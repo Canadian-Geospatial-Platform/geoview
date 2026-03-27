@@ -3,7 +3,7 @@ import type { LegendLayerProps } from './legend-layer';
 import type { TypeContainerBox } from '@/core/types/global-types';
 interface CollapsibleContentProps {
     layerPath: string;
-    initLightBox: (images: string, altText: string, returnFocusId: string, index?: number, scale?: number) => void;
+    initLightBox: (images: string, altText: string, returnFocusId: string, index?: number) => void;
     LegendLayerComponent: ComponentType<LegendLayerProps>;
     showControls: boolean;
     containerType: TypeContainerBox;

@@ -8,62 +8,74 @@ import type { MapViewer } from '@/geo/map/map-viewer';
  */
 export declare abstract class AbstractPlugin {
     #private;
+    /** The id of the plugin */
     pluginId: string;
+    /** The map viewer for the plugin */
     mapViewer: MapViewer;
+    /** The plugin properties */
     pluginProps?: unknown;
+    /** The plugin react object */
     react: typeof React;
+    /** The plugin createRoot object */
     createRoot: typeof createRoot;
+    /** The plugin useTheme object */
     useTheme: typeof useTheme;
+    /** The plugin translate object */
     translate?: typeof i18next;
     /**
      * Creates an instance of the plugin.
-     * @param {string} pluginId - Unique identifier for the plugin instance.
-     * @param {MapViewer} mapViewer - The map viewer
-     * @param {unknown | undefined} props - Optional plugin options and properties.
+     *
+     * @param pluginId - Unique identifier for the plugin instance
+     * @param mapViewer - The map viewer
+     * @param props - Optional plugin options and properties
      */
     constructor(pluginId: string, mapViewer: MapViewer, props: unknown | undefined);
     /**
-     * Sets the config (which happens post creation)
-     * @param {unknown} config - The config
+     * Sets the config (which happens post creation).
+     *
+     * @param config - The config
      */
     setConfig(config: unknown): void;
     /**
-     * Gets the config
-     * @returns {unknown} The config
+     * Gets the config.
+     *
+     * @returns The config
      */
     getConfig(): unknown;
     /**
-     * Returns the language currently used by the 'translate' i18next component used by this Plugin
-     * @returns string The language, 'en' (English) by default.
+     * Returns the language currently used by the 'translate' i18next component used by this Plugin.
+     *
+     * @returns The language, 'en' (English) by default
      */
     displayLanguage(): string;
     /**
-     * Must override function to get the schema validator
+     * Must override function to get the schema validator.
      */
     abstract schema(): unknown;
     /**
-     * Must override function to get the default config
+     * Must override function to get the default config.
      */
     abstract defaultConfig(): unknown;
     /**
      * Overridable function to get the translations object for the Plugin.
-     * @returns {Record<string, unknown>} The translations object
+     *
+     * @returns The translations object
      */
     defaultTranslations(): Record<string, unknown>;
     /**
-     * Override this to do the actual adding
+     * Override this to do the actual adding.
      */
     protected abstract onAdd(): void;
     /**
-     * Optionally override this to do something when done adding
+     * Optionally override this to do something when done adding.
      */
     protected onAdded?(): void;
     /**
-     * Override this to do the actual removal
+     * Override this to do the actual removal.
      */
     protected abstract onRemove(): void;
     /**
-     * Optionally override this to do something when done being removed
+     * Optionally override this to do something when done being removed.
      */
     protected onRemoved?(): void;
     /**

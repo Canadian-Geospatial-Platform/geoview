@@ -4,17 +4,17 @@ import type { TypeAppBarProps, TypeDisplayTheme, TypeFooterBarProps, TypeGlobalS
  */
 export declare class MapFeatureConfig {
     #private;
-    /** map configuration. */
+    /** Map configuration. */
     map: TypeMapConfig;
     /** Display theme, default = geo.ca. */
     theme?: TypeDisplayTheme;
-    /** Nav bar properies. */
+    /** Nav bar properties. */
     navBar?: TypeValidNavBarProps[];
-    /** Footer bar properies. */
+    /** Footer bar properties. */
     footerBar?: TypeFooterBarProps;
-    /** App bar properies. */
+    /** App bar properties. */
     appBar?: TypeAppBarProps;
-    /** Overview map properies. */
+    /** Overview map properties. */
     overviewMap?: TypeOverviewMapProps;
     /** Map components. */
     components?: TypeValidMapComponentProps[];
@@ -24,7 +24,7 @@ export declare class MapFeatureConfig {
     corePackagesConfig?: TypeCorePackagesConfig;
     /** List of external packages. */
     externalPackages?: TypeExternalPackagesProps[];
-    /** Global map settings */
+    /** Global map settings. */
     globalSettings: TypeGlobalSettings;
     /** Service URLs. */
     serviceUrls: TypeServiceUrls;
@@ -34,13 +34,12 @@ export declare class MapFeatureConfig {
      */
     schemaVersionUsed?: TypeValidVersions;
     /**
-     * The class constructor
+     * Creates an instance of MapFeatureConfig.
      *
      * All properties at this inheritance level have no values provided in the metadata. They are therefore initialized
      * from the configuration passed as a parameter or from the default values.
      *
-     * @param {TypeMapFeaturesInstance} userMapFeatureConfig - The map feature configuration to instantiate.
-     * @constructor
+     * @param userMapFeatureConfig - The map feature configuration to instantiate
      */
     constructor(userMapFeatureConfig: TypeMapFeaturesInstance);
 }

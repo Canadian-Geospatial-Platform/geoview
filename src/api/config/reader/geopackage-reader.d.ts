@@ -11,18 +11,15 @@ export interface GeoPackageLayerData {
     geoPackageFeatures: GeoPackageFeature[];
     styleSld?: string | number | Uint8Array;
 }
-/**
- * A class to generate a GeoView layer config from a GeoPackage.
- * @exports
- * @class GeoPackageReader
- */
+/** A class to generate a GeoView layer config from a GeoPackage. */
 export declare class GeoPackageReader {
     #private;
     /**
      * Generates a WKB layer config from a GeoPackage.
+     *
      * @param layerConfig - The config to convert
-     * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
-     * @returns A Promise of a WKB layer config
+     * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+     * @returns A promise that resolves with the WKB layer config
      */
     static createLayerConfigFromGeoPackage(layerConfig: GeoPackageLayerConfig, abortSignal?: AbortSignal): Promise<TypeWkbLayerConfig>;
 }

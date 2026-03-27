@@ -4,9 +4,7 @@ import type { Geometry } from 'ol/geom';
 import type Feature from 'ol/Feature';
 import type { MapFeatureConfig } from '@/api/config/map-feature-config';
 import type { MapConfigLayerEntry, TypeGeoviewLayerType } from './layer-schema-types';
-/**
- *  Definition of the map feature instance according to what is specified in the schema.
- */
+/** Definition of the map feature instance according to what is specified in the schema. */
 export type TypeMapFeaturesInstance = {
     /** map configuration. */
     map: TypeMapConfig;
@@ -14,13 +12,13 @@ export type TypeMapFeaturesInstance = {
     serviceUrls: TypeServiceUrls;
     /** Display theme, default = geo.ca. */
     theme?: TypeDisplayTheme;
-    /** Nav bar properies. */
+    /** Nav bar properties. */
     navBar?: TypeValidNavBarProps[];
-    /** App bar properies. */
+    /** App bar properties. */
     appBar?: TypeAppBarProps;
-    /** Footer bar properies. */
+    /** Footer bar properties. */
     footerBar?: TypeFooterBarProps;
-    /** Overview map properies. */
+    /** Overview map properties. */
     overviewMap?: TypeOverviewMapProps;
     /** Map components. */
     components?: TypeValidMapComponentProps[];
@@ -267,9 +265,7 @@ export type TypeMapViewSettings = {
 export type TypeValidMapProjectionCodes = 3978 | 3857 | 3573;
 /** Constant mainly used to test if a TypeValidMapProjectionCodes variable is a valid projection codes. */
 export declare const VALID_PROJECTION_CODES: number[];
-/**
- *  Definition of the basemap options type.
- */
+/** Definition of the basemap options type. */
 export declare const VALID_BASEMAP_ID: TypeBasemapId[];
 /** default configuration if provided configuration is missing or wrong */
 export declare const BASEMAP_ID: Record<TypeValidMapProjectionCodes, TypeBasemapId[]>;
@@ -325,14 +321,9 @@ export declare const CONFIG_RCS_TYPE = "rcs";
 export declare const CONFIG_GEOPACKAGE_TYPE = "GeoPackage";
 export declare const CONFIG_SHAPEFILE_TYPE = "shapefile";
 export declare const VALID_ZOOM_LEVELS: number[];
-/**
- *  Definition of the MapFeatureConfig default values. All the default values that applies to the map feature configuration are
- * defined here.
- */
+/** Definition of the MapFeatureConfig default values. All the default values that applies to the map feature configuration are defined here. */
 export declare const DEFAULT_MAP_FEATURE_CONFIG: MapFeatureConfig;
-/**
- * Definition of the default order of the tabs inside appbar
- */
+/** Definition of the default order of the tabs inside appbar. */
 export declare const DEFAULT_APPBAR_TABS_ORDER: string[];
 export declare const DEFAULT_APPBAR_CORE: {
     readonly GEOLOCATOR: "geolocator";
@@ -691,6 +682,7 @@ export type TypeFeatureInfoEntry = {
 };
 /**
  * Partial definition of a TypeFeatureInfoEntry for simpler use case queries.
+ *
  * Purposely linking this simpler type to the main TypeFeatureInfoEntry type here, in case, for future we want
  * to add more information on one or the other and keep things loosely linked together.
  */
@@ -745,42 +737,42 @@ export interface TypeAltitudeResponse {
 }
 /**
  * Type guard function that redefines a TypeBaseVectorGeometryConfig as a TypeLineStringVectorConfig if the type attribute of the
- * verifyIfConfig parameter is 'lineString'. The type assertion applies only to the true block of the if clause that use
- * this function.
+ * verifyIfConfig parameter is 'lineString'.
  *
- * @param {TypeBaseVectorGeometryConfig} verifyIfConfig Polymorphic object to test in order to determine if the type assertion is valid.
+ * The type assertion applies only to the true block of the if clause that use this function.
  *
- * @returns {boolean} true if the type assertion is valid.
+ * @param verifyIfConfig - Polymorphic object to test in order to determine if the type assertion is valid
+ * @returns True if the type assertion is valid
  */
 export declare const isLineStringVectorConfig: (verifyIfConfig: TypeBaseVectorGeometryConfig) => verifyIfConfig is TypeLineStringVectorConfig;
 /**
  * Type guard function that redefines a TypeBaseVectorGeometryConfig as a TypePolygonVectorConfig if the type attribute of the
- * verifyIfConfig parameter is 'filledPolygon'. The type assertion applies only to the true block of the if clause that use
- * this function.
+ * verifyIfConfig parameter is 'filledPolygon'.
  *
- * @param {TypeBaseVectorGeometryConfig} verifyIfConfig Polymorphic object to test in order to determine if the type assertion is valid.
+ * The type assertion applies only to the true block of the if clause that use this function.
  *
- * @returns {boolean} true if the type assertion is valid.
+ * @param verifyIfConfig - Polymorphic object to test in order to determine if the type assertion is valid
+ * @returns True if the type assertion is valid
  */
 export declare const isFilledPolygonVectorConfig: (verifyIfConfig: TypeBaseVectorGeometryConfig) => verifyIfConfig is TypePolygonVectorConfig;
 /**
  * Type guard function that redefines a TypeBaseVectorGeometryConfig as a TypeSimpleSymbolVectorConfig if the type attribute of the
- * verifyIfConfig parameter is 'simpleSymbol'. The type assertion applies only to the true block of the if clause that use
- * this function.
+ * verifyIfConfig parameter is 'simpleSymbol'.
  *
- * @param {TypeBaseVectorGeometryConfig} verifyIfConfig Polymorphic object to test in order to determine if the type assertion is valid.
+ * The type assertion applies only to the true block of the if clause that use this function.
  *
- * @returns {boolean} true if the type assertion is valid.
+ * @param verifyIfConfig - Polymorphic object to test in order to determine if the type assertion is valid
+ * @returns True if the type assertion is valid
  */
 export declare const isSimpleSymbolVectorConfig: (verifyIfConfig: TypeBaseVectorGeometryConfig) => verifyIfConfig is TypeSimpleSymbolVectorConfig;
 /**
  * Type guard function that redefines a TypeBaseVectorGeometryConfig as a TypeIconSymbolVectorConfig if the type attribute of the
- * verifyIfConfig parameter is 'iconSymbol'. The type assertion applies only to the true block of the if clause that use
- * this function.
+ * verifyIfConfig parameter is 'iconSymbol'.
  *
- * @param {TypeBaseVectorGeometryConfig} verifyIfConfig Polymorphic object to test in order to determine if the type assertion is valid.
+ * The type assertion applies only to the true block of the if clause that use this function.
  *
- * @returns {boolean} true if the type assertion is valid.
+ * @param verifyIfConfig - Polymorphic object to test in order to determine if the type assertion is valid
+ * @returns True if the type assertion is valid
  */
 export declare const isIconSymbolVectorConfig: (verifyIfConfig: TypeBaseVectorGeometryConfig) => verifyIfConfig is TypeIconSymbolVectorConfig;
 export {};

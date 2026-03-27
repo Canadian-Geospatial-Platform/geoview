@@ -14,11 +14,11 @@ interface FeatureItemProps {
     mapId: string;
     containerType: TypeContainerBox;
     featureInfoItem: TypeFieldEntry;
-    onInitLightBox: (images: string, altText: string, returnFocusId: string, index?: number, scale?: number) => void;
+    onInitLightBox: (images: string, altText: string, returnFocusId: string, index?: number) => void;
 }
 interface FeatureRowProps {
     featureInfoItem: TypeFieldEntry;
-    onInitLightBox: (images: string, altText: string, returnFocusId: string, index?: number, scale?: number) => void;
+    onInitLightBox: (images: string, altText: string, returnFocusId: string, index?: number) => void;
     language: TypeDisplayLanguage;
     layerDateTemporalMode: TemporalMode;
     displayDateFormat: TypeDisplayDateFormat;

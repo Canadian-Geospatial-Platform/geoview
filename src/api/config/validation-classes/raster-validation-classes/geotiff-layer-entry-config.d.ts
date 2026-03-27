@@ -7,15 +7,13 @@ export interface GeoTIFFLayerEntryConfigProps extends AbstractBaseLayerEntryConf
     /** Source settings to apply to the GeoView layer source at creation time. */
     source?: TypeSourceGeoTIFFInitialConfig;
 }
-/**
- * Type used to define a GeoTIFF layer to display on the map.
- */
+/** Type used to define a GeoTIFF layer to display on the map. */
 export declare class GeoTIFFLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     #private;
     /**
-     * The class constructor.
+     * Creates an instance of GeoTIFFLayerEntryConfig.
      *
-     * @param layerConfig -  The layer configuration we want to instanciate.
+     * @param layerConfig - The layer configuration we want to instantiate
      */
     constructor(layerConfig: GeoTIFFLayerEntryConfigProps);
     /**
@@ -39,27 +37,28 @@ export declare class GeoTIFFLayerEntryConfig extends AbstractBaseLayerEntryConfi
     /**
      * Getter for the embedded color map.
      *
-     * @returns {RGBA[] | undefined} The embedded RGBA color map, if present.
+     * @returns The embedded RGBA color map, or undefined if not present
      */
     getEmbeddedColorMap(): RGBA[] | undefined;
     /**
      * Setter for the embedded color map.
      *
-     * @param colorMap - The embedded RGBA color map to set.
+     * @param colorMap - Optional embedded RGBA color map to set
      */
     setEmbeddedColorMap(colorMap: RGBA[] | undefined): void;
     /**
-     * checks if an embedded color map is present in the layer config.
+     * Checks if an embedded color map is present in the layer config.
      *
-     * @returns `true` if an embedded color map exists; otherwise `false`.
+     * @returns `true` if an embedded color map exists; otherwise `false`
      */
     hasEmbeddedColorMap(): boolean;
     /**
-     * Type guard that checks whether the given configuration (class instance or plain object) represents an GeoTIFF layer type.
+     * Type guard that checks whether the given configuration (class instance or plain object) represents a GeoTIFF layer type.
+     *
      * Supports `ConfigClassOrType` (class instance or plain object) and plain layer config objects (`TypeGeoviewLayerConfig`).
-     * @param {ConfigClassOrType | TypeGeoviewLayerConfig} layerConfig - The layer config to check. Can be an instance of a config class or a raw config object.
-     * @returns `true` if the config is for a GeoTIFF layer; otherwise `false`.
-     * @static
+     *
+     * @param layerConfig - The layer config to check. Can be an instance of a config class or a raw config object
+     * @returns `true` if the config is for a GeoTIFF layer; otherwise `false`
      */
     static isClassOrTypeGeoTIFF(layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig): layerConfig is TypeGeoTIFFLayerConfig;
 }

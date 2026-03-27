@@ -28,10 +28,6 @@ import type { TypeFeatureInfoResultSet } from '@/core/stores/store-interface-and
  */
 export declare class LayerApi {
     #private;
-    /** A zoom level buffer to guarantee that the calculations being done via the resolutions, inches per meter, dpi are more strict than not enough */
-    /** The value 0.21 seems rather specific, but it was the value giving us the best result during testing on layer National Forest Inventory Photo Plot Summary */
-    /** It could be increased slightly if ever we need to, but it might offer worse precision depending on various layers */
-    static readonly MIN_MAX_ZOOM_LEVEL_BUFFER = 0.21;
     /** The opacity ratio to use when highlighting a layer vs the other layers */
     static readonly HIGHLIGHT_OPACITY_RATIO = 4;
     /** Reference on the map viewer */

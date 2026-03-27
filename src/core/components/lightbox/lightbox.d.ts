@@ -12,7 +12,6 @@ export interface LightboxProps {
     slides: LightBoxSlides[];
     index: number;
     exited: () => void;
-    scale?: number;
     onSlideChange?: (index: number) => void;
 }
 /**

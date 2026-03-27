@@ -1,6 +1,5 @@
 export declare const LOG_TRACE_DETAILED = 1;
 export declare const LOG_TRACE_USE_EFFECT_UNMOUNT = 2;
-export declare const LOG_TRACE_USE_CALLBACK = 3;
 export declare const LOG_TRACE_RENDER_DETAILED = 4;
 export declare const LOG_TRACE_RENDER = 5;
 export declare const LOG_TRACE_USE_MEMO = 6;
@@ -24,7 +23,6 @@ export declare class ConsoleLogger {
     trackerInterval: number;
     logCount: {
         renderer: number;
-        useCallback: number;
         useMemo: number;
         useEffect: number;
     };
@@ -64,7 +62,7 @@ export declare class ConsoleLogger {
     /**
      * Logging function commonly used in the useMemo to log when a value is being memoized.
      * Only shows if LOG_ACTIVE is true.
-     * @param {string} useMemoFunction - The useCallback function identifier
+     * @param {string} useMemoFunction - The useMemo function identifier
      * @param {unknown[]} messages - The messages to log
      */
     logTraceUseMemo(useMemoFunction: string, ...messages: unknown[]): void;
@@ -73,6 +71,7 @@ export declare class ConsoleLogger {
      * Only shows if LOG_ACTIVE is true.
      * @param {string} useCallbackFunction - The useCallback function identifier
      * @param {unknown[]} messages - The messages to log
+     * @deprecated This function is deprecated.
      */
     logTraceUseCallback(useCallbackFunction: string, ...messages: unknown[]): void;
     /**

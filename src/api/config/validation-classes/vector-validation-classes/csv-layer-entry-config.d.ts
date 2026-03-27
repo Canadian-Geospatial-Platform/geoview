@@ -8,9 +8,9 @@ export interface CsvLayerEntryConfigProps extends VectorLayerEntryConfigProps {
 }
 export declare class CsvLayerEntryConfig extends VectorLayerEntryConfig {
     /**
-     * The class constructor.
+     * Creates an instance of CsvLayerEntryConfig.
      *
-     * @param layerConfig - The layer configuration we want to instanciate.
+     * @param layerConfig - The layer configuration we want to instantiate
      */
     constructor(layerConfig: CsvLayerEntryConfigProps);
     /**
@@ -26,12 +26,12 @@ export declare class CsvLayerEntryConfig extends VectorLayerEntryConfig {
      */
     getSource(): TypeSourceCSVInitialConfig;
     /**
-     * Type guard that checks whether the given configuration (class instance or plain object)
-     * represents a CSV layer type.
+     * Type guard that checks whether the given configuration (class instance or plain object) represents a CSV layer type.
+     *
      * Supports `ConfigClassOrType` (class instance or plain object) and plain layer config objects (`TypeGeoviewLayerConfig`).
-     * @param {ConfigClassOrType | TypeGeoviewLayerConfig} layerConfig - The layer config to check. Can be an instance of a config class or a raw config object.
-     * @returns `true` if the config is for a CSV layer; otherwise `false`.
-     * @static
+     *
+     * @param layerConfig - The layer config to check. Can be an instance of a config class or a raw config object
+     * @returns `true` if the config is for a CSV layer; otherwise `false`
      */
     static isClassOrTypeCSV(layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig): layerConfig is TypeCSVLayerConfig;
 }

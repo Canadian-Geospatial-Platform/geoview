@@ -1,5 +1,5 @@
 interface UseLightBoxReturnType {
-    initLightBox: (images: string, altText: string, returnFocusId: string, index?: number, scale?: number) => void;
+    initLightBox: (images: string, altText: string, returnFocusId: string, index?: number) => void;
     LightBoxComponent: () => JSX.Element;
 }
 export declare function useLightBox(): UseLightBoxReturnType;
