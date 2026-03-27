@@ -133,7 +133,7 @@ Un système de plugiciels permet d'étendre les fonctionnalités sans modifier l
 
 - **Dépôt GitHub** : Canadian-Geospatial-Platform/geoview
 - **GEO.ca** : [geo.ca](https://app.geo.ca)
-- **Documentation** : [Code](README-DEV.md) **En anglais seulement**
+- **Documentation** : [Code](README-DEV.md) (En anglais seulement)
 
 ---
 
