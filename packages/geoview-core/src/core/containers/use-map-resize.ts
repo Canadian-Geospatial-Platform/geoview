@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { logger } from '@/core/utils/logger';
 
 // #region USE MAP RESIZE
+
 /** Props for the useMapResize hook. */
 interface UseMapResizeProps {
   isMapFullScreen: boolean;
@@ -88,4 +89,5 @@ export const useMapResize = ({
 
   return { mapShellContainerRef };
 };
-// #endregion USE MAP SIZE
+
+// #endregion USE MAP RESIZE

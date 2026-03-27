@@ -131,8 +131,8 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
   /**
    * Marks the user as having been prompted when the modal opens.
+   * Reset prompt flag when modal is dismissed.
    */
-  // Reset prompt flag when modal is dismissed (user made a choice)
   useEffect(() => {
     if (open) {
       hasBeenPromptedRef.current = true;
@@ -162,7 +162,6 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   /**
    * Initializes the handlers ref with exit and keydown functions to avoid circular dependencies.
    */
-  // Initialize the handlers object
   useEffect(() => {
     logger.logTraceUseEffect('FOCUS-TRAP - handlers', handlers.current);
 
@@ -197,7 +196,6 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
     };
   }, [focusTrapId, geoviewElement, handleScrolling, mapElementStore, setActiveTrapGeoView, setCrosshairActive]);
 
-  // Create memoized functions that use the handlers
   /**
    * Exits the focus trap by delegating to the handlers ref.
    */
@@ -215,7 +213,6 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   /**
    * Activates the focus trap on the shell element.
    */
-  // Set focus trap function
   const setFocusTrap = useCallback((): void => {
     if (shellElementRef.current) {
       const mapHTMLElement = shellElementRef.current;
@@ -230,7 +227,6 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
     }
   }, [handleExit, mapId, setActiveTrapGeoView]);
 
-  // Handle button clicks
   /**
    * Handles when the user clicks the enable focus trap button.
    */
