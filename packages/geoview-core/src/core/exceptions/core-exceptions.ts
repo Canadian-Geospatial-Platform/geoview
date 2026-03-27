@@ -289,6 +289,8 @@ export class ResponseEmptyError extends Error {
   /**
    * Creates an instance of ResponseEmptyError.
    *
+   * The default message indicates that the response was empty, but a custom message can be provided for more context.
+   *
    * @param message - Optional error message
    */
   constructor(message: string = 'Empty response.') {
@@ -317,6 +319,8 @@ export class ResponseEmptyError extends Error {
 export class ResponseContentError extends Error {
   /**
    * Creates an instance of ResponseContentError.
+   *
+   * The default message indicates that the response contained an error in its content, but a custom message can be provided for more context.
    *
    * @param message - Optional error message
    */
@@ -383,11 +387,12 @@ export class ResponseTypeError extends Error {
 
 /**
  * Custom error class for handling invalid dates.
- * @extends {Error}
  */
 export class InvalidDateError extends Error {
   /**
    * Creates an instance of InvalidDateError.
+   *
+   * The default message indicates that the date is invalid, but a custom message can be provided for more context.
    *
    * @param date - The invalid date
    */
@@ -411,11 +416,12 @@ export class InvalidDateError extends Error {
 
 /**
  * Custom error class for handling invalid time IANA formats.
- * @extends {Error}
  */
 export class InvalidTimezoneError extends Error {
   /**
    * Creates an instance of InvalidTimezoneError.
+   *
+   * The default message indicates that the timezone is invalid, but a custom message can be provided for more context.
    *
    * @param timezone - The invalid timezone
    */
@@ -439,13 +445,14 @@ export class InvalidTimezoneError extends Error {
 
 /**
  * Custom error class for handling invalid time dimensions.
- * @extends {Error}
  */
 export class InvalidTimeDimensionError extends Error {
   /**
    * Creates an instance of InvalidTimeDimensionError.
    *
-   * @param dimension - The invalid date duration
+   * The default message indicates that the time dimension is invalid, but a custom message can be provided for more context.
+   *
+   * @param dimension - The invalid time dimension
    */
   constructor(dimension: string) {
     // Pass the provided message (or default message) to the parent Error class

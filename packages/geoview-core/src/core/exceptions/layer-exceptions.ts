@@ -110,11 +110,13 @@ export class LayerNotEsriDynamicError extends LayerError {
 }
 
 /**
- * Custom error class thrown when the EsriDynamic layer does not support dynamic layers.
+ * Custom error class thrown when the GeoView layer configuration is invalid due to the EsriDynamic layer not supporting dynamic layers.
  */
 export class LayerNotSupportingDynamicLayersError extends LayerError {
   /**
    * Creates an instance of LayerNotSupportingDynamicLayersError.
+   *
+   * This error is thrown when the EsriDynamic layer does not support dynamic layers.
    *
    * @param layerPath - The path of the layer
    * @param layerName - The layer name
@@ -128,11 +130,15 @@ export class LayerNotSupportingDynamicLayersError extends LayerError {
 }
 
 /**
- * Custom error class thrown when the provided layer ID does not correspond to a valid feature layer.
+ * Custom error class thrown when the GeoView layer configuration is invalid due to the layer ID does not correspond to a feature layer.
+ *
+ * This error is specifically used when the provided layer ID does not correspond to a valid feature layer.
  */
 export class LayerNotFeatureLayerError extends LayerError {
   /**
    * Creates an instance of LayerNotFeatureLayerError.
+   *
+   * This error is thrown when the layer ID provided does not correspond to a feature layer.
    *
    * @param layerPath - The path of the layer
    * @param layerName - The layer name
@@ -169,7 +175,6 @@ export class LayerNotQueryableError extends LayerError {
 
 /**
  * Custom error class thrown when a GeoView layer status was 'error' when it was expecting another status.
- * @extends {LayerError}
  */
 export class LayerStatusErrorError extends LayerError {
   /**
@@ -188,11 +193,12 @@ export class LayerStatusErrorError extends LayerError {
 
 /**
  * Error thrown when a GeoView layer has an invalid layer type.
+ *
  * This typically indicates a configuration issue for a specific layer and its type.
  */
 export class LayerInvalidGeoviewLayerTypeError extends LayerError {
   /**
-   * Creates an instance of LayerInvalidGeoviewLayerTypeError.
+   * Constructs a new LayerInvalidGeoviewLayerTypeError instance.
    *
    * @param geoviewLayerId - The ID of the GeoView layer with invalid layer type
    * @param geoviewLayerType - The Geoview layer type
@@ -207,11 +213,12 @@ export class LayerInvalidGeoviewLayerTypeError extends LayerError {
 
 /**
  * Error thrown when a GeoView layer is missing a required `geoviewLayerId`.
+ *
  * This typically indicates a configuration issue for a specific layer type.
  */
 export class LayerMissingGeoviewLayerIdError extends LayerError {
   /**
-   * Creates an instance of LayerMissingGeoviewLayerIdError.
+   * Constructs a new LayerMissingGeoviewLayerIdError instance.
    *
    * @param geoviewLayerType - The Geoview layer type
    */
@@ -225,6 +232,7 @@ export class LayerMissingGeoviewLayerIdError extends LayerError {
 
 /**
  * Error thrown when a GeoView layer is missing a required `source.extent`.
+ *
  * This typically indicates a configuration issue for a specific layer type.
  */
 export class LayerMissingSourceExtentError extends LayerError {
@@ -241,6 +249,7 @@ export class LayerMissingSourceExtentError extends LayerError {
 
 /**
  * Error thrown when a GeoView layer is missing a required `source.projection`.
+ *
  * This typically indicates a configuration issue for a specific layer type.
  */
 export class LayerMissingSourceProjectionError extends LayerError {
@@ -256,13 +265,17 @@ export class LayerMissingSourceProjectionError extends LayerError {
 }
 
 /**
- * Custom error class thrown when the ESRI layer ID is not a number.
+ * Custom error class thrown when the GeoView layer configuration is invalid due to the ESRI layer ID is not a number.
+ *
+ * This error is used when the ESRI layer ID provided is expected to be a number, but it is not.
  */
 export class LayerEntryConfigLayerIdEsriMustBeNumberError extends LayerError {
   /**
    * Creates an instance of LayerEntryConfigLayerIdEsriMustBeNumberError.
    *
-   * @param geoviewLayerId - The ID of the GeoView layer with invalid layer type
+   * This error is thrown when the ESRI layer ID is not a number, which is required for proper layer configuration.
+   *
+   * @param geoviewLayerId - The ID of the GeoView layer
    * @param badNumber - The invalid non-numeric layer ID
    * @param layerName - The layer name
    */
@@ -276,11 +289,12 @@ export class LayerEntryConfigLayerIdEsriMustBeNumberError extends LayerError {
 
 /**
  * Custom error class thrown when the GeoView layer configuration couldn't read the fields information from the vector metadata.
- * @extends {LayerError}
  */
 export class LayerEntryConfigFieldsNotFoundError extends LayerError {
   /**
    * Creates an instance of LayerEntryConfigFieldsNotFoundError.
+   *
+   * This error is thrown when the fields information from the vector metadata couldn't be found.
    *
    * @param geoviewLayerId - The ID of the GeoView layer
    * @param layerName - The layer name
@@ -295,11 +309,12 @@ export class LayerEntryConfigFieldsNotFoundError extends LayerError {
 
 /**
  * Custom error class thrown when the ESRI feature layer has too many features.
- * @extends {LayerError}
  */
 export class LayerTooManyEsriFeatures extends LayerError {
   /**
    * Creates an instance of LayerTooManyEsriFeatures.
+   *
+   * This error is thrown when the ESRI feature layer has more than 200 000 features.
    *
    * @param geoviewLayerId - The ID of the GeoView layer
    * @param layerName - The layer name
@@ -315,11 +330,10 @@ export class LayerTooManyEsriFeatures extends LayerError {
 
 /**
  * Custom error class thrown when the MetadataAccessPath is missing for a layer configuration.
- * @extends {LayerError}
  */
 export class LayerMetadataAccessPathMandatoryError extends LayerError {
   /**
-   * Creates an instance of LayerMetadataAccessPathMandatoryError.
+   * Constructs a new LayerMetadataAccessPathMandatoryError.
    *
    * @param geoviewLayerId - The ID of the GeoView layer missing a valid `metadataAccessPath`
    * @param geoviewLayerType - The Geoview layer type
@@ -340,7 +354,7 @@ export class LayerMetadataAccessPathMandatoryError extends LayerError {
  */
 export class LayerDataAccessPathMandatoryError extends LayerError {
   /**
-   * Creates an instance of LayerDataAccessPathMandatoryError.
+   * Constructs a new LayerDataAccessPathMandatoryError.
    *
    * @param layerPath - The layer path of the layer entry missing a valid `dataAccessPath`
    * @param layerName - The layer name
@@ -554,7 +568,7 @@ export class LayerNoGeographicDataInCSVError extends LayerError {
  */
 export class LayerDifferingFieldLengthsError extends LayerError {
   /**
-   * Creates an instance of LayerDifferingFieldLengthsError.
+   * Constructs a new LayerDifferingFieldLengthsError instance.
    *
    * @param layerPath - The path or identifier of the layer
    */
@@ -571,7 +585,7 @@ export class LayerDifferingFieldLengthsError extends LayerError {
  */
 export class LayerConfigWFSMissingError extends LayerError {
   /**
-   * Creates an instance of LayerConfigWFSMissingError.
+   * Constructs a new LayerConfigWFSMissingError instance.
    *
    * @param layerPath - The path or identifier of the layer
    */

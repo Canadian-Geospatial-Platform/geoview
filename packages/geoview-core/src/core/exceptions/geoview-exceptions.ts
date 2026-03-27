@@ -323,6 +323,7 @@ export class CoreBasemapCreationError extends GeoViewError {
 
 /**
  * Error thrown when the basemap creation process takes longer than expected.
+ *
  * This error is typically used to notify that the basemap did not complete its creation
  * within a predefined timeout period.
  */

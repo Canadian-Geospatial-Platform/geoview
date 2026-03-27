@@ -43,6 +43,9 @@ export class LayerEntryConfigLayerIdNotFoundError extends LayerEntryConfigError 
   /**
    * Creates an instance of LayerEntryConfigLayerIdNotFoundError.
    *
+   * This error is typically thrown when a GeoView layer's configuration is missing the expected layer ID,
+   * which is essential for identifying and loading the layer correctly.
+   *
    * @param layerConfig - The configuration object associated with the GeoView layer
    */
   constructor(layerConfig: ConfigBaseClass) {
@@ -59,6 +62,9 @@ export class LayerEntryConfigLayerIdNotFoundError extends LayerEntryConfigError 
 export class LayerEntryConfigInvalidLayerEntryConfigError extends LayerEntryConfigError {
   /**
    * Creates an instance of LayerEntryConfigInvalidLayerEntryConfigError.
+   *
+   * This error is typically thrown when the metadata associated with a layer entry configuration is found to be invalid during the loading process,
+   * which prevents the layer from being loaded successfully.
    *
    * @param layerConfig - The configuration object associated with the GeoView layer
    */
@@ -79,6 +85,9 @@ export class LayerEntryConfigEmptyLayerGroupError extends LayerEntryConfigError 
   /**
    * Creates an instance of LayerEntryConfigEmptyLayerGroupError.
    *
+   * This error is typically thrown when a layer group in the configuration is found to be empty,
+   * which is not allowed.
+   *
    * @param layerConfig - The configuration object associated with the GeoView layer
    */
   constructor(layerConfig: ConfigBaseClass) {
@@ -97,6 +106,8 @@ export class LayerEntryConfigEmptyLayerGroupError extends LayerEntryConfigError 
 export class LayerEntryConfigUnableToCreateGroupLayerError extends LayerEntryConfigError {
   /**
    * Creates an instance of LayerEntryConfigUnableToCreateGroupLayerError.
+   *
+   * This error is typically thrown when there is an issue with creating a group layer as part of the configuration process,
    *
    * @param layerConfig - The configuration object associated with the GeoView layer
    */
