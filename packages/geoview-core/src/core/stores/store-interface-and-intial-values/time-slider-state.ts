@@ -130,8 +130,11 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
       },
 
       setFiltering(layerPath: string, filtering: boolean): void {
+        const timeSliderLayer = get().timeSliderState.timeSliderLayers[layerPath];
+        if (!timeSliderLayer) return; // This can happen if there are no features in the service
+
         // Redirect to TimeSliderEventProcessor
-        const { field, minAndMax, values, additionalLayerpaths } = get().timeSliderState.timeSliderLayers[layerPath];
+        const { field, minAndMax, values, additionalLayerpaths } = timeSliderLayer;
 
         // Update the filters
         TimeSliderEventProcessor.updateFilters(get().mapId, layerPath, field, filtering, minAndMax, values);
@@ -157,8 +160,10 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
         get().timeSliderState.setterActions.setStep(layerPath, step);
       },
       setValues(layerPath: string, values: number[]): void {
-        // Redirect to TimeSliderEventProcessor
-        const { field, minAndMax, filtering, additionalLayerpaths } = get().timeSliderState.timeSliderLayers[layerPath];
+        const timeSliderLayer = get().timeSliderState.timeSliderLayers[layerPath];
+        if (!timeSliderLayer) return; // This can happen if there are no features in the service
+
+        const { field, minAndMax, filtering, additionalLayerpaths } = timeSliderLayer;
 
         // Update the filters
         TimeSliderEventProcessor.updateFilters(get().mapId, layerPath, field, filtering, minAndMax, values);
