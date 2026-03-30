@@ -54,5 +54,6 @@ export declare const TIMEOUT: Record<string, number>;
 export declare const LIGHTBOX_SELECTORS: {
     readonly ROOT: ".yarl__root";
     readonly CONTAINER: ".yarl__container";
+    readonly TOOLBAR: ".yarl__toolbar";
 };
 //# sourceMappingURL=constant.d.ts.map

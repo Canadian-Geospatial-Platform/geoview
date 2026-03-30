@@ -41,6 +41,11 @@ import type { AbstractPlugin } from '@/api/plugin/abstract-plugin';
  */
 export declare class MapViewer {
     #private;
+    /** A zoom level buffer to guarantee that the calculations being done via the resolutions, inches per meter, dpi are more strict than not enough
+     * The value 0.21 seems rather specific, but it was the value giving us the best result during testing on layer
+     * National Forest Inventory Photo Plot Summary (6433173f-bca8-44e6-be8e-3e8a19d3c299) at zoom level 3.78 +/- 0.25
+     * It could be increased slightly if ever we need to, but it might offer worse precision depending on various layers */
+    static readonly ZOOM_LEVEL_FROM_SCALE_BUFFER = 0.21;
     /** Default densification number when forming layer extents, to make ture to compensate for earth curvature */
     static DEFAULT_STOPS: number;
     /** Default DPI values */

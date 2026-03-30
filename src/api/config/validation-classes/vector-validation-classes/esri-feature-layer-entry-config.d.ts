@@ -7,9 +7,9 @@ export interface EsriFeatureLayerEntryConfigProps extends VectorLayerEntryConfig
 }
 export declare class EsriFeatureLayerEntryConfig extends VectorLayerEntryConfig {
     /**
-     * The class constructor.
+     * Creates an instance of EsriFeatureLayerEntryConfig.
      *
-     * @param layerConfig - The layer configuration we want to instanciate.
+     * @param layerConfig - The layer configuration we want to instantiate
      */
     constructor(layerConfig: EsriFeatureLayerEntryConfigProps);
     /**
@@ -35,19 +35,18 @@ export declare class EsriFeatureLayerEntryConfig extends VectorLayerEntryConfig 
     getLayerMetadata(): TypeMetadataEsriFeatureLayer | undefined;
     /**
      * Overrides the get geometry type to interpret the esri type name.
-     * @returns {TypeStyleGeometry | undefined} The geometry type, if it could be determined.
-     * @throws {NotSupportedError} When the geometry type is not supported.
-     * @override
-     * @protected
+     *
+     * @returns The geometry type, or undefined if it could not be determined
+     * @throws {NotSupportedError} When the geometry type is not supported
      */
     protected onGetGeometryType(): TypeStyleGeometry | undefined;
     /**
      * Type guard that checks whether the given configuration (class instance or plain object)
-     * represents a Esri Feature layer type.
+     * represents an Esri Feature layer type.
      * Supports `ConfigClassOrType` (class instance or plain object) and plain layer config objects (`TypeGeoviewLayerConfig`).
-     * @param {ConfigClassOrType | TypeGeoviewLayerConfig} layerConfig - The layer config to check. Can be an instance of a config class or a raw config object.
-     * @returns `true` if the config is for a Esri Feature layer; otherwise `false`.
-     * @static
+     *
+     * @param layerConfig - The layer config to check. Can be an instance of a config class or a raw config object
+     * @returns `true` if the config is for an Esri Feature layer; otherwise `false`
      */
     static isClassOrTypeEsriFeature(layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig): layerConfig is TypeEsriFeatureLayerConfig;
 }

@@ -237,6 +237,24 @@ export declare function addUiComponent(targetDivId: string, component: React.Rea
  */
 export declare function sanitizeHtmlContent(contentHtml: string): string;
 /**
+ * Enhances links accessibility by adding screen reader announcements for external links.
+ *
+ * Uses DOM parsing to safely inject visually-hidden span elements with announcement text
+ * for screen readers.
+ *
+ * **Security Note:** This function does NOT sanitize output. Callers MUST sanitize the result
+ * using `sanitizeHtmlContent()` before rendering to prevent XSS risks.
+ *
+ * @param html - HTML string containing links (typically from linkifyHtml)
+ * @param announcementText - Translated announcement text for screen readers (e.g., "opens in new tab")
+ * @returns HTML string with visually-hidden accessibility announcements injected into external links, or the original HTML if parsing fails
+ *
+ * @example
+ * Input: '<a href="..." target="_blank">View</a>'
+ * Output: '<a href="..." target="_blank">View <span class="visually-hidden"> (opens in new tab)</span></a>'
+ */
+export declare function enhanceLinksAccessibility(html: string, announcementText: string): string;
+/**
  * Sets up a MutationObserver to monitor when a specific DOM element (e.g., a div container)
  * is removed from the document. When the element is removed, it triggers a cleanup callback
  * and disconnects the observer to prevent memory leaks.

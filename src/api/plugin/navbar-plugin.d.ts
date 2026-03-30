@@ -13,10 +13,12 @@ export type TypeNavBarButtonConfig = {
  * NavBar Plugin abstract class.
  */
 export declare abstract class NavBarPlugin extends AbstractPlugin {
+    /** The buttons with or without panels, to be rendered in the NavBar */
     buttonPanels: Record<string, TypeButtonPanel>;
     /**
-     * Overridable function to create nav bar button props content
-     * @returns IconButtonPropsExtend The nav bar button props content
+     * Overridable function to create nav bar button props content.
+     *
+     * @returns The nav bar button props content
      */
     protected onCreateButtonConfigs(): Record<string, TypeNavBarButtonConfig>;
     /**

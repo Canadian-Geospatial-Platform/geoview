@@ -8,15 +8,13 @@ export interface EsriImageLayerEntryConfigProps extends AbstractBaseLayerEntryCo
     rasterFunctionInfos?: TypeMetadataEsriRasterFunctionInfos[];
     allowedMosaicMethods?: string;
 }
-/**
- * Type used to define a GeoView image layer to display on the map.
- */
+/** Type used to define a GeoView image layer to display on the map. */
 export declare class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     #private;
     /**
-     * The class constructor.
+     * Creates an instance of EsriImageLayerEntryConfig.
      *
-     * @param layerConfig - The layer configuration we want to instanciate.
+     * @param layerConfig - The layer configuration we want to instantiate
      */
     constructor(layerConfig: EsriImageLayerEntryConfigProps);
     /**
@@ -46,48 +44,55 @@ export declare class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryCon
     getLayerMetadata(): TypeMetadataEsriImage | undefined;
     /**
      * Gets the raster function infos from the layer metadata.
-     * @returns The metadata raster function infos or undefined.
+     *
+     * @returns The metadata raster function infos, or undefined if not available
      */
     getRasterFunctionInfos(): TypeMetadataEsriRasterFunctionInfos[] | undefined;
     /**
      * Gets the allowed mosaic methods from the layer metadata.
-     * @returns The allowed mosaic methods or undefined.
+     *
+     * @returns The allowed mosaic methods, or undefined if not available
      */
     getAllowedMosaicMethods(): string | undefined;
     /**
-     * Gets the active raster function identifier
-     * @returns The raster function identifier
+     * Gets the active raster function identifier.
+     *
+     * @returns The raster function identifier, or undefined if not set
      */
     getInitialRasterFunction(): string | undefined;
     /**
      * Sets the initial raster function for this layer.
      * Called during metadata processing to set default if not explicitly configured.
-     * @param rasterFunction - The raster function name to set.
+     *
+     * @param rasterFunction - The raster function name to set
      */
     setInitialRasterFunction(rasterFunction: string): void;
     /**
      * Gets the initial mosaic rule for this layer.
-     * @returns The initial mosaic rule or undefined.
+     *
+     * @returns The initial mosaic rule, or undefined if not set
      */
     getInitialMosaicRule(): TypeMosaicRule | undefined;
     /**
      * Sets the initial mosaic rule for this layer.
-     * @param mosaicRule - The initial mosaic rule to set.
+     *
+     * @param mosaicRule - The initial mosaic rule to set
      */
     setInitialMosaicRule(mosaicRule: TypeMosaicRule): void;
     /**
-     * Type guard that checks whether the given configuration (class instance or plain object)
-     * represents an Esri Image layer type.
+     * Type guard that checks whether the given configuration (class instance or plain object) represents an Esri Image layer type.
+     *
      * Supports `ConfigClassOrType` (class instance or plain object) and plain layer config objects (`TypeGeoviewLayerConfig`).
-     * @param layerConfig - The layer config to check. Can be an instance of a config class or a raw config object.
-     * @returns `true` if the config is for an Esri Image layer; otherwise `false`.
-     * @static
+     *
+     * @param layerConfig - The layer config to check. Can be an instance of a config class or a raw config object
+     * @returns `true` if the config is for an Esri Image layer; otherwise `false`
      */
     static isClassOrTypeEsriImage(layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig): layerConfig is TypeEsriImageLayerConfig;
     /**
      * Helper function to support when a layerConfig is either a class instance or a regular json object.
-     * @param layerConfig - The layer config class instance or regular json object.
-     * @returns The raster function or undefined.
+     *
+     * @param layerConfig - Optional layer config class instance or regular json object
+     * @returns The raster function, or undefined if not available
      */
     static getClassOrTypeSourceInitialRasterFunction(layerConfig: ConfigClassOrType | undefined): string | undefined;
 }

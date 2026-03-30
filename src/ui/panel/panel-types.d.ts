@@ -86,6 +86,20 @@ export interface TypeButtonProps extends Omit<ButtonProps, 'type'> {
     type: 'text' | 'textWithIcon' | 'icon';
     /** Button visibility. */
     visible?: boolean;
+    /** Accessible label for screen readers */
+    'aria-label'?: string;
+    /** Indicates if the button is in a pressed state */
+    'aria-pressed'?: boolean | 'mixed';
+    /** Indicates if the element controls an expandable region */
+    'aria-expanded'?: boolean;
+    /** Indicates the checked state of the button when used as a checkbox/radio */
+    'aria-checked'?: boolean | 'mixed';
+    /** Identifies the element(s) controlled by this button */
+    'aria-controls'?: string;
+    /** Indicates the element has a popup context menu or sub-level menu */
+    'aria-haspopup'?: boolean | 'menu' | 'listbox' | 'tree' | 'grid' | 'dialog';
+    /** Indicates whether the element is hidden from accessibility API */
+    'aria-hidden'?: boolean;
 }
 /**
  * Interface for the text properties used when creating a new text field.

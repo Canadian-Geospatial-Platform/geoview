@@ -4,17 +4,20 @@ import { AbstractPlugin } from './abstract-plugin';
  * Footer Plugin abstract class.
  */
 export declare abstract class FooterPlugin extends AbstractPlugin {
+    /** The index of the tab */
     value?: number;
+    /** The footer props */
     footerProps?: TypeTabs;
     /**
-     * Overrides the get config
-     * @override
-     * @returns {unknown} The config
+     * Overrides the get config.
+     *
+     * @returns The config
      */
     getConfig(): unknown;
     /**
-     * Overridable function to create footer props content
-     * @returns TypeTabs The footer props content
+     * Overridable function to create footer props content.
+     *
+     * @returns The footer props content
      */
     protected onCreateContentProps(): TypeTabs;
     /**

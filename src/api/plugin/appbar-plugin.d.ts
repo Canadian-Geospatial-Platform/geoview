@@ -5,28 +5,34 @@ import { AbstractPlugin } from './abstract-plugin';
  * AppBar Plugin abstract class.
  */
 export declare abstract class AppBarPlugin extends AbstractPlugin {
+    /** The created button panel object */
     buttonPanel?: TypeButtonPanel;
+    /** The button props */
     buttonProps?: IconButtonPropsExtend;
+    /** The panel props */
     panelProps?: TypePanelProps;
     /**
-     * Overrides the get config
-     * @override
-     * @returns {AppBarPluginConfig} The config
+     * Overrides the get config.
+     *
+     * @returns The config
      */
     getConfig(): AppBarPluginConfig;
     /**
-     * Overridable function to create app bar button props content
-     * @returns IconButtonPropsExtend The app bar button props content
+     * Overridable function to create app bar button props content.
+     *
+     * @returns The app bar button props content
      */
     protected onCreateButtonProps(): IconButtonPropsExtend;
     /**
-     * Overridable function to create app bar props content
-     * @returns TypePanelProps The app bar props content
+     * Overridable function to create app bar props content.
+     *
+     * @returns The app bar props content
      */
     protected onCreateContentProps(): TypePanelProps;
     /**
-     * Overridable function to create app bar actual content
-     * @returns JSX.Element The app bar actual content
+     * Overridable function to create app bar actual content.
+     *
+     * @returns The app bar actual content
      */
     protected onCreateContent(): JSX.Element;
     /**

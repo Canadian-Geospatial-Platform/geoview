@@ -13,9 +13,7 @@ type LayerTypesKey = 'CSV' | 'ESRI_DYNAMIC' | 'ESRI_FEATURE' | 'ESRI_IMAGE' | 'I
 export type TypeGeoviewLayerType = 'CSV' | 'esriDynamic' | 'esriFeature' | 'esriImage' | 'GeoJSON' | 'GeoTIFF' | 'imageStatic' | 'KML' | 'ogcFeature' | 'ogcWfs' | 'ogcWms' | 'ogcWmts' | 'vectorTiles' | 'WKB' | 'xyzTiles';
 /** Definition of the geoview layer types accepted by the viewer. */
 export type TypeInitialGeoviewLayerType = TypeGeoviewLayerType | 'geoCore' | 'GeoPackage' | 'shapefile' | 'rcs';
-/**
- * Definition of the GeoView layer constants
- */
+/** Definition of the GeoView layer constants. */
 export declare const CONST_LAYER_TYPES: Record<LayerTypesKey, TypeGeoviewLayerType>;
 /** Type used to configure the feature info for a layer. */
 export type TypeFeatureInfoLayerConfig = {
@@ -53,9 +51,7 @@ export type TypeLayerStatus = 'newInstance' | 'registered' | 'processing' | 'pro
 /** The possible strategies when working with vector layers data */
 export type VectorStrategy = 'all' | 'bbox';
 export type LayerEntryTypesKey = 'VECTOR' | 'VECTOR_TILE' | 'RASTER_TILE' | 'RASTER_IMAGE' | 'GROUP' | 'GEOCORE' | 'GEOPACKAGE' | 'SHAPEFILE' | 'RCS';
-/**
- * Definition of the sub schema to use for each type of Geoview layer
- */
+/** Definition of the sub schema to use for each type of Geoview layer. */
 export declare const CONST_GEOVIEW_SCHEMA_BY_TYPE: Record<TypeGeoviewLayerType, string>;
 export declare const validVectorLayerLegendTypes: TypeGeoviewLayerType[];
 export declare const CONST_LAYER_ENTRY_TYPES: Record<LayerEntryTypesKey, TypeLayerEntryType>;
@@ -330,34 +326,39 @@ export type ShapefileLayerConfig = {
 };
 /**
  * Type guard that checks if a given map layer configuration entry is of type GeoCore.
- * @param {MapConfigLayerEntry} layerConfigEntryOption - The layer entry config to check
- * @returns {layerConfigEntryOption is GeoCoreLayerConfig} True if the layer is a GeoCore layer, narrowing the type to GeoCoreLayerConfig.
+ *
+ * @param layerConfigEntryOption - The layer entry config to check
+ * @returns True if the layer is a GeoCore layer, narrowing the type to GeoCoreLayerConfig
  */
 export declare const mapConfigLayerEntryIsGeoCore: (layerConfigEntryOption: MapConfigLayerEntry) => layerConfigEntryOption is GeoCoreLayerConfig;
 /**
  * Type guard that checks if a given map layer configuration entry is of type GeoPackage.
- * @param {MapConfigLayerEntry} layerConfigEntryOption - The layer entry config to check
- * @returns {layerConfigEntryOption is GeoPackageLayerConfig} True if the layer is a GeoPackage layer, narrowing the type to GeoPackageLayerConfig.
+ *
+ * @param layerConfigEntryOption - The layer entry config to check
+ * @returns True if the layer is a GeoPackage layer, narrowing the type to GeoPackageLayerConfig
  */
 export declare const mapConfigLayerEntryIsGeoPackage: (layerConfigEntryOption: MapConfigLayerEntry) => layerConfigEntryOption is GeoPackageLayerConfig;
 /**
  * Type guard that checks if a given map layer configuration entry is of type Shapefile.
- * @param {MapConfigLayerEntry} layerConfigEntryOption - The layer entry config to check
- * @returns {layerConfigEntryOption is ShapefileLayerConfig} True if the layer is a Shapefile layer, narrowing the type to ShapefileLayerConfig.
+ *
+ * @param layerConfigEntryOption - The layer entry config to check
+ * @returns True if the layer is a Shapefile layer, narrowing the type to ShapefileLayerConfig
  */
 export declare const mapConfigLayerEntryIsShapefile: (layerConfigEntryOption: MapConfigLayerEntry) => layerConfigEntryOption is ShapefileLayerConfig;
 /**
  * Type guard that checks if a given map layer configuration entry is of type RCS.
- * @param {MapConfigLayerEntry} layerConfigEntryOption - The layer entry config to check
- * @returns {layerConfigEntryOption is RCSLayerConfig} True if the layer is a RCS layer, narrowing the type to RCSLayerConfig.
+ *
+ * @param layerConfigEntryOption - The layer entry config to check
+ * @returns True if the layer is a RCS layer, narrowing the type to RCSLayerConfig
  */
 export declare const mapConfigLayerEntryIsRCS: (layerConfigEntryOption: MapConfigLayerEntry) => layerConfigEntryOption is RCSLayerConfig;
 type SpecialLayerConfigs = GeoCoreLayerConfig | RCSLayerConfig | GeoPackageLayerConfig | ShapefileLayerConfig;
 export type MapConfigLayerEntry = SpecialLayerConfigs | TypeGeoviewLayerConfig;
 /**
- * Temporary? function to serialize a geoview layer configuration to be able to send it to the store
- * @param {MapConfigLayerEntry} geoviewLayerConfig - The geoviewlayer config to serialize
- * @returns {MapConfigLayerEntry} The serialized config as pure JSON
+ * Temporary? function to serialize a geoview layer configuration to be able to send it to the store.
+ *
+ * @param geoviewLayerConfig - The geoview layer config to serialize
+ * @returns The serialized config as pure JSON
  */
 export declare const serializeTypeGeoviewLayerConfig: (geoviewLayerConfig: MapConfigLayerEntry) => TypeGeoviewLayerConfig;
 export interface TypeMetadataWMSRoot {
@@ -602,9 +603,7 @@ export interface TypeMetadataGeoTIFFAsset {
     href: string;
     type: string;
 }
-/**
- * Represents layer metadata as read from an Esri layer service.
- */
+/** Represents layer metadata as read from an Esri layer service. */
 export interface TypeLayerMetadataEsri {
     type: string;
     capabilities: string;
@@ -685,9 +684,7 @@ export interface TypeEsriSpatialReference {
     latestWkid?: number;
     wkt?: string;
 }
-/**
- * Payload response for a url call to {server_url}/MapServer?f=json
- */
+/** Payload response for a url call to {server_url}/MapServer?f=json. */
 export interface TypeMetadataEsriDynamic {
     currentVersion: number;
     serviceDescription: string;
@@ -700,9 +697,7 @@ export interface TypeMetadataEsriDynamic {
     fullExtent: TypeLayerMetadataEsriExtent;
     initialExtent: TypeLayerMetadataEsriExtent;
 }
-/**
- * Payload response for a url call to {server_url}/MapServer/{layerId}?f=json
- */
+/** Payload response for a url call to {server_url}/MapServer/{layerId}?f=json. */
 export interface TypeMetadataEsriDynamicLayer {
     id: number;
     name: string;
@@ -723,9 +718,7 @@ export interface TypeMetadataEsriDynamicLayer {
     drawingInfo?: TypeLayerMetadataEsriDrawingInfo;
     timeInfo?: TimeDimensionESRI;
 }
-/**
- * Payload response for a url call to {server_url}/FeatureServer?f=json
- */
+/** Payload response for a url call to {server_url}/FeatureServer?f=json. */
 export interface TypeMetadataEsriFeature {
     currentVersion: number;
     serviceDescription: string;
@@ -737,9 +730,7 @@ export interface TypeMetadataEsriFeature {
     fullExtent?: TypeLayerMetadataEsriExtent;
     initialExtent?: TypeLayerMetadataEsriExtent;
 }
-/**
- * Payload response for a url call to {server_url}/FeatureServer/{layerId}?f=json
- */
+/** Payload response for a url call to {server_url}/FeatureServer/{layerId}?f=json. */
 export interface TypeMetadataEsriFeatureLayer {
     id: number;
     name: string;
@@ -768,9 +759,7 @@ export interface TypeMetadataEsriFeatureLayer {
     editingInfo?: unknown;
     timeInfo?: TimeDimensionESRI;
 }
-/**
- * Payload response for a url call to {server_url}/ImageServer?f=json
- */
+/** Payload response for a url call to {server_url}/ImageServer?f=json. */
 export interface TypeMetadataEsriImage {
     currentVersion: number;
     name: string;
