@@ -1023,7 +1023,7 @@ export const useMapAllLayersCollapsedToggle = (): boolean =>
 /**
  * Returns the full layer state slice for the given map.
  *
- * Internal-only selector — not exported to avoid direct store access from outside this module.
+ * Internal-only selector - not exported to avoid direct store access from outside this module.
  *
  * @param mapId - The map identifier.
  * @returns The ILayerState for the given map.
@@ -1233,7 +1233,7 @@ export const getStoreMapLegendCollapsibleLayers = (mapId: string): TypeOrderedLa
 /**
  * Returns the map config state for the given map.
  *
- * Internal-only selector — not exported to avoid direct store access from outside this module.
+ * Internal-only selector - not exported to avoid direct store access from outside this module.
  *
  * @param mapId - The map identifier.
  * @returns The ILayerState for the given map.

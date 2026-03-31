@@ -359,7 +359,7 @@ export const useDataTableSelectedFeature = (): TypeFeatureInfoEntry | null =>
 /**
  * Returns the full data table state slice for the given map.
  *
- * Internal-only selector — not exported to avoid direct store access from outside this module.
+ * Internal-only selector - not exported to avoid direct store access from outside this module.
  *
  * @param mapId - The map identifier.
  * @returns The IDataTableState for the given map.
