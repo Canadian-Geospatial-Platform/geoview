@@ -192,7 +192,7 @@ export class DrawerController extends AbstractMapViewerController {
 
   // #endregion OVERRIDES
 
-  // #region PUBLIC METHODS
+  // #region PUBLIC METHODS - DRAWING
 
   /**
    * Starts a drawing operation with the specified geometry type.
@@ -890,6 +890,8 @@ export class DrawerController extends AbstractMapViewerController {
     }
   }
 
+  // #endregion PUBLIC METHODS - DRAWING
+
   // #region PUBLIC METHODS - HISTORY
 
   /**
@@ -1237,8 +1239,6 @@ export class DrawerController extends AbstractMapViewerController {
 
   // #endregion PUBLIC METHODS - DOWNLOAD
 
-  // #endregion PUBLIC METHODS
-
   // #region PRIVATE METHODS - DRAWING
 
   /**
@@ -1560,6 +1560,12 @@ export class DrawerController extends AbstractMapViewerController {
   // GV Eventually, these should be moved to a store adaptor or similar construct that directly connects the domain to the store without going through the controller
   // GV.CONT but for now this allows us to keep domain-store interactions in one place and call application-level processes as needed during migration.
 
+  /**
+   * Handles display language changes to update measurement tooltips and default text values.
+   *
+   * @param sender - The domain that sent the event
+   * @param event - The language change event containing the new language
+   */
   #handleDisplayLanguageChanged(sender: UIDomain, event: DomainLanguageChangedEvent): void {
     // Update all measurement tooltips when language changes
     this.#updateMeasurementTooltips(event.language);
@@ -1933,8 +1939,6 @@ export class DrawerController extends AbstractMapViewerController {
     DrawerController.#keyboardHandlers.set(mapId, handler);
     document.addEventListener('keydown', handler);
   }
-
-  // #endregion
 
   // #endregion DOMAIN HANDLERS
 
