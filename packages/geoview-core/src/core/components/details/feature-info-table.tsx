@@ -207,23 +207,10 @@ export const FeatureRow = memo(function FeatureRow({
     <TableRow className="feature-info-row" sx={sxClasses.featureInfoRow}>
       {featureInfoItem.alias !== 'html' ? (
         <>
-          <TableCell
-            component="th"
-            scope="row"
-            sx={{
-              fontWeight: 'bold',
-              width: '50%',
-              verticalAlign: 'top',
-            }}
-          >
+          <TableCell component="th" scope="row">
             {alias}
           </TableCell>
-          <TableCell
-            sx={{
-              wordWrap: 'break-word',
-              paddingRight: '0.3125rem',
-            }}
-          >
+          <TableCell>
             {stringValues.map((item: string, idx: number) => (
               <FeatureItem
                 key={`${alias}-${itemIds[idx]}`}
@@ -240,13 +227,7 @@ export const FeatureRow = memo(function FeatureRow({
           </TableCell>
         </>
       ) : (
-        <TableCell
-          colSpan={2}
-          sx={{
-            wordWrap: 'break-word',
-            paddingRight: '0.3125rem',
-          }}
-        >
+        <TableCell colSpan={2}>
           {stringValues.map((item: string, idx: number) => (
             <FeatureItem
               key={`${alias}-${itemIds[idx]}`}

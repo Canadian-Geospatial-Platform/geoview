@@ -57,7 +57,7 @@ export const Attribution = memo(function Attribution(): JSX.Element {
 
   const buttonStyles = {
     ...ICON_BUTTON_BASE_STYLES,
-    color: interaction === 'dynamic' ? theme.palette.geoViewColor.bgColor.light[800] : theme.palette.geoViewColor.grey.dark[500],
+    color: interaction === 'dynamic' ? theme.palette.geoViewColor.bgColor.dark[650] : theme.palette.geoViewColor.grey.dark[500],
   };
 
   // Memoize values

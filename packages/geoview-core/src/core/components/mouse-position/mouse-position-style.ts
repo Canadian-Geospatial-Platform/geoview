@@ -19,14 +19,15 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     width: 'auto',
     backgroundColor: 'transparent !important',
     height: 'inherit !important',
-    color: theme.palette.geoViewColor.bgColor.light[800],
+    color: theme.palette.geoViewColor.bgColor.dark[650],
     lineHeight: 1.5,
     ':hover': {
       backgroundColor: 'transparent !important',
-      color: theme.palette.geoViewColor.bgColor.light[600],
+      color: theme.palette.geoViewColor.bgColor.dark[750],
     },
   },
   mousePositionTextContainer: {
+    color: theme.palette.geoViewColor.bgColor.dark[650],
     display: 'flex',
     flexDirection: 'column',
     [theme.breakpoints.down('md')]: {

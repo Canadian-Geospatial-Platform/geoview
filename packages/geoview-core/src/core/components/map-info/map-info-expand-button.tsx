@@ -52,7 +52,7 @@ export const MapInfoExpandButton = memo(function MapInfoExpandButton({ onExpand,
 
   const buttonStyles = {
     ...BUTTON_BASE_STYLES,
-    color: theme.palette.geoViewColor.bgColor.light[800],
+    color: theme.palette.geoViewColor.bgColor.dark[650],
   };
 
   /**

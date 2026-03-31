@@ -20,7 +20,7 @@ import { DEFAULT_FOOTER_TABS_ORDER } from '@/api/types/map-schema-types';
 import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
 
 // default tabs icon and class
-import { LegendIcon, InfoOutlinedIcon, LayersOutlinedIcon, StorageIcon, QuestionMarkIcon } from '@/ui/icons';
+import { LegendIcon, InfoIcon, LayersIcon, StorageIcon, QuestionMarkIcon } from '@/ui/icons';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { Legend } from '@/core/components/legend/legend';
 import { LayersPanel } from '@/core/components/layers/layers-panel';
@@ -125,7 +125,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
       footerBarTabsConfig.tabs.custom.forEach((customTab) => {
         const newTab = {
           [customTab.id]: {
-            icon: <InfoOutlinedIcon />, // TODO: Make it configurable if needed
+            icon: <InfoIcon />, // TODO: Make it configurable if needed
             label: customTab.label,
             content: <UseHtmlToReact htmlContent={customTab.contentHTML ?? ''} />,
           },
@@ -148,8 +148,8 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
 
     return {
       legend: { icon: <LegendIcon />, content: <Legend containerType={CONTAINER_TYPE.FOOTER_BAR} /> },
-      layers: { icon: <LayersOutlinedIcon />, content: <LayersPanel containerType={CONTAINER_TYPE.FOOTER_BAR} /> },
-      details: { icon: <InfoOutlinedIcon />, content: <DetailsPanel containerType={CONTAINER_TYPE.FOOTER_BAR} /> },
+      layers: { icon: <LayersIcon />, content: <LayersPanel containerType={CONTAINER_TYPE.FOOTER_BAR} /> },
+      details: { icon: <InfoIcon />, content: <DetailsPanel containerType={CONTAINER_TYPE.FOOTER_BAR} /> },
       'data-table': { icon: <StorageIcon />, content: <Datapanel containerType={CONTAINER_TYPE.FOOTER_BAR} /> },
       guide: { icon: <QuestionMarkIcon />, content: <Guide containerType={CONTAINER_TYPE.FOOTER_BAR} /> },
     } as Record<string, Tab>;
@@ -192,7 +192,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   const handleAddTab = useCallback((sender: FooterBarApi, event: FooterTabCreatedEvent): void => {
     const newTab = {
       [event.tab.id]: {
-        icon: event.tab.icon || <InfoOutlinedIcon />,
+        icon: event.tab.icon || <InfoIcon />,
         label: event.tab.label,
         content: typeof event.tab.content === 'string' ? <UseHtmlToReact htmlContent={event.tab.content ?? ''} /> : event.tab.content,
       },
