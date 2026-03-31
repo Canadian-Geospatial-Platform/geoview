@@ -115,7 +115,7 @@ export const useMapHideCoordinateInfoSwitch = (): boolean =>
 /**
  * Returns the full feature info state slice for the given map.
  *
- * Internal-only selector � not exported to avoid direct store access from outside this module.
+ * Internal-only selector - not exported to avoid direct store access from outside this module.
  *
  * @param mapId - The map identifier.
  * @returns The IFeatureInfoState for the given map.

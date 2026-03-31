@@ -283,7 +283,7 @@ export const useUINavbarComponents = (): TypeValidNavBarProps[] => useStore(useG
 /**
  * Returns the full UI state slice for the given map.
  *
- * Internal-only selector — not exported to avoid direct store access from outside this module.
+ * Internal-only selector - not exported to avoid direct store access from outside this module.
  *
  * @param mapId - The map identifier.
  * @returns The IUIState for the given map.

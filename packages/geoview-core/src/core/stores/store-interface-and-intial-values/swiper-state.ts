@@ -85,7 +85,7 @@ export const useSwiperOrientation = (): string => useStore(useGeoViewStore(), (s
 /**
  * Returns the full swiper state slice for the given map.
  *
- * Internal-only selector — not exported to avoid direct store access from outside this module.
+ * Internal-only selector - not exported to avoid direct store access from outside this module.
  *
  * @param mapId - The map identifier.
  * @returns The ISwiperState for the given map.

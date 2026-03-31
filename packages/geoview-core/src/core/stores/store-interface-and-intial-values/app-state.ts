@@ -386,7 +386,7 @@ export const useAppDisplayThemeById = (mapId: string): TypeDisplayTheme =>
 /**
  * Returns the full app state slice for the given map.
  *
- * Internal-only selector — not exported to avoid direct store access from outside this module.
+ * Internal-only selector - not exported to avoid direct store access from outside this module.
  *
  * @param mapId - The map id for the App State to read
  * @returns The App State for the given map.

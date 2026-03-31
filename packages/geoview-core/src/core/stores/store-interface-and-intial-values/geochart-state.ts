@@ -187,7 +187,7 @@ export const useGeochartSelectedLayerPath = (): string => useStore(useGeoViewSto
 /**
  * Returns the full geochart state slice for the given map.
  *
- * Internal-only selector — not exported to avoid direct store access from outside this module.
+ * Internal-only selector - not exported to avoid direct store access from outside this module.
  *
  * @param mapId - The map id for the Geochart State to read
  * @returns The Geochart State
