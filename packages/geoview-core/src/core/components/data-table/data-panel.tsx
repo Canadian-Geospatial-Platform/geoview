@@ -77,7 +77,7 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
     return visibleInRangeLayers
       .map((layerPath) => mappedLayerData.filter((data) => data.layerPath === layerPath)[0])
       .filter((layer) => layer !== undefined && !getStoreMapIsLayerHiddenOnMap(mapId, layer.layerPath));
-    // TODO: CHECK - Above, we're using a state selector, where we should probably use a state hook. We do this here and elsewhere with the same selector.
+    // TODO: CHECK -This should likely go through a Zustand hook instead of a state getter (line above).
   }, [mappedLayerData, visibleInRangeLayers, mapId]);
 
   /**

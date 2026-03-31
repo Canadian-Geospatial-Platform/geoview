@@ -79,7 +79,7 @@ const useControlActions = (layerPath: string): ControlActions => {
       handleZoomToLayerVisibleScale: (event: React.MouseEvent): void => {
         event.stopPropagation();
         // Read current state values when handler executes
-        // TODO: REFACTOR - This isn't an ideal pattern, review.
+        // TODO: CHECK -This should likely go through a Zustand hook instead of a state getter
         const layer = getStoreLayerStateLegendLayerByPath(mapId, layerPath);
 
         // Use orderedLayerInfo to check visibility range
@@ -95,7 +95,7 @@ const useControlActions = (layerPath: string): ControlActions => {
       handleToggleVisibility: (event: React.MouseEvent): boolean => {
         event.stopPropagation();
         // Read current state values when handler executes
-        // TODO: REFACTOR - This isn't an ideal pattern, review.
+        // TODO: CHECK -This should likely go through a Zustand hook instead of a state getter
         const layer = getStoreLayerStateLegendLayerByPath(mapId, layerPath);
         const layerInfo = getStoreMapOrderedLayerInfoByPath(mapId, layerPath);
         const isInVisibleRange = layerInfo?.inVisibleRange || false;
@@ -109,7 +109,7 @@ const useControlActions = (layerPath: string): ControlActions => {
       handleHighlightLayer: (event: React.MouseEvent): void => {
         event.stopPropagation();
         // Read current state values when handler executes
-        // TODO: REFACTOR - This isn't an ideal pattern, review.
+        // TODO: CHECK -This should likely go through a Zustand hook instead of a state getter
         const layer = getStoreLayerStateLegendLayerByPath(mapId, layerPath);
         const layerInfo = getStoreMapOrderedLayerInfoByPath(mapId, layerPath);
         const isInVisibleRange = layerInfo?.inVisibleRange || false;

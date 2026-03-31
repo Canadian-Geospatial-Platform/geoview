@@ -24,8 +24,8 @@ import {
   useMapAllVisibleandInRangeLayers,
   useMapOrderedLayers,
   useMapSelectorLayerQueryable,
-  getStoreMapLayerParentHidden,
-  getStoreMapIsLayerHiddenOnMap,
+  getStoreMapLayerParentHidden, // TODO: CHECK -This should likely go through a Zustand hook instead of a state getter
+  getStoreMapIsLayerHiddenOnMap, // TODO: CHECK - This should likely go through a Zustand hook instead of a state getter
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import type { TypeFeatureInfoEntry, TypeLayerData, TypeMapMouseInfo } from '@/api/types/map-schema-types';
 

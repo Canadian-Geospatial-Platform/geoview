@@ -197,7 +197,8 @@ export class TimeSliderController extends AbstractMapViewerController {
     layerTimeDimensionInfo: TimeDimension,
     timesliderConfig?: TypeTimeSliderProps
   ): TypeTimeSliderValues | undefined {
-    // Get the layer using the map event processor, If no temporal dimension OR layerPath, return undefined
+    // If no layerPath, return undefined
+    // TODO: CHECK - Can this truly happen, a layerConfig without a layerPath!?
     if (!layerConfig.layerPath) return undefined;
 
     // Get temporal dimension info from plugin config

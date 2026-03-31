@@ -10,7 +10,8 @@
   "author": "Matthew Muehlhauser",
   "license": "MIT",
   "scripts": {
-    "build": "tsc --build"
+    "build": "tsc --build",
+    "build-dev": "tsc --build"
   },
   "dependencies": {
     "@emotion/react": "^11.13.3",

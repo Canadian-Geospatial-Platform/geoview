@@ -162,6 +162,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
 
     // Set the layers list
     return visibleInRangeLayers.reduce<LayerListEntry[]>((acc, layerPath) => {
+      // TODO: CHECK -This should likely go through a Zustand hook instead of a state getter
       const layer = storeArrayOfLayerData.find(
         (layerData) => layerData.layerPath === layerPath && !getStoreMapIsLayerHiddenOnMap(mapId, layerData.layerPath)
       );

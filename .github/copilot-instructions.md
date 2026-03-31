@@ -64,17 +64,52 @@ Key rules: **140-char print width**, single quotes, always-parens on arrows, ES5
 ### Three-Layer System
 
 ```
-UI Components (React) → Event Processors → Zustand Store
-Backend/Map Events → Event Processors → Zustand Store
+UI Components (React) → Controllers → Zustand Store
+Backend/Map Events → Domains → Controllers → Zustand Store
 ```
 
 **Critical Rules:**
 
-1. **UI components**: Read state from `MapState`/store slices, call `MapState.actions.*` (which redirect to Event Processors), NEVER import Event Processors directly
-2. **TypeScript backend code**: Use Event Processor static methods directly (e.g., `MapEventProcessor.setZoom(mapId, 10)`)
-3. **Event Processors**: Single source of truth for business logic, state validation, side effects
-   - Extend `AbstractEventProcessor` from [event-processor-architecture.md](../docs/programming/event-processor-architecture.md)
-   - Static methods for TS files, store actions for UI
+1. **UI components**: Read state from store hooks (`useMapZoom`, `useLayerLegendLayers`, etc.), call controller methods via `useMapController()`, `useLayerController()`, etc.
+2. **TypeScript backend code**: Access controllers via `this.getControllersRegistry()` (inside controllers) or `mapViewer.controllers` (from MapViewer)
+3. **Controllers**: Single source of truth for business logic, state validation, side effects
+   - Extend `AbstractMapViewerController` from `@/core/controllers/base/abstract-map-viewer-controller`
+   - Instance methods (not static) — one controller registry per MapViewer
+   - Lifecycle managed via `hook()` / `unhook()` template methods
+4. **Domains** (`LayerDomain`, `UIDomain`): Own the GV layer instances and emit domain events. Controllers subscribe to domain events in `onHook()` and propagate changes to the store.
+
+**Available Controllers:**
+
+| Controller | Responsibility |
+|---|---|
+| `MapController` | Zoom, center, projection, highlight, filters |
+| `LayerController` | Visibility, opacity, settings, item visibility |
+| `LayerCreatorController` | Layer creation and removal |
+| `LayerSetController` | Feature queries, layer set management |
+| `UIController` | UI state, tabs, theme, language, notifications |
+| `DataTableController` | Data table filters |
+| `PluginController` | Plugin loading and access |
+| `DrawerController` | Drawing operations (conditional) |
+| `TimeSliderController` | Time slider state and filters (conditional) |
+
+**Accessing controllers from React components:**
+
+```typescript
+import { useMapController } from '@/core/controllers/map-controller';
+import { useLayerController } from '@/core/controllers/layer-controller';
+
+const mapController = useMapController();
+const layerController = useLayerController();
+mapController.zoomToExtent(extent);
+layerController.setLayerOpacity(layerPath, 0.5);
+```
+
+**Cross-controller communication (inside controllers):**
+
+```typescript
+this.getControllersRegistry().mapController.applyLayerFilters(layerPath);
+this.getControllersRegistry().uiController.setCircularProgress(true);
+```
 
 ### Layer Architecture
 
@@ -119,7 +154,7 @@ import { Layer } from "ol/layer";
 
 import { Box, Typography, IconButton } from "@/ui";
 import { SettingsIcon, ArrowBackIcon } from "@/ui";
-import { MapEventProcessor } from "@/api/event-processors";
+import { useMapController } from "@/core/controllers/map-controller";
 ```
 
 **MUI import rules:**
@@ -380,25 +415,34 @@ export const useLayerStoreActions = (): LayerActions =>
   useStore(useGeoViewStore(), (state) => state.layerState.actions);
 ```
 
-### No Store Leakage in .ts Files
+### Store Access Patterns
 
-Pattern from [using-store.md](../docs/programming/using-store.md):
+**React components** read state via store hooks, call controllers for mutations:
 
 ```typescript
-// ✅ In TypeScript file
-MapEventProcessor.clickMarkerIconHide(this.mapId);
+// ✅ In React component — read from store hook
+const zoom = useMapZoom();
+const legendLayers = useLayerLegendLayers();
 
-// ✅ In Event Processor
-static clickMarkerIconHide(mapId: string) {
-  const store = getGeoViewStore(mapId);
-  store.getState().mapState.actions.hideClickMarker();
-}
+// ✅ In React component — mutate via controller
+const mapController = useMapController();
+mapController.zoomToExtent(extent);
+```
 
-// ✅ In store interface
-export interface IMapState {
-  clickMarker: TypeClickMarker | undefined;
-  actions: { hideClickMarker: () => void };
-}
+**Controllers** update the store directly via setter functions:
+
+```typescript
+// ✅ In a controller method
+import { setStoreMapClickMarker } from '@/core/stores/store-interface-and-intial-values/map-state';
+
+setStoreMapClickMarker(this.getMapId(), projectedCoords[0]);
+```
+
+**Non-React .ts files** access controllers via the registry (never import store hooks):
+
+```typescript
+// ✅ Inside another controller
+this.getControllersRegistry().mapController.applyLayerFilters(layerPath);
 ```
 
 ## Config & Schema Validation
@@ -576,7 +620,7 @@ async function fetchMetadata(
  * Updates layer visibility state.
  *
  * This method does not directly manipulate the map.
- * It dispatches an event to the EventProcessor, which
+ * It delegates to the layer controller, which
  * will trigger the appropriate GeoView API call.
  *
  * @param layerPath - Target layer path
@@ -899,7 +943,6 @@ Keys use **dot-separated namespaces** (2-3 levels deep):
 
 ## Key Files to Reference
 
-- [event-processor-architecture.md](../docs/programming/event-processor-architecture.md) - State management patterns
 - [layerset-architecture.md](../docs/programming/layerset-architecture.md) - Layer data synchronization
 - [adding-layer-types.md](../docs/programming/adding-layer-types.md) - Extending layer support
 - [best-practices.md](../docs/programming/best-practices.md) - Code style & patterns
@@ -909,11 +952,23 @@ Keys use **dot-separated namespaces** (2-3 levels deep):
 
 ```
 packages/geoview-core/src/
-├── api/              # Public APIs & Event Processors (exported to plugins)
-│   ├── event-processors/
+├── api/              # Public APIs (exported to plugins)
 │   ├── config/       # ConfigApi, ConfigValidation - schema validation
+│   ├── events/       # EventHelper, event delegate types
 │   └── plugin/       # Plugin registration APIs
-├── core/             # Core utilities, stores, workers
+├── core/             # Core utilities, stores, controllers, workers
+│   ├── controllers/  # Business logic controllers (one per domain)
+│   │   ├── base/     # AbstractController, AbstractMapViewerController, ControllerRegistry, ControllerManager
+│   │   ├── map-controller.ts
+│   │   ├── layer-controller.ts
+│   │   ├── layer-creator-controller.ts
+│   │   ├── layer-set-controller.ts
+│   │   ├── ui-controller.ts
+│   │   ├── data-table-controller.ts
+│   │   ├── plugin-controller.ts
+│   │   ├── drawer-controller.ts
+│   │   └── time-slider-controller.ts
+│   ├── domains/      # Domain models (LayerDomain, UIDomain) - own GV layer instances, emit events
 │   ├── stores/       # Zustand store slices
 │   │   └── store-interface-and-intial-values/  # Hook exports per slice
 │   ├── components/   # Shared React components

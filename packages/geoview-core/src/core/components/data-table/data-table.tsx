@@ -478,6 +478,7 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
       if (extent) {
         // Project
         const center = getCenter(extent);
+        // TODO: CHECK -This should likely go through a Zustand hook instead of a state getter
         const newCenter = Projection.transformPoints([center], getStoreMapCurrentProjectionEPSG(mapId), `EPSG:4326`)[0];
 
         // Zoom to extent and wait for it to finish

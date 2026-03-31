@@ -143,6 +143,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
           return false;
         }
 
+        // TODO: CHECK -This should likely go through a Zustand hook instead of a state getter
         // Check if main layer is hidden (includes out of scale check)
         const mainLayerHidden = getStoreMapIsLayerHiddenOnMap(mapId, layer.layerPath);
 
@@ -151,6 +152,8 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
           const hasVisibleAdditionalLayer = layer.timeSliderLayerInfo.additionalLayerpaths.some(
             (layerPath) => !getStoreMapIsLayerHiddenOnMap(mapId, layerPath)
           );
+          // TODO: CHECK -This should likely go through a Zustand hook instead of a state getter (line above)
+
           // Show if main layer is visible OR any additional layer is visible
           if (mainLayerHidden && !hasVisibleAdditionalLayer) {
             return false;

@@ -204,6 +204,7 @@ export function LegendFullscreen({ layersList, mapId, containerType, isOpen, onC
 
     if (isOpen) {
       // Entering fullscreen: save collapse state and expand all
+      // TODO: CHECK -This should likely go through a Zustand hook instead of a state getter
       const orderedLayerInfo = getStoreMapOrderedLayerInfo(mapId);
       const collapseState: Record<string, boolean> = {};
 
