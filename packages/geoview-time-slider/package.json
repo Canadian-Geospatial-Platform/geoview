@@ -9,7 +9,8 @@
   "author": "Damon Ulmi",
   "license": "MIT",
   "scripts": {
-    "build": "tsc --build"
+    "build": "tsc --build",
+    "build-dev": "tsc --build"
   },
   "peerDependencies": {
     "geoview-core": "workspace:^2.0.0",

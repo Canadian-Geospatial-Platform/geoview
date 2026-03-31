@@ -529,7 +529,7 @@ export class OLTransform extends OLPointer {
     // Update handles after deletion
     this.updateHandles();
 
-    // Fire transform end event to notify drawer event processor to update undo/redo buttons
+    // Fire transform end raise event to update undo/redo buttons
     this.onTransformend?.(new TransformEvent('transformend', this.selectedFeature));
   }
 

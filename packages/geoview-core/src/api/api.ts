@@ -141,7 +141,7 @@ export class API {
 
     // GV Now that we're unmounted, we can remove the store, best practice
     try {
-      // Delete store and event processor
+      // Delete store
       removeGeoviewStore(mapId);
     } catch (error: unknown) {
       // Failed to remove the store, eat the exception and continue

@@ -189,6 +189,7 @@ export class MapViewer {
   // TODO: REFACTOR IMPORTANT - Ideally, the MapViewer class would be a proper 'Domain' class unaware of 'controllers'.
   // TO.DOCONT: We should review everywhere in this file where 'this.controllers.' is used - as those are backwards domain (MapViewer) calling a controller.
   // TO.DOCONT: However, we can only do this once we have another 'Application class' which holds the ControllersRegistry instead of the MapViewer itself.
+  // TO.DOCONT: That's another big refactor to come.
   /** The controller registry owning all framework-level controllers */
   controllers: ControllerRegistry;
 
@@ -489,6 +490,8 @@ export class MapViewer {
     map.addControl(scaleBarImperial);
 
     // Get the projection
+    // TODO: CHECK - Do we really have to go through the store to get the map projection when we're in the map-viewer class itself?
+    // TO.DOCONT: Do a 'find-all-references' on 'getStoreMapCurrentProjection' and 'getStoreMapCurrentProjectionEPSG' to review them all.
     const mapProjection = Projection.getProjectionFromString(getStoreMapCurrentProjectionEPSG(this.mapId));
 
     // add map overlays

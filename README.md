@@ -2,7 +2,7 @@
 
 **La version française suit.**
 
-Natural Resources Canada / Ressources naturelles Canada  
+Natural Resources Canada / Ressources naturelles Canada
 Part of **GEO.ca**
 
 ---
@@ -56,7 +56,7 @@ A plugin system allows functionality to be extended without modifying the core. 
 
 - Declarative (HTML `data-config`) and programmatic (`createMapFromConfig`) map creation
 - Shareable map state via URL parameters
-- Zustand-based state management with a clear three-layer architecture (UI → Event Processors → Store)
+- Zustand-based state management with a clear three-layer architecture (UI → Controllers → Store)
 - Comprehensive event system for map, layer, and interaction events
 - Bilingual support (English and French)
 - WCAG 2.1 accessibility compliance
@@ -75,7 +75,7 @@ A plugin system allows functionality to be extended without modifying the core. 
 - Report bugs or request features via **GitHub Issues**
 - Contributions are welcome following Government of Canada open-source guidelines
 
-**Contact**:  
+**Contact**:
 `geo@nrcan-rncan.gc.ca`
 
 ---
@@ -90,7 +90,7 @@ This project is released under the applicable Government of Canada open-source l
 
 # GeoView – Visualisateur / Viewer
 
-Ressources naturelles Canada / Natural Resources Canada  
+Ressources naturelles Canada / Natural Resources Canada
 Fait partie de **GEO.ca**
 
 ---
@@ -142,7 +142,7 @@ Un système de plugiciels permet d'étendre les fonctionnalités sans modifier l
 - Signalez des bogues ou proposez des fonctionnalités via les **issues GitHub**
 - Les contributions sont les bienvenues conformément aux lignes directrices open source du gouvernement du Canada
 
-**Contact**:  
+**Contact**:
 `geo@nrcan-rncan.gc.ca`
 
 ---

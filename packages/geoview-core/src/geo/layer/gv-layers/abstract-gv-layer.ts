@@ -763,6 +763,10 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param layerFilters - The filter layers associated to the layer or undefined
    * @param refresh - Whether to refresh the layer after setting filters
    */
+  // TODO: REFACTOR - Now that the event processors are gone, it's clear this layers filtering process can be improved.
+  // TO.DOCONT: Change this function to a 'applyLayerFilters' with the 'onSetLayerFilters' also renamed to 'onApplyLayerFilters'
+  // TO.DOCONT: And we don't need to create a new LayerFilters when we call this, we can reuse the layerFilter in class attribute
+  // TO.DOCONT: if we have the setClassFilter, setDataFilter, setTimeFilter all called. Search id : ce707359
   setLayerFilters(layerFilters: LayerFilters, refresh: boolean | undefined): void {
     // Keep it
     this.#layerFilters = layerFilters;
