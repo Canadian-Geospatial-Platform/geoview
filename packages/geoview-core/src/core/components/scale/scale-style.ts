@@ -38,9 +38,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   scaleText: {
     fontSize: theme.palette.geoViewFontSize.default,
-    color: theme.palette.geoViewColor.bgColor.light[800],
+    color: theme.palette.geoViewColor.bgColor.dark[650],
     whiteSpace: 'nowrap',
-    borderBottom: `2px solid ${theme.palette.geoViewColor.primary.light[300]}`,
+    borderBottom: `2px solid ${theme.palette.geoViewColor.bgColor.dark[650]}`,
     textTransform: 'lowercase',
     position: 'relative',
     display: 'inline-block',
@@ -63,7 +63,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       bottom: '-1px',
       width: '1px',
       height: '8px',
-      backgroundColor: theme.palette.geoViewColor.bgColor.light[800],
+      backgroundColor: theme.palette.geoViewColor.bgColor.dark[650],
     },
 
     '&.hasScaleLine::before': {

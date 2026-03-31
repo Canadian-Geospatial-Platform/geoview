@@ -42,9 +42,17 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     overflowX: 'hidden',
   },
   featureInfoRow: {
+    th: {
+      fontWeight: 'bold',
+    },
     '& td, & th': {
+      verticalAlign: 'top',
+      width: '50%',
       padding: '5px',
       borderBottom: 'none',
+      overflowWrap: 'break-word',
+      wordBreak: 'break-word',
+      whiteSpace: 'pre-wrap',
     },
     '&:nth-of-type(odd)': {
       backgroundColor: theme.palette.geoViewColor.bgColor.darken(0.1),
@@ -53,9 +61,10 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   featureInfoItemValue: {
     marginRight: 0,
-    wordBreak: 'break-word',
     overflowX: 'auto',
     textOverflow: 'ellipsis',
+    overflowWrap: 'break-word',
+    wordBreak: 'break-word',
     whiteSpace: 'pre-wrap',
     ' table': {
       border: '1px solid',
@@ -64,10 +73,11 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
     ' th, td': {
       border: '1px solid',
-      wordBreak: 'normal',
-      textAllign: 'center',
+      textAlign: 'center',
       padding: '5px',
-      whiteSpace: 'nowrap',
+      overflowWrap: 'break-word',
+      wordBreak: 'break-word',
+      whiteSpace: 'pre-wrap',
     },
   },
   featureInfoItemImage: {
@@ -76,10 +86,13 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     display: 'block',
   },
   boxContainerFeatureInfo: {
-    wordWrap: 'break-word',
+    overflowWrap: 'break-word',
+    wordBreak: 'break-word',
+    whiteSpace: 'pre-wrap',
     fontSize: theme.palette.geoViewFontSize.default,
     lineHeight: '19px',
     '& .MuiTable-root': {
+      tableLayout: 'fixed',
       borderCollapse: 'separate',
       borderSpacing: 0,
     },
