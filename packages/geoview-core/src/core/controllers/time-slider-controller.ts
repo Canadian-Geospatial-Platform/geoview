@@ -79,7 +79,8 @@ export class TimeSliderController extends AbstractMapViewerController {
    */
   updateTimeSliderValues(layerPath: string, values: number[]): void {
     // Get the store values
-    const timeSliderValues = getStoreTimeSliderLayer(this.getMapId(), layerPath)!;
+    const timeSliderValues = getStoreTimeSliderLayer(this.getMapId(), layerPath);
+    if (!timeSliderValues) return;
 
     // Get the corresponding layer
     const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
@@ -96,7 +97,8 @@ export class TimeSliderController extends AbstractMapViewerController {
    */
   updateTimeSliderFiltering(layerPath: string, filtering: boolean): void {
     // Get the store values
-    const timeSliderValues = getStoreTimeSliderLayer(this.getMapId(), layerPath)!;
+    const timeSliderValues = getStoreTimeSliderLayer(this.getMapId(), layerPath);
+    if (!timeSliderValues) return;
 
     // Get the corresponding layer
     const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
