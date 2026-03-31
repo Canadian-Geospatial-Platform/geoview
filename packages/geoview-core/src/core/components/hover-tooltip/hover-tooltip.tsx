@@ -79,6 +79,8 @@ export const HoverTooltip = memo(function HoverTooltip(): JSX.Element | null {
    * Calculates the tooltip position with boundary checks.
    */
   const memoPosition = useMemo(() => {
+    // TODO: CHECK - This should likely go through a Zustand hook instead of a state getter.
+    // TO.DOCONT: Or write down why we do an exception here (other than 'use it only when needed')
     // Use store getter, we do not subcribe to modification and use it only when needed
     const pointerPosition = getStoreMapPointerPosition(mapId);
 

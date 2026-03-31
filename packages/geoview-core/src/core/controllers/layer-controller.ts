@@ -1101,7 +1101,7 @@ export class LayerController extends AbstractMapViewerController {
     // Get highlighted layer to set active button state because there can only be one highlighted layer at a time.
     const currentHighlight = getStoreLayerStateHighlightedLayer(this.getMapId());
 
-    // Highlight layer and get new highlighted layer path from map event processor.
+    // Highlight layer and get new highlighted layer path from map controller.
     const highlightedLayerpath = this.getControllersRegistry().mapController.changeOrRemoveLayerHighlight(layerPath, currentHighlight);
 
     // Save to the store

@@ -9,7 +9,8 @@
   "author": "Alexandre Roy",
   "license": "MIT",
   "scripts": {
-    "build": "tsc --build"
+    "build": "tsc --build",
+    "build-dev": "tsc --build"
   },
   "dependencies": {
     "geochart": "github:Canadian-Geospatial-Platform/geochart#develop"

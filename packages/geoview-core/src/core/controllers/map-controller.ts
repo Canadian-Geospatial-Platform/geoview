@@ -785,6 +785,11 @@ export class MapController extends AbstractMapViewerController {
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
    * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path.
    */
+  // TODO: REFACTOR - This function, if we don't actually delete it, should basically only return the
+  // TO.DOCONT: layer.getLayerFilter() from the domain, never go in the store.
+  // TO.DOCONT: The store synchronization should happen via a event hook. Event that is raised by the
+  // TO.DOCONT: layer when the layer filters attributes themselves are set.
+  // TO.DOCONT: This is related to the other TODO to improve the layer filterings. Search id: ce707359
   getActiveFilters(layerPath: string): LayerFilters {
     // Get the layer and layer config
     const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);

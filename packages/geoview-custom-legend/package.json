@@ -7,7 +7,8 @@
     "custom-legend"
   ],
   "scripts": {
-    "build": "tsc --build"
+    "build": "tsc --build",
+    "build-dev": "tsc --build"
   },
   "author": "Ahmed-yacin Farah",
   "license": "MIT",
