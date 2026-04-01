@@ -40,7 +40,7 @@ export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfi
 
   // /**
   //  * Helper function to get the layer metadata casted as TypeLayerMetadataVector.
-  //  * @returns {TypeLayerMetadataVector | undefined} The casted layer metadata in the right type.
+  //  * @returns The casted layer metadata in the right type.
   //  */
   // TODO: REFACTOR - Add this function once cleanup is ready. Search id: 7887777f
   // override getLayerMetadata(): TypeLayerMetadataVector | undefined {

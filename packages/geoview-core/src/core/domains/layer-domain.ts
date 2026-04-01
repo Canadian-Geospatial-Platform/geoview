@@ -912,6 +912,7 @@ export class LayerDomain {
    * Registers a layer entry config registered handler.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback registered, for chaining or unregistration purposes
    */
   onLayerEntryConfigRegistered(callback: DomainLayerStatusChangedDelegate): DomainLayerStatusChangedDelegate {
     // Register the event handler
@@ -942,6 +943,7 @@ export class LayerDomain {
    * Registers a layer entry config unregistered handler.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback registered, for chaining or unregistration purposes
    */
   onLayerEntryConfigUnregistered(callback: DomainLayerStatusChangedDelegate): DomainLayerStatusChangedDelegate {
     // Register the event handler
@@ -972,6 +974,7 @@ export class LayerDomain {
    * Registers a layer status changed event handler.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback registered, for chaining or unregistration purposes
    */
   onLayerStatusChanged(callback: DomainLayerStatusChangedDelegate): DomainLayerStatusChangedDelegate {
     // Register the event handler
@@ -1002,6 +1005,7 @@ export class LayerDomain {
    * Registers a layer all loaded event handler.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback registered, for chaining or unregistration purposes
    */
   onLayerAllLoaded(callback: DomainLayerStatusChangedDelegate): DomainLayerStatusChangedDelegate {
     // Register the event handler
@@ -1036,6 +1040,7 @@ export class LayerDomain {
    * Registers a layer registered handler.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback registered, for chaining or unregistration purposes
    */
   onLayerRegistered(callback: DomainLayerRegisteredDelegate): DomainLayerRegisteredDelegate {
     // Register the event handler
@@ -1066,6 +1071,7 @@ export class LayerDomain {
    * Registers a layer unregistered handler.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback registered, for chaining or unregistration purposes
    */
   onLayerUnregistered(callback: DomainLayerRegisteredDelegate): DomainLayerRegisteredDelegate {
     // Register the event handler
@@ -1096,6 +1102,7 @@ export class LayerDomain {
    * Registers a layer loading event handler.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback registered, for chaining or unregistration purposes
    */
   onLayerLoading(callback: DomainLayerBaseDelegate): DomainLayerBaseDelegate {
     // Register the event handler
@@ -1126,6 +1133,7 @@ export class LayerDomain {
    * Registers a layer first loaded event handler.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback registered, for chaining or unregistration purposes
    */
   onLayerFirstLoaded(callback: DomainLayerBaseDelegate): DomainLayerBaseDelegate {
     // Register the event handler
@@ -1156,6 +1164,7 @@ export class LayerDomain {
    * Registers a layer loaded event handler.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback registered, for chaining or unregistration purposes
    */
   onLayerLoaded(callback: DomainLayerBaseDelegate): DomainLayerBaseDelegate {
     // Register the event handler
@@ -1186,6 +1195,7 @@ export class LayerDomain {
    * Registers a layer error event handler.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback registered, for chaining or unregistration purposes
    */
   onLayerError(callback: DomainLayerErrorDelegate): DomainLayerErrorDelegate {
     // Register the event handler
@@ -1216,6 +1226,7 @@ export class LayerDomain {
    * Registers a layer name changed event handler.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback registered, for chaining or unregistration purposes
    */
   onLayerNameChanged(callback: DomainLayerNameChangedDelegate): DomainLayerNameChangedDelegate {
     // Register the event handler
@@ -1246,6 +1257,7 @@ export class LayerDomain {
    * Registers a layer visible changed event handler.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback registered, for chaining or unregistration purposes
    */
   onLayerVisibleChanged(callback: DomainLayerVisibleChangedDelegate): DomainLayerVisibleChangedDelegate {
     // Register the event handler
@@ -1276,6 +1288,7 @@ export class LayerDomain {
    * Registers a layer opacity changed event handler.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback registered, for chaining or unregistration purposes
    */
   onLayerOpacityChanged(callback: DomainLayerOpacityChangedDelegate): DomainLayerOpacityChangedDelegate {
     // Register the event handler
@@ -1306,6 +1319,7 @@ export class LayerDomain {
    * Registers a layer hoverable changed event handler.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback registered, for chaining or unregistration purposes
    */
   onLayerHoverableChanged(callback: DomainLayerHoverableChangedDelegate): DomainLayerHoverableChangedDelegate {
     // Register the event handler
@@ -1336,6 +1350,7 @@ export class LayerDomain {
    * Registers a layer queryable changed event handler.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback registered, for chaining or unregistration purposes
    */
   onLayerQueryableChanged(callback: DomainLayerQueryableChangedDelegate): DomainLayerQueryableChangedDelegate {
     // Register the event handler
@@ -1366,6 +1381,7 @@ export class LayerDomain {
    * Registers a layer message event handler.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback registered, for chaining or unregistration purposes
    */
   onLayerMessage(callback: DomainLayerMessageDelegate): DomainLayerMessageDelegate {
     // Register the event handler
@@ -1396,6 +1412,7 @@ export class LayerDomain {
    * Registers a layer item visibility changed event handler.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback registered, for chaining or unregistration purposes
    */
   onLayerItemVisibilityChanged(callback: DomainLayerItemVisibilityChangedDelegate): DomainLayerItemVisibilityChangedDelegate {
     // Register the event handler
@@ -1426,6 +1443,7 @@ export class LayerDomain {
    * Registers a layer WMS image load rescue event handler.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback registered, for chaining or unregistration purposes
    */
   onLayerWMSImageLoadRescue(callback: DomainLayerWMSImageLoadRescueDelegate): DomainLayerWMSImageLoadRescueDelegate {
     // Register the event handler
@@ -1456,6 +1474,7 @@ export class LayerDomain {
    * Registers a layer group layer added event handler.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback registered, for chaining or unregistration purposes
    */
   onLayerGroupLayerAdded(callback: DomainLayerGroupChildrenUpdatedDelegate): DomainLayerGroupChildrenUpdatedDelegate {
     // Register the event handler
@@ -1486,6 +1505,7 @@ export class LayerDomain {
    * Registers a layer group layer removed event handler.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback registered, for chaining or unregistration purposes
    */
   onLayerGroupLayerRemoved(callback: DomainLayerGroupChildrenUpdatedDelegate): DomainLayerGroupChildrenUpdatedDelegate {
     // Register the event handler

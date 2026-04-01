@@ -46,6 +46,7 @@ export class Draw extends Interaction {
    * Initializes a Draw component.
    *
    * @param options - Object to configure the initialization of the Draw interaction
+   * @param geometryApi - The geometry API used to retrieve geometry groups if a geometry group key is provided in the options
    */
   constructor(options: DrawOptions, geometryApi: GeometryApi) {
     super(options);

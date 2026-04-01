@@ -490,9 +490,9 @@ export class MapController extends AbstractMapViewerController {
   /**
    * Update or remove the layer highlight.
    *
-   * @param {string} layerPath - The layer path to set as the highlighted layer.
-   * @param {string} highlightedLayerPath - The layer path of the currently highlighted layer.
-   * @returns {string} The layer path of the highlighted layer.
+   * @param layerPath - The layer path to set as the highlighted layer.
+   * @param highlightedLayerPath - The layer path of the currently highlighted layer.
+   * @returns The layer path of the highlighted layer.
    */
   changeOrRemoveLayerHighlight(layerPath: string, highlightedLayerPath: string): string {
     // If layer is currently highlighted layer, remove highlight
@@ -945,6 +945,7 @@ export class MapController extends AbstractMapViewerController {
 
   /**
    * Sets the visibility of **all layers** in a given map.
+   *
    * Iterates through all GeoView layers associated with the specified map ID and
    * applies the provided visibility value. Only layers whose current visibility
    * differs from the desired state will be updated.

@@ -34,7 +34,7 @@ export class StateApi {
   /**
    * Instantiates an StateApi class.
    *
-   * @param {string} mapId - The map id this StateApi belongs to
+   * @param mapId - The map id this StateApi belongs to
    */
   constructor(mapController: MapController) {
     this.#mapController = mapController;
@@ -42,8 +42,8 @@ export class StateApi {
 
   /**
    * Get the collapsed state of layer's legend.
-   * @param {string} layerPath - Path of the layer to get state for.
-   * @returns {boolean} If the legend is collapsed.
+   * @param layerPath - Path of the layer to get state for.
+   * @returns If the legend is collapsed.
    */
   getLegendCollapsedState(layerPath: string): boolean {
     // Get from store
@@ -52,9 +52,9 @@ export class StateApi {
 
   /**
    * Get a specific state from a plugin.
-   * @param {'time-slider' | 'geochart' | 'swiper'} pluginId - The plugin to get state for.
-   * @param {string} state - The state to get.
-   * @returns {string | TypeGeochartResultSetEntry[] | GeoChartStoreByLayerPath | TypeTimeSliderValues | undefined} The requested state.
+   * @param pluginId - The plugin to get state for.
+   * @param state - The state to get.
+   * @returns The requested state.
    */
   getPluginState(
     pluginId: 'geochart' | 'swiper' | 'time-slider',
@@ -93,9 +93,9 @@ export class StateApi {
 
   /**
    * Set the collapsed state of layer's legend.
-   * @param {string} layerPath - Path of the layer to get state for.
-   * @param {boolean} collapsed - The new state
-   * @returns {boolean} If the legend is collapsed.
+   * @param layerPath - Path of the layer to get state for.
+   * @param collapsed - The new state
+   * @returns If the legend is collapsed.
    */
   setLegendCollapsedState(layerPath: string, collapsed: boolean): void {
     // Save to the store
@@ -104,7 +104,7 @@ export class StateApi {
 
   /**
    * Set selected layer in layers tab.
-   * @param {string} layerPath - The path of the layer to set
+   * @param layerPath - The path of the layer to set
    */
   setSelectedLayersTabLayer(layerPath: string): void {
     setStoreLayerSelectedLayersTabLayer(this.#mapController.getMapId(), layerPath);
@@ -151,7 +151,7 @@ export class StateApi {
 
   /**
    * Emits layers reordered event.
-   * @param {LayersReorderedEvent} event - The event to emit
+   * @param event - The event to emit
    * @private
    */
   #emitLayersReordered(event: LayersReorderedEvent): void {
@@ -161,7 +161,7 @@ export class StateApi {
 
   /**
    * Registers a layers reordered event handler.
-   * @param {LayersReorderedDelegate} callback - The callback to be executed whenever the event is emitted
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onLayersReordered(callback: LayersReorderedDelegate): void {
     // Register the event handler
@@ -170,7 +170,7 @@ export class StateApi {
 
   /**
    * Unregisters a layers reordered event handler.
-   * @param {LayersReorderedDelegate} callback - The callback to stop being called whenever the event is emitted
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offLayersReordered(callback: LayersReorderedDelegate): void {
     // Unregister the event handler

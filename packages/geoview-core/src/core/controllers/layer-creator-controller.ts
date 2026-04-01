@@ -109,6 +109,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
 
   /**
    * Creates an instance of the LayerCreator class.
+   *
    * @param layerDomain - The layer domain to be used by the LayerCreator
    */
   constructor(mapViewer: MapViewer, layerDomain: LayerDomain) {
