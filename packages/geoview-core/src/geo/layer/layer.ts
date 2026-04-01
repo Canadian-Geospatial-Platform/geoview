@@ -758,7 +758,7 @@ export class LayerApi {
    * @param layerPath - The path of the layer whose visibility is being updated.
    * @param newValue - Optional. The new visibility value to apply. If omitted, the current visibility is toggled.
    * @returns The resulting visibility state of the layer after the update
-   * @throws {LayerNotFoundError} If the layer cannot be found at the given path.
+   * @throws {LayerNotFoundError} When the layer cannot be found at the given path.
    */
   setOrToggleLayerVisibility(layerPath: string, newValue?: boolean): boolean {
     // Redirect to controller

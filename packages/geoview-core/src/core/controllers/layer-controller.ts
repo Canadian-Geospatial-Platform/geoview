@@ -788,6 +788,7 @@ export class LayerController extends AbstractMapViewerController {
    *
    * @param layerPath - The layer path
    * @param mosaicRule - The mosaic rule to apply or undefined to remove it
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
    */
   setLayerMosaicRule(layerPath: string, mosaicRule: TypeMosaicRule | undefined): void {
     const layer = this.getGeoviewLayer(layerPath);

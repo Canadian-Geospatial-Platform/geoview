@@ -138,11 +138,11 @@ type EqualityFn<T> = (prev: T, next: T) => boolean;
  * This is useful when the store returns a new object or array on every update,
  * but you want to avoid infinite render loops or excessive component updates.
  * @template T - The type of the selected state slice.
- * @param {GeoviewStoreType} store - The Zustand store instance to subscribe to.
- * @param {(state: IGeoviewState) => T} selector - A function that selects a piece of state from the store.
- * @param {(prev: T, next: T) => boolean} [isEqual] - A function that compares the previous and next selector results.
+ * @param store - The Zustand store instance to subscribe to.
+ * @param selector - A function that selects a piece of state from the store.
+ * @param isEqual - A function that compares the previous and next selector results.
  *                                                    Should return true if they are equal and reference can be reused.
- * @returns {T} The selected state slice. Returns the previous reference if `isEqual(prev, next)` is true.
+ * @returns The selected state slice. Returns the previous reference if `isEqual(prev, next)` is true.
  * @example
  * const queryableLayers = useStableSelector(
  *   store,

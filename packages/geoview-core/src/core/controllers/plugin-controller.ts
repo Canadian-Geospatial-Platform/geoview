@@ -36,7 +36,7 @@ export class PluginController extends AbstractMapViewerController {
    * Shortcut to get the Map Viewer plugins instance for a given map id
    * This is use to reduce the use of api.getMapViewer(mapId).plugins and be more explicit
 
-   * @returns {PluginsContainer} The map plugins container
+   * @returns The map plugins container
    */
   async getMapViewerPlugins(): Promise<PluginsContainer> {
     await whenThisThen(() => this.getMapViewer());
@@ -46,8 +46,8 @@ export class PluginController extends AbstractMapViewerController {
   /**
    * Retrieves a plugin instance registered for a given map viewer, if it exists.
    *
-   * @param {string} pluginId - The identifier of the plugin to retrieve.
-   * @returns {Promise<AbstractPlugin | undefined>} A promise that resolves to the plugin instance if found, or `undefined` otherwise.
+   * @param pluginId - The identifier of the plugin to retrieve.
+   * @returns A promise that resolves to the plugin instance if found, or `undefined` otherwise.
    */
   async getMapViewerPluginIfExists(pluginId: string): Promise<AbstractPlugin | undefined> {
     // Get the plugins
@@ -68,8 +68,8 @@ export class PluginController extends AbstractMapViewerController {
    * This method first loads the plugin script by name, then registers the
    * plugin with the {@link PluginController} for the specified map.
    *
-   * @param {string} pluginName - The name of the plugin to load and register.
-   * @returns {Promise<void>} A promise that resolves when the plugin has been successfully loaded
+   * @param pluginName - The name of the plugin to load and register.
+   * @returns A promise that resolves when the plugin has been successfully loaded
    * and added to the map, or rejects with a formatted error if loading or registration fails.
    */
   loadAndAddPlugin(pluginName: string): Promise<void> {

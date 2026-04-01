@@ -450,7 +450,6 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
    */
   const handleClearAllHighlights = useCallback((): void => {
     if (checkedFeatures.length === 0) return;
-    if (checkedFeatures.length === 0) return;
     // clear all highlights from features on the map in all layers
     mapController.removeHighlightedFeature('all');
     // clear checked features array

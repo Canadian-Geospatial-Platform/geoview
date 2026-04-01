@@ -1376,10 +1376,10 @@ export abstract class WfsRenderer {
    * - Outer parentheses are removed when they fully wrap the expression.
    * - The function recursively parses nested expressions.
    * - Throws an error if the string cannot be parsed into a valid AST node.
-   * @param {string} sqlString - A SQL-like filter expression to parse.
-   * @returns {AST} An abstract syntax tree describing the logical and
+   * @param sqlString - A SQL-like filter expression to parse.
+   * @returns An abstract syntax tree describing the logical and
    * comparison structure of the filter expression.
-   * @throws {Error} If the filter expression cannot be parsed.
+   * @throws {Error} When the filter expression cannot be parsed.
    * @private
    * @static
    */

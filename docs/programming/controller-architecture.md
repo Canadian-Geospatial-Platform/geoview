@@ -147,6 +147,7 @@ export class ControllerRegistry {
   readonly uiController: UIController;
   readonly mapController: MapController;
   readonly layerController: LayerController;
+  readonly layerCreatorController: LayerCreatorController;
   readonly layerSetController: LayerSetController;
   readonly pluginController: PluginController;
   readonly dataTableController: DataTableController;
@@ -168,6 +169,7 @@ export class ControllerRegistry {
     this.uiController = new UIController(mapViewer, uiDomain);
     this.mapController = new MapController(mapViewer, featureHighlight);
     this.layerController = new LayerController(mapViewer, layerDomain);
+    this.layerCreatorController = new LayerCreatorController(mapViewer, layerDomain);
     this.layerSetController = new LayerSetController(mapViewer, layerDomain);
     this.pluginController = new PluginController(mapViewer);
     this.dataTableController = new DataTableController(mapViewer);
@@ -649,6 +651,7 @@ The following table summarizes all controllers, their purpose, dependencies, and
 | `UIController` | Language, theme, panels, focus traps, notifications | `UIDomain` | Yes (language changed) | No |
 | `MapController` | Zoom, highlighting, click markers | `FeatureHighlight` | No | No |
 | `LayerController` | Layer lifecycle, config/GV layer access, layer property changes | `LayerDomain` | Yes (15+ events) | No |
+| `LayerCreatorController` | Layer creation, removal, reload, GeoCore UUID resolution | `LayerDomain` | No (subscribes to GeoViewLayer events per-layer) | No |
 | `LayerSetController` | Feature info queries, legends, layer sets | `LayerDomain` | Yes (map click/pointer) | No |
 | `PluginController` | Plugin loading, adding, removing | — | No | No |
 | `DataTableController` | Data table filter operations | — | No | No |
@@ -676,6 +679,18 @@ The most heavily-connected controller. Subscribes to 15+ `LayerDomain` events in
 - `onLayerWMSImageLoadRescue`
 
 Exposes domain getters (config access, GV layer access) and orchestration methods (layer deletion, querying, filtering).
+
+### LayerCreatorController
+
+No domain subscriptions in `onHook()`. Instead, subscribes to individual `AbstractGeoViewLayer` events per-layer as they are created (e.g., `onLayerEntryRegisterInit`, `onLayerGVCreated`, `onLayerGroupCreated`, `onLayerMessage`). Provides the full layer lifecycle API:
+
+- `loadListOfGeoviewLayer()` — batch-loads layers from map config
+- `addGeoviewLayerByGeoCoreUUID()` — resolves a GeoCore UUID and adds the layer
+- `addGeoviewLayer()` — adds a single layer from a `TypeGeoviewLayerConfig`
+- `reloadGeocoreLayers()` / `reloadLayer()` — reloads GeoCore or individual layers
+- `removeLayerUsingPath()` / `removeAllGeoviewLayers()` — removes layers and cleans up store entries (time slider, geochart, swiper, feature info)
+
+Also emits its own events: `onLayerConfigAdded`, `onLayerConfigError`, `onLayerConfigRemoved`, `onLayerCreated`. Static helpers include `createLayerConfigFromType()` and `convertMapConfigsToGeoviewLayerConfig()`.
 
 ### LayerSetController
 
@@ -752,6 +767,7 @@ packages/geoview-core/src/
 │   │   ├── map-controller.ts                   # Zoom, highlighting, click markers
 │   │   ├── ui-controller.ts                    # UI domain → store (language, panels, etc.)
 │   │   ├── layer-controller.ts                 # Layer domain → store (15+ event subscriptions)
+│   │   ├── layer-creator-controller.ts         # Layer creation, removal, reload, GeoCore
 │   │   ├── layer-set-controller.ts             # Map events → feature info queries & legends
 │   │   ├── plugin-controller.ts                # Plugin loading & lifecycle
 │   │   ├── data-table-controller.ts            # Data table filter operations

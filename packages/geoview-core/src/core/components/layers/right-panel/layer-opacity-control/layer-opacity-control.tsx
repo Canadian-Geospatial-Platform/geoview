@@ -57,9 +57,9 @@ export function LayerOpacityControl(props: LayerOpacityControlProps): JSX.Elemen
 
   /**
    * Updates the opacity of the layer on the map, optionally updating the store
-   * @param {number | number[]} value - The opacity to set.
-   * @param {number} activeThumb - Provided by onChange, but not used.
-   * @param {boolean} updateStore - Should the store be updated.
+   * @param value - The opacity to set.
+   * @param activeThumb - Provided by onChange, but not used.
+   * @param updateStore - Should the store be updated.
    */
   const handleSliderChange = useCallback(
     (value: number | number[], activeThumb: number, updateStore: boolean = false): void => {

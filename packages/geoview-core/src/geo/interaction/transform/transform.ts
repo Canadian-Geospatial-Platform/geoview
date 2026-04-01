@@ -58,6 +58,7 @@ export class Transform extends Interaction {
    * Initializes a Transform component.
    *
    * @param options - Object to configure the initialization of the Transform interaction
+   * @param geometryApi - The geometry API used to retrieve geometry groups if a geometry group key is provided in the options
    */
   constructor(options: TransformOptions, geometryApi: GeometryApi) {
     super(options);
