@@ -5,11 +5,11 @@ import { getSxClasses } from './details-style';
 
 import { List, ListItem, Box, Typography, Switch, Tooltip } from '@/ui';
 import {
-  useDetailsLayerDataArray,
-  useDetailsCoordinateInfoEnabled,
+  useStoreDetailsLayerDataArray,
+  useStoreDetailsCoordinateInfoEnabled,
   toggleStoreDetailsCoordinateInfoEnabled,
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { logger } from '@/core/utils/logger';
 
@@ -49,10 +49,10 @@ export function CoordinateInfoSwitch({ disabled }: CoordinateInfoSwitchProps): J
 
   const { t } = useTranslation();
   const theme = useTheme();
-  const mapId = useGeoViewMapId();
+  const mapId = useStoreGeoViewMapId();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('md'));
 
-  const coordinateInfoEnabled = useDetailsCoordinateInfoEnabled();
+  const coordinateInfoEnabled = useStoreDetailsCoordinateInfoEnabled();
 
   /**
    * Handles toggling the coordinate info switch.
@@ -87,7 +87,7 @@ export function CoordinateInfo(): JSX.Element {
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
-  const layerDataArray = useDetailsLayerDataArray();
+  const layerDataArray = useStoreDetailsLayerDataArray();
 
   // Find the coordinate info layer
   const coordinateInfoLayer = layerDataArray.find((layer) => layer.layerPath === 'coordinate-info');

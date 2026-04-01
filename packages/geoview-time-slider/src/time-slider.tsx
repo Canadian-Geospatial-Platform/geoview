@@ -1,21 +1,21 @@
 import { Box } from 'geoview-core/ui';
-import { useGeoViewMapId } from 'geoview-core/core/stores/geoview-store';
+import { useStoreGeoViewMapId } from 'geoview-core/core/stores/geoview-store';
 import {
   setStoreTimeSliderDelay,
   setStoreTimeSliderLocked,
   setStoreTimeSliderReversed,
   setStoreTimeSliderStep,
-  useTimeSliderLayers,
+  useStoreTimeSliderLayers,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/time-slider-state';
 import {
-  useLayerDateTemporalMode,
-  useLayerDisplayDateFormat,
-  useLayerDisplayDateFormatShort,
-  useLayerDisplayDateTimezone,
-  useLayerNames,
+  useStoreLayerDateTemporalMode,
+  useStoreLayerDisplayDateFormat,
+  useStoreLayerDisplayDateFormatShort,
+  useStoreLayerDisplayDateTimezone,
+  useStoreLayerNameSet,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
-import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 import { logger } from 'geoview-core/core/utils/logger';
 
 import { DateMgt } from 'geoview-core/core/utils/date-mgt';
@@ -71,8 +71,8 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   const sliderValueRef = useRef<number>();
   const sliderDeltaRef = useRef<number>();
 
-  const mapId = useGeoViewMapId();
-  const displayLanguage = useAppDisplayLanguage();
+  const mapId = useStoreGeoViewMapId();
+  const displayLanguage = useStoreAppDisplayLanguage();
 
   const {
     title,
@@ -92,28 +92,29 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
     displayDateFormatShort: displayDateFormatShortFromStore,
     displayDateTimezone: displayDateTimezoneFromStore,
     serviceDateTemporalMode: serviceDateTemporalModeFromStore,
-  } = useTimeSliderLayers()![layerPath];
+  } = useStoreTimeSliderLayers()![layerPath];
+  // TODO: CHECK - The above should probably use the 'useStoreTimeSliderLayer' hook, cleaner
 
   const timeSliderController = useTimeSliderController();
 
   // The display date format as specified by the layer
-  const layerDisplayDateFormat = useLayerDisplayDateFormat(layerPath);
+  const layerDisplayDateFormat = useStoreLayerDisplayDateFormat(layerPath);
   const displayDateFormat = displayDateFormatFromStore ?? layerDisplayDateFormat;
 
   // The display date format as specified by the layer
-  const layerDisplayDateFormatShort = useLayerDisplayDateFormatShort(layerPath);
+  const layerDisplayDateFormatShort = useStoreLayerDisplayDateFormatShort(layerPath);
   const displayDateFormatShort = displayDateFormatShortFromStore ?? layerDisplayDateFormatShort ?? displayDateFormat;
 
   // The display date timezone as specified by the layer
-  const layerDisplayDateTimezone = useLayerDisplayDateTimezone(layerPath);
+  const layerDisplayDateTimezone = useStoreLayerDisplayDateTimezone(layerPath);
   const displayDateTimezone = displayDateTimezoneFromStore ?? layerDisplayDateTimezone;
 
   // The temporal mode as specified by the layer
-  const layerTemporalMode = useLayerDateTemporalMode(layerPath);
+  const layerTemporalMode = useStoreLayerDateTemporalMode(layerPath);
   const serviceDateTemporalMode = serviceDateTemporalModeFromStore ?? layerTemporalMode;
 
   // Get name from legend layers
-  const names = useLayerNames();
+  const names = useStoreLayerNameSet();
   const name = names[layerPath];
   const additionalNames = additionalLayerpaths?.map((additionalLayerPath) => names[additionalLayerPath]);
   const combinedNames = additionalNames ? `${name}, ${additionalNames.join(', ')}` : name;

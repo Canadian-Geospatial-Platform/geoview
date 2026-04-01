@@ -20,7 +20,7 @@ import { KML } from 'geoview-core/geo/layer/geoview-layers/vector/kml';
 import type { GeoViewLayerAddedResult } from 'geoview-core/core/controllers/layer-creator-controller';
 import type { TypeMapFeaturesInstance, TypeFeatureInfoResult, codedValueType } from 'geoview-core/api/types/map-schema-types';
 import type { TypeLegendItem } from 'geoview-core/core/components/layers/types';
-import { getStoreLayerStateLegendLayerByPath } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
+import { getStoreLayerLegendLayerByPath } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
 
 /**
  * Main Layer testing class.
@@ -1815,7 +1815,7 @@ export class LayerTester extends GVAbstractTester {
     checkIconsList?: Partial<TypeLegendItem>[]
   ): void {
     // Get the layer legend
-    const legendLayer = getStoreLayerStateLegendLayerByPath(mapId, layerPath);
+    const legendLayer = getStoreLayerLegendLayerByPath(mapId, layerPath);
 
     // Verify the layer has a legend information
     test.addStep(`Verify the layer ${layerPath} has legend information...`);
@@ -1852,7 +1852,7 @@ export class LayerTester extends GVAbstractTester {
     checkIconsList?: Partial<TypeLegendItem>[]
   ): void {
     // Get the layer legend from the store
-    const legendLayer = getStoreLayerStateLegendLayerByPath(mapId, layerPath);
+    const legendLayer = getStoreLayerLegendLayerByPath(mapId, layerPath);
 
     // Verify the icon were also loaded for the layer
     test.addStep(`Verify the icons were loaded for the layer...`);

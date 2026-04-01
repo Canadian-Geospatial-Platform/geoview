@@ -5,7 +5,7 @@ import { GVAbstractTester } from './abstract-gv-tester';
 import { delay } from 'geoview-core/core/utils/utilities';
 import type { TypeFeatureInfoEntry } from 'geoview-core/api/types/map-schema-types';
 import { logger } from 'geoview-core/core/utils/logger';
-import { getStoreActiveFooterBarTab } from 'geoview-core/core/stores/store-interface-and-intial-values/ui-state';
+import { getStoreUIActiveFooterBarTab } from 'geoview-core/core/stores/store-interface-and-intial-values/ui-state';
 import { setStoreDetailsSelectedLayerPath } from 'geoview-core/core/stores/store-interface-and-intial-values/feature-info-state';
 import { getStoreLayerItemVisibility } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
 import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
@@ -101,7 +101,7 @@ export class DetailsTester extends GVAbstractTester {
 
         // Check that details is the active footer bar
         test.addStep("Verifying 'details' is the selected footer tab...");
-        Test.assertIsEqual(getStoreActiveFooterBarTab(this.getMapId()).tabId, 'details');
+        Test.assertIsEqual(getStoreUIActiveFooterBarTab(this.getMapId()).tabId, 'details');
 
         logger.logDebug(results);
       }

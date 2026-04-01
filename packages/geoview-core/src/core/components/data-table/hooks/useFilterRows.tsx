@@ -1,8 +1,11 @@
 import type { Dispatch, SetStateAction } from 'react';
 import { useEffect, useState } from 'react';
 import type { TypeColumnFiltersState } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { useDataTableLayerSettings, setStoreColumnFiltersEntry } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import {
+  useStoreDataTableLayerSettings,
+  setStoreColumnFiltersEntry,
+} from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 
 /** Properties for the useFilterRows hook. */
@@ -20,8 +23,8 @@ export function useFilterRows({ layerPath }: UseFilterRowsProps): {
   columnFilters: TypeColumnFiltersState;
   setColumnFilters: Dispatch<SetStateAction<TypeColumnFiltersState>>;
 } {
-  const mapId = useGeoViewMapId();
-  const datatableSettings = useDataTableLayerSettings();
+  const mapId = useStoreGeoViewMapId();
+  const datatableSettings = useStoreDataTableLayerSettings();
 
   const [columnFilters, setColumnFilters] = useState<TypeColumnFiltersState>(datatableSettings[layerPath].columnFiltersRecord || []);
 

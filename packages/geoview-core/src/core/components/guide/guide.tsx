@@ -5,12 +5,12 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { Box } from '@/ui';
-import { useAppGuide } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreAppGuide } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { logger } from '@/core/utils/logger';
 import { getSxClasses } from './guide-style';
 import type { LayerListEntry } from '@/core/components/common';
 import { Layout } from '@/core/components/common';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { TABS } from '@/core/utils/constant';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { GuideSearch } from './guide-search';
@@ -50,8 +50,8 @@ export const Guide = memo(function GuidePanel({ containerType }: GuideType): JSX
   );
 
   // Store
-  const guide = useAppGuide();
-  const mapId = useGeoViewMapId();
+  const guide = useStoreAppGuide();
+  const mapId = useStoreGeoViewMapId();
 
   // Callbacks & Memoize values
   /**

@@ -4,8 +4,8 @@ import { useTheme } from '@mui/material/styles';
 import { IconButton, FullscreenIcon, FullscreenExitIcon } from '@/ui';
 import type { TypeHTMLElement } from '@/core/types/global-types';
 import { getSxClasses } from '@/core/components/nav-bar/nav-bar-style';
-import { useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useStoreAppIsFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 import { useUIController } from '@/core/controllers/ui-controller';
 
@@ -18,14 +18,13 @@ export default function Fullscreen(): JSX.Element {
   // Log
   logger.logTraceRender('components/nav-bar/buttons/fullscreen');
 
-  const mapId = useGeoViewMapId();
-
   const { t } = useTranslation<string>();
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
   // get the values from store
-  const isFullScreen = useAppFullscreenActive();
+  const mapId = useStoreGeoViewMapId();
+  const isFullScreen = useStoreAppIsFullscreenActive();
   const uiController = useUIController();
 
   /**

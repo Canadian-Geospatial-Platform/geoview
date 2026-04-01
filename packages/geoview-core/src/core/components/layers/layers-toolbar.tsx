@@ -7,14 +7,14 @@ import { useTheme } from '@mui/material';
 import { Box, AddCircleOutlineIcon, Button } from '@/ui';
 import { ToggleAll } from '@/core/components/toggle-all/toggle-all';
 import {
-  useLayerDisplayState,
-  useLayerLegendLayers,
+  useStoreLayerDisplayState,
+  useStoreLayerLayerPaths,
   setStoreLayerDisplayState,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import type { TypeLayersViewDisplayState } from './types';
 import { logger } from '@/core/utils/logger';
 import type { TypeContainerBox } from '@/core/types/global-types';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 
 interface TypeLayersToolbar {
   containerType: TypeContainerBox;
@@ -39,9 +39,9 @@ export function LayersToolbar({ containerType }: TypeLayersToolbar): JSX.Element
   };
 
   // Store
-  const mapId = useGeoViewMapId();
-  const displayState = useLayerDisplayState();
-  const legendLayers = useLayerLegendLayers();
+  const mapId = useStoreGeoViewMapId();
+  const displayState = useStoreLayerDisplayState();
+  const layerPaths = useStoreLayerLayerPaths();
 
   // State
   const lastDisplayState = useRef<TypeLayersViewDisplayState | null>(null);
@@ -73,7 +73,7 @@ export function LayersToolbar({ containerType }: TypeLayersToolbar): JSX.Element
    */
   useEffect(() => {
     // Always show 'add' panel when there are no layers
-    if (legendLayers.length === 0 && displayState !== 'add') {
+    if (layerPaths.length === 0 && displayState !== 'add') {
       setStoreLayerDisplayState(mapId, 'add');
     }
 
@@ -93,7 +93,7 @@ export function LayersToolbar({ containerType }: TypeLayersToolbar): JSX.Element
         userClickedAdd.current = false;
       }
     }
-  }, [displayState, legendLayers.length, mapId]);
+  }, [displayState, layerPaths.length, mapId]);
 
   /**
    * Secondary effect specifically for auto-switching to view mode.
@@ -104,11 +104,11 @@ export function LayersToolbar({ containerType }: TypeLayersToolbar): JSX.Element
    * 3. User didn't explicitly click the Add button
    */
   useEffect(() => {
-    if (legendLayers.length > 0 && displayState === 'add' && !userClickedAdd.current) {
+    if (layerPaths.length > 0 && displayState === 'add' && !userClickedAdd.current) {
       setStoreLayerDisplayState(mapId, 'view');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [legendLayers.length, mapId]); // Only depend on legendLayers.length and mapId
+  }, [layerPaths.length, mapId]); // Only depend on layerPaths.length and mapId
 
   return (
     <Box id={`${mapId}-${containerType}-layers-toolbar`} sx={layerToolbarStyle}>

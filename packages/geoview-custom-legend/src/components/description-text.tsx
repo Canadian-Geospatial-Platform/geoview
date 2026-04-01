@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
-import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
 import { logger } from 'geoview-core/core/utils/logger';
 
@@ -27,7 +27,7 @@ export function DescriptionText({ description, sxClasses }: DescriptionTextProps
   const { ui } = cgpv;
   const { Box, Typography, KeyboardArrowDownIcon, KeyboardArrowUpIcon, IconButton, Collapse } = ui.elements;
 
-  const displayLanguage = useAppDisplayLanguage();
+  const displayLanguage = useStoreAppDisplayLanguage();
   const [expanded, setExpanded] = useState<boolean>(!description.collapsed);
 
   /**

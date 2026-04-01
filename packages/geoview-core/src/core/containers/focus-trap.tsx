@@ -9,8 +9,8 @@ import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react
 import { getFocusTrapSxClasses } from './containers-style';
 import { ARROW_KEY_CODES } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
-import { useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useStoreAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useEventListener } from '@/core/components/common/hooks/use-event-listener';
 
 /** Interface for the focus trap properties. */
@@ -54,10 +54,10 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   // Store
   // tracks if the last action was done through a keyboard (map navigation) or mouse (mouse movement)
   const uiController = useUIController();
-  const activeTrapGeoView = useUIActiveTrapGeoView();
+  const activeTrapGeoView = useStoreUIActiveTrapGeoView();
 
   // Get container and fullscreen state
-  const geoviewElement = useAppGeoviewHTMLElement();
+  const geoviewElement = useStoreAppGeoviewHTMLElement();
   const mapElementStore = geoviewElement.querySelector('[id^="mapTargetElement-"]') as HTMLElement;
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
 

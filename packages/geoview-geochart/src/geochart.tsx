@@ -1,8 +1,11 @@
 import type { GeoChartConfig, ChartType, GeoChartDefaultColors, SchemaValidator, GeoChartAction } from 'geochart';
 import { GeoChart as GeoChartComponent } from 'geochart';
 
-import { useAppDisplayLanguageById, useDisplayDateTimezone } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
-import { useLayerDisplayDateFormatShort } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
+import {
+  useStoreAppDisplayLanguageById,
+  useStoreDisplayDateTimezone,
+} from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreLayerDisplayDateFormatShort } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
 import type { TypeGeochartResultSetEntry } from 'geoview-core/core/stores/store-interface-and-intial-values/geochart-state';
 import { useUIController } from 'geoview-core/core/controllers/ui-controller';
 import { useLayerController } from 'geoview-core/core/controllers/layer-controller';
@@ -54,9 +57,9 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
   const [action, setAction] = useState<GeoChartAction>();
 
   // Use Store
-  const displayLanguage = useAppDisplayLanguageById(mapId);
-  const displayDateFormatShort = useLayerDisplayDateFormatShort(layerPath);
-  const displayDateTimezone = useDisplayDateTimezone();
+  const displayLanguage = useStoreAppDisplayLanguageById(mapId);
+  const displayDateFormatShort = useStoreLayerDisplayDateFormatShort(layerPath);
+  const displayDateTimezone = useStoreDisplayDateTimezone();
   const uiController = useUIController();
   const layerController = useLayerController();
 

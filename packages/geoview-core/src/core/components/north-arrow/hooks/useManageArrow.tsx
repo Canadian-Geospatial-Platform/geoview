@@ -2,13 +2,13 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Projection } from '@/geo/utils/projection';
 import { NORTH_POLE_POSITION } from '@/core/utils/constant';
 import {
-  useMapCenterCoordinates,
-  useMapFixNorth,
-  useMapNorthArrowElement,
-  useMapProjectionEPSG,
-  useMapRotation,
-  useMapSize,
-  useMapZoom,
+  useStoreMapCenterCoordinates,
+  useStoreMapFixNorth,
+  useStoreMapNorthArrowElement,
+  useStoreMapCurrentProjectionEPSG,
+  useStoreMapRotation,
+  useStoreMapSize,
+  useStoreMapZoom,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import { useMapController } from '@/core/controllers/map-controller';
@@ -36,13 +36,13 @@ export const useManageArrow = (): ArrowReturn => {
   const angle = useRef(0); // keep track of rotation angle for fix north
 
   // Store
-  const mapProjectionEPSG = useMapProjectionEPSG();
-  const northArrowElement = useMapNorthArrowElement();
-  const fixNorth = useMapFixNorth();
-  const mapZoom = useMapZoom();
-  const mapRotation = useMapRotation();
-  const mapCenterCoord = useMapCenterCoordinates();
-  const mapSize = useMapSize();
+  const mapProjectionEPSG = useStoreMapCurrentProjectionEPSG();
+  const northArrowElement = useStoreMapNorthArrowElement();
+  const fixNorth = useStoreMapFixNorth();
+  const mapZoom = useStoreMapZoom();
+  const mapRotation = useStoreMapRotation();
+  const mapCenterCoord = useStoreMapCenterCoordinates();
+  const mapSize = useStoreMapSize();
   const mapController = useMapController();
 
   /**

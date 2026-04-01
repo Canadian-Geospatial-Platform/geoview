@@ -7,7 +7,7 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { logger } from '@/core/utils/logger';
 import type { MappedLayerDataType, ColumnsType } from '@/core/components/data-table/data-table-types';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 
 /** Properties for the useToolbarActionMessage hook. */
 interface UseSelectedRowMessageProps {
@@ -35,7 +35,7 @@ export function useToolbarActionMessage({
   const { t } = useTranslation();
 
   // Get store values
-  const mapId = useGeoViewMapId();
+  const mapId = useStoreGeoViewMapId();
 
   /**
    * Updates the toolbar message when filters or feature data change.

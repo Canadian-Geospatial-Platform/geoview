@@ -1,8 +1,11 @@
 import type { Dispatch, SetStateAction } from 'react';
 import { useEffect, useState } from 'react';
-import { useDataTableLayerSettings, setStoreGlobalFilteredEntry } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import {
+  useStoreDataTableLayerSettings,
+  setStoreGlobalFilteredEntry,
+} from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { logger } from '@/core/utils/logger';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 
 /** Properties for the useGlobalFilter hook. */
 export interface UseGlobalFilterProps {
@@ -19,9 +22,9 @@ export function useGlobalFilter({ layerPath }: UseGlobalFilterProps): {
   globalFilter: string;
   setGlobalFilter: Dispatch<SetStateAction<string>>;
 } {
-  const datatableSettings = useDataTableLayerSettings();
+  const datatableSettings = useStoreDataTableLayerSettings();
 
-  const mapId = useGeoViewMapId();
+  const mapId = useStoreGeoViewMapId();
   const [globalFilter, setGlobalFilter] = useState(datatableSettings[layerPath].globalFilterRecord ?? '');
 
   /**

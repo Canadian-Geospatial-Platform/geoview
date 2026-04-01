@@ -9,7 +9,7 @@ import { ResponsiveGridLayout } from './responsive-grid-layout';
 import { Typography } from '@/ui';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
-import { useLayerSelectorName } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useStoreLayerName } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 /** Properties for the Layout component. */
 interface LayoutProps {
@@ -71,7 +71,7 @@ const Layout = forwardRef(
     // Hooks
     const responsiveLayoutRef = useRef<ResponsiveGridLayoutExposedMethods>(null);
     const theme = useTheme();
-    const layerName = useLayerSelectorName(selectedLayerPath!);
+    const layerName = useStoreLayerName(selectedLayerPath!);
 
     /**
      * Handles clicks to layers in left panel and shows the right panel.

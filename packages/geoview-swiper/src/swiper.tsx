@@ -7,12 +7,15 @@ import type { EventTypes } from 'ol/Observable';
 import type BaseEvent from 'ol/events/Event';
 
 import type { SwipeOrientation } from 'geoview-core/core/stores/store-interface-and-intial-values/swiper-state';
-import { useSwiperLayerPaths, useSwiperOrientation } from 'geoview-core/core/stores/store-interface-and-intial-values/swiper-state';
+import {
+  useStoreSwiperLayerPaths,
+  useStoreSwiperOrientation,
+} from 'geoview-core/core/stores/store-interface-and-intial-values/swiper-state';
 import { logger } from 'geoview-core/core/utils/logger';
 import { getLocalizedMessage, delay } from 'geoview-core/core/utils/utilities';
 import { debounce } from 'geoview-core/core/utils/debounce';
-import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
-import { useMapSize, useMapVisibleLayers } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
+import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreMapSize, useStoreMapVisibleLayers } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import { getSxClasses } from './swiper-style';
 import { useMemo } from 'react';
@@ -61,7 +64,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
   const swiperRef = useRef<HTMLElement>();
 
   // SxClasses
-  const mapHeight = useMapSize()[1];
+  const mapHeight = useStoreMapSize()[1];
   const sxClasses = useMemo(() => getSxClasses(mapHeight), [mapHeight]);
 
   // States
@@ -72,10 +75,10 @@ export function Swiper(props: SwiperProps): JSX.Element {
   const [yPositionHorizontal, setYPositionHorizontal] = useState(mapSize.current[1] / 2);
 
   // Get store values
-  const layerPaths = useSwiperLayerPaths();
-  const displayLanguage = useAppDisplayLanguage();
-  const visibleLayers = useMapVisibleLayers();
-  const orientation = useSwiperOrientation();
+  const layerPaths = useStoreSwiperLayerPaths();
+  const displayLanguage = useStoreAppDisplayLanguage();
+  const visibleLayers = useStoreMapVisibleLayers();
+  const orientation = useStoreSwiperOrientation();
 
   // Grab reference
   const theSwiper = swiperRef.current;

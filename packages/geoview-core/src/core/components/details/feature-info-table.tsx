@@ -6,11 +6,11 @@ import linkifyHtml from 'linkify-html';
 import { Box, Button, Table, TableHead, TableBody, TableRow, TableCell, TableContainer } from '@/ui';
 import { isImage, stringify, sanitizeHtmlContent, enhanceLinksAccessibility } from '@/core/utils/utilities';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
-import { useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
 import {
-  useLayerDateTemporalMode,
-  useLayerDisplayDateFormat,
-  useLayerDisplayDateTimezone,
+  useStoreLayerDateTemporalMode,
+  useStoreLayerDisplayDateFormat,
+  useStoreLayerDisplayDateTimezone,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { logger } from '@/core/utils/logger';
 import type { TypeDisplayLanguage, TypeFieldEntry } from '@/api/types/map-schema-types';
@@ -18,7 +18,7 @@ import type { TypeContainerBox } from '@/core/types/global-types';
 import { DateMgt, type TemporalMode, type TimeIANA, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import { useLightBox } from '@/core/components/common';
 import { getSxClasses } from './details-style';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 
 /** Properties for the FeatureInfoTable component. */
 interface FeatureInfoTableProps {
@@ -171,7 +171,7 @@ export const FeatureRow = memo(function FeatureRow({
   displayDateTimezone,
   containerType,
 }: FeatureRowProps): JSX.Element {
-  const mapId = useGeoViewMapId();
+  const mapId = useStoreGeoViewMapId();
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
   const { alias, value } = featureInfoItem;
@@ -268,10 +268,10 @@ export const FeatureInfoTable = memo(function FeatureInfoTable({
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Store hooks
-  const language = useAppDisplayLanguage();
-  const layerDateTemporalMode = useLayerDateTemporalMode(layerPath);
-  const displayDateFormat = useLayerDisplayDateFormat(layerPath);
-  const displayDateTimezone = useLayerDisplayDateTimezone(layerPath);
+  const language = useStoreAppDisplayLanguage();
+  const layerDateTemporalMode = useStoreLayerDateTemporalMode(layerPath);
+  const displayDateFormat = useStoreLayerDisplayDateFormat(layerPath);
+  const displayDateTimezone = useStoreLayerDisplayDateTimezone(layerPath);
 
   // Store
   const { initLightBox, LightBoxComponent } = useLightBox();

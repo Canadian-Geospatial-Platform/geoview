@@ -24,19 +24,30 @@ export interface IDrawerState {
   /** The current drawing style properties. */
   style: StyleProps;
 
-  /** The active Draw interaction instance, or undefined when not drawing. */
+  /**
+   * The active Draw interaction instance, or undefined when not drawing.
+   *
+   * @deprecated This class instance shouldn't be in the store, remove this property
+   */
   drawInstance: Draw | undefined;
 
   /** Whether the drawer is in editing mode. */
   isEditing: boolean;
 
-  /** The active Transform interaction instance, or undefined when not editing. */
+  /**
+   * The active Transform interaction instance, or undefined when not editing.
+   *
+   * @deprecated This class instance shouldn't be in the store, remove this property
+   */
   transformInstance: Transform | undefined;
 
   /** The currently selected drawing feature, or undefined. */
   selectedDrawing: Feature | undefined;
 
-  /** The active Snap interaction instance, or undefined when snapping is disabled. */
+  /** The active Snap interaction instance, or undefined when snapping is disabled.
+   *
+   * @deprecated This class instance shouldn't be in the store, remove this property
+   */
   snapInstance: Snap | undefined;
 
   /** Whether measurement overlays are hidden. */
@@ -89,7 +100,7 @@ export interface IDrawerState {
 
 // #endregion INTERFACE DEFINITIONS
 
-// #region UTIL FUNCTIONS
+// #region UTIL FUNCTIONS (PRIVATE)
 
 /**
  * Reads the geometry type of a drawing feature.
@@ -109,7 +120,7 @@ const utilReadDrawingType = (feature: Feature<Geometry> | undefined): string | u
   return geometry?.getType();
 };
 
-// #endregion UTIL FUNCTIONS
+// #endregion UTIL FUNCTIONS (PRIVATE)
 
 // #region STATE INITIALIZATION
 
@@ -473,10 +484,10 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
 
 // #endregion STATE INITIALIZATION
 
-// #region STATE SELECTORS
-// GV Should only be used specifically to access the Store.
-// GV Use sparingly and only if you are sure of what you are doing.
-// GV DO NOT USE this technique in React components, use the hooks above instead.
+// #region STATE GETTERS & HOOKS
+// GV Getters should be used to get the values at a moment in time.
+// GV Hooks should be used to attach to values and trigger UI components when they change.
+// GV Typically they are listed in couples (getter + hook) for the same value.
 
 /**
  * Returns the full drawer state slice for the given map.
@@ -516,19 +527,12 @@ export const isStoreDrawerInitialized = (mapId: string): boolean => {
  * @param mapId - The map identifier
  * @returns The active geometry type
  */
-export const getStoreActiveGeom = (mapId: string): string => {
+export const getStoreDrawerActiveGeom = (mapId: string): string => {
   return getStoreDrawerState(mapId).activeGeom;
 };
 
-/**
- * Gets the available geometry types from the drawer store.
- *
- * @param mapId - The map identifier
- * @returns The array of geometry type strings
- */
-export const getStoreGeomTypes = (mapId: string): string[] => {
-  return getStoreDrawerState(mapId).geomTypes;
-};
+/** Hooks the active geometry type from the drawer state. */
+export const useStoreDrawerActiveGeom = (): string => useStore(useGeoViewStore(), (state) => state.drawerState.activeGeom);
 
 /**
  * Gets the current drawing style from the drawer store.
@@ -536,9 +540,12 @@ export const getStoreGeomTypes = (mapId: string): string[] => {
  * @param mapId - The map identifier
  * @returns The style properties
  */
-export const getStoreStyle = (mapId: string): StyleProps => {
+export const getStoreDrawerStyle = (mapId: string): StyleProps => {
   return getStoreDrawerState(mapId).style;
 };
+
+/** Hooks the current drawing style. */
+export const useStoreDrawerStyle = (): StyleProps => useStore(useGeoViewStore(), (state) => state.drawerState.style);
 
 /**
  * Checks whether drawing mode is active.
@@ -546,9 +553,74 @@ export const getStoreStyle = (mapId: string): StyleProps => {
  * @param mapId - The map identifier
  * @returns True if a Draw instance is present
  */
-export const getStoreIsDrawing = (mapId: string): boolean => {
+export const getStoreDrawerIsDrawing = (mapId: string): boolean => {
   return getStoreDrawerState(mapId).drawInstance !== undefined;
 };
+
+/** Hooks whether drawing mode is active. */
+export const useStoreDrawerIsDrawing = (): boolean => useStore(useGeoViewStore(), (state) => state.drawerState.drawInstance !== undefined);
+
+/** Hooks the Draw interaction instance. */
+export const useStoreDrawerDrawInstance = (): Draw | undefined => useStore(useGeoViewStore(), (state) => state.drawerState.drawInstance);
+
+/**
+ * Checks whether editing mode is active.
+ *
+ * @param mapId - The map identifier
+ * @returns True if a Transform instance is present
+ */
+export const getStoreDrawerIsEditing = (mapId: string): boolean => {
+  return getStoreDrawerState(mapId).transformInstance !== undefined;
+};
+
+/** Hooks whether editing mode is active. */
+export const useStoreDrawerIsEditing = (): boolean =>
+  useStore(useGeoViewStore(), (state) => state.drawerState.transformInstance !== undefined);
+
+/**
+ * Checks whether snapping mode is active.
+ *
+ * @param mapId - The map identifier
+ * @returns True if a Snap instance is present
+ */
+export const getStoreDrawerIsSnapping = (mapId: string): boolean => {
+  return getStoreDrawerState(mapId).snapInstance !== undefined;
+};
+
+/** Hooks whether snapping mode is active. */
+export const useStoreDrawerIsSnapping = (): boolean => useStore(useGeoViewStore(), (state) => state.drawerState.snapInstance !== undefined);
+
+/**
+ * Gets the currently selected drawing feature from the store.
+ *
+ * @param mapId - The map identifier
+ * @returns The selected feature, or undefined
+ * @deprecated This class instance shouldn't be in the store, remove this selector
+ */
+export const getStoreDrawerSelectedDrawing = (mapId: string): Feature | undefined => {
+  return getStoreDrawerState(mapId).selectedDrawing;
+};
+
+/** Hooks the geometry type of the currently selected drawing. */
+export const useStoreDrawerSelectedDrawing = (): string | undefined =>
+  useStore(useGeoViewStore(), (state) => utilReadDrawingType(state.drawerState.selectedDrawing));
+
+/**
+ * Gets the hide measurements flag from the drawer store.
+ *
+ * @param mapId - The map identifier
+ * @returns Whether measurements are hidden
+ */
+export const getStoreDrawerHideMeasurements = (mapId: string): boolean => {
+  return getStoreDrawerState(mapId).hideMeasurements;
+};
+
+/** Hooks whether measurements are hidden. */
+export const useStoreDrawerHideMeasurements = (): boolean => useStore(useGeoViewStore(), (state) => state.drawerState.hideMeasurements);
+
+// #endregion STATE GETTERS & HOOKS
+
+// #region STATE GETTERS & HOOKS - OTHERS (no match between getter-hook)
 
 /**
  * Gets the Draw interaction instance from the store.
@@ -557,18 +629,8 @@ export const getStoreIsDrawing = (mapId: string): boolean => {
  * @returns The Draw instance, or undefined
  * @deprecated This class instance shouldn't be in the store, remove this selector
  */
-export const getStoreDrawInstance = (mapId: string): Draw | undefined => {
+export const getStoreDrawerDrawInstance = (mapId: string): Draw | undefined => {
   return getStoreDrawerState(mapId).drawInstance;
-};
-
-/**
- * Checks whether editing mode is active.
- *
- * @param mapId - The map identifier
- * @returns True if a Transform instance is present
- */
-export const getStoreIsEditing = (mapId: string): boolean => {
-  return getStoreDrawerState(mapId).transformInstance !== undefined;
 };
 
 /**
@@ -578,18 +640,8 @@ export const getStoreIsEditing = (mapId: string): boolean => {
  * @returns The Transform instance, or undefined
  * @deprecated This class instance shouldn't be in the store, remove this selector
  */
-export const getStoreTransformInstance = (mapId: string): Transform | undefined => {
+export const getStoreDrawerTransformInstance = (mapId: string): Transform | undefined => {
   return getStoreDrawerState(mapId).transformInstance;
-};
-
-/**
- * Checks whether snapping mode is active.
- *
- * @param mapId - The map identifier
- * @returns True if a Snap instance is present
- */
-export const getStoreIsSnapping = (mapId: string): boolean => {
-  return getStoreDrawerState(mapId).snapInstance !== undefined;
 };
 
 /**
@@ -599,19 +651,18 @@ export const getStoreIsSnapping = (mapId: string): boolean => {
  * @returns The Snap instance, or undefined
  * @deprecated This class instance shouldn't be in the store, remove this selector
  */
-export const getStoreSnapInstance = (mapId: string): Snap | undefined => {
+export const getStoreDrawerSnapInstance = (mapId: string): Snap | undefined => {
   return getStoreDrawerState(mapId).snapInstance;
 };
 
 /**
- * Gets the currently selected drawing feature from the store.
+ * Gets the available geometry types from the drawer store.
  *
  * @param mapId - The map identifier
- * @returns The selected feature, or undefined
- * @deprecated This class instance shouldn't be in the store, remove this selector
+ * @returns The array of geometry type strings
  */
-export const getStoreSelectedDrawing = (mapId: string): Feature | undefined => {
-  return getStoreDrawerState(mapId).selectedDrawing;
+export const getStoreDrawerGeomTypes = (mapId: string): string[] => {
+  return getStoreDrawerState(mapId).geomTypes;
 };
 
 /**
@@ -620,18 +671,8 @@ export const getStoreSelectedDrawing = (mapId: string): Feature | undefined => {
  * @param mapId - The map identifier
  * @returns The drawing type string, or undefined if no selection
  */
-export const getStoreSelectedDrawingType = (mapId: string): string | undefined => {
-  return utilReadDrawingType(getStoreSelectedDrawing(mapId));
-};
-
-/**
- * Gets the hide measurements flag from the drawer store.
- *
- * @param mapId - The map identifier
- * @returns Whether measurements are hidden
- */
-export const getStoreHideMeasurements = (mapId: string): boolean => {
-  return getStoreDrawerState(mapId).hideMeasurements;
+export const getStoreDrawerSelectedDrawingType = (mapId: string): string | undefined => {
+  return utilReadDrawingType(getStoreDrawerSelectedDrawing(mapId));
 };
 
 /**
@@ -640,47 +681,17 @@ export const getStoreHideMeasurements = (mapId: string): boolean => {
  * @param mapId - The map identifier
  * @returns The icon source URL
  */
-export const getStoreIconSrc = (mapId: string): string => {
+export const getStoreDrawerIconSrc = (mapId: string): string => {
   return getStoreDrawerState(mapId).iconSrc;
 };
 
-// #endregion STATE SELECTORS
-
-// #region STATE HOOKS
-// GV To be used by React components
-
-/** Hooks whether drawing mode is active. */
-export const useDrawerIsDrawing = (): boolean => useStore(useGeoViewStore(), (state) => state.drawerState.drawInstance !== undefined);
-
-/** Hooks whether editing mode is active. */
-export const useDrawerIsEditing = (): boolean => useStore(useGeoViewStore(), (state) => state.drawerState.transformInstance !== undefined);
-
-/** Hooks whether snapping mode is active. */
-export const useDrawerIsSnapping = (): boolean => useStore(useGeoViewStore(), (state) => state.drawerState.snapInstance !== undefined);
-
-/** Hooks the geometry type of the currently selected drawing. */
-export const useDrawerSelectedDrawingType = (): string | undefined =>
-  useStore(useGeoViewStore(), (state) => utilReadDrawingType(state.drawerState.selectedDrawing));
-
-/** Hooks the active geometry type from the drawer state. */
-export const useDrawerActiveGeom = (): string => useStore(useGeoViewStore(), (state) => state.drawerState.activeGeom);
-
-/** Hooks the current drawing style. */
-export const useDrawerStyle = (): StyleProps => useStore(useGeoViewStore(), (state) => state.drawerState.style);
-
-/** Hooks the Draw interaction instance. */
-export const useDrawerDrawInstance = (): Draw | undefined => useStore(useGeoViewStore(), (state) => state.drawerState.drawInstance);
-
-/** Hooks whether measurements are hidden. */
-export const useDrawerHideMeasurements = (): boolean => useStore(useGeoViewStore(), (state) => state.drawerState.hideMeasurements);
-
 /** Hooks whether the undo action is disabled. */
-export const useDrawerUndoDisabled = (): boolean => useStore(useGeoViewStore(), (state) => state.drawerState.undoDisabled);
+export const useStoreDrawerUndoDisabled = (): boolean => useStore(useGeoViewStore(), (state) => state.drawerState.undoDisabled);
 
 /** Hooks whether the redo action is disabled. */
-export const useDrawerRedoDisabled = (): boolean => useStore(useGeoViewStore(), (state) => state.drawerState.redoDisabled);
+export const useStoreDrawerRedoDisabled = (): boolean => useStore(useGeoViewStore(), (state) => state.drawerState.redoDisabled);
 
-// #endregion STATE HOOKS
+// #endregion STATE GETTERS & HOOKS - OTHERS (no match between getter-hook)
 
 // #region STATE ADAPTORS
 // GV These methods should be called from a State Adaptor class listening on domain events triggered by controllers.

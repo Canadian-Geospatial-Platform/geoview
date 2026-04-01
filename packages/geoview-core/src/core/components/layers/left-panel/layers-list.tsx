@@ -2,30 +2,29 @@ import { useCallback, useMemo } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { List } from '@/ui';
 import { logger } from '@/core/utils/logger';
-import type { TypeLegendLayer } from '@/core/components/layers/types';
 import { SingleLayer } from './single-layer';
 import { getSxClasses } from './left-panel-styles';
 import type { TypeContainerBox } from '@/core/types/global-types';
-import { useMapOrderedLayers } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useStoreMapOrderedLayers } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 interface LayerListProps {
   depth: number;
-  layersList: TypeLegendLayer[];
+  layerPaths: string[];
   showLayerDetailsPanel: (layerId: string) => void;
   isLayoutEnlarged: boolean;
   containerType: TypeContainerBox;
 }
 
-export function LayersList({ layersList, showLayerDetailsPanel, isLayoutEnlarged, depth, containerType }: LayerListProps): JSX.Element {
+export function LayersList({ layerPaths, showLayerDetailsPanel, isLayoutEnlarged, depth, containerType }: LayerListProps): JSX.Element {
   // Log
-  logger.logTraceRender('components/layers/left-panel/layers-list', `Count ${layersList.length}`);
+  logger.logTraceRender('components/layers/left-panel/layers-list', `Count ${layerPaths.length}`);
 
   // Hook
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Store
-  const layerPathOrder = useMapOrderedLayers();
+  const layerPathOrder = useStoreMapOrderedLayers();
 
   // ? I doubt we want to define an explicit type for style properties?
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -39,20 +38,20 @@ export function LayersList({ layersList, showLayerDetailsPanel, isLayoutEnlarged
   // Memoize the legend items
   const memoLegendItems = useMemo(() => {
     // Log
-    logger.logTraceUseMemo('LAYERS-LIST - memoLegendItems', layersList);
+    logger.logTraceUseMemo('LAYERS-LIST - memoLegendItems', layerPaths);
 
-    const sortedLayers = layersList.sort((a, b) => {
-      return layerPathOrder.indexOf(a.layerPath) - layerPathOrder.indexOf(b.layerPath);
+    const sortedPaths = [...layerPaths].sort((a, b) => {
+      return layerPathOrder.indexOf(a) - layerPathOrder.indexOf(b);
     });
 
-    return sortedLayers.map((layer, index) => {
+    return sortedPaths.map((layerPath, index) => {
       const isFirst = index === 0;
-      const isLast = index === sortedLayers.length - 1;
+      const isLast = index === sortedPaths.length - 1;
 
       return (
         <SingleLayer
-          key={layer.layerPath}
-          layerPath={layer.layerPath}
+          key={layerPath}
+          layerPath={layerPath}
           depth={depth}
           showLayerDetailsPanel={showLayerDetailsPanel}
           isFirst={isFirst}
@@ -62,7 +61,7 @@ export function LayersList({ layersList, showLayerDetailsPanel, isLayoutEnlarged
         />
       );
     });
-  }, [depth, isLayoutEnlarged, showLayerDetailsPanel, layersList, layerPathOrder, containerType]);
+  }, [depth, isLayoutEnlarged, showLayerDetailsPanel, layerPaths, layerPathOrder, containerType]);
 
   return <List sx={getListClass()}>{memoLegendItems}</List>;
 }

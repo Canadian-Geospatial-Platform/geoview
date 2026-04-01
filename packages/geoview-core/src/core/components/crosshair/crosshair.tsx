@@ -5,11 +5,11 @@ import { Box, Fade, Typography } from '@/ui';
 
 import { getSxClasses } from './crosshair-style';
 import { CrosshairIcon } from './crosshair-icon';
-import { useAppCrosshairsActive } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreAppIsCrosshairsActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { getStoreMapPointerPosition } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import { useEventListener } from '@/core/components/common/hooks/use-event-listener';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useUIController } from '@/core/controllers/ui-controller';
 import { useMapController } from '@/core/controllers/map-controller';
 
@@ -38,8 +38,8 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
   const panDelta = useRef(128);
 
   //  Store
-  const isCrosshairsActive = useAppCrosshairsActive();
-  const mapId = useGeoViewMapId();
+  const mapId = useStoreGeoViewMapId();
+  const isCrosshairsActive = useStoreAppIsCrosshairsActive();
   const uiController = useUIController();
   const mapController = useMapController();
 

@@ -3,7 +3,7 @@ import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
 import { delay } from 'geoview-core/core/utils/utilities';
 import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
-import { getStoreActiveFooterBarTab } from 'geoview-core/core/stores/store-interface-and-intial-values/ui-state';
+import { getStoreUIActiveFooterBarTab } from 'geoview-core/core/stores/store-interface-and-intial-values/ui-state';
 import {
   getStoreGeochartChartsConfig,
   getStoreGeochartSelectedLayerPath,
@@ -42,7 +42,7 @@ export class GeochartTester extends GVAbstractTester {
         // Perform assertions
         // Check that geochart is the active footer bar
         test.addStep("Verifying 'geochart' is the selected footer tab...");
-        Test.assertIsEqual(getStoreActiveFooterBarTab(this.getMapId()).tabId, 'geochart');
+        Test.assertIsEqual(getStoreUIActiveFooterBarTab(this.getMapId()).tabId, 'geochart');
 
         // Check that layer path is selected
         test.addStep(`Verifying ${layerPath} is the selected layer for the geochart...`);
@@ -136,7 +136,7 @@ export class GeochartTester extends GVAbstractTester {
 
         // Check that geochart is the active footer bar
         test.addStep("Verifying 'geochart' is the selected footer tab...");
-        Test.assertIsEqual(getStoreActiveFooterBarTab(this.getMapId()).tabId, 'geochart');
+        Test.assertIsEqual(getStoreUIActiveFooterBarTab(this.getMapId()).tabId, 'geochart');
 
         // Check that layer path is selected
         test.addStep(`Verifying ${layerPathAdd} is the selected layer for the geochart...`);

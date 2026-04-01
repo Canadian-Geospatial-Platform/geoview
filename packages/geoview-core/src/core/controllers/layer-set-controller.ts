@@ -12,9 +12,9 @@ import {
   type TypeFeatureInfoResultSet,
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import {
-  getStoreActiveFooterBarTab,
-  getStoreAppBarComponents,
-  getStoreFooterBarComponents,
+  getStoreUIActiveFooterBarTab,
+  getStoreUIAppBarComponents,
+  getStoreUIFooterBarComponents,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import {
   getStoreMapConfigGlobalSettings,
@@ -39,7 +39,7 @@ import { FeatureInfoLayerSet } from '@/geo/layer/layer-sets/feature-info-layer-s
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 import type { TypeLegendItem, TypeLegendLayer, TypeLegendLayerItem } from '@/core/components/layers/types';
 import {
-  getStoreLayerStateLegendLayers,
+  getStoreLayerLegendLayers,
   setStoreLegendLayersDirectly,
   type TypeLegendResultSetEntry,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
@@ -271,14 +271,14 @@ export class LayerSetController extends AbstractMapViewerController {
     // Show details panel as soon as there is a click on the map
     // If the current tab is not 'details' nor 'geochart', switch to details
     if (
-      getStoreActiveFooterBarTab(this.getMapId()) === undefined ||
-      (!['details', 'geochart'].includes(getStoreActiveFooterBarTab(this.getMapId()).tabId) &&
-        getStoreFooterBarComponents(this.getMapId()).includes('details'))
+      getStoreUIActiveFooterBarTab(this.getMapId()) === undefined ||
+      (!['details', 'geochart'].includes(getStoreUIActiveFooterBarTab(this.getMapId()).tabId) &&
+        getStoreUIFooterBarComponents(this.getMapId()).includes('details'))
     ) {
       this.getControllersRegistry().uiController.setActiveFooterBarTab('details');
     }
     // Open details appbar tab when user clicked on map layer.
-    if (getStoreAppBarComponents(this.getMapId()).includes('details')) {
+    if (getStoreUIAppBarComponents(this.getMapId()).includes('details')) {
       this.getControllersRegistry().uiController.setActiveAppBarTab('details', true, true);
     }
   }
@@ -300,8 +300,9 @@ export class LayerSetController extends AbstractMapViewerController {
     // TODO: REFACTOR - propagateLegendToStore - IMPORTANT, this function uses 'createNewLegendEntries' recursively which sends the children array (existingEntries[entryIndex].children)
     // TO.DOCONT: in a loop and pushes objects into the array... However, when pushing objects into an array coming from a Zustand store (or react in general)
     // TO.DOCONT: the array remains the same object and a hook on the array
-    // TO.DOCONT: (for example here the "useLayerSelectorChildren = createLayerSelectorHook('children')") will never trigger, because
+    // TO.DOCONT: (for example here the "useStoreLayerChildren = createLayerSelectorHook('children')") will never trigger, because
     // TO.DOCONT: as far as react is concerned, it's the same array object.
+    // TO.DOCONT: UPDATE: Recently the stores have been fixed so that children are now a new array when updated. Refactoring this should be a bit more straightforward.
 
     const { layerPath } = legendResultSetEntry;
     const layerPathNodes = layerPath.split('/');
@@ -475,7 +476,7 @@ export class LayerSetController extends AbstractMapViewerController {
     };
 
     // Obtain the list of layers currently in the store
-    const layers = getStoreLayerStateLegendLayers(this.getMapId());
+    const layers = getStoreLayerLegendLayers(this.getMapId());
 
     // Process creation of legend entries
     createNewLegendEntries(2, layers);

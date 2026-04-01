@@ -10,16 +10,16 @@ import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { ItemsList } from './legend-layer-items';
 import type { LegendLayerProps } from './legend-layer';
 import {
-  useLayerSelectorChildren,
-  useLayerSelectorIcons,
-  useLayerSelectorItems,
-  useLayerSelectorName,
-  useLayerSelectorStatus,
-  useLayerSelectorSchemaTag,
+  useStoreLayerChildPaths,
+  useStoreLayerIcons,
+  useStoreLayerItems,
+  useStoreLayerName,
+  useStoreLayerStatus,
+  useStoreLayerSchemaTag,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
-import { useMapSelectorLayerLegendCollapsed } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useStoreMapLegendCollapsedByPath } from '@/core/stores/store-interface-and-intial-values/map-state';
 import type { TypeContainerBox } from '@/core/types/global-types';
 
 interface CollapsibleContentProps {
@@ -90,22 +90,22 @@ export const CollapsibleContent = memo(function CollapsibleContent({
   layerNameId,
 }: CollapsibleContentProps): JSX.Element | null {
   // Hooks
-  const mapId = useGeoViewMapId();
+  const mapId = useStoreGeoViewMapId();
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
-  const isCollapsed = useMapSelectorLayerLegendCollapsed(layerPath);
-  const schemaTag = useLayerSelectorSchemaTag(layerPath);
-  const layerItems = useLayerSelectorItems(layerPath);
-  const layerChildren = useLayerSelectorChildren(layerPath);
-  const layerIcons = useLayerSelectorIcons(layerPath);
-  const layerStatus = useLayerSelectorStatus(layerPath);
-  const layerName = useLayerSelectorName(layerPath);
+  const isCollapsed = useStoreMapLegendCollapsedByPath(layerPath);
+  const schemaTag = useStoreLayerSchemaTag(layerPath);
+  const layerItems = useStoreLayerItems(layerPath);
+  const layerChildPaths = useStoreLayerChildPaths(layerPath);
+  const layerIcons = useStoreLayerIcons(layerPath);
+  const layerStatus = useStoreLayerStatus(layerPath);
+  const layerName = useStoreLayerName(layerPath);
 
   // Log
-  logger.logTraceUseMemo('components/legend/legend-layer-container - CollapsibleContent', layerPath, layerChildren?.length);
+  logger.logTraceUseMemo('components/legend/legend-layer-container - CollapsibleContent', layerPath, layerChildPaths?.length);
 
   // Early returns
-  if ((layerChildren?.length === 0 && layerItems?.length === 1) || layerStatus === 'error') return null;
+  if ((layerChildPaths?.length === 0 && layerItems?.length === 1) || layerStatus === 'error') return null;
 
   const isWMSWithLegend = schemaTag === CONST_LAYER_TYPES.WMS && layerIcons?.[0]?.iconImage && layerIcons[0].iconImage !== 'no data';
 
@@ -136,14 +136,9 @@ export const CollapsibleContent = memo(function CollapsibleContent({
       unmountOnExit
     >
       <List>
-        {layerChildren &&
-          layerChildren.map((item) => (
-            <LegendLayerComponent
-              layerPath={item.layerPath}
-              key={item.layerPath}
-              showControls={showControls}
-              containerType={containerType}
-            />
+        {layerChildPaths &&
+          layerChildPaths.map((childPath) => (
+            <LegendLayerComponent layerPath={childPath} key={childPath} showControls={showControls} containerType={containerType} />
           ))}
       </List>
       <ItemsList items={layerItems || []} layerPath={layerPath} />

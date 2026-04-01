@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useAppGeolocatorServiceURL, useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreAppGeolocatorServiceURL, useStoreAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { cleanPostalCode, getDecimalDegreeItem } from '@/core/components/geolocator/utilities';
 import type { GeoListItem } from '@/core/components/geolocator/geolocator';
 import { logger } from '@/core/utils/logger';
@@ -40,8 +40,8 @@ export const useGeolocator = (): UseGeolocatorReturn => {
   const [searchValue, setSearchValue] = useState<string>('');
 
   // Store
-  const displayLanguage = useAppDisplayLanguage();
-  const geolocatorServiceURL = useAppGeolocatorServiceURL();
+  const displayLanguage = useStoreAppDisplayLanguage();
+  const geolocatorServiceURL = useStoreAppGeolocatorServiceURL();
 
   // Refs
   const displayLanguageRef = useRef(displayLanguage);

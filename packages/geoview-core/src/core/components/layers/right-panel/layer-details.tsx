@@ -30,15 +30,15 @@ import { useUIController } from '@/core/controllers/ui-controller';
 import type { TypeLegendLayer, TypeLegendItem } from '@/core/components/layers/types';
 import { getSxClasses } from './layer-details-style';
 import {
-  getStoreLayerStyleSettings,
-  useLayerHighlightedLayer,
-  useLayerSelectorBounds,
-  useLayerSelectorHasText,
+  useStoreLayerHighlightedLayer,
+  useStoreLayerBounds,
+  useStoreLayerHasText,
+  useStoreLayerStyleSettings,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useStoreUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import {
-  useDataTableAllFeaturesDataArray,
-  useDataTableLayerSettings,
+  useStoreDataTableAllFeaturesDataArray,
+  useStoreDataTableLayerSettings,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { LayerIcon } from '@/core/components/common/layer-icon';
 import { LayerOpacityControl } from './layer-opacity-control/layer-opacity-control';
@@ -49,17 +49,17 @@ import { LAYER_STATUS, TABS, TIMEOUT } from '@/core/utils/constant';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 
 import {
-  useMapVisibleLayers,
-  useMapSelectorIsLayerHiddenOnMap,
-  useMapSelectorLayerVisibility,
-  useMapSelectorLayerParentHidden,
+  useStoreMapVisibleLayers,
+  useStoreMapIsLayerHiddenOnMap,
+  useStoreMapLayerVisibility,
+  useStoreMapIsParentLayerHiddenOnMap,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import {
-  useTimeSliderLayers,
+  useStoreTimeSliderLayers,
   setStoreTimeSliderSelectedLayerPath,
 } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 import { useNavigateToTab } from '@/core/components/common/hooks/use-navigate-to-tab';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { DeleteUndoButton } from '@/core/components/layers/delete-undo-button';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { useLayerController } from '@/core/controllers/layer-controller';
@@ -89,9 +89,9 @@ const Sublayer = memo(({ layer }: SubLayerProps): JSX.Element => {
   const { t } = useTranslation<string>();
 
   // Hooks
-  const layerHidden = useMapSelectorIsLayerHiddenOnMap(layer.layerPath);
-  const parentHidden = useMapSelectorLayerParentHidden(layer.layerPath);
-  const layerVisible = useMapSelectorLayerVisibility(layer.layerPath);
+  const layerHidden = useStoreMapIsLayerHiddenOnMap(layer.layerPath);
+  const parentHidden = useStoreMapIsParentLayerHiddenOnMap(layer.layerPath);
+  const layerVisible = useStoreMapLayerVisibility(layer.layerPath);
   const mapController = useMapController();
 
   // Return the ui
@@ -140,27 +140,25 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   // Ref for settings button focus restoration
   const settingsButtonRef = useRef<HTMLButtonElement>(null);
   const infoButtonRef = useRef<HTMLButtonElement>(null);
-  const mapId = useGeoViewMapId();
+  const mapId = useStoreGeoViewMapId();
 
   // get store actions
-  const highlightedLayer = useLayerHighlightedLayer();
-  const hasText = useLayerSelectorHasText(layerDetails.layerPath);
+  const highlightedLayer = useStoreLayerHighlightedLayer();
+  const hasText = useStoreLayerHasText(layerDetails.layerPath);
+  const visibleLayers = useStoreMapVisibleLayers();
+  const datatableSettings = useStoreDataTableLayerSettings();
+  const layersData = useStoreDataTableAllFeaturesDataArray();
+  const bounds = useStoreLayerBounds(layerDetails.layerPath);
+  const layerVisible = useStoreMapLayerVisibility(layerDetails.layerPath);
+  const parentHidden = useStoreMapIsParentLayerHiddenOnMap(layerDetails.layerPath);
+  const layerHidden = useStoreMapIsLayerHiddenOnMap(layerDetails.layerPath);
+  const availableSettings = useStoreLayerStyleSettings(layerDetails.layerPath);
+  const timeSliderLayers = useStoreTimeSliderLayers();
+  const isFocusTrap = useStoreUIActiveTrapGeoView();
   const uiController = useUIController();
-  const visibleLayers = useMapVisibleLayers();
-  const datatableSettings = useDataTableLayerSettings();
-  const layersData = useDataTableAllFeaturesDataArray();
-  const bounds = useLayerSelectorBounds(layerDetails.layerPath);
-  const layerVisible = useMapSelectorLayerVisibility(layerDetails.layerPath);
-  const parentHidden = useMapSelectorLayerParentHidden(layerDetails.layerPath);
-  const layerHidden = useMapSelectorIsLayerHiddenOnMap(layerDetails.layerPath);
-  const timeSliderLayers = useTimeSliderLayers();
-  const isFocusTrap = useUIActiveTrapGeoView();
   const layerController = useLayerController();
   const layerSetController = useLayerSetController();
   const mapController = useMapController();
-
-  // TODO: CHECK - This should likely go through a Zustand hook instead of a state getter
-  const availableSettings = getStoreLayerStyleSettings(mapId, layerDetails.layerPath);
 
   // Use navigate hook for time slider (only if time slider state exists)
   const navigateToTimeSlider = useNavigateToTab('time-slider', setStoreTimeSliderSelectedLayerPath);

@@ -1,11 +1,11 @@
 import ReactDOMServer from 'react-dom/server';
-import { useGeoViewMapId, type TypeWindow } from 'geoview-core';
-import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreGeoViewMapId, type TypeWindow } from 'geoview-core';
+import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 import {
   setStoreDrawerIconSrc,
-  useDrawerActiveGeom,
-  useDrawerIsDrawing,
-  useDrawerStyle,
+  useStoreDrawerActiveGeom,
+  useStoreDrawerIsDrawing,
+  useStoreDrawerStyle,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
 
@@ -36,9 +36,9 @@ export function PointIcon(props: PointIconProps): JSX.Element {
   const { useEffect } = cgpv.reactUtilities.react;
   const { IconComponent } = props;
 
-  const mapId = useGeoViewMapId();
-
-  const { fillColor, strokeColor, strokeWidth } = useDrawerStyle();
+  // Store
+  const mapId = useStoreGeoViewMapId();
+  const { fillColor, strokeColor, strokeWidth } = useStoreDrawerStyle();
 
   useEffect(() => {
     logger.logTraceUseEffect('POINT ICON - Icon style sync', IconComponent, fillColor, strokeColor, strokeWidth);
@@ -97,8 +97,8 @@ export function GeometryPickerButton(): JSX.Element {
   const { useMemo } = cgpv.reactUtilities.react;
   const { PlaceIcon, TextFieldsIcon, ShapeLineIcon, ShowChartIcon, HexagonIcon, RectangleIcon, CircleIcon, StarIcon } = cgpv.ui.elements;
 
-  const geomType = useDrawerActiveGeom();
-  const style = useDrawerStyle();
+  const geomType = useStoreDrawerActiveGeom();
+  const style = useStoreDrawerStyle();
   const iconStyle = useMemo(
     () => ({
       fillColor: style.fillColor,
@@ -137,13 +137,13 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
   const { geomTypes, closePanel } = props;
 
   // Get store values
-  const displayLanguage = useAppDisplayLanguage();
+  const displayLanguage = useStoreAppDisplayLanguage();
   const drawerController = useDrawerController();
 
   // Store actions
-  const style = useDrawerStyle();
-  const activeGeom = useDrawerActiveGeom();
-  const isDrawing = useDrawerIsDrawing();
+  const style = useStoreDrawerStyle();
+  const activeGeom = useStoreDrawerActiveGeom();
+  const isDrawing = useStoreDrawerIsDrawing();
 
   const memoIconStyle = useMemo(
     () => ({

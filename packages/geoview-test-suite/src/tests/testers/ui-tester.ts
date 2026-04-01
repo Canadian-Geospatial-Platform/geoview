@@ -1,7 +1,7 @@
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
 import { delay } from 'geoview-core/core/utils/utilities';
-import { getStoreGeoviewHTMLElement } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
+import { getStoreAppGeoviewHTMLElement } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 
 /**
  * Main UI testing class.
@@ -36,7 +36,7 @@ export class UITester extends GVAbstractTester {
 
         // Get the GeoView HTML element
         test.addStep('Getting GeoView HTML element...');
-        const geoviewElement = getStoreGeoviewHTMLElement(mapId);
+        const geoviewElement = getStoreAppGeoviewHTMLElement(mapId);
 
         // Find the guide-container div
         test.addStep('Finding guide-container div...');

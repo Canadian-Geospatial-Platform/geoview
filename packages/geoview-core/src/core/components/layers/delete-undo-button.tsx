@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Box, CircularProgressBase, DeleteOutlineIcon, IconButton, UndoIcon } from '@/ui';
-import { useLayerSelectorDeletionStartTime } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useStoreLayerDeletionStartTime } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { logger } from '@/core/utils/logger';
 import { TIMEOUT } from '@/core/utils/constant';
 import { useLayerController } from '@/core/controllers/layer-controller';
@@ -74,7 +74,7 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
   const undoButtonRef = useRef<HTMLButtonElement>(null);
 
   // Store hooks
-  const layerDeletionStartTime = useLayerSelectorDeletionStartTime(layerPath);
+  const layerDeletionStartTime = useStoreLayerDeletionStartTime(layerPath);
   const layerController = useLayerController();
 
   // state

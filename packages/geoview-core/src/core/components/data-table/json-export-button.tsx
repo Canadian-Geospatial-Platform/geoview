@@ -6,8 +6,8 @@ import { MenuItem } from '@/ui';
 
 import { JsonExportWorker } from '@/core/workers/json-export-worker';
 import type { SerializedGeometry, TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
-import { useLayerSelectorName, useLayerSelectorSchemaTag } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { useMapProjectionEPSG } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useStoreLayerName, useStoreLayerSchemaTag } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useStoreMapCurrentProjectionEPSG } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { TIMEOUT } from '@/core/utils/constant';
@@ -36,9 +36,9 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
 
   // get store action and map projection
   const uiController = useUIController();
-  const mapProjectionEPSG = useMapProjectionEPSG();
-  const layerName = useLayerSelectorName(layerPath) ?? '';
-  const schemaTag = useLayerSelectorSchemaTag(layerPath);
+  const mapProjectionEPSG = useStoreMapCurrentProjectionEPSG();
+  const layerName = useStoreLayerName(layerPath) ?? '';
+  const schemaTag = useStoreLayerSchemaTag(layerPath);
   const layerController = useLayerController();
 
   // Keep exporting state

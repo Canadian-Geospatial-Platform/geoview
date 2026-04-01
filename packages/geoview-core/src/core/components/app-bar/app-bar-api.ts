@@ -5,7 +5,7 @@ import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 import { generateId } from '@/core/utils/utilities';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
-import { type ActiveAppBarTabType } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { getStoreUIActiveAppBarTab, type ActiveAppBarTabType } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import type { UIController } from '@/core/controllers/ui-controller';
 import { logger } from '@/core/utils/logger';
 
@@ -159,10 +159,10 @@ export class AppBarApi {
    * Gets the active app bar tab.
    *
    * @returns The active app bar tab info.
-   * @deprecated Legacy support. Should use uiController.getActiveAppBarTab directly instead.
+   * @deprecated Legacy support. Should be removed.
    */
   getActiveAppBarTab(): ActiveAppBarTabType {
-    return this.#uiController.getActiveAppBarTab();
+    return getStoreUIActiveAppBarTab(this.#uiController.getMapId());
   }
 
   /**

@@ -8,21 +8,21 @@ import { MRT_Localization_EN as MRTLocalizationEN } from 'material-react-table/l
 import { Modal, MRTTable as Table, type MRT_ColumnDef as MRTColumnDef, Box, CircularProgress, Button } from '@/ui';
 import { useUIController } from '@/core/controllers/ui-controller';
 import {
-  useUIActiveFocusItem,
-  useUIFooterBarComponents,
-  useUIAppbarComponents,
-  useUIActiveTrapGeoView,
+  useStoreUIActiveFocusItem,
+  useStoreUIFooterBarComponents,
+  useStoreUIAppbarComponents,
+  useStoreUIActiveTrapGeoView,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { useLayerNames, useLayerSelectedLayerPath } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useStoreLayerNameSet, useStoreLayerSelectedLayerPath } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { getSxClasses } from './data-table-style';
 import { logger } from '@/core/utils/logger';
 import {
   setStoreSelectedLayerPath,
-  useDataTableAllFeaturesDataArray,
+  useStoreDataTableAllFeaturesDataArray,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { useFeatureFieldInfos } from './hooks';
 import type { TypeFieldEntry } from '@/api/types/map-schema-types';
-import { useAppDisplayLanguage, useAppShellContainer } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreAppDisplayLanguage, useStoreAppShellContainer } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { TableViewIcon } from '@/ui/icons';
 import { useNavigateToTab } from '@/core/components/common/hooks/use-navigate-to-tab';
 
@@ -44,15 +44,15 @@ export default function DataTableModal(): JSX.Element {
 
   // get store function
   const uiController = useUIController();
-  const activeModalId = useUIActiveFocusItem().activeElementId;
-  const selectedLayerPath = useLayerSelectedLayerPath();
-  const layersData = useDataTableAllFeaturesDataArray();
-  const language = useAppDisplayLanguage();
-  const shellContainer = useAppShellContainer();
-  const footerBarComponents = useUIFooterBarComponents();
-  const appBarComponents = useUIAppbarComponents();
-  const isFocusTrap = useUIActiveTrapGeoView();
-  const layerNames = useLayerNames();
+  const activeModalId = useStoreUIActiveFocusItem().activeElementId;
+  const selectedLayerPath = useStoreLayerSelectedLayerPath();
+  const layersData = useStoreDataTableAllFeaturesDataArray();
+  const language = useStoreAppDisplayLanguage();
+  const shellContainer = useStoreAppShellContainer();
+  const footerBarComponents = useStoreUIFooterBarComponents();
+  const appBarComponents = useStoreUIAppbarComponents();
+  const isFocusTrap = useStoreUIActiveTrapGeoView();
+  const layerNames = useStoreLayerNameSet();
 
   const dataTableLocalization = language === 'fr' ? MRTLocalizationFR : MRTLocalizationEN;
 

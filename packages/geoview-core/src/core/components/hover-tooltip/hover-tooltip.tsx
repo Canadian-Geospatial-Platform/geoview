@@ -5,19 +5,19 @@ import { useTheme } from '@mui/material/styles';
 import { Box, BrowserNotSupportedIcon } from '@/ui';
 
 import {
-  getStoreMapPointerPosition,
-  useMapHoverFeatureInfo,
-  useMapIsMouseInsideMap,
+  useStoreMapHoverFeatureInfo,
+  useStoreMapIsMouseInsideMap,
+  useStoreMapPointerPosition,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { getSxClasses } from './hover-tooltip-styles';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
-import { useAppDisplayLanguage, useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
+import { useStoreAppDisplayLanguage, useStoreAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { logger } from '@/core/utils/logger';
 import { DateMgt } from '@/core/utils/date-mgt';
 import {
-  useLayerDateTemporalModes,
-  useLayerDisplayDateFormats,
-  useLayerDisplayDateTimezones,
+  useStoreLayerDateTemporalModeSet,
+  useStoreLayerDisplayDateFormatSet,
+  useStoreLayerDisplayDateTimezoneSet,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 /**
@@ -43,14 +43,15 @@ export const HoverTooltip = memo(function HoverTooltip(): JSX.Element | null {
   const mapRectRef = useRef<DOMRect | null>(null);
 
   // Store values
-  const mapId = useGeoViewMapId();
-  const hoverFeatureInfo = useMapHoverFeatureInfo();
-  const isMouseouseInMap = useMapIsMouseInsideMap();
-  const mapElem = useAppGeoviewHTMLElement().querySelector(`[id^="mapTargetElement-${useGeoViewMapId()}"]`) as HTMLElement;
-  const language = useAppDisplayLanguage();
-  const layerDateTemporalModes = useLayerDateTemporalModes();
-  const displayDateFormats = useLayerDisplayDateFormats();
-  const displayDateTimezones = useLayerDisplayDateTimezones();
+  const mapId = useStoreGeoViewMapId();
+  const hoverFeatureInfo = useStoreMapHoverFeatureInfo();
+  const isMouseouseInMap = useStoreMapIsMouseInsideMap();
+  const mapElem = useStoreAppGeoviewHTMLElement().querySelector(`[id^="mapTargetElement-${mapId}"]`) as HTMLElement;
+  const language = useStoreAppDisplayLanguage();
+  const layerDateTemporalModes = useStoreLayerDateTemporalModeSet();
+  const displayDateFormats = useStoreLayerDisplayDateFormatSet();
+  const displayDateTimezones = useStoreLayerDisplayDateTimezoneSet();
+  const pointerPosition = useStoreMapPointerPosition();
 
   /**
    * Formats the hovered feature value for display.
@@ -79,11 +80,6 @@ export const HoverTooltip = memo(function HoverTooltip(): JSX.Element | null {
    * Calculates the tooltip position with boundary checks.
    */
   const memoPosition = useMemo(() => {
-    // TODO: CHECK - This should likely go through a Zustand hook instead of a state getter.
-    // TO.DOCONT: Or write down why we do an exception here (other than 'use it only when needed')
-    // Use store getter, we do not subcribe to modification and use it only when needed
-    const pointerPosition = getStoreMapPointerPosition(mapId);
-
     // Early return in memo
     // Check for all required conditions upfront
     if (!pointerPosition?.pixel || !mapElem || memoValue === undefined || !isMouseouseInMap) {
@@ -115,7 +111,7 @@ export const HoverTooltip = memo(function HoverTooltip(): JSX.Element | null {
     if (tooltipY < mapRectRef.current.top) tooltipY = pointerPosition.pixel[1] + 10;
 
     return { left: `${tooltipX}px`, top: `${tooltipY}px`, isValid: true };
-  }, [mapId, mapElem, memoValue, isMouseouseInMap]);
+  }, [mapElem, memoValue, isMouseouseInMap, pointerPosition]);
 
   /**
    * Computes the tooltip content and visibility state.

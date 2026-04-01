@@ -6,12 +6,12 @@ import { Typography, Box, Link, SvgIcon, ClickAwayListener, List, Paper, useThem
 import { useUIController } from '@/core/controllers/ui-controller';
 import { GITHUB_REPO, GEO_URL_TEXT, CONTAINER_TYPE } from '@/core/utils/constant';
 import { GeoCaIcon, IconButton, Popper, CloseIcon } from '@/ui';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
-import { useMapInteraction } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
+import { useStoreMapInteraction } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { GitHubIcon } from '@/ui/icons';
 import { handleEscapeKey } from '@/core/utils/utilities';
 import { FocusTrapContainer } from '@/core/components/common/focus-trap-container';
-import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useStoreUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { DateMgt } from '@/core/utils/date-mgt';
 import type { SxStyles } from '@/ui/style/types';
 import { visuallyHidden } from '@/ui/style/default';
@@ -87,12 +87,12 @@ export default function Version(): JSX.Element {
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Store
-  const interaction = useMapInteraction();
-  const activeTrapGeoView = useUIActiveTrapGeoView();
+  const mapId = useStoreGeoViewMapId();
+  const interaction = useStoreMapInteraction();
+  const activeTrapGeoView = useStoreUIActiveTrapGeoView();
   const uiController = useUIController();
 
   // Get container
-  const mapId = useGeoViewMapId();
   const mapElem = document.getElementById(`shell-${mapId}`);
 
   // State

@@ -125,9 +125,9 @@ export type GeoviewStoreType = UseBoundStore<Mutate<StoreApi<IGeoviewState>, Sub
 // **********************************************************
 // GeoView state selectors
 // **********************************************************
-export const useGeoViewMapId = (): string => useStore(useGeoViewStore(), (state) => state.mapId);
-export const useGeoViewConfig = (): TypeMapFeaturesConfig | undefined => useStore(useGeoViewStore(), (state) => state.mapConfig);
-export const useGeoViewSharedMode = (): boolean | undefined => useStore(useGeoViewStore(), (state) => state.mapConfig?.sharedMode);
+export const useStoreGeoViewMapId = (): string => useStore(useGeoViewStore(), (state) => state.mapId);
+export const useStoreGeoViewConfig = (): TypeMapFeaturesConfig | undefined => useStore(useGeoViewStore(), (state) => state.mapConfig);
+export const useStoreGeoViewSharedMode = (): boolean | undefined => useStore(useGeoViewStore(), (state) => state.mapConfig?.sharedMode);
 
 /** To be able to compare objects for hooks */
 type EqualityFn<T> = (prev: T, next: T) => boolean;

@@ -1,8 +1,8 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { getSxClasses } from 'geoview-core/core/components/nav-bar/nav-bar-style';
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
-import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
-import { useDrawerUndoDisabled } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
+import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreDrawerUndoDisabled } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
 
 import { IconButton, UndoIcon } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
@@ -24,11 +24,11 @@ export default function Redo(): JSX.Element {
   // Get store values
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
-  const displayLanguage = useAppDisplayLanguage();
+  const displayLanguage = useStoreAppDisplayLanguage();
   const drawerController = useDrawerController();
 
   // Store actions
-  const undoDisabled = useDrawerUndoDisabled();
+  const undoDisabled = useStoreDrawerUndoDisabled();
 
   /**
    * Handles a click on the undo button

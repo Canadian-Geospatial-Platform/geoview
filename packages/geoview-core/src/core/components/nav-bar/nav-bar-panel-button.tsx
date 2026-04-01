@@ -5,12 +5,12 @@ import { useTranslation } from 'react-i18next';
 import { getSxClasses } from './nav-bar-style';
 import { Popper, IconButton, DialogTitle, DialogContent, Paper, Box } from '@/ui';
 import { CloseIcon } from '@/ui/icons';
-import { useAppShellContainer } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreAppShellContainer } from '@/core/stores/store-interface-and-intial-values/app-state';
 import type { TypeButtonPanel } from '@/ui/panel/panel-types';
 import { logger } from '@/core/utils/logger';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { handleEscapeKey } from '@/core/utils/utilities';
-import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useStoreUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
 /** The properties for the navbar panel button. */
 interface NavbarPanelButtonType {
@@ -36,8 +36,8 @@ export default function NavbarPanelButton({ buttonPanel, isActive = false }: Nav
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Store
-  const activeTrapGeoView = useUIActiveTrapGeoView();
-  const shellContainer = useAppShellContainer();
+  const activeTrapGeoView = useStoreUIActiveTrapGeoView();
+  const shellContainer = useStoreAppShellContainer();
 
   // States
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);

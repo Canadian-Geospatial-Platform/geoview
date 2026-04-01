@@ -3,8 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 
 import { Box, CopyrightIcon, Popover, IconButton, Typography } from '@/ui';
-import { useMapAttribution, useMapInteraction } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useStoreMapAttribution, useStoreMapInteraction } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 
 /** Popover anchor and transform origin positions. */
@@ -45,14 +45,14 @@ export const Attribution = memo(function Attribution(): JSX.Element {
   const theme = useTheme();
 
   // State
-  const interaction = useMapInteraction();
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const open = Boolean(anchorEl);
 
   // Store
-  const mapAttribution = useMapAttribution();
+  const mapId = useStoreGeoViewMapId();
+  const interaction = useStoreMapInteraction();
+  const mapAttribution = useStoreMapAttribution();
 
-  const mapId = useGeoViewMapId();
   const mapElem = document.getElementById(`shell-${mapId}`);
 
   const buttonStyles = {

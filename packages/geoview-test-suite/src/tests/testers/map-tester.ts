@@ -14,8 +14,11 @@ import {
 } from 'geoview-core/core/stores/store-interface-and-intial-values/feature-info-state';
 import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
 import { Projection } from 'geoview-core/geo/utils/projection';
-import { getStoreActiveAppBarTab, getStoreActiveFooterBarTab } from 'geoview-core/core/stores/store-interface-and-intial-values/ui-state';
-import { getStoreDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
+import {
+  getStoreUIActiveAppBarTab,
+  getStoreUIActiveFooterBarTab,
+} from 'geoview-core/core/stores/store-interface-and-intial-values/ui-state';
+import { getStoreAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 import {
   getStoreMapConfigViewSettingsProjection,
   getStoreMapHoverFeatureInfo,
@@ -329,7 +332,7 @@ export class MapTester extends GVAbstractTester {
       },
       (test, result) => {
         test.addStep('Verifying tab is selected...');
-        const { tabId } = getStoreActiveFooterBarTab(this.getMapId());
+        const { tabId } = getStoreUIActiveFooterBarTab(this.getMapId());
         Test.assertIsEqual(tabId, result);
       }
     );
@@ -358,7 +361,7 @@ export class MapTester extends GVAbstractTester {
       },
       (test, result) => {
         test.addStep('Verifying tab is selected...');
-        const activeTab = getStoreActiveAppBarTab(this.getMapId());
+        const activeTab = getStoreUIActiveAppBarTab(this.getMapId());
         Test.assertIsEqual(activeTab?.tabId, result);
       }
     );
@@ -419,7 +422,7 @@ export class MapTester extends GVAbstractTester {
 
         // If either the domain or the store language is set to 'fr'.
         // We typically only need to check the domain, but in this test we can check both too as we'll be asserting the result in the store later.
-        if (this.getMapViewer().getDisplayLanguage() === 'fr' || getStoreDisplayLanguage(this.getMapId()) === 'fr') {
+        if (this.getMapViewer().getDisplayLanguage() === 'fr' || getStoreAppDisplayLanguage(this.getMapId()) === 'fr') {
           throw new TestError(`False precondition, language is already set to '${targetLanguage}'`);
         }
 
@@ -427,7 +430,7 @@ export class MapTester extends GVAbstractTester {
         await this.getMapViewer().setLanguage(targetLanguage);
 
         // Return the display language as read from the store
-        return getStoreDisplayLanguage(this.getMapId());
+        return getStoreAppDisplayLanguage(this.getMapId());
       },
       (test, result) => {
         test.addStep('Verifying language changed...');

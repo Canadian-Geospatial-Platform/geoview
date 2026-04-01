@@ -19,9 +19,9 @@ import { LayerNotEsriDynamicError, LayerNotGeoJsonError, LayerWrongTypeError } f
 import { useControllers } from '@/core/controllers/base/controller-manager';
 import {
   getStoreLayerMosaicRule,
-  getStoreLayerStateHighlightedLayer,
-  getStoreLayerStateLegendLayerByPath,
-  getStoreLayerStateLegendLayers,
+  getStoreLayerHighlightedLayer,
+  getStoreLayerLegendLayerByPath,
+  getStoreLayerLegendLayers,
   setStoreHighlightedLayer,
   setStoreLayerBoundsForLayerAndParentsAndForget,
   setStoreLayerDateTemporal,
@@ -1033,10 +1033,10 @@ export class LayerController extends AbstractMapViewerController {
 
     // Get legend layers and legend layer to update
     // GV This object is about to get mutated multiple times, that's why we can use it to set legend layers later... (pattern should be changed..)
-    const curLayers = getStoreLayerStateLegendLayers(this.getMapId());
+    const curLayers = getStoreLayerLegendLayers(this.getMapId());
 
     // Get the particular object holding the items array itself from the store
-    const layerStore = getStoreLayerStateLegendLayerByPath(this.getMapId(), layerPath)!;
+    const layerStore = getStoreLayerLegendLayerByPath(this.getMapId(), layerPath)!;
 
     const itemsToggled: TypeLegendItem[] = [];
     try {
@@ -1114,7 +1114,7 @@ export class LayerController extends AbstractMapViewerController {
    */
   setHighlightLayer(layerPath: string): void {
     // Get highlighted layer to set active button state because there can only be one highlighted layer at a time.
-    const currentHighlight = getStoreLayerStateHighlightedLayer(this.getMapId());
+    const currentHighlight = getStoreLayerHighlightedLayer(this.getMapId());
 
     // Highlight layer and get new highlighted layer path from map controller.
     const highlightedLayerpath = this.getControllersRegistry().mapController.changeOrRemoveLayerHighlight(layerPath, currentHighlight);

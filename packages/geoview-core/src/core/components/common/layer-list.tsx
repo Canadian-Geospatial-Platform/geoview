@@ -8,7 +8,7 @@ import type { TypeFeatureInfoEntry, TypeQueryStatus } from '@/api/types/map-sche
 import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
 import { getSxClasses } from './layer-list-style';
 import { LayerIcon } from './layer-icon';
-import { useLayerSelectorStatus } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useStoreLayerStatus } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { logger } from '@/core/utils/logger';
 
 /** Represents an entry in the layer list. */
@@ -60,7 +60,7 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Store
-  const layerStatus = useLayerSelectorStatus(layer.layerPath);
+  const layerStatus = useStoreLayerStatus(layer.layerPath);
 
   // Style
   const containerClass = [

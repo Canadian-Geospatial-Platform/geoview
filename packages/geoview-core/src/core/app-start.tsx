@@ -9,7 +9,7 @@ import { ScopedCssBaseline } from '@mui/material';
 import { Shell } from '@/core/containers/shell';
 import { getTheme } from '@/ui/style/theme';
 import { logger } from '@/core/utils/logger';
-import { useAppDisplayThemeById } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreAppDisplayThemeById } from '@/core/stores/store-interface-and-intial-values/app-state';
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import { ControllerContext } from '@/core/controllers/base/controller-manager';
@@ -98,7 +98,7 @@ function AppStart(props: AppStartProps): JSX.Element {
 
   // GV get store values by id because context is not set.... it is the only atomic selector by id
   // once context is define, map id is available
-  const theme = useAppDisplayThemeById(mapViewer.mapId);
+  const theme = useStoreAppDisplayThemeById(mapViewer.mapId);
 
   return (
     <ErrorBoundary language={(i18nLang.language as TypeDisplayLanguage) || 'en'}>

@@ -1,6 +1,6 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
-import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 import { logger } from 'geoview-core/core/utils/logger';
 
 import { getSxClasses } from './about-panel-style';
@@ -30,7 +30,7 @@ function MarkdownFromPath(props: TypeMarkdownFromPathProps): JSX.Element {
   const { useEffect, useState } = react;
   const { Box, Typography } = ui.elements;
 
-  const displayLanguage = useAppDisplayLanguage();
+  const displayLanguage = useStoreAppDisplayLanguage();
 
   const [content, setContent] = useState<string>('');
   const [error, setError] = useState<string | null>(null);

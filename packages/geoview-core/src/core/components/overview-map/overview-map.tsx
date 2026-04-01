@@ -8,8 +8,8 @@ import { ThemeProvider } from '@mui/material/styles';
 
 import { cgpvTheme } from '@/ui/style/theme';
 import { OverviewMapToggle } from './overview-map-toggle';
-import { useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { useMapOverviewMapHideZoom, useMapZoom } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useStoreAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreMapOverviewMapHideZoom, useStoreMapZoom } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import { Box } from '@/ui/layout';
 import { TIMEOUT } from '@/core/utils/constant';
@@ -32,9 +32,9 @@ export function OverviewMap(props: OverviewMapProps): JSX.Element {
   logger.logTraceRender('components/overview-map/overview-map');
 
   // Store
-  const zoomLevel = useMapZoom();
-  const hideOnZoom = useMapOverviewMapHideZoom();
-  const displayLanguage = useAppDisplayLanguage();
+  const zoomLevel = useStoreMapZoom();
+  const hideOnZoom = useStoreMapOverviewMapHideZoom();
+  const displayLanguage = useStoreAppDisplayLanguage();
   const { i18n } = props;
   const mapController = useMapController();
 

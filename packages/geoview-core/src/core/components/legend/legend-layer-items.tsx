@@ -4,15 +4,15 @@ import { memo, useCallback, useMemo, useEffect, useRef } from 'react';
 import { Box, ListItem, ListItemButton, ListItemText, ListItemIcon, List, BrowserNotSupportedIcon } from '@/ui';
 import type { TypeLegendItem } from '@/core/components/layers/types';
 import {
-  useLayerSelectorCanToggle,
-  useLayerSelectorControls,
-  useLayerSelectorStyleConfig,
+  useStoreLayerCanToggle,
+  useStoreLayerControls,
+  useStoreLayerStyleConfig,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';
 import { generateId } from '@/core/utils/utilities';
-import { useMapSelectorIsLayerHiddenOnMap } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useStoreMapIsLayerHiddenOnMap } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useLayerController } from '@/core/controllers/layer-controller';
 
 interface ItemsListProps {
@@ -102,15 +102,16 @@ export const ItemsList = memo(function ItemsList({ items, layerPath }: ItemsList
   // Hooks
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
-  const mapId = useGeoViewMapId();
   const lastToggledRef = useRef<string | null>(null);
   const itemIdMapRef = useRef<Map<string, string>>(new Map());
 
-  const layerControls = useLayerSelectorControls(layerPath);
-  const layerHidden = useMapSelectorIsLayerHiddenOnMap(layerPath);
-  const canToggle = useLayerSelectorCanToggle(layerPath);
+  // Store
+  const mapId = useStoreGeoViewMapId();
+  const layerControls = useStoreLayerControls(layerPath);
+  const layerHidden = useStoreMapIsLayerHiddenOnMap(layerPath);
+  const canToggle = useStoreLayerCanToggle(layerPath);
   const canToggleItemVisibility = canToggle && layerControls?.visibility !== false;
-  const styleConfig = useLayerSelectorStyleConfig(layerPath);
+  const styleConfig = useStoreLayerStyleConfig(layerPath);
   const layerController = useLayerController();
 
   /**

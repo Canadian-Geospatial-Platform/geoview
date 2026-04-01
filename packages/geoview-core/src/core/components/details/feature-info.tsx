@@ -15,12 +15,12 @@ import {
 import {
   addStoreDetailsCheckedFeature,
   removeStoreDetailsCheckedFeature,
-  useDetailsCheckedFeatures,
+  useStoreDetailsCheckedFeatures,
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import {
   setStoreGeochartSelectedLayerPath,
-  useGeochartConfigs,
-  useGeochartLayerDataArrayBatch,
+  useStoreGeochartChartsConfig,
+  useStoreGeochartLayerDataArrayBatch,
 } from '@/core/stores/store-interface-and-intial-values/geochart-state';
 import { useNavigateToTab } from '@/core/components/common/hooks/use-navigate-to-tab';
 import { logger } from '@/core/utils/logger';
@@ -29,8 +29,8 @@ import type { TypeFeatureInfoEntry, TypeFieldEntry } from '@/api/types/map-schem
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { FeatureInfoTable } from './feature-info-table';
 import { getSxClasses } from './details-style';
-import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useStoreUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useMapController } from '@/core/controllers/map-controller';
 
 /** Properties for the FeatureInfo component. */
@@ -113,7 +113,7 @@ const FeatureHeader = memo(function FeatureHeader({
   const { t } = useTranslation();
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
-  const isFocusTrap = useUIActiveTrapGeoView();
+  const isFocusTrap = useStoreUIActiveTrapGeoView();
 
   /**
    * Handles when the checked button is toggled.
@@ -211,10 +211,10 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
   const [checked, setChecked] = useState<boolean>(false);
 
   // Store
-  const mapId = useGeoViewMapId();
-  const checkedFeatures = useDetailsCheckedFeatures();
-  const geochartLayerDataArrayBatch = useGeochartLayerDataArrayBatch();
-  const geochartConfigs = useGeochartConfigs();
+  const mapId = useStoreGeoViewMapId();
+  const checkedFeatures = useStoreDetailsCheckedFeatures();
+  const geochartLayerDataArrayBatch = useStoreGeochartLayerDataArrayBatch();
+  const geochartConfigs = useStoreGeochartChartsConfig();
   const mapController = useMapController();
 
   // Use navigate hook for geochart (only if geochart state exists)

@@ -14,23 +14,23 @@ import type { TypeModalProps, ModalApi, ModalEvent } from '@/ui';
 import { Box, CircularProgress, Link, Modal, Snackbar, Button } from '@/ui';
 import { getShellSxClasses } from './containers-style';
 import { useUIController } from '@/core/controllers/ui-controller';
-import { useMapInteraction, useMapLoaded } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useStoreMapInteraction, useStoreMapLoaded } from '@/core/stores/store-interface-and-intial-values/map-state';
 import {
-  useAppCircularProgressActive,
-  useAppFullscreenActive,
-  useAppGeoviewHTMLElement,
-  useAppHeight,
+  useStoreAppIsCircularProgressActive,
+  useStoreAppIsFullscreenActive,
+  useStoreAppGeoviewHTMLElement,
+  useStoreAppHeight,
 } from '@/core/stores/store-interface-and-intial-values/app-state';
 import {
-  useUIActiveFocusItem,
-  useUIActiveTrapGeoView,
-  useUIFooterPanelResizeValue,
-  useUIActiveFooterBarTab,
+  useStoreUIActiveFocusItem,
+  useStoreUIActiveTrapGeoView,
+  useStoreUIFooterPanelResizeValue,
+  useStoreUIActiveFooterBarTab,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import ExportModal from '@/core/components/export/export-modal';
 import DataTableModal from '@/core/components/data-table/data-table-modal';
 import FeatureDetailModal from '@/core/components/details/feature-detail-modal';
-import { useGeoViewConfig } from '@/core/stores/geoview-store';
+import { useStoreGeoViewConfig } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 import type { MapViewer, MapComponentAddedEvent, MapComponentRemovedEvent } from '@/geo/map/map-viewer';
 
@@ -82,19 +82,19 @@ export function Shell(props: ShellProps): JSX.Element {
   const [snackbarButton, setSnackbarButton] = useState<JSX.Element>();
 
   // Store
-  const mapLoaded = useMapLoaded();
-  const circularProgressActive = useAppCircularProgressActive();
-  const activeTrapGeoView = useUIActiveTrapGeoView();
-  const interaction = useMapInteraction();
-  const geoviewConfig = useGeoViewConfig();
-  const focusItem = useUIActiveFocusItem();
-  const uiController = useUIController();
-  const isMapFullScreen = useAppFullscreenActive();
-  const footerPanelResizeValue = useUIFooterPanelResizeValue();
-  const { isOpen } = useUIActiveFooterBarTab();
-  const geoviewElement = useAppGeoviewHTMLElement();
-  const appHeight = useAppHeight();
+  const mapLoaded = useStoreMapLoaded();
+  const circularProgressActive = useStoreAppIsCircularProgressActive();
+  const activeTrapGeoView = useStoreUIActiveTrapGeoView();
+  const interaction = useStoreMapInteraction();
+  const geoviewConfig = useStoreGeoViewConfig();
+  const focusItem = useStoreUIActiveFocusItem();
+  const isMapFullScreen = useStoreAppIsFullscreenActive();
+  const footerPanelResizeValue = useStoreUIFooterPanelResizeValue();
+  const { isOpen } = useStoreUIActiveFooterBarTab();
+  const geoviewElement = useStoreAppGeoviewHTMLElement();
+  const appHeight = useStoreAppHeight();
   const footerTabContainer = geoviewElement.querySelector(`[id^="${mapId}-tabsContainer"]`) as HTMLElement;
+  const uiController = useUIController();
 
   // SxClasses
   const sxClasses = useMemo(() => getShellSxClasses(theme, appHeight), [theme, appHeight]);

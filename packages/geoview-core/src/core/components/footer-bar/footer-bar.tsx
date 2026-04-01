@@ -11,17 +11,21 @@ import { useUIController } from '@/core/controllers/ui-controller';
 import { usePluginController } from '@/core/controllers/plugin-controller';
 import { getSxClasses } from './footer-bar-style';
 import { ResizeFooterPanel } from '@/core/components/footer-bar/hooks/resize-footer-panel';
-import { useAppFullscreenActive, useAppHeight, useAppShellContainer } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { useDetailsLayerDataArrayBatch } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import {
-  useUIActiveFooterBarTab,
-  useUIFooterPanelResizeValue,
-  useUIActiveTrapGeoView,
-  useUIHiddenTabs,
+  useStoreAppIsFullscreenActive,
+  useStoreAppHeight,
+  useStoreAppShellContainer,
+} from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreDetailsLayerDataArrayBatch } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import {
+  useStoreUIActiveFooterBarTab,
+  useStoreUIFooterPanelResizeValue,
+  useStoreUIActiveTrapGeoView,
+  useStoreUIHiddenTabs,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import type { FooterBarApi, FooterTabCreatedEvent, FooterTabRemovedEvent } from '@/core/components';
 import { DEFAULT_FOOTER_TABS_ORDER } from '@/api/types/map-schema-types';
-import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useStoreGeoViewConfig, useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { Legend } from '@/core/components/legend/legend';
 import { LayersPanel } from '@/core/components/layers/layers-panel';
@@ -63,8 +67,6 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   const { api: footerBarApi } = props;
 
   // Hooks
-  const isMapFullScreen = useAppFullscreenActive();
-  const footerPanelResizeValue = useUIFooterPanelResizeValue();
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
@@ -72,19 +74,21 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   const tabsContainerRef = useRef<HTMLDivElement>();
 
   // Store
-  const mapId = useGeoViewMapId();
-  const arrayOfLayerDataBatch = useDetailsLayerDataArrayBatch();
-  const activeFooterBarTab = useUIActiveFooterBarTab();
-  const activeTrapGeoView = useUIActiveTrapGeoView();
-  const shellContainer = useAppShellContainer();
-  const uiController = useUIController();
-  const backupAppHeight: number = useAppHeight();
+  const mapId = useStoreGeoViewMapId();
+  const isMapFullScreen = useStoreAppIsFullscreenActive();
+  const footerPanelResizeValue = useStoreUIFooterPanelResizeValue();
+  const arrayOfLayerDataBatch = useStoreDetailsLayerDataArrayBatch();
+  const activeFooterBarTab = useStoreUIActiveFooterBarTab();
+  const activeTrapGeoView = useStoreUIActiveTrapGeoView();
+  const shellContainer = useStoreAppShellContainer();
+  const backupAppHeight: number = useStoreAppHeight();
   const appHeight = document.getElementById(mapId)?.getAttribute('data-footer-height') ?? `${backupAppHeight}px`;
-  const hiddenTabs: string[] = useUIHiddenTabs();
+  const hiddenTabs: string[] = useStoreUIHiddenTabs();
+  const uiController = useUIController();
   const pluginController = usePluginController();
 
   // get store config for footer bar tabs to add (similar logic as in app-bar)
-  const footerBarTabsConfig = useGeoViewConfig()?.footerBar;
+  const footerBarTabsConfig = useStoreGeoViewConfig()?.footerBar;
 
   /**
    * Builds the footer bar tab keys from configuration.

@@ -4,10 +4,10 @@ import { useTheme } from '@mui/material/styles';
 import { Box, Tooltip } from '@/ui';
 import { NorthArrowIcon } from '@/core/components/north-arrow/north-arrow-icon';
 
-import { useMapRotation } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useStoreMapRotation } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useManageArrow } from '@/core/components/north-arrow/hooks/useManageArrow';
 import { logger } from '@/core/utils/logger';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 
 /**
  * Creates the map information rotation indicator component.
@@ -24,8 +24,8 @@ export const MapInfoRotationButton = memo(function MapInfoRotationButton(): JSX.
   const theme = useTheme();
 
   // Store
-  const mapId = useGeoViewMapId();
-  const mapRotation = useMapRotation();
+  const mapId = useStoreGeoViewMapId();
+  const mapRotation = useStoreMapRotation();
   const { rotationAngle } = useManageArrow();
 
   // Convert radians to degrees for tooltip

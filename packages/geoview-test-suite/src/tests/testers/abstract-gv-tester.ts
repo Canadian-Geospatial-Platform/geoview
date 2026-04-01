@@ -7,7 +7,7 @@ import type { TypeGeoviewLayerType } from 'geoview-core/api/types/layer-schema-t
 import type { TypeLegendItem } from 'geoview-core/core/components/layers/types';
 import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
 import { Test } from '../core/test';
-import { getStoreLayerStateLegendLayers } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
+import { getStoreLayerLegendLayers } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
 import type { GeometryApi } from 'geoview-core/geo/layer/geometry/geometry';
 
 /**
@@ -553,7 +553,7 @@ export abstract class GVAbstractTester extends AbstractTester {
 
     // Check the removal worked
     test.addStep(`Check that the layer is indeed removed...`);
-    const legendLayers = getStoreLayerStateLegendLayers(this.getMapId());
+    const legendLayers = getStoreLayerLegendLayers(this.getMapId());
     Test.assertArrayExcludes(
       legendLayers.map((legendLayer) => legendLayer.layerPath),
       layerPath

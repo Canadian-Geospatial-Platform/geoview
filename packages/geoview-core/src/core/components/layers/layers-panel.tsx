@@ -7,7 +7,7 @@ import { useTheme } from '@mui/material';
 import { Box } from '@/ui';
 
 import { useUIController } from '@/core/controllers/ui-controller';
-import { useLayerDisplayState, useSelectedLayer } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useStoreLayerDisplayState, useStoreSelectedLayer } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { LayersToolbar } from './layers-toolbar';
 import { LayerDetails } from './right-panel/layer-details';
 import { LeftPanel } from './left-panel/left-panel';
@@ -17,7 +17,7 @@ import { ResponsiveGridLayout } from '@/core/components/common/responsive-grid-l
 import { Typography } from '@/ui/typography/typography';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { TABS } from '@/core/utils/constant';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 
 interface TypeLayersPanel {
   containerType: TypeContainerBox;
@@ -30,14 +30,14 @@ export function LayersPanel({ containerType }: TypeLayersPanel): JSX.Element {
 
   const { t } = useTranslation();
 
-  const selectedLayer = useSelectedLayer(); // get store value
-  const displayState = useLayerDisplayState();
-  const [isLayoutEnlarged, setIsLayoutEnlarged] = useState<boolean>(false);
+  const mapId = useStoreGeoViewMapId();
+  const selectedLayer = useStoreSelectedLayer();
+  const displayState = useStoreLayerDisplayState();
 
   const uiController = useUIController();
 
   const responsiveLayoutRef = useRef<ResponsiveGridLayoutExposedMethods>(null);
-  const mapId = useGeoViewMapId();
+  const [isLayoutEnlarged, setIsLayoutEnlarged] = useState<boolean>(false);
 
   const showLayerDetailsPanel = useCallback((): void => {
     // Just set visibility - focus will be handled automatically by useEffect
