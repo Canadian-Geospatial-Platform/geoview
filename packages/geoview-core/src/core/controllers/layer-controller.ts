@@ -65,6 +65,8 @@ import type {
   LayerDomain,
   DomainLayerGroupChildrenUpdatedEvent,
   DomainLayerGroupChildrenUpdatedDelegate,
+  DomainLayerMessageDelegate,
+  DomainLayerMessageEvent,
 } from '@/core/domains/layer-domain';
 import { doTimeout, isValidUUID, type DelayJob } from '@/core/utils/utilities';
 import type { TemporalMode, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
@@ -142,6 +144,9 @@ export class LayerController extends AbstractMapViewerController {
   /** The bounded reference to the handle layer loaded changed */
   #boundedHandleDomainLayerAllLoaded: DomainLayerStatusChangedDelegate;
 
+  /** The bounded reference to the handle layer message event */
+  #boundedHandleDomainLayerMessage: DomainLayerMessageDelegate;
+
   /** The bounded reference to the handle layer hoverable changed */
   #boundedHandleDomainLayerHoverableChanged: DomainLayerHoverableChangedDelegate;
 
@@ -208,6 +213,9 @@ export class LayerController extends AbstractMapViewerController {
     // Keep a bounded reference to the handle layer all loaded changed
     this.#boundedHandleDomainLayerAllLoaded = this.#handleDomainLayerAllLoaded.bind(this);
 
+    // Keep a bounded reference to the handle layer message event
+    this.#boundedHandleDomainLayerMessage = this.#handleDomainLayerMessage.bind(this);
+
     // Keep a bounded reference to the handle layer hoverable changed
     this.#boundedHandleDomainLayerHoverableChanged = this.#handleDomainLayerHoverableChanged.bind(this);
 
@@ -266,6 +274,9 @@ export class LayerController extends AbstractMapViewerController {
     // Listens when the layers are all loaded in the Layer domain
     this.#layerDomain.onLayerAllLoaded(this.#boundedHandleDomainLayerAllLoaded);
 
+    // Listens when the layers are all loaded in the Layer domain
+    this.#layerDomain.onLayerMessage(this.#boundedHandleDomainLayerMessage);
+
     // Listens when the layer hoverable state is changed in the Layer domain
     this.#layerDomain.onLayerHoverableChanged(this.#boundedHandleDomainLayerHoverableChanged);
 
@@ -303,6 +314,9 @@ export class LayerController extends AbstractMapViewerController {
 
     // Unhooks when the layer hoverable state is changed in the Layer domain
     this.#layerDomain.offLayerHoverableChanged(this.#boundedHandleDomainLayerHoverableChanged);
+
+    // Unhooks when the layer loaded state is changed in the Layer domain
+    this.#layerDomain.offLayerMessage(this.#boundedHandleDomainLayerLoadedChanged);
 
     // Unhooks when the layers are all loaded in the Layer domain
     this.#layerDomain.offLayerAllLoaded(this.#boundedHandleDomainLayerAllLoaded);
@@ -1600,6 +1614,38 @@ export class LayerController extends AbstractMapViewerController {
   #handleDomainLayerAllLoaded(sender: LayerDomain, event: DomainLayerStatusChangedEvent): void {
     // Update the store that all layers are loaded at this point
     setStoreLayersAreLoading(this.getMapId(), false);
+  }
+
+  /**
+   * Handles layer-specific messages and displays them through the map viewer's notification system.
+   *
+   * @param layer - The layer instance that triggered the message
+   * @param layerMessageEvent - The message event containing notification details
+   *
+   * @example
+   * handleLayerMessage(myLayer, {
+   *   messageKey: 'layers.fetchProgress',
+   *   messageParams: [50, 100],
+   *   messageType: 'error',
+   *   notification: true
+   * });
+   */
+  #handleDomainLayerMessage(sender: LayerDomain, layerMessageEvent: DomainLayerMessageEvent): void {
+    // Read event params for clarity
+    const { messageType } = layerMessageEvent.layerEvent;
+    const { messageKey } = layerMessageEvent.layerEvent;
+    const { messageParams } = layerMessageEvent.layerEvent;
+    const { notification } = layerMessageEvent.layerEvent;
+
+    if (messageType === 'info') {
+      this.getMapViewer().notifications.showMessage(messageKey, messageParams, notification);
+    } else if (messageType === 'warning') {
+      this.getMapViewer().notifications.showWarning(messageKey, messageParams, notification);
+    } else if (messageType === 'error') {
+      this.getMapViewer().notifications.showError(messageKey, messageParams, notification);
+    } else if (messageType === 'success') {
+      this.getMapViewer().notifications.showSuccess(messageKey, messageParams, notification);
+    }
   }
 
   /**
