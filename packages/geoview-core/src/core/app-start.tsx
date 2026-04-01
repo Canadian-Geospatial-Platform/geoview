@@ -48,7 +48,7 @@ interface AppStartProps {
 class ErrorBoundary extends Component<{ children: JSX.Element; language: TypeDisplayLanguage }, { hasError: boolean }> {
   /**
    * Constructor
-   * @param {{ children: JSX.Element; language: TypeDisplayLanguage }} props - The props
+   * @param props - The props
    */
   constructor(props: { children: JSX.Element; language: TypeDisplayLanguage }) {
     super(props);

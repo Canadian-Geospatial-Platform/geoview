@@ -53,6 +53,7 @@ export abstract class Plugin {
    * @param constructor - The constructor of the plugin
    * @param mapId - The map id to add the plugin to
    * @param props - Optional properties to pass to the plugin
+   * @returns A promise that resolves with the plugin instance once added
    */
   static addPlugin(pluginId: string, constructor: typeof AbstractPlugin, mapId: string, props?: unknown): Promise<AbstractPlugin> {
     // TODO: REFACTOR IMPORTANT - Rethink how the plugin api finds the MapViewer
@@ -64,6 +65,7 @@ export abstract class Plugin {
    *
    * @param pluginId - The id of the plugin to delete
    * @param mapId - The map id to remove the plugin from
+   * @returns A promise that resolves once the plugin is removed
    */
   static async removePlugin(pluginId: string, mapId: string): Promise<void> {
     // TODO: REFACTOR IMPORTANT - Rethink how the plugin api finds the MapViewer
@@ -77,6 +79,7 @@ export abstract class Plugin {
    * Deletes all plugins loaded in a map.
    *
    * @param mapId - The map id to remove the plugin from (if not provided then plugin will be removed from all maps)
+   * @returns A promise that resolves once the plugins are removed
    */
   static async removePlugins(mapId: string): Promise<void> {
     // TODO: REFACTOR IMPORTANT - Rethink how the plugin api finds the MapViewer

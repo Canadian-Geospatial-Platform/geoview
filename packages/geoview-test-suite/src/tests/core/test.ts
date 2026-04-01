@@ -239,7 +239,7 @@ export class Test<T = unknown> {
    * @param actualValue - The actual value being checked
    * @param expectedValue - The expected value to compare against
    * @param [roundToPrecision] - Optional number of decimal places to round to before comparing (for numbers only)
-   * @throws {AssertionError} If the values are not strictly equal.
+   * @throws {AssertionError} When the values are not strictly equal.
    */
   static assertIsEqual<T = unknown>(actualValue: T, expectedValue: T, roundToPrecision?: number): asserts actualValue is T {
     // Redirect
@@ -258,7 +258,7 @@ export class Test<T = unknown> {
    * @param actualValue - The actual value being checked
    * @param expectedValue - The expected value to compare against
    * @param [roundToPrecision] - Optional number of decimal places to round to before comparing (for numbers only)
-   * @throws {AssertionValueDifferentError} If the values are equal.
+   * @throws {AssertionValueDifferentError} When the values are equal.
    */
   static assertIsNotEqual<T = unknown>(actualValue: T, expectedValue: T, roundToPrecision?: number): asserts actualValue is T {
     // Redirect
@@ -276,7 +276,7 @@ export class Test<T = unknown> {
    *
    * @param propertyPath - The name or path of the array being validated
    * @param actualValue - The actual value being checked
-   * @throws {AssertionUndefinedError} If the value isn't defined.
+   * @throws {AssertionUndefinedError} When the value isn't defined.
    */
   static assertIsDefined<T = unknown>(propertyPath: string, actualValue: T | undefined): void {
     // Checks if the value is defined
@@ -291,7 +291,7 @@ export class Test<T = unknown> {
    *
    * @param propertyPath - The name or path of the array being validated
    * @param actualValue - The actual value being checked
-   * @throws {AssertionUndefinedError} If the value isn't defined.
+   * @throws {AssertionUndefinedError} When the value is defined.
    */
   static assertIsUndefined<T = unknown>(propertyPath: string, actualValue: T | undefined): void {
     // Checks if the value is defined
@@ -306,7 +306,7 @@ export class Test<T = unknown> {
    *
    * @param actualValue - The actual value being checked
    * @param expectedType - The expected class type
-   * @throws {AssertionWrongInstanceError} If the value isn't defined.
+   * @throws {AssertionWrongInstanceError} When the value isn't of the expected type.
    */
   static assertIsInstance<T>(actualValue: unknown, expectedType: ClassType<T>): asserts actualValue is T {
     // Checks if the value is defined, first
@@ -324,7 +324,7 @@ export class Test<T = unknown> {
    *
    * @param actualError - The actual error being checked
    * @param expectedType - The expected class type
-   * @throws {AssertionWrongInstanceError} If the value isn't defined.
+   * @throws {AssertionWrongInstanceError} When the error isn't of expected type.
    */
   static assertIsErrorInstance<T extends Error>(actualError: T, expectedType: ClassType<T>): asserts actualError is T {
     // Checks if the value is defined, first
@@ -344,7 +344,7 @@ export class Test<T = unknown> {
    * that cannot be expressed with the other assertion methods.
    *
    * @param message - Custom message explaining why the test is being manually failed
-   * @throws {AssertionManualFailError} Always throws to fail the test.
+   * @throws {AssertionManualFailError} When invoked (always throws to fail the test)
    */
   static assertFail(message: string = 'Test manually failed'): never {
     // Throw the manual fail error
@@ -382,7 +382,7 @@ export class Test<T = unknown> {
    * Asserts that a value is an array.
    *
    * @param actualValue - The object to check
-   * @throws {AssertionValueNotAnArrayError} If the value is not an array.
+   * @throws {AssertionValueNotAnArrayError} When the value is not an array.
    */
   static assertIsArray(actualValue: unknown | unknown[] | undefined): asserts actualValue is unknown[] {
     if (Array.isArray(actualValue)) return;
@@ -396,8 +396,8 @@ export class Test<T = unknown> {
    *
    * @param array - The array to check the length
    * @param expectedValue - The expected length of the array
-   * @throws {AssertionArrayLengthError} If the values are not strictly equal.
-   * @throws {AssertionValueNotAnArrayError} If the value is not an array.
+   * @throws {AssertionArrayLengthError} When the array lengths aren't equal.
+   * @throws {AssertionValueNotAnArrayError} When the value is not an array.
    */
   static assertIsArrayLengthEqual(array: unknown[] | undefined, expectedValue: number): void {
     // Test if it is an array
@@ -414,8 +414,8 @@ export class Test<T = unknown> {
    *
    * @param array - The array to check the length
    * @param expectedMinimumLength - The expected minimum length of the array
-   * @throws {AssertionArrayLengthMinimalError} If the values are not strictly equal.
-   * @throws {AssertionValueNotAnArrayError} If the value is not an array.
+   * @throws {AssertionArrayLengthMinimalError} When the array length is under the minimum length.
+   * @throws {AssertionValueNotAnArrayError} When the value is not an array.
    */
   static assertIsArrayLengthMinimal(array: unknown[] | undefined, expectedMinimumLength: number): void {
     // Test if it is an array
@@ -433,8 +433,8 @@ export class Test<T = unknown> {
    * @template T - The type of the elements in the array.
    * @param array - The array to search
    * @param expectedValue - The value expected to be included in the array
-   * @throws {AssertionArrayNotIncludingError} Throws if the expected value is not found in the array.
-   * @throws {AssertionValueNotAnArrayError} If the value is not an array.
+   * @throws {AssertionArrayNotIncludingError} When the expected value is not found in the array.
+   * @throws {AssertionValueNotAnArrayError} When the value is not an array.
    */
   static assertArrayIncludes<T = unknown>(array: T[], expectedValue: T): void {
     // Test if it is an array
@@ -452,8 +452,8 @@ export class Test<T = unknown> {
    * @template T - The type of the elements in the array.
    * @param array - The array to search
    * @param expectedValue - The value expected to be included in the array
-   * @throws {AssertionArrayNotIncludingError} Throws if the expected value is not found in the array.
-   * @throws {AssertionValueNotAnArrayError} If the value is not an array.
+   * @throws {AssertionArrayNotIncludingError} When the expected value is found in the array.
+   * @throws {AssertionValueNotAnArrayError} When the value is not an array.
    */
   static assertArrayExcludes<T = unknown>(array: T[], expectedValue: T): void {
     // Test if it is an array
@@ -471,9 +471,9 @@ export class Test<T = unknown> {
    * @param actualValue - The actual array being checked
    * @param expectedValue - The expected array to compare against
    * @param [roundToPrecision] - Optional number of decimal places to round to before comparing (for number arrays only)
-   * @throws {AssertionValueNotAnArrayError} If one value isn't an array.
-   * @throws {AssertionArrayLengthError} If the lengths aren't the same between the 2 arrays.
-   * @throws {AssertionArraysNotEqualError} If one object isn't the same as the other object in the other array based on the primitive `===` comparer.
+   * @throws {AssertionValueNotAnArrayError} When one value isn't an array.
+   * @throws {AssertionArrayLengthError} When the lengths aren't the same between the 2 arrays.
+   * @throws {AssertionArraysNotEqualError} When one object isn't the same as the other object in the other array based on the primitive `===` comparer.
    */
   static assertIsArrayEqual<T = unknown>(actualValue: T[], expectedValue: T[], roundToPrecision?: number): void {
     // Redirect using a primitive comparer with optional rounding
@@ -496,10 +496,10 @@ export class Test<T = unknown> {
    *
    * @param actualValue - The actual array being checked
    * @param expectedValue - The expected array to compare against
-   * @throws {AssertionValueNotAnArrayError} If one value isn't an array.
-   * @throws {AssertionArrayLengthError} If the lengths aren't the same between the 2 arrays.
-   * @throws {AssertionArraysNotEqualError} If one object isn't the same as the other object in the other array based on the `assertJsonObject` comparer.
-   * @throws {AssertionJSONObjectError} If one object isn't the same as the other object in the other array based on the `assertJsonObject` comparer.
+   * @throws {AssertionValueNotAnArrayError} When one value isn't an array.
+   * @throws {AssertionArrayLengthError} When the lengths aren't the same between the 2 arrays.
+   * @throws {AssertionArraysNotEqualError} When one object isn't the same as the other object in the other array based on the `assertJsonObject` comparer.
+   * @throws {AssertionJSONObjectError} When one object isn't the same as the other object in the other array based on the `assertJsonObject` comparer.
    */
   static assertIsArrayEqualJsons<T = unknown>(actualValue: T[], expectedValue: T[]): void {
     // Redirect using a json comparer
@@ -520,9 +520,9 @@ export class Test<T = unknown> {
    *
    * @param actualValue - The actual array being checked
    * @param expectedValue - The expected array to compare against
-   * @throws {AssertionValueNotAnArrayError} If one value isn't an array.
-   * @throws {AssertionArrayLengthError} If the lengths aren't the same between the 2 arrays.
-   * @throws {AssertionArraysNotEqualError} If one object isn't the same as the other object in the other array based on the provided comparer mechanism.
+   * @throws {AssertionValueNotAnArrayError} When one value isn't an array.
+   * @throws {AssertionArrayLengthError} When the lengths aren't the same between the 2 arrays.
+   * @throws {AssertionArraysNotEqualError} When one object isn't the same as the other object in the other array based on the provided comparer mechanism.
    */
   static #assertIsArrayEqualComparer<T = unknown>(actualValue: T[], expectedValue: T[], comparer: ComparerDelegate<T>): void {
     // Check if both are arrays
@@ -554,8 +554,8 @@ export class Test<T = unknown> {
    *
    * @param actualObject - The JSON object to check
    * @param expectedObject - The JSON object to representing the properties/values the actual value should have
-   * @throws {TestError} If the JSON object being verified is actually a Promise (likely a dev issue).
-   * @throws {AssertionJSONObjectError} If the JSON object being verified is missing properties or has different values.
+   * @throws {TestError} When the JSON object being verified is actually a Promise (likely a dev issue).
+   * @throws {AssertionJSONObjectError} When the JSON object being verified is missing properties or has different values.
    */
   static assertJsonObject(actualObject: unknown, expectedObject: unknown): void {
     // If the object is a promise, throw error

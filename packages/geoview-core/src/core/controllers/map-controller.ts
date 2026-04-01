@@ -490,9 +490,9 @@ export class MapController extends AbstractMapViewerController {
   /**
    * Update or remove the layer highlight.
    *
-   * @param {string} layerPath - The layer path to set as the highlighted layer.
-   * @param {string} highlightedLayerPath - The layer path of the currently highlighted layer.
-   * @returns {string} The layer path of the highlighted layer.
+   * @param layerPath - The layer path to set as the highlighted layer.
+   * @param highlightedLayerPath - The layer path of the currently highlighted layer.
+   * @returns The layer path of the highlighted layer.
    */
   changeOrRemoveLayerHighlight(layerPath: string, highlightedLayerPath: string): string {
     // If layer is currently highlighted layer, remove highlight
@@ -893,7 +893,7 @@ export class MapController extends AbstractMapViewerController {
    * @param layerPath - The path of the layer whose visibility is being updated.
    * @param newValue - Optional. The new visibility value to apply. If omitted, the current visibility is toggled.
    * @returns The resulting visibility state of the layer after the update
-   * @throws {LayerNotFoundError} If the layer cannot be found at the given path.
+   * @throws {LayerNotFoundError} When the layer cannot be found at the given path.
    */
   setOrToggleLayerVisibility(layerPath: string, newValue?: boolean): boolean {
     // Get current visibility based on the store
@@ -945,6 +945,7 @@ export class MapController extends AbstractMapViewerController {
 
   /**
    * Sets the visibility of **all layers** in a given map.
+   *
    * Iterates through all GeoView layers associated with the specified map ID and
    * applies the provided visibility value. Only layers whose current visibility
    * differs from the desired state will be updated.
@@ -1468,7 +1469,7 @@ export class MapController extends AbstractMapViewerController {
    * @param isGeocore - Indicates if it is a geocore layer.
    * @param overrideGeocoreServiceNames - Indicates if geocore layer names should be kept as is or returned to defaults.
    * @returns Entry config object.
-   * @throws { LayerConfigNotFoundError } When the layer configuration couldn't be found at the given layer path.
+   * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
    */
   #createLayerEntryConfig(layerPath: string, isGeocore: boolean, overrideGeocoreServiceNames: boolean | 'hybrid'): TypeLayerEntryConfig {
     // Get needed info

@@ -183,9 +183,9 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
 
   /**
    * Recursively checks if all children of a layer are visible.
-   * @param {TypeLegendLayer} legendLayer - The legend layer to check
-   * @param {string[]} curVisibleLayers - The visible layers array
-   * @returns {boolean} Whether the children are visible
+   * @param legendLayer - The legend layer to check
+   * @param curVisibleLayers - The visible layers array
+   * @returns Whether the children are visible
    */
   const legendLayersChildrenVisible = useCallback((legendLayer: TypeLegendLayer, curVisibleLayers: string[]): boolean => {
     // Check if any children are not visible
@@ -293,8 +293,8 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
 
   /**
    * Recursively sets child layer visibility.
-   * @param {TypeLegendLayer} legendLayer - The legend layer to set the child visibility of
-   * @param {boolean} newVisibility - The new visibility to set
+   * @param legendLayer - The legend layer to set the child visibility of
+   * @param newVisibility - The new visibility to set
    */
   const setVisibilityForAllSublayers = useCallback(
     (legendLayer: TypeLegendLayer, newVisibility: boolean): void => {

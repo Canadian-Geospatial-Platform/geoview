@@ -1588,6 +1588,7 @@ export class GVWMS extends AbstractGVRaster {
    * Registers an image load callback event handler.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns A function that can be called to unregister the event handler
    */
   onImageLoadRescue(callback: ImageLoadRescueDelegate): ImageLoadRescueDelegate {
     // Register the event handler

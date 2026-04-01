@@ -960,8 +960,8 @@ export class WMS extends AbstractGeoViewRaster {
    * - If it is a leaf (no children), a standard `OgcWmsLayerEntryConfig` is created, optionally merged with a custom Geocore config.
    * This function acts as an entry point to recursively transform a WMS layer tree into fully configured layer entry objects.
    *
-   * @param {TypeLayerEntryShell} layerEntry - The WMS layer entry shell to convert (may be a group or leaf).
-   * @param {TypeWMSLayerConfig} geoviewLayerConfig - The parent GeoView layer config that this entry belongs to.
+   * @param layerEntry - The WMS layer entry shell to convert (may be a group or leaf).
+   * @param geoviewLayerConfig - The parent GeoView layer config that this entry belongs to.
    * @param serverType - The type of WMS server (e.g., 'geoserver', 'mapserver', etc.).
    * @param customGeocoreLayerConfig - Optional custom layer configuration to merge into leaf layers.
    * @returns The fully constructed layer entry configuration object.

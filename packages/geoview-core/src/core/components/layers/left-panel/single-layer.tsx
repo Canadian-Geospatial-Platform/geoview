@@ -201,7 +201,7 @@ export function SingleLayer({
 
   /**
    * Select the layer if not already selected and status is valid.
-   * @param {boolean} openPanel - Whether to open the details panel (default: true)
+   * @param openPanel - Whether to open the details panel (default: true)
    */
   const selectLayerIfNeeded = useCallback(
     (openPanel: boolean = true): void => {
