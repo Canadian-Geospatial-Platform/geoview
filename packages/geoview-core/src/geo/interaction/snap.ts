@@ -26,6 +26,7 @@ export class Snap extends Interaction {
    * Initializes a Snap component.
    *
    * @param options - Object to configure the initialization of the Snap interaction
+   * @param geometryApi - The geometry API used to retrieve geometry groups if a geometry group key is provided in the options
    */
   constructor(options: SnapOptions, geometryApi: GeometryApi) {
     super(options);

@@ -98,7 +98,7 @@ export function Legend({ containerType }: LegendType): JSX.Element | null {
    * Transform the list of the legends into subsets of lists.
    * it will return subsets of lists with pattern:- [[0,4,8],[1,5,9],[2,6],[3,7] ]
    * This way we can layout the legends into column wraps.
-   * @param {TypeLegendLayer} layers array of layers.
+   * @param layers - Array of layers.
    * @returns List of array of layers
    */
   const updateLegendLayerListByWindowSize = useCallback(

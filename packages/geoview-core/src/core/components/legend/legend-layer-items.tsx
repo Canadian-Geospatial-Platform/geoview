@@ -132,8 +132,8 @@ export const ItemsList = memo(function ItemsList({ items, layerPath }: ItemsList
 
   /**
    * Handles toggling of class visibility when the legend item is clicked.
-   * @param {TypeLegendItem} item - the item to change the visibility of
-   * @param {string} itemId - The HTML ID of the item for focus restoration
+   * @param item - The item to change the visibility of
+   * @param itemId - The HTML ID of the item for focus restoration
    */
   const handleToggleItemVisibility = useCallback(
     (item: TypeLegendItem, itemId: string): void => {

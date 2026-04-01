@@ -531,6 +531,7 @@ export abstract class AbstractBaseGVLayer {
    * Registers a layer name changed event handler.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The registered callback, which can be used to unregister the event handler later
    */
   onLayerNameChanged(callback: LayerNameChangedDelegate): LayerNameChangedDelegate {
     // Register the event handler
@@ -561,6 +562,7 @@ export abstract class AbstractBaseGVLayer {
    * Registers a visible changed event handler.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The registered callback, which can be used to unregister the event handler later
    */
   onLayerVisibleChanged(callback: LayerVisibleChangedDelegate): LayerVisibleChangedDelegate {
     // Register the event handler
@@ -591,6 +593,7 @@ export abstract class AbstractBaseGVLayer {
    * Registers an opacity changed event handler.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The registered callback, which can be used to unregister the event handler later
    */
   onLayerOpacityChanged(callback: LayerOpacityChangedDelegate): LayerOpacityChangedDelegate {
     // Register the event handler
@@ -621,6 +624,7 @@ export abstract class AbstractBaseGVLayer {
    * Registers a z-index changed event handler.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The registered callback, which can be used to unregister the event handler later
    */
   onLayerZIndexChanged(callback: LayerZIndexChangedDelegate): LayerZIndexChangedDelegate {
     // Register the event handler

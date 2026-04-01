@@ -24,7 +24,7 @@ export class FooterBarApi {
   /**
    * Instantiates a FooterBarApi class.
    *
-   * @param {UIController} uiController - The UI controller this footer bar api belongs to
+   * @param uiController - The UI controller this footer bar api belongs to
    */
   constructor(uiController: UIController) {
     // Keep the controller, for actions.

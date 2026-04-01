@@ -19,7 +19,7 @@ export class Notifications {
 
   /**
    * The class constructor to instanciate a notification class
-   * @param {UIController} uiController - The UI controller instance
+   * @param uiController - The UI controller instance
    */
   constructor(uiController: UIController) {
     // Keep the controller, for actions.

@@ -41,9 +41,9 @@ const DEVTOOLS_ACTIVE = isLocalhost() || !!LocalStorage.getItemAsNumber(LOCAL_ST
 /**
  * Mounts Zustand DevTools for a specific store instance.
  *
- * @param {string} instanceName - Unique name for this store instance
- * @param {any} store - The Zustand store
- * @param {HTMLElement} container - The container element
+ * @param instanceName - Unique name for this store instance
+ * @param store - The Zustand store
+ * @param container - The container element
  */
 const mountZustandDevTools = (instanceName: string, store: GeoviewStoreType, container: HTMLElement): void => {
   if (DEVTOOLS_ACTIVE) {
@@ -160,18 +160,19 @@ export const helperDeleteFromArray = <T extends TypeResultSetEntry>(
  * Helper method to propagate in the layerDataArray in a batched manner.
  * The propagation can be bypassed using 'layerPathBypass' parameter which tells the process to
  * immediately batch out the array in the store for faster triggering of the state, for faster updating of the UI.
- * @param {string} mapId - The map id
- * @param {T[]} layerDataArray - The layer data array to hold in buffer during the batch
- * @param {BatchedPropagationLayerDataArrayByMap<T>} batchPropagationObject - A reference to the BatchedPropagationLayerDataArrayByMap object used to hold all the layer data arrays in the buffer
- * @param {number} timeDelayBetweenPropagations - The delay between actual propagations in the store
- * @param {(layerDataArray: T[]) => void} onSetStoreLayerDataArray - The store action callback used to store the layerDataArray in the actual store
- * @param {string} traceProcessorIndication? - Simple parameter for logging purposes
- * @param {string} layerPathBypass? - Indicates a layer path which, when processed, should bypass the buffer period and immediately trigger an update to the store
- * @param {(layerPath: string) => void} onResetBypass? - The store action callback used to reset the layerPathBypass value in the store.
+ *
+ * @param mapId - The map id
+ * @param layerDataArray - The layer data array to hold in buffer during the batch
+ * @param batchPropagationObject - A reference to the BatchedPropagationLayerDataArrayByMap object used to hold all the layer data arrays in the buffer
+ * @param timeDelayBetweenPropagations - The delay between actual propagations in the store
+ * @param onSetStoreLayerDataArray - The store action callback used to store the layerDataArray in the actual store
+ * @param traceProcessorIndication? - Simple parameter for logging purposes
+ * @param layerPathBypass? - Indicates a layer path which, when processed, should bypass the buffer period and immediately trigger an update to the store
+ * @param onResetBypass? - The store action callback used to reset the layerPathBypass value in the store.
  *                                                     This is used so that when the bypass occurred once, it's not occuring again for all subsequent checks in the period of batch propagations.
  *                                                     It's up to the components to re-initialize the layerPathBypass at a certain time.
  *                                                     When no onResetBypass is specified, once the bypass occurs, all subsequent propagations happen immediately.
- * @returns {Promise<void>} Promise upon completion
+ * @returns Promise upon completion
  */
 export const helperPropagateArrayStoreBatch = async <
   T extends TypeFeatureInfoResultSetEntry | TypeAllFeatureInfoResultSetEntry | TypeHoverResultSetEntry | TypeGeochartResultSetEntry,

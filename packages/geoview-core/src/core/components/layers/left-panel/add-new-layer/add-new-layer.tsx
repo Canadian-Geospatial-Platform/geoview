@@ -56,12 +56,12 @@ interface FileUploadSectionProps {
 /**
  * A component that handles file uploads through drag-and-drop or file input
  * @component
- * @param {object} props - Component props
- * @param {function} props.onFileSelected - Callback when a file is selected, receives (file, fileURL, fileName)
- * @param {function} props.onUrlChanged - Callback when the URL input changes, receives the new URL
- * @param {string} props.displayURL - The URL to display in the text field
- * @param {string[]} props.disabledLayerTypes - Array of layer types that are disabled
- * @returns {JSX.Element} The rendered component
+ * @param props - Component props
+ * @param props.onFileSelected - Callback when a file is selected, receives (file, fileURL, fileName)
+ * @param props.onUrlChanged - Callback when the URL input changes, receives the new URL
+ * @param props.displayURL - The URL to display in the text field
+ * @param props.disabledLayerTypes - Array of layer types that are disabled
+ * @returns The rendered component
  */
 function FileUploadSection({
   onFileSelected,
@@ -88,8 +88,7 @@ function FileUploadSection({
   /**
    * Process a file for upload and notify the parent component
    *
-   * @param {File} file - The file to process (JSON, GeoJSON, ZIP, SHP or CSV)
-   * @returns {void}
+   * @param file - The file to process (JSON, GeoJSON, ZIP, SHP or CSV)
    * @throws {Error} Shows an error notification if file type is not supported
    */
   const processFile = (file: File): void => {
@@ -121,8 +120,7 @@ function FileUploadSection({
   /**
    * Handle file selection from the file input element
    *
-   * @param {ChangeEvent<HTMLInputElement>} event - The change event from the file input
-   * @returns {void}
+   * @param event - The change event from the file input
    */
   const handleChange = (event: ChangeEvent<HTMLInputElement>): void => {
     if (event.target.files && event.target.files.length > 0) {
@@ -133,8 +131,7 @@ function FileUploadSection({
   /**
    * Handle URL input changes in the text field
    *
-   * @param {ChangeEvent<HTMLInputElement>} event - The change event from the text input
-   * @returns {void}
+   * @param event - The change event from the text input
    */
   const handleInput = (event: ChangeEvent<HTMLInputElement>): void => {
     const url = event.target.value.trim();
@@ -145,8 +142,7 @@ function FileUploadSection({
   /**
    * Handle file drop events in the dropzone
    *
-   * @param {React.DragEvent<HTMLDivElement>} event - The drag event containing dropped files
-   * @returns {void}
+   * @param event - The drag event containing dropped files
    */
 
   const handleDrop = (event: React.DragEvent<HTMLDivElement>): void => {
@@ -250,7 +246,7 @@ function FileUploadSection({
  * including uploading files (JSON, GeoJSON, CSV, ZIP, SHP), entering URLs, selecting layer types,
  * and configuring layer options. It uses a stepper UI to break the process into manageable steps.
  *
- * @returns {JSX.Element} The rendered component with a multi-step form for adding layers
+ * @returns The rendered component with a multi-step form for adding layers
  */
 export function AddNewLayer(): JSX.Element {
   // Log
@@ -371,7 +367,6 @@ export function AddNewLayer(): JSX.Element {
    * Handle the first step of the layer addition process
    * Validates the layer URL and attempts to guess the layer type.
    * If valid, advances to the next step.
-   * @returns {void}
    */
   const handleStep1 = (): void => {
     // If we return here after step 2, URL/UUID and type will be out of sync
@@ -398,7 +393,6 @@ export function AddNewLayer(): JSX.Element {
    *
    * @description Loads metadata for the selected layer type and URL,
    * populates the layer list, and prepares for layer selection.
-   * @returns {void}
    */
   const handleStep2 = (): void => {
     setIsLoading(true);
@@ -511,7 +505,6 @@ export function AddNewLayer(): JSX.Element {
    * @description Validates layer selection and name,
    * and either advances to the final step or completes the process
    * depending on whether multiple layers are selected.
-   * @returns {void}
    */
   const handleStep3 = (): void => {
     let valid = true;
@@ -534,8 +527,8 @@ export function AddNewLayer(): JSX.Element {
 
   /**
    * Creates a full geoview config from the basic one supplied, modifies it and adds it to map.
-   * @param {MapConfigLayerEntry} newGeoViewLayer - The config of the layer to add.
-   * @returns {Promise<void>}
+   * @param newGeoViewLayer - The config of the layer to add
+   * @returns A Promove that resolves when the layer is added
    */
   const addGeoviewLayer = async (newGeoViewLayer: MapConfigLayerEntry): Promise<void> => {
     // Create new abort controller to handle canceling of this step.
@@ -602,7 +595,6 @@ export function AddNewLayer(): JSX.Element {
    *
    * @description Creates and adds the configured layer to the map,
    * shows appropriate notifications, and returns to the layer panel.
-   * @returns {void}
    */
   const handleStepLast = (): void => {
     setIsLoading(true);
@@ -649,7 +641,7 @@ export function AddNewLayer(): JSX.Element {
   /**
    * Set layerType from form input (Step 2)
    *
-   * @param {SelectChangeEvent<unknown>} event - TextField event
+   * @param event - TextField event
    */
   const handleSelectType = (event: SelectChangeEvent<unknown>): void => {
     setLayerType(event.target.value as TypeInitialGeoviewLayerType);
@@ -663,7 +655,7 @@ export function AddNewLayer(): JSX.Element {
   /**
    * Set the layer name from form input (Step 3)
    *
-   * @param {ChangeEvent<HTMLInputElement>} event - TextField event
+   * @param event - TextField event
    */
   const handleNameLayer = (event: ChangeEvent<HTMLInputElement>): void => {
     setStepButtonEnabled(true);
@@ -673,7 +665,7 @@ export function AddNewLayer(): JSX.Element {
   /**
    * Handle keydowns on back button
    *
-   * @param {KeyboardEvent<HTMLButtonElement>} event - Keyboard event
+   * @param event - Keyboard event
    */
   const handleBackKeyDown = (event: KeyboardEvent<HTMLButtonElement>): void => {
     if (event.key === 'Enter') {
@@ -684,7 +676,7 @@ export function AddNewLayer(): JSX.Element {
 
   /**
    * Handle keydowns on continue/finish button
-   * @param {KeyboardEvent<HTMLButtonElement>} event - Keyboard event
+   * @param event - Keyboard event
    */
   const handleNextKeyDown = (event: KeyboardEvent<HTMLButtonElement> | KeyboardEvent<HTMLDivElement>): void => {
     if (event.key === 'Enter' && stepButtonEnabled) {
@@ -711,10 +703,9 @@ export function AddNewLayer(): JSX.Element {
   /**
    * Handle file selection from the FileUploadSection component
    *
-   * @param {File} file - The selected file object
-   * @param {string} fileURL - The blob URL created for the file
-   * @param {string} fileName - The name of the file without extension
-   * @returns {void}
+   * @param file - The selected file object
+   * @param fileURL - The blob URL created for the file
+   * @param fileName - The name of the file without extension
    * @description Updates state with file information and enables the continue button
    */
   const handleFileSelected = (file: File, fileURL: string, fileName: string): void => {
@@ -731,8 +722,7 @@ export function AddNewLayer(): JSX.Element {
   /**
    * Handle URL input changes from the FileUploadSection component
    *
-   * @param {string} url - The URL entered by the user
-   * @returns {void}
+   * @param url - The URL entered by the user
    * @description Updates state with the new URL and resets related fields
    */
   const handleUrlChanged = (url: string): void => {
@@ -829,7 +819,7 @@ export function AddNewLayer(): JSX.Element {
    * Creates a set of Continue / Back buttons
    *
    * @param param0 specify if button is first or last in the list
-   * @returns {JSX.Element} React component
+   * @returns React component
    */
   // TODO: refactor - remove the unstable nested component
   // eslint-disable-next-line react/no-unstable-nested-components
