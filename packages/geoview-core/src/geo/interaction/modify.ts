@@ -48,6 +48,7 @@ export class Modify extends Interaction {
    * Initializes a Modify component.
    *
    * @param options - Object to configure the initialization of the Modify interaction
+   * @param geometryApi - The geometry API used to retrieve geometry groups if a geometry group key is provided in the options
    */
   constructor(options: ModifyOptions, geometryApi: GeometryApi) {
     super(options);

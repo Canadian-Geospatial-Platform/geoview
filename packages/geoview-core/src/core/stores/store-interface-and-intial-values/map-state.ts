@@ -220,9 +220,9 @@ const utilGetLegendCollapsibleLayers = (mapId: string, orderedLayerInfo: TypeOrd
 /**
  * Initializes a Map State and provide functions which use the get/set Zustand mechanisms.
  *
- * @param {TypeSetStore} set - The setter callback to be used by this state
- * @param {TypeGetStore} get - The getter callback to be used by this state
- * @returns {IMapState} - The initialized Map State
+ * @param set - The setter callback to be used by this state
+ * @param get - The getter callback to be used by this state
+ * @returns The initialized Map State
  */
 export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapState {
   const init = {
@@ -303,7 +303,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
     actions: {
       /**
        * Sets the map size.
-       * @param {Size} size - The size of the map.
+       * @param size - The size of the map.
        */
       setMapSize: (size: Size): void => {
         set({
@@ -316,7 +316,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
 
       /**
        * Sets the map scale.
-       * @param {TypeScaleInfo} scale - The scale information.
+       * @param scale - The scale information.
        */
       setMapScale: (scale: TypeScaleInfo): void => {
         set({
@@ -329,7 +329,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
 
       /**
        * Sets whether the map is loaded.
-       * @param {boolean} mapLoaded - Flag indicating if the map is loaded.
+       * @param mapLoaded - Flag indicating if the map is loaded.
        */
       setMapLoaded: (mapLoaded: boolean): void => {
         set({
@@ -354,7 +354,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
 
       /**
        * Sets the attribution of the map.
-       * @param {string[]} attribution - The attribution information.
+       * @param attribution - The attribution information.
        */
       setAttribution: (attribution: string[]): void => {
         set({
@@ -367,7 +367,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
 
       /**
        * Sets the current basemap options.
-       * @param {TypeBasemapOptions} basemapOptions - The new basemap options.
+       * @param basemapOptions - The new basemap options.
        */
       setCurrentBasemapOptions: (basemapOptions: TypeBasemapOptions): void => {
         set({
@@ -380,7 +380,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
 
       /**
        * Sets the initial filters of the map layers.
-       * @param {Record<string, string>} filters - The filters.
+       * @param filters - The filters.
        */
       setInitialFilters: (filters: Record<string, string>): void => {
         set({
@@ -393,7 +393,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
 
       /**
        * Sets the initial view of the map.
-       * @param {TypeZoomAndCenter | Extent} view - The view extent or zoom&center.
+       * @param view - The view extent or zoom&center.
        */
       setInitialView: (view: TypeZoomAndCenter | Extent): void => {
         const viewType = get().mapState.initialView;
@@ -411,10 +411,10 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
 
       /**
        * Sets the geolocator search area with coordinates and optional bounding box.
-       * @param {Object | undefined} area - The search area object containing coordinates and optional bounding box, or undefined to clear.
-       * @param {string} area.searchItem - The search item description.
-       * @param {Coordinate} area.coords - The coordinates of the search location.
-       * @param {Extent} [area.bbox] - Optional bounding box extent for the search area.
+       * @param area - The search area object containing coordinates and optional bounding box, or undefined to clear.
+       * @param area.searchItem - The search item description.
+       * @param area.coords - The coordinates of the search location.
+       * @param [area.bbox] - Optional bounding box extent for the search area.
        */
       setGeolocatorSearchArea: (area: { searchItem: string; coords: Coordinate; bbox?: Extent } | undefined): void => {
         set({
@@ -427,7 +427,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
 
       /**
        * Sets the view of the home button.
-       * @param {TypeMapViewSettings} view - The view to use.
+       * @param view - The view to use.
        */
       setHomeView: (view: TypeMapViewSettings): void => {
         set({
@@ -440,7 +440,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
 
       /**
        * Sets the interaction of the map.
-       * @param {TypeInteraction} interaction - The interaction type.
+       * @param interaction - The interaction type.
        */
       setInteraction: (interaction: TypeInteraction): void => {
         set({
@@ -453,7 +453,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
 
       /**
        * Sets to true if mouse is inside map.
-       * @param {boolean} isMouseInsideMap - True if mouse is inside map.
+       * @param isMouseInsideMap - True if mouse is inside map.
        */
       setIsMouseInsideMap: (isMouseInsideMap: boolean): void => {
         set({
@@ -466,7 +466,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
 
       /**
        * Sets the zoom level of the map.
-       * @param {number} zoom - The zoom level.
+       * @param zoom - The zoom level.
        */
       setZoom: (zoom: number): void => {
         set({
@@ -479,7 +479,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
 
       /**
        * Sets the rotation of the map.
-       * @param {number} rotation - The rotation angle.
+       * @param rotation - The rotation angle.
        */
       setRotation: (rotation: number): void => {
         set({
@@ -492,7 +492,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
 
       /**
        * Sets the overlay click marker of the map.
-       * @param {Overlay} overlayClickMarker - The overlay click marker.
+       * @param overlayClickMarker - The overlay click marker.
        */
       setOverlayClickMarker: (overlayClickMarker: Overlay): void => {
         set({
@@ -505,7 +505,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
 
       /**
        * Sets the overlay north marker of the map.
-       * @param {Overlay} overlayNorthMarker - The overlay north marker.
+       * @param overlayNorthMarker - The overlay north marker.
        */
       setOverlayNorthMarker: (overlayNorthMarker: Overlay): void => {
         set({
@@ -518,7 +518,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
 
       /**
        * Sets the projection of the map.
-       * @param {TypeValidMapProjectionCodes} projectionCode - The projection code.
+       * @param projectionCode - The projection code.
        */
       setProjection: (projectionCode: TypeValidMapProjectionCodes): void => {
         set({
@@ -531,7 +531,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
 
       /**
        * Sets the point markers.
-       * @param {Record<string, TypePointMarker[]>} pointMarkers - The new point markers.
+       * @param pointMarkers - The new point markers.
        */
       setPointMarkers: (pointMarkers: Record<string, TypePointMarker[]>): void => {
         set({
@@ -544,11 +544,11 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
 
       /**
        * Sets map move end properties.
-       * @param {Coordinate} centerCoordinates - The center coordinates of the map.
-       * @param {TypeMapMouseInfo} pointerPosition - The pointer position information.
-       * @param {string} degreeRotation - The degree rotation.
-       * @param {boolean} isNorthVisible - Flag indicating if north is visible.
-       * @param {TypeScaleInfo} scale - The scale information.
+       * @param centerCoordinates - The center coordinates of the map.
+       * @param pointerPosition - The pointer position information.
+       * @param degreeRotation - The degree rotation.
+       * @param isNorthVisible - Flag indicating if north is visible.
+       * @param scale - The scale information.
        */
       setMapMoveEnd: (
         centerCoordinates: Coordinate,
@@ -583,7 +583,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
 
       /**
        * Sets the pointer position of the map.
-       * @param {TypeMapMouseInfo} pointerPosition - The pointer position.
+       * @param pointerPosition - The pointer position.
        */
       setPointerPosition: (pointerPosition: TypeMapMouseInfo): void => {
         set({
@@ -596,7 +596,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
 
       /**
        * Sets the click coordinates of the map.
-       * @param {TypeMapMouseInfo} clickCoordinates - The click coordinates.
+       * @param clickCoordinates - The click coordinates.
        */
       setClickCoordinates: (clickCoordinates: TypeMapMouseInfo): void => {
         set({
@@ -609,7 +609,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
 
       /**
        * Sets whether the map is fixed to north.
-       * @param {boolean} fixNorth - Flag indicating if the map should be fixed to north.
+       * @param fixNorth - Flag indicating if the map should be fixed to north.
        */
       setFixNorth: (fixNorth: boolean): void => {
         set({
@@ -622,7 +622,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
 
       /**
        * Sets the highlighted features of the map.
-       * @param {TypeFeatureInfoEntry[]} highlightedFeatures - The highlighted features.
+       * @param highlightedFeatures - The highlighted features.
        */
       setHighlightedFeatures: (highlightedFeatures: TypeFeatureInfoEntry[]): void => {
         set({
@@ -635,7 +635,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
 
       /**
        * Sets the visible layers of the map.
-       * @param {string[]} visibleLayers - The visible layers.
+       * @param visibleLayers - The visible layers.
        */
       setVisibleLayers: (visibleLayers: string[]): void => {
         set({
@@ -648,7 +648,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
 
       /**
        * Sets the layers of the map that are in visible range.
-       * @param {string[]} visibleRangeLayers - The layers in their visible range
+       * @param visibleRangeLayers - The layers in their visible range
        */
       setVisibleRangeLayers: (visibleRangeLayers: string[]): void => {
         set({
@@ -661,7 +661,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
 
       /**
        * Sets the ordered layer information of the map.
-       * @param {TypeOrderedLayerInfo[]} orderedLayerInfo - The ordered layer information.
+       * @param orderedLayerInfo - The ordered layer information.
        */
       // TODO: REFACTOR - Calls to setOrderedLayerInfo are probably overkill when updating only parts of the whole objects array
       setOrderedLayerInfo: (orderedLayerInfo: TypeOrderedLayerInfo[]): void => {
@@ -704,7 +704,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
 
       /**
        * Sets the visible layers of the map.
-       * @param {string[]} orderedLayers - The ordered layers.
+       * @param orderedLayers - The ordered layers.
        */
       setOrderedLayers: (orderedLayers: string[]): void => {
         set({
@@ -717,8 +717,8 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
 
       /**
        * Sets whether a layer is hoverable.
-       * @param {string} layerPath - The path of the layer.
-       * @param {boolean} hoverable - Flag indicating if the layer should be hoverable.
+       * @param layerPath - The path of the layer.
+       * @param hoverable - Flag indicating if the layer should be hoverable.
        */
       setHoverable: (layerPath: string, hoverable: boolean): void => {
         const curLayerInfo = get().mapState.orderedLayerInfo;
@@ -733,8 +733,8 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
 
       /**
        * Sets whether a layer is hoverable.
-       * @param {string} layerPath - The path of the layer.
-       * @param {boolean} collapsed - Flag indicating if the layer should be collapsed.
+       * @param layerPath - The path of the layer.
+       * @param collapsed - Flag indicating if the layer should be collapsed.
        */
       setLegendCollapsed: (layerPath: string, collapsed: boolean): void => {
         const curLayerInfo = get().mapState.orderedLayerInfo;
@@ -749,8 +749,8 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
 
       /**
        * Sets whether a layer is queryable.
-       * @param {string} layerPath - The path of the layer.
-       * @param {boolean} queryable - Flag indicating if the layer should be queryable.
+       * @param layerPath - The path of the layer.
+       * @param queryable - Flag indicating if the layer should be queryable.
        */
       setQueryable: (layerPath: string, queryable: boolean): void => {
         const curLayerInfo = get().mapState.orderedLayerInfo;
@@ -766,7 +766,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
 
       /**
        * Sets the click marker of the map.
-       * @param {number[] | undefined} coord - The click marker coordinates.
+       * @param coord - The click marker coordinates.
        */
       setClickMarker: (coord: number[] | undefined): void => {
         set({

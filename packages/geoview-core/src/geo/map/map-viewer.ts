@@ -1469,8 +1469,8 @@ export class MapViewer {
   /**
    * Retrieves the scale information from the DOM elements for the given map ID.
    *
-   * @param {string} mapId - The unique identifier of the map.
-   * @returns {TypeScaleInfo} The scale information object
+   * @param mapId - The unique identifier of the map.
+   * @returns The scale information object
    */
   static getScaleInfoFromDomElement(mapId: string): TypeScaleInfo {
     // Get metric values

@@ -497,7 +497,7 @@ function insertPageHeader() {
 /**
  * Returns the regex pattern to match single quotes not preceded by backslash
  * Used to convert single quotes to double quotes for JSON parsing
- * @returns {RegExp} The regex pattern
+ * @returns The regex pattern
  */
 function getSingleQuoteRegex() {
   return /(?<!\\)'/g;
@@ -505,8 +505,8 @@ function getSingleQuoteRegex() {
 
 /**
  * Parse config text by replacing single quotes with double quotes
- * @param {string} configText - The config text to parse
- * @returns {object} The parsed JSON object
+ * @param configText - The config text to parse
+ * @returns The parsed JSON object
  * @throws {Error} If JSON is invalid
  */
 function parseConfigJSON(configText) {
@@ -609,13 +609,13 @@ function setupConfigValidation(
 /**
  * Initialize all config editor utilities in one call
  * Sets up line numbers, validation, and returns utility functions
- * @param {object} options - Configuration options
- * @param {string} options.textareaSelector - CSS selector for textarea
- * @param {string} options.lineNumbersSelector - CSS selector for line numbers container
- * @param {string} options.validationMessageSelector - CSS selector for validation message
- * @param {string} options.reloadButtonSelector - CSS selector for reload button (optional)
- * @param {function} options.onValidationChange - Callback for validation changes (optional)
- * @returns {object} Object with utility functions (parseConfigJSON, getSingleQuoteRegex)
+ * @param options - Configuration options
+ * @param options.textareaSelector - CSS selector for textarea
+ * @param options.lineNumbersSelector - CSS selector for line numbers container
+ * @param options.validationMessageSelector - CSS selector for validation message
+ * @param options.reloadButtonSelector - CSS selector for reload button (optional)
+ * @param options.onValidationChange - Callback for validation changes (optional)
+ * @returns Object with utility functions (parseConfigJSON, getSingleQuoteRegex)
  */
 function initializeConfigEditor(options = {}) {
   const {

@@ -647,7 +647,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * This method delegates the filter extraction logic to {@link GeoviewRenderer.getFilterFromStyle},
    * using the current layer configuration (outfields, style, and style settings).
    *
-   * @returns {string | undefined} A filter expression string if one can be derived from the style,
+   * @returns A filter expression string if one can be derived from the style,
    * or `undefined` if no filter applies.
    */
   getFilterFromStyle(): string | undefined {
@@ -1297,6 +1297,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * Registers a legend querying event handler.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The registered callback for potential unregistration
    */
   onLegendQuerying(callback: LegendQueryingDelegate): LegendQueryingDelegate {
     // Register the event handler
@@ -1327,6 +1328,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * Registers a legend queried event handler.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The registered callback for potential unregistration
    */
   onLegendQueried(callback: LegendQueriedDelegate): LegendQueriedDelegate {
     // Register the event handler
@@ -1357,6 +1359,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * Registers a filter applied event handler.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The registered callback for potential unregistration
    */
   onLayerFilterApplied(callback: LayerFilterAppliedDelegate): LayerFilterAppliedDelegate {
     // Register the event handler
@@ -1387,6 +1390,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * Registers a layer style changed event handler.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The registered callback for potential unregistration
    */
   onLayerStyleChanged(callback: StyleChangedDelegate): StyleChangedDelegate {
     // Register the event handler
@@ -1415,6 +1419,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * Registers when a layer have been first loaded on the map event handler.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The registered callback for potential unregistration
    */
   onLayerFirstLoaded(callback: LayerBaseDelegate): LayerBaseDelegate {
     // Register the event handler
@@ -1443,6 +1448,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * Registers when a layer is turning into a loading stage event handler.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The registered callback for potential unregistration
    */
   onLayerLoading(callback: LayerBaseDelegate): LayerBaseDelegate {
     // Register the event handler
@@ -1471,6 +1477,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * Registers when a layer is turning into a loaded stage event handler.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The registered callback for potential unregistration
    */
   onLayerLoaded(callback: LayerBaseDelegate): LayerBaseDelegate {
     // Register the event handler
@@ -1501,6 +1508,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * Registers when a layer is turning into a error stage event handler.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The registered callback for potential unregistration
    */
   onLayerError(callback: LayerErrorDelegate): LayerErrorDelegate {
     // Register the event handler
@@ -1531,6 +1539,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * Registers a layer message event handler.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The registered callback for potential unregistration
    */
   onLayerMessage(callback: LayerMessageDelegate): LayerMessageDelegate {
     // Register the event handler
@@ -1561,6 +1570,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * Registers an queryable changed event handler.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The registered callback for potential unregistration
    */
   onLayerQueryableChanged(callback: LayerQueryableChangedDelegate): LayerQueryableChangedDelegate {
     // Register the event handler
@@ -1591,6 +1601,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * Registers an hoverable changed event handler.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The registered callback for potential unregistration
    */
   onLayerHoverableChanged(callback: LayerHoverableChangedDelegate): LayerHoverableChangedDelegate {
     // Register the event handler
@@ -1621,6 +1632,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * Registers a layer item visibility toggled event handler.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The registered callback for potential unregistration
    */
   onLayerItemVisibilityChanged(callback: LayerItemVisibilityChangedDelegate): LayerItemVisibilityChangedDelegate {
     // Register the event handler

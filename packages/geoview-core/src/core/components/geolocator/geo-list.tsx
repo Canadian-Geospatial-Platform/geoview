@@ -28,8 +28,6 @@ export function GeoList({ geoListItems, searchValue }: GeoListProps): JSX.Elemen
   // Hooks
   const theme = useTheme();
   const sxClassesList = useMemo(() => getSxClassesList(theme), [theme]);
-
-  // Store
   const mapController = useMapController();
 
   /**

@@ -190,9 +190,9 @@ Tags Usually Overkill in TS
 - @static
 
 Advanced Best Practice
-✔ Short description = one sentence
+✔ Short title = one sentence
 ✔ Blank line
-✔ Behavior explanation (if applicable)
+✔ Description text, behavior explanation (if applicable). Do not add the @description tag.
 ✔ Blank line (if explanation)
 ✔ Then @param list (parameter - description, Add Optional for optional parameter)
 ✔ Then @returns
@@ -202,8 +202,12 @@ Advanced Best Practice
 /**
  * Updates layer visibility state.
  *
+ * Given the layerPath, this function retrieves a
+ * layer from the domain and set its visibility.
+ *
  * @param layerPath - Target layer path.
  * @param visible - New visibility state.
+ * @throws {LayerNotFoundError} When a layer with the provided layer path cannot be found.
  */
 ```
 

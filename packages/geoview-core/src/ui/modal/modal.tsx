@@ -225,8 +225,8 @@ function ModalUI(props: DialogPropsExtend): JSX.Element {
   /**
    * to return the updated / newly-created modal
    *
-   * @param { TypeModalProps } modal the object with modal properties
-   * @returns { JSX.Element } JSX for the newly created / updated modal
+   * @param modal the object with modal properties
+   * @returns JSX for the newly created / updated modal
    */
   const createdModal = (modal: TypeModalProps): JSX.Element => {
     // eslint-disable-next-line react/no-unstable-nested-components
