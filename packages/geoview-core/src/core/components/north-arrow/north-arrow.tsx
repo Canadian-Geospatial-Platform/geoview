@@ -8,12 +8,12 @@ import { NorthArrowIcon, NorthPoleIcon } from './north-arrow-icon';
 import { getSxClasses } from './north-arrow-style';
 import {
   setStoreMapOverlayNorthMarkerRef,
-  useMapNorthArrowElement,
-  useMapProjectionEPSG,
+  useStoreMapNorthArrowElement,
+  useStoreMapCurrentProjectionEPSG,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 import { useManageArrow } from './hooks/useManageArrow';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 import { TIMEOUT } from '@/core/utils/constant';
 
@@ -35,8 +35,8 @@ export const NorthArrow = memo(function NorthArrow(): JSX.Element {
   const northArrowRef = useRef<HTMLDivElement>(null);
 
   // Store
-  const mapProjectionEPSG = useMapProjectionEPSG();
-  const northArrowElement = useMapNorthArrowElement();
+  const mapProjectionEPSG = useStoreMapCurrentProjectionEPSG();
+  const northArrowElement = useStoreMapNorthArrowElement();
   const { rotationAngle, northOffset } = useManageArrow();
 
   /**
@@ -77,12 +77,12 @@ export const NorthArrow = memo(function NorthArrow(): JSX.Element {
  */
 export const NorthPoleFlag = memo(function NorthPoleFlag(): JSX.Element {
   // State
-  const mapId = useGeoViewMapId();
-  const northPoleId = `${mapId}-northpole`;
   const northPoleRef = useRef<HTMLDivElement | null>(null);
 
   // Store
-  const mapProjectionEPSG = useMapProjectionEPSG();
+  const mapId = useStoreGeoViewMapId();
+  const northPoleId = `${mapId}-northpole`;
+  const mapProjectionEPSG = useStoreMapCurrentProjectionEPSG();
   setTimeout(() => setStoreMapOverlayNorthMarkerRef(mapId, northPoleRef.current as HTMLElement), TIMEOUT.deferExecution); // set marker reference
 
   const isVisible = mapProjectionEPSG === Projection.PROJECTION_NAMES.LCC;

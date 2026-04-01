@@ -6,20 +6,23 @@ import DataTable from './data-table';
 
 import { useUIController } from '@/core/controllers/ui-controller';
 import {
-  useDataTableSelectedLayerPath,
-  useDataTableAllFeaturesDataArray,
-  useDataTableLayerSettings,
+  useStoreDataTableSelectedLayerPath,
+  useStoreDataTableAllFeaturesDataArray,
+  useStoreDataTableLayerSettings,
   setStoreSelectedLayerPath,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { useAppShowUnsymbolizedFeatures } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { useMapAllVisibleandInRangeLayers, getStoreMapIsLayerHiddenOnMap } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { useLayerNames, useLayerStatuses } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useStoreAppShowUnsymbolizedFeatures } from '@/core/stores/store-interface-and-intial-values/app-state';
 import {
-  useUIActiveAppBarTab,
-  useUIActiveFooterBarTab,
-  useUIAppbarComponents,
+  useStoreMapAllVisibleandInRangeLayers,
+  useStoreMapIsLayerHiddenOnMapSet,
+} from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useStoreLayerNameSet, useStoreLayerStatusSet } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import {
+  useStoreUIActiveAppBarTab,
+  useStoreUIActiveFooterBarTab,
+  useStoreUIAppbarComponents,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import type { LayerListEntry } from '@/core/components/common';
 import { Layout } from '@/core/components/common';
 import { logger } from '@/core/utils/logger';
@@ -53,19 +56,20 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
   const [isLoading, setIsLoading] = useState(false);
   const isFirstLoad = useRef<Record<string, boolean>>({});
 
-  const mapId = useGeoViewMapId();
+  const mapId = useStoreGeoViewMapId();
   const uiController = useUIController();
   const layerSetController = useLayerSetController();
-  const layerData = useDataTableAllFeaturesDataArray();
-  const selectedLayerPath = useDataTableSelectedLayerPath();
-  const datatableSettings = useDataTableLayerSettings();
-  const visibleInRangeLayers = useMapAllVisibleandInRangeLayers();
-  const activeFooterBarTab = useUIActiveFooterBarTab();
-  const activeAppBarTab = useUIActiveAppBarTab();
-  const appBarComponents = useUIAppbarComponents();
-  const showUnsymbolizedFeatures = useAppShowUnsymbolizedFeatures();
-  const layerNames = useLayerNames();
-  const layerStatuses = useLayerStatuses();
+  const layerData = useStoreDataTableAllFeaturesDataArray();
+  const selectedLayerPath = useStoreDataTableSelectedLayerPath();
+  const datatableSettings = useStoreDataTableLayerSettings();
+  const visibleInRangeLayers = useStoreMapAllVisibleandInRangeLayers();
+  const activeFooterBarTab = useStoreUIActiveFooterBarTab();
+  const activeAppBarTab = useStoreUIActiveAppBarTab();
+  const appBarComponents = useStoreUIAppbarComponents();
+  const showUnsymbolizedFeatures = useStoreAppShowUnsymbolizedFeatures();
+  const layerNames = useStoreLayerNameSet();
+  const layerStatuses = useStoreLayerStatusSet();
+  const layerHiddenSet = useStoreMapIsLayerHiddenOnMapSet();
 
   // Create columns for data table.
   const mappedLayerData = useFeatureFieldInfos(layerData);
@@ -76,9 +80,8 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
   const memoOrderedLayerData = useMemo(() => {
     return visibleInRangeLayers
       .map((layerPath) => mappedLayerData.filter((data) => data.layerPath === layerPath)[0])
-      .filter((layer) => layer !== undefined && !getStoreMapIsLayerHiddenOnMap(mapId, layer.layerPath));
-    // TODO: CHECK -This should likely go through a Zustand hook instead of a state getter (line above).
-  }, [mappedLayerData, visibleInRangeLayers, mapId]);
+      .filter((layer) => layer !== undefined && !layerHiddenSet[layer.layerPath]);
+  }, [mappedLayerData, visibleInRangeLayers, layerHiddenSet]);
 
   /**
    * Handles layer selection change from the layer list.

@@ -7,9 +7,9 @@ import { MousePosition } from '@/core/components/mouse-position/mouse-position';
 import { Scale } from '@/core/components/scale/scale';
 import { MapInfoExpandButton } from './map-info-expand-button';
 import { MapInfoRotationButton } from './map-info-rotation-button';
-import { useMapInteraction } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useStoreMapInteraction } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 
 /** Base styles for the map info bar container. */
 const MAP_INFO_BASE_STYLES = {
@@ -45,8 +45,8 @@ export const MapInfo = memo(function MapInfo({ onScrollShellIntoView }: MapInfoP
   const theme = useTheme();
 
   // Store
-  const interaction = useMapInteraction(); // Static map, do not display mouse position or rotation controls
-  const mapId = useGeoViewMapId(); // Element id for panel height (expanded)
+  const mapId = useStoreGeoViewMapId();
+  const interaction = useStoreMapInteraction(); // Static map, do not display mouse position or rotation controls
 
   // State
   const [expanded, setExpanded] = useState(false);

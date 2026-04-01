@@ -12,8 +12,8 @@ import {
   isStoreTimeSliderInitialized,
 } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 import { getStoreMapOrderedLayerInfo, getStoreMapStateForExportLayout } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { getStoreGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { getStoreLayerStateLegendLayers } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { getStoreAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { getStoreLayerLegendLayers } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 import { logger } from '@/core/utils/logger';
 import { getLocalizedMessage } from '@/core/utils/utilities';
@@ -912,7 +912,7 @@ export class ExportUtilities {
     layerDateTemporalModes: Record<string, TemporalMode>
   ): Promise<TypeMapInfoResult> {
     // Get all needed data from store state
-    const mapElement = getStoreGeoviewHTMLElement(mapId);
+    const mapElement = getStoreAppGeoviewHTMLElement(mapId);
     const mapState = getStoreMapStateForExportLayout(mapId);
     const { northArrow, northArrowElement, attribution, mapRotation, mapScale, currentProjection } = mapState;
 
@@ -993,7 +993,7 @@ export class ExportUtilities {
     const scaleLineWidth = `${pdfScaleWidth}px`;
 
     // Get all other state data
-    const legendLayers = getStoreLayerStateLegendLayers(mapId).filter(
+    const legendLayers = getStoreLayerLegendLayers(mapId).filter(
       (layer) => layer.layerStatus === 'loaded' && (layer.items.length === 0 || layer.items.some((item) => item.isVisible))
     );
     const orderedLayerInfo = getStoreMapOrderedLayerInfo(mapId);

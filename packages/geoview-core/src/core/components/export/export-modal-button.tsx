@@ -5,7 +5,7 @@ import { useTheme } from '@mui/material/styles';
 import { IconButton } from '@/ui/icon-button/icon-button';
 import { DownloadIcon } from '@/ui/icons';
 import { useUIController } from '@/core/controllers/ui-controller';
-import { useLayerAreLayersLoading } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useStoreLayerAreLayersLoading } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 /** Props for the ExportButton component. */
 interface ExportProps {
@@ -30,7 +30,7 @@ export default function ExportButton({ id, className = '', sxDetails }: ExportPr
 
   // get store function
   const uiController = useUIController();
-  const layersAreLoading = useLayerAreLayersLoading();
+  const layersAreLoading = useStoreLayerAreLayersLoading();
 
   return (
     <IconButton

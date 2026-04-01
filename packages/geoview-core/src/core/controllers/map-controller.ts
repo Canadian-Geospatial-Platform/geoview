@@ -78,22 +78,22 @@ import {
   type TypeOrderedLayerInfo,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { getStoreDataTableSelectedLayerPath, getStoreTableFilter } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { getStoreActiveAppBarTab, getStoreActiveFooterBarTab } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { getStoreUIActiveAppBarTab, getStoreUIActiveFooterBarTab } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import {
-  getStoreDisplayTheme,
-  getStoreIsCrosshairsActive,
+  getStoreAppDisplayTheme,
+  getStoreAppIsCrosshairsActive,
   getStoreShowLayerHighlightLayerBbox,
 } from '@/core/stores/store-interface-and-intial-values/app-state';
 import {
-  getStoreLayerStateHighlightedLayer,
-  getStoreLayerStateLayerBounds,
-  getStoreLayerStateLegendLayerByPath,
-  getStoreLayerStateSelectedLayerPath,
+  getStoreLayerHighlightedLayer,
+  getStoreLayerBounds,
+  getStoreLayerLegendLayerByPath,
+  getStoreLayerSelectedLayerPath,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import {
   getStoreTimeSliderFilter,
   getStoreTimeSliderLayers,
-  getStoreTimeSliderSelectedLayer,
+  getStoreTimeSliderSelectedLayerPath,
   isStoreTimeSliderInitialized,
   type TypeTimeSliderProps,
 } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
@@ -299,7 +299,7 @@ export class MapController extends AbstractMapViewerController {
     const options: FitOptions = fitOptions ?? { padding: OL_ZOOM_PADDING, duration: OL_ZOOM_DURATION };
 
     // Get the layer bounds
-    const bounds = getStoreLayerStateLayerBounds(this.getMapId(), layerPath);
+    const bounds = getStoreLayerBounds(this.getMapId(), layerPath);
 
     // If found
     if (bounds) {
@@ -509,7 +509,7 @@ export class MapController extends AbstractMapViewerController {
     this.getControllersRegistry().layerController.highlightLayer(layerPath);
 
     // Get bounds and highlight a bounding box for the layer (if true in global settings)
-    const bounds = getStoreLayerStateLayerBounds(this.getMapId(), layerPath);
+    const bounds = getStoreLayerBounds(this.getMapId(), layerPath);
     if (bounds && getStoreShowLayerHighlightLayerBbox(this.getMapId())) this.highlightBBox(bounds, true);
 
     return layerPath;
@@ -661,7 +661,7 @@ export class MapController extends AbstractMapViewerController {
       this.getControllersRegistry().layerController.refreshLayers();
 
       // Remove layer highlight if present to avoid bad reprojection
-      const highlightName = getStoreLayerStateHighlightedLayer(this.getMapId());
+      const highlightName = getStoreLayerHighlightedLayer(this.getMapId());
       if (highlightName !== '') {
         this.changeOrRemoveLayerHighlight(highlightName, highlightName);
       }
@@ -721,7 +721,7 @@ export class MapController extends AbstractMapViewerController {
     setStoreMapClickCoordinates(this.getMapId(), clickCoordinates);
 
     // If in WCAG mode, we need to emit the event
-    if (getStoreIsCrosshairsActive(this.getMapId())) this.getMapViewer().emitMapSingleClick(clickCoordinates);
+    if (getStoreAppIsCrosshairsActive(this.getMapId())) this.getMapViewer().emitMapSingleClick(clickCoordinates);
   }
 
   /**
@@ -1230,7 +1230,7 @@ export class MapController extends AbstractMapViewerController {
       // Construct map config
       const newMapConfig: TypeMapFeaturesInstance = {
         map,
-        theme: getStoreDisplayTheme(mapId),
+        theme: getStoreAppDisplayTheme(mapId),
         navBar: getStoreMapConfigNavBar(mapId),
         footerBar: getStoreMapConfigFooterBar(mapId),
         appBar: getStoreMapConfigAppBar(mapId),
@@ -1246,27 +1246,27 @@ export class MapController extends AbstractMapViewerController {
 
       // Set app bar tab settings
       if (newMapConfig.appBar) {
-        newMapConfig.appBar.selectedTab = getStoreActiveAppBarTab(mapId).tabId as TypeValidAppBarCoreProps;
+        newMapConfig.appBar.selectedTab = getStoreUIActiveAppBarTab(mapId).tabId as TypeValidAppBarCoreProps;
 
         const selectedDataTableLayerPath = getStoreDataTableSelectedLayerPath(mapId);
         if (selectedDataTableLayerPath) newMapConfig.appBar.selectedDataTableLayerPath = selectedDataTableLayerPath;
-        const selectedLayerPath = getStoreLayerStateSelectedLayerPath(mapId);
+        const selectedLayerPath = getStoreLayerSelectedLayerPath(mapId);
         if (selectedLayerPath) newMapConfig.appBar.selectedLayersLayerPath = selectedLayerPath;
       }
 
       // Set footer bar tab settings
       if (newMapConfig.footerBar) {
-        newMapConfig.footerBar.selectedTab = getStoreActiveFooterBarTab(mapId).tabId as TypeValidFooterBarTabsCoreProps;
+        newMapConfig.footerBar.selectedTab = getStoreUIActiveFooterBarTab(mapId).tabId as TypeValidFooterBarTabsCoreProps;
 
         const selectedDataTableLayerPath = getStoreDataTableSelectedLayerPath(mapId);
         if (selectedDataTableLayerPath) newMapConfig.footerBar.selectedDataTableLayerPath = selectedDataTableLayerPath;
-        const selectedLayerLayerPath = getStoreLayerStateSelectedLayerPath(mapId);
+        const selectedLayerLayerPath = getStoreLayerSelectedLayerPath(mapId);
         if (selectedLayerLayerPath) newMapConfig.footerBar.selectedLayersLayerPath = selectedLayerLayerPath;
 
         // If the TimeSlider plugin is initialized
         if (isStoreTimeSliderInitialized(mapId)) {
           // Store it
-          newMapConfig.footerBar.selectedTimeSliderLayerPath = getStoreTimeSliderSelectedLayer(mapId);
+          newMapConfig.footerBar.selectedTimeSliderLayerPath = getStoreTimeSliderSelectedLayerPath(mapId);
         }
       }
 
@@ -1403,7 +1403,7 @@ export class MapController extends AbstractMapViewerController {
 
     // Get info
     const orderedLayerInfo = getStoreMapOrderedLayerInfoByPath(mapId, layerPath)!; // Should always find one, so use a '!', otherwise let it break (was like this before)
-    const legendLayerInfo = getStoreLayerStateLegendLayerByPath(mapId, layerPath);
+    const legendLayerInfo = getStoreLayerLegendLayerByPath(mapId, layerPath);
 
     // Check if the layer is a geocore layers
     const isGeocore = isValidUUID(layerPath.split('/')[0]);
@@ -1477,7 +1477,7 @@ export class MapController extends AbstractMapViewerController {
 
     const layerEntryConfig = this.getControllersRegistry().layerController.getLayerEntryConfig(layerPath);
     const orderedLayerInfo = getStoreMapOrderedLayerInfoByPath(mapId, layerPath)!; // Should always find one, so use a '!', otherwise let it break (was like this before)
-    const legendLayerInfo = getStoreLayerStateLegendLayerByPath(mapId, layerPath);
+    const legendLayerInfo = getStoreLayerLegendLayerByPath(mapId, layerPath);
 
     // Get original layerEntryConfig from map config
     const pathArray = layerPath.split('/');

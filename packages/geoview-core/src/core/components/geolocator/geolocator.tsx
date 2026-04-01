@@ -9,7 +9,7 @@ import { debounce } from '@/core/utils/debounce';
 import { Box, ProgressBar, Typography } from '@/ui';
 
 import { useUIController } from '@/core/controllers/ui-controller';
-import { useUIActiveAppBarTab, useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useStoreUIActiveAppBarTab, useStoreUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { GeolocatorResult } from '@/core/components/geolocator/geolocator-result';
 import { getSxClasses } from '@/core/components/geolocator/geolocator-style';
 import { DEFAULT_APPBAR_CORE } from '@/api/types/map-schema-types';
@@ -18,7 +18,7 @@ import { logger } from '@/core/utils/logger';
 import { useGeolocator } from '@/core/components/geolocator/hooks/use-geolocator';
 import { GeolocatorBar } from '@/core/components/geolocator/geolocator-bar';
 import { handleEscapeKey } from '@/core/utils/utilities';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { CONTAINER_TYPE, TIMEOUT } from '@/core/utils/constant';
 
 /** Geolocation search result item. */
@@ -59,12 +59,12 @@ export function Geolocator(): JSX.Element {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const { t } = useTranslation();
-  const mapId = useGeoViewMapId();
 
   // Store
+  const mapId = useStoreGeoViewMapId();
   const uiController = useUIController();
-  const { tabId, isOpen } = useUIActiveAppBarTab();
-  const activeTrapGeoView = useUIActiveTrapGeoView();
+  const { tabId, isOpen } = useStoreUIActiveAppBarTab();
+  const activeTrapGeoView = useStoreUIActiveTrapGeoView();
 
   // Derived values
   const isPanelOpen = tabId === DEFAULT_APPBAR_CORE.GEOLOCATOR && isOpen;

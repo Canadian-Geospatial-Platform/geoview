@@ -6,9 +6,9 @@ import { Box, Divider, Typography } from '@/ui';
 import { Switch } from '@/ui/switch/switch';
 
 import {
-  getStoreLayerStyleSettings,
-  useLayerSelectorHasText,
-  useLayerSelectorTextVisibility,
+  useStoreLayerHasText,
+  useStoreLayerTextVisibility,
+  useStoreLayerStyleSettings,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 import { getSxClasses } from '../layer-details-style';
@@ -17,7 +17,6 @@ import { MosaicRulePanel } from './mosaic-rule-selector';
 import { WmsStylePanel } from './wms-style-selector';
 import type { TypeLegendLayer } from '@/core/components/layers/types';
 import { useLayerController } from '@/core/controllers/layer-controller';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 
 interface LayerSettingsPanelProps {
@@ -43,13 +42,10 @@ export function LayerSettingsPanel({ layerDetails }: LayerSettingsPanelProps): J
   const sxClasses = getSxClasses(theme);
 
   // Store
-  const mapId = useGeoViewMapId();
   const layerController = useLayerController();
-  const hasText = useLayerSelectorHasText(layerDetails.layerPath);
-  const textVisible = useLayerSelectorTextVisibility(layerDetails.layerPath);
-
-  // TODO: CHECK - This should likely go through a Zustand hook instead of a state getter
-  const availableSettings = getStoreLayerStyleSettings(mapId, layerDetails.layerPath);
+  const hasText = useStoreLayerHasText(layerDetails.layerPath);
+  const textVisible = useStoreLayerTextVisibility(layerDetails.layerPath);
+  const availableSettings = useStoreLayerStyleSettings(layerDetails.layerPath);
 
   // Derived values
   const isLayerHoverable = layerDetails.controls?.hover;

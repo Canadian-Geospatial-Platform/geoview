@@ -6,8 +6,8 @@ import { useTheme } from '@mui/material/styles';
 
 import { CheckIcon, Tooltip, Box, Button } from '@/ui';
 import { getSxClasses } from './scale-style';
-import { useMapInteraction, useMapScale } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useStoreMapInteraction, useStoreMapScale } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 
 /** The properties for the scale component. */
@@ -56,9 +56,9 @@ export const Scale = memo(function Scale({ expanded }: ScaleProps): JSX.Element 
   const [scaleMode, setScaleMode] = useState<number>(SCALE_MODES.METRIC);
 
   // Store
-  const mapId = useGeoViewMapId();
-  const scale = useMapScale();
-  const interaction = useMapInteraction();
+  const mapId = useStoreGeoViewMapId();
+  const scale = useStoreMapScale();
+  const interaction = useStoreMapInteraction();
 
   /**
    * Builds the list of scale display options.

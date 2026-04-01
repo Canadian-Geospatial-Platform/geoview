@@ -20,8 +20,8 @@ import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from '@/core/components/nav-bar/nav-bar-panel-button';
 import { formatLength, formatArea } from '@/core/utils/utilities';
 import type { Draw } from '@/geo/interaction/draw';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
-import { useAppDisplayLanguage, useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
+import { useStoreAppDisplayLanguage, useStoreAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { useMapController } from '@/core/controllers/map-controller';
 
@@ -75,9 +75,9 @@ export default function Measurement(): JSX.Element {
   const { t } = useTranslation<string>();
 
   // Stores
-  const mapId = useGeoViewMapId();
-  const displayLanguage = useAppDisplayLanguage();
-  const mapElement = useAppGeoviewHTMLElement().querySelector(`[id^="mapTargetElement-${mapId}"]`) as HTMLElement;
+  const mapId = useStoreGeoViewMapId();
+  const displayLanguage = useStoreAppDisplayLanguage();
+  const mapElement = useStoreAppGeoviewHTMLElement().querySelector(`[id^="mapTargetElement-${mapId}"]`) as HTMLElement;
   const mapController = useMapController();
 
   // States

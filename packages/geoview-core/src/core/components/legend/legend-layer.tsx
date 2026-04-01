@@ -4,18 +4,18 @@ import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material';
 
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { Box, ListItem, ListItemText, IconButton, KeyboardArrowDownIcon, KeyboardArrowUpIcon, ProgressBar } from '@/ui';
 import {
-  useLayerSelectorChildren,
-  useLayerSelectorItems,
-  useLayerSelectorName,
-  useLayerSelectorStatus,
-  useLayerSelectorSchemaTag,
+  useStoreLayerChildPaths,
+  useStoreLayerItems,
+  useStoreLayerName,
+  useStoreLayerStatus,
+  useStoreLayerSchemaTag,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import {
-  useMapSelectorLayerLegendCollapsed,
-  useMapSelectorIsLayerHiddenOnMap,
+  useStoreMapLegendCollapsedByPath,
+  useStoreMapIsLayerHiddenOnMap,
   setStoreMapToggleLegendCollapsed,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useLightBox } from '@/core/components/common';
@@ -59,13 +59,13 @@ const LegendLayerHeader = memo(
     logger.logTraceUseMemo('components/legend/legend-layer - LegendLayerHeader', layerPath);
 
     // Hooks
-    const isCollapsed = useMapSelectorLayerLegendCollapsed(layerPath);
-    const layerHidden = useMapSelectorIsLayerHiddenOnMap(layerPath);
-    const layerName = useLayerSelectorName(layerPath) ?? layerPath;
-    const layerItems = useLayerSelectorItems(layerPath);
-    const layerChildren = useLayerSelectorChildren(layerPath);
-    const schemaTag = useLayerSelectorSchemaTag(layerPath);
-    const layerStatus = useLayerSelectorStatus(layerPath);
+    const isCollapsed = useStoreMapLegendCollapsedByPath(layerPath);
+    const layerHidden = useStoreMapIsLayerHiddenOnMap(layerPath);
+    const layerName = useStoreLayerName(layerPath) ?? layerPath;
+    const layerItems = useStoreLayerItems(layerPath);
+    const layerChildPaths = useStoreLayerChildPaths(layerPath);
+    const schemaTag = useStoreLayerSchemaTag(layerPath);
+    const layerStatus = useStoreLayerStatus(layerPath);
 
     // Return the ui
     return (
@@ -87,7 +87,9 @@ const LegendLayerHeader = memo(
           secondary={showControls ? <SecondaryControls layerPath={layerPath} /> : undefined}
         />
         {showControls &&
-          ((layerChildren && layerChildren.length > 0) || (layerItems && layerItems.length > 1) || schemaTag === CONST_LAYER_TYPES.WMS) && (
+          ((layerChildPaths && layerChildPaths.length > 0) ||
+            (layerItems && layerItems.length > 1) ||
+            schemaTag === CONST_LAYER_TYPES.WMS) && (
             <IconButton
               className="buttonOutline"
               onClick={onExpandClick}
@@ -122,14 +124,14 @@ export function LegendLayer({ layerPath, showControls, containerType }: LegendLa
   const { t } = useTranslation<string>();
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
-  const mapId = useGeoViewMapId();
+
+  // Stores
+  const mapId = useStoreGeoViewMapId();
   const id = useId(); // WCAG - Generate a stable unique ID
   const layerNameId = `${mapId}-${containerType}-layer-name-${id}`; // WCAG - IDs to link the layer name to icon buttons related to it (aria-describedby)
   const collapseContainerId = `${mapId}-${containerType}-collapse-${id}`; // WCAG - IDs to link collapse buttons to collapsible content related to it (aria-controls)
-
-  // Stores
-  const layerStatus = useLayerSelectorStatus(layerPath);
-  const layerName = useLayerSelectorName(layerPath) ?? layerPath;
+  const layerStatus = useStoreLayerStatus(layerPath);
+  const layerName = useStoreLayerName(layerPath) ?? layerPath;
   const { initLightBox, LightBoxComponent } = useLightBox();
 
   // Internal state

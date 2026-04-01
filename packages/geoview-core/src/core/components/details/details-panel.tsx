@@ -7,25 +7,25 @@ import { IconButton, Grid, ArrowForwardIosOutlinedIcon, ArrowBackIosOutlinedIcon
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { useUIController } from '@/core/controllers/ui-controller';
 import {
-  useDetailsCheckedFeatures,
-  useDetailsLayerDataArrayBatch,
-  useDetailsSelectedLayerPath,
-  useDetailsCoordinateInfoEnabled,
-  useMapHideCoordinateInfoSwitch,
+  useStoreDetailsCheckedFeatures,
+  useStoreDetailsLayerDataArrayBatch,
+  useStoreDetailsSelectedLayerPath,
+  useStoreDetailsCoordinateInfoEnabled,
+  useStoreDetailsHideCoordinateInfoSwitch,
   setStoreDetailsLayerDataArrayBatchLayerPathBypass,
   setStoreDetailsSelectedLayerPath,
   removeStoreDetailsCheckedFeature,
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
-import { useUIActiveAppBarTab, useUIActiveFooterBarTab } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { useLayerNames, useLayerStatuses } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useStoreUIActiveAppBarTab, useStoreUIActiveFooterBarTab } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useStoreLayerNameSet, useStoreLayerStatusSet } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import {
-  useMapClickCoordinates,
-  useMapAllVisibleandInRangeLayers,
-  useMapOrderedLayers,
-  useMapSelectorLayerQueryable,
-  getStoreMapLayerParentHidden, // TODO: CHECK -This should likely go through a Zustand hook instead of a state getter
-  getStoreMapIsLayerHiddenOnMap, // TODO: CHECK - This should likely go through a Zustand hook instead of a state getter
+  useStoreMapClickCoordinates,
+  useStoreMapAllVisibleandInRangeLayers,
+  useStoreMapOrderedLayers,
+  useStoreMapLayerQueryable,
+  useStoreMapIsParentLayerHiddenOnMapSet,
+  useStoreMapIsLayerHiddenOnMapSet,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import type { TypeFeatureInfoEntry, TypeLayerData, TypeMapMouseInfo } from '@/api/types/map-schema-types';
 
@@ -61,21 +61,23 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Store
-  const mapId = useGeoViewMapId();
-  const selectedLayerPath = useDetailsSelectedLayerPath();
-  const arrayOfLayerDataBatch = useDetailsLayerDataArrayBatch();
-  const checkedFeatures = useDetailsCheckedFeatures();
-  const coordinateInfoEnabled = useDetailsCoordinateInfoEnabled();
-  const hideCoordinateInfoSwitch = useMapHideCoordinateInfoSwitch();
-  const visibleInRangeLayers = useMapAllVisibleandInRangeLayers();
-  const orderedLayers = useMapOrderedLayers();
-  const mapClickCoordinates = useMapClickCoordinates();
-  const activeAppBarTab = useUIActiveAppBarTab();
-  const activeFooterBarTab = useUIActiveFooterBarTab();
-  const queryableByLayerPath = useMapSelectorLayerQueryable(visibleInRangeLayers);
+  const mapId = useStoreGeoViewMapId();
+  const selectedLayerPath = useStoreDetailsSelectedLayerPath();
+  const arrayOfLayerDataBatch = useStoreDetailsLayerDataArrayBatch();
+  const checkedFeatures = useStoreDetailsCheckedFeatures();
+  const coordinateInfoEnabled = useStoreDetailsCoordinateInfoEnabled();
+  const hideCoordinateInfoSwitch = useStoreDetailsHideCoordinateInfoSwitch();
+  const visibleInRangeLayers = useStoreMapAllVisibleandInRangeLayers();
+  const orderedLayers = useStoreMapOrderedLayers();
+  const mapClickCoordinates = useStoreMapClickCoordinates();
+  const activeAppBarTab = useStoreUIActiveAppBarTab();
+  const activeFooterBarTab = useStoreUIActiveFooterBarTab();
+  const queryableByLayerPath = useStoreMapLayerQueryable(visibleInRangeLayers);
+  const layerNames = useStoreLayerNameSet();
+  const layerStatuses = useStoreLayerStatusSet();
+  const layerHiddenSet = useStoreMapIsLayerHiddenOnMapSet();
+  const layerParentHiddenSet = useStoreMapIsParentLayerHiddenOnMapSet();
   const uiController = useUIController();
-  const layerNames = useLayerNames();
-  const layerStatuses = useLayerStatuses();
   const mapController = useMapController();
 
   // States
@@ -184,7 +186,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
     // Set the layers list (filter: visible - visible in range and isQueryable)
     const layerListEntries = visibleInRangeLayers
       .map((layerPath) => arrayOfLayerDataBatch.find((layerData) => layerData.layerPath === layerPath))
-      .filter((layer) => layer && !getStoreMapIsLayerHiddenOnMap(mapId, layer.layerPath))
+      .filter((layer) => layer && !layerHiddenSet[layer.layerPath])
       .filter((layer) => layer && queryableByLayerPath[layer.layerPath])
       .map(
         (layer) =>
@@ -209,7 +211,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
         (layer.features?.length ?? 0) > 0 &&
         !existingLayerPaths.has(layer.layerPath) &&
         layer.layerPath !== 'coordinate-info' &&
-        !getStoreMapLayerParentHidden(mapId, layer.layerPath)
+        !layerParentHiddenSet[layer.layerPath]
       ) {
         layerListEntries.push({
           layerName: layerNames[layer.layerPath] ?? '',
@@ -266,6 +268,8 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
     queryableByLayerPath,
     layerNames,
     layerStatuses,
+    layerHiddenSet,
+    layerParentHiddenSet,
     getNumFeaturesLabel,
     mapId,
     orderedLayers,

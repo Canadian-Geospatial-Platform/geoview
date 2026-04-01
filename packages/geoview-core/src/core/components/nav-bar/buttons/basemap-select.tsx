@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { createElement, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useMapHasGeoviewBasemapLayer, useMapBasemapOptions } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useStoreMapHasGeoviewBasemapLayer, useStoreMapBasemapOptions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from '@/core/components/nav-bar/nav-bar-panel-button';
 import type { TypeBasemapOptions } from '@/api/types/map-schema-types';
@@ -33,8 +33,8 @@ export default function BasemapSelect(): JSX.Element {
   const { t } = useTranslation<string>();
 
   // Get values from store
-  const configBasemapOptions = useMapBasemapOptions();
-  const hasGeoviewBasemapLayer = useMapHasGeoviewBasemapLayer();
+  const configBasemapOptions = useStoreMapBasemapOptions();
+  const hasGeoviewBasemapLayer = useStoreMapHasGeoviewBasemapLayer();
   const mapController = useMapController();
 
   // Check if the basemap from the config is one of our default basemaps.

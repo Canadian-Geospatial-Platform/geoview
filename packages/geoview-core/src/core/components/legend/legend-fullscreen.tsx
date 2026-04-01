@@ -1,18 +1,17 @@
 import { useTheme } from '@mui/material';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Box, List, Typography, IconButton, FullscreenIcon } from '@/ui';
 import { logger } from '@/core/utils/logger';
 import {
-  getStoreMapOrderedLayerInfo,
+  getStoreMapLegendCollapsedSet,
   setStoreMapAllMapLayerCollapsed,
   setStoreMapLegendCollapsed,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 import { getSxClasses } from './legend-styles';
 import { LegendLayer } from './legend-layer';
-import type { TypeLegendLayer } from '@/core/components/layers/types';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { useEventListener } from '@/core/components/common/hooks/use-event-listener';
@@ -22,7 +21,7 @@ import { DEFAULT_APPBAR_CORE } from '@/api/types/map-schema-types';
 /**
  * Properties for the LegendFullscreen component.
  * @interface LegendFullscreenProps
- * @property {TypeLegendLayer[]} layersList - Array of legend layers to display in fullscreen mode.
+ * @property {string[]} layerPaths - Array of layer paths to display in fullscreen mode.
  * @property {string} mapId - The unique identifier of the map.
  * @property {TypeContainerBox} containerType - The type of container where the legend is displayed.
  * @property {boolean} isOpen - Controls whether the fullscreen dialog is open.
@@ -30,7 +29,7 @@ import { DEFAULT_APPBAR_CORE } from '@/api/types/map-schema-types';
  * @property {React.RefObject<HTMLButtonElement>} buttonRef - Reference to the fullscreen button for focus restoration.
  */
 interface LegendFullscreenProps {
-  layersList: TypeLegendLayer[];
+  layerPaths: string[];
   mapId: string;
   containerType: TypeContainerBox;
   isOpen: boolean;
@@ -109,14 +108,14 @@ export function LegendFullscreenButton({ containerType, onClick, buttonRef }: Fu
  * Manages layer collapse state by expanding all layers when entering fullscreen and
  * restoring the previous collapse state when exiting.
  * @param props - The component properties.
- * @param props.layersList - Array of legend layers to display.
+ * @param props.layerPaths - Array of layer paths to display.
  * @param props.mapId - The unique identifier of the map.
  * @param props.containerType - The type of container where the legend is displayed.
  * @param props.isOpen - Controls whether the fullscreen dialog is open.
  * @param props.onClose - Callback function invoked when the dialog is closed.
  * @returns The fullscreen legend dialog component.
  */
-export function LegendFullscreen({ layersList, mapId, containerType, isOpen, onClose, buttonRef }: LegendFullscreenProps): JSX.Element {
+export function LegendFullscreen({ layerPaths, mapId, containerType, isOpen, onClose, buttonRef }: LegendFullscreenProps): JSX.Element {
   logger.logTraceRender('components/legend/legend-fullscreen');
 
   // Hooks
@@ -125,8 +124,8 @@ export function LegendFullscreen({ layersList, mapId, containerType, isOpen, onC
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // State
-  const [fullscreenLegendLayerList, setFullscreenLegendLayersList] = useState<TypeLegendLayer[][]>([]);
-  const [, setSavedCollapseState] = useState<Record<string, boolean>>({});
+  const [fullscreenLegendLayerList, setFullscreenLegendLayersList] = useState<string[][]>([]);
+  const savedCollapseStateRef = useRef<Record<string, boolean>>({});
 
   // Memoize breakpoint values
   const breakpoints = useMemo(() => {
@@ -161,19 +160,19 @@ export function LegendFullscreen({ layersList, mapId, containerType, isOpen, onC
    * Distributes legend layers across multiple columns for fullscreen display.
    * Uses a round-robin algorithm to evenly distribute layers across the available columns
    * determined by the current window size.
-   * @param layers - Array of legend layers to distribute.
+   * @param paths - Array of layer paths to distribute.
    */
   const updateFullscreenLayerListByWindowSize = useCallback(
-    (layers: TypeLegendLayer[]): void => {
+    (paths: string[]): void => {
       const arrSize = getFullscreenLayerListSize();
-      const list = Array.from({ length: arrSize }, () => []) as Array<TypeLegendLayer[]>;
+      const list = Array.from({ length: arrSize }, () => []) as Array<string[]>;
 
-      layers.forEach((layer, index) => {
-        list[index % arrSize].push(layer);
+      paths.forEach((layerPath, index) => {
+        list[index % arrSize].push(layerPath);
       });
 
       // Format the list only if there is layers
-      setFullscreenLegendLayersList(layers.length === 0 ? [] : list);
+      setFullscreenLegendLayersList(paths.length === 0 ? [] : list);
     },
     [getFullscreenLayerListSize]
   );
@@ -181,8 +180,8 @@ export function LegendFullscreen({ layersList, mapId, containerType, isOpen, onC
   // Memoize the window resize handler and use the hook to add listener to avoid many creation
   const handleWindowResize = useCallback(() => {
     // Update the layer list based on window size
-    updateFullscreenLayerListByWindowSize(layersList);
-  }, [layersList, updateFullscreenLayerListByWindowSize]);
+    updateFullscreenLayerListByWindowSize(layerPaths);
+  }, [layerPaths, updateFullscreenLayerListByWindowSize]);
 
   // Wire a handler using a custom hook on the window resize event
   useEventListener<Window>('resize', handleWindowResize, window);
@@ -190,11 +189,11 @@ export function LegendFullscreen({ layersList, mapId, containerType, isOpen, onC
   // Handle initial layer setup
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('LEGEND FULLSCREEN - layer setup', layersList);
+    logger.logTraceUseEffect('LEGEND FULLSCREEN - layer setup', layerPaths);
 
     // Update the layer list based on window size
-    updateFullscreenLayerListByWindowSize(layersList);
-  }, [layersList, updateFullscreenLayerListByWindowSize]);
+    updateFullscreenLayerListByWindowSize(layerPaths);
+  }, [layerPaths, updateFullscreenLayerListByWindowSize]);
 
   // Handle fullscreen state changes
   useEffect(() => {
@@ -202,32 +201,21 @@ export function LegendFullscreen({ layersList, mapId, containerType, isOpen, onC
     logger.logTraceUseEffect('LEGEND FULLSCREEN - fullscreen state change', isOpen);
 
     if (isOpen) {
-      // Entering fullscreen: save collapse state and expand all
-      // TODO: CHECK -This should likely go through a Zustand hook instead of a state getter
-      const orderedLayerInfo = getStoreMapOrderedLayerInfo(mapId);
-      const collapseState: Record<string, boolean> = {};
-
-      orderedLayerInfo.forEach((layer) => {
-        collapseState[layer.layerPath] = layer.legendCollapsed;
-      });
-
-      setSavedCollapseState(collapseState);
+      // Entering fullscreen: snapshot collapse state from the store and expand all
+      // GV Here we use a store getter, because we actually want to snapshot the values to reuse them later, we don't want to hook on them
+      savedCollapseStateRef.current = getStoreMapLegendCollapsedSet(mapId);
 
       // Save to the store
       setStoreMapAllMapLayerCollapsed(mapId, false);
     } else {
       // Exiting fullscreen: restore saved collapse state
-      setSavedCollapseState((prevState) => {
-        if (Object.keys(prevState).length > 0) {
-          Object.entries(prevState).forEach(([layerPath, collapsed]) => {
-            // Save to the store
-            setStoreMapLegendCollapsed(mapId, layerPath, collapsed);
-          });
-          // Return empty object to clear state
-          return {};
-        }
-        return prevState;
-      });
+      const savedState = savedCollapseStateRef.current;
+      if (Object.keys(savedState).length > 0) {
+        Object.entries(savedState).forEach(([layerPath, collapsed]) => {
+          // Save to the store
+          setStoreMapLegendCollapsed(mapId, layerPath, collapsed);
+        });
+      }
     }
   }, [isOpen, mapId]);
 
@@ -258,7 +246,7 @@ export function LegendFullscreen({ layersList, mapId, containerType, isOpen, onC
       return noLayersContent;
     }
 
-    return fullscreenLegendLayerList.map((layers, idx) => (
+    return fullscreenLegendLayerList.map((paths, idx) => (
       <List
         className="legendList"
         // eslint-disable-next-line react/no-array-index-key
@@ -268,8 +256,8 @@ export function LegendFullscreen({ layersList, mapId, containerType, isOpen, onC
           ...sxClasses.legendList,
         }}
       >
-        {layers.map((layer) => (
-          <LegendLayer layerPath={layer.layerPath} key={layer.layerPath} showControls={false} containerType={containerType} />
+        {paths.map((layerPath) => (
+          <LegendLayer layerPath={layerPath} key={layerPath} showControls={false} containerType={containerType} />
         ))}
       </List>
     ));

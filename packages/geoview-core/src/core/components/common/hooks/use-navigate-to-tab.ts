@@ -1,15 +1,15 @@
 import { useCallback } from 'react';
 import {
-  useUIActiveFooterBarTab,
-  useUIFooterBarComponents,
-  useUIAppbarComponents,
+  useStoreUIActiveFooterBarTab,
+  useStoreUIFooterBarComponents,
+  useStoreUIAppbarComponents,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { scrollIfNotVisible } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import type { TypeValidAppBarCoreProps, TypeValidFooterBarTabsCoreProps } from '@/api/types/map-schema-types';
 import { TIMEOUT } from '@/core/utils/constant';
 import { useUIController } from '@/core/controllers/ui-controller';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 
 /** Options for navigating to a tab. */
 interface NavigateToTabOptions {
@@ -26,11 +26,11 @@ interface NavigateToTabOptions {
  */
 export function useNavigateToTab(tabId: string, onNavigate?: (mapId: string, layerPath: string) => void): (options?: NavigateToTabOptions) => void {
   // Store
-  const mapId = useGeoViewMapId();
+  const mapId = useStoreGeoViewMapId();
   const uiController = useUIController();
-  const { isOpen: isFooterOpen } = useUIActiveFooterBarTab();
-  const footerBarComponents = useUIFooterBarComponents();
-  const appBarComponents = useUIAppbarComponents();
+  const { isOpen: isFooterOpen } = useStoreUIActiveFooterBarTab();
+  const footerBarComponents = useStoreUIFooterBarComponents();
+  const appBarComponents = useStoreUIAppbarComponents();
 
   // Check if tab exists in footer or appbar
   const hasFooterTab = footerBarComponents.includes(tabId as TypeValidFooterBarTabsCoreProps);

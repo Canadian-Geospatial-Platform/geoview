@@ -5,9 +5,9 @@ import Slider from '@mui/material/Slider';
 import { Box, HeightIcon, IconButton, Popover } from '@/ui';
 
 import { useUIController } from '@/core/controllers/ui-controller';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { getSxClasses } from './resize-footer-panel-style';
-import { useUIFooterPanelResizeValue } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useStoreUIFooterPanelResizeValue } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { logger } from '@/core/utils/logger';
 
 /** Slider input styles for vertical orientation. */
@@ -48,14 +48,14 @@ export const ResizeFooterPanel = memo(function ResizeFooterPanel(): JSX.Element 
   const sxClasses = useMemo(() => getSxClasses(), []);
 
   // Store
-  const footerPanelResizeValue = useUIFooterPanelResizeValue();
+  const footerPanelResizeValue = useStoreUIFooterPanelResizeValue();
   const uiController = useUIController();
 
   // States
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 
   // Get container
-  const mapId = useGeoViewMapId();
+  const mapId = useStoreGeoViewMapId();
   const mapElem = document.getElementById(`shell-${mapId}`);
 
   // Marks calculation

@@ -318,43 +318,10 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
 
 // #endregion STATE INITIALIZATION
 
-// #region STATE HOOKS
-// GV To be used by React components
-
-/** Hook that returns the aggregated feature info result set entries for all layers. */
-export const useDataTableAllFeaturesDataArray = (): TypeAllFeatureInfoResultSetEntry[] =>
-  useStore(useGeoViewStore(), (state) => state.dataTableState.allFeaturesDataArray);
-
-/** Hook that returns the table filters record keyed by layer path. */
-export const useDataTableFilters = (): Record<string, string> => useStore(useGeoViewStore(), (state) => state.dataTableState.tableFilters);
-
-/**
- * Hook that returns the table filter for a specific layer.
- *
- * @param layerPath - The layer path to get the filter for.
- * @returns The filter string for the layer, or undefined if not set.
- */
-export const useDataTableFilterSelector = (layerPath: string): string | undefined => {
-  return useStore(useGeoViewStore(), (state) => state.dataTableState.tableFilters[layerPath]);
-};
-
-/** Hook that returns the currently selected data table layer path. */
-export const useDataTableSelectedLayerPath = (): string => useStore(useGeoViewStore(), (state) => state.dataTableState.selectedLayerPath);
-
-/** Hook that returns the per-layer data table settings record. */
-export const useDataTableLayerSettings = (): Record<string, IDataTableSettings> =>
-  useStore(useGeoViewStore(), (state) => state.dataTableState.layersDataTableSetting);
-
-/** Hook that returns the currently selected feature in the data table. */
-export const useDataTableSelectedFeature = (): TypeFeatureInfoEntry | null =>
-  useStore(useGeoViewStore(), (state) => state.dataTableState.selectedFeature);
-
-// #endregion STATE HOOKS
-
-// #region STATE SELECTORS
-// GV Should only be used specifically to access the Store.
-// GV Use sparingly and only if you are sure of what you are doing.
-// GV DO NOT USE this technique in React components, use the hooks above instead.
+// #region STATE GETTERS & HOOKS
+// GV Getters should be used to get the values at a moment in time.
+// GV Hooks should be used to attach to values and trigger UI components when they change.
+// GV Typically they are listed in couples (getter + hook) for the same value.
 
 /**
  * Returns the full data table state slice for the given map.
@@ -373,8 +340,32 @@ const getStoreDataTableState = (mapId: string): IDataTableState => getGeoViewSto
  * @param layerPath - The path of the layer
  * @returns The data table filter(s) for the layer
  */
+export const getStoreDataTableFilters = (mapId: string): Record<string, string> | undefined => {
+  return getStoreDataTableState(mapId)?.tableFilters;
+};
+
+/** Hook that returns the table filters record keyed by layer path. */
+export const useStoreDataTableFilters = (): Record<string, string> =>
+  useStore(useGeoViewStore(), (state) => state.dataTableState.tableFilters);
+
+/**
+ * Gets filter(s) for a layer.
+ * @param mapId - The map id of the state to act on
+ * @param layerPath - The path of the layer
+ * @returns The data table filter(s) for the layer
+ */
 export const getStoreTableFilter = (mapId: string, layerPath: string): string | undefined => {
   return getStoreDataTableState(mapId)?.tableFilters?.[layerPath];
+};
+
+/**
+ * Hook that returns the table filter for a specific layer.
+ *
+ * @param layerPath - The layer path to get the filter for.
+ * @returns The filter string for the layer, or undefined if not set.
+ */
+export const useStoreTableFilter = (layerPath: string): string | undefined => {
+  return useStore(useGeoViewStore(), (state) => state.dataTableState.tableFilters[layerPath]);
 };
 
 /**
@@ -387,6 +378,28 @@ export const getStoreDataTableSelectedLayerPath = (mapId: string): string => {
   return getStoreDataTableState(mapId)?.selectedLayerPath ?? '';
 };
 
+/** Hook that returns the currently selected data table layer path. */
+export const useStoreDataTableSelectedLayerPath = (): string =>
+  useStore(useGeoViewStore(), (state) => state.dataTableState.selectedLayerPath);
+
+/**
+ * Gets the aggregated feature info array for all layers in the data table.
+ *
+ * @param mapId - The map identifier.
+ * @returns The array of feature info result set entries.
+ */
+export const getStoreDataTableAllFeaturesDataArray = (mapId: string): TypeAllFeatureInfoResultSetEntry[] => {
+  return getStoreDataTableState(mapId)?.allFeaturesDataArray ?? [];
+};
+
+/** Hook that returns the aggregated feature info result set entries for all layers. */
+export const useStoreDataTableAllFeaturesDataArray = (): TypeAllFeatureInfoResultSetEntry[] =>
+  useStore(useGeoViewStore(), (state) => state.dataTableState.allFeaturesDataArray);
+
+// #endregion STATE GETTERS & HOOKS
+
+// #region STATE GETTERS & HOOKS - OTHERS (no match between getter-hook)
+
 /**
  * Gets whether the data table is filtered to the current map extent for a specific layer.
  *
@@ -398,17 +411,15 @@ export const getStoreMapFilteredRecord = (mapId: string, layerPath: string): boo
   return getStoreDataTableState(mapId)?.layersDataTableSetting?.[layerPath]?.mapFilteredRecord;
 };
 
-/**
- * Gets the aggregated feature info array for all layers in the data table.
- *
- * @param mapId - The map identifier.
- * @returns The array of feature info result set entries.
- */
-export const getStoreDataTableAllFeaturesArray = (mapId: string): TypeAllFeatureInfoResultSetEntry[] => {
-  return getStoreDataTableState(mapId)?.allFeaturesDataArray ?? [];
-};
+/** Hook that returns the per-layer data table settings record. */
+export const useStoreDataTableLayerSettings = (): Record<string, IDataTableSettings> =>
+  useStore(useGeoViewStore(), (state) => state.dataTableState.layersDataTableSetting);
 
-// #endregion STATE SELECTORS
+/** Hook that returns the currently selected feature in the data table. */
+export const useStoreDataTableSelectedFeature = (): TypeFeatureInfoEntry | null =>
+  useStore(useGeoViewStore(), (state) => state.dataTableState.selectedFeature);
+
+// #endregion STATE GETTERS & HOOKS - OTHERS (no match between getter-hook)
 
 // #region STATE ADAPTORS
 // GV These methods should be called from a State Adaptor class listening on domain events triggered by controllers.

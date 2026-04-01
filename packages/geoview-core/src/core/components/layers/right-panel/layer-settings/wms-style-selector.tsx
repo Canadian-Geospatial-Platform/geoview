@@ -7,7 +7,7 @@ import { Box, CircularProgress, Collapse, Typography } from '@/ui';
 import { ImageNotSupportedIcon, PaletteIcon, ExpandMoreIcon, ExpandLessIcon } from '@/ui';
 
 import { getSxClasses } from './layer-settings-style';
-import { useLayerSelectorWmsStyle, useLayerSelectorWmsStyles } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useStoreLayerWmsStyle, useStoreLayerWmsStyles } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import type { TypeLegendLayer } from '@/core/components/layers/types';
 import type { TypeMetadataWMSCapabilityLayerStyle } from '@/api/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';
@@ -140,8 +140,8 @@ export function WmsStylePanel({ layerDetails }: WmsStylePanelProps): JSX.Element
   const sxClasses = getSxClasses(theme);
 
   // Store hooks
-  const currentWmsStyle = useLayerSelectorWmsStyle(layerDetails.layerPath);
-  const storeWmsStyles = useLayerSelectorWmsStyles(layerDetails.layerPath);
+  const currentWmsStyle = useStoreLayerWmsStyle(layerDetails.layerPath);
+  const storeWmsStyles = useStoreLayerWmsStyles(layerDetails.layerPath);
   const memoWmsStyleArray = useMemo(() => storeWmsStyles || [], [storeWmsStyles]);
   const layerController = useLayerController();
 

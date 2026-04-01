@@ -4,17 +4,17 @@ import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
 import { delay } from 'geoview-core/core/utils/utilities';
 import {
-  getStoreActiveAppBarTab,
-  getStoreActiveFooterBarTab,
-  getStoreAppBarComponents,
-  getStoreFooterBarComponents,
-  getStoreNavBarComponents,
+  getStoreUIActiveAppBarTab,
+  getStoreUIActiveFooterBarTab,
+  getStoreUIAppBarComponents,
+  getStoreUIFooterBarComponents,
+  getStoreUINavBarComponents,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/ui-state';
 import {
-  getStoreDataTableAllFeaturesArray,
+  getStoreDataTableAllFeaturesDataArray,
   getStoreDataTableSelectedLayerPath,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/data-table-state';
-import { getStoreLayerStateLayerBounds } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
+import { getStoreLayerBounds } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
 import { getStoreMapPointMarkers } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
 
 /**
@@ -57,7 +57,7 @@ export class MapConfigTester extends GVAbstractTester {
       (test) => {
         // Verify the footer bar tab is selected
         test.addStep('Verifying data-table tab is selected in footer bar...');
-        const { tabId } = getStoreActiveFooterBarTab(mapId);
+        const { tabId } = getStoreUIActiveFooterBarTab(mapId);
         Test.assertIsEqual(tabId, 'data-table');
 
         // Verify the selected layer path in data table store
@@ -67,7 +67,7 @@ export class MapConfigTester extends GVAbstractTester {
 
         // Verify that layer data exists (table was created)
         test.addStep('Verifying data table is defined...');
-        const allFeaturesData = getStoreDataTableAllFeaturesArray(mapId);
+        const allFeaturesData = getStoreDataTableAllFeaturesDataArray(mapId);
         Test.assertIsDefined('allFeaturesDataArray', allFeaturesData);
 
         // Verify if there is an array of data tables with content
@@ -113,7 +113,7 @@ export class MapConfigTester extends GVAbstractTester {
       (test) => {
         // Verify that data-table is not in footer tabs
         test.addStep('Verifying data-table is selected in app bar...');
-        const activeTab = getStoreActiveAppBarTab(mapId);
+        const activeTab = getStoreUIActiveAppBarTab(mapId);
         Test.assertIsEqual(activeTab.tabId, 'data-table');
 
         // Verify the selected layer path in data table store
@@ -123,7 +123,7 @@ export class MapConfigTester extends GVAbstractTester {
 
         // Verify that layer data exists (table was created)
         test.addStep('Verifying data table is defined...');
-        const allFeaturesData = getStoreDataTableAllFeaturesArray(mapId);
+        const allFeaturesData = getStoreDataTableAllFeaturesDataArray(mapId);
         Test.assertIsDefined('allFeaturesDataArray', allFeaturesData);
 
         // Verify if there is an array of data tables with content
@@ -166,7 +166,7 @@ export class MapConfigTester extends GVAbstractTester {
       (test) => {
         // Verify that footer bar exists with default tabs
         test.addStep('Verifying footer bar has default tabs...');
-        const footerBarTabs = getStoreFooterBarComponents(mapId);
+        const footerBarTabs = getStoreUIFooterBarComponents(mapId);
         Test.assertIsDefined('footerBarTabs', footerBarTabs);
 
         // Verify default tabs are present (layers, data-table)
@@ -175,7 +175,7 @@ export class MapConfigTester extends GVAbstractTester {
 
         // Verify that app bar exists with default tabs
         test.addStep('Verifying app bar has default tabs...');
-        const appBarTabs = getStoreAppBarComponents(mapId);
+        const appBarTabs = getStoreUIAppBarComponents(mapId);
         Test.assertIsDefined('appBarTabs', appBarTabs);
 
         // Verify default tabs are present (geolocator, legend, details, export)
@@ -209,12 +209,12 @@ export class MapConfigTester extends GVAbstractTester {
       (test) => {
         // Verify that footer bar has no tabs
         test.addStep('Verifying footer bar has no tabs...');
-        const footerBarTabs = getStoreFooterBarComponents(mapId);
+        const footerBarTabs = getStoreUIFooterBarComponents(mapId);
         Test.assertIsArrayLengthEqual(footerBarTabs, 0);
 
         // Verify that app bar has no tabs
         test.addStep('Verifying app bar has no tabs...');
-        const appBarTabs = getStoreAppBarComponents(mapId);
+        const appBarTabs = getStoreUIAppBarComponents(mapId);
         Test.assertIsArrayLengthEqual(appBarTabs, 0);
       }
     );
@@ -240,7 +240,7 @@ export class MapConfigTester extends GVAbstractTester {
       (test) => {
         // Verify that navBar exists with default controls
         test.addStep('Verifying navBar has default controls...');
-        const navBarComponents = getStoreNavBarComponents(mapId);
+        const navBarComponents = getStoreUINavBarComponents(mapId);
         Test.assertIsDefined('navBarComponents', navBarComponents);
 
         // Verify default controls are present
@@ -270,7 +270,7 @@ export class MapConfigTester extends GVAbstractTester {
       (test) => {
         // Verify that navBar exists
         test.addStep('Verifying navBar exists...');
-        const navBarComponents = getStoreNavBarComponents(mapId);
+        const navBarComponents = getStoreUINavBarComponents(mapId);
         Test.assertIsDefined('navBarComponents', navBarComponents);
 
         // Verify no buttons are present
@@ -308,7 +308,7 @@ export class MapConfigTester extends GVAbstractTester {
         test.addStep('Getting layer bound extent...');
         const geoviewLayer = newMapViewer.controllers.layerController.getGeoviewLayerRegular('geojsonLYR5/polygons.json');
         Test.assertIsDefined('geoviewLayer', geoviewLayer);
-        const layerExtent = getStoreLayerStateLayerBounds(this.getMapId(), 'geojsonLYR5/polygons.json');
+        const layerExtent = getStoreLayerBounds(this.getMapId(), 'geojsonLYR5/polygons.json');
         Test.assertIsArray(layerExtent);
 
         await delay(2000);

@@ -17,7 +17,7 @@ import type { TypeButtonPanel } from '@/ui/panel/panel-types';
 import { getSxClasses } from './nav-bar-style';
 import type { NavBarApi, NavBarCreatedEvent, NavBarRemovedEvent } from '@/core/components';
 import type { TypeValidNavBarProps } from '@/api/types/map-schema-types';
-import { useUINavbarComponents } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useStoreUINavbarComponents } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from './nav-bar-panel-button';
 import { usePluginController } from '@/core/controllers/plugin-controller';
@@ -75,7 +75,7 @@ export function NavBar(props: NavBarProps): JSX.Element {
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Store
-  const navBarComponents = useUINavbarComponents();
+  const navBarComponents = useStoreUINavbarComponents();
   const pluginController = usePluginController();
 
   // Ref

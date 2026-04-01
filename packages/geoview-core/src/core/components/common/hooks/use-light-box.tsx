@@ -2,7 +2,7 @@ import { memo, useCallback, useState } from 'react';
 import { Box } from '@/ui';
 import type { LightBoxSlides } from '@/core/components/lightbox/lightbox';
 import { LightboxImg } from '@/core/components/lightbox/lightbox';
-import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useStoreUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { logger } from '@/core/utils/logger';
 import { TIMEOUT } from '@/core/utils/constant';
 
@@ -41,7 +41,7 @@ const BaseLightBoxComponent = memo(function BaseLightBoxComponent({
 }: BaseLightBoxProps) {
   logger.logTraceRender('components/common/use-lightbox (BaseLightBoxComponent)');
 
-  const activeTrapGeoView = useUIActiveTrapGeoView();
+  const activeTrapGeoView = useStoreUIActiveTrapGeoView();
 
   /**
    * Handles when the user changes slides in the lightbox.

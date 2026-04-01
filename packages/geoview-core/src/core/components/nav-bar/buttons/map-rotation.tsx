@@ -2,10 +2,10 @@ import type { ReactNode } from 'react';
 import { createElement, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  useMapRotation,
-  useMapFixNorth,
-  useMapNorthArrow,
-  useMapProjectionEPSG,
+  useStoreMapRotation,
+  useStoreMapFixNorth,
+  useStoreMapNorthArrow,
+  useStoreMapCurrentProjectionEPSG,
   setStoreMapFixNorth,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
@@ -17,7 +17,7 @@ import { useManageArrow } from '@/core/components/north-arrow/hooks/useManageArr
 import type { TypePanelProps } from '@/ui/panel/panel-types';
 import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 import { IconButton } from '@/ui/icon-button/icon-button';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useMapController } from '@/core/controllers/map-controller';
 
 /**
@@ -32,11 +32,11 @@ export default function MapRotation(): JSX.Element {
   const { t } = useTranslation<string>();
 
   // Get values from store
-  const mapId = useGeoViewMapId();
-  const mapRotation = useMapRotation();
-  const isFixNorth = useMapFixNorth();
-  const isNorthEnable = useMapNorthArrow();
-  const mapProjectionEPSG = useMapProjectionEPSG();
+  const mapId = useStoreGeoViewMapId();
+  const mapRotation = useStoreMapRotation();
+  const isFixNorth = useStoreMapFixNorth();
+  const isNorthEnable = useStoreMapNorthArrow();
+  const mapProjectionEPSG = useStoreMapCurrentProjectionEPSG();
   const { rotationAngle } = useManageArrow();
   const mapController = useMapController();
 

@@ -6,10 +6,7 @@ import { Box, Checkbox, Collapse, FormControl, Select, Typography } from '@/ui';
 import { CollectionsIcon, ExpandMoreIcon, ExpandLessIcon } from '@/ui';
 
 import { getSxClasses } from './layer-settings-style';
-import {
-  useLayerSelectorMosaicRule,
-  useLayerSelectorAllowedMosaicMethods,
-} from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useStoreLayerMosaicRule, useStoreLayerAllowedMosaicMethods } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 import type { TypeLegendLayer } from '../../types';
 import type { TypeMosaicMethod, TypeMosaicOperation } from '@/api/types/layer-schema-types';
@@ -68,8 +65,8 @@ export function MosaicRulePanel({ layerDetails }: MosaicRulePanelProps): JSX.Ele
   const { t } = useTranslation();
 
   // Store hooks
-  const mosaicRule = useLayerSelectorMosaicRule(layerDetails.layerPath);
-  const allowedMosaicMethods = useLayerSelectorAllowedMosaicMethods(layerDetails.layerPath);
+  const mosaicRule = useStoreLayerMosaicRule(layerDetails.layerPath);
+  const allowedMosaicMethods = useStoreLayerAllowedMosaicMethods(layerDetails.layerPath);
   const layerController = useLayerController();
 
   // State

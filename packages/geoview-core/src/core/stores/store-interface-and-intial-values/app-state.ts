@@ -283,105 +283,10 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
 
 // #endregion STATE INITIALIZATION
 
-// #region STATE HOOKS
-// GV To be used by React components
-
-/** Hook that returns whether the circular progress indicator is active. */
-export const useAppCircularProgressActive = (): boolean => useStore(useGeoViewStore(), (state) => state.appState.isCircularProgressActive);
-
-/** Hook that returns whether the crosshairs overlay is active. */
-export const useAppCrosshairsActive = (): boolean => useStore(useGeoViewStore(), (state) => state.appState.isCrosshairsActive);
-
-/** Hook that returns the list of disabled layer types. */
-export const useAppDisabledLayerTypes = (): TypeInitialGeoviewLayerType[] =>
-  useStore(useGeoViewStore(), (state) => state.appState.disabledLayerTypes);
-
-/** Hook that returns the current display language. */
-export const useAppDisplayLanguage = (): TypeDisplayLanguage => useStore(useGeoViewStore(), (state) => state.appState.displayLanguage);
-
-/** Hook that returns the current display date mode. */
-export const useAppDisplayDateMode = (): DisplayDateMode => useStore(useGeoViewStore(), (state) => state.appState.displayDateMode);
-
-/** Hook that returns the current display date timezone. */
-export const useDisplayDateTimezone = (): TimeIANA => useStore(useGeoViewStore(), (state) => state.appState.displayDateTimezone);
-
-/** Hook that returns the current display theme. */
-export const useAppDisplayTheme = (): TypeDisplayTheme => useStore(useGeoViewStore(), (state) => state.appState.displayTheme);
-
-/** Hook that returns whether fullscreen mode is active. */
-export const useAppFullscreenActive = (): boolean => useStore(useGeoViewStore(), (state) => state.appState.isFullscreenActive);
-
-/** Hook that returns the geolocator service URL. */
-export const useAppGeolocatorServiceURL = (): string | undefined =>
-  useStore(useGeoViewStore(), (state) => state.appState.geolocatorServiceURL);
-
-/** Hook that returns the metadata service URL. */
-export const useAppMetadataServiceURL = (): string | undefined => useStore(useGeoViewStore(), (state) => state.appState.metadataServiceURL);
-
-/** Hook that returns the root GeoView HTML element for the current map. */
-export const useAppGeoviewHTMLElement = (): HTMLElement => useStore(useGeoViewStore(), (state) => state.appState.geoviewHTMLElement);
-
-/** Hook that returns the current map container height in pixels. */
-export const useAppHeight = (): number => useStore(useGeoViewStore(), (state) => state.appState.height);
-
-/** Hook that returns the base URL for GeoView static assets. */
-export const useAppGeoviewAssetsURL = (): string => useStore(useGeoViewStore(), (state) => state.appState.geoviewAssetsURL);
-
-/** Hook that returns the guide content object. */
-export const useAppGuide = (): TypeGuideObject | undefined => useStore(useGeoViewStore(), (state) => state.appState.guide);
-
-/** Hook that returns the list of active notifications. */
-export const useAppNotifications = (): NotificationDetailsType[] => useStore(useGeoViewStore(), (state) => state.appState.notifications);
-
-/** Hook that returns whether unsymbolized features should be displayed. */
-export const useAppShowUnsymbolizedFeatures = (): boolean =>
-  useStore(useGeoViewStore(), (state) => state.appState.showUnsymbolizedFeatures);
-
-/**
- * Hook that returns the shell container HTML element for the current map.
- *
- * Queries the DOM for the element whose id starts with `shell-{mapId}`.
- *
- * @returns The shell container element.
- */
-export const useAppShellContainer = (): HTMLElement => {
-  const geoviewElement = useAppGeoviewHTMLElement();
-  const mapId = useStore(useGeoViewStore(), (state) => state.mapId);
-  return geoviewElement.querySelector(`[id^="shell-${mapId}"]`) as HTMLElement;
-};
-
-/**
- * Hook that returns the display language for a specific map by its id.
- *
- * Used in app-start.tsx before the GeoView context is assigned to the map.
- * Do not use this technique elsewhere; it is only intended for reloading language and theme.
- *
- * @param mapId - The map identifier.
- * @returns The display language for the given map.
- */
-// GV This hook uses getGeoViewStore, because of the context not being ready at the time this hook is used in app-start.
-export const useAppDisplayLanguageById = (mapId: string): TypeDisplayLanguage =>
-  useStore(getGeoViewStore(mapId), (state) => state.appState.displayLanguage);
-
-/**
- * Hook that returns the display theme for a specific map by its id.
- *
- * Used in app-start.tsx before the GeoView context is assigned to the map.
- * Do not use this technique elsewhere; it is only intended for reloading language and theme.
- *
- * @param mapId - The map identifier.
- * @returns The display theme for the given map.
- */
-// GV This hook uses getGeoViewStore, because of the context not being ready at the time this hook is used in app-start.
-export const useAppDisplayThemeById = (mapId: string): TypeDisplayTheme =>
-  useStore(getGeoViewStore(mapId), (state) => state.appState.displayTheme);
-
-// #endregion STATE HOOKS
-
-// #region STATE SELECTORS
-// GV Should only be used specifically to access the Store.
-// GV Use sparingly and only if you are sure of what you are doing.
-// GV DO NOT USE this technique in React components, use the hooks above instead.
+// #region STATE GETTERS & HOOKS
+// GV Getters should be used to get the values at a moment in time.
+// GV Hooks should be used to attach to values and trigger UI components when they change.
+// GV Typically they are listed in couples (getter + hook) for the same value.
 
 /**
  * Returns the full app state slice for the given map.
@@ -395,12 +300,87 @@ export const useAppDisplayThemeById = (mapId: string): TypeDisplayTheme =>
 const getStoreAppState = (mapId: string): IAppState => getGeoViewStore(mapId).getState().appState;
 
 /**
+ * Gets whether the circular progress indicator is active for the given map.
+ *
+ * @param mapId - The map identifier.
+ * @returns True if the progress indicator is active.
+ */
+export const getStoreAppIsCircularProgressActive = (mapId: string): boolean => getStoreAppState(mapId).isCircularProgressActive;
+
+/** Hook that returns whether the circular progress indicator is active. */
+export const useStoreAppIsCircularProgressActive = (): boolean =>
+  useStore(useGeoViewStore(), (state) => state.appState.isCircularProgressActive);
+
+/**
+ * Gets whether the crosshairs overlay is active for the given map.
+ *
+ * @param mapId - The map identifier.
+ * @returns True if crosshairs are active.
+ */
+export const getStoreAppIsCrosshairsActive = (mapId: string): boolean => getStoreAppState(mapId).isCrosshairsActive;
+
+/** Hook that returns whether the crosshairs overlay is active. */
+export const useStoreAppIsCrosshairsActive = (): boolean => useStore(useGeoViewStore(), (state) => state.appState.isCrosshairsActive);
+
+/**
  * Gets the disabled layer types for the given map.
  *
  * @param mapId - The map identifier.
  * @returns The list of disabled layer types.
  */
-export const getStoreDisabledLayerTypes = (mapId: string): TypeInitialGeoviewLayerType[] => getStoreAppState(mapId).disabledLayerTypes;
+export const getStoreAppDisabledLayerTypes = (mapId: string): TypeInitialGeoviewLayerType[] => getStoreAppState(mapId).disabledLayerTypes;
+
+/** Hook that returns the list of disabled layer types. */
+export const useStoreAppDisabledLayerTypes = (): TypeInitialGeoviewLayerType[] =>
+  useStore(useGeoViewStore(), (state) => state.appState.disabledLayerTypes);
+
+/**
+ * Gets the display language for the given map.
+ *
+ * @param mapId - The map identifier.
+ * @returns The display language.
+ */
+export const getStoreAppDisplayLanguage = (mapId: string): TypeDisplayLanguage => getStoreAppState(mapId).displayLanguage;
+
+/** Hook that returns the current display language. */
+export const useStoreAppDisplayLanguage = (): TypeDisplayLanguage => useStore(useGeoViewStore(), (state) => state.appState.displayLanguage);
+
+/**
+ * Hook that returns the display language for a specific map by its id.
+ *
+ * Used in app-start.tsx before the GeoView context is assigned to the map.
+ * Do not use this technique elsewhere; it is only intended for reloading language and theme.
+ *
+ * @param mapId - The map identifier.
+ * @returns The display language for the given map.
+ */
+// GV This hook uses getGeoViewStore, because of the context not being ready at the time this hook is used in app-start.
+export const useStoreAppDisplayLanguageById = (mapId: string): TypeDisplayLanguage =>
+  useStore(getGeoViewStore(mapId), (state) => state.appState.displayLanguage);
+
+/**
+ * Gets the display theme for the given map.
+ *
+ * @param mapId - The map identifier.
+ * @returns The display theme.
+ */
+export const getStoreAppDisplayTheme = (mapId: string): TypeDisplayTheme => getStoreAppState(mapId).displayTheme;
+
+/** Hook that returns the current display theme. */
+export const useStoreAppDisplayTheme = (): TypeDisplayTheme => useStore(useGeoViewStore(), (state) => state.appState.displayTheme);
+
+/**
+ * Hook that returns the display theme for a specific map by its id.
+ *
+ * Used in app-start.tsx before the GeoView context is assigned to the map.
+ * Do not use this technique elsewhere; it is only intended for reloading language and theme.
+ *
+ * @param mapId - The map identifier.
+ * @returns The display theme for the given map.
+ */
+// GV This hook uses getGeoViewStore, because of the context not being ready at the time this hook is used in app-start.
+export const useStoreAppDisplayThemeById = (mapId: string): TypeDisplayTheme =>
+  useStore(getGeoViewStore(mapId), (state) => state.appState.displayTheme);
 
 /**
  * Gets the display date mode for the given map.
@@ -408,7 +388,10 @@ export const getStoreDisabledLayerTypes = (mapId: string): TypeInitialGeoviewLay
  * @param mapId - The map identifier.
  * @returns The display date mode.
  */
-export const getStoreDisplayDateMode = (mapId: string): DisplayDateMode => getStoreAppState(mapId).displayDateMode;
+export const getStoreAppDisplayDateMode = (mapId: string): DisplayDateMode => getStoreAppState(mapId).displayDateMode;
+
+/** Hook that returns the current display date mode. */
+export const useStoreAppDisplayDateMode = (): DisplayDateMode => useStore(useGeoViewStore(), (state) => state.appState.displayDateMode);
 
 /**
  * Gets the display date timezone for the given map.
@@ -418,86 +401,8 @@ export const getStoreDisplayDateMode = (mapId: string): DisplayDateMode => getSt
  */
 export const getStoreDisplayDateTimezone = (mapId: string): TimeIANA => getStoreAppState(mapId).displayDateTimezone;
 
-/**
- * Gets the display language for the given map.
- *
- * @param mapId - The map identifier.
- * @returns The display language.
- */
-export const getStoreDisplayLanguage = (mapId: string): TypeDisplayLanguage => getStoreAppState(mapId).displayLanguage;
-
-/**
- * Gets the display theme for the given map.
- *
- * @param mapId - The map identifier.
- * @returns The display theme.
- */
-export const getStoreDisplayTheme = (mapId: string): TypeDisplayTheme => getStoreAppState(mapId).displayTheme;
-
-/**
- * Gets the default date format settings derived from the current display date mode.
- *
- * @param mapId - The map identifier.
- * @returns The default date display settings.
- */
-export const getStoreDisplayDateFormatDefault = (mapId: string): TypeDisplayDateDefaults =>
-  DateMgt.getDisplayDateDefaults(getStoreDisplayDateMode(mapId));
-
-/**
- * Gets the geolocator service URL for the given map.
- *
- * @param mapId - The map identifier.
- * @returns The geolocator service URL, or undefined if not configured.
- */
-export const getStoreGeolocatorServiceURL = (mapId: string): string | undefined => getStoreAppState(mapId).geolocatorServiceURL;
-
-/**
- * Gets the GeoView assets base URL for the given map.
- *
- * @param mapId - The map identifier.
- * @returns The assets base URL.
- */
-export const getStoreGeoviewAssetsURL = (mapId: string): string => getStoreAppState(mapId).geoviewAssetsURL;
-
-/**
- * Gets the root GeoView HTML element for the given map.
- *
- * @param mapId - The map identifier.
- * @returns The HTML element hosting the map.
- */
-export const getStoreGeoviewHTMLElement = (mapId: string): HTMLElement => getStoreAppState(mapId).geoviewHTMLElement;
-
-/**
- * Gets the guide content object for the given map.
- *
- * @param mapId - The map identifier.
- * @returns The guide object, or undefined if not set.
- */
-export const getStoreGuide = (mapId: string): TypeGuideObject | undefined => getStoreAppState(mapId).guide;
-
-/**
- * Gets the map container height for the given map.
- *
- * @param mapId - The map identifier.
- * @returns The height in pixels.
- */
-export const getStoreHeight = (mapId: string): number => getStoreAppState(mapId).height;
-
-/**
- * Gets whether the circular progress indicator is active for the given map.
- *
- * @param mapId - The map identifier.
- * @returns True if the progress indicator is active.
- */
-export const getStoreIsCircularProgressActive = (mapId: string): boolean => getStoreAppState(mapId).isCircularProgressActive;
-
-/**
- * Gets whether the crosshairs overlay is active for the given map.
- *
- * @param mapId - The map identifier.
- * @returns True if crosshairs are active.
- */
-export const getStoreIsCrosshairsActive = (mapId: string): boolean => getStoreAppState(mapId).isCrosshairsActive;
+/** Hook that returns the current display date timezone. */
+export const useStoreDisplayDateTimezone = (): TimeIANA => useStore(useGeoViewStore(), (state) => state.appState.displayDateTimezone);
 
 /**
  * Gets whether fullscreen mode is active for the given map.
@@ -505,7 +410,22 @@ export const getStoreIsCrosshairsActive = (mapId: string): boolean => getStoreAp
  * @param mapId - The map identifier.
  * @returns True if fullscreen is active.
  */
-export const getStoreIsFullscreenActive = (mapId: string): boolean => getStoreAppState(mapId).isFullscreenActive;
+export const getStoreAppIsFullscreenActive = (mapId: string): boolean => getStoreAppState(mapId).isFullscreenActive;
+
+/** Hook that returns whether fullscreen mode is active. */
+export const useStoreAppIsFullscreenActive = (): boolean => useStore(useGeoViewStore(), (state) => state.appState.isFullscreenActive);
+
+/**
+ * Gets the geolocator service URL for the given map.
+ *
+ * @param mapId - The map identifier.
+ * @returns The geolocator service URL, or undefined if not configured.
+ */
+export const getStoreAppGeolocatorServiceURL = (mapId: string): string | undefined => getStoreAppState(mapId).geolocatorServiceURL;
+
+/** Hook that returns the geolocator service URL. */
+export const useStoreAppGeolocatorServiceURL = (): string | undefined =>
+  useStore(useGeoViewStore(), (state) => state.appState.geolocatorServiceURL);
 
 /**
  * Gets the metadata service URL for the given map.
@@ -513,7 +433,55 @@ export const getStoreIsFullscreenActive = (mapId: string): boolean => getStoreAp
  * @param mapId - The map identifier.
  * @returns The metadata service URL, or undefined if not configured.
  */
-export const getStoreMetadataServiceURL = (mapId: string): string | undefined => getStoreAppState(mapId).metadataServiceURL;
+export const getStoreAppMetadataServiceURL = (mapId: string): string | undefined => getStoreAppState(mapId).metadataServiceURL;
+
+/** Hook that returns the metadata service URL. */
+export const useStoreAppMetadataServiceURL = (): string | undefined =>
+  useStore(useGeoViewStore(), (state) => state.appState.metadataServiceURL);
+
+/**
+ * Gets the root GeoView HTML element for the given map.
+ *
+ * @param mapId - The map identifier.
+ * @returns The HTML element hosting the map.
+ */
+export const getStoreAppGeoviewHTMLElement = (mapId: string): HTMLElement => getStoreAppState(mapId).geoviewHTMLElement;
+
+/** Hook that returns the root GeoView HTML element for the current map. */
+export const useStoreAppGeoviewHTMLElement = (): HTMLElement => useStore(useGeoViewStore(), (state) => state.appState.geoviewHTMLElement);
+
+/**
+ * Gets the map container height for the given map.
+ *
+ * @param mapId - The map identifier.
+ * @returns The height in pixels.
+ */
+export const getStoreAppHeight = (mapId: string): number => getStoreAppState(mapId).height;
+
+/** Hook that returns the current map container height in pixels. */
+export const useStoreAppHeight = (): number => useStore(useGeoViewStore(), (state) => state.appState.height);
+
+/**
+ * Gets the GeoView assets base URL for the given map.
+ *
+ * @param mapId - The map identifier.
+ * @returns The assets base URL.
+ */
+export const getStoreAppGeoviewAssetsURL = (mapId: string): string => getStoreAppState(mapId).geoviewAssetsURL;
+
+/** Hook that returns the base URL for GeoView static assets. */
+export const useStoreAppGeoviewAssetsURL = (): string => useStore(useGeoViewStore(), (state) => state.appState.geoviewAssetsURL);
+
+/**
+ * Gets the guide content object for the given map.
+ *
+ * @param mapId - The map identifier.
+ * @returns The guide object, or undefined if not set.
+ */
+export const getStoreAppGuide = (mapId: string): TypeGuideObject | undefined => getStoreAppState(mapId).guide;
+
+/** Hook that returns the guide content object. */
+export const useStoreAppGuide = (): TypeGuideObject | undefined => useStore(useGeoViewStore(), (state) => state.appState.guide);
 
 /**
  * Gets the list of active notifications for the given map.
@@ -521,7 +489,40 @@ export const getStoreMetadataServiceURL = (mapId: string): string | undefined =>
  * @param mapId - The map identifier.
  * @returns The array of notifications.
  */
-export const getStoreNotifications = (mapId: string): NotificationDetailsType[] => getStoreAppState(mapId).notifications;
+export const getStoreAppNotifications = (mapId: string): NotificationDetailsType[] => getStoreAppState(mapId).notifications;
+
+/** Hook that returns the list of active notifications. */
+export const useStoreAppNotifications = (): NotificationDetailsType[] =>
+  useStore(useGeoViewStore(), (state) => state.appState.notifications);
+
+/**
+ * Gets whether unsymbolized features should be displayed for the given map.
+ *
+ * @param mapId - The map identifier.
+ * @returns True if unsymbolized features should be shown.
+ */
+export const getStoreAppShowUnsymbolizedFeatures = (mapId: string): boolean => getStoreAppState(mapId).showUnsymbolizedFeatures;
+
+/** Hook that returns whether unsymbolized features should be displayed. */
+export const useStoreAppShowUnsymbolizedFeatures = (): boolean =>
+  useStore(useGeoViewStore(), (state) => state.appState.showUnsymbolizedFeatures);
+
+// #endregion STATE GETTERS & HOOKS
+
+// #region STATE GETTERS & HOOKS - OTHERS (no match between getter-hook)
+
+/**
+ * Hook that returns the shell container HTML element for the current map.
+ *
+ * Queries the DOM for the element whose id starts with `shell-{mapId}`.
+ *
+ * @returns The shell container element.
+ */
+export const useStoreAppShellContainer = (): HTMLElement => {
+  const geoviewElement = useStoreAppGeoviewHTMLElement();
+  const mapId = useStore(useGeoViewStore(), (state) => state.mapId);
+  return geoviewElement.querySelector(`[id^="shell-${mapId}"]`) as HTMLElement;
+};
 
 /**
  * Gets whether to show highlight bounding boxes around layer features for the given map.
@@ -532,17 +533,18 @@ export const getStoreNotifications = (mapId: string): NotificationDetailsType[] 
 export const getStoreShowLayerHighlightLayerBbox = (mapId: string): boolean => getStoreAppState(mapId).showLayerHighlightLayerBbox;
 
 /**
- * Gets whether unsymbolized features should be displayed for the given map.
+ * Gets the default date format settings derived from the current display date mode.
  *
  * @param mapId - The map identifier.
- * @returns True if unsymbolized features should be shown.
+ * @returns The default date display settings.
  */
-export const getStoreShowUnsymbolizedFeatures = (mapId: string): boolean => getStoreAppState(mapId).showUnsymbolizedFeatures;
+export const getStoreDisplayDateFormatDefault = (mapId: string): TypeDisplayDateDefaults =>
+  DateMgt.getDisplayDateDefaults(getStoreAppDisplayDateMode(mapId));
 
-// #endregion STATE SELECTORS
-// GV These methods should be called from a State Adaptor class listening on domain events triggered by controllers.
+// #endregion STATE GETTERS & HOOKS - OTHERS (no match between getter-hook)
 
 // #region STATE ADAPTORS
+// GV These methods should be called from a State Adaptor class listening on domain events triggered by controllers.
 
 /**
  * Sets the circular progress indicator active state.

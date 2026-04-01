@@ -4,10 +4,10 @@ import { useTranslation } from 'react-i18next';
 import { FocusTrap, Box, Button } from '@/ui';
 
 import { useUIController } from '@/core/controllers/ui-controller';
-import { useUIActiveFocusItem, useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useStoreUIActiveFocusItem, useStoreUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE, TIMEOUT } from '@/core/utils/constant';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 
 /** Properties for the FocusTrapContainer component. */
@@ -43,10 +43,10 @@ export const FocusTrapContainer = memo(function FocusTrapContainer({
   const { t } = useTranslation<string>();
 
   // Store
+  const mapId = useStoreGeoViewMapId();
   const uiController = useUIController();
-  const activeTrapGeoView = useUIActiveTrapGeoView();
-  const focusItem = useUIActiveFocusItem();
-  const mapId = useGeoViewMapId();
+  const activeTrapGeoView = useStoreUIActiveTrapGeoView();
+  const focusItem = useStoreUIActiveFocusItem();
 
   /**
    * Handles closing the focus trap and restoring focus.

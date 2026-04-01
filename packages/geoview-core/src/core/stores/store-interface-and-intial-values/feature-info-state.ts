@@ -79,38 +79,27 @@ export interface IFeatureInfoState {
 
 // #endregion INTERFACE DEFINITION
 
-// #region STATE HOOKS
-// GV To be used by React components
+// #region UTIL FUNCTIONS (PRIVATE)
 
-/** Hook that returns the list of checked/selected features. */
-export const useDetailsCheckedFeatures = (): TypeFeatureInfoEntry[] =>
-  useStore(useGeoViewStore(), (state) => state.detailsState.checkedFeatures);
+/**
+ * Gets the layer data array for one layer.
+ * @param mapId - The map id.
+ * @param layerPath - The path of the layer to get.
+ * @returns The ordered layer info.
+ */
+const findLayerDataFromLayerDataArray = (
+  layerPath: string,
+  layerDataArray: TypeFeatureInfoResultSetEntry[]
+): TypeFeatureInfoResultSetEntry | undefined => {
+  return layerDataArray.find((layer) => layer.layerPath === layerPath);
+};
 
-/** Hook that returns the feature info layer data array. */
-export const useDetailsLayerDataArray = (): TypeFeatureInfoResultSetEntry[] =>
-  useStore(useGeoViewStore(), (state) => state.detailsState.layerDataArray);
+// #endregion UTIL FUNCTIONS (PRIVATE)
 
-/** Hook that returns the batched feature info layer data array. */
-export const useDetailsLayerDataArrayBatch = (): TypeFeatureInfoResultSetEntry[] =>
-  useStore(useGeoViewStore(), (state) => state.detailsState.layerDataArrayBatch);
-
-/** Hook that returns the selected layer path in the details panel. */
-export const useDetailsSelectedLayerPath = (): string => useStore(useGeoViewStore(), (state) => state.detailsState.selectedLayerPath);
-
-/** Hook that returns whether coordinate info is enabled. */
-export const useDetailsCoordinateInfoEnabled = (): boolean =>
-  useStore(useGeoViewStore(), (state) => state.detailsState.coordinateInfoEnabled);
-
-/** Hook that returns whether the coordinate info switch is hidden. */
-export const useMapHideCoordinateInfoSwitch = (): boolean =>
-  useStore(useGeoViewStore(), (state) => state.detailsState.hideCoordinateInfoSwitch);
-
-// #endregion STATE HOOKS
-
-// #region STATE SELECTORS
-// GV Should only be used specifically to access the Store.
-// GV Use sparingly and only if you are sure of what you are doing.
-// GV DO NOT USE this technique in React components, use the hooks above instead.
+// #region STATE GETTERS & HOOKS
+// GV Getters should be used to get the values at a moment in time.
+// GV Hooks should be used to attach to values and trigger UI components when they change.
+// GV Typically they are listed in couples (getter + hook) for the same value.
 
 /**
  * Returns the full feature info state slice for the given map.
@@ -124,20 +113,6 @@ export const useMapHideCoordinateInfoSwitch = (): boolean =>
 const getStoreDetailsState = (mapId: string): IFeatureInfoState => getGeoViewStore(mapId).getState().detailsState;
 
 /**
- * Gets the layer data array for one layer.
- * @param mapId - The map id.
- * @param layerPath - The path of the layer to get.
- * @returns The ordered layer info.
- */
-const findLayerDataFromLayerDataArray = (
-  mapId: string,
-  layerPath: string,
-  layerDataArray: TypeFeatureInfoResultSetEntry[] = getStoreDetailsState(mapId).layerDataArray
-): TypeFeatureInfoResultSetEntry | undefined => {
-  return layerDataArray.find((layer) => layer.layerPath === layerPath);
-};
-
-/**
  * Gets the selected layer path in the details panel for the given map.
  *
  * @param mapId - The map identifier.
@@ -147,6 +122,13 @@ export const getStoreDetailsSelectedLayerPath = (mapId: string): string => {
   return getStoreDetailsState(mapId).selectedLayerPath;
 };
 
+/** Hook that returns the selected layer path in the details panel. */
+export const useStoreDetailsSelectedLayerPath = (): string => useStore(useGeoViewStore(), (state) => state.detailsState.selectedLayerPath);
+
+// #endregion STATE GETTERS & HOOKS
+
+// #region STATE GETTERS & HOOKS - OTHERS (no match between getter-hook)
+
 /**
  * Gets the feature info entries for a specific layer.
  *
@@ -155,10 +137,31 @@ export const getStoreDetailsSelectedLayerPath = (mapId: string): string => {
  * @returns The feature info entries, or undefined if the layer is not found.
  */
 export const getStoreDetailsFeatures = (mapId: string, layerPath: string): TypeFeatureInfoEntry[] | undefined => {
-  return findLayerDataFromLayerDataArray(mapId, layerPath)?.features;
+  const { layerDataArray } = getStoreDetailsState(mapId);
+  return findLayerDataFromLayerDataArray(layerPath, layerDataArray)?.features;
 };
 
-// #endregion STATE SELECTORS
+/** Hook that returns the list of checked/selected features. */
+export const useStoreDetailsCheckedFeatures = (): TypeFeatureInfoEntry[] =>
+  useStore(useGeoViewStore(), (state) => state.detailsState.checkedFeatures);
+
+/** Hook that returns the feature info layer data array. */
+export const useStoreDetailsLayerDataArray = (): TypeFeatureInfoResultSetEntry[] =>
+  useStore(useGeoViewStore(), (state) => state.detailsState.layerDataArray);
+
+/** Hook that returns the batched feature info layer data array. */
+export const useStoreDetailsLayerDataArrayBatch = (): TypeFeatureInfoResultSetEntry[] =>
+  useStore(useGeoViewStore(), (state) => state.detailsState.layerDataArrayBatch);
+
+/** Hook that returns whether coordinate info is enabled. */
+export const useStoreDetailsCoordinateInfoEnabled = (): boolean =>
+  useStore(useGeoViewStore(), (state) => state.detailsState.coordinateInfoEnabled);
+
+/** Hook that returns whether the coordinate info switch is hidden. */
+export const useStoreDetailsHideCoordinateInfoSwitch = (): boolean =>
+  useStore(useGeoViewStore(), (state) => state.detailsState.hideCoordinateInfoSwitch);
+
+// #endregion STATE GETTERS & HOOKS - OTHERS (no match between getter-hook)
 
 // #region STATE ADAPTORS
 

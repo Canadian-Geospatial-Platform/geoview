@@ -22,15 +22,15 @@ import { Geolocator } from '@/core/components/geolocator/geolocator';
 import type { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
 import ExportButton from '@/core/components/export/export-modal-button';
 import {
-  useUIActiveFocusItem,
-  useUIActiveTrapGeoView,
-  useUIAppbarComponents,
-  useUIActiveAppBarTab,
-  useUIHiddenTabs,
+  useStoreUIActiveFocusItem,
+  useStoreUIActiveTrapGeoView,
+  useStoreUIAppbarComponents,
+  useStoreUIActiveAppBarTab,
+  useStoreUIHiddenTabs,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { useMapInteraction, setStoreMapClickMarkerIconHide } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useStoreMapInteraction, setStoreMapClickMarkerIconHide } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useStoreAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreGeoViewConfig, useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 import type { AppBarApi, AppBarCreatedEvent, AppBarRemovedEvent } from '@/core/components';
 import { Guide, Legend, DetailsPanel, Datapanel, LayersPanel } from '@/core/components';
@@ -73,7 +73,6 @@ export function AppBar(props: AppBarProps): JSX.Element {
   const { api: appBarApi, onScrollShellIntoView } = props;
 
   // Hooks
-  const mapId = useGeoViewMapId();
   const { t } = useTranslation();
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
@@ -82,21 +81,21 @@ export function AppBar(props: AppBarProps): JSX.Element {
   const [buttonPanels, setButtonPanels] = useState<ButtonPanelType>({});
 
   // get store values and action
-  const activeModalId = useUIActiveFocusItem().activeElementId;
-  const interaction = useMapInteraction();
-  const appBarComponents = useUIAppbarComponents();
-  const { tabId, isOpen, isFocusTrapped } = useUIActiveAppBarTab();
-  const hiddenTabs = useUIHiddenTabs();
-  const activeTrapGeoView = useUIActiveTrapGeoView();
+  const mapId = useStoreGeoViewMapId();
+  const activeModalId = useStoreUIActiveFocusItem().activeElementId;
+  const interaction = useStoreMapInteraction();
+  const appBarComponents = useStoreUIAppbarComponents();
+  const { tabId, isOpen, isFocusTrapped } = useStoreUIActiveAppBarTab();
+  const hiddenTabs = useStoreUIHiddenTabs();
+  const activeTrapGeoView = useStoreUIActiveTrapGeoView();
   const pluginController = usePluginController();
-
-  const geoviewElement = useAppGeoviewHTMLElement().querySelector('[id^="mapTargetElement-"]') as HTMLElement;
-
   const uiController = useUIController();
 
+  const geoviewElement = useStoreAppGeoviewHTMLElement().querySelector('[id^="mapTargetElement-"]') as HTMLElement;
+
   // get store config for app bar to add (similar logic as in footer-bar)
-  const appBarConfig = useGeoViewConfig()?.appBar;
-  const footerBarConfig = useGeoViewConfig()?.footerBar;
+  const appBarConfig = useStoreGeoViewConfig()?.appBar;
+  const footerBarConfig = useStoreGeoViewConfig()?.footerBar;
 
   // #region REACT HOOKS
 

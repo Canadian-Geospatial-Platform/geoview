@@ -4,21 +4,21 @@ import { Layout } from 'geoview-core/core/components/common';
 import type { TypeDisplayLanguage } from 'geoview-core/api/types/map-schema-types';
 import type { TypeTimeSliderValues } from 'geoview-core/core/stores/store-interface-and-intial-values/time-slider-state';
 import {
-  useTimeSliderLayers,
-  useTimeSliderSelectedLayerPath,
+  useStoreTimeSliderLayers,
+  useStoreTimeSliderSelectedLayerPath,
   setStoreTimeSliderSelectedLayerPath,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/time-slider-state';
-import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 import {
-  getStoreMapIsLayerHiddenOnMap,
-  useMapAllVisibleandInRangeLayers,
+  useStoreMapAllVisibleandInRangeLayers,
+  useStoreMapIsLayerHiddenOnMapSet,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
 import {
-  useLayerDateTemporalModes,
-  useLayerDisplayDateFormats,
-  useLayerDisplayDateTimezones,
-  useLayerNames,
-  useLayerStatuses,
+  useStoreLayerDateTemporalModeSet,
+  useStoreLayerDisplayDateFormatSet,
+  useStoreLayerDisplayDateTimezoneSet,
+  useStoreLayerNameSet,
+  useStoreLayerStatusSet,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
 import { Box } from 'geoview-core/ui';
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
@@ -49,15 +49,16 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   const { useCallback, useMemo, useEffect } = reactUtilities.react;
 
   // get values from store
-  const displayLanguage = useAppDisplayLanguage();
-  const visibleInRangeLayers = useMapAllVisibleandInRangeLayers();
-  const timeSliderLayers = useTimeSliderLayers()!;
-  const selectedLayerPath = useTimeSliderSelectedLayerPath();
-  const layerNames = useLayerNames();
-  const layerStatuses = useLayerStatuses();
-  const layerDisplayDateFormats = useLayerDisplayDateFormats();
-  const layerDisplayDateTimezones = useLayerDisplayDateTimezones();
-  const layerTemporalModes = useLayerDateTemporalModes();
+  const displayLanguage = useStoreAppDisplayLanguage();
+  const layerHiddenSet = useStoreMapIsLayerHiddenOnMapSet();
+  const visibleInRangeLayers = useStoreMapAllVisibleandInRangeLayers();
+  const layerNames = useStoreLayerNameSet();
+  const layerStatuses = useStoreLayerStatusSet();
+  const layerDisplayDateFormats = useStoreLayerDisplayDateFormatSet();
+  const layerDisplayDateTimezones = useStoreLayerDisplayDateTimezoneSet();
+  const layerTemporalModes = useStoreLayerDateTemporalModeSet();
+  const timeSliderLayers = useStoreTimeSliderLayers()!;
+  const selectedLayerPath = useStoreTimeSliderSelectedLayerPath();
 
   // #region Handlers
 
@@ -143,16 +144,12 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
           return false;
         }
 
-        // TODO: CHECK -This should likely go through a Zustand hook instead of a state getter
         // Check if main layer is hidden (includes out of scale check)
-        const mainLayerHidden = getStoreMapIsLayerHiddenOnMap(mapId, layer.layerPath);
+        const mainLayerHidden = layerHiddenSet[layer.layerPath];
 
         // For custom time slider with additional layers, check if any additional layer is visible
         if (layer.timeSliderLayerInfo.additionalLayerpaths && layer.timeSliderLayerInfo.additionalLayerpaths.length > 0) {
-          const hasVisibleAdditionalLayer = layer.timeSliderLayerInfo.additionalLayerpaths.some(
-            (layerPath) => !getStoreMapIsLayerHiddenOnMap(mapId, layerPath)
-          );
-          // TODO: CHECK -This should likely go through a Zustand hook instead of a state getter (line above)
+          const hasVisibleAdditionalLayer = layer.timeSliderLayerInfo.additionalLayerpaths.some((layerPath) => !layerHiddenSet[layerPath]);
 
           // Show if main layer is visible OR any additional layer is visible
           if (mainLayerHidden && !hasVisibleAdditionalLayer) {
@@ -191,7 +188,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
           layerUniqueId: `${mapId}-${TABS.TIME_SLIDER}-${layer.layerPath}`,
         } as LayerListEntry;
       });
-  }, [timeSliderLayers, visibleInRangeLayers, getFilterInfo, layerStatuses, layerNames, displayLanguage, mapId]);
+  }, [timeSliderLayers, visibleInRangeLayers, getFilterInfo, layerStatuses, layerNames, layerHiddenSet, displayLanguage, mapId]);
 
   /**
    * Unselects the layer if it's removed from the visibility array.

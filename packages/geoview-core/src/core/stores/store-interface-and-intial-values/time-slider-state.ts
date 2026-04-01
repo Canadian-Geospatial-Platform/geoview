@@ -103,7 +103,7 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
 
     // TODO: REFACTOR - These setters reassign the whole 'timeSliderLayers' object (for all layerPaths) instead of just
     // TO.DOCONT: changing the one for the layerPath in question. This should be changed and a hook selector should be put in
-    // TO.DOCONT: place - instead of the too-high-level: useTimeSliderLayers
+    // TO.DOCONT: place - instead of the too-high-level: useStoreTimeSliderLayers
     actions: {
       addTimeSliderLayer(newLayer: TimeSliderLayerSet): void {
         set({
@@ -261,30 +261,10 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
 
 // #endregion STATE INITIALIZATION
 
-// #region STATE HOOKS
-// GV To be used by React components
-
-/** Hooks the full set of time-slider layers. Safe to call outside the TimeSlider plugin (optional chaining). */
-// GV This hook is called from other components than the TimeSlider so the '?' on the timeSliderState is mandatory
-export const useTimeSliderLayers = (): TimeSliderLayerSet | undefined =>
-  useStore(useGeoViewStore(), (state) => state.timeSliderState?.timeSliderLayers);
-
-/** Hooks the time-slider values for a specific layer path. Safe to call outside the TimeSlider plugin. */
-// GV This hook is called from other components than the TimeSlider so the '?' on the timeSliderState is mandatory
-export const useTimeSliderLayersSelector = (layerPath: string): TypeTimeSliderValues | undefined =>
-  useStore(useGeoViewStore(), (state) => state.timeSliderState?.timeSliderLayers[layerPath]);
-
-/** Hooks the currently selected layer path in the time slider. */
-export const useTimeSliderSelectedLayerPath = (): string => useStore(useGeoViewStore(), (state) => state.timeSliderState.selectedLayerPath);
-
-/** Hooks the slider filter string for a specific layer path. Safe to call outside the TimeSlider plugin. */
-// GV This hook is called from other components than the TimeSlider so the '?' on the timeSliderState is mandatory
-export const useTimeSliderFiltersSelector = (layerPath: string): string | undefined =>
-  useStore(useGeoViewStore(), (state) => state.timeSliderState?.sliderFilters[layerPath]);
-
-// #endregion STATE HOOKS
-
-// #region STATE SELECTORS
+// #region STATE GETTERS & HOOKS
+// GV Getters should be used to get the values at a moment in time.
+// GV Hooks should be used to attach to values and trigger UI components when they change.
+// GV Typically they are listed in couples (getter + hook) for the same value.
 
 /**
  * Returns the full time slider state slice for the given map.
@@ -330,6 +310,11 @@ export const getStoreTimeSliderLayers = (mapId: string): TimeSliderLayerSet => {
   return getStoreTimeSliderState(mapId).timeSliderLayers;
 };
 
+/** Hooks the full set of time-slider layers. Safe to call outside the TimeSlider plugin (optional chaining). */
+// GV This hook is called from other components than the TimeSlider so the '?' on the timeSliderState is mandatory
+export const useStoreTimeSliderLayers = (): TimeSliderLayerSet | undefined =>
+  useStore(useGeoViewStore(), (state) => state.timeSliderState?.timeSliderLayers);
+
 /**
  * Gets the time-slider values for a specific layer path.
  *
@@ -342,6 +327,11 @@ export const getStoreTimeSliderLayer = (mapId: string, layerPath: string): TypeT
   return getStoreTimeSliderState(mapId).timeSliderLayers[layerPath];
 };
 
+/** Hooks the time-slider values for a specific layer path. Safe to call outside the TimeSlider plugin. */
+// GV This hook is called from other components than the TimeSlider so the '?' on the timeSliderState is mandatory
+export const useStoreTimeSliderLayer = (layerPath: string): TypeTimeSliderValues | undefined =>
+  useStore(useGeoViewStore(), (state) => state.timeSliderState?.timeSliderLayers[layerPath]);
+
 /**
  * Gets the currently selected layer path from the time slider.
  *
@@ -349,9 +339,13 @@ export const getStoreTimeSliderLayer = (mapId: string, layerPath: string): TypeT
  * @returns The selected layer path.
  * @throws {PluginStateUninitializedError} When the TimeSlider plugin is uninitialized.
  */
-export const getStoreTimeSliderSelectedLayer = (mapId: string): string => {
+export const getStoreTimeSliderSelectedLayerPath = (mapId: string): string => {
   return getStoreTimeSliderState(mapId).selectedLayerPath;
 };
+
+/** Hooks the currently selected layer path in the time slider. */
+export const useStoreTimeSliderSelectedLayerPath = (): string =>
+  useStore(useGeoViewStore(), (state) => state.timeSliderState.selectedLayerPath);
 
 /**
  * Gets all slider filter expressions keyed by layer path.
@@ -376,7 +370,12 @@ export const getStoreTimeSliderFilter = (mapId: string, layerPath: string): stri
   return getStoreTimeSliderFilters(mapId)[layerPath];
 };
 
-// #endregion STATE SELECTORS
+/** Hooks the slider filter string for a specific layer path. Safe to call outside the TimeSlider plugin. */
+// GV This hook is called from other components than the TimeSlider so the '?' on the timeSliderState is mandatory
+export const useStoreTimeSliderFilter = (layerPath: string): string | undefined =>
+  useStore(useGeoViewStore(), (state) => state.timeSliderState?.sliderFilters[layerPath]);
+
+// #endregion STATE GETTERS & HOOKS
 
 // #region STATE ADAPTORS
 // GV These methods should be called from a State Adaptor class listening on domain events triggered by controllers.

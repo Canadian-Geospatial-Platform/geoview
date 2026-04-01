@@ -3,8 +3,8 @@ import { useTheme } from '@mui/material/styles';
 
 import { getSxClasses } from './data-table-style';
 import { Switch } from '@/ui';
-import { useDataTableLayerSettings, setStoreMapFilteredEntry } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useStoreDataTableLayerSettings, setStoreMapFilteredEntry } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 
 /** Properties for the FilterMap component. */
@@ -28,8 +28,8 @@ function FilterMap({ layerPath, isGlobalFilterOn }: FilterMapProps): JSX.Element
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
-  const mapId = useGeoViewMapId();
-  const datatableSettings = useDataTableLayerSettings();
+  const mapId = useStoreGeoViewMapId();
+  const datatableSettings = useStoreDataTableLayerSettings();
 
   return (
     <Switch

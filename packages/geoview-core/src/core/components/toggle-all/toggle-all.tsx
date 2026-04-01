@@ -4,12 +4,12 @@ import { useCallback } from 'react';
 import { Box, Switch, Tooltip } from '@/ui';
 import {
   setStoreMapAllMapLayerCollapsed,
-  useMapAllLayersCollapsedToggle,
-  useMapAllLayersVisibleToggle,
-  useMapHasCollapsibleLayersToggle,
+  useStoreMapAllLayersCollapsedToggle,
+  useStoreMapAllLayersVisibleToggle,
+  useStoreMapHasCollapsibleLayersToggle,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { useLayerDisplayState, useLayerAreLayersLoading } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useStoreLayerDisplayState, useStoreLayerAreLayersLoading } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 
 import type { TypeContainerBox } from '@/core/types/global-types';
@@ -46,13 +46,13 @@ export function ToggleAll({ source, containerType }: ToggleAllProps): JSX.Elemen
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('md'));
   const { t } = useTranslation<string>();
-  const mapId = useGeoViewMapId();
+  const mapId = useStoreGeoViewMapId();
 
-  const displayState = useLayerDisplayState();
-  const allLayersVisible = useMapAllLayersVisibleToggle();
-  const allLayersCollapsed = useMapAllLayersCollapsedToggle();
-  const layersAreLoading = useLayerAreLayersLoading();
-  const hasCollapsibleLayers = useMapHasCollapsibleLayersToggle();
+  const displayState = useStoreLayerDisplayState();
+  const allLayersVisible = useStoreMapAllLayersVisibleToggle();
+  const allLayersCollapsed = useStoreMapAllLayersCollapsedToggle();
+  const layersAreLoading = useStoreLayerAreLayersLoading();
+  const hasCollapsibleLayers = useStoreMapHasCollapsibleLayersToggle();
   const mapController = useMapController();
 
   /**

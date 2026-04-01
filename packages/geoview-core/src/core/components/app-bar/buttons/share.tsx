@@ -2,14 +2,14 @@ import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { ShareIcon, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Box } from '@/ui';
-import { useGeoViewMapId, useGeoViewSharedMode } from '@/core/stores/geoview-store';
+import { useStoreGeoViewMapId, useStoreGeoViewSharedMode } from '@/core/stores/geoview-store';
 import {
-  useMapInteraction,
-  useMapZoom,
-  useMapCenterCoordinates,
-  useMapProjection,
-  useMapCurrentBasemapOptions,
-  useMapOrderedLayers,
+  useStoreMapInteraction,
+  useStoreMapZoom,
+  useStoreMapCenterCoordinates,
+  useStoreMapCurrentProjection,
+  useStoreMapCurrentBasemapOptions,
+  useStoreMapOrderedLayers,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { Projection } from '@/geo/utils/projection';
 
@@ -98,14 +98,14 @@ export default function Share(): JSX.Element | null {
   const { t } = useTranslation<string>();
 
   // Store
-  const mapId = useGeoViewMapId();
-  const sharedMode = useGeoViewSharedMode();
-  const interaction = useMapInteraction();
-  const zoom = useMapZoom();
-  const center = useMapCenterCoordinates();
-  const projection = useMapProjection();
-  const basemap = useMapCurrentBasemapOptions();
-  const layers = useMapOrderedLayers();
+  const mapId = useStoreGeoViewMapId();
+  const sharedMode = useStoreGeoViewSharedMode();
+  const interaction = useStoreMapInteraction();
+  const zoom = useStoreMapZoom();
+  const center = useStoreMapCenterCoordinates();
+  const projection = useStoreMapCurrentProjection();
+  const basemap = useStoreMapCurrentBasemapOptions();
+  const layers = useStoreMapOrderedLayers();
 
   // State
   const [isModalOpen, setIsModalOpen] = useState(false);

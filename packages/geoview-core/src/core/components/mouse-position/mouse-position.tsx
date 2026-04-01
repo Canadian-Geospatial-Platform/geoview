@@ -4,7 +4,7 @@ import type { Coordinate } from 'ol/coordinate';
 import { useTheme } from '@mui/material/styles';
 import { Box, Button, CheckIcon } from '@/ui';
 
-import { useMapPointerPosition } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useStoreMapPointerPosition } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { getSxClasses } from './mouse-position-style';
 
@@ -98,7 +98,7 @@ export const MousePosition = memo(function MousePosition({ expanded }: MousePosi
   const [positionMode, setPositionMode] = useState<number>(POSITION_MODES.DMS);
 
   // Store
-  const pointerPosition = useMapPointerPosition();
+  const pointerPosition = useStoreMapPointerPosition();
 
   /**
    * Formats position strings for all display modes.

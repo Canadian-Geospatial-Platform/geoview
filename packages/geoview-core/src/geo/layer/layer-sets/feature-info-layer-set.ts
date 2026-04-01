@@ -12,7 +12,7 @@ import {
   type TypeFeatureInfoResultSet,
   type TypeFeatureInfoResultSetEntry,
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
-import { getStoreShowUnsymbolizedFeatures } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { getStoreAppShowUnsymbolizedFeatures } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { RequestAbortedError } from '@/core/exceptions/core-exceptions';
 import { LayerNoLastQueryToPerformError } from '@/core/exceptions/geoview-exceptions';
 import { logger } from '@/core/utils/logger';
@@ -196,7 +196,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
           // Filter out unsymbolized features if the showUnsymbolizedFeatures config is false
           // GV: KML and ESRI Image is excluded as they currently have no symbology.
-          if (!getStoreShowUnsymbolizedFeatures(this.getMapId()) && !(layer instanceof GVKML) && !(layer instanceof GVEsriImage)) {
+          if (!getStoreAppShowUnsymbolizedFeatures(this.getMapId()) && !(layer instanceof GVKML) && !(layer instanceof GVEsriImage)) {
             // eslint-disable-next-line no-param-reassign
             promiseResult.results = arrayOfRecords.filter((record) => record.featureIcon);
           }

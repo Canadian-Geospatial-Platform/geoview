@@ -2,8 +2,8 @@ import { createSvgIcon } from '@mui/material/utils';
 import { type TypeWindow } from 'geoview-core';
 import { getSxClasses } from 'geoview-core/core/components/nav-bar/nav-bar-style';
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
-import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
-import { useDrawerHideMeasurements } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
+import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreDrawerHideMeasurements } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
 
 import { IconButton, StraightenIcon } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
@@ -35,8 +35,8 @@ export default function Measurements(): JSX.Element {
   // Get store values
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
-  const displayLanguage = useAppDisplayLanguage();
-  const hideMeasurements = useDrawerHideMeasurements();
+  const displayLanguage = useStoreAppDisplayLanguage();
+  const hideMeasurements = useStoreDrawerHideMeasurements();
   const drawerController = useDrawerController();
 
   /**

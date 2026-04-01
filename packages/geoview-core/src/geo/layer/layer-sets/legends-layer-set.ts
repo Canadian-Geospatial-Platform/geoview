@@ -10,6 +10,7 @@ import type { PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set'
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
 import {
   deleteStoreLayerFromLegendLayers,
+  setStoreLayerStatus,
   setStoreLegendQueryStatus,
   type TypeLegend,
   type TypeLegendResultSet,
@@ -145,6 +146,9 @@ export class LegendsLayerSet extends AbstractLayerSet {
     // Change the layer status!
     this.resultSet[layerPath].layerStatus = layerStatus;
 
+    // Save to the store
+    this.#propagateToStoreLayerStatus(layerPath, layerStatus);
+
     // Check if ready to query legend
     this.#checkQueryLegend(layer, false);
   }
@@ -257,7 +261,21 @@ export class LegendsLayerSet extends AbstractLayerSet {
   }
 
   /**
-   * Propagates the legend query status to the store
+   * Propagates the layer status to the store.
+   *
+   * @param layerPath - The layer path to propagate the status for
+   * @param layerStatus - The layer status to propagate
+   */
+  #propagateToStoreLayerStatus(layerPath: string, layerStatus: TypeLayerStatus): void {
+    // Propagate
+    setStoreLayerStatus(this.getMapId(), layerPath, layerStatus);
+  }
+
+  /**
+   * Propagates the legend query status to the store.
+   *
+   * @param layerPath - The layer path to propagate the legend query status for
+   * @param resultSetEntry - The legend result set entry containing the legend query status and data to propagate
    */
   #propagateToStoreLegendQueryStatus(layerPath: string, resultSetEntry: TypeLegendResultSetEntry): void {
     // Propagate
@@ -315,12 +333,6 @@ export class LegendsLayerSet extends AbstractLayerSet {
 
       // Process a layer status changed
       this.processLayerStatusChanged(layerConfig.layerPath, layerStatusEvent.layerStatus, layer);
-
-      // If still existing (it's possible a layer set might want to unregister a layer config depending on its status, so we check)
-      if (this.resultSet[layerConfig.layerPath]) {
-        // Propagate the status to the store so that the UI gets updated
-        this.#propagateToStore(this.resultSet[layerConfig.layerPath]);
-      }
 
       // Emit the layer set updated changed event
       this.onLayerSetUpdatedProcess(layerConfig.layerPath);

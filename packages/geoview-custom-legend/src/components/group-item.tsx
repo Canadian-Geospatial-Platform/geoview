@@ -1,7 +1,7 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
-import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 import { logger } from 'geoview-core/core/utils/logger';
-import { useMapSelectorLayerArrayVisibility } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
+import { useStoreMapLayerArrayVisibility } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
 
 import type { TypeGroupLayer, TypeLegendItem } from '../custom-legend-types';
@@ -66,7 +66,7 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
     KeyboardArrowUpIcon,
   } = ui.elements;
 
-  const displayLanguage = useAppDisplayLanguage();
+  const displayLanguage = useStoreAppDisplayLanguage();
   const mapController = useMapController();
 
   const [collapsed, setCollapsed] = useState<boolean>(isGroupLayer(item) ? (item.collapsed ?? false) : false);
@@ -75,7 +75,7 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
   const layerPaths = useMemo(() => collectLayerPaths(item.children), [item.children]);
 
   // Check if all child layers are visible
-  const allVisible = useMapSelectorLayerArrayVisibility(layerPaths);
+  const allVisible = useStoreMapLayerArrayVisibility(layerPaths);
 
   if (!isGroupLayer(item)) return;
 

@@ -1,8 +1,8 @@
 import { type TypeWindow } from 'geoview-core';
 import { getSxClasses } from 'geoview-core/core/components/nav-bar/nav-bar-style';
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
-import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
-import { useDrawerIsDrawing } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
+import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreDrawerIsDrawing } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
 
 import { IconButton, DrawIcon } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
@@ -24,8 +24,8 @@ export default function Draw(): JSX.Element {
   // Get store values
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
-  const displayLanguage = useAppDisplayLanguage();
-  const isDrawing = useDrawerIsDrawing();
+  const displayLanguage = useStoreAppDisplayLanguage();
+  const isDrawing = useStoreDrawerIsDrawing();
   const drawerController = useDrawerController();
 
   /**

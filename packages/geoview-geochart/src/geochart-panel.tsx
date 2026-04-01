@@ -6,20 +6,20 @@ import { checkSelectedLayerPathList } from 'geoview-core/core/components/common/
 import { Typography } from 'geoview-core/ui/typography/typography';
 import { Box } from 'geoview-core/ui';
 import {
-  useMapClickCoordinates,
-  useMapAllVisibleandInRangeLayers,
-  getStoreMapIsLayerHiddenOnMap,
+  useStoreMapClickCoordinates,
+  useStoreMapAllVisibleandInRangeLayers,
+  useStoreMapIsLayerHiddenOnMapSet,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
-import { useLayerNames, useLayerStatuses } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
+import { useStoreLayerNameSet, useStoreLayerStatusSet } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
 import type { TypeGeochartResultSetEntry } from 'geoview-core/core/stores/store-interface-and-intial-values/geochart-state';
 import {
-  useGeochartConfigs,
-  useGeochartLayerDataArrayBatch,
-  useGeochartSelectedLayerPath,
+  useStoreGeochartChartsConfig,
+  useStoreGeochartLayerDataArrayBatch,
+  useStoreGeochartSelectedLayerPath,
   setStoreGeochartLayerDataArrayBatchLayerPathBypass,
   setStoreGeochartSelectedLayerPath,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/geochart-state';
-import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
 import { logger } from 'geoview-core/core/utils/logger';
 import { CONTAINER_TYPE, TABS } from 'geoview-core/core/utils/constant';
@@ -50,14 +50,15 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   const { useState, useCallback, useMemo, useEffect, useRef } = reactUtilities.react;
 
   // Get states and actions from store
-  const configObj = useGeochartConfigs();
-  const visibleInRangeLayers = useMapAllVisibleandInRangeLayers();
-  const storeArrayOfLayerData = useGeochartLayerDataArrayBatch();
-  const selectedLayerPath = useGeochartSelectedLayerPath();
-  const displayLanguage = useAppDisplayLanguage();
-  const mapClickCoordinates = useMapClickCoordinates();
-  const layerNames = useLayerNames();
-  const layerStatuses = useLayerStatuses();
+  const configObj = useStoreGeochartChartsConfig();
+  const displayLanguage = useStoreAppDisplayLanguage();
+  const visibleInRangeLayers = useStoreMapAllVisibleandInRangeLayers();
+  const mapClickCoordinates = useStoreMapClickCoordinates();
+  const layerHiddenSet = useStoreMapIsLayerHiddenOnMapSet();
+  const layerNames = useStoreLayerNameSet();
+  const layerStatuses = useStoreLayerStatusSet();
+  const storeArrayOfLayerData = useStoreGeochartLayerDataArrayBatch();
+  const selectedLayerPath = useStoreGeochartSelectedLayerPath();
 
   // Create the validator shared for all the charts in the footer
   const [schemaValidator] = useState<SchemaValidator>(new SchemaValidator());
@@ -162,10 +163,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
 
     // Set the layers list
     return visibleInRangeLayers.reduce<LayerListEntry[]>((acc, layerPath) => {
-      // TODO: CHECK -This should likely go through a Zustand hook instead of a state getter
-      const layer = storeArrayOfLayerData.find(
-        (layerData) => layerData.layerPath === layerPath && !getStoreMapIsLayerHiddenOnMap(mapId, layerData.layerPath)
-      );
+      const layer = storeArrayOfLayerData.find((layerData) => layerData.layerPath === layerPath && !layerHiddenSet[layerData.layerPath]);
 
       if (layer && memoConfigObj[layer.layerPath]) {
         acc.push({
@@ -182,7 +180,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
 
       return acc;
     }, []);
-  }, [storeArrayOfLayerData, visibleInRangeLayers, memoConfigObj, layerNames, layerStatuses, getNumFeaturesLabel, mapId]);
+  }, [storeArrayOfLayerData, visibleInRangeLayers, memoConfigObj, layerNames, layerStatuses, layerHiddenSet, getNumFeaturesLabel, mapId]);
 
   /** Memoizes the selected layer for the LayerList component. */
   const memoLayerSelectedItem = useMemo(() => {

@@ -4,10 +4,10 @@ import { Box, CircularProgressBase, ErrorIcon, Icon, BrowserNotSupportedIcon, La
 
 import { getSxClasses } from '@/core/components/common/layer-icon-style';
 import {
-  useLayerIconLayerSet,
-  useLayerSelectorChildren,
-  useLayerSelectorLegendQueryStatus,
-  useLayerSelectorStatus,
+  useStoreLayerIconLayerSet,
+  useStoreLayerChildPaths,
+  useStoreLayerLegendQueryStatus,
+  useStoreLayerStatus,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { logger } from '@/core/utils/logger';
 
@@ -46,7 +46,7 @@ function IconStack({ layerPath }: TypeIconStackProps): JSX.Element | null {
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Store
-  const iconData = useLayerIconLayerSet(layerPath);
+  const iconData = useStoreLayerIconLayerSet(layerPath);
 
   const { iconImage, iconImageStacked, numOfIcons } = useMemo(
     () => ({
@@ -131,12 +131,12 @@ export function LayerIcon({ layerPath }: LayerIconProps): JSX.Element {
   logger.logTraceRenderDetailed('components/common/layer-icon', layerPath);
 
   // Hooks
-  const layerStatus = useLayerSelectorStatus(layerPath);
-  const legendQueryStatus = useLayerSelectorLegendQueryStatus(layerPath);
-  const layerChildren = useLayerSelectorChildren(layerPath);
+  const layerStatus = useStoreLayerStatus(layerPath);
+  const legendQueryStatus = useStoreLayerLegendQueryStatus(layerPath);
+  const layerChildPaths = useStoreLayerChildPaths(layerPath);
 
   // If has children (is a group layer)
-  const hasChildren = layerChildren && layerChildren.length;
+  const hasChildren = layerChildPaths && layerChildPaths.length;
 
   // If there is an error in layer or query status, flag it and show icon error
   const isError = layerStatus === 'error' || (legendQueryStatus && legendQueryStatus === 'error');

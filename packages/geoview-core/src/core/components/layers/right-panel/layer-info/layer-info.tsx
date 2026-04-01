@@ -11,23 +11,23 @@ import { logger } from '@/core/utils/logger';
 import { getLocalizedMessage, isValidUUID } from '@/core/utils/utilities';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { UtilAddLayer } from '@/core/components/layers/left-panel/add-new-layer/add-layer-utils';
-import { useAppDisplayLanguage, useAppMetadataServiceURL } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { useMapProjectionEPSG } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { useDataTableFilterSelector } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { useStoreAppDisplayLanguage, useStoreAppMetadataServiceURL } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreMapCurrentProjectionEPSG } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useStoreTableFilter } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import {
-  useLayerDateTemporalMode,
-  useLayerDisplayDateFormat,
-  useLayerDisplayDateFormatShort,
-  useLayerDisplayDateTimezone,
-  useLayerSelectorBounds,
-  useLayerSelectorBounds4326,
-  useLayerSelectorFilter,
-  useLayerSelectorFilterClass,
-  useLayerTimeDimension,
+  useStoreLayerDateTemporalMode,
+  useStoreLayerDisplayDateFormat,
+  useStoreLayerDisplayDateFormatShort,
+  useStoreLayerDisplayDateTimezone,
+  useStoreLayerBounds,
+  useStoreLayerBounds4326,
+  useStoreLayerFilter,
+  useStoreLayerFilterClass,
+  useStoreLayerTimeDimension,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import {
-  useTimeSliderFiltersSelector,
-  useTimeSliderLayersSelector,
+  useStoreTimeSliderFilter,
+  useStoreTimeSliderLayer,
 } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 import { useLayerController } from '@/core/controllers/layer-controller';
 
@@ -58,21 +58,21 @@ export function LayerInfoPanel({ layerDetails }: LayerInfoPanelProps): JSX.Eleme
   const sxClasses = getSxClasses(theme);
 
   // Store hooks
-  const language = useAppDisplayLanguage();
-  const metadataUrl = useAppMetadataServiceURL();
-  const mapProjectionEPSG = useMapProjectionEPSG();
-  const layerFilter = useLayerSelectorFilter(layerDetails.layerPath);
-  const classFilter = useLayerSelectorFilterClass(layerDetails.layerPath);
-  const dataFilter = useDataTableFilterSelector(layerDetails.layerPath);
-  const timeFilter = useTimeSliderFiltersSelector(layerDetails.layerPath);
-  const bounds = useLayerSelectorBounds(layerDetails.layerPath);
-  const bounds4326 = useLayerSelectorBounds4326(layerDetails.layerPath);
-  const layerDisplayDateFormat = useLayerDisplayDateFormat(layerDetails.layerPath);
-  const layerDisplayDateFormatShort = useLayerDisplayDateFormatShort(layerDetails.layerPath);
-  const layerDateTemporalMode = useLayerDateTemporalMode(layerDetails.layerPath);
-  const layerDisplayDateTimezone = useLayerDisplayDateTimezone(layerDetails.layerPath);
-  const layerTimeDimension = useLayerTimeDimension(layerDetails.layerPath);
-  const timeSliderDimension = useTimeSliderLayersSelector(layerDetails.layerPath);
+  const language = useStoreAppDisplayLanguage();
+  const metadataUrl = useStoreAppMetadataServiceURL();
+  const mapProjectionEPSG = useStoreMapCurrentProjectionEPSG();
+  const layerFilter = useStoreLayerFilter(layerDetails.layerPath);
+  const classFilter = useStoreLayerFilterClass(layerDetails.layerPath);
+  const dataFilter = useStoreTableFilter(layerDetails.layerPath);
+  const timeFilter = useStoreTimeSliderFilter(layerDetails.layerPath);
+  const bounds = useStoreLayerBounds(layerDetails.layerPath);
+  const bounds4326 = useStoreLayerBounds4326(layerDetails.layerPath);
+  const layerDisplayDateFormat = useStoreLayerDisplayDateFormat(layerDetails.layerPath);
+  const layerDisplayDateFormatShort = useStoreLayerDisplayDateFormatShort(layerDetails.layerPath);
+  const layerDateTemporalMode = useStoreLayerDateTemporalMode(layerDetails.layerPath);
+  const layerDisplayDateTimezone = useStoreLayerDisplayDateTimezone(layerDetails.layerPath);
+  const layerTimeDimension = useStoreLayerTimeDimension(layerDetails.layerPath);
+  const timeSliderDimension = useStoreTimeSliderLayer(layerDetails.layerPath);
   const layerController = useLayerController();
 
   // TODO: CHECK - This should probably be a Zustand store hook instead of a controller getter?

@@ -38,20 +38,20 @@ import TopToolbar from './top-toolbar';
 import { useUIController } from '@/core/controllers/ui-controller';
 import { getStoreMapCurrentProjectionEPSG } from '@/core/stores/store-interface-and-intial-values/map-state';
 import {
-  useLayerDateTemporalMode,
-  useLayerDisplayDateFormat,
-  useLayerDisplayDateTimezone,
-  useLayerSelectorFilterClass,
-  useLayerSelectorName,
+  useStoreLayerDateTemporalMode,
+  useStoreLayerDisplayDateFormat,
+  useStoreLayerDisplayDateTimezone,
+  useStoreLayerFilterClass,
+  useStoreLayerName,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import {
-  useDataTableLayerSettings,
+  useStoreDataTableLayerSettings,
   setStoreColumnFilterModesEntry,
   setStoreColumnsFiltersVisibility,
   setStoreSelectedFeature,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { useTimeSliderFiltersSelector } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
-import { useAppDisplayLanguage, useAppShowUnsymbolizedFeatures } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreTimeSliderFilter } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
+import { useStoreAppDisplayLanguage, useStoreAppShowUnsymbolizedFeatures } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { DateMgt } from '@/core/utils/date-mgt';
 import linkifyHtml from 'linkify-html';
 import { isImage, delay, sanitizeHtmlContent, enhanceLinksAccessibility } from '@/core/utils/utilities';
@@ -63,7 +63,7 @@ import { getSxClasses } from './data-table-style';
 import { useLightBox } from '@/core/components/common';
 import { NUMBER_FILTER, DATE_FILTER, STRING_FILTER } from '@/core/utils/constant';
 import type { DataTableProps, ColumnsType } from './data-table-types';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 import { Projection } from '@/geo/utils/projection';
@@ -108,19 +108,21 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
   const sxClasses = getSxClasses(sxtheme);
 
   // get store actions and values
-  const language = useAppDisplayLanguage();
-  const datatableSettings = useDataTableLayerSettings();
-  const showUnsymbolizedFeatures = useAppShowUnsymbolizedFeatures();
-  const layerClassFilter = useLayerSelectorFilterClass(layerPath);
-  const layerTimeFilter = useTimeSliderFiltersSelector(layerPath);
-  const layerDateTemporalMode = useLayerDateTemporalMode(layerPath);
-  const displayDateFormat = useLayerDisplayDateFormat(layerPath);
-  const displayDateTimezone = useLayerDisplayDateTimezone(layerPath);
+  const mapId = useStoreGeoViewMapId();
+  const language = useStoreAppDisplayLanguage();
+  const datatableSettings = useStoreDataTableLayerSettings();
+  const showUnsymbolizedFeatures = useStoreAppShowUnsymbolizedFeatures();
+  const layerClassFilter = useStoreLayerFilterClass(layerPath);
+  const layerTimeFilter = useStoreTimeSliderFilter(layerPath);
+  const layerDateTemporalMode = useStoreLayerDateTemporalMode(layerPath);
+  const displayDateFormat = useStoreLayerDisplayDateFormat(layerPath);
+  const displayDateTimezone = useStoreLayerDisplayDateTimezone(layerPath);
   const displayDateTimezoneUniversal = displayDateTimezone === 'local' ? DateMgt.TIME_IANA_LOCAL : displayDateTimezone;
-  const layerName = useLayerSelectorName(layerPath);
+  const layerName = useStoreLayerName(layerPath);
   const dataTableController = useDataTableController();
   const layerController = useLayerController();
   const mapController = useMapController();
+  const uiController = useUIController();
 
   // internal state
   const [density, setDensity] = useState<MRTDensityState>('compact');
@@ -145,10 +147,6 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
   const { columnFilters, setColumnFilters } = useFilterRows({ layerPath });
   const { globalFilter, setGlobalFilter } = useGlobalFilter({ layerPath });
   // #endregion
-
-  const uiController = useUIController();
-
-  const mapId = useGeoViewMapId();
 
   // #region Handlers
 
@@ -478,7 +476,7 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
       if (extent) {
         // Project
         const center = getCenter(extent);
-        // TODO: CHECK -This should likely go through a Zustand hook instead of a state getter
+        // Transform the coordinate and use a state getter here, because we don't need to hook on value changes in this callback function.
         const newCenter = Projection.transformPoints([center], getStoreMapCurrentProjectionEPSG(mapId), `EPSG:4326`)[0];
 
         // Zoom to extent and wait for it to finish

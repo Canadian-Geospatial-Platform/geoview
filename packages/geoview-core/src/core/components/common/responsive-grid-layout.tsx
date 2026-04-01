@@ -17,9 +17,9 @@ import { getSxClasses as getGuideSxClasses } from '@/core/components/guide/guide
 import { FullScreenDialog } from './full-screen-dialog';
 import { logger } from '@/core/utils/logger';
 import { ArrowBackIcon, ArrowForwardIcon, CloseIcon, QuestionMarkIcon } from '@/ui/icons';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
-import { useAppGuide, useAppFullscreenActive, useAppShellContainer } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { useUIActiveTrapGeoView, useUIActiveFocusItem } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
+import { useStoreAppGuide, useStoreAppIsFullscreenActive, useStoreAppShellContainer } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreUIActiveTrapGeoView, useStoreUIActiveFocusItem } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE, TIMEOUT, LIGHTBOX_SELECTORS } from '@/core/utils/constant';
 
@@ -88,7 +88,6 @@ const ResponsiveGridLayout = forwardRef(
     // Hooks
     const { t } = useTranslation<string>();
     const theme = useTheme();
-    const isMapFullScreen = useAppFullscreenActive();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     // Derive whether we have content (vs guide-only) from rightMain prop
     const hasContent = !!rightMain;
@@ -103,11 +102,12 @@ const ResponsiveGridLayout = forwardRef(
     const closeBtnRef = useRef<HTMLButtonElement>(null);
 
     // Store
-    const mapId = useGeoViewMapId();
-    const guide = useAppGuide();
-    const isFocusTrap = useUIActiveTrapGeoView();
-    const focusItem = useUIActiveFocusItem();
-    const shellContainer = useAppShellContainer();
+    const mapId = useStoreGeoViewMapId();
+    const guide = useStoreAppGuide();
+    const isFocusTrap = useStoreUIActiveTrapGeoView();
+    const isMapFullScreen = useStoreAppIsFullscreenActive();
+    const focusItem = useStoreUIActiveFocusItem();
+    const shellContainer = useStoreAppShellContainer();
 
     // States
     const [isRightPanelVisible, setIsRightPanelVisible] = useState(false);

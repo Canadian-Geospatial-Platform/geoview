@@ -236,49 +236,10 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
 
 // #endregion STATE INITIALIZATION
 
-// #region STATE HOOKS
-// GV To be used by React components
-
-/** Hooks the current focus-trap item from the UI state. */
-export const useUIActiveFocusItem = (): FocusItemProps => useStore(useGeoViewStore(), (state) => state.uiState.focusItem);
-
-/** Hooks the active app-bar tab state. */
-export const useUIActiveAppBarTab = (): ActiveAppBarTabType => useStore(useGeoViewStore(), (state) => state.uiState.activeAppBarTab);
-
-/** Hooks the active footer-bar tab state. */
-export const useUIActiveFooterBarTab = (): ActiveFooterBarTabType =>
-  useStore(useGeoViewStore(), (state) => state.uiState.activeFooterBarTab);
-
-/** Hooks whether the GeoView-level keyboard focus trap is active. */
-export const useUIActiveTrapGeoView = (): boolean => useStore(useGeoViewStore(), (state) => state.uiState.activeTrapGeoView);
-
-/** Hooks the app-bar component identifiers. */
-export const useUIAppbarComponents = (): TypeValidAppBarCoreProps[] =>
-  useStore(useGeoViewStore(), (state) => state.uiState.appBarComponents);
-
-/** Hooks the footer-bar component identifiers. */
-export const useUIFooterBarComponents = (): TypeValidFooterBarTabsCoreProps[] =>
-  useStore(useGeoViewStore(), (state) => state.uiState.footerBarComponents);
-
-/** Hooks the core package component identifiers. */
-export const useUICorePackagesComponents = (): TypeValidMapCorePackageProps[] =>
-  useStore(useGeoViewStore(), (state) => state.uiState.corePackagesComponents);
-
-/** Hooks the footer panel resize value. */
-export const useUIFooterPanelResizeValue = (): number => useStore(useGeoViewStore(), (state) => state.uiState.footerPanelResizeValue);
-
-/** Hooks the list of hidden tab identifiers. */
-export const useUIHiddenTabs = (): string[] => useStore(useGeoViewStore(), (state) => state.uiState.hiddenTabs);
-
-/** Hooks the nav-bar component identifiers. */
-export const useUINavbarComponents = (): TypeValidNavBarProps[] => useStore(useGeoViewStore(), (state) => state.uiState.navBarComponents);
-
-// #endregion STATE HOOKS
-
-// #region STATE SELECTORS
-// GV Should only be used specifically to access the Store.
-// GV Use sparingly and only if you are sure of what you are doing.
-// GV DO NOT USE this technique in React components, use the hooks above instead.
+// #region STATE GETTERS & HOOKS
+// GV Getters should be used to get the values at a moment in time.
+// GV Hooks should be used to attach to values and trigger UI components when they change.
+// GV Typically they are listed in couples (getter + hook) for the same value.
 
 /**
  * Returns the full UI state slice for the given map.
@@ -297,7 +258,11 @@ const getStoreUIState = (mapId: string): IUIState => getGeoViewStore(mapId).getS
  * @param mapId - The map id.
  * @returns The active footer-bar tab state.
  */
-export const getStoreActiveFooterBarTab = (mapId: string): ActiveFooterBarTabType => getStoreUIState(mapId).activeFooterBarTab;
+export const getStoreUIActiveFooterBarTab = (mapId: string): ActiveFooterBarTabType => getStoreUIState(mapId).activeFooterBarTab;
+
+/** Hooks the active footer-bar tab state. */
+export const useStoreUIActiveFooterBarTab = (): ActiveFooterBarTabType =>
+  useStore(useGeoViewStore(), (state) => state.uiState.activeFooterBarTab);
 
 /**
  * Gets the active app-bar tab from the store.
@@ -305,7 +270,10 @@ export const getStoreActiveFooterBarTab = (mapId: string): ActiveFooterBarTabTyp
  * @param mapId - The map id.
  * @returns The active app-bar tab state.
  */
-export const getStoreActiveAppBarTab = (mapId: string): ActiveAppBarTabType => getStoreUIState(mapId).activeAppBarTab;
+export const getStoreUIActiveAppBarTab = (mapId: string): ActiveAppBarTabType => getStoreUIState(mapId).activeAppBarTab;
+
+/** Hooks the active app-bar tab state. */
+export const useStoreUIActiveAppBarTab = (): ActiveAppBarTabType => useStore(useGeoViewStore(), (state) => state.uiState.activeAppBarTab);
 
 /**
  * Gets the footer-bar component identifiers from the store.
@@ -313,7 +281,12 @@ export const getStoreActiveAppBarTab = (mapId: string): ActiveAppBarTabType => g
  * @param mapId - The map id.
  * @returns The array of footer-bar component props.
  */
-export const getStoreFooterBarComponents = (mapId: string): TypeValidFooterBarTabsCoreProps[] => getStoreUIState(mapId).footerBarComponents;
+export const getStoreUIFooterBarComponents = (mapId: string): TypeValidFooterBarTabsCoreProps[] =>
+  getStoreUIState(mapId).footerBarComponents;
+
+/** Hooks the footer-bar component identifiers. */
+export const useStoreUIFooterBarComponents = (): TypeValidFooterBarTabsCoreProps[] =>
+  useStore(useGeoViewStore(), (state) => state.uiState.footerBarComponents);
 
 /**
  * Gets the app-bar component identifiers from the store.
@@ -321,7 +294,11 @@ export const getStoreFooterBarComponents = (mapId: string): TypeValidFooterBarTa
  * @param mapId - The map id.
  * @returns The array of app-bar component props.
  */
-export const getStoreAppBarComponents = (mapId: string): TypeValidAppBarCoreProps[] => getStoreUIState(mapId).appBarComponents;
+export const getStoreUIAppBarComponents = (mapId: string): TypeValidAppBarCoreProps[] => getStoreUIState(mapId).appBarComponents;
+
+/** Hooks the app-bar component identifiers. */
+export const useStoreUIAppbarComponents = (): TypeValidAppBarCoreProps[] =>
+  useStore(useGeoViewStore(), (state) => state.uiState.appBarComponents);
 
 /**
  * Gets the nav-bar component identifiers from the store.
@@ -329,7 +306,11 @@ export const getStoreAppBarComponents = (mapId: string): TypeValidAppBarCoreProp
  * @param mapId - The map id.
  * @returns The array of nav-bar component props.
  */
-export const getStoreNavBarComponents = (mapId: string): TypeValidNavBarProps[] => getStoreUIState(mapId).navBarComponents;
+export const getStoreUINavBarComponents = (mapId: string): TypeValidNavBarProps[] => getStoreUIState(mapId).navBarComponents;
+
+/** Hooks the nav-bar component identifiers. */
+export const useStoreUINavbarComponents = (): TypeValidNavBarProps[] =>
+  useStore(useGeoViewStore(), (state) => state.uiState.navBarComponents);
 
 /**
  * Gets the core package component identifiers from the store.
@@ -337,13 +318,29 @@ export const getStoreNavBarComponents = (mapId: string): TypeValidNavBarProps[] 
  * @param mapId - The map id.
  * @returns The array of core package component props.
  */
-export const getStoreCorePackageComponents = (mapId: string): TypeValidMapCorePackageProps[] =>
+export const getStoreUICorePackageComponents = (mapId: string): TypeValidMapCorePackageProps[] =>
   getStoreUIState(mapId).corePackagesComponents;
 
-// #endregion STATE SELECTORS
-// GV These methods should be called from a State Adaptor class listening on domain events triggered by controllers.
+/** Hooks the core package component identifiers. */
+export const useStoreUICorePackagesComponents = (): TypeValidMapCorePackageProps[] =>
+  useStore(useGeoViewStore(), (state) => state.uiState.corePackagesComponents);
+
+/** Hooks the current focus-trap item from the UI state. */
+export const useStoreUIActiveFocusItem = (): FocusItemProps => useStore(useGeoViewStore(), (state) => state.uiState.focusItem);
+
+/** Hooks whether the GeoView-level keyboard focus trap is active. */
+export const useStoreUIActiveTrapGeoView = (): boolean => useStore(useGeoViewStore(), (state) => state.uiState.activeTrapGeoView);
+
+/** Hooks the footer panel resize value. */
+export const useStoreUIFooterPanelResizeValue = (): number => useStore(useGeoViewStore(), (state) => state.uiState.footerPanelResizeValue);
+
+/** Hooks the list of hidden tab identifiers. */
+export const useStoreUIHiddenTabs = (): string[] => useStore(useGeoViewStore(), (state) => state.uiState.hiddenTabs);
+
+// #endregion STATE GETTERS & HOOKS
 
 // #region STATE ADAPTORS
+// GV These methods should be called from a State Adaptor class listening on domain events triggered by controllers.
 
 /**
  * Sets the active footer bar tab.

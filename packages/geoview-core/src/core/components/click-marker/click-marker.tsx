@@ -4,12 +4,12 @@ import type { Coordinate } from 'ol/coordinate';
 import { Box, ClickMapMarker } from '@/ui';
 
 import {
-  useMapClickMarker,
-  useMapClickCoordinates,
+  useStoreMapClickMarker,
+  useStoreMapClickCoordinates,
   setStoreMapOverlayClickMarkerRef,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useMapController } from '@/core/controllers/map-controller';
 
 /** Represents a click marker placed on the map at the user's click location. */
@@ -27,13 +27,13 @@ export const ClickMarker = memo(function ClickMarker(): JSX.Element {
   logger.logTraceRender('components/click-marker/click-marker');
 
   // State
-  const mapId = useGeoViewMapId();
+  const mapId = useStoreGeoViewMapId();
   const clickMarkerRef = useRef<HTMLDivElement>(null);
   const clickMarkerId = `${mapId}-clickmarker`;
 
   // Store
-  const clickMarker = useMapClickMarker();
-  const clickCoordinates = useMapClickCoordinates();
+  const clickMarker = useStoreMapClickMarker();
+  const clickCoordinates = useStoreMapClickCoordinates();
   const mapController = useMapController();
 
   /**

@@ -4,7 +4,6 @@ import { AbstractMapViewerController } from '@/core/controllers/base/abstract-ma
 import {
   disableStoreFocusTrap,
   enableStoreFocusTrap,
-  getStoreActiveAppBarTab,
   hideStoreTabButton,
   setStoreActiveAppBarTab,
   setStoreActiveFooterBarTab,
@@ -12,12 +11,11 @@ import {
   setStoreFooterBarIsOpen,
   setStoreFooterPanelResizeValue,
   showStoreTabButton,
-  type ActiveAppBarTabType,
   type FocusItemProps,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import {
   addStoreNotification,
-  getStoreGeoviewAssetsURL,
+  getStoreAppGeoviewAssetsURL,
   removeStoreAllNotifications,
   removeStoreNotification,
   setStoreCircularProgress,
@@ -127,15 +125,6 @@ export class UIController extends AbstractMapViewerController {
   setActiveFooterBarTab(tab: string | undefined): void {
     // Save in store
     setStoreActiveFooterBarTab(this.getMapId(), tab);
-  }
-
-  /**
-   * Gets the active app bar tab from the store.
-   *
-   * @returns The active app bar tab info.
-   */
-  getActiveAppBarTab(): ActiveAppBarTabType {
-    return getStoreActiveAppBarTab(this.getMapId());
   }
 
   /**
@@ -434,7 +423,7 @@ export class UIController extends AbstractMapViewerController {
 
     try {
       // Create the guide
-      const guide = await createGuideObject(language, getStoreGeoviewAssetsURL(mapId));
+      const guide = await createGuideObject(language, getStoreAppGeoviewAssetsURL(mapId));
 
       // Save in store
       setStoreGuide(mapId, guide);

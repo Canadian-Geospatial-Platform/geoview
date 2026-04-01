@@ -21,13 +21,13 @@ import {
   List,
 } from '@/ui';
 import { getSxClasses } from './notifications-style';
-import { useAppNotifications } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useStoreAppNotifications } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
-import { useMapInteraction } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useStoreMapInteraction } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useShake } from '@/core/utils/useSpringAnimations';
 import { handleEscapeKey } from '@/core/utils/utilities';
-import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useStoreUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import type { SxStyles } from '@/ui/style/types';
 import { CONTAINER_TYPE, TIMEOUT } from '@/core/utils/constant';
 import { useUIController } from '@/core/controllers/ui-controller';
@@ -199,13 +199,13 @@ export default memo(function Notifications(): JSX.Element {
   const [open, setOpen] = useState(false);
 
   // Store
-  const notifications = useAppNotifications();
-  const interaction = useMapInteraction();
-  const activeTrapGeoView = useUIActiveTrapGeoView();
+  const notifications = useStoreAppNotifications();
+  const interaction = useStoreMapInteraction();
+  const activeTrapGeoView = useStoreUIActiveTrapGeoView();
   const uiController = useUIController();
 
   // Get container
-  const mapId = useGeoViewMapId();
+  const mapId = useStoreGeoViewMapId();
   const mapElem = document.getElementById(`shell-${mapId}`);
 
   // Animation

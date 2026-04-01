@@ -94,7 +94,7 @@ import {
   getStoreMapInteraction,
   setStoreMapInteraction,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { getStoreDisplayTheme } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { getStoreAppDisplayTheme } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { setStoreLayerSelectedLayersTabLayer, type TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { TIME_DELAY_BETWEEN_PROPAGATION_FOR_BATCH } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { GeoUtilities } from '@/geo/utils/utilities';
@@ -599,7 +599,7 @@ export class MapViewer {
    * @returns The display theme
    */
   getDisplayTheme(): TypeDisplayTheme {
-    return getStoreDisplayTheme(this.mapId);
+    return getStoreAppDisplayTheme(this.mapId);
   }
 
   /**

@@ -2,9 +2,9 @@ import { useMemo, useState } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 
-import { useDataTableSelectedFeature } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { useUIActiveFocusItem, useUIActiveAppBarTab } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { useAppShellContainer } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreDataTableSelectedFeature } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { useStoreUIActiveFocusItem, useStoreUIActiveAppBarTab } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useStoreAppShellContainer } from '@/core/stores/store-interface-and-intial-values/app-state';
 
 import { Modal, List, Box, Typography, BrowserNotSupportedIcon } from '@/ui';
 
@@ -31,13 +31,13 @@ export default function FeatureDetailModal(): JSX.Element {
 
   // get store function
   const uiController = useUIController();
-  const activeModalId = useUIActiveFocusItem().activeElementId;
-  const feature = useDataTableSelectedFeature()!;
+  const activeModalId = useStoreUIActiveFocusItem().activeElementId;
+  const feature = useStoreDataTableSelectedFeature()!;
   const [nameFieldValue, setNameFieldValue] = useState('');
-  const shellContainer = useAppShellContainer();
+  const shellContainer = useStoreAppShellContainer();
 
   // Determine which container (appBar or footerBar) the modal is rendered in
-  const activeAppBarTab = useUIActiveAppBarTab();
+  const activeAppBarTab = useStoreUIActiveAppBarTab();
   const containerType = activeAppBarTab.tabId === TABS.DATA_TABLE && activeAppBarTab.isOpen ? 'appBar' : 'footerBar';
 
   /**

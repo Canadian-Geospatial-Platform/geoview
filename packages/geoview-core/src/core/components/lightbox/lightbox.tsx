@@ -10,9 +10,9 @@ import 'yet-another-react-lightbox/styles.css';
 
 import { CloseIcon, ArrowRightIcon, ArrowLeftIcon, DownloadIcon, Tooltip } from '@/ui';
 import { logger } from '@/core/utils/logger';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { LIGHTBOX_SELECTORS } from '@/core/utils/constant';
-import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useStoreUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
 /** Slide definition for the lightbox. */
 export interface LightBoxSlides {
@@ -63,8 +63,8 @@ export const LightboxImg = memo(function LightboxImg({ open, slides, index, exit
   const [closeOnBackdropClick] = useState(true);
 
   // Store
-  const mapId = useGeoViewMapId();
-  const activeTrapGeoView = useUIActiveTrapGeoView();
+  const mapId = useStoreGeoViewMapId();
+  const activeTrapGeoView = useStoreUIActiveTrapGeoView();
 
   /**
    * Syncs internal open state when the prop changes.

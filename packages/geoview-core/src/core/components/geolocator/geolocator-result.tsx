@@ -8,10 +8,10 @@ import type { GeoListItem } from '@/core/components/geolocator/geolocator';
 import { GeoList } from '@/core/components/geolocator/geo-list';
 import { createMenuItems } from '@/core/components/geolocator/utilities';
 import { getSxClasses } from '@/core/components/geolocator/geolocator-style';
-import { useMapSize } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useStoreMapSize } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
-import { useAppShellContainer } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useStoreAppShellContainer } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 
 /** Props for the GeolocatorResult component. */
 interface GeolocatorFiltersType {
@@ -37,10 +37,10 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
   const { t } = useTranslation();
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
-  const mapId = useGeoViewMapId();
+  const mapId = useStoreGeoViewMapId();
 
   // Store
-  const shellContainer = useAppShellContainer();
+  const shellContainer = useStoreAppShellContainer();
 
   // State
   const [province, setProvince] = useState<string>('');
@@ -55,7 +55,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
 
   // Store
   // TODO: style - we should not base length on map size value, parent should adjust
-  const mapSize = useMapSize();
+  const mapSize = useStoreMapSize();
 
   /**
    * Clears all filters.

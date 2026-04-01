@@ -144,45 +144,10 @@ export function initializeGeochartState(set: TypeSetStore, get: TypeGetStore): I
 
 // #endregion STATE INITIALIZATION
 
-// #region STATE HOOKS
-// GV To be used by React components
-
-/**
- * Hook that returns the geochart chart configurations.
- *
- * Uses optional chaining because this hook may be called from components
- * outside the GeoChart plugin where the geochartState may be undefined.
- *
- * @returns The geochart configurations keyed by layer path, or undefined.
- */
-export const useGeochartConfigs = (): GeoChartStoreByLayerPath | undefined => {
-  // GV This hook is called from other components than the GeoChart so the '?' on the geochartState is mandatory
-  return useStore(useGeoViewStore(), (state) => state.geochartState?.geochartChartsConfig);
-};
-
-/** Hook that returns the geochart layer data array. */
-export const useGeochartLayerDataArray = (): TypeGeochartResultSetEntry[] =>
-  useStore(useGeoViewStore(), (state) => state.geochartState.layerDataArray);
-
-/**
- * Hook that returns the batched geochart layer data array.
- *
- * Uses optional chaining because this hook may be called from components
- * outside the GeoChart plugin where the geochartState may be undefined.
- *
- * @returns The batched geochart result set entries, or undefined.
- */
-export const useGeochartLayerDataArrayBatch = (): TypeGeochartResultSetEntry[] | undefined => {
-  // GV This hook is called from other components than the GeoChart so the '?' on the geochartState is mandatory
-  return useStore(useGeoViewStore(), (state) => state.geochartState?.layerDataArrayBatch);
-};
-
-/** Hook that returns the currently selected geochart layer path. */
-export const useGeochartSelectedLayerPath = (): string => useStore(useGeoViewStore(), (state) => state.geochartState.selectedLayerPath);
-
-// #endregion STATE HOOKS
-
-// #region STATE SELECTORS
+// #region STATE GETTERS & HOOKS
+// GV Getters should be used to get the values at a moment in time.
+// GV Hooks should be used to attach to values and trigger UI components when they change.
+// GV Typically they are listed in couples (getter + hook) for the same value.
 
 /**
  * Returns the full geochart state slice for the given map.
@@ -226,6 +191,10 @@ export const isStoreGeochartInitialized = (mapId: string): boolean => {
  */
 export const getStoreGeochartSelectedLayerPath = (mapId: string): string => getStoreGeochartState(mapId).selectedLayerPath;
 
+/** Hook that returns the currently selected geochart layer path. */
+export const useStoreGeochartSelectedLayerPath = (): string =>
+  useStore(useGeoViewStore(), (state) => state.geochartState.selectedLayerPath);
+
 /**
  * Gets the geochart chart configurations for the given map.
  *
@@ -234,6 +203,23 @@ export const getStoreGeochartSelectedLayerPath = (mapId: string): string => getS
  * @throws {PluginStateUninitializedError} When the Geochart plugin is uninitialized.
  */
 export const getStoreGeochartChartsConfig = (mapId: string): GeoChartStoreByLayerPath => getStoreGeochartState(mapId).geochartChartsConfig;
+
+/**
+ * Hook that returns the geochart chart configurations.
+ *
+ * Uses optional chaining because this hook may be called from components
+ * outside the GeoChart plugin where the geochartState may be undefined.
+ *
+ * @returns The geochart configurations keyed by layer path, or undefined.
+ */
+export const useStoreGeochartChartsConfig = (): GeoChartStoreByLayerPath | undefined => {
+  // GV This hook is called from other components than the GeoChart so the '?' on the geochartState is mandatory
+  return useStore(useGeoViewStore(), (state) => state.geochartState?.geochartChartsConfig);
+};
+
+// #endregion STATE GETTERS & HOOKS
+
+// #region STATE GETTERS & HOOKS (no match between getter-hook)
 
 /**
  * Gets the geochart layer data array for the given map.
@@ -254,7 +240,20 @@ export const getStoreGeochartLayerDataArray = (mapId: string): TypeGeochartResul
 export const getStoreGeochartLayerDataArrayBatchLayerPathBypass = (mapId: string): string =>
   getStoreGeochartState(mapId).layerDataArrayBatchLayerPathBypass;
 
-// #endregion STATE SELECTORS
+/**
+ * Hook that returns the batched geochart layer data array.
+ *
+ * Uses optional chaining because this hook may be called from components
+ * outside the GeoChart plugin where the geochartState may be undefined.
+ *
+ * @returns The batched geochart result set entries, or undefined.
+ */
+export const useStoreGeochartLayerDataArrayBatch = (): TypeGeochartResultSetEntry[] | undefined => {
+  // GV This hook is called from other components than the GeoChart so the '?' on the geochartState is mandatory
+  return useStore(useGeoViewStore(), (state) => state.geochartState?.layerDataArrayBatch);
+};
+
+// #endregion STATE GETTERS & HOOKS - OTHERS (no match between getter-hook)
 
 // #region STATE ADAPTORS
 // GV These methods should be called from a State Adaptor class listening on domain events triggered by controllers.

@@ -7,10 +7,7 @@ import { Box, CircularProgress, Collapse, Typography } from '@/ui';
 import { ImageNotSupportedIcon, FunctionsIcon, ExpandMoreIcon, ExpandLessIcon } from '@/ui';
 
 import { getSxClasses } from './layer-settings-style';
-import {
-  useLayerSelectorRasterFunctionInfos,
-  useLayerSelectorRasterFunction,
-} from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useStoreLayerRasterFunctionInfos, useStoreLayerRasterFunction } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import type { TypeLegendLayer } from '@/core/components/layers/types';
 import type { TypeMetadataEsriRasterFunctionInfos } from '@/api/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';
@@ -146,9 +143,9 @@ export function RasterFunctionPanel({ layerDetails }: RasterFunctionPanelProps):
   const sxClasses = getSxClasses(theme);
 
   // Store hooks
-  const storeRasterFunctionInfos = useLayerSelectorRasterFunctionInfos(layerDetails.layerPath);
+  const storeRasterFunctionInfos = useStoreLayerRasterFunctionInfos(layerDetails.layerPath);
   const memoRasterFunctionInfos = useMemo(() => storeRasterFunctionInfos || [], [storeRasterFunctionInfos]);
-  const currentRasterFunction = useLayerSelectorRasterFunction(layerDetails.layerPath);
+  const currentRasterFunction = useStoreLayerRasterFunction(layerDetails.layerPath);
   const layerController = useLayerController();
 
   // State

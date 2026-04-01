@@ -5,7 +5,7 @@ import type { Mark } from '@mui/base';
 import { getSxClasses } from './layer-opacity-control-styles';
 import { Box, Slider, Typography } from '@/ui';
 import type { TypeLegendLayer } from '@/core/components/layers/types';
-import { useMapSelectorIsLayerHiddenOnMap } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useStoreMapIsLayerHiddenOnMap } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import { useLayerController } from '@/core/controllers/layer-controller';
 
@@ -25,7 +25,7 @@ export function LayerOpacityControl(props: LayerOpacityControlProps): JSX.Elemen
   const { t } = useTranslation<string>();
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
-  const layerHidden = useMapSelectorIsLayerHiddenOnMap(layerDetails.layerPath);
+  const layerHidden = useStoreMapIsLayerHiddenOnMap(layerDetails.layerPath);
   const layerController = useLayerController();
 
   // State

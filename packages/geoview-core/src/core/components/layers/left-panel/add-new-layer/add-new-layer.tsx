@@ -4,12 +4,12 @@ import { useTranslation } from 'react-i18next';
 import type { SelectChangeEvent } from '@mui/material';
 import type { ButtonPropsLayerPanel } from '@/ui';
 import { Box, Button, IconButton, ButtonGroup, CircularProgressBase, FileUploadIcon, Paper, Select, Stepper, TextField } from '@/ui';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { setStoreLayerDisplayState } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import {
-  useAppDisabledLayerTypes,
-  useAppDisplayLanguage,
-  useAppShellContainer,
+  useStoreAppDisabledLayerTypes,
+  useStoreAppDisplayLanguage,
+  useStoreAppShellContainer,
 } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { ConfigApi } from '@/api/config/config-api';
 import { logger } from '@/core/utils/logger';
@@ -279,11 +279,11 @@ export function AddNewLayer(): JSX.Element {
   const isMultipleTextFieldRef = useRef<HTMLDivElement>(null);
 
   // Store
-  const mapId = useGeoViewMapId();
+  const mapId = useStoreGeoViewMapId();
+  const disabledLayerTypes = useStoreAppDisabledLayerTypes();
+  const language = useStoreAppDisplayLanguage();
+  const shellContainer = useStoreAppShellContainer();
   const uiController = useUIController();
-  const disabledLayerTypes = useAppDisabledLayerTypes();
-  const language = useAppDisplayLanguage();
-  const shellContainer = useAppShellContainer();
   const mapController = useMapController();
   const layerCreatorController = useLayerCreatorController();
 

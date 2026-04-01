@@ -3,11 +3,11 @@ import { MuiColorInput } from 'mui-color-input';
 import type { ChangeEvent } from 'react';
 import { useState } from 'react';
 import {
-  useDrawerStyle,
-  useDrawerActiveGeom,
-  useDrawerSelectedDrawingType,
+  useStoreDrawerStyle,
+  useStoreDrawerActiveGeom,
+  useStoreDrawerSelectedDrawing,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
-import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
 import { logger } from 'geoview-core/core/utils/logger';
 
@@ -63,15 +63,15 @@ export function StylePanel(): JSX.Element {
   const { Box, List, ListItem, Typography, TextField, IconButton, FormatBoldIcon, FormatItalicIcon } = ui.elements;
 
   // Get store values
-  const style = useDrawerStyle();
-  const activeGeom = useDrawerActiveGeom();
-  const selectedDrawingType = useDrawerSelectedDrawingType();
-  const displayLanguage = useAppDisplayLanguage();
+  const style = useStoreDrawerStyle();
+  const activeGeom = useStoreDrawerActiveGeom();
+  const selectedDrawing = useStoreDrawerSelectedDrawing();
+  const displayLanguage = useStoreAppDisplayLanguage();
   const drawerController = useDrawerController();
 
   const memoCurrentGeomType = useMemo(() => {
-    return selectedDrawingType ?? activeGeom;
-  }, [activeGeom, selectedDrawingType]);
+    return selectedDrawing ?? activeGeom;
+  }, [activeGeom, selectedDrawing]);
 
   // Local state for color inputs
   const [localFillColor, setLocalFillColor] = useState(style.fillColor);

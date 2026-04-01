@@ -16,11 +16,11 @@ import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 import { IconButton } from '@/ui/icon-button/icon-button';
 import { getSxClasses } from '@/ui/panel/panel-style';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
-import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useStoreUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { FocusTrapContainer } from '@/core/components/common';
 import { delay } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 
 /**
@@ -77,10 +77,10 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
   const closeBtnRef = useRef<HTMLButtonElement>(null);
   const panelWidth = panel?.width ?? 100; //percentage
   const sxClasses = useMemo(() => getSxClasses(theme, open, panelWidth), [theme, open, panelWidth]);
-  const mapId = useGeoViewMapId();
 
   // Store
-  const activeTrapGeoView = useUIActiveTrapGeoView();
+  const mapId = useStoreGeoViewMapId();
+  const activeTrapGeoView = useStoreUIActiveTrapGeoView();
 
   useEffect(() => {
     logger.logTraceUseEffect('UI.PANEL - open');

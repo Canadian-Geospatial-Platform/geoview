@@ -16,24 +16,24 @@ import {
   VisibilityOffOutlinedIcon,
   VisibilityOutlinedIcon,
 } from '@/ui';
-import type { TypeLegendLayer } from '@/core/components/layers/types';
 import {
-  useLayerDisplayState,
-  useLayerSelectedLayerPath,
-  useLayerSelectorName,
-  useLayerSelectorId,
-  useLayerSelectorStatus,
-  useLayerSelectorEntryType,
-  useLayerSelectorControls,
-  useLayerSelectorChildren,
-  useLayerSelectorItems,
+  useStoreLayerDisplayState,
+  useStoreLayerSelectedLayerPath,
+  useStoreLayerName,
+  useStoreLayerId,
+  useStoreLayerStatus,
+  useStoreLayerEntryType,
+  useStoreLayerControls,
+  useStoreLayerChildPaths,
+  useStoreLayerItems,
+  useStoreLayerHasDisabledVisibility,
   setStoreLayerSelectedLayersTabLayer,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import {
-  useMapSelectorLayerLegendCollapsed,
-  useMapSelectorLayerVisibility,
-  useMapSelectorLayerInVisibleRange,
-  useMapSelectorLayerParentHidden,
+  useStoreMapLegendCollapsedByPath,
+  useStoreMapLayerVisibility,
+  useStoreMapLayerInVisibleRange,
+  useStoreMapIsParentLayerHiddenOnMap,
   setStoreMapToggleLegendCollapsed,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { DeleteUndoButton } from '@/core/components/layers/delete-undo-button';
@@ -42,12 +42,11 @@ import { LayerIcon } from '@/core/components/common/layer-icon';
 import { logger } from '@/core/utils/logger';
 import { ArrowDownwardIcon, ArrowUpIcon, CenterFocusScaleIcon, LoopIcon } from '@/ui/icons';
 import { Divider } from '@/ui/divider/divider';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
-import type { TypeLayerControls } from '@/api/types/layer-schema-types';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { scrollListItemIntoView } from '@/core/utils/utilities';
 import { TIMEOUT, TABS } from '@/core/utils/constant';
 import type { TypeContainerBox } from '@/core/types/global-types';
-import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useStoreUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useMapController } from '@/core/controllers/map-controller';
 import { useLayerCreatorController } from '@/core/controllers/layer-creator-controller';
 
@@ -85,24 +84,24 @@ export function SingleLayer({
   const reloadRequestedRef = useRef<boolean>(false);
 
   // Get store states
-  const mapId = useGeoViewMapId();
-  const selectedLayerPath = useLayerSelectedLayerPath();
-  const displayState = useLayerDisplayState();
+  const mapId = useStoreGeoViewMapId();
+  const selectedLayerPath = useStoreLayerSelectedLayerPath();
+  const displayState = useStoreLayerDisplayState();
   const layerIsSelected = layerPath === selectedLayerPath && displayState === 'view';
-  const isKeyboardNavigationMode = useUIActiveTrapGeoView();
+  const isKeyboardNavigationMode = useStoreUIActiveTrapGeoView();
 
-  const isVisible = useMapSelectorLayerVisibility(layerPath);
-  const inVisibleRange = useMapSelectorLayerInVisibleRange(layerPath);
-  const legendExpanded = !useMapSelectorLayerLegendCollapsed(layerPath);
-  const parentHidden = useMapSelectorLayerParentHidden(layerPath);
+  const isVisible = useStoreMapLayerVisibility(layerPath);
+  const inVisibleRange = useStoreMapLayerInVisibleRange(layerPath);
+  const legendExpanded = !useStoreMapLegendCollapsedByPath(layerPath);
+  const parentHidden = useStoreMapIsParentLayerHiddenOnMap(layerPath);
 
-  const layerId = useLayerSelectorId(layerPath);
-  const layerName = useLayerSelectorName(layerPath);
-  const layerStatus = useLayerSelectorStatus(layerPath);
-  const layerEntryType = useLayerSelectorEntryType(layerPath);
-  const layerControls = useLayerSelectorControls(layerPath);
-  const layerChildren = useLayerSelectorChildren(layerPath);
-  const layerItems = useLayerSelectorItems(layerPath);
+  const layerId = useStoreLayerId(layerPath);
+  const layerName = useStoreLayerName(layerPath);
+  const layerStatus = useStoreLayerStatus(layerPath);
+  const layerEntryType = useStoreLayerEntryType(layerPath);
+  const layerControls = useStoreLayerControls(layerPath);
+  const layerChildPaths = useStoreLayerChildPaths(layerPath);
+  const layerItems = useStoreLayerItems(layerPath);
   const mapController = useMapController();
   const layerCreatorController = useLayerCreatorController();
 
@@ -148,43 +147,11 @@ export function SingleLayer({
     }
   }, [layerIsSelected, layerId]);
 
-  // if any of the child layers is selected return true
-  const isLayerChildSelected = useCallback(
-    (children: TypeLegendLayer[] | undefined): boolean => {
-      if (displayState !== 'view') {
-        return false;
-      }
-      if (children && children.length > 0) {
-        if (children.filter((child) => child.layerPath === selectedLayerPath).length > 0) {
-          return true;
-        }
+  // Check if any descendant layer is selected — layer paths are hierarchical so startsWith works
+  const layerChildIsSelected = displayState === 'view' && !!selectedLayerPath && selectedLayerPath.startsWith(`${layerPath}/`);
 
-        return children.some((child) => isLayerChildSelected(child.children));
-      }
-      return false;
-    },
-    [displayState, selectedLayerPath]
-  );
-
-  const layerChildIsSelected = isLayerChildSelected(layerChildren);
-
-  // returns true if any of the layer children has visibility of false
-  const layerHasDisabledVisibility = useCallback(
-    (children: TypeLegendLayer[] | undefined, controls: TypeLayerControls | undefined): boolean => {
-      if (controls?.visibility === false) {
-        return true;
-      }
-      let childrenHasAlways = false;
-      if (children && children.length > 0) {
-        childrenHasAlways = children.some((child) => layerHasDisabledVisibility(child.children, child.controls));
-      }
-
-      return childrenHasAlways;
-    },
-    []
-  );
-
-  const isLayerAlwaysVisible = layerHasDisabledVisibility(layerChildren, layerControls);
+  // Check if any layer in the subtree has visibility disabled
+  const isLayerAlwaysVisible = useStoreLayerHasDisabledVisibility(layerPath);
 
   // #region HANDLERS
 
@@ -447,8 +414,8 @@ export function SingleLayer({
 
     if (parentHidden) return t('layers.parentHidden');
 
-    if (layerChildren && layerChildren.length > 0) {
-      return t('legend.subLayersCount').replace('{count}', layerChildren.length.toString());
+    if (layerChildPaths && layerChildPaths.length > 0) {
+      return t('legend.subLayersCount').replace('{count}', layerChildPaths.length.toString());
     }
 
     const count = layerItems?.filter((d) => d.isVisible !== false).length || 0;
@@ -461,7 +428,7 @@ export function SingleLayer({
     }
 
     return itemsLengthDesc;
-  }, [layerPath, layerStatus, parentHidden, t, layerChildren, layerItems]);
+  }, [layerPath, layerStatus, parentHidden, t, layerChildPaths, layerItems]);
 
   // Memoize the EditModeButtons component section
 
@@ -551,7 +518,7 @@ export function SingleLayer({
             id={reloadButtonId}
             edge="end"
             size="small"
-            aria-label={layerChildren && layerChildren.length > 0 ? t('layers.reloadSublayers') : t('layers.reloadLayer')}
+            aria-label={layerChildPaths && layerChildPaths.length > 0 ? t('layers.reloadSublayers') : t('layers.reloadLayer')}
             className="buttonOutline"
             onClick={handleReload}
             onKeyDown={handleReloadKeyDown}
@@ -631,7 +598,7 @@ export function SingleLayer({
     handleToggleVisibility,
     handleToggleVisibilityKeyDown,
     isVisible,
-    layerChildren,
+    layerChildPaths,
     handleReload,
     handleReloadKeyDown,
     parentHidden,
@@ -645,7 +612,7 @@ export function SingleLayer({
     // Log
     logger.logTraceUseMemo('SINGLE-LAYER - memoArrowButtons');
 
-    if (layerChildren?.length) {
+    if (layerChildPaths?.length) {
       return (
         <IconButton
           color="primary"
@@ -662,14 +629,14 @@ export function SingleLayer({
     }
 
     return null;
-  }, [handleExpandGroupClick, handleExpandGroupKeyDown, layerChildren, legendExpanded, t]);
+  }, [handleExpandGroupClick, handleExpandGroupKeyDown, layerChildPaths, legendExpanded, t]);
 
   // Memoize the collapse component section
   const memoCollapse = useMemo((): JSX.Element | null => {
     // Log
-    logger.logTraceUseMemo('SINGLE-LAYER - memoCollapse', layerChildren);
+    logger.logTraceUseMemo('SINGLE-LAYER - memoCollapse', layerChildPaths);
 
-    if (!(layerChildren && layerChildren.length)) {
+    if (!layerChildPaths?.length) {
       return null;
     }
 
@@ -677,14 +644,14 @@ export function SingleLayer({
       <Collapse in={legendExpanded} timeout="auto">
         <LayersList
           depth={1 + depth}
-          layersList={layerChildren}
+          layerPaths={layerChildPaths}
           isLayoutEnlarged={isLayoutEnlarged}
           showLayerDetailsPanel={showLayerDetailsPanel}
           containerType={containerType}
         />
       </Collapse>
     );
-  }, [depth, isLayoutEnlarged, layerChildren, legendExpanded, showLayerDetailsPanel, containerType]);
+  }, [depth, isLayoutEnlarged, layerChildPaths, legendExpanded, showLayerDetailsPanel, containerType]);
 
   // Memoize the container class section
   const memoContainerClass = useMemo(() => {

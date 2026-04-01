@@ -39,7 +39,7 @@ import { formatError, NotSupportedError } from '@/core/exceptions/core-exception
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { LayerEntryConfigError } from '@/core/exceptions/layer-entry-config-exceptions';
 import { LayerCreatedTwiceError } from '@/core/exceptions/layer-exceptions';
-import { getStoreDisplayDateMode } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { getStoreAppDisplayDateMode } from '@/core/stores/store-interface-and-intial-values/app-state';
 import {
   addStoreGeochartChart,
   isStoreGeochartInitialized,
@@ -675,7 +675,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
     const promiseLayer = new Promise<void>((resolve, reject) => {
       // Continue the addition process
       layerBeingAdded
-        .createGeoViewLayers(getStoreDisplayDateMode(this.getMapId()), this.getMapViewer().getProjection(), abortSignal)
+        .createGeoViewLayers(getStoreAppDisplayDateMode(this.getMapId()), this.getMapViewer().getProjection(), abortSignal)
         .then(() => {
           // Add the layer on the map
           this.#addToMap(layerBeingAdded, geoviewLayerConfig);

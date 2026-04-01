@@ -15,14 +15,14 @@ import type { MapViewer } from '@/geo/map/map-viewer';
 
 import { getSxClasses } from './map-style';
 import {
-  useMapInteraction,
-  useMapLoaded,
-  useMapNorthArrow,
-  useMapOverviewMap,
+  useStoreMapInteraction,
+  useStoreMapLoaded,
+  useStoreMapNorthArrow,
+  useStoreMapOverviewMap,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
-import { useLayerAreLayersLoading } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useStoreLayerAreLayersLoading } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 /** Props for the Map component. */
 type MapProps = {
@@ -50,12 +50,12 @@ export function Map(props: MapProps): JSX.Element {
   const deviceSizeMedUp = useMediaQuery(defaultTheme.breakpoints.up('md')); // if screen size is medium and up
 
   // get values from the store
-  const mapId = useGeoViewMapId();
-  const overviewMap = useMapOverviewMap();
-  const northArrow = useMapNorthArrow();
-  const mapLoaded = useMapLoaded();
-  const layersAreLoading = useLayerAreLayersLoading();
-  const mapInteraction = useMapInteraction();
+  const mapId = useStoreGeoViewMapId();
+  const overviewMap = useStoreMapOverviewMap();
+  const northArrow = useStoreMapNorthArrow();
+  const mapLoaded = useStoreMapLoaded();
+  const mapInteraction = useStoreMapInteraction();
+  const layersAreLoading = useStoreLayerAreLayersLoading();
 
   // flag to check if map is initialized. we added to prevent double rendering in StrictMode
   const hasRun = useRef<boolean>(false);

@@ -11,7 +11,7 @@ import { type MRT_ColumnDef as MRTColumnDef } from 'material-react-table';
 import { IconButton, DownloadIcon, Menu, MenuItem } from '@/ui';
 import { logger } from '@/core/utils/logger';
 import type { ColumnsType } from './data-table-types';
-import { useLayerSelectorName } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useStoreLayerName } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 /** Properties for the ExportButton component. */
 interface ExportButtonProps {
@@ -35,7 +35,7 @@ function ExportButton({ layerPath, rows, columns, children }: ExportButtonProps)
   logger.logTraceRender('components/data-table/export-button');
 
   const { t } = useTranslation<string>();
-  const layerName = useLayerSelectorName(layerPath) ?? '';
+  const layerName = useStoreLayerName(layerPath) ?? '';
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
