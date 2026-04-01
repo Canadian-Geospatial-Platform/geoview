@@ -68,7 +68,7 @@ export class UIDomain {
    * @param language - The language to add the resource for (en, fr)
    * @param translations - The translation object to add
    */
-  addLocalizeRessourceBundle(language: TypeDisplayLanguage, translations: Record<string, unknown>): void {
+  addLocalizeResourceBundle(language: TypeDisplayLanguage, translations: Record<string, unknown>): void {
     this.#i18nInstance.addResourceBundle(language, 'translation', translations, true, false);
   }
 

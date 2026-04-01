@@ -274,7 +274,7 @@ export class LayerController extends AbstractMapViewerController {
     // Listens when the layers are all loaded in the Layer domain
     this.#layerDomain.onLayerAllLoaded(this.#boundedHandleDomainLayerAllLoaded);
 
-    // Listens when the layers are all loaded in the Layer domain
+    // Listens when the layers have a message to inform
     this.#layerDomain.onLayerMessage(this.#boundedHandleDomainLayerMessage);
 
     // Listens when the layer hoverable state is changed in the Layer domain
@@ -315,7 +315,7 @@ export class LayerController extends AbstractMapViewerController {
     // Unhooks when the layer hoverable state is changed in the Layer domain
     this.#layerDomain.offLayerHoverableChanged(this.#boundedHandleDomainLayerHoverableChanged);
 
-    // Unhooks when the layer loaded state is changed in the Layer domain
+    // Unhooks when the layer have a message to inform
     this.#layerDomain.offLayerMessage(this.#boundedHandleDomainLayerLoadedChanged);
 
     // Unhooks when the layers are all loaded in the Layer domain
