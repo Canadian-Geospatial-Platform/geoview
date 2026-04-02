@@ -48,7 +48,21 @@ function SwitchUI(props: ExtendedSwitchProps): JSX.Element {
   return (
     <MaterialFormControlLabel
       htmlFor={switchId}
-      control={<MaterialSwitch id={switchId} {...otherProps} />}
+      control={
+        <MaterialSwitch
+          id={switchId}
+          slotProps={{
+            input: {
+              // WCAG - Ensure aria-checked is set for accessibility.
+              // role="switch" requires aria-checked to reflect state; React manages
+              // the checked DOM property internally and does not update the HTML
+              // attribute, which is what screen readers rely on for role="switch".
+              'aria-checked': otherProps.checked,
+            },
+          }}
+          {...otherProps}
+        />
+      }
       label={label}
       sx={sxClasses.formControl}
     />

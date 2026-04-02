@@ -97,7 +97,13 @@ const Layout = forwardRef(
      * @returns The layer list element
      */
     const renderLayerList = useCallback((): JSX.Element => {
-      return <LayerList selectedLayerPath={selectedLayerPath} onListItemClick={handleLayerChange} layerList={layerList} />;
+      return (
+        <LayerList
+          selectedLayerPath={selectedLayerPath}
+          onListItemClick={handleLayerChange}
+          layerList={layerList}
+        />
+      );
     }, [selectedLayerPath, handleLayerChange, layerList]);
 
     /**
@@ -115,9 +121,9 @@ const Layout = forwardRef(
       };
 
       return (
-          <Typography sx={sxClasses} component="h3">
-            {layerName}
-          </Typography>
+        <Typography sx={sxClasses} component="h3">
+          {layerName}
+        </Typography>
       );
     }, [containerType, layerName, theme.breakpoints, theme.palette.geoViewFontSize.lg, toggleMode]);
 

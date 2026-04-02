@@ -18,7 +18,11 @@ import { FullScreenDialog } from './full-screen-dialog';
 import { logger } from '@/core/utils/logger';
 import { ArrowBackIcon, ArrowForwardIcon, CloseIcon, QuestionMarkIcon } from '@/ui/icons';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
-import { useStoreAppGuide, useStoreAppIsFullscreenActive, useStoreAppShellContainer } from '@/core/stores/store-interface-and-intial-values/app-state';
+import {
+  useStoreAppGuide,
+  useStoreAppIsFullscreenActive,
+  useStoreAppShellContainer,
+} from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useStoreUIActiveTrapGeoView, useStoreUIActiveFocusItem } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE, TIMEOUT, LIGHTBOX_SELECTORS } from '@/core/utils/constant';
@@ -30,7 +34,6 @@ const MAIN_ROW_SX: SxProps = {
   overflow: 'hidden',
   paddingTop: '30px',
 };
-
 
 /** Properties for the ResponsiveGridLayout component. */
 interface ResponsiveGridLayoutProps {
@@ -671,7 +674,6 @@ const ResponsiveGridLayout = forwardRef(
           <ResponsiveGrid.Left
             isRightPanelVisible={isRightPanelVisible}
             isEnlarged={isEnlarged}
-            ariaHidden={!isRightPanelVisible}
             toggleMode={toggleMode}
             sxProps={memoLeftTopSxProps}
             className="responsive-layout-left-top"
@@ -686,9 +688,7 @@ const ResponsiveGridLayout = forwardRef(
             sxProps={memoRightTopSxProps}
             className="responsive-layout-right-top"
           >
-            <Box sx={memoRightTopContentSx}>
-              {rightTop ?? <Box />}
-            </Box>
+            <Box sx={memoRightTopContentSx}>{rightTop ?? <Box />}</Box>
           </ResponsiveGrid.Right>
         </ResponsiveGrid.Root>
         <ResponsiveGrid.Root className="responsive-layout-main-row" sx={MAIN_ROW_SX}>
@@ -696,7 +696,6 @@ const ResponsiveGridLayout = forwardRef(
             isEnlarged={isEnlarged}
             isRightPanelVisible={isRightPanelVisible}
             toggleMode={toggleMode}
-            ariaHidden={!isRightPanelVisible}
             sxProps={sxClasses.gridLeftMain as SxProps}
             className="responsive-layout-left-main"
           >
