@@ -1,11 +1,19 @@
 import { isValidElement, useCallback, useEffect, useMemo, useState } from 'react';
+
 import { useTranslation } from 'react-i18next';
+
 import { useTheme } from '@mui/material/styles';
 
 import { MRT_Localization_FR as MRTLocalizationFR } from 'material-react-table/locales/fr';
 import { MRT_Localization_EN as MRTLocalizationEN } from 'material-react-table/locales/en';
 
+import linkifyHtml from 'linkify-html';
+
 import { Modal, MRTTable as Table, type MRT_ColumnDef as MRTColumnDef, Box, CircularProgress, Button } from '@/ui';
+import { TableViewIcon } from '@/ui/icons';
+import type { TypeFieldEntry } from '@/api/types/map-schema-types';
+import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
+import { useNavigateToTab } from '@/core/components/common/hooks/use-navigate-to-tab';
 import { useUIController } from '@/core/controllers/use-controllers';
 import {
   useStoreUIActiveFocusItem,
@@ -13,18 +21,16 @@ import {
   useStoreUIAppbarComponents,
   useStoreUIActiveTrapGeoView,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { useStoreLayerNameSet, useStoreLayerSelectedLayerPath } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { getSxClasses } from './data-table-style';
-import { logger } from '@/core/utils/logger';
+import { useStoreAppDisplayLanguage, useStoreAppShellContainer } from '@/core/stores/store-interface-and-intial-values/app-state';
 import {
   setStoreSelectedLayerPath,
   useStoreDataTableAllFeaturesDataArray,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { useStoreLayerNameSet, useStoreLayerSelectedLayerPath } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { logger } from '@/core/utils/logger';
+import { sanitizeHtmlContent, enhanceLinksAccessibility } from '@/core/utils/utilities';
+import { getSxClasses } from './data-table-style';
 import { useFeatureFieldInfos } from './hooks';
-import type { TypeFieldEntry } from '@/api/types/map-schema-types';
-import { useStoreAppDisplayLanguage, useStoreAppShellContainer } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { TableViewIcon } from '@/ui/icons';
-import { useNavigateToTab } from '@/core/components/common/hooks/use-navigate-to-tab';
 
 /**
  * Renders a lightweight read-only data table in a modal window.
@@ -78,20 +84,48 @@ export default function DataTableModal(): JSX.Element {
   }, [mappedLayerData, selectedLayerPath]);
 
   /**
+   * Linkify configuration options for URL detection and formatting.
+   */
+  const memoLinkifyOptions = useMemo(() => {
+    logger.logTraceUseMemo('DATA-TABLE-MODAL - memoLinkifyOptions');
+
+    return {
+      attributes: {
+        target: '_blank',
+        rel: 'noopener noreferrer',
+      },
+      defaultProtocol: 'https',
+      format: {
+        url: (value: string) => (value.length > 50 ? `${value.slice(0, 40)}…${value.slice(value.length - 10)}` : value),
+      },
+      ignoreTags: ['script', 'style', 'img'],
+    };
+  }, []);
+
+  /**
    * Creates a data table body cell.
    *
    * @param cellValue - Cell value to be displayed
    * @returns The cell element
    */
   const getCellValue = useCallback(
-    (cellValue: string): JSX.Element => {
-      return (
+    (cellValue: string | number | JSX.Element): JSX.Element => {
+      return typeof cellValue === 'string' || typeof cellValue === 'number' ? (
+        <Box component="div" sx={sxClasses.tableCell}>
+          <UseHtmlToReact
+            htmlContent={sanitizeHtmlContent(
+              enhanceLinksAccessibility(linkifyHtml(cellValue.toString(), memoLinkifyOptions), t('general.opensInNewTab'))
+            )}
+            itemOptions={{ tabIndex: 0 }}
+          />
+        </Box>
+      ) : (
         <Box component="div" sx={sxClasses.tableCell}>
           {cellValue}
         </Box>
       );
     },
-    [sxClasses.tableCell]
+    [sxClasses.tableCell, memoLinkifyOptions, t]
   );
 
   /**
@@ -113,7 +147,7 @@ export default function DataTableModal(): JSX.Element {
    */
   const memoColumns = useMemo<MRTColumnDef<Partial<Record<string, TypeFieldEntry>>>[]>(() => {
     // Log
-    logger.logTraceUseMemo('DATA-TABLE-MODAL - columns', memoLayer?.features);
+    logger.logTraceUseMemo('DATA-TABLE-MODAL - columns', memoLayer?.fieldInfos);
 
     if (!memoLayer?.fieldInfos) {
       return [];
@@ -137,29 +171,38 @@ export default function DataTableModal(): JSX.Element {
             return '';
           },
           header: value?.alias ?? '',
-          Cell: ({ cell }) => getCellValue(cell.getValue() as string),
+          Cell: ({ cell }) => getCellValue(cell.getValue() as string | number | JSX.Element),
           Header: ({ column }) => getTableHeader(column.columnDef.header),
           maxSize: 120,
         });
     });
 
     return columnList;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [memoLayer?.fieldInfos]);
+  }, [memoLayer?.fieldInfos, getCellValue, getTableHeader]);
 
   /**
    * Extracts the row data from the layer features.
    */
   const memoRows = useMemo(() => {
     // Log
-    logger.logTraceUseMemo('DATA-TABLE-MODAL - rows', memoLayer?.fieldInfos);
+    logger.logTraceUseMemo('DATA-TABLE-MODAL - rows', memoLayer?.features);
 
     return (
       memoLayer?.features?.map((feature) => {
         return feature.fieldInfo;
       }) ?? []
     );
-  }, [memoLayer?.features, memoLayer?.fieldInfos]);
+  }, [memoLayer?.features]);
+
+  /**
+   * Handles navigation to the advanced data table tab.
+   */
+  const handleNavigateToDataTable = useCallback((): void => {
+    // Close modal first
+    uiController.disableFocusTrap();
+    // Navigate to data-table tab with selected layer
+    navigateToDataTable({ layerPath: selectedLayerPath! });
+  }, [uiController, navigateToDataTable, selectedLayerPath]);
 
   /**
    * Updates loading state based on query status of the selected layer.
@@ -175,16 +218,6 @@ export default function DataTableModal(): JSX.Element {
       setIsLoading(true);
     } else setIsLoading(false);
   }, [layersData, selectedLayerPath]);
-
-  /**
-   * Handles navigation to the advanced data table tab.
-   */
-  const handleNavigateToDataTable = useCallback((): void => {
-    // Close modal first
-    uiController.disableFocusTrap();
-    // Navigate to data-table tab with selected layer
-    navigateToDataTable({ layerPath: selectedLayerPath! });
-  }, [uiController, navigateToDataTable, selectedLayerPath]);
 
   return (
     <Modal

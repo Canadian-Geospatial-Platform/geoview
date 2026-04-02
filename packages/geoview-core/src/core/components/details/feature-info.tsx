@@ -133,7 +133,7 @@ const FeatureHeader = memo(function FeatureHeader({
             <BrowserNotSupportedIcon />
           </Box>
         )}
-        <Typography sx={TYPOGRAPHY_STYLES} component="div">
+        <Typography sx={TYPOGRAPHY_STYLES} component="h4" variant="body1">
           {iconSrc ? (
             (name ?? t('details.nullValue'))
           ) : (

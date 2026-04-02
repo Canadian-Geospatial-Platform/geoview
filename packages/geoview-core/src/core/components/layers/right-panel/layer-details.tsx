@@ -5,10 +5,10 @@ import { delay } from '@/core/utils/utilities';
 import {
   Box,
   BrowserNotSupportedIcon,
-  CheckBoxIcon,
-  CheckBoxOutlineBlankIcon,
+  Checkbox,
   Divider,
   Fade,
+  FormControlLabel,
   Grid,
   HighlightIcon,
   HighlightOutlinedIcon,
@@ -101,7 +101,6 @@ const Sublayer = memo(function Sublayer({ layerPath }: SubLayerProps): JSX.Eleme
 
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
-  const { t } = useTranslation<string>();
 
   // Hooks
   const layerName = useStoreLayerName(layerPath);
@@ -113,27 +112,29 @@ const Sublayer = memo(function Sublayer({ layerPath }: SubLayerProps): JSX.Eleme
 
   // Return the ui
   return (
-    <>
-      <ListItem>
-        <IconButton
-          color="primary"
-          role="checkbox"
-          onClick={() => layerController.setOrToggleMapLayerVisibility(layerPath)}
-          disabled={parentHidden}
-          aria-checked={layerVisible === true}
-          aria-label={layerVisible ? t('layers.hideLayer', { name: layerName }) : t('layers.showLayer', { name: layerName })}
-          tooltipPlacement="left"
-        >
-          {layerVisible ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
-        </IconButton>
-        <LayerIcon layerPath={layerPath} />
-        <Box
-          component="span"
-          sx={{ ...sxClasses.tableIconLabel, ...(layerHidden && { color: theme.palette.grey[600], fontStyle: 'italic' }) }}
-        >
-          {layerName}
-        </Box>
-      </ListItem>
+    <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start', p: 0 }}>
+      <FormControlLabel
+        sx={sxClasses.formControlLabelFull}
+        control={
+          <Checkbox
+            color="primary"
+            checked={layerVisible === true}
+            onChange={() => layerController.setOrToggleMapLayerVisibility(layerPath)}
+            disabled={parentHidden}
+          />
+        }
+        label={
+          <Box sx={sxClasses.checkboxLabelContent}>
+            <LayerIcon layerPath={layerPath} />
+            <Box
+              component="span"
+              sx={{ ...sxClasses.tableIconLabel, ...(layerHidden && { color: theme.palette.grey[600], fontStyle: 'italic' }) }}
+            >
+              {layerName}
+            </Box>
+          </Box>
+        }
+      />
       {childPaths && (
         <Box sx={{ paddingLeft: '30px', width: '100%' }}>
           <List>
@@ -143,7 +144,7 @@ const Sublayer = memo(function Sublayer({ layerPath }: SubLayerProps): JSX.Eleme
           </List>
         </Box>
       )}
-    </>
+    </ListItem>
   );
 });
 
@@ -333,50 +334,60 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
     // For these layers, we need to disable checkboxes
     if (layerStyleConfig[item.geometryType]?.fields[0] === undefined) return null;
 
-    if (!layerCanToggle) {
-      return (
-        <IconButton disabled role="checkbox" aria-label={t('layers.visibilityIsAlways')} aria-checked={false} tooltipPlacement="left">
-          <CheckBoxIcon color="disabled" />
-        </IconButton>
-      );
-    }
+    const isDisabled = layerHidden || !layerCanToggle;
+
+    // Build the label content with icon and text
+    const labelContent = (
+      <Box sx={sxClasses.checkboxLabelContent}>
+        {item.icon ? (
+          <Box component="img" sx={{ maxHeight: '26px', maxWidth: '26px' }} alt="" src={item.icon} />
+        ) : (
+          <BrowserNotSupportedIcon sx={{ fontSize: '26px' }} />
+        )}
+        <Box component="span" sx={{ ...sxClasses.tableIconLabel, ...((layerHidden || !item.isVisible) && hiddenStyle) }}>
+          {item.name}
+        </Box>
+      </Box>
+    );
 
     return (
-      <IconButton
-        role="checkbox"
-        color="primary"
-        aria-label={item.isVisible ? t('layers.hideClass', { name: item.name }) : t('layers.showClass', { name: item.name })}
-        aria-checked={item.isVisible === true}
-        tooltipPlacement="left"
-        onClick={() => layerController.toggleItemVisibilityAndForget(layerPath, item)}
-        disabled={layerHidden}
-      >
-        {item.isVisible === true ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
-      </IconButton>
+      <FormControlLabel
+        control={
+          <Checkbox
+            color="primary"
+            checked={item.isVisible === true}
+            onChange={() => layerController.toggleItemVisibilityAndForget(layerPath, item)}
+            disabled={isDisabled}
+          />
+        }
+        label={labelContent}
+        sx={sxClasses.formControlLabelFull}
+      />
     );
   };
 
   const renderHeaderCheckbox = (): JSX.Element => {
-    if (!layerCanToggle) {
-      return (
-        <IconButton disabled role="checkbox" aria-label={t('layers.visibilityIsAlways')} aria-checked={false} tooltipPlacement="left">
-          <CheckBoxIcon color="disabled" />
-        </IconButton>
-      );
-    }
+    const isDisabled = layerHidden || !layerCanToggle;
+
+    const labelContent = (
+      <Box component="span" sx={{ fontWeight: 'bold', ...(layerHidden && hiddenStyle) }}>
+        {t('layers.toggleItemsVisibility')}
+      </Box>
+    );
 
     return (
-      <IconButton
-        color="primary"
-        role="checkbox"
-        aria-label={allItemsChecked ? t('layers.hideAllLayers') : t('layers.showAllLayers')}
-        aria-checked={allItemsChecked}
-        tooltipPlacement="left"
-        onClick={() => layerController.setAllItemsVisibilityAndForget(layerPath, !allItemsChecked)}
-        disabled={layerHidden}
-      >
-        {allItemsChecked ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
-      </IconButton>
+      <FormControlLabel
+        control={
+          <Checkbox
+            color="primary"
+            checked={allItemsChecked}
+            onChange={() => layerController.setAllItemsVisibilityAndForget(layerPath, !allItemsChecked)}
+            disabled={isDisabled}
+          />
+        }
+        label={labelContent}
+        sx={sxClasses.formControlLabel}
+      />
     );
   };
 
@@ -392,25 +403,8 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
         justifyItems="stretch"
       >
         {layerItems?.map((item) => (
-          <Grid
-            container
-            direction="row"
-            key={`${layerPath}/${item.name}`}
-            alignItems="center"
-            justifyItems="stretch"
-            sx={{ display: 'flex', flexWrap: 'nowrap', marginBottom: '5px' }}
-          >
-            <Grid size={{ xs: 'auto' }}>{renderItemCheckbox(item)}</Grid>
-            <Grid size={{ xs: 'grow' }} sx={{ display: 'flex' }}>
-              {item.icon ? (
-                <Box component="img" sx={{ alignSelf: 'center', maxHeight: '26px', maxWidth: '26px' }} alt={item.name} src={item.icon} />
-              ) : (
-                <BrowserNotSupportedIcon />
-              )}
-              <Box component="span" sx={{ ...sxClasses.tableIconLabel, ...((layerHidden || !item.isVisible) && hiddenStyle) }}>
-                {item.name}
-              </Box>
-            </Grid>
+          <Grid key={`${layerPath}/${item.name}`} sx={{ marginBottom: '5px' }}>
+            {renderItemCheckbox(item)}
           </Grid>
         ))}
       </Grid>
@@ -462,7 +456,13 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
   const renderHighlightButton = (): JSX.Element | null => {
     if (isLayerHighlightCapable)
       return (
-        <IconButton aria-label={t('legend.highlightLayer')} onClick={handleHighlightLayer} className="buttonOutline" disabled={layerHidden}>
+        <IconButton
+          aria-label={t('legend.highlightLayer')}
+          aria-pressed={highlightedLayer === layerPath}
+          onClick={handleHighlightLayer}
+          className="buttonOutline"
+          disabled={layerHidden}
+        >
           {highlightedLayer === layerPath ? <HighlightIcon /> : <HighlightOutlinedIcon />}
         </IconButton>
       );
@@ -628,7 +628,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
           gap: '15px',
         }}
       >
-        <Box sx={{ textAlign: 'left', flex: 1, minWidth: 0, [theme.breakpoints.down('sm')]: { display: 'none' } }}>
+        <Box sx={{ textAlign: 'left', flex: 1, minWidth: 0 }}>
           <Typography sx={{ ...sxClasses.categoryTitle, ...(layerHidden && hiddenStyle) }} title={layerName}>
             {layerName}
           </Typography>
@@ -656,37 +656,20 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap-reverse' }}>
                 {layerItems &&
                   layerItems.length > 1 &&
-                  layerItems.some((item) => layerStyleConfig?.[item.geometryType]?.fields[0] !== undefined) && (
-                    <Grid container direction="row" alignItems="center" justifyItems="stretch">
-                      <Grid size={{ xs: 'auto' }}>{renderHeaderCheckbox()}</Grid>
-                      <Grid size={{ xs: 'auto' }}>
-                        <Box component="span" sx={{ fontWeight: 'bold', ...(layerHidden && hiddenStyle) }}>
-                          {t('layers.toggleItemsVisibility')}
-                        </Box>
-                      </Grid>
-                    </Grid>
-                  )}
+                  layerItems.some((item) => layerStyleConfig?.[item.geometryType]?.fields[0] !== undefined) &&
+                  renderHeaderCheckbox()}
                 {layerChildPaths && layerChildPaths.length > 0 && (
-                  <Grid container direction="row" alignItems="center" justifyItems="stretch">
-                    <Grid size={{ xs: 'auto' }}>
-                      <IconButton
-                        role="checkbox"
-                        aria-label={allSublayersVisible ? t('layers.hideAllLayers') : t('layers.showAllLayers')}
-                        aria-checked={allSublayersVisible}
-                        tooltipPlacement="left"
-                        color="primary"
-                        onClick={handleToggleAllVisibility}
-                        disabled={layerHidden}
-                      >
-                        {allSublayersVisible ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
-                      </IconButton>
-                    </Grid>
-                    <Grid size={{ xs: 'auto' }}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox color="primary" checked={allSublayersVisible} onChange={handleToggleAllVisibility} disabled={layerHidden} />
+                    }
+                    label={
                       <Box component="span" sx={{ fontWeight: 'bold', ...(layerHidden && hiddenStyle) }}>
                         {t('layers.toggleSublayersVisibility')}
                       </Box>
-                    </Grid>
-                  </Grid>
+                    }
+                    sx={sxClasses.formControlLabel}
+                  />
                 )}
                 {layerControls?.opacity !== false && <LayerOpacityControl layerPath={layerPath} />}
               </Box>

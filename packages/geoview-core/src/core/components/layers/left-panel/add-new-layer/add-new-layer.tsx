@@ -201,6 +201,7 @@ function FileUploadSection({
           style={{ display: 'none' }}
           onChange={handleChange}
           accept=".json, .geojson, .gpkg, .csv, .zip, .shp, .kml, .tif"
+          aria-label={t('layers.fileTypes')!} // WCAG - Provides an accessible label for the hidden file input control
         />
       </Box>
       <Button
@@ -232,6 +233,30 @@ function FileUploadSection({
         onChange={handleInput}
         onKeyDown={onKeyDown}
         multiline
+        slotProps={{
+          inputLabel: {
+            sx: {
+              color: (theme) => theme.palette.geoViewColor.textColor.light[200], // WCAG - Matches global placeholder text color
+              '&.Mui-focused': {
+                color: (theme) => theme.palette.geoViewColor.primary.main, // Primary color when focused
+              },
+            },
+          },
+          input: {
+            sx: {
+              '&:focus-visible': {
+                outline: (theme) => `2px solid ${theme.palette.geoViewColor.primary.main}`,
+                outlineOffset: '2px',
+              },
+              '& textarea.keyboard-focused': {
+                // hide keyboard-focused default black outline (style.css)
+                // MUI adds a 2px border to the bottom of the input parent on focus.
+                // It has sufficient contrast to meet WCAG 2.1 requirements (see Success Criterion 1.4.11 and 2.4.7)
+                border: 'none !important',
+              },
+            },
+          },
+        }}
       />
     </Box>
   );
@@ -875,6 +900,11 @@ export function AddNewLayer(): JSX.Element {
       <Stepper
         activeStep={activeStep}
         orientation="vertical"
+        sx={{
+          '& .MuiStepLabel-label:not(.Mui-active):not(.Mui-completed)': {
+            color: (theme) => theme.palette.geoViewColor.textColor.light[200], // WCAG - Matches global placeholder text color
+          },
+        }}
         steps={[
           {
             stepLabel: {

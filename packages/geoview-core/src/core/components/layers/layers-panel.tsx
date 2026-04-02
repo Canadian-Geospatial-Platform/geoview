@@ -2,23 +2,16 @@ import { useRef, useCallback, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
-import { useTheme } from '@mui/material';
-
 import { Box } from '@/ui';
 
 import { useUIController } from '@/core/controllers/use-controllers';
-import {
-  useStoreLayerDisplayState,
-  useStoreLayerSelectedLayerPath,
-  useStoreLayerSelectedLayerName,
-} from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useStoreLayerDisplayState, useStoreLayerSelectedLayerPath } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { LayersToolbar } from './layers-toolbar';
 import { LayerDetails } from './right-panel/layer-details';
 import { LeftPanel } from './left-panel/left-panel';
 import { logger } from '@/core/utils/logger';
 import type { ResponsiveGridLayoutExposedMethods } from '@/core/components/common/responsive-grid-layout';
 import { ResponsiveGridLayout } from '@/core/components/common/responsive-grid-layout';
-import { Typography } from '@/ui/typography/typography';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { TABS } from '@/core/utils/constant';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
@@ -28,7 +21,6 @@ interface TypeLayersPanel {
 }
 
 export function LayersPanel({ containerType }: TypeLayersPanel): JSX.Element {
-  const theme = useTheme();
   // Log
   logger.logTraceRender('components/layers/layers-panel');
 
@@ -36,7 +28,6 @@ export function LayersPanel({ containerType }: TypeLayersPanel): JSX.Element {
 
   const mapId = useStoreGeoViewMapId();
   const selectedLayerPath = useStoreLayerSelectedLayerPath();
-  const selectedLayerName = useStoreLayerSelectedLayerName();
   const displayState = useStoreLayerDisplayState();
 
   const uiController = useUIController();
@@ -76,23 +67,6 @@ export function LayersPanel({ containerType }: TypeLayersPanel): JSX.Element {
     return null;
   };
 
-  const layerTitle = (): JSX.Element => {
-    return (
-      <Typography
-        sx={{
-          fontSize: theme.palette.geoViewFontSize.lg,
-          fontWeight: '600',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          [theme.breakpoints.up('sm')]: { display: 'none' },
-        }}
-        component="div"
-      >
-        {selectedLayerName ?? ''}
-      </Typography>
-    );
-  };
-
   const handleIsEnlargeClicked = useCallback(
     (isEnlarged: boolean): void => {
       setIsLayoutEnlarged(isEnlarged);
@@ -118,7 +92,6 @@ export function LayersPanel({ containerType }: TypeLayersPanel): JSX.Element {
       ref={responsiveLayoutRef}
       leftTop={<LayersToolbar containerType={containerType} />}
       leftMain={leftPanel()}
-      rightTop={layerTitle()}
       rightMain={rightPanel()}
       guideContentIds={guideContent()}
       hideEnlargeBtn={displayState !== 'view'}

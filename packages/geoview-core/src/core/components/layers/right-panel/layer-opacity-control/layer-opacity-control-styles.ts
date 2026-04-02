@@ -30,4 +30,8 @@ export const getSxClasses = (theme: Theme): any => ({
     fontStyle: 'italic',
     fontWeight: 'bold',
   },
+  controlVisible: {
+    fontWeight: 'bold',
+    whiteSpace: 'nowrap',
+  },
 });
