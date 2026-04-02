@@ -1,6 +1,7 @@
 /**
- * Create a map rotation button to open the rotation control panel
- * @returns {JSX.Element} the created map rotation button
+ * Creates a map rotation button to open the rotation control panel.
+ *
+ * @returns The map rotation button
  */
 export default function MapRotation(): JSX.Element;
 //# sourceMappingURL=map-rotation.d.ts.map

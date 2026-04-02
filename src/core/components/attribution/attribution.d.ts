@@ -1,8 +1,7 @@
 /**
- * Create an Attribution component that will display an attribution box
- * with the attribution text
+ * Attribution component that displays a popover with map attribution text.
  *
- * @returns {JSX.Element} created attribution element
+ * @returns The attribution icon button and popover
  */
 export declare const Attribution: import("react").NamedExoticComponent<object>;
 //# sourceMappingURL=attribution.d.ts.map

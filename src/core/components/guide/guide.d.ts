@@ -1,11 +1,15 @@
 import type { TypeContainerBox } from '@/core/types/global-types';
+/** Props for the Guide component. */
 interface GuideType {
+    /** The container box type for layout. */
     containerType: TypeContainerBox;
 }
 /**
- * Guide component to display help content
+ * Creates the guide component to display help content.
  *
- * @returns {JSX.Element} the guide (help) component
+ * Memoized to prevent re-renders when parent updates but containerType has not changed.
+ *
+ * @returns The guide component
  */
 export declare const Guide: import("react").NamedExoticComponent<GuideType>;
 export {};

@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react';
 import { type MRT_ColumnDef as MRTColumnDef } from 'material-react-table';
 import type { ColumnsType } from './data-table-types';
+/** Properties for the ExportButton component. */
 interface ExportButtonProps {
     layerPath: string;
     rows: ColumnsType[];
@@ -8,13 +9,10 @@ interface ExportButtonProps {
     children?: ReactElement | undefined;
 }
 /**
- * Custom  export button which will help to download data table data in csv format.
- * @param {string} layerPath id of the layer
- * @param {ColumnsType} rows list of rows to be displayed in data table
- * @param {MRTColumnDef<ColumnsType>[]} columns array of object represent column header data.
- * @param {ReactElement} children Menu item to be rendered in Menu.
- * @returns {JSX.Element} returns export button
+ * Renders an export button with a menu for downloading data table data.
  *
+ * @param props - ExportButton properties
+ * @returns The export button element
  */
 declare function ExportButton({ layerPath, rows, columns, children }: ExportButtonProps): JSX.Element;
 export default ExportButton;

@@ -1,17 +1,20 @@
 import type { Theme } from '@mui/material/styles';
 import type { SxProps } from '@mui/system';
+/** Sx class definitions for the north arrow component. */
 interface NorthArrowStyles {
+    /** Styles for the north arrow container. */
     northArrowContainer: SxProps<Theme>;
+    /** Dimensions for the north arrow icon. */
     northArrow: {
         width?: number;
         height?: number;
     };
 }
 /**
- * Get custom sx classes for the north arrow
+ * Gets custom sx classes for the north arrow.
  *
- * @param {Theme} theme the theme object
- * @returns {Object} the sx classes object
+ * @param theme - The theme object
+ * @returns The sx classes object
  */
 export declare const getSxClasses: (theme: Theme) => NorthArrowStyles;
 export {};

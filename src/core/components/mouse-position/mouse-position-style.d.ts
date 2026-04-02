@@ -1,10 +1,10 @@
 import type { Theme } from '@mui/material/styles';
 import type { SxStyles } from '@/ui/style/types';
 /**
- * Get custom sx classes for the mouse position
+ * Gets custom sx classes for the mouse position.
  *
- * @param {Theme} theme the theme object
- * @returns {Object} the sx classes object
+ * @param theme - The theme object
+ * @returns The sx classes object
  */
 export declare const getSxClasses: (theme: Theme) => SxStyles;
 //# sourceMappingURL=mouse-position-style.d.ts.map

@@ -1,4 +1,5 @@
 import type { ChangeEvent } from 'react';
+/** Props for the GeolocatorBar component. */
 interface GeolocatorBarProps {
     /** Current search input value */
     searchValue: string;
@@ -13,6 +14,12 @@ interface GeolocatorBarProps {
     /** Ref for the search input element */
     inputRef?: React.RefObject<HTMLInputElement>;
 }
+/**
+ * Creates the geolocator search bar component.
+ *
+ * @param props - Properties defined in GeolocatorBarProps interface
+ * @returns The geolocator bar
+ */
 export declare function GeolocatorBar({ searchValue, onChange, onSearch, onReset, isLoading, inputRef }: GeolocatorBarProps): JSX.Element;
 export {};
 //# sourceMappingURL=geolocator-bar.d.ts.map

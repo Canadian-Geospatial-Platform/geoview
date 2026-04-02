@@ -1,7 +1,7 @@
 /**
- * Open lighweight version (no function) of data table in a modal window
+ * Renders a lightweight read-only data table in a modal window.
  *
- * @returns {JSX.Element} the data table modal component
+ * @returns The data table modal element
  */
 export default function DataTableModal(): JSX.Element;
 //# sourceMappingURL=data-table-modal.d.ts.map

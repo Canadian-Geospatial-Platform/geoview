@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import type { TypeContainerBox } from '@/core/types/global-types';
+/** Properties for the FocusTrapContainer component. */
 interface FocusTrapContainerProps {
     children: ReactNode;
     id: string;
@@ -7,10 +8,10 @@ interface FocusTrapContainerProps {
     open?: boolean;
 }
 /**
- * Focus trap container which will trap the focus when navigating through keyboard tab.
- * @param {TypeChildren} children dom elements wrapped in Focus trap.
- * @param {boolean} open enable and disabling of focus trap.
- * @returns {JSX.Element}
+ * Traps keyboard tab focus within a container.
+ *
+ * @param props - FocusTrapContainer properties
+ * @returns The focus trap wrapper element
  */
 export declare const FocusTrapContainer: import("react").NamedExoticComponent<FocusTrapContainerProps>;
 export {};

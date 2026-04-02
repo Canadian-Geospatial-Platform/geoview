@@ -1,13 +1,13 @@
 import type { Coordinate } from 'ol/coordinate';
+/** Represents a click marker placed on the map at the user's click location. */
 export type TypeClickMarker = {
     lonlat: Coordinate;
     symbology?: unknown;
 };
 /**
- * Create a react element to display a marker ( at the click location) when a user clicks on
- * the map
+ * Displays a marker at the click location when a user clicks on the map.
  *
- * @returns {JSX.Element} the react element with a marker on click
+ * @returns The click marker element
  */
 export declare const ClickMarker: import("react").NamedExoticComponent<object>;
 //# sourceMappingURL=click-marker.d.ts.map

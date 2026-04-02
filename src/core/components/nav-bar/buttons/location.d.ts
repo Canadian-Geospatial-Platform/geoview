@@ -1,7 +1,7 @@
 /**
- * Create a location button to zoom to user location
+ * Creates a location button to zoom to user location.
  *
- * @returns {JSX.Element} the created location button
+ * @returns The location button
  */
 export default function Location(): JSX.Element;
 //# sourceMappingURL=location.d.ts.map

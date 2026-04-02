@@ -1,8 +1,9 @@
 /**
- * Map Information Rotation Indicator component
- * Displays the current map rotation angle
+ * Creates the map information rotation indicator component.
  *
- * @returns {JSX.Element} the rotation indicator
+ * Memoized to prevent re-renders since this component has no props.
+ *
+ * @returns The rotation indicator
  */
 export declare const MapInfoRotationButton: import("react").NamedExoticComponent<object>;
 //# sourceMappingURL=map-info-rotation-button.d.ts.map

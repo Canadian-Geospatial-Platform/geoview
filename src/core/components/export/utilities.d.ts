@@ -2,16 +2,21 @@ import type { TypeNorthArrow, TypeScaleInfo } from '@/core/stores/store-interfac
 import type { TypeLegendLayer } from '@/core/components/layers/types';
 import type { TypeTimeSliderValues } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 import { type TemporalMode, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
+/** Constants for export configuration. */
 export declare const EXPORT_CONSTANTS: {
+    /** DPI and quality settings */
     readonly DEFAULT_DPI: 96;
     readonly JPEG_QUALITY: 0.98;
+    /** Column optimization settings */
     readonly COLUMN_BALANCE_THRESHOLD: 0.8;
     readonly MAX_OPTIMIZATION_ITERATIONS: 20;
     readonly DEFAULT_MAX_COLUMNS: 4;
     readonly COLUMN_GAP: 10;
+    /** WMS image constraints */
     readonly WMS_MAX_WIDTH: 500;
     readonly WMS_INDENT_PER_LEVEL: 10;
 };
+/** Map state properties needed for export layout rendering. */
 export type TypeMapStateForExportLayout = {
     attribution: string[];
     northArrow: boolean;
@@ -20,12 +25,14 @@ export type TypeMapStateForExportLayout = {
     mapRotation: number;
     currentProjection: number;
 };
+/** North arrow SVG path data. */
 export type NorthArrowSVG = {
     d: string | null;
     fill: string | null;
     stroke: string | null;
     strokeWidth: string | null;
 };
+/** Flattened legend item for layout processing. */
 export type FlattenedLegendItem = {
     type: 'layer' | 'item' | 'child' | 'wms' | 'time';
     data: TypeLegendLayer;
@@ -40,10 +47,7 @@ export type FlattenedLegendItem = {
         height: number;
     };
 };
-/**
- * Element factory interface for creating renderer-specific elements
- * Allows us to abstract between Canvas (HTML) and PDF rendering
- */
+/** Element factory interface for creating renderer-specific elements (Canvas/HTML or PDF). */
 export interface ElementFactory {
     View: (props: any) => JSX.Element;
     Text: (props: any) => JSX.Element;
@@ -52,6 +56,7 @@ export interface ElementFactory {
     Svg: (props: any) => JSX.Element;
     Path: (props: any) => JSX.Element;
 }
+/** Result type containing all map export information. */
 export type TypeMapInfoResult = {
     mapDataUrl: string;
     scaleText: string;
@@ -64,64 +69,66 @@ export type TypeMapInfoResult = {
     canvasWidth: number;
     canvasHeight: number;
 };
+/** Utility class providing static methods for map export processing and layout rendering. */
 export declare class ExportUtilities {
     #private;
     /**
      * Renders multiple legend columns in a flexbox container with dynamic or fixed widths.
+     *
      * Uses space-between justification when columnWidths are provided to eliminate gaps.
      * Falls back to gap-based layout for equal-width columns.
      *
      * Layout modes:
      * - With columnWidths: Justified layout, each column has exact width, no gaps
-     * - Without columnWidths: Flex layout with 10px gaps between equal-width columns
+     * - Without columnWidths: Flexible layout, columns share available space with gaps in between
      *
-     * @param {FlattenedLegendItem[][]} columns - Array of columns, each containing legend items
-     * @param {ElementFactory} factory - Element factory for creating renderer-specific elements
-     * @param {any} scaledStyles - The scaled styles object for sizing
-     * @param {any} baseStyles - The base styles object for layout
-     * @param {Record<string, TypeDisplayDateFormat>} layerDateFormats - Date formats for layers
-     * @param {Record<string, TemporalMode>} layerDateTemporalModes - Temporal modes for layers
-     * @param {number[]} [columnWidths] - Optional array of column widths in pixels for justified layout
-     * @returns {JSX.Element} The rendered legend container with all columns
+     * @param columns - Array of columns, each containing legend items
+     * @param factory - Element factory for creating renderer-specific elements
+     * @param scaledStyles - The scaled styles object for sizing
+     * @param baseStyles - The base styles object for layout
+     * @param layerDateFormats - Date formats for layers
+     * @param layerDateTemporalModes - Temporal modes for layers
+     * @param columnWidths - Optional array of column widths in pixels for justified layout
+     * @returns The rendered legend container with all columns
      */
     static renderLegendColumns(columns: FlattenedLegendItem[][], factory: ElementFactory, scaledStyles: any, // eslint-disable-line @typescript-eslint/no-explicit-any
     baseStyles: any, // eslint-disable-line @typescript-eslint/no-explicit-any
     layerDateFormats: Record<string, TypeDisplayDateFormat>, layerDateTemporalModes: Record<string, TemporalMode>, columnWidths?: number[]): JSX.Element;
     /**
      * Renders the footer section with disclaimer, attributions, and date.
-     * Footer appears at the bottom of the export document in all formats.
      *
-     * @param {string} disclaimer - The disclaimer text to display
-     * @param {string[]} attributions - Array of attribution texts (one per map layer)
-     * @param {ElementFactory} factory - Element factory for creating renderer-specific elements
-     * @param {any} scaledStyles - The scaled styles object with footer styling
-     * @returns {JSX.Element} The rendered footer container
+     * @param disclaimer - The disclaimer text to display
+     * @param attributions - Array of attribution texts (one per map layer)
+     * @param factory - Element factory for creating renderer-specific elements
+     * @param scaledStyles - The scaled styles object with footer styling
+     * @returns The rendered footer container
      */
     static renderFooter(disclaimer: string, attributions: string[], factory: ElementFactory, scaledStyles: any): JSX.Element;
     /**
      * Renders a scale bar with tick marks and label text.
-     * The scale bar width is dynamically calculated to match the map extent.
-     * Includes left and right tick marks to clearly indicate the measurement distance.
      *
-     * @param {string} scaleText - The scale text label (e.g., "100 km (approx)")
-     * @param {string} scaleLineWidth - The scale line width as CSS string (e.g., "150px")
-     * @param {ElementFactory} factory - Element factory for creating renderer-specific elements
-     * @param {any} scaledStyles - The scaled styles object for text sizing
-     * @param {any} baseStyles - The base styles object for scale bar layout
-     * @returns {JSX.Element} The rendered scale bar container
+     * The scale bar width is dynamically calculated to match the map extent.
+     *
+     * @param scaleText - The scale text label (e.g., "100 km (approx)")
+     * @param scaleLineWidth - The scale line width as CSS string (e.g., "150px")
+     * @param factory - Element factory for creating renderer-specific elements
+     * @param scaledStyles - The scaled styles object for text sizing
+     * @param baseStyles - The base styles object for scale bar layout
+     * @returns The rendered scale bar container
      */
     static renderScaleBar(scaleText: string, scaleLineWidth: string, factory: ElementFactory, scaledStyles: any, // eslint-disable-line @typescript-eslint/no-explicit-any
     baseStyles: any): JSX.Element;
     /**
      * Renders a north arrow SVG icon with rotation to indicate true north direction.
+     *
      * The rotation accounts for both map rotation and user-configured north arrow orientation.
      * Returns null if north arrow is disabled or SVG data is unavailable.
      *
-     * @param {NorthArrowSVG[] | undefined} northArrowSvg - Array of SVG path data with stroke/fill properties
-     * @param {number} northArrowRotation - The rotation angle in degrees (includes map rotation + config offset)
-     * @param {ElementFactory} factory - Element factory for creating renderer-specific elements
-     * @param {any} scaledStyles - The scaled styles object for sizing and rotation
-     * @returns {JSX.Element | null} The rendered north arrow SVG or null if disabled
+     * @param northArrowSvg - Array of SVG path data with stroke/fill properties
+     * @param northArrowRotation - The rotation angle in degrees
+     * @param factory - Element factory for creating renderer-specific elements
+     * @param scaledStyles - The scaled styles object for sizing and rotation
+     * @returns The rendered north arrow SVG, or null if disabled
      */
     static renderNorthArrow(northArrowSvg: NorthArrowSVG[] | undefined, northArrowRotation: number, factory: ElementFactory, scaledStyles: any): JSX.Element | null;
     /**
@@ -147,13 +154,13 @@ export declare class ExportUtilities {
      * - Balances columns within 80% height ratio threshold
      * - All content fits on single auto-sized page
      *
-     * @param {string} mapId - The GeoView map ID
-     * @param {string} exportTitle - The export title (affects height calculation)
-     * @param {string} disclaimer - The disclaimer text (affects height calculation)
-     * @param {Record<string, TypeDisplayDateFormat>} layerDateFormats - Date formats for layers
-     * @param {Record<string, TemporalMode>} layerDateTemporalModes - Temporal modes for layers
-     * @returns {Promise<TypeMapInfoResult>} Map image URL, scale info, north arrow, legend columns, canvas dimensions
-     * @throws {Error} If canvas context is unavailable
+     * @param mapId - The GeoView map ID
+     * @param exportTitle - The export title (affects height calculation)
+     * @param disclaimer - The disclaimer text (affects height calculation)
+     * @param layerDateFormats - Date formats for layers
+     * @param layerDateTemporalModes - Temporal modes for layers
+     * @returns A promise that resolves with map image URL, scale info, north arrow, legend columns, and canvas dimensions
+     * @throws {Error} When canvas context is unavailable
      */
     static getMapInfo(mapId: string, exportTitle: string, disclaimer: string, layerDateFormats: Record<string, TypeDisplayDateFormat>, layerDateTemporalModes: Record<string, TemporalMode>): Promise<TypeMapInfoResult>;
 }

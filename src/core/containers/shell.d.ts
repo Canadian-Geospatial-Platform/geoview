@@ -1,11 +1,14 @@
 import type { MapViewer } from '@/geo/map/map-viewer';
+/** The properties for the shell component. */
 type ShellProps = {
+    /** The map viewer instance. */
     mapViewer: MapViewer;
 };
 /**
- * Create a shell component to wrap the map and other components not inside the map
- * @param {ShellProps} props the shell properties
- * @returns {JSX.Element} the shell component
+ * Creates a shell component to wrap the map and other components not inside the map.
+ *
+ * @param props - The shell properties
+ * @returns The shell component
  */
 export declare function Shell(props: ShellProps): JSX.Element;
 export {};

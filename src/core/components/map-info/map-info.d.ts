@@ -1,10 +1,14 @@
+/** Props for the MapInfo component. */
 interface MapInfoProps {
+    /** Callback to scroll the shell into view when the info bar is clicked. */
     onScrollShellIntoView: () => void;
 }
 /**
- * Create a map information element that contains attribtuion, mouse position and scale
+ * Creates the map information bar containing attribution, mouse position, and scale.
  *
- * @returns {JSX.Element} the map information element
+ * Memoized to prevent re-renders when parent updates but the onScrollShellIntoView callback has not changed.
+ *
+ * @returns The map information bar
  */
 export declare const MapInfo: import("react").NamedExoticComponent<MapInfoProps>;
 export {};

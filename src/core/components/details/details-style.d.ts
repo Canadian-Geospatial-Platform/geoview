@@ -1,10 +1,10 @@
 import type { Theme } from '@mui/material/styles';
 import type { SxStyles } from '@/ui/style/types';
 /**
- * Get custom sx classes for the details
+ * Gets the sx classes for the details components.
  *
- * @param {Theme} theme the theme object
- * @returns {Object} the sx classes object
+ * @param theme - The theme object
+ * @returns The sx classes object
  */
 export declare const getSxClasses: (theme: Theme) => SxStyles;
 //# sourceMappingURL=details-style.d.ts.map

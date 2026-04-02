@@ -1,7 +1,5 @@
 import type { CSSProperties } from 'react';
-/**
- * Interface used for custom html elements
- */
+/** Properties for the HTML-to-React converter component. */
 interface HtmlToReactProps {
     htmlContent: string;
     className?: string;
@@ -10,10 +8,10 @@ interface HtmlToReactProps {
     itemOptions?: Record<string, unknown>;
 }
 /**
- * Convert an HTML string to a JSX component
+ * Converts an HTML string to a JSX component.
  *
- * @param {HtmlToReactProps} props the properties to pass to the converted component
- * @returns {JSX.Element} returns the converted JSX component
+ * @param props - The properties for the HTML-to-React conversion
+ * @returns The converted JSX component
  */
 export declare function UseHtmlToReact({ htmlContent, className, style, extraOptions, itemOptions }: HtmlToReactProps): JSX.Element;
 export {};

@@ -1,14 +1,15 @@
-/**
- * Interface for the focus trap properties
- */
+/** Interface for the focus trap properties. */
 interface FocusTrapProps {
+    /** The map identifier. */
     mapId: string;
+    /** The focus trap element identifier. */
     focusTrapId: string;
 }
 /**
- * Create a dialog component to explain to keyboard user how to trigger and remove FocusTrap
- * @param {FocusTrapProps} props the focus trap dialog properties
- * @returns {JSX.Element} the focus trap dialog component
+ * Creates a dialog component to explain to keyboard user how to trigger and remove FocusTrap.
+ *
+ * @param props - The focus trap dialog properties
+ * @returns The focus trap dialog component
  */
 export declare function FocusTrapDialog(props: FocusTrapProps): JSX.Element;
 export {};

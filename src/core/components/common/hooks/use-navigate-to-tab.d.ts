@@ -1,6 +1,4 @@
-/**
- * Options for navigating to a tab
- */
+/** Options for navigating to a tab. */
 interface NavigateToTabOptions {
     /** The layer path to select after navigation (optional) */
     layerPath?: string;
@@ -8,12 +6,13 @@ interface NavigateToTabOptions {
     delay?: number;
 }
 /**
- * Custom hook for navigating to footer or appbar tabs with common functionality
- * Handles opening the tab, collapsing/expanding footer, and scrolling behavior
+ * Custom hook for navigating to footer or appbar tabs with common functionality.
  *
- * @param {string} tabId - The ID of the tab to navigate to (e.g., 'layers', 'data-table', 'time-slider-panel')
- * @param {(layerPath: string) => void} [onNavigate] - Optional callback to execute after navigation (e.g., setSelectedLayerPath)
- * @returns {Function} Navigate function that can be called with optional NavigateToTabOptions
+ * Handles opening the tab, collapsing/expanding footer, and scrolling behavior.
+ *
+ * @param tabId - The ID of the tab to navigate to (e.g., 'layers', 'data-table', 'time-slider-panel')
+ * @param onNavigate - Optional callback to execute after navigation (e.g., setSelectedLayerPath)
+ * @returns Navigate function that can be called with optional NavigateToTabOptions
  *
  * @example
  * // Simple usage - navigate to layers tab
