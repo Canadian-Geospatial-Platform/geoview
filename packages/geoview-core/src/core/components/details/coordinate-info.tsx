@@ -136,7 +136,7 @@ export function CoordinateInfo(): JSX.Element {
   return (
     <Box sx={sxClasses.rightPanelContainer} className="guide-content-container">
       <Box sx={sxClasses.coordinateInfoContainer}>
-        <Typography variant="h6" sx={sxClasses.coordinateInfoTitle}>
+        <Typography component="h4" variant="h6" sx={sxClasses.coordinateInfoTitle}>
           {t('details.coordinateInfoTitle')}
         </Typography>
 

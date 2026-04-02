@@ -125,9 +125,6 @@
     "selectLayerAndScroll": "Show in Layers panel",
     "hideText": "Hide feature text labels",
     "showText": "Show feature text labels",
-    "layerLoadingDescriptive": "Loading layer {{layerName}}",
-    "layerLoadedDescriptive": "Layer {{layerName}} loaded successfully",
-    "layerErrorDescriptive": "Error loading layer {{layerName}}",
     "layerOutOfRangeScreenReader": "(visibility limited by scale)"
   },
   "layers": {
@@ -150,7 +147,7 @@
     "stepTwo": "Select format",
     "stepThree": "Configure layer",
     "stepFour": "Enter name",
-    "fileTypes": "Upload a CSV, shapefile, GeoPackage, or GeoJSON file",
+    "fileTypes": "Choose a file to upload: .json, .geojson, .gpkg, .csv, .zip, .shp, .kml, .tif",
     "service": "Service type",
     "serviceEsriShapefile": "Shapefile",
     "serviceEsriFeature": "ESRI Feature Service",
@@ -200,7 +197,7 @@
     "fetchDone": "Data fetched - __param__ records.",
     "fetchStart": "Fetching data...",
     "only": "only",
-    "opacity": "Opacity",
+    "opacity": "Opacity (%)",
     "opacityMax": "Maximum from parent",
     "reloadLayer": "Reload layer",
     "reloadSublayers": "Reload all layers in error",
@@ -249,14 +246,13 @@
     "hideAllLayers": "Hide all layers",
     "showLayer": "Show {{name}} layer",
     "hideLayer": "Hide {{name}} layer",
-    "showClass": "Show {{name}} class",
-    "hideClass": "Hide {{name}} class",
     "tableViewNone": "Table (unavailable)",
     "moveLayerUp": "Move layer up",
     "moveLayerDown": "Move layer down",
     "layerControls": "Layers controls",
     "selectLayerAndScrollTimeSlider": "Show in Time Slider panel",
     "selectLayer": "Select {{layerName}}",
+    "layerActions": "Layer actions",
     "settings": {
       "title": "Layer settings",
       "selectRasterFunction": "Change raster function",
@@ -283,6 +279,11 @@
       "orderDescending": "Newest to Oldest",
       "selectWmsStyle": "Select WMS style",
       "back": "Back to layer details"
+    },
+    "status": {
+      "layerLoadingDescriptive": "Loading layer, {{layerName}}",
+      "layerLoadedDescriptive": "Layer, {{layerName}}, loaded successfully",
+      "layerErrorDescriptive": "Error loading layer, {{layerName}}"
     }
   },
   "details": {
@@ -521,7 +522,8 @@
       "pluginError": "A major error on Plugin '__param__' on map '__param__' has happened.",
       "pluginConfigNotFound": "The Plugin configuration '__param__' on map '__param__' at path '__param__' couldn't be found.",
       "pluginStateUninitialized": "The Plugin state for '__param__' on map '__param__' is uninitialized.",
-      "invalidZoomExtent": "Unable to zoom, the provided extent is invalid."
+      "invalidZoomExtent": "Unable to zoom, the provided extent is invalid.",
+      "loadingLayers": "Loading layers..."
     },
     "geocore": {
       "uuidNotFound": "GeoCore layer identifier '__param__' does not exist on the server.",

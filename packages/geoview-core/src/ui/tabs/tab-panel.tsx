@@ -1,5 +1,6 @@
 import type { ReactNode, Ref } from 'react';
 import { forwardRef } from 'react';
+
 import { Box } from '@/ui';
 import { FocusTrapContainer } from '@/core/components/common';
 import type { TypeContainerBox } from '@/core/types/global-types';
@@ -51,7 +52,7 @@ function TabPanelUI(props: TypeTabPanelProps, ref: Ref<HTMLDivElement>): JSX.Ele
   const { children, value, index, id, containerType, tabId, ...other } = props;
 
   return (
-    <Box component="section" role="tabpanel" hidden={value !== index} id={id} aria-labelledby={`${tabId} layers`} {...other} ref={ref}>
+    <Box component="section" role="tabpanel" hidden={value !== index} id={id} aria-labelledby={tabId} {...other} ref={ref}>
       <FocusTrapContainer id={tabId} containerType={containerType}>
         {children}
       </FocusTrapContainer>

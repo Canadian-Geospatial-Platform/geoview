@@ -12,8 +12,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     textAlign: 'left',
     fontWeight: '600',
     fontSize: theme.palette.geoViewFontSize.lg,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
   },
   layerDetails: {
     padding: '16px',
@@ -44,7 +42,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   tableIconLabel: {
     color: theme.palette.geoViewColor.textColor.main,
     fontSize: theme.palette.geoViewFontSize.default,
-    marginLeft: '20px',
     alignSelf: 'center',
   },
   wmsImage: {
@@ -103,5 +100,28 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
         whiteSpace: 'normal',
       },
     },
+  },
+  formControlLabelFull: {
+    margin: 0,
+    width: '100%',
+    gap: '8px',
+    '& .MuiFormControlLabel-label': {
+      width: '100%',
+      flex: 1,
+    },
+  },
+
+  formControlLabel: {
+    margin: 0,
+    gap: '8px',
+    '& .MuiFormControlLabel-label': {
+      flex: 1,
+    },
+  },
+
+  checkboxLabelContent: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
   },
 });

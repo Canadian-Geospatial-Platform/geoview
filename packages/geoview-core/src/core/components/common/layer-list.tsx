@@ -121,26 +121,26 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
   );
 
   return (
-    <Tooltip
-      title={layer.tooltip}
-      placement="top"
-      arrow
-      enterDelay={theme.transitions.duration.tooltipDelay}
-      enterNextDelay={theme.transitions.duration.tooltipDelay}
-      slotProps={{
-        popper: {
-          modifiers: [
-            {
-              name: 'offset',
-              options: {
-                offset: [0, -8],
+    <ListItem disablePadding className={containerClass}>
+      <Tooltip
+        title={layer.tooltip}
+        placement="top"
+        arrow
+        enterDelay={theme.transitions.duration.tooltipDelay}
+        enterNextDelay={theme.transitions.duration.tooltipDelay}
+        slotProps={{
+          popper: {
+            modifiers: [
+              {
+                name: 'offset',
+                options: {
+                  offset: [0, -8],
+                },
               },
-            },
-          ],
-        },
-      }}
-    >
-      <ListItem disablePadding className={containerClass}>
+            ],
+          },
+        }}
+      >
         <ListItemButton
           id={id}
           component="button"
@@ -167,16 +167,23 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
             </Box>
           </Box>
           {layer.layerPath !== LAYER_PATH_COORDINATE_INFO && (layer.numOffeatures ?? 0) > 0 && (
-            <Badge badgeContent={layer.numOffeatures} max={99} color="info" sx={sxClasses.layerCount} className="layer-count" aria-hidden="true"></Badge>
+            <Badge
+              badgeContent={layer.numOffeatures}
+              max={99}
+              color="info"
+              sx={sxClasses.layerCount}
+              className="layer-count"
+              aria-hidden="true"
+            ></Badge>
           )}
         </ListItemButton>
-        {layerStatus === 'loading' && (
-          <Box component="span" sx={sxClasses.progressBar}>
-            <ProgressBar />
-          </Box>
-        )}
-      </ListItem>
-    </Tooltip>
+      </Tooltip>
+      {layerStatus === 'loading' && (
+        <Box component="span" sx={sxClasses.progressBar}>
+          <ProgressBar aria-label={t('layers.status.layerLoadingDescriptive', { layerName: layer.layerName })!} />
+        </Box>
+      )}
+    </ListItem>
   );
 });
 
@@ -196,7 +203,6 @@ export const LayerList = memo(function LayerList({ layerList, selectedLayerPath,
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
-  // TODO: WCAG Issue #3119 Place in a landmark region (nav)
   return (
     <List sx={sxClasses.list}>
       {!!layerList.length &&

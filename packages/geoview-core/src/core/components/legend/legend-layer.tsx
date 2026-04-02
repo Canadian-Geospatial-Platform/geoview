@@ -152,15 +152,15 @@ export function LegendLayer({ layerPath, showControls, containerType }: LegendLa
   useEffect(() => {
     if (layerStatus === 'loading' && prevStatusRef.current !== 'loading') {
       // Announce when loading starts
-      setStatusMessage(t('legend.layerLoadingDescriptive', { layerName }) || '');
+      setStatusMessage(t('layers.status.layerLoadingDescriptive', { layerName }) || '');
       prevStatusRef.current = layerStatus;
     } else if (layerStatus === 'loaded' && prevStatusRef.current === 'loading') {
       // Announce when loading completes successfully
-      setStatusMessage(t('legend.layerLoadedDescriptive', { layerName }) || '');
+      setStatusMessage(t('layers.status.layerLoadedDescriptive', { layerName }) || '');
       prevStatusRef.current = layerStatus;
     } else if (layerStatus === 'error' && prevStatusRef.current === 'loading') {
       // Announce when loading fails
-      setStatusMessage(t('legend.layerErrorDescriptive', { layerName }) || '');
+      setStatusMessage(t('layers.status.layerErrorDescriptive', { layerName }) || '');
       prevStatusRef.current = layerStatus;
     } else {
       // Update ref for any other status changes
@@ -185,7 +185,7 @@ export function LegendLayer({ layerPath, showControls, containerType }: LegendLa
       </Box>
       {layerStatus === 'loading' && (
         <Box sx={sxClasses.loading}>
-          <ProgressBar aria-label={t('legend.layerLoadingDescriptive', { layerName }) || undefined} />
+          <ProgressBar aria-label={t('layers.status.layerLoadingDescriptive', { layerName })!} />
         </Box>
       )}
 
