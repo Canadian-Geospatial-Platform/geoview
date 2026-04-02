@@ -1,5 +1,6 @@
 import type { ReactNode, Ref } from 'react';
 import { forwardRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Box } from '@/ui';
 import { FocusTrapContainer } from '@/core/components/common';
 import type { TypeContainerBox } from '@/core/types/global-types';
@@ -45,13 +46,22 @@ export interface TypeTabPanelProps {
  * @see {@link https://mui.com/material-ui/react-tabs/}
  */
 function TabPanelUI(props: TypeTabPanelProps, ref: Ref<HTMLDivElement>): JSX.Element {
+  const { t } = useTranslation();
   logger.logTraceRenderDetailed('ui/tabs/tab-panel', props);
 
   // Get constant from props
   const { children, value, index, id, containerType, tabId, ...other } = props;
 
   return (
-    <Box component="section" role="tabpanel" hidden={value !== index} id={id} aria-labelledby={`${tabId} layers`} {...other} ref={ref}>
+    <Box
+      component="section"
+      role="tabpanel"
+      hidden={value !== index}
+      id={id}
+      aria-label={t('general.panelLabel', { title: tabId })!}
+      {...other}
+      ref={ref}
+    >
       <FocusTrapContainer id={tabId} containerType={containerType}>
         {children}
       </FocusTrapContainer>

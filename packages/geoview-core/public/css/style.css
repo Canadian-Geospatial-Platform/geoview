@@ -20,7 +20,7 @@ td {
 }
 
 .collapsible {
-  background-color: #777;
+  background-color: #757575;
   color: white;
   cursor: pointer;
   padding: 18px;
@@ -367,7 +367,7 @@ table.state {
   margin-bottom: 30px;
 }
 
-.demo-section h4 {
+.demo-section h4:not([class*='MuiTypography']) {
   color: #333;
   border-bottom: 2px solid #4caf50;
   padding-bottom: 8px;

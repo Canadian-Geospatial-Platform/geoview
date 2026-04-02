@@ -2,7 +2,7 @@ import type { CSSProperties, ReactNode } from 'react';
 import { useLayoutEffect, useCallback, useRef, useMemo, useState } from 'react';
 import type { SxProps, Theme } from '@mui/material/styles';
 import { useTheme } from '@mui/material/styles';
-import { Slider as MaterialSlider } from '@mui/material';
+import { Slider as MaterialSlider, type SliderProps as MuiSliderProps } from '@mui/material';
 import type { Mark } from '@mui/base';
 import { logger } from '@/core/utils/logger';
 
@@ -41,6 +41,7 @@ type SliderProps = {
   ariaLabelledby?: string;
   valueLabelFormat?: string | ((value: number, index: number) => ReactNode);
   valueLabelDisplay?: 'auto' | 'on';
+  slotProps?: MuiSliderProps['slotProps'];
 };
 
 /**
@@ -87,6 +88,7 @@ function SliderUI(props: SliderProps): JSX.Element {
     onValueLabelFormat,
     onValueDisplayAriaLabel,
     disabled,
+    slotProps,
     ...properties
   } = props;
 
@@ -351,12 +353,12 @@ function SliderUI(props: SliderProps): JSX.Element {
       disableSwap
       valueLabelDisplay={valueLabelDisplayOption}
       valueLabelFormat={onValueLabelFormat}
-      getAriaLabel={(): string => 'To implement with translation'}
       getAriaValueText={onValueDisplayAriaLabel}
       onChange={handleChange}
       onChangeCommitted={handleChangeCommitted}
       onKeyDown={handleKeyDown}
       disabled={disabled}
+      slotProps={slotProps}
     />
   );
 }
