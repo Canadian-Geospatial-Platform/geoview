@@ -1,18 +1,27 @@
 import type { TemporalMode, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
+/** Supported export file formats. */
 type FileFormat = 'pdf' | 'png' | 'jpeg';
+/** Properties for file export configuration. */
 export interface FileExportProps {
+    /** The export title text. */
     exportTitle: string;
+    /** The disclaimer text. */
     disclaimer: string;
+    /** The export resolution in DPI. */
     dpi: number;
+    /** Optional JPEG quality percentage. */
     jpegQuality?: number;
+    /** The output file format. */
     format: FileFormat;
+    /** Date display formats keyed by layer path. */
     layerDateFormats: Record<string, TypeDisplayDateFormat>;
+    /** Temporal modes keyed by layer path. */
     layerDateTemporalModes: Record<string, TemporalMode>;
 }
 /**
- * Export modal window component to export the viewer information in a PNG file
+ * Creates the export modal component for exporting the viewer information.
  *
- * @returns {JSX.Element} the export modal component
+ * @returns The export modal component
  */
 export default function ExportModal(): JSX.Element;
 export {};

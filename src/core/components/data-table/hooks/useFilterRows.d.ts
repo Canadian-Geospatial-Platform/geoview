@@ -1,12 +1,14 @@
 import type { Dispatch, SetStateAction } from 'react';
 import type { TypeColumnFiltersState } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+/** Properties for the useFilterRows hook. */
 export interface UseFilterRowsProps {
     layerPath: string;
 }
 /**
- * Custom hook to set the filtered row  for data table.
- * @param {string} layerPath key of the layer selected.
- * @returns {Object}
+ * Custom hook to manage column filter state for the data table.
+ *
+ * @param props - Hook properties containing the layer path
+ * @returns The column filters state and setter
  */
 export declare function useFilterRows({ layerPath }: UseFilterRowsProps): {
     columnFilters: TypeColumnFiltersState;

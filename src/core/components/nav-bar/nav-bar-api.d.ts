@@ -2,109 +2,110 @@ import type { TypeButtonGroupConfig, TypeButtonPanel, TypePanelProps } from '@/u
 import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 /**
- * Class to manage buttons on the nav-bar
- *
- * @exports
- * @class
+ * Class to manage buttons on the nav-bar.
  */
 export declare class NavBarApi {
     #private;
+    /** The map identifier. */
     mapId: string;
+    /** Groups of button panels created on the nav-bar. */
     buttons: Record<string, Record<string, TypeButtonPanel>>;
+    /** Configuration for button groups. */
     groupConfigs: Record<string, TypeButtonGroupConfig>;
     /**
-     * Instantiates a NavbarApi class.
+     * Instantiates a NavBarApi class.
      *
-     * @param {string} mapId - The map id this NavBarApi belongs to
+     * @param mapId - The map id this NavBarApi belongs to
      */
     constructor(mapId: string);
     /**
      * Registers an event handler for NavBar created events.
-     * @param {NavBarCreatedDelegate} callback - The callback to be executed whenever the event is emitted.
+     *
+     * @param callback - The callback to be executed whenever the event is emitted
      */
     onNavbarCreated(callback: NavBarCreatedDelegate): void;
     /**
      * Unregisters an event handler for NavBar created events.
-     * @param {NavBarCreatedDelegate} callback - The callback to stop being called whenever the event is emitted.
+     *
+     * @param callback - The callback to stop being called whenever the event is emitted
      */
     offNavbarCreated(callback: NavBarCreatedDelegate): void;
     /**
      * Registers an event handler for NavBar removed events.
-     * @param {NavBarRemovedDelegate} callback - The callback to be executed whenever the event is emitted.
+     *
+     * @param callback - The callback to be executed whenever the event is emitted
      */
     onNavbarRemoved(callback: NavBarRemovedDelegate): void;
     /**
      * Unregisters an event handler for NavBar removed events.
-     * @param {NavBarRemovedDelegate} callback - The callback to stop being called whenever the event is emitted.
+     *
+     * @param callback - The callback to stop being called whenever the event is emitted
      */
     offNavbarRemoved(callback: NavBarRemovedDelegate): void;
     /**
-     * Creates a nav-bar button panel
+     * Creates a nav-bar button panel.
      *
-     * @param {IconButtonPropsExtend} buttonProps - Button properties
-     * @param {TypePanelProps} panelProps - Panel properties
-     * @param {string} groupName - Group name to add the button panel to
-     * @returns {TypeButtonPanel | null} The created button panel
+     * @param buttonProps - Button properties
+     * @param panelProps - Panel properties
+     * @param groupName - Group name to add the button panel to
+     * @returns The created button panel
      */
     createNavbarButtonPanel(buttonProps: IconButtonPropsExtend, panelProps: TypePanelProps, groupName: string): TypeButtonPanel | null;
     /**
-     * Creates a new nav-bar button that will trigger a callback when clicked
+     * Creates a new nav-bar button that will trigger a callback when clicked.
      *
-     * @param {TypeButtonProps} buttonProps - Button properties
-     * @param {string} groupName - Group name to add button to
-     * @returns {TypeButtonPanel | null} The created button
+     * @param buttonProps - Button properties
+     * @param groupName - Group name to add button to
+     * @returns The created button
      */
     createNavbarButton(buttonProps: IconButtonPropsExtend, groupName: string): TypeButtonPanel | null;
     /**
-     * Gets a button panel from the nav-bar by using its id
+     * Gets a button panel from the nav-bar by using its id.
      *
-     * @param {string} buttonPanelId - The id of the button panel to get
-     * @returns {TypeButtonPanel | null} The Button panel
+     * @param buttonPanelId - The id of the button panel to get
+     * @returns The button panel, or null if not found
      */
     getNavBarButtonPanelById(buttonPanelId: string): TypeButtonPanel | null;
     /**
-     * Removes a nav-bar button or panel using its id
+     * Removes a nav-bar button or panel using its id.
      *
-     * @param {string} buttonPanelId - The id of the panel or button to remove
+     * @param buttonPanelId - The id of the panel or button to remove
      */
     removeNavbarButtonPanel(buttonPanelId: string): void;
     /**
-     * Sets configuration for a button group
+     * Sets configuration for a button group.
      *
-     * @param {string} groupName - The group name
-     * @param {TypeButtonGroupConfig} config - The group configuration
+     * @param groupName - The group name
+     * @param config - The group configuration
      */
     setGroupConfig(groupName: string, config: Partial<TypeButtonGroupConfig>): void;
     /**
-     * Gets configuration for a button group
+     * Gets configuration for a button group.
      *
-     * @param {string} groupName - The group name
-     * @returns {TypeButtonGroupConfig} The group configuration
+     * @param groupName - The group name
+     * @returns The group configuration
      */
     getGroupConfig(groupName: string): TypeButtonGroupConfig;
 }
-/**
- * Define an event for the delegate
- */
+/** Event payload when a nav-bar button panel is created. */
 export type NavBarCreatedEvent = {
+    /** The button panel identifier. */
     buttonPanelId: string;
+    /** The group the button panel belongs to. */
     group: string;
+    /** The created button panel. */
     buttonPanel: TypeButtonPanel;
 };
-/**
- * Define a delegate for the event handler function signature
- */
+/** Delegate type for NavBar created event handlers. */
 type NavBarCreatedDelegate = EventDelegateBase<NavBarApi, NavBarCreatedEvent, void>;
-/**
- * Define an event for the delegate
- */
+/** Event payload when a nav-bar button panel is removed. */
 export type NavBarRemovedEvent = {
+    /** The button panel identifier. */
     buttonPanelId: string;
+    /** The group the button panel belonged to. */
     group: string;
 };
-/**
- * Define a delegate for the event handler function signature
- */
+/** Delegate type for NavBar removed event handlers. */
 type NavBarRemovedDelegate = EventDelegateBase<NavBarApi, NavBarRemovedEvent, void>;
 export {};
 //# sourceMappingURL=nav-bar-api.d.ts.map

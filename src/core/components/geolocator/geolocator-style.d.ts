@@ -2,17 +2,17 @@ import type { Theme } from '@mui/material';
 import { Input } from '@mui/material';
 import type { SxStyles } from '@/ui/style/types';
 /**
- * Get custom sx classes for the geolocator
+ * Gets custom sx classes for the geolocator.
  *
- * @param {Theme} theme the theme object
- * @returns {Object} the sx classes object
+ * @param theme - The theme object
+ * @returns The sx classes object
  */
 export declare const getSxClasses: (theme: Theme) => SxStyles;
 /**
- * Get custom sx classes for the geolocator list
+ * Gets custom sx classes for the geolocator list.
  *
- * @param {Theme} theme the theme object
- * @returns {Object} the sx classes object
+ * @param theme - The theme object
+ * @returns The sx classes object
  */
 export declare const getSxClassesList: (theme: Theme) => SxStyles;
 export declare const StyledInputField: typeof Input;

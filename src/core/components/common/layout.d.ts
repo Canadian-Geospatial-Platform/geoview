@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import type { LayerListEntry } from './layer-list';
 import type { TypeContainerBox } from '@/core/types/global-types';
+/** Properties for the Layout component. */
 interface LayoutProps {
     children?: ReactNode;
     layoutSwitch?: ReactNode;
@@ -17,9 +18,17 @@ interface LayoutProps {
     hideEnlargeBtn?: boolean;
     toggleMode?: boolean;
 }
+/** Methods exposed by the Layout component via ref. */
 interface LayoutExposedMethods {
     showRightPanel: (visible: boolean) => void;
 }
+/**
+ * Two-panel layout with a layer list on the left and content on the right.
+ *
+ * @param props - Layout properties
+ * @param ref - Ref exposing showRightPanel method
+ * @returns The two-panel layout element
+ */
 declare const Layout: import("react").ForwardRefExoticComponent<LayoutProps & import("react").RefAttributes<LayoutExposedMethods>>;
 export { Layout };
 export type { LayoutExposedMethods };

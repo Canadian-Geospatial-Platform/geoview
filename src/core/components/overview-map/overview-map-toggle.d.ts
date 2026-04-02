@@ -1,18 +1,14 @@
 import type { OverviewMap as OLOverviewMap } from 'ol/control';
-/**
- * Properties for the overview map toggle
- */
+/** Properties for the overview map toggle. */
 interface OverviewMapToggleProps {
-    /**
-     * OpenLayers overview map control
-     */
+    /** OpenLayers overview map control. */
     overviewMap: OLOverviewMap;
 }
 /**
- * Create a toggle icon button
+ * Creates a toggle icon button for the overview map.
  *
- * @param {OverviewMapToggleProps} props overview map toggle properties
- * @returns {JSX.Element} returns the toggle icon button
+ * @param props - The overview map toggle properties
+ * @returns The toggle icon button or null if not yet mounted
  */
 export declare function OverviewMapToggle(props: OverviewMapToggleProps): JSX.Element | null;
 export {};

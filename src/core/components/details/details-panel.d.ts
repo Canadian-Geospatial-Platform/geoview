@@ -1,12 +1,14 @@
 import type { TypeContainerBox } from '@/core/types/global-types';
+/** Properties for the details panel component. */
 interface DetailsPanelType {
+    /** The container type (appBar or footerBar). */
     containerType: TypeContainerBox;
 }
 /**
- * layers list
+ * Creates the details panel component.
  *
- * @param {DetailsPanelProps} props The properties passed to LayersListFooter
- * @returns {JSX.Element} the layers list
+ * @param props - Properties defined in DetailsPanelType interface
+ * @returns The details panel component
  */
 export declare function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element;
 export {};

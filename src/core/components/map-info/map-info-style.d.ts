@@ -1,8 +1,8 @@
 import type { SxStyles } from '@/ui/style/types';
 /**
- * Get custom sx classes for the map information bar
+ * Gets custom sx classes for the map information bar.
  *
- * @returns {Object} the sx classes object
+ * @returns The sx classes object
  */
 export declare const getSxClasses: () => SxStyles;
 //# sourceMappingURL=map-info-style.d.ts.map

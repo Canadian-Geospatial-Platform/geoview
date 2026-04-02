@@ -1,7 +1,7 @@
 /**
- * Open lighweight version (no function) of feature detail in modal.
+ * Creates the lightweight feature detail modal component.
  *
- * @returns {JSX.Element} the feature detail modal component
+ * @returns The feature detail modal component
  */
 export default function FeatureDetailModal(): JSX.Element;
 //# sourceMappingURL=feature-detail-modal.d.ts.map

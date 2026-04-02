@@ -1,9 +1,11 @@
 /**
- * Exposes a function to help debug react hooks and their dependencies
- * @param {string} hookId - An indentifier for the given hook
- * @param {unknown[]} dependency - The dependency array
- * @param {string[]} dependencyNames? - The optional depedency names for each dependency in the array (strictly for user readability)
+ * Exposes a function to help debug react hooks and their dependencies.
+ *
+ * @param hookId - An identifier for the given hook
+ * @param dependency - Optional dependency array
+ * @param dependencyNames - Optional dependency names for each dependency in the array (strictly for user readability)
  */
 export declare const useWhatChanged: (hookId: string, dependency?: unknown[], dependencyNames?: string[]) => void;
+/** Logs and monitors render performance for a given component. */
 export declare const usePerformanceMonitor: (componentName: string) => void;
 //# sourceMappingURL=useWhatChanged.d.ts.map

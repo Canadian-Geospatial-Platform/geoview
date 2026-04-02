@@ -1,13 +1,15 @@
 import type { GeoListItem } from '@/core/components/geolocator/geolocator';
+/** Props for the GeoList component. */
 type GeoListProps = {
+    /** The geolocation items to display. */
     geoListItems: GeoListItem[];
+    /** The current search text. */
     searchValue: string;
 };
 /**
- * Create list of items to display under search.
- * @param {GeoListItem[]} geoListItems - The items to display
- * @param {string} searchValue - The search text
- * @returns {JSX.Element} React JSX element
+ * Creates the list of geolocation results to display under search.
+ *
+ * @returns The geolocation result list
  */
 export declare function GeoList({ geoListItems, searchValue }: GeoListProps): JSX.Element;
 export {};

@@ -1,3 +1,4 @@
+/** Shared style constants for both Canvas and PDF export layouts. */
 export declare const SHARED_STYLES: {
     readonly fontFamily: "Helvetica";
     readonly padding: 36;
@@ -191,6 +192,7 @@ export declare const SHARED_STYLES: {
         readonly textAlign: "center";
     };
 };
+/** PDF-specific styles in react-pdf format. */
 export declare const PDF_STYLES: {
     readonly scaleContainer: {
         readonly flexDirection: "row";
@@ -435,6 +437,7 @@ export declare const PDF_STYLES: {
         readonly textAlign: "center";
     };
 };
+/** Canvas-specific styles in CSS format. */
 export declare const CANVAS_STYLES: {
     readonly page: (width: number) => {
         width: string;
@@ -645,11 +648,17 @@ export declare const CANVAS_STYLES: {
     };
 };
 /**
- * Get scaled PDF styles for AUTO mode
+ * Gets scaled PDF styles for AUTO mode.
+ *
+ * @param docWidth - The document width in pixels
+ * @returns The scaled PDF styles object
  */
 export declare const getScaledPDFStyles: (docWidth: number) => any;
 /**
- * Get scaled Canvas styles for AUTO mode
+ * Gets scaled Canvas styles for AUTO mode.
+ *
+ * @param docWidth - The document width in pixels
+ * @returns The scaled Canvas styles object
  */
 export declare const getScaledCanvasStyles: (docWidth: number) => any;
 //# sourceMappingURL=layout-styles.d.ts.map

@@ -1,11 +1,14 @@
 import type { FooterBarApi } from '@/core/components';
+/** Props for the FooterBar component. */
 type FooterBarProps = {
+    /** The footer bar API instance. */
     api: FooterBarApi;
 };
 /**
- * The FooterBar component is used to display a list of tabs and their content.
+ * Creates the FooterBar component to display a list of tabs and their content.
  *
- * @returns {JSX.Element} returns the FooterBar Tabs component
+ * @param props - The footer bar props
+ * @returns The FooterBar tabs component, or null if no tabs
  */
 export declare function FooterBar(props: FooterBarProps): JSX.Element | null;
 export {};

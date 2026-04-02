@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import type { DialogProps } from '@mui/material';
+/** Properties for the FullScreenDialog component. */
 interface FullScreenDialogProps extends DialogProps {
     /** Whether the dialog is open */
     open: boolean;
