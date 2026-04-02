@@ -193,7 +193,6 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
       attributes: {
         target: '_blank',
         rel: 'noopener noreferrer',
-        title: t('details.externalLink'),
       },
       defaultProtocol: 'https',
       format: {
@@ -201,7 +200,7 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
       },
       ignoreTags: ['script', 'style', 'img'],
     }),
-    [t]
+    []
   );
 
   /**

@@ -1,5 +1,7 @@
 import { useEffect, useRef, useMemo } from 'react';
 
+import { useTranslation } from 'react-i18next';
+
 import { Box, useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
@@ -41,6 +43,7 @@ export function Map(props: MapProps): JSX.Element {
   logger.logTraceRender('components/map/map');
 
   const { viewer } = props;
+  const { t } = useTranslation();
 
   const defaultTheme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(), []);
@@ -91,7 +94,7 @@ export function Map(props: MapProps): JSX.Element {
       )}
       {layersAreLoading && (
         <Box sx={{ ...sxClasses.progressBar, bottom: mapInteraction === 'static' ? 0 : 40 }}>
-          <ProgressBar />
+          <ProgressBar aria-label={t('error.map.loadingLayers')!} />
         </Box>
       )}
     </Box>

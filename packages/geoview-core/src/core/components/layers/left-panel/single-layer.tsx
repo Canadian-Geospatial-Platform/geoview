@@ -587,9 +587,11 @@ export function SingleLayer({
             size="small"
             onClick={handleToggleVisibility}
             onKeyDown={handleToggleVisibilityKeyDown}
-            aria-label={t('layers.toggleVisibility')}
             className="buttonOutline"
             disabled={!inVisibleRange || parentHidden}
+            tooltip={t('layers.toggleVisibility')}
+            aria-label={`${t('layers.toggleVisibility')} - ${layerName}`} // WCAG - Provide descriptive aria-label for screen readers
+            aria-pressed={isVisible}
           >
             {isVisible ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon />}
           </IconButton>
@@ -597,6 +599,7 @@ export function SingleLayer({
       </>
     );
   }, [
+    layerName,
     layerPath,
     layerStatus,
     displayState,
@@ -755,6 +758,7 @@ export function SingleLayer({
             selected={layerIsSelected || (layerChildIsSelected && !legendExpanded)}
             sx={memoListItemButtonSx}
             className={!inVisibleRange ? 'out-of-range' : ''}
+            aria-current={layerIsSelected ? true : undefined}
           >
             <LayerIcon layerPath={layerPath} />
             <ListItemText primary={layerName !== undefined ? layerName : layerId} secondary={memoLayerDescription} />
@@ -769,7 +773,7 @@ export function SingleLayer({
         )}
         {layerStatus === 'loading' && (
           <Box sx={sxClasses.progressBarSingleLayer}>
-            <ProgressBar />
+            <ProgressBar aria-label={t('layers.status.layerLoadingDescriptive', { layerName })!} />
           </Box>
         )}
       </Box>

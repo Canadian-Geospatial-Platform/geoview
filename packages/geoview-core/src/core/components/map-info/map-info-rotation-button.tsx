@@ -51,11 +51,14 @@ export const MapInfoRotationButton = memo(function MapInfoRotationButton(): JSX.
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    '&:focus-visible': {
+      outlineColor: theme.palette.geoViewColor.primary.main,
+    },
   };
 
   return (
     <Tooltip title={tooltipText} placement="top">
-      <Box sx={containerStyles}>
+      <Box sx={containerStyles} tabIndex={0} role="note">
         <Box
           className={`map-info-rotation-${mapId}`}
           sx={{

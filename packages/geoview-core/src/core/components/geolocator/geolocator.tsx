@@ -217,7 +217,7 @@ export function Geolocator(): JSX.Element {
 
         {isLoading && (
           <Box sx={sxClasses.progressBar}>
-            <ProgressBar aria-label={t('geolocator.loadingResults') || undefined} />
+            <ProgressBar aria-label={t('geolocator.loadingResults')!} />
           </Box>
         )}
 

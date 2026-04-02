@@ -77,7 +77,7 @@ export function ToggleAll({ source, containerType }: ToggleAllProps): JSX.Elemen
   return (
     <Box id={`${mapId}-${containerType}-${source}-toggle-all`} sx={toggleAllStyle}>
       {(source === 'legend' || displayState === 'view') && (
-        <Tooltip title={t('toggleAll.showTooltip')} placement="top">
+        <Tooltip title={t('toggleAll.showTooltip')} placement="top" describeChild>
           <span>
             <Switch
               size={isSmallScreen ? 'small' : 'medium'}
@@ -91,7 +91,7 @@ export function ToggleAll({ source, containerType }: ToggleAllProps): JSX.Elemen
         </Tooltip>
       )}
       {hasCollapsibleLayers && (source === 'legend' || displayState === 'view') && (
-        <Tooltip title={t('toggleAll.collapseTooltip')} placement="top">
+        <Tooltip title={t('toggleAll.collapseTooltip')} placement="top" describeChild>
           <span>
             <Switch
               size={isSmallScreen ? 'small' : 'medium'}
