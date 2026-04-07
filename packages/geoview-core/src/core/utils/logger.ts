@@ -63,6 +63,9 @@ export class ConsoleLogger {
     useEffect: 0,
   };
 
+  /** The number of render logs - per component. */
+  logCountRenderPerComponent: { [component: string]: number } = {};
+
   /**
    * Constructor.
    *
@@ -129,8 +132,18 @@ export class ConsoleLogger {
   logTraceRender(component: string, ...messages: unknown[]): void {
     // Validate log active
     if (!LOG_ACTIVE) return;
+
+    // Keep track of the number of times the render happened, per component
+    if (!this.logCountRenderPerComponent[component]) this.logCountRenderPerComponent[component] = 0;
+
     // Redirect
-    this.#logLevel(LOG_TRACE_RENDER, `RENDR - ${this.logCount.renderer++}`, 'plum', component, ...messages); // Not a typo, 5 characters for alignment
+    this.#logLevel(
+      LOG_TRACE_RENDER,
+      `RENDR - ${this.logCount.renderer++} - ${this.logCountRenderPerComponent[component]++}`,
+      'plum',
+      component,
+      ...messages
+    ); // Not a typo, 5 characters for alignment
   }
 
   /**
