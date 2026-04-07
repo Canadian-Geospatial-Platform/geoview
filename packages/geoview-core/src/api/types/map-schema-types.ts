@@ -650,7 +650,7 @@ export type TypeLayerStyleConfigInfo = {
   /** Flag used to show/hide features associated to the label (default: true). */
   visible: boolean;
   /** The label to display for the field. */
-  label: string;
+  label?: string;
   /** The OpenLayers Text style to apply to the label (will override the global feature text) */
   text?: TypeLayerTextConfig;
   /**

@@ -748,7 +748,7 @@ export abstract class GeoUtilities {
             const legendLayerListItem: TypeLegendItem = {
               geometryType,
               icon: iconDetailsEntry.iconImage,
-              name: iconDetailsEntry.name,
+              name: iconDetailsEntry.name ?? '',
               isVisible: true,
             };
             iconDetailsEntry.iconList = [legendLayerListItem];
@@ -761,7 +761,7 @@ export abstract class GeoUtilities {
                 const legendLayerListItem: TypeLegendItem = {
                   geometryType,
                   icon: canvas ? canvas.toDataURL() : null,
-                  name: styleSettings.info[i].label,
+                  name: styleSettings.info[i].label ?? '',
                   isVisible: styleSettings.info[i].visible !== false,
                 };
                 iconDetailsEntry.iconList?.push(legendLayerListItem);
@@ -771,7 +771,7 @@ export abstract class GeoUtilities {
               const legendLayerListItem: TypeLegendItem = {
                 geometryType,
                 icon: styleRepresentation.defaultCanvas.toDataURL(),
-                name: styleSettings.info[styleSettings.info.length - 1].label,
+                name: styleSettings.info[styleSettings.info.length - 1].label ?? '',
                 isVisible: styleSettings.info[styleSettings.info.length - 1].visible !== false,
               };
               iconDetailsEntry.iconList.push(legendLayerListItem);
