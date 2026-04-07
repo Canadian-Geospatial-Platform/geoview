@@ -41,9 +41,6 @@ export interface ILayerState {
   /** The layer path of the currently highlighted layer. */
   highlightedLayer: string;
 
-  /** The full legend layer object for the currently selected layer. */
-  selectedLayer: TypeLegendLayer;
-
   /** The layer path of the currently selected layer, or undefined if none is selected. */
   selectedLayerPath?: string;
 
@@ -319,13 +316,10 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
       setSelectedLayerPath: (layerPath: string | undefined): void => {
         let theLayerPath: string | undefined = layerPath;
         if (layerPath && layerPath.length === 0) theLayerPath = undefined;
-        const curLayers = get().layerState.legendLayers;
-        const layer = utilLegendLayerByPathRec(curLayers, layerPath);
         set({
           layerState: {
             ...get().layerState,
             selectedLayerPath: theLayerPath,
-            selectedLayer: layer as TypeLegendLayer,
           },
         });
       },
@@ -465,6 +459,13 @@ export const getStoreLayerSelectedLayerPath = (mapId: string): string | undefine
 /** Hook that returns the selected layer path. */
 export const useStoreLayerSelectedLayerPath = (): string | null | undefined =>
   useStore(useGeoViewStore(), (state) => state.layerState.selectedLayerPath);
+
+/** Hook that returns the layer name of the currently selected layer. Primitive string so Object.is prevents spurious re-renders. */
+export const useStoreLayerSelectedLayerName = (): string | undefined =>
+  useStore(
+    useGeoViewStore(),
+    (state) => utilLegendLayerByPathRec(state.layerState.legendLayers, state.layerState.selectedLayerPath)?.layerName
+  );
 
 /**
  * Gets the highlighted layer path for the given map.
@@ -728,9 +729,6 @@ export const getStoreLayerItemVisibility = (mapId: string, layerPath: string, na
   return getStoreLayerLegendLayerByPath(mapId, layerPath)?.items.find((item) => item.name === name);
 };
 
-/** Hook that returns the selected legend layer object. */
-export const useStoreLayerSelectedLayer = (): TypeLegendLayer => useStore(useGeoViewStore(), (state) => state.layerState.selectedLayer);
-
 /** Hook that returns the EPSG:4326 bounds for a specific layer. */
 export const useStoreLayerBounds4326 = createLayerSelectorHook('bounds4326');
 
@@ -836,18 +834,17 @@ export const useStoreLayerNameSet = (): Record<string, string> => {
 };
 
 /**
- * Hook that returns the selected legend layer by looking it up from the legend layers array.
+ * Hook that returns the full legend layer for a given path.
  *
- * @returns The selected legend layer, or undefined if none is selected.
+ * Returns a new reference whenever any property of the layer changes.
+ * Use only in components that display all layer details (e.g. LayerDetails).
+ * Prefer targeted createLayerSelectorHook hooks elsewhere.
+ *
+ * @param layerPath - The layer path to look up
+ * @returns The matching legend layer, or undefined if not found
  */
-export const useStoreSelectedLayer = (): TypeLegendLayer | undefined => {
-  const layers = useStore(useGeoViewStore(), (state) => state.layerState.legendLayers);
-  const selectedLayerPath = useStore(useGeoViewStore(), (state) => state.layerState.selectedLayerPath);
-  if (selectedLayerPath) {
-    return utilLegendLayerByPathRec(layers, selectedLayerPath);
-  }
-  return undefined;
-};
+export const useStoreLayerByPath = (layerPath: string): TypeLegendLayer | undefined =>
+  useStore(useGeoViewStore(), (state) => utilLegendLayerByPathRec(state.layerState.legendLayers, layerPath));
 
 /**
  * Hook that returns the icon set (image URLs) for a specific layer.
