@@ -44,10 +44,10 @@ import KeyboardZoom from 'ol/interaction/KeyboardZoom';
  * Extends AbstractMapViewerController and delegates state mutations to the UIStateAdaptor.
  */
 export class UIController extends AbstractMapViewerController {
-  /** The UI Domain instance associated with this controller */
+  /** The UI Domain instance associated with this controller. */
   #uiDomain: UIDomain;
 
-  /** The bounded reference to the handle display language changed */
+  /** The bounded reference to the display language changed handler. */
   #boundedHandleDisplayLanguageChanged: DomainLanguageChangedDelegate;
 
   /**
@@ -443,7 +443,10 @@ export class UIController extends AbstractMapViewerController {
   // GV.CONT but for now this allows us to keep domain-store interactions in one place and call application-level processes as needed during migration.
 
   /**
-   * TODO: JSDOC THIS
+   * Handles the display language changed event from the UI domain.
+   *
+   * @param sender - The UI domain that emitted the event
+   * @param event - The language changed event containing the new language
    */
   #handleDisplayLanguageChanged(sender: UIDomain, event: DomainLanguageChangedEvent): void {
     setStoreDisplayLanguage(this.getMapId(), event.language);
