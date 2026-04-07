@@ -1,10 +1,8 @@
-// TODO: REFACTOR IMPORTANT - Rename this file to layer-api and move it in /api folder instead of /core
-
 import type BaseLayer from 'ol/layer/Base';
 import type { GeoJSONObject } from 'ol/format/GeoJSON';
 import type { FitOptions } from 'ol/View';
 
-import { type TypeOutfieldsType } from '@/api/types/map-schema-types';
+import type { TypeOutfieldsType } from '@/api/types/map-schema-types';
 import type { TypeGeoviewLayerConfig, TypeMosaicRule } from '@/api/types/layer-schema-types';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import type { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
@@ -39,7 +37,7 @@ import type {
   LayerPathDelegate,
   LayerPathEvent,
 } from '@/core/controllers/layer-creator-controller';
-import { type TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
+import type { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import type { HoverFeatureInfoLayerSet } from '@/geo/layer/layer-sets/hover-feature-info-layer-set';
 import type { AllFeatureInfoLayerSet } from '@/geo/layer/layer-sets/all-feature-info-layer-set';
 import type { LegendsLayerSet } from '@/geo/layer/layer-sets/legends-layer-set';

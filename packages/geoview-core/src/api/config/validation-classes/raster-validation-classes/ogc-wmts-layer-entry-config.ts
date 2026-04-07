@@ -1,6 +1,6 @@
 import type { ConfigClassOrType, TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
-import { type AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import type { AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { TileLayerEntryConfig } from '@/api/config/validation-classes/tile-layer-entry-config';
 import type { TypeSourceImageWMTSInitialConfig, TypeWmtsLayerConfig } from '@/geo/layer/geoview-layers/raster/wmts';
 

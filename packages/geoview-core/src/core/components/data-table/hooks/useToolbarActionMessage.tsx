@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { type MRT_TableInstance as MRTTableInstance, type MRT_ColumnFiltersState as MRTColumnFiltersState } from 'material-react-table';
+import type { MRT_TableInstance as MRTTableInstance, MRT_ColumnFiltersState as MRTColumnFiltersState } from 'material-react-table';
 import { useTranslation } from 'react-i18next';
 import {
   setStoreRowsFilteredEntry,

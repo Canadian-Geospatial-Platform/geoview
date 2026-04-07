@@ -8,7 +8,8 @@ import type { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import type { NotificationDetailsType } from '@/core/components/notifications/notifications';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { getScriptAndAssetURL } from '@/core/utils/utilities';
-import { DateMgt, type TimeIANA, type TypeDisplayDateDefaults } from '@/core/utils/date-mgt';
+import type { TimeIANA, TypeDisplayDateDefaults } from '@/core/utils/date-mgt';
+import { DateMgt } from '@/core/utils/date-mgt';
 
 // #region INTERFACE DEFINITION
 

@@ -17,7 +17,8 @@ import { getStoreLayerLegendLayers } from '@/core/stores/store-interface-and-int
 
 import { logger } from '@/core/utils/logger';
 import { getLocalizedMessage } from '@/core/utils/utilities';
-import { DateMgt, type TemporalMode, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
+import { DateMgt } from '@/core/utils/date-mgt';
+import type { TemporalMode, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import { NorthArrowIcon } from '@/core/components/north-arrow/north-arrow-icon';
 
 import { SHARED_STYLES, getScaledCanvasStyles } from '@/core/components/export/layout-styles';

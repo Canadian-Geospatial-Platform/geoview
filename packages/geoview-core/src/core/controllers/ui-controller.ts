@@ -1,4 +1,4 @@
-import { type TypeDisplayLanguage, type TypeDisplayTheme } from '@/api/types/map-schema-types';
+import type { TypeDisplayLanguage, TypeDisplayTheme } from '@/api/types/map-schema-types';
 import { useControllers } from '@/core/controllers/base/controller-manager';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import {

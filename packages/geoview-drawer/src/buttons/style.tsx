@@ -1,4 +1,4 @@
-import { type TypeWindow } from 'geoview-core';
+import type { TypeWindow } from 'geoview-core';
 import { MuiColorInput } from 'mui-color-input';
 import type { ChangeEvent } from 'react';
 import { useState } from 'react';

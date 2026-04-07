@@ -6,12 +6,12 @@ import { bbox } from 'ol/loadingstrategy';
 
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
-import {
-  type DisplayDateMode,
-  type TypeLayerStyleSettings,
-  type TypeOutfields,
-  type TypeOutfieldsType,
-  type TypeStyleGeometry,
+import type {
+  DisplayDateMode,
+  TypeLayerStyleSettings,
+  TypeOutfields,
+  TypeOutfieldsType,
+  TypeStyleGeometry,
 } from '@/api/types/map-schema-types';
 import type {
   TypeGeoviewLayerConfig,
