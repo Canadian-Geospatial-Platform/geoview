@@ -6,7 +6,6 @@ import { useTheme } from '@mui/material';
 
 import { ToggleAll } from '@/core/components/toggle-all/toggle-all';
 import { Box, List, Typography } from '@/ui';
-import { useStoreGeoViewMapId, useStoreLayerLayerPaths } from '@/core/stores/';
 import { logger } from '@/core/utils/logger';
 
 import { getSxClassesMain, getSxClasses } from './legend-styles';
@@ -15,6 +14,8 @@ import { LegendFullscreen, LegendFullscreenButton } from './legend-fullscreen';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { useEventListener } from '@/core/components/common/hooks/use-event-listener';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
+import { useStoreLayerLayerPaths } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 interface LegendType {
   containerType: TypeContainerBox;
@@ -175,6 +176,10 @@ export function Legend({ containerType }: LegendType): JSX.Element | null {
     ));
     // eslint-disable-next-line react-hooks/exhaustive-deps -- sxClasses is memoized from theme which is stable
   }, [formattedLegendLayerList, noLayersContent, containerType]);
+
+  // TODO: CLEANUP - Remove the commented code, we're trying to not unmount the Legend panel anymore to check performance 2026-04-07
+  // Early return with empty fragment if not the active tab
+  // if (activeFooterBarTab.tabId !== 'legend' && activeAppBarTab.tabId !== 'legend') return null;
 
   return (
     <>
