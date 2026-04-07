@@ -5,7 +5,7 @@ import {
   setStoreTimeSliderLocked,
   setStoreTimeSliderReversed,
   setStoreTimeSliderStep,
-  useStoreTimeSliderLayers,
+  useStoreTimeSliderLayer,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/time-slider-state';
 import {
   useStoreLayerDateTemporalMode,
@@ -92,8 +92,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
     displayDateFormatShort: displayDateFormatShortFromStore,
     displayDateTimezone: displayDateTimezoneFromStore,
     serviceDateTemporalMode: serviceDateTemporalModeFromStore,
-  } = useStoreTimeSliderLayers()![layerPath];
-  // TODO: CHECK - The above should probably use the 'useStoreTimeSliderLayer' hook, cleaner
+  } = useStoreTimeSliderLayer(layerPath)!;
 
   const timeSliderController = useTimeSliderController();
 
