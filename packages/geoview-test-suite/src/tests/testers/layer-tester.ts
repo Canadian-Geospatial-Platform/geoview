@@ -1394,7 +1394,7 @@ export class LayerTester extends GVAbstractTester {
    * Tests adding an Esri Dynamic layer that has fields with coded value domains and verifies
    * that the "material" field on layer 16 has a domain in the generated config.
    *
-   * @returns {Promise<Test<AbstractGVLayer>>} A Promise resolving when the test completes.
+   * @returns A promise that resolves when the test completes
    */
   testAddEsriDynamicWithDomainField(): Promise<Test<AbstractGVLayer>> {
     const gvLayerId = generateId();
@@ -1457,7 +1457,7 @@ export class LayerTester extends GVAbstractTester {
    * Tests adding an Esri Feature layer that has fields with coded value domains and verifies
    * that the "material" field on layer 16 has a domain in the generated config.
    *
-   * @returns {Promise<Test<AbstractGVLayer>>} A Promise resolving when the test completes.
+   * @returns A promise that resolves when the test completes
    */
   testAddEsriFeatureWithDomainField(): Promise<Test<AbstractGVLayer>> {
     const gvLayerId = generateId();
@@ -1521,7 +1521,7 @@ export class LayerTester extends GVAbstractTester {
    * and verifying that the "material" field value in the query results is the
    * domain-translated value (human-readable name) rather than the raw code.
    *
-   * @returns {Promise<Test<TypeFeatureInfoResult>>} A Promise resolving when the test completes.
+   * @returns A promise that resolves when the test completes
    */
   testEsriDynamicDomainFieldQueryValue(): Promise<Test<TypeFeatureInfoResult>> {
     const gvLayerId = generateId();
@@ -1607,7 +1607,7 @@ export class LayerTester extends GVAbstractTester {
    * and verifying that the "material" field value in the query results is the
    * domain-translated value (human-readable name) rather than the raw code.
    *
-   * @returns {Promise<Test<TypeFeatureInfoResult>>} A Promise resolving when the test completes.
+   * @returns A promise that resolves when the test completes
    */
   testEsriFeatureDomainFieldQueryValue(): Promise<Test<TypeFeatureInfoResult>> {
     const gvLayerId = generateId();
@@ -1891,7 +1891,7 @@ export class LayerTester extends GVAbstractTester {
     // Check that the layer is indeed there
     test.addStep(`Checking the geoview layer ${geoviewLayerId} exists on the map...`);
     Test.assertIsDefined(
-      `layerEntryConfig  ${geoviewLayerId}`,
+      `layerEntryConfig ${geoviewLayerId}`,
       this.getControllersRegistry().layerController.getLayerEntryConfigIfExists(geoviewLayerId)
     );
 
@@ -1902,7 +1902,7 @@ export class LayerTester extends GVAbstractTester {
     // Validate that it's gone
     test.addStep(`Validate that the layer is indeed gone...`);
     Test.assertIsUndefined(
-      `layerEntryConfig  ${geoviewLayerId}`,
+      `layerEntryConfig ${geoviewLayerId}`,
       this.getControllersRegistry().layerController.getLayerEntryConfigIfExists(geoviewLayerId)
     );
   }

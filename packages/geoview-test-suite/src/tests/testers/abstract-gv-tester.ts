@@ -17,7 +17,7 @@ import type { GeometryApi } from 'geoview-core/geo/layer/geometry/geometry';
 export abstract class GVAbstractTester extends AbstractTester {
   /** GLOBAL CONSTANTS FOR THE TESTS */
 
-  /** timeout value for waiting for layer registration */
+  /** Timeout value for waiting for layer registration. */
   static readonly LAYER_REGISTRATION_TIMEOUT_MS = 30000;
 
   /** Some long lat coordinates for map investigations */
@@ -417,7 +417,7 @@ export abstract class GVAbstractTester extends AbstractTester {
     'https://datacube-prod-data-public.s3.ca-central-1.amazonaws.com/store/eo4ce/vegetation/vegetation-2020-fCOVER.tif';
   static readonly GEOTIFF_VEGETATION_FILE: string = 'vegetation-2020-fCOVER.tif';
 
-  /** Water Network (has fields with coded value domains, e.g. "material" on layer 16) */
+  /** Water Network (has fields with coded value domains, e.g. "material" on layer 16). */
   static readonly WATER_NETWORK_MAP_SERVER: string = 'https://sampleserver6.arcgisonline.com/arcgis/rest/services/Water_Network/MapServer';
   static readonly WATER_NETWORK_LAYER_ID: string = '16';
   static readonly WATER_NETWORK_LAYER_NAME: string = 'Water Network';

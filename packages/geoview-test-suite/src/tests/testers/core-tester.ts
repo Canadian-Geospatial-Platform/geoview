@@ -2,6 +2,7 @@ import type { DateLike } from 'geoview-core/core/utils/date-mgt';
 import { DateMgt } from 'geoview-core/core/utils/date-mgt';
 import type { PingResult } from 'geoview-core/core/utils/utilities';
 import { validateAndPingUrl } from 'geoview-core/core/utils/utilities';
+
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
 import type { TypeDisplayLanguage } from 'geoview-core/api/types/map-schema-types';
@@ -94,7 +95,7 @@ export class CoreTester extends GVAbstractTester {
    * Uses the Historical Flood MapServer URL which is known to be reachable.
    * Asserts that the result has isValid=true and isReachable=true.
    *
-   * @returns {Promise<Test<PingResult>>} A Promise resolving when the test completes.
+   * @returns A promise that resolves when the test completes
    */
   testValidateAndPingUrlValidReachable(): Promise<Test<PingResult>> {
     return this.test(
@@ -124,7 +125,7 @@ export class CoreTester extends GVAbstractTester {
    * Uses a malformed string that is not a valid URL.
    * Asserts that the result has isValid=false and isReachable=false.
    *
-   * @returns {Promise<Test<PingResult>>} A Promise resolving when the test completes.
+   * @returns A promise that resolves when the test completes
    */
   testValidateAndPingUrlInvalidFormat(): Promise<Test<PingResult>> {
     return this.test(
@@ -157,7 +158,7 @@ export class CoreTester extends GVAbstractTester {
    * Uses GVAbstractTester.BAD_URL which has valid URL syntax but the server does not exist.
    * Asserts that the result has isValid=true and isReachable=false.
    *
-   * @returns {Promise<Test<PingResult>>} A Promise resolving when the test completes.
+   * @returns A promise that resolves when the test completes
    */
   testValidateAndPingUrlUnreachable(): Promise<Test<PingResult>> {
     return this.test(
@@ -188,7 +189,7 @@ export class CoreTester extends GVAbstractTester {
    * so this validates that the OGC GetCapabilities fallback logic works.
    * Asserts that the result has isValid=true and isReachable=true.
    *
-   * @returns {Promise<Test<PingResult>>} A Promise resolving when the test completes.
+   * @returns A promise that resolves when the test completes
    */
   testValidateAndPingUrlWmsService(): Promise<Test<PingResult>> {
     return this.test(
