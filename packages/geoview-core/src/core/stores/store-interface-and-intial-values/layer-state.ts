@@ -745,10 +745,11 @@ export const useStoreLayerCanToggle = createLayerSelectorHook('canToggle');
  * @returns The child layer paths, or undefined if no children exist
  */
 export const useStoreLayerChildPaths = (layerPath: string): string[] | undefined => {
-  return useStableSelector(useGeoViewStore(), (state): string[] | undefined => {
+  const result = useStableSelector(useGeoViewStore(), (state): string[] => {
     const layer = utilLegendLayerByPathRec(state.layerState.legendLayers, layerPath);
-    return layer?.children?.map((child) => child.layerPath);
+    return layer?.children?.map((child) => child.layerPath) ?? [];
   });
+  return result.length > 0 ? result : undefined;
 };
 
 /**
