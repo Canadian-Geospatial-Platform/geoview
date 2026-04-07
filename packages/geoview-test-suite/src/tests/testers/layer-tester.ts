@@ -18,7 +18,7 @@ import { OgcFeature } from 'geoview-core/geo/layer/geoview-layers/vector/ogc-fea
 import { WKB } from 'geoview-core/geo/layer/geoview-layers/vector/wkb';
 import { KML } from 'geoview-core/geo/layer/geoview-layers/vector/kml';
 import type { GeoViewLayerAddedResult } from 'geoview-core/core/controllers/layer-creator-controller';
-import type { TypeMapFeaturesInstance } from 'geoview-core/api/types/map-schema-types';
+import type { TypeMapFeaturesInstance, TypeFeatureInfoResult, codedValueType } from 'geoview-core/api/types/map-schema-types';
 import type { TypeLegendItem } from 'geoview-core/core/components/layers/types';
 import { getStoreLayerStateLegendLayerByPath } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
 
@@ -1410,12 +1410,12 @@ export class LayerTester extends GVAbstractTester {
           { id: GVAbstractTester.WATER_NETWORK_LAYER_ID },
         ]);
 
-        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
-        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath);
+        await this.helperStepAddLayerOnMap(test, gvConfig);
+        return this.helperStepCheckLayerAtLayerPath(test, layerPath);
       },
       (test) => {
         // Verify the layer exists
-        LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPath);
+        LayerTester.helperStepAssertLayerExists(test, this.getMapId(), layerPath);
 
         // Get the layer entry config to check for the domain on the "material" field
         test.addStep('Getting the layer entry config...');
@@ -1448,7 +1448,7 @@ export class LayerTester extends GVAbstractTester {
         Test.assertIsArrayLengthMinimal(codedDomain.codedValues, 1);
       },
       (test) => {
-        LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPath);
+        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -1473,12 +1473,12 @@ export class LayerTester extends GVAbstractTester {
           { id: GVAbstractTester.WATER_NETWORK_LAYER_ID },
         ]);
 
-        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
-        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath);
+        await this.helperStepAddLayerOnMap(test, gvConfig);
+        return this.helperStepCheckLayerAtLayerPath(test, layerPath);
       },
       (test) => {
         // Verify the layer exists
-        LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPath);
+        LayerTester.helperStepAssertLayerExists(test, this.getMapId(), layerPath);
 
         // Get the layer entry config to check for the domain on the "material" field
         test.addStep('Getting the layer entry config...');
@@ -1511,7 +1511,7 @@ export class LayerTester extends GVAbstractTester {
         Test.assertIsArrayLengthMinimal(codedDomain.codedValues, 1);
       },
       (test) => {
-        LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPath);
+        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -1537,8 +1537,8 @@ export class LayerTester extends GVAbstractTester {
           { id: GVAbstractTester.WATER_NETWORK_LAYER_ID },
         ]);
 
-        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
-        await LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath);
+        await this.helperStepAddLayerOnMap(test, gvConfig);
+        await this.helperStepCheckLayerAtLayerPath(test, layerPath);
 
         // Wait for the layer to be registered in the allFeatureInfoLayerSet
         test.addStep('Waiting for the layer to be registered in the allFeatureInfoLayerSet...');
@@ -1553,7 +1553,7 @@ export class LayerTester extends GVAbstractTester {
 
         // Query all features
         test.addStep('Triggering getAllFeatureInfo query...');
-        const result = await DataTableEventProcessor.triggerGetAllFeatureInfo(this.getMapId(), layerPath);
+        const result = await this.getControllersRegistry().layerSetController.triggerGetAllFeatureInfo(layerPath);
         return result;
       },
       (test, result) => {
@@ -1597,7 +1597,7 @@ export class LayerTester extends GVAbstractTester {
         }
       },
       (test) => {
-        LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPath);
+        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -1623,8 +1623,8 @@ export class LayerTester extends GVAbstractTester {
           { id: GVAbstractTester.WATER_NETWORK_LAYER_ID },
         ]);
 
-        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
-        await LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath);
+        await this.helperStepAddLayerOnMap(test, gvConfig);
+        await this.helperStepCheckLayerAtLayerPath(test, layerPath);
 
         // Wait for the layer to be registered in the allFeatureInfoLayerSet
         test.addStep('Waiting for the layer to be registered in the allFeatureInfoLayerSet...');
@@ -1639,7 +1639,7 @@ export class LayerTester extends GVAbstractTester {
 
         // Query all features
         test.addStep('Triggering getAllFeatureInfo query...');
-        const result = await DataTableEventProcessor.triggerGetAllFeatureInfo(this.getMapId(), layerPath);
+        const result = await this.getControllersRegistry().layerSetController.triggerGetAllFeatureInfo(layerPath);
         return result;
       },
       (test, result) => {
@@ -1682,7 +1682,7 @@ export class LayerTester extends GVAbstractTester {
         }
       },
       (test) => {
-        LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPath);
+        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }

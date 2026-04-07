@@ -35,13 +35,13 @@ interface TypeDocument extends Document {
 }
 
 /** Result of a URL reachability ping check. */
-interface PingResult {
+export type PingResult = {
   isValid: boolean;
   isReachable: boolean;
   needsProxy: boolean;
   status: number | null;
   error?: string;
-}
+};
 
 /** Represents RGBA color as [Red, Green, Blue, Alpha]. */
 export type RGBA = [r: number, g: number, b: number, a: number];
