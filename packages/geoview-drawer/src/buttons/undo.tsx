@@ -27,7 +27,7 @@ export default function Redo(): JSX.Element {
   const displayLanguage = useStoreAppDisplayLanguage();
   const drawerController = useDrawerController();
 
-  // Store actions
+  // Store
   const undoDisabled = useStoreDrawerUndoDisabled();
 
   /**

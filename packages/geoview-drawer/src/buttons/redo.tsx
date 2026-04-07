@@ -26,7 +26,7 @@ export default function Redo(): JSX.Element {
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
   const displayLanguage = useStoreAppDisplayLanguage();
 
-  // Store actions
+  // Store
   const redoDisabled = useStoreDrawerRedoDisabled();
   const drawerController = useDrawerController();
 

@@ -37,9 +37,9 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
   const { t } = useTranslation();
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
-  const mapId = useStoreGeoViewMapId();
 
   // Store
+  const mapId = useStoreGeoViewMapId();
   const shellContainer = useStoreAppShellContainer();
 
   // State

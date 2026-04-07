@@ -136,14 +136,12 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
 
   const { geomTypes, closePanel } = props;
 
-  // Get store values
+  // Store
   const displayLanguage = useStoreAppDisplayLanguage();
-  const drawerController = useDrawerController();
-
-  // Store actions
   const style = useStoreDrawerStyle();
   const activeGeom = useStoreDrawerActiveGeom();
   const isDrawing = useStoreDrawerIsDrawing();
+  const drawerController = useDrawerController();
 
   const memoIconStyle = useMemo(
     () => ({

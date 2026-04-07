@@ -46,8 +46,9 @@ export function ToggleAll({ source, containerType }: ToggleAllProps): JSX.Elemen
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('md'));
   const { t } = useTranslation<string>();
-  const mapId = useStoreGeoViewMapId();
 
+  // Store
+  const mapId = useStoreGeoViewMapId();
   const displayState = useStoreLayerDisplayState();
   const allLayersVisible = useStoreMapAllLayersVisibleToggle();
   const allLayersCollapsed = useStoreMapAllLayersCollapsedToggle();

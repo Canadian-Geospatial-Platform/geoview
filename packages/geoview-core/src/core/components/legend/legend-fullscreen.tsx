@@ -108,11 +108,6 @@ export function LegendFullscreenButton({ containerType, onClick, buttonRef }: Fu
  * Manages layer collapse state by expanding all layers when entering fullscreen and
  * restoring the previous collapse state when exiting.
  * @param props - The component properties.
- * @param props.layerPaths - Array of layer paths to display.
- * @param props.mapId - The unique identifier of the map.
- * @param props.containerType - The type of container where the legend is displayed.
- * @param props.isOpen - Controls whether the fullscreen dialog is open.
- * @param props.onClose - Callback function invoked when the dialog is closed.
  * @returns The fullscreen legend dialog component.
  */
 export function LegendFullscreen({ layerPaths, mapId, containerType, isOpen, onClose, buttonRef }: LegendFullscreenProps): JSX.Element {
@@ -160,6 +155,7 @@ export function LegendFullscreen({ layerPaths, mapId, containerType, isOpen, onC
    * Distributes legend layers across multiple columns for fullscreen display.
    * Uses a round-robin algorithm to evenly distribute layers across the available columns
    * determined by the current window size.
+   *
    * @param paths - Array of layer paths to distribute.
    */
   const updateFullscreenLayerListByWindowSize = useCallback(
