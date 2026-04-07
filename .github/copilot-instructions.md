@@ -80,23 +80,23 @@ Backend/Map Events → Domains → Controllers → Zustand Store
 
 **Available Controllers:**
 
-| Controller | Responsibility |
-|---|---|
-| `MapController` | Zoom, center, projection, highlight, filters |
-| `LayerController` | Visibility, opacity, settings, item visibility |
-| `LayerCreatorController` | Layer creation and removal |
-| `LayerSetController` | Feature queries, layer set management |
-| `UIController` | UI state, tabs, theme, language, notifications |
-| `DataTableController` | Data table filters |
-| `PluginController` | Plugin loading and access |
-| `DrawerController` | Drawing operations (conditional) |
-| `TimeSliderController` | Time slider state and filters (conditional) |
+| Controller               | Responsibility                                 |
+| ------------------------ | ---------------------------------------------- |
+| `MapController`          | Zoom, center, projection, highlight, filters   |
+| `LayerController`        | Visibility, opacity, settings, item visibility |
+| `LayerCreatorController` | Layer creation and removal                     |
+| `LayerSetController`     | Feature queries, layer set management          |
+| `UIController`           | UI state, tabs, theme, language, notifications |
+| `DataTableController`    | Data table filters                             |
+| `PluginController`       | Plugin loading and access                      |
+| `DrawerController`       | Drawing operations (conditional)               |
+| `TimeSliderController`   | Time slider state and filters (conditional)    |
 
 **Accessing controllers from React components:**
 
 ```typescript
-import { useMapController } from '@/core/controllers/map-controller';
-import { useLayerController } from '@/core/controllers/layer-controller';
+import { useMapController } from "@/core/controllers/map-controller";
+import { useLayerController } from "@/core/controllers/layer-controller";
 
 const mapController = useMapController();
 const layerController = useLayerController();
@@ -447,7 +447,7 @@ mapController.zoomToExtent(extent);
 
 ```typescript
 // ✅ In a controller method
-import { setStoreMapClickMarker } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { setStoreMapClickMarker } from "@/core/stores/store-interface-and-intial-values/map-state";
 
 setStoreMapClickMarker(this.getMapId(), projectedCoords[0]);
 ```
@@ -1098,12 +1098,12 @@ this.testError(
     // This should throw the expected error
     test.addStep('Creating config with bad URL...');
     const config = SomeLayer.createGeoviewLayerConfig(id, name, BAD_URL, false, [...]);
-    await helperStepAddLayerOnMap(test, mapViewer, config);
+    await this.helperStepAddLayerOnMap(test, config);
   },
   undefined,  // optional additional assertion on the error
   (test) => {
     // Cleanup
-    helperFinalizeStepRemoveLayerConfigAndAssert(test, mapViewer, layerPath);
+    this.helperFinalizeStepRemoveLayerConfigAndAssert(test, layerPath);
   }
 );
 ```
@@ -1121,23 +1121,42 @@ GVAbstractTester.FOREST_INDUSTRY_MAP_SERVER;
 // ... etc.
 ```
 
-### Static Helper Methods (on `LayerTester`)
+### Helper Methods
+
+Helper methods are **instance methods** on the tester classes. They access the map via `this.getMapViewer()`, `this.getMapId()`, and `this.getControllersRegistry()` internally — no need to pass `mapViewer` or `mapId` as parameters.
+
+**Instance helpers (on `this` — inherited from `GVAbstractTester` or defined on `LayerTester`):**
 
 ```typescript
-// Add layer to map and wait
-LayerTester.helperStepAddLayerOnMap(test, mapViewer, gvConfig)
-LayerTester.helperStepAddLayerOnMapFromUUID(test, mapViewer, uuid)
+// Add layer to map and wait (instance, async)
+this.helperStepAddLayerOnMap(test, gvConfig);
+this.helperStepAddLayerOnMapFromUUID(test, uuid);
 
-// Check layer loaded
-LayerTester.helperStepCheckLayerAtLayerPath(test, mapViewer, layerPath, timeout?, waitStyle?)
+// Check layer loaded (instance, async)
+this.helperStepCheckLayerAtLayerPath(test, layerPath);
 
+// Cleanup (instance — defined on GVAbstractTester)
+this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+
+// Cleanup layer config (instance — defined on LayerTester)
+this.helperFinalizeStepRemoveLayerConfigAndAssert(test, gvLayerId);
+```
+
+**Static helpers (assertion-only — require explicit `mapId`):**
+
+```typescript
 // Assert layer exists with optional icon checks
-LayerTester.helperStepAssertLayerExists(test, mapViewer, layerPath, iconImage?, iconsList?)
-LayerTester.helperStepAssertStyleApplied(test, mapViewer, layerPath, iconImage?, iconsList?)
+LayerTester.helperStepAssertLayerExists(test, this.getMapId(), layerPath, iconImage?, iconsList?)
+LayerTester.helperStepAssertStyleApplied(test, this.getMapId(), layerPath, iconImage?, iconsList?)
+```
 
-// Cleanup
-LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, mapViewer, layerPath)
-LayerTester.helperFinalizeStepRemoveLayerConfigAndAssert(test, mapViewer, gvLayerId)
+**Accessor methods (on `this` — inherited from `GVAbstractTester`):**
+
+```typescript
+this.getMapViewer(); // Returns MapViewer instance
+this.getMapId(); // Returns mapId string
+this.getControllersRegistry(); // Returns ControllerRegistry
+this.getGeometryApi(); // Returns GeometryApi
 ```
 
 ---
@@ -1170,17 +1189,17 @@ testAddMyNewLayer(): Promise<Test<AbstractGVLayer>> {
         gvLayerId, gvLayerName, layerUrl, false,
         [{ id: GVAbstractTester.MY_NEW_LAYER_ID }]
       );
-      await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
-      return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath);
+      await this.helperStepAddLayerOnMap(test, gvConfig);
+      return this.helperStepCheckLayerAtLayerPath(test, layerPath);
     },
     (test) => {
       LayerTester.helperStepAssertLayerExists(
-        test, this.getMapViewer(), layerPath, undefined,
+        test, this.getMapId(), layerPath, undefined,
         GVAbstractTester.MY_NEW_LAYER_ICON_LIST
       );
     },
     (test) => {
-      LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPath);
+      this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
     }
   );
 }
@@ -1204,11 +1223,11 @@ testAddMyNewLayerBadUrl(): Promise<Test<LayerServiceMetadataUnableToFetchError>>
         gvLayerId, gvLayerName, layerUrl, false,
         [{ id: GVAbstractTester.MY_NEW_LAYER_ID }]
       );
-      await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+      await this.helperStepAddLayerOnMap(test, gvConfig);
     },
     undefined,
     (test) => {
-      LayerTester.helperFinalizeStepRemoveLayerConfigAndAssert(test, this.getMapViewer(), layerPath);
+      this.helperFinalizeStepRemoveLayerConfigAndAssert(test, layerPath);
     }
   );
 }
@@ -1312,13 +1331,13 @@ testMyLayerQuery(): Promise<Test<TypeFeatureInfoResult>> {
         { id: GVAbstractTester.MY_LAYER_ID },
       ]);
 
-      await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
-      await LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath);
+      await this.helperStepAddLayerOnMap(test, gvConfig);
+      await this.helperStepCheckLayerAtLayerPath(test, layerPath);
 
       // Wait for registration in allFeatureInfoLayerSet (required before querying)
       test.addStep('Waiting for allFeatureInfoLayerSet registration...');
       // prettier-ignore
-      await whenThisThen(() => this.getMapViewer().layer.allFeatureInfoLayerSet.getRegisteredLayerPaths().includes(layerPath), 30000);
+      await whenThisThen(() => this.getMapViewer().layer.allFeatureInfoLayerSet.getRegisteredLayerPaths().includes(layerPath), GVAbstractTester.LAYER_REGISTRATION_TIMEOUT_MS);
 
       // Set zoom to layer's visible range (required — query returns empty if out of range)
       test.addStep('Setting zoom level...');
@@ -1326,7 +1345,7 @@ testMyLayerQuery(): Promise<Test<TypeFeatureInfoResult>> {
 
       // Query all features
       test.addStep('Triggering getAllFeatureInfo query...');
-      return DataTableEventProcessor.triggerGetAllFeatureInfo(this.getMapId(), layerPath);
+      return this.getControllersRegistry().layerSetController.triggerGetAllFeatureInfo(layerPath);
     },
     (test, result) => {
       test.addStep('Verifying query returned results...');
@@ -1339,7 +1358,7 @@ testMyLayerQuery(): Promise<Test<TypeFeatureInfoResult>> {
       // ... additional assertions on field values
     },
     (test) => {
-      LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPath);
+      this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
     }
   );
 }
@@ -1599,7 +1618,7 @@ import { GVTestSuiteMyFeature } from './tests/suites/suite-my-feature';
 2. **Use static assertions** from `Test` class — never use `if/else` to check results
 3. **Always clean up** in the `callbackFinalize` — remove layers, reset map state
 4. **Use `generateId()`** for layer IDs — prevents conflicts between parallel tests
-5. **Reuse existing helpers** — `LayerTester.helperStep*` methods handle common patterns
+5. **Reuse existing helpers** — instance helpers via `this.helperStep*` and static assertion helpers via `LayerTester.helperStepAssert*`
 6. **Add constants to `GVAbstractTester`** — URLs, UUIDs, expected icon lists go there
 7. **True negative tests** use `testError()` with an expected error class
 8. **Import layer classes directly** — e.g., `EsriDynamic`, `WMS`, `GeoJSON` for `createGeoviewLayerConfig()`
