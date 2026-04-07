@@ -20,7 +20,7 @@ export default function Home(): JSX.Element {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
-  // Store actions
+  // Store
   const mapController = useMapController();
 
   /**

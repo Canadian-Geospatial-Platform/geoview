@@ -25,6 +25,8 @@ export function LayerOpacityControl(props: LayerOpacityControlProps): JSX.Elemen
   const { t } = useTranslation<string>();
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
+
+  // Store
   const layerHidden = useStoreMapIsLayerHiddenOnMap(layerDetails.layerPath);
   const layerController = useLayerController();
 

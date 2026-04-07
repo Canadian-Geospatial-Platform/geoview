@@ -917,6 +917,7 @@ export const getStoreLayerDisplayDateFormat = (mapId: string, layerPath: string)
 
 /**
  * React hook that returns the display date format for a specific layer.
+ *
  * The hook first attempts to resolve a layer-specific display date format
  * using the provided layer path. If the layer does not define its own
  * display date format (or cannot be found), the application-wide display
@@ -963,6 +964,7 @@ export const useStoreLayerDisplayDateFormatSet = (): Record<string, TypeDisplayD
 
 /**
  * React hook that returns the display date format for a specific layer.
+ *
  * The hook first attempts to resolve a layer-specific display date format
  * using the provided layer path. If the layer does not define its own
  * display date format (or cannot be found), the application-wide display
@@ -985,6 +987,7 @@ export const useStoreLayerDisplayDateFormatShort = (layerPath: string | undefine
 
 /**
  * React hook that returns the display date timezone for a specific layer.
+ *
  * The hook first attempts to resolve a layer-specific display date timezone
  * using the provided layer path. If the layer does not define its own
  * display date timezone (or cannot be found), the application-wide display
