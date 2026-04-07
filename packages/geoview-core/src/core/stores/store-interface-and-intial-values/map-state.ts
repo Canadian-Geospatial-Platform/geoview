@@ -31,14 +31,16 @@ import type {
   TypeValidVersions,
 } from '@/api/types/map-schema-types';
 import { DEFAULT_HIGHLIGHT_COLOR, MAP_CENTER, MAP_ZOOM_LEVEL } from '@/api/types/map-schema-types';
+import type { MapConfigLayerEntry } from '@/api/types/layer-schema-types';
+import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { getGeoViewStore, useGeoViewStore } from '@/core/stores/stores-managers';
-import { type TypeSetStore, type TypeGetStore, useStableSelector } from '@/core/stores/geoview-store';
+import type { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
+import { useStableSelector } from '@/core/stores/geoview-store';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import type { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import type { TypeHoverFeatureInfo } from './feature-info-state';
 import { getStoreLayerStatus, getStoreLayerLegendLayerByPath } from './layer-state';
 import type { TypeMapStateForExportLayout } from '@/core/components/export/utilities';
-import { CONST_LAYER_TYPES, type MapConfigLayerEntry } from '@/api/types/layer-schema-types';
 
 // #region INTERFACE DEFINITION
 

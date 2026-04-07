@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import type { Options } from 'export-to-csv';
 import { ExportToCsv } from 'export-to-csv';
 
-import { type MRT_ColumnDef as MRTColumnDef } from 'material-react-table';
+import type { MRT_ColumnDef as MRTColumnDef } from 'material-react-table';
 
 import { IconButton, DownloadIcon, Menu, MenuItem } from '@/ui';
 import { logger } from '@/core/utils/logger';

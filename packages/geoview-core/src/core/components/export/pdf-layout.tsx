@@ -1,7 +1,7 @@
 import { pdf } from '@react-pdf/renderer';
 
 import { Document, Page, Text, View, Image, Svg, Path } from '@react-pdf/renderer';
-import { type TemporalMode, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
+import type { TemporalMode, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import type { FlattenedLegendItem, ElementFactory, NorthArrowSVG } from '@/core/components/export/utilities';
 import { ExportUtilities } from '@/core/components/export/utilities';
 import type { FileExportProps } from '@/core/components/export/export-modal';

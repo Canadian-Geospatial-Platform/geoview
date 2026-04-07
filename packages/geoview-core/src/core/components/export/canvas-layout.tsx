@@ -1,7 +1,7 @@
 import { renderToString } from 'react-dom/server';
 import * as html2canvas from '@html2canvas/html2canvas';
 
-import { type TemporalMode, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
+import type { TemporalMode, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import type { FileExportProps } from '@/core/components/export/export-modal';
 import type { FlattenedLegendItem, ElementFactory, NorthArrowSVG } from '@/core/components/export/utilities';
 import { ExportUtilities, EXPORT_CONSTANTS } from '@/core/components/export/utilities';

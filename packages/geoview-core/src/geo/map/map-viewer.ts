@@ -65,7 +65,7 @@ import EventHelper from '@/api/events/event-helper';
 import { ModalApi } from '@/ui';
 import { delay, generateId, getLocalizedMessage, whenThisThen } from '@/core/utils/utilities';
 import { debounce } from '@/core/utils/debounce';
-import { type TimeIANA } from '@/core/utils/date-mgt';
+import type { TimeIANA } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { NORTH_POLE_POSITION, TIMEOUT } from '@/core/utils/constant';
 import type { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';

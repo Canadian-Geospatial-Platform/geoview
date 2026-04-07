@@ -15,7 +15,8 @@ import {
 import { logger } from '@/core/utils/logger';
 import type { TypeDisplayLanguage, TypeFieldEntry } from '@/api/types/map-schema-types';
 import type { TypeContainerBox } from '@/core/types/global-types';
-import { DateMgt, type TemporalMode, type TimeIANA, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
+import { DateMgt } from '@/core/utils/date-mgt';
+import type { TemporalMode, TimeIANA, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import { useLightBox } from '@/core/components/common';
 import { getSxClasses } from './details-style';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';

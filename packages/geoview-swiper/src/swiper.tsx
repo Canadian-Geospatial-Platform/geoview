@@ -1,4 +1,5 @@
 import Draggable from 'react-draggable';
+import { useMemo } from 'react';
 
 import { getRenderPixel } from 'ol/render';
 import type RenderEvent from 'ol/render/Event';
@@ -17,9 +18,8 @@ import { debounce } from 'geoview-core/core/utils/debounce';
 import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 import { useStoreMapSize, useStoreMapVisibleLayers } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
-import { getSxClasses } from './swiper-style';
-import { useMemo } from 'react';
 import { TIMEOUT } from 'geoview-core/core/utils/constant';
+import { getSxClasses } from './swiper-style';
 
 /** Properties for the Swiper component. */
 type SwiperProps = {

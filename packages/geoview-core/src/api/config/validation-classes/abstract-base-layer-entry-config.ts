@@ -15,7 +15,8 @@ import type {
 } from '@/api/types/layer-schema-types';
 import type { ConfigBaseClassProps } from '@/api/config/validation-classes/config-base-class';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
-import { DateMgt, type TemporalMode, type TimeDimension, type TimeIANA, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
+import { DateMgt } from '@/core/utils/date-mgt';
+import type { TemporalMode, TimeDimension, TimeIANA, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
 import { NoPrimaryKeyFieldError } from '@/core/exceptions/geoview-exceptions';
 import { GeoUtilities } from '@/geo/utils/utilities';

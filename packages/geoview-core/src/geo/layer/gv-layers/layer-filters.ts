@@ -1,5 +1,5 @@
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
-import { type FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
+import type { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 
 /**
  * Aggregates and composes the different filter fragments applied at various

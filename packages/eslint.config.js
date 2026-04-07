@@ -103,6 +103,7 @@ export default [
           fixStyle: 'separate-type-imports',
         },
       ],
+      '@typescript-eslint/no-import-type-side-effects': 'error',
       'no-useless-constructor': 'off',
       '@typescript-eslint/no-useless-constructor': 'error',
       'no-unused-vars': 'off',

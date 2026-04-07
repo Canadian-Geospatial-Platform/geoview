@@ -25,10 +25,7 @@ import {
   useStoreLayerFilterClass,
   useStoreLayerTimeDimension,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import {
-  useStoreTimeSliderFilter,
-  useStoreTimeSliderLayer,
-} from '@/core/stores/store-interface-and-intial-values/time-slider-state';
+import { useStoreTimeSliderFilter, useStoreTimeSliderLayer } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 import { useLayerController } from '@/core/controllers/layer-controller';
 
 // OGC/ESRI service capability request suffixes

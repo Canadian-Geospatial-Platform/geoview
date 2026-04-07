@@ -6,9 +6,11 @@ import type { Projection as OLProjection } from 'ol/proj';
 import { getGeoViewStore, useGeoViewStore } from '@/core/stores/stores-managers';
 import type { TypeLayersViewDisplayState, TypeLegendItem, TypeLegendLayer } from '@/core/components/layers/types';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
-import { type TypeGetStore, type TypeSetStore, useStableSelector } from '@/core/stores/geoview-store';
+import type { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
+import { useStableSelector } from '@/core/stores/geoview-store';
 import type { TypeLayerStyleConfig, TypeResultSet, TypeResultSetEntry } from '@/api/types/map-schema-types';
-import { DateMgt, type TemporalMode, type TimeDimension, type TimeIANA, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
+import type { TemporalMode, TimeDimension, TimeIANA, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
+import { DateMgt } from '@/core/utils/date-mgt';
 import type {
   TypeGeoviewLayerType,
   TypeLayerStatus,

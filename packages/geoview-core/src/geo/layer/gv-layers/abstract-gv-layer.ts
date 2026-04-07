@@ -32,7 +32,7 @@ import type {
   codedValueType,
   rangeDomainType,
 } from '@/api/types/map-schema-types';
-import { type TypeLayerMetadataFields, type TypeGeoviewLayerType, type TypeMetadataEsriDynamicLayer } from '@/api/types/layer-schema-types';
+import type { TypeLayerMetadataFields, TypeGeoviewLayerType, TypeMetadataEsriDynamicLayer } from '@/api/types/layer-schema-types';
 import type { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { LayerFailedToLoadError, LayerImageFailedToLoadError } from '@/core/exceptions/geoview-exceptions';
 import type { TypeLegendItem } from '@/core/components/layers/types';

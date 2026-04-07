@@ -13,7 +13,8 @@ import {
   setStoreMapLegendCollapsed,
   utilFindMapLayerAndChildrenFromOrderedInfo,
 } from './store-interface-and-intial-values/map-state';
-import { getStoreTimeSliderLayers, type TimeSliderLayerSet } from './store-interface-and-intial-values/time-slider-state';
+import type { TimeSliderLayerSet } from './store-interface-and-intial-values/time-slider-state';
+import { getStoreTimeSliderLayers } from './store-interface-and-intial-values/time-slider-state';
 import { getStoreSwiperLayerPaths } from './store-interface-and-intial-values/swiper-state';
 import { logger } from '@/core/utils/logger';
 import type { EventDelegateBase } from '@/api/events/event-helper';
