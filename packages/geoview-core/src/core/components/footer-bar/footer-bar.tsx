@@ -25,6 +25,7 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import type { FooterBarApi, FooterTabCreatedEvent, FooterTabRemovedEvent } from '@/core/components';
 import { DEFAULT_FOOTER_TABS_ORDER } from '@/api/types/map-schema-types';
+import { CONTAINER_TYPE, TABS } from '@/core/utils/constant';
 import { useStoreGeoViewConfig, useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { Legend } from '@/core/components/legend/legend';
@@ -35,7 +36,6 @@ import { camelCase, delay, scrollIfNotVisible } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { Guide } from '@/core/components/guide/guide';
 import { FooterPlugin } from '@/api/plugin/footer-plugin';
-import { CONTAINER_TYPE } from '@/core/utils/constant';
 
 /** Tab definition with icon, content, and optional label. */
 interface Tab {
@@ -238,10 +238,10 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     logger.logTraceUseEffect('FOOTER-TABS - arrayOfLayerDataBatch', arrayOfLayerDataBatch, activeFooterBarTab);
 
     // If the details tab is not in the footer bar tabs config, return
-    if (footerBarTabsConfig && !footerBarTabsConfig.tabs.core.includes('details')) return;
+    if (footerBarTabsConfig && !footerBarTabsConfig.tabs.core.includes(TABS.DETAILS)) return;
 
     // If we're on the details panel and the footer is collapsed
-    if (activeFooterBarTab.tabId === 'details' && !activeFooterBarTab.isOpen) {
+    if (activeFooterBarTab.tabId === TABS.DETAILS && !activeFooterBarTab.isOpen) {
       // Uncollapse it
       uiController.setFooterBarIsOpen(true);
     }

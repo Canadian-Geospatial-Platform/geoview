@@ -15,6 +15,7 @@ import {
   setStoreDetailsLayerDataArrayBatchLayerPathBypass,
   setStoreDetailsSelectedLayerPath,
   removeStoreDetailsCheckedFeature,
+  LAYER_PATH_COORDINATE_INFO,
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { useStoreUIActiveAppBarTab, useStoreUIActiveFooterBarTab } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useStoreLayerNameSet, useStoreLayerStatusSet } from '@/core/stores/store-interface-and-intial-values/layer-state';
@@ -70,8 +71,8 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   const visibleInRangeLayers = useStoreMapAllVisibleandInRangeLayers();
   const orderedLayers = useStoreMapOrderedLayers();
   const mapClickCoordinates = useStoreMapClickCoordinates();
-  const activeAppBarTab = useStoreUIActiveAppBarTab();
-  const activeFooterBarTab = useStoreUIActiveFooterBarTab();
+  const { tabId: appBarTabId, isOpen: appBarIsOpen } = useStoreUIActiveAppBarTab();
+  const { tabId: footerBarTabId, isOpen: footerBarIsOpen } = useStoreUIActiveFooterBarTab();
   const queryableByLayerPath = useStoreMapLayerQueryable(visibleInRangeLayers);
   const layerNames = useStoreLayerNameSet();
   const layerStatuses = useStoreLayerStatusSet();
@@ -168,13 +169,13 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
    */
   const memoIsPanelOpen = useMemo(() => {
     if (containerType === CONTAINER_TYPE.FOOTER_BAR) {
-      return activeFooterBarTab.tabId === TABS.DETAILS && activeFooterBarTab.isOpen && isRightPanelVisible;
+      return footerBarTabId === TABS.DETAILS && footerBarIsOpen && isRightPanelVisible;
     }
     if (containerType === CONTAINER_TYPE.APP_BAR) {
-      return activeAppBarTab.tabId === 'details' && activeAppBarTab.isOpen && isRightPanelVisible;
+      return appBarTabId === TABS.DETAILS && appBarIsOpen && isRightPanelVisible;
     }
     return false;
-  }, [containerType, activeFooterBarTab, activeAppBarTab, isRightPanelVisible]);
+  }, [containerType, footerBarTabId, footerBarIsOpen, appBarTabId, appBarIsOpen, isRightPanelVisible]);
 
   /**
    * Memoizes the layers list for the LayerList component and centralizing indexing purposes.
@@ -210,7 +211,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
       if (
         (layer.features?.length ?? 0) > 0 &&
         !existingLayerPaths.has(layer.layerPath) &&
-        layer.layerPath !== 'coordinate-info' &&
+        layer.layerPath !== LAYER_PATH_COORDINATE_INFO &&
         !layerParentHiddenSet[layer.layerPath]
       ) {
         layerListEntries.push({
@@ -228,9 +229,11 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
 
     // Split the layers list into two groups while preserving order (exclude coordinate-info from sorting)
     const layersWithFeatures = layerListEntries.filter(
-      (layer) => layer.numOffeatures && layer.numOffeatures > 0 && layer.layerPath !== 'coordinate-info'
+      (layer) => layer.numOffeatures && layer.numOffeatures > 0 && layer.layerPath !== LAYER_PATH_COORDINATE_INFO
     );
-    const layersWithoutFeatures = layerListEntries.filter((layer) => layer.numOffeatures === 0 && layer.layerPath !== 'coordinate-info');
+    const layersWithoutFeatures = layerListEntries.filter(
+      (layer) => layer.numOffeatures === 0 && layer.layerPath !== LAYER_PATH_COORDINATE_INFO
+    );
 
     // Sort layersWithFeatures according to orderedLayers
     layersWithFeatures.sort((a, b) => {
@@ -246,16 +249,16 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
     const orderedLayerListEntries = [...layersWithFeatures, ...layersWithoutFeatures];
 
     // Add coordinate info layer at the beginning if it exists and is enabled
-    const coordinateInfoLayer = arrayOfLayerDataBatch.find((layer) => layer.layerPath === 'coordinate-info');
+    const coordinateInfoLayer = arrayOfLayerDataBatch.find((layer) => layer.layerPath === LAYER_PATH_COORDINATE_INFO);
     if (coordinateInfoLayer && coordinateInfoEnabled) {
       orderedLayerListEntries.unshift({
-        layerName: layerNames[coordinateInfoLayer.layerPath] ?? 'Coordinate Information',
+        layerName: t('details.coordinateInfoTitle'),
         layerPath: coordinateInfoLayer.layerPath,
         layerStatus: layerStatuses[coordinateInfoLayer.layerPath],
         queryStatus: coordinateInfoLayer.queryStatus,
         numOffeatures: coordinateInfoLayer.features?.length ?? 0,
         layerFeatures: getNumFeaturesLabel(coordinateInfoLayer),
-        tooltip: t('layers.selectLayer', { layerName: layerNames[coordinateInfoLayer.layerPath] ?? '' }) ?? '',
+        tooltip: t('layers.selectLayer', { layerName: t('details.coordinateInfoTitle') }) ?? '',
         layerUniqueId: `${mapId}-${TABS.DETAILS}-${coordinateInfoLayer.layerPath}`,
       });
     }
@@ -638,16 +641,16 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
    */
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('DETAILS-PANEL - panel closed check', activeFooterBarTab, activeAppBarTab, containerType);
+    logger.logTraceUseEffect('DETAILS-PANEL - panel closed check', containerType);
 
     let shouldClear = false;
 
     if (containerType === CONTAINER_TYPE.FOOTER_BAR) {
       // For footer bar: clear when not on details tab or footer is collapsed
-      shouldClear = activeFooterBarTab.tabId !== TABS.DETAILS || !activeFooterBarTab.isOpen;
+      shouldClear = footerBarTabId !== TABS.DETAILS || !footerBarIsOpen;
     } else if (containerType === CONTAINER_TYPE.APP_BAR) {
       // For app bar: clear when details panel is closed (tabId === 'details' and isOpen === false)
-      shouldClear = activeAppBarTab.tabId === TABS.DETAILS && !activeAppBarTab.isOpen;
+      shouldClear = appBarTabId === TABS.DETAILS && !appBarIsOpen;
     }
 
     if (shouldClear) {
@@ -658,7 +661,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
       // Clear all checked features
       removeStoreDetailsCheckedFeature(mapId, 'all');
     }
-  }, [mapId, mapController, activeFooterBarTab, activeAppBarTab, containerType]);
+  }, [mapId, mapController, footerBarTabId, footerBarIsOpen, appBarTabId, appBarIsOpen, containerType]);
 
   /**
    * Checks if all layers query status is processed.
@@ -677,25 +680,31 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
    */
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('DETAILS-PANEL - check for auto-guide display', activeAppBarTab, activeFooterBarTab, arrayOfLayerDataBatch);
+    logger.logTraceUseEffect('DETAILS-PANEL - check for auto-guide display', arrayOfLayerDataBatch);
 
     // Check if details panel just opened (from AppBar or Footer)
     const isDetailsActive =
-      (containerType === CONTAINER_TYPE.FOOTER_BAR && activeFooterBarTab.tabId === TABS.DETAILS && activeFooterBarTab.isOpen) ||
-      (containerType === CONTAINER_TYPE.APP_BAR && activeAppBarTab.tabId === TABS.DETAILS && activeAppBarTab.isOpen);
+      (containerType === CONTAINER_TYPE.FOOTER_BAR && footerBarTabId === TABS.DETAILS && footerBarIsOpen) ||
+      (containerType === CONTAINER_TYPE.APP_BAR && appBarTabId === TABS.DETAILS && appBarIsOpen);
 
     // Only run when details is active
     if (isDetailsActive && arrayOfLayerDataBatch && arrayOfLayerDataBatch.length > 0) {
       // Check if all layers have no features (excluding coordinate-info)
       const allLayersHaveNoFeatures = arrayOfLayerDataBatch.every(
-        (layer) => layer.layerPath === 'coordinate-info' || !layer.features || layer.features.length === 0
+        (layer) => layer.layerPath === LAYER_PATH_COORDINATE_INFO || !layer.features || layer.features.length === 0
       );
 
-      // If all layers have no features and queries are processed
-      if (allLayersHaveNoFeatures && memoIsAllLayersQueryStatusProcessed()) {
-        logger.logTraceUseEffect('DETAILS-PANEL - All layers have no features, showing right panel with guide');
+      // Check if we should clear the selected layer
+      const shouldClearSelectedLayer = allLayersHaveNoFeatures && !coordinateInfoEnabled;
+
+      // If should clear the selected layer and queries are processed
+      if (shouldClearSelectedLayer && memoIsAllLayersQueryStatusProcessed()) {
+        // Log
+        logger.logDebug('DETAILS-PANEL - All layers have no features and coordinate info is disabled, showing right panel with guide');
+
         // Clear selection to show the guide
         setStoreDetailsSelectedLayerPath(mapId, '');
+
         // Make sure the right panel is visible
         if (!isRightPanelVisible) {
           layoutRef.current?.showRightPanel(true);
@@ -704,8 +713,11 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
     }
   }, [
     mapId,
-    activeAppBarTab,
-    activeFooterBarTab,
+    appBarTabId,
+    appBarIsOpen,
+    footerBarTabId,
+    footerBarIsOpen,
+    coordinateInfoEnabled,
     containerType,
     arrayOfLayerDataBatch,
     memoIsAllLayersQueryStatusProcessed,
@@ -722,7 +734,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
    * @returns The right panel content, or null to show the guide
    */
   const renderContent = (): JSX.Element | null => {
-    if (selectedLayerPath === 'coordinate-info') {
+    if (selectedLayerPath === LAYER_PATH_COORDINATE_INFO) {
       return <CoordinateInfo />;
     }
 
@@ -830,7 +842,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
       onLayerListClicked={(layerEntry) => handleLayerChange(layerEntry)}
       onRightPanelClosed={handleRightPanelClosed}
       onRightPanelVisibilityChanged={handleRightPanelVisibilityChanged}
-      guideContentIds={['details']}
+      guideContentIds={[TABS.DETAILS]}
       hideEnlargeBtn={containerType === CONTAINER_TYPE.APP_BAR}
       toggleMode={containerType === CONTAINER_TYPE.APP_BAR}
     >

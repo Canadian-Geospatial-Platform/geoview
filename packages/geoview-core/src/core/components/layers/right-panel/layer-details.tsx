@@ -673,7 +673,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
       {/* Sequential crossfade: fade out → swap content → fade in */}
       <Fade in={contentVisible} timeout={TIMEOUT.fadingPanelDuration}>
         <Box>
-          {activeView === 'details' && (
+          {activeView === TABS.DETAILS && (
             <>
               {renderLayerButtons()}
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap-reverse' }}>

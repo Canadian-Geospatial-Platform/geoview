@@ -134,7 +134,11 @@ export const TIMEOUT: Record<string, number> = {
   northPoleVisibility: 1000,
 
   deleteLayerUndoWindow: 2500,
+
+  delayBeforeShwoingSlowCoordinateInfoWarning: 3000,
+
   featureHighlight: 5000,
+
   geolocationReturn: 10000,
   deleteLayerLoading: 10000,
 };

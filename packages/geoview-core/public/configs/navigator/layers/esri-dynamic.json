@@ -249,5 +249,8 @@
     "tabs": {
       "core": ["geolocator", "legend", "details", "export"]
     }
+  },
+  "globalSettings": {
+    "coordinateInfoEnabled": false
   }
 }
