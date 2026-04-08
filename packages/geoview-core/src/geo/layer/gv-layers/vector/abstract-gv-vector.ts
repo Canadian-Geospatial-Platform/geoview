@@ -10,6 +10,7 @@ import type { Coordinate } from 'ol/coordinate';
 import type { Extent } from 'ol/extent';
 import type { Pixel } from 'ol/pixel';
 import type { Projection as OLProjection } from 'ol/proj';
+import { getUid } from 'ol/util';
 
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
@@ -46,6 +47,9 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   /** Callback delegates for the text visible changed event */
   #onTextVisibleChangedHandlers: TextVisibleChangedDelegate[] = [];
 
+  /** Cache for feature styles keyed by feature ID */
+  #styleCache: Map<string, Style | undefined> = new Map();
+
   /**
    * Constructs a GeoView Vector layer to manage an OpenLayer layer.
    *
@@ -63,14 +67,8 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
       properties: { layerConfig },
       source: olSource,
       style: (feature, resolution) => {
-        // Calculate the style for the feature
-        const style = AbstractGVVector.calculateStyleForFeature(
-          this as AbstractGVLayer,
-          feature,
-          resolution,
-          label,
-          this.getLayerFilters()?.getFilterEquation()
-        );
+        // Get or create cached style
+        const style = this.#getOrCreateCachedStyle(feature, resolution, label);
 
         // Set the style applied, throwing a style applied event in the process
         this.setStyleApplied(true);
@@ -89,6 +87,10 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
     // Init the layer options with initial settings
     AbstractGVVector.initOptionsWithInitialSettings(layerOptions, layerConfig);
+
+    // Clear cache when layer style or filters are updated.
+    this.onLayerStyleChanged(() => this.#clearStyleCache());
+    this.onLayerFilterApplied(() => this.#clearStyleCache());
 
     // If the layer is initially not visible, make it visible until the style is set so we have a style for the legend
     this.onLayerFirstLoaded(() => {
@@ -421,6 +423,58 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   // #endregion OVERRIDES
 
   // #region METHODS
+
+  /**
+   * Gets or creates a cached style for a feature at a given resolution.
+   *
+   * Resolution is rounded to 2 decimal places to prevent cache thrashing during smooth zoom animations.
+   * This avoids recreating Style objects for every tiny resolution change.
+   *
+   * @param feature - The feature to calculate style for.
+   * @param resolution - The current map resolution.
+   * @param label - Style label for fallback styling.
+   * @returns The cached or newly calculated style.
+   */
+  #getOrCreateCachedStyle(feature: FeatureLike, resolution: number, label: string): Style | undefined {
+    // Round resolution to 1 decimal place as cache key component to reduce style churn at zoom boundaries.
+    const roundedResolution = Math.round(resolution * 10) / 10;
+    const resolvedFeatureId = feature.getId ? feature.getId() : undefined;
+    const featureId = resolvedFeatureId !== undefined ? `${resolvedFeatureId}` : `${getUid(feature)}`;
+    const cacheKey = `${featureId}:${roundedResolution}`;
+
+    // Return cached style if available
+    if (this.#styleCache.has(cacheKey)) {
+      return this.#styleCache.get(cacheKey);
+    }
+
+    // Calculate new style and cache it
+    const style = AbstractGVVector.calculateStyleForFeature(
+      this as AbstractGVLayer,
+      feature,
+      resolution,
+      label,
+      this.getLayerFilters()?.getFilterEquation()
+    );
+
+    this.#styleCache.set(cacheKey, style);
+
+    // Limit cache size to prevent memory bloat (keep last 5000 entries)
+    if (this.#styleCache.size > 5000) {
+      const firstKey = this.#styleCache.keys().next().value;
+      if (firstKey) {
+        this.#styleCache.delete(firstKey);
+      }
+    }
+
+    return style;
+  }
+
+  /**
+   * Clears the style cache. Call this when layer style, filters, or visibility changes to ensure fresh styles are recalculated.
+   */
+  #clearStyleCache(): void {
+    this.#styleCache.clear();
+  }
 
   /**
    * Sets the style applied flag indicating when a style has been applied for the AbstractGVVector via the style callback function.
