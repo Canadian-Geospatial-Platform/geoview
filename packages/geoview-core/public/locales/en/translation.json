@@ -455,7 +455,8 @@
     "filterToggle": "filters",
     "searchInputLabel": "Search data table columns",
     "tableControls": "Data table controls",
-    "tableAriaLabelWithLayer": "{{layerName}} data table"
+    "tableAriaLabelWithLayer": "{{layerName}} data table",
+    "filterDataToExtent": "Filter to extent"
   },
   "geoChart": {
     "noChartAvailable": "Click on the map on a layer with chart"

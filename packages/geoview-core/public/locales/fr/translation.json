@@ -455,7 +455,8 @@
     "filterToggle": "les filtres",
     "searchInputLabel": "Rechercher dans les colonnes du tableau",
     "tableControls": "Contrôles du tableau de données",
-    "tableAriaLabelWithLayer": "Tableau de données {{layerName}}"
+    "tableAriaLabelWithLayer": "Tableau de données {{layerName}}",
+    "filterDataToExtent": "Filtrer dans l'étendue"
   },
   "geochart": {
     "noChartAvailable": "Cliquer sur une couche de la carte qui contient un graphique"
