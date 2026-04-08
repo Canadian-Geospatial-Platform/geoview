@@ -8,16 +8,16 @@ import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
 import { logger } from '@/core/utils/logger';
 
-/**
- * Custom Filter map toggle button.
- * @param props - The props for the filter map component
- * @returns The filter switch
- *
- */
 interface FilterDataToExtentProps {
   layerPath: string;
 }
 
+/**
+ * Custom Filter map toggle button.
+ *
+ * @param props - The props for the filter map component
+ * @returns The filter switch
+ */
 function FilterDataToExtent(props: FilterDataToExtentProps): JSX.Element {
   const { layerPath } = props;
   // Log
