@@ -51,6 +51,7 @@ export interface IDataTableState {
     setInitiallayerDataTableSetting: (layerPath: string) => void;
     setGlobalFilteredEntry: (globalFilterValue: string, layerPath: string) => void;
     setMapFilteredEntry: (mapFiltered: boolean, layerPath: string) => void;
+    setFilterDataToExtent: (filterDataToExtent: boolean, layerPath: string) => void;
     setRowsFilteredEntry: (rows: number, layerPath: string) => void;
     setSelectedFeature: (feature: TypeFeatureInfoEntry) => void;
     setSelectedLayerPath: (layerPath: string) => void;
@@ -132,6 +133,7 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
           columnFilterModesRecord: {},
           columnsFiltersVisibility: false,
           mapFilteredRecord: true,
+          filterDataToExtent: false,
           rowsFilteredRecord: 0,
           toolbarRowSelectedMessageRecord: '',
           globalFilterRecord: '',
@@ -299,6 +301,18 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
         });
       },
 
+      setFilterDataToExtent: (filterDataToExtent: boolean, layerPath: string) => {
+        const layerSettings = get().dataTableState.layersDataTableSetting[layerPath];
+        layerSettings.filterDataToExtent = filterDataToExtent;
+
+        set({
+          dataTableState: {
+            ...get().dataTableState,
+            layersDataTableSetting: { ...get().dataTableState.layersDataTableSetting, [layerPath]: layerSettings },
+          },
+        });
+      },
+
       /**
        * Sets the currently selected feature in the data table.
        *
@@ -408,6 +422,17 @@ export const getStoreDataTableAllFeaturesArray = (mapId: string): TypeAllFeature
   return getStoreDataTableState(mapId)?.allFeaturesDataArray ?? [];
 };
 
+/**
+ * Gets whether the data table is filtered to the current map extent for a specific layer.
+ *
+ * @param mapId - The map identifier.
+ * @param layerPath - The layer path to check.
+ * @returns True if map extent filtering is enabled, or undefined if the layer has no settings.
+ */
+export const getStoreDataTableFilterDataToExtent = (mapId: string, layerPath: string): boolean | undefined => {
+  return getStoreDataTableState(mapId)?.layersDataTableSetting?.[layerPath]?.filterDataToExtent;
+};
+
 // #endregion STATE SELECTORS
 
 // #region STATE ADAPTORS
@@ -498,7 +523,7 @@ export const setStoreGlobalFilteredEntry = (mapId: string, globalFilterValue: st
 };
 
 /**
- * Sets whether the data table is filtered to the current map extent for a layer in the store.
+ * Sets whether the map feature is filtered to the data table filters for a specific layer in the store.
  *
  * @param mapId - The map identifier.
  * @param mapFiltered - Whether map extent filtering is enabled.
@@ -506,6 +531,17 @@ export const setStoreGlobalFilteredEntry = (mapId: string, globalFilterValue: st
  */
 export const setStoreMapFilteredEntry = (mapId: string, mapFiltered: boolean, layerPath: string): void => {
   getStoreDataTableState(mapId).actions.setMapFilteredEntry(mapFiltered, layerPath);
+};
+
+/**
+ * Sets whether the data table is filtered to the current map extent for a layer in the store.
+ *
+ * @param mapId - The map identifier.
+ * @param filterDataToExtent - Whether filtering data to extent is enabled.
+ * @param layerPath - The target layer path.
+ */
+export const setStoreFilterDataToExtent = (mapId: string, filterDataToExtent: boolean, layerPath: string): void => {
+  getStoreDataTableState(mapId).actions.setFilterDataToExtent(filterDataToExtent, layerPath);
 };
 
 /**
@@ -633,8 +669,11 @@ export interface IDataTableSettings {
   /** Whether column filter inputs are visible. */
   columnsFiltersVisibility: boolean;
 
-  /** Whether the table is filtered to the current map extent. */
+  /** Whether the features in the map should reflect the filters applied in the data table. */
   mapFilteredRecord: boolean;
+
+  /** Whether the data table is filtered to the current map extent. */
+  filterDataToExtent: boolean;
 
   /** The number of rows matching the current filters. */
   rowsFilteredRecord: number;
