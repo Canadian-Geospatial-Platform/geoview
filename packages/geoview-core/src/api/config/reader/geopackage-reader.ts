@@ -197,7 +197,7 @@ export class GeoPackageReader {
     const promises = [
       Fetch.fetchArrayBuffer(url, { signal: abortSignal }),
       initSqlJs({
-        locateFile: (file) => `https://sql.js.org/dist/${file}`,
+        locateFile: () => `https://sql.js.org/dist/sql-wasm.wasm`,
       }),
     ];
     const [arrayBufferResponse, SQL] = await Promise.all(promises);
