@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { createElement, useCallback } from 'react';
+import { createElement, useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   useStoreMapRotation,
@@ -49,15 +49,35 @@ export default function MapRotation(): JSX.Element {
   rotationDegrees = ((rotationDegrees + 180) % 360) - 180;
   rotationDegrees = Math.round(rotationDegrees);
 
+  // Keeps the slider value responsive while the store catches up to map updates.
+  const [sliderRotationDegrees, setSliderRotationDegrees] = useState<number>(rotationDegrees);
+
+  // Indicates whether the user is actively dragging the slider.
+  const [isSliderDragging, setIsSliderDragging] = useState<boolean>(false);
+
+  // The rotation value currently displayed in the UI.
+  const displayedRotationDegrees = isSliderDragging ? sliderRotationDegrees : rotationDegrees;
+
   // Calculate projection rotation
   const totalRotation = Math.round(rotationAngle.angle);
-  const projectionRotation = totalRotation - rotationDegrees;
+  const projectionRotation = totalRotation - displayedRotationDegrees;
 
   // Build label text
   const rotationLabel =
     projectionRotation !== 0
-      ? `${t('mapctrl.rotation.rotation')}: ${rotationDegrees}° (${t('mapctrl.rotation.projection')}: ${projectionRotation}°)`
-      : `${t('mapctrl.rotation.rotation')}: ${rotationDegrees}°`;
+      ? `${t('mapctrl.rotation.rotation')}: ${displayedRotationDegrees}° (${t('mapctrl.rotation.projection')}: ${projectionRotation}°)`
+      : `${t('mapctrl.rotation.rotation')}: ${displayedRotationDegrees}°`;
+
+  /**
+   * Syncs the slider display with the store whenever the user is not dragging it.
+   */
+  useEffect((): void => {
+    logger.logTraceUseEffect('MAP ROTATION - sliderRotationDegrees sync', rotationDegrees, isSliderDragging);
+
+    if (!isSliderDragging) {
+      setSliderRotationDegrees(rotationDegrees);
+    }
+  }, [rotationDegrees, isSliderDragging]);
 
   /**
    * Handles rotation slider change.
@@ -68,10 +88,25 @@ export default function MapRotation(): JSX.Element {
     (value: number | number[]): void => {
       const degrees = Array.isArray(value) ? value[0] : value;
       const radians = (degrees * Math.PI) / 180;
-      mapController.rotate(radians);
+
+      setIsSliderDragging(true);
+      setSliderRotationDegrees(degrees);
+      mapController.rotate(radians, false);
     },
     [mapController]
   );
+
+  /**
+   * Handles when the user finishes moving the rotation slider.
+   *
+   * @param value - The final slider value after the user releases it
+   */
+  const handleSliderChangeCommitted = useCallback((value: number | number[]): void => {
+    const degrees = Array.isArray(value) ? value[0] : value;
+
+    setSliderRotationDegrees(degrees);
+    setIsSliderDragging(false);
+  }, []);
 
   /**
    * Handles fix north toggle.
@@ -83,6 +118,7 @@ export default function MapRotation(): JSX.Element {
 
       if (!isChecked) {
         mapController.rotate(0);
+        setSliderRotationDegrees(0);
       }
     },
     [mapId, mapController]
@@ -92,6 +128,8 @@ export default function MapRotation(): JSX.Element {
    * Handles when the user clicks the reset button.
    */
   const handleReset = useCallback((): void => {
+    setSliderRotationDegrees(0);
+    setIsSliderDragging(false);
     mapController.rotate(0);
   }, [mapController]);
 
@@ -109,8 +147,9 @@ export default function MapRotation(): JSX.Element {
           </Typography>
         </Box>
         <Slider
-          value={rotationDegrees}
+          value={displayedRotationDegrees}
           onChange={handleSliderChange}
+          onChangeCommitted={handleSliderChangeCommitted}
           min={-180}
           max={180}
           step={1}
@@ -134,7 +173,7 @@ export default function MapRotation(): JSX.Element {
               tooltipPlacement="right"
               size="small"
               onClick={handleReset}
-              disabled={rotationDegrees === 0 || isFixNorth}
+              disabled={displayedRotationDegrees === 0 || isFixNorth}
             >
               {t('mapnav.rotation.reset')}
             </IconButton>
