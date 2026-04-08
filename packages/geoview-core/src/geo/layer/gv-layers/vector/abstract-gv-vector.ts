@@ -105,9 +105,9 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
       const textLayerOptions: VectorLayerOptions<VectorSource<Feature<Geometry>>> = {
         properties: { layerConfig, isAuxiliaryLayer: true },
         source: olSource, // Share the same source
-        style: (feature, resolution) => {
+        style: (feature) => {
           // Calculate text-only style for the feature
-          const style = AbstractGVVector.calculateTextStyleForFeature(this as AbstractGVLayer, feature, resolution);
+          const style = AbstractGVVector.calculateTextStyleForFeature(this as AbstractGVLayer, feature);
           return style;
         },
         // Enable declutter based on layerText.declutterMode
@@ -579,10 +579,9 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    *
    * @param layer - The layer on which to work for the style.
    * @param feature - Feature that needs its style defined.
-   * @param resolution - The map resolution.
    * @returns The text-only style or undefined if no text style could be calculated.
    */
-  static calculateTextStyleForFeature(layer: AbstractGVLayer, feature: FeatureLike, resolution: number): Style | undefined {
+  static calculateTextStyleForFeature(layer: AbstractGVLayer, feature: FeatureLike): Style | undefined {
     // Get the layer config and style
     const style = layer.getStyle() || {};
     const outfields = layer.getLayerConfig().getOutfields();
@@ -600,7 +599,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     if (!styleSettings) return undefined;
 
     // Get the text style
-    const textStyle = GeoviewTextRenderer.getTextStyle(feature, resolution, styleSettings, layerText, aliasLookup);
+    const textStyle = GeoviewTextRenderer.getTextStyle(feature, styleSettings, layerText, aliasLookup);
 
     // If no text style, return undefined
     if (!textStyle) return undefined;
