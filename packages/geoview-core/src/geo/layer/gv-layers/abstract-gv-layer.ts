@@ -1798,7 +1798,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
     // Clone the style
     const styleClone = featureStyle.clone();
-    styleClone?.setGeometry?.('');
+    styleClone.setGeometry('');
     const styleKey = `${geometryType}${JSON.stringify(styleClone)}`;
 
     if (!imageSourceDict[styleKey]) {

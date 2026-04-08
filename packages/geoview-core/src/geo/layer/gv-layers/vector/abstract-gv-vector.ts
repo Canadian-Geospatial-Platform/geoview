@@ -10,13 +10,12 @@ import type { Coordinate } from 'ol/coordinate';
 import type { Extent } from 'ol/extent';
 import type { Pixel } from 'ol/pixel';
 import type { Projection as OLProjection } from 'ol/proj';
-import { getUid } from 'ol/util';
 
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
 import { logger } from '@/core/utils/logger';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
-import type { TypeFeatureInfoResult } from '@/api/types/map-schema-types';
+import type { TypeFeatureInfoResult, TypeLayerStyleConfig } from '@/api/types/map-schema-types';
 import type { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
@@ -88,14 +87,17 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     // Init the layer options with initial settings
     AbstractGVVector.initOptionsWithInitialSettings(layerOptions, layerConfig);
 
-    // Clear cache when layer style or filters are updated.
-    this.onLayerStyleChanged(() => this.#clearStyleCache());
+    // Clear cache when filters are updated.
     this.onLayerFilterApplied(() => this.#clearStyleCache());
 
     // If the layer is initially not visible, make it visible until the style is set so we have a style for the legend
     this.onLayerFirstLoaded(() => {
+      const layerStyleChangedHandler = (): void => this.setVisible(false);
       if (!this.getStyle() && !this.getVisible()) {
-        this.onLayerStyleChanged(() => this.setVisible(false));
+        this.onLayerStyleChanged(() => {
+          layerStyleChangedHandler();
+          this.offLayerStyleChanged(layerStyleChangedHandler);
+        });
         this.setVisible(true);
       }
     });
@@ -438,17 +440,9 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   #getOrCreateCachedStyle(feature: FeatureLike, resolution: number, label: string): Style | undefined {
     // Round resolution to 1 decimal place as cache key component to reduce style churn at zoom boundaries.
     const roundedResolution = Math.round(resolution * 10) / 10;
-    const resolvedFeatureId = feature.getId ? feature.getId() : undefined;
-    const featureId = resolvedFeatureId !== undefined ? `${resolvedFeatureId}` : `${getUid(feature)}`;
-    const cacheKey = `${featureId}:${roundedResolution}`;
-
-    // Return cached style if available
-    if (this.#styleCache.has(cacheKey)) {
-      return this.#styleCache.get(cacheKey);
-    }
 
     // Calculate new style and cache it
-    const style = AbstractGVVector.calculateStyleForFeature(
+    const featureStyle = AbstractGVVector.calculateStyleForFeature(
       this as AbstractGVLayer,
       feature,
       resolution,
@@ -456,17 +450,33 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
       this.getLayerFilters()?.getFilterEquation()
     );
 
-    this.#styleCache.set(cacheKey, style);
+    // If no feature style generated
+    if (!featureStyle) {
+      // No style
+      return undefined;
+    }
 
-    // Limit cache size to prevent memory bloat (keep last 5000 entries)
-    if (this.#styleCache.size > 5000) {
-      const firstKey = this.#styleCache.keys().next().value;
-      if (firstKey) {
-        this.#styleCache.delete(firstKey);
+    // Clone the style
+    const styleClone = featureStyle.clone();
+    // Eliminate geometry from the style clone to prevent cache misses due to different geometries on features
+    styleClone.setGeometry('');
+    // Create a cache key based on the rounded resolution and the stringified style (without geometry)
+    const styleKey = `${roundedResolution}${JSON.stringify(styleClone)}`;
+
+    // Cache the style if not already cached
+    if (!this.#styleCache.has(styleKey)) {
+      this.#styleCache.set(styleKey, featureStyle);
+
+      // Limit cache size to prevent memory bloat (keep last 5000 entries)
+      if (this.#styleCache.size > 5000) {
+        const firstKey = this.#styleCache.keys().next().value;
+        if (firstKey) {
+          this.#styleCache.delete(firstKey);
+        }
       }
     }
 
-    return style;
+    return this.#styleCache.get(styleKey);
   }
 
   /**
@@ -474,6 +484,17 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    */
   #clearStyleCache(): void {
     this.#styleCache.clear();
+  }
+
+  /**
+   * Sets the layer style.
+   *
+   * @param style - The layer style
+   */
+  override setStyle(style: TypeLayerStyleConfig): void {
+    this.#clearStyleCache();
+    super.setStyle(style);
+    this.refresh(undefined);
   }
 
   /**
