@@ -95,7 +95,7 @@ const STRING_FIELD_FILTERS = ['contains', 'startsWith', 'endsWith'];
  * @returns The data table element
  */
 
-function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Element {
+function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: DataTableProps): JSX.Element {
   // Log
   logger.logTraceRender('components/data-table/data-table');
 
@@ -516,15 +516,10 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
     const layerFilterEquation = GeoviewRenderer.createFilterNodeFromFilter(layerFilterClassAndTime);
 
     // Filter each features
-    let filterArray =
+    const filterArray =
       data?.features?.filter((f) => {
         return f.feature && GeoviewRenderer.featureRespectsFilterEquation(f.feature, layerFilterEquation);
       }) ?? [];
-
-    // Filter out unsymbolized features if the showUnsymbolizedFeatures config is false
-    if (!showUnsymbolizedFeatures) {
-      filterArray = filterArray.filter((record) => record.featureIcon);
-    }
 
     return (filterArray ?? []).map((feature, featureIndex) => {
       // Create unique button ID per feature
@@ -928,7 +923,15 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
   }, [globalFilter]);
 
   // set toolbar custom action message in store.
-  useToolbarActionMessage({ data, columnFilters, globalFilter, layerPath, tableInstance: useTable, showUnsymbolizedFeatures });
+  useToolbarActionMessage({
+    data,
+    columnFilters,
+    globalFilter,
+    layerPath,
+    tableInstance: useTable,
+    showUnsymbolizedFeatures,
+    unfilteredFeaturesCount,
+  });
 
   return (
     <Box ref={dataTableWrapperRef} sx={sxClasses.dataTableWrapper} className="data-table-wrapper">

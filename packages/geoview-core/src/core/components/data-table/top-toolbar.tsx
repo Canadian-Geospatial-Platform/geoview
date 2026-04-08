@@ -12,8 +12,10 @@ import { Box, IconButton, Switch } from '@/ui';
 import ExportButton from './export-button';
 import JSONExportButton from './json-export-button';
 import FilterMap from './filter-map';
+import FilterDataToExtent from './filter-data-extent';
 import type { ColumnsType } from './data-table-types';
 import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
+import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { SxStyles } from '@/ui/style/types';
 import { ClearFiltersIcon } from '@/ui/icons';
 import { logger } from '@/core/utils/logger';
@@ -65,6 +67,10 @@ function TopToolbar(props: TopToolbarProps<ColumnsType>): JSX.Element {
   logger.logTraceRender('components/data-table/top-toolbar');
 
   const { sxClasses, datatableSettings, layerPath, t, globalFilter, useTable, columns, data, table } = props;
+
+  // ESRI Dynamic layer data does not include geometry and can't be filtered to extent
+  const isEsriDynamic = data.features?.[0]?.geoviewLayerType === CONST_LAYER_TYPES.ESRI_DYNAMIC;
+
   return (
     <Box
       className="data-table-top-toolbar"
@@ -80,6 +86,7 @@ function TopToolbar(props: TopToolbarProps<ColumnsType>): JSX.Element {
         </Box>
         <Box display="flex">
           <FilterMap layerPath={layerPath} isGlobalFilterOn={!!globalFilter?.length} />
+          {!isEsriDynamic && <FilterDataToExtent layerPath={layerPath} />}
         </Box>
       </Box>
       <Box display="flex" sx={{ flexDirection: 'column' }}>
