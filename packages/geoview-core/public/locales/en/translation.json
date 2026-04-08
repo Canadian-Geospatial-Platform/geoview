@@ -303,7 +303,6 @@
     "nullValue": "Null",
     "toggleCoordinateInfo": "Toggle coordinate info tool",
     "showCoordinateInfo": "Show coordinate info",
-    "noCoordinateInfo": "No Coordinate Info",
     "coordinateInfoTitle": "Coordinate Info",
     "geographicCoordinates": "Geographic Coordinates",
     "degreesDecimal": "Decimal Degrees",
@@ -490,7 +489,8 @@
       "basemapLayerCreationError": "Error creating __param__ basemap.",
       "kmlLayerWarning": "KML layers will not have proper symbols in the panels or have entries in the data table.",
       "layerCRSNotSupported": "The spatial reference of the map '__param__' is not officially supported by the layer '__param__'. GeoView will still attempt to load the layer on the map, but it might be misaligned.",
-      "invalidGeometry": "The '__param__' layer contains features with invalid geometries that will not show on the map."
+      "invalidGeometry": "The '__param__' layer contains features with invalid geometries that will not show on the map.",
+      "slowCoordinateInfo": "The coordinate info for the clicked coordinates is taking longer than expected to fetch..."
     }
   },
   "error": {

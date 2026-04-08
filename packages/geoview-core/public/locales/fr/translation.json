@@ -303,7 +303,6 @@
     "nullValue": "Nul",
     "toggleCoordinateInfo": "Basculer l'outil d'informations sur les coordonnées",
     "showCoordinateInfo": "Afficher les informations sur les coordonnées",
-    "noCoordinateInfo": "Aucune information sur les coordonnées",
     "coordinateInfoTitle": "Informations sur les coordonnées",
     "geographicCoordinates": "Coordonnée géographique",
     "degreesDecimal": "Degrés décimaux",
@@ -490,7 +489,8 @@
       "basemapLayerCreationError": "Erreur lors de la création de la couche de base __param__.",
       "kmlLayerWarning": "Les couches KML n'afficheront pas les symboles appropriés dans les panneaux et ne comporteront pas d'entrées dans le tableau de données.",
       "layerCRSNotSupported": "La référence spatiale de la carte '__param__' n'est pas officiellement supportée par la couche '__param__'. GeoView va tout de même tenté d'afficher la couche, mais celle-ci risque d'être désalignée..",
-      "invalidGeometry": "La couche '__param__' contient des entités dont la géométrie est invalide et qui ne s'afficheront pas sur la carte."
+      "invalidGeometry": "La couche '__param__' contient des entités dont la géométrie est invalide et qui ne s'afficheront pas sur la carte.",
+      "slowCoordinateInfo": "Les informations de coordonnées pour le point cliqué prennent plus de temps que prévu à être récupérées..."
     }
   },
   "error": {
