@@ -23,6 +23,14 @@ import { useStoreUIActiveTrapGeoView, useStoreUIActiveFocusItem } from '@/core/s
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE, TIMEOUT, LIGHTBOX_SELECTORS } from '@/core/utils/constant';
 
+/** SxProps for the main row root container. */
+// TODO: To prevent the right panel toolbar to be hidden on first click og group layer. There is still a jump on first selection
+const MAIN_ROW_SX: SxProps = {
+  flexGrow: 1,
+  overflow: 'hidden',
+  paddingTop: '30px',
+};
+
 
 /** Properties for the ResponsiveGridLayout component. */
 interface ResponsiveGridLayoutProps {
@@ -125,6 +133,30 @@ const ResponsiveGridLayout = forwardRef(
     // sxClasses
     const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
     const guideSxClasses = useMemo(() => getGuideSxClasses(theme), [theme]);
+
+    /** Memoized sxProps for the left-top panel. */
+    const memoLeftTopSxProps = useMemo(() => ({ zIndex: isFullScreen ? 'unset' : 200 }), [isFullScreen]);
+
+    /** Memoized sxProps for the right-top panel. */
+    const memoRightTopSxProps = useMemo(() => ({ zIndex: isFullScreen ? 'unset' : 100, alignContent: 'flex-end' }), [isFullScreen]);
+
+    /** Memoized sx for the right-top content box layout. */
+    const memoRightTopContentSx = useMemo(
+      () => ({
+        display: 'flex',
+        alignItems: containerType === CONTAINER_TYPE.APP_BAR ? 'end' : 'center',
+        flexDirection: containerType === CONTAINER_TYPE.APP_BAR ? 'column' : 'row',
+        gap: containerType === CONTAINER_TYPE.APP_BAR ? '10px' : '0',
+        [theme.breakpoints.up('sm')]: {
+          justifyContent: containerType === CONTAINER_TYPE.APP_BAR ? 'space-between' : 'right',
+        },
+        [theme.breakpoints.down('sm')]: {
+          justifyContent: 'space-between',
+        },
+        width: '100%',
+      }),
+      [containerType, theme.breakpoints]
+    );
 
     // Expose imperative methods to parent component
     useImperativeHandle(
@@ -231,8 +263,8 @@ const ResponsiveGridLayout = forwardRef(
      * Toggles the guide panel open or closed.
      */
     const handleOpenGuide = useCallback((): void => {
-      setIsGuideOpen(!isGuideOpen);
-    }, [isGuideOpen]);
+      setIsGuideOpen((prev) => !prev);
+    }, []);
 
     /**
      * Focus management for the guide close button using requestAnimationFrame.
@@ -293,9 +325,9 @@ const ResponsiveGridLayout = forwardRef(
     /**
      * Toggles fullscreen mode for the right panel.
      */
-    const handleToggleFullScreen = useCallback(() => {
-      setIsFullScreen(!isFullScreen);
-    }, [isFullScreen]);
+    const handleToggleFullScreen = useCallback((): void => {
+      setIsFullScreen((prev) => !prev);
+    }, []);
 
     /**
      * Handles keyboard events within the guide container.
@@ -339,6 +371,8 @@ const ResponsiveGridLayout = forwardRef(
     );
 
     // If we're on mobile
+    // TODO: CHECK - theme.breakpoints.down('md') returns a CSS media query string which is always truthy
+    // TO.DOCONT: in a boolean context. This should probably use isMobile or useMediaQuery for proper responsive behavior?
     if (theme.breakpoints.down('md')) {
       if (!(leftMain || leftTop) && !isRightPanelVisible) {
         setIsRightPanelVisible(true);
@@ -637,9 +671,9 @@ const ResponsiveGridLayout = forwardRef(
           <ResponsiveGrid.Left
             isRightPanelVisible={isRightPanelVisible}
             isEnlarged={isEnlarged}
-            aria-hidden={!isRightPanelVisible}
+            ariaHidden={!isRightPanelVisible}
             toggleMode={toggleMode}
-            sxProps={{ zIndex: isFullScreen ? 'unset' : 200 }}
+            sxProps={memoLeftTopSxProps}
             className="responsive-layout-left-top"
           >
             {/* This panel is hidden from screen readers when not visible */}
@@ -649,41 +683,20 @@ const ResponsiveGridLayout = forwardRef(
             isRightPanelVisible={isRightPanelVisible}
             isEnlarged={isEnlarged}
             toggleMode={toggleMode}
-            sxProps={{ zIndex: isFullScreen ? 'unset' : 100, alignContent: 'flex-end' }}
+            sxProps={memoRightTopSxProps}
             className="responsive-layout-right-top"
           >
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: containerType === CONTAINER_TYPE.APP_BAR ? 'end' : 'center',
-                flexDirection: containerType === CONTAINER_TYPE.APP_BAR ? 'column' : 'row',
-                gap: containerType === CONTAINER_TYPE.APP_BAR ? '10px' : '0',
-                [theme.breakpoints.up('sm')]: {
-                  justifyContent: containerType === CONTAINER_TYPE.APP_BAR ? 'space-between' : 'right',
-                },
-                [theme.breakpoints.down('sm')]: {
-                  justifyContent: 'space-between',
-                },
-                width: '100%',
-              }}
-            >
+            <Box sx={memoRightTopContentSx}>
               {rightTop ?? <Box />}
             </Box>
           </ResponsiveGrid.Right>
         </ResponsiveGrid.Root>
-        <ResponsiveGrid.Root
-          className="responsive-layout-main-row"
-          sx={{
-            flexGrow: 1,
-            overflow: 'hidden',
-            paddingTop: '30px', // TODO: To prevent the right panel toolbar to be hidden on first click og group layer. There is still a jump onn first selection
-          }}
-        >
+        <ResponsiveGrid.Root className="responsive-layout-main-row" sx={MAIN_ROW_SX}>
           <ResponsiveGrid.Left
             isEnlarged={isEnlarged}
             isRightPanelVisible={isRightPanelVisible}
             toggleMode={toggleMode}
-            aria-hidden={!isRightPanelVisible}
+            ariaHidden={!isRightPanelVisible}
             sxProps={sxClasses.gridLeftMain as SxProps}
             className="responsive-layout-left-main"
           >

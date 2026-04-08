@@ -1,4 +1,4 @@
-import type { ReactNode} from 'react';
+import type { ReactNode, ForwardedRef } from 'react';
 import { forwardRef, useMemo } from 'react';
 import { useTheme } from '@mui/material/styles';
 import type { GridProps, SxProps } from '@/ui';
@@ -18,10 +18,14 @@ interface ResponsiveGridPanelProps extends GridProps {
   isEnlarged: boolean;
   className?: string;
   toggleMode?: boolean;
+  ariaHidden?: boolean;
 }
 
 /** Grid container padding. */
 const PADDING = '0 6px';
+
+/** Default empty sx props to avoid new object reference on every render. */
+const EMPTY_SX_PROPS: SxProps = {};
 
 /** Base breakpoint sizes without xs since it's common. */
 type BaseBreakpointSize = 'sm' | 'md' | 'lg' | 'xl';
@@ -127,18 +131,18 @@ ResponsiveGridRoot.displayName = 'ResponsiveGridRoot';
  * @param ref - Forwarded ref for the Grid element
  * @returns The responsive grid panel element
  */
-const ResponsiveGridPanel = forwardRef(
+const ResponsiveGridPanel = forwardRef<HTMLDivElement, ResponsiveGridPanelProps & { isLeftPanel: boolean }>(
   (
     {
       children,
       className = '',
       isRightPanelVisible = false,
-      sxProps = {},
+      sxProps = EMPTY_SX_PROPS,
       isEnlarged,
       isLeftPanel,
       toggleMode = false,
-      ...rest
-    }: ResponsiveGridPanelProps & { isLeftPanel: boolean },
+      ariaHidden,
+    },
     ref
   ) => {
     // Log
@@ -178,7 +182,7 @@ const ResponsiveGridPanel = forwardRef(
         }}
         component="div"
         ref={ref}
-        {...rest}
+        aria-hidden={ariaHidden}
       >
         {children}
       </Grid>
@@ -194,7 +198,7 @@ ResponsiveGridPanel.displayName = 'ResponsiveRightPanel';
  * @param ref - Forwarded ref
  * @returns The left panel element
  */
-const ResponsiveGridLeftPanel = forwardRef((props: ResponsiveGridPanelProps, ref) => (
+const ResponsiveGridLeftPanel = forwardRef<HTMLDivElement, ResponsiveGridPanelProps>((props, ref: ForwardedRef<HTMLDivElement>) => (
   <ResponsiveGridPanel {...props} isLeftPanel ref={ref} />
 ));
 ResponsiveGridLeftPanel.displayName = 'ResponsiveGridLeftPanel';
@@ -206,7 +210,7 @@ ResponsiveGridLeftPanel.displayName = 'ResponsiveGridLeftPanel';
  * @param ref - Forwarded ref
  * @returns The right panel element
  */
-const ResponsiveGridRightPanel = forwardRef((props: ResponsiveGridPanelProps, ref) => (
+const ResponsiveGridRightPanel = forwardRef<HTMLDivElement, ResponsiveGridPanelProps>((props, ref: ForwardedRef<HTMLDivElement>) => (
   <ResponsiveGridPanel {...props} isLeftPanel={false} ref={ref} />
 ));
 ResponsiveGridRightPanel.displayName = 'ResponsiveGridRightPanel';

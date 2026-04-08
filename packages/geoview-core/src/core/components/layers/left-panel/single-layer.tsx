@@ -50,6 +50,20 @@ import { useStoreUIActiveTrapGeoView } from '@/core/stores/store-interface-and-i
 import { useMapController } from '@/core/controllers/map-controller';
 import { useLayerCreatorController } from '@/core/controllers/layer-creator-controller';
 
+/** Static Tooltip slotProps — offset popper by [0, -8]. */
+const TOOLTIP_SLOT_PROPS = {
+  popper: {
+    modifiers: [
+      {
+        name: 'offset',
+        options: {
+          offset: [0, -8],
+        },
+      },
+    ],
+  },
+};
+
 interface SingleLayerProps {
   layerPath: string;
   depth: number;
@@ -168,6 +182,7 @@ export function SingleLayer({
 
   /**
    * Select the layer if not already selected and status is valid.
+   *
    * @param openPanel - Whether to open the details panel (default: true)
    */
   const selectLayerIfNeeded = useCallback(
@@ -707,6 +722,15 @@ export function SingleLayer({
     }
   }, [layerStatus, layerPath, reloadButtonId, layerListItemButtonId]);
 
+  /** Memoized sx for the list item button. */
+  const memoListItemButtonSx = useMemo(
+    () => ({
+      minHeight: '4.51rem',
+      ...(!inVisibleRange || parentHidden || !isVisible || layerStatus === 'error' ? sxClasses.outOfRange : {}),
+    }),
+    [inVisibleRange, parentHidden, isVisible, layerStatus, sxClasses.outOfRange]
+  );
+
   return (
     <ListItem
       ref={layerListItemRef}
@@ -724,27 +748,13 @@ export function SingleLayer({
           enterDelay={theme.transitions.duration.tooltipDelay}
           enterNextDelay={theme.transitions.duration.tooltipDelay}
           arrow
-          slotProps={{
-            popper: {
-              modifiers: [
-                {
-                  name: 'offset',
-                  options: {
-                    offset: [0, -8],
-                  },
-                },
-              ],
-            },
-          }}
+          slotProps={TOOLTIP_SLOT_PROPS}
         >
           <ListItemButton
             id={layerListItemButtonId}
             onClick={handleLayerClick}
             selected={layerIsSelected || (layerChildIsSelected && !legendExpanded)}
-            sx={{
-              minHeight: '4.51rem',
-              ...(!inVisibleRange || parentHidden || !isVisible || layerStatus === 'error' ? sxClasses.outOfRange : {}),
-            }}
+            sx={memoListItemButtonSx}
             className={!inVisibleRange ? 'out-of-range' : ''}
           >
             <LayerIcon layerPath={layerPath} />
