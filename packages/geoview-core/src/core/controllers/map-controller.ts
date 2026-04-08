@@ -846,15 +846,25 @@ export class MapController extends AbstractMapViewerController {
   }
 
   /**
-   * Animates the map rotation to the specified angle.
+   * Rotates the map to the specified angle.
    *
    * The store is updated automatically via the MapViewer move-end event.
    *
    * @param rotation - The target rotation angle in radians
+   * @param animate - Whether to animate the rotation change, defaults to true
    */
-  rotate(rotation: number): void {
+  rotate(rotation: number, animate: boolean = true): void {
     // Do the actual view map rotation
-    this.getMapViewer().map.getView().animate({ rotation });
+    const view = this.getMapViewer().map.getView();
+
+    if (animate) {
+      view.animate({ rotation });
+      return;
+    }
+
+    // Cancel any in-flight animations so slider drags stay in sync with the displayed value.
+    view.cancelAnimations();
+    view.setRotation(rotation);
     // GV No need to Save to the store, because this will trigger an event on MapViewer which will take care of updating the store
   }
 
@@ -1429,6 +1439,8 @@ export class MapController extends AbstractMapViewerController {
     else listOfLayerEntryConfig.push(this.#createLayerEntryConfig(layerPath, isGeocore, overrideGeocoreServiceNames));
 
     // Get initial settings
+    // Disable is necessary to prevent prettier from auto overriding the formatting of this line.
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     const initialSettings = MapController.#getInitialSettings(layerEntryConfig, orderedLayerInfo, legendLayerInfo!);
 
     // Construct geoview layer config
@@ -1513,6 +1525,8 @@ export class MapController extends AbstractMapViewerController {
     }
 
     // Get initial settings
+    // Disable is necessary to prevent prettier from auto overriding the formatting of this line.
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     const initialSettings = MapController.#getInitialSettings(layerEntryConfig, orderedLayerInfo, legendLayerInfo!);
 
     // Clone the source object
