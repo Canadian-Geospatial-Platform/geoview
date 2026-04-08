@@ -466,6 +466,8 @@ const subscriptions: Record<string, SubscriptionDelegate[]> = {};
  * @param store - The GeoView Zustand store instance.
  */
 export function initGeochartStateSubscriptions(store: GeoviewStoreType): void {
+  const { mapId } = store.getState();
+
   // Checks for updated layers in layer data array from the details state
   const layerDataArrayUpdate = store.subscribe(
     (state) => state.detailsState.layerDataArray as TypeGeochartResultSetEntry[],
@@ -474,7 +476,7 @@ export function initGeochartStateSubscriptions(store: GeoviewStoreType): void {
       logger.logTraceCoreStoreSubscription('GEOCHART STATE - detailsState.layerDataArray', cur);
 
       // Also propagate in the geochart arrays
-      setStoreGeochartLayerDataArray(store.getState().mapId, cur);
+      setStoreGeochartLayerDataArray(mapId, cur);
     }
   );
 
@@ -486,7 +488,7 @@ export function initGeochartStateSubscriptions(store: GeoviewStoreType): void {
       logger.logTraceCoreStoreSubscription('GEOCHART STATE - geochartState.layerDataArray', cur);
 
       // Also propagate in the batched array
-      propagateStoreGeochartFeatureInfoBatch(store.getState().mapId, cur).catch((error: unknown) => {
+      propagateStoreGeochartFeatureInfoBatch(mapId, cur).catch((error: unknown) => {
         // Log
         logger.logPromiseFailed('propagateStoreGeochartFeatureInfoBatch in layerDataArrayUpdateBatch subscribe in geochart-state', error);
       });
@@ -494,7 +496,7 @@ export function initGeochartStateSubscriptions(store: GeoviewStoreType): void {
   );
 
   // Add subscriptions to the list of subscriptions to be used by the state
-  subscriptions[store.getState().mapId] = [layerDataArrayUpdate, layerDataArrayUpdateBatch];
+  subscriptions[mapId] = [layerDataArrayUpdate, layerDataArrayUpdateBatch];
 }
 
 /**

@@ -10,6 +10,7 @@ import { getSxClasses } from './layer-list-style';
 import { LayerIcon } from './layer-icon';
 import { useStoreLayerStatus } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { logger } from '@/core/utils/logger';
+import { LAYER_PATH_COORDINATE_INFO, useStoreDetailsQueryStatus } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 
 /** Represents an entry in the layer list. */
 export interface LayerListEntry {
@@ -60,14 +61,17 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Store
-  const layerStatus = useStoreLayerStatus(layer.layerPath);
+  // TODO: REFACTOR - The whole 'layer' parameter received in the component parameters list should be reviewed and turned obsolete.
+  // TO.DOCONT: It should all be using store selector hooks instead. Fallback to layer query status if details query status is not available for now.
+  const layerStatus = useStoreLayerStatus(layer.layerPath) ?? layer.layerStatus;
+  const layerQueryStatus = useStoreDetailsQueryStatus(layer.layerPath) ?? layer.queryStatus;
 
   // Style
   const containerClass = [
     'layer-panel',
     'bordered',
-    layer.layerStatus ?? '',
-    `query-${layer.queryStatus}`,
+    layerStatus ?? '',
+    `query-${layerQueryStatus}`,
     isSelected ? 'selectedLayer bordered-primary' : '',
   ]
     .join(' ')
@@ -75,16 +79,16 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
 
   // Constant for state
   const isDisabled = layer?.numOffeatures === 0 || layer?.isDisabled;
-  const isLoading = layer.queryStatus === 'processing' || layer.layerStatus === 'loading' || layer.layerStatus === 'processing';
+  const isLoading = layerQueryStatus === 'processing' || layerStatus === 'loading' || layerStatus === 'processing';
 
   /**
    * Gets the layer status label based on query and layer status.
    */
   const getLayerStatus = useCallback((): JSX.Element | string => {
-    if (layer.layerStatus === 'error' || layer?.queryStatus === 'error') {
+    if (layerStatus === 'error' || layerQueryStatus === 'error') {
       return `${t('legend.layerError')}`;
     }
-    if (['processing'].includes(layer.queryStatus)) {
+    if (['processing'].includes(layerQueryStatus)) {
       return `${t('layers.querying')}...`;
     }
     return (
@@ -92,7 +96,7 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
         {layer.layerFeatures ?? ''} {layer?.mapFilteredIcon ?? ''}
       </>
     );
-  }, [layer.layerFeatures, layer.layerStatus, layer?.mapFilteredIcon, layer.queryStatus, t]);
+  }, [layer.layerFeatures, layerStatus, layer?.mapFilteredIcon, layerQueryStatus, t]);
 
   /**
    * Handles layer selection with keyboard (Enter or Spacebar).
@@ -140,7 +144,7 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
           // disable when layer features has null value.
           disabled={isDisabled || isLoading}
         >
-          {layer.layerPath === 'coordinate-info' ? (
+          {layer.layerPath === LAYER_PATH_COORDINATE_INFO ? (
             // Treat
             <LocationSearchingIcon />
           ) : (
@@ -156,7 +160,7 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
               </Typography>
             </Box>
           </Box>
-          {layer.layerPath !== 'coordinate-info' && (layer.numOffeatures ?? 0) > 0 && (
+          {layer.layerPath !== LAYER_PATH_COORDINATE_INFO && (layer.numOffeatures ?? 0) > 0 && (
             <Badge badgeContent={layer.numOffeatures} max={99} color="info" sx={sxClasses.layerCount} className="layer-count" aria-hidden="true"></Badge>
           )}
         </ListItemButton>

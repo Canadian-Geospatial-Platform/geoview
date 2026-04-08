@@ -15,16 +15,10 @@ import type {
   TypeResultSetEntry,
   TypeQueryStatus,
   TypeFieldEntry,
-  TypeUtmZoneResponse,
-  TypeAltitudeResponse,
-  TypeNtsResponse,
-  TypeServiceUrls,
-  TypeMapMouseInfo,
 } from '@/api/types/map-schema-types';
 import type { TypeGeoviewLayerType } from '@/api/types/layer-schema-types';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
-import { Projection } from '@/geo/utils/projection';
 import { doUntil } from '@/core/utils/utilities';
 
 // #region INTERFACE DEFINITION
@@ -73,11 +67,19 @@ export interface IFeatureInfoState {
     setLayerDataArrayBatch: (layerDataArray: TypeFeatureInfoResultSetEntry[]) => void;
     setLayerDataArrayBatchLayerPathBypass: (layerPath: string) => void;
     setSelectedLayerPath: (selectedLayerPath: string) => void;
-    toggleCoordinateInfoEnabled: () => void;
+    setCoordinateInfoEnabled: (coordinateInfoEnabled: boolean) => void;
+    updateCoordinateInfoLayer: (features: TypeFeatureInfoEntry[], queryStatus: TypeQueryStatus) => void;
   };
 }
 
 // #endregion INTERFACE DEFINITION
+
+// #region PUBLIC CONSTANTS
+
+/** The layer path for the coordinate info feature. */
+export const LAYER_PATH_COORDINATE_INFO = 'coordinate-info';
+
+// #endregion PUBLIC CONSTANTS
 
 // #region UTIL FUNCTIONS (PRIVATE)
 
@@ -125,6 +127,53 @@ export const getStoreDetailsSelectedLayerPath = (mapId: string): string => {
 /** Hook that returns the selected layer path in the details panel. */
 export const useStoreDetailsSelectedLayerPath = (): string => useStore(useGeoViewStore(), (state) => state.detailsState.selectedLayerPath);
 
+/**
+ * Gets the layer query status for a given layer path.
+ *
+ * @param mapId - The map identifier.
+ * @param layerPath - The layer path to get the query status for.
+ * @returns The query status for the layer, or undefined if the layer is not found.
+ */
+export const getStoreDetailsQueryStatus = (mapId: string, layerPath: string): TypeQueryStatus | undefined => {
+  return findLayerDataFromLayerDataArray(layerPath, getStoreDetailsState(mapId).layerDataArray)?.queryStatus;
+};
+
+/** Hook that returns the selected layer path in the details panel. */
+export const useStoreDetailsQueryStatus = (layerPath: string): string | undefined => {
+  return useStore(useGeoViewStore(), (state) => findLayerDataFromLayerDataArray(layerPath, state.detailsState.layerDataArray)?.queryStatus);
+};
+
+/**
+ * Gets the coordinate info enabled state for the given map.
+ *
+ * @param mapId - The map identifier.
+ * @returns Whether coordinate info is enabled.
+ */
+export const getStoreDetailsCoordinateInfoEnabled = (mapId: string): boolean => {
+  return getStoreDetailsState(mapId).coordinateInfoEnabled;
+};
+
+/** Hook that returns whether coordinate info is enabled. */
+export const useStoreDetailsCoordinateInfoEnabled = (): boolean =>
+  useStore(useGeoViewStore(), (state) => state.detailsState.coordinateInfoEnabled);
+
+/**
+ * Gets the feature info entry for the coordinate info layer from the details store.
+ *
+ * @param mapId - The map identifier.
+ * @returns The feature info entry for the coordinate info layer, or undefined if not found.
+ */
+export const getStoreDetailsLayerDataArrayFeature = (mapId: string): TypeFeatureInfoEntry | undefined => {
+  return findLayerDataFromLayerDataArray(LAYER_PATH_COORDINATE_INFO, getStoreDetailsState(mapId).layerDataArray)?.features?.[0];
+};
+
+/** Hook that returns the feature info for the coordinate info layer data array. */
+export const useStoreDetailsLayerDataArrayFeature = (): TypeFeatureInfoEntry | undefined =>
+  useStore(
+    useGeoViewStore(),
+    (state) => findLayerDataFromLayerDataArray(LAYER_PATH_COORDINATE_INFO, state.detailsState.layerDataArray)?.features?.[0]
+  );
+
 // #endregion STATE GETTERS & HOOKS
 
 // #region STATE GETTERS & HOOKS - OTHERS (no match between getter-hook)
@@ -145,17 +194,9 @@ export const getStoreDetailsFeatures = (mapId: string, layerPath: string): TypeF
 export const useStoreDetailsCheckedFeatures = (): TypeFeatureInfoEntry[] =>
   useStore(useGeoViewStore(), (state) => state.detailsState.checkedFeatures);
 
-/** Hook that returns the feature info layer data array. */
-export const useStoreDetailsLayerDataArray = (): TypeFeatureInfoResultSetEntry[] =>
-  useStore(useGeoViewStore(), (state) => state.detailsState.layerDataArray);
-
 /** Hook that returns the batched feature info layer data array. */
 export const useStoreDetailsLayerDataArrayBatch = (): TypeFeatureInfoResultSetEntry[] =>
   useStore(useGeoViewStore(), (state) => state.detailsState.layerDataArrayBatch);
-
-/** Hook that returns whether coordinate info is enabled. */
-export const useStoreDetailsCoordinateInfoEnabled = (): boolean =>
-  useStore(useGeoViewStore(), (state) => state.detailsState.coordinateInfoEnabled);
 
 /** Hook that returns whether the coordinate info switch is hidden. */
 export const useStoreDetailsHideCoordinateInfoSwitch = (): boolean =>
@@ -226,12 +267,12 @@ export const removeStoreDetailsCheckedFeature = (mapId: string, feature: TypeFea
 };
 
 /**
- * Toggles the coordinate info enabled state in the store.
+ * Sets whether the coordinate info feature is enabled in the store.
  *
  * @param mapId - The map identifier.
  */
-export const toggleStoreDetailsCoordinateInfoEnabled = (mapId: string): void => {
-  getStoreDetailsState(mapId).actions.toggleCoordinateInfoEnabled();
+export const setStoreDetailsCoordinateInfoEnabled = (mapId: string, coordinateInfoEnabled: boolean): void => {
+  getStoreDetailsState(mapId).actions.setCoordinateInfoEnabled(coordinateInfoEnabled);
 };
 
 /**
@@ -288,125 +329,17 @@ export const deleteStoreDetailsFeatureInfo = (mapId: string, layerPath: string):
 };
 
 /**
- * Creates (or replaces) the coordinate-info layer entry in the details store.
+ * Updates (creates/replaces) the specific coordinate information layer entry in the details store.
  *
- * Builds a synthetic layer data entry with a 'coordinate-info' layer path
+ * Builds a synthetic layer data entry with a specific layer path
  * and appends it to the current layer data array.
  *
  * @param mapId - The map identifier.
  * @param features - Optional feature entries to include in the coordinate info layer.
+ * @param queryStatus - The status of the query.
  */
-export const createStoreCoordinateInfoLayer = (mapId: string, features: TypeFeatureInfoEntry[] = []): void => {
-  const coordinateInfoLayer = {
-    layerPath: 'coordinate-info',
-    layerName: 'Coordinate Information',
-    eventListenerEnabled: false,
-    queryStatus: 'processed',
-    layerStatus: 'processed',
-    numOffeature: 1,
-    features,
-  } as unknown as TypeFeatureInfoResultSetEntry & { numOffeatures: number };
-
-  // Get layer array, minus the coordinate-info layer
-  const featureInfoState = getStoreDetailsState(mapId);
-  const currentLayerDataArray = [...featureInfoState.layerDataArray].filter((layer) => layer.layerPath !== 'coordinate-info');
-
-  // Add the new coordinate info layer
-  currentLayerDataArray.push(coordinateInfoLayer);
-
-  // Update the store directly
-  featureInfoState.actions.setLayerDataArray(currentLayerDataArray);
-};
-
-/**
- * Creates or deletes coordinate info based on the current enabled state.
- *
- * When coordinate info is enabled, fetches UTM zone, NTS sheet, and altitude
- * data from the configured service URLs and creates a coordinate info layer
- * entry in the store. When disabled, removes any existing coordinate info.
- *
- * @param mapId - The map identifier.
- * @param coordinates - The map mouse info containing click coordinates.
- * @param serviceUrls - Optional service URLs for UTM, NTS, and altitude lookups.
- */
-export const createOrDeleteStoreCoordinateInfo = (
-  mapId: string,
-  coordinates: TypeMapMouseInfo,
-  serviceUrls: TypeServiceUrls | undefined
-): void => {
-  // If the coordinate info is not enabled, clear any existing info
-  const state = getStoreDetailsState(mapId);
-  if (!state.coordinateInfoEnabled) {
-    deleteStoreDetailsFeatureInfo(mapId, 'coordinate-info');
-    return;
-  }
-
-  const [lng, lat] = coordinates.lonlat;
-
-  if (!serviceUrls) return;
-
-  const { utmZoneUrl, ntsSheetUrl, altitudeUrl } = serviceUrls;
-  Promise.allSettled([
-    fetch(`${utmZoneUrl}?bbox=${lng}%2C${lat}%2C${lng}%2C${lat}`).then((r) => r.json()) as Promise<TypeUtmZoneResponse>,
-    fetch(`${ntsSheetUrl}?bbox=${lng}%2C${lat}%2C${lng}%2C${lat}`).then((r) => r.json()) as Promise<TypeNtsResponse>,
-    fetch(`${altitudeUrl}?lat=${lat}&lon=${lng}`).then((r) => r.json()) as Promise<TypeAltitudeResponse>,
-  ])
-    .then(([utmResult, ntsResult, elevationResult]) => {
-      const utmData = utmResult.status === 'fulfilled' ? utmResult.value : undefined;
-      const ntsData = ntsResult.status === 'fulfilled' ? ntsResult.value : undefined;
-      const elevationData = elevationResult.status === 'fulfilled' ? elevationResult.value : undefined;
-
-      const utmIdentifier = utmData?.features[0].properties.identifier;
-      const [easting, northing] = utmIdentifier
-        ? Projection.transformToUTMNorthingEasting(coordinates.lonlat, utmIdentifier)
-        : [undefined, undefined];
-
-      // Create coordinate info layer entry
-      const coordinateFeature: TypeFeatureInfoEntry[] = [
-        {
-          uid: 'coordinate-info-feature',
-          fieldInfo: {
-            latitude: { value: lat.toFixed(6), fieldKey: 0, dataType: 'number', alias: 'Latitude' },
-            longitude: { value: lng.toFixed(6), fieldKey: 1, dataType: 'number', alias: 'Longitude' },
-            utmZone: { value: utmIdentifier, fieldKey: 2, dataType: 'string', alias: 'UTM Identifier' },
-            easting: { value: easting?.toFixed(2), fieldKey: 3, dataType: 'number', alias: 'Easting' },
-            northing: { value: northing?.toFixed(2), fieldKey: 4, dataType: 'number', alias: 'Northing' },
-            ntsMapsheet: {
-              value: ntsData?.features
-                .filter((f) => f.properties.name !== '')
-                .sort((f) => f.properties.scale)
-                .map((f) => {
-                  const scale = `${f.properties.scale / 1000}K`;
-                  return `${f.properties.identifier} - ${f.properties.name} - ${scale}`;
-                })
-                .join('\n'),
-              fieldKey: 5,
-              dataType: 'string',
-              alias: 'NTS Mapsheets',
-            },
-            elevation: {
-              value: elevationData?.altitude ? `${elevationData.altitude} m` : undefined,
-              fieldKey: 6,
-              dataType: 'string',
-              alias: 'Elevation',
-            },
-          },
-          extent: undefined,
-          geometry: undefined,
-          featureKey: 0,
-          geoviewLayerType: 'CSV',
-          supportZoomTo: true,
-          layerPath: 'coordinate-info',
-        },
-      ];
-
-      // Create it in the store
-      createStoreCoordinateInfoLayer(mapId, coordinateFeature);
-    })
-    .catch((error: unknown) => {
-      // Log
-      logger.logPromiseFailed('Failed to get coordinate info', error);
-    });
+export const updateStoreCoordinateInfoLayer = (mapId: string, features: TypeFeatureInfoEntry[], queryStatus: TypeQueryStatus): void => {
+  getStoreDetailsState(mapId).actions.updateCoordinateInfoLayer(features, queryStatus);
 };
 
 // #region STATE ADAPTORS - BATCH PROPAGATION
@@ -465,6 +398,22 @@ export const propagateStoreFeatureInfoBatch = (mapId: string, layerDataArray: Ty
  * @returns The initialized FeatureInfo State
  */
 export function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFeatureInfoState {
+  // Wait for the state to be ready and initialize the coordinate info layer
+  // GV There may be a better way to do this, but it's what we were doing at the time of this refactor
+  doUntil(() => {
+    // Once the details state is ready in the store
+    if (get().detailsState) {
+      // Updates the store coodinate info layer if it needs to be there
+      if (get().detailsState.coordinateInfoEnabled) updateStoreCoordinateInfoLayer(get().mapId, [], 'init');
+
+      // We did it
+      return true;
+    }
+
+    // Keep waiting
+    return false;
+  }, 1000);
+
   return {
     checkedFeatures: [],
     layerDataArray: [],
@@ -575,22 +524,47 @@ export function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFea
       },
 
       /**
-       * Toggles the coordinate info enabled state.
+       * Sets whether the coordinate info feature is enabled in the store.
        *
-       * When enabling, also triggers coordinate info creation if click coordinates exist.
+       * @param coordinateInfoEnabled - Whether coordinate info is enabled.
        */
-      toggleCoordinateInfoEnabled: () => {
-        const { coordinateInfoEnabled } = get().detailsState;
+      setCoordinateInfoEnabled: (coordinateInfoEnabled: boolean) => {
         set({
           detailsState: {
             ...get().detailsState,
-            coordinateInfoEnabled: !coordinateInfoEnabled,
+            coordinateInfoEnabled,
           },
         });
-        const { clickCoordinates } = get().mapState;
-        if (!coordinateInfoEnabled && clickCoordinates) {
-          createOrDeleteStoreCoordinateInfo(get().mapId, clickCoordinates, get().mapConfig?.serviceUrls);
-        }
+      },
+
+      /**
+       * Updates (creates/replaces) the coordinate-info synthetic layer entry.
+       *
+       * @param features - Optional feature entries to include in the coordinate info layer.
+       */
+      updateCoordinateInfoLayer: (features: TypeFeatureInfoEntry[], queryStatus: TypeQueryStatus) => {
+        const coordinateInfoLayer = {
+          layerPath: LAYER_PATH_COORDINATE_INFO,
+          queryStatus,
+          features,
+          featuresHaveGeometry: true,
+        } as TypeFeatureInfoResultSetEntry;
+
+        // Get layer array, minus the coordinate-info layer
+        const currentLayerDataArray = [...get().detailsState.layerDataArray].filter(
+          (layer) => layer.layerPath !== LAYER_PATH_COORDINATE_INFO
+        );
+
+        // Add the new coordinate info layer
+        currentLayerDataArray.push(coordinateInfoLayer);
+
+        // Update the store
+        set({
+          detailsState: {
+            ...get().detailsState,
+            layerDataArray: currentLayerDataArray,
+          },
+        });
       },
     },
   } as IFeatureInfoState;
@@ -630,44 +604,8 @@ export function initDetailsStateSubscriptions(store: GeoviewStoreType): void {
     }
   );
 
-  const clickCoordinates = store.subscribe(
-    (state) => state.mapState.clickCoordinates,
-    (coords) => {
-      if (!coords) return;
-      // Log
-      logger.logTraceCoreStoreSubscription('FEATURE-INFO STATE - clickCoordinates', coords);
-
-      createOrDeleteStoreCoordinateInfo(mapId, coords, store.getState().mapConfig?.serviceUrls);
-    }
-  );
-
-  const coordinateInfoEnabledSubscription = store.subscribe(
-    (state) => state.detailsState.coordinateInfoEnabled,
-    (enabled) => {
-      if (enabled) {
-        // Create empty coordinate info layer when enabled
-        createStoreCoordinateInfoLayer(mapId);
-      } else {
-        // Remove coordinate info layer when disabled
-        deleteStoreDetailsFeatureInfo(mapId, 'coordinate-info');
-      }
-    }
-  );
-
-  // Check initial state and create coordinate info layer if neeeded
-  if (store.getState().detailsState.coordinateInfoEnabled) {
-    doUntil(() => {
-      if (mapId) {
-        createStoreCoordinateInfoLayer(mapId);
-        return true;
-      }
-      return false;
-    }, 1000);
-  }
-
   // Add subscriptions to the list of subscriptions to be used by the state
-  subscriptions[mapId] = [];
-  subscriptions[mapId].push(...[layerDataArrayUpdateBatch, clickCoordinates, coordinateInfoEnabledSubscription]);
+  subscriptions[mapId] = [layerDataArrayUpdateBatch];
 }
 
 /**

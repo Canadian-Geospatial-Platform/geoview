@@ -1145,6 +1145,13 @@ export const getStoreMapPointerPosition = (mapId: string): TypeMapMouseInfo | un
 export const useStoreMapPointerPosition = (): TypeMapMouseInfo | undefined =>
   useStore(useGeoViewStore(), (state) => state.mapState.pointerPosition);
 
+/** Returns the current pointer position, or undefined if unavailable. */
+export const getStoreMapClickCoordinates = (mapId: string): TypeMapMouseInfo | undefined => getStoreMapState(mapId).clickCoordinates;
+
+/** Selects the click coordinates from the store. */
+export const useStoreMapClickCoordinates = (): TypeMapMouseInfo | undefined =>
+  useStore(useGeoViewStore(), (state) => state.mapState.clickCoordinates);
+
 /** Returns the current basemap options. */
 export const getStoreMapCurrentBasemapOptions = (mapId: string): TypeBasemapOptions => {
   return getStoreMapState(mapId).currentBasemapOptions;
@@ -1251,10 +1258,6 @@ export const useStoreMapCenterCoordinates = (): Coordinate => useStore(useGeoVie
 
 /** Selects the click marker state from the store. */
 export const useStoreMapClickMarker = (): TypeClickMarker | undefined => useStore(useGeoViewStore(), (state) => state.mapState.clickMarker);
-
-/** Selects the click coordinates from the store. */
-export const useStoreMapClickCoordinates = (): TypeMapMouseInfo | undefined =>
-  useStore(useGeoViewStore(), (state) => state.mapState.clickCoordinates);
 
 /** Selects the current map extent from the store. */
 export const useStoreMapExtent = (): Extent | undefined => useStore(useGeoViewStore(), (state) => state.mapState.mapExtent);

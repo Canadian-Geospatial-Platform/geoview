@@ -1,17 +1,16 @@
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme, useMediaQuery } from '@mui/material';
 import { getSxClasses } from './details-style';
 
 import { List, ListItem, Box, Typography, Switch, Tooltip } from '@/ui';
 import {
-  useStoreDetailsLayerDataArray,
+  useStoreDetailsLayerDataArrayFeature,
   useStoreDetailsCoordinateInfoEnabled,
-  toggleStoreDetailsCoordinateInfoEnabled,
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
-import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { logger } from '@/core/utils/logger';
+import { useMapController } from '@/core/controllers/map-controller';
 
 /** Coordinate data extracted from the feature info. */
 type CoordinateData = {
@@ -49,18 +48,38 @@ export function CoordinateInfoSwitch({ disabled }: CoordinateInfoSwitchProps): J
 
   const { t } = useTranslation();
   const theme = useTheme();
-  const mapId = useStoreGeoViewMapId();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('md'));
 
+  // Store
   const coordinateInfoEnabled = useStoreDetailsCoordinateInfoEnabled();
+  const mapController = useMapController();
+
+  // AbortController ref — aborts any in-flight coordinate info fetch on unmount or re-toggle
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   /**
    * Handles toggling the coordinate info switch.
    */
   const handleCoordinateInfoToggle = useCallback((): void => {
+    // Abort any in-flight request
+    abortControllerRef.current?.abort();
+
+    // Create a new AbortController for this toggle
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     // Toggle the state
-    toggleStoreDetailsCoordinateInfoEnabled(mapId);
-  }, [mapId]);
+    mapController.toggleCoordinateInfoEnabled(controller.signal);
+  }, [mapController]);
+
+  /**
+   * Aborts the previous coordinate info request on unmount.
+   */
+  useEffect(() => {
+    return (): void => {
+      abortControllerRef.current?.abort();
+    };
+  }, []);
 
   return (
     <Tooltip title={t('details.toggleCoordinateInfo')} placement="top">
@@ -87,11 +106,8 @@ export function CoordinateInfo(): JSX.Element {
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
-  const layerDataArray = useStoreDetailsLayerDataArray();
-
-  // Find the coordinate info layer
-  const coordinateInfoLayer = layerDataArray.find((layer) => layer.layerPath === 'coordinate-info');
-  const feature = coordinateInfoLayer?.features?.[0];
+  // Store
+  const feature = useStoreDetailsLayerDataArrayFeature();
 
   /**
    * Memoizes the parsed coordinate data from the feature.
