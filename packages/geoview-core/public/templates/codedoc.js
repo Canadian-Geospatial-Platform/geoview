@@ -193,14 +193,19 @@ function addRectangle(map, groupKey) {
 }
 
 function listenToLegendLayerSetChanges(elementId, mapViewer) {
-  mapViewer.layer.legendsLayerSet.onLayerSetUpdated((sender, payload) => {
+  const displayField = document.getElementById(elementId);
 
-    const { resultSet } = payload;
+  // Listen on the layer status changes
+  const allResults = {};
+  displayField.innerHTML = '';
+  mapViewer.layer.onLayerStatusChanged((sender, payload) => {
+    const layerPath = payload.config.layerPath;
+    const layerStatus = payload.status;
+    allResults[layerPath] = layerStatus;
+
     const outputHeader = '<table class="state"><tr class="state"><th class="state">Name</th><th class="state">Status</th></tr>';
-    const displayField = document.getElementById(elementId);
-    const output = Object.keys(resultSet).reduce((outputValue, layerPath) => {
-      const { layerStatus } = resultSet[layerPath];
-      return `${outputValue}<tr class="state"><td class="state">${layerPath}</td><td class="state">${layerStatus}</td></tr>`;
+    const output = Object.keys(allResults).reduce((outputValue, layerPath) => {
+      return `${outputValue}<tr class="state"><td class="state">${layerPath}</td><td class="state">${allResults[layerPath]}</td></tr>`;
     }, outputHeader);
     displayField.innerHTML = output && output !== outputHeader ? `${output}</table>` : '';
   });
@@ -225,7 +230,7 @@ async function onConfigChange(mapId, e) {
 
   // create map
   try {
-    const mapViewer = await cgpv.api.createMapFromConfig(mapId, e.target.value, 800);
+    const mapViewer = await cgpv.api.createMapFromConfigFast(mapId, e.target.value, 800);
     listenToLegendLayerSetChanges('sandboxMap-state', mapViewer);
   } catch (error) {
     console.error('Failed to create map from config', error);

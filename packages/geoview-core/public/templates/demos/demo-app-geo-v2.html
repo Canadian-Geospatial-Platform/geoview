@@ -106,7 +106,7 @@
         cgpv.api.hasMapViewer(mapId) && (await cgpv.api.deleteMapViewer(mapId, false));
 
         // Create the map
-        await cgpv.api.createMapFromConfig(mapId, configString);
+        await cgpv.api.createMapFromConfigFast(mapId, configString);
 
         // Add the geoview layer by geocore id
         cgpv.api.getMapViewer(mapId).layer.addGeoviewLayerByGeoCoreUUID(id);

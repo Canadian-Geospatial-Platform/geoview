@@ -514,7 +514,7 @@ export class MapConfigTester extends GVAbstractTester {
 
     // Wait for layer to load and data table to initialize
     test.addStep('Creating the map from config...');
-    const mapViewer = await this.getApi().createMapFromConfig(mapId, JSON.stringify(baseConfig), 500);
+    const mapViewer = await this.getApi().createMapFromConfigFast(mapId, JSON.stringify(baseConfig), 500);
 
     // Replace the map viewer in the tester with the new one created from config
     this.setMapViewer(mapViewer);
