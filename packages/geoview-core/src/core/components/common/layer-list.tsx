@@ -84,7 +84,8 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
   // Default disabled state
   let isDisabled = isLoading || layer?.isDisabled || layer?.numOffeatures === 0;
 
-  // If it's the layer coordinate info, it's never disabled, because it always at least have the clicked map coordinates information
+  // If it's the layer coordinate info, it's never disabled, because it always at least have the clicked map coordinates information.
+  // However, if "coordinateInfoEnabled" is true, and no map click has been done,the layer coord info will show zero-ed out coordinates in the UI.
   if (isLayerCoordinateInfo) isDisabled = false;
 
   /**
