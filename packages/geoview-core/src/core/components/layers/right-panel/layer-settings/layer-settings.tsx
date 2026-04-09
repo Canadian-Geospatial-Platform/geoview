@@ -9,18 +9,21 @@ import {
   useStoreLayerHasText,
   useStoreLayerTextVisibility,
   useStoreLayerStyleSettings,
+  useStoreLayerControls,
+  useStoreLayerHoverable,
+  useStoreLayerQueryable,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 import { getSxClasses } from '../layer-details-style';
 import { RasterFunctionPanel } from './raster-function-selector';
 import { MosaicRulePanel } from './mosaic-rule-selector';
 import { WmsStylePanel } from './wms-style-selector';
-import type { TypeLegendLayer } from '@/core/components/layers/types';
 import { useLayerController } from '@/core/controllers/layer-controller';
 import { logger } from '@/core/utils/logger';
 
 interface LayerSettingsPanelProps {
-  layerDetails: TypeLegendLayer;
+  /** The layer path to configure settings for. */
+  layerPath: string;
 }
 
 /**
@@ -30,9 +33,9 @@ interface LayerSettingsPanelProps {
  * interaction toggles) as inline collapsible sections. The header and
  * back navigation are handled by the parent.
  *
- * @param layerDetails - The legend layer to configure.
+ * @param layerPath - The layer path to configure.
  */
-export function LayerSettingsPanel({ layerDetails }: LayerSettingsPanelProps): JSX.Element {
+export function LayerSettingsPanel({ layerPath }: LayerSettingsPanelProps): JSX.Element {
   // Log
   logger.logTraceRender('components/layers/right-panel/layer-settings/layer-settings');
 
@@ -43,26 +46,31 @@ export function LayerSettingsPanel({ layerDetails }: LayerSettingsPanelProps): J
 
   // Store
   const layerController = useLayerController();
-  const hasText = useStoreLayerHasText(layerDetails.layerPath);
-  const textVisible = useStoreLayerTextVisibility(layerDetails.layerPath);
-  const availableSettings = useStoreLayerStyleSettings(layerDetails.layerPath);
+  const hasText = useStoreLayerHasText(layerPath);
+  const textVisible = useStoreLayerTextVisibility(layerPath);
+  const availableSettings = useStoreLayerStyleSettings(layerPath);
+  const layerControls = useStoreLayerControls(layerPath);
+  const hoverable = useStoreLayerHoverable(layerPath);
+  const queryable = useStoreLayerQueryable(layerPath);
 
   // Derived values
-  const isLayerHoverable = layerDetails.controls?.hover;
-  const isLayerQueryable = layerDetails.controls?.query;
+  const isLayerHoverable = layerControls?.hover;
+  const isLayerQueryable = layerControls?.query;
+
+  // TODO: CHECK - Change the use of hooks in those callbacks to use state getters instead?
 
   // Stable handlers for hover/query toggles
   const handleToggleHoverable = useCallback((): void => {
-    layerController.setLayerHoverable(layerDetails.layerPath, !layerDetails.hoverable!);
-  }, [layerDetails.layerPath, layerDetails.hoverable, layerController]);
+    layerController.setLayerHoverable(layerPath, !hoverable!);
+  }, [layerPath, hoverable, layerController]);
 
   const handleToggleQueryable = useCallback((): void => {
-    layerController.setLayerQueryable(layerDetails.layerPath, !layerDetails.queryable!);
-  }, [layerDetails.layerPath, layerDetails.queryable, layerController]);
+    layerController.setLayerQueryable(layerPath, !queryable!);
+  }, [layerPath, queryable, layerController]);
 
   const handleToggleText = useCallback((): void => {
-    layerController.setLayerTextVisibility(layerDetails.layerPath, !textVisible);
-  }, [layerDetails.layerPath, textVisible, layerController]);
+    layerController.setLayerTextVisibility(layerPath, !textVisible);
+  }, [layerPath, textVisible, layerController]);
 
   function renderToggleTextButton(): JSX.Element {
     return (
@@ -85,10 +93,10 @@ export function LayerSettingsPanel({ layerDetails }: LayerSettingsPanelProps): J
         <Typography sx={sxClasses.infoSectionTitle}>{t('layers.layerInfoInteraction')}</Typography>
         <Box sx={sxClasses.infoSectionContent}>
           {isLayerHoverable && (
-            <Switch size="small" onChange={handleToggleHoverable} label={t('layers.layerHoverable')} checked={layerDetails.hoverable} />
+            <Switch size="small" onChange={handleToggleHoverable} label={t('layers.layerHoverable')} checked={hoverable} />
           )}
           {isLayerQueryable && (
-            <Switch size="small" onChange={handleToggleQueryable} label={t('layers.layerQueryable')} checked={layerDetails.queryable} />
+            <Switch size="small" onChange={handleToggleQueryable} label={t('layers.layerQueryable')} checked={queryable} />
           )}
           {hasText && renderToggleTextButton()}
         </Box>
@@ -100,9 +108,9 @@ export function LayerSettingsPanel({ layerDetails }: LayerSettingsPanelProps): J
     <Box>
       <Divider sx={{ height: 'auto', marginTop: '10px', marginBottom: '10px' }} variant="middle" />
 
-      {availableSettings?.includes('rasterFunction') && <RasterFunctionPanel layerDetails={layerDetails} />}
-      {availableSettings?.includes('mosaicRule') && <MosaicRulePanel layerDetails={layerDetails} />}
-      {availableSettings?.includes('wmsStyles') && <WmsStylePanel layerDetails={layerDetails} />}
+      {availableSettings?.includes('rasterFunction') && <RasterFunctionPanel layerPath={layerPath} />}
+      {availableSettings?.includes('mosaicRule') && <MosaicRulePanel layerPath={layerPath} />}
+      {availableSettings?.includes('wmsStyles') && <WmsStylePanel layerPath={layerPath} />}
 
       {renderInteractionSection()}
     </Box>
