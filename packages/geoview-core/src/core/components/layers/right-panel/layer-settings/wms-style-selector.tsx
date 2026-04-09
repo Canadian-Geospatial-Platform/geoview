@@ -8,7 +8,6 @@ import { ImageNotSupportedIcon, PaletteIcon, ExpandMoreIcon, ExpandLessIcon } fr
 
 import { getSxClasses } from './layer-settings-style';
 import { useStoreLayerWmsStyle, useStoreLayerWmsStyles } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import type { TypeLegendLayer } from '@/core/components/layers/types';
 import type { TypeMetadataWMSCapabilityLayerStyle } from '@/api/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';
 import { useLayerController } from '@/core/controllers/layer-controller';
@@ -20,7 +19,8 @@ interface WmsStyleItemProps {
 }
 
 interface WmsStylePanelProps {
-  layerDetails: TypeLegendLayer;
+  /** The layer path to configure WMS styles for. */
+  layerPath: string;
 }
 
 /**
@@ -127,10 +127,10 @@ function WmsStyleItem({ style, isSelected, onSelect }: WmsStyleItemProps): JSX.E
  * Displays available styles as cards within a collapsible section,
  * consistent with the raster function panel pattern.
  *
- * @param layerDetails - The legend layer to configure WMS styles for.
+ * @param layerPath - The layer path to configure WMS styles for.
  * @returns A JSX element representing the WMS style panel.
  */
-export function WmsStylePanel({ layerDetails }: WmsStylePanelProps): JSX.Element {
+export function WmsStylePanel({ layerPath }: WmsStylePanelProps): JSX.Element {
   // Log
   logger.logTraceRender('components/layers/right-panel/layer-settings/wms-style-selector > WmsStylePanel');
 
@@ -140,8 +140,8 @@ export function WmsStylePanel({ layerDetails }: WmsStylePanelProps): JSX.Element
   const sxClasses = getSxClasses(theme);
 
   // Store hooks
-  const currentWmsStyle = useStoreLayerWmsStyle(layerDetails.layerPath);
-  const storeWmsStyles = useStoreLayerWmsStyles(layerDetails.layerPath);
+  const currentWmsStyle = useStoreLayerWmsStyle(layerPath);
+  const storeWmsStyles = useStoreLayerWmsStyles(layerPath);
   const memoWmsStyleArray = useMemo(() => storeWmsStyles || [], [storeWmsStyles]);
   const layerController = useLayerController();
 
@@ -150,10 +150,9 @@ export function WmsStylePanel({ layerDetails }: WmsStylePanelProps): JSX.Element
 
   const handleSelect = useCallback(
     (wmsStyleName: string): void => {
-      // TODO: REFACTOR - This setting of styles should be done through a controller, because it affects the domain directly.
-      layerController.setLayerWmsStyle(layerDetails.layerPath, wmsStyleName);
+      layerController.setLayerWmsStyle(layerPath, wmsStyleName);
     },
-    [layerDetails.layerPath, layerController]
+    [layerPath, layerController]
   );
 
   const handleToggle = useCallback((): void => {

@@ -1,4 +1,4 @@
-import { Fragment, memo, useCallback, useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { delay } from '@/core/utils/utilities';
@@ -27,14 +27,25 @@ import {
 import { ArrowBackIcon } from '@/ui/icons';
 
 import { useUIController } from '@/core/controllers/ui-controller';
-import type { TypeLegendLayer, TypeLegendItem } from '@/core/components/layers/types';
+import type { TypeLegendItem } from '@/core/components/layers/types';
 import { getSxClasses } from './layer-details-style';
 import {
-  useStoreLayerByPath,
+  getStoreLayerLegendLayerByPath,
   useStoreLayerHighlightedLayer,
   useStoreLayerBounds,
   useStoreLayerHasText,
   useStoreLayerStyleSettings,
+  useStoreLayerAllChildrenVisible,
+  useStoreLayerChildPaths,
+  useStoreLayerControls,
+  useStoreLayerStatus,
+  useStoreLayerItems,
+  useStoreLayerStyleConfig,
+  useStoreLayerCanToggle,
+  useStoreLayerName,
+  useStoreLayerSchemaTag,
+  useStoreLayerIcons,
+  useStoreLayerAttribution,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useStoreUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import {
@@ -77,11 +88,16 @@ interface LayerDetailsProps {
 }
 
 interface SubLayerProps {
-  layer: TypeLegendLayer;
+  layerPath: string;
 }
 
-// Memoized Sublayer Component
-const Sublayer = memo(({ layer }: SubLayerProps): JSX.Element => {
+/**
+ * Renders a single sublayer item with visibility toggle.
+ *
+ * Memoized to avoid re-rendering all sublayer items when only one changes.
+ * Self-recursive: renders its own children if present.
+ */
+const Sublayer = memo(function Sublayer({ layerPath }: SubLayerProps): JSX.Element {
   // Log
   logger.logTraceRender('components/layers/right-panel/Sublayer');
 
@@ -90,33 +106,46 @@ const Sublayer = memo(({ layer }: SubLayerProps): JSX.Element => {
   const { t } = useTranslation<string>();
 
   // Hooks
-  const layerHidden = useStoreMapIsLayerHiddenOnMap(layer.layerPath);
-  const parentHidden = useStoreMapIsParentLayerHiddenOnMap(layer.layerPath);
-  const layerVisible = useStoreMapLayerVisibility(layer.layerPath);
+  const layerName = useStoreLayerName(layerPath);
+  const childPaths = useStoreLayerChildPaths(layerPath);
+  const layerHidden = useStoreMapIsLayerHiddenOnMap(layerPath);
+  const parentHidden = useStoreMapIsParentLayerHiddenOnMap(layerPath);
+  const layerVisible = useStoreMapLayerVisibility(layerPath);
   const mapController = useMapController();
 
   // Return the ui
   return (
-    <ListItem>
-      <IconButton
-        color="primary"
-        role="checkbox"
-        onClick={() => mapController.setOrToggleMapLayerVisibility(layer.layerPath)}
-        disabled={parentHidden}
-        aria-checked={layerVisible === true}
-        aria-label={layerVisible ? t('layers.hideLayer', { name: layer.layerName }) : t('layers.showLayer', { name: layer.layerName })}
-        tooltipPlacement="left"
-      >
-        {layerVisible ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
-      </IconButton>
-      <LayerIcon layerPath={layer.layerPath} />
-      <Box
-        component="span"
-        sx={{ ...sxClasses.tableIconLabel, ...(layerHidden && { color: theme.palette.grey[600], fontStyle: 'italic' }) }}
-      >
-        {layer.layerName}
-      </Box>
-    </ListItem>
+    <>
+      <ListItem>
+        <IconButton
+          color="primary"
+          role="checkbox"
+          onClick={() => mapController.setOrToggleMapLayerVisibility(layerPath)}
+          disabled={parentHidden}
+          aria-checked={layerVisible === true}
+          aria-label={layerVisible ? t('layers.hideLayer', { name: layerName }) : t('layers.showLayer', { name: layerName })}
+          tooltipPlacement="left"
+        >
+          {layerVisible ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
+        </IconButton>
+        <LayerIcon layerPath={layerPath} />
+        <Box
+          component="span"
+          sx={{ ...sxClasses.tableIconLabel, ...(layerHidden && { color: theme.palette.grey[600], fontStyle: 'italic' }) }}
+        >
+          {layerName}
+        </Box>
+      </ListItem>
+      {childPaths && (
+        <Box sx={{ paddingLeft: '30px', width: '100%' }}>
+          <List>
+            {childPaths.map((childPath) => (
+              <Sublayer key={childPath} layerPath={childPath} />
+            ))}
+          </List>
+        </Box>
+      )}
+    </>
   );
 });
 
@@ -134,7 +163,6 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
   const sxClasses = getSxClasses(theme);
   const hiddenStyle = { color: theme.palette.grey[600], fontStyle: 'italic' };
 
-  const [allSublayersVisible, setAllSublayersVisible] = useState(true);
   const [contentVisible, setContentVisible] = useState(true);
   const [activeView, setActiveView] = useState<'details' | 'settings' | 'info'>('details');
 
@@ -142,9 +170,19 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
   const settingsButtonRef = useRef<HTMLButtonElement>(null);
   const infoButtonRef = useRef<HTMLButtonElement>(null);
 
-  // get store state
+  // get store state — individual hooks for precise reactivity
   const mapId = useStoreGeoViewMapId();
-  const layerDetails = useStoreLayerByPath(layerPath);
+  const layerName = useStoreLayerName(layerPath);
+  const layerControls = useStoreLayerControls(layerPath);
+  const layerStatus = useStoreLayerStatus(layerPath);
+  const layerItems = useStoreLayerItems(layerPath);
+  const layerStyleConfig = useStoreLayerStyleConfig(layerPath);
+  const layerCanToggle = useStoreLayerCanToggle(layerPath);
+  const layerSchemaTag = useStoreLayerSchemaTag(layerPath);
+  const layerIcons = useStoreLayerIcons(layerPath);
+  const layerAttribution = useStoreLayerAttribution(layerPath);
+  const layerChildPaths = useStoreLayerChildPaths(layerPath);
+  const allSublayersVisible = useStoreLayerAllChildrenVisible(layerPath);
   const highlightedLayer = useStoreLayerHighlightedLayer();
   const hasText = useStoreLayerHasText(layerPath);
   const visibleLayers = useStoreMapVisibleLayers();
@@ -166,10 +204,10 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
   const navigateToTimeSlider = useNavigateToTab('time-slider', setStoreTimeSliderSelectedLayerPath);
 
   // Is highlight button disabled?
-  const isLayerHighlightCapable = layerDetails?.controls?.highlight;
+  const isLayerHighlightCapable = layerControls?.highlight;
 
   // Is zoom to extent button disabled?
-  const isLayerZoomToExtentCapable = layerDetails?.controls?.zoom;
+  const isLayerZoomToExtentCapable = layerControls?.zoom;
 
   // Generate unique table details button ID
   const tableDetailsButtonId = `table-details-${containerType}-${mapId}`;
@@ -180,31 +218,6 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
     logger.logTraceUseEffect('LAYER DETAILS - reset activeView on layer change', layerPath);
     setActiveView('details');
   }, [layerPath]);
-
-  /**
-   * Recursively checks if all children of a layer are visible.
-   * @param legendLayer - The legend layer to check
-   * @param curVisibleLayers - The visible layers array
-   * @returns Whether the children are visible
-   */
-  const legendLayersChildrenVisible = useCallback((legendLayer: TypeLegendLayer, curVisibleLayers: string[]): boolean => {
-    // Check if any children are not visible
-    if (legendLayer.children.find((child) => !curVisibleLayers.includes(child.layerPath))) return false;
-
-    // Check if any of the children have a child that is not visible
-    const invisibleChildren = legendLayer.children.find((child) => {
-      return child.children?.length && !legendLayersChildrenVisible(child, curVisibleLayers);
-    });
-
-    if (invisibleChildren) return false;
-    return true;
-  }, []);
-
-  useEffect(() => {
-    if (!layerDetails) return;
-    const allChildrenVisible = legendLayersChildrenVisible(layerDetails, visibleLayers);
-    if (allChildrenVisible !== allSublayersVisible) setAllSublayersVisible(allChildrenVisible);
-  }, [allSublayersVisible, layerDetails, layerDetails?.children, legendLayersChildrenVisible, visibleLayers]);
 
   const handleRefreshLayer = (): void => {
     layerController.resetLayer(layerPath).catch((error: unknown) => {
@@ -221,11 +234,10 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
   };
 
   const handleOpenTable = (): void => {
-    if (!layerDetails) return;
     // trigger the fetching of the features when not available OR when layer status is in error
     if (
       !layersData.filter((layers) => layers.layerPath === layerPath && !!layers?.features?.length).length ||
-      layerDetails.layerStatus === LAYER_STATUS.ERROR
+      layerStatus === LAYER_STATUS.ERROR
     ) {
       layerSetController.triggerGetAllFeatureInfo(layerPath).catch((error: unknown) => {
         // Log
@@ -294,46 +306,37 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
   }, []);
 
   /**
-   * Recursively sets child layer visibility.
-   * @param legendLayer - The legend layer to set the child visibility of
-   * @param newVisibility - The new visibility to set
+   * Sets visibility for all children of the layer.
    */
-  const setVisibilityForAllSublayers = useCallback(
-    (legendLayer: TypeLegendLayer, newVisibility: boolean): void => {
+  const handleToggleAllVisibility = useCallback((): void => {
+    // Use the non-reactive getter to walk the tree — only needed at click time
+    const layer = getStoreLayerLegendLayerByPath(mapId, layerPath);
+    if (!layer) return;
+
+    const setRecursive = (legendLayer: typeof layer, newVisibility: boolean): void => {
       legendLayer.children.forEach((child) => {
         if (newVisibility) {
           if (!visibleLayers.includes(child.layerPath)) mapController.setOrToggleMapLayerVisibility(child.layerPath, true);
         } else if (visibleLayers.includes(child.layerPath)) mapController.setOrToggleMapLayerVisibility(child.layerPath, false);
-        if (child.children.length) setVisibilityForAllSublayers(child, newVisibility);
+        if (child.children.length) setRecursive(child, newVisibility);
       });
-    },
-    [mapController, visibleLayers]
-  );
+    };
+    setRecursive(layer, !allSublayersVisible);
+  }, [allSublayersVisible, mapId, layerPath, mapController, visibleLayers]);
 
-  /**
-   * Sets visibility for all children of the layer.
-   */
-  const handleToggleAllVisibility = useCallback((): void => {
-    if (!layerDetails) return;
-    setVisibilityForAllSublayers(layerDetails, !allSublayersVisible);
-  }, [allSublayersVisible, layerDetails, setVisibilityForAllSublayers]);
-
-  const allItemsChecked = (): boolean => {
-    if (!layerDetails) return false;
-    return layerDetails.items.every((i) => i.isVisible !== false);
-  };
+  const allItemsChecked = !!(layerItems && layerItems.every((i) => i.isVisible !== false));
 
   const renderItemCheckbox = (item: TypeLegendItem): JSX.Element | null => {
-    if (!layerDetails || !layerDetails.styleConfig) return null;
+    if (!layerStyleConfig) return null;
 
     // No checkbox for simple style layers
-    if (layerDetails.styleConfig[item.geometryType]?.type === 'simple') return null;
+    if (layerStyleConfig[item.geometryType]?.type === 'simple') return null;
 
     // GV: Some esri layer has uniqueValue renderer but there is no field defined in their metadata (i.e. e2424b6c-db0c-4996-9bc0-2ca2e6714d71).
     // For these layers, we need to disable checkboxes
-    if (layerDetails.styleConfig[item.geometryType]?.fields[0] === undefined) return null;
+    if (layerStyleConfig[item.geometryType]?.fields[0] === undefined) return null;
 
-    if (!layerDetails.canToggle) {
+    if (!layerCanToggle) {
       return (
         <IconButton disabled role="checkbox" aria-label={t('layers.visibilityIsAlways')} aria-checked={false} tooltipPlacement="left">
           <CheckBoxIcon color="disabled" />
@@ -357,7 +360,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
   };
 
   const renderHeaderCheckbox = (): JSX.Element => {
-    if (!layerDetails?.canToggle) {
+    if (!layerCanToggle) {
       return (
         <IconButton disabled role="checkbox" aria-label={t('layers.visibilityIsAlways')} aria-checked={false} tooltipPlacement="left">
           <CheckBoxIcon color="disabled" />
@@ -369,13 +372,13 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
       <IconButton
         color="primary"
         role="checkbox"
-        aria-label={allItemsChecked() ? t('layers.hideAllLayers') : t('layers.showAllLayers')}
-        aria-checked={allItemsChecked() === true}
+        aria-label={allItemsChecked ? t('layers.hideAllLayers') : t('layers.showAllLayers')}
+        aria-checked={allItemsChecked}
         tooltipPlacement="left"
-        onClick={() => layerController.setAllItemsVisibilityAndForget(layerPath, !allItemsChecked())}
+        onClick={() => layerController.setAllItemsVisibilityAndForget(layerPath, !allItemsChecked)}
         disabled={layerHidden}
       >
-        {allItemsChecked() ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
+        {allItemsChecked ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
       </IconButton>
     );
   };
@@ -391,11 +394,11 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
         justifyContent="left"
         justifyItems="stretch"
       >
-        {layerDetails?.items.map((item) => (
+        {layerItems?.map((item) => (
           <Grid
             container
             direction="row"
-            key={`${item.name}/${layerDetails.items.indexOf(item)}`}
+            key={`${layerPath}/${item.name}`}
             alignItems="center"
             justifyItems="stretch"
             sx={{ display: 'flex', flexWrap: 'nowrap', marginBottom: '5px' }}
@@ -417,21 +420,8 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
     );
   };
 
-  const renderSubLayers = (startLayer: TypeLegendLayer): JSX.Element => {
-    return (
-      <List>
-        {startLayer.children.map((layer) => (
-          <Fragment key={layer.layerId}>
-            <Sublayer layer={layer} />
-            {layer.children.length > 0 && <Box sx={{ paddingLeft: '30px', width: '100%' }}>{renderSubLayers(layer)}</Box>}
-          </Fragment>
-        ))}
-      </List>
-    );
-  };
-
   const renderDetailsButton = (): JSX.Element => {
-    const isDisabled = layerDetails?.controls?.table === false || layerHidden || parentHidden;
+    const isDisabled = layerControls?.table === false || layerHidden || parentHidden;
 
     return (
       <IconButton
@@ -499,7 +489,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
 
   const renderDeleteButton = (): JSX.Element | null => {
     // Only render delete button if layer is removable (controls.remove must be explicitly true)
-    const isRemovable = layerDetails?.controls?.remove ?? false;
+    const isRemovable = layerControls?.remove ?? false;
     if (!isRemovable) return null;
 
     return (
@@ -513,7 +503,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
   };
 
   const renderSettingsButton = (): JSX.Element | null => {
-    const hasInteraction = layerDetails?.controls?.hover || layerDetails?.controls?.query;
+    const hasInteraction = layerControls?.hover || layerControls?.query;
     if (!availableSettings?.length && !hasInteraction && !hasText) return null;
 
     if (activeView === 'settings') {
@@ -593,34 +583,32 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
     );
   };
 
-  const getSubTitle = (): string | null => {
-    if (!layerDetails) return null;
+  const subTitle = ((): string | null => {
     if (parentHidden) return t('layers.parentHidden');
     if (!layerVisible) return t('layers.hidden');
-    if (layerDetails.children.length > 0) {
-      return t('legend.subLayersCount').replace('{count}', layerDetails.children.length.toString());
+    if (layerChildPaths && layerChildPaths.length > 0) {
+      return t('legend.subLayersCount').replace('{count}', layerChildPaths.length.toString());
     }
-    const count = layerDetails.items.filter((d) => d.isVisible !== false).length;
-    const totalCount = layerDetails.items.length;
+    const count = layerItems?.filter((d) => d.isVisible !== false).length ?? 0;
+    const totalCount = layerItems?.length ?? 0;
 
     if (totalCount <= 1) {
       return null;
     }
     return t('legend.itemsCount').replace('{count}', count.toString()).replace('{totalCount}', totalCount.toString());
-  };
+  })();
 
   const renderWMSImage = (): JSX.Element | null => {
-    if (!layerDetails) return null;
     if (
-      layerDetails.schemaTag === CONST_LAYER_TYPES.WMS &&
-      layerDetails.icons.length &&
-      layerDetails.icons[0].iconImage &&
-      layerDetails.icons[0].iconImage !== 'no data'
+      layerSchemaTag === CONST_LAYER_TYPES.WMS &&
+      layerIcons?.length &&
+      layerIcons[0].iconImage &&
+      layerIcons[0].iconImage !== 'no data'
     ) {
       return (
         <Grid sx={sxClasses.itemsGrid}>
           <Grid container pt={6} pb={6}>
-            <Box component="img" alt="" src={layerDetails.icons[0].iconImage} sx={sxClasses.wmsImage} />
+            <Box component="img" alt="" src={layerIcons[0].iconImage} sx={sxClasses.wmsImage} />
           </Grid>
         </Grid>
       );
@@ -628,8 +616,6 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
 
     return null;
   };
-
-  if (!layerDetails) return null;
 
   // TODO: WCAG Issue #3116 - Consider using CSS rather than Divider for cleaner HTML structure
   // Render
@@ -646,25 +632,19 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
         }}
       >
         <Box sx={{ textAlign: 'left', flex: 1, minWidth: 0, [theme.breakpoints.down('sm')]: { display: 'none' } }}>
-          <Typography sx={{ ...sxClasses.categoryTitle, ...(layerHidden && hiddenStyle) }} title={layerDetails.layerName}>
-            {layerDetails.layerName}
+          <Typography sx={{ ...sxClasses.categoryTitle, ...(layerHidden && hiddenStyle) }} title={layerName}>
+            {layerName}
           </Typography>
-          {(() => {
-            const subTitle = getSubTitle();
-            return (
-              subTitle && (
-                <Typography
-                  sx={{
-                    fontSize: theme.palette.geoViewFontSize.sm,
-                    ...(layerHidden && hiddenStyle),
-                  }}
-                >
-                  {' '}
-                  {subTitle}{' '}
-                </Typography>
-              )
-            );
-          })()}
+          {subTitle && (
+            <Typography
+              sx={{
+                fontSize: theme.palette.geoViewFontSize.sm,
+                ...(layerHidden && hiddenStyle),
+              }}
+            >
+              {subTitle}
+            </Typography>
+          )}
         </Box>
         {renderSettingsButton()}
         {renderInfoButton()}
@@ -677,8 +657,9 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
             <>
               {renderLayerButtons()}
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap-reverse' }}>
-                {layerDetails.items.length > 1 &&
-                  layerDetails.items.some((item) => layerDetails.styleConfig?.[item.geometryType]?.fields[0] !== undefined) && (
+                {layerItems &&
+                  layerItems.length > 1 &&
+                  layerItems.some((item) => layerStyleConfig?.[item.geometryType]?.fields[0] !== undefined) && (
                     <Grid container direction="row" alignItems="center" justifyItems="stretch">
                       <Grid size={{ xs: 'auto' }}>{renderHeaderCheckbox()}</Grid>
                       <Grid size={{ xs: 'auto' }}>
@@ -688,7 +669,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
                       </Grid>
                     </Grid>
                   )}
-                {layerDetails.children.length > 0 && (
+                {layerChildPaths && layerChildPaths.length > 0 && (
                   <Grid container direction="row" alignItems="center" justifyItems="stretch">
                     <Grid size={{ xs: 'auto' }}>
                       <IconButton
@@ -710,17 +691,23 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
                     </Grid>
                   </Grid>
                 )}
-                {layerDetails.controls?.opacity !== false && <LayerOpacityControl layerDetails={layerDetails} />}
+                {layerControls?.opacity !== false && <LayerOpacityControl layerPath={layerPath} />}
               </Box>
               <Divider sx={{ height: 'auto', marginTop: '10px', marginBottom: '10px' }} variant="middle" />
               {renderWMSImage()}
               <Box>
-                {layerDetails.items?.length > 0 && renderItems()}
-                {layerDetails.children.length > 0 && renderSubLayers(layerDetails)}
+                {layerItems && layerItems.length > 0 && renderItems()}
+                {layerChildPaths && layerChildPaths.length > 0 && (
+                  <List>
+                    {layerChildPaths.map((childPath) => (
+                      <Sublayer key={childPath} layerPath={childPath} />
+                    ))}
+                  </List>
+                )}
               </Box>
               <Divider sx={{ height: 'auto', marginTop: '10px', marginBottom: '10px' }} variant="middle" />
-              {layerDetails.layerAttribution &&
-                layerDetails.layerAttribution.map((attribution) => {
+              {layerAttribution &&
+                layerAttribution.map((attribution) => {
                   if (attribution) {
                     return (
                       <Typography
@@ -740,8 +727,8 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
                 })}
             </>
           )}
-          {activeView === 'settings' && <LayerSettingsPanel layerDetails={layerDetails} />}
-          {activeView === 'info' && <LayerInfoPanel layerDetails={layerDetails} />}
+          {activeView === 'settings' && <LayerSettingsPanel layerPath={layerPath} />}
+          {activeView === 'info' && <LayerInfoPanel layerPath={layerPath} />}
         </Box>
       </Fade>
     </Paper>
