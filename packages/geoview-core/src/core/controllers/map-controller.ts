@@ -886,7 +886,8 @@ export class MapController extends AbstractMapViewerController {
    * Toggles the coordinate info display on or off.
    *
    * When toggled on, clicking the map will display coordinate information such as UTM zone, NTS sheet, and altitude.
-   * When toggled off, any existing coordinate info will be removed from the store and map.
+   * When toggled off, any existing details coordinate info is removed from the details store.
+   * The clicked coordinates themselves remain in the map store.
    *
    * @param abortSignal - Optional AbortSignal to cancel the fetch requests if needed.
    */

@@ -24,7 +24,7 @@ import type { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE, TIMEOUT, LIGHTBOX_SELECTORS } from '@/core/utils/constant';
 
 /** SxProps for the main row root container. */
-// TODO: To prevent the right panel toolbar to be hidden on first click og group layer. There is still a jump on first selection
+// TODO: To prevent the right panel toolbar to be hidden on first click of group layer. There is still a jump on first selection
 const MAIN_ROW_SX: SxProps = {
   flexGrow: 1,
   overflow: 'hidden',
