@@ -1070,7 +1070,7 @@
           const configArea = document.getElementById('configGeoview');
           // Use centralized config parser
           const configText = configArea.value.replace(getSingleQuoteRegex(), '"');
-          const mapViewer = await cgpv.api.createMapFromConfig('map1', configText);
+          const mapViewer = await cgpv.api.createMapFromConfigFast('map1', configText);
           listenToLegendLayerSetChanges('sandboxMap-state', mapViewer);
         } catch (error) {
           console.error('Failed to create map from config', error);

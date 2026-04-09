@@ -224,7 +224,7 @@ function addLayers(layers) {
                 await removeMap('Map1');
 
                 // Create map from config
-                await cgpv.api.createMapFromConfig('Map1', JSON.stringify(mapConfig), 800).then((mapViewer) => {
+                await cgpv.api.createMapFromConfigFast('Map1', JSON.stringify(mapConfig), 800).then((mapViewer) => {
                   if (langSwitch) {
                       mapViewer.notifications.showWarning('Map language changed', []);
                       mapViewer.notifications.addNotificationWarning(`MapViewer: Map language changed to ${lang}`);
@@ -429,7 +429,7 @@ cgpv.api.getMapViewer('Map1').replaceMapConfigLayerNames(pairs, mapConfig, true)
           await removeMap('Map1');
 
           // Create map from config
-          await cgpv.api.createMapFromConfig('Map1', JSON.stringify(mapConfig), 800).then((mapViewer) => {
+          await cgpv.api.createMapFromConfigFast('Map1', JSON.stringify(mapConfig), 800).then((mapViewer) => {
             if (langSwitch) {
               mapViewer.notifications.showWarning('Map language changed', []);
               mapViewer.notifications.addNotificationWarning(`MapViewer: Map language changed to ${lang}`);
