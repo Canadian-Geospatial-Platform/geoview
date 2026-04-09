@@ -952,7 +952,7 @@ export class MapController extends AbstractMapViewerController {
       });
 
       // Start a timer to warn the user if fetches take too long
-      const slowWarningTimer = doTimeout(TIMEOUT.delayBeforeShwoingSlowCoordinateInfoWarning);
+      const slowWarningTimer = doTimeout(TIMEOUT.delayBeforeShowingSlowCoordinateInfoWarning);
       slowWarningTimer.promise
         .then((timeoutResult) => {
           // If the signal has been aborted, it means we don't care about the fetch result anymore, so ignore

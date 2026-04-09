@@ -694,7 +694,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
                       <IconButton
                         role="checkbox"
                         aria-label={allSublayersVisible ? t('layers.hideAllLayers') : t('layers.showAllLayers')}
-                        aria-checked={allSublayersVisible === true}
+                        aria-checked={allSublayersVisible}
                         tooltipPlacement="left"
                         color="primary"
                         onClick={handleToggleAllVisibility}
