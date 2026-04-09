@@ -551,7 +551,7 @@ export class LayerController extends AbstractMapViewerController {
    *
    * @param layerPath - The layer path to the layer's configuration.
    * @param timeout - Optionally indicate the timeout after which time to abandon the promise
-   * @param checkFrequency - Optionally indicate the frequency at which to check for the condition on the layerabstract
+   * @param checkFrequency - Optionally indicate the frequency at which to check for the condition on the layer
    * @returns A promise that resolves to an OpenLayer layer associated to the layer path.
    */
   getOLLayerAsync(layerPath: string, timeout?: number, checkFrequency?: number): Promise<BaseLayer> {

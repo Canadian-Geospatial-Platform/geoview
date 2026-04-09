@@ -339,19 +339,10 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
       },
 
       /**
-       * Updates the deletion progress of a specific layer in the store.
-       * This function immutably updates the `legendLayers` array in the
-       * `layerState` by setting or removing the `deletionProgressPercentage`
-       * property for the layer identified by `layerPath`.
+       * Sets the deletion start time for the layer identified by the given layer path.
        *
-       * @param layerPath - The unique path or identifier of the layer to update.
-       * @param progression - The deletion progress percentage (0–100).
-       *   - If a number is provided, sets `deletionProgressPercentage` to that value.
-       *   - If `undefined`, removes the `deletionProgressPercentage` property from the layer.
-       * @remarks
-       * This function uses `utilUpdateLayerByPath` to find the
-       * target layer and update it immutably, ensuring that the rest of the
-       * `legendLayers` array remains unchanged.
+       * @param layerPath - The unique path or identifier of the layer to update
+       * @param startTime - The deletion start time timestamp, or undefined to remove it
        */
       setLayerDeletionStartTime: (layerPath: string, startTime: number | undefined): void => {
         set((state) => {

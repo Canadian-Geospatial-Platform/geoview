@@ -839,7 +839,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
       }
       selectedLayerPath={selectedLayerPath}
       layerList={memoLayersList}
-      onLayerListClicked={(layerEntry) => handleLayerChange(layerEntry)}
+      onLayerListClicked={handleLayerChange}
       onRightPanelClosed={handleRightPanelClosed}
       onRightPanelVisibilityChanged={handleRightPanelVisibilityChanged}
       guideContentIds={[TABS.DETAILS]}
