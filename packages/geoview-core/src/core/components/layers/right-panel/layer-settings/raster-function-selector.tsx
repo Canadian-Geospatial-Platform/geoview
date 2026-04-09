@@ -8,7 +8,6 @@ import { ImageNotSupportedIcon, FunctionsIcon, ExpandMoreIcon, ExpandLessIcon } 
 
 import { getSxClasses } from './layer-settings-style';
 import { useStoreLayerRasterFunctionInfos, useStoreLayerRasterFunction } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import type { TypeLegendLayer } from '@/core/components/layers/types';
 import type { TypeMetadataEsriRasterFunctionInfos } from '@/api/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';
 import { useLayerController } from '@/core/controllers/layer-controller';
@@ -21,7 +20,8 @@ interface RasterFunctionItemProps {
 }
 
 interface RasterFunctionPanelProps {
-  layerDetails: TypeLegendLayer;
+  /** The layer path to configure raster functions for. */
+  layerPath: string;
 }
 
 /** Stable empty array reference to avoid re-renders when raster function infos are undefined. */
@@ -133,10 +133,10 @@ function RasterFunctionItem({ info, isSelected, previewPromise, onSelect }: Rast
  * Replaces the previous Menu-based approach with cards displayed
  * directly within the settings panel.
  *
- * @param layerDetails - The legend layer to configure raster functions for.
+ * @param layerPath - The layer path to configure raster functions for.
  * @returns A JSX element representing the RasterFunctionPanel component.
  */
-export function RasterFunctionPanel({ layerDetails }: RasterFunctionPanelProps): JSX.Element {
+export function RasterFunctionPanel({ layerPath }: RasterFunctionPanelProps): JSX.Element {
   // Log
   logger.logTraceRender('components/layers/right-panel/layer-settings/raster-function-selector > RasterFunctionPanel');
 
@@ -146,8 +146,8 @@ export function RasterFunctionPanel({ layerDetails }: RasterFunctionPanelProps):
   const sxClasses = getSxClasses(theme);
 
   // Store hooks
-  const rasterFunctionInfos = useStoreLayerRasterFunctionInfos(layerDetails.layerPath) ?? EMPTY_RASTER_FUNCTION_INFOS;
-  const currentRasterFunction = useStoreLayerRasterFunction(layerDetails.layerPath);
+  const rasterFunctionInfos = useStoreLayerRasterFunctionInfos(layerPath) ?? EMPTY_RASTER_FUNCTION_INFOS;
+  const currentRasterFunction = useStoreLayerRasterFunction(layerPath);
   const layerController = useLayerController();
 
   // State
@@ -160,16 +160,16 @@ export function RasterFunctionPanel({ layerDetails }: RasterFunctionPanelProps):
 
     if (rasterFunctionInfos.length > 0) {
       // TODO: CHECK - Verify if that's the intent here? - Use a hook?
-      const promises = layerController.getLayerRasterFunctionPreviews(layerDetails.layerPath);
+      const promises = layerController.getLayerRasterFunctionPreviews(layerPath);
       setPreviewPromises(promises);
     }
-  }, [layerDetails.layerPath, rasterFunctionInfos, layerController]);
+  }, [layerPath, rasterFunctionInfos, layerController]);
 
   const handleSelect = useCallback(
     (rasterFunctionName: string): void => {
-      layerController.setLayerRasterFunction(layerDetails.layerPath, rasterFunctionName);
+      layerController.setLayerRasterFunction(layerPath, rasterFunctionName);
     },
-    [layerDetails.layerPath, layerController]
+    [layerPath, layerController]
   );
 
   const handleToggle = useCallback((): void => {

@@ -195,6 +195,19 @@ const utilDeleteLayerFromLegendLayers = (legendLayers: TypeLegendLayer[], layerP
 };
 
 /**
+ * Recursively checks whether all children of a layer are visible.
+ *
+ * @param layer - The legend layer to check
+ * @param visibleLayers - The set of currently visible layer paths
+ * @returns True if every descendant layer path is in visibleLayers
+ */
+const utilAllChildrenVisible = (layer: TypeLegendLayer, visibleLayers: string[]): boolean => {
+  return layer.children.every(
+    (child) => visibleLayers.includes(child.layerPath) && (!child.children?.length || utilAllChildrenVisible(child, visibleLayers))
+  );
+};
+
+/**
  * Checks whether any layer in the subtree has visibility disabled in its controls.
  *
  * @param layer - The root layer to start the check from
@@ -727,6 +740,22 @@ export const useStoreLayerBounds4326 = createLayerSelectorHook('bounds4326');
 export const useStoreLayerCanToggle = createLayerSelectorHook('canToggle');
 
 /**
+ * Selects whether all sublayers of a layer are visible.
+ *
+ * Reads from both layerState (children tree) and mapState (visibleLayers).
+ *
+ * @param layerPath - The layer path to check
+ * @returns True if all children and descendants are visible
+ */
+export const useStoreLayerAllChildrenVisible = (layerPath: string): boolean => {
+  return useStore(useGeoViewStore(), (state): boolean => {
+    const layer = utilLegendLayerByPathRec(state.layerState.legendLayers, layerPath);
+    if (!layer || !layer.children.length) return true;
+    return utilAllChildrenVisible(layer, state.mapState.visibleLayers);
+  });
+};
+
+/**
  * Selects the child layer paths for a specific layer.
  *
  * Uses useStableSelector with shallowObjectEqual so the component only re-renders
@@ -745,8 +774,6 @@ export const useStoreLayerChildPaths = (layerPath: string): string[] | undefined
 
 /**
  * Selects whether any layer in the subtree (including the layer itself) has visibility disabled.
- *
- * Returns a boolean so Object.is comparison prevents unnecessary re-renders.
  *
  * @param layerPath - The layer path to check
  * @returns True if any node in the subtree has controls.visibility === false
@@ -795,6 +822,24 @@ export const useStoreLayerStyleConfig = createLayerSelectorHook('styleConfig');
 /** Hook that returns the text visibility for a specific layer. */
 export const useStoreLayerTextVisibility = createLayerSelectorHook('textVisible');
 
+/** Hook that returns the layer attribution for a specific layer. */
+export const useStoreLayerAttribution = createLayerSelectorHook('layerAttribution');
+
+/** Hook that returns the layer opacity for a specific layer. */
+export const useStoreLayerOpacity = createLayerSelectorHook('opacity');
+
+/** Hook that returns the max opacity inherited from parent for a specific layer. */
+export const useStoreLayerOpacityMaxFromParent = createLayerSelectorHook('opacityMaxFromParent');
+
+/** Hook that returns the hoverable flag for a specific layer. */
+export const useStoreLayerHoverable = createLayerSelectorHook('hoverable');
+
+/** Hook that returns the queryable flag for a specific layer. */
+export const useStoreLayerQueryable = createLayerSelectorHook('queryable');
+
+/** Hook that returns the URL for a specific layer. */
+export const useStoreLayerUrl = createLayerSelectorHook('url');
+
 // #endregion STATE GETTERS & HOOKS - OTHERS (no match between getter-hook)
 
 // #region STATE GETTERS & HOOKS - SPECIALIZED
@@ -823,19 +868,6 @@ export const useStoreLayerNameSet = (): Record<string, string> => {
     }, {});
   });
 };
-
-/**
- * Hook that returns the full legend layer for a given path.
- *
- * Returns a new reference whenever any property of the layer changes.
- * Use only in components that display all layer details (e.g. LayerDetails).
- * Prefer targeted createLayerSelectorHook hooks elsewhere.
- *
- * @param layerPath - The layer path to look up
- * @returns The matching legend layer, or undefined if not found
- */
-export const useStoreLayerByPath = (layerPath: string): TypeLegendLayer | undefined =>
-  useStore(useGeoViewStore(), (state) => utilLegendLayerByPathRec(state.layerState.legendLayers, layerPath));
 
 /**
  * Hook that returns the icon set (image URLs) for a specific layer.
