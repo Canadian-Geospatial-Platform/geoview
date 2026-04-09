@@ -135,7 +135,7 @@ export const TIMEOUT: Record<string, number> = {
 
   deleteLayerUndoWindow: 2500,
 
-  delayBeforeShwoingSlowCoordinateInfoWarning: 3000,
+  delayBeforeShowingSlowCoordinateInfoWarning: 3000,
 
   featureHighlight: 5000,
 
