@@ -41,6 +41,10 @@ import { LayerEntryConfigError } from '@/core/exceptions/layer-entry-config-exce
 import { LayerCreatedTwiceError } from '@/core/exceptions/layer-exceptions';
 import { getStoreAppDisplayDateMode } from '@/core/stores/store-interface-and-intial-values/app-state';
 import {
+  getStoreLayerSelectedLayerPath,
+  setStoreLayerSelectedLayersTabLayer,
+} from '@/core/stores/store-interface-and-intial-values/layer-state';
+import {
   addStoreGeochartChart,
   isStoreGeochartInitialized,
   removeStoreGeochartChart,
@@ -583,6 +587,13 @@ export class LayerCreatorController extends AbstractMapViewerController {
 
       // Log
       logger.logInfo(`Layer removed for ${layerPath}`);
+
+      // Clear the selected path if it was set to it
+      const currentlySelectedLayerPath = getStoreLayerSelectedLayerPath(this.getMapId());
+      if (layerPath === currentlySelectedLayerPath) {
+        // Clear it
+        setStoreLayerSelectedLayersTabLayer(this.getMapId(), '');
+      }
 
       // Redirect to feature info delete
       deleteStoreDetailsFeatureInfo(this.getMapId(), layerPath);
