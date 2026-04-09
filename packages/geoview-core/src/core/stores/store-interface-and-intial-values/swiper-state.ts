@@ -35,6 +35,7 @@ export interface ISwiperState {
 
 /**
  * Initializes a Swiper state object.
+ *
  * @param set - The store set callback function
  * @param get - The store get callback function
  * @returns The Swiper state object
@@ -45,6 +46,11 @@ export function initializeSwiperState(set: TypeSetStore, get: TypeGetStore): ISw
     orientation: 'vertical',
 
     actions: {
+      /**
+       * Sets the layer paths for the swiper.
+       *
+       * @param layerPaths - The array of layer paths
+       */
       setLayerPaths(layerPaths: string[]) {
         set({
           swiperState: {
@@ -53,6 +59,11 @@ export function initializeSwiperState(set: TypeSetStore, get: TypeGetStore): ISw
           },
         });
       },
+      /**
+       * Sets the swiper orientation.
+       *
+       * @param orientation - The swipe orientation
+       */
       setOrientation(orientation: SwipeOrientation) {
         set({
           swiperState: {

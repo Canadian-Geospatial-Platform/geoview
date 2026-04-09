@@ -195,6 +195,11 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
     },
 
     actions: {
+      /**
+       * Sets the active geometry type.
+       *
+       * @param geomType - The geometry type to set as active
+       */
       setActiveGeom: (geomType: string) => {
         set({
           drawerState: {
@@ -204,6 +209,11 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
         });
       },
 
+      /**
+       * Sets the drawing style.
+       *
+       * @param style - The style properties to apply
+       */
       setStyle: (style: StyleProps) => {
         set({
           drawerState: {
@@ -213,6 +223,11 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
         });
       },
 
+      /**
+       * Sets the fill color.
+       *
+       * @param fillColor - The fill color value
+       */
       setFillColor: (fillColor: string) => {
         set({
           drawerState: {
@@ -225,6 +240,11 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
         });
       },
 
+      /**
+       * Sets the stroke color.
+       *
+       * @param strokeColor - The stroke color value
+       */
       setStrokeColor: (strokeColor: string) => {
         set({
           drawerState: {
@@ -237,6 +257,11 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
         });
       },
 
+      /**
+       * Sets the stroke width.
+       *
+       * @param strokeWidth - The stroke width value
+       */
       setStrokeWidth: (strokeWidth: number) => {
         set({
           drawerState: {
@@ -249,6 +274,11 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
         });
       },
 
+      /**
+       * Sets the icon size.
+       *
+       * @param iconSize - The icon size value
+       */
       setIconSize: (iconSize: number) => {
         set({
           drawerState: {
@@ -261,6 +291,11 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
         });
       },
 
+      /**
+       * Sets the text value.
+       *
+       * @param text - The text content
+       */
       setTextValue: (text: string) => {
         set({
           drawerState: {
@@ -273,6 +308,11 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
         });
       },
 
+      /**
+       * Sets the text size.
+       *
+       * @param textSize - The text size value
+       */
       setTextSize: (textSize: number) => {
         set({
           drawerState: {
@@ -285,6 +325,11 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
         });
       },
 
+      /**
+       * Sets the text font.
+       *
+       * @param textFont - The font family name
+       */
       setTextFont: (textFont: string) => {
         set({
           drawerState: {
@@ -297,6 +342,11 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
         });
       },
 
+      /**
+       * Sets the text color.
+       *
+       * @param textColor - The text color value
+       */
       setTextColor: (textColor: string) => {
         set({
           drawerState: {
@@ -309,6 +359,11 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
         });
       },
 
+      /**
+       * Sets the text halo color.
+       *
+       * @param textHaloColor - The text halo color value
+       */
       setTextHaloColor: (textHaloColor: string) => {
         set({
           drawerState: {
@@ -321,6 +376,11 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
         });
       },
 
+      /**
+       * Sets the text halo width.
+       *
+       * @param textHaloWidth - The text halo width value
+       */
       setTextHaloWidth: (textHaloWidth: number) => {
         set({
           drawerState: {
@@ -333,6 +393,11 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
         });
       },
 
+      /**
+       * Sets the text bold state.
+       *
+       * @param textBold - Whether text should be bold
+       */
       setTextBold: (textBold: boolean) => {
         set({
           drawerState: {
@@ -345,6 +410,11 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
         });
       },
 
+      /**
+       * Sets the text italic state.
+       *
+       * @param textItalic - Whether text should be italic
+       */
       setTextItalic: (textItalic: boolean) => {
         set({
           drawerState: {
@@ -357,6 +427,11 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
         });
       },
 
+      /**
+       * Sets the text rotation angle.
+       *
+       * @param textRotation - The rotation angle in degrees
+       */
       setTextRotation: (textRotation: number) => {
         set({
           drawerState: {
@@ -369,6 +444,11 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
         });
       },
 
+      /**
+       * Sets the draw interaction instance.
+       *
+       * @param drawInstance - The OpenLayers Draw interaction
+       */
       setDrawInstance: (drawInstance: Draw) => {
         set({
           drawerState: {
@@ -378,6 +458,9 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
         });
       },
 
+      /**
+       * Removes the draw interaction instance.
+       */
       removeDrawInstance: () => {
         set({
           drawerState: {
@@ -387,6 +470,11 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
         });
       },
 
+      /**
+       * Sets the transform interaction instance.
+       *
+       * @param transformInstance - The OpenLayers Transform interaction
+       */
       setTransformInstance: (transformInstance: Transform) => {
         set({
           drawerState: {
@@ -396,6 +484,9 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
         });
       },
 
+      /**
+       * Removes the transform interaction instance.
+       */
       removeTransformInstance: () => {
         set({
           drawerState: {
@@ -405,6 +496,11 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
         });
       },
 
+      /**
+       * Sets the selected drawing feature.
+       *
+       * @param selectedDrawing - The selected feature
+       */
       setSelectedDrawing(selectedDrawing: Feature) {
         set({
           drawerState: {
@@ -414,6 +510,11 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
         });
       },
 
+      /**
+       * Sets the snap interaction instance.
+       *
+       * @param snapInstance - The OpenLayers Snap interaction
+       */
       setSnapInstance(snapInstance: Snap) {
         set({
           drawerState: {
@@ -423,6 +524,9 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
         });
       },
 
+      /**
+       * Removes the snap interaction instance.
+       */
       removeSnapInstance() {
         set({
           drawerState: {
@@ -432,6 +536,11 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
         });
       },
 
+      /**
+       * Sets whether measurements are hidden.
+       *
+       * @param hideMeasurements - Whether to hide measurements
+       */
       setHideMeasurements: (hideMeasurements: boolean) => {
         set({
           drawerState: {
@@ -441,6 +550,11 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
         });
       },
 
+      /**
+       * Sets the icon source URL.
+       *
+       * @param iconSrc - The icon source path
+       */
       setIconSrc: (iconSrc: string) => {
         set({
           drawerState: {
@@ -450,6 +564,11 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
         });
       },
 
+      /**
+       * Sets the undo button disabled state.
+       *
+       * @param undoDisabled - Whether undo is disabled
+       */
       setUndoDisabled: (undoDisabled: boolean) => {
         set({
           drawerState: {
@@ -459,6 +578,11 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
         });
       },
 
+      /**
+       * Sets the redo button disabled state.
+       *
+       * @param redoDisabled - Whether redo is disabled
+       */
       setRedoDisabled: (redoDisabled: boolean) => {
         set({
           drawerState: {
@@ -468,6 +592,11 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
         });
       },
 
+      /**
+       * Updates the drawing style state.
+       *
+       * @param style - The new style properties
+       */
       updateStateStyle: (style: StyleProps) => {
         set({
           drawerState: {

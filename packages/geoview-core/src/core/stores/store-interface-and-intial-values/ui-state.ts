@@ -133,6 +133,11 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
     },
 
     actions: {
+      /**
+       * Enables the focus trap for the given UI element.
+       *
+       * @param uiFocus - The focus item properties
+       */
       enableFocusTrap: (uiFocus: FocusItemProps) => {
         set({
           uiState: {
@@ -141,10 +146,16 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
           },
         });
       },
+
       // TODO: WCAG Issue #3222 RAF seems to be working well for timing purposes
       // (RAF ensures that modal transitions, focus trap releases, and DOM updates, are completed before focus restoration takes place)
       // Try removing setTimeout from all instances of disableFocusTrap as that might now be redundant
       // See issue #3222 for more detail.
+      /**
+       * Disables the focus trap and restores focus to the callback element.
+       *
+       * @param callBackElementId - The element ID to restore focus to
+       */
       disableFocusTrap: (callBackElementId: string) => {
         const id = callBackElementId ?? (get().uiState.focusItem.callbackElementId as string);
         requestAnimationFrame(() => {
@@ -163,6 +174,12 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
           },
         });
       },
+
+      /**
+       * Sets the active footer bar tab.
+       *
+       * @param tabId - The tab ID to activate, or undefined to clear
+       */
       setActiveFooterBarTab: (tabId: string | undefined) => {
         set({
           uiState: {
@@ -174,6 +191,12 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
           },
         });
       },
+
+      /**
+       * Sets whether the GeoView trap is active.
+       *
+       * @param active - Whether the trap is active
+       */
       setActiveTrapGeoView: (active: boolean) => {
         set({
           uiState: {
@@ -182,6 +205,12 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
           },
         });
       },
+
+      /**
+       * Sets the hidden tabs list.
+       *
+       * @param hiddenTabs - The array of tab IDs to hide
+       */
       setHiddenTabs: (hiddenTabs: string[]) => {
         set({
           uiState: {
@@ -190,6 +219,12 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
           },
         });
       },
+
+      /**
+       * Sets the footer panel resize value.
+       *
+       * @param value - The resize value
+       */
       setFooterPanelResizeValue: (value) => {
         set({
           uiState: {
@@ -198,7 +233,13 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
           },
         });
       },
+
       // TODO: the setter for footer bar is still split in 2 instead of following app bar. Ken, can you set it up correclty with your PR for footer....
+      /**
+       * Sets whether the footer bar is open.
+       *
+       * @param open - Whether the footer bar should be open
+       */
       setFooterBarIsOpen: (open: boolean) => {
         set({
           uiState: {
@@ -210,6 +251,14 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
           },
         });
       },
+
+      /**
+       * Sets the active app bar tab.
+       *
+       * @param tabId - The tab ID to activate, or undefined to clear
+       * @param isOpen - Whether the app bar panel should be open
+       * @param isFocusTrapped - Optional whether focus should be trapped in the panel
+       */
       setActiveAppBarTab: (tabId: string | undefined, isOpen: boolean, isFocusTrapped: boolean = false) => {
         // Gv Side effect with focus trap and side panel app bar open
         // We need to check if the viewer is in keyboard navigation mode. If not, we don't apply the focus trap.

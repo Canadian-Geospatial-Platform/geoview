@@ -923,9 +923,8 @@ export class MapController extends AbstractMapViewerController {
    * data from the configured service URLs and creates a coordinate info layer
    * entry in the store. When disabled, removes any existing coordinate info.
    *
-   * @param mapId - The map identifier.
    * @param coordinates - The map mouse info containing click coordinates.
-   * @param serviceUrls - Optional service URLs for UTM, NTS, and altitude lookups.
+   * @param serviceUrls - Service URLs for UTM, NTS, and altitude lookups.
    * @param abortSignal - Optional AbortSignal to cancel the fetch requests if needed.
    */
   async updateStoreCoordinateInfo(coordinates: TypeMapMouseInfo, serviceUrls: TypeServiceUrls, abortSignal?: AbortSignal): Promise<void> {

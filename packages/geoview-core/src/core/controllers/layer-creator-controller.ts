@@ -348,7 +348,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
   }
 
   /**
-   * Refreshes GeoCore Layers
+   * Refreshes GeoCore layers.
    */
   reloadGeocoreLayers(): void {
     const configs = this.getControllersRegistry().layerController.getLayerEntryConfigs();
@@ -465,7 +465,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
   }
 
   /**
-   * Removes all geoview layers from the map
+   * Removes all geoview layers from the map.
    */
   removeAllGeoviewLayers(): void {
     this.getControllersRegistry()
@@ -1083,7 +1083,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
    * @param language - The language setting used for layer labels and metadata.
    * @param mapConfigLayerEntries - The array of layer entries to convert.
    * @param errorCallback - Callback invoked when an error occurs during layer processing.
-   * @returns An array of promises, each resolving to a `TypeGeoviewLayerConfig` object
+   * @returns An array of promises, each resolving to a TypeGeoviewLayerConfig object
    */
   static convertMapConfigsToGeoviewLayerConfig(
     mapId: string,
@@ -1110,7 +1110,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
    * @param language - The language setting used for layer labels and metadata.
    * @param entry - The array of layer entry to convert.
    * @param errorCallback - Callback invoked when an error occurs during layer processing.
-   * @returns A promise that resolves to a `TypeGeoviewLayerConfig` object
+   * @returns A promise that resolves to a TypeGeoviewLayerConfig object
    */
   static convertMapConfigToGeoviewLayerConfig(
     mapId: string,
@@ -1357,8 +1357,11 @@ export class LayerCreatorController extends AbstractMapViewerController {
   // #endregion EVENTS
 }
 
+/** Represents the result of adding a GeoView layer. */
 export type GeoViewLayerAddedResult = {
+  /** The created GeoView layer instance. */
   layer: AbstractGeoViewLayer;
+  /** A promise that resolves when the layer is fully loaded. */
   promiseLayer: Promise<void>;
 };
 
@@ -1366,7 +1369,7 @@ export type GeoViewLayerAddedResult = {
  * Define an event for the delegate
  */
 export type LayerEvent = {
-  // The loaded layer
+  /** The loaded layer. */
   layer: AbstractGVLayer;
 };
 
@@ -1379,10 +1382,10 @@ export type LayerDelegate = EventDelegateBase<LayerCreatorController, LayerEvent
  * Define an event for the delegate
  */
 export type LayerPathEvent = {
-  // The layer path
+  /** The layer path. */
   layerPath: string;
 
-  // The layer name
+  /** The layer name. */
   layerName: string;
 };
 
@@ -1407,10 +1410,10 @@ export type LayerBuilderDelegate = EventDelegateBase<LayerCreatorController, Lay
  * Define an event for the delegate
  */
 export type LayerConfigErrorEvent = {
-  // The layer path (or the geoview layer id) depending when the error occurs in the process
+  /** The layer path (or the geoview layer id) depending when the error occurs in the process. */
   layerPath: string;
 
-  // The error
+  /** The error message. */
   error: string;
 };
 
