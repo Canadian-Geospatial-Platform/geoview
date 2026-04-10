@@ -26,7 +26,7 @@ import {
 } from '@/ui';
 import { ArrowBackIcon } from '@/ui/icons';
 
-import { useUIController } from '@/core/controllers/ui-controller';
+import { useUIController } from '@/core/controllers/use-controllers';
 import type { TypeLegendItem } from '@/core/components/layers/types';
 import { getSxClasses } from './layer-details-style';
 import {
@@ -74,9 +74,7 @@ import { useNavigateToTab } from '@/core/components/common/hooks/use-navigate-to
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { DeleteUndoButton } from '@/core/components/layers/delete-undo-button';
 import type { TypeContainerBox } from '@/core/types/global-types';
-import { useLayerController } from '@/core/controllers/layer-controller';
-import { useLayerSetController } from '@/core/controllers/layer-set-controller';
-import { useMapController } from '@/core/controllers/map-controller';
+import { useLayerController, useLayerSetController } from '@/core/controllers/use-controllers';
 
 // TODO: WCAG Issue #3108 - Fix layers.moreInfo button (button nested within a button)
 // TODO: WCAG Issue #3108 - Check all disabled buttons. They may need special treatment. Need to find instance in UI first)
@@ -111,7 +109,7 @@ const Sublayer = memo(function Sublayer({ layerPath }: SubLayerProps): JSX.Eleme
   const layerHidden = useStoreMapIsLayerHiddenOnMap(layerPath);
   const parentHidden = useStoreMapIsParentLayerHiddenOnMap(layerPath);
   const layerVisible = useStoreMapLayerVisibility(layerPath);
-  const mapController = useMapController();
+  const layerController = useLayerController();
 
   // Return the ui
   return (
@@ -120,7 +118,7 @@ const Sublayer = memo(function Sublayer({ layerPath }: SubLayerProps): JSX.Eleme
         <IconButton
           color="primary"
           role="checkbox"
-          onClick={() => mapController.setOrToggleMapLayerVisibility(layerPath)}
+          onClick={() => layerController.setOrToggleMapLayerVisibility(layerPath)}
           disabled={parentHidden}
           aria-checked={layerVisible === true}
           aria-label={layerVisible ? t('layers.hideLayer', { name: layerName }) : t('layers.showLayer', { name: layerName })}
@@ -198,7 +196,6 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
   const uiController = useUIController();
   const layerController = useLayerController();
   const layerSetController = useLayerSetController();
-  const mapController = useMapController();
 
   // Use navigate hook for time slider (only if time slider state exists)
   const navigateToTimeSlider = useNavigateToTab('time-slider', setStoreTimeSliderSelectedLayerPath);
@@ -219,15 +216,15 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
     setActiveView('details');
   }, [layerPath]);
 
-  const handleRefreshLayer = (): void => {
+  const handleResetLayer = (): void => {
     layerController.resetLayer(layerPath).catch((error: unknown) => {
       // Log
-      logger.logPromiseFailed('in layerController.resetLayer in layer-details.handleRefreshLayer', error);
+      logger.logPromiseFailed('in layerController.resetLayer in layer-details.handleResetLayer', error);
     });
   };
 
   const handleZoomTo = (): void => {
-    mapController.zoomToLayerExtent(layerPath).catch((error: unknown) => {
+    layerController.zoomToLayerExtent(layerPath).catch((error: unknown) => {
       // Log
       logger.logPromiseFailed('in zoomToLayerExtent in layer-details.handleZoomTo', error);
     });
@@ -316,13 +313,13 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
     const setRecursive = (legendLayer: typeof layer, newVisibility: boolean): void => {
       legendLayer.children.forEach((child) => {
         if (newVisibility) {
-          if (!visibleLayers.includes(child.layerPath)) mapController.setOrToggleMapLayerVisibility(child.layerPath, true);
-        } else if (visibleLayers.includes(child.layerPath)) mapController.setOrToggleMapLayerVisibility(child.layerPath, false);
+          if (!visibleLayers.includes(child.layerPath)) layerController.setOrToggleMapLayerVisibility(child.layerPath, true);
+        } else if (visibleLayers.includes(child.layerPath)) layerController.setOrToggleMapLayerVisibility(child.layerPath, false);
         if (child.children.length) setRecursive(child, newVisibility);
       });
     };
     setRecursive(layer, !allSublayersVisible);
-  }, [allSublayersVisible, mapId, layerPath, mapController, visibleLayers]);
+  }, [allSublayersVisible, mapId, layerPath, layerController, visibleLayers]);
 
   const allItemsChecked = !!(layerItems && layerItems.every((i) => i.isVisible !== false));
 
@@ -572,7 +569,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
         {hasDataTable && renderDetailsButton()}
         {timeSliderButton}
         {showDivider && <Box sx={sxClasses.verticalDivider} />}
-        <IconButton aria-label={t('legend.refreshLayer')} className="buttonOutline" onClick={handleRefreshLayer}>
+        <IconButton aria-label={t('legend.resetLayer')} className="buttonOutline" onClick={handleResetLayer}>
           <RestartAltIcon />
         </IconButton>
         {renderHighlightButton()}

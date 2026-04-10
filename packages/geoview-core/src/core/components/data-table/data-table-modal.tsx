@@ -6,7 +6,7 @@ import { MRT_Localization_FR as MRTLocalizationFR } from 'material-react-table/l
 import { MRT_Localization_EN as MRTLocalizationEN } from 'material-react-table/locales/en';
 
 import { Modal, MRTTable as Table, type MRT_ColumnDef as MRTColumnDef, Box, CircularProgress, Button } from '@/ui';
-import { useUIController } from '@/core/controllers/ui-controller';
+import { useUIController } from '@/core/controllers/use-controllers';
 import {
   useStoreUIActiveFocusItem,
   useStoreUIFooterBarComponents,

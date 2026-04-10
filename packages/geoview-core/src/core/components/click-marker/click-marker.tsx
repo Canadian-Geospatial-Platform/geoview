@@ -10,7 +10,7 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
-import { useMapController } from '@/core/controllers/map-controller';
+import { useMapController } from '@/core/controllers/use-controllers';
 
 /** Represents a click marker placed on the map at the user's click location. */
 export type TypeClickMarker = {

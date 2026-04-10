@@ -13,7 +13,7 @@ import { logger } from '@/core/utils/logger';
 import { generateId } from '@/core/utils/utilities';
 import { useStoreMapIsLayerHiddenOnMap } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
-import { useLayerController } from '@/core/controllers/layer-controller';
+import { useLayerController } from '@/core/controllers/use-controllers';
 
 interface ItemsListProps {
   items: TypeLegendItem[];

@@ -31,7 +31,7 @@ import { FeatureInfoTable } from './feature-info-table';
 import { getSxClasses } from './details-style';
 import { useStoreUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
-import { useMapController } from '@/core/controllers/map-controller';
+import { useMapController } from '@/core/controllers/use-controllers';
 
 /** Properties for the FeatureInfo component. */
 interface FeatureInfoProps {

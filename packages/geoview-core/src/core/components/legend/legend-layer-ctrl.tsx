@@ -44,8 +44,7 @@ import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';
 import { useNavigateToTab } from '@/core/components/common/hooks/use-navigate-to-tab';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
-import { useLayerController } from '@/core/controllers/layer-controller';
-import { useMapController } from '@/core/controllers/map-controller';
+import { useLayerController } from '@/core/controllers/use-controllers';
 
 // TODO: WCAG Issue #3332 - Consider disabling Zoom to Layer button when it's already zoomed to that layer's extent
 // TODO: WCAG - Consider showing Show in Time Slider button in WCAG mode (requires re-working WCAG UX)
@@ -72,7 +71,6 @@ const useControlActions = (layerPath: string): ControlActions => {
   // Store
   const mapId = useStoreGeoViewMapId();
   const layerController = useLayerController();
-  const mapController = useMapController();
 
   /**
    * Builds the memoized control action handlers.
@@ -95,7 +93,7 @@ const useControlActions = (layerPath: string): ControlActions => {
         if (!isZoomToVisibleScaleCapable) {
           return;
         }
-        mapController.zoomToLayerVisibleScale(layerPath);
+        layerController.zoomToLayerVisibleScale(layerPath);
       },
 
       /**
@@ -112,7 +110,7 @@ const useControlActions = (layerPath: string): ControlActions => {
         if (!isInVisibleRange || parentHidden || layer?.layerStatus === 'error') {
           return false;
         }
-        return mapController.setOrToggleMapLayerVisibility(layerPath);
+        return layerController.setOrToggleMapLayerVisibility(layerPath);
       },
 
       /**
@@ -149,12 +147,12 @@ const useControlActions = (layerPath: string): ControlActions => {
         if (isZoomToLayerDisabled) {
           return;
         }
-        mapController.zoomToLayerExtent(layerPath).catch((error: unknown) => {
+        layerController.zoomToLayerExtent(layerPath).catch((error: unknown) => {
           logger.logPromiseFailed('in zoomToLayerExtent in legend-layer.handleZoomTo', error);
         });
       },
     }),
-    [layerPath, mapId, layerController, mapController]
+    [layerPath, mapId, layerController]
   );
 };
 

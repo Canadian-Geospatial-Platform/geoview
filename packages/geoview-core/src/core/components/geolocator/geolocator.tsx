@@ -8,7 +8,7 @@ import { useTheme } from '@mui/material';
 import { debounce } from '@/core/utils/debounce';
 import { Box, ProgressBar, Typography } from '@/ui';
 
-import { useUIController } from '@/core/controllers/ui-controller';
+import { useUIController } from '@/core/controllers/use-controllers';
 import { useStoreUIActiveAppBarTab, useStoreUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { GeolocatorResult } from '@/core/components/geolocator/geolocator-result';
 import { getSxClasses } from '@/core/components/geolocator/geolocator-style';

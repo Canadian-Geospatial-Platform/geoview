@@ -20,7 +20,7 @@ import type { TypeValidNavBarProps } from '@/api/types/map-schema-types';
 import { useStoreUINavbarComponents } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from './nav-bar-panel-button';
-import { usePluginController } from '@/core/controllers/plugin-controller';
+import { usePluginController } from '@/core/controllers/use-controllers';
 
 /** The properties for the nav-bar component. */
 type NavBarProps = {

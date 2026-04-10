@@ -31,10 +31,9 @@ import { UtilAddLayer } from '@/core/components/layers/left-panel/add-new-layer/
 import { AddLayerTree } from '@/core/components/layers/left-panel/add-new-layer/add-layer-tree';
 import { ShapefileReader } from '@/api/config/reader/shapefile-reader';
 import { GeoPackageReader } from '@/api/config/reader/geopackage-reader';
-import { useLayerCreatorController, type GeoViewLayerAddedResult } from '@/core/controllers/layer-creator-controller';
+import type { GeoViewLayerAddedResult } from '@/core/controllers/layer-creator-controller';
 import type { GeoViewError } from '@/core/exceptions/geoview-exceptions';
-import { useUIController } from '@/core/controllers/ui-controller';
-import { useMapController } from '@/core/controllers/map-controller';
+import { useLayerController, useLayerCreatorController, useUIController } from '@/core/controllers/use-controllers';
 
 const sxClasses = {
   buttonGroup: {
@@ -284,7 +283,7 @@ export function AddNewLayer(): JSX.Element {
   const language = useStoreAppDisplayLanguage();
   const shellContainer = useStoreAppShellContainer();
   const uiController = useUIController();
-  const mapController = useMapController();
+  const layerController = useLayerController();
   const layerCreatorController = useLayerCreatorController();
 
   // List of layer types and labels (Step 2)
@@ -350,7 +349,7 @@ export function AddNewLayer(): JSX.Element {
     // Done adding
     setIsLoading(false);
     setStoreLayerDisplayState(mapId, 'view');
-    mapController.setLayerZIndices();
+    layerController.setLayerZIndices();
   };
 
   const doneAddedShowMessage = (layerBeingAdded: AbstractGeoViewLayer): void => {

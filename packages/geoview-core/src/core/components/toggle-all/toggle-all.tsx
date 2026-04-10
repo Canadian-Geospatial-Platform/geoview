@@ -13,7 +13,7 @@ import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 
 import type { TypeContainerBox } from '@/core/types/global-types';
-import { useMapController } from '@/core/controllers/map-controller';
+import { useLayerController } from '@/core/controllers/use-controllers';
 
 /** The properties for the toggle all component. */
 interface ToggleAllProps {
@@ -54,14 +54,14 @@ export function ToggleAll({ source, containerType }: ToggleAllProps): JSX.Elemen
   const allLayersCollapsed = useStoreMapAllLayersCollapsedToggle();
   const layersAreLoading = useStoreLayerAreLayersLoading();
   const hasCollapsibleLayers = useStoreMapHasCollapsibleLayersToggle();
-  const mapController = useMapController();
+  const layerController = useLayerController();
 
   /**
    * Handles when the user toggles the visibility switch.
    */
   const handleVisibilityToggle = useCallback((): void => {
-    mapController.setAllMapLayerVisibility(!allLayersVisible);
-  }, [allLayersVisible, mapController]);
+    layerController.setAllMapLayerVisibility(!allLayersVisible);
+  }, [allLayersVisible, layerController]);
 
   /**
    * Handles when the user toggles the collapse switch.

@@ -708,7 +708,7 @@ export class LayerApi {
    */
   zoomToLayerExtent(layerPath: string, fitOptions?: FitOptions): Promise<void> {
     // Redirect to controller
-    return this.#controllers.mapController.zoomToLayerExtent(layerPath, fitOptions);
+    return this.#controllers.layerController.zoomToLayerExtent(layerPath, fitOptions);
   }
 
   /**
@@ -742,7 +742,7 @@ export class LayerApi {
    */
   setAllLayersVisibility(newValue: boolean): void {
     // Redirect to controller
-    return this.#controllers.mapController.setAllLayersVisibility(newValue);
+    return this.#controllers.layerController.setAllLayersVisibility(newValue);
   }
 
   /**
@@ -760,7 +760,7 @@ export class LayerApi {
    */
   setOrToggleLayerVisibility(layerPath: string, newValue?: boolean): boolean {
     // Redirect to controller
-    return this.#controllers.mapController.setOrToggleLayerVisibility(layerPath, newValue);
+    return this.#controllers.layerController.setOrToggleLayerVisibility(layerPath, newValue);
   }
 
   // #endregion PUBLIC METHODS - LAYER CONTROLLER GENERAL REDIRECTIONS

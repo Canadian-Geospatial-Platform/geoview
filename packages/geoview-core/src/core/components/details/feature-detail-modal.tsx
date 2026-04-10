@@ -8,7 +8,7 @@ import { useStoreAppShellContainer } from '@/core/stores/store-interface-and-int
 
 import { Modal, List, Box, Typography, BrowserNotSupportedIcon } from '@/ui';
 
-import { useUIController } from '@/core/controllers/ui-controller';
+import { useUIController } from '@/core/controllers/use-controllers';
 import { getSxClasses } from './details-style';
 import { FeatureInfoTable } from './feature-info-table';
 import type { TypeFieldEntry } from '@/api/types/map-schema-types';

@@ -16,18 +16,18 @@ import {
 import type { TimeSliderLayerSet } from './store-interface-and-intial-values/time-slider-state';
 import { getStoreTimeSliderLayers } from './store-interface-and-intial-values/time-slider-state';
 import { getStoreSwiperLayerPaths } from './store-interface-and-intial-values/swiper-state';
+import { setStoreLayerSelectedLayersTabLayer, setStoreReorderLegendLayers } from './store-interface-and-intial-values/layer-state';
 import { logger } from '@/core/utils/logger';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
-import { setStoreLayerSelectedLayersTabLayer, setStoreReorderLegendLayers } from './store-interface-and-intial-values/layer-state';
-import type { MapController } from '../controllers/map-controller';
+import type { LayerController } from '@/core/controllers/layer-controller';
 
 /**
  * API to manage states.
  */
 export class StateApi {
-  /** The map controller instance */
-  #mapController: MapController;
+  /** The layer controller instance */
+  #layerController: LayerController;
 
   /** Keep all callback delegates references */
   #onLayersReorderedHandlers: LayersReorderedDelegate[] = [];
@@ -35,10 +35,10 @@ export class StateApi {
   /**
    * Instantiates an StateApi class.
    *
-   * @param mapId - The map id this StateApi belongs to
+   * @param layerController - The layer controller instance to interact with layer-related states.
    */
-  constructor(mapController: MapController) {
-    this.#mapController = mapController;
+  constructor(layerController: LayerController) {
+    this.#layerController = layerController;
   }
 
   /**
@@ -48,7 +48,7 @@ export class StateApi {
    */
   getLegendCollapsedState(layerPath: string): boolean {
     // Get from store
-    return getStoreMapLegendCollapsedByPath(this.#mapController.getMapId(), layerPath);
+    return getStoreMapLegendCollapsedByPath(this.#layerController.getMapId(), layerPath);
   }
 
   /**
@@ -65,16 +65,16 @@ export class StateApi {
       // Depending on the state requested, call the corresponding getter
       switch (state) {
         case 'geochartChartsConfig':
-          return getStoreGeochartChartsConfig(this.#mapController.getMapId());
+          return getStoreGeochartChartsConfig(this.#layerController.getMapId());
 
         case 'selectedLayerPath':
-          return getStoreGeochartSelectedLayerPath(this.#mapController.getMapId());
+          return getStoreGeochartSelectedLayerPath(this.#layerController.getMapId());
 
         case 'layerDataArray':
-          return getStoreGeochartLayerDataArray(this.#mapController.getMapId());
+          return getStoreGeochartLayerDataArray(this.#layerController.getMapId());
 
         case 'layerDataArrayBatchLayerPathBypass':
-          return getStoreGeochartLayerDataArrayBatchLayerPathBypass(this.#mapController.getMapId());
+          return getStoreGeochartLayerDataArrayBatchLayerPathBypass(this.#layerController.getMapId());
 
         default:
           logger.logError(`${state} not available from geochart`);
@@ -82,11 +82,11 @@ export class StateApi {
       }
     }
     if (pluginId === 'swiper') {
-      if (state === 'layerPaths') return getStoreSwiperLayerPaths(this.#mapController.getMapId());
+      if (state === 'layerPaths') return getStoreSwiperLayerPaths(this.#layerController.getMapId());
       logger.logError(`${state} not available from swiper`);
     }
     if (pluginId === 'time-slider') {
-      if (state === 'timeSliderLayers') return getStoreTimeSliderLayers(this.#mapController.getMapId());
+      if (state === 'timeSliderLayers') return getStoreTimeSliderLayers(this.#layerController.getMapId());
       logger.logError(`${state} not available from time slider`);
     }
     return undefined;
@@ -100,7 +100,7 @@ export class StateApi {
    */
   setLegendCollapsedState(layerPath: string, collapsed: boolean): void {
     // Save to the store
-    setStoreMapLegendCollapsed(this.#mapController.getMapId(), layerPath, collapsed);
+    setStoreMapLegendCollapsed(this.#layerController.getMapId(), layerPath, collapsed);
   }
 
   /**
@@ -108,14 +108,14 @@ export class StateApi {
    * @param layerPath - The path of the layer to set
    */
   setSelectedLayersTabLayer(layerPath: string): void {
-    setStoreLayerSelectedLayersTabLayer(this.#mapController.getMapId(), layerPath);
+    setStoreLayerSelectedLayersTabLayer(this.#layerController.getMapId(), layerPath);
   }
 
   reorderLayers(layerPath: string, move: number): void {
     // Apply some ordering logic
     const direction = move < 0 ? -1 : 1;
     let absoluteMoves = Math.abs(move);
-    const orderedLayers = [...getStoreMapOrderedLayerInfo(this.#mapController.getMapId())];
+    const orderedLayers = [...getStoreMapOrderedLayerInfo(this.#layerController.getMapId())];
     let startingIndex = -1;
     for (let i = 0; i < orderedLayers.length; i++) if (orderedLayers[i].layerPath === layerPath) startingIndex = i;
 
@@ -139,10 +139,10 @@ export class StateApi {
     orderedLayers.splice(nextIndex, 0, ...movedLayers);
 
     // Redirect
-    this.#mapController.setMapOrderedLayerInfoDirectly(orderedLayers);
+    this.#layerController.setMapOrderedLayerInfoDirectly(orderedLayers);
 
     // Reorder the legend layers, because the order layer info has changed
-    setStoreReorderLegendLayers(this.#mapController.getMapId());
+    setStoreReorderLegendLayers(this.#layerController.getMapId());
 
     // Emit event
     this.#emitLayersReordered({ orderedLayers });

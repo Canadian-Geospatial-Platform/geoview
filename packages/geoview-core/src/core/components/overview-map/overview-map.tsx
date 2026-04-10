@@ -13,7 +13,7 @@ import { useStoreMapOverviewMapHideZoom, useStoreMapZoom } from '@/core/stores/s
 import { logger } from '@/core/utils/logger';
 import { Box } from '@/ui/layout';
 import { TIMEOUT } from '@/core/utils/constant';
-import { useMapController } from '@/core/controllers/map-controller';
+import { useMapController } from '@/core/controllers/use-controllers';
 
 /** The properties for the overview map component. */
 export type OverviewMapProps = {

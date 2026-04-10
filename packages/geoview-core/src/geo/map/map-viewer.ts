@@ -330,7 +330,7 @@ export class MapViewer {
     this.appBarApi = new AppBarApi(this.controllers.uiController);
     this.navBarApi = new NavBarApi();
     this.footerBarApi = new FooterBarApi(this.controllers.uiController);
-    this.stateApi = new StateApi(this.controllers.mapController);
+    this.stateApi = new StateApi(this.controllers.layerController);
     this.notifications = new Notifications(this.controllers.uiController);
 
     this.modal = new ModalApi();
@@ -1929,7 +1929,7 @@ export class MapViewer {
         }
 
         // Save to the store
-        this.controllers.mapController.setLayerInVisibleRange(layerPath, inVisibleRange);
+        this.controllers.layerController.setLayerInVisibleRange(layerPath, inVisibleRange);
       });
 
       // Emit to the outside

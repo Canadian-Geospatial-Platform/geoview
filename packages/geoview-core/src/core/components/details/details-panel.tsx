@@ -5,7 +5,6 @@ import { useTheme } from '@mui/material/styles';
 import { IconButton, Grid, ArrowForwardIosOutlinedIcon, ArrowBackIosOutlinedIcon, ClearHighlightIcon, Box } from '@/ui';
 
 import type { TypeContainerBox } from '@/core/types/global-types';
-import { useUIController } from '@/core/controllers/ui-controller';
 import {
   useStoreDetailsCheckedFeatures,
   useStoreDetailsLayerDataArrayBatch,
@@ -39,7 +38,7 @@ import { CONTAINER_TYPE, FEATURE_INFO_STATUS, TABS, TIMEOUT } from '@/core/utils
 import { DetailsSkeleton } from './details-skeleton';
 import { CoordinateInfo, CoordinateInfoSwitch } from './coordinate-info';
 import { logger } from '@/core/utils/logger';
-import { useMapController } from '@/core/controllers/map-controller';
+import { useMapController, useUIController } from '@/core/controllers/use-controllers';
 
 /** Properties for the details panel component. */
 interface DetailsPanelType {

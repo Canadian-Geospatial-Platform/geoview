@@ -10,7 +10,7 @@ import { IconButton } from '@/ui/icon-button/icon-button';
 import { List, ListItem } from '@/ui/list';
 import { ProjectionIcon, PublicIcon } from '@/ui/icons';
 import { useTranslation } from 'react-i18next';
-import { useMapController } from '@/core/controllers/map-controller';
+import { useMapController } from '@/core/controllers/use-controllers';
 
 /** Mapping of projection codes to their display names. */
 const projectionChoiceOptions: {

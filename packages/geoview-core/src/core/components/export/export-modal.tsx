@@ -40,7 +40,7 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { exportFile } from '@/core/utils/utilities';
 
-import { useUIController } from '@/core/controllers/ui-controller';
+import { useUIController } from '@/core/controllers/use-controllers';
 import type { TemporalMode, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import { createPDFMapUrl } from '@/core/components/export/pdf-layout';
 import { createCanvasMapUrls } from '@/core/components/export/canvas-layout';

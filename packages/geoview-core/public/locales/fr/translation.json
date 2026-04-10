@@ -116,7 +116,7 @@
     "layerRegister": "La couche accède aux métadonnées...",
     "layerLoading": "La couche se charge...",
     "tableDetails": "Table détaillée",
-    "refreshLayer": "Réinitialiser la couche",
+    "resetLayer": "Réinitialiser la couche",
     "highlightLayer": "Couche mise en évidence",
     "subLayersCount": "{count} sous-couches",
     "itemsCount": "{count} sur {totalCount} classes",

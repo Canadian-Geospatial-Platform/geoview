@@ -6,7 +6,7 @@ import { useStoreDrawerUndoDisabled } from 'geoview-core/core/stores/store-inter
 
 import { IconButton, UndoIcon } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
-import { useDrawerController } from 'geoview-core/core/controllers/drawer-controller';
+import { useDrawerController } from 'geoview-core/core/controllers/use-controllers';
 
 /**
  * Creates an undo button to undo the last drawing action.

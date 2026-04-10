@@ -34,8 +34,6 @@ import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-lay
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import type { TypeLegendLayer } from '@/core/components/layers/types';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
-import { LayerCreatorController } from '@/core/controllers/layer-creator-controller';
-import { useControllers } from '@/core/controllers/base/controller-manager';
 import {
   getStoreMapClickCoordinates,
   getStoreMapConfigAppBar,
@@ -61,42 +59,29 @@ import {
   getStoreMapInitialView,
   getStoreMapInteraction,
   getStoreMapLayerPaths,
-  getStoreMapOrderedLayerIndexByPath,
-  getStoreMapOrderedLayerInfo,
   getStoreMapOrderedLayerInfoByPath,
   getStoreMapPointMarkers,
   getStoreMapRotation,
-  getStoreMapVisibilityByPath,
   isStoreMapConfigInitialized,
-  setStoreLayerInVisibleRange,
   setStoreMapClickCoordinates,
   setStoreMapClickMarker,
   setStoreMapCurrentBasemapOptions,
   setStoreMapGeolocatorSearchArea,
   setStoreMapHighlightedFeatures,
-  setStoreMapLayerVisibility,
-  setStoreMapOrderedLayerDirectly,
   setStoreMapPointMarkers,
   setStoreMapProjection,
   setStoreMapSize,
-  utilFindMapLayerAndChildrenFromOrderedInfo,
   type TypeOrderedLayerInfo,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { getStoreDataTableSelectedLayerPath, getStoreTableFilter } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { getStoreDataTableSelectedLayerPath } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { getStoreUIActiveAppBarTab, getStoreUIActiveFooterBarTab } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import {
-  getStoreAppDisplayTheme,
-  getStoreAppIsCrosshairsActive,
-  getStoreShowLayerHighlightLayerBbox,
-} from '@/core/stores/store-interface-and-intial-values/app-state';
+import { getStoreAppDisplayTheme, getStoreAppIsCrosshairsActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 import {
   getStoreLayerHighlightedLayer,
-  getStoreLayerBounds,
   getStoreLayerLegendLayerByPath,
   getStoreLayerSelectedLayerPath,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import {
-  getStoreTimeSliderFilter,
   getStoreTimeSliderLayers,
   getStoreTimeSliderSelectedLayerPath,
   isStoreTimeSliderInitialized,
@@ -114,8 +99,7 @@ import { DateMgt, type TimeDimension } from '@/core/utils/date-mgt';
 import { delay, doTimeout, isValidUUID } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { logger } from '@/core/utils/logger';
-import { MapViewer } from '@/geo/map/map-viewer';
-import { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
+import type { MapViewer } from '@/geo/map/map-viewer';
 import { Projection } from '@/geo/utils/projection';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
@@ -125,7 +109,7 @@ import type { Draw } from '@/geo/interaction/draw';
 import type { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import type { FitOptions } from 'ol/View';
 import { GeoUtilities } from '@/geo/utils/utilities';
-import { InvalidExtentError, NoBoundsError } from '@/core/exceptions/geoview-exceptions';
+import { InvalidExtentError } from '@/core/exceptions/geoview-exceptions';
 import { AbstractGVVectorTile } from '@/geo/layer/gv-layers/vector/abstract-gv-vector-tile';
 import type { FeatureHighlight } from '@/geo/map/feature-highlight';
 
@@ -157,12 +141,12 @@ export class MapController extends AbstractMapViewerController {
   // #region PUBLIC METHODS - ZOOM FUNCTIONS
 
   /**
-   * Zoom to the specified extent.
+   * Zooms to the specified extent.
    *
-   * @param extent - The extent to zoom to.
-   * @param options - The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 13, duration: 500 }).
-   * @returns A promise that resolves when the zoom animation is complete.
-   * @throws {InvalidExtentError} When the extent is invalid.
+   * @param extent - The extent to zoom to
+   * @param options - The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 13, duration: 500 })
+   * @returns A promise that resolves when the zoom animation is complete
+   * @throws {InvalidExtentError} When the extent is invalid
    */
   zoomToExtent(extent: Extent, options: FitOptions = DEFAULT_OL_FITOPTIONS): Promise<void> {
     // Merge user options with defaults
@@ -189,9 +173,9 @@ export class MapController extends AbstractMapViewerController {
   }
 
   /**
-   * Return to initial view state of map using config.
+   * Returns to initial view state of map using config.
    *
-   * @returns A promise that resolves when the zoom animation is complete.
+   * @returns A promise that resolves when the zoom animation is complete
    */
   async zoomToInitialExtent(): Promise<void> {
     // Get the map id
@@ -242,10 +226,10 @@ export class MapController extends AbstractMapViewerController {
   }
 
   /**
-   * Zoom to geolocation position provided.
+   * Zooms to geolocation position provided.
    *
-   * @param position - Info on position to zoom to.
-   * @returns A promise that resolves when the zoom animation is complete.
+   * @param position - Info on position to zoom to
+   * @returns A promise that resolves when the zoom animation is complete
    */
   zoomToMyLocation(position: GeolocationPosition): Promise<void> {
     const coord: Coordinate = [position.coords.longitude, position.coords.latitude];
@@ -258,69 +242,6 @@ export class MapController extends AbstractMapViewerController {
     const extent: Extent = [...projectedCoords[0], ...projectedCoords[0]];
 
     return this.zoomToExtent(extent);
-  }
-
-  /**
-   * Zoom to layer visible scale.
-   *
-   * @param layerPath - Path of layer to zoom to.
-   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
-   */
-  zoomToLayerVisibleScale(layerPath: string): void {
-    const view = this.getMapViewer().getView();
-    const mapZoom = view.getZoom();
-    const geoviewLayer = this.getControllersRegistry().layerController.getGeoviewLayer(layerPath);
-    const layerMaxZoom = geoviewLayer.getMaxZoom();
-    const layerMinZoom = geoviewLayer.getMinZoom();
-
-    // Set the right zoom (Infinity will act as a no change in zoom level)
-    let layerZoom = Infinity;
-    if (layerMinZoom !== -Infinity && layerMinZoom >= mapZoom!) layerZoom = layerMinZoom + 0.25;
-    else if (layerMaxZoom !== Infinity && layerMaxZoom <= mapZoom!) layerZoom = layerMaxZoom - 0.25;
-
-    // Change view to go to proper zoom centered in the middle of layer extent
-    // If there is no layerExtent or if the zoom needs to zoom out, the center will be undefined and not use
-    // Check if the map center is already in the layer extent and if so, do not center
-    geoviewLayer
-      .getBounds(this.getMapViewer().getProjection(), MapViewer.DEFAULT_STOPS)
-      .then((layerExtent) => {
-        const centerExtent =
-          layerExtent && layerMinZoom > mapZoom! && !GeoUtilities.isPointInExtent(view.getCenter()!, layerExtent)
-            ? [(layerExtent[2] + layerExtent[0]) / 2, (layerExtent[1] + layerExtent[3]) / 2]
-            : undefined;
-
-        view.animate({
-          center: centerExtent,
-          zoom: layerZoom,
-          duration: OL_ZOOM_DURATION,
-        });
-      })
-      .catch((error: unknown) => {
-        // Log error
-        logger.logPromiseFailed('in getBounds in mapController.zoomToLayerVisibleScale', error);
-      });
-  }
-
-  /**
-   * Zoom to extents of a layer.
-   *
-   * @param layerPath - The path of the layer to zoom to.
-   * @throws {NoBoundsError} When the layer doesn't have bounds.
-   */
-  zoomToLayerExtent(layerPath: string, fitOptions?: FitOptions): Promise<void> {
-    // Define some zoom options
-    const options: FitOptions = fitOptions ?? { padding: OL_ZOOM_PADDING, duration: OL_ZOOM_DURATION };
-
-    // Get the layer bounds
-    const bounds = getStoreLayerBounds(this.getMapId(), layerPath);
-
-    // If found
-    if (bounds) {
-      return this.zoomToExtent(bounds, options);
-    }
-
-    // Failed
-    throw new NoBoundsError(layerPath);
   }
 
   /**
@@ -491,44 +412,6 @@ export class MapController extends AbstractMapViewerController {
   }
 
   /**
-   * Removes all highlighted features for a specific layer.
-   *
-   * @param layerPath - The layer path to remove highlights from
-   */
-  removeLayerHighlights(layerPath: string): void {
-    // Redirect to layer api
-    this.getControllersRegistry().layerController.removeLayerHighlights(layerPath);
-  }
-
-  /**
-   * Update or remove the layer highlight.
-   *
-   * @param layerPath - The layer path to set as the highlighted layer.
-   * @param highlightedLayerPath - The layer path of the currently highlighted layer.
-   * @returns The layer path of the highlighted layer.
-   */
-  changeOrRemoveLayerHighlight(layerPath: string, highlightedLayerPath: string): string {
-    // If layer is currently highlighted layer, remove highlight
-    if (highlightedLayerPath === layerPath) {
-      this.getControllersRegistry().layerController.setHighlightLayer('');
-      this.getControllersRegistry().layerController.removeHighlightLayer();
-      return '';
-    }
-
-    // If the layer path is set to nothing, done
-    if (!layerPath) return '';
-
-    // Redirect to layer to highlight
-    this.getControllersRegistry().layerController.highlightLayer(layerPath);
-
-    // Get bounds and highlight a bounding box for the layer (if true in global settings)
-    const bounds = getStoreLayerBounds(this.getMapId(), layerPath);
-    if (bounds && getStoreShowLayerHighlightLayerBbox(this.getMapId())) this.highlightBBox(bounds, true);
-
-    return layerPath;
-  }
-
-  /**
    * Adds point markers to a group, replacing existing markers with matching IDs or coordinates.
    *
    * @param group - The group to add the markers to
@@ -676,7 +559,7 @@ export class MapController extends AbstractMapViewerController {
       // Remove layer highlight if present to avoid bad reprojection
       const highlightName = getStoreLayerHighlightedLayer(this.getMapId());
       if (highlightName !== '') {
-        this.changeOrRemoveLayerHighlight(highlightName, highlightName);
+        this.getControllersRegistry().layerController.changeOrRemoveLayerHighlight(highlightName, highlightName);
       }
 
       // Reset the map object of overview map control
@@ -771,75 +654,6 @@ export class MapController extends AbstractMapViewerController {
   }
 
   /**
-   * Reorders a layer by moving it up or down in the layer stack.
-   *
-   * @param layerPath - The layer path to reorder
-   * @param move - The number of positions to move (positive = up, negative = down)
-   */
-  reorderLayer(layerPath: string, move: number): void {
-    // Redirect to state API
-    this.getMapViewer().stateApi.reorderLayers(layerPath, move);
-  }
-
-  /**
-   * Apply all available filters to layer.
-   *
-   * @param layerPath - The path of the layer to apply filters to.
-   * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path.
-   */
-  applyLayerFilters(layerPath: string): void {
-    // Get the Geoview layer
-    const geoviewLayer = this.getControllersRegistry().layerController.getGeoviewLayerRegularIfExists(layerPath);
-
-    // If found it
-    if (geoviewLayer) {
-      // Read filter information from the UI
-      const layerFilters = this.getActiveFilters(layerPath);
-
-      // Apply the view filter on the layer
-      geoviewLayer.setLayerFilters(layerFilters, true);
-    }
-  }
-
-  /**
-   * Get all active filters for layer.
-   *
-   * @param layerPath - The path for the layer to get filters from.
-   * @returns The active layer filters
-   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
-   * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path.
-   */
-  // TODO: REFACTOR - This function, if we don't actually delete it, should basically only return the
-  // TO.DOCONT: layer.getLayerFilter() from the domain, never go in the store.
-  // TO.DOCONT: The store synchronization should happen via a event hook. Event that is raised by the
-  // TO.DOCONT: layer when the layer filters attributes themselves are set.
-  // TO.DOCONT: This is related to the other TODO to improve the layer filterings. Search id: ce707359
-  getActiveFilters(layerPath: string): LayerFilters {
-    // Get the layer and layer config
-    const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
-    const layerConfig = layer.getLayerConfig();
-
-    // The initial filter
-    const initialFilter = layerConfig.getLayerFilter();
-
-    // The class breaks filter if any
-    const classFilter = layer.getFilterFromStyle();
-
-    // The data table filter if any
-    const dataFilter = getStoreTableFilter(this.getMapId(), layerPath);
-
-    // If the TimeSlider is initialized
-    let timeFilter: string | undefined;
-    if (isStoreTimeSliderInitialized(this.getMapId())) {
-      // Assign it for the return
-      timeFilter = getStoreTimeSliderFilter(this.getMapId(), layerPath);
-    }
-
-    // Return the current filters in the application
-    return new LayerFilters(initialFilter, classFilter, dataFilter, timeFilter);
-  }
-
-  /**
    * Forces the map to re-render all layers and features.
    * Useful when layer styles or features have been updated programmatically and need to be reflected visually.
    */
@@ -899,7 +713,7 @@ export class MapController extends AbstractMapViewerController {
    * When toggled off, any existing details coordinate info is removed from the details store.
    * The clicked coordinates themselves remain in the map store.
    *
-   * @param abortSignal - Optional AbortSignal to cancel the fetch requests if needed.
+   * @param abortSignal - Optional AbortSignal to cancel the fetch requests if needed
    */
   toggleCoordinateInfoEnabled(abortSignal: AbortSignal): void {
     // Get the state value
@@ -934,9 +748,9 @@ export class MapController extends AbstractMapViewerController {
    * data from the configured service URLs and creates a coordinate info layer
    * entry in the store. When disabled, removes any existing coordinate info.
    *
-   * @param coordinates - The map mouse info containing click coordinates.
-   * @param serviceUrls - Service URLs for UTM, NTS, and altitude lookups.
-   * @param abortSignal - Optional AbortSignal to cancel the fetch requests if needed.
+   * @param coordinates - The map mouse info containing click coordinates
+   * @param serviceUrls - Service URLs for UTM, NTS, and altitude lookups
+   * @param abortSignal - Optional AbortSignal to cancel the fetch requests if needed
    */
   async updateStoreCoordinateInfo(coordinates: TypeMapMouseInfo, serviceUrls: TypeServiceUrls, abortSignal?: AbortSignal): Promise<void> {
     const [lng, lat] = coordinates.lonlat;
@@ -1050,242 +864,6 @@ export class MapController extends AbstractMapViewerController {
 
   // #endregion PUBLIC METHODS - OTHERS
 
-  // #region PUBLIC METHODS - LAYERS
-
-  /**
-   * Sets or toggles the visibility of a specific layer within a map.
-   * If the layer exists at the provided layer path for the given map, the method delegates
-   * the visibility change to the map viewer's layer API. If `newValue` is provided, the layer
-   * visibility is explicitly set to that value; otherwise, the visibility is toggled.
-   *
-   * @param layerPath - The path of the layer whose visibility is being changed.
-   * @param newValue - Optional. The new visibility value. If omitted, the visibility is toggled.
-   * @returns The resulting visibility state of the layer after the operation, or `false`
-   * if the layer does not exist at the given path.
-   */
-  setOrToggleMapLayerVisibility(layerPath: string, newValue?: boolean): boolean {
-    // If the GV layer exists at the layer path
-    if (this.getControllersRegistry().layerController.getGeoviewLayerIfExists(layerPath)) {
-      // Redirect to set or toggle the layer visibility and return the resulting visibility
-      return this.setOrToggleLayerVisibility(layerPath, newValue);
-    }
-    return false;
-  }
-
-  /**
-   * Sets or toggles the visibility of a layer within the current map.
-   *
-   * Retrieves the current visibility of the layer, determines the resulting visibility
-   * based on the optional `newValue`, and applies the change only if the visibility
-   * actually differs. If `newValue` is provided, the visibility is set explicitly;
-   * if omitted, the method toggles the current visibility.
-   *
-   * @param layerPath - The path of the layer whose visibility is being updated.
-   * @param newValue - Optional. The new visibility value to apply. If omitted, the current visibility is toggled.
-   * @returns The resulting visibility state of the layer after the update
-   * @throws {LayerNotFoundError} When the layer cannot be found at the given path.
-   */
-  setOrToggleLayerVisibility(layerPath: string, newValue?: boolean): boolean {
-    // Get current visibility based on the store
-    // TODO: CHECK - Should likely check the current visibility by using the layer (domain) instead of the store
-    const layerVisibility = getStoreMapVisibilityByPath(this.getMapId(), layerPath);
-
-    // Determine the outcome of the new visibility based on parameters
-    const newVisibility = newValue !== undefined ? newValue : !layerVisibility;
-
-    if (layerVisibility !== newVisibility) {
-      // Redirect to set or toggle the layer visibility and return the resulting visibility
-      this.getControllersRegistry().layerController.getGeoviewLayer(layerPath).setVisible(newVisibility);
-    }
-
-    return newVisibility;
-  }
-
-  /**
-   * Sets the visibility of all geoview layers on the map.
-   *
-   * @param newValue - The new visibility.
-   */
-  setAllLayersVisibility(newValue: boolean): void {
-    this.getControllersRegistry()
-      .layerController.getLayerEntryLayerPaths()
-      .forEach((layerPath) => {
-        // If the layer path has a corresponding Geoview layer (it's possible that there's a layer entry config without necessarily a GV layer)
-        if (this.getControllersRegistry().layerController.getGeoviewLayerIfExists(layerPath)) {
-          // There is a geoview layer at this layer path
-          this.setOrToggleLayerVisibility(layerPath, newValue);
-        }
-      });
-  }
-
-  /**
-   * Sets the visibility of the Geoview basemap layer.
-   *
-   * @param newVisibility - The visibility state to apply to the basemap layer (`true` to show, `false` to hide).
-   */
-  setVisibilityOfGeoviewBasemapLayers(newVisibility: boolean): void {
-    this.getControllersRegistry()
-      .layerController.getGeoviewLayers()
-      .forEach((layer) => {
-        if (layer.getLayerConfig().getGeoviewLayerConfig().useAsBasemap === true && layer.getVisible() !== newVisibility) {
-          this.setOrToggleLayerVisibility(layer.getLayerPath(), newVisibility);
-        }
-      });
-  }
-
-  /**
-   * Sets the visibility of **all layers** in a given map.
-   *
-   * Iterates through all GeoView layers associated with the specified map ID and
-   * applies the provided visibility value. Only layers whose current visibility
-   * differs from the desired state will be updated.
-   *
-   * @param newVisibility - The visibility state to apply to all layers (`true` to show, `false` to hide).
-   */
-  setAllMapLayerVisibility(newVisibility: boolean): void {
-    // Set the visibility for all layers
-    this.getControllersRegistry()
-      .layerController.getGeoviewLayers()
-      .forEach((layer) => {
-        if (layer.getLayerConfig().getGeoviewLayerConfig().useAsBasemap !== true && layer.getVisible() !== newVisibility) {
-          this.setOrToggleLayerVisibility(layer.getLayerPath(), newVisibility);
-        }
-      });
-  }
-
-  /**
-   * Sets the visibility of a layer in the store ordered layer info.
-   *
-   * @param layerPath - The layer path of the layer to change
-   * @param visibility - The visibility to set
-   */
-  setMapLayerVisibility(layerPath: string, visibility: boolean): void {
-    // Save to the store
-    setStoreMapLayerVisibility(this.getMapId(), layerPath, visibility);
-
-    // Update the z indices
-    this.setLayerZIndices();
-  }
-
-  /**
-   * Updates the visible range state for a layer in the ordered layer info.
-   *
-   * @param layerPath - The layer path to update
-   * @param inVisibleRange - Whether the layer is in visible zoom range
-   */
-  setLayerInVisibleRange(layerPath: string, inVisibleRange: boolean): void {
-    // Save to the store
-    setStoreLayerInVisibleRange(this.getMapId(), layerPath, inVisibleRange);
-
-    // Update the z indices
-    this.setLayerZIndices();
-  }
-
-  /**
-   * Replaces a layer in the orderedLayerInfo array.
-   *
-   * @param layerConfig - The config of the layer to add.
-   * @param layerPathToReplace - The layerPath of the info to replace.
-   */
-  replaceOrderedLayerInfo(layerConfig: ConfigBaseClass, layerPathToReplace?: string): void {
-    const orderedLayerInfo = getStoreMapOrderedLayerInfo(this.getMapId());
-    const layerPath = layerConfig.getGeoviewLayerId() ? `${layerConfig.getGeoviewLayerId()}/base-group` : layerConfig.layerPath;
-    const pathToSearch = layerPathToReplace || layerPath;
-    const index = getStoreMapOrderedLayerIndexByPath(this.getMapId(), pathToSearch);
-    const replacedLayers = utilFindMapLayerAndChildrenFromOrderedInfo(pathToSearch, orderedLayerInfo);
-
-    const newOrderedLayerInfo = LayerCreatorController.generateArrayOfLayerOrderInfo(layerConfig);
-    orderedLayerInfo.splice(index, replacedLayers.length, ...newOrderedLayerInfo);
-
-    // Save in the store
-    setStoreMapOrderedLayerDirectly(this.getMapId(), orderedLayerInfo);
-
-    // Update the z indices
-    this.setLayerZIndices();
-  }
-
-  /**
-   * Adds a new layer to the orderedLayerInfo array using a layer config.
-   *
-   * @param geoviewLayerConfig - The config of the layer to add.
-   */
-  addOrderedLayerInfoByConfig(geoviewLayerConfig: TypeGeoviewLayerConfig | TypeLayerEntryConfig, index?: number): void {
-    const orderedLayerInfo = getStoreMapOrderedLayerInfo(this.getMapId());
-
-    const newOrderedLayerInfo = LayerCreatorController.generateArrayOfLayerOrderInfo(geoviewLayerConfig);
-    if (!index) orderedLayerInfo.unshift(...newOrderedLayerInfo);
-    else orderedLayerInfo.splice(index, 0, ...newOrderedLayerInfo);
-
-    // Save in the store
-    setStoreMapOrderedLayerDirectly(this.getMapId(), orderedLayerInfo);
-
-    // Update the z indices
-    this.setLayerZIndices();
-  }
-
-  /**
-   * Adds new layer info to the orderedLayerInfo array.
-   *
-   * @param layerInfo - The ordered layer info to add.
-   */
-  addOrderedLayerInfo(layerInfo: TypeOrderedLayerInfo, index?: number): void {
-    const orderedLayerInfo = getStoreMapOrderedLayerInfo(this.getMapId());
-    if (!index) orderedLayerInfo.unshift(layerInfo);
-    else orderedLayerInfo.splice(index, 0, layerInfo);
-
-    // Save in store
-    setStoreMapOrderedLayerDirectly(this.getMapId(), orderedLayerInfo);
-
-    // Update the z indices
-    this.setLayerZIndices();
-  }
-
-  /**
-   * Removes a layer from the orderedLayerInfo array.
-   *
-   * @param layerPath - The path of the layer to remove.
-   * @param removeSublayers - Should sublayers be removed.
-   */
-  removeOrderedLayerInfo(layerPath: string, removeSublayers: boolean = true): void {
-    const orderedLayerInfo = getStoreMapOrderedLayerInfo(this.getMapId());
-    const newOrderedLayerInfo = removeSublayers
-      ? orderedLayerInfo.filter((layerInfo) => !layerInfo.layerPath.startsWith(`${layerPath}/`) && !(layerInfo.layerPath === layerPath))
-      : orderedLayerInfo.filter((layerInfo) => !(layerInfo.layerPath === layerPath));
-
-    // Save in store
-    setStoreMapOrderedLayerDirectly(this.getMapId(), newOrderedLayerInfo);
-
-    // Update the z indices
-    this.setLayerZIndices();
-  }
-
-  /**
-   * Updates the ordered layer info in the store and recalculates layer Z indices.
-   *
-   * @param orderedLayerInfo - The new ordered layer info array
-   * @deprecated This function shouldn't exist as it breaks the separation of concern between the controller and the store implementation.
-   */
-  setMapOrderedLayerInfoDirectly(orderedLayerInfo: TypeOrderedLayerInfo[]): void {
-    // Save in store
-    setStoreMapOrderedLayerDirectly(this.getMapId(), orderedLayerInfo);
-
-    // Update the z indices
-    this.setLayerZIndices();
-  }
-
-  /**
-   * Set Z index for layers
-   */
-  setLayerZIndices(): void {
-    const reversedLayers = [...getStoreMapOrderedLayerInfo(this.getMapId())].reverse();
-    reversedLayers.forEach((orderedLayerInfo, index) => {
-      const gvLayer = this.getControllersRegistry().layerController.getGeoviewLayerIfExists(orderedLayerInfo.layerPath);
-      gvLayer?.setZIndex(index + 10);
-    });
-  }
-
-  // #endregion PUBLIC METHODS - LAYERS
-
   // #region PUBLIC METHODS - BASEMAP API
 
   /**
@@ -1349,7 +927,7 @@ export class MapController extends AbstractMapViewerController {
   /**
    * Creates a map config based on current map state.
    *
-   * @param overrideGeocoreServiceNames - Indicates if geocore layer names should be kept as is or returned to defaults.
+   * @param overrideGeocoreServiceNames - Indicates if geocore layer names should be kept as is or returned to defaults
    * @returns The type map features instance
    */
   createMapConfigFromMapState(overrideGeocoreServiceNames: boolean | 'hybrid' = true): TypeMapFeaturesInstance | undefined {
@@ -1487,10 +1065,10 @@ export class MapController extends AbstractMapViewerController {
   /**
    * Searches through a map config and replaces any matching layer names with their provided partner.
    *
-   * @param namePairs - The array of name pairs. Presumably one english and one french name in each pair.
-   * @param mapConfig - The config to modify.
-   * @param removeUnlisted - Remove any layer name that doesn't appear in namePairs.
-   * @returns Map config with updated names.
+   * @param namePairs - The array of name pairs. Presumably one english and one french name in each pair
+   * @param mapConfig - The config to modify
+   * @param removeUnlisted - Remove any layer name that doesn't appear in namePairs
+   * @returns Map config with updated names
    */
   static utilReplaceMapConfigLayerNames(
     namePairs: string[][],
@@ -1571,9 +1149,9 @@ export class MapController extends AbstractMapViewerController {
   /**
    * Creates a geoview layer config based on current layer state.
    *
-   * @param layerPath - Path of the layer to create config for.
-   * @param overrideGeocoreServiceNames - Indicates if geocore layer names should be kept as is or returned to defaults.
-   * @returns Geoview layer config object.
+   * @param layerPath - Path of the layer to create config for
+   * @param overrideGeocoreServiceNames - Indicates if geocore layer names should be kept as is or returned to defaults
+   * @returns Geoview layer config object
    */
   #createGeoviewLayerConfig(layerPath: string, overrideGeocoreServiceNames: boolean | 'hybrid'): MapConfigLayerEntry | undefined {
     // Get the map id
@@ -1655,11 +1233,11 @@ export class MapController extends AbstractMapViewerController {
   /**
    * Creates a layer entry config based on current layer state.
    *
-   * @param layerPath - Path of the layer to create config for.
-   * @param isGeocore - Indicates if it is a geocore layer.
-   * @param overrideGeocoreServiceNames - Indicates if geocore layer names should be kept as is or returned to defaults.
-   * @returns Entry config object.
-   * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
+   * @param layerPath - Path of the layer to create config for
+   * @param isGeocore - Indicates if it is a geocore layer
+   * @param overrideGeocoreServiceNames - Indicates if geocore layer names should be kept as is or returned to defaults
+   * @returns Entry config object
+   * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path
    */
   #createLayerEntryConfig(layerPath: string, isGeocore: boolean, overrideGeocoreServiceNames: boolean | 'hybrid'): TypeLayerEntryConfig {
     // Get needed info
@@ -1823,10 +1401,10 @@ export class MapController extends AbstractMapViewerController {
   /**
    * Creates layer initial settings according to provided configs.
    *
-   * @param layerEntryConfig - Layer entry config for the layer.
-   * @param orderedLayerInfo - Ordered layer info for the layer.
-   * @param legendLayerInfo - Legend layer info for the layer.
-   * @returns Initial settings object.
+   * @param layerEntryConfig - Layer entry config for the layer
+   * @param orderedLayerInfo - Ordered layer info for the layer
+   * @param legendLayerInfo - Legend layer info for the layer
+   * @returns Initial settings object
    */
   static #getInitialSettings(
     layerEntryConfig: ConfigBaseClass,
@@ -1853,9 +1431,9 @@ export class MapController extends AbstractMapViewerController {
   /**
    * Searches through a list of layer entry configs and replaces any matching layer names with their provided partner.
    *
-   * @param pairsDict - The dict of name pairs. Presumably one english and one french name in each pair.
-   * @param listOfLayerEntryConfigs - The layer entry configs to modify.
-   * @param removeUnlisted - Remove any layer name that doesn't appear in namePairs.
+   * @param pairsDict - The dict of name pairs. Presumably one english and one french name in each pair
+   * @param listOfLayerEntryConfigs - The layer entry configs to modify
+   * @param removeUnlisted - Remove any layer name that doesn't appear in namePairs
    */
   static #replaceLayerEntryConfigNames(
     pairsDict: Record<string, string>,
@@ -1873,14 +1451,4 @@ export class MapController extends AbstractMapViewerController {
   }
 
   // #endregion STATIC PRIVATE METHODS - CONFIG CREATION
-}
-
-/**
- * Hook to access the MapController from the controller context.
- *
- * @returns The map controller instance
- * @throws {Error} When used outside of a ControllerContext.Provider.
- */
-export function useMapController(): MapController {
-  return useControllers().mapController;
 }

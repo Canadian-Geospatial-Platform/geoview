@@ -11,9 +11,8 @@ import { useStoreMapCurrentProjectionEPSG } from '@/core/stores/store-interface-
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { TIMEOUT } from '@/core/utils/constant';
-import { useUIController } from '@/core/controllers/ui-controller';
 import { logger } from '@/core/utils/logger';
-import { useLayerController } from '@/core/controllers/layer-controller';
+import { useLayerController, useUIController } from '@/core/controllers/use-controllers';
 
 /** Properties for the JSONExportButton component. */
 interface JSONExportButtonProps {

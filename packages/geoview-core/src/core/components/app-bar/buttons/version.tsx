@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import type { Theme } from '@mui/material';
 import { Typography, Box, Link, SvgIcon, ClickAwayListener, List, Paper, useTheme } from '@mui/material';
 
-import { useUIController } from '@/core/controllers/ui-controller';
+import { useUIController } from '@/core/controllers/use-controllers';
 import { GITHUB_REPO, GEO_URL_TEXT, CONTAINER_TYPE } from '@/core/utils/constant';
 import { GeoCaIcon, IconButton, Popper, CloseIcon } from '@/ui';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';

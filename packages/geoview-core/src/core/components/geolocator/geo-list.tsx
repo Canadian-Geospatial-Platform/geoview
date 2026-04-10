@@ -6,7 +6,7 @@ import { getSxClassesList } from '@/core/components/geolocator/geolocator-style'
 import { getBoldListTitle, getTooltipTitle } from '@/core/components/geolocator/utilities';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { logger } from '@/core/utils/logger';
-import { useMapController } from '@/core/controllers/map-controller';
+import { useMapController } from '@/core/controllers/use-controllers';
 
 /** Props for the GeoList component. */
 type GeoListProps = {

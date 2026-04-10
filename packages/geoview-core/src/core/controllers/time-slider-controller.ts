@@ -1,5 +1,4 @@
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
-import { useControllers } from '@/core/controllers/base/controller-manager';
 import {
   addOrUpdateStoreTimeSliderFilter,
   addStoreTimeSliderLayer,
@@ -173,7 +172,7 @@ export class TimeSliderController extends AbstractMapViewerController {
     setStoreTimeSliderValues(this.getMapId(), layer.getLayerPath(), values);
 
     // Apply filters on the map
-    this.getControllersRegistry().mapController.applyLayerFilters(layer.getLayerPath());
+    this.getControllersRegistry().layerController.applyLayerFilters(layer.getLayerPath());
   }
 
   // #endregion PRIVATE METHODS
@@ -358,17 +357,4 @@ export class TimeSliderController extends AbstractMapViewerController {
   }
 
   // #endregion STATIC METHODS
-}
-
-/**
- * Hook to access the TimeSliderController from the controller context.
- *
- * @returns The time slider controller instance
- * @throws {Error} When used outside of a ControllerContext.Provider.
- * @throws {Error} When the TimeSlider plugin is not configured.
- */
-export function useTimeSliderController(): TimeSliderController {
-  const controller = useControllers().timeSliderController;
-  if (!controller) throw new Error('useTimeSliderController must be used with an initialized time slider plugin state');
-  return controller;
 }

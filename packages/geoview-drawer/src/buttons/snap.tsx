@@ -7,7 +7,7 @@ import { useStoreDrawerIsSnapping } from 'geoview-core/core/stores/store-interfa
 
 import { IconButton } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
-import { useDrawerController } from 'geoview-core/core/controllers/drawer-controller';
+import { useDrawerController } from 'geoview-core/core/controllers/use-controllers';
 
 const snappingIconPath =
   'M 152.5,259.5 V 348.8 C 151.8,455.1 193.8,527.3 320,527.3 451.7,527.3 487.5,455.8 487.5,348.8 V 259.5 H 391.8 V 348.8 C 391.8,410.7 386.3,452 320,452 256.1,452 248.2,403.7 248.2,348.8 V 259.5 Z M 152.5,221.2 H 248.2 V 170.2 C 248.2,156.1 237.6,144.7 224.3,144.7 H 176.5 C 163.3,144.7 152.5,156.1 152.5,170.2 Z M 391.8,221.2 H 487.5 V 170.2 C 487.5,156.1 476.7,144.7 463.5,144.7 H 415.7 C 402.4,144.7 391.8,156.1 391.8,170.2 Z';

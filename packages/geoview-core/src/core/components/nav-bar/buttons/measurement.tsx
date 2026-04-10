@@ -23,7 +23,7 @@ import type { Draw } from '@/geo/interaction/draw';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useStoreAppDisplayLanguage, useStoreAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { GeoUtilities } from '@/geo/utils/utilities';
-import { useMapController } from '@/core/controllers/map-controller';
+import { useMapController } from '@/core/controllers/use-controllers';
 
 /** The geometry group key for measurement features. */
 const MEASURE_GROUP_KEY = 'geoview-measurement';

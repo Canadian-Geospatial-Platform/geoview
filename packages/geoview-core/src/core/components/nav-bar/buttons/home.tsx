@@ -4,7 +4,7 @@ import { useTheme } from '@mui/material/styles';
 import { IconButton, HomeIcon } from '@/ui';
 import { getSxClasses } from '@/core/components/nav-bar/nav-bar-style';
 import { logger } from '@/core/utils/logger';
-import { useMapController } from '@/core/controllers/map-controller';
+import { useMapController } from '@/core/controllers/use-controllers';
 
 /**
  * Creates a home button to return the user to the map center.

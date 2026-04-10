@@ -27,7 +27,7 @@ import {
   useStoreLayerUrl,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useStoreTimeSliderFilter, useStoreTimeSliderLayer } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
-import { useLayerController } from '@/core/controllers/layer-controller';
+import { useLayerController } from '@/core/controllers/use-controllers';
 
 // OGC/ESRI service capability request suffixes
 const WFS_PARAMS = '?service=WFS&version=2.0.0&request=GetCapabilities';
