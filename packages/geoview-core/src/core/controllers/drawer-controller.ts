@@ -65,7 +65,6 @@ import type {
 } from '@/geo/interaction/transform/transform';
 import type { Draw } from '@/geo/interaction/draw';
 import { formatArea, formatLength, generateId } from '@/core/utils/utilities';
-import { GeoUtilities } from '@/geo/utils/utilities';
 import type { TypeDisplayLanguage, TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
 import { getStoreAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
 import Collection from 'ol/Collection';
@@ -90,7 +89,7 @@ export class DrawerController extends AbstractMapViewerController {
   static #keyboardHandlers: Map<string, (event: KeyboardEvent) => void> = new Map();
 
   /** Keep track of the temporary transform instances for new text drawings */
-  static #tempTransformInstances = new Map<string, Transform>();
+  static #tempTextTransformInstances = new Map<string, Transform>();
 
   /** Track features that were selected and their original geometries */
   // GV The Map was because the transform COULD select multiple features
@@ -476,12 +475,15 @@ export class DrawerController extends AbstractMapViewerController {
   /**
    * Clears all drawings from the map.
    *
+   * @param saveHistory - Optional flag to determine whether to save this action to history (default: true)
    */
   clearDrawings(saveHistory: boolean = true): void {
     // Get the map id
     const mapId = this.getMapId();
 
     if (!isStoreDrawerInitialized(mapId)) return;
+
+    this.#stopAllInteractions();
 
     // Get all geometries for each type
     const features = this.#getDrawingFeatures();
@@ -490,7 +492,7 @@ export class DrawerController extends AbstractMapViewerController {
     if (saveHistory && features.length > 0) {
       this.#saveToHistory({
         type: 'clear',
-        features: features.map((ftr) => ftr.clone()),
+        features: features,
       });
     }
 
@@ -558,12 +560,12 @@ export class DrawerController extends AbstractMapViewerController {
     if (!isStoreDrawerInitialized(mapId)) return;
 
     const hideMeasurements = getStoreDrawerHideMeasurements(mapId);
-    const selectedDrawingId = getStoreDrawerSelectedDrawing(mapId)?.getId();
+    const selectedDrawingId = getStoreDrawerSelectedDrawing(mapId)?.get('featureId');
 
     // Get all overlays, ignoring currently selected features
     const features = this.#getDrawingFeatures();
     const measureOverlays = features
-      .filter((feature) => feature.getId() !== selectedDrawingId)
+      .filter((feature) => feature.get('featureId') !== selectedDrawingId)
       .map((feature) => feature.get('measureTooltip'));
 
     // Toggle the visibility of the measure tooltips
@@ -834,7 +836,7 @@ export class DrawerController extends AbstractMapViewerController {
     if (!selectedFeature) return;
 
     // Get the current state for this feature
-    const stateKey = `${mapId}-${selectedFeature.getId()}`;
+    const stateKey = `${mapId}-${selectedFeature.get('featureId')}`;
     const savedState = DrawerController.#selectedFeatureState.get(stateKey);
 
     // Store original style if not already stored
@@ -1106,7 +1108,7 @@ export class DrawerController extends AbstractMapViewerController {
             type: 'Feature',
             geometry: new GeoJSON().writeGeometryObject(clonedGeometry),
             properties: {
-              id: feature.getId(),
+              id: feature.get('featureId'),
               geometryGroup: feature.get('geometryGroup'),
               style: styleProps,
             },
@@ -1248,11 +1250,11 @@ export class DrawerController extends AbstractMapViewerController {
     // Get the map id
     const mapId = this.getMapId();
 
-    const tempTransform = DrawerController.#tempTransformInstances.get(mapId);
+    const tempTransform = DrawerController.#tempTextTransformInstances.get(mapId);
     if (tempTransform) {
       tempTransform.clearSelection();
       tempTransform.stopInteraction();
-      DrawerController.#tempTransformInstances.delete(mapId);
+      DrawerController.#tempTextTransformInstances.delete(mapId);
     }
   }
 
@@ -1265,7 +1267,7 @@ export class DrawerController extends AbstractMapViewerController {
   #getFeatureById(featureId: string): Feature | undefined {
     const allDrawingFeatures = this.#getDrawingFeatures();
 
-    const foundFeature = allDrawingFeatures.find((feature) => feature.getId() === featureId);
+    const foundFeature = allDrawingFeatures.find((feature) => feature.get('featureId') === featureId);
 
     return foundFeature;
   }
@@ -1302,7 +1304,6 @@ export class DrawerController extends AbstractMapViewerController {
 
     // Check if state exist and if draw instance is enable, solve error when switch lang and no draw instance
     if (!isStoreDrawerInitialized(mapId)) return [];
-    if (!getStoreDrawerDrawInstance(mapId)) return [];
 
     // Get features from drawing group
     const geometryGroup = this.#geometryApi.getGeometryGroup(DrawerController.DRAW_GROUP_KEY);
@@ -1311,6 +1312,23 @@ export class DrawerController extends AbstractMapViewerController {
       return [];
     }
     return features;
+  }
+
+  /**
+   * Stops all active interactions (drawing, editing)
+   */
+  #stopAllInteractions(): void {
+    const drawInstance = getStoreDrawInstance(this.getMapId());
+    if (drawInstance) {
+      drawInstance.finishDrawing();
+      this.stopDrawing();
+    }
+
+    // End any active transform instance
+    const transformInstance = getStoreTransformInstance(this.getMapId());
+    if (transformInstance) {
+      this.stopEditing();
+    }
   }
 
   // #endregion PRIVATE METHODS - DRAWING
@@ -1335,16 +1353,22 @@ export class DrawerController extends AbstractMapViewerController {
     const history = DrawerController.#drawerHistory.get(mapId)!;
     const currentIndex = DrawerController.#historyIndex.get(mapId)!;
 
+    // Clone all features to prevent shared references with map features
+    const clonedAction: DrawerHistoryAction = {
+      ...action,
+      features: action.features.map((feature) => feature.clone()),
+    };
+
     if (insertAtCurrentIndex) {
       // Insert right after current index for redo capability
-      history.splice(currentIndex + 1, 0, action);
+      history.splice(currentIndex + 1, 0, clonedAction);
       // Don't update the index - stay at current position
     } else {
       // Remove any history after current index
       history.splice(currentIndex + 1);
 
       // Add new action
-      history.push(action);
+      history.push(clonedAction);
       DrawerController.#historyIndex.set(mapId, history.length - 1);
     }
 
@@ -1374,20 +1398,21 @@ export class DrawerController extends AbstractMapViewerController {
 
     // Re-add the features
     action.features.forEach((feature) => {
-      feature.setId(feature.get('featureId'));
-      this.getGeometryApi().geometries.push(feature);
-      this.getGeometryApi().addToGeometryGroup(feature, DrawerController.DRAW_GROUP_KEY);
+      const clonedFeature = feature.clone();
+      clonedFeature.setId(feature.get('featureId'));
+      this.getGeometryApi().geometries.push(clonedFeature);
+      this.getGeometryApi().addToGeometryGroup(clonedFeature, DrawerController.DRAW_GROUP_KEY);
 
       // Add to transform instance if editing is active
       const transformInstance = getStoreDrawerTransformInstance(mapId);
       if (transformInstance) {
-        transformInstance.addFeature(feature);
+        transformInstance.addFeature(clonedFeature);
       }
 
       // Recreate measurement overlay
-      const geom = feature.getGeometry();
+      const geom = clonedFeature.getGeometry();
       if (geom && !(geom instanceof Point)) {
-        const overlay = DrawerController.#createMeasureTooltip(feature, false, getStoreAppDisplayLanguage(mapId));
+        const overlay = DrawerController.#createMeasureTooltip(clonedFeature, false, getStoreAppDisplayLanguage(mapId));
         if (overlay) viewer.map.addOverlay(overlay);
       }
     });
@@ -1445,7 +1470,7 @@ export class DrawerController extends AbstractMapViewerController {
     if (!viewer) return;
 
     action.features.forEach((feature, index) => {
-      const currentFeature = this.#getFeatureById(feature.getId() as string);
+      const currentFeature = this.#getFeatureById(feature.get('featureId'));
       if (currentFeature) {
         // Restore modified geometry if it exists
         if (action.modifiedGeometries && action.modifiedGeometries[index]) {
@@ -1480,7 +1505,7 @@ export class DrawerController extends AbstractMapViewerController {
     if (!viewer) return;
 
     action.features.forEach((feature, index) => {
-      const currentFeature = this.#getFeatureById(feature.getId() as string);
+      const currentFeature = this.#getFeatureById(feature.get('featureId'));
       if (currentFeature) {
         if (action.originalGeometries && action.originalGeometries[index]) {
           // Restore geometry
@@ -1587,14 +1612,45 @@ export class DrawerController extends AbstractMapViewerController {
     displayLanguage: TypeDisplayLanguage
   ): void {
     if (previousProjection) {
+      this.#stopAllInteractions();
+
+      const fromProjection = Projection.PROJECTIONS[previousProjection];
+      const toProjection = Projection.PROJECTIONS[currentProjection];
+
       const features = this.#getDrawingFeatures();
       features.forEach((feature) => {
         const geometry = feature.getGeometry();
         if (!geometry) return;
 
-        geometry.transform(Projection.PROJECTIONS[previousProjection], Projection.PROJECTIONS[currentProjection]);
-        this.#updateMeasurementTooltips(displayLanguage);
+        geometry.transform(fromProjection, toProjection);
       });
+
+      // Update tooltips once
+      this.#updateMeasurementTooltips(displayLanguage);
+
+      // Reproject all geometries in the history
+      const history = DrawerController.#drawerHistory.get(this.getMapId());
+      if (history) {
+        history.forEach((action) => {
+          // Reproject feature geometries
+          action.features.forEach((feature) => {
+            const geometry = feature.getGeometry();
+            if (geometry) {
+              geometry.transform(fromProjection, toProjection);
+            }
+          });
+
+          // Reproject original geometries (for modify actions)
+          action.originalGeometries?.forEach((geometry) => {
+            geometry.transform(fromProjection, toProjection);
+          });
+
+          // Reproject modified geometries (for modify actions)
+          action.modifiedGeometries?.forEach((geometry) => {
+            geometry.transform(fromProjection, toProjection);
+          });
+        });
+      }
     }
   }
 
@@ -1698,7 +1754,7 @@ export class DrawerController extends AbstractMapViewerController {
         });
 
         // Keep track of this temp transform instance for cleanup
-        DrawerController.#tempTransformInstances.set(mapId, tempTransform);
+        DrawerController.#tempTextTransformInstances.set(mapId, tempTransform);
 
         let isDeselected = false;
         // Handle when the temporary editing is done
@@ -1800,7 +1856,7 @@ export class DrawerController extends AbstractMapViewerController {
         features: [feature],
       });
 
-      const featureId = feature.getId();
+      const featureId = feature.get('featureId');
       if (featureId) {
         this.deleteSingleDrawing(featureId as string);
       }
@@ -1837,14 +1893,15 @@ export class DrawerController extends AbstractMapViewerController {
             true
           );
         } else {
-          const stateKey = `${mapId}-${previousFeature.getId()}`;
+          const stateKey = `${mapId}-${previousFeature.get('featureId')}`;
           const savedState = DrawerController.#selectedFeatureState.get(stateKey);
 
           if (savedState) {
             const currentGeometry = previousFeature.getGeometry();
 
             // Check for changes
-            const geometryChanged = currentGeometry && !GeoUtilities.geometriesAreEqual(savedState.originalGeometry, currentGeometry);
+            const transformInstance = getStoreTransformInstance(mapId);
+            const geometryChanged = currentGeometry && transformInstance && transformInstance.canUndo();
             const styleChanged =
               savedState.originalStyleStored && savedState.originalStyle && savedState.originalStyle !== previousFeature.getStyle();
 
@@ -1869,7 +1926,7 @@ export class DrawerController extends AbstractMapViewerController {
 
       // If we have a new feature selected, save its current state
       if (newFeature) {
-        const stateKey = `${mapId}-${newFeature.getId()}`;
+        const stateKey = `${mapId}-${newFeature.get('featureId')}`;
         const currentGeometry = newFeature.getGeometry();
 
         if (currentGeometry) {
