@@ -18,27 +18,19 @@ import {
   DEFAULT_TEXT_VALUES,
   isStoreDrawerInitialized,
   getStoreDrawerActiveGeom,
-  getStoreDrawerDrawInstance,
   getStoreDrawerHideMeasurements,
   getStoreDrawerIconSrc,
   getStoreDrawerIsDrawing,
   getStoreDrawerIsEditing,
   getStoreDrawerIsSnapping,
   getStoreDrawerSelectedDrawing,
-  getStoreDrawerSnapInstance,
   getStoreDrawerStyle,
-  getStoreDrawerTransformInstance,
-  removeStoreDrawInstance,
-  removeStoreSnapInstance,
-  removeStoreTransformInstance,
   setStoreActiveGeom,
   setStoreDrawerIconSize,
-  setStoreDrawInstance,
   setStoreFillColor,
   setStoreHideMeasurements,
   setStoreRedoDisabled,
   setStoreSelectedDrawing,
-  setStoreSnapInstance,
   setStoreStrokeColor,
   setStoreStrokeWidth,
   setStoreTextBold,
@@ -50,10 +42,12 @@ import {
   setStoreTextRotation,
   setStoreTextSize,
   setStoreTextValue,
-  setStoreTransformInstance,
   setStoreUndoDisabled,
   updateStoreStateStyle,
   type StyleProps,
+  setStoreIsDrawing,
+  setStoreIsEditing,
+  setStoreIsSnapping,
 } from '@/core/stores/store-interface-and-intial-values/drawer-state';
 import type { DomainLanguageChangedDelegate, DomainLanguageChangedEvent, UIDomain } from '@/core/domains/ui-domain';
 import type { MapViewer } from '@/geo/map/map-viewer';
@@ -64,6 +58,7 @@ import type {
   TransformSelectionEvent,
 } from '@/geo/interaction/transform/transform';
 import type { Draw } from '@/geo/interaction/draw';
+import type { Snap } from '@/geo/interaction/snap';
 import { formatArea, formatLength, generateId } from '@/core/utils/utilities';
 import type { TypeDisplayLanguage, TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
 import { getStoreAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
@@ -71,8 +66,8 @@ import Collection from 'ol/Collection';
 import { Projection } from '@/geo/utils/projection';
 import { getArea, getLength } from 'ol/sphere';
 import { getStoreMapCurrentProjection } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { logger } from '@/core/utils/logger';
 import type { GeometryApi } from '@/geo/layer/geometry/geometry';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Controller responsible for drawer interactions, keyboard shortcuts, and
@@ -87,6 +82,12 @@ export class DrawerController extends AbstractMapViewerController {
 
   /** Keyboard event handlers for each map keyed by map id. */
   static #keyboardHandlers: Map<string, (event: KeyboardEvent) => void> = new Map();
+
+  static #drawInstance: Draw | undefined = undefined;
+
+  static #transformInstance: Transform | undefined = undefined;
+
+  static #snapInstance: Snap | undefined = undefined;
 
   /** Keep track of the temporary transform instances for new text drawings */
   static #tempTextTransformInstances = new Map<string, Transform>();
@@ -229,7 +230,7 @@ export class DrawerController extends AbstractMapViewerController {
     currentStyle.textRotation = 0;
 
     // If drawing already, stop and restart as it's likely a style change
-    if (getStoreDrawerDrawInstance(mapId)) {
+    if (DrawerController.#drawInstance) {
       this.stopDrawing();
     }
 
@@ -257,7 +258,7 @@ export class DrawerController extends AbstractMapViewerController {
     draw.onDrawEnd(this.#handleDrawEnd());
 
     // Update state
-    setStoreDrawInstance(mapId, draw);
+    this.#setDrawInstance(draw);
     if (geomType) {
       this.setActiveGeom(geomType);
     }
@@ -285,10 +286,10 @@ export class DrawerController extends AbstractMapViewerController {
       viewer.registerMapPointerHandlers(viewer.map);
     }
 
-    getStoreDrawerDrawInstance(mapId)?.stopInteraction();
+    DrawerController.#drawInstance?.stopInteraction();
 
     // Update state
-    removeStoreDrawInstance(mapId);
+    this.#setDrawInstance(undefined);
   }
 
   /**
@@ -331,12 +332,12 @@ export class DrawerController extends AbstractMapViewerController {
       viewer.unregisterMapPointerHandlers(viewer.map);
     }
 
-    const oldTransformInstance = getStoreDrawerTransformInstance(mapId);
+    const oldTransformInstance = DrawerController.#transformInstance;
 
     // If editing already, stop and restart as it's likely a style change
     if (oldTransformInstance) {
       oldTransformInstance.stopInteraction();
-      removeStoreTransformInstance(mapId);
+      this.#setTransformInstance(undefined);
     }
 
     // Only start editing if the drawing group exists
@@ -352,14 +353,14 @@ export class DrawerController extends AbstractMapViewerController {
       // Handle Selection Events (new selection, removed selection, or both)
       transformInstance.onSelectionChange(this.#handleTransformSelectionChange());
 
-      setStoreTransformInstance(mapId, transformInstance);
+      this.#setTransformInstance(transformInstance);
     } else {
       this.startDrawing();
       return;
     }
 
     // If we have an active drawing instance, stop it
-    const drawInstance = getStoreDrawerDrawInstance(mapId);
+    const drawInstance = DrawerController.#drawInstance;
     if (drawInstance) {
       this.stopDrawing();
     }
@@ -383,11 +384,11 @@ export class DrawerController extends AbstractMapViewerController {
       viewer.registerMapPointerHandlers(viewer.map);
     }
 
-    const transformInstance = getStoreDrawerTransformInstance(mapId);
+    const transformInstance = DrawerController.#transformInstance;
 
     if (!transformInstance) return;
     transformInstance.stopInteraction();
-    removeStoreTransformInstance(mapId);
+    this.#setTransformInstance(undefined);
   }
 
   /**
@@ -422,7 +423,7 @@ export class DrawerController extends AbstractMapViewerController {
     const snapInstance = viewer.initSnapInteractions(DrawerController.DRAW_GROUP_KEY);
     snapInstance.startInteraction();
 
-    setStoreSnapInstance(mapId, snapInstance);
+    this.#setSnapInstance(snapInstance);
   }
 
   /**
@@ -434,10 +435,10 @@ export class DrawerController extends AbstractMapViewerController {
 
     if (!isStoreDrawerInitialized(mapId)) return;
 
-    const snapInstance = getStoreDrawerSnapInstance(mapId);
+    const snapInstance = DrawerController.#snapInstance;
     snapInstance?.stopInteraction();
 
-    removeStoreSnapInstance(mapId);
+    this.#setSnapInstance(undefined);
   }
 
   /**
@@ -811,7 +812,7 @@ export class DrawerController extends AbstractMapViewerController {
     const mapId = this.getMapId();
 
     // Refresh the draw instance with the new style
-    if (getStoreDrawerDrawInstance(mapId) !== undefined) {
+    if (DrawerController.#drawInstance !== undefined) {
       this.startDrawing();
     }
 
@@ -829,7 +830,7 @@ export class DrawerController extends AbstractMapViewerController {
 
     if (!isStoreDrawerInitialized(mapId)) return;
 
-    const transformInstance = getStoreDrawerTransformInstance(mapId);
+    const transformInstance = DrawerController.#transformInstance;
     if (!transformInstance) return;
 
     const selectedFeature = transformInstance.getSelectedFeature();
@@ -908,7 +909,7 @@ export class DrawerController extends AbstractMapViewerController {
     if (!isStoreDrawerInitialized(mapId)) return false;
 
     // If editing, undo the transform instance
-    const transformInstance = getStoreDrawerTransformInstance(mapId);
+    const transformInstance = DrawerController.#transformInstance;
     if (transformInstance && transformInstance.getSelectedFeature()) {
       if (transformInstance.canUndo()) {
         return transformInstance.undo(() => {
@@ -965,7 +966,7 @@ export class DrawerController extends AbstractMapViewerController {
     if (!isStoreDrawerInitialized(mapId)) return false;
 
     // If editing, redo the transform instance
-    const transformInstance = getStoreDrawerTransformInstance(mapId);
+    const transformInstance = DrawerController.#transformInstance;
     if (transformInstance && transformInstance.getSelectedFeature()) {
       if (transformInstance.canRedo()) {
         return transformInstance.redo(() => {
@@ -1318,14 +1319,14 @@ export class DrawerController extends AbstractMapViewerController {
    * Stops all active interactions (drawing, editing)
    */
   #stopAllInteractions(): void {
-    const drawInstance = getStoreDrawInstance(this.getMapId());
+    const drawInstance = DrawerController.#drawInstance;
     if (drawInstance) {
       drawInstance.finishDrawing();
       this.stopDrawing();
     }
 
     // End any active transform instance
-    const transformInstance = getStoreTransformInstance(this.getMapId());
+    const transformInstance = DrawerController.#transformInstance;
     if (transformInstance) {
       this.stopEditing();
     }
@@ -1334,6 +1335,42 @@ export class DrawerController extends AbstractMapViewerController {
   // #endregion PRIVATE METHODS - DRAWING
 
   // #region PRIVATE METHODS - HISTORY
+
+  /**
+   * Sets the draw instance for the drawer controller and updates the flag in the store
+   *
+   * @param drawInstance - The draw instance to set
+   */
+  #setDrawInstance(drawInstance: Draw | undefined): void {
+    const mapId = this.getMapId();
+
+    DrawerController.#drawInstance = drawInstance;
+    setStoreIsDrawing(mapId, !!drawInstance);
+  }
+
+  /**
+   * Sets the transform instance for the drawer controller and updates the flag in the store
+   *
+   * @param transformInstance - The transform instance to set
+   */
+  #setTransformInstance(transformInstance: Transform | undefined): void {
+    const mapId = this.getMapId();
+
+    DrawerController.#transformInstance = transformInstance;
+    setStoreIsEditing(mapId, !!transformInstance);
+  }
+
+  /**
+   * Sets the snap instance for the drawer controller and updates the flag in the store
+   *
+   * @param snapInstance - The snap instance to set
+   */
+  #setSnapInstance(snapInstance: Snap | undefined): void {
+    const mapId = this.getMapId();
+
+    DrawerController.#snapInstance = snapInstance;
+    setStoreIsSnapping(mapId, !!snapInstance);
+  }
 
   /**
    * Saves an action to the drawer history.
@@ -1404,7 +1441,7 @@ export class DrawerController extends AbstractMapViewerController {
       this.getGeometryApi().addToGeometryGroup(clonedFeature, DrawerController.DRAW_GROUP_KEY);
 
       // Add to transform instance if editing is active
-      const transformInstance = getStoreDrawerTransformInstance(mapId);
+      const transformInstance = DrawerController.#transformInstance;
       if (transformInstance) {
         transformInstance.addFeature(clonedFeature);
       }
@@ -1540,7 +1577,7 @@ export class DrawerController extends AbstractMapViewerController {
 
     if (!isStoreDrawerInitialized(mapId)) return;
 
-    const transformInstance = getStoreDrawerTransformInstance(mapId);
+    const transformInstance = DrawerController.#transformInstance;
     if (transformInstance) {
       transformInstance.selectFeature(action.features[0], false);
     }
@@ -1556,7 +1593,7 @@ export class DrawerController extends AbstractMapViewerController {
 
     if (!isStoreDrawerInitialized(mapId)) return;
 
-    const transformInstance = getStoreDrawerTransformInstance(mapId);
+    const transformInstance = DrawerController.#transformInstance;
     if (transformInstance && getStoreDrawerSelectedDrawing(mapId)) {
       const undoDisabled = !transformInstance.canUndo();
       const redoDisabled = !transformInstance.canRedo();
@@ -1744,7 +1781,7 @@ export class DrawerController extends AbstractMapViewerController {
 
       // For text features, create a temporary transform for immediate editing
       if (currentGeomType === 'Text') {
-        const drawInstance = getStoreDrawerDrawInstance(mapId);
+        const drawInstance = DrawerController.#drawInstance;
         drawInstance?.stopInteraction();
 
         const featureCollection = new Collection([feature]); // Only select this specific feature
@@ -1900,7 +1937,7 @@ export class DrawerController extends AbstractMapViewerController {
             const currentGeometry = previousFeature.getGeometry();
 
             // Check for changes
-            const transformInstance = getStoreTransformInstance(mapId);
+            const transformInstance = DrawerController.#transformInstance;
             const geometryChanged = currentGeometry && transformInstance && transformInstance.canUndo();
             const styleChanged =
               savedState.originalStyleStored && savedState.originalStyle && savedState.originalStyle !== previousFeature.getStyle();
