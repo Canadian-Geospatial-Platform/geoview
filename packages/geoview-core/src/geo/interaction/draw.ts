@@ -104,6 +104,14 @@ export class Draw extends Interaction {
   }
 
   /**
+   * Finishes the current drawing, triggering the drawend event.
+   * This is equivalent to double-clicking or pressing Enter to complete a drawing.
+   */
+  finishDrawing(): void {
+    this.#olDraw.finishDrawing();
+  }
+
+  /**
    * Emits the drawstart event to all registered handlers.
    *
    * @param event - The event to emit
