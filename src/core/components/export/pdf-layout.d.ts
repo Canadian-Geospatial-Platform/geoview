@@ -1,4 +1,4 @@
-import { type TemporalMode, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
+import type { TemporalMode, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import type { FlattenedLegendItem, NorthArrowSVG } from '@/core/components/export/utilities';
 import type { FileExportProps } from '@/core/components/export/export-modal';
 /** Properties for the PDF export document component. */

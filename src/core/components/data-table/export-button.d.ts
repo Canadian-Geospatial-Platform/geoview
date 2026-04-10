@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import { type MRT_ColumnDef as MRTColumnDef } from 'material-react-table';
+import type { MRT_ColumnDef as MRTColumnDef } from 'material-react-table';
 import type { ColumnsType } from './data-table-types';
 /** Properties for the ExportButton component. */
 interface ExportButtonProps {

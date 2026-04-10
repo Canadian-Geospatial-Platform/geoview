@@ -3,10 +3,9 @@ import type { QueryType } from '@/api/types/map-schema-types';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
-import type { LayerApi } from '@/geo/layer/layer';
 import type { TypeHoverResultSet, TypeHoverResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 /**
- * A Layer-set working with the LayerApi at handling a result set of registered layers and synchronizing
+ * A Layer-set working with the LayerSetController at handling a result set of registered layers and synchronizing
  * events happening on them (in this case when the user hovers on the map) with a store
  * for UI updates.
  */
@@ -16,12 +15,6 @@ export declare class HoverFeatureInfoLayerSet extends AbstractLayerSet {
     static QUERY_TYPE: QueryType;
     /** The resultSet object as existing in the base class, retyped here as a TypeHoverFeatureInfoResultSet */
     resultSet: TypeHoverResultSet;
-    /**
-     * The class constructor that instantiates a set of layers.
-     *
-     * @param layerApi - The layer Api to work with
-     */
-    constructor(layerApi: LayerApi);
     /**
      * Overrides the behavior to apply when a hover-feature-info-layer-set wants to check for condition to register a layer in its set.
      *
@@ -62,5 +55,9 @@ export declare class HoverFeatureInfoLayerSet extends AbstractLayerSet {
      * @param layerPath - The layer path
      */
     clearResults(layerPath: string): void;
+    /**
+     * Clears the results immediately for all.
+     */
+    clearResultsAll(): void;
 }
 //# sourceMappingURL=hover-feature-info-layer-set.d.ts.map

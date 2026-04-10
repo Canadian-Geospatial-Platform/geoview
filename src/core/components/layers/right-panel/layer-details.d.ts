@@ -1,9 +1,8 @@
-import type { TypeLegendLayer } from '@/core/components/layers/types';
 import type { TypeContainerBox } from '@/core/types/global-types';
 interface LayerDetailsProps {
-    layerDetails: TypeLegendLayer;
+    layerPath: string;
     containerType: TypeContainerBox;
 }
-export declare function LayerDetails(props: LayerDetailsProps): JSX.Element;
+export declare function LayerDetails(props: LayerDetailsProps): JSX.Element | null;
 export {};
 //# sourceMappingURL=layer-details.d.ts.map

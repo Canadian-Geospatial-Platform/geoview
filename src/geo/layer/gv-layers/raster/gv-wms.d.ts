@@ -236,14 +236,15 @@ export declare class GVWMS extends AbstractGVRaster {
      * Registers an image load callback event handler.
      *
      * @param callback - The callback to be executed whenever the event is emitted
+     * @returns A function that can be called to unregister the event handler
      */
-    onImageLoadRescue(callback: ImageLoadRescueDelegate): void;
+    onImageLoadRescue(callback: ImageLoadRescueDelegate): ImageLoadRescueDelegate;
     /**
      * Unregisters an image load callback event handler.
      *
      * @param callback - The callback to stop being called whenever the event is emitted
      */
-    offImageLoadRescue(callback: ImageLoadRescueDelegate): void;
+    offImageLoadRescue(callback: ImageLoadRescueDelegate | undefined): void;
 }
 export type CRSOverride = {
     layerProjection: string;

@@ -6,18 +6,14 @@ import type { EventDelegateBase } from '@/api/events/event-helper';
  */
 export declare class NavBarApi {
     #private;
-    /** The map identifier. */
-    mapId: string;
     /** Groups of button panels created on the nav-bar. */
     buttons: Record<string, Record<string, TypeButtonPanel>>;
     /** Configuration for button groups. */
     groupConfigs: Record<string, TypeButtonGroupConfig>;
     /**
      * Instantiates a NavBarApi class.
-     *
-     * @param mapId - The map id this NavBarApi belongs to
      */
-    constructor(mapId: string);
+    constructor();
     /**
      * Registers an event handler for NavBar created events.
      *

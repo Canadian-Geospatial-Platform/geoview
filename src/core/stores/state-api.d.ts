@@ -1,67 +1,53 @@
-import type { GeoChartStoreByLayerPath, TypeGeochartResultSetEntry } from './store-interface-and-intial-values/geochart-state';
-import type { TypeOrderedLayerInfo } from './store-interface-and-intial-values/map-state';
+import { type GeoChartStoreByLayerPath, type TypeGeochartResultSetEntry } from './store-interface-and-intial-values/geochart-state';
+import { type TypeOrderedLayerInfo } from './store-interface-and-intial-values/map-state';
 import type { TimeSliderLayerSet } from './store-interface-and-intial-values/time-slider-state';
-import type { TypeLegendLayer } from '@/core/components/layers/types';
 import type { EventDelegateBase } from '@/api/events/event-helper';
+import type { MapController } from '../controllers/map-controller';
 /**
  * API to manage states.
  */
 export declare class StateApi {
     #private;
-    /** The map id this StateApi belongs to */
-    mapId: string;
     /**
      * Instantiates an StateApi class.
      *
-     * @param {string} mapId - The map id this StateApi belongs to
+     * @param mapId - The map id this StateApi belongs to
      */
-    constructor(mapId: string);
-    /**
-     * Get a specific layer panel state.
-     * @param {'highlightedLayer' | 'selectedLayerPath' | 'displayState'} state - The state to get
-     * @returns {string | boolean | null | undefined} The requested state
-     */
-    getLayerPanelState(state: 'highlightedLayer' | 'selectedLayerPath' | 'displayState'): string | boolean | null | undefined;
-    /**
-     * Get a legend layer.
-     * @param {string} layerPath - The path of the layer to get
-     * @returns {TypeLegendLayer | undefined} The requested legend layer
-     */
-    getLegendLayerInfo(layerPath: string): TypeLegendLayer | undefined;
+    constructor(mapController: MapController);
     /**
      * Get the collapsed state of layer's legend.
-     * @param {string} layerPath - Path of the layer to get state for.
-     * @returns {boolean} If the legend is collapsed.
+     * @param layerPath - Path of the layer to get state for.
+     * @returns If the legend is collapsed.
      */
     getLegendCollapsedState(layerPath: string): boolean;
     /**
      * Get a specific state from a plugin.
-     * @param {'time-slider' | 'geochart' | 'swiper'} pluginId - The plugin to get state for.
-     * @param {string} state - The state to get.
-     * @returns {string | TypeGeochartResultSetEntry[] | GeoChartStoreByLayerPath | TypeTimeSliderValues | undefined} The requested state.
+     * @param pluginId - The plugin to get state for.
+     * @param state - The state to get.
+     * @returns The requested state.
      */
     getPluginState(pluginId: 'geochart' | 'swiper' | 'time-slider', state: string): string | TypeGeochartResultSetEntry[] | GeoChartStoreByLayerPath | TimeSliderLayerSet | string[] | undefined;
     /**
      * Set the collapsed state of layer's legend.
-     * @param {string} layerPath - Path of the layer to get state for.
-     * @param {boolean} collapsed - The new state
-     * @returns {boolean} If the legend is collapsed.
+     * @param layerPath - Path of the layer to get state for.
+     * @param collapsed - The new state
+     * @returns If the legend is collapsed.
      */
     setLegendCollapsedState(layerPath: string, collapsed: boolean): void;
     /**
      * Set selected layer in layers tab.
-     * @param {string} layerPath - The path of the layer to set
+     * @param layerPath - The path of the layer to set
      */
     setSelectedLayersTabLayer(layerPath: string): void;
-    reorderLayers(mapId: string, layerPath: string, move: number): void;
+    reorderLayers(layerPath: string, move: number): void;
     /**
      * Registers a layers reordered event handler.
-     * @param {LayersReorderedDelegate} callback - The callback to be executed whenever the event is emitted
+     * @param callback - The callback to be executed whenever the event is emitted
      */
     onLayersReordered(callback: LayersReorderedDelegate): void;
     /**
      * Unregisters a layers reordered event handler.
-     * @param {LayersReorderedDelegate} callback - The callback to stop being called whenever the event is emitted
+     * @param callback - The callback to stop being called whenever the event is emitted
      */
     offLayersReordered(callback: LayersReorderedDelegate): void;
 }

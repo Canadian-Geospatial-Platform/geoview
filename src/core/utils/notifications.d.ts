@@ -1,17 +1,15 @@
 import type { EventDelegateBase } from '@/api/events/event-helper';
+import type { UIController } from '@/core/controllers/ui-controller';
 /** Class used to send message to user for a map. Can be a notification and/or a snackbar message. */
 export declare class Notifications {
     #private;
-    /** The map id. */
-    mapId: string;
     /** Snackbar messages to display. */
     snackbarMessageQueue: SnackbarProps[];
     /**
-     * The class constructor to instantiate a notification class.
-     *
-     * @param mapId - The map id
+     * The class constructor to instanciate a notification class
+     * @param uiController - The UI controller instance
      */
-    constructor(mapId: string);
+    constructor(uiController: UIController);
     /**
      * Adds a notification message.
      *

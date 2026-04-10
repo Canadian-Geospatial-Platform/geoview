@@ -3,13 +3,13 @@ import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import type { TypeGuideObject } from '@/core/stores/store-interface-and-intial-values/app-state';
 import type { TypeHTMLElement } from '@/core/types/global-types';
 /** Result of a URL reachability ping check. */
-interface PingResult {
+export type PingResult = {
     isValid: boolean;
     isReachable: boolean;
     needsProxy: boolean;
     status: number | null;
     error?: string;
-}
+};
 /** Represents RGBA color as [Red, Green, Blue, Alpha]. */
 export type RGBA = [r: number, g: number, b: number, a: number];
 /**
@@ -457,12 +457,11 @@ export declare function readTextWithBestEncoding(buffer: ArrayBuffer, encodings?
 /**
  * Create guide object from .md file.
  *
- * @param mapId - ID of map
  * @param language - Language to use for guide
  * @param assetsURL - The base URL for assets
  * @returns A promise that resolves with the guide object, or undefined on error
  */
-export declare function createGuideObject(mapId: string, language: TypeDisplayLanguage, assetsURL: string): Promise<TypeGuideObject | undefined>;
+export declare function createGuideObject(language: TypeDisplayLanguage, assetsURL: string): Promise<TypeGuideObject>;
 /**
  * Callback function which is fired when keyboard key is pressed.
  *
@@ -561,5 +560,4 @@ export type DoUntilJob = {
     /** The ID of the interval */
     interval?: ReturnType<typeof setInterval>;
 };
-export {};
 //# sourceMappingURL=utilities.d.ts.map

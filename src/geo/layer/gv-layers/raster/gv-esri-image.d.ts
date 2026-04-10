@@ -7,12 +7,12 @@ import type { Projection as OLProjection } from 'ol/proj';
 import type { Map as OLMap } from 'ol';
 import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import type { TypeFeatureInfoEntry, TypeFeatureInfoResult } from '@/api/types/map-schema-types';
+import type { TypeMetadataEsriRasterFunctionInfos, TypeMosaicRule } from '@/api/types/layer-schema-types';
+import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import type { TemporalMode } from '@/core/utils/date-mgt';
 import type { GeometryJson } from '@/geo/layer/gv-layers/utils';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
-import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import type { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
-import type { TypeMetadataEsriRasterFunctionInfos, TypeMosaicRule } from '@/api/types/layer-schema-types';
-import type { TemporalMode } from '@/index';
 /**
  * Manages an Esri Image layer.
  */

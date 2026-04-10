@@ -1,22 +1,21 @@
 import type { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
 import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 import type { EventDelegateBase } from '@/api/events/event-helper';
-import type { ActiveAppBarTabType } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { type ActiveAppBarTabType } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import type { UIController } from '@/core/controllers/ui-controller';
 /**
  * Class to manage buttons on the app-bar.
  */
 export declare class AppBarApi {
     #private;
-    /** The map id this AppBarApi belongs to. */
-    mapId: string;
     /** Button panels registered on the app-bar, keyed by panel id. */
     buttons: Record<string, TypeButtonPanel>;
     /**
      * Instantiates an AppBarApi class.
      *
-     * @param mapId - The map id this AppBarApi belongs to
+     * @param uiController - The UI controller this app bar api belongs to
      */
-    constructor(mapId: string);
+    constructor(uiController: UIController);
     /**
      * Registers an event handler for AppBar created events.
      *
@@ -57,9 +56,10 @@ export declare class AppBarApi {
      */
     getAppBarButtonPanelById(buttonPanelId: string): TypeButtonPanel | null;
     /**
-     * Gets the currently active app-bar tab.
+     * Gets the active app bar tab.
      *
-     * @returns The active app bar tab info
+     * @returns The active app bar tab info.
+     * @deprecated Legacy support. Should be removed.
      */
     getActiveAppBarTab(): ActiveAppBarTabType;
     /**
@@ -74,6 +74,7 @@ export declare class AppBarApi {
      * @param tabId - The id of the tab to be selected
      * @param open - Optional open (true) or closed (false) panel (default: true)
      * @param isFocusTrapped - Optional whether focus should be trapped (default: true)
+     * @deprecated Legacy support. Should use uiController.setActiveAppBarTab directly instead.
      */
     selectTab(tabId: string, open?: boolean, isFocusTrapped?: boolean): void;
 }

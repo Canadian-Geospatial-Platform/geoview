@@ -1,4 +1,4 @@
-import { type MRT_TableInstance as MRTTableInstance, type MRT_ColumnFiltersState as MRTColumnFiltersState } from 'material-react-table';
+import type { MRT_TableInstance as MRTTableInstance, MRT_ColumnFiltersState as MRTColumnFiltersState } from 'material-react-table';
 import type { MappedLayerDataType, ColumnsType } from '@/core/components/data-table/data-table-types';
 /** Properties for the useToolbarActionMessage hook. */
 interface UseSelectedRowMessageProps {

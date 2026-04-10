@@ -3,10 +3,9 @@ import type { EventDelegateBase } from '@/api/events/event-helper';
 import type { QueryType, TypeResultSet } from '@/api/types/map-schema-types';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { AbstractLayerSet, type PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
-import type { LayerApi } from '@/geo/layer/layer';
-import type { TypeFeatureInfoResultSet, TypeFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import { type TypeFeatureInfoResultSet, type TypeFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 /**
- * A Layer-set working with the LayerApi at handling a result set of registered layers and synchronizing
+ * A Layer-set working with the LayerSetController at handling a result set of registered layers and synchronizing
  * events happening on them (in this case when the user click a location on the map) with a store
  * for UI updates.
  */
@@ -16,12 +15,6 @@ export declare class FeatureInfoLayerSet extends AbstractLayerSet {
     static QUERY_TYPE: QueryType;
     /** The resultSet object as existing in the base class, retyped here as a TypeFeatureInfoResultSet */
     resultSet: TypeFeatureInfoResultSet;
-    /**
-     * The class constructor that instantiates a set of layers.
-     *
-     * @param layerApi - The layer Api to work with
-     */
-    constructor(layerApi: LayerApi);
     /**
      * Overrides the behavior to apply when a feature-info-layer-set wants to check for condition to register a layer in its set.
      *
@@ -59,10 +52,10 @@ export declare class FeatureInfoLayerSet extends AbstractLayerSet {
      * Queries the features at the provided coordinate for all the registered layers.
      *
      * @param lonLatCoordinate - The longitude/latitude coordinate where to query the features
-     * @param fromClick - Optional whether the query is from a user click
+     * @param callbackWhenFirstQueryStarted - Optional callback to be executed when the first query has started progressing.
      * @returns A promise that resolves with the result of the query
      */
-    queryLayers(lonLatCoordinate: Coordinate, fromClick?: boolean): Promise<TypeFeatureInfoResultSet>;
+    queryLayers(lonLatCoordinate: Coordinate, callbackWhenFirstQueryStarted?: () => void): Promise<TypeFeatureInfoResultSet>;
     /**
      * Clears the results for the provided layer path.
      *

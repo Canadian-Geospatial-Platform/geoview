@@ -1,8 +1,8 @@
 import type { Extent } from 'ol/extent';
 import type { TypeLayerStyleConfig, TypeStyleGeometry } from '@/api/types/map-schema-types';
-import type { TypeGeoviewLayerType, TypeLayerControls, TypeLayerEntryType, TypeLayerStatus, TypeMosaicRule } from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerType, TypeLayerControls, TypeLayerEntryType, TypeLayerStatus, TypeMetadataEsriRasterFunctionInfos, TypeMetadataWMSCapabilityLayerStyle, TypeMosaicMethod, TypeMosaicRule } from '@/api/types/layer-schema-types';
 import type { LegendQueryStatus } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import type { TemporalMode, TimeIANA, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
+import type { TemporalMode, TimeDimension, TimeIANA, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 export type TypeLayersViewDisplayState = 'add' | 'view';
 export type TypeLegendLayerItem = {
     geometryType?: TypeStyleGeometry;
@@ -48,8 +48,12 @@ export interface TypeLegendLayer {
     items: TypeLegendItem[];
     children: TypeLegendLayer[];
     rasterFunction?: string;
+    rasterFunctionInfos?: TypeMetadataEsriRasterFunctionInfos[];
+    allowedMosaicMethods?: TypeMosaicMethod[];
     mosaicRule?: TypeMosaicRule;
+    timeDimension?: TimeDimension;
     wmsStyle?: string;
+    wmsStyles?: TypeMetadataWMSCapabilityLayerStyle[];
     opacity?: number;
     opacityMaxFromParent?: number;
     zoom?: number;

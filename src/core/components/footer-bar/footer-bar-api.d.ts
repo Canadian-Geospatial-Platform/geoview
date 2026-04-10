@@ -1,20 +1,19 @@
 import type { TypeTabs } from '@/ui/tabs/tabs';
 import type { EventDelegateBase } from '@/api/events/event-helper';
+import type { UIController } from '@/core/controllers/ui-controller';
 /**
  * API to manage tabs on the footer bar component.
  */
 export declare class FooterBarApi {
     #private;
-    /** The map id this footer bar API belongs to. */
-    mapId: string;
     /** Array that holds added tabs. */
     tabs: TypeTabs[];
     /**
      * Instantiates a FooterBarApi class.
      *
-     * @param mapId - The map id this footer bar API belongs to
+     * @param uiController - The UI controller this footer bar api belongs to
      */
-    constructor(mapId: string);
+    constructor(uiController: UIController);
     /**
      * Registers an event handler for footerbar tab created events.
      *
@@ -55,12 +54,14 @@ export declare class FooterBarApi {
      * Shows a tab by id.
      *
      * @param id - The id of the tab to be shown
+     * @deprecated Legacy support. Should use uiController.showTabButton directly instead.
      */
     showTabButton(id: string): void;
     /**
      * Selects a tab by id, if the id is not a tab, the footer bar will close.
      *
      * @param id - The id of the tab to be selected
+     * @deprecated Legacy support. Should use uiController.setActiveFooterBarTab directly instead.
      */
     selectTab(id: string): void;
 }

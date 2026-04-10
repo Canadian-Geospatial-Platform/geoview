@@ -1,6 +1,6 @@
 import type { TypeDisplayLanguage, TypeFieldEntry } from '@/api/types/map-schema-types';
 import type { TypeContainerBox } from '@/core/types/global-types';
-import { type TemporalMode, type TimeIANA, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
+import type { TemporalMode, TimeIANA, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 /** Properties for the FeatureInfoTable component. */
 interface FeatureInfoTableProps {
     /** The layer path for date format lookups. */

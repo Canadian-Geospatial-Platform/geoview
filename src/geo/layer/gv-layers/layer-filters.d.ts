@@ -1,4 +1,4 @@
-import { type FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
+import type { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 /**
  * Aggregates and composes the different filter fragments applied at various
  * levels of the application (initial load, class-level, data table, time slider).

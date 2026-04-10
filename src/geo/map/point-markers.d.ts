@@ -8,8 +8,8 @@ import type { TypePointMarker } from '@/api/types/map-schema-types';
  */
 export declare class PointMarkers {
     #private;
-    /** The map projection */
-    mapProjection: string;
+    /** The map viewer */
+    mapViewer: MapViewer;
     /** The map ID */
     mapId: string;
     /**

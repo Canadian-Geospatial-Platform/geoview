@@ -1,12 +1,7 @@
 import type { i18n } from 'i18next';
 import type { MapViewer } from '@/geo/map/map-viewer';
-export declare const MapContext: import("react").Context<TypeMapContext>;
-/**
- * Type used for the map context
- */
-export type TypeMapContext = {
-    mapId: string;
-};
+/** Create contexts for the map, layer controller, and UI controller */
+export declare const StoreContext: import("react").Context<string | undefined>;
 /**
  * interface used when passing map features configuration
  */

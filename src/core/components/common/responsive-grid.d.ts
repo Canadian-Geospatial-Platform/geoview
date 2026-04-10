@@ -12,12 +12,13 @@ interface ResponsiveGridPanelProps extends GridProps {
     isEnlarged: boolean;
     className?: string;
     toggleMode?: boolean;
+    ariaHidden?: boolean;
 }
 /** Responsive grid component with Root, Left, and Right panel slots. */
 export declare const ResponsiveGrid: {
     Root: import("react").ForwardRefExoticComponent<Omit<ResponsiveGridProps, "ref"> & import("react").RefAttributes<unknown>>;
-    Left: import("react").ForwardRefExoticComponent<Omit<ResponsiveGridPanelProps, "ref"> & import("react").RefAttributes<unknown>>;
-    Right: import("react").ForwardRefExoticComponent<Omit<ResponsiveGridPanelProps, "ref"> & import("react").RefAttributes<unknown>>;
+    Left: import("react").ForwardRefExoticComponent<Omit<ResponsiveGridPanelProps, "ref"> & import("react").RefAttributes<HTMLDivElement>>;
+    Right: import("react").ForwardRefExoticComponent<Omit<ResponsiveGridPanelProps, "ref"> & import("react").RefAttributes<HTMLDivElement>>;
 };
 export {};
 //# sourceMappingURL=responsive-grid.d.ts.map

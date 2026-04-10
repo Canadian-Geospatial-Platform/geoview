@@ -1,6 +1,6 @@
 import type { ConfigClassOrType, TypeGeoviewLayerConfig, TypeMetadataWFS, TypeMetadataWFSFeatureTypeListFeatureType } from '@/api/types/layer-schema-types';
 import type { TypeOutfields } from '@/api/types/map-schema-types';
-import { type TypeWFSLayerConfig } from '@/geo/layer/geoview-layers/vector/wfs';
+import type { TypeWFSLayerConfig } from '@/geo/layer/geoview-layers/vector/wfs';
 import type { VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 export interface OgcWfsLayerEntryConfigProps extends VectorLayerEntryConfigProps {

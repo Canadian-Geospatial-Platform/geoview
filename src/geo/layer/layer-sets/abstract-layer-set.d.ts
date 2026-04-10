@@ -1,10 +1,11 @@
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import type { QueryType, TypeFeatureInfoEntry, TypeFeatureInfoResult, TypeLocation, TypeResultSet, TypeResultSetEntry } from '@/api/types/map-schema-types';
+import type { LayerDomain } from '@/core/domains/layer-domain';
 import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
-import type { LayerApi } from '@/geo/layer/layer';
 import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
+import type { MapViewer } from '@/geo/map/map-viewer';
 /**
  * A class to hold a set of layers associated with a value of any type.
  *
@@ -12,16 +13,19 @@ import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-la
  */
 export declare abstract class AbstractLayerSet {
     #private;
-    /** The LayerApi to work with */
-    protected layerApi: LayerApi;
+    /** The LayerDomain to work with */
+    protected layerDomain: LayerDomain;
+    /** The MapViewer to work with */
+    protected mapViewer: MapViewer;
     /** An object containing the result sets indexed using the layer path */
     resultSet: TypeResultSet;
     /**
      * Constructs a new LayerSet instance.
      *
-     * @param layerApi - The LayerApi instance to work with
+     * @param mapViewer - The MapViewer instance to work with
+     * @param layerDomain - The LayerDomain instance to work with
      */
-    constructor(layerApi: LayerApi);
+    constructor(mapViewer: MapViewer, layerDomain: LayerDomain);
     /**
      * A must-override method called to propagate the result set entry to the store.
      *
