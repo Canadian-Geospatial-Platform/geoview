@@ -18,11 +18,13 @@ import type {
 import {
   DEFAULT_MAP_FEATURE_CONFIG,
   VALID_PROJECTION_CODES,
+  VALID_BASEMAP_ID,
   MAP_CENTER,
   MAP_ZOOM_LEVEL,
   MAX_EXTENTS_RESTRICTION,
 } from '@/api/types/map-schema-types';
 import { deepMerge } from '@/core/utils/utilities';
+import { logger } from '@/core/utils/logger';
 
 /**
  * The map feature configuration class.
@@ -64,6 +66,9 @@ export class MapFeatureConfig {
   /** Service URLs. */
   serviceUrls: TypeServiceUrls;
 
+  /** Indicates whether schema validation errors were detected during configuration parsing. */
+  hasSchemaErrors: boolean = false;
+
   /**
    * The schema version used to validate the configuration file. The schema should enumerate the list of versions accepted by
    * this version of the viewer.
@@ -92,6 +97,22 @@ export class MapFeatureConfig {
 
     // Combine the default values.
     this.map = deepMerge(gvMapDefault, gvMapFromUser);
+
+    // Validate the projection after merge — user may have provided an invalid code that overwrote the default
+    if (!VALID_PROJECTION_CODES.includes(this.map.viewSettings.projection)) {
+      logger.logWarning(`Invalid projection code '${this.map.viewSettings.projection}', defaulting to 3978`);
+      this.map.viewSettings.projection = DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.projection;
+      this.map.viewSettings.maxExtent = MAX_EXTENTS_RESTRICTION[this.map.viewSettings.projection];
+      this.map.viewSettings.initialView = {
+        zoomAndCenter: [MAP_ZOOM_LEVEL[this.map.viewSettings.projection], MAP_CENTER[this.map.viewSettings.projection]],
+      };
+    }
+
+    // Validate basemapId after merge — user may have provided an invalid basemapId that overwrote the default
+    if (!VALID_BASEMAP_ID.includes(this.map.basemapOptions.basemapId)) {
+      logger.logWarning(`Invalid basemapId '${this.map.basemapOptions.basemapId}', defaulting to 'transport'`);
+      this.map.basemapOptions = structuredClone(DEFAULT_MAP_FEATURE_CONFIG.map.basemapOptions);
+    }
 
     // Above code will add default zoomAndCenter, remove if other initial view is provided
     if (this.map.viewSettings.initialView?.extent || this.map.viewSettings.initialView?.layerIds)

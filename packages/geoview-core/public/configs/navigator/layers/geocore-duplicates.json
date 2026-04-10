@@ -267,5 +267,6 @@
   "serviceUrls": {
     "metadataUrl": "https://open.canada.ca/data/en/dataset/"
   },
-  "theme": "geo.ca"
+  "theme": "geo.ca",
+  "navBar": ["zoom", "rotation", "fullscreen", "home", "location", "measurement", "basemap-select", "projection"]
 }

@@ -363,6 +363,24 @@ export class BasemapLayerCreationError extends GeoViewError {
 }
 
 /**
+ * Error thrown when the overview map basemap creation fails.
+ */
+export class OverviewMapCreationError extends GeoViewError {
+  /**
+   * Creates an instance of OverviewMapCreationError.
+   */
+  constructor() {
+    super('error.basemap.overviewMapCreationError');
+
+    // Set a custom name for the error type to differentiate it from other error types
+    this.name = 'OverviewMapCreationError';
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, OverviewMapCreationError.prototype);
+  }
+}
+
+/**
  * Error thrown when trying to get a primary key field for a layer and such a field doesn't exist.
  */
 export class NoPrimaryKeyFieldError extends GeoViewError {

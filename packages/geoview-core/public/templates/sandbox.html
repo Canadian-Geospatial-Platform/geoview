@@ -64,6 +64,7 @@
       'core': ['legend', 'details', 'geolocator', 'export']
     }
   },
+  "navBar": ["zoom", "rotation", "fullscreen", "home", "location", "measurement", "basemap-select", "projection"],
   'corePackages': [],
   'corePackagesConfig':[
     {
@@ -1039,7 +1040,7 @@
         },
       });
 
-      // Create Button============================================================================================================
+      // Create Button
       const createMapButton = document.getElementById('createMap');
 
       // add an event listener when a button is clicked
@@ -1077,7 +1078,8 @@
         }
       });
 
-      // Map Size=====================Start==================================
+      // #region Map Size START
+
       const applyMapSizeBtn = document.getElementById('applyMapSize');
       const mapWidthInput = document.getElementById('mapWidth');
       const mapHeightInput = document.getElementById('mapHeight');
@@ -1086,11 +1088,7 @@
         const mapWidth = document.getElementById('mapWidth')?.value;
         const mapHeight = document.getElementById('mapHeight')?.value;
 
-        /**
-         * ===========================================================================
-         *  MIN WIDTH and MIN HEIGHT should be greater than 0
-         * ===========================================================================
-         */
+        // MIN WIDTH and MIN HEIGHT should be greater than 0
         if (parseInt(mapWidth) > 0 && parseInt(mapHeight) > 0) {
           createMapButton.dispatchEvent(new Event('click'));
         }
@@ -1120,7 +1118,7 @@
         sandboxMap.dataset.height = '900px';
       }
 
-      // Map Size=====================End==================================
+      // #endregion Map Size END
 
       const deleteMapButton = document.getElementById('deleteMap');
 

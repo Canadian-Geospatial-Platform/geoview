@@ -343,8 +343,8 @@ export class MapViewer {
 
     // Register handler when basemap has error
     this.basemap.onBasemapError((sender, event) => {
-      // Show the error
-      this.notifications.showErrorFromError(event.error);
+      // Show the error using the GeoViewError messageKey and params
+      this.notifications.showError(event.error.messageKey, event.error.messageParams);
     });
 
     // Mouse bounded handle references

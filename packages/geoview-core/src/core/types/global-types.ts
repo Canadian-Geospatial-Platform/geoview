@@ -21,6 +21,8 @@ export interface TypeMapFeaturesConfig extends TypeMapFeaturesInstance {
   displayLanguage?: TypeDisplayLanguage;
   /** This attribute is not part of the schema. It is placed here to keep the 'data-shared' attribute of the HTML div of the map. */
   sharedMode?: boolean;
+  /** This attribute is not part of the schema. It indicates whether schema validation errors were detected. */
+  hasSchemaErrors?: boolean;
 }
 
 /** Definition of a global Window type. */

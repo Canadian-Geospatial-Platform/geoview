@@ -1240,14 +1240,14 @@ export abstract class GeoviewRenderer {
     arrayOfPointStyleConfig: TypeLayerStyleConfigInfo[]
   ): Promise<TypeVectorLayerStyles> {
     try {
-      // UniqueValue or ClassBreak point style configuration ============================================================
+      // UniqueValue or ClassBreak point style configuration
       const styleArray: (HTMLCanvasElement | null)[] = layerStyles.Point!.arrayOfCanvas ?? [];
       const promiseOfCanvasCreated: Promise<HTMLCanvasElement | null>[] = [];
       for (let i = 0; i < arrayOfPointStyleConfig.length; i++) {
         if (isIconSymbolVectorConfig(arrayOfPointStyleConfig[i].settings))
-          // Icon symbol ================================================================================================
+          // Icon symbol
           promiseOfCanvasCreated.push(this.createIconCanvas(this.processSimplePoint(arrayOfPointStyleConfig[i].settings)));
-        // Simple vector symbol =======================================================================================
+        // Simple vector symbol
         else
           promiseOfCanvasCreated.push(
             new Promise<HTMLCanvasElement | null>((resolveSimpleVectorSymbol) => {
@@ -1283,7 +1283,7 @@ export abstract class GeoviewRenderer {
       const layerStyles: TypeVectorLayerStyles = { Point: {} };
       if (defaultSettings) {
         if (isIconSymbolVectorConfig(defaultSettings)) {
-          // Icon symbol ======================================================================================
+          // Icon symbol
           const canvas = await this.createIconCanvas(this.processSimplePoint(defaultSettings));
           layerStyles.Point!.defaultCanvas = canvas;
           if (arrayOfPointStyleConfig) {
@@ -1295,7 +1295,7 @@ export abstract class GeoviewRenderer {
           return layerStyles;
         }
 
-        // Simple vector symbol =============================================================================
+        // Simple vector symbol
         layerStyles.Point!.defaultCanvas = this.createPointCanvas(this.processSimplePoint(defaultSettings));
         if (arrayOfPointStyleConfig) {
           layerStyles.Point!.arrayOfCanvas = [];
@@ -1326,8 +1326,7 @@ export abstract class GeoviewRenderer {
       const legendStyles: TypeVectorLayerStyles = {};
 
       if (styleConfig.Point) {
-        // ======================================================================================================================
-        // Point style configuration ============================================================================================
+        // Point style configuration
         if (styleConfig.Point.type === 'simple') {
           const layerStyles = await this.#getPointStyleSubRoutine(styleConfig.Point.info[0].settings);
           legendStyles.Point = layerStyles.Point;
@@ -1341,8 +1340,7 @@ export abstract class GeoviewRenderer {
       }
 
       if (styleConfig.LineString) {
-        // ======================================================================================================================
-        // LineString style configuration =======================================================================================
+        // LineString style configuration
         const layerStyles: TypeVectorLayerStyles = { LineString: {} };
         if (styleConfig.LineString.type === 'simple') {
           layerStyles.LineString!.defaultCanvas = this.createLineStringCanvas(this.processSimpleLineString(styleConfig.LineString));
@@ -1362,8 +1360,7 @@ export abstract class GeoviewRenderer {
       }
 
       if (styleConfig.Polygon) {
-        // ======================================================================================================================
-        // Polygon style configuration ==========================================================================================
+        // Polygon style configuration
         const layerStyles: TypeVectorLayerStyles = { Polygon: {} };
         if (styleConfig.Polygon.type === 'simple') {
           layerStyles.Polygon!.defaultCanvas = this.createPolygonCanvas(this.processSimplePolygon(styleConfig.Polygon.info[0].settings));

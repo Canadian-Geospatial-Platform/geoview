@@ -66,7 +66,7 @@ Package system and development:
 
 ### TypeScript API Reference (TypeDoc)
 
-> **📚 Complete API Reference:** For detailed TypeScript interfaces, types, classes, and functions, see our auto-generated [TypeDoc API Documentation](https://canadian-geospatial-platform.github.io/geoview/docs/typedoc/)
+> **📚 Complete API Reference:** For detailed TypeScript interfaces, types, classes, and functions, see our auto-generated [TypeDoc API Documentation](https://canadian-geospatial-platform.github.io/geoview/public/docs/typedoc/)
 
 **What's in TypeDoc:**
 

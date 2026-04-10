@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Open Maps Demo - Canadian Geospatial Platform Viewer</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="msapplication-config" content="./img/browserconfig.xml" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="theme-color" content="#ffffff" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <link rel="stylesheet" href="css/style.css" />
+
+    <!-- the host page must load Vue since RAMP doesn't bundle it -->
+    <script src="https://unpkg.com/vue@3.1.5/dist/vue.global.prod.js"></script>
+
+    <!-- Load closure template scripts -->
+    <script
+      id="CDTSsoyutils"
+      src="https://ssl-templates.services.gc.ca/app/cls/WET/gcweb/v4_0_32/cdts/compiled/soyutils.js"
+      type="text/javascript"
+    ></script>
+    <script
+      id="CDTSwet"
+      src="https://ssl-templates.services.gc.ca/app/cls/WET/gcweb/v4_0_32/cdts/compiled/wet-en.js"
+      type="text/javascript"
+    ></script>
+    <script
+      src="https://code.jquery.com/jquery-2.0.3.min.js"
+      integrity="sha384-5BJxsRUsHmz1Kk/hmquvrNXoqth2fWO8TW4G5MbuwrD7g7eyanb4SJ9KV+VGChAT"
+      crossorigin="anonymous"
+    ></script>
+
+    <noscript>
+      <!-- Write closure fall-back static file -->
+      <!-- /ROOT/etc/designs/canada/cdts/gcweb/latest/cdts/static/refTop.html -->
+      <!--[if gte IE 9 | !IE]><!-->
+      <link href="https://www.canada.ca/etc/designs/canada/cdts/gcweb/v4_0_32/assets/favicon.ico" rel="icon" type="image/x-icon" />
+      <link href="https://www.canada.ca/etc/designs/canada/cdts/gcweb/v4_0_32/css/theme.min.css" rel="stylesheet" />
+      <link href="https://www.canada.ca/etc/designs/canada/cdts/gcweb/v4_0_32/cdts/cdtsfixes.css" rel="stylesheet" />
+      <!--<![endif]-->
+      <!--[if lt IE 9]>
+        <link href="https://www.canada.ca/etc/designs/canada/cdts/gcweb/v4_0_32/assets/favicon.ico" rel="shortcut icon" />
+        <link rel="stylesheet" href="https://www.canada.ca/etc/designs/canada/cdts/gcweb/v4_0_32/css/ie8-theme.min.css" />
+      <![endif]-->
+      <!--[if lte IE 9]> <![endif]-->
+      <link href="https://www.canada.ca/etc/designs/canada/cdts/gcweb/v4_0_32/css/noscript.min.css" rel="stylesheet" />
+    </noscript>
+
+    <!-- Write closure template -->
+    <script id="CDTSRefTopScript" type="text/javascript">
+      document.write(
+        wet.builder.refTop({
+          cdnEnv: 'prod',
+        })
+      );
+    </script>
+  </head>
+
+  <!-- ********** IMPORTANT HTML CODE SECTION - START ********** -->
+  <style>
+    html {
+      font-size: 16px;
+    }
+    .back-to-main a,
+    .back-to-main a:visited {
+      color: white;
+    }
+  </style>
+  <!-- ********** IMPORTANT HTML CODE SECTION - END ********** -->
+
+  <body typeof="WebPage" vocab="http://schema.org/">
+    <div id="def-top">
+      <!-- Write closure fall-back static file -->
+      <!-- /ROOT/etc/designs/canada/cdts/gcweb/latest/cdts/static/top-en.html -->
+      <ul id="wb-tphp">
+        <li class="wb-slc">
+          <a class="wb-sl" href="#wb-cont">Skip to main content</a>
+        </li>
+        <li class="wb-slc visible-sm visible-md visible-lg">
+          <a class="wb-sl" href="#wb-info">Skip to "About this site"</a>
+        </li>
+      </ul>
+      <header role="banner">
+        <div class="container" id="wb-bnr">
+          <section class="visible-md visible-lg text-right" id="wb-lng">
+            <h2 class="wb-inv">Language selection</h2>
+            <div class="row">
+              <div class="col-md-12">
+                <ul class="list-inline margin-bottom-none">
+                  <li>
+                    <a href="javascript:;" lang="fr">Français</a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </section>
+          <div class="row">
+            <div class="brand col-xs-8 col-sm-9 col-md-6">
+              <a href="https://www.canada.ca/en.html">
+                <img
+                  data="https://www.canada.ca/etc/designs/canada/cdts/gcweb/v4_0_32/assets/sig-blk-en.svg"
+                  tabindex="-1"
+                  type="image/svg+xml"
+                />
+                <span class="wb-inv"> Government of Canada</span>
+              </a>
+            </div>
+            <section class="wb-mb-links col-xs-4 col-sm-3 visible-sm visible-xs" id="wb-glb-mn">
+              <h2>Search and menus</h2>
+              <ul class="list-inline text-right chvrn">
+                <li>
+                  <a aria-controls="mb-pnl" class="overlay-lnk" href="#mb-pnl" role="button" title="Search and menus"
+                    ><span class="glyphicon glyphicon-search"
+                      ><span class="glyphicon glyphicon-th-list"><span class="wb-inv">Search and menus</span></span></span
+                    ></a
+                  >
+                </li>
+              </ul>
+              <div id="mb-pnl"></div>
+            </section>
+            <section class="col-xs-6 text-right visible-md visible-lg" id="wb-srch">
+              <h2>Search</h2>
+              <form action="https://www.canada.ca/en/sr.html#wb-land" class="form-inline" method="get" name="cse-search-box" role="search">
+                <div class="form-group">
+                  <label class="wb-inv" for="wb-srch-q">Search website</label>
+                  <input name="cdn" type="hidden" value="canada" />
+                  <input name="st" type="hidden" value="s" />
+                  <input name="num" type="hidden" value="10" />
+                  <input name="langs" type="hidden" value="en" />
+                  <input name="st1rt" type="hidden" value="1" />
+                  <input name="s5bm3ts21rch" type="hidden" value="x" />
+                  <input
+                    class="wb-srch-q form-control"
+                    id="wb-srch-q"
+                    list="wb-srch-q-ac"
+                    maxlength="150"
+                    name="q"
+                    placeholder="Search Canada.ca"
+                    size="27"
+                    type="search"
+                    value=""
+                  />
+                  <input name="_charset_" type="hidden" value="UTF-8" />
+                  <datalist id="wb-srch-q-ac">
+                    <!--[if lte IE 9]><select><![endif]-->
+                    <!--[if lte IE 9]></select><![endif]-->
+                  </datalist>
+                </div>
+                <div class="form-group submit">
+                  <button class="btn btn-primary btn-small" id="wb-srch-sub" name="wb-srch-sub" type="submit">
+                    <span class="glyphicon-search glyphicon"></span><span class="wb-inv">Search</span>
+                  </button>
+                </div>
+              </form>
+            </section>
+          </div>
+        </div>
+        <nav class="wb-menu visible-md visible-lg" id="wb-sm" role="navigation" typeof="SiteNavigationElement">
+          <div class="container nvbar">
+            <h2>Topics menu</h2>
+            <div class="row">
+              <ul class="list-inline menu">
+                <li>
+                  <a href="https://www.esdc.gc.ca/en/jobs/index.page">Jobs</a>
+                </li>
+                <li>
+                  <a href="https://www.cic.gc.ca/english/index.asp">Immigration</a>
+                </li>
+                <li>
+                  <a href="https://travel.gc.ca/">Travel</a>
+                </li>
+                <li>
+                  <a href="https://www.canada.ca/en/services/business.html">Business</a>
+                </li>
+                <li>
+                  <a href="https://www.canada.ca/en/services/benefits.html">Benefits</a>
+                </li>
+                <li>
+                  <a href="https://healthycanadians.gc.ca/index-eng.php">Health</a>
+                </li>
+                <li>
+                  <a href="https://www.canada.ca/en/services/taxes.html">Taxes</a>
+                </li>
+                <li>
+                  <a href="https://www.canada.ca/en/services.html">More services</a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </nav>
+        <nav id="wb-bc" property="breadcrumb" role="navigation">
+          <h2>You are here:</h2>
+          <div class="container">
+            <div class="row">
+              <ol class="breadcrumb">
+                <li>
+                  <a href="https://www.canada.ca/en.html">Home</a>
+                </li>
+              </ol>
+            </div>
+          </div>
+        </nav>
+      </header>
+    </div>
+    <!-- Write closure template -->
+    <script id="CDTSTopScript" type="text/javascript">
+      var defTop = document.getElementById('def-top');
+      defTop.outerHTML = wet.builder.top({
+        cdnEnv: 'prod',
+        lngLinks: [
+          {
+            lang: 'fr',
+            href: '#',
+            text: 'Français',
+          },
+        ],
+        search: true,
+      });
+    </script>
+
+    <main class="container" property="mainContentOfPage" role="main">
+      <div>
+        <div class="back-to-main" style="color: white">
+          <a href="./index.html?tab=specific-demos">← Back to Main</a>
+        </div>
+      </div>
+
+      <!-- This is the div for the map (same config EN and FR) -->
+      <div id="MapEN" class="geoview-map" data-lang="en" data-config-url="./configs/open-maps/open-maps-config.json"></div>
+    </main>
+
+    <div id="def-footer">
+      <!-- Write closure fall-back static file -->
+      <!-- /ROOT/etc/designs/canada/cdts/gcweb/latest/cdts/static/footer-en.html -->
+      <aside class="gc-nttvs container">
+        <h2>Government of Canada activities and initiatives</h2>
+        <div class="wb-eqht row" id="gcwb_prts">
+          <p class="mrgn-lft-md">
+            <a href="https://www.canada.ca/activities.html">Access Government of Canada activities and initiatives</a>
+          </p>
+        </div>
+      </aside>
+      <footer id="wb-info" role="contentinfo">
+        <nav class="container wb-navcurr" role="navigation">
+          <h2 class="wb-inv">About government</h2>
+          <ul class="list-unstyled colcount-sm-2 colcount-md-3">
+            <li>
+              <a href="https://www.canada.ca/en/contact.html">Contact us</a>
+            </li>
+            <li>
+              <a href="https://www.canada.ca/en/government/dept.html">Departments and agencies</a>
+            </li>
+            <li>
+              <a href="https://www.canada.ca/en/government/publicservice.html">Public service and military</a>
+            </li>
+            <li>
+              <a href="https://www.servicecanada.gc.ca/gcnews">News</a>
+            </li>
+            <li>
+              <a href="https://www.canada.ca/en/government/system/laws.html">Treaties, laws and regulations</a>
+            </li>
+            <li>
+              <a href="https://www.canada.ca/en/transparency/reporting.html">Government-wide reporting</a>
+            </li>
+            <li>
+              <a href="https://pm.gc.ca/eng">Prime Minister</a>
+            </li>
+            <li>
+              <a href="https://www.canada.ca/en/government/system.html">How government works</a>
+            </li>
+            <li>
+              <a href="https://open.canada.ca/en/">Open government</a>
+            </li>
+          </ul>
+        </nav>
+        <div class="brand">
+          <div class="container">
+            <div class="row">
+              <nav class="col-md-10 ftr-urlt-lnk">
+                <h2 class="wb-inv">About this site</h2>
+                <ul>
+                  <li>
+                    <a href="https://www.canada.ca/en/social.html">Social media</a>
+                  </li>
+                  <li>
+                    <a href="https://www.canada.ca/en/mobile.html">Mobile applications</a>
+                  </li>
+                  <li>
+                    <a href="https://www1.canada.ca/en/newsite.html">About Canada.ca</a>
+                  </li>
+                  <li>
+                    <a href="https://www.canada.ca/en/transparency/terms.html">Terms and conditions</a>
+                  </li>
+                  <li>
+                    <a href="https://www.canada.ca/en/transparency/privacy.html">Privacy</a>
+                  </li>
+                </ul>
+              </nav>
+              <div class="col-xs-6 visible-sm visible-xs tofpg">
+                <a href="#wb-cont">Top of Page <span class="glyphicon glyphicon-chevron-up"></span></a>
+              </div>
+              <div class="col-xs-6 col-md-2 text-right">
+                <img
+                  aria-label="Symbol of the Government of Canada"
+                  data="https://www.canada.ca/etc/designs/canada/cdts/gcweb/v4_0_32/assets/wmms-blk.svg"
+                  role="img"
+                  tabindex="-1"
+                  type="image/svg+xml"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <!-- Write closure template -->
+    <script id="CDTSDefFooterScript" type="text/javascript">
+      var defFooter = document.getElementById('def-footer');
+      defFooter.outerHTML = wet.builder.footer({
+        cdnEnv: 'prod',
+      });
+    </script>
+    <!-- Write closure template -->
+    <script id="CDTSRefFooterScript" type="text/javascript">
+      document.write(
+        wet.builder.refFooter({
+          cdnEnv: 'prod',
+        })
+      );
+    </script>
+
+    <script src="https://www.canada.ca/etc/designs/canada/cdts/gcweb/v4_0_32/js/wet-boew.min.js"></script>
+    <script src="https://www.canada.ca/etc/designs/canada/cdts/gcweb/v4_0_32/js/theme.min.js"></script>
+
+    <script>
+      cgpv.init();
+    </script>
+  </body>
+</html>

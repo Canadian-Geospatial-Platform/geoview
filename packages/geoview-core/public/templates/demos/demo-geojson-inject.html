@@ -60,7 +60,7 @@
       // initialize cgpv
       cgpv.init();
 
-      // Add points 1 button ====================================================================================
+      // #region Add points 1 button
       // find the button element by ID
       var addPoints1Button = document.getElementById('Add-points1');
 
@@ -125,7 +125,9 @@
         cgpv.api.getMapViewer('map1').layer.setGeojsonSource('geojsonLYR1/blank.json', points1);
       });
 
-      // Add points 2 button ====================================================================================
+      // #endregion Add points 1 button
+
+      // #region Add points 2 button
       // find the button element by ID
       var addPoints2Button = document.getElementById('Add-points2');
 
@@ -136,8 +138,9 @@
       addPoints2Button.addEventListener('click', () => {
         cgpv.api.getMapViewer('map1').layer.setGeojsonSource('geojsonLYR1/blank.json', points2);
       });
+// #endregion Add points 2 button
 
-      // Add points 3 button ====================================================================================
+      // #region Add points 3 button
       // find the button element by ID
       var addPoints3Button = document.getElementById('Add-points3');
 
@@ -201,7 +204,9 @@
       addPoints3Button.addEventListener('click', () => {
         cgpv.api.getMapViewer('map1').layer.setGeojsonSource('geojsonLYR1/blank.json', points3);
       });
-      // Add replace fields button ====================================================================================
+      // #endregion Add points 3 button
+
+      // #region Add replace fields button
       // find the button element by ID
       var replaceFieldsButton = document.getElementById('Replace-outfields');
 
@@ -216,6 +221,7 @@
             ['Program', 'Title', 'ID']
           );
       });
+      // #endregion Add replace fields button
     </script>
   </body>
 </html>
