@@ -461,7 +461,7 @@ cgpv.api.getMapViewer('Map1').replaceMapConfigLayerNames(pairs, mapConfig, true)
         });
       }
 
-      // Delete Button============================================================================================================
+      // Delete Button
       const deleteMapButton = document.getElementById('deleteMap');
 
       // add an event listener when a button is clicked
@@ -470,13 +470,13 @@ cgpv.api.getMapViewer('Map1').replaceMapConfigLayerNames(pairs, mapConfig, true)
         document.getElementById('Map1').remove();
       });
 
-      // Create Button============================================================================================================
+      // Create Button
       const createMapButton = document.getElementById('createMap');
 
       // add an event listener when a button is clicked
       createMapButton.addEventListener('click', createMapDiv);
 
-      // Refresh Button============================================================================================================
+      // Refresh Button
       const refreshMapButton = document.getElementById('refreshMap');
 
       // add an event listener when a button is clicked
@@ -485,7 +485,7 @@ cgpv.api.getMapViewer('Map1').replaceMapConfigLayerNames(pairs, mapConfig, true)
         refreshMap();
       });
 
-      // Update Config Button============================================================================================================
+      // Update Config Button
       const updateConfigButton = document.getElementById('updateState');
 
       // add an event listener when a button is clicked
@@ -497,7 +497,7 @@ cgpv.api.getMapViewer('Map1').replaceMapConfigLayerNames(pairs, mapConfig, true)
         updateConfigTextArea();
       });
 
-      // Change Language Button============================================================================================================
+      // Change Language Button
       const changeLanguageButton = document.getElementById('changeLanguage');
 
       // add an event listener when a button is clicked
@@ -509,7 +509,7 @@ cgpv.api.getMapViewer('Map1').replaceMapConfigLayerNames(pairs, mapConfig, true)
         if (mapDiv) mapDiv.setAttribute('data-lang', lang);
       });
 
-      // Add Layers Button============================================================================================================
+      // Add Layers Button
       const addLayersButton = document.getElementById('addLayers');
 
       // add an event listener when a button is clicked
@@ -521,7 +521,7 @@ cgpv.api.getMapViewer('Map1').replaceMapConfigLayerNames(pairs, mapConfig, true)
         }
       });
 
-      // Change Names Button============================================================================================================
+      // Change Names Button
       const changeNamesButton = document.getElementById('changeNames');
 
       // add an event listener when a button is clicked
@@ -539,7 +539,7 @@ cgpv.api.getMapViewer('Map1').replaceMapConfigLayerNames(pairs, mapConfig, true)
         updateConfigTextArea();
       });
 
-      // Change Names and Remove Button============================================================================================================
+      // Change Names and Remove Button
       const changeNamesAndRemoveButton = document.getElementById('changeNamesAndRemove');
 
       // add an event listener when a button is clicked
@@ -674,7 +674,7 @@ cgpv.api.getMapViewer('Map1').replaceMapConfigLayerNames(pairs, mapConfig, true)
         ],
       };
 
-      // Add Layers Custom Button============================================================================================================
+      // Add Layers Custom Button
       const addLayersCustomButton = document.getElementById('addLayersCustom');
 
       // add an event listener when a button is clicked

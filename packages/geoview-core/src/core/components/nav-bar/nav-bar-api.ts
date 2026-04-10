@@ -202,11 +202,14 @@ export class NavBarApi {
     Object.keys(this.buttons).forEach((groupName) => {
       const group = this.buttons[groupName];
 
-      // delete the button or panel from the group
-      delete group[buttonPanelId];
+      // Only remove and emit if the button actually exists in this group
+      if (group[buttonPanelId]) {
+        // delete the button or panel from the group
+        delete group[buttonPanelId];
 
-      // trigger an event that a button or panel has been removed to update the state and re-render
-      this.#emitNavbarRemoved({ buttonPanelId, group: groupName });
+        // trigger an event that a button or panel has been removed to update the state and re-render
+        this.#emitNavbarRemoved({ buttonPanelId, group: groupName });
+      }
     });
   }
 

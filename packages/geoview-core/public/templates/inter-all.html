@@ -31,13 +31,30 @@
     </div>
 
     <div class="draw-menu">
+      <div class="draw-menu-item">
+        <span>Select + Translate mode?</span>
+        <input class="form-check-input" id="chkTranslate" type="checkbox" onchange="chkTranslate()" />
+        <span style="font-size: smaller; margin-left: 8px"
+          >(enable to click a shape to select it, then drag to move it to a new position)</span
+        >
+      </div>
+      <div class="draw-menu-item">
+        <span>Extent mode?</span>
+        <input class="form-check-input" id="chkExtent" type="checkbox" onchange="chkExtent()" />
+        <span style="font-size: smaller; margin-left: 8px"
+          >(Shift-Drag to draw an extent, Shift-Drag corners/edges to resize, Shift-Click outside to remove)</span
+        >
+      </div>
+    </div>
+
+    <div class="draw-menu" style="margin-top: 15px">
       <!-- GROUP A -->
       <div id="geomGroupA" style="color: blue">
         <div class="draw-menu-item">GROUP A:</div>
 
         <div class="draw-menu-item">
           <span>Select shape:</span>
-          <select class="form-select" name="Draw switcher" id="switchDrawA" onchange="selDrawChanged('geomGroupA');">
+          <select class="form-select" name="Draw switcher" id="switchDrawA" onchange="selDrawChanged('geomGroupA')">
             <option value="None" selected>None</option>
             <option value="Point">Points</option>
             <option value="LineString">Lines</option>
@@ -69,7 +86,7 @@
 
         <div class="draw-menu-item">
           <span>Select shape:</span>
-          <select class="form-select" name="Draw switcher" id="switchDrawB" onchange="selDrawChanged('geomGroupB');">
+          <select class="form-select" name="Draw switcher" id="switchDrawB" onchange="selDrawChanged('geomGroupB')">
             <option value="None" selected>None</option>
             <option value="Point">Points</option>
             <option value="LineString">Lines</option>
@@ -101,7 +118,7 @@
 
         <div class="draw-menu-item">
           <span>Select shape:</span>
-          <select class="form-select" name="Draw switcher" id="switchDrawC" onchange="selDrawChanged('geomGroupC');">
+          <select class="form-select" name="Draw switcher" id="switchDrawC" onchange="selDrawChanged('geomGroupC')">
             <option value="None" selected>None</option>
             <option value="Point">Points</option>
             <option value="LineString">Lines</option>
@@ -297,6 +314,62 @@
           // Stop
           //addLog('logs', "Stop modifying " + groupKey);
           modify.stopInteraction();
+        }
+      }
+
+      let translateInteraction = null;
+      let extentInteraction = null;
+
+      function chkTranslate() {
+        // If activating
+        if (document.getElementById('chkTranslate').checked) {
+          // If already was initialized
+          if (translateInteraction) {
+            translateInteraction.startInteraction();
+          } else {
+            // Init select + translate interactions (select a shape first, then drag to move)
+            translateInteraction = map1.initTranslateInteractions();
+
+            // Wire handler
+            translateInteraction.onTranslateStarted((sender, payload) => {
+              // Log the event
+              addLog('LOGS1', 'translateStarted');
+              console.log(payload);
+            });
+
+            // Wire handler
+            translateInteraction.onTranslateEnded((sender, payload) => {
+              // Log the event
+              addLog('LOGS1', 'translateEnded');
+              console.log(payload);
+            });
+          }
+        } else if (translateInteraction) {
+          // Stop
+          translateInteraction.stopInteraction();
+        }
+      }
+
+      function chkExtent() {
+        // If activating
+        if (document.getElementById('chkExtent').checked) {
+          // If already was initialized
+          if (extentInteraction) {
+            extentInteraction.startInteraction();
+          } else {
+            // Init extent interaction
+            extentInteraction = map1.initExtentInteractions();
+
+            // Wire handler
+            extentInteraction.onExtentChanged((sender, payload) => {
+              // Log the event
+              addLog('LOGS1', 'extentChanged');
+              console.log(payload);
+            });
+          }
+        } else if (extentInteraction) {
+          // Stop
+          extentInteraction.stopInteraction();
         }
       }
 

@@ -241,6 +241,11 @@ async function renderMap(mapElement: HTMLElement): Promise<MapViewer> {
   const mapViewer = new MapViewer(configuration, i18n);
   api.setMapViewer(mapId, mapViewer);
 
+  // If schema validation errors were detected, notify the user
+  if (configuration.hasSchemaErrors) {
+    mapViewer.notifications.showWarning('warning.schema.validationIssues');
+  }
+
   // Create a promise to be resolved when the MapViewer is initialized via the AppStart component
   reactRoots[mapId].render(<AppStart mapViewer={mapViewer} i18nLang={i18n} />);
 

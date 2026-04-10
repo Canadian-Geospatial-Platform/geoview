@@ -492,10 +492,16 @@
       "layerCRSNotSupported": "The spatial reference of the map '__param__' is not officially supported by the layer '__param__'. GeoView will still attempt to load the layer on the map, but it might be misaligned.",
       "invalidGeometry": "The '__param__' layer contains features with invalid geometries that will not show on the map.",
       "slowCoordinateInfo": "The coordinate info for the clicked coordinates is taking longer than expected to fetch..."
+    },
+    "schema": {
+      "validationIssues": "A configuration warning was found, check the console to see what is wrong."
     }
   },
   "error": {
     "generic": "An error happened, contact us or view console for details.",
+    "basemap": {
+      "overviewMapCreationError": "Error creating the overview map basemap."
+    },
     "layer": {
       "differingFieldLengths": "Length of provided fields do not match.",
       "layerConfigNotFound": "Layer Configuration at layer path '__param__' not found.",

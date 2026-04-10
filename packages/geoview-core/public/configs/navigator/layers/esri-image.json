@@ -96,5 +96,6 @@
     "tabs": {
       "core": ["geolocator", "legend", "details", "export"]
     }
-  }
+  },
+  "navBar": ["zoom", "rotation", "fullscreen", "home", "location", "measurement", "basemap-select", "projection"]
 }

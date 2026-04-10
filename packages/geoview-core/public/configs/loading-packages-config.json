@@ -17,5 +17,6 @@
     "tabs": {
       "core": ["geolocator", "export", "about-panel", "aoi-panel", "custom-legend", "guide", "details", "data-table", "layers"]
     }
-  }
+  },
+  "navBar": ["drawer"]
 }

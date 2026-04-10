@@ -175,8 +175,8 @@ export class PluginController extends AbstractMapViewerController {
         } catch (error: unknown) {
           // Log warning
           logger.logWarning(`Config not found.`, error);
-          // Notify with a warning
-          mapViewer.notifications.addNotificationWarning('error.map.pluginConfigNotFound', [pluginId, mapId, configPath]);
+          // GV: This warning is misleading because most of the time the conifg will be inside main config , comment for now
+          // mapViewer.notifications.addNotificationWarning('error.map.pluginConfigNotFound', [pluginId, mapId, configPath]);
         }
       }
 

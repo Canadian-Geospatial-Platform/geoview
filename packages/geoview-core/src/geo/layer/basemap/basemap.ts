@@ -29,10 +29,15 @@ import {
 import { logger } from '@/core/utils/logger';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
-import { BasemapTakingLongTimeError, BasemapLayerCreationError, CoreBasemapCreationError } from '@/core/exceptions/geoview-exceptions';
+import {
+  GeoViewError,
+  BasemapTakingLongTimeError,
+  BasemapLayerCreationError,
+  CoreBasemapCreationError,
+  OverviewMapCreationError,
+} from '@/core/exceptions/geoview-exceptions';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import { Fetch } from '@/core/utils/fetch-helper';
-import { formatError } from '@/core/exceptions/core-exceptions';
 
 /**
  * A class to get a Basemap for a define projection and language. For the moment, a list maps are available and
@@ -238,7 +243,7 @@ export class BasemapApi {
       this.overviewMap = await this.createCoreBasemap({ basemapId: 'transport', shaded: false, labeled: false });
     } catch (error: unknown) {
       // Emit about the error
-      this.#emitBasemapError({ error: formatError(error) });
+      this.#emitBasemapError({ error: error instanceof GeoViewError ? error : new OverviewMapCreationError() });
     }
 
     // Overview Map Control
@@ -792,7 +797,7 @@ type BasemapChangedDelegate = EventDelegateBase<BasemapApi, BasemapChangedEvent,
  * Define an event for the delegate.
  */
 export type BasemapErrorEvent = {
-  error: Error;
+  error: GeoViewError;
 };
 
 /**

@@ -59,10 +59,8 @@
       }
     ]
   },
-  "components": ["overview-map"],
-  "overviewMap": {
-    "hideOnZoom": 7
-  },
+  "components": ["overview-map", "north-arrow"],
+  "overviewMap": { "hideOnZoom": 7 },
   "footerBar": {
     "tabs": {
       "core": ["layers", "data-table", "time-slider"]
@@ -74,5 +72,6 @@
     "tabs": {
       "core": ["geolocator", "legend", "details", "export"]
     }
-  }
+  },
+  "navBar": ["zoom", "rotation", "fullscreen", "home", "location", "measurement", "basemap-select", "projection"]
 }

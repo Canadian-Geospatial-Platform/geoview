@@ -289,14 +289,17 @@ export class ConfigApi {
       if (!providedMapFeatureConfig) throw new MapConfigError('The string configuration provided cannot be translated to a json object');
 
       // Validate the map config
-      ConfigApi.validateSchema(MAP_CONFIG_SCHEMA_PATH, providedMapFeatureConfig);
+      const schemaValid = ConfigApi.validateSchema(MAP_CONFIG_SCHEMA_PATH, providedMapFeatureConfig);
 
       // Validate
       if (!providedMapFeatureConfig.map) throw new MapConfigError('The map property is mandatory');
 
       // Instanciate the mapFeatureConfig. If an error is detected, a workaround procedure
       // will be executed to try to correct the problem in the best possible way.
-      return new MapFeatureConfig(providedMapFeatureConfig);
+      const mapFeatureConfig = new MapFeatureConfig(providedMapFeatureConfig);
+      mapFeatureConfig.hasSchemaErrors = !schemaValid;
+
+      return mapFeatureConfig;
     } catch (error: unknown) {
       // If we get here, it is because the user provided a string config that cannot be translated to a json object,
       // or the config doesn't have the mandatory map property or the listOfGeoviewLayerConfig is defined but is not
@@ -343,7 +346,7 @@ export class ConfigApi {
           for (let j = 1; j < path.length; j++) {
             node = node[path[j]] as Record<string, unknown>;
           }
-          logger.logWarning('='.repeat(200), `\nSchemaPath: ${schemaPath}`, '\nSchema error: ', error, '\nObject affected: ', node);
+          logger.logWarning('SCHEMA VALIDATION', `\nSchemaPath: ${schemaPath}`, '\nSchema error: ', error, '\nObject affected: ', node);
         }
         return false;
       }

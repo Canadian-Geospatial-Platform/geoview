@@ -25,11 +25,15 @@
         <p>This page is used to showcase loading / unloading packages at runtime.</p>
       </div>
     </div>
-    <div class="toolbar">
+    <div class="toolbar" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px">
       <button class="btn btn-primary" id="load-aoi-panel-btn">Load Area of Interest Panel</button>
-      <button class="btn btn-primary" id="unload-aoi-panel-btn">Unload Area of Interest Panel</button>
       <button class="btn btn-primary" id="load-custom-legend-btn">Load Custom Legend</button>
+      <button class="btn btn-primary" id="load-about-panel-btn">Load About Panel</button>
+      <button class="btn btn-primary" id="load-drawer-btn">Load Drawer</button>
+      <button class="btn btn-primary" id="unload-aoi-panel-btn">Unload Area of Interest Panel</button>
       <button class="btn btn-primary" id="unload-custom-legend-btn">Unload Custom Legend</button>
+      <button class="btn btn-primary" id="unload-about-panel-btn">Unload About Panel</button>
+      <button class="btn btn-primary" id="unload-drawer-btn">Unload Drawer</button>
     </div>
 
     <div id="map1" class="geoview-map" data-lang="en" data-config-url="./configs/loading-packages-config.json"></div>
@@ -44,6 +48,7 @@
       // Register handler when map has been initialized
       cgpv.onMapInit((mapViewer) => {
         if (mapViewer.mapId === 'map1') {
+          // #region AOI
           // get load aoi panel button element
           var loadAoiPanelBtn = document.getElementById('load-aoi-panel-btn');
 
@@ -59,7 +64,9 @@
           unloadAoiPanelBtn.addEventListener('click', function (e) {
             cgpv.api.plugin.removePlugin('aoi-panel', mapViewer.mapId);
           });
+          // #endregion AOI
 
+          // #region Custom Legend
           // get load custom legend button element
           var loadCustomLegendBtn = document.getElementById('load-custom-legend-btn');
 
@@ -76,6 +83,45 @@
           unloadCustomLegendBtn.addEventListener('click', function (e) {
             cgpv.api.plugin.removePlugin('custom-legend', mapViewer.mapId);
           });
+          // #endregion Custom Legend
+
+          // #region About Panel
+          // get load about panel button element
+          var loadAboutPanelBtn = document.getElementById('load-about-panel-btn');
+
+          // add event handler to the load about panel button
+          loadAboutPanelBtn.addEventListener('click', function (e) {
+            if (!window?.geoviewPlugins) window.geoviewPlugins = {};
+            cgpv.api.plugin.addPlugin('about-panel', window.geoviewPlugins['about-panel'], mapViewer.mapId);
+          });
+
+          // get unload about panel button element
+          var unloadAboutPanelBtn = document.getElementById('unload-about-panel-btn');
+
+          // add event handler to the unload about panel button
+          unloadAboutPanelBtn.addEventListener('click', function (e) {
+            cgpv.api.plugin.removePlugin('about-panel', mapViewer.mapId);
+          });
+          // #endregion About Panel
+
+          // #region Drawer
+          // get load drawer button element
+          var loadDrawerBtn = document.getElementById('load-drawer-btn');
+
+          // add event handler to the load drawer button
+          loadDrawerBtn.addEventListener('click', function (e) {
+            if (!window?.geoviewPlugins) window.geoviewPlugins = {};
+            cgpv.api.plugin.addPlugin('drawer', window.geoviewPlugins['drawer'], mapViewer.mapId);
+          });
+
+          // get unload drawer button element
+          var unloadDrawerBtn = document.getElementById('unload-drawer-btn');
+
+          // add event handler to the unload drawer button
+          unloadDrawerBtn.addEventListener('click', function (e) {
+            cgpv.api.plugin.removePlugin('drawer', mapViewer.mapId);
+          });
+          // #endregion Drawer
         }
       });
 

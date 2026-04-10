@@ -492,10 +492,16 @@
       "layerCRSNotSupported": "La référence spatiale de la carte '__param__' n'est pas officiellement supportée par la couche '__param__'. GeoView va tout de même tenté d'afficher la couche, mais celle-ci risque d'être désalignée..",
       "invalidGeometry": "La couche '__param__' contient des entités dont la géométrie est invalide et qui ne s'afficheront pas sur la carte.",
       "slowCoordinateInfo": "Les informations de coordonnées pour le point cliqué prennent plus de temps que prévu à être récupérées..."
+    },
+    "schema": {
+      "validationIssues": "Une erreur de configuration a été trouvée, vérifiez la console pour voir ce qui ne va pas."
     }
   },
   "error": {
     "generic": "Une erreur est survenue, contactez nous ou regardez dans la console pour plus de détails.",
+    "basemap": {
+      "overviewMapCreationError": "Erreur lors de la création de la couche de base de la carte d'aperçu."
+    },
     "layer": {
       "differingFieldLengths": "La longueur des champs fournis ne correspond pas.",
       "layerConfigNotFound": "La configuration de la couche à l'emplacement '__param__' est introuvable.",
