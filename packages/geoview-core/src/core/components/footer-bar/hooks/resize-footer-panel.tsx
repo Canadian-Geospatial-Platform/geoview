@@ -4,7 +4,7 @@ import { useState, useMemo, memo, useCallback } from 'react';
 import Slider from '@mui/material/Slider';
 import { Box, HeightIcon, IconButton, Popover } from '@/ui';
 
-import { useUIController } from '@/core/controllers/ui-controller';
+import { useUIController } from '@/core/controllers/use-controllers';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { getSxClasses } from './resize-footer-panel-style';
 import { useStoreUIFooterPanelResizeValue } from '@/core/stores/store-interface-and-intial-values/ui-state';

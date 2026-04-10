@@ -12,7 +12,7 @@ import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
 import { logger } from 'geoview-core/core/utils/logger';
 
 import { FONT_OPTIONS, DEFAULT_FONT, loadGoogleFont } from '../utils/fonts';
-import { useDrawerController } from 'geoview-core/core/controllers/drawer-controller';
+import { useDrawerController } from 'geoview-core/core/controllers/use-controllers';
 
 // Styles
 const sxClasses = {

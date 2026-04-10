@@ -1,5 +1,4 @@
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
-import { useControllers } from '@/core/controllers/base/controller-manager';
 import {
   addOrUpdateStoreTableFilter,
   getStoreDataTableSelectedLayerPath,
@@ -40,7 +39,7 @@ export class DataTableController extends AbstractMapViewerController {
     const layerPath = getStoreDataTableSelectedLayerPath(this.getMapId());
     const filter = getStoreMapFilteredRecord(this.getMapId(), layerPath) ? filterStrings : '';
     addOrUpdateStoreTableFilter(this.getMapId(), layerPath, filter);
-    this.getControllersRegistry().mapController.applyLayerFilters(layerPath);
+    this.getControllersRegistry().layerController.applyLayerFilters(layerPath);
   }
 
   // #endregion PUBLIC METHODS
@@ -54,14 +53,4 @@ export class DataTableController extends AbstractMapViewerController {
   // #region STATIC METHODS
 
   // #endregion STATIC METHODS
-}
-
-/**
- * Hook to access the DataTableController from the controller context.
- *
- * @returns The data table controller instance
- * @throws {Error} When used outside of a ControllerContext.Provider.
- */
-export function useDataTableController(): DataTableController {
-  return useControllers().dataTableController;
 }

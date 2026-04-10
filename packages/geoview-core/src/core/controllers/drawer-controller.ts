@@ -12,7 +12,6 @@ import { Circle as CircleGeom, LineString } from 'ol/geom';
 import Overlay from 'ol/Overlay';
 
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
-import { useControllers } from '@/core/controllers/base/controller-manager';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 import {
   DEFAULT_TEXT_VALUES,
@@ -2240,19 +2239,6 @@ export class DrawerController extends AbstractMapViewerController {
   };
 
   // #endregion STATIC METHODS
-}
-
-/**
- * Hook to access the DrawerController from the controller context.
- *
- * @returns The drawer controller instance
- * @throws {Error} When used outside of a ControllerContext.Provider.
- * @throws {Error} When the Drawer plugin is not configured.
- */
-export function useDrawerController(): DrawerController {
-  const controller = useControllers().drawerController;
-  if (!controller) throw new Error('useDrawerController must be used with an initialized drawer plugin state');
-  return controller;
 }
 
 /** Represents a GeoJSON feature with geometry and style properties */

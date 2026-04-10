@@ -26,7 +26,7 @@ export class AbstractController {
     this.onUnhook();
   }
 
-  //#endregion
+  //#endregion PUBLIC METHODS
 
   //#region PROTECTED METHODS
 
@@ -51,5 +51,5 @@ export class AbstractController {
     // To be implemented by subclasses
   }
 
-  //#endregion
+  //#endregion PROTECTED METHODS
 }

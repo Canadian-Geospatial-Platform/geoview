@@ -7,8 +7,7 @@ import { Box, Tabs } from '@/ui';
 // default tabs icon and class
 import { LegendIcon, InfoIcon, LayersIcon, StorageIcon, QuestionMarkIcon } from '@/ui/icons';
 
-import { useUIController } from '@/core/controllers/ui-controller';
-import { usePluginController } from '@/core/controllers/plugin-controller';
+import { usePluginController, useUIController } from '@/core/controllers/use-controllers';
 import { getSxClasses } from './footer-bar-style';
 import { ResizeFooterPanel } from '@/core/components/footer-bar/hooks/resize-footer-panel';
 import {

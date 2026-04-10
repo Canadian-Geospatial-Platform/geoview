@@ -10,7 +10,7 @@ import { getSxClasses } from './layer-settings-style';
 import { useStoreLayerWmsStyle, useStoreLayerWmsStyles } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import type { TypeMetadataWMSCapabilityLayerStyle } from '@/api/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';
-import { useLayerController } from '@/core/controllers/layer-controller';
+import { useLayerController } from '@/core/controllers/use-controllers';
 
 interface WmsStyleItemProps {
   style: TypeMetadataWMSCapabilityLayerStyle;

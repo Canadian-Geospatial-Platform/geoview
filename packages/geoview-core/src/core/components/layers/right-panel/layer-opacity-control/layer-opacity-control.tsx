@@ -7,7 +7,7 @@ import { Box, Slider, Typography } from '@/ui';
 import { useStoreLayerOpacity, useStoreLayerOpacityMaxFromParent } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useStoreMapIsLayerHiddenOnMap } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
-import { useLayerController } from '@/core/controllers/layer-controller';
+import { useLayerController } from '@/core/controllers/use-controllers';
 
 interface LayerOpacityControlProps {
   /** The layer path to control opacity for. */

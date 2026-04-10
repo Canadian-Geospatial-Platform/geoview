@@ -14,7 +14,7 @@ import {
 import { useStoreMapClickCoordinates } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { logger } from '@/core/utils/logger';
-import { useMapController } from '@/core/controllers/map-controller';
+import { useMapController } from '@/core/controllers/use-controllers';
 
 /** Coordinate data extracted from the feature info. */
 type CoordinateData = {

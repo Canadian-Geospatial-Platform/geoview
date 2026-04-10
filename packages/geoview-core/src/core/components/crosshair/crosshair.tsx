@@ -10,8 +10,7 @@ import { getStoreMapPointerPosition } from '@/core/stores/store-interface-and-in
 import { logger } from '@/core/utils/logger';
 import { useEventListener } from '@/core/components/common/hooks/use-event-listener';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
-import { useUIController } from '@/core/controllers/ui-controller';
-import { useMapController } from '@/core/controllers/map-controller';
+import { useMapController, useUIController } from '@/core/controllers/use-controllers';
 
 /** Properties for the Crosshair component. */
 type CrosshairProps = {

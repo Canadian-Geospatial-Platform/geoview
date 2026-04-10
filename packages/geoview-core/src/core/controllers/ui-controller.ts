@@ -1,5 +1,4 @@
 import type { TypeDisplayLanguage, TypeDisplayTheme } from '@/api/types/map-schema-types';
-import { useControllers } from '@/core/controllers/base/controller-manager';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import {
   disableStoreFocusTrap,
@@ -453,14 +452,4 @@ export class UIController extends AbstractMapViewerController {
   }
 
   // #endregion DOMAIN HANDLERS
-}
-
-/**
- * Hook to access the UI controller from the controller context.
- *
- * @returns The UI controller instance
- * @throws {Error} When used outside of a ControllerContext.Provider.
- */
-export function useUIController(): UIController {
-  return useControllers().uiController;
 }

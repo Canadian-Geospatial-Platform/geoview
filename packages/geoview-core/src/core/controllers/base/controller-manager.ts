@@ -10,8 +10,8 @@ export const ControllerContext = createContext<ControllerRegistry | null>(null);
 /**
  * Hook to access the controller registry from the context.
  *
- * @returns The controller registry instance from the context.
- * @throws {Error} When used outside of a ControllerProvider.
+ * @returns The controller registry instance from the context
+ * @throws {Error} When used outside of a ControllerProvider
  */
 export function useControllers(): ControllerRegistry {
   const ctx = useContext(ControllerContext);

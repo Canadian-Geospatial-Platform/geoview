@@ -4,7 +4,6 @@ import { useTheme } from '@mui/material/styles';
 import { Box, FilterAltIcon } from '@/ui';
 import DataTable from './data-table';
 
-import { useUIController } from '@/core/controllers/ui-controller';
 import {
   useStoreDataTableSelectedLayerPath,
   useStoreDataTableAllFeaturesDataArray,
@@ -32,7 +31,7 @@ import type { MappedLayerDataType } from './data-table-types';
 import { DEFAULT_APPBAR_CORE } from '@/api/types/map-schema-types';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import DataSkeleton from './data-skeleton';
-import { useLayerSetController } from '@/core/controllers/layer-set-controller';
+import { useLayerSetController, useUIController } from '@/core/controllers/use-controllers';
 
 /** Properties for the Datapanel component. */
 interface DataPanelType {

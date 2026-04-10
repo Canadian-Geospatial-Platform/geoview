@@ -3,13 +3,13 @@ import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/store-inter
 import { logger } from 'geoview-core/core/utils/logger';
 import { useStoreMapLayerArrayVisibility } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
+import { useLayerController } from 'geoview-core/core/controllers/use-controllers';
 
 import type { TypeGroupLayer, TypeLegendItem } from '../custom-legend-types';
 import { isGroupLayer, generateLegendItemId, isLegendLayer } from '../custom-legend-types';
 import type { getSxClasses } from '../custom-legend-style';
 import { LegendItem } from './legend-item';
 import { DescriptionText } from './description-text';
-import { useMapController } from 'geoview-core/core/controllers/map-controller';
 
 /** Props for the GroupItem component. */
 interface GroupItemProps {
@@ -67,7 +67,7 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
   } = ui.elements;
 
   const displayLanguage = useStoreAppDisplayLanguage();
-  const mapController = useMapController();
+  const layerController = useLayerController();
 
   const [collapsed, setCollapsed] = useState<boolean>(isGroupLayer(item) ? (item.collapsed ?? false) : false);
 
@@ -94,7 +94,7 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
 
     // Toggle all child layers
     layerPaths.forEach((layerPath) => {
-      mapController.setOrToggleMapLayerVisibility(layerPath, newVisibility);
+      layerController.setOrToggleMapLayerVisibility(layerPath, newVisibility);
     });
   };
 

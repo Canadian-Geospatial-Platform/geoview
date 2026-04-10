@@ -30,7 +30,7 @@ import { handleEscapeKey } from '@/core/utils/utilities';
 import { useStoreUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import type { SxStyles } from '@/ui/style/types';
 import { CONTAINER_TYPE, TIMEOUT } from '@/core/utils/constant';
-import { useUIController } from '@/core/controllers/ui-controller';
+import { useUIController } from '@/core/controllers/use-controllers';
 
 /** Details for a single notification entry. */
 export type NotificationDetailsType = {

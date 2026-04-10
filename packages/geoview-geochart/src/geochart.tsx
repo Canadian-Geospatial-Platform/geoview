@@ -7,8 +7,7 @@ import {
 } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 import { useStoreLayerDisplayDateFormatShort } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
 import type { TypeGeochartResultSetEntry } from 'geoview-core/core/stores/store-interface-and-intial-values/geochart-state';
-import { useUIController } from 'geoview-core/core/controllers/ui-controller';
-import { useLayerController } from 'geoview-core/core/controllers/layer-controller';
+import { useUIController, useLayerController } from 'geoview-core/core/controllers/use-controllers';
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import type { TypeFeatureInfoEntry } from 'geoview-core/api/types/map-schema-types';
 import { logger } from 'geoview-core/core/utils/logger';

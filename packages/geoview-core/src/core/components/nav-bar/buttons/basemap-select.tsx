@@ -11,7 +11,7 @@ import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 import { IconButton } from '@/ui/icon-button/icon-button';
 import { List, ListItem } from '@/ui/list';
 import { BlockIcon, PublicIcon, SatelliteIcon, SignpostIcon } from '@/ui/icons';
-import { useMapController } from '@/core/controllers/map-controller';
+import { useLayerController, useMapController } from '@/core/controllers/use-controllers';
 
 /** Mapping of basemap choice identifiers to their options. */
 const basemapChoiceOptions: Record<string, TypeBasemapOptions> = {
@@ -36,6 +36,7 @@ export default function BasemapSelect(): JSX.Element {
   const configBasemapOptions = useStoreMapBasemapOptions();
   const hasGeoviewBasemapLayer = useStoreMapHasGeoviewBasemapLayer();
   const mapController = useMapController();
+  const layerController = useLayerController();
 
   // Check if the basemap from the config is one of our default basemaps.
   // If there is a custom basemap, we need to use it as the default regardless of basemap options.
@@ -57,8 +58,8 @@ export default function BasemapSelect(): JSX.Element {
 
       // If the Geoview basemap layer is present, toggle visibility based on selection. We hide it on nogeom.
       if (hasGeoviewBasemapLayer) {
-        if (basemapChoice === 'default') mapController.setVisibilityOfGeoviewBasemapLayers(true);
-        else mapController.setVisibilityOfGeoviewBasemapLayers(false);
+        if (basemapChoice === 'default') layerController.setVisibilityOfGeoviewBasemapLayers(true);
+        else layerController.setVisibilityOfGeoviewBasemapLayers(false);
       }
 
       mapController
@@ -74,7 +75,7 @@ export default function BasemapSelect(): JSX.Element {
         closeButton.focus();
       }
     },
-    [configBasemapOptions, hasGeoviewBasemapLayer, mapController]
+    [configBasemapOptions, hasGeoviewBasemapLayer, layerController, mapController]
   );
 
   /**

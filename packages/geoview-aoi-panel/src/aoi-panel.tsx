@@ -4,7 +4,7 @@ import { Projection } from 'geoview-core/geo/utils/projection';
 import { useStoreMapCurrentProjectionEPSG } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from 'geoview-core/core/utils/logger';
 import { getSxClasses } from './area-of-interest-style';
-import { useMapController } from 'geoview-core/core/controllers/map-controller';
+import { useMapController } from 'geoview-core/core/controllers/use-controllers';
 
 /** Props for the AoiPanel component. */
 interface AoiPanelProps {

@@ -10,7 +10,7 @@ import { useStoreLayerMosaicRule, useStoreLayerAllowedMosaicMethods } from '@/co
 
 import type { TypeMosaicMethod, TypeMosaicOperation } from '@/api/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';
-import { useLayerController } from '@/core/controllers/layer-controller';
+import { useLayerController } from '@/core/controllers/use-controllers';
 
 // Maps mosaic method keys to their filter name and translation key
 const METHOD_ENTRIES: Record<string, { name: string; labelKey: string }> = {

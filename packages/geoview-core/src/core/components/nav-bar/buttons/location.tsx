@@ -3,9 +3,8 @@ import { useTheme } from '@mui/material/styles';
 
 import { IconButton, EmojiPeopleIcon } from '@/ui';
 import { getSxClasses } from '@/core/components/nav-bar/nav-bar-style';
-import { useUIController } from '@/core/controllers/ui-controller';
 import { logger } from '@/core/utils/logger';
-import { useMapController } from '@/core/controllers/map-controller';
+import { useMapController, useUIController } from '@/core/controllers/use-controllers';
 
 /**
  * Creates a location button to zoom to user location.

@@ -13,7 +13,7 @@ import { MapInfo } from '@/core/components/map-info/map-info';
 import type { TypeModalProps, ModalApi, ModalEvent } from '@/ui';
 import { Box, CircularProgress, Link, Modal, Snackbar, Button } from '@/ui';
 import { getShellSxClasses } from './containers-style';
-import { useUIController } from '@/core/controllers/ui-controller';
+import { useUIController } from '@/core/controllers/use-controllers';
 import { useStoreMapInteraction, useStoreMapLoaded } from '@/core/stores/store-interface-and-intial-values/map-state';
 import {
   useStoreAppIsCircularProgressActive,

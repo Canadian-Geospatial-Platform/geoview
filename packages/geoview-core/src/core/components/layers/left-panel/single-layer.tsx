@@ -47,8 +47,7 @@ import { scrollListItemIntoView } from '@/core/utils/utilities';
 import { TIMEOUT, TABS } from '@/core/utils/constant';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { useStoreUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { useMapController } from '@/core/controllers/map-controller';
-import { useLayerCreatorController } from '@/core/controllers/layer-creator-controller';
+import { useLayerController, useLayerCreatorController } from '@/core/controllers/use-controllers';
 
 /** Static Tooltip slotProps — offset popper by [0, -8]. */
 const TOOLTIP_SLOT_PROPS = {
@@ -116,7 +115,7 @@ export function SingleLayer({
   const layerControls = useStoreLayerControls(layerPath);
   const layerChildPaths = useStoreLayerChildPaths(layerPath);
   const layerItems = useStoreLayerItems(layerPath);
-  const mapController = useMapController();
+  const layerController = useLayerController();
   const layerCreatorController = useLayerCreatorController();
 
   // Build unique ID format
@@ -250,14 +249,14 @@ export function SingleLayer({
       selectLayerIfNeeded();
 
       // Reorder
-      mapController.reorderLayer(layerPath, direction);
+      layerController.reorderLayer(layerPath, direction);
 
       // Scroll into view after DOM updates (scrollListItemIntoView utility does not work well for this)
       requestAnimationFrame(() => {
         layerListItemRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
       });
     },
-    [layerPath, selectLayerIfNeeded, mapController]
+    [layerPath, selectLayerIfNeeded, layerController]
   );
 
   const handleArrowKeyDown = useCallback(
@@ -267,7 +266,7 @@ export function SingleLayer({
         selectLayerIfNeeded(false);
 
         // Reorder
-        mapController.reorderLayer(layerPath, direction);
+        layerController.reorderLayer(layerPath, direction);
 
         // Allow the reorder action to work
         event.preventDefault();
@@ -278,7 +277,7 @@ export function SingleLayer({
         });
       }
     },
-    [layerPath, selectLayerIfNeeded, mapController]
+    [layerPath, selectLayerIfNeeded, layerController]
   );
 
   const handleArrowKeyDownWrapper = useCallback(
@@ -324,8 +323,8 @@ export function SingleLayer({
     selectLayerIfNeeded();
 
     // Toggle visibility
-    mapController.setOrToggleMapLayerVisibility(layerPath);
-  }, [layerPath, mapController, selectLayerIfNeeded]);
+    layerController.setOrToggleMapLayerVisibility(layerPath);
+  }, [layerPath, layerController, selectLayerIfNeeded]);
 
   const handleToggleVisibilityKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLButtonElement>): void => {
@@ -335,13 +334,13 @@ export function SingleLayer({
         selectLayerIfNeeded(false);
 
         // Toggle visibility
-        mapController.setOrToggleMapLayerVisibility(layerPath);
+        layerController.setOrToggleMapLayerVisibility(layerPath);
 
         // Allow the toggle visibility action to work
         event.preventDefault();
       }
     },
-    [layerPath, mapController, selectLayerIfNeeded]
+    [layerPath, layerController, selectLayerIfNeeded]
   );
 
   const handleZoomToLayerVisibleScale = useCallback((): void => {
@@ -349,8 +348,8 @@ export function SingleLayer({
     selectLayerIfNeeded();
 
     // Zoom to visible scale
-    mapController.zoomToLayerVisibleScale(layerPath);
-  }, [layerPath, mapController, selectLayerIfNeeded]);
+    layerController.zoomToLayerVisibleScale(layerPath);
+  }, [layerPath, layerController, selectLayerIfNeeded]);
 
   const handleZoomToLayerVisibleScaleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLButtonElement>): void => {
@@ -359,7 +358,7 @@ export function SingleLayer({
         selectLayerIfNeeded(false);
 
         // Zoom to visible scale
-        mapController.zoomToLayerVisibleScale(layerPath);
+        layerController.zoomToLayerVisibleScale(layerPath);
 
         // Allow the zoom to visible scale action to work
         event.preventDefault();
@@ -370,7 +369,7 @@ export function SingleLayer({
         });
       }
     },
-    [layerPath, mapController, selectLayerIfNeeded, layerListItemButtonId]
+    [layerPath, layerController, selectLayerIfNeeded, layerListItemButtonId]
   );
 
   const handleReload = useCallback((): void => {

@@ -16,8 +16,7 @@ import {
   LayersOutlinedIcon,
 } from '@/ui';
 
-import { useUIController } from '@/core/controllers/ui-controller';
-import { usePluginController } from '@/core/controllers/plugin-controller';
+import { usePluginController, useUIController } from '@/core/controllers/use-controllers';
 import { Geolocator } from '@/core/components/geolocator/geolocator';
 import type { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
 import ExportButton from '@/core/components/export/export-modal-button';

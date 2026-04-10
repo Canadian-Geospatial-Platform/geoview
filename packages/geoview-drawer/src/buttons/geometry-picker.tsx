@@ -10,7 +10,7 @@ import {
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
 
 import { logger } from 'geoview-core/core/utils/logger';
-import { useDrawerController } from 'geoview-core/core/controllers/drawer-controller';
+import { useDrawerController } from 'geoview-core/core/controllers/use-controllers';
 
 /** Props for the GeometryPickerPanel component. */
 export interface GeometryPickerPanelProps {

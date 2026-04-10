@@ -21,7 +21,7 @@ import { logger } from 'geoview-core/core/utils/logger';
 import { DateMgt } from 'geoview-core/core/utils/date-mgt';
 import { getSxClasses } from './time-slider-style';
 import { Switch } from 'geoview-core/ui/switch/switch';
-import { useTimeSliderController } from 'geoview-core/core/controllers/time-slider-controller';
+import { useTimeSliderController } from 'geoview-core/core/controllers/use-controllers';
 
 /** Properties for the TimeSlider component. */
 interface TimeSliderProps {

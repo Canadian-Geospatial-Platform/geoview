@@ -11,7 +11,7 @@ import {
   useStoreMapZoom,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
-import { useMapController } from '@/core/controllers/map-controller';
+import { useMapController } from '@/core/controllers/use-controllers';
 
 /** Return type for the useManageArrow hook. */
 interface ArrowReturn {

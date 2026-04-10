@@ -6,7 +6,7 @@ import { useTheme } from '@mui/material';
 
 import { Box } from '@/ui';
 
-import { useUIController } from '@/core/controllers/ui-controller';
+import { useUIController } from '@/core/controllers/use-controllers';
 import {
   useStoreLayerDisplayState,
   useStoreLayerSelectedLayerPath,

@@ -35,7 +35,6 @@ import {
 } from '@/ui';
 
 import TopToolbar from './top-toolbar';
-import { useUIController } from '@/core/controllers/ui-controller';
 import { getStoreMapCurrentProjectionEPSG } from '@/core/stores/store-interface-and-intial-values/map-state';
 import {
   useStoreLayerDateTemporalMode,
@@ -67,9 +66,7 @@ import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 import { Projection } from '@/geo/utils/projection';
-import { useDataTableController } from '@/core/controllers/data-table-controller';
-import { useLayerController } from '@/core/controllers/layer-controller';
-import { useMapController } from '@/core/controllers/map-controller';
+import { useDataTableController, useLayerController, useMapController, useUIController } from '@/core/controllers/use-controllers';
 
 /** The possible filters for numeric columns */
 const NUMERIC_FIELD_FILTERS = [

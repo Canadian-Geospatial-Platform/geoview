@@ -5,7 +5,7 @@ import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/store-inter
 
 import { IconButton, UploadIcon } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
-import { useDrawerController } from 'geoview-core/core/controllers/drawer-controller';
+import { useDrawerController } from 'geoview-core/core/controllers/use-controllers';
 
 /**
  * Creates an upload button to upload drawings to the viewer.

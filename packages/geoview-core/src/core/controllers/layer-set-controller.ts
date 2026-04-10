@@ -4,7 +4,6 @@ import type { TypeFeatureInfoResult } from '@/api/types/map-schema-types';
 import { CONST_LAYER_TYPES, type TypeLayerControls, type TypeMosaicMethod } from '@/api/types/layer-schema-types';
 import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
-import { useControllers } from '@/core/controllers/base/controller-manager';
 import type { LayerDomain } from '@/core/domains/layer-domain';
 import {
   getStoreDetailsSelectedLayerPath,
@@ -82,8 +81,8 @@ export class LayerSetController extends AbstractMapViewerController {
   /**
    * Creates an instance of LayerSetController.
    *
-   * @param mapViewer - The map viewer instance to associate with this controller.
-   * @param layerDomain - The layer domain instance to associate with this controller.
+   * @param mapViewer - The map viewer instance to associate with this controller
+   * @param layerDomain - The layer domain instance to associate with this controller
    */
   constructor(mapViewer: MapViewer, layerDomain: LayerDomain) {
     super(mapViewer);
@@ -214,7 +213,7 @@ export class LayerSetController extends AbstractMapViewerController {
    * This method waits for the map viewer layers to be rendered before performing the query.
    *
    * @returns A promise that resolves with the result of the query
-   * @throws {LayerNoLastQueryToPerformError} When there's no last query to perform.
+   * @throws {LayerNoLastQueryToPerformError} When there's no last query to perform
    */
   async repeatLastQuery(): Promise<TypeFeatureInfoResultSet> {
     // Wait until the render completes
@@ -565,14 +564,4 @@ export class LayerSetController extends AbstractMapViewerController {
   }
 
   // #endregion PRIVATE METHODS - STORE PROPAGATION
-}
-
-/**
- * Layer Controller hook to access the layer controller from the context.
- *
- * @returns The layer controller instance from the context.
- * @throws {Error} When used outside of a ControllerContext.Provider.
- */
-export function useLayerSetController(): LayerSetController {
-  return useControllers().layerSetController;
 }

@@ -4,7 +4,7 @@ import { IconButton, ZoomOutIcon } from '@/ui';
 import { getSxClasses } from '@/core/components/nav-bar/nav-bar-style';
 import { useStoreMapZoom } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
-import { useMapController } from '@/core/controllers/map-controller';
+import { useMapController } from '@/core/controllers/use-controllers';
 
 /**
  * Creates a zoom out button.

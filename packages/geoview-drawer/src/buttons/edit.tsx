@@ -6,7 +6,7 @@ import { useStoreDrawerIsEditing } from 'geoview-core/core/stores/store-interfac
 
 import { IconButton, EditIcon, EditOffIcon } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
-import { useDrawerController } from 'geoview-core/core/controllers/drawer-controller';
+import { useDrawerController } from 'geoview-core/core/controllers/use-controllers';
 
 /**
  * Creates an edit button to toggle editing capabilities.

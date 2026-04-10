@@ -18,7 +18,7 @@ import { getSxClasses } from '../layer-details-style';
 import { RasterFunctionPanel } from './raster-function-selector';
 import { MosaicRulePanel } from './mosaic-rule-selector';
 import { WmsStylePanel } from './wms-style-selector';
-import { useLayerController } from '@/core/controllers/layer-controller';
+import { useLayerController } from '@/core/controllers/use-controllers';
 import { logger } from '@/core/utils/logger';
 
 interface LayerSettingsPanelProps {

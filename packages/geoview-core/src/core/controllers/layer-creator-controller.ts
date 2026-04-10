@@ -2,7 +2,7 @@ import { GeoCore } from '@/api/config/geocore';
 import { GeoPackageReader } from '@/api/config/reader/geopackage-reader';
 import { ShapefileReader } from '@/api/config/reader/shapefile-reader';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
-import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
+import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import EventHelper, { type EventDelegateBase } from '@/api/events/event-helper';
 import {
   CONST_LAYER_TYPES,
@@ -14,7 +14,6 @@ import {
   type GeoPackageLayerConfig,
   type MapConfigLayerEntry,
   type TypeGeoviewLayerConfig,
-  type TypeLayerEntryConfig,
 } from '@/api/types/layer-schema-types';
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
@@ -32,7 +31,6 @@ import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-v
 import { OgcWmtsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wmts-layer-entry-config';
 import { XYZTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import { VectorTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
-import { useControllers } from './base/controller-manager';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { DomainLayerBaseEvent, LayerDomain } from '@/core/domains/layer-domain';
 import { formatError, NotSupportedError } from '@/core/exceptions/core-exceptions';
@@ -56,6 +54,7 @@ import {
   type TypeOrderedLayerInfo,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { isStoreSwiperInitialized, removeStoreSwiperLayerPath } from '@/core/stores/store-interface-and-intial-values/swiper-state';
+import { deleteStoreDetailsFeatureInfo } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import {
   isStoreTimeSliderInitialized,
   removeStoreTimeSliderLayer,
@@ -88,7 +87,6 @@ import { WKB } from '@/geo/layer/geoview-layers/vector/wkb';
 import { ConfigValidation } from '@/api/config/config-validation';
 import { generateId, isValidUUID } from '@/core/utils/utilities';
 import { LayerGeoCoreError } from '@/core/exceptions/geocore-exceptions';
-import { deleteStoreDetailsFeatureInfo } from '../stores/store-interface-and-intial-values/feature-info-state';
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
 import type { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 
@@ -122,7 +120,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
   }
 
   /**
-   * Load layers that was passed in with the map config
+   * Loads layers that were passed in with the map config.
    *
    * @param mapConfigLayerEntries - An optional array containing layers passed within the map config
    * @returns A promise that resolves when everything is done
@@ -164,7 +162,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
         try {
           // Generate array of layer order information for non-basemap layers
           if (geoviewLayerConfig.useAsBasemap !== true) {
-            const layerInfos = LayerCreatorController.generateArrayOfLayerOrderInfo(geoviewLayerConfig);
+            const layerInfos = AbstractMapViewerController.generateArrayOfLayerOrderInfo(geoviewLayerConfig);
             orderedLayerInfos.push(...layerInfos);
           }
 
@@ -207,7 +205,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
     mapConfigLayerEntries.splice(0, mapConfigLayerEntries.length, ...validGeoviewLayerConfigs);
 
     // Init ordered layer info (?)
-    this.getControllersRegistry().mapController.setMapOrderedLayerInfoDirectly(orderedLayerInfos);
+    this.getControllersRegistry().layerController.setMapOrderedLayerInfoDirectly(orderedLayerInfos);
   }
 
   /**
@@ -239,7 +237,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
     try {
       // GV: This is here as a placeholder so that the layers will appear in the proper order,
       // GV: regardless of how quickly we get the response. It is removed, in the catch below, if the layer fails.
-      this.getControllersRegistry().mapController.addOrderedLayerInfo(layerInfo);
+      this.getControllersRegistry().layerController.addOrderedLayerInfo(layerInfo);
 
       const parsedLayerEntryConfig = layerEntryConfig ? JSON.parse(layerEntryConfig) : undefined;
       if (parsedLayerEntryConfig && !parsedLayerEntryConfig[0].layerId) parsedLayerEntryConfig[0].layerId = 'base-group';
@@ -289,7 +287,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
 
       if (geoviewLayerConfig.useAsBasemap === true) {
         // If a basemap, remove the orderedLayerInfo placeholder as basemap are not part of the ordered layer info.
-        this.getControllersRegistry().mapController.removeOrderedLayerInfo(geoviewLayerConfig.geoviewLayerId, true);
+        this.getControllersRegistry().layerController.removeOrderedLayerInfo(geoviewLayerConfig.geoviewLayerId, true);
       }
 
       // Add the geoview layer
@@ -300,7 +298,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
 
       // Remove geoCore ordered layer info placeholder
       const orderedInfo = getStoreMapOrderedLayerInfoByPath(this.getMapId(), uuid);
-      if (orderedInfo) this.getControllersRegistry().mapController.removeOrderedLayerInfo(uuid, false);
+      if (orderedInfo) this.getControllersRegistry().layerController.removeOrderedLayerInfo(uuid, false);
 
       // Show the error(s)
       this.showLayerError(error, uuid);
@@ -317,10 +315,10 @@ export class LayerCreatorController extends AbstractMapViewerController {
    * and makes sure to inform the layer sets about the layer. The result contains the instanciated GeoViewLayer along
    * with a promise that will resolve when the layer will be officially on the map.
    *
-   * @param geoviewLayerConfig - The geoview layer configuration to add.
-   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
-   * @returns The result of the addition of the geoview layer.
-   * @throws {LayerCreatedTwiceError} When there already is a layer on the map with the provided geoviewLayerId.
+   * @param geoviewLayerConfig - The geoview layer configuration to add
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+   * @returns The result of the addition of the geoview layer
+   * @throws {LayerCreatedTwiceError} When there already is a layer on the map with the provided geoviewLayerId
    */
   addGeoviewLayer(geoviewLayerConfig: TypeGeoviewLayerConfig, abortSignal?: AbortSignal): GeoViewLayerAddedResult {
     // TODO: REFACTOR listOfLayerEntryConfig types - This should be dealt with the config classes and this line commented out.
@@ -396,7 +394,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
         });
 
         // Prepare listeners for changing the visibility
-        this.getControllersRegistry().mapController.setMapOrderedLayerInfoDirectly(originalMapOrderedLayerInfo);
+        this.getControllersRegistry().layerController.setMapOrderedLayerInfoDirectly(originalMapOrderedLayerInfo);
         originalMapOrderedLayerInfo.forEach((layerInfo) => {
           function setLayerVisibility(sender: LayerDomain, event: DomainLayerBaseEvent): void {
             const layerPath = event.layer.getLayerPath();
@@ -606,8 +604,8 @@ export class LayerCreatorController extends AbstractMapViewerController {
    * If it's an aggregate error, log and show all of them.
    * If it's a regular error, log and show only that error.
    *
-   * @param error - The error to log and show.
-   * @param geoviewLayerId - The Geoview layer id for which the error happened.
+   * @param error - The error to log and show
+   * @param geoviewLayerId - The Geoview layer id for which the error happened
    */
   showLayerError(error: unknown, geoviewLayerId: string): void {
     // If an aggregation error
@@ -646,9 +644,9 @@ export class LayerCreatorController extends AbstractMapViewerController {
   /**
    * Continues the addition of the geoview layer.
    *
-   * @param geoviewLayerConfig - The geoview layer configuration to add.
-   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
-   * @returns The result of the addition of the geoview layer.
+   * @param geoviewLayerConfig - The geoview layer configuration to add
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+   * @returns The result of the addition of the geoview layer
    * The result contains the instanciated GeoViewLayer along with a promise that will resolve when the layer will be officially on the map.
    */
   #addGeoviewLayerStep2(geoviewLayerConfig: TypeGeoviewLayerConfig, abortSignal?: AbortSignal): GeoViewLayerAddedResult {
@@ -727,7 +725,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
     // Unregister from ordered layer info
     if (unregisterOrderedLayerInfo) {
       // Remove from ordered layer info
-      this.getControllersRegistry().mapController.removeOrderedLayerInfo(layerConfig.layerPath);
+      this.getControllersRegistry().layerController.removeOrderedLayerInfo(layerConfig.layerPath);
     }
 
     // If the TimeSlider plugin is initialized
@@ -763,8 +761,8 @@ export class LayerCreatorController extends AbstractMapViewerController {
    *
    * @param parentPath - The parent path
    * @returns Child layer paths
-   * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
-   * @throws {LayerWrongTypeError} When the layer configuration is of the wrong type at the given layer path.
+   * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path
+   * @throws {LayerWrongTypeError} When the layer configuration is of the wrong type at the given layer path
    */
   #getAllChildPaths(parentPath: string): string[] {
     // Get the group layer
@@ -787,8 +785,8 @@ export class LayerCreatorController extends AbstractMapViewerController {
    *     cleanup actions tied to removal).
    *  3. Registers the new layer-entry configuration using `registerLayerConfigInit`.
    *
-   * @param geoviewLayer - The GeoView layer associated with this registration event.
-   * @param event - The event containing the layer-entry configuration to be registered.
+   * @param geoviewLayer - The GeoView layer associated with this registration event
+   * @param event - The event containing the layer-entry configuration to be registered
    */
   #handleLayerEntryRegisterInit(geoviewLayer: AbstractGeoViewLayer, event: LayerEntryRegisterInitEvent): void {
     // Log
@@ -823,8 +821,8 @@ export class LayerCreatorController extends AbstractMapViewerController {
    *  3. Emits a "layer created" event so external code can bind to it immediately.
    *  4. Calls the layer's `init()` method to finalize initialization.
    *
-   * @param geoviewLayer - The parent or context GeoView layer associated with this creation event.
-   * @param event - The event containing the newly created GV layer instance and its configuration.
+   * @param geoviewLayer - The parent or context GeoView layer associated with this creation event
+   * @param event - The event containing the newly created GV layer instance and its configuration
    */
   #handleLayerGVCreated(geoviewLayer: AbstractGeoViewLayer, event: LayerGVCreatedEvent): void {
     // Get the GV Layer and the config
@@ -888,7 +886,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
 
     // TODO: REFACTOR - Think about moving this call somewhere else
     // Set in visible range property for all newly added layers
-    this.getControllersRegistry().layerController.setLayerInVisibleRange(groupLayer);
+    this.getControllersRegistry().layerController.updateLayerInVisibleRange(groupLayer);
   }
 
   /**
@@ -946,7 +944,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
         this.getMapViewer().notifications.showWarning('warning.layer.kmlLayerWarning', [], true);
 
       // Set the layer z indices
-      this.getControllersRegistry().mapController.setLayerZIndices();
+      this.getControllersRegistry().layerController.setLayerZIndices();
     }
   }
 
@@ -972,7 +970,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
   /**
    * Validates the geoview layer configuration array to eliminate duplicate entries and inform the user.
    *
-   * @param mapConfigLayerEntries - The Map Config Layer Entries to validate.
+   * @param mapConfigLayerEntries - The Map Config Layer Entries to validate
    * @returns The new configuration with duplicate entries eliminated
    */
   #deleteDuplicateAndMultipleUuidGeoviewLayerConfig(mapConfigLayerEntries?: MapConfigLayerEntry[]): MapConfigLayerEntry[] {
@@ -989,7 +987,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
             // Remove geoCore ordered layer info placeholder
             const orderedInfo = getStoreMapOrderedLayerInfoByPath(this.getMapId(), geoviewLayerConfigToCreate.geoviewLayerId);
             if (orderedInfo) {
-              this.getControllersRegistry().mapController.removeOrderedLayerInfo(geoviewLayerConfigToCreate.geoviewLayerId, false);
+              this.getControllersRegistry().layerController.removeOrderedLayerInfo(geoviewLayerConfigToCreate.geoviewLayerId, false);
             }
 
             return false;
@@ -1005,7 +1003,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
   /**
    * Prints an error message for the duplicate geoview layer configuration.
    *
-   * @param mapConfigLayerEntry - The Map Config Layer Entry in error.
+   * @param mapConfigLayerEntry - The Map Config Layer Entry in error
    */
   #printDuplicateGeoviewLayerConfigError(mapConfigLayerEntry: MapConfigLayerEntry): void {
     // Log
@@ -1030,9 +1028,9 @@ export class LayerCreatorController extends AbstractMapViewerController {
    * - If the layer type is not supported, an error is thrown.
    * - TODO: Refactor to use the validated configuration with metadata already fetched.
    *
-   * @param geoviewLayerConfig - The configuration object for the GeoView layer.
+   * @param geoviewLayerConfig - The configuration object for the GeoView layer
    * @returns An instance of the corresponding `AbstractGeoViewLayer` subclass
-   * @throws {NotSupportedError} When the configuration does not match any supported layer type.
+   * @throws {NotSupportedError} When the configuration does not match any supported layer type
    */
   static createLayerConfigFromType(geoviewLayerConfig: TypeGeoviewLayerConfig): AbstractGeoViewLayer {
     // Depending on the layer type of config
@@ -1090,10 +1088,10 @@ export class LayerCreatorController extends AbstractMapViewerController {
    * Converts a list of map configuration layer entries into an array of promises,
    * each resolving to one or more GeoView layer configuration objects.
    *
-   * @param mapId - The unique identifier of the map instance this configuration applies to.
-   * @param language - The language setting used for layer labels and metadata.
-   * @param mapConfigLayerEntries - The array of layer entries to convert.
-   * @param errorCallback - Callback invoked when an error occurs during layer processing.
+   * @param mapId - The unique identifier of the map instance this configuration applies to
+   * @param language - The language setting used for layer labels and metadata
+   * @param mapConfigLayerEntries - The array of layer entries to convert
+   * @param errorCallback - Callback invoked when an error occurs during layer processing
    * @returns An array of promises, each resolving to a TypeGeoviewLayerConfig object
    */
   static convertMapConfigsToGeoviewLayerConfig(
@@ -1117,10 +1115,10 @@ export class LayerCreatorController extends AbstractMapViewerController {
    * this function processes each entry accordingly and wraps the result in a `Promise`.
    * Errors encountered during asynchronous operations are handled via a provided callback.
    *
-   * @param mapId - The unique identifier of the map instance this configuration applies to.
-   * @param language - The language setting used for layer labels and metadata.
-   * @param entry - The array of layer entry to convert.
-   * @param errorCallback - Callback invoked when an error occurs during layer processing.
+   * @param mapId - The unique identifier of the map instance this configuration applies to
+   * @param language - The language setting used for layer labels and metadata
+   * @param entry - The array of layer entry to convert
+   * @param errorCallback - Callback invoked when an error occurs during layer processing
    * @returns A promise that resolves to a TypeGeoviewLayerConfig object
    */
   static convertMapConfigToGeoviewLayerConfig(
@@ -1169,76 +1167,6 @@ export class LayerCreatorController extends AbstractMapViewerController {
     });
 
     return promise;
-  }
-
-  /**
-   * Generate an array of layer info for the orderedLayerList.
-   *
-   * @param geoviewLayerConfig - The config to get the info from.
-   * @returns The array of ordered layer info
-   */
-  static generateArrayOfLayerOrderInfo(geoviewLayerConfig: TypeGeoviewLayerConfig | ConfigBaseClass): TypeOrderedLayerInfo[] {
-    const newOrderedLayerInfos: TypeOrderedLayerInfo[] = [];
-
-    const addSubLayerPathToLayerOrder = (layerEntryConfig: TypeLayerEntryConfig, layerPath: string): void => {
-      const subLayerPath = layerPath.endsWith(`/${layerEntryConfig.layerId}`) ? layerPath : `${layerPath}/${layerEntryConfig.layerId}`;
-
-      const settings = ConfigBaseClass.getClassOrTypeInitialSettings(layerEntryConfig);
-      const featureInfo = AbstractBaseLayerEntryConfig.getClassOrTypeFeatureInfo(layerEntryConfig);
-
-      const layerInfo: TypeOrderedLayerInfo = {
-        layerPath: subLayerPath,
-        visible: settings?.states?.visible ?? true, // default: true
-        queryableSource: featureInfo?.queryable ?? true, // default: true
-        queryableState: settings?.states?.queryable ?? true, // default: true
-        hoverable: settings?.states?.hoverable ?? true, // default: true
-        legendCollapsed: settings?.states?.legendCollapsed ?? false, // default: false
-        inVisibleRange: true,
-      };
-
-      newOrderedLayerInfos.push(layerInfo);
-      if (layerEntryConfig.listOfLayerEntryConfig?.length) {
-        layerEntryConfig.listOfLayerEntryConfig?.forEach((subLayerEntryConfig) => {
-          addSubLayerPathToLayerOrder(subLayerEntryConfig, subLayerPath);
-        });
-      }
-    };
-
-    // TODO: REFACTOR listOfLayerEntryConfig types - This function has issues with the expected types and what it's truly doing.
-    // TO.DOCONT: Sometimes, geoviewLayerConfig is a ConfigBaseClass instance and sometimes a regular json object
-    // GV: The old code was doing `if (theGeoviewLayerConfig.geoviewLayerId)` which condition is only possible when `geoviewLayerId` is a property of the class instance.
-    // GV: However, since that it's not a property anymore, that code was only being executed when the objet was a json object. For a while now...
-    // GV: Attempting to fix it by supporting both the class instance and the json object by doing something like:
-    // GV: const theGeoviewLayerConfig = ConfigBaseClass.getClassOrTypeGeoviewLayerConfig(geoviewLayerConfig);
-    // GV: was actually making it worse. Therefore, I'm assuming the correct condition check is to check if the variable is a
-    // GV: json object (not a class instance), so I'm changing it for clarity. However, I'm not sure what the whole intention is here.
-
-    if (!(geoviewLayerConfig instanceof ConfigBaseClass)) {
-      if (geoviewLayerConfig.listOfLayerEntryConfig?.length > 1) {
-        const layerPath = `${geoviewLayerConfig.geoviewLayerId}/base-group`;
-        // Using as any, because even a TypeGeoviewLayerConfig can have initialSettings? To confirm...
-        const settingsGVLC = ConfigBaseClass.getClassOrTypeInitialSettings(geoviewLayerConfig)?.states;
-
-        const layerInfo: TypeOrderedLayerInfo = {
-          layerPath,
-          legendCollapsed: settingsGVLC?.legendCollapsed ?? false, // default: false
-          visible: settingsGVLC?.visible ?? true, // default: true
-          inVisibleRange: true,
-        };
-
-        newOrderedLayerInfos.push(layerInfo);
-        geoviewLayerConfig.listOfLayerEntryConfig.forEach((layerEntryConfig) => {
-          addSubLayerPathToLayerOrder(layerEntryConfig, layerPath);
-        });
-      } else {
-        const layerEntryConfig = geoviewLayerConfig.listOfLayerEntryConfig[0];
-        addSubLayerPathToLayerOrder(layerEntryConfig, layerEntryConfig.layerPath);
-      }
-    } else {
-      addSubLayerPathToLayerOrder(geoviewLayerConfig as TypeLayerEntryConfig, geoviewLayerConfig.layerPath);
-    }
-
-    return newOrderedLayerInfos;
   }
 
   // #endregion STATIC METHODS
@@ -1376,22 +1304,16 @@ export type GeoViewLayerAddedResult = {
   promiseLayer: Promise<void>;
 };
 
-/**
- * Define an event for the delegate
- */
+/** Defines the event payload for the layer loaded delegate. */
 export type LayerEvent = {
   /** The loaded layer. */
   layer: AbstractGVLayer;
 };
 
-/**
- * Define a delegate for the event handler function signature
- */
+/** Defines a delegate for the layer loaded event handler function signature. */
 export type LayerDelegate = EventDelegateBase<LayerCreatorController, LayerEvent, void>;
 
-/**
- * Define an event for the delegate
- */
+/** Defines the event payload for the layer path delegate. */
 export type LayerPathEvent = {
   /** The layer path. */
   layerPath: string;
@@ -1400,26 +1322,19 @@ export type LayerPathEvent = {
   layerName: string;
 };
 
-/**
- * Define a delegate for the event handler function signature
- */
+/** Defines a delegate for the layer path event handler function signature. */
 export type LayerPathDelegate = EventDelegateBase<LayerCreatorController, LayerPathEvent, void>;
 
-/**
- * Define an event for the delegate
- */
+/** Defines the event payload for the layer builder delegate. */
 export type LayerBuilderEvent = {
+  /** The built layer. */
   layer: AbstractGeoViewLayer;
 };
 
-/**
- * Define a delegate for the event handler function signature
- */
+/** Defines a delegate for the layer builder event handler function signature. */
 export type LayerBuilderDelegate = EventDelegateBase<LayerCreatorController, LayerBuilderEvent, void>;
 
-/**
- * Define an event for the delegate
- */
+/** Defines the event payload for the layer config error delegate. */
 export type LayerConfigErrorEvent = {
   /** The layer path (or the geoview layer id) depending when the error occurs in the process. */
   layerPath: string;
@@ -1428,17 +1343,5 @@ export type LayerConfigErrorEvent = {
   error: string;
 };
 
-/**
- * Define a delegate for the event handler function signature
- */
+/** Defines a delegate for the layer config error event handler function signature. */
 export type LayerConfigErrorDelegate = EventDelegateBase<LayerCreatorController, LayerConfigErrorEvent, void>;
-
-/**
- * Hook to access the LayerCreatorController from the controller context.
- *
- * @returns The layer creator controller instance
- * @throws {Error} When used outside of a ControllerContext.Provider.
- */
-export function useLayerCreatorController(): LayerCreatorController {
-  return useControllers().layerCreatorController;
-}

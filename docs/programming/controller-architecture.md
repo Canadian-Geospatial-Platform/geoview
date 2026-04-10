@@ -227,7 +227,7 @@ this.controllers.unhookControllers();
 
 ### React Access
 
-Components access controllers through `ControllerContext`:
+Components access controllers through `ControllerContext` and individual hooks:
 
 ```typescript
 // In controller-manager.ts
@@ -241,8 +241,22 @@ export function useControllers(): ControllerRegistry {
 ```
 
 ```typescript
-// In a React component
-const { layerController, uiController } = useControllers();
+// In use-controllers.ts — individual hooks for each controller
+import { useControllers } from '@/core/controllers/base/controller-manager';
+
+export function useMapController(): MapController {
+  return useControllers().mapController;
+}
+export function useLayerController(): LayerController {
+  return useControllers().layerController;
+}
+// ... one hook per controller
+```
+
+```typescript
+// In a React component — prefer individual hooks
+const layerController = useLayerController();
+const uiController = useUIController();
 uiController.setActiveFooterBarTab('layers');
 ```
 
@@ -649,8 +663,8 @@ The following table summarizes all controllers, their purpose, dependencies, and
 | Controller | Purpose | Domain/Dependencies | Subscribes in `onHook()` | Plugin-Conditional |
 | --- | --- | --- | --- | --- |
 | `UIController` | Language, theme, panels, focus traps, notifications | `UIDomain` | Yes (language changed) | No |
-| `MapController` | Zoom, highlighting, click markers | `FeatureHighlight` | No | No |
-| `LayerController` | Layer lifecycle, config/GV layer access, layer property changes | `LayerDomain` | Yes (15+ events) | No |
+| `MapController` | Zoom, projection, click markers, basemap, coordinate info | `FeatureHighlight` | No | No |
+| `LayerController` | Layer lifecycle, config/GV layer access, layer property changes, layer highlighting, layer zoom | `LayerDomain` | Yes (15+ events) | No |
 | `LayerCreatorController` | Layer creation, removal, reload, GeoCore UUID resolution | `LayerDomain` | No (subscribes to GeoViewLayer events per-layer) | No |
 | `LayerSetController` | Feature info queries, legends, layer sets | `LayerDomain` | Yes (map click/pointer) | No |
 | `PluginController` | Plugin loading, adding, removing | — | No | No |
@@ -664,7 +678,7 @@ Subscribes to `UIDomain.onLanguageChanged()`. Provides a large public API for ma
 
 ### MapController
 
-No domain subscriptions. Provides zoom operations (`zoomToExtent`, `zoomToLayerExtent`, `zoomToMyLocation`, etc.) and feature highlighting (`addHighlightedFeature`, `highlightBBox`, `removeHighlightedFeature`, etc.) via the injected `FeatureHighlight` instance.
+No domain subscriptions. Provides zoom operations (`zoomToExtent`, `zoomToInitialExtent`, `zoomToMyLocation`, `zoomToGeoLocatorLocation`, etc.), feature highlighting (`addHighlightedFeature`, `highlightBBox`, `removeHighlightedFeature`, etc.), projection switching (`setProjection`), basemap management (`setBasemap`, `resetBasemap`), click markers, and coordinate info.
 
 ### LayerController
 
@@ -678,7 +692,7 @@ The most heavily-connected controller. Subscribes to 15+ `LayerDomain` events in
 - `onLayerGroupLayerAdded`, `onLayerGroupLayerRemoved`
 - `onLayerWMSImageLoadRescue`
 
-Exposes domain getters (config access, GV layer access) and orchestration methods (layer deletion, querying, filtering).
+Exposes domain getters (config access, GV layer access) and orchestration methods (layer deletion, querying, filtering, layer highlighting via `highlightLayer`/`removeHighlightLayer`, and layer zoom via `zoomToLayerExtent`/`zoomToLayerVisibleScale`).
 
 ### LayerCreatorController
 
@@ -764,15 +778,16 @@ packages/geoview-core/src/
 │   │   │   ├── abstract-map-viewer-controller.ts # + MapViewer access
 │   │   │   ├── controller-registry.ts          # Creates, owns, hooks all controllers
 │   │   │   └── controller-manager.ts           # React context & useControllers() hook
-│   │   ├── map-controller.ts                   # Zoom, highlighting, click markers
+│   │   ├── map-controller.ts                   # Zoom, projection, click markers, basemap
 │   │   ├── ui-controller.ts                    # UI domain → store (language, panels, etc.)
-│   │   ├── layer-controller.ts                 # Layer domain → store (15+ event subscriptions)
+│   │   ├── layer-controller.ts                 # Layer domain → store (15+ events, highlighting, zoom)
 │   │   ├── layer-creator-controller.ts         # Layer creation, removal, reload, GeoCore
 │   │   ├── layer-set-controller.ts             # Map events → feature info queries & legends
 │   │   ├── plugin-controller.ts                # Plugin loading & lifecycle
 │   │   ├── data-table-controller.ts            # Data table filter operations
 │   │   ├── drawer-controller.ts                # Drawing tools (conditional — drawer plugin)
-│   │   └── time-slider-controller.ts           # Temporal filtering (conditional — time-slider plugin)
+│   │   ├── time-slider-controller.ts           # Temporal filtering (conditional — time-slider plugin)
+│   │   └── use-controllers.ts                  # Individual React hooks (useMapController, etc.)
 │   ├── domains/
 │   │   ├── ui-domain.ts                        # Language/i18n management & events
 │   │   └── layer-domain.ts                     # Layer lifecycle, registries & events

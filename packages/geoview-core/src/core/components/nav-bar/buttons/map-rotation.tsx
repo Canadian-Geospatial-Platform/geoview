@@ -18,7 +18,7 @@ import type { TypePanelProps } from '@/ui/panel/panel-types';
 import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 import { IconButton } from '@/ui/icon-button/icon-button';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
-import { useMapController } from '@/core/controllers/map-controller';
+import { useMapController } from '@/core/controllers/use-controllers';
 
 /**
  * Creates a map rotation button to open the rotation control panel.

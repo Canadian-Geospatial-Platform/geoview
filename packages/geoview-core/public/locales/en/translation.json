@@ -116,7 +116,7 @@
     "layerRegister": "Layer is accessing metadata...",
     "layerLoading": "Layer is loading...",
     "tableDetails": "Table details",
-    "refreshLayer": "Reset layer",
+    "resetLayer": "Reset layer",
     "highlightLayer": "Highlight layer",
     "subLayersCount": "{count} sublayers",
     "itemsCount": "{count} of {totalCount} classes",
