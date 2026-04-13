@@ -13,7 +13,7 @@ export declare class GeoCore {
      * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
      * @returns A promise that resolves with the layer configuration and associated geocharts
      */
-    static createLayerConfigFromUUID(uuid: string, language: TypeDisplayLanguage, mapId?: string, layerConfig?: GeoCoreLayerConfig, abortSignal?: AbortSignal): Promise<GeoCoreLayerConfigResponse>;
+    static createLayerConfigFromUUID(uuid: string, currentLayerIds: string[], language: TypeDisplayLanguage, mapId?: string, layerConfig?: GeoCoreLayerConfig, abortSignal?: AbortSignal): Promise<GeoCoreLayerConfigResponse>;
     /**
      * Gets GeoView layer configurations list from the RCS UUIDs of the list of layer entry configurations.
      *

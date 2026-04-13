@@ -2,7 +2,7 @@ import type { TypeLayerStyleConfig, TypeStyleGeometry, TypeLayerStyleSettings, T
 import type { ConfigClassOrType, TypeBaseSourceInitialConfig, TypeFeatureInfoLayerConfig, TypeGeoviewLayerType, TypeLayerEntryType, TypeValidSourceProjectionCodes } from '@/api/types/layer-schema-types';
 import type { ConfigBaseClassProps } from '@/api/config/validation-classes/config-base-class';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
-import { type TemporalMode, type TimeDimension, type TimeIANA, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
+import type { TemporalMode, TimeDimension, TimeIANA, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 export interface AbstractBaseLayerEntryConfigProps extends ConfigBaseClassProps {
     /** Source settings to apply to the GeoView layer source at creation time. */
     source?: TypeBaseSourceInitialConfig;

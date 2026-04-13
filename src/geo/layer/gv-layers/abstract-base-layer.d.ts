@@ -299,50 +299,54 @@ export declare abstract class AbstractBaseGVLayer {
      * Registers a layer name changed event handler.
      *
      * @param callback - The callback to be executed whenever the event is emitted
+     * @returns The registered callback, which can be used to unregister the event handler later
      */
-    onLayerNameChanged(callback: LayerNameChangedDelegate): void;
+    onLayerNameChanged(callback: LayerNameChangedDelegate): LayerNameChangedDelegate;
     /**
      * Unregisters a layer name changed event handler.
      *
      * @param callback - The callback to stop being called whenever the event is emitted
      */
-    offLayerNameChanged(callback: LayerNameChangedDelegate): void;
+    offLayerNameChanged(callback: LayerNameChangedDelegate | undefined): void;
     /**
      * Registers a visible changed event handler.
      *
      * @param callback - The callback to be executed whenever the event is emitted
+     * @returns The registered callback, which can be used to unregister the event handler later
      */
-    onVisibleChanged(callback: VisibleChangedDelegate): void;
+    onLayerVisibleChanged(callback: LayerVisibleChangedDelegate): LayerVisibleChangedDelegate;
     /**
      * Unregisters a visible changed event handler.
      *
      * @param callback - The callback to stop being called whenever the event is emitted
      */
-    offVisibleChanged(callback: VisibleChangedDelegate): void;
+    offLayerVisibleChanged(callback: LayerVisibleChangedDelegate | undefined): void;
     /**
      * Registers an opacity changed event handler.
      *
      * @param callback - The callback to be executed whenever the event is emitted
+     * @returns The registered callback, which can be used to unregister the event handler later
      */
-    onLayerOpacityChanged(callback: LayerOpacityChangedDelegate): void;
+    onLayerOpacityChanged(callback: LayerOpacityChangedDelegate): LayerOpacityChangedDelegate;
     /**
      * Unregisters an opacity changed event handler.
      *
      * @param callback - The callback to stop being called whenever the event is emitted
      */
-    offLayerOpacityChanged(callback: LayerOpacityChangedDelegate): void;
+    offLayerOpacityChanged(callback: LayerOpacityChangedDelegate | undefined): void;
     /**
      * Registers a z-index changed event handler.
      *
      * @param callback - The callback to be executed whenever the event is emitted
+     * @returns The registered callback, which can be used to unregister the event handler later
      */
-    onLayerZIndexChanged(callback: LayerZIndexChangedDelegate): void;
+    onLayerZIndexChanged(callback: LayerZIndexChangedDelegate): LayerZIndexChangedDelegate;
     /**
      * Unregisters a z-index changed event handler.
      *
      * @param callback - The callback to stop being called whenever the event is emitted
      */
-    offLayerZIndexChanged(callback: LayerZIndexChangedDelegate): void;
+    offLayerZIndexChanged(callback: LayerZIndexChangedDelegate | undefined): void;
     /**
      * Recursively searches the layer tree to find the parent GVGroupLayer
      * of a given layer.
@@ -362,11 +366,20 @@ export declare abstract class AbstractBaseGVLayer {
     static getParent(layer: AbstractBaseGVLayer, groupLayers: AbstractBaseGVLayer[]): GVGroupLayer | undefined;
 }
 /**
+ * Define an event for the delegate
+ */
+export interface LayerBaseEvent {
+}
+/**
+ * Define a delegate for the event handler function signature
+ */
+export type LayerBaseDelegate = EventDelegateBase<AbstractBaseGVLayer, LayerBaseEvent, void>;
+/**
  * Define an event for the delegate.
  */
-export type LayerNameChangedEvent = {
+export interface LayerNameChangedEvent extends LayerBaseEvent {
     layerName?: string;
-};
+}
 /**
  * Define a delegate for the event handler function signature.
  */
@@ -374,19 +387,19 @@ export type LayerNameChangedDelegate = EventDelegateBase<AbstractBaseGVLayer, La
 /**
  * Define an event for the delegate
  */
-export type VisibleChangedEvent = {
+export interface LayerVisibleChangedEvent extends LayerBaseEvent {
     visible: boolean;
-};
+}
 /**
  * Define a delegate for the event handler function signature
  */
-export type VisibleChangedDelegate = EventDelegateBase<AbstractBaseGVLayer, VisibleChangedEvent, void>;
+export type LayerVisibleChangedDelegate = EventDelegateBase<AbstractBaseGVLayer, LayerVisibleChangedEvent, void>;
 /**
  * Define an event for the delegate
  */
-export type LayerOpacityChangedEvent = {
+export interface LayerOpacityChangedEvent extends LayerBaseEvent {
     opacity: number;
-};
+}
 /**
  * Define a delegate for the event handler function signature
  */
@@ -394,9 +407,9 @@ export type LayerOpacityChangedDelegate = EventDelegateBase<AbstractBaseGVLayer,
 /**
  * Define an event for the delegate
  */
-export type LayerZIndexChangedEvent = {
+export interface LayerZIndexChangedEvent extends LayerBaseEvent {
     zIndex: number;
-};
+}
 /**
  * Define a delegate for the event handler function signature
  */

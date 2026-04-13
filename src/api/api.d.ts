@@ -81,9 +81,22 @@ export declare class API {
      * @param divId - Id of the div to create map in (becomes the mapId)
      * @param mapConfig - Config passed in from the function call (string or url of a config path)
      * @param divHeight - Optional height of the div to inject the map in (mandatory if the map reloads)
+     * @param waitOnMapReady - Optional flag to wait for the map to be ready before resolving the promise
      * @returns A promise that resolves with the MapViewer (after the onMapReady is triggered) which will be created from the configuration
      */
-    createMapFromConfig(divId: string, mapConfig: string, divHeight?: number): Promise<MapViewer>;
+    createMapFromConfig(divId: string, mapConfig: string, divHeight?: number, waitOnMapReady?: boolean): Promise<MapViewer>;
+    /**
+     * Creates a new map in a given div id.
+     *
+     * GV The div MUST NOT have a geoview-map class or a warning will be shown when initMapDivFromFunctionCall is called.
+     * If is present, the div will be created with a default config.
+     *
+     * @param divId - Id of the div to create map in (becomes the mapId)
+     * @param mapConfig - Config passed in from the function call (string or url of a config path)
+     * @param divHeight - Optional height of the div to inject the map in (mandatory if the map reloads)
+     * @returns A promise that resolves with the MapViewer (after the onMapReady is triggered) which will be created from the configuration
+     */
+    createMapFromConfigFast(divId: string, mapConfig: string, divHeight?: number): Promise<MapViewer>;
     /**
      * Reload a map from a config object stored in store, or provided. It first removes then recreates the map.
      *

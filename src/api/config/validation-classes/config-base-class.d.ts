@@ -602,13 +602,13 @@ export declare abstract class ConfigBaseClass {
      *
      * @param callback - The callback to be executed whenever the event is emitted
      */
-    onLayerStatusChanged(callback: LayerStatusChangedDelegate): void;
+    onLayerStatusChanged(callback: LayerStatusChangedDelegate): LayerStatusChangedDelegate;
     /**
      * Unregisters a layer status changed event handler.
      *
      * @param callback - The callback to stop being called whenever the event is emitted
      */
-    offLayerStatusChanged(callback: LayerStatusChangedDelegate): void;
+    offLayerStatusChanged(callback: LayerStatusChangedDelegate | undefined): void;
 }
 export type TypeLayerEntryShell = {
     id: number | string;

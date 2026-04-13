@@ -1,4 +1,4 @@
-import { type TemporalMode, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
+import type { TemporalMode, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import type { FileExportProps } from '@/core/components/export/export-modal';
 import type { FlattenedLegendItem, NorthArrowSVG } from '@/core/components/export/utilities';
 /** Properties for the Canvas export document component. */

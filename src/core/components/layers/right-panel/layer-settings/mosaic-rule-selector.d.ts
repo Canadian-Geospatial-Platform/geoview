@@ -1,6 +1,6 @@
-import type { TypeLegendLayer } from '../../types';
 interface MosaicRulePanelProps {
-    layerDetails: TypeLegendLayer;
+    /** The layer path to configure mosaic rules for. */
+    layerPath: string;
 }
 /**
  * Inline panel section for configuring mosaic rules on ArcGIS ImageServer layers.
@@ -14,9 +14,9 @@ interface MosaicRulePanelProps {
  * and how overlapping pixels are resolved (e.g., via blending, maximum, or minimum values).
  *
  * @see {@link https://developers.arcgis.com/javascript/latest/references/core/layers/support/MosaicRule}
- * @param layerDetails - The legend layer to configure mosaic rules for.
+ * @param layerPath - The layer path to configure mosaic rules for.
  * @returns A JSX element representing the MosaicRulePanel component.
  */
-export declare function MosaicRulePanel({ layerDetails }: MosaicRulePanelProps): JSX.Element;
+export declare function MosaicRulePanel({ layerPath }: MosaicRulePanelProps): JSX.Element;
 export {};
 //# sourceMappingURL=mosaic-rule-selector.d.ts.map

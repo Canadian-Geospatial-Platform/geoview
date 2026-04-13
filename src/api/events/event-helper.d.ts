@@ -18,14 +18,14 @@ export default class EventHelper {
      * @param handlersList - The list of handlers to be called with the event
      * @param callback - The callback to be executed whenever the event is raised
      */
-    static onEvent<T, U, Z>(handlersList: EventDelegateBase<T, U, Z>[], callback: EventDelegateBase<T, U, Z>): void;
+    static onEvent<T, U, Z>(handlersList: EventDelegateBase<T, U, Z>[], callback: EventDelegateBase<T, U, Z>): EventDelegateBase<T, U, Z>;
     /**
      * Removes an event handler callback from the provided handlersList.
      *
      * @param handlersList - The list of handlers on which to check to remove the handler
      * @param callback - The callback to stop being called whenever the event is emitted
      */
-    static offEvent<T, U, Z>(handlersList: EventDelegateBase<T, U, Z>[], callback: EventDelegateBase<T, U, Z>): void;
+    static offEvent<T, U, Z>(handlersList: EventDelegateBase<T, U, Z>[], callback: EventDelegateBase<T, U, Z> | undefined): void;
 }
 export type EventDelegateBase<T, U, Z> = (sender: T, event: U) => Z;
 //# sourceMappingURL=event-helper.d.ts.map

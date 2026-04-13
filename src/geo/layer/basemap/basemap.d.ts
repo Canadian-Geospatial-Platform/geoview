@@ -49,7 +49,7 @@ export declare class BasemapApi {
      * @param toggleButton - The toggle button element for the overview map
      * @returns The overview map control
      */
-    getOverviewMapControl(olMap: OLMap, toggleButton: HTMLDivElement): OLOverviewMap;
+    initOverviewMapControl(olMap: OLMap, toggleButton: HTMLDivElement): OLOverviewMap;
     /**
      * Creates the layers for the overview map.
      *

@@ -9,11 +9,12 @@ import type { Projection as OLProjection } from 'ol/proj';
 import type { Condition } from 'ol/events/condition';
 import type { Size } from 'ol/size';
 import type { GeometryFunction } from 'ol/interaction/Draw';
-import type { TypeMapFeaturesInstance, TypeViewSettings, TypeInteraction, TypeValidMapProjectionCodes, TypeDisplayLanguage, TypeDisplayTheme, TypeMapViewSettings } from '@/api/types/map-schema-types';
+import type { TypeMapFeaturesInstance, TypeViewSettings, TypeInteraction, TypeValidMapProjectionCodes, TypeDisplayLanguage, TypeDisplayTheme, TypeMapViewSettings, TypeMapMouseInfo, TypeMapState } from '@/api/types/map-schema-types';
 import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
 import { BasemapApi } from '@/geo/layer/basemap/basemap';
 import { LayerApi } from '@/geo/layer/layer';
 import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
+import { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import { AppBarApi } from '@/core/components/app-bar/app-bar-api';
 import { NavBarApi } from '@/core/components/nav-bar/nav-bar-api';
 import { FooterBarApi } from '@/core/components/footer-bar/footer-bar-api';
@@ -28,14 +29,16 @@ import type { TransformOptions } from '@/geo/interaction/transform/transform';
 import { Transform } from '@/geo/interaction/transform/transform';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import { ModalApi } from '@/ui';
-import { type TimeIANA } from '@/core/utils/date-mgt';
+import type { TimeIANA } from '@/core/utils/date-mgt';
 import type { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';
 import type { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import { Notifications } from '@/core/utils/notifications';
-import type { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
-import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { type TypeOrderedLayerInfo, type TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { type TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import type { PluginsContainer } from '@/api/plugin/plugin-types';
 import type { AbstractPlugin } from '@/api/plugin/abstract-plugin';
+import { GeometryApi } from '@/geo/layer/geometry/geometry';
+import { FeatureHighlight } from './feature-highlight';
 /**
  * Class used to manage created maps.
  */
@@ -72,14 +75,20 @@ export declare class MapViewer {
     footerBarApi: FooterBarApi;
     /** Used to manage states */
     stateApi: StateApi;
-    /** Used to access basemap functions */
-    basemap: BasemapApi;
     /** Used to attach the notification class */
     notifications: Notifications;
+    /** Used to access geometry API to create and manage geometries */
+    geometry: GeometryApi;
+    /** Used to access basemap API functions */
+    basemap: BasemapApi;
     /** Used to access layers functions */
     layer: LayerApi;
+    /** Used to access feature highlight API functions */
+    featureHighlight: FeatureHighlight;
     /** Modals creation */
     modal: ModalApi;
+    /** The controller registry owning all framework-level controllers */
+    controllers: ControllerRegistry;
     /** Max number of icons cached */
     iconImageCacheSize: number;
     /** Getter for map is init */
@@ -118,6 +127,10 @@ export declare class MapViewer {
      * @returns A promise that resolves when the map initialization is complete
      */
     initMap(): Promise<void>;
+    /**
+     * Initializes the map controls
+     */
+    initMapControls(): Promise<void>;
     /**
      * Gets a plugin by its id.
      *
@@ -199,11 +212,15 @@ export declare class MapViewer {
      */
     getCoordinateFromPixel(pointXY: [number, number], timeoutMs: number): Promise<Coordinate>;
     /**
-     * Gets the map projection.
-     *
+     * Gets the map projection
      * @returns The map projection
      */
     getProjection(): OLProjection;
+    /**
+     * Gets the map projection number
+     * @returns The map projection number
+     */
+    getProjectionNumber(): number | undefined;
     /**
      * Gets the ordered layer info.
      *
@@ -354,16 +371,6 @@ export declare class MapViewer {
      */
     removeComponent(mapComponentId: string): void;
     /**
-     * Add a localization ressource bundle for a supported language (fr, en).
-     *
-     * Then the new key added can be access from the utilities function getLocalizesMessage
-     * to reuse in ui from outside the core viewer.
-     *
-     * @param language - The language to add the resource for (en, fr)
-     * @param translations - The translation object to add
-     */
-    addLocalizeRessourceBundle(language: TypeDisplayLanguage, translations: Record<string, unknown>): void;
-    /**
      * Emits a map single click event.
      *
      * NOTE: This Does not update the store, only emit the click.
@@ -430,6 +437,14 @@ export declare class MapViewer {
      * @param legend - The legend to check
      */
     updateIconImageCache(legend: TypeLegend): void;
+    /**
+     * Waits for the map to be ready before resolving the promise.
+     *
+     * This function checks if the map is already ready, and if not, it waits for the onMapReady event to be triggered.
+     *
+     * @returns A promise that resolves when the map is ready.
+     */
+    waitForMapReady(): Promise<void>;
     /**
      * Waits until all GeoView layers reach the specified status before resolving the promise.
      *
@@ -510,6 +525,13 @@ export declare class MapViewer {
      * @returns The transform interaction
      */
     initTransformInteractions(options?: Partial<TransformOptions>): Transform;
+    /**
+     * Retrieves the scale information from the DOM elements for the given map ID.
+     *
+     * @param mapId - The unique identifier of the map.
+     * @returns The scale information object
+     */
+    static getScaleInfoFromDomElement(mapId: string): TypeScaleInfo;
     /**
      * Gets if north pole is visible. This is not a perfect solution and is more a work around.
      *
@@ -679,37 +701,37 @@ export declare class MapViewer {
      *
      * @param callback - The callback to be executed whenever the event is emitted
      */
-    onMapPointerMove(callback: MapPointerMoveDelegate): void;
+    onMapPointerMove(callback: MapPointerMoveDelegate): MapPointerMoveDelegate;
     /**
      * Unregisters a map pointer move event callback.
      *
      * @param callback - The callback to stop being called whenever the event is emitted
      */
-    offMapPointerMove(callback: MapPointerMoveDelegate): void;
+    offMapPointerMove(callback: MapPointerMoveDelegate | undefined): void;
     /**
      * Registers a map pointer stop event callback.
      *
      * @param callback - The callback to be executed whenever the event is emitted
      */
-    onMapPointerStop(callback: MapPointerMoveDelegate): void;
+    onMapPointerStop(callback: MapPointerMoveDelegate): MapPointerMoveDelegate;
     /**
      * Unregisters a map pointer stop event callback.
      *
      * @param callback - The callback to stop being called whenever the event is emitted
      */
-    offMapPointerStop(callback: MapPointerMoveDelegate): void;
+    offMapPointerStop(callback: MapPointerMoveDelegate | undefined): void;
     /**
      * Registers a map single click event callback.
      *
      * @param callback - The callback to be executed whenever the event is emitted
      */
-    onMapSingleClick(callback: MapSingleClickDelegate): void;
+    onMapSingleClick(callback: MapSingleClickDelegate): MapSingleClickDelegate;
     /**
      * Unregisters a map single click end event callback.
      *
      * @param callback - The callback to stop being called whenever the event is emitted
      */
-    offMapSingleClick(callback: MapSingleClickDelegate): void;
+    offMapSingleClick(callback: MapSingleClickDelegate | undefined): void;
     /**
      * Registers a map zoom end event callback.
      *
@@ -795,27 +817,6 @@ export declare class MapViewer {
      */
     offMapLanguageChanged(callback: MapLanguageChangedDelegate): void;
 }
-/**
- *  Definition of map state to attach to the map object for reference.
- */
-export type TypeMapState = {
-    currentProjection: number;
-    currentZoom: number;
-    mapCenterCoordinates: Coordinate;
-    mapExtent: Extent;
-    rotation: number;
-    singleClickedPosition: TypeMapMouseInfo;
-    pointerPosition: TypeMapMouseInfo;
-};
-/**
- * Type used to define the map mouse information
- * */
-export type TypeMapMouseInfo = {
-    lonlat: Coordinate;
-    pixel: Coordinate;
-    projected: Coordinate;
-    dragging: boolean;
-};
 /**
  * Type used when fetching geometry json
  */

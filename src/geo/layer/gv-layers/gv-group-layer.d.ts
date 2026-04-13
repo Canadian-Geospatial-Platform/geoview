@@ -2,9 +2,9 @@ import LayerGroup from 'ol/layer/Group';
 import type { Options as LayerGroupOptions } from 'ol/layer/Group';
 import type { Projection as OLProjection } from 'ol/proj';
 import type { Extent } from 'ol/extent';
-import type { EventDelegateBase } from '@/api/events/event-helper';
+import { type EventDelegateBase } from '@/api/events/event-helper';
 import type { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
-import { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
+import { AbstractBaseGVLayer, type LayerBaseEvent } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 /**
  * Manages a Group Layer.
@@ -109,34 +109,34 @@ export declare class GVGroupLayer extends AbstractBaseGVLayer {
      *
      * @param callback - The callback to be executed whenever the event is emitted
      */
-    onLayerAdded(callback: LayerDelegate): void;
+    onLayerAdded(callback: LayerGroupChildrenUpdatedDelegate): void;
     /**
      * Unregisters a layer added event handler.
      *
      * @param callback - The callback to stop being called whenever the event is emitted
      */
-    offLayerAdded(callback: LayerDelegate): void;
+    offLayerAdded(callback: LayerGroupChildrenUpdatedDelegate): void;
     /**
      * Registers a layer removed event handler.
      *
      * @param callback - The callback to be executed whenever the event is emitted
      */
-    onLayerRemoved(callback: LayerDelegate): void;
+    onLayerRemoved(callback: LayerGroupChildrenUpdatedDelegate): void;
     /**
      * Unregisters a layer removed event handler.
      *
      * @param callback - The callback to stop being called whenever the event is emitted
      */
-    offLayerRemoved(callback: LayerDelegate): void;
+    offLayerRemoved(callback: LayerGroupChildrenUpdatedDelegate): void;
 }
 /**
  * Define an event for the delegate
  */
-export type LayerEvent = {
-    layer: AbstractBaseGVLayer;
-};
+export interface LayerGroupChildrenUpdatedEvent<T extends AbstractBaseGVLayer = AbstractBaseGVLayer> extends LayerBaseEvent {
+    child: T;
+}
 /**
  * Define a delegate for the event handler function signature
  */
-export type LayerDelegate = EventDelegateBase<GVGroupLayer, LayerEvent, void>;
+export type LayerGroupChildrenUpdatedDelegate = EventDelegateBase<GVGroupLayer, LayerGroupChildrenUpdatedEvent, void>;
 //# sourceMappingURL=gv-group-layer.d.ts.map

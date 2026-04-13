@@ -7,6 +7,7 @@ import type { InteractionOptions } from '../interaction';
 import { Interaction } from '../interaction';
 import { HandleType } from './transform-base';
 import type { TransformEvent, TransformSelectionEvent, TransformDeleteFeatureEvent } from './transform-events';
+import type { GeometryApi } from '@/geo/layer/geometry/geometry';
 /**
  * Supported options for transform interactions
  */
@@ -31,8 +32,9 @@ export declare class Transform extends Interaction {
      * Initializes a Transform component.
      *
      * @param options - Object to configure the initialization of the Transform interaction
+     * @param geometryApi - The geometry API used to retrieve geometry groups if a geometry group key is provided in the options
      */
-    constructor(options: TransformOptions);
+    constructor(options: TransformOptions, geometryApi: GeometryApi);
     /**
      * Starts the interaction on the map.
      * @override

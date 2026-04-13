@@ -6,6 +6,7 @@ import type { EventDelegateBase } from '@/api/events/event-helper';
 import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import type { InteractionOptions } from './interaction';
 import { Interaction } from './interaction';
+import type { GeometryApi } from '@/geo/layer/geometry/geometry';
 /**
  * Supported options for modify interactions
  */
@@ -25,8 +26,9 @@ export declare class Modify extends Interaction {
      * Initializes a Modify component.
      *
      * @param options - Object to configure the initialization of the Modify interaction
+     * @param geometryApi - The geometry API used to retrieve geometry groups if a geometry group key is provided in the options
      */
-    constructor(options: ModifyOptions);
+    constructor(options: ModifyOptions, geometryApi: GeometryApi);
     /**
      * Starts the interaction on the map.
      */

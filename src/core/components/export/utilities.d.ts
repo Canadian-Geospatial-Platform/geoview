@@ -1,7 +1,8 @@
+import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import type { TypeNorthArrow, TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import type { TypeLegendLayer } from '@/core/components/layers/types';
-import type { TypeTimeSliderValues } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
-import { type TemporalMode, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
+import { type TypeTimeSliderValues } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
+import type { TemporalMode, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 /** Constants for export configuration. */
 export declare const EXPORT_CONSTANTS: {
     /** DPI and quality settings */
@@ -162,6 +163,6 @@ export declare class ExportUtilities {
      * @returns A promise that resolves with map image URL, scale info, north arrow, legend columns, and canvas dimensions
      * @throws {Error} When canvas context is unavailable
      */
-    static getMapInfo(mapId: string, exportTitle: string, disclaimer: string, layerDateFormats: Record<string, TypeDisplayDateFormat>, layerDateTemporalModes: Record<string, TemporalMode>): Promise<TypeMapInfoResult>;
+    static getMapInfo(mapId: string, displayLanguage: TypeDisplayLanguage, exportTitle: string, disclaimer: string, layerDateFormats: Record<string, TypeDisplayDateFormat>, layerDateTemporalModes: Record<string, TemporalMode>): Promise<TypeMapInfoResult>;
 }
 //# sourceMappingURL=utilities.d.ts.map

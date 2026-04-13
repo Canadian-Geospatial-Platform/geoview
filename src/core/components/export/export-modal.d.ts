@@ -1,8 +1,11 @@
+import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import type { TemporalMode, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 /** Supported export file formats. */
 type FileFormat = 'pdf' | 'png' | 'jpeg';
 /** Properties for file export configuration. */
 export interface FileExportProps {
+    /** The language */
+    language: TypeDisplayLanguage;
     /** The export title text. */
     exportTitle: string;
     /** The disclaimer text. */

@@ -1,7 +1,7 @@
-import type { TypeLegendLayer } from '@/core/components/layers/types';
 interface LayerOpacityControlProps {
-    layerDetails: TypeLegendLayer;
+    /** The layer path to control opacity for. */
+    layerPath: string;
 }
-export declare function LayerOpacityControl(props: LayerOpacityControlProps): JSX.Element;
+export declare function LayerOpacityControl({ layerPath }: LayerOpacityControlProps): JSX.Element;
 export {};
 //# sourceMappingURL=layer-opacity-control.d.ts.map
