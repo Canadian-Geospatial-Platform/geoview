@@ -9,6 +9,7 @@ import type { Map as OLMap } from 'ol';
 import { Polygon } from 'ol/geom';
 
 import EventHelper, { type EventDelegateBase } from '@/api/events/event-helper';
+import type { LayerBaseEvent } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { parseXMLToJson } from '@/core/utils/utilities';
@@ -59,6 +60,9 @@ export class GVWMS extends AbstractGVRaster {
 
   /** Callback delegates for the image load rescue event */
   #onImageLoadRescueHandlers: ImageLoadRescueDelegate[] = [];
+
+  /** Callback delegates for the WMS style changed event */
+  #onWmsStyleChangedHandlers: WMSStyleChangedDelegate[] = [];
 
   /** Indicates if the CRS is to be overridden, because the layer struggles loading on the map */
   #overrideCRS?: CRSOverride;
@@ -626,6 +630,9 @@ export class GVWMS extends AbstractGVRaster {
     this.#wmsStyle = wmsStyleId;
 
     this.getOLSource()?.updateParams({ STYLES: wmsStyleId });
+
+    // Emit about it
+    this.#emitWmsStyleChanged({ wmsStyleName: wmsStyleId });
   }
 
   /**
@@ -1574,7 +1581,7 @@ export class GVWMS extends AbstractGVRaster {
   // #region EVENTS
 
   /**
-   * Emits an event to all handlers when the layer's sent a message.
+   * Emits an event to all handlers when the layer's image failed to load.
    *
    * @param event - The event to emit
    * @returns An array of boolean values returned by each event handler, indicating whether the event was handled
@@ -1605,6 +1612,37 @@ export class GVWMS extends AbstractGVRaster {
     EventHelper.offEvent(this.#onImageLoadRescueHandlers, callback);
   }
 
+  /**
+   * Emits a WMS style changed event to all handlers.
+   *
+   * @param event - The event to emit
+   */
+  #emitWmsStyleChanged(event: WMSStyleChangedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onWmsStyleChangedHandlers, event);
+  }
+
+  /**
+   * Registers a WMS style changed event handler.
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The registered callback, which can be used to unregister the event handler later
+   */
+  onWmsStyleChanged(callback: WMSStyleChangedDelegate): WMSStyleChangedDelegate {
+    // Register the event handler
+    return EventHelper.onEvent(this.#onWmsStyleChangedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a WMS style changed event handler.
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
+   */
+  offWmsStyleChanged(callback: WMSStyleChangedDelegate | undefined): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onWmsStyleChangedHandlers, callback);
+  }
+
   // #endregion EVENTS
 }
 
@@ -1619,3 +1657,16 @@ export type ImageLoadRescueEvent = { imageLoadErrorEvent: Error };
  * Define a delegate for the event handler function signature
  */
 export type ImageLoadRescueDelegate = EventDelegateBase<GVWMS, ImageLoadRescueEvent, boolean>;
+
+/**
+ * Define an event for the delegate.
+ */
+export interface WMSStyleChangedEvent extends LayerBaseEvent {
+  /** The WMS style name that was applied. */
+  wmsStyleName: string;
+}
+
+/**
+ * Define a delegate for the event handler function signature.
+ */
+export type WMSStyleChangedDelegate = EventDelegateBase<GVWMS, WMSStyleChangedEvent, void>;

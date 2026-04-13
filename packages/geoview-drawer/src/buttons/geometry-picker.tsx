@@ -1,8 +1,7 @@
 import ReactDOMServer from 'react-dom/server';
-import { useStoreGeoViewMapId, type TypeWindow } from 'geoview-core';
+import type { TypeWindow } from 'geoview-core';
 import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 import {
-  setStoreDrawerIconSrc,
   useStoreDrawerActiveGeom,
   useStoreDrawerIsDrawing,
   useStoreDrawerStyle,
@@ -37,8 +36,8 @@ export function PointIcon(props: PointIconProps): JSX.Element {
   const { IconComponent } = props;
 
   // Store
-  const mapId = useStoreGeoViewMapId();
   const { fillColor, strokeColor, strokeWidth } = useStoreDrawerStyle();
+  const drawerController = useDrawerController();
 
   useEffect(() => {
     logger.logTraceUseEffect('POINT ICON - Icon style sync', IconComponent, fillColor, strokeColor, strokeWidth);
@@ -76,11 +75,11 @@ export function PointIcon(props: PointIconProps): JSX.Element {
     const dataUrl = `data:image/svg+xml;base64,${btoa(svgStr)}`;
 
     // Store the URL
-    setStoreDrawerIconSrc(mapId, dataUrl);
+    drawerController.setDrawerIconSrc(dataUrl);
 
     // Clean up when component unmounts
     return () => URL.revokeObjectURL(dataUrl);
-  }, [IconComponent, fillColor, mapId, strokeColor, strokeWidth]);
+  }, [IconComponent, fillColor, drawerController, strokeColor, strokeWidth]);
 
   return <IconComponent sx={{ fill: fillColor, stroke: strokeColor, strokeWidth }} />;
 }

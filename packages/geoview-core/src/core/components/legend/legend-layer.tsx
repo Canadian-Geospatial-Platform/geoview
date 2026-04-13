@@ -12,12 +12,9 @@ import {
   useStoreLayerName,
   useStoreLayerStatus,
   useStoreLayerSchemaTag,
+  useStoreLayerIsHiddenOnMap,
+  useStoreLayerLegendCollapsed,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import {
-  useStoreMapLegendCollapsedByPath,
-  useStoreMapIsLayerHiddenOnMap,
-  setStoreMapToggleLegendCollapsed,
-} from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useLightBox } from '@/core/components/common';
 import { LayerIcon } from '@/core/components/common/layer-icon';
 import { SecondaryControls } from './legend-layer-ctrl';
@@ -27,6 +24,7 @@ import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { Typography } from '@/ui/typography/typography';
+import { useLayerController } from '@/core/controllers/use-controllers';
 
 export interface LegendLayerProps {
   layerPath: string;
@@ -59,8 +57,8 @@ const LegendLayerHeader = memo(
     logger.logTraceUseMemo('components/legend/legend-layer - LegendLayerHeader', layerPath);
 
     // Hooks
-    const isCollapsed = useStoreMapLegendCollapsedByPath(layerPath);
-    const layerHidden = useStoreMapIsLayerHiddenOnMap(layerPath);
+    const isCollapsed = useStoreLayerLegendCollapsed(layerPath);
+    const layerHidden = useStoreLayerIsHiddenOnMap(layerPath);
     const layerName = useStoreLayerName(layerPath) ?? layerPath;
     const layerItems = useStoreLayerItems(layerPath);
     const layerChildPaths = useStoreLayerChildPaths(layerPath);
@@ -133,6 +131,7 @@ export function LegendLayer({ layerPath, showControls, containerType }: LegendLa
   const layerStatus = useStoreLayerStatus(layerPath);
   const layerName = useStoreLayerName(layerPath) ?? layerPath;
   const { initLightBox, LightBoxComponent } = useLightBox();
+  const layerController = useLayerController();
 
   // Internal state
   const prevStatusRef = useRef<string | undefined>(undefined); // Ref to track previous status for status change detection
@@ -142,10 +141,10 @@ export function LegendLayer({ layerPath, showControls, containerType }: LegendLa
     (event: React.MouseEvent): void => {
       event.stopPropagation();
 
-      // Save to the store
-      setStoreMapToggleLegendCollapsed(mapId, layerPath);
+      // Toggle the legend collapse
+      layerController.toggleLegendCollapsed(layerPath);
     },
-    [layerPath, mapId]
+    [layerPath, layerController]
   );
 
   // WCAG - Track layer status changes for screen reader announcements

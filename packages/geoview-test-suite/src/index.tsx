@@ -85,28 +85,28 @@ class TestSuitePlugin extends AbstractPlugin {
     this.getConfig().suites.forEach((suite) => {
       if (suite === 'suite-core') {
         // Instanciate the GeoView Test Suite
-        this.addTestSuite(new GVTestSuiteCore(window.cgpv.api, this.mapViewer));
+        this.addTestSuite(new GVTestSuiteCore(window.cgpv.api, this.mapViewer, this.controllerRegistry));
       } else if (suite === 'suite-config') {
         // Instanciate the GeoView Test Suite
-        this.addTestSuite(new GVTestSuiteConfig(window.cgpv.api, this.mapViewer));
+        this.addTestSuite(new GVTestSuiteConfig(window.cgpv.api, this.mapViewer, this.controllerRegistry));
       } else if (suite === 'suite-map') {
         // Instanciate the GeoView Test Suite
-        this.addTestSuite(new GVTestSuiteMapVaria(window.cgpv.api, this.mapViewer));
+        this.addTestSuite(new GVTestSuiteMapVaria(window.cgpv.api, this.mapViewer, this.controllerRegistry));
       } else if (suite === 'suite-layer') {
         // Instanciate the GeoView Test Suite
-        this.addTestSuite(new GVTestSuiteLayer(window.cgpv.api, this.mapViewer));
+        this.addTestSuite(new GVTestSuiteLayer(window.cgpv.api, this.mapViewer, this.controllerRegistry));
       } else if (suite === 'suite-geochart') {
         // Instanciate the GeoView Test Suite
-        this.addTestSuite(new GVTestSuiteGeochart(window.cgpv.api, this.mapViewer));
+        this.addTestSuite(new GVTestSuiteGeochart(window.cgpv.api, this.mapViewer, this.controllerRegistry));
       } else if (suite === 'suite-map-config') {
         // Instanciate the GeoView Test Suite
-        this.addTestSuite(new GVTestSuiteMapConfig(window.cgpv.api, this.mapViewer));
+        this.addTestSuite(new GVTestSuiteMapConfig(window.cgpv.api, this.mapViewer, this.controllerRegistry));
       } else if (suite === 'suite-ui') {
         // Instanciate the GeoView Test Suite
-        this.addTestSuite(new GVTestSuiteUI(window.cgpv.api, this.mapViewer));
+        this.addTestSuite(new GVTestSuiteUI(window.cgpv.api, this.mapViewer, this.controllerRegistry));
       } else if (suite === 'suite-details') {
         // Instanciate the GeoView Test Suite
-        this.addTestSuite(new GVTestSuiteDetails(window.cgpv.api, this.mapViewer));
+        this.addTestSuite(new GVTestSuiteDetails(window.cgpv.api, this.mapViewer, this.controllerRegistry));
       } else {
         // Throw
         throw new TestSuiteInitializationError(suite, this.mapViewer.mapId);

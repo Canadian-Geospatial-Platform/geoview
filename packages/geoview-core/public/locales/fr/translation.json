@@ -550,7 +550,7 @@
       "loadingLayers": "Chargement des couches..."
     },
     "geocore": {
-      "uuidNotFound": "L'identifiant de couche GeoCore '__param__' n'existe pas sur le serveur.",
+      "serviceFail": "Le service Geocore ne répond pas pour UUID '__param__'.",
       "invalidResponse": "Réponse invalide '__param__' retournée par le service GeoCore pour UUID '__param__'.",
       "noLayer": "Aucune couche retournée par le service GeoCore pour UUID '__param__'."
     },

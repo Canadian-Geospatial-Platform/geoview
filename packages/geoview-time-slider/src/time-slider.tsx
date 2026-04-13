@@ -1,12 +1,5 @@
 import { Box } from 'geoview-core/ui';
-import { useStoreGeoViewMapId } from 'geoview-core/core/stores/geoview-store';
-import {
-  setStoreTimeSliderDelay,
-  setStoreTimeSliderLocked,
-  setStoreTimeSliderReversed,
-  setStoreTimeSliderStep,
-  useStoreTimeSliderLayer,
-} from 'geoview-core/core/stores/store-interface-and-intial-values/time-slider-state';
+import { useStoreTimeSliderLayer } from 'geoview-core/core/stores/store-interface-and-intial-values/time-slider-state';
 import {
   useStoreLayerDateTemporalMode,
   useStoreLayerDisplayDateFormat,
@@ -72,7 +65,6 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   const sliderValueRef = useRef<number>();
   const sliderDeltaRef = useRef<number>();
 
-  const mapId = useStoreGeoViewMapId();
   const displayLanguage = useStoreAppDisplayLanguage();
 
   const {
@@ -312,8 +304,8 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
    */
   const handleLock = useCallback((): void => {
     clearTimeout(playIntervalRef.current);
-    setStoreTimeSliderLocked(mapId, layerPath, !locked);
-  }, [mapId, layerPath, locked]);
+    timeSliderController.setLocked(layerPath, !locked);
+  }, [timeSliderController, layerPath, locked]);
 
   /**
    * Handles when the user clicks the play/pause button.
@@ -330,21 +322,21 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
    */
   const handleReverse = useCallback((): void => {
     clearTimeout(playIntervalRef.current);
-    setStoreTimeSliderReversed(mapId, layerPath, !reversed);
+    timeSliderController.setReversed(layerPath, !reversed);
     if (isPlaying) {
       if (reversed) moveBack();
       else moveForward();
     }
-  }, [isPlaying, mapId, layerPath, moveBack, moveForward, reversed]);
+  }, [isPlaying, timeSliderController, layerPath, moveBack, moveForward, reversed]);
 
   /**
    * Handles when the user changes the time delay.
    */
   const handleTimeChange = useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>): void => {
-      setStoreTimeSliderDelay(mapId, layerPath, Number(event.target.value));
+      timeSliderController.setDelay(layerPath, Number(event.target.value));
     },
-    [mapId, layerPath]
+    [timeSliderController, layerPath]
   );
 
   /**
@@ -352,9 +344,9 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
    */
   const handleStepChange = useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>): void => {
-      setStoreTimeSliderStep(mapId, layerPath, Number(event.target.value));
+      timeSliderController.setStep(layerPath, Number(event.target.value));
     },
-    [mapId, layerPath]
+    [timeSliderController, layerPath]
   );
 
   /**

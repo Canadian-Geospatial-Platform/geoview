@@ -17,9 +17,9 @@ import { WMTS } from '@/geo/layer/geoview-layers/raster/wmts';
 import { XYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
 
 import {
+  LayerGeoCoreServiceFailError,
   LayerGeoCoreInvalidResponseError,
   LayerGeoCoreNoLayersError,
-  LayerGeoCoreUUIDNotFoundError,
 } from '@/core/exceptions/geocore-exceptions';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { formatError, NotSupportedError } from '@/core/exceptions/core-exceptions';
@@ -35,6 +35,10 @@ export class UUIDmapConfigReader {
    * @param uuids - A list of uuids to get the configurations for
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves with the layers and geocharts parsed from GeoCore
+   * @throws {LayerGeoCoreServiceFailError} When the Geocore service fails to respond
+   * @throws {LayerGeoCoreInvalidResponseError} When the Geocore service fails to respond with a valid payload
+   * @throws {LayerGeoCoreNoLayersError} When the Geocore service responds a 'valid' payload with missing layers information
+   * @throws {NotSupportedError} When the layer type read in the layerType property from Geocore payload isn't a supported type
    */
   static async getGVConfigFromUUIDs(
     baseUrl: string,
@@ -57,7 +61,7 @@ export class UUIDmapConfigReader {
       };
     } catch (error: unknown) {
       // If the promise had failed
-      if (!result) throw new LayerGeoCoreUUIDNotFoundError(uuids, formatError(error));
+      if (!result) throw new LayerGeoCoreServiceFailError(uuids, formatError(error));
 
       // Re-throw the original error otherwise
       throw error;
@@ -72,6 +76,10 @@ export class UUIDmapConfigReader {
    * @param uuids - A list of uuids to get the configurations for
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves with the layers parsed from Geonetwork RCS
+   * @throws {LayerGeoCoreServiceFailError} When the Geocore service fails to respond
+   * @throws {LayerGeoCoreInvalidResponseError} When the Geocore service fails to respond with a valid payload
+   * @throws {LayerGeoCoreNoLayersError} When the Geocore service responds a 'valid' payload with missing layers information
+   * @throws {NotSupportedError} When the layer type read in the layerType property from Geocore payload isn't a supported type
    */
   static async getGVConfigFromUUIDsRCS(
     baseUrl: string,
@@ -100,7 +108,7 @@ export class UUIDmapConfigReader {
       };
     } catch (error: unknown) {
       // If the promise had failed
-      if (!result) throw new LayerGeoCoreUUIDNotFoundError(uuids, formatError(error));
+      if (!result) throw new LayerGeoCoreServiceFailError(uuids, formatError(error));
 
       // Re-throw the original error otherwise
       throw error;
@@ -114,6 +122,9 @@ export class UUIDmapConfigReader {
    * @param resultData - The uuid request result
    * @param lang - The language to use
    * @returns The layers parsed from uuid result
+   * @throws {LayerGeoCoreInvalidResponseError} When the Geocore service fails to respond with a valid payload
+   * @throws {LayerGeoCoreNoLayersError} When the Geocore service responds a 'valid' payload with missing layers information
+   * @throws {NotSupportedError} When the layer type read in the layerType property from Geocore payload isn't a supported type
    */
   static #getLayerConfigFromResponse(
     uuids: string[],
@@ -121,16 +132,15 @@ export class UUIDmapConfigReader {
     lang: TypeDisplayLanguage
   ): TypeGeoviewLayerConfig[] {
     // If invalid response
-    if (
-      !resultData ||
-      !resultData.response ||
-      !resultData.response.rcs ||
-      !resultData.response.rcs[lang] ||
-      resultData.response.rcs[lang].length === 0
-    ) {
+    if (!resultData || !resultData.response || !resultData.response.rcs || !resultData.response.rcs[lang]) {
       const errorMessage = resultData?.errorMessage || '<no error description>';
       throw new LayerGeoCoreInvalidResponseError(uuids, errorMessage);
     }
+
+    // Make sure it's an array
+    if (!Array.isArray(resultData.response.rcs[lang])) throw new LayerGeoCoreInvalidResponseError(uuids, 'empty object in rcs response');
+
+    // It's an array, it has to contain something
     if (resultData.response.rcs[lang].length === 0) throw new LayerGeoCoreNoLayersError(uuids);
 
     const listOfGeoviewLayerConfig: TypeGeoviewLayerConfig[] = [];
@@ -310,7 +320,8 @@ export type GeoCoreConfigResponseRoot = {
 };
 
 export type GeoCoreConfigResponse = {
-  rcs: Record<TypeDisplayLanguage, GeoCoreConfigResponseRCSLayers[]>;
+  // GV When Geocore fails, the payload may have an object in the rcs.en property, hence the 'GeoCoreConfigResponseRCSLayers[] | object' typing here
+  rcs: Record<TypeDisplayLanguage, GeoCoreConfigResponseRCSLayers[] | object>;
   gcs: Record<TypeDisplayLanguage, GeoCoreConfigResponseGCSLayers>[];
 };
 

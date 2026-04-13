@@ -550,7 +550,7 @@
       "loadingLayers": "Loading layers..."
     },
     "geocore": {
-      "uuidNotFound": "GeoCore layer identifier '__param__' does not exist on the server.",
+      "serviceFail": "GeoCore service is unresponsive for UUID '__param__'.",
       "invalidResponse": "Invalid response '__param__' from GeoCore service for UUID '__param__'.",
       "noLayer": "No layers returned by GeoCore service for UUID '__param__'."
     },

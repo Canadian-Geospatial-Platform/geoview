@@ -57,15 +57,13 @@ export function LayerSettingsPanel({ layerPath }: LayerSettingsPanelProps): JSX.
   const isLayerHoverable = layerControls?.hover;
   const isLayerQueryable = layerControls?.query;
 
-  // TODO: CHECK - Change the use of hooks in those callbacks to use state getters instead?
-
   // Stable handlers for hover/query toggles
   const handleToggleHoverable = useCallback((): void => {
-    layerController.setLayerHoverable(layerPath, !hoverable!);
+    layerController.setLayerHoverable(layerPath, !hoverable);
   }, [layerPath, hoverable, layerController]);
 
   const handleToggleQueryable = useCallback((): void => {
-    layerController.setLayerQueryable(layerPath, !queryable!);
+    layerController.setLayerQueryable(layerPath, !queryable);
   }, [layerPath, queryable, layerController]);
 
   const handleToggleText = useCallback((): void => {

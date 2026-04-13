@@ -6,7 +6,7 @@ import { generateId } from '@/core/utils/utilities';
 
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import { DEFAULT_MAP_FEATURE_CONFIG } from '@/api/types/map-schema-types';
-import type { GeoCoreLayerConfig, RCSLayerConfig, TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
+import type { GeoCoreLayerConfig, TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
 import type { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { getStoreMapConfigServiceUrls, getStoreMapConfigState } from '@/core/stores/store-interface-and-intial-values/map-state';
 
@@ -21,6 +21,10 @@ export class GeoCore {
    * @param layerConfig - Optional layer configuration
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves with the layer configuration and associated geocharts
+   * @throws {LayerGeoCoreServiceFailError} When the Geocore service fails to respond
+   * @throws {LayerGeoCoreInvalidResponseError} When the Geocore service fails to respond with a valid payload
+   * @throws {LayerGeoCoreNoLayersError} When the Geocore service responds a 'valid' payload with missing layers information
+   * @throws {NotSupportedError} When the layer type read in the layerType property from Geocore payload isn't a supported type
    */
   static async createLayerConfigFromUUID(
     uuid: string,
@@ -106,15 +110,17 @@ export class GeoCore {
    * @param uuid - The UUID of the layer
    * @param language - The language
    * @param mapId - The map identifier
-   * @param layerConfig - Optional layer configuration
    * @param abortSignal - Optional {@link AbortSignal} used to handle cancelling of fetch
    * @returns A promise that resolves with the layer configuration to add to the map
+   * @throws {LayerGeoCoreServiceFailError} When the Geocore service fails to respond
+   * @throws {LayerGeoCoreInvalidResponseError} When the Geocore service fails to respond with a valid payload
+   * @throws {LayerGeoCoreNoLayersError} When the Geocore service responds a 'valid' payload with missing layers information
+   * @throws {NotSupportedError} When the layer type read in the layerType property from Geocore payload isn't a supported type
    */
   static async createLayerConfigFromRCSUUID(
     uuid: string,
     language: TypeDisplayLanguage,
     mapId: string,
-    layerConfig?: RCSLayerConfig,
     abortSignal?: AbortSignal
   ): Promise<TypeGeoviewLayerConfig> {
     // Get the map config and rcsUrl if it overrides the default

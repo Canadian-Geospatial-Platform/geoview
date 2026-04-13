@@ -8,7 +8,6 @@ import defaultConfig from '../default-config-geochart.json';
 import { GeoChartPanel } from './geochart-panel';
 import type { PluginGeoChartConfig } from './geochart-types';
 import { convertGeoViewGeoChartConfigToCore } from './geochart-types';
-import { initStoreGeochartCharts } from 'geoview-core/core/stores/store-interface-and-intial-values/geochart-state';
 import { logger } from 'geoview-core/core/utils/logger';
 
 /**
@@ -86,12 +85,13 @@ class GeoChartFooterPlugin extends FooterPlugin {
     // Initialize the store with geochart provided configuration if there is one
     if (this.getConfig().charts) {
       const configs = this.getConfig().charts.map((config) => convertGeoViewGeoChartConfigToCore(config));
+
       // Init the charts to the store
-      initStoreGeochartCharts(this.mapViewer.mapId, configs);
+      this.controllerRegistry.geoChartController?.initCharts(configs);
 
       // If there is charts, tab should be shown
       if (configs.length) {
-        this.mapViewer.controllers.uiController.showTabButton('geochart');
+        this.controllerRegistry.uiController.showTabButton('geochart');
       }
 
       // Log
