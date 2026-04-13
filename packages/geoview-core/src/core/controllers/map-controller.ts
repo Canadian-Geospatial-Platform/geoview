@@ -6,7 +6,7 @@ import type { OverviewMap as OLOverviewMap } from 'ol/control';
 
 import {
   MAP_EXTENTS,
-  MAX_EXTENTS_RESTRICTION,
+  VALID_PROJECTION_CODES,
   type Extent,
   type TypeAltitudeResponse,
   type TypeBasemapOptions,
@@ -34,6 +34,7 @@ import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-lay
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import type { TypeLegendLayer } from '@/core/components/layers/types';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
+import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import {
   getStoreMapClickCoordinates,
   getStoreMapConfigAppBar,
@@ -51,34 +52,34 @@ import {
   getStoreMapConfigServiceUrls,
   getStoreMapConfigViewSettings,
   getStoreMapCurrentBasemapOptions,
-  getStoreMapCurrentProjection,
-  getStoreMapCurrentProjectionEPSG,
   getStoreMapHighlightedFeatures,
   getStoreMapHighlightedFeaturesByUid,
   getStoreMapHomeView,
   getStoreMapInitialView,
   getStoreMapInteraction,
-  getStoreMapLayerPaths,
-  getStoreMapOrderedLayerInfoByPath,
   getStoreMapPointMarkers,
   getStoreMapRotation,
   isStoreMapConfigInitialized,
+  setStoreMapAttribution,
   setStoreMapClickCoordinates,
-  setStoreMapClickMarker,
+  setStoreMapClickMarkerIconHide,
   setStoreMapCurrentBasemapOptions,
+  setStoreMapFixNorth,
   setStoreMapGeolocatorSearchArea,
   setStoreMapHighlightedFeatures,
   setStoreMapPointMarkers,
   setStoreMapProjection,
   setStoreMapSize,
-  type TypeOrderedLayerInfo,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { getStoreDataTableSelectedLayerPath } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { getStoreUIActiveAppBarTab, getStoreUIActiveFooterBarTab } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { getStoreAppDisplayTheme, getStoreAppIsCrosshairsActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 import {
   getStoreLayerHighlightedLayer,
+  getStoreLayerHoverable,
   getStoreLayerLegendLayerByPath,
+  getStoreLayerOrderedLayerPaths,
+  getStoreLayerQueryable,
   getStoreLayerSelectedLayerPath,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import {
@@ -91,7 +92,6 @@ import {
   updateStoreCoordinateInfoLayer,
   getStoreDetailsCoordinateInfoEnabled,
   setStoreDetailsCoordinateInfoEnabled,
-  deleteStoreDetailsFeatureInfo,
   LAYER_PATH_COORDINATE_INFO,
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { DEFAULT_OL_FITOPTIONS, OL_ZOOM_DURATION, OL_ZOOM_PADDING, TIMEOUT } from '@/core/utils/constant';
@@ -99,7 +99,7 @@ import { DateMgt, type TimeDimension } from '@/core/utils/date-mgt';
 import { delay, doTimeout, isValidUUID } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { logger } from '@/core/utils/logger';
-import type { MapViewer } from '@/geo/map/map-viewer';
+import type { MapProjectionChangedDelegate, MapProjectionChangedEvent, MapViewer } from '@/geo/map/map-viewer';
 import { Projection } from '@/geo/utils/projection';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
@@ -111,7 +111,6 @@ import type { FitOptions } from 'ol/View';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { InvalidExtentError } from '@/core/exceptions/geoview-exceptions';
 import { AbstractGVVectorTile } from '@/geo/layer/gv-layers/vector/abstract-gv-vector-tile';
-import type { FeatureHighlight } from '@/geo/map/feature-highlight';
 
 /**
  * Controller responsible for Map interactions.
@@ -120,21 +119,57 @@ export class MapController extends AbstractMapViewerController {
   /** The minimal delay in ms to wait after a zoom animation to ensure it has completed. */
   static readonly ZOOM_MIN_DELAY = 500;
 
-  /** The feature highlight instance associated with this controller */
-  #featureHighlight: FeatureHighlight;
+  /** The bounded reference to the handle map projection changed method */
+  #boundedHandleMapProjectionChangeStarted: MapProjectionChangedDelegate;
+
+  /** The bounded reference to the handle map projection changed method */
+  #boundedHandleMapProjectionChanged: MapProjectionChangedDelegate;
+
+  /** Resolve callback for the pending projection change promise. */
+  #projectionChangeResolve: (() => void) | undefined;
+
+  /** Indicates if the overview map visibility state before the map projection happened */
+  #projectionChangingOverviewMapVisibility: boolean = false;
 
   /**
    * Creates an instance of MapController.
    *
    * @param mapViewer - The map viewer instance to associate with this controller
-   * @param featureHighlight - The feature highlight instance to associate with this controller
+   * @param controllerRegistry - The controller registry for accessing sibling controllers
    */
-  constructor(mapViewer: MapViewer, featureHighlight: FeatureHighlight) {
-    super(mapViewer);
-    this.#featureHighlight = featureHighlight;
+  constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry) {
+    super(mapViewer, controllerRegistry);
+
+    // Keep a bounded reference to the handle map projection changed method
+    this.#boundedHandleMapProjectionChangeStarted = this.#handleMapProjectionChangeStarted.bind(this);
+
+    // Keep a bounded reference to the handle map projection changed method
+    this.#boundedHandleMapProjectionChanged = this.#handleMapProjectionChanged.bind(this);
   }
 
   // #region OVERRIDES
+
+  /**
+   * Subscribes to the map projection changed event on the MapViewer.
+   */
+  protected override onHook(): void {
+    // Listens when a map projection change start occurs
+    this.getMapViewer().onMapProjectionChangeStarted(this.#boundedHandleMapProjectionChangeStarted);
+
+    // Listens when a map projection change occurs
+    this.getMapViewer().onMapProjectionChanged(this.#boundedHandleMapProjectionChanged);
+  }
+
+  /**
+   * Unsubscribes from the map projection changed event on the MapViewer.
+   */
+  protected override onUnhook(): void {
+    // Unhooks when a map projection change occurs
+    this.getMapViewer().offMapProjectionChanged(this.#boundedHandleMapProjectionChanged);
+
+    // Listens when a map projection change start occurs
+    this.getMapViewer().offMapProjectionChangeStarted(this.#boundedHandleMapProjectionChangeStarted);
+  }
 
   // #endregion OVERRIDES
 
@@ -153,7 +188,7 @@ export class MapController extends AbstractMapViewerController {
     const mergedOptions: FitOptions = { ...DEFAULT_OL_FITOPTIONS, ...options };
 
     // Validate the extent coordinates - need to make sure we aren't excluding zero with !number or using invalid extents
-    const validatedExtent = GeoUtilities.validateExtent(extent, getStoreMapCurrentProjectionEPSG(this.getMapId()));
+    const validatedExtent = GeoUtilities.validateExtent(extent, this.getMapViewer().getProjectionEPSG());
     if (
       !extent.some((number) => {
         return (!number && number !== 0) || Number.isNaN(number);
@@ -181,7 +216,7 @@ export class MapController extends AbstractMapViewerController {
     // Get the map id
     const mapId = this.getMapId();
 
-    const currProjection = getStoreMapCurrentProjection(mapId);
+    const currProjection = this.getMapViewer().getProjectionNumber();
     let extent: Extent | undefined = MAP_EXTENTS[currProjection];
     const options: FitOptions = { padding: OL_ZOOM_PADDING, duration: OL_ZOOM_DURATION };
     const homeView = getStoreMapHomeView(mapId) || getStoreMapInitialView(mapId);
@@ -236,7 +271,7 @@ export class MapController extends AbstractMapViewerController {
     const projectedCoords = Projection.transformPoints(
       [coord],
       Projection.PROJECTION_NAMES.LONLAT,
-      getStoreMapCurrentProjectionEPSG(this.getMapId())
+      this.getMapViewer().getProjectionEPSG()
     );
 
     const extent: Extent = [...projectedCoords[0], ...projectedCoords[0]];
@@ -303,15 +338,18 @@ export class MapController extends AbstractMapViewerController {
       (indicatorBox[i] as HTMLElement).style.display = 'none';
     }
 
-    const projectionConfig = Projection.PROJECTIONS[getStoreMapCurrentProjection(mapId)];
     if (bbox) {
       // GV There were issues with fromLonLat in rare cases in LCC projections, transformExtentFromProj seems to solve them.
       // GV fromLonLat and transformExtentFromProj give differing results in many cases, fromLonLat had issues with the first
       // GV three results from a geolocator search for "vancouver river"
-      const convertedExtent = Projection.transformExtentFromProj(bbox, Projection.getProjectionLonLat(), projectionConfig);
+      const convertedExtent = Projection.transformExtentFromProj(
+        bbox,
+        Projection.getProjectionLonLat(),
+        this.getMapViewer().getProjection()
+      );
 
       // Highlight
-      this.#featureHighlight.highlightGeolocatorBBox(convertedExtent);
+      this.getMapViewer().featureHighlight.highlightGeolocatorBBox(convertedExtent);
 
       // Zoom to extent and await
       await this.zoomToExtent(convertedExtent, {
@@ -329,7 +367,7 @@ export class MapController extends AbstractMapViewerController {
       const projectedCoords = Projection.transformPoints(
         [coords],
         Projection.PROJECTION_NAMES.LONLAT,
-        getStoreMapCurrentProjectionEPSG(mapId)
+        this.getMapViewer().getProjectionEPSG()
       );
 
       const extent: Extent = [...projectedCoords[0], ...projectedCoords[0]];
@@ -358,7 +396,7 @@ export class MapController extends AbstractMapViewerController {
    */
   addHighlightedFeature(feature: TypeFeatureInfoEntry): void {
     if (feature.geoviewLayerType !== CONST_LAYER_TYPES.WMS) {
-      this.#featureHighlight.highlightFeature(feature);
+      this.getMapViewer().featureHighlight.highlightFeature(feature);
 
       // Save in store
       // TODO: CHECK - What is this doing? Just refreshing the highlighted features with the same list?
@@ -374,7 +412,7 @@ export class MapController extends AbstractMapViewerController {
    */
   highlightBBox(extent: Extent, isLayerHighlight?: boolean): void {
     // Perform a highlight bbox
-    this.#featureHighlight.highlightGeolocatorBBox(extent, isLayerHighlight);
+    this.getMapViewer().featureHighlight.highlightGeolocatorBBox(extent, isLayerHighlight);
   }
 
   /**
@@ -382,7 +420,7 @@ export class MapController extends AbstractMapViewerController {
    */
   removeBBoxHighlight(): void {
     // Remove the highlight bbox
-    this.#featureHighlight.removeBBoxHighlight();
+    this.getMapViewer().featureHighlight.removeBBoxHighlight();
   }
 
   /**
@@ -397,9 +435,9 @@ export class MapController extends AbstractMapViewerController {
       // Filter what we want to keep as highlighted features
       let highlightedFeatures: TypeFeatureInfoEntry[] = [];
       if (feature === 'all') {
-        this.#featureHighlight.removeHighlight(feature);
+        this.getMapViewer().featureHighlight.removeHighlight(feature);
       } else {
-        this.#featureHighlight.removeHighlight(feature.uid!);
+        this.getMapViewer().featureHighlight.removeHighlight(feature.uid!);
 
         // Get highlighted features from the store
         // TODO: CHECK - Why are we getting the features to resave them right after? Just to trigger a store update?
@@ -436,7 +474,7 @@ export class MapController extends AbstractMapViewerController {
     // Set the group markers, and update on the map
     curMarkers[group] = groupMarkers;
     setStoreMapPointMarkers(this.getMapId(), curMarkers);
-    this.#featureHighlight.pointMarkers?.updatePointMarkers(curMarkers);
+    this.getMapViewer().featureHighlight.pointMarkers?.updatePointMarkers(curMarkers);
   }
 
   /**
@@ -466,7 +504,7 @@ export class MapController extends AbstractMapViewerController {
 
     // Set the pointMarkers and update on map
     setStoreMapPointMarkers(this.getMapId(), curMarkers);
-    this.#featureHighlight.pointMarkers?.updatePointMarkers(curMarkers);
+    this.getMapViewer().featureHighlight.pointMarkers?.updatePointMarkers(curMarkers);
   }
 
   // #endregion PUBLIC METHODS - HIGHLIGHT FEATURES
@@ -479,103 +517,44 @@ export class MapController extends AbstractMapViewerController {
    * Reprojects the view, reloads basemaps, refreshes layers, removes incompatible vector tile layers,
    * and repeats the last feature query. Shows a circular progress indicator during the transition.
    *
-   * @param projectionCode - The target projection code
+   * @param projectionNumber - The target projection code
    * @returns A promise that resolves when the projection change is complete
    */
-  async setProjection(projectionCode: TypeValidMapProjectionCodes): Promise<void> {
-    try {
-      // Set circular progress to hide basemap switching
-      this.getControllersRegistry().uiController.setCircularProgress(true);
+  setProjection(projectionNumber: TypeValidMapProjectionCodes): Promise<void> {
+    // If invalid, return
+    if (!VALID_PROJECTION_CODES.includes(Number(projectionNumber))) return Promise.resolve();
 
-      // get view status (center and projection) to calculate new center
-      const currentView = this.getMapViewer().map.getView();
-      const currentCenter = currentView.getCenter();
-      const currentProjection = currentView.getProjection().getCode();
-      const centerLatLng = Projection.transformPoints([currentCenter!], currentProjection, Projection.PROJECTION_NAMES.LONLAT)[0] as [
-        number,
-        number,
-      ];
-      const newProjection = projectionCode;
-
-      // If maxExtent was provided and in the native projection, apply
-      // GV The extent is different between LCC and WM and switching from one to the other may introduce weird constraint.
-      // GV We may have to keep extent as array for configuration file but, technically, user does not change projection often.
-      // GV A wider LCC extent like [-125, 30, -60, 89] (minus -125) will introduce distortion on larger screen...
-      // GV It is why we apply the max extent only on native projection, otherwise we apply default
-      const viewSettings = getStoreMapConfigViewSettings(this.getMapId());
-      const mapMaxExtent =
-        viewSettings && viewSettings.maxExtent && Number(newProjection) === Number(viewSettings.projection)
-          ? viewSettings?.maxExtent
-          : MAX_EXTENTS_RESTRICTION[newProjection];
-
-      // create new view settings
-      const newView: TypeViewSettings = {
-        initialView: { zoomAndCenter: [currentView.getZoom() as number, centerLatLng] },
-        minZoom: currentView.getMinZoom(),
-        maxZoom: currentView.getMaxZoom(),
-        maxExtent: mapMaxExtent,
-        projection: newProjection,
-      };
-
-      // use store action to set projection value in store and apply new view to the map
-      setStoreMapProjection(this.getMapId(), projectionCode);
-
-      // Clear the WMS layers that had an override CRS
-      this.getControllersRegistry().layerController.clearWMSLayersWithOverrideCRS();
-
-      // Clear any loaded vector features in the data table
-      this.getControllersRegistry().layerSetController.clearVectorFeaturesFromAllFeatureInfoLayerSet();
-
-      // Before changing the view, clear the basemaps right away to prevent a moment where a
-      // vector tile basemap might, momentarily, be in different projection than the view.
-      // Note: It seems that since OpenLayers 10.5 OpenLayers throws an exception about this. So this line was added.
-      this.getMapViewer().basemap.clearBasemaps();
-
-      // Set overview map visibility to false when reproject to remove it from the map as it is vector tile
-      this.setOverviewMapVisibility(false);
-
-      // Remove all vector tiles from the map, because they don't allow on-the-fly reprojection (OpenLayers 10.5 exception issue)
-      // GV Experimental code, to test further... not problematic to keep it for now
-      this.getControllersRegistry()
-        .layerController.getGeoviewLayers()
-        .filter((layer) => layer instanceof AbstractGVVectorTile)
-        .forEach((layer) => {
-          // Remove the layer through the controller
-          this.getControllersRegistry().layerCreatorController.removeLayerUsingPath(layer.getLayerPath());
-
-          // Log
-          this.getMapViewer().notifications.showWarning('warning.layer.vectorTileRemoved', [layer.getLayerName()], true);
-        });
-
-      // set new view
-      this.getMapViewer().setView(newView);
-
-      // reload the basemap from new projection
-      await this.resetBasemap();
-
-      // refresh layers so new projection is render properly
-      this.getControllersRegistry().layerController.refreshLayers();
-
-      // Remove layer highlight if present to avoid bad reprojection
-      const highlightName = getStoreLayerHighlightedLayer(this.getMapId());
-      if (highlightName !== '') {
-        this.getControllersRegistry().layerController.changeOrRemoveLayerHighlight(highlightName, highlightName);
-      }
-
-      // Reset the map object of overview map control
-      this.setOverviewMapVisibility(true);
-
-      // Repeat last query for layer features after a delay to allow projection change to propagate
-      this.getMapViewer()
-        .controllers.layerSetController.repeatLastQueryIfAny()
-        .catch((error: unknown) => {
-          // Log
-          logger.logPromiseFailed('in repeatLastQueryIfAny in mapController.setProjection', error);
-        });
-    } finally {
-      // Remove circular progress as refresh is done
-      this.getControllersRegistry().uiController.setCircularProgress(false);
+    // Get the max extent
+    // GV The extent is different between LCC and WM and switching from one to the other may introduce weird constraint.
+    // GV We may have to keep extent as array for configuration file but, technically, user does not change projection often.
+    // GV A wider LCC extent like [-125, 30, -60, 89] (minus -125) will introduce distortion on larger screen...
+    // GV It is why we apply the max extent only on native projection, otherwise we send undefined so that it applies default
+    const viewSettings = getStoreMapConfigViewSettings(this.getMapId());
+    let maxMapExtent;
+    if (
+      viewSettings &&
+      viewSettings.maxExtent &&
+      Projection.readEPSGNumber(this.getMapViewer().getProjection()) === Number(viewSettings.projection)
+    ) {
+      maxMapExtent = viewSettings.maxExtent;
     }
+
+    // Create a promise that will be resolved by the projection changed event handler
+    const promise = new Promise<void>((resolve) => {
+      this.#projectionChangeResolve = resolve;
+    });
+
+    // Set the projection on the MapViewer (fires the MapProjectionChangedEvent)
+    const changed = this.getMapViewer().setProjection(projectionNumber, maxMapExtent);
+
+    // If the projection was not changed (unsupported), resolve immediately
+    if (!changed) {
+      this.#projectionChangeResolve = undefined;
+      return Promise.resolve();
+    }
+
+    // Return the promise that the projection will happen
+    return promise;
   }
 
   /**
@@ -632,25 +611,51 @@ export class MapController extends AbstractMapViewerController {
   }
 
   /**
-   * Shows the click marker icon at the given marker position.
+   * Sets the reference to the click marker overlay element in the MapViewer.
    *
-   * Projects the marker's lon/lat coordinates to the current map projection before placing it.
+   * This allows the MapViewer to control the display and positioning of the click marker on the map.
+   *
+   * @param clickMarkerRef - The HTMLDivElement reference for the click marker overlay
+   */
+  setClickMarkerOverlayRef(clickMarkerRef: HTMLDivElement): void {
+    this.getMapViewer().getClickMarkerOverlay().setElement(clickMarkerRef);
+  }
+
+  /**
+   * Sets the reference to the north pole marker overlay element in the MapViewer.
+   *
+   * @param northPoleMarkerRef - The HTMLDivElement reference for the north pole marker overlay
+   */
+  setNorthPoleMarkerOverlayRef(northPoleMarkerRef: HTMLDivElement): void {
+    this.getMapViewer().getNorthPoleMarkerOverlay().setElement(northPoleMarkerRef);
+  }
+
+  /**
+   * Shows the click marker icon at the given marker position.
    *
    * @param marker - The click marker containing lon/lat coordinates
    */
   clickMarkerIconShow(marker: TypeClickMarker): void {
-    // Project coords
-    const projectedCoords = Projection.transformPoints(
-      [marker.lonlat],
-      Projection.PROJECTION_NAMES.LONLAT,
-      getStoreMapCurrentProjectionEPSG(this.getMapId())
-    );
+    // Redirect to the map viewer
+    this.getMapViewer().clickMarkerIconShow(marker);
+  }
 
-    // Set it on the MapViewer
-    this.getMapViewer().map.getOverlayById(`${this.getMapId()}-clickmarker`)!.setPosition(projectedCoords[0]);
+  /**
+   * Hides the click marker icon and clears the click marker from the store.
+   */
+  clickMarkerIconHide(): void {
+    // Save to the store
+    setStoreMapClickMarkerIconHide(this.getMapId());
+  }
 
-    // Save in store
-    setStoreMapClickMarker(this.getMapId(), projectedCoords[0]);
+  /**
+   * Sets the fix north state.
+   *
+   * @param fixNorth - The new fix north state
+   */
+  setFixNorth(fixNorth: boolean): void {
+    // Save to the store
+    setStoreMapFixNorth(this.getMapId(), fixNorth);
   }
 
   /**
@@ -758,7 +763,7 @@ export class MapController extends AbstractMapViewerController {
     // If toggling it off
     if (!newCoordinateInfoEnabledState) {
       // Remove coordinate info layer when disabled
-      deleteStoreDetailsFeatureInfo(this.getMapId(), LAYER_PATH_COORDINATE_INFO);
+      this.getControllersRegistry().detailsController.deleteFeatureInfo(LAYER_PATH_COORDINATE_INFO);
     }
   }
 
@@ -888,6 +893,16 @@ export class MapController extends AbstractMapViewerController {
   // #region PUBLIC METHODS - BASEMAP API
 
   /**
+   * Sets the attribution text for the map.
+   *
+   * @param attribution - An array of attribution strings to display on the map
+   */
+  setAttribution(attribution: string[]): void {
+    // Save in the store
+    setStoreMapAttribution(this.getMapId(), attribution);
+  }
+
+  /**
    * Gets the OpenLayers overview map control for the given map.
    *
    * @param div - The HTML div element to host the overview map
@@ -896,6 +911,15 @@ export class MapController extends AbstractMapViewerController {
   initOverviewMapControl(div: HTMLDivElement): OLOverviewMap {
     const olMap = this.getMapViewer().map;
     return this.getMapViewer().basemap.initOverviewMapControl(olMap, div);
+  }
+
+  /**
+   * Gets the visibility state of the overview map control.
+   *
+   * @returns True if the overview map control is visible, false otherwise
+   */
+  getOverviewMapVisibility(): boolean {
+    return this.getMapViewer().basemap.getOverviewMapControlVisibility();
   }
 
   /**
@@ -916,7 +940,7 @@ export class MapController extends AbstractMapViewerController {
   resetBasemap(): Promise<void> {
     // reset basemap will use the current display language and projection and recreate the basemap
     const language = this.getMapViewer().getDisplayLanguage();
-    const projection = getStoreMapCurrentProjection(this.getMapId());
+    const projection = this.getMapViewer().getProjectionNumber();
     return this.getMapViewer().basemap.loadDefaultBasemaps(projection, language);
   }
 
@@ -929,7 +953,7 @@ export class MapController extends AbstractMapViewerController {
   async setBasemap(basemapOptions: TypeBasemapOptions): Promise<void> {
     // Set basemap will use the current display language and projection and recreate the basemap
     const language = this.getMapViewer().getDisplayLanguage();
-    const projection = getStoreMapCurrentProjection(this.getMapId());
+    const projection = this.getMapViewer().getProjectionNumber();
 
     // Create the core basemap
     const basemap = await this.getMapViewer().basemap.createCoreBasemap(basemapOptions, projection, language);
@@ -960,7 +984,7 @@ export class MapController extends AbstractMapViewerController {
 
     if (isStoreMapConfigInitialized(mapId)) {
       // Get paths of top level layers
-      const layerOrder = getStoreMapLayerPaths(mapId).filter(
+      const layerOrder = getStoreLayerOrderedLayerPaths(mapId).filter(
         (layerPath) => !this.getControllersRegistry().layerController.getLayerEntryConfigIfExists(layerPath)?.getParentLayerConfig()
       );
 
@@ -970,7 +994,7 @@ export class MapController extends AbstractMapViewerController {
         .filter((mapLayerEntry) => !!mapLayerEntry);
 
       // Get info for view
-      const projection = getStoreMapCurrentProjection(mapId);
+      const projection = mapViewer.getProjectionNumber();
       const currentView = mapViewer.map.getView();
       const currentCenter = currentView.getCenter();
       const currentProjection = currentView.getProjection().getCode();
@@ -1160,8 +1184,97 @@ export class MapController extends AbstractMapViewerController {
   // #endregion PUBLIC METHODS - GEOMETRY API FOR DRAWING TOOLS
 
   // #region DOMAIN HANDLERS
-  // GV Eventually, these should be moved to a store adaptor or similar construct that directly connects the domain to the store without going through the controller
-  // GV.CONT but for now this allows us to keep domain-store interactions in one place and call application-level processes as needed during migration.
+
+  /**
+   * Handles the pre-projection-change cleanup before the map view applies the new projection.
+   *
+   * Shows a loading indicator, clears stale WMS override CRS layers and vector feature data,
+   * hides the overview map, removes layer highlights, and strips incompatible vector tile layers.
+   *
+   * @param mapViewer - The MapViewer instance that emitted the event
+   * @param event - The projection changed event containing the new and previous projections
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  #handleMapProjectionChangeStarted(mapViewer: MapViewer, event: MapProjectionChangedEvent): void {
+    // Show loading indicator while the projection change is being processed
+    this.getControllersRegistry().uiController.setCircularProgress(true);
+
+    // Clear the WMS layers that had an override CRS
+    this.getControllersRegistry().layerController.clearWMSLayersWithOverrideCRS();
+
+    // Clear any loaded vector features in the data table, we'll need to refetch those on the new projection
+    this.getControllersRegistry().layerSetController.clearVectorFeaturesFromAllFeatureInfoLayerSet();
+
+    // Set overview map visibility to false when reproject to remove it from the map as it is vector tile
+    this.#projectionChangingOverviewMapVisibility = this.getOverviewMapVisibility();
+    this.setOverviewMapVisibility(false);
+
+    // Remove layer highlight if present to avoid bad reprojection
+    const highlightName = getStoreLayerHighlightedLayer(this.getMapId());
+    if (highlightName !== '') {
+      this.getControllersRegistry().layerController.changeOrRemoveLayerHighlight(highlightName, highlightName);
+    }
+
+    // Remove all vector tiles from the map, because they don't allow on-the-fly reprojection (OpenLayers 10.5 exception issue)
+    // GV Experimental code, to test further... not problematic to keep it for now
+    this.getControllersRegistry()
+      .layerController.getGeoviewLayers()
+      .filter((layer) => layer instanceof AbstractGVVectorTile)
+      .forEach((layer) => {
+        // Remove the layer through the controller
+        this.getControllersRegistry().layerCreatorController.removeLayerUsingPath(layer.getLayerPath());
+
+        // Log
+        this.getMapViewer().notifications.showWarning('warning.layer.vectorTileRemoved', [layer.getLayerName()], true);
+      });
+  }
+
+  /**
+   * Handles the post-projection-change work after the map view has applied the new projection.
+   *
+   * Updates the store projection, reloads the basemap, refreshes remaining layers,
+   * restores the overview map, repeats the last feature query, and resolves the
+   * pending projection change promise.
+   *
+   * @param mapViewer - The MapViewer instance that emitted the event
+   * @param event - The projection changed event containing the new and previous projections
+   */
+  #handleMapProjectionChanged(mapViewer: MapViewer, event: MapProjectionChangedEvent): void {
+    // Save in the store
+    setStoreMapProjection(this.getMapId(), Projection.readEPSGNumber(event.projection) as TypeValidMapProjectionCodes);
+
+    // Reload the basemap from new projection
+    this.resetBasemap()
+      .then(() => {
+        // Remove circular progress as basemap is reset, rest is interesting to see
+        this.getControllersRegistry().uiController.setCircularProgress(false);
+
+        // Refresh layers so new projection is render properly
+        this.getControllersRegistry().layerController.refreshLayers();
+
+        // Reset the overview map visiblity to what it was before changing the map projection
+        this.setOverviewMapVisibility(this.#projectionChangingOverviewMapVisibility);
+
+        // Repeat last query for layer features
+        this.getControllersRegistry()
+          .layerSetController.repeatLastQueryIfAny()
+          .catch((error: unknown) => {
+            // Log
+            logger.logPromiseFailed('in repeatLastQueryIfAny in mapController.setProjection', error);
+          });
+      })
+      .catch((error: unknown) => {
+        // Log
+        logger.logPromiseFailed('in resetBasemap in mapController.handleMapProjectionChanged', error);
+      })
+      .finally(() => {
+        // Resolve the pending projection change promise
+        if (this.#projectionChangeResolve) {
+          this.#projectionChangeResolve();
+          this.#projectionChangeResolve = undefined;
+        }
+      });
+  }
 
   // #endregion DOMAIN HANDLERS
 
@@ -1191,7 +1304,6 @@ export class MapController extends AbstractMapViewerController {
     }
 
     // Get info
-    const orderedLayerInfo = getStoreMapOrderedLayerInfoByPath(mapId, layerPath)!; // Should always find one, so use a '!', otherwise let it break (was like this before)
     const legendLayerInfo = getStoreLayerLegendLayerByPath(mapId, layerPath);
 
     // Check if the layer is a geocore layers
@@ -1204,7 +1316,7 @@ export class MapController extends AbstractMapViewerController {
     }
 
     // Check for sublayers
-    const sublayerPaths = getStoreMapLayerPaths(mapId).filter(
+    const sublayerPaths = getStoreLayerOrderedLayerPaths(mapId).filter(
       // We only want the immediate child layers, group sublayers will handle their own sublayers
       (entryLayerPath) => layerEntryLayerPaths.includes(entryLayerPath)
     );
@@ -1218,7 +1330,7 @@ export class MapController extends AbstractMapViewerController {
     else listOfLayerEntryConfig.push(this.#createLayerEntryConfig(layerPath, isGeocore, overrideGeocoreServiceNames));
 
     // Get initial settings
-    const initialSettings = MapController.#getInitialSettings(layerEntryConfig, orderedLayerInfo, legendLayerInfo);
+    const initialSettings = MapController.#getInitialSettings(mapId, layerEntryConfig, legendLayerInfo!);
 
     // Construct geoview layer config
     const newGeoviewLayerConfig: MapConfigLayerEntry =
@@ -1265,7 +1377,6 @@ export class MapController extends AbstractMapViewerController {
     const mapId = this.getMapId();
 
     const layerEntryConfig = this.getControllersRegistry().layerController.getLayerEntryConfig(layerPath);
-    const orderedLayerInfo = getStoreMapOrderedLayerInfoByPath(mapId, layerPath)!; // Should always find one, so use a '!', otherwise let it break (was like this before)
     const legendLayerInfo = getStoreLayerLegendLayerByPath(mapId, layerPath);
 
     // Get original layerEntryConfig from map config
@@ -1292,7 +1403,7 @@ export class MapController extends AbstractMapViewerController {
     // Create list of sublayer entry configs if it is a group layer
     const listOfLayerEntryConfig: TypeLayerEntryConfig[] = [];
     if (layerEntryConfig.getEntryTypeIsGroup()) {
-      const sublayerPaths = getStoreMapLayerPaths(mapId).filter(
+      const sublayerPaths = getStoreLayerOrderedLayerPaths(mapId).filter(
         (entryLayerPath) =>
           entryLayerPath.startsWith(`${layerPath}/`) && entryLayerPath.split('/').length === layerPath.split('/').length + 1
       );
@@ -1302,7 +1413,7 @@ export class MapController extends AbstractMapViewerController {
     }
 
     // Get initial settings
-    const initialSettings = MapController.#getInitialSettings(layerEntryConfig, orderedLayerInfo, legendLayerInfo);
+    const initialSettings = MapController.#getInitialSettings(mapId, layerEntryConfig, legendLayerInfo!);
 
     // Clone the source object
     let source;
@@ -1422,23 +1533,19 @@ export class MapController extends AbstractMapViewerController {
   /**
    * Creates layer initial settings according to provided configs.
    *
+   * @param mapId - The map identifier
    * @param layerEntryConfig - Layer entry config for the layer
-   * @param orderedLayerInfo - Ordered layer info for the layer
    * @param legendLayerInfo - Legend layer info for the layer
    * @returns Initial settings object
    */
-  static #getInitialSettings(
-    layerEntryConfig: ConfigBaseClass,
-    orderedLayerInfo: TypeOrderedLayerInfo,
-    legendLayerInfo: TypeLegendLayer | undefined
-  ): TypeLayerInitialSettings {
+  static #getInitialSettings(mapId: string, layerEntryConfig: ConfigBaseClass, legendLayerInfo: TypeLegendLayer): TypeLayerInitialSettings {
     return {
       states: {
-        visible: orderedLayerInfo.visible,
+        visible: legendLayerInfo.visible,
         opacity: legendLayerInfo?.opacity ?? 1,
-        legendCollapsed: orderedLayerInfo.legendCollapsed,
-        queryable: orderedLayerInfo.queryableState,
-        hoverable: orderedLayerInfo.hoverable,
+        legendCollapsed: legendLayerInfo.legendCollapsed,
+        queryable: getStoreLayerQueryable(mapId, layerEntryConfig.layerPath),
+        hoverable: getStoreLayerHoverable(mapId, layerEntryConfig.layerPath),
       },
       controls: layerEntryConfig.getInitialSettings()?.controls,
       bounds: layerEntryConfig.getInitialSettingsBounds(),

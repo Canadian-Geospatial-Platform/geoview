@@ -400,10 +400,10 @@ export const useStoreAppDisplayDateMode = (): DisplayDateMode => useStore(useGeo
  * @param mapId - The map identifier.
  * @returns The IANA timezone string.
  */
-export const getStoreDisplayDateTimezone = (mapId: string): TimeIANA => getStoreAppState(mapId).displayDateTimezone;
+export const getStoreAppDisplayDateTimezone = (mapId: string): TimeIANA => getStoreAppState(mapId).displayDateTimezone;
 
 /** Hook that returns the current display date timezone. */
-export const useStoreDisplayDateTimezone = (): TimeIANA => useStore(useGeoViewStore(), (state) => state.appState.displayDateTimezone);
+export const useStoreAppDisplayDateTimezone = (): TimeIANA => useStore(useGeoViewStore(), (state) => state.appState.displayDateTimezone);
 
 /**
  * Gets whether fullscreen mode is active for the given map.
@@ -531,7 +531,7 @@ export const useStoreAppShellContainer = (): HTMLElement => {
  * @param mapId - The map identifier.
  * @returns True if layer highlight bboxes should be shown.
  */
-export const getStoreShowLayerHighlightLayerBbox = (mapId: string): boolean => getStoreAppState(mapId).showLayerHighlightLayerBbox;
+export const getStoreAppShowLayerHighlightLayerBbox = (mapId: string): boolean => getStoreAppState(mapId).showLayerHighlightLayerBbox;
 
 /**
  * Gets the default date format settings derived from the current display date mode.
@@ -539,7 +539,7 @@ export const getStoreShowLayerHighlightLayerBbox = (mapId: string): boolean => g
  * @param mapId - The map identifier.
  * @returns The default date display settings.
  */
-export const getStoreDisplayDateFormatDefault = (mapId: string): TypeDisplayDateDefaults =>
+export const getStoreAppDisplayDateFormatDefault = (mapId: string): TypeDisplayDateDefaults =>
   DateMgt.getDisplayDateDefaults(getStoreAppDisplayDateMode(mapId));
 
 // #endregion STATE GETTERS & HOOKS - OTHERS (no match between getter-hook)
@@ -553,7 +553,7 @@ export const getStoreDisplayDateFormatDefault = (mapId: string): TypeDisplayDate
  * @param mapId - The map identifier
  * @param active - Whether the circular progress is active
  */
-export const setStoreCircularProgress = (mapId: string, active: boolean): void => {
+export const setStoreAppCircularProgress = (mapId: string, active: boolean): void => {
   getStoreAppState(mapId).actions.setCircularProgress(active);
 };
 
@@ -563,7 +563,7 @@ export const setStoreCircularProgress = (mapId: string, active: boolean): void =
  * @param mapId - The map identifier
  * @param lang - The language code (e.g. 'en' or 'fr')
  */
-export const setStoreDisplayLanguage = (mapId: string, lang: TypeDisplayLanguage): void => {
+export const setStoreAppDisplayLanguage = (mapId: string, lang: TypeDisplayLanguage): void => {
   getStoreAppState(mapId).actions.setDisplayLanguage(lang);
 };
 
@@ -573,7 +573,7 @@ export const setStoreDisplayLanguage = (mapId: string, lang: TypeDisplayLanguage
  * @param mapId - The map identifier
  * @param theme - The theme identifier
  */
-export const setStoreDisplayTheme = (mapId: string, theme: TypeDisplayTheme): void => {
+export const setStoreAppDisplayTheme = (mapId: string, theme: TypeDisplayTheme): void => {
   getStoreAppState(mapId).actions.setDisplayTheme(theme);
 };
 
@@ -583,7 +583,7 @@ export const setStoreDisplayTheme = (mapId: string, theme: TypeDisplayTheme): vo
  * @param mapId - The map identifier
  * @param displayDateTimezone - The IANA timezone identifier
  */
-export const setStoreDisplayDateTimezone = (mapId: string, displayDateTimezone: TimeIANA): void => {
+export const setStoreAppDisplayDateTimezone = (mapId: string, displayDateTimezone: TimeIANA): void => {
   getStoreAppState(mapId).actions.setDisplayDateTimezone(displayDateTimezone);
 };
 
@@ -593,7 +593,7 @@ export const setStoreDisplayDateTimezone = (mapId: string, displayDateTimezone: 
  * @param mapId - The map identifier
  * @param active - Whether the crosshairs are active
  */
-export const setStoreCrosshairActive = (mapId: string, active: boolean): void => {
+export const setStoreAppCrosshairActive = (mapId: string, active: boolean): void => {
   getStoreAppState(mapId).actions.setCrosshairActive(active);
 };
 
@@ -603,7 +603,7 @@ export const setStoreCrosshairActive = (mapId: string, active: boolean): void =>
  * @param mapId - The map identifier
  * @param active - Whether fullscreen mode is active
  */
-export const setStoreFullScreenActive = (mapId: string, active: boolean): void => {
+export const setStoreAppFullScreenActive = (mapId: string, active: boolean): void => {
   getStoreAppState(mapId).actions.setFullScreenActive(active);
 };
 
@@ -616,7 +616,7 @@ export const setStoreFullScreenActive = (mapId: string, active: boolean): void =
  * @param notification - The notification details to add
  * @returns A promise that resolves when the notification has been added
  */
-export const addStoreNotification = async (mapId: string, notification: NotificationDetailsType): Promise<void> => {
+export const addStoreAppNotification = async (mapId: string, notification: NotificationDetailsType): Promise<void> => {
   // Because notification is called before map is created, we use the async
   // version of getAppStateAsync
   const appState = await getGeoViewStoreAsync(mapId).then((store) => store.getState().appState);
@@ -650,7 +650,7 @@ export const addStoreNotification = async (mapId: string, notification: Notifica
  * @param key - The unique key of the notification to remove
  * @returns A promise that resolves when the notification has been removed
  */
-export const removeStoreNotification = async (mapId: string, key: string): Promise<void> => {
+export const removeStoreAppNotification = async (mapId: string, key: string): Promise<void> => {
   // Because notification is called before map is created, we use the async
   // version of getAppStateAsync
   const appState = await getGeoViewStoreAsync(mapId).then((store) => store.getState().appState);
@@ -665,7 +665,7 @@ export const removeStoreNotification = async (mapId: string, key: string): Promi
  *
  * @param mapId - The map identifier
  */
-export const removeStoreAllNotifications = (mapId: string): void => {
+export const removeStoreAppAllNotifications = (mapId: string): void => {
   getStoreAppState(mapId).actions.setNotifications([]);
 };
 
@@ -675,7 +675,7 @@ export const removeStoreAllNotifications = (mapId: string): void => {
  * @param mapId - The map identifier
  * @param guide - The guide object to display
  */
-export const setStoreGuide = (mapId: string, guide: TypeGuideObject): void => {
+export const setStoreAppGuide = (mapId: string, guide: TypeGuideObject): void => {
   getStoreAppState(mapId).actions.setGuide(guide);
 };
 

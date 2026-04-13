@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, Fragment, useMemo, isValidElement } from 'react';
+import { useRef, useState, useEffect, Fragment, useMemo, isValidElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 
@@ -15,12 +15,10 @@ import { ButtonGroup, Box, IconButton } from '@/ui';
 import { ExpandLessIcon, ExpandMoreIcon } from '@/ui/icons';
 import type { TypeButtonPanel } from '@/ui/panel/panel-types';
 import { getSxClasses } from './nav-bar-style';
-import type { NavBarApi, NavBarCreatedEvent, NavBarRemovedEvent } from '@/core/components';
-import type { TypeValidNavBarProps } from '@/api/types/map-schema-types';
-import { useStoreUINavbarComponents } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import type { NavBarApi } from '@/core/components';
+import { useStoreUINavbarComponents, useStoreUINavBarButtonPanelVersion } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from './nav-bar-panel-button';
-import { usePluginController } from '@/core/controllers/use-controllers';
 
 /** The properties for the nav-bar component. */
 type NavBarProps = {
@@ -76,23 +74,23 @@ export function NavBar(props: NavBarProps): JSX.Element {
 
   // Store
   const navBarComponents = useStoreUINavbarComponents();
-  const pluginController = usePluginController();
+  const navBarButtonPanelVersion = useStoreUINavBarButtonPanelVersion();
 
   // Ref
   const navBarRef = useRef<HTMLDivElement>(null);
 
   // State
-  const [buttonPanelGroups, setButtonPanelGroups] = useState<NavButtonGroups>({});
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [maxButtonsPerColumn, setMaxButtonsPerColumn] = useState<number>(10);
 
   /**
-   * Builds the initial button panel groups from the navbar component configuration.
+   * Derives button panel groups from config and the NavBar API registry.
    */
-  useEffect(() => {
+  const memoButtonPanelGroups = useMemo<NavButtonGroups>((): NavButtonGroups => {
     // Log
-    logger.logTraceUseEffect('navBarComponents store value changed');
+    logger.logTraceUseMemo('NAV-BAR - memoButtonPanelGroups', navBarComponents, navBarButtonPanelVersion);
 
+    // Build built-in button groups from config
     let zoomRotateButtons: NavbarButtonGroup = {};
     if (navBarComponents.includes('zoom')) {
       zoomRotateButtons = { ...zoomRotateButtons, zoomIn: 'zoomIn', zoomOut: 'zoomOut' };
@@ -105,106 +103,38 @@ export function NavBar(props: NavBarProps): JSX.Element {
     if (navBarComponents.includes('fullscreen')) {
       displayButtons = { ...displayButtons, fullScreen: 'fullScreen' };
     }
-
     if (navBarComponents.includes('location')) {
       displayButtons = { ...displayButtons, location: 'location' };
     }
-
     if (navBarComponents.includes('home')) {
       displayButtons = { ...displayButtons, home: 'home' };
     }
-
     if (navBarComponents.includes('basemap-select')) {
       displayButtons = { ...displayButtons, basemapSelect: 'basemapSelect' };
     }
-
     if (navBarComponents.includes('measurement')) {
       displayButtons = { ...displayButtons, measurement: 'measurement' };
     }
-
     if (navBarComponents.includes('projection')) {
       displayButtons = { ...displayButtons, projection: 'projection' };
     }
 
-    setButtonPanelGroups((prevState) => ({
+    // Start with built-in groups
+    const groups: NavButtonGroups = {
       ...(Object.keys(zoomRotateButtons).length > 0 && { zoom: zoomRotateButtons }),
       ...(Object.keys(displayButtons).length > 0 && { display: displayButtons }),
-      ...prevState,
-    }));
-    // If buttonPanelGroups is in the dependencies, it triggers endless rerenders
-  }, [navBarComponents]);
+    };
 
-  /**
-   * Handles when a button panel is added via the NavBar API.
-   */
-  const handleNavApiAddButtonPanel = useCallback((sender: NavBarApi, event: NavBarCreatedEvent): void => {
-    setButtonPanelGroups((prevState) => {
-      const existingGroup = prevState?.[event.group] || {};
-
-      return {
-        ...prevState,
-        [event.group]: {
-          ...existingGroup, // Spread existing buttons first
-          [event.buttonPanelId]: event.buttonPanel,
-        },
-      };
-    });
-  }, []);
-
-  /**
-   * Handles when a button panel is removed via the NavBar API.
-   */
-  const handleNavApiRemoveButtonPanel = useCallback(
-    (sender: NavBarApi, event: NavBarRemovedEvent): void => {
-      setButtonPanelGroups((prevState) => {
-        const state = { ...prevState };
-        const group = state[event.group];
-        delete group[event.buttonPanelId];
-        return state;
-      });
-    },
-    [setButtonPanelGroups]
-  );
-
-  /**
-   * Loads and adds navbar plugins from the configuration.
-   */
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('NAV-BAR - navBarComponents');
-
-    const processPlugin = (pluginName: TypeValidNavBarProps): void => {
-      // Check if the plugin is in navBarComponents but not in corePackages
-      if (navBarComponents.includes(pluginName)) {
-        // Load and add the plugin
-        pluginController.loadAndAddPlugin(pluginName).catch((error: unknown) => {
-          // Log
-          logger.logPromiseFailed('loadAndAddPlugin(time-slider) in processPlugin in nav-bar', error);
-        });
+    // Merge plugin button panels from the NavBar API registry
+    Object.entries(navBarApi.buttons).forEach(([groupName, groupButtons]) => {
+      if (Object.keys(groupButtons).length > 0) {
+        groups[groupName] = { ...groups[groupName], ...groupButtons };
       }
-    };
+    });
 
-    // Process drawer plugin if it's in the navBar
-    processPlugin('drawer');
-  }, [navBarComponents, pluginController]);
-
-  /**
-   * Registers NavBar API event listeners on mount and cleans up on unmount.
-   */
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('NAV-BAR API - mount');
-
-    // Register NavBar created/removed handlers
-    navBarApi.onNavbarCreated(handleNavApiAddButtonPanel);
-    navBarApi.onNavbarRemoved(handleNavApiRemoveButtonPanel);
-
-    return () => {
-      // Unregister events
-      navBarApi.offNavbarCreated(handleNavApiAddButtonPanel);
-      navBarApi.offNavbarRemoved(handleNavApiRemoveButtonPanel);
-    };
-  }, [navBarApi, handleNavApiAddButtonPanel, handleNavApiRemoveButtonPanel]);
+    return groups;
+    // navBarButtonPanelVersion triggers re-computation when plugins add/remove button panels
+  }, [navBarComponents, navBarButtonPanelVersion, navBarApi.buttons]);
 
   /**
    * Calculates and updates the maximum buttons per column based on available height.
@@ -375,7 +305,7 @@ export function NavBar(props: NavBarProps): JSX.Element {
 
   return (
     <Box ref={navBarRef} sx={sxClasses.navBarRef}>
-      {[...Object.keys(buttonPanelGroups)].map((key) => renderButtonPanelGroup(buttonPanelGroups[key], key))}
+      {[...Object.keys(memoButtonPanelGroups)].map((key) => renderButtonPanelGroup(memoButtonPanelGroups[key], key))}
     </Box>
   );
 }

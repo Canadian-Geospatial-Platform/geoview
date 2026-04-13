@@ -9,7 +9,6 @@ import { logger } from '@/core/utils/logger';
 import type { TypeValidAppBarCoreProps, TypeValidFooterBarTabsCoreProps } from '@/api/types/map-schema-types';
 import { TIMEOUT } from '@/core/utils/constant';
 import { useUIController } from '@/core/controllers/use-controllers';
-import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 
 /** Options for navigating to a tab. */
 interface NavigateToTabOptions {
@@ -24,9 +23,8 @@ interface NavigateToTabOptions {
  *
  * Handles opening the tab, collapsing/expanding footer, and scrolling behavior.
  */
-export function useNavigateToTab(tabId: string, onNavigate?: (mapId: string, layerPath: string) => void): (options?: NavigateToTabOptions) => void {
+export function useNavigateToTab(tabId: string, onNavigate?: (layerPath: string) => void): (options?: NavigateToTabOptions) => void {
   // Store
-  const mapId = useStoreGeoViewMapId();
   const uiController = useUIController();
   const { isOpen: isFooterOpen } = useStoreUIActiveFooterBarTab();
   const footerBarComponents = useStoreUIFooterBarComponents();
@@ -56,7 +54,7 @@ export function useNavigateToTab(tabId: string, onNavigate?: (mapId: string, lay
         setTimeout(() => {
           // Execute callback if provided
           if (onNavigate && layerPath) {
-            onNavigate(mapId, layerPath);
+            onNavigate(layerPath);
           }
 
           // Scroll the footer into view
@@ -72,13 +70,12 @@ export function useNavigateToTab(tabId: string, onNavigate?: (mapId: string, lay
         setTimeout(() => {
           // Execute callback if provided
           if (onNavigate && layerPath) {
-            onNavigate(mapId, layerPath);
+            onNavigate(layerPath);
           }
         }, delay);
       }
     },
     [
-      mapId,
       hasTab,
       hasFooterTab,
       hasAppBarTab,

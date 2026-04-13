@@ -74,7 +74,7 @@ export function hasTimeSliderPlugin(store: GeoviewStoreType): boolean {
   return store.getState().mapConfig!.footerBar?.tabs.core.includes('time-slider') ?? false;
 }
 
-export function hasGeochartPlugin(store: GeoviewStoreType): boolean {
+export function hasGeoChartPlugin(store: GeoviewStoreType): boolean {
   return store.getState().mapConfig!.footerBar?.tabs.core.includes('geochart') ?? false;
 }
 
@@ -97,7 +97,7 @@ export const addGeoViewStore = (config: TypeMapFeaturesConfig): void => {
 
   // Initialize the store subscriptions
   initDetailsStateSubscriptions(geoviewStore);
-  if (hasGeochartPlugin(geoviewStore)) initGeochartStateSubscriptions(geoviewStore);
+  if (hasGeoChartPlugin(geoviewStore)) initGeochartStateSubscriptions(geoviewStore);
 
   useStoresManager.setState((state) => ({
     stores: {
@@ -112,7 +112,7 @@ export const addGeoViewStore = (config: TypeMapFeaturesConfig): void => {
 export const removeGeoviewStore = (id: string): void => {
   // Clear the store subscriptions
   clearDetailsStateSubscriptions(id);
-  if (hasGeochartPlugin(getGeoViewStore(id))) clearGeochartStateSubscriptions(id);
+  if (hasGeoChartPlugin(getGeoViewStore(id))) clearGeochartStateSubscriptions(id);
 
   delete useStoresManager.getState().stores[id];
 };

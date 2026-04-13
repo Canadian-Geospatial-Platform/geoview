@@ -9,18 +9,19 @@ import type {
   TypeResultSetEntry,
 } from '@/api/types/map-schema-types';
 import { generateId, whenThisThen } from '@/core/utils/utilities';
+import { logger } from '@/core/utils/logger';
 import type { LayerDomain } from '@/core/domains/layer-domain';
 import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
+import type { MapViewer } from '@/geo/map/map-viewer';
 import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
-import type { MapViewer } from '@/geo/map/map-viewer';
-import { logger } from '@/core/utils/logger';
 
 /**
  * A class to hold a set of layers associated with a value of any type.
@@ -35,6 +36,9 @@ export abstract class AbstractLayerSet {
 
   /** The MapViewer to work with */
   protected mapViewer: MapViewer;
+
+  /** The controller registry to work with */
+  protected controllerRegistry: ControllerRegistry;
 
   /** An object containing the result sets indexed using the layer path */
   resultSet: TypeResultSet = {};
@@ -54,10 +58,12 @@ export abstract class AbstractLayerSet {
    * Constructs a new LayerSet instance.
    *
    * @param mapViewer - The MapViewer instance to work with
+   * @param controllerRegistry - The ControllerRegistry instance to work with
    * @param layerDomain - The LayerDomain instance to work with
    */
-  constructor(mapViewer: MapViewer, layerDomain: LayerDomain) {
+  constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry, layerDomain: LayerDomain) {
     this.mapViewer = mapViewer;
+    this.controllerRegistry = controllerRegistry;
     this.layerDomain = layerDomain;
   }
 

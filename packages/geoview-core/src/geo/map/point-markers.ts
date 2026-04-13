@@ -11,6 +11,7 @@ import type { MapViewer } from '@/geo/map/map-viewer';
 import { logger } from '@/core/utils/logger';
 import type { TypePointMarker } from '@/api/types/map-schema-types';
 import { getStoreMapPointMarkers } from '@/core/stores/store-interface-and-intial-values/map-state';
+import type { MapController } from '@/core/controllers/map-controller';
 
 /**
  * A class to handle point markers.
@@ -20,10 +21,10 @@ export class PointMarkers {
   #featureHighlight: FeatureHighlight;
 
   /** The map viewer */
-  mapViewer: MapViewer;
+  #mapViewer: MapViewer;
 
-  /** The map ID */
-  mapId: string;
+  /** The map controller */
+  #mapController: MapController;
 
   /** Array to track marker feature IDs */
   #featureIds: string[] = [];
@@ -32,13 +33,15 @@ export class PointMarkers {
    * Initializes point marker classes.
    *
    * @param mapViewer - The map viewer
+   * @param mapController - The map controller
    * @param featureHighlight - The feature highlight class
    */
-  constructor(mapViewer: MapViewer, featureHighlight: FeatureHighlight) {
-    this.mapViewer = mapViewer;
-    this.mapId = mapViewer.mapId;
+  constructor(mapViewer: MapViewer, mapController: MapController, featureHighlight: FeatureHighlight) {
+    this.#mapViewer = mapViewer;
+    this.#mapController = mapController;
     this.#featureHighlight = featureHighlight;
-    if (Object.keys(getStoreMapPointMarkers(this.mapId)).length) this.updatePointMarkers(getStoreMapPointMarkers(this.mapId));
+    if (Object.keys(getStoreMapPointMarkers(this.#mapViewer.mapId)).length)
+      this.updatePointMarkers(getStoreMapPointMarkers(this.#mapViewer.mapId));
   }
 
   /**
@@ -68,7 +71,7 @@ export class PointMarkers {
             Projection.transformPoints(
               [point.coordinate],
               `EPSG:${point.projectionCode || 4326}`,
-              this.mapViewer.getProjection().getCode()
+              this.#mapViewer.getProjection().getCode()
             )[0]
           ),
         });
@@ -106,7 +109,7 @@ export class PointMarkers {
   // TODO: REFACTOR - These functions should likely be removed from here and just be handled in the map controller, but for now they are left here to avoid breaking changes with the point marker API
   addPointMarkers(group: string, pointMarkers: TypePointMarker[]): void {
     // Redirect to map controller
-    this.mapViewer.controllers.mapController.addPointMarkers(group, pointMarkers);
+    this.#mapController.addPointMarkers(group, pointMarkers);
   }
 
   /**
@@ -118,7 +121,7 @@ export class PointMarkers {
   // TODO: REFACTOR - These functions should likely be removed from here and just be handled in the map controller, but for now they are left here to avoid breaking changes with the point marker API
   removePointMarkersOrGroup(group: string, idsOrCoordinates?: string[] | Coordinate[]): void {
     // Redirect to map controller
-    this.mapViewer.controllers.mapController.removePointMarkersOrGroup(group, idsOrCoordinates);
+    this.#mapController.removePointMarkersOrGroup(group, idsOrCoordinates);
   }
 
   /**
@@ -127,7 +130,7 @@ export class PointMarkers {
    * @param group - The group to zoom to
    */
   zoomToPointMarkerGroup(group: string): void {
-    const groupMarkers = getStoreMapPointMarkers(this.mapId)[group];
+    const groupMarkers = getStoreMapPointMarkers(this.#mapViewer.mapId)[group];
 
     if (groupMarkers) {
       // Create list of feature IDs
@@ -152,7 +155,7 @@ export class PointMarkers {
     // Get extent of point markers and zoom to it
     const extent = this.getExtentFromMarkerIds(idList);
     if (extent)
-      this.mapViewer.controllers.mapController.zoomToExtent(extent).catch((error: unknown) => {
+      this.#mapController.zoomToExtent(extent).catch((error: unknown) => {
         // Log
         logger.logPromiseFailed('zoomToExtent in zoomToPointMarkersOrGroup in PointMarkers.zoomToPointMarkers', error);
       });

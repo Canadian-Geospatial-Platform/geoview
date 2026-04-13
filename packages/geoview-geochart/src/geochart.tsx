@@ -3,7 +3,7 @@ import { GeoChart as GeoChartComponent } from 'geochart';
 
 import {
   useStoreAppDisplayLanguageById,
-  useStoreDisplayDateTimezone,
+  useStoreAppDisplayDateTimezone,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 import { useStoreLayerDisplayDateFormatShort } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
 import type { TypeGeochartResultSetEntry } from 'geoview-core/core/stores/store-interface-and-intial-values/geochart-state';
@@ -57,8 +57,8 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
 
   // Use Store
   const displayLanguage = useStoreAppDisplayLanguageById(mapId);
+  const displayDateTimezone = useStoreAppDisplayDateTimezone();
   const displayDateFormatShort = useStoreLayerDisplayDateFormatShort(layerPath);
-  const displayDateTimezone = useStoreDisplayDateTimezone();
   const uiController = useUIController();
   const layerController = useLayerController();
 

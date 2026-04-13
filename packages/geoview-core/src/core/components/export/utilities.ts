@@ -3,7 +3,7 @@ import { Buffer } from 'buffer';
 import { renderToString } from 'react-dom/server';
 
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
-import type { TypeNorthArrow, TypeScaleInfo, TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
+import type { TypeNorthArrow, TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import type { TypeLegendLayer } from '@/core/components/layers/types';
 import {
   type TypeTimeSliderValues,
@@ -11,7 +11,7 @@ import {
   getStoreTimeSliderLayers,
   isStoreTimeSliderInitialized,
 } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
-import { getStoreMapOrderedLayerInfo, getStoreMapStateForExportLayout } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { getStoreMapStateForExportLayout } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { getStoreAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { getStoreLayerLegendLayers } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
@@ -691,7 +691,7 @@ export class ExportUtilities {
    * Preserves depth information and parent-child relationships for proper rendering.
    *
    * Processing steps:
-   * 1. Filters layers by visibility (orderedLayerInfo)
+   * 1. Filters layers by visibility (legendLayers)
    * 2. Checks for meaningful content (items, icons, time dimensions, children)
    * 3. Recursively processes children to prevent empty parent headers
    * 4. Flattens structure while preserving depth and parentName
@@ -705,15 +705,10 @@ export class ExportUtilities {
    * - item: Individual legend icon + label
    *
    * @param layers - The legend layers from the map state
-   * @param orderedLayerInfo - Layer visibility info for filtering
    * @param timeSliderLayers - Optional time-enabled layers with dimension data
    * @returns Flattened array of all legend items with depth/parent info
    */
-  static #processLegendLayers(
-    layers: TypeLegendLayer[],
-    orderedLayerInfo: TypeOrderedLayerInfo[],
-    timeSliderLayers?: TimeSliderLayerSet
-  ): FlattenedLegendItem[] {
+  static #processLegendLayers(layers: TypeLegendLayer[], timeSliderLayers?: TimeSliderLayerSet): FlattenedLegendItem[] {
     const allItems: FlattenedLegendItem[] = [];
 
     const flattenLayer = (layer: TypeLegendLayer, depth = 0, rootLayerName?: string): FlattenedLegendItem[] => {
@@ -721,7 +716,7 @@ export class ExportUtilities {
       const currentRootName = rootLayerName || layer.layerName;
 
       // Check if layer is visible on the map
-      const layerInfo = orderedLayerInfo.find((info) => info.layerPath === layer.layerPath);
+      const layerInfo = layers.find((info) => info.layerPath === layer.layerPath);
       if (!layerInfo?.visible) {
         return items;
       }
@@ -997,7 +992,6 @@ export class ExportUtilities {
     const legendLayers = getStoreLayerLegendLayers(mapId).filter(
       (layer) => layer.layerStatus === 'loaded' && (layer.items.length === 0 || layer.items.some((item) => item.isVisible))
     );
-    const orderedLayerInfo = getStoreMapOrderedLayerInfo(mapId);
     let timeSliderLayers = undefined;
     if (isStoreTimeSliderInitialized(mapId)) {
       timeSliderLayers = getStoreTimeSliderLayers(mapId);
@@ -1049,7 +1043,7 @@ export class ExportUtilities {
     }));
 
     // Process legend data
-    const allItems = this.#processLegendLayers(cleanLegendLayers, orderedLayerInfo, timeSliderLayers);
+    const allItems = this.#processLegendLayers(cleanLegendLayers, timeSliderLayers);
 
     // Calculate scale factor for WMS images based on document width
     const wmsScale = mapImageWidth / 612;

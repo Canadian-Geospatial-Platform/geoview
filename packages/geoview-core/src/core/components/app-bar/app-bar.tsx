@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import type { ReactNode, KeyboardEvent } from 'react';
-import { useState, useEffect, useCallback, Fragment, useMemo } from 'react';
+import { useEffect, useCallback, Fragment, useMemo } from 'react';
 import { useTheme } from '@mui/material/styles';
 import type { IconButtonPropsExtend } from '@/ui';
 import {
@@ -16,7 +16,7 @@ import {
   LayersOutlinedIcon,
 } from '@/ui';
 
-import { usePluginController, useUIController } from '@/core/controllers/use-controllers';
+import { useMapController, useUIController } from '@/core/controllers/use-controllers';
 import { Geolocator } from '@/core/components/geolocator/geolocator';
 import type { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
 import ExportButton from '@/core/components/export/export-modal-button';
@@ -26,21 +26,21 @@ import {
   useStoreUIAppbarComponents,
   useStoreUIActiveAppBarTab,
   useStoreUIHiddenTabs,
+  useStoreUIAppBarPanelIds,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { useStoreMapInteraction, setStoreMapClickMarkerIconHide } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useStoreMapInteraction } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useStoreAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useStoreGeoViewConfig, useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
-import type { AppBarApi, AppBarCreatedEvent, AppBarRemovedEvent } from '@/core/components';
+import type { AppBarApi } from '@/core/components';
 import { Guide, Legend, DetailsPanel, Datapanel, LayersPanel } from '@/core/components';
 import Notifications from '@/core/components/notifications/notifications';
 
 import Version from './buttons/version';
 import Share from './buttons/share';
 import { getSxClasses } from './app-bar-style';
-import { enforceArrayOrder, helpClosePanelById, helpOpenPanelById } from './app-bar-helper';
+import { enforceArrayOrder } from './app-bar-helper';
 import { CONTAINER_TYPE, LIGHTBOX_SELECTORS, TIMEOUT } from '@/core/utils/constant';
-import type { TypeValidAppBarCoreProps } from '@/api/types/map-schema-types';
 import { DEFAULT_APPBAR_CORE, DEFAULT_APPBAR_TABS_ORDER } from '@/api/types/map-schema-types';
 import { camelCase, handleEscapeKey } from '@/core/utils/utilities';
 import { IconButton } from '@/ui/icon-button/icon-button';
@@ -76,9 +76,6 @@ export function AppBar(props: AppBarProps): JSX.Element {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
-  // internal component state
-  const [buttonPanels, setButtonPanels] = useState<ButtonPanelType>({});
-
   // get store values and action
   const mapId = useStoreGeoViewMapId();
   const activeModalId = useStoreUIActiveFocusItem().activeElementId;
@@ -87,14 +84,44 @@ export function AppBar(props: AppBarProps): JSX.Element {
   const { tabId, isOpen, isFocusTrapped } = useStoreUIActiveAppBarTab();
   const hiddenTabs = useStoreUIHiddenTabs();
   const activeTrapGeoView = useStoreUIActiveTrapGeoView();
-  const pluginController = usePluginController();
   const uiController = useUIController();
+  const mapController = useMapController();
 
   const geoviewElement = useStoreAppGeoviewHTMLElement().querySelector('[id^="mapTargetElement-"]') as HTMLElement;
 
   // get store config for app bar to add (similar logic as in footer-bar)
   const appBarConfig = useStoreGeoViewConfig()?.appBar;
   const footerBarConfig = useStoreGeoViewConfig()?.footerBar;
+
+  // Read app-bar panel ids from the store (reactive — no event handlers needed)
+  const appBarPanelIds = useStoreUIAppBarPanelIds();
+
+  /**
+   * Builds the button panels record from store panel ids and api registry, with open/focus state derived from the active tab.
+   */
+  const buttonPanels = useMemo((): ButtonPanelType => {
+    // Log
+    logger.logTraceUseMemo('APP-BAR - buttonPanels', appBarPanelIds, tabId, isOpen, isFocusTrapped);
+
+    const panels: ButtonPanelType = {};
+    appBarPanelIds.forEach((id) => {
+      const panel = appBarApi.buttons[id];
+      if (panel) {
+        // Derive panel status from the store's active app bar tab
+        panels[id] = {
+          ...panel,
+          ...(panel.panel && {
+            panel: {
+              ...panel.panel,
+              status: id === tabId && isOpen,
+              isFocusTrapped: id === tabId ? isFocusTrapped : false,
+            },
+          }),
+        };
+      }
+    });
+    return panels;
+  }, [appBarPanelIds, appBarApi, tabId, isOpen, isFocusTrapped]);
 
   // #region REACT HOOKS
 
@@ -133,43 +160,6 @@ export function AppBar(props: AppBarProps): JSX.Element {
   // #region Handlers
 
   /**
-   * Handles closing a panel by id and returning focus.
-   *
-   * @param buttonId - The id of the panel button to close
-   */
-  const closePanelById = useCallback(
-    (buttonId: string): void => {
-      // Callback when removing and focus is lost
-      const focusWhenNoElementCallback = (): void => {
-        const mapCont = geoviewElement;
-        mapCont?.focus();
-
-        // if in focus trap mode, trigger the event
-        if (mapCont?.closest('.geoview-map')?.classList.contains('map-focus-trap')) {
-          mapCont.classList.add('keyboard-focus');
-        }
-      };
-
-      // Redirect to helper
-      helpClosePanelById(mapId, buttonId, setButtonPanels, focusWhenNoElementCallback);
-    },
-    [geoviewElement, mapId]
-  );
-
-  /**
-   * Handles opening a panel by id.
-   *
-   * @param buttonId - The id of the panel button to open
-   */
-  const openPanelById = useCallback(
-    (buttonId: string): void => {
-      // Redirect to helper
-      helpOpenPanelById(buttonId, setButtonPanels, isFocusTrapped);
-    },
-    [isFocusTrapped]
-  );
-
-  /**
    * Handles when an app-bar button is clicked.
    *
    * @param buttonId - The id of the clicked button
@@ -202,47 +192,6 @@ export function AppBar(props: AppBarProps): JSX.Element {
     [uiController, isFocusTrapped, getButtonElementId]
   );
 
-  /**
-   * Handles when a new button panel is added to the AppBar.
-   *
-   * @param sender - The AppBar API instance
-   * @param event - The creation event containing the new button panel
-   */
-  const handleAddButtonPanel = useCallback(
-    (sender: AppBarApi, event: AppBarCreatedEvent): void => {
-      setButtonPanels((prevState) => {
-        return {
-          ...prevState,
-          [event.buttonPanelId]: event.buttonPanel,
-        };
-      });
-
-      if (isOpen && tabId === event.buttonPanelId) openPanelById(tabId);
-    },
-    // Don't want to update every time active tab changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [buttonPanels]
-  );
-
-  /**
-   * Handles when a button panel is removed from the AppBar.
-   *
-   * @param sender - The AppBar API instance
-   * @param event - The removal event containing the removed button panel id
-   */
-  const handleRemoveButtonPanel = useCallback(
-    (sender: AppBarApi, event: AppBarRemovedEvent): void => {
-      setButtonPanels((prevState) => {
-        const state = { ...prevState };
-
-        delete state[event.buttonPanelId];
-
-        return state;
-      });
-    },
-    [setButtonPanels]
-  );
-
   // #endregion
 
   /**
@@ -265,75 +214,35 @@ export function AppBar(props: AppBarProps): JSX.Element {
   }, []);
 
   /**
-   * Handles when the panel closes
+   * Handles when the panel closes.
    */
   const handlePanelClose = useCallback(() => {
-    // Save to the store
-    setStoreMapClickMarkerIconHide(mapId);
-  }, [mapId]);
+    // Hide the marker icon
+    mapController.clickMarkerIconHide();
+  }, [mapController]);
 
   /**
-   * Registers and unregisters AppBar created/removed event handlers.
+   * Restores focus when a panel is closed.
    */
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('APP-BAR - mount');
+    logger.logTraceUseEffect('APP-BAR - focus restore on close', isOpen, tabId);
 
-    // Register AppBar created/removed handlers
-    appBarApi.onAppBarCreated(handleAddButtonPanel);
-    appBarApi.onAppBarRemoved(handleRemoveButtonPanel);
-
-    return () => {
-      // Unregister events
-      appBarApi.offAppBarCreated(handleAddButtonPanel);
-      appBarApi.offAppBarRemoved(handleRemoveButtonPanel);
-    };
-  }, [appBarApi, handleAddButtonPanel, handleRemoveButtonPanel]);
-
-  /**
-   * Opens or closes the active panel when isOpen or tabId changes.
-   */
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('APP-BAR - PANEL - OPEN/CLOSE ', isOpen);
-
-    // Open and close of the panel.
-    if (isOpen) {
-      openPanelById(tabId);
-    } else {
-      closePanelById(tabId);
-    }
-    // NOTE: Run this effect when isOpen, tabId changes
-    // should not re-render when openPanelById, closePanelById changes.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, tabId]);
-
-  /**
-   * Create default tabs from configuration parameters (similar logic as in footer-bar).
-   */
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('APP-BAR - appBarConfig');
-
-    // Get built-in core components
-    const builtInCoreComponents = Object.values(DEFAULT_APPBAR_CORE) as TypeValidAppBarCoreProps[];
-
-    // Process all configured plugins dynamically
-    if (appBarConfig?.tabs.core) {
-      appBarConfig.tabs.core.forEach((pluginName) => {
-        // Skip built-in components
-        if (builtInCoreComponents.includes(pluginName)) {
-          return;
+    if (!isOpen && tabId) {
+      const buttonElementId = `${mapId}-${CONTAINER_TYPE.APP_BAR}-${tabId}-panel-btn`;
+      const buttonElement = document.getElementById(buttonElementId);
+      if (buttonElement) {
+        buttonElement.focus();
+      } else {
+        const mapCont = geoviewElement;
+        mapCont?.focus();
+        if (mapCont?.closest('.geoview-map')?.classList.contains('map-focus-trap')) {
+          mapCont.classList.add('keyboard-focus');
         }
-
-        // Load and add the plugin
-        pluginController.loadAndAddPlugin(pluginName).catch((error: unknown) => {
-          // Log
-          logger.logPromiseFailed('loadAndAddPlugin(time-slider) in processPlugin in app-bar', error);
-        });
-      });
+      }
     }
-  }, [appBarConfig, pluginController]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   /**
    * Creates AppBar button panels from configuration tabs.

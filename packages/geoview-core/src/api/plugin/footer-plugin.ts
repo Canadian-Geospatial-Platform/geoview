@@ -1,6 +1,7 @@
 import type { TypeTabs } from '@/ui/tabs/tabs';
 import { logger } from '@/core/utils/logger';
 import { AbstractPlugin } from './abstract-plugin';
+import { getStoreUIFooterTabs } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
 /**
  * Footer Plugin abstract class.
@@ -45,8 +46,8 @@ export abstract class FooterPlugin extends AbstractPlugin {
     // Log
     // No need to log, parent class does it well already via added() function.
 
-    // Set value to length of tabs(?)
-    this.value = this.mapViewer.footerBarApi.tabs.length;
+    // Set value to length of tabs from the store
+    this.value = getStoreUIFooterTabs(this.mapViewer.mapId).length;
 
     // Create props
     this.footerProps = this.onCreateContentProps();

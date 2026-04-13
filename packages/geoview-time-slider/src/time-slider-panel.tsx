@@ -6,17 +6,14 @@ import type { TypeTimeSliderValues } from 'geoview-core/core/stores/store-interf
 import {
   useStoreTimeSliderLayers,
   useStoreTimeSliderSelectedLayerPath,
-  setStoreTimeSliderSelectedLayerPath,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/time-slider-state';
 import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 import {
-  useStoreMapAllVisibleandInRangeLayers,
-  useStoreMapIsLayerHiddenOnMapSet,
-} from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
-import {
+  useStoreLayerAllVisibleAndInRangeLayers,
   useStoreLayerDateTemporalModeSet,
   useStoreLayerDisplayDateFormatSet,
   useStoreLayerDisplayDateTimezoneSet,
+  useStoreLayerIsHiddenOnMapSet,
   useStoreLayerNameSet,
   useStoreLayerStatusSet,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
@@ -27,6 +24,7 @@ import { CONTAINER_TYPE, TABS } from 'geoview-core/core/utils/constant';
 
 import { DateMgt } from 'geoview-core/core/utils/date-mgt';
 import { TimeSlider } from './time-slider';
+import { useTimeSliderController } from 'geoview-core/core/controllers/use-controllers';
 
 /** Properties for the TimeSliderPanel component. */
 interface TypeTimeSliderProps {
@@ -50,8 +48,8 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
 
   // get values from store
   const displayLanguage = useStoreAppDisplayLanguage();
-  const layerHiddenSet = useStoreMapIsLayerHiddenOnMapSet();
-  const visibleInRangeLayers = useStoreMapAllVisibleandInRangeLayers();
+  const layerHiddenSet = useStoreLayerIsHiddenOnMapSet();
+  const visibleInRangeLayers = useStoreLayerAllVisibleAndInRangeLayers();
   const layerNames = useStoreLayerNameSet();
   const layerStatuses = useStoreLayerStatusSet();
   const layerDisplayDateFormats = useStoreLayerDisplayDateFormatSet();
@@ -59,6 +57,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   const layerTemporalModes = useStoreLayerDateTemporalModeSet();
   const timeSliderLayers = useStoreTimeSliderLayers()!;
   const selectedLayerPath = useStoreTimeSliderSelectedLayerPath();
+  const timeSliderController = useTimeSliderController();
 
   // #region Handlers
 
@@ -70,9 +69,9 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   const handleClickLayerList = useCallback(
     (layer: LayerListEntry) => {
       // Set the layer path
-      setStoreTimeSliderSelectedLayerPath?.(mapId, layer.layerPath);
+      timeSliderController.setSelectedLayerPathTimeSlider(layer.layerPath);
     },
-    [mapId]
+    [timeSliderController]
   );
 
   /**
@@ -199,9 +198,9 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
 
     if (selectedLayerPath && !memoLayersList.some((layer) => layer.layerPath === selectedLayerPath)) {
       // Selected layer is no longer in the visible layers list, unselect it
-      setStoreTimeSliderSelectedLayerPath?.(mapId, '');
+      timeSliderController.setSelectedLayerPathTimeSlider('');
     }
-  }, [mapId, selectedLayerPath, memoLayersList]);
+  }, [timeSliderController, selectedLayerPath, memoLayersList]);
 
   /**
    * Renders the right panel content based on selected Layer path of time slider.

@@ -76,8 +76,29 @@ export type TypeValidNavBarProps =
   | 'projection'
   | 'drawer';
 
+/** Built-in nav bar core components that are not plugins. */
+export const DEFAULT_NAVBAR_CORE = {
+  ZOOM: 'zoom',
+  ROTATION: 'rotation',
+  FULLSCREEN: 'fullscreen',
+  HOME: 'home',
+  LOCATION: 'location',
+  BASEMAP_SELECT: 'basemap-select',
+  MEASUREMENT: 'measurement',
+  PROJECTION: 'projection',
+} as const;
+
 /** Supported footer bar tabs */
 export type TypeValidFooterBarTabsCoreProps = 'legend' | 'layers' | 'details' | 'data-table' | 'time-slider' | 'geochart' | 'guide';
+
+/** Built-in footer bar core components that are not plugins. */
+export const DEFAULT_FOOTERBAR_CORE = {
+  LEGEND: 'legend',
+  LAYERS: 'layers',
+  DETAILS: 'details',
+  DATA_TABLE: 'data-table',
+  GUIDE: 'guide',
+} as const;
 
 /** Default tabs order */
 export const DEFAULT_FOOTER_TABS_ORDER = ['legend', 'layers', 'details', 'geochart', 'time-slider', 'data-table', 'guide'];

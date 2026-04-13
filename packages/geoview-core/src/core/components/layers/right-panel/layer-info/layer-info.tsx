@@ -12,7 +12,7 @@ import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { UtilAddLayer } from '@/core/components/layers/left-panel/add-new-layer/add-layer-utils';
 import { useStoreAppDisplayLanguage, useStoreAppMetadataServiceURL } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useStoreMapCurrentProjectionEPSG } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { useStoreTableFilter } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { useStoreDataTableFilter } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import {
   useStoreLayerDateTemporalMode,
   useStoreLayerDisplayDateFormat,
@@ -62,7 +62,7 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
   const mapProjectionEPSG = useStoreMapCurrentProjectionEPSG();
   const layerFilter = useStoreLayerFilter(layerPath);
   const classFilter = useStoreLayerFilterClass(layerPath);
-  const dataFilter = useStoreTableFilter(layerPath);
+  const dataFilter = useStoreDataTableFilter(layerPath);
   const timeFilter = useStoreTimeSliderFilter(layerPath);
   const schemaTag = useStoreLayerSchemaTag(layerPath);
   const url = useStoreLayerUrl(layerPath);
