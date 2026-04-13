@@ -13,24 +13,11 @@ import { getArea, getLength } from 'ol/sphere';
 import { Text, Fill, Icon as OLIcon, Stroke, Style } from 'ol/style';
 import type { StyleLike } from 'ol/style/Style';
 
-import type { MapViewer } from '@/geo/map/map-viewer';
-import type {
-  Transform,
-  TransformDeleteFeatureEvent,
-  TransformEvent,
-  TransformSelectionEvent,
-} from '@/geo/interaction/transform/transform';
-import type { Draw } from '@/geo/interaction/draw';
-import type { Snap } from '@/geo/interaction/snap';
-import type { GeometryApi } from '@/geo/layer/geometry/geometry';
-import { Projection } from '@/geo/utils/projection';
-import { GeoUtilities } from '@/geo/utils/utilities';
-
+import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
-import { getGeoViewStore } from '@/core/stores/stores-managers';
+import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import {
   DEFAULT_TEXT_VALUES,
-  isStoreDrawerInitialized,
   getStoreDrawerActiveGeom,
   getStoreDrawerHideMeasurements,
   getStoreDrawerIconSrc,
@@ -38,8 +25,11 @@ import {
   getStoreDrawerIsEditing,
   getStoreDrawerIsSnapping,
   getStoreDrawerStyle,
+  isStoreDrawerInitialized,
+  updateStoreStateStyle,
   setStoreActiveGeom,
   setStoreDrawerIconSize,
+  setStoreDrawerIconSrc,
   setStoreFillColor,
   setStoreHideMeasurements,
   setStoreRedoDisabled,
@@ -56,19 +46,25 @@ import {
   setStoreTextSize,
   setStoreTextValue,
   setStoreUndoDisabled,
-  updateStoreStateStyle,
-  type StyleProps,
   setStoreIsDrawing,
   setStoreIsEditing,
   setStoreIsSnapping,
+  type StyleProps,
 } from '@/core/stores/store-interface-and-intial-values/drawer-state';
 import type { DomainLanguageChangedDelegate, DomainLanguageChangedEvent, UIDomain } from '@/core/domains/ui-domain';
+import type { MapProjectionChangedDelegate, MapProjectionChangedEvent, MapViewer } from '@/geo/map/map-viewer';
+import type {
+  Transform,
+  TransformDeleteFeatureEvent,
+  TransformEvent,
+  TransformSelectionEvent,
+} from '@/geo/interaction/transform/transform';
+import type { Draw } from '@/geo/interaction/draw';
+import type { Snap } from '@/geo/interaction/snap';
 import { formatArea, formatLength, generateId } from '@/core/utils/utilities';
+import { GeoUtilities } from '@/geo/utils/utilities';
 import { getStoreAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { getStoreMapCurrentProjection } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
-
-import type { TypeDisplayLanguage, TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
 
 /**
  * Controller responsible for drawer interactions, keyboard shortcuts, and
@@ -122,30 +118,24 @@ export class DrawerController extends AbstractMapViewerController {
   /** The UI Domain instance associated with this controller. */
   #uiDomain: UIDomain;
 
-  /** The Geometry Api used by this controller. */
-  #geometryApi: GeometryApi;
-
   /** The language changed event hook. */
   #hookLanguageChanged?: DomainLanguageChangedDelegate;
 
-  /** The store subscription callback to unsubscribe from projection changes. */
-  #hookProjectionSubscription?: () => void;
+  /** The map projection changed event subscription reference. */
+  #hookMapProjectionChanged?: MapProjectionChangedDelegate;
 
   /**
    * Creates an instance of DrawerController.
    *
    * @param mapViewer - The map viewer instance to associate with this controller
+   * @param controllerRegistry - The controller registry for accessing sibling controllers
    * @param uiDomain - The UI domain instance to associate with this controller
-   * @param geometryApi - The geometry API instance to associate with this controller
    */
-  constructor(mapViewer: MapViewer, uiDomain: UIDomain, geometryApi: GeometryApi) {
-    super(mapViewer);
+  constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry, uiDomain: UIDomain) {
+    super(mapViewer, controllerRegistry);
 
     // Keep a reference on the UI domain
     this.#uiDomain = uiDomain;
-
-    // Keep a reference on the geometry api
-    this.#geometryApi = geometryApi;
   }
 
   // #region OVERRIDES
@@ -157,17 +147,11 @@ export class DrawerController extends AbstractMapViewerController {
     // Setup the keyboard handlers for undo/redo
     this.#hookKeyboardHandlers();
 
-    // Listens when the language is changed in the UI domain and process actions accordingly
+    // Listen when the language is changed in the UI domain
     this.#hookLanguageChanged = this.#uiDomain.onLanguageChanged(this.#handleDisplayLanguageChanged.bind(this));
 
-    // Subscribe to projection changes
-    // TODO: REFACTOR - Change this to listen on the domain event instead of the store state, because we are doing application-domain work with this subscribe.
-    this.#hookProjectionSubscription = getGeoViewStore(this.getMapId()).subscribe(
-      (state) => state.mapState.currentProjection,
-      (currentProjection, previousProjection) => {
-        this.#handleMapReprojection(currentProjection, previousProjection, this.getMapViewer().getDisplayLanguage());
-      }
-    );
+    // Listen when the map projection changes on the MapViewer
+    this.#hookMapProjectionChanged = this.getMapViewer().onMapProjectionChanged(this.#handleMapReprojection.bind(this));
   }
 
   /**
@@ -181,9 +165,9 @@ export class DrawerController extends AbstractMapViewerController {
     }
 
     // Unsubscribe from projection changes
-    if (this.#hookProjectionSubscription) {
-      this.#hookProjectionSubscription();
-      this.#hookProjectionSubscription = undefined;
+    if (this.#hookMapProjectionChanged) {
+      this.getMapViewer().offMapProjectionChanged(this.#hookMapProjectionChanged);
+      this.#hookMapProjectionChanged = undefined;
     }
 
     // Remove keyboard handler
@@ -593,11 +577,8 @@ export class DrawerController extends AbstractMapViewerController {
    * @param geomType - The geometry type to set as active
    */
   setActiveGeom(geomType: string): void {
-    // Get the map id
-    const mapId = this.getMapId();
-
     // Save to the store
-    setStoreActiveGeom(mapId, geomType);
+    setStoreActiveGeom(this.getMapId(), geomType);
 
     // Refresh
     this.refreshInteractionInstances();
@@ -609,11 +590,8 @@ export class DrawerController extends AbstractMapViewerController {
    * @param fillColor - The fill color value
    */
   setFillColor(fillColor: string): void {
-    // Get the map id
-    const mapId = this.getMapId();
-
     // Save to the store
-    setStoreFillColor(mapId, fillColor);
+    setStoreFillColor(this.getMapId(), fillColor);
 
     // Update the feature style at large
     this.updateFeatureStyle();
@@ -625,11 +603,8 @@ export class DrawerController extends AbstractMapViewerController {
    * @param strokeColor - The stroke color value
    */
   setStrokeColor(strokeColor: string): void {
-    // Get the map id
-    const mapId = this.getMapId();
-
     // Save to the store
-    setStoreStrokeColor(mapId, strokeColor);
+    setStoreStrokeColor(this.getMapId(), strokeColor);
 
     // Update the feature style at large
     this.updateFeatureStyle();
@@ -641,14 +616,19 @@ export class DrawerController extends AbstractMapViewerController {
    * @param strokeWidth - The stroke width value
    */
   setStrokeWidth(strokeWidth: number): void {
-    // Get the map id
-    const mapId = this.getMapId();
-
     // Save to the store
-    setStoreStrokeWidth(mapId, strokeWidth);
+    setStoreStrokeWidth(this.getMapId(), strokeWidth);
 
     // Update the feature style at large
     this.updateFeatureStyle();
+  }
+
+  setDrawerIconSrc(iconSrc: string): void {
+    // Save to the store
+    setStoreDrawerIconSrc(this.getMapId(), iconSrc);
+
+    // Update the feature style at large? Wasn't doing it before, leaving it like this with comment in case we should uncomment
+    // this.updateFeatureStyle();
   }
 
   /**
@@ -657,11 +637,8 @@ export class DrawerController extends AbstractMapViewerController {
    * @param iconSize - The icon size value
    */
   setDrawerIconSize(iconSize: number): void {
-    // Get the map id
-    const mapId = this.getMapId();
-
     // Save to the store
-    setStoreDrawerIconSize(mapId, iconSize);
+    setStoreDrawerIconSize(this.getMapId(), iconSize);
 
     // Update the feature style at large
     this.updateFeatureStyle();
@@ -673,11 +650,8 @@ export class DrawerController extends AbstractMapViewerController {
    * @param text - The text content
    */
   setTextValue(text: string | string[]): void {
-    // Get the map id
-    const mapId = this.getMapId();
-
     // Save to the store
-    setStoreTextValue(mapId, text);
+    setStoreTextValue(this.getMapId(), text);
 
     // Update the feature style at large
     this.updateFeatureStyle();
@@ -689,11 +663,8 @@ export class DrawerController extends AbstractMapViewerController {
    * @param size - The text size in pixels
    */
   setTextSize(size: number): void {
-    // Get the map id
-    const mapId = this.getMapId();
-
     // Save to the store
-    setStoreTextSize(mapId, size);
+    setStoreTextSize(this.getMapId(), size);
 
     // Update the feature style at large
     this.updateFeatureStyle();
@@ -705,11 +676,8 @@ export class DrawerController extends AbstractMapViewerController {
    * @param font - The font family name
    */
   setTextFont(font: string): void {
-    // Get the map id
-    const mapId = this.getMapId();
-
     // Save to the store
-    setStoreTextFont(mapId, font);
+    setStoreTextFont(this.getMapId(), font);
 
     // Update the feature style at large
     this.updateFeatureStyle();
@@ -721,11 +689,8 @@ export class DrawerController extends AbstractMapViewerController {
    * @param color - The text color value
    */
   setTextColor(color: string): void {
-    // Get the map id
-    const mapId = this.getMapId();
-
     // Save to the store
-    setStoreTextColor(mapId, color);
+    setStoreTextColor(this.getMapId(), color);
 
     // Update the feature style at large
     this.updateFeatureStyle();
@@ -737,11 +702,8 @@ export class DrawerController extends AbstractMapViewerController {
    * @param color - The halo color value
    */
   setTextHaloColor(color: string): void {
-    // Get the map id
-    const mapId = this.getMapId();
-
     // Save to the store
-    setStoreTextHaloColor(mapId, color);
+    setStoreTextHaloColor(this.getMapId(), color);
 
     // Update the feature style at large
     this.updateFeatureStyle();
@@ -753,11 +715,8 @@ export class DrawerController extends AbstractMapViewerController {
    * @param width - The halo width value
    */
   setTextHaloWidth(width: number): void {
-    // Get the map id
-    const mapId = this.getMapId();
-
     // Save to the store
-    setStoreTextHaloWidth(mapId, width);
+    setStoreTextHaloWidth(this.getMapId(), width);
 
     // Update the feature style at large
     this.updateFeatureStyle();
@@ -769,11 +728,8 @@ export class DrawerController extends AbstractMapViewerController {
    * @param bold - Whether the text should be bold
    */
   setTextBold(bold: boolean): void {
-    // Get the map id
-    const mapId = this.getMapId();
-
     // Save to the store
-    setStoreTextBold(mapId, bold);
+    setStoreTextBold(this.getMapId(), bold);
 
     // Update the feature style at large
     this.updateFeatureStyle();
@@ -785,11 +741,8 @@ export class DrawerController extends AbstractMapViewerController {
    * @param italic - Whether the text should be italic
    */
   setTextItalic(italic: boolean): void {
-    // Get the map id
-    const mapId = this.getMapId();
-
     // Save to the store
-    setStoreTextItalic(mapId, italic);
+    setStoreTextItalic(this.getMapId(), italic);
 
     // Update the feature style at large
     this.updateFeatureStyle();
@@ -801,11 +754,8 @@ export class DrawerController extends AbstractMapViewerController {
    * @param rotation - The rotation angle
    */
   setTextRotation(rotation: number): void {
-    // Get the map id
-    const mapId = this.getMapId();
-
     // Save to the store
-    setStoreTextRotation(mapId, rotation);
+    setStoreTextRotation(this.getMapId(), rotation);
 
     // Update the feature style at large
     this.updateFeatureStyle();
@@ -1084,14 +1034,11 @@ export class DrawerController extends AbstractMapViewerController {
    *
    */
   downloadDrawings(): void {
-    // Get the map id
-    const mapId = this.getMapId();
-
     const features = this.#getDrawingFeatures();
     if (features.length === 0) return;
 
     // Get current map projection
-    const mapProjection = Projection.PROJECTIONS[getStoreMapCurrentProjection(mapId)];
+    const mapProjection = this.getMapViewer().getProjection();
 
     // Convert to GeoJSON with style properties
     const geojson = {
@@ -1151,7 +1098,7 @@ export class DrawerController extends AbstractMapViewerController {
         const viewer = this.getMapViewer();
 
         // Get current map projection
-        const mapProjection = Projection.PROJECTIONS[getStoreMapCurrentProjection(mapId)];
+        const mapProjection = this.getMapViewer().getProjection();
 
         const newFeatures: Feature[] = [];
         geojson.features.forEach((geoFeature: GeoJsonFeature) => {
@@ -1310,7 +1257,7 @@ export class DrawerController extends AbstractMapViewerController {
     if (!isStoreDrawerInitialized(mapId)) return [];
 
     // Get features from drawing group
-    const geometryGroup = this.#geometryApi.getGeometryGroup(DrawerController.DRAW_GROUP_KEY);
+    const geometryGroup = this.getGeometryApi().getGeometryGroup(DrawerController.DRAW_GROUP_KEY);
     const features = geometryGroup?.vectorSource.getFeatures();
     if (!features) {
       return [];
@@ -1640,31 +1587,23 @@ export class DrawerController extends AbstractMapViewerController {
   /**
    * Handles map projection changes to reproject the drawings.
    *
-   * @param currentProjection - The current projection code
-   * @param previousProjection - The previous projection code
-   * @param displayLanguage - The current display language for updating measurement tooltips after reprojection
+   * @param sender - The map viewer that sent the event
+   * @param event - The map projection change event containing the previous and current projections
    */
-  #handleMapReprojection(
-    currentProjection: TypeValidMapProjectionCodes,
-    previousProjection: TypeValidMapProjectionCodes,
-    displayLanguage: TypeDisplayLanguage
-  ): void {
-    if (previousProjection) {
+  #handleMapReprojection(sender: MapViewer, event: MapProjectionChangedEvent): void {
+    if (event.previousProjection) {
       this.#stopAllInteractions();
-
-      const fromProjection = Projection.PROJECTIONS[previousProjection];
-      const toProjection = Projection.PROJECTIONS[currentProjection];
 
       const features = this.#getDrawingFeatures();
       features.forEach((feature) => {
         const geometry = feature.getGeometry();
         if (!geometry) return;
 
-        geometry.transform(fromProjection, toProjection);
+        geometry.transform(event.previousProjection, event.projection);
       });
 
       // Update tooltips once
-      this.#updateMeasurementTooltips(displayLanguage);
+      this.#updateMeasurementTooltips(sender.getDisplayLanguage());
 
       // Reproject all geometries in the history
       if (this.#drawerHistory) {
@@ -1673,18 +1612,18 @@ export class DrawerController extends AbstractMapViewerController {
           action.features.forEach((feature) => {
             const geometry = feature.getGeometry();
             if (geometry) {
-              geometry.transform(fromProjection, toProjection);
+              geometry.transform(event.previousProjection, event.projection);
             }
           });
 
           // Reproject original geometries (for modify actions)
           action.originalGeometries?.forEach((geometry) => {
-            geometry.transform(fromProjection, toProjection);
+            geometry.transform(event.previousProjection, event.projection);
           });
 
           // Reproject modified geometries (for modify actions)
           action.modifiedGeometries?.forEach((geometry) => {
-            geometry.transform(fromProjection, toProjection);
+            geometry.transform(event.previousProjection, event.projection);
           });
         });
       }

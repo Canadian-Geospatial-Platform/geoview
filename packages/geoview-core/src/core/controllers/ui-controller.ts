@@ -1,29 +1,36 @@
 import type { TypeDisplayLanguage, TypeDisplayTheme } from '@/api/types/map-schema-types';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
+import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import {
-  disableStoreFocusTrap,
-  enableStoreFocusTrap,
-  hideStoreTabButton,
-  setStoreActiveAppBarTab,
-  setStoreActiveFooterBarTab,
-  setStoreActiveTrapGeoView,
-  setStoreFooterBarIsOpen,
-  setStoreFooterPanelResizeValue,
-  showStoreTabButton,
+  addStoreUIAppBarPanelId,
+  addStoreUIFooterTab,
+  bumpStoreUINavBarButtonPanelVersion,
+  disableStoreUIFocusTrap,
+  enableStoreUIFocusTrap,
+  hideStoreUITabButton,
+  removeStoreUIAppBarPanelId,
+  removeStoreUIFooterTab,
+  setStoreUIActiveAppBarTab,
+  setStoreUIActiveFooterBarTab,
+  setStoreUIActiveTrapGeoView,
+  setStoreUIFooterBarIsOpen,
+  setStoreUIFooterPanelResizeValue,
+  showStoreUITabButton,
   type FocusItemProps,
+  type TypeFooterTabEntry,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import {
-  addStoreNotification,
+  addStoreAppNotification,
   getStoreAppGeoviewAssetsURL,
-  removeStoreAllNotifications,
-  removeStoreNotification,
-  setStoreCircularProgress,
-  setStoreCrosshairActive,
-  setStoreDisplayDateTimezone,
-  setStoreDisplayLanguage,
-  setStoreDisplayTheme,
-  setStoreFullScreenActive,
-  setStoreGuide,
+  removeStoreAppAllNotifications,
+  removeStoreAppNotification,
+  setStoreAppCircularProgress,
+  setStoreAppCrosshairActive,
+  setStoreAppDisplayDateTimezone,
+  setStoreAppDisplayLanguage,
+  setStoreAppDisplayTheme,
+  setStoreAppFullScreenActive,
+  setStoreAppGuide,
 } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { DateMgt, type TimeIANA } from '@/core/utils/date-mgt';
 import type { TypeHTMLElement } from '@/core/types/global-types';
@@ -53,10 +60,11 @@ export class UIController extends AbstractMapViewerController {
    * Creates an instance of UIController.
    *
    * @param mapViewer - The map viewer instance
+   * @param controllerRegistry - The controller registry for accessing sibling controllers
    * @param uiDomain - The UI domain instance
    */
-  constructor(mapViewer: MapViewer, uiDomain: UIDomain) {
-    super(mapViewer);
+  constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry, uiDomain: UIDomain) {
+    super(mapViewer, controllerRegistry);
 
     // Keep the domain internally
     this.#uiDomain = uiDomain;
@@ -93,6 +101,7 @@ export class UIController extends AbstractMapViewerController {
    * @returns The current display language
    */
   getDisplayLanguage(): TypeDisplayLanguage {
+    // Get the language from the domain
     return this.#uiDomain.getLanguage();
   }
 
@@ -102,8 +111,8 @@ export class UIController extends AbstractMapViewerController {
    * @param tab - The tab identifier to show
    */
   showTabButton(tab: string): void {
-    // Save in store
-    showStoreTabButton(this.getMapId(), tab);
+    // Save in the store
+    showStoreUITabButton(this.getMapId(), tab);
   }
 
   /**
@@ -112,8 +121,28 @@ export class UIController extends AbstractMapViewerController {
    * @param tab - The tab identifier to hide
    */
   hideTabButton(tab: string): void {
-    // Save in store
-    hideStoreTabButton(this.getMapId(), tab);
+    // Save in the store
+    hideStoreUITabButton(this.getMapId(), tab);
+  }
+
+  /**
+   * Adds a tab to the footer bar with the given properties.
+   *
+   * @param tab - The properties of the tab to add
+   */
+  addFooterTab(tab: TypeFooterTabEntry): void {
+    // Save in the store
+    addStoreUIFooterTab(this.getMapId(), tab);
+  }
+
+  /**
+   * Removes a tab from the footer bar by its identifier.
+   *
+   * @param id - The identifier of the tab to remove
+   */
+  removeFooterTab(id: string): void {
+    // Save in the store
+    removeStoreUIFooterTab(this.getMapId(), id);
   }
 
   /**
@@ -122,8 +151,28 @@ export class UIController extends AbstractMapViewerController {
    * @param tab - The tab identifier to activate, or undefined to deactivate
    */
   setActiveFooterBarTab(tab: string | undefined): void {
-    // Save in store
-    setStoreActiveFooterBarTab(this.getMapId(), tab);
+    // Save in the store
+    setStoreUIActiveFooterBarTab(this.getMapId(), tab);
+  }
+
+  /**
+   * Adds an app-bar panel id to the store, which will make the app-bar show the corresponding panel.
+   *
+   * @param id - The id of the panel to be added and shown in the app-bar
+   */
+  addAppBarPanelId(id: string): void {
+    // Save in the store
+    addStoreUIAppBarPanelId(this.getMapId(), id);
+  }
+
+  /**
+   * Removes an app-bar panel id from the store, which will make the app-bar hide the corresponding panel.
+   *
+   * @param id - The id of the panel to be removed and hidden in the app-bar
+   */
+  removeAppBarPanelId(id: string): void {
+    // Save in the store
+    removeStoreUIAppBarPanelId(this.getMapId(), id);
   }
 
   /**
@@ -134,8 +183,8 @@ export class UIController extends AbstractMapViewerController {
    * @param isFocusTrapped - Whether focus should be trapped in the panel
    */
   setActiveAppBarTab(tab: string | undefined, isOpen: boolean, isFocusTrapped: boolean): void {
-    // Save in store
-    setStoreActiveAppBarTab(this.getMapId(), tab, isOpen, isFocusTrapped);
+    // Save in the store
+    setStoreUIActiveAppBarTab(this.getMapId(), tab, isOpen, isFocusTrapped);
   }
 
   /**
@@ -145,7 +194,19 @@ export class UIController extends AbstractMapViewerController {
    */
   setFooterBarIsOpen(isOpen: boolean): void {
     // Save in store
-    setStoreFooterBarIsOpen(this.getMapId(), isOpen);
+    setStoreUIFooterBarIsOpen(this.getMapId(), isOpen);
+  }
+
+  /**
+   * Bumps the nav-bar button panel version to trigger a re-render in the nav-bar component when button panels are
+   * added or removed without necessarily adding or removing a panel id (ex: when all buttons are removed from a panel
+   * but the panel itself is not removed from the store to avoid losing its state).
+   * This is a workaround and eventually the store structure should be refactored to better accommodate button panel
+   * state and avoid this type of workaround.
+   */
+  bumpNavBarButtonPanelVersion(): void {
+    // Save in the store
+    bumpStoreUINavBarButtonPanelVersion(this.getMapId());
   }
 
   /**
@@ -155,7 +216,7 @@ export class UIController extends AbstractMapViewerController {
    */
   enableFocusTrap(uiFocus: FocusItemProps): void {
     // Save in store
-    enableStoreFocusTrap(this.getMapId(), uiFocus);
+    enableStoreUIFocusTrap(this.getMapId(), uiFocus);
   }
 
   /**
@@ -165,7 +226,7 @@ export class UIController extends AbstractMapViewerController {
    */
   disableFocusTrap(callbackElementId?: string): void {
     // Save in store
-    disableStoreFocusTrap(this.getMapId(), callbackElementId);
+    disableStoreUIFocusTrap(this.getMapId(), callbackElementId);
   }
 
   /**
@@ -175,7 +236,7 @@ export class UIController extends AbstractMapViewerController {
    */
   setActiveTrapGeoView(active: boolean): void {
     // Save in store
-    setStoreActiveTrapGeoView(this.getMapId(), active);
+    setStoreUIActiveTrapGeoView(this.getMapId(), active);
   }
 
   /**
@@ -185,7 +246,7 @@ export class UIController extends AbstractMapViewerController {
    */
   setFooterPanelResizeValue(value: number): void {
     // Save in store
-    setStoreFooterPanelResizeValue(this.getMapId(), value);
+    setStoreUIFooterPanelResizeValue(this.getMapId(), value);
   }
 
   /**
@@ -195,7 +256,7 @@ export class UIController extends AbstractMapViewerController {
    */
   setCircularProgress(active: boolean): void {
     // Save in store
-    setStoreCircularProgress(this.getMapId(), active);
+    setStoreAppCircularProgress(this.getMapId(), active);
   }
 
   /**
@@ -223,7 +284,7 @@ export class UIController extends AbstractMapViewerController {
       const promiseSetGuide = this.createGuide();
 
       // Remove all previous notifications to ensure there is no mix en and fr
-      removeStoreAllNotifications(mapId);
+      removeStoreAppAllNotifications(mapId);
 
       // When all promises are done
       Promise.all([promiseChangeLanguage, promiseResetBasemap, promiseSetGuide])
@@ -245,7 +306,7 @@ export class UIController extends AbstractMapViewerController {
    */
   setDisplayTheme(theme: TypeDisplayTheme): void {
     // Save in store
-    setStoreDisplayTheme(this.getMapId(), theme);
+    setStoreAppDisplayTheme(this.getMapId(), theme);
   }
 
   /**
@@ -258,7 +319,7 @@ export class UIController extends AbstractMapViewerController {
     DateMgt.validateTimezone(displayDateTimezone);
 
     // Save in store
-    setStoreDisplayDateTimezone(this.getMapId(), displayDateTimezone);
+    setStoreAppDisplayDateTimezone(this.getMapId(), displayDateTimezone);
   }
 
   /**
@@ -268,7 +329,7 @@ export class UIController extends AbstractMapViewerController {
    */
   setCrosshairActive(active: boolean): void {
     // Save in store
-    setStoreCrosshairActive(this.getMapId(), active);
+    setStoreAppCrosshairActive(this.getMapId(), active);
 
     // Because the map is focused/blured, we need to enable/disable the map interaction for WCAG
     this.setActiveMapInteractionWCAG(active);
@@ -346,7 +407,7 @@ export class UIController extends AbstractMapViewerController {
     }
 
     // Save in store
-    setStoreFullScreenActive(this.getMapId(), status);
+    setStoreAppFullScreenActive(this.getMapId(), status);
   }
 
   /**
@@ -383,7 +444,7 @@ export class UIController extends AbstractMapViewerController {
    */
   addNotification(notification: NotificationDetailsType): void {
     // Save in store
-    addStoreNotification(this.getMapId(), notification).catch((error: unknown) => {
+    addStoreAppNotification(this.getMapId(), notification).catch((error: unknown) => {
       // Log
       logger.logPromiseFailed('uiController.addNotification in uiController', error);
     });
@@ -396,7 +457,7 @@ export class UIController extends AbstractMapViewerController {
    */
   removeNotification(key: string): void {
     // Save in store
-    removeStoreNotification(this.getMapId(), key).catch((error: unknown) => {
+    removeStoreAppNotification(this.getMapId(), key).catch((error: unknown) => {
       // Log
       logger.logPromiseFailed('uiController.removeNotification in uiController', error);
     });
@@ -405,7 +466,7 @@ export class UIController extends AbstractMapViewerController {
   /** Removes all notifications from the notification center. */
   removeAllNotifications(): void {
     // Save in store
-    removeStoreAllNotifications(this.getMapId());
+    removeStoreAppAllNotifications(this.getMapId());
   }
 
   /**
@@ -425,7 +486,7 @@ export class UIController extends AbstractMapViewerController {
       const guide = await createGuideObject(language, getStoreAppGeoviewAssetsURL(mapId));
 
       // Save in store
-      setStoreGuide(mapId, guide);
+      setStoreAppGuide(mapId, guide);
 
       // Check guide loading tracker
       logger.logMarkerCheck('map-guide', 'for guide to be loaded');
@@ -448,7 +509,7 @@ export class UIController extends AbstractMapViewerController {
    * @param event - The language changed event containing the new language
    */
   #handleDisplayLanguageChanged(sender: UIDomain, event: DomainLanguageChangedEvent): void {
-    setStoreDisplayLanguage(this.getMapId(), event.language);
+    setStoreAppDisplayLanguage(this.getMapId(), event.language);
   }
 
   // #endregion DOMAIN HANDLERS

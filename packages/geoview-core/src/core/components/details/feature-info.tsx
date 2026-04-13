@@ -12,13 +12,8 @@ import {
   Typography,
   ZoomInSearchIcon,
 } from '@/ui';
+import { useStoreDetailsCheckedFeatures } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import {
-  addStoreDetailsCheckedFeature,
-  removeStoreDetailsCheckedFeature,
-  useStoreDetailsCheckedFeatures,
-} from '@/core/stores/store-interface-and-intial-values/feature-info-state';
-import {
-  setStoreGeochartSelectedLayerPath,
   useStoreGeochartChartsConfig,
   useStoreGeochartLayerDataArrayBatch,
 } from '@/core/stores/store-interface-and-intial-values/geochart-state';
@@ -30,8 +25,7 @@ import type { TypeContainerBox } from '@/core/types/global-types';
 import { FeatureInfoTable } from './feature-info-table';
 import { getSxClasses } from './details-style';
 import { useStoreUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
-import { useMapController } from '@/core/controllers/use-controllers';
+import { useDetailsController, useGeoChartControllerIfExists, useMapController } from '@/core/controllers/use-controllers';
 
 /** Properties for the FeatureInfo component. */
 interface FeatureInfoProps {
@@ -211,14 +205,17 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
   const [checked, setChecked] = useState<boolean>(false);
 
   // Store
-  const mapId = useStoreGeoViewMapId();
   const checkedFeatures = useStoreDetailsCheckedFeatures();
   const geochartLayerDataArrayBatch = useStoreGeochartLayerDataArrayBatch();
   const geochartConfigs = useStoreGeochartChartsConfig();
   const mapController = useMapController();
+  const detailsController = useDetailsController();
+  const geoChartController = useGeoChartControllerIfExists();
 
   // Use navigate hook for geochart (only if geochart state exists)
-  const navigateToGeochart = useNavigateToTab('geochart', setStoreGeochartSelectedLayerPath);
+  const navigateToGeochart = useNavigateToTab('geochart', (lyrPath) => {
+    geoChartController?.setSelectedLayerPath(lyrPath);
+  });
 
   /**
    * Memoizes the feature name.
@@ -273,13 +270,13 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
       // If feature is checked
       if (checkedState) {
         // Add
-        addStoreDetailsCheckedFeature(mapId, feature);
+        detailsController.addCheckedFeature(feature);
       } else {
         // Remove
-        removeStoreDetailsCheckedFeature(mapId, feature);
+        detailsController.removeCheckedFeature(feature);
       }
     },
-    [mapId, feature]
+    [detailsController, feature]
   );
 
   /**

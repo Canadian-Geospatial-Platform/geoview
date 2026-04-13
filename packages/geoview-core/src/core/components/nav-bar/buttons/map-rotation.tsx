@@ -6,7 +6,6 @@ import {
   useStoreMapFixNorth,
   useStoreMapNorthArrow,
   useStoreMapCurrentProjectionEPSG,
-  setStoreMapFixNorth,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from '@/core/components/nav-bar/nav-bar-panel-button';
@@ -17,7 +16,6 @@ import { useManageArrow } from '@/core/components/north-arrow/hooks/useManageArr
 import type { TypePanelProps } from '@/ui/panel/panel-types';
 import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 import { IconButton } from '@/ui/icon-button/icon-button';
-import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useMapController } from '@/core/controllers/use-controllers';
 
 /**
@@ -32,7 +30,6 @@ export default function MapRotation(): JSX.Element {
   const { t } = useTranslation<string>();
 
   // Get values from store
-  const mapId = useStoreGeoViewMapId();
   const mapRotation = useStoreMapRotation();
   const isFixNorth = useStoreMapFixNorth();
   const isNorthEnable = useStoreMapNorthArrow();
@@ -114,14 +111,14 @@ export default function MapRotation(): JSX.Element {
   const handleFixNorth = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>): void => {
       const isChecked = event.target.checked;
-      setStoreMapFixNorth(mapId, isChecked);
+      mapController.setFixNorth(isChecked);
 
       if (!isChecked) {
         mapController.rotate(0);
         setSliderRotationDegrees(0);
       }
     },
-    [mapId, mapController]
+    [mapController]
   );
 
   /**

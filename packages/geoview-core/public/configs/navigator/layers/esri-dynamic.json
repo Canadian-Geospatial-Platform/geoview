@@ -40,7 +40,12 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "4",
-            "layerName": "Test"
+            "layerName": "Test",
+            "initialSettings": {
+              "states": {
+                "legendCollapsed": false
+              }
+            }
           },
           {
             "layerId": "1",

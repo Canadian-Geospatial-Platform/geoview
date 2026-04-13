@@ -7,7 +7,6 @@ import { getStoreUIActiveFooterBarTab } from 'geoview-core/core/stores/store-int
 import {
   getStoreGeochartChartsConfig,
   getStoreGeochartSelectedLayerPath,
-  setStoreGeochartSelectedLayerPath,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/geochart-state';
 
 /**
@@ -197,7 +196,7 @@ export class GeochartTester extends GVAbstractTester {
     test.addStep(`Selecting the geochart for the added layer...`);
 
     // Select the right layer path
-    setStoreGeochartSelectedLayerPath(this.getMapId(), layerPath);
+    this.getControllersRegistry().geoChartController?.setSelectedLayerPath(layerPath);
 
     // Wait purposely on the UI, this waiting period isn't necessary for the test, but it's good to see it happen in real-time
     await delay(1000);

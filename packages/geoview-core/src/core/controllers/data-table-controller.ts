@@ -1,8 +1,18 @@
+import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
+import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import {
-  addOrUpdateStoreTableFilter,
+  addOrUpdateStoreDataTableFilter,
   getStoreDataTableSelectedLayerPath,
-  getStoreMapFilteredRecord,
+  getStoreDataTableFilteredRecord,
+  setStoreDataTableColumnFiltersEntry,
+  setStoreDataTableColumnsFiltersVisibility,
+  setStoreDataTableColumnFilterModesEntry,
+  setStoreDataTableFilteredEntry,
+  setStoreDataTableGlobalFilteredEntry,
+  setStoreDataTableSelectedFeature,
+  setStoreDataTableSelectedLayerPath,
+  type TypeColumnFiltersState,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import type { MapViewer } from '@/geo/map/map-viewer';
 
@@ -14,11 +24,12 @@ export class DataTableController extends AbstractMapViewerController {
    * Creates an instance of DataTableController.
    *
    * @param mapViewer - The map viewer instance to associate with this controller
+   * @param controllerRegistry - The controller registry for accessing sibling controllers
    */
   // GV Leave the constructor here, because we'll likely need it soon to inject dependencies.
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor
-  constructor(mapViewer: MapViewer) {
-    super(mapViewer);
+  constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry) {
+    super(mapViewer, controllerRegistry);
   }
 
   // #region OVERRIDES
@@ -37,9 +48,84 @@ export class DataTableController extends AbstractMapViewerController {
    */
   applyMapFilters(filterStrings: string): void {
     const layerPath = getStoreDataTableSelectedLayerPath(this.getMapId());
-    const filter = getStoreMapFilteredRecord(this.getMapId(), layerPath) ? filterStrings : '';
-    addOrUpdateStoreTableFilter(this.getMapId(), layerPath, filter);
+    const filter = getStoreDataTableFilteredRecord(this.getMapId(), layerPath) ? filterStrings : '';
+    addOrUpdateStoreDataTableFilter(this.getMapId(), layerPath, filter);
     this.getControllersRegistry().layerController.applyLayerFilters(layerPath);
+  }
+
+  /**
+   * Sets the selected layer path in the store, which determines which layer's data is displayed in the data table.
+   *
+   * @param layerPath - The path of the layer to select
+   */
+  setSelectedLayerPath(layerPath: string): void {
+    // Save in the store
+    setStoreDataTableSelectedLayerPath(this.getMapId(), layerPath);
+  }
+
+  /**
+   * Sets the filtered entry state for a specific layer in the data table, which determines whether map filters are applied to that layer.
+   *
+   * @param layerPath - The path of the layer to update
+   * @param mapFiltered - A boolean indicating whether the layer should be filtered based on the data table filters
+   */
+  setFilteredEntry(layerPath: string, mapFiltered: boolean): void {
+    // Save in the store
+    setStoreDataTableFilteredEntry(this.getMapId(), mapFiltered, layerPath);
+  }
+
+  /**
+   * Sets the global filter value for a specific layer in the data table, which determines the global filter applied to that layer.
+   *
+   * @param layerPath - The path of the layer to update
+   * @param globalFilterValue - The global filter value to set for the layer
+   */
+  setGlobalFilteredEntry(layerPath: string, globalFilterValue: string): void {
+    // Save in the store
+    setStoreDataTableGlobalFilteredEntry(this.getMapId(), globalFilterValue, layerPath);
+  }
+
+  /**
+   * Sets the column filters state for a specific layer in the data table, which determines the filters applied to individual columns for that layer.
+   *
+   * @param layerPath - The path of the layer to update
+   * @param columnFilters - The column filters state to set for the layer
+   */
+  setColumnFiltersEntry(layerPath: string, columnFilters: TypeColumnFiltersState): void {
+    // Save in the store
+    setStoreDataTableColumnFiltersEntry(this.getMapId(), columnFilters, layerPath);
+  }
+
+  /**
+   * Sets the column filter modes for a specific layer in the data table, which determines how filters are applied to individual columns for that layer.
+   *
+   * @param layerPath - The path of the layer to update
+   * @param columnFilterModes - The column filter modes to set for the layer
+   */
+  setColumnFilterModesEntry(layerPath: string, columnFilterModes: Record<string, string>): void {
+    // Save in the store
+    setStoreDataTableColumnFilterModesEntry(this.getMapId(), columnFilterModes, layerPath);
+  }
+
+  /**
+   * Sets the visibility of column filters for a specific layer in the data table, which determines whether the column filter UI is shown for that layer.
+   *
+   * @param layerPath - The path of the layer to update
+   * @param visible - A boolean indicating whether the column filter UI should be visible for the layer
+   */
+  setColumnsFiltersVisibility(layerPath: string, visible: boolean): void {
+    // Save in the store
+    setStoreDataTableColumnsFiltersVisibility(this.getMapId(), visible, layerPath);
+  }
+
+  /**
+   * Sets the selected feature in the data table, which determines which feature's details are displayed.
+   *
+   * @param feature - The feature to select
+   */
+  setSelectedFeature(feature: TypeFeatureInfoEntry): void {
+    // Save in the store
+    setStoreDataTableSelectedFeature(this.getMapId(), feature);
   }
 
   // #endregion PUBLIC METHODS

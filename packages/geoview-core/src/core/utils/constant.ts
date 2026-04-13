@@ -24,7 +24,7 @@ export const DEFAULT_OL_FITOPTIONS: FitOptions = {
 
 /** The north pole position used for north arrow marker and rotation angle. */
 // NOTE: north value (set longitude to be half of Canada extent (142° W, 52° W)) - projection central meridian is -95
-export const NORTH_POLE_POSITION: [number, number] = [90, -95];
+export const NORTH_POLE_POSITION_LONLAT: [number, number] = [90, -95];
 
 /** Overview map widget dimensions. */
 export const OL_OVERVIEWMAP_SIZE = {

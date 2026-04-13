@@ -9,6 +9,9 @@ import { getSxClasses } from './legend-styles';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { ItemsList } from './legend-layer-items';
 import type { LegendLayerProps } from './legend-layer';
+import { logger } from '@/core/utils/logger';
+import type { TypeContainerBox } from '@/core/types/global-types';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import {
   useStoreLayerChildPaths,
   useStoreLayerIcons,
@@ -16,11 +19,8 @@ import {
   useStoreLayerName,
   useStoreLayerStatus,
   useStoreLayerSchemaTag,
+  useStoreLayerLegendCollapsed,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
-import { logger } from '@/core/utils/logger';
-import { useStoreMapLegendCollapsedByPath } from '@/core/stores/store-interface-and-intial-values/map-state';
-import type { TypeContainerBox } from '@/core/types/global-types';
 
 interface CollapsibleContentProps {
   layerPath: string;
@@ -93,7 +93,7 @@ export const CollapsibleContent = memo(function CollapsibleContent({
   const mapId = useStoreGeoViewMapId();
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
-  const isCollapsed = useStoreMapLegendCollapsedByPath(layerPath);
+  const isCollapsed = useStoreLayerLegendCollapsed(layerPath);
   const schemaTag = useStoreLayerSchemaTag(layerPath);
   const layerItems = useStoreLayerItems(layerPath);
   const layerChildPaths = useStoreLayerChildPaths(layerPath);
@@ -141,7 +141,8 @@ export const CollapsibleContent = memo(function CollapsibleContent({
             <LegendLayerComponent layerPath={childPath} key={childPath} showControls={showControls} containerType={containerType} />
           ))}
       </List>
-      <ItemsList items={layerItems || []} layerPath={layerPath} />
+      {/* TODO: Remove this recent fix layerItems.length > 1, because Johann fixed it another way? */}
+      {layerItems && layerItems.length > 1 && <ItemsList items={layerItems || []} layerPath={layerPath} />}
     </Collapse>
   );
 });

@@ -24,21 +24,17 @@ import {
   useStoreLayerStatus,
   useStoreLayerEntryType,
   useStoreLayerName,
-  setStoreLayerSelectedLayersTabLayer,
   getStoreLayerLegendLayerByPath,
+  getStoreLayerParentHidden,
+  useStoreLayerIsParentHiddenOnMap,
+  useStoreLayerInVisibleRange,
+  useStoreLayerVisible,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import {
   useStoreUIFooterBarComponents,
   useStoreUIAppbarComponents,
   useStoreUIActiveTrapGeoView,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import {
-  getStoreMapLayerParentHidden,
-  getStoreMapOrderedLayerInfoByPath,
-  useStoreMapLayerInVisibleRange,
-  useStoreMapIsParentLayerHiddenOnMap,
-  useStoreMapLayerVisibility,
-} from '@/core/stores/store-interface-and-intial-values/map-state';
 import type { TypeLegendItem } from '@/core/components/layers/types';
 import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';
@@ -85,9 +81,8 @@ const useControlActions = (layerPath: string): ControlActions => {
         // Read current state values when handler executes
         const layer = getStoreLayerLegendLayerByPath(mapId, layerPath);
 
-        // Use orderedLayerInfo to check visibility range
-        const layerInfo = getStoreMapOrderedLayerInfoByPath(mapId, layerPath);
-        const isInVisibleRange = layerInfo?.inVisibleRange || false;
+        // Check visibility range
+        const isInVisibleRange = layer?.inVisibleRange || false;
 
         const isZoomToVisibleScaleCapable = !isInVisibleRange && layer?.entryType !== 'group';
         if (!isZoomToVisibleScaleCapable) {
@@ -103,14 +98,13 @@ const useControlActions = (layerPath: string): ControlActions => {
         event.stopPropagation();
         // Read current state values when handler executes
         const layer = getStoreLayerLegendLayerByPath(mapId, layerPath);
-        const layerInfo = getStoreMapOrderedLayerInfoByPath(mapId, layerPath);
-        const isInVisibleRange = layerInfo?.inVisibleRange || false;
-        const parentHidden = getStoreMapLayerParentHidden(mapId, layerPath);
+        const isInVisibleRange = layer?.inVisibleRange;
+        const parentHidden = getStoreLayerParentHidden(mapId, layerPath);
 
         if (!isInVisibleRange || parentHidden || layer?.layerStatus === 'error') {
           return false;
         }
-        return layerController.setOrToggleMapLayerVisibility(layerPath);
+        return layerController.setOrToggleLayerVisibilityIfExists(layerPath);
       },
 
       /**
@@ -120,10 +114,9 @@ const useControlActions = (layerPath: string): ControlActions => {
         event.stopPropagation();
         // Read current state values when handler executes
         const layer = getStoreLayerLegendLayerByPath(mapId, layerPath);
-        const layerInfo = getStoreMapOrderedLayerInfoByPath(mapId, layerPath);
-        const isInVisibleRange = layerInfo?.inVisibleRange || false;
-        const parentHidden = getStoreMapLayerParentHidden(mapId, layerPath);
-        const isVisible = layerInfo?.visible || false;
+        const isInVisibleRange = layer?.inVisibleRange || false;
+        const parentHidden = getStoreLayerParentHidden(mapId, layerPath);
+        const isVisible = layer?.visible || false;
 
         if (!isInVisibleRange || parentHidden || !isVisible || layer?.layerStatus === 'error') {
           return;
@@ -138,10 +131,9 @@ const useControlActions = (layerPath: string): ControlActions => {
         event.stopPropagation();
         // Read current state values when handler executes
         const layer = getStoreLayerLegendLayerByPath(mapId, layerPath);
-        const layerInfo = getStoreMapOrderedLayerInfoByPath(mapId, layerPath);
-        const isInVisibleRange = layerInfo?.inVisibleRange || false;
-        const parentHidden = getStoreMapLayerParentHidden(mapId, layerPath);
-        const isVisible = layerInfo?.visible || false;
+        const isInVisibleRange = layer?.inVisibleRange || false;
+        const parentHidden = getStoreLayerParentHidden(mapId, layerPath);
+        const isVisible = layer?.visible || false;
 
         const isZoomToLayerDisabled = !isInVisibleRange || parentHidden || !isVisible || layer?.layerStatus === 'error';
         if (isZoomToLayerDisabled) {
@@ -160,7 +152,7 @@ const useControlActions = (layerPath: string): ControlActions => {
 const useSubtitle = (layerPath: string, childPaths: string[], items: TypeLegendItem[]): string => {
   // Hooks
   const { t } = useTranslation();
-  const parentHidden = useStoreMapIsParentLayerHiddenOnMap(layerPath);
+  const parentHidden = useStoreLayerIsParentHiddenOnMap(layerPath);
 
   return useMemo(() => {
     if (parentHidden) return t('layers.parentHidden');
@@ -185,9 +177,12 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
   const hasFooterLayersTab = footerBarComponents.includes('layers');
   const hasAppBarLayersTab = appBarComponents.includes('layers');
   const hasLayersTab = hasFooterLayersTab || hasAppBarLayersTab;
+  const layerController = useLayerController();
 
   // Use navigate hook
-  const navigateToLayers = useNavigateToTab('layers', setStoreLayerSelectedLayersTabLayer);
+  const navigateToLayers = useNavigateToTab('layers', (lyrPath) => {
+    layerController.setSelectedLayerPath(lyrPath);
+  });
 
   // Create stable handler for layer navigation
   const handleNavigateToLayers = useCallback(
@@ -211,9 +206,9 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
   const layerItems = useStoreLayerItems(layerPath);
   const layerControls = useStoreLayerControls(layerPath);
   const layerStatus = useStoreLayerStatus(layerPath);
-  const isVisible = useStoreMapLayerVisibility(layerPath);
-  const isInVisibleRange = useStoreMapLayerInVisibleRange(layerPath);
-  const parentHidden = useStoreMapIsParentLayerHiddenOnMap(layerPath);
+  const isVisible = useStoreLayerVisible(layerPath);
+  const isInVisibleRange = useStoreLayerInVisibleRange(layerPath);
+  const parentHidden = useStoreLayerIsParentHiddenOnMap(layerPath);
   const highlightedLayer = useStoreLayerHighlightedLayer();
   const isFocusTrap = useStoreUIActiveTrapGeoView();
   const layerName = useStoreLayerName(layerPath) ?? layerPath;

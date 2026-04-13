@@ -11,22 +11,20 @@ import {
   useStoreDetailsSelectedLayerPath,
   useStoreDetailsCoordinateInfoEnabled,
   useStoreDetailsHideCoordinateInfoSwitch,
-  setStoreDetailsLayerDataArrayBatchLayerPathBypass,
-  setStoreDetailsSelectedLayerPath,
-  removeStoreDetailsCheckedFeature,
   LAYER_PATH_COORDINATE_INFO,
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { useStoreUIActiveAppBarTab, useStoreUIActiveFooterBarTab } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { useStoreLayerNameSet, useStoreLayerStatusSet } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import {
-  useStoreMapClickCoordinates,
-  useStoreMapAllVisibleandInRangeLayers,
-  useStoreMapOrderedLayers,
-  useStoreMapLayerQueryable,
-  useStoreMapIsParentLayerHiddenOnMapSet,
-  useStoreMapIsLayerHiddenOnMapSet,
-} from '@/core/stores/store-interface-and-intial-values/map-state';
+  useStoreLayerNameSet,
+  useStoreLayerStatusSet,
+  useStoreLayerQueryableByPaths,
+  useStoreLayerIsHiddenOnMapSet,
+  useStoreLayerIsParentHiddenOnMapSet,
+  useStoreLayerAllVisibleAndInRangeLayers,
+  useStoreLayerOrderedLayerPaths,
+} from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
+import { useStoreMapClickCoordinates } from '@/core/stores/store-interface-and-intial-values/map-state';
 import type { TypeFeatureInfoEntry, TypeLayerData, TypeMapMouseInfo } from '@/api/types/map-schema-types';
 
 import type { LayerListEntry, LayoutExposedMethods } from '@/core/components/common';
@@ -38,7 +36,7 @@ import { CONTAINER_TYPE, FEATURE_INFO_STATUS, TABS, TIMEOUT } from '@/core/utils
 import { DetailsSkeleton } from './details-skeleton';
 import { CoordinateInfo, CoordinateInfoSwitch } from './coordinate-info';
 import { logger } from '@/core/utils/logger';
-import { useMapController, useUIController } from '@/core/controllers/use-controllers';
+import { useMapController, useUIController, useDetailsController } from '@/core/controllers/use-controllers';
 
 /** Properties for the details panel component. */
 interface DetailsPanelType {
@@ -67,18 +65,19 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   const checkedFeatures = useStoreDetailsCheckedFeatures();
   const coordinateInfoEnabled = useStoreDetailsCoordinateInfoEnabled();
   const hideCoordinateInfoSwitch = useStoreDetailsHideCoordinateInfoSwitch();
-  const visibleInRangeLayers = useStoreMapAllVisibleandInRangeLayers();
-  const orderedLayers = useStoreMapOrderedLayers();
+  const visibleInRangeLayers = useStoreLayerAllVisibleAndInRangeLayers();
+  const orderedLayers = useStoreLayerOrderedLayerPaths();
   const mapClickCoordinates = useStoreMapClickCoordinates();
   const { tabId: appBarTabId, isOpen: appBarIsOpen } = useStoreUIActiveAppBarTab();
   const { tabId: footerBarTabId, isOpen: footerBarIsOpen } = useStoreUIActiveFooterBarTab();
-  const queryableByLayerPath = useStoreMapLayerQueryable(visibleInRangeLayers);
+  const queryableByLayerPath = useStoreLayerQueryableByPaths(visibleInRangeLayers);
   const layerNames = useStoreLayerNameSet();
   const layerStatuses = useStoreLayerStatusSet();
-  const layerHiddenSet = useStoreMapIsLayerHiddenOnMapSet();
-  const layerParentHiddenSet = useStoreMapIsParentLayerHiddenOnMapSet();
+  const layerHiddenSet = useStoreLayerIsHiddenOnMapSet();
+  const layerParentHiddenSet = useStoreLayerIsParentHiddenOnMapSet();
   const uiController = useUIController();
   const mapController = useMapController();
+  const detailsController = useDetailsController();
 
   // States
   const [currentFeatureIndex, setCurrentFeatureIndex] = useState<number>(0);
@@ -372,8 +371,8 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
     logger.logTraceUseEffect('DETAILS-PANEL - memoLayersList changed', memoLayersList);
 
     // Unselect the layer path if no more layers in the list
-    if (!memoLayersList.length) setStoreDetailsSelectedLayerPath(mapId, '');
-  }, [memoLayersList, mapId]);
+    if (!memoLayersList.length) detailsController.setSelectedLayerPath('');
+  }, [memoLayersList, detailsController]);
 
   /**
    * Effect used when the layers list changes.
@@ -423,8 +422,8 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
     logger.logTraceUseEffect('DETAILS-PANEL - update layer data bypass', selectedLayerPath);
 
     // Set the layer data array batch bypass to the currently selected layer
-    setStoreDetailsLayerDataArrayBatchLayerPathBypass(mapId, selectedLayerPath);
-  }, [mapId, selectedLayerPath]);
+    detailsController.setLayerDataArrayBatchLayerPathBypass(selectedLayerPath);
+  }, [detailsController, selectedLayerPath]);
 
   /**
    * Effect used to persist or alter the current layer selection based on the layers list changes
@@ -438,14 +437,13 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
     if (selectedLayerPath) {
       // Redirect to the keep selected layer path logic
       checkSelectedLayerPathList(
-        mapId,
-        setStoreDetailsLayerDataArrayBatchLayerPathBypass,
-        setStoreDetailsSelectedLayerPath,
+        (lyrPath) => detailsController.setLayerDataArrayBatchLayerPathBypass(lyrPath),
+        (lyrPath) => detailsController.setSelectedLayerPath(lyrPath),
         memoLayerSelectedItem,
         memoLayersList
       );
     }
-  }, [mapId, memoLayerSelectedItem, memoLayersList, selectedLayerPath]);
+  }, [detailsController, memoLayerSelectedItem, memoLayersList, selectedLayerPath]);
 
   // #endregion
 
@@ -459,10 +457,10 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
     // clear all highlights from features on the map in all layers
     mapController.removeHighlightedFeature('all');
     // clear checked features array
-    removeStoreDetailsCheckedFeature(mapId, 'all');
+    detailsController.removeCheckedFeature('all');
     // add the highlight to the current feature
     mapController.addHighlightedFeature(memoSelectedLayerData?.features?.[currentFeatureIndex] as TypeFeatureInfoEntry);
-  }, [checkedFeatures, currentFeatureIndex, mapId, mapController, memoSelectedLayerData?.features]);
+  }, [checkedFeatures, currentFeatureIndex, detailsController, mapController, memoSelectedLayerData?.features]);
 
   /**
    * Handles when the right panel is closed in responsive layout.
@@ -535,7 +533,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   const handleLayerChange = useCallback(
     (layerEntry: LayerListEntry): void => {
       // Set the selected layer path in the store which will in turn trigger the store listeners on this component
-      setStoreDetailsSelectedLayerPath(mapId, layerEntry.layerPath);
+      detailsController.setSelectedLayerPath(layerEntry.layerPath);
 
       // Re-highlight the current feature when panel becomes visible (layer selection makes panel visible)
       // Use setTimeout to ensure the layer data is updated first
@@ -547,7 +545,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
         }
       }, TIMEOUT.deferExecution);
     },
-    [mapId, mapController, arrayOfLayerDataBatch, hasValidGeometry]
+    [detailsController, mapController, arrayOfLayerDataBatch, hasValidGeometry]
   );
   // #endregion
 
@@ -608,7 +606,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
       // if we don't have a selected layer path with features select the first layer path with features
       if (!selectedLayerPath.length) {
         const selectedLayer = memoLayersList.find((layer) => !!layer.numOffeatures);
-        setStoreDetailsSelectedLayerPath(mapId, selectedLayer?.layerPath ?? '');
+        detailsController.setSelectedLayerPath(selectedLayer?.layerPath ?? '');
         // Ensure the info panel is visible
         layoutRef.current?.showRightPanel(true);
       }
@@ -621,9 +619,12 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
 
     // On new map click (coordinates changed), clear all highlights, checked features, and layer features
     if (coordinatesChanged) {
+      // Clear all highlights
       mapController.removeHighlightedFeature('all');
 
-      removeStoreDetailsCheckedFeature(mapId, 'all');
+      // Clear all checked features
+      detailsController.removeCheckedFeature('all');
+
       // Clear features from all layers to remove out-of-range layers from display
       arrayOfLayerDataBatch.forEach((layer) => {
         // eslint-disable-next-line no-param-reassign
@@ -633,7 +634,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
       prevMapClickCoordinates.current = mapClickCoordinates;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mapId, mapController, mapClickCoordinates, memoLayersList, coordinateInfoEnabled]);
+  }, [detailsController, mapController, mapClickCoordinates, memoLayersList, coordinateInfoEnabled]);
 
   /**
    * Clear highlights and checked features when the details panel is closed
@@ -657,10 +658,11 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
 
       // Clear all highlights
       mapController.removeHighlightedFeature('all');
+
       // Clear all checked features
-      removeStoreDetailsCheckedFeature(mapId, 'all');
+      detailsController.removeCheckedFeature('all');
     }
-  }, [mapId, mapController, footerBarTabId, footerBarIsOpen, appBarTabId, appBarIsOpen, containerType]);
+  }, [detailsController, mapController, footerBarTabId, footerBarIsOpen, appBarTabId, appBarIsOpen, containerType]);
 
   /**
    * Checks if all layers query status is processed.
@@ -702,7 +704,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
         logger.logDebug('DETAILS-PANEL - All layers have no features and coordinate info is disabled, showing right panel with guide');
 
         // Clear selection to show the guide
-        setStoreDetailsSelectedLayerPath(mapId, '');
+        detailsController.setSelectedLayerPath('');
 
         // Make sure the right panel is visible
         if (!isRightPanelVisible) {
@@ -711,7 +713,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
       }
     }
   }, [
-    mapId,
+    detailsController,
     appBarTabId,
     appBarIsOpen,
     footerBarTabId,

@@ -5,9 +5,9 @@ import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-la
 import type { PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
 import {
-  deleteStoreFeatureAllInfo,
+  deleteStoreDataTableFeatureAllInfo,
   propagateFeatureInfoDataTableToStore,
-  setStoreInitialSettings,
+  setStoreDataTableInitialSettings,
   type TypeAllFeatureInfoResultSet,
   type TypeAllFeatureInfoResultSetEntry,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
@@ -50,7 +50,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
     }
 
     if (isQueryable) {
-      this.mapViewer.controllers.uiController.showTabButton('data-table');
+      this.controllerRegistry.uiController.showTabButton('data-table');
     }
 
     // Return
@@ -72,7 +72,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
     this.resultSet[layerPath].features = undefined;
 
     // Extra initialization of settings
-    setStoreInitialSettings(this.getMapId(), layerPath);
+    setStoreDataTableInitialSettings(this.getMapId(), layerPath);
   }
 
   /**
@@ -94,8 +94,8 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
    */
   protected override onDeleteFromStore(layerPath: string): void {
     // Remove it from data table info array
-    deleteStoreFeatureAllInfo(this.getMapId(), layerPath, () => {
-      this.mapViewer.controllers.uiController.hideTabButton('data-table');
+    deleteStoreDataTableFeatureAllInfo(this.getMapId(), layerPath, () => {
+      this.controllerRegistry.uiController.hideTabButton('data-table');
     });
   }
 

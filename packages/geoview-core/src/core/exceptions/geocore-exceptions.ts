@@ -33,23 +33,23 @@ export class LayerGeoCoreError extends GeoViewError {
 }
 
 /**
- * Error thrown when one or more layer UUIDs are not found when queried.
+ * Error thrown when the Geocore service fails to respond.
  */
-export class LayerGeoCoreUUIDNotFoundError extends LayerGeoCoreError {
+export class LayerGeoCoreServiceFailError extends LayerGeoCoreError {
   /**
-   * Constructs a new UUID-not-found error for a given map and list of UUIDs.
+   * Constructs a new geocore service fail error for a given UUIDs.
    *
    * @param uuids - The list of UUIDs that could not be found
    * @param cause - The original error that caused this one
    */
   constructor(uuids: string[], cause: Error) {
-    super(uuids, 'error.geocore.uuidNotFound', uuids, { cause });
+    super(uuids, 'error.geocore.serviceFail', uuids, { cause });
 
     // Set a custom name for the error type to differentiate it from other error types
-    this.name = 'LayerGeoCoreUUIDNotFoundError';
+    this.name = 'LayerGeoCoreServiceFailError';
 
     // Ensure correct inheritance (important for transpilation targets)
-    Object.setPrototypeOf(this, LayerGeoCoreUUIDNotFoundError.prototype);
+    Object.setPrototypeOf(this, LayerGeoCoreServiceFailError.prototype);
   }
 }
 
@@ -61,9 +61,9 @@ export class LayerGeoCoreInvalidResponseError extends LayerGeoCoreError {
    * Constructs a new LayerGeoCoreInvalidResponseError for a given map and UUIDs.
    *
    * @param uuids - The list of UUIDs that caused an invalid response by GeoCore
-   * @param errorMessage - The error message from the invalid response
+   * @param errorMessage - The error message explaining the invalid response
    */
-  constructor(uuids: string[], errorMessage: unknown) {
+  constructor(uuids: string[], errorMessage: string) {
     super(uuids, 'error.geocore.invalidResponse', [errorMessage, uuids.toString()]);
 
     // Set a custom name for the error type to differentiate it from other error types

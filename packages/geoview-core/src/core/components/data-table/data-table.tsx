@@ -43,12 +43,7 @@ import {
   useStoreLayerFilterClass,
   useStoreLayerName,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import {
-  useStoreDataTableLayerSettings,
-  setStoreColumnFilterModesEntry,
-  setStoreColumnsFiltersVisibility,
-  setStoreSelectedFeature,
-} from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { useStoreDataTableLayerSettings } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { useStoreTimeSliderFilter } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 import { useStoreAppDisplayLanguage, useStoreAppShowUnsymbolizedFeatures } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { DateMgt } from '@/core/utils/date-mgt';
@@ -160,7 +155,7 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
   const handleToggleColumnFilters = (updaterOrValue: boolean | ((prev: boolean) => boolean)): void => {
     const newValue = typeof updaterOrValue === 'function' ? updaterOrValue(showColumnFilters) : updaterOrValue;
     setShowColumnFilters(newValue);
-    setStoreColumnsFiltersVisibility(mapId, newValue, layerPath);
+    dataTableController.setColumnsFiltersVisibility(layerPath, newValue);
   };
 
   // #endregion
@@ -562,7 +557,7 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
             aria-label={t('dataTable.details')}
             tooltipPlacement="top"
             onClick={() => {
-              setStoreSelectedFeature(mapId, feature);
+              dataTableController.setSelectedFeature(feature);
               uiController.enableFocusTrap({ activeElementId: 'featureDetailDataTable', callbackElementId: featureDetailsButtonId });
             }}
           >
@@ -897,8 +892,8 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
     // Log
     logger.logTraceUseEffect('DATA-TABLE - columnFilterFns', columnFilterFns);
 
-    setStoreColumnFilterModesEntry(mapId, columnFilterFns, layerPath);
-  }, [mapId, columnFilterFns, layerPath]);
+    dataTableController.setColumnFilterModesEntry(layerPath, columnFilterFns);
+  }, [dataTableController, columnFilterFns, layerPath]);
 
   /**
    * Updates the map when the filter map switch is toggled.

@@ -16,6 +16,7 @@ import {
   type TypeLegendResultSet,
   type TypeLegendResultSetEntry,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import type { LayerDomain } from '@/core/domains/layer-domain';
 import type { StyleChangedDelegate, StyleChangedEvent } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
@@ -26,7 +27,6 @@ import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import { GVEsriFeature } from '@/geo/layer/gv-layers/vector/gv-esri-feature';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import type { MapViewer } from '@/geo/map/map-viewer';
-import type { LayerSetController } from '@/core/controllers/layer-set-controller';
 
 /**
  * A Layer-set working with the LayerSetController at handling a result set of registered layers and synchronizing
@@ -36,9 +36,6 @@ import type { LayerSetController } from '@/core/controllers/layer-set-controller
 export class LegendsLayerSet extends AbstractLayerSet {
   /** The resultSet object as existing in the base class, retyped here as a TypeLegendResultSet */
   declare resultSet: TypeLegendResultSet;
-
-  /** The layer set controller */
-  protected layerSetController: LayerSetController;
 
   /** A bounded reference to the handle layer status changed */
   #boundedHandleLayerStatusChanged: LayerStatusChangedDelegate;
@@ -53,12 +50,11 @@ export class LegendsLayerSet extends AbstractLayerSet {
    * Constructs a Legends LayerSet to manage layers legends.
    *
    * @param mapViewer - The map viewer
-   * @param layerSetController - The layer set controller
+   * @param controllerRegistry - The controller registry
    * @param layerDomain - The layer domain
    */
-  constructor(mapViewer: MapViewer, layerSetController: LayerSetController, layerDomain: LayerDomain) {
-    super(mapViewer, layerDomain);
-    this.layerSetController = layerSetController;
+  constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry, layerDomain: LayerDomain) {
+    super(mapViewer, controllerRegistry, layerDomain);
     this.#boundedHandleLayerStatusChanged = this.#handleLayerStatusChanged.bind(this);
     this.#boundedHandleLayerStyleChanged = this.#handleLayerStyleChanged.bind(this);
     this.#boundedHandleLayerStyleApplied = this.#handleStyleApplied.bind(this);
@@ -257,7 +253,7 @@ export class LegendsLayerSet extends AbstractLayerSet {
    */
   #propagateToStore(resultSetEntry: TypeLegendResultSetEntry): void {
     // Propagate
-    this.layerSetController.propagateLegendToStore(resultSetEntry);
+    this.controllerRegistry.layerSetController.propagateLegendToStore(resultSetEntry);
   }
 
   /**

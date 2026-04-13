@@ -17,6 +17,7 @@ import type { ConfigBaseClass } from '@/api/config/validation-classes/config-bas
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import type { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
+import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import { LayerNotEsriDynamicError, LayerNotGeoJsonError, LayerWrongTypeError } from '@/core/exceptions/layer-exceptions';
 import {
   getStoreLayerBounds,
@@ -24,12 +25,15 @@ import {
   getStoreLayerHighlightedLayer,
   getStoreLayerLegendLayerByPath,
   getStoreLayerLegendLayers,
-  setStoreHighlightedLayer,
+  getStoreLayerOrderedLayerIndexByPath,
+  getStoreLayerOrderedLayerPaths,
+  setStoreLayerAllMapLayerCollapsed,
   setStoreLayerBoundsForLayerAndParentsAndForget,
   setStoreLayerDateTemporal,
   setStoreLayerDeletionStartTime,
   setStoreLayerDisplayDateFormat,
   setStoreLayerDisplayDateFormatShort,
+  setStoreLayerHighlightedLayer,
   setStoreLayerHoverable,
   setStoreLayerItemVisibility,
   setStoreLayerMosaicRule,
@@ -39,49 +43,51 @@ import {
   setStoreLayersAreLoading,
   setStoreLayerTextVisibility,
   setStoreLayerWmsStyle,
-  setStoreLegendLayersDirectly,
-  setStoreOpacity,
-} from '@/core/stores/store-interface-and-intial-values/layer-state';
-import {
-  getStoreMapConfigCorePackagesConfig,
-  getStoreMapOrderedLayerIndexByPath,
-  getStoreMapOrderedLayerInfo,
+  setStoreLayerOpacity,
+  setStoreLayerDisplayState,
   setStoreLayerInVisibleRange,
-  setStoreMapLayerHoverable,
-  setStoreMapLayerQueryable,
-  setStoreMapLayerVisibility,
-  setStoreMapOrderedLayerDirectly,
-  utilFindMapLayerAndChildrenFromOrderedInfo,
-  type TypeOrderedLayerInfo,
-} from '@/core/stores/store-interface-and-intial-values/map-state';
-import { getStoreShowLayerHighlightLayerBbox } from '@/core/stores/store-interface-and-intial-values/app-state';
+  setStoreLayerVisibility,
+  setStoreLayerLegendCollapsed,
+  setStoreLayerOrderedLayers,
+  setStoreLayerSelectedLayersTabLayer,
+  setStoreLegendLayersDirectly,
+  utilFindLayerAndChildrenPaths,
+} from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { getStoreMapConfigCorePackagesConfig } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { getStoreAppShowLayerHighlightLayerBbox } from '@/core/stores/store-interface-and-intial-values/app-state';
 import {
   getStoreTimeSliderFilter,
   isStoreTimeSliderInitialized,
   type TypeTimeSliderProps,
 } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
-import { getStoreTableFilter } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { getStoreDataTableFilter } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import type {
   DomainLayerHoverableChangedDelegate,
   DomainLayerHoverableChangedEvent,
   DomainLayerBaseDelegate,
   DomainLayerBaseEvent,
+  DomainLayerItemVisibilityChangedDelegate,
+  DomainLayerItemVisibilityChangedEvent,
+  DomainLayerMosaicRuleChangedDelegate,
+  DomainLayerMosaicRuleChangedEvent,
   DomainLayerNameChangedDelegate,
   DomainLayerNameChangedEvent,
   DomainLayerOpacityChangedDelegate,
   DomainLayerOpacityChangedEvent,
   DomainLayerQueryableChangedDelegate,
   DomainLayerQueryableChangedEvent,
+  DomainLayerRasterFunctionChangedDelegate,
+  DomainLayerRasterFunctionChangedEvent,
+  DomainLayerRegisteredDelegate,
+  DomainLayerRegisteredEvent,
   DomainLayerStatusChangedDelegate,
   DomainLayerStatusChangedEvent,
   DomainLayerVisibleChangedDelegate,
   DomainLayerVisibleChangedEvent,
-  DomainLayerItemVisibilityChangedDelegate,
-  DomainLayerItemVisibilityChangedEvent,
-  DomainLayerRegisteredDelegate,
-  DomainLayerRegisteredEvent,
   DomainLayerWMSImageLoadRescueEvent,
   DomainLayerWMSImageLoadRescueDelegate,
+  DomainLayerWMSStyleChangedDelegate,
+  DomainLayerWMSStyleChangedEvent,
   DomainLayerGroupChildrenUpdatedEvent,
   DomainLayerGroupChildrenUpdatedDelegate,
   DomainLayerMessageDelegate,
@@ -90,7 +96,7 @@ import type {
 } from '@/core/domains/layer-domain';
 import { doTimeout, isValidUUID, type DelayJob } from '@/core/utils/utilities';
 import type { TemporalMode, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
-import type { TypeLegendItem } from '@/core/components/layers/types';
+import type { TypeLayersViewDisplayState, TypeLegendItem } from '@/core/components/layers/types';
 import { logger } from '@/core/utils/logger';
 import { NoBoundsError } from '@/core/exceptions/geoview-exceptions';
 import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
@@ -181,6 +187,15 @@ export class LayerController extends AbstractMapViewerController {
   /** The bounded reference to the handle WMS Layer Image Load Callbacks */
   #boundedHandleDomainLayerWMSImageLoadRescue: DomainLayerWMSImageLoadRescueDelegate;
 
+  /** The bounded reference to the handle WMS style changed */
+  #boundedHandleDomainLayerWMSStyleChanged: DomainLayerWMSStyleChangedDelegate;
+
+  /** The bounded reference to the handle raster function changed */
+  #boundedHandleDomainLayerRasterFunctionChanged: DomainLayerRasterFunctionChangedDelegate;
+
+  /** The bounded reference to the handle mosaic rule changed */
+  #boundedHandleDomainLayerMosaicRuleChanged: DomainLayerMosaicRuleChangedDelegate;
+
   /** Callback delegates for the layer item visibility toggled event */
   #onLayerItemVisibilityToggledHandlers: ControllerLayerItemVisibilityChangedDelegate[] = [];
 
@@ -188,10 +203,11 @@ export class LayerController extends AbstractMapViewerController {
    * Creates an instance of LayerController.
    *
    * @param mapViewer - The map viewer instance to associate with this controller
+   * @param controllerRegistry - The controller registry for accessing sibling controllers
    * @param layerDomain - The layer domain instance to associate with this controller
    */
-  constructor(mapViewer: MapViewer, layerDomain: LayerDomain) {
-    super(mapViewer);
+  constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry, layerDomain: LayerDomain) {
+    super(mapViewer, controllerRegistry);
 
     // Keep the domain internally
     this.#layerDomain = layerDomain;
@@ -249,6 +265,15 @@ export class LayerController extends AbstractMapViewerController {
 
     // Keep a bounded reference to the handle WMS Layer Image Load Callbacks
     this.#boundedHandleDomainLayerWMSImageLoadRescue = this.#handleDomainLayerWMSImageLoadRescue.bind(this);
+
+    // Keep a bounded reference to the handle WMS style changed
+    this.#boundedHandleDomainLayerWMSStyleChanged = this.#handleDomainLayerWMSStyleChanged.bind(this);
+
+    // Keep a bounded reference to the handle layer raster function changed
+    this.#boundedHandleDomainLayerRasterFunctionChanged = this.#handleDomainLayerRasterFunctionChanged.bind(this);
+
+    // Keep a bounded reference to the handle layer mosaic rule changed
+    this.#boundedHandleDomainLayerMosaicRuleChanged = this.#handleDomainLayerMosaicRuleChanged.bind(this);
   }
 
   // #region OVERRIDES
@@ -310,12 +335,30 @@ export class LayerController extends AbstractMapViewerController {
 
     // Listens when a WMS image load rescue event occurs
     this.#layerDomain.onLayerWMSImageLoadRescue(this.#boundedHandleDomainLayerWMSImageLoadRescue);
+
+    // Listens when a WMS style is changed in the Layer domain
+    this.#layerDomain.onLayerWmsStyleChanged(this.#boundedHandleDomainLayerWMSStyleChanged);
+
+    // Listens when a layer raster function is changed in the Layer domain
+    this.#layerDomain.onLayerRasterFunctionChanged(this.#boundedHandleDomainLayerRasterFunctionChanged);
+
+    // Listens when a layer mosaic rule is changed in the Layer domain
+    this.#layerDomain.onLayerMosaicRuleChanged(this.#boundedHandleDomainLayerMosaicRuleChanged);
   }
 
   /**
    * Unhooks the controller from the action.
    */
   protected override onUnhook(): void {
+    // Unhooks when a layer mosaic rule is changed in the Layer domain
+    this.#layerDomain.offLayerMosaicRuleChanged(this.#boundedHandleDomainLayerMosaicRuleChanged);
+
+    // Unhooks when a layer raster function is changed in the Layer domain
+    this.#layerDomain.offLayerRasterFunctionChanged(this.#boundedHandleDomainLayerRasterFunctionChanged);
+
+    // Unhooks when a WMS style is changed in the Layer domain
+    this.#layerDomain.offLayerWmsStyleChanged(this.#boundedHandleDomainLayerWMSStyleChanged);
+
     // Unhooks when a WMS image load rescue event occurs
     this.#layerDomain.offLayerWMSImageLoadRescue(this.#boundedHandleDomainLayerWMSImageLoadRescue);
 
@@ -577,6 +620,30 @@ export class LayerController extends AbstractMapViewerController {
 
   // #endregion PUBLIC METHODS - DOMAIN SIMPLE GETTERS
 
+  // #region PUBLIC METHODS - UI RELATED
+
+  /**
+   * Sets the layer panel display state.
+   *
+   * @param displayState - The new display state for the layers view
+   */
+  setLayerDisplayState(displayState: TypeLayersViewDisplayState): void {
+    // Save in the store
+    setStoreLayerDisplayState(this.getMapId(), displayState);
+  }
+
+  /**
+   * Sets the selected layer path in the layers tab.
+   *
+   * @param layerPath - The layer path to select
+   */
+  setSelectedLayerPath(layerPath: string): void {
+    // Save in the store
+    setStoreLayerSelectedLayersTabLayer(this.getMapId(), layerPath);
+  }
+
+  // #endregion PUBLIC METHODS - UI RELATED
+
   // #region PUBLIC METHODS
 
   /**
@@ -756,27 +823,6 @@ export class LayerController extends AbstractMapViewerController {
   }
 
   /**
-   * Sets or toggles the visibility of a specific layer within a map.
-   *
-   * If the layer exists at the provided layer path for the given map, the method delegates
-   * the visibility change to the map viewer's layer API. If `newValue` is provided, the layer
-   * visibility is explicitly set to that value; otherwise, the visibility is toggled.
-   *
-   * @param layerPath - The path of the layer whose visibility is being changed
-   * @param newValue - Optional. The new visibility value. If omitted, the visibility is toggled
-   * @returns The resulting visibility state of the layer after the operation, or `false`
-   * if the layer does not exist at the given path.
-   */
-  setOrToggleMapLayerVisibility(layerPath: string, newValue?: boolean): boolean {
-    // If the GV layer exists at the layer path
-    if (this.getGeoviewLayerIfExists(layerPath)) {
-      // Redirect to set or toggle the layer visibility and return the resulting visibility
-      return this.setOrToggleLayerVisibility(layerPath, newValue);
-    }
-    return false;
-  }
-
-  /**
    * Sets or toggles the visibility of a layer within the current map.
    *
    * Retrieves the current visibility of the layer, determines the resulting visibility
@@ -807,65 +853,78 @@ export class LayerController extends AbstractMapViewerController {
   }
 
   /**
-   * Sets the visibility of all geoview layers on the map.
+   * Sets or toggles the visibility of a specific layer within a map.
    *
-   * @param newValue - The new visibility
+   * If the layer exists at the provided layer path for the given map, the method delegates
+   * the visibility change to the map viewer's layer API. If `newValue` is provided, the layer
+   * visibility is explicitly set to that value; otherwise, the visibility is toggled.
+   *
+   * @param layerPath - The path of the layer whose visibility is being changed
+   * @param newValue - Optional. The new visibility value. If omitted, the visibility is toggled
+   * @returns The resulting visibility state of the layer after the operation, or `false`
+   * if the layer does not exist at the given path.
+   */
+  setOrToggleLayerVisibilityIfExists(layerPath: string, newValue?: boolean): boolean {
+    // TODO: CHECK - Validate that when this function is called it wouldn't simply be better to
+    // TO.DOCONT: call the 'setOrToggleLayerVisibility' function instead and let it throw an exception?
+    // If the GV layer exists at the layer path
+    if (this.getGeoviewLayerIfExists(layerPath)) {
+      // Redirect to set or toggle the layer visibility and return the resulting visibility
+      return this.setOrToggleLayerVisibility(layerPath, newValue);
+    }
+    return false;
+  }
+
+  /**
+   * Sets the visibility of all GeoView layers on the map, including basemaps.
+   *
+   * Iterates through every registered GeoView layer and applies the provided
+   * visibility value unconditionally via `setOrToggleLayerVisibility`.
+   *
+   * @param newValue - The visibility state to apply to all layers (`true` to show, `false` to hide)
    */
   setAllLayersVisibility(newValue: boolean): void {
-    // For each layer entries
-    this.getLayerEntryLayerPaths().forEach((layerPath) => {
-      // If the layer path has a corresponding Geoview layer (it's possible that there's a layer entry config without necessarily a GV layer)
-      if (this.getGeoviewLayerIfExists(layerPath)) {
-        // There is a geoview layer at this layer path
-        this.setOrToggleLayerVisibility(layerPath, newValue);
-      }
+    // For each layer
+    this.getGeoviewLayers().forEach((layer) => {
+      // There is a geoview layer at this layer path
+      this.setOrToggleLayerVisibility(layer.getLayerPath(), newValue);
     });
   }
 
   /**
-   * Sets the visibility of the Geoview basemap layer.
+   * Sets the visibility of basemap layers only.
    *
-   * @param newVisibility - The visibility state to apply to the basemap layer (`true` to show, `false` to hide)
+   * Iterates through all GeoView layers and applies the provided visibility
+   * value only to layers marked as basemaps (`useAsBasemap === true`). Layers
+   * whose visibility already matches the desired state are skipped.
+   *
+   * @param newVisibility - The visibility state to apply to basemap layers (`true` to show, `false` to hide)
    */
-  setVisibilityOfGeoviewBasemapLayers(newVisibility: boolean): void {
-    // For each layer entries
+  setAllLayersVisibilityBasemapsOnly(newVisibility: boolean): void {
+    // For each layer
     this.getGeoviewLayers().forEach((layer) => {
-      if (layer.getLayerConfig().getGeoviewLayerConfig().useAsBasemap === true && layer.getVisible() !== newVisibility) {
+      if (layer.getLayerConfig().getGeoviewLayerConfig().useAsBasemap && layer.getVisible() !== newVisibility) {
         this.setOrToggleLayerVisibility(layer.getLayerPath(), newVisibility);
       }
     });
   }
 
   /**
-   * Sets the visibility of **all layers** in a given map.
+   * Sets the visibility of all non-basemap layers.
    *
-   * Iterates through all GeoView layers associated with the specified map ID and
-   * applies the provided visibility value. Only layers whose current visibility
-   * differs from the desired state will be updated.
+   * Iterates through all GeoView layers and applies the provided visibility
+   * value only to layers that are not marked as basemaps (`useAsBasemap !== true`).
+   * Layers whose visibility already matches the desired state are skipped.
    *
-   * @param newVisibility - The visibility state to apply to all layers (`true` to show, `false` to hide)
+   * @param newVisibility - The visibility state to apply to non-basemap layers (`true` to show, `false` to hide)
    */
-  setAllMapLayerVisibility(newVisibility: boolean): void {
-    // For each layer entries
+  setAllLayersVisibilityExceptBasemaps(newVisibility: boolean): void {
+    // For each layer
     this.getGeoviewLayers().forEach((layer) => {
       if (layer.getLayerConfig().getGeoviewLayerConfig().useAsBasemap !== true && layer.getVisible() !== newVisibility) {
         this.setOrToggleLayerVisibility(layer.getLayerPath(), newVisibility);
       }
     });
-  }
-
-  /**
-   * Sets the visibility of a layer in the store ordered layer info.
-   *
-   * @param layerPath - The layer path of the layer to change
-   * @param visibility - The visibility to set
-   */
-  setMapLayerVisibility(layerPath: string, visibility: boolean): void {
-    // Save to the store
-    setStoreMapLayerVisibility(this.getMapId(), layerPath, visibility);
-
-    // Update the z indices
-    this.setLayerZIndices();
   }
 
   /**
@@ -934,100 +993,135 @@ export class LayerController extends AbstractMapViewerController {
    * Sets Z index for layers.
    */
   setLayerZIndices(): void {
-    const reversedLayers = [...getStoreMapOrderedLayerInfo(this.getMapId())].reverse();
-    reversedLayers.forEach((orderedLayerInfo, index) => {
-      const gvLayer = this.getGeoviewLayerIfExists(orderedLayerInfo.layerPath);
+    const reversedLayers = [...getStoreLayerOrderedLayerPaths(this.getMapId())].reverse();
+    reversedLayers.forEach((layerPath, index) => {
+      const gvLayer = this.getGeoviewLayerIfExists(layerPath);
       gvLayer?.setZIndex(index + 10);
     });
   }
 
   /**
-   * Replaces a layer in the orderedLayerInfo array.
+   * Toggles the legend collapsed state for a layer in the store.
+   *
+   * @param layerPath - The path of the layer to toggle the legend collapsed state for
+   */
+  toggleLegendCollapsed(layerPath: string): void {
+    // Get the current state
+    const legendCollapsed = getStoreLayerLegendLayerByPath(this.getMapId(), layerPath)?.legendCollapsed ?? false;
+
+    // Redirect
+    this.setLegendCollapsed(layerPath, !legendCollapsed);
+  }
+
+  /**
+   * Sets the legend collapsed state for a layer in the store.
+   *
+   * @param layerPath - The path of the layer to set the legend collapsed state for
+   * @param legendCollapsed - The new collapsed state of the legend
+   */
+  setLegendCollapsed(layerPath: string, legendCollapsed: boolean): void {
+    // Save in the store
+    setStoreLayerLegendCollapsed(this.getMapId(), layerPath, legendCollapsed);
+  }
+
+  /**
+   * Sets the legend collapsed state for all layers in the store.
+   *
+   * @param newCollapsed - The new collapsed state of the legends
+   */
+  setAllMapLayerCollapsed(newCollapsed: boolean): void {
+    // Save in the store
+    setStoreLayerAllMapLayerCollapsed(this.getMapId(), newCollapsed);
+  }
+
+  /**
+   * Replaces a layer's paths in the ordered layers array.
    *
    * @param layerConfig - The config of the layer to add
-   * @param layerPathToReplace - The layerPath of the info to replace
+   * @param layerPathToReplace - The layerPath of the entry to replace
    */
-  replaceOrderedLayerInfo(layerConfig: ConfigBaseClass, layerPathToReplace?: string): void {
-    const orderedLayerInfo = getStoreMapOrderedLayerInfo(this.getMapId());
+  replaceOrderedLayerPaths(layerConfig: ConfigBaseClass, layerPathToReplace?: string): void {
+    const orderedLayers = [...getStoreLayerOrderedLayerPaths(this.getMapId())];
     const layerPath = layerConfig.getGeoviewLayerId() ? `${layerConfig.getGeoviewLayerId()}/base-group` : layerConfig.layerPath;
     const pathToSearch = layerPathToReplace || layerPath;
-    const index = getStoreMapOrderedLayerIndexByPath(this.getMapId(), pathToSearch);
-    const replacedLayers = utilFindMapLayerAndChildrenFromOrderedInfo(pathToSearch, orderedLayerInfo);
+    const index = getStoreLayerOrderedLayerIndexByPath(this.getMapId(), pathToSearch);
+    const replacedLayers = utilFindLayerAndChildrenPaths(pathToSearch, orderedLayers);
 
-    const newOrderedLayerInfo = AbstractMapViewerController.generateArrayOfLayerOrderInfo(layerConfig);
-    orderedLayerInfo.splice(index, replacedLayers.length, ...newOrderedLayerInfo);
+    const newLayerPaths = AbstractMapViewerController.generateOrderedLayerPaths(layerConfig);
+    orderedLayers.splice(index, replacedLayers.length, ...newLayerPaths);
 
     // Save in the store
-    setStoreMapOrderedLayerDirectly(this.getMapId(), orderedLayerInfo);
+    setStoreLayerOrderedLayers(this.getMapId(), orderedLayers);
 
     // Update the z indices
     this.setLayerZIndices();
   }
 
   /**
-   * Adds a new layer to the orderedLayerInfo array using a layer config.
+   * Adds a new layer to the ordered layers array using a layer config.
    *
    * @param geoviewLayerConfig - The config of the layer to add
+   * @param index - Optional position to insert at
    */
-  addOrderedLayerInfoByConfig(geoviewLayerConfig: TypeGeoviewLayerConfig | TypeLayerEntryConfig, index?: number): void {
-    const orderedLayerInfo = getStoreMapOrderedLayerInfo(this.getMapId());
+  addOrderedLayerPathsByConfig(geoviewLayerConfig: TypeGeoviewLayerConfig | TypeLayerEntryConfig, index?: number): void {
+    const orderedLayers = [...getStoreLayerOrderedLayerPaths(this.getMapId())];
 
-    const newOrderedLayerInfo = AbstractMapViewerController.generateArrayOfLayerOrderInfo(geoviewLayerConfig);
-    if (!index) orderedLayerInfo.unshift(...newOrderedLayerInfo);
-    else orderedLayerInfo.splice(index, 0, ...newOrderedLayerInfo);
+    const newLayerPaths = AbstractMapViewerController.generateOrderedLayerPaths(geoviewLayerConfig);
+    if (!index) orderedLayers.unshift(...newLayerPaths);
+    else orderedLayers.splice(index, 0, ...newLayerPaths);
 
     // Save in the store
-    setStoreMapOrderedLayerDirectly(this.getMapId(), orderedLayerInfo);
+    setStoreLayerOrderedLayers(this.getMapId(), orderedLayers);
 
     // Update the z indices
     this.setLayerZIndices();
   }
 
   /**
-   * Adds new layer info to the orderedLayerInfo array.
+   * Adds a new layer path to the ordered layers array.
    *
-   * @param layerInfo - The ordered layer info to add
+   * @param layerPath - The layer path to add
+   * @param index - Optional position to insert at
    */
-  addOrderedLayerInfo(layerInfo: TypeOrderedLayerInfo, index?: number): void {
-    const orderedLayerInfo = getStoreMapOrderedLayerInfo(this.getMapId());
-    if (!index) orderedLayerInfo.unshift(layerInfo);
-    else orderedLayerInfo.splice(index, 0, layerInfo);
+  addOrderedLayerPath(layerPath: string, index?: number): void {
+    const orderedLayers = [...getStoreLayerOrderedLayerPaths(this.getMapId())];
+    if (!index) orderedLayers.unshift(layerPath);
+    else orderedLayers.splice(index, 0, layerPath);
 
     // Save in store
-    setStoreMapOrderedLayerDirectly(this.getMapId(), orderedLayerInfo);
+    setStoreLayerOrderedLayers(this.getMapId(), orderedLayers);
 
     // Update the z indices
     this.setLayerZIndices();
   }
 
   /**
-   * Removes a layer from the orderedLayerInfo array.
+   * Removes a layer from the ordered layers array.
    *
    * @param layerPath - The path of the layer to remove
    * @param removeSublayers - Should sublayers be removed
    */
-  removeOrderedLayerInfo(layerPath: string, removeSublayers: boolean = true): void {
-    const orderedLayerInfo = getStoreMapOrderedLayerInfo(this.getMapId());
-    const newOrderedLayerInfo = removeSublayers
-      ? orderedLayerInfo.filter((layerInfo) => !layerInfo.layerPath.startsWith(`${layerPath}/`) && !(layerInfo.layerPath === layerPath))
-      : orderedLayerInfo.filter((layerInfo) => !(layerInfo.layerPath === layerPath));
+  removeOrderedLayerPath(layerPath: string, removeSublayers: boolean = true): void {
+    const orderedLayers = getStoreLayerOrderedLayerPaths(this.getMapId());
+    const newOrderedLayers = removeSublayers
+      ? orderedLayers.filter((path) => !path.startsWith(`${layerPath}/`) && path !== layerPath)
+      : orderedLayers.filter((path) => path !== layerPath);
 
     // Save in store
-    setStoreMapOrderedLayerDirectly(this.getMapId(), newOrderedLayerInfo);
+    setStoreLayerOrderedLayers(this.getMapId(), newOrderedLayers);
 
     // Update the z indices
     this.setLayerZIndices();
   }
 
   /**
-   * Updates the ordered layer info in the store and recalculates layer Z indices.
+   * Updates the ordered layers in the store and recalculates layer Z indices.
    *
-   * @param orderedLayerInfo - The new ordered layer info array
-   * @deprecated This function shouldn't exist as it breaks the separation of concern between the controller and the store implementation.
+   * @param orderedLayers - The new ordered layers array
    */
-  setMapOrderedLayerInfoDirectly(orderedLayerInfo: TypeOrderedLayerInfo[]): void {
+  setMapOrderedLayersDirectly(orderedLayers: string[]): void {
     // Save in store
-    setStoreMapOrderedLayerDirectly(this.getMapId(), orderedLayerInfo);
+    setStoreLayerOrderedLayers(this.getMapId(), orderedLayers);
 
     // Update the z indices
     this.setLayerZIndices();
@@ -1061,15 +1155,6 @@ export class LayerController extends AbstractMapViewerController {
 
     // Update the raster function
     layer.setRasterFunction(rasterFunctionId);
-
-    //TODO: REFACTOR - The function should stop here and an event should be raised by the domain to the controller to manage the store
-    //TO.DOCONT: Same pattern as setLayerName, setLayerOpacity, etc, etc
-
-    // Update the store
-    setStoreLayerRasterFunction(this.getMapId(), layerPath, rasterFunctionId);
-
-    // Trigger legend re-query through the layer set system (forced refresh)
-    this.getControllersRegistry().layerSetController.legendsLayerSet.queryLegend(layer, true);
   }
 
   /**
@@ -1108,22 +1193,17 @@ export class LayerController extends AbstractMapViewerController {
    * @param layerPath - The layer path
    * @param mosaicRule - The mosaic rule to apply or undefined to remove it
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
+   * @throws {LayerWrongTypeError} When the layer is not an ESRI Image layer
    */
   setLayerMosaicRule(layerPath: string, mosaicRule: TypeMosaicRule | undefined): void {
+    // Get the layer
     const layer = this.getGeoviewLayer(layerPath);
-    if (!(layer instanceof GVEsriImage)) return;
+
+    // Check if it's the right type
+    if (!(layer instanceof GVEsriImage)) throw new LayerWrongTypeError(layerPath, layer.getLayerName());
 
     // Update the mosaic rule
     layer.setMosaicRule(mosaicRule);
-
-    //TODO: REFACTOR - The function should stop here and an event should be raised by the domain to the controller to manage the store
-    //TO.DOCONT: Same pattern as setLayerName, setLayerOpacity, etc, etc
-
-    // Update the store
-    setStoreLayerMosaicRule(this.getMapId(), layerPath, mosaicRule);
-
-    // Trigger legend re-query through the layer set system
-    this.getControllersRegistry().layerSetController.legendsLayerSet.queryLegend(layer, true);
   }
 
   /**
@@ -1171,7 +1251,7 @@ export class LayerController extends AbstractMapViewerController {
     const classFilter = layer.getFilterFromStyle();
 
     // The data table filter if any
-    const dataFilter = getStoreTableFilter(this.getMapId(), layerPath);
+    const dataFilter = getStoreDataTableFilter(this.getMapId(), layerPath);
 
     // If the TimeSlider is initialized
     let timeFilter: string | undefined;
@@ -1254,7 +1334,7 @@ export class LayerController extends AbstractMapViewerController {
     const opacity = layerConfig.getInitialSettings()?.states?.opacity ?? 1; // default: 1
     const visibility = layerConfig.getInitialSettings()?.states?.visible ?? true; // default: true
     this.setLayerOpacity(layerPath, opacity);
-    this.setOrToggleMapLayerVisibility(layerPath, visibility);
+    this.setOrToggleLayerVisibility(layerPath, visibility);
 
     if (visibility) {
       // Return the promise that all items visibility will be renderered if layer is set to visible
@@ -1284,12 +1364,9 @@ export class LayerController extends AbstractMapViewerController {
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
    * @throws {LayerWrongTypeError} When the layer was of wrong type
    */
-  async setItemVisibility(layerPath: string, item: TypeLegendItem, visible: boolean, waitForRender: boolean): Promise<void> {
-    // Get registered layer config
-    const layer = this.getGeoviewLayerRegular(layerPath);
-
-    // Set it
-    await layer.setStyleItemVisibility(item, visible, waitForRender);
+  setItemVisibility(layerPath: string, item: TypeLegendItem, visible: boolean, waitForRender: boolean): Promise<void> {
+    // Get registered layer and set visibility
+    return this.getGeoviewLayerRegular(layerPath).setStyleItemVisibility(item, visible, waitForRender);
   }
 
   /**
@@ -1304,7 +1381,7 @@ export class LayerController extends AbstractMapViewerController {
    * @returns A promise that resolves once the visibility change has been applied
    */
   toggleItemVisibility(layerPath: string, item: TypeLegendItem, waitForRender: boolean): Promise<void> {
-    // Redirect to layer API
+    // Redirect to controller
     return this.setItemVisibility(layerPath, item, !item.isVisible, waitForRender);
   }
 
@@ -1435,7 +1512,7 @@ export class LayerController extends AbstractMapViewerController {
     const highlightedLayerpath = this.changeOrRemoveLayerHighlight(layerPath, currentHighlight);
 
     // Save to the store
-    setStoreHighlightedLayer(this.getMapId(), highlightedLayerpath);
+    setStoreLayerHighlightedLayer(this.getMapId(), highlightedLayerpath);
   }
 
   /**
@@ -1494,7 +1571,7 @@ export class LayerController extends AbstractMapViewerController {
 
     // Get bounds and highlight a bounding box for the layer (if true in global settings)
     const bounds = getStoreLayerBounds(this.getMapId(), layerPath);
-    if (bounds && getStoreShowLayerHighlightLayerBbox(this.getMapId()))
+    if (bounds && getStoreAppShowLayerHighlightLayerBbox(this.getMapId()))
       this.getControllersRegistry().mapController.highlightBBox(bounds, true);
 
     return layerPath;
@@ -1686,25 +1763,21 @@ export class LayerController extends AbstractMapViewerController {
    * Sets the WMS style for a WMS layer.
    *
    * @param layerPath - The layer path
-   * @param wmsStyle - The WMS style to apply, if any
+   * @param wmsStyleName - The WMS style name to apply
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
+   * @throws {LayerWrongTypeError} When the layer is not a WMS layer
    */
   setLayerWmsStyle(layerPath: string, wmsStyleName: string | undefined): void {
     if (!wmsStyleName) return; // Skip if no style name to apply
 
+    // Get the layer
     const layer = this.getGeoviewLayer(layerPath);
-    if (!(layer instanceof GVWMS)) return;
+
+    // Check if it's the right type
+    if (!(layer instanceof GVWMS)) throw new LayerWrongTypeError(layerPath, layer.getLayerName());
 
     // Update the WMS style
     layer.setWmsStyle(wmsStyleName);
-
-    //TODO: REFACTOR - The function should stop here and an event should be raised by the domain to the controller to manage the store
-    //TO.DOCONT: Same pattern as setLayerName, setLayerOpacity, etc, etc
-
-    // Update the store
-    setStoreLayerWmsStyle(this.getMapId(), layerPath, wmsStyleName);
-
-    // Trigger legend re-query through the layer set system
-    this.getControllersRegistry().layerSetController.legendsLayerSet.queryLegend(layer, true);
   }
 
   /**
@@ -1948,8 +2021,11 @@ export class LayerController extends AbstractMapViewerController {
    * @param event - The event containing the opacity change
    */
   #handleDomainLayerVisibleChanged(sender: LayerDomain, event: DomainLayerVisibleChangedEvent): void {
-    // Redirect to the map controller
-    this.setMapLayerVisibility(event.layer.getLayerPath(), event.layerEvent.visible);
+    // Save to the store
+    setStoreLayerVisibility(this.getMapId(), event.layer.getLayerPath(), event.layerEvent.visible);
+
+    // Update the z indices
+    this.setLayerZIndices();
   }
 
   /**
@@ -1960,7 +2036,7 @@ export class LayerController extends AbstractMapViewerController {
    */
   #handleDomainLayerOpacityChanged(sender: LayerDomain, event: DomainLayerOpacityChangedEvent): void {
     // Update the store
-    setStoreOpacity(this.getMapId(), event.layer.getLayerPath(), event.layerEvent.opacity);
+    setStoreLayerOpacity(this.getMapId(), event.layer.getLayerPath(), event.layerEvent.opacity);
   }
 
   /**
@@ -2066,10 +2142,6 @@ export class LayerController extends AbstractMapViewerController {
    */
   #handleDomainLayerHoverableChanged(sender: LayerDomain, event: DomainLayerHoverableChangedEvent): void {
     // Save in store
-    // TODO: CHECK - Why 2 store locations to store the hoverable state? Centralize?
-    setStoreMapLayerHoverable(this.getMapId(), event.layer.getLayerPath(), event.layerEvent.hoverable);
-
-    // Save in store
     setStoreLayerHoverable(this.getMapId(), event.layer.getLayerPath(), event.layerEvent.hoverable);
 
     // If not hoverable
@@ -2091,10 +2163,6 @@ export class LayerController extends AbstractMapViewerController {
   #handleDomainLayerQueryableChanged(sender: LayerDomain, event: DomainLayerQueryableChangedEvent): void {
     // Save in store
     setStoreLayerQueryable(this.getMapId(), event.layer.getLayerPath(), event.layerEvent.queryable);
-
-    // Save in store
-    // TODO: CHECK - Why 2 store locations to store the queryable state? Centralize?
-    setStoreMapLayerQueryable(this.getMapId(), event.layer.getLayerPath(), event.layerEvent.queryable);
 
     // If not queryable
     if (!event.layerEvent.queryable) {
@@ -2168,7 +2236,7 @@ export class LayerController extends AbstractMapViewerController {
     // If any
     if (initialSettingsOpacity !== undefined) {
       // Update the store
-      setStoreOpacity(this.getMapId(), event.layer.getLayerPath(), initialSettingsOpacity);
+      setStoreLayerOpacity(this.getMapId(), event.layer.getLayerPath(), initialSettingsOpacity);
     }
   }
 
@@ -2260,18 +2328,60 @@ export class LayerController extends AbstractMapViewerController {
     return false;
   }
 
+  /**
+   * Handles when a layer's WMS style has changed in the domain.
+   *
+   * @param sender - The layer domain that emitted the event
+   * @param event - The WMS style changed event
+   */
+  #handleDomainLayerWMSStyleChanged(sender: LayerDomain, event: DomainLayerWMSStyleChangedEvent): void {
+    // Update the store
+    setStoreLayerWmsStyle(this.getMapId(), event.layer.getLayerPath(), event.layerEvent.wmsStyleName);
+
+    // Trigger legend re-query through the layer set system (forced refresh)
+    this.getControllersRegistry().layerSetController.legendsLayerSet.queryLegend(event.layer, true);
+  }
+
+  /**
+   * Handles when a layer's raster function has changed in the domain.
+   *
+   * @param sender - The layer domain that emitted the event
+   * @param event - The raster function changed event
+   */
+  #handleDomainLayerRasterFunctionChanged(sender: LayerDomain, event: DomainLayerRasterFunctionChangedEvent): void {
+    // Update the store
+    setStoreLayerRasterFunction(this.getMapId(), event.layer.getLayerPath(), event.layerEvent.functionId);
+
+    // Trigger legend re-query through the layer set system (forced refresh)
+    this.getControllersRegistry().layerSetController.legendsLayerSet.queryLegend(event.layer, true);
+  }
+
+  /**
+   * Handles when a layer's mosaic rule has changed in the domain.
+   *
+   * @param sender - The layer domain that emitted the event
+   * @param event - The mosaic rule changed event
+   */
+  #handleDomainLayerMosaicRuleChanged(sender: LayerDomain, event: DomainLayerMosaicRuleChangedEvent): void {
+    // Update the store
+    setStoreLayerMosaicRule(this.getMapId(), event.layer.getLayerPath(), event.layerEvent.mosaicRule);
+
+    // Trigger legend re-query through the layer set system (forced refresh)
+    this.getControllersRegistry().layerSetController.legendsLayerSet.queryLegend(event.layer, true);
+  }
+
   // #endregion DOMAIN HANDLERS
 
   // #region PRIVATE METHODS
 
   /**
-   * Registers layer information for the ordered layer info in the store.
+   * Registers layer information for the ordered layers in the store.
    *
    * @param layerConfig - The layer configuration to be reordered
    */
   #registerForOrderedLayerInfo(layerConfig: ConfigBaseClass): void {
     // If the map index for the given layer path hasn't been set yet
-    if (getStoreMapOrderedLayerIndexByPath(this.getMapId(), layerConfig.layerPath) === -1) {
+    if (getStoreLayerOrderedLayerIndexByPath(this.getMapId(), layerConfig.layerPath) === -1) {
       // Get the parent layer path
       const parentLayerPathArray = layerConfig.layerPath.split('/');
       parentLayerPathArray.pop();
@@ -2280,34 +2390,31 @@ export class LayerController extends AbstractMapViewerController {
       // Get the parent layer config, if any
       const parentLayerConfig = layerConfig.getParentLayerConfig();
 
-      // If the map index of a parent layer path has been set and it is a valid UUID, the ordered layer info is a place holder
+      // If the map index of a parent layer path has been set and it is a valid UUID, the ordered layer entry is a placeholder
       // registered while the geocore layer info was fetched
-      if (getStoreMapOrderedLayerIndexByPath(this.getMapId(), parentLayerPath) !== -1 && isValidUUID(parentLayerPath)) {
-        // Replace the placeholder ordered layer info
-        this.replaceOrderedLayerInfo(layerConfig, parentLayerPath);
+      if (getStoreLayerOrderedLayerIndexByPath(this.getMapId(), parentLayerPath) !== -1 && isValidUUID(parentLayerPath)) {
+        // Replace the placeholder ordered layer paths
+        this.replaceOrderedLayerPaths(layerConfig, parentLayerPath);
       } else if (parentLayerConfig) {
         // Here the map index of a sub layer path hasn't been set and there's a parent layer config for the current layer config
         // Get the map index of the parent layer path
-        const parentLayerIndex = getStoreMapOrderedLayerIndexByPath(this.getMapId(), parentLayerPath);
+        const parentLayerIndex = getStoreLayerOrderedLayerIndexByPath(this.getMapId(), parentLayerPath);
 
         // Get the number of layers
-        const numberOfLayers = utilFindMapLayerAndChildrenFromOrderedInfo(
-          parentLayerPath,
-          getStoreMapOrderedLayerInfo(this.getMapId())
-        ).length;
+        const numberOfLayers = utilFindLayerAndChildrenPaths(parentLayerPath, getStoreLayerOrderedLayerPaths(this.getMapId())).length;
 
         // If the map index of the parent has been set
         if (parentLayerIndex !== -1) {
-          // Add the ordered layer information for the sub layer path based on the parent index + the number of child layers
-          this.addOrderedLayerInfoByConfig(layerConfig as TypeLayerEntryConfig, parentLayerIndex + numberOfLayers);
+          // Add the ordered layer paths for the sub layer path based on the parent index + the number of child layers
+          this.addOrderedLayerPathsByConfig(layerConfig as TypeLayerEntryConfig, parentLayerIndex + numberOfLayers);
         } else {
           // If we get here, something went wrong and we have a sub layer being registered before the parent
           logger.logError(`Sub layer ${layerConfig.layerPath} registered in layer order before parent layer`);
-          this.addOrderedLayerInfoByConfig(parentLayerConfig);
+          this.addOrderedLayerPathsByConfig(parentLayerConfig);
         }
       } else {
-        // Add the orderedLayerInfo for layer that hasn't been set and has no parent layer or geocore placeholder
-        this.addOrderedLayerInfoByConfig(layerConfig as TypeLayerEntryConfig);
+        // Add the ordered layer paths for layer that hasn't been set and has no parent layer or geocore placeholder
+        this.addOrderedLayerPathsByConfig(layerConfig as TypeLayerEntryConfig);
       }
     }
   }

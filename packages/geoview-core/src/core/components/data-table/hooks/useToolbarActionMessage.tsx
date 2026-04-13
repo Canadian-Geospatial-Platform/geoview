@@ -2,8 +2,8 @@ import { useEffect } from 'react';
 import type { MRT_TableInstance as MRTTableInstance, MRT_ColumnFiltersState as MRTColumnFiltersState } from 'material-react-table';
 import { useTranslation } from 'react-i18next';
 import {
-  setStoreRowsFilteredEntry,
-  setStoreToolbarRowSelectedMessageEntry,
+  setStoreDataTableRowsFilteredEntry,
+  setStoreDataTableToolbarRowSelectedMessageEntry,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { logger } from '@/core/utils/logger';
 import type { MappedLayerDataType, ColumnsType } from '@/core/components/data-table/data-table-types';
@@ -70,9 +70,9 @@ export function useToolbarActionMessage({
         length = 0;
       }
 
-      setStoreRowsFilteredEntry(mapId, length, layerPath);
+      setStoreDataTableRowsFilteredEntry(mapId, length, layerPath);
     }
 
-    setStoreToolbarRowSelectedMessageEntry(mapId, message, layerPath);
+    setStoreDataTableToolbarRowSelectedMessageEntry(mapId, message, layerPath);
   }, [mapId, columnFilters, data.features, globalFilter, showUnsymbolizedFeatures, tableInstance, layerPath, t]);
 }

@@ -3,12 +3,12 @@ import { useTheme, useMediaQuery } from '@mui/material';
 import { useCallback } from 'react';
 import { Box, Switch, Tooltip } from '@/ui';
 import {
-  setStoreMapAllMapLayerCollapsed,
-  useStoreMapAllLayersCollapsedToggle,
-  useStoreMapAllLayersVisibleToggle,
-  useStoreMapHasCollapsibleLayersToggle,
-} from '@/core/stores/store-interface-and-intial-values/map-state';
-import { useStoreLayerDisplayState, useStoreLayerAreLayersLoading } from '@/core/stores/store-interface-and-intial-values/layer-state';
+  useStoreLayerDisplayState,
+  useStoreLayerAllLayersVisibleToggle,
+  useStoreLayerAllLayersCollapsedToggle,
+  useStoreLayerAreLayersLoading,
+  useStoreLayerHasCollapsibleLayersToggle,
+} from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 
@@ -50,25 +50,25 @@ export function ToggleAll({ source, containerType }: ToggleAllProps): JSX.Elemen
   // Store
   const mapId = useStoreGeoViewMapId();
   const displayState = useStoreLayerDisplayState();
-  const allLayersVisible = useStoreMapAllLayersVisibleToggle();
-  const allLayersCollapsed = useStoreMapAllLayersCollapsedToggle();
+  const allLayersVisible = useStoreLayerAllLayersVisibleToggle();
+  const allLayersCollapsed = useStoreLayerAllLayersCollapsedToggle();
   const layersAreLoading = useStoreLayerAreLayersLoading();
-  const hasCollapsibleLayers = useStoreMapHasCollapsibleLayersToggle();
+  const hasCollapsibleLayers = useStoreLayerHasCollapsibleLayersToggle();
   const layerController = useLayerController();
 
   /**
    * Handles when the user toggles the visibility switch.
    */
   const handleVisibilityToggle = useCallback((): void => {
-    layerController.setAllMapLayerVisibility(!allLayersVisible);
+    layerController.setAllLayersVisibilityExceptBasemaps(!allLayersVisible);
   }, [allLayersVisible, layerController]);
 
   /**
    * Handles when the user toggles the collapse switch.
    */
   const handleCollapseToggle = useCallback((): void => {
-    setStoreMapAllMapLayerCollapsed(mapId, !allLayersCollapsed);
-  }, [allLayersCollapsed, mapId]);
+    layerController.setAllMapLayerCollapsed(!allLayersCollapsed);
+  }, [allLayersCollapsed, layerController]);
 
   // TODO Hide this component until all layers have loaded the first time.
   // TO.DO May require something external as a useRef for the first time the !layerAreLoading didn't work

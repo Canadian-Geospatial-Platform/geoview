@@ -4,6 +4,7 @@ import { TestSuiteCannotExecuteError } from '../core/exceptions';
 import { GVAbstractTester } from '../testers/abstract-gv-tester';
 import { GeochartTester } from '../testers/geochart-tester';
 import { GVAbstractTestSuite } from './abstract-gv-test-suite';
+import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
 
 /**
  * The GeoView Test Suite.
@@ -17,12 +18,13 @@ export class GVTestSuiteGeochart extends GVAbstractTestSuite {
    *
    * @param api - The shared api
    * @param mapViewer - The map viewer
+   * @param controllerRegistry - The controller registry
    */
-  constructor(api: API, mapViewer: MapViewer) {
-    super(api, mapViewer);
+  constructor(api: API, mapViewer: MapViewer, controllerRegistry: ControllerRegistry) {
+    super(api, mapViewer, controllerRegistry);
 
     // Create the Geochart tester
-    this.#geochartTester = new GeochartTester(api, mapViewer);
+    this.#geochartTester = new GeochartTester(api, mapViewer, controllerRegistry);
     this.addTester(this.#geochartTester);
   }
 

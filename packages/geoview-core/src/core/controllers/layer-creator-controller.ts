@@ -16,6 +16,8 @@ import {
   type TypeGeoviewLayerConfig,
 } from '@/api/types/layer-schema-types';
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
+import type { GeoViewGeoChartConfig } from '@/api/config/reader/uuid-config-reader';
+import type { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { CsvLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/csv-layer-entry-config';
 import { EsriFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
@@ -32,6 +34,7 @@ import { OgcWmtsLayerEntryConfig } from '@/api/config/validation-classes/raster-
 import { XYZTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import { VectorTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
+import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import type { DomainLayerBaseEvent, LayerDomain } from '@/core/domains/layer-domain';
 import { formatError, NotSupportedError } from '@/core/exceptions/core-exceptions';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
@@ -39,22 +42,14 @@ import { LayerEntryConfigError } from '@/core/exceptions/layer-entry-config-exce
 import { LayerCreatedTwiceError } from '@/core/exceptions/layer-exceptions';
 import { getStoreAppDisplayDateMode } from '@/core/stores/store-interface-and-intial-values/app-state';
 import {
+  getStoreLayerLegendLayers,
   getStoreLayerSelectedLayerPath,
   setStoreLayerSelectedLayersTabLayer,
+  getStoreLayerOrderedLayerPaths,
+  addStoreLayerInitialFilter,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import {
-  addStoreGeochartChart,
-  isStoreGeochartInitialized,
-  removeStoreGeochartChart,
-} from '@/core/stores/store-interface-and-intial-values/geochart-state';
-import {
-  addStoreMapInitialFilter,
-  getStoreMapOrderedLayerInfo,
-  getStoreMapOrderedLayerInfoByPath,
-  type TypeOrderedLayerInfo,
-} from '@/core/stores/store-interface-and-intial-values/map-state';
-import { isStoreSwiperInitialized, removeStoreSwiperLayerPath } from '@/core/stores/store-interface-and-intial-values/swiper-state';
-import { deleteStoreDetailsFeatureInfo } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import { isStoreGeochartInitialized } from '@/core/stores/store-interface-and-intial-values/geochart-state';
+import { isStoreSwiperInitialized } from '@/core/stores/store-interface-and-intial-values/swiper-state';
 import {
   isStoreTimeSliderInitialized,
   removeStoreTimeSliderLayer,
@@ -88,7 +83,6 @@ import { ConfigValidation } from '@/api/config/config-validation';
 import { generateId, isValidUUID } from '@/core/utils/utilities';
 import { LayerGeoCoreError } from '@/core/exceptions/geocore-exceptions';
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
-import type { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 
 export class LayerCreatorController extends AbstractMapViewerController {
   /** Reference on the layer domain. */
@@ -112,10 +106,12 @@ export class LayerCreatorController extends AbstractMapViewerController {
   /**
    * Creates an instance of the LayerCreator class.
    *
+   * @param mapViewer - The map viewer instance to associate with this controller
+   * @param controllerRegistry - The controller registry for accessing sibling controllers
    * @param layerDomain - The layer domain to be used by the LayerCreator
    */
-  constructor(mapViewer: MapViewer, layerDomain: LayerDomain) {
-    super(mapViewer);
+  constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry, layerDomain: LayerDomain) {
+    super(mapViewer, controllerRegistry);
     this.#layerDomain = layerDomain;
   }
 
@@ -134,6 +130,16 @@ export class LayerCreatorController extends AbstractMapViewerController {
       this.getControllersRegistry().layerController.getGeoviewLayerIds(),
       this.getMapViewer().getDisplayLanguage(),
       mapConfigLayerEntries,
+      (layerPath: string, geochartConfig: GeoViewGeoChartConfig) => {
+        // Add the chart to the store
+        this.getControllersRegistry().geoChartController?.addChart(layerPath, geochartConfig);
+
+        // Make sure geochart tab is shown
+        this.getControllersRegistry().uiController.showTabButton('geochart');
+
+        // Log
+        logger.logInfo('Added GeoChart configs for layer path:', layerPath);
+      },
       (mapConfigLayerEntry: MapConfigLayerEntry, error: unknown) => {
         // Show the error(s)
         this.showLayerError(error, mapConfigLayerEntry.geoviewLayerId);
@@ -141,14 +147,14 @@ export class LayerCreatorController extends AbstractMapViewerController {
     );
 
     // Wait for all promises (GeoCore ones) to process
-    // The reason for the Promise.allSettled is because of synch issues with the 'setMapOrderedLayerInfo' which happens below and the
-    // other setMapOrderedLayerInfos that happen in parallel via the ADD_LAYER events ping/pong'ing, making the setMapOrdered below fail
+    // The reason for the Promise.allSettled is because of synch issues with the 'setMapOrderedLayers' which happens below and the
+    // other setMapOrderedLayers that happen in parallel via the ADD_LAYER events ping/pong'ing, making the setMapOrdered below fail
     // if we don't stage the promises. If we don't stage the promises, sometimes I have 4 layers loaded in 'Details' and sometimes
     // I have 3 layers loaded in Details - for example.
     // To fix this, we'll have to synch the ADD_LAYER events and make sure those 'know' what order they should be in when they
-    // propagate the mapOrderedLayerInfo in their processes. For now at least, this is repeating the same behavior until the events are fixed.
-    const orderedLayerInfos: TypeOrderedLayerInfo[] = getStoreMapOrderedLayerInfo(this.getMapId()).length
-      ? getStoreMapOrderedLayerInfo(this.getMapId())
+    // propagate the mapOrderedLayers in their processes. For now at least, this is repeating the same behavior until the events are fixed.
+    const orderedLayers: string[] = getStoreLayerOrderedLayerPaths(this.getMapId()).length
+      ? [...getStoreLayerOrderedLayerPaths(this.getMapId())]
       : [];
     const promisedLayers = await Promise.allSettled(promisesOfGeoviewLayers);
 
@@ -160,10 +166,10 @@ export class LayerCreatorController extends AbstractMapViewerController {
         const geoviewLayerConfig = promise.value;
 
         try {
-          // Generate array of layer order information for non-basemap layers
+          // Generate array of layer paths for non-basemap layers
           if (geoviewLayerConfig.useAsBasemap !== true) {
-            const layerInfos = AbstractMapViewerController.generateArrayOfLayerOrderInfo(geoviewLayerConfig);
-            orderedLayerInfos.push(...layerInfos);
+            const layerPaths = AbstractMapViewerController.generateOrderedLayerPaths(geoviewLayerConfig);
+            orderedLayers.push(...layerPaths);
           }
 
           // Add it
@@ -204,8 +210,8 @@ export class LayerCreatorController extends AbstractMapViewerController {
     // Replace the array received in param
     mapConfigLayerEntries.splice(0, mapConfigLayerEntries.length, ...validGeoviewLayerConfigs);
 
-    // Init ordered layer info (?)
-    this.getControllersRegistry().layerController.setMapOrderedLayerInfoDirectly(orderedLayerInfos);
+    // Init ordered layers
+    this.getControllersRegistry().layerController.setMapOrderedLayersDirectly(orderedLayers);
   }
 
   /**
@@ -216,16 +222,6 @@ export class LayerCreatorController extends AbstractMapViewerController {
    * @returns A promise that resolves with the added layer result or undefined when an error occurs
    */
   async addGeoviewLayerByGeoCoreUUID(uuid: string, layerEntryConfig?: string): Promise<GeoViewLayerAddedResult | undefined> {
-    // Add a place holder to the ordered layer info array
-    const layerInfo: TypeOrderedLayerInfo = {
-      layerPath: uuid,
-      visible: true,
-      queryableState: true,
-      hoverable: true,
-      legendCollapsed: false,
-      inVisibleRange: true,
-    };
-
     // Get the current geoview layer ids
     const currentGeoviewLayerIds = this.getControllersRegistry().layerController.getGeoviewLayerIds();
 
@@ -237,7 +233,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
     try {
       // GV: This is here as a placeholder so that the layers will appear in the proper order,
       // GV: regardless of how quickly we get the response. It is removed, in the catch below, if the layer fails.
-      this.getControllersRegistry().layerController.addOrderedLayerInfo(layerInfo);
+      this.getControllersRegistry().layerController.addOrderedLayerPath(uuid);
 
       const parsedLayerEntryConfig = layerEntryConfig ? JSON.parse(layerEntryConfig) : undefined;
       if (parsedLayerEntryConfig && !parsedLayerEntryConfig[0].layerId) parsedLayerEntryConfig[0].layerId = 'base-group';
@@ -278,7 +274,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
         // For each geocharts configuration
         Object.entries(response.geocharts).forEach(([layerPath, geochartConfig]) => {
           // Add a GeoChart configuration on-the-fly
-          addStoreGeochartChart(this.getMapId(), layerPath, geochartConfig);
+          this.getControllersRegistry().geoChartController?.addChart(layerPath, geochartConfig);
 
           // Make sure geochart tab is shown
           this.getControllersRegistry().uiController.showTabButton('geochart');
@@ -286,8 +282,8 @@ export class LayerCreatorController extends AbstractMapViewerController {
       }
 
       if (geoviewLayerConfig.useAsBasemap === true) {
-        // If a basemap, remove the orderedLayerInfo placeholder as basemap are not part of the ordered layer info.
-        this.getControllersRegistry().layerController.removeOrderedLayerInfo(geoviewLayerConfig.geoviewLayerId, true);
+        // If a basemap, remove the ordered layer placeholder as basemap are not part of the ordered layers.
+        this.getControllersRegistry().layerController.removeOrderedLayerPath(geoviewLayerConfig.geoviewLayerId, true);
       }
 
       // Add the geoview layer
@@ -296,9 +292,8 @@ export class LayerCreatorController extends AbstractMapViewerController {
       // An error happening here likely means an issue with the UUID or a trivial config error.
       // The majority of typicaly errors happen in the addGeoviewLayer promise catcher, not here.
 
-      // Remove geoCore ordered layer info placeholder
-      const orderedInfo = getStoreMapOrderedLayerInfoByPath(this.getMapId(), uuid);
-      if (orderedInfo) this.getControllersRegistry().layerController.removeOrderedLayerInfo(uuid, false);
+      // Remove geoCore ordered layer placeholder
+      this.getControllersRegistry().layerController.removeOrderedLayerPath(uuid, false);
 
       // Show the error(s)
       this.showLayerError(error, uuid);
@@ -354,10 +349,11 @@ export class LayerCreatorController extends AbstractMapViewerController {
    */
   reloadGeocoreLayers(): void {
     const configs = this.getControllersRegistry().layerController.getLayerEntryConfigs();
-    const originalMapOrderedLayerInfo = getStoreMapOrderedLayerInfo(this.getMapId());
+    const originalOrderedLayers = [...getStoreLayerOrderedLayerPaths(this.getMapId())];
+    const originalLegendLayersInfo = getStoreLayerLegendLayers(this.getMapId());
     const parentPaths: string[] = [];
 
-    // Have to do the Promise allSettled so the new MapOrderedLayerInfo has all the children layerPaths
+    // Have to do the Promise allSettled so the new ordered layers have all the children layerPaths
     Promise.allSettled(
       configs
         .filter((config) => {
@@ -375,14 +371,12 @@ export class LayerCreatorController extends AbstractMapViewerController {
         })
     )
       .then(() => {
-        const originalLayerPaths = originalMapOrderedLayerInfo.map((info) => info.layerPath);
-
         // Prepare listeners for removing previously removed layers
         parentPaths.forEach((parentPath) => {
           function removeChildLayers(sender: LayerCreatorController): void {
             const childPaths = sender.#getAllChildPaths(parentPath);
             childPaths.forEach((childPath) => {
-              if (!originalLayerPaths.includes(childPath)) {
+              if (!originalOrderedLayers.includes(childPath)) {
                 sender.removeLayerUsingPath(childPath);
               }
             });
@@ -394,12 +388,12 @@ export class LayerCreatorController extends AbstractMapViewerController {
         });
 
         // Prepare listeners for changing the visibility
-        this.getControllersRegistry().layerController.setMapOrderedLayerInfoDirectly(originalMapOrderedLayerInfo);
-        originalMapOrderedLayerInfo.forEach((layerInfo) => {
+        this.getControllersRegistry().layerController.setMapOrderedLayersDirectly(originalOrderedLayers);
+        originalOrderedLayers.forEach((layerPath) => {
           function setLayerVisibility(sender: LayerDomain, event: DomainLayerBaseEvent): void {
-            const layerPath = event.layer.getLayerPath();
-            if (layerInfo.layerPath === layerPath) {
-              const { visible } = originalMapOrderedLayerInfo.filter((info) => info.layerPath === layerPath)[0];
+            const eventLayerPath = event.layer.getLayerPath();
+            if (layerPath === eventLayerPath) {
+              const { visible } = originalLegendLayersInfo.filter((info) => info.layerPath === eventLayerPath)[0];
               event.layer?.setVisible(visible);
               // TODO: MINOR - Bound this 'setLayerVisibility' function (like other ones) instead of creating a new handler on each 'forEach'
               sender.offLayerFirstLoaded(setLayerVisibility);
@@ -594,7 +588,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
       }
 
       // Redirect to feature info delete
-      deleteStoreDetailsFeatureInfo(this.getMapId(), layerPath);
+      this.getControllersRegistry().detailsController.deleteFeatureInfo(layerPath);
     }
   }
 
@@ -719,13 +713,13 @@ export class LayerCreatorController extends AbstractMapViewerController {
    * Unregisters the layer in the Domain to stop managing it.
    *
    * @param layerConfig - The layer entry config to unregister
-   * @param unregisterOrderedLayerInfo - Should it be unregistered from orderedLayerInfo
+   * @param unregisterOrderedLayer - Should it be unregistered from orderedLayers
    */
-  #unregisterLayerConfig(layerConfig: ConfigBaseClass, unregisterOrderedLayerInfo: boolean = true): void {
-    // Unregister from ordered layer info
-    if (unregisterOrderedLayerInfo) {
-      // Remove from ordered layer info
-      this.getControllersRegistry().layerController.removeOrderedLayerInfo(layerConfig.layerPath);
+  #unregisterLayerConfig(layerConfig: ConfigBaseClass, unregisterOrderedLayer: boolean = true): void {
+    // Unregister from ordered layers
+    if (unregisterOrderedLayer) {
+      // Remove from ordered layers
+      this.getControllersRegistry().layerController.removeOrderedLayerPath(layerConfig.layerPath);
     }
 
     // If the TimeSlider plugin is initialized
@@ -740,7 +734,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
     // If the geochart plugin is initialized
     if (isStoreGeochartInitialized(this.getMapId())) {
       // Remove from the GeoChart Charts
-      removeStoreGeochartChart(this.getMapId(), layerConfig.layerPath, () => {
+      this.getControllersRegistry().geoChartController?.removeChart(layerConfig.layerPath, () => {
         // Remove the tab
         this.getControllersRegistry().uiController.hideTabButton('geochart');
       });
@@ -749,7 +743,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
     // If the swiper plugin is initialized
     if (isStoreSwiperInitialized(this.getMapId())) {
       // Remove it from the Swiper
-      removeStoreSwiperLayerPath(this.getMapId(), layerConfig.layerPath);
+      this.getControllersRegistry().swiperController?.removeLayerPathIfExists(layerConfig.layerPath);
     }
 
     // Unregister from the domain
@@ -962,7 +956,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
       // If any layer filter
       if (layerFilter) {
         // Save to the store
-        addStoreMapInitialFilter(this.getMapId(), layerConfig.layerPath, layerFilter);
+        addStoreLayerInitialFilter(this.getMapId(), layerConfig.layerPath, layerFilter);
       }
     }
   }
@@ -984,11 +978,8 @@ export class LayerCreatorController extends AbstractMapViewerController {
           ) {
             this.#printDuplicateGeoviewLayerConfigError(geoviewLayerConfigToCreate);
 
-            // Remove geoCore ordered layer info placeholder
-            const orderedInfo = getStoreMapOrderedLayerInfoByPath(this.getMapId(), geoviewLayerConfigToCreate.geoviewLayerId);
-            if (orderedInfo) {
-              this.getControllersRegistry().layerController.removeOrderedLayerInfo(geoviewLayerConfigToCreate.geoviewLayerId, false);
-            }
+            // Remove geoCore ordered layer placeholder
+            this.getControllersRegistry().layerController.removeOrderedLayerPath(geoviewLayerConfigToCreate.geoviewLayerId, false);
 
             return false;
           }
@@ -1091,6 +1082,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
    * @param mapId - The unique identifier of the map instance this configuration applies to
    * @param language - The language setting used for layer labels and metadata
    * @param mapConfigLayerEntries - The array of layer entries to convert
+   * @param addGeoChartCallback - Callback invoked when a geochart configuration is initialized during layer processing
    * @param errorCallback - Callback invoked when an error occurs during layer processing
    * @returns An array of promises, each resolving to a TypeGeoviewLayerConfig object
    */
@@ -1099,12 +1091,13 @@ export class LayerCreatorController extends AbstractMapViewerController {
     currentLayerIds: string[],
     language: TypeDisplayLanguage,
     mapConfigLayerEntries: MapConfigLayerEntry[],
+    addGeoChartCallback: (layerPath: string, geochartConfig: GeoViewGeoChartConfig) => void,
     errorCallback: (mapConfigLayerEntry: MapConfigLayerEntry, error: unknown) => void
   ): Promise<TypeGeoviewLayerConfig>[] {
     // For each layer entry
     return mapConfigLayerEntries.map((entry) => {
       // Redirect
-      return this.convertMapConfigToGeoviewLayerConfig(mapId, currentLayerIds, language, entry, errorCallback);
+      return this.convertMapConfigToGeoviewLayerConfig(mapId, currentLayerIds, language, entry, addGeoChartCallback, errorCallback);
     });
   }
 
@@ -1118,6 +1111,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
    * @param mapId - The unique identifier of the map instance this configuration applies to
    * @param language - The language setting used for layer labels and metadata
    * @param entry - The array of layer entry to convert
+   * @param addGeoChartCallback - Callback invoked when a geochart configuration is initialized during layer processing
    * @param errorCallback - Callback invoked when an error occurs during layer processing
    * @returns A promise that resolves to a TypeGeoviewLayerConfig object
    */
@@ -1126,6 +1120,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
     currentLayerIds: string[],
     language: TypeDisplayLanguage,
     entry: MapConfigLayerEntry,
+    addGeoChartCallback: (layerPath: string, geochartConfig: GeoViewGeoChartConfig) => void,
     errorCallback: (mapConfigLayerEntry: MapConfigLayerEntry, error: unknown) => void
   ): Promise<TypeGeoviewLayerConfig> {
     // Depending on the map config layer entry type
@@ -1137,11 +1132,8 @@ export class LayerCreatorController extends AbstractMapViewerController {
         if (isStoreGeochartInitialized(mapId)) {
           // For each geocharts configuration
           Object.entries(response.geocharts).forEach(([layerPath, geochartConfig]) => {
-            // Add the chart to the store
-            addStoreGeochartChart(mapId, layerPath, geochartConfig);
-
-            // Log
-            logger.logInfo('Added GeoChart configs for layer path:', layerPath);
+            // Callback
+            addGeoChartCallback(layerPath, geochartConfig);
           });
         }
         return response.config;
@@ -1154,7 +1146,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
       promise = ShapefileReader.convertShapefileConfigToGeoJson(entry);
     } else if (mapConfigLayerEntryIsRCS(entry)) {
       // Working with a RCS (Geocore subset) layer
-      promise = GeoCore.createLayerConfigFromRCSUUID(entry.geoviewLayerId, language, mapId, entry);
+      promise = GeoCore.createLayerConfigFromRCSUUID(entry.geoviewLayerId, language, mapId);
     } else {
       // Working with a standard GeoView layer
       promise = Promise.resolve(entry);

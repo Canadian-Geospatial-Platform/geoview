@@ -7,8 +7,11 @@ import type { Mark } from '@mui/base';
 
 import { getSxClasses } from './layer-opacity-control-styles';
 import { Box, Slider, Typography } from '@/ui';
-import { useStoreLayerOpacity, useStoreLayerOpacityMaxFromParent } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { useStoreMapIsLayerHiddenOnMap } from '@/core/stores/store-interface-and-intial-values/map-state';
+import {
+  useStoreLayerIsHiddenOnMap,
+  useStoreLayerOpacity,
+  useStoreLayerOpacityMaxFromParent,
+} from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { logger } from '@/core/utils/logger';
 import { useLayerController } from '@/core/controllers/use-controllers';
 
@@ -30,7 +33,7 @@ export function LayerOpacityControl({ layerPath }: LayerOpacityControlProps): JS
   const sxClasses = getSxClasses(theme);
 
   // Store
-  const layerHidden = useStoreMapIsLayerHiddenOnMap(layerPath);
+  const layerHidden = useStoreLayerIsHiddenOnMap(layerPath);
   const layerController = useLayerController();
   const labelId = useId();
 
