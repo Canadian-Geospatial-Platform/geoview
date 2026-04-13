@@ -1,4 +1,4 @@
-import { memo, useMemo, useRef } from 'react';
+import { memo, useEffect, useMemo, useRef } from 'react';
 
 import { useTheme } from '@mui/material/styles';
 
@@ -6,16 +6,12 @@ import { Box } from '@/ui';
 import { Projection } from '@/geo/utils/projection';
 import { NorthArrowIcon, NorthPoleIcon } from './north-arrow-icon';
 import { getSxClasses } from './north-arrow-style';
-import {
-  setStoreMapOverlayNorthMarkerRef,
-  useStoreMapNorthArrowElement,
-  useStoreMapCurrentProjectionEPSG,
-} from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useStoreMapNorthArrowElement, useStoreMapCurrentProjectionEPSG } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 import { useManageArrow } from './hooks/useManageArrow';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
-import { TIMEOUT } from '@/core/utils/constant';
+import { useMapController } from '@/core/controllers/use-controllers';
 
 /**
  * Creates a north arrow component.
@@ -81,14 +77,19 @@ export const NorthPoleFlag = memo(function NorthPoleFlag(): JSX.Element {
 
   // Store
   const mapId = useStoreGeoViewMapId();
-  const northPoleId = `${mapId}-northpole`;
   const mapProjectionEPSG = useStoreMapCurrentProjectionEPSG();
-  setTimeout(() => setStoreMapOverlayNorthMarkerRef(mapId, northPoleRef.current as HTMLElement), TIMEOUT.deferExecution); // set marker reference
-
   const isVisible = mapProjectionEPSG === Projection.PROJECTION_NAMES.LCC;
+  const mapController = useMapController();
+
+  /**
+   * Registers the north pole marker overlay ref on mount.
+   */
+  useEffect(() => {
+    mapController.setNorthPoleMarkerOverlayRef(northPoleRef.current!);
+  }, [mapController]);
 
   return (
-    <Box ref={northPoleRef} id={northPoleId} style={{ visibility: isVisible ? 'visible' : 'hidden' }}>
+    <Box ref={northPoleRef} id={`${mapId}-northpole`} style={{ visibility: isVisible ? 'visible' : 'hidden' }}>
       <NorthPoleIcon />
     </Box>
   );

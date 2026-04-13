@@ -6,11 +6,9 @@ import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-la
 import { AbstractLayerSet, type PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { GVKML } from '@/geo/layer/gv-layers/vector/gv-kml';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
-import {
-  deleteStoreDetailsFeatureInfo,
-  propagateStoreFeatureInfoDetails,
-  type TypeFeatureInfoResultSet,
-  type TypeFeatureInfoResultSetEntry,
+import type {
+  TypeFeatureInfoResultSet,
+  TypeFeatureInfoResultSetEntry,
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { getStoreAppShowUnsymbolizedFeatures } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { RequestAbortedError } from '@/core/exceptions/core-exceptions';
@@ -84,7 +82,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
    */
   protected override onDeleteFromStore(layerPath: string): void {
     // Remove it from feature info array (propagating to the store)
-    deleteStoreDetailsFeatureInfo(this.getMapId(), layerPath);
+    this.controllerRegistry.detailsController.deleteFeatureInfo(layerPath);
   }
 
   /**
@@ -265,7 +263,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
    */
   #propagateToStore(resultSetEntry: TypeFeatureInfoResultSetEntry): void {
     // Propagate
-    propagateStoreFeatureInfoDetails(this.getMapId(), resultSetEntry);
+    this.controllerRegistry.detailsController.propagateFeatureInfo(resultSetEntry);
   }
 
   /**

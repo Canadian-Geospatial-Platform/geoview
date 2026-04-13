@@ -37,7 +37,7 @@ import type {
   LayerPathDelegate,
   LayerPathEvent,
 } from '@/core/controllers/layer-creator-controller';
-import type { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
+
 import type { HoverFeatureInfoLayerSet } from '@/geo/layer/layer-sets/hover-feature-info-layer-set';
 import type { AllFeatureInfoLayerSet } from '@/geo/layer/layer-sets/all-feature-info-layer-set';
 import type { LegendsLayerSet } from '@/geo/layer/layer-sets/legends-layer-set';
@@ -66,9 +66,6 @@ export class LayerApi {
   /** Used to access geometry API to create and manage geometries */
   // TODO: REFACTOR (would be breaking change) - Remove this reference and favor using mapViewer.geometry instead
   geometry: GeometryApi;
-
-  /** Order to load layers */
-  initialLayerOrder: Array<TypeOrderedLayerInfo> = [];
 
   /** Used to access feature and bounding box highlighting */
   // TODO: REFACTOR (would be breaking change) - Remove this reference and favor using mapViewer.geometry instead

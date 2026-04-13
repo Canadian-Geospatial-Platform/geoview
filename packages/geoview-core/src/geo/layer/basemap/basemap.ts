@@ -21,11 +21,8 @@ import type {
   BasemapJsonResponse,
 } from '@/geo/layer/basemap/basemap-types';
 import { Projection } from '@/geo/utils/projection';
-import {
-  getStoreMapBasemapOptions,
-  getStoreMapCurrentProjection,
-  setStoreMapAttribution,
-} from '@/core/stores/store-interface-and-intial-values/map-state';
+import { getStoreMapBasemapOptions } from '@/core/stores/store-interface-and-intial-values/map-state';
+import type { MapController } from '@/core/controllers/map-controller';
 import { logger } from '@/core/utils/logger';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
@@ -51,9 +48,6 @@ export class BasemapApi {
   /** Indicates if the basemap has been created successfully */
   created: boolean = false;
 
-  /** The map viewer */
-  mapViewer: MapViewer;
-
   /** The active basemap */
   activeBasemap?: TypeBasemapProps;
 
@@ -75,22 +69,31 @@ export class BasemapApi {
   /** The basemap options passed from the map config */
   basemapOptions: TypeBasemapOptions;
 
+  /** The map viewer */
+  #mapViewer: MapViewer;
+
+  /** The map controller */
+  #mapController: MapController;
+
   /**
    * Initializes the basemap API.
    *
    * @param mapViewer - The map viewer
+   * @param mapController - The map controller
    * @param basemapOptions - The basemap option properties, passed in from map config
    */
-  constructor(mapViewer: MapViewer, basemapOptions: TypeBasemapOptions) {
+  constructor(mapViewer: MapViewer, mapController: MapController, basemapOptions: TypeBasemapOptions) {
     // Keep the properties
-    this.mapViewer = mapViewer;
+    this.#mapViewer = mapViewer;
+    this.#mapController = mapController;
     this.basemapOptions = basemapOptions;
 
-    // Create the overview default basemap (no label, no shaded)
-    this.setOverviewMap().catch((error: unknown) => {
-      // Log
-      logger.logPromiseFailed('setOverviewMap in constructor of layer/basemap', error);
-    });
+    // TODO: CLEANUP - Remove commented code. Commenting this out doesn't seem necessary and was causing issue where the getView() wasn't ready yet (better performance causing this sync issue?)
+    // // Create the overview default basemap (no label, no shaded)
+    // this.setOverviewMap().catch((error: unknown) => {
+    //   // Log
+    //   logger.logPromiseFailed('setOverviewMap in constructor of layer/basemap', error);
+    // });
   }
 
   /** The basemap creation configuration list */
@@ -225,7 +228,7 @@ export class BasemapApi {
 
       if (tileLayer) {
         // add this layer to the basemap group
-        tileLayer.set(this.mapViewer.mapId, 'basemap');
+        tileLayer.set(this.#mapViewer.mapId, 'basemap');
         newLayers.push(tileLayer as BaseLayer);
       }
     });
@@ -239,7 +242,7 @@ export class BasemapApi {
    */
   async setOverviewMap(): Promise<void> {
     // Only create overview map for supported projections (3857 and 3978)
-    const projectionCode = getStoreMapCurrentProjection(this.mapViewer.mapId);
+    const projectionCode = this.#mapViewer.getProjectionNumber();
     if (projectionCode !== 3857 && projectionCode !== 3978) return;
 
     try {
@@ -255,6 +258,15 @@ export class BasemapApi {
       // switches to layers of the correct projection (important for vector tiles)
       this.overviewMapCtrl.getOverviewMap().setLayers(this.createOverviewMapLayers());
     }
+  }
+
+  /**
+   * Gets the visibility state of the overview map control.
+   *
+   * @returns True if the overview map control is visible, false otherwise
+   */
+  getOverviewMapControlVisibility(): boolean {
+    return !!this.overviewMapCtrl?.getMap();
   }
 
   /**
@@ -339,7 +351,7 @@ export class BasemapApi {
       if (basemapLayer.styleUrl) {
         const tileSize = [tileInfo.rows, tileInfo.cols];
         source = new VectorTile({
-          attributions: getLocalizedMessage(this.mapViewer.getDisplayLanguage(), 'mapctrl.attribution.defaultnrcan'),
+          attributions: getLocalizedMessage(this.#mapViewer.getDisplayLanguage(), 'mapctrl.attribution.defaultnrcan'),
           projection: Projection.PROJECTIONS[urlProj],
           url: basemapLayer.url,
           format: new MVT(),
@@ -352,7 +364,7 @@ export class BasemapApi {
         });
       } else {
         source = new XYZ({
-          attributions: getLocalizedMessage(this.mapViewer.getDisplayLanguage(), 'mapctrl.attribution.defaultnrcan'),
+          attributions: getLocalizedMessage(this.#mapViewer.getDisplayLanguage(), 'mapctrl.attribution.defaultnrcan'),
           projection: Projection.PROJECTIONS[urlProj],
           url: basemapLayer.url,
           crossOrigin: 'Anonymous',
@@ -431,10 +443,10 @@ export class BasemapApi {
     let maxZoom = 23;
 
     // Check if projection is provided for the basemap creation
-    const projectionCode = projection === undefined ? getStoreMapCurrentProjection(this.mapViewer.mapId) : projection;
+    const projectionCode = projection === undefined ? this.#mapViewer.getProjectionNumber() : projection;
 
     // Check if language is provided for the basemap creation
-    const languageCode = language === undefined ? this.mapViewer.getDisplayLanguage() : language;
+    const languageCode = language === undefined ? this.#mapViewer.getDisplayLanguage() : language;
 
     // Check if basemap options are provided for the basemap creation
     const coreBasemapOptions = basemapOptions === undefined ? this.basemapOptions : basemapOptions;
@@ -581,10 +593,10 @@ export class BasemapApi {
         basemapOptions: coreBasemapOptions,
         attribution:
           coreBasemapOptions.basemapId === 'osm'
-            ? ['© OpenStreetMap', getLocalizedMessage(this.mapViewer.getDisplayLanguage(), 'mapctrl.attribution.defaultnrcan')]
+            ? ['© OpenStreetMap', getLocalizedMessage(this.#mapViewer.getDisplayLanguage(), 'mapctrl.attribution.defaultnrcan')]
             : [
                 basemapLayers.find((layer) => coreBasemapOptions.basemapId === layer.basemapId)?.copyright || '',
-                getLocalizedMessage(this.mapViewer.getDisplayLanguage(), 'mapctrl.attribution.defaultnrcan'),
+                getLocalizedMessage(this.#mapViewer.getDisplayLanguage(), 'mapctrl.attribution.defaultnrcan'),
               ],
         zoomLevels: {
           min: minZoom,
@@ -621,7 +633,7 @@ export class BasemapApi {
    */
   async loadDefaultBasemaps(projection?: TypeValidMapProjectionCodes, language?: TypeDisplayLanguage): Promise<void> {
     // Create the core basemap
-    const basemap = await this.createCoreBasemap(getStoreMapBasemapOptions(this.mapViewer.mapId), projection, language);
+    const basemap = await this.createCoreBasemap(getStoreMapBasemapOptions(this.#mapViewer.mapId), projection, language);
 
     // Info used by create custom basemap
     this.defaultOrigin = basemap?.defaultOrigin;
@@ -637,7 +649,7 @@ export class BasemapApi {
    */
   clearBasemaps(): void {
     // Remove previous basemaps
-    const layers = this.mapViewer.map.getAllLayers();
+    const layers = this.#mapViewer.map.getAllLayers();
 
     // Loop through all layers on the map
     for (let layerIndex = 0; layerIndex < layers.length; layerIndex++) {
@@ -649,7 +661,7 @@ export class BasemapApi {
       // Check if the group id matches basemap
       if (layerId && layerId === 'basemap') {
         // Remove the basemap layer
-        this.mapViewer.map.removeLayer(layer);
+        this.#mapViewer.map.removeLayer(layer);
       }
     }
   }
@@ -664,7 +676,7 @@ export class BasemapApi {
     this.activeBasemap = basemap;
 
     // Set store attribution for the selected basemap or empty string if not provided
-    setStoreMapAttribution(this.mapViewer.mapId, basemap ? basemap.attribution : ['']);
+    this.#mapController.setAttribution(basemap ? basemap.attribution : ['']);
 
     // Update the basemap layers on the map
     if (basemap?.layers) {
@@ -704,7 +716,7 @@ export class BasemapApi {
         basemapLayer.set('mapId', 'basemap');
 
         // Add the basemap layer
-        this.mapViewer.map.getLayers().insertAt(index, basemapLayer);
+        this.#mapViewer.map.getLayers().insertAt(index, basemapLayer);
 
         // Render the layer
         basemapLayer.changed();

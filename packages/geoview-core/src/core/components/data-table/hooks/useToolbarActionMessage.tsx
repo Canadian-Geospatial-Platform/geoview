@@ -5,7 +5,7 @@ import { setStoreRowsFilteredEntry } from '@/core/stores/store-interface-and-int
 import { logger } from '@/core/utils/logger';
 import type { ColumnsType } from '@/core/components/data-table/data-table-types';
 import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
-import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
+import { useDataTableController } from '@/core/controllers/use-controllers';
 
 /** Properties for the useToolbarActionMessage hook. */
 interface UseSelectedRowMessageProps {
@@ -37,7 +37,7 @@ export function useToolbarActionMessage({
   const { t } = useTranslation();
 
   // Get store values
-  const mapId = useStoreGeoViewMapId();
+  const dataTableController = useDataTableController();
 
   /**
    * Computes the toolbar message based on current filters and feature data.
@@ -70,6 +70,8 @@ export function useToolbarActionMessage({
         message = `${data.features?.length} ${t('dataTable.features')}`;
         length = 0;
       }
+
+      dataTableController.setRowsFilteredEntry(layerPath, length);
     }
 
     return { message, filteredRowCount: length };
