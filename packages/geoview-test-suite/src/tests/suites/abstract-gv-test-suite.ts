@@ -13,18 +13,23 @@ export abstract class GVAbstractTestSuite extends AbstractTestSuite {
   /** The MapViewer */
   #mapViewer: MapViewer;
 
+  /** The ControllerRegistry */
+  #controllerRegistry: ControllerRegistry;
+
   /**
    * Constructs an {@link GVAbstractTestSuite} instance.
    *
    * @param api - The api, mainly used to retrieve the MapViewer
    * @param mapViewer - The map viewer
+   * @param controllerRegistry - The controller registry, used to pass to testers that need it
    */
-  protected constructor(api: API, mapViewer: MapViewer) {
+  protected constructor(api: API, mapViewer: MapViewer, controllerRegistry: ControllerRegistry) {
     super();
 
     // Keep attributes
     this.#api = api;
     this.#mapViewer = mapViewer;
+    this.#controllerRegistry = controllerRegistry;
   }
 
   /**
@@ -51,7 +56,7 @@ export abstract class GVAbstractTestSuite extends AbstractTestSuite {
    * @returns The controllers registry
    */
   getControllersRegistry(): ControllerRegistry {
-    return this.getMapViewer().controllers;
+    return this.#controllerRegistry;
   }
 
   /**

@@ -8,6 +8,8 @@ import { Feature } from 'ol';
 import type { Projection as OLProjection } from 'ol/proj';
 import type { Map as OLMap } from 'ol';
 
+import type { EventDelegateBase } from '@/api/events/event-helper';
+import EventHelper from '@/api/events/event-helper';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { logger } from '@/core/utils/logger';
@@ -28,6 +30,7 @@ import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values
 import type { TemporalMode } from '@/core/utils/date-mgt';
 import type { GeometryJson } from '@/geo/layer/gv-layers/utils';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
+import type { LayerBaseEvent } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import type { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
@@ -45,6 +48,12 @@ export class GVEsriImage extends AbstractGVRaster {
 
   /** The currently active mosaic rule */
   #mosaicRule?: TypeMosaicRule;
+
+  /** Callback delegates for the raster function changed event */
+  #onRasterFunctionChangedHandlers: RasterFunctionChangedDelegate[] = [];
+
+  /** Callback delegates for the mosaic rule changed event */
+  #onMosaicRuleChangedHandlers: MosaicRuleChangedDelegate[] = [];
 
   /**
    * Constructs a GVEsriImage layer to manage an OpenLayer layer.
@@ -565,6 +574,9 @@ export class GVEsriImage extends AbstractGVRaster {
 
     // Update the OpenLayers source
     this.getOLSource().updateParams(params);
+
+    // Emit about it
+    this.#emitRasterFunctionChanged({ functionId: rasterFunctionId });
   }
 
   /**
@@ -652,16 +664,86 @@ export class GVEsriImage extends AbstractGVRaster {
     }
     olSource.updateParams(params);
     olSource.changed();
+
+    // Emit about it
+    this.#emitMosaicRuleChanged({ mosaicRule });
   }
 
   // #endregion METHODS
+
+  // #region EVENTS
+
+  /**
+   * Emits a raster function changed event to all handlers.
+   *
+   * @param event - The event to emit
+   */
+  #emitRasterFunctionChanged(event: RasterFunctionChangedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onRasterFunctionChangedHandlers, event);
+  }
+
+  /**
+   * Registers a raster function changed event handler.
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The registered callback, which can be used to unregister the event handler later
+   */
+  onRasterFunctionChanged(callback: RasterFunctionChangedDelegate): RasterFunctionChangedDelegate {
+    // Register the event handler
+    return EventHelper.onEvent(this.#onRasterFunctionChangedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a raster function changed event handler.
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
+   */
+  offRasterFunctionChanged(callback: RasterFunctionChangedDelegate | undefined): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onRasterFunctionChangedHandlers, callback);
+  }
+
+  /**
+   * Emits a mosaic rule changed event to all handlers.
+   *
+   * @param event - The event to emit
+   */
+  #emitMosaicRuleChanged(event: MosaicRuleChangedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onMosaicRuleChangedHandlers, event);
+  }
+
+  /**
+   * Registers a mosaic rule changed event handler.
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The registered callback, which can be used to unregister the event handler later
+   */
+  onMosaicRuleChanged(callback: MosaicRuleChangedDelegate): MosaicRuleChangedDelegate {
+    // Register the event handler
+    return EventHelper.onEvent(this.#onMosaicRuleChangedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a mosaic rule changed event handler.
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
+   */
+  offMosaicRuleChanged(callback: MosaicRuleChangedDelegate | undefined): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onMosaicRuleChangedHandlers, callback);
+  }
+
+  // #endregion EVENTS
 }
 
-// Exported for use in ESRI Dynamic raster layers
+/** Legend structure returned by the ESRI Image layer legend endpoint. */
 export type TypeEsriImageLayerLegend = {
   layers: TypeEsriImageLayerLegendLayer[];
 };
 
+/** A single layer entry within an ESRI image legend response. */
 export type TypeEsriImageLayerLegendLayer = {
   layerId: number | string;
   layerName: string;
@@ -672,6 +754,7 @@ export type TypeEsriImageLayerLegendLayer = {
   legend: TypeEsriImageLayerLegendLayerLegend[];
 };
 
+/** A single legend entry (symbol) within an ESRI image legend layer. */
 export type TypeEsriImageLayerLegendLayerLegend = {
   label: string;
   url: string;
@@ -682,6 +765,7 @@ export type TypeEsriImageLayerLegendLayerLegend = {
   values: string[];
 };
 
+/** JSON response from the ESRI Image identify operation. */
 export type EsriImageIdentifyJsonResponse = {
   objectId: number;
   name: string;
@@ -711,3 +795,33 @@ export type EsriImageIdentifyJsonResponse = {
   };
   processedValues?: string[];
 };
+
+// #region EVENT DELEGATES
+
+/**
+ * Define an event for the delegate.
+ */
+export interface RasterFunctionChangedEvent extends LayerBaseEvent {
+  /** The raster function identifier, or undefined when removed. */
+  functionId: string | undefined;
+}
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+export type RasterFunctionChangedDelegate = EventDelegateBase<GVEsriImage, RasterFunctionChangedEvent, void>;
+
+/**
+ * Define an event for the delegate.
+ */
+export interface MosaicRuleChangedEvent extends LayerBaseEvent {
+  /** The mosaic rule, or undefined when removed. */
+  mosaicRule: TypeMosaicRule | undefined;
+}
+
+/**
+ * Define a delegate for the event handler function signature.
+ */
+export type MosaicRuleChangedDelegate = EventDelegateBase<GVEsriImage, MosaicRuleChangedEvent, void>;
+
+// #endregion EVENT DELEGATES

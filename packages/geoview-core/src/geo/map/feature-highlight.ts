@@ -11,10 +11,11 @@ import type { Color } from 'ol/color';
 
 import { type TypeHighlightColors, type TypeFeatureInfoEntry, DEFAULT_HIGHLIGHT_COLOR } from '@/api/types/map-schema-types';
 import { logger } from '@/core/utils/logger';
-import type { MapViewer } from '@/geo/map/map-viewer';
-import { PointMarkers } from './point-markers';
 import { getStoreMapFeatureHighlightColor } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { TIMEOUT } from '@/core/utils/constant';
+import type { MapController } from '@/core/controllers/map-controller';
+import type { MapViewer } from '@/geo/map/map-viewer';
+import { PointMarkers } from './point-markers';
 
 /**
  * A class to handle highlighting of features.
@@ -22,6 +23,9 @@ import { TIMEOUT } from '@/core/utils/constant';
 export class FeatureHighlight {
   /** Reference on the map viewer */
   mapViewer: MapViewer;
+
+  /** Reference on the map controller */
+  mapController: MapController;
 
   /** The vector source to use for the highlight features */
   highlightSource: VectorSource = new VectorSource();
@@ -56,9 +60,10 @@ export class FeatureHighlight {
    *
    * @param mapViewer - A reference to the map viewer
    */
-  constructor(mapViewer: MapViewer) {
+  constructor(mapViewer: MapViewer, mapController: MapController) {
     // Keep the reference
     this.mapViewer = mapViewer;
+    this.mapController = mapController;
   }
 
   /**
@@ -67,7 +72,7 @@ export class FeatureHighlight {
   init(): void {
     // Initialize the Feature Highlight (adding the map option sets zIndex to infinity because it is undefined)
     this.overlayLayer = new VectorLayer({ source: this.highlightSource, map: this.mapViewer.map });
-    this.pointMarkers = new PointMarkers(this.mapViewer, this);
+    this.pointMarkers = new PointMarkers(this.mapViewer, this.mapController, this);
     if (getStoreMapFeatureHighlightColor(this.mapViewer.mapId) !== DEFAULT_HIGHLIGHT_COLOR)
       this.changeHighlightColor(getStoreMapFeatureHighlightColor(this.mapViewer.mapId));
   }

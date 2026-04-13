@@ -27,7 +27,7 @@ interface UseLightBoxReturnType {
 // TODO: Unmemoize this component, probably, because it's in 'common' folder
 /**
  * Base component for the lightbox, separated to avoid unnecessary re-renders of the lightbox when parent components update but lightbox props have not changed.
- * 
+ *
  * @param props - The properties defined in BaseLightBoxProps interface
  * @returns The base lightbox component
  */
@@ -92,7 +92,7 @@ export function useLightBox(): UseLightBoxReturnType {
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
   const [slides, setSlides] = useState<LightBoxSlides[]>([]);
   const [slidesIndex, setSlidesIndex] = useState(0);
-  const [storedReturnFocusId, setStoredReturnFocusId] = useState('0');
+  const [stateReturnFocusId, setReturnFocusId] = useState('0');
 
   /**
    * Creates the slides list from an image string.
@@ -135,7 +135,7 @@ export function useLightBox(): UseLightBoxReturnType {
       setIsLightBoxOpen(true);
       setSlides(createSlidesList(images, altText));
       setSlidesIndex(index ?? 0);
-      setStoredReturnFocusId(returnFocusId);
+      setReturnFocusId(returnFocusId);
     },
     [createSlidesList]
   );
@@ -146,11 +146,11 @@ export function useLightBox(): UseLightBoxReturnType {
         isLightBoxOpen={isLightBoxOpen}
         slides={slides}
         slidesIndex={slidesIndex}
-        returnFocusId={storedReturnFocusId}
+        returnFocusId={stateReturnFocusId}
         onExit={handleExit}
       />
     );
-  }, [isLightBoxOpen, slides, slidesIndex, storedReturnFocusId, handleExit]);
+  }, [isLightBoxOpen, slides, slidesIndex, stateReturnFocusId, handleExit]);
 
   return {
     initLightBox,

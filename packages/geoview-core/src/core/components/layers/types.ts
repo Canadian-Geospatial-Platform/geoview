@@ -56,6 +56,15 @@ export interface TypeLegendLayer {
   hoverable?: boolean;
   queryable?: boolean;
 
+  /** Whether the layer is visible. */
+  visible: boolean;
+
+  /** Whether the layer is visible at the current map zoom. */
+  inVisibleRange: boolean;
+
+  /** Whether the layer legend is collapsed. */
+  legendCollapsed: boolean;
+
   hasText?: boolean;
   textVisible?: boolean;
 

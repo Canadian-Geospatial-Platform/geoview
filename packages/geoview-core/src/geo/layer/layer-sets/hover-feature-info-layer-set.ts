@@ -3,7 +3,8 @@ import type { QueryType, TypeFeatureInfoResult } from '@/api/types/map-schema-ty
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
-import { getStoreMapOrderedLayerInfo, setStoreMapHoverFeatureInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { setStoreMapHoverFeatureInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { getStoreLayerInVisibleRangeLayerPaths } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import type {
   TypeHoverFeatureInfo,
   TypeHoverResultSet,
@@ -225,10 +226,10 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
    */
   #getOrderedLayerPaths(): string[] {
     // Get the map layer order
-    const mapLayerOrder = getStoreMapOrderedLayerInfo(this.getMapId()).filter((layer) => layer.inVisibleRange);
+    const layerPathsInVisibleRange = getStoreLayerInVisibleRangeLayerPaths(this.getMapId());
     const resultSetLayers = new Set(Object.keys(this.resultSet));
 
     // Filter and order the layers that are in our resultSet
-    return mapLayerOrder.map((layer) => layer.layerPath).filter((layerPath) => resultSetLayers.has(layerPath));
+    return layerPathsInVisibleRange.filter((layerPath) => resultSetLayers.has(layerPath));
   }
 }

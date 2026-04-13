@@ -3,11 +3,7 @@ import { useEffect, useRef, memo } from 'react';
 import type { Coordinate } from 'ol/coordinate';
 import { Box, ClickMapMarker } from '@/ui';
 
-import {
-  useStoreMapClickMarker,
-  useStoreMapClickCoordinates,
-  setStoreMapOverlayClickMarkerRef,
-} from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useStoreMapClickMarker, useStoreMapClickCoordinates } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useMapController } from '@/core/controllers/use-controllers';
@@ -29,7 +25,6 @@ export const ClickMarker = memo(function ClickMarker(): JSX.Element {
   // State
   const mapId = useStoreGeoViewMapId();
   const clickMarkerRef = useRef<HTMLDivElement>(null);
-  const clickMarkerId = `${mapId}-clickmarker`;
 
   // Store
   const clickMarker = useStoreMapClickMarker();
@@ -43,9 +38,9 @@ export const ClickMarker = memo(function ClickMarker(): JSX.Element {
     // Log
     logger.logTraceUseEffect('CLICK-MARKER - setOverlayClickMarkerRef');
 
-    // Update the store
-    setStoreMapOverlayClickMarkerRef(mapId, clickMarkerRef.current as HTMLElement);
-  }, [mapId]);
+    // Set the click marker overlay
+    mapController.setClickMarkerOverlayRef(clickMarkerRef.current!);
+  }, [mapController]);
 
   /**
    * Shows the click marker when click coordinates change.
@@ -62,7 +57,7 @@ export const ClickMarker = memo(function ClickMarker(): JSX.Element {
   return (
     <Box
       ref={clickMarkerRef}
-      id={clickMarkerId}
+      id={`${mapId}-clickmarker`}
       sx={{ position: 'absolute', visibility: clickMarker !== undefined ? 'visible' : 'hidden' }}
     >
       <ClickMapMarker

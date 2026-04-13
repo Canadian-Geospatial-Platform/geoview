@@ -27,15 +27,11 @@ import {
   useStoreLayerChildPaths,
   useStoreLayerItems,
   useStoreLayerHasDisabledVisibility,
-  setStoreLayerSelectedLayersTabLayer,
+  useStoreLayerVisible,
+  useStoreLayerInVisibleRange,
+  useStoreLayerIsParentHiddenOnMap,
+  useStoreLayerLegendCollapsed,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import {
-  useStoreMapLegendCollapsedByPath,
-  useStoreMapLayerVisibility,
-  useStoreMapLayerInVisibleRange,
-  useStoreMapIsParentLayerHiddenOnMap,
-  setStoreMapToggleLegendCollapsed,
-} from '@/core/stores/store-interface-and-intial-values/map-state';
 import { DeleteUndoButton } from '@/core/components/layers/delete-undo-button';
 import { LayersList } from './layers-list';
 import { LayerIcon } from '@/core/components/common/layer-icon';
@@ -103,10 +99,10 @@ export function SingleLayer({
   const layerIsSelected = layerPath === selectedLayerPath && displayState === 'view';
   const isKeyboardNavigationMode = useStoreUIActiveTrapGeoView();
 
-  const isVisible = useStoreMapLayerVisibility(layerPath);
-  const inVisibleRange = useStoreMapLayerInVisibleRange(layerPath);
-  const legendExpanded = !useStoreMapLegendCollapsedByPath(layerPath);
-  const parentHidden = useStoreMapIsParentLayerHiddenOnMap(layerPath);
+  const isVisible = useStoreLayerVisible(layerPath);
+  const inVisibleRange = useStoreLayerInVisibleRange(layerPath);
+  const legendExpanded = !useStoreLayerLegendCollapsed(layerPath);
+  const parentHidden = useStoreLayerIsParentHiddenOnMap(layerPath);
 
   const layerId = useStoreLayerId(layerPath);
   const layerName = useStoreLayerName(layerPath);
@@ -187,13 +183,13 @@ export function SingleLayer({
   const selectLayerIfNeeded = useCallback(
     (openPanel: boolean = true): void => {
       if (!layerIsSelected && ['processed', 'loaded'].includes(layerStatus!)) {
-        setStoreLayerSelectedLayersTabLayer(mapId, layerPath);
+        layerController.setSelectedLayerPath(layerPath);
         if (openPanel) {
           showLayerDetailsPanel?.(layerId || '');
         }
       }
     },
-    [mapId, layerIsSelected, layerStatus, layerPath, layerId, showLayerDetailsPanel]
+    [layerController, layerIsSelected, layerStatus, layerPath, layerId, showLayerDetailsPanel]
   );
 
   /**
@@ -207,8 +203,8 @@ export function SingleLayer({
     selectLayerIfNeeded();
 
     // Set legend collapse value
-    setStoreMapToggleLegendCollapsed(mapId, layerPath);
-  }, [layerPath, selectLayerIfNeeded, mapId, blurOtherLayerButtons]);
+    layerController.toggleLegendCollapsed(layerPath);
+  }, [layerPath, selectLayerIfNeeded, layerController, blurOtherLayerButtons]);
 
   const handleExpandGroupKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLButtonElement>): void => {
@@ -220,13 +216,13 @@ export function SingleLayer({
         selectLayerIfNeeded(false);
 
         // Set legend collapse value
-        setStoreMapToggleLegendCollapsed(mapId, layerPath);
+        layerController.toggleLegendCollapsed(layerPath);
 
         // Allow the toggle expansion action to work
         event.preventDefault();
       }
     },
-    [layerPath, mapId, blurOtherLayerButtons, selectLayerIfNeeded]
+    [layerPath, layerController, blurOtherLayerButtons, selectLayerIfNeeded]
   );
 
   const handleLayerClick = useCallback((): void => {
@@ -239,9 +235,9 @@ export function SingleLayer({
     blurOtherLayerButtons();
 
     // Set selected layer path
-    setStoreLayerSelectedLayersTabLayer(mapId, layerPath);
+    layerController.setSelectedLayerPath(layerPath);
     showLayerDetailsPanel?.(layerId || '');
-  }, [mapId, layerPath, layerId, layerStatus, showLayerDetailsPanel, blurOtherLayerButtons]);
+  }, [layerController, layerPath, layerId, layerStatus, showLayerDetailsPanel, blurOtherLayerButtons]);
 
   const handleArrowClick = useCallback(
     (direction: number) => {
@@ -323,7 +319,7 @@ export function SingleLayer({
     selectLayerIfNeeded();
 
     // Toggle visibility
-    layerController.setOrToggleMapLayerVisibility(layerPath);
+    layerController.setOrToggleLayerVisibilityIfExists(layerPath);
   }, [layerPath, layerController, selectLayerIfNeeded]);
 
   const handleToggleVisibilityKeyDown = useCallback(
@@ -334,7 +330,7 @@ export function SingleLayer({
         selectLayerIfNeeded(false);
 
         // Toggle visibility
-        layerController.setOrToggleMapLayerVisibility(layerPath);
+        layerController.setOrToggleLayerVisibilityIfExists(layerPath);
 
         // Allow the toggle visibility action to work
         event.preventDefault();

@@ -1,17 +1,26 @@
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
+import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import {
   addOrUpdateStoreTimeSliderFilter,
   addStoreTimeSliderLayer,
   getStoreTimeSliderLayer,
   isStoreTimeSliderInitialized,
+  setStoreTimeSliderDelay,
+  setStoreTimeSliderDisplayDateFormat,
+  setStoreTimeSliderDisplayDateFormatShort,
+  setStoreTimeSliderDisplayDateTimezone,
   setStoreTimeSliderFiltering,
+  setStoreTimeSliderLocked,
+  setStoreTimeSliderReversed,
+  setStoreTimeSliderSelectedLayerPath,
+  setStoreTimeSliderStep,
   setStoreTimeSliderValues,
   type TypeTimeSliderProps,
   type TypeTimeSliderValues,
 } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
-import { DateMgt, type TimeDimension } from '@/core/utils/date-mgt';
+import { DateMgt, type TimeDimension, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
@@ -25,11 +34,12 @@ export class TimeSliderController extends AbstractMapViewerController {
    * Creates an instance of TimeSliderController.
    *
    * @param mapViewer - The map viewer instance to associate with this controller
+   * @param controllerRegistry - The controller registry for accessing sibling controllers
    */
   // GV Leave the constructor here, because we'll likely need it soon to inject dependencies.
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor
-  constructor(mapViewer: MapViewer) {
-    super(mapViewer);
+  constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry) {
+    super(mapViewer, controllerRegistry);
   }
 
   // #region OVERRIDES
@@ -37,6 +47,16 @@ export class TimeSliderController extends AbstractMapViewerController {
   // #endregion OVERRIDES
 
   // #region PUBLIC METHODS
+
+  /**
+   * Sets the selected layer path in the time-slider panel.
+   *
+   * @param layerPath - The layer path to select
+   */
+  setSelectedLayerPathTimeSlider(layerPath: string): void {
+    // Save in the store
+    setStoreTimeSliderSelectedLayerPath(this.getMapId(), layerPath);
+  }
 
   /**
    * Checks if the layer has time slider values. If there are, adds the time slider layer and applies filters.
@@ -104,6 +124,84 @@ export class TimeSliderController extends AbstractMapViewerController {
 
     // Update the filters on the layer in question and potential additional ones
     this.#updateAndApplyTimeFiltersForAll(layer, timeSliderValues, filtering, timeSliderValues.values);
+  }
+
+  /**
+   * Sets the step value for a layer path in the time-slider panel.
+   *
+   * @param layerPath - The layer path
+   * @param step - The step value
+   */
+  setStep(layerPath: string, step: number): void {
+    // Save in the store
+    setStoreTimeSliderStep(this.getMapId(), layerPath, step);
+  }
+
+  /**
+   * Sets the delay value for a layer path in the time-slider panel.
+   *
+   * @param layerPath - The layer path
+   * @param delay - The delay value
+   */
+  setDelay(layerPath: string, delay: number): void {
+    // Save in the store
+    setStoreTimeSliderDelay(this.getMapId(), layerPath, delay);
+  }
+
+  /**
+   * Sets the locked state for a layer path in the time-slider panel.
+   *
+   * @param layerPath - The layer path
+   * @param locked - The locked state
+   */
+  setLocked(layerPath: string, locked: boolean): void {
+    // Save in the store
+    setStoreTimeSliderLocked(this.getMapId(), layerPath, locked);
+  }
+
+  /**
+   * Sets the reversed state for a layer path in the time-slider panel.
+   *
+   * @param layerPath - The layer path
+   * @param reversed - The reversed state
+   */
+
+  setReversed(layerPath: string, reversed: boolean): void {
+    // Save in the store
+    setStoreTimeSliderReversed(this.getMapId(), layerPath, reversed);
+  }
+
+  /**
+   * Sets the display date format for a layer path in the time-slider panel.
+   *
+   * @param layerPath - The layer path
+   * @param displayDateFormat - The display date format
+   */
+  setDisplayDateFormat(layerPath: string, displayDateFormat: TypeDisplayDateFormat): void {
+    // Save in the store
+    setStoreTimeSliderDisplayDateFormat(this.getMapId(), layerPath, displayDateFormat);
+  }
+
+  /**
+   * Sets the short display date format for a layer path in the time-slider panel.
+   *
+   * @param layerPath - The layer path
+   * @param displayDateFormat - The short display date format
+   */
+  setDisplayDateFormatShort(layerPath: string, displayDateFormat: TypeDisplayDateFormat): void {
+    // Save in the store
+    setStoreTimeSliderDisplayDateFormatShort(this.getMapId(), layerPath, displayDateFormat);
+  }
+
+  /**
+   * Sets the display date timezone for a layer path in the time-slider panel.
+   *
+   * @param layerPath - The layer path
+   * @param displayDateTimezone - The display date timezone
+   */
+  setDisplayDateTimezone(layerPath: string, displayDateTimezone: string): void {
+    // Save in the store
+    setStoreTimeSliderDisplayDateTimezone(this.getMapId(), layerPath, displayDateTimezone);
   }
 
   // #endregion PUBLIC METHODS

@@ -6,12 +6,12 @@ import type { TypeLegendItem } from '@/core/components/layers/types';
 import {
   useStoreLayerCanToggle,
   useStoreLayerControls,
+  useStoreLayerIsHiddenOnMap,
   useStoreLayerStyleConfig,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';
 import { generateId } from '@/core/utils/utilities';
-import { useStoreMapIsLayerHiddenOnMap } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useLayerController } from '@/core/controllers/use-controllers';
 
@@ -112,7 +112,7 @@ export const ItemsList = memo(function ItemsList({ items, layerPath }: ItemsList
   // Store
   const mapId = useStoreGeoViewMapId();
   const layerControls = useStoreLayerControls(layerPath);
-  const layerHidden = useStoreMapIsLayerHiddenOnMap(layerPath);
+  const layerHidden = useStoreLayerIsHiddenOnMap(layerPath);
   const canToggle = useStoreLayerCanToggle(layerPath);
   const canToggleItemVisibility = canToggle && layerControls?.visibility !== false;
   const styleConfig = useStoreLayerStyleConfig(layerPath);

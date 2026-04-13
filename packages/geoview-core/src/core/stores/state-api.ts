@@ -6,17 +6,15 @@ import {
   type GeoChartStoreByLayerPath,
   type TypeGeochartResultSetEntry,
 } from './store-interface-and-intial-values/geochart-state';
-import {
-  type TypeOrderedLayerInfo,
-  getStoreMapLegendCollapsedByPath,
-  getStoreMapOrderedLayerInfo,
-  setStoreMapLegendCollapsed,
-  utilFindMapLayerAndChildrenFromOrderedInfo,
-} from './store-interface-and-intial-values/map-state';
 import type { TimeSliderLayerSet } from './store-interface-and-intial-values/time-slider-state';
 import { getStoreTimeSliderLayers } from './store-interface-and-intial-values/time-slider-state';
 import { getStoreSwiperLayerPaths } from './store-interface-and-intial-values/swiper-state';
-import { setStoreLayerSelectedLayersTabLayer, setStoreReorderLegendLayers } from './store-interface-and-intial-values/layer-state';
+import {
+  getStoreLayerLegendCollapsed,
+  getStoreLayerOrderedLayerPaths,
+  setStoreReorderLegendLayers,
+  utilFindLayerAndChildrenPaths,
+} from './store-interface-and-intial-values/layer-state';
 import { logger } from '@/core/utils/logger';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
@@ -48,7 +46,7 @@ export class StateApi {
    */
   getLegendCollapsedState(layerPath: string): boolean {
     // Get from store
-    return getStoreMapLegendCollapsedByPath(this.#layerController.getMapId(), layerPath);
+    return getStoreLayerLegendCollapsed(this.#layerController.getMapId(), layerPath);
   }
 
   /**
@@ -99,8 +97,8 @@ export class StateApi {
    * @returns If the legend is collapsed.
    */
   setLegendCollapsedState(layerPath: string, collapsed: boolean): void {
-    // Save to the store
-    setStoreMapLegendCollapsed(this.#layerController.getMapId(), layerPath, collapsed);
+    // Redirect to controller
+    this.#layerController.setLegendCollapsed(layerPath, collapsed);
   }
 
   /**
@@ -108,16 +106,26 @@ export class StateApi {
    * @param layerPath - The path of the layer to set
    */
   setSelectedLayersTabLayer(layerPath: string): void {
-    setStoreLayerSelectedLayersTabLayer(this.#layerController.getMapId(), layerPath);
+    // Redirect to controller
+    this.#layerController.setSelectedLayerPath(layerPath);
   }
 
+  /**
+   * Reorders a layer and its children within the ordered layers list by a given number of positions.
+   *
+   * The layer (along with any child paths) is extracted from its current position and re-inserted
+   * at the target index, skipping only siblings at the same depth. Updates the store, reorders the
+   * legend layers, and emits a layers reordered event.
+   *
+   * @param layerPath - The path of the layer to move
+   * @param move - The number of sibling positions to move (negative = toward index 0, positive = toward end)
+   */
   reorderLayers(layerPath: string, move: number): void {
     // Apply some ordering logic
     const direction = move < 0 ? -1 : 1;
     let absoluteMoves = Math.abs(move);
-    const orderedLayers = [...getStoreMapOrderedLayerInfo(this.#layerController.getMapId())];
-    let startingIndex = -1;
-    for (let i = 0; i < orderedLayers.length; i++) if (orderedLayers[i].layerPath === layerPath) startingIndex = i;
+    const orderedLayers = [...getStoreLayerOrderedLayerPaths(this.#layerController.getMapId())];
+    const startingIndex = orderedLayers.indexOf(layerPath);
 
     // If layer not found, exit early
     if (startingIndex === -1) {
@@ -125,23 +133,22 @@ export class StateApi {
       return;
     }
 
-    const layerInfo = orderedLayers[startingIndex];
-    const movedLayers = utilFindMapLayerAndChildrenFromOrderedInfo(layerPath, orderedLayers);
+    const movedLayers = utilFindLayerAndChildrenPaths(layerPath, orderedLayers);
     orderedLayers.splice(startingIndex, movedLayers.length);
     let nextIndex = startingIndex;
-    const pathLength = layerInfo.layerPath.split('/').length;
+    const pathLength = layerPath.split('/').length;
     while (absoluteMoves > 0) {
       nextIndex += direction;
       if (nextIndex === orderedLayers.length || nextIndex === 0) {
         absoluteMoves = 0;
-      } else if (orderedLayers[nextIndex].layerPath.split('/').length === pathLength) absoluteMoves--;
+      } else if (orderedLayers[nextIndex].split('/').length === pathLength) absoluteMoves--;
     }
     orderedLayers.splice(nextIndex, 0, ...movedLayers);
 
     // Redirect
-    this.#layerController.setMapOrderedLayerInfoDirectly(orderedLayers);
+    this.#layerController.setMapOrderedLayersDirectly(orderedLayers);
 
-    // Reorder the legend layers, because the order layer info has changed
+    // Reorder the legend layers, because the ordered layers have changed
     setStoreReorderLegendLayers(this.#layerController.getMapId());
 
     // Emit event
@@ -191,8 +198,8 @@ type LayersReorderedDelegate = EventDelegateBase<StateApi, LayersReorderedEvent,
  * Define an event for the delegate
  */
 export type LayersReorderedEvent = {
-  // The layer path of the affected layer
-  orderedLayers: TypeOrderedLayerInfo[];
+  // The layer paths in the new order
+  orderedLayers: string[];
 };
 
 // #endregion EVENTS & DELEGATES

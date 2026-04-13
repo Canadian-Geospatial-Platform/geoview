@@ -1,4 +1,4 @@
-import { useStoreLayerDisplayState, useStoreLayerLayerPaths } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useStoreLayerDisplayState, useStoreLayerTopLevelLayerPaths } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { LayersList } from './layers-list';
 import { AddNewLayer } from './add-new-layer/add-new-layer';
 import { logger } from '@/core/utils/logger';
@@ -15,7 +15,7 @@ export function LeftPanel({ showLayerDetailsPanel, isLayoutEnlarged, containerTy
   logger.logTraceRender('components/layers/left-panel/left-panel');
 
   // get from the store
-  const layerPaths = useStoreLayerLayerPaths();
+  const layerPaths = useStoreLayerTopLevelLayerPaths();
   const displayState = useStoreLayerDisplayState();
 
   if (displayState === 'add') {

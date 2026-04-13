@@ -1,5 +1,5 @@
-import type { MutableRefObject, ReactNode } from 'react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { MutableRefObject } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useTheme } from '@mui/material/styles';
 
 import type { TypeTabs } from '@/ui';
@@ -21,8 +21,8 @@ import {
   useStoreUIFooterPanelResizeValue,
   useStoreUIActiveTrapGeoView,
   useStoreUIHiddenTabs,
+  useStoreUIFooterTabs,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import type { FooterBarApi, FooterTabCreatedEvent, FooterTabRemovedEvent } from '@/core/components';
 import { DEFAULT_FOOTER_TABS_ORDER } from '@/api/types/map-schema-types';
 import { CONTAINER_TYPE, TABS } from '@/core/utils/constant';
 import { useStoreGeoViewConfig, useStoreGeoViewMapId } from '@/core/stores/geoview-store';
@@ -35,16 +35,7 @@ import { camelCase, delay, scrollIfNotVisible } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { Guide } from '@/core/components/guide/guide';
 import { FooterPlugin } from '@/api/plugin/footer-plugin';
-
-/** Tab definition with icon, content, and optional label. */
-interface Tab {
-  /** The tab icon element. */
-  icon: ReactNode;
-  /** The tab content element. */
-  content: ReactNode;
-  /** Optional tab label. */
-  label?: string;
-}
+import type { FooterBarApi, FooterTabContent } from './footer-bar-api';
 
 /** Props for the FooterBar component. */
 type FooterBarProps = {
@@ -90,58 +81,27 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   const footerBarTabsConfig = useStoreGeoViewConfig()?.footerBar;
 
   /**
-   * Builds the footer bar tab keys from configuration.
-   */
-  const memoFooterBarTabKeys = useMemo(() => {
-    // Log
-    logger.logTraceUseMemo('FOOTER-BAR - memoFooterBarTabKeys', footerBarTabsConfig?.tabs?.core);
-
-    const coreTabs = (footerBarTabsConfig?.tabs?.core ?? []).reduce(
-      (acc, curr) => {
-        // eslint-disable-next-line no-param-reassign
-        acc[curr] = {} as Tab;
-        return acc;
-      },
-      {} as Record<string, Tab>
-    );
-
-    // Add custom tabs
-    const customTabs = (footerBarTabsConfig?.tabs?.custom ?? []).reduce(
-      (acc, curr) => {
-        // eslint-disable-next-line no-param-reassign
-        acc[curr.id] = {} as Tab;
-        return acc;
-      },
-      {} as Record<string, Tab>
-    );
-
-    return { ...coreTabs, ...customTabs };
-  }, [footerBarTabsConfig?.tabs]);
-
-  // List of Footer Tabs created from config file.
-  const [tabsList, setTabsList] = useState<Record<string, Tab>>(memoFooterBarTabKeys);
-
-  /**
-   * Creates custom tabs from configuration.
+   * Registers custom footer tab entries from configuration on mount.
    */
   useEffect(() => {
-    if (footerBarTabsConfig?.tabs?.custom) {
-      footerBarTabsConfig.tabs.custom.forEach((customTab) => {
-        const newTab = {
-          [customTab.id]: {
-            icon: <InfoIcon />, // TODO: Make it configurable if needed
-            label: customTab.label,
-            content: <UseHtmlToReact htmlContent={customTab.contentHTML ?? ''} />,
-          },
-        } as Record<string, Tab>;
+    // Log
+    logger.logTraceUseEffect('FOOTER-BAR - seed custom footer tabs from config', footerBarTabsConfig?.tabs?.custom);
 
-        // Add the custom tab to the tabs list
-        setTabsList((prevState: Record<string, Tab>) => {
-          return { ...prevState, ...newTab };
-        });
+    // Seed custom tabs and register their content (core tabs are seeded in setDefaultConfigValues)
+    (footerBarTabsConfig?.tabs?.custom ?? []).forEach((customTab) => {
+      footerBarApi.createTab({
+        id: customTab.id,
+        value: 0,
+        label: customTab.label ?? '',
+        icon: <InfoIcon />,
+        content: <UseHtmlToReact htmlContent={customTab.contentHTML ?? ''} />,
       });
-    }
-  }, [footerBarTabsConfig]);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Read footer tabs from the store (reactive — no event handlers needed)
+  const footerTabs = useStoreUIFooterTabs();
 
   /**
    * Builds the panel definitions for each core tab.
@@ -156,7 +116,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
       details: { icon: <InfoIcon />, content: <DetailsPanel containerType={CONTAINER_TYPE.FOOTER_BAR} /> },
       'data-table': { icon: <StorageIcon />, content: <Datapanel containerType={CONTAINER_TYPE.FOOTER_BAR} /> },
       guide: { icon: <QuestionMarkIcon />, content: <Guide containerType={CONTAINER_TYPE.FOOTER_BAR} /> },
-    } as Record<string, Tab>;
+    } as Record<string, FooterTabContent>;
   }, []);
 
   /**
@@ -164,70 +124,38 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
    */
   const memoFooterBarTabs = useMemo(() => {
     // Log
-    logger.logTraceUseMemo('FOOTER-BAR - memoFooterBarTabs', tabsList, memoTabs);
+    logger.logTraceUseMemo('FOOTER-BAR - memoFooterBarTabs', footerTabs, memoTabs);
 
     // Early return if no footer tab provided
-    if (!tabsList || Object.keys(tabsList).length === 0) return [];
+    if (!footerTabs || footerTabs.length === 0) return [];
 
-    // Set the allTabs (union of all footer tabs) and get the needed keys
-    const allTabs = { ...tabsList, ...memoTabs };
-    const tabsListKeys = Object.keys(tabsList);
-    const availableTabKeys: string[] = tabsListKeys.includes('guide') ? tabsListKeys : [...tabsListKeys, 'guide'];
+    // Build lookup of tab ids from the store
+    const tabIds = footerTabs.map((t) => t.id);
+    const tabLabelMap = new Map(footerTabs.map((t) => [t.id, t.label]));
+    const availableTabKeys: string[] = tabIds.includes('guide') ? tabIds : [...tabIds, 'guide'];
 
     // Custom tabs first, then core tabs in DEFAULT_FOOTER_TABS_ORDER ... last guide
     const customTabKeys = availableTabKeys.filter((tabKey) => !DEFAULT_FOOTER_TABS_ORDER.includes(tabKey));
     const coreTabKeys = DEFAULT_FOOTER_TABS_ORDER.filter((tabKey) => availableTabKeys.includes(tabKey));
     const orderedTabKeys = customTabKeys.concat(coreTabKeys);
 
-    return orderedTabKeys.map((tab, index) => {
+    return orderedTabKeys.map((tabId, index) => {
+      // Look up content: first from core memoTabs, then from the API content registry
+      const coreTab = memoTabs[tabId];
+      const registryContent = footerBarApi.getTabContent(tabId);
+      const icon = coreTab?.icon ?? registryContent?.icon ?? '';
+      const content = coreTab?.content ?? registryContent?.content ?? '';
+      const label = tabLabelMap.get(tabId) || `${camelCase(tabId)}.title`;
+
       return {
-        id: tab,
+        id: tabId,
         value: index,
-        label: allTabs[tab].label ? allTabs[tab].label : `${camelCase(tab)}.title`,
-        icon: allTabs[tab]?.icon ?? '',
-        content: <Box sx={sxClasses.tabContent}>{allTabs[tab]?.content ?? ''}</Box>,
+        label,
+        icon,
+        content: <Box sx={sxClasses.tabContent}>{content}</Box>,
       } as TypeTabs;
     });
-  }, [memoTabs, tabsList, sxClasses]);
-
-  /**
-   * Handles adding a tab from the API.
-   */
-  const handleAddTab = useCallback((sender: FooterBarApi, event: FooterTabCreatedEvent): void => {
-    const newTab = {
-      [event.tab.id]: {
-        icon: event.tab.icon || <InfoIcon />,
-        label: event.tab.label,
-        content: typeof event.tab.content === 'string' ? <UseHtmlToReact htmlContent={event.tab.content ?? ''} /> : event.tab.content,
-      },
-    } as Record<string, Tab>;
-
-    // NOTE: we need prevState because of an async nature of adding plugins.
-    setTabsList((prevState: Record<string, Tab>) => {
-      return { ...prevState, ...newTab };
-    });
-  }, []);
-
-  /**
-   * Handles removing a tab from the API.
-   */
-  const handleRemoveTab = useCallback((sender: FooterBarApi, event: FooterTabRemovedEvent): void => {
-    // remove the tab from the list
-    setTabsList((prevState) => {
-      const state = { ...prevState };
-      delete state[event.tabid];
-      return state;
-    });
-  }, []);
-
-  /**
-   * Updates the active footer tab based on footer tabs created from configuration.
-   */
-  useEffect(() => {
-    if (!activeFooterBarTab.tabId && activeFooterBarTab.isOpen) uiController.setActiveFooterBarTab(memoFooterBarTabs?.[0]?.id ?? '');
-    // No need to update when selected tab changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [memoFooterBarTabs, uiController]);
+  }, [memoTabs, footerTabs, sxClasses, footerBarApi]);
 
   /**
    * Whenever the array layer data batch changes if we're on 'details' tab and it's collapsed, make sure we uncollapse it
@@ -329,61 +257,6 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
         });
     }
   }, [pluginController, activeFooterBarTab]);
-
-  /**
-   * Registers and unregisters tab create/remove event handlers on mount.
-   */
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('FOOTER-BAR - mount');
-
-    // TODO: Refactor - Registering those handlers only when the component has been mounted can cause issues if 'someone' calls
-    // TO.DOCONT: mapViewer('map1').footerBarApi.createTab() before the component is actually mounted.
-    // TO.DOCONT: The handler when tabs are created should happen earlier and the ui component should only 'react' to store tabs values.
-    // TO.DOCONT: We had an issue where a custom footer tab was never appearing, because the 'createTab()' call was happening before
-    // TO.DOCONT: this FooterBar component was actually mounted. That being said, removing the 'mapLoaded' condition, before mounting
-    // TO.DOCONT: the FooterBar (in Footer-bar.tsx), was sufficient to fix the issue for now, but it should be addressed eventually.
-
-    // Register footerbar tab created/removed handlers
-    footerBarApi.onFooterTabCreated(handleAddTab);
-    footerBarApi.onFooterTabRemoved(handleRemoveTab);
-
-    return () => {
-      // Unregister events
-      footerBarApi.offFooterTabCreated(handleAddTab);
-      footerBarApi.offFooterTabRemoved(handleRemoveTab);
-    };
-  }, [footerBarApi, handleAddTab, handleRemoveTab]);
-
-  /**
-   * Creates default tabs from configuration parameters (similar logic as in app-bar).
-   */
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('FOOTER-BAR - footerBarTabsConfig');
-
-    // TODO: Refactor Footer-bar - This loadScript shouldn't be part of a useEffect, because those happen everytime their depedencies change.
-    // TO.DOCONT: In development with StrictMode this is triggered twice to prevent developers from doing stuff like that here.
-    // TO.DOCONT: Also, important, the dependencies of this useEffect (and the code herein) isn't meant to be part of a useEffect in the first place.
-    // TO.DOCONT: Looking at the other useEffects, it's clear there's a lot of refactoring that should be done in the Footer-bar in general.
-
-    // Packages tab
-    if (footerBarTabsConfig && footerBarTabsConfig.tabs.core.includes('time-slider')) {
-      // Load and add the plugin
-      pluginController.loadAndAddPlugin('time-slider').catch((error: unknown) => {
-        // Log
-        logger.logPromiseFailed('loadAndAddPlugin(time-slider) in useEffect in FooterBar', error);
-      });
-    }
-
-    if (footerBarTabsConfig && footerBarTabsConfig.tabs.core.includes('geochart')) {
-      // Load and add the plugin
-      pluginController.loadAndAddPlugin('geochart').catch((error: unknown) => {
-        // Log
-        logger.logPromiseFailed('loadAndAddPlugin(geochart) in useEffect in FooterBar', error);
-      });
-    }
-  }, [footerBarTabsConfig, pluginController]);
 
   /**
    * Scrolls the footer into view on mouse click.

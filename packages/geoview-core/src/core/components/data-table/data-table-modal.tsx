@@ -10,11 +10,11 @@ import { MRT_Localization_EN as MRTLocalizationEN } from 'material-react-table/l
 import linkifyHtml from 'linkify-html';
 
 import { Modal, MRTTable as Table, type MRT_ColumnDef as MRTColumnDef, Box, CircularProgress, Button } from '@/ui';
+import { useDataTableController, useUIController } from '@/core/controllers/use-controllers';
 import { TableViewIcon } from '@/ui/icons';
 import type { TypeFieldEntry } from '@/api/types/map-schema-types';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { useNavigateToTab } from '@/core/components/common/hooks/use-navigate-to-tab';
-import { useUIController } from '@/core/controllers/use-controllers';
 import {
   useStoreUIActiveFocusItem,
   useStoreUIFooterBarComponents,
@@ -22,10 +22,7 @@ import {
   useStoreUIActiveTrapGeoView,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useStoreAppDisplayLanguage, useStoreAppShellContainer } from '@/core/stores/store-interface-and-intial-values/app-state';
-import {
-  setStoreSelectedLayerPath,
-  useStoreDataTableAllFeaturesDataArray,
-} from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { useStoreDataTableAllFeaturesDataArray } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { useStoreLayerNameSet, useStoreLayerSelectedLayerPath } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { logger } from '@/core/utils/logger';
 import { sanitizeHtmlContent, enhanceLinksAccessibility } from '@/core/utils/utilities';
@@ -49,7 +46,6 @@ export default function DataTableModal(): JSX.Element {
   const [isLoading, setIsLoading] = useState(true);
 
   // get store function
-  const uiController = useUIController();
   const activeModalId = useStoreUIActiveFocusItem().activeElementId;
   const selectedLayerPath = useStoreLayerSelectedLayerPath();
   const layersData = useStoreDataTableAllFeaturesDataArray();
@@ -59,6 +55,8 @@ export default function DataTableModal(): JSX.Element {
   const appBarComponents = useStoreUIAppbarComponents();
   const isFocusTrap = useStoreUIActiveTrapGeoView();
   const layerNames = useStoreLayerNameSet();
+  const uiController = useUIController();
+  const dataTableController = useDataTableController();
 
   const dataTableLocalization = language === 'fr' ? MRTLocalizationFR : MRTLocalizationEN;
 
@@ -68,7 +66,9 @@ export default function DataTableModal(): JSX.Element {
   const hasDataTableTab = hasFooterDataTableTab || hasAppBarDataTableTab;
 
   // Use navigate hook with scrollToFooter disabled since modal closes
-  const navigateToDataTable = useNavigateToTab('data-table', setStoreSelectedLayerPath);
+  const navigateToDataTable = useNavigateToTab('data-table', (lyrPath) => {
+    dataTableController.setSelectedLayerPath(lyrPath);
+  });
 
   // Create columns for data table.
   const mappedLayerData = useFeatureFieldInfos(layersData);

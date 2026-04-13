@@ -1,8 +1,7 @@
 import type { TypeButtonGroupConfig, TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
 import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 
-import type { EventDelegateBase } from '@/api/events/event-helper';
-import EventHelper from '@/api/events/event-helper';
+import type { UIController } from '@/core/controllers/ui-controller';
 import { generateId } from '@/core/utils/utilities';
 
 /**
@@ -15,77 +14,17 @@ export class NavBarApi {
   /** Configuration for button groups. */
   groupConfigs: Record<string, TypeButtonGroupConfig> = {};
 
-  /** Callback handlers for the NavBar created event. */
-  #onNavBarCreatedHandlers: NavBarCreatedDelegate[] = [];
-
-  /** Callback handlers for the NavBar removed event. */
-  #onNavBarRemovedHandlers: NavBarRemovedDelegate[] = [];
+  /** The UI controller instance for accessing the map id. */
+  #uiController: UIController;
 
   /**
    * Instantiates a NavBarApi class.
+   *
+   * @param uiController - The UI controller instance
    */
-  constructor() {
+  constructor(uiController: UIController) {
+    this.#uiController = uiController;
     this.#createDefaultButtonPanels();
-  }
-
-  /**
-   * Emits an event to all registered NavBar created event handlers.
-   *
-   * @param event - The event to emit
-   */
-  #emitNavbarCreated(event: NavBarCreatedEvent): void {
-    // Emit the NavBar created event
-    EventHelper.emitEvent(this, this.#onNavBarCreatedHandlers, event);
-  }
-
-  /**
-   * Registers an event handler for NavBar created events.
-   *
-   * @param callback - The callback to be executed whenever the event is emitted
-   */
-  onNavbarCreated(callback: NavBarCreatedDelegate): void {
-    // Register the NavBar created event callback
-    EventHelper.onEvent(this.#onNavBarCreatedHandlers, callback);
-  }
-
-  /**
-   * Unregisters an event handler for NavBar created events.
-   *
-   * @param callback - The callback to stop being called whenever the event is emitted
-   */
-  offNavbarCreated(callback: NavBarCreatedDelegate): void {
-    // Unregister the NavBar created event callback
-    EventHelper.offEvent(this.#onNavBarCreatedHandlers, callback);
-  }
-
-  /**
-   * Emits an event to all registered NavBar removed event handlers.
-   *
-   * @param event - The event to emit
-   */
-  #emitNavbarRemoved(event: NavBarRemovedEvent): void {
-    // Emit the NavBar removed event
-    EventHelper.emitEvent(this, this.#onNavBarRemovedHandlers, event);
-  }
-
-  /**
-   * Registers an event handler for NavBar removed events.
-   *
-   * @param callback - The callback to be executed whenever the event is emitted
-   */
-  onNavbarRemoved(callback: NavBarRemovedDelegate): void {
-    // Register the NavBar removed event callback
-    EventHelper.onEvent(this.#onNavBarRemovedHandlers, callback);
-  }
-
-  /**
-   * Unregisters an event handler for NavBar removed events.
-   *
-   * @param callback - The callback to stop being called whenever the event is emitted
-   */
-  offNavbarRemoved(callback: NavBarRemovedDelegate): void {
-    // Unregister the NavBar removed event callback
-    EventHelper.offEvent(this.#onNavBarRemovedHandlers, callback);
   }
 
   /**
@@ -137,8 +76,8 @@ export class NavBarApi {
       // add the new button panel to the correct group
       if (group !== '__proto__' && buttonPanelId !== '__proto__') this.buttons[group][buttonPanelId] = buttonPanel;
 
-      // trigger an event that a new button or button panel has been created to update the state and re-render
-      this.#emitNavbarCreated({ buttonPanelId, group, buttonPanel });
+      // Bump the store version to trigger a re-render in the nav-bar component
+      this.#uiController.bumpNavBarButtonPanelVersion();
 
       return buttonPanel;
     }
@@ -206,11 +145,11 @@ export class NavBarApi {
       if (group[buttonPanelId]) {
         // delete the button or panel from the group
         delete group[buttonPanelId];
-
-        // trigger an event that a button or panel has been removed to update the state and re-render
-        this.#emitNavbarRemoved({ buttonPanelId, group: groupName });
       }
     });
+
+    // Bump the store version to trigger a re-render in the nav-bar component
+    this.#uiController.bumpNavBarButtonPanelVersion();
   }
 
   /**
@@ -237,27 +176,3 @@ export class NavBarApi {
     return this.groupConfigs[groupName] || { groupName, accordionThreshold: 10 };
   }
 }
-
-/** Event payload when a nav-bar button panel is created. */
-export type NavBarCreatedEvent = {
-  /** The button panel identifier. */
-  buttonPanelId: string;
-  /** The group the button panel belongs to. */
-  group: string;
-  /** The created button panel. */
-  buttonPanel: TypeButtonPanel;
-};
-
-/** Delegate type for NavBar created event handlers. */
-type NavBarCreatedDelegate = EventDelegateBase<NavBarApi, NavBarCreatedEvent, void>;
-
-/** Event payload when a nav-bar button panel is removed. */
-export type NavBarRemovedEvent = {
-  /** The button panel identifier. */
-  buttonPanelId: string;
-  /** The group the button panel belonged to. */
-  group: string;
-};
-
-/** Delegate type for NavBar removed event handlers. */
-type NavBarRemovedDelegate = EventDelegateBase<NavBarApi, NavBarRemovedEvent, void>;

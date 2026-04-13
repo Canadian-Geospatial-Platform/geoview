@@ -58,8 +58,8 @@ export default function BasemapSelect(): JSX.Element {
 
       // If the Geoview basemap layer is present, toggle visibility based on selection. We hide it on nogeom.
       if (hasGeoviewBasemapLayer) {
-        if (basemapChoice === 'default') layerController.setVisibilityOfGeoviewBasemapLayers(true);
-        else layerController.setVisibilityOfGeoviewBasemapLayers(false);
+        if (basemapChoice === 'default') layerController.setAllLayersVisibilityBasemapsOnly(true);
+        else layerController.setAllLayersVisibilityBasemapsOnly(false);
       }
 
       mapController
