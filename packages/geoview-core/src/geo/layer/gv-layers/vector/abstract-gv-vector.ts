@@ -90,17 +90,8 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     // Clear cache when filters are updated.
     this.onLayerFilterApplied(() => this.#clearStyleCache());
 
-    // If the layer is initially not visible, make it visible until the style is set so we have a style for the legend
-    this.onLayerFirstLoaded(() => {
-      const layerStyleChangedHandler = (): void => this.setVisible(false);
-      if (!this.getStyle() && !this.getVisible()) {
-        this.onLayerStyleChanged(() => {
-          layerStyleChangedHandler();
-          this.offLayerStyleChanged(layerStyleChangedHandler);
-        });
-        this.setVisible(true);
-      }
-    });
+    // Keep the subscription clean and readable
+    this.onLayerFirstLoaded(this.#handleLayerFirstLoaded.bind(this));
 
     // Create and set the OpenLayer layer
     this.setOLLayer(new VectorLayer<VectorSource<Feature<Geometry>>>(layerOptions));
@@ -550,6 +541,49 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    */
   getTextLayerVisible(): boolean {
     return this.#textOLLayer?.getVisible() ?? false;
+  }
+
+  /**
+   * Handles the first loaded event for the layer.
+   *
+   * If the layer starts with no style and is initially invisible, it temporarily sets the layer to visible
+   * to allow the style to be applied, then restores the original visibility state after the style is applied.
+   */
+  #handleLayerFirstLoaded(): void {
+    // Capture the initial visibility state so we can restore it later
+    const initialVisible = this.getVisible();
+
+    // If the layer has no style yet and is initially invisible
+    if (!this.getStyle() && !initialVisible) {
+      this.#ensureStyleWithTemporaryVisibility(initialVisible);
+    }
+  }
+
+  /**
+   * Ensures that the layer style is applied even if the layer is initially invisible.
+   *
+   * Temporarily sets the layer to visible to allow the style to be applied, then restores the original visibility state.
+   *
+   * @param initialVisible - Whether the layer is visible intially
+   */
+  #ensureStyleWithTemporaryVisibility(initialVisible: boolean): void {
+    // Subscribe to style changes
+    const hook = this.onLayerStyleChanged(() => {
+      // Unsubscribe after the first style change to avoid repeated triggers
+      this.offLayerStyleChanged(hook);
+
+      // Restore the original visibility state
+      this.setVisible(initialVisible);
+    });
+
+    // Handle race condition: style may already be set
+    if (this.getStyle()) {
+      this.offLayerStyleChanged(hook);
+      return;
+    }
+
+    // Temporarily make the layer visible so the style can be computed/applied
+    this.setVisible(true);
   }
 
   // #endregion METHODS
