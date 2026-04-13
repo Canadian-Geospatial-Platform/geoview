@@ -1,8 +1,5 @@
 import { useStore } from 'zustand';
 
-import type { Feature } from 'ol';
-import type { Geometry } from 'ol/geom';
-
 import { getGeoViewStore, useGeoViewStore } from '@/core/stores/stores-managers';
 import type { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
@@ -30,8 +27,8 @@ export interface IDrawerState {
   /** Whether snapping is enabled. */
   isSnapping: boolean;
 
-  /** The currently selected drawing feature, or undefined. */
-  selectedDrawing: Feature | undefined;
+  /** The currently selected drawing type. */
+  selectedDrawingType: string;
 
   /** Whether measurement overlays are hidden. */
   hideMeasurements: boolean;
@@ -68,7 +65,7 @@ export interface IDrawerState {
     setIsDrawing: (isDrawing: boolean) => void;
     setIsEditing: (isEditing: boolean) => void;
     setIsSnapping: (isSnapping: boolean) => void;
-    setSelectedDrawing: (selectedDrawing: Feature | undefined) => void;
+    setSelectedDrawingType: (drawingType: string) => void;
     setHideMeasurements: (hideMeasurements: boolean) => void;
     setIconSrc: (iconSrc: string) => void;
     setUndoDisabled: (undoDisabled: boolean) => void;
@@ -78,28 +75,6 @@ export interface IDrawerState {
 }
 
 // #endregion INTERFACE DEFINITIONS
-
-// #region UTIL FUNCTIONS (PRIVATE)
-
-/**
- * Reads the geometry type of a drawing feature.
- *
- * Returns 'Text' if the feature has a text property, otherwise returns the
- * OpenLayers geometry type. Point and LineString are returned as-is;
- * all other types are treated as polygons by consumers.
- *
- * @param feature - The feature to read the drawing type from
- * @returns The drawing type string, or undefined if no feature is provided
- */
-const utilReadDrawingType = (feature: Feature<Geometry> | undefined): string | undefined => {
-  if (!feature) return undefined;
-  if (feature.get('text')) return 'Text';
-  // Only Point and LineString matter. Everything else treated as polygon
-  const geometry = feature.getGeometry();
-  return geometry?.getType();
-};
-
-// #endregion UTIL FUNCTIONS (PRIVATE)
 
 // #region STATE INITIALIZATION
 
@@ -138,7 +113,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
     isDrawing: false,
     isEditing: false,
     isSnapping: false,
-    selectedDrawing: undefined,
+    selectedDrawingType: 'Point',
     hideMeasurements: true,
     iconSrc: '',
     undoDisabled: true,
@@ -161,6 +136,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
           drawerState: {
             ...get().drawerState,
             activeGeom: initialGeomType,
+            selectedDrawingType: initialGeomType,
             geomTypes: drawerConfig.geomTypes || init.geomTypes,
             style: {
               ...init.style,
@@ -465,15 +441,15 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
       },
 
       /**
-       * Sets the selected drawing feature.
+       * Sets the currently selected drawing type.
        *
-       * @param selectedDrawing - The selected feature
+       * @param drawingType - The drawing type to set
        */
-      setSelectedDrawing: (selectedDrawing: Feature) => {
+      setSelectedDrawingType: (drawingType: string) => {
         set({
           drawerState: {
             ...get().drawerState,
-            selectedDrawing,
+            selectedDrawingType: drawingType,
           },
         });
       },
@@ -658,19 +634,19 @@ export const getStoreDrawerIsSnapping = (mapId: string): boolean => {
 export const useStoreDrawerIsSnapping = (): boolean => useStore(useGeoViewStore(), (state) => state.drawerState.isSnapping);
 
 /**
- * Gets the currently selected drawing feature from the store.
+ * Gets the geometry type of the currently selected drawing.
  *
  * @param mapId - The map identifier
- * @returns The selected feature, or undefined
- * @deprecated This class instance shouldn't be in the store, remove this selector
+ * @returns The drawing type string, or undefined if no selection
  */
-export const getStoreDrawerSelectedDrawing = (mapId: string): Feature | undefined => {
-  return getStoreDrawerState(mapId).selectedDrawing;
+export const getStoreDrawerSelectedDrawingType = (mapId: string): string | undefined => {
+  return getStoreDrawerState(mapId).selectedDrawingType;
 };
 
 /** Hooks the geometry type of the currently selected drawing. */
-export const useStoreDrawerSelectedDrawing = (): string | undefined =>
-  useStore(useGeoViewStore(), (state) => utilReadDrawingType(state.drawerState.selectedDrawing));
+export const useStoreDrawerSelectedDrawingType = (): string => {
+  return useStore(useGeoViewStore(), (state) => state.drawerState.selectedDrawingType);
+};
 
 /**
  * Gets the hide measurements flag from the drawer store.
@@ -697,16 +673,6 @@ export const useStoreDrawerHideMeasurements = (): boolean => useStore(useGeoView
  */
 export const getStoreDrawerGeomTypes = (mapId: string): string[] => {
   return getStoreDrawerState(mapId).geomTypes;
-};
-
-/**
- * Gets the geometry type of the currently selected drawing.
- *
- * @param mapId - The map identifier
- * @returns The drawing type string, or undefined if no selection
- */
-export const getStoreDrawerSelectedDrawingType = (mapId: string): string | undefined => {
-  return utilReadDrawingType(getStoreDrawerSelectedDrawing(mapId));
 };
 
 /**
@@ -901,14 +867,13 @@ export const setStoreIsSnapping = (mapId: string, isSnapping: boolean): void => 
 };
 
 /**
- * Sets the selected drawing feature in the drawer store.
+ * Sets the selected drawing type in the drawer store.
  *
  * @param mapId - The map identifier
- * @param selectedDrawing - The selected feature, or undefined to clear selection
- * @deprecated This function shouldn't exist
+ * @param drawingType - The drawing type to set as selected
  */
-export const setStoreSelectedDrawing = (mapId: string, selectedDrawing: Feature | undefined): void => {
-  getStoreDrawerState(mapId).actions.setSelectedDrawing(selectedDrawing);
+export const setStoreSelectedDrawingType = (mapId: string, drawingType: string): void => {
+  getStoreDrawerState(mapId).actions.setSelectedDrawingType(drawingType);
 };
 
 /**

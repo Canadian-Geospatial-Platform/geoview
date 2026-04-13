@@ -5,7 +5,7 @@ import { useState } from 'react';
 import {
   useStoreDrawerStyle,
   useStoreDrawerActiveGeom,
-  useStoreDrawerSelectedDrawing,
+  useStoreDrawerSelectedDrawingType,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
 import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
@@ -65,13 +65,13 @@ export function StylePanel(): JSX.Element {
   // Get store values
   const style = useStoreDrawerStyle();
   const activeGeom = useStoreDrawerActiveGeom();
-  const selectedDrawing = useStoreDrawerSelectedDrawing();
+  const selectedDrawingType = useStoreDrawerSelectedDrawingType();
   const displayLanguage = useStoreAppDisplayLanguage();
   const drawerController = useDrawerController();
 
   const memoCurrentGeomType = useMemo(() => {
-    return selectedDrawing ?? activeGeom;
-  }, [activeGeom, selectedDrawing]);
+    return selectedDrawingType ?? activeGeom;
+  }, [activeGeom, selectedDrawingType]);
 
   // Local state for color inputs
   const [localFillColor, setLocalFillColor] = useState(style.fillColor);
