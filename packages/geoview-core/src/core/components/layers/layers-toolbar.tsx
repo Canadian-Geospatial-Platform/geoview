@@ -6,15 +6,12 @@ import { useTheme } from '@mui/material';
 
 import { Box, AddCircleOutlineIcon, Button } from '@/ui';
 import { ToggleAll } from '@/core/components/toggle-all/toggle-all';
-import {
-  useStoreLayerDisplayState,
-  useStoreLayerLayerPaths,
-  setStoreLayerDisplayState,
-} from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useStoreLayerDisplayState, useStoreLayerTopLevelLayerPaths } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import type { TypeLayersViewDisplayState } from './types';
 import { logger } from '@/core/utils/logger';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
+import { useLayerController } from '@/core/controllers/use-controllers';
 
 interface TypeLayersToolbar {
   containerType: TypeContainerBox;
@@ -41,7 +38,8 @@ export function LayersToolbar({ containerType }: TypeLayersToolbar): JSX.Element
   // Store
   const mapId = useStoreGeoViewMapId();
   const displayState = useStoreLayerDisplayState();
-  const layerPaths = useStoreLayerLayerPaths();
+  const layerPaths = useStoreLayerTopLevelLayerPaths();
+  const layerController = useLayerController();
 
   // State
   const lastDisplayState = useRef<TypeLayersViewDisplayState | null>(null);
@@ -59,9 +57,9 @@ export function LayersToolbar({ containerType }: TypeLayersToolbar): JSX.Element
         userClickedAdd.current = false;
       }
 
-      setStoreLayerDisplayState(mapId, displayStateParam);
+      layerController.setLayerDisplayState(displayStateParam);
     },
-    [mapId]
+    [layerController]
   );
 
   /**
@@ -74,7 +72,7 @@ export function LayersToolbar({ containerType }: TypeLayersToolbar): JSX.Element
   useEffect(() => {
     // Always show 'add' panel when there are no layers
     if (layerPaths.length === 0 && displayState !== 'add') {
-      setStoreLayerDisplayState(mapId, 'add');
+      layerController.setLayerDisplayState('add');
     }
 
     // Track display state changes to handle transitions
@@ -93,7 +91,7 @@ export function LayersToolbar({ containerType }: TypeLayersToolbar): JSX.Element
         userClickedAdd.current = false;
       }
     }
-  }, [displayState, layerPaths.length, mapId]);
+  }, [displayState, layerPaths.length, layerController]);
 
   /**
    * Secondary effect specifically for auto-switching to view mode.
@@ -105,10 +103,10 @@ export function LayersToolbar({ containerType }: TypeLayersToolbar): JSX.Element
    */
   useEffect(() => {
     if (layerPaths.length > 0 && displayState === 'add' && !userClickedAdd.current) {
-      setStoreLayerDisplayState(mapId, 'view');
+      layerController.setLayerDisplayState('view');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [layerPaths.length, mapId]); // Only depend on layerPaths.length and mapId
+  }, [layerPaths.length, layerController]); // Only depend on layerPaths.length and layerController
 
   return (
     <Box id={`${mapId}-${containerType}-layers-toolbar`} sx={layerToolbarStyle}>

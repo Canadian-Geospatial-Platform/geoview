@@ -5,8 +5,8 @@
       "projection": 3978
     },
     "basemapOptions": {
-      "basemapId": "nogeom",
-      "shaded": false,
+      "basemapId": "transport",
+      "shaded": true,
       "labeled": false
     },
     "listOfGeoviewLayerConfig": [

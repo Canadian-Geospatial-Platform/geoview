@@ -1,6 +1,9 @@
 import type { AbstractPlugin } from '@/api/plugin/abstract-plugin';
 import type { PluginsContainer } from '@/api/plugin/plugin-types';
+import { DEFAULT_APPBAR_CORE, DEFAULT_FOOTERBAR_CORE, DEFAULT_NAVBAR_CORE } from '@/api/types/map-schema-types';
+import type { TypeValidAppBarCoreProps } from '@/api/types/map-schema-types';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
+import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import { getScriptAndAssetURL, whenThisThen } from '@/core/utils/utilities';
 import { formatError } from '@/core/exceptions/core-exceptions';
 import type { MapViewer } from '@/geo/map/map-viewer';
@@ -18,11 +21,12 @@ export class PluginController extends AbstractMapViewerController {
    * Creates an instance of PluginController.
    *
    * @param mapViewer - The map viewer instance to associate with this controller
+   * @param controllerRegistry - The controller registry for accessing sibling controllers
    */
   // GV Leave the constructor here, because we'll likely need it soon to inject dependencies.
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor
-  constructor(mapViewer: MapViewer) {
-    super(mapViewer);
+  constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry) {
+    super(mapViewer, controllerRegistry);
   }
 
   // #region OVERRIDES
@@ -60,6 +64,43 @@ export class PluginController extends AbstractMapViewerController {
 
     // Not found
     return undefined;
+  }
+
+  /**
+   * Loads plugins referenced in the footer-bar, app-bar, and nav-bar configuration.
+   *
+   * Collects tab/component names from all three configs, filters out built-in core components,
+   * deduplicates the remaining plugin names, and loads each one.
+   *
+   * @returns A promise that resolves when all configured plugins are loaded
+   */
+  loadConfiguredPlugins(): Promise<void[]> {
+    // Get the map configuration
+    const config = this.getMapViewer().mapFeaturesConfig;
+
+    // Build sets of built-in names that are NOT plugins (they are rendered by core components)
+    const builtInAppBar = new Set<string>(Object.values(DEFAULT_APPBAR_CORE) as string[]);
+    const builtInFooterBar = new Set<string>(Object.values(DEFAULT_FOOTERBAR_CORE));
+    const builtInNavBar = new Set<string>(Object.values(DEFAULT_NAVBAR_CORE));
+
+    // Collect plugin names from footer-bar config (e.g. 'time-slider', 'geochart')
+    const footerPlugins = (config?.footerBar?.tabs?.core ?? []).filter((name: string) => !builtInFooterBar.has(name));
+
+    // Collect plugin names from app-bar config (e.g. 'about-panel', 'aoi-panel')
+    const appBarPlugins = (config?.appBar?.tabs?.core ?? []).filter((name: TypeValidAppBarCoreProps) => !builtInAppBar.has(name));
+
+    // Collect plugin names from nav-bar config (e.g. 'drawer')
+    const navBarPlugins = (config?.navBar ?? []).filter((name: string) => !builtInNavBar.has(name));
+
+    // Deduplicate across all bars and load each plugin
+    const uniquePlugins = [...new Set([...footerPlugins, ...appBarPlugins, ...navBarPlugins])];
+    const promises = uniquePlugins.map((pluginName) =>
+      this.loadAndAddPlugin(pluginName).catch((error: unknown) => {
+        logger.logError(`Failed to load configured plugin: ${pluginName}`, error);
+      })
+    );
+
+    return Promise.all(promises);
   }
 
   /**
@@ -122,7 +163,7 @@ export class PluginController extends AbstractMapViewerController {
     // in order to cancel the "'new' expression, whose target lacks a construct signature" error message
     // ? unknown type cannot be use, need to escape
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const plugin: AbstractPlugin = new (constructor as any)(pluginId, mapViewer, props);
+    const plugin: AbstractPlugin = new (constructor as any)(pluginId, mapViewer, this.getControllersRegistry(), props);
 
     // Attach to the map plugins object
     mapViewer.plugins[pluginId] = plugin;

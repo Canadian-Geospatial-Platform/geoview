@@ -43,7 +43,6 @@ export interface IDataTableState {
 
   /** Store actions callable from adaptors. */
   actions: {
-    setActiveLayersData: (layers: TypeLayerData[]) => void;
     setAllFeaturesDataArray: (allFeaturesDataArray: TypeAllFeatureInfoResultSetEntry[]) => void;
     setColumnFiltersEntry: (filtered: TypeColumnFiltersState, layerPath: string) => void;
     setColumnFilterModesEntry: (filterModes: Record<string, string>, layerPath: string) => void;
@@ -89,20 +88,6 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
     },
 
     actions: {
-      /**
-       * Sets the active layer data array in the store.
-       *
-       * @param activeLayerData - The layer data objects to set as active.
-       */
-      setActiveLayersData: (activeLayerData: TypeLayerData[]): void => {
-        set({
-          dataTableState: {
-            ...get().dataTableState,
-            activeLayerData,
-          },
-        });
-      },
-
       /**
        * Sets the aggregated feature info result set entries in the store.
        *
@@ -354,7 +339,7 @@ export const useStoreDataTableFilters = (): Record<string, string> =>
  * @param layerPath - The path of the layer
  * @returns The data table filter(s) for the layer
  */
-export const getStoreTableFilter = (mapId: string, layerPath: string): string | undefined => {
+export const getStoreDataTableFilter = (mapId: string, layerPath: string): string | undefined => {
   return getStoreDataTableState(mapId)?.tableFilters?.[layerPath];
 };
 
@@ -364,7 +349,7 @@ export const getStoreTableFilter = (mapId: string, layerPath: string): string | 
  * @param layerPath - The layer path to get the filter for.
  * @returns The filter string for the layer, or undefined if not set.
  */
-export const useStoreTableFilter = (layerPath: string): string | undefined => {
+export const useStoreDataTableFilter = (layerPath: string): string | undefined => {
   return useStore(useGeoViewStore(), (state) => state.dataTableState.tableFilters[layerPath]);
 };
 
@@ -401,13 +386,24 @@ export const useStoreDataTableAllFeaturesDataArray = (): TypeAllFeatureInfoResul
 // #region STATE GETTERS & HOOKS - OTHERS (no match between getter-hook)
 
 /**
+ * Gets the feature info entries for a specific layer from the data table store.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to retrieve features for
+ * @returns The feature info entries for the layer, or undefined if not found
+ */
+export const getStoreDataTableFeaturesByPath = (mapId: string, layerPath: string): TypeFeatureInfoEntry[] | undefined => {
+  return getStoreDataTableState(mapId)?.allFeaturesDataArray.filter((data) => data.layerPath === layerPath)?.[0].features;
+};
+
+/**
  * Gets whether the data table is filtered to the current map extent for a specific layer.
  *
  * @param mapId - The map identifier.
  * @param layerPath - The layer path to check.
  * @returns True if map extent filtering is enabled, or undefined if the layer has no settings.
  */
-export const getStoreMapFilteredRecord = (mapId: string, layerPath: string): boolean | undefined => {
+export const getStoreDataTableFilteredRecord = (mapId: string, layerPath: string): boolean | undefined => {
   return getStoreDataTableState(mapId)?.layersDataTableSetting?.[layerPath]?.mapFilteredRecord;
 };
 
@@ -430,7 +426,7 @@ export const useStoreDataTableSelectedFeature = (): TypeFeatureInfoEntry | null 
  * @param mapId - The map identifier.
  * @param layerPath - The layer path to initialize settings for.
  */
-export const setStoreInitialSettings = (mapId: string, layerPath: string): void => {
+export const setStoreDataTableInitialSettings = (mapId: string, layerPath: string): void => {
   getStoreDataTableState(mapId).actions.setInitiallayerDataTableSetting(layerPath);
 };
 
@@ -440,7 +436,7 @@ export const setStoreInitialSettings = (mapId: string, layerPath: string): void 
  * @param mapId - The map identifier.
  * @param layerPath - The layer path to select.
  */
-export const setStoreSelectedLayerPath = (mapId: string, layerPath: string): void => {
+export const setStoreDataTableSelectedLayerPath = (mapId: string, layerPath: string): void => {
   getStoreDataTableState(mapId).actions.setSelectedLayerPath(layerPath);
 };
 
@@ -450,18 +446,8 @@ export const setStoreSelectedLayerPath = (mapId: string, layerPath: string): voi
  * @param mapId - The map identifier.
  * @param feature - The feature entry to select.
  */
-export const setStoreSelectedFeature = (mapId: string, feature: TypeFeatureInfoEntry): void => {
+export const setStoreDataTableSelectedFeature = (mapId: string, feature: TypeFeatureInfoEntry): void => {
   getStoreDataTableState(mapId).actions.setSelectedFeature(feature);
-};
-
-/**
- * Sets the active layer data in the data table store.
- *
- * @param mapId - The map identifier.
- * @param activeLayerData - The layer data objects to set as active.
- */
-export const setStoreActiveLayersData = (mapId: string, activeLayerData: TypeLayerData[]): void => {
-  getStoreDataTableState(mapId).actions.setActiveLayersData(activeLayerData);
 };
 
 /**
@@ -471,7 +457,7 @@ export const setStoreActiveLayersData = (mapId: string, activeLayerData: TypeLay
  * @param filtered - The column filter state to apply.
  * @param layerPath - The target layer path.
  */
-export const setStoreColumnFiltersEntry = (mapId: string, filtered: TypeColumnFiltersState, layerPath: string): void => {
+export const setStoreDataTableColumnFiltersEntry = (mapId: string, filtered: TypeColumnFiltersState, layerPath: string): void => {
   getStoreDataTableState(mapId).actions.setColumnFiltersEntry(filtered, layerPath);
 };
 
@@ -482,7 +468,7 @@ export const setStoreColumnFiltersEntry = (mapId: string, filtered: TypeColumnFi
  * @param filterModes - A record mapping column ids to their filter mode.
  * @param layerPath - The target layer path.
  */
-export const setStoreColumnFilterModesEntry = (mapId: string, filterModes: Record<string, string>, layerPath: string): void => {
+export const setStoreDataTableColumnFilterModesEntry = (mapId: string, filterModes: Record<string, string>, layerPath: string): void => {
   getStoreDataTableState(mapId).actions.setColumnFilterModesEntry(filterModes, layerPath);
 };
 
@@ -493,7 +479,7 @@ export const setStoreColumnFilterModesEntry = (mapId: string, filterModes: Recor
  * @param visible - Whether column filters should be visible.
  * @param layerPath - The target layer path.
  */
-export const setStoreColumnsFiltersVisibility = (mapId: string, visible: boolean, layerPath: string): void => {
+export const setStoreDataTableColumnsFiltersVisibility = (mapId: string, visible: boolean, layerPath: string): void => {
   getStoreDataTableState(mapId).actions.setColumnsFiltersVisibility(visible, layerPath);
 };
 
@@ -504,7 +490,7 @@ export const setStoreColumnsFiltersVisibility = (mapId: string, visible: boolean
  * @param globalFilterValue - The global filter string.
  * @param layerPath - The target layer path.
  */
-export const setStoreGlobalFilteredEntry = (mapId: string, globalFilterValue: string, layerPath: string): void => {
+export const setStoreDataTableGlobalFilteredEntry = (mapId: string, globalFilterValue: string, layerPath: string): void => {
   getStoreDataTableState(mapId).actions.setGlobalFilteredEntry(globalFilterValue, layerPath);
 };
 
@@ -515,7 +501,7 @@ export const setStoreGlobalFilteredEntry = (mapId: string, globalFilterValue: st
  * @param mapFiltered - Whether map extent filtering is enabled.
  * @param layerPath - The target layer path.
  */
-export const setStoreMapFilteredEntry = (mapId: string, mapFiltered: boolean, layerPath: string): void => {
+export const setStoreDataTableFilteredEntry = (mapId: string, mapFiltered: boolean, layerPath: string): void => {
   getStoreDataTableState(mapId).actions.setMapFilteredEntry(mapFiltered, layerPath);
 };
 
@@ -526,7 +512,7 @@ export const setStoreMapFilteredEntry = (mapId: string, mapFiltered: boolean, la
  * @param rows - The filtered row count.
  * @param layerPath - The target layer path.
  */
-export const setStoreRowsFilteredEntry = (mapId: string, rows: number, layerPath: string): void => {
+export const setStoreDataTableRowsFilteredEntry = (mapId: string, rows: number, layerPath: string): void => {
   getStoreDataTableState(mapId).actions.setRowsFilteredEntry(rows, layerPath);
 };
 
@@ -537,7 +523,7 @@ export const setStoreRowsFilteredEntry = (mapId: string, rows: number, layerPath
  * @param message - The message to display.
  * @param layerPath - The target layer path.
  */
-export const setStoreToolbarRowSelectedMessageEntry = (mapId: string, message: string, layerPath: string): void => {
+export const setStoreDataTableToolbarRowSelectedMessageEntry = (mapId: string, message: string, layerPath: string): void => {
   getStoreDataTableState(mapId).actions.setToolbarRowSelectedMessageEntry(message, layerPath);
 };
 
@@ -551,7 +537,7 @@ export const setStoreToolbarRowSelectedMessageEntry = (mapId: string, message: s
  * @param layerPath - The layer path to set the filter for.
  * @param filter - The filter expression string.
  */
-export const addOrUpdateStoreTableFilter = (mapId: string, layerPath: string, filter: string): void => {
+export const addOrUpdateStoreDataTableFilter = (mapId: string, layerPath: string, filter: string): void => {
   const dataTableState = getStoreDataTableState(mapId);
   const curTableFilters = dataTableState?.tableFilters;
   dataTableState?.actions.setTableFilters({ ...curTableFilters, [layerPath]: filter });
@@ -590,7 +576,7 @@ export const propagateFeatureInfoDataTableToStore = (mapId: string, resultSetEnt
  * @param layerPath - The layer path whose feature info should be removed.
  * @param callbackWhenEmpty - Callback invoked when no layer data remains.
  */
-export const deleteStoreFeatureAllInfo = (mapId: string, layerPath: string, callbackWhenEmpty: () => void): void => {
+export const deleteStoreDataTableFeatureAllInfo = (mapId: string, layerPath: string, callbackWhenEmpty: () => void): void => {
   // Redirect to helper function
   helperDeleteFromArray(getStoreDataTableState(mapId).allFeaturesDataArray, layerPath, (layerArrayResult) => {
     // Update the layer data array in the store

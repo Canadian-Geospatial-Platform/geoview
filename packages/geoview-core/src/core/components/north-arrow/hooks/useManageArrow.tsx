@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Projection } from '@/geo/utils/projection';
-import { NORTH_POLE_POSITION } from '@/core/utils/constant';
+import { NORTH_POLE_POSITION_LONLAT } from '@/core/utils/constant';
 import {
   useStoreMapCenterCoordinates,
   useStoreMapFixNorth,
@@ -139,7 +139,7 @@ export const useManageArrow = (): ArrowReturn => {
 
       // Calculate offset
       let newOffset = offsetX;
-      const northPolePosition = mapController.getPixelFromCoordinate(NORTH_POLE_POSITION);
+      const northPolePosition = mapController.getPixelFromCoordinate(NORTH_POLE_POSITION_LONLAT);
 
       if (!fixNorth && northPolePosition !== null) {
         const screenNorthPoint = northPolePosition;

@@ -3,21 +3,18 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Box, List, Typography, IconButton, FullscreenIcon } from '@/ui';
-import { logger } from '@/core/utils/logger';
-import {
-  getStoreMapLegendCollapsedSet,
-  setStoreMapAllMapLayerCollapsed,
-  setStoreMapLegendCollapsed,
-} from '@/core/stores/store-interface-and-intial-values/map-state';
 
+import { DEFAULT_APPBAR_CORE } from '@/api/types/map-schema-types';
 import { getSxClasses } from './legend-styles';
 import { LegendLayer } from './legend-layer';
+import { logger } from '@/core/utils/logger';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 import type { TypeContainerBox } from '@/core/types/global-types';
+import { useStoreAppShellContainer } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { getStoreLayerLegendCollapsedSet } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useEventListener } from '@/core/components/common/hooks/use-event-listener';
 import { FullScreenDialog } from '@/core/components/common/full-screen-dialog';
-import { DEFAULT_APPBAR_CORE } from '@/api/types/map-schema-types';
-import { useStoreAppShellContainer } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useLayerController } from '@/core/controllers/use-controllers';
 
 /**
  * Properties for the LegendFullscreen component.
@@ -123,6 +120,7 @@ export function LegendFullscreen({ layerPaths, mapId, containerType, isOpen, onC
   // State
   const [fullscreenLegendLayerList, setFullscreenLegendLayersList] = useState<string[][]>([]);
   const savedCollapseStateRef = useRef<Record<string, boolean>>({});
+  const layerController = useLayerController();
 
   // Memoize breakpoint values
   const breakpoints = useMemo(() => {
@@ -201,21 +199,21 @@ export function LegendFullscreen({ layerPaths, mapId, containerType, isOpen, onC
     if (isOpen) {
       // Entering fullscreen: snapshot collapse state from the store and expand all
       // GV Here we use a store getter, because we actually want to snapshot the values to reuse them later, we don't want to hook on them
-      savedCollapseStateRef.current = getStoreMapLegendCollapsedSet(mapId);
+      savedCollapseStateRef.current = getStoreLayerLegendCollapsedSet(mapId);
 
       // Save to the store
-      setStoreMapAllMapLayerCollapsed(mapId, false);
+      layerController.setAllMapLayerCollapsed(false);
     } else {
       // Exiting fullscreen: restore saved collapse state
       const savedState = savedCollapseStateRef.current;
       if (Object.keys(savedState).length > 0) {
         Object.entries(savedState).forEach(([layerPath, collapsed]) => {
-          // Save to the store
-          setStoreMapLegendCollapsed(mapId, layerPath, collapsed);
+          // Perform collapse action
+          layerController.setLegendCollapsed(layerPath, collapsed);
         });
       }
     }
-  }, [isOpen, mapId]);
+  }, [isOpen, layerController, mapId]);
 
   // Memoize the no layers content
   const noLayersContent = useMemo(() => {

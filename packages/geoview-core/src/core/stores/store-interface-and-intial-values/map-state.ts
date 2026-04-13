@@ -1,8 +1,6 @@
-import { useMemo } from 'react';
 import { useStore } from 'zustand';
 
 import type { Coordinate } from 'ol/coordinate';
-import type Overlay from 'ol/Overlay';
 import type { Extent } from 'ol/extent';
 import type { Size } from 'ol/size';
 
@@ -32,14 +30,11 @@ import type {
 } from '@/api/types/map-schema-types';
 import { DEFAULT_HIGHLIGHT_COLOR, MAP_CENTER, MAP_ZOOM_LEVEL } from '@/api/types/map-schema-types';
 import type { MapConfigLayerEntry } from '@/api/types/layer-schema-types';
-import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { getGeoViewStore, useGeoViewStore } from '@/core/stores/stores-managers';
 import type { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
-import { useStableSelector } from '@/core/stores/geoview-store';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import type { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import type { TypeHoverFeatureInfo } from './feature-info-state';
-import { getStoreLayerStatus, getStoreLayerLegendLayerByPath } from './layer-state';
 import type { TypeMapStateForExportLayout } from '@/core/components/export/utilities';
 
 // #region INTERFACE DEFINITION
@@ -66,7 +61,6 @@ export interface IMapState {
   homeView: TypeMapViewSettings | undefined;
   hoverFeatureInfo: TypeHoverFeatureInfo | undefined | null;
   isMouseInsideMap: boolean;
-  initialFilters: Record<string, string>;
   initialView: TypeMapViewSettings;
   interaction: TypeInteraction;
   mapExtent: Extent | undefined;
@@ -74,10 +68,6 @@ export interface IMapState {
   mapDisplayed: boolean;
   northArrow: boolean;
   northArrowElement: TypeNorthArrow;
-  orderedLayerInfo: TypeOrderedLayerInfo[];
-  orderedLayers: string[];
-  overlayClickMarker?: Overlay;
-  overlayNorthMarker?: Overlay;
   overviewMap: boolean;
   overviewMapHideZoom: number;
   pointerPosition?: TypeMapMouseInfo;
@@ -85,8 +75,6 @@ export interface IMapState {
   rotation: number;
   scale: TypeScaleInfo;
   size: Size;
-  visibleLayers: string[];
-  visibleRangeLayers: string[];
   zoom: number;
 
   setDefaultConfigValues: (config: TypeMapFeaturesConfig) => void;
@@ -97,7 +85,6 @@ export interface IMapState {
     setMapLoaded: (mapLoaded: boolean) => void;
     setMapDisplayed: () => void;
     setAttribution: (attribution: string[]) => void;
-    setInitialFilters: (filters: Record<string, string>) => void;
     setInitialView: (view: TypeZoomAndCenter | Extent) => void;
     setGeolocatorSearchArea: (area: { searchItem: string; coords: Coordinate; bbox?: Extent } | undefined) => void;
     setHomeView: (view: TypeMapViewSettings) => void;
@@ -105,8 +92,6 @@ export interface IMapState {
     setIsMouseInsideMap: (isMouseInsideMap: boolean) => void;
     setZoom: (zoom: number) => void;
     setRotation: (rotation: number) => void;
-    setOverlayClickMarker: (overlay: Overlay) => void;
-    setOverlayNorthMarker: (overlay: Overlay) => void;
     setProjection: (projectionCode: TypeValidMapProjectionCodes) => void;
     setMapMoveEnd: (
       centerCoordinates: Coordinate,
@@ -122,146 +107,12 @@ export interface IMapState {
     setCurrentBasemapOptions: (basemapOptions: TypeBasemapOptions) => void;
     setFixNorth: (ifFix: boolean) => void;
     setHighlightedFeatures: (highlightedFeatures: TypeFeatureInfoEntry[]) => void;
-    setVisibleLayers: (newOrder: string[]) => void;
-    setVisibleRangeLayers: (newOrder: string[]) => void;
-    setOrderedLayerInfo: (newOrderedLayerInfo: TypeOrderedLayerInfo[]) => void;
-    setOrderedLayers: (newOrder: string[]) => void;
-    setHoverable: (layerPath: string, hoverable: boolean) => void;
-    setLegendCollapsed: (layerPath: string, newValue?: boolean) => void;
-    setQueryable: (layerPath: string, queryable: boolean) => void;
-    updateOrderedLayerInfoByPath: (layerPath: string, updates: Partial<TypeOrderedLayerInfo>) => void;
     setClickMarker: (coord: number[] | undefined) => void;
     setHoverFeatureInfo: (hoverFeatureInfo: TypeHoverFeatureInfo) => void;
   };
 }
 
 // #endregion INTERFACE DEFINITION
-
-/**
- * Finds a single ordered layer info entry matching the given layer path.
- *
- * @param layerPath - The layer path to search for
- * @param orderedLayerInfo - The ordered layer info array to search in
- * @returns The matching ordered layer info, or undefined if not found
- */
-const utilFindMapLayerFromOrderedInfo = (layerPath: string, orderedLayerInfo: TypeOrderedLayerInfo[]): TypeOrderedLayerInfo | undefined => {
-  return orderedLayerInfo.find((layer) => layer.layerPath === layerPath);
-};
-
-/**
- * Finds a layer and all its children from the ordered layer info array.
- *
- * Matches the exact layer path and any paths that start with the given path followed by a separator.
- *
- * @param layerPath - The layer path to search for
- * @param orderedLayerInfo - The ordered layer info array to search in
- * @returns The matching ordered layer info entries including the layer and its children
- */
-// TODO: CHECK - Should likely not export this function if we have proper encapsulation (we didn't export the other similar functions in other states)
-export const utilFindMapLayerAndChildrenFromOrderedInfo = (
-  layerPath: string,
-  orderedLayerInfo: TypeOrderedLayerInfo[]
-): TypeOrderedLayerInfo[] => {
-  return orderedLayerInfo.filter((layer) => layer.layerPath.startsWith(`${layerPath}/`) || layer.layerPath === layerPath);
-};
-
-/**
- * Checks whether any parent layer of the given layer path is hidden (not visible).
- *
- * Traverses up the layer path hierarchy and returns true as soon as any ancestor is not visible.
- *
- * @param layerPath - The layer path to check parent visibility for
- * @param orderedLayerInfo - The ordered layer info array to search in
- * @returns True if any parent layer is hidden, false otherwise
- */
-const utilGetParentLayerHiddenOnMap = (layerPath: string, orderedLayerInfo: TypeOrderedLayerInfo[]): boolean => {
-  // For each parent
-  const parentLayerPathArray = layerPath.split('/');
-  parentLayerPathArray.pop();
-  let parentLayerPath = parentLayerPathArray.join('/');
-  let parentLayerInfo = orderedLayerInfo.find((info: TypeOrderedLayerInfo) => info.layerPath === parentLayerPath);
-
-  while (parentLayerInfo !== undefined) {
-    // Return true as soon as any parent is not visible
-    if (parentLayerInfo.visible === false) return true;
-
-    // Prepare for next parent
-    parentLayerPathArray.pop();
-    parentLayerPath = parentLayerPathArray.join('/');
-    // eslint-disable-next-line no-loop-func
-    parentLayerInfo = orderedLayerInfo.find((info: TypeOrderedLayerInfo) => info.layerPath === parentLayerPath);
-  }
-
-  return false;
-};
-
-/**
- * Checks whether a layer is hidden on the map.
- *
- * A layer is considered hidden if any of its parent layers are hidden,
- * it is not in the visible range, or it is not visible.
- *
- * @param layerPath - The layer path to check
- * @param orderedLayerInfo - The ordered layer info array to search in
- * @returns True if the layer is hidden on the map, false otherwise
- */
-const utilGetLayerHiddenOnMap = (layerPath: string, orderedLayerInfo: TypeOrderedLayerInfo[]): boolean => {
-  return (
-    utilGetParentLayerHiddenOnMap(layerPath, orderedLayerInfo) ||
-    !utilFindMapLayerFromOrderedInfo(layerPath, orderedLayerInfo)?.inVisibleRange ||
-    !utilFindMapLayerFromOrderedInfo(layerPath, orderedLayerInfo)?.visible
-  );
-};
-
-/**
- * Returns the ordered layer info entries that have collapsible legends.
- *
- * A layer is considered collapsible if it has children, multiple legend items,
- * or is a WMS layer with valid icon images.
- *
- * @param mapId - The map identifier
- * @param orderedLayerInfo - The ordered layer info array to filter
- * @returns The ordered layer info entries with collapsible legends
- */
-const utilGetLegendCollapsibleLayers = (mapId: string, orderedLayerInfo: TypeOrderedLayerInfo[]): TypeOrderedLayerInfo[] => {
-  // TODO: CHECK - This store references another store by using getStoreLayerLegendLayerByPath below :/
-  return orderedLayerInfo.filter((layer) => {
-    const legendLayer = getStoreLayerLegendLayerByPath(mapId, layer.layerPath);
-    return (
-      (legendLayer?.children && legendLayer.children.length > 0) ||
-      (legendLayer?.items && legendLayer.items.length > 1) ||
-      (legendLayer?.schemaTag === CONST_LAYER_TYPES.WMS &&
-        legendLayer?.icons?.some((icon) => icon.iconImage && icon.iconImage !== 'no data'))
-    );
-  });
-};
-
-/**
- * Immutably updates a single entry in the ordered layer info array by layer path.
- *
- * Returns a new array where only the matching entry is replaced with a shallow-merged copy.
- * Non-matching entries keep their original object references.
- *
- * @param orderedLayerInfo - The current ordered layer info array
- * @param layerPath - The layer path to update
- * @param updates - Partial properties to merge into the matching entry
- * @returns A new array with the updated entry, or the same array if the path was not found
- */
-const utilUpdateOrderedLayerInfoByPath = (
-  orderedLayerInfo: TypeOrderedLayerInfo[],
-  layerPath: string,
-  updates: Partial<TypeOrderedLayerInfo>
-): TypeOrderedLayerInfo[] => {
-  let found = false;
-  const result = orderedLayerInfo.map((entry) => {
-    if (entry.layerPath === layerPath) {
-      found = true;
-      return { ...entry, ...updates };
-    }
-    return entry;
-  });
-  return found ? result : orderedLayerInfo;
-};
 
 // #region STATE INITIALIZATION
 
@@ -287,7 +138,6 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
     highlightedFeatures: [],
     homeView: undefined,
     hoverFeatureInfo: undefined,
-    initialFilters: {},
     initialView: {
       zoomAndCenter: [MAP_ZOOM_LEVEL[3857], MAP_CENTER[3857]],
     },
@@ -298,8 +148,6 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
     mapDisplayed: false,
     northArrow: false,
     northArrowElement: { degreeRotation: '180.0', isNorthVisible: true } as TypeNorthArrow,
-    orderedLayerInfo: [],
-    orderedLayers: [],
     overviewMap: false,
     overviewMapHideZoom: 0,
     pointerPosition: undefined,
@@ -313,8 +161,6 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       labelNumeric: '',
     } as TypeScaleInfo,
     size: [0, 0] as Size,
-    visibleLayers: [],
-    visibleRangeLayers: [],
     zoom: 0,
 
     /**
@@ -432,20 +278,6 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       },
 
       /**
-       * Sets the initial filters of the map layers.
-       *
-       * @param filters - The filters.
-       */
-      setInitialFilters: (filters: Record<string, string>): void => {
-        set({
-          mapState: {
-            ...get().mapState,
-            initialFilters: filters,
-          },
-        });
-      },
-
-      /**
        * Sets the initial view of the map.
        *
        * @param view - The view extent or zoom&center.
@@ -547,34 +379,6 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
           mapState: {
             ...get().mapState,
             rotation,
-          },
-        });
-      },
-
-      /**
-       * Sets the overlay click marker of the map.
-       *
-       * @param overlayClickMarker - The overlay click marker.
-       */
-      setOverlayClickMarker: (overlayClickMarker: Overlay): void => {
-        set({
-          mapState: {
-            ...get().mapState,
-            overlayClickMarker,
-          },
-        });
-      },
-
-      /**
-       * Sets the overlay north marker of the map.
-       *
-       * @param overlayNorthMarker - The overlay north marker.
-       */
-      setOverlayNorthMarker: (overlayNorthMarker: Overlay): void => {
-        set({
-          mapState: {
-            ...get().mapState,
-            overlayNorthMarker,
           },
         });
       },
@@ -704,134 +508,6 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       },
 
       /**
-       * Sets the visible layers of the map.
-       *
-       * @param visibleLayers - The visible layers.
-       */
-      setVisibleLayers: (visibleLayers: string[]): void => {
-        set({
-          mapState: {
-            ...get().mapState,
-            visibleLayers,
-          },
-        });
-      },
-
-      /**
-       * Sets the layers of the map that are in visible range.
-       *
-       * @param visibleRangeLayers - The layers in their visible range
-       */
-      setVisibleRangeLayers: (visibleRangeLayers: string[]): void => {
-        set({
-          mapState: {
-            ...get().mapState,
-            visibleRangeLayers,
-          },
-        });
-      },
-
-      /**
-       * Sets the ordered layer information of the map.
-       *
-       * @param orderedLayerInfo - The ordered layer information.
-       */
-      setOrderedLayerInfo: (orderedLayerInfo: TypeOrderedLayerInfo[]): void => {
-        set({
-          mapState: {
-            ...get().mapState,
-            orderedLayerInfo,
-          },
-        });
-
-        // Get all layers as specified in the order layer info we're updating
-        const orderedLayers = orderedLayerInfo.map((layer) => layer.layerPath);
-
-        // Check if the order of the layers has changed
-        if (JSON.stringify(orderedLayers) !== JSON.stringify(get().mapState.orderedLayers)) {
-          // Set the readonly representation of ordered layers array according to the order the layers are
-          get().mapState.actions.setOrderedLayers(orderedLayers);
-        }
-
-        // Get all visible layers as specified in the order layer info we're updating
-        const visibleLayers = orderedLayerInfo.filter((layer) => layer.visible).map((layer) => layer.layerPath);
-
-        // Check if the order of the layers has changed
-        if (JSON.stringify(visibleLayers) !== JSON.stringify(get().mapState.visibleLayers)) {
-          // Set the readonly representation of visibile layers array according to the visibile layers
-          get().mapState.actions.setVisibleLayers(visibleLayers);
-        }
-
-        // Get all layers in visible range as specified in the order layer info we're updating
-        const inVisibleRange = orderedLayerInfo.filter((layer) => layer.inVisibleRange).map((layer) => layer.layerPath);
-
-        // Check if the order of the layers has changed
-        if (JSON.stringify(inVisibleRange) !== JSON.stringify(get().mapState.visibleRangeLayers)) {
-          // Set the readonly representation of visibile range layers array according to the visibile range layers
-          get().mapState.actions.setVisibleRangeLayers(inVisibleRange);
-        }
-      },
-
-      /**
-       * Sets the visible layers of the map.
-       *
-       * @param orderedLayers - The ordered layers.
-       */
-      setOrderedLayers: (orderedLayers: string[]): void => {
-        set({
-          mapState: {
-            ...get().mapState,
-            orderedLayers,
-          },
-        });
-      },
-
-      /**
-       * Sets whether a layer is hoverable.
-       *
-       * @param layerPath - The path of the layer.
-       * @param hoverable - Flag indicating if the layer should be hoverable.
-       */
-      setHoverable: (layerPath: string, hoverable: boolean): void => {
-        get().mapState.actions.updateOrderedLayerInfoByPath(layerPath, { hoverable });
-      },
-
-      /**
-       * Sets whether a layer legend is collapsed.
-       *
-       * @param layerPath - The path of the layer.
-       * @param collapsed - Flag indicating if the layer should be collapsed.
-       */
-      setLegendCollapsed: (layerPath: string, collapsed: boolean): void => {
-        get().mapState.actions.updateOrderedLayerInfoByPath(layerPath, { legendCollapsed: collapsed });
-      },
-
-      /**
-       * Sets whether a layer is queryable.
-       *
-       * @param layerPath - The path of the layer.
-       * @param queryable - Flag indicating if the layer should be queryable.
-       */
-      setQueryable: (layerPath: string, queryable: boolean): void => {
-        const updates: Partial<TypeOrderedLayerInfo> = { queryableState: queryable };
-        if (queryable) updates.hoverable = true;
-        get().mapState.actions.updateOrderedLayerInfoByPath(layerPath, updates);
-      },
-
-      /**
-       * Immutably updates a single entry in orderedLayerInfo and recalculates derived state.
-       *
-       * @param layerPath - The layer path to update.
-       * @param updates - Partial properties to merge into the matching entry.
-       */
-      updateOrderedLayerInfoByPath: (layerPath: string, updates: Partial<TypeOrderedLayerInfo>): void => {
-        const newOrderedLayerInfo = utilUpdateOrderedLayerInfoByPath(get().mapState.orderedLayerInfo, layerPath, updates);
-        if (newOrderedLayerInfo !== get().mapState.orderedLayerInfo) {
-          get().mapState.actions.setOrderedLayerInfo(newOrderedLayerInfo);
-        }
-      },
-
-      /**
        * Sets the click marker of the map.
        *
        * @param coord - The click marker coordinates.
@@ -924,236 +600,6 @@ export const getStoreMapStateForExportLayout = (mapId: string): TypeMapStateForE
     mapRotation: mapState.rotation,
     currentProjection: mapState.currentProjection,
   };
-};
-
-/** Returns the ordered layer info array for the given map. */
-export const getStoreMapOrderedLayerInfo = (mapId: string): TypeOrderedLayerInfo[] => {
-  return getStoreMapState(mapId).orderedLayerInfo;
-};
-
-/** Returns the ordered layer info for a specific layer path, or undefined if not found. */
-export const getStoreMapOrderedLayerInfoByPath = (mapId: string, layerPath: string): TypeOrderedLayerInfo | undefined => {
-  return utilFindMapLayerFromOrderedInfo(layerPath, getStoreMapOrderedLayerInfo(mapId));
-};
-
-/** Returns the legend collapsed state for all layers, defaulting to true if not found. */
-export const getStoreMapLegendCollapsedSet = (mapId: string): Record<string, boolean> => {
-  const collapsedSet: Record<string, boolean> = {};
-  getStoreMapOrderedLayerInfo(mapId).forEach((layer) => {
-    collapsedSet[layer.layerPath] = layer.legendCollapsed ?? true;
-  });
-  return collapsedSet;
-};
-
-/** Returns the legend collapsed state for a layer, defaulting to true if not found. */
-export const getStoreMapLegendCollapsedByPath = (mapId: string, layerPath: string): boolean => {
-  return getStoreMapOrderedLayerInfoByPath(mapId, layerPath)?.legendCollapsed ?? true;
-};
-
-/**
- * Selects the legend collapsed state for a given layer.
- *
- * @param layerPath - The layer path to check
- * @returns True if the layer legend is collapsed
- */
-export const useStoreMapLegendCollapsedByPath = (layerPath: string): boolean => {
-  // Hook
-  return useStore(
-    useGeoViewStore(),
-    (state) => utilFindMapLayerFromOrderedInfo(layerPath, state.mapState.orderedLayerInfo)?.legendCollapsed || false
-  );
-};
-
-/**
- * Selects whether all collapsible layer legends are collapsed.
- *
- * @returns True if all collapsible legends are collapsed, or if there are no collapsible layers
- */
-export const useStoreMapAllLayersCollapsedToggle = (): boolean =>
-  useStore(useGeoViewStore(), (state) => {
-    // Get the legend collapsible layers
-    const collapsibleLayers = utilGetLegendCollapsibleLayers(state.mapId, state.mapState.orderedLayerInfo);
-
-    // If there are no collapsible layers, return true
-    if (collapsibleLayers.length === 0) return true;
-    return collapsibleLayers.every((layer) => layer.legendCollapsed);
-  });
-
-/**
- * Selects whether there are any layers with collapsible legends.
- *
- * @returns True if at least one layer has a collapsible legend
- */
-export const useStoreMapHasCollapsibleLayersToggle = (): boolean =>
-  useStore(useGeoViewStore(), (state) => utilGetLegendCollapsibleLayers(state.mapId, state.mapState.orderedLayerInfo).length > 0);
-
-/** Returns the visibility state of a layer, or undefined if the layer is not found. */
-export const getStoreMapVisibilityByPath = (mapId: string, layerPath: string): boolean | undefined => {
-  return getStoreMapOrderedLayerInfoByPath(mapId, layerPath)?.visible;
-};
-
-/** Returns whether any parent of the given layer is hidden. */
-export const getStoreMapLayerParentHidden = (mapId: string, layerPath: string): boolean => {
-  const orderedLayerInfo = getStoreMapOrderedLayerInfo(mapId);
-  return utilGetParentLayerHiddenOnMap(layerPath, orderedLayerInfo);
-};
-
-/** Returns whether the layer is within its visible zoom range, defaulting to true. */
-export const getStoreMapInVisibleRangeByPath = (mapId: string, layerPath: string): boolean => {
-  return getStoreMapOrderedLayerInfoByPath(mapId, layerPath)?.inVisibleRange ?? true;
-};
-
-/** Returns all layer paths from the ordered layer info. */
-export const getStoreMapLayerPaths = (mapId: string): string[] => {
-  return getStoreMapOrderedLayerInfo(mapId).map((orderedLayerInfo) => {
-    return orderedLayerInfo.layerPath;
-  });
-};
-
-/**
- * Returns the index of a layer in the ordered layer info array by its path.
- *
- * @param mapId - The map identifier
- * @param layerPath - The layer path to search for
- * @returns The zero-based index of the layer, or -1 if not found
- * @deprecated This function seems fragile, do not use
- */
-export const getStoreMapOrderedLayerIndexByPath = (mapId: string, layerPath: string): number => {
-  const info = getStoreMapOrderedLayerInfo(mapId);
-  for (let i = 0; i < info.length; i++) if (info[i].layerPath === layerPath) return i;
-  return -1;
-};
-
-/** Returns the initial filter string for a layer path, or undefined if none is set. */
-export const getStoreMapInitialFilter = (mapId: string, layerPath: string): string | undefined => {
-  return getStoreMapState(mapId).initialFilters[layerPath];
-};
-
-/** Selects the initial layer filters from the store. */
-export const useStoreMapInitialFilters = (): Record<string, string> =>
-  useStore(useGeoViewStore(), (state) => state.mapState.initialFilters);
-
-/** Returns the layer paths of all layers currently in their visible zoom range. */
-export const getStoreMapLayersInVisibleRange = (mapId: string): string[] => {
-  const { orderedLayerInfo } = getStoreMapState(mapId);
-  const layersInVisibleRange = orderedLayerInfo.filter((layer) => layer.inVisibleRange).map((layer) => layer.layerPath);
-  return layersInVisibleRange;
-};
-
-/**
- * Selects the visibility state of a single layer.
- *
- * @param layerPath - The layer path to check visibility for
- * @returns True if the layer is visible, false otherwise
- */
-export const useStoreMapLayerVisibility = (layerPath: string): boolean => {
-  // Hook
-  return useStore(
-    useGeoViewStore(),
-    (state) => utilFindMapLayerFromOrderedInfo(layerPath, state.mapState.orderedLayerInfo)?.visible || false
-  );
-};
-
-/**
- * Selects whether any of the given layer paths are visible.
- *
- * @param layerPaths - The layer paths to check visibility for
- * @returns True if at least one layer is visible, false otherwise
- */
-export const useStoreMapLayerArrayVisibility = (layerPaths: string[]): boolean => {
-  return useStore(useGeoViewStore(), (state) => {
-    // Return true if all layers are visible (or don't exist yet)
-    return layerPaths.some((layerPath) => {
-      return utilFindMapLayerFromOrderedInfo(layerPath, state.mapState.orderedLayerInfo)?.visible || false;
-    });
-  });
-};
-
-/**
- * Selects whether a layer is within its visible zoom range.
- *
- * @param layerPath - The layer path to check
- * @returns True if the layer is in visible range
- */
-export const useStoreMapLayerInVisibleRange = (layerPath: string): boolean => {
-  // Hook
-  return useStore(
-    useGeoViewStore(),
-    (state) => utilFindMapLayerFromOrderedInfo(layerPath, state.mapState.orderedLayerInfo)?.inVisibleRange || false
-  );
-};
-
-/**
- * Selects whether all layers are visible (excluding errored layers).
- *
- * @returns True if all non-errored layers are visible
- */
-export const useStoreMapAllLayersVisibleToggle = (): boolean =>
-  // TODO: CHECK - Cross-stores, here we jump into the layer store :/
-  useStore(useGeoViewStore(), (state) =>
-    state.mapState.orderedLayerInfo.every((layer) => layer.visible || getStoreLayerStatus(state.mapId, layer.layerPath) === 'error')
-  );
-
-/** Returns whether a layer is effectively hidden on the map (parent hidden, out of range, or not visible). */
-export const getStoreMapIsLayerHiddenOnMap = (mapId: string, layerPath: string): boolean => {
-  const { orderedLayerInfo } = getStoreMapState(mapId);
-  return utilGetLayerHiddenOnMap(layerPath, orderedLayerInfo);
-};
-
-/**
- * Selects whether a layer is effectively hidden on the map.
- *
- * A layer is hidden if any parent is hidden, or if it is out of visible range, or if it is not visible.
- *
- * @param layerPath - The layer path to check
- * @returns True if the layer is hidden on the map
- */
-export const useStoreMapIsLayerHiddenOnMap = (layerPath: string): boolean => {
-  return useStore(useGeoViewStore(), (state) => utilGetLayerHiddenOnMap(layerPath, state.mapState.orderedLayerInfo));
-};
-
-/**
- * Selects the hidden-on-map state for all layers.
- *
- * @returns A record mapping each layer path to whether it is hidden on the map
- */
-export const useStoreMapIsLayerHiddenOnMapSet = (): Record<string, boolean> => {
-  return useStableSelector(useGeoViewStore(), (state) => {
-    return state.mapState.orderedLayerInfo.reduce<Record<string, boolean>>((acc, layer) => {
-      if (layer.layerPath) {
-        // eslint-disable-next-line no-param-reassign
-        acc[layer.layerPath] = utilGetLayerHiddenOnMap(layer.layerPath, state.mapState.orderedLayerInfo);
-      }
-      return acc;
-    }, {});
-  });
-};
-
-/**
- * Selects whether any parent of the given layer is hidden.
- *
- * @param layerPath - The layer path to check parent visibility for
- * @returns True if any parent layer is hidden
- */
-export const useStoreMapIsParentLayerHiddenOnMap = (layerPath: string): boolean => {
-  return useStore(useGeoViewStore(), (state) => utilGetParentLayerHiddenOnMap(layerPath, state.mapState.orderedLayerInfo));
-};
-
-/**
- * Selects the parent-hidden state for all layers.
- *
- * @returns A record mapping each layer path to whether any of its parents are hidden
- */
-export const useStoreMapIsParentLayerHiddenOnMapSet = (): Record<string, boolean> => {
-  return useStableSelector(useGeoViewStore(), (state) => {
-    return state.mapState.orderedLayerInfo.reduce<Record<string, boolean>>((acc, layer) => {
-      if (layer.layerPath) {
-        // eslint-disable-next-line no-param-reassign
-        acc[layer.layerPath] = utilGetParentLayerHiddenOnMap(layer.layerPath, state.mapState.orderedLayerInfo);
-      }
-      return acc;
-    }, {});
-  });
 };
 
 /** Returns the current map projection code. */
@@ -1273,11 +719,6 @@ export const getStoreMapHighlightedFeaturesByUid = (mapId: string, featureUid: s
   return getStoreMapState(mapId).highlightedFeatures.filter((feature) => feature.uid === featureUid);
 };
 
-/** Returns the ordered layer info entries that have collapsible legends. */
-export const getStoreMapLegendCollapsibleLayers = (mapId: string): TypeOrderedLayerInfo[] => {
-  return utilGetLegendCollapsibleLayers(mapId, getStoreMapOrderedLayerInfo(mapId));
-};
-
 // #endregion STATE GETTERS & HOOKS
 
 // #region STATE GETTERS & HOOKS - OTHERS (no match between getter-hook)
@@ -1325,48 +766,8 @@ export const useStoreMapScale = (): TypeScaleInfo => useStore(useGeoViewStore(),
 /** Selects the map size from the store. */
 export const useStoreMapSize = (): Size => useStore(useGeoViewStore(), (state) => state.mapState.size);
 
-/** Selects the ordered layer paths from the store. */
-export const useStoreMapOrderedLayers = (): string[] => useStore(useGeoViewStore(), (state) => state.mapState.orderedLayers);
-
-/** Selects the visible layer paths from the store. */
-export const useStoreMapVisibleLayers = (): string[] => useStore(useGeoViewStore(), (state) => state.mapState.visibleLayers);
-
-/**
- * Selects the union of visible and in-range layer paths.
- *
- * Used by data-table, details, geochart, and time-slider left panel components.
- *
- * @returns The deduplicated array of layer paths that are visible or in visible range
- */
-export const useStoreMapAllVisibleandInRangeLayers = (): string[] => {
-  const visibleLayers = useStore(useGeoViewStore(), (state) => state.mapState.visibleLayers);
-  const visibleRangeLayers = useStore(useGeoViewStore(), (state) => state.mapState.visibleRangeLayers);
-  return useMemo(() => {
-    return [...new Set([...visibleLayers, ...visibleRangeLayers])];
-  }, [visibleLayers, visibleRangeLayers]);
-};
-
 /** Selects the current zoom level from the store. */
 export const useStoreMapZoom = (): number => useStore(useGeoViewStore(), (state) => state.mapState.zoom);
-
-/**
- * Selects the queryable state for multiple layer paths.
- *
- * @param layerPaths - The layer paths to check queryable state for
- * @returns A record mapping each layer path to its queryable state
- */
-export const useStoreMapLayerQueryable = (layerPaths: string[]): Record<string, boolean> => {
-  // Hook
-  return useStableSelector(useGeoViewStore(), (state) => {
-    const result: Record<string, boolean> = {};
-
-    for (const layerPath of layerPaths) {
-      result[layerPath] = utilFindMapLayerFromOrderedInfo(layerPath, state.mapState.orderedLayerInfo)?.queryableState || false;
-    }
-
-    return result;
-  });
-};
 
 // #endregion STATE GETTERS & HOOKS - OTHERS (no match between getter-hook)
 
@@ -1493,16 +894,6 @@ export const setStoreMapCurrentBasemapOptions = (mapId: string, basemapOptions: 
   getStoreMapState(mapId).actions.setCurrentBasemapOptions(basemapOptions);
 };
 
-/** Sets the overlay north marker in the store. */
-export const setStoreMapOverlayNorthMarker = (mapId: string, overlay: Overlay): void => {
-  getStoreMapState(mapId).actions.setOverlayNorthMarker(overlay);
-};
-
-/** Sets the overlay click marker in the store. */
-export const setStoreMapOverlayClickMarker = (mapId: string, overlay: Overlay): void => {
-  getStoreMapState(mapId).actions.setOverlayClickMarker(overlay);
-};
-
 /** Sets the click marker position in the store. */
 export const setStoreMapClickMarker = (mapId: string, projectedCoords: number[]): void => {
   getStoreMapState(mapId).actions.setClickMarker(projectedCoords);
@@ -1548,36 +939,9 @@ export const setStoreMapPointerPosition = (mapId: string, pointerPosition: TypeM
   getStoreMapState(mapId).actions.setPointerPosition(pointerPosition);
 };
 
-/** Sets the hoverable state for a layer in the store. */
-export const setStoreMapLayerHoverable = (mapId: string, layerPath: string, hoverable: boolean): void => {
-  getStoreMapState(mapId).actions.setHoverable(layerPath, hoverable);
-};
-
 /** Sets the hover feature info in the store. */
 export const setStoreMapHoverFeatureInfo = (mapId: string, hoverFeatureInfo: TypeHoverFeatureInfo): void => {
   getStoreMapState(mapId).actions.setHoverFeatureInfo(hoverFeatureInfo);
-};
-
-/**
- * Sets the visibility of a layer in the store ordered layer info.
- *
- * @param mapId - The ID of the map
- * @param layerPath - The layer path of the layer to change
- * @param visibility - The visibility to set
- */
-export const setStoreMapLayerVisibility = (mapId: string, layerPath: string, visibility: boolean): void => {
-  getStoreMapState(mapId).actions.updateOrderedLayerInfoByPath(layerPath, { visible: visibility });
-};
-
-/**
- * Sets the visibility range state for a specific layer in the store.
- *
- * @param mapId - The map identifier
- * @param layerPath - The unique layer path identifier
- * @param inVisibleRange - Whether the layer is within its visible zoom range
- */
-export const setStoreLayerInVisibleRange = (mapId: string, layerPath: string, inVisibleRange: boolean): void => {
-  getStoreMapState(mapId).actions.updateOrderedLayerInfoByPath(layerPath, { inVisibleRange });
 };
 
 /** Sets the map interaction mode in the store. */
@@ -1605,32 +969,9 @@ export const setStoreMapRotation = (mapId: string, rotation: number): void => {
   getStoreMapState(mapId).actions.setRotation(rotation);
 };
 
-/** Sets the queryable state for a layer in the store. */
-export const setStoreMapLayerQueryable = (mapId: string, layerPath: string, queryable: boolean): void => {
-  getStoreMapState(mapId).actions.setQueryable(layerPath, queryable);
-};
-
 /** Sets the highlighted features in the store. */
 export const setStoreMapHighlightedFeatures = (mapId: string, highlightedFeatures: TypeFeatureInfoEntry[]): void => {
   getStoreMapState(mapId).actions.setHighlightedFeatures(highlightedFeatures);
-};
-
-/** Sets the legend collapsed state for a layer in the store. */
-export const setStoreMapLegendCollapsed = (mapId: string, layerPath: string, collapsed: boolean): void => {
-  getStoreMapState(mapId).actions.setLegendCollapsed(layerPath, collapsed);
-};
-
-/** Toggles the legend collapsed state for a layer in the store. */
-export const setStoreMapToggleLegendCollapsed = (mapId: string, layerPath: string): void => {
-  const legendCollapsedRightNow: boolean =
-    utilFindMapLayerFromOrderedInfo(layerPath, getStoreMapOrderedLayerInfo(mapId))?.legendCollapsed || false;
-  getStoreMapState(mapId).actions.setLegendCollapsed(layerPath, !legendCollapsedRightNow);
-};
-
-/** Adds an initial filter for a layer path in the store. */
-export const addStoreMapInitialFilter = (mapId: string, layerPath: string, filter: string): void => {
-  const curFilters = getStoreMapState(mapId).initialFilters;
-  getStoreMapState(mapId).actions.setInitialFilters({ ...curFilters, [layerPath]: filter });
 };
 
 /** Updates the store with map move end properties including center, rotation, extent, and scale. */
@@ -1646,44 +987,9 @@ export const setStoreMapMoveEnd = (
   getStoreMapState(mapId).actions.setMapMoveEnd(centerCoordinates, pointerPosition, degreeRotation, isNorthVisible, mapExtent, scale);
 };
 
-/** Sets the legend collapsed state for all layers in the store. */
-export const setStoreMapAllMapLayerCollapsed = (mapId: string, newCollapsed: boolean): void => {
-  // Set the collapsed state for all layers
-  const orderedLayerInfo = getStoreMapOrderedLayerInfo(mapId);
-  orderedLayerInfo.forEach((layer) => {
-    if (layer.legendCollapsed !== newCollapsed) {
-      setStoreMapLegendCollapsed(mapId, layer.layerPath, newCollapsed);
-    }
-  });
-};
-
 /** Sets the fix north state in the store. */
 export const setStoreMapFixNorth = (mapId: string, fixNorth: boolean): void => {
   getStoreMapState(mapId).actions.setFixNorth(fixNorth);
-};
-
-/** Sets the HTML element reference for the overlay click marker. */
-export const setStoreMapOverlayClickMarkerRef = (mapId: string, htmlRef: HTMLElement): void => {
-  const overlay = getStoreMapState(mapId).overlayClickMarker;
-  if (overlay !== undefined) overlay.setElement(htmlRef);
-};
-
-/** Sets the HTML element reference for the overlay north marker. */
-export const setStoreMapOverlayNorthMarkerRef = (mapId: string, htmlRef: HTMLElement): void => {
-  const overlay = getStoreMapState(mapId).overlayNorthMarker;
-  if (overlay !== undefined) overlay.setElement(htmlRef);
-};
-
-/**
- * Temporary method to set the ordered layers directly in the store.
- * This method should be used with caution and only in specific cases, as it bypasses the usual
- * state update patterns and may lead to unintended side effects if not used properly.
- *
- * @param mapId - The map identifier
- * @param orderedLayerInfo - The ordered layer info array to set
- */
-export const setStoreMapOrderedLayerDirectly = (mapId: string, orderedLayerInfo: TypeOrderedLayerInfo[]): void => {
-  getStoreMapState(mapId).actions.setOrderedLayerInfo(orderedLayerInfo);
 };
 
 // #endregion STATE ADAPTORS
@@ -1713,28 +1019,4 @@ export interface TypeNorthArrow {
 
   /** Whether the north direction is currently visible on the map. */
   isNorthVisible: boolean;
-}
-
-/** Represents ordering and state information for a single layer. */
-export interface TypeOrderedLayerInfo {
-  /** The unique layer path identifier. */
-  layerPath: string;
-
-  /** Whether the layer responds to hover interactions. */
-  hoverable?: boolean;
-
-  /** Whether the layer source supports queries. */
-  queryableSource?: boolean;
-
-  /** The current queryable state of the layer. */
-  queryableState?: boolean;
-
-  /** Whether the layer is visible. */
-  visible: boolean;
-
-  /** Whether the layer is within its visible zoom range. */
-  inVisibleRange: boolean;
-
-  /** Whether the layer legend is collapsed. */
-  legendCollapsed: boolean;
 }

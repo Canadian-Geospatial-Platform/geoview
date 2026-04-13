@@ -1,7 +1,7 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 import { logger } from 'geoview-core/core/utils/logger';
-import { useStoreMapLayerArrayVisibility } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
+import { useStoreLayerArrayVisibility } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
 import { useLayerController } from 'geoview-core/core/controllers/use-controllers';
 
@@ -75,7 +75,7 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
   const layerPaths = useMemo(() => collectLayerPaths(item.children), [item.children]);
 
   // Check if all child layers are visible
-  const allVisible = useStoreMapLayerArrayVisibility(layerPaths);
+  const allVisible = useStoreLayerArrayVisibility(layerPaths);
 
   if (!isGroupLayer(item)) return;
 
@@ -94,7 +94,7 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
 
     // Toggle all child layers
     layerPaths.forEach((layerPath) => {
-      layerController.setOrToggleMapLayerVisibility(layerPath, newVisibility);
+      layerController.setOrToggleLayerVisibilityIfExists(layerPath, newVisibility);
     });
   };
 

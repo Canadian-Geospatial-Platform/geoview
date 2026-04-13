@@ -5,7 +5,6 @@ import type { SelectChangeEvent } from '@mui/material';
 import type { ButtonPropsLayerPanel } from '@/ui';
 import { Box, Button, IconButton, ButtonGroup, CircularProgressBase, FileUploadIcon, Paper, Select, Stepper, TextField } from '@/ui';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
-import { setStoreLayerDisplayState } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import {
   useStoreAppDisabledLayerTypes,
   useStoreAppDisplayLanguage,
@@ -373,7 +372,7 @@ export function AddNewLayer(): JSX.Element {
   const doneAdding = (): void => {
     // Done adding
     setIsLoading(false);
-    setStoreLayerDisplayState(mapId, 'view');
+    layerController.setLayerDisplayState('view');
     layerController.setLayerZIndices();
   };
 
@@ -886,7 +885,7 @@ export function AddNewLayer(): JSX.Element {
             className="buttonOutlineFilled"
             size="small"
             type="text"
-            onClick={() => setStoreLayerDisplayState(mapId, 'view')}
+            onClick={() => layerController.setLayerDisplayState('view')}
           >
             {t('general.cancel')}
           </Button>

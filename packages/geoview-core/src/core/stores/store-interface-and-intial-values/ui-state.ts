@@ -12,6 +12,14 @@ import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 
 // #region INTERFACE DEFINITION
 
+/** Serializable metadata for a footer tab entry (no JSX \u2014 content lives in the FooterBarApi registry). */
+export type TypeFooterTabEntry = {
+  /** The unique tab identifier. */
+  id: string;
+  /** The tab label (translation key or display string). */
+  label?: string;
+};
+
 /**
  * Represents the UI Zustand store slice.
  *
@@ -42,8 +50,17 @@ export interface IUIState {
   /** Tab identifiers that are hidden from the footer bar. */
   hiddenTabs: string[];
 
+  /** Footer tab entries registered via the FooterBarApi (serializable metadata only — no JSX). */
+  footerTabs: TypeFooterTabEntry[];
+
+  /** App-bar panel identifiers registered via the AppBarApi (full objects live in the AppBarApi registry). */
+  appBarPanelIds: string[];
+
   /** The list of nav-bar component identifiers. */
   navBarComponents: TypeValidNavBarProps[];
+
+  /** Version counter that increments when nav-bar button panels are added or removed (triggers re-render). */
+  navBarButtonPanelVersion: number;
 
   /** The current resize value (percentage) for the footer panel. */
   footerPanelResizeValue: number;
@@ -76,6 +93,21 @@ export interface IUIState {
 
     /** Sets the footer bar open state. */
     setFooterBarIsOpen: (open: boolean) => void;
+
+    /** Adds a footer tab entry. */
+    addFooterTab: (tab: TypeFooterTabEntry) => void;
+
+    /** Removes a footer tab entry by id. */
+    removeFooterTab: (id: string) => void;
+
+    /** Adds an app-bar panel id. */
+    addAppBarPanelId: (id: string) => void;
+
+    /** Removes an app-bar panel id. */
+    removeAppBarPanelId: (id: string) => void;
+
+    /** Increments the nav-bar button panel version to trigger a re-render. */
+    bumpNavBarButtonPanelVersion: () => void;
   };
 }
 
@@ -97,10 +129,13 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
     footerBarComponents: [],
     activeFooterBarTab: { tabId: '', isOpen: false, isFocusTrapped: false },
     navBarComponents: [],
+    navBarButtonPanelVersion: 0,
     activeTrapGeoView: false,
     corePackagesComponents: [],
     focusItem: { activeElementId: false, callbackElementId: false },
     hiddenTabs: ['data-table', 'time-slider', 'geochart'],
+    footerTabs: [],
+    appBarPanelIds: [],
     footerPanelResizeValue: 35,
 
     // initialize default stores section from config information when store receive configuration file
@@ -110,6 +145,13 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
       // - selectedTab unset → close
       const isAppBarOpen = !!geoviewConfig.appBar?.selectedTab;
       const isFooterBarOpen = !!geoviewConfig.footerBar?.selectedTab;
+
+      // Seed footer tabs from config so they are available on the very first render
+      const coreTabs = geoviewConfig.footerBar?.tabs?.core || [];
+      const footerTabEntries: TypeFooterTabEntry[] = coreTabs.map((id) => ({ id }));
+
+      // If no selectedTab in config, default to the first core tab so the tab content renders
+      const footerSelectedTab = geoviewConfig.footerBar?.selectedTab || coreTabs[0] || '';
 
       set({
         uiState: {
@@ -121,8 +163,9 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
             isFocusTrapped: false,
           },
           footerBarComponents: geoviewConfig.footerBar?.tabs.core || [],
+          footerTabs: footerTabEntries,
           activeFooterBarTab: {
-            tabId: geoviewConfig.footerBar?.selectedTab || '',
+            tabId: footerSelectedTab,
             isOpen: isFooterBarOpen,
             isFocusTrapped: false,
           },
@@ -253,6 +296,92 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
       },
 
       /**
+       * Adds a footer tab entry to the store.
+       *
+       * @param tab - The footer tab entry to add
+       */
+      addFooterTab: (tab: TypeFooterTabEntry) => {
+        const existing = get().uiState.footerTabs;
+        const index = existing.findIndex((t) => t.id === tab.id);
+        if (index === -1) {
+          // Add new entry
+          set({
+            uiState: {
+              ...get().uiState,
+              footerTabs: [...existing, tab],
+            },
+          });
+        } else {
+          // Upsert existing entry to trigger re-render (e.g. when plugin registers content after seeding)
+          const updated = [...existing];
+          updated[index] = tab;
+          set({
+            uiState: {
+              ...get().uiState,
+              footerTabs: updated,
+            },
+          });
+        }
+      },
+
+      /**
+       * Removes a footer tab entry from the store by id.
+       *
+       * @param id - The tab id to remove
+       */
+      removeFooterTab: (id: string) => {
+        set({
+          uiState: {
+            ...get().uiState,
+            footerTabs: get().uiState.footerTabs.filter((t) => t.id !== id),
+          },
+        });
+      },
+
+      /**
+       * Adds an app-bar panel id to the store.
+       *
+       * @param id - The panel id to add
+       */
+      addAppBarPanelId: (id: string) => {
+        const existing = get().uiState.appBarPanelIds;
+        if (!existing.includes(id)) {
+          set({
+            uiState: {
+              ...get().uiState,
+              appBarPanelIds: [...existing, id],
+            },
+          });
+        }
+      },
+
+      /**
+       * Removes an app-bar panel id from the store.
+       *
+       * @param id - The panel id to remove
+       */
+      removeAppBarPanelId: (id: string) => {
+        set({
+          uiState: {
+            ...get().uiState,
+            appBarPanelIds: get().uiState.appBarPanelIds.filter((panelId) => panelId !== id),
+          },
+        });
+      },
+
+      /**
+       * Increments the nav-bar button panel version to trigger a re-render.
+       */
+      bumpNavBarButtonPanelVersion: () => {
+        set({
+          uiState: {
+            ...get().uiState,
+            navBarButtonPanelVersion: get().uiState.navBarButtonPanelVersion + 1,
+          },
+        });
+      },
+
+      /**
        * Sets the active app bar tab.
        *
        * @param tabId - The tab ID to activate, or undefined to clear
@@ -374,6 +503,32 @@ export const getStoreUICorePackageComponents = (mapId: string): TypeValidMapCore
 export const useStoreUICorePackagesComponents = (): TypeValidMapCorePackageProps[] =>
   useStore(useGeoViewStore(), (state) => state.uiState.corePackagesComponents);
 
+/**
+ * Gets the footer tab entries from the store.
+ *
+ * @param mapId - The map identifier
+ * @returns The array of footer tab entries
+ */
+export const getStoreUIFooterTabs = (mapId: string): TypeFooterTabEntry[] => getStoreUIState(mapId).footerTabs;
+
+/** Hooks the footer tab entries registered via the FooterBarApi. */
+export const useStoreUIFooterTabs = (): TypeFooterTabEntry[] => useStore(useGeoViewStore(), (state) => state.uiState.footerTabs);
+
+/**
+ * Gets the app-bar panel ids from the store.
+ *
+ * @param mapId - The map identifier
+ * @returns The array of app-bar panel ids
+ */
+export const getStoreUIAppBarPanelIds = (mapId: string): string[] => getStoreUIState(mapId).appBarPanelIds;
+
+/** Hooks the app-bar panel ids registered via the AppBarApi. */
+export const useStoreUIAppBarPanelIds = (): string[] => useStore(useGeoViewStore(), (state) => state.uiState.appBarPanelIds);
+
+/** Hooks the nav-bar button panel version counter (triggers re-render on change). */
+export const useStoreUINavBarButtonPanelVersion = (): number =>
+  useStore(useGeoViewStore(), (state) => state.uiState.navBarButtonPanelVersion);
+
 /** Hooks the current focus-trap item from the UI state. */
 export const useStoreUIActiveFocusItem = (): FocusItemProps => useStore(useGeoViewStore(), (state) => state.uiState.focusItem);
 
@@ -397,7 +552,7 @@ export const useStoreUIHiddenTabs = (): string[] => useStore(useGeoViewStore(), 
  * @param mapId - The map identifier
  * @param tab - The tab identifier, or undefined to deactivate
  */
-export const setStoreActiveFooterBarTab = (mapId: string, tab: string | undefined): void => {
+export const setStoreUIActiveFooterBarTab = (mapId: string, tab: string | undefined): void => {
   getStoreUIState(mapId).actions.setActiveFooterBarTab(tab);
 };
 
@@ -409,7 +564,7 @@ export const setStoreActiveFooterBarTab = (mapId: string, tab: string | undefine
  * @param isOpen - Whether the tab is open
  * @param isFocusTrapped - Whether focus is trapped on the tab
  */
-export const setStoreActiveAppBarTab = (mapId: string, tab: string | undefined, isOpen: boolean, isFocusTrapped: boolean): void => {
+export const setStoreUIActiveAppBarTab = (mapId: string, tab: string | undefined, isOpen: boolean, isFocusTrapped: boolean): void => {
   getStoreUIState(mapId).actions.setActiveAppBarTab(tab, isOpen, isFocusTrapped);
 };
 
@@ -419,7 +574,7 @@ export const setStoreActiveAppBarTab = (mapId: string, tab: string | undefined, 
  * @param mapId - The map identifier
  * @param isOpen - Whether the footer bar is open
  */
-export const setStoreFooterBarIsOpen = (mapId: string, isOpen: boolean): void => {
+export const setStoreUIFooterBarIsOpen = (mapId: string, isOpen: boolean): void => {
   getStoreUIState(mapId).actions.setFooterBarIsOpen(isOpen);
 };
 
@@ -429,7 +584,7 @@ export const setStoreFooterBarIsOpen = (mapId: string, isOpen: boolean): void =>
  * @param mapId - The map identifier
  * @param uiFocus - The focus item containing active and callback element identifiers
  */
-export const enableStoreFocusTrap = (mapId: string, uiFocus: FocusItemProps): void => {
+export const enableStoreUIFocusTrap = (mapId: string, uiFocus: FocusItemProps): void => {
   getStoreUIState(mapId).actions.enableFocusTrap(uiFocus);
 };
 
@@ -441,7 +596,7 @@ export const enableStoreFocusTrap = (mapId: string, uiFocus: FocusItemProps): vo
  * @param mapId - The map identifier
  * @param callbackElementId - Optional element identifier to restore focus to. If 'no-focus' is passed, focus is not restored
  */
-export const disableStoreFocusTrap = (mapId: string, callbackElementId?: string): void => {
+export const disableStoreUIFocusTrap = (mapId: string, callbackElementId?: string): void => {
   getStoreUIState(mapId).actions.disableFocusTrap(callbackElementId);
 };
 
@@ -451,7 +606,7 @@ export const disableStoreFocusTrap = (mapId: string, callbackElementId?: string)
  * @param mapId - The map identifier
  * @param active - Whether the focus trap is active
  */
-export const setStoreActiveTrapGeoView = (mapId: string, active: boolean): void => {
+export const setStoreUIActiveTrapGeoView = (mapId: string, active: boolean): void => {
   getStoreUIState(mapId).actions.setActiveTrapGeoView(active);
 };
 
@@ -461,7 +616,7 @@ export const setStoreActiveTrapGeoView = (mapId: string, active: boolean): void 
  * @param mapId - The map identifier
  * @param value - The resize percentage value
  */
-export const setStoreFooterPanelResizeValue = (mapId: string, value: number): void => {
+export const setStoreUIFooterPanelResizeValue = (mapId: string, value: number): void => {
   getStoreUIState(mapId).actions.setFooterPanelResizeValue(value);
 };
 
@@ -471,7 +626,7 @@ export const setStoreFooterPanelResizeValue = (mapId: string, value: number): vo
  * @param mapId - The map identifier
  * @param tab - The tab identifier to show
  */
-export const showStoreTabButton = (mapId: string, tab: string): void => {
+export const showStoreUITabButton = (mapId: string, tab: string): void => {
   const uiState = getStoreUIState(mapId);
   const { hiddenTabs } = uiState;
 
@@ -489,7 +644,7 @@ export const showStoreTabButton = (mapId: string, tab: string): void => {
  * @param mapId - The map identifier
  * @param tab - The tab identifier to hide
  */
-export const hideStoreTabButton = (mapId: string, tab: string): void => {
+export const hideStoreUITabButton = (mapId: string, tab: string): void => {
   const uiState = getStoreUIState(mapId);
   const { hiddenTabs } = uiState;
 
@@ -497,6 +652,55 @@ export const hideStoreTabButton = (mapId: string, tab: string): void => {
   if (!hiddenTabs.includes(tab)) {
     uiState.actions.setHiddenTabs([...hiddenTabs, tab]);
   }
+};
+
+/**
+ * Adds a footer tab entry to the store.
+ *
+ * @param mapId - The map identifier
+ * @param tab - The footer tab entry to add
+ */
+export const addStoreUIFooterTab = (mapId: string, tab: TypeFooterTabEntry): void => {
+  getStoreUIState(mapId).actions.addFooterTab(tab);
+};
+
+/**
+ * Removes a footer tab entry from the store by id.
+ *
+ * @param mapId - The map identifier
+ * @param id - The tab id to remove
+ */
+export const removeStoreUIFooterTab = (mapId: string, id: string): void => {
+  getStoreUIState(mapId).actions.removeFooterTab(id);
+};
+
+/**
+ * Adds an app-bar panel id to the store.
+ *
+ * @param mapId - The map identifier
+ * @param id - The panel id to add
+ */
+export const addStoreUIAppBarPanelId = (mapId: string, id: string): void => {
+  getStoreUIState(mapId).actions.addAppBarPanelId(id);
+};
+
+/**
+ * Removes an app-bar panel id from the store.
+ *
+ * @param mapId - The map identifier
+ * @param id - The panel id to remove
+ */
+export const removeStoreUIAppBarPanelId = (mapId: string, id: string): void => {
+  getStoreUIState(mapId).actions.removeAppBarPanelId(id);
+};
+
+/**
+ * Bumps the nav-bar button panel version to trigger a re-render.
+ *
+ * @param mapId - The map identifier
+ */
+export const bumpStoreUINavBarButtonPanelVersion = (mapId: string): void => {
+  getStoreUIState(mapId).actions.bumpNavBarButtonPanelVersion();
 };
 
 // #endregion STATE ADAPTORS

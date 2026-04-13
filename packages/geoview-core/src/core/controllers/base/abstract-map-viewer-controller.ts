@@ -1,10 +1,8 @@
-import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import type { TypeGeoviewLayerConfig, TypeLayerEntryConfig } from '@/api/types/layer-schema-types';
-import type { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { AbstractController } from './abstract-controller';
-import type { MapViewer } from '@/geo/map/map-viewer';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
+import type { MapViewer } from '@/geo/map/map-viewer';
 import type { GeometryApi } from '@/geo/layer/geometry/geometry';
 import type { BasemapApi } from '@/geo/layer/basemap/basemap';
 
@@ -19,14 +17,19 @@ export class AbstractMapViewerController extends AbstractController {
   /** The map viewer instance associated with this controller */
   #mapViewer: MapViewer;
 
+  /** The controller registry associated with this controller */
+  #controllerRegistry: ControllerRegistry;
+
   /**
    * Creates an instance of AbstractMapViewerController.
    *
    * @param mapViewer - The map viewer instance to associate with this controller
+   * @param controllerRegistry - The controller registry for accessing sibling controllers
    */
-  constructor(mapViewer: MapViewer) {
+  constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry) {
     super();
     this.#mapViewer = mapViewer;
+    this.#controllerRegistry = controllerRegistry;
   }
 
   /**
@@ -53,7 +56,7 @@ export class AbstractMapViewerController extends AbstractController {
    * @returns The controller registry owned by the map viewer
    */
   getControllersRegistry(): ControllerRegistry {
-    return this.getMapViewer().controllers;
+    return this.#controllerRegistry;
   }
 
   /**
@@ -77,31 +80,18 @@ export class AbstractMapViewerController extends AbstractController {
   // #region STATIC METHODS
 
   /**
-   * Generates an array of layer info for the orderedLayerList.
+   * Generates an array of layer paths for the ordered layer list.
    *
    * @param geoviewLayerConfig - The config to get the info from
-   * @returns The array of ordered layer info
+   * @returns The array of ordered layer paths
    */
-  static generateArrayOfLayerOrderInfo(geoviewLayerConfig: TypeGeoviewLayerConfig | ConfigBaseClass): TypeOrderedLayerInfo[] {
-    const newOrderedLayerInfos: TypeOrderedLayerInfo[] = [];
+  static generateOrderedLayerPaths(geoviewLayerConfig: TypeGeoviewLayerConfig | ConfigBaseClass): string[] {
+    const layerPaths: string[] = [];
 
     const addSubLayerPathToLayerOrder = (layerEntryConfig: TypeLayerEntryConfig, layerPath: string): void => {
       const subLayerPath = layerPath.endsWith(`/${layerEntryConfig.layerId}`) ? layerPath : `${layerPath}/${layerEntryConfig.layerId}`;
 
-      const settings = ConfigBaseClass.getClassOrTypeInitialSettings(layerEntryConfig);
-      const featureInfo = AbstractBaseLayerEntryConfig.getClassOrTypeFeatureInfo(layerEntryConfig);
-
-      const layerInfo: TypeOrderedLayerInfo = {
-        layerPath: subLayerPath,
-        visible: settings?.states?.visible ?? true, // default: true
-        queryableSource: featureInfo?.queryable ?? true, // default: true
-        queryableState: settings?.states?.queryable ?? true, // default: true
-        hoverable: settings?.states?.hoverable ?? true, // default: true
-        legendCollapsed: settings?.states?.legendCollapsed ?? false, // default: false
-        inVisibleRange: true,
-      };
-
-      newOrderedLayerInfos.push(layerInfo);
+      layerPaths.push(subLayerPath);
       if (layerEntryConfig.listOfLayerEntryConfig?.length) {
         layerEntryConfig.listOfLayerEntryConfig?.forEach((subLayerEntryConfig) => {
           addSubLayerPathToLayerOrder(subLayerEntryConfig, subLayerPath);
@@ -121,17 +111,8 @@ export class AbstractMapViewerController extends AbstractController {
     if (!(geoviewLayerConfig instanceof ConfigBaseClass)) {
       if (geoviewLayerConfig.listOfLayerEntryConfig?.length > 1) {
         const layerPath = `${geoviewLayerConfig.geoviewLayerId}/base-group`;
-        // Using as any, because even a TypeGeoviewLayerConfig can have initialSettings? To confirm...
-        const settingsGVLC = ConfigBaseClass.getClassOrTypeInitialSettings(geoviewLayerConfig)?.states;
 
-        const layerInfo: TypeOrderedLayerInfo = {
-          layerPath,
-          legendCollapsed: settingsGVLC?.legendCollapsed ?? false, // default: false
-          visible: settingsGVLC?.visible ?? true, // default: true
-          inVisibleRange: true,
-        };
-
-        newOrderedLayerInfos.push(layerInfo);
+        layerPaths.push(layerPath);
         geoviewLayerConfig.listOfLayerEntryConfig.forEach((layerEntryConfig) => {
           addSubLayerPathToLayerOrder(layerEntryConfig, layerPath);
         });
@@ -143,7 +124,7 @@ export class AbstractMapViewerController extends AbstractController {
       addSubLayerPathToLayerOrder(geoviewLayerConfig as TypeLayerEntryConfig, geoviewLayerConfig.layerPath);
     }
 
-    return newOrderedLayerInfos;
+    return layerPaths;
   }
 
   // #endregion STATIC METHODS

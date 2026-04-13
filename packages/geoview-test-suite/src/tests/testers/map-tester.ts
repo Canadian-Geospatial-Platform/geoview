@@ -8,7 +8,6 @@ import type { Extent, TypeBasemapId, TypeMapState, TypeValidMapProjectionCodes }
 import {
   getStoreDetailsFeatures,
   getStoreDetailsSelectedLayerPath,
-  setStoreDetailsSelectedLayerPath,
   type TypeFeatureInfoResultSetEntry,
   type TypeHoverFeatureInfo,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/feature-info-state';
@@ -17,6 +16,7 @@ import { Projection } from 'geoview-core/geo/utils/projection';
 import {
   getStoreUIActiveAppBarTab,
   getStoreUIActiveFooterBarTab,
+  getStoreUIFooterTabs,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/ui-state';
 import { getStoreAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 import {
@@ -88,7 +88,7 @@ export class MapTester extends GVAbstractTester {
 
         // Perform a zoom
         test.addStep('Performing zoom...');
-        await this.getMapViewer().controllers.mapController.zoomMap(zoomEnd, zoomDuration);
+        await this.getControllersRegistry().mapController.zoomMap(zoomEnd, zoomDuration);
 
         // Return the result
         return zoomEnd;
@@ -101,7 +101,7 @@ export class MapTester extends GVAbstractTester {
       async (test) => {
         // Unzooms to original position
         test.addStep('Unzooms to the original zoom...');
-        await this.getMapViewer().controllers.mapController.zoomMap(currentZoom, zoomDuration);
+        await this.getControllersRegistry().mapController.zoomMap(currentZoom, zoomDuration);
       }
     );
   }
@@ -127,7 +127,7 @@ export class MapTester extends GVAbstractTester {
     zoomLevel: number
   ): Promise<Test<Extent>> {
     // Zoom to initial extent
-    await this.getMapViewer().controllers.mapController.zoomToInitialExtent();
+    await this.getControllersRegistry().mapController.zoomToInitialExtent();
 
     // Get the current init extent
     const { mapExtent, currentProjection } = getStoreMapStateJson(this.getMapId());
@@ -142,25 +142,25 @@ export class MapTester extends GVAbstractTester {
 
         // Perform a projection switch
         test.addStep(`Performing projection switch to ${secondProjection}...`);
-        await this.getMapViewer().controllers.mapController.setProjection(secondProjection);
+        await this.getControllersRegistry().mapController.setProjection(secondProjection);
 
         // Update the step
         test.addStep(`Performing zoom to level ${zoomLevel}...`);
 
         // Perform a zoom
-        await this.getMapViewer().controllers.mapController.zoomMap(zoomLevel, 1000);
+        await this.getControllersRegistry().mapController.zoomMap(zoomLevel, 1000);
 
         // Update the step
         test.addStep('Performing projection switch to original...');
 
         // Perform a projection switch
-        await this.getMapViewer().controllers.mapController.setProjection(initialProjection);
+        await this.getControllersRegistry().mapController.setProjection(initialProjection);
 
         // Update the step
         test.addStep('Performing zomm to inital extent...');
 
         // Zoom to initial extent
-        await this.getMapViewer().controllers.mapController.zoomToInitialExtent();
+        await this.getControllersRegistry().mapController.zoomToInitialExtent();
 
         // Return the result
         return getStoreMapStateJson(this.getMapId()).mapExtent;
@@ -395,9 +395,9 @@ export class MapTester extends GVAbstractTester {
         return customTabId;
       },
       (test, result) => {
-        test.addStep('Verifying custom tab exists...');
-        const { tabs } = this.getMapViewer().footerBarApi;
-        const customTab = tabs.find((tab) => tab.id === result);
+        test.addStep('Verifying custom tab exists in store...');
+        const footerTabs = getStoreUIFooterTabs(this.getMapId());
+        const customTab = footerTabs.find((tab) => tab.id === result);
         Test.assertIsDefined('customTab', customTab);
 
         test.addStep('Verifying custom tab id...');
@@ -512,7 +512,7 @@ export class MapTester extends GVAbstractTester {
         // Switch to LCC projection if not already there
         if (currentProjection !== 3978) {
           test.addStep('Switching to LCC projection (3978)...');
-          await this.getMapViewer().controllers.mapController.setProjection(3978);
+          await this.getControllersRegistry().mapController.setProjection(3978);
         }
 
         test.addStep('Zooming to British Columbia extent...');
@@ -772,11 +772,11 @@ export class MapTester extends GVAbstractTester {
         test.addStep(`First selected layer: ${originalLayerPath}`);
 
         // The alternate layer
-        const altLayerPathh = originalLayerPath === layerPath1 ? layerPath2 : layerPath1;
+        const altLayerPath = originalLayerPath === layerPath1 ? layerPath2 : layerPath1;
 
         // Manually select the alternate layer
-        test.addStep(`Manually selecting the other layer '${altLayerPathh}'...`);
-        setStoreDetailsSelectedLayerPath(this.getMapId(), altLayerPathh);
+        test.addStep(`Manually selecting the other layer '${altLayerPath}'...`);
+        this.getControllersRegistry().detailsController.setSelectedLayerPath(altLayerPath);
 
         // Simulate a map click at second location
         test.addStep(`Performing second map click at [${clickCoordinates2.join(', ')}]...`);

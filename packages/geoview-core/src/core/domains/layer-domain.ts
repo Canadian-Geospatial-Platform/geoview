@@ -43,7 +43,20 @@ import type {
   LayerQueryableChangedEvent,
 } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
-import { GVWMS, type ImageLoadRescueDelegate, type ImageLoadRescueEvent } from '@/geo/layer/gv-layers/raster/gv-wms';
+import {
+  GVWMS,
+  type ImageLoadRescueDelegate,
+  type ImageLoadRescueEvent,
+  type WMSStyleChangedDelegate,
+  type WMSStyleChangedEvent,
+} from '@/geo/layer/gv-layers/raster/gv-wms';
+import {
+  GVEsriImage,
+  type RasterFunctionChangedEvent,
+  type RasterFunctionChangedDelegate,
+  type MosaicRuleChangedEvent,
+  type MosaicRuleChangedDelegate,
+} from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { GeoUtilities } from '@/geo/utils/utilities';
 
 /**
@@ -109,65 +122,83 @@ export class LayerDomain {
   /** Keep a bounded reference to the handle WMS Layer Image Load Callbacks */
   #boundedHandleLayerWMSImageLoadRescue: ImageLoadRescueDelegate;
 
-  /** Keep all callback delegate references */
+  /** Keep a bounded reference to the handle WMS style changed */
+  #boundedHandleLayerWMSStyleChanged: WMSStyleChangedDelegate;
+
+  /** Keep a bounded reference to the handle layer raster function changed */
+  #boundedHandleLayerRasterFunctionChanged: RasterFunctionChangedDelegate;
+
+  /** Keep a bounded reference to the handle layer mosaic rule changed */
+  #boundedHandleLayerMosaicRuleChanged: MosaicRuleChangedDelegate;
+
+  /** Callback delegates for the layer entry config registered event. */
   #onLayerEntryConfigRegisteredHandlers: DomainLayerStatusChangedDelegate[] = [];
 
-  /** Keep all callback delegate references */
+  /** Callback delegates for the layer entry config unregistered event. */
   #onLayerEntryConfigUnregisteredHandlers: DomainLayerStatusChangedDelegate[] = [];
 
-  /** Keep all callback delegate references */
+  /** Callback delegates for the layer status changed event. */
   #onLayerStatusChangedHandlers: DomainLayerStatusChangedDelegate[] = [];
 
-  /** Keep all callback delegate references */
+  /** Callback delegates for the layer registered event. */
   #onLayerRegisteredHandlers: DomainLayerRegisteredDelegate[] = [];
 
-  /** Keep all callback delegate references */
+  /** Callback delegates for the layer unregistered event. */
   #onLayerUnregisteredHandlers: DomainLayerRegisteredDelegate[] = [];
 
-  /** Keep all callback delegate references */
+  /** Callback delegates for the all layers loaded event. */
   #onLayerAllLoadedHandlers: DomainLayerStatusChangedDelegate[] = [];
 
-  /** Keep all callback delegate references */
+  /** Callback delegates for the layer name changed event. */
   #onLayerNameChangedHandlers: DomainLayerNameChangedDelegate[] = [];
 
-  /** Keep all callback delegate references */
+  /** Callback delegates for the layer visible changed event. */
   #onLayerVisibleChangedHandlers: DomainLayerVisibleChangedDelegate[] = [];
 
-  /** Keep all callback delegate references */
+  /** Callback delegates for the layer opacity changed event. */
   #onLayerOpacityChangedHandlers: DomainLayerOpacityChangedDelegate[] = [];
 
-  /** Keep all callback delegate references */
+  /** Callback delegates for the layer loading event. */
   #onLayerLoadingHandlers: DomainLayerBaseDelegate[] = [];
 
-  /** Keep all callback delegate references */
+  /** Callback delegates for the layer first loaded event. */
   #onLayerFirstLoadedHandlers: DomainLayerBaseDelegate[] = [];
 
-  /** Keep all callback delegate references */
+  /** Callback delegates for the layer loaded event. */
   #onLayerLoadedHandlers: DomainLayerBaseDelegate[] = [];
 
-  /** Keep all callback delegate references */
+  /** Callback delegates for the layer error event. */
   #onLayerErrorHandlers: DomainLayerErrorDelegate[] = [];
 
-  /** Keep all callback delegate references */
+  /** Callback delegates for the layer message event. */
   #onLayerMessageHandlers: DomainLayerMessageDelegate[] = [];
 
-  /** Keep all callback delegate references */
+  /** Callback delegates for the layer hoverable changed event. */
   #onLayerHoverableChangedHandlers: DomainLayerHoverableChangedDelegate[] = [];
 
-  /** Keep all callback delegate references */
+  /** Callback delegates for the layer queryable changed event. */
   #onLayerQueryableChangedHandlers: DomainLayerQueryableChangedDelegate[] = [];
 
-  /** Keep all callback delegate references */
+  /** Callback delegates for the layer item visibility changed event. */
   #onLayerItemVisibilityChangedHandlers: DomainLayerItemVisibilityChangedDelegate[] = [];
 
-  /** Keep all callback delegate references */
-  #onLayerWMSImageLoadRescueHandlers: DomainLayerWMSImageLoadRescueDelegate[] = [];
-
-  /** Keep all callback delegate references */
+  /** Callback delegates for the group layer added event. */
   #onLayerGroupLayerAddedHandlers: DomainLayerGroupChildrenUpdatedDelegate[] = [];
 
-  /** Keep all callback delegate references */
+  /** Callback delegates for the group layer removed event. */
   #onLayerGroupLayerRemovedHandlers: DomainLayerGroupChildrenUpdatedDelegate[] = [];
+
+  /** Callback delegates for the WMS image load rescue event. */
+  #onLayerWMSImageLoadRescueHandlers: DomainLayerWMSImageLoadRescueDelegate[] = [];
+
+  /** Callback delegates for the WMS style changed event. */
+  #onLayerWMSStyleChangedHandlers: DomainLayerWMSStyleChangedDelegate[] = [];
+
+  /** Callback delegates for the layer raster function changed event. */
+  #onLayerRasterFunctionChangedHandlers: DomainLayerRasterFunctionChangedDelegate[] = [];
+
+  /** Callback delegates for the layer mosaic rule changed event. */
+  #onLayerMosaicRuleChangedHandlers: DomainLayerMosaicRuleChangedDelegate[] = [];
 
   /**
    * Constructor for the LayerDomain class.
@@ -189,6 +220,9 @@ export class LayerDomain {
     this.#boundedHandleLayerGroupLayerAdded = this.#handleLayerGroupLayerAdded.bind(this);
     this.#boundedHandleLayerGroupLayerRemoved = this.#handleLayerGroupLayerRemoved.bind(this);
     this.#boundedHandleLayerWMSImageLoadRescue = this.#handleLayerWMSImageLoadRescue.bind(this);
+    this.#boundedHandleLayerWMSStyleChanged = this.#handleLayerWmsStyleChanged.bind(this);
+    this.#boundedHandleLayerRasterFunctionChanged = this.#handleLayerRasterFunctionChanged.bind(this);
+    this.#boundedHandleLayerMosaicRuleChanged = this.#handleLayerMosaicRuleChanged.bind(this);
   }
 
   // #region PUBLIC LAYER GETTERS
@@ -529,6 +563,15 @@ export class LayerDomain {
       // For a WMS, register a hook when the image fails to load so that we can try to rescue it
       if (gvLayer instanceof GVWMS) gvLayer.onImageLoadRescue(this.#boundedHandleLayerWMSImageLoadRescue);
 
+      // For a WMS, register a hook when the WMS style is changed so that we can update the layer accordingly
+      if (gvLayer instanceof GVWMS) gvLayer.onWmsStyleChanged(this.#boundedHandleLayerWMSStyleChanged);
+
+      // For an Esri Image, register a hook when the raster function is changed so that we can update the layer accordingly
+      if (gvLayer instanceof GVEsriImage) gvLayer.onRasterFunctionChanged(this.#boundedHandleLayerRasterFunctionChanged);
+
+      // For an Esri Image, register a hook when the mosaic rule is changed so that we can update the layer accordingly
+      if (gvLayer instanceof GVEsriImage) gvLayer.onMosaicRuleChanged(this.#boundedHandleLayerMosaicRuleChanged);
+
       // Initialize it, attaching OpenLayers event on it
       gvLayer.init();
     } else if (gvLayer instanceof GVGroupLayer) {
@@ -560,6 +603,15 @@ export class LayerDomain {
 
     // If deleting a regular layer
     if (gvLayer instanceof AbstractGVLayer) {
+      // For an Esri Image, unregister the hook when the mosaic rule is changed
+      if (gvLayer instanceof GVEsriImage) gvLayer.offMosaicRuleChanged(this.#boundedHandleLayerMosaicRuleChanged);
+
+      // For an Esri Image, unregister the hook when the raster function is changed
+      if (gvLayer instanceof GVEsriImage) gvLayer.offRasterFunctionChanged(this.#boundedHandleLayerRasterFunctionChanged);
+
+      // For a WMS, unregister the hook when the WMS style is changed
+      if (gvLayer instanceof GVWMS) gvLayer.offWmsStyleChanged(this.#boundedHandleLayerWMSStyleChanged);
+
       // For a WMS, unregister the hook when the image fails to load
       if (gvLayer instanceof GVWMS) gvLayer.offImageLoadRescue(this.#boundedHandleLayerWMSImageLoadRescue);
 
@@ -892,6 +944,45 @@ export class LayerDomain {
   #handleLayerWMSImageLoadRescue(layer: GVWMS, event: ImageLoadRescueEvent): boolean {
     // Emit about it
     return this.#emitLayerWMSImageLoadRescue({ layer, layerEvent: event })?.[0];
+  }
+
+  /**
+   * Handles layer raster function changed events from registered layers.
+   *
+   * Forwards the event to domain listeners via emitLayerRasterFunctionChanged.
+   *
+   * @param layer - The layer whose raster function changed
+   * @param event - The raster function changed event
+   */
+  #handleLayerRasterFunctionChanged(layer: GVEsriImage, event: RasterFunctionChangedEvent): void {
+    // Emit about it
+    this.#emitLayerRasterFunctionChanged({ layer, layerEvent: event });
+  }
+
+  /**
+   * Handles layer mosaic rule changed events from registered layers.
+   *
+   * Forwards the event to domain listeners via emitLayerMosaicRuleChanged.
+   *
+   * @param layer - The layer whose mosaic rule changed
+   * @param event - The mosaic rule changed event
+   */
+  #handleLayerMosaicRuleChanged(layer: GVEsriImage, event: MosaicRuleChangedEvent): void {
+    // Emit about it
+    this.#emitLayerMosaicRuleChanged({ layer, layerEvent: event });
+  }
+
+  /**
+   * Handles layer WMS style changed events from registered layers.
+   *
+   * Forwards the event to domain listeners via emitLayerWmsStyleChanged.
+   *
+   * @param layer - The layer whose WMS style changed
+   * @param event - The WMS style changed event
+   */
+  #handleLayerWmsStyleChanged(layer: GVWMS, event: WMSStyleChangedEvent): void {
+    // Emit about it
+    this.#emitLayerWmsStyleChanged({ layer, layerEvent: event });
   }
 
   // #endregion PRIVATE LAYER HANDLERS
@@ -1461,6 +1552,99 @@ export class LayerDomain {
   }
 
   /**
+   * Emits layer raster function changed event.
+   *
+   * @param event - The event to emit
+   */
+  #emitLayerRasterFunctionChanged(event: DomainLayerRasterFunctionChangedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerRasterFunctionChangedHandlers, event);
+  }
+
+  /**
+   * Registers a layer raster function changed event handler.
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback registered, for chaining or unregistration purposes
+   */
+  onLayerRasterFunctionChanged(callback: DomainLayerRasterFunctionChangedDelegate): DomainLayerRasterFunctionChangedDelegate {
+    // Register the event handler
+    return EventHelper.onEvent(this.#onLayerRasterFunctionChangedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a layer raster function changed event handler.
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerRasterFunctionChanged(callback: DomainLayerRasterFunctionChangedDelegate | undefined): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerRasterFunctionChangedHandlers, callback);
+  }
+
+  /**
+   * Emits layer mosaic rule changed event.
+   *
+   * @param event - The event to emit
+   */
+  #emitLayerMosaicRuleChanged(event: DomainLayerMosaicRuleChangedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerMosaicRuleChangedHandlers, event);
+  }
+
+  /**
+   * Registers a layer mosaic rule changed event handler.
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback registered, for chaining or unregistration purposes
+   */
+  onLayerMosaicRuleChanged(callback: DomainLayerMosaicRuleChangedDelegate): DomainLayerMosaicRuleChangedDelegate {
+    // Register the event handler
+    return EventHelper.onEvent(this.#onLayerMosaicRuleChangedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a layer mosaic rule changed event handler.
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerMosaicRuleChanged(callback: DomainLayerMosaicRuleChangedDelegate | undefined): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerMosaicRuleChangedHandlers, callback);
+  }
+
+  /**
+   * Emits layer WMS style changed event.
+   *
+   * @param event - The event to emit
+   */
+  #emitLayerWmsStyleChanged(event: DomainLayerWMSStyleChangedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerWMSStyleChangedHandlers, event);
+  }
+
+  /**
+   * Registers a layer WMS style changed event handler.
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback registered, for chaining or unregistration purposes
+   */
+  onLayerWmsStyleChanged(callback: DomainLayerWMSStyleChangedDelegate): DomainLayerWMSStyleChangedDelegate {
+    // Register the event handler
+    return EventHelper.onEvent(this.#onLayerWMSStyleChangedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a layer WMS style changed event handler.
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerWmsStyleChanged(callback: DomainLayerWMSStyleChangedDelegate | undefined): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerWMSStyleChangedHandlers, callback);
+  }
+
+  /**
    * Emits layer group layer added event.
    *
    * @param event - The event to emit
@@ -1525,8 +1709,9 @@ export class LayerDomain {
   // #endregion EVENTS - GV LAYERS
 }
 
+/** Define a base event for layer entry events. */
 export interface DomainLayerEntryBaseEvent<T extends ConfigBaseClass = ConfigBaseClass> {
-  // The layer entry config
+  /** The layer entry configuration. */
   config: T;
 }
 
@@ -1534,7 +1719,7 @@ export interface DomainLayerEntryBaseEvent<T extends ConfigBaseClass = ConfigBas
  * Define an event for the delegate
  */
 export interface DomainLayerStatusChangedEvent extends DomainLayerEntryBaseEvent {
-  // The new layer status
+  /** The new layer status. */
   status: TypeLayerStatus;
 }
 
@@ -1547,6 +1732,7 @@ export type DomainLayerStatusChangedDelegate = EventDelegateBase<LayerDomain, Do
  * Define an event for the delegate
  */
 export interface DomainLayerRegisteredEvent {
+  /** The registered layer. */
   layer: AbstractBaseGVLayer;
 }
 
@@ -1559,10 +1745,10 @@ export type DomainLayerRegisteredDelegate = EventDelegateBase<LayerDomain, Domai
  * Define an event for the delegate
  */
 export interface DomainLayerBaseEvent<T extends AbstractBaseGVLayer = AbstractBaseGVLayer, U extends LayerBaseEvent = LayerBaseEvent> {
-  // The layer included in the event payload
+  /** The layer included in the event payload. */
   layer: T;
 
-  // The layer event itself being redirected
+  /** The layer event itself being redirected. */
   layerEvent: U;
 }
 
@@ -1642,6 +1828,36 @@ export interface DomainLayerWMSImageLoadRescueEvent extends DomainLayerBaseEvent
  * Define a delegate for the event handler function signature
  */
 export type DomainLayerWMSImageLoadRescueDelegate = EventDelegateBase<LayerDomain, DomainLayerWMSImageLoadRescueEvent, boolean>;
+
+/**
+ * Define an event for the delegate
+ */
+export interface DomainLayerWMSStyleChangedEvent extends DomainLayerBaseEvent<GVWMS, WMSStyleChangedEvent> {}
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+export type DomainLayerWMSStyleChangedDelegate = EventDelegateBase<LayerDomain, DomainLayerWMSStyleChangedEvent, void>;
+
+/**
+ * Define an event for the delegate
+ */
+export interface DomainLayerRasterFunctionChangedEvent extends DomainLayerBaseEvent<AbstractGVLayer, RasterFunctionChangedEvent> {}
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+export type DomainLayerRasterFunctionChangedDelegate = EventDelegateBase<LayerDomain, DomainLayerRasterFunctionChangedEvent, void>;
+
+/**
+ * Define an event for the delegate
+ */
+export interface DomainLayerMosaicRuleChangedEvent extends DomainLayerBaseEvent<GVEsriImage, MosaicRuleChangedEvent> {}
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+export type DomainLayerMosaicRuleChangedDelegate = EventDelegateBase<LayerDomain, DomainLayerMosaicRuleChangedEvent, void>;
 
 /**
  * Define an event for the delegate

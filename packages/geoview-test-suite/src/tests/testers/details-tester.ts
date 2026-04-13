@@ -6,7 +6,6 @@ import { delay } from 'geoview-core/core/utils/utilities';
 import type { TypeFeatureInfoEntry } from 'geoview-core/api/types/map-schema-types';
 import { logger } from 'geoview-core/core/utils/logger';
 import { getStoreUIActiveFooterBarTab } from 'geoview-core/core/stores/store-interface-and-intial-values/ui-state';
-import { setStoreDetailsSelectedLayerPath } from 'geoview-core/core/stores/store-interface-and-intial-values/feature-info-state';
 import { getStoreLayerItemVisibility } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
 import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
 
@@ -43,7 +42,7 @@ export class DetailsTester extends GVAbstractTester {
         const resultsOntarioResults = await this.helperStepQueryLayerAtCoordinate(test, layer, lonlat1);
 
         // Check that the details panel was selected for the layer
-        await DetailsTester.helperStepCheckDetailsPanel(test, this.getMapId(), layerPath);
+        await this.helperStepCheckDetailsPanel(test, layerPath);
 
         // Make the layer invisible
         layer.setVisible(false);
@@ -211,7 +210,6 @@ export class DetailsTester extends GVAbstractTester {
    *
    * @template T - The type parameter for the test instance
    * @param test - The test instance used to log each step of the details setup process
-   * @param mapViewer - The map viewer containing the layer and UI context
    * @param layerPath - The unique path or ID of the layer to interact with
    * @param lonlat - The longitude/latitude coordinate at which to query the layer
    * @returns A promise that resolves to the layer after setup is complete
@@ -238,11 +236,10 @@ export class DetailsTester extends GVAbstractTester {
    *
    * @template T - The type parameter for the test instance
    * @param test - The test instance used to log each step
-   * @param mapId - The ID of the map containing the layer and UI context
    * @param layerPath - The unique path or ID of the layer to check
    * @returns A promise that resolves when the check is complete
    */
-  static async helperStepCheckDetailsPanel<T>(test: Test<T>, mapId: string, layerPath: string): Promise<void> {
+  async helperStepCheckDetailsPanel<T>(test: Test<T>, layerPath: string): Promise<void> {
     // Update the step
     test.addStep(`Waiting on UI to refresh...`);
 
@@ -253,6 +250,6 @@ export class DetailsTester extends GVAbstractTester {
     test.addStep(`Selecting the details for the added layer...`);
 
     // Select the right layer path
-    setStoreDetailsSelectedLayerPath(mapId, layerPath);
+    this.getControllersRegistry().detailsController.setSelectedLayerPath(layerPath);
   }
 }
