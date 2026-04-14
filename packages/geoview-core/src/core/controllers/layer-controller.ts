@@ -757,6 +757,7 @@ export class LayerController extends AbstractMapViewerController {
 
   /**
    * Sets or toggles the visibility of a specific layer within a map.
+   *
    * If the layer exists at the provided layer path for the given map, the method delegates
    * the visibility change to the map viewer's layer API. If `newValue` is provided, the layer
    * visibility is explicitly set to that value; otherwise, the visibility is toggled.

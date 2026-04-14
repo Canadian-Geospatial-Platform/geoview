@@ -254,6 +254,8 @@ export function useLayerController(): LayerController {
 ```
 
 ```typescript
+import { useLayerController, useUIController } from '@/core/controllers/use-controllers';
+
 // In a React component — prefer individual hooks
 const layerController = useLayerController();
 const uiController = useUIController();
