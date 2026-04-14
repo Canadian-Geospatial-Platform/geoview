@@ -406,14 +406,14 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
       );
     };
 
-    const header = tabsContainerRef.current.querySelector('#footerbar-header');
+    const header = tabsContainerRef.current.querySelector(`#${mapId}-footerbar-header`);
     header?.addEventListener('click', handleClick);
 
     // Cleanup function to remove event listener
     return () => {
       header?.removeEventListener('click', handleClick);
     };
-  }, []);
+  }, [mapId]);
 
   return memoFooterBarTabs.length > 0 ? (
     <Box
@@ -423,6 +423,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
       id={`${mapId}-tabsContainer`}
     >
       <Tabs
+        mapId={mapId}
         shellContainer={shellContainer}
         activeTrap={activeTrapGeoView}
         isCollapsed={!activeFooterBarTab.isOpen}
