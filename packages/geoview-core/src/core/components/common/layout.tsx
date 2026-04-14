@@ -1,14 +1,16 @@
 import type { ReactNode, Ref } from 'react';
-import { forwardRef, useCallback, useImperativeHandle, useRef } from 'react';
+import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef } from 'react';
+
 import { useTheme } from '@mui/material/styles';
-import { logger } from '@/core/utils/logger';
+
+import { Typography } from '@/ui';
 import type { LayerListEntry } from './layer-list';
 import { LayerList } from './layer-list';
 import type { ResponsiveGridLayoutExposedMethods } from './responsive-grid-layout';
 import { ResponsiveGridLayout } from './responsive-grid-layout';
-import { Typography } from '@/ui';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
+import { logger } from '@/core/utils/logger';
 import { useStoreLayerName } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 /** Properties for the Layout component. */
@@ -36,11 +38,12 @@ const TITLE_STYLES = {
 
 /** Methods exposed by the Layout component via ref. */
 interface LayoutExposedMethods {
+  /** Shows or hides the right panel. */
   showRightPanel: (visible: boolean) => void;
 }
 
 /**
- * Two-panel layout with a layer list on the left and content on the right.
+ * Creates a two-panel layout with a layer list on the left and content on the right.
  *
  * @param props - Layout properties
  * @param ref - Ref exposing showRightPanel method
@@ -73,8 +76,10 @@ const Layout = forwardRef(
     const theme = useTheme();
     const layerName = useStoreLayerName(selectedLayerPath!);
 
+    // #region Handlers
+
     /**
-     * Handles clicks to layers in left panel and shows the right panel.
+     * Selects a layer from the left panel and shows the right panel.
      *
      * @param layer - The selected layer entry
      */
@@ -91,27 +96,32 @@ const Layout = forwardRef(
       [onLayerListClicked]
     );
 
+    // #endregion Handlers
+
     /**
-     * Renders the layer list in the left panel.
-     *
-     * @returns The layer list element
+     * Memoized layer list component for the left panel.
      */
-    const renderLayerList = useCallback((): JSX.Element => {
-      return (
-        <LayerList
-          selectedLayerPath={selectedLayerPath}
-          onListItemClick={handleLayerChange}
-          layerList={layerList}
-        />
-      );
+    const memoLayerList = useMemo((): JSX.Element => {
+      logger.logTraceUseMemo('LAYOUT - memoLayerList', selectedLayerPath, handleLayerChange, layerList);
+
+      return <LayerList selectedLayerPath={selectedLayerPath} onListItemClick={handleLayerChange} layerList={layerList} />;
     }, [selectedLayerPath, handleLayerChange, layerList]);
 
     /**
-     * Renders the layer title in the right panel header.
-     *
-     * @returns The layer title element
+     * Memoized layer title component for the right panel header.
      */
-    const renderLayerTitle = useCallback((): JSX.Element => {
+    const memoLayerTitle = useMemo((): JSX.Element | null => {
+      logger.logTraceUseMemo(
+        'LAYOUT - memoLayerTitle',
+        containerType,
+        layerName,
+        theme.breakpoints,
+        theme.palette.geoViewFontSize.lg,
+        toggleMode
+      );
+
+      if (!layerName) return null; // Don't render when no layer selected
+
       // clamping code copied from https://tailwindcss.com/docs/line-clamp
       const sxClasses = {
         ...TITLE_STYLES,
@@ -138,8 +148,8 @@ const Layout = forwardRef(
       <ResponsiveGridLayout
         ref={responsiveLayoutRef}
         leftTop={layoutSwitch}
-        leftMain={renderLayerList()}
-        rightTop={renderLayerTitle()}
+        leftMain={memoLayerList}
+        rightTop={memoLayerTitle}
         rightMain={children}
         guideContentIds={guideContentIds}
         onIsEnlargeClicked={onIsEnlargeClicked}
