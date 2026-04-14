@@ -46,13 +46,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     '&:not(:last-child)': {
       borderBottom: `1px solid ${theme.palette.geoViewColor.bgColor.dark[300]}`,
     },
-
-    '& .MuiIconButton-root': {
-      color: theme.palette.geoViewColor.textColor.lighten(0.2, 0.4),
-      '&:hover': {
-        color: theme.palette.geoViewColor.textColor.lighten(0.2, 0.6),
-      },
-    },
   },
   notificationsItemMsg: {
     display: 'flex',

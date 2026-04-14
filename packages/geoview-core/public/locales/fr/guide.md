@@ -69,7 +69,7 @@ _N.B. : La carte doit être focalisée pour que les combinaisons de touches fonc
 
 Selon la configuration de la visionneuse, la carte peut fournir une carte d'aperçu, une représentation générique de la carte principale à une taille réduite. Elle est située dans le coin supérieur droit de la carte.
 
-<img src="{{assetsURL}}/img/guide/navigation/overview.png" alt="Carte d'aperçu affichée dans le coin supérieur droit de la carte principale" style="max-width: 500px;"/>
+<img src="{{assetsURL}}/img/guide/navigation/overview.png" alt="Carte d'aperçu affichée dans le coin supérieur droit de la carte principale"/>
 
 Cliquez sur l'encadré dans la carte d'aperçu et déplacez-le pour modifier la vue sur la carte principale. Cliquez sur l'icône de basculement dans le coin supérieur droit pour afficher ou masquer la carte d'aperçu.
 

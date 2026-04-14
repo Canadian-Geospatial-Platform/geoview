@@ -177,7 +177,14 @@ const useSubtitle = (layerPath: string, childPaths: string[], items: TypeLegendI
   }, [childPaths.length, items, parentHidden, t]);
 };
 
-// SecondaryControls component (no memo to force re render from layers panel modifications)
+/**
+ * Creates the secondary control buttons for a legend layer.
+ *
+ * Not memoized to force re-render from layers panel modifications.
+ *
+ * @param props - Properties defined in SecondaryControlsProps interface
+ * @returns The secondary controls element
+ */
 export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.Element {
   // Add store actions for selecting layer and UI
   const footerBarComponents = useStoreUIFooterBarComponents();
@@ -241,7 +248,7 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
   return (
     <Stack direction="row" alignItems="center" sx={sxClasses.layerStackIcons}>
       {!!subTitle.length && <Typography fontSize={14}>{subTitle}</Typography>}
-      <Box sx={{ ...sxClasses.subtitle, display: 'flex', alignItems: 'center' }}>
+      <Box role="group" aria-label={t('layers.layerControls')!} sx={{ ...sxClasses.subtitle, display: 'flex', alignItems: 'center' }}>
         {/* Button to select layer in panel and scroll to footer
             Hidden in WCAG mode - keyboard users can Tab to layer panel instead
           */}
@@ -249,9 +256,9 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
           <Box sx={sxClasses.buttonDivider}>
             <IconButton
               tooltip={t('legend.selectLayerAndScroll')}
-              aria-label={`${t('legend.selectLayerAndScroll')} - ${layerName}`}
               className="buttonOutline"
               onClick={handleNavigateToLayers}
+              aria-label={`${t('legend.selectLayerAndScroll')} - ${layerName}`} // WCAG - Provide descriptive aria-label for screen readers
             >
               <LayersIcon />
             </IconButton>
@@ -261,10 +268,10 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
           <IconButton
             edge="end"
             tooltip={t('layers.zoomVisibleScale')}
-            aria-label={`${t('layers.zoomVisibleScale')} - ${layerName}`} // WCAG - // WCAG - Provide descriptive aria-label for screen readers
-            aria-disabled={!isZoomToVisibleScaleCapable}
             className={`buttonOutline`}
             onClick={controls.handleZoomToLayerVisibleScale}
+            aria-label={`${t('layers.zoomVisibleScale')} - ${layerName}`} // WCAG - Provide descriptive aria-label for screen readers
+            aria-disabled={!isZoomToVisibleScaleCapable} // WCAG - used instead of disabled to allow button to retain focus after keyboard press
           >
             <CenterFocusScaleIcon />
           </IconButton>
@@ -273,11 +280,11 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
           <IconButton
             edge={isInVisibleRange ? false : 'end'}
             tooltip={t('layers.toggleVisibility')}
-            aria-label={`${t('layers.toggleVisibility')} - ${layerName}`} // WCAG - Provide descriptive aria-label for screen readers
-            aria-pressed={isVisible} // WCAG - used instead of disabled to allow button to retain focus after keyboard press
-            aria-disabled={!isInVisibleRange || parentHidden || layerStatus === 'error'}
             className="buttonOutline"
             onClick={controls.handleToggleVisibility}
+            aria-label={`${t('layers.toggleVisibility')} - ${layerName}`} // WCAG - Provide descriptive aria-label for screen readers
+            aria-pressed={isVisible}
+            aria-disabled={!isInVisibleRange || parentHidden || layerStatus === 'error'} // WCAG - used instead of disabled to allow button to be discoverable by screen readers
           >
             {isVisible ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon />}
           </IconButton>
@@ -285,11 +292,11 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
         {isLayerHighlightCapable && (
           <IconButton
             tooltip={t('legend.highlightLayer')}
-            aria-label={`${t('legend.highlightLayer')} - ${layerName}`} // WCAG - Provide descriptive aria-label for icon button tooltips
-            aria-pressed={highlightedLayer === layerPath}
-            aria-disabled={!isInVisibleRange || parentHidden || !isVisible || layerStatus === 'error'}
             className="buttonOutline"
             onClick={controls.handleHighlightLayer}
+            aria-label={`${t('legend.highlightLayer')} - ${layerName}`} // WCAG - Provide descriptive aria-label for icon button tooltips
+            aria-pressed={highlightedLayer === layerPath}
+            aria-disabled={!isInVisibleRange || parentHidden || !isVisible || layerStatus === 'error'} // WCAG - used instead of disabled to allow button to be discoverable by screen readers
           >
             {highlightedLayer === layerPath ? <HighlightIcon /> : <HighlightOutlinedIcon />}
           </IconButton>
@@ -297,10 +304,10 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
         {isLayerZoomToExtentCapable && (
           <IconButton
             tooltip={t('legend.zoomTo')}
-            aria-label={`${t('legend.zoomTo')} - ${layerName}`} // WCAG - Provide descriptive aria-label for icon button tooltips
-            aria-disabled={isZoomToLayerDisabled} // WCAG - used instead of disabled to allow button to retain focus after keyboard press
             className="buttonOutline"
             onClick={controls.handleZoomTo}
+            aria-label={`${t('legend.zoomTo')} - ${layerName}`} // WCAG - Provide descriptive aria-label for icon button tooltips
+            aria-disabled={isZoomToLayerDisabled} // WCAG - used instead of disabled to allow button to be discoverable by screen readers
           >
             <ZoomInSearchIcon />
           </IconButton>

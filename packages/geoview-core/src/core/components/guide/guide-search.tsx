@@ -1,17 +1,26 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useTheme } from '@mui/material/styles';
+
 import { renderToStaticMarkup } from 'react-dom/server';
+
+import { useTranslation } from 'react-i18next';
+
+import { useTheme } from '@mui/material/styles';
+
 import Markdown from 'markdown-to-jsx';
+
 import { Box, TextField, InputAdornment, IconButton } from '@/ui';
 import { SearchIcon, CloseIcon, KeyboardArrowUpIcon, KeyboardArrowDownIcon } from '@/ui/icons';
+import type { TypeContainerBox } from '@/core/types/global-types';
 import type { TypeGuideObject } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
+import { TIMEOUT, TABS } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
 import { getSxClasses } from './guide-style';
-import { TIMEOUT } from '@/core/utils/constant';
 
 /** Props for the GuideSearch component. */
 interface GuideSearchProps {
+  /** The container type (footerBar, appBar, etc.). */
+  containerType: TypeContainerBox;
   /** The guide content object. */
   guide: TypeGuideObject | undefined;
   /** Callback to change the active guide section. */
@@ -29,10 +38,14 @@ interface SearchMatch {
 /**
  * Creates the guide search component.
  *
+ * @param props - Properties defined in GuideSearchProps interface
  * @returns The guide search input and navigation controls
  */
-export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: GuideSearchProps): JSX.Element {
-  logger.logTraceRender('components/guide/guide');
+export function GuideSearch({ containerType, guide, onSectionChange, onSearchStateChange }: GuideSearchProps): JSX.Element {
+  logger.logTraceRender('components/guide/guide-search');
+
+  // Store
+  const mapId = useStoreGeoViewMapId();
 
   // Hooks
   const { t } = useTranslation();
@@ -43,7 +56,14 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [currentMatchIndex, setCurrentMatchIndex] = useState<number>(0);
   const [allMatches, setAllMatches] = useState<SearchMatch[]>([]);
+  const [srAnnouncement, setSrAnnouncement] = useState<string>('');
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  /** Unique ID for the search instructions element. */
+  const searchInstructionsId = `${mapId}-${containerType}-${TABS.GUIDE}-search-instructions`;
+
+  /** Determines if navigation buttons should be disabled (when no matches or when showing the only available match).*/
+  const isNavigationDisabled = allMatches.length === 0 || (allMatches.length === 1 && currentMatchIndex === 0);
 
   // #region Helper functions
   /**
@@ -359,26 +379,6 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
   );
 
   /**
-   * Updates search matches when search term changes
-   */
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('GUIDE-SEARCH - search term changes');
-
-    findAllMatches(searchTerm);
-  }, [searchTerm, findAllMatches]);
-
-  /**
-   * Notifies parent component of search state changes
-   */
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('GUIDE-SEARCH - notify parent of search state changes');
-
-    onSearchStateChange(searchTerm, highlightSearchTerm);
-  }, [searchTerm, highlightSearchTerm, onSearchStateChange]);
-
-  /**
    * Navigates to a specific search match.
    *
    * @param index - The match index to navigate to
@@ -390,6 +390,13 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
       const match = allMatches[index];
       setCurrentMatchIndex(index);
       onSectionChange(match.sectionIndex);
+
+      setSrAnnouncement(
+        t('guide.searchNavigationAnnouncement', {
+          current: index + 1,
+          total: allMatches.length,
+        })!
+      );
 
       setTimeout(() => {
         // Ensure the section is expanded/visible
@@ -416,24 +423,65 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
         }, TIMEOUT.guideSearchVisibility);
       }, TIMEOUT.guideSearchSectionExpand);
     },
-    [allMatches, onSectionChange]
+    [allMatches, onSectionChange, t]
   );
+
+  /**
+   * Updates search matches when search term changes
+   */
+  useEffect(() => {
+    logger.logTraceUseEffect('GUIDE-SEARCH - search term changes', searchTerm);
+    findAllMatches(searchTerm);
+  }, [searchTerm, findAllMatches]);
+
+  /**
+   * Announces search results for screen readers.
+   */
+  useEffect(() => {
+    logger.logTraceUseEffect('GUIDE-SEARCH - announce search results', searchTerm, allMatches.length);
+
+    if (searchTerm.trim().length >= 3) {
+      if (allMatches.length === 0) {
+        setSrAnnouncement(t('guide.noResults')!);
+      } else if (allMatches.length === 1) {
+        setSrAnnouncement(t('guide.oneResult')!);
+      } else {
+        setSrAnnouncement(t('guide.multipleResults', { count: allMatches.length })!);
+      }
+    } else {
+      setSrAnnouncement('');
+    }
+  }, [allMatches.length, searchTerm, t]);
+
+  /**
+   * Notifies parent component of search state changes
+   */
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('GUIDE-SEARCH - notify parent of search state changes');
+
+    onSearchStateChange(searchTerm, highlightSearchTerm);
+  }, [searchTerm, highlightSearchTerm, onSearchStateChange]);
+
+  // #region Handlers
 
   /**
    * Navigates to the next search match.
    */
   const handleNext = useCallback((): void => {
+    if (isNavigationDisabled) return;
     const nextIndex = (currentMatchIndex + 1) % allMatches.length;
     navigateToMatch(nextIndex);
-  }, [currentMatchIndex, allMatches.length, navigateToMatch]);
+  }, [isNavigationDisabled, currentMatchIndex, allMatches.length, navigateToMatch]);
 
   /**
    * Navigates to the previous search match.
    */
   const handlePrevious = useCallback((): void => {
-    const prevIndex = currentMatchIndex === 0 ? allMatches.length - 1 : currentMatchIndex - 1;
+    if (isNavigationDisabled) return;
+    const prevIndex = currentMatchIndex === -1 || currentMatchIndex === 0 ? allMatches.length - 1 : currentMatchIndex - 1;
     navigateToMatch(prevIndex);
-  }, [currentMatchIndex, allMatches.length, navigateToMatch]);
+  }, [isNavigationDisabled, currentMatchIndex, allMatches.length, navigateToMatch]);
 
   /**
    * Clears the search term and resets search state.
@@ -443,6 +491,29 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
     setCurrentMatchIndex(0);
     setAllMatches([]);
     setTimeout(() => searchInputRef.current?.focus(), TIMEOUT.deferExecution);
+  }, []);
+
+  /**
+   * Handles keyboard events on the clear button.
+   */
+  const handleClearKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLButtonElement>): void => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        event.stopPropagation();
+        handleClear();
+      }
+    },
+    [handleClear]
+  );
+
+  /**
+   * Handles keyboard events on navigation buttons to prevent event propagation.
+   */
+  const handleNavigationKeyDown = useCallback((event: React.KeyboardEvent<HTMLButtonElement>): void => {
+    if (event.key === 'Enter' || event.key === ' ' || event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+      event.stopPropagation();
+    }
   }, []);
 
   /**
@@ -465,21 +536,41 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
     [allMatches.length, handleNext, handlePrevious]
   );
 
-  // TODO: WCAG Issue #3114 #3115 Contrast issues with search icons/text
+  /**
+   * Handles form submission to prevent page reload.
+   */
+  const handleFormSubmit = useCallback((event: React.FormEvent<HTMLFormElement>): void => {
+    event.preventDefault();
+  }, []);
+
+  /**
+   * Handles search term input changes.
+   */
+  const handleSearchTermChange = useCallback((event: React.ChangeEvent<HTMLInputElement>): void => {
+    setSearchTerm(event.target.value);
+  }, []);
+
+  // #endregion Handlers
+
   return (
     <Box sx={sxClasses.guideSearch}>
-      <form role="search" aria-label={t('guide.searchFormLabel')!}>
+      {/* WCAG - Live region announces search results and navigation state to screen readers */}
+      <Box role="status" aria-live="polite" aria-atomic="true" sx={sxClasses.visuallyHidden}>
+        {srAnnouncement}
+      </Box>
+      <form onSubmit={handleFormSubmit} role="search" aria-label={t('guide.searchFormLabel')!}>
         <TextField
           inputRef={searchInputRef}
           fullWidth
           size="small"
           placeholder={t('guide.search')!}
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={handleSearchTermChange}
           onKeyDown={handleKeyDown}
           slotProps={{
             htmlInput: {
               'aria-label': t('guide.searchInputLabel')!,
+              'aria-describedby': searchInstructionsId,
             },
             input: {
               startAdornment: (
@@ -489,31 +580,50 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
               ),
               endAdornment: searchTerm && (
                 <InputAdornment position="end">
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                     {allMatches.length > 0 && (
                       <>
-                        <Box sx={{ fontSize: '0.75rem', color: 'text.secondary', whiteSpace: 'nowrap' }}>
+                        <Box
+                          role="status"
+                          sx={{ fontSize: '0.75rem', color: theme.palette.geoViewColor.textColor.light[200], whiteSpace: 'nowrap' }}
+                          aria-label={
+                            t('guide.searchMatchCountLabel', {
+                              current: currentMatchIndex + 1,
+                              total: allMatches.length,
+                            })!
+                          }
+                        >
                           {currentMatchIndex + 1} of {allMatches.length}
                         </Box>
                         <IconButton
                           size="small"
-                          aria-label={t('guide.arrowUp')}
+                          aria-label={t('guide.previousMatch')}
                           className="buttonOutline"
                           onClick={handlePrevious}
-                          disabled={allMatches.length === 0}
+                          aria-disabled={isNavigationDisabled}
+                          onKeyDown={handleNavigationKeyDown}
                         >
                           <KeyboardArrowUpIcon sx={{ fontSize: theme.palette.geoViewFontSize.sm }} />
                         </IconButton>
                         <IconButton
                           size="small"
-                          aria-label={t('guide.arrowDown')}
+                          aria-label={t('guide.nextMatch')}
                           className="buttonOutline"
                           onClick={handleNext}
-                          disabled={allMatches.length === 0}
+                          aria-disabled={isNavigationDisabled}
+                          onKeyDown={handleNavigationKeyDown}
                         >
                           <KeyboardArrowDownIcon sx={{ fontSize: theme.palette.geoViewFontSize.sm }} />
                         </IconButton>
                       </>
+                    )}
+                    {searchTerm.trim().length >= 3 && allMatches.length === 0 && (
+                      <Box
+                        sx={{ fontSize: '0.75rem', color: theme.palette.geoViewColor.textColor.light[200], whiteSpace: 'nowrap', mr: 1 }}
+                        role="status"
+                      >
+                        {t('guide.noResults')}
+                      </Box>
                     )}
                     <IconButton
                       size="small"
@@ -522,13 +632,7 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
                       className="buttonOutline"
                       aria-label={t('general.clearSearch')}
                       onClick={handleClear}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handleClear();
-                        }
-                      }}
+                      onKeyDown={handleClearKeyDown}
                       sx={{ ml: 1 }}
                     >
                       <CloseIcon sx={{ fontSize: theme.palette.geoViewFontSize.sm }} />
@@ -540,6 +644,9 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
           }}
         />
       </form>
+      <Box id={searchInstructionsId} sx={sxClasses.visuallyHidden}>
+        {t('guide.searchInstructions')!}
+      </Box>
     </Box>
   );
 }

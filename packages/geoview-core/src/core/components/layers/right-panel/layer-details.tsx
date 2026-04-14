@@ -76,10 +76,6 @@ import { DeleteUndoButton } from '@/core/components/layers/delete-undo-button';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { useLayerController, useLayerSetController } from '@/core/controllers/use-controllers';
 
-// TODO: WCAG Issue #3108 - Fix layers.moreInfo button (button nested within a button)
-// TODO: WCAG Issue #3108 - Check all disabled buttons. They may need special treatment. Need to find instance in UI first)
-// TODO: WCAG Issue #3108 - Check all icon buttons for "state related" aria values (i.e aria-checked, aria-disabled, etc.)
-
 interface LayerDetailsProps {
   layerPath: string;
   containerType: TypeContainerBox;
@@ -150,6 +146,13 @@ const Sublayer = memo(function Sublayer({ layerPath }: SubLayerProps): JSX.Eleme
 
 Sublayer.displayName = 'Sublayer';
 
+/**
+ * Creates the layer details panel with settings, info, and visibility controls.
+ *
+ * @param props - Properties defined in LayerDetailsProps interface
+ * @returns The layer details panel element, or null if layer not found
+ */
+
 export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
   // Log
   logger.logTraceRender('components/layers/right-panel/layer-details');
@@ -204,11 +207,16 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
   // Is highlight button disabled?
   const isLayerHighlightCapable = layerControls?.highlight;
 
-  // Is zoom to extent button disabled?
+  // Is zoom to extent button capable?
   const isLayerZoomToExtentCapable = layerControls?.zoom;
+  // Is zoom button disabled?
+  const isZoomDisabled = layerHidden || bounds === undefined || Number.isNaN(bounds[0]);
+
+  // Is table button disabled?
+  const isTableButtonDisabled = layerControls?.table === false || layerHidden || parentHidden;
 
   // Generate unique table details button ID
-  const tableDetailsButtonId = `table-details-${containerType}-${mapId}`;
+  const tableDetailsButtonId = `${mapId}-${containerType}-table-details`;
 
   // Reset view to details when layer changes
   useEffect(() => {
@@ -225,6 +233,10 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
   };
 
   const handleZoomTo = (): void => {
+    // Early return if zoom button is disabled
+    if (isZoomDisabled) {
+      return;
+    }
     layerController.zoomToLayerExtent(layerPath).catch((error: unknown) => {
       // Log
       logger.logPromiseFailed('in zoomToLayerExtent in layer-details.handleZoomTo', error);
@@ -232,6 +244,10 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
   };
 
   const handleOpenTable = (): void => {
+    // Early return if table button is disabled
+    if (isTableButtonDisabled) {
+      return;
+    }
     // trigger the fetching of the features when not available OR when layer status is in error
     if (
       !layersData.filter((layers) => layers.layerPath === layerPath && !!layers?.features?.length).length ||
@@ -246,6 +262,10 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
   };
 
   const handleHighlightLayer = (): void => {
+    // Early return if highlight button is disabled
+    if (layerHidden) {
+      return;
+    }
     layerController.setHighlightLayer(layerPath);
   };
 
@@ -408,17 +428,15 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
   };
 
   const renderDetailsButton = (): JSX.Element => {
-    const isDisabled = layerControls?.table === false || layerHidden || parentHidden;
-
     return (
       <IconButton
         id={tableDetailsButtonId}
-        aria-label={isDisabled ? t('layers.tableViewNone') : t('legend.tableDetails')}
         className="buttonOutline"
         onClick={handleOpenTable}
-        disabled={isDisabled}
+        aria-label={isTableButtonDisabled ? t('layers.tableViewNone') : t('legend.tableDetails')}
+        aria-disabled={isTableButtonDisabled} // WCAG - used instead of disabled to allow button to be discoverable by screen readers
       >
-        <TableViewIcon color={isDisabled ? 'disabled' : 'inherit'} />
+        <TableViewIcon color={isTableButtonDisabled ? 'disabled' : 'inherit'} />
       </IconButton>
     );
   };
@@ -434,13 +452,17 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
     if (isLayerInTimeSlider && !isFocusTrap) {
       return (
         <IconButton
-          aria-label={t('layers.selectLayerAndScrollTimeSlider')}
           className="buttonOutline"
           onClick={(event) => {
+            // Early return if button is disabled
+            if (isDisabled) {
+              return;
+            }
             event.stopPropagation();
             navigateToTimeSlider({ layerPath });
           }}
-          disabled={isDisabled}
+          aria-label={t('layers.selectLayerAndScrollTimeSlider')}
+          aria-disabled={isDisabled} // WCAG - used instead of disabled to allow button to be discoverable by screen readers
         >
           <TimeSliderIcon color={isDisabled ? 'disabled' : 'inherit'} />
         </IconButton>
@@ -453,11 +475,11 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
     if (isLayerHighlightCapable)
       return (
         <IconButton
-          aria-label={t('legend.highlightLayer')}
-          aria-pressed={highlightedLayer === layerPath}
           onClick={handleHighlightLayer}
           className="buttonOutline"
-          disabled={layerHidden}
+          aria-label={t('legend.highlightLayer')}
+          aria-disabled={layerHidden} // WCAG - used instead of disabled to allow button to be discoverable by screen readers
+          aria-pressed={highlightedLayer === layerPath}
         >
           {highlightedLayer === layerPath ? <HighlightIcon /> : <HighlightOutlinedIcon />}
         </IconButton>
@@ -469,10 +491,10 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
     if (isLayerZoomToExtentCapable)
       return (
         <IconButton
-          aria-label={t('legend.zoomTo')}
           onClick={handleZoomTo}
           className="buttonOutline"
-          disabled={layerHidden || bounds === undefined || Number.isNaN(bounds[0])}
+          aria-disabled={isZoomDisabled} // WCAG - used instead of disabled to allow button to be discoverable by screen readers
+          aria-label={t('legend.zoomTo')}
         >
           <ZoomInSearchIcon />
         </IconButton>
@@ -503,10 +525,10 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
       return (
         <IconButton
           iconRef={settingsButtonRef}
-          aria-label={t('layers.settings.back')}
           className="buttonOutline"
           onClick={handleSettingsBackToDetails}
           tooltipPlacement="bottom"
+          aria-label={t('layers.settings.back')}
         >
           <ArrowBackIcon />
         </IconButton>
@@ -516,10 +538,10 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
     return (
       <IconButton
         iconRef={settingsButtonRef}
-        aria-label={t('layers.settings.title')}
         className="buttonOutline"
         onClick={handleOpenSettings}
         tooltipPlacement="bottom"
+        aria-label={t('layers.settings.title')}
       >
         <SettingsIcon />
       </IconButton>
@@ -531,10 +553,10 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
       return (
         <IconButton
           iconRef={infoButtonRef}
-          aria-label={t('layers.settings.back')}
           className="buttonOutline"
           onClick={handleInfoBackToDetails}
           tooltipPlacement="bottom"
+          aria-label={t('layers.settings.back')}
         >
           <ArrowBackIcon />
         </IconButton>
@@ -544,10 +566,10 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
     return (
       <IconButton
         iconRef={infoButtonRef}
-        aria-label={t('layers.moreInfo')}
         className="buttonOutline"
         onClick={handleOpenInfo}
         tooltipPlacement="bottom"
+        aria-label={t('layers.moreInfo')}
       >
         <InfoOutlinedIcon />
       </IconButton>
@@ -561,11 +583,15 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
     const showDivider = hasDataTable || timeSliderButton;
 
     return (
-      <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '15px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+      <Box
+        role="group"
+        sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '15px', flexWrap: 'wrap', justifyContent: 'flex-end' }}
+        aria-label={t('layers.layerControls')!}
+      >
         {hasDataTable && renderDetailsButton()}
         {timeSliderButton}
         {showDivider && <Box sx={sxClasses.verticalDivider} />}
-        <IconButton aria-label={t('legend.resetLayer')} className="buttonOutline" onClick={handleResetLayer}>
+        <IconButton className="buttonOutline" onClick={handleResetLayer} aria-label={t('legend.resetLayer')}>
           <RestartAltIcon />
         </IconButton>
         {renderHighlightButton()}
