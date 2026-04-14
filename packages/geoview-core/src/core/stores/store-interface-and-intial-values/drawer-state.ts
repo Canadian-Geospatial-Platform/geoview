@@ -939,11 +939,14 @@ export type StyleProps = {
   /** The stroke width in pixels. */
   strokeWidth: number;
 
+  /** Optional icon source URL for point drawings. */
+  iconSrc?: string;
+
   /** Optional icon size in pixels. */
   iconSize?: number;
 
   /** Optional text content for text drawings. */
-  text?: string;
+  text?: string | string[];
 
   /** Optional text size in pixels. */
   textSize?: number;
