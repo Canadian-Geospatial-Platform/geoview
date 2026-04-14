@@ -1495,12 +1495,20 @@ export abstract class GeoUtilities {
    * @param geom2 - The second geometry
    * @returns Whether the two geometries are equal or not
    */
-  static geometriesAreEqual(geom1: Geometry, geom2: Geometry): boolean {
+  static geometriesAreEqual(geom1: Geometry | undefined, geom2: Geometry | undefined): boolean {
+    if (!geom1 || !geom2) return false;
     if (geom1.getType() !== geom2.getType()) return false;
 
-    if (geom1 instanceof Point || geom1 instanceof LineString || geom1 instanceof Polygon) {
+    // For points
+    if (geom1 instanceof Point && geom2 instanceof Point) {
+      const origCoords = geom1.getCoordinates();
+      const currCoords = geom2.getCoordinates();
+      return origCoords[0] === currCoords[0] && origCoords[1] === currCoords[1];
+    }
+
+    if (geom1 instanceof LineString || geom1 instanceof Polygon) {
       const coords1 = geom1.getCoordinates();
-      const coords2 = (geom2 as Point | LineString | Polygon).getCoordinates();
+      const coords2 = (geom2 as LineString | Polygon).getCoordinates();
       return JSON.stringify(coords1) === JSON.stringify(coords2);
     }
 

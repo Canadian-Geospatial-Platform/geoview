@@ -112,6 +112,20 @@ export class Draw extends Interaction {
   }
 
   /**
+   * Removes the last point added to the current drawing, allowing the user to undo the last step while drawing.
+   */
+  undo(): boolean {
+    const sketch = this.#olDraw.getOverlay()?.getSource()?.getFeatures()[0];
+    // LineString and Polygons will change to 'Point' (the cursor point overlay) if no features in array
+    if (sketch.getGeometry()?.getType() === 'Point') {
+      return false; // No points to remove
+    }
+
+    this.#olDraw.removeLastPoint();
+    return true;
+  }
+
+  /**
    * Emits the drawstart event to all registered handlers.
    *
    * @param event - The event to emit
