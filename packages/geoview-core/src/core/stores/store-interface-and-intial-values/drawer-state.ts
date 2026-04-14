@@ -28,7 +28,7 @@ export interface IDrawerState {
   isSnapping: boolean;
 
   /** The currently selected drawing type. */
-  selectedDrawingType: string;
+  selectedDrawingType: string | undefined;
 
   /** Whether measurement overlays are hidden. */
   hideMeasurements: boolean;
@@ -65,7 +65,7 @@ export interface IDrawerState {
     setIsDrawing: (isDrawing: boolean) => void;
     setIsEditing: (isEditing: boolean) => void;
     setIsSnapping: (isSnapping: boolean) => void;
-    setSelectedDrawingType: (drawingType: string) => void;
+    setSelectedDrawingType: (drawingType: string | undefined) => void;
     setHideMeasurements: (hideMeasurements: boolean) => void;
     setIconSrc: (iconSrc: string) => void;
     setUndoDisabled: (undoDisabled: boolean) => void;
@@ -113,7 +113,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
     isDrawing: false,
     isEditing: false,
     isSnapping: false,
-    selectedDrawingType: 'Point',
+    selectedDrawingType: undefined,
     hideMeasurements: true,
     iconSrc: '',
     undoDisabled: true,
@@ -136,7 +136,6 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
           drawerState: {
             ...get().drawerState,
             activeGeom: initialGeomType,
-            selectedDrawingType: initialGeomType,
             geomTypes: drawerConfig.geomTypes || init.geomTypes,
             style: {
               ...init.style,
@@ -644,7 +643,7 @@ export const getStoreDrawerSelectedDrawingType = (mapId: string): string | undef
 };
 
 /** Hooks the geometry type of the currently selected drawing. */
-export const useStoreDrawerSelectedDrawingType = (): string => {
+export const useStoreDrawerSelectedDrawingType = (): string | undefined => {
   return useStore(useGeoViewStore(), (state) => state.drawerState.selectedDrawingType);
 };
 
@@ -872,7 +871,7 @@ export const setStoreIsSnapping = (mapId: string, isSnapping: boolean): void => 
  * @param mapId - The map identifier
  * @param drawingType - The drawing type to set as selected
  */
-export const setStoreSelectedDrawingType = (mapId: string, drawingType: string): void => {
+export const setStoreSelectedDrawingType = (mapId: string, drawingType: string | undefined): void => {
   getStoreDrawerState(mapId).actions.setSelectedDrawingType(drawingType);
 };
 
