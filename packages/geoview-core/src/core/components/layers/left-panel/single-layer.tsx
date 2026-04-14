@@ -73,6 +73,13 @@ interface SingleLayerProps {
   containerType: TypeContainerBox;
 }
 
+/**
+ * Creates a single layer list item with controls and nested children.
+ *
+ * @param props - Properties defined in SingleLayerProps interface
+ * @returns The single layer list item element
+ */
+
 export function SingleLayer({
   depth,
   layerPath,
@@ -125,6 +132,10 @@ export function SingleLayer({
   const orderUpButtonId = `${mapId}-${containerType}-${layerPath}-up-order-btn`;
   const orderDownButtonId = `${mapId}-${containerType}-${layerPath}-down-order-btn`;
 
+  // Is zoom to visible scale button visible?
+  const isZoomToVisibleScaleCapable = !inVisibleRange && layerEntryType !== 'group';
+  const isZoomToVisibleScaleButton = layerControls?.visibleScale ?? false;
+
   // State to track if delete button should show for loading layers
   const [showDeleteOnLoading, setShowDeleteOnLoading] = useState(false);
 
@@ -136,6 +147,8 @@ export function SingleLayer({
 
   // Timer to show delete button after a delay for loading/processing layers so user can remove them to enable collapse/show all
   useEffect(() => {
+    logger.logTraceUseEffect('SINGLE-LAYER - show delete button timer', layerStatus);
+
     if (layerStatus && ['newInstance', 'registered', 'processing', 'loading'].includes(layerStatus)) {
       const timer = setTimeout(() => {
         setShowDeleteOnLoading(true);
@@ -152,6 +165,8 @@ export function SingleLayer({
 
   // Scroll this list item into view if selected
   useEffect(() => {
+    logger.logTraceUseEffect('SINGLE-LAYER - scroll list item into view', layerIsSelected, layerId);
+
     if (layerIsSelected && layerId) {
       const listItem = document.getElementById(layerId);
       if (listItem) {
@@ -319,17 +334,27 @@ export function SingleLayer({
   );
 
   const handleToggleVisibility = useCallback((): void => {
+    // Early return if button is disabled
+    if (!inVisibleRange || parentHidden) {
+      return;
+    }
     // Select the layer if not already selected
     selectLayerIfNeeded();
 
     // Toggle visibility
     layerController.setOrToggleMapLayerVisibility(layerPath);
-  }, [layerPath, layerController, selectLayerIfNeeded]);
+  }, [layerPath, layerController, selectLayerIfNeeded, inVisibleRange, parentHidden]);
 
   const handleToggleVisibilityKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLButtonElement>): void => {
       // Only handle Enter and Space keys
       if (event.key === 'Enter' || event.key === ' ') {
+        // Prevent activation if disabled (but allow navigation keys like Tab)
+        if (!inVisibleRange || parentHidden) {
+          event.preventDefault();
+          return;
+        }
+
         // Select the layer if not already selected
         selectLayerIfNeeded(false);
 
@@ -340,20 +365,31 @@ export function SingleLayer({
         event.preventDefault();
       }
     },
-    [layerPath, layerController, selectLayerIfNeeded]
+    [layerPath, layerController, selectLayerIfNeeded, inVisibleRange, parentHidden]
   );
 
   const handleZoomToLayerVisibleScale = useCallback((): void => {
+    // Return early if button is disabled
+    if (!isZoomToVisibleScaleCapable) {
+      return;
+    }
+
     // Select the layer if not already selected
     selectLayerIfNeeded();
 
     // Zoom to visible scale
     layerController.zoomToLayerVisibleScale(layerPath);
-  }, [layerPath, layerController, selectLayerIfNeeded]);
+  }, [layerPath, layerController, selectLayerIfNeeded, isZoomToVisibleScaleCapable]);
 
   const handleZoomToLayerVisibleScaleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLButtonElement>): void => {
       if (event.key === 'Enter' || event.key === ' ') {
+        // Guard: prevent activation if disabled (but allow navigation keys like Tab)
+        if (!isZoomToVisibleScaleCapable) {
+          event.preventDefault();
+          return;
+        }
+
         // Select the layer if not already selected
         selectLayerIfNeeded(false);
 
@@ -362,14 +398,9 @@ export function SingleLayer({
 
         // Allow the zoom to visible scale action to work
         event.preventDefault();
-
-        // Restore focus to main layer button after zoom completes
-        requestAnimationFrame(() => {
-          document.getElementById(layerListItemButtonId)?.focus();
-        });
       }
     },
-    [layerPath, layerController, selectLayerIfNeeded, layerListItemButtonId]
+    [layerPath, layerController, selectLayerIfNeeded, isZoomToVisibleScaleCapable]
   );
 
   const handleReload = useCallback((): void => {
@@ -458,26 +489,26 @@ export function SingleLayer({
           <IconButton
             className="buttonOutline"
             id={orderUpButtonId}
-            aria-label={t('layers.moveLayerUp')}
-            aria-disabled={isFirst}
             edge="end"
             size="small"
             onKeyDown={handleArrowKeyDownWrapper}
             onClick={handleArrowClickWrapper}
             sx={isFirst ? sxClasses.orderButtonDisabled : sxClasses.orderButtonEnabled}
+            aria-label={t('layers.moveLayerUp')}
+            aria-disabled={isFirst} // WCAG - used instead of disabled to allow button retain focus and be discoverable by screen readers
           >
             <ArrowUpIcon />
           </IconButton>
           <IconButton
             className="buttonOutline"
             id={orderDownButtonId}
-            aria-label={t('layers.moveLayerDown')}
-            aria-disabled={isLast}
             edge="end"
             size="small"
             onKeyDown={handleArrowKeyDownWrapper}
             onClick={handleArrowClickWrapper}
             sx={isLast ? sxClasses.orderButtonDisabled : sxClasses.orderButtonEnabled}
+            aria-label={t('layers.moveLayerDown')}
+            aria-disabled={isLast} // WCAG - used instead of disabled to allow button retain focus and be discoverable by screen readers
           >
             <ArrowDownwardIcon />
           </IconButton>
@@ -532,10 +563,10 @@ export function SingleLayer({
             id={reloadButtonId}
             edge="end"
             size="small"
-            aria-label={layerChildPaths && layerChildPaths.length > 0 ? t('layers.reloadSublayers') : t('layers.reloadLayer')}
             className="buttonOutline"
             onClick={handleReload}
             onKeyDown={handleReloadKeyDown}
+            aria-label={layerChildPaths && layerChildPaths.length > 0 ? t('layers.reloadSublayers') : t('layers.reloadLayer')}
           >
             <LoopIcon />
           </IconButton>
@@ -554,9 +585,9 @@ export function SingleLayer({
           <IconButton
             edge="end"
             size="small"
-            aria-label={t('layers.visibilityIsAlways')}
             className="buttonOutline"
-            disabled={!inVisibleRange}
+            aria-disabled={!inVisibleRange} // WCAG - used instead of disabled to allow button to be discoverable by screen readers
+            aria-label={t('layers.visibilityIsAlways')}
           >
             <VisibilityOutlinedIcon color="disabled" />
           </IconButton>
@@ -565,22 +596,22 @@ export function SingleLayer({
       return <Box />;
     }
 
-    // Is zoom to visible scale button visible?
-    const isZoomToVisibleScaleCapable = !inVisibleRange && layerEntryType !== 'group';
-
     return (
       <>
-        <IconButton
-          edge="end"
-          size="small"
-          aria-label={t('layers.zoomVisibleScale')}
-          sx={{ ...sxClasses.zoomButton, display: isZoomToVisibleScaleCapable ? 'block' : 'none' }}
-          className="buttonOutline"
-          onClick={handleZoomToLayerVisibleScale}
-          onKeyDown={handleZoomToLayerVisibleScaleKeyDown}
-        >
-          <CenterFocusScaleIcon />
-        </IconButton>
+        {isZoomToVisibleScaleButton && (
+          <IconButton
+            edge="end"
+            size="small"
+            sx={sxClasses.zoomButton}
+            className="buttonOutline"
+            onClick={handleZoomToLayerVisibleScale}
+            onKeyDown={handleZoomToLayerVisibleScaleKeyDown}
+            aria-label={t('layers.zoomVisibleScale')}
+            aria-disabled={!isZoomToVisibleScaleCapable} // WCAG - used instead of disabled to allow button to be discoverable by screen readers
+          >
+            <CenterFocusScaleIcon />
+          </IconButton>
+        )}
         {isLayerVisibleCapable && (
           <IconButton
             edge={inVisibleRange ? false : 'end'}
@@ -588,8 +619,8 @@ export function SingleLayer({
             onClick={handleToggleVisibility}
             onKeyDown={handleToggleVisibilityKeyDown}
             className="buttonOutline"
-            disabled={!inVisibleRange || parentHidden}
             tooltip={t('layers.toggleVisibility')}
+            aria-disabled={!inVisibleRange || parentHidden} // WCAG - used instead of disabled to allow button to be discoverable by screen readers
             aria-label={`${t('layers.toggleVisibility')} - ${layerName}`} // WCAG - Provide descriptive aria-label for screen readers
             aria-pressed={isVisible}
           >
@@ -606,8 +637,9 @@ export function SingleLayer({
     showDeleteOnLoading,
     layerControls?.remove,
     isLayerAlwaysVisible,
-    layerEntryType,
     inVisibleRange,
+    isZoomToVisibleScaleCapable,
+    isZoomToVisibleScaleButton,
     t,
     handleZoomToLayerVisibleScale,
     handleZoomToLayerVisibleScaleKeyDown,
