@@ -560,7 +560,6 @@ export class OLTransform extends OLPointer {
 
   /**
    * Cleans up the interaction.
-   * @override
    */
   override dispose(): void {
     this.clearSelection();

@@ -12,7 +12,6 @@ import type { GeometryApi } from 'geoview-core/geo/layer/geometry/geometry';
 
 /**
  * Main GeoView Abstract Tester class.
- * @extends {AbstractTester}
  */
 export abstract class GVAbstractTester extends AbstractTester {
   /** GLOBAL CONSTANTS FOR THE TESTS */

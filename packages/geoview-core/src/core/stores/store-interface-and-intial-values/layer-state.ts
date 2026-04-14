@@ -1110,7 +1110,6 @@ export const setStoreLayerStatus = (mapId: string, layerPath: string, layerStatu
  * @param mapId - The ID of the map.
  * @param layerPath - The layer path of the layer to change.
  * @param layerName - The layer name to set.
- * @static
  */
 export const setStoreLayerName = (mapId: string, layerPath: string, layerName: string | undefined): void => {
   getStoreLayerState(mapId).actions.updateLayerByPath(layerPath, (layer) => ({ ...layer, layerName: layerName ?? '' }));

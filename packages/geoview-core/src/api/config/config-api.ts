@@ -288,7 +288,7 @@ export class ConfigApi {
       // Validate
       if (!providedMapFeatureConfig) throw new MapConfigError('The string configuration provided cannot be translated to a json object');
 
-      // Validate the map config
+      // Validate the map config against the schema
       const schemaValid = ConfigApi.validateSchema(MAP_CONFIG_SCHEMA_PATH, providedMapFeatureConfig);
 
       // Validate
@@ -320,6 +320,11 @@ export class ConfigApi {
    * @returns `true` if validation passes, `false` otherwise
    */
   static validateSchema(schemaPath: string, targetObject: object): boolean {
+    // Create a plain JSON copy to strip class instance properties (e.g. hasSchemaErrors)
+    // that would trigger additionalProperties errors in the schema validation
+    const cleanObject = JSON.parse(JSON.stringify(targetObject)) as Record<string, unknown>;
+    delete cleanObject.hasSchemaErrors;
+
     // create a validator object
     const validator = new Ajv({
       strict: false,
@@ -334,7 +339,7 @@ export class ConfigApi {
 
     if (validate) {
       // validate configuration
-      const valid = validate(targetObject);
+      const valid = validate(cleanObject);
 
       // If an error is detected, print it in the logger
       if (!valid) {
@@ -342,7 +347,7 @@ export class ConfigApi {
           const error = validate.errors![i];
           const { instancePath } = error;
           const path = instancePath.split('/');
-          let node = targetObject as Record<string, unknown>;
+          let node = cleanObject;
           for (let j = 1; j < path.length; j++) {
             node = node[path[j]] as Record<string, unknown>;
           }
@@ -352,7 +357,7 @@ export class ConfigApi {
       }
 
       // Log
-      logger.logDebug('CONFIG-MAP-VALIDATED', targetObject);
+      logger.logDebug('CONFIG-MAP-VALIDATED', cleanObject);
       return true;
     }
 
