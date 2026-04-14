@@ -2049,7 +2049,7 @@ export class DrawerController extends AbstractMapViewerController {
         updateStoreStateStyle(mapId, featureProperties);
       }
 
-      const geomType = newFeature?.get('text') ? 'Text' : newFeature?.getGeometry()?.getType() || 'Polygon';
+      const geomType = newFeature?.get('text') ? 'Text' : newFeature?.getGeometry()?.getType() || undefined;
       setStoreSelectedDrawingType(mapId, geomType);
 
       // Update the undo redo state
