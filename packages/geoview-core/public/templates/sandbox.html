@@ -269,11 +269,12 @@
 
         <div class="option-item">
           <p><strong>projection</strong> <code>number</code> <em style="color: #d73a49">*required</em></p>
-          <p>Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada.</p>
+          <p>Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator, Lambert Conical Conform Canada and North Pole LAEA Canada.</p>
           <p><strong>Valid values:</strong></p>
           <ul>
             <li><code>3978</code> - Lambert Conical Conform Canada (default)</li>
             <li><code>3857</code> - Web Mercator</li>
+            <li><code>3573</code> - North Pole LAEA Canada - <strong>No default basemap</strong></li>
           </ul>
         </div>
 
@@ -294,6 +295,7 @@
                   <ul>
                     <li><strong>EPSG:3978</strong> - Longitude: [-140 to -60], Latitude: [40 to 90]</li>
                     <li><strong>EPSG:3857</strong> - Longitude: [-180 to 180], Latitude: [-90 to 90]</li>
+                    <li><strong>EPSG:3573</strong> - Longitude: [-180 to 180], Latitude: [45 to 90]</li>
                   </ul>
                 </li>
               </ul>

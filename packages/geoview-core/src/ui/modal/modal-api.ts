@@ -91,7 +91,6 @@ export class ModalApi {
    * Emits modal opened event to all registered handlers.
    *
    * @param event - Event containing the modal ID
-   * @private
    */
   #emitModalOpened(event: ModalEvent): void {
     // Emit the event for all handlers
@@ -122,7 +121,6 @@ export class ModalApi {
    * Emits modal closed event to all registered handlers.
    *
    * @param event - Event containing the modal ID
-   * @private
    */
   #emitModalClosed(event: ModalEvent): void {
     // Emit the event for all handlers

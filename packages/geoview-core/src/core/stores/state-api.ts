@@ -153,7 +153,6 @@ export class StateApi {
   /**
    * Emits layers reordered event.
    * @param event - The event to emit
-   * @private
    */
   #emitLayersReordered(event: LayersReorderedEvent): void {
     // Emit the event for all handlers

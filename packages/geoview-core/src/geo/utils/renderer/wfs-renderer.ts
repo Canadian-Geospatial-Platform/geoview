@@ -1380,8 +1380,6 @@ export abstract class WfsRenderer {
    * @returns An abstract syntax tree describing the logical and
    * comparison structure of the filter expression.
    * @throws {Error} When the filter expression cannot be parsed.
-   * @private
-   * @static
    */
   static #sqlToOlWfsFilterXmlParse(sqlString: string): AST {
     // eslint-disable-next-line no-param-reassign

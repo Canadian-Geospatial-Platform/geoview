@@ -70,13 +70,12 @@
           'map': {
             'interaction': 'dynamic',
             'viewSettings': {
-              'zoom': 4,
-              'center': [-100, 'x'],
+              'zoomAndCenter': [4, [-100, 'x']],
               'projection': 1111
             }}
           }"
     ></div>
-    <p>This map will load with bad configuration (<strong>'center': [-100, 'x']</strong>) replaced with default.</p>
+    <p>This map will load with bad configuration (<strong>'zoomAndCenter': [4, [-100, 'x']]</strong>) replaced with default.</p>
 
     <div class="demo-section">
       <h4 id="HLCONF3">3. Load with bad config values</h4>
@@ -90,8 +89,7 @@
           'map': {
             'interaction': 'dynamic',
             'viewSettings': {
-              'zoom': 40,
-              'center': ['Last', -1000],
+              'zoomAndCenter': [40, ['Last', -1000]],
               'projection': 3857
             },
             'basemapOptions': {
@@ -106,7 +104,10 @@
           'theme': 'geo.ca'
         }"
     ></div>
-    <p>This map will load with bad configuration replaced with default.</p>
+    <p>
+      This map will load with bad configuration replaced with default. It also notifies the user of the issues for configuration
+      basemapOptions bad property.
+    </p>
     <button type="button" class="collapsible">Configuration Snippet</button>
     <pre id="map3CS" class="panel"></pre>
 
@@ -122,8 +123,7 @@
         'map': {
           'interaction': 'dynamic',
           'viewSettings': {
-            'zoom': 40,
-            'center': ['Last', -1000],
+            'zoomAndCenter': [40, ['Last', -1000]],
             'projection': 3857
           },
           'basemapOptions': {
@@ -151,7 +151,7 @@
         'theme': 'geo.ca'
       }"
     ></div>
-    <p>This map will not load layers with bad configuration and inform the user.</p>
+    <p>This map will not load layers with bad configuration and inform the user, basemapId is not defined.</p>
     <button type="button" class="collapsible">Configuration Snippet</button>
     <pre id="map4CS" class="panel"></pre>
 
@@ -162,9 +162,9 @@
     <div id="map5A" class="geoview-map" data-lang="en" data-shared></div>
     <p>
       This map loads its configurations from the URL parameters by providing a <strong>data-shared</strong> attribute. If a
-      <strong>data-config</strong> or <strong>data-config-url</strong> attribute is also provided, the base configuration is preserved
-      and URL parameters selectively update specific properties (projection, zoom, center, basemap options). Layers from URL parameters
-      are appended to existing config layers, not replaced.
+      <strong>data-config</strong> or <strong>data-config-url</strong> attribute is also provided, the base configuration is preserved and
+      URL parameters selectively update specific properties (projection, zoom, center, basemap options). Layers from URL parameters are
+      appended to existing config layers, not replaced.
     </p>
 
     <div class="demo-section">
@@ -178,8 +178,9 @@
       'map': {
         'interaction': 'dynamic',
         'viewSettings': {
-          'zoom': 4,
-          'center': [-100, 40],
+          'initialView': {
+            'zoomAndCenter': [4, [-100, 40]]
+          },
           'projection': 3857
         },
         'basemapOptions': {
@@ -230,8 +231,9 @@
             map: {
               interaction: 'dynamic',
               viewSettings: {
-                zoom: 10,
-                center: [-110, 70],
+                initialView: {
+                  zoomAndCenter: [10, [-110, 70]],
+                },
                 projection: 3978,
               },
               basemapOptions: {

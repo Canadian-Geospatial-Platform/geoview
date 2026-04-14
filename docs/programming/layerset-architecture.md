@@ -358,8 +358,7 @@ Each Layer Set implements `onPropagateToStore()` to update the Zustand store (i.
 ```typescript
   /**
    * Propagates the resultSetEntry to the store
-   * @param {TypeFeatureInfoResultSetEntry} resultSetEntry - The result set entry to propagate to the store
-   * @private
+   * @param resultSetEntry - The result set entry to propagate to the store
    */
   #propagateToStore(resultSetEntry: TypeFeatureInfoResultSetEntry, eventType: EventType = 'click'): void {
     // Propagate
