@@ -387,6 +387,10 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
 
   /**
    * Scrolls the footer into view on mouse click.
+   *
+   * TODO: WCAG issue #3418 - Replace querySelector + addEventListener with declarative pattern
+   * TO.DOCONT: Use useRef for headerRef and forward to Tabs component
+   * TO.DOCONT: Replace addEventListener with onClick prop on header element
    */
   useEffect(() => {
     // Log
@@ -406,14 +410,14 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
       );
     };
 
-    const header = tabsContainerRef.current.querySelector('#footerbar-header');
+    const header = tabsContainerRef.current.querySelector(`#${mapId}-footerbar-header`);
     header?.addEventListener('click', handleClick);
 
     // Cleanup function to remove event listener
     return () => {
       header?.removeEventListener('click', handleClick);
     };
-  }, []);
+  }, [mapId]);
 
   return memoFooterBarTabs.length > 0 ? (
     <Box
@@ -423,6 +427,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
       id={`${mapId}-tabsContainer`}
     >
       <Tabs
+        mapId={mapId}
         shellContainer={shellContainer}
         activeTrap={activeTrapGeoView}
         isCollapsed={!activeFooterBarTab.isOpen}

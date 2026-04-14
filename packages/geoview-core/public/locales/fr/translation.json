@@ -30,7 +30,13 @@
     "enable": "Activer",
     "disable": "Désactiver",
     "panelLabel": "Panneau de {{title}}",
-    "opensInNewTab": " (s'ouvre dans un nouvel onglet)"
+    "opensInNewTab": " (s'ouvre dans un nouvel onglet)",
+    "notificationType": {
+      "error": "Erreur",
+      "warning": "Avertissement",
+      "success": "Succès",
+      "info": "Information"
+    }
   },
   "mapnav": {
     "arianavbar": "Groupe de buttons vertical pour navigation sur la carte",
@@ -94,6 +100,7 @@
     "export": "Télécharger la carte",
     "notifications": "Notifications",
     "noNotificationsAvailable": "Aucune notification disponible",
+    "notificationsWithCount": "Notifications, {{count}}",
     "layers": "Couches",
     "share": "Partager",
     "shareUrl": "URL partageable",
@@ -246,7 +253,6 @@
     "hideAllLayers": "Masquer toutes les couches",
     "showLayer": "Afficher la couche {{name}}",
     "hideLayer": "Masquer la couche {{name}}",
-    "tableViewNone": "Tableau (indisponible)",
     "moveLayerUp": "Déplacer la couche vers le haut",
     "moveLayerDown": "Déplacer la couche vers le bas",
     "layerControls": "Commandes des couches",
@@ -463,10 +469,16 @@
     "searchFormLabel": "Rechercher dans le guide",
     "searchInputLabel": "Entrer le(s) mot(s)-clé(s)",
     "errorMessage": "Désolé, impossible de trouver le document d'aide!",
-    "arrowUp": "Correspondance précédente",
-    "arrowDown": "Correspondance suivante",
+    "previousMatch": "Correspondance précédente",
+    "nextMatch": "Correspondance suivante",
     "closeGuide": "Fermer le guide",
-    "toggleGuide": "Basculer le guide"
+    "toggleGuide": "Basculer le guide",
+    "noResults": "Aucun résultat",
+    "oneResult": "1 résultat trouvé",
+    "multipleResults": "{{count}} résultats trouvés. Appuyez sur Entrée ou Flèche bas pour naviguer vers le premier résultat.",
+    "searchInstructions": "Tapez au moins 3 caractères pour rechercher. Appuyez sur Entrée ou Flèche bas pour passer au résultat suivant, Flèche haut pour le précédent.",
+    "searchNavigationAnnouncement": "Résultat {{current}} sur {{total}}",
+    "searchMatchCountLabel": "Correspondance {{current}} sur {{total}}"
   },
   "footerBar": {
     "resizeTooltip": "Redimensionner",

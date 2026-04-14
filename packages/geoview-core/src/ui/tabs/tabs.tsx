@@ -14,6 +14,7 @@ import { getSxClasses } from '@/ui/tabs/tabs-style';
 import { TabPanel } from '@/ui/tabs/tab-panel';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { handleEscapeKey } from '@/core/utils/utilities';
+import type { SxStyles } from '../style/types';
 
 /**
  * Type used for properties of each tab
@@ -38,6 +39,8 @@ type FocusItemProps = {
  * Tabs ui properties
  */
 export interface TypeTabsProps {
+  /** The map identifier associated with the tabs component. */
+  mapId: string;
   shellContainer?: HTMLElement;
   tabs: TypeTabs[];
   selectedTab?: number;
@@ -73,6 +76,45 @@ const CustomScrollButton = memo(function CustomScrollButton({ direction, ...prop
 });
 
 /**
+ * Creates a standardized tab element ID.
+ *
+ * This ensures unique element IDs when multiple map viewers are rendered
+ * on the same page. The format must match the extraction logic in extractTabId.
+ *
+ * @param mapId - The map identifier
+ * @param tabId - The tab identifier
+ * @returns Formatted tab ID string
+ */
+const createTabId = (mapId: string, tabId: string): string => `${mapId}-tab-${tabId}`;
+
+/**
+ * Creates a standardized tab panel element ID.
+ *
+ * This ensures unique element IDs when multiple map viewers are rendered
+ * on the same page. The format follows the tab ID pattern with a 'panel' infix.
+ *
+ * @param mapId - The map identifier
+ * @param tabId - The tab identifier
+ * @returns Formatted panel ID string
+ */
+const createPanelId = (mapId: string, tabId: string): string => `${mapId}-panel-${tabId}`;
+
+/**
+ * Extracts the base tab ID from a full tab element ID.
+ *
+ * This reverses the ID construction performed by createTabId. The prefix
+ * format must remain in sync with createTabId to ensure correct extraction.
+ *
+ * @param fullId - The complete tab element ID
+ * @param mapId - The map identifier
+ * @returns The extracted tab ID, or the original ID if it doesn't match the expected pattern
+ */
+const extractTabId = (fullId: string, mapId: string): string => {
+  const prefix = `${mapId}-tab-`;
+  return fullId.startsWith(prefix) ? fullId.substring(prefix.length) : fullId;
+};
+
+/**
  * Custom tabbed interface component with responsive mobile support.
  *
  * Provides a fully accessible tabs UI with keyboard navigation, focus management,
@@ -85,6 +127,7 @@ const CustomScrollButton = memo(function CustomScrollButton({ direction, ...prop
  * @example
  * ```tsx
  * <Tabs
+ *   mapId="mapWM"
  *   tabs={[
  *     { id: 'tab1', value: 0, label: 'Tab 1', content: <div>Content 1</div> },
  *     { id: 'tab2', value: 1, label: 'Tab 2', content: <div>Content 2</div> }
@@ -92,6 +135,8 @@ const CustomScrollButton = memo(function CustomScrollButton({ direction, ...prop
  *   selectedTab={0}
  *   containerType="panel"
  *   appHeight="100vh"
+ *   hiddenTabs={[]}
+ *   isFullScreen={false}
  *   onSelectedTabChanged={handleTabChange}
  * />
  * ```
@@ -101,6 +146,7 @@ const CustomScrollButton = memo(function CustomScrollButton({ direction, ...prop
 function TabsUI(props: TypeTabsProps): JSX.Element {
   const {
     // NOTE: need this shellContainer, so that mobile dropdown can be rendered on top fullscreen window.
+    mapId,
     shellContainer,
     tabs,
     rightButtons,
@@ -130,7 +176,7 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
   const [value, setValue] = useState<number | boolean>(0);
   const [tabPanels, setTabPanels] = useState([tabs[0]]);
   const tabPanelRef = useRef<HTMLDivElement | null>(null);
-  const sxClasses = useMemo(() => getSxClasses(theme, isFullScreen, appHeight), [theme, isFullScreen, appHeight]);
+  const sxClasses = useMemo((): SxStyles => getSxClasses(theme, isFullScreen, appHeight), [theme, isFullScreen, appHeight]);
 
   // #region Handlers
 
@@ -175,11 +221,13 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
    * Handles when the user clicks on a tab to expand/collapse the panel
    */
   const handleClick = useCallback(
-    (event: MouseEvent<HTMLDivElement>): void => {
+    (event: MouseEvent<HTMLElement>): void => {
       // Get the tab (if already created to extract the value, set -1 if tab does not exist)
       // We need this information to know if we create, switch or collapse a tab
-      const { id } = event.target as HTMLDivElement;
-      const tab = tabPanels.filter((item) => item !== undefined && item.id === id);
+      const { id } = event.currentTarget;
+      // Extract base tab id by removing the prefix
+      const baseId = extractTabId(id, mapId);
+      const tab = tabPanels.filter((item) => item !== undefined && item.id === baseId);
       const index = tab.length > 0 ? tab[0].value : -1;
 
       // toggle on -1, so that when no tab is selected on fullscreen
@@ -190,7 +238,7 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
       if (activeTrap) onOpenKeyboard?.({ activeElementId: id, callbackElementId: id });
       else onCloseKeyboard?.();
     },
-    [activeTrap, onCloseKeyboard, onOpenKeyboard, onToggleCollapse, value, tabPanels]
+    [activeTrap, onCloseKeyboard, onOpenKeyboard, onToggleCollapse, value, tabPanels, mapId]
   );
 
   // #endregion
@@ -211,9 +259,11 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
   // Do not add dependency on onToggleCollapse or isCollapse, because then on re-render after the change, the useEffect just re-collapses/re-expands...
 
   /**
-   * Build mobile tab dropdown.
+   * Builds mobile tab dropdown.
    */
-  const memoMobileTabsDropdownValues = useMemo(() => {
+  const memoMobileTabsDropdownValues = useMemo((): TypeMenuItemProps[] => {
+    logger.logTraceUseMemo('UI.TABS - memoMobileTabsDropdownValues', tabs, t);
+
     const newTabs = tabs.map((tab) => ({
       type: 'item',
       item: { value: tab.value, children: t(`${tab.label}`) },
@@ -243,9 +293,15 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
 
         // ESC is from elsewhere (e.g., left panel/layer list when right panel is closed)
         // Handle it the traditional way - focus the tab button
-        handleEscapeKey(event.key, tabs[selectedTab ?? 0]?.id, true, () => {
-          onCloseKeyboard?.();
-        });
+        const targetTabIndex = selectedTab ?? 0;
+        const targetTab = tabs[targetTabIndex];
+
+        // Guard: only proceed if we have a valid tab with an id
+        if (targetTab?.id) {
+          handleEscapeKey(event.key, createTabId(mapId, targetTab.id), true, () => {
+            onCloseKeyboard?.();
+          });
+        }
       }
     };
     tabPanel?.addEventListener('keydown', handleFooterbarEscapeKey);
@@ -253,17 +309,23 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
     return () => {
       tabPanel?.removeEventListener('keydown', handleFooterbarEscapeKey);
     };
-  }, [selectedTab, isCollapsed, tabs, onCloseKeyboard]);
+  }, [selectedTab, isCollapsed, tabs, onCloseKeyboard, mapId]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sxMerged: any = { ...sxClasses.panel, visibility: TabContentVisibilty };
 
-  // Get the visible tabs
-  const visibleTabs = useMemo(() => tabs.filter((tab) => !hiddenTabs.includes(tab.id)), [tabs, hiddenTabs]);
+  /**
+   * Filters out hidden tabs from the tab list.
+   */
+  const memoVisibleTabs = useMemo((): TypeTabs[] => {
+    logger.logTraceUseMemo('UI.TABS - memoVisibleTabs', tabs, hiddenTabs);
+
+    return tabs.filter((tab) => !hiddenTabs.includes(tab.id));
+  }, [tabs, hiddenTabs]);
 
   // Make sure the selected tab is among the visible tabs
   // (it's possible that the store has a selected value set to something that hasn't yet been created as a tab).
-  const validSelectedTab = visibleTabs.find((tab) => tab.value === selectedTab)?.value;
+  const validSelectedTab = memoVisibleTabs.find((tab) => tab.value === selectedTab)?.value;
 
   return (
     <Box
@@ -276,7 +338,7 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
     >
       <Grid
         container
-        id="footerbar-header"
+        id={`${mapId}-footerbar-header`}
         sx={{
           width: '100%',
           paddingLeft: '9px',
@@ -296,17 +358,17 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
               ScrollButtonComponent={CustomScrollButton}
               {...tabsProps}
             >
-              {visibleTabs.map((tab) => {
+              {memoVisibleTabs.map((tab) => {
                 return (
                   <MaterialTab
                     label={t(tab.label)}
                     key={`${t(tab.label)}`}
                     icon={tab.icon}
                     iconPosition="start"
-                    id={tab.id}
+                    id={createTabId(mapId, tab.id)}
                     onClick={handleClick}
                     sx={sxClasses.tab}
-                    aria-controls={`${shellContainer?.id ?? ''}-${tab.id}`}
+                    aria-controls={createPanelId(mapId, tab.id)}
                     tabIndex={0}
                     value={tab.value}
                     {...tabProps}
@@ -317,13 +379,13 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
           ) : (
             <Box sx={sxClasses.mobileDropdown}>
               <Select
-                labelId="footerBarDropdownLabel"
+                labelId={`${mapId}-footerBarDropdownLabel`}
                 label=""
                 formControlProps={{ size: 'small' }}
-                id="footerBarDropdown"
+                id={`${mapId}-footerBarDropdown`}
                 fullWidth
                 variant="standard"
-                inputLabel={{ id: 'footerBarDropdownLabel' }}
+                inputLabel={{ id: `${mapId}-footerBarDropdownLabel` }}
                 menuItems={memoMobileTabsDropdownValues}
                 value={value}
                 onChange={(event: SelectChangeEvent<unknown>) => updateTabPanel(event.target.value as number)}
@@ -336,7 +398,7 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
           {rightButtons as ReactNode}
         </Grid>
       </Grid>
-      <Box id="tabPanel" sx={sxMerged} className="tab-panels-container">
+      <Box id={`${mapId}-tabPanel`} sx={sxMerged} className="tab-panels-container">
         {tabPanels.map((tab, index) => {
           return tab ? (
             <TabPanel
@@ -344,8 +406,8 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
               index={index}
               // eslint-disable-next-line react/no-array-index-key
               key={`${tab.id}-${index}`}
-              id={`${shellContainer?.id ?? ''}-${tab.id}`}
-              tabId={tab.id}
+              id={createPanelId(mapId, tab.id)}
+              tabId={createTabId(mapId, tab.id)}
               containerType={containerType}
               ref={tabPanelRef}
               className="tab-panel"

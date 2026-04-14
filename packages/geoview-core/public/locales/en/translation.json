@@ -30,7 +30,13 @@
     "enable": "Enable",
     "disable": "Disable",
     "panelLabel": "{{title}} panel",
-    "opensInNewTab": " (opens in new tab)"
+    "opensInNewTab": " (opens in new tab)",
+    "notificationType": {
+      "error": "Error",
+      "warning": "Warning",
+      "success": "Success",
+      "info": "Information"
+    }
   },
   "mapnav": {
     "arianavbar": "Vertical button group for map navigation",
@@ -94,6 +100,7 @@
     "export": "Download map",
     "notifications": "Notifications",
     "noNotificationsAvailable": "No notifications available",
+    "notificationsWithCount": "Notifications, {{count}}",
     "layers": "Layers",
     "share": "Share",
     "shareUrl": "Shareable URL",
@@ -246,7 +253,6 @@
     "hideAllLayers": "Hide all layers",
     "showLayer": "Show {{name}} layer",
     "hideLayer": "Hide {{name}} layer",
-    "tableViewNone": "Table (unavailable)",
     "moveLayerUp": "Move layer up",
     "moveLayerDown": "Move layer down",
     "layerControls": "Layers controls",
@@ -463,10 +469,16 @@
     "searchFormLabel": "Search guide",
     "searchInputLabel": "Search keyword(s)",
     "errorMessage": "Sorry, unable to find the help document!",
-    "arrowUp": "Previous match",
-    "arrowDown": "Next match",
+    "previousMatch": "Previous match",
+    "nextMatch": "Next match",
     "closeGuide": "Close guide",
-    "toggleGuide": "Toggle guide"
+    "toggleGuide": "Toggle guide",
+    "noResults": "No results",
+    "oneResult": "1 match found",
+    "multipleResults": "{{count}} matches found. Press Enter or Arrow Down to navigate to first match.",
+    "searchInstructions": "Type at least 3 characters to search. Press Enter or Arrow Down to navigate to next match, Arrow Up for previous match.",
+    "searchNavigationAnnouncement": "Showing match {{current}} of {{total}}",
+    "searchMatchCountLabel": "Match {{current}} of {{total}}"
   },
   "footerBar": {
     "resizeTooltip": "Resize",
