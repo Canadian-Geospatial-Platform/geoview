@@ -1,19 +1,25 @@
 import type { ReactNode } from 'react';
 import { memo, useState, useMemo, useCallback, useEffect } from 'react';
-import Markdown from 'markdown-to-jsx';
+
 import { renderToStaticMarkup } from 'react-dom/server';
+
 import { useTranslation } from 'react-i18next';
+
 import { useTheme } from '@mui/material/styles';
+
+import Markdown from 'markdown-to-jsx';
+
 import { Box } from '@/ui';
-import { useStoreAppGuide } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { logger } from '@/core/utils/logger';
-import { getSxClasses } from './guide-style';
 import type { LayerListEntry } from '@/core/components/common';
 import { Layout } from '@/core/components/common';
+import type { TypeContainerBox } from '@/core/types/global-types';
+import { useStoreAppGuide } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { TABS } from '@/core/utils/constant';
-import type { TypeContainerBox } from '@/core/types/global-types';
+import { logger } from '@/core/utils/logger';
+import { getSxClasses } from './guide-style';
 import { GuideSearch } from './guide-search';
+import type { SxStyles } from '@/ui/style/types';
 
 /** Guide list item extending LayerListEntry with content. */
 interface GuideListItem extends LayerListEntry {
@@ -32,15 +38,20 @@ interface GuideType {
  *
  * Memoized to prevent re-renders when parent updates but containerType has not changed.
  *
+ * @param props - Properties defined in GuideType interface
  * @returns The guide component
  */
 export const Guide = memo(function GuidePanel({ containerType }: GuideType): JSX.Element {
   logger.logTraceRender('components/guide/guide');
 
+  // Store
+  const guide = useStoreAppGuide();
+  const mapId = useStoreGeoViewMapId();
+
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const sxClasses = useMemo((): SxStyles => getSxClasses(theme), [theme]);
 
   // State
   const [selectedLayerPath, setSelectedLayerPath] = useState<string>('loadingStatus');
@@ -48,10 +59,6 @@ export const Guide = memo(function GuidePanel({ containerType }: GuideType): JSX
   const [highlightFunction, setHighlightFunction] = useState<(content: string, sectionIndex: number) => string>(
     () => (content: string) => content
   );
-
-  // Store
-  const guide = useStoreAppGuide();
-  const mapId = useStoreGeoViewMapId();
 
   // Callbacks & Memoize values
   /**
@@ -76,11 +83,11 @@ export const Guide = memo(function GuidePanel({ containerType }: GuideType): JSX
   );
 
   /**
-   * Gets the layer list with markdown content.
-   *
-   * @returns The list of guide items
+   * Builds the memoized layer list with markdown content.
    */
-  const getListOfGuides = useCallback((): GuideListItem[] => {
+  const memoLayersList = useMemo((): GuideListItem[] => {
+    logger.logTraceUseMemo('GUIDE - memoLayersList', guide, mapId, createMarkdownComponent, containerType);
+
     if (!guide) return [];
 
     return Object.keys(guide).map((item: string) => {
@@ -114,11 +121,6 @@ export const Guide = memo(function GuidePanel({ containerType }: GuideType): JSX
   }, [guide, mapId, createMarkdownComponent, containerType]);
 
   /**
-   * Builds the memoized layer list with markdown content.
-   */
-  const memoLayersList = useMemo(() => getListOfGuides(), [getListOfGuides]);
-
-  /**
    * Handles section change from GuideSearch component.
    */
   const handleSectionChange = useCallback(
@@ -134,7 +136,9 @@ export const Guide = memo(function GuidePanel({ containerType }: GuideType): JSX
   /**
    * Builds the current guide content with search highlighting applied.
    */
-  const memoCurrentGuideContent = useMemo(() => {
+  const memoCurrentGuideContent = useMemo((): ReactNode => {
+    logger.logTraceUseMemo('GUIDE - memoCurrentGuideContent', memoLayersList, guideItemIndex, guide, highlightFunction);
+
     const currentItem = memoLayersList[guideItemIndex];
     if (!currentItem || !guide) return null;
 
@@ -193,6 +197,8 @@ export const Guide = memo(function GuidePanel({ containerType }: GuideType): JSX
    * Resets scroll position and handles anchor link navigation when content changes.
    */
   useEffect(() => {
+    logger.logTraceUseEffect('GUIDE - anchor link navigation and scroll reset', selectedLayerPath, guideItemIndex);
+
     const container = document.querySelector('.guidebox-container')!.parentElement;
 
     // Reset scroll position when content changes - use requestAnimationFrame to ensure DOM is ready
@@ -241,7 +247,14 @@ export const Guide = memo(function GuidePanel({ containerType }: GuideType): JSX
           containerType={containerType}
           titleFullscreen={t('guide.title')}
           selectedLayerPath={selectedLayerPath}
-          layoutSwitch={<GuideSearch guide={guide} onSectionChange={handleSectionChange} onSearchStateChange={handleSearchStateChange} />}
+          layoutSwitch={
+            <GuideSearch
+              containerType={containerType}
+              guide={guide}
+              onSectionChange={handleSectionChange}
+              onSearchStateChange={handleSearchStateChange}
+            />
+          }
           layerList={memoLayersList}
           onLayerListClicked={handleGuideItemClick}
           aria-label={ariaLabel}

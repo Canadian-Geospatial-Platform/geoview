@@ -1,8 +1,12 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
 import { useTranslation } from 'react-i18next';
+
 import { useTheme } from '@mui/material/styles';
 import { ClickAwayListener } from '@mui/material';
+
 import { animated } from '@react-spring/web';
+
 import {
   Box,
   InfoIcon,
@@ -20,17 +24,18 @@ import {
   Button,
   List,
 } from '@/ui';
-import { getSxClasses } from './notifications-style';
+import type { SxStyles } from '@/ui/style/types';
+import { visuallyHidden } from '@/ui/style/default';
+import { useUIController } from '@/core/controllers/use-controllers';
 import { useStoreAppNotifications } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
-import { logger } from '@/core/utils/logger';
 import { useStoreMapInteraction } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { useShake } from '@/core/utils/useSpringAnimations';
-import { handleEscapeKey } from '@/core/utils/utilities';
 import { useStoreUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import type { SxStyles } from '@/ui/style/types';
 import { CONTAINER_TYPE, TIMEOUT } from '@/core/utils/constant';
-import { useUIController } from '@/core/controllers/use-controllers';
+import { logger } from '@/core/utils/logger';
+import { handleEscapeKey } from '@/core/utils/utilities';
+import { useShake } from '@/core/utils/useSpringAnimations';
+import { getSxClasses } from './notifications-style';
 
 /** Details for a single notification entry. */
 export type NotificationDetailsType = {
@@ -62,6 +67,7 @@ const NotificationItem = memo(function NotificationItem({
   onRemove,
   sxClasses,
   t,
+  closeButtonId,
 }: {
   /** The notification details to display. */
   notification: NotificationDetailsType;
@@ -71,13 +77,24 @@ const NotificationItem = memo(function NotificationItem({
   sxClasses: SxStyles;
   /** The translation function. */
   t: (key: string, options?: Record<string, unknown>) => string;
-}) {
+  /** The close button element ID for focus management. */
+  closeButtonId: string;
+}): JSX.Element {
+  // #region Handlers
+
   /**
    * Handles when the user clicks the remove button for this notification.
    */
   const handleRemove = useCallback((): void => {
     onRemove(notification.key);
-  }, [notification.key, onRemove]);
+    // Move focus to close button after removal to prevent focus loss
+    const closeButton = document.getElementById(closeButtonId);
+    if (closeButton) {
+      closeButton.focus();
+    }
+  }, [notification.key, onRemove, closeButtonId]);
+
+  // #endregion Handlers
 
   const icon = (() => {
     switch (notification.notificationType) {
@@ -92,11 +109,14 @@ const NotificationItem = memo(function NotificationItem({
     }
   })();
 
-  // TODO: WCAG Issue #3114 - Review button contrast
   return (
     <Box sx={sxClasses.notificationItem} component="li">
       {icon}
       <Box component="p" id={notification.key} sx={sxClasses.notificationsItemMsg}>
+        {/* WCAG - Add visually hidden severity text for screen readers */}
+        <Box component="span" sx={visuallyHidden}>
+          {t(`general.notificationType.${notification.notificationType}`)}:{' '}
+        </Box>
         {notification.message}
         {notification.count > 1 && (
           <Box component="span" aria-label={t('appbar.repeatedNotificationTimes', { count: notification.count })}>
@@ -105,6 +125,7 @@ const NotificationItem = memo(function NotificationItem({
         )}
       </Box>
       <IconButton
+        className="buttonOutline"
         tooltip={t('general.remove')}
         aria-label={t('appbar.removeNotification')}
         aria-describedby={notification.key}
@@ -131,7 +152,8 @@ const NotificationHeader = memo(function NotificationHeader({
   hasNotifications,
   t,
   sxClasses,
-  mapId,
+  titleId,
+  closeButtonId,
 }: {
   /** Callback to close the notification panel. */
   onClose: () => void;
@@ -143,12 +165,14 @@ const NotificationHeader = memo(function NotificationHeader({
   t: (key: string) => string;
   /** The sx classes object. */
   sxClasses: SxStyles;
-  /** The map identifier. */
-  mapId: string;
-}) {
+  /** The dialog title element ID. */
+  titleId: string;
+  /** The close button element ID. */
+  closeButtonId: string;
+}): JSX.Element {
   return (
     <Box component="header" sx={sxClasses.notificationsHeader}>
-      <Typography component="h2" sx={sxClasses.notificationsTitle} id={`notification-title-${mapId}`}>
+      <Typography component="h2" sx={sxClasses.notificationsTitle} id={titleId}>
         {t('appbar.notifications')}
       </Typography>
       <Box>
@@ -163,12 +187,13 @@ const NotificationHeader = memo(function NotificationHeader({
           {t('general.removeAll')}
         </Button>
         <IconButton
-          id={`notification-close-button-${mapId}`}
+          className="buttonOutline"
+          id={closeButtonId}
           tooltip={t('general.close')}
-          aria-label={t('appbar.closeNotificationsDialog')}
           size="small"
           sx={{ ml: '0.25rem' }}
           onClick={onClose}
+          aria-label={t('appbar.closeNotificationsDialog')}
         >
           <CloseIcon />
         </IconButton>
@@ -208,10 +233,18 @@ export default memo(function Notifications(): JSX.Element {
   const mapId = useStoreGeoViewMapId();
   const mapElem = document.getElementById(`shell-${mapId}`);
 
+  // Element IDs for accessibility and focus management
+  const dialogId = `${mapId}-notification-dialog`;
+  const titleId = `${mapId}-notification-title`;
+  const closeButtonId = `${mapId}-notification-close-button`;
+  const bellButtonId = `${mapId}-${CONTAINER_TYPE.APP_BAR}-notifications-btn`;
+
   // Animation
   const shakeAnimation = useShake();
   const timerRef = useRef<ReturnType<typeof setTimeout>>();
   const AnimatedSpan = animated('span');
+
+  // #region Handlers
 
   /**
    * Handles when the user clicks the notification bell button.
@@ -229,7 +262,7 @@ export default memo(function Notifications(): JSX.Element {
   }, [open]);
 
   /**
-   * Handles when the user removes a single notification.
+   * Removes a single notification.
    *
    * @param key - The notification key to remove
    */
@@ -242,18 +275,25 @@ export default memo(function Notifications(): JSX.Element {
 
   /**
    * Handles when the user removes all notifications.
-   *
-   * @param key - The notification key to remove
    */
-  const handleRemoveAllNotifications = useCallback(() => {
+  const handleRemoveAllNotifications = useCallback((): void => {
     uiController.removeAllNotifications();
-  }, [uiController]);
+    // Move focus to close button after removal to prevent focus loss
+    const closeButton = document.getElementById(closeButtonId);
+    if (closeButton) {
+      closeButton.focus();
+    }
+  }, [uiController, closeButtonId]);
+
+  // #endregion Handlers
 
   // Effects
   /**
    * Resets the notification count when the popover opens.
    */
   useEffect(() => {
+    logger.logTraceUseEffect('NOTIFICATIONS - popover open state sync', open);
+
     if (open) {
       // When panel open, remove the notification count on the popover. On new notification, it will continue to
       // increment notification from those inside the popover
@@ -293,31 +333,34 @@ export default memo(function Notifications(): JSX.Element {
   /**
    * Builds the rendered list of notification items.
    */
-  const memoNotificationsList = useMemo(
-    () =>
-      notifications.map((notification) => (
-        <NotificationItem
-          key={notification.key}
-          notification={notification}
-          onRemove={handleRemoveNotification}
-          sxClasses={sxClasses}
-          t={t}
-        />
-      )),
-    [notifications, handleRemoveNotification, sxClasses, t]
-  );
+  const memoNotificationsList = useMemo((): JSX.Element[] => {
+    logger.logTraceUseMemo('NOTIFICATIONS - memoNotificationsList', notifications);
+
+    return notifications.map((notification) => (
+      <NotificationItem
+        key={notification.key}
+        notification={notification}
+        onRemove={handleRemoveNotification}
+        sxClasses={sxClasses}
+        t={t}
+        closeButtonId={closeButtonId}
+      />
+    ));
+  }, [notifications, handleRemoveNotification, sxClasses, t, closeButtonId]);
 
   return (
     <ClickAwayListener mouseEvent="onMouseDown" touchEvent="onTouchStart" onClickAway={handleClickAway}>
       <Box sx={{ padding: interaction === 'dynamic' ? 'none' : '5px' }}>
         <IconButton
-          id={`${mapId}-${CONTAINER_TYPE.APP_BAR}-notifications-btn`}
-          aria-label={t('appbar.notifications')}
-          aria-haspopup="dialog"
+          id={bellButtonId}
           tooltipPlacement="right"
           onClick={handleOpenPopover}
           className={`${interaction === 'dynamic' ? 'buttonFilled' : 'style4'} ${open ? 'active' : ''}`}
           color="primary"
+          aria-label={
+            notificationsCount > 0 ? t('appbar.notificationsWithCount', { count: notificationsCount }) : t('appbar.notifications')
+          }
+          aria-haspopup="dialog"
         >
           <Badge badgeContent={notificationsCount > 99 ? '99+' : notificationsCount} color="error">
             <AnimatedSpan
@@ -334,15 +377,15 @@ export default memo(function Notifications(): JSX.Element {
 
         <Popper
           role="dialog"
-          id={`notification-dialog-${mapId}`}
-          aria-labelledby={`notification-title-${mapId}`}
+          id={dialogId}
+          aria-labelledby={titleId}
           aria-modal="true"
           open={open}
           anchorEl={anchorEl}
           placement="right-end"
           onClose={handleClickAway}
           container={mapElem}
-          focusSelector={`#notification-close-button-${mapId}`}
+          focusSelector={`#${closeButtonId}`}
           focusTrap={activeTrapGeoView}
           modifiers={[
             {
@@ -364,7 +407,8 @@ export default memo(function Notifications(): JSX.Element {
               hasNotifications={notifications.length > 0}
               t={t}
               sxClasses={sxClasses}
-              mapId={mapId}
+              titleId={titleId}
+              closeButtonId={closeButtonId}
             />
             <List sx={sxClasses.notificationsList} aria-live="polite" aria-relevant="all">
               {notifications.length > 0 ? (

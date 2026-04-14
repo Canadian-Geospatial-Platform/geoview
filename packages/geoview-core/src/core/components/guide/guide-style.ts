@@ -1,5 +1,6 @@
 import type { Theme } from '@mui/material/styles';
 import type { SxStyles } from '@/ui/style/types';
+import { visuallyHidden } from '@/ui/style/default';
 
 /**
  * Gets reusable guide box styles for guide content.
@@ -141,4 +142,5 @@ export const getSxClasses = (theme: Theme): SxStyles =>
       width: '400px',
       maxWidth: '100%',
     },
+    visuallyHidden,
   }) as const;
