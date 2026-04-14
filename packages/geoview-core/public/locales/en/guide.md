@@ -69,7 +69,7 @@ _Note: The map must be focused for key binding to work._
 
 Depending on the viewer configuration, the map may provide an overview map, a generic representation of the main map at a reduced size. It is located in the upper-right corner of the map.
 
-<img src="{{assetsURL}}/img/guide/navigation/overview.png" alt="Overview map displayed in the upper-right corner of the main map" style="max-width: 500px;"/>
+<img src="{{assetsURL}}/img/guide/navigation/overview.png" alt="Overview map displayed in the upper-right corner of the main map" />
 
 Click-hold on the box in the overview map and drag it to change the extent of the main map. Clicking on the toggle icon in the top right corner of the overview map will expand or contract it.
 
