@@ -673,7 +673,7 @@ export class DrawerController extends AbstractMapViewerController {
    *
    * @param text - The text content
    */
-  setTextValue(text: string): void {
+  setTextValue(text: string | string[]): void {
     // Get the map id
     const mapId = this.getMapId();
 
@@ -884,14 +884,15 @@ export class DrawerController extends AbstractMapViewerController {
           currentTextSize = featureSize;
         }
 
-        // Rotation is different from the store, so the handle was used. Update the style and properties (currently the only way to change the rotation)
+        // Rotation is different from the store, so the handle was used. Update the style and properties
+        // GV Currently the only way to change the rotation is with the handle, but if a UI element is added, then this will be needed
         if (newStyle.textRotation && Math.abs(newStyle.textRotation - featureRotation) < DrawerController.STYLE_TOLERANCE) {
           currentRotation = featureRotation;
         }
 
         featureStyle = new Style({
           text: new Text({
-            text: selectedFeature.get('text') || newStyle.text,
+            text: newStyle.text || selectedFeature.get('text'),
             fill: new Fill({ color: newStyle.textColor }),
             stroke: new Stroke({ color: newStyle.textHaloColor, width: newStyle.textHaloWidth }),
             font: `${newStyle.textItalic ? 'italic ' : ''}${newStyle.textBold ? 'bold ' : ''}${currentTextSize}px ${newStyle.textFont}`,
@@ -1517,7 +1518,10 @@ export class DrawerController extends AbstractMapViewerController {
 
         // Restore modified style if it exists
         if (action.modifiedStyles && action.modifiedStyles[index]) {
-          DrawerController.#updateFeatureStyleAndProperties(currentFeature, action.modifiedStyles[index]);
+          const modifiedStyle = action.modifiedStyles[index];
+          if (modifiedStyle && modifiedStyle instanceof Style) {
+            currentFeature.setStyle(modifiedStyle);
+          }
         }
       }
     });
@@ -1552,33 +1556,13 @@ export class DrawerController extends AbstractMapViewerController {
 
         // Restore style
         if (action.originalStyles && action.originalStyles[index]) {
-          DrawerController.#updateFeatureStyleAndProperties(currentFeature, action.originalStyles[index]);
+          const originalStyle = action.originalStyles[index];
+          if (originalStyle && originalStyle instanceof Style) {
+            currentFeature.setStyle(originalStyle);
+          }
         }
       }
     });
-  }
-
-  /**
-   * Updates a feature's style and syncs its properties to match the style.
-   *
-   * @param feature - The feature to update
-   * @param style - The style to apply
-   */
-  static #updateFeatureStyleAndProperties(feature: Feature, style: StyleLike | undefined): void {
-    if (!style || !(style instanceof Style)) return;
-
-    feature.setStyle(style);
-
-    // Update feature properties to match the style
-    const styleProps = DrawerController.#getStyleProperties(style);
-    const isTextFeature = feature.get('text') !== undefined;
-
-    if (isTextFeature) {
-      DrawerController.#setFeatureProperties(feature, 'Text', styleProps);
-    } else if (feature.getGeometry() instanceof Point) {
-      const iconSrc = feature.get('iconSrc');
-      DrawerController.#setFeatureProperties(feature, 'Point', styleProps, iconSrc);
-    }
   }
 
   /**
@@ -1833,29 +1817,6 @@ export class DrawerController extends AbstractMapViewerController {
           if (!newFeature && previousFeature && !isDeselected) {
             isDeselected = true;
 
-            // Extract visual properties and update stored properties to match
-            const visualProps = DrawerController.#extractVisualTextProperties(previousFeature);
-            if (visualProps) {
-              previousFeature.set('textSize', visualProps.visualSize);
-              previousFeature.set('textRotation', visualProps.visualRotation);
-            }
-
-            // Extract other text properties from the current visual style
-            const transformStyle = previousFeature.getStyle();
-            if (transformStyle instanceof Style) {
-              const transformText = transformStyle.getText();
-              if (transformText) {
-                const fill = transformText.getFill();
-                const stroke = transformText.getStroke();
-
-                if (fill) previousFeature.set('textColor', fill.getColor());
-                if (stroke) {
-                  previousFeature.set('textHaloColor', stroke.getColor());
-                  previousFeature.set('textHaloWidth', stroke.getWidth());
-                }
-              }
-            }
-
             // Save text to history
             this.#saveToHistory({
               type: 'add',
@@ -1904,22 +1865,16 @@ export class DrawerController extends AbstractMapViewerController {
       const isTextFeature = feature.get('text') !== undefined;
       // Update Text Styles
       if (isTextFeature) {
-        const visualProps = DrawerController.#extractVisualTextProperties(feature);
-
-        if (visualProps && isStoreDrawerInitialized(mapId)) {
-          // Update stored properties to match visual style
-          feature.set('textSize', visualProps.visualSize);
-          feature.set('textRotation', visualProps.visualRotation);
+        const currentStyle = feature.getStyle();
+        if (currentStyle instanceof Style && isStoreDrawerInitialized(mapId)) {
+          const styleProps = DrawerController.#getStyleProperties(currentStyle);
 
           // Update store
-          setStoreTextSize(mapId, visualProps.visualSize);
-          setStoreTextRotation(mapId, visualProps.visualRotation);
-          setStoreTextValue(mapId, feature.get('text'));
-          setStoreTextBold(mapId, feature.get('textBold'));
-          setStoreTextItalic(mapId, feature.get('textItalic'));
-
-          // After updating the store, update the transform's style
-          // this.updateTransformingFeatureStyle(getStoreDrawerStyle(mapId));
+          setStoreTextSize(mapId, styleProps.textSize || 18);
+          setStoreTextRotation(mapId, styleProps.textRotation || 0);
+          setStoreTextValue(mapId, styleProps.text || '');
+          setStoreTextBold(mapId, styleProps.textBold || false);
+          setStoreTextItalic(mapId, styleProps.textItalic || false);
         }
       }
 
@@ -2423,42 +2378,6 @@ export class DrawerController extends AbstractMapViewerController {
     // Apply center offset after all coordinates are calculated
     return coords.map((point) => [point[0] + center[0], point[1] + center[1]]);
   };
-
-  /**
-   * Extracts visual text size and rotation from a feature's style.
-   *
-   * @param feature - The feature to extract visual properties from
-   * @returns Object with visual size and rotation, or undefined if not a text feature or not extractable
-   */
-  static #extractVisualTextProperties(feature: Feature): { visualSize: number; visualRotation: number } | undefined {
-    const existingStyle = feature.getStyle();
-    if (!(existingStyle instanceof Style)) return undefined;
-
-    const existingText = existingStyle.getText();
-    if (!existingText) return undefined;
-
-    // Default to stored properties
-    let visualSize = feature.get('textSize') as number;
-    let visualRotation = feature.get('textRotation') as number;
-
-    // Parse size from font string (e.g., "bold 48px Arial" → 48)
-    const fontStr = existingText.getFont();
-    if (fontStr) {
-      const fontParts = fontStr.split(' ');
-      const sizeStr = fontParts.find((part) => part.endsWith('px'));
-      if (sizeStr) {
-        visualSize = parseFloat(sizeStr);
-      }
-    }
-
-    // Extract rotation
-    const rotation = existingText.getRotation();
-    if (rotation !== undefined) {
-      visualRotation = rotation;
-    }
-
-    return { visualSize, visualRotation };
-  }
 
   /**
    * Compares two styles by their properties rather than reference equality.

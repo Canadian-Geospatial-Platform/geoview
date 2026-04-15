@@ -53,7 +53,7 @@ export interface IDrawerState {
     setStrokeColor: (strokeColor: string) => void;
     setStrokeWidth: (strokeWidth: number) => void;
     setIconSize: (iconSize: number) => void;
-    setTextValue: (text: string) => void;
+    setTextValue: (text: string | string[]) => void;
     setTextSize: (textSize: number) => void;
     setTextFont: (textFont: string) => void;
     setTextColor: (textColor: string) => void;
@@ -249,7 +249,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
        *
        * @param text - The text content
        */
-      setTextValue: (text: string) => {
+      setTextValue: (text: string | string[]) => {
         set({
           drawerState: {
             ...get().drawerState,
@@ -512,13 +512,20 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
       /**
        * Updates the drawing style state.
        *
+       * @description We merge / spread the new style so we keep a value for all the style properties.
+       * If any property is missing, it will throw an error in the geometry picker
+       * because it won't be able to find a style for all the geometry types
+       *
        * @param style - The new style properties
        */
       updateStateStyle: (style: StyleProps) => {
         set({
           drawerState: {
             ...get().drawerState,
-            style,
+            style: {
+              ...get().drawerState.style,
+              ...style,
+            },
           },
         });
       },
@@ -751,7 +758,7 @@ export const setStoreDrawerIconSize = (mapId: string, iconSize: number): void =>
  * @param mapId - The map identifier
  * @param text - The text value
  */
-export const setStoreTextValue = (mapId: string, text: string): void => {
+export const setStoreTextValue = (mapId: string, text: string | string[]): void => {
   getStoreDrawerState(mapId).actions.setTextValue(text);
 };
 
