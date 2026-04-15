@@ -94,7 +94,7 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
        *
        * @param activeLayerData - The layer data objects to set as active.
        */
-      setActiveLayersData: (activeLayerData: TypeLayerData[]) => {
+      setActiveLayersData: (activeLayerData: TypeLayerData[]): void => {
         set({
           dataTableState: {
             ...get().dataTableState,
@@ -108,7 +108,7 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
        *
        * @param allFeaturesDataArray - The feature info entries for all layers.
        */
-      setAllFeaturesDataArray(allFeaturesDataArray: TypeAllFeatureInfoResultSetEntry[]) {
+      setAllFeaturesDataArray(allFeaturesDataArray: TypeAllFeatureInfoResultSetEntry[]): void {
         set({
           dataTableState: {
             ...get().dataTableState,
@@ -126,7 +126,7 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
        *
        * @param layerPath - The layer path to initialize settings for.
        */
-      setInitiallayerDataTableSetting: (layerPath: string) => {
+      setInitiallayerDataTableSetting: (layerPath: string): void => {
         const layerSettings = {
           columnFiltersRecord: [],
           columnFilterModesRecord: {},
@@ -151,7 +151,7 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
        * @param filtered - The column filter state to apply.
        * @param layerPath - The target layer path.
        */
-      setColumnFiltersEntry: (filtered: TypeColumnFiltersState, layerPath: string) => {
+      setColumnFiltersEntry: (filtered: TypeColumnFiltersState, layerPath: string): void => {
         const layerSettings = get().dataTableState.layersDataTableSetting[layerPath];
         layerSettings.columnFiltersRecord = filtered;
 
@@ -169,7 +169,7 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
        * @param filterModes - A record mapping column ids to their filter mode.
        * @param layerPath - The target layer path.
        */
-      setColumnFilterModesEntry: (filterModes: Record<string, string>, layerPath: string) => {
+      setColumnFilterModesEntry: (filterModes: Record<string, string>, layerPath: string): void => {
         const layerSettings = get().dataTableState.layersDataTableSetting[layerPath];
         layerSettings.columnFilterModesRecord = filterModes;
 
@@ -187,7 +187,7 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
        * @param visible - Whether column filters should be visible.
        * @param layerPath - The target layer path.
        */
-      setColumnsFiltersVisibility: (visible: boolean, layerPath: string) => {
+      setColumnsFiltersVisibility: (visible: boolean, layerPath: string): void => {
         const layerSettings = get().dataTableState.layersDataTableSetting[layerPath];
         layerSettings.columnsFiltersVisibility = visible;
 
@@ -205,7 +205,7 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
        * @param mapFiltered - Whether map extent filtering is enabled.
        * @param layerPath - The target layer path.
        */
-      setMapFilteredEntry: (mapFiltered: boolean, layerPath: string) => {
+      setMapFilteredEntry: (mapFiltered: boolean, layerPath: string): void => {
         const layerSettings = get().dataTableState.layersDataTableSetting[layerPath];
         layerSettings.mapFilteredRecord = mapFiltered;
 
@@ -223,7 +223,7 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
        * @param rows - The filtered row count.
        * @param layerPath - The target layer path.
        */
-      setRowsFilteredEntry: (rows: number, layerPath: string) => {
+      setRowsFilteredEntry: (rows: number, layerPath: string): void => {
         const layerSettings = get().dataTableState.layersDataTableSetting[layerPath];
         layerSettings.rowsFilteredRecord = rows;
 
@@ -255,7 +255,7 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
        * @param message - The message to display in the toolbar.
        * @param layerPath - The target layer path.
        */
-      setToolbarRowSelectedMessageEntry: (message: string, layerPath: string) => {
+      setToolbarRowSelectedMessageEntry: (message: string, layerPath: string): void => {
         const layerSettings = get().dataTableState.layersDataTableSetting[layerPath];
         layerSettings.toolbarRowSelectedMessageRecord = message;
 
@@ -272,7 +272,7 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
        *
        * @param layerPath - The layer path to select.
        */
-      setSelectedLayerPath: (layerPath: string) => {
+      setSelectedLayerPath: (layerPath: string): void => {
         set({
           dataTableState: {
             ...get().dataTableState,
@@ -287,7 +287,7 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
        * @param globalFilterValue - The global filter string.
        * @param layerPath - The target layer path.
        */
-      setGlobalFilteredEntry: (globalFilterValue: string, layerPath: string) => {
+      setGlobalFilteredEntry: (globalFilterValue: string, layerPath: string): void => {
         const layerSettings = get().dataTableState.layersDataTableSetting[layerPath];
         layerSettings.globalFilterRecord = globalFilterValue;
 
@@ -304,7 +304,7 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
        *
        * @param feature - The feature entry to select.
        */
-      setSelectedFeature: (feature: TypeFeatureInfoEntry) => {
+      setSelectedFeature: (feature: TypeFeatureInfoEntry): void => {
         set({
           dataTableState: {
             ...get().dataTableState,

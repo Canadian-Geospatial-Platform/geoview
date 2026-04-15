@@ -325,6 +325,7 @@
         <li>mapViewer.onMapLanguageChanged</li>
         <li>mapViewer.onMapMoveEnd</li>
         <li>mapViewer.onMapZoomEnd</li>
+        <li>mapViewer.onMapProjectionChanged</li>
         <li>mapViewer.basemap.onBasemapChanged</li>
         <li>mapViewer.layer.onLayerConfigAdded when a layer config has been added</li>
         <li>mapViewer.layer.onLayerConfigRemoved when a layer config has been removed</li>
@@ -405,6 +406,11 @@
           mapViewer.notifications.addNotificationSuccess(
             `MapViewer: Map moved to center latitude ${payload.lonlat[1]} and longitude ${payload.lonlat[0]}`
           );
+        });
+
+        // listen to map projection changed event
+        mapViewer.onMapProjectionChanged((sender, payload) => {
+          mapViewer.notifications.addNotificationSuccess(`MapViewer: Map projection changed to ${payload.projection}`);
         });
 
         // listen to ANY/ALL layer status at ANY time (generic event catcher)

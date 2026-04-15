@@ -23,6 +23,21 @@ brackets '<' and '>' as follows:
 const [basemapList, setBasemapList] = useState<TypeBasemapProps[]>([]);
 ```
 
+Every function and method must declare its return type explicitly — do not rely on type inference. Use `: void` for functions that do not return a value. This applies to standalone functions, class methods, arrow functions in `useCallback`/`useMemo`, and component functions:
+
+```ts
+// ❌ Bad: missing return type
+function processLayer(layerPath: string) {
+export function MyComponent() {
+
+// ✅ Good: explicit return type
+function processLayer(layerPath: string): void {
+export function MyComponent(): JSX.Element {
+override onHook(): void {
+async fetchMetadata(id: string): Promise<void> {
+const handleClick = useCallback((): void => { ... }, []);
+```
+
 ## 2- Avoid using variable names that are too short.
 
 It is difficult to know what a variable with the name `e` refers to. Is it an `element`, an `event` or anything else whose name starts
@@ -148,12 +163,14 @@ const [scaleMode, setScaleMode] = useState<number>(0);
 ## 9- How we format JSDOC
 
 Golden Rule of JSDoc in TypeScript Projects
+
 - Explain why
 - Explain behavior
 - Explain side effects
 - Explain non-obvious constraints
 
 It should NOT:
+
 - Repeat type information already in the signature
 - Replace TS visibility keywords
 - Duplicate what the compiler already guarantees
@@ -169,11 +186,12 @@ It should NOT:
  */
 async function fetchMetadata(
   geoviewLayerId: string,
-  signal?: AbortSignal
-): Promise<LayerMetadata> { }
+  signal?: AbortSignal,
+): Promise<LayerMetadata> {}
 ```
 
 Tags Worth Using
+
 - @param
 - @returns
 - @throws (@throws {TheErrorType} (description)  e.g. @throws {LayerNotGeoJsonError} When...)
@@ -182,6 +200,7 @@ Tags Worth Using
 - @see
 
 Tags Usually Overkill in TS
+
 - @private
 - @protected
 - @public
@@ -243,12 +262,12 @@ When using `useMemo`, prefix the variable name with `memo` followed by camelCase
 ```typescript
 // ❌ Bad: Generic variable name doesn't indicate memoization
 const filteredList = useMemo(() => {
-  return items.filter(item => item.active);
+  return items.filter((item) => item.active);
 }, [items]);
 
 // ✅ Good: Prefix with 'memo' to indicate memoized value
 const memoFilteredList = useMemo(() => {
-  return items.filter(item => item.active);
+  return items.filter((item) => item.active);
 }, [items]);
 
 // ✅ Good: Even for computed objects

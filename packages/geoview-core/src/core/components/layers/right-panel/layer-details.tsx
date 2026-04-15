@@ -340,7 +340,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
     const labelContent = (
       <Box sx={sxClasses.checkboxLabelContent}>
         {item.icon ? (
-          <Box component="img" sx={{ maxHeight: '26px', maxWidth: '26px' }} alt="" src={item.icon} />
+          <Box component="img" alt="" src={item.icon} />
         ) : (
           <BrowserNotSupportedIcon sx={{ fontSize: '26px' }} />
         )}
