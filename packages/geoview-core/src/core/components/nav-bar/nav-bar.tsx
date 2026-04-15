@@ -11,7 +11,7 @@ import Home from './buttons/home';
 import Location from './buttons/location';
 import Projection from './buttons/projection';
 import MapRotation from './buttons/map-rotation';
-import { ButtonGroup, Box, IconButton, Collapse } from '@/ui';
+import { ButtonGroup, Box, IconButton } from '@/ui';
 import { ExpandLessIcon, ExpandMoreIcon } from '@/ui/icons';
 import type { TypeButtonPanel } from '@/ui/panel/panel-types';
 import { getSxClasses } from './nav-bar-style';
@@ -84,6 +84,7 @@ export function NavBar(props: NavBarProps): JSX.Element {
   // State
   const [buttonPanelGroups, setButtonPanelGroups] = useState<NavButtonGroups>({});
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+  const [maxButtonsPerColumn, setMaxButtonsPerColumn] = useState<number>(10);
 
   /**
    * Builds the initial button panel groups from the navbar component configuration.
@@ -206,6 +207,52 @@ export function NavBar(props: NavBarProps): JSX.Element {
   }, [navBarApi, handleNavApiAddButtonPanel, handleNavApiRemoveButtonPanel]);
 
   /**
+   * Calculates and updates the maximum buttons per column based on available height.
+   */
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('NAV-BAR - calculate max buttons per column');
+
+    const calculateMaxButtons = (): void => {
+      if (!navBarRef.current) return;
+
+      const mapContainer = navBarRef.current.parentElement;
+      if (!mapContainer) return;
+
+      const mapHeight = mapContainer.clientHeight;
+      const overviewMapSpace = 167; // 150px + 6px margin top + 6px margin bottom + 5px from top
+      const infoBarHeight = 40; // Map info bar at bottom
+      const navbarPadding = 12; // 6px top + 6px bottom
+      const buttonGroupGap = 15; // Gap between button groups
+
+      const availableHeight = mapHeight - overviewMapSpace - infoBarHeight - navbarPadding - buttonGroupGap;
+
+      const buttonHeight = 44; // Each button is 44px
+      const maxButtons = Math.floor(availableHeight / buttonHeight);
+
+      // Set minimum of 3 buttons per column to avoid too many columns
+      setMaxButtonsPerColumn(Math.max(3, maxButtons));
+    };
+
+    // Calculate on mount
+    calculateMaxButtons();
+
+    // Watch for resize
+    const resizeObserver = new ResizeObserver(() => {
+      calculateMaxButtons();
+    });
+
+    const mapContainer = navBarRef.current?.parentElement;
+    if (mapContainer) {
+      resizeObserver.observe(mapContainer);
+    }
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
+
+  /**
    * Renders a single button panel or default button.
    *
    * @param buttonPanel - The button panel or default navbar key
@@ -263,12 +310,22 @@ export function NavBar(props: NavBarProps): JSX.Element {
 
     const buttonKeys = Object.keys(buttonPanelGroup);
     const groupConfig = navBarApi.getGroupConfig(groupName);
-    const threshold = groupConfig.accordionThreshold;
-    // GV Add one because there's no point showing an expand button if there's only one button left to show
-    const needsExpansion = buttonKeys.length > threshold! + 1;
+    const threshold = groupConfig.accordionThreshold || 10; // Default threshold for collapse
+    const needsExpansion = buttonKeys.length > threshold + 1;
 
-    // State for tracking expanded groups
     const isExpanded = expandedGroups.has(groupName);
+
+    // Determine which buttons to show
+    const visibleButtonKeys = needsExpansion && !isExpanded ? buttonKeys.slice(0, threshold) : buttonKeys;
+
+    // Use dynamic maxButtonsPerColumn from state instead of config
+    const buttonsPerColumn = maxButtonsPerColumn;
+
+    // Split buttons into columns
+    const columns: string[][] = [];
+    for (let i = 0; i < visibleButtonKeys.length; i += buttonsPerColumn) {
+      columns.push(visibleButtonKeys.slice(i, i + buttonsPerColumn));
+    }
 
     const toggleExpansion = (): void => {
       setExpandedGroups((prev) => {
@@ -282,48 +339,37 @@ export function NavBar(props: NavBarProps): JSX.Element {
       });
     };
 
-    const visibleKeys = needsExpansion ? buttonKeys.slice(0, threshold) : buttonKeys;
-    const hiddenKeys = buttonKeys.slice(threshold);
-
     return (
-      <Fragment key={groupName}>
-        <ButtonGroup
-          key={groupName}
-          aria-label={t('mapnav.arianavbar')!}
-          variant="contained"
-          sx={sxClasses.navBtnGroup}
-          orientation="vertical"
-        >
-          {/*  Always visible buttons */}
-          {visibleKeys.map((buttonPanelKey) => {
-            const buttonPanel: TypeButtonPanel | DefaultNavbar = buttonPanelGroup[buttonPanelKey];
-            return renderButtonPanel(buttonPanel, buttonPanelKey);
-          })}
+      <Box key={groupName} sx={sxClasses.navBtnGroupColumns}>
+        {columns.map((columnKeys, columnIndex) => (
+          <ButtonGroup
+            // eslint-disable-next-line react/no-array-index-key
+            key={`${groupName}-column-${columnIndex}`}
+            aria-label={t('mapnav.arianavbar')!}
+            variant="contained"
+            sx={sxClasses.navBtnGroup}
+            orientation="vertical"
+          >
+            {columnKeys.map((buttonPanelKey) => {
+              const buttonPanel: TypeButtonPanel | DefaultNavbar = buttonPanelGroup[buttonPanelKey];
+              return renderButtonPanel(buttonPanel, buttonPanelKey);
+            })}
 
-          {/*  Collapsible hidden buttons */}
-          {needsExpansion && (
-            <Collapse in={isExpanded} timeout="auto" unmountOnExit>
-              {hiddenKeys.map((buttonPanelKey) => {
-                const buttonPanel: TypeButtonPanel | DefaultNavbar = buttonPanelGroup[buttonPanelKey];
-                return renderButtonPanel(buttonPanel, buttonPanelKey);
-              })}
-            </Collapse>
-          )}
-
-          {/* Expand/Collapse button */}
-          {needsExpansion && (
-            <IconButton
-              key={`expand-${groupName}`}
-              aria-label={isExpanded ? t('general.close') : t('general.open')}
-              tooltipPlacement="left"
-              sx={sxClasses.navButton}
-              onClick={toggleExpansion}
-            >
-              {isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-            </IconButton>
-          )}
-        </ButtonGroup>
-      </Fragment>
+            {/* Add expand button to the last column when collapsed */}
+            {needsExpansion && columnIndex === columns.length - 1 && (
+              <IconButton
+                key={`expand-${groupName}`}
+                aria-label={isExpanded ? t('general.close') : t('general.open')}
+                tooltipPlacement="left"
+                sx={sxClasses.navButton}
+                onClick={toggleExpansion}
+              >
+                {isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+              </IconButton>
+            )}
+          </ButtonGroup>
+        ))}
+      </Box>
     );
   }
 
