@@ -193,6 +193,8 @@ export interface CreateHandleProps {
 /**
  * OpenLayers Transform interaction for manipulating features on the map.
  */
+// TODO: Refactor - May be able to remove the use of properties and instead just read / set the style
+// TO.DOCONT - This has already been done in the drawer controller
 export class OLTransform extends OLPointer {
   /** The collection of features to transform */
   features: Collection<Feature>;

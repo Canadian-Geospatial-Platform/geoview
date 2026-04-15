@@ -1281,6 +1281,7 @@ export class DrawerController extends AbstractMapViewerController {
    * @param displayLanguage - The display language
    */
   #updateMeasurementTooltips(displayLanguage: TypeDisplayLanguage): void {
+    // TODO: Update measurements to use styles, similar to the measurement navbar tool, since overlays aren't exported
     const features = this.#getDrawingFeatures();
 
     features.forEach((feature) => {
