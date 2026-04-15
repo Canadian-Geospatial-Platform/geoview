@@ -86,6 +86,33 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
   }, [mappedLayerData, visibleInRangeLayers, layerHiddenSet]);
 
   /**
+   * Applies filtering to the ordered layer data features.
+   */
+  const memoFilteredOrderedLayerData = useMemo(() => {
+    return memoOrderedLayerData.map((layer) => {
+      let { features } = layer;
+
+      // Apply extent filtering if enabled for the selected layer
+      if (features && getStoreDataTableFilterDataToExtent(mapId, layer.layerPath) && mapExtent) {
+        features = features.filter((feature) => {
+          const { geometry } = feature;
+          return geometry?.intersectsExtent(mapExtent);
+        });
+      }
+
+      // Apply unsymbolized feature filtering if configured
+      if (features && !showUnsymbolizedFeatures) {
+        features = features.filter((feature) => feature.featureIcon);
+      }
+
+      return {
+        ...layer,
+        features,
+      };
+    });
+  }, [memoOrderedLayerData, mapId, mapExtent, showUnsymbolizedFeatures]);
+
+  /**
    * Handles layer selection change from the layer list.
    */
   const handleLayerChange = useCallback(
