@@ -339,11 +339,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
     // Build the label content with icon and text
     const labelContent = (
       <Box sx={sxClasses.checkboxLabelContent}>
-        {item.icon ? (
-          <Box component="img" alt="" src={item.icon} />
-        ) : (
-          <BrowserNotSupportedIcon sx={{ fontSize: '26px' }} />
-        )}
+        {item.icon ? <Box component="img" alt="" src={item.icon} /> : <BrowserNotSupportedIcon sx={{ fontSize: '26px' }} />}
         <Box component="span" sx={{ ...sxClasses.tableIconLabel, ...((layerHidden || !item.isVisible) && hiddenStyle) }}>
           {item.name}
         </Box>
