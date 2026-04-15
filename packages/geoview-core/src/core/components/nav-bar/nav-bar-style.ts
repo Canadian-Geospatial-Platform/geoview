@@ -23,7 +23,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     top: '180px',
     bottom: '55px',
     alignItems: 'flex-start',
-    justifyContent: 'center',
+    justifyContent: 'flex-end',
     flexWrap: 'wrap-reverse',
     gap: '15px',
   },
