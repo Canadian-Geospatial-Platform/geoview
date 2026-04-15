@@ -18,13 +18,13 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     marginRight: 0,
     zIndex: 150,
     pointerEvents: 'all',
-    justifyContent: 'center',
     backgroundColor: 'transparent',
-    transition: 'bottom 300ms ease-in-out',
-    bottom: '6rem',
+    transition: 'top 300ms ease-in-out, bottom 300ms ease-in-out',
+    top: '180px',
+    bottom: '55px',
     alignItems: 'flex-start',
+    justifyContent: 'center',
     flexWrap: 'wrap-reverse',
-    maxHeight: '60%',
     gap: '15px',
   },
   navBtnGroupContainer: {
@@ -42,6 +42,12 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     '& .MuiButtonGroup-grouped:not(:last-child)': {
       borderColor: theme.palette.geoViewColor.bgColor.light[900],
     },
+  },
+  navBtnGroupColumns: {
+    display: 'flex',
+    flexDirection: 'row',
+    gap: '8px',
+    alignItems: 'center',
   },
   navButton: {
     backgroundColor: theme.palette.geoViewColor.bgColor.light[500],
