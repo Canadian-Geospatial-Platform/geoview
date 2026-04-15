@@ -153,7 +153,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
        *
        * @param geomType - The geometry type to set as active
        */
-      setActiveGeom: (geomType: string) => {
+      setActiveGeom: (geomType: string): void => {
         set({
           drawerState: {
             ...get().drawerState,
@@ -167,7 +167,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
        *
        * @param style - The style properties to apply
        */
-      setStyle: (style: StyleProps) => {
+      setStyle: (style: StyleProps): void => {
         set({
           drawerState: {
             ...get().drawerState,
@@ -181,7 +181,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
        *
        * @param fillColor - The fill color value
        */
-      setFillColor: (fillColor: string) => {
+      setFillColor: (fillColor: string): void => {
         set({
           drawerState: {
             ...get().drawerState,
@@ -198,7 +198,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
        *
        * @param strokeColor - The stroke color value
        */
-      setStrokeColor: (strokeColor: string) => {
+      setStrokeColor: (strokeColor: string): void => {
         set({
           drawerState: {
             ...get().drawerState,
@@ -215,7 +215,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
        *
        * @param strokeWidth - The stroke width value
        */
-      setStrokeWidth: (strokeWidth: number) => {
+      setStrokeWidth: (strokeWidth: number): void => {
         set({
           drawerState: {
             ...get().drawerState,
@@ -232,7 +232,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
        *
        * @param iconSize - The icon size value
        */
-      setIconSize: (iconSize: number) => {
+      setIconSize: (iconSize: number): void => {
         set({
           drawerState: {
             ...get().drawerState,
@@ -249,7 +249,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
        *
        * @param text - The text content
        */
-      setTextValue: (text: string | string[]) => {
+      setTextValue: (text: string | string[]): void => {
         set({
           drawerState: {
             ...get().drawerState,
@@ -266,7 +266,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
        *
        * @param textSize - The text size value
        */
-      setTextSize: (textSize: number) => {
+      setTextSize: (textSize: number): void => {
         set({
           drawerState: {
             ...get().drawerState,
@@ -283,7 +283,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
        *
        * @param textFont - The font family name
        */
-      setTextFont: (textFont: string) => {
+      setTextFont: (textFont: string): void => {
         set({
           drawerState: {
             ...get().drawerState,
@@ -300,7 +300,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
        *
        * @param textColor - The text color value
        */
-      setTextColor: (textColor: string) => {
+      setTextColor: (textColor: string): void => {
         set({
           drawerState: {
             ...get().drawerState,
@@ -317,7 +317,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
        *
        * @param textHaloColor - The text halo color value
        */
-      setTextHaloColor: (textHaloColor: string) => {
+      setTextHaloColor: (textHaloColor: string): void => {
         set({
           drawerState: {
             ...get().drawerState,
@@ -334,7 +334,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
        *
        * @param textHaloWidth - The text halo width value
        */
-      setTextHaloWidth: (textHaloWidth: number) => {
+      setTextHaloWidth: (textHaloWidth: number): void => {
         set({
           drawerState: {
             ...get().drawerState,
@@ -351,7 +351,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
        *
        * @param textBold - Whether text should be bold
        */
-      setTextBold: (textBold: boolean) => {
+      setTextBold: (textBold: boolean): void => {
         set({
           drawerState: {
             ...get().drawerState,
@@ -368,7 +368,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
        *
        * @param textItalic - Whether text should be italic
        */
-      setTextItalic: (textItalic: boolean) => {
+      setTextItalic: (textItalic: boolean): void => {
         set({
           drawerState: {
             ...get().drawerState,
@@ -385,7 +385,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
        *
        * @param textRotation - The rotation angle in degrees
        */
-      setTextRotation: (textRotation: number) => {
+      setTextRotation: (textRotation: number): void => {
         set({
           drawerState: {
             ...get().drawerState,
@@ -402,7 +402,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
        *
        * @param isDrawing - Whether drawing mode is active
        */
-      setIsDrawing: (isDrawing: boolean) => {
+      setIsDrawing: (isDrawing: boolean): void => {
         set({
           drawerState: {
             ...get().drawerState,
@@ -416,7 +416,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
        *
        * @param isEditing - Whether editing mode is active
        */
-      setIsEditing: (isEditing: boolean) => {
+      setIsEditing: (isEditing: boolean): void => {
         set({
           drawerState: {
             ...get().drawerState,
@@ -430,7 +430,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
        *
        * @param isSnapping - Whether snapping mode is active
        */
-      setIsSnapping: (isSnapping: boolean) => {
+      setIsSnapping: (isSnapping: boolean): void => {
         set({
           drawerState: {
             ...get().drawerState,
@@ -444,7 +444,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
        *
        * @param drawingType - The drawing type to set
        */
-      setSelectedDrawingType: (drawingType: string) => {
+      setSelectedDrawingType: (drawingType: string): void => {
         set({
           drawerState: {
             ...get().drawerState,
@@ -458,7 +458,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
        *
        * @param hideMeasurements - Whether to hide measurements
        */
-      setHideMeasurements: (hideMeasurements: boolean) => {
+      setHideMeasurements: (hideMeasurements: boolean): void => {
         set({
           drawerState: {
             ...get().drawerState,
@@ -472,7 +472,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
        *
        * @param iconSrc - The icon source path
        */
-      setIconSrc: (iconSrc: string) => {
+      setIconSrc: (iconSrc: string): void => {
         set({
           drawerState: {
             ...get().drawerState,
@@ -486,7 +486,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
        *
        * @param undoDisabled - Whether undo is disabled
        */
-      setUndoDisabled: (undoDisabled: boolean) => {
+      setUndoDisabled: (undoDisabled: boolean): void => {
         set({
           drawerState: {
             ...get().drawerState,
@@ -500,7 +500,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
        *
        * @param redoDisabled - Whether redo is disabled
        */
-      setRedoDisabled: (redoDisabled: boolean) => {
+      setRedoDisabled: (redoDisabled: boolean): void => {
         set({
           drawerState: {
             ...get().drawerState,
@@ -518,7 +518,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
        *
        * @param style - The new style properties
        */
-      updateStateStyle: (style: StyleProps) => {
+      updateStateStyle: (style: StyleProps): void => {
         set({
           drawerState: {
             ...get().drawerState,
