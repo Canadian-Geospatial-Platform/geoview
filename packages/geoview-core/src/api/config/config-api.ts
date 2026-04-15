@@ -320,9 +320,11 @@ export class ConfigApi {
    * @returns `true` if validation passes, `false` otherwise
    */
   static validateSchema(schemaPath: string, targetObject: object): boolean {
-    // Create a plain JSON copy to strip class instance properties (e.g. hasSchemaErrors)
-    // that would trigger additionalProperties errors in the schema validation
-    const cleanObject = JSON.parse(JSON.stringify(targetObject)) as Record<string, unknown>;
+    // Create a plain copy to strip class instance properties (e.g. hasSchemaErrors)
+    // that would trigger additionalProperties errors in the schema validation.
+    // Use spread + delete instead of JSON.parse(JSON.stringify()) to avoid creating
+    // a JSON.parse taint source that triggers CodeQL resource-exhaustion warnings.
+    const cleanObject: Record<string, unknown> = { ...(targetObject as Record<string, unknown>) };
     delete cleanObject.hasSchemaErrors;
 
     // create a validator object
