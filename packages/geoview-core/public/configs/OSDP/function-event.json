@@ -304,5 +304,6 @@
       "core": ["layers", "details", "data-table", "time-slider"]
     }
   },
+  "navBar": ["zoom", "rotation", "fullscreen", "home", "location", "measurement", "basemap-select", "projection"],
   "corePackages": ["swiper"]
 }

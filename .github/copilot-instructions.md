@@ -181,17 +181,24 @@ import { useMapController } from "@/core/controllers/map-controller";
 ### Component Export Patterns
 
 - **Named exports** (not default exports): `export function MyComponent()` or `export const MyComponent = ...`
-- **Explicit return types on components and functions**: Always declare the return type explicitly — do not rely on inference:
+- **Explicit return types on all functions**: Every function and method must declare its return type explicitly — do not rely on inference. Use `: void` for functions that do not return a value:
 
 ```typescript
 // ❌ Bad: missing return type
 export function MyComponent() {
+function processLayer(layerPath: string) {
 
 // ✅ Good: explicit return type
 export function MyComponent(): JSX.Element {
+function processLayer(layerPath: string): void {
 
 // ✅ Good: memo component with explicit return type
 export const MyComponent = memo(function MyComponent(): JSX.Element {
+
+// ✅ Good: class methods with explicit return type
+override onHook(): void {
+private processConfig(config: TypeMapConfig): TypeMapConfig {
+async fetchMetadata(id: string): Promise<void> {
 ```
 
 - **Explicit return types on `useCallback` and `useMemo`**: Arrow functions inside `useCallback` and `useMemo` must also have explicit return type annotations:
@@ -476,14 +483,15 @@ this.getControllersRegistry().mapController.applyLayerFilters(layerPath);
 > 2. Missing `logger.logTraceUseEffect` / `logger.logTraceUseMemo` as first line in hooks
 > 3. Missing `/** */` JSDoc on handlers, `useEffect`, `useMemo`, `useCallback`
 > 4. Missing explicit return types on `useCallback` / `useMemo` arrow functions
-> 5. `useMemo` variables not prefixed with `memo` (e.g., `columns` → `memoColumns`)
-> 6. `//` line comments on properties/constants instead of `/** */`
-> 7. Multi-line `/** */` on interface properties instead of single-line
-> 8. Missing `@param` / `@returns` on non-handler `useCallback` functions
-> 9. `{Type}` annotations in `@param` / `@returns` (only `@throws` keeps braces)
-> 10. Removed TODO/NOTE comments — **never delete** existing TODO/NOTE comments during cleanup
-> 11. Missing `#region Handlers` / `#endregion` around handler groups
-> 12. Missing `memo` justification in component JSDoc when `memo()` is used
+> 5. Missing explicit return types on functions/methods (including `: void` for non-returning functions)
+> 6. `useMemo` variables not prefixed with `memo` (e.g., `columns` → `memoColumns`)
+> 7. `//` line comments on properties/constants instead of `/** */`
+> 8. Multi-line `/** */` on interface properties instead of single-line
+> 9. Missing `@param` / `@returns` on non-handler `useCallback` functions
+> 10. `{Type}` annotations in `@param` / `@returns` (only `@throws` keeps braces)
+> 11. Removed TODO/NOTE comments — **never delete** existing TODO/NOTE comments during cleanup
+> 12. Missing `#region Handlers` / `#endregion` around handler groups
+> 13. Missing `memo` justification in component JSDoc when `memo()` is used
 
 ### Logging
 

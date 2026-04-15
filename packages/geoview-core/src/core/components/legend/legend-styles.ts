@@ -107,9 +107,6 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     '& .MuiListItemIcon-root': {
       minWidth: '1rem',
     },
-    '& img': {
-      maxWidth: '1.5rem',
-    },
   },
   layerListItem: {
     paddingLeft: '6px',
