@@ -113,6 +113,8 @@ export class Draw extends Interaction {
 
   /**
    * Removes the last point added to the current drawing, allowing the user to undo the last step while drawing.
+   *
+   * @returns True if a point was removed, false if there were no points to remove
    */
   undo(): boolean {
     const sketch = this.#olDraw.getOverlay()?.getSource()?.getFeatures()[0];
