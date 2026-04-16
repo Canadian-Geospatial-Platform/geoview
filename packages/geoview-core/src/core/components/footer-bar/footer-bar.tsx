@@ -356,7 +356,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   }, [footerBarApi, handleAddTab, handleRemoveTab]);
 
   /**
-   * Creates default tabs from configuration parameters (similar logic as iin app-bar).
+   * Creates default tabs from configuration parameters (similar logic as in app-bar).
    */
   useEffect(() => {
     // Log

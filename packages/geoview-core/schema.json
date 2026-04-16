@@ -219,7 +219,7 @@
         },
         "selectedTab": {
           "type": "string",
-          "enum": ["", "geolocator", "geochart", "details", "legend", "guide", "data-table", "layers", "aoi-panel"],
+          "enum": ["", "geolocator", "geochart", "details", "legend", "guide", "data-table", "layers", "aoi-panel", "custom-legend", "about-panel"],
           "description": "App bar tab to be selected at map load, it will open the panel"
         },
         "selectedDataTableLayerPath": {
@@ -623,7 +623,7 @@
       }
     },
     "TypeValidMapProjectionCodes": {
-      "description": "Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada.",
+      "description": "Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator, Lambert Conical Conform Canada and North Pole LAEA Canada.",
       "enum": [3978, 3857, 3573],
       "default": 3978
     },
@@ -1589,13 +1589,26 @@
         },
         "projection": {
           "type": "integer",
-          "description": "Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada."
+          "description": "Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator, Lambert Conical Conform Canada and North Pole LAEA Canada."
         },
         "featureInfo": {
           "$ref": "#/definitions/TypeFeatureInfoNotQueryable"
         },
         "tileGrid": {
           "$ref": "#/definitions/TypeTileGrid"
+        },
+        "extent": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "number"
+          },
+          "description": "The service extent to use when building the tile grid without metadata (e.g. [minX, minY, maxX, maxY])."
+        },
+        "resolutionLevels": {
+          "type": "integer",
+          "description": "The number of resolution levels (zoom levels) to generate when building the tile grid without metadata."
         }
       }
     },

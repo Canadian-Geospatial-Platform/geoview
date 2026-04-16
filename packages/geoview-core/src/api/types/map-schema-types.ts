@@ -291,7 +291,7 @@ export type TypeViewSettings = {
    */
   maxZoom?: number;
   /**
-   * Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada.
+   * Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator, Lambert Conical Conform Canada and North Pole LAEA Canada.
    * Default = 3978.
    */
   projection: TypeValidMapProjectionCodes;

@@ -238,6 +238,10 @@ export class BasemapApi {
    * @returns A promise that resolves when the overview map basemap has been created and set
    */
   async setOverviewMap(): Promise<void> {
+    // Only create overview map for supported projections (3857 and 3978)
+    const projectionCode = getStoreMapCurrentProjection(this.mapViewer.mapId);
+    if (projectionCode !== 3857 && projectionCode !== 3978) return;
+
     try {
       // Create the Core Basemap
       this.overviewMap = await this.createCoreBasemap({ basemapId: 'transport', shaded: false, labeled: false });

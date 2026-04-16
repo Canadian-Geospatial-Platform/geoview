@@ -1,6 +1,6 @@
 # GeoView
 
-[Demo](https://canadian-geospatial-platform.github.io/geoview/public/index.html)
+## Live Demo Site - [GeoView in Action](https://canadian-geospatial-platform.github.io/geoview/public/index.html)
 
 ![BigPicture](https://user-images.githubusercontent.com/3472990/233729101-89cc4196-915d-4d6e-a353-4fb70cbb566e.PNG)
 

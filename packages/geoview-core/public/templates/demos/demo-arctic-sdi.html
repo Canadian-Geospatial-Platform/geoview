@@ -76,7 +76,7 @@
                   'source': {
                     'extent': [-4889334.802955, -4889334.802955, 4889334.802955, 4889334.802955],
                     'resolutionLevels': 11,
-                    'projection': 'EPSG:3573',
+                    'projection': '3573',
                     'dataAccessPath': 'https://basemap.arctic-sdi.org/mapcache/wmts'
                   }
                 }
@@ -84,8 +84,7 @@
             }
           ]
         },
-        'components': ['overview-map', 'north-arrow'],
-        'overviewMap': { 'hideOnZoom': 7 },
+        'components': ['north-arrow'],
         'navBar': ['zoom'],
         'footerBar': {
           'tabs': {
@@ -159,7 +158,7 @@
                   'source': {
                     'extent': [-4889334.802955, -4889334.802955, 4889334.802955, 4889334.802955],
                     'resolutionLevels': 11,
-                    'projection': 'EPSG:3573',
+                    'projection': '3573',
                     'dataAccessPath': 'https://basemap.arctic-sdi.org/mapcache/wmts'
                   }
                 }
@@ -167,8 +166,7 @@
             }
           ]
         },
-        'components': ['overview-map', 'north-arrow'],
-        'overviewMap': { 'hideOnZoom': 7 },
+        'components': ['north-arrow'],
         'navBar': ['zoom'],
         'footerBar': {
           'tabs': {
@@ -179,9 +177,9 @@
         'theme': 'geo.ca',
         'appBar': {
           'tabs': {
-            'core': ['geolocator', 'custom-legend', 'details', 'export'],
-            'selectedTab': 'custom-legend'
-          }
+            'core': ['geolocator', 'custom-legend', 'details', 'export']
+          },
+          'selectedTab': 'custom-legend'
         },
         'corePackagesConfig': [
           {

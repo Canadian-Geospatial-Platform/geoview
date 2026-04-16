@@ -19,6 +19,7 @@ __Add the URL for your deploy!__
 
 # Checklist:
 
+- [ ] I have run the **Test Suite** and **No errors have been introduced**
 - [ ] I have run "@workspace review this branch diff (compare to upstream/develop) against GeoView coding standards" in my co pilot chat
 - [ ] I asked copilot to **audit JSDoc comments for a folder or file or diff branch againt upstream/develop** in my co pilot chat
 - [ ] I have build __(rush build)__ and deploy __(rush host)__ my PR

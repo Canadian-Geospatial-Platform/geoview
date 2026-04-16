@@ -204,9 +204,9 @@ export class ConfigApi {
         interaction: urlParams.i as TypeInteraction,
         viewSettings: {
           initialView: {
-            zoomAndCenter: [parseInt(zoom, 10), [parseInt(center[0], 10), parseInt(center[1], 10)]] as TypeZoomAndCenter,
+            zoomAndCenter: [Number(zoom), [Number(center[0]), Number(center[1])]] as TypeZoomAndCenter,
           },
-          projection: urlParams.p as TypeValidMapProjectionCodes,
+          projection: Number(urlParams.p) as TypeValidMapProjectionCodes,
         },
         basemapOptions,
         listOfGeoviewLayerConfig: [] as MapConfigLayerEntry[],
@@ -343,17 +343,23 @@ export class ConfigApi {
       // validate configuration
       const valid = validate(cleanObject);
 
-      // If an error is detected, print it in the logger
+      // If an error is detected, deduplicate by instancePath + keyword + message and print in the logger
       if (!valid) {
+        const seen = new Set<string>();
         for (let i = 0; i < validate.errors!.length; i += 1) {
           const error = validate.errors![i];
-          const { instancePath } = error;
-          const path = instancePath.split('/');
-          let node = cleanObject;
-          for (let j = 1; j < path.length; j++) {
-            node = node[path[j]] as Record<string, unknown>;
+          const dedupeKey = error.instancePath;
+          if (!seen.has(dedupeKey)) {
+            seen.add(dedupeKey);
+
+            const { instancePath } = error;
+            const path = instancePath.split('/');
+            let node = cleanObject;
+            for (let j = 1; j < path.length; j++) {
+              node = node[path[j]] as Record<string, unknown>;
+            }
+            logger.logWarning('SCHEMA VALIDATION', `\nSchemaPath: ${schemaPath}`, '\nSchema error: ', error, '\nObject affected: ', node);
           }
-          logger.logWarning('SCHEMA VALIDATION', `\nSchemaPath: ${schemaPath}`, '\nSchema error: ', error, '\nObject affected: ', node);
         }
         return false;
       }
