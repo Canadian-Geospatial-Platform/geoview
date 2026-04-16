@@ -2251,7 +2251,6 @@ export abstract class GeoviewRenderer {
    * If the style does not exist for the geometryType, create it using the default style strategy.
    *
    * @param feature - Feature that need its style to be defined
-   * @param resolution - The resolution of the map
    * @param layerStyle - The style to use
    * @param label - The style label when one has to be created
    * @param filterEquation - Optional filter equation associated to the layer
@@ -2260,7 +2259,6 @@ export abstract class GeoviewRenderer {
    */
   static getAndCreateFeatureStyle(
     feature: FeatureLike,
-    resolution: number,
     layerStyle: TypeLayerStyleConfig,
     label: string,
     filterEquation?: FilterNodeType[],
