@@ -684,6 +684,27 @@ export class MapController extends AbstractMapViewerController {
   }
 
   /**
+   * Nudges the map center by an imperceptible amount to trigger extent change events.
+   *
+   * Useful for triggering extent-based listeners without visible map movement.
+   * The store is updated automatically via the MapViewer move-end event.
+   *
+   * @param offsetX - The horizontal offset in map units (default: 0.00001)
+   * @param offsetY - The vertical offset in map units (default: 0)
+   */
+  nudgeMapCenter(offsetX: number = 0.00001, offsetY: number = 0): void {
+    const view = this.getMapViewer().map.getView();
+    const currentCenter = view.getCenter()!;
+
+    // Shift center by imperceptible amount
+    const newCenter: Coordinate = [currentCenter[0] + offsetX, currentCenter[1] + offsetY];
+
+    // Set center without animation
+    view.setCenter(newCenter);
+    // GV No need to Save to the store, because this will trigger an event on MapViewer which will take care of updating the store
+  }
+
+  /**
    * Rotates the map to the specified angle.
    *
    * The store is updated automatically via the MapViewer move-end event.
@@ -1197,7 +1218,7 @@ export class MapController extends AbstractMapViewerController {
     else listOfLayerEntryConfig.push(this.#createLayerEntryConfig(layerPath, isGeocore, overrideGeocoreServiceNames));
 
     // Get initial settings
-    const initialSettings = MapController.#getInitialSettings(layerEntryConfig, orderedLayerInfo, legendLayerInfo!);
+    const initialSettings = MapController.#getInitialSettings(layerEntryConfig, orderedLayerInfo, legendLayerInfo);
 
     // Construct geoview layer config
     const newGeoviewLayerConfig: MapConfigLayerEntry =
@@ -1281,7 +1302,7 @@ export class MapController extends AbstractMapViewerController {
     }
 
     // Get initial settings
-    const initialSettings = MapController.#getInitialSettings(layerEntryConfig, orderedLayerInfo, legendLayerInfo!);
+    const initialSettings = MapController.#getInitialSettings(layerEntryConfig, orderedLayerInfo, legendLayerInfo);
 
     // Clone the source object
     let source;
@@ -1409,12 +1430,12 @@ export class MapController extends AbstractMapViewerController {
   static #getInitialSettings(
     layerEntryConfig: ConfigBaseClass,
     orderedLayerInfo: TypeOrderedLayerInfo,
-    legendLayerInfo: TypeLegendLayer
+    legendLayerInfo: TypeLegendLayer | undefined
   ): TypeLayerInitialSettings {
     return {
       states: {
         visible: orderedLayerInfo.visible,
-        opacity: legendLayerInfo.opacity,
+        opacity: legendLayerInfo?.opacity ?? 1,
         legendCollapsed: orderedLayerInfo.legendCollapsed,
         queryable: orderedLayerInfo.queryableState,
         hoverable: orderedLayerInfo.hoverable,
