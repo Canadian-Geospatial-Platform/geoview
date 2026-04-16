@@ -46,6 +46,9 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   /** Callback delegates for the text visible changed event */
   #onTextVisibleChangedHandlers: TextVisibleChangedDelegate[] = [];
 
+  /** Cache for feature styles keyed by feature ID */
+  #styleCache: Map<string, Style | undefined> = new Map();
+
   /** Maximum number of styles to cache */
   static readonly STYLE_CACHE_SIZE_LIMIT = 1000;
 
@@ -67,12 +70,15 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
       source: olSource,
       style: (feature) => {
         // Get or create cached style
-        const style = AbstractGVVector.calculateStyleForFeature(
-          this as AbstractGVLayer,
-          feature,
-          label,
-          this.getLayerFilters()?.getFilterEquation()
-        );
+        const style =
+          feature.getGeometry()?.getType() === 'Point'
+            ? this.#getOrCreateCachedStyle(feature, label)
+            : AbstractGVVector.calculateStyleForFeature(
+                this as AbstractGVLayer,
+                feature,
+                label,
+                this.getLayerFilters()?.getFilterEquation()
+              );
 
         // Set the style applied, throwing a style applied event in the process
         this.setStyleApplied(true);
@@ -84,6 +90,9 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
     // Init the layer options with initial settings
     AbstractGVVector.initOptionsWithInitialSettings(layerOptions, layerConfig);
+
+    // Clear cache when filters are updated.
+    this.onLayerFilterApplied(() => this.#clearStyleCache());
 
     // Keep the subscription clean and readable
     this.onLayerFirstLoaded(this.#handleLayerFirstLoaded.bind(this));
@@ -413,11 +422,65 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   // #region METHODS
 
   /**
+   * Gets or creates a cached style for a feature.
+   *
+   * @param feature - The feature to calculate style for.
+   * @param label - Style label for fallback styling.
+   * @returns The cached or newly calculated style.
+   */
+  #getOrCreateCachedStyle(feature: FeatureLike, label: string): Style | undefined {
+    // Calculate new style and cache it
+    const featureStyle = AbstractGVVector.calculateStyleForFeature(
+      this as AbstractGVLayer,
+      feature,
+      label,
+      this.getLayerFilters()?.getFilterEquation()
+    );
+
+    // If no feature style generated
+    if (!featureStyle) {
+      // No style
+      return undefined;
+    }
+
+    // Clone the style
+    const styleClone = featureStyle.clone();
+    // Eliminate geometry from the style clone to prevent cache misses due to different geometries on features
+    styleClone.setGeometry('');
+    // Create a cache key based on the stringified style (without geometry)
+    const styleKey = JSON.stringify(styleClone);
+
+    // Cache the style if not already cached
+    if (!this.#styleCache.has(styleKey)) {
+      this.#styleCache.set(styleKey, featureStyle);
+
+      // Limit cache size to prevent memory bloat
+      if (this.#styleCache.size > AbstractGVVector.STYLE_CACHE_SIZE_LIMIT) {
+        const firstKey = this.#styleCache.keys().next().value;
+        if (firstKey) {
+          this.#styleCache.delete(firstKey);
+        }
+      }
+    }
+
+    return this.#styleCache.get(styleKey);
+  }
+
+  /**
+   * Clears the style cache. Call this when layer style, filters, or visibility changes to ensure fresh styles are recalculated.
+   */
+  #clearStyleCache(): void {
+    this.#styleCache.clear();
+  }
+
+  /**
    * Sets the layer style.
    *
    * @param style - The layer style
    */
   override setStyle(style: TypeLayerStyleConfig): void {
+    // Clear the style cache to ensure new styles are calculated with the updated style configuration
+    this.#clearStyleCache();
     super.setStyle(style);
     // Trigger a refresh to apply the new style to all features
     this.refresh(undefined);
