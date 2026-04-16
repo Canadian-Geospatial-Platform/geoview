@@ -280,7 +280,7 @@
   "overviewMap": { "hideOnZoom": 7 },
   "footerBar": {
     "tabs": {
-      "core": ["layers", "data-table"]
+      "core": ["layers", "data-table", "time-slider"]
     }
   },
   "corePackages": [],
