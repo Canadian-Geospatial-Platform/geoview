@@ -46,9 +46,6 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   /** Callback delegates for the text visible changed event */
   #onTextVisibleChangedHandlers: TextVisibleChangedDelegate[] = [];
 
-  /** Cache for feature styles keyed by feature ID */
-  #styleCache: Map<string, Style | undefined> = new Map();
-
   /** Maximum number of styles to cache */
   static readonly STYLE_CACHE_SIZE_LIMIT = 1000;
 
@@ -68,9 +65,14 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     const layerOptions: VectorLayerOptions<VectorSource<Feature<Geometry>>> = {
       properties: { layerConfig },
       source: olSource,
-      style: (feature, resolution) => {
+      style: (feature) => {
         // Get or create cached style
-        const style = this.#getOrCreateCachedStyle(feature, resolution, label);
+        const style = AbstractGVVector.calculateStyleForFeature(
+          this as AbstractGVLayer,
+          feature,
+          label,
+          this.getLayerFilters()?.getFilterEquation()
+        );
 
         // Set the style applied, throwing a style applied event in the process
         this.setStyleApplied(true);
@@ -78,20 +80,10 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
         // Return the style
         return style;
       },
-      // TODO: (SEE ISSUE 3227) For layers with text, in order for declutterMode options to work, declutter at the layer level must be true
-      // TO.DOCONT: If true though, this will cause the features themselves to be decluttered, which we don't want
-      // TO.DOCONT: Instead, the best solution would be to create a second text only layer that uses the same source.
-      // TO.DOCONT: Could both layers be accessed by the same GeoView Layer? So that only the text layer or both layer's visibility can be toggled?
-      // TO.DOCONT: If two separate layers, could we remove the text from the sublayers? Could have separate categories for the text, although
-      // TO.DOCONT: then we wouldn't be able to turn off the individual text categories in the UI. Would be all or nothing at the main layer level.
-      // declutter: true,
     };
 
     // Init the layer options with initial settings
     AbstractGVVector.initOptionsWithInitialSettings(layerOptions, layerConfig);
-
-    // Clear cache when filters are updated.
-    this.onLayerFilterApplied(() => this.#clearStyleCache());
 
     // Keep the subscription clean and readable
     this.onLayerFirstLoaded(this.#handleLayerFirstLoaded.bind(this));
@@ -421,73 +413,11 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   // #region METHODS
 
   /**
-   * Gets or creates a cached style for a feature at a given resolution.
-   *
-   * Resolution is rounded to 2 decimal places to prevent cache thrashing during smooth zoom animations.
-   * This avoids recreating Style objects for every tiny resolution change.
-   *
-   * @param feature - The feature to calculate style for.
-   * @param resolution - The current map resolution.
-   * @param label - Style label for fallback styling.
-   * @returns The cached or newly calculated style.
-   */
-  #getOrCreateCachedStyle(feature: FeatureLike, resolution: number, label: string): Style | undefined {
-    // Round resolution to 1 decimal place as cache key component to reduce style churn at zoom boundaries.
-    const roundedResolution = Math.round(resolution * 10) / 10;
-
-    // Calculate new style and cache it
-    const featureStyle = AbstractGVVector.calculateStyleForFeature(
-      this as AbstractGVLayer,
-      feature,
-      resolution,
-      label,
-      this.getLayerFilters()?.getFilterEquation()
-    );
-
-    // If no feature style generated
-    if (!featureStyle) {
-      // No style
-      return undefined;
-    }
-
-    // Clone the style
-    const styleClone = featureStyle.clone();
-    // Eliminate geometry from the style clone to prevent cache misses due to different geometries on features
-    styleClone.setGeometry('');
-    // Create a cache key based on the rounded resolution and the stringified style (without geometry)
-    const styleKey = `${roundedResolution}${JSON.stringify(styleClone)}`;
-
-    // Cache the style if not already cached
-    if (!this.#styleCache.has(styleKey)) {
-      this.#styleCache.set(styleKey, featureStyle);
-
-      // Limit cache size to prevent memory bloat
-      if (this.#styleCache.size > AbstractGVVector.STYLE_CACHE_SIZE_LIMIT) {
-        const firstKey = this.#styleCache.keys().next().value;
-        if (firstKey) {
-          this.#styleCache.delete(firstKey);
-        }
-      }
-    }
-
-    return this.#styleCache.get(styleKey);
-  }
-
-  /**
-   * Clears the style cache. Call this when layer style, filters, or visibility changes to ensure fresh styles are recalculated.
-   */
-  #clearStyleCache(): void {
-    this.#styleCache.clear();
-  }
-
-  /**
    * Sets the layer style.
    *
    * @param style - The layer style
    */
   override setStyle(style: TypeLayerStyleConfig): void {
-    // Clear the style cache to ensure new styles are calculated with the updated style configuration
-    this.#clearStyleCache();
     super.setStyle(style);
     // Trigger a refresh to apply the new style to all features
     this.refresh(undefined);
@@ -668,7 +598,6 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   static calculateStyleForFeature(
     layer: AbstractGVLayer,
     feature: FeatureLike,
-    resolution: number,
     label: string,
     filterEquation?: FilterNodeType[]
   ): Style | undefined {
@@ -676,7 +605,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     const style = layer.getStyle() || {};
 
     // Get and create Feature style if necessary
-    return GeoviewRenderer.getAndCreateFeatureStyle(feature, resolution, style, label, filterEquation, (geometryType, theStyle) => {
+    return GeoviewRenderer.getAndCreateFeatureStyle(feature, style, label, filterEquation, (geometryType, theStyle) => {
       // A new style has been created
       logger.logDebug('A new style has been created on-the-fly', geometryType, layer);
 
