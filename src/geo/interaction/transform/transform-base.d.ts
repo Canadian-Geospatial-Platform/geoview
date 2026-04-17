@@ -157,7 +157,6 @@ export declare class OLTransform extends OLPointer {
     contextMenuHandler: (e: MouseEvent) => void;
     /**
      * Cleans up the interaction.
-     * @override
      */
     dispose(): void;
     /**

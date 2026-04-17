@@ -2,7 +2,7 @@ import { type GeoChartStoreByLayerPath, type TypeGeochartResultSetEntry } from '
 import { type TypeOrderedLayerInfo } from './store-interface-and-intial-values/map-state';
 import type { TimeSliderLayerSet } from './store-interface-and-intial-values/time-slider-state';
 import type { EventDelegateBase } from '@/api/events/event-helper';
-import type { MapController } from '../controllers/map-controller';
+import type { LayerController } from '@/core/controllers/layer-controller';
 /**
  * API to manage states.
  */
@@ -11,9 +11,9 @@ export declare class StateApi {
     /**
      * Instantiates an StateApi class.
      *
-     * @param mapId - The map id this StateApi belongs to
+     * @param layerController - The layer controller instance to interact with layer-related states.
      */
-    constructor(mapController: MapController);
+    constructor(layerController: LayerController);
     /**
      * Get the collapsed state of layer's legend.
      * @param layerPath - Path of the layer to get state for.

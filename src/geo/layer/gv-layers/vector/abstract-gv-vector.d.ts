@@ -10,7 +10,7 @@ import type { Pixel } from 'ol/pixel';
 import type { Projection as OLProjection } from 'ol/proj';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
-import type { TypeFeatureInfoResult } from '@/api/types/map-schema-types';
+import type { TypeFeatureInfoResult, TypeLayerStyleConfig } from '@/api/types/map-schema-types';
 import type { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVVectorSource } from '@/geo/layer/source/vector-source';
@@ -23,6 +23,8 @@ export declare abstract class AbstractGVVector extends AbstractGVLayer {
     #private;
     /** Indicates if the style has been applied on the layer yet */
     styleApplied: boolean;
+    /** Maximum number of styles to cache */
+    static readonly STYLE_CACHE_SIZE_LIMIT = 1000;
     /**
      * Constructs a GeoView Vector layer to manage an OpenLayer layer.
      *
@@ -129,6 +131,12 @@ export declare abstract class AbstractGVVector extends AbstractGVLayer {
      * @returns A promise that resolves with the extent of the features.
      */
     onGetExtentFromFeatures(objectIds: number[] | string[], outProjection: OLProjection, outfield?: string): Promise<Extent>;
+    /**
+     * Sets the layer style.
+     *
+     * @param style - The layer style
+     */
+    setStyle(style: TypeLayerStyleConfig): void;
     /**
      * Sets the style applied flag indicating when a style has been applied for the AbstractGVVector via the style callback function.
      *

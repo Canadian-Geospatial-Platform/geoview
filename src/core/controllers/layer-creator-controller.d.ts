@@ -1,10 +1,8 @@
-import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import { type EventDelegateBase } from '@/api/events/event-helper';
 import { type MapConfigLayerEntry, type TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { LayerDomain } from '@/core/domains/layer-domain';
-import { type TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import type { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import type { MapViewer } from '@/geo/map/map-viewer';
@@ -17,7 +15,7 @@ export declare class LayerCreatorController extends AbstractMapViewerController 
      */
     constructor(mapViewer: MapViewer, layerDomain: LayerDomain);
     /**
-     * Load layers that was passed in with the map config
+     * Loads layers that were passed in with the map config.
      *
      * @param mapConfigLayerEntries - An optional array containing layers passed within the map config
      * @returns A promise that resolves when everything is done
@@ -38,10 +36,10 @@ export declare class LayerCreatorController extends AbstractMapViewerController 
      * and makes sure to inform the layer sets about the layer. The result contains the instanciated GeoViewLayer along
      * with a promise that will resolve when the layer will be officially on the map.
      *
-     * @param geoviewLayerConfig - The geoview layer configuration to add.
-     * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
-     * @returns The result of the addition of the geoview layer.
-     * @throws {LayerCreatedTwiceError} When there already is a layer on the map with the provided geoviewLayerId.
+     * @param geoviewLayerConfig - The geoview layer configuration to add
+     * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+     * @returns The result of the addition of the geoview layer
+     * @throws {LayerCreatedTwiceError} When there already is a layer on the map with the provided geoviewLayerId
      */
     addGeoviewLayer(geoviewLayerConfig: TypeGeoviewLayerConfig, abortSignal?: AbortSignal): GeoViewLayerAddedResult;
     /**
@@ -71,8 +69,8 @@ export declare class LayerCreatorController extends AbstractMapViewerController 
      * If it's an aggregate error, log and show all of them.
      * If it's a regular error, log and show only that error.
      *
-     * @param error - The error to log and show.
-     * @param geoviewLayerId - The Geoview layer id for which the error happened.
+     * @param error - The error to log and show
+     * @param geoviewLayerId - The Geoview layer id for which the error happened
      */
     showLayerError(error: unknown, geoviewLayerId: string): void;
     /**
@@ -86,19 +84,19 @@ export declare class LayerCreatorController extends AbstractMapViewerController 
      * - If the layer type is not supported, an error is thrown.
      * - TODO: Refactor to use the validated configuration with metadata already fetched.
      *
-     * @param geoviewLayerConfig - The configuration object for the GeoView layer.
+     * @param geoviewLayerConfig - The configuration object for the GeoView layer
      * @returns An instance of the corresponding `AbstractGeoViewLayer` subclass
-     * @throws {NotSupportedError} When the configuration does not match any supported layer type.
+     * @throws {NotSupportedError} When the configuration does not match any supported layer type
      */
     static createLayerConfigFromType(geoviewLayerConfig: TypeGeoviewLayerConfig): AbstractGeoViewLayer;
     /**
      * Converts a list of map configuration layer entries into an array of promises,
      * each resolving to one or more GeoView layer configuration objects.
      *
-     * @param mapId - The unique identifier of the map instance this configuration applies to.
-     * @param language - The language setting used for layer labels and metadata.
-     * @param mapConfigLayerEntries - The array of layer entries to convert.
-     * @param errorCallback - Callback invoked when an error occurs during layer processing.
+     * @param mapId - The unique identifier of the map instance this configuration applies to
+     * @param language - The language setting used for layer labels and metadata
+     * @param mapConfigLayerEntries - The array of layer entries to convert
+     * @param errorCallback - Callback invoked when an error occurs during layer processing
      * @returns An array of promises, each resolving to a TypeGeoviewLayerConfig object
      */
     static convertMapConfigsToGeoviewLayerConfig(mapId: string, currentLayerIds: string[], language: TypeDisplayLanguage, mapConfigLayerEntries: MapConfigLayerEntry[], errorCallback: (mapConfigLayerEntry: MapConfigLayerEntry, error: unknown) => void): Promise<TypeGeoviewLayerConfig>[];
@@ -109,20 +107,13 @@ export declare class LayerCreatorController extends AbstractMapViewerController 
      * this function processes each entry accordingly and wraps the result in a `Promise`.
      * Errors encountered during asynchronous operations are handled via a provided callback.
      *
-     * @param mapId - The unique identifier of the map instance this configuration applies to.
-     * @param language - The language setting used for layer labels and metadata.
-     * @param entry - The array of layer entry to convert.
-     * @param errorCallback - Callback invoked when an error occurs during layer processing.
+     * @param mapId - The unique identifier of the map instance this configuration applies to
+     * @param language - The language setting used for layer labels and metadata
+     * @param entry - The array of layer entry to convert
+     * @param errorCallback - Callback invoked when an error occurs during layer processing
      * @returns A promise that resolves to a TypeGeoviewLayerConfig object
      */
     static convertMapConfigToGeoviewLayerConfig(mapId: string, currentLayerIds: string[], language: TypeDisplayLanguage, entry: MapConfigLayerEntry, errorCallback: (mapConfigLayerEntry: MapConfigLayerEntry, error: unknown) => void): Promise<TypeGeoviewLayerConfig>;
-    /**
-     * Generate an array of layer info for the orderedLayerList.
-     *
-     * @param geoviewLayerConfig - The config to get the info from.
-     * @returns The array of ordered layer info
-     */
-    static generateArrayOfLayerOrderInfo(geoviewLayerConfig: TypeGeoviewLayerConfig | ConfigBaseClass): TypeOrderedLayerInfo[];
     /**
      * Registers a layer config added event handler.
      *
@@ -179,58 +170,36 @@ export type GeoViewLayerAddedResult = {
     /** A promise that resolves when the layer is fully loaded. */
     promiseLayer: Promise<void>;
 };
-/**
- * Define an event for the delegate
- */
+/** Defines the event payload for the layer loaded delegate. */
 export type LayerEvent = {
     /** The loaded layer. */
     layer: AbstractGVLayer;
 };
-/**
- * Define a delegate for the event handler function signature
- */
+/** Defines a delegate for the layer loaded event handler function signature. */
 export type LayerDelegate = EventDelegateBase<LayerCreatorController, LayerEvent, void>;
-/**
- * Define an event for the delegate
- */
+/** Defines the event payload for the layer path delegate. */
 export type LayerPathEvent = {
     /** The layer path. */
     layerPath: string;
     /** The layer name. */
     layerName: string;
 };
-/**
- * Define a delegate for the event handler function signature
- */
+/** Defines a delegate for the layer path event handler function signature. */
 export type LayerPathDelegate = EventDelegateBase<LayerCreatorController, LayerPathEvent, void>;
-/**
- * Define an event for the delegate
- */
+/** Defines the event payload for the layer builder delegate. */
 export type LayerBuilderEvent = {
+    /** The built layer. */
     layer: AbstractGeoViewLayer;
 };
-/**
- * Define a delegate for the event handler function signature
- */
+/** Defines a delegate for the layer builder event handler function signature. */
 export type LayerBuilderDelegate = EventDelegateBase<LayerCreatorController, LayerBuilderEvent, void>;
-/**
- * Define an event for the delegate
- */
+/** Defines the event payload for the layer config error delegate. */
 export type LayerConfigErrorEvent = {
     /** The layer path (or the geoview layer id) depending when the error occurs in the process. */
     layerPath: string;
     /** The error message. */
     error: string;
 };
-/**
- * Define a delegate for the event handler function signature
- */
+/** Defines a delegate for the layer config error event handler function signature. */
 export type LayerConfigErrorDelegate = EventDelegateBase<LayerCreatorController, LayerConfigErrorEvent, void>;
-/**
- * Hook to access the LayerCreatorController from the controller context.
- *
- * @returns The layer creator controller instance
- * @throws {Error} When used outside of a ControllerContext.Provider.
- */
-export declare function useLayerCreatorController(): LayerCreatorController;
 //# sourceMappingURL=layer-creator-controller.d.ts.map

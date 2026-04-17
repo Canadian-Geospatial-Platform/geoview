@@ -23,8 +23,8 @@ export declare class PluginController extends AbstractMapViewerController {
     /**
      * Retrieves a plugin instance registered for a given map viewer, if it exists.
      *
-     * @param pluginId - The identifier of the plugin to retrieve.
-     * @returns A promise that resolves to the plugin instance if found, or `undefined` otherwise.
+     * @param pluginId - The identifier of the plugin to retrieve
+     * @returns A promise that resolves to the plugin instance if found, or `undefined` otherwise
      */
     getMapViewerPluginIfExists(pluginId: string): Promise<AbstractPlugin | undefined>;
     /**
@@ -32,7 +32,7 @@ export declare class PluginController extends AbstractMapViewerController {
      * This method first loads the plugin script by name, then registers the
      * plugin with the {@link PluginController} for the specified map.
      *
-     * @param pluginName - The name of the plugin to load and register.
+     * @param pluginName - The name of the plugin to load and register
      * @returns A promise that resolves when the plugin has been successfully loaded
      * and added to the map, or rejects with a formatted error if loading or registration fails.
      */
@@ -69,11 +69,4 @@ export declare class PluginController extends AbstractMapViewerController {
      */
     static loadScript(pluginId: string): Promise<typeof AbstractPlugin>;
 }
-/**
- * Hook to access the PluginController from the controller context.
- *
- * @returns The plugin controller instance
- * @throws {Error} When used outside of a ControllerContext.Provider.
- */
-export declare function usePluginController(): PluginController;
 //# sourceMappingURL=plugin-controller.d.ts.map

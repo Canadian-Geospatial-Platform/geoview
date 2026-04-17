@@ -36,12 +36,4 @@ export declare class TimeSliderController extends AbstractMapViewerController {
      */
     updateTimeSliderFiltering(layerPath: string, filtering: boolean): void;
 }
-/**
- * Hook to access the TimeSliderController from the controller context.
- *
- * @returns The time slider controller instance
- * @throws {Error} When used outside of a ControllerContext.Provider.
- * @throws {Error} When the TimeSlider plugin is not configured.
- */
-export declare function useTimeSliderController(): TimeSliderController;
 //# sourceMappingURL=time-slider-controller.d.ts.map

@@ -496,7 +496,7 @@ export declare abstract class GeoUtilities {
      * @param geom2 - The second geometry
      * @returns Whether the two geometries are equal or not
      */
-    static geometriesAreEqual(geom1: Geometry, geom2: Geometry): boolean;
+    static geometriesAreEqual(geom1: Geometry | undefined, geom2: Geometry | undefined): boolean;
     /**
      * Apply buffer to extent.
      *

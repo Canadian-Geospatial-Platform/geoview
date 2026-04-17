@@ -5,6 +5,7 @@ import { OverviewMap as OLOverviewMap } from 'ol/control';
 import type { TypeBasemapOptions, TypeValidMapProjectionCodes, TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import type { TypeBasemapProps, BasemapCreationList } from '@/geo/layer/basemap/basemap-types';
 import type { EventDelegateBase } from '@/api/events/event-helper';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import type { MapViewer } from '@/geo/map/map-viewer';
 /**
  * A class to get a Basemap for a define projection and language. For the moment, a list maps are available and
@@ -139,7 +140,7 @@ type BasemapChangedDelegate = EventDelegateBase<BasemapApi, BasemapChangedEvent,
  * Define an event for the delegate.
  */
 export type BasemapErrorEvent = {
-    error: Error;
+    error: GeoViewError;
 };
 /**
  * Define a delegate for the event handler function signature.

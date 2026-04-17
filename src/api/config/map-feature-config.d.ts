@@ -28,6 +28,8 @@ export declare class MapFeatureConfig {
     globalSettings: TypeGlobalSettings;
     /** Service URLs. */
     serviceUrls: TypeServiceUrls;
+    /** Indicates whether schema validation errors were detected during configuration parsing. */
+    hasSchemaErrors: boolean;
     /**
      * The schema version used to validate the configuration file. The schema should enumerate the list of versions accepted by
      * this version of the viewer.

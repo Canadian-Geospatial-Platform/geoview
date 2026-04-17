@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react';
 import type { SxProps, Theme } from '@mui/material/styles';
+import { type SliderProps as MuiSliderProps } from '@mui/material';
 import type { Mark } from '@mui/base';
 /**
  * Properties for the Slider
@@ -25,6 +26,7 @@ type SliderProps = {
     ariaLabelledby?: string;
     valueLabelFormat?: string | ((value: number, index: number) => ReactNode);
     valueLabelDisplay?: 'auto' | 'on';
+    slotProps?: MuiSliderProps['slotProps'];
 };
 /**
  * Custom Material-UI Slider component with advanced label and mark management.

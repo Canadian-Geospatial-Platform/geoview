@@ -1,12 +1,14 @@
 import type BaseLayer from 'ol/layer/Base';
 import type { GeoJSONObject } from 'ol/format/GeoJSON';
+import type { FitOptions } from 'ol/View';
 import { type Extent, type TypeFeatureInfoEntryPartial } from '@/api/types/map-schema-types';
-import type { TypeLayerStatus, TypeMosaicMethod, TypeMosaicOperation, TypeMosaicRule } from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeLayerStatus, TypeMosaicMethod, TypeMosaicOperation, TypeMosaicRule } from '@/api/types/layer-schema-types';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import type { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
+import { type TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import type { LayerDomain } from '@/core/domains/layer-domain';
 import type { TemporalMode, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import type { TypeLegendItem } from '@/core/components/layers/types';
@@ -14,6 +16,7 @@ import { MapViewer } from '@/geo/map/map-viewer';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
+import { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 /**
  * LayerController class that extends the AbstractMapViewerController and provides methods to interact with map layers.
  */
@@ -24,8 +27,8 @@ export declare class LayerController extends AbstractMapViewerController {
     /**
      * Creates an instance of LayerController.
      *
-     * @param mapViewer - The map viewer instance to associate with this controller.
-     * @param layerDomain - The layer domain instance to associate with this controller.
+     * @param mapViewer - The map viewer instance to associate with this controller
+     * @param layerDomain - The layer domain instance to associate with this controller
      */
     constructor(mapViewer: MapViewer, layerDomain: LayerDomain);
     /**
@@ -58,8 +61,8 @@ export declare class LayerController extends AbstractMapViewerController {
      * Retrieves the layer entry configuration for the given layer path.
      *
      * @param layerPath - The layer path to look up
-     * @returns The ConfigBaseClass layer configuration.
-     * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
+     * @returns The ConfigBaseClass layer configuration
+     * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path
      */
     getLayerEntryConfig(layerPath: string): ConfigBaseClass;
     /**
@@ -72,19 +75,19 @@ export declare class LayerController extends AbstractMapViewerController {
     /**
      * Gets the layer configuration of a regular layer (not a group) at the specified layer path.
      *
-     * @param layerPath - The layer path.
-     * @returns The layer configuration.
-     * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
-     * @throws {LayerWrongTypeError} When the layer configuration is of the wrong type at the given layer path.
+     * @param layerPath - The layer path
+     * @returns The layer configuration
+     * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path
+     * @throws {LayerWrongTypeError} When the layer configuration is of the wrong type at the given layer path
      */
     getLayerEntryConfigRegular(layerPath: string): AbstractBaseLayerEntryConfig;
     /**
      * Gets the layer configuration of a group layer (not a regular) at the specified layer path.
      *
-     * @param layerPath - The layer path.
-     * @returns The layer configuration.
-     * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
-     * @throws {LayerWrongTypeError} When the layer configuration is of the wrong type at the given layer path.
+     * @param layerPath - The layer path
+     * @returns The layer configuration
+     * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path
+     * @throws {LayerWrongTypeError} When the layer configuration is of the wrong type at the given layer path
      */
     getLayerEntryConfigGroup(layerPath: string): GroupLayerEntryConfig;
     /**
@@ -94,7 +97,7 @@ export declare class LayerController extends AbstractMapViewerController {
      */
     getGeoviewLayerPaths(): string[];
     /**
-     * Gets all GeoView Layers
+     * Gets all GeoView layers.
      *
      * @returns The list of new Geoview Layers
      */
@@ -105,7 +108,7 @@ export declare class LayerController extends AbstractMapViewerController {
      * This method filters the list returned by `getGeoviewLayers()` and
      * returns only the layers that are instances of `AbstractGVLayer`.
      *
-     * @returns An array containing only the regular layers from the current GeoView layer collection.
+     * @returns An array containing only the regular layers from the current GeoView layer collection
      */
     getGeoviewLayersRegulars(): AbstractGVLayer[];
     /**
@@ -114,13 +117,13 @@ export declare class LayerController extends AbstractMapViewerController {
      * This method filters the list returned by `getGeoviewLayers()` and
      * returns only the layers that are instances of `GVGroupLayer`.
      *
-     * @returns An array containing only the group layers from the current GeoView layer collection.
+     * @returns An array containing only the group layers from the current GeoView layer collection
      */
     getGeoviewLayersGroups(): GVGroupLayer[];
     /**
      * Gets all GeoView layers that are at the root.
      *
-     * @returns An array containing only the layers at the root level of the registry.
+     * @returns An array containing only the layers at the root level of the registry
      */
     getGeoviewLayersRoot(): AbstractBaseGVLayer[];
     /**
@@ -128,7 +131,7 @@ export declare class LayerController extends AbstractMapViewerController {
      *
      * @param layerPath - The layer path to look up
      * @returns The Geoview layer
-     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
+     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
      */
     getGeoviewLayer(layerPath: string): AbstractBaseGVLayer;
     /**
@@ -146,8 +149,8 @@ export declare class LayerController extends AbstractMapViewerController {
      *
      * @param layerPath - The layer path
      * @returns The AbstractGVLayer Layer
-     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
-     * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path.
+     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
+     * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path
      */
     getGeoviewLayerRegular(layerPath: string): AbstractGVLayer;
     /**
@@ -158,7 +161,7 @@ export declare class LayerController extends AbstractMapViewerController {
      *
      * @param layerPath - The layer path
      * @returns The AbstractGVLayer or undefined when not found
-     * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path.
+     * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path
      */
     getGeoviewLayerRegularIfExists(layerPath: string): AbstractGVLayer | undefined;
     /**
@@ -167,16 +170,16 @@ export declare class LayerController extends AbstractMapViewerController {
      * This function waits the timeout period before abandonning (or uses the default timeout when not provided).
      * Note this function uses the 'Async' suffix to differentiate it from 'getOLLayer'.
      *
-     * @param layerPath - The layer path to the layer's configuration.
+     * @param layerPath - The layer path to the layer's configuration
      * @param timeout - Optionally indicate the timeout after which time to abandon the promise
      * @param checkFrequency - Optionally indicate the frequency at which to check for the condition on the layer
-     * @returns A promise that resolves to an OpenLayer layer associated to the layer path.
+     * @returns A promise that resolves to an OpenLayer layer associated to the layer path
      */
     getOLLayerAsync(layerPath: string, timeout?: number, checkFrequency?: number): Promise<BaseLayer>;
     /**
      * Gets the max extent of all layers on the map, or of a provided subset of layers.
      *
-     * @param layerIds - Identifiers or layerPaths of layers to get max extents from.
+     * @param layerIds - Identifiers or layerPaths of layers to get max extents from
      * @returns A promise that resolves with the overall extent or undefined when no bounds are found
      */
     getExtentOfMultipleLayers(layerIds?: string[]): Promise<Extent | undefined>;
@@ -187,14 +190,14 @@ export declare class LayerController extends AbstractMapViewerController {
      * @param objectIds - The IDs of features to get extents from
      * @param outfield - Optional ID field to return for services that require a value in outfields
      * @returns A promise that resolves with the extent of the features
-     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
-     * @throws {LayerWrongTypeError} When the layer was of wrong type.
+     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
+     * @throws {LayerWrongTypeError} When the layer was of wrong type
      */
     getExtentFromFeatures(layerPath: string, objectIds: number[], outfield?: string): Promise<Extent>;
     /**
      * Retrieves the service (metadata) projection code for a specific raster layer.
      *
-     * @param layerPath - The fully qualified path of the layer.
+     * @param layerPath - The fully qualified path of the layer
      * @returns The projection code (e.g., "EPSG:4326") defined in the layer's service metadata,
      *          or `undefined` if:
      *          - the layer does not exist,
@@ -211,29 +214,29 @@ export declare class LayerController extends AbstractMapViewerController {
     /**
      * Gets the raster function previews for the ESRI image layer.
      *
-     * @param layerPath - The layer path.
-     * @returns The raster function previews.
+     * @param layerPath - The layer path
+     * @returns The raster function previews
      */
     getLayerRasterFunctionPreviews(layerPath: string): Map<string, Promise<string>>;
     /**
      * Checks if a layer has a text layer.
      *
-     * @param layerPath - The layer path of the layer to check.
-     * @returns True if the layer has a text layer, false otherwise.
+     * @param layerPath - The layer path of the layer to check
+     * @returns True if the layer has a text layer, false otherwise
      */
     getLayerHasText(layerPath: string): boolean;
     /**
      * Gets the text visibility state for a layer.
      *
-     * @param layerPath - The layer path of the layer to check.
-     * @returns True if text is visible, false otherwise. Returns undefined if layer has no text.
+     * @param layerPath - The layer path of the layer to check
+     * @returns True if text is visible, false otherwise. Returns undefined if layer has no text
      */
     getLayerTextVisibility(layerPath: string): boolean | undefined;
     /**
      * Sets the text visibility for a layer.
      *
-     * @param layerPath - The layer path of the layer to change.
-     * @param visible - True to show text, false to hide text.
+     * @param layerPath - The layer path of the layer to change
+     * @param visible - True to show text, false to hide text
      */
     setLayerTextVisibility(layerPath: string, visible: boolean): void;
     /**
@@ -241,15 +244,15 @@ export declare class LayerController extends AbstractMapViewerController {
      *
      * @param layerPath - The layer path to set the queryable property
      * @param name - The value to set for the name property
-     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
-     * @throws {LayerWrongTypeError} When the layer was of wrong type.
+     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
+     * @throws {LayerWrongTypeError} When the layer was of wrong type
      */
     setLayerName(layerPath: string, name: string): void;
     /**
      * Sets opacity for a layer.
      *
-     * @param layerPath - The path of the layer.
-     * @param opacity - The new opacity to use.
+     * @param layerPath - The path of the layer
+     * @param opacity - The new opacity to use
      * @param emitOpacityChange - Whether to emit the event or not (false to avoid updating the legend layers)
      * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
      */
@@ -259,26 +262,151 @@ export declare class LayerController extends AbstractMapViewerController {
      *
      * @param layerPath - The layer path to set the queryable property
      * @param queryable - The value to set for the queryable property
-     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
-     * @throws {LayerWrongTypeError} When the layer was of wrong type.
+     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
+     * @throws {LayerWrongTypeError} When the layer was of wrong type
      */
     setLayerQueryable(layerPath: string, queryable: boolean): void;
     /**
      * Sets hoverable state for a layer.
      *
-     * @param layerPath - The path of the layer.
-     * @param hoverable - The new hoverable state for the layer.
-     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
-     * @throws {LayerWrongTypeError} When the layer was of wrong type.
+     * @param layerPath - The path of the layer
+     * @param hoverable - The new hoverable state for the layer
+     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
+     * @throws {LayerWrongTypeError} When the layer was of wrong type
      */
     setLayerHoverable(layerPath: string, hoverable: boolean): void;
     /**
+     * Sets or toggles the visibility of a specific layer within a map.
+     *
+     * If the layer exists at the provided layer path for the given map, the method delegates
+     * the visibility change to the map viewer's layer API. If `newValue` is provided, the layer
+     * visibility is explicitly set to that value; otherwise, the visibility is toggled.
+     *
+     * @param layerPath - The path of the layer whose visibility is being changed
+     * @param newValue - Optional. The new visibility value. If omitted, the visibility is toggled
+     * @returns The resulting visibility state of the layer after the operation, or `false`
+     * if the layer does not exist at the given path.
+     */
+    setOrToggleMapLayerVisibility(layerPath: string, newValue?: boolean): boolean;
+    /**
+     * Sets or toggles the visibility of a layer within the current map.
+     *
+     * Retrieves the current visibility of the layer, determines the resulting visibility
+     * based on the optional `newValue`, and applies the change only if the visibility
+     * actually differs. If `newValue` is provided, the visibility is set explicitly;
+     * if omitted, the method toggles the current visibility.
+     *
+     * @param layerPath - The path of the layer whose visibility is being updated
+     * @param newValue - Optional. The new visibility value to apply. If omitted, the current visibility is toggled
+     * @returns The resulting visibility state of the layer after the update
+     * @throws {LayerNotFoundError} When the layer cannot be found at the given path
+     */
+    setOrToggleLayerVisibility(layerPath: string, newValue?: boolean): boolean;
+    /**
+     * Sets the visibility of all geoview layers on the map.
+     *
+     * @param newValue - The new visibility
+     */
+    setAllLayersVisibility(newValue: boolean): void;
+    /**
+     * Sets the visibility of the Geoview basemap layer.
+     *
+     * @param newVisibility - The visibility state to apply to the basemap layer (`true` to show, `false` to hide)
+     */
+    setVisibilityOfGeoviewBasemapLayers(newVisibility: boolean): void;
+    /**
+     * Sets the visibility of **all layers** in a given map.
+     *
+     * Iterates through all GeoView layers associated with the specified map ID and
+     * applies the provided visibility value. Only layers whose current visibility
+     * differs from the desired state will be updated.
+     *
+     * @param newVisibility - The visibility state to apply to all layers (`true` to show, `false` to hide)
+     */
+    setAllMapLayerVisibility(newVisibility: boolean): void;
+    /**
+     * Sets the visibility of a layer in the store ordered layer info.
+     *
+     * @param layerPath - The layer path of the layer to change
+     * @param visibility - The visibility to set
+     */
+    setMapLayerVisibility(layerPath: string, visibility: boolean): void;
+    /**
+     * Updates the visible-range settings (min/max zoom) of a GeoView layer and
+     * stores whether the layer is currently within the visible range based on
+     * the map's zoom level.
+     *
+     * Behavior:
+     *  - Reads the layer's configuration to determine min/max zoom or min/max scale.
+     *  - Converts scale-based limits into zoom levels when necessary.
+     *  - Applies calculated `minZoom` and `maxZoom` to non-group layers only.
+     *    (Group layers are skipped because their children already inherit the
+     *     correct configuration and visibility is handled elsewhere.)
+     *  - Computes whether the layer is currently in visible range and updates
+     *    the store via `mapController`.
+     *
+     * @param gvLayer - The layer whose visibility
+     *   range should be recalculated and stored.
+     */
+    updateLayerInVisibleRange(gvLayer: AbstractBaseGVLayer): void;
+    /**
+     * Sets the visible range state for a layer and updates Z indices.
+     *
+     * @param layerPath - The path identifying the target layer
+     * @param inVisibleRange - Whether the layer is within the visible zoom range
+     */
+    setLayerInVisibleRange(layerPath: string, inVisibleRange: boolean): void;
+    /**
+     * Sets Z index for layers.
+     */
+    setLayerZIndices(): void;
+    /**
+     * Replaces a layer in the orderedLayerInfo array.
+     *
+     * @param layerConfig - The config of the layer to add
+     * @param layerPathToReplace - The layerPath of the info to replace
+     */
+    replaceOrderedLayerInfo(layerConfig: ConfigBaseClass, layerPathToReplace?: string): void;
+    /**
+     * Adds a new layer to the orderedLayerInfo array using a layer config.
+     *
+     * @param geoviewLayerConfig - The config of the layer to add
+     */
+    addOrderedLayerInfoByConfig(geoviewLayerConfig: TypeGeoviewLayerConfig | TypeLayerEntryConfig, index?: number): void;
+    /**
+     * Adds new layer info to the orderedLayerInfo array.
+     *
+     * @param layerInfo - The ordered layer info to add
+     */
+    addOrderedLayerInfo(layerInfo: TypeOrderedLayerInfo, index?: number): void;
+    /**
+     * Removes a layer from the orderedLayerInfo array.
+     *
+     * @param layerPath - The path of the layer to remove
+     * @param removeSublayers - Should sublayers be removed
+     */
+    removeOrderedLayerInfo(layerPath: string, removeSublayers?: boolean): void;
+    /**
+     * Updates the ordered layer info in the store and recalculates layer Z indices.
+     *
+     * @param orderedLayerInfo - The new ordered layer info array
+     * @deprecated This function shouldn't exist as it breaks the separation of concern between the controller and the store implementation.
+     */
+    setMapOrderedLayerInfoDirectly(orderedLayerInfo: TypeOrderedLayerInfo[]): void;
+    /**
+     * Reorders a layer by moving it up or down in the layer stack.
+     *
+     * @param layerPath - The layer path to reorder
+     * @param move - The number of positions to move (positive = up, negative = down)
+     */
+    reorderLayer(layerPath: string, move: number): void;
+    /**
      * Updates the raster function for an ESRI Image layer.
      *
-     * @param layerPath - The path of the layer.
-     * @param rasterFunctionId - The raster function ID to apply or undefined to remove it.
-     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
-     * @throws {LayerWrongTypeError} When the layer is not an ESRI Image layer.
+     * @param layerPath - The path of the layer
+     * @param rasterFunctionId - The raster function ID to apply or undefined to remove it
+     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
+     * @throws {LayerWrongTypeError} When the layer is not an ESRI Image layer
      */
     setLayerRasterFunction(layerPath: string, rasterFunctionId: string | undefined): void;
     /**
@@ -307,29 +435,27 @@ export declare class LayerController extends AbstractMapViewerController {
      *
      * @param layerPath - The layer path
      * @param mosaicRule - The mosaic rule to apply or undefined to remove it
-     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
+     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
      */
     setLayerMosaicRule(layerPath: string, mosaicRule: TypeMosaicRule | undefined): void;
     /**
-     * Updates the visible-range settings (min/max zoom) of a GeoView layer and
-     * stores whether the layer is currently within the visible range based on
-     * the map's zoom level.
+     * Applies all available filters to layer.
      *
-     * Behavior:
-     *  - Reads the layer's configuration to determine min/max zoom or min/max scale.
-     *  - Converts scale-based limits into zoom levels when necessary.
-     *  - Applies calculated `minZoom` and `maxZoom` to non-group layers only.
-     *    (Group layers are skipped because their children already inherit the
-     *     correct configuration and visibility is handled elsewhere.)
-     *  - Computes whether the layer is currently in visible range and updates
-     *    the store via `mapController`.
-     *
-     * @param gvLayer - The layer whose visibility
-     *   range should be recalculated and stored.
+     * @param layerPath - The path of the layer to apply filters to
+     * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path
      */
-    setLayerInVisibleRange(gvLayer: AbstractBaseGVLayer): void;
+    applyLayerFilters(layerPath: string): void;
     /**
-     * Checks if the layer results sets are all greater than or equal to the provided status
+     * Gets all active filters for layer.
+     *
+     * @param layerPath - The path for the layer to get filters from
+     * @returns The active layer filters
+     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
+     * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path
+     */
+    getActiveFilters(layerPath: string): LayerFilters;
+    /**
+     * Checks if the layer results sets are all greater than or equal to the provided status.
      *
      * @returns Indicates if all layers passed the callback and how many have passed the callback
      */
@@ -358,7 +484,7 @@ export declare class LayerController extends AbstractMapViewerController {
      * @param layerPath - The layer path to refresh
      * @returns A promise that resolves once the layer has been refreshed,
      * its states reset, and its items rendered if visible
-     * @throws {LayerNotFoundError} When the layer could not be found at the specified layer path.
+     * @throws {LayerNotFoundError} When the layer could not be found at the specified layer path
      */
     resetLayer(layerPath: string): Promise<void>;
     /**
@@ -370,15 +496,15 @@ export declare class LayerController extends AbstractMapViewerController {
      * render cycle before resolving. Finally, it emits an event indicating the visibility
      * change.
      *
-     * @param layerPath - The path identifying the target layer within the map.
-     * @param item - The legend item whose visibility will be updated.
-     * @param visible - Whether the item should be visible.
+     * @param layerPath - The path identifying the target layer within the map
+     * @param item - The legend item whose visibility will be updated
+     * @param visible - Whether the item should be visible
      * @param waitForRender - If `true`, the promise resolves only after the
      * underlying layer has finished its next render cycle.
      * @returns A promise that resolves once the visibility has been applied,
      * optional legend store updated, filters applied, and render completed if requested
-     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
-     * @throws {LayerWrongTypeError} When the layer was of wrong type.
+     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
+     * @throws {LayerWrongTypeError} When the layer was of wrong type
      */
     setItemVisibility(layerPath: string, item: TypeLegendItem, visible: boolean, waitForRender: boolean): Promise<void>;
     /**
@@ -413,8 +539,8 @@ export declare class LayerController extends AbstractMapViewerController {
      * @param visibility - Whether all items in the layer should be visible
      * @param waitForRender - If true, the returned promise resolves only after the layer has completed its next render cycle
      * @returns A promise that resolves once all item visibilities have been updated and the layer has rendered if requested
-     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
-     * @throws {LayerWrongTypeError} When the layer was of wrong type.
+     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
+     * @throws {LayerWrongTypeError} When the layer was of wrong type
      */
     setAllItemsVisibility(layerPath: string, visible: boolean, waitForRender: boolean): Promise<void>;
     /**
@@ -433,22 +559,44 @@ export declare class LayerController extends AbstractMapViewerController {
      */
     setHighlightLayer(layerPath: string): void;
     /**
-     * Highlights layer or sublayer on map
+     * Highlights layer or sublayer on map.
      *
      * @param layerPath - Identifier of layer to highlight
-     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
+     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
      */
     highlightLayer(layerPath: string): void;
     /**
+     * Updates or removes the layer highlight.
+     *
+     * @param layerPath - The layer path to set as the highlighted layer
+     * @param highlightedLayerPath - The layer path of the currently highlighted layer
+     * @returns The layer path of the highlighted layer
+     */
+    changeOrRemoveLayerHighlight(layerPath: string, highlightedLayerPath: string): string;
+    /**
      * Removes layer and feature highlights for a given layer.
      *
-     * @param layerPath - The path of the layer to remove highlights from.
+     * @param layerPath - The path of the layer to remove highlights from
      */
     removeLayerHighlights(layerPath: string): void;
     /**
-     * Removes layer or sublayer highlight
+     * Removes layer or sublayer highlight.
      */
     removeHighlightLayer(): void;
+    /**
+     * Zooms to layer visible scale.
+     *
+     * @param layerPath - Path of layer to zoom to
+     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
+     */
+    zoomToLayerVisibleScale(layerPath: string): void;
+    /**
+     * Zooms to extents of a layer.
+     *
+     * @param layerPath - The path of the layer to zoom to
+     * @throws {NoBoundsError} When the layer doesn't have bounds
+     */
+    zoomToLayerExtent(layerPath: string, fitOptions?: FitOptions): Promise<void>;
     /**
      * Clears any overridden CRS settings on all WMS layers in the map.
      *
@@ -463,7 +611,7 @@ export declare class LayerController extends AbstractMapViewerController {
      * are interpreted.
      * The value is stored in the application state via the LayerController.
      *
-     * @param layerPath - The unique path identifying the layer.
+     * @param layerPath - The unique path identifying the layer
      * @param temporalMode - The date format to apply
      * for displaying date values associated with this layer.
      */
@@ -475,8 +623,8 @@ export declare class LayerController extends AbstractMapViewerController {
      * are formatted when displayed (e.g., in legends, tooltips, or UI components).
      * The value is stored in the application state via the LayerController.
      *
-     * @param layerPath - The unique path identifying the layer.
-     * @param displayDateFormat - The date format to apply for displaying date values associated with this layer.
+     * @param layerPath - The unique path identifying the layer
+     * @param displayDateFormat - The date format to apply for displaying date values associated with this layer
      */
     setLayerDisplayDateFormat(layerPath: string, displayDateFormat: TypeDisplayDateFormat | string): void;
     /**
@@ -487,7 +635,7 @@ export declare class LayerController extends AbstractMapViewerController {
      * are formatted when displayed (e.g., in legends, tooltips, or UI components).
      * The value is stored in the application state via the LayerController.
      *
-     * @param layerPath - The unique path identifying the layer.
+     * @param layerPath - The unique path identifying the layer
      * @param displayDateFormat - The date format to apply
      * for displaying date values associated with this layer.
      */
@@ -502,12 +650,12 @@ export declare class LayerController extends AbstractMapViewerController {
     /**
      * Changes a GeoJson Source of a GeoJSON layer at the given layer path.
      *
-     * @param layerPath - The path of the layer.
-     * @param geojson - The new geoJSON.
+     * @param layerPath - The path of the layer
+     * @param geojson - The new geoJSON
      * @returns A promise that resolves when the geojson source has been set
-     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
-     * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path.
-     * @throws {LayerNotGeoJsonError} When the layer is not a GeoJson layer.
+     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
+     * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path
+     * @throws {LayerNotGeoJsonError} When the layer is not a GeoJson layer
      */
     setGeojsonSource(layerPath: string, geojson: GeoJSONObject | string): Promise<void>;
     /**
@@ -516,9 +664,9 @@ export declare class LayerController extends AbstractMapViewerController {
      * @param layerPath - The layer path of the layer to query
      * @param objectIDs - The object IDs to filter the query on
      * @returns A promise that resolves with an array of feature info entry records
-     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
-     * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path.
-     * @throws {LayerNotEsriDynamicError} When the layer configuration isn't EsriDynamic.
+     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
+     * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path
+     * @throws {LayerNotEsriDynamicError} When the layer configuration isn't EsriDynamic
      */
     queryLayerEsriDynamic(layerPath: string, objectIDs: number[]): Promise<TypeFeatureInfoEntryPartial[]>;
     /**
@@ -535,13 +683,13 @@ export declare class LayerController extends AbstractMapViewerController {
      * the previous timer is cancelled and a new one starts, preserving the
      * original visibility state from the first call.
      *
-     * @param layerPath - Unique path identifying the layer within the map.
-     * @param undoWindowDuration - Duration in milliseconds of the undo window before deletion is finalized.
+     * @param layerPath - Unique path identifying the layer within the map
+     * @param undoWindowDuration - Duration in milliseconds of the undo window before deletion is finalized
      * @returns A promise resolving to:
      * - `true` if the deletion completed successfully.
      * - `false` if the deletion was aborted, superseded by a newer call, or
      *   if the layer was already in the deletion process.
-     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
+     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
      */
     deleteLayerStartTimer(layerPath: string, undoWindowDuration: number): Promise<boolean>;
     /**
@@ -550,7 +698,7 @@ export declare class LayerController extends AbstractMapViewerController {
      * This restores the layer to its previous visibility state and stops
      * the deletion timer.
      *
-     * @param layerPath - Unique path identifying the layer within the map.
+     * @param layerPath - Unique path identifying the layer within the map
      */
     deleteLayerAbort(layerPath: string): void;
     /**
@@ -566,23 +714,15 @@ export declare class LayerController extends AbstractMapViewerController {
      */
     offLayerItemVisibilityChanged(callback: ControllerLayerItemVisibilityChangedDelegate): void;
 }
-/**
- * Layer Controller hook to access the layer controller from the context.
- *
- * @returns The layer controller instance from the context.
- * @throws {Error} When used outside of a ControllerContext.Provider.
- */
-export declare function useLayerController(): LayerController;
-/**
- * Define an event for the delegate
- */
+/** Defines the event payload for the layer item visibility changed delegate. */
 export type ControllerLayerItemVisibilityChangedEvent = {
+    /** The affected layer. */
     layer: AbstractGVLayer;
+    /** The item being changed. */
     item: TypeLegendItem;
+    /** The new visibility. */
     visible: boolean;
 };
-/**
- * Define a delegate for the event handler function signature
- */
+/** Defines a delegate for the layer item visibility changed event handler function signature. */
 export type ControllerLayerItemVisibilityChangedDelegate = EventDelegateBase<LayerController, ControllerLayerItemVisibilityChangedEvent, void>;
 //# sourceMappingURL=layer-controller.d.ts.map
