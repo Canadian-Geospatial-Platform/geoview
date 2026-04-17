@@ -13,6 +13,7 @@ import { CONTAINER_TYPE } from '@/core/utils/constant';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { useEventListener } from '@/core/components/common/hooks/use-event-listener';
 import { FullScreenDialog } from '@/core/components/common/full-screen-dialog';
+import { useAppShellContainer } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { DEFAULT_APPBAR_CORE } from '@/api/types/map-schema-types';
 
 /**
@@ -123,6 +124,7 @@ export function LegendFullscreen({ layersList, mapId, containerType, isOpen, onC
   // State
   const [fullscreenLegendLayerList, setFullscreenLegendLayersList] = useState<TypeLegendLayer[][]>([]);
   const [, setSavedCollapseState] = useState<Record<string, boolean>>({});
+  const shellContainer = useAppShellContainer();
 
   // Memoize breakpoint values
   const breakpoints = useMemo(() => {
@@ -281,6 +283,8 @@ export function LegendFullscreen({ layersList, mapId, containerType, isOpen, onC
         // Use onExited callback to restore focus to the fullscreen button after the dialog exit animation completes
         buttonRef.current?.focus();
       }}
+      container={shellContainer}
+      disableEnforceFocus={true}
     >
       <Box
         sx={sxClasses.fullscreenContainer}
