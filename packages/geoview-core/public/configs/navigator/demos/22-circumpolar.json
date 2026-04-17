@@ -39,7 +39,7 @@
             "source": {
               "extent": [-4889334.802955, -4889334.802955, 4889334.802955, 4889334.802955],
               "resolutionLevels": 11,
-              "projection": "3573",
+              "projection": 3573,
               "dataAccessPath": "https://basemap.arctic-sdi.org/mapcache/wmts"
             }
           }
