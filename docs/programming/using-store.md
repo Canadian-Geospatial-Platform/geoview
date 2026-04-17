@@ -1,11 +1,8 @@
 # Using Zustand Store
 
-> ** Audience:** GeoView core developers
->
-> **For API Users:** See [Event Processors](app/events/event-processors.md) for the public API approach to state management.
+> **Audience:** GeoView core developers
 
-We use [Zustand](https://github.com/pmndrs/zustand) store for our state management. We define a list of functions and concept to follow....
-For this reason we have put together some explanations here to help you use store functionnalities when programming.
+We use [Zustand](https://github.com/pmndrs/zustand) store for our state management. The store is split into slices (map, layer, UI, etc.) with three access patterns: **selector hooks** for React components, **getter/setter functions** for controllers, and **controller methods** for mutations.
 
 ## Dev tools
 
@@ -23,109 +20,137 @@ useEffect hook
 - Put all const that use new keyword or do something in your component in useEffect with empty bracket dependencies useEffect(..., []). This will allow to run the code only once when component is mounted.
 - Put store subscribe in useEffect with empty bracket and unsubcribe on return when component is unmount.
 
-## Store and ts files
+## Three Function Types per Store Slice
 
-No store leakage in ts file, always use the static method in the needed event processor
-**ts file**
+Each store state file in `src/core/stores/store-interface-and-intial-values/` exports three types of functions:
+
+### Selector Hooks (`useStore*`) — React components only
+
+Fine-grained hooks that trigger re-renders when the selected state changes.
 
 ```ts
-  /**
-   * Hide a click marker from the map
-   */
-  clickMarkerIconHide(): void {
-    MapEventProcessor.clickMarkerIconHide(this.mapId);
-  }
+// Pattern: useStore[SliceName][PropertyName]
+export const useStoreMapZoom = (): number =>
+  useStore(useGeoViewStore(), (state) => state.mapState.zoom);
 
-  /**
-   * Show a marker on the map
-   * @param {TypeClickMarker} marker the marker to add
-   */
-  clickMarkerIconShow(marker: TypeClickMarker): void {
-    MapEventProcessor.clickMarkerIconShow(this.mapId, marker);
-  }
+export const useStoreMapClickMarker = (): TypeClickMarker | undefined =>
+  useStore(useGeoViewStore(), (state) => state.mapState.clickMarker);
 ```
 
-**event processor file**
+### Getter Functions (`getStore*`) — controllers and non-React code
+
+Point-in-time snapshots. Takes `mapId` as first parameter.
 
 ```ts
-  // **********************************************************
-  // Static functions for Typescript files to set store values
-  // **********************************************************
-  static clickMarkerIconHide(mapId: string) {
-    const store = getGeoViewStore(mapId);
-    store.getState().mapState.actions.hideClickMarker();
-  }
+export const getStoreMapZoom = (mapId: string): number =>
+  getStoreMapState(mapId).zoom;
 
-  static clickMarkerIconShow(mapId: string, marker: TypeClickMarker) {
-    const store = getGeoViewStore(mapId);
-    store.getState().mapState.actions.showClickMarker(marker);
-  }
-  ...
+export const getStoreMapOrderedLayerInfo = (
+  mapId: string,
+): TypeOrderedLayerInfo[] => getStoreMapState(mapId).orderedLayerInfo;
 ```
 
-**store interface file**
+### Setter Functions (`setStore*`) — controllers only
+
+Mutate state via internal actions. Takes `mapId` as first parameter. **Never call these from React components.**
 
 ```ts
-export interface IMapState {
-  ...
-  clickMarker: TypeClickMarker | undefined;
-  ...
+export const setStoreMapZoom = (mapId: string, zoom: number): void => {
+  getStoreMapState(mapId).actions.setZoom(zoom);
+};
 
-  actions: {
-    hideClickMarker: () => void;
-    ...
-    showClickMarker: (marker: TypeClickMarker) => void;
-    ...
-  };
+export const setStoreMapClickMarker = (
+  mapId: string,
+  marker: TypeClickMarker,
+): void => {
+  getStoreMapState(mapId).actions.showClickMarker(marker);
+};
+```
+
+## Store Access Patterns
+
+### React Components — read via hooks, mutate via controllers
+
+Components read state through `useStore*` selector hooks and mutate through controller methods. **Never call `setStore*` functions directly from components.**
+
+```ts
+import { useStoreMapZoom, useStoreMapClickMarker } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useMapController } from '@/core/controllers/use-controllers';
+
+export function MyComponent(): JSX.Element {
+  // Read state — re-renders when values change
+  const zoom = useStoreMapZoom();
+  const clickMarker = useStoreMapClickMarker();
+
+  // Get controller for mutations
+  const mapController = useMapController();
+
+  const handleZoom = useCallback((): void => {
+    mapController.zoomToExtent(extent);
+  }, [mapController]);
+
+  return <Box onClick={handleZoom}>Zoom: {zoom}</Box>;
 }
+```
 
-export function initializeMapState(set: TypeSetStore, get: TypeGetStore) {
-  const init = {
-    ...
-    clickMarker: undefined,
-    ...
+### Controllers — read via getters, mutate via setters
 
-    actions: {
-      hideClickMarker: () => {
-        set({
-          mapState: { ...get().mapState, clickMarker: undefined },
-        });
-      },
-      ...
-      showClickMarker: (marker: TypeClickMarker) => {
-        set({
-          mapState: { ...get().mapState, clickMarker: marker },
-        });
-      },
-      ...
+Controllers import `getStore*` and `setStore*` functions directly. They contain the validation and business logic.
+
+```ts
+import {
+  getStoreMapZoom,
+  setStoreMapZoom,
+  setStoreMapProjection,
+} from "@/core/stores/store-interface-and-intial-values/map-state";
+
+export class MapController extends AbstractMapViewerController {
+  zoomToLevel(zoom: number): void {
+    const mapId = this.getMapId();
+    const currentZoom = getStoreMapZoom(mapId);
+
+    // Business logic / validation
+    if (zoom !== currentZoom) {
+      setStoreMapZoom(mapId, zoom);
     }
   }
 }
-
-// **********************************************************
-// Map state selectors
-// **********************************************************
-...
-export const useMapClickMarker = () => useStore(useGeoViewStore(), (state) => state.mapState.clickMarker);
-...
-
-export const useMapStoreActions = () => useStore(useGeoViewStore(), (state) => state.mapState.actions);
 ```
 
-**component file**
+### Cross-controller communication — via registry
+
+Inside a controller, access other controllers through `this.getControllersRegistry()`:
 
 ```ts
-// get values and actions from the store
-const clickMarker = useMapClickMarker();
-const { hideClickMarker, showClickMarker } = useMapStoreActions();
+// Inside a controller method
+this.getControllersRegistry().mapController.applyLayerFilters(layerPath);
+this.getControllersRegistry().uiController.setCircularProgress(true);
 ```
 
-## Store and components
+### Plugins and non-React classes — via `mapViewer.controllers`
 
-TO COME
+```ts
+// In a plugin
+const layerPaths =
+  this.mapViewer.controllers.layerController.getLayerEntryLayerPaths();
+this.mapViewer.controllers.timeSliderController?.checkInitTimeSliderLayerAndApplyFilters(
+  layer,
+  config,
+);
+```
+
+## Summary Table
+
+| Context                      | Read State                        | Mutate State                                      |
+| ---------------------------- | --------------------------------- | ------------------------------------------------- |
+| **React component**          | `useStore*` hooks                 | Controller methods via `useMapController()`, etc. |
+| **Inside controller**        | `getStore*` getters               | `setStore*` setters                               |
+| **Plugin / non-React class** | `this.mapViewer.controllers.*`    | `this.mapViewer.controllers.*` methods            |
+| **Test suite**               | `this.getControllersRegistry().*` | Controller methods                                |
+
+**Key rule:** Components never call `setStore*` directly — mutations always go through controller methods.
 
 ## See Also
 
-- **[Event Processors](app/events/event-processors.md)** - Public API for state management
 - **[Best Practices](programming/best-practices.md)** - Coding standards
-- **[Using TypeScript](programming/using-type.md)** - TypeScript patterns
+- **[Event Helper](programming/event-helper.md)** - Delegate event system

@@ -18,7 +18,7 @@ This section contains comprehensive documentation for GeoView's package system, 
 
 GeoView includes six built-in packages that extend the viewer's functionality:
 
-| Package            | Description                                | Location    |
+| Package           | Description                                | Location    |
 | ----------------- | ------------------------------------------ | ----------- |
 | **time-slider**   | Time dimension support for WMS/ESRI layers | Footer bar  |
 | **geochart**      | Interactive data visualization charts      | Footer bar  |
@@ -110,7 +110,7 @@ GeoView includes six built-in packages that extend the viewer's functionality:
 
 ## 🔗 Related Documentation
 
-- **[Event Processors](app/events/event-processors.md)** - State management for packages
+- **[Controllers API](app/events/controllers.md)** - Controllers for performing actions
 - **[Configuration Reference](app/config/configuration-reference.md)** - Package configuration options
 - **[API Reference](app/api/api.md)** - Core API methods
 - **[State Management](programming/using-store.md)** - Zustand store architecture
@@ -119,13 +119,13 @@ GeoView includes six built-in packages that extend the viewer's functionality:
 
 ### Common Tasks
 
-| Task                            | Documentation                                                     |
-| ------------------------------- | ----------------------------------------------------------------- |
-| Use a core package               | [Core Packages Reference](./geoview-core-packages.md)                            |
-| Create TypeScript package       | [Core Package Development](./core-packages.md)                    |
-| Create JavaScript package       | [JavaScript Package Development](./javascript-packages.md)        |
-| Understand package architecture | [Package Overview](./overview.md)                                 |
-| Configure package                | [Configuration Reference](app/config/configuration-reference.md) |
+| Task                            | Documentation                                                    |
+| ------------------------------- | ---------------------------------------------------------------- |
+| Use a core package              | [Core Packages Reference](./geoview-core-packages.md)            |
+| Create TypeScript package       | [Core Package Development](./core-packages.md)                   |
+| Create JavaScript package       | [JavaScript Package Development](./javascript-packages.md)       |
+| Understand package architecture | [Package Overview](./overview.md)                                |
+| Configure package               | [Configuration Reference](app/config/configuration-reference.md) |
 
 ---
 

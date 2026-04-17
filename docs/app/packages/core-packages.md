@@ -128,7 +128,6 @@ When creating a new package in the monorepo it will involve creating necessary f
 2. Add Top-Level Files
 
    Within your new package directory, create the following files:
-
    - README.md
 
      Provides documentation for the package. Include an overview, installation instructions, usage examples, etc.
@@ -152,7 +151,6 @@ When creating a new package in the monorepo it will involve creating necessary f
 4. Add the Source Files
 
    within the **src** directory create the following files:
-
    - _nameOfPackage_-panels.tsx
 
      Defines the react components or funcionalies of the panel.
@@ -251,7 +249,7 @@ CropOriginal as AoiIcon,
 ## See Also
 
 - **[Core Packages Reference](./geoview-core-packages.md)** - Complete package development guide with API reference
-- **[Event Processors](app/events/event-processors.md)** - State management for packages
+- **[Controllers API](app/events/controllers.md)** - Controllers for performing actions
 - **[Package Examples](https://github.com/Canadian-Geospatial-Platform/geoview/tree/develop/packages)** - Real package implementations
 
 ## Available core packages

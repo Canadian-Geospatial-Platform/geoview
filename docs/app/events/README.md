@@ -1,12 +1,12 @@
 # GeoView Event System
 
-Documentation for GeoView's event system, event types, and event processors.
+Documentation for GeoView's event system, event types, and controllers.
 
 ## Event System Overview
 
 - **[Event System](app/events/event-system.md)** - Core event concepts and architecture
-- **[Event Processors](app/events/event-processors.md)** - State management and event handling
-- **[Event Creation](app/events/event-creation.md)** - Creating custom events
+- **[Controllers](app/events/controllers.md)** - Controllers API for performing actions
+- **[Event Creation](app/events/event-creation.md)** - Creating custom events using the delegate pattern
 
 ## Event Types
 
@@ -17,4 +17,5 @@ Documentation for GeoView's event system, event types, and event processors.
 ## Related Documentation
 
 - [API Reference](app/api/api.md) - Main API entry points
-- [Event Processor Architecture](programming/event-processor-architecture.md) - Developer guide for creating event processors
+- [Controller Architecture](programming/controller-architecture.md) - Developer guide for controller patterns
+- [Event Helper](programming/event-helper.md) - Delegate event system internals

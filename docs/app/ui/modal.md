@@ -11,7 +11,6 @@ A component that can be used to create, show, hide and delete a modal.
   ```
 
 - It takes all of the MUI Dialog props. The following props are modified for customizability. Those props are:
-
   - _id_: the id of the modal component
   - _className_: if any custom classes are to be applied to the component
   - _style_: custom styles that are not to be a part of classes
@@ -52,4 +51,4 @@ The custom Modal takes all of the props defined under MaterialDialogProps by MUI
 
 ## More information
 
-Refer to Material UI Dialog (aka Modal) component and Dialog API for more information on props and how the HTML gets rendered from TextField component. https://mui.com/components/dialogs/ and https://mui.com/api/dialogs/
+The GeoView Modal is a custom wrapper around MUI Dialog. Import it from `@/ui` rather than directly from `@mui/material`. For MUI Dialog props reference, see the [MUI Dialog documentation](https://mui.com/material-ui/react-dialog/).

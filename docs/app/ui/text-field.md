@@ -61,4 +61,4 @@ The custom TextField takes all of the props defined under BaseTextFieldProps by 
 
 ## More information
 
-Refer to Material UI TextField component and TextField API for more information on props and how the HTML gets rendered from TextField component. https://mui.com/components/text-fields/ and https://mui.com/api/text-field/
+The GeoView TextField is a custom wrapper around MUI TextField. Import it from `@/ui` rather than directly from `@mui/material`. For MUI TextField props reference, see the [MUI TextField documentation](https://mui.com/material-ui/react-text-field/).

@@ -15,11 +15,11 @@ Implementation: Use private and protected access modifiers to restrict access to
 
   **Example of a getter implemented using a function to get the value of a private variable**
 
-```
+```typescript
    /**
-    * The getter method that returns the serviceMetadata private property.
+    * Gets the service metadata.
     *
-    * @returns {Record<string, unknown>} The GeoView service metadata.
+    * @returns The GeoView service metadata
     */
    getServiceMetadata(): Record<string, unknown> {
      return this.#serviceMetadata;
@@ -31,7 +31,7 @@ Implementation: Use private and protected access modifiers to restrict access to
 
   **Example of a _definite assignment assertion_**
 
-```
+```typescript
    // GV NOTE START ****************************************************************************************************
    // The following attributes use the 'definite assignment assertion' (! after the property name) to indicate that
    // it will not be null or undefined when used. It is not initialized by the constructor. We declare it here

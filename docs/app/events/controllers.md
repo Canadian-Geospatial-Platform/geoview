@@ -27,10 +27,10 @@ mapViewer.layer.setLayerOpacity("layerPath", 0.7);
 
 GeoView separates **performing actions** from **listening to events**:
 
-| Purpose                                 | Use This                | Example                            |
-| --------------------------------------- | ----------------------- | ---------------------------------- |
-| **Perform an action** (change state)    | MapViewer / Layer API   | `mapViewer.setMapZoomLevel(10)`    |
-| **Listen to events** (react to changes) | Delegate event handlers | `mapViewer.onMapMoveEnd(callback)` |
+| Purpose                                 | Use This                | Example                                     |
+| --------------------------------------- | ----------------------- | ------------------------------------------- |
+| **Perform an action** (change state)    | MapViewer / Layer API   | `mapViewer.setMapZoomLevel(10)`             |
+| **Listen to events** (react to changes) | Delegate event handlers | `mapViewer.onMapMoveEnd(callback)`          |
 
 ### When to Use Controllers
 

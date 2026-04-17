@@ -23,7 +23,7 @@
   - [Event System](app/events/event-system.md)
   - [Map Events](app/events/map-events.md)
   - [Layer Events](app/events/layer-events.md)
-  - [Event Processors](app/events/event-processors.md)
+  - [Controllers API](app/events/controllers.md)
 
 - **Packages**
   - [Packages Overview](app/packages/README.md)
@@ -37,11 +37,10 @@
 
 - **Developer Documentation**
   - [Best Practices](programming/best-practices.md)
-  - [Event Processor Architecture](programming/event-processor-architecture.md)
+  - [Using Store](programming/using-store.md)
   - [LayerSet Architecture](programming/layerset-architecture.md)
   - [Adding Layer Types](programming/adding-layer-types.md)
-  - [Using Store](programming/using-store.md)
-  - [Using Types](programming/using-type.md)
+  - [Event Helper](programming/event-helper.md)
   - [Logging](programming/logging.md)
   - [Object Oriented](programming/object-oriented.md)
   - [Troubleshooting](programming/troubleshooting.md)

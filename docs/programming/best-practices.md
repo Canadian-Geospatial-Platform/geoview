@@ -96,7 +96,7 @@ We do the import statement in the following order
 - react
 - react-dom
 - react-i18n
-- material-ui
+- MUI (hooks/utilities only — UI components come from `@/ui`)
 - OpenLayers
 - other project dependecies (@/core, @/geo and @/api)
 
@@ -108,22 +108,18 @@ import { createRoot } from "react-dom/client";
 
 import { useTranslation } from "react-i18next";
 
-import { makeStyles, createStyles } from "@material-ui/core/styles";
-import {
-  Card,
-  CardHeader,
-  CardContent,
-  Divider,
-  IconButton,
-} from "@material-ui/core";
-import CloseIcon from "@material-ui/icons/Close";
+import { useTheme } from "@mui/material/styles";
 
 import View, { ViewOptions } from "ol/View";
 
+import { Box, Card, CardHeader, CardContent, Divider, IconButton } from "@/ui";
+import { CloseIcon } from "@/ui";
 import { logger } from "@/core/utils/logger";
 import type { EsriBaseRenderer } from "@/geo/utils/renderer/esri-renderer";
 import { Plugin } from "@/api/plugin/plugin";
 ```
+
+**Note:** MUI UI components (`Box`, `Typography`, `IconButton`, etc.) and icons must be imported from `@/ui`, never directly from `@mui/material` or `@mui/icons-material`. MUI hooks and utilities (`useTheme`, `useMediaQuery`) are imported directly from `@mui/material` or `@mui/material/styles`.
 
 **Note:** For import from a packacge outside of core use
 
