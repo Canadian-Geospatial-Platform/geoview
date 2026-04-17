@@ -17,6 +17,7 @@ import type { TypeContainerBox } from '@/core/types/global-types';
 import { useEventListener } from '@/core/components/common/hooks/use-event-listener';
 import { FullScreenDialog } from '@/core/components/common/full-screen-dialog';
 import { DEFAULT_APPBAR_CORE } from '@/api/types/map-schema-types';
+import { useStoreAppShellContainer } from '@/core/stores/store-interface-and-intial-values/app-state';
 
 /**
  * Properties for the LegendFullscreen component.
@@ -117,6 +118,7 @@ export function LegendFullscreen({ layerPaths, mapId, containerType, isOpen, onC
   const { t } = useTranslation<string>();
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const shellContainer = useStoreAppShellContainer();
 
   // State
   const [fullscreenLegendLayerList, setFullscreenLegendLayersList] = useState<string[][]>([]);
@@ -270,6 +272,8 @@ export function LegendFullscreen({ layerPaths, mapId, containerType, isOpen, onC
         // Use onExited callback to restore focus to the fullscreen button after the dialog exit animation completes
         buttonRef.current?.focus();
       }}
+      container={shellContainer}
+      disableEnforceFocus={true}
     >
       <Box
         sx={sxClasses.fullscreenContainer}
