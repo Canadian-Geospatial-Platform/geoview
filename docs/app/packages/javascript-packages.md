@@ -211,5 +211,5 @@ The viewer is bundled with core packages, you can load them by passing their id 
 
 - **[Core Package Development](./core-packages.md)** - Modern TypeScript package development (recommended)
 - **[Core Packages](app/packages/core-packages.md)** - Rush.js monorepo setup
-- **[Event Processors](app/events/event-processors.md)** - State management for packages
+- **[Controllers API](app/events/controllers.md)** - Controllers for performing actions
 - **[API Reference](app/api/api.md)** - Main API methods

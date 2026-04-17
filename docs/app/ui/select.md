@@ -11,7 +11,6 @@ geoview/packages/geoview-core/src/ui/select
 ```
 
 - It takes the following props:
-
   - Required:
     - id: the id of the Select component
     - label: the label text of this `<select>` element. It is rendered as a `<label>` element. For accessibility, this prop is required
@@ -38,10 +37,8 @@ The required props are further described as below
 - ### `selectItems`:
 
   The structure of `<select>` element. This prop is rendered as `<option>` inside the `<select>` element. This prop has a custom structure and can be defined as per the requirement.
-
   - if the provided options are not to be grouped (categorized):
     the `selectItems` will take an array of objects. These objects will have `id`,`value` and `default` as keys. These keys are:
-
     - `id`: the id of this `<option>` element
     - `value`: the value for this `<option>` element. This text shows up to user
     - `default`: this key is optional and can be either true or false. This key defines if the option is selected by default. If this key is not provided, then its false by default.
@@ -58,7 +55,6 @@ The required props are further described as below
 
   - if the provided options are to be grouped (categorized):
     the `selectItems` will take an array of objects. These objects will have two keys `category` and `items` as keys. These keys are:
-
     - `category`: the name of group/category of multiple options
     - `items`: the `<option>` element for the above defined category. It takes an array of objects which will have `id`,`value` and `default` as keys. The keys have been defined above.
 
@@ -94,4 +90,4 @@ The required props are further described as below
 
 ## More information
 
-Refer to Material UI Select component and Select API for more information on props and how the HTML gets rendered from Select component. https://mui.com/components/selects/ and https://mui.com/api/select/
+The GeoView Select is a custom wrapper around MUI Select. Import it from `@/ui` rather than directly from `@mui/material`. For MUI Select props reference, see the [MUI Select documentation](https://mui.com/material-ui/react-select/).

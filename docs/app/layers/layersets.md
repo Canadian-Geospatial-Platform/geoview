@@ -115,7 +115,7 @@ mapViewer.onMapSingleClick((sender, payload) => {
     Object.values(featureInfoLayerSet.resultSet).forEach((entry) => {
       if (entry.featureInfo?.features) {
         console.log(
-          `Found ${entry.featureInfo.features.length} features in ${entry.layerName}`
+          `Found ${entry.featureInfo.features.length} features in ${entry.layerName}`,
         );
 
         // Access feature properties
@@ -189,7 +189,7 @@ allFeatureInfoLayerSet.queryLayers().then(() => {
   Object.values(allFeatureInfoLayerSet.resultSet).forEach((entry) => {
     if (entry.featureInfo?.features) {
       console.log(
-        `${entry.layerName}: ${entry.featureInfo.features.length} features`
+        `${entry.layerName}: ${entry.featureInfo.features.length} features`,
       );
     }
   });
@@ -262,7 +262,7 @@ hoverLayerSet.onLayerSetUpdated((sender, payload) => {
 ```typescript
 hoverFeatureInfoLayerSet.onLayerSetUpdated((sender, payload) => {
   const hasFeatures = Object.values(hoverFeatureInfoLayerSet.resultSet).some(
-    (entry) => entry.featureInfo?.features?.length > 0
+    (entry) => entry.featureInfo?.features?.length > 0,
   );
 
   // Change cursor when hovering over features
@@ -368,7 +368,7 @@ Object.entries(legendsLayerSet.resultSet).forEach(([layerPath, entry]) => {
 const processedLayers = Object.entries(allFeatureInfoLayerSet.resultSet)
   .filter(
     ([_, entry]) =>
-      entry.layerStatus === "processed" && entry.queryStatus === "processed"
+      entry.layerStatus === "processed" && entry.queryStatus === "processed",
   )
   .map(([layerPath, entry]) => ({
     path: layerPath,
@@ -393,7 +393,7 @@ const parentEntry = legendsLayerSet.resultSet[parentPath];
 
 if (parentEntry.children) {
   console.log(
-    `${parentEntry.layerName} has ${parentEntry.children.length} sublayers:`
+    `${parentEntry.layerName} has ${parentEntry.children.length} sublayers:`,
   );
 
   parentEntry.children.forEach((childPath) => {
@@ -513,7 +513,7 @@ mapViewer.onMapPointerMove((sender, payload) => {
 // Update tooltip content
 hoverLayerSet.onLayerSetUpdated((sender, payload) => {
   const hasFeatures = Object.values(hoverLayerSet.resultSet).some(
-    (entry) => entry.featureInfo?.features?.length > 0
+    (entry) => entry.featureInfo?.features?.length > 0,
   );
 
   if (hasFeatures) {
@@ -652,7 +652,7 @@ import type {
 ## See Also
 
 - [Layer API](app/api/layer-api.md) - Complete Layer API reference with all methods
-- [Event Processors](app/events/event-processors.md) - State management and event handling patterns
+- [Controllers API](app/events/controllers.md) - Controllers for performing actions
 - [API Reference](app/api/api.md) - Main GeoView API entry points
 - [TypeDoc Reference](../../typedoc/) - Auto-generated API documentation
 

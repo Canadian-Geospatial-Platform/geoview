@@ -341,13 +341,13 @@ Apply attribute or spatial filters to layers:
 // Attribute filter
 mapViewer.layer.applyViewFilter(
   layerPath,
-  "population > 100000 AND name LIKE 'New%'"
+  "population > 100000 AND name LIKE 'New%'",
 );
 
 // Temporal filter
 mapViewer.layer.applyViewFilter(
   layerPath,
-  "dateField >= date'2023-01-01T00:00:00Z'"
+  "dateField >= date'2023-01-01T00:00:00Z'",
 );
 
 // Clear filter
@@ -370,7 +370,7 @@ Query features from layers:
 // Get features at a coordinate
 const features = await mapViewer.layer.getFeatureInfo(
   [longitude, latitude],
-  layerPath
+  layerPath,
 );
 
 features.forEach((feature) => {
@@ -763,7 +763,7 @@ async function loadLayersByCategory(category: string) {
     } catch (error) {
       console.warn(
         `Failed to load layer ${layerConfig.geoviewLayerId}:`,
-        error
+        error,
       );
     }
   }
@@ -787,7 +787,7 @@ mapViewer.layer.onVisibilityChanged((sender, payload) => {
 - **[Layer Events](app/events/layer-events.md)** - Layer event documentation
 - **[Configuration Reference](app/config/configuration-reference.md)** - Configuration schema
 - **[Creating Maps](app/config/create-map.md)** - Map initialization
-- **[Event Processors](app/events/event-processors.md)** - State management
+- **[Controllers API](app/events/controllers.md)** - Controllers for performing actions
 
 ---
 

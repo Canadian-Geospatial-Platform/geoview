@@ -8,32 +8,78 @@ This guide explains how to add support for new layer types to GeoView.
 
 ## Overview
 
-GeoView layers are divided into two categories:
+GeoView uses a **two-tier layer system** to separate configuration/metadata processing from runtime map rendering:
 
-- **Raster** - Image-based layers (managed by `AbstractGeoViewRaster`)
-- **Vector** - Geometry-based layers (managed by `AbstractGeoViewVector`)
+1. **GeoView Layer classes** (`AbstractGeoViewLayer`) — Handle metadata fetching, config validation, and layer entry processing. They create GV layer instances as their final step. Located in `packages/geoview-core/src/geo/layer/geoview-layers/`.
 
-Both categories extend the parent abstract class `AbstractGeoViewLayers`.
+2. **GV Layer classes** (`AbstractGVLayer`) — OpenLayers wrapper classes that hold the actual OL layer on the map. The application (controllers, domain, UI) works with GV layers at runtime. Located in `packages/geoview-core/src/geo/layer/gv-layers/`.
+
+### Layer Creation Pipeline
+
+```
+Config JSON (TypeGeoviewLayerConfig)
+        ↓
+LayerCreatorController.createLayerConfigFromType()
+        ↓
+GeoView Layer (e.g., new EsriDynamic)
+   1. onFetchAndSetServiceMetadata()
+   2. onValidateListOfLayerEntryConfig()
+   3. onProcessLayerMetadata()
+   4. onProcessOneLayerEntry()
+   5. onCreateGVLayer()  ← Creates the GV layer
+        ↓
+GV Layer (e.g., new GVEsriDynamic) — holds OpenLayers layer
+        ↓
+LayerDomain.registerGVLayer() — registered for runtime use
+```
+
+### GV Layer Categories
+
+GV layers are divided into three categories:
+
+- **Raster** — Image-based layers (`AbstractGVRaster`)
+- **Vector** — Geometry-based layers (`AbstractGVVector`)
+- **Tile** — Tile-based layers (`AbstractGVTile`)
+
+All categories extend `AbstractGVLayer`, which extends `AbstractBaseGVLayer`.
 
 ## Architecture
 
+### GeoView Layer Hierarchy (Config & Metadata Tier)
+
 ```
-AbstractGeoViewLayers (parent)
-+-- AbstractGeoViewRaster
-|   +-- EsriDynamic
-|   +-- EsriImage
-|   +-- ImageStatic
-|   +-- OgcWms (wms.ts)
-|   +-- VectorTiles
-|   +-- XyzTiles
-+-- AbstractGeoViewVector
-    +-- CSV
-    +-- EsriFeature
-    +-- GeoJSON
-    +-- KML
-    +-- OgcFeature
-    +-- OgcWfs (wfs.ts)
-    +-- WKB
+AbstractGeoViewLayer (geoview-layers/)
++-- AbstractGeoViewRaster (geoview-layers/raster/)
+|   +-- EsriDynamic, EsriImage, ImageStatic, WMS, Geotiff, VectorTiles, WMTS, XYZTiles
++-- AbstractGeoViewVector (geoview-layers/vector/)
+    +-- CSV, EsriFeature, GeoJSON, KML, OgcFeature, WFS, WKB
+```
+
+### GV Layer Hierarchy (Runtime Tier)
+
+```
+AbstractBaseGVLayer
++-- AbstractGVLayer
+|   +-- AbstractGVRaster (raster/)
+|   |   +-- GVEsriDynamic
+|   |   +-- GVEsriImage
+|   |   +-- GVImageStatic
+|   |   +-- GVWMS
+|   +-- AbstractGVVector (vector/)
+|   |   +-- GVEsriFeature
+|   |   +-- GVCSV
+|   |   +-- GVGeoJSON
+|   |   +-- GVKML
+|   |   +-- GVOgcFeature
+|   |   +-- GVWFS
+|   |   +-- GVWKB
+|   |   +-- AbstractGVVectorTile
+|   |       +-- GVVectorTiles
+|   +-- AbstractGVTile (tile/)
+|       +-- GVGeotiff
+|       +-- GVWMTS
+|       +-- GVXYZTiles
++-- GVGroupLayer
 ```
 
 > **Note:** `GeoPackage` and `shapefile` are input file formats that are automatically converted to one of the vector types above (typically GeoJSON or WKB) during loading, so they don't have dedicated class implementations.
@@ -57,35 +103,64 @@ First, determine if your new layer type is **raster** or **vector** based on the
 - Extends `VectorSource`
 
 **Note on Vector Tiles:**
-Despite being in the `raster` folder, `VectorTiles` represents pre-tiled vector data (Mapbox Vector Tiles/MVT format) and is different from raster XYZ tiles. It's organized under raster due to its tile-based delivery mechanism.
+`VectorTiles` now lives under `gv-layers/vector/` as it extends `AbstractGVVectorTile`, which extends `AbstractGVVector`.
 
-## Step 2: Create Layer Class
+## Step 2: Create Layer Classes
 
-Create your new layer class in the appropriate category folder:
+You need to create **both** classes — one in each tier:
 
-### Location
+### Locations
+
+**GeoView layer** (config & metadata tier):
 
 - Raster: `packages/geoview-core/src/geo/layer/geoview-layers/raster/`
 - Vector: `packages/geoview-core/src/geo/layer/geoview-layers/vector/`
 
+**GV layer** (runtime tier):
+
+- Raster: `packages/geoview-core/src/geo/layer/gv-layers/raster/`
+- Vector: `packages/geoview-core/src/geo/layer/gv-layers/vector/`
+- Tile: `packages/geoview-core/src/geo/layer/gv-layers/tile/`
+
 ### Example: Adding Image Static Layer
+
+**Step 2a — Create the GeoView layer class** (handles metadata fetching, config validation, and creates the GV layer):
 
 ```typescript
 // packages/geoview-core/src/geo/layer/geoview-layers/raster/image-static.ts
 
 import { AbstractGeoViewRaster } from "./abstract-geoview-raster";
-import type {
-  TypeImageStaticLayerConfig,
-  TypeImageStaticLayerEntryConfig,
-} from "@/geo/map/map-schema-types";
+import { GVImageStatic } from "@/geo/layer/gv-layers/raster/gv-image-static";
 
 /**
- * A class to add image static layer.
- *
- * @exports
- * @class ImageStatic
+ * Manages metadata fetching and config validation for Image Static layers.
  */
 export class ImageStatic extends AbstractGeoViewRaster {
+  /**
+   * Creates the GV layer instance that will be used at runtime.
+   */
+  protected override onCreateGVLayer(
+    layerConfig: ImageStaticLayerEntryConfig,
+  ): GVImageStatic {
+    const source = ImageStatic.createImageStaticSource(layerConfig);
+    return new GVImageStatic(source, layerConfig);
+  }
+
+  // Implement other abstract methods (onFetchAndSetServiceMetadata, etc.)
+}
+```
+
+**Step 2b — Create the GV layer class** (OpenLayers wrapper used at runtime by controllers, domain, and UI):
+
+```typescript
+// packages/geoview-core/src/geo/layer/gv-layers/raster/gv-image-static.ts
+
+import { AbstractGVRaster } from "./abstract-gv-raster";
+
+/**
+ * GV layer wrapper for Image Static layers. Holds the OpenLayers layer on the map.
+ */
+export class GVImageStatic extends AbstractGVRaster {
   // Implementation here
 }
 ```
@@ -96,19 +171,19 @@ Create type guard functions to validate layer types:
 
 ```typescript
 export const layerConfigIsImageStatic = (
-  verifyIfLayer: TypeGeoviewLayerConfig
+  verifyIfLayer: TypeGeoviewLayerConfig,
 ): verifyIfLayer is TypeImageStaticLayerConfig => {
   return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.IMAGE_STATIC;
 };
 
 export const geoviewLayerIsImageStatic = (
-  verifyIfGeoViewLayer: AbstractGeoViewLayer
+  verifyIfGeoViewLayer: AbstractGeoViewLayer,
 ): verifyIfGeoViewLayer is ImageStatic => {
   return verifyIfGeoViewLayer?.type === CONST_LAYER_TYPES.IMAGE_STATIC;
 };
 
 export const geoviewEntryIsImageStatic = (
-  verifyIfGeoViewEntry: TypeLayerEntryConfig
+  verifyIfGeoViewEntry: TypeLayerEntryConfig,
 ): verifyIfGeoViewEntry is TypeImageStaticLayerEntryConfig => {
   return (
     verifyIfGeoViewEntry?.geoviewRootLayer?.geoviewLayerType ===
@@ -122,13 +197,17 @@ export const geoviewEntryIsImageStatic = (
 Create configuration types for your layer:
 
 ```typescript
-export interface TypeImageStaticLayerEntryConfig
-  extends Omit<TypeImageLayerEntryConfig, "source"> {
+export interface TypeImageStaticLayerEntryConfig extends Omit<
+  TypeImageLayerEntryConfig,
+  "source"
+> {
   source: TypeSourceImageStaticInitialConfig;
 }
 
-export interface TypeImageStaticLayerConfig
-  extends Omit<TypeGeoviewLayerConfig, "listOfLayerEntryConfig"> {
+export interface TypeImageStaticLayerConfig extends Omit<
+  TypeGeoviewLayerConfig,
+  "listOfLayerEntryConfig"
+> {
   geoviewLayerType: "imageStatic";
   listOfLayerEntryConfig: TypeImageStaticLayerEntryConfig[];
 }
@@ -150,8 +229,7 @@ export type TypeSourceImageInitialConfig =
 /**
  * Initial settings for static image sources.
  */
-export interface TypeSourceImageStaticInitialConfig
-  extends TypeBaseSourceImageInitialConfig {
+export interface TypeSourceImageStaticInitialConfig extends TypeBaseSourceImageInitialConfig {
   /** Image extent */
   extent: Extent;
 }
@@ -241,7 +319,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * Validate layer entry configuration
    */
   protected validateListOfLayerEntryConfig(
-    listOfLayerEntryConfig: TypeListOfLayerEntryConfig
+    listOfLayerEntryConfig: TypeListOfLayerEntryConfig,
   ): TypeListOfLayerEntryConfig {
     // Validate and return config
     return listOfLayerEntryConfig;
@@ -251,7 +329,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * Process layer metadata
    */
   protected async processLayerMetadata(
-    layerConfig: TypeLayerEntryConfig
+    layerConfig: TypeLayerEntryConfig,
   ): Promise<void> {
     // Process metadata for this layer entry
   }
@@ -260,7 +338,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * Create OpenLayers layer
    */
   protected async processOneLayerEntry(
-    layerConfig: AbstractBaseLayerEntryConfig
+    layerConfig: AbstractBaseLayerEntryConfig,
   ): Promise<BaseLayer | null> {
     const olLayer = new ImageLayer({
       source: new Static({
@@ -552,7 +630,7 @@ protected applyStyle(olLayer: BaseLayer, styleConfig: any): void {
 
 - **[GeoView Layers Guide](app/layers/layers.md)** - User-facing layer documentation
 - **[Layer API Reference](app/api/layer-api.md)** - API methods
-- **[TypeScript Patterns](programming/using-type.md)** - TypeScript conventions
+- **[Event Helper](programming/event-helper.md)** - Delegate event system
 - **[Best Practices](programming/best-practices.md)** - General coding standards
 
 ## Example: Complete Layer Implementation

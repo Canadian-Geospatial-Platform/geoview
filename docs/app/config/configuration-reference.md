@@ -3302,4 +3302,4 @@ try {
 - **[GeoView Layers](app/layers/layers.md)** - Layer concepts and usage
 - **[Layer API](app/api/layer-api.md)** - Adding and managing layers
 - **[Packages](app/packages/geoview-core-packages.md)** - Geoview packages -specific configuration
-- **[Event Processors](app/events/event-processors.md)** - State management
+- **[Controllers API](app/events/controllers.md)** - Controllers for performing actions

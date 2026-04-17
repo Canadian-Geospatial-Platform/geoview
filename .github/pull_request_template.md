@@ -15,20 +15,56 @@ Fixes # (issue)
 
 Please describe the tests that you ran to verify your changes. Provide instructions so we can reproduce.
 
-__Add the URL for your deploy!__
+**Add the URL for your deploy!**
 
 # Checklist:
 
 - [ ] I have run the **Test Suite** and **No errors have been introduced**
-- [ ] I have run "@workspace review this branch diff (compare to upstream/develop) against GeoView coding standards" in my co pilot chat
-- [ ] I asked copilot to **audit JSDoc comments for a folder or file or diff branch againt upstream/develop** in my co pilot chat
-- [ ] I have build __(rush build)__ and deploy __(rush host)__ my PR
+- [ ] I have run `@BranchReview` agent in VS Code Chat and addressed all violations
+- [ ] I have run `@DocUpdate` agent in VS Code Chat and documentation is in sync with code changes
+- [ ] I have build **(rush build)** and deploy **(rush host)** my PR
 - [ ] I have connected the issues(s) to this PR
 - [ ] My code follows the style guidelines of this project
 - [ ] I have performed a self-review of my own code
 - [ ] I have commented my code, particularly in hard-to-understand areas
 - [ ] My changes generate no new warnings
 - [ ] I have created new issue(s) related to the outcome of this PR is needed
--  ~~I have made corresponding changes to the documentation~~
--  ~~I have added tests that prove my fix is effective or that my feature works~~
--  ~~New and existing unit tests pass locally with my changes~~
+- ~~I have added tests that prove my fix is effective or that my feature works~~
+- ~~New and existing unit tests pass locally with my changes~~
+
+# Pre-PR Copilot Agent Checks
+
+Before creating your PR, run the following two Copilot agents in VS Code Chat to catch common issues automatically.
+
+## Branch Review (`@BranchReview`)
+
+Audits all changed `.ts`/`.tsx` files against the GeoView coding standards (JSDoc, logging, return types, naming, accessibility, imports, performance patterns).
+
+**How to run:**
+
+1. Open VS Code Chat (Ctrl+Shift+I)
+2. Select the **BranchReview** agent from the agent picker (or type `@BranchReview`)
+3. Type the target branch name (defaults to `develop`):
+   ```
+   @BranchReview develop
+   ```
+4. Review the violation report and fix flagged items (the agent can auto-fix most issues on approval)
+
+- [ ] `@BranchReview` has been run and all violations have been addressed
+
+## Documentation Update (`@DocUpdate`)
+
+Checks that documentation in `docs/` is still consistent with the code you changed. Catches stale references, missing docs for new features, and incorrect code examples.
+
+**How to run:**
+
+1. Open VS Code Chat (Ctrl+Shift+I)
+2. Select the **DocUpdate** agent from the agent picker (or type `@DocUpdate`)
+3. Run a full audit or target a specific section:
+   ```
+   @DocUpdate full audit of docs/programming/
+   @DocUpdate check docs/app/layers/
+   ```
+4. Review the audit summary and approve any proposed documentation updates
+
+- [ ] `@DocUpdate` has been run and documentation is in sync with code changes

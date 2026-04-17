@@ -26,14 +26,14 @@ export abstract class AbstractLayerSet {
   protected resultSet: TypeResultSet = {};
 
   protected abstract onRegisterLayerConfigCheck(
-    layerConfig: ConfigBaseClass
+    layerConfig: ConfigBaseClass,
   ): boolean;
   protected abstract onPropagateToStore(
     resultSetEntry: TypeResultSetEntry,
-    type: PropagationType
+    type: PropagationType,
   ): void;
   protected abstract onGetDefaultResultSetEntry(
-    layerConfig: ConfigBaseClass
+    layerConfig: ConfigBaseClass,
   ): TypeResultSetEntry;
 }
 ```
@@ -81,15 +81,16 @@ Layer Sets use an event-driven system to track layer state changes and propagate
 
 **Purpose:** Tracks layer status progression and fetches legend/symbology data for all layers.
 
-**Store Connection:** `legendsLayerSet` slice in LayerEventProcessor
+**Store Connection:** Propagates to `layer-state` store via `LayerSetController`
 
 **Registration Condition:**
 
 ```typescript
 /**
  * Overrides the behavior to apply when checking for condition to register a layer in its set.
- * @param {AbstractBaseLayer} layer - The layer
- * @returns {boolean} True when the layer should be registered to this legends-layer-set
+ *
+ * @param layer - The layer
+ * @returns True when the layer should be registered to this legends-layer-set
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 protected override onRegisterLayerCheck(layer: AbstractBaseLayer): boolean {
@@ -122,15 +123,16 @@ protected override onRegisterLayerCheck(layer: AbstractBaseLayer): boolean {
 
 **Purpose:** Query and manage features at specific map locations.
 
-**Store Connection:** `featureInfoLayerSet` slice in LayerEventProcessor
+**Store Connection:** Propagates to `feature-info-state` store via `propagateStoreFeatureInfoDetails()`
 
 **Registration Condition:**
 
 ```typescript
 /**
  * Overrides the behavior to apply when a feature-info-layer-set wants to check for condition to register a layer in its set.
- * @param {AbstractBaseLayer} layer - The layer
- * @returns {boolean} True when the layer should be registered to this feature-info-layer-set.
+ *
+ * @param layer - The layer
+ * @returns True when the layer should be registered to this feature-info-layer-set
  */
 protected override onRegisterLayerCheck(layer: AbstractBaseLayer): boolean {
   // Return if the layer is of queryable type and source is queryable
@@ -163,15 +165,16 @@ async queryLayers(location?: TypeLocation, extent?: Extent): Promise<void> {
 
 **Purpose:** Query and manage ALL features from layers (no spatial filter).
 
-**Store Connection:** `allFeatureInfoLayerSet` slice in LayerEventProcessor
+**Store Connection:** Propagates to `feature-info-state` store via `propagateFeatureInfoDataTableToStore()`
 
 **Registration Condition:**
 
 ```typescript
 /**
  * Overrides the behavior to apply when a feature-info-layer-set wants to check for condition to register a layer in its set.
- * @param {AbstractBaseLayer} layer - The layer
- * @returns {boolean} True when the layer should be registered to this all-feature-info-layer-set.
+ *
+ * @param layer - The layer
+ * @returns True when the layer should be registered to this all-feature-info-layer-set
  */
 protected override onRegisterLayerCheck(layer: AbstractBaseLayer): boolean {
   // Return if the layer is of queryable type and source is queryable
@@ -215,15 +218,16 @@ async queryLayers(location?: undefined, extent?: Extent): Promise<void> {
 
 **Purpose:** Query features under mouse cursor for hover tooltips.
 
-**Store Connection:** `hoverFeatureInfoLayerSet` slice in LayerEventProcessor
+**Store Connection:** Propagates to `feature-info-state` store via `setStoreMapHoverFeatureInfo()`
 
 **Registration Condition:**
 
 ```typescript
 /**
  * Overrides the behavior to apply when a hover-feature-info-layer-set wants to check for condition to register a layer in its set.
- * @param {AbstractBaseLayer} layer - The layer
- * @returns {boolean} True when the layer should be registered to this hover-feature-info-layer-set.
+ *
+ * @param layer - The layer
+ * @returns True when the layer should be registered to this hover-feature-info-layer-set
  */
 protected override onRegisterLayerCheck(layer: AbstractBaseLayer): boolean {
   // Return if the layer is of queryable type and source is queryable
@@ -353,21 +357,21 @@ protected unregisterLayer(layerPath: string): void {
 
 ### Propagation Pattern
 
-Each Layer Set implements `onPropagateToStore()` to update the Zustand store (i.e. FeatureInfoLayerSet):
+Each Layer Set implements `onPropagateToStore()` to update the Zustand store. Each concrete layer set has a private `#propagateToStore()` method that calls the appropriate store propagation function directly:
 
 ```typescript
   /**
-   * Propagates the resultSetEntry to the store
+   * Propagates the resultSetEntry to the store.
+   *
    * @param resultSetEntry - The result set entry to propagate to the store
    */
-  #propagateToStore(resultSetEntry: TypeFeatureInfoResultSetEntry, eventType: EventType = 'click'): void {
+  #propagateToStore(resultSetEntry: TypeFeatureInfoResultSetEntry): void {
     // Propagate
-    FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.getMapId(), eventType, resultSetEntry).catch((error: unknown) => {
-      // Log
-      logger.logPromiseFailed('FeatureInfoEventProcessor.propagateToStore in FeatureInfoLayerSet', error);
-    });
+    propagateStoreFeatureInfoDetails(this.getMapId(), resultSetEntry);
   }
 ```
+
+Propagation functions are exported from the store state files (e.g., `propagateStoreFeatureInfoDetails` from `feature-info-state.ts`, `propagateFeatureInfoDataTableToStore` from the same file) and are called by both layer sets and `LayerSetController`.
 
 ### Store Structure
 
@@ -448,7 +452,7 @@ Layer Sets emit events through `EventHelper` static methods:
 
 ```typescript
 class AbstractLayerSet {
-  /** Keep all callback delegates references */
+  /** Callback delegates for the layer set updated event. */
   #onLayerSetUpdatedHandlers: LayerSetUpdatedDelegate[] = [];
 
   /**
@@ -503,7 +507,7 @@ export class MyCustomLayerSet extends AbstractLayerSet {
 
   // Default entry structure
   protected onGetDefaultResultSetEntry(
-    layerConfig: ConfigBaseClass
+    layerConfig: ConfigBaseClass,
   ): TypeResultSetEntry {
     return {
       layerPath: layerConfig.layerPath,
@@ -517,7 +521,7 @@ export class MyCustomLayerSet extends AbstractLayerSet {
   // Store propagation
   protected onPropagateToStore(
     resultSetEntry: TypeResultSetEntry,
-    type: PropagationType
+    type: PropagationType,
   ): void {
     // Update store slice
     this.#setMyCustomLayerSetEntry(resultSetEntry.layerPath, resultSetEntry);
@@ -614,5 +618,5 @@ legendsLayerSet.onLayerSetUpdated((sender, payload) => {
 
 **For Core Developers:**
 
-- [Event Processor Architecture](programming/event-processor-architecture.md) - Store and event system
+- [Using Zustand Store](programming/using-store.md) - Store access patterns and controllers
 - [Adding Layer Types](programming/adding-layer-types.md) - Layer implementation details and adding new layer types

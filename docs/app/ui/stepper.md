@@ -50,7 +50,6 @@ The custom props are defined as below:
 - ### `steps`
 
   The prop that defines the steps that are involved in the process. It must be passed as an array of objects. These objects will have the following keys:
-
   - `label`: The label of the step. Its a short text label for each step e.g. "Step 1". This key is optional.
   - `description`: The body of the step. Contains the description which is the HTML that is received from the parent component. The body is created as a `<div>` element and contains all the HTML that is passed as a value. Tbis prop is mandatory and takes string, JSX or HTML.
   - `disableStepMovement`: allows the locking of a step and has a boolean value. This prop is optional and by default, its set as `false`.
@@ -94,4 +93,4 @@ The custom props are defined as below:
 
 ## More information
 
-Refer to Material UI Stepper component and Stepper API for more information on props and how the HTML gets rendered from Stepper component. https://mui.com/components/steppers/ and https://mui.com/api/stepper/
+The GeoView Stepper is a custom wrapper around MUI Stepper. Import it from `@/ui` rather than directly from `@mui/material`. For MUI Stepper props reference, see the [MUI Stepper documentation](https://mui.com/material-ui/react-stepper/).
