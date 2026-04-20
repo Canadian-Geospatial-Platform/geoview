@@ -34,6 +34,7 @@ Event system and event handling:
 
 - **[Event System](app/events/event-system.md)** - Core event concepts and architecture
 - **[Controllers API](app/events/controllers.md)** - Controllers for performing actions
+- **[Event Creation](app/events/event-creation.md)** - Creating custom events using the delegate pattern
 - **[Map Events](app/events/map-events.md)** - Map-specific events
 - **[Layer Events](app/events/layer-events.md)** - Layer-specific events
 - **[Layer Set Events](app/events/layerset-events.md)** - Layer set events
@@ -126,7 +127,7 @@ Guides for extending GeoView functionality:
 
 ### Configuration
 
-- **[Loading Maps](./app/loading-maps.md)** - Map initialization methods
+- **[Creating Maps](./app/config/create-map.md)** - Map initialization methods
 - **[Accessing Types](./app/accessing-types.md)** - TypeScript type definitions
 
 ## 🗺️ Documentation Quick Navigation
@@ -138,7 +139,7 @@ Guides for extending GeoView functionality:
 | Create a map     | [Creating Maps](app/config/create-map.md)                 |
 | Add a layer      | [Layer API](app/api/layer-api.md#adding-layers)           |
 | Create a package | [Core Package Development](app/packages/core-packages.md) |
-| Handle events    | [Using Zustand Store](programming/using-store.md)         |
+| Handle events    | [Event System](app/events/event-system.md)                |
 | Use utilities    | [API Utilities](app/api/utilities.md)                     |
 | Draw geometry    | [Geometry API](app/api/geometry-api.md)                   |
 | Run tests        | [Test Suite Guide](app/testing/using-test-suite.md)       |

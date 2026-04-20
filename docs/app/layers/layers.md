@@ -2,7 +2,7 @@
 
 > **👥 Audience:** Developers using GeoView in their applications
 >
-> **For Core Contributors:** See [Adding Layer Types](programming/adding-layer-types.md) for implementation details
+> **For Core Contributors:** See [Adding Layer Types](../../programming/adding-layer-types.md) for implementation details
 
 GeoView Layers are the primary way to display spatial data on your map. This guide explains layer concepts, types, configuration, and usage.
 
