@@ -104,7 +104,7 @@ const useControlActions = (layerPath: string): ControlActions => {
         if (!isInVisibleRange || parentHidden || layer?.layerStatus === 'error') {
           return false;
         }
-        return layerController.setOrToggleLayerVisibilityIfExists(layerPath);
+        return layerController.setOrToggleLayerVisibility(layerPath);
       },
 
       /**

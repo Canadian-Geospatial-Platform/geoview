@@ -67,7 +67,7 @@ export function ToggleAll({ source, containerType }: ToggleAllProps): JSX.Elemen
    * Handles when the user toggles the collapse switch.
    */
   const handleCollapseToggle = useCallback((): void => {
-    layerController.setAllMapLayerCollapsed(!allLayersCollapsed);
+    layerController.setAllLayerCollapsed(!allLayersCollapsed);
   }, [allLayersCollapsed, layerController]);
 
   // TODO Hide this component until all layers have loaded the first time.

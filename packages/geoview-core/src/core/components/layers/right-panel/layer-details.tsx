@@ -114,7 +114,7 @@ const Sublayer = memo(function Sublayer({ layerPath }: SubLayerProps): JSX.Eleme
           <Checkbox
             color="primary"
             checked={layerVisible === true}
-            onChange={() => layerController.setOrToggleLayerVisibilityIfExists(layerPath)}
+            onChange={() => layerController.setOrToggleLayerVisibility(layerPath)}
             disabled={parentHidden}
           />
         }
@@ -312,8 +312,8 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
     const setRecursive = (legendLayer: typeof layer, newVisibility: boolean): void => {
       legendLayer.children.forEach((child) => {
         if (newVisibility) {
-          if (!visibleLayers.includes(child.layerPath)) layerController.setOrToggleLayerVisibilityIfExists(child.layerPath, true);
-        } else if (visibleLayers.includes(child.layerPath)) layerController.setOrToggleLayerVisibilityIfExists(child.layerPath, false);
+          if (!visibleLayers.includes(child.layerPath)) layerController.setOrToggleLayerVisibility(child.layerPath, true);
+        } else if (visibleLayers.includes(child.layerPath)) layerController.setOrToggleLayerVisibility(child.layerPath, false);
         if (child.children.length) setRecursive(child, newVisibility);
       });
     };
