@@ -66,6 +66,7 @@ class TimeSliderPlugin extends FooterPlugin {
             noLayers: 'No layers with temporal data',
           },
           slider: {
+            animationControls: 'Animation controls',
             unlockRight: 'Unlock right handle',
             unlockLeft: 'Unlock left handle',
             lockRight: 'Lock right handle',
@@ -78,6 +79,7 @@ class TimeSliderPlugin extends FooterPlugin {
             back: 'Back',
             forward: 'Forward',
             changeDirection: 'Change animation direction',
+            reverseAnimation: 'Reverse animation',
             timeDelay: 'Animation delay',
             stepValue: 'Step value',
             hour: 'Hour',
@@ -95,6 +97,7 @@ class TimeSliderPlugin extends FooterPlugin {
             noLayers: 'Pas de couches avec des données temporelles',
           },
           slider: {
+            animationControls: "Contrôles d'animation",
             unlockRight: 'Déverrouiller la poignée droite',
             unlockLeft: 'Déverrouiller la poignée gauche',
             lockRight: 'Verrouiller la poignée droite',
@@ -107,6 +110,7 @@ class TimeSliderPlugin extends FooterPlugin {
             back: 'Retour',
             forward: 'En avant',
             changeDirection: `Changer la direction de l'animation`,
+            reverseAnimation: `Inverser l'animation`,
             timeDelay: `Délai d'animation`,
             stepValue: 'Valeur du saut',
             hour: 'Heure',
