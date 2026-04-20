@@ -17,6 +17,7 @@ object.onEventName((sender, payload) => {
 ```
 
 Where:
+
 - object is the object that emits the event (e.g., mapViewer, mapViewer.layer)
 - onEventName is the event name (e.g., onMapZoomEnd, onLayerLoaded)
 - sender is the object that triggered the event
@@ -24,11 +25,11 @@ Where:
 
 ## Common Events
 
-- [Map Events](app/events/map-events.md)
-- [Layer Events](app/events/layer-events.md)
-
+- [Map Events](./map-events.md)
+- [Layer Events](./layer-events.md)
 
 ## Best Practices
+
 - Register map events after initialization: Always register your event handlers inside the onMapInit callback.
 - Layer-specific events: For layer-specific events, register them after the layer is created using the onLayerCreated event.
 - Error handling: Always include error handling in your event callbacks to prevent uncaught exceptions.
@@ -36,29 +37,30 @@ Where:
 - Performance: Be mindful of performance when handling events that fire frequently (like onLayerLoading or onMapMoveEnd).
 
 ### Example: Complete Event Registration
+
 ```typescript
 cgpv.onMapInit((mapViewer) => {
   // Map events
   mapViewer.onMapMoveEnd((sender, payload) => {
     console.log(`Map moved to: ${payload.lonlat[0]}, ${payload.lonlat[1]}`);
   });
-  
+
   // Layer events
   mapViewer.layer.onLayerCreated((sender, payload) => {
     const layer = payload.layer;
     console.log(`Layer created: ${layer.getLayerPath()}`);
-    
+
     // Register layer-specific events
-    if (layer.getLayerPath() === 'mySpecialLayer') {
-      layer.onVisibleChanged((sender, payload) => {
+    if (layer.getLayerPath() === "mySpecialLayer") {
+      layer.onLayerVisibleChanged((sender, payload) => {
         console.log(`Special layer visibility: ${payload.visible}`);
       });
     }
   });
-  
+
   // All layers loaded event
   mapViewer.layer.onLayerAllLoaded((sender, payload) => {
-    console.log('All layers loaded, map is ready for interaction');
+    console.log("All layers loaded, map is ready for interaction");
   });
 });
 

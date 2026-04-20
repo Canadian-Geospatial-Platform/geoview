@@ -13,13 +13,13 @@ If this happens, try to resolve the issue by injection cgpv script only one or u
 
 When you call `cgpv.init()`, it scans the DOM for elements that are intended to host GeoView maps. It initializes all GeoView maps found in the DOM. Call this after registering your event handlers.
 
-Specifically, it looks for `<div>` elements with certain attributes that identify them as GeoView map containers. The most common attribute is `data-geoview-map`, but your implementation may support others.
+Specifically, it looks for `<div>` elements with the `geoview-map` class that identify them as GeoView map containers.
 
 **Typical requirements for a GeoView map container:**
 
 - The element is a `<div>`.
 - It has the class attribute value `geoview-map`.
-- It may include additional attributes such as `data-config`, `data-config-url`, `data-lang`, `data-footer-height` or `data-shared` to specify map configuration, language, footer height, or shared state.
+- It may include additional attributes such as `data-config`, `data-config-url`, `data-lang`, `data-footer-height`, `data-geocore-keys`, or `data-shared` to specify map configuration, language, footer height, GeoCore layers, or shared state.
 - The `data-config` has precedence over `data-config-url` if both are provided.
 
 **Example:**
@@ -93,11 +93,35 @@ The `data-footer-height` attribute allows for manually setting the height of the
 ></div>
 ```
 
+##### `data-geocore-keys`
+
+The `data-geocore-keys` attribute allows you to inject GeoCore layers by UUID directly on the div element, without including them in the main configuration object. Multiple UUIDs are separated by commas.
+
+```html
+<div
+  id="myMap"
+  class="geoview-map"
+  data-lang="en"
+  data-geocore-keys="12acd145-626a-49eb-b850-0a59c9bc7506,ccc75c12-5acc-4a6a-959f-ef6f621147b9"
+  data-config-url="configs/map-config.json"
+  style="width: 100%; height: 400px;"
+></div>
+```
+
+The specified GeoCore layers are appended to any layers already defined in `data-config` or `data-config-url`.
+
 ##### `data-shared`
 
 When set, the map will load configuration from URL parameters if they are present. This is especially useful for sharing specific map views or configurations via links.
 
-When `data-shared` is used together with `data-config` or `data-config-url`, the base configuration from those attributes is preserved, and URL parameters selectively update specific properties (projection, zoom, center, basemap options). Layers from URL parameters are appended to existing config layers, not replaced.
+> **Live demo:** [demo-share.html](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/packages/geoview-core/public/templates/demos/demo-share.html)
+
+When `data-shared` is used together with `data-config` or `data-config-url`, the base configuration from those attributes is preserved, and URL parameters selectively override specific properties:
+
+- **Projection** (`p`) — overrides `viewSettings.projection`
+- **Zoom and center** (`z`, `c`) — overrides `viewSettings.initialView.zoomAndCenter`
+- **Basemap options** (`b`) — overrides `basemapOptions`
+- **Layers** (`keys`) — **appended** to existing config layers, not replaced
 
 ```html
 <div
@@ -114,7 +138,7 @@ With this setup, you can share a link with URL parameters to load a specific map
 Example URL with parameters:
 
 ```
-https://example.com/geoview/default-config.html?p=3857&z=4&c=-100,40&l=en&t=dark&b=id:transport,s:off,l:on&i=dynamic&cc=overview-map&keys=12acd145-626a-49eb-b850-0a59c9bc7506,ccc75c12-5acc-4a6a-959f-ef6f621147b9#HLCONF5
+https://example.com/geoview/default-config.html?p=3857&z=4&c=-100,40&b=id:transport,s:off,l:on&i=dynamic&keys=12acd145-626a-49eb-b850-0a59c9bc7506,ccc75c12-5acc-4a6a-959f-ef6f621147b9
 ```
 
 Supported URL parameters:
@@ -122,12 +146,12 @@ Supported URL parameters:
 | Parameter | Description                               | Example Values                                                              |
 | --------- | ----------------------------------------- | --------------------------------------------------------------------------- |
 | `z`       | Zoom level                                | `4`                                                                         |
-| `p`       | Projection                                | `3857`, `3978`                                                              |
+| `p`       | Projection code                           | `3857`, `3978`                                                              |
 | `c`       | Center coordinates [longitude, latitude]  | `-100,40`                                                                   |
-| `l`       | Language                                  | `en`, `fr`                                                                  |
-| `t`       | Theme                                     | `dark`, `light`, `geo.ca`                                                   |
-| `b`       | Basemap options                           | `id:transport,s:off,l:on}`                                                  |
-| `keys`    | Geocore layer UUID keys (comma separated) | `12acd145-626a-49eb-b850-0a59c9bc7506,ccc75c12-5acc-4a6a-959f-ef6f621147b9` |
+| `b`       | Basemap options                           | `id:transport,s:off,l:on`                                                   |
+| `i`       | Interaction type                          | `dynamic`, `static`                                                         |
+| `keys`    | GeoCore layer UUID keys (comma separated) | `12acd145-626a-49eb-b850-0a59c9bc7506,ccc75c12-5acc-4a6a-959f-ef6f621147b9` |
+| `v`       | Schema version                            | `1.0`                                                                       |
 
 **How it works:**
 
@@ -146,20 +170,9 @@ For detailed configuration options, refer to the GeoView configuration documenta
 
 You can also create maps programmatically using the `createMapFromConfig` method from the API. This is useful when you need to create maps dynamically or when you want more control over the creation process.
 
-```typescript
-/**
- * Create a new map in a given div id.
- *
- * @param divId - Id of the div to create map in (becomes the mapId)
- * @param mapConfig - Config passed in from the function call (string or url of a config path)
- * @param divHeight - Optional height of the div to inject the map in (mandatory if the map reloads)
- * @param waitOnMapReady - Optional flag to wait for the map to be ready before resolving the promise
- * @returns A promise that resolves with the MapViewer (after the onMapReady is triggered) which will be created from the configuration
- */
-createMapFromConfig(divId: string, mapConfig: string, divHeight?: number, waitOnMapReady: boolean = true): Promise<MapViewer>
-```
+> **Full API Reference:** [API — TypeDoc](https://canadian-geospatial-platform.github.io/geoview/public/docs/typedoc/classes/API.html)
 
-**Important Note:** The div MUST NOT have a geoview-map class or a warning will be shown when the map is initialized.
+**Important Note:** The div MUST NOT have a `geoview-map` class. If it does, an `InitMapWrongCallError` will be thrown. The class is added automatically by the framework.
 
 **Example Usage:**
 
@@ -174,16 +187,21 @@ const mapConfig = JSON.stringify({
   // Your map configuration
 });
 
-// Create the map
-cgpv.api
-  .createMapFromConfig("dynamicMap", mapConfig, 500)
-  .then((mapViewer) => {
-    console.log("Map created successfully:", mapViewer.id);
-    // You can now interact with the map viewer
-  })
-  .catch((error) => {
-    console.error("Error creating map:", error);
-  });
+// Create the map (awaits map ready by default)
+const mapViewer = await cgpv.api.createMapFromConfig(
+  "dynamicMap",
+  mapConfig,
+  500,
+);
+console.log("Map created successfully:", mapViewer.mapId);
+
+// Or without waiting for map ready
+const mapViewer2 = await cgpv.api.createMapFromConfig(
+  "dynamicMap2",
+  mapConfig,
+  500,
+  false,
+);
 ```
 
 **When to use this approach:**
@@ -192,14 +210,15 @@ cgpv.api
 - When you want to load different configurations based on user actions
 - When you need to manage the lifecycle of maps programmatically
 
+#### Initialization Events
+
 ```typescript
 // Register a handler when the map is initialized
 cgpv.onMapInit((mapViewer) => {
   // This callback is executed when map is init. The layers have NOT been registered yet at this time.
-  // Note: Layers have NOT been registered yet at this time. If you really want to make sure to track ALL
-  // status changes for ANY particular layer, you can use a hook such as:
+  // If you want to track ALL status changes for ANY particular layer, use:
   // `mapViewer.layer.onLayerStatusChanged()`
-  console.log("Map initialized:", mapViewer.id);
+  console.log("Map initialized:", mapViewer.mapId);
 
   // Listen to ANY/ALL layer status at ANY time (generic event catcher)
   mapViewer.layer.onLayerStatusChanged((sender, payload) => {
@@ -212,86 +231,39 @@ cgpv.onMapInit((mapViewer) => {
 // Register a handler when the map is ready (map and UI are fully loaded)
 cgpv.onMapReady((mapViewer) => {
   // This callback is executed when map is ready / ALL layers have at least been registered.
-  // NOTE: some layers can be further along in their individual status at the time this event is triggered(!).
-  console.log("Map ready for interaction:", mapViewer.id);
+  // NOTE: some layers can be further along in their individual status at the time this event is triggered(!)
+  console.log("Map ready for interaction:", mapViewer.mapId);
 });
 ```
 
 These events are important for proper initialization sequencing:
 
-- onMapInit - Fires when the map object is first initialized, but before layers are processed
-- onMapReady - Fires when the map and UI are fully loaded and ready for interaction (**note** layers might not be ready)
+- `onMapInit` — Fires when the map object is first initialized, but before layers are processed
+- `onMapReady` — Fires when the map and UI are fully loaded and ready for interaction (**note**: layers might not be ready)
 
 Using these events helps you properly sequence your application's initialization logic.
 
-### Accessing a created map
+### Accessing a Created Map
 
-The api.maps array is now private and only accessible from the api. The `cgpv.api.maps` is not available anymore. To access and interact with the maps, new functions have been added.
+> **Full API Reference:** [API — TypeDoc](https://canadian-geospatial-platform.github.io/geoview/public/docs/typedoc/classes/API.html)
 
-- How to get a list of maps available
-
-```typescript
-/**
- * Gets the list of all map IDs currently in the collection.
- *
- * @returns {string[]} Array of map IDs
- */
-getMapViewerIds(): string[]
-```
-
-- How to know if a map exist
+The `cgpv.api.maps` property is private. Use the following methods to access and interact with maps:
 
 ```typescript
-/**
- * Return true if a map id is already registered.
- *
- * @param {string} mapId - The unique identifier of the map to retrieve
- * @returns {boolean} True if map exist
- */
-hasMapViewer(mapId: string): boolean
-```
+// Get a list of all active map IDs
+const mapIds = cgpv.api.getMapViewerIds(); // string[]
 
-- How to access a map by id
+// Check if a map exists
+const exists = cgpv.api.hasMapViewer("Map1"); // boolean
 
-```typescript
-/**
- * Gets a map viewer instance by its ID.
- *
- * @param {string} mapId - The unique identifier of the map to retrieve
- * @returns {MapViewer} The map viewer instance if found
- * @throws {Error} If the map with the specified ID is not found
- */
-getMapViewer(mapId: string): MapViewer
-```
+// Get a map viewer by ID (throws MapViewerNotFoundError if not found)
+const mapViewer = cgpv.api.getMapViewer("Map1");
+mapViewer.layer.addGeoviewLayerByGeoCoreUUID(layer);
 
-_Implementation_
+// Get a map viewer asynchronously (waits until available)
+const mapViewer = await cgpv.api.getMapViewerAsync("Map1");
 
-```typescripts
-const myMap = cgpv.api.getMapViewer('Map1');
-myMap.layer.addGeoviewLayerByGeoCoreUUID(layer)
-```
-
-- How to delete a map instance
-
-```typescript
-/**
- * Delete a map viewer instance by its ID.
- *
- * @param {string} mapId - The unique identifier of the map to delete
- * @param {boolean} deleteContainer - True if we want to delete div from the page
- * @returns {Promise<HTMLElement} The Promise containing the HTML element
- */
-deleteMapViewer(mapId: string, deleteContainer: boolean): Promise<HTMLElement | void> {
-```
-
-_Implementation_
-
-```typescript
-if (cgpv.api.hasMapViewer(map)) {
-  cgpv.api.deleteMapViewer(map, false).then(() => {
-    resolve();
-  });
-} else {
-  resolve();
-}
+// Delete a map instance
+// deleteContainer: true removes the div from the DOM, false keeps it for reuse
+await cgpv.api.deleteMapViewer("Map1", false);
 ```

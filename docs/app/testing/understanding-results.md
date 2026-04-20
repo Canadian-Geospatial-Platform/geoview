@@ -1,12 +1,6 @@
 # Understanding Test Results
 
-This guide explains how to interpret test results from the GeoView Test Suite.
-
-## Test Status Types
-
-Each test can have one of the following statuses:
-
-### ✅ Passed (Success)
+This content has been consolidated into [Using the Test Suite — Understanding Results](./using-test-suite.md#understanding-results).
 
 The test executed successfully and all assertions passed.
 

@@ -51,7 +51,8 @@ Add three methods to `LayerApi` for your event:
 ```typescript
 /**
  * Emits the LayerSomething event to all handlers.
- * @param {LayerSomethingEvent} event - The event to emit
+ *
+ * @param event - The event to emit
  */
 #emitLayerSomething(event: LayerSomethingEvent): void {
   EventHelper.emitEvent(this, this.#onLayerSomethingHandlers, event);
@@ -59,7 +60,8 @@ Add three methods to `LayerApi` for your event:
 
 /**
  * Registers a LayerSomething event handler.
- * @param {LayerSomethingDelegate} callback - The callback to be executed whenever the event is emitted
+ *
+ * @param callback - The callback to be executed whenever the event is emitted
  */
 onLayerSomething(callback: LayerSomethingDelegate): void {
   EventHelper.onEvent(this.#onLayerSomethingHandlers, callback);
@@ -67,7 +69,8 @@ onLayerSomething(callback: LayerSomethingDelegate): void {
 
 /**
  * Unregisters a LayerSomething event handler.
- * @param {LayerSomethingDelegate} callback - The callback to stop being called whenever the event is emitted
+ *
+ * @param callback - The callback to stop being called whenever the event is emitted
  */
 offLayerSomething(callback: LayerSomethingDelegate): void {
   EventHelper.offEvent(this.#onLayerSomethingHandlers, callback);

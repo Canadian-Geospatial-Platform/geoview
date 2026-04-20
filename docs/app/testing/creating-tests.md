@@ -1,512 +1,243 @@
 # Creating Custom Tests
 
-This guide explains how to create custom test suites and testers for the GeoView Test Suite framework.
+This guide explains how to add new test suites and testers to the GeoView Test Suite framework.
 
 ## Overview
 
-Creating custom tests involves:
+Creating custom tests involves four steps:
 
-1. **Creating a Tester** - A class that contains test methods
-2. **Creating a Test Suite** - A class that groups testers
-3. **Registering the Suite** - Adding your suite to the plugin
-4. **Configuration** - Making your suite available to users
+1. **Create a Tester** — A class containing test methods
+2. **Create a Test Suite** — A class that groups and orchestrates testers
+3. **Register the Suite** — Wire it into the plugin's `onAdd()` method
+4. **Configure** — Add the suite ID to the HTML test page
 
-## Quick Start
+## Step 1: Create a Tester
 
-### Step 1: Create a Custom Tester
-
-Create a new file in `src/tests/testers/` (e.g., `my-custom-tester.ts`):
+Create a new file in `src/tests/testers/`:
 
 ```typescript
-import { GVAbstractTester } from "./abstract-gv-tester";
+// my-feature-tester.ts
 import { Test } from "../core/test";
+import { GVAbstractTester } from "./abstract-gv-tester";
 
-export class MyCustomTester extends GVAbstractTester {
-  /**
-   * Returns the name of the Tester.
-   */
+export class MyFeatureTester extends GVAbstractTester {
   override getName(): string {
-    return "MyCustomTester";
+    return "MyFeatureTester";
   }
 
-  /**
-   * A simple test that verifies map is loaded.
-   */
-  testMapLoaded(): Promise<Test<boolean>> {
+  testSomething(): Promise<Test<string>> {
     return this.test(
-      "Test if map is loaded",
+      "Test something works...",
       async (test) => {
-        // Test execution logic
-        test.addStep("Checking if map viewer exists...");
-        const mapViewer = this.getMapViewer();
-
-        test.addStep("Verifying map is initialized...");
-        const isLoaded = mapViewer !== undefined;
-
-        return isLoaded;
+        // EXECUTION: perform the action
+        test.addStep("Doing something...");
+        const result = await someOperation();
+        return result;
+      },
+      (test, result) => {
+        // ASSERTIONS: verify the result
+        Test.assertIsDefined("result", result);
+        Test.assertIsEqual(result, "expected-value");
       },
       (test) => {
-        // Assertions
-        const result = test.getResult();
-        Test.assertIsDefined(result);
-        Test.assertIsEqual(result, true);
-        return result!;
-      }
+        // CLEANUP (optional): always runs
+        cleanupResources();
+      },
     );
   }
 }
 ```
 
-### Step 2: Create a Custom Test Suite
-
-Create a new file in `src/tests/suites/` (e.g., `suite-my-custom.ts`):
+### The `test()` Method
 
 ```typescript
+this.test(message, callback, callbackAssert, callbackFinalize?)
+```
+
+| Parameter          | Signature                | Purpose                                     |
+| ------------------ | ------------------------ | ------------------------------------------- |
+| `message`          | `string`                 | Description shown in test output            |
+| `callback`         | `(test) => Promise<T>`   | Execute test logic, return result           |
+| `callbackAssert`   | `(test, result) => void` | Run assertions on the result (throw = fail) |
+| `callbackFinalize` | `(test) => void`         | Cleanup (always runs, optional)             |
+
+### The `testError()` Method (True Negatives)
+
+Use when the test should **throw** a specific error to pass:
+
+```typescript
+testBadUrlFails(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
+  return this.testError(
+    'Test with bad url should fail...',
+    LayerServiceMetadataUnableToFetchError,
+    async (test) => {
+      test.addStep('Creating config with bad URL...');
+      const config = MyLayer.createGeoviewLayerConfig(id, name, GVAbstractTester.BAD_URL, false, [...]);
+      await this.helperStepAddLayerOnMap(test, config);
+    },
+    undefined,  // optional: additional assertion on the error
+    (test) => {
+      this.helperFinalizeStepRemoveLayerConfigAndAssert(test, layerPath);
+    }
+  );
+}
+```
+
+### Accessor Methods
+
+Inside testers, access the map and controllers via inherited methods:
+
+```typescript
+this.getMapViewer(); // MapViewer instance
+this.getMapId(); // Map ID string
+this.getControllersRegistry(); // Controller registry
+this.getGeometryApi(); // Geometry API
+```
+
+### Helper Methods
+
+**Instance helpers** (inherited from `GVAbstractTester`):
+
+```typescript
+this.helperStepAddLayerOnMap(test, gvConfig); // Add layer and wait
+this.helperStepAddLayerOnMapFromUUID(test, uuid); // Add from GeoCore UUID
+this.helperStepCheckLayerAtLayerPath(test, layerPath); // Wait for layer ready
+this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath); // Cleanup
+```
+
+**Static helpers** on `LayerTester` (require explicit `mapId`):
+
+```typescript
+LayerTester.helperStepAssertLayerExists(test, this.getMapId(), layerPath, iconImage?, iconsList?)
+LayerTester.helperStepAssertStyleApplied(test, this.getMapId(), layerPath, iconImage?, iconsList?)
+```
+
+### Shared Constants
+
+URLs, UUIDs, and expected icon lists are defined as `static readonly` on `GVAbstractTester`:
+
+```typescript
+GVAbstractTester.BAD_URL; // 'https://badurl/oops'
+GVAbstractTester.QUEBEC_LONLAT; // [-71.356, 46.780]
+GVAbstractTester.ONTARIO_CENTER_LONLAT; // [-87, 51]
+GVAbstractTester.HISTORICAL_FLOOD_URL_MAP_SERVER;
+// etc.
+```
+
+## Step 2: Create a Test Suite
+
+Create a new file in `src/tests/suites/`:
+
+```typescript
+// suite-my-feature.ts
 import type { API } from "geoview-core/api/api";
 import type { MapViewer } from "geoview-core/geo/map/map-viewer";
 import { GVAbstractTestSuite } from "./abstract-gv-test-suite";
-import { MyCustomTester } from "../testers/my-custom-tester";
+import { MyFeatureTester } from "../testers/my-feature-tester";
 
-export class GVTestSuiteMyCustom extends GVAbstractTestSuite {
-  #myCustomTester: MyCustomTester;
+export class GVTestSuiteMyFeature extends GVAbstractTestSuite {
+  #tester: MyFeatureTester;
 
   constructor(api: API, mapViewer: MapViewer) {
     super(api, mapViewer);
-
-    // Create and add tester
-    this.#myCustomTester = new MyCustomTester(api, mapViewer);
-    this.addTester(this.#myCustomTester);
+    this.#tester = new MyFeatureTester(api, mapViewer);
+    this.addTester(this.#tester);
   }
 
   override getName(): string {
-    return "My Custom Test Suite";
+    return "My Feature Test Suite";
   }
 
   override getDescriptionAsHtml(): string {
-    return "Test Suite for my custom functionality.";
+    return "Tests for My Feature.";
   }
 
   protected override onLaunchTestSuite(): Promise<unknown> {
-    // Run tests
-    const pTest1 = this.#myCustomTester.testMapLoaded();
-
-    // Return promise that resolves when all tests complete
-    return Promise.all([pTest1]);
+    // Parallel: independent tests
+    const p1 = this.#tester.testSomething();
+    const p2 = this.#tester.testSomethingElse();
+    return Promise.all([p1, p2]);
   }
 }
 ```
 
-### Step 3: Register Your Suite
+### Conditional Execution
 
-Add your suite to `src/index.tsx`:
+If the suite requires a specific plugin/feature, override `onCanExecuteTestSuite()`:
 
 ```typescript
-import { GVTestSuiteMyCustom } from './tests/suites/suite-my-custom';
-
-// In the TestSuitePlugin class:
-#suites: { [key: string]: AbstractTestSuite } = {
-  'suite-config': GVTestSuiteConfig,
-  'suite-map': GVTestSuiteMapVaria,
-  'suite-layer': GVTestSuiteLayer,
-  'suite-geochart': GVTestSuiteGeochart,
-  'suite-my-custom': GVTestSuiteMyCustom,  // Add your suite
-};
-```
-
-### Step 4: Use Your Suite
-
-Configure your suite in GeoView config:
-
-```json
-{
-  "corePackages": ["test-suite"],
-  "corePackagesConfig": [
-    {
-      "test-suite": {
-        "suites": ["suite-my-custom"]
-      }
-    }
-  ]
+protected override async onCanExecuteTestSuite(): Promise<boolean> {
+  const config = this.getMapViewer().mapFeaturesConfig;
+  return config.footerBar?.tabs?.core?.includes('my-feature') ?? false;
 }
 ```
 
-## Test Method Patterns
+### Mixed Parallel + Sequential
 
-### Basic Test Pattern
+When some tests modify shared map state (zoom, projection):
 
 ```typescript
-testSomething(): Promise<Test<ResultType>> {
-  return this.test(
-    'Test description shown to user',
-    async (test) => {
-      // Execution phase
-      test.addStep('Describe what you are doing...');
-      const result = await performAction();
+protected override async onLaunchTestSuite(): Promise<unknown> {
+  // Parallel tests first
+  const p1 = this.#tester.testAddLayer();
+  const p2 = this.#tester.testAddLayerBadUrl();
+  await Promise.all([p1, p2]);
 
-      test.addStep('Another step...');
-      const finalResult = processResult(result);
-
-      return finalResult;
-    },
-    (test) => {
-      // Assertion phase
-      const result = test.getResult();
-      Test.assertIsDefined(result);
-      Test.assertIsEqual(result.someProperty, expectedValue);
-      return result!;
-    },
-    (test) => {
-      // Optional cleanup phase
-      test.addStep('Cleaning up...');
-      cleanupResources();
-    }
-  );
+  // Sequential tests that change zoom (run after parallel)
+  await this.#tester.testLayerQuery();
+  return this.#tester.testAnotherLayerQuery();
 }
 ```
 
-### Testing Expected Errors (True Negatives)
+## Step 3: Register the Suite
+
+In `src/index.tsx`, import and add an `else if` branch in `onAdd()`:
 
 ```typescript
-testErrorHandling(): Promise<Test<MyErrorType>> {
-  return this.testError(
-    'Test that error is properly thrown',
-    MyExpectedErrorClass,
-    async (test) => {
-      // Execution that should throw error
-      test.addStep('Attempting invalid operation...');
-      await operationThatShouldFail();
-    },
-    (test) => {
-      // Assertions on the error
-      const error = test.getError();
-      Test.assertIsDefined(error);
-      Test.assertIsInstanceOf(error, MyExpectedErrorClass);
-      return error as MyExpectedErrorClass;
-    }
-  );
+import { GVTestSuiteMyFeature } from './tests/suites/suite-my-feature';
+
+// In onAdd():
+} else if (suite === 'suite-my-feature') {
+  this.addTestSuite(new GVTestSuiteMyFeature(window.cgpv.api, this.mapViewer));
 }
 ```
 
-## Working with Steps
+## Step 4: Add to HTML Test Page
 
-### Adding Steps
+In `packages/geoview-core/public/templates/tests.html`, create a map div:
 
-Steps provide granular progress feedback:
-
-```typescript
-test.addStep("Loading configuration...");
-test.addStep("Validating data...");
-test.addStep("Processing results...");
+```html
+<div
+  id="mapMyFeature"
+  class="geoviewMap"
+  data-lang="en"
+  data-config="{
+    'map': { 'viewSettings': { 'projection': 3978 } },
+    'corePackages': ['test-suite'],
+    'corePackagesConfig': [{ 'test-suite': { 'suites': ['suite-my-feature'] } }]
+  }"
+></div>
 ```
 
-### Step Levels
+## Key Rules
 
-Use different step levels for visual hierarchy:
-
-```typescript
-test.addStep("Major operation starting", "major", "blue");
-test.addStep("Sub-step 1", "regular", "black");
-test.addStep("Sub-step 2", "regular", "black");
-test.addStep("Operation complete", "major", "green");
-```
-
-## Assertion Methods
-
-### Value Assertions
-
-```typescript
-// Check if defined
-Test.assertIsDefined(value);
-Test.assertIsUndefined(value);
-
-// Check equality
-Test.assertIsEqual(actual, expected);
-Test.assertIsNotEqual(actual, unexpected);
-
-// Check instance type
-Test.assertIsInstanceOf(object, ExpectedClass);
-```
-
-### Array Assertions
-
-```typescript
-// Check array length
-Test.assertIsArrayLength(array, expectedLength);
-Test.assertIsArrayLengthMinimal(array, minimumLength);
-
-// Check array contents
-Test.assertArrayIncludes(array, expectedValue);
-Test.assertArrayExcludes(array, unexpectedValue);
-```
-
-### Object Assertions
-
-```typescript
-// Verify object structure and values
-const actual = {
-  user: { name: "Alice", roles: ["admin"] },
-  active: true,
-};
-
-const expected = {
-  user: { name: "Alice" }, // Partial check - only verifies name
-  active: true,
-};
-
-Test.assertJsonObject(actual, expected); // Passes
-```
-
-The `assertJsonObject` method verifies that the actual object contains **at least** all properties and values from the expected object. Additional properties in actual are allowed.
-
-## Layer Testing Patterns
-
-### Adding and Testing Layers
-
-```typescript
-testMyLayer(): Promise<Test<AbstractGVLayer>> {
-  const gvLayerId = generateId();
-  const layerPath = `${gvLayerId}/0`;
-
-  return this.test(
-    'Test adding my custom layer',
-    async (test) => {
-      // Create layer config
-      test.addStep('Creating layer configuration...');
-      const config = MyLayer.createGeoviewLayerConfig(
-        gvLayerId,
-        'My Layer',
-        'https://example.com/layer'
-      );
-
-      // Add to map
-      await LayerTester.helperStepAddLayerOnMap(
-        test,
-        this.getMapViewer(),
-        config
-      );
-
-      // Wait until ready
-      return LayerTester.helperStepCheckLayerAtLayerPath(
-        test,
-        this.getMapViewer(),
-        layerPath
-      );
-    },
-    (test) => {
-      // Assert layer exists
-      return LayerTester.helperStepAssertLayerExists(
-        test,
-        this.getMapViewer(),
-        layerPath
-      );
-    },
-    (test) => {
-      // Cleanup
-      LayerTester.helperFinalizeStepRemoveLayerAndAssert(
-        test,
-        this.getMapViewer(),
-        layerPath
-      );
+1.  **Always use `test.addStep()`** — logs progress in the test UI
+2.  **Use static assertions** from `Test` class — never use `if/else` for checks
+3.  **Always clean up** — remove layers, reset state in `callbackFinalize`
+4.  **Use `generateId()`** for layer IDs — prevents conflicts between parallel tests
+5.  **Add constants to `GVAbstractTester`** — URLs, expected icon lists go there
+6.  **Import layer classes directly** — e.g., `EsriDynamic`, `WMS`, `GeoJSON` for `createGeoviewLayerConfig()`
+    return result;
     }
-  );
-}
-```
 
-### Using Layer Helper Methods
+          Test.assertIsEqual(result, expectedValue);
+          return result!;
+        }
 
-The `LayerTester` class provides helper methods:
-
-```typescript
-// Add layer to map and wait for added event
-await LayerTester.helperStepAddLayerOnMap(test, mapViewer, config);
-
-// Check layer exists at path
-const layer = await LayerTester.helperStepCheckLayerAtLayerPath(
-  test,
-  mapViewer,
-  layerPath
-);
-
-// Assert layer exists
-const layer = LayerTester.helperStepAssertLayerExists(
-  test,
-  mapViewer,
-  layerPath
-);
-
-// Remove layer and assert removal
-LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, mapViewer, layerPath);
-```
-
-## Configuration Testing Patterns
-
-### Testing Layer Configurations
-
-```typescript
-testMyLayerConfig(): Promise<Test<TypeGeoviewLayerConfig>> {
-  return this.test(
-    'Test my layer configuration',
-    async (test) => {
-      test.addStep('Creating configuration object...');
-      const config = {
-        geoviewLayerId: 'myLayer',
-        geoviewLayerName: 'My Test Layer',
-        metadataAccessPath: 'https://example.com/metadata'
-      };
-
-      test.addStep('Initializing configuration...');
-      const gvConfig = await MyLayer.createLayerConfig(config);
-
-      return gvConfig;
-    },
-    (test) => {
-      const config = test.getResult();
-
-      // Verify config structure
-      Test.assertJsonObject(config, {
-        geoviewLayerId: 'myLayer',
-        geoviewLayerType: 'myLayerType',
-        listOfLayerEntryConfig: []
-      });
-
-      return config!;
+    );
     }
-  );
-}
-```
 
-## Event Handling in Tests
-
-### Waiting for Events
-
-```typescript
-testWithEventWait(): Promise<Test<EventPayload>> {
-  return this.test(
-    'Test waiting for map event',
-    async (test) => {
-      test.addStep('Setting up event listener...');
-
-      // Create promise that resolves on event
-      const eventPromise = new Promise<EventPayload>((resolve) => {
-        this.getMapViewer().onMapLoaded((payload) => {
-          resolve(payload);
-        });
-      });
-
-      test.addStep('Triggering action...');
-      triggerSomeAction();
-
-      test.addStep('Waiting for event...');
-      const payload = await eventPromise;
-
-      return payload;
-    },
-    (test) => {
-      const payload = test.getResult();
-      Test.assertIsDefined(payload);
-      return payload!;
-    }
-  );
-}
-```
-
-## Advanced Patterns
-
-### Testing Asynchronous Operations
-
-```typescript
-testAsyncOperation(): Promise<Test<ResultType>> {
-  return this.test(
-    'Test async operation',
-    async (test) => {
-      test.addStep('Starting async operation...');
-
-      // Wait for multiple async operations
-      const [result1, result2] = await Promise.all([
-        asyncOperation1(),
-        asyncOperation2()
-      ]);
-
-      test.addStep('Processing results...');
-      const finalResult = combineResults(result1, result2);
-
-      return finalResult;
-    },
-    (test) => {
-      const result = test.getResult();
-      Test.assertIsDefined(result);
-      Test.assertJsonObject(result, expectedStructure);
-      return result!;
-    }
-  );
-}
-```
-
-### Testing with Timeouts
-
-```typescript
-testWithTimeout(): Promise<Test<boolean>> {
-  return this.test(
-    'Test with timeout',
-    async (test) => {
-      test.addStep('Starting timed operation...');
-
-      const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error('Timeout')), 5000);
-      });
-
-      const operationPromise = performLongOperation();
-
-      // Race between operation and timeout
-      const result = await Promise.race([
-        operationPromise,
-        timeoutPromise
-      ]);
-
-      return result;
-    },
-    (test) => {
-      const result = test.getResult();
-      Test.assertIsDefined(result);
-      return result!;
-    }
-  );
-}
-```
-
-### Conditional Testing
-
-```typescript
-testConditional(): Promise<Test<string>> {
-  return this.test(
-    'Test with conditional logic',
-    async (test) => {
-      test.addStep('Checking preconditions...');
-      const canProceed = checkPreconditions();
-
-      if (!canProceed) {
-        test.addStep('Preconditions not met, skipping...', 'major', 'orange');
-        test.setStatus('skipped');
-        return 'skipped';
-      }
-
-      test.addStep('Preconditions met, proceeding...');
-      const result = await performTest();
-
-      return result;
-    },
-    (test) => {
-      const result = test.getResult();
-      if (result === 'skipped') {
-        return result;
-      }
-
-      Test.assertIsEqual(result, expectedValue);
-      return result!;
-    }
-  );
-}
-```
+````
 
 ## Best Practices
 
@@ -547,7 +278,7 @@ testIsolated(): Promise<Test<void>> {
     }
   );
 }
-```
+````
 
 ### Descriptive Test Names
 

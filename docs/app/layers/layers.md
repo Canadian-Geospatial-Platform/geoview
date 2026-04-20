@@ -16,6 +16,35 @@ A **GeoView Layer** is an abstraction that wraps OpenLayers layers and provides 
 - Provides events for lifecycle management (loading, loaded, error)
 - Supports temporal data and filtering
 
+## Two-Tier Layer System
+
+GeoView uses a **two-tier** layer architecture. Both tiers are created for every layer:
+
+| Tier             | Name          | Base Class                   | Purpose                                                                                             |
+| ---------------- | ------------- | ---------------------------- | --------------------------------------------------------------------------------------------------- |
+| **Config tier**  | GeoView Layer | `AbstractGeoviewLayerConfig` | Handles configuration, metadata fetching, and validation. Created from the JSON config you provide. |
+| **Runtime tier** | GV Layer      | `AbstractBaseGVLayer`        | Wraps the actual OpenLayers layer for rendering and interaction on the map.                         |
+
+**How to access each tier:**
+
+```typescript
+const layerPath = "myLayer/sublayer1";
+
+// Runtime tier — GV layer (OpenLayers wrapper)
+const gvLayer = mapViewer.layer.getGeoviewLayer(layerPath);
+console.log(gvLayer.getVisible(), gvLayer.getOpacity());
+
+// Config tier — layer entry config, then up to the GeoView layer config
+const layerEntryConfig = mapViewer.layer.getLayerEntryConfig(layerPath);
+const geoviewLayerConfig = layerEntryConfig.getGeoviewLayerConfig();
+console.log(
+  geoviewLayerConfig.geoviewLayerId,
+  geoviewLayerConfig.geoviewLayerType,
+);
+```
+
+> **Naming note:** `getGeoviewLayer()` returns the **GV layer** (runtime tier), not the config-tier GeoView layer. To reach the config tier, use `getLayerEntryConfig()` followed by `.getGeoviewLayerConfig()`.
+
 ## Layer Categories
 
 GeoView layers are divided into two main categories:
@@ -27,8 +56,10 @@ Raster layers display image-based data rendered on the server or as tiles.
 **Supported Types:**
 
 - `ogcWms` - OGC Web Map Service
+- `ogcWmts` - OGC Web Map Tile Service
 - `esriDynamic` - ESRI Dynamic Map Service
 - `esriImage` - ESRI Image Service
+- `GeoTIFF` - GeoTIFF raster data
 - `imageStatic` - Static image with geographic bounds
 - `xyzTiles` - XYZ tile service (raster tiles)
 
@@ -127,17 +158,7 @@ console.log("Layer added:", result.layer.getLayerPath());
 
 ```typescript
 // Load layer from GeoCore catalog
-await mapViewer.layer.addGeoviewLayerByGeoCoreUUID("uuid-from-geocore", "en");
-```
-
-### Method 3: Add from Configuration Array
-
-```typescript
-// Load multiple layers at once
-await mapViewer.layer.loadListOfGeoviewLayer([
-  { geoviewLayerId: "layer1", geoviewLayerType: "ogcWms" /* ... */ },
-  { geoviewLayerId: "layer2", geoviewLayerType: "esriFeature" /* ... */ },
-]);
+await mapViewer.layer.addGeoviewLayerByGeoCoreUUID("uuid-from-geocore");
 ```
 
 ## Layer Configuration
@@ -156,9 +177,17 @@ interface TypeGeoviewLayerConfig {
 
   // Optional
   initialSettings?: {
-    opacity?: number; // 0-1
-    visible?: boolean; // true/false
-    extent?: Extent; // [minX, minY, maxX, maxY]
+    controls?: TypeLayerControls; // UI control availability
+    states?: {
+      visible?: boolean; // Initial visibility (default: true)
+      opacity?: number; // Initial opacity 0-1 (default: 1)
+      queryable?: boolean; // Feature info queries (default: false)
+      hoverable?: boolean; // Hover interactions (default: true)
+    };
+    bounds?: Extent; // Geographic bounds [minX, minY, maxX, maxY]
+    extent?: Extent; // View extent constraint
+    minZoom?: number; // Minimum visible zoom
+    maxZoom?: number; // Maximum visible zoom
   };
 
   // Layer entries (sublayers)
@@ -173,7 +202,7 @@ interface TypeGeoviewLayerConfig {
 }
 ```
 
-See [Configuration Reference](app/config/configuration-reference.md) for complete details.
+See [Configuration Reference](../config/configuration-reference.md) for complete details.
 
 ## Working with Layers
 
@@ -186,32 +215,42 @@ const layerIds = mapViewer.layer.getGeoviewLayerIds();
 // Get all layer paths (includes sublayers)
 const layerPaths = mapViewer.layer.getGeoviewLayerPaths();
 
-// Get layer by path
+// Get GV layer by path (runtime layer wrapping OpenLayers)
 const layerPath = "myLayer/sublayer1";
-const layer = mapViewer.layer.getGeoviewLayerByLayerPath(layerPath);
+const gvLayer = mapViewer.layer.getGeoviewLayer(layerPath);
 
-// Get layer configuration
-const config = mapViewer.layer.getLayerConfig(layerPath);
+// Get layer entry configuration
+const config = mapViewer.layer.getLayerEntryConfig(layerPath);
+
+// Get the GeoView layer config (top-level config tier) from a layer entry config
+const geoviewLayerConfig = config.getGeoviewLayerConfig();
+console.log(
+  geoviewLayerConfig.geoviewLayerId,
+  geoviewLayerConfig.geoviewLayerType,
+);
 ```
 
 ### Control Visibility
 
 ```typescript
-// Get visibility
-const isVisible = mapViewer.layer.getVisible(layerPath);
+// Get visibility from the GV layer object
+const gvLayer = mapViewer.layer.getGeoviewLayer(layerPath);
+const isVisible = gvLayer.getVisible();
 
-// Set visibility
-mapViewer.layer.setVisible(layerPath, true);
+// Set visibility via the layer controller
+const layerController = mapViewer.controllers.layerController;
+layerController.setOrToggleLayerVisibility(layerPath, true);
 ```
 
 ### Control Opacity
 
 ```typescript
-// Get opacity
-const opacity = mapViewer.layer.getOpacity(layerPath);
+// Get opacity from the GV layer object
+const gvLayer = mapViewer.layer.getGeoviewLayer(layerPath);
+const opacity = gvLayer.getOpacity();
 
 // Set opacity (0 = transparent, 1 = opaque)
-mapViewer.layer.setOpacity(layerPath, 0.7);
+mapViewer.layer.setLayerOpacity(layerPath, 0.7);
 ```
 
 ### Remove Layers
@@ -251,14 +290,18 @@ cgpv.onMapInit((mapViewer) => {
     console.log("Layer status:", payload.status);
   });
 
-  // Layer error
-  mapViewer.layer.onLayerError((sender, payload) => {
-    console.error("Layer error:", payload.error);
+  // Layer visibility toggled
+  mapViewer.layer.onLayerVisibilityToggled((sender, payload) => {
+    console.log(
+      "Layer visibility changed:",
+      payload.layer.getLayerPath(),
+      payload.visible,
+    );
   });
 });
 ```
 
-See [Layer Events](app/events/layer-events.md) for complete event reference.
+See [Layer Events](../events/layer-events.md) for complete event reference.
 
 ## Temporal Layers
 
@@ -317,41 +360,39 @@ externalDateFormat: "MM-YYYY[THH:MM:SSZ]";
 
 ### Temporal Filtering
 
-Filter temporal layers by date range:
+Temporal layers can be filtered using the layer's built-in filter mechanisms. Layer filters are applied through the layer configuration:
 
 ```typescript
-// CQL filter syntax
-const filter =
-  "dateField >= date'2023-01-01T00:00:00Z' AND dateField <= date'2023-12-31T23:59:59Z'";
-mapViewer.layer.applyViewFilter(layerPath, filter);
+// Set a layer filter in the configuration
+{
+  layerFilter: "dateField >= date'2023-01-01T00:00:00Z' AND dateField <= date'2023-12-31T23:59:59Z'";
+}
 ```
 
-If using `externalDateFormat`, use that format in your filters:
+For runtime filter changes, use the map controller:
 
 ```typescript
-// If externalDateFormat is 'DD/MM/YYYY HH:mm:ss-05:00'
-const filter = "dateField >= date'01/01/2023 00:00:00-05:00'";
+const mapController = mapViewer.controllers.mapController;
+mapController.applyLayerFilters(layerPath);
 ```
 
 ## Filtering Layers
 
-Apply attribute or spatial filters to layers:
+Filters are applied through layer configuration using the `layerFilter` property:
 
 ```typescript
-// Attribute filter
-mapViewer.layer.applyViewFilter(
-  layerPath,
-  "population > 100000 AND name LIKE 'New%'",
-);
+// In layer entry configuration
+{
+  layerId: 'myLayer',
+  layerFilter: "population > 100000 AND name LIKE 'New%'"
+}
+```
 
-// Temporal filter
-mapViewer.layer.applyViewFilter(
-  layerPath,
-  "dateField >= date'2023-01-01T00:00:00Z'",
-);
+For runtime filter changes, use the map controller:
 
-// Clear filter
-mapViewer.layer.applyViewFilter(layerPath, "");
+```typescript
+const mapController = mapViewer.controllers.mapController;
+mapController.applyLayerFilters(layerPath);
 ```
 
 **CQL Filter Syntax:**
@@ -364,27 +405,27 @@ mapViewer.layer.applyViewFilter(layerPath, "");
 
 ## Feature Information
 
-Query features from layers:
+Feature queries are handled through the layer set controller:
 
 ```typescript
-// Get features at a coordinate
-const features = await mapViewer.layer.getFeatureInfo(
-  [longitude, latitude],
-  layerPath,
-);
+// Query all features for a layer
+const result =
+  await mapViewer.controllers.layerSetController.triggerGetAllFeatureInfo(
+    layerPath,
+  );
 
-features.forEach((feature) => {
+result.results.forEach((feature) => {
   console.log("Feature properties:", feature.fieldInfo);
 });
 ```
 
-See [Layer API Reference](app/api/layer-api.md#feature-queries) for more query methods.
+See [Layer API Reference](../api/layer-api.md) for more query methods.
 
 ## Layer Styling
 
 ### Vector Layer Styling
 
-Vector layers can be styled using OpenLayers style configuration:
+Vector layers are styled using the `layerStyle` property in the layer entry configuration:
 
 ```typescript
 {
@@ -396,21 +437,12 @@ Vector layers can be styled using OpenLayers style configuration:
     source: {
       dataAccessPath: 'https://example.com/data.geojson'
     },
-    style: {
-      Point: {
-        color: '#FF0000',
-        size: 8
-      },
-      LineString: {
-        color: '#0000FF',
-        width: 2
-      },
-      Polygon: {
-        fillColor: '#00FF00',
-        fillOpacity: 0.5,
-        strokeColor: '#000000',
-        strokeWidth: 1
-      }
+    layerStyle: {
+      styleType: 'simple',
+      fillColor: '#00FF0088',
+      strokeColor: '#000000',
+      strokeWidth: 2,
+      pointRadius: 8
     }
   }]
 }
@@ -418,7 +450,7 @@ Vector layers can be styled using OpenLayers style configuration:
 
 ### Raster Layer Styling
 
-Raster layers use server-defined styles. Check your service's capabilities for available styles:
+Raster layers use server-defined styles. For WMS, use the `wmsStyle` source property:
 
 ```typescript
 {
@@ -427,14 +459,16 @@ Raster layers use server-defined styles. Check your service's capabilities for a
 
   listOfLayerEntryConfig: [{
     layerId: 'layer1',
-    style: 'custom_style_name'  // Must exist on server
+    source: {
+      wmsStyle: 'custom_style_name'  // Must exist on server
+    }
   }]
 }
 ```
 
 ## Best Practices
 
-### ? DO
+### ✅ DO
 
 1. **Use unique layer IDs**
 
@@ -451,7 +485,7 @@ Raster layers use server-defined styles. Check your service's capabilities for a
 3. **Set initial visibility and opacity**
 
    ```typescript
-   initialSettings: { visible: true, opacity: 0.8 }
+   initialSettings: { states: { visible: true, opacity: 0.8 } }
    ```
 
 4. **Handle layer events**
@@ -464,10 +498,11 @@ Raster layers use server-defined styles. Check your service's capabilities for a
 
 5. **Use layer paths for operations**
    ```typescript
-   mapViewer.layer.setVisible("myLayer/sublayer1", true);
+   const layerController = mapViewer.controllers.layerController;
+   layerController.setOrToggleLayerVisibility("myLayer/sublayer1", true);
    ```
 
-### ? DON'T
+### ❌ DON'T
 
 1. **Don't use duplicate layer IDs**
 
@@ -488,11 +523,11 @@ Raster layers use server-defined styles. Check your service's capabilities for a
 
    ```typescript
    // BAD
-   await mapViewer.layer.addGeoviewLayer(config);
+   mapViewer.layer.addGeoviewLayer(config);
 
    // GOOD
    try {
-     await mapViewer.layer.addGeoviewLayer(config);
+     mapViewer.layer.addGeoviewLayer(config);
    } catch (error) {
      console.error("Failed to add layer:", error);
    }
@@ -604,10 +639,9 @@ CSV file with coordinate columns.
     source: {
       dataAccessPath: 'https://example.com/data.csv'
     },
-    // Specify coordinate columns
     sourceOptions: {
-      x: 'longitude',  // or 'lon', 'x'
-      y: 'latitude'    // or 'lat', 'y'
+      latitudeField: 'latitude',
+      longitudeField: 'longitude'
     }
   }]
 }
@@ -743,10 +777,14 @@ const result = mapViewer.layer.addGeoviewLayer(config);
 mapViewer.layer.onLayerFirstLoaded((sender, payload) => {
   if (payload.layer.getLayerPath() === result.layerPath) {
     // Zoom to layer extent
-    const extent = mapViewer.layer.getExtent(result.layerPath);
-    if (extent) {
-      mapViewer.map.getView().fit(extent);
-    }
+    const layerController = mapViewer.controllers.layerController;
+    layerController
+      .getExtentOfMultipleLayers([result.layerPath])
+      .then((extent) => {
+        if (extent) {
+          mapViewer.zoomToExtent(extent);
+        }
+      });
   }
 });
 ```
@@ -774,20 +812,21 @@ async function loadLayersByCategory(category: string) {
 
 ```typescript
 // Keep two layers in sync
-mapViewer.layer.onVisibilityChanged((sender, payload) => {
-  if (payload.layerPath === "layer1") {
-    mapViewer.layer.setVisible("layer2", payload.visible);
+mapViewer.layer.onLayerVisibilityToggled((sender, payload) => {
+  if (payload.layer.getLayerPath() === "layer1") {
+    const layerController = mapViewer.controllers.layerController;
+    layerController.setOrToggleLayerVisibility("layer2", payload.visible);
   }
 });
 ```
 
 ## See Also
 
-- **[Layer API Reference](app/api/layer-api.md)** - Complete API method reference
-- **[Layer Events](app/events/layer-events.md)** - Layer event documentation
-- **[Configuration Reference](app/config/configuration-reference.md)** - Configuration schema
-- **[Creating Maps](app/config/create-map.md)** - Map initialization
-- **[Controllers API](app/events/controllers.md)** - Controllers for performing actions
+- **[Layer API Reference](../api/layer-api.md)** - Complete API method reference
+- **[Layer Events](../events/layer-events.md)** - Layer event documentation
+- **[Configuration Reference](../config/configuration-reference.md)** - Configuration schema
+- **[Creating Maps](../config/create-map.md)** - Map initialization
+- **[Controllers API](../events/controllers.md)** - Controllers for performing actions
 
 ---
 

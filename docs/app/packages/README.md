@@ -10,9 +10,8 @@ This section contains comprehensive documentation for GeoView's package system, 
 
 ### Development Guides
 
-- **[Package Development Overview](./overview.md)** - Introduction to GeoView packages, components vs packages
 - **[Creating Core Packages](./core-packages.md)** - Rush.js monorepo setup and TypeScript package development
-- **[Creating JavaScript Packages](./javascript-packages.md)** - Vanilla JavaScript package development guide
+- **[Creating JavaScript Packages](./javascript-packages.md)** - Vanilla JavaScript package development guide (legacy)
 
 ## 🔌 Core Packages
 
@@ -91,41 +90,39 @@ GeoView includes six built-in packages that extend the viewer's functionality:
 1. Create package structure in `packages/`
 2. Update `rush.json` with package entry
 3. Update `webpack.common.js` with bundle config
-4. Create event processor extending `AbstractEventProcessor`
+4. Create plugin class extending `AppBarPlugin`, `FooterPlugin`, or `NavBarPlugin`
 5. Create React component using GeoView hooks
 6. Export package and register
 
-**JavaScript Package:**
+**JavaScript Package (Legacy):**
 
 1. Create IIFE-wrapped class
-2. Implement `added` and `removed` hooks
-3. Use provided `api`, `createElement`, `react`, `props`, `translate`, `makeStyles`
-4. Load via configuration
+2. Implement `onAdd()` and `onRemove()` lifecycle methods
+3. Export class via `window.geoviewPlugins`
+4. Load via `cgpv.api.plugin.addPlugin()`
 
 ### Development Guides
 
 - **[Core Package Development](./core-packages.md)** - TypeScript, Rush.js, Webpack setup
-- **[JavaScript Package Development](./javascript-packages.md)** - Vanilla JS package creation
-- **[Package Development Overview](./overview.md)** - Architecture and best practices
+- **[JavaScript Package Development](./javascript-packages.md)** - Vanilla JS package creation (legacy)
 
 ## 🔗 Related Documentation
 
-- **[Controllers API](app/events/controllers.md)** - Controllers for performing actions
-- **[Configuration Reference](app/config/configuration-reference.md)** - Package configuration options
-- **[API Reference](app/api/api.md)** - Core API methods
-- **[State Management](programming/using-store.md)** - Zustand store architecture
+- **[Controllers API](../events/controllers.md)** - Controllers for performing actions
+- **[Configuration Reference](../config/configuration-reference.md)** - Package configuration options
+- **[API Reference](../api/api.md)** - Core API methods
+- **[State Management](../../programming/using-store.md)** - Zustand store architecture
 
 ## 📋 Quick Reference
 
 ### Common Tasks
 
-| Task                            | Documentation                                                    |
-| ------------------------------- | ---------------------------------------------------------------- |
-| Use a core package              | [Core Packages Reference](./geoview-core-packages.md)            |
-| Create TypeScript package       | [Core Package Development](./core-packages.md)                   |
-| Create JavaScript package       | [JavaScript Package Development](./javascript-packages.md)       |
-| Understand package architecture | [Package Overview](./overview.md)                                |
-| Configure package               | [Configuration Reference](app/config/configuration-reference.md) |
+| Task                      | Documentation                                                   |
+| ------------------------- | --------------------------------------------------------------- |
+| Use a core package        | [Core Packages Reference](./geoview-core-packages.md)           |
+| Create TypeScript package | [Core Package Development](./core-packages.md)                  |
+| Create JavaScript package | [JavaScript Package Development](./javascript-packages.md)      |
+| Configure package         | [Configuration Reference](../config/configuration-reference.md) |
 
 ---
 

@@ -1,173 +1,203 @@
 # JavaScript Packages
 
-## Creating a package using vanilla javascript
+> **⚠️ Legacy Approach:** This document describes vanilla JavaScript package development using an IIFE pattern and external script loading.
+>
+> **For Modern Development:** Use TypeScript and the monorepo structure described in [Core Package Development](./core-packages.md) for better type safety, tooling, and integration.
 
-To create a package, start by creating a JavaScript file preferably with the packages name.
+## Overview
 
-The package requires to be written inside an immediately invoked function expression [IIFE](https://developer.mozilla.org/en-US/docs/Glossary/IIFE)
+External JavaScript packages allow you to extend GeoView without being part of the Rush monorepo. The package is loaded as a separate `<script>` tag and registered with the viewer at runtime.
+
+## Creating a Package
+
+A package is a JavaScript file written inside an [IIFE](https://developer.mozilla.org/en-US/docs/Glossary/IIFE) (Immediately Invoked Function Expression). The class must be exported to `window.geoviewPlugins` so the viewer can find it.
+
+### Minimal Structure
 
 ```js
+// my-plugin.js
 (function () {
-  // create package class
+  class MyPlugin {
+    // Called when the plugin is added to a map
+    onAdd() {
+      console.log("Plugin added to map:", this.mapViewer.mapId);
+    }
+
+    // Called when the plugin is removed from a map
+    onRemove() {
+      console.log("Plugin removed from map:", this.mapViewer.mapId);
+    }
+  }
+
+  // Export the plugin class — the key must match the plugin ID
+  window.geoviewPlugins = window.geoviewPlugins || {};
+  window.geoviewPlugins["my-plugin"] = MyPlugin;
 })();
 ```
 
-Inside this function you need to create a class that will be used to initialize the package
+### Available Properties
+
+When the plugin is instantiated by the viewer, the following properties are available on `this`:
+
+| Property           | Description                                      |
+| ------------------ | ------------------------------------------------ |
+| `this.pluginId`    | The unique plugin identifier                     |
+| `this.mapViewer`   | The `MapViewer` instance for the map             |
+| `this.pluginProps` | Properties passed when loading the plugin        |
+| `this.react`       | React library (for `createElement`, hooks, etc.) |
+| `this.createRoot`  | React DOM `createRoot` function                  |
+| `this.translate`   | The `react-i18next` translation instance         |
+| `this.useTheme`    | MUI `useTheme` hook                              |
+
+### Translations
+
+Override the `defaultTranslations()` method to add English and French translations:
 
 ```js
-(function () {
-  class Test {}
-})();
-```
-
-The class implements 1 constant `translations` and 2 hooks `added, removed` that will be accessed and called directly from the viewer, it will also automatically get access to `api`, `createElement`, `react`, `props`, `translate` and `makeStyles`.
-
-The `translations` constant is an optional object, if defined then any translations provided will be passed to the core viewer translation instance (i18next) and will extend the current translations. Supported translations are for languages English and French and written as `en` and `fr` keys.
-
-```js
-(function () {
-  class Test {
-    translations = {
+class MyPlugin {
+  defaultTranslations() {
+    return {
       en: {
-        testMessage: "Hello",
+        MyPlugin: { title: "My Plugin" },
       },
       fr: {
-        testMessage: "Bonjour",
+        MyPlugin: { title: "Mon Plugin" },
       },
     };
   }
-})();
+
+  onAdd() {
+    // Translations are merged into i18next automatically
+  }
+
+  onRemove() {}
+}
 ```
 
-The `added` hook is a required function that is called from the viewer immediately after the package has been loaded. In this function you can create a react component and use the core viewer API calls.
+### Creating a React Component
 
-As mentioned this class will automatically get access to few objects
-
-`api` is an object used to call any available API function from the core viewer.
-
-`createElement` is an essential function to create React HTML elements [see](#creating-a-react-component) for an example usage, `createElement` is part of `React` which takes 3 arguments, the first is the HTML element to create, an example would be a `button`, the second argument is the element attributes for example `onClick` or `className` or `style`..., the third argument is the element content / children for example `Click here`.
-
-`react` is the an object to use React functions and hooks such as useState, useEffect etc... [see](https://reactjs.org/docs/hooks-intro.html) for more information.
-
-`props` is an object containing the package properties passed when loading the package [see](#loading-the-package) for more information.
-
-`translate` is an object to access `react-i18next` functions including `useTranslation` which will allow for accessing the viewer translations [see](https://react.i18next.com/latest/usetranslation-hook) for more information.
-
-`makeStyles` is an object that will allow the package to use material ui themeing and access the core viewer theme [see](https://material-ui.com/styles/basics/)
-
-The `removed` hook is a required function that is called from the viewer when a call has been made to remove the package. Any cleanup code should be written here, for example removing added components.
-
-### Creating a React component
-
-Using the `added` hook you can create and load a react component in the viewer
-
-A react component can be a functional component or a class component [see](https://reactjs.org/docs/hooks-state.html) for more information on how to use each one.
-
-Below is a simple example of a funcational component that will add a panel to the viewer on the app-bar that will have a counter as it's content
+Use `this.react.createElement` to create React elements without JSX:
 
 ```js
 // counter.js
 (function () {
-    class Counter {
-        // added panel
-        panel = null;
+  class CounterPlugin {
+    panel = null;
 
-        // optional
-        translations = {
-            'en': {
-                count: 'Count',
-            },
-            'fr': {
-                count: 'Compter',
-            },
-        };
-
-        // required, called immediately after package loads
-        added = {
-            const { api, react, translate } = this;
-
-            // get mapId passed from package properties when created
-            const { mapId } = this.props;
-
-            // used to create react element
-            const h = this.createElement;
-
-            const { useState } = react;
-            const { useTranslation } = translate;
-
-            // create a react functional component
-            const Component = () => {
-                const [count, setCount] = useState(0);
-
-                // access translations
-                const { t } = useTranslation();
-
-                return h('button', {
-                    onClick: () => setCount(count + 1)
-                }, `${t('count')} ${count})`;
-            }
-
-            // button props
-            const button = {
-                tooltip: 'Counter',
-                icon: '<i class="material-icons">add</i>',
-            };
-
-            // panel props
-            const panel = {
-                title: 'Counter',
-                icon: '<i class="material-icons">add</i>',
-                content: Component,
-                width: 200,
-            };
-
-            // create a new button panel on the app-bar
-            this.panel = api.getMapViewer[mapId].createAppbarPanel(button, panel, null);
-        };
-
-        // removed is a function called when removing a package to cleanup
-        removed = () => {
-            const { mapId } = this.props;
-
-            this.api.getMapViewer[mapId].removeAppbarPanel(this.panel.id);
-        };
+    defaultTranslations() {
+      return {
+        en: { CounterPlugin: { count: "Count" } },
+        fr: { CounterPlugin: { count: "Compter" } },
+      };
     }
 
-    // export this package
-    window.packages = window.packages || {};
-    window.packages.counter = Counter;
+    onAdd() {
+      const { react, translate, mapViewer } = this;
+      const h = react.createElement;
+      const { useState } = react;
+
+      // Create a functional React component
+      const CounterComponent = () => {
+        const [count, setCount] = useState(0);
+        const { t } = translate.useTranslation();
+
+        return h(
+          "button",
+          {
+            onClick: () => setCount(count + 1),
+          },
+          `${t("CounterPlugin.count")} ${count}`,
+        );
+      };
+
+      // Button properties for the app bar
+      const buttonProps = {
+        id: "counter-plugin",
+        "aria-label": "CounterPlugin.count",
+        tooltip: "Counter",
+        children: h("span", null, "+"),
+        visible: true,
+      };
+
+      // Panel properties
+      const panelProps = {
+        title: "Counter",
+        content: CounterComponent,
+        width: 300,
+      };
+
+      // Create a panel on the app bar
+      this.panel = mapViewer.appBarApi.createAppbarPanel(
+        buttonProps,
+        panelProps,
+      );
+    }
+
+    onRemove() {
+      if (this.panel) {
+        this.mapViewer.appBarApi.removeAppbarPanel(this.panel.buttonPanelId);
+      }
+    }
+  }
+
+  // Export the plugin
+  window.geoviewPlugins = window.geoviewPlugins || {};
+  window.geoviewPlugins["counter"] = CounterPlugin;
 })();
 ```
 
-A package needs to be exported before it can be loaded to the viewer. To export the package add this at the bottom of the package class, see example above for the example package.
+## Loading the Package
 
-```js
-// export this package
-window.packages = window.packages || {};
-window.packages.counter = Counter;
+### Step 1: Include the Script
+
+Add a `<script>` tag in the `<head>` of your HTML page:
+
+```html
+<script src="./counter.js"></script>
 ```
 
-### Loading the package
+### Step 2: Register the Plugin
 
-You can load a package by first importing it in a script tag in the `<head>` element of the page
-
-` <script src="./counter.js"></script>`
-
-Then after the core viewer API is ready you can add the package to the viewer init callback using the `add` API function. This function takes 3 arguments, the first is the package name (should be unique name), the second is the exported package class, the third is the package properties. package properties can be accessed using `this.props` inside the package `added` or `removed` functions.
-
-`cgpv.api.plugin.addPlugin(name, packageClass, props)`
+After the map is initialized, register the plugin using `cgpv.api.plugin.addPlugin`. The function takes 4 arguments:
 
 ```js
-cgpv.init(function () {
-  cgpv.api.plugin.addPlugin("counter", window.packages["counter"], {
-    mapId: "mapLCC",
-  });
+cgpv.api.plugin.addPlugin(pluginId, pluginClass, mapId, props);
+```
+
+| Argument      | Description                              |
+| ------------- | ---------------------------------------- |
+| `pluginId`    | Unique plugin name (string)              |
+| `pluginClass` | The exported plugin class                |
+| `mapId`       | The map ID to attach the plugin to       |
+| `props`       | Optional properties passed to the plugin |
+
+**Example:**
+
+```js
+cgpv.onMapInit((mapViewer) => {
+  cgpv.api.plugin.addPlugin(
+    "counter",
+    window.geoviewPlugins["counter"],
+    mapViewer.mapId,
+    { someOption: true },
+  );
 });
 ```
 
-## Loading bundled core packages
+### Removing a Plugin
 
-The viewer is bundled with core packages, you can load them by passing their id in the map config object in the `corePackages`, `footerBar.tabs.core` or `appBar.tabs.core` array as follows
+```js
+cgpv.api.plugin.removePlugin("counter", "mapId");
+```
+
+## Loading Bundled Core Packages
+
+The viewer is bundled with core packages. Load them by adding their ID to the appropriate config array:
+
+- **`corePackages`** — Map-level packages (e.g., `swiper`, `test-suite`)
+- **`appBar.tabs.core`** — App bar packages (e.g., `aoi-panel`, `about-panel`, `custom-legend`)
+- **`footerBar.tabs.core`** — Footer bar packages (e.g., `time-slider`, `geochart`)
+- **`navBar`** — Nav bar packages (e.g., `drawer`)
 
 ```html
 <div
@@ -178,7 +208,7 @@ The viewer is bundled with core packages, you can load them by passing their id 
         'map': {
           'interaction': 'dynamic',
           'viewSettings': {
-            'projection': 3857,
+            'projection': 3857
           },
           'basemapOptions': {
             'basemapId': 'transport',
@@ -187,6 +217,7 @@ The viewer is bundled with core packages, you can load them by passing their id 
           }
         },
         'components': ['north-arrow', 'overview-map'],
+        'navBar': ['drawer'],
         'corePackages': ['swiper'],
         'appBar': {
           'tabs': {
@@ -205,11 +236,7 @@ The viewer is bundled with core packages, you can load them by passing their id 
 
 ## See Also
 
-> **⚠️ Legacy Approach:** This document describes vanilla JavaScript packages development using IIFE pattern.
->
-> **For Modern Development:** Use TypeScript and the monorepo structure described in [Core Package Development](./core-packages.md) for better type safety and tooling support.
-
 - **[Core Package Development](./core-packages.md)** - Modern TypeScript package development (recommended)
-- **[Core Packages](app/packages/core-packages.md)** - Rush.js monorepo setup
-- **[Controllers API](app/events/controllers.md)** - Controllers for performing actions
-- **[API Reference](app/api/api.md)** - Main API methods
+- **[Core Packages Reference](./geoview-core-packages.md)** - API reference for all bundled packages
+- **[Controllers API](../events/controllers.md)** - Controllers for performing actions
+- **[API Reference](../api/api.md)** - Main API methods

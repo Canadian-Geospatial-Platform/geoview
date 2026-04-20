@@ -146,14 +146,14 @@ When creating a new package in the monorepo it will involve creating necessary f
 
 3. Create the src Directory
 
-   Create a **src** direcory withing you package directory to hold the source files.
+   Create a **src** directory within your package directory to hold the source files.
 
 4. Add the Source Files
 
-   within the **src** directory create the following files:
+   Within the **src** directory create the following files:
    - _nameOfPackage_-panels.tsx
 
-     Defines the react components or funcionalies of the panel.
+     Defines the react components or functionalities of the panel.
 
    - _nameOfPackage_-style.ts
 
@@ -161,7 +161,7 @@ When creating a new package in the monorepo it will involve creating necessary f
 
    - index.tsx
 
-     The entry point for the pluggin. This file imports and exports the main components and styles. It also contains translation information.
+     The entry point for the plugin. This file imports and exports the main components and styles. It also contains translation information.
 
    - tsconfig.json
 
@@ -171,70 +171,105 @@ In conclusion, by following these steps, you can create and configure a new pack
 
 ### Adding translation information to index.tsx
 
-To add translation information, you can just create an object as follow in index.tsx
+To add translation information, override the `defaultTranslations()` method in your plugin class inside `index.tsx`:
 
-```JS
+```typescript
   /**
-   * translations object to inject to the viewer translations
+   * Overrides the default translations for the Plugin.
+   *
+   * @returns The translations object for the Plugin
    */
-  translations = toJsonObject({
-    en: {
-      AoiPanel: {
-        title: 'Area of Interest',
+  override defaultTranslations(): Record<string, unknown> {
+    return {
+      en: {
+        AoiPanel: {
+          title: 'Area of Interest',
+        },
       },
-    },
-    fr: {
-      AoiPanel: {
-        title: "Région d'intérêt",
+      fr: {
+        AoiPanel: {
+          title: "Région d'intérêt",
+        },
       },
-    },
-  });
+    };
+  }
 ```
 
-### Adding your pluggin ID to the concerned files
+### Adding your plugin ID to the concerned files
 
-1. map-schema-types.ts
-   Let's say we want to add a new package having the aoi-panel ID. To be detected as being valid, you must add your package ID to the schema (config-validation-schema.json). You must find the type definition TypeValidAppBarCoreProps and add your package ID to the enum section.
+1. schema.json
+   Let's say we want to add a new package having the aoi-panel ID. To be detected as being valid, you must add your package ID to the schema (`packages/geoview-core/schema.json`). Find the `TypeValidAppBarCoreProps` definition and add your package ID to the enum array.
 
-```
+```json
     "TypeValidAppBarCoreProps": {
       "description": "Valid values for the app bar tabs core array.",
       "additionalProperties": false,
-      "enum": ["geolocator", "export", "geochart", "details", "legend", "guide", "data-table", "layers", "aoi-panel"]
+      "enum": [
+        "about-panel",
+        "geolocator",
+        "export",
+        "geochart",
+        "details",
+        "legend",
+        "guide",
+        "data-table",
+        "layers",
+        "share",
+        "aoi-panel",
+        "custom-legend"
+      ]
     },
 ```
 
-2. config-validation-schema.json
-   The file map-schema-type.js contains the typescript definition for all the types defined in the config-validation-schema.json file. therefor, you must add your package ID to TypeValidAppBarCoreProps as follow:
+2. map-schema-types.ts
+   The file `packages/geoview-core/src/api/types/map-schema-types.ts` contains the TypeScript definitions that mirror the JSON schema. You must add your package ID to the `TypeValidAppBarCoreProps` type:
 
-```
+```typescript
 /** Supported app bar values. */
 export type TypeValidAppBarCoreProps =
-  | 'geolocator'
-  | 'export'
-  | 'aoi-panel'
-  | 'geochart'
-  | 'guide'
-  | 'legend'
-  | 'details'
-  | 'data-table'
-  | 'layers';
+  | "geolocator"
+  | "export"
+  | "aoi-panel"
+  | "about-panel"
+  | "custom-legend"
+  | "guide"
+  | "legend"
+  | "details"
+  | "data-table"
+  | "layers";
 ```
+
+> **Note:** Some packages appear in the **app bar** (`TypeValidAppBarCoreProps`) and others in the **footer bar** (`TypeValidFooterBarTabsCoreProps`). Make sure you add your package ID to the correct type.
 
 3. loading-packages-config.json
-   Adding the pluggin ID to loading-packages-config.json ensures that your new package is recognized and loaded by the application. Let's say we want to add a package named area of interest. you should add the new package to the configuration file to ensure it is loaded by the application.
+   Adding the plugin ID to `packages/geoview-core/public/configs/loading-packages-config.json` ensures that your new package is loaded by default. For **app bar** packages, add the ID to the `appBar.tabs.core` array:
 
-```
+```json
 {
-  "core": ["aoi-panel"]
+  "corePackages": [],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "export",
+        "about-panel",
+        "aoi-panel",
+        "custom-legend",
+        "guide",
+        "details",
+        "data-table",
+        "layers"
+      ]
+    }
+  }
 }
 ```
 
-Edit packages/geoview-core/public/configs/loading-packages-config.json to include your package under the core key.
+> **Note:** For **map-level** core packages (like `swiper` or `test-suite`), add the ID to the `corePackages` array instead. The valid map core packages are defined in `TypeValidMapCorePackageProps` in `schema.json`.
 
 ### Icons definition (Optional)
 
-If you need a new Icon that does not extist in packages/geoview-core/src/ui/icons/index.ts, you can explore [predefined material UI icons](https://mui.com/material-ui/material-icons/) and chose one from those available. You must add a line in packages/geoview-core/src/ui/icons/index.ts as follow:
+If you need a new Icon that does not exist in packages/geoview-core/src/ui/icons/index.ts, you can explore [predefined material UI icons](https://mui.com/material-ui/material-icons/) and chose one from those available. You must add a line in packages/geoview-core/src/ui/icons/index.ts as follow:
 
 ```
 CropOriginal as AoiIcon,
@@ -246,12 +281,53 @@ CropOriginal as AoiIcon,
 - Use rush build to build the package along with the other packages in the monorepo.
 - To test the code will working on it you can always use the **rush serve** command.
 
+## Custom Package Configuration
+
+Each core package is associated with a default schema and configuration file. Users can customize a package by providing a custom configuration file.
+
+To associate a custom configuration with a package:
+
+1. Provide a JSON configuration file using `data-config-url`:
+
+```html
+<div
+  id="mapLCC"
+  class="geoview-map"
+  data-lang="en"
+  data-config-url="./configs/my-map-config.json"
+></div>
+```
+
+2. In the configuration file, specify the desired core packages:
+
+```json
+{
+  "corePackages": ["swiper"],
+  "footerBar": {
+    "tabs": {
+      "core": ["time-slider"]
+    }
+  }
+}
+```
+
+3. Create a configuration file for the package named `<config-file-name>-<package-name>.json` (e.g., `my-map-config-time-slider.json`)
+4. Place both configuration files in the same folder
+
+For example, the time-slider package has a [schema](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/packages/geoview-time-slider/schema.json) and [default configuration](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/packages/geoview-time-slider/default-config-time-slider-panel.json) that can be overridden.
+
 ## See Also
 
 - **[Core Packages Reference](./geoview-core-packages.md)** - Complete package development guide with API reference
-- **[Controllers API](app/events/controllers.md)** - Controllers for performing actions
+- **[Controllers API](../events/controllers.md)** - Controllers for performing actions
 - **[Package Examples](https://github.com/Canadian-Geospatial-Platform/geoview/tree/develop/packages)** - Real package implementations
 
 ## Available core packages
 
-Available package ids `aoi-panel`, `swiper`, `time-slider`, `geochart`
+**App bar packages:** `aoi-panel`, `about-panel`, `custom-legend`
+
+**Footer bar packages:** `geochart`, `time-slider`
+
+**Nav bar packages:** `drawer`
+
+**Map core packages (via `corePackages`):** `swiper`, `test-suite`

@@ -1,20 +1,22 @@
-
 # HOW TO USE THEMING TO STYLE A COMPONENT
 
+In GeoView we have a defined list of colors. These colors are defined in the [IGeoViewColors interface](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/packages/geoview-core/src/ui/style/types.ts#L121). Every theme in our application defines/overrides these colors.
 
-In GeoView we have a defined list of colors. These colors are defined in out [IGeoViewColors object](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/packages/geoview-core/src/ui/style/types.ts#L70). Every theme in our application defines/overrides these colors.
-
-| Color Name | Description  |
-|--|--|
-| bgColor | Background color, used as background of the footer  |
-|textColor | Color for text |
-|primary | Primary color, replaces the material UI primary color|
-|secondary | Replaces the secondary color in material UI|
-| error|Replaces the error color in material UI |
-| info|Replaces the info color in material UI |
-| warning|Replaces the warning color in material UI |
+| Color Name | Type                | Description                                        |
+| ---------- | ------------------- | -------------------------------------------------- |
+| white      | `string`            | White color constant (`#FFFFFF`)                   |
+| bgColor    | `GeoViewColorClass` | Background color, used as background of the footer |
+| textColor  | `GeoViewColorClass` | Color for text                                     |
+| primary    | `GeoViewColorClass` | Primary color, replaces the MUI primary color      |
+| secondary  | `GeoViewColorClass` | Replaces the secondary color in MUI                |
+| success    | `GeoViewColorClass` | Replaces the success color in MUI                  |
+| error      | `GeoViewColorClass` | Replaces the error color in MUI                    |
+| warning    | `GeoViewColorClass` | Replaces the warning color in MUI                  |
+| info       | `GeoViewColorClass` | Replaces the info color in MUI                     |
+| grey       | `GeoViewColorClass` | Grey color for borders, dividers, etc.             |
 
 ## Defining GeoViewColor object
+
 Each theme in the application overrides the default GeoViewColor in the default file.
 An example of of a `geoViewColors` object is below;
 
@@ -34,6 +36,7 @@ export  const  geoViewColors:  IGeoViewColors  = {
 ```
 
 ### What is GeoViewColorClass?
+
 Though each color is defined as a hex sometimes in the application we need to use a shade of that color - it can be a light/darker shade. `GeoViewColorClass` takes in a hex value and gives us access to different shades of the provided colors. It also gives us methods of manipulating the given color.
 
 For example; this is how to use the background color - but 20% darker.
@@ -44,18 +47,18 @@ To get it 70% light..
 
 What if you want it 55% light with an opacity of 0.3? You can use the method `lighten`
 `theme.palette.geoViewColor.bgColor.lighten(0.55, 0.3)`
-The class also has a method .`dark(coefficient:Number, opacity:number)` for getting a darker color.
+The class also has a method `.darken(coefficient, opacity)` for getting a darker color.
 
 ## Accessing GeoViewColors in the application
 
-* GeoView colors are part of the theme palette - accessible via `theme.palette.geoViewColor`.
-* For example to access primary color use `theme.palette.geoViewColor.primary`; for text Color use `theme.palette.geoViewColor.textColor..`
-* To access the default color use `.default`. e.g. to access the default bgColor use `theme.palette.geoViewColors.bgColor.default`
-* To access a darker version of a dark use `.dark[50...950]`. e.g. to get bgColor 50% darker use `theme.palette.geoViewColors.bgColor.dark[500]`. Possible numbers for this are `50, 100, 150, 200, 250....850, 900, 950`. Note the increment by 50.
-* For light color use `...light[50..950]`
-
+- GeoView colors are part of the theme palette — accessible via `theme.palette.geoViewColor`.
+- For example, to access primary color use `theme.palette.geoViewColor.primary`; for text color use `theme.palette.geoViewColor.textColor`.
+- To access the base color use `.main`. e.g. `theme.palette.geoViewColor.bgColor.main`
+- To access a darker shade use `.dark[50...950]`. e.g. `theme.palette.geoViewColor.bgColor.dark[500]`. Possible values are `50, 100, 150, 200, 250, ... 900, 950` (increments of 50).
+- For lighter shades use `.light[50...950]`
 
 ## Customizing An Existing Theme
+
 The system currently has 3 themes `dark`, `light` and `geo.ca`. All themes are in the [style folder](https://github.com/Canadian-Geospatial-Platform/geoview/tree/develop/packages/geoview-core/src/ui/style).
 
 Our themes are basically involve defining the geoView colors. Below is an example of the dark theme file.

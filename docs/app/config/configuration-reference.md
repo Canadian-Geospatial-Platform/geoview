@@ -111,6 +111,7 @@ interface TypeMapFeaturesInstance {
   externalPackages?: TypeExternalPackages;
   serviceUrls?: TypeServiceUrls;
   globalSettings?: TypeGlobalSettings;
+  schemaVersionUsed?: TypeValidVersions;
 }
 ```
 
@@ -227,8 +228,7 @@ TypeMapViewSettings: {
 - **projection** (Required): EPSG projection code (default: 3978)
   - `3978` - Canada Lambert Conformal Conic
   - `3857` - Web Mercator
-
-  > **Note:** Only these two projections are currently supported. Using any other EPSG code will result in a schema validation error.
+  - `3573` - North Pole LAEA Canada
 
 - **initialView** (Optional): Settings for the initial view for map
   - **zoomAndCenter**: [zoom, [longitude, latitude]] format. Longitude domain = [-160..160], Latitude domain = [-80..80]
@@ -325,11 +325,12 @@ See [GeoView Layer Configuration](#geoview-layer-configuration) section for deta
 Color to use for feature highlighting.
 
 ```typescript
-highlightColor?: "black" | "white" | "red" | "green";
+highlightColor?: "aqua" | "black" | "white" | "red" | "green";
 ```
 
 **Valid Values:**
 
+- `"aqua"` - Aqua highlight color (default)
 - `"black"` - Black highlight color
 - `"white"` - White highlight color
 - `"red"` - Red highlight color
@@ -435,16 +436,18 @@ theme?: "dark" | "light" | "geo.ca";
 Controls available on the navigation bar.
 
 ```typescript
-navBar?: Array<"zoom" | "fullscreen" | "home" | "location" | "basemap-select" | "projection" | "drawer">;
+navBar?: Array<"zoom" | "rotation" | "fullscreen" | "home" | "location" | "basemap-select" | "measurement" | "projection" | "drawer">;
 ```
 
 **Valid Values:**
 
 - `"zoom"` - Zoom in/out controls
+- `"rotation"` - Map rotation control
 - `"fullscreen"` - Fullscreen toggle
 - `"home"` - Return to initial extent
 - `"location"` - Geolocator control
 - `"basemap-select"` - Basemap selector
+- `"measurement"` - Distance and area measurement tools
 - `"projection"` - Projection selector
 - `"drawer"` - **Drawer package** - Drawing tools
 
@@ -592,22 +595,19 @@ Configuration for the overview map.
 
 ```typescript
 overviewMap?: {
-  hideOnZoom?: boolean;
-  collapsed?: boolean;
+  hideOnZoom?: number;
 };
 ```
 
 **Properties:**
 
-- `hideOnZoom` - Hide overview map when zoomed in
-- `collapsed` - Start with overview map collapsed
+- `hideOnZoom` - Minimum zoom level at which the overview map is displayed (range: 0-10, default: 0)
 
 **Example:**
 
 ```json
 "overviewMap": {
-  "hideOnZoom": true,
-  "collapsed": false
+  "hideOnZoom": 5
 }
 ```
 
@@ -646,15 +646,16 @@ components?: Array<"overview-map" | "north-arrow">;
 
 #### corePackages (Optional)
 
-List of core packages to load. Currently only contains the Swiper package.
+List of core packages to load.
 
 ```typescript
-corePackages?: Array<"swiper">;
+corePackages?: Array<"swiper" | "test-suite">;
 ```
 
 **Available Packages:**
 
 - `"swiper"` - Layer swipe comparison tool
+- `"test-suite"` - GeoView test suite (for development/testing only)
 
 **Example:**
 
@@ -740,7 +741,8 @@ serviceUrls?: {
   geocoreUrl?: string;
   rcsUrl?: string;
   proxyUrl?: string;
-  geolocator?: string;
+  geolocatorUrl?: string;
+  metadataUrl?: string;
   utmZoneUrl?: string;
   ntsSheetUrl?: string;
   altitudeUrl?: string;
@@ -751,7 +753,7 @@ serviceUrls?: {
 
 ```json
 "serviceUrls": {
-  "geolocator": "https://geolocator.api.geo.ca?keys=geonames,nominatim",
+  "geolocatorUrl": "https://geolocator.api.geo.ca?keys=geonames,nominatim",
   "geocoreUrl": "https://geocore.api.geo.ca"
 }
 ```
@@ -766,6 +768,7 @@ Global settings for the map instance.
 globalSettings?: TypeGlobalSettings;
 
 TypeGlobalSettings = {
+  displayDateMode?: DisplayDateMode;
   canRemoveSublayers?: boolean;
   disabledLayerTypes?: TypeGeoviewLayerType[];
   showUnsymbolizedFeatures?: boolean;
@@ -780,9 +783,12 @@ TypeGlobalSettings = {
   - **Type:** `boolean`
   - **Default:** `true`
 
+- **displayDateMode** (Optional): The display date pattern to use for the application
+  - **Type:** `DisplayDateMode`
+
 - **disabledLayerTypes** (Optional): Array of layer types that should be disabled
   - **Type:** `TypeGeoviewLayerType[]`
-  - **Valid values:** `"esriDynamic"`, `"esriFeature"`, `"imageStatic"`, `"geoJSON"`, `"geoPackage"`, `"xyzTiles"`, `"vectorTiles"`, `"ogcFeature"`, `"ogcWms"`, `"ogcWfs"`, `"CSV"`
+  - **Valid values:** `"esriDynamic"`, `"esriFeature"`, `"esriImage"`, `"imageStatic"`, `"GeoJSON"`, `"GeoTIFF"`, `"xyzTiles"`, `"vectorTiles"`, `"ogcFeature"`, `"ogcWms"`, `"ogcWfs"`, `"ogcWmts"`, `"CSV"`, `"KML"`, `"WKB"`
 
 - **showUnsymbolizedFeatures** (Optional): Whether to display unsymbolized features in the datatable and other components
   - **Type:** `boolean`
@@ -885,11 +891,13 @@ geoviewLayerType: TypeGeoviewLayerType;
 | `'esriFeature'` | ESRI Feature Service       |
 | `'esriImage'`   | ESRI Image Service         |
 | `'GeoJSON'`     | GeoJSON data               |
+| `'GeoTIFF'`     | GeoTIFF raster data        |
 | `'CSV'`         | CSV with coordinates       |
 | `'KML'`         | Keyhole Markup Language    |
 | `'WKB'`         | Well-Known Binary          |
 | `'xyzTiles'`    | XYZ Raster Tiles           |
 | `'vectorTiles'` | Mapbox Vector Tiles        |
+| `'ogcWmts'`     | OGC Web Map Tile Service   |
 | `'imageStatic'` | Static georeferenced image |
 
 > **Note:** Additional input types `'geoCore'`, `'GeoPackage'`, `'shapefile'`, and `'rcs'` are also accepted during layer creation and will be automatically converted to one of the standard types above.
@@ -1287,6 +1295,7 @@ interface TypeLayerControls {
   remove?: boolean; // Is remove control available. Default = false
   table?: boolean; // Is table available. Default = true
   visibility?: boolean; // Is visibility control available. Default = true
+  visibleScale?: boolean; // Is visible scale control available
   zoom?: boolean; // Is zoom available. Default = true
 }
 
@@ -1321,6 +1330,7 @@ controls?: TypeLayerControls;
     "remove": false,
     "table": true,
     "visibility": true,
+    "visibleScale": true,
     "zoom": true
   }
 }
