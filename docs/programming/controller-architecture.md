@@ -2,7 +2,7 @@
 
 > **Audience:** Core developers contributing to GeoView
 >
-> **Replaces:** [Event Processor Architecture](event-processor-architecture.md) — the controller pattern supersedes event processors as the primary state coordination layer
+> **Note:** The controller pattern supersedes the former event processor architecture as the primary state coordination layer.
 
 This document explains the internal architecture of Controllers, how they integrate with Domains and the Zustand store, and how to create custom controllers.
 

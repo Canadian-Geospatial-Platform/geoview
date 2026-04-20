@@ -1716,6 +1716,8 @@ import { GVTestSuiteMyFeature } from './tests/suites/suite-my-feature';
 - [best-practices.md](../docs/programming/best-practices.md) - Code style & patterns
 - [using-store.md](../docs/programming/using-store.md) - Zustand usage patterns
 - [event-helper.md](../docs/programming/event-helper.md) - Delegate event system
+- [controller-architecture.md](../docs/programming/controller-architecture.md) - Controller design & domain integration
+- [troubleshooting.md](../docs/programming/troubleshooting.md) - Service-specific fixes & known issues
 
 ## TypeDoc-First API Documentation Policy
 
