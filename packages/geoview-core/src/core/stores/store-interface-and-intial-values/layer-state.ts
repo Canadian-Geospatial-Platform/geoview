@@ -570,12 +570,21 @@ export const getStoreLayerLegendLayers = (mapId: string): TypeLegendLayer[] => {
 // Don't do this, see note in the getter above.
 // export const useStoreLayerStateLegendLayers = ...
 
-/** Returns all layer paths from the ordered layers. */
+/**
+ * Returns all layer paths from the ordered layers.
+ *
+ * @param mapId - The map identifier
+ * @returns The ordered layer paths array
+ */
 export const getStoreLayerOrderedLayerPaths = (mapId: string): string[] => {
   return getStoreLayerState(mapId).orderedLayers;
 };
 
-/** Selects the ordered layer paths from the store. */
+/**
+ * Selects the ordered layer paths from the store.
+ *
+ * @returns The ordered layer paths array
+ */
 export const useStoreLayerOrderedLayerPaths = (): string[] => useStore(useGeoViewStore(), (state) => state.layerState.orderedLayers);
 
 /**
@@ -589,16 +598,30 @@ export const getStoreLayerOrderedLayerIndexByPath = (mapId: string, layerPath: s
   return getStoreLayerOrderedLayerPaths(mapId).indexOf(layerPath);
 };
 
-/** Returns the initial filter string for a layer path, or undefined if none is set. */
+/**
+ * Returns the initial filter string for a layer path, or undefined if none is set.
+ *
+ * @param mapId - The map identifier.
+ * @param layerPath - The layer path.
+ * @returns The initial filter string, or undefined if none is set.
+ */
 export const getStoreLayerInitialFilter = (mapId: string, layerPath: string): string | undefined => {
   return getStoreLayerState(mapId).initialFilters[layerPath];
 };
 
-/** Selects the initial layer filters from the store. */
+/**
+ * Selects the initial layer filters from the store.
+ *
+ * @returns A record of filter strings keyed by layer path
+ */
 export const useStoreLayerInitialFilters = (): Record<string, string> =>
   useStore(useGeoViewStore(), (state) => state.layerState.initialFilters);
 
-/** Hook that returns only the top-level layer paths. Re-renders only when layers are added, removed, or reordered. */
+/**
+ * Hook that returns only the top-level layer paths. Re-renders only when layers are added, removed, or reordered.
+ *
+ * @returns The top-level layer paths
+ */
 export const useStoreLayerTopLevelLayerPaths = (): string[] =>
   useStableSelector(useGeoViewStore(), (state) => state.layerState.legendLayers.map((layer) => layer.layerPath));
 
@@ -612,11 +635,19 @@ export const getStoreLayerSelectedLayerPath = (mapId: string): string | undefine
   return getStoreLayerState(mapId).selectedLayerPath;
 };
 
-/** Hook that returns the selected layer path. */
+/**
+ * Hook that returns the selected layer path.
+ *
+ * @returns The selected layer path, or null/undefined if none is selected
+ */
 export const useStoreLayerSelectedLayerPath = (): string | null | undefined =>
   useStore(useGeoViewStore(), (state) => state.layerState.selectedLayerPath);
 
-/** Hook that returns the layer name of the currently selected layer. Primitive string so Object.is prevents spurious re-renders. */
+/**
+ * Hook that returns the layer name of the currently selected layer. Primitive string so Object.is prevents spurious re-renders.
+ *
+ * @returns The selected layer name, or undefined if no layer is selected
+ */
 export const useStoreLayerSelectedLayerName = (): string | undefined =>
   useStore(
     useGeoViewStore(),
@@ -633,7 +664,11 @@ export const getStoreLayerHighlightedLayer = (mapId: string): string => {
   return getStoreLayerState(mapId).highlightedLayer;
 };
 
-/** Hook that returns the highlighted layer path. */
+/**
+ * Hook that returns the highlighted layer path.
+ *
+ * @returns The highlighted layer path
+ */
 export const useStoreLayerHighlightedLayer = (): string => useStore(useGeoViewStore(), (state) => state.layerState.highlightedLayer);
 
 /**
@@ -646,7 +681,11 @@ export const getStoreLayerDisplayState = (mapId: string): TypeLayersViewDisplayS
   return getStoreLayerState(mapId).displayState;
 };
 
-/** Hook that returns the current layers panel display state. */
+/**
+ * Hook that returns the current layers panel display state.
+ *
+ * @returns The current display state
+ */
 export const useStoreLayerDisplayState = (): TypeLayersViewDisplayState =>
   useStore(useGeoViewStore(), (state) => state.layerState.displayState);
 
@@ -660,7 +699,11 @@ export const getStoreLayerAreLayersLoading = (mapId: string): boolean => {
   return getStoreLayerState(mapId).layersAreLoading;
 };
 
-/** Hook that returns whether layers are currently loading. */
+/**
+ * Hook that returns whether layers are currently loading.
+ *
+ * @returns True if layers are loading
+ */
 export const useStoreLayerAreLayersLoading = (): boolean => useStore(useGeoViewStore(), (state) => state.layerState.layersAreLoading);
 
 /**
@@ -798,12 +841,16 @@ export const getStoreLayerVisible = (mapId: string, layerPath: string): boolean 
 /**
  * Selects whether a layer is within its visible zoom range.
  *
- * @param layerPath - The layer path to check
  * @returns True if the layer is in visible range
  */
 export const useStoreLayerVisible = createLayerSelectorHook('visible');
 
-/** Returns the layer paths of all layers currently visible. */
+/**
+ * Returns the layer paths of all layers currently visible.
+ *
+ * @param mapId - The map identifier.
+ * @returns An array of layer paths that are currently visible.
+ */
 export const getStoreLayerVisibleLayerPaths = (mapId: string): string[] => {
   const allLayers = utilFindAllLayers(getStoreLayerState(mapId).legendLayers);
   return Object.values(allLayers)
@@ -827,7 +874,13 @@ export const useStoreLayerArrayVisibility = (layerPaths: string[]): boolean => {
   });
 };
 
-/** Returns whether any parent of the given layer is hidden. */
+/**
+ * Returns whether any parent of the given layer is hidden.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to check parent visibility for
+ * @returns True if any parent layer is hidden
+ */
 export const getStoreLayerParentHidden = (mapId: string, layerPath: string): boolean => {
   return utilGetParentLayerHiddenOnMap(getStoreLayerState(mapId).legendLayers, layerPath);
 };
@@ -851,7 +904,12 @@ export const getStoreLayerInVisibleRange = (mapId: string, layerPath: string): b
  */
 export const useStoreLayerInVisibleRange = createLayerSelectorHook('inVisibleRange');
 
-/** Returns the layer paths of all layers currently in their visible zoom range. */
+/**
+ * Returns the layer paths of all layers currently in their visible zoom range.
+ *
+ * @param mapId - The map identifier
+ * @returns An array of layer paths that are in their visible zoom range
+ */
 export const getStoreLayerInVisibleRangeLayerPaths = (mapId: string): string[] => {
   const allLayers = utilFindAllLayers(getStoreLayerState(mapId).legendLayers);
   return Object.values(allLayers)
@@ -869,7 +927,13 @@ export const useStoreLayerAllLayersVisibleToggle = (): boolean =>
     Object.values(utilFindAllLayers(state.layerState.legendLayers)).every((layer) => layer.visible || layer.layerStatus === 'error')
   );
 
-/** Returns whether a layer is effectively hidden on the map (parent hidden, out of range, or not visible). */
+/**
+ * Returns whether a layer is effectively hidden on the map (parent hidden, out of range, or not visible).
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to check
+ * @returns True if the layer is hidden on the map
+ */
 export const getStoreLayerIsHiddenOnMap = (mapId: string, layerPath: string): boolean => {
   return utilGetLayerHiddenOnMap(getStoreLayerState(mapId).legendLayers, layerPath);
 };
@@ -928,7 +992,10 @@ export const useStoreLayerIsParentHiddenOnMapSet = (): Record<string, boolean> =
   });
 };
 
-/** Selects the visible layer paths derived from legendLayers. */
+/** Selects the visible layer paths derived from legendLayers.
+ *
+ * @returns The array of visible layer paths
+ */
 export const useStoreLayerVisibleLayers = (): string[] =>
   useStableSelector(useGeoViewStore(), (state) => {
     const allLayers = utilFindAllLayers(state.layerState.legendLayers);
@@ -952,7 +1019,12 @@ export const useStoreLayerAllVisibleAndInRangeLayers = (): string[] =>
       .map((layer) => layer.layerPath);
   });
 
-/** Returns the legend collapsed state for all layers, defaulting to false if not found. */
+/**
+ * Returns the legend collapsed state for all layers, defaulting to false if not found.
+ *
+ * @param mapId - The map identifier
+ * @returns A record mapping each layer path to its collapsed state
+ */
 export const getStoreLayerLegendCollapsedSet = (mapId: string): Record<string, boolean> => {
   const allLayers = utilFindAllLayers(getStoreLayerLegendLayers(mapId));
   return Object.values(allLayers).reduce<Record<string, boolean>>((acc, layer) => {
@@ -962,12 +1034,23 @@ export const getStoreLayerLegendCollapsedSet = (mapId: string): Record<string, b
   }, {});
 };
 
-/** Returns the ordered layer info entries that have collapsible legends. */
+/**
+ * Returns the ordered layer info entries that have collapsible legends.
+ *
+ * @param mapId - The map identifier
+ * @returns The layers with collapsible legends
+ */
 export const getStoreLayerLegendCollapsibleLayers = (mapId: string): TypeLegendLayer[] => {
   return utilGetLegendCollapsibleLayers(getStoreLayerLegendLayers(mapId));
 };
 
-/** Returns the legend collapsed state for a layer, defaulting to false if not found. */
+/**
+ * Returns the legend collapsed state for a layer, defaulting to false if not found.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to check
+ * @returns True if the layer legend is collapsed
+ */
 export const getStoreLayerLegendCollapsed = (mapId: string, layerPath: string): boolean => {
   return getStoreLayerLegendLayerByPath(mapId, layerPath)?.legendCollapsed ?? false;
 };
@@ -1526,9 +1609,10 @@ export const setStoreLayerStatus = (mapId: string, layerPath: string, layerStatu
 
 /**
  * Sets the layer name of the layer and its children in the store.
- * @param mapId - The ID of the map.
- * @param layerPath - The layer path of the layer to change.
- * @param layerName - The layer name to set.
+ *
+ * @param mapId - The ID of the map
+ * @param layerPath - The layer path of the layer to change
+ * @param layerName - The layer name to set
  */
 export const setStoreLayerName = (mapId: string, layerPath: string, layerName: string | undefined): void => {
   getStoreLayerState(mapId).actions.updateLayerByPath(layerPath, (layer) => ({ ...layer, layerName: layerName ?? '' }));
@@ -1714,12 +1798,23 @@ export const setStoreLayerInVisibleRange = (mapId: string, layerPath: string, in
   getStoreLayerState(mapId).actions.updateLayerByPath(layerPath, (layer) => ({ ...layer, inVisibleRange }));
 };
 
-/** Sets the legend collapsed state for a layer in the store. */
+/**
+ * Sets the legend collapsed state for a layer in the store.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to update
+ * @param legendCollapsed - Whether the legend should be collapsed
+ */
 export const setStoreLayerLegendCollapsed = (mapId: string, layerPath: string, legendCollapsed: boolean): void => {
   getStoreLayerState(mapId).actions.updateLayerByPath(layerPath, (layer) => ({ ...layer, legendCollapsed }));
 };
 
-/** Sets the legend collapsed state for all layers in the store. */
+/**
+ * Sets the legend collapsed state for all layers in the store.
+ *
+ * @param mapId - The map identifier
+ * @param newCollapsed - Whether all legends should be collapsed
+ */
 export const setStoreLayerAllMapLayerCollapsed = (mapId: string, newCollapsed: boolean): void => {
   // Set the collapsed state for all layers in the tree
   const allLayers = utilFindAllLayers(getStoreLayerLegendLayers(mapId));
@@ -1898,23 +1993,35 @@ export const setStoreLayerDeletionStartTime = (mapId: string, layerPath: string,
 /**
  * Temporary method to set the legend layers directly in the store, used for the moment to set the
  * legend layers with the data from the query result of the legend.
+ *
  * This method should be used with caution and only in specific cases, as it bypasses the usual
  * state update patterns and may lead to unintended side effects if not used properly.
  *
- * @param mapId
- * @param legendLayers
+ * @param mapId - The map identifier
+ * @param legendLayers - The legend layers to set
  */
 export const setStoreLegendLayersDirectly = (mapId: string, legendLayers: TypeLegendLayer[]): void => {
   // Set updated legend layers
   getStoreLayerState(mapId).actions.setLegendLayers(legendLayers);
 };
 
-/** Sets the ordered layers directly in the store. */
+/**
+ * Sets the ordered layers directly in the store.
+ *
+ * @param mapId - The map identifier
+ * @param layerPaths - The ordered layer paths to set
+ */
 export const setStoreLayerOrderedLayers = (mapId: string, layerPaths: string[]): void => {
   getStoreLayerState(mapId).actions.setOrderedLayers(layerPaths);
 };
 
-/** Adds an initial filter for a layer path in the store. */
+/**
+ * Adds an initial filter for a layer path in the store.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to set the filter for
+ * @param filter - The filter string to add
+ */
 export const addStoreLayerInitialFilter = (mapId: string, layerPath: string, filter: string): void => {
   const curFilters = getStoreLayerState(mapId).initialFilters;
   getStoreLayerState(mapId).actions.setInitialFilters({ ...curFilters, [layerPath]: filter });
