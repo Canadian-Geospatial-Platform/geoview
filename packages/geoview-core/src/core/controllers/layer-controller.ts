@@ -863,10 +863,9 @@ export class LayerController extends AbstractMapViewerController {
    * @param newValue - Optional. The new visibility value. If omitted, the visibility is toggled
    * @returns The resulting visibility state of the layer after the operation, or `false`
    * if the layer does not exist at the given path.
+   * @deprecated Seems not used anymore by codebase (2026-04-20) - remove the function?
    */
   setOrToggleLayerVisibilityIfExists(layerPath: string, newValue?: boolean): boolean {
-    // TODO: CHECK - Validate that when this function is called it wouldn't simply be better to
-    // TO.DOCONT: call the 'setOrToggleLayerVisibility' function instead and let it throw an exception?
     // If the GV layer exists at the layer path
     if (this.getGeoviewLayerIfExists(layerPath)) {
       // Redirect to set or toggle the layer visibility and return the resulting visibility
@@ -1029,7 +1028,7 @@ export class LayerController extends AbstractMapViewerController {
    *
    * @param newCollapsed - The new collapsed state of the legends
    */
-  setAllMapLayerCollapsed(newCollapsed: boolean): void {
+  setAllLayerCollapsed(newCollapsed: boolean): void {
     // Save in the store
     setStoreLayerAllMapLayerCollapsed(this.getMapId(), newCollapsed);
   }

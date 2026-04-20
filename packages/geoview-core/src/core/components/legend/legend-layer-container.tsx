@@ -150,8 +150,7 @@ export const CollapsibleContent = memo(function CollapsibleContent({
             <LegendLayerComponent layerPath={childPath} key={childPath} showControls={showControls} containerType={containerType} />
           ))}
       </List>
-      {/* TODO: Remove this recent fix layerItems.length > 1, because Johann fixed it another way? */}
-      {layerItems && layerItems.length > 1 && <ItemsList items={layerItems || []} layerPath={layerPath} />}
+      <ItemsList items={layerItems || []} layerPath={layerPath} />
     </Collapse>
   );
 });

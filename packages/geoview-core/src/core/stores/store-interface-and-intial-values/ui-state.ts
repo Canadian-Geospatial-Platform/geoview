@@ -139,7 +139,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
     footerPanelResizeValue: 35,
 
     // initialize default stores section from config information when store receive configuration file
-    setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
+    setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig): void => {
       // App bar and footer bar state rules:
       // - selectedTab set → open
       // - selectedTab unset → close
@@ -181,7 +181,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
        *
        * @param uiFocus - The focus item properties
        */
-      enableFocusTrap: (uiFocus: FocusItemProps) => {
+      enableFocusTrap: (uiFocus: FocusItemProps): void => {
         set({
           uiState: {
             ...get().uiState,
@@ -199,7 +199,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
        *
        * @param callBackElementId - The element ID to restore focus to
        */
-      disableFocusTrap: (callBackElementId: string) => {
+      disableFocusTrap: (callBackElementId: string): void => {
         const id = callBackElementId ?? (get().uiState.focusItem.callbackElementId as string);
         requestAnimationFrame(() => {
           // Don't focus if 'no-focus' is passed
@@ -223,7 +223,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
        *
        * @param tabId - The tab ID to activate, or undefined to clear
        */
-      setActiveFooterBarTab: (tabId: string | undefined) => {
+      setActiveFooterBarTab: (tabId: string | undefined): void => {
         set({
           uiState: {
             ...get().uiState,
@@ -240,7 +240,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
        *
        * @param active - Whether the trap is active
        */
-      setActiveTrapGeoView: (active: boolean) => {
+      setActiveTrapGeoView: (active: boolean): void => {
         set({
           uiState: {
             ...get().uiState,
@@ -254,7 +254,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
        *
        * @param hiddenTabs - The array of tab IDs to hide
        */
-      setHiddenTabs: (hiddenTabs: string[]) => {
+      setHiddenTabs: (hiddenTabs: string[]): void => {
         set({
           uiState: {
             ...get().uiState,
@@ -268,7 +268,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
        *
        * @param value - The resize value
        */
-      setFooterPanelResizeValue: (value) => {
+      setFooterPanelResizeValue: (value): void => {
         set({
           uiState: {
             ...get().uiState,
@@ -283,7 +283,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
        *
        * @param open - Whether the footer bar should be open
        */
-      setFooterBarIsOpen: (open: boolean) => {
+      setFooterBarIsOpen: (open: boolean): void => {
         set({
           uiState: {
             ...get().uiState,
@@ -300,7 +300,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
        *
        * @param tab - The footer tab entry to add
        */
-      addFooterTab: (tab: TypeFooterTabEntry) => {
+      addFooterTab: (tab: TypeFooterTabEntry): void => {
         const existing = get().uiState.footerTabs;
         const index = existing.findIndex((t) => t.id === tab.id);
         if (index === -1) {
@@ -329,7 +329,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
        *
        * @param id - The tab id to remove
        */
-      removeFooterTab: (id: string) => {
+      removeFooterTab: (id: string): void => {
         set({
           uiState: {
             ...get().uiState,
@@ -343,7 +343,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
        *
        * @param id - The panel id to add
        */
-      addAppBarPanelId: (id: string) => {
+      addAppBarPanelId: (id: string): void => {
         const existing = get().uiState.appBarPanelIds;
         if (!existing.includes(id)) {
           set({
@@ -360,7 +360,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
        *
        * @param id - The panel id to remove
        */
-      removeAppBarPanelId: (id: string) => {
+      removeAppBarPanelId: (id: string): void => {
         set({
           uiState: {
             ...get().uiState,
@@ -372,7 +372,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
       /**
        * Increments the nav-bar button panel version to trigger a re-render.
        */
-      bumpNavBarButtonPanelVersion: () => {
+      bumpNavBarButtonPanelVersion: (): void => {
         set({
           uiState: {
             ...get().uiState,
@@ -388,7 +388,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
        * @param isOpen - Whether the app bar panel should be open
        * @param isFocusTrapped - Optional whether focus should be trapped in the panel
        */
-      setActiveAppBarTab: (tabId: string | undefined, isOpen: boolean, isFocusTrapped: boolean = false) => {
+      setActiveAppBarTab: (tabId: string | undefined, isOpen: boolean, isFocusTrapped: boolean = false): void => {
         // Gv Side effect with focus trap and side panel app bar open
         // We need to check if the viewer is in keyboard navigation mode. If not, we don't apply the focus trap.
         // Focus trap has side effect when a app bar panel is open. It does not let user use their mouse
