@@ -1,94 +1,98 @@
-### Layer Events
+# Layer Events
+
+> **Full API Reference:** [LayerApi — TypeDoc](https://canadian-geospatial-platform.github.io/geoview/public/docs/typedoc/classes/LayerApi.html)
+>
+> TypeDoc is auto-generated from source code and always reflects the current event signatures, payload types, and delegate definitions.
+
+Layer events are available on `mapViewer.layer` (LayerApi) and on individual GV layer instances.
+
+## LayerApi Events
+
+Register on `mapViewer.layer` to watch all layers:
+
 ```typescript
-// Layer configuration added
-mapViewer.layer.onLayerConfigAdded((sender, payload) => {
-  console.log(`Layer added: ${payload.layer.geoviewLayerId}`);
-});
+cgpv.onMapInit((mapViewer) => {
+  // Layer lifecycle
+  mapViewer.layer.onLayerConfigAdded((sender, event) => {
+    console.log("Config added:", event.layer.geoviewLayerId);
+  });
 
-// Layer configuration removed
-mapViewer.layer.onLayerConfigRemoved((sender, payload) => {
-  console.log(`Layer removed: ${payload.layerPath}`);
-});
+  mapViewer.layer.onLayerCreated((sender, event) => {
+    console.log("Layer created:", event.layer.getLayerPath());
+  });
 
-// Layer configuration error
-mapViewer.layer.onLayerConfigError((sender, payload) => {
-  console.error(`Layer error: ${payload.error}`);
-});
+  mapViewer.layer.onLayerConfigRemoved((sender, event) => {
+    console.log("Layer removed:", event.layerPath);
+  });
 
-// Layer created (after configuration is processed)
-mapViewer.layer.onLayerCreated((sender, payload) => {
-  console.log(`Layer created: ${payload.layer.getLayerPath()}`);
-  
-  // You can attach layer-specific events here
-  const layer = payload.layer;
+  mapViewer.layer.onLayerConfigError((sender, event) => {
+    console.error("Config error:", event.layerPath, event.error);
+  });
+
+  // Layer loading status
+  mapViewer.layer.onLayerStatusChanged((sender, event) => {
+    console.log(`${event.config.layerPath} status: ${event.status}`);
+  });
+
+  mapViewer.layer.onLayerFirstLoaded((sender, event) => {
+    console.log("First load:", event.layer.getLayerPath());
+  });
+
+  mapViewer.layer.onLayerLoaded((sender, event) => {
+    console.log("Loaded:", event.layer.getLayerPath());
+  });
+
+  mapViewer.layer.onLayerLoading((sender, event) => {
+    console.log("Loading:", event.layer.getLayerPath());
+  });
+
+  mapViewer.layer.onLayerError((sender, event) => {
+    console.error("Layer error:", event.layer.getLayerPath(), event.error);
+  });
+
+  // All layers finished loading
+  mapViewer.layer.onLayerAllLoaded((sender, event) => {
+    console.log("All layers loaded");
+  });
 });
 ```
 
-### Layer Status Events
+## GV Layer Instance Events
+
+Register on individual layer instances for layer-specific events:
+
 ```typescript
-// Generic event for any layer status change
-mapViewer.layer.onLayerStatusChanged((sender, payload) => {
-  console.log(`Layer ${payload.config.layerPath} status: ${payload.status}`);
-});
+mapViewer.layer.onLayerCreated((sender, event) => {
+  const layer = event.layer;
 
-// Layer first loaded (fires only once per layer)
-mapViewer.layer.onLayerFirstLoaded((sender, payload) => {
-  console.log(`Layer ${payload.layer.getLayerPath()} loaded for the first time`);
-});
+  layer.onLayerVisibleChanged((sender, event) => {
+    console.log(`${layer.getLayerPath()} visibility: ${event.visible}`);
+  });
 
-// Layer loading (fires on every render cycle)
-mapViewer.layer.onLayerLoading((sender, payload) => {
-  console.log(`Layer ${payload.layer.getLayerPath()} is loading...`);
-});
+  layer.onLayerOpacityChanged((sender, event) => {
+    console.log(`${layer.getLayerPath()} opacity: ${event.opacity}`);
+  });
 
-// Layer loaded (fires on every render cycle)
-mapViewer.layer.onLayerLoaded((sender, payload) => {
-  console.log(`Layer ${payload.layer.getLayerPath()} finished loading`);
-});
+  layer.onLayerNameChanged((sender, event) => {
+    console.log(`${layer.getLayerPath()} renamed: ${event.layerName}`);
+  });
 
-// Layer error (fires when rendering fails)
-mapViewer.layer.onLayerError((sender, payload) => {
-  console.error(`Layer error: ${payload.error}`);
-});
+  layer.onLayerFirstLoaded((sender, event) => {
+    console.log(`${layer.getLayerPath()} first load complete`);
+  });
 
-// All layers loaded (fires when all layers finish loading/error)
-mapViewer.layer.onLayerAllLoaded((sender, payload) => {
-  console.log('All layers have finished loading');
+  layer.onLayerLoaded((sender, event) => {
+    console.log(`${layer.getLayerPath()} loaded`);
+  });
+
+  layer.onLayerError((sender, event) => {
+    console.error(`${layer.getLayerPath()} error:`, event.error);
+  });
 });
 ```
 
-### Layer Specific Events
+## See Also
 
-You can attach events to specific layers after they're created:
-
-```typescript
-// After a layer is created
-mapViewer.layer.onLayerCreated((sender, payload) => {
-  const layer = payload.layer;
-  
-  // Layer-specific first load event
-  layer.onLayerFirstLoaded((sender, payload) => {
-    console.log(`${layer.getLayerPath()} loaded for the first time`);
-  });
-  
-  // Layer-specific loaded event
-  layer.onLayerLoaded((sender, payload) => {
-    console.log(`${layer.getLayerPath()} finished loading`);
-  });
-  
-  // Layer-specific error event
-  layer.onLayerError((sender, payload) => {
-    console.error(`${layer.getLayerPath()} error: ${payload.error}`);
-  });
-  
-  // Layer visibility changed
-  layer.onVisibleChanged((sender, payload) => {
-    console.log(`${layer.getLayerPath()} visibility: ${payload.visible}`);
-  });
-  
-  // Layer opacity changed
-  layer.onLayerOpacityChanged((sender, payload) => {
-    console.log(`${layer.getLayerPath()} opacity: ${payload.opacity}`);
-  });
-});
-```
+- **[Map Events](./map-events.md)** — Map viewer events (zoom, move, click, etc.)
+- **[Event System Overview](./event-system.md)** — How the delegate event pattern works
+- **[Creating Events](./event-creation.md)** — How to add new events

@@ -10,7 +10,6 @@ Complete API reference for interacting with GeoView maps and components.
 ## Map Viewer API
 
 - **[MapViewer API](app/api/map-viewer-api.md)** - MapViewer instance methods and properties
-- **[MapViewer Functions](app/api/map-viewer-functions.md)** - Detailed function reference
 
 ## Layer Management
 

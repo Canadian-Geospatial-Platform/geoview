@@ -2,7 +2,7 @@
 
 > **👥 Audience:** API users building applications with GeoView
 >
-> **For Core Developers:** See [Controller Architecture](programming/controller-architecture.md) for implementation details
+> **For Core Developers:** See [Controller Architecture](../../programming/controller-architecture.md) for implementation details
 
 Controllers are the single source of truth for business logic in GeoView. They manage state, validation, and side effects for maps, layers, UI, and plugin functionality. Each `MapViewer` instance has its own controller registry.
 
@@ -27,10 +27,10 @@ mapViewer.layer.setLayerOpacity("layerPath", 0.7);
 
 GeoView separates **performing actions** from **listening to events**:
 
-| Purpose                                 | Use This                | Example                                     |
-| --------------------------------------- | ----------------------- | ------------------------------------------- |
-| **Perform an action** (change state)    | MapViewer / Layer API   | `mapViewer.setMapZoomLevel(10)`             |
-| **Listen to events** (react to changes) | Delegate event handlers | `mapViewer.onMapMoveEnd(callback)`          |
+| Purpose                                 | Use This                | Example                            |
+| --------------------------------------- | ----------------------- | ---------------------------------- |
+| **Perform an action** (change state)    | MapViewer / Layer API   | `mapViewer.setMapZoomLevel(10)`    |
+| **Listen to events** (react to changes) | Delegate event handlers | `mapViewer.onMapMoveEnd(callback)` |
 
 ### When to Use Controllers
 
@@ -314,11 +314,11 @@ if (swiperPlugin) {
 
 ## See Also
 
-- **[MapViewer API](app/api/map-viewer-api.md)** — MapViewer methods
-- **[Layer API](app/api/layer-api.md)** — Layer management methods
-- **[API Reference](app/api/api.md)** — Main API entry points
-- **[Packages](app/packages/geoview-core-packages.md)** — Package development
+- **[MapViewer API](../api/map-viewer-api.md)** — MapViewer methods
+- **[Layer API](../api/layer-api.md)** — Layer management methods
+- **[API Reference](../api/api.md)** — Main API entry points
+- **[Packages](../packages/geoview-core-packages.md)** — Package development
 
 ---
 
-> **🔧 For Core Developers:** See [Controller Architecture](programming/controller-architecture.md) for implementation details and internal patterns.
+> **🔧 For Core Developers:** See [Controller Architecture](../../programming/controller-architecture.md) for implementation details and internal patterns.

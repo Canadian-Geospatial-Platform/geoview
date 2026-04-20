@@ -83,16 +83,20 @@ The time slider is typically included in the GeoView build. To use it:
 **Programmatic:**
 
 ```typescript
-// Access via MapViewer
-const mapViewer = cgpv.api.getMapViewer("mapId");
+// Access time slider state via store getter functions
+import {
+  isStoreTimeSliderInitialized,
+  getStoreTimeSliderLayers,
+  getStoreTimeSliderFilters,
+} from "geoview-core";
 
-// Check if time slider is available
-if (TimeSliderEventProcessor.isTimeSliderInitialized("mapId")) {
+// Check if time slider is initialized
+if (isStoreTimeSliderInitialized("mapId")) {
   // Get time-enabled layers
-  const timeLayers = TimeSliderEventProcessor.getTimeSliderLayers("mapId");
+  const timeLayers = getStoreTimeSliderLayers("mapId");
 
   // Get current filters
-  const filters = TimeSliderEventProcessor.getTimeSliderFilters("mapId");
+  const filters = getStoreTimeSliderFilters("mapId");
 }
 ```
 
@@ -396,8 +400,8 @@ The time slider state is managed through the `TimeSliderController` and Zustand 
 ```typescript
 const mapViewer = cgpv.api.getMapViewer("mapId");
 
-// Access time slider state via store hooks (in React components)
-// useTimeSliderLayers, useTimeSliderSelectedLayer, useTimeSliderFilters
+// Access time slider controller
+const timeSliderController = mapViewer.controllers.timeSliderController;
 
 // Time slider filtering is managed automatically by the UI
 // Configuration-driven setup is the recommended approach
@@ -547,7 +551,7 @@ const geochartPlugin = mapViewer.plugins["geochart"];
 // Configure charts via corePackagesConfig in map configuration
 ```
 
-**See Also:** [Controllers API](app/events/controllers.md)
+**See Also:** [Controllers API](../events/controllers.md)
 
 ---
 
@@ -625,7 +629,7 @@ if (swiperPlugin) {
       }
     ]
   },
-  "corePackage": ["swiper"],
+  "corePackages": ["swiper"],
   "corePackagesConfig": [
     {
       "swiper": {
@@ -659,7 +663,7 @@ if (swiperPlugin) {
 }
 ```
 
-**See Also:** [Controllers API](app/events/controllers.md)
+**See Also:** [Controllers API](../events/controllers.md)
 
 ---
 
@@ -667,7 +671,7 @@ if (swiperPlugin) {
 
 **Description:** A drawing and geometry editing package that allows users to create, modify, and manage geometries on the map.
 
-**Version:** 2.0.x
+**Version:** 1.0.0
 
 **Repository:** `packages/geoview-drawer/`
 
@@ -752,7 +756,7 @@ The drawer functionality is managed through the `DrawerController`. The drawer p
 // - uploadDrawings(file) (imports GeoJSON)
 ```
 
-**See Also:** [Controllers API](app/events/controllers.md)
+**See Also:** [Controllers API](../events/controllers.md)
 
 ---
 
@@ -1205,7 +1209,7 @@ interface TypeDescription {
 
 **See Also:**
 
-- [Configuration Reference - Custom Legend](app/config/configuration-reference.md#custom-legend-package)
+- [Configuration Reference](../config/configuration-reference.md) - Package configuration options
 
 ---
 
@@ -1528,8 +1532,7 @@ The panel gracefully handles:
 
 **See Also:**
 
-- [Configuration Reference - About Panel](app/config/configuration-reference.md#about-panel-package)
-- [AppBar Plugins](app/ui/appbar.md)
+- [Configuration Reference](../config/configuration-reference.md) - Package configuration options
 
 ---
 
@@ -1575,36 +1578,17 @@ packages/
 }
 ```
 
-3. **Create Event Processor:**
+3. **Create UI Component:**
 
-```typescript
-// my-package-event-processor.ts
-import { AbstractEventProcessor } from "@/api/event-processors/abstract-event-processor";
-import type { GeoviewStoreType } from "@/core/stores/geoview-store";
-
-export class MyPackageEventProcessor extends AbstractEventProcessor {
-  protected static getMyPackageState(mapId: string) {
-    return super.getState(mapId).myPackageState;
-  }
-
-  static doSomething(mapId: string, value: string): void {
-    this.getMyPackageState(mapId).setterActions.setSomething(value);
-  }
-}
-```
-
-4. **Create UI Component:**
+Create a React component for your package panel:
 
 ```typescript
 // my-package-panel.tsx
-import { useEffect } from "react";
-import { useGeoViewMapId } from "geoview-core";
+import { useEffect } from 'react';
 
-export function MyPackagePanel() {
-  const mapId = useGeoViewMapId();
-
+export function MyPackagePanel({ mapId }: { mapId: string }): JSX.Element {
   useEffect(() => {
-    console.log("Package initialized for map:", mapId);
+    console.log('Package initialized for map:', mapId);
   }, [mapId]);
 
   return (
@@ -1616,31 +1600,44 @@ export function MyPackagePanel() {
 }
 ```
 
-5. **Export Package:**
+4. **Create Plugin Entry Point:**
+
+For app bar packages, extend `AppBarPlugin`. For nav bar packages, extend `NavBarPlugin`:
 
 ```typescript
 // index.tsx
-export { MyPackagePanel } from "./my-package-panel";
-export { MyPackageEventProcessor } from "./my-package-event-processor";
+import { AppBarPlugin } from "geoview-core/api/plugin/appbar-plugin";
+import { MyPackagePanel } from "./my-package-panel";
+import schema from "../schema.json";
+import defaultConfig from "../default-config-my-package.json";
+
+class MyPackagePlugin extends AppBarPlugin {
+  override schema(): unknown {
+    return schema;
+  }
+
+  override defaultConfig(): unknown {
+    return defaultConfig;
+  }
+
+  override defaultTranslations(): Record<string, unknown> {
+    return {
+      en: { MyPackage: { title: "My Package" } },
+      fr: { MyPackage: { title: "Mon Paquet" } },
+    };
+  }
+}
+
+export default MyPackagePlugin;
 ```
 
-6. **Register with GeoView:**
+5. **Register in webpack and configuration:**
 
-In your main application:
-
-```typescript
-import { MyPackagePanel } from "geoview-my-package";
-
-cgpv.api.package.register({
-  packageId: "my-package",
-  component: MyPackagePanel,
-  configSchema: myPackageSchema,
-});
-```
+See [Core Packages Guide](./core-packages.md) for the full steps to register in `webpack.common.js`, `rush.json`, `schema.json`, and `map-schema-types.ts`.
 
 ### Package Best Practices
 
-1. **Use Event Processors:** All state management should go through event processors
+1. **Use Controllers:** State management should go through controllers
 2. **Type Safety:** Leverage TypeScript for all interfaces and types
 3. **Accessibility:** Ensure package UI is accessible (WCAG 2.1 AA)
 4. **Internationalization:** Support both English and French
@@ -1685,8 +1682,8 @@ rush add -p lodash --caret
 
 ## See Also
 
-- **[Controllers API](app/events/controllers.md)** - Controllers for performing actions
-- **[Configuration Reference](app/config/configuration-reference.md)** - Package configuration options
-- **[API Reference](app/api/api.md)** - Core API methods
+- **[Controllers API](../events/controllers.md)** - Controllers for performing actions
+- **[Configuration Reference](../config/configuration-reference.md)** - Package configuration options
+- **[API Reference](../api/api.md)** - Core API methods
 - **[Core Package Development](./core-packages.md)** - Creating custom packages (detailed guide)
-- **[State Management](programming/using-store.md)** - Zustand store architecture
+- **[State Management](../../programming/using-store.md)** - Zustand store architecture

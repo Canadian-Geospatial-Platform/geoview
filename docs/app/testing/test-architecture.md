@@ -1,203 +1,119 @@
 # Test Architecture
 
-This document explains the architectural design of the GeoView Test Suite framework.
+This document explains the design of the GeoView Test Suite framework.
 
-## Design Principles
-
-### 1. Sequential Execution
-
-Tests run one at a time in a predictable order, ensuring:
-
-- **No Race Conditions**: Tests don't interfere with each other
-- **Predictable State**: Each test starts with known conditions
-- **Easy Debugging**: Clear execution flow for troubleshooting
-
-### 2. Event-Driven Reporting
-
-All test state changes emit events:
-
-- **Real-Time Feedback**: UI updates as tests progress
-- **Flexible Integration**: External systems can monitor tests
-- **Comprehensive Logging**: All events can be captured
-
-### 3. Hierarchical Organization
-
-Tests are organized in a clear hierarchy:
-
-- **Plugin**: Top-level coordinator
-- **Test Suite**: Groups related functionality
-- **Tester**: Contains test methods
-- **Test**: Individual test case
-- **Step**: Granular progress indicator
-
-### 4. Separation of Concerns
-
-Each component has a single responsibility:
-
-- **Plugin**: Manages suites and configuration
-- **Suite**: Orchestrates testers
-- **Tester**: Executes tests
-- **Test**: Tracks state and assertions
-
-## Component Architecture
+## Class Hierarchy
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│ TestSuitePlugin (AbstractPlugin)                         │
-│ • Suite registration & lifecycle                         │
-│ • Configuration management                               │
-│ • Event aggregation                                      │
-└────────────────┬────────────────────────────────────────┘
-                 │ manages
-                 ▼
-┌─────────────────────────────────────────────────────────┐
-│ AbstractTestSuite                                        │
-│ • Tester management                                      │
-│ • Test counting & aggregation                            │
-│ • Lifecycle (launch/reset)                               │
-└────────────────┬────────────────────────────────────────┘
-                 │ contains
-                 ▼
-┌─────────────────────────────────────────────────────────┐
-│ AbstractTester                                           │
-│ • Test execution (test/testError)                        │
-│ • API access (getAPI/getMapViewer)                       │
-│ • Event emission                                         │
-└────────────────┬────────────────────────────────────────┘
-                 │ creates
-                 ▼
-┌─────────────────────────────────────────────────────────┐
-│ Test<T>                                                  │
-│ • State management (status, result, error)               │
-│ • Step tracking                                          │
-│ • Static assertion methods                               │
-└────────────────┬────────────────────────────────────────┘
-                 │ contains
-                 ▼
-┌─────────────────────────────────────────────────────────┐
-│ TestStep                                                 │
-│ • Message                                                │
-│ • Level (major/regular)                                  │
-│ • Color                                                  │
-└─────────────────────────────────────────────────────────┘
+packages/geoview-test-suite/src/
+├── index.tsx                            # Plugin entry — registers suites from config
+└── tests/
+    ├── core/                            # Framework base classes
+    │   ├── abstract-test-suite.ts       # Base suite — addTester(), launchTestSuite()
+    │   ├── abstract-tester.ts           # Base tester — test(), testError(), assertions
+    │   ├── test.ts                      # Test<T> — lifecycle, static assertions
+    │   ├── test-step.ts                 # TestStep — message, level, color
+    │   └── exceptions.ts               # Assertion error types
+    ├── suites/                          # GeoView-specific suites
+    │   ├── abstract-gv-test-suite.ts    # GV base — holds API + MapViewer refs
+    │   ├── suite-core.ts               # Date/utility tests
+    │   ├── suite-config.ts             # Layer config validation
+    │   ├── suite-layer.ts              # Layer add/remove/legend/query
+    │   ├── suite-map-varia.ts          # Map zoom/projection/basemap
+    │   ├── suite-map-config.ts         # Map config creation/destruction
+    │   ├── suite-geochart.ts           # Geochart plugin tests
+    │   ├── suite-details.ts            # Details panel tests
+    │   └── suite-ui.ts                 # DOM-level UI tests
+    └── testers/                         # GeoView-specific testers
+        ├── abstract-gv-tester.ts        # GV base — constants, URLs, helpers
+        ├── core-tester.ts
+        ├── config-tester.ts
+        ├── layer-tester.ts
+        ├── map-tester.ts
+        ├── map-config-tester.ts
+        ├── geochart-tester.ts
+        ├── details-tester.ts
+        └── ui-tester.ts
 ```
 
-## Data Flow
+## Test Lifecycle
 
-### Test Execution Flow
-
-```
-1. User Configuration
-   └─> "suites": ["suite-config"]
-       │
-2. Plugin Initialization
-   ├─> Create test suite instances
-   ├─> Register suites with plugin
-   └─> Set up event handlers
-       │
-3. Suite Launch (Sequential)
-   ├─> Suite 1: launchTestSuite()
-   │   ├─> Tester A: test1()
-   │   │   ├─> Create Test instance
-   │   │   ├─> Execute callback
-   │   │   ├─> Run assertions
-   │   │   ├─> Finalize (cleanup)
-   │   │   └─> Emit success/failure
-   │   ├─> Tester A: test2()
-   │   └─> Tester B: test1()
-   └─> Suite 2: launchTestSuite()
-       └─> ...
-```
-
-### Event Flow
-
-```
-Test Instance (Lowest Level)
-  │
-  ├─ Status Changed
-  │  └─> emits TestChanged event
-  │      │
-  │      ▼
-  │  AbstractTester (Middle Level)
-  │    ├─ Listens to Test events
-  │    ├─ Updates internal state
-  │    └─ Re-emits as specific events:
-  │        ├─> onTestStarted
-  │        ├─> onTestUpdated
-  │        ├─> onSuccess
-  │        └─> onFailure
-  │            │
-  │            ▼
-  │        AbstractTestSuite (Suite Level)
-  │          ├─ Listens to Tester events
-  │          ├─ Aggregates test counts
-  │          └─ Re-emits events upward
-  │              │
-  │              ▼
-  │          TestSuitePlugin (Top Level)
-  │            ├─ Listens to Suite events
-  │            └─ Provides public API
-  │                │
-  │                ▼
-  │            User Callbacks
-  │              ├─ onTestStarted((e) => {...})
-  │              ├─ onSuccess((e) => {...})
-  │              └─ onFailure((e) => {...})
-  │
-  └─ Step Added
-     └─> emits TestChanged event
-         └─> (flows through same hierarchy)
-```
-
-## State Management
-
-### Test State Lifecycle
+Each test follows this lifecycle:
 
 ```
 ┌─────────┐
-│   new   │ ─── Test created
+│   new   │  Test instance created
 └────┬────┘
      │ test() called
      ▼
-┌─────────┐
-│ running │ ─── Executing callback
-└────┬────┘
+┌──────────┐
+│ running  │  Executing callback (test logic)
+└────┬─────┘
+     │ callback returns result
+     ▼
+┌───────────┐
+│ verifying │  Running callbackAssert (assertions)
+└────┬──────┘
      │
-     ├──[Success]──> ┌────────┐
-     │               │ passed │ ─── Assertions passed
-     │               └────────┘
+     ├── assertions pass ──> ┌─────────┐
+     │                       │ success │
+     │                       └─────────┘
      │
-     ├──[Failure]──> ┌────────┐
-     │               │ failed │ ─── Error or assertion failed
-     │               └────────┘
-     │
-     └──[Skip]────> ┌─────────┐
-                    │ skipped │ ─── Precondition not met
-                    └─────────┘
+     └── assertion fails ──> ┌────────┐
+                              │ failed │
+                              └────────┘
 ```
 
-### Suite State Aggregation
+**callbackFinalize** (cleanup) always runs after assertions, regardless of success or failure.
 
-```typescript
-class AbstractTestSuite {
-  // Aggregates counts from all testers
-  getTotalTests(): number {
-    return this.#testers.reduce(
-      (sum, tester) => sum + tester.getTotalTests(),
-      0
-    );
-  }
+## Execution Flow
 
-  getCompletedTests(): number {
-    return this.#testers.reduce(
-      (sum, tester) => sum + tester.getCompletedTests(),
-      0
-    );
-  }
-
-  // Similar for failed/successful counts
-}
 ```
+1. Plugin reads config: "suites": ["suite-layer", "suite-config"]
+2. Plugin creates suite instances via if/else-if chain in onAdd()
+3. Each suite creates its testers in the constructor
+4. Suite.onLaunchTestSuite() orchestrates test execution:
+   ├── Independent tests → Promise.all([...])
+   └── State-dependent tests → sequential await
+5. Each tester.test() call:
+   ├── Creates Test<T> instance
+   ├── Executes callback (returns result)
+   ├── Runs callbackAssert (throws on failure)
+   ├── Runs callbackFinalize (cleanup)
+   └── Emits success/failure event
+```
+
+## Event Propagation
+
+Events bubble up through the hierarchy:
+
+```
+Test instance
+  └─ emits TestChanged
+       └─ AbstractTester listens, re-emits as:
+            ├─ onTestStarted
+            ├─ onTestUpdated
+            ├─ onSuccess
+            └─ onFailure
+                 └─ AbstractTestSuite listens, aggregates counts, re-emits
+                      └─ TestSuitePlugin listens, provides public API
+```
+
+## Execution Patterns
+
+| Pattern                         | When to Use                        | Example                               |
+| ------------------------------- | ---------------------------------- | ------------------------------------- |
+| `Promise.all()` (parallel)      | Independent tests, no shared state | `suite-config`, `suite-ui`            |
+| Mixed parallel + sequential     | Some tests modify map state        | `suite-layer`                         |
+| Sequential `await`              | All tests modify shared state      | `suite-map-varia`, `suite-map-config` |
+| `onCanExecuteTestSuite()` guard | Suite requires specific plugin     | `suite-geochart`, `suite-details`     |
+
+## Key Design Decisions
+
+- **In-browser execution**: Tests run in the actual viewer with real OpenLayers rendering — not in a headless test runner
+- **Custom framework**: No dependency on Jest/Vitest/Mocha — the `Test` class provides its own assertion API
+- **`generateId()` for layer IDs**: Prevents conflicts between parallel tests adding layers
+- **Instance helpers vs static helpers**: Instance methods (e.g., `this.helperStepAddLayerOnMap()`) use `this.getMapViewer()` internally. Static methods (e.g., `LayerTester.helperStepAssertLayerExists()`) require explicit `mapId` parameter
 
 ## Test Execution Patterns
 
@@ -339,9 +255,12 @@ class TestError extends Error {
 }
 
 class AssertionValueError extends TestError {
-  constructor(public actualValue: unknown, public expectedValue: unknown) {
+  constructor(
+    public actualValue: unknown,
+    public expectedValue: unknown,
+  ) {
     super(
-      `Expected value to equal "${expectedValue}" but got "${actualValue}"`
+      `Expected value to equal "${expectedValue}" but got "${actualValue}"`,
     );
   }
 }
@@ -364,7 +283,7 @@ class LayerTester extends GVAbstractTester {
   protected static async helperStepAddLayerOnMap(
     test: Test,
     mapViewer: MapViewer,
-    config: TypeGeoviewLayerConfig
+    config: TypeGeoviewLayerConfig,
   ): Promise<GeoViewLayerAddedResult> {
     test.addStep("Adding layer to the map...");
 

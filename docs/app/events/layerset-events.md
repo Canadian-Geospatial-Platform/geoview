@@ -1,103 +1,84 @@
-# Layer Sets in GeoView
+# Layer Set Events
 
-GeoView uses the concept of Layer Sets to manage and synchronize groups of layers and their associated data, events, and UI updates. Each Layer Set is responsible for a specific aspect of layer management and interacts with the store and event processors to keep the application state in sync.
+> **Full API Reference:** [AbstractLayerSet — TypeDoc](https://canadian-geospatial-platform.github.io/geoview/public/docs/typedoc/classes/AbstractLayerSet.html) | [FeatureInfoLayerSet](https://canadian-geospatial-platform.github.io/geoview/public/docs/typedoc/classes/FeatureInfoLayerSet.html) | [AllFeatureInfoLayerSet](https://canadian-geospatial-platform.github.io/geoview/public/docs/typedoc/classes/AllFeatureInfoLayerSet.html) | [HoverFeatureInfoLayerSet](https://canadian-geospatial-platform.github.io/geoview/public/docs/typedoc/classes/HoverFeatureInfoLayerSet.html) | [LegendsLayerSet](https://canadian-geospatial-platform.github.io/geoview/public/docs/typedoc/classes/LegendsLayerSet.html)
+>
+> TypeDoc is auto-generated from source code and always reflects the current method signatures, event delegates, and result set types.
 
-## Overview
+Layer sets are reactive collections that track layers and synchronize query results with the Zustand store. Each layer set maintains a `resultSet` object keyed by layer path and exposes events when the set is updated.
 
-A Layer Set is a class that manages a collection of layers for a particular purpose, such as querying feature info, handling all features, or managing legends. Layer Sets listen to events, update the store, and provide APIs for querying or updating their managed layers.
+## Accessing Layer Sets
 
-The main Layer Sets in GeoView are:
+All layer sets are properties on `LayerSetController`, accessed through the controllers registry:
 
-- AllFeatureInfoLayerSet
-- FeatureInfoLayerSet
-- LegendsLayerSet
+```typescript
+cgpv.onMapInit((mapViewer) => {
+  const layerSetCtrl = mapViewer.controllers.layerSetController;
 
-## How Layer Sets Work
-
-Each Layer Set extends AbstractLayerSet and is constructed with a reference to the LayerApi.
-They maintain a resultSet object keyed by layer path, holding the relevant data (features, legend info, etc.).
-Layer Sets listen to map or layer events (e.g., clicks, style changes) and update their result sets accordingly.
-
-They propagate changes to the store, triggering UI updates in React components.
-
-### Understanding `resultSet` and `getRegisteredLayerPaths`
-
-All Layer Sets in GeoView (`AllFeatureInfoLayerSet`, `FeatureInfoLayerSet`, `LegendsLayerSet`) maintain a **`resultSet`** object. This object holds the current data for each registered layer, keyed by the layer's path.
-
-### What is `resultSet`?
-
-- `resultSet` is an object where **each key is a layer path** (a unique string identifying a layer), and **each value is the data** relevant to that Layer Set.
-  - For `AllFeatureInfoLayerSet`, the value is all features for that layer.
-  - For `FeatureInfoLayerSet`, the value is features found at the last queried location.
-  - For `LegendsLayerSet`, the value is the legend/symbology info for that layer.**Example structure:**
-
-```ts
-{
-  "layer1/path": { ...data for layer 1... },
-  "layer2/path": { ...data for layer 2... }
-}
-```
-
-You can always access the current state of all managed layers through the resultSet property of a Layer Set.
-
-## AllFeatureInfoLayerSet
-
-Handles querying and storing information about all features in a layer. This is used when you want to retrieve all records/features from a layer, for example, to populate a data table.
-
-Key Features:
-
-- Manages a result set for all features in each registered layer.
-- Handles queries for all features, disables UI buttons during queries to prevent concurrent requests.
-- Propagates results and status to the store for UI updates.
-- Used by the Data Table and other components that need access to all features in a layer.
-
-```ts
-// Query all features for a layer
-allFeatureInfoLayerSet.queryLayer("layerPath").then((features) => {
-  // features is an array of all features in the layer
+  layerSetCtrl.featureInfoLayerSet; // FeatureInfoLayerSet — map click queries
+  layerSetCtrl.allFeatureInfoLayerSet; // AllFeatureInfoLayerSet — all-features queries
+  layerSetCtrl.hoverFeatureInfoLayerSet; // HoverFeatureInfoLayerSet — hover queries
+  layerSetCtrl.legendsLayerSet; // LegendsLayerSet — legend/symbology data
 });
 ```
 
-## FeatureInfoLayerSet
+## Common Event — `onLayerSetUpdated`
 
-Handles querying and storing information about features at a specific location (e.g., when a user clicks on the map).
+All layer sets inherit `onLayerSetUpdated` from `AbstractLayerSet`. It fires whenever a layer is registered, unregistered, or its result set entry changes.
 
-Key Features:
+```typescript
+cgpv.onMapInit((mapViewer) => {
+  const { legendsLayerSet } = mapViewer.controllers.layerSetController;
 
-- Listens for map click events and queries all registered layers at the clicked location.
-- Stores the result set for each layer, including feature info and query status.
-- Updates the store so UI components (like details panels) can display feature info for the selected location.
-- Handles metadata patching if feature info fields are missing in the layer config.
-
-```ts
-// Query features at a specific coordinate
-featureInfoLayerSet.queryLayers([longitude, latitude]).then((resultSet) => {
-  // resultSet contains features for all layers at the clicked location
+  legendsLayerSet.onLayerSetUpdated((sender, event) => {
+    console.log("Layer set updated for:", event.layerPath);
+    console.log("Current result set:", event.resultSet);
+  });
 });
 ```
 
-## LegendsLayerSet
+**Payload:** `{ layerPath: string; resultSet: TypeResultSet }`
 
-Manages legend information for all registered layers by tracking their layer status progression and fetching their legend/symbology data.
+## FeatureInfoLayerSet Events
 
-Key Features:
+Handles querying features at a specific location (map click). In addition to `onLayerSetUpdated`, it exposes:
 
-- Registers all layers (regardless of type) to track their layer status progression in the UI
-- Queries and fetches legend data (symbology, icons, labels) for each layer when ready
-- Updates `legendQueryStatus` ('init' → 'querying' → 'queried') to track legend fetching progress
-- Listens to layer style changes and automatically re-queries legends when styles are updated
-- Propagates legend data to the store for UI rendering in the Legend Panel and layer lists
+### `onQueryEnded` / `offQueryEnded`
 
-```ts
-// Listen for legend updates
-mapViewer.layer.legendsLayerSet.onLayerSetUpdated((sender, payload) => {
-  // payload.resultSet contains legend info for all layers
+Fires when a click-based feature query completes across all registered layers.
+
+```typescript
+cgpv.onMapInit((mapViewer) => {
+  const { featureInfoLayerSet } = mapViewer.controllers.layerSetController;
+
+  featureInfoLayerSet.onQueryEnded((sender, event) => {
+    console.log("Query completed at:", event.coordinate);
+    console.log("Results:", event.resultSet);
+  });
 });
 ```
 
-When to Use Each Layer Set
-| Layer Set | Use Case |
-|-------------------------|-----------------------------------------------|
-| AllFeatureInfoLayerSet | Data Table, export, or any "all features" UI |
-| FeatureInfoLayerSet | Map click, popups, details for a location |
-| LegendsLayerSet | Displaying layer symbology/legend in the UI |
+**Payload:** `{ coordinate: Coordinate; resultSet: TypeResultSet }`
+
+## Layer Set Summary
+
+| Layer Set                  | Purpose                              | Query Method              | Custom Events  |
+| -------------------------- | ------------------------------------ | ------------------------- | -------------- |
+| `FeatureInfoLayerSet`      | Features at a clicked location       | `queryLayers(coordinate)` | `onQueryEnded` |
+| `AllFeatureInfoLayerSet`   | All features in a layer (data table) | `queryLayer(layerPath)`   | —              |
+| `HoverFeatureInfoLayerSet` | Feature under the cursor             | `queryLayers(coordinate)` | —              |
+| `LegendsLayerSet`          | Legend/symbology data                | `queryLegend(layer)`      | —              |
+
+All four layer sets also inherit `onLayerSetUpdated` from `AbstractLayerSet`.
+
+## Query Status Values
+
+Each result set entry includes a `queryStatus` field tracking the query lifecycle:
+
+- **Feature info layer sets:** `'init'` → `'processing'` → `'processed'` | `'error'`
+- **Legends layer set:** `'init'` → `'querying'` → `'queried'` | `'error'` (via `legendQueryStatus`)
+
+## Related Documentation
+
+- [Layer Set Architecture](../../programming/layerset-architecture.md) — internal design and data flow
+- [Event System](event-system.md) — delegate pattern overview
+- [Layer Events](layer-events.md) — events on individual layers

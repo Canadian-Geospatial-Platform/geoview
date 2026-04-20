@@ -1,232 +1,124 @@
 # Using the Test Suite
 
-The GeoView Test Suite allows you to run automated tests within your GeoView application to verify functionality and catch issues early.
-
 ## Configuration
 
-### Adding the Test Suite Package
-
-To enable the test suite in your GeoView map, add it to the `corePackages` array and configure which suites to run:
+Add the test-suite package to your GeoView map configuration:
 
 ```json
 {
   "map": {
     "interaction": "dynamic",
-    "viewSettings": {
-      "projection": 3978
-    }
+    "viewSettings": { "projection": 3978 }
   },
   "corePackages": ["test-suite"],
   "corePackagesConfig": [
     {
       "test-suite": {
-        "suites": ["suite-config", "suite-map"]
+        "suites": ["suite-config", "suite-layer"]
       }
     }
   ]
 }
 ```
 
-### Configuration Options
+### Available Suites
 
-#### suites (Required)
+| Suite ID           | Description                                       |
+| ------------------ | ------------------------------------------------- |
+| `suite-core`       | Date/utility function tests                       |
+| `suite-config`     | Layer configuration validation                    |
+| `suite-map`        | Map zoom, projection, basemap, UI                 |
+| `suite-layer`      | Layer add/remove, legend, queries                 |
+| `suite-map-config` | Map config creation/destruction                   |
+| `suite-geochart`   | Geochart plugin (requires geochart in footer bar) |
+| `suite-details`    | Details panel (requires details in footer bar)    |
+| `suite-ui`         | DOM-level UI tests                                |
 
-An array of test suite identifiers to run. Available values:
+### HTML Configuration
 
-- `"suite-config"`: Tests layer configuration validation
-- `"suite-map"`: Tests map functionality (state, zoom, projection)
-- `"suite-layer"`: Tests layer addition, removal, and behavior
-- `"suite-geochart"`: Tests geochart component functionality
+Tests are triggered from HTML pages. Each map div specifies which suites to run:
 
-**Example - Running all available suites:**
-
-```json
-{
-  "test-suite": {
-    "suites": ["suite-config", "suite-map", "suite-layer", "suite-geochart"]
-  }
-}
+```html
+<div
+  id="mapTest"
+  class="geoviewMap"
+  data-lang="en"
+  data-config="{
+    'map': { 'viewSettings': { 'projection': 3978 } },
+    'corePackages': ['test-suite'],
+    'corePackagesConfig': [{ 'test-suite': { 'suites': ['suite-layer'] } }]
+  }"
+></div>
 ```
 
-**Example - Running only configuration tests:**
-
-```json
-{
-  "test-suite": {
-    "suites": ["suite-config"]
-  }
-}
-```
-
-## Running Tests
-
-### Automatic Execution
-
-When configured, the test suite will be available in your GeoView map. Tests can be triggered:
-
-- Programmatically via the GeoView API
-- Through the test suite UI component (if enabled)
-- During map initialization (depending on configuration)
-
-### Programmatic Execution
-
-Access the test suite through the GeoView API:
-
-```javascript
-// Get the test suite plugin instance
-const testSuitePlugin = cgpv.api.maps["mapId"].corePackages["test-suite"];
-
-// Launch all configured test suites
-await testSuitePlugin.launchTestSuites();
-
-// Reset test suites to initial state
-testSuitePlugin.resetTestSuites();
-```
-
-## Monitoring Test Progress
-
-### Using Events
-
-Subscribe to test events to monitor execution:
-
-```javascript
-const testSuitePlugin = cgpv.api.maps["mapId"].corePackages["test-suite"];
-
-// Listen for test started
-testSuitePlugin.onTestStarted((event) => {
-  console.log("Test started:", event.testId, event.testName);
-});
-
-// Listen for test updates (steps)
-testSuitePlugin.onTestUpdated((event) => {
-  console.log("Test step:", event.step);
-});
-
-// Listen for test success
-testSuitePlugin.onSuccess((event) => {
-  console.log("Test passed:", event.testId);
-});
-
-// Listen for test failure
-testSuitePlugin.onFailure((event) => {
-  console.error("Test failed:", event.testId, event.error);
-});
-```
-
-### Event Payload
-
-#### onTestStarted
-
-```typescript
-{
-  testId: string; // Unique test identifier
-  testName: string; // Human-readable test name
-  testerName: string; // Name of the tester running the test
-  suiteName: string; // Name of the test suite
-}
-```
-
-#### onTestUpdated
-
-```typescript
-{
-  testId: string;
-  step: string; // Description of the current step
-}
-```
-
-#### onSuccess
-
-```typescript
-{
-  testId: string;
-  testName: string;
-  result: any; // The assertion result (varies by test)
-}
-```
-
-#### onFailure
-
-```typescript
-{
-  testId: string;
-  testName: string;
-  error: Error;          // The error that caused failure
-  steps: string[];       // All steps completed before failure
-}
-```
-
-## Understanding Test Output
+## Understanding Results
 
 ### Test Status
 
-Each test can have one of the following statuses:
+Each test transitions through these statuses:
 
-- **new**: Test created but not started
-- **running**: Test is currently executing
-- **passed**: Test completed successfully
-- **failed**: Test failed with an error
-- **skipped**: Test was skipped (e.g., due to precondition failure)
+| Status      | Meaning                                 |
+| ----------- | --------------------------------------- |
+| `new`       | Test created but not yet started        |
+| `running`   | Test callback is executing              |
+| `verifying` | Assertions are running                  |
+| `success`   | All assertions passed                   |
+| `failed`    | An error was thrown or assertion failed |
 
-### Test Steps
+### Test Output
 
-Tests report granular steps during execution:
+Tests log granular steps during execution:
 
 ```
-Test: Adding Esri Dynamic layer...
+Test Adding Esri Dynamic layer on map...
   ✓ Creating the GeoView Layer Configuration...
   ✓ Adding layer to the map...
   ✓ Waiting for layer to be ready...
   ✓ Verifying layer exists at path...
-  ✓ Assertion passed
   ✓ Removing layer from map...
   ✓ Test completed successfully
 ```
 
-### Test Types
+### Regular Tests vs Error Tests
 
-#### Regular Tests (True Positives)
-
-Tests that verify expected successful behavior:
+**Regular tests** (true positives) verify expected behavior:
 
 ```
-Test Adding Esri Dynamic layer
-  ✓ Result: Green checkmark
+Test Adding Esri Dynamic layer  →  ✓ success
 ```
 
-#### Error Tests (True Negatives)
-
-Tests that verify expected failures:
+**Error tests** (true negatives) verify that errors are properly thrown:
 
 ```
-Test Adding Esri Dynamic with bad URL (Expected error thrown)
-  ✓ Result: Green checkmark
+Test Adding Esri Dynamic with bad url  →  ✓ success (expected error was thrown)
 ```
 
-These tests verify that the system properly handles and reports error conditions.
+An error test **fails** if the expected error is NOT thrown — meaning the system failed to detect an invalid state.
 
-## Best Practices
+### Common Assertion Errors
 
-### Test Execution Order
+| Error Type                    | Meaning                                   |
+| ----------------------------- | ----------------------------------------- |
+| `AssertionValueError`         | Actual value doesn't match expected       |
+| `AssertionUndefinedError`     | Expected a value but got `undefined`      |
+| `AssertionWrongInstanceError` | Object is wrong type/class                |
+| `AssertionJSONObjectError`    | Object structure mismatch                 |
+| `AssertionNoErrorThrownError` | Error test: expected error was not thrown |
 
-Tests run sequentially in the order defined by each test suite. This ensures:
+## Monitoring with Events
 
-- Predictable test state
-- No race conditions
-- Proper cleanup between tests
+The plugin emits events you can subscribe to:
 
-### Performance Considerations
+```javascript
+// Events: onTestStarted, onTestUpdated, onSuccess, onFailure
+testSuitePlugin.onSuccess((sender, event) => {
+  console.log("Test passed:", event.test.getTitle());
+});
 
-- Running all test suites can take several minutes
-- Each suite includes multiple tests with network requests
-- Consider running specific suites during development
-- Run all suites in CI/CD pipelines for comprehensive validation
-
-### Development Workflow
-
-1. **During Development**: Run specific test suites related to your changes
-2. **Before Commit**: Run all relevant test suites
-3. **In CI/CD**: Run all test suites on every build
+testSuitePlugin.onFailure((sender, event) => {
+  console.error("Test failed:", event.test.getTitle(), event.test.getError());
+});
+```
 
 ## Troubleshooting
 

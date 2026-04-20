@@ -58,11 +58,10 @@ Package system and development:
 
 ### Testing
 
-- **[Test Suite Guide](app/testing/README.md)** - Overview of the GeoView Test Suite
-- **[Using the Test Suite](app/testing/using-test-suite.md)** - How to configure and run tests
-- **[Available Test Suites](app/testing/available-suites.md)** - Built-in test suites
-- **[Understanding Results](app/testing/understanding-results.md)** - Interpreting test outcomes
-- **[Creating Custom Tests](app/testing/creating-tests.md)** - Developer guide for custom tests
+- **[Test Suite Guide](app/testing/README.md)** — Overview, available suites, architecture
+- **[Using the Test Suite](app/testing/using-test-suite.md)** — Configuration, running tests, interpreting results
+- **[Creating Custom Tests](app/testing/creating-tests.md)** — Adding new suites and testers
+- **[API Reference](app/testing/api-reference.md)** — Assertion methods and helpers
 
 ### TypeScript API Reference (TypeDoc)
 
@@ -109,8 +108,7 @@ Guides for extending GeoView functionality:
 - **[Packages](app/packages/)** - Overview, core packages, and development guides
 - **[Core Package Reference](app/packages/geoview-core-packages.md)** - Complete package reference
 - **[Core Package Development](app/packages/core-packages.md)** - Creating TypeScript packages (Rush.js)
-- **[JavaScript Package Development](app/packages/javascript-packages.md)** - Creating vanilla JS packages
-- **[Package Overview](app/packages/overview.md)** - Architecture and package types
+- **[JavaScript Package Development](app/packages/javascript-packages.md)** - Creating vanilla JS packages (legacy)
 
 ### Documentation Organization
 

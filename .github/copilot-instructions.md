@@ -111,6 +111,33 @@ this.getControllersRegistry().mapController.applyLayerFilters(layerPath);
 this.getControllersRegistry().uiController.setCircularProgress(true);
 ```
 
+### Map Initialization Sequence
+
+The global `cgpv` object provides both an initialization function and event listeners:
+
+```typescript
+// 1. Register event listener BEFORE calling init
+cgpv.onMapInit((mapViewer) => {
+  // Fires when each map is initialized (map is ready, layers may still be loading)
+  mapViewer.onMapMoveEnd((sender, event) => {
+    console.log("Map moved to:", event.lonlat);
+  });
+});
+
+cgpv.onMapReady((mapViewer) => {
+  // Fires when map and UI are fully loaded
+});
+
+// 2. Call init to trigger map creation from HTML div configs
+cgpv.init();
+```
+
+- **`cgpv.init()`** — Initializes all maps declared in the HTML (reads `data-config` / `data-config-url` attributes)
+- **`cgpv.onMapInit(callback)`** — Event listener that fires after each map is initialized. Register BEFORE calling `cgpv.init()`
+- **`cgpv.onMapReady(callback)`** — Event listener that fires when map and UI are fully loaded
+- **`cgpv.api.getMapViewer(mapId)`** — Returns the `MapViewer` instance for a specific map
+- **`cgpv.api.getMapViewerAsync(mapId)`** — Async version that waits for the map to be available
+
 ### Layer Architecture
 
 **Two-tier system** — both tiers are mandatory for every layer:
@@ -1694,7 +1721,7 @@ import { GVTestSuiteMyFeature } from './tests/suites/suite-my-feature';
 
 **Favor linking to TypeDoc over repeating method signatures in markdown docs.**
 
-The TypeDoc reference at `https://canadian-geospatial-platform.github.io/geoview/public/docs/typedoc/` is auto-generated from source code JSDoc and is always in sync. When writing or updating API documentation in `docs/app/api/`:
+The TypeDoc reference at `https://canadian-geospatial-platform.github.io/geoview/public/docs/typedoc/` is auto-generated from source code JSDoc and is always in sync. When writing or updating API documentation in `docs/app/api/` or `docs/app/events/`:
 
 1. **Link to TypeDoc** at the top of each file for the full method reference
 2. **Focus on concepts, access patterns, and usage examples** — things TypeDoc does not convey well

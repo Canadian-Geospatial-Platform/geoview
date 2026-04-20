@@ -1,123 +1,76 @@
 # GeoView Test Suite
 
-The GeoView Test Suite is a comprehensive testing framework built as a core package that allows you to run automated tests within the GeoView viewer. It provides both user-facing test execution capabilities and a developer framework for creating custom tests.
-
-## Overview
-
-The Test Suite plugin enables:
-
-- **Automated Testing**: Run predefined tests to verify map, layer, configuration, and component functionality
-- **Visual Feedback**: Real-time test progress and results displayed in the viewer
-- **Event-Driven Architecture**: Monitor test execution through event handlers
-- **Extensible Framework**: Create custom test suites and testers for specific use cases
+GeoView uses its own custom test framework (NOT Jest/Vitest/Mocha). The `geoview-test-suite` package is a GeoView plugin that runs in-browser tests against a live map instance with real OpenLayers rendering.
 
 ## Documentation
 
-### For Test Users
-
-- [Using the Test Suite](app/testing/using-test-suite.md) - How to configure and run tests
-- [Available Test Suites](app/testing/available-suites.md) - Built-in test suites and what they test
-- [Understanding Results](app/testing/understanding-results.md) - Interpreting test outcomes
-
-### For Test Developers
-
-- [Creating Custom Tests](app/testing/creating-tests.md) - Developer guide for building custom test suites
-- [Test Architecture](app/testing/test-architecture.md) - Understanding the test framework design
-- [API Reference](app/testing/api-reference.md) - Complete API documentation
+- **[Using the Test Suite](./using-test-suite.md)** — How to configure, run tests, and interpret results
+- **[Test Architecture](./test-architecture.md)** — Framework design and execution model
+- **[Creating Custom Tests](./creating-tests.md)** — Developer guide for adding new test suites and testers
+- **[API Reference](./api-reference.md)** — Assertion methods and helper utilities
 
 ## Quick Start
 
-### Basic Configuration
-
-Add the test-suite package to your GeoView configuration:
+Add `test-suite` to your map configuration:
 
 ```json
 {
   "map": {
     "interaction": "dynamic",
-    "viewSettings": {
-      "projection": 3978
-    }
+    "viewSettings": { "projection": 3978 }
   },
   "corePackages": ["test-suite"],
   "corePackagesConfig": [
     {
       "test-suite": {
-        "suites": ["suite-config", "suite-map"]
+        "suites": ["suite-layer", "suite-config"]
       }
     }
   ]
 }
 ```
 
-### Running All Available Suites
+## Available Suites
 
-```json
-{
-  "corePackages": ["test-suite"],
-  "corePackagesConfig": [
-    {
-      "test-suite": {
-        "suites": ["suite-config", "suite-map", "suite-layer", "suite-geochart"]
-      }
-    }
-  ]
-}
-```
+| Suite ID           | Description                         |
+| ------------------ | ----------------------------------- |
+| `suite-core`       | Date/utility function tests         |
+| `suite-config`     | Layer configuration validation      |
+| `suite-map`        | Map zoom, projection, basemap, UI   |
+| `suite-layer`      | Layer add/remove, legend, queries   |
+| `suite-map-config` | Map config creation/destruction     |
+| `suite-geochart`   | Geochart plugin (requires geochart) |
+| `suite-details`    | Details panel (requires details)    |
+| `suite-ui`         | DOM-level UI tests                  |
 
 ## Architecture Overview
 
-The Test Suite follows a hierarchical architecture:
-
 ```
-TestSuitePlugin
-  ├── Test Suite 1 (e.g., Config Test Suite)
-  │   ├── Tester A (e.g., ConfigTester)
-  │   │   ├── Test 1
-  │   │   │   ├── Step 1
-  │   │   │   ├── Step 2
-  │   │   │   └── Step 3
-  │   │   └── Test 2
-  │   └── Tester B
-  └── Test Suite 2 (e.g., Map Test Suite)
-      └── Tester C (e.g., MapTester)
-          └── Tests...
+TestSuitePlugin (AbstractPlugin)
+  └── GVAbstractTestSuite (extends AbstractTestSuite)
+        └── *Tester (extends GVAbstractTester → AbstractTester)
+              └── Test<T> — individual test with lifecycle and assertions
+                    └── TestStep — sub-step logging within a test
 ```
 
-- **Plugin**: Manages multiple test suites
-- **Test Suite**: Groups related testers (e.g., all config-related tests)
-- **Tester**: Contains individual test methods
-- **Test**: Single test case with steps and assertions
-- **Step**: Granular progress indicator within a test
+- **Plugin** — Manages multiple test suites, aggregates events
+- **Suite** — Groups related testers, orchestrates execution order
+- **Tester** — Contains test methods and shared helper methods
+- **Test** — Single test with lifecycle: `new` → `running` → `verifying` → `success`/`failed`
+- **Step** — Granular progress indicator within a test
 
-## Key Features
+## Test Types
 
-### Sequential Execution
+- **Regular tests** (`this.test(...)`) — Verify expected behavior (true positives)
+- **Error tests** (`this.testError(...)`) — Verify expected failures (true negatives). Test passes when the expected error is thrown
 
-Tests run sequentially (not in parallel) to ensure predictable state and avoid conflicts between tests.
+## Execution Patterns
 
-### Event-Based Reporting
+Suites control whether their tests run in parallel or sequentially:
 
-The test suite emits events at every stage:
-
-- `onTestStarted`: When a test begins
-- `onTestUpdated`: When test steps are added
-- `onSuccess`: When a test passes
-- `onFailure`: When a test fails
-
-### Test Types
-
-- **Regular Tests**: Verify expected behavior (true positives)
-- **Error Tests**: Verify expected failures (true negatives)
-
-### Comprehensive Assertions
-
-Built-in assertion methods for:
-
-- Value equality
-- Object structure validation
-- Array operations
-- Type checking
+- **Parallel**: Independent tests grouped in `Promise.all()` (e.g., config validation, layer add)
+- **Sequential**: Tests that modify shared map state (zoom, projection) run with `await`
+- **Mixed**: Parallel first, then sequential for state-dependent tests
 - Error validation
 
 ## Test Lifecycle

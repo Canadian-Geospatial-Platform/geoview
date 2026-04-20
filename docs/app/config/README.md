@@ -7,13 +7,12 @@ This section contains comprehensive documentation for configuring GeoView maps.
 ### Getting Started
 
 - **[Creating Maps](./create-map.md)** - How to create maps using declarative (HTML) and programmatic approaches
-
   - Declarative approach with `data-` attributes
   - Programmatic approach with `createMapFromConfig()`
   - Map initialization and configuration loading
   - HTML attribute reference
 
-- **[Configuration Reference](app/config/configuration-reference.md)** - Complete configuration schema and options
+- **[Configuration Reference](./configuration-reference.md)** - Complete configuration schema and options
   - Map configuration properties
   - Layer configuration options
   - UI component settings (appBar, footerBar, navBar)
@@ -40,25 +39,27 @@ This section contains comprehensive documentation for configuring GeoView maps.
 ### Programmatic Approach (JavaScript)
 
 ```javascript
-const mapConfig = {
+const mapConfig = JSON.stringify({
   map: {
     interaction: "dynamic",
     viewSettings: {
-      zoom: 4,
-      center: [-95, 60],
       projection: 3978,
+      initialView: {
+        zoomAndCenter: [4, [-95, 60]],
+      },
     },
     basemapOptions: {
       basemapId: "transport",
       shaded: false,
+      labeled: true,
     },
     listOfGeoviewLayerConfig: [
       // Layer configurations...
     ],
   },
-};
+});
 
-cgpv.api.maps.createMapFromConfig("mapId", mapConfig);
+await cgpv.api.createMapFromConfig("mapId", mapConfig);
 ```
 
 ## 🔍 Common Configuration Tasks
@@ -70,7 +71,7 @@ cgpv.api.maps.createMapFromConfig("mapId", mapConfig);
 | Configure basemap       | [Configuration Reference - Basemap Options](./configuration-reference.md#basemapoptions)        |
 | Add layers              | [Configuration Reference - Layer Config](./configuration-reference.md#listofgeoviewlayerconfig) |
 | Configure UI components | [Configuration Reference - UI Components](./configuration-reference.md#appbar-footerbar-navbar) |
-| Set up packages          | [Configuration Reference - Core Packages](./configuration-reference.md#corepackages)            |
+| Set up packages         | [Configuration Reference - Core Packages](./configuration-reference.md#corepackages)            |
 
 ## 📋 Configuration Schema
 
@@ -80,24 +81,29 @@ The configuration follows a hierarchical structure:
 Config
 ├── map
 │   ├── interaction
-│   ├── viewSettings (zoom, center, projection)
+│   ├── viewSettings (projection, initialView, enableRotation, minZoom, maxZoom)
 │   ├── basemapOptions
 │   ├── listOfGeoviewLayerConfig[]
+│   ├── highlightColor
 │   └── extraOptions
 ├── theme
-├── language
-├── appBar (tabs, buttons)
+├── appBar (tabs)
 ├── footerBar (tabs)
-├── navBar (buttons)
+├── navBar (controls)
+├── overviewMap
+├── components[]
 ├── corePackages[]
 ├── corePackagesConfig[]
-└── components[]
+├── externalPackages[]
+├── serviceUrls
+├── globalSettings
+└── schemaVersionUsed
 ```
 
 ## 🔗 Related Documentation
 
 - **[Layer API](../api/layer-api.md)** - Programmatically managing layers
-- **[Core Geoview Packagea](../packages/geoview-core-packages.md)** - Available packages and their configuration
+- **[Core GeoView Packages](../packages/geoview-core-packages.md)** - Available packages and their configuration
 - **[API Reference](../api/api.md)** - Core API methods
 - **[Layers Guide](../layers/layers.md)** - Understanding layer types
 

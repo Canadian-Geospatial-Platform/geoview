@@ -1,908 +1,118 @@
 # Test Suite API Reference
 
-Complete API documentation for the GeoView Test Suite framework.
+Quick reference for the assertion API and helper methods.
 
-## Core Classes
+## Assertion Methods (Static on `Test`)
 
-### TestSuitePlugin
+All assertions throw on failure. Use inside `callbackAssert`.
 
-**Location**: `packages/geoview-test-suite/src/index.tsx`
+### Value Assertions
 
-Main plugin class that manages test suites.
-
-#### Constructor
-
-```typescript
-constructor(
-  config: TestSuiteConfig,
-  api: API,
-  mapViewer: MapViewer
-)
-```
-
-**Parameters**:
-
-- `config`: Plugin configuration with suite names
-- `api`: GeoView API instance
-- `mapViewer`: Map viewer instance
-
-#### Methods
-
-##### addTestSuite()
-
-```typescript
-addTestSuite(suite: AbstractTestSuite): void
-```
-
-Registers a test suite with the plugin.
-
-**Parameters**:
-
-- `suite`: Test suite instance to add
-
-##### launchTestSuites()
-
-```typescript
-async launchTestSuites(): Promise<void>
-```
-
-Executes all registered test suites sequentially.
-
-**Returns**: Promise that resolves when all suites complete
-
-##### resetTestSuites()
-
-```typescript
-resetTestSuites(): void
-```
-
-Resets all test suites to initial state.
-
-#### Event Methods
-
-##### onTestStarted()
-
-```typescript
-onTestStarted(callback: (event: TestChangedEvent) => void): void
-```
-
-Registers callback for test started events.
-
-**Parameters**:
-
-- `callback`: Function called when test starts
-
-**Event Payload**:
-
-```typescript
-{
-  testId: string;
-  testName: string;
-  testerName: string;
-  suiteName: string;
-}
-```
-
-##### onTestUpdated()
-
-```typescript
-onTestUpdated(callback: (event: TestChangedEvent) => void): void
-```
-
-Registers callback for test step updates.
-
-**Parameters**:
-
-- `callback`: Function called when test adds step
-
-**Event Payload**:
-
-```typescript
-{
-  testId: string;
-  step: string;
-}
-```
-
-##### onSuccess()
-
-```typescript
-onSuccess(callback: (event: TestChangedEvent) => void): void
-```
-
-Registers callback for test success events.
-
-**Parameters**:
-
-- `callback`: Function called when test passes
-
-**Event Payload**:
-
-```typescript
-{
-  testId: string;
-  testName: string;
-  result: any;
-}
-```
-
-##### onFailure()
-
-```typescript
-onFailure(callback: (event: TestChangedEvent) => void): void
-```
-
-Registers callback for test failure events.
-
-**Parameters**:
-
-- `callback`: Function called when test fails
-
-**Event Payload**:
-
-```typescript
-{
-  testId: string;
-  testName: string;
-  error: Error;
-  steps: string[];
-}
-```
-
----
-
-### AbstractTestSuite
-
-**Location**: `packages/geoview-test-suite/src/tests/core/abstract-test-suite.ts`
-
-Abstract base class for all test suites.
-
-#### Constructor
-
-```typescript
-constructor(
-  api: API,
-  mapViewer: MapViewer
-)
-```
-
-#### Abstract Methods (Must Implement)
-
-##### getName()
-
-```typescript
-abstract getName(): string
-```
-
-Returns the name of the test suite.
-
-##### getDescriptionAsHtml()
-
-```typescript
-abstract getDescriptionAsHtml(): string
-```
-
-Returns HTML description of the test suite.
-
-##### onLaunchTestSuite()
-
-```typescript
-protected abstract onLaunchTestSuite(): Promise<unknown>
-```
-
-Executes the test suite's tests. Return a promise that resolves when all tests complete.
-
-#### Methods
-
-##### addTester()
-
-```typescript
-protected addTester(tester: AbstractTester): void
-```
-
-Adds a tester to the test suite.
-
-##### getTesters()
-
-```typescript
-protected getTesters(): AbstractTester[]
-```
-
-Returns array of registered testers.
-
-##### getTotalTests()
-
-```typescript
-getTotalTests(): number
-```
-
-Returns total number of tests across all testers.
-
-##### getCompletedTests()
-
-```typescript
-getCompletedTests(): number
-```
-
-Returns number of completed tests.
-
-##### getFailedTests()
-
-```typescript
-getFailedTests(): number
-```
-
-Returns number of failed tests.
-
-##### getSuccessfulTests()
-
-```typescript
-getSuccessfulTests(): number
-```
-
-Returns number of successful tests.
-
-##### launchTestSuite()
-
-```typescript
-async launchTestSuite(): Promise<unknown>
-```
-
-Launches the test suite. Calls `onLaunchTestSuite()`.
-
-##### resetTestSuite()
-
-```typescript
-resetTestSuite(): void
-```
-
-Resets all testers to initial state.
-
----
-
-### AbstractTester
-
-**Location**: `packages/geoview-test-suite/src/tests/core/abstract-tester.ts`
-
-Abstract base class for all testers.
-
-#### Constructor
-
-```typescript
-constructor(
-  api: API,
-  mapViewer: MapViewer
-)
-```
-
-#### Abstract Methods (Must Implement)
-
-##### getName()
-
-```typescript
-abstract getName(): string
-```
-
-Returns the name of the tester.
-
-#### Protected Methods
-
-##### test()
-
-```typescript
-protected test<T>(
-  message: string,
-  callback: (test: Test<T>) => Promise<T>,
-  callbackAssert?: (test: Test<T>) => T,
-  callbackFinalize?: (test: Test<T>) => void
-): Promise<Test<T>>
-```
-
-Executes a regular test (true positive).
-
-**Parameters**:
-
-- `message`: Test description shown to users
-- `callback`: Async function that executes the test, returns result
-- `callbackAssert`: Optional function to perform assertions on result
-- `callbackFinalize`: Optional cleanup function (always runs)
-
-**Returns**: Promise resolving to Test instance
-
-**Example**:
-
-```typescript
-testSomething(): Promise<Test<ResultType>> {
-  return this.test(
-    'Test description',
-    async (test) => {
-      test.addStep('Doing something...');
-      const result = await doSomething();
-      return result;
-    },
-    (test) => {
-      const result = test.getResult();
-      Test.assertIsDefined(result);
-      return result!;
-    },
-    (test) => {
-      cleanup();
-    }
-  );
-}
-```
-
-##### testError()
-
-```typescript
-protected testError<T extends Error>(
-  message: string,
-  errorClass: ClassType<T>,
-  callback: (test: Test<T>) => Promise<void>,
-  callbackAssert?: (test: Test<T>) => T,
-  callbackFinalize?: (test: Test<T>) => void
-): Promise<Test<T>>
-```
-
-Executes an error test (true negative). Test **passes** if expected error is thrown.
-
-**Parameters**:
-
-- `message`: Test description
-- `errorClass`: Expected error class to be thrown
-- `callback`: Function that should throw the error
-- `callbackAssert`: Optional assertions on the error
-- `callbackFinalize`: Optional cleanup function
-
-**Returns**: Promise resolving to Test instance
-
-**Example**:
-
-```typescript
-testError(): Promise<Test<MyError>> {
-  return this.testError(
-    'Test error handling',
-    MyError,
-    async (test) => {
-      test.addStep('Attempting bad operation...');
-      await operationThatShouldFail();
-    },
-    (test) => {
-      const error = test.getError();
-      Test.assertIsDefined(error);
-      return error as MyError;
-    }
-  );
-}
-```
-
-##### getAPI()
-
-```typescript
-protected getAPI(): API
-```
-
-Returns the GeoView API instance.
-
-##### getMapViewer()
-
-```typescript
-protected getMapViewer(): MapViewer
-```
-
-Returns the map viewer instance.
-
-#### Public Methods
-
-##### getTotalTests()
-
-```typescript
-getTotalTests(): number
-```
-
-Returns total number of tests in this tester.
-
-##### getCompletedTests()
-
-```typescript
-getCompletedTests(): number
-```
-
-Returns number of completed tests.
-
-##### getFailedTests()
-
-```typescript
-getFailedTests(): number
-```
-
-Returns number of failed tests.
-
-##### getSuccessfulTests()
-
-```typescript
-getSuccessfulTests(): number
-```
-
-Returns number of successful tests.
-
-##### reset()
-
-```typescript
-reset(): void
-```
-
-Resets tester to initial state.
-
-#### Event Methods
-
-Same as TestSuitePlugin: `onTestStarted`, `onTestUpdated`, `onSuccess`, `onFailure`
-
----
-
-### Test<T>
-
-**Location**: `packages/geoview-test-suite/src/tests/core/test.ts`
-
-Represents a single test instance.
-
-#### Constructor
-
-```typescript
-constructor(title: string)
-```
-
-#### Properties
-
-##### id
-
-```typescript
-readonly id: string
-```
-
-Unique test identifier (auto-generated).
-
-#### Methods
-
-##### getTitle()
-
-```typescript
-getTitle(): string
-```
-
-Returns the test title.
-
-##### setTitle()
-
-```typescript
-setTitle(title: string): void
-```
-
-Sets the test title.
-
-##### getType()
-
-```typescript
-getType(): TestType
-```
-
-Returns test type: `'regular'` or `'true-negative'`.
-
-##### setType()
-
-```typescript
-setType(type: TestType): void
-```
-
-Sets the test type.
-
-##### getStatus()
-
-```typescript
-getStatus(): TestStatus
-```
-
-Returns current status: `'new'` | `'running'` | `'passed'` | `'failed'` | `'skipped'`.
-
-##### setStatus()
-
-```typescript
-setStatus(status: TestStatus): void
-```
-
-Sets the test status.
-
-##### getSteps()
-
-```typescript
-getSteps(): TestStep[]
-```
-
-Returns array of test steps.
-
-##### addStep()
-
-```typescript
-addStep(
-  step: string,
-  level?: TestStepLevel,
-  color?: string
-): void
-```
-
-Adds a step to the test.
-
-**Parameters**:
-
-- `step`: Step description
-- `level`: `'major'` or `'regular'` (default: `'regular'`)
-- `color`: CSS color for display (default: `'black'`)
-
-##### getStepsAsHtml()
-
-```typescript
-getStepsAsHtml(): string
-```
-
-Returns steps formatted as HTML list.
-
-##### getResult()
-
-```typescript
-getResult(): T | undefined
-```
-
-Returns the test result (set by callback return value).
-
-##### setResult()
-
-```typescript
-setResult(result: T): void
-```
-
-Sets the test result.
-
-##### getError()
-
-```typescript
-getError(): Error | undefined
-```
-
-Returns the error if test failed.
-
-##### setError()
-
-```typescript
-setError(error: Error): void
-```
-
-Sets the test error.
-
-#### Static Assertion Methods
-
-##### assertIsDefined()
-
-```typescript
-static assertIsDefined(value: unknown): void
-```
-
-Asserts value is not undefined.
-
-**Throws**: `AssertionUndefinedError`
-
-##### assertIsUndefined()
-
-```typescript
-static assertIsUndefined(value: unknown): void
-```
-
-Asserts value is undefined.
-
-**Throws**: `AssertionDefinedError`
-
-##### assertIsEqual()
-
-```typescript
-static assertIsEqual(
-  actual: unknown,
-  expected: unknown
-): void
-```
-
-Asserts values are strictly equal (===).
-
-**Throws**: `AssertionValueError`
-
-##### assertIsNotEqual()
-
-```typescript
-static assertIsNotEqual(
-  actual: unknown,
-  expected: unknown
-): void
-```
-
-Asserts values are not strictly equal (!==).
-
-**Throws**: `AssertionValueError`
-
-##### assertIsInstanceOf()
-
-```typescript
-static assertIsInstanceOf(
-  value: unknown,
-  expectedClass: ClassType
-): void
-```
-
-Asserts value is instance of expected class.
-
-**Throws**: `AssertionWrongInstanceError`
-
-##### assertIsArrayLength()
-
-```typescript
-static assertIsArrayLength(
-  array: unknown[] | undefined,
-  expectedLength: number
-): void
-```
-
-Asserts array has exact length.
-
-**Throws**: `AssertionArrayLengthError`
-
-##### assertIsArrayLengthMinimal()
-
-```typescript
-static assertIsArrayLengthMinimal(
-  array: unknown[] | undefined,
-  expectedMinimumLength: number
-): void
-```
-
-Asserts array has at least minimum length.
-
-**Throws**: `AssertionArrayLengthMinimalError`
-
-##### assertArrayIncludes()
-
-```typescript
-static assertArrayIncludes<T>(
-  array: T[],
-  expectedValue: T
-): void
-```
-
-Asserts array includes expected value.
-
-**Throws**: `AssertionArrayIncludingError`
-
-##### assertArrayExcludes()
-
-```typescript
-static assertArrayExcludes<T>(
-  array: T[],
-  unexpectedValue: T
-): void
-```
-
-Asserts array does not include unexpected value.
-
-**Throws**: `AssertionArrayExcludingError`
-
-##### assertJsonObject()
-
-```typescript
-static assertJsonObject(
-  actualObject: unknown,
-  expectedObject: unknown
-): void
-```
-
-Asserts actual object contains at least all properties and values from expected object. Performs deep recursive comparison.
-
-**Rules**:
-
-- All properties in expected must exist in actual
-- Values must match exactly
-- Nested objects recursively validated
-- Extra properties in actual are allowed
-
-**Throws**: `AssertionJSONObjectError` with mismatch details
-
-**Example**:
-
 ```typescript
-const actual = {
-  user: { name: "Alice", age: 30 },
-  active: true,
-};
-
-const expected = {
-  user: { name: "Alice" }, // age not required
-  active: true,
-};
-
-Test.assertJsonObject(actual, expected); // Passes
+Test.assertIsDefined("propertyName", value); // Throws if undefined
+Test.assertIsUndefined("propertyName", value); // Throws if defined
+Test.assertIsEqual(actual, expected); // Strict equality (===)
+Test.assertIsNotEqual(actual, expected); // Strict inequality (!==)
+Test.assertIsInstance(value, ExpectedClass); // instanceof check
+Test.assertIsErrorInstance(error, ExpectedClass); // Error type check
+Test.assertFail("reason"); // Force failure
 ```
 
----
+### Array Assertions
 
-### TestStep
-
-**Location**: `packages/geoview-test-suite/src/tests/core/test-step.ts`
-
-Represents a test step.
-
-#### Constructor
-
 ```typescript
-constructor(
-  message: string,
-  level: TestStepLevel = 'regular',
-  color: string = 'black'
-)
+Test.assertIsArray(value); // Checks Array.isArray()
+Test.assertIsArrayLengthEqual(array, expectedLen); // Exact length
+Test.assertIsArrayLengthMinimal(array, minLen); // Minimum length
+Test.assertArrayIncludes(array, expectedValue); // Contains value
+Test.assertArrayExcludes(array, excludedValue); // Does not contain value
+Test.assertIsArrayEqual(actual, expected); // Element-wise equality
+Test.assertIsArrayEqualJsons(actual, expected); // Deep JSON comparison
 ```
 
-#### Properties
+### Object Assertions
 
-##### message
-
 ```typescript
-readonly message: string
+Test.assertJsonObject(actual, expected);
 ```
 
-Step description.
+Verifies `actual` contains **at least** all properties and values from `expected`. Extra properties in `actual` are allowed. Deep recursive comparison.
 
-##### level
+## Test Instance Methods
 
 ```typescript
-readonly level: TestStepLevel
+test.addStep(message, level?, color?)   // Log progress ('regular'|'major', CSS color)
+test.getResult(): T | undefined         // Get test result (set by callback return)
+test.getError(): Error | undefined      // Get error if test failed
+test.getStatus(): TestStatus            // 'new'|'running'|'verifying'|'success'|'failed'
+test.getTitle(): string                 // Test description
+test.getSteps(): TestStep[]             // All logged steps
 ```
 
-Step level: `'major'` or `'regular'`.
+## Instance Helper Methods (on `this`)
 
-##### color
+Inherited from `GVAbstractTester`. These use `this.getMapViewer()` internally — no need to pass map references.
 
 ```typescript
-readonly color: string
-```
+// Add layer to map and wait for it to load
+await this.helperStepAddLayerOnMap(test, gvConfig);
 
-CSS color for display.
+// Add layer from GeoCore UUID
+await this.helperStepAddLayerOnMapFromUUID(test, uuid);
 
----
+// Wait for layer to be ready at a path
+await this.helperStepCheckLayerAtLayerPath(test, layerPath);
 
-## Helper Classes
-
-### LayerTester Helpers
-
-**Location**: `packages/geoview-test-suite/src/tests/testers/layer-tester.ts`
-
-Static helper methods for layer testing.
-
-#### helperStepAddLayerOnMap()
-
-```typescript
-static async helperStepAddLayerOnMap(
-  test: Test,
-  mapViewer: MapViewer,
-  config: TypeGeoviewLayerConfig
-): Promise<GeoViewLayerAddedResult>
+// Remove layer and assert removal (cleanup)
+this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
 ```
 
-Adds layer to map and waits for added event.
+## Static Helper Methods (on `LayerTester`)
 
-**Parameters**:
+These require explicit `mapId` because they don't have access to `this`.
 
-- `test`: Test instance for adding steps
-- `mapViewer`: Map viewer instance
-- `config`: Layer configuration
-
-**Returns**: Promise resolving to layer added result
-
-#### helperStepCheckLayerAtLayerPath()
-
 ```typescript
-static async helperStepCheckLayerAtLayerPath(
-  test: Test,
-  mapViewer: MapViewer,
-  layerPath: string
-): Promise<AbstractGVLayer>
-```
-
-Checks if layer exists at path and waits until ready.
-
-**Parameters**:
+// Assert layer exists with optional icon checks
+LayerTester.helperStepAssertLayerExists(test, mapId, layerPath, iconImage?, iconsList?)
 
-- `test`: Test instance
-- `mapViewer`: Map viewer instance
-- `layerPath`: Layer path (e.g., "layerId/0")
-
-**Returns**: Promise resolving to layer instance
-
-#### helperStepAssertLayerExists()
-
-```typescript
-static helperStepAssertLayerExists(
-  test: Test,
-  mapViewer: MapViewer,
-  layerPath: string
-): AbstractGVLayer
+// Assert style was applied
+LayerTester.helperStepAssertStyleApplied(test, mapId, layerPath, iconImage?, iconsList?)
 ```
-
-Asserts layer exists at path and returns it.
-
-**Parameters**:
 
-- `test`: Test instance
-- `mapViewer`: Map viewer instance
-- `layerPath`: Layer path
+## Accessor Methods (on `this`)
 
-**Returns**: Layer instance
-
-**Throws**: Assertion error if layer not found
-
-#### helperFinalizeStepRemoveLayerAndAssert()
-
 ```typescript
-static helperFinalizeStepRemoveLayerAndAssert(
-  test: Test,
-  mapViewer: MapViewer,
-  layerPath: string
-): void
+this.getMapViewer(); // MapViewer instance
+this.getMapId(); // Map ID string
+this.getControllersRegistry(); // Access controllers
+this.getGeometryApi(); // Geometry API
 ```
-
-Removes layer and asserts successful removal.
-
-**Parameters**:
-
-- `test`: Test instance
-- `mapViewer`: Map viewer instance
-- `layerPath`: Layer path
-
----
 
 ## Type Definitions
 
-### TestType
-
 ```typescript
+type TestStatus = "new" | "running" | "verifying" | "success" | "failed";
 type TestType = "regular" | "true-negative";
-```
-
-### TestStatus
-
-```typescript
-type TestStatus = "new" | "running" | "passed" | "failed" | "skipped";
-```
-
-### TestStepLevel
-
-```typescript
 type TestStepLevel = "major" | "regular";
 ```
 
-### ClassType
+## Plugin Event Methods
+
+The `TestSuitePlugin` emits events through the delegate pattern:
 
 ```typescript
-type ClassType<T = unknown> = new (...args: any[]) => T;
+plugin.onTestStarted(callback); // Test begins execution
+plugin.onTestUpdated(callback); // Test adds a step
+plugin.onSuccess(callback); // Test passes
+plugin.onFailure(callback); // Test fails
 ```
 
-### TestChangedEvent
-
-```typescript
-interface TestChangedEvent {
-  test?: Test;
-  testId?: string;
-  testName?: string;
-  testerName?: string;
-  suiteName?: string;
-  status?: TestStatus;
-  step?: string;
-  error?: Error;
+status?: TestStatus;
+step?: string;
+error?: Error;
 }
-```
+
+````
 
 ### TestChangedDelegate
 
@@ -912,7 +122,7 @@ type TestChangedDelegate = EventDelegateBase<
   TestChangedEvent,
   void
 >;
-```
+````
 
 ---
 
@@ -1028,7 +238,7 @@ export class MyTester extends GVAbstractTester {
         Test.assertIsDefined(result);
         Test.assertIsEqual(result, true);
         return result!;
-      }
+      },
     );
   }
 }
