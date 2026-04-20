@@ -4,13 +4,9 @@ import type { Size } from 'ol/size';
 import type { Coordinate } from 'ol/coordinate';
 import type { OverviewMap as OLOverviewMap } from 'ol/control';
 import { type Extent, type TypeBasemapOptions, type TypeFeatureInfoEntry, type TypeMapFeaturesInstance, type TypeMapMouseInfo, type TypePointMarker, type TypeServiceUrls, type TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
-import { type TypeGeoviewLayerConfig, type TypeLayerEntryConfig } from '@/api/types/layer-schema-types';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
-import { type TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { MapViewer } from '@/geo/map/map-viewer';
-import { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
-import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
+import type { MapViewer } from '@/geo/map/map-viewer';
 import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import type { Draw } from '@/geo/interaction/draw';
 import type { TypeClickMarker } from '@/core/components/click-marker/click-marker';
@@ -31,41 +27,27 @@ export declare class MapController extends AbstractMapViewerController {
      */
     constructor(mapViewer: MapViewer, featureHighlight: FeatureHighlight);
     /**
-     * Zoom to the specified extent.
+     * Zooms to the specified extent.
      *
-     * @param extent - The extent to zoom to.
-     * @param options - The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 13, duration: 500 }).
-     * @returns A promise that resolves when the zoom animation is complete.
-     * @throws {InvalidExtentError} When the extent is invalid.
+     * @param extent - The extent to zoom to
+     * @param options - The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 13, duration: 500 })
+     * @returns A promise that resolves when the zoom animation is complete
+     * @throws {InvalidExtentError} When the extent is invalid
      */
     zoomToExtent(extent: Extent, options?: FitOptions): Promise<void>;
     /**
-     * Return to initial view state of map using config.
+     * Returns to initial view state of map using config.
      *
-     * @returns A promise that resolves when the zoom animation is complete.
+     * @returns A promise that resolves when the zoom animation is complete
      */
     zoomToInitialExtent(): Promise<void>;
     /**
-     * Zoom to geolocation position provided.
+     * Zooms to geolocation position provided.
      *
-     * @param position - Info on position to zoom to.
-     * @returns A promise that resolves when the zoom animation is complete.
+     * @param position - Info on position to zoom to
+     * @returns A promise that resolves when the zoom animation is complete
      */
     zoomToMyLocation(position: GeolocationPosition): Promise<void>;
-    /**
-     * Zoom to layer visible scale.
-     *
-     * @param layerPath - Path of layer to zoom to.
-     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
-     */
-    zoomToLayerVisibleScale(layerPath: string): void;
-    /**
-     * Zoom to extents of a layer.
-     *
-     * @param layerPath - The path of the layer to zoom to.
-     * @throws {NoBoundsError} When the layer doesn't have bounds.
-     */
-    zoomToLayerExtent(layerPath: string, fitOptions?: FitOptions): Promise<void>;
     /**
      * Animates the map to the specified zoom level.
      *
@@ -124,20 +106,6 @@ export declare class MapController extends AbstractMapViewerController {
      */
     removeHighlightedFeature(feature: TypeFeatureInfoEntry | 'all'): void;
     /**
-     * Removes all highlighted features for a specific layer.
-     *
-     * @param layerPath - The layer path to remove highlights from
-     */
-    removeLayerHighlights(layerPath: string): void;
-    /**
-     * Update or remove the layer highlight.
-     *
-     * @param layerPath - The layer path to set as the highlighted layer.
-     * @param highlightedLayerPath - The layer path of the currently highlighted layer.
-     * @returns The layer path of the highlighted layer.
-     */
-    changeOrRemoveLayerHighlight(layerPath: string, highlightedLayerPath: string): string;
-    /**
      * Adds point markers to a group, replacing existing markers with matching IDs or coordinates.
      *
      * @param group - The group to add the markers to
@@ -191,29 +159,6 @@ export declare class MapController extends AbstractMapViewerController {
      */
     clickMarkerIconShow(marker: TypeClickMarker): void;
     /**
-     * Reorders a layer by moving it up or down in the layer stack.
-     *
-     * @param layerPath - The layer path to reorder
-     * @param move - The number of positions to move (positive = up, negative = down)
-     */
-    reorderLayer(layerPath: string, move: number): void;
-    /**
-     * Apply all available filters to layer.
-     *
-     * @param layerPath - The path of the layer to apply filters to.
-     * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path.
-     */
-    applyLayerFilters(layerPath: string): void;
-    /**
-     * Get all active filters for layer.
-     *
-     * @param layerPath - The path for the layer to get filters from.
-     * @returns The active layer filters
-     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
-     * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path.
-     */
-    getActiveFilters(layerPath: string): LayerFilters;
-    /**
      * Forces the map to re-render all layers and features.
      * Useful when layer styles or features have been updated programmatically and need to be reflected visually.
      */
@@ -232,13 +177,14 @@ export declare class MapController extends AbstractMapViewerController {
      */
     setMapSize(size: Size, resizeMap?: boolean): void;
     /**
-     * Animates the map rotation to the specified angle.
+     * Rotates the map to the specified angle.
      *
      * The store is updated automatically via the MapViewer move-end event.
      *
      * @param rotation - The target rotation angle in radians
+     * @param animate - Whether to animate the rotation change, defaults to true
      */
-    rotate(rotation: number): void;
+    rotate(rotation: number, animate?: boolean): void;
     /**
      * Toggles the coordinate info display on or off.
      *
@@ -246,7 +192,7 @@ export declare class MapController extends AbstractMapViewerController {
      * When toggled off, any existing details coordinate info is removed from the details store.
      * The clicked coordinates themselves remain in the map store.
      *
-     * @param abortSignal - Optional AbortSignal to cancel the fetch requests if needed.
+     * @param abortSignal - Optional AbortSignal to cancel the fetch requests if needed
      */
     toggleCoordinateInfoEnabled(abortSignal: AbortSignal): void;
     /**
@@ -256,110 +202,11 @@ export declare class MapController extends AbstractMapViewerController {
      * data from the configured service URLs and creates a coordinate info layer
      * entry in the store. When disabled, removes any existing coordinate info.
      *
-     * @param coordinates - The map mouse info containing click coordinates.
-     * @param serviceUrls - Service URLs for UTM, NTS, and altitude lookups.
-     * @param abortSignal - Optional AbortSignal to cancel the fetch requests if needed.
+     * @param coordinates - The map mouse info containing click coordinates
+     * @param serviceUrls - Service URLs for UTM, NTS, and altitude lookups
+     * @param abortSignal - Optional AbortSignal to cancel the fetch requests if needed
      */
     updateStoreCoordinateInfo(coordinates: TypeMapMouseInfo, serviceUrls: TypeServiceUrls, abortSignal?: AbortSignal): Promise<void>;
-    /**
-     * Sets or toggles the visibility of a specific layer within a map.
-     * If the layer exists at the provided layer path for the given map, the method delegates
-     * the visibility change to the map viewer's layer API. If `newValue` is provided, the layer
-     * visibility is explicitly set to that value; otherwise, the visibility is toggled.
-     *
-     * @param layerPath - The path of the layer whose visibility is being changed.
-     * @param newValue - Optional. The new visibility value. If omitted, the visibility is toggled.
-     * @returns The resulting visibility state of the layer after the operation, or `false`
-     * if the layer does not exist at the given path.
-     */
-    setOrToggleMapLayerVisibility(layerPath: string, newValue?: boolean): boolean;
-    /**
-     * Sets or toggles the visibility of a layer within the current map.
-     *
-     * Retrieves the current visibility of the layer, determines the resulting visibility
-     * based on the optional `newValue`, and applies the change only if the visibility
-     * actually differs. If `newValue` is provided, the visibility is set explicitly;
-     * if omitted, the method toggles the current visibility.
-     *
-     * @param layerPath - The path of the layer whose visibility is being updated.
-     * @param newValue - Optional. The new visibility value to apply. If omitted, the current visibility is toggled.
-     * @returns The resulting visibility state of the layer after the update
-     * @throws {LayerNotFoundError} When the layer cannot be found at the given path.
-     */
-    setOrToggleLayerVisibility(layerPath: string, newValue?: boolean): boolean;
-    /**
-     * Sets the visibility of all geoview layers on the map.
-     *
-     * @param newValue - The new visibility.
-     */
-    setAllLayersVisibility(newValue: boolean): void;
-    /**
-     * Sets the visibility of the Geoview basemap layer.
-     *
-     * @param newVisibility - The visibility state to apply to the basemap layer (`true` to show, `false` to hide).
-     */
-    setVisibilityOfGeoviewBasemapLayers(newVisibility: boolean): void;
-    /**
-     * Sets the visibility of **all layers** in a given map.
-     *
-     * Iterates through all GeoView layers associated with the specified map ID and
-     * applies the provided visibility value. Only layers whose current visibility
-     * differs from the desired state will be updated.
-     *
-     * @param newVisibility - The visibility state to apply to all layers (`true` to show, `false` to hide).
-     */
-    setAllMapLayerVisibility(newVisibility: boolean): void;
-    /**
-     * Sets the visibility of a layer in the store ordered layer info.
-     *
-     * @param layerPath - The layer path of the layer to change
-     * @param visibility - The visibility to set
-     */
-    setMapLayerVisibility(layerPath: string, visibility: boolean): void;
-    /**
-     * Updates the visible range state for a layer in the ordered layer info.
-     *
-     * @param layerPath - The layer path to update
-     * @param inVisibleRange - Whether the layer is in visible zoom range
-     */
-    setLayerInVisibleRange(layerPath: string, inVisibleRange: boolean): void;
-    /**
-     * Replaces a layer in the orderedLayerInfo array.
-     *
-     * @param layerConfig - The config of the layer to add.
-     * @param layerPathToReplace - The layerPath of the info to replace.
-     */
-    replaceOrderedLayerInfo(layerConfig: ConfigBaseClass, layerPathToReplace?: string): void;
-    /**
-     * Adds a new layer to the orderedLayerInfo array using a layer config.
-     *
-     * @param geoviewLayerConfig - The config of the layer to add.
-     */
-    addOrderedLayerInfoByConfig(geoviewLayerConfig: TypeGeoviewLayerConfig | TypeLayerEntryConfig, index?: number): void;
-    /**
-     * Adds new layer info to the orderedLayerInfo array.
-     *
-     * @param layerInfo - The ordered layer info to add.
-     */
-    addOrderedLayerInfo(layerInfo: TypeOrderedLayerInfo, index?: number): void;
-    /**
-     * Removes a layer from the orderedLayerInfo array.
-     *
-     * @param layerPath - The path of the layer to remove.
-     * @param removeSublayers - Should sublayers be removed.
-     */
-    removeOrderedLayerInfo(layerPath: string, removeSublayers?: boolean): void;
-    /**
-     * Updates the ordered layer info in the store and recalculates layer Z indices.
-     *
-     * @param orderedLayerInfo - The new ordered layer info array
-     * @deprecated This function shouldn't exist as it breaks the separation of concern between the controller and the store implementation.
-     */
-    setMapOrderedLayerInfoDirectly(orderedLayerInfo: TypeOrderedLayerInfo[]): void;
-    /**
-     * Set Z index for layers
-     */
-    setLayerZIndices(): void;
     /**
      * Gets the OpenLayers overview map control for the given map.
      *
@@ -389,7 +236,7 @@ export declare class MapController extends AbstractMapViewerController {
     /**
      * Creates a map config based on current map state.
      *
-     * @param overrideGeocoreServiceNames - Indicates if geocore layer names should be kept as is or returned to defaults.
+     * @param overrideGeocoreServiceNames - Indicates if geocore layer names should be kept as is or returned to defaults
      * @returns The type map features instance
      */
     createMapConfigFromMapState(overrideGeocoreServiceNames?: boolean | 'hybrid'): TypeMapFeaturesInstance | undefined;
@@ -405,10 +252,10 @@ export declare class MapController extends AbstractMapViewerController {
     /**
      * Searches through a map config and replaces any matching layer names with their provided partner.
      *
-     * @param namePairs - The array of name pairs. Presumably one english and one french name in each pair.
-     * @param mapConfig - The config to modify.
-     * @param removeUnlisted - Remove any layer name that doesn't appear in namePairs.
-     * @returns Map config with updated names.
+     * @param namePairs - The array of name pairs. Presumably one english and one french name in each pair
+     * @param mapConfig - The config to modify
+     * @param removeUnlisted - Remove any layer name that doesn't appear in namePairs
+     * @returns Map config with updated names
      */
     static utilReplaceMapConfigLayerNames(namePairs: string[][], mapConfig: TypeMapFeaturesInstance, removeUnlisted?: boolean): TypeMapFeaturesInstance;
     /**
@@ -436,11 +283,4 @@ export declare class MapController extends AbstractMapViewerController {
      */
     initDrawInteractions(geomGroupKey: string, type: string, style: TypeFeatureStyle): Draw;
 }
-/**
- * Hook to access the MapController from the controller context.
- *
- * @returns The map controller instance
- * @throws {Error} When used outside of a ControllerContext.Provider.
- */
-export declare function useMapController(): MapController;
 //# sourceMappingURL=map-controller.d.ts.map

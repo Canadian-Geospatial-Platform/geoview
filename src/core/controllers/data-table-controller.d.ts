@@ -20,11 +20,4 @@ export declare class DataTableController extends AbstractMapViewerController {
      */
     applyMapFilters(filterStrings: string): void;
 }
-/**
- * Hook to access the DataTableController from the controller context.
- *
- * @returns The data table controller instance
- * @throws {Error} When used outside of a ControllerContext.Provider.
- */
-export declare function useDataTableController(): DataTableController;
 //# sourceMappingURL=data-table-controller.d.ts.map

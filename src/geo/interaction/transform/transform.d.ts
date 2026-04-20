@@ -37,12 +37,10 @@ export declare class Transform extends Interaction {
     constructor(options: TransformOptions, geometryApi: GeometryApi);
     /**
      * Starts the interaction on the map.
-     * @override
      */
     startInteraction(): void;
     /**
      * Stops the interaction on the map.
-     * @override
      */
     stopInteraction(): void;
     /**

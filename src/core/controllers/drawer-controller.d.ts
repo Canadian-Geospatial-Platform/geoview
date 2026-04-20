@@ -1,8 +1,8 @@
+import type { MapViewer } from '@/geo/map/map-viewer';
+import type { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import { type StyleProps } from '@/core/stores/store-interface-and-intial-values/drawer-state';
 import type { UIDomain } from '@/core/domains/ui-domain';
-import type { MapViewer } from '@/geo/map/map-viewer';
-import type { GeometryApi } from '@/geo/layer/geometry/geometry';
 /**
  * Controller responsible for drawer interactions, keyboard shortcuts, and
  * bridging the drawer state with the UI domain and map projection changes.
@@ -13,6 +13,8 @@ export declare class DrawerController extends AbstractMapViewerController {
     static readonly DRAW_GROUP_KEY = "draw-group";
     /** Maximum history size */
     static readonly MAX_HISTORY_SIZE = 50;
+    /** Tolerance for comparing style values */
+    static readonly STYLE_TOLERANCE = 0.1;
     /** The default icon source as a base64-encoded SVG data URI */
     static readonly DEFAULT_ICON_SOURCE = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBkPSJNMTIgMkM4LjEzIDIgNSA1LjEzIDUgOWMwIDUuMjUgNyAxMyA3IDEzczctNy43NSA3LTEzYzAtMy44Ny0zLjEzLTctNy03bTAgOS41Yy0xLjM4IDAtMi41LTEuMTItMi41LTIuNXMxLjEyLTIuNSAyLjUtMi41IDIuNSAxLjEyIDIuNSAyLjUtMS4xMiAyLjUtMi41IDIuNSIgZmlsbD0icmdiYSgyNTIsIDI0MSwgMCwgMC4zKSIgc3Ryb2tlPSIjMDAwMDAwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjwvc3ZnPg==";
     /**
@@ -79,6 +81,7 @@ export declare class DrawerController extends AbstractMapViewerController {
     /**
      * Clears all drawings from the map.
      *
+     * @param saveHistory - Optional flag to determine whether to save this action to history (default: true)
      */
     clearDrawings(saveHistory?: boolean): void;
     /**
@@ -131,7 +134,7 @@ export declare class DrawerController extends AbstractMapViewerController {
      *
      * @param text - The text content
      */
-    setTextValue(text: string): void;
+    setTextValue(text: string | string[]): void;
     /**
      * Sets the text size in the store and updates the feature style.
      *
@@ -218,12 +221,4 @@ export declare class DrawerController extends AbstractMapViewerController {
      */
     uploadDrawings(file: File): void;
 }
-/**
- * Hook to access the DrawerController from the controller context.
- *
- * @returns The drawer controller instance
- * @throws {Error} When used outside of a ControllerContext.Provider.
- * @throws {Error} When the Drawer plugin is not configured.
- */
-export declare function useDrawerController(): DrawerController;
 //# sourceMappingURL=drawer-controller.d.ts.map

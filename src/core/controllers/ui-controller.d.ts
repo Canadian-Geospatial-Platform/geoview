@@ -177,11 +177,4 @@ export declare class UIController extends AbstractMapViewerController {
      */
     createGuide(): Promise<void>;
 }
-/**
- * Hook to access the UI controller from the controller context.
- *
- * @returns The UI controller instance
- * @throws {Error} When used outside of a ControllerContext.Provider.
- */
-export declare function useUIController(): UIController;
 //# sourceMappingURL=ui-controller.d.ts.map

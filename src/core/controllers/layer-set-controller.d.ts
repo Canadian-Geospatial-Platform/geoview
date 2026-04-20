@@ -28,8 +28,8 @@ export declare class LayerSetController extends AbstractMapViewerController {
     /**
      * Creates an instance of LayerSetController.
      *
-     * @param mapViewer - The map viewer instance to associate with this controller.
-     * @param layerDomain - The layer domain instance to associate with this controller.
+     * @param mapViewer - The map viewer instance to associate with this controller
+     * @param layerDomain - The layer domain instance to associate with this controller
      */
     constructor(mapViewer: MapViewer, layerDomain: LayerDomain);
     /**
@@ -83,7 +83,7 @@ export declare class LayerSetController extends AbstractMapViewerController {
      * This method waits for the map viewer layers to be rendered before performing the query.
      *
      * @returns A promise that resolves with the result of the query
-     * @throws {LayerNoLastQueryToPerformError} When there's no last query to perform.
+     * @throws {LayerNoLastQueryToPerformError} When there's no last query to perform
      */
     repeatLastQuery(): Promise<TypeFeatureInfoResultSet>;
     /**
@@ -112,11 +112,4 @@ export declare class LayerSetController extends AbstractMapViewerController {
      */
     propagateLegendToStore(legendResultSetEntry: TypeLegendResultSetEntry): void;
 }
-/**
- * Layer Controller hook to access the layer controller from the context.
- *
- * @returns The layer controller instance from the context.
- * @throws {Error} When used outside of a ControllerContext.Provider.
- */
-export declare function useLayerSetController(): LayerSetController;
 //# sourceMappingURL=layer-set-controller.d.ts.map

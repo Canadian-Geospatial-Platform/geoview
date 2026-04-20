@@ -35,6 +35,17 @@ export declare class Draw extends Interaction {
      */
     stopInteraction(): void;
     /**
+     * Finishes the current drawing, triggering the drawend event.
+     * This is equivalent to double-clicking or pressing Enter to complete a drawing.
+     */
+    finishDrawing(): void;
+    /**
+     * Removes the last point added to the current drawing, allowing the user to undo the last step while drawing.
+     *
+     * @returns True if a point was removed, false if there were no points to remove
+     */
+    undo(): boolean;
+    /**
      * Registers a callback handler for the drawstart event.
      *
      * @param callback - The callback to be executed whenever the event is emitted
