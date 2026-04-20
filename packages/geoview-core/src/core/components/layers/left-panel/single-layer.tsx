@@ -319,7 +319,7 @@ export function SingleLayer({
     selectLayerIfNeeded();
 
     // Toggle visibility
-    layerController.setOrToggleLayerVisibilityIfExists(layerPath);
+    layerController.setOrToggleLayerVisibility(layerPath);
   }, [layerPath, layerController, selectLayerIfNeeded]);
 
   const handleToggleVisibilityKeyDown = useCallback(
@@ -330,7 +330,7 @@ export function SingleLayer({
         selectLayerIfNeeded(false);
 
         // Toggle visibility
-        layerController.setOrToggleLayerVisibilityIfExists(layerPath);
+        layerController.setOrToggleLayerVisibility(layerPath);
 
         // Allow the toggle visibility action to work
         event.preventDefault();

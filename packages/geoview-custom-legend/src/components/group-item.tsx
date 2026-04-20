@@ -94,7 +94,7 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
 
     // Toggle all child layers
     layerPaths.forEach((layerPath) => {
-      layerController.setOrToggleLayerVisibilityIfExists(layerPath, newVisibility);
+      layerController.setOrToggleLayerVisibility(layerPath, newVisibility);
     });
   };
 
