@@ -202,7 +202,7 @@ export function LegendFullscreen({ layerPaths, mapId, containerType, isOpen, onC
       savedCollapseStateRef.current = getStoreLayerLegendCollapsedSet(mapId);
 
       // Save to the store
-      layerController.setAllMapLayerCollapsed(false);
+      layerController.setAllLayerCollapsed(false);
     } else {
       // Exiting fullscreen: restore saved collapse state
       const savedState = savedCollapseStateRef.current;

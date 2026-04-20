@@ -1192,9 +1192,10 @@ export class MapViewer {
   }
 
   /**
-   * Show a marker on the map.
+   * Shows a marker on the map.
    *
    * @param marker - The marker to add
+   * @returns The projected coordinates of the marker
    */
   clickMarkerIconShow(marker: TypeClickMarker): number[] {
     // Project coords
@@ -2344,6 +2345,7 @@ export class MapViewer {
    * Registers a map init event callback.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback delegate that was registered
    */
   onMapInit(callback: MapInitDelegate): MapInitDelegate {
     // Register the event handler
@@ -2372,6 +2374,7 @@ export class MapViewer {
    * Registers a map ready event callback.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback delegate that was registered
    */
   onMapReady(callback: MapReadyDelegate): MapReadyDelegate {
     // Register the event handler
@@ -2400,6 +2403,7 @@ export class MapViewer {
    * Registers a map layers processed event callback.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback delegate that was registered
    */
   onMapLayersProcessed(callback: MapLayersProcessedDelegate): MapLayersProcessedDelegate {
     // Register the event handler
@@ -2428,6 +2432,7 @@ export class MapViewer {
    * Registers a map layers loaded event callback.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback delegate that was registered
    */
   onMapLayersLoaded(callback: MapLayersLoadedDelegate): MapLayersLoadedDelegate {
     // Register the event handler
@@ -2456,6 +2461,7 @@ export class MapViewer {
    * Registers a map move end event callback.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback delegate that was registered
    */
   onMapMoveEnd(callback: MapMoveEndDelegate): MapMoveEndDelegate {
     // Register the event handler
@@ -2486,6 +2492,7 @@ export class MapViewer {
    * Registers a map pointer move event callback.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback delegate that was registered
    */
   onMapPointerMove(callback: MapPointerMoveDelegate): MapPointerMoveDelegate {
     // Register the event handler
@@ -2516,6 +2523,7 @@ export class MapViewer {
    * Registers a map pointer stop event callback.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback delegate that was registered
    */
   onMapPointerStop(callback: MapPointerMoveDelegate): MapPointerMoveDelegate {
     // Register the event handler
@@ -2546,6 +2554,7 @@ export class MapViewer {
    * Registers a map single click event callback.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback delegate that was registered
    */
   onMapSingleClick(callback: MapSingleClickDelegate): MapSingleClickDelegate {
     // Register the event handler
@@ -2574,6 +2583,7 @@ export class MapViewer {
    * Registers a map zoom end event callback.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback delegate that was registered
    */
   onMapZoomEnd(callback: MapZoomEndDelegate): MapZoomEndDelegate {
     // Register the event handler
@@ -2602,6 +2612,7 @@ export class MapViewer {
    * Registers a map rotation event callback.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback delegate that was registered
    */
   onMapRotation(callback: MapRotationDelegate): MapRotationDelegate {
     // Register the event handler
@@ -2630,6 +2641,7 @@ export class MapViewer {
    * Registers a map change size event callback.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback delegate that was registered
    */
   onMapChangeSize(callback: MapChangeSizeDelegate): MapChangeSizeDelegate {
     // Register the event handler
@@ -2660,6 +2672,7 @@ export class MapViewer {
    * Registers a map projection change event callback.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback delegate that was registered
    */
   onMapProjectionChangeStarted(callback: MapProjectionChangedDelegate): MapProjectionChangedDelegate {
     // Register the event handler
@@ -2690,6 +2703,7 @@ export class MapViewer {
    * Registers a map projection change event callback.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback delegate that was registered
    */
   onMapProjectionChanged(callback: MapProjectionChangedDelegate): MapProjectionChangedDelegate {
     // Register the event handler
@@ -2718,6 +2732,7 @@ export class MapViewer {
    * Registers a component added event callback.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback delegate that was registered
    */
   onMapComponentAdded(callback: MapComponentAddedDelegate): MapComponentAddedDelegate {
     // Register the component added event handler
@@ -2746,6 +2761,7 @@ export class MapViewer {
    * Registers a component removed event callback.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback delegate that was registered
    */
   onMapComponentRemoved(callback: MapComponentRemovedDelegate): MapComponentRemovedDelegate {
     // Register the component removed event handler
@@ -2774,6 +2790,7 @@ export class MapViewer {
    * Registers a language changed event callback.
    *
    * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback delegate that was registered
    */
   onMapLanguageChanged(callback: MapLanguageChangedDelegate): MapLanguageChangedDelegate {
     // Register the component removed event handler
