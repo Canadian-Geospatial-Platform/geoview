@@ -10,7 +10,9 @@ import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { ItemsList } from './legend-layer-items';
 import type { LegendLayerProps } from './legend-layer';
 import {
+  useStoreLayerCanToggle,
   useStoreLayerChildPaths,
+  useStoreLayerControls,
   useStoreLayerIcons,
   useStoreLayerItems,
   useStoreLayerName,
@@ -100,12 +102,19 @@ export const CollapsibleContent = memo(function CollapsibleContent({
   const layerIcons = useStoreLayerIcons(layerPath);
   const layerStatus = useStoreLayerStatus(layerPath);
   const layerName = useStoreLayerName(layerPath);
+  const canToggle = useStoreLayerCanToggle(layerPath);
+  const layerControls = useStoreLayerControls(layerPath);
+  const canToggleItemVisibility = canToggle && layerControls?.visibility !== false;
 
   // Log
   logger.logTraceUseMemo('components/legend/legend-layer-container - CollapsibleContent', layerPath, layerChildPaths?.length);
 
   // Early returns
   if ((layerChildPaths?.length === 0 && layerItems?.length === 1) || layerStatus === 'error') return null;
+
+  // GV Hide the collapsible when all items share the same icon and none can be toggled — nothing useful to display
+  const allSameIcon = layerItems && layerItems.length > 0 && layerItems.every((item): boolean => item.icon === layerItems[0].icon);
+  if (layerChildPaths?.length === 0 && allSameIcon && !canToggleItemVisibility) return null;
 
   const isWMSWithLegend = schemaTag === CONST_LAYER_TYPES.WMS && layerIcons?.[0]?.iconImage && layerIcons[0].iconImage !== 'no data';
 

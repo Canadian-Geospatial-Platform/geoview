@@ -159,7 +159,11 @@ const allConfigs = mapViewer.layer.getLayerEntryConfigs();
 const olLayer = await mapViewer.layer.getOLLayerAsync("myLayer", 5000);
 ```
 
----
+> **⚠️ Prefer GeoView layers over raw OpenLayers layers.**
+>
+> Always use `getGeoviewLayer()` / `getGeoviewLayerIfExists()` to interact with layers. GeoView layers are fully integrated with the UI, store, events, and controllers — changes made through them (visibility, opacity, filters, etc.) propagate correctly to the legend, layer panel, and other components.
+>
+> Accessing the OpenLayers layer directly via `getOLLayerAsync()` bypasses this integration. Changes made on the OL layer (e.g., `olLayer.setVisible(false)`) will **not** update the store or UI, which can cause the map and the layer panel to fall out of sync. Use direct OL access only when you need low-level OpenLayers functionality that GeoView does not expose, and be aware of potential side effects.
 
 ## Event Handling
 
