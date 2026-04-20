@@ -79,6 +79,6 @@ Each result set entry includes a `queryStatus` field tracking the query lifecycl
 
 ## Related Documentation
 
-- [Layer Set Architecture](../../programming/layerset-architecture.md) — internal design and data flow
+- [Layer Set Architecture](programming/layerset-architecture.md) — internal design and data flow
 - [Event System](event-system.md) — delegate pattern overview
 - [Layer Events](layer-events.md) — events on individual layers

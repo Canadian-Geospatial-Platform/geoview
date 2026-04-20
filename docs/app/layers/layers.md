@@ -2,7 +2,7 @@
 
 > **👥 Audience:** Developers using GeoView in their applications
 >
-> **For Core Contributors:** See [Adding Layer Types](../../programming/adding-layer-types.md) for implementation details
+> **For Core Contributors:** See [Adding Layer Types](programming/adding-layer-types.md) for implementation details
 
 GeoView Layers are the primary way to display spatial data on your map. This guide explains layer concepts, types, configuration, and usage.
 
@@ -202,7 +202,7 @@ interface TypeGeoviewLayerConfig {
 }
 ```
 
-See [Configuration Reference](../config/configuration-reference.md) for complete details.
+See [Configuration Reference](app/config/configuration-reference.md) for complete details.
 
 ## Working with Layers
 
@@ -301,7 +301,7 @@ cgpv.onMapInit((mapViewer) => {
 });
 ```
 
-See [Layer Events](../events/layer-events.md) for complete event reference.
+See [Layer Events](app/events/layer-events.md) for complete event reference.
 
 ## Temporal Layers
 
@@ -419,7 +419,7 @@ result.results.forEach((feature) => {
 });
 ```
 
-See [Layer API Reference](../api/layer-api.md) for more query methods.
+See [Layer API Reference](app/api/layer-api.md) for more query methods.
 
 ## Layer Styling
 
@@ -822,11 +822,11 @@ mapViewer.layer.onLayerVisibilityToggled((sender, payload) => {
 
 ## See Also
 
-- **[Layer API Reference](../api/layer-api.md)** - Complete API method reference
-- **[Layer Events](../events/layer-events.md)** - Layer event documentation
-- **[Configuration Reference](../config/configuration-reference.md)** - Configuration schema
-- **[Creating Maps](../config/create-map.md)** - Map initialization
-- **[Controllers API](../events/controllers.md)** - Controllers for performing actions
+- **[Layer API Reference](app/api/layer-api.md)** - Complete API method reference
+- **[Layer Events](app/events/layer-events.md)** - Layer event documentation
+- **[Configuration Reference](app/config/configuration-reference.md)** - Configuration schema
+- **[Creating Maps](app/config/create-map.md)** - Map initialization
+- **[Controllers API](app/events/controllers.md)** - Controllers for performing actions
 
 ---
 

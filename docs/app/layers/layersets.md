@@ -478,11 +478,11 @@ legendsLayerSet.offLayerSetUpdated(handleLegendUpdate);
 
 ## See Also
 
-- [Layer API](../api/layer-api.md) - Complete Layer API reference
-- [Controllers API](../events/controllers.md) - Controllers for performing actions
-- [API Reference](../api/api.md) - Main GeoView API entry points
-- [Layers](../layers/layers.md) - Layer concepts and configuration
+- [Layer API](app/api/layer-api.md) - Complete Layer API reference
+- [Controllers API](app/events/controllers.md) - Controllers for performing actions
+- [API Reference](app/api/api.md) - Main GeoView API entry points
+- [Layers](app/layers/layers.md) - Layer concepts and configuration
 
 **For Core Developers:**
 
-- [Layer Set Architecture](../../programming/layerset-architecture.md) - Technical implementation details and internal event system
+- [Layer Set Architecture](programming/layerset-architecture.md) - Technical implementation details and internal event system

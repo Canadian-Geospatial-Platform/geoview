@@ -319,7 +319,7 @@ For example, the time-slider package has a [schema](https://github.com/Canadian-
 ## See Also
 
 - **[Core Packages Reference](./geoview-core-packages.md)** - Complete package development guide with API reference
-- **[Controllers API](../events/controllers.md)** - Controllers for performing actions
+- **[Controllers API](app/events/controllers.md)** - Controllers for performing actions
 - **[Package Examples](https://github.com/Canadian-Geospatial-Platform/geoview/tree/develop/packages)** - Real package implementations
 
 ## Available core packages

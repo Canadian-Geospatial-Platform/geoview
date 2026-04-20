@@ -8,5 +8,5 @@ Documentation for GeoView's UI system, theming, and styling.
 
 ## Related Documentation
 
-- [Accessibility](../accessibility.md) - WCAG compliance and accessibility features
-- [Best Practices](../../programming/best-practices.md) - Coding standards including component patterns
+- [Accessibility](app/accessibility.md) - WCAG compliance and accessibility features
+- [Best Practices](programming/best-practices.md) - Coding standards including component patterns

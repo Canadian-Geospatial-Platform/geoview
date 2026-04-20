@@ -115,7 +115,7 @@ const snap = mapViewer.initSnapInteractions("my-geometries");
 
 ## Event Handling
 
-Events use the [EventHelper delegate pattern](../../programming/event-helper.md). Each event has `onXxx()` / `offXxx()` pairs.
+Events use the [EventHelper delegate pattern](programming/event-helper.md). Each event has `onXxx()` / `offXxx()` pairs.
 
 ### Lifecycle Events
 
@@ -206,4 +206,4 @@ mapViewer.onMapComponentRemoved((sender, payload) => {
 - [API Reference](api.md) — Main API entry points
 - [Layer API](layer-api.md) — Layer management
 - [Geometry API](geometry-api.md) — Vector geometry operations
-- [Controllers](../events/controllers.md) — Controllers API documentation
+- [Controllers](app/events/controllers.md) — Controllers API documentation

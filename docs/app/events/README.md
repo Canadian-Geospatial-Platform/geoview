@@ -16,6 +16,6 @@ Documentation for GeoView's event system, event types, and controllers.
 
 ## Related Documentation
 
-- [API Reference](../api/api.md) - Main API entry points
-- [Controller Architecture](../../programming/controller-architecture.md) - Developer guide for controller patterns
-- [Event Helper](../../programming/event-helper.md) - Delegate event system internals
+- [API Reference](app/api/api.md) - Main API entry points
+- [Controller Architecture](programming/controller-architecture.md) - Developer guide for controller patterns
+- [Event Helper](programming/event-helper.md) - Delegate event system internals

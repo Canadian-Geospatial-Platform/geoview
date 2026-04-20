@@ -551,7 +551,7 @@ const geochartPlugin = mapViewer.plugins["geochart"];
 // Configure charts via corePackagesConfig in map configuration
 ```
 
-**See Also:** [Controllers API](../events/controllers.md)
+**See Also:** [Controllers API](app/events/controllers.md)
 
 ---
 
@@ -663,7 +663,7 @@ if (swiperPlugin) {
 }
 ```
 
-**See Also:** [Controllers API](../events/controllers.md)
+**See Also:** [Controllers API](app/events/controllers.md)
 
 ---
 
@@ -756,7 +756,7 @@ The drawer functionality is managed through the `DrawerController`. The drawer p
 // - uploadDrawings(file) (imports GeoJSON)
 ```
 
-**See Also:** [Controllers API](../events/controllers.md)
+**See Also:** [Controllers API](app/events/controllers.md)
 
 ---
 
@@ -1209,7 +1209,7 @@ interface TypeDescription {
 
 **See Also:**
 
-- [Configuration Reference](../config/configuration-reference.md) - Package configuration options
+- [Configuration Reference](app/config/configuration-reference.md) - Package configuration options
 
 ---
 
@@ -1532,7 +1532,7 @@ The panel gracefully handles:
 
 **See Also:**
 
-- [Configuration Reference](../config/configuration-reference.md) - Package configuration options
+- [Configuration Reference](app/config/configuration-reference.md) - Package configuration options
 
 ---
 
@@ -1682,8 +1682,8 @@ rush add -p lodash --caret
 
 ## See Also
 
-- **[Controllers API](../events/controllers.md)** - Controllers for performing actions
-- **[Configuration Reference](../config/configuration-reference.md)** - Package configuration options
-- **[API Reference](../api/api.md)** - Core API methods
+- **[Controllers API](app/events/controllers.md)** - Controllers for performing actions
+- **[Configuration Reference](app/config/configuration-reference.md)** - Package configuration options
+- **[API Reference](app/api/api.md)** - Core API methods
 - **[Core Package Development](./core-packages.md)** - Creating custom packages (detailed guide)
-- **[State Management](../../programming/using-store.md)** - Zustand store architecture
+- **[State Management](programming/using-store.md)** - Zustand store architecture

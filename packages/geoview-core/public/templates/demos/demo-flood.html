@@ -156,8 +156,19 @@
           },
           'listOfGeoviewLayerConfig': [
             {
-              'geoviewLayerId': 'FloodLYR',
-              'geoviewLayerName': 'Inondations – Année courante',
+              'geoviewLayerId': 'Flood72hLYR',
+              'geoviewLayerName': 'Produits d\'inondation (72 h.)',
+              'metadataAccessPath': 'https://maps-cartes.services.geo.ca/egs_sgu/rest/services/Flood_Inondation/EGS_Flood_Product_Active_fr/MapServer',
+              'geoviewLayerType': 'esriDynamic',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '0'
+                }
+              ]
+            },
+            {
+              'geoviewLayerId': 'FloodCurrentLYR',
+              'geoviewLayerName': 'Produits d\'inondation (année en cours)',
               'metadataAccessPath': 'https://maps-cartes.services.geo.ca/egs_sgu/rest/services/Flood_Inondation/EGS_Flood_Product_Current_fr/MapServer',
               'geoviewLayerType': 'esriDynamic',
               'listOfLayerEntryConfig': [
@@ -166,20 +177,40 @@
                 },
                 {
                   'layerId': '1'
-                },
-                {
-                  'layerId': '2'
                 }
               ]
             },
             {
-              'geoviewLayerId': 'IceLYR',
-              'geoviewLayerName': 'Glace de rivière - Année courante',
+              'geoviewLayerId': 'FloodIce72hLYR',
+              'geoviewLayerName': 'Produits des glaces de rivières (72 h.)',
+              'metadataAccessPath': 'https://maps-cartes.services.geo.ca/egs_sgu/rest/services/Ice_Glace/EGS_RiverIce_Product_Active_FP_fr/MapServer',
+              'geoviewLayerType': 'esriDynamic',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '0'
+                }
+              ]
+            },
+            {
+              'geoviewLayerId': 'FloodIceCurrentLYR',
+              'geoviewLayerName': 'Produits des glaces de rivières (année en cours)',
               'metadataAccessPath': 'https://maps-cartes.services.geo.ca/egs_sgu/rest/services/Ice_Glace/EGS_RiverIce_Product_Current_FP_fr/MapServer',
               'geoviewLayerType': 'esriDynamic',
               'listOfLayerEntryConfig': [
                 {
                   'layerId': '0'
+                }
+              ]
+            },
+            {
+              'geoviewLayerId': 'FloodIceStateLYR',
+              'metadataAccessPath': 'https://maps-cartes.services.geo.ca/hosted_heberge/rest/services/Hosted/EGS_RiverIce_Product_Current/MapServer/WMTS',
+              'geoviewLayerName': 'État des glaces de rivières',
+              'geoviewLayerType': 'ogcWmts',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': 'Hosted_EGS_RiverIce_Product_Current',
+                  'tileMatrixSet': 'default028mm'
                 }
               ]
             }

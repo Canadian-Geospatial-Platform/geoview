@@ -37,7 +37,7 @@ const mapViewer = await cgpv.api.createMapFromConfig(
     theme: "dark",
     language: "en",
   }),
-  800
+  800,
 );
 ```
 
@@ -78,10 +78,10 @@ const ids = cgpv.api.getMapViewerIds();
 ### Utilities
 
 ```typescript
-cgpv.api.utilities.core;       // Core utility functions
-cgpv.api.utilities.geo;        // Geographic utility functions
+cgpv.api.utilities.core; // Core utility functions
+cgpv.api.utilities.geo; // Geographic utility functions
 cgpv.api.utilities.projection; // Projection utilities
-cgpv.api.utilities.date;       // Date management utilities
+cgpv.api.utilities.date; // Date management utilities
 ```
 
 ---
@@ -92,5 +92,5 @@ cgpv.api.utilities.date;       // Date management utilities
 - [cgpv.md](cgpv.md) — Global cgpv object documentation
 - [map-viewer-api.md](map-viewer-api.md) — MapViewer instance methods
 - [layer-api.md](layer-api.md) — Layer management API
-- [controllers.md](../events/controllers.md) — Controllers API documentation
+- [controllers.md](app/events/controllers.md) — Controllers API documentation
 - [api-utilities.md](utilities.md) — Utilities documentation

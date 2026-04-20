@@ -167,7 +167,7 @@ const olLayer = await mapViewer.layer.getOLLayerAsync("myLayer", 5000);
 
 ## Event Handling
 
-The Layer API exposes events via the [EventHelper delegate pattern](../../programming/event-helper.md). Each event has an `onXxx()` to subscribe and `offXxx()` to unsubscribe.
+The Layer API exposes events via the [EventHelper delegate pattern](programming/event-helper.md). Each event has an `onXxx()` to subscribe and `offXxx()` to unsubscribe.
 
 ### Layer Lifecycle Events
 
@@ -277,7 +277,7 @@ try {
 
 - **[LayerApi — TypeDoc](https://canadian-geospatial-platform.github.io/geoview/public/docs/typedoc/classes/LayerApi.html)** — Complete method reference
 - [Layer Sets Guide](./layersets.md) — Working with layer sets
-- [Controllers API](../events/controllers.md) — Controllers for performing actions
-- [Configuration Reference](../config/configuration-reference.md) — Layer configuration options
+- [Controllers API](app/events/controllers.md) — Controllers for performing actions
+- [Configuration Reference](app/config/configuration-reference.md) — Layer configuration options
 - [API Reference](api.md) — Main API entry points
 - [Map Viewer API](map-viewer-api.md) — MapViewer instance methods

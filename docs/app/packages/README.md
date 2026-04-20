@@ -108,22 +108,22 @@ GeoView includes six built-in packages that extend the viewer's functionality:
 
 ## 🔗 Related Documentation
 
-- **[Controllers API](../events/controllers.md)** - Controllers for performing actions
-- **[Configuration Reference](../config/configuration-reference.md)** - Package configuration options
-- **[API Reference](../api/api.md)** - Core API methods
-- **[State Management](../../programming/using-store.md)** - Zustand store architecture
+- **[Controllers API](app/events/controllers.md)** - Controllers for performing actions
+- **[Configuration Reference](app/config/configuration-reference.md)** - Package configuration options
+- **[API Reference](app/api/api.md)** - Core API methods
+- **[State Management](programming/using-store.md)** - Zustand store architecture
 
 ## 📋 Quick Reference
 
 ### Common Tasks
 
-| Task                      | Documentation                                                   |
-| ------------------------- | --------------------------------------------------------------- |
-| Use a core package        | [Core Packages Reference](./geoview-core-packages.md)           |
-| Create TypeScript package | [Core Package Development](./core-packages.md)                  |
-| Create JavaScript package | [JavaScript Package Development](./javascript-packages.md)      |
-| Configure package         | [Configuration Reference](../config/configuration-reference.md) |
+| Task                      | Documentation                                                    |
+| ------------------------- | ---------------------------------------------------------------- |
+| Use a core package        | [Core Packages Reference](./geoview-core-packages.md)            |
+| Create TypeScript package | [Core Package Development](./core-packages.md)                   |
+| Create JavaScript package | [JavaScript Package Development](./javascript-packages.md)       |
+| Configure package         | [Configuration Reference](app/config/configuration-reference.md) |
 
 ---
 
-**Navigation:** [Main Documentation](../../README.md) | [API Documentation](../api/README.md) | [Layer Documentation](../layers/README.md)
+**Navigation:** [Main Documentation](README.md) | [API Documentation](app/api/README.md) | [Layer Documentation](app/layers/README.md)

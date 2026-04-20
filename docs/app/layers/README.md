@@ -9,6 +9,6 @@ Documentation for GeoView layer types, configuration, and layer set management.
 
 ## Related Documentation
 
-- [Layer API](../api/layer-api.md) - Layer management API
-- [Layer Events](../events/layer-events.md) - Layer-specific events
-- [Adding Layer Types](../../programming/adding-layer-types.md) - Developer guide for implementing new layer types
+- [Layer API](app/api/layer-api.md) - Layer management API
+- [Layer Events](app/events/layer-events.md) - Layer-specific events
+- [Adding Layer Types](programming/adding-layer-types.md) - Developer guide for implementing new layer types

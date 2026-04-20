@@ -238,5 +238,5 @@ The viewer is bundled with core packages. Load them by adding their ID to the ap
 
 - **[Core Package Development](./core-packages.md)** - Modern TypeScript package development (recommended)
 - **[Core Packages Reference](./geoview-core-packages.md)** - API reference for all bundled packages
-- **[Controllers API](../events/controllers.md)** - Controllers for performing actions
-- **[API Reference](../api/api.md)** - Main API methods
+- **[Controllers API](app/events/controllers.md)** - Controllers for performing actions
+- **[API Reference](app/api/api.md)** - Main API methods

@@ -112,4 +112,4 @@ cgpv.logger.logInfo("My plugin loaded");
 - [api.md](api.md) — API class methods (`createMapFromConfig`, `reload`, etc.)
 - [map-viewer-api.md](map-viewer-api.md) — MapViewer instance methods
 - [layer-api.md](layer-api.md) — Layer management API
-- [controllers.md](../events/controllers.md) — Controllers API documentation
+- [controllers.md](app/events/controllers.md) — Controllers API documentation

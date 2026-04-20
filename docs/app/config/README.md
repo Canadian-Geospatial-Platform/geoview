@@ -102,11 +102,11 @@ Config
 
 ## 🔗 Related Documentation
 
-- **[Layer API](../api/layer-api.md)** - Programmatically managing layers
-- **[Core GeoView Packages](../packages/geoview-core-packages.md)** - Available packages and their configuration
-- **[API Reference](../api/api.md)** - Core API methods
-- **[Layers Guide](../layers/layers.md)** - Understanding layer types
+- **[Layer API](app/api/layer-api.md)** - Programmatically managing layers
+- **[Core GeoView Packages](app/packages/geoview-core-packages.md)** - Available packages and their configuration
+- **[API Reference](app/api/api.md)** - Core API methods
+- **[Layers Guide](app/layers/layers.md)** - Understanding layer types
 
 ---
 
-**Navigation:** [Main Documentation](../../README.md) | [API Documentation](../api/README.md) | [Packages](../packages/README.md)
+**Navigation:** [Main Documentation](README.md) | [API Documentation](app/api/README.md) | [Packages](app/packages/README.md)
