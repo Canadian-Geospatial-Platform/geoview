@@ -395,9 +395,13 @@
   "exportModal": {
     "title": "Map preview",
     "exportBtn": "Download",
-    "formatBtn": "Format",
-    "dpiBtn": "DPI",
-    "qualityBtn": "Quality",
+    "typeSelect": "Type",
+    "valueSelect": "Value",
+    "qualitySelect": "Quality",
+    "dpi": "DPI",
+    "pdf": "PDF",
+    "png": "PNG",
+    "jpeg": "JPEG",
     "exportTitle": "Title",
     "approx": "approx.",
     "fileExportDefaultPrefixName": "map-download",
@@ -405,7 +409,8 @@
     "pageSize": "Page size",
     "letter": "Letter",
     "legal": "Legal",
-    "tabloid": "Tabloid"
+    "tabloid": "Tabloid",
+    "previewAlt": "Export Preview"
   },
   "geolocator": {
     "title": "Geolocator",
@@ -419,7 +424,7 @@
     "searchResults": "Search results",
     "noResult": "No matches found for",
     "resultsFound": "{{count}} result(s) found for '{{searchTerm}}'",
-    "province": "Province",
+    "province": "Province/Territory",
     "category": "Category",
     "clearFilters": "Clear filters",
     "noFilter": "No filter",

@@ -37,6 +37,7 @@ export default function ExportButton({ id, className = '', sxDetails }: ExportPr
       id={id}
       aria-label={t('appbar.export')}
       aria-haspopup="dialog"
+      tooltipPlacement="right"
       onClick={() => uiController.enableFocusTrap({ activeElementId: 'export', callbackElementId: id })}
       sx={{ [theme.breakpoints.down('md')]: { display: 'none' }, ...sxDetails }}
       className={className}

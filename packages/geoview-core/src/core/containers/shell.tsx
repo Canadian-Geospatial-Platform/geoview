@@ -27,7 +27,7 @@ import {
   useStoreUIFooterPanelResizeValue,
   useStoreUIActiveFooterBarTab,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import ExportModal from '@/core/components/export/export-modal';
+import { ExportModal } from '@/core/components/export/export-modal';
 import DataTableModal from '@/core/components/data-table/data-table-modal';
 import FeatureDetailModal from '@/core/components/details/feature-detail-modal';
 import { useStoreGeoViewConfig } from '@/core/stores/geoview-store';

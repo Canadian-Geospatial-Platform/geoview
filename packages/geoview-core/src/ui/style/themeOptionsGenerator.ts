@@ -471,6 +471,14 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
           },
         },
       },
+      MuiFormLabel: {
+        styleOverrides: {
+          root: {
+            color: geoViewColors.textColor.light[200], // Placeholder text color that meets WCAG contrast (min 4.5:1) requirements against a white background
+            opacity: 1,
+          },
+        },
+      },
     },
     overrides: {
       button: {

@@ -395,9 +395,13 @@
   "exportModal": {
     "title": "Aperçu de la carte",
     "exportBtn": "Télécharger",
-    "formatBtn": "Format",
-    "dpiBtn": "PPP",
-    "qualityBtn": "Qualité",
+    "typeSelect": "Type",
+    "valueSelect": "Valeur",
+    "qualitySelect": "Qualité",
+    "dpi": "PPP",
+    "pdf": "PDF",
+    "png": "PNG",
+    "jpeg": "JPEG",
     "exportTitle": "Titre",
     "approx": "approx.",
     "fileExportDefaultPrefixName": "carte-telechargement",
@@ -405,7 +409,8 @@
     "pageSize": "Taille de la page",
     "letter": "Lettre",
     "legal": "Légal",
-    "tabloid": "Tabloïd"
+    "tabloid": "Tabloïd",
+    "previewAlt": "Aperçu de l'exportation de la carte"
   },
   "geolocator": {
     "title": "Géolocalisation",
@@ -419,7 +424,7 @@
     "searchResults": "Résultats de la recherche",
     "noResult": "Aucun résultat correspondant à",
     "resultsFound": "{{count}} résultat(s) trouvé(s) pour '{{searchTerm}}'",
-    "province": "Province",
+    "province": "Province/Territoire",
     "category": "Catégorie",
     "clearFilters": "Effacer les filtres",
     "noFilter": "Aucun Filtre",
