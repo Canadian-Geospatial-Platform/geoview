@@ -63,6 +63,14 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       padding: '0px 12px 4px 0px !important',
     },
   },
+  filterBox: {
+    flexGrow: 2,
+    paddingRight: '8px',
+    maxWidth: 150,
+    '& .MuiInputLabel-root': {
+      fontSize: theme.palette.geoViewFontSize.sm,
+    },
+  },
   searchResult: {
     position: 'relative',
     display: 'flex',

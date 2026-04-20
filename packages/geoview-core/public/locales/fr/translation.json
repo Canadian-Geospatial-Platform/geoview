@@ -97,7 +97,7 @@
     "crosshair": "Utiliser les touches <strong>fléchées</strong>, <strong>+</strong> et <strong>-</strong> pour naviguer sur la carte, <strong>Entrée</strong> pour sélectionner et <strong>Shift+fléchées</strong> <strong>Haut</strong> et <strong>Bas</strong> pour modfier le déplacement."
   },
   "appbar": {
-    "export": "Télécharger la carte",
+    "export": "Exporter la carte",
     "notifications": "Notifications",
     "noNotificationsAvailable": "Aucune notification disponible",
     "notificationsWithCount": "Notifications, {{count}}",
@@ -394,10 +394,14 @@
   },
   "exportModal": {
     "title": "Aperçu de la carte",
-    "exportBtn": "Télécharger",
-    "formatBtn": "Format",
-    "dpiBtn": "PPP",
-    "qualityBtn": "Qualité",
+    "exportBtn": "Exporter",
+    "formatSelect": "Format",
+    "resolutionSelect": "Résolution",
+    "qualitySelect": "Qualité",
+    "dpi": "PPP",
+    "pdf": "PDF",
+    "png": "PNG",
+    "jpeg": "JPEG",
     "exportTitle": "Titre",
     "approx": "approx.",
     "fileExportDefaultPrefixName": "carte-telechargement",
@@ -405,7 +409,8 @@
     "pageSize": "Taille de la page",
     "letter": "Lettre",
     "legal": "Légal",
-    "tabloid": "Tabloïd"
+    "tabloid": "Tabloïd",
+    "previewAlt": "Aperçu de l'exportation de la carte"
   },
   "geolocator": {
     "title": "Géolocalisation",
@@ -419,7 +424,7 @@
     "searchResults": "Résultats de la recherche",
     "noResult": "Aucun résultat correspondant à",
     "resultsFound": "{{count}} résultat(s) trouvé(s) pour '{{searchTerm}}'",
-    "province": "Province",
+    "province": "Province/Territoire",
     "category": "Catégorie",
     "clearFilters": "Effacer les filtres",
     "noFilter": "Aucun Filtre",

@@ -8,17 +8,61 @@ import type { SxStyles } from '@/ui/style/types';
  * @returns The sx classes object
  */
 export const getSxClasses = (theme: Theme): SxStyles => ({
-  title: {
-    marginBottom: 2,
-    textAlign: 'center',
+  dialogContent: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '1rem',
+    margin: '0 auto',
+    padding: '16px 10%',
+    width: '100%',
+    overflowX: 'hidden',
   },
 
-  titleInput: {
+  exportSettings: {
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1rem',
+    justifyContent: 'space-between',
+    marginBottom: 2,
+    [theme.breakpoints.up('md')]: {
+      flexDirection: 'row',
+    },
+  },
+
+  exportTitleInput: {
     minWidth: 300,
+    '& input.keyboard-focused': {
+      // hide keyboard-focused default black outline (style.css)
+      // MUI adds a 2px border to the bottom of the input parent on focus.
+      // It has sufficient contrast to meet WCAG 2.1 requirements (see Success Criterion 1.4.11 and 2.4.7)
+      border: 'none !important',
+    },
+  },
+
+  exportOptions: {
+    display: 'flex',
+    gap: '1rem',
+    justifyContent: 'center',
+    alignItems: 'end',
+    '& .MuiFormControl-root': {
+      minWidth: '100px',
+    },
+    '& .MuiInputLabel-formControl': {
+      fontSize: theme.palette.geoViewFontSize.default,
+      marginTop: 0,
+    },
+    '& .MuiInputLabel-formControl.Mui-focused': {
+      color: theme.palette.text.primary,
+    },
+    '& .MuiSelect-select': {
+      padding: '0px 12px 4px 0px !important',
+    },
   },
 
   mapPreview: {
-    maxWidth: '80%',
+    maxWidth: '100%',
     width: 'auto',
     height: 'auto',
     border: '1px solid #ccc',
@@ -43,27 +87,5 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   dialogActions: {
     padding: '1rem',
     gap: '0.5rem',
-  },
-
-  buttonOutlined: {
-    fontSize: theme.palette.geoViewFontSize.sm,
-    padding: '0.7rem 1rem',
-    height: '47px',
-    borderColor: theme.palette.geoViewColor.primary.main,
-    color: theme.palette.geoViewColor.primary.main,
-    '&:hover': {
-      borderColor: theme.palette.geoViewColor.primary.dark[200],
-      backgroundColor: theme.palette.geoViewColor.primary.light[100],
-    },
-  },
-
-  buttonContained: {
-    fontSize: theme.palette.geoViewFontSize.sm,
-    padding: '0.7rem 1rem',
-    backgroundColor: theme.palette.geoViewColor.primary.main,
-    height: '47px',
-    '&:hover': {
-      backgroundColor: theme.palette.geoViewColor.primary.dark[200],
-    },
   },
 });
