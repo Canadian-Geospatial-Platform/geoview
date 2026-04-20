@@ -27,7 +27,7 @@ import {
   useStoreUIFooterPanelResizeValue,
   useStoreUIActiveFooterBarTab,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import ExportModal from '@/core/components/export/export-modal';
+import { ExportModal } from '@/core/components/export/export-modal';
 import DataTableModal from '@/core/components/data-table/data-table-modal';
 import FeatureDetailModal from '@/core/components/details/feature-detail-modal';
 import { useStoreGeoViewConfig } from '@/core/stores/geoview-store';
@@ -38,6 +38,7 @@ import { FocusTrapDialog } from './focus-trap';
 import type { Notifications, SnackBarOpenEvent, SnackbarType } from '@/core/utils/notifications';
 import { useMapResize } from './use-map-resize';
 import { delay, scrollIfNotVisible } from '@/core/utils/utilities';
+import type { SxStyles } from '@/ui/style/types';
 
 /** The properties for the shell component. */
 type ShellProps = {
@@ -97,7 +98,7 @@ export function Shell(props: ShellProps): JSX.Element {
   const uiController = useUIController();
 
   // SxClasses
-  const sxClasses = useMemo(() => getShellSxClasses(theme, appHeight), [theme, appHeight]);
+  const memoSxClasses = useMemo((): SxStyles => getShellSxClasses(theme, appHeight), [theme, appHeight]);
 
   // Ref for container height
   const { mapShellContainerRef } = useMapResize({
@@ -298,18 +299,18 @@ export function Shell(props: ShellProps): JSX.Element {
   }, [mapViewer, handleMapRemoveComponent, handleModalOpen, handleSnackBarOpen, handleModalClose, handleMapAddComponent]);
 
   return (
-    <Box sx={sxClasses.all}>
+    <Box sx={memoSxClasses.all}>
       <Link
         id={`toplink-${mapViewer.mapId}`}
         href={`#bottomlink-${mapViewer.mapId}`}
         tabIndex={0}
-        sx={{ ...sxClasses.skip, top: '0px' }}
+        sx={{ ...memoSxClasses.skip, top: '0px' }}
         onClick={() => handleSkipLinkClick(`bottomlink-${mapViewer.mapId}`)}
       >
         {t('keyboardnav.start')}
       </Link>
       <FocusTrap open={activeTrapGeoView}>
-        <Box ref={shellRef} id={`shell-${mapViewer.mapId}`} sx={sxClasses.shell} className="geoview-shell" tabIndex={-1}>
+        <Box ref={shellRef} id={`shell-${mapViewer.mapId}`} sx={memoSxClasses.shell} className="geoview-shell" tabIndex={-1}>
           <CircularProgress isLoaded={mapLoaded} />
           <CircularProgress isLoaded={!circularProgressActive} />
           {interaction === 'dynamic' && (
@@ -317,7 +318,7 @@ export function Shell(props: ShellProps): JSX.Element {
               id={`main-map-${mapViewer.mapId}`}
               href={`#main-map-${mapViewer.mapId}`}
               tabIndex={0}
-              sx={{ ...sxClasses.skip, top: '0px' }}
+              sx={{ ...memoSxClasses.skip, top: '0px' }}
               onClick={(e) => {
                 e.preventDefault();
                 handleSkipToMainContent();
@@ -327,9 +328,9 @@ export function Shell(props: ShellProps): JSX.Element {
             </Link>
           )}
 
-          <Box id={`map-${mapViewer.mapId}`} sx={sxClasses.mapShellContainer} className="mapContainer" ref={mapShellContainerRef}>
+          <Box id={`map-${mapViewer.mapId}`} sx={memoSxClasses.mapShellContainer} className="mapContainer" ref={mapShellContainerRef}>
             <AppBar api={mapViewer.appBarApi} onScrollShellIntoView={handleScrollShellIntoView} />
-            <Box sx={sxClasses.mapContainer}>
+            <Box sx={memoSxClasses.mapContainer}>
               <Map viewer={mapViewer} />
             </Box>
             {interaction === 'dynamic' && <NavBar api={mapViewer.navBarApi} />}
@@ -369,7 +370,7 @@ export function Shell(props: ShellProps): JSX.Element {
         id={`bottomlink-${mapViewer.mapId}`}
         href={`#toplink-${mapViewer.mapId}`}
         tabIndex={0}
-        sx={{ ...sxClasses.skip, bottom: '0px' }}
+        sx={{ ...memoSxClasses.skip, bottom: '0px' }}
         onClick={() => handleSkipLinkClick(`toplink-${mapViewer.mapId}`)}
       >
         {t('keyboardnav.end')}

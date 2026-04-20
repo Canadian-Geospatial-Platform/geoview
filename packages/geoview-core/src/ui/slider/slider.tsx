@@ -104,14 +104,21 @@ function SliderUI(props: SliderProps): JSX.Element {
 
   // Ref
   const sliderRef = useRef<HTMLDivElement>(null);
+  /** Tracks the currently active thumb index for focus management in multi-thumb sliders. */
+  const activeThumbRef = useRef<number>(0);
 
   const containerId = generateId(18);
 
   const valueLabelDisplayOption = valueLabelDisplay === undefined ? 'on' : 'auto';
 
   // TODO: Refactor - when refactor time slider, re work logic for marks and label to have all of them inside slider (geochart-time slider)
-  // Limit visible marks to max 30
-  const memoProcessedMarks = useMemo(() => {
+  /**
+   * Limits visible marks to maximum 30 with even distribution.
+   */
+  const memoProcessedMarks = useMemo((): Mark[] | undefined => {
+    // Log
+    logger.logTraceUseMemo('SLIDER - memoProcessedMarks', marks);
+
     if (!marks || marks.length === 0) return marks;
 
     const maxVisibleMarks = 30;
@@ -151,8 +158,13 @@ function SliderUI(props: SliderProps): JSX.Element {
     }));
   }, [marks]);
 
-  // Memoize the className calculation
-  const memoFinalClassName = useMemo(() => {
+  /**
+   * Computes the final className with label spread applied for multi-thumb horizontal sliders.
+   */
+  const memoFinalClassName = useMemo((): string | undefined => {
+    // Log
+    logger.logTraceUseMemo('SLIDER - memoFinalClassName', sliderValue, orientation);
+
     const shouldSpreadLabel = Array.isArray(sliderValue) && sliderValue.length >= 2 && (!orientation || orientation === 'horizontal');
 
     if (!shouldSpreadLabel) return className;
@@ -166,6 +178,9 @@ function SliderUI(props: SliderProps): JSX.Element {
    * Handles when the user drags the slider thumb to change the value
    */
   const handleChange = (event: React.SyntheticEvent | Event, newValue: number | number[], activeThumb: number): void => {
+    // Track which thumb is active
+    activeThumbRef.current = activeThumb;
+
     // Update the internal state if not controlled, meaning 'value' isn't provided by the parent component
     if (!isControlled) {
       setInternalValue(newValue);
@@ -185,28 +200,34 @@ function SliderUI(props: SliderProps): JSX.Element {
     onChangeCommitted?.(newValue);
   };
 
-  // Focus on slider handle
-  const focusSlider = useCallback(() => {
+  // #endregion
+
+  /**
+   * Focuses the active slider thumb input element.
+   */
+  const focusSlider = useCallback((): void => {
     if (sliderRef.current) {
-      // Find the hidden input element and focus it
-      const input = sliderRef.current.querySelectorAll('input[type="range"]');
-      if (input[0]) {
-        (input[0] as HTMLElement).focus();
+      // Find the hidden input elements
+      const inputs = sliderRef.current.querySelectorAll('input[type="range"]');
+      // Focus the active thumb's input
+      const inputToFocus = inputs[activeThumbRef.current];
+      if (inputToFocus) {
+        (inputToFocus as HTMLElement).focus();
       }
     }
   }, []);
 
-  // GV There is a bug with focus on slider element. When the arrow key is pressed, the event trigger value change
-  // GV for the slider then the slider value is updated. This causes the slider to lose focus.
-  // GV The solution is to manually focus the slider element when the arrow key is pressed.
-  // GV This is a workaround until the issue is fixed in the Material UI library.
-  // GV When there is 2 handles, the focus on the second handle is lost and the focus is back to first handle
-  // TODO: https://github.com/Canadian-Geospatial-Platform/geoview/issues/2560
+  // GV There is a bug with MUI Slider focus management. When arrow keys are pressed, the value change
+  // GV triggers a re-render which causes the slider to lose focus. The workaround is to manually
+  // GV refocus the slider element after arrow key presses. For multi-thumb sliders, we track which
+  // GV thumb (via activeThumbRef) is active to ensure focus returns to the correct thumb input,
+  // GV enabling independent keyboard control of each thumb.
+  // GV See: https://github.com/Canadian-Geospatial-Platform/geoview/issues/2560
   /**
    * Handles keyboard events on the slider to maintain focus during arrow key interactions
    */
   const handleKeyDown = useCallback(
-    (event: React.KeyboardEvent) => {
+    (event: React.KeyboardEvent): void => {
       if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) {
         focusSlider();
       }

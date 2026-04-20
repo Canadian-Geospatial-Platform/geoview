@@ -57,8 +57,10 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
   // TODO: style - we should not base length on map size value, parent should adjust
   const mapSize = useStoreMapSize();
 
+  // #region Handlers
+
   /**
-   * Clears all filters.
+   * Handles when the user clicks the clear filters button.
    */
   const handleClearFilters = (): void => {
     // Prevent action when button is disabled
@@ -68,6 +70,8 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
     setProvince('');
     setCategory('');
   };
+
+  // #endregion
 
   /**
    * Reduces provinces from the API response data.
@@ -129,7 +133,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
     <Paper component="div" elevation={4} square sx={{ width: 350 }}>
       {!error && (
         <Box sx={sxClasses.filter} className="geolocator-filters" role="group" aria-label={t('geolocator.filtersGroupTitle')!}>
-          <Box sx={{ flexGrow: 2, paddingRight: '8px', maxWidth: 150 }}>
+          <Box sx={sxClasses.filterBox}>
             <Select
               labelId={`${mapId}-geolocator-province-filter-label`}
               formControlProps={{ variant: 'standard', size: 'small' }}
@@ -145,7 +149,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
               MenuProps={{ container: shellContainer }}
             />
           </Box>
-          <Box sx={{ flexGrow: 2, paddingRight: '8px', maxWidth: 150 }}>
+          <Box sx={sxClasses.filterBox}>
             <Select
               labelId={`${mapId}-geolocator-category-filter-label`}
               id={`${mapId}-geolocator-category-filter`}

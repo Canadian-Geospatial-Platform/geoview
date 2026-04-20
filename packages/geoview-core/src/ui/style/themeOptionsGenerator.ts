@@ -108,7 +108,7 @@ const getButtonStyleOverrides = (geoViewColors: IGeoViewColors): any => ({
  * Configures all MUI component overrides, typography, palette, and spacing
  * to match GeoView's design system.
  *
- * @param geoViewColors - Color palette to generate theme from
+ * @param geoViewColors - Optional color palette to generate theme from
  * @returns Complete MUI ThemeOptions configuration
  */
 export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoViewColors): ThemeOptions => {
@@ -468,6 +468,14 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
               WebkitAppearance: 'none',
               appearance: 'none',
             },
+          },
+        },
+      },
+      MuiFormLabel: {
+        styleOverrides: {
+          root: {
+            color: geoViewColors.textColor.light[200], // Placeholder text color that meets WCAG contrast (min 4.5:1) requirements against a white background
+            opacity: 1,
           },
         },
       },

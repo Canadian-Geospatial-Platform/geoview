@@ -24,8 +24,10 @@ import type { ChangeEvent, RefObject } from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
+import type { SelectChangeEvent } from '@mui/material';
 
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, LoadingButton, Skeleton, TextField, Menu, MenuItem } from '@/ui';
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, LoadingButton, Select, Skeleton, TextField } from '@/ui';
+import type { TypeMenuItemProps } from '@/ui/select/select';
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import { useStoreUIActiveFocusItem } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
@@ -47,6 +49,7 @@ import { createCanvasMapUrls } from '@/core/components/export/canvas-layout';
 import { getSxClasses } from '@/core/components/export/export-modal-style';
 import { TIMEOUT } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
+import type { SxStyles } from '@/ui/style/types';
 
 /** Supported export file formats. */
 type FileFormat = 'pdf' | 'png' | 'jpeg';
@@ -79,14 +82,23 @@ export interface FileExportProps {
  *
  * @returns The export modal component
  */
-export default function ExportModal(): JSX.Element {
+export function ExportModal(): JSX.Element {
   // Log
   logger.logTraceRender('components/export/export-modal');
 
   // Hooks
   const { t } = useTranslation();
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+
+  /**
+   * Computes SX style classes for the export modal.
+   */
+  const memoSxClasses = useMemo((): SxStyles => {
+    // Log
+    logger.logTraceUseMemo('EXPORT-MODAL - memoSxClasses', theme);
+
+    return getSxClasses(theme);
+  }, [theme]);
 
   // Store
   const mapId = useStoreGeoViewMapId();
@@ -106,18 +118,47 @@ export default function ExportModal(): JSX.Element {
   const [exportMapResolution, setExportMapResolution] = useState(300);
   const [exportFormat, setExportFormat] = useState<FileFormat>('png');
   const exportContainerRef = useRef(null) as RefObject<HTMLDivElement>;
-  const [dpiMenuOpen, setDpiMenuOpen] = useState(false);
-  const [dpiAnchorEl, setDpiAnchorEl] = useState<null | HTMLElement>(null);
-  const [formatMenuOpen, setFormatMenuOpen] = useState(false);
-  const [formatAnchorEl, setFormatAnchorEl] = useState<null | HTMLElement>(null);
   const [jpegQuality, setJpegQuality] = useState(90); // Default 90%
-  const [qualityMenuOpen, setQualityMenuOpen] = useState(false);
-  const [qualityAnchorEl, setQualityAnchorEl] = useState<null | HTMLElement>(null);
   const [pngPreviewUrls, setPngPreviewUrls] = useState<string[]>([]);
   const dialogRef = useRef(null) as RefObject<HTMLDivElement>;
   const titleInputRef = useRef<HTMLInputElement>(null);
 
   const fileExportDefaultPrefixName = t('exportModal.fileExportDefaultPrefixName');
+
+  /**
+   * Builds menu items for format selection.
+   */
+  const memoFormatMenuItems = useMemo<TypeMenuItemProps[]>((): TypeMenuItemProps[] => {
+    logger.logTraceUseMemo('EXPORT-MODAL - memoFormatMenuItems', t);
+
+    return [
+      { item: { value: 'pdf', children: t('exportModal.pdf') } },
+      { item: { value: 'png', children: t('exportModal.png') } },
+      { item: { value: 'jpeg', children: t('exportModal.jpeg') } },
+    ];
+  }, [t]);
+
+  /**
+   * Builds menu items for DPI selection.
+   */
+  const memoDpiMenuItems = useMemo<TypeMenuItemProps[]>((): TypeMenuItemProps[] => {
+    logger.logTraceUseMemo('EXPORT-MODAL - memoDpiMenuItems', t);
+
+    return [
+      { item: { value: 96, children: `96 ${t('exportModal.dpi')}` } },
+      { item: { value: 150, children: `150 ${t('exportModal.dpi')}` } },
+      { item: { value: 300, children: `300 ${t('exportModal.dpi')}` } },
+    ];
+  }, [t]);
+
+  /**
+   * Builds menu items for quality selection.
+   */
+  const memoQualityMenuItems = useMemo<TypeMenuItemProps[]>((): TypeMenuItemProps[] => {
+    logger.logTraceUseMemo('EXPORT-MODAL - memoQualityMenuItems');
+
+    return QUALITY_OPTIONS.map((quality) => ({ item: { value: quality, children: `${quality}%` } }));
+  }, []);
 
   /**
    * Generates the export preview at maximum quality.
@@ -245,14 +286,8 @@ export default function ExportModal(): JSX.Element {
   /**
    * Handles closing the export modal.
    */
-  // TODO: WCAG Issue #3222 - Review Disable Focus Trap Behaviour
   const handleCloseModal = useCallback(() => {
-    // Defer disabling the focus trap to the next tick so the Dialog's own focus trap
-    // has time to release before we attempt to restore focus via disableFocusTrap
-    // (which uses the callbackElementId to re-focus the export button in the app bar).
-    setTimeout(() => {
-      uiController.disableFocusTrap();
-    }, TIMEOUT.deferExecution);
+    uiController.disableFocusTrap();
 
     // Clear preview content so skeleton shows on next open
     setPngPreviewUrls([]);
@@ -268,97 +303,42 @@ export default function ExportModal(): JSX.Element {
   }, [performExport]);
 
   /**
-   * Handles opening the format selection menu.
+   * Handles format selection change.
    */
-  const handleFormatMenuClick = (event: React.MouseEvent<HTMLElement>): void => {
-    setFormatAnchorEl(event.currentTarget);
-    setFormatMenuOpen(true);
-  };
-
-  /**
-   * Handles closing the format selection menu.
-   */
-  const handleFormatMenuClose = useCallback((): void => {
-    setFormatMenuOpen(false);
+  const handleFormatChange = useCallback((event: SelectChangeEvent<unknown>): void => {
+    const format = event.target.value as FileFormat;
+    setExportFormat(format);
+    if (format === 'pdf') {
+      setExportMapResolution(300);
+    }
   }, []);
 
   /**
-   * Handles selecting a file format.
-   *
-   * @param format - The selected file format
+   * Handles DPI selection change.
    */
-  const handleSelectFormat = useCallback(
-    (format: FileFormat): void => {
-      setExportFormat(format);
-      if (format === 'pdf') {
-        setExportMapResolution(300);
-      }
-      handleFormatMenuClose();
-    },
-    [handleFormatMenuClose]
-  );
-
-  /**
-   * Handles opening the DPI selection menu.
-   */
-  const handleDpiMenuClick = (event: React.MouseEvent<HTMLElement>): void => {
-    setDpiAnchorEl(event.currentTarget);
-    setDpiMenuOpen(true);
-  };
-
-  /**
-   * Handles closing the DPI selection menu.
-   */
-  const handleMenuClose = useCallback((): void => {
-    setDpiMenuOpen(false);
+  const handleDpiChange = useCallback((event: SelectChangeEvent<unknown>): void => {
+    setExportMapResolution(Number(event.target.value));
   }, []);
 
   /**
-   * Handles selecting a DPI value.
-   *
-   * @param dpi - The selected DPI value
+   * Handles quality selection change.
    */
-  const handleSelectDpi = useCallback(
-    (dpi: number): void => {
-      setExportMapResolution(dpi);
-      handleMenuClose();
-    },
-    [handleMenuClose]
-  );
-
-  /**
-   * Handles opening the quality selection menu.
-   */
-  const handleQualityMenuClick = (event: React.MouseEvent<HTMLElement>): void => {
-    setQualityAnchorEl(event.currentTarget);
-    setQualityMenuOpen(true);
-  };
-
-  /**
-   * Handles closing the quality selection menu.
-   */
-  const handleQualityMenuClose = useCallback((): void => {
-    setQualityMenuOpen(false);
+  const handleQualityChange = useCallback((event: SelectChangeEvent<unknown>): void => {
+    setJpegQuality(Number(event.target.value));
   }, []);
-
-  /**
-   * Handles selecting a quality value.
-   *
-   * @param quality - The selected JPEG quality percentage
-   */
-  const handleSelectQuality = useCallback(
-    (quality: number): void => {
-      setJpegQuality(quality);
-      handleQualityMenuClose();
-    },
-    [handleQualityMenuClose]
-  );
 
   /**
    * Handles focusing the title input when the dialog opens.
    */
   const handleDialogEntered = useCallback((): void => {
     titleInputRef.current?.focus();
+  }, []);
+
+  /**
+   * Handles when the title input value changes.
+   */
+  const handleTitleChange = useCallback((e: ChangeEvent<HTMLInputElement>): void => {
+    setExportTitle(e.target.value);
   }, []);
 
   // #endregion HANDLERS
@@ -378,22 +358,72 @@ export default function ExportModal(): JSX.Element {
       container={shellContainer}
     >
       <DialogTitle>{t('exportModal.title')}</DialogTitle>
-      <DialogContent dividers ref={dialogRef}>
+      <DialogContent dividers ref={dialogRef} sx={memoSxClasses.dialogContent}>
         {/* Title input */}
-        <Box sx={sxClasses.title}>
+        <Box sx={memoSxClasses.exportSettings}>
           <TextField
             id={`${mapId}-export-title-input`}
             inputRef={titleInputRef}
             label={t('exportModal.exportTitle')}
             variant="standard"
             value={exportTitle}
-            onChange={(e: ChangeEvent<HTMLInputElement>) => setExportTitle(e.target.value)}
-            sx={sxClasses.titleInput}
+            onChange={handleTitleChange}
+            sx={memoSxClasses.exportTitleInput}
           />
+          <Box sx={memoSxClasses.exportOptions}>
+            {/* Format Selection */}
+            <Select
+              labelId={`${mapId}-export-type-label`}
+              formControlProps={{ variant: 'standard', size: 'small' }}
+              id={`${mapId}-export-type-select`}
+              value={exportFormat}
+              onChange={handleFormatChange}
+              label={t('exportModal.formatSelect')}
+              menuItems={memoFormatMenuItems}
+              variant="standard"
+              MenuProps={{ container: shellContainer }}
+              inputLabel={{ id: `${mapId}-export-type-label` }}
+              fullWidth
+            />
+
+            {/* DPI Selection - Only show for PNG and JPEG */}
+            {(exportFormat === 'png' || exportFormat === 'jpeg') && (
+              <Select
+                labelId={`${mapId}-export-value-label`}
+                formControlProps={{ variant: 'standard', size: 'small' }}
+                id={`${mapId}-export-value-select`}
+                value={exportMapResolution}
+                onChange={handleDpiChange}
+                label={t('exportModal.resolutionSelect')}
+                menuItems={memoDpiMenuItems}
+                variant="standard"
+                MenuProps={{ container: shellContainer }}
+                inputLabel={{ id: `${mapId}-export-value-label` }}
+                fullWidth
+              />
+            )}
+
+            {/* Quality Selection - Only show for JPEG */}
+            {exportFormat === 'jpeg' && (
+              <Select
+                labelId={`${mapId}-export-quality-label`}
+                formControlProps={{ variant: 'standard', size: 'small' }}
+                id={`${mapId}-export-quality-select`}
+                value={jpegQuality}
+                onChange={handleQualityChange}
+                label={t('exportModal.qualitySelect')}
+                menuItems={memoQualityMenuItems}
+                variant="standard"
+                MenuProps={{ container: shellContainer }}
+                inputLabel={{ id: `${mapId}-export-quality-label` }}
+                fullWidth
+              />
+            )}
+          </Box>
         </Box>
 
         {/* PDF Preview */}
-        <Box ref={exportContainerRef} sx={{ textAlign: 'center' }}>
+        <Box ref={exportContainerRef}>
           {(() => {
             if (isMapLoading || isLegendLoading) {
               // Calculate skeleton dimensions: 80% of dialog width with map aspect ratio
@@ -403,76 +433,30 @@ export default function ExportModal(): JSX.Element {
               const mapAspectRatio = mapCanvas ? mapCanvas.height / mapCanvas.width : 1.3;
               const skeletonHeight = skeletonWidth * mapAspectRatio;
 
-              return <Skeleton variant="rounded" width={skeletonWidth} height={skeletonHeight} sx={sxClasses.mapSkeletonMargin} />;
+              return <Skeleton variant="rounded" width={skeletonWidth} height={skeletonHeight} sx={memoSxClasses.mapSkeletonMargin} />;
             }
 
             if (pngPreviewUrls) {
               return pngPreviewUrls.map((imageUrl) => {
                 const key = imageUrl.substring(imageUrl.length - 10);
-                return <Box component="img" key={key} src={imageUrl} alt="Export Preview" sx={sxClasses.mapPreview} />;
+                return <Box component="img" key={key} src={imageUrl} alt={t('exportModal.previewAlt')!} sx={memoSxClasses.mapPreview} />;
               });
             }
 
-            return <Box sx={sxClasses.mapLoading}>Loading preview...</Box>;
+            return <Box sx={memoSxClasses.mapLoading}>Loading preview...</Box>;
           })()}
         </Box>
       </DialogContent>
-      <DialogActions sx={sxClasses.dialogActions}>
-        <Button onClick={handleCloseModal} type="text" size="small" sx={sxClasses.buttonOutlined}>
+      <DialogActions sx={memoSxClasses.dialogActions}>
+        <Button onClick={handleCloseModal} type="text" size="medium" variant="outlined">
           {t('general.cancel')}
         </Button>
-
-        {/* Format Selection Menu */}
-        <Menu id={`${mapId}-export-format-selection`} open={formatMenuOpen} onClose={handleFormatMenuClose} anchorEl={formatAnchorEl}>
-          <MenuItem onClick={() => handleSelectFormat('pdf')}>PDF</MenuItem>
-          <MenuItem onClick={() => handleSelectFormat('png')}>PNG</MenuItem>
-          <MenuItem onClick={() => handleSelectFormat('jpeg')}>JPEG</MenuItem>
-        </Menu>
-        <Button type="text" onClick={handleFormatMenuClick} variant="outlined" size="small" sx={sxClasses.buttonOutlined}>
-          {t('exportModal.formatBtn')} {exportFormat.toUpperCase()}
-        </Button>
-
-        {/* DPI Selection - Only show for PNG and JPEG */}
-        {(exportFormat === 'png' || exportFormat === 'jpeg') && (
-          <>
-            <Menu id={`${mapId}-export-dpi-selection`} open={dpiMenuOpen} onClose={handleMenuClose} anchorEl={dpiAnchorEl}>
-              <MenuItem onClick={() => handleSelectDpi(96)}>96 {t('exportModal.dpiBtn')}</MenuItem>
-              <MenuItem onClick={() => handleSelectDpi(150)}>150 {t('exportModal.dpiBtn')}</MenuItem>
-              <MenuItem onClick={() => handleSelectDpi(300)}>300 {t('exportModal.dpiBtn')}</MenuItem>
-            </Menu>
-            <Button type="text" onClick={handleDpiMenuClick} variant="outlined" size="small" sx={sxClasses.buttonOutlined}>
-              {t('exportModal.dpiBtn')}: {exportMapResolution}
-            </Button>
-          </>
-        )}
-
-        {/* Quality Selection - Only show for JPEG */}
-        {exportFormat === 'jpeg' && (
-          <>
-            <Menu
-              id={`${mapId}-export-quality-selection`}
-              open={qualityMenuOpen}
-              onClose={handleQualityMenuClose}
-              anchorEl={qualityAnchorEl}
-            >
-              {QUALITY_OPTIONS.map((quality) => (
-                <MenuItem key={quality} onClick={() => handleSelectQuality(quality)}>
-                  {quality}%
-                </MenuItem>
-              ))}
-            </Menu>
-            <Button type="text" onClick={handleQualityMenuClick} variant="outlined" size="small" sx={sxClasses.buttonOutlined}>
-              {t('exportModal.qualityBtn')}: {jpegQuality}%
-            </Button>
-          </>
-        )}
 
         <LoadingButton
           loading={isMapExporting}
           variant="contained"
           onClick={handleExport}
-          size="small"
-          sx={sxClasses.buttonContained}
+          size="medium"
           disabled={isLegendLoading || isMapLoading}
         >
           {t('exportModal.exportBtn')}

@@ -6,6 +6,7 @@ import { IconButton } from '@/ui/icon-button/icon-button';
 import { DownloadIcon } from '@/ui/icons';
 import { useUIController } from '@/core/controllers/use-controllers';
 import { useStoreLayerAreLayersLoading } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { logger } from '@/core/utils/logger';
 
 /** Props for the ExportButton component. */
 interface ExportProps {
@@ -24,6 +25,8 @@ interface ExportProps {
  * @returns The export button
  */
 export default function ExportButton({ id, className = '', sxDetails }: ExportProps): JSX.Element {
+  logger.logTraceRender('components/export/export-modal-button');
+
   // Hooks
   const theme = useTheme();
   const { t } = useTranslation<string>();
@@ -37,6 +40,7 @@ export default function ExportButton({ id, className = '', sxDetails }: ExportPr
       id={id}
       aria-label={t('appbar.export')}
       aria-haspopup="dialog"
+      tooltipPlacement="right"
       onClick={() => uiController.enableFocusTrap({ activeElementId: 'export', callbackElementId: id })}
       sx={{ [theme.breakpoints.down('md')]: { display: 'none' }, ...sxDetails }}
       className={className}
