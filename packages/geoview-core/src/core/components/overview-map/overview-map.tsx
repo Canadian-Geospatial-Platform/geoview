@@ -45,17 +45,20 @@ export function OverviewMap(props: OverviewMapProps): JSX.Element {
 
   // Values
   // TODO: CHECK - Alternative approach, the determination of 'if the overview-map should be visible' could probably be handled elsewhere and the component only listen to a visibility flag from the store?
-  const shouldBeVisibile = isInitialized && (hideOnZoom === 0 || zoomLevel > hideOnZoom);
+  let shouldBeVisible: boolean | undefined = undefined;
+  if (isInitialized) {
+    shouldBeVisible = hideOnZoom === 0 || zoomLevel > hideOnZoom;
+  }
 
   /**
    * Updates visibility based on zoom level changes.
    */
   useEffect(() => {
-    logger.logTraceUseEffect('OVERVIEW-MAP - zoom level changed');
+    logger.logTraceUseEffect('OVERVIEW-MAP - shouldBeVisible', shouldBeVisible);
 
     // Tweak the visibility
-    mapController.setOverviewMapVisibility(shouldBeVisibile);
-  }, [mapController, shouldBeVisibile]);
+    mapController.setOverviewMapVisibility(!!shouldBeVisible);
+  }, [mapController, shouldBeVisible]);
 
   /**
    * Initializes the overview map control and renders the toggle button on mount.
