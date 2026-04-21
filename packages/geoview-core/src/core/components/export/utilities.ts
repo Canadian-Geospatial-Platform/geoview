@@ -716,8 +716,9 @@ export class ExportUtilities {
       const currentRootName = rootLayerName || layer.layerName;
 
       // Check if layer is visible on the map
-      const layerInfo = layers.find((info) => info.layerPath === layer.layerPath);
-      if (!layerInfo?.visible) {
+      // For root layers, check the root layers array; for nested layers, use the layer object directly
+      const isVisible = depth === 0 ? layers.find((info) => info.layerPath === layer.layerPath)?.visible : layer.visible;
+      if (!isVisible) {
         return items;
       }
 
