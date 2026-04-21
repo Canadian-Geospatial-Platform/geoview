@@ -17,6 +17,7 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { getStoreMapConfigGlobalSettings } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
+import { whenThisThen } from '@/core/utils/utilities';
 import { LayerNoLastQueryToPerformError } from '@/core/exceptions/geoview-exceptions';
 import { AllFeatureInfoLayerSet } from '@/geo/layer/layer-sets/all-feature-info-layer-set';
 import { HoverFeatureInfoLayerSet } from '@/geo/layer/layer-sets/hover-feature-info-layer-set';
@@ -139,7 +140,14 @@ export class LayerSetController extends AbstractMapViewerController {
    * @param layerPath - The layer path to query the features from
    * @returns A promise that resolves with the feature info result
    */
-  triggerGetAllFeatureInfo(layerPath: string): Promise<TypeFeatureInfoResult> {
+  async triggerGetAllFeatureInfo(layerPath: string, waitForLayer: boolean = false): Promise<TypeFeatureInfoResult> {
+    // If the layer isn't in the domain yet, give it a chance to get registered
+    if (waitForLayer) {
+      // Wait for the layer to be available, this can happen if the trigger is called too soon (or between the layer config registration and the actual layer registration)
+      await whenThisThen(() => this.allFeatureInfoLayerSet.getRegisteredLayerPaths().includes(layerPath));
+    }
+
+    // Query the registered layer
     return this.allFeatureInfoLayerSet.queryLayer(layerPath);
   }
 
