@@ -388,7 +388,7 @@ export const useStoreDataTableAllFeaturesDataArray = (): TypeAllFeatureInfoResul
  * @returns The feature info entries for the layer, or undefined if not found
  */
 export const getStoreDataTableFeaturesByPath = (mapId: string, layerPath: string): TypeFeatureInfoEntry[] | undefined => {
-  return getStoreDataTableState(mapId)?.allFeaturesDataArray.filter((data) => data.layerPath === layerPath)?.[0].features;
+  return getStoreDataTableState(mapId)?.allFeaturesDataArray.filter((data) => data.layerPath === layerPath)?.[0]?.features;
 };
 
 /**
