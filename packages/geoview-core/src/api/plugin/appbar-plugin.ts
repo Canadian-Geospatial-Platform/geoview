@@ -92,6 +92,12 @@ export abstract class AppBarPlugin extends AbstractPlugin {
 
     // Create a new button panel on the app-bar
     this.buttonPanel = this.mapViewer.appBarApi.createAppbarPanel(this.buttonProps, this.panelProps) || undefined;
+
+    // If it should be opened from the start
+    if (this.getConfig().isOpen) {
+      // Make sure the app bar is open if the config says it should be
+      this.controllerRegistry.uiController.setActiveAppBarTab(this.pluginId, true, false);
+    }
   }
 
   /**
