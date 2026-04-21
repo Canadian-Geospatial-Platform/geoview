@@ -246,7 +246,7 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
       // Get the features already loaded in the store, if any
       const features = getStoreDataTableFeaturesByPath(mapId, selectedLayerPath);
 
-      // If no features were already loaded (not event an empty array)
+      // If no features were already loaded (not even an empty array)
       if (!features) {
         // Check if the layer is visible and in range (stable check that doesn't change when features load)
         const isLayerAvailable = visibleInRangeLayers.includes(selectedLayerPath);
@@ -254,7 +254,7 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
         if (isLayerAvailable) {
           setIsLoading(true);
           layerSetController
-            .triggerGetAllFeatureInfo(selectedLayerPath)
+            .triggerGetAllFeatureInfo(selectedLayerPath, true)
             .catch((error: unknown) => {
               // Log error
               logger.logError(`Data panel has failed to get all feature info, error: ${error}`);
