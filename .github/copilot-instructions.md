@@ -150,6 +150,13 @@ cgpv.init();
 - `LegendsLayerSet`, `DetailsLayerSet` - extend `AbstractLayerSet`
 - Event-driven sync with layer changes via result sets
 
+**Layer Name Resolution** — `ConfigBaseClass` has two methods for getting a layer's name:
+
+- **`getLayerName()`** — Returns only the entry-level `#layerName` field. Can be `undefined` for layers whose name is set at the GeoView layer config level (e.g., geocore/UUID layers).
+- **`getLayerNameCascade()`** — Cascades through `#layerName` → `geoviewLayerName` → `geoviewLayerId` → `layerPath`. Always returns a non-empty string.
+
+**Always use `getLayerNameCascade()` when you need a display name.** Use `getLayerName()` only when you specifically need to check if the entry has its own name set.
+
 ### Event Delegate System
 
 GeoView uses a lightweight typed delegate event system (see [event-helper.md](../docs/programming/event-helper.md)). Classes own private handler arrays (`#onXxxHandlers`) and expose `onXxx()`/`offXxx()` subscribe/unsubscribe methods. Events are emitted via `EventHelper.emitEvent()`. Controllers subscribe in `onHook()` and unsubscribe in `onUnhook()`.
