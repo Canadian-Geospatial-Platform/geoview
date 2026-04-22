@@ -503,15 +503,6 @@ export abstract class GVAbstractTester extends AbstractTester {
   }
 
   /**
-   * Sets the MapViewer.
-   *
-   * @param mapViewer - The MapViewer to set
-   */
-  setMapViewer(mapViewer: MapViewer): void {
-    this.#mapViewer = mapViewer;
-  }
-
-  /**
    * Gets the Map Id.
    *
    * @returns The Map Id
@@ -535,6 +526,16 @@ export abstract class GVAbstractTester extends AbstractTester {
    */
   getControllersRegistry(): ControllerRegistry {
     return this.#controllerRegistry;
+  }
+
+  /**
+   * Sets the MapViewer and the Controller registry for the current test.
+   *
+   * @param mapViewer - The MapViewer to set
+   */
+  reassignMapViewerAndControllers(mapViewer: MapViewer): void {
+    this.#mapViewer = mapViewer;
+    this.#controllerRegistry = mapViewer.controllers;
   }
 
   /**
