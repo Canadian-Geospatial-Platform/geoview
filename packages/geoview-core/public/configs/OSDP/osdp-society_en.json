@@ -43,17 +43,6 @@
             }
           }
         ]
-      },
-      {
-        "geoviewLayerId": "66909604-f685-4f1b-a3d8-447996e6b41b",
-        "geoviewLayerName": "Majority (%) mother tongue by census division, 2016",
-        "geoviewLayerType": "geoCore",
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "7",
-            "layerName": "Majority (%) mother tongue by census division, 2016"
-          }
-        ]
       }
     ]
   },

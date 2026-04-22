@@ -249,6 +249,11 @@
         // Show the current tab and mark button as active
         document.getElementById(tabName).classList.add('active');
         evt.currentTarget.classList.add('active');
+
+        // Update URL without reloading the page
+        const url = new URL(window.location);
+        url.searchParams.set('tab', tabName);
+        window.history.replaceState({}, '', url);
       }
 
       // Check URL parameter to open specific tab on load
