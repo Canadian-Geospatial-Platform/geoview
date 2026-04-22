@@ -524,28 +524,13 @@ export class MapController extends AbstractMapViewerController {
     // If invalid, return
     if (!VALID_PROJECTION_CODES.includes(Number(projectionNumber))) return Promise.resolve();
 
-    // Get the max extent
-    // GV The extent is different between LCC and WM and switching from one to the other may introduce weird constraint.
-    // GV We may have to keep extent as array for configuration file but, technically, user does not change projection often.
-    // GV A wider LCC extent like [-125, 30, -60, 89] (minus -125) will introduce distortion on larger screen...
-    // GV It is why we apply the max extent only on native projection, otherwise we send undefined so that it applies default
-    const viewSettings = getStoreMapConfigViewSettings(this.getMapId());
-    let maxMapExtent;
-    if (
-      viewSettings &&
-      viewSettings.maxExtent &&
-      Projection.readEPSGNumber(this.getMapViewer().getProjection()) === Number(viewSettings.projection)
-    ) {
-      maxMapExtent = viewSettings.maxExtent;
-    }
-
     // Create a promise that will be resolved by the projection changed event handler
     const promise = new Promise<void>((resolve) => {
       this.#projectionChangeResolve = resolve;
     });
 
     // Set the projection on the MapViewer (fires the MapProjectionChangedEvent)
-    const changed = this.getMapViewer().setProjection(projectionNumber, maxMapExtent);
+    const changed = this.getMapViewer().setProjection(projectionNumber);
 
     // If the projection was not changed (unsupported), resolve immediately
     if (!changed) {

@@ -21,7 +21,7 @@ import {
   VALID_BASEMAP_ID,
   MAP_CENTER,
   MAP_ZOOM_LEVEL,
-  MAX_EXTENTS_RESTRICTION,
+  MAX_EXTENTS_RESTRICTION_LONLAT,
 } from '@/api/types/map-schema-types';
 import { deepMerge } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
@@ -102,7 +102,7 @@ export class MapFeatureConfig {
     if (!VALID_PROJECTION_CODES.includes(this.map.viewSettings.projection)) {
       logger.logWarning(`Invalid projection code '${this.map.viewSettings.projection}', defaulting to 3978`);
       this.map.viewSettings.projection = DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.projection;
-      this.map.viewSettings.maxExtent = MAX_EXTENTS_RESTRICTION[this.map.viewSettings.projection];
+      this.map.viewSettings.maxExtent = MAX_EXTENTS_RESTRICTION_LONLAT[this.map.viewSettings.projection];
       this.map.viewSettings.initialView = {
         zoomAndCenter: [MAP_ZOOM_LEVEL[this.map.viewSettings.projection], MAP_CENTER[this.map.viewSettings.projection]],
       };
@@ -152,7 +152,7 @@ export class MapFeatureConfig {
       projection && VALID_PROJECTION_CODES.includes(projection) ? projection : DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.projection;
 
     // Set values specific to projection
-    mapConfig.viewSettings.maxExtent = MAX_EXTENTS_RESTRICTION[proj];
+    mapConfig.viewSettings.maxExtent = MAX_EXTENTS_RESTRICTION_LONLAT[proj];
     mapConfig.viewSettings.initialView = { zoomAndCenter: [MAP_ZOOM_LEVEL[proj], MAP_CENTER[proj]] };
 
     // Return it
