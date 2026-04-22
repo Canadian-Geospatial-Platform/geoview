@@ -34,10 +34,15 @@ import { FeatureInfoLayerSet } from '@/geo/layer/layer-sets/feature-info-layer-s
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 import type { TypeLegendItem, TypeLegendLayer, TypeLegendLayerItem } from '@/core/components/layers/types';
 import {
+  getStoreLayerIcons,
+  getStoreLayerItems,
   getStoreLayerLegendLayers,
+  getStoreLayerLegendQueryStatus,
+  getStoreLayerLegendSchemaTag,
+  getStoreLayerLegendStyleConfig,
   getStoreLayerOrderedLayerIndexByPath,
+  getStoreLayerStatus,
   setStoreLegendLayersDirectly,
-  type TypeLegendResultSetEntry,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
@@ -45,7 +50,6 @@ import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
-import { GeoUtilities } from '@/geo/utils/utilities';
 
 /**
  * LayerSetController class that extends the AbstractMapViewerController and provides methods to interact with map layers.
@@ -176,12 +180,8 @@ export class LayerSetController extends AbstractMapViewerController {
    * @param layerPath - The layer path to clear features for
    */
   resetResultSet(layerPath: string): void {
-    const { resultSet } = this.featureInfoLayerSet;
-
-    if (resultSet[layerPath]) {
-      resultSet[layerPath].features = [];
-      this.getControllersRegistry().detailsController.propagateFeatureInfo(resultSet[layerPath]);
-    }
+    // Reset the details features
+    this.featureInfoLayerSet.clearResults(layerPath);
 
     // Remove highlighted features and marker if it is the selected layer path
     if (getStoreDetailsSelectedLayerPath(this.getMapId()) === layerPath) {
@@ -297,7 +297,7 @@ export class LayerSetController extends AbstractMapViewerController {
    * @param legendResultSetEntry - The legend result set entry that triggered the propagation
    * @deprecated This function should be replaced, it's called too often and does too many things, see TODO.
    */
-  propagateLegendToStore(legendResultSetEntry: TypeLegendResultSetEntry): void {
+  propagateLegendToStore(layerPath: string): void {
     // TODO: REFACTOR - propagateLegendToStore - This whole function should be refactored to an initial propagation into the store and then only specific propagations in the store.
     // TO.DOCONT: Right now things are sometimes recalculated, sometimes reset, sometimes unsure processing, for every single propagation in the store...
 
@@ -308,7 +308,6 @@ export class LayerSetController extends AbstractMapViewerController {
     // TO.DOCONT: as far as react is concerned, it's the same array object.
     // TO.DOCONT: UPDATE: Recently the stores have been fixed so that children are now a new array when updated. Refactoring this should be a bit more straightforward.
 
-    const { layerPath } = legendResultSetEntry;
     const layerPathNodes = layerPath.split('/');
 
     const setLayerControls = (layerConfig: ConfigBaseClass, isChild: boolean = false, layer?: AbstractBaseGVLayer): TypeLayerControls => {
@@ -360,9 +359,21 @@ export class LayerSetController extends AbstractMapViewerController {
       // Get the existing store entry if any
       const existingStoreEntry: TypeLegendLayer | undefined = existingEntries[entryIndex];
 
+      // Get the layer status
+      const layerStatus = getStoreLayerStatus(this.getMapId(), layerConfig.layerPath);
+
+      // Get the legend query status
+      const legendQueryStatus = getStoreLayerLegendQueryStatus(this.getMapId(), layerConfig.layerPath);
+
+      // Get the legend info
+      const legendSchemaTag = getStoreLayerLegendSchemaTag(this.getMapId(), layerConfig.layerPath);
+
+      // Get the style config
+      const legendStyleConfig = getStoreLayerLegendStyleConfig(this.getMapId(), layerConfig.layerPath);
+
       if (layerConfig.getEntryTypeIsGroup()) {
         // Get the schema tag
-        const schemaTag = legendResultSetEntry.data?.type ?? layerConfig.getSchemaTag();
+        const schemaTag = legendSchemaTag ?? layerConfig.getSchemaTag();
 
         const controls: TypeLayerControls = setLayerControls(layerConfig, currentLevel > 2);
         if (entryIndex === -1) {
@@ -371,11 +382,12 @@ export class LayerSetController extends AbstractMapViewerController {
             layerId: layerConfig.layerId,
             layerPath: entryLayerPath,
             layerName,
-            layerStatus: legendResultSetEntry.layerStatus,
-            legendQueryStatus: legendResultSetEntry.legendQueryStatus,
+            layerStatus,
+            legendQueryStatus: legendQueryStatus ?? 'init',
+            legendSchemaTag,
             schemaTag: schemaTag,
             entryType: 'group',
-            canToggle: legendResultSetEntry.data?.type !== CONST_LAYER_TYPES.ESRI_IMAGE,
+            canToggle: legendSchemaTag !== CONST_LAYER_TYPES.ESRI_IMAGE,
             opacity: layerConfig.getInitialSettings()?.states?.opacity ?? 1, // GV: This is call all the time, if set on OL use value, default to config or 1
             visible: true,
             inVisibleRange: true,
@@ -408,19 +420,10 @@ export class LayerSetController extends AbstractMapViewerController {
         // Not a group
         const layerConfigCasted = layerConfig as AbstractBaseLayerEntryConfig;
 
-        // Read the icons
-        // If data type is set
-        let icons: TypeLegendLayerItem[] = [];
-        let items: TypeLegendItem[] = [];
-        if (legendResultSetEntry.data) {
-          icons = GeoUtilities.getLayerIconImage(legendResultSetEntry.data.type, legendResultSetEntry.data) ?? [];
-          items = GeoUtilities.getLayerItemsFromIcons(legendResultSetEntry.data.type, icons);
-        }
-
         const controls: TypeLayerControls = setLayerControls(layerConfig, currentLevel > 2, layer);
 
         // Get the schema tag
-        const schemaTag = legendResultSetEntry.data?.type ?? layerConfig.getSchemaTag();
+        const schemaTag = legendSchemaTag ?? layerConfig.getSchemaTag();
 
         // Get the visibility flag, invisible if the layer doesn't exist yet (could be only the config exists)
         const visible = layer?.getVisible() ?? false;
@@ -434,9 +437,9 @@ export class LayerSetController extends AbstractMapViewerController {
           layerPath: entryLayerPath,
           layerAttribution: layer?.getAttributions(),
           layerName,
-          layerStatus: legendResultSetEntry.layerStatus,
-          legendQueryStatus: legendResultSetEntry.legendQueryStatus,
-          styleConfig: legendResultSetEntry.data?.styleConfig,
+          layerStatus,
+          legendQueryStatus: legendQueryStatus ?? 'init',
+          styleConfig: legendStyleConfig,
           schemaTag: schemaTag,
           entryType: layerConfig.getEntryType(),
           canToggle: schemaTag !== CONST_LAYER_TYPES.ESRI_IMAGE,
@@ -448,8 +451,8 @@ export class LayerSetController extends AbstractMapViewerController {
           inVisibleRange: layer?.inVisibleRange(this.getMapViewer().getView().getZoom() ?? 0) ?? true,
           legendCollapsed: layerConfig.getInitialSettings()?.states?.legendCollapsed ?? false, // default: false
           children: [] as TypeLegendLayer[],
-          items,
-          icons,
+          items: getStoreLayerItems(this.getMapId(), layerConfig.layerPath) ?? [],
+          icons: getStoreLayerIcons(this.getMapId(), layerConfig.layerPath) ?? [],
           // TODO: Encapsulate rasterFunction and possibly other 'settings' into their own object
           rasterFunction: layer instanceof GVEsriImage ? layer.getRasterFunction() : undefined,
           rasterFunctionInfos: layer instanceof GVEsriImage ? layer.getMetadataRasterFunctionInfos() : undefined,
@@ -534,7 +537,7 @@ export class LayerSetController extends AbstractMapViewerController {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   #handleMapPointerMoved(mapViewer: MapViewer, event: MapPointerMoveEvent): void {
     // Clear all hover features
-    this.hoverFeatureInfoLayerSet.clearResultsAll();
+    this.hoverFeatureInfoLayerSet.clearResults();
   }
 
   /**

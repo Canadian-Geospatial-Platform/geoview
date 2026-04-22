@@ -40,6 +40,7 @@ export interface TypeLegendLayer {
   layerAttribution?: string[];
   layerName: string;
   legendQueryStatus: LegendQueryStatus;
+  legendSchemaTag?: TypeGeoviewLayerType;
   schemaTag: TypeGeoviewLayerType;
   entryType: TypeLayerEntryType;
   styleConfig?: TypeLayerStyleConfig;

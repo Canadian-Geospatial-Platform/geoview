@@ -1,6 +1,6 @@
 import { useStore } from 'zustand';
 
-import type { TypeFeatureInfoEntry, TypeLayerData, TypeResultSet, TypeResultSetEntry } from '@/api/types/map-schema-types';
+import type { TypeFeatureInfoEntry, TypeLayerData, TypeQueryStatus, TypeResultSetEntry } from '@/api/types/map-schema-types';
 import { type TypeSetStore, type TypeGetStore, useStableSelector } from '@/core/stores/geoview-store';
 import { getGeoViewStore, helperDeleteFromArray, useGeoViewStore } from '@/core/stores/stores-managers';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
@@ -333,6 +333,24 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
 
 // #endregion STATE INITIALIZATION
 
+// #region UTIL FUNCTIONS (PRIVATE)
+
+/**
+ * Finds a layer data entry from the all features data array by layer path.
+ *
+ * @param layerPath - The path of the layer to find
+ * @param allFeaturesDataArray - The array to search in
+ * @returns The matching entry, or undefined if not found
+ */
+const findLayerDataFromLayerDataArray = (
+  layerPath: string,
+  allFeaturesDataArray: TypeAllFeatureInfoResultSetEntry[]
+): TypeAllFeatureInfoResultSetEntry | undefined => {
+  return allFeaturesDataArray.find((layer) => layer.layerPath === layerPath);
+};
+
+// #endregion UTIL FUNCTIONS (PRIVATE)
+
 // #region STATE GETTERS & HOOKS
 // GV Getters should be used to get the values at a moment in time.
 // GV Hooks should be used to attach to values and trigger UI components when they change.
@@ -411,6 +429,29 @@ export const getStoreDataTableAllFeaturesDataArray = (mapId: string): TypeAllFea
 export const useStoreDataTableAllFeaturesDataArray = (): TypeAllFeatureInfoResultSetEntry[] =>
   useStore(useGeoViewStore(), (state) => state.dataTableState.allFeaturesDataArray);
 
+/**
+ * Gets the aggregated feature info array for all layers in the data table.
+ *
+ * @param mapId - The map identifier.
+ * @returns The array of feature info result set entries.
+ */
+export const getStoreDataTableQueryStatus = (mapId: string, layerPath: string): TypeQueryStatus | undefined => {
+  return findLayerDataFromLayerDataArray(layerPath, getStoreDataTableState(mapId)?.allFeaturesDataArray)?.queryStatus;
+};
+
+/**
+ * Hook that returns the query status for a specific layer in the data table.
+ *
+ * @param layerPath - The layer path to get the query status for
+ * @returns The query status for the layer, or undefined if the layer is not found
+ */
+export const useStoreDataTableQueryStatus = (layerPath: string): TypeQueryStatus | undefined => {
+  return useStore(
+    useGeoViewStore(),
+    (state) => findLayerDataFromLayerDataArray(layerPath, state.dataTableState.allFeaturesDataArray)?.queryStatus
+  );
+};
+
 // #endregion STATE GETTERS & HOOKS
 
 // #region STATE GETTERS & HOOKS - OTHERS (no match between getter-hook)
@@ -423,7 +464,7 @@ export const useStoreDataTableAllFeaturesDataArray = (): TypeAllFeatureInfoResul
  * @returns The feature info entries for the layer, or undefined if not found
  */
 export const getStoreDataTableFeaturesByPath = (mapId: string, layerPath: string): TypeFeatureInfoEntry[] | undefined => {
-  return getStoreDataTableState(mapId)?.allFeaturesDataArray.filter((data) => data.layerPath === layerPath)?.[0]?.features;
+  return findLayerDataFromLayerDataArray(layerPath, getStoreDataTableState(mapId)?.allFeaturesDataArray)?.features;
 };
 
 /**
@@ -603,19 +644,32 @@ export const addOrUpdateStoreDataTableFilter = (mapId: string, layerPath: string
 /**
  * Propagates a feature info result set entry to the data table store.
  *
- * If an entry for the same layer path does not already exist in the
- * allFeaturesDataArray, it is appended.
+ * If an entry for the same layer path already exists, its queryStatus
+ * and features are updated. Otherwise a new entry is appended.
  *
- * @param mapId - The map identifier.
- * @param resultSetEntry - The feature info result set entry to propagate.
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to propagate data for
+ * @param queryStatus - The current query status
+ * @param features - Optional array of feature info entries for the layer
  */
-export const propagateFeatureInfoDataTableToStore = (mapId: string, resultSetEntry: TypeAllFeatureInfoResultSetEntry): void => {
+export const propagateFeatureInfoDataTableToStore = (
+  mapId: string,
+  layerPath: string,
+  queryStatus: TypeQueryStatus,
+  features: TypeFeatureInfoEntry[] | undefined
+): void => {
   const dataTableState = getStoreDataTableState(mapId);
 
   // Create a get all features info object for each layer which is then used to render layers
   const allFeaturesDataArray = [...dataTableState.allFeaturesDataArray];
-  if (!allFeaturesDataArray.find((layerEntry) => layerEntry.layerPath === resultSetEntry.layerPath)) {
-    allFeaturesDataArray.push(resultSetEntry);
+  const existingEntry = findLayerDataFromLayerDataArray(layerPath, allFeaturesDataArray);
+  if (existingEntry) {
+    // Update existing entry
+    const existingIndex = allFeaturesDataArray.indexOf(existingEntry);
+    allFeaturesDataArray[existingIndex] = { ...existingEntry, queryStatus, features };
+  } else {
+    // Append new entry
+    allFeaturesDataArray.push({ layerPath, queryStatus, features });
   }
 
   // Update the layer data array in the store
@@ -705,6 +759,3 @@ export interface IDataTableSettings {
 
 /** A feature info result set entry that combines result set entry metadata with layer data. */
 export type TypeAllFeatureInfoResultSetEntry = TypeResultSetEntry & TypeLayerData;
-
-/** A full result set of feature info entries for all layers. */
-export type TypeAllFeatureInfoResultSet = TypeResultSet<TypeAllFeatureInfoResultSetEntry>;

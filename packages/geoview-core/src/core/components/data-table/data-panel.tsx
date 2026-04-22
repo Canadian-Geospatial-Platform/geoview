@@ -134,7 +134,7 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
    */
   const isMapFilteredSelectedForLayer = useCallback(
     (layerPath: string): boolean => {
-      return datatableSettings[layerPath].mapFilteredRecord && !!datatableSettings[layerPath].rowsFilteredRecord;
+      return datatableSettings[layerPath]?.mapFilteredRecord && !!datatableSettings[layerPath]?.rowsFilteredRecord;
     },
     [datatableSettings]
   );

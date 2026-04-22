@@ -330,7 +330,7 @@ export class LayerDomain {
    * @returns The layer paths of the GV Layers
    */
   getGeoviewLayerPaths(): string[] {
-    return Object.keys(this.#gvLayers);
+    return Object.keys(this.#layerEntryConfigs);
   }
 
   /**

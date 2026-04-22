@@ -149,7 +149,6 @@ export class WFS extends AbstractGeoViewVector {
     }
 
     // Redirect
-    // TODO: MINOR - Config init - Check if there's a way to better determine the vector strategy flag, defaults to 'all', how is it used here?
     return WFS.createGeoviewLayerConfig(
       this.getGeoviewLayerId(),
       this.getGeoviewLayerName(),
@@ -264,7 +263,7 @@ export class WFS extends AbstractGeoViewVector {
     sourceOptions: SourceOptions<Feature>,
     readOptions: ReadOptions
   ): Promise<Feature[]> {
-    // Cast it to a WFS layer config
+    // Cast it to proper type
     const layerConfigWFS = layerConfig as OgcWfsLayerEntryConfig;
 
     // Get the supported info formats
@@ -276,12 +275,12 @@ export class WFS extends AbstractGeoViewVector {
     // TODO: WMS - Add support for other formats. Not quite the GV issue #3134, but similar
 
     // TODO: FIX THIS EXCEPTION - Exception, the geo.weather.gc.ca/geomet service says it supports application/json, but it doesn't in reality
-    if (layerConfig.getDataAccessPath().includes('//geo.weather.gc.ca/geomet')) outputFormat = undefined;
+    if (layerConfigWFS.getDataAccessPath().includes('//geo.weather.gc.ca/geomet')) outputFormat = undefined;
 
     // Check if url contains metadata parameters for the getCapabilities request and reformat the urls
     let wfsUrl = GeoUtilities.ensureServiceRequestUrlGetFeature(
-      layerConfig.getDataAccessPath(),
-      layerConfig.layerId,
+      layerConfigWFS.getDataAccessPath(),
+      layerConfigWFS.layerId,
       layerConfigWFS.getVersion(),
       outputFormat,
       undefined,
@@ -298,10 +297,10 @@ export class WFS extends AbstractGeoViewVector {
     let responseData;
     if (outputFormat) {
       // Query and read Json
-      responseData = await AbstractGeoViewVector.fetchJson(wfsUrl, layerConfig.getSource().postSettings);
+      responseData = await AbstractGeoViewVector.fetchJson(wfsUrl, layerConfigWFS.getSource().postSettings);
     } else {
       // Query and read text
-      responseData = await AbstractGeoViewVector.fetchText(wfsUrl, layerConfig.getSource().postSettings);
+      responseData = await AbstractGeoViewVector.fetchText(wfsUrl, layerConfigWFS.getSource().postSettings);
     }
 
     // Check if the data is GeoJSON

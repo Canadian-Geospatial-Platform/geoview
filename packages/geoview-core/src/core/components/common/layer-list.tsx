@@ -11,6 +11,7 @@ import { LayerIcon } from './layer-icon';
 import { useStoreLayerStatus } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { logger } from '@/core/utils/logger';
 import { LAYER_PATH_COORDINATE_INFO, useStoreDetailsQueryStatus } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import { useStoreDataTableQueryStatus } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 
 /** Represents an entry in the layer list. */
 export interface LayerListEntry {
@@ -68,6 +69,7 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
   // TO.DOCONT: It should all be using store selector hooks instead. Fallback to layer query status if details query status is not available for now.
   const layerStatus = useStoreLayerStatus(layer.layerPath) ?? layer.layerStatus;
   const layerQueryStatus = useStoreDetailsQueryStatus(layer.layerPath) ?? layer.queryStatus;
+  const dataQueryStatus = useStoreDataTableQueryStatus(layer.layerPath) ?? layer.queryStatus;
 
   // Style
   const containerClass = [
@@ -81,7 +83,7 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
     .trim();
 
   // Constant for state
-  const isLoading = layerQueryStatus === 'processing' || layerStatus === 'loading' || layerStatus === 'processing';
+  const isLoading = layerQueryStatus === 'processing' || dataQueryStatus === 'processing' || layerStatus === 'loading' || layerStatus === 'processing';
   const isLayerCoordinateInfo = layer.layerPath === LAYER_PATH_COORDINATE_INFO;
 
   // Default disabled state

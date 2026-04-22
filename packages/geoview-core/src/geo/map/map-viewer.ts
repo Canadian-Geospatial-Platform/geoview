@@ -73,7 +73,8 @@ import type { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global
 import type { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import { Notifications } from '@/core/utils/notifications';
 import {
-  getStoreMapBasemapOptions,
+  getStoreMapCurrentBasemapOptionsOrInitial,
+  getStoreMapConfigViewSettings,
   getStoreMapGeolocatorSearchArea,
   getStoreMapInteraction,
   getStoreMapStateJson,
@@ -89,7 +90,6 @@ import {
   setStoreMapMoveEnd,
   setStoreMapInteraction,
   type TypeScaleInfo,
-  getStoreMapConfigViewSettings,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { getStoreAppDisplayTheme } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { getStoreLayerOrderedLayerPaths, type TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
@@ -346,7 +346,7 @@ export class MapViewer {
     this.modal = new ModalApi();
 
     // create basemap and pass in the map id to be able to access the map instance
-    this.basemap = new BasemapApi(this, this.controllers.mapController, getStoreMapBasemapOptions(this.mapId));
+    this.basemap = new BasemapApi(this, this.controllers.mapController, getStoreMapCurrentBasemapOptionsOrInitial(this.mapId));
 
     // Initialize layer api
     this.layer = new LayerApi(this.controllers, this.#layerDomain, this.geometry, this.featureHighlight);

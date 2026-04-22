@@ -143,6 +143,7 @@ export class LayerApi {
     this.featureInfoLayerSet = controllerRegistry.layerSetController.featureInfoLayerSet;
 
     // Keep a reference on the geometry api and feature highlight
+    // GV These assignations references of the layer sets are for legacy support. They could be removed eventually.
     this.geometry = geometryApi;
     this.featureHighlight = featureHighlight;
 

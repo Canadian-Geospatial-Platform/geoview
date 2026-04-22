@@ -50,7 +50,6 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
    *
    * @returns The strongly-typed layer metadata specific to this layer entry config.
    */
-  // TODO: REFACTOR - Fix this override once cleanup is ready. Search id: 7887777f
   override getLayerMetadata(): TypeOutfields[] | undefined {
     return super.getLayerMetadata() as TypeOutfields[] | undefined;
   }

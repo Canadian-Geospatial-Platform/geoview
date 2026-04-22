@@ -1,4 +1,4 @@
-import type { TypeGeoviewLayerType, TypeLayerMetadataVector, TypeBaseVectorSourceInitialConfig } from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerType, TypeBaseVectorSourceInitialConfig } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_ENTRY_TYPES } from '@/api/types/layer-schema-types';
 import type { AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
@@ -11,7 +11,6 @@ export interface VectorLayerEntryConfigProps extends AbstractBaseLayerEntryConfi
 /**
  * Type used to define a GeoView vector layer to display on the map.
  */
-// TODO: Refactor - This class should be named 'AbstractVectorLayerEntryConfig' to align with others
 export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /** Max number of records for query */
   maxRecordCount?: number;
@@ -38,31 +37,5 @@ export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfi
     return super.getSource();
   }
 
-  // /**
-  //  * Helper function to get the layer metadata casted as TypeLayerMetadataVector.
-  //  * @returns The casted layer metadata in the right type.
-  //  */
-  // TODO: REFACTOR - Add this function once cleanup is ready. Search id: 7887777f
-  // override getLayerMetadata(): TypeLayerMetadataVector | undefined {
-  //   return super.getLayerMetadata() as TypeLayerMetadataVector | undefined;
-  // }
-
   // #endregion OVERRIDES
-
-  // #region PUBLIC METHODS
-
-  /**
-   * Helper function to get the layer metadata casted as TypeLayerMetadataVector.
-   *
-   * @returns The casted layer metadata in the right type
-   */
-  getLayerMetadataCasted(): TypeLayerMetadataVector | undefined {
-    // TODO: REFACTOR - Remove this function in favor of a generic to be used by the class signature itself. Search id: 7887777f :
-    // TO.DOCONT: `class AbstractBaseLayerEntryConfig<TLayerMetadata = unknown>`
-    // TO.DOCONT: `class VectorLayerEntryConfig<TLayerMetadata = TypeLayerMetadataVector> extends AbstractBaseLayerEntryConfig<TypeLayerMetadataVector>`
-    // TO.DOCONT: `class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig<TypeLayerMetadataWfs[]>`
-    return super.getLayerMetadata() as TypeLayerMetadataVector | undefined;
-  }
-
-  // #endregion PUBLIC METHODS
 }

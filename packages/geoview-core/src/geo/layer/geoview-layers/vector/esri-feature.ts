@@ -212,23 +212,30 @@ export class EsriFeature extends AbstractGeoViewVector {
     sourceOptions: SourceOptions<Feature>,
     readOptions: ReadOptions
   ): Promise<Feature[]> {
+    // Cast it to proper type
+    const layerConfigEsriFeature = layerConfig as EsriFeatureLayerEntryConfig;
+
     // Use the basic fetch
     const responseDataCount = await Fetch.fetchEsriJson<{ count: number }>(
-      `${layerConfig.getDataAccessPath(true)}${layerConfig.layerId}/query?f=json&where=1=1&returnCountOnly=true`
+      `${layerConfigEsriFeature.getDataAccessPath(true)}${layerConfigEsriFeature.layerId}/query?f=json&where=1=1&returnCountOnly=true`
     );
 
     // Check if feature count is too large
     if (responseDataCount.count > AbstractGeoViewVector.MAX_ESRI_FEATURES) {
       // Throw
-      throw new LayerTooManyEsriFeatures(layerConfig.layerId, layerConfig.getLayerNameCascade(), responseDataCount.count);
+      throw new LayerTooManyEsriFeatures(
+        layerConfigEsriFeature.layerId,
+        layerConfigEsriFeature.getLayerNameCascade(),
+        responseDataCount.count
+      );
     }
 
     // Determine the maximum number of records allowed
-    const maxRecords = layerConfig.getLayerMetadataCasted()?.maxRecordCount;
+    const maxRecords = layerConfigEsriFeature.getLayerMetadata()?.maxRecordCount;
 
     // Retrieve the full ESRI feature data
     const responseData = await EsriFeature.#fetchEsriFeaturesByChunk(
-      `${layerConfig.getDataAccessPath(true)}${layerConfig.layerId}/query?f=json&where=1=1&outfields=*&geometryPrecision=1&maxAllowableOffset=5`,
+      `${layerConfigEsriFeature.getDataAccessPath(true)}${layerConfigEsriFeature.layerId}/query?f=json&where=1=1&outfields=*&geometryPrecision=1&maxAllowableOffset=5`,
       responseDataCount.count,
       maxRecords
     );
@@ -246,12 +253,12 @@ export class EsriFeature extends AbstractGeoViewVector {
 
       // If we had to clean geometries, emit a warning message
       if (hadInvalidGeometries) {
-        this.emitMessage('warning.layer.invalidGeometry', [layerConfig.getLayerNameCascade()], 'warning', true);
+        this.emitMessage('warning.layer.invalidGeometry', [layerConfigEsriFeature.getLayerNameCascade()], 'warning', true);
       }
 
       return allFeatures;
     } catch (error: unknown) {
-      throw new LayerFeatureParsingError(layerConfig.layerId, layerConfig.getLayerNameCascade(), formatError(error));
+      throw new LayerFeatureParsingError(layerConfigEsriFeature.layerId, layerConfigEsriFeature.getLayerNameCascade(), formatError(error));
     }
   }
 

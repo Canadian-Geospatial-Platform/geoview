@@ -1,5 +1,5 @@
 import type { ErrorInfo } from 'react';
-import { createContext, StrictMode, Suspense, Component } from 'react';
+import { createContext, StrictMode, Suspense, Component, useEffect } from 'react';
 import { I18nextProvider } from 'react-i18next';
 import type { i18n } from 'i18next';
 
@@ -99,6 +99,23 @@ function AppStart(props: AppStartProps): JSX.Element {
   // GV get store values by id because context is not set.... it is the only atomic selector by id
   // once context is define, map id is available
   const theme = useStoreAppDisplayThemeById(mapViewer.mapId);
+
+  /**
+   * A useEffect hook to log the mounting and unmounting of the AppStart component, which initializes the mapViewer.
+   *
+   * This is useful for debugging and ensuring that the mapViewer is properly initialized and cleaned up when
+   * the component lifecycle changes.
+   */
+  useEffect(() => {
+    // Mounted - log initialization
+    logger.logTraceUseEffect('AppStart useEffect', mapViewer.mapId);
+    logger.logDebug('AppStart mounted, initializing mapViewer on mapId:', mapViewer.mapId);
+    return () => {
+      // Unmounted - log cleanup
+      logger.logTraceUseEffectUnmount('AppStart useEffect', mapViewer.mapId);
+      logger.logDebug('AppStart unmounted, cleaning up mapViewer on mapId:', mapViewer.mapId);
+    };
+  }, [mapViewer.mapId]);
 
   return (
     <ErrorBoundary language={(i18nLang.language as TypeDisplayLanguage) || 'en'}>

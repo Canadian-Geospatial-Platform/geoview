@@ -102,11 +102,14 @@ export class CSV extends AbstractGeoViewVector {
     sourceOptions: SourceOptions<Feature>,
     readOptions: ReadOptions
   ): Promise<Feature[]> {
+    // Cast it to proper type
+    const layerConfigCSV = layerConfig as CsvLayerEntryConfig;
+
     // Query
     const responseData = await AbstractGeoViewVector.fetchText(layerConfig.getDataAccessPath(false), layerConfig.getSource().postSettings);
 
     // Attempt to convert CSV text to OpenLayers features
-    return CSV.convertCsv(responseData, layerConfig as CsvLayerEntryConfig, readOptions.featureProjection);
+    return CSV.convertCsv(responseData, layerConfigCSV, readOptions.featureProjection);
   }
 
   /**

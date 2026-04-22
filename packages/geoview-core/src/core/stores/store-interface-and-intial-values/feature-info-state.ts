@@ -278,19 +278,65 @@ export const setStoreDetailsCoordinateInfoEnabled = (mapId: string, coordinateIn
 /**
  * Propagates a feature info result set entry to the details store.
  *
- * If an entry for the same layer path does not already exist in the
- * layerDataArray, it is appended.
+ * If an entry for the same layer path already exists, its queryStatus,
+ * features, and featuresHaveGeometry are updated. Otherwise a new entry
+ * is appended.
  *
- * @param mapId - The map identifier.
- * @param resultSetEntry - The feature info result set entry to propagate.
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to propagate data for
+ * @param queryStatus - The current query status
+ * @param features - The feature info entries for the layer
+ * @param featuresHaveGeometry - Whether the features have associated geometry
  */
-export const propagateStoreFeatureInfoDetails = (mapId: string, resultSetEntry: TypeFeatureInfoResultSetEntry): void => {
+export const setStoreFeatureInfoDetails = (
+  mapId: string,
+  layerPath: string,
+  queryStatus: TypeQueryStatus,
+  features: TypeFeatureInfoEntry[] | undefined,
+  featuresHaveGeometry: boolean
+): void => {
   // The feature info state
   const featureInfoState = getStoreDetailsState(mapId);
 
   // Create a details object for each layer which is then used to render layers in details panel.
   const layerDataArray = [...featureInfoState.layerDataArray];
-  if (!layerDataArray.find((layerEntry) => layerEntry.layerPath === resultSetEntry.layerPath)) layerDataArray.push(resultSetEntry);
+  const existingEntry = findLayerDataFromLayerDataArray(layerPath, layerDataArray);
+  if (existingEntry) {
+    // Update existing entry
+    const existingIndex = layerDataArray.indexOf(existingEntry);
+    layerDataArray[existingIndex] = { ...existingEntry, queryStatus, features, featuresHaveGeometry };
+  } else {
+    // Append new entry
+    layerDataArray.push({ layerPath, queryStatus, features, featuresHaveGeometry });
+  }
+
+  // Update the layer data array in the store
+  featureInfoState.actions.setLayerDataArray(layerDataArray);
+};
+
+/**
+ * Sets the 'featuresHaveGeometry' property for a specific layer in the details store.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to update
+ * @param featuresHaveGeometry - Whether the features for the layer have geometry
+ */
+export const setStoreFeatureInfoDetailsUpdateFeaturesHaveGeometry = (
+  mapId: string,
+  layerPath: string,
+  featuresHaveGeometry: boolean
+): void => {
+  // The feature info state
+  const featureInfoState = getStoreDetailsState(mapId);
+
+  // Create a details object for each layer which is then used to render layers in details panel.
+  const layerDataArray = [...featureInfoState.layerDataArray];
+  const existingEntry = findLayerDataFromLayerDataArray(layerPath, layerDataArray);
+  if (existingEntry) {
+    // Update existing entry
+    const existingIndex = layerDataArray.indexOf(existingEntry);
+    layerDataArray[existingIndex] = { ...existingEntry, featuresHaveGeometry };
+  }
 
   // Update the layer data array in the store
   featureInfoState.actions.setLayerDataArray(layerDataArray);

@@ -639,14 +639,18 @@ export const getStoreMapCurrentBasemapOptions = (mapId: string): TypeBasemapOpti
 export const useStoreMapCurrentBasemapOptions = (): TypeBasemapOptions =>
   useStore(useGeoViewStore(), (state) => state.mapState.currentBasemapOptions);
 
-/** Returns the basemap options, falling back to initial options if current are not set. */
+/** Returns the initial basemap options from the store. */
 export const getStoreMapBasemapOptions = (mapId: string): TypeBasemapOptions => {
-  // TODO: CHECK - This getter actually uses both state values, revise its name?
-  return getStoreMapCurrentBasemapOptions(mapId) || getStoreMapState(mapId).basemapOptions;
+  return getStoreMapState(mapId).basemapOptions;
 };
 
 /** Selects the initial basemap options from the store. */
 export const useStoreMapBasemapOptions = (): TypeBasemapOptions => useStore(useGeoViewStore(), (state) => state.mapState.basemapOptions);
+
+/** Returns the basemap options, falling back to initial options if current are not set. */
+export const getStoreMapCurrentBasemapOptionsOrInitial = (mapId: string): TypeBasemapOptions => {
+  return getStoreMapCurrentBasemapOptions(mapId) ?? getStoreMapState(mapId).basemapOptions;
+};
 
 /** Returns the home view settings for the map. */
 export const getStoreMapHomeView = (mapId: string): TypeMapViewSettings => {

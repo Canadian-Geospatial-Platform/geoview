@@ -1,15 +1,10 @@
 import type { Coordinate } from 'ol/coordinate';
-import type { QueryType, TypeFeatureInfoResult } from '@/api/types/map-schema-types';
+import type { QueryType } from '@/api/types/map-schema-types';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
-import type { PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { setStoreMapHoverFeatureInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { getStoreLayerInVisibleRangeLayerPaths } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import type {
-  TypeHoverFeatureInfo,
-  TypeHoverResultSet,
-  TypeHoverResultSetEntry,
-} from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import type { TypeHoverResultSet } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { RequestAbortedError } from '@/core/exceptions/core-exceptions';
 import { logger } from '@/core/utils/logger';
 
@@ -22,11 +17,10 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
   /** The query type */
   static QUERY_TYPE: QueryType = 'at_pixel';
 
-  /** The resultSet object as existing in the base class, retyped here as a TypeHoverFeatureInfoResultSet */
-  declare resultSet: TypeHoverResultSet;
+  /** The abort controller shared by all layer queries for the current queryLayers call. */
+  #abortController: AbortController = new AbortController();
 
-  /** The abort controllers per layer path */
-  #abortControllers: { [layerPath: string]: AbortController } = {};
+  // #region OVERRIDES
 
   /**
    * Overrides the behavior to apply when a hover-feature-info-layer-set wants to check for condition to register a layer in its set.
@@ -40,32 +34,6 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
   }
 
   /**
-   * Overrides the behavior to apply when a hover-feature-info-layer-set wants to register a layer in its set.
-   *
-   * @param layer - The layer
-   */
-  protected override onRegisterLayer(layer: AbstractBaseGVLayer): void {
-    // Call parent
-    super.onRegisterLayer(layer);
-
-    // Update the resultSet data
-    const layerPath = layer.getLayerPath();
-    this.resultSet[layerPath].queryStatus = 'processed';
-    this.resultSet[layerPath].feature = undefined;
-  }
-
-  /**
-   * Overrides the behavior to apply when propagating to the store.
-   *
-   * @param resultSetEntry - The result set entry to propagate to the store
-   * @param type - The propagation type
-   */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected override onPropagateToStore(resultSetEntry: TypeHoverResultSetEntry, type: PropagationType): void {
-    // Nothing to do here, hover's store only needs updating when a query happens
-  }
-
-  /**
    * Overrides the behavior to apply when deleting from the store.
    *
    * @param layerPath - The layer path to delete from the store
@@ -75,148 +43,140 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
     // Nothing to do here, hover's store only needs updating when a query happens
   }
 
+  // #endregion OVERRIDES
+
+  // #region PUBLIC METHODS
+
   /**
    * Queries the features at the provided coordinate for all the registered layers.
    *
    * @param coordinate - The pixel coordinate where to query the features when the queryType is 'at_pixel' or the map coordinate otherwise
-   * @param queryType - The query type, default: HoverFeatureInfoLayerSet.QUERY_TYPE
+   * @param queryType - The query type, either 'at_pixel' or 'all_features'. Defaults to the HoverFeatureInfoLayerSet.QUERY_TYPE static property value ('at_pixel').
    * @returns A promise that resolves with the hover result set results
    */
   async queryLayers(coordinate: Coordinate, queryType: QueryType = HoverFeatureInfoLayerSet.QUERY_TYPE): Promise<TypeHoverResultSet> {
-    // FIXME: Watch out for code reentrancy between queries!
+    // Abort all in-flight queries from a previous call and create a fresh controller for this call
+    this.#abortController.abort();
+    this.#abortController = new AbortController();
+    const { signal } = this.#abortController;
+
+    // The result set to be returned
+    const querySet: TypeHoverResultSet = {};
 
     // Get the layer visible in order and filter orderedLayerPaths to only include paths that exist in resultSet
     const orderedLayerPaths = this.#getOrderedLayerPaths();
-    const layersToQuery = orderedLayerPaths.filter((path) => path in this.resultSet);
 
-    // Prepare to hold all promises of features in the loop below
-    const allPromises: Promise<TypeFeatureInfoResult>[] = [];
-
-    // Reinitialize the resultSet
-    // Loop on each layer path in the resultSet were there is a layer to query
-    layersToQuery.forEach((layerPath) => {
-      // Get the layer associated with the layer path
-      const layer = this.layerDomain.getGeoviewLayerRegular(layerPath);
-
-      // If the layer is not hoverable, skip it
-      if (!layer.getHoverable()) return;
-
-      // Flag processing
-      this.resultSet[layerPath].queryStatus = 'init';
-
-      // If the layer path has an abort controller
-      if (Object.keys(this.#abortControllers).includes(layerPath)) {
-        // Abort it
-        this.#abortControllers[layerPath].abort();
-      }
-
-      // Create an AbortController for the query
-      this.#abortControllers[layerPath] = new AbortController();
-
-      // Process query on results data
-      const promise = this.queryLayerFeatures(layer, queryType, coordinate, false, this.#abortControllers[layerPath]);
-
-      // Add the promise
-      allPromises.push(promise);
-
-      // When the promise is done, propagate to store
-      promise
-        .then((promiseResult) => {
-          // Get the array of records in the results
-          const arrayOfRecords = promiseResult.results;
-
-          if (arrayOfRecords.length) {
-            // Here we're explicitely typing it as string | undefined, because the object fieldInfo could be empty and have no first property
-            // and without '"noUncheckedIndexedAccess": true' in the tsconfig, this is allowed.. this explicit way is safer
-            const nameField = arrayOfRecords[0].nameField ?? Object.keys(arrayOfRecords[0].fieldInfo)[0];
-            const fieldInfo = nameField ? arrayOfRecords[0].fieldInfo[nameField] : undefined;
-
-            this.resultSet[layerPath].feature = {
-              layerPath,
-              featureIcon: arrayOfRecords[0].featureIcon,
-              fieldInfo,
-              geoviewLayerType: arrayOfRecords[0].geoviewLayerType,
-              nameField,
-            };
-            this.resultSet[layerPath].queryStatus = 'processed';
-          } else {
-            this.resultSet[layerPath].feature = undefined;
-          }
-
-          // Check if this layer should update the store
-          const shouldUpdate = orderedLayerPaths.slice(0, orderedLayerPaths.indexOf(layerPath)).every((higherLayerPath) => {
-            const higherLayer = this.resultSet[higherLayerPath];
-            // Allow update if higher layer:
-            // - hasn't been processed yet (will overwrite later if needed)
-            // - OR is processed but has no feature
-            return (
-              higherLayer.queryStatus === 'init' ||
-              (higherLayer.queryStatus === 'processed' && !higherLayer.feature) ||
-              higherLayer.queryStatus === 'error'
-            );
-          });
-
-          // If it should update and there is a feature to propagate
-          if (shouldUpdate && this.resultSet[layerPath].queryStatus === 'processed' && this.resultSet[layerPath].feature) {
-            // Propagate to the store
-            this.#propagateToStore(this.resultSet[layerPath].feature);
-          }
-        })
-        .catch((error: unknown) => {
-          // If aborted
-          if (error instanceof RequestAbortedError) {
-            // Log
-            logger.logDebug('Query aborted and replaced by another one.. keep spinning..');
-          } else {
-            // If there's a resultSet for the layer path
-            if (this.resultSet[layerPath]) {
-              // Error
-              this.resultSet[layerPath].queryStatus = 'error';
-              this.resultSet[layerPath].feature = undefined;
-            }
-
-            // Log
-            logger.logPromiseFailed('queryLayerFeatures in queryLayers in hoverFeatureInfoLayerSet', error);
-          }
-        });
+    // Initialize the resultSet
+    orderedLayerPaths.forEach((layerPath) => {
+      // Init the result set entry for the layer path
+      querySet[layerPath] = {
+        layerPath: layerPath,
+        queryStatus: 'init',
+        feature: undefined,
+      };
     });
+
+    // Query each hoverable layer and collect the promises
+    const allPromises = orderedLayerPaths
+      .filter((layerPath) => this.layerDomain.getGeoviewLayerRegular(layerPath).getHoverable())
+      .map((layerPath) => this.#queryLayerAndProcess(layerPath, coordinate, queryType, querySet, orderedLayerPaths, signal));
 
     // Await for the promises to settle
     await Promise.allSettled(allPromises);
 
     // Return the results
-    return this.resultSet;
-  }
-
-  /**
-   * Clears the results for the provided layer path.
-   *
-   * @param layerPath - The layer path
-   */
-  clearResults(layerPath: string): void {
-    // Edit the result set
-    this.resultSet[layerPath].feature = undefined;
-
-    // Propagate to store
-    this.#propagateToStore(this.resultSet[layerPath].feature);
+    return querySet;
   }
 
   /**
    * Clears the results immediately for all.
    */
-  clearResultsAll(): void {
+  clearResults(): void {
     // This will execute immediately on every pointer move to clear the HoverFeatureInfo
-    this.#propagateToStore(null);
+    setStoreMapHoverFeatureInfo(this.getMapId(), null);
   }
 
+  // #endregion PUBLIC METHODS
+
+  // #region PRIVATE METHODS
+
   /**
-   * Propagates the resultSetEntry to the store.
+   * Queries a single layer's features and processes the hover results.
    *
-   * @param hoverFeatureInfo - The hover info to propagate to the store
+   * @param layerPath - The layer path to query
+   * @param coordinate - The coordinate where to query the features
+   * @param queryType - The query type
+   * @param querySet - The result set to update with the query results
+   * @param orderedLayerPaths - The ordered layer paths used to determine store update priority
+   * @param signal - The abort signal for this query call
    */
-  #propagateToStore(hoverFeatureInfo: TypeHoverFeatureInfo | undefined): void {
-    // Save to the store
-    setStoreMapHoverFeatureInfo(this.getMapId(), hoverFeatureInfo);
+  async #queryLayerAndProcess(
+    layerPath: string,
+    coordinate: Coordinate,
+    queryType: QueryType,
+    querySet: TypeHoverResultSet,
+    orderedLayerPaths: string[],
+    signal: AbortSignal
+  ): Promise<void> {
+    // Get the layer associated with the layer path
+    const layer = this.layerDomain.getGeoviewLayerRegular(layerPath);
+
+    try {
+      // Process query on results data using the shared abort controller for this call
+      const promiseResult = await this.queryLayerFeatures(layer, queryType, coordinate, false, this.#abortController);
+
+      // If a newer queryLayers call has aborted this one, discard stale results
+      if (signal.aborted) return;
+
+      // Get the array of records in the results
+      const arrayOfRecords = promiseResult.results;
+      if (arrayOfRecords.length) {
+        // Here we're explicitely typing it as string | undefined, because the object fieldInfo could be empty and have no first property
+        // and without '"noUncheckedIndexedAccess": true' in the tsconfig, this is allowed.. this explicit way is safer so that 'nameField' is typed 'string | undefined'
+        const nameField = arrayOfRecords[0].nameField ?? (Object.keys(arrayOfRecords[0].fieldInfo)[0] as string | undefined);
+        const fieldInfo = nameField ? arrayOfRecords[0].fieldInfo[nameField] : undefined;
+
+        // eslint-disable-next-line no-param-reassign
+        querySet[layerPath].queryStatus = 'processed';
+
+        // eslint-disable-next-line no-param-reassign
+        querySet[layerPath].feature = {
+          layerPath,
+          featureIcon: arrayOfRecords[0].featureIcon,
+          fieldInfo,
+          geoviewLayerType: arrayOfRecords[0].geoviewLayerType,
+          nameField,
+        };
+      }
+
+      // Check if this layer should update the store
+      const shouldUpdate = orderedLayerPaths.slice(0, orderedLayerPaths.indexOf(layerPath)).every((higherLayerPath) => {
+        const higherLayer = querySet[higherLayerPath];
+        // Allow update if higher layer:
+        // - hasn't been processed yet (will overwrite later if needed)
+        // - OR is processed but has no feature
+        return (
+          higherLayer.queryStatus === 'init' ||
+          (higherLayer.queryStatus === 'processed' && !higherLayer.feature) ||
+          higherLayer.queryStatus === 'error'
+        );
+      });
+
+      // If it should update and there is a feature to propagate
+      if (shouldUpdate && querySet[layerPath].queryStatus === 'processed' && querySet[layerPath].feature) {
+        // This will execute immediately on every pointer move to clear the HoverFeatureInfo
+        setStoreMapHoverFeatureInfo(this.getMapId(), querySet[layerPath].feature);
+      }
+    } catch (error: unknown) {
+      // If aborted
+      if (error instanceof RequestAbortedError || signal.aborted) {
+        // Log
+        logger.logDebug('Query aborted and replaced by another one.. keep spinning..');
+      } else {
+        // Log
+        logger.logPromiseFailed('queryLayerFeatures in queryLayers in hoverFeatureInfoLayerSet', error);
+      }
+    }
   }
 
   /**
@@ -227,9 +187,11 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
   #getOrderedLayerPaths(): string[] {
     // Get the map layer order
     const layerPathsInVisibleRange = getStoreLayerInVisibleRangeLayerPaths(this.getMapId());
-    const resultSetLayers = new Set(Object.keys(this.resultSet));
+    const registeredLayerPaths = this.getRegisteredLayerPaths();
 
     // Filter and order the layers that are in our resultSet
-    return layerPathsInVisibleRange.filter((layerPath) => resultSetLayers.has(layerPath));
+    return layerPathsInVisibleRange.filter((layerPath) => registeredLayerPaths.includes(layerPath));
   }
+
+  // #endregion PRIVATE METHODS
 }

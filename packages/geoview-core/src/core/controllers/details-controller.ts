@@ -5,11 +5,9 @@ import type { MapViewer } from '@/geo/map/map-viewer';
 import {
   addStoreDetailsCheckedFeature,
   deleteStoreDetailsFeatureInfo,
-  propagateStoreFeatureInfoDetails,
   removeStoreDetailsCheckedFeature,
   setStoreDetailsLayerDataArrayBatchLayerPathBypass,
   setStoreDetailsSelectedLayerPath,
-  type TypeFeatureInfoResultSetEntry,
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 
 /**
@@ -67,16 +65,6 @@ export class DetailsController extends AbstractMapViewerController {
   removeCheckedFeature(feature: TypeFeatureInfoEntry | 'all'): void {
     // Save in the store
     removeStoreDetailsCheckedFeature(this.getMapId(), feature);
-  }
-
-  /**
-   * Propagates feature information to the details panel.
-   *
-   * @param resultSetEntry - The feature information result set entry to propagate
-   */
-  propagateFeatureInfo(resultSetEntry: TypeFeatureInfoResultSetEntry): void {
-    // Save in the store
-    propagateStoreFeatureInfoDetails(this.getMapId(), resultSetEntry);
   }
 
   /**

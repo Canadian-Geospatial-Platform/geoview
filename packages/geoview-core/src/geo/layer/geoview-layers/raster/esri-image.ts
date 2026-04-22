@@ -267,7 +267,6 @@ export class EsriImage extends AbstractGeoViewRaster {
     const rasterFunction = layerConfig.getInitialRasterFunction();
     const mosaicRule = layerConfig.getInitialMosaicRule();
 
-    //TODO Fix these depricated parameters?
     const sourceOptions: SourceOptions = {
       url: layerConfig.getDataAccessPath(),
       attributions: layerConfig.getAttributions(),

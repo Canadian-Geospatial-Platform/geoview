@@ -227,7 +227,7 @@ export class GeoJSON extends AbstractGeoViewVector {
     sourceOptions: SourceOptions<Feature>,
     readOptions: ReadOptions
   ): Promise<Feature[]> {
-    // Cast it to a GeoJson layer type
+    // Cast it to proper type
     const layerConfigGeoJSON = layerConfig as GeoJSONLayerEntryConfig;
 
     // Read input config geojson
@@ -240,7 +240,10 @@ export class GeoJSON extends AbstractGeoViewVector {
       responseData = geojson;
     } else {
       // Have to fetch it
-      responseData = await AbstractGeoViewVector.fetchJson(layerConfig.getDataAccessPath(false), layerConfig.getSource().postSettings);
+      responseData = await AbstractGeoViewVector.fetchJson(
+        layerConfigGeoJSON.getDataAccessPath(false),
+        layerConfigGeoJSON.getSource().postSettings
+      );
     }
 
     // Read the EPSG from the data
@@ -252,7 +255,7 @@ export class GeoJSON extends AbstractGeoViewVector {
     // Assign the data projection reading options best we can, otherwise use the config, otherwise leave it undefined to let OpenLayers figure it out by itself using the GeoJSON parser later
     // https://openlayers.org/en/latest/apidoc/module-ol_format_GeoJSON-GeoJSON.html
     // eslint-disable-next-line no-param-reassign
-    readOptions.dataProjection = dataEPSG || layerConfig.getSource().dataProjection;
+    readOptions.dataProjection = dataEPSG || layerConfigGeoJSON.getSource().dataProjection;
 
     // Read the features
     return GeoUtilities.readFeaturesFromGeoJSON(responseData, readOptions);

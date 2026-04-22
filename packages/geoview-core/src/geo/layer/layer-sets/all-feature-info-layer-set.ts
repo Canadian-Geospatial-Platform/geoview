@@ -2,14 +2,11 @@ import type { QueryType, TypeFeatureInfoResult } from '@/api/types/map-schema-ty
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
-import type { PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
 import {
   deleteStoreDataTableFeatureAllInfo,
   propagateFeatureInfoDataTableToStore,
   setStoreDataTableInitialSettings,
-  type TypeAllFeatureInfoResultSet,
-  type TypeAllFeatureInfoResultSetEntry,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { RequestAbortedError } from '@/core/exceptions/core-exceptions';
 import { logger } from '@/core/utils/logger';
@@ -23,11 +20,10 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
   /** The query type */
   static QUERY_TYPE: QueryType = 'all';
 
-  /** The resultSet object as existing in the base class, retyped here as a TypeAllFeatureInfoResultSet */
-  declare resultSet: TypeAllFeatureInfoResultSet;
-
   /** The abort controllers per layer path */
   #abortControllers: { [layerPath: string]: AbortController } = {};
+
+  // #region OVERRIDES
 
   /**
    * Overrides the behavior to apply when a feature-info-layer-set wants to check for condition to register a layer in its set.
@@ -68,23 +64,12 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
 
     // Update the resultSet data
     const layerPath = layer.getLayerPath();
-    this.resultSet[layerPath].queryStatus = 'init';
-    this.resultSet[layerPath].features = undefined;
+
+    // Propagate
+    propagateFeatureInfoDataTableToStore(this.getMapId(), layerPath, 'init', undefined);
 
     // Extra initialization of settings
     setStoreDataTableInitialSettings(this.getMapId(), layerPath);
-  }
-
-  /**
-   * Overrides the behavior to apply when propagating to the store.
-   *
-   * @param resultSetEntry - The result set entry to propagate
-   * @param type - The propagation type
-   */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected override onPropagateToStore(resultSetEntry: TypeAllFeatureInfoResultSetEntry, type: PropagationType): void {
-    // Redirect - Add layer to the list after registration
-    this.#propagateToStore(resultSetEntry);
   }
 
   /**
@@ -99,6 +84,10 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
     });
   }
 
+  // #endregion OVERRIDES
+
+  // #region PUBLIC METHODS
+
   /**
    * Helper function used to launch the query on a layer to get all of its feature information.
    *
@@ -107,90 +96,55 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
    * @returns A promise that resolves with the result of the query
    */
   // TODO: (future development) The queryType is a door opened to allow the triggering using a bounding box or a polygon.
-  queryLayer(layerPath: string, queryType: QueryType = AllFeatureInfoLayerSet.QUERY_TYPE): Promise<TypeFeatureInfoResult> {
-    // FIXME: Watch out for code reentrancy between queries!
-    // FIX.MECONT: The AbortController and the 'isDisabled' flag help a lot, but there could be some minor timing issues left
-    // FIX.MECONT: with the mutating this.resultSet.
-    // FIX.MECONT: Consider using a LIFO pattern, per layer path, as the race condition resolution.
+  async queryLayer(layerPath: string, queryType: QueryType = AllFeatureInfoLayerSet.QUERY_TYPE): Promise<TypeFeatureInfoResult> {
+    // Get the layer layer associated with the layer path
+    const layer = this.layerDomain.getGeoviewLayerRegular(layerPath);
 
-    // If valid layer path
-    if (this.resultSet[layerPath]) {
-      // Get the layer config and layer associated with the layer path
-      const layer = this.layerDomain.getGeoviewLayerRegular(layerPath);
+    // Propagate
+    propagateFeatureInfoDataTableToStore(this.getMapId(), layerPath, 'processing', undefined);
 
-      // Flag processing
-      this.resultSet[layerPath].queryStatus = 'processing';
+    // Abort any in-flight query for this layer path
+    this.#abortControllers[layerPath]?.abort();
 
-      // Disable all buttons until query is done so we do not have concurrent queries
-      Object.keys(this.resultSet).forEach((path) => {
-        this.resultSet[path].isDisabled = true;
-      });
+    // Create a fresh AbortController for this query
+    this.#abortControllers[layerPath] = new AbortController();
+    const { signal } = this.#abortControllers[layerPath];
 
-      // Propagate to the store
-      this.#propagateToStore(this.resultSet[layerPath]);
+    try {
+      // Process query on results data
+      const promiseResult = await this.queryLayerFeatures(layer, queryType, layerPath, false, this.#abortControllers[layerPath]);
 
-      // If the layer path has an abort controller
-      if (Object.keys(this.#abortControllers).includes(layerPath)) {
-        // Abort it
-        this.#abortControllers[layerPath].abort();
+      // Get the array of records in the results
+      const arrayOfRecords = promiseResult.results;
+
+      // Align arrayOfRecords fields with layerConfig fields so callers receive the aligned data
+      if (arrayOfRecords.length) {
+        AbstractLayerSet.alignRecordsWithOutFields(layer.getLayerConfig(), arrayOfRecords);
       }
 
-      // Create an AbortController for the query
-      this.#abortControllers[layerPath] = new AbortController();
+      // Only propagate to the store if this query has not been superseded by a newer one
+      if (!signal.aborted && this.getRegisteredLayerPaths().includes(layerPath)) {
+        propagateFeatureInfoDataTableToStore(this.getMapId(), layerPath, 'processed', arrayOfRecords);
+      }
 
-      // Process query on results data
-      const promise = this.queryLayerFeatures(layer, queryType, layerPath, false, this.#abortControllers[layerPath]);
+      // Return the result with aligned records
+      return promiseResult;
+    } catch (error: unknown) {
+      // If aborted
+      if (error instanceof RequestAbortedError || signal.aborted) {
+        // Log
+        logger.logDebug('Query aborted and replaced by another one.. keep spinning..');
+      } else if (this.getRegisteredLayerPaths().includes(layerPath)) {
+        // Log
+        logger.logPromiseFailed('queryLayerFeatures in queryLayers in AllFeatureInfoLayerSet', error);
 
-      // When the promise is done, propagate to store
-      promise
-        .then((promiseResult) => {
-          // Guard against the layer having been removed during the query
-          if (!this.resultSet[layerPath]) return;
+        // Propagate
+        propagateFeatureInfoDataTableToStore(this.getMapId(), layerPath, 'error', undefined);
+      }
 
-          // Get the array of records in the results
-          const arrayOfRecords = promiseResult.results;
-
-          // Use the response to align arrayOfRecords fields with layerConfig fields
-          if (arrayOfRecords.length) {
-            AbstractLayerSet.alignRecordsWithOutFields(layer.getLayerConfig(), arrayOfRecords);
-          }
-
-          // Keep the features retrieved
-          this.resultSet[layerPath].features = arrayOfRecords;
-          this.resultSet[layerPath].queryStatus = 'processed';
-        })
-        .catch((error: unknown) => {
-          // If aborted
-          if (error instanceof RequestAbortedError) {
-            // Log
-            logger.logDebug('Query aborted and replaced by another one.. keep spinning..');
-          } else if (this.resultSet[layerPath]) {
-            // Error
-            this.resultSet[layerPath].features = undefined;
-            this.resultSet[layerPath].queryStatus = 'error';
-
-            // Log
-            logger.logPromiseFailed('queryLayerFeatures in queryLayers in AllFeatureInfoLayerSet', error);
-          }
-        })
-        .finally(() => {
-          // Enable all buttons since query is done
-          Object.keys(this.resultSet).forEach((path) => {
-            this.resultSet[path].isDisabled = false;
-          });
-
-          // Propagate to the store (guard against the layer having been removed during the query)
-          if (this.resultSet[layerPath]) {
-            this.#propagateToStore(this.resultSet[layerPath]);
-          }
-        });
-
-      // Return the promise
-      return promise;
+      // Re-throw so the caller can handle the error
+      throw error;
     }
-
-    // Return empty
-    return Promise.resolve({ results: [] });
   }
 
   /**
@@ -204,24 +158,9 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
    * @param layerPath - The unique path identifying the layer to clear
    */
   clearLayerFeatures(layerPath: string): void {
-    // If valid layer path
-    if (!this.resultSet[layerPath]) return;
-
-    // Clear features
-    this.resultSet[layerPath].features = undefined;
-    this.resultSet[layerPath].queryStatus = 'init';
-
-    // Propagate to the store
-    this.#propagateToStore(this.resultSet[layerPath]);
-  }
-
-  /**
-   * Propagates the resultSetEntry to the store.
-   *
-   * @param resultSetEntry - The result set entry to propagate to the store
-   */
-  #propagateToStore(resultSetEntry: TypeAllFeatureInfoResultSetEntry): void {
     // Propagate
-    propagateFeatureInfoDataTableToStore(this.getMapId(), resultSetEntry);
+    propagateFeatureInfoDataTableToStore(this.getMapId(), layerPath, 'init', undefined);
   }
+
+  // #endregion PUBLIC METHODS
 }

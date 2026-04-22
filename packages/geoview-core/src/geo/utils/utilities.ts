@@ -731,7 +731,7 @@ export abstract class GeoUtilities {
    * @returns An array of legend layer item metadata containing icon images and legend entries,
    * or `undefined` if no legend is provided.
    */
-  static getLayerIconImage(schemaTag: TypeGeoviewLayerType, layerLegend: TypeLegend | null | undefined): TypeLegendLayerItem[] | undefined {
+  static getLayerIconImage(schemaTag: TypeGeoviewLayerType, layerLegend: TypeLegend | undefined): TypeLegendLayerItem[] | undefined {
     const iconDetails: TypeLegendLayerItem[] = [];
     if (layerLegend) {
       if (this.isVectorLegend(layerLegend, schemaTag)) {

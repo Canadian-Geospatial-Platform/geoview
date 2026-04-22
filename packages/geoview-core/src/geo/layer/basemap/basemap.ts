@@ -21,7 +21,7 @@ import type {
   BasemapJsonResponse,
 } from '@/geo/layer/basemap/basemap-types';
 import { Projection } from '@/geo/utils/projection';
-import { getStoreMapBasemapOptions } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { getStoreMapCurrentBasemapOptionsOrInitial } from '@/core/stores/store-interface-and-intial-values/map-state';
 import type { MapController } from '@/core/controllers/map-controller';
 import { logger } from '@/core/utils/logger';
 import type { EventDelegateBase } from '@/api/events/event-helper';
@@ -633,7 +633,7 @@ export class BasemapApi {
    */
   async loadDefaultBasemaps(projection?: TypeValidMapProjectionCodes, language?: TypeDisplayLanguage): Promise<void> {
     // Create the core basemap
-    const basemap = await this.createCoreBasemap(getStoreMapBasemapOptions(this.#mapViewer.mapId), projection, language);
+    const basemap = await this.createCoreBasemap(getStoreMapCurrentBasemapOptionsOrInitial(this.#mapViewer.mapId), projection, language);
 
     // Info used by create custom basemap
     this.defaultOrigin = basemap?.defaultOrigin;

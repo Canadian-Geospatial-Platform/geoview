@@ -211,11 +211,8 @@ export class WKB extends AbstractGeoViewVector {
     sourceOptions: SourceOptions<Feature>,
     readOptions: ReadOptions
   ): Promise<Feature[]> {
-    // Cast the layer config
+    // Cast it to proper type
     const layerConfigWKB = layerConfig as WkbLayerEntryConfig;
-
-    // Is WKB format
-    const responseData = layerConfig.getDataAccessPath();
 
     // Check if we have it in Projection and try adding it if we're missing it (should already be done?)
     await Projection.addProjectionIfMissing(layerConfig.getSource().dataProjection);
@@ -235,7 +232,7 @@ export class WKB extends AbstractGeoViewVector {
       });
     } else {
       // Fallback to using default read method
-      features = GeoUtilities.readFeaturesFromWKB(responseData, readOptions);
+      features = GeoUtilities.readFeaturesFromWKB(layerConfigWKB.getDataAccessPath(), readOptions);
     }
 
     // Return them

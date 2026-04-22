@@ -1,17 +1,12 @@
-import type { EventDelegateBase } from '@/api/events/event-helper';
-import EventHelper from '@/api/events/event-helper';
-import type {
-  QueryType,
-  TypeFeatureInfoEntry,
-  TypeFeatureInfoResult,
-  TypeLocation,
-  TypeResultSet,
-  TypeResultSetEntry,
-} from '@/api/types/map-schema-types';
+import type { QueryType, TypeFeatureInfoEntry, TypeFeatureInfoResult, TypeLocation } from '@/api/types/map-schema-types';
 import { generateId, whenThisThen } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import type { LayerDomain } from '@/core/domains/layer-domain';
-import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
+import type {
+  ConfigBaseClass,
+  LayerStatusChangedDelegate,
+  LayerStatusChangedEvent,
+} from '@/api/config/validation-classes/config-base-class';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
@@ -40,19 +35,19 @@ export abstract class AbstractLayerSet {
   /** The controller registry to work with */
   protected controllerRegistry: ControllerRegistry;
 
-  /** An object containing the result sets indexed using the layer path */
-  resultSet: TypeResultSet = {};
-
   /** Indicates the default when registering a layer config */
   // GV: Only the LegendsLayerSet registers the layer configs to track the 'boxes' in the UI.
   // GV: The other layer sets register the layer OBJECTS instead of the layer CONFIGS.
   #defaultRegisterLayerConfigCheck = false;
 
+  /** The registered layer configs */
+  #registeredLayerConfigs: ConfigBaseClass[] = [];
+
   /** The registered layers */
   #registeredLayers: AbstractBaseGVLayer[] = [];
 
-  /** Callback delegates for the layer set updated event */
-  #onLayerSetUpdatedHandlers: LayerSetUpdatedDelegate[] = [];
+  /** Keep a bounded reference to the handle when the layer config status callbacks */
+  #boundedHandleLayerStatusChanged: LayerStatusChangedDelegate;
 
   /**
    * Constructs a new LayerSet instance.
@@ -65,17 +60,12 @@ export abstract class AbstractLayerSet {
     this.mapViewer = mapViewer;
     this.controllerRegistry = controllerRegistry;
     this.layerDomain = layerDomain;
+
+    /** Keep a reference to the handle when the layer config status changes */
+    this.#boundedHandleLayerStatusChanged = this.#handleLayerStatusChanged.bind(this);
   }
 
   // #region OVERRIDES
-
-  /**
-   * A must-override method called to propagate the result set entry to the store.
-   *
-   * @param resultSetEntry - The result set entry to propagate
-   * @param type - The propagation type
-   */
-  protected abstract onPropagateToStore(resultSetEntry: TypeResultSetEntry, type: PropagationType): void;
 
   /**
    * A must-override method called to delete a result set entry from the store.
@@ -104,9 +94,9 @@ export abstract class AbstractLayerSet {
    *
    * @param layerConfig - The layer config
    */
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this, @typescript-eslint/no-unused-vars
   protected onRegisterLayerConfig(layerConfig: ConfigBaseClass): void {
-    // Override this to perform additional registrations
+    // Add the layer config to the registered layer configs
+    this.#registeredLayerConfigs.push(layerConfig);
   }
 
   /**
@@ -115,9 +105,9 @@ export abstract class AbstractLayerSet {
    *
    * @param layerConfig - The layer config
    */
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this, @typescript-eslint/no-unused-vars
   protected onUnregisterLayerConfig(layerConfig: ConfigBaseClass | undefined): void {
-    // Override this to perform additional unregistrations
+    // Remove layer config from registered layer configs
+    this.#registeredLayerConfigs = this.#registeredLayerConfigs.filter((layer) => layer.layerPath !== layerConfig?.layerPath);
   }
 
   /**
@@ -149,28 +139,8 @@ export abstract class AbstractLayerSet {
    * @param layer - The layer config
    */
   protected onRegisterLayer(layer: AbstractBaseGVLayer): void {
-    // Get layer name
-    const layerPath = layer.getLayerPath();
-
-    // If not there (wasn't pre-registered via a config-registration)
-    if (!(layerPath in this.resultSet)) {
-      this.resultSet[layerPath] = {
-        layerPath,
-      };
-    }
-
     // Add to the registered layers array
     this.#registeredLayers.push(layer);
-  }
-
-  /**
-   * An overridable layer set updated function for a layer-set to indicate the layer set has been updated.
-   *
-   * @param layerPath - The layer path
-   */
-  protected onLayerSetUpdatedProcess(layerPath: string): void {
-    // Emit layer set updated event to the outside
-    this.#emitLayerSetUpdated({ layerPath, resultSet: this.resultSet });
   }
 
   // #endregion OVERRIDES
@@ -183,6 +153,15 @@ export abstract class AbstractLayerSet {
   getClassName(): string {
     // Return the name of the class
     return this.constructor.name;
+  }
+
+  /**
+   * Gets the registered layer config paths based on the registered layer configs.
+   *
+   * @returns An array of layer config paths
+   */
+  getRegisteredLayerConfigPaths(): string[] {
+    return this.#registeredLayerConfigs.map((layer) => layer.layerPath);
   }
 
   /**
@@ -201,20 +180,9 @@ export abstract class AbstractLayerSet {
    */
   registerLayerConfig(layerConfig: ConfigBaseClass): void {
     // Update the registration of all layer sets if !payload.layerSetId or update only the specified layer set
-    if (this.onRegisterLayerConfigCheck(layerConfig) && !(layerConfig.layerPath in this.resultSet)) {
-      // Prep the resultSet (it's registered, but it doesn't mean it's in the store yet)
-      this.resultSet[layerConfig.layerPath] = {
-        layerPath: layerConfig.layerPath,
-      };
-
+    if (this.onRegisterLayerConfigCheck(layerConfig) && !this.getRegisteredLayerConfigPaths().includes(layerConfig.layerPath)) {
       // Call the registration function for the layer-set. This method is different for each child.
       this.onRegisterLayerConfig(layerConfig);
-
-      // Call for propagation to the store upon registration
-      this.onPropagateToStore(this.resultSet[layerConfig.layerPath], 'config-registration');
-
-      // Inform that the layer set has been updated
-      this.onLayerSetUpdatedProcess(layerConfig.layerPath);
     }
 
     // Prepare the config for its layer registration later
@@ -240,12 +208,6 @@ export abstract class AbstractLayerSet {
     if (this.onRegisterLayerCheck(layer)) {
       // Call the registration function for the layer-set. This method is different for each child.
       this.onRegisterLayer(layer);
-
-      // Call for propagation to the store upon registration
-      this.onPropagateToStore(this.resultSet[layer.getLayerPath()], 'layer-registration');
-
-      // Inform that the layer set has been updated
-      this.onLayerSetUpdatedProcess(layer.getLayerPath());
     }
   }
 
@@ -261,14 +223,8 @@ export abstract class AbstractLayerSet {
     // Delete from the store
     this.onDeleteFromStore(layerPath);
 
-    // Delete the result set for the layer path
-    delete this.resultSet[layerPath];
-
     // Remove layer from registered layers
     this.#registeredLayers = this.#registeredLayers.filter((layer) => layer.getLayerPath() !== layerPath);
-
-    // Inform that the layer set has been updated
-    this.onLayerSetUpdatedProcess(layerPath);
   }
 
   // #endregion PUBLIC METHODS
@@ -327,29 +283,39 @@ export abstract class AbstractLayerSet {
    */
   #prepareConfigForLayerRegistration(layerConfig: ConfigBaseClass): void {
     // Listen to the status changes so that when it gets loaded it automatically gets registered as a layer
-    layerConfig.onLayerStatusChanged(() => {
-      try {
-        // If the layer status is 'loaded', otherwise, don't even try yet
-        if (layerConfig.layerStatus === 'loaded') {
-          // The layer has become loaded
+    layerConfig.onLayerStatusChanged(this.#boundedHandleLayerStatusChanged);
+  }
 
-          // Get the layer (not just the config) if it exists yet
-          const layer = this.layerDomain.getGeoviewLayerIfExists(layerConfig.layerPath);
+  /**
+   * Handles the layer status change event.
+   *
+   * When a layer's status changes to `loaded`, this method attempts to retrieve the corresponding layer
+   * from the layer domain and registers it into the system's layer set. If registration fails, errors
+   * are logged appropriately.
+   *
+   * @param layerConfig - The configuration object for the layer
+   * @param event - The layer status change event
+   */
+  #handleLayerStatusChanged(layerConfig: ConfigBaseClass, event: LayerStatusChangedEvent): void {
+    try {
+      // If the layer status is 'loaded', otherwise, don't even try yet
+      if (event.layerStatus === 'loaded') {
+        // The layer has become loaded
+        layerConfig.offLayerStatusChanged(this.#boundedHandleLayerStatusChanged);
 
-          // If the layer could be found
-          if (layer) {
-            // Register the layer itself (not the layer config) automatically in the layer set
-            this.registerLayer(layer).catch((error: unknown) => {
-              // Log
-              logger.logPromiseFailed('in registerLayer in registerLayerConfig', error);
-            });
-          }
-        }
-      } catch (error: unknown) {
-        // Error happened when trying to register the layer coming from the layer config
-        logger.logError('Error trying to register the layer coming from the layer config', error);
+        // Get the layer
+        const layer = this.layerDomain.getGeoviewLayer(layerConfig.layerPath);
+
+        // Register the layer itself (not the layer config) automatically in the layer set
+        this.registerLayer(layer).catch((error: unknown) => {
+          // Log
+          logger.logPromiseFailed('in registerLayer in #handleLayerStatusChanged', error);
+        });
       }
-    });
+    } catch (error: unknown) {
+      // Error happened when trying to register the layer coming from the layer config
+      logger.logError('Error trying to register the layer coming from the layer config', error);
+    }
   }
 
   // #endregion PRIVATE METHODS
@@ -468,54 +434,4 @@ export abstract class AbstractLayerSet {
   }
 
   // #endregion STATIC METHODS
-
-  // #region EVENTS
-
-  /**
-   * Emits an event to all registered handlers.
-   *
-   * @param event - The event to emit
-   */
-  #emitLayerSetUpdated(event: LayerSetUpdatedEvent): void {
-    // Emit the layersetupdated event
-    EventHelper.emitEvent(this, this.#onLayerSetUpdatedHandlers, event);
-  }
-
-  /**
-   * Registers a callback to be executed whenever the layer set is updated.
-   *
-   * @param callback - The callback function
-   */
-  onLayerSetUpdated(callback: LayerSetUpdatedDelegate): void {
-    // Register the layersetupdated event callback
-    EventHelper.onEvent(this.#onLayerSetUpdatedHandlers, callback);
-  }
-
-  /**
-   * Unregisters a callback from being called whenever the layer set is updated.
-   *
-   * @param callback - The callback function to unregister
-   */
-  offLayerSetUpdated(callback: LayerSetUpdatedDelegate): void {
-    // Unregister the layersetupdated event callback
-    EventHelper.offEvent(this.#onLayerSetUpdatedHandlers, callback);
-  }
-
-  // #endregion EVENTS
 }
-
-/** The propagation type, notably for the store */
-export type PropagationType = 'config-registration' | 'layer-registration' | 'layerStatus' | 'layerName';
-
-/**
- * Define a delegate for the event handler function signature
- */
-type LayerSetUpdatedDelegate = EventDelegateBase<AbstractLayerSet, LayerSetUpdatedEvent, void>;
-
-/**
- * Define an event for the delegate
- */
-export type LayerSetUpdatedEvent = {
-  layerPath: string;
-  resultSet: TypeResultSet;
-};

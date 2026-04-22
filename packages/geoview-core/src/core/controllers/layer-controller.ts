@@ -53,14 +53,7 @@ import {
   setStoreLegendLayersDirectly,
   utilFindLayerAndChildrenPaths,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { getStoreMapConfigCorePackagesConfig } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { getStoreAppShowLayerHighlightLayerBbox } from '@/core/stores/store-interface-and-intial-values/app-state';
-import {
-  getStoreTimeSliderFilter,
-  isStoreTimeSliderInitialized,
-  type TypeTimeSliderProps,
-} from '@/core/stores/store-interface-and-intial-values/time-slider-state';
-import { getStoreDataTableFilter } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import type {
   DomainLayerHoverableChangedDelegate,
   DomainLayerHoverableChangedEvent,
@@ -112,7 +105,6 @@ import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vecto
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import { GVGeoJSON } from '@/geo/layer/gv-layers/vector/gv-geojson';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
-import { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 
 /**
  * LayerController class that extends the AbstractMapViewerController and provides methods to interact with map layers.
@@ -145,7 +137,7 @@ export class LayerController extends AbstractMapViewerController {
   /** The bounded reference to the handle layer registered */
   #boundedHandleDomainLayerRegistered: DomainLayerRegisteredDelegate;
 
-  /** The bounded reference to the handle layer registered */
+  /** The bounded reference to the handle layer unregistered */
   #boundedHandleDomainLayerUnregistered: DomainLayerRegisteredDelegate;
 
   /** The bounded reference to the handle layer name changed */
@@ -166,7 +158,7 @@ export class LayerController extends AbstractMapViewerController {
   /** The bounded reference to the handle layer loaded changed */
   #boundedHandleDomainLayerLoadedChanged: DomainLayerBaseDelegate;
 
-  /** The bounded reference to the handle layer loaded changed */
+  /** The bounded reference to the handle all layers loaded */
   #boundedHandleDomainLayerAllLoaded: DomainLayerStatusChangedDelegate;
 
   /** The bounded reference to the handle layer message event */
@@ -678,18 +670,13 @@ export class LayerController extends AbstractMapViewerController {
   /**
    * Retrieves the service (metadata) projection code for a specific raster layer.
    *
-   * @param layerPath - The fully qualified path of the layer
-   * @returns The projection code (e.g., "EPSG:4326") defined in the layer's service metadata,
-   *          or `undefined` if:
-   *          - the layer does not exist,
-   *          - the layer is not a raster layer,
-   *          - or the metadata projection is not available.
-   * @description
-   *
-   * This method looks up the GeoView layer associated with the provided `layerPath`.
+   * Looks up the GeoView layer associated with the provided `layerPath`.
    * If the layer exists and is an instance of `AbstractGVRaster`, it retrieves the
    * projection defined in the service metadata via `getMetadataProjection()`.
-   * The projection code is then returned using `projection.getCode()`.
+   *
+   * @param layerPath - The fully qualified path of the layer
+   * @returns The projection code (e.g., "EPSG:4326") defined in the layer's service metadata,
+   * or `undefined` if the layer does not exist, is not a raster layer, or the metadata projection is not available
    */
   getLayerMetatadaProjectionEPSG(layerPath: string): string | undefined {
     // Get the layer if it exists
@@ -1209,67 +1196,11 @@ export class LayerController extends AbstractMapViewerController {
   }
 
   /**
-   * Applies all available filters to layer.
-   *
-   * @param layerPath - The path of the layer to apply filters to
-   * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path
-   */
-  applyLayerFilters(layerPath: string): void {
-    // Get the Geoview layer
-    const geoviewLayer = this.getGeoviewLayerRegularIfExists(layerPath);
-
-    // If found it
-    if (geoviewLayer) {
-      // Read filter information from the UI
-      const layerFilters = this.getActiveFilters(layerPath);
-
-      // Apply the view filter on the layer
-      geoviewLayer.setLayerFilters(layerFilters, true);
-    }
-  }
-
-  /**
-   * Gets all active filters for layer.
-   *
-   * @param layerPath - The path for the layer to get filters from
-   * @returns The active layer filters
-   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
-   * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path
-   */
-  // TODO: REFACTOR - This function, if we don't actually delete it, should basically only return the
-  // TO.DOCONT: layer.getLayerFilter() from the domain, never go in the store.
-  // TO.DOCONT: The store synchronization should happen via a event hook. Event that is raised by the
-  // TO.DOCONT: layer when the layer filters attributes themselves are set.
-  // TO.DOCONT: This is related to the other TODO to improve the layer filterings. Search id: ce707359
-  getActiveFilters(layerPath: string): LayerFilters {
-    // Get the layer and layer config
-    const layer = this.getGeoviewLayerRegular(layerPath);
-    const layerConfig = layer.getLayerConfig();
-
-    // The initial filter
-    const initialFilter = layerConfig.getLayerFilter();
-
-    // The class breaks filter if any
-    const classFilter = layer.getFilterFromStyle();
-
-    // The data table filter if any
-    const dataFilter = getStoreDataTableFilter(this.getMapId(), layerPath);
-
-    // If the TimeSlider is initialized
-    let timeFilter: string | undefined;
-    if (isStoreTimeSliderInitialized(this.getMapId())) {
-      // Assign it for the return
-      timeFilter = getStoreTimeSliderFilter(this.getMapId(), layerPath);
-    }
-
-    // Return the current filters in the application
-    return new LayerFilters(initialFilter, classFilter, dataFilter, timeFilter);
-  }
-
-  /**
    * Checks if the layer results sets are all greater than or equal to the provided status.
    *
-   * @returns Indicates if all layers passed the callback and how many have passed the callback
+   * @param status - The layer status threshold to check against
+   * @param callbackNotGood - Optional callback invoked for each layer that does not meet the status threshold
+   * @returns Indicates if all layers passed the check and how many have passed
    */
   checkLayerStatus(status: TypeLayerStatus, callbackNotGood?: (layerConfig: ConfigBaseClass) => void): [boolean, number] {
     // Redirect to domain
@@ -1418,7 +1349,7 @@ export class LayerController extends AbstractMapViewerController {
    * @throws {LayerWrongTypeError} When the layer was of wrong type
    */
   async setAllItemsVisibility(layerPath: string, visible: boolean, waitForRender: boolean): Promise<void> {
-    // TODO: REFACTOR IMPORTANT - Move setAllItemsVisibility to the domain eventually and move the this.#isControllingVisibility flag in the domain as well.
+    // TODO: REFACTOR IMPORTANT - Move setAllItemsVisibility to the domain eventually and move the this.#isBatchingLayerItemsVisibility flag in the domain as well.
     // Get the layer
     const layer = this.getGeoviewLayerRegular(layerPath);
 
@@ -1466,8 +1397,8 @@ export class LayerController extends AbstractMapViewerController {
     // Shadow-copy this specific array so that the hooks are triggered for this items array and this one only
     layerStore.items = [...layerStore.items];
 
-    // Now that it's done, apply the layer visibility
-    this.applyLayerFilters(layerPath);
+    // Now, set the layer filters on class
+    layer.setLayerFiltersClass();
 
     // Set updated legend layers
     setStoreLegendLayersDirectly(this.getMapId(), curLayers);
@@ -1761,8 +1692,7 @@ export class LayerController extends AbstractMapViewerController {
    * The value is stored in the application state via the LayerController.
    *
    * @param layerPath - The unique path identifying the layer
-   * @param temporalMode - The date format to apply
-   * for displaying date values associated with this layer.
+   * @param temporalMode - The temporal mode to apply for interpreting date values associated with this layer
    */
   setLayerDateTemporalMode(layerPath: string, temporalMode: TemporalMode): void {
     // Redirect
@@ -1797,8 +1727,7 @@ export class LayerController extends AbstractMapViewerController {
    * The value is stored in the application state via the LayerController.
    *
    * @param layerPath - The unique path identifying the layer
-   * @param displayDateFormat - The date format to apply
-   * for displaying date values associated with this layer.
+   * @param displayDateFormat - The date format to apply for displaying date values associated with this layer
    */
   setLayerDisplayDateFormatShort(layerPath: string, displayDateFormat: TypeDisplayDateFormat | string): void {
     // Make sure of the input format
@@ -2065,10 +1994,10 @@ export class LayerController extends AbstractMapViewerController {
   }
 
   /**
-   * Handles when a layer opacity is changed on the map.
+   * Handles when a layer visibility is changed on the map.
    *
    * @param sender - The layer domain that fired the event
-   * @param event - The event containing the opacity change
+   * @param event - The event containing the visibility change
    */
   #handleDomainLayerVisibleChanged(sender: LayerDomain, event: DomainLayerVisibleChangedEvent): void {
     // Save to the store
@@ -2114,7 +2043,7 @@ export class LayerController extends AbstractMapViewerController {
     // If the layer is regular layer
     if (event.layer instanceof AbstractGVLayer) {
       // Register the layer in the time-slider if it must
-      this.#registerForTimeSlider(event.layer);
+      this.getControllersRegistry().timeSliderController?.tryRegisterLayer(event.layer);
     }
   }
 
@@ -2152,16 +2081,8 @@ export class LayerController extends AbstractMapViewerController {
   /**
    * Handles layer-specific messages and displays them through the map viewer's notification system.
    *
-   * @param layer - The layer instance that triggered the message
+   * @param sender - The layer domain that fired the event
    * @param layerMessageEvent - The message event containing notification details
-   *
-   * @example
-   * handleLayerMessage(myLayer, {
-   *   messageKey: 'layers.fetchProgress',
-   *   messageParams: [50, 100],
-   *   messageType: 'error',
-   *   notification: true
-   * });
    */
   #handleDomainLayerMessage(sender: LayerDomain, layerMessageEvent: DomainLayerMessageEvent): void {
     // Read event params for clarity
@@ -2197,7 +2118,7 @@ export class LayerController extends AbstractMapViewerController {
     // If not hoverable
     if (!event.layerEvent.hoverable) {
       // Clear the results when turning the hoverable to false
-      this.getControllersRegistry().layerSetController.hoverFeatureInfoLayerSet.clearResults(event.layer.getLayerPath());
+      this.getControllersRegistry().layerSetController.hoverFeatureInfoLayerSet.clearResults();
     }
   }
 
@@ -2238,12 +2159,10 @@ export class LayerController extends AbstractMapViewerController {
     }
 
     // Here, the item visibility was set on the GV Layer directly, we're not in batch mode.
+    event.layer.setLayerFiltersClass();
 
     // Get the layer path
     const layerPath = event.layer.getLayerPath();
-
-    // Apply filter to layer
-    this.applyLayerFilters(layerPath);
 
     // Save to the store
     setStoreLayerItemVisibility(
@@ -2466,36 +2385,6 @@ export class LayerController extends AbstractMapViewerController {
         // Add the ordered layer paths for layer that hasn't been set and has no parent layer or geocore placeholder
         this.addOrderedLayerPathsByConfig(layerConfig as TypeLayerEntryConfig);
       }
-    }
-  }
-
-  /**
-   * Registers layer information for TimeSlider.
-   *
-   * @param layer - The layer to be registered
-   */
-  #registerForTimeSlider(layer: AbstractGVLayer): void {
-    // TODO: CHECK - Think about delegating this code to the time slider controller itself?
-    try {
-      // Get time slider config if present in map config
-      const timeSliderConfigs = getStoreMapConfigCorePackagesConfig(this.getMapId())?.find((config) =>
-        Object.keys(config).includes('time-slider')
-      )?.['time-slider'] as Record<'sliders', TypeTimeSliderProps[]>;
-
-      const layerSliderConfig = timeSliderConfigs?.sliders?.find((slider: TypeTimeSliderProps) =>
-        slider.layerPaths.includes(layer.getLayerPath())
-      );
-
-      // If the layer is loaded AND flag is true to use time dimension, continue
-      if (layer.getIsTimeAware() && layer.getTimeDimension()) {
-        // Check (if dimension is valid) and add time slider layer when needed
-        this.getControllersRegistry().timeSliderController?.checkInitTimeSliderLayerAndApplyFilters(layer, layerSliderConfig);
-      }
-    } catch (error: unknown) {
-      // Log error
-      logger.logError(error);
-      // Layer failed to load, abandon it for the TimeSlider registration, too bad.
-      // Here, we haven't even made it to a possible layer registration for a possible Time Slider, because we couldn't even get the layer to load anyways.
     }
   }
 

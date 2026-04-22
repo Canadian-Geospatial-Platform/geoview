@@ -4,7 +4,7 @@ import type { Extent } from 'ol/extent';
 import type { Projection as OLProjection } from 'ol/proj';
 
 import { getGeoViewStore, useGeoViewStore } from '@/core/stores/stores-managers';
-import type { TypeLayersViewDisplayState, TypeLegendItem, TypeLegendLayer } from '@/core/components/layers/types';
+import type { TypeLayersViewDisplayState, TypeLegendItem, TypeLegendLayer, TypeLegendLayerItem } from '@/core/components/layers/types';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import type { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 import { useStableSelector } from '@/core/stores/geoview-store';
@@ -25,7 +25,6 @@ import { getStoreAppDisplayDateFormatDefault, getStoreAppDisplayDateTimezone } f
 import { logger } from '@/core/utils/logger';
 import { Projection } from '@/geo/utils/projection';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
-import { GeoUtilities } from '@/geo/utils/utilities';
 
 // #region INTERFACE DEFINITION
 
@@ -1066,6 +1065,76 @@ export const getStoreLayerLegendCollapsed = (mapId: string, layerPath: string): 
 export const useStoreLayerLegendCollapsed = createLayerSelectorHook('legendCollapsed') ?? false;
 
 /**
+ * Gets the legend query status for a specific layer.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to look up
+ * @returns The layer legend query status, defaults to undefined
+ */
+export const getStoreLayerLegendQueryStatus = (mapId: string, layerPath: string): LegendQueryStatus | undefined => {
+  return getStoreLayerLegendLayerByPath(mapId, layerPath)?.legendQueryStatus;
+};
+
+/** Hook that returns the legend query status for a specific layer. */
+export const useStoreLayerLegendQueryStatus = createLayerSelectorHook('legendQueryStatus');
+
+/**
+ * Gets the legend schema tag for a specific layer.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to look up
+ * @returns The layer legend schema tag, defaults to undefined
+ */
+export const getStoreLayerLegendSchemaTag = (mapId: string, layerPath: string): TypeGeoviewLayerType | undefined => {
+  return getStoreLayerLegendLayerByPath(mapId, layerPath)?.legendSchemaTag;
+};
+
+/** Hook that returns the legend schema tag for a specific layer. */
+export const useStoreLayerLegendSchemaTag = createLayerSelectorHook('legendSchemaTag');
+
+/**
+ * Gets the legend style config for a specific layer.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to look up
+ * @returns The layer legend style config, defaults to undefined
+ */
+export const getStoreLayerLegendStyleConfig = (mapId: string, layerPath: string): TypeLayerStyleConfig | undefined => {
+  return getStoreLayerLegendLayerByPath(mapId, layerPath)?.styleConfig;
+};
+
+/** Hook that returns the style configuration for a specific layer. */
+export const useStoreLayerStyleConfig = createLayerSelectorHook('styleConfig');
+
+/**
+ * Gets the legend icons for a specific layer.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to look up
+ * @returns The layer legend icons, defaults to undefined
+ */
+export const getStoreLayerIcons = (mapId: string, layerPath: string): TypeLegendLayerItem[] | undefined => {
+  return getStoreLayerLegendLayerByPath(mapId, layerPath)?.icons;
+};
+
+/** Hook that returns the legend icons for a specific layer. */
+export const useStoreLayerIcons = createLayerSelectorHook('icons');
+
+/**
+ * Gets the legend items for a specific layer.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to look up
+ * @returns The layer legend items, defaults to undefined
+ */
+export const getStoreLayerItems = (mapId: string, layerPath: string): TypeLegendItem[] | undefined => {
+  return getStoreLayerLegendLayerByPath(mapId, layerPath)?.items;
+};
+
+/** Hook that returns the legend items for a specific layer. */
+export const useStoreLayerItems = createLayerSelectorHook('items');
+
+/**
  * Selects whether all collapsible layer legends are collapsed.
  *
  * Non-collapsible leaf layers are considered inherently collapsed (nothing to expand),
@@ -1314,20 +1383,8 @@ export const useStoreLayerFilter = createLayerSelectorHook('layerFilter');
 /** Hook that returns the layer filter class for a specific layer. */
 export const useStoreLayerFilterClass = createLayerSelectorHook('layerFilterClass');
 
-/** Hook that returns the legend query status for a specific layer. */
-export const useStoreLayerLegendQueryStatus = createLayerSelectorHook('legendQueryStatus');
-
-/** Hook that returns the legend icons for a specific layer. */
-export const useStoreLayerIcons = createLayerSelectorHook('icons');
-
-/** Hook that returns the legend items for a specific layer. */
-export const useStoreLayerItems = createLayerSelectorHook('items');
-
 /** Hook that returns the schema tag for a specific layer. */
 export const useStoreLayerSchemaTag = createLayerSelectorHook('schemaTag');
-
-/** Hook that returns the style configuration for a specific layer. */
-export const useStoreLayerStyleConfig = createLayerSelectorHook('styleConfig');
 
 /** Hook that returns the text visibility for a specific layer. */
 export const useStoreLayerTextVisibility = createLayerSelectorHook('textVisible');
@@ -1955,18 +2012,19 @@ export const setStoreLegendQueryStatus = (
   mapId: string,
   layerPath: string,
   legendQueryStatus: LegendQueryStatus,
-  data: TypeLegend | undefined
+  legendSchemaTag: TypeGeoviewLayerType | undefined,
+  icons: TypeLegendLayerItem[] | undefined,
+  items: TypeLegendItem[] | undefined,
+  styleConfig: TypeLayerStyleConfig | undefined
 ): void => {
-  getStoreLayerState(mapId).actions.updateLayerByPath(layerPath, (layer) => {
-    const updated: TypeLegendLayer = { ...layer, legendQueryStatus, styleConfig: data?.styleConfig };
-
-    if (data?.type) {
-      updated.icons = GeoUtilities.getLayerIconImage(data.type, data) ?? [];
-      updated.items = GeoUtilities.getLayerItemsFromIcons(data.type, updated.icons);
-    }
-
-    return updated;
-  });
+  getStoreLayerState(mapId).actions.updateLayerByPath(layerPath, (layer) => ({
+    ...layer,
+    legendQueryStatus,
+    legendSchemaTag,
+    icons: icons ?? [],
+    items: items ?? [],
+    styleConfig,
+  }));
 };
 
 /**

@@ -1241,11 +1241,6 @@ export interface TypeMetadataEsriLayerSummary {
   type?: string; // Older ArcGIS servers may not provide a 'type' property (true?)
 }
 
-export interface TypeLayerMetadataVector {
-  maxRecordCount: number;
-  fields?: TypeLayerMetadataFields[];
-}
-
 export interface TypeLayerMetadataFields {
   name: string;
   type: string;

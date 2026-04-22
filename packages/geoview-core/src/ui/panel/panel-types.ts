@@ -134,9 +134,6 @@ export type TypeButtonPanel = {
   button: IconButtonPropsExtend;
   /** Group name. */
   groupName?: string;
-  /** callback triggered when a panel is fully opened */
-  onOpen?: () => void;
-  // TODO: Check - Why handleOpen here and in TypePanelAppProps? Acts as a bridge, why?
 };
 
 /**

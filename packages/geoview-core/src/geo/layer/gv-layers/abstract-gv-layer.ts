@@ -60,8 +60,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   /** Counts the number of times the loading happened. */
   loadingCounter: number = 0;
 
-  /** Marks the latest loading count for the layer.
-   * This useful to know when the put the layer loaded status back correctly with parallel processing happening */
+  /** Marks the latest loading count for the layer. Useful to know when to put the layer loaded status back correctly with parallel processing happening. */
   loadingMarker: number = 0;
 
   /** The OpenLayer source */
@@ -750,7 +749,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   /**
    * Gets the layer filters associated to the layer.
    *
-   * @returns The filter associated to the layer or undefined.
+   * @returns The layer filters associated to the layer.
    */
   getLayerFilters(): LayerFilters {
     // Return it
@@ -758,32 +757,51 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   }
 
   /**
-   * Sets the layer filters associated to the layer.
+   * Sets the class filter on the layer, derived from the current style configuration.
    *
-   * @param layerFilters - The filter layers associated to the layer or undefined
-   * @param refresh - Whether to refresh the layer after setting filters
+   * @param classFilter - Optional class filter expression to apply. Defaults to the filter derived from the current style.
    */
-  // TODO: REFACTOR - Now that the event processors are gone, it's clear this layers filtering process can be improved.
-  // TO.DOCONT: Change this function to a 'applyLayerFilters' with the 'onSetLayerFilters' also renamed to 'onApplyLayerFilters'
-  // TO.DOCONT: And we don't need to create a new LayerFilters when we call this, we can reuse the layerFilter in class attribute
-  // TO.DOCONT: if we have the setClassFilter, setDataFilter, setTimeFilter all called. Search id : ce707359
-  setLayerFilters(layerFilters: LayerFilters, refresh: boolean | undefined): void {
-    // Keep it
-    this.#layerFilters = layerFilters;
+  setLayerFiltersClass(classFilter: string | undefined = this.getFilterFromStyle()): void {
+    // Get the current layer filter
+    const curLayerFilter = this.getLayerFilters();
+
+    // Set it
+    curLayerFilter.setClassFilter(classFilter);
 
     // Redirect
-    this.onSetLayerFilters(layerFilters);
+    this.setLayerFilters(curLayerFilter, true);
+  }
 
-    // If refreshing
-    if (refresh) {
-      // Refresh
-      this.getOLLayer().changed();
-    }
+  /**
+   * Sets the data filter on the layer.
+   *
+   * @param dataFilter - Optional data filter expression to apply
+   */
+  setLayerFiltersData(dataFilter: string | undefined): void {
+    // Get the current layer filter
+    const curLayerFilter = this.getLayerFilters();
 
-    // Emit event
-    this.emitLayerFilterApplied({
-      filter: layerFilters,
-    });
+    // Set it
+    curLayerFilter.setDataFilter(dataFilter);
+
+    // Redirect
+    this.setLayerFilters(curLayerFilter, true);
+  }
+
+  /**
+   * Sets the time filter on the layer.
+   *
+   * @param timeFilter - Optional time filter expression to apply
+   */
+  setLayerFiltersTime(timeFilter: string | undefined): void {
+    // Get the current layer filter
+    const curLayerFilter = this.getLayerFilters();
+
+    // Set it
+    curLayerFilter.setTimeFilter(timeFilter);
+
+    // Redirect
+    this.setLayerFilters(curLayerFilter, true);
   }
 
   /**
@@ -802,6 +820,31 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
     // Redirect
     this.setLayerFilters(layerFilters, true);
+  }
+
+  /**
+   * Sets the layer filters associated to the layer.
+   *
+   * @param layerFilters - The layer filters to apply
+   * @param refresh - Whether to trigger a layer re-render after setting filters
+   */
+  setLayerFilters(layerFilters: LayerFilters, refresh: boolean | undefined): void {
+    // Keep it
+    this.#layerFilters = layerFilters;
+
+    // Redirect
+    this.onSetLayerFilters(layerFilters);
+
+    // If refreshing
+    if (refresh) {
+      // Refresh
+      this.getOLLayer().changed();
+    }
+
+    // Emit event
+    this.emitLayerFilterApplied({
+      filter: layerFilters,
+    });
   }
 
   /**

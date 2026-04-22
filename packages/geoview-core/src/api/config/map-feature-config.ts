@@ -124,11 +124,6 @@ export class MapFeatureConfig {
     this.appBar = deepMerge(DEFAULT_MAP_FEATURE_CONFIG.appBar, userMapFeatureConfig.appBar);
     this.footerBar = deepMerge(DEFAULT_MAP_FEATURE_CONFIG.footerBar, userMapFeatureConfig.footerBar);
     this.overviewMap = deepMerge(DEFAULT_MAP_FEATURE_CONFIG.overviewMap, userMapFeatureConfig.overviewMap);
-
-    // TODO: CLEANUP - Remove commented code 2026-02-13. I've commented it because I couldn't understand why we were defaulting this after a deepMerge happening just before
-    // this.appBar!.tabs.core = userMapFeatureConfig.appBar?.tabs.core ?? DEFAULT_MAP_FEATURE_CONFIG.appBar?.tabs.core ?? [];
-    // this.footerBar!.tabs.core = userMapFeatureConfig.footerBar?.tabs.core ?? DEFAULT_MAP_FEATURE_CONFIG.footerBar?.tabs.core ?? [];
-
     this.components = [...(userMapFeatureConfig.components ?? DEFAULT_MAP_FEATURE_CONFIG.components ?? [])];
     this.corePackages = [...(userMapFeatureConfig.corePackages ?? DEFAULT_MAP_FEATURE_CONFIG.corePackages ?? [])];
     this.corePackagesConfig = [...(userMapFeatureConfig.corePackagesConfig ?? DEFAULT_MAP_FEATURE_CONFIG.corePackagesConfig ?? [])];

@@ -218,6 +218,13 @@ export function AppBar(props: AppBarProps): JSX.Element {
   }, []);
 
   /**
+   * Handles when the panel opens.
+   */
+  const handlePanelOpen = useCallback(() => {
+    // Do something
+  }, []);
+
+  /**
    * Handles when the panel closes.
    */
   const handlePanelClose = useCallback(() => {
@@ -399,7 +406,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
             <Panel
               panel={buttonPanel.panel}
               button={buttonPanel.button}
-              onOpen={buttonPanel.onOpen}
+              onOpen={handlePanelOpen}
               onClose={handlePanelClose}
               onKeyDown={(event: KeyboardEvent) => {
                 // Early exit if lightbox is handling ESC

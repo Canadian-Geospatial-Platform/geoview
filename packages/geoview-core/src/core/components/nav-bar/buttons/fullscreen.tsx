@@ -34,9 +34,6 @@ export default function Fullscreen(): JSX.Element {
     const element = document.getElementById(`shell-${mapId}`);
     if (element) {
       uiController.setFullScreen(!isFullScreen, element as TypeHTMLElement);
-
-      // TODO: deprecated, do we still need this? January 30th 2026
-      // setFooterBarIsOpen(false);
     }
   }
 

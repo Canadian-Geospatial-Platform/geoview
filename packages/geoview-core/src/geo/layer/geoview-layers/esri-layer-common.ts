@@ -121,8 +121,7 @@ export class EsriUtilities {
     metadata: TypeMetadataEsriDynamic | TypeMetadataEsriFeature
   ): void {
     // Initialize the layer name by filling the blanks with the name from the metadata
-    // TODO: CHECK - LAYER NAME - Why here we send '' and not in any other layer types?
-    layerConfig.initLayerNameFromMetadata(metadata.layers?.[Number(layerConfig.layerId)]?.name ?? '');
+    layerConfig.initLayerNameFromMetadata(metadata.layers?.[Number(layerConfig.layerId)]?.name);
 
     // Recursively validate children
     layer.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig);
@@ -215,8 +214,7 @@ export class EsriUtilities {
     this.#checkForWarningOnTheLayerMetadata(layer, layerConfig, metadata, metadataLayer);
 
     // Initialize the layer name by filling the blanks with the name from the metadata
-    // TODO: CHECK - LAYER NAME - Why here we send 'No name / Sans nom' and not in any other layer types?
-    layerConfig.initLayerNameFromMetadata(metadataLayer?.name || 'No name / Sans nom');
+    layerConfig.initLayerNameFromMetadata(metadataLayer?.name);
   }
 
   /**

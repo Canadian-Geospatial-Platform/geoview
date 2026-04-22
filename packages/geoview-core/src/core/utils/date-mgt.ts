@@ -170,7 +170,6 @@ export abstract class DateMgt {
   static readonly #TIME_TOKENS = ['H', 'HH', 'h', 'hh', 'k', 'kk', 'm', 'mm', 's', 'ss', 'S', 'SS', 'SSS', 'A', 'a', 'X', 'x'];
 
   /** The default input formats to append to the specific input formats when trying to read a date in a non-ISO format. */
-  // TODO: Add more date format support (this is only used when a particular input format is specified, otherwise we default to ISO formats)
   static readonly #DEFAULT_INPUT_FORMATS = [
     'YYYY-MM-DDTHH:mm:ss.SSS[Z]',
     'YYYY-MM-DDTHH:mm:ss.SSSZ',
