@@ -22,6 +22,7 @@ Please describe the tests that you ran to verify your changes. Provide instructi
 - [ ] I have run the **Test Suite** and **No errors have been introduced**
 - [ ] I have run `@BranchReview` agent in VS Code Chat and addressed all violations
 - [ ] I have run `@DocUpdate` agent in VS Code Chat and documentation is in sync with code changes
+- [ ] I have run `@IssueReview` agent in VS Code Chat and the implementation aligns with the linked issue
 - [ ] I have build **(rush build)** and deploy **(rush host)** my PR
 - [ ] I have connected the issues(s) to this PR
 - [ ] My code follows the style guidelines of this project
@@ -68,3 +69,19 @@ Checks that documentation in `docs/` is still consistent with the code you chang
 4. Review the audit summary and approve any proposed documentation updates
 
 - [ ] `@DocUpdate` has been run and documentation is in sync with code changes
+
+## Issue Review (`@IssueReview`)
+
+Compares your branch changes against the linked GitHub issue's proposed fix. Checks whether the implementation aligns with what was proposed, catches gaps, and provides feedback to improve future issue drafts.
+
+**How to run:**
+
+1. Open VS Code Chat (Ctrl+Shift+I)
+2. Select the **IssueReview** agent from the agent picker (or type `@IssueReview`)
+3. Provide the issue number:
+   ```
+   @IssueReview #1234
+   ```
+4. Review the alignment report — it will flag items that were proposed but not implemented, unexpected changes, and root cause accuracy
+
+- [ ] `@IssueReview` has been run and the alignment report has been reviewed
