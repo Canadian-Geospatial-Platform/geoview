@@ -37,7 +37,7 @@ import {
   VALID_DISPLAY_THEME,
   VALID_PROJECTION_CODES,
   MAP_ZOOM_LEVEL,
-  MAX_EXTENTS_RESTRICTION,
+  MAX_EXTENTS_RESTRICTION_LONLAT,
 } from '@/api/types/map-schema-types';
 import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
 
@@ -89,6 +89,7 @@ import {
   setStoreMapMoveEnd,
   setStoreMapInteraction,
   type TypeScaleInfo,
+  getStoreMapConfigViewSettings,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { getStoreAppDisplayTheme } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { getStoreLayerOrderedLayerPaths, type TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
@@ -649,26 +650,29 @@ export class MapViewer {
   /**
    * Set the map viewSettings (coordinate values in lon/lat).
    *
-   * @param mapView - Map viewSettings object
+   * @param mapViewSettings - Map viewSettings object
    */
-  setView(mapView: TypeViewSettings): void {
+  setView(mapViewSettings: TypeViewSettings): void {
     const currentView = this.getView();
     const viewOptions: ViewOptions = {};
-    viewOptions.projection = `EPSG:${mapView.projection}`;
-    viewOptions.zoom = mapView.initialView?.zoomAndCenter ? mapView.initialView?.zoomAndCenter[0] : currentView.getZoom();
-    viewOptions.center = mapView.initialView?.zoomAndCenter
-      ? Projection.transformFromLonLat(mapView.initialView?.zoomAndCenter[1], Projection.getProjectionFromString(viewOptions.projection))
+    viewOptions.projection = `EPSG:${mapViewSettings.projection}`;
+    viewOptions.zoom = mapViewSettings.initialView?.zoomAndCenter ? mapViewSettings.initialView?.zoomAndCenter[0] : currentView.getZoom();
+    viewOptions.center = mapViewSettings.initialView?.zoomAndCenter
+      ? Projection.transformFromLonLat(
+          mapViewSettings.initialView?.zoomAndCenter[1],
+          Projection.getProjectionFromString(viewOptions.projection)
+        )
       : Projection.transformFromLonLat(
           Projection.transformToLonLat(currentView.getCenter()!, currentView.getProjection()),
           Projection.getProjectionFromString(viewOptions.projection)
         );
-    viewOptions.minZoom = mapView.minZoom ? mapView.minZoom : currentView.getMinZoom();
-    viewOptions.maxZoom = mapView.maxZoom ? mapView.maxZoom : currentView.getMaxZoom();
-    viewOptions.rotation = mapView.rotation ? mapView.rotation : currentView.getRotation();
+    viewOptions.minZoom = mapViewSettings.minZoom ? mapViewSettings.minZoom : currentView.getMinZoom();
+    viewOptions.maxZoom = mapViewSettings.maxZoom ? mapViewSettings.maxZoom : currentView.getMaxZoom();
+    viewOptions.rotation = mapViewSettings.rotation ? mapViewSettings.rotation : currentView.getRotation();
 
-    if (mapView.maxExtent) {
-      const projObj = Projection.getProjectionFromString(`EPSG:${mapView.projection}`);
-      viewOptions.extent = MapViewer.#computeViewExtent(Number(mapView.projection), mapView.maxExtent, projObj);
+    if (mapViewSettings.maxExtent) {
+      const projObj = Projection.getProjectionFromString(`EPSG:${mapViewSettings.projection}`);
+      viewOptions.extent = MapViewer.#computeViewExtent(Number(mapViewSettings.projection), mapViewSettings.maxExtent, projObj);
     }
 
     const newView = new View(viewOptions);
@@ -765,13 +769,16 @@ export class MapViewer {
    * @param maxExtent - Optional max extent for the view
    * @returns True if the projection was changed, false if the projection code is unsupported
    */
-  setProjection(projectionNumber: TypeValidMapProjectionCodes, maxExtent: number[] | undefined): boolean {
+  setProjection(projectionNumber: TypeValidMapProjectionCodes): boolean {
     if (VALID_PROJECTION_CODES.includes(Number(projectionNumber))) {
       // Get the current projection
       const currentProjection = this.getProjection();
 
       // Get the new projection
       const newProjection = Projection.PROJECTIONS[projectionNumber];
+
+      // Get the view settings as configured
+      const viewSettings = getStoreMapConfigViewSettings(this.mapId);
 
       // Get view status (center and projection) to calculate new center
       const currentView = this.map.getView();
@@ -782,12 +789,22 @@ export class MapViewer {
         number,
       ];
 
+      // GV The extent is different between LCC and WM and switching from one to the other may introduce weird constraint.
+      // GV We may have to keep extent as array for configuration file but, technically, user does not change projection often.
+      // GV A wider LCC extent like [-125, 30, -60, 89] (minus -125) will introduce distortion on larger screen...
+      // GV It is why we apply the max extent only on native projection, otherwise we send undefined so that it applies default
+      // If we're switching to the projection as configured
+      let maxExtent4326 = MAX_EXTENTS_RESTRICTION_LONLAT[projectionNumber];
+      if (projectionNumber === viewSettings?.projection && viewSettings.maxExtent) {
+        maxExtent4326 = viewSettings.maxExtent;
+      }
+
       // Create new view settings
       const newView: TypeViewSettings = {
         initialView: { zoomAndCenter: [currentView.getZoom() as number, centerLatLng] },
         minZoom: currentView.getMinZoom(),
         maxZoom: currentView.getMaxZoom(),
-        maxExtent: maxExtent ?? MAX_EXTENTS_RESTRICTION[projectionNumber],
+        maxExtent: maxExtent4326,
         projection: projectionNumber,
       };
 

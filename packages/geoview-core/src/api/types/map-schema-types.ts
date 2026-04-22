@@ -379,13 +379,13 @@ export const VALID_MAP_CENTER: Record<TypeValidMapProjectionCodes, Record<string
 // Map view extents for each projection
 export const MAP_EXTENTS: Record<TypeValidMapProjectionCodes, number[]> = {
   3857: [-180, 0, 80, 84],
-  // TODO: tighten these up for initial view now that we have a separate MAX_EXTENTS_RESTRICTION
+  // TODO: tighten these up for initial view now that we have a separate MAX_EXTENTS_RESTRICTION_LONLAT
   3978: [-150, -10, -30, 90],
   3573: [-180, 45, 180, 90],
 };
 
 // Extent restrictions for each projection
-export const MAX_EXTENTS_RESTRICTION: Record<TypeValidMapProjectionCodes, number[]> = {
+export const MAX_EXTENTS_RESTRICTION_LONLAT: Record<TypeValidMapProjectionCodes, number[]> = {
   3857: [-180, -85.05112877980659, 180, 85.05112877980659],
   3978: [-150, -10, -30, 90],
   3573: [-180, 45, 180, 90],
