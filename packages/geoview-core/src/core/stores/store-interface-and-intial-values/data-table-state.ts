@@ -1,7 +1,7 @@
 import { useStore } from 'zustand';
 
 import type { TypeFeatureInfoEntry, TypeLayerData, TypeResultSet, TypeResultSetEntry } from '@/api/types/map-schema-types';
-import type { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
+import { type TypeSetStore, type TypeGetStore, useStableSelector } from '@/core/stores/geoview-store';
 import { getGeoViewStore, helperDeleteFromArray, useGeoViewStore } from '@/core/stores/stores-managers';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
@@ -426,8 +426,9 @@ export const getStoreMapFilteredRecord = (mapId: string, layerPath: string): boo
 };
 
 /** Hook that returns the per-layer data table settings record. */
-export const useStoreDataTableLayerSettings = (): Record<string, IDataTableSettings> =>
-  useStore(useGeoViewStore(), (state) => state.dataTableState.layersDataTableSetting);
+export const useStoreDataTableLayerSettings = (): Record<string, IDataTableSettings> => {
+  return useStableSelector(useGeoViewStore(), (state) => state.dataTableState.layersDataTableSetting);
+};
 
 /** Hook that returns the currently selected feature in the data table. */
 export const useStoreDataTableSelectedFeature = (): TypeFeatureInfoEntry | null =>

@@ -8,7 +8,6 @@ import {
   useStoreDataTableSelectedLayerPath,
   useStoreDataTableAllFeaturesDataArray,
   useStoreDataTableLayerSettings,
-  getStoreDataTableFilterDataToExtent,
   setStoreSelectedLayerPath,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { useStoreAppShowUnsymbolizedFeatures } from '@/core/stores/store-interface-and-intial-values/app-state';
@@ -93,7 +92,7 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
       let { features } = layer;
 
       // Apply extent filtering if enabled for the selected layer
-      if (features && getStoreDataTableFilterDataToExtent(mapId, layer.layerPath) && mapExtent) {
+      if (features && datatableSettings[layer.layerPath]?.filterDataToExtent && mapExtent) {
         features = features.filter((feature) => {
           const { geometry } = feature;
           return geometry?.intersectsExtent(mapExtent);
@@ -110,7 +109,7 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
         features,
       };
     });
-  }, [memoOrderedLayerData, mapId, mapExtent, showUnsymbolizedFeatures]);
+  }, [memoOrderedLayerData, mapExtent, showUnsymbolizedFeatures, datatableSettings]);
 
   /**
    * Handles layer selection change from the layer list.

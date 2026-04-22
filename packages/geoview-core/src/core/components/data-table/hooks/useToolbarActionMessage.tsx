@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useMemo } from 'react';
 import type { MRT_TableInstance as MRTTableInstance, MRT_ColumnFiltersState as MRTColumnFiltersState } from 'material-react-table';
 import { useTranslation } from 'react-i18next';
 import {
@@ -40,11 +40,11 @@ export function useToolbarActionMessage({
   const mapId = useStoreGeoViewMapId();
 
   /**
-   * Updates the toolbar message when filters or feature data change.
+   * Computes the toolbar message based on current filters and feature data.
    */
-  useEffect(() => {
+  const memoToolbarMessage = useMemo(() => {
     // Log
-    logger.logTraceUseEffect('USETOOLBARACTIONMESSAGE - combined', { columnFilters, globalFilter });
+    logger.logTraceUseMemo('USETOOLBARACTIONMESSAGE - combined', { columnFilters, globalFilter });
 
     let message = '';
     let length = 0;
@@ -55,14 +55,14 @@ export function useToolbarActionMessage({
       const filteredRows = tableInstance.getFilteredRowModel().rows.length;
 
       if (filteredRows !== visibleFeatures) {
-        // Table has additional filtering applied (column filters or global filter)
+        // Table has additional filtering applied
         length = filteredRows;
         message = t('dataTable.rowsFiltered')
           .replace('{rowsFiltered}', filteredRows.toString())
           .replace('{totalRows}', visibleFeatures.toString() ?? '');
         message += !showUnsymbolizedFeatures ? ` (${unfilteredFeaturesCount} ${t('dataTable.total')})` : '';
       } else if (!showUnsymbolizedFeatures && visibleFeatures !== unfilteredFeaturesCount) {
-        // No table filtering, but some features are hidden due to missing icons
+        // Some features hidden due to missing icons
         message = `${visibleFeatures} ${t('dataTable.features')} ${t('dataTable.showing')} (${unfilteredFeaturesCount} ${t('dataTable.total')})`;
         length = 0;
       } else {
@@ -70,10 +70,12 @@ export function useToolbarActionMessage({
         message = `${data.features?.length} ${t('dataTable.features')}`;
         length = 0;
       }
-
-      setStoreRowsFilteredEntry(mapId, length, layerPath);
     }
 
-    setStoreToolbarRowSelectedMessageEntry(mapId, message, layerPath);
-  }, [mapId, columnFilters, data.features, globalFilter, showUnsymbolizedFeatures, tableInstance, layerPath, t, unfilteredFeaturesCount]);
+    return { message, length };
+  }, [columnFilters, data.features, globalFilter, showUnsymbolizedFeatures, tableInstance, t, unfilteredFeaturesCount]);
+
+  // Update store
+  setStoreRowsFilteredEntry(mapId, memoToolbarMessage.length, layerPath);
+  setStoreToolbarRowSelectedMessageEntry(mapId, memoToolbarMessage.message, layerPath);
 }
