@@ -27,7 +27,6 @@ const LegendListItem = memo(
     layerVisible,
     canToggle,
     showNameTooltip,
-    showIcon,
     onToggle,
     sxClasses,
     id,
@@ -36,7 +35,6 @@ const LegendListItem = memo(
     layerVisible: boolean;
     canToggle: boolean;
     showNameTooltip: boolean;
-    showIcon: boolean;
     onToggle?: () => void;
     sxClasses: Record<string, object>;
     id: string;
@@ -80,13 +78,11 @@ const LegendListItem = memo(
             aria-pressed={isVisible && layerVisible}
             aria-label={`${t('layers.toggleVisibility')} - ${name}`} // WCAG - Provide descriptive aria-label for accessibility
           >
-            {showIcon && (
-              <ListItemIcon>
-                <Box sx={{ display: 'flex', padding: '0 18px 0 18px', margin: '0 -18px 0 -18px' }}>
-                  {icon ? <Box component="img" alt="" src={icon} /> : <BrowserNotSupportedIcon />}
-                </Box>
-              </ListItemIcon>
-            )}
+            <ListItemIcon>
+              <Box sx={{ display: 'flex', padding: '0 18px 0 18px', margin: '0 -18px 0 -18px' }}>
+                {icon ? <Box component="img" alt="" src={icon} /> : <BrowserNotSupportedIcon />}
+              </Box>
+            </ListItemIcon>
             <ListItemText primary={name} />
           </ListItemButton>
         </Tooltip>
@@ -159,9 +155,6 @@ export const ItemsList = memo(function ItemsList({ items, layerPath }: ItemsList
   // Early returns
   if (!items?.length) return null;
 
-  // GV Hide item icons when all items share the same icon (redundant with the layer header icon)
-  const allSameIcon = items.every((item): boolean => item.icon === items[0].icon);
-
   // Direct mapping since we only reach this code if items has content
   // GV isVisible is part of key so that it forces a re-render when it changes
   // GV this is specifically because of esriFeature layers. This also causes focus to be lost when using a keyboard to toggle layer visibility
@@ -187,7 +180,6 @@ export const ItemsList = memo(function ItemsList({ items, layerPath }: ItemsList
             key={`${item.name}-${item.isVisible}-${item.icon}`}
             id={itemId}
             {...commonProps}
-            showIcon={!allSameIcon}
             onToggle={canToggle ? () => handleToggleItemVisibility(item, itemId) : undefined}
             sxClasses={sxClasses}
           />
