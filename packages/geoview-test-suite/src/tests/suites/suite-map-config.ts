@@ -52,7 +52,7 @@ export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
   protected override async onLaunchTestSuite(): Promise<unknown> {
     // // GV START DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
     // // Test DEBUG
-    // const pDevTest0 = this.#mapConfigTester.testDataTableSelectedTabFooterBar();
+    // const pDevTest0 = this.#mapConfigTester.testInitialViewLayerIdsSetExtent();
 
     // // Resolve when all
     // return Promise.all([pDevTest0]);

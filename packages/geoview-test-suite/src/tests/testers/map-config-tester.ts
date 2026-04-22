@@ -516,14 +516,14 @@ export class MapConfigTester extends GVAbstractTester {
     test.addStep('Creating the map from config...');
     const mapViewer = await this.getApi().createMapFromConfigFast(mapId, JSON.stringify(baseConfig), 500);
 
-    // Replace the map viewer in the tester with the new one created from config
-    this.setMapViewer(mapViewer);
+    // Replace the map viewer and the controller registry in the tester with the new one created from config
+    this.reassignMapViewerAndControllers(mapViewer);
 
     // Wait for layer to load and data table to initialize
     test.addStep('Waiting for layers to get loaded...');
-    await mapViewer.waitForLayersLoaded();
+    const loadedLayersCount = await mapViewer.waitForLayersLoaded();
 
-    test.addStep('Layers loaded');
+    test.addStep(`Layers loaded (${loadedLayersCount})`);
     return mapViewer;
   }
 
