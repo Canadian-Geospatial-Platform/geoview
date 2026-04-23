@@ -11,6 +11,7 @@ import {
   getStoreDataTableFeaturesByPath,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { useStoreAppShowUnsymbolizedFeatures } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreMapExtent } from '@/core/stores/store-interface-and-intial-values/map-state';
 import {
   useStoreLayerAllVisibleAndInRangeLayers,
   useStoreLayerIsHiddenOnMapSet,
@@ -71,7 +72,6 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
   const layerNames = useStoreLayerNameSet();
   const layerStatuses = useStoreLayerStatusSet();
   const layerHiddenSet = useStoreLayerIsHiddenOnMapSet();
-  const uiController = useUIController();
 
   // Create columns for data table.
   const mappedLayerData = useFeatureFieldInfos(layerData);

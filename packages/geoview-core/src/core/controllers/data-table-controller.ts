@@ -13,7 +13,6 @@ import {
   setStoreDataTableRowsFilteredEntry,
   setStoreDataTableSelectedFeature,
   setStoreDataTableSelectedLayerPath,
-  setStoreDataTableToolbarRowSelectedMessageEntry,
   type TypeColumnFiltersState,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import type { MapViewer } from '@/geo/map/map-viewer';
@@ -140,18 +139,6 @@ export class DataTableController extends AbstractMapViewerController {
   setRowsFilteredEntry(layerPath: string, rows: number): void {
     // Save in the store
     setStoreDataTableRowsFilteredEntry(this.getMapId(), rows, layerPath);
-  }
-
-  /**
-   * Sets the toolbar message for the selected row in a specific layer in the data table, which determines the
-   * message displayed in the toolbar for the selected row.
-   *
-   * @param layerPath - The path of the layer to update
-   * @param message - The message to set for the selected row in the toolbar
-   */
-  setToolbarRowSelectedMessageEntry(layerPath: string, message: string): void {
-    // Save in the store
-    setStoreDataTableToolbarRowSelectedMessageEntry(this.getMapId(), message, layerPath);
   }
 
   // #endregion PUBLIC METHODS
