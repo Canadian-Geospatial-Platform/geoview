@@ -575,7 +575,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
       }
 
       // Emit about it
-      this.#emitLayerConfigRemoved({ layerPath, layerName: layerEntryConfig.getLayerName() || 'No name / Sans nom' });
+      this.#emitLayerConfigRemoved({ layerPath, layerName: layerEntryConfig.getLayerNameCascade() });
 
       // Log
       logger.logInfo(`Layer removed for ${layerPath}`);
