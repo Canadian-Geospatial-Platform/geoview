@@ -921,17 +921,6 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
     prevGlobalFilterRef.current = globalFilter ?? '';
   }, [globalFilter]);
 
-  // set toolbar custom action message in store.
-  // useToolbarActionMessage({
-  //   data,
-  //   columnFilters,
-  //   globalFilter,
-  //   layerPath,
-  //   tableInstance: useTable,
-  //   showUnsymbolizedFeatures,
-  //   unfilteredFeaturesCount,
-  // });
-
   return (
     <Box ref={dataTableWrapperRef} sx={sxClasses.dataTableWrapper} className="data-table-wrapper">
       <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={language}>
