@@ -55,12 +55,12 @@ export function useEventListener<T extends HTMLElement | Window = Window>(
       // Create event listener that calls handler function stored in ref
       const eventListener = (event: Event): void => savedHandler.current(event);
 
-      targetElement.addEventListener(eventName as string, eventListener);
+      targetElement.addEventListener(eventName, eventListener);
 
       // Remove event listener on cleanup
       return () => {
         logger.logTraceUseEffect('REMOVE EVENT LISTENER', eventName, element);
-        targetElement.removeEventListener(eventName as string, eventListener);
+        targetElement.removeEventListener(eventName, eventListener);
       };
     }
 

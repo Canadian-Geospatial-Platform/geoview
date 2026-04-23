@@ -2,7 +2,7 @@ import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import { Circle as CircleStyle, Fill, Stroke, Style } from 'ol/style';
 import Feature from 'ol/Feature';
-import { Point, MultiPoint, LineString, MultiLineString, Polygon, MultiPolygon } from 'ol/geom';
+import { GeometryCollection, Point, MultiPoint, LineString, MultiLineString, Polygon, MultiPolygon } from 'ol/geom';
 import type { Extent } from 'ol/extent';
 import { getCenter } from 'ol/extent';
 import { fromExtent } from 'ol/geom/Polygon';
@@ -138,6 +138,78 @@ export class FeatureHighlight {
   }
 
   /**
+   * Applies the circle marker style on a point highlight feature.
+   *
+   * @param feature - Point feature to style
+   */
+  #stylePointHighlightFeature(feature: Feature): void {
+    const radStyle = new Style({
+      image: new CircleStyle({
+        radius: 10,
+        stroke: new Stroke({ color: this.#highlightColor, width: 1.25 }),
+        fill: this.#highlightFill,
+      }),
+    });
+    feature.setStyle(radStyle);
+  }
+
+  /**
+   * Highlights a geometry by type and returns the number of highlighted features.
+   *
+   * @param geometry - Geometry to highlight
+   * @param id - Base id to assign to highlighted feature(s)
+   * @returns Number of highlighted features created
+   */
+  #highlightGeometry(geometry: unknown, id: string): number {
+    if (geometry instanceof Polygon || geometry instanceof LineString || geometry instanceof MultiLineString) {
+      const newFeature = new Feature(geometry);
+      this.#styleHighlightedFeature(newFeature, id);
+      return 1;
+    }
+
+    if (geometry instanceof Point) {
+      const newFeature = new Feature(geometry);
+      this.#styleHighlightedFeature(newFeature, id);
+      this.#stylePointHighlightFeature(newFeature);
+      return 1;
+    }
+
+    if (geometry instanceof MultiPoint) {
+      const coordinates: Coordinate[] = geometry.getCoordinates();
+      for (let i = 0; i < coordinates.length; i++) {
+        const newPoint = new Point(coordinates[i]);
+        const newFeature = new Feature(newPoint);
+        const pointId = `${id}-${i}`;
+        this.#styleHighlightedFeature(newFeature, pointId);
+        this.#stylePointHighlightFeature(newFeature);
+      }
+      return coordinates.length;
+    }
+
+    if (geometry instanceof MultiPolygon) {
+      const polygons = geometry.getPolygons();
+      for (let i = 0; i < polygons.length; i++) {
+        const newPolygon = polygons[i];
+        const newFeature = new Feature(newPolygon);
+        const polygonId = `${id}-${i}`;
+        this.#styleHighlightedFeature(newFeature, polygonId);
+      }
+      return polygons.length;
+    }
+
+    if (geometry instanceof GeometryCollection) {
+      const geometries = geometry.getGeometriesArray();
+      let highlightedCount = 0;
+      for (let i = 0; i < geometries.length; i++) {
+        highlightedCount += this.#highlightGeometry(geometries[i], `${id}-${i}`);
+      }
+      return highlightedCount;
+    }
+
+    return 0;
+  }
+
+  /**
    * Removes feature highlight(s).
    *
    * @param id - Uid of the feature to deselect, or 'all' to clear all
@@ -166,49 +238,14 @@ export class FeatureHighlight {
    */
   highlightFeature(feature: TypeFeatureInfoEntry): void {
     const { geometry } = feature;
-    if (geometry instanceof Polygon) {
-      const newFeature = new Feature(geometry);
-      this.#styleHighlightedFeature(newFeature, feature.uid!);
-    } else if (geometry instanceof LineString || geometry instanceof MultiLineString) {
-      const newFeature = new Feature(geometry);
-      this.#styleHighlightedFeature(newFeature, feature.uid!);
-    } else if (geometry instanceof MultiPoint) {
-      const coordinates: Coordinate[] = geometry.getCoordinates();
-      for (let i = 0; i < coordinates.length; i++) {
-        const newPoint = new Point(coordinates[i]);
-        const newFeature = new Feature(newPoint);
-        const id = `${feature.uid!}-${i}`;
-        this.#styleHighlightedFeature(newFeature, id);
-        const radStyle = new Style({
-          image: new CircleStyle({
-            radius: 10,
-            stroke: new Stroke({ color: this.#highlightColor, width: 1.25 }),
-            fill: this.#highlightFill,
-          }),
-        });
-        newFeature.setStyle(radStyle);
-      }
-    } else if (geometry instanceof MultiPolygon) {
-      const polygons = geometry.getPolygons();
-      for (let i = 0; i < polygons.length; i++) {
-        const newPolygon = polygons[i];
-        const newFeature = new Feature(newPolygon);
-        const id = `${feature.uid!}-${i}`;
-        this.#styleHighlightedFeature(newFeature, id);
-      }
-    } else if (feature.extent) {
+    const highlightedCount = this.#highlightGeometry(geometry, feature.uid!);
+
+    if (!highlightedCount && feature.extent) {
       const center = getCenter(feature.extent);
       const newPoint = new Point(center);
       const newFeature = new Feature(newPoint);
       this.#styleHighlightedFeature(newFeature, feature.uid!);
-      const radStyle = new Style({
-        image: new CircleStyle({
-          radius: 10,
-          stroke: new Stroke({ color: this.#highlightColor, width: 1.25 }),
-          fill: this.#highlightFill,
-        }),
-      });
-      newFeature.setStyle(radStyle);
+      this.#stylePointHighlightFeature(newFeature);
     }
     this.overlayLayer?.changed();
   }

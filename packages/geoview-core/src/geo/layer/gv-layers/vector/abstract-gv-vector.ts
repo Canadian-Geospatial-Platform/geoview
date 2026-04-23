@@ -73,12 +73,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
         const style =
           feature.getGeometry()?.getType() === 'Point'
             ? this.#getOrCreateCachedStyle(feature, label)
-            : AbstractGVVector.calculateStyleForFeature(
-                this as AbstractGVLayer,
-                feature,
-                label,
-                this.getLayerFilters()?.getFilterEquation()
-              );
+            : AbstractGVVector.calculateStyleForFeature(this, feature, label, this.getLayerFilters()?.getFilterEquation());
 
         // Set the style applied, throwing a style applied event in the process
         this.setStyleApplied(true);
@@ -106,7 +101,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
         source: olSource, // Share the same source
         style: (feature) => {
           // Calculate text-only style for the feature
-          const style = AbstractGVVector.calculateTextStyleForFeature(this as AbstractGVLayer, feature);
+          const style = AbstractGVVector.calculateTextStyleForFeature(this, feature);
           return style;
         },
         // Enable declutter based on layerText.declutterMode
@@ -430,12 +425,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    */
   #getOrCreateCachedStyle(feature: FeatureLike, label: string): Style | undefined {
     // Calculate new style and cache it
-    const featureStyle = AbstractGVVector.calculateStyleForFeature(
-      this as AbstractGVLayer,
-      feature,
-      label,
-      this.getLayerFilters()?.getFilterEquation()
-    );
+    const featureStyle = AbstractGVVector.calculateStyleForFeature(this, feature, label, this.getLayerFilters()?.getFilterEquation());
 
     // If no feature style generated
     if (!featureStyle) {

@@ -834,6 +834,47 @@ export class LayerTester extends GVAbstractTester {
   }
 
   /**
+   * Tests adding a GeoJSON GeometryCollection layer on the map.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testAddGeoJSONWithGeometryCollection(): Promise<Test<AbstractGVLayer>> {
+    // Create a random geoview layer id
+    const gvLayerId = generateId();
+    const layerUrl = GVAbstractTester.GEOJSON_DATASET_ROOT;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.GEOJSON_GEOMETRY_COLLECTION}`;
+    const gvLayerName = 'Geometry Collection JSON';
+
+    // Test
+    return this.test(
+      `Test Adding GeoJSON GeometryCollection layer on map...`,
+      async (test) => {
+        // Creating the configuration
+        test.addStep('Creating the GeoView Layer Configuration...');
+
+        // Create the config
+        const gvConfig = GeoJSON.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
+          { id: GVAbstractTester.GEOJSON_GEOMETRY_COLLECTION },
+        ]);
+
+        // Redirect to helper to add the layer to the map and wait
+        await this.helperStepAddLayerOnMap(test, gvConfig);
+
+        // Find the layer and wait until its ready
+        return this.helperStepCheckLayerAtLayerPath(test, layerPath);
+      },
+      (test) => {
+        // Verify the layer exists and legend information was created
+        LayerTester.helperStepAssertLayerExists(test, this.getMapId(), layerPath);
+      },
+      (test) => {
+        // Redirect to helper to clean up and assert
+        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+      }
+    );
+  }
+
+  /**
    * Tests the behavior of initializing a GeoJSON layer configuration using an invalid metadata URL.
    *
    * This test verifies that when a GeoJSON layer configuration is initialized with an invalid or unreachable

@@ -1,12 +1,9 @@
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import type {
-  GeoPackageLayerConfig,
-  ShapefileLayerConfig,
   TypeGeoviewLayerType,
   TypeLayerEntryConfig,
   MapConfigLayerEntry,
   TypeGeoviewLayerConfig,
-  ConfigClassOrType,
 } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES, CONST_LAYER_ENTRY_TYPES } from '@/api/types/layer-schema-types';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
@@ -128,7 +125,7 @@ export class UtilAddLayer {
   static getLayerNameById(layerTree: TypeGeoviewLayerConfig | undefined, layerId: string): string | undefined {
     const foundLayerEntry = UtilAddLayer.getLayerById(layerTree, layerId);
     // Using as ConfigClassOrType, because of the types confusion between class instance and regular object
-    if (foundLayerEntry) return ConfigBaseClass.getClassOrTypeLayerName(foundLayerEntry as ConfigClassOrType);
+    if (foundLayerEntry) return ConfigBaseClass.getClassOrTypeLayerName(foundLayerEntry);
     return undefined;
   }
 
@@ -247,7 +244,7 @@ export class UtilAddLayer {
         geoviewLayerId: geoviewLayerId,
         geoviewLayerType: 'shapefile',
         metadataAccessPath: layerURL,
-      } as ShapefileLayerConfig;
+      };
     }
 
     if (layerType === 'GeoPackage') {
@@ -256,7 +253,7 @@ export class UtilAddLayer {
         geoviewLayerId: geoviewLayerId,
         geoviewLayerType: 'GeoPackage',
         metadataAccessPath: layerURL,
-      } as GeoPackageLayerConfig;
+      };
     }
 
     const listOfLayerEntryConfig: LayerEntryConfigShell[] = [];
@@ -270,7 +267,7 @@ export class UtilAddLayer {
         geoviewLayerName: layerName,
         geoviewLayerType: layerType as TypeGeoviewLayerType,
         metadataAccessPath: layerURL,
-        listOfLayerEntryConfig: layersToAdd[0].listOfLayerEntryConfig as unknown as TypeLayerEntryConfig[],
+        listOfLayerEntryConfig: layersToAdd[0].listOfLayerEntryConfig,
       };
     }
 

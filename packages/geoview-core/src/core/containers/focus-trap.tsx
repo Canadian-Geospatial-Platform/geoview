@@ -80,7 +80,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
    */
   useEffect(() => {
     logger.logTraceUseEffect('FOCUS-TRAP - shellElementRef');
-    shellElementRef.current = geoviewElement.querySelector('.geoview-shell') as HTMLElement;
+    shellElementRef.current = geoviewElement.querySelector('.geoview-shell');
   }, [geoviewElement]);
 
   /**

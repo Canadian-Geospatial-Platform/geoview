@@ -170,7 +170,7 @@ async function getMapConfig(mapElement: Element): Promise<TypeMapFeaturesConfig>
   mapConfigExtend.displayLanguage = lang;
   mapConfigExtend.sharedMode = mapElement.hasAttribute('data-shared');
 
-  return mapConfigExtend as unknown as TypeMapFeaturesConfig;
+  return mapConfigExtend;
 }
 
 /**

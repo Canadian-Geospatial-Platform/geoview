@@ -1995,7 +1995,7 @@ export class LayerController extends AbstractMapViewerController {
    */
   #handleDomainLayerEntryConfigRegistered(sender: LayerDomain, event: DomainLayerStatusChangedEvent): void {
     // Register for ordered layer information
-    if (event.config.getGeoviewLayerConfig().useAsBasemap !== true) this.#registerForOrderedLayerInfo(event.config as TypeLayerEntryConfig);
+    if (event.config.getGeoviewLayerConfig().useAsBasemap !== true) this.#registerForOrderedLayerInfo(event.config);
 
     // Tell the layer sets about it
     this.getControllersRegistry().layerSetController.allLayerSets.forEach((layerSet) => {

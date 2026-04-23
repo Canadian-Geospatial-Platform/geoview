@@ -76,7 +76,7 @@ export class GeoTIFF extends AbstractGeoViewRaster {
         const url = metadataAccessPath.endsWith('/') ? metadataAccessPath.slice(0, -1) : metadataAccessPath;
 
         // Fetch it
-        return (await Fetch.fetchJson<T>(url, { signal: abortSignal })) as T;
+        return await Fetch.fetchJson<T>(url, { signal: abortSignal });
       }
 
       // The metadataAccessPath didn't seem like it was containing actual metadata, so it was skipped

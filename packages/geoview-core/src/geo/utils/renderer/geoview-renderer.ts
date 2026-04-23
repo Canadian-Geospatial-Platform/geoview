@@ -1,7 +1,7 @@
 import { asArray, asString } from 'ol/color';
 import { Style, Stroke, Fill, RegularShape, Circle as StyleCircle, Icon as StyleIcon, Circle } from 'ol/style';
 import type { Geometry } from 'ol/geom';
-import { LineString, Point, Polygon } from 'ol/geom';
+import { LineString, Point, Polygon, GeometryCollection } from 'ol/geom';
 import type { Options as IconOptions } from 'ol/style/Icon';
 import Icon from 'ol/style/Icon';
 import type { Options as CircleOptions } from 'ol/style/Circle';
@@ -329,6 +329,58 @@ export abstract class GeoviewRenderer {
           [4, drawingCanvas.height - 4],
           [4, 4],
         ],
+      ])
+    );
+
+    context.getImageData(0, 0, drawingCanvas.width, drawingCanvas.height);
+    return drawingCanvas;
+  }
+
+  /**
+   * Creates a canvas with the GeometryCollection settings defined in the style.
+   *
+   * @param geometryCollectionStyle - Optional style associated to the GeometryCollection
+   * @returns The created canvas
+   */
+  static createGeometryCollectionCanvas(geometryCollectionStyle?: Style): HTMLCanvasElement {
+    // Create canvas
+    const drawingCanvas = document.createElement('canvas');
+    drawingCanvas.width = this.LEGEND_CANVAS_WIDTH;
+    drawingCanvas.height = this.LEGEND_CANVAS_HEIGHT;
+
+    // Create a gradient background to better see the different geometries that compose the GeometryCollection symbol
+    const context = drawingCanvas.getContext('2d', { willReadFrequently: true })!;
+    const gradient = context.createLinearGradient(0, drawingCanvas.height, drawingCanvas.width, 0);
+    gradient.addColorStop(0, '#7f7f7f');
+    gradient.addColorStop(0.667, '#ffffff');
+    gradient.addColorStop(1, '#ffffff');
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+    const drawingContext = toContext(context);
+
+    // Get the style to use for the GeometryCollection by cloning the one provided in parameter (if any) and setting the geometry to null.
+    const styleToUse = geometryCollectionStyle ? geometryCollectionStyle.clone() : undefined;
+    if (styleToUse) styleToUse.setGeometry(null);
+    drawingContext.setStyle(styleToUse!);
+    drawingContext.setTransform([1, 0, 0, 1, 0, 0]);
+
+    // Draw a combination of geometries to represent the GeometryCollection
+    drawingContext.drawGeometry(
+      new GeometryCollection([
+        new Polygon([
+          [
+            [6, 6],
+            [drawingCanvas.width - 6, 6],
+            [drawingCanvas.width - 6, drawingCanvas.height - 6],
+            [6, drawingCanvas.height - 6],
+            [6, 6],
+          ],
+        ]),
+        new LineString([
+          [8, drawingCanvas.height - 8],
+          [drawingCanvas.width - 8, 8],
+        ]),
+        new Point([drawingCanvas.width / 2, drawingCanvas.height / 2]),
       ])
     );
 
@@ -1219,6 +1271,7 @@ export abstract class GeoviewRenderer {
 
     const settings = (styleSettings.type === 'simple' ? styleSettings.info[0].settings : styleSettings) as TypeKindOfVectorSettings;
     const geometry = feature?.getGeometry() as Geometry;
+    const isGeometryCollection = geometry instanceof GeometryCollection;
 
     let style: Style | undefined;
     if (isFilledPolygonVectorConfig(settings)) {
@@ -1227,6 +1280,11 @@ export abstract class GeoviewRenderer {
         style = this.#processFillStyle[fillStyle](settings, geometry);
       } else {
         style = this.#processFillStyle[fillStyle](settings);
+      }
+
+      // GeometryCollection uses polygon settings as the base symbol and derives point rendering from that same base.
+      if (style && isGeometryCollection) {
+        style.setImage(this.#createGeometryCollectionPointSymbol(settings));
       }
     }
 
@@ -1238,6 +1296,26 @@ export abstract class GeoviewRenderer {
     }
 
     return style;
+  }
+
+  /**
+   * Creates a point symbol derived from polygon settings for GeometryCollection rendering.
+   *
+   * @param settings - Polygon settings used as base
+   * @returns The point symbol used for embedded points
+   */
+  static #createGeometryCollectionPointSymbol(settings: TypePolygonVectorConfig): StyleCircle {
+    const fillColor = settings.color ?? this.getDefaultColor(0.25);
+    const strokeColor = settings.stroke?.color ?? this.getDefaultColor(1);
+    const strokeWidth = settings.stroke?.width ?? 1;
+
+    const circleOptions: CircleOptions = {
+      fill: new Fill({ color: fillColor }),
+      radius: 5,
+      stroke: new Stroke({ color: strokeColor, width: strokeWidth }),
+    };
+
+    return new StyleCircle(circleOptions);
   }
 
   // #endregion PROCESS RENDERER
@@ -1276,7 +1354,7 @@ export abstract class GeoviewRenderer {
       return layerStyles;
     } catch (error: unknown) {
       logger.logError('Error processing array of point styles', error);
-      return {} as TypeVectorLayerStyles;
+      return {};
     }
   }
 
@@ -1324,7 +1402,7 @@ export abstract class GeoviewRenderer {
       return await this.processArrayOfPointStyleConfig(layerStyles, arrayOfPointStyleConfig!);
     } catch (error: unknown) {
       logger.logError('Error getPointStyle sub routine', error);
-      return {} as TypeVectorLayerStyles;
+      return {};
     }
   }
 
@@ -1394,6 +1472,39 @@ export abstract class GeoviewRenderer {
 
         legendStyles.Polygon = layerStyles.Polygon;
       }
+
+      if (styleConfig.GeometryCollection) {
+        // GeometryCollection style configuration
+        const layerStyles: TypeVectorLayerStyles = { GeometryCollection: {} };
+        if (styleConfig.GeometryCollection.type === 'simple') {
+          const { settings } = styleConfig.GeometryCollection.info[0];
+          const style = this.processSimplePolygon(settings);
+          if (style && isFilledPolygonVectorConfig(settings)) style.setImage(this.#createGeometryCollectionPointSymbol(settings));
+          layerStyles.GeometryCollection!.defaultCanvas = this.createGeometryCollectionCanvas(style);
+        } else {
+          if (styleConfig.GeometryCollection.hasDefault) {
+            const defaultSettings = styleConfig.GeometryCollection.info[styleConfig.GeometryCollection.info.length - 1].settings;
+            const defaultStyle = this.processSimplePolygon(defaultSettings);
+            if (defaultStyle && isFilledPolygonVectorConfig(defaultSettings)) {
+              defaultStyle.setImage(this.#createGeometryCollectionPointSymbol(defaultSettings));
+            }
+            layerStyles.GeometryCollection!.defaultCanvas = this.createGeometryCollectionCanvas(defaultStyle);
+          }
+
+          const styleArray: HTMLCanvasElement[] = [];
+          styleConfig.GeometryCollection.info.forEach((styleInfo) => {
+            const style = this.processSimplePolygon(styleInfo.settings);
+            if (style && isFilledPolygonVectorConfig(styleInfo.settings)) {
+              style.setImage(this.#createGeometryCollectionPointSymbol(styleInfo.settings));
+            }
+            styleArray.push(this.createGeometryCollectionCanvas(style));
+          });
+          if (styleConfig.GeometryCollection.hasDefault) styleArray.pop();
+          layerStyles.GeometryCollection!.arrayOfCanvas = styleArray;
+        }
+
+        legendStyles.GeometryCollection = layerStyles.GeometryCollection;
+      }
       return legendStyles;
     } catch (error: unknown) {
       logger.logError('Error getLegendStyles', error);
@@ -1429,7 +1540,7 @@ export abstract class GeoviewRenderer {
       };
       return { type: 'simple', hasDefault: false, fields: [], info: [{ visible: true, label, settings, values: [] }] };
     }
-    if (geometryType === 'Polygon') {
+    if (geometryType === 'Polygon' || geometryType === 'GeometryCollection') {
       const settings: TypePolygonVectorConfig = {
         type: 'filledPolygon',
         color: this.getDefaultColor(0.25),
@@ -2464,6 +2575,8 @@ export abstract class GeoviewRenderer {
         }
       } else if (geometryType === 'LineString') {
         imageSource = this.createLineStringCanvas(style).toDataURL();
+      } else if (geometryType === 'GeometryCollection') {
+        imageSource = this.createGeometryCollectionCanvas(style).toDataURL();
       } else {
         imageSource = this.createPolygonCanvas(style).toDataURL();
       }
@@ -2749,6 +2862,7 @@ export abstract class GeoviewRenderer {
       MultiLineString: GeoviewRenderer.processSimpleLineString.bind(GeoviewRenderer),
       Polygon: GeoviewRenderer.processSimplePolygon.bind(GeoviewRenderer),
       MultiPolygon: GeoviewRenderer.processSimplePolygon.bind(GeoviewRenderer),
+      GeometryCollection: GeoviewRenderer.processSimplePolygon.bind(GeoviewRenderer),
     },
     uniqueValue: {
       Point: GeoviewRenderer.processUniqueValuePoint.bind(GeoviewRenderer),
@@ -2757,6 +2871,7 @@ export abstract class GeoviewRenderer {
       MultiLineString: GeoviewRenderer.processUniqueLineString.bind(GeoviewRenderer),
       Polygon: GeoviewRenderer.processUniquePolygon.bind(GeoviewRenderer),
       MultiPolygon: GeoviewRenderer.processUniquePolygon.bind(GeoviewRenderer),
+      GeometryCollection: GeoviewRenderer.processUniquePolygon.bind(GeoviewRenderer),
     },
     classBreaks: {
       Point: GeoviewRenderer.processClassBreaksPoint.bind(GeoviewRenderer),
@@ -2765,6 +2880,7 @@ export abstract class GeoviewRenderer {
       MultiLineString: GeoviewRenderer.processClassBreaksLineString.bind(GeoviewRenderer),
       Polygon: GeoviewRenderer.processClassBreaksPolygon.bind(GeoviewRenderer),
       MultiPolygon: GeoviewRenderer.processClassBreaksPolygon.bind(GeoviewRenderer),
+      GeometryCollection: GeoviewRenderer.processClassBreaksPolygon.bind(GeoviewRenderer),
     },
   };
 

@@ -204,19 +204,16 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
       .map((layerPath) => arrayOfLayerDataBatch.find((layerData) => layerData.layerPath === layerPath))
       .filter((layer) => layer && !layerHiddenSet[layer.layerPath])
       .filter((layer) => layer && queryableByLayerPath[layer.layerPath])
-      .map(
-        (layer) =>
-          ({
-            layerName: layerNames[layer!.layerPath] ?? '',
-            layerPath: layer!.layerPath,
-            layerStatus: layerStatuses[layer!.layerPath],
-            queryStatus: layer!.queryStatus,
-            numOffeatures: layer!.features?.length ?? 0,
-            layerFeatures: getNumFeaturesLabel(layer!),
-            tooltip: t('layers.selectLayer', { layerName: layerNames[layer!.layerPath] }) ?? '',
-            layerUniqueId: `${mapId}-${TABS.DETAILS}-${layer!.layerPath ?? ''}`,
-          }) as LayerListEntry
-      );
+      .map((layer) => ({
+        layerName: layerNames[layer!.layerPath] ?? '',
+        layerPath: layer!.layerPath,
+        layerStatus: layerStatuses[layer!.layerPath],
+        queryStatus: layer!.queryStatus,
+        numOffeatures: layer!.features?.length ?? 0,
+        layerFeatures: getNumFeaturesLabel(layer!),
+        tooltip: t('layers.selectLayer', { layerName: layerNames[layer!.layerPath] }) ?? '',
+        layerUniqueId: `${mapId}-${TABS.DETAILS}-${layer!.layerPath ?? ''}`,
+      }));
 
     // Merge in-range and out-of-range layers while preserving order from arrayOfLayerDataBatch
     const existingLayerPaths = new Set(layerListEntries.map((entry) => entry.layerPath));

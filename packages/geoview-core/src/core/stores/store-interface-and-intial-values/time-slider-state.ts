@@ -350,7 +350,7 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
         });
       },
     },
-  } as ITimeSliderState;
+  };
 
   return init;
 }

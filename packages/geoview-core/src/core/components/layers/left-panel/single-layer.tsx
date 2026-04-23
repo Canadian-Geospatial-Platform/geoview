@@ -436,7 +436,7 @@ export function SingleLayer({
 
   const handleBlurWithin = useCallback((event: React.FocusEvent<HTMLElement>): void => {
     // Only blur if focus moved outside this layer item
-    if (!event.currentTarget.contains(event.relatedTarget as Node)) {
+    if (!event.currentTarget.contains(event.relatedTarget)) {
       setHasFocusWithin(false);
     }
   }, []);

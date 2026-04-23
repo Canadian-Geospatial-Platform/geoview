@@ -1491,6 +1491,8 @@ export abstract class GeoUtilities {
   /**
    * Function for checking if two geometries have the same coordinates.
    *
+   * Note: will return false for geometry collections.
+   *
    * @param geom1 - The first geometry
    * @param geom2 - The second geometry
    * @returns Whether the two geometries are equal or not
@@ -1498,6 +1500,9 @@ export abstract class GeoUtilities {
   static geometriesAreEqual(geom1: Geometry | undefined, geom2: Geometry | undefined): boolean {
     if (!geom1 || !geom2) return false;
     if (geom1.getType() !== geom2.getType()) return false;
+
+    // TODO: Implement check for Geometry Collections
+    if (geom1.getType() === 'GeometryCollection') return false;
 
     // For points
     if (geom1 instanceof Point && geom2 instanceof Point) {

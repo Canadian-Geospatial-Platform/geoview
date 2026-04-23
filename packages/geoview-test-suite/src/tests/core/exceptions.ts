@@ -2,6 +2,14 @@
 
 import type { ClassType } from 'geoview-core/core/types/global-types';
 
+// GV: Satisfies a type check to allow the build to work
+declare global {
+  interface ErrorConstructor {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+    captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+  }
+}
+
 /**
  * Custom error to indicate that a test execution (not an Assertion) has failed.
  */

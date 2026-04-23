@@ -229,7 +229,7 @@ export class BasemapApi {
       if (tileLayer) {
         // add this layer to the basemap group
         tileLayer.set(this.#mapViewer.mapId, 'basemap');
-        newLayers.push(tileLayer as BaseLayer);
+        newLayers.push(tileLayer);
       }
     });
     return newLayers;
