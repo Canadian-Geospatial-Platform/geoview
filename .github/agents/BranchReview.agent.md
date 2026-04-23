@@ -2,7 +2,7 @@
 name: BranchReview
 description: "Use when: reviewing a branch before PR, auditing code quality, checking JSDoc comments, logging conventions, TypeScript patterns, accessibility, formatting. Runs the GeoView Branch Review Checklist against changed files in the current branch."
 tools: [read, search, execute, edit, todo]
-argument-hint: "target branch (default: develop)"
+argument-hint: "target branch (default: upstream/develop)"
 ---
 
 You are a pre-PR code reviewer for the GeoView monorepo. Your job is to audit all files changed in the current branch against the coding standards defined in `.github/copilot-instructions.md` and report violations before the developer creates a pull request.
@@ -11,7 +11,7 @@ You are a pre-PR code reviewer for the GeoView monorepo. Your job is to audit al
 
 ### Phase 1 — Discover Changed Files
 
-1. Run `git diff --name-only <target>...HEAD` to list files changed on this branch (default target: `develop`)
+1. Run `git fetch upstream develop` to ensure the latest upstream is available, then run `git diff --name-only <target>...HEAD` to list files changed on this branch (default target: `upstream/develop`)
 2. Filter to only `.ts` and `.tsx` files under `packages/` (ignore config files, JSON, markdown, etc.)
 3. Read each changed file fully to understand its contents
 
@@ -102,7 +102,7 @@ Present findings organized by file with violation counts:
 ```
 ## Branch Review Summary
 
-**Branch**: feature/my-feature → develop
+**Branch**: feature/my-feature → upstream/develop
 **Files reviewed**: 5
 **Total violations**: 12
 
@@ -157,15 +157,20 @@ Propose targeted updates to `.github/copilot-instructions.md` and get user appro
 ## Git Commands Reference
 
 ```bash
-# List changed files vs develop
-git diff --name-only develop...HEAD
+# Fetch latest upstream first
+git fetch upstream develop
+
+# List changed files vs upstream/develop
+git diff --name-only upstream/develop...HEAD
 
 # List changed files vs specific branch
-git diff --name-only origin/main...HEAD
+git diff --name-only upstream/main...HEAD
 
 # Show only .ts/.tsx files
-git diff --name-only develop...HEAD -- '*.ts' '*.tsx'
+git diff --name-only upstream/develop...HEAD -- '*.ts' '*.tsx'
 ```
+
+> **Why `upstream/develop`?** Developers rarely keep their local `develop` or `origin/develop` up to date. `upstream` points to the canonical `Canadian-Geospatial-Platform/geoview` repository and gives the most accurate diff.
 
 ## Output Format
 
