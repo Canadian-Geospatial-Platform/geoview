@@ -78,7 +78,7 @@ export class MapConfigTester extends GVAbstractTester {
         // Verify the number of features in the data table
         test.addStep('Verifying number of features in data table...');
         if ('features' in allFeaturesData[0]) {
-          Test.assertIsArrayLengthMinimal(allFeaturesData[0].features as unknown[], 4);
+          Test.assertIsArrayLengthMinimal(allFeaturesData[0].features, 4);
         } else {
           Test.assertFail('No data table OR features data found in data table.');
         }
@@ -134,7 +134,7 @@ export class MapConfigTester extends GVAbstractTester {
         // Verify the number of features in the data table
         test.addStep('Verifying number of features in data table...');
         if ('features' in allFeaturesData[0]) {
-          Test.assertIsArrayLengthMinimal(allFeaturesData[0].features as unknown[], 4);
+          Test.assertIsArrayLengthMinimal(allFeaturesData[0].features, 4);
         } else {
           Test.assertFail('No data table OR features data found in data table.');
         }

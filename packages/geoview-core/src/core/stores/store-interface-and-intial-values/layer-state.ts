@@ -532,7 +532,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         });
       },
     },
-  } as ILayerState;
+  };
 }
 
 // #endregion STATE INITIALIZATION

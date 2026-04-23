@@ -1988,7 +1988,7 @@ export class OLTransform extends OLPointer {
       [minX, maxY], // NW
     ];
 
-    const rotatedCorners = corners.map((corner) => OLTransform.rotateCoordinate(corner as Coordinate, this.center!, -textRotation));
+    const rotatedCorners = corners.map((corner) => OLTransform.rotateCoordinate(corner, this.center!, -textRotation));
 
     // Create rotated extent boundary
     const rotatedBoundary = [rotatedCorners[0], rotatedCorners[1], rotatedCorners[2], rotatedCorners[3], rotatedCorners[0]];

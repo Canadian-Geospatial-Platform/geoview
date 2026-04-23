@@ -13,9 +13,9 @@ export type TypeGeometryKeys = 'POLYLINE' | 'POLYGON' | 'CIRCLE' | 'MARKER';
  */
 export const CONST_GEOMETRY_TYPES: Record<TypeGeometryKeys, TypeOfGeometry> = {
   POLYLINE: 'polyline',
-  POLYGON: 'polygon' as TypeOfGeometry,
-  CIRCLE: 'circle' as TypeOfGeometry,
-  MARKER: 'marker' as TypeOfGeometry,
+  POLYGON: 'polygon',
+  CIRCLE: 'circle',
+  MARKER: 'marker',
 };
 
 /**

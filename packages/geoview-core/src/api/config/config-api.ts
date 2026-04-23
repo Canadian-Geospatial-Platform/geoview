@@ -230,9 +230,9 @@ export class ConfigApi {
             const layerConfig: MapConfigLayerEntry = {
               geoviewLayerType: 'geoCore',
               geoviewLayerId: key,
-            } as MapConfigLayerEntry;
+            };
 
-            listOfGeoviewLayerConfig.push(layerConfig as TypeGeoviewLayerConfig);
+            listOfGeoviewLayerConfig.push(layerConfig as unknown as TypeGeoviewLayerConfig);
           });
 
           // Store the new computed listOfGeoviewLayerConfig in the map.

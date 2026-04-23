@@ -1,7 +1,6 @@
 import type { Type as OLGeomType } from 'ol/geom/Geometry';
 import { Draw as OLDraw } from 'ol/interaction';
 import type { GeometryFunction, DrawEvent as OLDrawEvent, Options as OLDrawOptions } from 'ol/interaction/Draw';
-import type { FlatStyle } from 'ol/style/flat';
 
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
@@ -59,7 +58,7 @@ export class Draw extends Interaction {
     const olOptions: OLDrawOptions = {
       source: geomGroup.vectorSource,
       type: (options.type as OLGeomType) || 'Polygon',
-      style: GeoUtilities.convertTypeFeatureStyleToOpenLayersStyle(options.style) as FlatStyle,
+      style: GeoUtilities.convertTypeFeatureStyleToOpenLayersStyle(options.style),
       freehand: options.freehand,
       stopClick: true,
       geometryFunction: options.geometryFunction,

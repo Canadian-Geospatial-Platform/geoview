@@ -2,6 +2,8 @@ import type { DateLike } from 'geoview-core/core/utils/date-mgt';
 import { DateMgt } from 'geoview-core/core/utils/date-mgt';
 import type { PingResult } from 'geoview-core/core/utils/utilities';
 import { validateAndPingUrl } from 'geoview-core/core/utils/utilities';
+import type { TypeLayerStyleConfig, TypePolygonVectorConfig } from 'geoview-core/api/types/map-schema-types';
+import { GeoviewRenderer } from 'geoview-core/geo/utils/renderer/geoview-renderer';
 
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
@@ -206,6 +208,83 @@ export class CoreTester extends GVAbstractTester {
 
         test.addStep('Verifying isReachable is true (OGC GetCapabilities should succeed)...');
         Test.assertIsEqual(result.isReachable, true);
+      }
+    );
+  }
+
+  /**
+   * Tests GeometryCollection legend generation through the renderer.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testGeometryCollectionLegendStyles(): Promise<Test<Awaited<ReturnType<typeof GeoviewRenderer.getLegendStyles>>>> {
+    return this.test(
+      `Test GeometryCollection legend style generation...`,
+      (test) => {
+        const createPolygonSettings = (fillColor: string, strokeColor: string): TypePolygonVectorConfig => ({
+          type: 'filledPolygon',
+          color: fillColor,
+          stroke: {
+            color: strokeColor,
+            lineStyle: 'solid',
+            width: 2,
+          },
+          fillStyle: 'solid',
+        });
+
+        const styleConfig: TypeLayerStyleConfig = {
+          GeometryCollection: {
+            type: 'uniqueValue',
+            fields: ['status'],
+            hasDefault: true,
+            info: [
+              {
+                label: 'Active',
+                visible: true,
+                values: ['active'],
+                settings: createPolygonSettings('rgba(46, 204, 113, 0.35)', 'rgba(39, 174, 96, 1)'),
+              },
+              {
+                label: 'Inactive',
+                visible: true,
+                values: ['inactive'],
+                settings: createPolygonSettings('rgba(231, 76, 60, 0.35)', 'rgba(192, 57, 43, 1)'),
+              },
+              {
+                label: 'Maintenance',
+                visible: true,
+                values: ['maintenance'],
+                settings: createPolygonSettings('rgba(241, 196, 15, 0.35)', 'rgba(243, 156, 18, 1)'),
+              },
+              {
+                label: 'Other',
+                visible: true,
+                values: [],
+                settings: createPolygonSettings('rgba(149, 165, 166, 0.25)', 'rgba(127, 140, 141, 1)'),
+              },
+            ],
+          },
+        };
+
+        test.addStep('Generating legend styles for GeometryCollection renderer settings...');
+        return GeoviewRenderer.getLegendStyles(styleConfig);
+      },
+      (test, result) => {
+        test.addStep('Verifying GeometryCollection legend styles exist...');
+        Test.assertIsDefined('result.GeometryCollection', result.GeometryCollection);
+
+        test.addStep('Verifying GeometryCollection default canvas exists...');
+        Test.assertIsDefined('result.GeometryCollection.defaultCanvas', result.GeometryCollection?.defaultCanvas);
+
+        test.addStep('Verifying GeometryCollection legend entries were generated...');
+        Test.assertIsDefined('result.GeometryCollection.arrayOfCanvas', result.GeometryCollection?.arrayOfCanvas);
+        Test.assertIsArrayLengthEqual(result.GeometryCollection?.arrayOfCanvas, 3);
+
+        test.addStep('Verifying generated GeometryCollection canvases have width...');
+        Test.assertIsEqual((result.GeometryCollection?.defaultCanvas?.width ?? 0) > 0, true);
+
+        test.addStep('Verifying generated GeometryCollection canvases have height...');
+        Test.assertIsEqual((result.GeometryCollection?.defaultCanvas?.height ?? 0) > 0, true);
       }
     );
   }

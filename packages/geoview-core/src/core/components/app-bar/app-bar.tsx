@@ -129,7 +129,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
   // #region REACT HOOKS
 
-  const memoPanels = useMemo(() => {
+  const memoPanels = useMemo((): Record<string, GroupPanelType> => {
     // Log
     logger.logTraceUseMemo('APP-BAR - panels');
 
@@ -144,7 +144,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
       legend: { icon: <LegendIcon />, content: <Legend containerType={CONTAINER_TYPE.APP_BAR} /> },
       layers: { icon: <LayersOutlinedIcon />, content: <LayersPanel containerType={CONTAINER_TYPE.APP_BAR} /> },
       'data-table': { icon: <StorageIcon />, content: <Datapanel containerType={CONTAINER_TYPE.APP_BAR} /> },
-    } as Record<string, GroupPanelType>;
+    };
   }, [interaction]);
 
   /**

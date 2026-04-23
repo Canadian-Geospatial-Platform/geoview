@@ -64,7 +64,7 @@ export function debounce<F extends (...args: any[]) => any>(fn: F, wait: number,
     return result;
   };
 
-  return debounced as DebouncedFunction<F>;
+  return debounced;
 }
 
 /** Options for the debounced function. */

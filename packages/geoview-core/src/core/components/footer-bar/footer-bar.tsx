@@ -1,4 +1,3 @@
-import type { MutableRefObject } from 'react';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTheme } from '@mui/material/styles';
 
@@ -35,7 +34,7 @@ import { camelCase, delay, scrollIfNotVisible } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { Guide } from '@/core/components/guide/guide';
 import { FooterPlugin } from '@/api/plugin/footer-plugin';
-import type { FooterBarApi, FooterTabContent } from './footer-bar-api';
+import type { FooterBarApi } from './footer-bar-api';
 
 /** Props for the FooterBar component. */
 type FooterBarProps = {
@@ -134,7 +133,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   /**
    * Builds the panel definitions for each core tab.
    */
-  const memoTabs = useMemo(() => {
+  const memoTabs: Record<string, { icon: JSX.Element; content: JSX.Element }> = useMemo(() => {
     // Log
     logger.logTraceUseMemo('FOOTER-BAR - memoTabs');
 
@@ -144,7 +143,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
       details: { icon: <InfoIcon />, content: <DetailsPanel containerType={CONTAINER_TYPE.FOOTER_BAR} /> },
       'data-table': { icon: <StorageIcon />, content: <Datapanel containerType={CONTAINER_TYPE.FOOTER_BAR} /> },
       guide: { icon: <QuestionMarkIcon />, content: <Guide containerType={CONTAINER_TYPE.FOOTER_BAR} /> },
-    } as Record<string, FooterTabContent>;
+    };
   }, []);
 
   /**
@@ -181,7 +180,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
         label,
         icon,
         content: <Box sx={memoSxClasses.tabContent}>{content}</Box>,
-      } as TypeTabs;
+      };
     });
   }, [memoTabs, footerTabs, memoSxClasses, footerBarApi]);
 
@@ -304,12 +303,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   }, [mapId]);
 
   return memoFooterBarTabs.length > 0 ? (
-    <Box
-      ref={tabsContainerRef as MutableRefObject<HTMLDivElement>}
-      sx={memoSxClasses.tabsContainer}
-      className="tabsContainer"
-      id={`${mapId}-tabsContainer`}
-    >
+    <Box ref={tabsContainerRef} sx={memoSxClasses.tabsContainer} className="tabsContainer" id={`${mapId}-tabsContainer`}>
       <Tabs
         mapId={mapId}
         shellContainer={shellContainer}

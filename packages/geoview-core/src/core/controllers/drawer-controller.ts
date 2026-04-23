@@ -227,7 +227,7 @@ export class DrawerController extends AbstractMapViewerController {
       Star: (coordinates: SketchCoordType, geometry: SimpleGeometry): Polygon => {
         const svgPath =
           'm 7.61,20.13 8.22,7.04 -2.51,10.53 9.24,-5.64 9.24,5.64 L29.29,27.17 37.51,20.13 26.72,19.27 22.56,9.27 18.4,19.27 Z';
-        return DrawerController.#svgPathToGeometry(svgPath, coordinates, geometry as Polygon);
+        return DrawerController.#svgPathToGeometry(svgPath, coordinates, geometry);
       },
       Rectangle: createBox(),
     };
@@ -1115,7 +1115,7 @@ export class DrawerController extends AbstractMapViewerController {
           const feature = new Feature({ geometry: olGeometry });
 
           // Apply style from properties
-          const styleProps = (geoFeature.properties.style as unknown as TypeGeoJSONStyleProps) || undefined;
+          const styleProps = geoFeature.properties.style || undefined;
           const iconSrc = styleProps?.iconSrc || DrawerController.DEFAULT_ICON_SOURCE;
           let featureStyle;
           if (olGeometry instanceof Point) {
@@ -1896,7 +1896,7 @@ export class DrawerController extends AbstractMapViewerController {
             const styleChanged =
               savedState.originalStyleStored &&
               savedState.originalStyle &&
-              DrawerController.#stylesAreDifferent(savedState.originalStyle, previousFeature.getStyle() as Style);
+              DrawerController.#stylesAreDifferent(savedState.originalStyle, previousFeature.getStyle());
 
             if (geometryChanged || styleChanged) {
               // Save modify action - include geometry and style only if it was changed

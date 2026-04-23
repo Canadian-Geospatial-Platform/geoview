@@ -365,7 +365,7 @@ export class WFS extends AbstractGeoViewVector {
     const responseJson = await Fetch.fetchXMLToJson(`${urlGetCap}`, { signal: abortSignal });
 
     // Parse the WFS_Capabilities opening the root node right away to skip to the meat.
-    return findPropertyByRegexPath(responseJson, /(?:WFS_Capabilities)/) as TypeMetadataWFS;
+    return findPropertyByRegexPath(responseJson, /(?:WFS_Capabilities)/);
   }
 
   /**

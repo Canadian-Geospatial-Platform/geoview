@@ -611,7 +611,7 @@ export class GeometryApi {
     }
 
     try {
-      geometryGroup.vectorLayer.getSource()?.addFeature(geometry as never);
+      geometryGroup.vectorLayer.getSource()?.addFeature(geometry);
       geometryGroup.vectorLayer.changed();
     } catch (error: unknown) {
       logger.logError(`Error adding geometry to group ${geometryGroupId}`, error);
@@ -633,7 +633,7 @@ export class GeometryApi {
         ?.getFeatures()
         .forEach((layerGeometry) => {
           if (geometry === layerGeometry) {
-            geometryGroups[i].vectorLayer.getSource()?.removeFeature(geometry as never);
+            geometryGroups[i].vectorLayer.getSource()?.removeFeature(geometry);
           }
         });
       geometryGroups[i].vectorLayer.changed();
@@ -655,7 +655,7 @@ export class GeometryApi {
       ?.getFeatures()
       .forEach((layerGeometry) => {
         if (geometry === layerGeometry) {
-          geometryGroup.vectorLayer.getSource()?.removeFeature(geometry as never);
+          geometryGroup.vectorLayer.getSource()?.removeFeature(geometry);
         }
       });
     geometryGroup.vectorLayer.changed();
@@ -707,11 +707,14 @@ export class GeometryApi {
    * @param featureId - The id of the feature
    * @param projection - Optional projection code to transform the coordinates to.
    *   Otherwise, uses the map's projection by default
-   * @returns The coordinates of the feature, or undefined if not found
+   * @returns The coordinates of the feature, or undefined if not found or if the geometry type is not currently supported (e.g., GeometryCollection)
    */
   getFeatureCoords(featureId: string, projection?: number): Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][] | undefined {
     const feature = this.getGeometry(featureId);
     const featureGeometry = feature?.getGeometry();
+
+    if (featureGeometry?.getType() === 'GeometryCollection') return undefined;
+
     let coords;
 
     if (
@@ -751,6 +754,17 @@ export class GeometryApi {
   ): void {
     const feature = this.getGeometry(featureId);
     const featureGeometry = feature.getGeometry();
+
+    if (!featureGeometry) {
+      throw new Error(`Unable to set coordinates for feature ${featureId}`);
+    }
+
+    if (featureGeometry.getType() === 'GeometryCollection') {
+      throw new NotSupportedError(
+        `GeometryCollection coordinates are not currently supported by setFeatureCoords for feature ${featureId}`
+      );
+    }
+
     const mapProjection = this.#mapViewer.getProjection().getCode();
     const coordsProjection = `EPSG:${projection || 4326}`;
     const projectedCoordinates = Projection.transformCoordinates(coordinates, coordsProjection, mapProjection);
@@ -834,6 +848,10 @@ export class GeometryApi {
       case 'MultiPolygon':
         // Create a MultiPolygon geometry
         return new MultiPolygon(coordinates as Coordinate[][][]);
+
+      case 'GeometryCollection':
+        // GeometryCollection requires a list of child geometry objects, not only coordinate arrays.
+        throw new NotSupportedError('GeometryCollection creation is not currently supported by createGeometryFromType');
 
       // Add support for other geometry types as needed
       default:

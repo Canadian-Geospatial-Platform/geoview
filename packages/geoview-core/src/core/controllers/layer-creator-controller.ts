@@ -11,7 +11,6 @@ import {
   mapConfigLayerEntryIsRCS,
   mapConfigLayerEntryIsShapefile,
   type GeoCoreLayerConfig,
-  type GeoPackageLayerConfig,
   type MapConfigLayerEntry,
   type TypeGeoviewLayerConfig,
 } from '@/api/types/layer-schema-types';
@@ -1140,7 +1139,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
       });
     } else if (mapConfigLayerEntryIsGeoPackage(entry)) {
       // Working with a geopackage layer
-      promise = GeoPackageReader.createLayerConfigFromGeoPackage(entry as GeoPackageLayerConfig);
+      promise = GeoPackageReader.createLayerConfigFromGeoPackage(entry);
     } else if (mapConfigLayerEntryIsShapefile(entry)) {
       // Working with a shapefile layer
       promise = ShapefileReader.convertShapefileConfigToGeoJson(entry);

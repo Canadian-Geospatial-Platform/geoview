@@ -2,7 +2,6 @@ import { Modify as olModify } from 'ol/interaction';
 import type { ModifyEvent as olModifyEvent, Options as olModifyOptions } from 'ol/interaction/Modify';
 import Collection from 'ol/Collection';
 import type Feature from 'ol/Feature';
-import type { FlatStyle } from 'ol/style/flat';
 import type { Condition } from 'ol/events/condition';
 
 import type { EventDelegateBase } from '@/api/events/event-helper';
@@ -56,7 +55,7 @@ export class Modify extends Interaction {
     // The OpenLayers Modify options
     // TODO: Enhancements - Add support for more modifying options
     const olOptions: olModifyOptions = {
-      style: GeoUtilities.convertTypeFeatureStyleToOpenLayersStyle(options.style) as FlatStyle,
+      style: GeoUtilities.convertTypeFeatureStyleToOpenLayersStyle(options.style),
     };
 
     // If a list of features is specified

@@ -587,15 +587,48 @@ export const DEFAULT_APPBAR_CORE = {
 
 // #region SUB LAYERS
 
-export const STYLE_GEOMETRY_TYPES = ['Point', 'MultiPoint', 'LineString', 'MultiLineString', 'Polygon', 'MultiPolygon'] as const;
+export const STYLE_GEOMETRY_TYPES = [
+  'Point',
+  'MultiPoint',
+  'LineString',
+  'MultiLineString',
+  'Polygon',
+  'MultiPolygon',
+  'GeometryCollection',
+] as const;
 
 /** Valid keys for the geometryType property. */
 export type TypeStyleGeometry = (typeof STYLE_GEOMETRY_TYPES)[number];
 
-export type SerializedGeometry = {
-  type: TypeStyleGeometry;
-  coordinates: Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][];
-};
+export type SerializedGeometry =
+  | {
+      type: 'Point';
+      coordinates: Coordinate;
+    }
+  | {
+      type: 'MultiPoint';
+      coordinates: Coordinate[];
+    }
+  | {
+      type: 'LineString';
+      coordinates: Coordinate[];
+    }
+  | {
+      type: 'MultiLineString';
+      coordinates: Coordinate[][];
+    }
+  | {
+      type: 'Polygon';
+      coordinates: Coordinate[][];
+    }
+  | {
+      type: 'MultiPolygon';
+      coordinates: Coordinate[][][];
+    }
+  | {
+      type: 'GeometryCollection';
+      geometries: SerializedGeometry[];
+    };
 
 /** Definition of the range object that is part of the temporal dimension. */
 export type TypeRangeItems = {

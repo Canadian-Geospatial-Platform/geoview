@@ -119,6 +119,9 @@ export class GVTestSuiteConfig extends GVAbstractTestSuite {
     // Test a GeoJSON Metadata.meta config
     const pGeoJson = this.#configTester.testGeojsonWithMetadataMeta();
 
+    // Test a GeoJSON GeometryCollection sample config
+    const pGeoJsonGeometryCollection = this.#configTester.testGeojsonWithGeometryCollection();
+
     // Test a skip
     const pGeoJsonBadUrlSkip = this.#configTester.testGeoJSONBadUrlExpectSkip();
 
@@ -177,6 +180,7 @@ export class GVTestSuiteConfig extends GVAbstractTestSuite {
       pOGcFeature,
       pOgcFeatureBadUrl,
       pGeoJson,
+      pGeoJsonGeometryCollection,
       pGeoJsonBadUrlSkip,
       pGeoJsonBadUrlFail,
       pCSV,

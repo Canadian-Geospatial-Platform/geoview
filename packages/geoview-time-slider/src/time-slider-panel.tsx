@@ -185,7 +185,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
           layerStatus: 'loaded',
           queryStatus: 'processed',
           layerUniqueId: `${mapId}-${TABS.TIME_SLIDER}-${layer.layerPath}`,
-        } as LayerListEntry;
+        } satisfies LayerListEntry;
       });
   }, [timeSliderLayers, visibleInRangeLayers, getFilterInfo, layerStatuses, layerNames, layerHiddenSet, displayLanguage, mapId]);
 

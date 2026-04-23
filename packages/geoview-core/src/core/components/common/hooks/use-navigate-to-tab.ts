@@ -48,7 +48,7 @@ export function useNavigateToTab(tabId: string, onNavigate?: (layerPath: string)
       // If there are 2 components with the same tab (app bar or footer), prefer footer
       if (hasFooterTab) {
         // Open footer tab
-        uiController.setActiveFooterBarTab(tabId as TypeValidFooterBarTabsCoreProps);
+        uiController.setActiveFooterBarTab(tabId);
         if (!isFooterOpen) uiController.setFooterBarIsOpen(true);
 
         setTimeout(() => {
@@ -65,7 +65,7 @@ export function useNavigateToTab(tabId: string, onNavigate?: (layerPath: string)
         }, delay);
       } else if (hasAppBarTab) {
         // Open appBar tab
-        uiController.setActiveAppBarTab(tabId as TypeValidAppBarCoreProps, true, false);
+        uiController.setActiveAppBarTab(tabId, true, false);
 
         setTimeout(() => {
           // Execute callback if provided
