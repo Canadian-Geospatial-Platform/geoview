@@ -1,7 +1,6 @@
 import { useEffect, useMemo } from 'react';
 import type { MRT_TableInstance as MRTTableInstance, MRT_ColumnFiltersState as MRTColumnFiltersState } from 'material-react-table';
 import { useTranslation } from 'react-i18next';
-import { setStoreRowsFilteredEntry } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { logger } from '@/core/utils/logger';
 import type { ColumnsType } from '@/core/components/data-table/data-table-types';
 import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
@@ -70,8 +69,6 @@ export function useToolbarActionMessage({
         message = `${data.features?.length} ${t('dataTable.features')}`;
         length = 0;
       }
-
-      dataTableController.setRowsFilteredEntry(layerPath, length);
     }
 
     return { message, filteredRowCount: length };
@@ -82,8 +79,8 @@ export function useToolbarActionMessage({
     logger.logTraceUseEffect('USETOOLBARACTIONMESSAGE - set store toolbar message', memoToolbarMessage.filteredRowCount);
 
     // Update the store with the current filtered row count for the layer
-    setStoreRowsFilteredEntry(mapId, memoToolbarMessage.filteredRowCount, layerPath);
-  }, [mapId, layerPath, memoToolbarMessage.filteredRowCount, memoToolbarMessage.message]);
+    dataTableController.setRowsFilteredEntry(layerPath, memoToolbarMessage.filteredRowCount);
+  }, [dataTableController, layerPath, memoToolbarMessage.filteredRowCount, memoToolbarMessage.message]);
 
   return memoToolbarMessage.message;
 }

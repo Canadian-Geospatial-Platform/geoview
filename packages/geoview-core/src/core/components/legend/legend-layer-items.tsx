@@ -28,7 +28,7 @@ const LegendListItem = memo(
     canToggle,
     showNameTooltip,
     onToggle,
-    memoSxClasses,
+    sxClasses,
     id,
   }: {
     item: TypeLegendItem;
@@ -36,7 +36,7 @@ const LegendListItem = memo(
     canToggle: boolean;
     showNameTooltip: boolean;
     onToggle?: () => void;
-    memoSxClasses: Record<string, object>;
+    sxClasses: Record<string, object>;
     id: string;
   }): JSX.Element => {
     const { t } = useTranslation<string>();
@@ -49,7 +49,7 @@ const LegendListItem = memo(
     const itemClassName = getItemClassName();
 
     return (
-      <ListItem sx={memoSxClasses.layerListItem} disablePadding className={`layerListItem ${itemClassName || ''}`}>
+      <ListItem sx={sxClasses.layerListItem} disablePadding className={`layerListItem ${itemClassName || ''}`}>
         <Tooltip
           title={tooltipTitle || (showNameTooltip ? name : '')}
           placement="top"
@@ -73,7 +73,7 @@ const LegendListItem = memo(
             onClick={canToggle && onToggle ? onToggle : undefined}
             disabled={!canToggle || !onToggle}
             disableRipple
-            sx={memoSxClasses.layerListItemButton}
+            sx={sxClasses.layerListItemButton}
             className={`layerListItemButton ${itemClassName || ''}`}
             aria-pressed={isVisible && layerVisible}
             aria-label={`${t('layers.toggleVisibility')} - ${name}`} // WCAG - Provide descriptive aria-label for accessibility
@@ -185,7 +185,7 @@ export const ItemsList = memo(function ItemsList({ items, layerPath }: ItemsList
             id={itemId}
             {...commonProps}
             onToggle={canToggle ? () => handleToggleItemVisibility(item, itemId) : undefined}
-            memoSxClasses={memoSxClasses}
+            sxClasses={memoSxClasses}
           />
         );
       })}

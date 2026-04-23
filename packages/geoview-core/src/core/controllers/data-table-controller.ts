@@ -8,12 +8,12 @@ import {
   setStoreDataTableColumnFiltersEntry,
   setStoreDataTableColumnsFiltersVisibility,
   setStoreDataTableColumnFilterModesEntry,
+  setStoreDataTableFilterDataToExtent,
   setStoreDataTableFilteredEntry,
   setStoreDataTableGlobalFilteredEntry,
   setStoreDataTableRowsFilteredEntry,
   setStoreDataTableSelectedFeature,
   setStoreDataTableSelectedLayerPath,
-  setStoreDataTableToolbarRowSelectedMessageEntry,
   type TypeColumnFiltersState,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import type { MapViewer } from '@/geo/map/map-viewer';
@@ -143,15 +143,14 @@ export class DataTableController extends AbstractMapViewerController {
   }
 
   /**
-   * Sets the toolbar message for the selected row in a specific layer in the data table, which determines the
-   * message displayed in the toolbar for the selected row.
+   * Sets whether to filter data to the map extent for a specific layer in the data table, which determines whether the data table is filtered based on the current map extent for that layer.
    *
    * @param layerPath - The path of the layer to update
-   * @param message - The message to set for the selected row in the toolbar
+   * @param filterDataToExtent - A boolean indicating whether to filter data to the map extent for the layer
    */
-  setToolbarRowSelectedMessageEntry(layerPath: string, message: string): void {
+  setFilterDataToExtent(layerPath: string, filterDataToExtent: boolean): void {
     // Save in the store
-    setStoreDataTableToolbarRowSelectedMessageEntry(this.getMapId(), message, layerPath);
+    setStoreDataTableFilterDataToExtent(this.getMapId(), filterDataToExtent, layerPath);
   }
 
   // #endregion PUBLIC METHODS

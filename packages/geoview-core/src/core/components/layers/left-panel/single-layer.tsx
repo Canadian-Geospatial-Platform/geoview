@@ -756,18 +756,15 @@ export function SingleLayer({
   }, [layerStatus, layerPath, reloadButtonId, layerListItemButtonId]);
 
   /** Memoized sx for the list item button. */
-  const memoListItemButtonSx = useMemo(
-    () => {
-      // Log
-      logger.logTraceUseMemo('SINGLE-LAYER - memoListItemButtonSx', inVisibleRange, parentHidden, isVisible, layerStatus);
+  const memoListItemButtonSx = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('SINGLE-LAYER - memoListItemButtonSx', inVisibleRange, parentHidden, isVisible, layerStatus);
 
-      return {
-        minHeight: '4.51rem',
-        ...(!inVisibleRange || parentHidden || !isVisible || layerStatus === 'error' ? memoSxClasses.outOfRange : {}),
-      };
-    },
-    [inVisibleRange, parentHidden, isVisible, layerStatus, memoSxClasses.outOfRange]
-  );
+    return {
+      minHeight: '4.51rem',
+      ...(!inVisibleRange || parentHidden || !isVisible || layerStatus === 'error' ? memoSxClasses.outOfRange : {}),
+    };
+  }, [inVisibleRange, parentHidden, isVisible, layerStatus, memoSxClasses.outOfRange]);
 
   return (
     <ListItem
