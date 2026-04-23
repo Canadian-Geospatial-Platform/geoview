@@ -119,7 +119,6 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
           mapFilteredRecord: true,
           filterDataToExtent: false,
           rowsFilteredRecord: 0,
-          toolbarRowSelectedMessageRecord: '',
           globalFilterRecord: '',
         };
 

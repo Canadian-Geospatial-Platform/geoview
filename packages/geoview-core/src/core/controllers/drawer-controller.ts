@@ -632,7 +632,8 @@ export class DrawerController extends AbstractMapViewerController {
     // Save to the store
     setStoreDrawerIconSrc(this.getMapId(), iconSrc);
 
-    // Update the feature style at large? Wasn't doing it before, leaving it like this with comment in case we should uncomment
+    // GV There's only the one point icon and there's no way currently to change it, so no need to update the feature style here
+    // GV If we were to add a way to select different icons, then this would need to be uncommented.
     // this.updateFeatureStyle();
   }
 

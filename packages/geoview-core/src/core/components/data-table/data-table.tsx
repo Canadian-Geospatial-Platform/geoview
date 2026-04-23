@@ -164,11 +164,14 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
   /**
    * Handles toggling column filters visibility.
    */
-  const handleToggleColumnFilters = useCallback((updaterOrValue: boolean | ((prev: boolean) => boolean)): void => {
-    const newValue = typeof updaterOrValue === 'function' ? updaterOrValue(showColumnFilters) : updaterOrValue;
-    setShowColumnFilters(newValue);
-    dataTableController.setColumnsFiltersVisibility(layerPath, newValue);
-  }, [dataTableController, layerPath, showColumnFilters]);
+  const handleToggleColumnFilters = useCallback(
+    (updaterOrValue: boolean | ((prev: boolean) => boolean)): void => {
+      const newValue = typeof updaterOrValue === 'function' ? updaterOrValue(showColumnFilters) : updaterOrValue;
+      setShowColumnFilters(newValue);
+      dataTableController.setColumnsFiltersVisibility(layerPath, newValue);
+    },
+    [dataTableController, layerPath, showColumnFilters]
+  );
 
   // #endregion HANDLERS
 

@@ -57,7 +57,7 @@ export function StylePanel(): JSX.Element {
 
   const { cgpv } = window as TypeWindow;
   const { ui, reactUtilities } = cgpv;
-  const { useCallback, useEffect, useMemo } = reactUtilities.react;
+  const { useCallback, useEffect } = reactUtilities.react;
 
   // Components
   const { Box, List, ListItem, Typography, TextField, IconButton, FormatBoldIcon, FormatItalicIcon } = ui.elements;

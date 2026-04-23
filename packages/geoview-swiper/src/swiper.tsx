@@ -372,7 +372,11 @@ export function Swiper(props: SwiperProps): JSX.Element {
           onStop={onStop}
           onDrag={onStop}
         >
-          <Box sx={[orientation === 'vertical' ? memoSxClasses.vertical : memoSxClasses.horizontal, memoSxClasses.bar]} tabIndex={0} ref={swiperRef}>
+          <Box
+            sx={[orientation === 'vertical' ? memoSxClasses.vertical : memoSxClasses.horizontal, memoSxClasses.bar]}
+            tabIndex={0}
+            ref={swiperRef}
+          >
             <Tooltip title={getLocalizedMessage(displayLanguage, 'swiper.tooltip')}>
               <Box className="handleContainer">
                 <HandleIcon sx={memoSxClasses.handle} className="handleL" />
