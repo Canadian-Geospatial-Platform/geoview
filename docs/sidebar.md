@@ -1,5 +1,6 @@
 - [Home](/)
 - [Getting Started](README.md)
+- [Troubleshooting](app/ui/troubleshooting.md)
 
 - **Getting Started**
   - [Documentation Overview](README.md)
@@ -43,6 +44,7 @@
 
 - **UI & Theming**
   - [Theming](app/ui/theming.md)
+  - [Troubleshooting](app/ui/troubleshooting.md)
   - [Accessibility](app/accessibility.md)
   - [Accessing Types](app/accessing-types.md)
 

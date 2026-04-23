@@ -6,7 +6,7 @@
     },
     "basemapOptions": {
       "basemapId": "simple",
-      "shaded": false,
+      "shaded": true,
       "labeled": true,
       "labelZIndex": 20
     }
