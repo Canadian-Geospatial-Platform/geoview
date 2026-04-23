@@ -49,7 +49,7 @@ export interface IDataTableState {
     setColumnsFiltersVisibility: (visible: boolean, layerPath: string) => void;
     setInitiallayerDataTableSetting: (layerPath: string) => void;
     setGlobalFilteredEntry: (globalFilterValue: string, layerPath: string) => void;
-    setMapFilteredEntry: (mapFiltered: boolean, layerPath: string) => void;
+    setMapFilteredRecord: (mapFiltered: boolean, layerPath: string) => void;
     setFilterDataToExtent: (filterDataToExtent: boolean, layerPath: string) => void;
     setRowsFilteredEntry: (rows: number, layerPath: string) => void;
     setSelectedFeature: (feature: TypeFeatureInfoEntry) => void;
@@ -138,12 +138,14 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
        */
       setColumnFiltersEntry: (filtered: TypeColumnFiltersState, layerPath: string): void => {
         const layerSettings = get().dataTableState.layersDataTableSetting[layerPath];
-        layerSettings.columnFiltersRecord = filtered;
 
         set({
           dataTableState: {
             ...get().dataTableState,
-            layersDataTableSetting: { ...get().dataTableState.layersDataTableSetting, [layerPath]: layerSettings },
+            layersDataTableSetting: {
+              ...get().dataTableState.layersDataTableSetting,
+              [layerPath]: { ...layerSettings, columnFiltersRecord: filtered },
+            },
           },
         });
       },
@@ -156,12 +158,14 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
        */
       setColumnFilterModesEntry: (filterModes: Record<string, string>, layerPath: string): void => {
         const layerSettings = get().dataTableState.layersDataTableSetting[layerPath];
-        layerSettings.columnFilterModesRecord = filterModes;
 
         set({
           dataTableState: {
             ...get().dataTableState,
-            layersDataTableSetting: { ...get().dataTableState.layersDataTableSetting, [layerPath]: layerSettings },
+            layersDataTableSetting: {
+              ...get().dataTableState.layersDataTableSetting,
+              [layerPath]: { ...layerSettings, columnFilterModesRecord: filterModes },
+            },
           },
         });
       },
@@ -174,12 +178,14 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
        */
       setColumnsFiltersVisibility: (visible: boolean, layerPath: string): void => {
         const layerSettings = get().dataTableState.layersDataTableSetting[layerPath];
-        layerSettings.columnsFiltersVisibility = visible;
 
         set({
           dataTableState: {
             ...get().dataTableState,
-            layersDataTableSetting: { ...get().dataTableState.layersDataTableSetting, [layerPath]: layerSettings },
+            layersDataTableSetting: {
+              ...get().dataTableState.layersDataTableSetting,
+              [layerPath]: { ...layerSettings, columnsFiltersVisibility: visible },
+            },
           },
         });
       },
@@ -190,14 +196,16 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
        * @param mapFiltered - Whether map extent filtering is enabled.
        * @param layerPath - The target layer path.
        */
-      setMapFilteredEntry: (mapFiltered: boolean, layerPath: string): void => {
+      setMapFilteredRecord: (mapFiltered: boolean, layerPath: string): void => {
         const layerSettings = get().dataTableState.layersDataTableSetting[layerPath];
-        layerSettings.mapFilteredRecord = mapFiltered;
 
         set({
           dataTableState: {
             ...get().dataTableState,
-            layersDataTableSetting: { ...get().dataTableState.layersDataTableSetting, [layerPath]: layerSettings },
+            layersDataTableSetting: {
+              ...get().dataTableState.layersDataTableSetting,
+              [layerPath]: { ...layerSettings, mapFilteredRecord: mapFiltered },
+            },
           },
         });
       },
@@ -210,12 +218,14 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
        */
       setRowsFilteredEntry: (rows: number, layerPath: string): void => {
         const layerSettings = get().dataTableState.layersDataTableSetting[layerPath];
-        layerSettings.rowsFilteredRecord = rows;
 
         set({
           dataTableState: {
             ...get().dataTableState,
-            layersDataTableSetting: { ...get().dataTableState.layersDataTableSetting, [layerPath]: layerSettings },
+            layersDataTableSetting: {
+              ...get().dataTableState.layersDataTableSetting,
+              [layerPath]: { ...layerSettings, rowsFilteredRecord: rows },
+            },
           },
         });
       },
@@ -256,24 +266,28 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
        */
       setGlobalFilteredEntry: (globalFilterValue: string, layerPath: string): void => {
         const layerSettings = get().dataTableState.layersDataTableSetting[layerPath];
-        layerSettings.globalFilterRecord = globalFilterValue;
 
         set({
           dataTableState: {
             ...get().dataTableState,
-            layersDataTableSetting: { ...get().dataTableState.layersDataTableSetting, [layerPath]: layerSettings },
+            layersDataTableSetting: {
+              ...get().dataTableState.layersDataTableSetting,
+              [layerPath]: { ...layerSettings, globalFilterRecord: globalFilterValue },
+            },
           },
         });
       },
 
-      setFilterDataToExtent: (filterDataToExtent: boolean, layerPath: string) => {
+      setFilterDataToExtent: (filterDataToExtent: boolean, layerPath: string): void => {
         const layerSettings = get().dataTableState.layersDataTableSetting[layerPath];
-        layerSettings.filterDataToExtent = filterDataToExtent;
 
         set({
           dataTableState: {
             ...get().dataTableState,
-            layersDataTableSetting: { ...get().dataTableState.layersDataTableSetting, [layerPath]: layerSettings },
+            layersDataTableSetting: {
+              ...get().dataTableState.layersDataTableSetting,
+              [layerPath]: { ...layerSettings, filterDataToExtent },
+            },
           },
         });
       },
@@ -397,7 +411,7 @@ export const getStoreDataTableFeaturesByPath = (mapId: string, layerPath: string
  * @param layerPath - The layer path to check.
  * @returns True if map extent filtering is enabled, or undefined if the layer has no settings.
  */
-export const getStoreDataTableFilteredRecord = (mapId: string, layerPath: string): boolean | undefined => {
+export const getStoreDataTableMapFilteredRecord = (mapId: string, layerPath: string): boolean | undefined => {
   return getStoreDataTableState(mapId)?.layersDataTableSetting?.[layerPath]?.mapFilteredRecord;
 };
 
@@ -507,8 +521,8 @@ export const setStoreDataTableGlobalFilteredEntry = (mapId: string, globalFilter
  * @param mapFiltered - Whether map extent filtering is enabled.
  * @param layerPath - The target layer path.
  */
-export const setStoreDataTableFilteredEntry = (mapId: string, mapFiltered: boolean, layerPath: string): void => {
-  getStoreDataTableState(mapId).actions.setMapFilteredEntry(mapFiltered, layerPath);
+export const setStoreDataTableMapFilteredRecord = (mapId: string, mapFiltered: boolean, layerPath: string): void => {
+  getStoreDataTableState(mapId).actions.setMapFilteredRecord(mapFiltered, layerPath);
 };
 
 /**

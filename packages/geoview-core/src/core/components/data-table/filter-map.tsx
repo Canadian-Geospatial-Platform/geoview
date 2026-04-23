@@ -38,7 +38,7 @@ function FilterMap({ layerPath, isGlobalFilterOn }: FilterMapProps): JSX.Element
    * This function toggles the filtered entry state for the specified layer in the data table.
    */
   const handleFilterdEntryChanged = useCallback(() => {
-    dataTableController.setFilteredEntry(layerPath, !datatableSettings[layerPath].mapFilteredRecord);
+    dataTableController.setMapFilteredRecord(layerPath, !datatableSettings[layerPath].mapFilteredRecord);
   }, [dataTableController, datatableSettings, layerPath]);
 
   return (
