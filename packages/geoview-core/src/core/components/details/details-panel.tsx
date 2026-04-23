@@ -56,7 +56,10 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo(() => {
+    logger.logTraceUseMemo('DETAILS-PANEL - memoSxClasses', theme);
+    return getSxClasses(theme);
+  }, [theme]);
 
   // Store
   const mapId = useStoreGeoViewMapId();
@@ -99,6 +102,9 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
    */
   // Create a memoized Set of checked feature IDs
   const memoIsCheckedFeaturesSet = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('DETAILS-PANEL - memoIsCheckedFeaturesSet', checkedFeatures);
+
     return new Set(checkedFeatures.map((feature) => feature?.uid));
   }, [checkedFeatures]);
 
@@ -166,6 +172,9 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
    * Memoizes whether the panel is currently open.
    */
   const memoIsPanelOpen = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('DETAILS-PANEL - memoIsPanelOpen', containerType, footerBarTabId, footerBarIsOpen, appBarTabId, appBarIsOpen, isRightPanelVisible);
+
     if (containerType === CONTAINER_TYPE.FOOTER_BAR) {
       return footerBarTabId === TABS.DETAILS && footerBarIsOpen && isRightPanelVisible;
     }
@@ -755,8 +764,8 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
       const isNextDisabled = !memoSelectedLayerData?.features || currentFeatureIndex + 1 >= memoSelectedLayerData.features.length;
 
       return (
-        <Box sx={sxClasses.rightPanelContainer} className="guide-content-container">
-          <Grid container sx={sxClasses.rightPanelBtnHolder}>
+        <Box sx={memoSxClasses.rightPanelContainer} className="guide-content-container">
+          <Grid container sx={memoSxClasses.rightPanelBtnHolder}>
             <Grid size={{ xs: 6 }} sx={{ alignSelf: 'center' }}>
               <Box role="status" aria-live="polite" aria-atomic="true">
                 {t('details.featureDetailsTitle')
@@ -823,7 +832,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
       containerType={containerType}
       titleFullscreen={t('details.title')}
       layoutSwitch={
-        <Box sx={sxClasses.layoutSwitch}>
+        <Box sx={memoSxClasses.layoutSwitch}>
           {!hideCoordinateInfoSwitch && <CoordinateInfoSwitch disabled={!mapClickCoordinates} />}
           <IconButton
             aria-label={t('details.clearAllfeatures')}

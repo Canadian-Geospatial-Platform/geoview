@@ -234,17 +234,17 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
   /**
    * Handles resetting the layer to its initial state.
    */
-  const handleResetLayer = (): void => {
+  const handleResetLayer = useCallback((): void => {
     layerController.resetLayer(layerPath).catch((error: unknown) => {
       // Log
       logger.logPromiseFailed('in layerController.resetLayer in layer-details.handleResetLayer', error);
     });
-  };
+  }, [layerController, layerPath]);
 
   /**
    * Handles zooming to the layer's extent.
    */
-  const handleZoomTo = (): void => {
+  const handleZoomTo = useCallback((): void => {
     // Early return if zoom button is disabled
     if (isZoomDisabled) {
       return;
@@ -253,12 +253,12 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
       // Log
       logger.logPromiseFailed('in zoomToLayerExtent in layer-details.handleZoomTo', error);
     });
-  };
+  }, [isZoomDisabled, layerController, layerPath]);
 
   /**
    * Handles opening the data table for the layer.
    */
-  const handleOpenTable = (): void => {
+  const handleOpenTable = useCallback((): void => {
     // Early return if table button is disabled
     if (isTableButtonDisabled) {
       return;
@@ -274,18 +274,18 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
       });
     }
     uiController.enableFocusTrap({ activeElementId: 'layerDataTable', callbackElementId: tableDetailsButtonId });
-  };
+  }, [isTableButtonDisabled, layerPath, layerSetController, layerStatus, layersData, tableDetailsButtonId, uiController]);
 
   /**
    * Handles highlighting the layer on the map.
    */
-  const handleHighlightLayer = (): void => {
+  const handleHighlightLayer = useCallback((): void => {
     // Early return if highlight button is disabled
     if (layerHidden) {
       return;
     }
     layerController.setHighlightLayer(layerPath);
-  };
+  }, [layerController, layerHidden, layerPath]);
 
   /**
    * Handles navigation to the Time Slider panel when the button is clicked.

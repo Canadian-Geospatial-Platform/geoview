@@ -51,7 +51,10 @@ export const Guide = memo(function GuidePanel({ containerType }: GuideType): JSX
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
-  const sxClasses = useMemo((): SxStyles => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo((): SxStyles => {
+    logger.logTraceUseMemo('GUIDE - memoSxClasses', theme);
+    return getSxClasses(theme);
+  }, [theme]);
 
   // State
   const [selectedLayerPath, setSelectedLayerPath] = useState<string>('loadingStatus');
@@ -241,7 +244,7 @@ export const Guide = memo(function GuidePanel({ containerType }: GuideType): JSX
 
   const ariaLabel = t('guide.title');
   return (
-    <Box sx={sxClasses.guideContainer}>
+    <Box sx={memoSxClasses.guideContainer}>
       <Box sx={{ flex: 1, minHeight: 0 }}>
         <Layout
           containerType={containerType}
@@ -259,7 +262,7 @@ export const Guide = memo(function GuidePanel({ containerType }: GuideType): JSX
           onLayerListClicked={handleGuideItemClick}
           aria-label={ariaLabel}
         >
-          <Box sx={sxClasses.rightPanelContainer} className="guidebox-container">
+          <Box sx={memoSxClasses.rightPanelContainer} className="guidebox-container">
             <Box className="guideBox">{memoCurrentGuideContent}</Box>
           </Box>
         </Layout>

@@ -50,7 +50,10 @@ export function GuideSearch({ containerType, guide, onSectionChange, onSearchSta
   // Hooks
   const { t } = useTranslation();
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo(() => {
+    logger.logTraceUseMemo('GUIDE-SEARCH - memoSxClasses', theme);
+    return getSxClasses(theme);
+  }, [theme]);
 
   // State
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -553,9 +556,9 @@ export function GuideSearch({ containerType, guide, onSectionChange, onSearchSta
   // #endregion Handlers
 
   return (
-    <Box sx={sxClasses.guideSearch}>
+    <Box sx={memoSxClasses.guideSearch}>
       {/* WCAG - Live region announces search results and navigation state to screen readers */}
-      <Box role="status" aria-live="polite" aria-atomic="true" sx={sxClasses.visuallyHidden}>
+      <Box role="status" aria-live="polite" aria-atomic="true" sx={memoSxClasses.visuallyHidden}>
         {srAnnouncement}
       </Box>
       <form onSubmit={handleFormSubmit} role="search" aria-label={t('guide.searchFormLabel')!}>
@@ -644,7 +647,7 @@ export function GuideSearch({ containerType, guide, onSectionChange, onSearchSta
           }}
         />
       </form>
-      <Box id={searchInstructionsId} sx={sxClasses.visuallyHidden}>
+      <Box id={searchInstructionsId} sx={memoSxClasses.visuallyHidden}>
         {t('guide.searchInstructions')!}
       </Box>
     </Box>

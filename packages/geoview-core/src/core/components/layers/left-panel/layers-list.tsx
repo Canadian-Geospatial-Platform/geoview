@@ -21,7 +21,10 @@ export function LayersList({ layerPaths, showLayerDetailsPanel, isLayoutEnlarged
 
   // Hook
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo(() => {
+    logger.logTraceUseMemo('LAYERS-LIST - memoSxClasses', theme);
+    return getSxClasses(theme);
+  }, [theme]);
 
   // Store
   const layerPathOrder = useStoreLayerOrderedLayerPaths();
@@ -30,10 +33,10 @@ export function LayersList({ layerPaths, showLayerDetailsPanel, isLayoutEnlarged
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const getListClass = useCallback((): any => {
     if (depth === 0) {
-      return sxClasses.list;
+      return memoSxClasses.list;
     }
-    return sxClasses.listSubitem;
-  }, [depth, sxClasses]);
+    return memoSxClasses.listSubitem;
+  }, [depth, memoSxClasses]);
 
   // Memoize the legend items
   const memoLegendItems = useMemo(() => {

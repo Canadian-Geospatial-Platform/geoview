@@ -139,25 +139,25 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
   const { globalFilter, setGlobalFilter } = useGlobalFilter({ layerPath });
   // #endregion
 
-  // #region Handlers
+  // #region HANDLERS
 
   /**
    * Handles density change for the data table.
    */
-  const handleDensityChange = (updaterOrValue: MRTDensityState | ((prevState: MRTDensityState) => MRTDensityState)): void => {
+  const handleDensityChange = useCallback((updaterOrValue: MRTDensityState | ((prevState: MRTDensityState) => MRTDensityState)): void => {
     setDensity(updaterOrValue);
-  };
+  }, []);
 
   /**
    * Handles toggling column filters visibility.
    */
-  const handleToggleColumnFilters = (updaterOrValue: boolean | ((prev: boolean) => boolean)): void => {
+  const handleToggleColumnFilters = useCallback((updaterOrValue: boolean | ((prev: boolean) => boolean)): void => {
     const newValue = typeof updaterOrValue === 'function' ? updaterOrValue(showColumnFilters) : updaterOrValue;
     setShowColumnFilters(newValue);
     dataTableController.setColumnsFiltersVisibility(layerPath, newValue);
-  };
+  }, [dataTableController, layerPath, showColumnFilters]);
 
-  // #endregion
+  // #endregion HANDLERS
 
   /** Checks if a value is a Dayjs instance. */
   const isDayjs = (v: unknown): v is Dayjs => typeof v === 'object' && v !== null && 'isValid' in v;

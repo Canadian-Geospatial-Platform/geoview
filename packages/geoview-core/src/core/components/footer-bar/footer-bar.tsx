@@ -1,5 +1,5 @@
 import type { MutableRefObject } from 'react';
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTheme } from '@mui/material/styles';
 
 import type { TypeTabs } from '@/ui';
@@ -58,7 +58,10 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
 
   // Hooks
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo(() => {
+    logger.logTraceUseMemo('FOOTER-BAR - memoSxClasses', theme);
+    return getSxClasses(theme);
+  }, [theme]);
 
   // State & ref
   const tabsContainerRef = useRef<HTMLDivElement>();
@@ -80,6 +83,29 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   // get store config for footer bar tabs to add (similar logic as in app-bar)
   const footerBarTabsConfig = useStoreGeoViewConfig()?.footerBar;
 
+  // #region HANDLERS
+
+  /**
+   * Handles the collapse/expand toggle.
+   */
+  const handleToggleCollapse = useCallback((): void => {
+    if (activeFooterBarTab.isOpen) uiController.setActiveFooterBarTab(undefined);
+    uiController.setFooterBarIsOpen(!activeFooterBarTab.isOpen);
+  }, [activeFooterBarTab.isOpen, uiController]);
+
+  /**
+   * Handles when the selected tab changes.
+   */
+  const handleSelectedTabChanged = useCallback(
+    (tab: TypeTabs): void => {
+      uiController.setActiveFooterBarTab(tab.id);
+      uiController.setFooterBarIsOpen(true);
+    },
+    [uiController]
+  );
+
+  // #endregion HANDLERS
+
   /**
    * Registers custom footer tab entries from configuration on mount.
    */
@@ -100,7 +126,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Read footer tabs from the store (reactive — no event handlers needed)
+  // Read footer tabs from the store (reactive â€” no event handlers needed)
   const footerTabs = useStoreUIFooterTabs();
 
   /**
@@ -152,10 +178,10 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
         value: index,
         label,
         icon,
-        content: <Box sx={sxClasses.tabContent}>{content}</Box>,
+        content: <Box sx={memoSxClasses.tabContent}>{content}</Box>,
       } as TypeTabs;
     });
-  }, [memoTabs, footerTabs, sxClasses, footerBarApi]);
+  }, [memoTabs, footerTabs, memoSxClasses, footerBarApi]);
 
   /**
    * Whenever the array layer data batch changes if we're on 'details' tab and it's collapsed, make sure we uncollapse it
@@ -194,22 +220,6 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
       tabsContainerRef.current = tabsContainer;
     }
   }, [activeFooterBarTab.isOpen, uiController]);
-
-  /**
-   * Handles the collapse/expand toggle.
-   */
-  const handleToggleCollapse = (): void => {
-    if (activeFooterBarTab.isOpen) uiController.setActiveFooterBarTab(undefined);
-    uiController.setFooterBarIsOpen(!activeFooterBarTab.isOpen);
-  };
-
-  /**
-   * Handles when the selected tab changes.
-   */
-  const handleSelectedTabChanged = (tab: TypeTabs): void => {
-    uiController.setActiveFooterBarTab(tab.id);
-    uiController.setFooterBarIsOpen(true);
-  };
 
   /**
    * Handles resizing the footerbar when toggling fullscreen.
@@ -295,7 +305,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   return memoFooterBarTabs.length > 0 ? (
     <Box
       ref={tabsContainerRef as MutableRefObject<HTMLDivElement>}
-      sx={sxClasses.tabsContainer}
+      sx={memoSxClasses.tabsContainer}
       className="tabsContainer"
       id={`${mapId}-tabsContainer`}
     >

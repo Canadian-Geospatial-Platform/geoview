@@ -49,14 +49,19 @@ const responsiveWidths = {
   },
 } as const;
 
+/** Main container styles for the legend component. */
+const sxClassesMain = getSxClassesMain();
+
 export function Legend({ containerType }: LegendType): JSX.Element | null {
   logger.logTraceRender('components/legend/legend');
 
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
-  const sxClassesMain = useMemo(() => getSxClassesMain(), []);
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo(() => {
+    logger.logTraceUseMemo('LEGEND - memoSxClasses', theme);
+    return getSxClasses(theme);
+  }, [theme]);
 
   // State
   const [formattedLegendLayerList, setFormattedLegendLayersList] = useState<string[][]>([]);
@@ -68,7 +73,7 @@ export function Legend({ containerType }: LegendType): JSX.Element | null {
   const layerPaths = useStoreLayerTopLevelLayerPaths();
 
   // Memoize breakpoint values
-  const breakpoints = useMemo(() => {
+  const memoBreakpoints = useMemo(() => {
     // Log
     logger.logTraceUseMemo('LEGEND - breakpoints', theme.breakpoints.values);
 
@@ -86,11 +91,11 @@ export function Legend({ containerType }: LegendType): JSX.Element | null {
     if (containerType === CONTAINER_TYPE.APP_BAR) return 1;
 
     const { innerWidth } = window;
-    if (innerWidth < breakpoints.sm) return 1;
-    if (innerWidth < breakpoints.md) return 2;
-    if (innerWidth < breakpoints.lg) return 3;
+    if (innerWidth < memoBreakpoints.sm) return 1;
+    if (innerWidth < memoBreakpoints.md) return 2;
+    if (innerWidth < memoBreakpoints.lg) return 3;
     return 4;
-  }, [breakpoints, containerType]);
+  }, [memoBreakpoints, containerType]);
 
   /**
    * Transform the list of the legends into subsets of lists.
@@ -133,30 +138,30 @@ export function Legend({ containerType }: LegendType): JSX.Element | null {
   }, [layerPaths, updateLegendLayerListByWindowSize]);
 
   // Memoize the no layers content
-  const noLayersContent = useMemo(() => {
+  const memoNoLayersContent = useMemo(() => {
     // Log
     logger.logTraceUseMemo('components/legend - noLayersContent');
 
     return (
       <Box sx={styles.noLayersContainer}>
-        <Typography variant="h3" gutterBottom sx={sxClasses.legendInstructionsTitle}>
+        <Typography variant="h3" gutterBottom sx={memoSxClasses.legendInstructionsTitle}>
           {t('legend.noLayersAdded')}
         </Typography>
-        <Typography component="p" sx={sxClasses.legendInstructionsBody}>
+        <Typography component="p" sx={memoSxClasses.legendInstructionsBody}>
           {t('legend.noLayersAddedDescription')}
         </Typography>
       </Box>
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- sxClasses is memoized from theme which is stable
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- memoSxClasses is memoized from theme which is stable
   }, [t]);
 
   // Memoize the rendered content based on whether there are legend layers
-  const content = useMemo(() => {
+  const memoContent = useMemo(() => {
     // Log
     logger.logTraceUseMemo('components/legend - content', formattedLegendLayerList.length);
 
     if (!formattedLegendLayerList.length) {
-      return noLayersContent;
+      return memoNoLayersContent;
     }
 
     return formattedLegendLayerList.map((paths, idx) => (
@@ -166,7 +171,7 @@ export function Legend({ containerType }: LegendType): JSX.Element | null {
         key={`${idx}`}
         sx={{
           width: containerType === CONTAINER_TYPE.APP_BAR ? responsiveWidths.full : responsiveWidths.responsive,
-          ...sxClasses.legendList,
+          ...memoSxClasses.legendList,
         }}
       >
         {paths.map((layerPath) => (
@@ -174,8 +179,8 @@ export function Legend({ containerType }: LegendType): JSX.Element | null {
         ))}
       </List>
     ));
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- sxClasses is memoized from theme which is stable
-  }, [formattedLegendLayerList, noLayersContent, containerType]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- memoSxClasses is memoized from theme which is stable
+  }, [formattedLegendLayerList, memoNoLayersContent, containerType]);
 
   // TODO: CLEANUP - Remove the commented code, we're trying to not unmount the Legend panel anymore to check performance 2026-04-07
   // Early return with empty fragment if not the active tab
@@ -192,7 +197,7 @@ export function Legend({ containerType }: LegendType): JSX.Element | null {
         buttonRef={fullScreenBtnRef}
       />
 
-      <Box sx={sxClasses.toggleBar}>
+      <Box sx={memoSxClasses.toggleBar}>
         <ToggleAll containerType={containerType} source="legend" />
         <LegendFullscreenButton containerType={containerType} onClick={() => setIsFullScreen(true)} buttonRef={fullScreenBtnRef} />
       </Box>
@@ -200,7 +205,7 @@ export function Legend({ containerType }: LegendType): JSX.Element | null {
         sx={{ background: theme.palette.geoViewColor.bgColor.main, ...sxClassesMain.container }}
         id={`${mapId}-${containerType}-legendContainer`}
       >
-        <Box sx={styles.flexContainer}>{content}</Box>
+        <Box sx={styles.flexContainer}>{memoContent}</Box>
       </Box>
     </>
   );

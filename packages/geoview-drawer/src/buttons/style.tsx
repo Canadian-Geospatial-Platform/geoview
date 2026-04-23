@@ -70,6 +70,7 @@ export function StylePanel(): JSX.Element {
   const drawerController = useDrawerController();
 
   const memoCurrentGeomType = useMemo(() => {
+    logger.logTraceUseMemo('STYLE-PANEL - memoCurrentGeomType', activeGeom, selectedDrawingType);
     return selectedDrawingType ?? activeGeom;
   }, [activeGeom, selectedDrawingType]);
 
