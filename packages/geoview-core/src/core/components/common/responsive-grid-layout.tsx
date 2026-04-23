@@ -146,17 +146,11 @@ const ResponsiveGridLayout = forwardRef(
       return getGuideSxClasses(theme);
     }, [theme]);
 
-    /** Memoized sxProps for the left-top panel. */
-    const memoLeftTopSxProps = useMemo(() => {
-      logger.logTraceUseMemo('RESPONSIVE-GRID-LAYOUT - memoLeftTopSxProps', isFullScreen);
-      return { zIndex: isFullScreen ? 'unset' : 200 };
-    }, [isFullScreen]);
+    /** Sx props for the left-top panel. */
+    const leftTopSxProps = { zIndex: isFullScreen ? 'unset' : 200 };
 
-    /** Memoized sxProps for the right-top panel. */
-    const memoRightTopSxProps = useMemo(() => {
-      logger.logTraceUseMemo('RESPONSIVE-GRID-LAYOUT - memoRightTopSxProps', isFullScreen);
-      return { zIndex: isFullScreen ? 'unset' : 100, alignContent: 'flex-end' };
-    }, [isFullScreen]);
+    /** Sx props for the right-top panel. */
+    const rightTopSxProps = { zIndex: isFullScreen ? 'unset' : 100, alignContent: 'flex-end' };
 
     /** Memoized sx for the right-top content box layout. */
     const memoRightTopContentSx = useMemo(
@@ -697,7 +691,7 @@ const ResponsiveGridLayout = forwardRef(
             isRightPanelVisible={isRightPanelVisible}
             isEnlarged={isEnlarged}
             toggleMode={toggleMode}
-            sxProps={memoLeftTopSxProps}
+            sxProps={leftTopSxProps}
             className="responsive-layout-left-top"
           >
             {/* This panel is hidden from screen readers when not visible */}
@@ -707,7 +701,7 @@ const ResponsiveGridLayout = forwardRef(
             isRightPanelVisible={isRightPanelVisible}
             isEnlarged={isEnlarged}
             toggleMode={toggleMode}
-            sxProps={memoRightTopSxProps}
+            sxProps={rightTopSxProps}
             className="responsive-layout-right-top"
           >
             <Box sx={memoRightTopContentSx}>{rightTop ?? <Box />}</Box>

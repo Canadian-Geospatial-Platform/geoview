@@ -29,6 +29,19 @@ import { sanitizeHtmlContent, enhanceLinksAccessibility } from '@/core/utils/uti
 import { getSxClasses } from './data-table-style';
 import { useFeatureFieldInfos } from './hooks';
 
+/** Linkify configuration options for URL detection and formatting. */
+const linkifyOptions = {
+  attributes: {
+    target: '_blank',
+    rel: 'noopener noreferrer',
+  },
+  defaultProtocol: 'https',
+  format: {
+    url: (value: string) => (value.length > 50 ? `${value.slice(0, 40)}…${value.slice(value.length - 10)}` : value),
+  },
+  ignoreTags: ['script', 'style', 'img'],
+};
+
 /**
  * Renders a lightweight read-only data table in a modal window.
  *
@@ -84,25 +97,6 @@ export default function DataTableModal(): JSX.Element {
   }, [mappedLayerData, selectedLayerPath]);
 
   /**
-   * Linkify configuration options for URL detection and formatting.
-   */
-  const memoLinkifyOptions = useMemo(() => {
-    logger.logTraceUseMemo('DATA-TABLE-MODAL - memoLinkifyOptions');
-
-    return {
-      attributes: {
-        target: '_blank',
-        rel: 'noopener noreferrer',
-      },
-      defaultProtocol: 'https',
-      format: {
-        url: (value: string) => (value.length > 50 ? `${value.slice(0, 40)}…${value.slice(value.length - 10)}` : value),
-      },
-      ignoreTags: ['script', 'style', 'img'],
-    };
-  }, []);
-
-  /**
    * Creates a data table body cell.
    *
    * @param cellValue - Cell value to be displayed
@@ -114,7 +108,7 @@ export default function DataTableModal(): JSX.Element {
         <Box component="div" sx={sxClasses.tableCell}>
           <UseHtmlToReact
             htmlContent={sanitizeHtmlContent(
-              enhanceLinksAccessibility(linkifyHtml(cellValue.toString(), memoLinkifyOptions), t('general.opensInNewTab'))
+              enhanceLinksAccessibility(linkifyHtml(cellValue.toString(), linkifyOptions), t('general.opensInNewTab'))
             )}
             itemOptions={{ tabIndex: 0 }}
           />
@@ -125,7 +119,7 @@ export default function DataTableModal(): JSX.Element {
         </Box>
       );
     },
-    [sxClasses.tableCell, memoLinkifyOptions, t]
+    [sxClasses.tableCell, t]
   );
 
   /**

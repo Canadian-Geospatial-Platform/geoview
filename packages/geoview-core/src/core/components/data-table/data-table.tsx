@@ -81,6 +81,19 @@ const DATE_FIELD_FILTERS = NUMERIC_FIELD_FILTERS;
 /** The possible filters for string columns */
 const STRING_FIELD_FILTERS = ['contains', 'startsWith', 'endsWith'];
 
+/** Linkify configuration options for URL detection and formatting. */
+const linkifyOptions = {
+  attributes: {
+    target: '_blank',
+    rel: 'noopener noreferrer',
+  },
+  defaultProtocol: 'https',
+  format: {
+    url: (value: string) => (value.length > 50 ? `${value.slice(0, 40)}\u2026${value.slice(value.length - 10)}` : value),
+  },
+  ignoreTags: ['script', 'style', 'img'],
+};
+
 /**
  * Renders the interactive data table for a single layer.
  *
@@ -182,21 +195,6 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
     );
   }, []);
 
-  const linkifyOptions = useMemo(
-    () => ({
-      attributes: {
-        target: '_blank',
-        rel: 'noopener noreferrer',
-      },
-      defaultProtocol: 'https',
-      format: {
-        url: (value: string) => (value.length > 50 ? `${value.slice(0, 40)}…${value.slice(value.length - 10)}` : value),
-      },
-      ignoreTags: ['script', 'style', 'img'],
-    }),
-    []
-  );
-
   /**
    * Creates an image button that triggers the lightbox.
    *
@@ -234,7 +232,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
         cellValue
       );
     },
-    [initLightBox, t, containerType, mapId, linkifyOptions]
+    [initLightBox, t, containerType, mapId]
   );
 
   /**

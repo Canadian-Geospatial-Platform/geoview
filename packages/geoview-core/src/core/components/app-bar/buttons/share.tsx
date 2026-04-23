@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { ShareIcon, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Box } from '@/ui';
@@ -151,14 +151,9 @@ export default function Share(): JSX.Element | null {
 
   // #endregion
 
-  // Memoize visibility check
-  const memoIsVisible = useMemo(() => {
-    logger.logTraceUseMemo('SHARE - memoIsVisible', sharedMode);
-    return sharedMode === true;
-  }, [sharedMode]);
-
   // If shared mode is not enabled, don't render the button
-  if (!memoIsVisible) return null;
+  const isVisible = sharedMode === true;
+  if (!isVisible) return null;
 
   return (
     <>
