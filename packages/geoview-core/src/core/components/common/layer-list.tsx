@@ -58,7 +58,10 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo(() => {
+    logger.logTraceUseMemo('LAYER-LIST - LayerListItem - memoSxClasses', theme);
+    return getSxClasses(theme);
+  }, [theme]);
 
   // Store
   // TODO: REFACTOR - The whole 'layer' parameter received in the component parameters list should be reviewed and turned obsolete.
@@ -144,7 +147,7 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
         <ListItemButton
           id={id}
           component="button"
-          sx={sxClasses.listItemButton}
+          sx={memoSxClasses.listItemButton}
           onKeyDown={(e) => handleLayerKeyDown(e, layer)}
           onClick={() => onListItemClick(layer)}
           selected={isSelected}
@@ -156,7 +159,7 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
           ) : (
             layer.layerPath && !layer.content && <LayerIcon layerPath={layer.layerPath} />
           )}
-          <Box component="span" sx={sxClasses.listPrimaryText} className="layerInfo">
+          <Box component="span" sx={memoSxClasses.listPrimaryText} className="layerInfo">
             <Typography component="span" className="layerTitle">
               {layer.layerName}
             </Typography>
@@ -171,7 +174,7 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
               badgeContent={layer.numOffeatures}
               max={99}
               color="info"
-              sx={sxClasses.layerCount}
+              sx={memoSxClasses.layerCount}
               className="layer-count"
               aria-hidden="true"
             ></Badge>
@@ -179,7 +182,7 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
         </ListItemButton>
       </Tooltip>
       {layerStatus === 'loading' && (
-        <Box component="span" sx={sxClasses.progressBar}>
+        <Box component="span" sx={memoSxClasses.progressBar}>
           <ProgressBar aria-label={t('layers.status.layerLoadingDescriptive', { layerName: layer.layerName })!} />
         </Box>
       )}
@@ -201,10 +204,13 @@ export const LayerList = memo(function LayerList({ layerList, selectedLayerPath,
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo(() => {
+    logger.logTraceUseMemo('LAYER-LIST - LayerList - memoSxClasses', theme);
+    return getSxClasses(theme);
+  }, [theme]);
 
   return (
-    <List sx={sxClasses.list}>
+    <List sx={memoSxClasses.list}>
       {!!layerList.length &&
         layerList.map((layer) => (
           <LayerListItem

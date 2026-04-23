@@ -80,6 +80,7 @@ export function CoordinateInfoSwitch({ disabled }: CoordinateInfoSwitchProps): J
    * Aborts the previous coordinate info request on unmount.
    */
   useEffect(() => {
+    logger.logTraceUseEffect('COORDINATE-INFO - abort on unmount');
     return (): void => {
       abortControllerRef.current?.abort();
     };
@@ -108,7 +109,10 @@ export function CoordinateInfoSwitch({ disabled }: CoordinateInfoSwitchProps): J
 export function CoordinateInfo(): JSX.Element {
   const { t } = useTranslation();
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo(() => {
+    logger.logTraceUseMemo('COORDINATE-INFO - memoSxClasses', theme);
+    return getSxClasses(theme);
+  }, [theme]);
 
   // Store
   const clickCoordinates = useStoreMapClickCoordinates();
@@ -120,6 +124,7 @@ export function CoordinateInfo(): JSX.Element {
    * Memoizes the parsed coordinate data from the feature.
    */
   const memoCoordinateData = useMemo((): CoordinateData => {
+    logger.logTraceUseMemo('COORDINATE-INFO - memoCoordinateData', clickCoordinates);
     return {
       lat: parseFloat(clickCoordinates?.lonlat[1]?.toString() || '0'),
       lng: parseFloat(clickCoordinates?.lonlat[0]?.toString() || '0'),
@@ -134,20 +139,20 @@ export function CoordinateInfo(): JSX.Element {
   const { lat, lng, utmZone, easting, northing, ntsMapsheet, elevation } = memoCoordinateData;
 
   return (
-    <Box sx={sxClasses.rightPanelContainer} className="guide-content-container">
-      <Box sx={sxClasses.coordinateInfoContainer}>
-        <Typography component="h4" variant="h6" sx={sxClasses.coordinateInfoTitle}>
+    <Box sx={memoSxClasses.rightPanelContainer} className="guide-content-container">
+      <Box sx={memoSxClasses.coordinateInfoContainer}>
+        <Typography component="h4" variant="h6" sx={memoSxClasses.coordinateInfoTitle}>
           {t('details.coordinateInfoTitle')}
         </Typography>
 
         <List>
-          <ListItem sx={sxClasses.coordinateInfoSection} disablePadding>
-            <Typography variant="subtitle1" sx={sxClasses.coordinateInfoSectionTitle}>
+          <ListItem sx={memoSxClasses.coordinateInfoSection} disablePadding>
+            <Typography variant="subtitle1" sx={memoSxClasses.coordinateInfoSectionTitle}>
               {t('details.geographicCoordinates')}
             </Typography>
-            <Box sx={sxClasses.coordinateInfoContent}>
+            <Box sx={memoSxClasses.coordinateInfoContent}>
               <Typography>{t('details.degreesDecimal')}:</Typography>
-              <Box sx={sxClasses.coordinateInfoSubContent}>
+              <Box sx={memoSxClasses.coordinateInfoSubContent}>
                 <Typography>
                   {t('details.latitude')}: {lat.toFixed(6)}° {lat >= 0 ? 'N' : 'S'}
                 </Typography>
@@ -156,7 +161,7 @@ export function CoordinateInfo(): JSX.Element {
                 </Typography>
               </Box>
               <Typography>{t('details.degreesMinutesSeconds')}:</Typography>
-              <Box sx={sxClasses.coordinateInfoSubContent}>
+              <Box sx={memoSxClasses.coordinateInfoSubContent}>
                 <Typography>
                   {t('details.latitude')}: {GeoUtilities.coordFormatDMS(lat)}
                 </Typography>
@@ -167,13 +172,13 @@ export function CoordinateInfo(): JSX.Element {
             </Box>
           </ListItem>
 
-          <ListItem sx={sxClasses.coordinateInfoSection} disablePadding>
-            <Typography variant="subtitle1" sx={sxClasses.coordinateInfoSectionTitle}>
+          <ListItem sx={memoSxClasses.coordinateInfoSection} disablePadding>
+            <Typography variant="subtitle1" sx={memoSxClasses.coordinateInfoSectionTitle}>
               {t('details.utmCoordinates')}
             </Typography>
             {spinning && <CircularProgressBase size={20} />}
             {!spinning && utmZone && (
-              <Box sx={sxClasses.coordinateInfoContent}>
+              <Box sx={memoSxClasses.coordinateInfoContent}>
                 <Typography>
                   {t('details.zone')}: {utmZone}
                 </Typography>
@@ -187,13 +192,13 @@ export function CoordinateInfo(): JSX.Element {
             )}
           </ListItem>
 
-          <ListItem sx={sxClasses.coordinateInfoSection} disablePadding>
-            <Typography variant="subtitle1" sx={sxClasses.coordinateInfoSectionTitle}>
+          <ListItem sx={memoSxClasses.coordinateInfoSection} disablePadding>
+            <Typography variant="subtitle1" sx={memoSxClasses.coordinateInfoSectionTitle}>
               {t('details.ntsMapsheet')}
             </Typography>
             {spinning && <CircularProgressBase size={20} />}
             {!spinning && ntsMapsheet && (
-              <Box sx={sxClasses.coordinateInfoContent}>
+              <Box sx={memoSxClasses.coordinateInfoContent}>
                 {ntsMapsheet.split('\n').map((line) => (
                   <Typography key={line}>{line}</Typography>
                 ))}
@@ -201,13 +206,13 @@ export function CoordinateInfo(): JSX.Element {
             )}
           </ListItem>
 
-          <ListItem sx={sxClasses.coordinateInfoSection} disablePadding>
-            <Typography variant="subtitle1" sx={sxClasses.coordinateInfoSectionTitle}>
+          <ListItem sx={memoSxClasses.coordinateInfoSection} disablePadding>
+            <Typography variant="subtitle1" sx={memoSxClasses.coordinateInfoSectionTitle}>
               {t('details.elevation')}
             </Typography>
             {spinning && <CircularProgressBase size={20} />}
             {!spinning && elevation && (
-              <Box sx={sxClasses.coordinateInfoContent}>
+              <Box sx={memoSxClasses.coordinateInfoContent}>
                 <Typography>{elevation}</Typography>
               </Box>
             )}

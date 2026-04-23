@@ -28,7 +28,7 @@ const LegendListItem = memo(
     canToggle,
     showNameTooltip,
     onToggle,
-    sxClasses,
+    memoSxClasses,
     id,
   }: {
     item: TypeLegendItem;
@@ -36,7 +36,7 @@ const LegendListItem = memo(
     canToggle: boolean;
     showNameTooltip: boolean;
     onToggle?: () => void;
-    sxClasses: Record<string, object>;
+    memoSxClasses: Record<string, object>;
     id: string;
   }): JSX.Element => {
     const { t } = useTranslation<string>();
@@ -49,7 +49,7 @@ const LegendListItem = memo(
     const itemClassName = getItemClassName();
 
     return (
-      <ListItem sx={sxClasses.layerListItem} disablePadding className={`layerListItem ${itemClassName || ''}`}>
+      <ListItem sx={memoSxClasses.layerListItem} disablePadding className={`layerListItem ${itemClassName || ''}`}>
         <Tooltip
           title={tooltipTitle || (showNameTooltip ? name : '')}
           placement="top"
@@ -73,7 +73,7 @@ const LegendListItem = memo(
             onClick={canToggle && onToggle ? onToggle : undefined}
             disabled={!canToggle || !onToggle}
             disableRipple
-            sx={sxClasses.layerListItemButton}
+            sx={memoSxClasses.layerListItemButton}
             className={`layerListItemButton ${itemClassName || ''}`}
             aria-pressed={isVisible && layerVisible}
             aria-label={`${t('layers.toggleVisibility')} - ${name}`} // WCAG - Provide descriptive aria-label for accessibility
@@ -101,7 +101,10 @@ export const ItemsList = memo(function ItemsList({ items, layerPath }: ItemsList
 
   // Hooks
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo(() => {
+    logger.logTraceUseMemo('LEGEND-LAYER-ITEMS - memoSxClasses', theme);
+    return getSxClasses(theme);
+  }, [theme]);
   const lastToggledRef = useRef<string | null>(null);
   const itemIdMapRef = useRef<Map<string, string>>(new Map());
 
@@ -146,6 +149,7 @@ export const ItemsList = memo(function ItemsList({ items, layerPath }: ItemsList
 
   // Keep focus on layers when they are toggled using keyboard
   useEffect(() => {
+    logger.logTraceUseEffect('LEGEND-LAYER-ITEMS - keep focus on toggled layer', items);
     if (lastToggledRef.current) {
       document.getElementById(lastToggledRef.current)?.focus();
       lastToggledRef.current = null;
@@ -160,7 +164,7 @@ export const ItemsList = memo(function ItemsList({ items, layerPath }: ItemsList
   // GV this is specifically because of esriFeature layers. This also causes focus to be lost when using a keyboard to toggle layer visibility
   // TODO Add a visibility hook for the individual classes to update this in the future
   return (
-    <List className="layerList" sx={sxClasses.layerList}>
+    <List className="layerList" sx={memoSxClasses.layerList}>
       {items.map((item) => {
         const itemId = getItemId(item);
         const canReallyToggle = Boolean(
@@ -181,7 +185,7 @@ export const ItemsList = memo(function ItemsList({ items, layerPath }: ItemsList
             id={itemId}
             {...commonProps}
             onToggle={canToggle ? () => handleToggleItemVisibility(item, itemId) : undefined}
-            sxClasses={sxClasses}
+            memoSxClasses={memoSxClasses}
           />
         );
       })}

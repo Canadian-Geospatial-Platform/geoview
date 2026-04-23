@@ -106,7 +106,10 @@ const FeatureHeader = memo(function FeatureHeader({
   // Hooks
   const { t } = useTranslation();
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo(() => {
+    logger.logTraceUseMemo('FEATURE-INFO - FeatureHeader - memoSxClasses', theme);
+    return getSxClasses(theme);
+  }, [theme]);
   const isFocusTrap = useStoreUIActiveTrapGeoView();
 
   /**
@@ -119,7 +122,7 @@ const FeatureHeader = memo(function FeatureHeader({
 
   return (
     <Box sx={HEADER_STYLES.container}>
-      <Box sx={sxClasses.flexBoxAlignCenter}>
+      <Box sx={memoSxClasses.flexBoxAlignCenter}>
         {iconSrc ? (
           <Box component="img" src={iconSrc} alt="" className="layer-icon" />
         ) : (
@@ -143,7 +146,7 @@ const FeatureHeader = memo(function FeatureHeader({
       <Box
         role="group"
         sx={{
-          ...sxClasses.flexBoxAlignCenter,
+          ...memoSxClasses.flexBoxAlignCenter,
           [theme.breakpoints.down('sm')]: { display: 'none' },
         }}
         aria-label={t('details.featureActions')!}
@@ -199,7 +202,10 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
 
   // Hooks
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo(() => {
+    logger.logTraceUseMemo('FEATURE-INFO - FeatureInfo - memoSxClasses', theme);
+    return getSxClasses(theme);
+  }, [theme]);
 
   // State
   const [checked, setChecked] = useState<boolean>(false);
@@ -221,6 +227,7 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
    * Memoizes the feature name.
    */
   const memoFeatureName = useMemo(() => {
+    logger.logTraceUseMemo('FEATURE-INFO - memoFeatureName', feature.nameField);
     // Try to get the value at the fieldName
     const value = feature.nameField && (feature.fieldInfo?.[feature.nameField]?.value as string);
     return value ?? 'No name / Sans nom';
@@ -230,6 +237,7 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
    * Memoizes whether the feature has a geometry.
    */
   const memoFeatureHasGeometry = useMemo(() => {
+    logger.logTraceUseMemo('FEATURE-INFO - memoFeatureHasGeometry', feature.geometry);
     return !!feature.geometry;
   }, [feature.geometry]);
 
@@ -237,6 +245,7 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
    * Memoizes the feature info list.
    */
   const memoFeatureInfoList: TypeFieldEntry[] = useMemo(() => {
+    logger.logTraceUseMemo('FEATURE-INFO - memoFeatureInfoList', feature.fieldInfo);
     if (!feature?.fieldInfo) return [];
 
     return Object.entries(feature.fieldInfo)
@@ -256,6 +265,7 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
    * Memoizes whether the feature has a geochart.
    */
   const memoHasGeochart = useMemo(() => {
+    logger.logTraceUseMemo('FEATURE-INFO - memoHasGeochart', feature.layerPath);
     return (
       !!geochartConfigs?.[feature.layerPath] &&
       (geochartLayerDataArrayBatch?.some((entry) => entry.layerPath === feature.layerPath && (entry.features?.length ?? 0) > 0) ?? false)
@@ -345,7 +355,7 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
         onGeochart={handleGeochart}
       />
 
-      <Box sx={sxClasses.featureInfoListContainer}>
+      <Box sx={memoSxClasses.featureInfoListContainer}>
         <FeatureInfoTable layerPath={feature.layerPath} featureInfoList={memoFeatureInfoList} containerType={containerType} />
       </Box>
     </Paper>

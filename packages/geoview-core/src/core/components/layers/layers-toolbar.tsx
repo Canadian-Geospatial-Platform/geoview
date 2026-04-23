@@ -70,6 +70,7 @@ export function LayersToolbar({ containerType }: TypeLayersToolbar): JSX.Element
    * - Restores focus when user cancels
    */
   useEffect(() => {
+    logger.logTraceUseEffect('LAYERS-TOOLBAR - display state logic', displayState, layerPaths.length);
     // Always show 'add' panel when there are no layers
     if (layerPaths.length === 0 && displayState !== 'add') {
       layerController.setLayerDisplayState('add');
@@ -102,6 +103,7 @@ export function LayersToolbar({ containerType }: TypeLayersToolbar): JSX.Element
    * 3. User didn't explicitly click the Add button
    */
   useEffect(() => {
+    logger.logTraceUseEffect('LAYERS-TOOLBAR - auto-switch to view mode', layerPaths.length);
     if (layerPaths.length > 0 && displayState === 'add' && !userClickedAdd.current) {
       layerController.setLayerDisplayState('view');
     }

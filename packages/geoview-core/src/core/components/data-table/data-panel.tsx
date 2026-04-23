@@ -80,6 +80,9 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
    * Orders the layers by visible layer order.
    */
   const memoOrderedLayerData = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('DATA-PANEL - memoOrderedLayerData', visibleInRangeLayers, mappedLayerData);
+
     return visibleInRangeLayers
       .map((layerPath) => mappedLayerData.filter((data) => data.layerPath === layerPath)[0])
       .filter((layer) => layer !== undefined && !layerHiddenSet[layer.layerPath]);

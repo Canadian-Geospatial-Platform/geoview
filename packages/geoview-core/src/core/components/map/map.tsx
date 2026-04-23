@@ -46,7 +46,10 @@ export function Map(props: MapProps): JSX.Element {
   const { t } = useTranslation();
 
   const defaultTheme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(), []);
+  const memoSxClasses = useMemo(() => {
+    logger.logTraceUseMemo('MAP - memoSxClasses');
+    return getSxClasses();
+  }, []);
 
   // internal state - get ref to div element
   const mapElement = useRef<HTMLElement | undefined>();
@@ -81,7 +84,7 @@ export function Map(props: MapProps): JSX.Element {
 
   return (
     // ? the map is focusable and needs to be tabbable for keyboard navigation (only when interaction is dynamic)
-    <Box id={`mapTargetElement-${mapId}`} ref={mapElement} sx={sxClasses.mapContainer} tabIndex={mapInteraction === 'static' ? -1 : 0}>
+    <Box id={`mapTargetElement-${mapId}`} ref={mapElement} sx={memoSxClasses.mapContainer} tabIndex={mapInteraction === 'static' ? -1 : 0}>
       {mapLoaded && (
         <>
           {northArrow && <NorthArrow />}
@@ -93,7 +96,7 @@ export function Map(props: MapProps): JSX.Element {
         </>
       )}
       {layersAreLoading && (
-        <Box sx={{ ...sxClasses.progressBar, bottom: mapInteraction === 'static' ? 0 : 40 }}>
+        <Box sx={{ ...memoSxClasses.progressBar, bottom: mapInteraction === 'static' ? 0 : 40 }}>
           <ProgressBar aria-label={t('error.map.loadingLayers')!} />
         </Box>
       )}

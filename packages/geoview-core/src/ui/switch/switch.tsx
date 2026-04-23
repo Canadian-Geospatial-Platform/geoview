@@ -43,7 +43,10 @@ function SwitchUI(props: ExtendedSwitchProps): JSX.Element {
   // Hooks
   const switchId = useId(); // WCAG - Unique ID to associate label with switch
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo(() => {
+    logger.logTraceUseMemo('SWITCH - memoSxClasses', theme);
+    return getSxClasses(theme);
+  }, [theme]);
 
   return (
     <MaterialFormControlLabel
@@ -64,7 +67,7 @@ function SwitchUI(props: ExtendedSwitchProps): JSX.Element {
         />
       }
       label={label}
-      sx={sxClasses.formControl}
+      sx={memoSxClasses.formControl}
     />
   );
 }

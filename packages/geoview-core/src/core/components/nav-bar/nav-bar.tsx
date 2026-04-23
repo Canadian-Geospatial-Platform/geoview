@@ -70,7 +70,7 @@ export function NavBar(props: NavBarProps): JSX.Element {
   // Hooks
   const { t } = useTranslation();
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Store
   const navBarComponents = useStoreUINavbarComponents();
@@ -214,7 +214,7 @@ export function NavBar(props: NavBarProps): JSX.Element {
             aria-label={buttonPanel.button['aria-label']}
             tooltip={buttonPanel.button.tooltip}
             tooltipPlacement={buttonPanel.button.tooltipPlacement}
-            sx={sxClasses.navButton}
+            sx={memoSxClasses.navButton}
             onClick={buttonPanel.button.onClick}
           >
             {buttonPanel.button.children}
@@ -270,14 +270,14 @@ export function NavBar(props: NavBarProps): JSX.Element {
     };
 
     return (
-      <Box key={groupName} sx={sxClasses.navBtnGroupColumns}>
+      <Box key={groupName} sx={memoSxClasses.navBtnGroupColumns}>
         {columns.map((columnKeys, columnIndex) => (
           <ButtonGroup
             // eslint-disable-next-line react/no-array-index-key
             key={`${groupName}-column-${columnIndex}`}
             aria-label={t('mapnav.arianavbar')!}
             variant="contained"
-            sx={sxClasses.navBtnGroup}
+            sx={memoSxClasses.navBtnGroup}
             orientation="vertical"
           >
             {columnKeys.map((buttonPanelKey) => {
@@ -291,7 +291,7 @@ export function NavBar(props: NavBarProps): JSX.Element {
                 key={`expand-${groupName}`}
                 aria-label={isExpanded ? t('general.close') : t('general.open')}
                 tooltipPlacement="left"
-                sx={sxClasses.navButton}
+                sx={memoSxClasses.navButton}
                 onClick={toggleExpansion}
               >
                 {isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
@@ -304,7 +304,7 @@ export function NavBar(props: NavBarProps): JSX.Element {
   }
 
   return (
-    <Box ref={navBarRef} sx={sxClasses.navBarRef}>
+    <Box ref={navBarRef} sx={memoSxClasses.navBarRef}>
       {[...Object.keys(memoButtonPanelGroups)].map((key) => renderButtonPanelGroup(memoButtonPanelGroups[key], key))}
     </Box>
   );

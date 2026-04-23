@@ -54,7 +54,7 @@ const LegendLayerHeader = memo(
     collapseContainerId,
   }: LegendLayerHeaderProps): JSX.Element => {
     // Log
-    logger.logTraceUseMemo('components/legend/legend-layer - LegendLayerHeader', layerPath);
+    logger.logTraceRender('components/legend/legend-layer - LegendLayerHeader', layerPath);
 
     // Hooks
     const isCollapsed = useStoreLayerLegendCollapsed(layerPath);
@@ -121,7 +121,11 @@ export function LegendLayer({ layerPath, showControls, containerType }: LegendLa
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  /** Memoized sx class definitions for the legend layer. */
+  const memoSxClasses = useMemo(() => {
+    logger.logTraceUseMemo('LEGEND-LAYER - memoSxClasses', theme);
+    return getSxClasses(theme);
+  }, [theme]);
 
   // Stores
   const mapId = useStoreGeoViewMapId();
@@ -137,6 +141,9 @@ export function LegendLayer({ layerPath, showControls, containerType }: LegendLa
   const prevStatusRef = useRef<string | undefined>(undefined); // Ref to track previous status for status change detection
   const [statusMessage, setStatusMessage] = useState<string>('');
 
+  /**
+   * Handles click on the layer expand/collapse toggle button.
+   */
   const handleExpandGroupClick = useCallback(
     (event: React.MouseEvent): void => {
       event.stopPropagation();
@@ -147,8 +154,12 @@ export function LegendLayer({ layerPath, showControls, containerType }: LegendLa
     [layerPath, layerController]
   );
 
+  /**
+   * Tracks layer status changes for screen reader announcements.
+   */
   // WCAG - Track layer status changes for screen reader announcements
   useEffect(() => {
+    logger.logTraceUseEffect('LEGEND-LAYER - WCAG track layer status changes', layerStatus);
     if (layerStatus === 'loading' && prevStatusRef.current !== 'loading') {
       // Announce when loading starts
       setStatusMessage(t('layers.status.layerLoadingDescriptive', { layerName }) || '');
@@ -168,22 +179,22 @@ export function LegendLayer({ layerPath, showControls, containerType }: LegendLa
   }, [layerStatus, layerName, t]);
 
   return (
-    <ListItem className="legendListItem" sx={sxClasses.legendListItem} key={layerPath}>
+    <ListItem className="legendListItem" sx={memoSxClasses.legendListItem} key={layerPath}>
       <LegendLayerHeader
         layerPath={layerPath}
         tooltip={t('layers.toggleCollapse')}
         onExpandClick={handleExpandGroupClick}
-        sxClasses={sxClasses}
+        sxClasses={memoSxClasses}
         showControls={showControls}
         layerNameId={layerNameId}
         collapseContainerId={collapseContainerId}
       />
       {/* WCAG - ARIA live region for screen reader announcements */}
-      <Box sx={sxClasses.visuallyHidden} role="status" aria-live="polite" aria-atomic="true">
+      <Box sx={memoSxClasses.visuallyHidden} role="status" aria-live="polite" aria-atomic="true">
         {statusMessage}
       </Box>
       {layerStatus === 'loading' && (
-        <Box sx={sxClasses.loading}>
+        <Box sx={memoSxClasses.loading}>
           <ProgressBar aria-label={t('layers.status.layerLoadingDescriptive', { layerName })!} />
         </Box>
       )}

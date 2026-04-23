@@ -122,6 +122,9 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
    * Memoizes the fetching of the correct config based on the provided layers array.
    */
   const memoAllInfo = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('GEOVIEW-GEOCHART - memoAllInfo', layers);
+
     // Find the right config/layer/data for what we want based on the layerDataArray
     const [foundConfigChart, foundConfigChartLyr, foundLayerEntry, foundData]: [
       GeoViewGeoChartConfig | undefined,
