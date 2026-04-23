@@ -30,9 +30,12 @@ This agent creates a feedback loop between issue drafting and implementation:
 
 ### Step 2 — Gather the Branch Diff
 
-1. Run `git diff develop --name-only` (or the target branch the user specifies) to get changed files
-2. Run `git diff develop -- <file>` for each changed file to get the actual diff
-3. Read the changed files to understand the full context of the changes
+1. Run `git fetch upstream develop` to ensure the latest upstream develop is available
+2. Run `git diff upstream/develop --name-only` to get changed files
+3. Run `git diff upstream/develop -- <file>` for each changed file to get the actual diff
+4. Read the changed files to understand the full context of the changes
+
+> **Why `upstream/develop`?** Developers rarely keep their local `develop` or `origin/develop` up to date. `upstream` points to the canonical `Canadian-Geospatial-Platform/geoview` repository and gives the most accurate diff.
 
 ### Step 3 — Compare and Report
 
