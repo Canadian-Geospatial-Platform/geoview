@@ -50,7 +50,7 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
 
   const { cgpv } = window as TypeWindow;
   const { ui, reactUtilities } = cgpv;
-  const { useState, useMemo } = reactUtilities.react;
+  const { useState, useCallback, useMemo } = reactUtilities.react;
   const {
     Box,
     ListItem,
@@ -72,31 +72,38 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
   const [collapsed, setCollapsed] = useState<boolean>(isGroupLayer(item) ? (item.collapsed ?? false) : false);
 
   // Collect all layer paths from children
-  const layerPaths = useMemo(() => collectLayerPaths(item.children), [item.children]);
+  const memoLayerPaths = useMemo(() => {
+    logger.logTraceUseMemo('GROUP-ITEM - memoLayerPaths', item.children);
+    return collectLayerPaths(item.children);
+  }, [item.children]);
 
   // Check if all child layers are visible
-  const allVisible = useStoreLayerArrayVisibility(layerPaths);
+  const allVisible = useStoreLayerArrayVisibility(memoLayerPaths);
 
   if (!isGroupLayer(item)) return;
 
-  /**
-   * Handles when the user toggles the group collapse state
-   */
-  const handleToggleCollapse = (): void => {
-    setCollapsed((prev) => !prev);
-  };
+  // #region HANDLERS
 
   /**
-   * Handles when the user toggles the visibility of all child layers
+   * Handles when the user toggles the group collapse state.
    */
-  const handleToggleVisibility = (): void => {
+  const handleToggleCollapse = useCallback((): void => {
+    setCollapsed((prev) => !prev);
+  }, []);
+
+  /**
+   * Handles when the user toggles the visibility of all child layers.
+   */
+  const handleToggleVisibility = useCallback((): void => {
     const newVisibility = !allVisible;
 
     // Toggle all child layers
-    layerPaths.forEach((layerPath) => {
+    memoLayerPaths.forEach((layerPath) => {
       layerController.setOrToggleLayerVisibility(layerPath, newVisibility);
     });
-  };
+  }, [allVisible, layerController, memoLayerPaths]);
+
+  // #endregion HANDLERS
 
   // Get current item text and path for children
   const currentPath = itemPath || item.itemId || `group-${item.text.toLowerCase().replace(/\s+/g, '-')}`;

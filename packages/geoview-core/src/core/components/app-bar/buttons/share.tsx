@@ -153,6 +153,7 @@ export default function Share(): JSX.Element | null {
 
   // Memoize visibility check
   const memoIsVisible = useMemo(() => {
+    logger.logTraceUseMemo('SHARE - memoIsVisible', sharedMode);
     return sharedMode === true;
   }, [sharedMode]);
 

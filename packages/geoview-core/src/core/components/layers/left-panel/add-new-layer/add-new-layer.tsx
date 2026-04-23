@@ -760,7 +760,11 @@ export function AddNewLayer(): JSX.Element {
 
   // #endregion
 
+  /**
+   * Validates the URL and manages step button enabled state based on active step.
+   */
   useEffect(() => {
+    logger.logTraceUseEffect('ADD-NEW-LAYER - URL validation and step button state', activeStep, layerURL);
     if (activeStep === 0) {
       // Validate URL for step 1
       const validateUrl = async (): Promise<void> => {
@@ -815,7 +819,11 @@ export function AddNewLayer(): JSX.Element {
     if (activeStep === 2 && !layerIdsToAdd.length) setStepButtonEnabled(false);
   }, [layerURL, activeStep, layerIdsToAdd, layerType, uiController]);
 
+  /**
+   * Manages focus when the active step changes.
+   */
   useEffect(() => {
+    logger.logTraceUseEffect('ADD-NEW-LAYER - focus management on step change', activeStep);
     if (activeStep === 1) {
       (serviceTypeRef.current?.getElementsByTagName('input')[0].previousSibling as HTMLDivElement).focus();
     }

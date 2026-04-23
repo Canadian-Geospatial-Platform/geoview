@@ -130,22 +130,39 @@ const ResponsiveGridLayout = forwardRef(
      * Notifies parent when right panel visibility changes.
      */
     useEffect(() => {
+      logger.logTraceUseEffect('RESPONSIVE-GRID-LAYOUT - right panel visibility changed', isRightPanelVisible);
       onRightPanelVisibilityChanged?.(isRightPanelVisible);
     }, [isRightPanelVisible, onRightPanelVisibilityChanged]);
 
-    // sxClasses
-    const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
-    const guideSxClasses = useMemo(() => getGuideSxClasses(theme), [theme]);
+    /** Memoized sx class definitions for the responsive layout. */
+    const memoSxClasses = useMemo(() => {
+      logger.logTraceUseMemo('RESPONSIVE-GRID-LAYOUT - memoSxClasses', theme);
+      return getSxClasses(theme);
+    }, [theme]);
+
+    /** Memoized sx class definitions for the guide panel. */
+    const memoGuideSxClasses = useMemo(() => {
+      logger.logTraceUseMemo('RESPONSIVE-GRID-LAYOUT - memoGuideSxClasses', theme);
+      return getGuideSxClasses(theme);
+    }, [theme]);
 
     /** Memoized sxProps for the left-top panel. */
-    const memoLeftTopSxProps = useMemo(() => ({ zIndex: isFullScreen ? 'unset' : 200 }), [isFullScreen]);
+    const memoLeftTopSxProps = useMemo(() => {
+      logger.logTraceUseMemo('RESPONSIVE-GRID-LAYOUT - memoLeftTopSxProps', isFullScreen);
+      return { zIndex: isFullScreen ? 'unset' : 200 };
+    }, [isFullScreen]);
 
     /** Memoized sxProps for the right-top panel. */
-    const memoRightTopSxProps = useMemo(() => ({ zIndex: isFullScreen ? 'unset' : 100, alignContent: 'flex-end' }), [isFullScreen]);
+    const memoRightTopSxProps = useMemo(() => {
+      logger.logTraceUseMemo('RESPONSIVE-GRID-LAYOUT - memoRightTopSxProps', isFullScreen);
+      return { zIndex: isFullScreen ? 'unset' : 100, alignContent: 'flex-end' };
+    }, [isFullScreen]);
 
     /** Memoized sx for the right-top content box layout. */
     const memoRightTopContentSx = useMemo(
-      () => ({
+      () => {
+        logger.logTraceUseMemo('RESPONSIVE-GRID-LAYOUT - memoRightTopContentSx', containerType, theme.breakpoints);
+        return {
         display: 'flex',
         alignItems: containerType === CONTAINER_TYPE.APP_BAR ? 'end' : 'center',
         flexDirection: containerType === CONTAINER_TYPE.APP_BAR ? 'column' : 'row',
@@ -156,8 +173,9 @@ const ResponsiveGridLayout = forwardRef(
         [theme.breakpoints.down('sm')]: {
           justifyContent: 'space-between',
         },
-        width: '100%',
-      }),
+          width: '100%',
+        };
+      },
       [containerType, theme.breakpoints]
     );
 
@@ -187,6 +205,7 @@ const ResponsiveGridLayout = forwardRef(
      * Toggles guide visibility based on rightMain content availability.
      */
     useEffect(() => {
+      logger.logTraceUseEffect('RESPONSIVE-GRID-LAYOUT - guide visibility toggle', rightMain, guideContentIds);
       if (rightMain) {
         setIsGuideOpen(false);
       } else if (guideContentIds) {
@@ -200,6 +219,7 @@ const ResponsiveGridLayout = forwardRef(
      * Notifies parent when guide open state changes.
      */
     useEffect(() => {
+      logger.logTraceUseEffect('RESPONSIVE-GRID-LAYOUT - guide open state changed', isGuideOpen);
       onGuideIsOpen?.(isGuideOpen);
     }, [isGuideOpen, onGuideIsOpen]);
 
@@ -207,6 +227,7 @@ const ResponsiveGridLayout = forwardRef(
      * Resets enlarged state when the enlarge button is hidden.
      */
     useEffect(() => {
+      logger.logTraceUseEffect('RESPONSIVE-GRID-LAYOUT - reset enlarged state', hideEnlargeBtn, isEnlarged);
       // if hideEnlargeBtn changes to true and isEnlarged is true, set isEnlarged to false
       if (hideEnlargeBtn && isEnlarged) {
         setIsEnlarged(false);
@@ -303,6 +324,7 @@ const ResponsiveGridLayout = forwardRef(
      * Focuses the close button when the right panel becomes visible with content.
      */
     useEffect(() => {
+      logger.logTraceUseEffect('RESPONSIVE-GRID-LAYOUT - focus close button when right panel visible', isRightPanelVisible, hasContent);
       if (isRightPanelVisible && hasContent && !isGuideOpen && closeBtnRef.current) {
         requestAnimationFrame(() => {
           closeBtnRef.current?.focus();
@@ -554,14 +576,14 @@ const ResponsiveGridLayout = forwardRef(
           ref={guideContainerRef}
           tabIndex={0}
           className="panel-content-container"
-          sx={guideSxClasses.guideContainer}
+          sx={memoGuideSxClasses.guideContainer}
           onKeyDown={handleGuideKeyDown}
         >
           <Box
             className="guideBox"
             sx={{
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              ...(guideSxClasses.guideContainer as any)?.['& .guideBox'],
+              ...(memoGuideSxClasses.guideContainer as any)?.['& .guideBox'],
             }}
           >
             {/* Close button inside guide - shown when WCAG is enabled, not fullscreen, and no feature content is selected */}
@@ -609,11 +631,11 @@ const ResponsiveGridLayout = forwardRef(
           <Box
             ref={isGuideOpen ? undefined : rightMainRef}
             tabIndex={shouldTrapFocus ? -1 : undefined} // MUI will throw an error and automatically set this to -1 when box is focused
-            sx={sxClasses.rightMainContent}
+            sx={memoSxClasses.rightMainContent}
             className={`responsive-layout-right-main-content ${isGuideOpen ? 'guide-container' : ''}`}
             onKeyDown={handlePanelKeyDown}
           >
-            <Box sx={sxClasses.rightButtonsContainer} className="guide-button-container">
+            <Box sx={memoSxClasses.rightButtonsContainer} className="guide-button-container">
               <ButtonGroup size="small" variant="outlined" aria-label={t('details.guideControls')!} className="guide-button-group">
                 {!toggleMode && !hideEnlargeBtn && renderEnlargeButton()}
                 {!!guideContentIds?.length && renderGuideButton()}
@@ -659,7 +681,7 @@ const ResponsiveGridLayout = forwardRef(
             container={shellContainer}
             disableEnforceFocus={true}
           >
-            <Box sx={sxClasses.rightMainContent} className="responsive-layout-right-main-content fullscreen-mode">
+            <Box sx={memoSxClasses.rightMainContent} className="responsive-layout-right-main-content fullscreen-mode">
               {content}
             </Box>
           </FullScreenDialog>
@@ -669,8 +691,8 @@ const ResponsiveGridLayout = forwardRef(
     };
 
     return (
-      <Box ref={ref} sx={sxClasses.container} className="responsive-layout-container">
-        <ResponsiveGrid.Root sx={sxClasses.topRow} className="responsive-layout-top-row">
+      <Box ref={ref} sx={memoSxClasses.container} className="responsive-layout-container">
+        <ResponsiveGrid.Root sx={memoSxClasses.topRow} className="responsive-layout-top-row">
           <ResponsiveGrid.Left
             isRightPanelVisible={isRightPanelVisible}
             isEnlarged={isEnlarged}
@@ -696,7 +718,7 @@ const ResponsiveGridLayout = forwardRef(
             isEnlarged={isEnlarged}
             isRightPanelVisible={isRightPanelVisible}
             toggleMode={toggleMode}
-            sxProps={sxClasses.gridLeftMain as SxProps}
+            sxProps={memoSxClasses.gridLeftMain as SxProps}
             className="responsive-layout-left-main"
           >
             {leftMain}
@@ -705,7 +727,7 @@ const ResponsiveGridLayout = forwardRef(
             isEnlarged={isEnlarged}
             isRightPanelVisible={isRightPanelVisible}
             toggleMode={toggleMode}
-            sxProps={sxClasses.gridRightMain as SxProps}
+            sxProps={memoSxClasses.gridRightMain as SxProps}
             className="responsive-layout-right-main"
           >
             {renderRightContent()}

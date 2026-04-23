@@ -45,14 +45,11 @@ export const useManageArrow = (): ArrowReturn => {
   const mapSize = useStoreMapSize();
   const mapController = useMapController();
 
-  /**
-   * Whether the map projection is Lambert Conformal Conic.
-   */
-  const memoIsLCCProjection = useMemo(() => mapProjectionEPSG === Projection.PROJECTION_NAMES.LCC, [mapProjectionEPSG]);
-  /**
-   * Whether the map projection is Web Mercator.
-   */
-  const memoIsWebMercator = useMemo(() => mapProjectionEPSG === Projection.PROJECTION_NAMES.WM, [mapProjectionEPSG]);
+  /** Whether the map projection is Lambert Conformal Conic. */
+  const isLCCProjection = mapProjectionEPSG === Projection.PROJECTION_NAMES.LCC;
+
+  /** Whether the map projection is Web Mercator. */
+  const isWebMercator = mapProjectionEPSG === Projection.PROJECTION_NAMES.WM;
 
   const prevRotationRef = useRef(0);
   const equalCountRef = useRef(0);
@@ -75,12 +72,12 @@ export const useManageArrow = (): ArrowReturn => {
     }
 
     // Early return if unsupported projection
-    if (!memoIsLCCProjection && !memoIsWebMercator) {
+    if (!isLCCProjection && !isWebMercator) {
       return { memoCalculatedRotation: { angle: 0 }, memoCalculatedOffset: 0 };
     }
 
     // Handle Web Mercator Projection first - north is always up, only map rotation matters
-    if (memoIsWebMercator) {
+    if (isWebMercator) {
       return {
         memoCalculatedRotation: { angle: mapRotation * (180 / Math.PI) },
         memoCalculatedOffset: offsetX,
@@ -99,7 +96,7 @@ export const useManageArrow = (): ArrowReturn => {
     }
 
     // Handle LCC Projection
-    if (memoIsLCCProjection) {
+    if (isLCCProjection) {
       const arrowAngle = parseFloat(northArrowElement.degreeRotation);
       const angleDegrees = 270 - arrowAngle;
 
@@ -172,7 +169,7 @@ export const useManageArrow = (): ArrowReturn => {
 
     // Should never goes here but failover to default values
     return { memoCalculatedRotation: { angle: 0 }, memoCalculatedOffset: 0 };
-  }, [mapSize, northArrowElement, memoIsLCCProjection, memoIsWebMercator, mapCenterCoord, mapZoom, mapRotation, fixNorth, mapController]);
+  }, [mapSize, northArrowElement, isLCCProjection, isWebMercator, mapCenterCoord, mapZoom, mapRotation, fixNorth, mapController]);
 
   /**
    * Updates local state with the calculated rotation and offset values.

@@ -100,10 +100,10 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
    * @param key - The GeoChart unique key of the child component
    * @param theCallbackRedraw - The callback to execute whenever we want to redraw the GeoChart
    */
-  const handleProvideCallbackRedraw = (key: string, theCallbackRedraw: () => void): void => {
+  const handleProvideCallbackRedraw = useCallback((key: string, theCallbackRedraw: () => void): void => {
     // Keep the callback
     redrawGeochart.current[key] = theCallbackRedraw;
-  };
+  }, []);
 
   // #region HOOKS
 
@@ -142,6 +142,9 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
 
   // Convert the config object from core to geoview-geochart type-equivalent
   const memoConfigObj = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('GEOCHART-PANEL - memoConfigObj', configObj);
+
     // Memoize a better config object using the geoview-geochart type-equivalent instead of the store's
     return configObj
       ? Object.fromEntries(

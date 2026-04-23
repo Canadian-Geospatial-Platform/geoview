@@ -215,7 +215,10 @@ export default memo(function Notifications(): JSX.Element {
   // Hooks
   const { t } = useTranslation();
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo(() => {
+    logger.logTraceUseMemo('NOTIFICATIONS - memoSxClasses', theme);
+    return getSxClasses(theme);
+  }, [theme]);
 
   // State
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
@@ -341,12 +344,12 @@ export default memo(function Notifications(): JSX.Element {
         key={notification.key}
         notification={notification}
         onRemove={handleRemoveNotification}
-        sxClasses={sxClasses}
+        sxClasses={memoSxClasses}
         t={t}
         closeButtonId={closeButtonId}
       />
     ));
-  }, [notifications, handleRemoveNotification, sxClasses, t, closeButtonId]);
+  }, [notifications, handleRemoveNotification, memoSxClasses, t, closeButtonId]);
 
   return (
     <ClickAwayListener mouseEvent="onMouseDown" touchEvent="onTouchStart" onClickAway={handleClickAway}>
@@ -400,17 +403,17 @@ export default memo(function Notifications(): JSX.Element {
           }}
           handleKeyDown={(key, callBackFn) => handleEscapeKey(key, '', false, callBackFn)}
         >
-          <Paper component="section" sx={sxClasses.notificationPanel}>
+          <Paper component="section" sx={memoSxClasses.notificationPanel}>
             <NotificationHeader
               onClose={handleClickAway}
               onRemoveAll={handleRemoveAllNotifications}
               hasNotifications={notifications.length > 0}
               t={t}
-              sxClasses={sxClasses}
+              sxClasses={memoSxClasses}
               titleId={titleId}
               closeButtonId={closeButtonId}
             />
-            <List sx={sxClasses.notificationsList} aria-live="polite" aria-relevant="all">
+            <List sx={memoSxClasses.notificationsList} aria-live="polite" aria-relevant="all">
               {notifications.length > 0 ? (
                 memoNotificationsList
               ) : (

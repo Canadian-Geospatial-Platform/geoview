@@ -98,24 +98,27 @@ export function GeometryPickerButton(): JSX.Element {
 
   const geomType = useStoreDrawerActiveGeom();
   const style = useStoreDrawerStyle();
-  const iconStyle = useMemo(
-    () => ({
-      fillColor: style.fillColor,
-      strokeColor: style.strokeColor,
-      textColor: style.textColor,
-      textHaloColor: style.textHaloColor,
-    }),
+  const memoIconStyle = useMemo(
+    () => {
+      logger.logTraceUseMemo('GEOMETRY-PICKER - GeomIcon - memoIconStyle', style);
+      return {
+        fillColor: style.fillColor,
+        strokeColor: style.strokeColor,
+        textColor: style.textColor,
+        textHaloColor: style.textHaloColor,
+      };
+    },
     [style]
   );
 
   if (geomType === 'Point') return <PointIcon IconComponent={PlaceIcon} />;
-  if (geomType === 'Text') return <TextFieldsIcon sx={{ color: iconStyle.textColor }} stroke={iconStyle.textHaloColor} />;
-  if (geomType === 'LineString') return <ShowChartIcon sx={{ color: iconStyle.strokeColor }} />;
-  if (geomType === 'Polygon') return <HexagonIcon sx={{ color: iconStyle.fillColor }} stroke={iconStyle.strokeColor} />;
-  if (geomType === 'Rectangle') return <RectangleIcon sx={{ color: iconStyle.fillColor }} stroke={iconStyle.strokeColor} />;
-  if (geomType === 'Circle') return <CircleIcon sx={{ color: iconStyle.fillColor }} stroke={iconStyle.strokeColor} />;
-  if (geomType === 'Star') return <StarIcon sx={{ color: iconStyle.fillColor }} stroke={iconStyle.strokeColor} />;
-  return <ShapeLineIcon sx={{ color: iconStyle.fillColor }} stroke={iconStyle.strokeColor} />;
+  if (geomType === 'Text') return <TextFieldsIcon sx={{ color: memoIconStyle.textColor }} stroke={memoIconStyle.textHaloColor} />;
+  if (geomType === 'LineString') return <ShowChartIcon sx={{ color: memoIconStyle.strokeColor }} />;
+  if (geomType === 'Polygon') return <HexagonIcon sx={{ color: memoIconStyle.fillColor }} stroke={memoIconStyle.strokeColor} />;
+  if (geomType === 'Rectangle') return <RectangleIcon sx={{ color: memoIconStyle.fillColor }} stroke={memoIconStyle.strokeColor} />;
+  if (geomType === 'Circle') return <CircleIcon sx={{ color: memoIconStyle.fillColor }} stroke={memoIconStyle.strokeColor} />;
+  if (geomType === 'Star') return <StarIcon sx={{ color: memoIconStyle.fillColor }} stroke={memoIconStyle.strokeColor} />;
+  return <ShapeLineIcon sx={{ color: memoIconStyle.fillColor }} stroke={memoIconStyle.strokeColor} />;
 }
 
 /**
@@ -143,12 +146,15 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
   const drawerController = useDrawerController();
 
   const memoIconStyle = useMemo(
-    () => ({
-      color: style.fillColor,
-      stroke: style.strokeColor,
-      textColor: style.textColor,
-      textHaloColor: style.textHaloColor,
-    }),
+    () => {
+      logger.logTraceUseMemo('GEOMETRY-PICKER - GeometryPickerPanel - memoIconStyle', style);
+      return {
+        color: style.fillColor,
+        stroke: style.strokeColor,
+        textColor: style.textColor,
+        textHaloColor: style.textHaloColor,
+      };
+    },
     [style]
   );
 

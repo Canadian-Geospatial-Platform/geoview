@@ -80,7 +80,10 @@ export function Swiper(props: SwiperProps): JSX.Element {
 
   // SxClasses
   const mapHeight = useStoreMapSize()[1];
-  const sxClasses = useMemo(() => getSxClasses(mapHeight), [mapHeight]);
+  const memoSxClasses = useMemo(() => {
+    logger.logTraceUseMemo('SWIPER - memoSxClasses', mapHeight);
+    return getSxClasses(mapHeight);
+  }, [mapHeight]);
 
   // States
   const [olLayers, setOlLayers] = useState<BaseLayer[]>([]);
@@ -358,7 +361,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
   if (layerPaths && layerPaths.length > 0) {
     // Use a swiper
     return (
-      <Box sx={sxClasses.layerSwipe}>
+      <Box sx={memoSxClasses.layerSwipe}>
         <Draggable
           key={orientation} // This forces recreation when orientation changes
           axis={orientation === 'vertical' ? 'x' : 'y'}
@@ -369,11 +372,11 @@ export function Swiper(props: SwiperProps): JSX.Element {
           onStop={onStop}
           onDrag={onStop}
         >
-          <Box sx={[orientation === 'vertical' ? sxClasses.vertical : sxClasses.horizontal, sxClasses.bar]} tabIndex={0} ref={swiperRef}>
+          <Box sx={[orientation === 'vertical' ? memoSxClasses.vertical : memoSxClasses.horizontal, memoSxClasses.bar]} tabIndex={0} ref={swiperRef}>
             <Tooltip title={getLocalizedMessage(displayLanguage, 'swiper.tooltip')}>
               <Box className="handleContainer">
-                <HandleIcon sx={sxClasses.handle} className="handleL" />
-                <HandleIcon sx={sxClasses.handle} className="handleR" />
+                <HandleIcon sx={memoSxClasses.handle} className="handleL" />
+                <HandleIcon sx={memoSxClasses.handle} className="handleR" />
               </Box>
             </Tooltip>
           </Box>

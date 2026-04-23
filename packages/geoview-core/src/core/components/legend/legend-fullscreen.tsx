@@ -114,7 +114,10 @@ export function LegendFullscreen({ layerPaths, mapId, containerType, isOpen, onC
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo(() => {
+    logger.logTraceUseMemo('LEGEND-FULLSCREEN - memoSxClasses', theme);
+    return getSxClasses(theme);
+  }, [theme]);
   const shellContainer = useStoreAppShellContainer();
 
   // State
@@ -123,7 +126,7 @@ export function LegendFullscreen({ layerPaths, mapId, containerType, isOpen, onC
   const layerController = useLayerController();
 
   // Memoize breakpoint values
-  const breakpoints = useMemo(() => {
+  const memoBreakpoints = useMemo(() => {
     // Log
     logger.logTraceUseMemo('LEGEND FULLSCREEN - breakpoints', theme.breakpoints.values);
 
@@ -145,11 +148,11 @@ export function LegendFullscreen({ layerPaths, mapId, containerType, isOpen, onC
    */
   const getFullscreenLayerListSize = useCallback(() => {
     const { innerWidth } = window;
-    if (innerWidth < breakpoints.sm) return 1;
-    if (innerWidth < breakpoints.md) return 2;
-    if (innerWidth < breakpoints.lg) return 3;
+    if (innerWidth < memoBreakpoints.sm) return 1;
+    if (innerWidth < memoBreakpoints.md) return 2;
+    if (innerWidth < memoBreakpoints.lg) return 3;
     return 4;
-  }, [breakpoints]);
+  }, [memoBreakpoints]);
 
   /**
    * Distributes legend layers across multiple columns for fullscreen display.
@@ -216,30 +219,30 @@ export function LegendFullscreen({ layerPaths, mapId, containerType, isOpen, onC
   }, [isOpen, layerController, mapId]);
 
   // Memoize the no layers content
-  const noLayersContent = useMemo(() => {
+  const memoNoLayersContent = useMemo(() => {
     // Log
     logger.logTraceUseMemo('components/legend-fullscreen - noLayersContent');
 
     return (
       <Box sx={styles.noLayersContainer}>
-        <Typography component="div" gutterBottom sx={sxClasses.legendInstructionsTitle}>
+        <Typography component="div" gutterBottom sx={memoSxClasses.legendInstructionsTitle}>
           {t('legend.noLayersAdded')}
         </Typography>
-        <Typography component="p" sx={sxClasses.legendInstructionsBody}>
+        <Typography component="p" sx={memoSxClasses.legendInstructionsBody}>
           {t('legend.noLayersAddedDescription')}
         </Typography>
       </Box>
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- sxClasses is memoized from theme which is stable
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- memoSxClasses is memoized from theme which is stable
   }, [t]);
 
   // Memoize fullscreen content
-  const fullscreenContent = useMemo(() => {
+  const memoFullscreenContent = useMemo(() => {
     // Log
     logger.logTraceUseMemo('components/legend-fullscreen - fullscreenContent', fullscreenLegendLayerList.length);
 
     if (!fullscreenLegendLayerList.length) {
-      return noLayersContent;
+      return memoNoLayersContent;
     }
 
     return fullscreenLegendLayerList.map((paths, idx) => (
@@ -249,7 +252,7 @@ export function LegendFullscreen({ layerPaths, mapId, containerType, isOpen, onC
         key={`fullscreen-${idx}`}
         sx={{
           width: responsiveWidths.responsive,
-          ...sxClasses.legendList,
+          ...memoSxClasses.legendList,
         }}
       >
         {paths.map((layerPath) => (
@@ -257,8 +260,8 @@ export function LegendFullscreen({ layerPaths, mapId, containerType, isOpen, onC
         ))}
       </List>
     ));
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- sxClasses is memoized from theme which is stable
-  }, [fullscreenLegendLayerList, noLayersContent]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- memoSxClasses is memoized from theme which is stable
+  }, [fullscreenLegendLayerList, memoNoLayersContent]);
 
   return (
     <FullScreenDialog
@@ -274,7 +277,7 @@ export function LegendFullscreen({ layerPaths, mapId, containerType, isOpen, onC
       disableEnforceFocus={true}
     >
       <Box
-        sx={sxClasses.fullscreenContainer}
+        sx={memoSxClasses.fullscreenContainer}
         id={`${mapId}-${containerType}-${DEFAULT_APPBAR_CORE.LEGEND}-panel-fullscreen-container`}
         {...({
           // To set the content behind the dialog as inert to remove access to content
@@ -283,7 +286,7 @@ export function LegendFullscreen({ layerPaths, mapId, containerType, isOpen, onC
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any)}
       >
-        {fullscreenContent}
+        {memoFullscreenContent}
       </Box>
     </FullScreenDialog>
   );

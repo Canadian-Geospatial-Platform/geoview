@@ -55,7 +55,10 @@ export function Geolocator(): JSX.Element {
 
   // Hooks
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo(() => {
+    logger.logTraceUseMemo('GEOLOCATOR - memoSxClasses', theme);
+    return getSxClasses(theme);
+  }, [theme]);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const { t } = useTranslation();
@@ -76,15 +79,36 @@ export function Geolocator(): JSX.Element {
   const prevLoadingRef = useRef<boolean>(false);
   const [statusMessage, setStatusMessage] = useState<string>('');
 
+  // #region HANDLERS
+
   // Create debounced version of getGeolocations
-  const debouncedRequest = useMemo(
-    () =>
-      debounce((value: string) => {
-        if (value.length >= MIN_SEARCH_LENGTH) {
-          getGeolocations(value);
-        }
-      }, DEBOUNCE_DELAY),
-    [getGeolocations]
+  const debouncedRequest = useMemo(() => {
+    logger.logTraceUseMemo('GEOLOCATOR - debouncedRequest', getGeolocations);
+    return debounce((value: string) => {
+      if (value.length >= MIN_SEARCH_LENGTH) {
+        getGeolocations(value);
+      }
+    }, DEBOUNCE_DELAY);
+  }, [getGeolocations]);
+
+  /**
+   * Handles search input value changes.
+   */
+  const handleChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>): void => {
+      const { value } = event.target;
+      setSearchValue(value);
+
+      if (!value.length || value.length < MIN_SEARCH_LENGTH) {
+        resetState();
+        return;
+      }
+
+      if (value.length >= MIN_SEARCH_LENGTH) {
+        debouncedRequest(value);
+      }
+    },
+    [debouncedRequest, resetState, setSearchValue]
   );
 
   /**
@@ -95,6 +119,8 @@ export function Geolocator(): JSX.Element {
       debouncedRequest(searchValue);
     }
   }, [searchValue, debouncedRequest]);
+
+  // #endregion HANDLERS
 
   /**
    * Resets the search and closes the geolocator panel.
@@ -108,26 +134,12 @@ export function Geolocator(): JSX.Element {
   }, [setSearchValue, uiController, mapId]);
 
   /**
-   * Handles search input value changes.
-   */
-  const handleChange = (event: ChangeEvent<HTMLInputElement>): void => {
-    const { value } = event.target;
-    setSearchValue(value);
-
-    if (!value.length || value.length < MIN_SEARCH_LENGTH) {
-      resetState();
-      return;
-    }
-
-    if (value.length >= MIN_SEARCH_LENGTH) {
-      debouncedRequest(value);
-    }
-  };
-
-  /**
    * Cancels the debounced request on unmount.
    */
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('GEOLOCATOR - cancel debounced request on unmount');
+
     return () => {
       debouncedRequest.cancel();
     };
@@ -190,13 +202,13 @@ export function Geolocator(): JSX.Element {
       aria-modal={isPanelOpen && activeTrapGeoView ? true : undefined}
       aria-hidden={!isPanelOpen}
       aria-label={t('geolocator.panelTitle')!}
-      sx={sxClasses.root}
+      sx={memoSxClasses.root}
       visibility={isPanelOpen ? 'visible' : 'hidden'}
       id={`${mapId}-${CONTAINER_TYPE.APP_BAR}-${DEFAULT_APPBAR_CORE.GEOLOCATOR}-panel`}
     >
       <FocusTrapContainer open={isPanelOpen && activeTrapGeoView} id="geolocator-focus-trap" containerType={CONTAINER_TYPE.APP_BAR}>
-        <Box sx={sxClasses.geolocator}>
-          <Typography component="h2" sx={sxClasses.visuallyHidden}>
+        <Box sx={memoSxClasses.geolocator}>
+          <Typography component="h2" sx={memoSxClasses.visuallyHidden}>
             {t('geolocator.panelTitle')}
           </Typography>
 
@@ -211,18 +223,18 @@ export function Geolocator(): JSX.Element {
         </Box>
 
         {/* WCAG - ARIA live region for screen reader announcements */}
-        <Box sx={sxClasses.visuallyHidden} role="status" aria-live="polite" aria-atomic="true">
+        <Box sx={memoSxClasses.visuallyHidden} role="status" aria-live="polite" aria-atomic="true">
           {statusMessage}
         </Box>
 
         {isLoading && (
-          <Box sx={sxClasses.progressBar}>
+          <Box sx={memoSxClasses.progressBar}>
             <ProgressBar aria-label={t('geolocator.loadingResults')!} />
           </Box>
         )}
 
         {(error || (!!data && searchValue?.length >= MIN_SEARCH_LENGTH)) && (
-          <Box sx={sxClasses.searchResult}>
+          <Box sx={memoSxClasses.searchResult}>
             <GeolocatorResult geoLocationData={!data ? [] : data} searchValue={searchValue} error={error} />
           </Box>
         )}

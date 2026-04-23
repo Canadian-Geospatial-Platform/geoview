@@ -55,6 +55,9 @@ const WMSLegendImage = memo(
     containerType,
     collapseContainerId,
   }: WMSLegendImageProps): JSX.Element => {
+    // Log
+    logger.logTraceRender('components/legend/legend-layer-container - WMSLegendImage');
+
     const { t } = useTranslation();
     const id = useId();
     const buttonId = `${mapId}-${containerType}-legend-image-btn-${id}`; // Create unique ID for focus management after lightbox closes
@@ -89,10 +92,16 @@ export const CollapsibleContent = memo(function CollapsibleContent({
   collapseContainerId,
   layerNameId,
 }: CollapsibleContentProps): JSX.Element | null {
+  // Log
+  logger.logTraceRender('components/legend/legend-layer-container - CollapsibleContent', layerPath);
+
   // Hooks
   const mapId = useStoreGeoViewMapId();
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const sxClasses = useMemo(() => {
+    logger.logTraceUseMemo('components/legend/legend-layer-container - CollapsibleContent - sxClasses', theme);
+    return getSxClasses(theme);
+  }, [theme]);
   const isCollapsed = useStoreLayerLegendCollapsed(layerPath);
   const schemaTag = useStoreLayerSchemaTag(layerPath);
   const layerItems = useStoreLayerItems(layerPath);
@@ -100,9 +109,6 @@ export const CollapsibleContent = memo(function CollapsibleContent({
   const layerIcons = useStoreLayerIcons(layerPath);
   const layerStatus = useStoreLayerStatus(layerPath);
   const layerName = useStoreLayerName(layerPath);
-
-  // Log
-  logger.logTraceUseMemo('components/legend/legend-layer-container - CollapsibleContent', layerPath, layerChildPaths?.length);
 
   // Early returns
   if ((layerChildPaths?.length === 0 && layerItems?.length === 1) || layerStatus === 'error') return null;

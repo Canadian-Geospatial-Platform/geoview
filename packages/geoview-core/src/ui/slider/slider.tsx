@@ -100,7 +100,10 @@ function SliderUI(props: SliderProps): JSX.Element {
 
   // Hooks
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo(() => {
+    logger.logTraceUseMemo('SLIDER - memoSxClasses', theme);
+    return getSxClasses(theme);
+  }, [theme]);
 
   // Ref
   const sliderRef = useRef<HTMLDivElement>(null);
@@ -112,6 +115,8 @@ function SliderUI(props: SliderProps): JSX.Element {
   // TODO: Refactor - when refactor time slider, re work logic for marks and label to have all of them inside slider (geochart-time slider)
   // Limit visible marks to max 30
   const memoProcessedMarks = useMemo(() => {
+    logger.logTraceUseMemo('SLIDER - memoProcessedMarks', marks);
+
     if (!marks || marks.length === 0) return marks;
 
     const maxVisibleMarks = 30;
@@ -153,6 +158,7 @@ function SliderUI(props: SliderProps): JSX.Element {
 
   // Memoize the className calculation
   const memoFinalClassName = useMemo(() => {
+    logger.logTraceUseMemo('SLIDER - memoFinalClassName', sliderValue, orientation, className);
     const shouldSpreadLabel = Array.isArray(sliderValue) && sliderValue.length >= 2 && (!orientation || orientation === 'horizontal');
 
     if (!shouldSpreadLabel) return className;
@@ -163,9 +169,9 @@ function SliderUI(props: SliderProps): JSX.Element {
   // #region Handlers
 
   /**
-   * Handles when the user drags the slider thumb to change the value
+   * Handles when the user drags the slider thumb to change the value.
    */
-  const handleChange = (event: React.SyntheticEvent | Event, newValue: number | number[], activeThumb: number): void => {
+  const handleChange = useCallback((event: React.SyntheticEvent | Event, newValue: number | number[], activeThumb: number): void => {
     // Update the internal state if not controlled, meaning 'value' isn't provided by the parent component
     if (!isControlled) {
       setInternalValue(newValue);
@@ -175,15 +181,15 @@ function SliderUI(props: SliderProps): JSX.Element {
 
     // Callback
     onChange?.(newValue, activeThumb);
-  };
+  }, [isControlled, onChange, setInternalValue]);
 
   /**
-   * Handles when the user completes a slider drag (mouseup)
+   * Handles when the user completes a slider drag (mouseup).
    */
-  const handleChangeCommitted = (event: React.SyntheticEvent | Event, newValue: number | number[]): void => {
+  const handleChangeCommitted = useCallback((event: React.SyntheticEvent | Event, newValue: number | number[]): void => {
     // Callback
     onChangeCommitted?.(newValue);
-  };
+  }, [onChangeCommitted]);
 
   // Focus on slider handle
   const focusSlider = useCallback(() => {
@@ -342,7 +348,7 @@ function SliderUI(props: SliderProps): JSX.Element {
     <MaterialSlider
       {...properties}
       id={containerId}
-      sx={disabled ? null : sxClasses.slider}
+      sx={disabled ? null : memoSxClasses.slider}
       className={memoFinalClassName}
       ref={sliderRef}
       orientation={orientation}

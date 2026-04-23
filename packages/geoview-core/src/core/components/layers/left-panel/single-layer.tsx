@@ -91,7 +91,10 @@ export function SingleLayer({
   // Hook
   const { t } = useTranslation<string>();
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo(() => {
+    logger.logTraceUseMemo('SINGLE-LAYER - memoSxClasses', theme);
+    return getSxClasses(theme);
+  }, [theme]);
 
   // Create ref for scrolling into view
   const layerListItemRef = useRef<HTMLLIElement>(null);
@@ -489,7 +492,7 @@ export function SingleLayer({
             size="small"
             onKeyDown={handleArrowKeyDownWrapper}
             onClick={handleArrowClickWrapper}
-            sx={isFirst ? sxClasses.orderButtonDisabled : sxClasses.orderButtonEnabled}
+            sx={isFirst ? memoSxClasses.orderButtonDisabled : memoSxClasses.orderButtonEnabled}
             aria-label={t('layers.moveLayerUp')}
             aria-disabled={isFirst} // WCAG - used instead of disabled to allow button retain focus and be discoverable by screen readers
           >
@@ -502,13 +505,13 @@ export function SingleLayer({
             size="small"
             onKeyDown={handleArrowKeyDownWrapper}
             onClick={handleArrowClickWrapper}
-            sx={isLast ? sxClasses.orderButtonDisabled : sxClasses.orderButtonEnabled}
+            sx={isLast ? memoSxClasses.orderButtonDisabled : memoSxClasses.orderButtonEnabled}
             aria-label={t('layers.moveLayerDown')}
             aria-disabled={isLast} // WCAG - used instead of disabled to allow button retain focus and be discoverable by screen readers
           >
             <ArrowDownwardIcon />
           </IconButton>
-          <Divider orientation="vertical" sx={sxClasses.dividerVertical} variant="middle" flexItem />
+          <Divider orientation="vertical" sx={memoSxClasses.dividerVertical} variant="middle" flexItem />
         </>
       );
     }
@@ -522,9 +525,9 @@ export function SingleLayer({
     isLast,
     layerPath,
     t,
-    sxClasses.orderButtonDisabled,
-    sxClasses.orderButtonEnabled,
-    sxClasses.dividerVertical,
+    memoSxClasses.orderButtonDisabled,
+    memoSxClasses.orderButtonEnabled,
+    memoSxClasses.dividerVertical,
     hasFocusWithin,
     orderDownButtonId,
     orderUpButtonId,
@@ -598,7 +601,7 @@ export function SingleLayer({
           <IconButton
             edge="end"
             size="small"
-            sx={sxClasses.zoomButton}
+            sx={memoSxClasses.zoomButton}
             className="buttonOutline"
             onClick={handleZoomToLayerVisibleScale}
             onKeyDown={handleZoomToLayerVisibleScaleKeyDown}
@@ -649,7 +652,7 @@ export function SingleLayer({
     parentHidden,
     reloadButtonId,
     panelCloseButtonId,
-    sxClasses.zoomButton,
+    memoSxClasses.zoomButton,
   ]);
 
   // Memoize the arrow buttons component section
@@ -754,11 +757,16 @@ export function SingleLayer({
 
   /** Memoized sx for the list item button. */
   const memoListItemButtonSx = useMemo(
-    () => ({
-      minHeight: '4.51rem',
-      ...(!inVisibleRange || parentHidden || !isVisible || layerStatus === 'error' ? sxClasses.outOfRange : {}),
-    }),
-    [inVisibleRange, parentHidden, isVisible, layerStatus, sxClasses.outOfRange]
+    () => {
+      // Log
+      logger.logTraceUseMemo('SINGLE-LAYER - memoListItemButtonSx', inVisibleRange, parentHidden, isVisible, layerStatus);
+
+      return {
+        minHeight: '4.51rem',
+        ...(!inVisibleRange || parentHidden || !isVisible || layerStatus === 'error' ? memoSxClasses.outOfRange : {}),
+      };
+    },
+    [inVisibleRange, parentHidden, isVisible, layerStatus, memoSxClasses.outOfRange]
   );
 
   return (
@@ -771,7 +779,7 @@ export function SingleLayer({
       onFocusCapture={handleFocusWithin}
       onBlurCapture={handleBlurWithin}
     >
-      <Box sx={sxClasses.containerBox}>
+      <Box sx={memoSxClasses.containerBox}>
         <Tooltip
           title={t('layers.selectLayer', { layerName })}
           placement="top"
@@ -800,7 +808,7 @@ export function SingleLayer({
           </Box>
         )}
         {layerStatus === 'loading' && (
-          <Box sx={sxClasses.progressBarSingleLayer}>
+          <Box sx={memoSxClasses.progressBarSingleLayer}>
             <ProgressBar aria-label={t('layers.status.layerLoadingDescriptive', { layerName })!} />
           </Box>
         )}

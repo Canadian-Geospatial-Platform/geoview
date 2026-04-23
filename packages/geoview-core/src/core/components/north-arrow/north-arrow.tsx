@@ -25,7 +25,10 @@ export const NorthArrow = memo(function NorthArrow(): JSX.Element {
 
   // Hooks
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo(() => {
+    logger.logTraceUseMemo('NORTH-ARROW - memoSxClasses', theme);
+    return getSxClasses(theme);
+  }, [theme]);
 
   // State (no useState for item used inside function only without rendering... use useRef)
   const northArrowRef = useRef<HTMLDivElement>(null);
@@ -39,7 +42,10 @@ export const NorthArrow = memo(function NorthArrow(): JSX.Element {
    * Checks whether the map projection supports a north arrow.
    */
   const memoIsValidProjection = useMemo(
-    () => mapProjectionEPSG === Projection.PROJECTION_NAMES.LCC || mapProjectionEPSG === Projection.PROJECTION_NAMES.WM,
+    () => {
+      logger.logTraceUseMemo('NORTH-ARROW - memoIsValidProjection', mapProjectionEPSG);
+      return mapProjectionEPSG === Projection.PROJECTION_NAMES.LCC || mapProjectionEPSG === Projection.PROJECTION_NAMES.WM;
+    },
     [mapProjectionEPSG]
   );
 
@@ -48,7 +54,7 @@ export const NorthArrow = memo(function NorthArrow(): JSX.Element {
   return (
     <Box
       ref={northArrowRef}
-      sx={sxClasses.northArrowContainer}
+      sx={memoSxClasses.northArrowContainer}
       style={{
         transition: theme.transitions.create(['all', 'transform'], {
           duration: theme.transitions.duration.standard,
@@ -59,7 +65,7 @@ export const NorthArrow = memo(function NorthArrow(): JSX.Element {
         left: northOffset,
       }}
     >
-      <NorthArrowIcon width={sxClasses.northArrow.width || 30} height={sxClasses.northArrow.height || 30} />
+      <NorthArrowIcon width={memoSxClasses.northArrow.width || 30} height={memoSxClasses.northArrow.height || 30} />
     </Box>
   );
 });
@@ -85,6 +91,7 @@ export const NorthPoleFlag = memo(function NorthPoleFlag(): JSX.Element {
    * Registers the north pole marker overlay ref on mount.
    */
   useEffect(() => {
+    logger.logTraceUseEffect('NORTH-ARROW - register north pole marker overlay ref', mapController);
     mapController.setNorthPoleMarkerOverlayRef(northPoleRef.current!);
   }, [mapController]);
 
