@@ -431,7 +431,7 @@ Additional layers can be added to the map viewer by clicking **Add a layer** but
 Usage:
 
 - If you wish to add a file, you can do so by dragging the file over the import wizard, by clicking on the **Choose a File** button and selecting the file, or by providing the URL to the file.
-- Accepted file types are GeoJSON files (.json or .geojson), GeoPackages (.gpkg), comma separated value files (.csv) with coordinate values, shapefiles (.shp), or ZIP files (.zip) containing a shapefile.
+- Accepted file types are GeoJSON files (.json or .geojson), GeoPackages (.gpkg), comma separated value files (.csv) with coordinate values, KML files (.kml), GeoTIFF files (.tif), shapefiles (.shp), or ZIP files (.zip) containing a shapefile.
 - If you wish to add a service, you can do so by entering the service URL into the text box. The URL will be validated automatically to verify that the server is reachable. The **Continue** button will only be enabled once the URL has been successfully validated.
 - Click the **Continue** button to proceed.
 - Ensure the the correct file or service type is selected from the dropdown menu. If the wrong type is selected, an error will be displayed prompting you to try a different type.

@@ -85,9 +85,9 @@ export class ConfigApi {
 
     if (/.(?:GEO)?JSON(?:$|\?)/i.test(url)) return CONST_LAYER_TYPES.GEOJSON;
 
-    if (upperUrl.endsWith('.GPKG')) return CONFIG_GEOPACKAGE_TYPE;
+    if (/.GPKG(?:$|\?)/i.test(url)) return CONFIG_GEOPACKAGE_TYPE;
 
-    if (upperUrl.endsWith('.TIF')) return CONST_LAYER_TYPES.GEOTIFF;
+    if (/.TIFF?(?:$|\?)/i.test(url)) return CONST_LAYER_TYPES.GEOTIFF;
 
     if (upperUrl.includes('VECTORTILESERVER')) return CONST_LAYER_TYPES.VECTOR_TILES;
 

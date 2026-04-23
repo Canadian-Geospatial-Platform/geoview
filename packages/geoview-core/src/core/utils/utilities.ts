@@ -10,7 +10,7 @@ import type { TypeGuideObject } from '@/core/stores/store-interface-and-intial-v
 import { Fetch } from '@/core/utils/fetch-helper';
 import { ensureServiceRequestUrl } from '@/core/utils/ogc-url-helper';
 import type { TypeHTMLElement } from '@/core/types/global-types';
-import { TIMEOUT } from '@/core/utils/constant';
+import { TIMEOUT, VALID_FILE_EXTENSIONS_REGEX } from '@/core/utils/constant';
 import { CONFIG_PROXY_URL } from '@/api/types/map-schema-types';
 
 /** The observers to monitor element removals from the DOM tree */
@@ -446,11 +446,30 @@ export function isValidUUID(uuid: string): boolean {
  * Checks whether a text response contains a valid OGC capabilities root element.
  *
  * @param text - The response text to check
- * @returns True if the text contains WMS or WFS capabilities markers
+ * @returns True if the text contains WMS, WFS, or WMTS capabilities markers
  */
 function isOgcCapabilitiesResponse(text: string): boolean {
   const lower = text.toLowerCase();
-  return lower.includes('wms_capabilities') || lower.includes('wmt_ms_capabilities') || lower.includes('wfs_capabilities');
+  return (
+    lower.includes('wms_capabilities') ||
+    lower.includes('wmt_ms_capabilities') ||
+    lower.includes('wfs_capabilities') ||
+    lower.includes('opengis.net/wmts')
+  );
+}
+
+/**
+ * Attempts a lightweight GET request (Range: bytes=0-0) on a file-based URL to check reachability.
+ *
+ * Only runs when the URL matches a recognized file extension. The response body is not consumed —
+ * the request is aborted immediately after headers arrive.
+ *
+ * @param url - The URL to probe (may be proxied)
+ * @returns True if the server responded with a status below 400, false otherwise
+ */
+async function probeFileUrl(url: string): Promise<boolean> {
+  const { response, reason } = await Fetch.fetchProbeUrl(url);
+  return reason === 'ok' && response !== null && response.status < 400;
 }
 
 /**
@@ -499,6 +518,7 @@ export async function validateAndPingUrl(
   const ogcCheckUrls = [
     ensureServiceRequestUrl(targetUrl, 'WMS', 'GetCapabilities', ''),
     ensureServiceRequestUrl(targetUrl, 'WFS', 'GetCapabilities', ''),
+    ensureServiceRequestUrl(targetUrl, 'WMTS', 'GetCapabilities', ''),
   ];
 
   // HEAD request to see if the server responds
@@ -516,13 +536,8 @@ export async function validateAndPingUrl(
     // 4xx/5xx — server is alive but bare path fails.
     // WMS/WFS services often return 4xx without query params. Since HEAD succeeded (no CORS issue),
     // try GetCapabilities directly to see if it is a valid OGC service.
-    // Use raw fetch because WFS GetCapabilities may return non-2xx to the bare path but 200 with params.
-    const directChecks = await Promise.allSettled(
-      ogcCheckUrls.map(async (url) => {
-        const resp = await fetch(url);
-        return resp.text();
-      })
-    );
+    // Use fetchTextPermissive because OGC services may return valid capabilities XML with non-2xx status.
+    const directChecks = await Promise.allSettled(ogcCheckUrls.map((url) => Fetch.fetchTextPermissive(url)));
 
     // We fire both WMS and WFS GetCapabilities in parallel. If either one returns a valid
     // capabilities response, the URL is considered reachable — we don't need both to succeed.
@@ -533,7 +548,13 @@ export async function validateAndPingUrl(
       }
     }
 
-    // Not a valid OGC service either — the path is truly wrong
+    // Not a valid OGC service — try a lightweight GET for file-based URLs
+    if (VALID_FILE_EXTENSIONS_REGEX.test(targetUrlWithoutParams) && (await probeFileUrl(targetUrlWithoutParams))) {
+      result.isReachable = true;
+      return result;
+    }
+
+    // The path is truly wrong
     result.isReachable = false;
     result.error = `Server returned status ${response.status} and no OGC service found at this URL`;
     return result;
@@ -552,15 +573,9 @@ export async function validateAndPingUrl(
   // CORS — server is alive but blocks cross-origin.
   // Try OGC GetCapabilities through proxy (only WMS/WFS have CORS issues).
   if (reason === 'cors') {
-    const proxyChecks = await Promise.allSettled(
-      ogcCheckUrls.map(async (checkUrl) => {
-        const proxiedUrl = `${proxyBase}?${checkUrl}`;
-        // Use raw fetch instead of Fetch.fetchText because the proxy may forward non-2xx
-        // responses that still contain valid capabilities XML in the body.
-        const resp = await fetch(proxiedUrl);
-        return resp.text();
-      })
-    );
+    // Use fetchTextPermissive because the proxy may forward non-2xx responses
+    // that still contain valid capabilities XML in the body.
+    const proxyChecks = await Promise.allSettled(ogcCheckUrls.map((checkUrl) => Fetch.fetchTextPermissive(`${proxyBase}?${checkUrl}`)));
 
     // Same as above: if either WMS or WFS GetCapabilities succeeds through the proxy, it's reachable.
     for (const settled of proxyChecks) {
@@ -569,6 +584,13 @@ export async function validateAndPingUrl(
         result.needsProxy = true;
         return result;
       }
+    }
+
+    // Not a valid OGC service through proxy — try a lightweight GET for file-based URLs
+    if (VALID_FILE_EXTENSIONS_REGEX.test(targetUrlWithoutParams) && (await probeFileUrl(`${proxyBase}?${targetUrlWithoutParams}`))) {
+      result.isReachable = true;
+      result.needsProxy = true;
+      return result;
     }
 
     result.isReachable = false;

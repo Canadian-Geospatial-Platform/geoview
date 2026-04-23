@@ -143,6 +143,15 @@ export const TIMEOUT: Record<string, number> = {
   deleteLayerLoading: 10000,
 };
 
+/** File extensions recognized by GeoView for file-based layer URLs (used in validation, type guessing, and file upload). */
+export const VALID_FILE_EXTENSIONS = ['.json', '.geojson', '.csv', '.kml', '.gpkg', '.tif', '.tiff', '.zip', '.shp', '.wkb'] as const;
+
+/** Regex pattern matching URLs that end with a recognized file extension (case-insensitive, ignores query params). */
+export const VALID_FILE_EXTENSIONS_REGEX = /\.(geo)?json|\.csv|\.kml|\.gpkg|\.tiff?|\.zip|\.shp|\.wkb$/i;
+
+/** Comma-separated string of valid file extensions for use in file input `accept` attributes. */
+export const VALID_FILE_EXTENSIONS_ACCEPT = VALID_FILE_EXTENSIONS.filter((ext) => ext !== '.tiff' && ext !== '.wkb').join(', ');
+
 /**
  * Lightbox DOM selectors for yet-another-react-lightbox components.
  * ROOT: Use for state detection (checking if lightbox is open)
