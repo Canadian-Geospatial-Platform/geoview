@@ -49,7 +49,6 @@ import { useStoreAppDisplayLanguage } from '@/core/stores/store-interface-and-in
 import { DateMgt } from '@/core/utils/date-mgt';
 import linkifyHtml from 'linkify-html';
 import { isImage, delay, sanitizeHtmlContent, enhanceLinksAccessibility } from '@/core/utils/utilities';
-import { debounce } from '@/core/utils/debounce';
 import { logger } from '@/core/utils/logger';
 import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 import { useFilterRows, useGlobalFilter } from './hooks';
@@ -81,6 +80,12 @@ const DATE_FIELD_FILTERS = NUMERIC_FIELD_FILTERS;
 /** The possible filters for string columns */
 const STRING_FIELD_FILTERS = ['contains', 'startsWith', 'endsWith'];
 
+/** Checks if a value is a Dayjs instance. */
+const isDayjs = (v: unknown): v is Dayjs => typeof v === 'object' && v !== null && 'isValid' in v;
+
+/** Checks if a value is a date range tuple containing at least one Dayjs element. */
+const isDateRange = (v: unknown): v is [Dayjs | null, Dayjs | null] => Array.isArray(v) && (v as unknown[]).some(isDayjs);
+
 /** Linkify configuration options for URL detection and formatting. */
 const linkifyOptions = {
   attributes: {
@@ -110,7 +115,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
   const { t } = useTranslation();
 
   const sxtheme = useTheme();
-  const sxClasses = getSxClasses(sxtheme);
+  const memoSxClasses = useMemo(() => getSxClasses(sxtheme), [sxtheme]);
 
   // get store actions and values
   const mapId = useStoreGeoViewMapId();
@@ -127,6 +132,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
   const layerController = useLayerController();
   const mapController = useMapController();
   const uiController = useUIController();
+  const { mapFilteredRecord } = datatableSettings[layerPath];
 
   // internal state
   const [density, setDensity] = useState<MRTDensityState>('compact');
@@ -139,12 +145,6 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
   );
 
   const dataTableLocalization = language === 'fr' ? MRTLocalizationFR : MRTLocalizationEN;
-
-  // #region PINNED Datatable columns
-  const iconColumn = { alias: t('dataTable.icon'), dataType: 'string', id: 'icon' };
-  const zoomColumn = { alias: t('dataTable.zoom'), dataType: 'string', id: 'zoom' };
-  const detailColumn = { alias: t('dataTable.details'), dataType: 'string', id: 'details' };
-  // #endregion
 
   // #region REACT CUSTOM HOOKS
   const { initLightBox, LightBoxComponent } = useLightBox();
@@ -174,12 +174,6 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
   );
 
   // #endregion HANDLERS
-
-  /** Checks if a value is a Dayjs instance. */
-  const isDayjs = (v: unknown): v is Dayjs => typeof v === 'object' && v !== null && 'isValid' in v;
-
-  /** Checks if a value is a date range tuple. */
-  const isDateRange = useCallback((v: unknown): v is [Dayjs | null, Dayjs | null] => Array.isArray(v) && v.some(isDayjs), []);
 
   /**
    * Creates a table header cell with tooltip.
@@ -249,17 +243,17 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
     (cellValue: string | number | JSX.Element, cellId: string): JSX.Element => {
       return typeof cellValue === 'string' || typeof cellValue === 'number' ? (
         <Tooltip title={cellValue} placement="top" arrow>
-          <Box component="div" sx={density === 'compact' ? sxClasses.tableCell : {}}>
+          <Box component="div" sx={density === 'compact' ? memoSxClasses.tableCell : {}}>
             {createLightBoxButton(cellValue, cellId)}
           </Box>
         </Tooltip>
       ) : (
-        <Box component="div" sx={density === 'compact' ? sxClasses.tableCell : {}}>
+        <Box component="div" sx={density === 'compact' ? memoSxClasses.tableCell : {}}>
           {cellValue}
         </Box>
       );
     },
-    [createLightBoxButton, density, sxClasses.tableCell]
+    [createLightBoxButton, density, memoSxClasses.tableCell]
   );
 
   /**
@@ -326,6 +320,11 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
     // Log
     logger.logTraceUseMemo('DATA-TABLE - memoColumns', density);
 
+    // Pinned data table columns
+    const iconColumn = { alias: t('dataTable.icon'), dataType: 'string', id: 'icon' };
+    const zoomColumn = { alias: t('dataTable.zoom'), dataType: 'string', id: 'zoom' };
+    const detailColumn = { alias: t('dataTable.details'), dataType: 'string', id: 'details' };
+
     const entries = Object.entries({ ICON: iconColumn, ZOOM: zoomColumn, DETAILS: detailColumn, ...data.fieldInfos });
     const columnList = [] as MRTColumnDef<ColumnsType>[];
     entries.forEach(([key, value]) => {
@@ -345,7 +344,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
           return '';
         },
         header: value.alias,
-        visibleInShowHideMenu: value.id === 'icon' || value.id === 'zoom' || value.id === 'details' ? false : true,
+        visibleInShowHideMenu: value.id !== 'icon' && value.id !== 'zoom' && value.id !== 'details',
 
         Header: ({ column }) => getTableHeader(column.columnDef.header),
         Cell: ({ cell }) => getCellValueWithTooltip(cell.getValue() as string | number | JSX.Element, cell.id),
@@ -367,31 +366,39 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
 
         // Spread in the extra config for the special columns (icon/zoom/details)
         ...([t('dataTable.icon'), t('dataTable.zoom'), t('dataTable.details')].includes(value.alias)
-          ? (() => {
-              return {
-                size: 60,
-                grow: false,
-                enableColumnFilter: false,
-                enableColumnActions: false,
-                enableSorting: false,
-                enableResizing: false,
-                enableGlobalFilter: false,
-                muiTableBodyCellProps: {
-                  sx: sxClasses.pinnedColumn,
-                },
-                muiTableHeadCellProps: {
-                  sx: sxClasses.pinnedColumn,
-                },
-              };
-            })()
+          ? {
+              size: 60,
+              grow: false,
+              enableColumnFilter: false,
+              enableColumnActions: false,
+              enableSorting: false,
+              enableResizing: false,
+              enableGlobalFilter: false,
+              muiTableBodyCellProps: {
+                sx: memoSxClasses.pinnedColumn,
+              },
+              muiTableHeadCellProps: {
+                sx: memoSxClasses.pinnedColumn,
+              },
+            }
           : {}),
       });
     });
 
     return columnList;
-    // TODO: CLEANUP REACT - Uncomment all disable react-hooks/exhaustive-deps from this file and fix all dependencies!
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [density, getFilterConfig, getCellContentDate, displayDateTimezone]);
+  }, [
+    density,
+    getFilterConfig,
+    getCellContentDate,
+    getCellValueWithTooltip,
+    getTableHeader,
+    data.fieldInfos,
+    displayDateTimezoneUniversal,
+    displayDateFormat,
+    language,
+    memoSxClasses,
+    t,
+  ]);
 
   /**
    * Initializes default filter modes for columns using the first available option.
@@ -564,8 +571,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
 
       return featureInfo;
     }) as unknown as ColumnsType[];
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data.features, layerClassFilter, layerTimeFilter, handleZoomIn]);
+  }, [data.features, layerClassFilter, layerTimeFilter, handleZoomIn, mapId, containerType, t, dataTableController, uiController]);
 
   // TODO: Cleanup - remove  dead code
   // TODO: The table is triggering many useless callback. With max-height of 5000px, it is slower to create but faster scroll.
@@ -580,14 +586,17 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
   // hook.js:608 Warning: A component is changing a controlled input to be uncontrolled. This is likely caused by the value changing from a defined to undefined, which should not happen.
   // Decide between using a controlled or uncontrolled input element for the lifetime of the component. More info: https://reactjs.org/link/controlled-components Error Component Stack
 
-  let useTable: MRTTableInstance<ColumnsType> | null = null;
-  // Ref to the table wrapper element - used to scope search input DOM queries to a specific table instance
+  /** Ref to the table wrapper element — scopes search input DOM queries to this table instance. */
   const dataTableWrapperRef = useRef<HTMLDivElement>(null);
-  // Ref to track previous globalFilter value - used to detect when clear button is pressed (transition from text to empty)
+
+  /** Ref to track the previous globalFilter value — detects when the clear button is pressed (transition from text to empty). */
   const prevGlobalFilterRef = useRef<string | null>(null);
 
+  /** Ref to the table instance — used to access state in callbacks without adding the table instance to effect deps. */
+  const tableInstanceRef = useRef<MRTTableInstance<ColumnsType> | null>(null);
+
   // Create the Material React Table
-  useTable = useMaterialReactTable({
+  const useTable = useMaterialReactTable({
     columns: memoColumns,
     data: memoRows,
     enableDensityToggle: true,
@@ -624,7 +633,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
     renderTopToolbar: useCallback(
       (props: { table: MRTTableInstance<ColumnsType> }): ReactNode => (
         <TopToolbar
-          sxClasses={sxClasses}
+          sxClasses={memoSxClasses}
           layerPath={layerPath}
           t={t}
           globalFilter={globalFilter}
@@ -635,7 +644,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
           unfilteredFeaturesCount={unfilteredFeaturesCount}
         />
       ),
-      [sxClasses, layerPath, t, globalFilter, memoColumns, data, unfilteredFeaturesCount] // Include dependencies
+      [memoSxClasses, layerPath, t, globalFilter, memoColumns, data, unfilteredFeaturesCount] // Include dependencies
     ),
     enableFilterMatchHighlighting: true,
     enableColumnResizing: true,
@@ -654,10 +663,10 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
     columnVirtualizerOptions: { overscan: 2 },
     localization: dataTableLocalization,
     muiTableHeadCellProps: {
-      sx: sxClasses.tableHeadCell,
+      sx: memoSxClasses.tableHeadCell,
     },
     muiTableHeadProps: {
-      sx: sxClasses.tableHead,
+      sx: memoSxClasses.tableHead,
     },
     defaultColumn: {
       muiFilterTextFieldProps: {
@@ -699,6 +708,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
       'aria-label': t('dataTable.tableAriaLabelWithLayer', { layerName })!,
     },
   });
+  tableInstanceRef.current = useTable;
 
   /**
    * Scrolls to top of table when sorting changes.
@@ -708,7 +718,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
     logger.logTraceUseEffect('DATA-TABLE - sorting', sorting);
 
     // update scroll index when there are some rows in the table.
-    const rowsCount = useTable.getRowCount();
+    const rowsCount = tableInstanceRef.current?.getRowCount() ?? 0;
     // scroll to the top of the table when the sorting changes
     try {
       if (rowsCount > 0) {
@@ -717,7 +727,6 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
     } catch (error: unknown) {
       logger.logError('Data table error on sorting action', error);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sorting]);
 
   /**
@@ -728,21 +737,20 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
     logger.logTraceUseEffect('DATA-TABLE - memoInitialColumnFilterModes', memoInitialColumnFilterModes);
 
     // Only set defaults if we don't have stored values and columns are now available
-    if (Object.keys(columnFilterFns).length === 0 && Object.keys(memoInitialColumnFilterModes).length > 0) {
-      setColumnFilterFns(memoInitialColumnFilterModes);
+    if (Object.keys(memoInitialColumnFilterModes).length > 0) {
+      setColumnFilterFns((prev) => (Object.keys(prev).length === 0 ? memoInitialColumnFilterModes : prev));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [memoInitialColumnFilterModes]);
 
   /**
-   * Converts column filter state into filter strings for the map.
+   * Builds filter expression strings from the current column filter state.
    *
-   * @param columnFilter - The column filters state
-   * @returns The list of filter strings
+   * @param columnFilter - The column filters to convert
+   * @returns The list of SQL-like filter expression strings, one per active filter
    */
   const buildFilterList = useCallback(
     (columnFilter: MRTColumnFiltersState): string[] => {
-      const tableState = useTable.getState();
+      const tableState = tableInstanceRef.current?.getState();
       if (!columnFilter.length) return [''];
 
       return columnFilter.map(({ id: filterId, value }) => {
@@ -826,7 +834,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
         if (isColumnFilterNumeric(filterId)) {
           const num = Number(value);
           if (Number.isNaN(num)) return '';
-          return `${filterId} ${NUMBER_FILTER[filterFn]} ${num}`;
+          return `${filterId} ${NUMBER_FILTER[filterFn ?? 'equals']} ${num}`;
         }
 
         /* -------------------------
@@ -838,47 +846,35 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
         return strFilter?.replace('filterId', filterId).replace('value', value as string) ?? '';
       });
     },
-    [useTable, isDateRange, isColumnFilterNumeric]
+    [isColumnFilterNumeric]
   );
 
   /**
-   * Filters the map based on the data table filter strings.
+   * Applies column filters to the map layer.
    *
-   * @param filters - The column filters to apply
-   */
-  const filterMap = debounce((filters: MRTColumnFiltersState) => {
-    const filterStrings = buildFilterList(filters)
-      .filter((filterValue) => filterValue.length)
-      .join(' and ');
-    dataTableController.applyMapFilters(filterStrings);
-  }, 500);
-
-  /**
-   * Debounces column filter changes before applying them to the map.
+   * Passing an empty array clears the map filter.
    *
-   * @param filters - The column filters to apply
+   * @param filters - The column filters to apply, or an empty array to clear
    */
-  const debouncedColumnFilters = useCallback(
+  const filterMap = useCallback(
     (filters: MRTColumnFiltersState): void => {
-      return filterMap(filters);
+      const filterStrings = buildFilterList(filters)
+        .filter((filterValue) => filterValue.length)
+        .join(' and ');
+      dataTableController.applyMapFilters(filterStrings);
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [datatableSettings[layerPath]?.mapFilteredRecord]
+    [buildFilterList, dataTableController]
   );
 
   /**
-   * Updates the map when column filters change.
+   * Applies map filters when column filters or the filter-map toggle changes.
    */
-  // update map when column filters change
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('DATA-TABLE - columnFilters', columnFilters);
 
-    if (columnFilters && datatableSettings[layerPath].mapFilteredRecord) {
-      debouncedColumnFilters(columnFilters);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [columnFilters]);
+    filterMap(mapFilteredRecord ? columnFilters : []);
+  }, [columnFilters, filterMap, mapFilteredRecord]);
 
   /**
    * Saves column filter modes to the store when they change.
@@ -889,17 +885,6 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
 
     dataTableController.setColumnFilterModesEntry(layerPath, columnFilterFns);
   }, [dataTableController, columnFilterFns, layerPath]);
-
-  /**
-   * Updates the map when the filter map switch is toggled.
-   */
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('DATA-TABLE - mapFilteredRecord', datatableSettings[layerPath].mapFilteredRecord);
-
-    filterMap(columnFilters);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [datatableSettings[layerPath].mapFilteredRecord]);
 
   /**
    * Restores focus to the search input when the clear search button is pressed.
@@ -918,7 +903,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
   }, [globalFilter]);
 
   return (
-    <Box ref={dataTableWrapperRef} sx={sxClasses.dataTableWrapper} className="data-table-wrapper">
+    <Box ref={dataTableWrapperRef} sx={memoSxClasses.dataTableWrapper} className="data-table-wrapper">
       <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={language}>
         <MaterialReactTable table={useTable} />
       </LocalizationProvider>
