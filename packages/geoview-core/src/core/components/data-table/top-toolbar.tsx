@@ -54,6 +54,7 @@ interface TopToolbarProps<TData extends ColumnsType> {
   /** The Material React Table instance. */
   table: MRTTableInstance<ColumnsType>;
 
+  /** The count of features before any filters are applied. */
   unfilteredFeaturesCount?: number;
 }
 
@@ -78,8 +79,8 @@ function TopToolbar(props: TopToolbarProps<ColumnsType>): JSX.Element {
     tableInstance: table,
     columnFilters: table.getState().columnFilters,
     globalFilter: table.getState().globalFilter ?? '',
-    showUnsymbolizedFeatures: showUnsymbolizedFeatures, // Need to pass this prop
-    unfilteredFeaturesCount: unfilteredFeaturesCount || 0, // Need to pass this prop
+    showUnsymbolizedFeatures: showUnsymbolizedFeatures,
+    unfilteredFeaturesCount: unfilteredFeaturesCount || 0,
   });
 
   // ESRI Dynamic layer data does not include geometry and can't be filtered to extent
