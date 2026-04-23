@@ -183,6 +183,38 @@ const layerPath = `${gvLayerId}/${layerId}`;
 const message = `Initializing config on url: ${url}`;
 ```
 
+### HTTP Fetching (`Fetch` Helper Class)
+
+- **NEVER use raw `fetch()`** — always use the `Fetch` class from `@/core/utils/fetch-helper`. It provides built-in abort controllers, timeout handling, signal merging, and typed error handling (`RequestTimeoutError`, `RequestAbortedError`, `ResponseError`, `NetworkError`).
+
+| Need                             | Method                                            |
+| -------------------------------- | ------------------------------------------------- |
+| JSON response                    | `Fetch.fetchJson<T>(url)`                         |
+| ESRI JSON (embedded error check) | `Fetch.fetchEsriJson<T>(url)`                     |
+| Text response                    | `Fetch.fetchText(url)`                            |
+| Text regardless of HTTP status   | `Fetch.fetchTextPermissive(url)`                  |
+| Blob as base64 image             | `Fetch.fetchBlobImage(url)`                       |
+| Raw blob                         | `Fetch.fetchBlob(url)`                            |
+| Array buffer                     | `Fetch.fetchArrayBuffer(url)`                     |
+| XML → JSON                       | `Fetch.fetchXMLToJson<T>(url)`                    |
+| HEAD reachability check          | `Fetch.fetchHeadWithTimeout(url, timeoutMs)`      |
+| GET probe (Range: bytes=0-0)     | `Fetch.fetchProbeUrl(url, timeoutMs)`             |
+| JSON with timeout (legacy alias) | `Fetch.fetchWithTimeout<T>(url, init, timeoutMs)` |
+
+```typescript
+// ❌ Bad: Raw fetch — no timeout, no abort, no typed errors
+const response = await fetch(url);
+const data = await response.json();
+
+// ✅ Good: Fetch helper with built-in timeout and error handling
+const data = await Fetch.fetchJson<MyType>(url);
+
+// ✅ Good: Permissive text fetch (doesn't throw on non-2xx — for OGC probing)
+const text = await Fetch.fetchTextPermissive(url);
+```
+
+**Exception — Web Workers**: Worker scripts cannot import the `Fetch` class (it breaks the build). Use `fetchWithTimeout` from `@/core/utils/fetch-worker-helper` instead — a lightweight worker-safe equivalent.
+
 ### Code Organization (per [best-practices.md](../docs/programming/best-practices.md))
 
 **Component order:**

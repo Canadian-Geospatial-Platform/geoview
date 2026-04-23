@@ -13,6 +13,7 @@ import {
 import { ConfigApi } from '@/api/config/config-api';
 import { logger } from '@/core/utils/logger';
 import { generateId, getLocalizedMessage, isValidUUID, validateAndPingUrl } from '@/core/utils/utilities';
+import { VALID_FILE_EXTENSIONS_ACCEPT } from '@/core/utils/constant';
 import { Config } from '@/api/config/config';
 import type { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import type {
@@ -199,7 +200,7 @@ function FileUploadSection({
           ref={fileInputRef}
           style={{ display: 'none' }}
           onChange={handleChange}
-          accept=".json, .geojson, .gpkg, .csv, .zip, .shp, .kml, .tif"
+          accept={VALID_FILE_EXTENSIONS_ACCEPT}
           aria-label={t('layers.fileTypes')!} // WCAG - Provides an accessible label for the hidden file input control
         />
       </Box>

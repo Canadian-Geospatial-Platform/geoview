@@ -432,7 +432,7 @@ Vous pouvez ajouter des couches au visualiseur de cartes en cliquant sur **Ajout
 Marche à suivre :
 
 - Pour ajouter un fichier, vous pouvez soit glisser le fichier dans l’assistant d’importation, soit cliquer sur le bouton **Choisir un fichier**, soit entrer l’URL du fichier.
-- Les types de fichiers acceptés sont les fichiers GeoJSON (.json ou .geojson), les fichiers GeoPackage (.gpkg), les fichiers CSV (.csv) contenant des valeurs de coordonnées, les fichiers shapefile (.shp) ou les fichiers ZIP (.zip) contenant un fichier shapefile.
+- Les types de fichiers acceptés sont les fichiers GeoJSON (.json ou .geojson), les fichiers GeoPackage (.gpkg), les fichiers CSV (.csv) contenant des valeurs de coordonnées, les fichiers KML (.kml), les fichiers GeoTIFF (.tif), les fichiers shapefile (.shp) ou les fichiers ZIP (.zip) contenant un fichier shapefile.
 - Pour ajouter un service, entrez l'URL du service dans le champ de texte. L'URL sera validée automatiquement afin de vérifier que le serveur est accessible. Le bouton **Continuer** ne sera activé qu'une fois l'URL validée avec succès.
 - Cliquez sur le bouton **Continuer** pour passer à la prochaine étape.
 - Vérifiez que le bon format de fichier ou de service est sélectionné dans le menu déroulant. S’il est erroné, vous recevrez un message d’erreur vous demandant de choisir un autre format.

@@ -343,6 +343,57 @@ export abstract class Fetch {
   }
 
   /**
+   * Fetches a URL and returns the response text regardless of the HTTP status code.
+   *
+   * Unlike `fetchText`, this method does **not** throw on non-2xx responses. This is useful
+   * for probing OGC services that may return valid capabilities XML even with 4xx/5xx status codes.
+   *
+   * @param url - The URL to fetch
+   * @param init - Optional initialization parameters for the fetch
+   * @param timeoutMs - Optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError
+   * @returns A promise that resolves with the response text (may be empty)
+   * @throws {RequestTimeoutError} When the request exceeds the timeout duration
+   * @throws {RequestAbortedError} When the request was aborted by the caller's signal
+   * @throws {NetworkError} When a network issue happened
+   */
+  static async fetchTextPermissive(url: string, init?: RequestInit, timeoutMs?: number): Promise<string> {
+    // The original signal if any
+    const originalSignal = init?.signal || undefined;
+
+    // If we want to use a timeout controller
+    let timeoutSignal: AbortSignal | undefined;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    if (timeoutMs) {
+      const timeoutController = Fetch.#createTimeoutAbortController(timeoutMs);
+      timeoutSignal = timeoutController.controller.signal;
+      ({ timeoutId } = timeoutController);
+    }
+
+    // Merge the abort signals to support the optional original abort controller and the optional timeout one
+    const combinedSignal = Fetch.#mergeAbortSignals([originalSignal, timeoutSignal]);
+
+    try {
+      // Query and read — intentionally not checking response.ok
+      const response = await fetch(url, {
+        ...init,
+        signal: combinedSignal,
+      });
+
+      // Return the text regardless of HTTP status
+      return await response.text();
+    } catch (error: unknown) {
+      // Throw the exceptions that we know
+      Fetch.#throwWhatWeKnow(error, originalSignal, timeoutSignal, timeoutMs);
+
+      // Throw anything else
+      throw error;
+    } finally {
+      // Clear the timeout, if any. We're done
+      clearTimeout(timeoutId);
+    }
+  }
+
+  /**
    * Performs a HEAD request to check URL reachability without downloading the body.
    *
    * Returns a structured result indicating what happened:
@@ -382,6 +433,65 @@ export abstract class Fetch {
       if (error instanceof TypeError) {
         try {
           const probe = await fetch(url, { method: 'HEAD', mode: 'no-cors' });
+          if (probe.type === 'opaque') {
+            return { response: null, reason: 'cors' };
+          }
+          return { response: null, reason: 'network' };
+        } catch {
+          // no-cors probe also failed — server truly unreachable
+          return { response: null, reason: 'network' };
+        }
+      }
+
+      return { response: null, reason: 'network' };
+    } finally {
+      // Clear the timeout, if any. We're done
+      clearTimeout(timeoutId);
+    }
+  }
+
+  /**
+   * Probes a file URL for reachability using a minimal GET request with a Range header.
+   *
+   * Uses `Range: bytes=0-0` to minimize data transfer and does not consume the response body.
+   * Unlike `fetchHeadWithTimeout`, this uses GET because some file servers do not support HEAD.
+   * Returns a structured result identical to `fetchHeadWithTimeout`.
+   *
+   * @param url - The URL to probe
+   * @param timeoutMs - Optional timeout in milliseconds before aborting the request
+   * @returns A promise that resolves with a structured result containing the response (if any) and a reason
+   */
+  static async fetchProbeUrl(url: string, timeoutMs?: number): Promise<HeadResult> {
+    // If we want to use a timeout controller
+    let timeoutSignal: AbortSignal | undefined;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    if (timeoutMs) {
+      const timeoutController = Fetch.#createTimeoutAbortController(timeoutMs);
+      timeoutSignal = timeoutController.controller.signal;
+      ({ timeoutId } = timeoutController);
+    }
+
+    try {
+      // Query with GET + Range header to minimize data transfer
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: { Range: 'bytes=0-0' },
+        signal: timeoutSignal,
+      });
+
+      // Any HTTP response (even 404/500) means the server is alive
+      return { response, reason: 'ok' };
+    } catch (error: unknown) {
+      // AbortController fired — timeout
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        return { response: null, reason: 'timeout' };
+      }
+
+      // TypeError covers both CORS and true network failures.
+      // Use a no-cors probe to distinguish: if the server responds (opaque), it is CORS.
+      if (error instanceof TypeError) {
+        try {
+          const probe = await fetch(url, { method: 'GET', mode: 'no-cors' });
           if (probe.type === 'opaque') {
             return { response: null, reason: 'cors' };
           }
