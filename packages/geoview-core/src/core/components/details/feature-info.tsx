@@ -233,13 +233,8 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
     return value ?? 'No name / Sans nom';
   }, [feature]);
 
-  /**
-   * Memoizes whether the feature has a geometry.
-   */
-  const memoFeatureHasGeometry = useMemo(() => {
-    logger.logTraceUseMemo('FEATURE-INFO - memoFeatureHasGeometry', feature.geometry);
-    return !!feature.geometry;
-  }, [feature.geometry]);
+  /** Whether the feature has a geometry. */
+  const featureHasGeometry = !!feature.geometry;
 
   /**
    * Memoizes the feature info list.
@@ -347,7 +342,7 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
       <FeatureHeader
         iconSrc={feature.featureIcon}
         name={memoFeatureName}
-        hasGeometry={memoFeatureHasGeometry}
+        hasGeometry={featureHasGeometry}
         hasGeochart={memoHasGeochart}
         checked={checked}
         onCheckChange={handleFeatureChecked}
