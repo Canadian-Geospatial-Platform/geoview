@@ -98,18 +98,15 @@ export function GeometryPickerButton(): JSX.Element {
 
   const geomType = useStoreDrawerActiveGeom();
   const style = useStoreDrawerStyle();
-  const memoIconStyle = useMemo(
-    () => {
-      logger.logTraceUseMemo('GEOMETRY-PICKER - GeomIcon - memoIconStyle', style);
-      return {
-        fillColor: style.fillColor,
-        strokeColor: style.strokeColor,
-        textColor: style.textColor,
-        textHaloColor: style.textHaloColor,
-      };
-    },
-    [style]
-  );
+  const memoIconStyle = useMemo(() => {
+    logger.logTraceUseMemo('GEOMETRY-PICKER - GeomIcon - memoIconStyle', style);
+    return {
+      fillColor: style.fillColor,
+      strokeColor: style.strokeColor,
+      textColor: style.textColor,
+      textHaloColor: style.textHaloColor,
+    };
+  }, [style]);
 
   if (geomType === 'Point') return <PointIcon IconComponent={PlaceIcon} />;
   if (geomType === 'Text') return <TextFieldsIcon sx={{ color: memoIconStyle.textColor }} stroke={memoIconStyle.textHaloColor} />;
@@ -145,18 +142,15 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
   const isDrawing = useStoreDrawerIsDrawing();
   const drawerController = useDrawerController();
 
-  const memoIconStyle = useMemo(
-    () => {
-      logger.logTraceUseMemo('GEOMETRY-PICKER - GeometryPickerPanel - memoIconStyle', style);
-      return {
-        color: style.fillColor,
-        stroke: style.strokeColor,
-        textColor: style.textColor,
-        textHaloColor: style.textHaloColor,
-      };
-    },
-    [style]
-  );
+  const memoIconStyle = useMemo(() => {
+    logger.logTraceUseMemo('GEOMETRY-PICKER - GeometryPickerPanel - memoIconStyle', style);
+    return {
+      color: style.fillColor,
+      stroke: style.strokeColor,
+      textColor: style.textColor,
+      textHaloColor: style.textHaloColor,
+    };
+  }, [style]);
 
   // Styles
   const sxClasses = {

@@ -80,8 +80,6 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
   // Check if all child layers are visible
   const allVisible = useStoreLayerArrayVisibility(memoLayerPaths);
 
-  if (!isGroupLayer(item)) return;
-
   // #region HANDLERS
 
   /**
@@ -107,6 +105,8 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
 
   // Get current item text and path for children
   const currentPath = itemPath || item.itemId || `group-${item.text.toLowerCase().replace(/\s+/g, '-')}`;
+
+  if (!isGroupLayer(item)) return;
 
   return (
     <ListItem sx={sxClasses.legendListItem} disablePadding className="layerListItem groupItem">

@@ -41,13 +41,10 @@ export const NorthArrow = memo(function NorthArrow(): JSX.Element {
   /**
    * Checks whether the map projection supports a north arrow.
    */
-  const memoIsValidProjection = useMemo(
-    () => {
-      logger.logTraceUseMemo('NORTH-ARROW - memoIsValidProjection', mapProjectionEPSG);
-      return mapProjectionEPSG === Projection.PROJECTION_NAMES.LCC || mapProjectionEPSG === Projection.PROJECTION_NAMES.WM;
-    },
-    [mapProjectionEPSG]
-  );
+  const memoIsValidProjection = useMemo(() => {
+    logger.logTraceUseMemo('NORTH-ARROW - memoIsValidProjection', mapProjectionEPSG);
+    return mapProjectionEPSG === Projection.PROJECTION_NAMES.LCC || mapProjectionEPSG === Projection.PROJECTION_NAMES.WM;
+  }, [mapProjectionEPSG]);
 
   if (!memoIsValidProjection) return <Box />;
 

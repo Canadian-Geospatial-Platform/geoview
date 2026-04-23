@@ -183,28 +183,31 @@ function SliderUI(props: SliderProps): JSX.Element {
   /**
    * Handles when the user drags the slider thumb to change the value.
    */
-  const handleChange = useCallback((event: React.SyntheticEvent | Event, newValue: number | number[], activeThumb: number): void => {
-    // Track which thumb is active
-    activeThumbRef.current = activeThumb;
+  const handleChange = useCallback(
+    (event: React.SyntheticEvent | Event, newValue: number | number[], activeThumb: number): void => {
+      // Update the internal state if not controlled, meaning 'value' isn't provided by the parent component
+      if (!isControlled) {
+        setInternalValue(newValue);
+      }
 
-    // Update the internal state if not controlled, meaning 'value' isn't provided by the parent component
-    if (!isControlled) {
-      setInternalValue(newValue);
-    }
+      event.preventDefault();
 
-    event.preventDefault();
-
-    // Callback
-    onChange?.(newValue, activeThumb);
-  }, [isControlled, onChange, setInternalValue]);
+      // Callback
+      onChange?.(newValue, activeThumb);
+    },
+    [isControlled, onChange, setInternalValue]
+  );
 
   /**
    * Handles when the user completes a slider drag (mouseup).
    */
-  const handleChangeCommitted = useCallback((event: React.SyntheticEvent | Event, newValue: number | number[]): void => {
-    // Callback
-    onChangeCommitted?.(newValue);
-  }, [onChangeCommitted]);
+  const handleChangeCommitted = useCallback(
+    (event: React.SyntheticEvent | Event, newValue: number | number[]): void => {
+      // Callback
+      onChangeCommitted?.(newValue);
+    },
+    [onChangeCommitted]
+  );
 
   // #endregion
 

@@ -4,12 +4,8 @@ import { useCallback } from 'react';
 
 import { getSxClasses } from './data-table-style';
 import { Switch } from '@/ui';
-import {
-  useStoreDataTableLayerSettings,
-  setStoreFilterDataToExtent,
-} from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
-import { useMapController } from '@/core/controllers/use-controllers';
+import { useStoreDataTableLayerSettings } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { useMapController, useDataTableController } from '@/core/controllers/use-controllers';
 
 import { logger } from '@/core/utils/logger';
 
@@ -33,9 +29,9 @@ function FilterDataToExtent(props: FilterDataToExtentProps): JSX.Element {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
-  const mapId = useStoreGeoViewMapId();
   const datatableSettings = useStoreDataTableLayerSettings();
   const mapController = useMapController();
+  const dataTableController = useDataTableController();
 
   /**
    * Handles when the filter toggle is changed.
@@ -45,13 +41,13 @@ function FilterDataToExtent(props: FilterDataToExtentProps): JSX.Element {
   const handleFilterToggle = useCallback((): void => {
     // Toggle the filter state
     const newFilterState = !datatableSettings[layerPath].filterDataToExtent;
-    setStoreFilterDataToExtent(mapId, newFilterState, layerPath);
+    dataTableController.setFilterDataToExtent(layerPath, newFilterState);
 
     // Very slightly nudge the map center to trigger extent-based filtering
     // Alternate direction to prevent long-term drift
     const offset = newFilterState ? 0.00001 : -0.00001;
     mapController.nudgeMapCenter(offset, 0);
-  }, [mapId, layerPath, datatableSettings, mapController]);
+  }, [dataTableController, layerPath, datatableSettings, mapController]);
 
   return (
     <Switch
