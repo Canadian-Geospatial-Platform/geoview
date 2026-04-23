@@ -173,7 +173,15 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
    */
   const memoIsPanelOpen = useMemo(() => {
     // Log
-    logger.logTraceUseMemo('DETAILS-PANEL - memoIsPanelOpen', containerType, footerBarTabId, footerBarIsOpen, appBarTabId, appBarIsOpen, isRightPanelVisible);
+    logger.logTraceUseMemo(
+      'DETAILS-PANEL - memoIsPanelOpen',
+      containerType,
+      footerBarTabId,
+      footerBarIsOpen,
+      appBarTabId,
+      appBarIsOpen,
+      isRightPanelVisible
+    );
 
     if (containerType === CONTAINER_TYPE.FOOTER_BAR) {
       return footerBarTabId === TABS.DETAILS && footerBarIsOpen && isRightPanelVisible;
