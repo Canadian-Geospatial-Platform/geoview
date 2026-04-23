@@ -1,17 +1,17 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import type { MRT_TableInstance as MRTTableInstance, MRT_ColumnFiltersState as MRTColumnFiltersState } from 'material-react-table';
 import { useTranslation } from 'react-i18next';
-import {
-  setStoreRowsFilteredEntry,
-  setStoreToolbarRowSelectedMessageEntry,
-} from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { setStoreRowsFilteredEntry } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { logger } from '@/core/utils/logger';
-import type { MappedLayerDataType, ColumnsType } from '@/core/components/data-table/data-table-types';
+import type { ColumnsType } from '@/core/components/data-table/data-table-types';
+import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 
 /** Properties for the useToolbarActionMessage hook. */
 interface UseSelectedRowMessageProps {
-  data: MappedLayerDataType;
+  data: {
+    features?: TypeFeatureInfoEntry[] | null;
+  };
   layerPath: string;
   tableInstance: MRTTableInstance<ColumnsType>;
   columnFilters: MRTColumnFiltersState;
@@ -33,7 +33,7 @@ export function useToolbarActionMessage({
   tableInstance,
   showUnsymbolizedFeatures,
   unfilteredFeaturesCount,
-}: UseSelectedRowMessageProps): void {
+}: UseSelectedRowMessageProps): string {
   const { t } = useTranslation();
 
   // Get store values
@@ -72,10 +72,16 @@ export function useToolbarActionMessage({
       }
     }
 
-    return { message, length };
-  }, [columnFilters, data.features, globalFilter, showUnsymbolizedFeatures, tableInstance, t, unfilteredFeaturesCount]);
+    return { message, filteredRowCount: length };
+  }, [columnFilters, globalFilter, data.features?.length, tableInstance, showUnsymbolizedFeatures, unfilteredFeaturesCount, t]);
 
-  // Update store
-  setStoreRowsFilteredEntry(mapId, memoToolbarMessage.length, layerPath);
-  setStoreToolbarRowSelectedMessageEntry(mapId, memoToolbarMessage.message, layerPath);
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('USETOOLBARACTIONMESSAGE - set store toolbar message', memoToolbarMessage.filteredRowCount);
+
+    // Update the store with the current filtered row count for the layer
+    setStoreRowsFilteredEntry(mapId, memoToolbarMessage.filteredRowCount, layerPath);
+  }, [mapId, layerPath, memoToolbarMessage.filteredRowCount, memoToolbarMessage.message]);
+
+  return memoToolbarMessage.message;
 }

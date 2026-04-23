@@ -50,14 +50,14 @@ import {
   setStoreSelectedFeature,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { useStoreTimeSliderFilter } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
-import { useStoreAppDisplayLanguage, useStoreAppShowUnsymbolizedFeatures } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { DateMgt } from '@/core/utils/date-mgt';
 import linkifyHtml from 'linkify-html';
 import { isImage, delay, sanitizeHtmlContent, enhanceLinksAccessibility } from '@/core/utils/utilities';
 import { debounce } from '@/core/utils/debounce';
 import { logger } from '@/core/utils/logger';
 import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
-import { useFilterRows, useToolbarActionMessage, useGlobalFilter } from './hooks';
+import { useFilterRows, useGlobalFilter } from './hooks';
 import { getSxClasses } from './data-table-style';
 import { useLightBox } from '@/core/components/common';
 import { NUMBER_FILTER, DATE_FILTER, STRING_FILTER } from '@/core/utils/constant';
@@ -108,7 +108,6 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
   const mapId = useStoreGeoViewMapId();
   const language = useStoreAppDisplayLanguage();
   const datatableSettings = useStoreDataTableLayerSettings();
-  const showUnsymbolizedFeatures = useStoreAppShowUnsymbolizedFeatures();
   const layerClassFilter = useStoreLayerFilterClass(layerPath);
   const layerTimeFilter = useStoreTimeSliderFilter(layerPath);
   const layerDateTemporalMode = useStoreLayerDateTemporalMode(layerPath);
@@ -630,17 +629,17 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
       (props: { table: MRTTableInstance<ColumnsType> }): ReactNode => (
         <TopToolbar
           sxClasses={sxClasses}
-          datatableSettings={datatableSettings}
           layerPath={layerPath}
           t={t}
           globalFilter={globalFilter}
-          useTable={useTable}
+          useTable={props.table}
           columns={memoColumns}
           data={data}
           table={props.table}
+          unfilteredFeaturesCount={unfilteredFeaturesCount}
         />
       ),
-      [datatableSettings, layerPath, globalFilter, memoColumns, data, sxClasses, t, useTable] // Include dependencies
+      [sxClasses, layerPath, t, globalFilter, memoColumns, data, unfilteredFeaturesCount] // Include dependencies
     ),
     enableFilterMatchHighlighting: true,
     enableColumnResizing: true,
@@ -923,15 +922,15 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
   }, [globalFilter]);
 
   // set toolbar custom action message in store.
-  useToolbarActionMessage({
-    data,
-    columnFilters,
-    globalFilter,
-    layerPath,
-    tableInstance: useTable,
-    showUnsymbolizedFeatures,
-    unfilteredFeaturesCount,
-  });
+  // useToolbarActionMessage({
+  //   data,
+  //   columnFilters,
+  //   globalFilter,
+  //   layerPath,
+  //   tableInstance: useTable,
+  //   showUnsymbolizedFeatures,
+  //   unfilteredFeaturesCount,
+  // });
 
   return (
     <Box ref={dataTableWrapperRef} sx={sxClasses.dataTableWrapper} className="data-table-wrapper">

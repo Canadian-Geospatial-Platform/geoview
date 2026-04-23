@@ -14,10 +14,12 @@ import JSONExportButton from './json-export-button';
 import FilterMap from './filter-map';
 import FilterDataToExtent from './filter-data-extent';
 import type { ColumnsType } from './data-table-types';
+import { useToolbarActionMessage } from './hooks/useToolbarActionMessage';
 import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { SxStyles } from '@/ui/style/types';
 import { ClearFiltersIcon } from '@/ui/icons';
+import { useStoreAppShowUnsymbolizedFeatures } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { logger } from '@/core/utils/logger';
 
 /** Properties for the TopToolbar component. */
@@ -25,9 +27,6 @@ import { logger } from '@/core/utils/logger';
 interface TopToolbarProps<TData extends ColumnsType> {
   /** Classes or styles for the component. */
   sxClasses: SxStyles;
-
-  /** Settings for the datatable, indexed by layerPath. */
-  datatableSettings: Record<string, { toolbarRowSelectedMessageRecord: string }>;
 
   /** The path for the current layer being processed. */
   layerPath: string;
@@ -54,6 +53,8 @@ interface TopToolbarProps<TData extends ColumnsType> {
 
   /** The Material React Table instance. */
   table: MRTTableInstance<ColumnsType>;
+
+  unfilteredFeaturesCount?: number;
 }
 
 /**
@@ -66,7 +67,20 @@ function TopToolbar(props: TopToolbarProps<ColumnsType>): JSX.Element {
   // Log
   logger.logTraceRender('components/data-table/top-toolbar');
 
-  const { sxClasses, datatableSettings, layerPath, t, globalFilter, useTable, columns, data, table } = props;
+  const { sxClasses, layerPath, t, globalFilter, useTable, columns, data, table, unfilteredFeaturesCount } = props;
+
+  const showUnsymbolizedFeatures = useStoreAppShowUnsymbolizedFeatures();
+
+  // Get toolbar message
+  const toolbarMessage = useToolbarActionMessage({
+    data: data,
+    layerPath,
+    tableInstance: table,
+    columnFilters: table.getState().columnFilters,
+    globalFilter: table.getState().globalFilter ?? '',
+    showUnsymbolizedFeatures: showUnsymbolizedFeatures, // Need to pass this prop
+    unfilteredFeaturesCount: unfilteredFeaturesCount || 0, // Need to pass this prop
+  });
 
   // ESRI Dynamic layer data does not include geometry and can't be filtered to extent
   const isEsriDynamic = data.features?.[0]?.geoviewLayerType === CONST_LAYER_TYPES.ESRI_DYNAMIC;
@@ -82,7 +96,7 @@ function TopToolbar(props: TopToolbarProps<ColumnsType>): JSX.Element {
     >
       <Box display="flex" sx={{ flexDirection: 'column', justifyContent: 'space-evenly' }}>
         <Box component="p" role="status" className="filter-results-summary" sx={sxClasses.selectedRows} aria-live="polite">
-          {datatableSettings[layerPath].toolbarRowSelectedMessageRecord}
+          {toolbarMessage}
         </Box>
         <Box display="flex">
           <FilterMap layerPath={layerPath} isGlobalFilterOn={!!globalFilter?.length} />

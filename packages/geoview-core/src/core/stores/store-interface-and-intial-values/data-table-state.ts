@@ -56,7 +56,6 @@ export interface IDataTableState {
     setSelectedFeature: (feature: TypeFeatureInfoEntry) => void;
     setSelectedLayerPath: (layerPath: string) => void;
     setTableFilters(newTableFilters: Record<string, string>): void;
-    setToolbarRowSelectedMessageEntry: (message: string, layerPath: string) => void;
   };
 }
 
@@ -247,24 +246,6 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
           dataTableState: {
             ...get().dataTableState,
             tableFilters: newTableFilters,
-          },
-        });
-      },
-
-      /**
-       * Sets the toolbar row-selected message for the specified layer.
-       *
-       * @param message - The message to display in the toolbar.
-       * @param layerPath - The target layer path.
-       */
-      setToolbarRowSelectedMessageEntry: (message: string, layerPath: string): void => {
-        const layerSettings = get().dataTableState.layersDataTableSetting[layerPath];
-        layerSettings.toolbarRowSelectedMessageRecord = message;
-
-        set({
-          dataTableState: {
-            ...get().dataTableState,
-            layersDataTableSetting: { ...get().dataTableState.layersDataTableSetting, [layerPath]: layerSettings },
           },
         });
       },
@@ -568,17 +549,6 @@ export const setStoreRowsFilteredEntry = (mapId: string, rows: number, layerPath
 };
 
 /**
- * Sets the toolbar row-selected message for a specific layer in the store.
- *
- * @param mapId - The map identifier.
- * @param message - The message to display.
- * @param layerPath - The target layer path.
- */
-export const setStoreToolbarRowSelectedMessageEntry = (mapId: string, message: string, layerPath: string): void => {
-  getStoreDataTableState(mapId).actions.setToolbarRowSelectedMessageEntry(message, layerPath);
-};
-
-/**
  * Adds or updates a table filter for a specific layer in the store.
  *
  * Merges the provided filter with existing filters, overwriting
@@ -689,9 +659,6 @@ export interface IDataTableSettings {
 
   /** The number of rows matching the current filters. */
   rowsFilteredRecord: number;
-
-  /** The toolbar message shown when rows are selected. */
-  toolbarRowSelectedMessageRecord: string;
 
   /** The current global filter string applied across all columns. */
   globalFilterRecord: string;
