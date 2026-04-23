@@ -46,6 +46,87 @@
             ]
           }
         ]
+      },
+      {
+        "geoviewLayerId": "geojsonLYR2",
+        "geoviewLayerName": "Geometry Collection Sample",
+        "metadataAccessPath": "./datasets/geojson",
+        "geoviewLayerType": "GeoJSON",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "geometrycollection.json",
+            "layerName": "Geometry Collection",
+            "layerStyle": {
+              "GeometryCollection": {
+                "type": "uniqueValue",
+                "fields": ["status"],
+                "hasDefault": true,
+                "info": [
+                  {
+                    "label": "Active",
+                    "visible": true,
+                    "values": ["active"],
+                    "settings": {
+                      "type": "filledPolygon",
+                      "color": "rgba(46, 204, 113, 0.35)",
+                      "stroke": {
+                        "color": "rgba(39, 174, 96, 1)",
+                        "lineStyle": "solid",
+                        "width": 2
+                      },
+                      "fillStyle": "solid"
+                    }
+                  },
+                  {
+                    "label": "Inactive",
+                    "visible": true,
+                    "values": ["inactive"],
+                    "settings": {
+                      "type": "filledPolygon",
+                      "color": "rgba(231, 76, 60, 0.35)",
+                      "stroke": {
+                        "color": "rgba(192, 57, 43, 1)",
+                        "lineStyle": "solid",
+                        "width": 2
+                      },
+                      "fillStyle": "solid"
+                    }
+                  },
+                  {
+                    "label": "Maintenance",
+                    "visible": true,
+                    "values": ["maintenance"],
+                    "settings": {
+                      "type": "filledPolygon",
+                      "color": "rgba(241, 196, 15, 0.35)",
+                      "stroke": {
+                        "color": "rgba(243, 156, 18, 1)",
+                        "lineStyle": "solid",
+                        "width": 2
+                      },
+                      "fillStyle": "solid"
+                    }
+                  },
+                  {
+                    "label": "Other",
+                    "visible": true,
+                    "values": [],
+                    "settings": {
+                      "type": "filledPolygon",
+                      "color": "rgba(149, 165, 166, 0.25)",
+                      "stroke": {
+                        "color": "rgba(127, 140, 141, 1)",
+                        "lineStyle": "solid",
+                        "width": 2
+                      },
+                      "fillStyle": "solid"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ]
       }
     ]
   },

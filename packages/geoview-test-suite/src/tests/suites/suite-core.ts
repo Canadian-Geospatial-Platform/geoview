@@ -60,6 +60,7 @@ export class GVTestSuiteCore extends GVAbstractTestSuite {
     const pPingInvalidFormat = this.#coreTester.testValidateAndPingUrlInvalidFormat();
     const pPingUnreachable = this.#coreTester.testValidateAndPingUrlUnreachable();
     const pPingWmsService = this.#coreTester.testValidateAndPingUrlWmsService();
+    const pGeometryCollectionLegendStyles = this.#coreTester.testGeometryCollectionLegendStyles();
 
     // Resolve when all
     return Promise.all([
@@ -70,6 +71,7 @@ export class GVTestSuiteCore extends GVAbstractTestSuite {
       pPingInvalidFormat,
       pPingUnreachable,
       pPingWmsService,
+      pGeometryCollectionLegendStyles,
     ]);
   }
 }

@@ -187,6 +187,9 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
     // Test domain field query value translation — run sequentially at the end
     // because they change the zoom level to 17.4 which would affect other tests
     await this.#layerTester.testEsriDynamicDomainFieldQueryValue();
-    return this.#layerTester.testEsriFeatureDomainFieldQueryValue();
+    await this.#layerTester.testEsriFeatureDomainFieldQueryValue();
+
+    // Run the GeometryCollection layer test last to avoid perturbing icon color ordering used by earlier strict icon assertions.
+    return this.#layerTester.testAddGeoJSONWithGeometryCollection();
   }
 }

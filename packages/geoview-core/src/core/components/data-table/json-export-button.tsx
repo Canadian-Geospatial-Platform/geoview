@@ -1,7 +1,8 @@
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Geometry } from 'ol/geom';
-import { Point, MultiPoint, LineString, MultiLineString, Polygon, MultiPolygon } from 'ol/geom';
+import { GeometryCollection, Point, MultiPoint, LineString, MultiLineString, Polygon, MultiPolygon } from 'ol/geom';
+import type { Coordinate } from 'ol/coordinate';
 import { MenuItem } from '@/ui';
 
 import { JsonExportWorker } from '@/core/workers/json-export-worker';
@@ -49,30 +50,37 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
    * @param geometry - The geometry to serialize
    * @returns The serialized geometry JSON
    */
-  const serializeGeometry = (geometry: Geometry): SerializedGeometry => {
-    let builtGeometry = {} as SerializedGeometry;
-
+  const serializeGeometry = useCallback((geometry: Geometry): SerializedGeometry => {
     if (geometry instanceof Polygon) {
-      builtGeometry = { type: 'Polygon', coordinates: geometry.getCoordinates() };
-    } else if (geometry instanceof MultiPolygon) {
-      builtGeometry = { type: 'MultiPolygon', coordinates: geometry.getCoordinates() };
-    } else if (geometry instanceof LineString) {
-      builtGeometry = { type: 'LineString', coordinates: geometry.getCoordinates() };
-    } else if (geometry instanceof MultiLineString) {
-      builtGeometry = { type: 'MultiLineString', coordinates: geometry.getCoordinates() };
-    } else if (geometry instanceof Point) {
+      return { type: 'Polygon', coordinates: geometry.getCoordinates() };
+    }
+    if (geometry instanceof MultiPolygon) {
+      return { type: 'MultiPolygon', coordinates: geometry.getCoordinates() };
+    }
+    if (geometry instanceof LineString) {
+      return { type: 'LineString', coordinates: geometry.getCoordinates() };
+    }
+    if (geometry instanceof MultiLineString) {
+      return { type: 'MultiLineString', coordinates: geometry.getCoordinates() };
+    }
+    if (geometry instanceof Point) {
       // TODO: There is no proper support for esriDynamic MultiPoint issue 2589... this is a workaround
       if (GeometryApi.isArrayOfCoordinates(geometry.getCoordinates())) {
-        builtGeometry = { type: 'MultiPoint', coordinates: geometry.getCoordinates() };
-      } else {
-        builtGeometry = { type: 'Point', coordinates: geometry.getCoordinates() };
+        return { type: 'MultiPoint', coordinates: geometry.getCoordinates() as unknown as Coordinate[] };
       }
-    } else if (geometry instanceof MultiPoint) {
-      builtGeometry = { type: 'MultiPoint', coordinates: geometry.getCoordinates() };
+      return { type: 'Point', coordinates: geometry.getCoordinates() };
     }
-
-    return builtGeometry;
-  };
+    if (geometry instanceof MultiPoint) {
+      return { type: 'MultiPoint', coordinates: geometry.getCoordinates() };
+    }
+    if (geometry instanceof GeometryCollection) {
+      return {
+        type: 'GeometryCollection',
+        geometries: geometry.getGeometriesArray().map((nestedGeometry) => serializeGeometry(nestedGeometry)),
+      };
+    }
+    throw new Error(`Unsupported geometry type for JSON export: ${geometry.getType()}`);
+  }, []);
 
   /**
    * Fetches geometries for a chunk of ESRI Dynamic features.
@@ -193,7 +201,7 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
         worker.terminate();
       }
     },
-    [features, fetchESRI, mapProjectionEPSG, rows]
+    [features, fetchESRI, mapProjectionEPSG, rows, serializeGeometry]
   );
 
   /**
