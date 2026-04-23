@@ -269,7 +269,10 @@
 
         <div class="option-item">
           <p><strong>projection</strong> <code>number</code> <em style="color: #d73a49">*required</em></p>
-          <p>Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator, Lambert Conical Conform Canada and North Pole LAEA Canada.</p>
+          <p>
+            Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator, Lambert Conical Conform Canada and North Pole
+            LAEA Canada.
+          </p>
           <p><strong>Valid values:</strong></p>
           <ul>
             <li><code>3978</code> - Lambert Conical Conform Canada (default)</li>
@@ -658,7 +661,12 @@
               </ul>
             </li>
             <li>
-              <code>tabs.custom</code> - Array of custom tab objects with <code>id</code>, <code>label</code>, and <code>contentHTML</code>
+              <code>tabs.custom</code> - Array of custom tab objects
+              <ul>
+                <li><code>id</code> <em style="color: #d73a49">*required</em> - Unique identifier for the custom tab</li>
+                <li><code>label</code> <em style="color: #d73a49">*required</em> - Display label shown on the tab</li>
+                <li><code>contentHTML</code> <em style="color: #d73a49">*required</em> - HTML content to render inside the tab panel</li>
+              </ul>
             </li>
             <li><code>selectedTab</code> - Initially selected tab</li>
             <li><code>selectedLayersLayerPath</code> - Initial selected layer in layers tab</li>
@@ -666,6 +674,16 @@
             <li><code>selectedTimeSliderLayerPath</code> - Initially selected layer in time slider tab</li>
           </ul>
           <p><strong>Default:</strong> <code>{ tabs: { core: ['layers', 'data-table'], custom: [] } }</code></p>
+          <p>
+            <strong>Note:</strong> Custom tab content is static HTML. Changing the map language will <strong>not</strong> update custom tab
+            content. To display content in another language, create a new map configuration with the translated <code>contentHTML</code>.
+          </p>
+          <p>
+            <strong>Note:</strong> Since <code>contentHTML</code> is inside a JSON string, you must escape quotes. Use <code>\"</code> for
+            double quotes or <code>\'</code> for single quotes. For example:
+            <code>"contentHTML": "&lt;div class=\"my-class\"&gt;..."</code> or
+            <code>'contentHTML': '&lt;div class=\'my-class\'&gt;...'</code>.
+          </p>
         </div>
 
         <div class="option-item">

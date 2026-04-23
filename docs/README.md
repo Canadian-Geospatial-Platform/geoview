@@ -4,6 +4,8 @@ Welcome to the GeoView documentation! This documentation is organized by audienc
 
 ## 📖 For GeoView Users (API Documentation)
 
+> **🔍 Something not working?** See the **[Troubleshooting Guide](app/ui/troubleshooting.md)** for how GeoView reports errors and what to do when things go wrong.
+
 ### API Reference
 
 **Location:** [`app/api/`](./app/api/)
@@ -124,6 +126,7 @@ Guides for extending GeoView functionality:
 
 - **[Accessibility](./app/accessibility.md)** - WCAG compliance and accessibility features
 - **[Theming](./app/ui/theming.md)** - UI themes and styling
+- **[Troubleshooting](./app/ui/troubleshooting.md)** - Error messages, notifications, and what to do when something goes wrong
 
 ### Configuration
 
@@ -143,6 +146,7 @@ Guides for extending GeoView functionality:
 | Use utilities    | [API Utilities](app/api/utilities.md)                     |
 | Draw geometry    | [Geometry API](app/api/geometry-api.md)                   |
 | Run tests        | [Test Suite Guide](app/testing/using-test-suite.md)       |
+| Troubleshooting  | [Troubleshooting](app/ui/troubleshooting.md)              |
 | Contribute code  | [Best Practices](programming/best-practices.md)           |
 
 ## 📁 Documentation Structure
