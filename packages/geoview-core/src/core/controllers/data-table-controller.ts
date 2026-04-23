@@ -4,12 +4,12 @@ import type { ControllerRegistry } from '@/core/controllers/base/controller-regi
 import {
   addOrUpdateStoreDataTableFilter,
   getStoreDataTableSelectedLayerPath,
-  getStoreDataTableFilteredRecord,
+  getStoreDataTableMapFilteredRecord,
   setStoreDataTableColumnFiltersEntry,
   setStoreDataTableColumnsFiltersVisibility,
   setStoreDataTableColumnFilterModesEntry,
   setStoreDataTableFilterDataToExtent,
-  setStoreDataTableFilteredEntry,
+  setStoreDataTableMapFilteredRecord,
   setStoreDataTableGlobalFilteredEntry,
   setStoreDataTableRowsFilteredEntry,
   setStoreDataTableSelectedFeature,
@@ -50,7 +50,7 @@ export class DataTableController extends AbstractMapViewerController {
    */
   applyMapFilters(filterStrings: string): void {
     const layerPath = getStoreDataTableSelectedLayerPath(this.getMapId());
-    const filter = getStoreDataTableFilteredRecord(this.getMapId(), layerPath) ? filterStrings : '';
+    const filter = getStoreDataTableMapFilteredRecord(this.getMapId(), layerPath) ? filterStrings : '';
     addOrUpdateStoreDataTableFilter(this.getMapId(), layerPath, filter);
     this.getControllersRegistry().layerController.applyLayerFilters(layerPath);
   }
@@ -71,9 +71,9 @@ export class DataTableController extends AbstractMapViewerController {
    * @param layerPath - The path of the layer to update
    * @param mapFiltered - A boolean indicating whether the layer should be filtered based on the data table filters
    */
-  setFilteredEntry(layerPath: string, mapFiltered: boolean): void {
+  setMapFilteredRecord(layerPath: string, mapFiltered: boolean): void {
     // Save in the store
-    setStoreDataTableFilteredEntry(this.getMapId(), mapFiltered, layerPath);
+    setStoreDataTableMapFilteredRecord(this.getMapId(), mapFiltered, layerPath);
   }
 
   /**
