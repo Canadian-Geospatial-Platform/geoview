@@ -788,6 +788,51 @@ export class ConfigTester extends GVAbstractTester {
   }
 
   /**
+   * Tests a GeoJSON Config using the GeometryCollection sample file.
+   *
+   * @returns A promise that resolves with a Test containing the configuration
+   */
+  testGeojsonWithGeometryCollection(): Promise<Test<TypeGeoviewLayerConfig>> {
+    // The url
+    const url = `${GVAbstractTester.GEOJSON_DATASET_ROOT}/${GVAbstractTester.GEOJSON_GEOMETRY_COLLECTION}`;
+
+    // Dummy names
+    const gvLayerId: string = 'gvLayerId';
+    const gvLayerType: TypeGeoviewLayerType = 'GeoJSON';
+    const gvLayerName: string = 'GeojsonGeometryCollectionLayer';
+
+    // Expected config
+    const expectedConfig = {
+      geoviewLayerId: gvLayerId,
+      geoviewLayerType: gvLayerType,
+      geoviewLayerName: gvLayerName,
+      metadataAccessPath: GVAbstractTester.GEOJSON_DATASET_ROOT,
+    };
+
+    return this.test(
+      'Test a Geojson with GeometryCollection sample file',
+      (test) => {
+        test.addStep(`Initializing config on url: ${url}`);
+
+        return GeoJSON.initGeoviewLayerConfig(gvLayerId, gvLayerName, url);
+      },
+      (test, result) => {
+        test.addStep('Verifying expected config...');
+        Test.assertJsonObject(result, expectedConfig);
+
+        test.addStep('Verifying 1 layer entry in the config...');
+        Test.assertIsArrayLengthEqual(result.listOfLayerEntryConfig, 1);
+
+        test.addStep('Verifying layer id in the list...');
+        Test.assertIsEqual(result.listOfLayerEntryConfig[0].layerId, GVAbstractTester.GEOJSON_GEOMETRY_COLLECTION);
+
+        test.addStep('Verifying layer entry is of the right type...');
+        Test.assertIsInstance(result.listOfLayerEntryConfig[0], GeoJSONLayerEntryConfig);
+      }
+    );
+  }
+
+  /**
    * Tests the behavior of initializing a GeoJSON layer configuration using an invalid data URL
    * that does not point to a valid metadata file.
    *

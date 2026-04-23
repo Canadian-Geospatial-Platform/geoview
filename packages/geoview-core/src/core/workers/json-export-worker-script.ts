@@ -75,53 +75,61 @@ function transformPoints(points: Coordinate[]): Coordinate[] {
  * @returns The transformed geometry
  */
 function transformGeometry(geometry: SerializedGeometry): SerializedGeometry {
-  const { type, coordinates } = geometry;
-
-  let transformedGeometry = {} as SerializedGeometry;
-  if (type === 'Polygon') {
-    // coordinates are in the form of Coordinate[][]
-    transformedGeometry = {
-      type,
-      coordinates: (coordinates as Coordinate[][]).map((coords: Coordinate[]) => {
+  if (geometry.type === 'Polygon') {
+    return {
+      type: 'Polygon',
+      coordinates: geometry.coordinates.map((coords: Coordinate[]) => {
         return coords.map((coord: Coordinate) => transformPoints([coord])[0]);
       }),
     };
-  } else if (type === 'MultiPolygon') {
-    // coordinates are in the form of Coordinate[][][]
-    transformedGeometry = {
-      type,
-      coordinates: (coordinates as Coordinate[][][]).map((coords1: Coordinate[][]) => {
+  }
+
+  if (geometry.type === 'MultiPolygon') {
+    return {
+      type: 'MultiPolygon',
+      coordinates: geometry.coordinates.map((coords1: Coordinate[][]) => {
         return coords1.map((coords2: Coordinate[]) => {
           return coords2.map((coord: Coordinate) => transformPoints([coord])[0]);
         });
       }),
     };
-  } else if (type === 'LineString') {
-    // coordinates are in the form of Coordinate[]
-    transformedGeometry = {
-      type,
-      coordinates: (coordinates as Coordinate[]).map((coord: Coordinate) => transformPoints([coord])[0]),
-    };
-  } else if (type === 'MultiLineString') {
-    // coordinates are in the form of Coordinate[][]
-    transformedGeometry = {
-      type,
-      coordinates: (coordinates as Coordinate[][]).map((coords: Coordinate[]) => {
-        return coords.map((coord: Coordinate) => transformPoints([coord])[0]);
-      }),
-    };
-  } else if (type === 'Point') {
-    // coordinates are in the form of Coordinate
-    transformedGeometry = { type, coordinates: transformPoints([coordinates as Coordinate])[0] };
-  } else if (type === 'MultiPoint') {
-    // coordinates are in the form of Coordinate[]
-    transformedGeometry = {
-      type,
-      coordinates: (coordinates as Coordinate[]).map((coord: Coordinate) => transformPoints([coord])[0]),
+  }
+
+  if (geometry.type === 'LineString') {
+    return {
+      type: 'LineString',
+      coordinates: geometry.coordinates.map((coord: Coordinate) => transformPoints([coord])[0]),
     };
   }
 
-  return transformedGeometry;
+  if (geometry.type === 'MultiLineString') {
+    return {
+      type: 'MultiLineString',
+      coordinates: geometry.coordinates.map((coords: Coordinate[]) => {
+        return coords.map((coord: Coordinate) => transformPoints([coord])[0]);
+      }),
+    };
+  }
+
+  if (geometry.type === 'Point') {
+    return { type: 'Point', coordinates: transformPoints([geometry.coordinates])[0] };
+  }
+
+  if (geometry.type === 'MultiPoint') {
+    return {
+      type: 'MultiPoint',
+      coordinates: geometry.coordinates.map((coord: Coordinate) => transformPoints([coord])[0]),
+    };
+  }
+
+  if (geometry.type === 'GeometryCollection') {
+    return {
+      type: 'GeometryCollection',
+      geometries: geometry.geometries.map((nestedGeometry: SerializedGeometry) => transformGeometry(nestedGeometry)),
+    };
+  }
+
+  throw new Error(`Unsupported geometry type for transformation: ${(geometry as { type: string }).type}`);
 }
 
 /** The main worker object containing methods for initialization and processing. */
