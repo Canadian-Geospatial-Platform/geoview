@@ -83,6 +83,9 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   // get store config for footer bar tabs to add (similar logic as in app-bar)
   const footerBarTabsConfig = useStoreGeoViewConfig()?.footerBar;
 
+  // Ref so the seed effect reads the initial config without it being a dep (must only run once on mount)
+  const footerBarTabsConfigRef = useRef(footerBarTabsConfig);
+
   // #region HANDLERS
 
   /**
@@ -111,10 +114,10 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
    */
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('FOOTER-BAR - seed custom footer tabs from config', footerBarTabsConfig?.tabs?.custom);
+    logger.logTraceUseEffect('FOOTER-BAR - seed custom footer tabs from config', footerBarTabsConfigRef.current?.tabs?.custom);
 
     // Seed custom tabs and register their content (core tabs are seeded in setDefaultConfigValues)
-    (footerBarTabsConfig?.tabs?.custom ?? []).forEach((customTab) => {
+    (footerBarTabsConfigRef.current?.tabs?.custom ?? []).forEach((customTab) => {
       footerBarApi.createTab({
         id: customTab.id,
         value: 0,
@@ -123,8 +126,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
         content: <UseHtmlToReact htmlContent={customTab.contentHTML ?? ''} />,
       });
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [footerBarApi]);
 
   // Read footer tabs from the store (reactive — no event handlers needed)
   const footerTabs = useStoreUIFooterTabs();
@@ -198,8 +200,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
       // Uncollapse it
       uiController.setFooterBarIsOpen(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [arrayOfLayerDataBatch, activeFooterBarTab, uiController]);
+  }, [arrayOfLayerDataBatch, activeFooterBarTab, uiController, footerBarTabsConfig]);
   // Don't add isCollapsed in the dependency array, because it'll retrigger the useEffect
 
   /**

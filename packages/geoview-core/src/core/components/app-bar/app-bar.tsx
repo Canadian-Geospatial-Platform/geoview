@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import type { ReactNode, KeyboardEvent } from 'react';
-import { useEffect, useCallback, Fragment, useMemo } from 'react';
+import { useEffect, useCallback, Fragment, useMemo, useRef } from 'react';
 import { useTheme } from '@mui/material/styles';
 import type { IconButtonPropsExtend } from '@/ui';
 import {
@@ -95,6 +95,10 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
   // Read app-bar panel ids from the store (reactive — no event handlers needed)
   const appBarPanelIds = useStoreUIAppBarPanelIds();
+
+  // Ref so the focus-restore effect can read the latest geoviewElement without it being a dep
+  const geoviewElementRef = useRef(geoviewElement);
+  geoviewElementRef.current = geoviewElement;
 
   /**
    * Builds the button panels record from store panel ids and api registry, with open/focus state derived from the active tab.
@@ -234,15 +238,14 @@ export function AppBar(props: AppBarProps): JSX.Element {
       if (buttonElement) {
         buttonElement.focus();
       } else {
-        const mapCont = geoviewElement;
+        const mapCont = geoviewElementRef.current;
         mapCont?.focus();
         if (mapCont?.closest('.geoview-map')?.classList.contains('map-focus-trap')) {
           mapCont.classList.add('keyboard-focus');
         }
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen]);
+  }, [isOpen, tabId, mapId]);
 
   /**
    * Creates AppBar button panels from configuration tabs.
