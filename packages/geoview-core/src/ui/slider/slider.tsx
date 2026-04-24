@@ -122,8 +122,6 @@ function SliderUI(props: SliderProps): JSX.Element {
     // Log
     logger.logTraceUseMemo('SLIDER - memoProcessedMarks', marks);
 
-    logger.logTraceUseMemo('SLIDER - memoProcessedMarks', marks);
-
     if (!marks || marks.length === 0) return marks;
 
     const maxVisibleMarks = 30;
