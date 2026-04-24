@@ -233,8 +233,7 @@ export function LegendFullscreen({ layerPaths, mapId, containerType, isOpen, onC
         </Typography>
       </Box>
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- memoSxClasses is memoized from theme which is stable
-  }, [t]);
+  }, [t, memoSxClasses]);
 
   // Memoize fullscreen content
   const memoFullscreenContent = useMemo(() => {
@@ -260,8 +259,7 @@ export function LegendFullscreen({ layerPaths, mapId, containerType, isOpen, onC
         ))}
       </List>
     ));
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- memoSxClasses is memoized from theme which is stable
-  }, [fullscreenLegendLayerList, memoNoLayersContent]);
+  }, [fullscreenLegendLayerList, memoNoLayersContent, memoSxClasses]);
 
   return (
     <FullScreenDialog

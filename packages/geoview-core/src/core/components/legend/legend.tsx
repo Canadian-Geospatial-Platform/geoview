@@ -152,8 +152,7 @@ export function Legend({ containerType }: LegendType): JSX.Element | null {
         </Typography>
       </Box>
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- memoSxClasses is memoized from theme which is stable
-  }, [t]);
+  }, [t, memoSxClasses]);
 
   // Memoize the rendered content based on whether there are legend layers
   const memoContent = useMemo(() => {
@@ -179,8 +178,7 @@ export function Legend({ containerType }: LegendType): JSX.Element | null {
         ))}
       </List>
     ));
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- memoSxClasses is memoized from theme which is stable
-  }, [formattedLegendLayerList, memoNoLayersContent, containerType]);
+  }, [formattedLegendLayerList, memoNoLayersContent, containerType, memoSxClasses]);
 
   // TODO: CLEANUP - Remove the commented code, we're trying to not unmount the Legend panel anymore to check performance 2026-04-07
   // Early return with empty fragment if not the active tab

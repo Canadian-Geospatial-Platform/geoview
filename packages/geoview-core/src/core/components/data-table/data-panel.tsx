@@ -233,15 +233,14 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
    */
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('DATA-PANEL - unmount', selectedLayerPath);
+    logger.logTraceUseEffect('DATA-PANEL - unmount');
 
     // NOTE: Reason for not using component unmount, because we are not mounting and unmounting components
     // when we switch tabs.
     if (activeFooterBarTab.tabId !== TABS.DATA_TABLE && containerType !== CONTAINER_TYPE.APP_BAR) {
       dataTableController.setSelectedLayerPath('');
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataTableController, activeFooterBarTab]);
+  }, [dataTableController, activeFooterBarTab, containerType]);
 
   /**
    * Resets the selected layer path when the app bar data table tab is closed.

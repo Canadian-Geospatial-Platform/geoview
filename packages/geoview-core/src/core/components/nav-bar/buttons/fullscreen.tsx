@@ -65,8 +65,7 @@ export default function Fullscreen(): JSX.Element {
       document.removeEventListener('mozfullscreenchange', handleExit);
       document.removeEventListener('MSFullscreenChange', handleExit);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [uiController]);
 
   return (
     <IconButton

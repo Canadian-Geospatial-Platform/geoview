@@ -254,13 +254,14 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
 
     // If a selected tab is defined
     if (selectedTab !== undefined) {
-      const newPanels = [...tabPanels];
-      newPanels[selectedTab] = tabs[selectedTab];
-      setTabPanels(newPanels);
+      setTabPanels((prev) => {
+        const next = [...prev];
+        next[selectedTab] = tabs[selectedTab];
+        return next;
+      });
       // Make sure internal state follows
       setValue(selectedTab);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTab, tabs]);
   // Do not add dependency on onToggleCollapse or isCollapse, because then on re-render after the change, the useEffect just re-collapses/re-expands...
 
