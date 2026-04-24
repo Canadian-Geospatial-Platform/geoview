@@ -312,7 +312,7 @@ export default memo(function Notifications(): JSX.Element {
    * Triggers the shake animation when new notifications arrive.
    */
   useEffect(() => {
-    logger.logTraceUseEffect('Notifications - notifications list changed', notificationsCount, notifications);
+    logger.logTraceUseEffect('Notifications - notifications list changed', notifications);
 
     const curNotificationCount = notifications.reduce((sum, n) => sum + n.count, 0);
     if (curNotificationCount > notificationsCountRef.current) {
@@ -334,7 +334,7 @@ export default memo(function Notifications(): JSX.Element {
         clearTimeout(timerRef.current);
       }
     };
-  }, [notifications]); // Only depend on notifications changes
+  }, [notifications]);
 
   /**
    * Builds the rendered list of notification items.
