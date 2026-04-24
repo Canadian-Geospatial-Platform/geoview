@@ -226,6 +226,10 @@ export default memo(function Notifications(): JSX.Element {
   const [notificationsCount, setNotificationsCount] = useState(0);
   const [open, setOpen] = useState(false);
 
+  // Ref to read the latest notificationsCount inside the notifications effect without making it a dep
+  const notificationsCountRef = useRef(notificationsCount);
+  notificationsCountRef.current = notificationsCount;
+
   // Store
   const notifications = useStoreAppNotifications();
   const interaction = useStoreMapInteraction();
@@ -311,7 +315,7 @@ export default memo(function Notifications(): JSX.Element {
     logger.logTraceUseEffect('Notifications - notifications list changed', notificationsCount, notifications);
 
     const curNotificationCount = notifications.reduce((sum, n) => sum + n.count, 0);
-    if (curNotificationCount > notificationsCount) {
+    if (curNotificationCount > notificationsCountRef.current) {
       if (timerRef.current) {
         clearTimeout(timerRef.current);
       }
@@ -330,7 +334,6 @@ export default memo(function Notifications(): JSX.Element {
         clearTimeout(timerRef.current);
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [notifications]); // Only depend on notifications changes
 
   /**
