@@ -73,8 +73,8 @@ AbstractBaseGVLayer
 |   |   +-- GVOgcFeature
 |   |   +-- GVWFS
 |   |   +-- GVWKB
-|   |   +-- AbstractGVVectorTile
-|   |       +-- GVVectorTiles
+|   +-- AbstractGVVectorTile (vector/)
+|   |   +-- GVVectorTiles
 |   +-- AbstractGVTile (tile/)
 |       +-- GVGeotiff
 |       +-- GVWMTS
@@ -103,7 +103,7 @@ First, determine if your new layer type is **raster** or **vector** based on the
 - Extends `VectorSource`
 
 **Note on Vector Tiles:**
-`VectorTiles` now lives under `gv-layers/vector/` as it extends `AbstractGVVectorTile`, which extends `AbstractGVVector`.
+`VectorTiles` lives under `gv-layers/vector/` but `AbstractGVVectorTile` extends `AbstractGVLayer` directly (not `AbstractGVVector`).
 
 ## Step 2: Create Layer Classes
 
@@ -237,21 +237,12 @@ export interface TypeSourceImageStaticInitialConfig extends TypeBaseSourceImageI
 
 ## Step 6: Register Layer Type
 
-Update `packages/geoview-core/src/geo/layer/geoview-layers/abstract-geoview-layers.ts`:
+Update `packages/geoview-core/src/api/types/layer-schema-types.ts`:
 
-### Add to DEFAULT_LAYER_NAMES
-
-```typescript
-export const DEFAULT_LAYER_NAMES: string = {
-  // ... existing entries
-  imageStatic: "Static Image",
-};
-```
-
-### Add to LayerTypeKey
+### Add to LayerTypesKey
 
 ```typescript
-export type LayerTypeKey =
+export type LayerTypesKey =
   | "esriDynamic"
   | "esriFeature"
   | "imageStatic" // Add here
@@ -273,11 +264,20 @@ export type TypeGeoviewLayerType =
 ### Add to CONST_LAYER_TYPES
 
 ```typescript
-export const CONST_LAYER_TYPES: {
-  [key in LayerTypeKey]: TypeGeoviewLayerType;
-} = {
+export const CONST_LAYER_TYPES: Record<LayerTypesKey, TypeGeoviewLayerType> = {
   // ... existing entries
   IMAGE_STATIC: "imageStatic",
+};
+```
+
+### Add to DEFAULT_LAYER_NAMES
+
+Update the non-exported `DEFAULT_LAYER_NAMES` constant in `packages/geoview-core/src/geo/layer/geoview-layers/abstract-geoview-layers.ts`:
+
+```typescript
+const DEFAULT_LAYER_NAMES: Record<string, string> = {
+  // ... existing entries
+  imageStatic: "Static Image",
 };
 ```
 
@@ -285,73 +285,68 @@ export const CONST_LAYER_TYPES: {
 
 Implement all required abstract methods from parent classes:
 
-### From AbstractGeoViewLayers
+### From AbstractGeoViewLayer
+
+The base class defines exactly **4 abstract methods**:
 
 ```typescript
-protected abstract fetchServiceMetadata(): Promise<void>;
-protected abstract validateListOfLayerEntryConfig(
-  listOfLayerEntryConfig: TypeListOfLayerEntryConfig
-): TypeListOfLayerEntryConfig;
-protected abstract processLayerMetadata(layerConfig: TypeLayerEntryConfig): Promise<void>;
-protected abstract processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<BaseLayer | null>;
-protected abstract getFeatureInfoAtPixel(location: Pixel, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries>;
-protected abstract getFeatureInfoAtCoordinate(location: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries>;
-protected abstract getFeatureInfoAtLonLat(location: Coordinate, layerPath: string): Promise<TypeArrayOfFeatureInfoEntries>;
-protected abstract getFeatureInfoUsingBBox(location: Coordinate[], layerPath: string): Promise<TypeArrayOfFeatureInfoEntries>;
-protected abstract getFeatureInfoUsingPolygon(location: Coordinate[], layerPath: string): Promise<TypeArrayOfFeatureInfoEntries>;
-protected abstract getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType;
-protected abstract getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number';
+protected abstract onFetchServiceMetadata<T>(abortSignal?: AbortSignal): Promise<T>;
+protected abstract onInitLayerEntries(): Promise<TypeGeoviewLayerConfig>;
+protected abstract onProcessLayerMetadata(
+  layerConfig: AbstractBaseLayerEntryConfig
+): Promise<void>;
+protected abstract onCreateGVLayer(
+  layerConfig: AbstractBaseLayerEntryConfig
+): AbstractGVLayer;
 ```
+
+It also defines **overridable (non-abstract) methods** that you can override when needed:
+
+```typescript
+// Override to add custom validation logic for layer entries (step 2 in processing order)
+protected onValidateListOfLayerEntryConfig(listOfLayerEntryConfig: ConfigBaseClass[]): void;
+```
+
+> **Note:** Feature query methods (`getFeatureInfoAtCoordinate`, `getFeatureInfoAtLonLat`, etc.) are on the **GV layer** classes (e.g., `AbstractGVRaster`, `AbstractGVVector`), not on `AbstractGeoViewLayer`.
 
 ### Example Implementation
 
 ```typescript
 export class ImageStatic extends AbstractGeoViewRaster {
   /**
-   * Fetch service metadata (not needed for static images)
+   * Fetches service metadata (not needed for static images).
    */
-  protected async fetchServiceMetadata(): Promise<void> {
+  protected async onFetchServiceMetadata(): Promise<void> {
     // Static images don't have service metadata
     return Promise.resolve();
   }
 
   /**
-   * Validate layer entry configuration
+   * Initializes layer entries from config.
    */
-  protected validateListOfLayerEntryConfig(
-    listOfLayerEntryConfig: TypeListOfLayerEntryConfig,
-  ): TypeListOfLayerEntryConfig {
+  protected async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Validate and return config
-    return listOfLayerEntryConfig;
+    return this.geoviewLayerConfig;
   }
 
   /**
-   * Process layer metadata
+   * Processes layer metadata for a single entry.
    */
-  protected async processLayerMetadata(
-    layerConfig: TypeLayerEntryConfig,
+  protected async onProcessLayerMetadata(
+    layerConfig: AbstractBaseLayerEntryConfig,
   ): Promise<void> {
     // Process metadata for this layer entry
   }
 
   /**
-   * Create OpenLayers layer
+   * Creates the GV layer instance for runtime use.
    */
-  protected async processOneLayerEntry(
+  protected onCreateGVLayer(
     layerConfig: AbstractBaseLayerEntryConfig,
-  ): Promise<BaseLayer | null> {
-    const olLayer = new ImageLayer({
-      source: new Static({
-        url: layerConfig.source.dataAccessPath,
-        projection: layerConfig.source.projection,
-        imageExtent: layerConfig.source.extent,
-      }),
-    });
-
-    return olLayer;
+  ): GVImageStatic {
+    const source = ImageStatic.createImageStaticSource(layerConfig);
+    return new GVImageStatic(source, layerConfig);
   }
-
-  // Implement other required methods...
 }
 ```
 
@@ -530,12 +525,11 @@ mapViewer.layer.onLayerFirstLoaded((sender, payload) => {
 ### Pattern 1: Layer with Metadata Service
 
 ```typescript
-protected async fetchServiceMetadata(): Promise<void> {
+protected async onFetchServiceMetadata(): Promise<void> {
   const metadataUrl = this.metadata.metadataAccessPath[this.mapId];
 
   try {
-    const response = await fetch(metadataUrl);
-    const metadata = await response.json();
+    const metadata = await Fetch.fetchJson(metadataUrl);
 
     // Store metadata for use in other methods
     this.serviceMetadata = metadata;

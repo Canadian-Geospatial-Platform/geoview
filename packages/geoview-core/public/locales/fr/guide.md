@@ -314,9 +314,8 @@ Les couches peuvent être en format de trame ou vectoriel. Voici les types de co
 | WMS                           | CSV                         |
 | Image statique                | WFS                         |
 | Couche de tuiles vectorielles | KML                         |
-| Vector tiles layer            | WKB                         |
-| COG - Geotiff                 | Shapefile                   |
-| WMTS                          |                             |
+| COG - Geotiff                 | WKB                         |
+| WMTS                          | Shapefile                   |
 
 _N.B. : Si une couche ne se charge pas correctement, un message d’erreur s’affichera dans l’outil de *notification* de la barre latérale. Au lieu d’utiliser les actions standard pour les couches, vous pouvez soit recharger la couche (surtout utile s’il y a un problème temporaire de connexion réseau), soit la retirer. Si vous retirez la couche, elle sera retirée complètement du sélecteur de couches._
 

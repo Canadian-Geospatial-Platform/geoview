@@ -31,7 +31,32 @@ For each doc file, check for:
 - **Incorrect examples**: Code snippets in docs that no longer compile or reference renamed/removed symbols
 - **Structural drift**: File paths or directory references in docs that no longer match the actual project structure
 
-### Phase 3 — Report
+### Phase 3 — Guide Files (EN/FR)
+
+Read the user-facing guide markdown files and cross-reference them against actual GeoView capabilities:
+
+- **`packages/geoview-core/public/locales/en/guide.md`** — English guide
+- **`packages/geoview-core/public/locales/fr/guide.md`** — French guide
+
+Check for:
+
+- **Capability drift**: Features, file types, layer types, or UI behaviors described in the guide that no longer match the actual code (e.g., accepted file extensions, supported services, available UI controls)
+- **Missing capabilities**: New features or supported formats added in code but not mentioned in the guide
+- **EN/FR inconsistency**: Content present in one language but missing or different in the other (e.g., a file type listed in EN but not FR, or a section translated differently)
+- **Stale instructions**: Steps or workflows described in the guide that no longer match the current UI flow
+
+Key code areas to cross-reference against the guides:
+
+| Guide Topic                        | Code Location                                                                                    |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Accepted file types                | `VALID_FILE_EXTENSIONS` in `core/utils/constant.ts`, file upload `accept` in `add-new-layer.tsx` |
+| Supported layer/service types      | `guessLayerType()` in `config-api.ts`, layer type constants                                      |
+| Map controls & UI                  | `packages/geoview-core/src/core/components/`, config schema                                      |
+| Keyboard shortcuts & accessibility | Component event handlers, WCAG patterns                                                          |
+
+Include guide findings in the Phase 4 report under a dedicated `### Guide Files` section.
+
+### Phase 4 — Report
 
 Present a structured summary organized by doc file:
 
@@ -54,11 +79,11 @@ Use these severity labels:
 - **INCORRECT** — Doc example or path is wrong
 - **OK** — Doc is consistent with current code
 
-### Phase 4 — Propose Edits
+### Phase 5 — Propose Edits
 
 After presenting the summary, ask the user which items to fix. Then apply edits one doc file at a time, showing the diff for review.
 
-### Phase 5 — Update Copilot Instructions
+### Phase 6 — Update Copilot Instructions
 
 After applying documentation edits, review `.github/copilot-instructions.md` and check if the changes you made reveal patterns, conventions, or architectural knowledge that should be reflected in the instructions file. For example:
 

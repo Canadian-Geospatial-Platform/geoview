@@ -70,7 +70,7 @@ Backend/Map Events → Domains → Controllers → Zustand Store
 
 **Critical Rules:**
 
-1. **UI components**: Read state from store hooks (`useMapZoom`, `useLayerLegendLayers`, etc.), call controller methods via `useMapController()`, `useLayerController()`, etc.
+1. **UI components**: Read state from store hooks (`useStoreMapZoom`, `useStoreLayerSelectedLayerPath`, etc.), call controller methods via `useMapController()`, `useLayerController()`, etc.
 2. **TypeScript backend code**: Access controllers via `this.getControllersRegistry()` (inside controllers) or `mapViewer.controllers` (from MapViewer)
 3. **Controllers**: Single source of truth for business logic, state validation, side effects
    - Extend `AbstractMapViewerController` from `@/core/controllers/base/abstract-map-viewer-controller`
@@ -492,44 +492,62 @@ One MUI icon can have multiple aliases. Custom SVG icons (`LegendIcon`, `ClearHi
 
 Store hooks live in `packages/geoview-core/src/core/stores/store-interface-and-intial-values/` with files per slice: `map-state.ts`, `layer-state.ts`, `ui-state.ts`, `data-table-state.ts`, etc.
 
-**Naming pattern**: `use{SliceName}{PropertyName}`
+Each slice exports three types of functions with consistent naming:
+
+| Type                 | Pattern                                           | Context                             |
+| -------------------- | ------------------------------------------------- | ----------------------------------- |
+| **Selector hooks**   | `useStore{SliceName}{PropertyName}`               | React components only               |
+| **Getter functions** | `getStore{SliceName}{PropertyName}(mapId)`        | Controllers and non-React code      |
+| **Setter functions** | `setStore{SliceName}{PropertyName}(mapId, value)` | Controllers only — never from React |
 
 ```typescript
-// Selector hooks — one per state property
-export const useMapZoom = (): number =>
+// Selector hooks — React components only (re-render on change)
+export const useStoreMapZoom = (): number =>
   useStore(useGeoViewStore(), (state) => state.mapState.zoom);
 
-export const useLayerLegendLayers = (): TypeLegendLayer[] =>
-  useStore(useGeoViewStore(), (state) => state.layerState.legendLayers);
+export const useStoreLayerSelectedLayerPath = (): string | undefined | null =>
+  useStore(useGeoViewStore(), (state) => state.layerState.selectedLayerPath);
 
-// Actions hook — one per slice
-export const useMapStoreActions = (): MapActions =>
-  useStore(useGeoViewStore(), (state) => state.mapState.actions);
+export const useStoreUIActiveFooterBarTab = (): string =>
+  useStore(useGeoViewStore(), (state) => state.uiState.activeFooterBarTab);
 
-export const useLayerStoreActions = (): LayerActions =>
-  useStore(useGeoViewStore(), (state) => state.layerState.actions);
+// Getter functions — point-in-time snapshots for controllers AND react components (no re-render)
+export const getStoreMapZoom = (mapId: string): number =>
+  getStoreMapState(mapId).zoom;
+
+// Setter functions — mutate state from controllers
+export const setStoreMapClickMarker = (
+  mapId: string,
+  marker: TypeClickMarker,
+): void => {
+  getStoreMapState(mapId).actions.showClickMarker(marker);
+};
 ```
 
 ### Store Access Patterns
 
-**React components** read state via store hooks, call controllers for mutations:
+**React components** read state via `useStore*` hooks (render), via `getStore*` getters (point-in-time snapshot), call controllers for mutations:
 
 ```typescript
 // ✅ In React component — read from store hook
-const zoom = useMapZoom();
-const legendLayers = useLayerLegendLayers();
+const zoom = useStoreMapZoom();
+const selectedLayerPath = useStoreLayerSelectedLayerPath();
 
 // ✅ In React component — mutate via controller
 const mapController = useMapController();
 mapController.zoomToExtent(extent);
 ```
 
-**Controllers** update the store directly via setter functions:
+**Controllers** read via `getStore*` getters, mutate via `setStore*` setters:
 
 ```typescript
 // ✅ In a controller method
-import { setStoreMapClickMarker } from "@/core/stores/store-interface-and-intial-values/map-state";
+import {
+  getStoreMapZoom,
+  setStoreMapClickMarker,
+} from "@/core/stores/store-interface-and-intial-values/map-state";
 
+const currentZoom = getStoreMapZoom(this.getMapId());
 setStoreMapClickMarker(this.getMapId(), projectedCoords[0]);
 ```
 
@@ -546,6 +564,12 @@ this.getControllersRegistry().mapController.applyLayerFilters(layerPath);
 - Config validation happens via `src/api` files in geoview-core
 - Plugin packages have their own config schemas (default-config-\*.json) but rely on core's validation APIs
 - Use `ConfigApi` and `ConfigValidation` classes from geoview-core for config operations
+
+### URL Validation & File Extension Constants
+
+- **`validateAndPingUrl()`** (`core/utils/utilities.ts`) validates URL syntax and server reachability using a multi-step fallback strategy: HEAD → OGC GetCapabilities (WMS/WFS/WMTS) → file extension probe (GET with `Range: bytes=0-0`). Both the direct and CORS-proxy paths include file extension fallback.
+- **`VALID_FILE_EXTENSIONS`**, **`VALID_FILE_EXTENSIONS_REGEX`**, and **`VALID_FILE_EXTENSIONS_ACCEPT`** in `core/utils/constant.ts` are the single source of truth for recognized file extensions (`.json`, `.geojson`, `.csv`, `.kml`, `.gpkg`, `.tif`, `.tiff`, `.zip`, `.shp`, `.wkb`). Always use these constants instead of hardcoding extension lists.
+- **`guessLayerType()`** in `config-api.ts` maps file extensions to layer types. Its regex patterns must support query parameters (use `(?:$|\?)` anchors, not `endsWith`).
 
 ## Comments, JSDoc & Logging Standards
 
