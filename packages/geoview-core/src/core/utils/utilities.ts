@@ -461,8 +461,7 @@ function isOgcCapabilitiesResponse(text: string): boolean {
 /**
  * Attempts a lightweight GET request (Range: bytes=0-0) on a file-based URL to check reachability.
  *
- * Only runs when the URL matches a recognized file extension. The response body is not consumed —
- * the request is aborted immediately after headers arrive.
+ * Only runs when the URL matches a recognized file extension. The response body is not consumed.
  *
  * @param url - The URL to probe (may be proxied)
  * @returns True if the server responded with a status below 400, false otherwise
