@@ -44,7 +44,8 @@ export const useGeolocator = (): UseGeolocatorReturn => {
   const geolocatorServiceURL = useStoreAppGeolocatorServiceURL();
 
   // Refs
-  const displayLanguageRef = useRef(displayLanguage);
+  const searchValueRef = useRef(searchValue);
+  searchValueRef.current = searchValue;
   const abortControllerRef = useRef<AbortController | null>(null);
   const fetchTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>();
 
@@ -122,7 +123,7 @@ export const useGeolocator = (): UseGeolocatorReturn => {
         const newAbortController = new AbortController();
         abortControllerRef.current = newAbortController;
 
-        const currentUrl = `${geolocatorServiceURL}&lang=${displayLanguageRef.current}`;
+        const currentUrl = `${geolocatorServiceURL}&lang=${displayLanguage}`;
         const result = await Fetch.fetchJson<GeoListItem[]>(`${currentUrl}&q=${encodeURIComponent(`${cleanSearchTerm}*`)}`, {
           signal: abortControllerRef.current.signal,
         });
@@ -137,7 +138,7 @@ export const useGeolocator = (): UseGeolocatorReturn => {
         clearTimeout(fetchTimerRef.current);
       }
     },
-    [geolocatorServiceURL]
+    [geolocatorServiceURL, displayLanguage]
   );
 
   /**
@@ -167,14 +168,10 @@ export const useGeolocator = (): UseGeolocatorReturn => {
    * Re-fetches results when the display language changes.
    */
   useEffect(() => {
-    logger.logTraceUseEffect('GEOLOCATOR - change language', displayLanguage, searchValue);
+    logger.logTraceUseEffect('GEOLOCATOR - change language', displayLanguage);
 
-    // Set language and redo request
-    displayLanguageRef.current = displayLanguage;
-    getGeolocations(searchValue);
-
-    // Only listen to change in language and getGeolocations to request new value with updated language
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Re-fetch with the current search value using the updated language
+    getGeolocations(searchValueRef.current);
   }, [displayLanguage, getGeolocations]);
 
   return {
