@@ -992,7 +992,8 @@ export const useStoreLayerIsParentHiddenOnMapSet = (): Record<string, boolean> =
   });
 };
 
-/** Selects the visible layer paths derived from legendLayers.
+/**
+ * Selects the visible layer paths derived from legendLayers.
  *
  * @returns The array of visible layer paths
  */
