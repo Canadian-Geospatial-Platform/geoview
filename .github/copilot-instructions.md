@@ -296,6 +296,15 @@ const handleClickWrapper = useCallback(
 - Reduces unnecessary re-renders of memoized child components
 - Module-level constants (`const FADE_DURATION = 200`) belong **outside** the component function to avoid re-creation on every render
 
+**Dependency Array Hygiene:**
+
+**Remove any variable from a `useEffect`/`useCallback`/`useMemo` dependency array that is not actually used inside the hook body.** Do this proactively — do not wait to be asked. This includes:
+- Stable `useCallback(fn, [])` references listed out of habit
+- `useState` setters (always stable, never needed as deps)
+- Ref objects (`useRef` — always stable)
+
+The one legitimate exception is a "trigger token" — a value whose identity change drives re-execution even though its value isn't consumed inside the body. In that case, add an explicit comment explaining why.
+
 **useMemo Naming Convention:**
 
 When using `useMemo`, prefix the variable name with `memo` followed by camelCase:
