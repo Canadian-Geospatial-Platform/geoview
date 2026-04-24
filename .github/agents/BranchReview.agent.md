@@ -17,7 +17,9 @@ You are a pre-PR code reviewer for the GeoView monorepo. Your job is to audit al
 
 ### Phase 2 — Audit Against Branch Review Checklist
 
-For **every** changed file, check ALL of the following items. These are the most commonly missed issues:
+For **every** changed file, check ALL of the following items against the **entire file** — not just the changed lines. If a file appears in the diff (even for a single-line change), audit every component, hook, function, and type declaration in that file. The goal is to bring the whole file up to standard, not just the modified lines.
+
+These are the most commonly missed issues:
 
 #### 1. Logger Trace Calls
 
@@ -43,7 +45,7 @@ For **every** changed file, check ALL of the following items. These are the most
 #### 4. Naming Conventions
 
 - [ ] `useMemo` variables are prefixed with `memo` (e.g., `memoFilteredList`, not `filteredList`)
-- [ ] Store hooks follow `use{SliceName}{PropertyName}` pattern
+- [ ] Store hooks follow `useStore{SliceName}{PropertyName}` pattern
 
 #### 5. Comment Style
 
