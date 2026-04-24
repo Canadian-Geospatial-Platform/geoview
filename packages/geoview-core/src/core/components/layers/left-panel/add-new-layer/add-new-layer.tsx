@@ -78,7 +78,7 @@ function FileUploadSection({
   const uiController = useUIController();
 
   // State
-  const [localDisplayURL, setLocalDisplayURL] = useState(displayURL);
+  const [localDisplayURL, setLocalDisplayURL] = useState<string>(displayURL);
   const dragPopover = useRef(null);
   const [drag, setDrag] = useState<boolean>(false);
 
@@ -726,12 +726,7 @@ export function AddNewLayer(): JSX.Element {
   };
 
   /**
-   * Handle file selection from the FileUploadSection component
-   *
-   * @param file - The selected file object
-   * @param fileURL - The blob URL created for the file
-   * @param fileName - The name of the file without extension
-   * @description Updates state with file information and enables the continue button
+   * Handles file selection from the FileUploadSection component.
    */
   const handleFileSelected = (file: File, fileURL: string, fileName: string): void => {
     setDisplayURL(file.name);
@@ -745,10 +740,7 @@ export function AddNewLayer(): JSX.Element {
   };
 
   /**
-   * Handle URL input changes from the FileUploadSection component
-   *
-   * @param url - The URL entered by the user
-   * @description Updates state with the new URL and resets related fields
+   * Handles URL input changes from the FileUploadSection component.
    */
   const handleUrlChanged = (url: string): void => {
     setDisplayURL(url);
@@ -762,7 +754,13 @@ export function AddNewLayer(): JSX.Element {
 
   // #endregion
 
+  /**
+   * Validates the URL and manages step button state when the active step or inputs change.
+   */
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('ADD-NEW-LAYER - URL validation and step state', layerURL, activeStep, layerIdsToAdd, layerType);
+
     if (activeStep === 0) {
       // Validate URL for step 1
       const validateUrl = async (): Promise<void> => {
@@ -817,7 +815,13 @@ export function AddNewLayer(): JSX.Element {
     if (activeStep === 2 && !layerIdsToAdd.length) setStepButtonEnabled(false);
   }, [layerURL, activeStep, layerIdsToAdd, layerType, uiController]);
 
+  /**
+   * Manages input focus when the active step changes.
+   */
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('ADD-NEW-LAYER - step focus management', activeStep);
+
     if (activeStep === 1) {
       (serviceTypeRef.current?.getElementsByTagName('input')[0].previousSibling as HTMLDivElement).focus();
     }

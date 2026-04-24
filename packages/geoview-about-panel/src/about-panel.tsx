@@ -39,6 +39,9 @@ function MarkdownFromPath(props: TypeMarkdownFromPathProps): JSX.Element {
   const theme = ui.useTheme();
   const sxClasses = getSxClasses(theme);
 
+  /**
+   * Fetches and loads the markdown content when the path changes.
+   */
   useEffect(() => {
     logger.logTraceUseEffect('ABOUT-PANEL - fetch markdown', { mdPath });
 
