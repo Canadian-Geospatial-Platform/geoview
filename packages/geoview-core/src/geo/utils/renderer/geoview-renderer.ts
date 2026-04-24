@@ -1509,6 +1509,79 @@ export abstract class GeoviewRenderer {
   }
 
   /**
+   * Evaluate an Arcade expression using feature data.
+   *
+   * Supports field references, conditional logic (if/else, ternary), comparison operators,
+   * logical operators, and basic string functions (upper, lower).
+   *
+   * @param expression - Arcade expression string (e.g., "if($feature.STATUS == 'Active') return 'A' else return 'B'")
+   * @param feature - Feature containing field data
+   * @returns The evaluated result (string, number, or boolean) or null if evaluation fails
+   */
+  static evaluateArcadeExpression(expression: string, feature: Feature): string | number | boolean | null {
+    try {
+      // Replace $feature.fieldName with actual values
+      let evaluableExpression = expression.replace(/\$feature\.([a-zA-Z_][\w]*)/g, (match, fieldName) => {
+        const value = feature.get(fieldName);
+        if (value === undefined || value === null) return 'null';
+        // Wrap strings in quotes for JavaScript evaluation
+        if (typeof value === 'string') return `'${value.replace(/'/g, "\\'")}'`;
+        return String(value);
+      });
+
+      // Replace $feature["fieldName"] or $feature['fieldName'] with actual values
+      evaluableExpression = evaluableExpression.replace(/\$feature\[["']([^"']+)["']\]/g, (match, fieldName) => {
+        const value = feature.get(fieldName);
+        if (value === undefined || value === null) return 'null';
+        // Wrap strings in quotes for JavaScript evaluation
+        if (typeof value === 'string') return `'${value.replace(/'/g, "\\'")}'`;
+        return String(value);
+      });
+
+      // Replace Arcade 'else' with JavaScript 'else'
+      evaluableExpression = evaluableExpression.replace(/\belse\b/g, 'else');
+
+      // Safety check: whitelist allowed characters and keywords
+      // Allow: alphanumeric, operators, parentheses, quotes, whitespace, keywords (if, else, return, upper, lower)
+      if (!/^[\w\s+\-*/%<>=!&|?:;(){}[\]'".,]+$/i.test(evaluableExpression)) {
+        logger.logWarning('Invalid characters in Arcade expression:', expression);
+        return null;
+      }
+
+      // Handle upper and lower functions
+      evaluableExpression = evaluableExpression.replace(/\bupper\s*\(([^)]+)\)/gi, '($1).toString().toUpperCase()');
+      evaluableExpression = evaluableExpression.replace(/\blower\s*\(([^)]+)\)/gi, '($1).toString().toLowerCase()');
+
+      // Convert Arcade if/else statements to valid JavaScript
+      // Arcade: if (condition) return value else return value
+      // JavaScript: if (condition) { return value; } else { return value; }
+      const hasIfStatement = /\bif\s*\(/i.test(evaluableExpression);
+
+      let result;
+      if (hasIfStatement) {
+        // For if/else statements, wrap returns with braces and semicolons
+        const jsExpression = evaluableExpression
+          // Add braces around if-block: if (condition) return value -> if (condition) { return value; }
+          .replace(/\bif\s*\(([^)]+)\)\s*return\s+([^;]+?)(?=\s*else|\s*$)/gi, 'if ($1) { return $2; }')
+          // Add braces around else-block: else return value -> else { return value; }
+          .replace(/\belse\s+return\s+([^;]+?)(?=\s*$|;)/gi, 'else { return $1; }');
+
+        // Execute as function body (no outer return needed)
+        result = new Function(jsExpression)();
+      } else {
+        // For simple expressions or ternaries, use return wrapper
+        result = new Function(`return ${evaluableExpression}`)();
+      }
+
+      // Return the result (can be string, number, or boolean)
+      return result !== undefined && result !== null ? result : null;
+    } catch (error) {
+      logger.logWarning('Failed to evaluate Arcade expression:', expression, error);
+      return null;
+    }
+  }
+
+  /**
    * Evaluate a simple value expression using feature data.
    *
    * Supports basic arithmetic operations and field references.
@@ -1865,6 +1938,7 @@ export abstract class GeoviewRenderer {
    * @param feature - Optional feature used to test the unique value conditions
    * @param domainsLookup - Optional lookup table to handle coded value domains
    * @param aliasLookup - Optional lookup table to handle field name aliases
+   * @param valueExpression - Optional Arcade expression to evaluate instead of using fields
    * @returns The Style created, or undefined if unable to create it
    */
   static searchUniqueValueEntry(
@@ -1872,10 +1946,26 @@ export abstract class GeoviewRenderer {
     uniqueValueStyleInfo: TypeLayerStyleConfigInfo[],
     feature?: Feature,
     domainsLookup?: TypeLayerMetadataFields[],
-    aliasLookup?: TypeAliasLookup
+    aliasLookup?: TypeAliasLookup,
+    valueExpression?: string
   ): TypeLayerStyleConfigInfo | undefined {
     // If no feature
     if (!feature) return undefined;
+
+    // If valueExpression is provided, evaluate it and match against values[0]
+    if (valueExpression) {
+      const evaluatedValue = this.evaluateArcadeExpression(valueExpression, feature);
+      if (evaluatedValue === null) return undefined;
+
+      // Match against uniqueValueStyleInfo[].values[0] (first value in array)
+      for (let i = 0; i < uniqueValueStyleInfo.length; i++) {
+        // eslint-disable-next-line eqeqeq
+        if (String(evaluatedValue) == String(uniqueValueStyleInfo[i].values[0])) {
+          return uniqueValueStyleInfo[i];
+        }
+      }
+      return undefined;
+    }
 
     // Get the feature keys
     const featureKeys = feature.getKeys();
@@ -1959,8 +2049,8 @@ export abstract class GeoviewRenderer {
     if (feature && !this.featureRespectsFilterEquation(feature, filterEquation)) return undefined;
 
     if (styleSettings.type === 'uniqueValue') {
-      const { hasDefault, fields, info } = styleSettings;
-      const styleEntry = this.searchUniqueValueEntry(fields, info, feature, domainsLookup, aliasLookup);
+      const { hasDefault, fields, info, valueExpression } = styleSettings;
+      const styleEntry = this.searchUniqueValueEntry(fields, info, feature, domainsLookup, aliasLookup, valueExpression);
 
       if (styleEntry && (bypassVisibility || styleEntry.visible !== false))
         return this.processSimplePoint(styleEntry.settings, feature, { visualVariables });
@@ -1993,8 +2083,8 @@ export abstract class GeoviewRenderer {
     if (feature && !this.featureRespectsFilterEquation(feature, filterEquation)) return undefined;
 
     if (styleSettings.type === 'uniqueValue') {
-      const { hasDefault, fields, info } = styleSettings;
-      const styleEntry = this.searchUniqueValueEntry(fields, info, feature, domainsLookup, aliasLookup);
+      const { hasDefault, fields, info, valueExpression } = styleSettings;
+      const styleEntry = this.searchUniqueValueEntry(fields, info, feature, domainsLookup, aliasLookup, valueExpression);
 
       if (styleEntry && (bypassVisibility || styleEntry.visible !== false))
         return this.processSimpleLineString(styleEntry.settings, feature, { visualVariables });
@@ -2027,8 +2117,8 @@ export abstract class GeoviewRenderer {
     if (feature && !this.featureRespectsFilterEquation(feature, filterEquation)) return undefined;
 
     if (styleSettings.type === 'uniqueValue') {
-      const { hasDefault, fields, info } = styleSettings;
-      const styleEntry = this.searchUniqueValueEntry(fields, info, feature, domainsLookup, aliasLookup);
+      const { hasDefault, fields, info, valueExpression } = styleSettings;
+      const styleEntry = this.searchUniqueValueEntry(fields, info, feature, domainsLookup, aliasLookup, valueExpression);
 
       if (styleEntry && (bypassVisibility || styleEntry.visible !== false))
         return this.processSimplePolygon(styleEntry.settings, feature, { visualVariables });
@@ -2044,37 +2134,56 @@ export abstract class GeoviewRenderer {
   /**
    * Search the class break entry using the field value stored in the feature.
    *
-   * @param field - Field involved in the class break definition
+   * @param field - Optional field involved in the class break definition
    * @param classBreakStyleInfo - Class break configuration
    * @param feature - Feature used to test the class break conditions
    * @param aliasLookup - Optional lookup table to handle field name aliases
+   * @param valueExpression - Optional Arcade expression to evaluate instead of using field
    * @returns The matching entry, or undefined if unable to find it
    */
   static searchClassBreakEntry(
-    field: string,
+    field: string | undefined,
     classBreakStyleInfo: TypeLayerStyleConfigInfo[],
     feature: Feature,
-    aliasLookup?: TypeAliasLookup
+    aliasLookup?: TypeAliasLookup,
+    valueExpression?: string
   ): TypeLayerStyleConfigInfo | undefined {
-    // For obscure reasons, it seems that sometimes the field names in the feature do not have the same case as those in the
-    // class break definition.
-    const featureKey = feature.getKeys().filter((key) => {
-      return key.toLowerCase() === field.toLowerCase();
-    });
+    let fieldValue: number;
 
-    // Failed to find match: Attempt to find the alias key from the names
-    if (featureKey.length !== 1 && aliasLookup && Object.keys(aliasLookup).length > 0) {
-      if (field in Object.keys(aliasLookup)) {
-        featureKey.push(aliasLookup[field]);
+    // If valueExpression is provided, evaluate it
+    if (valueExpression) {
+      const evaluatedValue = this.evaluateArcadeExpression(valueExpression, feature);
+      if (evaluatedValue === null) return undefined;
+
+      fieldValue = Number(evaluatedValue);
+      if (Number.isNaN(fieldValue)) {
+        logger.logWarning('Class breaks valueExpression did not return a numeric value:', evaluatedValue);
+        return undefined;
       }
+    } else if (field) {
+      // For obscure reasons, it seems that sometimes the field names in the feature do not have the same case as those in the
+      // class break definition.
+      const featureKey = feature.getKeys().filter((key) => {
+        return key.toLowerCase() === field.toLowerCase();
+      });
+
+      // Failed to find match: Attempt to find the alias key from the names
+      if (featureKey.length !== 1 && aliasLookup && Object.keys(aliasLookup).length > 0) {
+        if (field in Object.keys(aliasLookup)) {
+          featureKey.push(aliasLookup[field]);
+        }
+      }
+
+      if (featureKey.length !== 1) return undefined;
+
+      const fieldValueRaw = feature.get(featureKey[0]);
+
+      // Try to read it as a number, because we're in class break rendering mode, don't trust the service to sometimes return a string value like '1234' here..
+      fieldValue = Number(fieldValueRaw);
+    } else {
+      // Neither valueExpression nor field provided
+      return undefined;
     }
-
-    if (featureKey.length !== 1) return undefined;
-
-    const fieldValueRaw = feature.get(featureKey[0]);
-
-    // Try to read it as a number, because we're in class break rendering mode, don't trust the service to sometimes return a string value like '1234' here..
-    const fieldValue = Number(fieldValueRaw);
 
     // For each bucket
     for (let i = 0; i < classBreakStyleInfo.length; i++) {
@@ -2154,8 +2263,8 @@ export abstract class GeoviewRenderer {
     if (feature && !this.featureRespectsFilterEquation(feature, filterEquation)) return undefined;
 
     if (styleSettings.type === 'classBreaks') {
-      const { hasDefault, fields, info } = styleSettings;
-      const foundClassBreakInfo = feature && this.searchClassBreakEntry(fields[0], info, feature, aliasLookup);
+      const { hasDefault, fields, info, valueExpression } = styleSettings;
+      const foundClassBreakInfo = feature && this.searchClassBreakEntry(fields[0], info, feature, aliasLookup, valueExpression);
 
       // If found a class break renderer that works for the value of the feature
       if (foundClassBreakInfo && (bypassVisibility || foundClassBreakInfo.visible !== false)) {
@@ -2191,8 +2300,8 @@ export abstract class GeoviewRenderer {
     if (feature && !this.featureRespectsFilterEquation(feature, filterEquation)) return undefined;
 
     if (styleSettings.type === 'classBreaks') {
-      const { hasDefault, fields, info } = styleSettings;
-      const foundClassBreakInfo = feature && this.searchClassBreakEntry(fields[0], info, feature, aliasLookup);
+      const { hasDefault, fields, info, valueExpression } = styleSettings;
+      const foundClassBreakInfo = feature && this.searchClassBreakEntry(fields[0], info, feature, aliasLookup, valueExpression);
 
       // If found a class break renderer that works for the value of the feature
       if (foundClassBreakInfo && (bypassVisibility || foundClassBreakInfo.visible !== false)) {
@@ -2228,8 +2337,8 @@ export abstract class GeoviewRenderer {
     if (feature && !this.featureRespectsFilterEquation(feature, filterEquation)) return undefined;
 
     if (styleSettings.type === 'classBreaks') {
-      const { hasDefault, fields, info } = styleSettings;
-      const foundClassBreakInfo = feature && this.searchClassBreakEntry(fields[0], info, feature, aliasLookup);
+      const { hasDefault, fields, info, valueExpression } = styleSettings;
+      const foundClassBreakInfo = feature && this.searchClassBreakEntry(fields[0], info, feature, aliasLookup, valueExpression);
 
       // If found a class break renderer that works for the value of the feature
       if (foundClassBreakInfo && (bypassVisibility || foundClassBreakInfo.visible !== false)) {
@@ -2743,6 +2852,12 @@ export abstract class GeoviewRenderer {
     outFields: TypeOutfields[],
     useExtraSpacingInFilter: boolean = false
   ): string {
+    // If valueExpression is used, skip server-side filter generation
+    if (styleSettings.valueExpression) {
+      logger.logDebug('Cannot generate server-side filter for valueExpression-based unique value renderer');
+      return this.DEFAULT_FILTER_1EQUALS1;
+    }
+
     const spacing = useExtraSpacingInFilter ? ' ' : '';
     const quote = useExtraSpacingInFilter ? '"' : '';
 
@@ -2806,6 +2921,12 @@ export abstract class GeoviewRenderer {
    * Returns an always-true (`1=1`) if all features are visible, or an always-false (`1=0`) if no features are visible.
    */
   static #buildQueryClassBreaksFilter(styleSettings: TypeLayerStyleSettings, outfields: TypeOutfields[]): string {
+    // If valueExpression is used (indicated by empty fields array), skip server-side filter generation
+    if (styleSettings.fields.length === 0 || styleSettings.valueExpression) {
+      logger.logDebug('Cannot generate server-side filter for valueExpression-based class breaks renderer');
+      return this.DEFAULT_FILTER_1EQUALS1;
+    }
+
     const field = styleSettings.fields[0];
     const { info } = styleSettings;
     const { hasDefault } = styleSettings;
