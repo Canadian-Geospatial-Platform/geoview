@@ -339,9 +339,15 @@ export abstract class EsriRenderer {
   static #processUniqueValueRenderer(renderer: EsriUniqueValueRenderer): TypeLayerStyleConfig | undefined {
     const style: TypeLayerStyleConfig = {};
     const fields = [];
-    if (renderer.field1) fields.push(renderer.field1);
-    if (renderer.field2) fields.push(renderer.field2);
-    if (renderer.field3) fields.push(renderer.field3);
+
+    // Check if valueExpression is used instead of fields
+    if (renderer.valueExpression) {
+      logger.logDebug('Using valueExpression for unique value renderer');
+    } else {
+      if (renderer.field1) fields.push(renderer.field1);
+      if (renderer.field2) fields.push(renderer.field2);
+      if (renderer.field3) fields.push(renderer.field3);
+    }
 
     const uniqueValueStyleInfo: TypeLayerStyleConfigInfo[] = [];
     renderer.uniqueValueInfos.forEach((symbolInfo) => {
@@ -384,6 +390,12 @@ export abstract class EsriRenderer {
         fields,
         info: uniqueValueStyleInfo,
       };
+
+      // Store valueExpression if present
+      if (renderer.valueExpression) {
+        styleSettings.valueExpression = renderer.valueExpression;
+      }
+
       if (styleGeometry) {
         style[styleGeometry] = styleSettings;
         if (renderer.visualVariables) {
@@ -434,8 +446,16 @@ export abstract class EsriRenderer {
    * @returns The Geoview style, or undefined if it can not be created
    */
   static #processClassBreakRenderer(renderer: EsriClassBreakRenderer): TypeLayerStyleConfig | undefined {
-    const { field } = renderer;
     const style: TypeLayerStyleConfig = {};
+    const fields = [];
+
+    // Check if valueExpression is used instead of field
+    if (renderer.valueExpression) {
+      logger.logDebug('Using valueExpression for class breaks renderer');
+    } else if (renderer.field) {
+      fields.push(renderer.field);
+    }
+
     const classBreakStyleInfo: TypeLayerStyleConfigInfo[] = [];
     for (let i = 0; i < renderer.classBreakInfos.length; i++) {
       const settings = this.convertSymbol(renderer.classBreakInfos[i].symbol);
@@ -478,10 +498,15 @@ export abstract class EsriRenderer {
       if (styleGeometry) {
         const styleSettings: TypeLayerStyleSettings = {
           type: 'classBreaks',
-          fields: [field],
+          fields,
           hasDefault,
           info: classBreakStyleInfo,
         };
+
+        // Store valueExpression if present
+        if (renderer.valueExpression) {
+          styleSettings.valueExpression = renderer.valueExpression;
+        }
 
         style[styleGeometry] = styleSettings;
         if (renderer.visualVariables) {
@@ -510,12 +535,14 @@ export interface EsriUniqueValueRenderer extends EsriBaseRenderer {
   type: 'uniqueValue';
   defaultLabel: string;
   defaultSymbol: EsriSymbol;
-  field1: string;
-  field2: string;
-  field3: string;
+  field1?: string;
+  field2?: string;
+  field3?: string;
   fieldDelimiter: string;
   rotationType: 'arithmetic' | 'geographic';
   uniqueValueInfos: EsriUniqueValueInfo[];
+  valueExpression?: string;
+  valueExpressionTitle?: string;
 }
 
 export type EsriUniqueValueInfo = {
@@ -616,9 +643,11 @@ export interface EsriClassBreakRenderer extends EsriBaseRenderer {
   classBreakInfos: EsriClassBreakInfoEntry[];
   defaultLabel: string;
   defaultSymbol: EsriSymbol;
-  field: string;
+  field?: string;
   minValue: number;
   rotationExpression: string;
   rotationType: 'arithmetic' | 'geographic';
+  valueExpression?: string;
+  valueExpressionTitle?: string;
 }
 // #endregion TYPE & INTERFACE
