@@ -664,6 +664,7 @@ export type TypeLayerStyleSettings = {
   hasDefault: boolean;
   info: TypeLayerStyleConfigInfo[];
   visualVariables?: TypeLayerStyleVisualVariable[];
+  valueExpression?: string;
 };
 
 /** Information needed to render the feature. */
