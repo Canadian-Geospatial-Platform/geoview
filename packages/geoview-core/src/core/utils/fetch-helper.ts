@@ -241,7 +241,7 @@ export abstract class Fetch {
    * @throws {ResponseContentError} When the fetched blob is of type 'text/xml', indicating an unexpected server error
    * @throws {NetworkError} When a network issue happened
    */
-  static async fetchBlobImage(url: string, init?: RequestInit, timeoutMs?: number): Promise<string | ArrayBuffer | null> {
+  static async fetchBlobImage(url: string, init?: RequestInit, timeoutMs?: number): Promise<string> {
     // Fetch the blob
     const blob = await Fetch.fetchBlob(url, init, timeoutMs);
 
