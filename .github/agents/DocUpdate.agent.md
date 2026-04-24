@@ -45,15 +45,6 @@ Check for:
 - **EN/FR inconsistency**: Content present in one language but missing or different in the other (e.g., a file type listed in EN but not FR, or a section translated differently)
 - **Stale instructions**: Steps or workflows described in the guide that no longer match the current UI flow
 
-Key code areas to cross-reference against the guides:
-
-| Guide Topic                        | Code Location                                                                                    |
-| ---------------------------------- | ------------------------------------------------------------------------------------------------ |
-| Accepted file types                | `VALID_FILE_EXTENSIONS` in `core/utils/constant.ts`, file upload `accept` in `add-new-layer.tsx` |
-| Supported layer/service types      | `guessLayerType()` in `config-api.ts`, layer type constants                                      |
-| Map controls & UI                  | `packages/geoview-core/src/core/components/`, config schema                                      |
-| Keyboard shortcuts & accessibility | Component event handlers, WCAG patterns                                                          |
-
 Include guide findings in the Phase 4 report under a dedicated `### Guide Files` section.
 
 ### Phase 4 — Report
