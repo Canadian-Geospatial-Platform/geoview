@@ -9,6 +9,7 @@ interface GuideType {
  *
  * Memoized to prevent re-renders when parent updates but containerType has not changed.
  *
+ * @param props - Properties defined in GuideType interface
  * @returns The guide component
  */
 export declare const Guide: import("react").NamedExoticComponent<GuideType>;

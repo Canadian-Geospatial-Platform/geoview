@@ -20,10 +20,11 @@ interface LayoutProps {
 }
 /** Methods exposed by the Layout component via ref. */
 interface LayoutExposedMethods {
+    /** Shows or hides the right panel. */
     showRightPanel: (visible: boolean) => void;
 }
 /**
- * Two-panel layout with a layer list on the left and content on the right.
+ * Creates a two-panel layout with a layer list on the left and content on the right.
  *
  * @param props - Layout properties
  * @param ref - Ref exposing showRightPanel method

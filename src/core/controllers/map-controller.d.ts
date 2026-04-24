@@ -177,6 +177,16 @@ export declare class MapController extends AbstractMapViewerController {
      */
     setMapSize(size: Size, resizeMap?: boolean): void;
     /**
+     * Nudges the map center by an imperceptible amount to trigger extent change events.
+     *
+     * Useful for triggering extent-based listeners without visible map movement.
+     * The store is updated automatically via the MapViewer move-end event.
+     *
+     * @param offsetX - The horizontal offset in map units (default: 0.00001)
+     * @param offsetY - The vertical offset in map units (default: 0)
+     */
+    nudgeMapCenter(offsetX?: number, offsetY?: number): void;
+    /**
      * Rotates the map to the specified angle.
      *
      * The store is updated automatically via the MapViewer move-end event.

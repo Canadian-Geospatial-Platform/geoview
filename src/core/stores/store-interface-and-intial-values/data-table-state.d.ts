@@ -1,5 +1,5 @@
 import type { TypeFeatureInfoEntry, TypeLayerData, TypeResultSet, TypeResultSetEntry } from '@/api/types/map-schema-types';
-import type { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
+import { type TypeSetStore, type TypeGetStore } from '@/core/stores/geoview-store';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 /**
  * Represents the data table Zustand store slice.
@@ -37,11 +37,11 @@ export interface IDataTableState {
         setInitiallayerDataTableSetting: (layerPath: string) => void;
         setGlobalFilteredEntry: (globalFilterValue: string, layerPath: string) => void;
         setMapFilteredEntry: (mapFiltered: boolean, layerPath: string) => void;
+        setFilterDataToExtent: (filterDataToExtent: boolean, layerPath: string) => void;
         setRowsFilteredEntry: (rows: number, layerPath: string) => void;
         setSelectedFeature: (feature: TypeFeatureInfoEntry) => void;
         setSelectedLayerPath: (layerPath: string) => void;
         setTableFilters(newTableFilters: Record<string, string>): void;
-        setToolbarRowSelectedMessageEntry: (message: string, layerPath: string) => void;
     };
 }
 /**
@@ -106,6 +106,14 @@ export declare const useStoreDataTableLayerSettings: () => Record<string, IDataT
 /** Hook that returns the currently selected feature in the data table. */
 export declare const useStoreDataTableSelectedFeature: () => TypeFeatureInfoEntry | null;
 /**
+ * Gets whether the data table is filtered to the current map extent for a specific layer.
+ *
+ * @param mapId - The map identifier.
+ * @param layerPath - The layer path to check.
+ * @returns True if map extent filtering is enabled, or undefined if the layer has no settings.
+ */
+export declare const getStoreDataTableFilterDataToExtent: (mapId: string, layerPath: string) => boolean | undefined;
+/**
  * Initializes default data table settings for a layer in the store.
  *
  * @param mapId - The map identifier.
@@ -166,13 +174,21 @@ export declare const setStoreColumnsFiltersVisibility: (mapId: string, visible: 
  */
 export declare const setStoreGlobalFilteredEntry: (mapId: string, globalFilterValue: string, layerPath: string) => void;
 /**
- * Sets whether the data table is filtered to the current map extent for a layer in the store.
+ * Sets whether the map feature is filtered to the data table filters for a specific layer in the store.
  *
  * @param mapId - The map identifier.
  * @param mapFiltered - Whether map extent filtering is enabled.
  * @param layerPath - The target layer path.
  */
 export declare const setStoreMapFilteredEntry: (mapId: string, mapFiltered: boolean, layerPath: string) => void;
+/**
+ * Sets whether the data table is filtered to the current map extent for a layer in the store.
+ *
+ * @param mapId - The map identifier.
+ * @param filterDataToExtent - Whether filtering data to extent is enabled.
+ * @param layerPath - The target layer path.
+ */
+export declare const setStoreFilterDataToExtent: (mapId: string, filterDataToExtent: boolean, layerPath: string) => void;
 /**
  * Sets the filtered row count for a specific layer in the store.
  *
@@ -181,14 +197,6 @@ export declare const setStoreMapFilteredEntry: (mapId: string, mapFiltered: bool
  * @param layerPath - The target layer path.
  */
 export declare const setStoreRowsFilteredEntry: (mapId: string, rows: number, layerPath: string) => void;
-/**
- * Sets the toolbar row-selected message for a specific layer in the store.
- *
- * @param mapId - The map identifier.
- * @param message - The message to display.
- * @param layerPath - The target layer path.
- */
-export declare const setStoreToolbarRowSelectedMessageEntry: (mapId: string, message: string, layerPath: string) => void;
 /**
  * Adds or updates a table filter for a specific layer in the store.
  *
@@ -249,12 +257,12 @@ export interface IDataTableSettings {
     columnFilterModesRecord: Record<string, string>;
     /** Whether column filter inputs are visible. */
     columnsFiltersVisibility: boolean;
-    /** Whether the table is filtered to the current map extent. */
+    /** Whether the features in the map should reflect the filters applied in the data table. */
     mapFilteredRecord: boolean;
+    /** Whether the data table is filtered to the current map extent. */
+    filterDataToExtent: boolean;
     /** The number of rows matching the current filters. */
     rowsFilteredRecord: number;
-    /** The toolbar message shown when rows are selected. */
-    toolbarRowSelectedMessageRecord: string;
     /** The current global filter string applied across all columns. */
     globalFilterRecord: string;
 }

@@ -6,7 +6,7 @@ import type { IGeoViewColors } from '@/ui/style/types';
  * Configures all MUI component overrides, typography, palette, and spacing
  * to match GeoView's design system.
  *
- * @param geoViewColors - Color palette to generate theme from
+ * @param geoViewColors - Optional color palette to generate theme from
  * @returns Complete MUI ThemeOptions configuration
  */
 export declare const generateThemeOptions: (geoViewColors?: IGeoViewColors) => ThemeOptions;
