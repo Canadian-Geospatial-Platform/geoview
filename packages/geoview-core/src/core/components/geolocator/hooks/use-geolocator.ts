@@ -91,7 +91,7 @@ export const useGeolocator = (): UseGeolocatorReturn => {
     }
 
     return () => {};
-  }, [isLoading, resetState]);
+  }, [isLoading]);
 
   /**
    * Cleans up state on unmount.
