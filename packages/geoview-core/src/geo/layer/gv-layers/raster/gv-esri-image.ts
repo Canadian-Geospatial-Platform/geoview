@@ -611,13 +611,8 @@ export class GVEsriImage extends AbstractGVRaster {
           const renderingRule = encodeURIComponent(JSON.stringify({ rasterFunction: info.name }));
           const previewUrl = `${baseUrl}/exportImage?bbox=${bbox}&size=${size},${size}&f=image&renderingRule=${renderingRule}`;
 
-          const result = await Fetch.fetchBlobImage(previewUrl);
-          if (typeof result !== 'string') {
-            logger.logWarning(`fetchBlobImage returned non-string for raster function ${info.name}`);
-            return '';
-          }
-
           // Cache the result
+          const result = await Fetch.fetchBlobImage(previewUrl);
           this.#rasterFunctionPreviewCache.set(info.name, result);
           return result;
         } catch (error) {
