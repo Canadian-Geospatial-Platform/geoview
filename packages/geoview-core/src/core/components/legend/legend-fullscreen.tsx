@@ -259,7 +259,7 @@ export function LegendFullscreen({ layerPaths, mapId, containerType, isOpen, onC
         ))}
       </List>
     ));
-  }, [fullscreenLegendLayerList, memoNoLayersContent, memoSxClasses]);
+  }, [fullscreenLegendLayerList, memoNoLayersContent, containerType, memoSxClasses]);
 
   return (
     <FullScreenDialog
