@@ -16,5 +16,6 @@ export interface DataTableProps {
     data: MappedLayerDataType;
     layerPath: string;
     containerType: TypeContainerBox;
+    unfilteredFeaturesCount: number;
 }
 //# sourceMappingURL=data-table-types.d.ts.map

@@ -26,6 +26,6 @@ export interface FileExportProps {
  *
  * @returns The export modal component
  */
-export default function ExportModal(): JSX.Element;
+export declare function ExportModal(): JSX.Element;
 export {};
 //# sourceMappingURL=export-modal.d.ts.map

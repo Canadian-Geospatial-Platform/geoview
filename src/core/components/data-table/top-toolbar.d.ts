@@ -6,10 +6,6 @@ import type { SxStyles } from '@/ui/style/types';
 interface TopToolbarProps<TData extends ColumnsType> {
     /** Classes or styles for the component. */
     sxClasses: SxStyles;
-    /** Settings for the datatable, indexed by layerPath. */
-    datatableSettings: Record<string, {
-        toolbarRowSelectedMessageRecord: string;
-    }>;
     /** The path for the current layer being processed. */
     layerPath: string;
     /** Translation function for internationalization. */
@@ -33,6 +29,8 @@ interface TopToolbarProps<TData extends ColumnsType> {
     };
     /** The Material React Table instance. */
     table: MRTTableInstance<ColumnsType>;
+    /** The count of features before any filters are applied. */
+    unfilteredFeaturesCount?: number;
 }
 /**
  * Renders the top toolbar for the data table with filters, search, and export controls.

@@ -490,14 +490,13 @@ export declare abstract class GeoviewRenderer {
      * If the style does not exist for the geometryType, create it using the default style strategy.
      *
      * @param feature - Feature that need its style to be defined
-     * @param resolution - The resolution of the map
      * @param layerStyle - The style to use
      * @param label - The style label when one has to be created
      * @param filterEquation - Optional filter equation associated to the layer
      * @param callbackWhenCreatingStyle - Optional callback to execute when a new style had to be created
      * @returns The style applied to the feature, or undefined if not found
      */
-    static getAndCreateFeatureStyle(feature: FeatureLike, resolution: number, layerStyle: TypeLayerStyleConfig, label: string, filterEquation?: FilterNodeType[], callbackWhenCreatingStyle?: (geometryType: TypeStyleGeometry, style: TypeLayerStyleConfigInfo) => void): Style | undefined;
+    static getAndCreateFeatureStyle(feature: FeatureLike, layerStyle: TypeLayerStyleConfig, label: string, filterEquation?: FilterNodeType[], callbackWhenCreatingStyle?: (geometryType: TypeStyleGeometry, style: TypeLayerStyleConfigInfo) => void): Style | undefined;
     /**
      * Gets the image source from the style of the feature using the layer entry config.
      *

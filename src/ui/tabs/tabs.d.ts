@@ -21,6 +21,8 @@ type FocusItemProps = {
  * Tabs ui properties
  */
 export interface TypeTabsProps {
+    /** The map identifier associated with the tabs component. */
+    mapId: string;
     shellContainer?: HTMLElement;
     tabs: TypeTabs[];
     selectedTab?: number;
@@ -53,6 +55,7 @@ export interface TypeTabsProps {
  * @example
  * ```tsx
  * <Tabs
+ *   mapId="mapWM"
  *   tabs={[
  *     { id: 'tab1', value: 0, label: 'Tab 1', content: <div>Content 1</div> },
  *     { id: 'tab2', value: 1, label: 'Tab 2', content: <div>Content 2</div> }
@@ -60,6 +63,8 @@ export interface TypeTabsProps {
  *   selectedTab={0}
  *   containerType="panel"
  *   appHeight="100vh"
+ *   hiddenTabs={[]}
+ *   isFullScreen={false}
  *   onSelectedTabChanged={handleTabChange}
  * />
  * ```
