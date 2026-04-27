@@ -51,7 +51,7 @@ import linkifyHtml from 'linkify-html';
 import { isImage, delay, sanitizeHtmlContent, enhanceLinksAccessibility } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
-import { useFilterRows, useGlobalFilter } from './hooks';
+import { useFilterRows, useGlobalFilter, useColumnVisibility } from './hooks';
 import { getSxClasses } from './data-table-style';
 import { useLightBox } from '@/core/components/common';
 import { NUMBER_FILTER, DATE_FILTER, STRING_FILTER } from '@/core/utils/constant';
@@ -150,6 +150,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
   const { initLightBox, LightBoxComponent } = useLightBox();
   const { columnFilters, setColumnFilters } = useFilterRows({ layerPath });
   const { globalFilter, setGlobalFilter } = useGlobalFilter({ layerPath });
+  const { columnVisibility, onColumnVisibilityChange } = useColumnVisibility({ layerPath });
   // #endregion
 
   // #region HANDLERS
@@ -374,6 +375,9 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
               enableSorting: false,
               enableResizing: false,
               enableGlobalFilter: false,
+              // GV Pinned columns must never be hidden — Hide All / Show All would put MRT in a
+              // GV contradictory pinned+hidden state that triggers repeated onColumnVisibilityChange calls.
+              enableHiding: false,
               muiTableBodyCellProps: {
                 sx: memoSxClasses.pinnedColumn,
               },
@@ -382,6 +386,9 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
               },
             }
           : {}),
+
+        // GV geoviewID is an internal column that must always remain hidden from the user.
+        ...(value.alias === 'geoviewID' ? { enableHiding: false } : {}),
       });
     });
 
@@ -607,7 +614,6 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
     initialState: {
       showColumnFilters: datatableSettings[layerPath].columnsFiltersVisibility,
       showGlobalFilter: true,
-      columnVisibility: { geoviewID: false },
     },
     state: {
       sorting,
@@ -617,6 +623,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
       columnPinning: { left: ['ICON', 'ZOOM', 'DETAILS'] },
       globalFilter,
       columnFilterFns,
+      columnVisibility,
     },
     icons: {
       FilterListOffIcon: ClearFiltersIcon,
@@ -628,6 +635,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
     onColumnFiltersChange: setColumnFilters,
     onGlobalFilterChange: setGlobalFilter,
     onColumnFilterFnsChange: setColumnFilterFns,
+    onColumnVisibilityChange,
     enableBottomToolbar: false,
     positionToolbarAlertBanner: 'none', // hide existing row count
     renderTopToolbar: useCallback(
@@ -883,7 +891,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
     // Log
     logger.logTraceUseEffect('DATA-TABLE - columnFilterFns', columnFilterFns);
 
-    dataTableController.setColumnFilterModesEntry(layerPath, columnFilterFns);
+    dataTableController.setColumnFilterModesRecord(layerPath, columnFilterFns);
   }, [dataTableController, columnFilterFns, layerPath]);
 
   /**

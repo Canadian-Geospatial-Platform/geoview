@@ -1,5 +1,4 @@
 /* eslint-disable camelcase */
-import { memo } from 'react';
 
 import type { MRT_TableInstance as MRTTableInstance, MRT_ColumnDef } from 'material-react-table';
 import {
@@ -155,4 +154,4 @@ function TopToolbar(props: TopToolbarProps<ColumnsType>): JSX.Element {
   );
 }
 
-export default memo(TopToolbar);
+export default TopToolbar;

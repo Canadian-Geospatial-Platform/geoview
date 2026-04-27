@@ -32,7 +32,7 @@ export function useFilterRows({ layerPath }: UseFilterRowsProps): {
     // Log
     logger.logTraceUseEffect('USEFILTERROWS - columnFilters', columnFilters);
 
-    dataTableController.setColumnFiltersEntry(layerPath, columnFilters);
+    dataTableController.setColumnFiltersRecord(layerPath, columnFilters);
   }, [dataTableController, columnFilters, layerPath]);
 
   return { columnFilters, setColumnFilters };

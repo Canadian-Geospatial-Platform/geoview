@@ -5,13 +5,14 @@ import {
   addOrUpdateStoreDataTableFilter,
   getStoreDataTableSelectedLayerPath,
   getStoreDataTableMapFilteredRecord,
-  setStoreDataTableColumnFiltersEntry,
+  setStoreDataTableColumnFiltersRecord,
+  setStoreDataTableColumnVisibilityRecord,
   setStoreDataTableColumnsFiltersVisibility,
-  setStoreDataTableColumnFilterModesEntry,
+  setStoreDataTableColumnFilterModesRecord,
   setStoreDataTableFilterDataToExtent,
   setStoreDataTableMapFilteredRecord,
-  setStoreDataTableGlobalFilteredEntry,
-  setStoreDataTableRowsFilteredEntry,
+  setStoreDataTableGlobalFilterRecord,
+  setStoreDataTableRowsFilteredRecord,
   setStoreDataTableSelectedFeature,
   setStoreDataTableSelectedLayerPath,
   type TypeColumnFiltersState,
@@ -82,9 +83,9 @@ export class DataTableController extends AbstractMapViewerController {
    * @param layerPath - The path of the layer to update
    * @param globalFilterValue - The global filter value to set for the layer
    */
-  setGlobalFilteredEntry(layerPath: string, globalFilterValue: string): void {
+  setGlobalFilterRecord(layerPath: string, globalFilterValue: string): void {
     // Save in the store
-    setStoreDataTableGlobalFilteredEntry(this.getMapId(), globalFilterValue, layerPath);
+    setStoreDataTableGlobalFilterRecord(this.getMapId(), globalFilterValue, layerPath);
   }
 
   /**
@@ -93,9 +94,20 @@ export class DataTableController extends AbstractMapViewerController {
    * @param layerPath - The path of the layer to update
    * @param columnFilters - The column filters state to set for the layer
    */
-  setColumnFiltersEntry(layerPath: string, columnFilters: TypeColumnFiltersState): void {
+  setColumnFiltersRecord(layerPath: string, columnFilters: TypeColumnFiltersState): void {
     // Save in the store
-    setStoreDataTableColumnFiltersEntry(this.getMapId(), columnFilters, layerPath);
+    setStoreDataTableColumnFiltersRecord(this.getMapId(), columnFilters, layerPath);
+  }
+
+  /**
+   * Sets the column visibility state for a specific layer in the data table.
+   *
+   * @param layerPath - The path of the layer to update
+   * @param columnVisibility - A record mapping column ids to their visibility state
+   */
+  setColumnVisibilityRecord(layerPath: string, columnVisibility: Record<string, boolean>): void {
+    // Save in the store
+    setStoreDataTableColumnVisibilityRecord(this.getMapId(), columnVisibility, layerPath);
   }
 
   /**
@@ -104,9 +116,9 @@ export class DataTableController extends AbstractMapViewerController {
    * @param layerPath - The path of the layer to update
    * @param columnFilterModes - The column filter modes to set for the layer
    */
-  setColumnFilterModesEntry(layerPath: string, columnFilterModes: Record<string, string>): void {
+  setColumnFilterModesRecord(layerPath: string, columnFilterModes: Record<string, string>): void {
     // Save in the store
-    setStoreDataTableColumnFilterModesEntry(this.getMapId(), columnFilterModes, layerPath);
+    setStoreDataTableColumnFilterModesRecord(this.getMapId(), columnFilterModes, layerPath);
   }
 
   /**
@@ -137,9 +149,9 @@ export class DataTableController extends AbstractMapViewerController {
    * @param layerPath - The path of the layer to update
    * @param rows - The number of rows filtered for the layer
    */
-  setRowsFilteredEntry(layerPath: string, rows: number): void {
+  setRowsFilteredRecord(layerPath: string, rows: number): void {
     // Save in the store
-    setStoreDataTableRowsFilteredEntry(this.getMapId(), rows, layerPath);
+    setStoreDataTableRowsFilteredRecord(this.getMapId(), rows, layerPath);
   }
 
   /**

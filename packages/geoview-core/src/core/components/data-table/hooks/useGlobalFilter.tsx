@@ -30,7 +30,7 @@ export function useGlobalFilter({ layerPath }: UseGlobalFilterProps): {
     // Log
     logger.logTraceUseEffect('USEGLOBALFILTERS - globalFilters', globalFilter);
 
-    dataTableController.setGlobalFilteredEntry(layerPath, globalFilter);
+    dataTableController.setGlobalFilterRecord(layerPath, globalFilter);
   }, [dataTableController, globalFilter, layerPath]);
 
   return { globalFilter, setGlobalFilter };

@@ -79,7 +79,7 @@ export function useToolbarActionMessage({
     logger.logTraceUseEffect('USETOOLBARACTIONMESSAGE - set store toolbar message', memoToolbarMessage.filteredRowCount);
 
     // Update the store with the current filtered row count for the layer
-    dataTableController.setRowsFilteredEntry(layerPath, memoToolbarMessage.filteredRowCount);
+    dataTableController.setRowsFilteredRecord(layerPath, memoToolbarMessage.filteredRowCount);
   }, [dataTableController, layerPath, memoToolbarMessage.filteredRowCount, memoToolbarMessage.message]);
 
   return memoToolbarMessage.message;

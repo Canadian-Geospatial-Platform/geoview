@@ -44,14 +44,15 @@ export interface IDataTableState {
   /** Store actions callable from adaptors. */
   actions: {
     setAllFeaturesDataArray: (allFeaturesDataArray: TypeAllFeatureInfoResultSetEntry[]) => void;
-    setColumnFiltersEntry: (filtered: TypeColumnFiltersState, layerPath: string) => void;
-    setColumnFilterModesEntry: (filterModes: Record<string, string>, layerPath: string) => void;
+    setColumnFiltersRecord: (filtered: TypeColumnFiltersState, layerPath: string) => void;
+    setColumnFilterModesRecord: (filterModes: Record<string, string>, layerPath: string) => void;
     setColumnsFiltersVisibility: (visible: boolean, layerPath: string) => void;
     setInitiallayerDataTableSetting: (layerPath: string) => void;
-    setGlobalFilteredEntry: (globalFilterValue: string, layerPath: string) => void;
+    setColumnVisibilityRecord: (columnVisibility: Record<string, boolean>, layerPath: string) => void;
+    setGlobalFilterRecord: (globalFilterValue: string, layerPath: string) => void;
     setMapFilteredRecord: (mapFiltered: boolean, layerPath: string) => void;
     setFilterDataToExtent: (filterDataToExtent: boolean, layerPath: string) => void;
-    setRowsFilteredEntry: (rows: number, layerPath: string) => void;
+    setRowsFilteredRecord: (rows: number, layerPath: string) => void;
     setSelectedFeature: (feature: TypeFeatureInfoEntry) => void;
     setSelectedLayerPath: (layerPath: string) => void;
     setTableFilters(newTableFilters: Record<string, string>): void;
@@ -120,6 +121,7 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
           filterDataToExtent: false,
           rowsFilteredRecord: 0,
           globalFilterRecord: '',
+          columnVisibilityRecord: { geoviewID: false },
         };
 
         set({
@@ -136,7 +138,7 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
        * @param filtered - The column filter state to apply.
        * @param layerPath - The target layer path.
        */
-      setColumnFiltersEntry: (filtered: TypeColumnFiltersState, layerPath: string): void => {
+      setColumnFiltersRecord: (filtered: TypeColumnFiltersState, layerPath: string): void => {
         const layerSettings = get().dataTableState.layersDataTableSetting[layerPath];
 
         set({
@@ -156,7 +158,7 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
        * @param filterModes - A record mapping column ids to their filter mode.
        * @param layerPath - The target layer path.
        */
-      setColumnFilterModesEntry: (filterModes: Record<string, string>, layerPath: string): void => {
+      setColumnFilterModesRecord: (filterModes: Record<string, string>, layerPath: string): void => {
         const layerSettings = get().dataTableState.layersDataTableSetting[layerPath];
 
         set({
@@ -191,6 +193,26 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
       },
 
       /**
+       * Updates the column visibility for the specified layer in the store.
+       *
+       * @param columnVisibility - A record mapping column ids to their visibility state.
+       * @param layerPath - The target layer path.
+       */
+      setColumnVisibilityRecord: (columnVisibility: Record<string, boolean>, layerPath: string): void => {
+        const layerSettings = get().dataTableState.layersDataTableSetting[layerPath];
+
+        set({
+          dataTableState: {
+            ...get().dataTableState,
+            layersDataTableSetting: {
+              ...get().dataTableState.layersDataTableSetting,
+              [layerPath]: { ...layerSettings, columnVisibilityRecord: columnVisibility },
+            },
+          },
+        });
+      },
+
+      /**
        * Sets whether the data table is filtered to the current map extent for the specified layer.
        *
        * @param mapFiltered - Whether map extent filtering is enabled.
@@ -216,7 +238,7 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
        * @param rows - The filtered row count.
        * @param layerPath - The target layer path.
        */
-      setRowsFilteredEntry: (rows: number, layerPath: string): void => {
+      setRowsFilteredRecord: (rows: number, layerPath: string): void => {
         const layerSettings = get().dataTableState.layersDataTableSetting[layerPath];
 
         set({
@@ -264,7 +286,7 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
        * @param globalFilterValue - The global filter string.
        * @param layerPath - The target layer path.
        */
-      setGlobalFilteredEntry: (globalFilterValue: string, layerPath: string): void => {
+      setGlobalFilterRecord: (globalFilterValue: string, layerPath: string): void => {
         const layerSettings = get().dataTableState.layersDataTableSetting[layerPath];
 
         set({
@@ -477,8 +499,23 @@ export const setStoreDataTableSelectedFeature = (mapId: string, feature: TypeFea
  * @param filtered - The column filter state to apply.
  * @param layerPath - The target layer path.
  */
-export const setStoreDataTableColumnFiltersEntry = (mapId: string, filtered: TypeColumnFiltersState, layerPath: string): void => {
-  getStoreDataTableState(mapId).actions.setColumnFiltersEntry(filtered, layerPath);
+export const setStoreDataTableColumnFiltersRecord = (mapId: string, filtered: TypeColumnFiltersState, layerPath: string): void => {
+  getStoreDataTableState(mapId).actions.setColumnFiltersRecord(filtered, layerPath);
+};
+
+/**
+ * Sets the column visibility for a specific layer in the store.
+ *
+ * @param mapId - The map identifier.
+ * @param columnVisibility - A record mapping column ids to their visibility state.
+ * @param layerPath - The target layer path.
+ */
+export const setStoreDataTableColumnVisibilityRecord = (
+  mapId: string,
+  columnVisibility: Record<string, boolean>,
+  layerPath: string
+): void => {
+  getStoreDataTableState(mapId).actions.setColumnVisibilityRecord(columnVisibility, layerPath);
 };
 
 /**
@@ -488,8 +525,8 @@ export const setStoreDataTableColumnFiltersEntry = (mapId: string, filtered: Typ
  * @param filterModes - A record mapping column ids to their filter mode.
  * @param layerPath - The target layer path.
  */
-export const setStoreDataTableColumnFilterModesEntry = (mapId: string, filterModes: Record<string, string>, layerPath: string): void => {
-  getStoreDataTableState(mapId).actions.setColumnFilterModesEntry(filterModes, layerPath);
+export const setStoreDataTableColumnFilterModesRecord = (mapId: string, filterModes: Record<string, string>, layerPath: string): void => {
+  getStoreDataTableState(mapId).actions.setColumnFilterModesRecord(filterModes, layerPath);
 };
 
 /**
@@ -510,8 +547,8 @@ export const setStoreDataTableColumnsFiltersVisibility = (mapId: string, visible
  * @param globalFilterValue - The global filter string.
  * @param layerPath - The target layer path.
  */
-export const setStoreDataTableGlobalFilteredEntry = (mapId: string, globalFilterValue: string, layerPath: string): void => {
-  getStoreDataTableState(mapId).actions.setGlobalFilteredEntry(globalFilterValue, layerPath);
+export const setStoreDataTableGlobalFilterRecord = (mapId: string, globalFilterValue: string, layerPath: string): void => {
+  getStoreDataTableState(mapId).actions.setGlobalFilterRecord(globalFilterValue, layerPath);
 };
 
 /**
@@ -543,8 +580,8 @@ export const setStoreDataTableFilterDataToExtent = (mapId: string, filterDataToE
  * @param rows - The filtered row count.
  * @param layerPath - The target layer path.
  */
-export const setStoreDataTableRowsFilteredEntry = (mapId: string, rows: number, layerPath: string): void => {
-  getStoreDataTableState(mapId).actions.setRowsFilteredEntry(rows, layerPath);
+export const setStoreDataTableRowsFilteredRecord = (mapId: string, rows: number, layerPath: string): void => {
+  getStoreDataTableState(mapId).actions.setRowsFilteredRecord(rows, layerPath);
 };
 
 /**
@@ -661,6 +698,9 @@ export interface IDataTableSettings {
 
   /** The current global filter string applied across all columns. */
   globalFilterRecord: string;
+
+  /** A record mapping column ids to their visibility state. */
+  columnVisibilityRecord: Record<string, boolean>;
 }
 
 /** A feature info result set entry that combines result set entry metadata with layer data. */
