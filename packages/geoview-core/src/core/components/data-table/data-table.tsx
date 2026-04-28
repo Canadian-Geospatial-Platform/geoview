@@ -14,6 +14,8 @@ import { MRT_Localization_EN as MRTLocalizationEN } from 'material-react-table/l
 import { useTheme } from '@mui/material/styles';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 
+import type { SxStyles } from '@/ui/style/types';
+
 import {
   MaterialReactTable,
   useMaterialReactTable,
@@ -80,6 +82,9 @@ const DATE_FIELD_FILTERS = NUMERIC_FIELD_FILTERS;
 /** The possible filters for string columns */
 const STRING_FIELD_FILTERS = ['contains', 'startsWith', 'endsWith'];
 
+/** Minimum character count to show tooltip on table body cells. */
+const TOOLTIP_CHAR_THRESHOLD = 20;
+
 /** Checks if a value is a Dayjs instance. */
 const isDayjs = (v: unknown): v is Dayjs => typeof v === 'object' && v !== null && 'isValid' in v;
 
@@ -94,10 +99,72 @@ const linkifyOptions = {
   },
   defaultProtocol: 'https',
   format: {
-    url: (value: string) => (value.length > 50 ? `${value.slice(0, 40)}\u2026${value.slice(value.length - 10)}` : value),
+    url: (value: string): string => (value.length > 50 ? `${value.slice(0, 40)}\u2026${value.slice(value.length - 10)}` : value),
   },
   ignoreTags: ['script', 'style', 'img'],
 };
+
+/** Properties for the TooltipCell component. */
+interface TooltipCellProps {
+  /** The content to wrap with the tooltip. */
+  children: ReactNode;
+  /** The tooltip text to display. */
+  title: string | number;
+  /** Whether the tooltip should be open. */
+  isOpen?: boolean;
+  /** Whether to show the tooltip based on content length. */
+  showTooltip?: boolean;
+}
+
+/**
+ * Creates the tooltip cell wrapper component.
+ *
+ * The tooltip opens when either the parent cell is focused (keyboard) or the mouse hovers over it.
+ *
+ * @param props - Properties defined in TooltipCellProps interface
+ * @returns The tooltip cell wrapper element
+ */
+function TooltipCell({ children, title, isOpen = false, showTooltip = true }: TooltipCellProps): JSX.Element {
+  // Log
+  logger.logTraceRender('components/data-table/data-table > TooltipCell');
+
+  const [isHovered, setIsHovered] = useState(false);
+
+  // #region Handlers
+
+  /**
+   * Handles mouse enter to show tooltip.
+   */
+  const handleMouseEnter = useCallback((): void => {
+    setIsHovered(true);
+  }, []);
+
+  /**
+   * Handles mouse leave to hide tooltip.
+   */
+  const handleMouseLeave = useCallback((): void => {
+    setIsHovered(false);
+  }, []);
+
+  // #endregion
+
+  // If showTooltip is false, return content without tooltip wrapper
+  if (!showTooltip) {
+    return (
+      <Box component="span" sx={{ display: 'block', width: '100%' }}>
+        {children}
+      </Box>
+    );
+  }
+
+  return (
+    <Tooltip title={title} arrow open={isOpen || isHovered} disableHoverListener disableFocusListener disableTouchListener>
+      <Box component="span" sx={{ display: 'block', width: '100%' }} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+        {children}
+      </Box>
+    </Tooltip>
+  );
+}
 
 /**
  * Renders the interactive data table for a single layer.
@@ -107,7 +174,6 @@ const linkifyOptions = {
  * @param props - DataTable properties
  * @returns The data table element
  */
-
 function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: DataTableProps): JSX.Element {
   // Log
   logger.logTraceRender('components/data-table/data-table');
@@ -115,7 +181,10 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
   const { t } = useTranslation();
 
   const sxtheme = useTheme();
-  const memoSxClasses = useMemo(() => getSxClasses(sxtheme), [sxtheme]);
+  const memoSxClasses = useMemo((): SxStyles => {
+    logger.logTraceUseMemo('DATA-TABLE - memoSxClasses', sxtheme);
+    return getSxClasses(sxtheme);
+  }, [sxtheme]);
 
   // get store actions and values
   const mapId = useStoreGeoViewMapId();
@@ -137,12 +206,14 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
   // internal state
   const [density, setDensity] = useState<MRTDensityState>('compact');
   const [showColumnFilters, setShowColumnFilters] = useState<boolean>(datatableSettings[layerPath].columnsFiltersVisibility);
+  const [focusedCell, setFocusedCell] = useState<string | null>(null);
   const rowVirtualizerInstanceRef = useRef<MRTRowVirtualizer>(null);
   const columnVirtualizerInstanceRef = useRef<MRTColumnVirtualizer>(null);
   const [sorting, setSorting] = useState<MRTSortingState>([]);
   const [columnFilterFns, setColumnFilterFns] = useState<Record<string, string>>(
     datatableSettings[layerPath]?.columnFilterModesRecord || {}
   );
+  const filteredFeaturesRef = useRef<TypeFeatureInfoEntry[]>([]);
 
   const dataTableLocalization = language === 'fr' ? MRTLocalizationFR : MRTLocalizationEN;
 
@@ -162,6 +233,8 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
     setDensity(updaterOrValue);
   }, []);
 
+  // #region Handlers
+
   /**
    * Handles toggling column filters visibility.
    */
@@ -174,7 +247,45 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
     [dataTableController, layerPath, showColumnFilters]
   );
 
-  // #endregion HANDLERS
+  /**
+   * Handles cell focus for tooltip display.
+   */
+  const handleCellFocus = useCallback((event: React.FocusEvent<HTMLTableCellElement>): void => {
+    const cellId = event.currentTarget.getAttribute('data-cell-id');
+    if (cellId) setFocusedCell(cellId);
+  }, []);
+
+  /**
+   * Handles cell blur to hide tooltip.
+   */
+  const handleCellBlur = useCallback((): void => {
+    setFocusedCell(null);
+  }, []);
+
+  /**
+   * Handles keyboard navigation in table head cells.
+   */
+  const handleTableHeadKeyDown = useCallback((event: React.KeyboardEvent): void => {
+    if (event.key.startsWith('Arrow')) {
+      const target = event.target as HTMLElement;
+      const isInsideMenu = target.closest('[role="menu"]') !== null;
+      if (isInsideMenu) {
+        event.stopPropagation();
+      }
+    }
+  }, []);
+
+  /**
+   * Handles keyboard activation of column action buttons.
+   */
+  const handleColumnActionsKeyDown = useCallback((event: React.KeyboardEvent): void => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      (event.currentTarget as HTMLElement).click();
+    }
+  }, []);
+
+  // #endregion
 
   /**
    * Creates a table header cell with tooltip.
@@ -182,16 +293,19 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
    * @param header - Value to be displayed in the header
    * @returns The header element
    */
-  const getTableHeader = useCallback((header: string): JSX.Element => {
-    return (
-      // Tooltip allows long titles to be fully visible on hover
-      <Tooltip title={header} placement="top" arrow disableInteractive>
-        <Box component="span" sx={{ whiteSpace: 'nowrap', justifyContent: 'end' }}>
-          {header}
-        </Box>
-      </Tooltip>
-    );
-  }, []);
+  const getTableHeader = useCallback(
+    (header: string): JSX.Element => {
+      return (
+        // Tooltip allows long titles to be fully visible on hover
+        <Tooltip title={header} placement="top" arrow disableInteractive>
+          <Box component="span" sx={memoSxClasses.tableHeaderContent}>
+            {header}
+          </Box>
+        </Tooltip>
+      );
+    },
+    [memoSxClasses.tableHeaderContent]
+  );
 
   /**
    * Creates an image button that triggers the lightbox.
@@ -201,19 +315,24 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
    * @returns The cell content element
    */
   const createLightBoxButton = useCallback(
-    (cellValue: string | number, cellId: string): string | number | JSX.Element => {
+    (cellValue: string | number, cellId: string, feature?: TypeFeatureInfoEntry): string | number | JSX.Element => {
       const uniqueButtonId = `${mapId}-${containerType}-btn-${cellId}`; // Create unique ID for focus management after lightbox closes
-
-      if (typeof cellValue === 'string' && isImage(cellValue)) {
+      const isImageValue = typeof cellValue === 'string' && isImage(cellValue);
+      if (isImageValue) {
+        // Extract feature name for aria-label
+        const featureName =
+          feature?.nameField && feature.fieldInfo[feature.nameField] ? ` - ${feature.fieldInfo[feature.nameField]?.value}` : '';
         return (
           <Button
             type="text"
+            variant="outlined"
             size="small"
             id={uniqueButtonId}
-            onClick={() => initLightBox(cellValue, '', uniqueButtonId, 0)} // WCAG - Using empty alt text for images as descriptive text is not available
-            sx={{ height: '2.5rem', paddingLeft: '0.5rem', paddingRight: '0.5rem', textTransform: 'none' }}
+            onClick={() => initLightBox(cellValue, '', uniqueButtonId, 0)}
+            sx={memoSxClasses.lightboxButton}
+            aria-label={`${t('dataTable.openImages')}${featureName}`}
           >
-            {t('dataTable.images')}
+            {t('dataTable.openImages')}
           </Button>
         );
       }
@@ -224,14 +343,44 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
           htmlContent={sanitizeHtmlContent(
             enhanceLinksAccessibility(linkifyHtml(cellValue.toString(), linkifyOptions), t('general.opensInNewTab'))
           )}
-          itemOptions={{ tabIndex: 0 }}
         />
       ) : (
         cellValue
       );
     },
-    [initLightBox, t, containerType, mapId]
+    [initLightBox, t, containerType, mapId, memoSxClasses.lightboxButton]
   );
+
+  /**
+   * Extracts plain text or full URL from cell content for tooltip display.
+   *
+   * For links, returns the full href URL (useful when link text is truncated).
+   * Uses lightweight regex for better performance with large tables.
+   *
+   * @param cellValue - The cell value (may contain HTML)
+   * @returns Plain text or full URL for tooltip display
+   */
+  const extractTooltipText = useCallback((cellValue: string | number): string => {
+    if (typeof cellValue === 'number') return String(cellValue);
+
+    // Fast path: no HTML tags present - skip processing
+    if (!cellValue.includes('<')) return cellValue;
+
+    // Check for anchor tag and extract href (most common case for links)
+    const anchorMatch = cellValue.match(/<a[^>]+href=["']([^"']+)["']/i);
+    if (anchorMatch) {
+      return anchorMatch[1];
+    }
+
+    // Use DOMParser for robust HTML stripping
+    try {
+      const doc = new DOMParser().parseFromString(cellValue, 'text/html');
+      return doc.body.textContent || '';
+    } catch {
+      // Fallback: improved regex that handles malformed tags
+      return cellValue.replace(/<[^>]*>?/g, '').trim();
+    }
+  }, []);
 
   /**
    * Creates a data table body cell with tooltip.
@@ -241,30 +390,55 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
    * @returns The cell element
    */
   const getCellValueWithTooltip = useCallback(
-    (cellValue: string | number | JSX.Element, cellId: string): JSX.Element => {
+    (cellValue: string | number | JSX.Element, cellId: string, feature?: TypeFeatureInfoEntry): JSX.Element => {
+      const isOpen = focusedCell === cellId;
+      const isImageValue = typeof cellValue === 'string' && isImage(cellValue);
+
+      // For images, the button handles its own tooltip
+      if (isImageValue) {
+        return (
+          <Box component="div" sx={density === 'compact' ? memoSxClasses.tableCell : {}}>
+            {createLightBoxButton(cellValue, cellId, feature)}
+          </Box>
+        );
+      }
+
+      // Extract tooltip text - for links, show full URL; for plain text, strip HTML
+      let tooltipTitle: string;
+      if (typeof cellValue === 'string' || typeof cellValue === 'number') {
+        tooltipTitle = extractTooltipText(cellValue);
+      } else {
+        tooltipTitle = String(cellValue);
+      }
+
+      // Check if content exceeds threshold (images always show tooltip)
+      const showTooltip = isImageValue || String(tooltipTitle).length > TOOLTIP_CHAR_THRESHOLD;
+
       return typeof cellValue === 'string' || typeof cellValue === 'number' ? (
-        <Tooltip title={cellValue} placement="top" arrow>
+        <TooltipCell title={tooltipTitle} isOpen={isOpen} showTooltip={showTooltip}>
           <Box component="div" sx={density === 'compact' ? memoSxClasses.tableCell : {}}>
             {createLightBoxButton(cellValue, cellId)}
           </Box>
-        </Tooltip>
+        </TooltipCell>
       ) : (
         <Box component="div" sx={density === 'compact' ? memoSxClasses.tableCell : {}}>
           {cellValue}
         </Box>
       );
     },
-    [createLightBoxButton, density, memoSxClasses.tableCell]
+    [createLightBoxButton, density, memoSxClasses.tableCell, focusedCell, extractTooltipText]
   );
 
   /**
    * Creates a formatted date cell with tooltip.
    *
    * @param date - The date value to render
+   * @param cellId - ID of the cell
    * @returns The date cell element
    */
   const getCellContentDate = useCallback(
-    (date: Dayjs): JSX.Element => {
+    (date: Dayjs, cellId: string): JSX.Element => {
+      const isOpen = focusedCell === cellId;
       const formattedDate = DateMgt.formatDate(
         date.toDate(),
         displayDateFormat[language],
@@ -272,13 +446,17 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
         displayDateTimezone,
         layerDateTemporalMode
       );
+
+      // Check if formatted date length exceeds threshold
+      const showTooltip = formattedDate.length > TOOLTIP_CHAR_THRESHOLD;
+
       return (
-        <Tooltip title={formattedDate} arrow>
-          <Box tabIndex={0}>{formattedDate}</Box>
-        </Tooltip>
+        <TooltipCell title={formattedDate} isOpen={isOpen} showTooltip={showTooltip}>
+          <Box>{formattedDate}</Box>
+        </TooltipCell>
       );
     },
-    [language, displayDateFormat, displayDateTimezone, layerDateTemporalMode]
+    [language, displayDateFormat, displayDateTimezone, layerDateTemporalMode, focusedCell]
   );
 
   /**
@@ -315,8 +493,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
    * Builds material react data table column definitions.
    */
 
-  // TODO: WCAG Issue #3114 Contrast is low on sort and action icons in header.
-  // TODO: WCAG Issue #3116 At times generates empty table headings.
+  // TODO: WCAG Issue #3450 At times generates empty table headings.
   const memoColumns = useMemo<MRTColumnDef<ColumnsType>[]>(() => {
     // Log
     logger.logTraceUseMemo('DATA-TABLE - memoColumns', density);
@@ -348,7 +525,8 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
         visibleInShowHideMenu: value.id !== 'icon' && value.id !== 'zoom' && value.id !== 'details',
 
         Header: ({ column }) => getTableHeader(column.columnDef.header),
-        Cell: ({ cell }) => getCellValueWithTooltip(cell.getValue() as string | number | JSX.Element, cell.id),
+        Cell: ({ cell }) =>
+          getCellValueWithTooltip(cell.getValue() as string | number | JSX.Element, cell.id, filteredFeaturesRef.current[cell.row.index]),
 
         // Spread in the filter config
         ...filterConfig,
@@ -356,7 +534,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
         // Spread in more properties if dataType is date
         ...(value.dataType === 'date' && {
           accessorFn: (row) => (row[key].value ? DateMgt.createDayjs(row[key].value as string) : undefined),
-          Cell: ({ cell }) => getCellContentDate(cell.getValue<Dayjs>()),
+          Cell: ({ cell }) => getCellContentDate(cell.getValue<Dayjs>(), cell.id),
           muiFilterDatePickerProps: {
             timezone: displayDateTimezoneUniversal,
             format: displayDateFormat[language],
@@ -410,7 +588,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
   /**
    * Initializes default filter modes for columns using the first available option.
    */
-  const memoInitialColumnFilterModes = useMemo(() => {
+  const memoInitialColumnFilterModes = useMemo<Record<string, string>>(() => {
     // Log
     logger.logTraceUseMemo('DATA-TABLE - memoInitialColumnFilterModes');
 
@@ -511,10 +689,44 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
     [mapId, layerPath, layerController, mapController]
   );
 
+  // #region Handlers
+
+  /**
+   * Handles zoom button clicks.
+   */
+  const handleZoomClickWrapper = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>): void => {
+      const index = Number(event.currentTarget.dataset.featureIndex);
+      const feature = filteredFeaturesRef.current[index];
+      if (feature) {
+        handleZoomIn(feature).catch((error) => logger.logError('Zoom failed:', error));
+      }
+    },
+    [handleZoomIn]
+  );
+
+  /**
+   * Handles details button clicks.
+   */
+  const handleDetailsClickWrapper = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>): void => {
+      const index = Number(event.currentTarget.dataset.featureIndex);
+      const buttonId = event.currentTarget.id;
+      const feature = filteredFeaturesRef.current[index];
+      if (feature) {
+        dataTableController.setSelectedFeature(feature);
+        uiController.enableFocusTrap({ activeElementId: 'featureDetailDataTable', callbackElementId: buttonId });
+      }
+    },
+    [dataTableController, uiController]
+  );
+
+  // #endregion
+
   /**
    * Builds the data table rows from features with filtering applied.
    */
-  const memoRows = useMemo(() => {
+  const memoRows = useMemo<ColumnsType[]>(() => {
     // Log
     logger.logTraceUseMemo('DATA-TABLE - memoRows', data.features);
 
@@ -529,6 +741,9 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
       data?.features?.filter((f) => {
         return f.feature && GeoviewRenderer.featureRespectsFilterEquation(f.feature, layerFilterEquation);
       }) ?? [];
+
+    // Store filtered features in ref for handler access
+    filteredFeaturesRef.current = filterArray;
 
     return (filterArray ?? []).map((feature, featureIndex) => {
       // Create unique button ID per feature
@@ -547,13 +762,13 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
         ICON: icon,
         ZOOM: (
           <IconButton
+            data-feature-index={featureIndex}
             color="primary"
-            aria-label={t('dataTable.zoom')}
+            aria-label={`${t('dataTable.zoom')}${feature?.nameField && feature.fieldInfo[feature.nameField] ? ` - ${feature.fieldInfo[feature.nameField]?.value}` : ''}`}
+            tooltip={t('dataTable.zoom')}
             tooltipPlacement="top"
             // Function returns void promise instead of void, other work arounds led to more eslint issues
-            onClick={() => {
-              handleZoomIn(feature).catch((error) => logger.logError('Zoom failed:', error));
-            }}
+            onClick={handleZoomClickWrapper}
             disabled={!feature.supportZoomTo}
           >
             <ZoomInSearchIcon />
@@ -562,13 +777,12 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
         DETAILS: (
           <IconButton
             id={featureDetailsButtonId}
+            data-feature-index={featureIndex}
             color="primary"
-            aria-label={t('dataTable.details')}
+            aria-label={`${t('dataTable.details')}${feature?.nameField && feature.fieldInfo[feature.nameField] ? ` - ${feature.fieldInfo[feature.nameField]?.value}` : ''}`}
+            tooltip={t('dataTable.details')}
             tooltipPlacement="top"
-            onClick={() => {
-              dataTableController.setSelectedFeature(feature);
-              uiController.enableFocusTrap({ activeElementId: 'featureDetailDataTable', callbackElementId: featureDetailsButtonId });
-            }}
+            onClick={handleDetailsClickWrapper}
           >
             <InfoOutlinedIcon />
           </IconButton>
@@ -578,7 +792,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
 
       return featureInfo;
     }) as unknown as ColumnsType[];
-  }, [data.features, layerClassFilter, layerTimeFilter, handleZoomIn, mapId, containerType, t, dataTableController, uiController]);
+  }, [data.features, layerClassFilter, layerTimeFilter, handleZoomClickWrapper, handleDetailsClickWrapper, mapId, containerType, t]);
 
   // TODO: Cleanup - remove  dead code
   // TODO: The table is triggering many useless callback. With max-height of 5000px, it is slower to create but faster scroll.
@@ -652,7 +866,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
           unfilteredFeaturesCount={unfilteredFeaturesCount}
         />
       ),
-      [memoSxClasses, layerPath, t, globalFilter, memoColumns, data, unfilteredFeaturesCount] // Include dependencies
+      [memoSxClasses, layerPath, t, globalFilter, memoColumns, data, unfilteredFeaturesCount]
     ),
     enableFilterMatchHighlighting: true,
     enableColumnResizing: true,
@@ -660,9 +874,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
     enablePagination: false,
     enableRowVirtualization: true,
     muiTableContainerProps: {
-      sx: {
-        maxHeight: 'calc(100% - 97px)', // 97px is the height of the data table header. Setting max height prevents the containing columns scrollbars from triggering
-      },
+      sx: memoSxClasses.tableContainer,
       className: 'data-table-container',
     },
     rowVirtualizerInstanceRef,
@@ -672,15 +884,17 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
     localization: dataTableLocalization,
     muiTableHeadCellProps: {
       sx: memoSxClasses.tableHeadCell,
+      onKeyDown: handleTableHeadKeyDown,
+    },
+    muiColumnActionsButtonProps: {
+      onKeyDown: handleColumnActionsKeyDown,
     },
     muiTableHeadProps: {
       sx: memoSxClasses.tableHead,
     },
     defaultColumn: {
       muiFilterTextFieldProps: {
-        sx: () => ({
-          minWidth: '50px',
-        }),
+        sx: memoSxClasses.filterTextField,
       },
     },
     // override z-index of table when table is in fullscreen mode
@@ -690,19 +904,13 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
         height: '100%',
       },
     }),
+    muiTableBodyCellProps: ({ cell }) => ({
+      'data-cell-id': cell.id,
+      onFocus: handleCellFocus,
+      onBlur: handleCellBlur,
+    }),
     muiTableBodyProps: {
-      sx: (theme) => ({
-        // stripe the rows, make odd rows a darker color
-        '& tr:nth-of-type(odd) > td': {
-          backgroundColor: theme.palette.geoViewColor.bgColor.darken(0.1),
-        },
-        '& tr:hover > td': {
-          backgroundColor: theme.palette.secondary.light,
-        },
-        '& .Mui-selected > td': {
-          backgroundColor: `${theme.palette.secondary.light} !important`,
-        },
-      }),
+      sx: memoSxClasses.tableBody,
     },
     // Improve global filter accessibility
     muiSearchTextFieldProps: {
@@ -714,7 +922,11 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
     // Improve table accessibility
     muiTableProps: {
       'aria-label': t('dataTable.tableAriaLabelWithLayer', { layerName })!,
+      'aria-rowcount': memoRows.length + 1, // +1 to account for the header row
     },
+    muiTableBodyRowProps: ({ row }) => ({
+      'aria-rowindex': row.index + 2, // +2 to account for 1-based indexing and header row
+    }),
   });
   tableInstanceRef.current = useTable;
 

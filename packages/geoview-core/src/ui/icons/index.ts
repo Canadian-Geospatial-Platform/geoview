@@ -124,6 +124,7 @@ export {
   Undo as UndoIcon,
   Upload as UploadIcon,
   UploadFile as UploadFileIcon,
+  ViewColumn as ViewColumnIcon,
   Visibility as VisibilityIcon,
   VisibilityOff as VisibilityOffIcon,
   VisibilityOutlined as VisibilityOutlinedIcon,
