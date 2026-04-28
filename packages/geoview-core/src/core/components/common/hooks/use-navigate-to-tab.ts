@@ -75,14 +75,6 @@ export function useNavigateToTab(tabId: string, onNavigate?: (layerPath: string)
         }, delay);
       }
     },
-    [
-      hasTab,
-      hasFooterTab,
-      hasAppBarTab,
-      isFooterOpen,
-      tabId,
-      onNavigate,
-      uiController,
-    ]
+    [hasTab, hasFooterTab, hasAppBarTab, isFooterOpen, tabId, onNavigate, uiController]
   );
 }

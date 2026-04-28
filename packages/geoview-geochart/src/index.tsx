@@ -10,14 +10,6 @@ import type { PluginGeoChartConfig } from './geochart-types';
 import { convertGeoViewGeoChartConfigToCore } from './geochart-types';
 import { logger } from 'geoview-core/core/utils/logger';
 
-// GV: Satisfies a type check to allow the build to work
-declare global {
-  interface ErrorConstructor {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-    captureStackTrace(targetObject: object, constructorOpt?: Function): void;
-  }
-}
-
 /**
  * The Chart Plugin which will be automatically instanciated during GeoView's initialization.
  */

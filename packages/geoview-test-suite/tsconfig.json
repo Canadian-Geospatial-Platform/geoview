@@ -6,6 +6,6 @@
       "geoview-core/*": ["../geoview-core/src/*"]
     }
   },
-  "include": ["src"],
+  "include": ["src", "../global.d.ts"],
   "references": [{ "path": "../geoview-core" }]
 }

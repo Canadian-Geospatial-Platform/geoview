@@ -11,7 +11,7 @@ export default [
   js.configs.recommended,
   // Ignores (actually recommended to be first in the whole config logic)
   {
-    ignores: ['node_modules/', 'dist/', 'eslint.config.js'],
+    ignores: ['node_modules/', 'dist/', 'eslint.config.js', 'global.d.ts'],
   },
 
   // Core logic for TypeScript files
