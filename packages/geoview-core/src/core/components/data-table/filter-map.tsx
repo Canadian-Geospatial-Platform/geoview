@@ -17,7 +17,7 @@ interface FilterMapProps {
 /**
  * Renders a toggle switch to filter the map based on data table filters.
  *
- * @param props - FilterMap properties
+ * @param props - Properties defined in FilterMapProps interface
  * @returns The filter map toggle switch element
  */
 function FilterMap({ layerPath, isGlobalFilterOn }: FilterMapProps): JSX.Element {
@@ -32,18 +32,22 @@ function FilterMap({ layerPath, isGlobalFilterOn }: FilterMapProps): JSX.Element
   const datatableSettings = useStoreDataTableLayerSettings();
   const dataTableController = useDataTableController();
 
+  // #region Handlers
+
   /**
    * Handles the change event for the filter map toggle switch.
    *
    * This function toggles the filtered entry state for the specified layer in the data table.
    */
-  const handleFilterdEntryChanged = useCallback(() => {
+  const handleFilterdEntryChanged = useCallback((): void => {
     dataTableController.setMapFilteredRecord(layerPath, !datatableSettings[layerPath].mapFilteredRecord);
   }, [dataTableController, datatableSettings, layerPath]);
 
+  // #endregion
+
   return (
     <Switch
-      size="medium"
+      size="small"
       onChange={handleFilterdEntryChanged}
       checked={!!datatableSettings[layerPath]?.mapFilteredRecord}
       sx={sxClasses.filterMap}
