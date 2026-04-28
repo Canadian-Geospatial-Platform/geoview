@@ -127,6 +127,9 @@ export class LayerController extends AbstractMapViewerController {
   /** Used to keep a reference of highlighted layer */
   #highlightedLayerPath: string = '';
 
+  /** Stores the original opacity of the highlighted layer (and its leaf children for groups) so it can be restored on unhighlight. */
+  #highlightedLayerOriginalOpacity: Map<string, number> = new Map();
+
   /** Holds all the layers in process of being deleted from the map */
   #layersBeingDeleted: Record<string, LayerDeletionJob> = {};
 
@@ -1527,23 +1530,47 @@ export class LayerController extends AbstractMapViewerController {
     // Find the layer
     const layer = this.getGeoviewLayer(layerPath);
 
-    // Keep the highlighted layer with its original opacity
+    // Store and set the highlighted layer path
     this.#highlightedLayerPath = layerPath;
 
-    // Build a list of layers to exclude from the opacity adjustments
-    const excludingLayers = [layer];
+    // Store ALL layers' opacities before any modifications.
+    // We must capture the entire map state because:
+    // 1. Ancestor groups must be boosted (so the highlighted layer isn't capped by parent opacity)
+    // 2. Boosting ancestors cascades to siblings, changing their opacities
+    // 3. Other layers will be dimmed by the ratio
+    this.#highlightedLayerOriginalOpacity.clear();
+    this.#storeAllLayerOpacities();
 
-    // If the layer we're highlighting is a group, we have to exclude all its children from upcoming opacity adjustments
-    if (layer instanceof GVGroupLayer) {
-      excludingLayers.push(...layer.getLayersAllLeafs());
+    // Get the ancestor groups of the highlighted layer (immediate parent → root).
+    // They must be boosted to 1.0 so the highlighted layer isn't capped.
+    const ancestors = layer.getParents();
+
+    // Boost ancestors from root down (reverse of getParents() order which is child→root).
+    // Each setOpacity(1) cascades to children, but that's fine — we'll override afterward.
+    for (let i = ancestors.length - 1; i >= 0; i--) {
+      ancestors[i].setOpacity(1);
     }
 
-    // Get all other regular gv layers on the map excluding the one we highlight and its children
+    // Boost the highlighted layer to 100% opacity.
+    // For groups, setOpacity cascades to all children automatically.
+    layer.setOpacity(1);
+
+    // Build the set of layers that should NOT be dimmed:
+    // the highlighted layer + its descendants (if group) + its ancestor groups
+    const protectedLayers = new Set<AbstractBaseGVLayer>([layer, ...ancestors]);
+    if (layer instanceof GVGroupLayer) {
+      layer.getLayersAll().forEach((descendant) => protectedLayers.add(descendant));
+    }
+
+    // Dim all other leaf layers by the ratio.
+    // Ancestor groups are already at 1.0 (needed to uncap children), so we only dim leaf layers.
     this.getGeoviewLayersRegulars()
-      .filter((otherLayer) => !excludingLayers.includes(otherLayer))
+      .filter((otherLayer) => !protectedLayers.has(otherLayer))
       .forEach((otherLayer) => {
         // Reduce the opacity on the other layer using the ratio.
-        otherLayer.setOpacity(otherLayer.getOpacity() / LayerController.HIGHLIGHT_OPACITY_RATIO);
+        // Use the stored original opacity (not current, which may have been altered by ancestor cascade).
+        const originalOpacity = this.#highlightedLayerOriginalOpacity.get(otherLayer.getLayerPath()) ?? otherLayer.getOpacity();
+        otherLayer.setOpacity(originalOpacity / LayerController.HIGHLIGHT_OPACITY_RATIO);
       });
   }
 
@@ -1607,24 +1634,48 @@ export class LayerController extends AbstractMapViewerController {
     // If no current highlight, skip
     if (!layer) return;
 
-    // Build a list of layers to exclude from the opacity adjustments
-    const excludingLayers = [layer];
-
-    // If the layer we're removing the highlight is a group, we have to exclude all its children from upcoming opacity adjustments
-    if (layer instanceof GVGroupLayer) {
-      excludingLayers.push(...layer.getLayersAllLeafs());
-    }
-
-    // Get all other regular gv layers on the map excluding the one we highlight and its children
-    this.getGeoviewLayersRegulars()
-      .filter((otherLayer) => !excludingLayers.includes(otherLayer))
-      .forEach((otherLayer) => {
-        // Resets the opacity on the other layer using the ratio.
-        otherLayer.setOpacity(otherLayer.getOpacity() * LayerController.HIGHLIGHT_OPACITY_RATIO);
-      });
+    // Restore ALL layers to their original opacities.
+    // Process top-level layers first (getGeoviewLayers returns groups + regulars at root level).
+    // For groups, setOpacity cascades to children, then children get overridden by their own stored values.
+    this.getGeoviewLayers().forEach((topLayer) => {
+      this.#restoreLayerOpacity(topLayer);
+      // If it's a group, restore all descendants top-down (getLayersAll is depth-first: parent before children)
+      if (topLayer instanceof GVGroupLayer) {
+        topLayer.getLayersAll().forEach((descendant) => {
+          this.#restoreLayerOpacity(descendant);
+        });
+      }
+    });
+    this.#highlightedLayerOriginalOpacity.clear();
 
     // Clear the highlighted layer information
     this.#highlightedLayerPath = '';
+  }
+
+  /**
+   * Stores the current opacity of all layers (groups and leaves) on the map into the opacity map.
+   */
+  #storeAllLayerOpacities(): void {
+    this.getGeoviewLayers().forEach((topLayer) => {
+      this.#highlightedLayerOriginalOpacity.set(topLayer.getLayerPath(), topLayer.getOpacity());
+      if (topLayer instanceof GVGroupLayer) {
+        topLayer.getLayersAll().forEach((descendant) => {
+          this.#highlightedLayerOriginalOpacity.set(descendant.getLayerPath(), descendant.getOpacity());
+        });
+      }
+    });
+  }
+
+  /**
+   * Restores a single layer's opacity from the stored original opacity map.
+   *
+   * @param layer - The layer to restore opacity for
+   */
+  #restoreLayerOpacity(layer: AbstractBaseGVLayer): void {
+    const originalOpacity = this.#highlightedLayerOriginalOpacity.get(layer.getLayerPath());
+    if (originalOpacity !== undefined) {
+      layer.setOpacity(originalOpacity);
+    }
   }
 
   /**
