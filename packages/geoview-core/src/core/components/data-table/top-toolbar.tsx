@@ -3,12 +3,12 @@
 import type { MRT_TableInstance as MRTTableInstance, MRT_ColumnDef } from 'material-react-table';
 import {
   MRT_GlobalFilterTextField as MRTGlobalFilterTextField,
-  MRT_ShowHideColumnsButton as MRTShowHideColumnsButton,
   MRT_ToggleDensePaddingButton as MRTToggleDensePaddingButton,
 } from 'material-react-table';
 
 import { Box, IconButton, Switch } from '@/ui';
 import ExportButton from './export-button';
+import { ShowHideColumnsButton } from './show-hide-columns-button';
 import JSONExportButton from './json-export-button';
 import FilterMap from './filter-map';
 import FilterDataToExtent from './filter-data-extent';
@@ -85,31 +85,34 @@ function TopToolbar(props: TopToolbarProps<ColumnsType>): JSX.Element {
   // ESRI Dynamic layer data does not include geometry and can't be filtered to extent
   const isEsriDynamic = data.features?.[0]?.geoviewLayerType === CONST_LAYER_TYPES.ESRI_DYNAMIC;
 
+  // Check if there are any active filters with actual values
+  const hasActiveFilters = table.getState().columnFilters?.some((filter) => {
+    if (Array.isArray(filter.value)) {
+      // For range filters, check if any element has a value
+      return filter.value.some((v) => v !== undefined && v !== null && v !== '');
+    }
+    // For single-value filters
+    return filter.value !== undefined && filter.value !== null && filter.value !== '';
+  });
+
   return (
-    <Box
-      className="data-table-top-toolbar"
-      role="region"
-      display="flex"
-      aria-label={t('dataTable.tableControls')}
-      sx={{ justifyContent: 'space-between', borderBottom: '1px solid #9e9e9e' }}
-      p={4}
-    >
-      <Box display="flex" sx={{ flexDirection: 'column', justifyContent: 'space-evenly' }}>
+    <Box className="data-table-top-toolbar" role="region" aria-label={t('dataTable.tableControls')} sx={sxClasses.toolbarContainer}>
+      <Box sx={sxClasses.toolbarRow}>
         <Box component="p" role="status" className="filter-results-summary" sx={sxClasses.selectedRows} aria-live="polite">
           {toolbarMessage}
         </Box>
-        <Box display="flex">
-          <FilterMap layerPath={layerPath} isGlobalFilterOn={!!globalFilter?.length} />
-          {!isEsriDynamic && <FilterDataToExtent layerPath={layerPath} />}
-        </Box>
-      </Box>
-      <Box display="flex" sx={{ flexDirection: 'column' }}>
-        <Box sx={{ float: 'right', marginLeft: 'auto', maxWidth: '15rem' }}>
+        <Box>
           <form role="search" onSubmit={(e) => e.preventDefault()} aria-label={t('dataTable.searchInputLabel')}>
             <MRTGlobalFilterTextField className="buttonOutline" table={table} />
           </form>
         </Box>
-        <Box display="flex" sx={{ justifyContent: 'space-around' }}>
+      </Box>
+      <Box sx={sxClasses.toolbarRow}>
+        <Box>
+          <FilterMap layerPath={layerPath} isGlobalFilterOn={!!globalFilter?.length} />
+          {!isEsriDynamic && <FilterDataToExtent layerPath={layerPath} />}
+        </Box>
+        <Box sx={sxClasses.toolbarControls}>
           <Switch
             checked={table.getState().showColumnFilters}
             onChange={() => table.setShowColumnFilters(!table.getState().showColumnFilters)}
@@ -122,32 +125,36 @@ function TopToolbar(props: TopToolbarProps<ColumnsType>): JSX.Element {
             sx={sxClasses.filterMap}
           />
 
-          <IconButton
-            className="buttonOutline"
-            aria-label={t('dataTable.clearFilters')}
-            color="primary"
-            onClick={() => useTable?.resetColumnFilters()}
-          >
-            <ClearFiltersIcon />
-          </IconButton>
+          <Box sx={sxClasses.toolbarButtonGroup}>
+            <IconButton
+              className="buttonOutline"
+              aria-label={t('dataTable.clearFilters')}
+              aria-disabled={!hasActiveFilters}
+              color="primary"
+              onClick={() => {
+                if (hasActiveFilters) {
+                  useTable?.resetColumnFilters();
+                }
+              }}
+            >
+              <ClearFiltersIcon />
+            </IconButton>
 
-          {/* Override column pinning options */}
-          <MRTShowHideColumnsButton
-            className="buttonOutline"
-            table={{ ...table, options: { ...table.options, enableColumnPinning: false } }}
-          />
-          <MRTToggleDensePaddingButton className="buttonOutline" table={table} />
+            {/* Override column pinning options */}
+            <ShowHideColumnsButton table={table} />
+            <MRTToggleDensePaddingButton className="buttonOutline" table={table} aria-pressed={table.getState().density === 'compact'} />
 
-          {/* Export Buttons */}
-          {useTable?.getFilteredRowModel()?.rows ? (
-            <ExportButton layerPath={layerPath} rows={useTable.getFilteredRowModel().rows.map((row) => row.original)} columns={columns}>
-              <JSONExportButton
-                rows={useTable.getFilteredRowModel().rows.map((row) => row.original)}
-                features={data.features as TypeFeatureInfoEntry[]}
-                layerPath={layerPath}
-              />
-            </ExportButton>
-          ) : undefined}
+            {/* Export Buttons */}
+            {useTable?.getFilteredRowModel()?.rows ? (
+              <ExportButton layerPath={layerPath} rows={useTable.getFilteredRowModel().rows.map((row) => row.original)} columns={columns}>
+                <JSONExportButton
+                  rows={useTable.getFilteredRowModel().rows.map((row) => row.original)}
+                  features={data.features as TypeFeatureInfoEntry[]}
+                  layerPath={layerPath}
+                />
+              </ExportButton>
+            ) : undefined}
+          </Box>
         </Box>
       </Box>
     </Box>
