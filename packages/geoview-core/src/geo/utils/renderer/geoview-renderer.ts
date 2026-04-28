@@ -775,6 +775,7 @@ export abstract class GeoviewRenderer {
     if (settings.rotation !== undefined) circleOptions.rotation = settings.rotation;
     return new Style({
       image: new StyleCircle(circleOptions),
+      zIndex: settings.zIndex,
     });
   }
 
@@ -803,6 +804,7 @@ export abstract class GeoviewRenderer {
     if (settings.rotation !== undefined) regularShapeOptions.rotation = settings.rotation;
     return new Style({
       image: new RegularShape(regularShapeOptions),
+      zIndex: settings.zIndex,
     });
   }
 
@@ -867,6 +869,7 @@ export abstract class GeoviewRenderer {
     if (settings.rotation !== undefined) regularShapeOptions.rotation = settings.rotation;
     return new Style({
       image: new RegularShape(regularShapeOptions),
+      zIndex: settings.zIndex,
     });
   }
 
@@ -916,6 +919,7 @@ export abstract class GeoviewRenderer {
     if (settings.scale !== undefined) iconOptions.scale = settings.scale;
     return new Style({
       image: new StyleIcon(iconOptions),
+      zIndex: settings.zIndex,
     });
   }
 
@@ -984,7 +988,11 @@ export abstract class GeoviewRenderer {
     let style: Style | undefined;
     if (isLineStringVectorConfig(settings)) {
       const strokeOptions: StrokeOptions = this.createStrokeOptions(settings);
-      style = new Style({ stroke: new Stroke(strokeOptions), geometry });
+      style = new Style({
+        stroke: new Stroke(strokeOptions),
+        geometry,
+        zIndex: settings.zIndex,
+      });
     }
 
     // Apply visual variables if feature and style exist
@@ -1013,6 +1021,7 @@ export abstract class GeoviewRenderer {
       stroke: new Stroke(strokeOptions),
       fill: new Fill(fillOptions),
       geometry,
+      zIndex: settings.zIndex,
     });
   }
 
@@ -1032,6 +1041,7 @@ export abstract class GeoviewRenderer {
       stroke: new Stroke(strokeOptions),
       fill: new Fill(fillOptions),
       geometry,
+      zIndex: settings.zIndex,
     });
   }
 
@@ -1104,6 +1114,7 @@ export abstract class GeoviewRenderer {
       stroke: new Stroke(strokeOptions),
       fill: new Fill(fillOptions),
       geometry,
+      zIndex: settings.zIndex,
     });
   }
 
@@ -1543,8 +1554,8 @@ export abstract class GeoviewRenderer {
 
       // Safety check: whitelist allowed characters and keywords
       // Allow: alphanumeric, operators, parentheses, quotes, whitespace, keywords (if, else, return, upper, lower)
-      if (!/^[\w\s+\-*/%<>=!&|?:;(){}[\]'".,]+$/i.test(evaluableExpression)) {
-        logger.logWarning('Invalid characters in Arcade expression:', expression);
+      if (/\b(?!upper|lower|if|return|toString|toUpperCase|toLowerCase)\w+\s*\(/i.test(evaluableExpression)) {
+        logger.logWarning('Disallowed function call in expression');
         return null;
       }
 
@@ -1592,6 +1603,15 @@ export abstract class GeoviewRenderer {
    */
   static evaluateValueExpression(expression: string, feature: Feature): number | null {
     try {
+      // Check if expression is simple arithmetic or complex Arcade
+      const hasArcadeKeywords = /\b(if|else|return|upper|lower|when)\b/i.test(expression);
+
+      if (hasArcadeKeywords) {
+        // Delegate to full Arcade evaluator, coerce result to number
+        const result = this.evaluateArcadeExpression(expression, feature);
+        return typeof result === 'number' ? result : Number(result);
+      }
+
       // Replace $feature["fieldName"] or $feature['fieldName'] with actual values
       const evaluableExpression = expression.replace(/\$feature\[["']([^"']+)["']\]/g, (match, fieldName) => {
         const value = feature.get(fieldName);

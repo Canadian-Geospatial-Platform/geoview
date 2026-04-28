@@ -851,6 +851,8 @@ export interface TypeLineStringVectorConfig extends TypeBaseVectorGeometryConfig
   graphicStrokes?: GraphicStrokeWithPlacement[];
   /** The text / label settings */
   text?: TypeLayerTextConfig;
+  /** Z-index for controlling render order (higher values render on top) */
+  zIndex?: number;
 }
 
 export interface GraphicStrokeWithPlacement {
@@ -914,6 +916,8 @@ export interface TypePolygonVectorConfig extends TypeBaseVectorGeometryConfig {
   graphicFills?: GraphicFillWithPattern[];
   /** The text / label settings */
   text?: TypeLayerTextConfig;
+  /** Z-index for controlling render order (higher values render on top) */
+  zIndex?: number;
 }
 
 /** Valid values to specify fill styles. */
@@ -946,6 +950,8 @@ export interface TypeSimpleSymbolVectorConfig extends TypeBaseVectorGeometryConf
   symbol: TypeSymbol;
   /** The text / label settings */
   text?: TypeLayerTextConfig;
+  /** Z-index for controlling render order (higher values render on top) */
+  zIndex?: number;
 }
 
 /** Valid values to specify symbol shapes. */
@@ -976,6 +982,8 @@ export interface TypeIconSymbolVectorConfig extends TypeBaseVectorGeometryConfig
    * with the Canvas renderer.
    */
   crossOrigin?: string;
+  /** Z-index for controlling render order (higher values render on top) */
+  zIndex?: number;
 }
 // #endregion STYLE
 

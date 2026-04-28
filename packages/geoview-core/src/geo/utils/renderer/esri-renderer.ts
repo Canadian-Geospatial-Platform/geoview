@@ -350,11 +350,22 @@ export abstract class EsriRenderer {
     }
 
     const uniqueValueStyleInfo: TypeLayerStyleConfigInfo[] = [];
-    renderer.uniqueValueInfos.forEach((symbolInfo) => {
+    const totalCount = renderer.uniqueValueInfos.length;
+
+    renderer.uniqueValueInfos.forEach((symbolInfo, index) => {
       const settings = this.convertSymbol(symbolInfo.symbol);
       if (settings) {
         if (renderer.rotationType === 'geographic' && (isIconSymbolVectorConfig(settings) || isSimpleSymbolVectorConfig(settings)))
           settings.rotation = Math.PI / 2 - settings.rotation!;
+
+        // Automatically assign zIndex if drawInClassOrder is true
+        if (
+          renderer.drawInClassOrder &&
+          (isSimpleSymbolVectorConfig(settings) || isLineStringVectorConfig(settings) || isFilledPolygonVectorConfig(settings))
+        ) {
+          settings.zIndex = totalCount - index;
+        }
+
         uniqueValueStyleInfo.push({
           label: symbolInfo.label,
           visible: true,
@@ -373,6 +384,17 @@ export abstract class EsriRenderer {
         (isIconSymbolVectorConfig(defaultSettings) || isSimpleSymbolVectorConfig(defaultSettings))
       )
         defaultSettings.rotation = Math.PI / 2 - defaultSettings.rotation!;
+
+      // Default gets lowest zIndex (renders underneath)
+      if (
+        renderer.drawInClassOrder &&
+        (isSimpleSymbolVectorConfig(defaultSettings) ||
+          isLineStringVectorConfig(defaultSettings) ||
+          isFilledPolygonVectorConfig(defaultSettings))
+      ) {
+        defaultSettings.zIndex = 0;
+      }
+
       uniqueValueStyleInfo.push({
         label: renderer.defaultLabel,
         visible: true,
@@ -457,11 +479,22 @@ export abstract class EsriRenderer {
     }
 
     const classBreakStyleInfo: TypeLayerStyleConfigInfo[] = [];
+    const totalCount = renderer.classBreakInfos.length;
+
     for (let i = 0; i < renderer.classBreakInfos.length; i++) {
       const settings = this.convertSymbol(renderer.classBreakInfos[i].symbol);
       if (settings) {
         if (renderer.rotationType === 'geographic' && (isIconSymbolVectorConfig(settings) || isSimpleSymbolVectorConfig(settings)))
           settings.rotation = Math.PI / 2 - settings.rotation!;
+
+        // Automatically assign zIndex if drawInClassOrder is true
+        if (
+          renderer.drawInClassOrder &&
+          (isSimpleSymbolVectorConfig(settings) || isLineStringVectorConfig(settings) || isFilledPolygonVectorConfig(settings))
+        ) {
+          settings.zIndex = totalCount - i;
+        }
+
         const geoviewClassBreakInfo: TypeLayerStyleConfigInfo = {
           label: renderer.classBreakInfos[i].label,
           visible: true,
@@ -484,6 +517,16 @@ export abstract class EsriRenderer {
         (isIconSymbolVectorConfig(defaultSettings) || isSimpleSymbolVectorConfig(defaultSettings))
       )
         defaultSettings.rotation = Math.PI / 2 - defaultSettings.rotation!;
+
+      // Default gets lowest zIndex (renders underneath)
+      if (
+        renderer.drawInClassOrder &&
+        (isSimpleSymbolVectorConfig(defaultSettings) ||
+          isLineStringVectorConfig(defaultSettings) ||
+          isFilledPolygonVectorConfig(defaultSettings))
+      ) {
+        defaultSettings.zIndex = 0;
+      }
       classBreakStyleInfo.push({
         label: renderer.defaultLabel,
         visible: true,
@@ -527,6 +570,7 @@ export type EsriRendererTypes = 'uniqueValue' | 'simple' | 'classBreaks';
 export type EsriBaseRenderer = {
   type: EsriRendererTypes;
   visualVariables?: TypeLayerStyleVisualVariable[];
+  drawInClassOrder?: boolean;
 };
 
 type TypeEsriColor = [number, number, number, number];

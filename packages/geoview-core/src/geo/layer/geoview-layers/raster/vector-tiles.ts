@@ -166,7 +166,8 @@ export class VectorTiles extends AbstractGeoViewRaster {
     let appliedStyle = layerConfig.getStyleUrl() || this.getMetadata()?.defaultStyles;
 
     if (appliedStyle) {
-      if (!appliedStyle.endsWith('/root.json')) appliedStyle = `${appliedStyle}/root.json`;
+      // GV When viewing a style in AGO, it will typically be given and shown to the user with f=pjson
+      if (!appliedStyle.endsWith('/root.json') && !appliedStyle.endsWith('f=pjson')) appliedStyle = `${appliedStyle}/root.json`;
 
       applyStyle(layer.getOLLayer(), appliedStyle, {
         resolutions: resolutions?.length ? resolutions : [],
