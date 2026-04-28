@@ -1,25 +1,16 @@
-import { useCallback, useMemo, useState, memo } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useTheme } from '@mui/material/styles';
+import { useCallback, useState, memo } from 'react';
 
-import { Box, CopyrightIcon, Popover, IconButton, Typography } from '@/ui';
+import { useTranslation } from 'react-i18next';
+
+import { useTheme } from '@mui/material/styles';
+import { ClickAwayListener } from '@mui/material';
+
+import { Box, CopyrightIcon, Popper, Paper, IconButton, Typography } from '@/ui';
 import { useStoreMapAttribution, useStoreMapInteraction } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 
-/** Popover anchor and transform origin positions. */
-const POPOVER_POSITIONS = {
-  anchorOrigin: {
-    vertical: 'top' as const,
-    horizontal: 'right' as const,
-  },
-  transformOrigin: {
-    vertical: 'bottom' as const,
-    horizontal: 'right' as const,
-  },
-} as const;
-
-/** Styles for the popover content box. */
+/** Styles for the popper content box. */
 const BOX_STYLES = { padding: '1rem', width: '28.125rem' } as const;
 
 /** Base styles for the attribution icon button. */
@@ -46,71 +37,73 @@ export const Attribution = memo(function Attribution(): JSX.Element {
 
   // State
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
-  const open = Boolean(anchorEl);
+  const [open, setOpen] = useState(false);
 
   // Store
   const mapId = useStoreGeoViewMapId();
   const interaction = useStoreMapInteraction();
   const mapAttribution = useStoreMapAttribution();
 
+  // Get container
   const mapElem = document.getElementById(`shell-${mapId}`);
 
+  // Set style for type of interaction (dynamic vs static)
   const buttonStyles = {
     ...ICON_BUTTON_BASE_STYLES,
     color: interaction === 'dynamic' ? theme.palette.geoViewColor.bgColor.dark[650] : theme.palette.geoViewColor.grey.dark[500],
   };
 
-  // Memoize values
-  const memoAttributionContent = useMemo(
-    () => mapAttribution.map((attribution) => <Typography key={attribution}>{attribution}</Typography>),
-    [mapAttribution]
-  );
+  // Attribution values
+  const attributionContent = mapAttribution.map((attribution) => <Typography key={attribution}>{attribution}</Typography>);
 
   // #region Handlers
 
   /**
-   * Handles opening the attribution popover.
+   * Handles toggling the attribution popper.
    */
   const handleOpenPopover = useCallback((event: React.MouseEvent<HTMLButtonElement>): void => {
     event.stopPropagation();
     setAnchorEl(event.currentTarget);
+    setOpen((prev) => !prev);
   }, []);
 
   /**
-   * Handles closing the attribution popover.
+   * Handles closing the attribution popper when clicking away.
    */
-  const handleClosePopover = useCallback((event: React.MouseEvent<HTMLButtonElement>): void => {
-    event.stopPropagation();
-    setAnchorEl(null);
-  }, []);
+  const handleClickAway = useCallback((): void => {
+    if (open) setOpen(false);
+  }, [open]);
 
   // #endregion
 
   return (
-    <>
-      <IconButton
-        id="attribution"
-        onClick={handleOpenPopover}
-        className={open ? 'active' : ''}
-        aria-label={t('mapctrl.attribution.tooltip')}
-        tooltipPlacement="top"
-        sx={buttonStyles}
-      >
-        <CopyrightIcon />
-      </IconButton>
-      <Popover
-        open={open}
-        anchorEl={anchorEl}
-        container={mapElem}
-        anchorOrigin={POPOVER_POSITIONS.anchorOrigin}
-        transformOrigin={{
-          vertical: 'bottom',
-          horizontal: 'right',
-        }}
-        onClose={handleClosePopover}
-      >
-        <Box sx={BOX_STYLES}>{memoAttributionContent}</Box>
-      </Popover>
-    </>
+    <ClickAwayListener mouseEvent="onMouseDown" touchEvent="onTouchStart" onClickAway={handleClickAway}>
+      <Box>
+        <IconButton
+          id="attribution"
+          onClick={handleOpenPopover}
+          className={open ? 'active' : ''}
+          aria-label={t('mapctrl.attribution.tooltip')}
+          tooltipPlacement="top"
+          sx={buttonStyles}
+        >
+          <CopyrightIcon />
+        </IconButton>
+        <Popper
+          open={open}
+          anchorEl={anchorEl}
+          placement="top-end"
+          container={mapElem}
+          sx={{
+            pointerEvents: 'auto',
+            zIndex: theme.zIndex.modal + 100,
+          }}
+        >
+          <Paper>
+            <Box sx={BOX_STYLES}>{attributionContent}</Box>
+          </Paper>
+        </Popper>
+      </Box>
+    </ClickAwayListener>
   );
 });
