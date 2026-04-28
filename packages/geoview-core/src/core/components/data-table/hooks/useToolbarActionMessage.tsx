@@ -2,7 +2,7 @@ import { useEffect, useMemo } from 'react';
 import type { MRT_TableInstance as MRTTableInstance, MRT_ColumnFiltersState as MRTColumnFiltersState } from 'material-react-table';
 import { useTranslation } from 'react-i18next';
 import { logger } from '@/core/utils/logger';
-import type { ColumnsType } from '@/core/components/data-table/data-table-types';
+import type { DataTableRow } from '@/core/components/data-table/data-table-types';
 import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 import { useDataTableController } from '@/core/controllers/use-controllers';
 
@@ -12,7 +12,7 @@ interface UseSelectedRowMessageProps {
     features?: TypeFeatureInfoEntry[] | null;
   };
   layerPath: string;
-  tableInstance: MRTTableInstance<ColumnsType>;
+  tableInstance: MRTTableInstance<DataTableRow> | null;
   columnFilters: MRTColumnFiltersState;
   globalFilter: string;
   showUnsymbolizedFeatures: boolean;
@@ -74,6 +74,9 @@ export function useToolbarActionMessage({
     return { message, filteredRowCount: length };
   }, [columnFilters, globalFilter, data.features?.length, tableInstance, showUnsymbolizedFeatures, unfilteredFeaturesCount, t]);
 
+  /**
+   * Updates the store with the current filtered row count.
+   */
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('USETOOLBARACTIONMESSAGE - set store toolbar message', memoToolbarMessage.filteredRowCount);

@@ -451,7 +451,7 @@
     "reduceBtn": "Réduire",
     "features": "Élément(s)",
     "featureFiltered": "élément filtré(s)",
-    "images": "Images",
+    "openImages": "Ouvrir les images",
     "noFeatures": "inconnue...",
     "showing": "affiché(s)",
     "total": "total",
@@ -461,7 +461,11 @@
     "searchInputLabel": "Rechercher dans les colonnes du tableau",
     "tableControls": "Contrôles du tableau de données",
     "tableAriaLabelWithLayer": "Tableau de données {{layerName}}",
-    "filterDataToExtent": "Filtrer dans l'étendue"
+    "filterDataToExtent": "Filtrer dans l'étendue",
+    "showHideColumns": "Afficher/Masquer les colonnes",
+    "showHideColumnsTooltip": "Afficher/Masquer les colonnes ({{visible}} sur {{total}} visibles)",
+    "showAll": "Tout afficher",
+    "hideAll": "Tout masquer"
   },
   "geochart": {
     "noChartAvailable": "Cliquer sur une couche de la carte qui contient un graphique"

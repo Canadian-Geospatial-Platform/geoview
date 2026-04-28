@@ -451,7 +451,7 @@
     "reduceBtn": "Reduce",
     "features": "feature(s)",
     "featureFiltered": "features filtered",
-    "images": "Images",
+    "openImages": "Open images",
     "noFeatures": "unknown...",
     "showing": "showing",
     "total": "total",
@@ -461,7 +461,11 @@
     "searchInputLabel": "Search data table columns",
     "tableControls": "Data table controls",
     "tableAriaLabelWithLayer": "{{layerName}} data table",
-    "filterDataToExtent": "Filter to extent"
+    "filterDataToExtent": "Filter to extent",
+    "showHideColumns": "Show/Hide Columns",
+    "showHideColumnsTooltip": "Show/Hide columns ({{visible}} of {{total}} visible)",
+    "showAll": "Show All",
+    "hideAll": "Hide All"
   },
   "geoChart": {
     "noChartAvailable": "Click on the map on a layer with chart"

@@ -14,15 +14,15 @@ interface FilterDataToExtentProps {
 }
 
 /**
- * Custom Filter map toggle button.
+ * Creates a toggle switch to filter data table rows to the current map extent.
  *
- * @param props - The props for the filter map component
- * @returns The filter switch
+ * @param props - Properties defined in FilterDataToExtentProps interface
+ * @returns The filter data to extent toggle element
  */
 function FilterDataToExtent(props: FilterDataToExtentProps): JSX.Element {
   const { layerPath } = props;
   // Log
-  logger.logTraceRender('components/data-table/filter-map');
+  logger.logTraceRender('components/data-table/filter-data-extent');
 
   // Hook
   const { t } = useTranslation();
@@ -32,6 +32,8 @@ function FilterDataToExtent(props: FilterDataToExtentProps): JSX.Element {
   const datatableSettings = useStoreDataTableLayerSettings();
   const mapController = useMapController();
   const dataTableController = useDataTableController();
+
+  // #region Handlers
 
   /**
    * Handles when the filter toggle is changed.
@@ -49,9 +51,11 @@ function FilterDataToExtent(props: FilterDataToExtentProps): JSX.Element {
     mapController.nudgeMapCenter(offset, 0);
   }, [dataTableController, layerPath, datatableSettings, mapController]);
 
+  // #endregion
+
   return (
     <Switch
-      size="medium"
+      size="small"
       onChange={handleFilterToggle}
       checked={datatableSettings[layerPath].filterDataToExtent}
       sx={sxClasses.filterMap}
