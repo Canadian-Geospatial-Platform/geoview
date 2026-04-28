@@ -153,26 +153,23 @@ const ResponsiveGridLayout = forwardRef(
     const rightTopSxProps = { zIndex: isFullScreen ? 'unset' : 100, alignContent: 'flex-end' };
 
     /** Memoized sx for the right-top content box layout. */
-    const memoRightTopContentSx = useMemo(
-      () => {
-        logger.logTraceUseMemo('RESPONSIVE-GRID-LAYOUT - memoRightTopContentSx', containerType, theme.breakpoints);
+    const memoRightTopContentSx = useMemo(() => {
+      logger.logTraceUseMemo('RESPONSIVE-GRID-LAYOUT - memoRightTopContentSx', containerType, theme.breakpoints);
 
-        return {
-          display: 'flex',
-          alignItems: containerType === CONTAINER_TYPE.APP_BAR ? 'end' : 'center',
-          flexDirection: containerType === CONTAINER_TYPE.APP_BAR ? 'column' : 'row',
-          gap: containerType === CONTAINER_TYPE.APP_BAR ? '10px' : '0',
-          [theme.breakpoints.up('sm')]: {
-            justifyContent: containerType === CONTAINER_TYPE.APP_BAR ? 'space-between' : 'right',
-          },
-          [theme.breakpoints.down('sm')]: {
-            justifyContent: 'space-between',
-          },
-            width: '100%',
-        };
-      },
-      [containerType, theme.breakpoints]
-    );
+      return {
+        display: 'flex',
+        alignItems: containerType === CONTAINER_TYPE.APP_BAR ? 'end' : 'center',
+        flexDirection: containerType === CONTAINER_TYPE.APP_BAR ? 'column' : 'row',
+        gap: containerType === CONTAINER_TYPE.APP_BAR ? '10px' : '0',
+        [theme.breakpoints.up('sm')]: {
+          justifyContent: containerType === CONTAINER_TYPE.APP_BAR ? 'space-between' : 'right',
+        },
+        [theme.breakpoints.down('sm')]: {
+          justifyContent: 'space-between',
+        },
+        width: '100%',
+      };
+    }, [containerType, theme.breakpoints]);
 
     // Expose imperative methods to parent component
     useImperativeHandle(

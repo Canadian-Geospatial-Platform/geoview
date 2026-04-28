@@ -279,7 +279,7 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
         });
       },
     },
-  } as IAppState;
+  };
 }
 
 // #endregion STATE INITIALIZATION

@@ -100,7 +100,7 @@ export class EsriFeature extends AbstractGeoViewVector {
     AbstractGeoViewRaster.throwIfMetatadaHasError(this.getGeoviewLayerId(), this.getLayerEntryNameOrGeoviewLayerName(), responseJson);
 
     // Return it
-    return responseJson as T;
+    return responseJson;
   }
 
   /**

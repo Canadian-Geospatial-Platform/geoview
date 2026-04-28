@@ -234,7 +234,7 @@ export class GeoPackageReader {
       stmt = db.prepare(`SELECT f_table_name, styleSLD FROM layer_styles`);
       while (stmt.step()) {
         const [tableName, sld] = stmt.get();
-        if (sld) styleSlds[tableName as string] = sld as string;
+        if (sld) styleSlds[tableName as string] = sld;
       }
     } catch (error) {
       logger.logError(error);

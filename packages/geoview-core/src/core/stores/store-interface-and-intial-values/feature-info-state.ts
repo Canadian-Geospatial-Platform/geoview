@@ -567,7 +567,7 @@ export function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFea
         });
       },
     },
-  } as IFeatureInfoState;
+  };
 }
 
 // #endregion STATE INITIALIZATION

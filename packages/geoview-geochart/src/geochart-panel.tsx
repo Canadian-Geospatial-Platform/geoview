@@ -150,7 +150,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
       ? Object.fromEntries(
           Object.entries(configObj).map(([layerPath, layerChartConfig]) => [
             layerPath,
-            { charts: [convertGeoViewGeoChartConfigFromCore(layerChartConfig)] } as GeoViewGeoChartRootConfig,
+            { charts: [convertGeoViewGeoChartConfigFromCore(layerChartConfig)] },
           ])
         )
       : {};

@@ -68,7 +68,7 @@ export abstract class WfsRenderer {
     const rules = Array.isArray(rulesRaw) ? rulesRaw : [rulesRaw];
 
     // Default geometry type
-    let geomType: TypeStyleGeometry = 'Point' as TypeStyleGeometry;
+    let geomType: TypeStyleGeometry = 'Point';
 
     const infos: TypeLayerStyleConfigInfo[] = [];
     const fields: string[] = [];
@@ -524,7 +524,7 @@ export abstract class WfsRenderer {
     return {
       visible: true,
       settings,
-    } as Partial<TypeLayerStyleConfigInfo>;
+    };
   }
 
   /**
@@ -664,7 +664,7 @@ export abstract class WfsRenderer {
     return {
       visible: true,
       settings,
-    } as Partial<TypeLayerStyleConfigInfo>;
+    };
   }
 
   /**

@@ -491,7 +491,7 @@ export class WMTS extends AbstractGeoViewRaster {
     const projection = getProjection(`EPSG:${metadataProjectionCode}`);
 
     // Calculate max resolution for projection extent, defaults to max resolution for Web Mercator if extent is unavailable.
-    const maxResolution = projection?.getExtent() ? getWidth(projection.getExtent() as number[]) / 256 : 156543.03392804097;
+    const maxResolution = projection?.getExtent() ? getWidth(projection.getExtent()) / 256 : 156543.03392804097;
 
     const bounds = layerConfig.getInitialSettingsBounds();
     const extent = bounds

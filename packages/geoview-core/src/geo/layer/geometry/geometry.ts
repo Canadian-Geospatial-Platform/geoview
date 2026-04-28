@@ -611,7 +611,7 @@ export class GeometryApi {
     }
 
     try {
-      geometryGroup.vectorLayer.getSource()?.addFeature(geometry as never);
+      geometryGroup.vectorLayer.getSource()?.addFeature(geometry);
       geometryGroup.vectorLayer.changed();
     } catch (error: unknown) {
       logger.logError(`Error adding geometry to group ${geometryGroupId}`, error);
@@ -633,7 +633,7 @@ export class GeometryApi {
         ?.getFeatures()
         .forEach((layerGeometry) => {
           if (geometry === layerGeometry) {
-            geometryGroups[i].vectorLayer.getSource()?.removeFeature(geometry as never);
+            geometryGroups[i].vectorLayer.getSource()?.removeFeature(geometry);
           }
         });
       geometryGroups[i].vectorLayer.changed();
@@ -655,7 +655,7 @@ export class GeometryApi {
       ?.getFeatures()
       .forEach((layerGeometry) => {
         if (geometry === layerGeometry) {
-          geometryGroup.vectorLayer.getSource()?.removeFeature(geometry as never);
+          geometryGroup.vectorLayer.getSource()?.removeFeature(geometry);
         }
       });
     geometryGroup.vectorLayer.changed();

@@ -328,7 +328,7 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
         });
       },
     },
-  } as IDataTableState;
+  };
 }
 
 // #endregion STATE INITIALIZATION

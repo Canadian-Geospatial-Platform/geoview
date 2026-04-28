@@ -2263,7 +2263,7 @@ export class MapViewer {
       // Not zooming on layers, but we have an extent to zoom to instead
       // If extent is not lon/lat, we assume it is in the map projection and use it as is.
       const extent = GeoUtilities.isExtentLonLat(this.mapFeaturesConfig.map.viewSettings.initialView.extent)
-        ? this.convertExtentLonLatToMapProj(this.mapFeaturesConfig.map.viewSettings.initialView.extent as Extent)
+        ? this.convertExtentLonLatToMapProj(this.mapFeaturesConfig.map.viewSettings.initialView.extent)
         : this.mapFeaturesConfig.map.viewSettings.initialView.extent;
 
       // Zoom to extent

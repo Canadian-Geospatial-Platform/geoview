@@ -44,7 +44,7 @@ const PANEL_SIZES = {
   default: { xs: 12 } as PanelSize,
   left: {
     normal: { sm: 5, md: 4, lg: 4 },
-    enlarged: { sm: 3, md: 2, lg: 1.25 }
+    enlarged: { sm: 3, md: 2, lg: 1.25 },
   } as PanelConfig,
   right: {
     normal: { sm: 7, md: 8, lg: 8 },
@@ -61,7 +61,7 @@ const PANEL_SIZES = {
  * @returns The panel size configuration
  */
 const getLeftPanelSize = (isRightPanelVisible: boolean, isEnlarged: boolean, toggleMode: boolean): PanelSize => {
-  if ( toggleMode ) {
+  if (toggleMode) {
     return isRightPanelVisible ? { xs: 'auto' } : { xs: 'grow' };
   }
 
@@ -80,7 +80,7 @@ const getLeftPanelSize = (isRightPanelVisible: boolean, isEnlarged: boolean, tog
  * @returns The panel size configuration
  */
 const getRightPanelSize = (isRightPanelVisible: boolean, isEnlarged: boolean, toggleMode: boolean): PanelSize => {
-  if ( toggleMode ) {
+  if (toggleMode) {
     return isRightPanelVisible ? { xs: 'grow' } : { xs: 0 };
   }
 

@@ -151,10 +151,25 @@ const config = {
         exclude: /node_modules/,
         use: [
           {
-            loader: 'babel-loader',
+            loader: 'swc-loader',
             options: {
-              plugins: ['@babel/transform-runtime'],
-              presets: ['@babel/preset-env', ['@babel/preset-react', { runtime: 'automatic' }], '@babel/preset-typescript'],
+              jsc: {
+                parser: {
+                  syntax: 'typescript',
+                  tsx: true,
+                  decorators: false,
+                },
+                transform: {
+                  react: {
+                    runtime: 'automatic',
+                  },
+                },
+                externalHelpers: false,
+                target: 'es2021',
+              },
+              module: {
+                type: 'es6',
+              },
             },
           },
         ],
@@ -163,10 +178,25 @@ const config = {
         test: /github.com\+Canadian-Geospatial-Platform\+geochart(.*)\.(ts|tsx|js|jsx)$/,
         use: [
           {
-            loader: 'babel-loader',
+            loader: 'swc-loader',
             options: {
-              plugins: ['@babel/transform-runtime'],
-              presets: ['@babel/preset-env', ['@babel/preset-react', { runtime: 'automatic' }], '@babel/preset-typescript'],
+              jsc: {
+                parser: {
+                  syntax: 'typescript',
+                  tsx: true,
+                  decorators: false,
+                },
+                transform: {
+                  react: {
+                    runtime: 'automatic',
+                  },
+                },
+                externalHelpers: false,
+                target: 'es2021',
+              },
+              module: {
+                type: 'es6',
+              },
             },
           },
         ],
@@ -187,10 +217,19 @@ const config = {
             },
           },
           {
-            loader: 'babel-loader',
+            loader: 'swc-loader',
             options: {
-              plugins: ['@babel/transform-runtime'],
-              presets: ['@babel/preset-env', '@babel/preset-typescript'],
+              jsc: {
+                parser: {
+                  syntax: 'typescript',
+                  tsx: false,
+                },
+                externalHelpers: false,
+                target: 'es2021',
+              },
+              module: {
+                type: 'es6',
+              },
             },
           },
         ],

@@ -1262,7 +1262,7 @@ export abstract class GeoviewRenderer {
       return layerStyles;
     } catch (error: unknown) {
       logger.logError('Error processing array of point styles', error);
-      return {} as TypeVectorLayerStyles;
+      return {};
     }
   }
 
@@ -1310,7 +1310,7 @@ export abstract class GeoviewRenderer {
       return await this.processArrayOfPointStyleConfig(layerStyles, arrayOfPointStyleConfig!);
     } catch (error: unknown) {
       logger.logError('Error getPointStyle sub routine', error);
-      return {} as TypeVectorLayerStyles;
+      return {};
     }
   }
 
