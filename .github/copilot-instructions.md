@@ -80,17 +80,17 @@ Backend/Map Events → Domains → Controllers → Zustand Store
 
 **Available Controllers:**
 
-| Controller               | Responsibility                                 |
-| ------------------------ | ---------------------------------------------- |
-| `MapController`          | Zoom, center, projection, highlight, filters   |
-| `LayerController`        | Visibility, opacity, settings, item visibility |
-| `LayerCreatorController` | Layer creation and removal                     |
-| `LayerSetController`     | Feature queries, layer set management          |
-| `UIController`           | UI state, tabs, theme, language, notifications |
-| `DataTableController`    | Data table filters                             |
-| `PluginController`       | Plugin loading and access                      |
-| `DrawerController`       | Drawing operations (conditional)               |
-| `TimeSliderController`   | Time slider state and filters (conditional)    |
+| Controller               | Responsibility                                                  |
+| ------------------------ | --------------------------------------------------------------- |
+| `MapController`          | Zoom, center, projection, bbox highlight, filters               |
+| `LayerController`        | Visibility, opacity, layer highlight, settings, item visibility |
+| `LayerCreatorController` | Layer creation and removal                                      |
+| `LayerSetController`     | Feature queries, layer set management                           |
+| `UIController`           | UI state, tabs, theme, language, notifications                  |
+| `DataTableController`    | Data table filters                                              |
+| `PluginController`       | Plugin loading and access                                       |
+| `DrawerController`       | Drawing operations (conditional)                                |
+| `TimeSliderController`   | Time slider state and filters (conditional)                     |
 
 **Accessing controllers from React components:**
 
@@ -156,6 +156,21 @@ cgpv.init();
 - **`getLayerNameCascade()`** — Cascades through `#layerName` → `geoviewLayerName` → `geoviewLayerId` → `layerPath`. Always returns a non-empty string.
 
 **Always use `getLayerNameCascade()` when you need a display name.** Use `getLayerName()` only when you specifically need to check if the entry has its own name set.
+
+### Layer Opacity System
+
+**Hierarchical capping** — `AbstractBaseGVLayer.onSetOpacity()` clamps each layer's opacity to `Math.min(parent.getOpacity(), opacity)`. A child can never exceed its parent's opacity. This means:
+
+- To boost a deeply nested layer to 100%, ALL ancestor groups must also be set to 100% first
+- Ancestors must be boosted top-down (root → leaf direction), otherwise the parent cap blocks children
+
+**Group cascade** — `GVGroupLayer.onSetOpacity()` overrides the base method and calls `child.setOpacity(opacity)` on every direct child. This cascades recursively through nested groups. Consequences:
+
+- Setting a group's opacity affects ALL descendants (not just the target child)
+- When modifying a group's opacity temporarily (e.g., for highlight), sibling layers get their opacities changed as a side effect
+- `getLayersAllLeafs()` returns only leaf layers (non-groups); `getLayersAll()` includes intermediate groups — use the latter when you need to store/restore opacities at every level
+
+**Snapshot/restore pattern** — When temporarily modifying layer opacities (e.g., highlight), store the entire map's opacity state upfront using a `Map<string, number>` keyed by layer path, then restore all values on cleanup. This is safer than ratio-based arithmetic (multiply/divide) which accumulates floating-point drift over repeated operations.
 
 ### Event Delegate System
 
