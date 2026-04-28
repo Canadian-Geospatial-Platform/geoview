@@ -1785,6 +1785,9 @@ packages/geoview-core/src/
 ├── geo/              # OpenLayers layer management
 │   ├── layer/        # GeoView & GV layer classes
 │   ├── map/          # MapViewer
+│   ├── utils/        # Geo utilities
+│   │   ├── renderer/ # Layer styling processors (EsriRenderer, WfsRenderer, GeoviewRenderer)
+│   │   └── projection.ts
 │   └── interaction/
 └── ui/               # UI components & layout
     ├── icons/        # Icon barrel (index.ts) re-exporting @mui/icons-material
