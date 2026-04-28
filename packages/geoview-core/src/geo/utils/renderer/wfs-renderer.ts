@@ -85,7 +85,10 @@ export abstract class WfsRenderer {
         hasClassBreaks = filterInfo.hasGreaterOrLessThan;
 
         // Compile the fields
-        if (!fields.includes(filterInfo.propertyName)) fields.push(filterInfo.propertyName);
+        const propertyNames = Array.isArray(filterInfo.propertyName) ? filterInfo.propertyName : [filterInfo.propertyName];
+        propertyNames.forEach((name) => {
+          if (!fields.includes(name)) fields.push(name);
+        });
       }
 
       // Check if it's a PointSymbolizer
@@ -190,8 +193,15 @@ export abstract class WfsRenderer {
    * @throws {NotSupportedError} When the filter uses `ogc:Function` or cannot be interpreted
    */
   static #readFilterFromRule(filter: TypeUserStyleRuleFilter): FilterInfo {
-    // If the filter is based on a function, throw error
-    if (filter['ogc:PropertyIsEqualTo']?.['ogc:Function']) throw new NotSupportedError('Filters based on functions are not supported.');
+    // Try to parse function-based filters first
+    if (filter['ogc:PropertyIsEqualTo']?.['ogc:Function']) {
+      const funcInfo = this.#tryParseConcatFunction(filter);
+      if (funcInfo) return funcInfo;
+
+      throw new NotSupportedError(
+        'Function-based filters are only partially supported. Currently only supports simple concat functions with string literals.'
+      );
+    }
 
     // Read simple filters
     let filterOption = this.#readFilterInfoNumberOptionFromFilter(filter);
@@ -209,6 +219,67 @@ export abstract class WfsRenderer {
 
     // Throw
     throw new NotSupportedError(`Couldn't read the filter information.`);
+  }
+
+  static #tryParseConcatFunction(filter: TypeUserStyleRuleFilter): FilterInfo | undefined {
+    const eqTo = filter['ogc:PropertyIsEqualTo'];
+    const func = eqTo?.['ogc:Function'];
+    if (!eqTo || !func) return undefined;
+
+    const funcName = func['@attributes']?.name;
+
+    if (funcName !== 'concat') return undefined;
+
+    // Extract the expected value (right side of equality)
+    const expectedValue = String(eqTo['ogc:Literal']);
+
+    // Extract PropertyName and Literal nodes from concat function
+    const fields: string[] = [];
+    const separators: string[] = [];
+
+    // Parse the XML structure - typically alternates PropertyName/Literal
+    Object.keys(func).forEach((key) => {
+      if (key === 'ogc:PropertyName') {
+        const props = Array.isArray(func[key]) ? func[key] : [func[key]];
+        fields.push(...props);
+      } else if (key === 'ogc:Literal') {
+        const lits = Array.isArray(func[key]) ? func[key] : [func[key]];
+        separators.push(...lits);
+      }
+    });
+
+    // Check all separators are identical
+    const uniqueSeparators = [...new Set(separators)];
+    if (uniqueSeparators.length !== 1) {
+      throw new NotSupportedError(
+        'Concat functions with multiple different separators are not supported. All separators must be identical.'
+      );
+    }
+
+    // Validate structural correctness: N fields need N-1 separators
+    if (separators.length !== fields.length - 1) {
+      throw new NotSupportedError(
+        `Concat function structure mismatch: found ${fields.length} fields but ${separators.length} separators. Expected ${fields.length - 1} separators.`
+      );
+    }
+
+    // Split the expected value by the separator
+    const separator = separators[0];
+    const values = expectedValue.split(separator).map((v) => v.trim());
+
+    // Validate field count matches value count
+    if (fields.length !== values.length) {
+      throw new NotSupportedError(
+        `Concat function has ${fields.length} fields but the comparison value splits into ${values.length} parts.`
+      );
+    }
+
+    return {
+      hasGreaterOrLessThan: false,
+      propertyName: fields, // Primary field for backward compat
+      values, // Split values
+      valuesConditions: undefined,
+    };
   }
 
   /**
@@ -1703,7 +1774,7 @@ type GraphicInfo = { innerSVG: string; vx: number; vy: number; vw: number; vh: n
 
 type FilterInfo = {
   hasGreaterOrLessThan: boolean;
-  propertyName: string;
+  propertyName: string | string[];
   values: (number | string)[];
   valuesConditions?: TypeLayerStyleValueCondition[];
 };

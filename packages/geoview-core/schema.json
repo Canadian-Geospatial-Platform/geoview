@@ -835,6 +835,10 @@
               "$ref": "#/definitions/TypeStrokeSymbolConfig"
             }
           },
+          "zIndex": {
+            "description": "Z-index of classes for vector features in the style.",
+            "type": "number"
+          },
           "additionalProperties": false
         }
       ]
@@ -871,6 +875,10 @@
               "description": "Kind of filling  for vector features.",
               "$ref": "#/definitions/TypeFillStyle",
               "default": "solid"
+            },
+            "zIndex": {
+              "description": "Z-index of classes for vector features in the style.",
+              "type": "number"
             }
           },
           "additionalProperties": false
@@ -917,6 +925,10 @@
             },
             "symbol": {
               "$ref": "#/definitions/TypeSymbol"
+            },
+            "zIndex": {
+              "description": "Z-index of classes for vector features in the style.",
+              "type": "number"
             }
           },
           "additionalProperties": false
@@ -975,6 +987,10 @@
               "description": "The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data with the Canvas renderer.",
               "type": "string",
               "default": "Anonymous"
+            },
+            "zIndex": {
+              "description": "Z-index of classes for vector features in the style.",
+              "type": "number"
             }
           },
           "additionalProperties": false

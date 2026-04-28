@@ -7,7 +7,6 @@ import {
   useStoreLayerCanToggle,
   useStoreLayerControls,
   useStoreLayerIsHiddenOnMap,
-  useStoreLayerStyleConfig,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';
@@ -114,7 +113,6 @@ export const ItemsList = memo(function ItemsList({ items, layerPath }: ItemsList
   const layerHidden = useStoreLayerIsHiddenOnMap(layerPath);
   const canToggle = useStoreLayerCanToggle(layerPath);
   const canToggleItemVisibility = canToggle && layerControls?.visibility !== false;
-  const styleConfig = useStoreLayerStyleConfig(layerPath);
   const layerController = useLayerController();
 
   /**
@@ -167,9 +165,7 @@ export const ItemsList = memo(function ItemsList({ items, layerPath }: ItemsList
     <List className="layerList" sx={memoSxClasses.layerList}>
       {items.map((item) => {
         const itemId = getItemId(item);
-        const canReallyToggle = Boolean(
-          canToggleItemVisibility && !layerHidden && styleConfig?.[item.geometryType]?.fields[0] !== undefined
-        );
+        const canReallyToggle = Boolean(canToggleItemVisibility && !layerHidden);
 
         // Common properties for the legend list item
         const commonProps = {

@@ -385,10 +385,6 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
     // No checkbox for simple style layers
     if (layerStyleConfig[item.geometryType]?.type === 'simple') return null;
 
-    // GV: Some esri layer has uniqueValue renderer but there is no field defined in their metadata (i.e. e2424b6c-db0c-4996-9bc0-2ca2e6714d71).
-    // For these layers, we need to disable checkboxes
-    if (layerStyleConfig[item.geometryType]?.fields[0] === undefined) return null;
-
     const isDisabled = layerHidden || !layerCanToggle;
 
     // Build the label content with icon and text
@@ -704,10 +700,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
             <>
               {renderLayerButtons()}
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap-reverse' }}>
-                {layerItems &&
-                  layerItems.length > 1 &&
-                  layerItems.some((item) => layerStyleConfig?.[item.geometryType]?.fields[0] !== undefined) &&
-                  renderHeaderCheckbox()}
+                {layerItems && layerItems.length > 1 && renderHeaderCheckbox()}
                 {layerChildPaths && layerChildPaths.length > 0 && (
                   <FormControlLabel
                     control={
