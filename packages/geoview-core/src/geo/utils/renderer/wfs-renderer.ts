@@ -221,6 +221,12 @@ export abstract class WfsRenderer {
     throw new NotSupportedError(`Couldn't read the filter information.`);
   }
 
+  /**
+   * Attempts to parse a function-based filter, specifically looking for `concat` functions used within `PropertyIsEqualTo` filters.
+   *
+   * @param filter - The OGC filter block to evaluate for function-based patterns
+   * @returns The parsed filter information if the structure matches a supported `concat` function pattern, or undefined if it does not match
+   */
   static #tryParseConcatFunction(filter: TypeUserStyleRuleFilter): FilterInfo | undefined {
     const eqTo = filter['ogc:PropertyIsEqualTo'];
     const func = eqTo?.['ogc:Function'];

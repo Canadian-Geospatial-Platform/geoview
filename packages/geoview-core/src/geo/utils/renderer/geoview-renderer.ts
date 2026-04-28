@@ -1536,7 +1536,7 @@ export abstract class GeoviewRenderer {
         const value = feature.get(fieldName);
         if (value === undefined || value === null) return 'null';
         // Escape backslashes and then wrap strings in quotes for JavaScript evaluation
-        if (typeof value === 'string') return `'${value.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
+        if (typeof value === 'string') return "'" + value.replace(/\\/g, '\\\\').replace(/'/g, "\\'") + "'";
         return String(value);
       });
 
@@ -1545,7 +1545,7 @@ export abstract class GeoviewRenderer {
         const value = feature.get(fieldName);
         if (value === undefined || value === null) return 'null';
         // Escape backslashes and then wrap strings in quotes for JavaScript evaluation
-        if (typeof value === 'string') return `'${value.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
+        if (typeof value === 'string') return "'" + value.replace(/\\/g, '\\\\').replace(/'/g, "\\'") + "'";
         return String(value);
       });
 
