@@ -4,6 +4,8 @@ import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { Badge, Box, List, ListItem, ListItemButton, Tooltip, Typography, ProgressBar, LocationSearchingIcon } from '@/ui';
 
+import type { SxStyles } from '@/ui/style/types';
+
 import type { TypeFeatureInfoEntry, TypeQueryStatus } from '@/api/types/map-schema-types';
 import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
 import { getSxClasses } from './layer-list-style';
@@ -81,7 +83,7 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
   /**
    * Builds the sx classes for the layer list item component.
    */
-  const memoSxClasses = useMemo(() => {
+  const memoSxClasses = useMemo((): SxStyles => {
     logger.logTraceUseMemo('LAYER-LIST - LayerListItem - memoSxClasses', theme);
     return getSxClasses(theme);
   }, [theme]);
@@ -114,8 +116,12 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
   // However, if "coordinateInfoEnabled" is true, and no map click has been done,the layer coord info will show zero-ed out coordinates in the UI.
   if (isLayerCoordinateInfo) isDisabled = false;
 
+  // #region Handlers
+
   /**
    * Gets the layer status label based on query and layer status.
+   *
+   * @returns The status label as JSX element or string
    */
   const getLayerStatus = useCallback((): JSX.Element | string => {
     if (layerStatus === 'error' || layerQueryStatus === 'error') {
@@ -146,6 +152,8 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
     [isDisabled, isLoading, onListItemClick]
   );
 
+  // #endregion
+
   return (
     <ListItem disablePadding className={containerClass}>
       <Tooltip
@@ -175,6 +183,7 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
           onClick={() => onListItemClick(layer)}
           selected={isSelected}
           disabled={isDisabled}
+          aria-current={isSelected ? true : undefined}
         >
           {layer.layerPath === LAYER_PATH_COORDINATE_INFO ? (
             // Treat
@@ -231,7 +240,7 @@ export const LayerList = memo(function LayerList({ layerList, selectedLayerPath,
   /**
    * Builds the sx classes for the layer list component.
    */
-  const memoSxClasses = useMemo(() => {
+  const memoSxClasses = useMemo((): SxStyles => {
     logger.logTraceUseMemo('LAYER-LIST - LayerList - memoSxClasses', theme);
     return getSxClasses(theme);
   }, [theme]);
