@@ -709,9 +709,15 @@ export interface TypeUserStyleRuleFilterPropertyDetails {
 }
 
 export interface TypeUserStyleRuleFilterFunction {
+  '@attributes': TypeUserStyleRuleFilterFunctionAttributes;
   'ogc:PropertyName': string;
   'ogc:Literal': string;
 }
+
+export interface TypeUserStyleRuleFilterFunctionAttributes {
+  name: string;
+}
+
 export interface TypeUserStyleSymbolizer {
   'se:Stroke'?: TypeUserStyleParameter;
   'se:Fill'?: TypeUserStyleParameter;
