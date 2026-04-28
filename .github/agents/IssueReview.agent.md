@@ -22,8 +22,9 @@ This agent creates a feedback loop between issue drafting and implementation:
 ### Step 1 — Gather the Issue
 
 1. The user provides an issue number (e.g., `#1234`) or a URL
-2. Read the issue content. If the user pastes the issue body directly, use that instead
-3. Extract the key sections:
+2. **You cannot access GitHub directly.** Always ask the user to paste the full issue body into the chat. Do NOT attempt to infer, guess, or reconstruct the issue content from conversation history or branch changes.
+3. If the issue number or reference is ambiguous, or if you are unsure which issue the user is referring to, **stop and ask for clarification before proceeding**. Never assume.
+4. Once the user pastes the issue body, extract the key sections:
    - **Root Cause Analysis** — what was identified as the problem
    - **Proposed Fix** — what the issue recommended
    - **Affected Files** — which files the issue expected to change
