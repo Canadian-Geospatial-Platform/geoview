@@ -1535,8 +1535,8 @@ export abstract class GeoviewRenderer {
       let evaluableExpression = expression.replace(/\$feature\.([a-zA-Z_][\w]*)/g, (match, fieldName) => {
         const value = feature.get(fieldName);
         if (value === undefined || value === null) return 'null';
-        // Wrap strings in quotes for JavaScript evaluation
-        if (typeof value === 'string') return `'${value.replace(/'/g, "\\'")}'`;
+        // Escape backslashes and then wrap strings in quotes for JavaScript evaluation
+        if (typeof value === 'string') return `'${value.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
         return String(value);
       });
 
@@ -1544,13 +1544,10 @@ export abstract class GeoviewRenderer {
       evaluableExpression = evaluableExpression.replace(/\$feature\[["']([^"']+)["']\]/g, (match, fieldName) => {
         const value = feature.get(fieldName);
         if (value === undefined || value === null) return 'null';
-        // Wrap strings in quotes for JavaScript evaluation
-        if (typeof value === 'string') return `'${value.replace(/'/g, "\\'")}'`;
+        // Escape backslashes and then wrap strings in quotes for JavaScript evaluation
+        if (typeof value === 'string') return `'${value.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
         return String(value);
       });
-
-      // Replace Arcade 'else' with JavaScript 'else'
-      evaluableExpression = evaluableExpression.replace(/\belse\b/g, 'else');
 
       // Safety check: whitelist allowed characters and keywords
       // Allow: alphanumeric, operators, parentheses, quotes, whitespace, keywords (if, else, return, upper, lower)
