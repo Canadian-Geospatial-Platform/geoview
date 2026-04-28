@@ -832,10 +832,10 @@ export const useStoreLayerStatusSet = (): Record<string, TypeLayerStatus> => {
  *
  * @param mapId - The map identifier
  * @param layerPath - The layer path to look up
- * @returns The layer visible state, defaults to true
+ * @returns The layer visible state, defaults to false
  */
 export const getStoreLayerVisible = (mapId: string, layerPath: string): boolean => {
-  return getStoreLayerLegendLayerByPath(mapId, layerPath)?.visible ?? true;
+  return getStoreLayerLegendLayerByPath(mapId, layerPath)?.visible ?? false;
 };
 
 /**
@@ -854,22 +854,23 @@ export const useStoreLayerVisible = createLayerSelectorHook('visible');
 export const getStoreLayerVisibleLayerPaths = (mapId: string): string[] => {
   const allLayers = utilFindAllLayers(getStoreLayerState(mapId).legendLayers);
   return Object.values(allLayers)
-    .filter((layer) => layer.visible ?? true)
+    .filter((layer) => layer.visible ?? false)
     .map((layer) => layer.layerPath);
 };
 
 /**
  * Selects whether any of the given layer paths are visible.
  *
+ * A group layer is considered visible when at least one child layer is visible.
+ *
  * @param layerPaths - The layer paths to check visibility for
  * @returns True if at least one layer is visible, false otherwise
  */
-// TODO: CHECK - Sometimes the default is true and sometimes it's false, put them all to true when it's logical to do so?
 export const useStoreLayerArrayVisibility = (layerPaths: string[]): boolean => {
   return useStore(useGeoViewStore(), (state) => {
-    // Return true if all layers are visible (or don't exist yet)
+    // Return true if any layer is visible
     return layerPaths.some((layerPath) => {
-      return utilLegendLayerByPathRec(state.layerState.legendLayers, layerPath)?.visible || false;
+      return utilLegendLayerByPathRec(state.layerState.legendLayers, layerPath)?.visible ?? false;
     });
   });
 };

@@ -97,7 +97,13 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
 
     // Toggle all child layers
     memoLayerPaths.forEach((layerPath) => {
-      layerController.setOrToggleLayerVisibility(layerPath, newVisibility);
+      try {
+        // Toggle the visibility
+        layerController.setOrToggleLayerVisibility(layerPath, newVisibility);
+      } catch (error) {
+        // Log
+        logger.logWarning(`Failed to toggle visibility for layer at path ${layerPath}:`, error);
+      }
     });
   }, [allVisible, layerController, memoLayerPaths]);
 

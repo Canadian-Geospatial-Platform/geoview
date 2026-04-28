@@ -422,6 +422,9 @@ export class LayerSetController extends AbstractMapViewerController {
         // Get the schema tag
         const schemaTag = legendResultSetEntry.data?.type ?? layerConfig.getSchemaTag();
 
+        // Get the visibility flag, invisible if the layer doesn't exist yet (could be only the config exists)
+        const visible = layer?.getVisible() ?? false;
+
         const legendLayerEntry: TypeLegendLayer = {
           url: layerConfig.getMetadataAccessPath(),
           bounds: existingStoreEntry?.bounds, // Reassigning the value, because we try to not manage this property from within this function anymore
@@ -441,7 +444,7 @@ export class LayerSetController extends AbstractMapViewerController {
           opacityMaxFromParent: existingStoreEntry?.opacityMaxFromParent ?? 1, // Reassigning the value, because we try to not manage this property from within this function anymore
           hoverable: layerConfig.getInitialSettings()?.states?.hoverable, // default: true
           queryable: layerConfig.getInitialSettings()?.states?.queryable, // default: true
-          visible: layer?.getVisible() ?? true,
+          visible,
           inVisibleRange: layer?.inVisibleRange(this.getMapViewer().getView().getZoom() ?? 0) ?? true,
           legendCollapsed: layerConfig.getInitialSettings()?.states?.legendCollapsed ?? false, // default: false
           children: [] as TypeLegendLayer[],
