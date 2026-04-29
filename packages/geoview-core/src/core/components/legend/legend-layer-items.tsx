@@ -7,12 +7,15 @@ import {
   useStoreLayerCanToggle,
   useStoreLayerControls,
   useStoreLayerIsHiddenOnMap,
+  useStoreLayerSchemaTag,
+  useStoreLayerStyleConfig,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';
 import { generateId } from '@/core/utils/utilities';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useLayerController } from '@/core/controllers/use-controllers';
+import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 
 interface ItemsListProps {
   items: TypeLegendItem[];
@@ -113,6 +116,8 @@ export const ItemsList = memo(function ItemsList({ items, layerPath }: ItemsList
   const layerHidden = useStoreLayerIsHiddenOnMap(layerPath);
   const canToggle = useStoreLayerCanToggle(layerPath);
   const canToggleItemVisibility = canToggle && layerControls?.visibility !== false;
+  const layerSchemaTag = useStoreLayerSchemaTag(layerPath);
+  const layerStyleConfig = useStoreLayerStyleConfig(layerPath);
   const layerController = useLayerController();
 
   /**
@@ -165,7 +170,12 @@ export const ItemsList = memo(function ItemsList({ items, layerPath }: ItemsList
     <List className="layerList" sx={memoSxClasses.layerList}>
       {items.map((item) => {
         const itemId = getItemId(item);
-        const canReallyToggle = Boolean(canToggleItemVisibility && !layerHidden);
+        const hasValueExpression = layerStyleConfig
+          ? Object.values(layerStyleConfig).some((config) => 'valueExpression' in config && config.valueExpression)
+          : false;
+        const isEsriDynamic = layerSchemaTag === CONST_LAYER_TYPES.ESRI_DYNAMIC;
+
+        const canReallyToggle = Boolean(canToggleItemVisibility && !layerHidden && !(isEsriDynamic && hasValueExpression));
 
         // Common properties for the legend list item
         const commonProps = {

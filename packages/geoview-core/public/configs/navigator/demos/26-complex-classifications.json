@@ -39,6 +39,17 @@
         ]
       },
       {
+        "geoviewLayerId": "ESRIDynamicValueExpression",
+        "geoviewLayerName": "ESRI Dynamic with Value Expression to classify every 100 years",
+        "metadataAccessPath": "https://egisp.dfo-mpo.gc.ca/arcgis/rest/services/open_data_donnees_ouvertes/path/MapServer",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0"
+          }
+        ]
+      },
+      {
         "geoviewLayerId": "ESRIValueExpression",
         "geoviewLayerName": "ESRI Value Expression to classify every 100 years",
         "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer",

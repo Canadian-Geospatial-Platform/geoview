@@ -417,7 +417,12 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
     // No checkbox for simple style layers
     if (layerStyleConfig[item.geometryType]?.type === 'simple') return null;
 
-    const isDisabled = layerHidden || !layerCanToggle;
+    // Check if layer is ESRI Dynamic with valueExpression
+    const styleConfig = layerStyleConfig[item.geometryType];
+    const hasValueExpression = styleConfig && 'valueExpression' in styleConfig && styleConfig.valueExpression;
+    const isEsriDynamic = layerSchemaTag === CONST_LAYER_TYPES.ESRI_DYNAMIC;
+
+    const isDisabled = layerHidden || !layerCanToggle || (isEsriDynamic && !!hasValueExpression);
 
     // Build the label content with icon and text
     const labelContent = (
