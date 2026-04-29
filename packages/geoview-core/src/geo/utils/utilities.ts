@@ -1,4 +1,4 @@
-import type { Feature, MapBrowserEvent } from 'ol';
+﻿import type { Feature, MapBrowserEvent } from 'ol';
 import { WKB, WKT, GeoJSON, EsriJSON, KML, WFS } from 'ol/format';
 import type { ReadOptions } from 'ol/format/Feature';
 import type Geometry from 'ol/geom/Geometry';
@@ -240,11 +240,11 @@ export abstract class GeoUtilities {
    * The parameter sent in the callback is the proxy prefix with the '?' at the end.
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves with the capabilities XML as a string
-   * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
-   * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
-   * @throws {ResponseError} When the response is not OK (non-2xx).
-   * @throws {ResponseEmptyError} When the JSON response is empty.
-   * @throws {NetworkError} When a network issue happened.
+   * @throws {RequestTimeoutError} When the request exceeds the timeout duration
+   * @throws {RequestAbortedError} When the request was aborted by the caller's signal
+   * @throws {ResponseError} When the response is not OK (non-2xx)
+   * @throws {ResponseEmptyError} When the JSON response is empty
+   * @throws {NetworkError} When a network issue happened
    */
   static async getWMSServiceString(
     url: string,
@@ -288,11 +288,11 @@ export abstract class GeoUtilities {
    * The parameter sent in the callback is the proxy prefix with the '?' at the end.
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves with the parsed WMS metadata
-   * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
-   * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
-   * @throws {ResponseError} When the response is not OK (non-2xx).
-   * @throws {ResponseEmptyError} When the JSON response is empty.
-   * @throws {NetworkError} When a network issue happened.
+   * @throws {RequestTimeoutError} When the request exceeds the timeout duration
+   * @throws {RequestAbortedError} When the request was aborted by the caller's signal
+   * @throws {ResponseError} When the response is not OK (non-2xx)
+   * @throws {ResponseEmptyError} When the JSON response is empty
+   * @throws {NetworkError} When a network issue happened
    */
   static async getWMSServiceMetadata(
     url: string,
@@ -348,15 +348,15 @@ export abstract class GeoUtilities {
   /**
    * Fetch the json response from the XML response of a WMS getCapabilities request.
    *
-   * @param url - The url the url of the WMS server.
-   * @param layers - The layers to query separate by.
-   * @param abortSignal - Optional abort signal to handle cancelling of the process.
+   * @param url - The url the url of the WMS server
+   * @param layers - The layers to query separate by
+   * @param abortSignal - Optional abort signal to handle cancelling of the process
    * @returns A promise that resolves with the parsed WMTS metadata
-   * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
-   * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
-   * @throws {ResponseError} When the response is not OK (non-2xx).
-   * @throws {ResponseEmptyError} When the JSON response is empty.
-   * @throws {NetworkError} When a network issue happened.
+   * @throws {RequestTimeoutError} When the request exceeds the timeout duration
+   * @throws {RequestAbortedError} When the request was aborted by the caller's signal
+   * @throws {ResponseError} When the response is not OK (non-2xx)
+   * @throws {ResponseEmptyError} When the JSON response is empty
+   * @throws {NetworkError} When a network issue happened
    */
   static async getWMTSServiceMetadata(url: string, layers?: string, abortSignal?: AbortSignal): Promise<TypeMetadataWMTS> {
     // Make sure the URL has necessary information
@@ -617,11 +617,11 @@ export abstract class GeoUtilities {
    * The parameter sent in the callback is the proxy prefix with the '?' at the end.
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves with the parsed WMS styles
-   * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
-   * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
-   * @throws {ResponseError} When the response is not OK (non-2xx).
-   * @throws {ResponseEmptyError} When the JSON response is empty.
-   * @throws {NetworkError} When a network issue happened.
+   * @throws {RequestTimeoutError} When the request exceeds the timeout duration
+   * @throws {RequestAbortedError} When the request was aborted by the caller's signal
+   * @throws {ResponseError} When the response is not OK (non-2xx)
+   * @throws {ResponseEmptyError} When the JSON response is empty
+   * @throws {NetworkError} When a network issue happened
    */
   static async getWMSServiceStyles(
     url: string,
@@ -726,8 +726,8 @@ export abstract class GeoUtilities {
    * - Visibility defaults to `true` unless explicitly set to `false`.
    * - Returns `undefined` if `layerLegend` is `null` or `undefined`.
    *
-   * @param schemaTag - The layer schema type used to determine whether the legend should be interpreted as vector-based.
-   * @param layerLegend - The legend configuration object associated with the layer.
+   * @param schemaTag - The layer schema type used to determine whether the legend should be interpreted as vector-based
+   * @param layerLegend - The legend configuration object associated with the layer
    * @returns An array of legend layer item metadata containing icon images and legend entries,
    * or `undefined` if no legend is provided.
    */
@@ -994,10 +994,10 @@ export abstract class GeoUtilities {
    */
   static #parseEPSGFromName(name: string): string | undefined {
     // Standard forms
-    // "EPSG:4326" → EPSG:4326
-    // "urn:ogc:def:crs:EPSG::4326" → EPSG:4326
-    // "http://www.opengis.net/gml/srs/epsg.xml#4326" → EPSG:4326
-    // "urn:x-ogc:def:crs:EPSG:6.6:4326" → EPSG:4326
+    // "EPSG:4326" -> EPSG:4326
+    // "urn:ogc:def:crs:EPSG::4326" -> EPSG:4326
+    // "http://www.opengis.net/gml/srs/epsg.xml#4326" -> EPSG:4326
+    // "urn:x-ogc:def:crs:EPSG:6.6:4326" -> EPSG:4326
 
     // Direct "EPSG:xxxx"
     if (name.startsWith('EPSG:')) return name;
@@ -1015,7 +1015,7 @@ export abstract class GeoUtilities {
    * @param features - The Features data to read
    * @param options - Optional read options such as projection or extent
    * @returns An array of parsed OpenLayers Feature and whether there were any invalid geometries
-   * @throws {Error} When the EsriJSON data is invalid and cannot be parsed, even after attempting to clean invalid geometries.
+   * @throws {Error} When the EsriJSON data is invalid and cannot be parsed, even after attempting to clean invalid geometries
    */
   static readFeaturesFromEsriJSON(features: unknown, options: ReadOptions | undefined): EsriJSONReadResult {
     // GV Anything other than numbers in the geometry will throw errors in EsriJSON().readFeatures()
@@ -1411,7 +1411,7 @@ export abstract class GeoUtilities {
    */
   static getArea(geometry: Geometry): number {
     // Note that the geometry.getLength() and geometry.getArea() methods return measures of projected (planar) geometries.
-    // These can be very different than on-the-ground measures in certain situations — in northern and southern latitudes
+    // These can be very different than on-the-ground measures in certain situations - in northern and southern latitudes
     // using Web Mercator for example. For better results, use the functions in the ol/sphere module.
     return getAreaOL(geometry);
   }
@@ -1424,7 +1424,7 @@ export abstract class GeoUtilities {
    */
   static getLength(geometry: Geometry): number {
     // Note that the geometry.getLength() and geometry.getArea() methods return measures of projected (planar) geometries.
-    // These can be very different than on-the-ground measures in certain situations — in northern and southern latitudes
+    // These can be very different than on-the-ground measures in certain situations - in northern and southern latitudes
     // using Web Mercator for example. For better results, use the functions in the ol/sphere module.
     return getLengthOL(geometry);
   }
@@ -1575,7 +1575,7 @@ export abstract class GeoUtilities {
    *
    * @param wfsGeometryType - The wfs geometry type to convert
    * @returns The corresponding TypeStyleGeometry
-   * @throws {NotSupportedError} When the geometry type is not supported.
+   * @throws {NotSupportedError} When the geometry type is not supported
    */
   static wfsConvertGeometryTypeToOLGeometryType(wfsGeometryType: string): TypeStyleGeometry {
     switch (wfsGeometryType) {
@@ -1606,7 +1606,7 @@ export abstract class GeoUtilities {
    *
    * @param esriGeometryType - The esri geometry type to convert
    * @returns The corresponding TypeStyleGeometry
-   * @throws {NotSupportedError} When the geometry type is not supported.
+   * @throws {NotSupportedError} When the geometry type is not supported
    */
   static esriConvertEsriGeometryTypeToOLGeometryType(esriGeometryType: string): TypeStyleGeometry {
     switch (esriGeometryType) {

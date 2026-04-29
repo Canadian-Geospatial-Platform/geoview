@@ -1,4 +1,4 @@
-import type { Extent } from 'ol/extent';
+﻿import type { Extent } from 'ol/extent';
 
 import { Projection } from '@/geo/utils/projection';
 import type { TimeDimensionESRI } from '@/core/utils/date-mgt';
@@ -59,12 +59,12 @@ export class EsriUtilities {
    * it is a feature layer identified with a numeric layerId and creates a group entry
    * when a layer is a group.
    *
-   * @param layer - The ESRI layer instance pointer.
-   * @param listOfLayerEntryConfig - The list of layer entries configuration to validate.
-   * @param callbackWhenRegisteringConfig - Called when a config needs to be registered.
-   * @remarks
-   * - This method performs **indirect recursion** by eventually delegating child validation to
-   *   {@link validateListOfLayerEntryConfig} in a sub function called here.
+   * This method performs **indirect recursion** by eventually delegating child validation to
+   * {@link validateListOfLayerEntryConfig} in a sub function called here.
+   *
+   * @param layer - The ESRI layer instance pointer
+   * @param listOfLayerEntryConfig - The list of layer entries configuration to validate
+   * @param callbackWhenRegisteringConfig - Called when a config needs to be registered
    */
   static commonValidateListOfLayerEntryConfig(
     layer: EsriDynamic | EsriFeature,
@@ -102,18 +102,16 @@ export class EsriUtilities {
    * 1. Initializes the group layer name using metadata when the name is missing.
    * 2. Recursively validates all child layer entry configurations.
    * 3. Ensures the group contains at least one valid child layer; otherwise an error is registered.
+   * This method performs **indirect recursion** by delegating child validation to
+   * {@link validateListOfLayerEntryConfig}. If the group ends up with no valid child layers
+   * after validation, a {@link LayerEntryConfigEmptyLayerGroupError} is attached on the layer.
    *
    * @param layer - The parent GeoView layer instance responsible for validating layer
    * entry configurations and registering potential load errors.
-   * @param layerConfig - The group layer entry configuration being validated.
+   * @param layerConfig - The group layer entry configuration being validated
    * @param metadata - The ESRI service metadata associated with the layer. This metadata
    * may be used to resolve missing layer names. If undefined, no metadata-based initialization
    * will occur.
-   * @remarks
-   * - This method performs **indirect recursion** by delegating child validation to
-   *   {@link validateListOfLayerEntryConfig}.
-   * - If the group ends up with no valid child layers after validation, a
-   *   {@link LayerEntryConfigEmptyLayerGroupError} is attached on the layer.
    */
   static #validateGroupLayer(
     layer: EsriDynamic | EsriFeature,
@@ -146,6 +144,11 @@ export class EsriUtilities {
    * If validation fails (e.g., invalid `layerId` or layer not found in metadata),
    * a corresponding layer load error is registered on the parent layer.
    *
+   * If the metadata indicates that the layer contains `subLayerIds`, the configuration is
+   * expanded into a group layer via {@link #expandSubLayers}. When no sublayers exist, the
+   * validation is finalized through {@link #finalizeRegularLayer}. Errors are reported via
+   * `layer.addLayerLoadError`.
+   *
    * @param layer - The GeoView layer instance responsible for validating
    * configurations and registering potential layer load errors.
    * @param layerConfig - The layer entry configuration to
@@ -161,12 +164,6 @@ export class EsriUtilities {
    * and inspect properties such as sublayers.
    * @param callbackWhenRegisteringConfig - Callback invoked whenever new layer entry
    * configurations are dynamically created and need to be registered.
-   * @remarks
-   * - If the metadata indicates that the layer contains `subLayerIds`, the layer
-   *   configuration is expanded into a group layer via {@link #expandSubLayers}.
-   * - When no sublayers exist, the validation is finalized through
-   *   {@link #finalizeRegularLayer}.
-   * - Errors encountered during validation are reported using `layer.addLayerLoadError`.
    */
   static #validateRegularLayer(
     layer: EsriDynamic | EsriFeature,
@@ -237,6 +234,11 @@ export class EsriUtilities {
    *    registers it through the callback.
    * 6. Recursively validates the newly generated sublayer configurations.
    *
+   * The type of generated sublayer configuration is determined by the type of the original `layerConfig`.
+   * This method performs **indirect recursion** by invoking {@link validateListOfLayerEntryConfig} on the
+   * generated sublayer configurations. The original layer entry configuration is **replaced** by a group
+   * configuration within the parent list.
+   *
    * @param layer - The parent GeoView layer instance responsible
    * for validating the newly created sublayer configurations and registering potential errors.
    * @param layerConfig - The original layer entry configuration that will
@@ -245,18 +247,11 @@ export class EsriUtilities {
    * This index is used to replace the original configuration with the newly created group configuration.
    * @param listOfLayerEntryConfig - The list containing the layer entry configuration being expanded.
    * This array is modified in-place to replace the original configuration with the generated group layer.
-   * @param metadata - The full ESRI service metadata used to resolve sublayer names and other properties.
+   * @param metadata - The full ESRI service metadata used to resolve sublayer names and other properties
    * @param metadataLayer - The metadata layer corresponding to the configuration being
    * expanded. This metadata provides the list of `subLayerIds` used to generate child configurations.
    * @param callbackWhenRegisteringConfig - Callback invoked
    * whenever a new layer entry configuration is created and needs to be registered by the calling system.
-   * @remarks
-   * - The type of generated sublayer configuration is determined by the type of the
-   *   original `layerConfig`.
-   * - This method performs **indirect recursion** by invoking
-   *   {@link validateListOfLayerEntryConfig} on the generated sublayer configurations.
-   * - The original layer entry configuration is **replaced** by a group configuration
-   *   within the parent list.
    */
   static #expandSubLayers(
     layer: EsriDynamic | EsriFeature,
@@ -308,15 +303,15 @@ export class EsriUtilities {
    *
    * This method does **not** throw errors; it only emits warnings to help developers diagnose configuration or
    * server-side metadata inconsistencies. It checks two cases:
-   * 1. **EsriDynamic layers** — Logs a warning if the metadata explicitly indicates that dynamic layers
+   * 1. **EsriDynamic layers** - Logs a warning if the metadata explicitly indicates that dynamic layers
    *    are *not* supported (`supportsDynamicLayers === false`).
-   * 2. **EsriFeature layers** — Logs a warning if the metadata for the child layer does not identify itself
+   * 2. **EsriFeature layers** - Logs a warning if the metadata for the child layer does not identify itself
    *    as a `"Feature Layer"`, which may suggest a misconfiguration or unexpected server response.
    *
-   * @param layer - The ESRI layer instance being evaluated.
+   * @param layer - The ESRI layer instance being evaluated
    * @param layerConfig - The configuration object associated with the layer entry. Used to
    * report contextual information (layer path, user-friendly name, etc.) in warnings.
-   * @param metadata - The full ESRI service metadata used to resolve sublayer names and other properties.
+   * @param metadata - The full ESRI service metadata used to resolve sublayer names and other properties
    * @param metadataLayer - The metadata layer corresponding to the configuration being
    * expanded. This metadata provides the list of `subLayerIds` used to generate child configurations.
    */
@@ -801,10 +796,10 @@ export class EsriUtilities {
    * For ESRI Image layers, well-known pixel fields (`PixelValue`, `ProcessedValue`, `Name`)
    * are short-circuited to `'string'` because they have no metadata entry.
    *
-   * @param layerConfig - The ESRI layer config, used to detect EsriImage-specific fields.
-   * @param fields - The metadata field definitions to search.
-   * @param fieldName - Field name for which we want to get the type.
-   * @returns The mapped outfield type (`'date'`, `'oid'`, `'number'`, or `'string'`).
+   * @param layerConfig - The ESRI layer config, used to detect EsriImage-specific fields
+   * @param fields - The metadata field definitions to search
+   * @param fieldName - Field name for which we want to get the type
+   * @returns The mapped outfield type (`'date'`, `'oid'`, `'number'`, or `'string'`)
    */
   static esriGetFieldType(
     layerConfig: EsriDynamicLayerEntryConfig | EsriFeatureLayerEntryConfig | EsriImageLayerEntryConfig,
@@ -838,9 +833,9 @@ export class EsriUtilities {
   /**
    * Returns the domain of the specified field.
    *
-   * @param fields - The metadata field definitions to search.
-   * @param fieldName - Field name for which we want to get the domain.
-   * @returns The domain of the field, or `null` if not found.
+   * @param fields - The metadata field definitions to search
+   * @param fieldName - Field name for which we want to get the domain
+   * @returns The domain of the field, or `null` if not found
    */
   // TODO: ESRI domains are translated to GeoView domains in the configuration. Any GeoView layer that support geoview domains can
   // TO.DOCONT: call a method getFieldDomain that use config.source.featureInfo.outfields to find a field domain.

@@ -15,32 +15,51 @@ import { useStoreDataTableQueryStatus } from '@/core/stores/store-interface-and-
 
 /** Represents an entry in the layer list. */
 export interface LayerListEntry {
+  /** Optional content to render inside the item. */
   content?: string | ReactNode;
+  /** Display name of the layer. */
   layerName: string;
+  /** Unique path identifying the layer. */
   layerPath: string;
+  /** Current load status of the layer. */
   layerStatus: TypeLayerStatus;
+  /** Current query status of the layer. */
   queryStatus: TypeQueryStatus;
+  /** Formatted feature count string. */
   layerFeatures?: string;
+  /** Optional icon indicating map filter is active. */
   mapFilteredIcon?: ReactNode;
+  /** Optional tooltip content. */
   tooltip?: JSX.Element | string;
+  /** Number of features in the layer. */
   numOffeatures?: number;
+  /** Array of feature info entries. */
   features?: TypeFeatureInfoEntry[] | undefined;
+  /** Unique DOM id for the layer list item. */
   layerUniqueId?: string;
+  /** Whether the layer item is disabled. */
   isDisabled?: boolean;
 }
 
 /** Properties for the LayerList component. */
 interface LayerListProps {
+  /** Array of layer entries to render. */
   layerList: LayerListEntry[];
+  /** Path of the currently selected layer. */
   selectedLayerPath: string | undefined;
+  /** Callback invoked when a layer item is clicked. */
   onListItemClick: (layer: LayerListEntry) => void;
 }
 
 /** Properties for the LayerListItem component. */
 interface LayerListItemProps {
+  /** The unique DOM id for this list item. */
   id: string;
+  /** Whether this item is currently selected. */
   isSelected: boolean;
+  /** The layer entry data to render. */
   layer: LayerListEntry;
+  /** Callback invoked when the item is clicked. */
   onListItemClick: (layer: LayerListEntry) => void;
 }
 
@@ -59,6 +78,10 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
+
+  /**
+   * Builds the sx classes for the layer list item component.
+   */
   const memoSxClasses = useMemo(() => {
     logger.logTraceUseMemo('LAYER-LIST - LayerListItem - memoSxClasses', theme);
     return getSxClasses(theme);
@@ -206,6 +229,10 @@ export const LayerList = memo(function LayerList({ layerList, selectedLayerPath,
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
+
+  /**
+   * Builds the sx classes for the layer list component.
+   */
   const memoSxClasses = useMemo(() => {
     logger.logTraceUseMemo('LAYER-LIST - LayerList - memoSxClasses', theme);
     return getSxClasses(theme);

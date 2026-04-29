@@ -1,4 +1,4 @@
-import type BaseLayer from 'ol/layer/Base';
+﻿import type BaseLayer from 'ol/layer/Base';
 import type { GeoJSONObject } from 'ol/format/GeoJSON';
 import type { FitOptions } from 'ol/View';
 
@@ -286,9 +286,9 @@ export class LayerApi {
   /**
    * Gets the layer configuration of the specified layer path.
    *
-   * @param layerPath - The layer path.
-   * @returns The layer configuration.
-   * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
+   * @param layerPath - The layer path
+   * @returns The layer configuration
+   * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path
    */
   getLayerEntryConfig(layerPath: string): ConfigBaseClass {
     // Redirect to controller
@@ -298,10 +298,10 @@ export class LayerApi {
   /**
    * Gets the layer configuration of a regular layer (not a group) at the specified layer path.
    *
-   * @param layerPath - The layer path.
-   * @returns The layer configuration.
-   * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
-   * @throws {LayerWrongTypeError} When the layer configuration is of the wrong type at the given layer path.
+   * @param layerPath - The layer path
+   * @returns The layer configuration
+   * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path
+   * @throws {LayerWrongTypeError} When the layer configuration is of the wrong type at the given layer path
    */
   getLayerEntryConfigRegular(layerPath: string): AbstractBaseLayerEntryConfig {
     // Redirect to controller
@@ -311,10 +311,10 @@ export class LayerApi {
   /**
    * Gets the layer configuration of a group layer (not a regular) at the specified layer path.
    *
-   * @param layerPath - The layer path.
-   * @returns The layer configuration.
-   * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
-   * @throws {LayerWrongTypeError} When the layer configuration is of the wrong type at the given layer path.
+   * @param layerPath - The layer path
+   * @returns The layer configuration
+   * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path
+   * @throws {LayerWrongTypeError} When the layer configuration is of the wrong type at the given layer path
    */
   getLayerEntryConfigGroup(layerPath: string): GroupLayerEntryConfig {
     // Redirect to controller
@@ -324,8 +324,8 @@ export class LayerApi {
   /**
    * Gets the layer configuration of the specified layer path.
    *
-   * @param layerPath - The layer path.
-   * @returns The layer configuration or undefined if not found.
+   * @param layerPath - The layer path
+   * @returns The layer configuration or undefined if not found
    */
   getLayerEntryConfigIfExists(layerPath: string): ConfigBaseClass | undefined {
     // Redirect to controller
@@ -343,7 +343,7 @@ export class LayerApi {
   }
 
   /**
-   * Gets all GeoView Layers
+   * Gets all GeoView layers.
    *
    * @returns The list of new Geoview Layers
    */
@@ -358,7 +358,7 @@ export class LayerApi {
    * This method filters the list returned by `getGeoviewLayers()` and
    * returns only the layers that are instances of `AbstractGVLayer`.
    *
-   * @returns An array containing only the regular layers from the current GeoView layer collection.
+   * @returns An array containing only the regular layers from the current GeoView layer collection
    */
   getGeoviewLayersRegulars(): AbstractGVLayer[] {
     // Redirect to controller
@@ -371,7 +371,7 @@ export class LayerApi {
    * This method filters the list returned by `getGeoviewLayers()` and
    * returns only the layers that are instances of `GVGroupLayer`.
    *
-   * @returns An array containing only the group layers from the current GeoView layer collection.
+   * @returns An array containing only the group layers from the current GeoView layer collection
    */
   getGeoviewLayersGroups(): GVGroupLayer[] {
     // Redirect to controller
@@ -381,7 +381,7 @@ export class LayerApi {
   /**
    * Gets all GeoView layers that are at the root.
    *
-   * @returns An array containing only the layers at the root level of the registry.
+   * @returns An array containing only the layers at the root level of the registry
    */
   getGeoviewLayersRoot(): AbstractBaseGVLayer[] {
     // Redirect to controller
@@ -393,7 +393,7 @@ export class LayerApi {
    *
    * @param layerPath - The layer path
    * @returns The new Geoview Layer
-   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
    */
   getGeoviewLayer(layerPath: string): AbstractBaseGVLayer {
     // Redirect to controller
@@ -408,8 +408,8 @@ export class LayerApi {
    *
    * @param layerPath - The layer path
    * @returns The new Geoview Layer
-   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
-   * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path.
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
+   * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path
    */
   getGeoviewLayerRegular(layerPath: string): AbstractGVLayer {
     // Redirect to controller
@@ -424,7 +424,7 @@ export class LayerApi {
    *
    * @param layerPath - The layer path
    * @returns The AbstractGVLayer or undefined when not found
-   * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path.
+   * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path
    */
   getGeoviewLayerRegularIfExists(layerPath: string): AbstractGVLayer | undefined {
     // Redirect to controller
@@ -448,10 +448,10 @@ export class LayerApi {
    * This function waits the timeout period before abandonning (or uses the default timeout when not provided).
    * Note this function uses the 'Async' suffix to differentiate it from 'getOLLayer'.
    *
-   * @param layerPath - The layer path to the layer's configuration.
+   * @param layerPath - The layer path to the layer's configuration
    * @param timeout - Optionally indicate the timeout after which time to abandon the promise
-   * @param checkFrequency - Optionally indicate the frequency at which to check for the condition on the layerabstract
-   * @returns A promise that resolves to an OpenLayer layer associated to the layer path.
+   * @param checkFrequency - Optionally indicate the frequency at which to check for the condition on the layer
+   * @returns A promise that resolves to an OpenLayer layer associated to the layer path
    */
   getOLLayerAsync(layerPath: string, timeout?: number, checkFrequency?: number): Promise<BaseLayer> {
     // Redirect to controller
@@ -469,10 +469,10 @@ export class LayerApi {
    * and makes sure to inform the layer sets about the layer. The result contains the instanciated GeoViewLayer along
    * with a promise that will resolve when the layer will be officially on the map.
    *
-   * @param geoviewLayerConfig - The geoview layer configuration to add.
-   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
-   * @returns The result of the addition of the geoview layer.
-   * @throws {LayerCreatedTwiceError} When there already is a layer on the map with the provided geoviewLayerId.
+   * @param geoviewLayerConfig - The geoview layer configuration to add
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+   * @returns The result of the addition of the geoview layer
+   * @throws {LayerCreatedTwiceError} When there already is a layer on the map with the provided geoviewLayerId
    */
   addGeoviewLayer(geoviewLayerConfig: TypeGeoviewLayerConfig, abortSignal?: AbortSignal): GeoViewLayerAddedResult {
     // Redirect to controller
@@ -513,9 +513,9 @@ export class LayerApi {
   /**
    * Renames a layer.
    *
-   * @param layerPath - The path of the layer.
-   * @param name - The new name to use.
-   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
+   * @param layerPath - The path of the layer
+   * @param name - The new name to use
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
    */
   setLayerName(layerPath: string, name: string): void {
     // Redirect to controller
@@ -525,9 +525,9 @@ export class LayerApi {
   /**
    * Sets the opacity of a layer.
    *
-   * @param layerPath - The path of the layer.
-   * @param opacity - The new opacity value for the layer.
-   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
+   * @param layerPath - The path of the layer
+   * @param opacity - The new opacity value for the layer
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
    */
   setLayerOpacity(layerPath: string, opacity: number): void {
     // Redirect to controller
@@ -537,10 +537,10 @@ export class LayerApi {
   /**
    * Sets queryable state for a layer.
    *
-   * @param layerPath - The path of the layer.
-   * @param queryable - The new queryable state for the layer.
-   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
-   * @throws {LayerWrongTypeError} When the layer was of wrong type.
+   * @param layerPath - The path of the layer
+   * @param queryable - The new queryable state for the layer
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
+   * @throws {LayerWrongTypeError} When the layer was of wrong type
    */
   setLayerQueryable(layerPath: string, queryable: boolean): void {
     // Redirect to controller
@@ -550,10 +550,10 @@ export class LayerApi {
   /**
    * Sets hoverable state for a layer.
    *
-   * @param layerPath - The path of the layer.
-   * @param hoverable - The new hoverable state for the layer.
-   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
-   * @throws {LayerWrongTypeError} When the layer was of wrong type.
+   * @param layerPath - The path of the layer
+   * @param hoverable - The new hoverable state for the layer
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
+   * @throws {LayerWrongTypeError} When the layer was of wrong type
    */
   setLayerHoverable(layerPath: string, hoverable: boolean): void {
     // Redirect to controller
@@ -563,10 +563,10 @@ export class LayerApi {
   /**
    * Updates the raster function for an ESRI Image layer.
    *
-   * @param layerPath - The path of the layer.
-   * @param rasterFunctionId - The raster function ID to apply or undefined to remove it.
-   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
-   * @throws {LayerWrongTypeError} When the layer is not an ESRI Image layer.
+   * @param layerPath - The path of the layer
+   * @param rasterFunctionId - The raster function ID to apply or undefined to remove it
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
+   * @throws {LayerWrongTypeError} When the layer is not an ESRI Image layer
    */
   setLayerRasterFunction(layerPath: string, rasterFunctionId: string | undefined): void {
     // Redirect to controller
@@ -617,9 +617,8 @@ export class LayerApi {
    * are interpreted.
    * The value is stored in the application state via the layerController.
    *
-   * @param layerPath - The unique path identifying the layer.
-   * @param temporalMode - The date format to apply
-   * for displaying date values associated with this layer.
+   * @param layerPath - The unique path identifying the layer
+   * @param temporalMode - The temporal mode to apply for interpreting date values associated with this layer
    */
   setLayerDateTemporalMode(layerPath: string, temporalMode: TemporalMode): void {
     // Redirect to controller
@@ -633,9 +632,8 @@ export class LayerApi {
    * are formatted when displayed (e.g., in legends, tooltips, or UI components).
    * The value is stored in the application state via the layerController.
    *
-   * @param layerPath - The unique path identifying the layer.
-   * @param displayDateFormat - The date format to apply
-   * for displaying date values associated with this layer.
+   * @param layerPath - The unique path identifying the layer
+   * @param displayDateFormat - The date format to apply for displaying date values associated with this layer
    */
   setLayerDisplayDateFormat(layerPath: string, displayDateFormat: TypeDisplayDateFormat | string): void {
     // Redirect to controller
@@ -650,9 +648,8 @@ export class LayerApi {
    * are formatted when displayed (e.g., in legends, tooltips, or UI components).
    * The value is stored in the application state via the layerController.
    *
-   * @param layerPath - The unique path identifying the layer.
-   * @param displayDateFormat - The date format to apply
-   * for displaying date values associated with this layer.
+   * @param layerPath - The unique path identifying the layer
+   * @param displayDateFormat - The date format to apply for displaying date values associated with this layer
    */
   setLayerDisplayDateFormatShort(layerPath: string, displayDateFormat: TypeDisplayDateFormat | string): void {
     // Redirect to controller
@@ -684,12 +681,12 @@ export class LayerApi {
   /**
    * Changes a GeoJson Source of a GeoJSON layer at the given layer path.
    *
-   * @param layerPath - The path of the layer.
-   * @param geojson - The new geoJSON.
+   * @param layerPath - The path of the layer
+   * @param geojson - The new geoJSON
    * @returns A promise that resolves when the geojson source has been set
-   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
-   * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path.
-   * @throws {LayerNotGeoJsonError} When the layer is not a GeoJson layer.
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
+   * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path
+   * @throws {LayerNotGeoJsonError} When the layer is not a GeoJson layer
    */
   setGeojsonSource(layerPath: string, geojson: GeoJSONObject | string): Promise<void> {
     // Redirect to controller
@@ -699,10 +696,10 @@ export class LayerApi {
   /**
    * Zoom to extents of a layer.
    *
-   * @param layerPath - The path of the layer to zoom to.
-   * @param fitOptions - Optional fit options for zooming.
+   * @param layerPath - The path of the layer to zoom to
+   * @param fitOptions - Optional fit options for zooming
    * @returns A promise that resolves when the zoom operation is complete
-   * @throws {NoBoundsError} When the layer doesn't have bounds.
+   * @throws {NoBoundsError} When the layer doesn't have bounds
    */
   zoomToLayerExtent(layerPath: string, fitOptions?: FitOptions): Promise<void> {
     // Redirect to controller
@@ -718,15 +715,15 @@ export class LayerApi {
    * render cycle before resolving. Finally, it emits an event indicating the visibility
    * change.
    *
-   * @param layerPath - The path identifying the target layer within the map.
-   * @param item - The legend item whose visibility will be updated.
-   * @param visibility - Whether the item should be visible.
+   * @param layerPath - The path identifying the target layer within the map
+   * @param item - The legend item whose visibility will be updated
+   * @param visibility - Whether the item should be visible
    * @param waitForRender - If `true`, the promise resolves only after the
    * underlying layer has finished its next render cycle.
    * @returns A promise that resolves once the visibility has been applied,
    * optional legend store updated, filters applied, and render completed if requested
-   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
-   * @throws {LayerWrongTypeError} When the layer was of wrong type.
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
+   * @throws {LayerWrongTypeError} When the layer was of wrong type
    */
   setItemVisibility(layerPath: string, item: TypeLegendItem, visibility: boolean, waitForRender: boolean): Promise<void> {
     // Redirect to controller
@@ -736,7 +733,7 @@ export class LayerApi {
   /**
    * Sets the visibility of all geoview layers on the map.
    *
-   * @param newValue - The new visibility.
+   * @param newValue - The new visibility
    */
   setAllLayersVisibility(newValue: boolean): void {
     // Redirect to controller
@@ -751,10 +748,10 @@ export class LayerApi {
    * actually differs. If `newValue` is provided, the visibility is set explicitly;
    * if omitted, the method toggles the current visibility.
    *
-   * @param layerPath - The path of the layer whose visibility is being updated.
-   * @param newValue - Optional. The new visibility value to apply. If omitted, the current visibility is toggled.
+   * @param layerPath - The path of the layer whose visibility is being updated
+   * @param newValue - Optional. The new visibility value to apply. If omitted, the current visibility is toggled
    * @returns The resulting visibility state of the layer after the update
-   * @throws {LayerNotFoundError} When the layer cannot be found at the given path.
+   * @throws {LayerNotFoundError} When the layer cannot be found at the given path
    */
   setOrToggleLayerVisibility(layerPath: string, newValue?: boolean): boolean {
     // Redirect to controller
@@ -768,13 +765,13 @@ export class LayerApi {
   /**
    * Redefine feature info fields.
    *
-   * @param layerPath - The path of the layer.
-   * @param fieldNames - The new field names to use.
-   * @param fields - The fields to change.
-   * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
-   * @throws {LayerWrongTypeError} When the layer configuration is of the wrong type at the given layer path.
-   * @throws {LayerDifferingFieldLengthsError} When the layer configuration has different field lengths.
-   * @throws {LayerNotQueryableError} When the layer configuration is not queryable.
+   * @param layerPath - The path of the layer
+   * @param fieldNames - The new field names to use
+   * @param fields - The fields to change
+   * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path
+   * @throws {LayerWrongTypeError} When the layer configuration is of the wrong type at the given layer path
+   * @throws {LayerDifferingFieldLengthsError} When the layer configuration has different field lengths
+   * @throws {LayerNotQueryableError} When the layer configuration is not queryable
    */
   redefineFeatureFields(layerPath: string, fieldNames: string[], fields: 'alias' | 'name'): void {
     // Get the layer config
@@ -799,14 +796,14 @@ export class LayerApi {
   /**
    * Replace outfield names, aliases and types with any number of new values, provided an identical count of each are supplied.
    *
-   * @param layerPath - The path of the layer.
-   * @param types - The new field types (TypeOutfieldsType) to use.
-   * @param fieldNames - The new field names to use.
-   * @param fieldAliases - Optional, the new field aliases to use.
-   * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
-   * @throws {LayerWrongTypeError} When the layer configuration is of the wrong type at the given layer path.
-   * @throws {LayerDifferingFieldLengthsError} When the layer configuration has different field lengths.
-   * @throws {LayerNotQueryableError} When the layer configuration is not queryable.
+   * @param layerPath - The path of the layer
+   * @param types - The new field types (TypeOutfieldsType) to use
+   * @param fieldNames - The new field names to use
+   * @param fieldAliases - Optional, the new field aliases to use
+   * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path
+   * @throws {LayerWrongTypeError} When the layer configuration is of the wrong type at the given layer path
+   * @throws {LayerDifferingFieldLengthsError} When the layer configuration has different field lengths
+   * @throws {LayerNotQueryableError} When the layer configuration is not queryable
    */
   replaceFeatureOutfields(layerPath: string, types: TypeOutfieldsType[], fieldNames: string[], fieldAliases?: string[]): void {
     // Get the layer config
@@ -1217,26 +1214,26 @@ export class LayerApi {
 
 // #region EVENT TYPES
 
-/**
- * Define an event for the delegate
- */
+/** Defines an event for the layer error delegate. */
 export interface LayerApiLayerErrorEvent {
+  /** The GV layer that triggered the error. */
   layer: AbstractBaseGVLayer;
+  /** The error that occurred. */
   error: GeoViewError;
 }
 
-/** Define a delegate for the layer visible changed event handler function signature. */
+/** Defines a delegate for the layer error event handler function signature. */
 export type LayerApiLayerErrorDelegate = EventDelegateBase<LayerApi, LayerApiLayerErrorEvent, void>;
 
-/**
- * Define an event for the delegate
- */
+/** Defines an event for the layer visible changed delegate. */
 export interface LayerApiLayerVisibleChangedEvent {
+  /** The GV layer whose visibility changed. */
   layer: AbstractBaseGVLayer;
+  /** The new visibility state. */
   visible: boolean;
 }
 
-/** Define a delegate for the layer visible changed event handler function signature. */
+/** Defines a delegate for the layer visible changed event handler function signature. */
 export type LayerApiLayerVisibleChangedDelegate = EventDelegateBase<LayerApi, LayerApiLayerVisibleChangedEvent, void>;
 
 // #endregion EVENT TYPES

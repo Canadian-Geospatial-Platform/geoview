@@ -1,4 +1,4 @@
-import type { Root } from 'react-dom/client';
+﻿import type { Root } from 'react-dom/client';
 
 import type { i18n } from 'i18next';
 
@@ -190,9 +190,9 @@ export class MapViewer {
   // TO.DOCONT: That's another big refactor to come, because we sill use the MapViewer very much like an application class instead of a domain class when
   // TO.DOCONT: we do things like cgpv.api.getMapViewer().doSomething.
   /**
-   *  The controller registry owning all framework-level controllers
+   * The controller registry owning all framework-level controllers.
    *
-   * @remarks Try not to use this accessor, as it creates a backwards dependency from the domain to the controllers.
+   * Try not to use this accessor, as it creates a backwards dependency from the domain to the controllers.
    * It is here for legacy reasons, but should be removed in the future.
    */
   controllers: ControllerRegistry;
@@ -991,9 +991,9 @@ export class MapViewer {
    *
    * Resolution is computed using: resolution = scale / (metersPerUnit * inchesPerMeter * dpi)
    *
-   * @param targetScale - The scale denominator (e.g., 50000000 for 1:50,000,000). Optional; returns undefined if not provided.
-   * @param dpiValue - Dots per inch to use for conversion. Defaults to `MapViewer.DEFAULT_DPI` (usually 96 or 90.714 depending on standard).
-   * @returns The map resolution in map units per pixel, or `undefined` if `targetScale` is not provided.
+   * @param targetScale - The scale denominator (e.g., 50000000 for 1:50,000,000). Optional; returns undefined if not provided
+   * @param dpiValue - Dots per inch to use for conversion. Defaults to `MapViewer.DEFAULT_DPI` (usually 96 or 90.714 depending on standard)
+   * @returns The map resolution in map units per pixel, or `undefined` if `targetScale` is not provided
    */
   getMapResolutionFromScale(targetScale: number | undefined, dpiValue: number = MapViewer.DEFAULT_DPI): number | undefined {
     if (!targetScale) return undefined;
@@ -1009,9 +1009,9 @@ export class MapViewer {
    *
    * Uses `getMapResolutionFromScale` internally and then computes the zoom for that resolution.
    *
-   * @param targetScale - The scale denominator (e.g., 50000000 for 1:50,000,000). Optional; returns undefined if not provided.
-   * @param dpiValue - Dots per inch to use for conversion. Defaults to `MapViewer.DEFAULT_DPI`.
-   * @returns The OpenLayers zoom level corresponding to the scale, or `undefined` if `targetScale` is not provided.
+   * @param targetScale - The scale denominator (e.g., 50000000 for 1:50,000,000). Optional; returns undefined if not provided
+   * @param dpiValue - Dots per inch to use for conversion. Defaults to `MapViewer.DEFAULT_DPI`
+   * @returns The OpenLayers zoom level corresponding to the scale, or `undefined` if `targetScale` is not provided
    */
   getMapZoomFromScale(targetScale: number | undefined, dpiValue: number = MapViewer.DEFAULT_DPI): number | undefined {
     // Get the resolution from the scale
@@ -1346,7 +1346,7 @@ export class MapViewer {
    *
    * This function checks if the map is already ready, and if not, it waits for the onMapReady event to be triggered.
    *
-   * @returns A promise that resolves when the map is ready.
+   * @returns A promise that resolves when the map is ready
    */
   waitForMapReady(): Promise<void> {
     // If already ready
@@ -1589,7 +1589,7 @@ export class MapViewer {
   /**
    * Retrieves the scale information from the DOM elements for the given map ID.
    *
-   * @param mapId - The unique identifier of the map.
+   * @param mapId - The unique identifier of the map
    * @returns The scale information object
    */
   static getScaleInfoFromDomElement(mapId: string): TypeScaleInfo {
@@ -1880,10 +1880,10 @@ export class MapViewer {
    * For polar projections (e.g. EPSG:3573), transforming a lon/lat bounding box clips
    * the view too tightly, so the projection's own extent is used directly instead.
    *
-   * @param projectionCode - The numeric projection code (e.g. 3978, 3857, 3573).
-   * @param maxExtent - The max extent in lon/lat.
-   * @param projection - The OpenLayers projection object.
-   * @returns The computed view extent, or undefined if none could be determined.
+   * @param projectionCode - The numeric projection code (e.g. 3978, 3857, 3573)
+   * @param maxExtent - The max extent in lon/lat
+   * @param projection - The OpenLayers projection object
+   * @returns The computed view extent, or undefined if none could be determined
    */
   static #computeViewExtent(projectionCode: number, maxExtent: Extent, projection: OLProjection): Extent | undefined {
     switch (projectionCode) {

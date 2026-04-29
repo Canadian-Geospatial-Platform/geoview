@@ -1,4 +1,4 @@
-import type { Feature } from 'ol';
+﻿import type { Feature } from 'ol';
 import type { ReadOptions } from 'ol/format/Feature';
 import type { Options as SourceOptions } from 'ol/source/Vector';
 import type { Projection as OLProjection } from 'ol/proj';
@@ -64,7 +64,7 @@ export class WFS extends AbstractGeoViewVector {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    *
-   * @returns The strongly-typed layer configuration specific to this layer.
+   * @returns The strongly-typed layer configuration specific to this layer
    */
   override getGeoviewLayerConfig(): TypeWFSLayerConfig {
     return super.getGeoviewLayerConfig() as TypeWFSLayerConfig;
@@ -73,7 +73,7 @@ export class WFS extends AbstractGeoViewVector {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    *
-   * @returns The strongly-typed metadata specific to this layer.
+   * @returns The strongly-typed metadata specific to this layer
    */
   override getMetadata(): TypeMetadataWFS | undefined {
     return super.getMetadata() as TypeMetadataWFS | undefined;
@@ -403,11 +403,11 @@ export class WFS extends AbstractGeoViewVector {
    * ID, name, and metadata access path URL. It then initializes the layer entries by calling
    * `initGeoViewLayerEntries`, which may involve fetching metadata or sublayer info.
    *
-   * @param geoviewLayerId - A unique identifier for the layer.
-   * @param geoviewLayerName - The display name of the layer.
-   * @param metadataAccessPath - The full service URL to the layer endpoint.
-   * @param isTimeAware - Optional to indicates whether the layer supports time-based filtering.
-   * @returns A promise that resolves to an initialized GeoView layer configuration with layer entries.
+   * @param geoviewLayerId - A unique identifier for the layer
+   * @param geoviewLayerName - The display name of the layer
+   * @param metadataAccessPath - The full service URL to the layer endpoint
+   * @param isTimeAware - Optional to indicates whether the layer supports time-based filtering
+   * @returns A promise that resolves to an initialized GeoView layer configuration with layer entries
    */
   static initGeoviewLayerConfig(
     geoviewLayerId: string,
@@ -675,13 +675,13 @@ export class WFS extends AbstractGeoViewVector {
    * This function constructs a `TypeWFSLayerConfig` object that describes an WFS Feature layer
    * and its associated entry configurations based on the provided parameters.
    *
-   * @param geoviewLayerId - A unique identifier for the GeoView layer.
-   * @param geoviewLayerName - The display name of the GeoView layer.
-   * @param metadataAccessPath - The full service URL to the layer endpoint.
-   * @param isTimeAware - Indicates whether the layer supports time-based filtering.
-   * @param strategy - Indicates the strategy to use to fetch vector data.
-   * @param layerEntries - An array of layer entries objects to be included in the configuration.
-   * @returns The constructed configuration object for the WFS Feature layer.
+   * @param geoviewLayerId - A unique identifier for the GeoView layer
+   * @param geoviewLayerName - The display name of the GeoView layer
+   * @param metadataAccessPath - The full service URL to the layer endpoint
+   * @param isTimeAware - Indicates whether the layer supports time-based filtering
+   * @param strategy - Indicates the strategy to use to fetch vector data
+   * @param layerEntries - An array of layer entries objects to be included in the configuration
+   * @returns The constructed configuration object for the WFS Feature layer
    */
   static createGeoviewLayerConfig(
     geoviewLayerId: string,
@@ -784,7 +784,7 @@ export class WFS extends AbstractGeoViewVector {
    *  - Checks whether the layer has no defined style and is configured to fetch styles from WMS.
    *  - Determines the WMS layer identifier associated with the WFS layer.
    *  - Attempts to infer the geometry type from metadata (non-fatal if it fails).
-   *  - Converts the WFS service URL into its WMS equivalent (commonly `cgi-bin/wfs` → `cgi-bin/wms`).
+   *  - Converts the WFS service URL into its WMS equivalent (commonly `cgi-bin/wfs` -> `cgi-bin/wms`).
    *  - Requests dynamic styles from the WMS service via `GetStyles`.
    *  - Applies the generated style back onto the WFS layer if successful.
    * Any failures during the process are logged as warnings but do not throw.

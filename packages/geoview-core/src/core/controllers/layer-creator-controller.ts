@@ -1004,12 +1004,10 @@ export class LayerCreatorController extends AbstractMapViewerController {
    * Creates an instance of a specific `AbstractGeoViewLayer` subclass based on the given GeoView layer configuration.
    *
    * This function determines the correct layer type from the configuration and instantiates it accordingly.
+   * Supports GeoJSON, CSV, WMS, Esri Dynamic, Esri Feature, Esri Image, GeoTIFF, ImageStatic, KML, WFS, WKB,
+   * OGC Feature, XYZ Tiles, and Vector Tiles. Throws if the layer type is unsupported.
    *
-   * @remarks
-   * - This method currently supports GeoJSON, CSV, WMS, Esri Dynamic, Esri Feature, Esri Image, GeoTIFF
-   *   ImageStatic, KML, WFS, WKB, OGC Feature, XYZ Tiles, and Vector Tiles.
-   * - If the layer type is not supported, an error is thrown.
-   * - TODO: Refactor to use the validated configuration with metadata already fetched.
+   * TODO: Refactor to use the validated configuration with metadata already fetched.
    *
    * @param geoviewLayerConfig - The configuration object for the GeoView layer
    * @returns An instance of the corresponding `AbstractGeoViewLayer` subclass

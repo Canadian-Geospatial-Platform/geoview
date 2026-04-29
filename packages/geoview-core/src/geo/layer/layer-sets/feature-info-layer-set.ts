@@ -1,4 +1,4 @@
-import type { Coordinate } from 'ol/coordinate';
+﻿import type { Coordinate } from 'ol/coordinate';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
 import type { QueryType, TypeResultSet } from '@/api/types/map-schema-types';
@@ -78,7 +78,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
    * Queries the features at the provided coordinate for all the registered layers.
    *
    * @param lonLatCoordinate - The longitude/latitude coordinate where to query the features
-   * @param callbackWhenFirstQueryStarted - Optional callback to be executed when the first query has started progressing.
+   * @param callbackWhenFirstQueryStarted - Optional callback to be executed when the first query has started progressing
    * @returns A promise that resolves with the result of the query
    */
   async queryLayers(lonLatCoordinate: Coordinate, callbackWhenFirstQueryStarted?: () => void): Promise<TypeFeatureInfoResultSet> {

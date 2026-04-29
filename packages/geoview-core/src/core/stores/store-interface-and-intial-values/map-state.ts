@@ -1,4 +1,4 @@
-import { useStore } from 'zustand';
+﻿import { useStore } from 'zustand';
 
 import type { Coordinate } from 'ol/coordinate';
 import type { Extent } from 'ol/extent';
@@ -198,7 +198,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       /**
        * Sets the map size.
        *
-       * @param size - The size of the map.
+       * @param size - The size of the map
        */
       setMapSize: (size: Size): void => {
         set({
@@ -212,7 +212,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       /**
        * Sets the map scale.
        *
-       * @param scale - The scale information.
+       * @param scale - The scale information
        */
       setMapScale: (scale: TypeScaleInfo): void => {
         set({
@@ -226,7 +226,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       /**
        * Sets whether the map is loaded.
        *
-       * @param mapLoaded - Flag indicating if the map is loaded.
+       * @param mapLoaded - Flag indicating if the map is loaded
        */
       setMapLoaded: (mapLoaded: boolean): void => {
         set({
@@ -252,7 +252,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       /**
        * Sets the attribution of the map.
        *
-       * @param attribution - The attribution information.
+       * @param attribution - The attribution information
        */
       setAttribution: (attribution: string[]): void => {
         set({
@@ -266,7 +266,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       /**
        * Sets the current basemap options.
        *
-       * @param basemapOptions - The new basemap options.
+       * @param basemapOptions - The new basemap options
        */
       setCurrentBasemapOptions: (basemapOptions: TypeBasemapOptions): void => {
         set({
@@ -280,7 +280,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       /**
        * Sets the initial view of the map.
        *
-       * @param view - The view extent or zoom&center.
+       * @param view - The view extent or zoom&center
        */
       setInitialView: (view: TypeZoomAndCenter | Extent): void => {
         const viewType = get().mapState.initialView;
@@ -299,10 +299,10 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       /**
        * Sets the geolocator search area with coordinates and optional bounding box.
        *
-       * @param area - The search area object containing coordinates and optional bounding box, or undefined to clear.
-       * @param area.searchItem - The search item description.
-       * @param area.coords - The coordinates of the search location.
-       * @param [area.bbox] - Optional bounding box extent for the search area.
+       * @param area - The search area object containing coordinates and optional bounding box, or undefined to clear
+       * @param area.searchItem - The search item description
+       * @param area.coords - The coordinates of the search location
+       * @param [area.bbox] - Optional bounding box extent for the search area
        */
       setGeolocatorSearchArea: (area: { searchItem: string; coords: Coordinate; bbox?: Extent } | undefined): void => {
         set({
@@ -316,7 +316,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       /**
        * Sets the view of the home button.
        *
-       * @param view - The view to use.
+       * @param view - The view to use
        */
       setHomeView: (view: TypeMapViewSettings): void => {
         set({
@@ -330,7 +330,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       /**
        * Sets the interaction of the map.
        *
-       * @param interaction - The interaction type.
+       * @param interaction - The interaction type
        */
       setInteraction: (interaction: TypeInteraction): void => {
         set({
@@ -344,7 +344,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       /**
        * Sets to true if mouse is inside map.
        *
-       * @param isMouseInsideMap - True if mouse is inside map.
+       * @param isMouseInsideMap - True if mouse is inside map
        */
       setIsMouseInsideMap: (isMouseInsideMap: boolean): void => {
         set({
@@ -358,7 +358,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       /**
        * Sets the zoom level of the map.
        *
-       * @param zoom - The zoom level.
+       * @param zoom - The zoom level
        */
       setZoom: (zoom: number): void => {
         set({
@@ -372,7 +372,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       /**
        * Sets the rotation of the map.
        *
-       * @param rotation - The rotation angle.
+       * @param rotation - The rotation angle
        */
       setRotation: (rotation: number): void => {
         set({
@@ -386,7 +386,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       /**
        * Sets the projection of the map.
        *
-       * @param projectionCode - The projection code.
+       * @param projectionCode - The projection code
        */
       setProjection: (projectionCode: TypeValidMapProjectionCodes): void => {
         set({
@@ -400,7 +400,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       /**
        * Sets the point markers.
        *
-       * @param pointMarkers - The new point markers.
+       * @param pointMarkers - The new point markers
        */
       setPointMarkers: (pointMarkers: Record<string, TypePointMarker[]>): void => {
         set({
@@ -414,11 +414,11 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       /**
        * Sets map move end properties.
        *
-       * @param centerCoordinates - The center coordinates of the map.
-       * @param pointerPosition - The pointer position information.
-       * @param degreeRotation - The degree rotation.
-       * @param isNorthVisible - Flag indicating if north is visible.
-       * @param scale - The scale information.
+       * @param centerCoordinates - The center coordinates of the map
+       * @param pointerPosition - The pointer position information
+       * @param degreeRotation - The degree rotation
+       * @param isNorthVisible - Flag indicating if north is visible
+       * @param scale - The scale information
        */
       setMapMoveEnd: (
         centerCoordinates: Coordinate,
@@ -454,7 +454,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       /**
        * Sets the pointer position of the map.
        *
-       * @param pointerPosition - The pointer position.
+       * @param pointerPosition - The pointer position
        */
       setPointerPosition: (pointerPosition: TypeMapMouseInfo): void => {
         set({
@@ -468,7 +468,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       /**
        * Sets the click coordinates of the map.
        *
-       * @param clickCoordinates - The click coordinates.
+       * @param clickCoordinates - The click coordinates
        */
       setClickCoordinates: (clickCoordinates: TypeMapMouseInfo): void => {
         set({
@@ -482,7 +482,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       /**
        * Sets whether the map is fixed to north.
        *
-       * @param fixNorth - Flag indicating if the map should be fixed to north.
+       * @param fixNorth - Flag indicating if the map should be fixed to north
        */
       setFixNorth: (fixNorth: boolean): void => {
         set({
@@ -496,7 +496,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       /**
        * Sets the highlighted features of the map.
        *
-       * @param highlightedFeatures - The highlighted features.
+       * @param highlightedFeatures - The highlighted features
        */
       setHighlightedFeatures: (highlightedFeatures: TypeFeatureInfoEntry[]): void => {
         set({
@@ -510,7 +510,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       /**
        * Sets the click marker of the map.
        *
-       * @param coord - The click marker coordinates.
+       * @param coord - The click marker coordinates
        */
       setClickMarker: (coord: number[] | undefined): void => {
         set({
@@ -521,7 +521,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       /**
        * Sets the hover feature information to be displayed in the hover tooltip.
        *
-       * @param hoverFeatureInfo - The hover feature information.
+       * @param hoverFeatureInfo - The hover feature information
        */
       setHoverFeatureInfo(hoverFeatureInfo: TypeHoverFeatureInfo) {
         set({
@@ -549,8 +549,8 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
  *
  * Internal-only selector - not exported to avoid direct store access from outside this module.
  *
- * @param mapId - The map identifier.
- * @returns The ILayerState for the given map.
+ * @param mapId - The map identifier
+ * @returns The ILayerState for the given map
  */
 // GV No export for the main state!
 const getStoreMapState = (mapId: string): IMapState => getGeoViewStore(mapId).getState().mapState;
@@ -782,9 +782,9 @@ export const useStoreMapZoom = (): number => useStore(useGeoViewStore(), (state)
  *
  * Internal-only selector - not exported to avoid direct store access from outside this module.
  *
- * @param mapId - The map identifier.
- * @returns The ILayerState for the given map.
- * @throws {Error} When the map config state is uninitialized.
+ * @param mapId - The map identifier
+ * @returns The ILayerState for the given map
+ * @throws {Error} When the map config state is uninitialized
  */
 // GV No export for the main state, here we had to for the api reload function
 export const getStoreMapConfigState = (mapId: string): TypeMapFeaturesConfig => {
@@ -796,8 +796,8 @@ export const getStoreMapConfigState = (mapId: string): TypeMapFeaturesConfig => 
 /**
  * Checks whether the map config state has been initialized for the given map.
  *
- * @param mapId - The map identifier.
- * @returns True if the map config state is initialized, false otherwise.
+ * @param mapId - The map identifier
+ * @returns True if the map config state is initialized, false otherwise
  */
 export const isStoreMapConfigInitialized = (mapId: string): boolean => {
   try {
@@ -858,9 +858,9 @@ export const getStoreMapConfigViewSettings = (mapId: string): TypeViewSettings =
 /**
  * Returns the current projection code from the map config state for the given map.
  *
- * @param mapId - The map identifier.
- * @returns The current projection code.
- * @throws {Error} When the map config state is uninitialized.
+ * @param mapId - The map identifier
+ * @returns The current projection code
+ * @throws {Error} When the map config state is uninitialized
  */
 export const getStoreMapConfigViewSettingsProjection = (mapId: string): TypeValidMapProjectionCodes =>
   getStoreMapConfigViewSettings(mapId).projection;

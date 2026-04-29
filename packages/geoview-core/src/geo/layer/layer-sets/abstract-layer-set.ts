@@ -149,6 +149,8 @@ export abstract class AbstractLayerSet {
 
   /**
    * A quick getter to help identify which layerset class the current instance is coming from.
+   *
+   * @returns The constructor name of the current layerset class instance
    */
   getClassName(): string {
     // Return the name of the class

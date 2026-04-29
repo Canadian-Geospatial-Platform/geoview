@@ -1,4 +1,4 @@
-import type { Coordinate } from 'ol/coordinate';
+﻿import type { Coordinate } from 'ol/coordinate';
 import type { QueryType } from '@/api/types/map-schema-types';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
@@ -51,7 +51,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
    * Queries the features at the provided coordinate for all the registered layers.
    *
    * @param coordinate - The pixel coordinate where to query the features when the queryType is 'at_pixel' or the map coordinate otherwise
-   * @param queryType - The query type, either 'at_pixel' or 'all_features'. Defaults to the HoverFeatureInfoLayerSet.QUERY_TYPE static property value ('at_pixel').
+   * @param queryType - The query type, either 'at_pixel' or 'all_features'. Defaults to the HoverFeatureInfoLayerSet.QUERY_TYPE static property value ('at_pixel')
    * @returns A promise that resolves with the hover result set results
    */
   async queryLayers(coordinate: Coordinate, queryType: QueryType = HoverFeatureInfoLayerSet.QUERY_TYPE): Promise<TypeHoverResultSet> {

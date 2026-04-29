@@ -1,4 +1,4 @@
-import type { ErrorInfo } from 'react';
+﻿import type { ErrorInfo } from 'react';
 import { createContext, StrictMode, Suspense, Component, useEffect } from 'react';
 import { I18nextProvider } from 'react-i18next';
 import type { i18n } from 'i18next';
@@ -17,38 +17,23 @@ import { ControllerContext } from '@/core/controllers/base/controller-manager';
 /** Create contexts for the map, layer controller, and UI controller */
 export const StoreContext = createContext<string | undefined>(undefined);
 
-/**
- * interface used when passing map features configuration
- */
+/** Defines the props for the AppStart component. */
 interface AppStartProps {
+  /** The map viewer instance to initialize. */
   mapViewer: MapViewer;
+  /** The i18n language instance for internationalization. */
   i18nLang: i18n;
 }
 
 /**
- * A React error boundary component that catches JavaScript errors anywhere in its child component tree,
- * logs those errors, and displays a fallback UI. It also attempts to automatically recover from errors
- * with up to 3 retries using exponential backoff, and provides a manual retry button for user intervention.
- *
- * @remarks
- * - Uses `componentDidCatch` to log errors and update state.
- * - Schedules automatic retries with exponential backoff (up to 10 seconds max delay).
- * - Displays error details and retry attempt count in the fallback UI.
- * - Clears any pending retry timeouts on unmount.
- *
- * @props
- * @param children - The React child nodes to render within the error boundary.
- * @param language - The language code for internationalization.
- *
- * @state
- * @property hasError - Indicates if an error has been caught.
- * @property errorInfo - The component stack trace or error details.
- * @property retryCount - The number of retry attempts made.
+ * A React error boundary component that catches JavaScript errors in its child tree,
+ * logs them, and displays a localized fallback UI.
  */
 class ErrorBoundary extends Component<{ children: JSX.Element; language: TypeDisplayLanguage }, { hasError: boolean }> {
   /**
-   * Constructor
-   * @param props - The props
+   * Constructs an instance of ErrorBoundary.
+   *
+   * @param props - The children to render and the display language for fallback UI
    */
   constructor(props: { children: JSX.Element; language: TypeDisplayLanguage }) {
     super(props);
@@ -88,7 +73,10 @@ class ErrorBoundary extends Component<{ children: JSX.Element; language: TypeDis
 }
 
 /**
- * Initialize the app with maps from inline html configs, url params
+ * Initializes the app with maps from inline HTML configs and URL params.
+ *
+ * @param props - Properties defined in AppStartProps interface
+ * @returns The app start component
  */
 function AppStart(props: AppStartProps): JSX.Element {
   // Log
@@ -101,10 +89,7 @@ function AppStart(props: AppStartProps): JSX.Element {
   const theme = useStoreAppDisplayThemeById(mapViewer.mapId);
 
   /**
-   * A useEffect hook to log the mounting and unmounting of the AppStart component, which initializes the mapViewer.
-   *
-   * This is useful for debugging and ensuring that the mapViewer is properly initialized and cleaned up when
-   * the component lifecycle changes.
+   * Logs the mounting and unmounting of the AppStart component for debugging.
    */
   useEffect(() => {
     // Mounted - log initialization

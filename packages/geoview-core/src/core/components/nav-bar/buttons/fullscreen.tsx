@@ -30,7 +30,7 @@ export default function Fullscreen(): JSX.Element {
   /**
    * Toggles between fullscreen and window mode.
    */
-  function setFullscreen(): void {
+  function handleSetFullscreen(): void {
     const element = document.getElementById(`shell-${mapId}`);
     if (element) {
       uiController.setFullScreen(!isFullScreen, element as TypeHTMLElement);
@@ -69,7 +69,7 @@ export default function Fullscreen(): JSX.Element {
       id="fullscreen"
       aria-label={t('mapnav.fullscreen')}
       tooltipPlacement="left"
-      onClick={() => setFullscreen()}
+      onClick={handleSetFullscreen}
       sx={sxClasses.navButton}
     >
       {!isFullScreen ? <FullscreenIcon /> : <FullscreenExitIcon />}

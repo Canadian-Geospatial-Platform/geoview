@@ -47,7 +47,9 @@ import { IconButton } from '@/ui/icon-button/icon-button';
 
 /** Mapping of panel id to its icon and content. */
 interface GroupPanelType {
+  /** The icon element for the panel button. */
   icon: ReactNode;
+  /** The content element rendered inside the panel. */
   content: ReactNode;
 }
 
@@ -64,6 +66,9 @@ export interface ButtonPanelType {
 
 /**
  * Creates an app-bar with buttons that can open a panel.
+ *
+ * @param props - Properties defined in AppBarProps interface
+ * @returns The app bar component
  */
 export function AppBar(props: AppBarProps): JSX.Element {
   // Log
@@ -103,7 +108,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
   /**
    * Builds the button panels record from store panel ids and api registry, with open/focus state derived from the active tab.
    */
-  const buttonPanels = useMemo((): ButtonPanelType => {
+  const memoButtonPanels = useMemo((): ButtonPanelType => {
     // Log
     logger.logTraceUseMemo('APP-BAR - buttonPanels', appBarPanelIds, tabId, isOpen, isFocusTrapped);
 
@@ -129,6 +134,9 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
   // #region REACT HOOKS
 
+  /**
+   * Builds the panel components record mapping panel ids to their icon and content.
+   */
   const memoPanels = useMemo((): Record<string, GroupPanelType> => {
     // Log
     logger.logTraceUseMemo('APP-BAR - panels');
@@ -171,10 +179,10 @@ export function AppBar(props: AppBarProps): JSX.Element {
   const handleButtonClicked = useCallback(
     (buttonId: string): void => {
       // Get the button panel
-      const buttonPanel = buttonPanels[buttonId];
+      const buttonPanel = memoButtonPanels[buttonId];
       uiController.setActiveAppBarTab(buttonId, !buttonPanel.panel?.status, !buttonPanel.panel?.status);
     },
-    [buttonPanels, uiController]
+    [memoButtonPanels, uiController]
   );
 
   /**
@@ -303,13 +311,13 @@ export function AppBar(props: AppBarProps): JSX.Element {
     // Log
     logger.logTraceUseMemo('APP-BAR - panels reorder buttons');
 
-    let buttonPanelNames = Object.keys(buttonPanels);
+    let buttonPanelNames = Object.keys(memoButtonPanels);
     buttonPanelNames = enforceArrayOrder(buttonPanelNames, DEFAULT_APPBAR_TABS_ORDER);
     const topPanel = buttonPanelNames.filter((groupName) => groupName !== DEFAULT_APPBAR_CORE.GUIDE);
     const bottomPanel = buttonPanelNames.filter((groupName) => groupName === DEFAULT_APPBAR_CORE.GUIDE);
 
     return { topPanelNames: topPanel, bottomPanelNames: bottomPanel };
-  }, [buttonPanels]);
+  }, [memoButtonPanels]);
 
   /**
    * Renders tab buttons in the app-bar.
@@ -323,7 +331,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
       .filter((name) => !hiddenTabs.includes(name))
       .map((panelName: string) => {
         // Get the button panel configuration for this panel name
-        const buttonPanel = buttonPanels[panelName];
+        const buttonPanel = memoButtonPanels[panelName];
 
         // Only render if the button is explicitly set to visible
         if (buttonPanel?.button.visible !== undefined && buttonPanel?.button.visible) {
@@ -395,9 +403,9 @@ export function AppBar(props: AppBarProps): JSX.Element {
           </List>
         </Box>
       </Box>
-      {Object.keys(buttonPanels).map((panelName: string) => {
+      {Object.keys(memoButtonPanels).map((panelName: string) => {
         // get button panel
-        const buttonPanel = buttonPanels[panelName];
+        const buttonPanel = memoButtonPanels[panelName];
         let content = null;
         if (buttonPanel?.buttonPanelId === DEFAULT_APPBAR_CORE.GEOLOCATOR) {
           content = buttonPanel?.panel?.content ?? '';

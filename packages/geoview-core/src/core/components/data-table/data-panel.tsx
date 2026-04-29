@@ -37,6 +37,7 @@ import { useDataTableController, useLayerSetController, useUIController } from '
 
 /** Properties for the Datapanel component. */
 interface DataPanelType {
+  /** The container type (app-bar or footer-bar). */
   containerType: TypeContainerBox;
 }
 
@@ -92,6 +93,9 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
    * Applies filtering to the ordered layer data features.
    */
   const memoFilteredOrderedLayerData = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('DATA-PANEL - memoFilteredOrderedLayerData', memoOrderedLayerData);
+
     return memoOrderedLayerData.map((layer) => {
       let { features } = layer;
 

@@ -1,4 +1,4 @@
-import type { QueryType, TypeFeatureInfoResult } from '@/api/types/map-schema-types';
+﻿import type { QueryType, TypeFeatureInfoResult } from '@/api/types/map-schema-types';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
@@ -29,7 +29,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
    * Overrides the behavior to apply when a feature-info-layer-set wants to check for condition to register a layer in its set.
    *
    * @param layer - The layer
-   * @returns True when the layer should be registered to this all-feature-info-layer-set.
+   * @returns True when the layer should be registered to this all-feature-info-layer-set
    */
   protected override onRegisterLayerCheck(layer: AbstractBaseGVLayer): boolean {
     // Want to exclude ESRI Image layers. They have "features", but probably not useful

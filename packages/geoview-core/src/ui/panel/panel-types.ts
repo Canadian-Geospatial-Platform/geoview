@@ -3,9 +3,7 @@ import type { TooltipProps, ButtonProps, TextFieldProps } from '@mui/material';
 
 import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 
-/**
- * Interface used to initialize a button panel.
- */
+/** Interface used to initialize a button panel. */
 export type TypeButtonPanelProps = {
   /** Panel properties. */
   panel: TypePanelProps;
@@ -13,9 +11,7 @@ export type TypeButtonPanelProps = {
   button: TypeButtonProps;
 };
 
-/**
- * Configuration for button groups
- */
+/** Configuration for button groups. */
 export type TypeButtonGroupConfig = {
   /** Group name */
   groupName: string;
@@ -23,9 +19,7 @@ export type TypeButtonGroupConfig = {
   accordionThreshold?: number;
 };
 
-/**
- * type for the panel properties used when creating a new panel.
- */
+/** Type for the panel properties used when creating a new panel. */
 export type TypePanelProps = {
   /** Panel id. */
   panelId?: string;

@@ -1,4 +1,4 @@
-import type BaseLayer from 'ol/layer/Base';
+﻿import type BaseLayer from 'ol/layer/Base';
 import type { Projection as OLProjection } from 'ol/proj';
 
 import {
@@ -201,7 +201,7 @@ export class LayerDomain {
   #onLayerMosaicRuleChangedHandlers: DomainLayerMosaicRuleChangedDelegate[] = [];
 
   /**
-   * Constructor for the LayerDomain class.
+   * Constructs an instance of LayerDomain.
    */
   constructor() {
     // Keep bounded references to the handlers
@@ -252,7 +252,7 @@ export class LayerDomain {
   /**
    * Gets the Layer Entry Configs.
    *
-   * @returns The ConfigBaseClass Layer Entry configuration.
+   * @returns The ConfigBaseClass Layer Entry configuration
    */
   getLayerEntryConfigs(): ConfigBaseClass[] {
     return Object.values(this.#layerEntryConfigs);
@@ -261,9 +261,9 @@ export class LayerDomain {
   /**
    * Gets the layer configuration of the specified layer path.
    *
-   * @param layerPath - The layer path.
-   * @returns The ConfigBaseClass layer configuration.
-   * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
+   * @param layerPath - The layer path
+   * @returns The ConfigBaseClass layer configuration
+   * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path
    */
   getLayerEntryConfig(layerPath: string): ConfigBaseClass {
     // Get the layer config
@@ -279,8 +279,8 @@ export class LayerDomain {
   /**
    * Gets the layer configuration of the specified layer path.
    *
-   * @param layerPath - The layer path.
-   * @returns The ConfigBaseClass layer configuration or undefined if not found.
+   * @param layerPath - The layer path
+   * @returns The ConfigBaseClass layer configuration or undefined if not found
    */
   getLayerEntryConfigIfExists(layerPath: string): ConfigBaseClass | undefined {
     return this.#layerEntryConfigs?.[layerPath];
@@ -289,10 +289,10 @@ export class LayerDomain {
   /**
    * Gets the layer configuration of a regular layer (not a group) at the specified layer path.
    *
-   * @param layerPath - The layer path.
-   * @returns The AbstractBaseLayerEntryConfig layer configuration.
-   * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
-   * @throws {LayerWrongTypeError} When the layer configuration is of the wrong type at the given layer path.
+   * @param layerPath - The layer path
+   * @returns The AbstractBaseLayerEntryConfig layer configuration
+   * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path
+   * @throws {LayerWrongTypeError} When the layer configuration is of the wrong type at the given layer path
    */
   getLayerEntryConfigRegular(layerPath: string): AbstractBaseLayerEntryConfig {
     // Get the layer entry config
@@ -308,10 +308,10 @@ export class LayerDomain {
   /**
    * Gets the layer configuration of a group layer (not a regular) at the specified layer path.
    *
-   * @param layerPath - The layer path.
-   * @returns The GroupLayerEntryConfig layer configuration.
-   * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
-   * @throws {LayerWrongTypeError} When the layer configuration is of the wrong type at the given layer path.
+   * @param layerPath - The layer path
+   * @returns The GroupLayerEntryConfig layer configuration
+   * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path
+   * @throws {LayerWrongTypeError} When the layer configuration is of the wrong type at the given layer path
    */
   getLayerEntryConfigGroup(layerPath: string): GroupLayerEntryConfig {
     // Get the layer entry config
@@ -348,7 +348,7 @@ export class LayerDomain {
    * This method filters the list returned by `getGeoviewLayers()` and
    * returns only the layers that are instances of `AbstractGVLayer`.
    *
-   * @returns An array containing only the regular layers from the current GeoView layer collection.
+   * @returns An array containing only the regular layers from the current GeoView layer collection
    */
   getGeoviewLayersRegulars(): AbstractGVLayer[] {
     return this.getGeoviewLayers().filter((l) => l instanceof AbstractGVLayer);
@@ -360,7 +360,7 @@ export class LayerDomain {
    * This method filters the list returned by `getGeoviewLayers()` and
    * returns only the layers that are instances of `GVGroupLayer`.
    *
-   * @returns An array containing only the group layers from the current GeoView layer collection.
+   * @returns An array containing only the group layers from the current GeoView layer collection
    */
   getGeoviewLayersGroups(): GVGroupLayer[] {
     return this.getGeoviewLayers().filter((l) => l instanceof GVGroupLayer);
@@ -369,7 +369,7 @@ export class LayerDomain {
   /**
    * Gets all GeoView layers that are at the root.
    *
-   * @returns An array containing only the layers at the root level of the registry.
+   * @returns An array containing only the layers at the root level of the registry
    */
   getGeoviewLayersRoot(): AbstractBaseGVLayer[] {
     return this.getGeoviewLayers().filter((layer) => !layer.getParent());
@@ -380,7 +380,7 @@ export class LayerDomain {
    *
    * @param layerPath - The layer path
    * @returns The AbstractBaseGVLayer associated to the layer path
-   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
    */
   getGeoviewLayer(layerPath: string): AbstractBaseGVLayer {
     // Get the layer
@@ -411,8 +411,8 @@ export class LayerDomain {
    *
    * @param layerPath - The layer path
    * @returns The AbstractGVLayer Layer
-   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
-   * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path.
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
+   * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path
    */
   getGeoviewLayerRegular(layerPath: string): AbstractGVLayer {
     // Get the layer
@@ -433,7 +433,7 @@ export class LayerDomain {
    *
    * @param layerPath - The layer path
    * @returns The AbstractGVLayer or undefined when not found
-   * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path.
+   * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path
    */
   getGeoviewLayerRegularIfExists(layerPath: string): AbstractGVLayer | undefined {
     // Get the layer if any
@@ -455,10 +455,10 @@ export class LayerDomain {
    * This function waits the timeout period before abandonning (or uses the default timeout when not provided).
    * Note this function uses the 'Async' suffix to differentiate it from 'getOLLayer'.
    *
-   * @param layerPath - The layer path to the layer's configuration.
+   * @param layerPath - The layer path to the layer's configuration
    * @param timeout - Optionally indicate the timeout after which time to abandon the promise
    * @param checkFrequency - Optionally indicate the frequency at which to check for the condition on the layerabstract
-   * @returns A promise that resolves to an OpenLayer layer associated to the layer path.
+   * @returns A promise that resolves to an OpenLayer layer associated to the layer path
    */
   getOLLayerAsync(layerPath: string, timeout?: number, checkFrequency?: number): Promise<BaseLayer> {
     // Make sure the open layer has been created, sometimes it can still be in the process of being created
@@ -705,7 +705,7 @@ export class LayerDomain {
   /**
    * Gets the max extent of all layers on the map, or of a provided subset of layers.
    *
-   * @param layerIds - Identifiers or layerPaths of layers to get max extents from.
+   * @param layerIds - Identifiers or layerPaths of layers to get max extents from
    * @returns A promise that resolves with the overall extent or undefined when no bounds are found
    */
   async getExtentOfMultipleLayers(layerIds: string[], projection: OLProjection, stops: number): Promise<Extent | undefined> {
