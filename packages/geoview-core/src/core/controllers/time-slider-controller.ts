@@ -1,7 +1,6 @@
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import {
-  addOrUpdateStoreTimeSliderFilter,
   addStoreTimeSliderLayer,
   getStoreTimeSliderLayer,
   isStoreTimeSliderInitialized,
@@ -81,11 +80,15 @@ export class TimeSliderController extends AbstractMapViewerController {
 
     // If any
     if (timeSliderValues) {
-      // Add it to the store
+      // Save in the store
       addStoreTimeSliderLayer(this.getMapId(), layer.getLayerPath(), timeSliderValues);
 
       // Update the filters on the layer in question and potential additional ones
       this.#updateAndApplyTimeFiltersForAll(layer, timeSliderValues, timeSliderValues.filtering, timeSliderValues.values);
+
+      // Save in the store
+      setStoreTimeSliderFiltering(this.getMapId(), layer.getLayerPath(), timeSliderValues.filtering);
+      setStoreTimeSliderValues(this.getMapId(), layer.getLayerPath(), timeSliderValues.values);
 
       // Make sure tab is visible
       this.getControllersRegistry().uiController.showTabButton('time-slider');
@@ -108,6 +111,9 @@ export class TimeSliderController extends AbstractMapViewerController {
 
     // Update the filters on the layer in question and potential additional ones
     this.#updateAndApplyTimeFiltersForAll(layer, timeSliderValues, timeSliderValues.filtering, values);
+
+    // Save in the store
+    setStoreTimeSliderValues(this.getMapId(), layer.getLayerPath(), values);
   }
 
   /**
@@ -126,6 +132,9 @@ export class TimeSliderController extends AbstractMapViewerController {
 
     // Update the filters on the layer in question and potential additional ones
     this.#updateAndApplyTimeFiltersForAll(layer, timeSliderValues, filtering, timeSliderValues.values);
+
+    // Save in the store
+    setStoreTimeSliderFiltering(this.getMapId(), layer.getLayerPath(), filtering);
   }
 
   /**
@@ -253,7 +262,7 @@ export class TimeSliderController extends AbstractMapViewerController {
     values: number[]
   ): void {
     // Update the filters on the layer in question
-    this.#updateAndApplyTimeFiltersForOne(layer, timeSliderValues, timeSliderValues.field, filtering, values);
+    TimeSliderController.#updateAndApplyTimeFiltersForOne(layer, timeSliderValues, timeSliderValues.field, filtering, values);
 
     // Many layer paths of layers to adjust
     // For each layer paths extra, apply the same filter
@@ -268,39 +277,14 @@ export class TimeSliderController extends AbstractMapViewerController {
       const additionalLayer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(additionalLayerPath);
 
       // Update the filters on the additional layer
-      this.#updateAndApplyTimeFiltersForOne(additionalLayer, timeSliderValues, additionalTimeSliderValues.field, filtering, values);
+      TimeSliderController.#updateAndApplyTimeFiltersForOne(
+        additionalLayer,
+        timeSliderValues,
+        additionalTimeSliderValues.field,
+        filtering,
+        values
+      );
     });
-  }
-
-  /**
-   * Updates and applies the temporal filter for a single layer.
-   *
-   * Generates the filter string, stores the filter and values in the store,
-   * and applies the filters on the map.
-   *
-   * @param layer - The GeoView layer to apply the filter on
-   * @param timeSliderValues - The time slider values for this layer
-   * @param field - The temporal field name to filter on
-   * @param filtering - Whether temporal filtering is active
-   * @param values - The current slider values (timestamps in milliseconds)
-   */
-  #updateAndApplyTimeFiltersForOne(
-    layer: AbstractGVLayer,
-    timeSliderValues: TypeTimeSliderValues,
-    field: string,
-    filtering: boolean,
-    values: number[]
-  ): void {
-    // Generate the filter string
-    const filter = TimeSliderController.#generateFilterString(layer, timeSliderValues, field, filtering, values);
-
-    // Set the filter on time on the layer
-    layer.setLayerFiltersTime(filter);
-
-    // ---- Always applied ----
-    addOrUpdateStoreTimeSliderFilter(this.getMapId(), layer.getLayerPath(), filter);
-    setStoreTimeSliderFiltering(this.getMapId(), layer.getLayerPath(), filtering);
-    setStoreTimeSliderValues(this.getMapId(), layer.getLayerPath(), values);
   }
 
   // #endregion PRIVATE METHODS
@@ -397,6 +381,32 @@ export class TimeSliderController extends AbstractMapViewerController {
       title: timesliderConfig?.title,
       values,
     };
+  }
+
+  /**
+   * Updates and applies the temporal filter for a single layer.
+   *
+   * Generates the filter string, stores the filter and values in the store,
+   * and applies the filters on the map.
+   *
+   * @param layer - The GeoView layer to apply the filter on
+   * @param timeSliderValues - The time slider values for this layer
+   * @param field - The temporal field name to filter on
+   * @param filtering - Whether temporal filtering is active
+   * @param values - The current slider values (timestamps in milliseconds)
+   */
+  static #updateAndApplyTimeFiltersForOne(
+    layer: AbstractGVLayer,
+    timeSliderValues: TypeTimeSliderValues,
+    field: string,
+    filtering: boolean,
+    values: number[]
+  ): void {
+    // Generate the filter string
+    const filter = this.#generateFilterString(layer, timeSliderValues, field, filtering, values);
+
+    // Set the filter on time on the layer
+    layer.setLayerFiltersTime(filter);
   }
 
   /**

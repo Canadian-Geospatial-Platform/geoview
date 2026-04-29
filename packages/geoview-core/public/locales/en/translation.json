@@ -534,7 +534,8 @@
       "notQueryableLayer": "Layer '{{layerNameOrPath}}' is not queryable.",
       "notAbleToQuery": "Unable to download records for '{{layerName}}'",
       "noWMSLegend": "Error fetching legend for '{{layerName}}': '{{errorName}}'",
-      "featureParsingError": "Unable to read feature data for layer '{{layerNameOrId}}'."
+      "featureParsingError": "Unable to read feature data for layer '{{layerNameOrId}}'.",
+      "styleGeometryNotFound": "The style for layer '{{layerName}}' and geometry type '{{geomType}}' could not be found."
     },
     "map": {
       "mapIdNotFound": "Map with ID '{{mapId}}' not found.",

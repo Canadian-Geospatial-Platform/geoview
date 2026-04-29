@@ -33,6 +33,8 @@ import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import type {
   LayerErrorDelegate,
   LayerErrorEvent,
+  LayerFilterAppliedDelegate,
+  LayerFilterAppliedEvent,
   LayerHoverableChangedDelegate,
   LayerHoverableChangedEvent,
   LayerItemVisibilityChangedDelegate,
@@ -113,6 +115,9 @@ export class LayerDomain {
   /** Keep a bounded reference to the handle layer item visibility changed */
   #boundedHandleLayerItemVisibilityChanged: LayerItemVisibilityChangedDelegate;
 
+  /** Keep a bounded reference to the handle layer filter applied */
+  #boundedHandleLayerFilterApplied: LayerFilterAppliedDelegate;
+
   /** Keep a bounded reference to the handle Group Layer Added Callbacks */
   #boundedHandleLayerGroupLayerAdded: LayerGroupChildrenUpdatedDelegate;
 
@@ -182,6 +187,9 @@ export class LayerDomain {
   /** Callback delegates for the layer item visibility changed event. */
   #onLayerItemVisibilityChangedHandlers: DomainLayerItemVisibilityChangedDelegate[] = [];
 
+  /** Callback delegates for the layer filter applied event. */
+  #onLayerFilterAppliedHandlers: DomainLayerFilterAppliedDelegate[] = [];
+
   /** Callback delegates for the group layer added event. */
   #onLayerGroupLayerAddedHandlers: DomainLayerGroupChildrenUpdatedDelegate[] = [];
 
@@ -217,6 +225,7 @@ export class LayerDomain {
     this.#boundedHandleLayerHoverableChanged = this.#handleLayerHoverableChanged.bind(this);
     this.#boundedHandleLayerQueryableChanged = this.#handleLayerQueryableChanged.bind(this);
     this.#boundedHandleLayerItemVisibilityChanged = this.#handleLayerItemVisibilityChanged.bind(this);
+    this.#boundedHandleLayerFilterApplied = this.#handleLayerFilterApplied.bind(this);
     this.#boundedHandleLayerGroupLayerAdded = this.#handleLayerGroupLayerAdded.bind(this);
     this.#boundedHandleLayerGroupLayerRemoved = this.#handleLayerGroupLayerRemoved.bind(this);
     this.#boundedHandleLayerWMSImageLoadRescue = this.#handleLayerWMSImageLoadRescue.bind(this);
@@ -557,8 +566,11 @@ export class LayerDomain {
       // Register a hook when a layer queryable is changed
       gvLayer.onLayerQueryableChanged(this.#boundedHandleLayerQueryableChanged);
 
-      // Register a hook when a layer style item visibility changes
+      // Register a hook when a layer style item visibility changed
       gvLayer.onLayerItemVisibilityChanged(this.#boundedHandleLayerItemVisibilityChanged);
+
+      // Register a hook when a layer filter changed
+      gvLayer.onLayerFilterApplied(this.#boundedHandleLayerFilterApplied);
 
       // For a WMS, register a hook when the image fails to load so that we can try to rescue it
       if (gvLayer instanceof GVWMS) gvLayer.onImageLoadRescue(this.#boundedHandleLayerWMSImageLoadRescue);
@@ -571,9 +583,6 @@ export class LayerDomain {
 
       // For an Esri Image, register a hook when the mosaic rule is changed so that we can update the layer accordingly
       if (gvLayer instanceof GVEsriImage) gvLayer.onMosaicRuleChanged(this.#boundedHandleLayerMosaicRuleChanged);
-
-      // Initialize it, attaching OpenLayers event on it
-      gvLayer.init();
     } else if (gvLayer instanceof GVGroupLayer) {
       // It's a group layer
 
@@ -927,6 +936,20 @@ export class LayerDomain {
   #handleLayerItemVisibilityChanged(layer: AbstractGVLayer, event: LayerItemVisibilityChangedEvent): void {
     // Emit about it
     this.#emitLayerItemVisibilityChanged({ layer, layerEvent: event });
+  }
+
+  /**
+   * Handles layer filter applied events from registered layers.
+   *
+   * Internal callback that is invoked when a layer's filter is applied.
+   * Forwards the event to domain listeners via emitLayerFilterApplied.
+   *
+   * @param layer - The layer whose filter was applied
+   * @param event - The layer filter applied event
+   */
+  #handleLayerFilterApplied(layer: AbstractGVLayer, event: LayerFilterAppliedEvent): void {
+    // Emit about it
+    this.#emitLayerFilterApplied({ layer, layerEvent: event });
   }
 
   /**
@@ -1490,7 +1513,7 @@ export class LayerDomain {
   }
 
   /**
-   * Emits layer message event.
+   * Emits layer item visibility changed event.
    *
    * @param event - The event to emit
    */
@@ -1518,6 +1541,37 @@ export class LayerDomain {
   offLayerItemVisibilityChanged(callback: DomainLayerItemVisibilityChangedDelegate | undefined): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerItemVisibilityChangedHandlers, callback);
+  }
+
+  /**
+   * Emits layer filter applied event.
+   *
+   * @param event - The event to emit
+   */
+  #emitLayerFilterApplied(event: DomainLayerFilterAppliedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerFilterAppliedHandlers, event);
+  }
+
+  /**
+   * Registers a layer filter applied event handler.
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback registered, for chaining or unregistration purposes
+   */
+  onLayerFilterApplied(callback: DomainLayerFilterAppliedDelegate): DomainLayerFilterAppliedDelegate {
+    // Register the event handler
+    return EventHelper.onEvent(this.#onLayerFilterAppliedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a layer filter applied event handler.
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerFilterApplied(callback: DomainLayerFilterAppliedDelegate | undefined): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerFilterAppliedHandlers, callback);
   }
 
   /**
@@ -1818,6 +1872,14 @@ export interface DomainLayerItemVisibilityChangedEvent extends DomainLayerBaseEv
 
 /** Define a delegate for the layer item visibility changed event handler function signature. */
 export type DomainLayerItemVisibilityChangedDelegate = EventDelegateBase<LayerDomain, DomainLayerItemVisibilityChangedEvent, void>;
+
+/**
+ * Define an event for the delegate
+ */
+export interface DomainLayerFilterAppliedEvent extends DomainLayerBaseEvent<AbstractGVLayer, LayerFilterAppliedEvent> {}
+
+/** Define a delegate for the layer filter applied event handler function signature. */
+export type DomainLayerFilterAppliedDelegate = EventDelegateBase<LayerDomain, DomainLayerFilterAppliedEvent, void>;
 
 /**
  * Define an event for the delegate

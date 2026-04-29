@@ -534,7 +534,8 @@
       "notQueryableLayer": "La couche '{{layerNameOrPath}}' n'est pas interrogeable.",
       "notAbleToQuery": "Impossible de téléchager les données pour '{{layerName}}'.",
       "noWMSLegend": "Erreur lors de la récupération de la légende pour '{{layerName}}': '{{errorName}}'",
-      "featureParsingError": "Impossible de lire les données d'entités pour la couche '{{layerNameOrId}}'."
+      "featureParsingError": "Impossible de lire les données d'entités pour la couche '{{layerNameOrId}}'.",
+      "styleGeometryNotFound": "Le style pour la couche '{{layerName}}' et le type de géométrie '{{geomType}}' introuvable."
     },
     "map": {
       "mapIdNotFound": "La carte avec l'identifiant '{{mapId}}' est introuvable.",

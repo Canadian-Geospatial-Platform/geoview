@@ -2,7 +2,6 @@ import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import {
-  addOrUpdateStoreDataTableFilter,
   getStoreDataTableSelectedLayerPath,
   getStoreDataTableMapFilteredRecord,
   setStoreDataTableColumnFiltersRecord,
@@ -50,17 +49,17 @@ export class DataTableController extends AbstractMapViewerController {
    * @param filterStrings - The filter expression to apply
    */
   applyMapFilters(filterStrings: string): void {
-    const layerPath = getStoreDataTableSelectedLayerPath(this.getMapId());
-    const filter = getStoreDataTableMapFilteredRecord(this.getMapId(), layerPath) ? filterStrings : '';
+    // Get the selected layer path
+    const selectedLayerPath = getStoreDataTableSelectedLayerPath(this.getMapId());
+
+    // TODO: Move this condition check in the caller?
+    const filter = getStoreDataTableMapFilteredRecord(this.getMapId(), selectedLayerPath) ? filterStrings : '';
 
     // Get the layer
-    const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
+    const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(selectedLayerPath);
 
     // Set the filters on the data on the layer
     layer.setLayerFiltersData(filter);
-
-    // Save in the store
-    addOrUpdateStoreDataTableFilter(this.getMapId(), layerPath, filter);
   }
 
   /**
