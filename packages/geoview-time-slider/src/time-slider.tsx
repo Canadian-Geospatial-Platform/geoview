@@ -390,7 +390,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
         const nearest = timeStampRange.reduce((prev, curr) => (Math.abs(curr - value) < Math.abs(prev - value) ? curr : prev));
         timeSliderController.updateTimeSliderValues(layerPath, [nearest]);
       } else {
-        timeSliderController.updateTimeSliderValues(layerPath, newValues as number[]);
+        timeSliderController.updateTimeSliderValues(layerPath, Array.isArray(newValues) ? newValues : [newValues]);
       }
     },
     [timeSliderController, discreteValues, layerPath, singleHandle, timeStampRange]
