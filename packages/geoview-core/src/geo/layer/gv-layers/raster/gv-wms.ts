@@ -963,7 +963,9 @@ export class GVWMS extends AbstractGVRaster {
     // If any found result
     if (featureMember) {
       // Format and return the information
-      return { results: GVWMS.#formatWmsFeatureInfoResult(wmsLayerConfig.layerPath, featureMember, clickCoordinate) };
+      return {
+        results: GVWMS.#formatWmsFeatureInfoResult(wmsLayerConfig.layerPath, wmsLayerConfig.getNameField(), featureMember, clickCoordinate),
+      };
     }
 
     // Failed
@@ -1391,6 +1393,7 @@ export class GVWMS extends AbstractGVRaster {
    */
   static #formatWmsFeatureInfoResult(
     layerPath: string,
+    nameField: string | undefined,
     featureMember: Record<string, unknown> | Record<string, unknown>[],
     clickCoordinate: Coordinate
   ): TypeFeatureInfoEntry[] {
@@ -1400,11 +1403,11 @@ export class GVWMS extends AbstractGVRaster {
     if (Array.isArray(featureMember)) {
       featureMember.forEach((feature) => {
         if (feature && typeof feature === 'object') {
-          results.push(this.#formatWmsFeatureInfoResultParser(feature, layerPath, clickCoordinate, featureKeyCounter++));
+          results.push(this.#formatWmsFeatureInfoResultParser(feature, layerPath, nameField, clickCoordinate, featureKeyCounter++));
         }
       });
     } else if (featureMember && typeof featureMember === 'object') {
-      results.push(this.#formatWmsFeatureInfoResultParser(featureMember, layerPath, clickCoordinate, featureKeyCounter++));
+      results.push(this.#formatWmsFeatureInfoResultParser(featureMember, layerPath, nameField, clickCoordinate, featureKeyCounter++));
     }
 
     return results;
@@ -1422,6 +1425,7 @@ export class GVWMS extends AbstractGVRaster {
   static #formatWmsFeatureInfoResultParser(
     feature: unknown,
     layerPath: string,
+    nameField: string | undefined,
     clickCoordinate: Coordinate,
     featureKey: number
   ): TypeFeatureInfoEntry {
@@ -1435,6 +1439,7 @@ export class GVWMS extends AbstractGVRaster {
       fieldInfo: {},
       supportZoomTo: true,
       layerPath,
+      nameField,
     };
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
