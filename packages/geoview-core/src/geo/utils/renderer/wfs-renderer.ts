@@ -457,10 +457,21 @@ export abstract class WfsRenderer {
         sizeGraphic: symSize,
         mimeType: symMime,
         fromSVGsOrMarkers: fromGraphic,
+        rotation: graphicRotation,
       } = this.#parseGraphic(symbol['se:Graphic']);
 
       // If no graphics info gathered
       if (graphicsInfo.length === 0) return; // Skip
+
+      // Apply rotation to each graphic if rotation is defined and non-zero
+      if (graphicRotation !== undefined && graphicRotation !== 0) {
+        graphicsInfo.forEach((gInfo) => {
+          const centerX = gInfo.vx + gInfo.vw / 2;
+          const centerY = gInfo.vy + gInfo.vh / 2;
+          // eslint-disable-next-line no-param-reassign
+          gInfo.innerSVG = `<g transform="rotate(${graphicRotation} ${centerX} ${centerY})">${gInfo.innerSVG}</g>`;
+        });
+      }
 
       globalMimeType ??= symMime;
       globalFromSVGsOrMarkers = globalFromSVGsOrMarkers !== 'svg' ? fromGraphic : 'svg';
@@ -967,18 +978,26 @@ export abstract class WfsRenderer {
     // Get the graphic size right away
     const sizeGraphic = Number(graphic?.['se:Size'] ?? 12); // default: 12
 
+    // Extract rotation if present
+    const rotationNode = graphic?.['se:Rotation'];
+    const rotation = rotationNode ? Number(rotationNode?.['ogc:Literal']) : undefined;
+
     // Check if we have ExternalGraphics (SVGs)
     const externalGraphics = graphic?.['se:ExternalGraphic'] ?? [];
     if (externalGraphics.length > 0) {
       // Redirect building the SVGs
-      return this.#parseGraphicsGatherSVGs(externalGraphics, sizeGraphic);
+      const result = this.#parseGraphicsGatherSVGs(externalGraphics, sizeGraphic);
+      result.rotation = !Number.isNaN(rotation) && rotation !== undefined ? rotation : 0;
+      return result;
     }
 
     // Support se:Mark (well-known shapes)
     const marker = graphic?.['se:Mark'];
     if (marker) {
       // Redirect building the markers
-      return this.#parseGraphicsMarkers(marker, sizeGraphic);
+      const result = this.#parseGraphicsMarkers(marker, sizeGraphic);
+      result.rotation = !Number.isNaN(rotation) && rotation !== undefined ? rotation : 0;
+      return result;
     }
 
     // Unsupported
@@ -1778,6 +1797,7 @@ type ExternalGraphicsInfo = {
   sizeGraphic: number;
   mimeType?: string;
   fromSVGsOrMarkers: 'svg' | 'marker';
+  rotation?: number;
 };
 
 type GraphicInfo = { innerSVG: string; vx: number; vy: number; vw: number; vh: number };
