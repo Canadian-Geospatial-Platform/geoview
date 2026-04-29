@@ -487,7 +487,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
         justifyItems="stretch"
       >
         {layerItems?.map((item) => (
-          <Grid key={`${layerPath}/${item.name}`} sx={{ marginBottom: '5px' }}>
+          <Grid key={`${layerPath}/${item.geometryType}/${item.name}/${item.icon || 'no-icon'}`} sx={{ marginBottom: '5px' }}>
             {renderItemCheckbox(item)}
           </Grid>
         ))}
