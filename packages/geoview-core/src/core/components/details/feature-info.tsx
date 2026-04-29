@@ -229,7 +229,8 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
   const memoFeatureName = useMemo(() => {
     logger.logTraceUseMemo('FEATURE-INFO - memoFeatureName', feature.nameField);
     // Try to get the value at the fieldName
-    const value = feature.nameField && (feature.fieldInfo?.[feature.nameField]?.value as string);
+    const effectiveNameField = feature.nameField ?? Object.keys(feature.fieldInfo ?? {})[0];
+    const value = effectiveNameField && (feature.fieldInfo?.[effectiveNameField]?.value as string);
     return value ?? 'No name / Sans nom';
   }, [feature]);
 
