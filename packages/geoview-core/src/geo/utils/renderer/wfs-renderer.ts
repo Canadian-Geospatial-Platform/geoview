@@ -73,6 +73,8 @@ export abstract class WfsRenderer {
     const infos: TypeLayerStyleConfigInfo[] = [];
     const fields: string[] = [];
     let hasClassBreaks: boolean = false;
+    let hasDefault: boolean = false;
+
     rules.forEach((userRule) => {
       // Check the filter for the rule if any
       const label = userRule['se:Name'] || 'unnamed';
@@ -89,6 +91,8 @@ export abstract class WfsRenderer {
         propertyNames.forEach((name) => {
           if (!fields.includes(name)) fields.push(name);
         });
+      } else {
+        hasDefault = true;
       }
 
       // Check if it's a PointSymbolizer
@@ -152,7 +156,7 @@ export abstract class WfsRenderer {
     const styleSettings = {
       type,
       fields,
-      hasDefault: false,
+      hasDefault,
       info: infos,
     } as unknown as TypeLayerStyleSettings;
 
