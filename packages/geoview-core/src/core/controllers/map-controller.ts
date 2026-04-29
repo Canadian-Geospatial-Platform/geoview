@@ -691,7 +691,7 @@ export class MapController extends AbstractMapViewerController {
 
     // Set center without animation
     view.setCenter(newCenter);
-    // GV No need to Save to the store, because this will trigger an event on MapViewer which will take care of updating the store
+    // GV No need to save to the store, because this will trigger an event on MapViewer which will take care of updating the store
   }
 
   /**
@@ -714,7 +714,7 @@ export class MapController extends AbstractMapViewerController {
     // Cancel any in-flight animations so slider drags stay in sync with the displayed value.
     view.cancelAnimations();
     view.setRotation(rotation);
-    // GV No need to Save to the store, because this will trigger an event on MapViewer which will take care of updating the store
+    // GV No need to save to the store, because this will trigger an event on MapViewer which will take care of updating the store
   }
 
   /**

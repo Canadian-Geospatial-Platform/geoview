@@ -638,7 +638,7 @@ export const setStoreDataTableRowsFilteredRecord = (mapId: string, rows: number,
 };
 
 /**
- * Adds or updates a table filter for a specific layer in the store.
+ * Sets a table filter for a specific layer in the store.
  *
  * Merges the provided filter with existing filters, overwriting
  * the entry for the given layer path.
@@ -647,7 +647,7 @@ export const setStoreDataTableRowsFilteredRecord = (mapId: string, rows: number,
  * @param layerPath - The layer path to set the filter for
  * @param filter - The filter expression string
  */
-export const addOrUpdateStoreDataTableFilter = (mapId: string, layerPath: string, filter: string): void => {
+export const setStoreDataTableFilter = (mapId: string, layerPath: string, filter = ''): void => {
   const dataTableState = getStoreDataTableState(mapId);
   const curTableFilters = dataTableState?.tableFilters;
   dataTableState?.actions.setTableFilters({ ...curTableFilters, [layerPath]: filter });

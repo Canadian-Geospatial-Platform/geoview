@@ -55,6 +55,16 @@ export class LayerFilters {
   }
 
   /**
+   * Sets the initial base filter.
+   *
+   * @param initialFilter - The initial base filter
+   */
+  setInitialFilter(initialFilter: string | undefined): void {
+    this.#initialFilter = initialFilter;
+    this.#refreshFilterEquation();
+  }
+
+  /**
    * Gets if the layer has an initial base filter.
    *
    * @returns True when the layer has an initial base filter
@@ -243,3 +253,6 @@ export class LayerFilters {
 
   // #endregion STATIC METHODS
 }
+
+/** Represents the types of filters that can be composed: initial, class, data, or time-based filters. */
+export type FilterCategory = 'initial' | 'class' | 'data' | 'time';

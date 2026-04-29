@@ -34,7 +34,6 @@ import { CancelledError, ResponseEmptyError, PromiseRejectErrorWrapper, formatEr
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
-import { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 
 /** Default display names keyed by GeoView layer type, used when no name is provided in the configuration. */
 const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
@@ -545,11 +544,8 @@ export abstract class AbstractGeoViewLayer {
    * @param layer - The layer to initialize
    */
   initGVLayer(layer: AbstractGVLayer): void {
-    // Get the layer config
-    const layerConfig = layer.getLayerConfig();
-
-    // Set the layer filters right away for the initial view
-    layer.setLayerFilters(new LayerFilters(layerConfig.getLayerFilter(), layer.getFilterFromStyle()), false);
+    // Initializes the layer
+    layer.init();
 
     // Redirect
     this.onInitGVLayer(layer);

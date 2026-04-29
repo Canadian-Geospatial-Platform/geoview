@@ -616,6 +616,50 @@ setStoreMapClickMarker(this.getMapId(), projectedCoords[0]);
 this.getControllersRegistry().mapController.applyLayerFilters(layerPath);
 ```
 
+### Batch Operations & Store Synchronization
+
+**Critical:** When controllers perform batch operations (e.g., toggling all items at once), they often suppress individual event handlers to avoid redundant processing. **After the batch completes, you must manually synchronize the store to reflect all state changes.**
+
+**Common pattern in `LayerController` (batch item visibility):**
+
+```typescript
+try {
+  // Suppress individual event handlers during batch
+  this.#isBatchingLayerItemsVisibility = true;
+
+  // Batch all operations without store updates
+  const promises = [];
+  items.forEach((item) => {
+    item.isVisible = newState;
+    promises.push(this.setItemVisibility(layerPath, item, newState, false));
+  });
+  await Promise.all(promises);
+} finally {
+  // Re-enable event handlers
+  this.#isBatchingLayerItemsVisibility = false;
+}
+
+// ✅ CRITICAL: After batch, manually update the store
+items.forEach((item) => {
+  setStoreLayerItemVisibility(
+    this.getMapId(), 
+    layerPath, 
+    item, 
+    item.isVisible, 
+    layer.getLayerFilters().getClassFilter() // also update related filters
+  );
+});
+```
+
+**Why this matters:** Domain layer changes (OL rendering, filter objects) happen during the batch, but the Zustand store isn't updated because event handlers were suppressed. Stale store data breaks:
+- Data table feature counts and filters
+- "Active Filters" UI display
+- Any component reading derived state from the store
+
+**Solution:** Create specific store setters for batch scenarios (e.g., `setStoreLayerClassFilter()`, `setStoreDataTableFilter()`). Call them explicitly after the batch completes. Do NOT rely on suppressed event handlers to update the store.
+
+**Reference:** Issue #3447 — Legend "Toggle All" doesn't update `layerFilterClass` in Zustand Store.
+
 ## Config & Schema Validation
 
 - **Only geoview-core** has full schema validation (schema.json, schema-default-config.json)
