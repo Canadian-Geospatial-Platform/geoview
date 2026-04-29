@@ -1392,7 +1392,8 @@ export class LayerTester extends GVAbstractTester {
       'Test initial settings cascade',
       async (test) => {
         // Add the layer to the map and get the AbstractGeoViewLayer
-        await this.helperStepAddLayerOnMap(test, config as unknown as TypeGeoviewLayerConfig);
+        const layerConfig = config as unknown as TypeGeoviewLayerConfig;
+        await this.helperStepAddLayerOnMap(test, layerConfig);
 
         // Return created map config
         return this.getMapViewer().createMapConfigFromMapState();

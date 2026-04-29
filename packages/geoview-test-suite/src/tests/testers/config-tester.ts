@@ -1364,7 +1364,8 @@ export class ConfigTester extends GVAbstractTester {
       'Test Settings Cascade to Sublayers',
       () => {
         // Use the config to convert simplified layer config into proper layer config
-        const configObj = Config.initializeMapConfig(this.getMapId(), [config as unknown as MapConfigLayerEntry], () => {}); // Empty callback, not necessary
+        const layerConfigs = [config] as unknown as MapConfigLayerEntry[];
+        const configObj = Config.initializeMapConfig(this.getMapId(), layerConfigs, () => {}); // Empty callback, not necessary
 
         if (!configObj || !configObj[0]) {
           throw new Error('Failed to initialize map config');
