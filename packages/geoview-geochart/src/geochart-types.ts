@@ -39,7 +39,8 @@ export type PluginGeoChartConfig = {
  * @returns The core type-equivalent of the objects
  */
 export function convertGeoViewGeoChartConfigToCore(chartConfigObject: GeoViewGeoChartConfig): GeoViewGeoChartCoreConfig {
-  return chartConfigObject as unknown as GeoViewGeoChartCoreConfig;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Bridge between two intentionally divergent type definitions - crash Github build
+  return chartConfigObject as any;
 }
 
 /**
@@ -49,5 +50,6 @@ export function convertGeoViewGeoChartConfigToCore(chartConfigObject: GeoViewGeo
  * @returns The geoview-geochart type-equivalent of the objects
  */
 export function convertGeoViewGeoChartConfigFromCore(chartConfigObject: GeoViewGeoChartCoreConfig): GeoViewGeoChartConfig {
-  return chartConfigObject as unknown as GeoViewGeoChartConfig;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Bridge between two intentionally divergent type definitions - crash Github build
+  return chartConfigObject as any;
 }
