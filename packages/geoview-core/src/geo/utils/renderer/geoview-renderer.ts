@@ -85,6 +85,9 @@ export abstract class GeoviewRenderer {
   /** Unary operators for the featureRespectsFilterEquation function */
   static readonly #UNARY_OPERATORS = new Set(['not', 'upper', 'lower']);
 
+  /** Arcade keywords and functions allowed in expression evaluation */
+  static readonly ALLOWED_ARCADE_KEYWORDS = ['upper', 'lower', 'if', 'else', 'return'];
+
   /**
    * Get the default color using the default color index.
    *
@@ -1551,7 +1554,11 @@ export abstract class GeoviewRenderer {
 
       // Safety check: whitelist allowed characters and keywords
       // Allow: alphanumeric, operators, parentheses, quotes, whitespace, keywords (if, else, return, upper, lower)
-      if (/\b(?!upper|lower|if|return|toString|toUpperCase|toLowerCase)\w+\s*\(/i.test(evaluableExpression)) {
+      // GV Arcade function reference: https://developers.arcgis.com/arcade/function-reference/text_functions\
+      // GV This is VERY restrictive and may need to be expanded based on actual use cases
+      const allowedKeywords = this.ALLOWED_ARCADE_KEYWORDS.join('|');
+      const disallowedFunctionRegex = new RegExp(`\\b(?!${allowedKeywords})\\w+\\s*\\(`, 'i');
+      if (disallowedFunctionRegex.test(evaluableExpression)) {
         logger.logWarning('Disallowed function call in expression');
         return null;
       }
@@ -1601,7 +1608,9 @@ export abstract class GeoviewRenderer {
   static evaluateValueExpression(expression: string, feature: Feature): number | null {
     try {
       // Check if expression is simple arithmetic or complex Arcade
-      const hasArcadeKeywords = /\b(if|else|return|upper|lower|when)\b/i.test(expression);
+      const allowedKeywords = this.ALLOWED_ARCADE_KEYWORDS.join('|');
+      const arcadeKeywordRegex = new RegExp(`\\b(${allowedKeywords})\\b`, 'i');
+      const hasArcadeKeywords = arcadeKeywordRegex.test(expression);
 
       if (hasArcadeKeywords) {
         // Delegate to full Arcade evaluator, coerce result to number
