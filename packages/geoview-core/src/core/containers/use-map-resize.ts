@@ -10,7 +10,6 @@ interface UseMapResizeProps {
   footerPanelResizeValue: number;
   isFooterBar: boolean;
   geoviewElement: HTMLElement;
-  footerTabContainer: HTMLElement | null;
   appHeight: number;
 }
 
@@ -31,7 +30,6 @@ export const useMapResize = ({
   footerPanelResizeValue,
   isFooterBar,
   geoviewElement,
-  footerTabContainer,
   appHeight,
 }: UseMapResizeProps): TypeUseMapResize => {
   const mapShellContainerRef = useRef<HTMLDivElement>(null);
@@ -48,15 +46,17 @@ export const useMapResize = ({
 
     // default values as set by the height of the div
     let containerHeight = `${appHeight}px`;
+    let containerFlex = '';
     let visibility = 'visible';
 
     // adjust values from px to % to accomodate fullscreen plus page zoom
     if (isMapFullScreen) {
-      const tabHeight = footerTabContainer?.clientHeight ?? 0;
-
       // by default the footerbar is collapsed when a user goes fullscreen
       if (!isFooterBarOpen) {
-        containerHeight = `calc(100% - ${tabHeight}px)`;
+        // Use flex growth to fill remaining space in the shell's flex column,
+        // regardless of sibling elements (skip links, CircularProgress, etc.)
+        containerHeight = 'auto';
+        containerFlex = '1';
       } else {
         containerHeight = `${100 - footerPanelResizeValue}%`;
 
@@ -70,7 +70,8 @@ export const useMapResize = ({
 
     mapShellContainerRef.current.style.visibility = visibility;
     mapShellContainerRef.current.style.height = containerHeight;
-  }, [footerTabContainer, footerPanelResizeValue, isFooterBarOpen, isMapFullScreen, appHeight]);
+    mapShellContainerRef.current.style.flex = containerFlex;
+  }, [footerPanelResizeValue, isFooterBarOpen, isMapFullScreen, appHeight]);
 
   /**
    * Adjusts geoviewElement height to accommodate the footer bar.

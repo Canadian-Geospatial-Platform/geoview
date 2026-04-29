@@ -94,7 +94,6 @@ export function Shell(props: ShellProps): JSX.Element {
   const { isOpen } = useStoreUIActiveFooterBarTab();
   const geoviewElement = useStoreAppGeoviewHTMLElement();
   const appHeight = useStoreAppHeight();
-  const footerTabContainer = geoviewElement.querySelector(`[id^="${mapId}-tabsContainer"]`) as HTMLElement;
   const uiController = useUIController();
 
   // SxClasses
@@ -107,7 +106,6 @@ export function Shell(props: ShellProps): JSX.Element {
     footerPanelResizeValue,
     isFooterBar: !!geoviewConfig?.footerBar,
     geoviewElement,
-    footerTabContainer,
     appHeight,
   });
 
