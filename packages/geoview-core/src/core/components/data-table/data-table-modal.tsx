@@ -9,18 +9,11 @@ import { MRT_Localization_EN as MRTLocalizationEN } from 'material-react-table/l
 
 import linkifyHtml from 'linkify-html';
 
-import { Modal, MRTTable as Table, type MRT_ColumnDef as MRTColumnDef, Box, CircularProgress, Button } from '@/ui';
-import { useDataTableController, useUIController } from '@/core/controllers/use-controllers';
-import { TableViewIcon } from '@/ui/icons';
+import { Modal, MRTTable as Table, type MRT_ColumnDef as MRTColumnDef, Box, CircularProgress } from '@/ui';
+import { useUIController } from '@/core/controllers/use-controllers';
 import type { TypeFieldEntry } from '@/api/types/map-schema-types';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
-import { useNavigateToTab } from '@/core/components/common/hooks/use-navigate-to-tab';
-import {
-  useStoreUIActiveFocusItem,
-  useStoreUIFooterBarComponents,
-  useStoreUIAppbarComponents,
-  useStoreUIActiveTrapGeoView,
-} from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useStoreUIActiveFocusItem } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useStoreAppDisplayLanguage, useStoreAppShellContainer } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useStoreDataTableAllFeaturesDataArray } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { useStoreLayerNameSet, useStoreLayerSelectedLayerPath } from '@/core/stores/store-interface-and-intial-values/layer-state';
@@ -64,24 +57,10 @@ export default function DataTableModal(): JSX.Element {
   const layersData = useStoreDataTableAllFeaturesDataArray();
   const language = useStoreAppDisplayLanguage();
   const shellContainer = useStoreAppShellContainer();
-  const footerBarComponents = useStoreUIFooterBarComponents();
-  const appBarComponents = useStoreUIAppbarComponents();
-  const isFocusTrap = useStoreUIActiveTrapGeoView();
   const layerNames = useStoreLayerNameSet();
   const uiController = useUIController();
-  const dataTableController = useDataTableController();
 
   const dataTableLocalization = language === 'fr' ? MRTLocalizationFR : MRTLocalizationEN;
-
-  // Check if data-table tab exists in footer or appBar
-  const hasFooterDataTableTab = footerBarComponents.includes('data-table');
-  const hasAppBarDataTableTab = appBarComponents.includes('data-table');
-  const hasDataTableTab = hasFooterDataTableTab || hasAppBarDataTableTab;
-
-  // Use navigate hook with scrollToFooter disabled since modal closes
-  const navigateToDataTable = useNavigateToTab('data-table', (lyrPath) => {
-    dataTableController.setSelectedLayerPath(lyrPath);
-  });
 
   // Create columns for data table.
   const mappedLayerData = useFeatureFieldInfos(layersData);
@@ -189,16 +168,6 @@ export default function DataTableModal(): JSX.Element {
   }, [memoLayer?.features]);
 
   /**
-   * Handles navigation to the advanced data table tab.
-   */
-  const handleNavigateToDataTable = useCallback((): void => {
-    // Close modal first
-    uiController.disableFocusTrap();
-    // Navigate to data-table tab with selected layer
-    navigateToDataTable({ layerPath: selectedLayerPath! });
-  }, [uiController, navigateToDataTable, selectedLayerPath]);
-
-  /**
    * Updates loading state based on query status of the selected layer.
    */
   useEffect(() => {
@@ -234,45 +203,29 @@ export default function DataTableModal(): JSX.Element {
             </Box>
           )}
           {!isLoading && (
-            <>
-              {hasDataTableTab && selectedLayerPath && !isFocusTrap && (
-                <Box sx={{ display: 'flex', justifyContent: 'flex-start', marginBottom: 2 }}>
-                  <Button
-                    variant="outlined"
-                    className="buttonOutline"
-                    onClick={handleNavigateToDataTable}
-                    type="text"
-                    size="small"
-                    startIcon={<TableViewIcon />}
-                  >
-                    {t('dataTable.accessAdvancedFunctions')}
-                  </Button>
-                </Box>
-              )}
-              <Table
-                columns={memoColumns}
-                data={memoRows}
-                enableColumnActions={false}
-                enablePagination={(memoLayer?.features?.length ?? 0) > 50}
-                enableBottomToolbar={(memoLayer?.features?.length ?? 0) > 50}
-                initialState={{ density: 'compact', pagination: { pageSize: 50, pageIndex: 0 } }}
-                muiPaginationProps={{
-                  rowsPerPageOptions: [50, 100],
-                }}
-                muiTableContainerProps={{ sx: { maxHeight: 'calc(90vh - 200px)' } }}
-                enableStickyHeader
-                enableSorting
-                positionToolbarAlertBanner="none"
-                localization={dataTableLocalization}
-                enableGlobalFilter={false}
-                enableColumnFilters={false}
-                enableDensityToggle={false}
-                enableFilters={false}
-                enableFullScreenToggle={false}
-                enableHiding={false}
-                enableTopToolbar={false}
-              />
-            </>
+            <Table
+              columns={memoColumns}
+              data={memoRows}
+              enableColumnActions={false}
+              enablePagination={(memoLayer?.features?.length ?? 0) > 50}
+              enableBottomToolbar={(memoLayer?.features?.length ?? 0) > 50}
+              initialState={{ density: 'compact', pagination: { pageSize: 50, pageIndex: 0 } }}
+              muiPaginationProps={{
+                rowsPerPageOptions: [50, 100],
+              }}
+              muiTableContainerProps={{ sx: { maxHeight: 'calc(90vh - 200px)' } }}
+              enableStickyHeader
+              enableSorting
+              positionToolbarAlertBanner="none"
+              localization={dataTableLocalization}
+              enableGlobalFilter={false}
+              enableColumnFilters={false}
+              enableDensityToggle={false}
+              enableFilters={false}
+              enableFullScreenToggle={false}
+              enableHiding={false}
+              enableTopToolbar={false}
+            />
           )}
         </>
       }

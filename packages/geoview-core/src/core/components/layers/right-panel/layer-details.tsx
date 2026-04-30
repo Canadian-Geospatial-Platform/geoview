@@ -28,7 +28,7 @@ import {
   ZoomInSearchIcon,
 } from '@/ui';
 import { ArrowBackIcon } from '@/ui/icons';
-import { useTimeSliderControllerIfExists, useUIController } from '@/core/controllers/use-controllers';
+import { useTimeSliderControllerIfExists, useUIController, useDataTableController } from '@/core/controllers/use-controllers';
 import type { TypeLegendItem } from '@/core/components/layers/types';
 import { getSxClasses } from './layer-details-style';
 import {
@@ -53,7 +53,11 @@ import {
   useStoreLayerIsHiddenOnMap,
   useStoreLayerVisibleLayers,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { useStoreUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import {
+  useStoreUIActiveTrapGeoView,
+  useStoreUIFooterBarComponents,
+  useStoreUIAppbarComponents,
+} from '@/core/stores/store-interface-and-intial-values/ui-state';
 import {
   useStoreDataTableAllFeaturesDataArray,
   useStoreDataTableLayerSettings,
@@ -196,14 +200,25 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
   const availableSettings = useStoreLayerStyleSettings(layerPath);
   const timeSliderLayers = useStoreTimeSliderLayers();
   const isFocusTrap = useStoreUIActiveTrapGeoView();
+  const footerBarComponents = useStoreUIFooterBarComponents();
+  const appBarComponents = useStoreUIAppbarComponents();
   const uiController = useUIController();
   const layerController = useLayerController();
   const layerSetController = useLayerSetController();
   const timeSliderController = useTimeSliderControllerIfExists();
+  const dataTableController = useDataTableController();
+
+  // Check if data-table tab exists in footer or appBar
+  const hasDataTableTab = footerBarComponents.includes('data-table') || appBarComponents.includes('data-table');
 
   // Use navigate hook for time slider (only if time slider state exists)
   const navigateToTimeSlider = useNavigateToTab('time-slider', (lyrPath) => {
     timeSliderController?.setSelectedLayerPathTimeSlider(lyrPath);
+  });
+
+  // Use navigate hook for data table
+  const navigateToDataTable = useNavigateToTab('data-table', (lyrPath) => {
+    dataTableController.setSelectedLayerPath(lyrPath);
   });
 
   // Is highlight button disabled?
@@ -270,11 +285,28 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
     ) {
       layerSetController.triggerGetAllFeatureInfo(layerPath).catch((error: unknown) => {
         // Log
-        logger.logPromiseFailed('Failed to triggerGetAllFeatureInfo in single-layer.handleLayerClick', error);
+        logger.logPromiseFailed('Failed to triggerGetAllFeatureInfo in layer-details.handleOpenTable', error);
       });
     }
-    uiController.enableFocusTrap({ activeElementId: 'layerDataTable', callbackElementId: tableDetailsButtonId });
-  }, [isTableButtonDisabled, layerPath, layerSetController, layerStatus, layersData, tableDetailsButtonId, uiController]);
+
+    // If data-table tab exists in viewer, navigate to it directly
+    if (hasDataTableTab) {
+      navigateToDataTable({ layerPath });
+    } else {
+      // Otherwise, open the data table modal
+      uiController.enableFocusTrap({ activeElementId: 'layerDataTable', callbackElementId: tableDetailsButtonId });
+    }
+  }, [
+    isTableButtonDisabled,
+    hasDataTableTab,
+    navigateToDataTable,
+    layerPath,
+    layerSetController,
+    layerStatus,
+    layersData,
+    tableDetailsButtonId,
+    uiController,
+  ]);
 
   /**
    * Handles highlighting the layer on the map.
@@ -464,7 +496,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
         id={tableDetailsButtonId}
         className="buttonOutline"
         onClick={handleOpenTable}
-        aria-label={t('legend.tableDetails')}
+        aria-label={hasDataTableTab ? t('dataTable.accessAdvancedFunctions') : t('legend.tableDetails')}
         aria-disabled={isTableButtonDisabled} // WCAG - used instead of disabled to allow button to be discoverable by screen readers
       >
         <TableViewIcon color={isTableButtonDisabled ? 'disabled' : 'inherit'} />
