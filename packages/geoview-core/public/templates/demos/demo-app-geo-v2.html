@@ -30,6 +30,8 @@
 
     <button class="btn btn-primary" onclick="loadMap()">Reload (remount)</button>
     <div id="map1" data-lang="en"></div>
+    <button type="button" class="collapsible">Configuration Snippet</button>
+    <pre id="map1CS" class="panel"></pre>
 
     <div class="demo-section">
       <h4>Test GeoCoreUUIDs</h4>
@@ -116,6 +118,12 @@
       insertPageHeader();
 
       loadMap();
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });
     </script>
   </body>
 </html>

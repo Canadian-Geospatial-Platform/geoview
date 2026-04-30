@@ -104,11 +104,15 @@
 
     <!-- This is the div for the map (same config EN and FR) -->
     <div id="MapEN" class="geoview-map" data-lang="en" data-config-url="./configs/open-maps/open-maps-config.json"></div>
+    <button type="button" class="collapsible">Configuration Snippet</button>
+    <pre id="MapENCS" class="panel"></pre>
 
     <div style="border-bottom: 3px solid #515ba5; margin: 20px 0"></div>
 
     <!-- This is the div for the map (same config EN and FR) -->
     <div id="MapFR" class="geoview-map" data-lang="fr" data-config-url="./configs/open-maps/open-maps-config.json"></div>
+    <button type="button" class="collapsible">Configuration Snippet</button>
+    <pre id="MapFRCS" class="panel"></pre>
 
     <!-- Link to Geoview, to replace by release hosted version https://viewer-visualiseur.services.geo.ca/apps/GeoView/2.1.2/cgpv-main.js -->
     <!-- Link to dev Geoview to use for testing <script src="https://canadian-geospatial-platform.github.io/geoview/public/cgpv-main.js"></script> -->
@@ -181,6 +185,12 @@
       }
 
       // ********** IMPORTANT CUSTOM CODE FOR KEYS INJECTION - END **********
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });
     </script>
   </body>
 </html>

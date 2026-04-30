@@ -135,6 +135,8 @@
         'externalPackages': []
       }"
     ></div>
+    <button type="button" class="collapsible">Configuration Snippet</button>
+    <pre id="Map1CS" class="panel"></pre>
 
     <script src="codedoc.js"></script>
     <script>
@@ -299,6 +301,12 @@
 
       // initialize cgpv
       cgpv.init();
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });
     </script>
   </body>
 </html>

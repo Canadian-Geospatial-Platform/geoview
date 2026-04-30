@@ -100,6 +100,8 @@
         }
       }"
     ></div>
+    <button type="button" class="collapsible">Configuration Snippet</button>
+    <pre id="map1CS" class="panel"></pre>
 
     <div class="demo-section">
       <h4 id="HLYR2">2. Sea Ice Extent (1979-2016)</h4>
@@ -225,6 +227,8 @@
         ]
       }"
     ></div>
+    <button type="button" class="collapsible">Configuration Snippet</button>
+    <pre id="map2CS" class="panel"></pre>
 
     <script src="codedoc.js"></script>
     <script>
@@ -232,6 +236,12 @@
 
       // initialize cgpv
       cgpv.init();
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });
     </script>
   </body>
 </html>
