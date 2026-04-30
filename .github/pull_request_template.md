@@ -47,7 +47,7 @@ Audits all changed `.ts`/`.tsx` files against the GeoView coding standards (JSDo
 2. Select the **BranchReview** agent from the agent picker (or type `@BranchReview`)
 3. Type the target branch name (defaults to `develop`):
    ```
-   @BranchReview develop
+   @BranchReview  against upstream/develop
    ```
 4. Review the violation report and fix flagged items (the agent can auto-fix most issues on approval)
 
