@@ -38,7 +38,7 @@ export const useMapResize = ({
    * Updates map height when toggling fullscreen and changing footer panel size.
    */
   useEffect(() => {
-    logger.logTraceUseEffect('USE MAP RESIZE - adjust map height for fullscren');
+    logger.logTraceUseEffect('USE MAP RESIZE - adjust map height for fullscreen');
 
     if (!mapShellContainerRef.current) {
       return;
