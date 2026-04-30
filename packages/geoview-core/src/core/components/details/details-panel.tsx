@@ -10,7 +10,6 @@ import {
   useStoreDetailsCoordinateInfoEnabled,
   useStoreDetailsHideCoordinateInfoSwitch,
   useStoreDetailsLayerDataArrayBatch,
-  useStoreDetailsQueryStatusSet,
   useStoreDetailsSelectedLayerPath,
   LAYER_PATH_COORDINATE_INFO,
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
@@ -77,7 +76,6 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   const queryableByLayerPath = useStoreLayerQueryableByPaths(visibleInRangeLayers);
   const layerNames = useStoreLayerNameSet();
   const layerStatuses = useStoreLayerStatusSet();
-  const queryStatuses = useStoreDetailsQueryStatusSet();
   const layerHiddenSet = useStoreLayerIsHiddenOnMapSet();
   const layerParentHiddenSet = useStoreLayerIsParentHiddenOnMapSet();
   const uiController = useUIController();
@@ -210,7 +208,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
         layerName: layerNames[layer!.layerPath] ?? '',
         layerPath: layer!.layerPath,
         layerStatus: layerStatuses[layer!.layerPath],
-        queryStatus: queryStatuses[layer!.layerPath],
+        queryStatus: layer?.queryStatus,
         numOffeatures: layer!.features?.length ?? 0,
         layerFeatures: getNumFeaturesLabel(layer!),
         tooltip: t('layers.selectLayer', { layerName: layerNames[layer!.layerPath] }) ?? '',
@@ -232,7 +230,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
           layerName: layerNames[layer.layerPath] ?? '',
           layerPath: layer.layerPath,
           layerStatus: layerStatuses[layer.layerPath],
-          queryStatus: queryStatuses[layer.layerPath],
+          queryStatus: layer.queryStatus,
           numOffeatures: layer.features?.length ?? 0,
           layerFeatures: getNumFeaturesLabel(layer),
           tooltip: t('layers.selectLayer', { layerName: layerNames[layer.layerPath] }) ?? '',
@@ -269,7 +267,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
         layerName: t('details.coordinateInfoTitle'),
         layerPath: coordinateInfoLayer.layerPath,
         layerStatus: layerStatuses[coordinateInfoLayer.layerPath],
-        queryStatus: queryStatuses[coordinateInfoLayer.layerPath],
+        queryStatus: coordinateInfoLayer.queryStatus,
         numOffeatures: coordinateInfoLayer.features?.length ?? 0,
         layerFeatures: getNumFeaturesLabel(coordinateInfoLayer),
         tooltip: t('layers.selectLayer', { layerName: t('details.coordinateInfoTitle') }) ?? '',
@@ -285,7 +283,6 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
     queryableByLayerPath,
     layerNames,
     layerStatuses,
-    queryStatuses,
     layerHiddenSet,
     layerParentHiddenSet,
     getNumFeaturesLabel,
