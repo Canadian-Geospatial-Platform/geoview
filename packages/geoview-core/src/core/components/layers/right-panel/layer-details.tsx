@@ -451,7 +451,13 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
   };
 
   const renderHeaderCheckbox = (): JSX.Element => {
-    const isDisabled = layerHidden || !layerCanToggle;
+    // Check if layer is ESRI Dynamic with valueExpression
+    const isEsriDynamic = layerSchemaTag === CONST_LAYER_TYPES.ESRI_DYNAMIC;
+    const hasValueExpression =
+      layerStyleConfig &&
+      Object.values(layerStyleConfig).some((styleConfig) => styleConfig && 'valueExpression' in styleConfig && styleConfig.valueExpression);
+
+    const isDisabled = layerHidden || !layerCanToggle || (isEsriDynamic && hasValueExpression);
 
     const labelContent = (
       <Box component="span" sx={{ fontWeight: 'bold', ...(layerHidden && hiddenStyle) }}>
