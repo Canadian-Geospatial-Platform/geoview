@@ -1099,7 +1099,7 @@ export const useStoreLayerLegendSchemaTag = createLayerSelectorHook('legendSchem
  * @param layerPath - The layer path to look up
  * @returns The layer legend style config, defaults to undefined
  */
-export const getStoreLayerLegendStyleConfig = (mapId: string, layerPath: string): TypeLayerStyleConfig | undefined => {
+export const getStoreLayerStyleConfig = (mapId: string, layerPath: string): TypeLayerStyleConfig | undefined => {
   return getStoreLayerLegendLayerByPath(mapId, layerPath)?.styleConfig;
 };
 

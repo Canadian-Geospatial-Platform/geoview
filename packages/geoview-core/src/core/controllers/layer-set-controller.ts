@@ -39,7 +39,7 @@ import {
   getStoreLayerLegendLayers,
   getStoreLayerLegendQueryStatus,
   getStoreLayerLegendSchemaTag,
-  getStoreLayerLegendStyleConfig,
+  getStoreLayerStyleConfig,
   getStoreLayerOrderedLayerIndexByPath,
   getStoreLayerStatus,
   setStoreLegendLayersDirectly,
@@ -369,7 +369,7 @@ export class LayerSetController extends AbstractMapViewerController {
       const legendSchemaTag = getStoreLayerLegendSchemaTag(this.getMapId(), layerConfig.layerPath);
 
       // Get the style config
-      const legendStyleConfig = getStoreLayerLegendStyleConfig(this.getMapId(), layerConfig.layerPath);
+      const legendStyleConfig = getStoreLayerStyleConfig(this.getMapId(), layerConfig.layerPath);
 
       if (layerConfig.getEntryTypeIsGroup()) {
         // Get the schema tag
