@@ -95,57 +95,53 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     // eslint-disable-next-line no-param-reassign
     sourceOptions.strategy = layerConfig.getSource().strategy === 'bbox' ? bbox : all;
 
-    // ESlint override about misused-promises, because we're using async in the loader callback instead of returning void, no worries in the end.
-    // eslint-disable-next-line no-param-reassign, @typescript-eslint/no-misused-promises
-    sourceOptions.loader = async (extent: Extent, resolution: number, projection: OLProjection, successCallback, failureCallback) => {
-      try {
-        // Clear last error if any
-        vectorSource.clearLoaderError();
+    // eslint-disable-next-line no-param-reassign
+    sourceOptions.loader = (extent: Extent, resolution: number, projection: OLProjection, successCallback, failureCallback): void => {
+      // GV Use void IIFE so the outer function stays sync and avoids @typescript-eslint/no-misused-promises
+      void (async (): Promise<void> => {
+        try {
+          // Clear last error if any
+          vectorSource.clearLoaderError();
 
-        // The read options
-        const options: ReadOptions = { dataProjection: layerConfig.getSource().dataProjection, featureProjection: projection, extent };
+          // The read options
+          const options: ReadOptions = { dataProjection: layerConfig.getSource().dataProjection, featureProjection: projection, extent };
 
-        // Grab the features to load in the source
-        const features = await this.onCreateVectorSourceLoadFeatures(layerConfig, sourceOptions, options);
+          // Grab the features to load in the source
+          const features = await this.onCreateVectorSourceLoadFeatures(layerConfig, sourceOptions, options);
 
-        // Only keep the features that fit the initial filter
-        const layerFilters = new LayerFilters(layerConfig.getLayerFilter());
-        const filterEquation = layerFilters.getFilterEquation();
-        const featuresFiltered = features.filter((feature) => GeoviewRenderer.featureRespectsFilterEquation(feature, filterEquation));
+          // Only keep the features that fit the initial filter
+          const layerFilters = new LayerFilters(layerConfig.getLayerFilter());
+          const filterEquation = layerFilters.getFilterEquation();
+          const featuresFiltered = features.filter((feature) => GeoviewRenderer.featureRespectsFilterEquation(feature, filterEquation));
 
-        // Parse the feature metadata
-        AbstractGeoViewVector.#processFeatureMetadata(featuresFiltered, layerConfig);
+          // Parse the feature metadata
+          AbstractGeoViewVector.#processFeatureMetadata(featuresFiltered, layerConfig);
 
-        // Normalize the date fields
-        AbstractGeoViewVector.#normalizeDateFields(features, layerConfig);
+          // Normalize the date fields
+          AbstractGeoViewVector.#normalizeDateFields(features, layerConfig);
 
-        // If the strategy is 'bbox'
-        if (sourceOptions.strategy === bbox) {
-          // Clear the previously fetched features or they'll get stacked up.
-          // GV Do this right before readding features so that the features flicker as less as possible on the map
-          vectorSource.clear(true);
+          // If the strategy is 'bbox'
+          if (sourceOptions.strategy === bbox) {
+            // Clear the previously fetched features or they'll get stacked up.
+            // GV Do this right before readding features so that the features flicker as less as possible on the map
+            vectorSource.clear(true);
+          }
+
+          // Add the features in the source
+          vectorSource.addFeatures(featuresFiltered);
+
+          // Call the success callback with the features. This will trigger the onLoaded callback on the layer object (though it
+          // seems not to call it everytime, OL issue? if issue persists, maybe we want to setLayerStatus to loaded here?)
+          successCallback?.(featuresFiltered);
+        } catch (error: unknown) {
+          // Set the error
+          vectorSource.setLoaderError(formatError(error));
+
+          // Call the failed callback, this will trigger the onError callback on the layer object (which will put the layerStatus to error)
+          // and this will remove the failed extent so that OpenLayers may retry loading it later.
+          failureCallback?.();
         }
-
-        // Add the features in the source
-        vectorSource.addFeatures(featuresFiltered);
-
-        // Call the success callback with the features. This will trigger the onLoaded callback on the layer object (though it
-        // seems not to call it everytime, OL issue? if issue persists, maybe we want to setLayerStatus to loaded here?)
-        successCallback?.(featuresFiltered);
-
-        // Return the features to satisfy OL 10.9 FeatureLoader return type
-        return featuresFiltered;
-      } catch (error: unknown) {
-        // Set the error
-        vectorSource.setLoaderError(formatError(error));
-
-        // Call the failed callback, this will trigger the onError callback on the layer object (which will put the layerStatus to error)
-        // and this will remove the failed extent so that OpenLayers may retry loading it later.
-        failureCallback?.();
-
-        // Return empty array to satisfy OL 10.9 FeatureLoader return type
-        return [];
-      }
+      })();
     };
 
     // Create the vector source with the source options
