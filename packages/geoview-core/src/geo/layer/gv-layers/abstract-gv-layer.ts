@@ -1923,22 +1923,26 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     inputTemporalMode: TemporalMode | undefined,
     callbackGetFieldValue: GetFieldValueDelegate
   ): number {
-    const featureFields = feature.getKeys();
     let fieldKeyCounter = fieldKeyCounterStart;
 
-    for (const fieldName of featureFields) {
-      // eslint-disable-next-line no-continue
-      if (fieldName === 'geometry') continue;
+    // If outfields exist, use that order to preserve service field order
+    if (outfields) {
+      for (const fieldEntry of outfields) {
+        // Skip geometry field
+        // eslint-disable-next-line no-continue
+        if (fieldEntry.name === 'geometry') continue;
 
-      const fieldValue = feature.get(fieldName);
-      // eslint-disable-next-line no-continue
-      if (fieldValue && typeof fieldValue === 'object' && !Array.isArray(fieldValue)) continue;
+        // Get the field value from the feature
+        const fieldValue = feature.get(fieldEntry.name);
 
-      // Find the field entry corresponding to the feature field
-      const fieldEntry = outfields?.find((outfield) => outfield.name === fieldName || outfield.alias === fieldName);
+        // Skip if field doesn't exist on the feature
+        // eslint-disable-next-line no-continue
+        if (fieldValue === undefined) continue;
 
-      // If the field entry was found
-      if (fieldEntry) {
+        // Skip if field value is an object (but allow arrays)
+        // eslint-disable-next-line no-continue
+        if (fieldValue && typeof fieldValue === 'object' && !Array.isArray(fieldValue)) continue;
+
         // Attach the fieldInfo property on the feature info entry
         // eslint-disable-next-line no-param-reassign
         featureInfoEntry.fieldInfo[fieldEntry.name] = {
@@ -1955,6 +1959,26 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
           dataType: fieldEntry.type,
           alias: fieldEntry.alias,
           domain: fieldEntry.domain,
+        };
+      }
+    } else {
+      // Fallback: if no outfields defined, use feature keys order (current behavior)
+      const featureFields = feature.getKeys();
+      for (const fieldName of featureFields) {
+        // eslint-disable-next-line no-continue
+        if (fieldName === 'geometry') continue;
+
+        const fieldValue = feature.get(fieldName);
+        // eslint-disable-next-line no-continue
+        if (fieldValue && typeof fieldValue === 'object' && !Array.isArray(fieldValue)) continue;
+
+        // Since no outfields, create a basic field entry
+        // eslint-disable-next-line no-param-reassign
+        featureInfoEntry.fieldInfo[fieldName] = {
+          fieldKey: fieldKeyCounter++,
+          value: fieldValue,
+          dataType: 'string',
+          alias: fieldName,
         };
       }
     }
