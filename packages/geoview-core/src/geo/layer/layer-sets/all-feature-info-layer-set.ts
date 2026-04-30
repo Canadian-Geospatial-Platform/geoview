@@ -5,7 +5,7 @@ import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-la
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
 import {
   deleteStoreDataTableFeatureAllInfo,
-  propagateFeatureInfoDataTableToStore,
+  setStoreDataTableQueryStatusAndFeatures,
   setStoreDataTableInitialSettings,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { RequestAbortedError } from '@/core/exceptions/core-exceptions';
@@ -66,7 +66,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
     const layerPath = layer.getLayerPath();
 
     // Propagate
-    propagateFeatureInfoDataTableToStore(this.getMapId(), layerPath, 'init', undefined);
+    setStoreDataTableQueryStatusAndFeatures(this.getMapId(), layerPath, 'init', undefined);
 
     // Extra initialization of settings
     setStoreDataTableInitialSettings(this.getMapId(), layerPath);
@@ -101,7 +101,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
     const layer = this.layerDomain.getGeoviewLayerRegular(layerPath);
 
     // Propagate
-    propagateFeatureInfoDataTableToStore(this.getMapId(), layerPath, 'processing', undefined);
+    setStoreDataTableQueryStatusAndFeatures(this.getMapId(), layerPath, 'processing', undefined);
 
     // Abort any in-flight query for this layer path
     this.#abortControllers[layerPath]?.abort();
@@ -124,7 +124,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
 
       // Only propagate to the store if this query has not been superseded by a newer one
       if (!signal.aborted && this.getRegisteredLayerPaths().includes(layerPath)) {
-        propagateFeatureInfoDataTableToStore(this.getMapId(), layerPath, 'processed', arrayOfRecords);
+        setStoreDataTableQueryStatusAndFeatures(this.getMapId(), layerPath, 'processed', arrayOfRecords);
       }
 
       // Return the result with aligned records
@@ -139,7 +139,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
         logger.logPromiseFailed('queryLayerFeatures in queryLayers in AllFeatureInfoLayerSet', error);
 
         // Propagate
-        propagateFeatureInfoDataTableToStore(this.getMapId(), layerPath, 'error', undefined);
+        setStoreDataTableQueryStatusAndFeatures(this.getMapId(), layerPath, 'error', undefined);
       }
 
       // Re-throw so the caller can handle the error
@@ -159,7 +159,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
    */
   clearLayerFeatures(layerPath: string): void {
     // Propagate
-    propagateFeatureInfoDataTableToStore(this.getMapId(), layerPath, 'init', undefined);
+    setStoreDataTableQueryStatusAndFeatures(this.getMapId(), layerPath, 'init', undefined);
   }
 
   // #endregion PUBLIC METHODS

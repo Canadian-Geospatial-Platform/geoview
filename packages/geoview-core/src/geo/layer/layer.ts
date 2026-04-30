@@ -137,6 +137,7 @@ export class LayerApi {
 
     // Keep a reference on the layer sets
     // GV These assignations references of the layer sets are for legacy support. They could be removed eventually.
+    // TODO: CLEANUP LEGACY - Remove the legacy support for this?
     this.legendsLayerSet = controllerRegistry.layerSetController.legendsLayerSet;
     this.hoverFeatureInfoLayerSet = controllerRegistry.layerSetController.hoverFeatureInfoLayerSet;
     this.allFeatureInfoLayerSet = controllerRegistry.layerSetController.allFeatureInfoLayerSet;
@@ -144,6 +145,7 @@ export class LayerApi {
 
     // Keep a reference on the geometry api and feature highlight
     // GV These assignations references of the layer sets are for legacy support. They could be removed eventually.
+    // TODO: CLEANUP LEGACY - Remove the legacy support for this?
     this.geometry = geometryApi;
     this.featureHighlight = featureHighlight;
 

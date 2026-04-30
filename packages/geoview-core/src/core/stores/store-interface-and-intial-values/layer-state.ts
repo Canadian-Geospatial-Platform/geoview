@@ -1812,7 +1812,7 @@ export const setStoreLayerItemVisibility = (
  *
  * @param mapId - The map identifier
  * @param layerPath - The layer path to update
- * @param opacity - The opacity value (0â€“1)
+ * @param opacity - The opacity value (0 - 1)
  */
 export const setStoreLayerOpacity = (mapId: string, layerPath: string, opacity: number): void => {
   getStoreLayerState(mapId).actions.updateLayerByPath(layerPath, (layer) => ({

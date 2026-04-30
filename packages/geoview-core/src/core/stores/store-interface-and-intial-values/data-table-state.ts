@@ -430,10 +430,11 @@ export const useStoreDataTableAllFeaturesDataArray = (): TypeAllFeatureInfoResul
   useStore(useGeoViewStore(), (state) => state.dataTableState.allFeaturesDataArray);
 
 /**
- * Gets the aggregated feature info array for all layers in the data table.
+ * Gets the aggregated query status for the given layer path.
  *
  * @param mapId - The map identifier
- * @returns The array of feature info result set entries
+ * @param layerPath - The layer path to get the query status for
+ * @returns The query status for the layer, or undefined if the layer is not found
  */
 export const getStoreDataTableQueryStatus = (mapId: string, layerPath: string): TypeQueryStatus | undefined => {
   return findLayerDataFromLayerDataArray(layerPath, getStoreDataTableState(mapId)?.allFeaturesDataArray)?.queryStatus;
@@ -663,7 +664,7 @@ export const addOrUpdateStoreDataTableFilter = (mapId: string, layerPath: string
  * @param queryStatus - The current query status
  * @param features - Optional array of feature info entries for the layer
  */
-export const propagateFeatureInfoDataTableToStore = (
+export const setStoreDataTableQueryStatusAndFeatures = (
   mapId: string,
   layerPath: string,
   queryStatus: TypeQueryStatus,
