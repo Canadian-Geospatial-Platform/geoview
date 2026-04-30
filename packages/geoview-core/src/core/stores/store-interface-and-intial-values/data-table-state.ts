@@ -452,6 +452,17 @@ export const useStoreDataTableQueryStatus = (layerPath: string): TypeQueryStatus
   );
 };
 
+/** Hook that returns the per-layer query status record. */
+export const useStoreDataTableQueryStatusSet = (): Record<string, TypeQueryStatus> => {
+  return useStableSelector(useGeoViewStore(), (state) => {
+    const statusRecord: Record<string, TypeQueryStatus> = {};
+    state.dataTableState.allFeaturesDataArray.forEach((layer) => {
+      statusRecord[layer.layerPath] = layer.queryStatus;
+    });
+    return statusRecord;
+  });
+};
+
 // #endregion STATE GETTERS & HOOKS
 
 // #region STATE GETTERS & HOOKS - OTHERS (no match between getter-hook)

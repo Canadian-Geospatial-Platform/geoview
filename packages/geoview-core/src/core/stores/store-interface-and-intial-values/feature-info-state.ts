@@ -1,6 +1,6 @@
 ﻿import { useStore } from 'zustand';
 
-import type { TypeSetStore, TypeGetStore, GeoviewStoreType } from '@/core/stores/geoview-store';
+import { type TypeSetStore, type TypeGetStore, type GeoviewStoreType, useStableSelector } from '@/core/stores/geoview-store';
 import {
   getGeoViewStore,
   helperDeleteFromArray,
@@ -141,6 +141,17 @@ export const getStoreDetailsQueryStatus = (mapId: string, layerPath: string): Ty
 /** Hook that returns the selected layer path in the details panel. */
 export const useStoreDetailsQueryStatus = (layerPath: string): TypeQueryStatus | undefined => {
   return useStore(useGeoViewStore(), (state) => findLayerDataFromLayerDataArray(layerPath, state.detailsState.layerDataArray)?.queryStatus);
+};
+
+/** Hook that returns the per-layer query status record. */
+export const useStoreDetailsQueryStatusSet = (): Record<string, TypeQueryStatus> => {
+  return useStableSelector(useGeoViewStore(), (state) => {
+    const statusRecord: Record<string, TypeQueryStatus> = {};
+    state.detailsState.layerDataArray.forEach((layer) => {
+      statusRecord[layer.layerPath] = layer.queryStatus;
+    });
+    return statusRecord;
+  });
 };
 
 /**

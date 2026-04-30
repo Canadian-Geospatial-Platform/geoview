@@ -10,8 +10,7 @@ import { getSxClasses } from './layer-list-style';
 import { LayerIcon } from './layer-icon';
 import { useStoreLayerStatus } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { logger } from '@/core/utils/logger';
-import { LAYER_PATH_COORDINATE_INFO, useStoreDetailsQueryStatus } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
-import { useStoreDataTableQueryStatus } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { LAYER_PATH_COORDINATE_INFO } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 
 /** Represents an entry in the layer list. */
 export interface LayerListEntry {
@@ -91,8 +90,7 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
   // TODO: REFACTOR - The whole 'layer' parameter received in the component parameters list should be reviewed and turned obsolete.
   // TO.DOCONT: It should all be using store selector hooks instead. Fallback to layer query status if details query status is not available for now.
   const layerStatus = useStoreLayerStatus(layer.layerPath) ?? layer.layerStatus;
-  const layerQueryStatus = useStoreDetailsQueryStatus(layer.layerPath) ?? layer.queryStatus;
-  const dataQueryStatus = useStoreDataTableQueryStatus(layer.layerPath) ?? layer.queryStatus;
+  const layerQueryStatus = layer.queryStatus;
 
   // Style
   const containerClass = [
@@ -106,7 +104,7 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
     .trim();
 
   // Constant for state
-  const isLoading = layerQueryStatus === 'processing' || dataQueryStatus === 'processing' || layerStatus === 'loading' || layerStatus === 'processing';
+  const isLoading = layerQueryStatus === 'processing' || layerStatus === 'loading' || layerStatus === 'processing';
   const isLayerCoordinateInfo = layer.layerPath === LAYER_PATH_COORDINATE_INFO;
 
   // Default disabled state
@@ -123,7 +121,7 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
     if (layerStatus === 'error' || layerQueryStatus === 'error') {
       return `${t('legend.layerError')}`;
     }
-    if (['processing'].includes(layerQueryStatus)) {
+    if (layerQueryStatus === 'processing') {
       return `${t('layers.querying')}...`;
     }
     return (

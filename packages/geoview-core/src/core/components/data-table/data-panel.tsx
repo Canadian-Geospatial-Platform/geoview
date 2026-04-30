@@ -18,6 +18,7 @@ import {
   useStoreLayerNameSet,
   useStoreLayerStatusSet,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useStoreDataTableQueryStatusSet } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import {
   useStoreUIActiveAppBarTab,
   useStoreUIActiveFooterBarTab,
@@ -72,6 +73,7 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
   const showUnsymbolizedFeatures = useStoreAppShowUnsymbolizedFeatures();
   const layerNames = useStoreLayerNameSet();
   const layerStatuses = useStoreLayerStatusSet();
+  const queryStatuses = useStoreDataTableQueryStatusSet();
   const layerHiddenSet = useStoreLayerIsHiddenOnMapSet();
 
   // Create columns for data table.
@@ -124,7 +126,7 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
    */
   const handleLayerChange = useCallback(
     (_layer: LayerListEntry): void => {
-      dataTableController.setSelectedLayerPath(_layer.layerPath); // This will trigger the useEffect below to call tiggerGetAllFeatureInfo()
+      dataTableController.setSelectedLayerPath(_layer.layerPath); // This will trigger the useEffect below to call triggerGetAllFeatureInfo()
       setIsLoading(true);
     },
     [dataTableController]
@@ -357,6 +359,7 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
       ...layer,
       layerName: layerNames[layer.layerPath],
       layerStatus: layerStatuses[layer.layerPath],
+      queryStatus: queryStatuses[layer.layerPath],
       layerUniqueId: `${mapId}-${containerType}-${TABS.DATA_TABLE}-${layer.layerPath}`,
       layerFeatures: getFeaturesOfLayer(layer.layerPath),
       tooltip: getLayerTooltip(layerNames[layer.layerPath] ?? '', layer.layerPath),
@@ -371,6 +374,7 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
     isMapFilteredSelectedForLayer,
     layerNames,
     layerStatuses,
+    queryStatuses,
     mapId,
     memoOrderedLayerData,
     theme.palette.geoViewColor.grey.main,
