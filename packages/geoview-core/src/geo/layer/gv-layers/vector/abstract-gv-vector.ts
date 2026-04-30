@@ -163,7 +163,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    */
   override getLayerConfig(): VectorLayerEntryConfig {
     // Call parent and cast
-    return super.getLayerConfig() as VectorLayerEntryConfig;
+    return super.getLayerConfig();
   }
 
   /**

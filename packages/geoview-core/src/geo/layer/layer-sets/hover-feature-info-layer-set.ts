@@ -131,9 +131,9 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
       // Get the array of records in the results
       const arrayOfRecords = promiseResult.results;
       if (arrayOfRecords.length) {
-        // Here we're explicitely typing it as string | undefined, because the object fieldInfo could be empty and have no first property
-        // and without '"noUncheckedIndexedAccess": true' in the tsconfig, this is allowed.. this explicit way is safer so that 'nameField' is typed 'string | undefined'
-        const nameField = arrayOfRecords[0].nameField ?? (Object.keys(arrayOfRecords[0].fieldInfo)[0] as string | undefined);
+        // Here it's possible that nameField actually be undefined, because the object fieldInfo could be empty and have no first property
+        // and without '"noUncheckedIndexedAccess": true' in the tsconfig, this is allowed. The code below checks for that.
+        const nameField = arrayOfRecords[0].nameField ?? Object.keys(arrayOfRecords[0].fieldInfo)[0];
         const fieldInfo = nameField ? arrayOfRecords[0].fieldInfo[nameField] : undefined;
 
         // eslint-disable-next-line no-param-reassign
