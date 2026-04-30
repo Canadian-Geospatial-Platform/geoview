@@ -1195,6 +1195,9 @@ export class WMS extends AbstractGeoViewRaster {
         // Override the outfields of the WMS to leverage possibilities working with a WMS layer, like knowing the field types when performing WMS queries
         layerConfig.setOutfields(outFields);
 
+        // Initialize the name field to the first field if not already set
+        layerConfig.initNameField(outFields?.[0]?.name);
+
         // If no layer style defined
         if (!layerConfig.getLayerStyle()) {
           // If the service metadata offers GetStyles
