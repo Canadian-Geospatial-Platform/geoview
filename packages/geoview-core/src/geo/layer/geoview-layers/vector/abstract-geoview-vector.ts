@@ -132,6 +132,9 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         // Call the success callback with the features. This will trigger the onLoaded callback on the layer object (though it
         // seems not to call it everytime, OL issue? if issue persists, maybe we want to setLayerStatus to loaded here?)
         successCallback?.(featuresFiltered);
+
+        // Return the features to satisfy OL 10.9 FeatureLoader return type
+        return featuresFiltered;
       } catch (error: unknown) {
         // Set the error
         vectorSource.setLoaderError(formatError(error));
@@ -139,6 +142,9 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         // Call the failed callback, this will trigger the onError callback on the layer object (which will put the layerStatus to error)
         // and this will remove the failed extent so that OpenLayers may retry loading it later.
         failureCallback?.();
+
+        // Return empty array to satisfy OL 10.9 FeatureLoader return type
+        return [];
       }
     };
 
