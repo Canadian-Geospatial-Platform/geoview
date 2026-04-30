@@ -357,7 +357,8 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     await this.waitLoadedStatus();
 
     // Get the layer bounds
-    let sourceExtent = this.getOLSource()?.getExtent() ?? undefined;
+    // ?? undefined to coerce null → undefined because OL 10.9 changed getExtent() to return Extent | null
+    let sourceExtent = this.getOLSource().getExtent() ?? undefined;
 
     // If both found
     if (sourceExtent) {
