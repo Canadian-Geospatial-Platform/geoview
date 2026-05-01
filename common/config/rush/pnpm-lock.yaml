@@ -155,8 +155,8 @@ importers:
         specifier: 0.2.1
         version: 0.2.1
       geotiff:
-        specifier: ^2.1.3
-        version: 2.1.3
+        specifier: ^3.0.5
+        version: 3.0.5
       html-react-parser:
         specifier: ^5.1.18
         version: 5.2.17(@types/react@18.3.28)(react@18.3.1)
@@ -4535,20 +4535,6 @@ packages:
     engines: {node: '>= 0.4'}
     dev: true
 
-  /geotiff@2.1.3:
-    resolution: {integrity: sha512-PT6uoF5a1+kbC3tHmZSUsLHBp2QJlHasxxxxPW47QIY1VBKpFB+FcDvX+MxER6UzgLQZ0xDzJ9s48B9JbOCTqA==}
-    engines: {node: '>=10.19'}
-    dependencies:
-      '@petamoriken/float16': 3.9.3
-      lerc: 3.0.0
-      pako: 2.1.0
-      parse-headers: 2.0.6
-      quick-lru: 6.1.2
-      web-worker: 1.5.0
-      xml-utils: 1.10.2
-      zstddec: 0.1.0
-    dev: false
-
   /geotiff@3.0.5:
     resolution: {integrity: sha512-OWcL9S9+yDZ6iAlXMt32T1iwUApJM8UiD47xbm6ZP1h33d10fqkPs14EG/ttT5EnefpZSx3G15iDFC5FxUNUwA==}
     engines: {node: '>=10.19'}
@@ -8032,10 +8018,6 @@ packages:
     dependencies:
       '@zarrita/storage': 0.2.0
       numcodecs: 0.3.2
-    dev: false
-
-  /zstddec@0.1.0:
-    resolution: {integrity: sha512-w2NTI8+3l3eeltKAdK8QpiLo/flRAr2p8AGeakfMZOXBxOg9HIu4LVDxBi81sYgVhFhdJjv1OrB5ssI8uFPoLg==}
     dev: false
 
   /zstddec@0.2.0:
