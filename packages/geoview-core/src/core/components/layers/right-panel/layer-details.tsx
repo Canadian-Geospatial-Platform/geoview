@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -75,6 +75,7 @@ import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { DeleteUndoButton } from '@/core/components/layers/delete-undo-button';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { useLayerController, useLayerSetController } from '@/core/controllers/use-controllers';
+import type { TypeLayerStyleSettings } from '@/api/types/map-schema-types';
 
 interface LayerDetailsProps {
   /** The layer path for the layer to display. */
@@ -234,6 +235,38 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
 
   // Generate unique table details button ID
   const tableDetailsButtonId = `${mapId}-${containerType}-table-details`;
+
+  // Layer is ESRI Dynamic
+  const isEsriDynamic = layerSchemaTag === CONST_LAYER_TYPES.ESRI_DYNAMIC;
+
+  // Layer has a value expression in its style config
+  const hasValueExpression = useMemo((): boolean => {
+    // Log
+    logger.logTraceUseMemo('LAYER DETAILS - hasValueExpression', layerStyleConfig);
+
+    return layerStyleConfig
+      ? Object.values(layerStyleConfig).some(
+          (styleConfig) => styleConfig && 'valueExpression' in styleConfig && styleConfig.valueExpression
+        )
+      : false;
+  }, [layerStyleConfig]);
+
+  /**
+   * Determines if a style configuration allows item visibility toggling.
+   *
+   * Simple styles cannot be toggled. UniqueValue/classBreaks styles
+   * require multiple non-default classes to enable toggling.
+   */
+  const canToggleStyleItems = (styleConfig: TypeLayerStyleSettings | undefined): boolean => {
+    if (!styleConfig || styleConfig.type === 'simple') return false;
+
+    if (styleConfig.type === 'uniqueValue' || styleConfig.type === 'classBreaks') {
+      const nonDefaultCount = styleConfig.hasDefault ? styleConfig.info.length - 1 : styleConfig.info.length;
+      return nonDefaultCount > 1;
+    }
+
+    return true;
+  };
 
   /**
    * Resets active view to details when layer changes.
@@ -414,10 +447,11 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
   const renderItemCheckbox = (item: TypeLegendItem): JSX.Element | null => {
     if (!layerStyleConfig) return null;
 
-    // No checkbox for simple style layers
-    if (layerStyleConfig[item.geometryType]?.type === 'simple') return null;
+    // Determine if style type allows toggling this item on/off
+    const styleConfig = layerStyleConfig[item.geometryType];
+    const canToggle = canToggleStyleItems(styleConfig);
 
-    const isDisabled = layerHidden || !layerCanToggle;
+    const isDisabled = layerHidden || !layerCanToggle || (isEsriDynamic && !!hasValueExpression);
 
     // Build the label content with icon and text
     const labelContent = (
@@ -428,6 +462,11 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
         </Box>
       </Box>
     );
+
+    // If not checkbox needed, just return the label content
+    if (!canToggle) {
+      return <Box sx={{ ...sxClasses.formControlLabelFull, paddingLeft: '9px' }}>{labelContent}</Box>;
+    }
 
     return (
       <FormControlLabel
@@ -446,7 +485,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
   };
 
   const renderHeaderCheckbox = (): JSX.Element => {
-    const isDisabled = layerHidden || !layerCanToggle;
+    const isDisabled = layerHidden || !layerCanToggle || (isEsriDynamic && hasValueExpression);
 
     const labelContent = (
       <Box component="span" sx={{ fontWeight: 'bold', ...(layerHidden && hiddenStyle) }}>
@@ -482,7 +521,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
         justifyItems="stretch"
       >
         {layerItems?.map((item) => (
-          <Grid key={`${layerPath}/${item.name}`} sx={{ marginBottom: '5px' }}>
+          <Grid key={`${layerPath}/${item.geometryType}/${item.name}/${item.icon || 'no-icon'}`} sx={{ marginBottom: '5px' }}>
             {renderItemCheckbox(item)}
           </Grid>
         ))}

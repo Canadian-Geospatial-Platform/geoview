@@ -1966,40 +1966,48 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     inputTemporalMode: TemporalMode | undefined,
     callbackGetFieldValue: GetFieldValueDelegate
   ): number {
-    const featureFields = feature.getKeys();
     let fieldKeyCounter = fieldKeyCounterStart;
 
-    for (const fieldName of featureFields) {
-      // eslint-disable-next-line no-continue
-      if (fieldName === 'geometry') continue;
+    // Build field entries: use outfields if available, otherwise create minimal entries from feature keys
+    // GV Note: We assume that if outfields are not provided, all fields are of type string and have no domain.
+    // GV This is a fallback and may not be accurate, but without outfield metadata we have no way to know the correct types or domains.
+    // GV And the alternative would be to skip and show no fields
+    const fieldEntries: Array<{
+      name: string;
+      type: TypeOutfieldsType;
+      alias: string;
+      domain?: codedValueType | rangeDomainType;
+    }> = outfields ?? feature.getKeys().map((name) => ({ name, type: 'string', alias: name }));
 
-      const fieldValue = feature.get(fieldName);
+    for (const fieldEntry of fieldEntries) {
+      // Skip geometry field
+      // eslint-disable-next-line no-continue
+      if (fieldEntry.name === 'geometry') continue;
+
+      // Get the field value from the feature
+      const fieldValue = feature.get(fieldEntry.name);
+
+      // Skip nested objects (but allow arrays)
       // eslint-disable-next-line no-continue
       if (fieldValue && typeof fieldValue === 'object' && !Array.isArray(fieldValue)) continue;
 
-      // Find the field entry corresponding to the feature field
-      const fieldEntry = outfields?.find((outfield) => outfield.name === fieldName || outfield.alias === fieldName);
-
-      // If the field entry was found
-      if (fieldEntry) {
-        // Attach the fieldInfo property on the feature info entry
-        // eslint-disable-next-line no-param-reassign
-        featureInfoEntry.fieldInfo[fieldEntry.name] = {
-          fieldKey: fieldKeyCounter++,
-          value: callbackGetFieldValue(
-            feature,
-            fieldEntry.name,
-            fieldEntry.type,
-            fieldEntry.domain,
-            inputFormat,
-            inputTimezone,
-            inputTemporalMode
-          ),
-          dataType: fieldEntry.type,
-          alias: fieldEntry.alias,
-          domain: fieldEntry.domain,
-        };
-      }
+      // Attach the fieldInfo property on the feature info entry
+      // eslint-disable-next-line no-param-reassign
+      featureInfoEntry.fieldInfo[fieldEntry.name] = {
+        fieldKey: fieldKeyCounter++,
+        value: callbackGetFieldValue(
+          feature,
+          fieldEntry.name,
+          fieldEntry.type,
+          fieldEntry.domain,
+          inputFormat,
+          inputTimezone,
+          inputTemporalMode
+        ),
+        dataType: fieldEntry.type,
+        alias: fieldEntry.alias,
+        domain: fieldEntry.domain,
+      };
     }
 
     // Return the counter

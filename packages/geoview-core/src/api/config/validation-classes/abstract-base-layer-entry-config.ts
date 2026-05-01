@@ -212,7 +212,20 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    * @param layerStyleMetadata - Optional layer style metadata to use to help fill the blanks in our layer style config
    */
   initLayerStyleFromMetadata(layerStyleMetadata: TypeLayerStyleConfig | undefined): void {
-    this.#layerStyle = deepMerge(layerStyleMetadata, this.#layerStyle);
+    // If no metadata, nothing to do
+    if (!layerStyleMetadata) return;
+
+    const normalizedMetadata: TypeLayerStyleConfig = {};
+
+    // Normalize Multi* geometry types to their simplified forms
+    Object.entries(layerStyleMetadata).forEach(([geometryType, styleConfig]) => {
+      // Convert MultiPolygon → Polygon, MultiPoint → Point, MultiLineString → LineString
+      const simplifiedType = geometryType.startsWith('Multi') ? geometryType.slice(5) : geometryType;
+
+      normalizedMetadata[simplifiedType as TypeStyleGeometry] = styleConfig;
+    });
+
+    this.#layerStyle = deepMerge(normalizedMetadata, this.#layerStyle);
   }
 
   /**

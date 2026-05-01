@@ -34,6 +34,7 @@ import {
 } from '@/core/exceptions/layer-entry-config-exceptions';
 import { deepMergeObjects, generateId, normalizeDatacubeAccessPath } from '@/core/utils/utilities';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { WfsRenderer } from '@/geo/utils/renderer/wfs-renderer';
@@ -1194,6 +1195,20 @@ export class WMS extends AbstractGeoViewRaster {
 
         // Override the outfields of the WMS to leverage possibilities working with a WMS layer, like knowing the field types when performing WMS queries
         layerConfig.setOutfields(outFields);
+
+        // Validate and sync the nameField from WFS to WMS
+        const nameField = layerConfig.getNameField();
+        const nameFieldIsValid = nameField && outFields.some((field) => field.name === nameField);
+
+        if (!nameFieldIsValid) {
+          // WFS nameField is invalid or missing - warn and default to first field
+          if (nameField) {
+            logger.logWarning(
+              `The WFS-derived nameField '${nameField}' for WMS layer ${layerConfig.layerPath} does not exist in the outfields. Using best available field.`
+            );
+          }
+          layerConfig.setNameField(AbstractGeoViewVector.findBestNameField(outFields));
+        }
 
         // If no layer style defined
         if (!layerConfig.getLayerStyle()) {

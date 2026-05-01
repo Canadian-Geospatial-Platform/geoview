@@ -193,7 +193,12 @@
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "DMF"
+            "layerId": "DMF",
+            "source": {
+              "featureInfo": {
+                "nameField": "label_en"
+              }
+            }
           }
         ]
       },
