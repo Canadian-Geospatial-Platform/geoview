@@ -96,7 +96,7 @@ export function Map(props: MapProps): JSX.Element {
       )}
       {layersAreLoading && (
         <Box sx={{ ...sxClasses.progressBar, bottom: mapInteraction === 'static' ? 0 : 40 }}>
-          <ProgressBar aria-label={t('error.map.loadingLayers')!} />
+          <ProgressBar aria-label={t('error.map.loadingLayers')} />
         </Box>
       )}
     </Box>

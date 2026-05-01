@@ -617,9 +617,9 @@ export async function extractGeotiffColorMap(url: string): Promise<RGBA[] | unde
 
   // ColorMap is a flat Uint16Array of 3 × N entries laid out as [R0…R(N-1), G0…G(N-1), B0…B(N-1)].
   // Values are 16-bit (0–65535) and must be scaled to 8-bit (0–255) by dividing by 256.
-  const colorMap = fileDirectory.ColorMap as Uint16Array | undefined;
+  const colorMap = (await fileDirectory.loadValue('ColorMap')) as Uint16Array | undefined;
 
-  if (!colorMap) {
+  if (!colorMap || colorMap.length % 3 !== 0) {
     return undefined; // no embedded palette
   }
 

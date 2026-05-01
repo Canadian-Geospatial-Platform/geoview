@@ -264,7 +264,7 @@ export const LayerList = memo(function LayerList({ layerList, selectedLayerPath,
               layerStatus: 'processed',
               queryStatus: 'processed',
               numOffeatures: 0, // Just so it's disabled..
-            } as LayerListEntry
+            }
           }
           onListItemClick={onListItemClick}
         />

@@ -708,7 +708,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
     muiSearchTextFieldProps: {
       inputProps: {
         type: 'search',
-        'aria-label': t('dataTable.searchInputLabel')!,
+        'aria-label': t('dataTable.searchInputLabel'),
       },
     },
     // Improve table accessibility

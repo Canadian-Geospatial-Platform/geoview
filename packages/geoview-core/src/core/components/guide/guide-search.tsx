@@ -445,9 +445,9 @@ export function GuideSearch({ containerType, guide, onSectionChange, onSearchSta
 
     if (searchTerm.trim().length >= 3) {
       if (allMatches.length === 0) {
-        setSrAnnouncement(t('guide.noResults')!);
+        setSrAnnouncement(t('guide.noResults'));
       } else if (allMatches.length === 1) {
-        setSrAnnouncement(t('guide.oneResult')!);
+        setSrAnnouncement(t('guide.oneResult'));
       } else {
         setSrAnnouncement(t('guide.multipleResults', { count: allMatches.length })!);
       }
@@ -561,18 +561,18 @@ export function GuideSearch({ containerType, guide, onSectionChange, onSearchSta
       <Box role="status" aria-live="polite" aria-atomic="true" sx={memoSxClasses.visuallyHidden}>
         {srAnnouncement}
       </Box>
-      <form onSubmit={handleFormSubmit} role="search" aria-label={t('guide.searchFormLabel')!}>
+      <form onSubmit={handleFormSubmit} role="search" aria-label={t('guide.searchFormLabel')}>
         <TextField
           inputRef={searchInputRef}
           fullWidth
           size="small"
-          placeholder={t('guide.search')!}
+          placeholder={t('guide.search')}
           value={searchTerm}
           onChange={handleSearchTermChange}
           onKeyDown={handleKeyDown}
           slotProps={{
             htmlInput: {
-              'aria-label': t('guide.searchInputLabel')!,
+              'aria-label': t('guide.searchInputLabel'),
               'aria-describedby': searchInstructionsId,
             },
             input: {

@@ -38,7 +38,7 @@ export function GeolocatorBar({ searchValue, onChange, onSearch, onReset, isLoad
       <Toolbar variant="dense">
         <form
           role="search"
-          aria-label={t('geolocator.searchFormLabel')!}
+          aria-label={t('geolocator.searchFormLabel')}
           onSubmit={(e) => {
             e.preventDefault();
             if (!isLoading) onSearch();
@@ -52,9 +52,9 @@ export function GeolocatorBar({ searchValue, onChange, onSearch, onReset, isLoad
               </InputAdornment>
             }
             inputProps={{
-              'aria-label': t('geolocator.searchInputLabel')!,
+              'aria-label': t('geolocator.searchInputLabel'),
             }}
-            placeholder={t('geolocator.search')!}
+            placeholder={t('geolocator.search')}
             onChange={onChange}
             value={searchValue}
             inputRef={inputRef}

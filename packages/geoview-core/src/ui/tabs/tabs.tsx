@@ -361,7 +361,7 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
               allowScrollButtonsMobile
               value={validSelectedTab !== undefined ? Math.max(0, validSelectedTab) : false}
               onChange={handleChange}
-              aria-label={t('footerBar.tabsLabel')!}
+              aria-label={t('footerBar.tabsLabel')}
               ScrollButtonComponent={CustomScrollButton}
               {...tabsProps}
             >
