@@ -110,7 +110,7 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
         </Box>
       </Fade>
       <Box sx={sxClasses.crosshairInfo}>
-        <Typography dangerouslySetInnerHTML={{ __html: t('mapctrl.crosshair')! }} />
+        <Typography dangerouslySetInnerHTML={{ __html: t('mapctrl.crosshair') }} />
       </Box>
     </Box>
   );

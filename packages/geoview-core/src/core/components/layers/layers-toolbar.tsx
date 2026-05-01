@@ -117,7 +117,7 @@ export function LayersToolbar({ containerType }: TypeLayersToolbar): JSX.Element
         makeResponsive
         type="text"
         size="small"
-        tooltip={t('legend.addLayer')!}
+        tooltip={t('legend.addLayer')}
         variant={displayState === 'add' ? 'contained' : 'outlined'}
         startIcon={<AddCircleOutlineIcon sx={{ fontSize: theme.palette.geoViewFontSize.sm }} />}
         onClick={() => handleSetDisplayState('add')}

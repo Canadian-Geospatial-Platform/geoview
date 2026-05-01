@@ -3,3 +3,6 @@ interface ErrorConstructor {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   captureStackTrace?(targetObject: object, constructorOpt?: Function): void;
 }
+
+// CSS module declarations for side-effect imports
+declare module '*.css';

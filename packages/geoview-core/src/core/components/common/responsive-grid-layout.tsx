@@ -415,7 +415,7 @@ const ResponsiveGridLayout = forwardRef(
           startIcon={isEnlarged ? <ArrowForwardIcon /> : <ArrowBackIcon />}
           sx={{ boxShadow: 'none' }}
           onClick={handleEnlargeToggle}
-          tooltip={isEnlarged ? t('dataTable.reduceBtn')! : t('dataTable.enlargeBtn')!}
+          tooltip={isEnlarged ? t('dataTable.reduceBtn') : t('dataTable.enlargeBtn')}
         >
           {isEnlarged ? t('dataTable.reduceBtn') : t('dataTable.enlargeBtn')}
         </Button>
@@ -453,8 +453,8 @@ const ResponsiveGridLayout = forwardRef(
           color="primary"
           startIcon={<CloseIcon sx={{ fontSize: theme.palette.geoViewFontSize.sm }} />}
           onClick={handleClosePanel}
-          tooltip={t('general.closeSelection')!}
-          aria-label={t('general.closeSelection')!}
+          tooltip={t('general.closeSelection')}
+          aria-label={t('general.closeSelection')}
         >
           {t('general.close')}
         </Button>
@@ -481,7 +481,7 @@ const ResponsiveGridLayout = forwardRef(
           className={`guideButton ${isGuideOpen ? 'active' : ''}`}
           disabled={isDisabled}
           aria-pressed={!isDisabled ? isGuideOpen : undefined}
-          tooltip={t('guide.toggleGuide')!}
+          tooltip={t('guide.toggleGuide')}
         >
           {t('general.guide')}
         </Button>
@@ -502,7 +502,7 @@ const ResponsiveGridLayout = forwardRef(
           variant="outlined"
           size="small"
           onClick={handleToggleFullScreen}
-          tooltip={isFullScreen ? t('general.closeFullscreen')! : t('general.openFullscreen')!}
+          tooltip={isFullScreen ? t('general.closeFullscreen') : t('general.openFullscreen')}
           aria-label={
             isGuideOpen
               ? t('general.fullScreenAriaLabel', { title: t('guide.title') })!
@@ -628,7 +628,7 @@ const ResponsiveGridLayout = forwardRef(
             onKeyDown={handlePanelKeyDown}
           >
             <Box sx={memoSxClasses.rightButtonsContainer} className="guide-button-container">
-              <ButtonGroup size="small" variant="outlined" aria-label={t('details.guideControls')!} className="guide-button-group">
+              <ButtonGroup size="small" variant="outlined" aria-label={t('details.guideControls')} className="guide-button-group">
                 {!toggleMode && !hideEnlargeBtn && renderEnlargeButton()}
                 {!!guideContentIds?.length && renderGuideButton()}
                 {!isMapFullScreen && renderFullScreenButton()}

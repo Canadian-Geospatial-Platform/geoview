@@ -70,9 +70,9 @@ const WMSLegendImage = memo(
           sx={sxClasses.imageButton}
           id={buttonId}
           onClick={() => initLightBox(imgSrc, altText, buttonId, 0)}
-          tooltip={t('general.enlargeImage')!}
+          tooltip={t('general.enlargeImage')}
           tooltipPlacement="top"
-          aria-label={title ? t('general.enlargeImageName', { title })! : t('general.enlargeImage')!} // WCAG - Descriptive aria-label for screen readers
+          aria-label={title ? t('general.enlargeImageName', { title })! : t('general.enlargeImage')} // WCAG - Descriptive aria-label for screen readers
           disableRipple
         >
           <Box component="img" src={imgSrc} alt={altText} sx={sxClasses.wmsImage} />

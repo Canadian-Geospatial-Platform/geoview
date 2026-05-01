@@ -201,7 +201,7 @@ function FileUploadSection({
           style={{ display: 'none' }}
           onChange={handleChange}
           accept={VALID_FILE_EXTENSIONS_ACCEPT}
-          aria-label={t('layers.fileTypes')!} // WCAG - Provides an accessible label for the hidden file input control
+          aria-label={t('layers.fileTypes')} // WCAG - Provides an accessible label for the hidden file input control
         />
       </Box>
       <Button
@@ -216,8 +216,8 @@ function FileUploadSection({
           }
         }}
         className="buttonOutlineFilled"
-        aria-label={t('layers.fileTypes')!}
-        tooltip={t('layers.fileTypes')!}
+        aria-label={t('layers.fileTypes')}
+        tooltip={t('layers.fileTypes')}
       >
         <FileUploadIcon />
         <Box component="span">{t('layers.upload')}</Box>

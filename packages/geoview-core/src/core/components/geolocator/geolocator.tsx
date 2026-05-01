@@ -229,7 +229,7 @@ export function Geolocator(): JSX.Element {
 
         {isLoading && (
           <Box sx={memoSxClasses.progressBar}>
-            <ProgressBar aria-label={t('geolocator.loadingResults')!} />
+            <ProgressBar aria-label={t('geolocator.loadingResults')} />
           </Box>
         )}
 

@@ -5,7 +5,7 @@
     "strict": true,
     "importHelpers": true,
     "moduleResolution": "node",
-    "experimentalDecorators": true,
+    "ignoreDeprecations": "6.0",
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
     "strictPropertyInitialization": true,

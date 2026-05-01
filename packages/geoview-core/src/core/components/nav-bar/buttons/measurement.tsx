@@ -402,7 +402,7 @@ export default function Measurement(): JSX.Element {
             value={activeMeasurement}
             exclusive
             onChange={handleTypeChange}
-            aria-label={t('measurement.title')!}
+            aria-label={t('measurement.title')}
             fullWidth
             size="small"
             disabled={!isMeasurementActive}
@@ -416,11 +416,11 @@ export default function Measurement(): JSX.Element {
               },
             }}
           >
-            <ToggleButton value="line" aria-label={t('measurement.line')!}>
+            <ToggleButton value="line" aria-label={t('measurement.line')}>
               <ShowChartIcon fontSize="small" />
               {t('measurement.line')}
             </ToggleButton>
-            <ToggleButton value="area" aria-label={t('measurement.area')!}>
+            <ToggleButton value="area" aria-label={t('measurement.area')}>
               <HexagonOutlinedIcon fontSize="small" />
               {t('measurement.area')}
             </ToggleButton>

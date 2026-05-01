@@ -128,7 +128,7 @@ export const FeatureItem = memo(function FeatureItem({
         sx={sxClasses.imageButton}
         id={buttonElementId}
         onClick={() => onInitLightBox(featureInfoItem.value as string, '', buttonElementId, index)}
-        tooltip={t('general.enlargeImage')!} // Tooltip for visual users to indicate the image can be enlarged
+        tooltip={t('general.enlargeImage')} // Tooltip for visual users to indicate the image can be enlarged
         tooltipPlacement="top"
         aria-label={t('general.enlargeImageName', { title: index === 0 ? alias : `${alias} ${index + 1}` })!} // WCAG - Descriptive aria-label for screen readers
         disableRipple
