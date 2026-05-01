@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -235,6 +235,21 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
   // Generate unique table details button ID
   const tableDetailsButtonId = `${mapId}-${containerType}-table-details`;
 
+  // Layer is ESRI Dynamic
+  const isEsriDynamic = layerSchemaTag === CONST_LAYER_TYPES.ESRI_DYNAMIC;
+
+  // Layer has a value expression in its style config
+  const hasValueExpression = useMemo((): boolean => {
+    // Log
+    logger.logTraceUseMemo('LAYER DETAILS - hasValueExpression', layerStyleConfig);
+
+    return layerStyleConfig
+      ? Object.values(layerStyleConfig).some(
+          (styleConfig) => styleConfig && 'valueExpression' in styleConfig && styleConfig.valueExpression
+        )
+      : false;
+  }, [layerStyleConfig]);
+
   /**
    * Resets active view to details when layer changes.
    */
@@ -417,11 +432,6 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
     // No checkbox for simple style layers
     if (layerStyleConfig[item.geometryType]?.type === 'simple') return null;
 
-    // Check if layer is ESRI Dynamic with valueExpression
-    const styleConfig = layerStyleConfig[item.geometryType];
-    const hasValueExpression = styleConfig && 'valueExpression' in styleConfig && styleConfig.valueExpression;
-    const isEsriDynamic = layerSchemaTag === CONST_LAYER_TYPES.ESRI_DYNAMIC;
-
     const isDisabled = layerHidden || !layerCanToggle || (isEsriDynamic && !!hasValueExpression);
 
     // Build the label content with icon and text
@@ -451,12 +461,6 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
   };
 
   const renderHeaderCheckbox = (): JSX.Element => {
-    // Check if layer is ESRI Dynamic with valueExpression
-    const isEsriDynamic = layerSchemaTag === CONST_LAYER_TYPES.ESRI_DYNAMIC;
-    const hasValueExpression =
-      layerStyleConfig &&
-      Object.values(layerStyleConfig).some((styleConfig) => styleConfig && 'valueExpression' in styleConfig && styleConfig.valueExpression);
-
     const isDisabled = layerHidden || !layerCanToggle || (isEsriDynamic && hasValueExpression);
 
     const labelContent = (

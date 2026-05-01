@@ -212,22 +212,20 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    * @param layerStyleMetadata - Optional layer style metadata to use to help fill the blanks in our layer style config
    */
   initLayerStyleFromMetadata(layerStyleMetadata: TypeLayerStyleConfig | undefined): void {
-    // If metadata exists, normalize geometry keys before merging
-    if (layerStyleMetadata) {
-      const normalizedMetadata: TypeLayerStyleConfig = {};
+    // If no metadata, nothing to do
+    if (!layerStyleMetadata) return;
 
-      // Normalize Multi* geometry types to their simplified forms
-      Object.entries(layerStyleMetadata).forEach(([geometryType, styleConfig]) => {
-        // Convert MultiPolygon → Polygon, MultiPoint → Point, MultiLineString → LineString
-        const simplifiedType = geometryType.startsWith('Multi') ? geometryType.slice(5) : geometryType;
+    const normalizedMetadata: TypeLayerStyleConfig = {};
 
-        normalizedMetadata[simplifiedType as TypeStyleGeometry] = styleConfig;
-      });
+    // Normalize Multi* geometry types to their simplified forms
+    Object.entries(layerStyleMetadata).forEach(([geometryType, styleConfig]) => {
+      // Convert MultiPolygon → Polygon, MultiPoint → Point, MultiLineString → LineString
+      const simplifiedType = geometryType.startsWith('Multi') ? geometryType.slice(5) : geometryType;
 
-      this.#layerStyle = deepMerge(normalizedMetadata, this.#layerStyle);
-    } else {
-      this.#layerStyle = deepMerge(layerStyleMetadata, this.#layerStyle);
-    }
+      normalizedMetadata[simplifiedType as TypeStyleGeometry] = styleConfig;
+    });
+
+    this.#layerStyle = deepMerge(normalizedMetadata, this.#layerStyle);
   }
 
   /**
