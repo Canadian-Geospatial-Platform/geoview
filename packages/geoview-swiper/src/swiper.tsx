@@ -141,7 +141,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
    */
   function postcompose(event: Event | BaseEvent): void {
     const evt = event as RenderEvent;
-    const ctx: CanvasRenderingContext2D | WebGLRenderingContext = evt.context!;
+    const ctx = evt.context! as CanvasRenderingContext2D | WebGLRenderingContext;
     if (ctx instanceof WebGLRenderingContext) {
       if (evt.type === 'postrender') {
         ctx.disable(ctx.SCISSOR_TEST);

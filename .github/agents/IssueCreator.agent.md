@@ -53,9 +53,10 @@ Generate the issue using the appropriate template below. Fill every section with
 
 ### Phase 4 — Present to User
 
-1. Create a temporary file `issue-draft.md` at the workspace root containing the full issue body in Markdown
+1. Create a temporary file `issue-draft.md` at the workspace root containing the full issue in Markdown
+   - **The FIRST line of `issue-draft.md` MUST be the title as an H1**: `# [BUG] concise title` / `# [FEATURE] concise title` / `# [DEMO] concise title`
+   - The rest of the body follows immediately after the title
 2. Tell the user:
-   - The issue title (prefixed with `[BUG]`, `[FEATURE]`, or `[DEMO]`)
    - To open `issue-draft.md`, select all (`Ctrl+A`), copy (`Ctrl+C`), and paste into the issue body
    - The URL to create the issue: `https://github.com/Canadian-Geospatial-Platform/geoview/issues/new`
    - To delete `issue-draft.md` after submitting

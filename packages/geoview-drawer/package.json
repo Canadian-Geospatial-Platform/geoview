@@ -14,22 +14,20 @@
     "build-dev": "tsc --build"
   },
   "dependencies": {
-    "@emotion/react": "^11.13.3",
-    "@emotion/styled": "^11.13.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
     "@mui/material": "^7.3.2",
     "mui-color-input": "^7.0.0",
-    "ol": "10.5.0"
+    "ol": "10.9.0"
   },
   "peerDependencies": {
     "geoview-core": "workspace:^2.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "zustand": "~5.0.0"
+    "zustand": "~5.0.12"
   },
   "devDependencies": {
     "geoview-core": "workspace:^2.0.0",
-    "@babel/core": "^7.25.8",
-    "@babel/runtime": "^7.25.7",
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.1",
     "react": "^18.3.1",
