@@ -132,7 +132,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
   return (
     <Paper component="div" elevation={4} square sx={{ width: 350 }}>
       {!error && (
-        <Box sx={sxClasses.filter} className="geolocator-filters" role="group" aria-label={t('geolocator.filtersGroupTitle')!}>
+        <Box sx={sxClasses.filter} className="geolocator-filters" role="group" aria-label={t('geolocator.filtersGroupTitle')}>
           <Box sx={sxClasses.filterBox}>
             <Select
               labelId={`${mapId}-geolocator-province-filter-label`}
@@ -184,7 +184,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
         sx={{ maxHeight: mapSize[1] - 240, overflowY: 'auto' }}
         className="geolocator-results-region"
         role="region"
-        aria-label={t('geolocator.searchResults')!}
+        aria-label={t('geolocator.searchResults')}
       >
         {error && (
           <Typography

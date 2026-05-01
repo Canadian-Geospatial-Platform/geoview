@@ -201,7 +201,7 @@ export function Geolocator(): JSX.Element {
       role={isPanelOpen ? 'dialog' : undefined}
       aria-modal={isPanelOpen && activeTrapGeoView ? true : undefined}
       aria-hidden={!isPanelOpen}
-      aria-label={t('geolocator.panelTitle')!}
+      aria-label={t('geolocator.panelTitle')}
       sx={memoSxClasses.root}
       visibility={isPanelOpen ? 'visible' : 'hidden'}
       id={`${mapId}-${CONTAINER_TYPE.APP_BAR}-${DEFAULT_APPBAR_CORE.GEOLOCATOR}-panel`}

@@ -681,7 +681,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
       <Box
         role="group"
         sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '15px', flexWrap: 'wrap', justifyContent: 'flex-end' }}
-        aria-label={t('layers.layerControls')!}
+        aria-label={t('layers.layerControls')}
       >
         {hasDataTable && renderDetailsButton()}
         {timeSliderButton}

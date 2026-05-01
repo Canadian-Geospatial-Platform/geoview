@@ -3,8 +3,7 @@ import { useState, useCallback, useMemo } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
-import type { Options } from 'export-to-csv';
-import { ExportToCsv } from 'export-to-csv';
+import { mkConfig, generateCsv, download } from 'export-to-csv';
 
 import type { MRT_ColumnDef as MRTColumnDef } from 'material-react-table';
 
@@ -64,15 +63,14 @@ function ExportButton({ layerPath, rows, columns, children }: ExportButtonProps)
     // Remove the utility columns
     const filteredColumns = columns.filter((col) => !COLUMNS_TO_REMOVE.includes(col.id as string));
 
-    return (): Options => ({
+    return () => ({
       filename: `table-${layerName.replaceAll(' ', '-')}`,
       fieldSeparator: ',',
-      quoteStrings: '"',
+      quoteStrings: true,
       decimalSeparator: '.',
-      showLabels: true,
       useBom: true,
       useKeysAsHeaders: false,
-      headers: filteredColumns.map((c) => c.id as string),
+      columnHeaders: filteredColumns.map((c) => c.id as string),
     });
   }, [columns, layerName]);
 
@@ -87,16 +85,17 @@ function ExportButton({ layerPath, rows, columns, children }: ExportButtonProps)
           // Only add the field if it's not a utility column
           if (!COLUMNS_TO_REMOVE.includes(curr)) {
             // eslint-disable-next-line no-param-reassign
-            acc[curr] = row[curr]?.value ?? '';
+            acc[curr] = String(row[curr]?.value ?? '');
           }
           return acc;
         },
-        {} as Record<string, unknown>
+        {} as Record<string, string>
       );
       return mappedRow;
     });
-    const csvExporter = new ExportToCsv(memoGetCsvOptions());
-    csvExporter.generateCsv(csvRows);
+    const csvConfig = mkConfig(memoGetCsvOptions());
+    const csv = generateCsv(csvConfig)(csvRows);
+    download(csvConfig)(csv);
     setAnchorEl(null);
   }, [memoGetCsvOptions, rows]);
 

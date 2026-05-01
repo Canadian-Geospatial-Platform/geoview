@@ -130,7 +130,7 @@ export const FeatureItem = memo(function FeatureItem({
         onClick={() => onInitLightBox(featureInfoItem.value as string, '', buttonElementId, index)}
         tooltip={t('general.enlargeImage')} // Tooltip for visual users to indicate the image can be enlarged
         tooltipPlacement="top"
-        aria-label={t('general.enlargeImageName', { title: index === 0 ? alias : `${alias} ${index + 1}` })!} // WCAG - Descriptive aria-label for screen readers
+        aria-label={t('general.enlargeImageName', { title: index === 0 ? alias : `${alias} ${index + 1}` })} // WCAG - Descriptive aria-label for screen readers
         disableRipple
       >
         <Box
@@ -283,7 +283,7 @@ export const FeatureInfoTable = memo(function FeatureInfoTable({
   return (
     <>
       <TableContainer className="details-feature-info-table" sx={sxClasses.boxContainerFeatureInfo}>
-        <Table aria-label={t('details.featureInfoTable')!}>
+        <Table aria-label={t('details.featureInfoTable')}>
           <TableHead sx={sxClasses.visuallyHidden}>
             <TableRow>
               <TableCell component="th" scope="col">

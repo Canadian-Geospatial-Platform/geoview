@@ -713,7 +713,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
     },
     // Improve table accessibility
     muiTableProps: {
-      'aria-label': t('dataTable.tableAriaLabelWithLayer', { layerName })!,
+      'aria-label': t('dataTable.tableAriaLabelWithLayer', { layerName }),
     },
   });
   tableInstanceRef.current = useTable;

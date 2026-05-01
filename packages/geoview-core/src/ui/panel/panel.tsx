@@ -115,7 +115,7 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
     <Box
       component="section"
       role={open && activeTrapGeoView ? 'dialog' : undefined}
-      aria-label={t('general.panelLabel', { title: t(panel.title) })!}
+      aria-label={t('general.panelLabel', { title: t(panel.title) })}
       aria-hidden={!open}
       aria-modal={open && activeTrapGeoView ? true : undefined}
       sx={{

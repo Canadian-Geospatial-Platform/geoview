@@ -206,7 +206,7 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
       </Tooltip>
       {layerStatus === 'loading' && (
         <Box component="span" sx={memoSxClasses.progressBar}>
-          <ProgressBar aria-label={t('layers.status.layerLoadingDescriptive', { layerName: layer.layerName })!} />
+          <ProgressBar aria-label={t('layers.status.layerLoadingDescriptive', { layerName: layer.layerName })} />
         </Box>
       )}
     </ListItem>

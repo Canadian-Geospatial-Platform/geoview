@@ -798,7 +798,7 @@ export function SingleLayer({
           </ListItemButton>
         </Tooltip>
         {!isLayoutEnlarged && (
-          <Box className="rightIcons-container" role="group" aria-label={t('layers.layerControls')!}>
+          <Box className="rightIcons-container" role="group" aria-label={t('layers.layerControls')}>
             {memoEditModeButtons}
             {memoMoreLayerButtons}
             {memoArrowButtons}
@@ -806,7 +806,7 @@ export function SingleLayer({
         )}
         {layerStatus === 'loading' && (
           <Box sx={memoSxClasses.progressBarSingleLayer}>
-            <ProgressBar aria-label={t('layers.status.layerLoadingDescriptive', { layerName })!} />
+            <ProgressBar aria-label={t('layers.status.layerLoadingDescriptive', { layerName })} />
           </Box>
         )}
       </Box>

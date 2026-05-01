@@ -146,9 +146,9 @@ export const HoverTooltip = memo(function HoverTooltip(): JSX.Element | null {
       }}
     >
       {memoTooltipContent.content.icon ? (
-        <Box component="img" className="layer-icon" alt={t('hovertooltip.alticon')!} src={memoTooltipContent.content.icon} />
+        <Box component="img" className="layer-icon" alt={t('hovertooltip.alticon')} src={memoTooltipContent.content.icon} />
       ) : (
-        <Box component="div" className="layer-icon" aria-label={t('hovertooltip.alticon')!}>
+        <Box component="div" className="layer-icon" aria-label={t('hovertooltip.alticon')}>
           <BrowserNotSupportedIcon />
         </Box>
       )}

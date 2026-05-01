@@ -398,7 +398,7 @@ export function GuideSearch({ containerType, guide, onSectionChange, onSearchSta
         t('guide.searchNavigationAnnouncement', {
           current: index + 1,
           total: allMatches.length,
-        })!
+        })
       );
 
       setTimeout(() => {
@@ -449,7 +449,7 @@ export function GuideSearch({ containerType, guide, onSectionChange, onSearchSta
       } else if (allMatches.length === 1) {
         setSrAnnouncement(t('guide.oneResult'));
       } else {
-        setSrAnnouncement(t('guide.multipleResults', { count: allMatches.length })!);
+        setSrAnnouncement(t('guide.multipleResults', { count: allMatches.length }));
       }
     } else {
       setSrAnnouncement('');
@@ -589,12 +589,10 @@ export function GuideSearch({ containerType, guide, onSectionChange, onSearchSta
                         <Box
                           role="status"
                           sx={{ fontSize: '0.75rem', color: theme.palette.geoViewColor.textColor.light[200], whiteSpace: 'nowrap' }}
-                          aria-label={
-                            t('guide.searchMatchCountLabel', {
-                              current: currentMatchIndex + 1,
-                              total: allMatches.length,
-                            })!
-                          }
+                          aria-label={t('guide.searchMatchCountLabel', {
+                            current: currentMatchIndex + 1,
+                            total: allMatches.length,
+                          })}
                         >
                           {currentMatchIndex + 1} of {allMatches.length}
                         </Box>
@@ -648,7 +646,7 @@ export function GuideSearch({ containerType, guide, onSectionChange, onSearchSta
         />
       </form>
       <Box id={searchInstructionsId} sx={memoSxClasses.visuallyHidden}>
-        {t('guide.searchInstructions')!}
+        {t('guide.searchInstructions')}
       </Box>
     </Box>
   );

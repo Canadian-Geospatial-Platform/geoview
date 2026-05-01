@@ -439,7 +439,7 @@ export function ExportModal(): JSX.Element {
             if (pngPreviewUrls) {
               return pngPreviewUrls.map((imageUrl) => {
                 const key = imageUrl.substring(imageUrl.length - 10);
-                return <Box component="img" key={key} src={imageUrl} alt={t('exportModal.previewAlt')!} sx={memoSxClasses.mapPreview} />;
+                return <Box component="img" key={key} src={imageUrl} alt={t('exportModal.previewAlt')} sx={memoSxClasses.mapPreview} />;
               });
             }
 

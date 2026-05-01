@@ -149,7 +149,7 @@ const FeatureHeader = memo(function FeatureHeader({
           ...memoSxClasses.flexBoxAlignCenter,
           [theme.breakpoints.down('sm')]: { display: 'none' },
         }}
-        aria-label={t('details.featureActions')!}
+        aria-label={t('details.featureActions')}
       >
         {/* Hidden in WCAG mode - keyboard users can Tab to layer panel instead */}
         {hasGeochart && !isFocusTrap && (

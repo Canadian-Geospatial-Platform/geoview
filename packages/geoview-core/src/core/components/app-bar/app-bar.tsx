@@ -282,7 +282,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
         const button: IconButtonPropsExtend = {
           id: tab,
           'aria-label': t(`${camelCase(tab)}.title`),
-          tooltip: t(`${camelCase(tab)}.title`)!,
+          tooltip: t(`${camelCase(tab)}.title`),
           tooltipPlacement: 'bottom',
           children: memoPanels[tab].icon,
         };
@@ -378,7 +378,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
   return (
     <Box sx={sxClasses.appBar} className={`interaction-${interaction}`} id={`${mapId}-appBar`} onClick={onScrollShellIntoView}>
-      <Box sx={sxClasses.appBarButtons} component="nav" aria-label={t('appbar.navLabel')!}>
+      <Box sx={sxClasses.appBarButtons} component="nav" aria-label={t('appbar.navLabel')}>
         {renderButtonPanel(topPanelNames)}
         <Box sx={sxClasses.versionButtonDiv}>
           {renderButtonPanel(bottomPanelNames)}
