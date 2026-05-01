@@ -1,8 +1,8 @@
-import type { MapViewer } from '@/geo/map/map-viewer';
-import type { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
+import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import { type StyleProps } from '@/core/stores/store-interface-and-intial-values/drawer-state';
 import type { UIDomain } from '@/core/domains/ui-domain';
+import type { MapViewer } from '@/geo/map/map-viewer';
 /**
  * Controller responsible for drawer interactions, keyboard shortcuts, and
  * bridging the drawer state with the UI domain and map projection changes.
@@ -21,10 +21,10 @@ export declare class DrawerController extends AbstractMapViewerController {
      * Creates an instance of DrawerController.
      *
      * @param mapViewer - The map viewer instance to associate with this controller
+     * @param controllerRegistry - The controller registry for accessing sibling controllers
      * @param uiDomain - The UI domain instance to associate with this controller
-     * @param geometryApi - The geometry API instance to associate with this controller
      */
-    constructor(mapViewer: MapViewer, uiDomain: UIDomain, geometryApi: GeometryApi);
+    constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry, uiDomain: UIDomain);
     /**
      * Hooks the controller into action.
      */
@@ -123,6 +123,12 @@ export declare class DrawerController extends AbstractMapViewerController {
      * @param strokeWidth - The stroke width value
      */
     setStrokeWidth(strokeWidth: number): void;
+    /**
+     * Sets the drawer icon source in the store.
+     *
+     * @param iconSrc - The icon source value
+     */
+    setDrawerIconSrc(iconSrc: string): void;
     /**
      * Sets the icon size in the store and updates the feature style.
      *

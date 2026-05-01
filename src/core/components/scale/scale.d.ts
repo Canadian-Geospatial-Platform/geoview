@@ -11,6 +11,6 @@ interface ScaleProps {
  * @param props - The scale properties
  * @returns The scale component
  */
-export declare const Scale: import("react").NamedExoticComponent<ScaleProps>;
+export declare const Scale: import("react").MemoExoticComponent<({ expanded }: ScaleProps) => JSX.Element>;
 export {};
 //# sourceMappingURL=scale.d.ts.map

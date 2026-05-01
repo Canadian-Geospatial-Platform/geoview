@@ -5,7 +5,7 @@
  *
  * @returns The north arrow component
  */
-export declare const NorthArrow: import("react").NamedExoticComponent<object>;
+export declare const NorthArrow: import("react").MemoExoticComponent<() => JSX.Element>;
 /**
  * Creates a north pole flag marker icon.
  *
@@ -13,5 +13,5 @@ export declare const NorthArrow: import("react").NamedExoticComponent<object>;
  *
  * @returns The north pole marker component
  */
-export declare const NorthPoleFlag: import("react").NamedExoticComponent<object>;
+export declare const NorthPoleFlag: import("react").MemoExoticComponent<() => JSX.Element>;
 //# sourceMappingURL=north-arrow.d.ts.map

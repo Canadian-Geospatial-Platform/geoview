@@ -33,8 +33,7 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     static readonly DEFAULT_LOADING_PERIOD: number;
     /** Counts the number of times the loading happened. */
     loadingCounter: number;
-    /** Marks the latest loading count for the layer.
-     * This useful to know when the put the layer loaded status back correctly with parallel processing happening */
+    /** Marks the latest loading count for the layer. Useful to know when to put the layer loaded status back correctly with parallel processing happening. */
     loadingMarker: number;
     /**
      * Constructs a GeoView layer to manage an OpenLayer layer.
@@ -323,16 +322,27 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     /**
      * Gets the layer filters associated to the layer.
      *
-     * @returns The filter associated to the layer or undefined.
+     * @returns The layer filters associated to the layer.
      */
     getLayerFilters(): LayerFilters;
     /**
-     * Sets the layer filters associated to the layer.
+     * Sets the class filter on the layer, derived from the current style configuration.
      *
-     * @param layerFilters - The filter layers associated to the layer or undefined
-     * @param refresh - Whether to refresh the layer after setting filters
+     * @param classFilter - Optional class filter expression to apply. Defaults to the filter derived from the current style.
      */
-    setLayerFilters(layerFilters: LayerFilters, refresh: boolean | undefined): void;
+    setLayerFiltersClass(classFilter?: string | undefined): void;
+    /**
+     * Sets the data filter on the layer.
+     *
+     * @param dataFilter - Optional data filter expression to apply
+     */
+    setLayerFiltersData(dataFilter: string | undefined): void;
+    /**
+     * Sets the time filter on the layer.
+     *
+     * @param timeFilter - Optional time filter expression to apply
+     */
+    setLayerFiltersTime(timeFilter: string | undefined): void;
     /**
      * Applies a time filter on a date range.
      *
@@ -340,6 +350,13 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      * @param date2 - The end date
      */
     setLayerFiltersDate(date1: string, date2: string): void;
+    /**
+     * Sets the layer filters associated to the layer.
+     *
+     * @param layerFilters - The layer filters to apply
+     * @param refresh - Whether to trigger a layer re-render after setting filters
+     */
+    setLayerFilters(layerFilters: LayerFilters, refresh: boolean | undefined): void;
     /**
      * Returns feature information for the layer specified.
      *

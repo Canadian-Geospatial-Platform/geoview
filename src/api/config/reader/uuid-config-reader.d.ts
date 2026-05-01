@@ -12,6 +12,10 @@ export declare class UUIDmapConfigReader {
      * @param uuids - A list of uuids to get the configurations for
      * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
      * @returns A promise that resolves with the layers and geocharts parsed from GeoCore
+     * @throws {LayerGeoCoreServiceFailError} When the Geocore service fails to respond
+     * @throws {LayerGeoCoreInvalidResponseError} When the Geocore service fails to respond with a valid payload
+     * @throws {LayerGeoCoreNoLayersError} When the Geocore service responds a 'valid' payload with missing layers information
+     * @throws {NotSupportedError} When the layer type read in the layerType property from Geocore payload isn't a supported type
      */
     static getGVConfigFromUUIDs(baseUrl: string, lang: TypeDisplayLanguage, uuids: string[], abortSignal?: AbortSignal): Promise<UUIDmapConfigReaderResponse>;
     /**
@@ -22,6 +26,10 @@ export declare class UUIDmapConfigReader {
      * @param uuids - A list of uuids to get the configurations for
      * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
      * @returns A promise that resolves with the layers parsed from Geonetwork RCS
+     * @throws {LayerGeoCoreServiceFailError} When the Geocore service fails to respond
+     * @throws {LayerGeoCoreInvalidResponseError} When the Geocore service fails to respond with a valid payload
+     * @throws {LayerGeoCoreNoLayersError} When the Geocore service responds a 'valid' payload with missing layers information
+     * @throws {NotSupportedError} When the layer type read in the layerType property from Geocore payload isn't a supported type
      */
     static getGVConfigFromUUIDsRCS(baseUrl: string, lang: TypeDisplayLanguage, uuids: string[], abortSignal?: AbortSignal): Promise<UUIDmapConfigReaderResponse>;
 }
@@ -31,7 +39,7 @@ export type GeoCoreConfigResponseRoot = {
     errorMessage?: string;
 };
 export type GeoCoreConfigResponse = {
-    rcs: Record<TypeDisplayLanguage, GeoCoreConfigResponseRCSLayers[]>;
+    rcs: Record<TypeDisplayLanguage, GeoCoreConfigResponseRCSLayers[] | object>;
     gcs: Record<TypeDisplayLanguage, GeoCoreConfigResponseGCSLayers>[];
 };
 export type GeoCoreConfigResponseRCSLayers = {

@@ -152,9 +152,9 @@ export declare const useStoreAppDisplayDateMode: () => DisplayDateMode;
  * @param mapId - The map identifier.
  * @returns The IANA timezone string.
  */
-export declare const getStoreDisplayDateTimezone: (mapId: string) => TimeIANA;
+export declare const getStoreAppDisplayDateTimezone: (mapId: string) => TimeIANA;
 /** Hook that returns the current display date timezone. */
-export declare const useStoreDisplayDateTimezone: () => TimeIANA;
+export declare const useStoreAppDisplayDateTimezone: () => TimeIANA;
 /**
  * Gets whether fullscreen mode is active for the given map.
  *
@@ -250,56 +250,56 @@ export declare const useStoreAppShellContainer: () => HTMLElement;
  * @param mapId - The map identifier.
  * @returns True if layer highlight bboxes should be shown.
  */
-export declare const getStoreShowLayerHighlightLayerBbox: (mapId: string) => boolean;
+export declare const getStoreAppShowLayerHighlightLayerBbox: (mapId: string) => boolean;
 /**
  * Gets the default date format settings derived from the current display date mode.
  *
  * @param mapId - The map identifier.
  * @returns The default date display settings.
  */
-export declare const getStoreDisplayDateFormatDefault: (mapId: string) => TypeDisplayDateDefaults;
+export declare const getStoreAppDisplayDateFormatDefault: (mapId: string) => TypeDisplayDateDefaults;
 /**
  * Sets the circular progress indicator active state.
  *
  * @param mapId - The map identifier
  * @param active - Whether the circular progress is active
  */
-export declare const setStoreCircularProgress: (mapId: string, active: boolean) => void;
+export declare const setStoreAppCircularProgress: (mapId: string, active: boolean) => void;
 /**
  * Sets the display language for the viewer.
  *
  * @param mapId - The map identifier
  * @param lang - The language code (e.g. 'en' or 'fr')
  */
-export declare const setStoreDisplayLanguage: (mapId: string, lang: TypeDisplayLanguage) => void;
+export declare const setStoreAppDisplayLanguage: (mapId: string, lang: TypeDisplayLanguage) => void;
 /**
  * Sets the display theme for the viewer.
  *
  * @param mapId - The map identifier
  * @param theme - The theme identifier
  */
-export declare const setStoreDisplayTheme: (mapId: string, theme: TypeDisplayTheme) => void;
+export declare const setStoreAppDisplayTheme: (mapId: string, theme: TypeDisplayTheme) => void;
 /**
  * Sets the timezone for date display.
  *
  * @param mapId - The map identifier
  * @param displayDateTimezone - The IANA timezone identifier
  */
-export declare const setStoreDisplayDateTimezone: (mapId: string, displayDateTimezone: TimeIANA) => void;
+export declare const setStoreAppDisplayDateTimezone: (mapId: string, displayDateTimezone: TimeIANA) => void;
 /**
  * Sets the crosshair overlay active state.
  *
  * @param mapId - The map identifier
  * @param active - Whether the crosshairs are active
  */
-export declare const setStoreCrosshairActive: (mapId: string, active: boolean) => void;
+export declare const setStoreAppCrosshairActive: (mapId: string, active: boolean) => void;
 /**
  * Sets the fullscreen mode active state.
  *
  * @param mapId - The map identifier
  * @param active - Whether fullscreen mode is active
  */
-export declare const setStoreFullScreenActive: (mapId: string, active: boolean) => void;
+export declare const setStoreAppFullScreenActive: (mapId: string, active: boolean) => void;
 /**
  * Adds a notification to the store or increments the count if it already exists.
  *
@@ -309,7 +309,7 @@ export declare const setStoreFullScreenActive: (mapId: string, active: boolean) 
  * @param notification - The notification details to add
  * @returns A promise that resolves when the notification has been added
  */
-export declare const addStoreNotification: (mapId: string, notification: NotificationDetailsType) => Promise<void>;
+export declare const addStoreAppNotification: (mapId: string, notification: NotificationDetailsType) => Promise<void>;
 /**
  * Removes a notification from the store by key.
  *
@@ -319,20 +319,20 @@ export declare const addStoreNotification: (mapId: string, notification: Notific
  * @param key - The unique key of the notification to remove
  * @returns A promise that resolves when the notification has been removed
  */
-export declare const removeStoreNotification: (mapId: string, key: string) => Promise<void>;
+export declare const removeStoreAppNotification: (mapId: string, key: string) => Promise<void>;
 /**
  * Removes all notifications from the store.
  *
  * @param mapId - The map identifier
  */
-export declare const removeStoreAllNotifications: (mapId: string) => void;
+export declare const removeStoreAppAllNotifications: (mapId: string) => void;
 /**
  * Sets the guide content object to be rendered in the guide panel.
  *
  * @param mapId - The map identifier
  * @param guide - The guide object to display
  */
-export declare const setStoreGuide: (mapId: string, guide: TypeGuideObject) => void;
+export declare const setStoreAppGuide: (mapId: string, guide: TypeGuideObject) => void;
 /**
  * Represents a hierarchical guide content structure.
  *

@@ -2,6 +2,7 @@ import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import type { Extent } from 'ol/extent';
 import { type TypeHighlightColors, type TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
+import type { MapController } from '@/core/controllers/map-controller';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import { PointMarkers } from './point-markers';
 /**
@@ -11,6 +12,8 @@ export declare class FeatureHighlight {
     #private;
     /** Reference on the map viewer */
     mapViewer: MapViewer;
+    /** Reference on the map controller */
+    mapController: MapController;
     /** The vector source to use for the highlight features */
     highlightSource: VectorSource;
     /** The hidden layer to display highlight. */
@@ -21,7 +24,7 @@ export declare class FeatureHighlight {
      *
      * @param mapViewer - A reference to the map viewer
      */
-    constructor(mapViewer: MapViewer);
+    constructor(mapViewer: MapViewer, mapController: MapController);
     /**
      * Initializes the FeatureHighlight with the MapViewer, now that the map is accessible inside the MapViewer.
      */

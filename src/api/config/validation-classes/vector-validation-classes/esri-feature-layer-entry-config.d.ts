@@ -15,22 +15,22 @@ export declare class EsriFeatureLayerEntryConfig extends VectorLayerEntryConfig 
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
      *
-     * @returns The strongly-typed layer configuration specific to this layer.
+     * @returns The strongly-typed layer configuration specific to this layer
      */
     getGeoviewLayerConfig(): TypeEsriFeatureLayerConfig;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
      *
-     * @remarks Sometimes, the layer processing uses metadata coming from MapServer/?f=json (TypeMetadataEsriDynamic) and sometimes
-     * from FeatureServer/?f=json (TypeMetadataEsriFeature) which is the reason for the double types.
+     * Sometimes, the layer processing uses metadata coming from MapServer/?f=json (TypeMetadataEsriDynamic)
+     * and sometimes from FeatureServer/?f=json (TypeMetadataEsriFeature) which is the reason for the double types.
      *
-     * @returns The strongly-typed service metadata specific to this layer entry config.
+     * @returns The strongly-typed service metadata specific to this layer entry config
      */
     getServiceMetadata(): TypeMetadataEsriDynamic | TypeMetadataEsriFeature | undefined;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
      *
-     * @returns The strongly-typed layer metadata specific to this layer entry config.
+     * @returns The strongly-typed layer metadata specific to this layer entry config
      */
     getLayerMetadata(): TypeMetadataEsriFeatureLayer | undefined;
     /**

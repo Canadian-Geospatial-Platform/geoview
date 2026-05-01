@@ -1,11 +1,11 @@
-import type { EventDelegateBase } from '@/api/events/event-helper';
-import type { QueryType, TypeFeatureInfoEntry, TypeFeatureInfoResult, TypeLocation, TypeResultSet, TypeResultSetEntry } from '@/api/types/map-schema-types';
+import type { QueryType, TypeFeatureInfoEntry, TypeFeatureInfoResult, TypeLocation } from '@/api/types/map-schema-types';
 import type { LayerDomain } from '@/core/domains/layer-domain';
 import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
+import type { MapViewer } from '@/geo/map/map-viewer';
 import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
-import type { MapViewer } from '@/geo/map/map-viewer';
 /**
  * A class to hold a set of layers associated with a value of any type.
  *
@@ -17,22 +17,16 @@ export declare abstract class AbstractLayerSet {
     protected layerDomain: LayerDomain;
     /** The MapViewer to work with */
     protected mapViewer: MapViewer;
-    /** An object containing the result sets indexed using the layer path */
-    resultSet: TypeResultSet;
+    /** The controller registry to work with */
+    protected controllerRegistry: ControllerRegistry;
     /**
      * Constructs a new LayerSet instance.
      *
      * @param mapViewer - The MapViewer instance to work with
+     * @param controllerRegistry - The ControllerRegistry instance to work with
      * @param layerDomain - The LayerDomain instance to work with
      */
-    constructor(mapViewer: MapViewer, layerDomain: LayerDomain);
-    /**
-     * A must-override method called to propagate the result set entry to the store.
-     *
-     * @param resultSetEntry - The result set entry to propagate
-     * @param type - The propagation type
-     */
-    protected abstract onPropagateToStore(resultSetEntry: TypeResultSetEntry, type: PropagationType): void;
+    constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry, layerDomain: LayerDomain);
     /**
      * A must-override method called to delete a result set entry from the store.
      *
@@ -77,15 +71,17 @@ export declare abstract class AbstractLayerSet {
      */
     protected onRegisterLayer(layer: AbstractBaseGVLayer): void;
     /**
-     * An overridable layer set updated function for a layer-set to indicate the layer set has been updated.
-     *
-     * @param layerPath - The layer path
-     */
-    protected onLayerSetUpdatedProcess(layerPath: string): void;
-    /**
      * A quick getter to help identify which layerset class the current instance is coming from.
+     *
+     * @returns The constructor name of the current layerset class instance
      */
     getClassName(): string;
+    /**
+     * Gets the registered layer config paths based on the registered layer configs.
+     *
+     * @returns An array of layer config paths
+     */
+    getRegisteredLayerConfigPaths(): string[];
     /**
      * Gets the registered layer paths based on the registered layers.
      *
@@ -173,31 +169,5 @@ export declare abstract class AbstractLayerSet {
      *   `false` if they consist only of fallback HTML or plain-text content
      */
     protected static recordsContainActualFields(layerConfig: AbstractBaseLayerEntryConfig, arrayOfRecords: TypeFeatureInfoEntry[]): boolean;
-    /**
-     * Registers a callback to be executed whenever the layer set is updated.
-     *
-     * @param callback - The callback function
-     */
-    onLayerSetUpdated(callback: LayerSetUpdatedDelegate): void;
-    /**
-     * Unregisters a callback from being called whenever the layer set is updated.
-     *
-     * @param callback - The callback function to unregister
-     */
-    offLayerSetUpdated(callback: LayerSetUpdatedDelegate): void;
 }
-/** The propagation type, notably for the store */
-export type PropagationType = 'config-registration' | 'layer-registration' | 'layerStatus' | 'layerName';
-/**
- * Define a delegate for the event handler function signature
- */
-type LayerSetUpdatedDelegate = EventDelegateBase<AbstractLayerSet, LayerSetUpdatedEvent, void>;
-/**
- * Define an event for the delegate
- */
-export type LayerSetUpdatedEvent = {
-    layerPath: string;
-    resultSet: TypeResultSet;
-};
-export {};
 //# sourceMappingURL=abstract-layer-set.d.ts.map

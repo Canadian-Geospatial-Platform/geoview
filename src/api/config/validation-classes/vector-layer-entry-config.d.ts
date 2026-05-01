@@ -1,4 +1,4 @@
-import type { TypeGeoviewLayerType, TypeLayerMetadataVector, TypeBaseVectorSourceInitialConfig } from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerType, TypeBaseVectorSourceInitialConfig } from '@/api/types/layer-schema-types';
 import type { AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 export interface VectorLayerEntryConfigProps extends AbstractBaseLayerEntryConfigProps {
@@ -24,11 +24,5 @@ export declare abstract class VectorLayerEntryConfig extends AbstractBaseLayerEn
      * @returns The strongly-typed source configuration specific to this layer entry config
      */
     getSource(): TypeBaseVectorSourceInitialConfig;
-    /**
-     * Helper function to get the layer metadata casted as TypeLayerMetadataVector.
-     *
-     * @returns The casted layer metadata in the right type
-     */
-    getLayerMetadataCasted(): TypeLayerMetadataVector | undefined;
 }
 //# sourceMappingURL=vector-layer-entry-config.d.ts.map

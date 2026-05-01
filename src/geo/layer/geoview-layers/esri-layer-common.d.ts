@@ -16,12 +16,12 @@ export declare class EsriUtilities {
      * it is a feature layer identified with a numeric layerId and creates a group entry
      * when a layer is a group.
      *
-     * @param layer - The ESRI layer instance pointer.
-     * @param listOfLayerEntryConfig - The list of layer entries configuration to validate.
-     * @param callbackWhenRegisteringConfig - Called when a config needs to be registered.
-     * @remarks
-     * - This method performs **indirect recursion** by eventually delegating child validation to
-     *   {@link validateListOfLayerEntryConfig} in a sub function called here.
+     * This method performs **indirect recursion** by eventually delegating child validation to
+     * {@link validateListOfLayerEntryConfig} in a sub function called here.
+     *
+     * @param layer - The ESRI layer instance pointer
+     * @param listOfLayerEntryConfig - The list of layer entries configuration to validate
+     * @param callbackWhenRegisteringConfig - Called when a config needs to be registered
      */
     static commonValidateListOfLayerEntryConfig(layer: EsriDynamic | EsriFeature, listOfLayerEntryConfig: ConfigBaseClass[], callbackWhenRegisteringConfig: RegisterLayerEntryConfigDelegate): void;
     /**
@@ -108,18 +108,18 @@ export declare class EsriUtilities {
      * For ESRI Image layers, well-known pixel fields (`PixelValue`, `ProcessedValue`, `Name`)
      * are short-circuited to `'string'` because they have no metadata entry.
      *
-     * @param layerConfig - The ESRI layer config, used to detect EsriImage-specific fields.
-     * @param fields - The metadata field definitions to search.
-     * @param fieldName - Field name for which we want to get the type.
-     * @returns The mapped outfield type (`'date'`, `'oid'`, `'number'`, or `'string'`).
+     * @param layerConfig - The ESRI layer config, used to detect EsriImage-specific fields
+     * @param fields - The metadata field definitions to search
+     * @param fieldName - Field name for which we want to get the type
+     * @returns The mapped outfield type (`'date'`, `'oid'`, `'number'`, or `'string'`)
      */
     static esriGetFieldType(layerConfig: EsriDynamicLayerEntryConfig | EsriFeatureLayerEntryConfig | EsriImageLayerEntryConfig, fields: TypeLayerMetadataFields[], fieldName: string): TypeOutfieldsType;
     /**
      * Returns the domain of the specified field.
      *
-     * @param fields - The metadata field definitions to search.
-     * @param fieldName - Field name for which we want to get the domain.
-     * @returns The domain of the field, or `null` if not found.
+     * @param fields - The metadata field definitions to search
+     * @param fieldName - Field name for which we want to get the domain
+     * @returns The domain of the field, or `null` if not found
      */
     static esriGetFieldDomain(fields: TypeLayerMetadataFields[], fieldName: string): codedValueType | rangeDomainType | undefined;
 }

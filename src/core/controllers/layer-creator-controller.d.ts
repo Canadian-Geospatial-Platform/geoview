@@ -1,7 +1,9 @@
 import { type EventDelegateBase } from '@/api/events/event-helper';
 import { type MapConfigLayerEntry, type TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
+import type { GeoViewGeoChartConfig } from '@/api/config/reader/uuid-config-reader';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
+import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import type { LayerDomain } from '@/core/domains/layer-domain';
 import type { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
@@ -11,9 +13,11 @@ export declare class LayerCreatorController extends AbstractMapViewerController 
     /**
      * Creates an instance of the LayerCreator class.
      *
+     * @param mapViewer - The map viewer instance to associate with this controller
+     * @param controllerRegistry - The controller registry for accessing sibling controllers
      * @param layerDomain - The layer domain to be used by the LayerCreator
      */
-    constructor(mapViewer: MapViewer, layerDomain: LayerDomain);
+    constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry, layerDomain: LayerDomain);
     /**
      * Loads layers that were passed in with the map config.
      *
@@ -43,7 +47,9 @@ export declare class LayerCreatorController extends AbstractMapViewerController 
      */
     addGeoviewLayer(geoviewLayerConfig: TypeGeoviewLayerConfig, abortSignal?: AbortSignal): GeoViewLayerAddedResult;
     /**
-     * Refreshes GeoCore layers.
+     * Refreshes all GeoCore layers by removing and re-adding them, then restoring the original layer order and visibility.
+     *
+     * Uses Promise.allSettled so that ordered layer paths include all children before restoring state.
      */
     reloadGeocoreLayers(): void;
     /**
@@ -77,12 +83,10 @@ export declare class LayerCreatorController extends AbstractMapViewerController 
      * Creates an instance of a specific `AbstractGeoViewLayer` subclass based on the given GeoView layer configuration.
      *
      * This function determines the correct layer type from the configuration and instantiates it accordingly.
+     * Supports GeoJSON, CSV, WMS, Esri Dynamic, Esri Feature, Esri Image, GeoTIFF, ImageStatic, KML, WFS, WKB,
+     * OGC Feature, XYZ Tiles, and Vector Tiles. Throws if the layer type is unsupported.
      *
-     * @remarks
-     * - This method currently supports GeoJSON, CSV, WMS, Esri Dynamic, Esri Feature, Esri Image, GeoTIFF
-     *   ImageStatic, KML, WFS, WKB, OGC Feature, XYZ Tiles, and Vector Tiles.
-     * - If the layer type is not supported, an error is thrown.
-     * - TODO: Refactor to use the validated configuration with metadata already fetched.
+     * TODO: Refactor to use the validated configuration with metadata already fetched.
      *
      * @param geoviewLayerConfig - The configuration object for the GeoView layer
      * @returns An instance of the corresponding `AbstractGeoViewLayer` subclass
@@ -96,10 +100,11 @@ export declare class LayerCreatorController extends AbstractMapViewerController 
      * @param mapId - The unique identifier of the map instance this configuration applies to
      * @param language - The language setting used for layer labels and metadata
      * @param mapConfigLayerEntries - The array of layer entries to convert
+     * @param addGeoChartCallback - Callback invoked when a geochart configuration is initialized during layer processing
      * @param errorCallback - Callback invoked when an error occurs during layer processing
      * @returns An array of promises, each resolving to a TypeGeoviewLayerConfig object
      */
-    static convertMapConfigsToGeoviewLayerConfig(mapId: string, currentLayerIds: string[], language: TypeDisplayLanguage, mapConfigLayerEntries: MapConfigLayerEntry[], errorCallback: (mapConfigLayerEntry: MapConfigLayerEntry, error: unknown) => void): Promise<TypeGeoviewLayerConfig>[];
+    static convertMapConfigsToGeoviewLayerConfig(mapId: string, currentLayerIds: string[], language: TypeDisplayLanguage, mapConfigLayerEntries: MapConfigLayerEntry[], addGeoChartCallback: (layerPath: string, geochartConfig: GeoViewGeoChartConfig) => void, errorCallback: (mapConfigLayerEntry: MapConfigLayerEntry, error: unknown) => void): Promise<TypeGeoviewLayerConfig>[];
     /**
      * Converts a map configuration layer entry into a promise of a GeoView layer configuration.
      *
@@ -110,10 +115,11 @@ export declare class LayerCreatorController extends AbstractMapViewerController 
      * @param mapId - The unique identifier of the map instance this configuration applies to
      * @param language - The language setting used for layer labels and metadata
      * @param entry - The array of layer entry to convert
+     * @param addGeoChartCallback - Callback invoked when a geochart configuration is initialized during layer processing
      * @param errorCallback - Callback invoked when an error occurs during layer processing
      * @returns A promise that resolves to a TypeGeoviewLayerConfig object
      */
-    static convertMapConfigToGeoviewLayerConfig(mapId: string, currentLayerIds: string[], language: TypeDisplayLanguage, entry: MapConfigLayerEntry, errorCallback: (mapConfigLayerEntry: MapConfigLayerEntry, error: unknown) => void): Promise<TypeGeoviewLayerConfig>;
+    static convertMapConfigToGeoviewLayerConfig(mapId: string, currentLayerIds: string[], language: TypeDisplayLanguage, entry: MapConfigLayerEntry, addGeoChartCallback: (layerPath: string, geochartConfig: GeoViewGeoChartConfig) => void, errorCallback: (mapConfigLayerEntry: MapConfigLayerEntry, error: unknown) => void): Promise<TypeGeoviewLayerConfig>;
     /**
      * Registers a layer config added event handler.
      *

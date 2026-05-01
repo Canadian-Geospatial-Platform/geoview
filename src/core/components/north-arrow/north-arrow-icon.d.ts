@@ -13,7 +13,7 @@ interface NorthArrowIconProps {
  * @param props - The north arrow icon properties
  * @returns The north arrow SVG element
  */
-export declare const NorthArrowIcon: import("react").NamedExoticComponent<NorthArrowIconProps>;
+export declare const NorthArrowIcon: import("react").MemoExoticComponent<(props: NorthArrowIconProps) => JSX.Element>;
 /**
  * Creates a north pole flag SVG icon.
  *
@@ -21,6 +21,6 @@ export declare const NorthArrowIcon: import("react").NamedExoticComponent<NorthA
  *
  * @returns The north pole SVG element
  */
-export declare const NorthPoleIcon: import("react").NamedExoticComponent<object>;
+export declare const NorthPoleIcon: import("react").MemoExoticComponent<() => JSX.Element>;
 export {};
 //# sourceMappingURL=north-arrow-icon.d.ts.map

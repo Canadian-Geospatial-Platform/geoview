@@ -3,22 +3,20 @@ import type { Extent } from 'ol/extent';
 import type { FeatureHighlight } from '@/geo/map/feature-highlight';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import type { TypePointMarker } from '@/api/types/map-schema-types';
+import type { MapController } from '@/core/controllers/map-controller';
 /**
  * A class to handle point markers.
  */
 export declare class PointMarkers {
     #private;
-    /** The map viewer */
-    mapViewer: MapViewer;
-    /** The map ID */
-    mapId: string;
     /**
      * Initializes point marker classes.
      *
      * @param mapViewer - The map viewer
+     * @param mapController - The map controller
      * @param featureHighlight - The feature highlight class
      */
-    constructor(mapViewer: MapViewer, featureHighlight: FeatureHighlight);
+    constructor(mapViewer: MapViewer, mapController: MapController, featureHighlight: FeatureHighlight);
     /**
      * Update the point markers on the map.
      *

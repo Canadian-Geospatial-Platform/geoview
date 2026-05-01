@@ -289,7 +289,7 @@ export declare abstract class AbstractBaseGVLayer {
      */
     setMaxZoom(maxZoom: number): void;
     /**
-     * Checks if layer is visible at the given zoo
+     * Checks if layer is visible at the given zoom level.
      *
      * @param zoom - Zoom level to be compared
      * @returns If the layer is visible at this zoom level
@@ -378,6 +378,7 @@ export type LayerBaseDelegate = EventDelegateBase<AbstractBaseGVLayer, LayerBase
  * Define an event for the delegate.
  */
 export interface LayerNameChangedEvent extends LayerBaseEvent {
+    /** The new layer name. */
     layerName?: string;
 }
 /**
@@ -388,6 +389,7 @@ export type LayerNameChangedDelegate = EventDelegateBase<AbstractBaseGVLayer, La
  * Define an event for the delegate
  */
 export interface LayerVisibleChangedEvent extends LayerBaseEvent {
+    /** The new visibility state. */
     visible: boolean;
 }
 /**
@@ -398,6 +400,7 @@ export type LayerVisibleChangedDelegate = EventDelegateBase<AbstractBaseGVLayer,
  * Define an event for the delegate
  */
 export interface LayerOpacityChangedEvent extends LayerBaseEvent {
+    /** The new opacity value. */
     opacity: number;
 }
 /**
@@ -408,6 +411,7 @@ export type LayerOpacityChangedDelegate = EventDelegateBase<AbstractBaseGVLayer,
  * Define an event for the delegate
  */
 export interface LayerZIndexChangedEvent extends LayerBaseEvent {
+    /** The new z-index value. */
     zIndex: number;
 }
 /**

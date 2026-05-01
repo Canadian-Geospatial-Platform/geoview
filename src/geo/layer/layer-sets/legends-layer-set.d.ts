@@ -1,12 +1,9 @@
 import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
-import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
-import type { PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
-import { type TypeLegendResultSet, type TypeLegendResultSetEntry } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import type { LayerDomain } from '@/core/domains/layer-domain';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { MapViewer } from '@/geo/map/map-viewer';
-import type { LayerSetController } from '@/core/controllers/layer-set-controller';
 /**
  * A Layer-set working with the LayerSetController at handling a result set of registered layers and synchronizing
  * events happening on them (in this case when the layers are going through the layer statuses and legend querying) with a store
@@ -14,18 +11,14 @@ import type { LayerSetController } from '@/core/controllers/layer-set-controller
  */
 export declare class LegendsLayerSet extends AbstractLayerSet {
     #private;
-    /** The resultSet object as existing in the base class, retyped here as a TypeLegendResultSet */
-    resultSet: TypeLegendResultSet;
-    /** The layer set controller */
-    protected layerSetController: LayerSetController;
     /**
      * Constructs a Legends LayerSet to manage layers legends.
      *
      * @param mapViewer - The map viewer
-     * @param layerSetController - The layer set controller
+     * @param controllerRegistry - The controller registry
      * @param layerDomain - The layer domain
      */
-    constructor(mapViewer: MapViewer, layerSetController: LayerSetController, layerDomain: LayerDomain);
+    constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry, layerDomain: LayerDomain);
     /**
      * Overrides the behavior to apply when an all-feature-info-layer-set wants to check for condition to register a layer in its set.
      *
@@ -58,20 +51,6 @@ export declare class LegendsLayerSet extends AbstractLayerSet {
      * @param layer - The layer
      */
     protected onRegisterLayer(layer: AbstractBaseGVLayer): void;
-    /**
-     * Processes action when the layer status changes.
-     *
-     * @param layerConfig - The layer config
-     * @param layerStatus - The new layer status
-     */
-    protected processLayerStatusChanged(layerPath: string, layerStatus: TypeLayerStatus, layer: AbstractBaseGVLayer | undefined): void;
-    /**
-     * Overrides the behavior to apply when propagating to the store.
-     *
-     * @param resultSetEntry - The result set entry to propagate
-     * @param type - The propagation type
-     */
-    protected onPropagateToStore(resultSetEntry: TypeLegendResultSetEntry, type: PropagationType): void;
     /**
      * Overrides the behavior to apply when deleting from the store.
      *

@@ -5,5 +5,5 @@
  *
  * @returns The resize footer panel
  */
-export declare const ResizeFooterPanel: import("react").NamedExoticComponent<object>;
+export declare const ResizeFooterPanel: import("react").MemoExoticComponent<() => JSX.Element>;
 //# sourceMappingURL=resize-footer-panel.d.ts.map

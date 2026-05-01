@@ -1,9 +1,8 @@
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import type { TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
-import type { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { AbstractController } from './abstract-controller';
-import type { MapViewer } from '@/geo/map/map-viewer';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
+import type { MapViewer } from '@/geo/map/map-viewer';
 import type { GeometryApi } from '@/geo/layer/geometry/geometry';
 import type { BasemapApi } from '@/geo/layer/basemap/basemap';
 /**
@@ -19,8 +18,9 @@ export declare class AbstractMapViewerController extends AbstractController {
      * Creates an instance of AbstractMapViewerController.
      *
      * @param mapViewer - The map viewer instance to associate with this controller
+     * @param controllerRegistry - The controller registry for accessing sibling controllers
      */
-    constructor(mapViewer: MapViewer);
+    constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry);
     /**
      * Gets the map viewer instance.
      *
@@ -52,11 +52,11 @@ export declare class AbstractMapViewerController extends AbstractController {
      */
     getGeometryApi(): GeometryApi;
     /**
-     * Generates an array of layer info for the orderedLayerList.
+     * Generates an array of layer paths for the ordered layer list.
      *
      * @param geoviewLayerConfig - The config to get the info from
-     * @returns The array of ordered layer info
+     * @returns The array of ordered layer paths
      */
-    static generateArrayOfLayerOrderInfo(geoviewLayerConfig: TypeGeoviewLayerConfig | ConfigBaseClass): TypeOrderedLayerInfo[];
+    static generateOrderedLayerPaths(geoviewLayerConfig: TypeGeoviewLayerConfig | ConfigBaseClass): string[];
 }
 //# sourceMappingURL=abstract-map-viewer-controller.d.ts.map

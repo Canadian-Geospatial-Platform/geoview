@@ -15,7 +15,7 @@ export declare const OL_ZOOM_PADDING: [number, number, number, number];
 /** Default OpenLayers fit options combining padding, max zoom, and duration. */
 export declare const DEFAULT_OL_FITOPTIONS: FitOptions;
 /** The north pole position used for north arrow marker and rotation angle. */
-export declare const NORTH_POLE_POSITION: [number, number];
+export declare const NORTH_POLE_POSITION_LONLAT: [number, number];
 /** Overview map widget dimensions. */
 export declare const OL_OVERVIEWMAP_SIZE: {
     width: string;
@@ -64,6 +64,12 @@ export declare const CONTAINER_TYPE: {
 };
 /** Timeout duration constants in milliseconds for various UI and async operations. */
 export declare const TIMEOUT: Record<string, number>;
+/** File extensions recognized by GeoView for file-based layer URLs (used in validation, type guessing, and file upload). */
+export declare const VALID_FILE_EXTENSIONS: readonly [".json", ".geojson", ".csv", ".kml", ".gpkg", ".tif", ".tiff", ".zip", ".shp", ".wkb"];
+/** Regex pattern matching URLs that end with a recognized file extension (case-insensitive, ignores query params). */
+export declare const VALID_FILE_EXTENSIONS_REGEX: RegExp;
+/** Comma-separated string of valid file extensions for use in file input `accept` attributes. */
+export declare const VALID_FILE_EXTENSIONS_ACCEPT: string;
 /**
  * Lightbox DOM selectors for yet-another-react-lightbox components.
  * ROOT: Use for state detection (checking if lightbox is open)

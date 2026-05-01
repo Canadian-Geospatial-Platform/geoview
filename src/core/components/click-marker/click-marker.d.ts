@@ -9,5 +9,5 @@ export type TypeClickMarker = {
  *
  * @returns The click marker element
  */
-export declare const ClickMarker: import("react").NamedExoticComponent<object>;
+export declare const ClickMarker: import("react").MemoExoticComponent<() => JSX.Element>;
 //# sourceMappingURL=click-marker.d.ts.map

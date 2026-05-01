@@ -10,7 +10,8 @@ import { GVGroupLayer, type LayerGroupChildrenUpdatedEvent } from '@/geo/layer/g
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import type { LayerErrorEvent, LayerHoverableChangedEvent, LayerItemVisibilityChangedEvent, LayerMessageEvent, LayerQueryableChangedEvent } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
-import { GVWMS, type ImageLoadRescueEvent } from '@/geo/layer/gv-layers/raster/gv-wms';
+import { GVWMS, type ImageLoadRescueEvent, type WMSStyleChangedEvent } from '@/geo/layer/gv-layers/raster/gv-wms';
+import { GVEsriImage, type RasterFunctionChangedEvent, type MosaicRuleChangedEvent } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 /**
  * Domain class responsible for managing layer registrations and lifecycle.
  *
@@ -22,7 +23,7 @@ import { GVWMS, type ImageLoadRescueEvent } from '@/geo/layer/gv-layers/raster/g
 export declare class LayerDomain {
     #private;
     /**
-     * Constructor for the LayerDomain class.
+     * Constructs an instance of LayerDomain.
      */
     constructor();
     /**
@@ -40,40 +41,40 @@ export declare class LayerDomain {
     /**
      * Gets the Layer Entry Configs.
      *
-     * @returns The ConfigBaseClass Layer Entry configuration.
+     * @returns The ConfigBaseClass Layer Entry configuration
      */
     getLayerEntryConfigs(): ConfigBaseClass[];
     /**
      * Gets the layer configuration of the specified layer path.
      *
-     * @param layerPath - The layer path.
-     * @returns The ConfigBaseClass layer configuration.
-     * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
+     * @param layerPath - The layer path
+     * @returns The ConfigBaseClass layer configuration
+     * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path
      */
     getLayerEntryConfig(layerPath: string): ConfigBaseClass;
     /**
      * Gets the layer configuration of the specified layer path.
      *
-     * @param layerPath - The layer path.
-     * @returns The ConfigBaseClass layer configuration or undefined if not found.
+     * @param layerPath - The layer path
+     * @returns The ConfigBaseClass layer configuration or undefined if not found
      */
     getLayerEntryConfigIfExists(layerPath: string): ConfigBaseClass | undefined;
     /**
      * Gets the layer configuration of a regular layer (not a group) at the specified layer path.
      *
-     * @param layerPath - The layer path.
-     * @returns The AbstractBaseLayerEntryConfig layer configuration.
-     * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
-     * @throws {LayerWrongTypeError} When the layer configuration is of the wrong type at the given layer path.
+     * @param layerPath - The layer path
+     * @returns The AbstractBaseLayerEntryConfig layer configuration
+     * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path
+     * @throws {LayerWrongTypeError} When the layer configuration is of the wrong type at the given layer path
      */
     getLayerEntryConfigRegular(layerPath: string): AbstractBaseLayerEntryConfig;
     /**
      * Gets the layer configuration of a group layer (not a regular) at the specified layer path.
      *
-     * @param layerPath - The layer path.
-     * @returns The GroupLayerEntryConfig layer configuration.
-     * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
-     * @throws {LayerWrongTypeError} When the layer configuration is of the wrong type at the given layer path.
+     * @param layerPath - The layer path
+     * @returns The GroupLayerEntryConfig layer configuration
+     * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path
+     * @throws {LayerWrongTypeError} When the layer configuration is of the wrong type at the given layer path
      */
     getLayerEntryConfigGroup(layerPath: string): GroupLayerEntryConfig;
     /**
@@ -94,7 +95,7 @@ export declare class LayerDomain {
      * This method filters the list returned by `getGeoviewLayers()` and
      * returns only the layers that are instances of `AbstractGVLayer`.
      *
-     * @returns An array containing only the regular layers from the current GeoView layer collection.
+     * @returns An array containing only the regular layers from the current GeoView layer collection
      */
     getGeoviewLayersRegulars(): AbstractGVLayer[];
     /**
@@ -103,13 +104,13 @@ export declare class LayerDomain {
      * This method filters the list returned by `getGeoviewLayers()` and
      * returns only the layers that are instances of `GVGroupLayer`.
      *
-     * @returns An array containing only the group layers from the current GeoView layer collection.
+     * @returns An array containing only the group layers from the current GeoView layer collection
      */
     getGeoviewLayersGroups(): GVGroupLayer[];
     /**
      * Gets all GeoView layers that are at the root.
      *
-     * @returns An array containing only the layers at the root level of the registry.
+     * @returns An array containing only the layers at the root level of the registry
      */
     getGeoviewLayersRoot(): AbstractBaseGVLayer[];
     /**
@@ -117,7 +118,7 @@ export declare class LayerDomain {
      *
      * @param layerPath - The layer path
      * @returns The AbstractBaseGVLayer associated to the layer path
-     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
+     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
      */
     getGeoviewLayer(layerPath: string): AbstractBaseGVLayer;
     /**
@@ -135,8 +136,8 @@ export declare class LayerDomain {
      *
      * @param layerPath - The layer path
      * @returns The AbstractGVLayer Layer
-     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
-     * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path.
+     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
+     * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path
      */
     getGeoviewLayerRegular(layerPath: string): AbstractGVLayer;
     /**
@@ -147,7 +148,7 @@ export declare class LayerDomain {
      *
      * @param layerPath - The layer path
      * @returns The AbstractGVLayer or undefined when not found
-     * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path.
+     * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path
      */
     getGeoviewLayerRegularIfExists(layerPath: string): AbstractGVLayer | undefined;
     /**
@@ -156,10 +157,10 @@ export declare class LayerDomain {
      * This function waits the timeout period before abandonning (or uses the default timeout when not provided).
      * Note this function uses the 'Async' suffix to differentiate it from 'getOLLayer'.
      *
-     * @param layerPath - The layer path to the layer's configuration.
+     * @param layerPath - The layer path to the layer's configuration
      * @param timeout - Optionally indicate the timeout after which time to abandon the promise
      * @param checkFrequency - Optionally indicate the frequency at which to check for the condition on the layerabstract
-     * @returns A promise that resolves to an OpenLayer layer associated to the layer path.
+     * @returns A promise that resolves to an OpenLayer layer associated to the layer path
      */
     getOLLayerAsync(layerPath: string, timeout?: number, checkFrequency?: number): Promise<BaseLayer>;
     /**
@@ -214,7 +215,7 @@ export declare class LayerDomain {
     /**
      * Gets the max extent of all layers on the map, or of a provided subset of layers.
      *
-     * @param layerIds - Identifiers or layerPaths of layers to get max extents from.
+     * @param layerIds - Identifiers or layerPaths of layers to get max extents from
      * @returns A promise that resolves with the overall extent or undefined when no bounds are found
      */
     getExtentOfMultipleLayers(layerIds: string[], projection: OLProjection, stops: number): Promise<Extent | undefined>;
@@ -453,6 +454,45 @@ export declare class LayerDomain {
      */
     offLayerWMSImageLoadRescue(callback: DomainLayerWMSImageLoadRescueDelegate | undefined): void;
     /**
+     * Registers a layer raster function changed event handler.
+     *
+     * @param callback - The callback to be executed whenever the event is emitted
+     * @returns The callback registered, for chaining or unregistration purposes
+     */
+    onLayerRasterFunctionChanged(callback: DomainLayerRasterFunctionChangedDelegate): DomainLayerRasterFunctionChangedDelegate;
+    /**
+     * Unregisters a layer raster function changed event handler.
+     *
+     * @param callback - The callback to stop being called whenever the event is emitted
+     */
+    offLayerRasterFunctionChanged(callback: DomainLayerRasterFunctionChangedDelegate | undefined): void;
+    /**
+     * Registers a layer mosaic rule changed event handler.
+     *
+     * @param callback - The callback to be executed whenever the event is emitted
+     * @returns The callback registered, for chaining or unregistration purposes
+     */
+    onLayerMosaicRuleChanged(callback: DomainLayerMosaicRuleChangedDelegate): DomainLayerMosaicRuleChangedDelegate;
+    /**
+     * Unregisters a layer mosaic rule changed event handler.
+     *
+     * @param callback - The callback to stop being called whenever the event is emitted
+     */
+    offLayerMosaicRuleChanged(callback: DomainLayerMosaicRuleChangedDelegate | undefined): void;
+    /**
+     * Registers a layer WMS style changed event handler.
+     *
+     * @param callback - The callback to be executed whenever the event is emitted
+     * @returns The callback registered, for chaining or unregistration purposes
+     */
+    onLayerWmsStyleChanged(callback: DomainLayerWMSStyleChangedDelegate): DomainLayerWMSStyleChangedDelegate;
+    /**
+     * Unregisters a layer WMS style changed event handler.
+     *
+     * @param callback - The callback to stop being called whenever the event is emitted
+     */
+    offLayerWmsStyleChanged(callback: DomainLayerWMSStyleChangedDelegate | undefined): void;
+    /**
      * Registers a layer group layer added event handler.
      *
      * @param callback - The callback to be executed whenever the event is emitted
@@ -479,13 +519,16 @@ export declare class LayerDomain {
      */
     offLayerGroupLayerRemoved(callback: DomainLayerGroupChildrenUpdatedDelegate | undefined): void;
 }
+/** Define a base event for layer entry events. */
 export interface DomainLayerEntryBaseEvent<T extends ConfigBaseClass = ConfigBaseClass> {
+    /** The layer entry configuration. */
     config: T;
 }
 /**
  * Define an event for the delegate
  */
 export interface DomainLayerStatusChangedEvent extends DomainLayerEntryBaseEvent {
+    /** The new layer status. */
     status: TypeLayerStatus;
 }
 /**
@@ -496,6 +539,7 @@ export type DomainLayerStatusChangedDelegate = EventDelegateBase<LayerDomain, Do
  * Define an event for the delegate
  */
 export interface DomainLayerRegisteredEvent {
+    /** The registered layer. */
     layer: AbstractBaseGVLayer;
 }
 /**
@@ -506,7 +550,9 @@ export type DomainLayerRegisteredDelegate = EventDelegateBase<LayerDomain, Domai
  * Define an event for the delegate
  */
 export interface DomainLayerBaseEvent<T extends AbstractBaseGVLayer = AbstractBaseGVLayer, U extends LayerBaseEvent = LayerBaseEvent> {
+    /** The layer included in the event payload. */
     layer: T;
+    /** The layer event itself being redirected. */
     layerEvent: U;
 }
 /** Define a delegate for the layer loading event handler function signature. */
@@ -576,6 +622,33 @@ export interface DomainLayerWMSImageLoadRescueEvent extends DomainLayerBaseEvent
  * Define a delegate for the event handler function signature
  */
 export type DomainLayerWMSImageLoadRescueDelegate = EventDelegateBase<LayerDomain, DomainLayerWMSImageLoadRescueEvent, boolean>;
+/**
+ * Define an event for the delegate
+ */
+export interface DomainLayerWMSStyleChangedEvent extends DomainLayerBaseEvent<GVWMS, WMSStyleChangedEvent> {
+}
+/**
+ * Define a delegate for the event handler function signature
+ */
+export type DomainLayerWMSStyleChangedDelegate = EventDelegateBase<LayerDomain, DomainLayerWMSStyleChangedEvent, void>;
+/**
+ * Define an event for the delegate
+ */
+export interface DomainLayerRasterFunctionChangedEvent extends DomainLayerBaseEvent<AbstractGVLayer, RasterFunctionChangedEvent> {
+}
+/**
+ * Define a delegate for the event handler function signature
+ */
+export type DomainLayerRasterFunctionChangedDelegate = EventDelegateBase<LayerDomain, DomainLayerRasterFunctionChangedEvent, void>;
+/**
+ * Define an event for the delegate
+ */
+export interface DomainLayerMosaicRuleChangedEvent extends DomainLayerBaseEvent<GVEsriImage, MosaicRuleChangedEvent> {
+}
+/**
+ * Define a delegate for the event handler function signature
+ */
+export type DomainLayerMosaicRuleChangedDelegate = EventDelegateBase<LayerDomain, DomainLayerMosaicRuleChangedEvent, void>;
 /**
  * Define an event for the delegate
  */

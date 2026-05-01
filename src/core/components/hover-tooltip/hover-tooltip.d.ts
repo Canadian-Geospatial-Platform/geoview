@@ -5,5 +5,5 @@
  *
  * @returns The hover tooltip element, or null when not visible
  */
-export declare const HoverTooltip: import("react").NamedExoticComponent<object>;
+export declare const HoverTooltip: import("react").MemoExoticComponent<() => JSX.Element | null>;
 //# sourceMappingURL=hover-tooltip.d.ts.map

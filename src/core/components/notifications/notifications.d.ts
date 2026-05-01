@@ -20,6 +20,6 @@ export type NotificationType = 'success' | 'error' | 'info' | 'warning';
  *
  * @returns The notification component
  */
-declare const _default: import("react").NamedExoticComponent<object>;
+declare const _default: import("react").MemoExoticComponent<() => JSX.Element>;
 export default _default;
 //# sourceMappingURL=notifications.d.ts.map

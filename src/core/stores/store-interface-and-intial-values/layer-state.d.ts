@@ -1,6 +1,6 @@
 import type { Extent } from 'ol/extent';
 import type { Projection as OLProjection } from 'ol/proj';
-import type { TypeLayersViewDisplayState, TypeLegendItem, TypeLegendLayer } from '@/core/components/layers/types';
+import type { TypeLayersViewDisplayState, TypeLegendItem, TypeLegendLayer, TypeLegendLayerItem } from '@/core/components/layers/types';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import type { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 import type { TypeLayerStyleConfig, TypeResultSet, TypeResultSetEntry } from '@/api/types/map-schema-types';
@@ -26,10 +26,14 @@ export interface ILayerState {
     displayState: TypeLayersViewDisplayState;
     /** Whether one or more layers are currently loading. */
     layersAreLoading: boolean;
+    /** The ordered layer paths controlling display and Z-index order. */
+    orderedLayers: string[];
+    /** The initial filter strings keyed by layer path. */
+    initialFilters: Record<string, string>;
     /**
      * Applies default configuration values from the map config to the layer store.
      *
-     * @param geoviewConfig - The map features configuration to extract defaults from.
+     * @param geoviewConfig - The map features configuration to extract defaults from
      */
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
     /** Store setter actions callable from adaptors. */
@@ -40,9 +44,21 @@ export interface ILayerState {
         setSelectedLayerPath: (layerPath: string | undefined) => void;
         setLayersAreLoading: (areLoading: boolean) => void;
         setLayerDeletionStartTime: (layerPath: string, startTime: number | undefined) => void;
+        setOrderedLayers: (newOrder: string[]) => void;
+        setInitialFilters: (filters: Record<string, string>) => void;
         updateLayerByPath: (layerPath: string, updater: (layer: TypeLegendLayer) => TypeLegendLayer) => void;
     };
 }
+/**
+ * Finds a layer and all its children from the ordered layers array.
+ *
+ * Matches the exact layer path and any paths that start with the given path followed by a separator.
+ *
+ * @param layerPath - The layer path to search for
+ * @param orderedLayers - The ordered layer paths array to search in
+ * @returns The matching layer paths including the layer and its children
+ */
+export declare const utilFindLayerAndChildrenPaths: (layerPath: string, orderedLayers: string[]) => string[];
 /**
  * Initializes a Layer State and provide functions which use the get/set Zustand mechanisms.
  *
@@ -58,70 +74,122 @@ export declare function initializeLayerState(set: TypeSetStore, get: TypeGetStor
  * GV avoid unnecessary re-renders of the full layers tree when any single layer property changes.
  * GV See examples below for how to create these precise hooks using the createLayerSelectorHook factory.
  *
- * @param mapId - The map identifier.
- * @returns The legend layers array.
+ * @param mapId - The map identifier
+ * @returns The legend layers array
  */
 export declare const getStoreLayerLegendLayers: (mapId: string) => TypeLegendLayer[];
 /**
- * Gets the layer paths for the given map.
+ * Returns all layer paths from the ordered layers.
  *
- * @param mapId - The map identifier.
- * @returns The layer paths array.
+ * @param mapId - The map identifier
+ * @returns The ordered layer paths array
  */
-export declare const getStoreLayerLayerPaths: (mapId: string) => string[];
-/** Hook that returns only the top-level layer paths. Re-renders only when layers are added, removed, or reordered. */
-export declare const useStoreLayerLayerPaths: () => string[];
+export declare const getStoreLayerOrderedLayerPaths: (mapId: string) => string[];
+/**
+ * Selects the ordered layer paths from the store.
+ *
+ * @returns The ordered layer paths array
+ */
+export declare const useStoreLayerOrderedLayerPaths: () => string[];
+/**
+ * Returns the index of a layer in the ordered layers array by its path.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to search for
+ * @returns The zero-based index of the layer, or -1 if not found
+ */
+export declare const getStoreLayerOrderedLayerIndexByPath: (mapId: string, layerPath: string) => number;
+/**
+ * Returns the initial filter string for a layer path, or undefined if none is set.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path
+ * @returns The initial filter string, or undefined if none is set
+ */
+export declare const getStoreLayerInitialFilter: (mapId: string, layerPath: string) => string | undefined;
+/**
+ * Selects the initial layer filters from the store.
+ *
+ * @returns A record of filter strings keyed by layer path
+ */
+export declare const useStoreLayerInitialFilters: () => Record<string, string>;
+/**
+ * Hook that returns only the top-level layer paths. Re-renders only when layers are added, removed, or reordered.
+ *
+ * @returns The top-level layer paths
+ */
+export declare const useStoreLayerTopLevelLayerPaths: () => string[];
 /**
  * Gets the selected layer path for the given map.
  *
- * @param mapId - The map identifier.
- * @returns The selected layer path, or undefined if none is selected.
+ * @param mapId - The map identifier
+ * @returns The selected layer path, or undefined if none is selected
  */
 export declare const getStoreLayerSelectedLayerPath: (mapId: string) => string | undefined;
-/** Hook that returns the selected layer path. */
+/**
+ * Hook that returns the selected layer path.
+ *
+ * @returns The selected layer path, or null/undefined if none is selected
+ */
 export declare const useStoreLayerSelectedLayerPath: () => string | null | undefined;
-/** Hook that returns the layer name of the currently selected layer. Primitive string so Object.is prevents spurious re-renders. */
+/**
+ * Hook that returns the layer name of the currently selected layer. Primitive string so Object.is prevents spurious re-renders.
+ *
+ * @returns The selected layer name, or undefined if no layer is selected
+ */
 export declare const useStoreLayerSelectedLayerName: () => string | undefined;
 /**
  * Gets the highlighted layer path for the given map.
  *
- * @param mapId - The map identifier.
- * @returns The highlighted layer path.
+ * @param mapId - The map identifier
+ * @returns The highlighted layer path
  */
 export declare const getStoreLayerHighlightedLayer: (mapId: string) => string;
-/** Hook that returns the highlighted layer path. */
+/**
+ * Hook that returns the highlighted layer path.
+ *
+ * @returns The highlighted layer path
+ */
 export declare const useStoreLayerHighlightedLayer: () => string;
 /**
  * Gets the layers panel display state for the given map.
  *
- * @param mapId - The map identifier.
- * @returns The display state.
+ * @param mapId - The map identifier
+ * @returns The display state
  */
 export declare const getStoreLayerDisplayState: (mapId: string) => TypeLayersViewDisplayState;
-/** Hook that returns the current layers panel display state. */
+/**
+ * Hook that returns the current layers panel display state.
+ *
+ * @returns The current display state
+ */
 export declare const useStoreLayerDisplayState: () => TypeLayersViewDisplayState;
 /**
  * Gets whether layers are currently loading for the given map.
  *
- * @param mapId - The map identifier.
- * @returns True if layers are loading.
+ * @param mapId - The map identifier
+ * @returns True if layers are loading
  */
 export declare const getStoreLayerAreLayersLoading: (mapId: string) => boolean;
-/** Hook that returns whether layers are currently loading. */
+/**
+ * Hook that returns whether layers are currently loading.
+ *
+ * @returns True if layers are loading
+ */
 export declare const useStoreLayerAreLayersLoading: () => boolean;
 /**
  * Gets a specific legend layer by its path for the given map.
  *
- * @param mapId - The map identifier.
- * @param layerPath - The layer path to look up.
- * @returns The matching legend layer, or undefined if not found.
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to look up
+ * @returns The matching legend layer, or undefined if not found
  */
 export declare const getStoreLayerLegendLayerByPath: (mapId: string, layerPath: string) => TypeLegendLayer | undefined;
 /**
  * Gets the selected layer path for the given map.
  *
- * @param mapId - The map identifier.
- * @returns The selected layer path, or undefined if none is selected.
+ * @param mapId - The map identifier
+ * @returns The selected layer path, or undefined if none is selected
  */
 export declare const getStoreLayerId: (mapId: string, layerPath: string) => string | undefined;
 /** Hook that returns the layer id for a specific layer. */
@@ -129,9 +197,9 @@ export declare const useStoreLayerId: (layerPath: string) => string | undefined;
 /**
  * Gets the bounds extent for a specific layer.
  *
- * @param mapId - The map identifier.
- * @param layerPath - The layer path to look up.
- * @returns The layer bounds extent, or undefined.
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to look up
+ * @returns The layer bounds extent, or undefined
  */
 export declare const getStoreLayerBounds: (mapId: string, layerPath: string) => Extent | undefined;
 /** Hook that returns the bounds extent for a specific layer. */
@@ -139,25 +207,262 @@ export declare const useStoreLayerBounds: (layerPath: string) => Extent | undefi
 /**
  * Gets the layer status for a specific layer.
  *
- * @param mapId - The map identifier.
- * @param layerPath - The layer path to look up.
- * @returns The layer status, or undefined.
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to look up
+ * @returns The layer status, or undefined
  */
 export declare const getStoreLayerStatus: (mapId: string, layerPath: string) => TypeLayerStatus | undefined;
 /** Hook that returns the layer status for a specific layer. */
 export declare const useStoreLayerStatus: (layerPath: string) => TypeLayerStatus | undefined;
 /**
+ * Gets the queryable state for a specific layer.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to look up
+ * @returns The layer queryable state, defaults to true
+ */
+export declare const getStoreLayerQueryable: (mapId: string, layerPath: string) => boolean;
+/** Hook that returns the queryable state for a specific layer. */
+export declare const useStoreLayerQueryable: (layerPath: string) => boolean | undefined;
+/**
+ * Hooks on the queryable states for multiple layer paths.
+ *
+ * @param layerPaths - The layer paths to check queryable state for
+ * @returns A record mapping each layer path to its queryable state
+ */
+export declare const useStoreLayerQueryableByPaths: (layerPaths: string[]) => Record<string, boolean>;
+/**
+ * Gets the hoverable state for a specific layer.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to look up
+ * @returns The layer hoverable state, defaults to true
+ */
+export declare const getStoreLayerHoverable: (mapId: string, layerPath: string) => boolean;
+/** Hook that returns the hoverable state for a specific layer. */
+export declare const useStoreLayerHoverable: (layerPath: string) => boolean | undefined;
+/**
  * Hook that returns a record of layer statuses for all layers.
  *
- * @returns A record of layer statuses keyed by layer path, defaulting to 'newInstance'.
+ * @returns A record of layer statuses keyed by layer path, defaulting to 'newInstance'
  */
 export declare const useStoreLayerStatusSet: () => Record<string, TypeLayerStatus>;
 /**
+ * Gets the visible state for a specific layer.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to look up
+ * @returns The layer visible state, defaults to false
+ */
+export declare const getStoreLayerVisible: (mapId: string, layerPath: string) => boolean;
+/**
+ * Selects whether a layer is within its visible zoom range.
+ *
+ * @returns True if the layer is in visible range
+ */
+export declare const useStoreLayerVisible: (layerPath: string) => boolean | undefined;
+/**
+ * Returns the layer paths of all layers currently visible.
+ *
+ * @param mapId - The map identifier
+ * @returns An array of layer paths that are currently visible
+ */
+export declare const getStoreLayerVisibleLayerPaths: (mapId: string) => string[];
+/**
+ * Selects whether any of the given layer paths are visible.
+ *
+ * A group layer is considered visible when at least one child layer is visible.
+ *
+ * @param layerPaths - The layer paths to check visibility for
+ * @returns True if at least one layer is visible, false otherwise
+ */
+export declare const useStoreLayerArrayVisibility: (layerPaths: string[]) => boolean;
+/**
+ * Returns whether any parent of the given layer is hidden.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to check parent visibility for
+ * @returns True if any parent layer is hidden
+ */
+export declare const getStoreLayerParentHidden: (mapId: string, layerPath: string) => boolean;
+/**
+ * Gets the InVisibleRange flag for a specific layer.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to look up
+ * @returns The InVisibleRange flag, or true if not defined
+ */
+export declare const getStoreLayerInVisibleRange: (mapId: string, layerPath: string) => boolean;
+/**
+ * Selects whether a layer is within its visible zoom range.
+ *
+ * @param layerPath - The layer path to check
+ * @returns True if the layer is in visible range
+ */
+export declare const useStoreLayerInVisibleRange: (layerPath: string) => boolean | undefined;
+/**
+ * Returns the layer paths of all layers currently in their visible zoom range.
+ *
+ * @param mapId - The map identifier
+ * @returns An array of layer paths that are in their visible zoom range
+ */
+export declare const getStoreLayerInVisibleRangeLayerPaths: (mapId: string) => string[];
+/**
+ * Selects whether all layers are visible (excluding errored layers).
+ *
+ * @returns True if all non-errored layers are visible
+ */
+export declare const useStoreLayerAllLayersVisibleToggle: () => boolean;
+/**
+ * Returns whether a layer is effectively hidden on the map (parent hidden, out of range, or not visible).
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to check
+ * @returns True if the layer is hidden on the map
+ */
+export declare const getStoreLayerIsHiddenOnMap: (mapId: string, layerPath: string) => boolean;
+/**
+ * Selects whether a layer is effectively hidden on the map.
+ *
+ * A layer is hidden if any parent is hidden, or if it is out of visible range, or if it is not visible.
+ *
+ * @param layerPath - The layer path to check
+ * @returns True if the layer is hidden on the map
+ */
+export declare const useStoreLayerIsHiddenOnMap: (layerPath: string) => boolean;
+/**
+ * Selects the hidden-on-map state for all layers.
+ *
+ * @returns A record mapping each layer path to whether it is hidden on the map
+ */
+export declare const useStoreLayerIsHiddenOnMapSet: () => Record<string, boolean>;
+/**
+ * Selects whether any parent of the given layer is hidden.
+ *
+ * @param layerPath - The layer path to check parent visibility for
+ * @returns True if any parent layer is hidden
+ */
+export declare const useStoreLayerIsParentHiddenOnMap: (layerPath: string) => boolean;
+/**
+ * Selects the parent-hidden state for all layers.
+ *
+ * @returns A record mapping each layer path to whether any of its parents are hidden
+ */
+export declare const useStoreLayerIsParentHiddenOnMapSet: () => Record<string, boolean>;
+/**
+ * Selects the visible layer paths derived from legendLayers.
+ *
+ * @returns The array of visible layer paths
+ */
+export declare const useStoreLayerVisibleLayers: () => string[];
+/**
+ * Selects the layer paths that are either visible or in their visible zoom range.
+ *
+ * Used by data-table, details, geochart, and time-slider left panel components.
+ *
+ * @returns The deduplicated array of layer paths that are visible or in visible range
+ */
+export declare const useStoreLayerAllVisibleAndInRangeLayers: () => string[];
+/**
+ * Returns the legend collapsed state for all layers, defaulting to false if not found.
+ *
+ * @param mapId - The map identifier
+ * @returns A record mapping each layer path to its collapsed state
+ */
+export declare const getStoreLayerLegendCollapsedSet: (mapId: string) => Record<string, boolean>;
+/**
+ * Returns the ordered layer info entries that have collapsible legends.
+ *
+ * @param mapId - The map identifier
+ * @returns The layers with collapsible legends
+ */
+export declare const getStoreLayerLegendCollapsibleLayers: (mapId: string) => TypeLegendLayer[];
+/**
+ * Returns the legend collapsed state for a layer, defaulting to false if not found.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to check
+ * @returns True if the layer legend is collapsed
+ */
+export declare const getStoreLayerLegendCollapsed: (mapId: string, layerPath: string) => boolean;
+/**
+ * Selects the legend collapsed state for a given layer.
+ *
+ * @param layerPath - The layer path to check
+ * @returns True if the layer legend is collapsed
+ */
+export declare const useStoreLayerLegendCollapsed: (layerPath: string) => boolean | undefined;
+/**
+ * Gets the legend query status for a specific layer.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to look up
+ * @returns The layer legend query status, defaults to undefined
+ */
+export declare const getStoreLayerLegendQueryStatus: (mapId: string, layerPath: string) => LegendQueryStatus | undefined;
+/** Hook that returns the legend query status for a specific layer. */
+export declare const useStoreLayerLegendQueryStatus: (layerPath: string) => LegendQueryStatus | undefined;
+/**
+ * Gets the legend schema tag for a specific layer.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to look up
+ * @returns The layer legend schema tag, defaults to undefined
+ */
+export declare const getStoreLayerLegendSchemaTag: (mapId: string, layerPath: string) => TypeGeoviewLayerType | undefined;
+/** Hook that returns the legend schema tag for a specific layer. */
+export declare const useStoreLayerLegendSchemaTag: (layerPath: string) => TypeGeoviewLayerType | undefined;
+/**
+ * Gets the legend style config for a specific layer.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to look up
+ * @returns The layer legend style config, defaults to undefined
+ */
+export declare const getStoreLayerStyleConfig: (mapId: string, layerPath: string) => TypeLayerStyleConfig | undefined;
+/** Hook that returns the style configuration for a specific layer. */
+export declare const useStoreLayerStyleConfig: (layerPath: string) => Partial<Record<"Point" | "MultiPoint" | "LineString" | "MultiLineString" | "Polygon" | "MultiPolygon" | "GeometryCollection", import("@/api/types/map-schema-types").TypeLayerStyleSettings>> | undefined;
+/**
+ * Gets the legend icons for a specific layer.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to look up
+ * @returns The layer legend icons, defaults to undefined
+ */
+export declare const getStoreLayerIcons: (mapId: string, layerPath: string) => TypeLegendLayerItem[] | undefined;
+/** Hook that returns the legend icons for a specific layer. */
+export declare const useStoreLayerIcons: (layerPath: string) => TypeLegendLayerItem[] | undefined;
+/**
+ * Gets the legend items for a specific layer.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to look up
+ * @returns The layer legend items, defaults to undefined
+ */
+export declare const getStoreLayerItems: (mapId: string, layerPath: string) => TypeLegendItem[] | undefined;
+/** Hook that returns the legend items for a specific layer. */
+export declare const useStoreLayerItems: (layerPath: string) => TypeLegendItem[] | undefined;
+/**
+ * Selects whether all collapsible layer legends are collapsed.
+ *
+ * Non-collapsible leaf layers are considered inherently collapsed (nothing to expand),
+ * so they do not prevent this from returning true.
+ *
+ * @returns True if all collapsible legends are collapsed, or if there are no collapsible layers
+ */
+export declare const useStoreLayerAllLayersCollapsedToggle: () => boolean;
+/**
+ * Selects whether there are any layers with collapsible legends.
+ *
+ * @returns True if at least one layer has a collapsible legend
+ */
+export declare const useStoreLayerHasCollapsibleLayersToggle: () => boolean;
+/**
  * Gets the WMS style for a specific layer.
  *
- * @param mapId - The map identifier.
- * @param layerPath - The layer path to look up.
- * @returns The WMS style name, or undefined.
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to look up
+ * @returns The WMS style name, or undefined
  */
 export declare const getStoreLayerWmsStyle: (mapId: string, layerPath: string) => string | undefined;
 /** Hook that returns the WMS style for a specific layer. */
@@ -165,9 +470,9 @@ export declare const useStoreLayerWmsStyle: (layerPath: string) => string | unde
 /**
  * Gets the available WMS styles metadata for a specific layer.
  *
- * @param mapId - The map identifier.
- * @param layerPath - The layer path to look up.
- * @returns The WMS styles metadata, or undefined.
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to look up
+ * @returns The WMS styles metadata, or undefined
  */
 export declare const getStoreLayerWmsStyles: (mapId: string, layerPath: string) => TypeMetadataWMSCapabilityLayerStyle[] | undefined;
 /** Hook that returns the available WMS styles metadata for a specific layer. */
@@ -175,9 +480,9 @@ export declare const useStoreLayerWmsStyles: (layerPath: string) => TypeMetadata
 /**
  * Gets the mosaic rule for a specific layer.
  *
- * @param mapId - The map identifier.
- * @param layerPath - The layer path to look up.
- * @returns The mosaic rule, or undefined.
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to look up
+ * @returns The mosaic rule, or undefined
  */
 export declare const getStoreLayerMosaicRule: (mapId: string, layerPath: string) => TypeMosaicRule | undefined;
 /** Hook that returns the mosaic rule for a specific layer. */
@@ -185,9 +490,9 @@ export declare const useStoreLayerMosaicRule: (layerPath: string) => TypeMosaicR
 /**
  * Gets the raster function for a specific layer.
  *
- * @param mapId - The map identifier.
- * @param layerPath - The layer path to look up.
- * @returns The raster function name, or undefined.
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to look up
+ * @returns The raster function name, or undefined
  */
 export declare const getStoreLayerRasterFunction: (mapId: string, layerPath: string) => string | undefined;
 /** Hook that returns the raster function for a specific layer. */
@@ -195,9 +500,9 @@ export declare const useStoreLayerRasterFunction: (layerPath: string) => string 
 /**
  * Gets the raster function infos for a specific layer.
  *
- * @param mapId - The map identifier.
- * @param layerPath - The layer path to look up.
- * @returns The raster function infos, or undefined.
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to look up
+ * @returns The raster function infos, or undefined
  */
 export declare const getStoreLayerRasterFunctionInfos: (mapId: string, layerPath: string) => TypeMetadataEsriRasterFunctionInfos[] | undefined;
 /** Hook that returns the raster function infos for a specific layer. */
@@ -205,9 +510,9 @@ export declare const useStoreLayerRasterFunctionInfos: (layerPath: string) => Ty
 /**
  * Gets the allowed mosaic methods for a specific layer.
  *
- * @param mapId - The map identifier.
- * @param layerPath - The layer path to look up.
- * @returns The allowed mosaic methods, or undefined.
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to look up
+ * @returns The allowed mosaic methods, or undefined
  */
 export declare const getStoreLayerAllowedMosaicMethods: (mapId: string, layerPath: string) => TypeMosaicMethod[] | undefined;
 /** Hook that returns the allowed mosaic methods for a specific layer. */
@@ -215,9 +520,9 @@ export declare const useStoreLayerAllowedMosaicMethods: (layerPath: string) => T
 /**
  * Gets the time dimension for a specific layer.
  *
- * @param mapId - The map identifier.
- * @param layerPath - The layer path to look up.
- * @returns The time dimension, or undefined.
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to look up
+ * @returns The time dimension, or undefined
  */
 export declare const getStoreLayerTimeDimension: (mapId: string, layerPath: string) => TimeDimension | undefined;
 /** Hook that returns the time dimension for a specific layer. */
@@ -225,18 +530,18 @@ export declare const useStoreLayerTimeDimension: (layerPath: string) => TimeDime
 /**
  * Gets the available style settings for a layer.
  *
- * @param mapId - The map identifier.
- * @param layerPath - The layer path.
- * @returns Array of available style setting types.
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path
+ * @returns Array of available style setting types
  */
 export declare const getStoreLayerStyleSettings: (mapId: string, layerPath: string) => string[];
 /**
  * Gets a specific legend item by name for a layer.
  *
- * @param mapId - The map identifier.
- * @param layerPath - The layer path to look up.
- * @param name - The legend item name to find.
- * @returns The matching legend item, or undefined.
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to look up
+ * @param name - The legend item name to find
+ * @returns The matching legend item, or undefined
  */
 export declare const getStoreLayerItemVisibility: (mapId: string, layerPath: string, name: string) => TypeLegendItem | undefined;
 /** Hook that returns the EPSG:4326 bounds for a specific layer. */
@@ -246,7 +551,7 @@ export declare const useStoreLayerCanToggle: (layerPath: string) => boolean | un
 /**
  * Selects whether all sublayers of a layer are visible.
  *
- * Reads from both layerState (children tree) and mapState (visibleLayers).
+ * Reads from layerState children tree and each layer's visible property.
  *
  * @param layerPath - The layer path to check
  * @returns True if all children and descendants are visible
@@ -256,7 +561,7 @@ export declare const useStoreLayerAllChildrenVisible: (layerPath: string) => boo
  * Selects the child layer paths for a specific layer.
  *
  * Uses useStableSelector with shallowObjectEqual so the component only re-renders
- * when children are added, removed, or reordered — not when a descendant's property changes.
+ * when children are added, removed, or reordered â€” not when a descendant's property changes.
  *
  * @param layerPath - The layer path to look up
  * @returns The child layer paths, or undefined if no children exist
@@ -281,16 +586,8 @@ export declare const useStoreLayerHasText: (layerPath: string) => boolean | unde
 export declare const useStoreLayerFilter: (layerPath: string) => string | undefined;
 /** Hook that returns the layer filter class for a specific layer. */
 export declare const useStoreLayerFilterClass: (layerPath: string) => string | undefined;
-/** Hook that returns the legend query status for a specific layer. */
-export declare const useStoreLayerLegendQueryStatus: (layerPath: string) => LegendQueryStatus | undefined;
-/** Hook that returns the legend icons for a specific layer. */
-export declare const useStoreLayerIcons: (layerPath: string) => import("@/core/components/layers/types").TypeLegendLayerItem[] | undefined;
-/** Hook that returns the legend items for a specific layer. */
-export declare const useStoreLayerItems: (layerPath: string) => TypeLegendItem[] | undefined;
 /** Hook that returns the schema tag for a specific layer. */
 export declare const useStoreLayerSchemaTag: (layerPath: string) => TypeGeoviewLayerType | undefined;
-/** Hook that returns the style configuration for a specific layer. */
-export declare const useStoreLayerStyleConfig: (layerPath: string) => Partial<Record<"Point" | "MultiPoint" | "LineString" | "MultiLineString" | "Polygon" | "MultiPolygon", import("@/api/types/map-schema-types").TypeLayerStyleSettings>> | undefined;
 /** Hook that returns the text visibility for a specific layer. */
 export declare const useStoreLayerTextVisibility: (layerPath: string) => boolean | undefined;
 /** Hook that returns the layer attribution for a specific layer. */
@@ -299,10 +596,6 @@ export declare const useStoreLayerAttribution: (layerPath: string) => string[] |
 export declare const useStoreLayerOpacity: (layerPath: string) => number | undefined;
 /** Hook that returns the max opacity inherited from parent for a specific layer. */
 export declare const useStoreLayerOpacityMaxFromParent: (layerPath: string) => number | undefined;
-/** Hook that returns the hoverable flag for a specific layer. */
-export declare const useStoreLayerHoverable: (layerPath: string) => boolean | undefined;
-/** Hook that returns the queryable flag for a specific layer. */
-export declare const useStoreLayerQueryable: (layerPath: string) => boolean | undefined;
 /** Hook that returns the URL for a specific layer. */
 export declare const useStoreLayerUrl: (layerPath: string) => string | undefined;
 /** Hook that returns the layer name for a specific layer. */
@@ -310,7 +603,7 @@ export declare const useStoreLayerName: (layerPath: string) => string | undefine
 /**
  * Hook that returns a record of layer names for all layers.
  *
- * @returns A record of layer names keyed by layer path.
+ * @returns A record of layer names keyed by layer path
  */
 export declare const useStoreLayerNameSet: () => Record<string, string>;
 /**
@@ -318,29 +611,29 @@ export declare const useStoreLayerNameSet: () => Record<string, string>;
  *
  * For WMS layers, returns canvas icon images; for other types, returns item icons.
  *
- * @param layerPath - The layer path to get icons for.
- * @returns An array of icon image strings.
+ * @param layerPath - The layer path to get icons for
+ * @returns An array of icon image strings
  */
 export declare const useStoreLayerIconLayerSet: (layerPath: string) => string[];
 /**
  * React hook that returns if the temporal mode of the dates for the layer.
  *
- * @param layerPath - Unique path identifying the layer in the legend state.
- * @returns The temporal mode of the dates for the layer. Default: DateMgt.DEFAULT_TEMPORAL_MODE.
+ * @param layerPath - Unique path identifying the layer in the legend state
+ * @returns The temporal mode of the dates for the layer. Default: DateMgt.DEFAULT_TEMPORAL_MODE
  */
 export declare const useStoreLayerDateTemporalMode: (layerPath: string | undefined) => TemporalMode;
 /**
  * React hook that returns if the temporal modes for the layers.
  *
- * @returns The temporal mode of the dates for the layer.
+ * @returns The temporal mode of the dates for the layer
  */
 export declare const useStoreLayerDateTemporalModeSet: () => Record<string, TemporalMode>;
 /**
  * Gets the display date format for a specific layer.
  *
- * @param mapId - The map identifier.
- * @param layerPath - The layer path to look up.
- * @returns The display date format, or undefined.
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to look up
+ * @returns The display date format, or undefined
  */
 export declare const getStoreLayerDisplayDateFormat: (mapId: string, layerPath: string) => TypeDisplayDateFormat | undefined;
 /**
@@ -351,7 +644,7 @@ export declare const getStoreLayerDisplayDateFormat: (mapId: string, layerPath: 
  * display date format (or cannot be found), the application-wide display
  * date format for the current map is returned as a fallback.
  *
- * @param layerPath - Unique path identifying the layer in the legend state.
+ * @param layerPath - Unique path identifying the layer in the legend state
  * @returns The display date format to use for the layer, falling back to the
  * application's default display date format when none is defined.
  */
@@ -359,7 +652,7 @@ export declare const useStoreLayerDisplayDateFormat: (layerPath: string | undefi
 /**
  * React hook that returns if the display date formats for the layers.
  *
- * @returns The display date format of the dates for the layer.
+ * @returns The display date format of the dates for the layer
  */
 export declare const useStoreLayerDisplayDateFormatSet: () => Record<string, TypeDisplayDateFormat>;
 /**
@@ -370,7 +663,7 @@ export declare const useStoreLayerDisplayDateFormatSet: () => Record<string, Typ
  * display date format (or cannot be found), the application-wide display
  * date format for the current map is returned as a fallback.
  *
- * @param layerPath - Unique path identifying the layer in the legend state.
+ * @param layerPath - Unique path identifying the layer in the legend state
  * @returns The display date format to use for the layer, falling back to the
  * application's default display date format when none is defined.
  */
@@ -383,7 +676,7 @@ export declare const useStoreLayerDisplayDateFormatShort: (layerPath: string | u
  * display date timezone (or cannot be found), the application-wide display
  * date timezone for the current map is returned as a fallback.
  *
- * @param layerPath - Unique path identifying the layer in the legend state.
+ * @param layerPath - Unique path identifying the layer in the legend state
  * @returns The display date timezone to use for the layer, falling back to the
  * application's default display date timezone when none is defined.
  */
@@ -391,52 +684,53 @@ export declare const useStoreLayerDisplayDateTimezone: (layerPath: string | unde
 /**
  * React hook that returns if the display date timezones for the layers.
  *
- * @returns The display date timezone of the dates for the layer.
+ * @returns The display date timezone of the dates for the layer
  */
 export declare const useStoreLayerDisplayDateTimezoneSet: () => Record<string, TimeIANA>;
 /**
  * Hook that returns the available style settings for a layer.
  *
- * @param layerPath - The layer path to get settings for.
- * @returns Array of available style setting types.
+ * @param layerPath - The layer path to get settings for
+ * @returns Array of available style setting types
  */
 export declare const useStoreLayerStyleSettings: (layerPath: string) => string[];
 /**
  * Sets the layers panel display state in the store.
  *
- * @param mapId - The map identifier.
- * @param displayState - The display state to set.
+ * @param mapId - The map identifier
+ * @param displayState - The display state to set
  */
 export declare const setStoreLayerDisplayState: (mapId: string, displayState: TypeLayersViewDisplayState) => void;
 /**
  * Sets the status for a specific layer in the store.
  *
- * @param mapId - The map identifier.
- * @param layerPath - The layer path to update.
- * @param layerStatus - The new layer status.
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to update
+ * @param layerStatus - The new layer status
  */
 export declare const setStoreLayerStatus: (mapId: string, layerPath: string, layerStatus: TypeLayerStatus) => void;
 /**
  * Sets the layer name of the layer and its children in the store.
- * @param mapId - The ID of the map.
- * @param layerPath - The layer path of the layer to change.
- * @param layerName - The layer name to set.
+ *
+ * @param mapId - The ID of the map
+ * @param layerPath - The layer path of the layer to change
+ * @param layerName - The layer name to set
  */
 export declare const setStoreLayerName: (mapId: string, layerPath: string, layerName: string | undefined) => void;
 /**
  * Sets the queryable flag for a specific layer in the store.
  *
- * @param mapId - The map identifier.
- * @param layerPath - The layer path to update.
- * @param queryable - Whether the layer should be queryable.
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to update
+ * @param queryable - Whether the layer should be queryable
  */
 export declare const setStoreLayerQueryable: (mapId: string, layerPath: string, queryable: boolean) => void;
 /**
  * Sets the hoverable flag for a specific layer in the store.
  *
- * @param mapId - The map identifier.
- * @param layerPath - The layer path to update.
- * @param hoverable - Whether the layer should be hoverable.
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to update
+ * @param hoverable - Whether the layer should be hoverable
  */
 export declare const setStoreLayerHoverable: (mapId: string, layerPath: string, hoverable: boolean) => void;
 /**
@@ -444,141 +738,169 @@ export declare const setStoreLayerHoverable: (mapId: string, layerPath: string, 
  *
  * Also computes and stores the EPSG:4326 projected bounds.
  *
- * @param mapId - The map identifier.
- * @param layerPath - The layer path to update.
- * @param bounds - The new bounds extent, or undefined to clear.
- * @param mapProjection - The current map projection.
- * @param stops - The number of interpolation stops for reprojection.
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to update
+ * @param bounds - The new bounds extent, or undefined to clear
+ * @param mapProjection - The current map projection
+ * @param stops - The number of interpolation stops for reprojection
  */
 export declare const setStoreLayerBounds: (mapId: string, layerPath: string, bounds: Extent | undefined, mapProjection: OLProjection, stops: number) => void;
 /**
  * Recalculates and stores bounds for a layer and all of its parent groups.
  *
- * @param mapId - The unique identifier of the map instance.
- * @param gvLayer - The starting layer for which bounds should be computed.
- * @returns A promise that resolves once bounds have been computed and
- * propagated up the entire parent hierarchy.
- * @description
  * This method recalculates the bounds for the provided layer and then
  * iteratively walks up the layer hierarchy, recalculating and storing
  * bounds for each parent group layer.
+ *
+ * @param mapId - The unique identifier of the map instance
+ * @param gvLayer - The starting layer for which bounds should be computed
+ * @returns A promise that resolves once bounds have been computed and
+ * propagated up the entire parent hierarchy.
  */
 export declare const setStoreLayerBoundsForLayerAndParents: (mapId: string, gvLayer: AbstractBaseGVLayer, mapProjection: OLProjection, stops: number) => Promise<void>;
 /**
  * Triggers asynchronous bounds recalculation and propagation for a layer
  * and its parent hierarchy without awaiting completion.
  *
- * @param mapId - The unique identifier of the map instance.
- * @param gvLayer - The layer from which bounds recalculation should begin.
- * @description
  * This method invokes {@link setLayerBoundsForLayerAndParentsInStore} using a
  * fire-and-forget pattern. The returned promise is intentionally not awaited,
  * allowing bounds recalculation and propagation to occur in the background.
- * @remarks
- * This method is intended for non-blocking workflows (e.g., UI updates)
- * where bounds propagation should not delay execution. Callers requiring
- * completion guarantees should use the awaited version instead.
+ * Callers requiring completion guarantees should use the awaited version instead.
+ *
+ * @param mapId - The unique identifier of the map instance
+ * @param gvLayer - The layer from which bounds recalculation should begin
  */
 export declare const setStoreLayerBoundsForLayerAndParentsAndForget: (mapId: string, gvLayer: AbstractBaseGVLayer, mapProjection: OLProjection, stops: number) => void;
 /**
  * Sets the visibility of a specific legend item and updates the class filter.
  *
- * @param mapId - The map identifier.
- * @param layerPath - The layer path containing the item.
- * @param item - The legend item to update (mutated in place).
- * @param visibility - The new visibility state.
- * @param classFilter - Optional class filter string to apply.
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path containing the item
+ * @param item - The legend item to update (mutated in place)
+ * @param visibility - The new visibility state
+ * @param classFilter - Optional class filter string to apply
  */
 export declare const setStoreLayerItemVisibility: (mapId: string, layerPath: string, item: TypeLegendItem, visibility: boolean, classFilter: string | undefined) => void;
 /**
  * Sets the opacity for a specific layer and propagates it to children.
  *
- * @param mapId - The map identifier.
- * @param layerPath - The layer path to update.
- * @param opacity - The opacity value (0–1).
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to update
+ * @param opacity - The opacity value (0 - 1)
  */
-export declare const setStoreOpacity: (mapId: string, layerPath: string, opacity: number) => void;
+export declare const setStoreLayerOpacity: (mapId: string, layerPath: string, opacity: number) => void;
 /**
  * Sets the highlighted layer path in the store.
  *
- * @param mapId - The map identifier.
- * @param layerPath - The layer path to highlight.
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to highlight
  */
-export declare const setStoreHighlightedLayer: (mapId: string, layerPath: string) => void;
+export declare const setStoreLayerHighlightedLayer: (mapId: string, layerPath: string) => void;
+/**
+ * Sets the visibility of a layer in the store.
+ *
+ * @param mapId - The ID of the map
+ * @param layerPath - The layer path of the layer to change
+ * @param visible - The visible state to set
+ */
+export declare const setStoreLayerVisibility: (mapId: string, layerPath: string, visible: boolean) => void;
+/**
+ * Sets the visibility range state for a specific layer in the store.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The unique layer path identifier
+ * @param inVisibleRange - Whether the layer is within its visible zoom range
+ */
+export declare const setStoreLayerInVisibleRange: (mapId: string, layerPath: string, inVisibleRange: boolean) => void;
+/**
+ * Sets the legend collapsed state for a layer in the store.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to update
+ * @param legendCollapsed - Whether the legend should be collapsed
+ */
+export declare const setStoreLayerLegendCollapsed: (mapId: string, layerPath: string, legendCollapsed: boolean) => void;
+/**
+ * Sets the legend collapsed state for all layers in the store.
+ *
+ * @param mapId - The map identifier
+ * @param newCollapsed - Whether all legends should be collapsed
+ */
+export declare const setStoreLayerAllMapLayerCollapsed: (mapId: string, newCollapsed: boolean) => void;
 /**
  * Sets the display date format for a specific layer in the store.
  *
- * @param mapId - The map identifier.
- * @param layerPath - The layer path to update.
- * @param displayDateFormat - The display date format to set.
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to update
+ * @param displayDateFormat - The display date format to set
  */
 export declare const setStoreLayerDisplayDateFormat: (mapId: string, layerPath: string, displayDateFormat: TypeDisplayDateFormat) => void;
 /**
  * Sets the short display date format for a specific layer in the store.
  *
- * @param mapId - The map identifier.
- * @param layerPath - The layer path to update.
- * @param displayDateFormat - The short display date format to set.
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to update
+ * @param displayDateFormat - The short display date format to set
  */
 export declare const setStoreLayerDisplayDateFormatShort: (mapId: string, layerPath: string, displayDateFormat: TypeDisplayDateFormat) => void;
 /**
  * Sets the date temporal mode for a specific layer in the store.
  *
- * @param mapId - The map identifier.
- * @param layerPath - The layer path to update.
- * @param temporalMode - The temporal mode to set.
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to update
+ * @param temporalMode - The temporal mode to set
  */
 export declare const setStoreLayerDateTemporal: (mapId: string, layerPath: string, temporalMode: TemporalMode) => void;
 /**
  * Sets the mosaic rule for a specific layer in the store.
  *
- * @param mapId - The map identifier.
- * @param layerPath - The layer path to update.
- * @param mosaicRule - The mosaic rule to set, or undefined to clear.
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to update
+ * @param mosaicRule - The mosaic rule to set, or undefined to clear
  */
 export declare const setStoreLayerMosaicRule: (mapId: string, layerPath: string, mosaicRule: TypeMosaicRule | undefined) => void;
 /**
  * Sets the raster function for a specific layer in the store.
  *
- * @param mapId - The map identifier.
- * @param layerPath - The layer path to update.
- * @param rasterFunctionId - The raster function id to set, or undefined to clear.
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to update
+ * @param rasterFunctionId - The raster function id to set, or undefined to clear
  */
 export declare const setStoreLayerRasterFunction: (mapId: string, layerPath: string, rasterFunctionId: string | undefined) => void;
 /**
  * Sets the WMS style for a specific layer in the store.
  *
- * @param mapId - The map identifier.
- * @param layerPath - The layer path to update.
- * @param wmsStyleName - The WMS style name to set, or undefined to clear.
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to update
+ * @param wmsStyleName - The WMS style name to set, or undefined to clear
  */
 export declare const setStoreLayerWmsStyle: (mapId: string, layerPath: string, wmsStyleName: string | undefined) => void;
 /**
  * Sets the Text Visibility for a specific layer in the store.
  *
- * @param mapId - The map identifier.
- * @param layerPath - The layer path to update.
- * @param textVisible - Whether the text is visible.
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to update
+ * @param textVisible - Whether the text is visible
  */
 export declare const setStoreLayerTextVisibility: (mapId: string, layerPath: string, textVisible: boolean) => void;
 /**
  * Sets the selected layer path in the layers tab.
  *
- * @param mapId - The map identifier.
- * @param layerPath - The layer path to select.
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to select
  */
 export declare const setStoreLayerSelectedLayersTabLayer: (mapId: string, layerPath: string) => void;
 /**
  * Reorders the legend layers based on the map's ordered layer info.
  *
- * @param mapId - The map identifier.
+ * @param mapId - The map identifier
  */
 export declare const setStoreReorderLegendLayers: (mapId: string) => void;
 /**
  * Sets whether layers are currently loading in the store.
  *
- * @param mapId - The map identifier.
- * @param areLoading - Whether layers are loading.
+ * @param mapId - The map identifier
+ * @param areLoading - Whether layers are loading
  */
 export declare const setStoreLayersAreLoading: (mapId: string, areLoading: boolean) => void;
 /**
@@ -586,37 +908,53 @@ export declare const setStoreLayersAreLoading: (mapId: string, areLoading: boole
  *
  * Updates the layer's icon images and legend items when legend data with a type is provided.
  *
- * @param mapId - The map identifier.
- * @param layerPath - The layer path to update.
- * @param legendQueryStatus - The new legend query status.
- * @param data - Optional legend data containing the layer type, legend styles, and style config.
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to update
+ * @param legendQueryStatus - The new legend query status
+ * @param data - Optional legend data containing the layer type, legend styles, and style config
  */
-export declare const setStoreLegendQueryStatus: (mapId: string, layerPath: string, legendQueryStatus: LegendQueryStatus, data: TypeLegend | undefined) => void;
+export declare const setStoreLegendQueryStatus: (mapId: string, layerPath: string, legendQueryStatus: LegendQueryStatus, legendSchemaTag: TypeGeoviewLayerType | undefined, icons: TypeLegendLayerItem[] | undefined, items: TypeLegendItem[] | undefined, styleConfig: TypeLayerStyleConfig | undefined) => void;
 /**
  * Deletes a layer from the legend layers in the store.
  *
- * @param mapId - The map identifier.
- * @param layerPath - The layer path to remove.
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to remove
  */
 export declare const deleteStoreLayerFromLegendLayers: (mapId: string, layerPath: string) => void;
 /**
  * Sets the deletion start time for a layer in the store.
  *
- * @param mapId - The map identifier.
- * @param layerPath - The layer path to update.
- * @param startTime - The deletion start timestamp, or undefined to clear.
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to update
+ * @param startTime - The deletion start timestamp, or undefined to clear
  */
 export declare const setStoreLayerDeletionStartTime: (mapId: string, layerPath: string, startTime: number | undefined) => void;
 /**
  * Temporary method to set the legend layers directly in the store, used for the moment to set the
  * legend layers with the data from the query result of the legend.
+ *
  * This method should be used with caution and only in specific cases, as it bypasses the usual
  * state update patterns and may lead to unintended side effects if not used properly.
  *
- * @param mapId
- * @param legendLayers
+ * @param mapId - The map identifier
+ * @param legendLayers - The legend layers to set
  */
 export declare const setStoreLegendLayersDirectly: (mapId: string, legendLayers: TypeLegendLayer[]) => void;
+/**
+ * Sets the ordered layers directly in the store.
+ *
+ * @param mapId - The map identifier
+ * @param layerPaths - The ordered layer paths to set
+ */
+export declare const setStoreLayerOrderedLayers: (mapId: string, layerPaths: string[]) => void;
+/**
+ * Adds an initial filter for a layer path in the store.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to set the filter for
+ * @param filter - The filter string to add
+ */
+export declare const addStoreLayerInitialFilter: (mapId: string, layerPath: string, filter: string) => void;
 /**
  * Represents legend result info for a layer including status and legend data.
  */
@@ -636,7 +974,7 @@ export type LegendQueryStatus = 'init' | 'querying' | 'queried' | 'error';
 export type TypeLegend = {
     /** The GeoView layer type this legend belongs to. */
     type: TypeGeoviewLayerType;
-    /** The legend content — vector styles, an HTML canvas, or null. */
+    /** The legend content - vector styles, an HTML canvas, or null. */
     legend: TypeVectorLayerStyles | HTMLCanvasElement | null;
     /** Optional style configuration associated with the legend. */
     styleConfig?: TypeLayerStyleConfig;

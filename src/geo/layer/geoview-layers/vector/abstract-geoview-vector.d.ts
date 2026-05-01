@@ -1,6 +1,7 @@
 import type Feature from 'ol/Feature';
 import type { Options as SourceOptions } from 'ol/source/Vector';
 import type { ReadOptions } from 'ol/format/Feature';
+import type { TypeOutfields } from '@/api/types/map-schema-types';
 import type { TypePostSettings } from '@/api/types/layer-schema-types';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -88,5 +89,15 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
      * @param layerConfig - The vector layer entry to configure
      */
     protected static processFeatureInfoConfig(headers: string[], firstRow: string[], excludedHeaders: string[], layerConfig: VectorLayerEntryConfig): void;
+    /**
+     * Finds the best field to use as a name field by searching for common name-like field patterns.
+     *
+     * Searches the outfields array for fields matching predefined keywords (name, title, label) in priority order.
+     * If no keyword match is found, returns the first field as a fallback.
+     *
+     * @param outfields - Array of outfields to search
+     * @returns The name of the best matching field, or undefined if no fields available
+     */
+    static findBestNameField(outfields: TypeOutfields[]): string | undefined;
 }
 //# sourceMappingURL=abstract-geoview-vector.d.ts.map

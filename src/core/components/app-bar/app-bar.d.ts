@@ -11,6 +11,9 @@ export interface ButtonPanelType {
 }
 /**
  * Creates an app-bar with buttons that can open a panel.
+ *
+ * @param props - Properties defined in AppBarProps interface
+ * @returns The app bar component
  */
 export declare function AppBar(props: AppBarProps): JSX.Element;
 export {};

@@ -28,6 +28,8 @@ export declare abstract class GeoviewRenderer {
     static readonly LEGEND_CANVAS_WIDTH = 50;
     /** Default value of the legend canvas height when the settings do not provide one. */
     static readonly LEGEND_CANVAS_HEIGHT = 50;
+    /** Arcade keywords and functions allowed in expression evaluation */
+    static readonly ALLOWED_ARCADE_KEYWORDS: string[];
     /**
      * Get the default color using the default color index.
      *
@@ -121,6 +123,13 @@ export declare abstract class GeoviewRenderer {
      * @returns The created canvas
      */
     static createPolygonCanvas(polygonStyle?: Style): HTMLCanvasElement;
+    /**
+     * Creates a canvas with the GeometryCollection settings defined in the style.
+     *
+     * @param geometryCollectionStyle - Optional style associated to the GeometryCollection
+     * @returns The created canvas
+     */
+    static createGeometryCollectionCanvas(geometryCollectionStyle?: Style): HTMLCanvasElement;
     /**
      * Create the stroke options using the specified settings.
      *
@@ -382,6 +391,17 @@ export declare abstract class GeoviewRenderer {
      */
     static interpolateColor(value: number, value1: number, value2: number, color1: string | number[], color2: string | number[]): string;
     /**
+     * Evaluate an Arcade expression using feature data.
+     *
+     * Supports field references, conditional logic (if/else, ternary), comparison operators,
+     * logical operators, and basic string functions (upper, lower).
+     *
+     * @param expression - Arcade expression string (e.g., "if($feature.STATUS == 'Active') return 'A' else return 'B'")
+     * @param feature - Feature containing field data
+     * @returns The evaluated result (string, number, or boolean) or null if evaluation fails
+     */
+    static evaluateArcadeExpression(expression: string, feature: Feature): string | number | boolean | null;
+    /**
      * Evaluate a simple value expression using feature data.
      *
      * Supports basic arithmetic operations and field references.
@@ -399,9 +419,10 @@ export declare abstract class GeoviewRenderer {
      * @param feature - Optional feature used to test the unique value conditions
      * @param domainsLookup - Optional lookup table to handle coded value domains
      * @param aliasLookup - Optional lookup table to handle field name aliases
+     * @param valueExpression - Optional Arcade expression to evaluate instead of using fields
      * @returns The Style created, or undefined if unable to create it
      */
-    static searchUniqueValueEntry(fields: string[], uniqueValueStyleInfo: TypeLayerStyleConfigInfo[], feature?: Feature, domainsLookup?: TypeLayerMetadataFields[], aliasLookup?: TypeAliasLookup): TypeLayerStyleConfigInfo | undefined;
+    static searchUniqueValueEntry(fields: string[], uniqueValueStyleInfo: TypeLayerStyleConfigInfo[], feature?: Feature, domainsLookup?: TypeLayerMetadataFields[], aliasLookup?: TypeAliasLookup, valueExpression?: string): TypeLayerStyleConfigInfo | undefined;
     /**
      * Process the unique value settings using a point feature to get its Style.
      *
@@ -432,13 +453,14 @@ export declare abstract class GeoviewRenderer {
     /**
      * Search the class break entry using the field value stored in the feature.
      *
-     * @param field - Field involved in the class break definition
+     * @param field - Optional field involved in the class break definition
      * @param classBreakStyleInfo - Class break configuration
      * @param feature - Feature used to test the class break conditions
      * @param aliasLookup - Optional lookup table to handle field name aliases
+     * @param valueExpression - Optional Arcade expression to evaluate instead of using field
      * @returns The matching entry, or undefined if unable to find it
      */
-    static searchClassBreakEntry(field: string, classBreakStyleInfo: TypeLayerStyleConfigInfo[], feature: Feature, aliasLookup?: TypeAliasLookup): TypeLayerStyleConfigInfo | undefined;
+    static searchClassBreakEntry(field: string | undefined, classBreakStyleInfo: TypeLayerStyleConfigInfo[], feature: Feature, aliasLookup?: TypeAliasLookup, valueExpression?: string): TypeLayerStyleConfigInfo | undefined;
     /**
      * Check whether a numeric value falls within a class-break interval using provided boundary conditions.
      *

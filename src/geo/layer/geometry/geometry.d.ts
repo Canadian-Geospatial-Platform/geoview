@@ -244,7 +244,7 @@ export declare class GeometryApi {
      * @param featureId - The id of the feature
      * @param projection - Optional projection code to transform the coordinates to.
      *   Otherwise, uses the map's projection by default
-     * @returns The coordinates of the feature, or undefined if not found
+     * @returns The coordinates of the feature, or undefined if not found or if the geometry type is not currently supported (e.g., GeometryCollection)
      */
     getFeatureCoords(featureId: string, projection?: number): Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][] | undefined;
     /**

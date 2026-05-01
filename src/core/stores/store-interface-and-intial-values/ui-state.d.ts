@@ -1,6 +1,13 @@
 import type { TypeValidAppBarCoreProps, TypeValidFooterBarTabsCoreProps, TypeValidMapCorePackageProps, TypeValidNavBarProps } from '@/api/types/map-schema-types';
 import type { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
+/** Serializable metadata for a footer tab entry (no JSX \u2014 content lives in the FooterBarApi registry). */
+export type TypeFooterTabEntry = {
+    /** The unique tab identifier. */
+    id: string;
+    /** The tab label (translation key or display string). */
+    label?: string;
+};
 /**
  * Represents the UI Zustand store slice.
  *
@@ -23,8 +30,14 @@ export interface IUIState {
     focusItem: FocusItemProps;
     /** Tab identifiers that are hidden from the footer bar. */
     hiddenTabs: string[];
+    /** Footer tab entries registered via the FooterBarApi (serializable metadata only — no JSX). */
+    footerTabs: TypeFooterTabEntry[];
+    /** App-bar panel identifiers registered via the AppBarApi (full objects live in the AppBarApi registry). */
+    appBarPanelIds: string[];
     /** The list of nav-bar component identifiers. */
     navBarComponents: TypeValidNavBarProps[];
+    /** Version counter that increments when nav-bar button panels are added or removed (triggers re-render). */
+    navBarButtonPanelVersion: number;
     /** The current resize value (percentage) for the footer panel. */
     footerPanelResizeValue: number;
     /** Sets default UI configuration values from the map features config. */
@@ -47,6 +60,16 @@ export interface IUIState {
         setHiddenTabs: (hiddenTabs: string[]) => void;
         /** Sets the footer bar open state. */
         setFooterBarIsOpen: (open: boolean) => void;
+        /** Adds a footer tab entry. */
+        addFooterTab: (tab: TypeFooterTabEntry) => void;
+        /** Removes a footer tab entry by id. */
+        removeFooterTab: (id: string) => void;
+        /** Adds an app-bar panel id. */
+        addAppBarPanelId: (id: string) => void;
+        /** Removes an app-bar panel id. */
+        removeAppBarPanelId: (id: string) => void;
+        /** Increments the nav-bar button panel version to trigger a re-render. */
+        bumpNavBarButtonPanelVersion: () => void;
     };
 }
 /**
@@ -111,6 +134,26 @@ export declare const useStoreUINavbarComponents: () => TypeValidNavBarProps[];
 export declare const getStoreUICorePackageComponents: (mapId: string) => TypeValidMapCorePackageProps[];
 /** Hooks the core package component identifiers. */
 export declare const useStoreUICorePackagesComponents: () => TypeValidMapCorePackageProps[];
+/**
+ * Gets the footer tab entries from the store.
+ *
+ * @param mapId - The map identifier
+ * @returns The array of footer tab entries
+ */
+export declare const getStoreUIFooterTabs: (mapId: string) => TypeFooterTabEntry[];
+/** Hooks the footer tab entries registered via the FooterBarApi. */
+export declare const useStoreUIFooterTabs: () => TypeFooterTabEntry[];
+/**
+ * Gets the app-bar panel ids from the store.
+ *
+ * @param mapId - The map identifier
+ * @returns The array of app-bar panel ids
+ */
+export declare const getStoreUIAppBarPanelIds: (mapId: string) => string[];
+/** Hooks the app-bar panel ids registered via the AppBarApi. */
+export declare const useStoreUIAppBarPanelIds: () => string[];
+/** Hooks the nav-bar button panel version counter (triggers re-render on change). */
+export declare const useStoreUINavBarButtonPanelVersion: () => number;
 /** Hooks the current focus-trap item from the UI state. */
 export declare const useStoreUIActiveFocusItem: () => FocusItemProps;
 /** Hooks whether the GeoView-level keyboard focus trap is active. */
@@ -125,7 +168,7 @@ export declare const useStoreUIHiddenTabs: () => string[];
  * @param mapId - The map identifier
  * @param tab - The tab identifier, or undefined to deactivate
  */
-export declare const setStoreActiveFooterBarTab: (mapId: string, tab: string | undefined) => void;
+export declare const setStoreUIActiveFooterBarTab: (mapId: string, tab: string | undefined) => void;
 /**
  * Sets the active app bar tab with its open and focus trap state.
  *
@@ -134,21 +177,21 @@ export declare const setStoreActiveFooterBarTab: (mapId: string, tab: string | u
  * @param isOpen - Whether the tab is open
  * @param isFocusTrapped - Whether focus is trapped on the tab
  */
-export declare const setStoreActiveAppBarTab: (mapId: string, tab: string | undefined, isOpen: boolean, isFocusTrapped: boolean) => void;
+export declare const setStoreUIActiveAppBarTab: (mapId: string, tab: string | undefined, isOpen: boolean, isFocusTrapped: boolean) => void;
 /**
  * Sets the footer bar open state.
  *
  * @param mapId - The map identifier
  * @param isOpen - Whether the footer bar is open
  */
-export declare const setStoreFooterBarIsOpen: (mapId: string, isOpen: boolean) => void;
+export declare const setStoreUIFooterBarIsOpen: (mapId: string, isOpen: boolean) => void;
 /**
  * Enables the focus trap on a specific UI element.
  *
  * @param mapId - The map identifier
  * @param uiFocus - The focus item containing active and callback element identifiers
  */
-export declare const enableStoreFocusTrap: (mapId: string, uiFocus: FocusItemProps) => void;
+export declare const enableStoreUIFocusTrap: (mapId: string, uiFocus: FocusItemProps) => void;
 /**
  * Disables the focus trap and restores focus to a callback element.
  *
@@ -157,35 +200,69 @@ export declare const enableStoreFocusTrap: (mapId: string, uiFocus: FocusItemPro
  * @param mapId - The map identifier
  * @param callbackElementId - Optional element identifier to restore focus to. If 'no-focus' is passed, focus is not restored
  */
-export declare const disableStoreFocusTrap: (mapId: string, callbackElementId?: string) => void;
+export declare const disableStoreUIFocusTrap: (mapId: string, callbackElementId?: string) => void;
 /**
  * Toggles the GeoView-level keyboard focus trap.
  *
  * @param mapId - The map identifier
  * @param active - Whether the focus trap is active
  */
-export declare const setStoreActiveTrapGeoView: (mapId: string, active: boolean) => void;
+export declare const setStoreUIActiveTrapGeoView: (mapId: string, active: boolean) => void;
 /**
  * Sets the footer panel resize value (percentage).
  *
  * @param mapId - The map identifier
  * @param value - The resize percentage value
  */
-export declare const setStoreFooterPanelResizeValue: (mapId: string, value: number) => void;
+export declare const setStoreUIFooterPanelResizeValue: (mapId: string, value: number) => void;
 /**
  * Shows a tab button by removing it from the hidden tabs list.
  *
  * @param mapId - The map identifier
  * @param tab - The tab identifier to show
  */
-export declare const showStoreTabButton: (mapId: string, tab: string) => void;
+export declare const showStoreUITabButton: (mapId: string, tab: string) => void;
 /**
  * Hides a tab button by adding it to the hidden tabs list.
  *
  * @param mapId - The map identifier
  * @param tab - The tab identifier to hide
  */
-export declare const hideStoreTabButton: (mapId: string, tab: string) => void;
+export declare const hideStoreUITabButton: (mapId: string, tab: string) => void;
+/**
+ * Adds a footer tab entry to the store.
+ *
+ * @param mapId - The map identifier
+ * @param tab - The footer tab entry to add
+ */
+export declare const addStoreUIFooterTab: (mapId: string, tab: TypeFooterTabEntry) => void;
+/**
+ * Removes a footer tab entry from the store by id.
+ *
+ * @param mapId - The map identifier
+ * @param id - The tab id to remove
+ */
+export declare const removeStoreUIFooterTab: (mapId: string, id: string) => void;
+/**
+ * Adds an app-bar panel id to the store.
+ *
+ * @param mapId - The map identifier
+ * @param id - The panel id to add
+ */
+export declare const addStoreUIAppBarPanelId: (mapId: string, id: string) => void;
+/**
+ * Removes an app-bar panel id from the store.
+ *
+ * @param mapId - The map identifier
+ * @param id - The panel id to remove
+ */
+export declare const removeStoreUIAppBarPanelId: (mapId: string, id: string) => void;
+/**
+ * Bumps the nav-bar button panel version to trigger a re-render.
+ *
+ * @param mapId - The map identifier
+ */
+export declare const bumpStoreUINavBarButtonPanelVersion: (mapId: string) => void;
 /** Describes which element holds the focus trap and where to restore focus on release. */
 export type FocusItemProps = {
     /** The id of the element that currently has focus, or false if no focus trap is active. */

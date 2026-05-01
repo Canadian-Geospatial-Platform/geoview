@@ -1,4 +1,4 @@
-import type { FooterBarApi } from '@/core/components';
+import type { FooterBarApi } from './footer-bar-api';
 /** Props for the FooterBar component. */
 type FooterBarProps = {
     /** The footer bar API instance. */

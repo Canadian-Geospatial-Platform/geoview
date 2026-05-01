@@ -1,5 +1,6 @@
 import type { Root } from 'react-dom/client';
 import type { i18n } from 'i18next';
+import { Overlay } from 'ol';
 import OLMap from 'ol/Map';
 import type { FitOptions } from 'ol/View';
 import View from 'ol/View';
@@ -33,7 +34,7 @@ import type { TimeIANA } from '@/core/utils/date-mgt';
 import type { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';
 import type { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import { Notifications } from '@/core/utils/notifications';
-import { type TypeOrderedLayerInfo, type TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { type TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { type TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import type { PluginsContainer } from '@/api/plugin/plugin-types';
 import type { AbstractPlugin } from '@/api/plugin/abstract-plugin';
@@ -87,7 +88,12 @@ export declare class MapViewer {
     featureHighlight: FeatureHighlight;
     /** Modals creation */
     modal: ModalApi;
-    /** The controller registry owning all framework-level controllers */
+    /**
+     * The controller registry owning all framework-level controllers.
+     *
+     * Try not to use this accessor, as it creates a backwards dependency from the domain to the controllers.
+     * It is here for legacy reasons, but should be removed in the future.
+     */
     controllers: ControllerRegistry;
     /** Max number of icons cached */
     iconImageCacheSize: number;
@@ -131,6 +137,18 @@ export declare class MapViewer {
      * Initializes the map controls
      */
     initMapControls(): Promise<void>;
+    /**
+     * Returns the click marker overlay.
+     *
+     * @returns The click marker overlay
+     */
+    getClickMarkerOverlay(): Overlay;
+    /**
+     * Returns the north pole marker overlay.
+     *
+     * @returns The north pole marker overlay
+     */
+    getNorthPoleMarkerOverlay(): Overlay;
     /**
      * Gets a plugin by its id.
      *
@@ -179,9 +197,9 @@ export declare class MapViewer {
     /**
      * Set the map viewSettings (coordinate values in lon/lat).
      *
-     * @param mapView - Map viewSettings object
+     * @param mapViewSettings - Map viewSettings object
      */
-    setView(mapView: TypeViewSettings): void;
+    setView(mapViewSettings: TypeViewSettings): void;
     /**
      * Asynchronously gets the map center coordinate to give a chance for the map to
      * render before returning the value.
@@ -212,21 +230,37 @@ export declare class MapViewer {
      */
     getCoordinateFromPixel(pointXY: [number, number], timeoutMs: number): Promise<Coordinate>;
     /**
-     * Gets the map projection
+     * Gets the map projection.
+     *
      * @returns The map projection
      */
     getProjection(): OLProjection;
     /**
-     * Gets the map projection number
+     * Gets the map projection EPSG string.
+     *
+     * @returns The map projection EPSG string
+     */
+    getProjectionEPSG(): string;
+    /**
+     * Gets the map projection number.
+     *
      * @returns The map projection number
      */
-    getProjectionNumber(): number | undefined;
+    getProjectionNumber(): TypeValidMapProjectionCodes;
     /**
-     * Gets the ordered layer info.
+     * Set the display projection of the map.
      *
-     * @returns The ordered layer info
+     * @param projectionNumber - The projection code (3978, 3857)
+     * @param maxExtent - Optional max extent for the view
+     * @returns True if the projection was changed, false if the projection code is unsupported
      */
-    getMapLayerOrderInfo(): TypeOrderedLayerInfo[];
+    setProjection(projectionNumber: TypeValidMapProjectionCodes): boolean;
+    /**
+     * Gets the ordered layer paths.
+     *
+     * @returns The ordered layer paths
+     */
+    getMapLayerOrderPaths(): string[];
     /**
      * Gets the i18nInstance for localization.
      *
@@ -274,13 +308,6 @@ export declare class MapViewer {
      */
     setDisplayDateTimezone(displayDateTimezone: TimeIANA): void;
     /**
-     * Set the display projection of the map.
-     *
-     * @param projectionCode - The projection code (3978, 3857)
-     * @returns A promise that resolves when the projection change is complete
-     */
-    setProjection(projectionCode: TypeValidMapProjectionCodes): Promise<void>;
-    /**
      * Rotates the view to align it at the given degrees.
      *
      * @param degree - The degrees to rotate the map to
@@ -310,9 +337,9 @@ export declare class MapViewer {
      *
      * Resolution is computed using: resolution = scale / (metersPerUnit * inchesPerMeter * dpi)
      *
-     * @param targetScale - The scale denominator (e.g., 50000000 for 1:50,000,000). Optional; returns undefined if not provided.
-     * @param dpiValue - Dots per inch to use for conversion. Defaults to `MapViewer.DEFAULT_DPI` (usually 96 or 90.714 depending on standard).
-     * @returns The map resolution in map units per pixel, or `undefined` if `targetScale` is not provided.
+     * @param targetScale - The scale denominator (e.g., 50000000 for 1:50,000,000). Optional; returns undefined if not provided
+     * @param dpiValue - Dots per inch to use for conversion. Defaults to `MapViewer.DEFAULT_DPI` (usually 96 or 90.714 depending on standard)
+     * @returns The map resolution in map units per pixel, or `undefined` if `targetScale` is not provided
      */
     getMapResolutionFromScale(targetScale: number | undefined, dpiValue?: number): number | undefined;
     /**
@@ -320,9 +347,9 @@ export declare class MapViewer {
      *
      * Uses `getMapResolutionFromScale` internally and then computes the zoom for that resolution.
      *
-     * @param targetScale - The scale denominator (e.g., 50000000 for 1:50,000,000). Optional; returns undefined if not provided.
-     * @param dpiValue - Dots per inch to use for conversion. Defaults to `MapViewer.DEFAULT_DPI`.
-     * @returns The OpenLayers zoom level corresponding to the scale, or `undefined` if `targetScale` is not provided.
+     * @param targetScale - The scale denominator (e.g., 50000000 for 1:50,000,000). Optional; returns undefined if not provided
+     * @param dpiValue - Dots per inch to use for conversion. Defaults to `MapViewer.DEFAULT_DPI`
+     * @returns The OpenLayers zoom level corresponding to the scale, or `undefined` if `targetScale` is not provided
      */
     getMapZoomFromScale(targetScale: number | undefined, dpiValue?: number): number | undefined;
     /**
@@ -386,15 +413,12 @@ export declare class MapViewer {
      */
     simulateMapClick(lonlat: Coordinate): SimulatedMapClick;
     /**
-     * Hide a click marker from the map
-     */
-    clickMarkerIconHide(): void;
-    /**
-     * Show a marker on the map.
+     * Shows a marker on the map.
      *
      * @param marker - The marker to add
+     * @returns The projected coordinates of the marker
      */
-    clickMarkerIconShow(marker: TypeClickMarker): void;
+    clickMarkerIconShow(marker: TypeClickMarker): number[];
     /**
      * Deletes the MapViewer, including its plugins, layers, etc.
      * This function does not unmount the MapViewer. To completely delete a MapViewer, use
@@ -442,7 +466,7 @@ export declare class MapViewer {
      *
      * This function checks if the map is already ready, and if not, it waits for the onMapReady event to be triggered.
      *
-     * @returns A promise that resolves when the map is ready.
+     * @returns A promise that resolves when the map is ready
      */
     waitForMapReady(): Promise<void>;
     /**
@@ -528,7 +552,7 @@ export declare class MapViewer {
     /**
      * Retrieves the scale information from the DOM elements for the given map ID.
      *
-     * @param mapId - The unique identifier of the map.
+     * @param mapId - The unique identifier of the map
      * @returns The scale information object
      */
     static getScaleInfoFromDomElement(mapId: string): TypeScaleInfo;
@@ -640,8 +664,9 @@ export declare class MapViewer {
      * Registers a map init event callback.
      *
      * @param callback - The callback to be executed whenever the event is emitted
+     * @returns The callback delegate that was registered
      */
-    onMapInit(callback: MapInitDelegate): void;
+    onMapInit(callback: MapInitDelegate): MapInitDelegate;
     /**
      * Unregisters a map init event callback.
      *
@@ -652,8 +677,9 @@ export declare class MapViewer {
      * Registers a map ready event callback.
      *
      * @param callback - The callback to be executed whenever the event is emitted
+     * @returns The callback delegate that was registered
      */
-    onMapReady(callback: MapReadyDelegate): void;
+    onMapReady(callback: MapReadyDelegate): MapReadyDelegate;
     /**
      * Unregisters a map ready event callback.
      *
@@ -664,8 +690,9 @@ export declare class MapViewer {
      * Registers a map layers processed event callback.
      *
      * @param callback - The callback to be executed whenever the event is emitted
+     * @returns The callback delegate that was registered
      */
-    onMapLayersProcessed(callback: MapLayersProcessedDelegate): void;
+    onMapLayersProcessed(callback: MapLayersProcessedDelegate): MapLayersProcessedDelegate;
     /**
      * Unregisters a map layers processed event callback.
      *
@@ -676,8 +703,9 @@ export declare class MapViewer {
      * Registers a map layers loaded event callback.
      *
      * @param callback - The callback to be executed whenever the event is emitted
+     * @returns The callback delegate that was registered
      */
-    onMapLayersLoaded(callback: MapLayersLoadedDelegate): void;
+    onMapLayersLoaded(callback: MapLayersLoadedDelegate): MapLayersLoadedDelegate;
     /**
      * Unregisters a map layers loaded event callback.
      *
@@ -688,8 +716,9 @@ export declare class MapViewer {
      * Registers a map move end event callback.
      *
      * @param callback - The callback to be executed whenever the event is emitted
+     * @returns The callback delegate that was registered
      */
-    onMapMoveEnd(callback: MapMoveEndDelegate): void;
+    onMapMoveEnd(callback: MapMoveEndDelegate): MapMoveEndDelegate;
     /**
      * Unregisters a map move end event callback.
      *
@@ -700,6 +729,7 @@ export declare class MapViewer {
      * Registers a map pointer move event callback.
      *
      * @param callback - The callback to be executed whenever the event is emitted
+     * @returns The callback delegate that was registered
      */
     onMapPointerMove(callback: MapPointerMoveDelegate): MapPointerMoveDelegate;
     /**
@@ -712,6 +742,7 @@ export declare class MapViewer {
      * Registers a map pointer stop event callback.
      *
      * @param callback - The callback to be executed whenever the event is emitted
+     * @returns The callback delegate that was registered
      */
     onMapPointerStop(callback: MapPointerMoveDelegate): MapPointerMoveDelegate;
     /**
@@ -724,6 +755,7 @@ export declare class MapViewer {
      * Registers a map single click event callback.
      *
      * @param callback - The callback to be executed whenever the event is emitted
+     * @returns The callback delegate that was registered
      */
     onMapSingleClick(callback: MapSingleClickDelegate): MapSingleClickDelegate;
     /**
@@ -736,8 +768,9 @@ export declare class MapViewer {
      * Registers a map zoom end event callback.
      *
      * @param callback - The callback to be executed whenever the event is emitted
+     * @returns The callback delegate that was registered
      */
-    onMapZoomEnd(callback: MapZoomEndDelegate): void;
+    onMapZoomEnd(callback: MapZoomEndDelegate): MapZoomEndDelegate;
     /**
      * Unregisters a map zoom end event callback.
      *
@@ -748,8 +781,9 @@ export declare class MapViewer {
      * Registers a map rotation event callback.
      *
      * @param callback - The callback to be executed whenever the event is emitted
+     * @returns The callback delegate that was registered
      */
-    onMapRotation(callback: MapRotationDelegate): void;
+    onMapRotation(callback: MapRotationDelegate): MapRotationDelegate;
     /**
      * Unregisters a map rotation event callback.
      *
@@ -760,8 +794,9 @@ export declare class MapViewer {
      * Registers a map change size event callback.
      *
      * @param callback - The callback to be executed whenever the event is emitted
+     * @returns The callback delegate that was registered
      */
-    onMapChangeSize(callback: MapChangeSizeDelegate): void;
+    onMapChangeSize(callback: MapChangeSizeDelegate): MapChangeSizeDelegate;
     /**
      * Unregisters a map change size event callback.
      *
@@ -772,20 +807,35 @@ export declare class MapViewer {
      * Registers a map projection change event callback.
      *
      * @param callback - The callback to be executed whenever the event is emitted
+     * @returns The callback delegate that was registered
      */
-    onMapProjectionChanged(callback: MapProjectionChangedDelegate): void;
+    onMapProjectionChangeStarted(callback: MapProjectionChangedDelegate): MapProjectionChangedDelegate;
     /**
      * Unregisters a map projection changed event callback.
      *
      * @param callback - The callback to stop being called whenever the event is emitted
      */
-    offMapProjectionChanged(callback: MapChangeSizeDelegate): void;
+    offMapProjectionChangeStarted(callback: MapProjectionChangedDelegate): void;
+    /**
+     * Registers a map projection change event callback.
+     *
+     * @param callback - The callback to be executed whenever the event is emitted
+     * @returns The callback delegate that was registered
+     */
+    onMapProjectionChanged(callback: MapProjectionChangedDelegate): MapProjectionChangedDelegate;
+    /**
+     * Unregisters a map projection changed event callback.
+     *
+     * @param callback - The callback to stop being called whenever the event is emitted
+     */
+    offMapProjectionChanged(callback: MapProjectionChangedDelegate): void;
     /**
      * Registers a component added event callback.
      *
      * @param callback - The callback to be executed whenever the event is emitted
+     * @returns The callback delegate that was registered
      */
-    onMapComponentAdded(callback: MapComponentAddedDelegate): void;
+    onMapComponentAdded(callback: MapComponentAddedDelegate): MapComponentAddedDelegate;
     /**
      * Unregisters a component added event callback.
      *
@@ -796,8 +846,9 @@ export declare class MapViewer {
      * Registers a component removed event callback.
      *
      * @param callback - The callback to be executed whenever the event is emitted
+     * @returns The callback delegate that was registered
      */
-    onMapComponentRemoved(callback: MapComponentRemovedDelegate): void;
+    onMapComponentRemoved(callback: MapComponentRemovedDelegate): MapComponentRemovedDelegate;
     /**
      * Unregisters a component removed event callback.
      *
@@ -808,8 +859,9 @@ export declare class MapViewer {
      * Registers a language changed event callback.
      *
      * @param callback - The callback to be executed whenever the event is emitted
+     * @returns The callback delegate that was registered
      */
-    onMapLanguageChanged(callback: MapLanguageChangedDelegate): void;
+    onMapLanguageChanged(callback: MapLanguageChangedDelegate): MapLanguageChangedDelegate;
     /**
      * Unregisters a language changed event callback.
      *
@@ -906,6 +958,7 @@ export type MapChangeSizeDelegate = EventDelegateBase<MapViewer, MapChangeSizeEv
  */
 export type MapProjectionChangedEvent = {
     projection: OLProjection;
+    previousProjection: OLProjection;
 };
 /**
  * Delegate for the map projection changed event handler function signature.

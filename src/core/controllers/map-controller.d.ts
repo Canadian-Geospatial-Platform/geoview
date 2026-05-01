@@ -6,12 +6,12 @@ import type { OverviewMap as OLOverviewMap } from 'ol/control';
 import { type Extent, type TypeBasemapOptions, type TypeFeatureInfoEntry, type TypeMapFeaturesInstance, type TypeMapMouseInfo, type TypePointMarker, type TypeServiceUrls, type TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
+import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import type { Draw } from '@/geo/interaction/draw';
 import type { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import type { FitOptions } from 'ol/View';
-import type { FeatureHighlight } from '@/geo/map/feature-highlight';
 /**
  * Controller responsible for Map interactions.
  */
@@ -23,9 +23,17 @@ export declare class MapController extends AbstractMapViewerController {
      * Creates an instance of MapController.
      *
      * @param mapViewer - The map viewer instance to associate with this controller
-     * @param featureHighlight - The feature highlight instance to associate with this controller
+     * @param controllerRegistry - The controller registry for accessing sibling controllers
      */
-    constructor(mapViewer: MapViewer, featureHighlight: FeatureHighlight);
+    constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry);
+    /**
+     * Subscribes to the map projection changed event on the MapViewer.
+     */
+    protected onHook(): void;
+    /**
+     * Unsubscribes from the map projection changed event on the MapViewer.
+     */
+    protected onUnhook(): void;
     /**
      * Zooms to the specified extent.
      *
@@ -125,10 +133,10 @@ export declare class MapController extends AbstractMapViewerController {
      * Reprojects the view, reloads basemaps, refreshes layers, removes incompatible vector tile layers,
      * and repeats the last feature query. Shows a circular progress indicator during the transition.
      *
-     * @param projectionCode - The target projection code
+     * @param projectionNumber - The target projection code
      * @returns A promise that resolves when the projection change is complete
      */
-    setProjection(projectionCode: TypeValidMapProjectionCodes): Promise<void>;
+    setProjection(projectionNumber: TypeValidMapProjectionCodes): Promise<void>;
     /**
      * Changes the map projection without awaiting the result.
      *
@@ -151,13 +159,35 @@ export declare class MapController extends AbstractMapViewerController {
      */
     setClickCoordinates(clickCoordinates: TypeMapMouseInfo, abortSignal?: AbortSignal): void;
     /**
-     * Shows the click marker icon at the given marker position.
+     * Sets the reference to the click marker overlay element in the MapViewer.
      *
-     * Projects the marker's lon/lat coordinates to the current map projection before placing it.
+     * This allows the MapViewer to control the display and positioning of the click marker on the map.
+     *
+     * @param clickMarkerRef - The HTMLDivElement reference for the click marker overlay
+     */
+    setClickMarkerOverlayRef(clickMarkerRef: HTMLDivElement): void;
+    /**
+     * Sets the reference to the north pole marker overlay element in the MapViewer.
+     *
+     * @param northPoleMarkerRef - The HTMLDivElement reference for the north pole marker overlay
+     */
+    setNorthPoleMarkerOverlayRef(northPoleMarkerRef: HTMLDivElement): void;
+    /**
+     * Shows the click marker icon at the given marker position.
      *
      * @param marker - The click marker containing lon/lat coordinates
      */
     clickMarkerIconShow(marker: TypeClickMarker): void;
+    /**
+     * Hides the click marker icon and clears the click marker from the store.
+     */
+    clickMarkerIconHide(): void;
+    /**
+     * Sets the fix north state.
+     *
+     * @param fixNorth - The new fix north state
+     */
+    setFixNorth(fixNorth: boolean): void;
     /**
      * Forces the map to re-render all layers and features.
      * Useful when layer styles or features have been updated programmatically and need to be reflected visually.
@@ -218,12 +248,24 @@ export declare class MapController extends AbstractMapViewerController {
      */
     updateStoreCoordinateInfo(coordinates: TypeMapMouseInfo, serviceUrls: TypeServiceUrls, abortSignal?: AbortSignal): Promise<void>;
     /**
+     * Sets the attribution text for the map.
+     *
+     * @param attribution - An array of attribution strings to display on the map
+     */
+    setAttribution(attribution: string[]): void;
+    /**
      * Gets the OpenLayers overview map control for the given map.
      *
      * @param div - The HTML div element to host the overview map
      * @returns The OpenLayers OverviewMap control
      */
     initOverviewMapControl(div: HTMLDivElement): OLOverviewMap;
+    /**
+     * Gets the visibility state of the overview map control.
+     *
+     * @returns True if the overview map control is visible, false otherwise
+     */
+    getOverviewMapVisibility(): boolean;
     /**
      * Sets the visibility of the overview map control.
      *

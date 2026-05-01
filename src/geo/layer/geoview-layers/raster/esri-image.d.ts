@@ -18,41 +18,41 @@ export declare class EsriImage extends AbstractGeoViewRaster {
     /**
      * Constructs an EsriImage Layer configuration processor.
      *
-     * @param layerConfig - The layer configuration.
+     * @param layerConfig - The layer configuration
      */
     constructor(layerConfig: TypeEsriImageLayerConfig);
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
      *
-     * @returns The strongly-typed layer configuration specific to this layer.
+     * @returns The strongly-typed layer configuration specific to this layer
      */
     getGeoviewLayerConfig(): TypeEsriImageLayerConfig;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
      *
-     * @returns The strongly-typed layer configuration specific to this layer.
+     * @returns The strongly-typed layer configuration specific to this layer
      */
     getMetadata(): TypeMetadataEsriImage | undefined;
     /**
      * Overrides the way a geoview layer config initializes its layer entries.
      *
-     * @returns A promise resolved once the layer entries have been initialized.
+     * @returns A promise resolved once the layer entries have been initialized
      */
     protected onInitLayerEntries(): Promise<TypeGeoviewLayerConfig>;
     /**
      * Overrides the way the layer metadata is processed.
      *
-     * @param layerConfig - The layer entry configuration to process.
-     * @param displayDateMode - The display date mode to use for processing time dimensions in the metadata.
-     * @param mapProjection - Optional map projection.
-     * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
-     * @returns A promise that the layer entry configuration has gotten its metadata processed.
+     * @param layerConfig - The layer entry configuration to process
+     * @param displayDateMode - The display date mode to use for processing time dimensions in the metadata
+     * @param mapProjection - Optional map projection
+     * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+     * @returns A promise that the layer entry configuration has gotten its metadata processed
      */
     protected onProcessLayerMetadata(layerConfig: EsriImageLayerEntryConfig, displayDateMode: DisplayDateMode, mapProjection?: OLProjection, abortSignal?: AbortSignal): Promise<EsriImageLayerEntryConfig>;
     /**
      * Overrides the creation of the GV Layer
      *
-     * @param layerConfig - The layer entry configuration.
+     * @param layerConfig - The layer entry configuration
      * @returns The GV Layer
      */
     protected onCreateGVLayer(layerConfig: EsriImageLayerEntryConfig): GVEsriImage;
@@ -63,11 +63,11 @@ export declare class EsriImage extends AbstractGeoViewRaster {
      * ID, name, and metadata access path URL. It then initializes the layer entries by calling
      * `initGeoViewLayerEntries`, which may involve fetching metadata or sublayer info.
      *
-     * @param geoviewLayerId - A unique identifier for the layer.
-     * @param geoviewLayerName - The display name of the layer.
-     * @param metadataAccessPath - The full service URL to the layer endpoint.
-     * @param isTimeAware - Indicates whether the layer supports time-based filtering.
-     * @returns A promise that resolves to an initialized GeoView layer configuration with layer entries.
+     * @param geoviewLayerId - A unique identifier for the layer
+     * @param geoviewLayerName - The display name of the layer
+     * @param metadataAccessPath - The full service URL to the layer endpoint
+     * @param isTimeAware - Indicates whether the layer supports time-based filtering
+     * @returns A promise that resolves to an initialized GeoView layer configuration with layer entries
      */
     static initGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware?: boolean): Promise<TypeGeoviewLayerConfig>;
     /**
@@ -76,11 +76,11 @@ export declare class EsriImage extends AbstractGeoViewRaster {
      * This function constructs a `TypeEsriImageLayerConfig` object that describes an Esri Image layer
      * and its associated entry configurations based on the provided parameters.
      *
-     * @param geoviewLayerId - A unique identifier for the GeoView layer.
-     * @param geoviewLayerName - The display name of the GeoView layer.
-     * @param metadataAccessPath - The URL or path to access metadata.
-     * @param isTimeAware - Indicates whether the layer supports time-based filtering.
-     * @returns The constructed configuration object for the Esri Image layer.
+     * @param geoviewLayerId - A unique identifier for the GeoView layer
+     * @param geoviewLayerName - The display name of the GeoView layer
+     * @param metadataAccessPath - The URL or path to access metadata
+     * @param isTimeAware - Indicates whether the layer supports time-based filtering
+     * @returns The constructed configuration object for the Esri Image layer
      */
     static createGeoviewLayerConfigSimple(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware: boolean | undefined): TypeEsriImageLayerConfig;
     /**
@@ -89,12 +89,12 @@ export declare class EsriImage extends AbstractGeoViewRaster {
      * This function constructs a `TypeEsriImageLayerConfig` object that describes an Esri Image layer
      * and its associated entry configurations based on the provided parameters.
      *
-     * @param geoviewLayerId - A unique identifier for the GeoView layer.
-     * @param geoviewLayerName - The display name of the GeoView layer.
-     * @param metadataAccessPath - The URL or path to access metadata.
-     * @param isTimeAware - Indicates whether the layer supports time-based filtering.
-     * @param layerEntries - An array of layer entries objects to be included in the configuration.
-     * @returns The constructed configuration object for the Esri Image layer.
+     * @param geoviewLayerId - A unique identifier for the GeoView layer
+     * @param geoviewLayerName - The display name of the GeoView layer
+     * @param metadataAccessPath - The URL or path to access metadata
+     * @param isTimeAware - Indicates whether the layer supports time-based filtering
+     * @param layerEntries - An array of layer entries objects to be included in the configuration
+     * @returns The constructed configuration object for the Esri Image layer
      */
     static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware: boolean | undefined, layerEntries: TypeLayerEntryShell[]): TypeEsriImageLayerConfig;
     /**
@@ -106,19 +106,19 @@ export declare class EsriImage extends AbstractGeoViewRaster {
      * 2. Instantiates a layer with that configuration.
      * 3. Processes the layer configuration and returns the result.
      *
-     * @param geoviewLayerId - The unique identifier for the GeoView layer.
-     * @param geoviewLayerName - The display name for the GeoView layer.
-     * @param url - The URL of the service endpoint.
-     * @param isTimeAware - Indicates if the layer is time aware.
-     * @returns A promise that resolves to an array of layer configurations.
+     * @param geoviewLayerId - The unique identifier for the GeoView layer
+     * @param geoviewLayerName - The display name for the GeoView layer
+     * @param url - The URL of the service endpoint
+     * @param isTimeAware - Indicates if the layer is time aware
+     * @returns A promise that resolves to an array of layer configurations
      */
     static processGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, url: string, isTimeAware: boolean): Promise<ConfigBaseClass[]>;
     /**
      * Creates an ImageArcGISRest source from a layer config.
      *
-     * @param layerConfig - The configuration for the EsriImage layer.
-     * @returns A fully configured ImageArcGISRest source.
-     * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
+     * @param layerConfig - The configuration for the EsriImage layer
+     * @returns A fully configured ImageArcGISRest source
+     * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called
      */
     static createEsriImageSource(layerConfig: EsriImageLayerEntryConfig): ImageArcGISRest;
 }
