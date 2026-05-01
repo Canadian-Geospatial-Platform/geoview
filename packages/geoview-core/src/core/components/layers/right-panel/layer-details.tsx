@@ -75,6 +75,7 @@ import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { DeleteUndoButton } from '@/core/components/layers/delete-undo-button';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { useLayerController, useLayerSetController } from '@/core/controllers/use-controllers';
+import type { TypeLayerStyleSettings } from '@/api/types/map-schema-types';
 
 interface LayerDetailsProps {
   /** The layer path for the layer to display. */
@@ -249,6 +250,23 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
         )
       : false;
   }, [layerStyleConfig]);
+
+  /**
+   * Determines if a style configuration allows item visibility toggling.
+   *
+   * Simple styles cannot be toggled. UniqueValue/classBreaks styles
+   * require multiple non-default classes to enable toggling.
+   */
+  const canToggleStyleItems = (styleConfig: TypeLayerStyleSettings | undefined): boolean => {
+    if (!styleConfig || styleConfig.type === 'simple') return false;
+
+    if (styleConfig.type === 'uniqueValue' || styleConfig.type === 'classBreaks') {
+      const nonDefaultCount = styleConfig.hasDefault ? styleConfig.info.length - 1 : styleConfig.info.length;
+      return nonDefaultCount > 1;
+    }
+
+    return true;
+  };
 
   /**
    * Resets active view to details when layer changes.
@@ -429,8 +447,9 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
   const renderItemCheckbox = (item: TypeLegendItem): JSX.Element | null => {
     if (!layerStyleConfig) return null;
 
-    // No checkbox for simple style layers
-    if (layerStyleConfig[item.geometryType]?.type === 'simple') return null;
+    // Determine if style type allows toggling this item on/off
+    const styleConfig = layerStyleConfig[item.geometryType];
+    const canToggle = canToggleStyleItems(styleConfig);
 
     const isDisabled = layerHidden || !layerCanToggle || (isEsriDynamic && !!hasValueExpression);
 
@@ -443,6 +462,11 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
         </Box>
       </Box>
     );
+
+    // If not checkbox needed, just return the label content
+    if (!canToggle) {
+      return <Box sx={{ ...sxClasses.formControlLabelFull, paddingLeft: '9px' }}>{labelContent}</Box>;
+    }
 
     return (
       <FormControlLabel
