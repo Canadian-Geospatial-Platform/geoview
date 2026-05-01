@@ -6,15 +6,15 @@ import type {
 import { logger } from '@/core/utils/logger';
 import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
 import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
-import type { PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
+import type { TypeLegendItem, TypeLegendLayerItem } from '@/core/components/layers/types';
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
 import {
   deleteStoreLayerFromLegendLayers,
+  getStoreLayerLegendQueryStatus,
   setStoreLayerStatus,
   setStoreLegendQueryStatus,
+  type LegendQueryStatus,
   type TypeLegend,
-  type TypeLegendResultSet,
-  type TypeLegendResultSetEntry,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import type { LayerDomain } from '@/core/domains/layer-domain';
@@ -27,6 +27,7 @@ import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import { GVEsriFeature } from '@/geo/layer/gv-layers/vector/gv-esri-feature';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import type { MapViewer } from '@/geo/map/map-viewer';
+import { GeoUtilities } from '@/geo/utils/utilities';
 
 /**
  * A Layer-set working with the LayerSetController at handling a result set of registered layers and synchronizing
@@ -34,9 +35,6 @@ import type { MapViewer } from '@/geo/map/map-viewer';
  * for UI updates.
  */
 export class LegendsLayerSet extends AbstractLayerSet {
-  /** The resultSet object as existing in the base class, retyped here as a TypeLegendResultSet */
-  declare resultSet: TypeLegendResultSet;
-
   /** A bounded reference to the handle layer status changed */
   #boundedHandleLayerStatusChanged: LayerStatusChangedDelegate;
 
@@ -59,6 +57,8 @@ export class LegendsLayerSet extends AbstractLayerSet {
     this.#boundedHandleLayerStyleChanged = this.#handleLayerStyleChanged.bind(this);
     this.#boundedHandleLayerStyleApplied = this.#handleStyleApplied.bind(this);
   }
+
+  // #region OVERRIDES
 
   /**
    * Overrides the behavior to apply when an all-feature-info-layer-set wants to check for condition to register a layer in its set.
@@ -96,8 +96,8 @@ export class LegendsLayerSet extends AbstractLayerSet {
     // Register the layer status changed handler
     layerConfig.onLayerStatusChanged(this.#boundedHandleLayerStatusChanged);
 
-    // Keep track if the legend has been init
-    this.resultSet[layerConfig.layerPath].legendQueryStatus = 'init';
+    // Propagate to the store as the config has been registered
+    this.controllerRegistry.layerSetController.propagateLegendToStore(layerConfig.layerPath);
   }
 
   /**
@@ -106,6 +106,9 @@ export class LegendsLayerSet extends AbstractLayerSet {
    * @param layerConfig - The layer config
    */
   protected override onUnregisterLayerConfig(layerConfig: ConfigBaseClass | undefined): void {
+    // Call parent
+    super.onUnregisterLayerConfig(layerConfig);
+
     // Unregister the layer status changed handler
     layerConfig?.offLayerStatusChanged(this.#boundedHandleLayerStatusChanged);
   }
@@ -130,37 +133,12 @@ export class LegendsLayerSet extends AbstractLayerSet {
       // Register handler on layer style change
       layer.onLayerStyleChanged(this.#boundedHandleLayerStyleChanged);
     }
+
+    // Propagate to the store as the layer has been registered.
+    // GV Without this call, the order of the layers can be off
+    // GV Test with http://localhost:8080/demos-navigator.html?config=./configs/navigator/demos/10-basic-appbar-data-table-tab.json
+    this.controllerRegistry.layerSetController.propagateLegendToStore(layer.getLayerPath());
   }
-
-  /**
-   * Processes action when the layer status changes.
-   *
-   * @param layerConfig - The layer config
-   * @param layerStatus - The new layer status
-   */
-  protected processLayerStatusChanged(layerPath: string, layerStatus: TypeLayerStatus, layer: AbstractBaseGVLayer | undefined): void {
-    // Change the layer status!
-    this.resultSet[layerPath].layerStatus = layerStatus;
-
-    // Save to the store
-    this.#propagateToStoreLayerStatus(layerPath, layerStatus);
-
-    // Check if ready to query legend
-    this.#checkQueryLegend(layer, false);
-  }
-
-  /**
-   * Overrides the behavior to apply when propagating to the store.
-   *
-   * @param resultSetEntry - The result set entry to propagate
-   * @param type - The propagation type
-   */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected override onPropagateToStore(resultSetEntry: TypeLegendResultSetEntry, type: PropagationType): void {
-    // Redirect - Add layer to the list after registration
-    this.#propagateToStore(resultSetEntry);
-  }
-
   /**
    * Overrides the behavior to apply when deleting from the store.
    *
@@ -171,6 +149,10 @@ export class LegendsLayerSet extends AbstractLayerSet {
     deleteStoreLayerFromLegendLayers(this.getMapId(), layerPath);
   }
 
+  // #endregion OVERRIDES
+
+  // #region PUBLIC METHODS
+
   /**
    * Queries the legend for the given layer path.
    *
@@ -180,6 +162,24 @@ export class LegendsLayerSet extends AbstractLayerSet {
   queryLegend(layer: AbstractBaseGVLayer, forced: boolean = false): void {
     // Trigger the check/query process
     this.#checkQueryLegend(layer, forced);
+  }
+
+  // #endregion PUBLIC METHODS
+
+  // #region PRIVATE METHODS
+
+  /**
+   * Processes action when the layer status changes.
+   *
+   * @param layerConfig - The layer config
+   * @param layerStatus - The new layer status
+   */
+  #processLayerStatusChanged(layerPath: string, layerStatus: TypeLayerStatus, layer: AbstractBaseGVLayer | undefined): void {
+    // Save to the store
+    this.#propagateToStoreLayerStatus(layerPath, layerStatus);
+
+    // Check if ready to query legend
+    this.#checkQueryLegend(layer, false);
   }
 
   /**
@@ -202,18 +202,17 @@ export class LegendsLayerSet extends AbstractLayerSet {
     // GV Gotta make sure that we're not already querying, because EsriImage layers, for example, adjust the
     // GV style on the fly when querying legend. So, be careful not to loop!
     const styleLoopingLayerTypes = [GVEsriDynamic, GVEsriFeature, GVEsriImage];
-    if (styleLoopingLayerTypes.some((type) => layer instanceof type) && this.resultSet[layerPath].legendQueryStatus === 'querying') {
+    if (
+      styleLoopingLayerTypes.some((type) => layer instanceof type) &&
+      getStoreLayerLegendQueryStatus(this.getMapId(), layerPath) === 'querying'
+    ) {
       return;
     }
 
     // If the legend should be queried
     if (this.#legendShouldBeQueried(layer, layerConfig, forced)) {
-      // Flag
-      this.resultSet[layerPath].data = undefined;
-      this.resultSet[layerPath].legendQueryStatus = 'querying';
-
       // Propagate to the store about the querying happening
-      this.#propagateToStoreLegendQueryStatus(layerPath, this.resultSet[layerPath]);
+      this.#propagateToStoreLegendQueryStatus(layerPath, 'querying', undefined);
 
       // Query the legend
       const legendPromise = layer.queryLegend();
@@ -226,17 +225,8 @@ export class LegendsLayerSet extends AbstractLayerSet {
             // Check for possible number of icons and set icon cache size
             this.mapViewer.updateIconImageCache(legend);
 
-            // Flag
-            this.resultSet[layerPath].legendQueryStatus = 'queried';
-
-            // Query completed, keep it
-            this.resultSet[layerPath].data = legend ?? undefined;
-
             // Propagate to the store once the legend is received
-            this.#propagateToStoreLegendQueryStatus(layerPath, this.resultSet[layerPath]);
-
-            // Inform that the layer set has been updated by calling parent to emit event
-            this.onLayerSetUpdatedProcess(layerPath);
+            this.#propagateToStoreLegendQueryStatus(layerPath, 'queried', legend);
           }
         })
         .catch((error: unknown) => {
@@ -244,16 +234,6 @@ export class LegendsLayerSet extends AbstractLayerSet {
           logger.logPromiseFailed('legendPromise in #checkQueryLegend in LegendsLayerSet', error);
         });
     }
-  }
-
-  /**
-   * Propagates the resultSetEntry to the store.
-   *
-   * @param resultSetEntry - The result set entry to propagate to the store
-   */
-  #propagateToStore(resultSetEntry: TypeLegendResultSetEntry): void {
-    // Propagate
-    this.controllerRegistry.layerSetController.propagateLegendToStore(resultSetEntry);
   }
 
   /**
@@ -271,11 +251,21 @@ export class LegendsLayerSet extends AbstractLayerSet {
    * Propagates the legend query status to the store.
    *
    * @param layerPath - The layer path to propagate the legend query status for
-   * @param resultSetEntry - The legend result set entry containing the legend query status and data to propagate
+   * @param queryStatus - The legend query status to propagate
+   * @param data - The legend data to propagate
    */
-  #propagateToStoreLegendQueryStatus(layerPath: string, resultSetEntry: TypeLegendResultSetEntry): void {
+  #propagateToStoreLegendQueryStatus(layerPath: string, queryStatus: LegendQueryStatus, data: TypeLegend | undefined): void {
+    // If any data type
+    let icons: TypeLegendLayerItem[] = [];
+    let items: TypeLegendItem[] = [];
+    if (data?.type) {
+      // Calculate icons and items
+      icons = GeoUtilities.getLayerIconImage(data?.type, data) ?? [];
+      items = GeoUtilities.getLayerItemsFromIcons(data.type, icons);
+    }
+
     // Propagate
-    setStoreLegendQueryStatus(this.getMapId(), layerPath, resultSetEntry.legendQueryStatus, resultSetEntry.data);
+    setStoreLegendQueryStatus(this.getMapId(), layerPath, queryStatus, data?.type, icons, items, data?.styleConfig);
   }
 
   /**
@@ -297,7 +287,7 @@ export class LegendsLayerSet extends AbstractLayerSet {
       if (forced) return true;
 
       // If legend never queried so far
-      shouldQueryLegend = this.resultSet[layerConfig.layerPath].legendQueryStatus === 'init';
+      shouldQueryLegend = getStoreLayerLegendQueryStatus(this.getMapId(), layerConfig.layerPath) === 'init';
 
       // If should query thus far
       if (shouldQueryLegend) {
@@ -328,10 +318,7 @@ export class LegendsLayerSet extends AbstractLayerSet {
       const layer = this.layerDomain.getGeoviewLayerIfExists(layerConfig.layerPath);
 
       // Process a layer status changed
-      this.processLayerStatusChanged(layerConfig.layerPath, layerStatusEvent.layerStatus, layer);
-
-      // Emit the layer set updated changed event
-      this.onLayerSetUpdatedProcess(layerConfig.layerPath);
+      this.#processLayerStatusChanged(layerConfig.layerPath, layerStatusEvent.layerStatus, layer);
     } catch (error: unknown) {
       // Log
       logger.logError('CAUGHT in handleLayerStatusChanged', layerConfig.layerPath, error);
@@ -363,4 +350,6 @@ export class LegendsLayerSet extends AbstractLayerSet {
       this.#checkQueryLegend(layer, true);
     }
   }
+
+  // #endregion PRIVATE METHODS
 }

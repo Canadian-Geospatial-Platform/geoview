@@ -36,7 +36,7 @@ import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
 import { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 
-// Constant used to define the default layer names
+/** Default display names keyed by GeoView layer type, used when no name is provided in the configuration. */
 const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
   CSV: 'CSV Layer',
   esriDynamic: 'Esri Dynamic Layer',
@@ -75,8 +75,10 @@ export abstract class AbstractGeoViewLayer {
   /** The default hit tolerance the query should be using */
   static readonly DEFAULT_HIT_TOLERANCE: number = 4;
 
-  /** The default waiting time before showing a warning about the metadata taking a long time to get processed */
+  /** The default waiting time before showing a warning about the metadata taking a long time to get processed. */
   static readonly DEFAULT_WAIT_PERIOD_METADATA_WARNING: number = 10 * 1000; // 10 seconds
+
+  /** The interval between repeated metadata fetch warnings after the initial one has been shown. */
   static readonly DEFAULT_WAIT_PERIOD_METADATA_WARNING_RECALL: number = 20 * 1000; // 20 seconds
 
   /** The default display date mode used when generating default configurations */
@@ -122,7 +124,7 @@ export abstract class AbstractGeoViewLayer {
   #onLayerMessageHandlers: LayerMessageDelegate[] = [];
 
   /**
-   * Constructor
+   * Constructs an AbstractGeoViewLayer instance.
    *
    * @param geoviewLayerConfig - The GeoView layer configuration options
    */
@@ -565,7 +567,7 @@ export abstract class AbstractGeoViewLayer {
    * this.emitMessage(
    *   'layers.fetchProgress',
    *   ['50', '100'],
-   *   messageType: 'error',
+   *   'error',
    *   true
    * );
    */
@@ -1231,7 +1233,7 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
-   * Registers a config created event handler.
+   * Registers a GV layer created event handler.
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
@@ -1241,7 +1243,7 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
-   * Unregisters a config created event handler.
+   * Unregisters a GV layer created event handler.
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
@@ -1422,7 +1424,7 @@ export type VisibleChangedEvent = {
  * Define an event for the delegate
  */
 export type LayerEntryRegisterInitEvent = {
-  // The configuration associated with the layer entry processed
+  /** The configuration associated with the layer entry that was initialized. */
   config: ConfigBaseClass;
 };
 
@@ -1435,7 +1437,7 @@ type LayerEntryRegisterInitDelegate = EventDelegateBase<AbstractGeoViewLayer, La
  * Define an event for the delegate
  */
 export type LayerEntryProcessedEvent = {
-  // The configuration associated with the layer entry processed
+  /** The configuration associated with the layer entry that was processed. */
   config: ConfigBaseClass;
 };
 
@@ -1448,10 +1450,10 @@ type LayerEntryProcessedDelegate = EventDelegateBase<AbstractGeoViewLayer, Layer
  * Define an event for the delegate
  */
 export type LayerConfigCreatedEvent = {
-  // The configuration associated with the layer to be created
+  /** The configuration associated with the layer that was created. */
   config: ConfigBaseClass;
 
-  // The errors, if any, which happened during config creation
+  /** The errors, if any, that occurred during config creation. */
   errors: Error[];
 };
 
@@ -1464,7 +1466,7 @@ type LayerConfigCreatedDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerC
  * Define an event for the delegate
  */
 export type LayerGVCreatedEvent = {
-  // The configuration associated with the layer to be created
+  /** The GV layer that was created. */
   layer: AbstractGVLayer;
 };
 
@@ -1477,7 +1479,7 @@ type LayerGVCreatedDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerGVCre
  * Define an event for the delegate
  */
 export type LayerGroupCreatedEvent = {
-  // The created layer group
+  /** The GV group layer that was created. */
   layer: GVGroupLayer;
 };
 
@@ -1487,7 +1489,9 @@ export type LayerGroupCreatedEvent = {
 type LayerGroupCreatedDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerGroupCreatedEvent, void>;
 
 export interface TypeWmsLegendStyle {
+  /** The name of the WMS legend style. */
   name: string;
+  /** The canvas element rendering the legend, or null if unavailable. */
   legend: HTMLCanvasElement | null;
 }
 
@@ -1500,10 +1504,13 @@ type LayerMessageDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerMessage
  * Define an event for the delegate
  */
 export type LayerMessageEvent = {
-  // The loaded layer
+  /** The i18n key (or literal string) for the message to display. */
   messageKey: string;
+  /** Parameters to interpolate into the localized message. */
   messageParams: string[];
+  /** The severity type of the message. */
   messageType: SnackbarType;
+  /** Whether to show the message as a notification. */
   notification: boolean;
 };
 

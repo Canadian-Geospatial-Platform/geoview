@@ -18,6 +18,8 @@ import {
   type TypeTimeSliderProps,
   type TypeTimeSliderValues,
 } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
+import { getStoreMapConfigCorePackagesConfig } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { logger } from '@/core/utils/logger';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { DateMgt, type TimeDimension, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
@@ -165,7 +167,6 @@ export class TimeSliderController extends AbstractMapViewerController {
    * @param layerPath - The layer path
    * @param reversed - The reversed state
    */
-
   setReversed(layerPath: string, reversed: boolean): void {
     // Save in the store
     setStoreTimeSliderReversed(this.getMapId(), layerPath, reversed);
@@ -202,6 +203,35 @@ export class TimeSliderController extends AbstractMapViewerController {
   setDisplayDateTimezone(layerPath: string, displayDateTimezone: string): void {
     // Save in the store
     setStoreTimeSliderDisplayDateTimezone(this.getMapId(), layerPath, displayDateTimezone);
+  }
+
+  /**
+   * Attempts to register a layer with the time slider if it has a temporal dimension and time slider values.
+   *
+   * @param layer - The layer to attempt registration for
+   */
+  tryRegisterLayer(layer: AbstractGVLayer): void {
+    try {
+      // Get time slider config if present in map config
+      const timeSliderConfigs = getStoreMapConfigCorePackagesConfig(this.getMapId())?.find((config) =>
+        Object.keys(config).includes('time-slider')
+      )?.['time-slider'] as Record<'sliders', TypeTimeSliderProps[]>;
+
+      const layerSliderConfig = timeSliderConfigs?.sliders?.find((slider: TypeTimeSliderProps) =>
+        slider.layerPaths.includes(layer.getLayerPath())
+      );
+
+      // If the layer is loaded AND flag is true to use time dimension, continue
+      if (layer.getIsTimeAware() && layer.getTimeDimension()) {
+        // Check (if dimension is valid) and add time slider layer when needed
+        this.getControllersRegistry().timeSliderController?.checkInitTimeSliderLayerAndApplyFilters(layer, layerSliderConfig);
+      }
+    } catch (error: unknown) {
+      // Log error
+      logger.logError(error);
+      // Layer failed to load, abandon it for the TimeSlider registration, too bad.
+      // Here, we haven't even made it to a possible layer registration for a possible Time Slider, because we couldn't even get the layer to load anyways.
+    }
   }
 
   // #endregion PUBLIC METHODS
@@ -264,13 +294,13 @@ export class TimeSliderController extends AbstractMapViewerController {
     // Generate the filter string
     const filter = TimeSliderController.#generateFilterString(layer, timeSliderValues, field, filtering, values);
 
+    // Set the filter on time on the layer
+    layer.setLayerFiltersTime(filter);
+
     // ---- Always applied ----
     addOrUpdateStoreTimeSliderFilter(this.getMapId(), layer.getLayerPath(), filter);
     setStoreTimeSliderFiltering(this.getMapId(), layer.getLayerPath(), filtering);
     setStoreTimeSliderValues(this.getMapId(), layer.getLayerPath(), values);
-
-    // Apply filters on the map
-    this.getControllersRegistry().layerController.applyLayerFilters(layer.getLayerPath());
   }
 
   // #endregion PRIVATE METHODS
@@ -296,10 +326,6 @@ export class TimeSliderController extends AbstractMapViewerController {
     layerTimeDimensionInfo: TimeDimension,
     timesliderConfig?: TypeTimeSliderProps
   ): TypeTimeSliderValues | undefined {
-    // If no layerPath, return undefined
-    // TODO: CHECK - Can this truly happen, a layerConfig without a layerPath!?
-    if (!layerConfig.layerPath) return undefined;
-
     // Get temporal dimension info from plugin config
     const configTimeDimension = timesliderConfig?.timeDimension;
 
@@ -396,7 +422,7 @@ export class TimeSliderController extends AbstractMapViewerController {
   ): string {
     let filter = '';
 
-    /** Helper function to format dates Esri way */
+    // Helper function to format dates Esri way
     const helperEsriDate = (ms: number): string => `date '${DateMgt.formatDateISOShort(ms)}'`;
 
     // If filtering

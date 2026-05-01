@@ -344,61 +344,54 @@ export class LayerCreatorController extends AbstractMapViewerController {
   }
 
   /**
-   * Refreshes GeoCore layers.
+   * Refreshes all GeoCore layers by removing and re-adding them, then restoring the original layer order and visibility.
+   *
+   * Uses Promise.allSettled so that ordered layer paths include all children before restoring state.
    */
   reloadGeocoreLayers(): void {
-    const configs = this.getControllersRegistry().layerController.getLayerEntryConfigs();
+    const { layerController } = this.getControllersRegistry();
     const originalOrderedLayers = [...getStoreLayerOrderedLayerPaths(this.getMapId())];
     const originalLegendLayersInfo = getStoreLayerLegendLayers(this.getMapId());
+
+    // Collect root-level GeoCore configs, remove each layer, and start re-adding — capturing both paths and promises
     const parentPaths: string[] = [];
+    const reloadPromises = layerController
+      .getLayerEntryConfigs()
+      .filter((config) => isValidUUID(config.getGeoviewLayerId()) && !config.getParentLayerConfig())
+      .map((config) => {
+        parentPaths.push(config.layerPath);
+        this.removeLayerUsingPath(config.layerPath);
+        return this.addGeoviewLayerByGeoCoreUUID(config.getGeoviewLayerId());
+      });
 
     // Have to do the Promise allSettled so the new ordered layers have all the children layerPaths
-    Promise.allSettled(
-      configs
-        .filter((config) => {
-          // Filter to just Geocore layers and not child layers
-          if (isValidUUID(config.getGeoviewLayerId()) && !config.getParentLayerConfig()) {
-            return true;
-          }
-          return false;
-        })
-        .map((config) => {
-          // Remove and add back in GeoCore Layers and return their promises
-          parentPaths.push(config.layerPath);
-          this.removeLayerUsingPath(config.layerPath);
-          return this.addGeoviewLayerByGeoCoreUUID(config.getGeoviewLayerId());
-        })
-    )
+    Promise.allSettled(reloadPromises)
       .then(() => {
-        // Prepare listeners for removing previously removed layers
+        // After each GeoCore layer loads, remove any new child paths that weren't in the original order
         parentPaths.forEach((parentPath) => {
-          function removeChildLayers(sender: LayerCreatorController): void {
-            const childPaths = sender.#getAllChildPaths(parentPath);
-            childPaths.forEach((childPath) => {
-              if (!originalOrderedLayers.includes(childPath)) {
-                sender.removeLayerUsingPath(childPath);
-              }
-            });
-            // TODO: MINOR - Bound this 'removeChildLayers' function (like other ones) instead of creating a new handler on each 'forEach'
+          const removeChildLayers = (sender: LayerCreatorController): void => {
+            sender
+              .#getAllChildPaths(parentPath)
+              .filter((childPath) => !originalOrderedLayers.includes(childPath))
+              .forEach((childPath) => sender.removeLayerUsingPath(childPath));
             sender.offLayerConfigAdded(removeChildLayers);
-          }
-
+          };
           this.onLayerConfigAdded(removeChildLayers);
         });
 
-        // Prepare listeners for changing the visibility
-        this.getControllersRegistry().layerController.setMapOrderedLayersDirectly(originalOrderedLayers);
+        // Restore original layer order
+        layerController.setMapOrderedLayersDirectly(originalOrderedLayers);
+
+        // Restore original visibility for each layer when it first loads
         originalOrderedLayers.forEach((layerPath) => {
-          function setLayerVisibility(sender: LayerDomain, event: DomainLayerBaseEvent): void {
+          const setLayerVisibility = (sender: LayerDomain, event: DomainLayerBaseEvent): void => {
             const eventLayerPath = event.layer.getLayerPath();
             if (layerPath === eventLayerPath) {
-              const { visible } = originalLegendLayersInfo.filter((info) => info.layerPath === eventLayerPath)[0];
-              event.layer?.setVisible(visible);
-              // TODO: MINOR - Bound this 'setLayerVisibility' function (like other ones) instead of creating a new handler on each 'forEach'
+              const { visible } = originalLegendLayersInfo.find((info) => info.layerPath === eventLayerPath) ?? {};
+              event.layer?.setVisible(visible ?? true);
               sender.offLayerFirstLoaded(setLayerVisibility);
             }
-          }
-
+          };
           // TODO: REFACTOR - Instead of attaching on the domain, attach it on the layer itself
           this.#layerDomain.onLayerFirstLoaded(setLayerVisibility);
         });
@@ -1011,12 +1004,10 @@ export class LayerCreatorController extends AbstractMapViewerController {
    * Creates an instance of a specific `AbstractGeoViewLayer` subclass based on the given GeoView layer configuration.
    *
    * This function determines the correct layer type from the configuration and instantiates it accordingly.
+   * Supports GeoJSON, CSV, WMS, Esri Dynamic, Esri Feature, Esri Image, GeoTIFF, ImageStatic, KML, WFS, WKB,
+   * OGC Feature, XYZ Tiles, and Vector Tiles. Throws if the layer type is unsupported.
    *
-   * @remarks
-   * - This method currently supports GeoJSON, CSV, WMS, Esri Dynamic, Esri Feature, Esri Image, GeoTIFF
-   *   ImageStatic, KML, WFS, WKB, OGC Feature, XYZ Tiles, and Vector Tiles.
-   * - If the layer type is not supported, an error is thrown.
-   * - TODO: Refactor to use the validated configuration with metadata already fetched.
+   * TODO: Refactor to use the validated configuration with metadata already fetched.
    *
    * @param geoviewLayerConfig - The configuration object for the GeoView layer
    * @returns An instance of the corresponding `AbstractGeoViewLayer` subclass

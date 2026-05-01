@@ -1069,7 +1069,6 @@ export type TypeLayerData = {
   // when property features is null, the query ended with an error.
   queryStatus: TypeQueryStatus;
   features?: TypeFeatureInfoEntry[];
-  isDisabled?: boolean;
 };
 
 // #endregion RESULT SET

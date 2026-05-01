@@ -189,6 +189,9 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
     await this.#layerTester.testEsriDynamicDomainFieldQueryValue();
     await this.#layerTester.testEsriFeatureDomainFieldQueryValue();
 
+    // Make sure the map is reset in its initial extent after the zooms
+    await this.getControllersRegistry().mapController.zoomToInitialExtent();
+
     // Run the GeometryCollection layer test last to avoid perturbing icon color ordering used by earlier strict icon assertions.
     return this.#layerTester.testAddGeoJSONWithGeometryCollection();
   }

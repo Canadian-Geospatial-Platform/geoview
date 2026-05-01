@@ -52,8 +52,15 @@ export class DataTableController extends AbstractMapViewerController {
   applyMapFilters(filterStrings: string): void {
     const layerPath = getStoreDataTableSelectedLayerPath(this.getMapId());
     const filter = getStoreDataTableMapFilteredRecord(this.getMapId(), layerPath) ? filterStrings : '';
+
+    // Get the layer
+    const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
+
+    // Set the filters on the data on the layer
+    layer.setLayerFiltersData(filter);
+
+    // Save in the store
     addOrUpdateStoreDataTableFilter(this.getMapId(), layerPath, filter);
-    this.getControllersRegistry().layerController.applyLayerFilters(layerPath);
   }
 
   /**

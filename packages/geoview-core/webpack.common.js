@@ -64,7 +64,6 @@ const multipleHtmlPluginsOutliers = globSync('./public/templates/outliers/*.html
   });
 });
 
-// TODO: I think we can remove config.resolve.alias.@config line
 const config = {
   cache: {
     type: 'filesystem',
@@ -135,7 +134,6 @@ const config = {
       '@': path.resolve(__dirname, 'src'),
       'geoview-core': path.resolve(__dirname, 'src'),
       '@public': path.resolve(__dirname, 'public'),
-      '@config': path.resolve(__dirname, 'src/api/config'),
     },
   },
   module: {

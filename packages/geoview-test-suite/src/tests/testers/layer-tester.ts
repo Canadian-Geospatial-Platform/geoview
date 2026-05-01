@@ -1,4 +1,4 @@
-import { Test } from '../core/test';
+﻿import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
 import { LayerStatusErrorError } from 'geoview-core/core/exceptions/layer-exceptions';
 import { LayerNoCapabilitiesError, LayerServiceMetadataUnableToFetchError } from 'geoview-core/core/exceptions/layer-exceptions';
@@ -1378,7 +1378,7 @@ export class LayerTester extends GVAbstractTester {
    */
   testInitialSettingsCascade(): Promise<Test<TypeMapFeaturesInstance | undefined>> {
     // The config
-    const config = GVAbstractTester.INITIAL_SETTINGS_CONFIG;
+    const layerConfig = GVAbstractTester.INITIAL_SETTINGS_CONFIG as unknown as TypeGeoviewLayerConfig;
 
     // Expected config
     const expectedResults = {
@@ -1392,7 +1392,6 @@ export class LayerTester extends GVAbstractTester {
       'Test initial settings cascade',
       async (test) => {
         // Add the layer to the map and get the AbstractGeoViewLayer
-        const layerConfig = config as unknown as TypeGeoviewLayerConfig;
         await this.helperStepAddLayerOnMap(test, layerConfig);
 
         // Return created map config
@@ -1400,7 +1399,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test, result) => {
         const layer = result?.map?.listOfGeoviewLayerConfig.find(
-          (geoviewLayer) => geoviewLayer.geoviewLayerId === config.geoviewLayerId
+          (geoviewLayer) => geoviewLayer.geoviewLayerId === layerConfig.geoviewLayerId
         ) as TypeGeoviewLayerConfig;
 
         // Perform assertions

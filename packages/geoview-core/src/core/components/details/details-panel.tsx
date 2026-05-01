@@ -7,10 +7,11 @@ import { IconButton, Grid, ArrowForwardIosOutlinedIcon, ArrowBackIosOutlinedIcon
 import type { TypeContainerBox } from '@/core/types/global-types';
 import {
   useStoreDetailsCheckedFeatures,
-  useStoreDetailsLayerDataArrayBatch,
-  useStoreDetailsSelectedLayerPath,
   useStoreDetailsCoordinateInfoEnabled,
   useStoreDetailsHideCoordinateInfoSwitch,
+  useStoreDetailsLayerDataArray,
+  useStoreDetailsLayerDataArrayBatch,
+  useStoreDetailsSelectedLayerPath,
   LAYER_PATH_COORDINATE_INFO,
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { useStoreUIActiveAppBarTab, useStoreUIActiveFooterBarTab } from '@/core/stores/store-interface-and-intial-values/ui-state';
@@ -25,7 +26,7 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useStoreMapClickCoordinates } from '@/core/stores/store-interface-and-intial-values/map-state';
-import type { TypeFeatureInfoEntry, TypeLayerData, TypeMapMouseInfo } from '@/api/types/map-schema-types';
+import type { TypeFeatureInfoEntry, TypeLayerData, TypeMapMouseInfo, TypeQueryStatus } from '@/api/types/map-schema-types';
 
 import type { LayerListEntry, LayoutExposedMethods } from '@/core/components/common';
 import { Layout } from '@/core/components/common';
@@ -43,6 +44,24 @@ interface DetailsPanelType {
   /** The container type (appBar or footerBar). */
   containerType: TypeContainerBox;
 }
+
+/**
+ * Structural entry used for batch-sensitive selection logic in the details panel.
+ *
+ * Contains only the data derived from the batched layer array — feature counts, query status, and identity.
+ * Display fields (layerName, layerStatus, layerFeatures, tooltip) are intentionally excluded so that live
+ * store updates to those fields do not re-trigger the batch-gated selection effects.
+ */
+type LayerListStructureEntry = {
+  /** Unique path identifying the layer. */
+  layerPath: string;
+  /** Number of features in the layer. */
+  numOffeatures: number;
+  /** Current query status of the layer, derived from batched layer data. */
+  queryStatus: TypeQueryStatus;
+  /** Unique DOM id for the layer list item. */
+  layerUniqueId: string;
+};
 
 /**
  * Creates the details panel component.
@@ -64,6 +83,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   // Store
   const mapId = useStoreGeoViewMapId();
   const selectedLayerPath = useStoreDetailsSelectedLayerPath();
+  const arrayOfLayerData = useStoreDetailsLayerDataArray();
   const arrayOfLayerDataBatch = useStoreDetailsLayerDataArrayBatch();
   const checkedFeatures = useStoreDetailsCheckedFeatures();
   const coordinateInfoEnabled = useStoreDetailsCoordinateInfoEnabled();
@@ -85,9 +105,8 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   // States
   const [currentFeatureIndex, setCurrentFeatureIndex] = useState<number>(0);
   const [selectedLayerPathLocal, setSelectedLayerPathLocal] = useState<string>(selectedLayerPath);
-  const [arrayOfLayerListLocal, setArrayOfLayerListLocal] = useState<LayerListEntry[]>([]);
+  const [arrayOfLayerListLocal, setArrayOfLayerListLocal] = useState<LayerListStructureEntry[]>([]);
   const [isRightPanelVisible, setIsRightPanelVisible] = useState<boolean>(false);
-  const prevLayerSelected = useRef<TypeLayerData>();
   const prevLayerFeatures = useRef<TypeFeatureInfoEntry[] | undefined | null>();
   const prevFeatureIndex = useRef<number>(0); // 0 because that's the default index for the features
   const prevMapClickCoordinates = useRef<TypeMapMouseInfo | undefined>(mapClickCoordinates);
@@ -100,7 +119,6 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   /**
    * Memoizes the set of checked feature IDs for O(1) lookup.
    */
-  // Create a memoized Set of checked feature IDs
   const memoIsCheckedFeaturesSet = useMemo(() => {
     // Log
     logger.logTraceUseMemo('DETAILS-PANEL - memoIsCheckedFeaturesSet', checkedFeatures);
@@ -128,7 +146,6 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
    *
    * @param arrayToClear - The array to clear of unchecked features
    */
-  // Modified clearHighlightsUnchecked
   const clearHighlightsUnchecked = useCallback(
     (arrayToClear: TypeFeatureInfoEntry[] | undefined | null) => {
       arrayToClear?.forEach((feature) => {
@@ -141,19 +158,16 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   );
 
   /**
-   * Gets the label for the number of features of a layer.
+   * Gets the formatted label for a feature count.
    *
-   * @param layer - The layer data to get the label for
+   * @param numOfFeatures - The number of features to format
    * @returns The features count label string
    */
   const getNumFeaturesLabel = useCallback(
-    (layer: TypeLayerData): string => {
-      const numOfFeatures = layer.features?.length ?? 0;
-      const label =
-        numOfFeatures === 0
-          ? `${t('general.none')} ${t('details.feature')} ${t('details.selected')}`
-          : `${numOfFeatures} ${t('details.feature')}${numOfFeatures > 1 ? 's' : ''}`;
-      return label;
+    (numOfFeatures: number): string => {
+      return numOfFeatures === 0
+        ? `${t('general.none')} ${t('details.feature')} ${t('details.selected')}`
+        : `${numOfFeatures} ${t('details.feature')}${numOfFeatures > 1 ? 's' : ''}`;
     },
     [t]
   );
@@ -193,33 +207,37 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   }, [containerType, footerBarTabId, footerBarIsOpen, appBarTabId, appBarIsOpen, isRightPanelVisible]);
 
   /**
-   * Memoizes the layers list for the LayerList component and centralizing indexing purposes.
+   * Memoizes the full display layer list for the LayerList component.
+   *
+   * Fully live — uses the non-batched layer data array and all live store hooks for filtering, ordering,
+   * merging, and display. Rerenders immediately when any live data changes (features, status, names,
+   * visibility, ordering). The batch-gated selection effects depend on memoLayersListBatched instead.
    */
-  const memoLayersList = useMemo(() => {
+  const memoLayersList = useMemo((): LayerListEntry[] => {
     // Log
-    logger.logTraceUseMemo('DETAILS-PANEL - memoLayersList', visibleInRangeLayers, arrayOfLayerDataBatch);
+    logger.logTraceUseMemo('DETAILS-PANEL - memoLayersList', visibleInRangeLayers, arrayOfLayerData);
 
     // Set the layers list (filter: visible - visible in range and isQueryable)
     const layerListEntries = visibleInRangeLayers
-      .map((layerPath) => arrayOfLayerDataBatch.find((layerData) => layerData.layerPath === layerPath))
+      .map((layerPath) => arrayOfLayerData.find((layerData) => layerData.layerPath === layerPath))
       .filter((layer) => layer && !layerHiddenSet[layer.layerPath])
       .filter((layer) => layer && queryableByLayerPath[layer.layerPath])
       .map((layer) => ({
-        layerName: layerNames[layer!.layerPath] ?? '',
         layerPath: layer!.layerPath,
+        layerName: layerNames[layer!.layerPath] ?? '',
         layerStatus: layerStatuses[layer!.layerPath],
         queryStatus: layer!.queryStatus,
         numOffeatures: layer!.features?.length ?? 0,
-        layerFeatures: getNumFeaturesLabel(layer!),
+        layerFeatures: getNumFeaturesLabel(layer!.features?.length ?? 0),
         tooltip: t('layers.selectLayer', { layerName: layerNames[layer!.layerPath] }) ?? '',
         layerUniqueId: `${mapId}-${TABS.DETAILS}-${layer!.layerPath ?? ''}`,
       }));
 
-    // Merge in-range and out-of-range layers while preserving order from arrayOfLayerDataBatch
+    // Merge in-range and out-of-range layers while preserving order from arrayOfLayerData
     const existingLayerPaths = new Set(layerListEntries.map((entry) => entry.layerPath));
 
     // Add layers with features that aren't already in the list (out-of-range layers with features)
-    arrayOfLayerDataBatch.forEach((layer) => {
+    arrayOfLayerData.forEach((layer) => {
       if (
         (layer.features?.length ?? 0) > 0 &&
         !existingLayerPaths.has(layer.layerPath) &&
@@ -227,12 +245,12 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
         !layerParentHiddenSet[layer.layerPath]
       ) {
         layerListEntries.push({
-          layerName: layerNames[layer.layerPath] ?? '',
           layerPath: layer.layerPath,
+          layerName: layerNames[layer.layerPath] ?? '',
           layerStatus: layerStatuses[layer.layerPath],
           queryStatus: layer.queryStatus,
           numOffeatures: layer.features?.length ?? 0,
-          layerFeatures: getNumFeaturesLabel(layer),
+          layerFeatures: getNumFeaturesLabel(layer.features?.length ?? 0),
           tooltip: t('layers.selectLayer', { layerName: layerNames[layer.layerPath] }) ?? '',
           layerUniqueId: `${mapId}-${TABS.DETAILS}-${layer.layerPath}`,
         });
@@ -261,15 +279,15 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
     const orderedLayerListEntries = [...layersWithFeatures, ...layersWithoutFeatures];
 
     // Add coordinate info layer at the beginning if it exists and is enabled
-    const coordinateInfoLayer = arrayOfLayerDataBatch.find((layer) => layer.layerPath === LAYER_PATH_COORDINATE_INFO);
+    const coordinateInfoLayer = arrayOfLayerData.find((layer) => layer.layerPath === LAYER_PATH_COORDINATE_INFO);
     if (coordinateInfoLayer && coordinateInfoEnabled) {
       orderedLayerListEntries.unshift({
-        layerName: t('details.coordinateInfoTitle'),
         layerPath: coordinateInfoLayer.layerPath,
+        layerName: t('details.coordinateInfoTitle'),
         layerStatus: layerStatuses[coordinateInfoLayer.layerPath],
         queryStatus: coordinateInfoLayer.queryStatus,
         numOffeatures: coordinateInfoLayer.features?.length ?? 0,
-        layerFeatures: getNumFeaturesLabel(coordinateInfoLayer),
+        layerFeatures: getNumFeaturesLabel(coordinateInfoLayer.features?.length ?? 0),
         tooltip: t('layers.selectLayer', { layerName: t('details.coordinateInfoTitle') }) ?? '',
         layerUniqueId: `${mapId}-${TABS.DETAILS}-${coordinateInfoLayer.layerPath}`,
       });
@@ -278,7 +296,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
     return orderedLayerListEntries;
   }, [
     visibleInRangeLayers,
-    arrayOfLayerDataBatch,
+    arrayOfLayerData,
     coordinateInfoEnabled,
     queryableByLayerPath,
     layerNames,
@@ -290,6 +308,25 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
     orderedLayers,
     t,
   ]);
+
+  /**
+   * Memoizes a minimal structural snapshot derived exclusively from the batched layer data array.
+   *
+   * Contains only layerPath, numOffeatures, and queryStatus — the minimum needed to detect when a
+   * batched update has changed feature counts or added/removed layers. This drives the batch-gated
+   * selection effects and the feature-index reset logic without re-triggering on live display changes.
+   */
+  const memoLayersListBatched = useMemo((): LayerListStructureEntry[] => {
+    // Log
+    logger.logTraceUseMemo('DETAILS-PANEL - memoLayersListBatched', arrayOfLayerDataBatch);
+
+    return arrayOfLayerDataBatch.map((layer) => ({
+      layerPath: layer.layerPath,
+      numOffeatures: layer.features?.length ?? 0,
+      queryStatus: layer.queryStatus,
+      layerUniqueId: `${mapId}-${TABS.DETAILS}-${layer.layerPath}`,
+    }));
+  }, [arrayOfLayerDataBatch, mapId]);
 
   /**
    * Memoizes the selected layer for the LayerList component.
@@ -376,17 +413,17 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   );
 
   /**
-   * Effect used when the layers list changes.
+   * Effect used when the structural layers list changes.
    * Note: This useEffect is triggered many times as the layerDataArray gets processed.
    * History: Logic was initially in click-marker. Brought here.
    */
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('DETAILS-PANEL - memoLayersList changed', memoLayersList);
+    logger.logTraceUseEffect('DETAILS-PANEL - memoLayersListBatched changed', memoLayersListBatched);
 
     // Unselect the layer path if no more layers in the list
-    if (!memoLayersList.length) detailsController.setSelectedLayerPath('');
-  }, [memoLayersList, detailsController]);
+    if (!memoLayersListBatched.length) detailsController.setSelectedLayerPath('');
+  }, [memoLayersListBatched, detailsController]);
 
   /**
    * Effect used when the layers list changes.
@@ -457,7 +494,12 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
         memoLayersList
       );
     }
-  }, [detailsController, memoLayerSelectedItem, memoLayersList, selectedLayerPath]);
+
+    // NOTE: memoLayerSelectedItem and memoLayersList intentionally omitted — they are always derived from
+    // memoLayersListBatched. Using memoLayersListBatched as the trigger ensures this effect only fires on
+    // structural (batched) changes, not on display-only updates like layerStatus or layerName.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [detailsController, memoLayersListBatched, selectedLayerPath]);
 
   // #endregion
 
@@ -540,6 +582,20 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   );
 
   /**
+   * Handles a click on the previous feature navigation button.
+   */
+  const handlePrevFeature = useCallback((): void => {
+    handleFeatureNavigateChange(-1);
+  }, [handleFeatureNavigateChange]);
+
+  /**
+   * Handles a click on the next feature navigation button.
+   */
+  const handleNextFeature = useCallback((): void => {
+    handleFeatureNavigateChange(1);
+  }, [handleFeatureNavigateChange]);
+
+  /**
    * Handles click to change the selected layer in left panel.
    *
    * @param layerEntry - The data of the newly selected layer
@@ -571,23 +627,21 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
    * the selected features with the store.
    */
   const resetCurrentIndex = (): void => {
-    // Keep reference on previously selected layer
-    prevLayerSelected.current = arrayOfLayerDataBatch.find((layer) => layer.layerPath === selectedLayerPathLocal);
     // Keep reference on previously selected features
-    prevLayerFeatures.current = prevLayerSelected.current?.features;
+    prevLayerFeatures.current = arrayOfLayerDataBatch.find((layer) => layer.layerPath === selectedLayerPathLocal)?.features;
     // Keep reference on previously selected index
     prevFeatureIndex.current = currentFeatureIndex;
     // Reset the indexing
     setCurrentFeatureIndex(0);
   };
 
-  // If the array of layer data has changed since last render
-  if (arrayOfLayerListLocal !== memoLayersList) {
+  // If the structural layer data has changed since last render (driven by batch updates only, not display changes)
+  if (arrayOfLayerListLocal !== memoLayersListBatched) {
     // Selected array layer data changed
-    setArrayOfLayerListLocal(memoLayersList);
+    setArrayOfLayerListLocal(memoLayersListBatched);
 
     // Only reset the feature index if the number of features in the currently selected layer changed
-    const currentSelectedLayer = memoLayersList.find((layer) => layer.layerPath === selectedLayerPath);
+    const currentSelectedLayer = memoLayersListBatched.find((layer) => layer.layerPath === selectedLayerPath);
     const previousSelectedLayer = arrayOfLayerListLocal.find((layer) => layer.layerPath === selectedLayerPath);
 
     // Reset index only if feature count changed for the selected layer
@@ -619,7 +673,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
     if (mapClickCoordinates && memoLayersList?.length) {
       // if we don't have a selected layer path with features select the first layer path with features
       if (!selectedLayerPath.length) {
-        const selectedLayer = memoLayersList.find((layer) => !!layer.numOffeatures);
+        const selectedLayer = memoLayersListBatched.find((layer) => !!layer.numOffeatures);
         detailsController.setSelectedLayerPath(selectedLayer?.layerPath ?? '');
         // Ensure the info panel is visible
         layoutRef.current?.showRightPanel(true);
@@ -647,8 +701,12 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
       // Update the ref to current coordinates
       prevMapClickCoordinates.current = mapClickCoordinates;
     }
+
+    // NOTE: memoLayersList intentionally omitted — they are always derived from
+    // memoLayersListBatched. Using memoLayersListBatched as the trigger ensures this effect only fires on
+    // structural (batched) changes, not on display-only updates like layerStatus or layerName.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [detailsController, mapController, mapClickCoordinates, memoLayersList, coordinateInfoEnabled]);
+  }, [detailsController, mapController, mapClickCoordinates, memoLayersListBatched, coordinateInfoEnabled]);
 
   /**
    * Clear highlights and checked features when the details panel is closed
@@ -679,15 +737,15 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   }, [detailsController, mapController, footerBarTabId, footerBarIsOpen, appBarTabId, appBarIsOpen, containerType]);
 
   /**
-   * Checks if all layers query status is processed.
+   * Memoizes whether all layers query status is processed.
    */
-  const memoIsAllLayersQueryStatusProcessed = useMemo(() => {
+  const memoIsAllLayersQueryStatusProcessed = useMemo((): boolean => {
     // Log
     logger.logTraceUseMemo('DETAILS-PANEL - AllLayersQueryStatusProcessed.');
 
-    if (!arrayOfLayerDataBatch || arrayOfLayerDataBatch?.length === 0) return () => false;
+    if (!arrayOfLayerDataBatch || arrayOfLayerDataBatch.length === 0) return false;
 
-    return () => arrayOfLayerDataBatch?.every((layer) => layer.queryStatus === FEATURE_INFO_STATUS.PROCESSED);
+    return arrayOfLayerDataBatch.every((layer) => layer.queryStatus === FEATURE_INFO_STATUS.PROCESSED);
   }, [arrayOfLayerDataBatch]);
 
   /**
@@ -713,7 +771,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
       const shouldClearSelectedLayer = allLayersHaveNoFeatures && !coordinateInfoEnabled;
 
       // If should clear the selected layer and queries are processed
-      if (shouldClearSelectedLayer && memoIsAllLayersQueryStatusProcessed()) {
+      if (shouldClearSelectedLayer && memoIsAllLayersQueryStatusProcessed) {
         // Log
         logger.logDebug('DETAILS-PANEL - All layers have no features and coordinate info is disabled, showing right panel with guide');
 
@@ -759,7 +817,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
     }
 
     // Until process or something found for selected layerPath, return skeleton
-    if (!memoIsAllLayersQueryStatusProcessed() && !(memoSelectedLayerDataFeatures && memoSelectedLayerDataFeatures.length > 0)) {
+    if (!memoIsAllLayersQueryStatusProcessed && !(memoSelectedLayerDataFeatures && memoSelectedLayerDataFeatures.length > 0)) {
       return <DetailsSkeleton />;
     }
 
@@ -786,11 +844,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
                     iconRef={prevButtonRef}
                     aria-label={t('details.previousFeatureBtn')}
                     tooltipPlacement="top"
-                    onClick={() => {
-                      if (!isPrevDisabled) {
-                        handleFeatureNavigateChange(-1);
-                      }
-                    }}
+                    onClick={handlePrevFeature}
                     aria-disabled={isPrevDisabled}
                     className="buttonOutline"
                   >
@@ -803,11 +857,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
                     }}
                     aria-label={t('details.nextFeatureBtn')}
                     tooltipPlacement="top"
-                    onClick={() => {
-                      if (!isNextDisabled) {
-                        handleFeatureNavigateChange(1);
-                      }
-                    }}
+                    onClick={handleNextFeature}
                     aria-disabled={isNextDisabled}
                     className="buttonOutline"
                   >

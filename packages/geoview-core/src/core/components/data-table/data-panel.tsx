@@ -18,6 +18,7 @@ import {
   useStoreLayerNameSet,
   useStoreLayerStatusSet,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useStoreDataTableQueryStatusSet } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import {
   useStoreUIActiveAppBarTab,
   useStoreUIActiveFooterBarTab,
@@ -37,6 +38,7 @@ import { useDataTableController, useLayerSetController, useUIController } from '
 
 /** Properties for the Datapanel component. */
 interface DataPanelType {
+  /** The container type (app-bar or footer-bar). */
   containerType: TypeContainerBox;
 }
 
@@ -71,6 +73,7 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
   const showUnsymbolizedFeatures = useStoreAppShowUnsymbolizedFeatures();
   const layerNames = useStoreLayerNameSet();
   const layerStatuses = useStoreLayerStatusSet();
+  const queryStatuses = useStoreDataTableQueryStatusSet();
   const layerHiddenSet = useStoreLayerIsHiddenOnMapSet();
 
   // Create columns for data table.
@@ -92,6 +95,9 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
    * Applies filtering to the ordered layer data features.
    */
   const memoFilteredOrderedLayerData = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('DATA-PANEL - memoFilteredOrderedLayerData', memoOrderedLayerData);
+
     return memoOrderedLayerData.map((layer) => {
       let { features } = layer;
 
@@ -120,7 +126,7 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
    */
   const handleLayerChange = useCallback(
     (_layer: LayerListEntry): void => {
-      dataTableController.setSelectedLayerPath(_layer.layerPath); // This will trigger the useEffect below to call tiggerGetAllFeatureInfo()
+      dataTableController.setSelectedLayerPath(_layer.layerPath); // This will trigger the useEffect below to call triggerGetAllFeatureInfo()
       setIsLoading(true);
     },
     [dataTableController]
@@ -134,7 +140,7 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
    */
   const isMapFilteredSelectedForLayer = useCallback(
     (layerPath: string): boolean => {
-      return datatableSettings[layerPath].mapFilteredRecord && !!datatableSettings[layerPath].rowsFilteredRecord;
+      return datatableSettings[layerPath]?.mapFilteredRecord && !!datatableSettings[layerPath]?.rowsFilteredRecord;
     },
     [datatableSettings]
   );
@@ -353,6 +359,7 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
       ...layer,
       layerName: layerNames[layer.layerPath],
       layerStatus: layerStatuses[layer.layerPath],
+      queryStatus: queryStatuses[layer.layerPath],
       layerUniqueId: `${mapId}-${containerType}-${TABS.DATA_TABLE}-${layer.layerPath}`,
       layerFeatures: getFeaturesOfLayer(layer.layerPath),
       tooltip: getLayerTooltip(layerNames[layer.layerPath] ?? '', layer.layerPath),
@@ -367,6 +374,7 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
     isMapFilteredSelectedForLayer,
     layerNames,
     layerStatuses,
+    queryStatuses,
     mapId,
     memoOrderedLayerData,
     theme.palette.geoViewColor.grey.main,

@@ -1,4 +1,4 @@
-import type { Feature } from 'ol';
+﻿import type { Feature } from 'ol';
 import type { ReadOptions } from 'ol/format/Feature';
 import type { Options as SourceOptions } from 'ol/source/Vector';
 import type { Projection as OLProjection } from 'ol/proj';
@@ -47,7 +47,7 @@ export class GeoJSON extends AbstractGeoViewVector {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    *
-   * @returns The strongly-typed layer configuration specific to this layer.
+   * @returns The strongly-typed layer configuration specific to this layer
    */
   override getGeoviewLayerConfig(): TypeGeoJSONLayerConfig {
     return super.getGeoviewLayerConfig() as TypeGeoJSONLayerConfig;
@@ -56,7 +56,7 @@ export class GeoJSON extends AbstractGeoViewVector {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    *
-   * @returns The strongly-typed metadata specific to this layer.
+   * @returns The strongly-typed metadata specific to this layer
    */
   override getMetadata(): TypeMetadataGeoJSON | undefined {
     return super.getMetadata() as TypeMetadataGeoJSON | undefined;
@@ -227,7 +227,7 @@ export class GeoJSON extends AbstractGeoViewVector {
     sourceOptions: SourceOptions<Feature>,
     readOptions: ReadOptions
   ): Promise<Feature[]> {
-    // Cast it to a GeoJson layer type
+    // Cast it to proper type
     const layerConfigGeoJSON = layerConfig as GeoJSONLayerEntryConfig;
 
     // Read input config geojson
@@ -240,7 +240,10 @@ export class GeoJSON extends AbstractGeoViewVector {
       responseData = geojson;
     } else {
       // Have to fetch it
-      responseData = await AbstractGeoViewVector.fetchJson(layerConfig.getDataAccessPath(false), layerConfig.getSource().postSettings);
+      responseData = await AbstractGeoViewVector.fetchJson(
+        layerConfigGeoJSON.getDataAccessPath(false),
+        layerConfigGeoJSON.getSource().postSettings
+      );
     }
 
     // Read the EPSG from the data
@@ -252,7 +255,7 @@ export class GeoJSON extends AbstractGeoViewVector {
     // Assign the data projection reading options best we can, otherwise use the config, otherwise leave it undefined to let OpenLayers figure it out by itself using the GeoJSON parser later
     // https://openlayers.org/en/latest/apidoc/module-ol_format_GeoJSON-GeoJSON.html
     // eslint-disable-next-line no-param-reassign
-    readOptions.dataProjection = dataEPSG || layerConfig.getSource().dataProjection;
+    readOptions.dataProjection = dataEPSG || layerConfigGeoJSON.getSource().dataProjection;
 
     // Read the features
     return GeoUtilities.readFeaturesFromGeoJSON(responseData, readOptions);
@@ -318,11 +321,11 @@ export class GeoJSON extends AbstractGeoViewVector {
    * ID, name, and metadata access path URL. It then initializes the layer entries by calling
    * `initGeoViewLayerEntries`, which may involve fetching metadata or sublayer info.
    *
-   * @param geoviewLayerId - A unique identifier for the layer.
-   * @param geoviewLayerName - The display name of the layer.
-   * @param metadataAccessPath - The full service URL to the layer endpoint.
-   * @param isTimeAware - Indicates whether the layer supports time-based filtering.
-   * @returns A promise that resolves to an initialized GeoView layer configuration with layer entries.
+   * @param geoviewLayerId - A unique identifier for the layer
+   * @param geoviewLayerName - The display name of the layer
+   * @param metadataAccessPath - The full service URL to the layer endpoint
+   * @param isTimeAware - Indicates whether the layer supports time-based filtering
+   * @returns A promise that resolves to an initialized GeoView layer configuration with layer entries
    */
   static initGeoviewLayerConfig(
     geoviewLayerId: string,
@@ -341,12 +344,12 @@ export class GeoJSON extends AbstractGeoViewVector {
    * This function constructs a `TypeGeoJSONLayerConfig` object that describes an GeoJson Feature layer
    * and its associated entry configurations based on the provided parameters.
    *
-   * @param geoviewLayerId - A unique identifier for the GeoView layer.
-   * @param geoviewLayerName - The display name of the GeoView layer.
-   * @param metadataAccessPath - The URL or path to access metadata or feature data.
-   * @param isTimeAware - Indicates whether the layer supports time-based filtering.
-   * @param layerEntries - An array of layer entries objects to be included in the configuration.
-   * @returns The constructed configuration object for the GeoJson Feature layer.
+   * @param geoviewLayerId - A unique identifier for the GeoView layer
+   * @param geoviewLayerName - The display name of the GeoView layer
+   * @param metadataAccessPath - The URL or path to access metadata or feature data
+   * @param isTimeAware - Indicates whether the layer supports time-based filtering
+   * @param layerEntries - An array of layer entries objects to be included in the configuration
+   * @returns The constructed configuration object for the GeoJson Feature layer
    */
   static createGeoviewLayerConfig(
     geoviewLayerId: string,

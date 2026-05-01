@@ -13,7 +13,9 @@ export default class EventHelper {
    */
   static emitEvent<T, U, Z>(sender: T, handlersList: EventDelegateBase<T, U, Z>[], event: U): Z[] {
     // Trigger all the handlers in the array
-    return handlersList.map((handler) => handler(sender, event));
+    // Spread the handlersList in a new array to avoid issues if the handlersList gets modified while emitting
+    // (e.g. a handler gets removed while emitting, which would cause the forEach to skip the next handler)
+    return [...handlersList].map((handler) => handler(sender, event));
   }
 
   /**

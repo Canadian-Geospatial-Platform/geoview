@@ -664,6 +664,8 @@ export class ConfigApi {
    *
    * @param uuid - The uuid to test
    * @returns True if the provided uuid is a valid uuid
+   * @deprecated This function is deprecated and will be removed in future versions.
+   * Please use the exported `isValidUUID` function from utilities instead.
    */
   static isValidUUID(uuid: string): boolean {
     // Redirect to the exported function in utilities

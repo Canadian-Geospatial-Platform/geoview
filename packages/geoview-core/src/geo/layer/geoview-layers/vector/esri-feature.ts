@@ -1,4 +1,4 @@
-import type { Feature } from 'ol';
+﻿import type { Feature } from 'ol';
 import type { ReadOptions } from 'ol/format/Feature';
 import type { Options as SourceOptions } from 'ol/source/Vector';
 import type { Projection as OLProjection } from 'ol/proj';
@@ -37,7 +37,7 @@ export class EsriFeature extends AbstractGeoViewVector {
   /**
    * Constructs an EsriFeature Layer configuration processor.
    *
-   * @param layerConfig - The layer configuration.
+   * @param layerConfig - The layer configuration
    */
   // The constructor is not useless, it narrows down the accepted parameter type.
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor
@@ -50,7 +50,7 @@ export class EsriFeature extends AbstractGeoViewVector {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    *
-   * @returns The strongly-typed layer configuration specific to this layer.
+   * @returns The strongly-typed layer configuration specific to this layer
    */
   override getGeoviewLayerConfig(): TypeEsriFeatureLayerConfig {
     return super.getGeoviewLayerConfig() as TypeEsriFeatureLayerConfig;
@@ -59,10 +59,10 @@ export class EsriFeature extends AbstractGeoViewVector {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    *
-   * @remarks Sometimes, the layer processing uses metadata coming from MapServer/?f=json (TypeMetadataEsriDynamic) and sometimes
-   * from FeatureServer/?f=json (TypeMetadataEsriFeature) which is the reason for the double types.
+   * Sometimes, the layer processing uses metadata coming from MapServer/?f=json (TypeMetadataEsriDynamic)
+   * and sometimes from FeatureServer/?f=json (TypeMetadataEsriFeature) which is the reason for the double types.
    *
-   * @returns The strongly-typed layer metadata specific to this layer.
+   * @returns The strongly-typed layer metadata specific to this layer
    */
   override getMetadata(): TypeMetadataEsriDynamic | TypeMetadataEsriFeature | undefined {
     return super.getMetadata() as TypeMetadataEsriDynamic | TypeMetadataEsriFeature | undefined;
@@ -72,9 +72,9 @@ export class EsriFeature extends AbstractGeoViewVector {
    * Overrides the way the metadata is fetched.
    *
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
-   *
-   * @remarks This function returns TypeMetadataEsriDynamic | TypeMetadataEsriDynamicLayer | TypeMetadataEsriFeature because sometimes the url is
-   * MapServer/?f=json, sometimes MapServer/{layerId}?f=json and sometimes FeatureServer/?f=json which all return different payloads.
+   * Returns TypeMetadataEsriDynamic | TypeMetadataEsriDynamicLayer | TypeMetadataEsriFeature because sometimes
+   * the url is MapServer/?f=json, sometimes MapServer/{layerId}?f=json and sometimes FeatureServer/?f=json
+   * which all return different payloads.
    *
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves with the metadata or undefined when no metadata for the particular layer type
@@ -212,23 +212,30 @@ export class EsriFeature extends AbstractGeoViewVector {
     sourceOptions: SourceOptions<Feature>,
     readOptions: ReadOptions
   ): Promise<Feature[]> {
+    // Cast it to proper type
+    const layerConfigEsriFeature = layerConfig as EsriFeatureLayerEntryConfig;
+
     // Use the basic fetch
     const responseDataCount = await Fetch.fetchEsriJson<{ count: number }>(
-      `${layerConfig.getDataAccessPath(true)}${layerConfig.layerId}/query?f=json&where=1=1&returnCountOnly=true`
+      `${layerConfigEsriFeature.getDataAccessPath(true)}${layerConfigEsriFeature.layerId}/query?f=json&where=1=1&returnCountOnly=true`
     );
 
     // Check if feature count is too large
     if (responseDataCount.count > AbstractGeoViewVector.MAX_ESRI_FEATURES) {
       // Throw
-      throw new LayerTooManyEsriFeatures(layerConfig.layerId, layerConfig.getLayerNameCascade(), responseDataCount.count);
+      throw new LayerTooManyEsriFeatures(
+        layerConfigEsriFeature.layerId,
+        layerConfigEsriFeature.getLayerNameCascade(),
+        responseDataCount.count
+      );
     }
 
     // Determine the maximum number of records allowed
-    const maxRecords = layerConfig.getLayerMetadataCasted()?.maxRecordCount;
+    const maxRecords = layerConfigEsriFeature.getLayerMetadata()?.maxRecordCount;
 
     // Retrieve the full ESRI feature data
     const responseData = await EsriFeature.#fetchEsriFeaturesByChunk(
-      `${layerConfig.getDataAccessPath(true)}${layerConfig.layerId}/query?f=json&where=1=1&outfields=*&geometryPrecision=1&maxAllowableOffset=5`,
+      `${layerConfigEsriFeature.getDataAccessPath(true)}${layerConfigEsriFeature.layerId}/query?f=json&where=1=1&outfields=*&geometryPrecision=1&maxAllowableOffset=5`,
       responseDataCount.count,
       maxRecords
     );
@@ -246,12 +253,12 @@ export class EsriFeature extends AbstractGeoViewVector {
 
       // If we had to clean geometries, emit a warning message
       if (hadInvalidGeometries) {
-        this.emitMessage('warning.layer.invalidGeometry', [layerConfig.getLayerNameCascade()], 'warning', true);
+        this.emitMessage('warning.layer.invalidGeometry', [layerConfigEsriFeature.getLayerNameCascade()], 'warning', true);
       }
 
       return allFeatures;
     } catch (error: unknown) {
-      throw new LayerFeatureParsingError(layerConfig.layerId, layerConfig.getLayerNameCascade(), formatError(error));
+      throw new LayerFeatureParsingError(layerConfigEsriFeature.layerId, layerConfigEsriFeature.getLayerNameCascade(), formatError(error));
     }
   }
 
@@ -281,11 +288,11 @@ export class EsriFeature extends AbstractGeoViewVector {
    * ID, name, and metadata access path URL. It then initializes the layer entries by calling
    * `initGeoViewLayerEntries`, which may involve fetching metadata or sublayer info.
    *
-   * @param geoviewLayerId - A unique identifier for the layer.
-   * @param geoviewLayerName - The display name of the layer.
-   * @param metadataAccessPath - The full service URL to the layer endpoint.
-   * @param isTimeAware - Indicates whether the layer supports time-based filtering.
-   * @returns A promise that resolves to an initialized GeoView layer configuration with layer entries.
+   * @param geoviewLayerId - A unique identifier for the layer
+   * @param geoviewLayerName - The display name of the layer
+   * @param metadataAccessPath - The full service URL to the layer endpoint
+   * @param isTimeAware - Indicates whether the layer supports time-based filtering
+   * @returns A promise that resolves to an initialized GeoView layer configuration with layer entries
    */
   static initGeoviewLayerConfig(
     geoviewLayerId: string,
@@ -304,12 +311,12 @@ export class EsriFeature extends AbstractGeoViewVector {
    * This function constructs a `TypeEsriFeatureLayerConfig` object that describes an Esri Feature layer
    * and its associated entry configurations based on the provided parameters.
    *
-   * @param geoviewLayerId - A unique identifier for the GeoView layer.
-   * @param geoviewLayerName - The display name of the GeoView layer.
-   * @param metadataAccessPath - The full service URL to the layer endpoint.
-   * @param isTimeAware - Indicates whether the layer supports time-based filtering.
-   * @param layerEntries - An array of layer entries objects to be included in the configuration.
-   * @returns The constructed configuration object for the Esri Feature layer.
+   * @param geoviewLayerId - A unique identifier for the GeoView layer
+   * @param geoviewLayerName - The display name of the GeoView layer
+   * @param metadataAccessPath - The full service URL to the layer endpoint
+   * @param isTimeAware - Indicates whether the layer supports time-based filtering
+   * @param layerEntries - An array of layer entries objects to be included in the configuration
+   * @returns The constructed configuration object for the Esri Feature layer
    */
   static createGeoviewLayerConfig(
     geoviewLayerId: string,

@@ -50,7 +50,7 @@ All categories extend `AbstractGVLayer`, which extends `AbstractBaseGVLayer`.
 ```
 AbstractGeoViewLayer (geoview-layers/)
 +-- AbstractGeoViewRaster (geoview-layers/raster/)
-|   +-- EsriDynamic, EsriImage, ImageStatic, WMS, Geotiff, VectorTiles, WMTS, XYZTiles
+|   +-- EsriDynamic, EsriImage, ImageStatic, WMS, GeoTIFF, VectorTiles, WMTS, XYZTiles
 +-- AbstractGeoViewVector (geoview-layers/vector/)
     +-- CSV, EsriFeature, GeoJSON, KML, OgcFeature, WFS, WKB
 ```
@@ -76,7 +76,7 @@ AbstractBaseGVLayer
 |   +-- AbstractGVVectorTile (vector/)
 |   |   +-- GVVectorTiles
 |   +-- AbstractGVTile (tile/)
-|       +-- GVGeotiff
+|       +-- GVGeoTIFF
 |       +-- GVWMTS
 |       +-- GVXYZTiles
 +-- GVGroupLayer

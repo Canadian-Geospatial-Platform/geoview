@@ -146,56 +146,56 @@ export class ControllerRegistry {
   readonly layerCreatorController: LayerCreatorController;
   readonly layerSetController: LayerSetController;
   readonly pluginController: PluginController;
+  readonly detailsController: DetailsController;
   readonly dataTableController: DataTableController;
 
   // Plugin-conditional controllers
+  readonly swiperController?: SwiperController;
   readonly drawerController?: DrawerController;
   readonly timeSliderController?: TimeSliderController;
+  readonly geoChartController?: GeoChartController;
 
   readonly allControllers: AbstractController[] = [];
 
-  constructor(
-    mapViewer: MapViewer,
-    uiDomain: UIDomain,
-    layerDomain: LayerDomain,
-    geometryApi: GeometryApi,
-    featureHighlight: FeatureHighlight,
-  ) {
+  constructor(mapViewer: MapViewer, uiDomain: UIDomain, layerDomain: LayerDomain) {
     // Always-present controllers
-    this.uiController = new UIController(mapViewer, uiDomain);
-    this.mapController = new MapController(mapViewer, featureHighlight);
-    this.layerController = new LayerController(mapViewer, layerDomain);
-    this.layerCreatorController = new LayerCreatorController(
-      mapViewer,
-      layerDomain,
-    );
-    this.layerSetController = new LayerSetController(mapViewer, layerDomain);
-    this.pluginController = new PluginController(mapViewer);
-    this.dataTableController = new DataTableController(mapViewer);
+    this.uiController = new UIController(mapViewer, this, uiDomain);
+    this.mapController = new MapController(mapViewer, this);
+    this.layerController = new LayerController(mapViewer, this, layerDomain);
+    this.layerCreatorController = new LayerCreatorController(mapViewer, this, layerDomain);
+    this.layerSetController = new LayerSetController(mapViewer, this, layerDomain);
+    this.pluginController = new PluginController(mapViewer, this);
+    this.detailsController = new DetailsController(mapViewer, this);
+    this.dataTableController = new DataTableController(mapViewer, this);
 
     // Plugin-conditional controllers
+    if (hasSwiperPlugin(getGeoViewStore(mapViewer.mapId))) {
+      this.swiperController = new SwiperController(mapViewer, this);
+    }
     if (hasDrawerPlugin(getGeoViewStore(mapViewer.mapId))) {
-      this.drawerController = new DrawerController(
-        mapViewer,
-        uiDomain,
-        geometryApi,
-      );
+      this.drawerController = new DrawerController(mapViewer, this, uiDomain);
     }
     if (hasTimeSliderPlugin(getGeoViewStore(mapViewer.mapId))) {
-      this.timeSliderController = new TimeSliderController(mapViewer);
+      this.timeSliderController = new TimeSliderController(mapViewer, this);
+    }
+    if (hasGeoChartPlugin(getGeoViewStore(mapViewer.mapId))) {
+      this.geoChartController = new GeoChartController(mapViewer, this);
     }
 
     // Register all for lifecycle management
     this.allControllers.push(
       this.uiController,
       this.mapController,
+      this.detailsController,
       this.layerController,
+      this.layerCreatorController,
       this.layerSetController,
       this.pluginController,
     );
+    if (this.swiperController) this.allControllers.push(this.swiperController);
     if (this.drawerController) this.allControllers.push(this.drawerController);
-    if (this.timeSliderController)
-      this.allControllers.push(this.timeSliderController);
+    if (this.timeSliderController) this.allControllers.push(this.timeSliderController);
+    if (this.geoChartController) this.allControllers.push(this.geoChartController);
   }
 
   hookControllers(): void {
@@ -216,15 +216,9 @@ Controllers are created and hooked during `MapViewer` construction:
 // In MapViewer constructor
 this.#uiDomain = new UIDomain(i18instance, displayLanguage);
 this.#layerDomain = new LayerDomain();
-const geometryApi = new GeometryApi(this);
 
 // Create and hook all controllers
-this.controllers = new ControllerRegistry(
-  this,
-  this.#uiDomain,
-  this.#layerDomain,
-  geometryApi,
-);
+this.controllers = new ControllerRegistry(this, this.#uiDomain, this.#layerDomain);
 this.controllers.hookControllers();
 ```
 

@@ -430,7 +430,6 @@ export function generateId(length: 8 | 18 | 36 = 36): string {
   return generatedId;
 }
 
-// TODO: refactor - This is a duplicate of static config api function. Replace in api OR create utilities api functions
 /**
  * Validates the GeoCore UUIDs.
  *

@@ -1,4 +1,4 @@
-import type {
+﻿import type {
   ConfigClassOrType,
   TypeGeoviewLayerConfig,
   TypeMetadataWFS,
@@ -30,7 +30,7 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    *
-   * @returns The strongly-typed layer configuration specific to this layer.
+   * @returns The strongly-typed layer configuration specific to this layer
    */
   override getGeoviewLayerConfig(): TypeWFSLayerConfig {
     return super.getGeoviewLayerConfig() as TypeWFSLayerConfig;
@@ -39,7 +39,7 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    *
-   * @returns The strongly-typed service metadata specific to this layer entry config.
+   * @returns The strongly-typed service metadata specific to this layer entry config
    */
   override getServiceMetadata(): TypeMetadataWFS | undefined {
     return super.getServiceMetadata() as TypeMetadataWFS | undefined;
@@ -48,9 +48,8 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    *
-   * @returns The strongly-typed layer metadata specific to this layer entry config.
+   * @returns The strongly-typed layer metadata specific to this layer entry config
    */
-  // TODO: REFACTOR - Fix this override once cleanup is ready. Search id: 7887777f
   override getLayerMetadata(): TypeOutfields[] | undefined {
     return super.getLayerMetadata() as TypeOutfields[] | undefined;
   }
