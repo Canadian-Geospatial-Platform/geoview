@@ -120,6 +120,19 @@ export const ItemsList = memo(function ItemsList({ items, layerPath }: ItemsList
   const layerStyleConfig = useStoreLayerStyleConfig(layerPath);
   const layerController = useLayerController();
 
+  // Layer is ESRI Dynamic
+  const isEsriDynamic = layerSchemaTag === CONST_LAYER_TYPES.ESRI_DYNAMIC;
+
+  // Layer has a value expression in its style config
+  const hasValueExpression = useMemo((): boolean => {
+    // Log
+    logger.logTraceUseMemo('LEGEND-LAYER-ITEMS - hasValueExpression', layerStyleConfig);
+
+    return layerStyleConfig
+      ? Object.values(layerStyleConfig).some((config) => 'valueExpression' in config && config.valueExpression)
+      : false;
+  }, [layerStyleConfig]);
+
   /**
    * Generates or retrieves a stable HTML ID for a legend item.
    * Uses a composite key (name + geometryType + icon) to uniquely identify items.
@@ -170,10 +183,6 @@ export const ItemsList = memo(function ItemsList({ items, layerPath }: ItemsList
     <List className="layerList" sx={memoSxClasses.layerList}>
       {items.map((item) => {
         const itemId = getItemId(item);
-        const hasValueExpression = layerStyleConfig
-          ? Object.values(layerStyleConfig).some((config) => 'valueExpression' in config && config.valueExpression)
-          : false;
-        const isEsriDynamic = layerSchemaTag === CONST_LAYER_TYPES.ESRI_DYNAMIC;
 
         const canReallyToggle = Boolean(canToggleItemVisibility && !layerHidden && !(isEsriDynamic && hasValueExpression));
 

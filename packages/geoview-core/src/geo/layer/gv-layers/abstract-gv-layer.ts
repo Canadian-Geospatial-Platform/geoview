@@ -1968,62 +1968,46 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   ): number {
     let fieldKeyCounter = fieldKeyCounterStart;
 
-    // If outfields exist, use that order to preserve service field order
-    if (outfields) {
-      for (const fieldEntry of outfields) {
-        // Skip geometry field
-        // eslint-disable-next-line no-continue
-        if (fieldEntry.name === 'geometry') continue;
+    // Build field entries: use outfields if available, otherwise create minimal entries from feature keys
+    // GV Note: We assume that if outfields are not provided, all fields are of type string and have no domain.
+    // GV This is a fallback and may not be accurate, but without outfield metadata we have no way to know the correct types or domains.
+    // GV And the alternative would be to skip and show no fields
+    const fieldEntries: Array<{
+      name: string;
+      type: TypeOutfieldsType;
+      alias: string;
+      domain?: codedValueType | rangeDomainType;
+    }> = outfields ?? feature.getKeys().map((name) => ({ name, type: 'string' as TypeOutfieldsType, alias: name }));
 
-        // Get the field value from the feature
-        const fieldValue = feature.get(fieldEntry.name);
+    for (const fieldEntry of fieldEntries) {
+      // Skip geometry field
+      // eslint-disable-next-line no-continue
+      if (fieldEntry.name === 'geometry') continue;
 
-        // Skip if field doesn't exist on the feature
-        // eslint-disable-next-line no-continue
-        if (fieldValue === undefined) continue;
+      // Get the field value from the feature
+      const fieldValue = feature.get(fieldEntry.name);
 
-        // Skip if field value is an object (but allow arrays)
-        // eslint-disable-next-line no-continue
-        if (fieldValue && typeof fieldValue === 'object' && !Array.isArray(fieldValue)) continue;
+      // Skip nested objects (but allow arrays)
+      // eslint-disable-next-line no-continue
+      if (fieldValue && typeof fieldValue === 'object' && !Array.isArray(fieldValue)) continue;
 
-        // Attach the fieldInfo property on the feature info entry
-        // eslint-disable-next-line no-param-reassign
-        featureInfoEntry.fieldInfo[fieldEntry.name] = {
-          fieldKey: fieldKeyCounter++,
-          value: callbackGetFieldValue(
-            feature,
-            fieldEntry.name,
-            fieldEntry.type,
-            fieldEntry.domain,
-            inputFormat,
-            inputTimezone,
-            inputTemporalMode
-          ),
-          dataType: fieldEntry.type,
-          alias: fieldEntry.alias,
-          domain: fieldEntry.domain,
-        };
-      }
-    } else {
-      // Fallback: if no outfields defined, use feature keys order (current behavior)
-      const featureFields = feature.getKeys();
-      for (const fieldName of featureFields) {
-        // eslint-disable-next-line no-continue
-        if (fieldName === 'geometry') continue;
-
-        const fieldValue = feature.get(fieldName);
-        // eslint-disable-next-line no-continue
-        if (fieldValue && typeof fieldValue === 'object' && !Array.isArray(fieldValue)) continue;
-
-        // Since no outfields, create a basic field entry
-        // eslint-disable-next-line no-param-reassign
-        featureInfoEntry.fieldInfo[fieldName] = {
-          fieldKey: fieldKeyCounter++,
-          value: fieldValue,
-          dataType: 'string',
-          alias: fieldName,
-        };
-      }
+      // Attach the fieldInfo property on the feature info entry
+      // eslint-disable-next-line no-param-reassign
+      featureInfoEntry.fieldInfo[fieldEntry.name] = {
+        fieldKey: fieldKeyCounter++,
+        value: callbackGetFieldValue(
+          feature,
+          fieldEntry.name,
+          fieldEntry.type,
+          fieldEntry.domain,
+          inputFormat,
+          inputTimezone,
+          inputTemporalMode
+        ),
+        dataType: fieldEntry.type,
+        alias: fieldEntry.alias,
+        domain: fieldEntry.domain,
+      };
     }
 
     // Return the counter
