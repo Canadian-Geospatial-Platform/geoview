@@ -1977,7 +1977,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
       type: TypeOutfieldsType;
       alias: string;
       domain?: codedValueType | rangeDomainType;
-    }> = outfields ?? feature.getKeys().map((name) => ({ name, type: 'string' as TypeOutfieldsType, alias: name }));
+    }> = outfields ?? feature.getKeys().map((name) => ({ name, type: 'string', alias: name }));
 
     for (const fieldEntry of fieldEntries) {
       // Skip geometry field
