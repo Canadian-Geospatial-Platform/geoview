@@ -4,7 +4,6 @@ import type {
   LayerStatusChangedEvent,
 } from '@/api/config/validation-classes/config-base-class';
 import { logger } from '@/core/utils/logger';
-import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
 import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import type { TypeLegendItem, TypeLegendLayerItem } from '@/core/components/layers/types';
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
@@ -138,6 +137,9 @@ export class LegendsLayerSet extends AbstractLayerSet {
     // GV Without this call, the order of the layers can be off
     // GV Test with http://localhost:8080/demos-navigator.html?config=./configs/navigator/demos/10-basic-appbar-data-table-tab.json
     this.controllerRegistry.layerSetController.propagateLegendToStore(layer.getLayerPath());
+
+    // Check if ready to query legend
+    this.#checkQueryLegend(layer, false);
   }
   /**
    * Overrides the behavior to apply when deleting from the store.
@@ -167,20 +169,6 @@ export class LegendsLayerSet extends AbstractLayerSet {
   // #endregion PUBLIC METHODS
 
   // #region PRIVATE METHODS
-
-  /**
-   * Processes action when the layer status changes.
-   *
-   * @param layerConfig - The layer config
-   * @param layerStatus - The new layer status
-   */
-  #processLayerStatusChanged(layerPath: string, layerStatus: TypeLayerStatus, layer: AbstractBaseGVLayer | undefined): void {
-    // Save to the store
-    this.#propagateToStoreLayerStatus(layerPath, layerStatus);
-
-    // Check if ready to query legend
-    this.#checkQueryLegend(layer, false);
-  }
 
   /**
    * Checks if the layer config has reached the 'processed' status or greater and if so queries the legend.
@@ -234,17 +222,6 @@ export class LegendsLayerSet extends AbstractLayerSet {
           logger.logPromiseFailed('legendPromise in #checkQueryLegend in LegendsLayerSet', error);
         });
     }
-  }
-
-  /**
-   * Propagates the layer status to the store.
-   *
-   * @param layerPath - The layer path to propagate the status for
-   * @param layerStatus - The layer status to propagate
-   */
-  #propagateToStoreLayerStatus(layerPath: string, layerStatus: TypeLayerStatus): void {
-    // Propagate
-    setStoreLayerStatus(this.getMapId(), layerPath, layerStatus);
   }
 
   /**
@@ -314,11 +291,14 @@ export class LegendsLayerSet extends AbstractLayerSet {
    */
   #handleLayerStatusChanged(layerConfig: ConfigBaseClass, layerStatusEvent: LayerStatusChangedEvent): void {
     try {
-      // Check if the geoview layer exists
-      const layer = this.layerDomain.getGeoviewLayerIfExists(layerConfig.layerPath);
+      // Save to the store
+      setStoreLayerStatus(this.getMapId(), layerConfig.layerPath, layerStatusEvent.layerStatus);
 
-      // Process a layer status changed
-      this.#processLayerStatusChanged(layerConfig.layerPath, layerStatusEvent.layerStatus, layer);
+      // TODO: CLEANUP - Remove commented code. In this refactoring of legends-layer-set, I'm not checking for query legend on
+      // TO.DOCONT: every layer status change 2026-05-01
+      // Check if ready to query legend
+      // const layer = this.layerDomain.getGeoviewLayerIfExists(layerConfig.layerPath);
+      // this.#checkQueryLegend(layer, false);
     } catch (error: unknown) {
       // Log
       logger.logError('CAUGHT in handleLayerStatusChanged', layerConfig.layerPath, error);
