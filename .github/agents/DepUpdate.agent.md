@@ -80,7 +80,24 @@ For each key dependency:
 2. Flag any version mismatches between packages
 3. Check `peerDependencies` alignment (especially React, OpenLayers)
 
-#### Phase 5 — Report
+#### Phase 5 — Security Vulnerability Audit
+
+1. Run `npm audit` from `packages/geoview-core` as an approximation (`pnpm audit` is preferred but requires advisory DB access)
+2. **Cross-reference every finding** against `common/temp/pnpm-lock.yaml` — `npm audit` produces false positives in pnpm workspaces because it doesn't understand symlinked `node_modules/`
+3. Classify each vulnerability:
+
+| Classification | Criteria | Action |
+|---|---|---|
+| **False positive** | pnpm lockfile shows a version outside the vulnerable range | Document as false positive, no action |
+| **Fixable direct** | Our `package.json` pins a vulnerable version | Bump version, `rush update` |
+| **Fixable via override** | Transitive dep is vulnerable, parent hasn't updated | Add pnpm override in `common/config/rush/.pnpmfile.cjs`, `rush update --full` |
+| **Needs parent update** | Transitive, no override possible | Document, track upstream issue |
+| **No fix available** | No patched version exists upstream | Document, assess actual runtime risk |
+
+4. Separate **dev dependencies** (webpack, typedoc, test tools) from **production dependencies** — dev-only vulnerabilities have lower risk since they don't ship to users
+5. Include a Security Vulnerabilities section in the report with tables for High, Moderate, and Low severity findings
+
+#### Phase 6 — Report
 
 Present a structured report:
 
@@ -110,7 +127,7 @@ Present a structured report:
 2. ...
 ```
 
-#### Phase 6 — Suggest Plan
+#### Phase 7 — Suggest Plan
 
 Based on the audit, suggest a prioritized update plan:
 
@@ -118,12 +135,12 @@ Based on the audit, suggest a prioritized update plan:
 2. **Coordinated updates** — Dependencies that must be updated together (e.g., `@mui/*` packages)
 3. **Major migrations** — Large efforts requiring feature branch, testing, and staged rollout
 
-#### Phase 7 — Save Report
+#### Phase 8 — Save Report
 
 Save the full report as a markdown file in `docs/programming/dependency-reports/`:
 
 - **File name:** `audit-YYYY-MM-DD.md` (use the current date)
-- **Content:** The complete structured report from Phase 5 + the prioritized plan from Phase 6
+- **Content:** The complete structured report from Phase 6 + security findings from Phase 5 + the prioritized plan from Phase 7
 - Create the `dependency-reports/` directory if it does not exist
 - These reports are committed to git (not gitignored) — they serve as historical records of dependency state
 
@@ -223,3 +240,6 @@ Ask the user if they want you to:
 5. **Respect semver** — clearly distinguish patch (safe), minor (usually safe), and major (breaking) updates
 6. **Check for known issues** — search GitHub issues for the dependency to find reported problems with specific versions
 7. **TypeScript compatibility** — verify the new dependency version ships types compatible with the project's TypeScript version
+8. **Never run `npm audit fix`** — it doesn't work in Rush/pnpm workspaces (no `package-lock.json`). It would corrupt the dependency tree
+9. **Always cross-reference `npm audit`** against `common/temp/pnpm-lock.yaml` — npm audit is unreliable in pnpm workspaces and produces false positives
+10. **Separate dev vs production risk** — vulnerabilities in dev-only dependencies (webpack, typedoc) don't ship to users and have lower priority

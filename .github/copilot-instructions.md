@@ -31,6 +31,18 @@ npm run fix         # ESLint auto-fix
 
 **NEVER** run `npm install` directly - always use `rush update`. Rush manages the monorepo and ensures consistent versions.
 
+**NEVER** run `npm audit fix` — it does not work in Rush/pnpm workspaces (no `package-lock.json` exists). It would corrupt the dependency tree.
+
+### Package Manager & Security Auditing
+
+- **pnpm 8.x** is the package manager under Rush (configured in `rush.json`)
+- **Lockfile**: `common/temp/pnpm-lock.yaml` is the single source of truth for installed versions
+- **`npm audit`** is unreliable in pnpm workspaces — it reads `node_modules/` but doesn't understand pnpm's symlinked structure, producing false positives. Always cross-reference findings against the pnpm lockfile.
+- **Fixing vulnerabilities**:
+  - Direct dependencies: bump version in `package.json`, run `rush update`
+  - Transitive dependencies: update the parent package, or add pnpm overrides in `common/config/rush/.pnpmfile.cjs`
+  - After overrides: run `rush update --full` to regenerate the lockfile
+
 ### Prettier Configuration
 
 The Prettier config lives at `packages/.prettierrc`:

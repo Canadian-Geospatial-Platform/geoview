@@ -264,3 +264,55 @@ These dependencies must always be updated together:
 | **React**   | `react`, `react-dom`, `@types/react`, `@types/react-dom`                   |
 | **i18next** | `i18next`, `react-i18next`                                                 |
 | **Webpack** | `webpack`, `webpack-cli`, `webpack-dev-server`                             |
+
+---
+
+## Security Auditing
+
+### pnpm vs npm audit
+
+GeoView uses **pnpm** (via Rush) as its package manager — **not npm**. This has important implications for security auditing:
+
+- **`npm audit`** reads the local `node_modules/` tree but does **not** understand pnpm's symlinked/hoisted structure. Results may include false positives or miss actual issues.
+- **`pnpm audit`** is the correct tool, but must be run through Rush's pnpm wrapper:
+  ```bash
+  # From the repo root — uses Rush's managed pnpm
+  common/temp/pnpm-local audit --dir packages/geoview-core
+  ```
+- **`npm audit fix` does NOT work in Rush** — it tries to modify a `package-lock.json` (which doesn't exist in pnpm workspaces) and would corrupt Rush's dependency management.
+
+### Fixing Vulnerabilities in Rush
+
+| Vulnerability Type | Fix Approach |
+|---|---|
+| **Direct dependency** (in our `package.json`) | Bump version in `package.json`, run `rush update` |
+| **Transitive dependency** (locked by a parent) | Update the parent package, or add pnpm overrides |
+| **No fix available** (e.g., lodash <=4.17.23 but latest is 4.17.21) | Document in audit report, monitor for upstream fix |
+
+#### pnpm Overrides (for transitive dependencies)
+
+When a transitive dependency has a vulnerability but the parent hasn't updated yet, force the version via pnpm overrides in `common/config/rush/.pnpmfile.cjs`:
+
+```javascript
+function readPackage(pkg) {
+  // Force serialize-javascript to patched version
+  if (pkg.dependencies && pkg.dependencies['serialize-javascript']) {
+    pkg.dependencies['serialize-javascript'] = '>=6.0.3';
+  }
+  return pkg;
+}
+module.exports = { hooks: { readPackage } };
+```
+
+After adding overrides, run `rush update --full` to regenerate the lockfile.
+
+### Audit Checklist (include in every full audit report)
+
+1. Run `pnpm audit` (or `npm audit` as approximation) on `packages/geoview-core`
+2. Classify each vulnerability:
+   - **Fixable directly** — bump our version
+   - **Fixable via override** — force transitive version
+   - **Needs parent update** — document and track upstream issue
+   - **No fix available** — document, assess actual risk (dev-only? runtime?)
+3. Separate **dev dependencies** from **production dependencies** — dev-only vulnerabilities (webpack, typedoc, etc.) have lower risk since they don't ship to users
+4. Add a Security Vulnerabilities section to the audit report
