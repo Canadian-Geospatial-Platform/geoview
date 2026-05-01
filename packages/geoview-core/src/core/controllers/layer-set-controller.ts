@@ -41,7 +41,6 @@ import {
   getStoreLayerLegendSchemaTag,
   getStoreLayerStyleConfig,
   getStoreLayerOrderedLayerIndexByPath,
-  getStoreLayerStatus,
   setStoreLegendLayersDirectly,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
@@ -360,7 +359,7 @@ export class LayerSetController extends AbstractMapViewerController {
       const existingStoreEntry: TypeLegendLayer | undefined = existingEntries[entryIndex];
 
       // Get the layer status
-      const layerStatus = getStoreLayerStatus(this.getMapId(), layerConfig.layerPath);
+      const { layerStatus } = layerConfig;
 
       // Get the legend query status
       const legendQueryStatus = getStoreLayerLegendQueryStatus(this.getMapId(), layerConfig.layerPath);
@@ -425,8 +424,10 @@ export class LayerSetController extends AbstractMapViewerController {
         // Get the schema tag
         const schemaTag = legendSchemaTag ?? layerConfig.getSchemaTag();
 
-        // Get the visibility flag, invisible if the layer doesn't exist yet (could be only the config exists)
-        const visible = layer?.getVisible() ?? false;
+        // Get the visibility flag, use the gv layer if we can, or use the initial settings of the config or default true if none are specified
+        // TODO: TEST - Attempt to set the visible state to false by default (it'd make more sense?) and see if it works...
+        // TO.DOCONT: When attempted, it wasn't working for the Hydro - Scale WMS group layers of group layers and the 'Show all' toggle.
+        const visible = layer?.getVisible() ?? layerConfigCasted.getInitialSettings()?.states?.visible ?? true;
 
         const legendLayerEntry: TypeLegendLayer = {
           url: layerConfig.getMetadataAccessPath(),
