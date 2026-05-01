@@ -675,11 +675,11 @@ export class GVEsriDynamic extends AbstractGVRaster {
           messageKey = 'layers.fetchProgress';
         }
 
-        this.emitMessage(messageKey, [processed, total], 'info');
+        this.emitMessage(messageKey, { processed, total }, 'info');
         break;
       }
       case 'error':
-        this.emitMessage('error.layer.notAbleToQuery', [this.getLayerName()], 'error');
+        this.emitMessage('error.layer.notAbleToQuery', { layerName: this.getLayerName() }, 'error');
         break;
       default:
         break;

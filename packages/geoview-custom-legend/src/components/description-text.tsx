@@ -1,8 +1,7 @@
 import { useState } from 'react';
 
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
-import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
-import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
+import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { logger } from 'geoview-core/core/utils/logger';
 
 import type { getSxClasses } from '../custom-legend-style';
@@ -27,7 +26,7 @@ export function DescriptionText({ description, sxClasses }: DescriptionTextProps
   const { ui } = cgpv;
   const { Box, Typography, KeyboardArrowDownIcon, KeyboardArrowUpIcon, IconButton, Collapse } = ui.elements;
 
-  const displayLanguage = useStoreAppDisplayLanguage();
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState<boolean>(!description.collapsed);
 
   /**
@@ -43,15 +42,13 @@ export function DescriptionText({ description, sxClasses }: DescriptionTextProps
         <IconButton
           size="small"
           onClick={handleToggle}
-          aria-label={getLocalizedMessage(displayLanguage, 'CustomLegend.descriptionToggle')}
+          aria-label={t('CustomLegend.descriptionToggle')}
           sx={sxClasses.descriptionToggleButton}
         >
           {expanded ? <KeyboardArrowUpIcon fontSize="small" /> : <KeyboardArrowDownIcon fontSize="small" />}
         </IconButton>
         <Typography sx={sxClasses.descriptionToggleText} onClick={handleToggle}>
-          {expanded
-            ? getLocalizedMessage(displayLanguage, 'CustomLegend.hideDescription')
-            : getLocalizedMessage(displayLanguage, 'CustomLegend.showDescription')}
+          {expanded ? t('CustomLegend.hideDescription') : t('CustomLegend.showDescription')}
         </Typography>
       </Box>
       <Collapse in={expanded} sx={sxClasses.descriptionCollapse}>

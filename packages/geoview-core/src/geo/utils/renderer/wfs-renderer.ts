@@ -1097,7 +1097,7 @@ export abstract class WfsRenderer {
       return [bbox.x, bbox.y, bbox.width, bbox.height];
     } catch (error: unknown) {
       // Error
-      throw new GeoViewError('Error computing viewBox for svg __param__', [svgString], formatError(error));
+      throw new GeoViewError(`Error computing viewBox for svg ${svgString}`, undefined, formatError(error));
     } finally {
       // clean up DOM node
       temp.remove();

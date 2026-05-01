@@ -2282,7 +2282,11 @@ export class LayerController extends AbstractMapViewerController {
           });
 
           // Notify the user
-          this.getMapViewer().notifications.showWarning('warning.layer.layerCRSNotSupported', [mapProj, event.layer.getLayerName()], true);
+          this.getMapViewer().notifications.showWarning(
+            'warning.layer.layerCRSNotSupported',
+            { mapProj, layerName: event.layer.getLayerName() },
+            true
+          );
 
           // Force a refresh so the layer gets drawn with the overridden CRS
           event.layer.refresh(this.getMapViewer().getProjection());

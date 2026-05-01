@@ -1145,7 +1145,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    */
   protected emitMessage(
     messageKey: string,
-    messageParams: unknown[] | undefined,
+    messageParams: Record<string, unknown> | undefined,
     messageType: SnackbarType = 'info',
     notification: boolean = false
   ): void {
@@ -1303,7 +1303,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
         // If still loading
         if (layerStatus === 'loading') {
           // Emit about the delay
-          this.emitMessage('warning.layer.slowRender', [this.getLayerName()], 'warning');
+          this.emitMessage('warning.layer.slowRender', { layerName: this.getLayerName() }, 'warning');
         }
 
         return false;
@@ -2146,7 +2146,7 @@ export type LayerErrorDelegate = EventDelegateBase<AbstractGVLayer, LayerErrorEv
 export interface LayerMessageEvent extends LayerBaseEvent {
   // The loaded layer
   messageKey: string;
-  messageParams: unknown[] | undefined;
+  messageParams: Record<string, unknown> | undefined;
   messageType: SnackbarType;
   notification: boolean;
 }

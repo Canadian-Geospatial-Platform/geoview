@@ -1,7 +1,6 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { getSxClasses } from 'geoview-core/core/components/nav-bar/nav-bar-style';
-import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
-import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
+import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { useStoreDrawerUndoDisabled } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
 
 import { IconButton, UndoIcon } from 'geoview-core/ui';
@@ -24,7 +23,7 @@ export default function Redo(): JSX.Element {
   // Get store values
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
-  const displayLanguage = useStoreAppDisplayLanguage();
+  const { t } = useTranslation<string>();
   const drawerController = useDrawerController();
 
   // Store
@@ -40,7 +39,7 @@ export default function Redo(): JSX.Element {
   return (
     <IconButton
       id="undo"
-      aria-label={getLocalizedMessage(displayLanguage, 'drawer.undoTooltip')}
+      aria-label={t('drawer.undoTooltip')}
       tooltipPlacement="left"
       onClick={handleUndo}
       sx={sxClasses.navButton}

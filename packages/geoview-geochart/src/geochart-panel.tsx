@@ -19,7 +19,7 @@ import {
   useStoreGeochartSelectedLayerPath,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/geochart-state';
 import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
-import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
+import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { logger } from 'geoview-core/core/utils/logger';
 import { CONTAINER_TYPE, TABS } from 'geoview-core/core/utils/constant';
 
@@ -52,6 +52,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   // Get states and actions from store
   const configObj = useStoreGeochartChartsConfig();
   const displayLanguage = useStoreAppDisplayLanguage();
+  const { t } = useTranslation();
   const visibleInRangeLayers = useStoreLayerAllVisibleAndInRangeLayers();
   const mapClickCoordinates = useStoreMapClickCoordinates();
   const layerHiddenSet = useStoreLayerIsHiddenOnMapSet();
@@ -117,8 +118,8 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
       const numOfFeatures = layer.features?.length ?? 0;
       const label =
         numOfFeatures === 0
-          ? `${getLocalizedMessage(displayLanguage, 'geochart.panel.empty')}`
-          : `${numOfFeatures} ${getLocalizedMessage(displayLanguage, 'geochart.panel.feature')}${numOfFeatures > 1 ? 's' : ''}`;
+          ? `${t('geochart.panel.empty')}`
+          : `${numOfFeatures} ${t('geochart.panel.feature')}${numOfFeatures > 1 ? 's' : ''}`;
 
       return label;
     },
@@ -283,7 +284,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
           onIsEnlargeClicked={handleIsEnlargeClicked}
           guideContentIds={['chart', 'chart.children.chartTypes', 'chart.children.chartControls']}
           containerType={CONTAINER_TYPE.FOOTER_BAR}
-          titleFullscreen={getLocalizedMessage(displayLanguage, 'geochart.title')}
+          titleFullscreen={t('geochart.title')}
         >
           {selectedLayerPath && (
             <Box sx={{ '& .MuiButtonGroup-groupedHorizontal.MuiButton-textSizeMedium': { fontSize: '0.9rem' } }}>
@@ -300,7 +301,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
     }
 
     // Loading UI
-    return <Typography>{getLocalizedMessage(displayLanguage, 'geochart.panel.loadingUI')}</Typography>;
+    return <Typography>{t('geochart.panel.loadingUI')}</Typography>;
   };
 
   // Render

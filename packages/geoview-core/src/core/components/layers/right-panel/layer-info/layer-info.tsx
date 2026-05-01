@@ -7,7 +7,7 @@ import { ListItemText } from '@/ui/list';
 
 import { getSxClasses } from '../layer-details-style';
 import { logger } from '@/core/utils/logger';
-import { getLocalizedMessage, isValidUUID } from '@/core/utils/utilities';
+import { isValidUUID } from '@/core/utils/utilities';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { UtilAddLayer } from '@/core/components/layers/left-panel/add-new-layer/add-layer-utils';
 import { useStoreAppDisplayLanguage, useStoreAppMetadataServiceURL } from '@/core/stores/store-interface-and-intial-values/app-state';
@@ -162,7 +162,7 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
               </a>
             </Box>
           )}
-          <Box>{`${getLocalizedMessage(language, 'layers.layerBounds', [mapProjectionEPSG])}: ${boundsRounded?.join(', ')}`}</Box>
+          <Box>{`${t('layers.layerBounds', { mapProjectionEPSG })}: ${boundsRounded?.join(', ')}`}</Box>
           <Box>{`${t('layers.layerBounds4326')}: ${boundsRounded4326?.join(', ')}`}</Box>
         </Box>
       </Box>

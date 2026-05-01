@@ -18,7 +18,7 @@ export class LayerGeoCoreError extends GeoViewError {
    * @param messageParams - Optional parameters for localization formatting
    * @param options - Optional error options, including `cause`
    */
-  protected constructor(uuids: string[], messageKey: string, messageParams?: unknown[], options?: ErrorOptions) {
+  protected constructor(uuids: string[], messageKey: string, messageParams?: Record<string, unknown>, options?: ErrorOptions) {
     super(messageKey, messageParams, options);
 
     // Set a custom name for the error type to differentiate it from other error types
@@ -43,7 +43,7 @@ export class LayerGeoCoreServiceFailError extends LayerGeoCoreError {
    * @param cause - The original error that caused this one
    */
   constructor(uuids: string[], cause: Error) {
-    super(uuids, 'error.geocore.serviceFail', uuids, { cause });
+    super(uuids, 'error.geocore.serviceFail', { uuid: uuids.toString() }, { cause });
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'LayerGeoCoreServiceFailError';
@@ -64,7 +64,7 @@ export class LayerGeoCoreInvalidResponseError extends LayerGeoCoreError {
    * @param errorMessage - The error message explaining the invalid response
    */
   constructor(uuids: string[], errorMessage: string) {
-    super(uuids, 'error.geocore.invalidResponse', [errorMessage, uuids.toString()]);
+    super(uuids, 'error.geocore.invalidResponse', { errorMessage, uuid: uuids.toString() });
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'LayerGeoCoreInvalidResponseError';
@@ -84,7 +84,7 @@ export class LayerGeoCoreNoLayersError extends LayerGeoCoreError {
    * @param uuids - The list of UUIDs that returned no layers
    */
   constructor(uuids: string[]) {
-    super(uuids, 'error.geocore.noLayer', [uuids.toString()]);
+    super(uuids, 'error.geocore.noLayer', { uuid: uuids.toString() });
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'LayerGeoCoreNoLayersError';

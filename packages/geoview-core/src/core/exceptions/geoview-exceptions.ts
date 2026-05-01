@@ -16,16 +16,16 @@ export class GeoViewError extends Error {
   readonly messageKey: string;
 
   /** The parameters to be translated using the localizedKey */
-  readonly messageParams: unknown[] | undefined;
+  readonly messageParams: Record<string, unknown> | undefined;
 
   /**
    * Constructs a new GeoViewError.
    *
    * @param messageKey - A localization key or a raw error message
-   * @param messageParams - Optional parameters for localization formatting
+   * @param messageParams - Optional named parameters for i18next interpolation
    * @param options - Optional error options, including `cause`
    */
-  constructor(messageKey: string, messageParams?: unknown[], options?: ErrorOptions) {
+  constructor(messageKey: string, messageParams?: Record<string, unknown>, options?: ErrorOptions) {
     // Call super with both message and native options (e.g., cause)
     super(`An error (${messageKey}) happened in GeoView`, options);
 
@@ -129,7 +129,7 @@ export class ConfigSchemaWrongPathError extends GeoViewError {
    * @param schemaPath - The wrong schema path
    */
   constructor(schemaPath: string) {
-    super('validation.schema.wrongPath', [schemaPath]);
+    super('validation.schema.wrongPath', { schemaPath });
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'ConfigSchemaWrongPathError';
@@ -149,7 +149,7 @@ export class MapViewerNotFoundError extends GeoViewError {
    * @param mapId - The unique identifier of the map that was not found
    */
   constructor(mapId: string) {
-    super('error.map.mapIdNotFound', [mapId]);
+    super('error.map.mapIdNotFound', { mapId });
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'MapViewerNotFoundError';
@@ -169,7 +169,7 @@ export class MapViewerAlreadyExistsError extends GeoViewError {
    * @param mapId - The unique identifier of the map that already exists
    */
   constructor(mapId: string) {
-    super('error.map.mapIdAlreadyExists', [mapId]);
+    super('error.map.mapIdAlreadyExists', { mapId });
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'MapViewerAlreadyExistsError';
@@ -189,7 +189,7 @@ export class GeoViewStoreOnMapNotFoundError extends GeoViewError {
    * @param mapId - The unique identifier of the map on which the GeoView Store was not found
    */
   constructor(mapId: string) {
-    super('error.map.geoviewStoreNotFound', [mapId]);
+    super('error.map.geoviewStoreNotFound', { mapId });
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'GeoViewStoreOnMapNotFoundError';
@@ -230,7 +230,7 @@ export class InvalidProjectionError extends GeoViewError {
    * @param projectionCode - The invalid projection code that caused the error
    */
   constructor(projectionCode: string) {
-    super('layers.errorProj', [projectionCode]);
+    super('layers.errorProj', { projectionCode });
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'InvalidProjectionError';
@@ -250,7 +250,7 @@ export class InvaliGeometryGroupIdError extends GeoViewError {
    * @param geometryGroupId - The invalid geometry group id that caused the error
    */
   constructor(geometryGroupId: string) {
-    super('error.map.errorGeometryGroupId', [geometryGroupId]);
+    super('error.map.errorGeometryGroupId', { geometryGroupId });
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'InvaliGeometryGroupIdError';
@@ -272,7 +272,7 @@ export class InvalidExtentError extends GeoViewError {
    * @param extent - The invalid extent that caused the error
    */
   constructor(extent: Extent) {
-    super('layers.errorInvalidExtent', [extent]);
+    super('layers.errorInvalidExtent', { extent });
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'InvalidExtentError';
@@ -352,7 +352,7 @@ export class BasemapLayerCreationError extends GeoViewError {
    * @param basemapType - The basemap type that failed to create
    */
   constructor(basemapType: string) {
-    super('warning.layer.basemapLayerCreationError', [basemapType]);
+    super('warning.layer.basemapLayerCreationError', { basemapType });
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'BasemapLayerCreationError';
@@ -390,7 +390,7 @@ export class NoPrimaryKeyFieldError extends GeoViewError {
    * @param layerPath - The path or identifier of the layer that caused the error
    */
   constructor(layerPath: string) {
-    super('layers.errorNoPrimaryKeyField', [layerPath]);
+    super('layers.errorNoPrimaryKeyField', { layerPath });
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'NoPrimaryKeyFieldError';
@@ -411,7 +411,7 @@ export class NoBoundsError extends GeoViewError {
    * @param layerPath - The path or identifier of the layer that caused the error
    */
   constructor(layerPath: string) {
-    super('layers.errorNoBounds', [layerPath]);
+    super('layers.errorNoBounds', { layerPath });
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'NoBoundsError';
@@ -434,7 +434,7 @@ export class NoExtentError extends GeoViewError {
    * @param layerPath - The layer path for which we tried to get an Extent
    */
   constructor(layerPath: string) {
-    super('layers.errorNoExtent', [layerPath]);
+    super('layers.errorNoExtent', { layerPath });
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'NoExtentError';
@@ -456,7 +456,7 @@ export class InitDivNotExistError extends GeoViewError {
    * @param mapId - The map id for which a wrong function call was made
    */
   constructor(mapId: string) {
-    super('error.map.mapDivNotExists', [mapId]);
+    super('error.map.mapDivNotExists', { mapId });
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'InitDivNotExistError';
@@ -478,7 +478,7 @@ export class InitMapWrongCallError extends GeoViewError {
    * @param mapId - The map id for which a wrong function call was made
    */
   constructor(mapId: string) {
-    super('error.map.mapWrongCall', [mapId]);
+    super('error.map.mapWrongCall', { mapId });
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'InitMapWrongCallError';
@@ -499,7 +499,7 @@ export class PluginError extends GeoViewError {
    * @param mapId - The map id
    */
   constructor(pluginId: string, mapId: string) {
-    super('error.map.pluginError', [pluginId, mapId]);
+    super('error.map.pluginError', { pluginId, mapId });
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'PluginError';
@@ -521,7 +521,7 @@ export class PluginConfigNotFoundError extends GeoViewError {
    * @param path - The config path that was not found
    */
   constructor(pluginId: string, mapId: string, path: string) {
-    super('error.map.pluginConfigNotFound', [pluginId, mapId, path]);
+    super('error.map.pluginConfigNotFound', { pluginId, mapId, path });
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'PluginConfigNotFoundError';
@@ -542,7 +542,7 @@ export class PluginStateUninitializedError extends GeoViewError {
    * @param mapId - The map id
    */
   constructor(pluginId: string, mapId: string) {
-    super('error.map.pluginStateUninitialized', [pluginId, mapId]);
+    super('error.map.pluginStateUninitialized', { pluginId, mapId });
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'PluginStateUninitializedError';
@@ -563,7 +563,7 @@ export class TestSuiteInitializationError extends GeoViewError {
    * @param mapId - The map id
    */
   constructor(testSuite: string, mapId: string) {
-    super('testSuite.initializationError', [testSuite, mapId]);
+    super('testSuite.initializationError', { testSuite, mapId });
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'TestSuiteInitializationError';
@@ -583,7 +583,7 @@ export class LayerConfigNotFoundError extends GeoViewError {
    * @param layerPath - The layer path where the layer config couldn't be found
    */
   constructor(layerPath: string) {
-    super('error.layer.layerConfigNotFound', [layerPath]);
+    super('error.layer.layerConfigNotFound', { layerPath });
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'LayerConfigNotFoundError';
@@ -604,7 +604,7 @@ export class LayerFailedToLoadError extends GeoViewError {
    * @param cause - Optional inner cause of the error
    */
   constructor(layerName: string, cause?: Error) {
-    super('layers.errorNotLoaded', [layerName], { cause });
+    super('layers.errorNotLoaded', { layerName }, { cause });
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'LayerFailedToLoadError';
@@ -625,7 +625,7 @@ export class LayerImageFailedToLoadError extends GeoViewError {
    * @param cause - Optional inner cause of the error
    */
   constructor(layerName: string, cause?: Error) {
-    super('layers.errorImageLoad', [layerName], { cause });
+    super('layers.errorImageLoad', { layerName }, { cause });
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'LayerImageFailedToLoadError';
@@ -647,7 +647,7 @@ export class LayerImageFailedToLoadWidthTooBigError extends GeoViewError {
    * @param maxWidth - The maximum supported width for the generated image by the service
    */
   constructor(layerName: string, requestedWidth: number, maxWidth: number) {
-    super('layers.errorImageLoadSizeLimitExceededWidth', [layerName, requestedWidth, maxWidth]);
+    super('layers.errorImageLoadSizeLimitExceededWidth', { layerName, requestedWidth, maxWidth });
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'LayerImageFailedToLoadWidthTooBigError';
@@ -669,7 +669,7 @@ export class LayerImageFailedToLoadHeightTooBigError extends GeoViewError {
    * @param maxHeight - The maximum supported height for the generated image by the service
    */
   constructor(layerName: string, requestedHeight: number, maxHeight: number) {
-    super('layers.errorImageLoadSizeLimitExceededHeight', [layerName, requestedHeight, maxHeight]);
+    super('layers.errorImageLoadSizeLimitExceededHeight', { layerName, requestedHeight, maxHeight });
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'LayerImageFailedToLoadHeightTooBigError';
@@ -689,7 +689,7 @@ export class LayerImageFailedNoImageError extends GeoViewError {
    * @param layerName - The layer name of the layer image that returned an empty image on load
    */
   constructor(layerName: string) {
-    super('layers.errorImageLoadNoImageReturned', [layerName]);
+    super('layers.errorImageLoadNoImageReturned', { layerName });
 
     // Set a custom name for the error type to differentiate it from other error types
     this.name = 'LayerImageFailedNoImageError';

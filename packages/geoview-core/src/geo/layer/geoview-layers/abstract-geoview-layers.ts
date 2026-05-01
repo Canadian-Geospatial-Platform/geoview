@@ -573,7 +573,7 @@ export abstract class AbstractGeoViewLayer {
    */
   protected emitMessage(
     messageKey: string,
-    messageParams: string[] | undefined = [],
+    messageParams: Record<string, unknown> | undefined = {},
     messageType: SnackbarType = 'info',
     notification: boolean = false
   ): void {
@@ -1108,7 +1108,7 @@ export abstract class AbstractGeoViewLayer {
         if (ConfigBaseClass.allLayerStatusAreGreaterThanOrEqualTo('processed', this.listOfLayerEntryConfig)) return true;
 
         // Emit message
-        this.emitMessage('warning.layer.metadataTakingLongTime', [this.getLayerEntryNameOrGeoviewLayerName()], 'warning');
+        this.emitMessage('warning.layer.metadataTakingLongTime', { layerName: this.getLayerEntryNameOrGeoviewLayerName() }, 'warning');
 
         // Use doUntil to emit warnings until processing is complete
         doUntil(() => {
@@ -1118,7 +1118,7 @@ export abstract class AbstractGeoViewLayer {
           }
 
           // Emit message
-          this.emitMessage('warning.layer.metadataTakingLongTime', [this.getLayerEntryNameOrGeoviewLayerName()], 'warning');
+          this.emitMessage('warning.layer.metadataTakingLongTime', { layerName: this.getLayerEntryNameOrGeoviewLayerName() }, 'warning');
           return false; // Continue the interval
         }, AbstractGeoViewLayer.DEFAULT_WAIT_PERIOD_METADATA_WARNING_RECALL);
 
@@ -1507,7 +1507,7 @@ export type LayerMessageEvent = {
   /** The i18n key (or literal string) for the message to display. */
   messageKey: string;
   /** Parameters to interpolate into the localized message. */
-  messageParams: string[];
+  messageParams: Record<string, unknown>;
   /** The severity type of the message. */
   messageType: SnackbarType;
   /** Whether to show the message as a notification. */

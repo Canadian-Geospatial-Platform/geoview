@@ -318,30 +318,18 @@ export function shallowArrayEqual<T>(a: T[], b: T[]): boolean {
 }
 
 /**
- * Take string like "My string is __param__" and replace parameters (__param__) from array of values.
- *
- * @param params - An array of parameters to replace, i.e. ['short']
- * @param message - The original message, i.e. "My string is __param__"
- * @returns Message with values replaced "My string is short"
- */
-export function replaceParams(params: unknown[], message: string): string {
-  let tmpMess = message;
-  (params as string[]).forEach((item: string) => {
-    tmpMess = tmpMess.replace('__param__', item);
-  });
-
-  return tmpMess;
-}
-
-/**
- * Return proper language Geoview localized values from map i18n instance.
+ * Returns proper language GeoView localized values from map i18n instance.
  *
  * @param language - The language to get the message in
  * @param messageKey - The localize key to read the message from
- * @param params - Optional array of parameters to replace, i.e. ['short']
+ * @param params - Optional record of named parameters for i18next interpolation
  * @returns The translated message with values replaced
  */
-export function getLocalizedMessage(language: TypeDisplayLanguage, messageKey: string, params: unknown[] | undefined = undefined): string {
+export function getLocalizedMessage(
+  language: TypeDisplayLanguage,
+  messageKey: string,
+  params: Record<string, unknown> | undefined = undefined
+): string {
   // Check if the message key exists, before translating it and log a warning when it doesn't exist
   if (!i18n.exists(messageKey, { lng: language })) {
     // Log error
@@ -349,13 +337,14 @@ export function getLocalizedMessage(language: TypeDisplayLanguage, messageKey: s
   }
 
   const trans = i18n.getFixedT(language);
-  let message = trans(messageKey);
 
-  // if params provided, replace them
-  if (params && params.length > 0) message = replaceParams(params, message);
+  // If params provided, pass them directly to i18next for {{key}} interpolation
+  if (params && Object.keys(params).length > 0) {
+    return trans(messageKey, params);
+  }
 
-  // Return the messsage
-  return message;
+  // Return the message
+  return trans(messageKey);
 }
 
 /**

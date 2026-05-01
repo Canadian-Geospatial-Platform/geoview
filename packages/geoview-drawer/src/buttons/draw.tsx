@@ -1,7 +1,6 @@
 import type { TypeWindow } from 'geoview-core';
 import { getSxClasses } from 'geoview-core/core/components/nav-bar/nav-bar-style';
-import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
-import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
+import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { useStoreDrawerIsDrawing } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
 
 import { IconButton, DrawIcon } from 'geoview-core/ui';
@@ -24,7 +23,7 @@ export default function Draw(): JSX.Element {
   // Get store values
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
-  const displayLanguage = useStoreAppDisplayLanguage();
+  const { t } = useTranslation<string>();
   const isDrawing = useStoreDrawerIsDrawing();
   const drawerController = useDrawerController();
 
@@ -38,7 +37,7 @@ export default function Draw(): JSX.Element {
   return (
     <IconButton
       id="draw"
-      aria-label={getLocalizedMessage(displayLanguage, 'drawer.toggleDrawing')}
+      aria-label={t('drawer.toggleDrawing')}
       tooltipPlacement="left"
       className={isDrawing ? 'highlighted active' : ''}
       onClick={handleDraw}

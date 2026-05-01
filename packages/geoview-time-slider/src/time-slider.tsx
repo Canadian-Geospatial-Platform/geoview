@@ -7,7 +7,7 @@ import {
   useStoreLayerDisplayDateTimezone,
   useStoreLayerNameSet,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
-import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
+import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 import { logger } from 'geoview-core/core/utils/logger';
 
@@ -66,6 +66,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   const sliderDeltaRef = useRef<number>();
 
   const displayLanguage = useStoreAppDisplayLanguage();
+  const { t } = useTranslation();
 
   const {
     title,
@@ -403,14 +404,10 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
    */
   const getLockTooltip = useCallback((): string => {
     if (reversed) {
-      return locked
-        ? getLocalizedMessage(displayLanguage, 'timeSlider.slider.unlockRight')
-        : getLocalizedMessage(displayLanguage, 'timeSlider.slider.lockRight');
+      return locked ? t('timeSlider.slider.unlockRight') : t('timeSlider.slider.lockRight');
     }
-    return locked
-      ? getLocalizedMessage(displayLanguage, 'timeSlider.slider.unlockLeft')
-      : getLocalizedMessage(displayLanguage, 'timeSlider.slider.lockLeft');
-  }, [locked, reversed, displayLanguage]);
+    return locked ? t('timeSlider.slider.unlockLeft') : t('timeSlider.slider.lockLeft');
+  }, [t, locked, reversed]);
 
   /**
    * Returns the consistent label for the lock button based on direction.
@@ -419,10 +416,10 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
    */
   const getLockLabel = useCallback((): string => {
     if (reversed) {
-      return getLocalizedMessage(displayLanguage, 'timeSlider.slider.lockRight');
+      return t('timeSlider.slider.lockRight');
     }
-    return getLocalizedMessage(displayLanguage, 'timeSlider.slider.lockLeft');
-  }, [reversed, displayLanguage]);
+    return t('timeSlider.slider.lockLeft');
+  }, [t, reversed]);
 
   /**
    * Creates labels for values on slider.
@@ -503,20 +500,9 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
           </Grid>
           <Grid size={{ sm: 6, md: 3 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: '10px' }}>
-              <Tooltip
-                title={
-                  filtering
-                    ? getLocalizedMessage(displayLanguage, 'timeSlider.slider.disableFilter')
-                    : getLocalizedMessage(displayLanguage, 'timeSlider.slider.enableFilter')
-                }
-              >
+              <Tooltip title={filtering ? t('timeSlider.slider.disableFilter') : t('timeSlider.slider.enableFilter')}>
                 <span>
-                  <Switch
-                    size="small"
-                    checked={filtering}
-                    onChange={handleCheckbox}
-                    label={getLocalizedMessage(displayLanguage, 'timeSlider.slider.filter')}
-                  />
+                  <Switch size="small" checked={filtering} onChange={handleCheckbox} label={t('timeSlider.slider.filter')} />
                 </span>
               </Tooltip>
             </Box>
@@ -539,19 +525,13 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
             {/* WCAG - Live region to announce slider value changes */}
             <Typography role="status" aria-live="polite" aria-atomic="true" sx={visuallyHidden}>
               {`${handleLabelFormat(values[0])}${
-                values.length > 1
-                  ? ` ${getLocalizedMessage(displayLanguage, 'timeSlider.slider.to')} ${handleLabelFormat(values[values.length - 1])}`
-                  : ''
+                values.length > 1 ? ` ${t('timeSlider.slider.to')} ${handleLabelFormat(values[values.length - 1])}` : ''
               }`}
             </Typography>
           </Box>
         </Grid>
         <Grid size={{ xs: 12 }}>
-          <Box
-            role="group"
-            aria-label={getLocalizedMessage(displayLanguage, 'timeSlider.slider.animationControls')}
-            sx={{ textAlign: 'center', paddingTop: '20px' }}
-          >
+          <Box role="group" aria-label={t('timeSlider.slider.animationControls')} sx={{ textAlign: 'center', paddingTop: '20px' }}>
             {!singleHandle && (
               <IconButton
                 className="buttonOutline"
@@ -567,8 +547,8 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
 
             <IconButton
               className="buttonOutline"
-              aria-label={getLocalizedMessage(displayLanguage, 'timeSlider.slider.back')}
-              tooltip={getLocalizedMessage(displayLanguage, 'timeSlider.slider.back')}
+              aria-label={t('timeSlider.slider.back')}
+              tooltip={t('timeSlider.slider.back')}
               tooltipPlacement="top"
               aria-disabled={isPlaying || !filtering}
               onClick={handleBack}
@@ -578,13 +558,9 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
 
             <IconButton
               className="buttonOutline"
-              aria-label={getLocalizedMessage(displayLanguage, 'timeSlider.slider.playAnimation')}
+              aria-label={t('timeSlider.slider.playAnimation')}
               aria-pressed={isPlaying}
-              tooltip={
-                isPlaying
-                  ? getLocalizedMessage(displayLanguage, 'timeSlider.slider.pauseAnimation')
-                  : getLocalizedMessage(displayLanguage, 'timeSlider.slider.playAnimation')
-              }
+              tooltip={isPlaying ? t('timeSlider.slider.pauseAnimation') : t('timeSlider.slider.playAnimation')}
               tooltipPlacement="top"
               aria-disabled={!filtering}
               onClick={handlePlay}
@@ -594,8 +570,8 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
 
             <IconButton
               className="buttonOutline"
-              aria-label={getLocalizedMessage(displayLanguage, 'timeSlider.slider.forward')}
-              tooltip={getLocalizedMessage(displayLanguage, 'timeSlider.slider.forward')}
+              aria-label={t('timeSlider.slider.forward')}
+              tooltip={t('timeSlider.slider.forward')}
               tooltipPlacement="top"
               aria-disabled={isPlaying || !filtering}
               onClick={handleForward}
@@ -605,9 +581,9 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
 
             <IconButton
               className="buttonOutline"
-              aria-label={getLocalizedMessage(displayLanguage, 'timeSlider.slider.reverseAnimation')}
+              aria-label={t('timeSlider.slider.reverseAnimation')}
               aria-pressed={reversed}
-              tooltip={getLocalizedMessage(displayLanguage, 'timeSlider.slider.changeDirection')}
+              tooltip={t('timeSlider.slider.changeDirection')}
               tooltipPlacement="top"
               onClick={handleReverse}
             >
@@ -617,7 +593,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
             <Box component="span" sx={{ paddingLeft: '10px' }}>
               <FormControl sx={{ width: '100px' }}>
                 <InputLabel htmlFor={timeDelayId} variant="standard">
-                  {getLocalizedMessage(displayLanguage, 'timeSlider.slider.timeDelay')}
+                  {t('timeSlider.slider.timeDelay')}
                 </InputLabel>
                 <NativeSelect
                   id={timeDelayId}
@@ -643,7 +619,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
               <Box component="span" sx={{ paddingLeft: '10px' }}>
                 <FormControl sx={{ width: '100px' }}>
                   <InputLabel htmlFor={stepValueId} variant="standard">
-                    {getLocalizedMessage(displayLanguage, 'timeSlider.slider.stepValue')}
+                    {t('timeSlider.slider.stepValue')}
                   </InputLabel>
                   <NativeSelect
                     id={stepValueId}
@@ -653,11 +629,11 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
                       onChange: handleStepChange,
                     }}
                   >
-                    <option value={3600000}>{getLocalizedMessage(displayLanguage, 'timeSlider.slider.hour')}</option>
-                    <option value={86400000}>{getLocalizedMessage(displayLanguage, 'timeSlider.slider.day')}</option>
-                    <option value={604800000}>{getLocalizedMessage(displayLanguage, 'timeSlider.slider.week')}</option>
-                    <option value={2592000000}>{getLocalizedMessage(displayLanguage, 'timeSlider.slider.month')}</option>
-                    <option value={31536000000}>{getLocalizedMessage(displayLanguage, 'timeSlider.slider.year')}</option>
+                    <option value={3600000}>{t('timeSlider.slider.hour')}</option>
+                    <option value={86400000}>{t('timeSlider.slider.day')}</option>
+                    <option value={604800000}>{t('timeSlider.slider.week')}</option>
+                    <option value={2592000000}>{t('timeSlider.slider.month')}</option>
+                    <option value={31536000000}>{t('timeSlider.slider.year')}</option>
                   </NativeSelect>
                 </FormControl>
               </Box>

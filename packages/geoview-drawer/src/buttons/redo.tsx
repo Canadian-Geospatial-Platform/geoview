@@ -1,7 +1,6 @@
 import type { TypeWindow } from 'geoview-core';
 import { getSxClasses } from 'geoview-core/core/components/nav-bar/nav-bar-style';
-import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
-import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
+import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { useStoreDrawerRedoDisabled } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
 
 import { IconButton, RedoIcon } from 'geoview-core/ui';
@@ -24,7 +23,7 @@ export default function Redo(): JSX.Element {
   // Get store values
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
-  const displayLanguage = useStoreAppDisplayLanguage();
+  const { t } = useTranslation<string>();
 
   // Store
   const redoDisabled = useStoreDrawerRedoDisabled();
@@ -40,7 +39,7 @@ export default function Redo(): JSX.Element {
   return (
     <IconButton
       id="redo"
-      aria-label={getLocalizedMessage(displayLanguage, 'drawer.redoTooltip')}
+      aria-label={t('drawer.redoTooltip')}
       tooltipPlacement="left"
       onClick={handleRedo}
       sx={sxClasses.navButton}
