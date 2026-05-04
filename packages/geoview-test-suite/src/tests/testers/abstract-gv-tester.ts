@@ -37,10 +37,10 @@ export abstract class GVAbstractTester extends AbstractTester {
   static FAKE_URL_ALWAYS_RETURNING_RESPONSE_INSTEAD_OF_NETWORK_ERROR = 'https://maps.canada.ca/wmsproxy/ws/wmsproxy/executeFromProxy';
 
   /** Airborne Radioactivity uuid */
-  static AIRBORNE_RADIOACTIVITY_UUID: string = '21b821cf-0f1c-40ee-8925-eab12d357668';
-  static AIRBORNE_RADIOACTIVITY_GROUP: string = `${GVAbstractTester.AIRBORNE_RADIOACTIVITY_UUID}/0`;
-  static AIRBORNE_RADIOACTIVITY_UUID_WITH_SUFFIX: string = `${GVAbstractTester.AIRBORNE_RADIOACTIVITY_UUID}/0/1`;
-  static AIRBORNE_RADIOACTIVITY_LAYER_GROUP_NAME: string = 'Airborne Radioactivity';
+  static AIRBORNE_RADIOACTIVITY_UUID = '21b821cf-0f1c-40ee-8925-eab12d357668';
+  static AIRBORNE_RADIOACTIVITY_GROUP = `${GVAbstractTester.AIRBORNE_RADIOACTIVITY_UUID}/0`;
+  static AIRBORNE_RADIOACTIVITY_UUID_WITH_SUFFIX = `${GVAbstractTester.AIRBORNE_RADIOACTIVITY_UUID}/0/1`;
+  static AIRBORNE_RADIOACTIVITY_LAYER_GROUP_NAME = 'Airborne Radioactivity';
 
   /** Historical Flood */
   static readonly HISTORICAL_FLOOD_URL_MAP_SERVER: string =

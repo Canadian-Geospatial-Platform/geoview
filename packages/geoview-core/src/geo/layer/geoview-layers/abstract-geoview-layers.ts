@@ -575,7 +575,7 @@ export abstract class AbstractGeoViewLayer {
     messageKey: string,
     messageParams: Record<string, unknown> | undefined = {},
     messageType: SnackbarType = 'info',
-    notification: boolean = false
+    notification = false
   ): void {
     this.#emitLayerMessage({ messageKey, messageParams, messageType, notification });
   }

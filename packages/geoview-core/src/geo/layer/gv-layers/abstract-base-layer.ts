@@ -13,7 +13,7 @@ import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
  */
 export abstract class AbstractBaseGVLayer {
   /** Indicates if the layer has become in loaded status at least once already */
-  loadedOnce: boolean = false;
+  loadedOnce = false;
 
   /** The OpenLayer layer // '!' is used here, because the children constructors are supposed to create the olLayer. */
   #olLayer!: BaseLayer;

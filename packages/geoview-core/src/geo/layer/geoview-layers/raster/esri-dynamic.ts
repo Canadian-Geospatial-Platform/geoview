@@ -28,7 +28,7 @@ export interface TypeEsriDynamicLayerConfig extends TypeGeoviewLayerConfig {
  */
 export class EsriDynamic extends AbstractGeoViewRaster {
   // The default hit tolerance the query should be using
-  static override DEFAULT_HIT_TOLERANCE: number = 7;
+  static override DEFAULT_HIT_TOLERANCE = 7;
 
   // Override the hit tolerance for a EsriDynamic layer
   override hitTolerance: number = EsriDynamic.DEFAULT_HIT_TOLERANCE;

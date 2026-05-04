@@ -32,7 +32,7 @@ import { GeoviewTextRenderer } from '@/geo/utils/renderer/geoview-text-renderer'
  */
 export abstract class AbstractGVVector extends AbstractGVLayer {
   /** Indicates if the style has been applied on the layer yet */
-  styleApplied: boolean = false;
+  styleApplied = false;
 
   /** Callback delegates for the style applied event */
   #onStyleAppliedHandlers: StyleAppliedDelegate[] = [];
@@ -41,7 +41,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   #textOLLayer?: VectorLayer<VectorSource<Feature<Geometry>>>;
 
   /** Indicates if the text layer is visible */
-  #textVisible: boolean = true;
+  #textVisible = true;
 
   /** Callback delegates for the text visible changed event */
   #onTextVisibleChangedHandlers: TextVisibleChangedDelegate[] = [];
@@ -312,7 +312,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     map: OLMap,
     location: Coordinate,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    queryGeometry: boolean = true,
+    queryGeometry = true,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoResult> {
@@ -333,7 +333,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     map: OLMap,
     lonlat: Coordinate,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    queryGeometry: boolean = true,
+    queryGeometry = true,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoResult> {

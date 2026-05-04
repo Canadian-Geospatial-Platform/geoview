@@ -17,7 +17,7 @@ export const helpOpenClosePanelByIdState = (
   buttonId: string,
   setterCallback: Dispatch<SetStateAction<ButtonPanelType>>,
   status: boolean,
-  isFocusTrapped: boolean = false
+  isFocusTrapped = false
 ): void => {
   // Open or Close it
   setterCallback((prevState) => {

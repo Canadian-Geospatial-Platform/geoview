@@ -598,11 +598,7 @@ export class Test<T = unknown> {
    *   ]
    * }
    */
-  static #jsonObjectIsAtLeast(
-    actual: Record<string, unknown>,
-    expected: Record<string, unknown>,
-    basePath: string = ''
-  ): ObjectAssertionResult {
+  static #jsonObjectIsAtLeast(actual: Record<string, unknown>, expected: Record<string, unknown>, basePath = ''): ObjectAssertionResult {
     // Array to collect all the paths where mismatches or missing data occur
     const mismatches: string[] = [];
 

@@ -95,7 +95,7 @@ export abstract class AssertionError extends Error {
    * @param expected - Expected value
    */
   protected constructor(
-    message: string = 'Assertion failed',
+    message = 'Assertion failed',
     public actual?: unknown,
     public expected?: unknown
   ) {

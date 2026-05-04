@@ -398,12 +398,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    */
   // GV: featureLimit ideal amount varies with the service and with maxAllowableOffset.
   // TODO: Add options for featureLimit to config
-  static #fetchEsriFeaturesByChunk(
-    url: string,
-    featureCount: number,
-    maxRecordCount?: number,
-    featureLimit: number = 1000
-  ): Promise<unknown[]> {
+  static #fetchEsriFeaturesByChunk(url: string, featureCount: number, maxRecordCount?: number, featureLimit = 1000): Promise<unknown[]> {
     // Update url
     const featureFetchLimit = maxRecordCount && maxRecordCount < featureLimit ? maxRecordCount : featureLimit;
 

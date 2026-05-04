@@ -9,7 +9,7 @@ export class TestStep {
   constructor(
     public message: string,
     public level: TestStepLevel = 'regular',
-    public color: string = 'black'
+    public color = 'black'
   ) {}
 }
 

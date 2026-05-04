@@ -2992,7 +2992,7 @@ export abstract class GeoviewRenderer {
   static #buildQueryUniqueValue(
     styleSettings: TypeLayerStyleSettings,
     outFields: TypeOutfields[],
-    useExtraSpacingInFilter: boolean = false
+    useExtraSpacingInFilter = false
   ): string {
     // If valueExpression is used, skip server-side filter generation
     if (styleSettings.valueExpression) {

@@ -47,7 +47,7 @@ export abstract class Projection {
   };
 
   /** Incremental number when creating custom WKTs on the fly */
-  static CUSTOM_WKT_NUM: number = 1001;
+  static CUSTOM_WKT_NUM = 1001;
 
   /** Holding all custom generated wkt */
   static CUSTOM_WKT_AND_NUM: { [wkt_num: string]: string } = {};
