@@ -3,7 +3,7 @@ import { useEffect, useRef, memo } from 'react';
 import type { Coordinate } from 'ol/coordinate';
 import { Box, ClickMapMarker } from '@/ui';
 
-import { useStoreMapClickMarker, useStoreMapClickCoordinates } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useStoreMapClickMarker, useStoreMapClickCoordinates } from '@/core/stores/states/map-state';
 import { logger } from '@/core/utils/logger';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useMapController } from '@/core/controllers/use-controllers';

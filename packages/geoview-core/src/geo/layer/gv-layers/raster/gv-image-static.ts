@@ -8,7 +8,7 @@ import { logger } from '@/core/utils/logger';
 import type { ImageStaticLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
-import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import type { TypeLegend } from '@/core/stores/states/layer-state';
 import { Projection } from '@/geo/utils/projection';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';

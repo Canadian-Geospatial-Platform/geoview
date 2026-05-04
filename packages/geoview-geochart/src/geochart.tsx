@@ -1,12 +1,9 @@
 import type { GeoChartConfig, ChartType, GeoChartDefaultColors, SchemaValidator, GeoChartAction } from 'geochart';
 import { GeoChart as GeoChartComponent } from 'geochart';
 
-import {
-  useStoreAppDisplayLanguageById,
-  useStoreAppDisplayDateTimezone,
-} from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
-import { useStoreLayerDisplayDateFormatShort } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
-import type { TypeGeochartResultSetEntry } from 'geoview-core/core/stores/store-interface-and-intial-values/geochart-state';
+import { useStoreAppDisplayLanguageById, useStoreAppDisplayDateTimezone } from 'geoview-core/core/stores/states/app-state';
+import { useStoreLayerDisplayDateFormatShort } from 'geoview-core/core/stores/states/layer-state';
+import type { TypeGeochartResultSetEntry } from 'geoview-core/core/stores/states/geochart-state';
 import { useUIController, useLayerController } from 'geoview-core/core/controllers/use-controllers';
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import type { TypeFeatureInfoEntry } from 'geoview-core/api/types/map-schema-types';

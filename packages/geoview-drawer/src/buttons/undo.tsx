@@ -1,7 +1,7 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { getSxClasses } from 'geoview-core/core/components/nav-bar/nav-bar-style';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
-import { useStoreDrawerUndoDisabled } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
+import { useStoreDrawerUndoDisabled } from 'geoview-core/core/stores/states/drawer-state';
 
 import { IconButton, UndoIcon } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';

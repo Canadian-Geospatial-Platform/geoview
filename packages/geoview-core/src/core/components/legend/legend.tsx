@@ -15,7 +15,7 @@ import { CONTAINER_TYPE } from '@/core/utils/constant';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { useEventListener } from '@/core/components/common/hooks/use-event-listener';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
-import { useStoreLayerTopLevelLayerPaths } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useStoreLayerTopLevelLayerPaths } from '@/core/stores/states/layer-state';
 
 interface LegendType {
   containerType: TypeContainerBox;

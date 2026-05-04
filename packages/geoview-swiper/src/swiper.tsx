@@ -7,17 +7,14 @@ import type BaseLayer from 'ol/layer/Base';
 import type { EventTypes } from 'ol/Observable';
 import type BaseEvent from 'ol/events/Event';
 
-import type { SwipeOrientation } from 'geoview-core/core/stores/store-interface-and-intial-values/swiper-state';
-import {
-  useStoreSwiperLayerPaths,
-  useStoreSwiperOrientation,
-} from 'geoview-core/core/stores/store-interface-and-intial-values/swiper-state';
+import type { SwipeOrientation } from 'geoview-core/core/stores/states/swiper-state';
+import { useStoreSwiperLayerPaths, useStoreSwiperOrientation } from 'geoview-core/core/stores/states/swiper-state';
 import { logger } from 'geoview-core/core/utils/logger';
 import { delay } from 'geoview-core/core/utils/utilities';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { debounce } from 'geoview-core/core/utils/debounce';
-import { useStoreMapSize } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
-import { useStoreLayerVisibleLayers } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
+import { useStoreMapSize } from 'geoview-core/core/stores/states/map-state';
+import { useStoreLayerVisibleLayers } from 'geoview-core/core/stores/states/layer-state';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
 import { TIMEOUT } from 'geoview-core/core/utils/constant';

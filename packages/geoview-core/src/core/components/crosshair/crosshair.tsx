@@ -5,8 +5,8 @@ import { Box, Fade, Typography } from '@/ui';
 
 import { getSxClasses } from './crosshair-style';
 import { CrosshairIcon } from './crosshair-icon';
-import { useStoreAppIsCrosshairsActive } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { getStoreMapPointerPosition } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useStoreAppIsCrosshairsActive } from '@/core/stores/states/app-state';
+import { getStoreMapPointerPosition } from '@/core/stores/states/map-state';
 import { logger } from '@/core/utils/logger';
 import { useEventListener } from '@/core/components/common/hooks/use-event-listener';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { FocusTrap, Box, Button } from '@/ui';
 
 import { useUIController } from '@/core/controllers/use-controllers';
-import { useStoreUIActiveFocusItem, useStoreUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useStoreUIActiveFocusItem, useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE, TIMEOUT } from '@/core/utils/constant';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';

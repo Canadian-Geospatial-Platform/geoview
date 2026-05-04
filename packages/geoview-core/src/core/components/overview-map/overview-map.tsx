@@ -8,8 +8,8 @@ import { ThemeProvider } from '@mui/material/styles';
 
 import { cgpvTheme } from '@/ui/style/theme';
 import { OverviewMapToggle } from './overview-map-toggle';
-import { useStoreAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { useStoreMapOverviewMapHideZoom, useStoreMapZoom } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useStoreAppDisplayLanguage } from '@/core/stores/states/app-state';
+import { useStoreMapOverviewMapHideZoom, useStoreMapZoom } from '@/core/stores/states/map-state';
 import { logger } from '@/core/utils/logger';
 import { Box } from '@/ui/layout';
 import { TIMEOUT } from '@/core/utils/constant';

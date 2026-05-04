@@ -9,8 +9,8 @@ import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react
 import { getFocusTrapSxClasses } from './containers-style';
 import { ARROW_KEY_CODES } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
-import { useStoreAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { useStoreUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useStoreAppGeoviewHTMLElement } from '@/core/stores/states/app-state';
+import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
 import { useEventListener } from '@/core/components/common/hooks/use-event-listener';
 
 /** Interface for the focus trap properties. */

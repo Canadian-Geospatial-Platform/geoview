@@ -27,10 +27,10 @@ import {
 import type { SxStyles } from '@/ui/style/types';
 import { visuallyHidden } from '@/ui/style/default';
 import { useUIController } from '@/core/controllers/use-controllers';
-import { useStoreAppNotifications } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreAppNotifications } from '@/core/stores/states/app-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
-import { useStoreMapInteraction } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { useStoreUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useStoreMapInteraction } from '@/core/stores/states/map-state';
+import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
 import { CONTAINER_TYPE, TIMEOUT } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
 import { handleEscapeKey } from '@/core/utils/utilities';

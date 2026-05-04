@@ -32,7 +32,7 @@ import type {
 import type { TypeBasemapLayer } from '@/geo/layer/basemap/basemap-types';
 import { NetworkError, NotSupportedError, ResponseEmptyError } from '@/core/exceptions/core-exceptions';
 import type { TypeMetadataWMTS } from '@/api/config/validation-classes/raster-validation-classes/ogc-wmts-layer-entry-config';
-import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import type { TypeLegend } from '@/core/stores/states/layer-state';
 import type { TypeLegendItem, TypeLegendLayerItem } from '@/core/components/layers/types';
 import type { TypeVectorLayerStyles } from './renderer/geoview-renderer';
 

@@ -1,10 +1,6 @@
 import ReactDOMServer from 'react-dom/server';
 import type { TypeWindow } from 'geoview-core';
-import {
-  useStoreDrawerActiveGeom,
-  useStoreDrawerIsDrawing,
-  useStoreDrawerStyle,
-} from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
+import { useStoreDrawerActiveGeom, useStoreDrawerIsDrawing, useStoreDrawerStyle } from 'geoview-core/core/stores/states/drawer-state';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
 
 import { logger } from 'geoview-core/core/utils/logger';

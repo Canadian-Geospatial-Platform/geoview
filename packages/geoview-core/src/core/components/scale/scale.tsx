@@ -6,7 +6,7 @@ import { useTheme } from '@mui/material/styles';
 
 import { CheckIcon, Tooltip, Box, Button } from '@/ui';
 import { getSxClasses } from './scale-style';
-import { useStoreMapInteraction, useStoreMapScale } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useStoreMapInteraction, useStoreMapScale } from '@/core/stores/states/map-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 

@@ -3,11 +3,8 @@ import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
 import { delay } from 'geoview-core/core/utils/utilities';
 import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
-import { getStoreUIActiveFooterBarTab } from 'geoview-core/core/stores/store-interface-and-intial-values/ui-state';
-import {
-  getStoreGeochartChartsConfig,
-  getStoreGeochartSelectedLayerPath,
-} from 'geoview-core/core/stores/store-interface-and-intial-values/geochart-state';
+import { getStoreUIActiveFooterBarTab } from 'geoview-core/core/stores/states/ui-state';
+import { getStoreGeochartChartsConfig, getStoreGeochartSelectedLayerPath } from 'geoview-core/core/stores/states/geochart-state';
 
 /**
  * Main Map testing class.

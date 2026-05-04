@@ -3,7 +3,7 @@ import {
   useStoreUIActiveFooterBarTab,
   useStoreUIFooterBarComponents,
   useStoreUIAppbarComponents,
-} from '@/core/stores/store-interface-and-intial-values/ui-state';
+} from '@/core/stores/states/ui-state';
 import { scrollIfNotVisible } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import type { TypeValidAppBarCoreProps, TypeValidFooterBarTabsCoreProps } from '@/api/types/map-schema-types';

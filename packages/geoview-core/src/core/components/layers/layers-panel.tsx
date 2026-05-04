@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Box } from '@/ui';
 
 import { useUIController } from '@/core/controllers/use-controllers';
-import { useStoreLayerDisplayState, useStoreLayerSelectedLayerPath } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useStoreLayerDisplayState, useStoreLayerSelectedLayerPath } from '@/core/stores/states/layer-state';
 import { LayersToolbar } from './layers-toolbar';
 import { LayerDetails } from './right-panel/layer-details';
 import { LeftPanel } from './left-panel/left-panel';

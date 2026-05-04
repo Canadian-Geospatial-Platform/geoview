@@ -16,15 +16,10 @@ import { HoverTooltip } from '@/core/components/hover-tooltip/hover-tooltip';
 import type { MapViewer } from '@/geo/map/map-viewer';
 
 import { getSxClasses } from './map-style';
-import {
-  useStoreMapInteraction,
-  useStoreMapLoaded,
-  useStoreMapNorthArrow,
-  useStoreMapOverviewMap,
-} from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useStoreMapInteraction, useStoreMapLoaded, useStoreMapNorthArrow, useStoreMapOverviewMap } from '@/core/stores/states/map-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
-import { useStoreLayerAreLayersLoading } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useStoreLayerAreLayersLoading } from '@/core/stores/states/layer-state';
 
 /** Props for the Map component. */
 type MapProps = {

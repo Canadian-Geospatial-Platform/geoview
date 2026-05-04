@@ -10,7 +10,7 @@ import { getScriptAndAssetURL } from '@/core/utils/utilities';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import { logger } from '@/core/utils/logger';
 import type { TypePointMarker } from '@/api/types/map-schema-types';
-import { getStoreMapPointMarkers } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { getStoreMapPointMarkers } from '@/core/stores/states/map-state';
 import type { MapController } from '@/core/controllers/map-controller';
 
 /**

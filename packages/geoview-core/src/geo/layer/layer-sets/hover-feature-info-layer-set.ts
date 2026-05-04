@@ -2,9 +2,9 @@
 import type { QueryType } from '@/api/types/map-schema-types';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
-import { setStoreMapHoverFeatureInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { getStoreLayerInVisibleRangeLayerPaths } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import type { TypeHoverResultSet } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import { setStoreMapHoverFeatureInfo } from '@/core/stores/states/map-state';
+import { getStoreLayerInVisibleRangeLayerPaths } from '@/core/stores/states/layer-state';
+import type { TypeHoverResultSet } from '@/core/stores/states/feature-info-state';
 import { RequestAbortedError } from '@/core/exceptions/core-exceptions';
 import { logger } from '@/core/utils/logger';
 

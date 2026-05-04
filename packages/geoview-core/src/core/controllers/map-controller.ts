@@ -70,10 +70,10 @@ import {
   setStoreMapPointMarkers,
   setStoreMapProjection,
   setStoreMapSize,
-} from '@/core/stores/store-interface-and-intial-values/map-state';
-import { getStoreDataTableSelectedLayerPath } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { getStoreUIActiveAppBarTab, getStoreUIActiveFooterBarTab } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { getStoreAppDisplayTheme, getStoreAppIsCrosshairsActive } from '@/core/stores/store-interface-and-intial-values/app-state';
+} from '@/core/stores/states/map-state';
+import { getStoreDataTableSelectedLayerPath } from '@/core/stores/states/data-table-state';
+import { getStoreUIActiveAppBarTab, getStoreUIActiveFooterBarTab } from '@/core/stores/states/ui-state';
+import { getStoreAppDisplayTheme, getStoreAppIsCrosshairsActive } from '@/core/stores/states/app-state';
 import {
   getStoreLayerHighlightedLayer,
   getStoreLayerHoverable,
@@ -81,19 +81,19 @@ import {
   getStoreLayerOrderedLayerPaths,
   getStoreLayerQueryable,
   getStoreLayerSelectedLayerPath,
-} from '@/core/stores/store-interface-and-intial-values/layer-state';
+} from '@/core/stores/states/layer-state';
 import {
   getStoreTimeSliderLayers,
   getStoreTimeSliderSelectedLayerPath,
   isStoreTimeSliderInitialized,
   type TypeTimeSliderProps,
-} from '@/core/stores/store-interface-and-intial-values/time-slider-state';
+} from '@/core/stores/states/time-slider-state';
 import {
   updateStoreCoordinateInfoLayer,
   getStoreDetailsCoordinateInfoEnabled,
   setStoreDetailsCoordinateInfoEnabled,
   LAYER_PATH_COORDINATE_INFO,
-} from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+} from '@/core/stores/states/feature-info-state';
 import { DEFAULT_OL_FITOPTIONS, OL_ZOOM_DURATION, OL_ZOOM_PADDING, TIMEOUT } from '@/core/utils/constant';
 import { DateMgt, type TimeDimension } from '@/core/utils/date-mgt';
 import { delay, doTimeout, isValidUUID } from '@/core/utils/utilities';

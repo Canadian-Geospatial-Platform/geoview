@@ -15,7 +15,7 @@ import {
   setStoreDataTableSelectedFeature,
   setStoreDataTableSelectedLayerPath,
   type TypeColumnFiltersState,
-} from '@/core/stores/store-interface-and-intial-values/data-table-state';
+} from '@/core/stores/states/data-table-state';
 import type { MapViewer } from '@/geo/map/map-viewer';
 
 /**

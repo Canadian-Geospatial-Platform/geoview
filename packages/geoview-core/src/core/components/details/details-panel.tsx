@@ -13,8 +13,8 @@ import {
   useStoreDetailsLayerDataArrayBatch,
   useStoreDetailsSelectedLayerPath,
   LAYER_PATH_COORDINATE_INFO,
-} from '@/core/stores/store-interface-and-intial-values/feature-info-state';
-import { useStoreUIActiveAppBarTab, useStoreUIActiveFooterBarTab } from '@/core/stores/store-interface-and-intial-values/ui-state';
+} from '@/core/stores/states/feature-info-state';
+import { useStoreUIActiveAppBarTab, useStoreUIActiveFooterBarTab } from '@/core/stores/states/ui-state';
 import {
   useStoreLayerNameSet,
   useStoreLayerStatusSet,
@@ -23,9 +23,9 @@ import {
   useStoreLayerIsParentHiddenOnMapSet,
   useStoreLayerAllVisibleAndInRangeLayers,
   useStoreLayerOrderedLayerPaths,
-} from '@/core/stores/store-interface-and-intial-values/layer-state';
+} from '@/core/stores/states/layer-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
-import { useStoreMapClickCoordinates } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useStoreMapClickCoordinates } from '@/core/stores/states/map-state';
 import type { TypeFeatureInfoEntry, TypeLayerData, TypeMapMouseInfo, TypeQueryStatus } from '@/api/types/map-schema-types';
 
 import type { LayerListEntry, LayoutExposedMethods } from '@/core/components/common';

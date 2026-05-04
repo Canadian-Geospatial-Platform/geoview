@@ -11,7 +11,7 @@ import { ResponsiveGridLayout } from './responsive-grid-layout';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
-import { useStoreLayerName } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useStoreLayerName } from '@/core/stores/states/layer-state';
 
 /** Properties for the Layout component. */
 interface LayoutProps {

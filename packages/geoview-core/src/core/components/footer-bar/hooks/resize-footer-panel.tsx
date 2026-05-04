@@ -7,7 +7,7 @@ import { Box, HeightIcon, IconButton, Popover } from '@/ui';
 import { useUIController } from '@/core/controllers/use-controllers';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { getSxClasses } from './resize-footer-panel-style';
-import { useStoreUIFooterPanelResizeValue } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useStoreUIFooterPanelResizeValue } from '@/core/stores/states/ui-state';
 import { logger } from '@/core/utils/logger';
 
 /** Slider input styles for vertical orientation. */

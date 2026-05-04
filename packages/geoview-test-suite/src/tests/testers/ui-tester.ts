@@ -1,7 +1,7 @@
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
 import { delay } from 'geoview-core/core/utils/utilities';
-import { getStoreAppGeoviewHTMLElement } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
+import { getStoreAppGeoviewHTMLElement } from 'geoview-core/core/stores/states/app-state';
 
 /**
  * Main UI testing class.

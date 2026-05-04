@@ -6,7 +6,7 @@ import { fromUrl } from 'geotiff';
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import { logger } from '@/core/utils/logger';
 import i18n from '@/core/translation/i18n';
-import type { TypeGuideObject } from '@/core/stores/store-interface-and-intial-values/app-state';
+import type { TypeGuideObject } from '@/core/stores/states/app-state';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { ensureServiceRequestUrl } from '@/core/utils/ogc-url-helper';
 import type { TypeHTMLElement } from '@/core/types/global-types';

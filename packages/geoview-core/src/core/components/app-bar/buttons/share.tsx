@@ -9,8 +9,8 @@ import {
   useStoreMapCenterCoordinates,
   useStoreMapCurrentProjection,
   useStoreMapCurrentBasemapOptions,
-} from '@/core/stores/store-interface-and-intial-values/map-state';
-import { useStoreLayerOrderedLayerPaths } from '@/core/stores/store-interface-and-intial-values/layer-state';
+} from '@/core/stores/states/map-state';
+import { useStoreLayerOrderedLayerPaths } from '@/core/stores/states/layer-state';
 import { Projection } from '@/geo/utils/projection';
 
 import type { Coordinate } from 'ol/coordinate';

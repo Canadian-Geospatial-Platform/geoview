@@ -10,7 +10,7 @@ import { Polygon } from 'ol/geom';
 
 import EventHelper, { type EventDelegateBase } from '@/api/events/event-helper';
 import type { LayerBaseEvent } from '@/geo/layer/gv-layers/abstract-base-layer';
-import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import type { TypeLegend } from '@/core/stores/states/layer-state';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { parseXMLToJson } from '@/core/utils/utilities';
 import { GeoUtilities } from '@/geo/utils/utilities';

@@ -5,8 +5,8 @@ import { GVAbstractTester } from './abstract-gv-tester';
 import { delay } from 'geoview-core/core/utils/utilities';
 import type { TypeFeatureInfoEntry } from 'geoview-core/api/types/map-schema-types';
 import { logger } from 'geoview-core/core/utils/logger';
-import { getStoreUIActiveFooterBarTab } from 'geoview-core/core/stores/store-interface-and-intial-values/ui-state';
-import { getStoreLayerItemVisibility } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
+import { getStoreUIActiveFooterBarTab } from 'geoview-core/core/stores/states/ui-state';
+import { getStoreLayerItemVisibility } from 'geoview-core/core/stores/states/layer-state';
 import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
 
 /**

@@ -9,7 +9,7 @@ import {
   useStoreLayerIsHiddenOnMap,
   useStoreLayerSchemaTag,
   useStoreLayerStyleConfig,
-} from '@/core/stores/store-interface-and-intial-values/layer-state';
+} from '@/core/stores/states/layer-state';
 import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';
 import { generateId } from '@/core/utils/utilities';

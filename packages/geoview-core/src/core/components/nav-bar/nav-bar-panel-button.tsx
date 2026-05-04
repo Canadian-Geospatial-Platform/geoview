@@ -5,12 +5,12 @@ import { useTranslation } from 'react-i18next';
 import { getSxClasses } from './nav-bar-style';
 import { Popper, IconButton, DialogTitle, DialogContent, Paper, Box } from '@/ui';
 import { CloseIcon } from '@/ui/icons';
-import { useStoreAppShellContainer } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreAppShellContainer } from '@/core/stores/states/app-state';
 import type { TypeButtonPanel } from '@/ui/panel/panel-types';
 import { logger } from '@/core/utils/logger';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { handleEscapeKey } from '@/core/utils/utilities';
-import { useStoreUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
 
 /** The properties for the navbar panel button. */
 interface NavbarPanelButtonType {

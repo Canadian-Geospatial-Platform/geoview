@@ -14,7 +14,7 @@ import {
   setStoreLegendQueryStatus,
   type LegendQueryStatus,
   type TypeLegend,
-} from '@/core/stores/store-interface-and-intial-values/layer-state';
+} from '@/core/stores/states/layer-state';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import type { LayerDomain } from '@/core/domains/layer-domain';
 import type { StyleChangedDelegate, StyleChangedEvent } from '@/geo/layer/gv-layers/abstract-gv-layer';

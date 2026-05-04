@@ -8,7 +8,7 @@ import {
   useStoreLayerChildPaths,
   useStoreLayerLegendQueryStatus,
   useStoreLayerStatus,
-} from '@/core/stores/store-interface-and-intial-values/layer-state';
+} from '@/core/stores/states/layer-state';
 import { logger } from '@/core/utils/logger';
 
 /** Properties for the IconStack component. */

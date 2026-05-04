@@ -4,21 +4,17 @@ import type { Theme } from '@mui/material/styles';
 import { useTheme } from '@mui/material/styles';
 import { Box, BrowserNotSupportedIcon } from '@/ui';
 
-import {
-  useStoreMapHoverFeatureInfo,
-  useStoreMapIsMouseInsideMap,
-  useStoreMapPointerPosition,
-} from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useStoreMapHoverFeatureInfo, useStoreMapIsMouseInsideMap, useStoreMapPointerPosition } from '@/core/stores/states/map-state';
 import { getSxClasses } from './hover-tooltip-styles';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
-import { useStoreAppDisplayLanguage, useStoreAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreAppDisplayLanguage, useStoreAppGeoviewHTMLElement } from '@/core/stores/states/app-state';
 import { logger } from '@/core/utils/logger';
 import { DateMgt } from '@/core/utils/date-mgt';
 import {
   useStoreLayerDateTemporalModeSet,
   useStoreLayerDisplayDateFormatSet,
   useStoreLayerDisplayDateTimezoneSet,
-} from '@/core/stores/store-interface-and-intial-values/layer-state';
+} from '@/core/stores/states/layer-state';
 
 /**
  * Creates the hover tooltip component.

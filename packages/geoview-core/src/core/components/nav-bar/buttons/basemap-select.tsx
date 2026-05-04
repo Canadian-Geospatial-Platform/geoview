@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { createElement, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useStoreMapHasGeoviewBasemapLayer, useStoreMapBasemapOptions } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useStoreMapHasGeoviewBasemapLayer, useStoreMapBasemapOptions } from '@/core/stores/states/map-state';
 import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from '@/core/components/nav-bar/nav-bar-panel-button';
 import type { TypeBasemapOptions } from '@/api/types/map-schema-types';

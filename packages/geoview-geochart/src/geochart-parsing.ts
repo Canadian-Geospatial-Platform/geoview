@@ -1,9 +1,9 @@
-import type { TypeFeatureInfoEntry, TypeFeatureInfoEntryPartial } from 'geoview-core/api/types/map-schema-types';
 import type { GeoChartDatasource } from 'geochart';
-import type { TypeGeochartResultSetEntry } from 'geoview-core/core/stores/store-interface-and-intial-values/geochart-state';
+import type { TypeFeatureInfoEntry, TypeFeatureInfoEntryPartial } from 'geoview-core/api/types/map-schema-types';
 import type { ConfigBaseClass } from 'geoview-core/api/config/validation-classes/config-base-class';
-import type { PluginGeoChartConfig, GeoViewGeoChartConfig, GeoViewGeoChartConfigLayer } from './geochart-types';
+import type { TypeGeochartResultSetEntry } from 'geoview-core/core/stores/states/geochart-state';
 import { deepClone } from 'geoview-core/core/utils/utilities';
+import type { PluginGeoChartConfig, GeoViewGeoChartConfig, GeoViewGeoChartConfigLayer } from './geochart-types';
 
 export class GeoChartParsing {
   /**

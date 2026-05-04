@@ -9,7 +9,7 @@ import { ScopedCssBaseline } from '@mui/material';
 import { Shell } from '@/core/containers/shell';
 import { getTheme } from '@/ui/style/theme';
 import { logger } from '@/core/utils/logger';
-import { useStoreAppDisplayThemeById } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreAppDisplayThemeById } from '@/core/stores/states/app-state';
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import { ControllerContext } from '@/core/controllers/base/controller-manager';

@@ -90,10 +90,10 @@ import {
   setStoreMapMoveEnd,
   setStoreMapInteraction,
   type TypeScaleInfo,
-} from '@/core/stores/store-interface-and-intial-values/map-state';
-import { getStoreAppDisplayTheme } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { getStoreLayerOrderedLayerPaths, type TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { TIME_DELAY_BETWEEN_PROPAGATION_FOR_BATCH } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+} from '@/core/stores/states/map-state';
+import { getStoreAppDisplayTheme } from '@/core/stores/states/app-state';
+import { getStoreLayerOrderedLayerPaths, type TypeLegend } from '@/core/stores/states/layer-state';
+import { TIME_DELAY_BETWEEN_PROPAGATION_FOR_BATCH } from '@/core/stores/states/feature-info-state';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
 import { Fetch } from '@/core/utils/fetch-helper';

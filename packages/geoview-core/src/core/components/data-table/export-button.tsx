@@ -10,7 +10,7 @@ import type { MRT_ColumnDef as MRTColumnDef } from 'material-react-table';
 import { IconButton, DownloadIcon, Menu, MenuItem } from '@/ui';
 import { logger } from '@/core/utils/logger';
 import type { DataTableRow } from './data-table-types';
-import { useStoreLayerName } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useStoreLayerName } from '@/core/stores/states/layer-state';
 
 /** Properties for the ExportButton component. */
 interface ExportButtonProps {

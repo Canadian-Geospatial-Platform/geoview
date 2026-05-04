@@ -6,7 +6,7 @@ import {
   useStoreMapFixNorth,
   useStoreMapNorthArrow,
   useStoreMapCurrentProjectionEPSG,
-} from '@/core/stores/store-interface-and-intial-values/map-state';
+} from '@/core/stores/states/map-state';
 import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from '@/core/components/nav-bar/nav-bar-panel-button';
 import { Box, Slider, Switch, Typography } from '@/ui';

@@ -7,7 +7,7 @@ import { MousePosition } from '@/core/components/mouse-position/mouse-position';
 import { Scale } from '@/core/components/scale/scale';
 import { MapInfoExpandButton } from './map-info-expand-button';
 import { MapInfoRotationButton } from './map-info-rotation-button';
-import { useStoreMapInteraction } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useStoreMapInteraction } from '@/core/stores/states/map-state';
 import { logger } from '@/core/utils/logger';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 

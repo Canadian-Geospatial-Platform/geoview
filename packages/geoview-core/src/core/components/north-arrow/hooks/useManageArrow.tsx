@@ -9,7 +9,7 @@ import {
   useStoreMapRotation,
   useStoreMapSize,
   useStoreMapZoom,
-} from '@/core/stores/store-interface-and-intial-values/map-state';
+} from '@/core/stores/states/map-state';
 import { logger } from '@/core/utils/logger';
 import { useMapController } from '@/core/controllers/use-controllers';
 

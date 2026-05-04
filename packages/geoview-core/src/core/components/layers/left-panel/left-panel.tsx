@@ -1,4 +1,4 @@
-import { useStoreLayerDisplayState, useStoreLayerTopLevelLayerPaths } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useStoreLayerDisplayState, useStoreLayerTopLevelLayerPaths } from '@/core/stores/states/layer-state';
 import { LayersList } from './layers-list';
 import { AddNewLayer } from './add-new-layer/add-new-layer';
 import { logger } from '@/core/utils/logger';

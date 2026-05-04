@@ -9,19 +9,15 @@ import { LegendIcon, InfoIcon, LayersIcon, StorageIcon, QuestionMarkIcon } from 
 import { usePluginController, useUIController } from '@/core/controllers/use-controllers';
 import { getSxClasses } from './footer-bar-style';
 import { ResizeFooterPanel } from '@/core/components/footer-bar/hooks/resize-footer-panel';
-import {
-  useStoreAppIsFullscreenActive,
-  useStoreAppHeight,
-  useStoreAppShellContainer,
-} from '@/core/stores/store-interface-and-intial-values/app-state';
-import { useStoreDetailsLayerDataArrayBatch } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import { useStoreAppIsFullscreenActive, useStoreAppHeight, useStoreAppShellContainer } from '@/core/stores/states/app-state';
+import { useStoreDetailsLayerDataArrayBatch } from '@/core/stores/states/feature-info-state';
 import {
   useStoreUIActiveFooterBarTab,
   useStoreUIFooterPanelResizeValue,
   useStoreUIActiveTrapGeoView,
   useStoreUIHiddenTabs,
   useStoreUIFooterTabs,
-} from '@/core/stores/store-interface-and-intial-values/ui-state';
+} from '@/core/stores/states/ui-state';
 import { DEFAULT_FOOTER_TABS_ORDER } from '@/api/types/map-schema-types';
 import { CONTAINER_TYPE, TABS } from '@/core/utils/constant';
 import { useStoreGeoViewConfig, useStoreGeoViewMapId } from '@/core/stores/geoview-store';

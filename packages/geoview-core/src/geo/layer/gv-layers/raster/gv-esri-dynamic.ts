@@ -30,7 +30,7 @@ import { EsriUtilities } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
-import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import type { TypeLegend } from '@/core/stores/states/layer-state';
 import type { TypeEsriImageLayerLegend } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { FetchEsriWorkerPool } from '@/core/workers/fetch-esri-worker-pool';
 import type { QueryParams } from '@/core/workers/fetch-esri-worker-script';

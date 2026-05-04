@@ -8,7 +8,7 @@ import type {
   OgcWmtsLayerEntryConfig,
   TypeMetadataWMTSLayer,
 } from '@/api/config/validation-classes/raster-validation-classes/ogc-wmts-layer-entry-config';
-import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import type { TypeLegend } from '@/core/stores/states/layer-state';
 import { AbstractGVTile } from '@/geo/layer/gv-layers/tile/abstract-gv-tile';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';

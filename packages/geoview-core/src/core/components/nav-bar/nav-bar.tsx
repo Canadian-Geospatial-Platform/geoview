@@ -16,7 +16,7 @@ import { ExpandLessIcon, ExpandMoreIcon } from '@/ui/icons';
 import type { TypeButtonPanel } from '@/ui/panel/panel-types';
 import { getSxClasses } from './nav-bar-style';
 import type { NavBarApi } from '@/core/components';
-import { useStoreUINavbarComponents, useStoreUINavBarButtonPanelVersion } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useStoreUINavbarComponents, useStoreUINavBarButtonPanelVersion } from '@/core/stores/states/ui-state';
 import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from './nav-bar-panel-button';
 

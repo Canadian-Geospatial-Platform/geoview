@@ -18,7 +18,7 @@ import {
   showStoreUITabButton,
   type FocusItemProps,
   type TypeFooterTabEntry,
-} from '@/core/stores/store-interface-and-intial-values/ui-state';
+} from '@/core/stores/states/ui-state';
 import {
   addStoreAppNotification,
   getStoreAppGeoviewAssetsURL,
@@ -31,7 +31,7 @@ import {
   setStoreAppDisplayTheme,
   setStoreAppFullScreenActive,
   setStoreAppGuide,
-} from '@/core/stores/store-interface-and-intial-values/app-state';
+} from '@/core/stores/states/app-state';
 import { DateMgt, type TimeIANA } from '@/core/utils/date-mgt';
 import type { TypeHTMLElement } from '@/core/types/global-types';
 import { formatError } from '@/core/exceptions/core-exceptions';

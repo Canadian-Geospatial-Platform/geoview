@@ -15,13 +15,9 @@ import {
   initDetailsStateSubscriptions,
   type TypeFeatureInfoResultSetEntry,
   type TypeHoverResultSetEntry,
-} from './store-interface-and-intial-values/feature-info-state';
-import type { TypeAllFeatureInfoResultSetEntry } from './store-interface-and-intial-values/data-table-state';
-import {
-  clearGeochartStateSubscriptions,
-  initGeochartStateSubscriptions,
-  type TypeGeochartResultSetEntry,
-} from './store-interface-and-intial-values/geochart-state';
+} from './states/feature-info-state';
+import type { TypeAllFeatureInfoResultSetEntry } from './states/data-table-state';
+import { clearGeochartStateSubscriptions, initGeochartStateSubscriptions, type TypeGeochartResultSetEntry } from './states/geochart-state';
 import { logger } from '../utils/logger';
 
 // GV This file is the equivalent of the controller-manager.ts file, but for the store.

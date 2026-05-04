@@ -1,7 +1,7 @@
 import type { Dispatch, SetStateAction } from 'react';
 import { useEffect, useRef, useState } from 'react';
 
-import { useStoreDataTableLayerSettings } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { useStoreDataTableLayerSettings } from '@/core/stores/states/data-table-state';
 import { useDataTableController } from '@/core/controllers/use-controllers';
 
 /** Properties for the useColumnVisibility hook. */

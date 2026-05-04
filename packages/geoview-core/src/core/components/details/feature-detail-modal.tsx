@@ -2,9 +2,9 @@ import { useMemo, useState } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 
-import { useStoreDataTableSelectedFeature } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { useStoreUIActiveFocusItem, useStoreUIActiveAppBarTab } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { useStoreAppShellContainer } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreDataTableSelectedFeature } from '@/core/stores/states/data-table-state';
+import { useStoreUIActiveFocusItem, useStoreUIActiveAppBarTab } from '@/core/stores/states/ui-state';
+import { useStoreAppShellContainer } from '@/core/stores/states/app-state';
 
 import { Modal, List, Box, Typography, BrowserNotSupportedIcon } from '@/ui';
 

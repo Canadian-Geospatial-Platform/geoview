@@ -8,7 +8,7 @@ import {
   useStoreLayerAllLayersCollapsedToggle,
   useStoreLayerAreLayersLoading,
   useStoreLayerHasCollapsibleLayersToggle,
-} from '@/core/stores/store-interface-and-intial-values/layer-state';
+} from '@/core/stores/states/layer-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 
