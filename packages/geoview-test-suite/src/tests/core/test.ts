@@ -176,7 +176,7 @@ export class Test<T = unknown> {
    * @param level - The step level
    * @param color - The step color for display purposes
    */
-  addStep(step: string, level: TestStepLevel = 'regular', color: string = 'black'): void {
+  addStep(step: string, level: TestStepLevel = 'regular', color = 'black'): void {
     this.#steps.push(new TestStep(step, level, color));
     this.#emitStepChanged({ step });
   }
@@ -346,7 +346,7 @@ export class Test<T = unknown> {
    * @param message - Custom message explaining why the test is being manually failed
    * @throws {AssertionManualFailError} When invoked (always throws to fail the test)
    */
-  static assertFail(message: string = 'Test manually failed'): never {
+  static assertFail(message = 'Test manually failed'): never {
     // Throw the manual fail error
     throw new AssertionManualFailError(message);
   }

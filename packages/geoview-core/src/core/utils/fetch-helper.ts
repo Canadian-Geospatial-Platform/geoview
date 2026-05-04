@@ -530,7 +530,7 @@ export abstract class Fetch {
    *     body: JSON.stringify({ id: 123 })
    *   }, 3000);
    */
-  static fetchWithTimeout<T>(url: string, init?: RequestInit, timeoutMs: number = 7000): Promise<T> {
+  static fetchWithTimeout<T>(url: string, init?: RequestInit, timeoutMs = 7000): Promise<T> {
     // Redirect
     return Fetch.fetchJson<T>(url, init, timeoutMs);
   }
@@ -561,7 +561,7 @@ export abstract class Fetch {
    * @returns An object describing whether the response is valid, and if not, includes error details
    */
   static checkResponseForEmbeddedErrors(content: unknown): VerifiedResponse {
-    let valid: boolean = true;
+    let valid = true;
     let code: number | undefined;
     let message: string | undefined;
     let details: string[] | undefined;

@@ -471,7 +471,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    * @returns The data access path
    * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called
    */
-  getDataAccessPath(endsWithSlash: boolean = false): string {
+  getDataAccessPath(endsWithSlash = false): string {
     // Read the data access path
     let { dataAccessPath } = this.getSource();
 

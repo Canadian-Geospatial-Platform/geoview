@@ -89,7 +89,7 @@ export function GuideSearch({ containerType, guide, onSectionChange, onSearchSta
    * @returns Regex pattern for proximity search
    */
   const createProximitySearchPattern = useCallback(
-    (term: string, maxWords: number = 5): RegExp => {
+    (term: string, maxWords = 5): RegExp => {
       // Normalize accents in the search term
       const normalizedTerm = normalizeAccents(term);
 

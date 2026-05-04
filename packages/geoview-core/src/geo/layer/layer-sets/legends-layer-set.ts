@@ -161,7 +161,7 @@ export class LegendsLayerSet extends AbstractLayerSet {
    * @param layerPath - The layer path to query the legend for
    * @param forced - Whether to force the query even if already queried
    */
-  queryLegend(layer: AbstractBaseGVLayer, forced: boolean = false): void {
+  queryLegend(layer: AbstractBaseGVLayer, forced = false): void {
     // Trigger the check/query process
     this.#checkQueryLegend(layer, forced);
   }

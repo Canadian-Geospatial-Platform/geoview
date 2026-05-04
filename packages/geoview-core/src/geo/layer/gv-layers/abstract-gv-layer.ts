@@ -58,10 +58,10 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   static readonly DEFAULT_LOADING_PERIOD: number = 8 * 1000; // 8 seconds
 
   /** Counts the number of times the loading happened. */
-  loadingCounter: number = 0;
+  loadingCounter = 0;
 
   /** Marks the latest loading count for the layer. Useful to know when to put the layer loaded status back correctly with parallel processing happening. */
-  loadingMarker: number = 0;
+  loadingMarker = 0;
 
   /** The OpenLayer source */
   #olSource: Source;
@@ -384,7 +384,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   protected getFeatureInfoAtPixel(
     map: OLMap,
     location: Pixel,
-    queryGeometry: boolean = true,
+    queryGeometry = true,
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoResult> {
     // Redirect to getFeatureInfoAtCoordinate
@@ -405,7 +405,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     map: OLMap,
     location: Coordinate,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    queryGeometry: boolean = true,
+    queryGeometry = true,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoResult> {
@@ -427,7 +427,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     map: OLMap,
     lonlat: Coordinate,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    queryGeometry: boolean = true,
+    queryGeometry = true,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoResult> {
@@ -449,7 +449,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     map: OLMap,
     location: Coordinate[],
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    queryGeometry: boolean = true,
+    queryGeometry = true,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoResult> {
@@ -471,7 +471,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     map: OLMap,
     location: Coordinate[],
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    queryGeometry: boolean = true,
+    queryGeometry = true,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoResult> {
@@ -861,7 +861,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     map: OLMap,
     queryType: QueryType,
     location: TypeLocation,
-    queryGeometry: boolean = true,
+    queryGeometry = true,
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoResult> {
     // Log
@@ -1006,7 +1006,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param timeout - A timeout for the period to wait for. Defaults to 30,000 ms
    * @returns A promise that resolves when the layer has been loaded at least once
    */
-  waitLoadedOnce(timeout: number = 30000): Promise<boolean> {
+  waitLoadedOnce(timeout = 30000): Promise<boolean> {
     // Create a promise and wait until the layer is first loaded
     return whenThisThen(() => {
       // If the layer is in error, abort the waiting
@@ -1026,7 +1026,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param timeout - A timeout for the period to wait for. Defaults to 30,000 ms
    * @returns A promise that resolves when the layer has been loaded at least once
    */
-  waitLoadedStatus(timeout: number = 30000): Promise<boolean> {
+  waitLoadedStatus(timeout = 30000): Promise<boolean> {
     // Create a promise and wait until the layer is first loaded
     return whenThisThen(() => {
       // If the layer is in error, abort the waiting
@@ -1046,7 +1046,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param timeout - A timeout for the period to wait for. Defaults to 30,000 ms
    * @returns A promise that resolves when the layer legend has been fetched
    */
-  waitLegendFetched(timeout: number = 30000): Promise<TypeLegend> {
+  waitLegendFetched(timeout = 30000): Promise<TypeLegend> {
     // Create a promise and wait until the layer is first loaded
     return whenThisThen(() => {
       // If the layer is in error, abort the waiting
@@ -1066,7 +1066,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param timeout - A timeout for the period to wait for. Defaults to 30,000 ms
    * @returns A promise that resolves when the layer style has been applied
    */
-  waitStyleApplied(timeout: number = 30000): Promise<TypeLayerStyleConfig> {
+  waitStyleApplied(timeout = 30000): Promise<TypeLayerStyleConfig> {
     // Create a promise and wait until the layer is first loaded
     return whenThisThen(() => {
       // If the layer is in error, abort the waiting
@@ -1147,7 +1147,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     messageKey: string,
     messageParams: Record<string, unknown> | undefined,
     messageType: SnackbarType = 'info',
-    notification: boolean = false
+    notification = false
   ): void {
     this.#emitLayerMessage({ messageKey, messageParams, messageType, notification });
   }

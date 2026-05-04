@@ -95,7 +95,7 @@ export abstract class GeoviewRenderer {
    * @param increment - Optional true, if we want to skip to next color
    * @returns The current default color string
    */
-  static getDefaultColor(alpha: number, increment: boolean = false): string {
+  static getDefaultColor(alpha: number, increment = false): string {
     // get color then increment if needed
     const color = asString(setAlphaColor(asArray(defaultColor[colorCount]), alpha));
     if (increment) colorCount++;

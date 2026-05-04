@@ -585,7 +585,7 @@ export class GVEsriImage extends AbstractGVRaster {
    * @param size - The size of the preview image (width and height)
    * @returns A map of raster function names to their preview image promises
    */
-  getRasterFunctionPreviews(size: number = 400): Map<string, Promise<string>> {
+  getRasterFunctionPreviews(size = 400): Map<string, Promise<string>> {
     const promises = new Map<string, Promise<string>>();
     const rasterFunctionInfos = this.getMetadataRasterFunctionInfos();
     const layerConfig = this.getLayerConfig();

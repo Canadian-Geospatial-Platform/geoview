@@ -199,7 +199,7 @@ export function SingleLayer({
    * @param openPanel - Whether to open the details panel (default: true)
    */
   const selectLayerIfNeeded = useCallback(
-    (openPanel: boolean = true): void => {
+    (openPanel = true): void => {
       if (!layerIsSelected && ['processed', 'loaded'].includes(layerStatus!)) {
         layerController.setSelectedLayerPath(layerPath);
         if (openPanel) {

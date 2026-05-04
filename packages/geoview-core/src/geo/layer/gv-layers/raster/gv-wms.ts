@@ -229,7 +229,7 @@ export class GVWMS extends AbstractGVRaster {
   protected override getFeatureInfoAtCoordinate(
     map: OLMap,
     location: Coordinate,
-    queryGeometry: boolean = true,
+    queryGeometry = true,
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoResult> {
     // Transform coordinate from map projection to lntlat
@@ -253,7 +253,7 @@ export class GVWMS extends AbstractGVRaster {
     map: OLMap,
     lonlat: Coordinate,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    queryGeometry: boolean = true,
+    queryGeometry = true,
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoResult> {
     // The FeatureInfoResult object that will be returned
@@ -1173,7 +1173,7 @@ export class GVWMS extends AbstractGVRaster {
     abortController: AbortController | undefined = undefined
   ): Promise<Record<string, unknown>> {
     // The info format
-    const infoFormat: string = 'text/xml';
+    const infoFormat = 'text/xml';
 
     // Try to get the information using xml format
     const responseData = await GVWMS.#readFeatureInfo(
@@ -1253,7 +1253,7 @@ export class GVWMS extends AbstractGVRaster {
     abortController: AbortController | undefined = undefined
   ): Promise<Record<string, unknown>> {
     // The info format
-    const infoFormat: string = 'text/html';
+    const infoFormat = 'text/html';
 
     // Try to get the information using html format
     const responseData = await GVWMS.#readFeatureInfo(
@@ -1561,7 +1561,7 @@ export class GVWMS extends AbstractGVRaster {
    * @param pixelTolerance - number of screen pixels (like ArcGIS Identify)
    * @returns The buffered polygon
    */
-  static #buildBufferPolygon(clickCoordinate: Coordinate, srsName: string, resolution: number, pixelTolerance: number = 10): Polygon {
+  static #buildBufferPolygon(clickCoordinate: Coordinate, srsName: string, resolution: number, pixelTolerance = 10): Polygon {
     // The buffer radius
     const bufferRadius = resolution * (pixelTolerance / 2); // buffer in map units
 

@@ -357,7 +357,7 @@ export class OLTransform extends OLPointer {
    * @param feature - The feature to select
    * @param clearHistory - Whether to clear the history
    */
-  selectFeature(feature: Feature<Geometry>, clearHistory: boolean = true): void {
+  selectFeature(feature: Feature<Geometry>, clearHistory = true): void {
     const previousFeature = this.selectedFeature;
 
     // Hide any existing text editor
@@ -427,7 +427,7 @@ export class OLTransform extends OLPointer {
    *
    * @param keepHistory - Whether the history should be kept when clearing the selection
    */
-  clearSelection(keepHistory: boolean = false): void {
+  clearSelection(keepHistory = false): void {
     if (this.onSelectionChange) {
       this.onSelectionChange(new TransformSelectionEvent('selectionchange', this.selectedFeature, undefined, keepHistory));
     }
@@ -1045,7 +1045,7 @@ export class OLTransform extends OLPointer {
    * @param handleType - The type of handle being dragged
    * @param ctrlKey - If the ctrlKey is being pressed to maintain the ratio
    */
-  handleScale(coordinate: Coordinate, handleType: HandleType, ctrlKey: boolean = false): void {
+  handleScale(coordinate: Coordinate, handleType: HandleType, ctrlKey = false): void {
     if (!this.selectedFeature || !this.startGeometry) return;
 
     // Handle text scaling differently

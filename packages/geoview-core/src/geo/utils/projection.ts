@@ -66,7 +66,7 @@ export abstract class Projection {
    * @param stops - Optional number of stops per side used for the transform. The default value is 25
    * @returns The densified extent transformed in the destination projection
    */
-  static transformAndDensifyExtent(extent: Extent, source: OLProjection, destination: OLProjection, stops: number = 25): Coordinate[] {
+  static transformAndDensifyExtent(extent: Extent, source: OLProjection, destination: OLProjection, stops = 25): Coordinate[] {
     const coordinates: number[][] = [];
     const width: number = extent[2] - extent[0];
     const height: number = extent[3] - extent[1];

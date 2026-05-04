@@ -236,7 +236,7 @@ export class LayerFilters {
    * @returns A combined SQL filter string joined with AND, or an empty string
    *   if no valid filters exist
    */
-  static joinWithAnd(filters: (string | undefined)[], extraSpacing: string = ''): string {
+  static joinWithAnd(filters: (string | undefined)[], extraSpacing = ''): string {
     const valid = filters.filter((f): f is string => !!f && f.trim().length > 0);
     return valid.length <= 1 ? (valid[0] ?? '') : valid.map((f) => `(${extraSpacing}${f}${extraSpacing})`).join(' AND ');
   }

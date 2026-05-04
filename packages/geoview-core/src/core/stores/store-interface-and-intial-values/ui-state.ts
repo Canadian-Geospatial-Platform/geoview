@@ -388,7 +388,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
        * @param isOpen - Whether the app bar panel should be open
        * @param isFocusTrapped - Optional whether focus should be trapped in the panel
        */
-      setActiveAppBarTab: (tabId: string | undefined, isOpen: boolean, isFocusTrapped: boolean = false): void => {
+      setActiveAppBarTab: (tabId: string | undefined, isOpen: boolean, isFocusTrapped = false): void => {
         // Gv Side effect with focus trap and side panel app bar open
         // We need to check if the viewer is in keyboard navigation mode. If not, we don't apply the focus trap.
         // Focus trap has side effect when a app bar panel is open. It does not let user use their mouse

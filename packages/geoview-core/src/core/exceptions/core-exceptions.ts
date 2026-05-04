@@ -27,7 +27,7 @@ export class NotImplementedError extends Error {
    *
    * @param message - Optional error message
    */
-  constructor(message: string = 'This method is not implemented.') {
+  constructor(message = 'This method is not implemented.') {
     // Call the base Error constructor with the provided message
     super(message);
 
@@ -56,7 +56,7 @@ export class NotSupportedError extends Error {
    *
    * @param message - Optional error message
    */
-  constructor(message: string = 'This operation is not supported.') {
+  constructor(message = 'This operation is not supported.') {
     super(message);
 
     this.name = 'NotSupportedError';
@@ -83,7 +83,7 @@ export class CancelledError extends Error {
    *
    * @param message - A custom error message explaining the cancellation
    */
-  constructor(message: string = 'This has been cancelled.') {
+  constructor(message = 'This has been cancelled.') {
     // Call the base Error constructor with the provided message
     super(message);
 
@@ -293,7 +293,7 @@ export class ResponseEmptyError extends Error {
    *
    * @param message - Optional error message
    */
-  constructor(message: string = 'Empty response.') {
+  constructor(message = 'Empty response.') {
     // Pass the provided message (or default message) to the parent Error class
     super(message);
 
@@ -324,7 +324,7 @@ export class ResponseContentError extends Error {
    *
    * @param message - Optional error message
    */
-  constructor(message: string = 'Response contained an error in its content.') {
+  constructor(message = 'Response contained an error in its content.') {
     // Pass the provided message (or default message) to the parent Error class
     super(message);
 

@@ -707,7 +707,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
    * @param layerConfig - The layer entry config to unregister
    * @param unregisterOrderedLayer - Should it be unregistered from orderedLayers
    */
-  #unregisterLayerConfig(layerConfig: ConfigBaseClass, unregisterOrderedLayer: boolean = true): void {
+  #unregisterLayerConfig(layerConfig: ConfigBaseClass, unregisterOrderedLayer = true): void {
     // Unregister from ordered layers
     if (unregisterOrderedLayer) {
       // Remove from ordered layers

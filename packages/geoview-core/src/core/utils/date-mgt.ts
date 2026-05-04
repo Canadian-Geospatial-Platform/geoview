@@ -334,7 +334,7 @@ export abstract class DateMgt {
    * @param strict - Optional, whether to enforce strict parsing when using custom formats
    * @returns Dayjs instance normalized to UTC using calendar semantics
    */
-  static parseCalendarDate(date: string, inputFormat?: string | string[], strict: boolean = false): Dayjs {
+  static parseCalendarDate(date: string, inputFormat?: string | string[], strict = false): Dayjs {
     let formats = undefined;
     if (inputFormat) {
       formats = this.#buildInputFormats(inputFormat);

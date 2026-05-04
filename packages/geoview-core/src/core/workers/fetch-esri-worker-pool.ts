@@ -18,7 +18,7 @@ export class FetchEsriWorkerPool extends AbstractWorkerPool<FetchEsriWorkerType>
    *
    * @param numWorkers - Optional number of workers to create in the pool
    */
-  constructor(numWorkers: number = 2) {
+  constructor(numWorkers = 2) {
     super('FetchEsriWorkerPool', FetchEsriWorker, numWorkers);
     this.#logger.logInfo('Worker pool created', `Number of workers: ${numWorkers}`);
   }

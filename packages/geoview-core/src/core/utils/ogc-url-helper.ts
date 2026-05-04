@@ -15,7 +15,7 @@
  * @param version - The default service version. Pass `''` to omit. Defaults to `'1.3.0'`.
  * @returns The normalized, fully qualified service request URL.
  */
-export function ensureServiceRequestUrl(url: string, service: string, request: string, version: string = '1.3.0'): string {
+export function ensureServiceRequestUrl(url: string, service: string, request: string, version = '1.3.0'): string {
   const parsedUrl = new URL(url, window.location.href); // fallback base if relative
   const params = parsedUrl.searchParams;
 

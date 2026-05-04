@@ -93,7 +93,7 @@ export default function Measurement(): JSX.Element {
    * @returns OpenLayers style function that applies measurement styles
    */
   const createSegmentStyle = useCallback(
-    (includeSegmentLabels: boolean = true): StyleFunction => {
+    (includeSegmentLabels = true): StyleFunction => {
       return (feature: FeatureLike) => {
         const styles: Style[] = [];
         const geometry = feature.getGeometry();

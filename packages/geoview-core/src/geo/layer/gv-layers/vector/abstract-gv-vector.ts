@@ -186,7 +186,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * @param opacity - The opacity value to set.
    * @param emitOpacityChanged - Whether to emit the opacity changed event.
    */
-  protected override onSetOpacity(opacity: number, emitOpacityChanged: boolean = true): void {
+  protected override onSetOpacity(opacity: number, emitOpacityChanged = true): void {
     // Call parent to handle geometry layer
     super.onSetOpacity(opacity, emitOpacityChanged);
 
@@ -200,7 +200,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * @param zIndex - The z-index value to set.
    * @param emitZIndexChanged - Whether to emit the z-index changed event.
    */
-  protected override onSetZIndex(zIndex: number, emitZIndexChanged: boolean = true): void {
+  protected override onSetZIndex(zIndex: number, emitZIndexChanged = true): void {
     // Set z-index for geometry layer
     super.onSetZIndex(zIndex, emitZIndexChanged);
 

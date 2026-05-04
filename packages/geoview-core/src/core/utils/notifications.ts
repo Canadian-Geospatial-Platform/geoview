@@ -316,7 +316,7 @@ export class Notifications {
    * @param withNotification - Optional, indicates if the message should also be added as a notification (default true)
    * @param button - Optional snackbar button
    */
-  showErrorGeneric(withNotification: boolean = true, button: ISnackbarButton = {}): void {
+  showErrorGeneric(withNotification = true, button: ISnackbarButton = {}): void {
     // Redirect
     this.#addSnackbarMessage('error', 'error.generic', {}, withNotification, button);
     if (withNotification) this.addNotificationError('error.generic', {});
