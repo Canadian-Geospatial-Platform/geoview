@@ -22,7 +22,7 @@ export default function Redo(): JSX.Element {
 
   // Get store values
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
   const { t } = useTranslation<string>();
 
   // Store
@@ -42,7 +42,7 @@ export default function Redo(): JSX.Element {
       aria-label={t('drawer.redoTooltip')}
       tooltipPlacement="left"
       onClick={handleRedo}
-      sx={sxClasses.navButton}
+      sx={memoSxClasses.navButton}
       disabled={redoDisabled}
     >
       <RedoIcon />

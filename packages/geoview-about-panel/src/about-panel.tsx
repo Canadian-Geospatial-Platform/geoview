@@ -35,7 +35,7 @@ function MarkdownFromPath(props: TypeMarkdownFromPathProps): JSX.Element {
 
   const theme = ui.useTheme();
   const sxClasses = getSxClasses(theme);
-  const { t } = useTranslation();
+  const { t } = useTranslation<string>();
 
   /**
    * Fetches and loads the markdown content when the path changes.

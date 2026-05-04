@@ -102,9 +102,12 @@ const FeatureHeader = memo(function FeatureHeader({
   onCheckChange,
   onZoomIn,
   onGeochart,
-}: FeatureHeaderProps) {
+}: FeatureHeaderProps): JSX.Element {
+  // Log
+  logger.logTraceRender('components/details/feature-info > FeatureHeader');
+
   // Hooks
-  const { t } = useTranslation();
+  const { t } = useTranslation<string>();
   const theme = useTheme();
   const memoSxClasses = useMemo(() => {
     logger.logTraceUseMemo('FEATURE-INFO - FeatureHeader - memoSxClasses', theme);

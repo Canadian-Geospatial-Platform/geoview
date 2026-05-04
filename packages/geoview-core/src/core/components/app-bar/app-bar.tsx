@@ -77,7 +77,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
   const { api: appBarApi, onScrollShellIntoView } = props;
 
   // Hooks
-  const { t } = useTranslation();
+  const { t } = useTranslation<string>();
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 

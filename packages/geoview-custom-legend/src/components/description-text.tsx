@@ -26,7 +26,7 @@ export function DescriptionText({ description, sxClasses }: DescriptionTextProps
   const { ui } = cgpv;
   const { Box, Typography, KeyboardArrowDownIcon, KeyboardArrowUpIcon, IconButton, Collapse } = ui.elements;
 
-  const { t } = useTranslation();
+  const { t } = useTranslation<string>();
   const [expanded, setExpanded] = useState<boolean>(!description.collapsed);
 
   /**

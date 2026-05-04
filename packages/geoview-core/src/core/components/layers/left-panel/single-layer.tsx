@@ -459,13 +459,13 @@ export function SingleLayer({
     if (parentHidden) return t('layers.parentHidden');
 
     if (layerChildPaths && layerChildPaths.length > 0) {
-      return t('legend.subLayersCount').replace('{count}', layerChildPaths.length.toString());
+      return t('legend.subLayersCount', { count: layerChildPaths.length });
     }
 
     const count = layerItems?.filter((d) => d.isVisible !== false).length || 0;
     const totalCount = layerItems?.length || 0;
 
-    let itemsLengthDesc = t('legend.itemsCount').replace('{count}', count.toString()).replace('{totalCount}', totalCount.toString());
+    let itemsLengthDesc = t('legend.itemsCount', { count, totalCount });
 
     if (totalCount <= 1) {
       itemsLengthDesc = '';

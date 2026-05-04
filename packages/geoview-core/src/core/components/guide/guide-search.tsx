@@ -48,7 +48,7 @@ export function GuideSearch({ containerType, guide, onSectionChange, onSearchSta
   const mapId = useStoreGeoViewMapId();
 
   // Hooks
-  const { t } = useTranslation();
+  const { t } = useTranslation<string>();
   const theme = useTheme();
   const memoSxClasses = useMemo(() => {
     logger.logTraceUseMemo('GUIDE-SEARCH - memoSxClasses', theme);

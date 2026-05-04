@@ -68,7 +68,7 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
 
   const displayLanguage = useStoreAppDisplayLanguage();
   const layerController = useLayerController();
-  const { t } = useTranslation();
+  const { t } = useTranslation<string>();
 
   const [collapsed, setCollapsed] = useState<boolean>(isGroupLayer(item) ? (item.collapsed ?? false) : false);
 

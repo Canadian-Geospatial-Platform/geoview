@@ -88,10 +88,13 @@ export const FeatureItem = memo(function FeatureItem({
   featureInfoItem,
   onInitLightBox,
 }: FeatureItemProps): JSX.Element {
+  // Log
+  logger.logTraceRender('components/details/feature-info-table > FeatureItem');
+
   // Hooks
-  const { t } = useTranslation();
+  const { t } = useTranslation<string>();
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   /**
    * Gets the linkify options for converting text URLs into clickable links, memoized to avoid unnecessary recalculations.
@@ -113,7 +116,7 @@ export const FeatureItem = memo(function FeatureItem({
 
   if (alias === 'html') {
     return (
-      <Box sx={sxClasses.featureInfoItemValue}>
+      <Box sx={memoSxClasses.featureInfoItemValue}>
         <UseHtmlToReact htmlContent={sanitizeHtmlContent(item)} />
       </Box>
     );
@@ -125,7 +128,7 @@ export const FeatureItem = memo(function FeatureItem({
     return (
       <Button
         type="icon"
-        sx={sxClasses.imageButton}
+        sx={memoSxClasses.imageButton}
         id={buttonElementId}
         onClick={() => onInitLightBox(featureInfoItem.value as string, '', buttonElementId, index)}
         tooltip={t('general.enlargeImage')} // Tooltip for visual users to indicate the image can be enlarged
@@ -136,7 +139,7 @@ export const FeatureItem = memo(function FeatureItem({
         <Box
           src={item}
           component="img"
-          sx={sxClasses.featureInfoItemImage}
+          sx={memoSxClasses.featureInfoItemImage}
           alt="" // WCAG - Using empty alt text for images as descriptive text is not available
         />
       </Button>
@@ -144,7 +147,7 @@ export const FeatureItem = memo(function FeatureItem({
   }
 
   return (
-    <Box sx={sxClasses.featureInfoItemValue}>
+    <Box sx={memoSxClasses.featureInfoItemValue}>
       <UseHtmlToReact
         htmlContent={sanitizeHtmlContent(
           enhanceLinksAccessibility(linkifyHtml(item.toString(), memoLinkifyOptions), t('general.opensInNewTab'))
@@ -172,9 +175,12 @@ export const FeatureRow = memo(function FeatureRow({
   displayDateTimezone,
   containerType,
 }: FeatureRowProps): JSX.Element {
+  // Log
+  logger.logTraceRender('components/details/feature-info-table > FeatureRow');
+
   const mapId = useStoreGeoViewMapId();
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
   const { alias, value } = featureInfoItem;
 
   // Get the original value in an array
@@ -199,13 +205,13 @@ export const FeatureRow = memo(function FeatureRow({
   // Generate stable deterministic IDs for each item: {fieldKey}-{index}
   // Using fieldKey and index ensures IDs remain stable across re-renders
   // Full ID format will be: {mapId}-{containerType}-{elementType}-{fieldKey}-{index}
-  const itemIds = useMemo(
+  const memoItemIds = useMemo(
     () => stringValues.map((_, idx) => `${featureInfoItem.fieldKey}-${idx}`),
     [stringValues, featureInfoItem.fieldKey]
   );
 
   return (
-    <TableRow className="feature-info-row" sx={sxClasses.featureInfoRow}>
+    <TableRow className="feature-info-row" sx={memoSxClasses.featureInfoRow}>
       {featureInfoItem.alias !== 'html' ? (
         <>
           <TableCell component="th" scope="row">
@@ -214,11 +220,11 @@ export const FeatureRow = memo(function FeatureRow({
           <TableCell>
             {stringValues.map((item: string, idx: number) => (
               <FeatureItem
-                key={`${alias}-${itemIds[idx]}`}
+                key={`${alias}-${memoItemIds[idx]}`}
                 item={item}
                 alias={alias}
                 index={idx}
-                uniqueItemId={itemIds[idx]}
+                uniqueItemId={memoItemIds[idx]}
                 mapId={mapId}
                 containerType={containerType}
                 featureInfoItem={featureInfoItem}
@@ -231,11 +237,11 @@ export const FeatureRow = memo(function FeatureRow({
         <TableCell colSpan={2}>
           {stringValues.map((item: string, idx: number) => (
             <FeatureItem
-              key={`${alias}-${itemIds[idx]}`}
+              key={`${alias}-${memoItemIds[idx]}`}
               item={item}
               alias={alias}
               index={idx}
-              uniqueItemId={itemIds[idx]}
+              uniqueItemId={memoItemIds[idx]}
               mapId={mapId}
               containerType={containerType}
               featureInfoItem={featureInfoItem}
@@ -264,9 +270,9 @@ export const FeatureInfoTable = memo(function FeatureInfoTable({
   logger.logTraceRender('components/details/feature-info-table');
 
   // Hooks
-  const { t } = useTranslation();
+  const { t } = useTranslation<string>();
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Store hooks
   const language = useStoreAppDisplayLanguage();
@@ -282,9 +288,9 @@ export const FeatureInfoTable = memo(function FeatureInfoTable({
 
   return (
     <>
-      <TableContainer className="details-feature-info-table" sx={sxClasses.boxContainerFeatureInfo}>
+      <TableContainer className="details-feature-info-table" sx={memoSxClasses.boxContainerFeatureInfo}>
         <Table aria-label={t('details.featureInfoTable')}>
-          <TableHead sx={sxClasses.visuallyHidden}>
+          <TableHead sx={memoSxClasses.visuallyHidden}>
             <TableRow>
               <TableCell component="th" scope="col">
                 {t('details.featureInfoTableField')}

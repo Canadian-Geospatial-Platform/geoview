@@ -22,7 +22,7 @@ export default function Edit(): JSX.Element {
 
   // Get store values
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
   const { t } = useTranslation<string>();
   const isEditing = useStoreDrawerIsEditing();
   const drawerController = useDrawerController();
@@ -41,7 +41,7 @@ export default function Edit(): JSX.Element {
       tooltipPlacement="left"
       className={isEditing ? 'highlighted active' : ''}
       onClick={handleToggleEditing}
-      sx={sxClasses.navButton}
+      sx={memoSxClasses.navButton}
     >
       {isEditing ? <EditOffIcon /> : <EditIcon />}
     </IconButton>

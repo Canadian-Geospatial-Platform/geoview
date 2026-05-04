@@ -94,7 +94,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
 
   // Get store values
   const layerPaths = useStoreSwiperLayerPaths();
-  const { t } = useTranslation();
+  const { t } = useTranslation<string>();
   const visibleLayers = useStoreLayerVisibleLayers();
   const orientation = useStoreSwiperOrientation();
 

@@ -66,7 +66,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   const sliderDeltaRef = useRef<number>();
 
   const displayLanguage = useStoreAppDisplayLanguage();
-  const { t } = useTranslation();
+  const { t } = useTranslation<string>();
 
   const {
     title,

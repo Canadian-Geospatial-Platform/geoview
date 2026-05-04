@@ -48,7 +48,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
 
   // get values from store
   const displayLanguage = useStoreAppDisplayLanguage();
-  const { t } = useTranslation();
+  const { t } = useTranslation<string>();
   const layerHiddenSet = useStoreLayerIsHiddenOnMapSet();
   const visibleInRangeLayers = useStoreLayerAllVisibleAndInRangeLayers();
   const layerNames = useStoreLayerNameSet();

@@ -61,7 +61,7 @@ export function Geolocator(): JSX.Element {
   }, [theme]);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
-  const { t } = useTranslation();
+  const { t } = useTranslation<string>();
 
   // Store
   const mapId = useStoreGeoViewMapId();
@@ -82,7 +82,7 @@ export function Geolocator(): JSX.Element {
   // #region HANDLERS
 
   // Create debounced version of getGeolocations
-  const debouncedRequest = useMemo(() => {
+  const memoDebouncedRequest = useMemo(() => {
     logger.logTraceUseMemo('GEOLOCATOR - debouncedRequest', getGeolocations);
     return debounce((value: string) => {
       if (value.length >= MIN_SEARCH_LENGTH) {
@@ -105,10 +105,10 @@ export function Geolocator(): JSX.Element {
       }
 
       if (value.length >= MIN_SEARCH_LENGTH) {
-        debouncedRequest(value);
+        memoDebouncedRequest(value);
       }
     },
-    [debouncedRequest, resetState, setSearchValue]
+    [memoDebouncedRequest, resetState, setSearchValue]
   );
 
   /**
@@ -116,9 +116,9 @@ export function Geolocator(): JSX.Element {
    */
   const handleSearch = useCallback((): void => {
     if (searchValue.length >= MIN_SEARCH_LENGTH) {
-      debouncedRequest(searchValue);
+      memoDebouncedRequest(searchValue);
     }
-  }, [searchValue, debouncedRequest]);
+  }, [searchValue, memoDebouncedRequest]);
 
   // #endregion HANDLERS
 
@@ -141,9 +141,9 @@ export function Geolocator(): JSX.Element {
     logger.logTraceUseEffect('GEOLOCATOR - cancel debounced request on unmount');
 
     return () => {
-      debouncedRequest.cancel();
+      memoDebouncedRequest.cancel();
     };
-  }, [debouncedRequest]);
+  }, [memoDebouncedRequest]);
 
   /**
    * Focuses the search input when the geolocator opens.

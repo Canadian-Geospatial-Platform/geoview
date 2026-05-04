@@ -21,7 +21,7 @@ export default function Download(): JSX.Element {
 
   // Get store values
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
   const { t } = useTranslation<string>();
   const drawerController = useDrawerController();
 
@@ -38,7 +38,7 @@ export default function Download(): JSX.Element {
       aria-label={t('drawer.downloadTooltip')}
       tooltipPlacement="left"
       onClick={handleDownload}
-      sx={sxClasses.navButton}
+      sx={memoSxClasses.navButton}
     >
       <DownloadIcon />
     </IconButton>

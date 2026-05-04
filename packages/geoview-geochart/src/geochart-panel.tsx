@@ -18,7 +18,6 @@ import {
   useStoreGeochartLayerDataArrayBatch,
   useStoreGeochartSelectedLayerPath,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/geochart-state';
-import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { logger } from 'geoview-core/core/utils/logger';
 import { CONTAINER_TYPE, TABS } from 'geoview-core/core/utils/constant';
@@ -51,8 +50,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
 
   // Get states and actions from store
   const configObj = useStoreGeochartChartsConfig();
-  const displayLanguage = useStoreAppDisplayLanguage();
-  const { t } = useTranslation();
+  const { t } = useTranslation<string>();
   const visibleInRangeLayers = useStoreLayerAllVisibleAndInRangeLayers();
   const mapClickCoordinates = useStoreMapClickCoordinates();
   const layerHiddenSet = useStoreLayerIsHiddenOnMapSet();
@@ -123,7 +121,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
 
       return label;
     },
-    [displayLanguage]
+    [t]
   );
 
   /**

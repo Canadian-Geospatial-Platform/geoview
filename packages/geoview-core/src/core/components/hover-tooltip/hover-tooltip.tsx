@@ -36,7 +36,7 @@ export const HoverTooltip = memo(function HoverTooltip(): JSX.Element | null {
   const theme: Theme & {
     iconImage: React.CSSProperties;
   } = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Refs
   const tooltipRef = useRef<HTMLDivElement>(null);
@@ -138,7 +138,7 @@ export const HoverTooltip = memo(function HoverTooltip(): JSX.Element | null {
   return (
     <Box
       ref={tooltipRef}
-      sx={sxClasses.tooltipItem}
+      sx={memoSxClasses.tooltipItem}
       style={{
         visibility: memoPosition.isValid && memoTooltipContent.isVisible ? 'visible' : 'hidden',
         left: memoPosition.left,
@@ -152,7 +152,7 @@ export const HoverTooltip = memo(function HoverTooltip(): JSX.Element | null {
           <BrowserNotSupportedIcon />
         </Box>
       )}
-      {memoTooltipContent.content.value !== undefined && <Box sx={sxClasses.tooltipText}>{memoTooltipContent.content.value}</Box>}
+      {memoTooltipContent.content.value !== undefined && <Box sx={memoSxClasses.tooltipText}>{memoTooltipContent.content.value}</Box>}
     </Box>
   );
 });

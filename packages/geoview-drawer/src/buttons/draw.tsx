@@ -22,7 +22,7 @@ export default function Draw(): JSX.Element {
 
   // Get store values
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
   const { t } = useTranslation<string>();
   const isDrawing = useStoreDrawerIsDrawing();
   const drawerController = useDrawerController();
@@ -41,7 +41,7 @@ export default function Draw(): JSX.Element {
       tooltipPlacement="left"
       className={isDrawing ? 'highlighted active' : ''}
       onClick={handleDraw}
-      sx={sxClasses.navButton}
+      sx={memoSxClasses.navButton}
     >
       <DrawIcon />
     </IconButton>

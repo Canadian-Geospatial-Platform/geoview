@@ -146,6 +146,15 @@ Use `this.react.createElement` to create React elements without JSX:
 })();
 ```
 
+> **TypeScript Core Packages:** Monorepo TSX plugins (e.g., `geoview-drawer`, `geoview-swiper`) can import `useTranslation` directly:
+>
+> ```typescript
+> import { useTranslation } from "geoview-core/core/translation/i18n";
+> const { t } = useTranslation<string>();
+> ```
+>
+> This avoids using `this.translate` and provides better type safety. See [Core Package Development](./core-packages.md).
+
 ## Loading the Package
 
 ### Step 1: Include the Script

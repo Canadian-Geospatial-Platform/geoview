@@ -34,9 +34,9 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
   logger.logTraceRender('components/geolocator/geolocator-result');
 
   // Hooks
-  const { t } = useTranslation();
+  const { t } = useTranslation<string>();
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Store
   const mapId = useStoreGeoViewMapId();
@@ -114,7 +114,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
     if (!(province.length || category.length)) return null;
 
     return (
-      <List sx={sxClasses.filterListError}>
+      <List sx={memoSxClasses.filterListError}>
         {!!province.length && (
           <ListItem>
             <ListItemText primary={`${t('geolocator.province')}: ${province}`} />
@@ -127,13 +127,13 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
         )}
       </List>
     );
-  }, [province, category, t, sxClasses.filterListError]);
+  }, [province, category, t, memoSxClasses.filterListError]);
 
   return (
     <Paper component="div" elevation={4} square sx={{ width: 350 }}>
       {!error && (
-        <Box sx={sxClasses.filter} className="geolocator-filters" role="group" aria-label={t('geolocator.filtersGroupTitle')}>
-          <Box sx={sxClasses.filterBox}>
+        <Box sx={memoSxClasses.filter} className="geolocator-filters" role="group" aria-label={t('geolocator.filtersGroupTitle')}>
+          <Box sx={memoSxClasses.filterBox}>
             <Select
               labelId={`${mapId}-geolocator-province-filter-label`}
               formControlProps={{ variant: 'standard', size: 'small' }}
@@ -149,7 +149,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
               MenuProps={{ container: shellContainer }}
             />
           </Box>
-          <Box sx={sxClasses.filterBox}>
+          <Box sx={memoSxClasses.filterBox}>
             <Select
               labelId={`${mapId}-geolocator-category-filter-label`}
               id={`${mapId}-geolocator-category-filter`}
@@ -200,7 +200,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
         {!!memoFilteredData.length && (
           <>
             {/* An announcement for screen readers about the number of results found */}
-            <Box className="geolocatorResultsStatus" sx={sxClasses.geolocatorResultsStatus}>
+            <Box className="geolocatorResultsStatus" sx={memoSxClasses.geolocatorResultsStatus}>
               <Typography role="status" aria-live="polite" aria-atomic="true" component="p">
                 {t('geolocator.resultsFound', { count: memoFilteredData.length, searchTerm: searchValue })}
               </Typography>

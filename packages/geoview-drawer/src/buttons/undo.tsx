@@ -22,7 +22,7 @@ export default function Redo(): JSX.Element {
 
   // Get store values
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
   const { t } = useTranslation<string>();
   const drawerController = useDrawerController();
 
@@ -42,7 +42,7 @@ export default function Redo(): JSX.Element {
       aria-label={t('drawer.undoTooltip')}
       tooltipPlacement="left"
       onClick={handleUndo}
-      sx={sxClasses.navButton}
+      sx={memoSxClasses.navButton}
       disabled={undoDisabled}
     >
       <UndoIcon />

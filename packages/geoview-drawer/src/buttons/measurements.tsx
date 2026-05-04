@@ -33,7 +33,7 @@ export default function Measurements(): JSX.Element {
 
   // Get store values
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
   const { t } = useTranslation<string>();
   const hideMeasurements = useStoreDrawerHideMeasurements();
   const drawerController = useDrawerController();
@@ -51,7 +51,7 @@ export default function Measurements(): JSX.Element {
       aria-label={t('drawer.toggleMeasurements')}
       tooltipPlacement="left"
       onClick={handleToggleMeasurements}
-      sx={sxClasses.navButton}
+      sx={memoSxClasses.navButton}
     >
       {!hideMeasurements ? <StraightenIcon /> : <HideMeasurementIcon />}
     </IconButton>

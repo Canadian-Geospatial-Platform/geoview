@@ -87,7 +87,7 @@ export function ExportModal(): JSX.Element {
   logger.logTraceRender('components/export/export-modal');
 
   // Hooks
-  const { t } = useTranslation();
+  const { t } = useTranslation<string>();
   const theme = useTheme();
 
   /**

@@ -21,7 +21,7 @@ export default function Clear(): JSX.Element {
 
   // Get store values
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
   const { t } = useTranslation<string>();
   const drawerController = useDrawerController();
 
@@ -33,7 +33,7 @@ export default function Clear(): JSX.Element {
   };
 
   return (
-    <IconButton id="clear" aria-label={t('drawer.clearTooltip')} tooltipPlacement="left" onClick={handleClear} sx={sxClasses.navButton}>
+    <IconButton id="clear" aria-label={t('drawer.clearTooltip')} tooltipPlacement="left" onClick={handleClear} sx={memoSxClasses.navButton}>
       <DeleteIcon />
     </IconButton>
   );

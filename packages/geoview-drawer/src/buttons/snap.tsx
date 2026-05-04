@@ -33,7 +33,7 @@ export default function Snapping(): JSX.Element {
 
   // Get store values
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
   const { t } = useTranslation<string>();
   const isSnapping = useStoreDrawerIsSnapping();
   const drawerController = useDrawerController();
@@ -52,7 +52,7 @@ export default function Snapping(): JSX.Element {
       tooltipPlacement="left"
       onClick={handleToggleSnapping}
       className={isSnapping ? 'highlighted active' : ''}
-      sx={sxClasses.navButton}
+      sx={memoSxClasses.navButton}
     >
       <SnappingIcon />
     </IconButton>
