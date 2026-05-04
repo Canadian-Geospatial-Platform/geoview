@@ -20,10 +20,9 @@ import Clear from './buttons/clear';
  * Creates all drawer button configurations for the NavBar.
  *
  * @param config - The drawer configuration
- * @param t - The translation function
  * @returns The button configurations for the drawer bar
  */
-export function createDrawerButtons(config: TypeDrawerConfig, t: (key: string) => string): Record<string, TypeNavBarButtonConfig> {
+export function createDrawerButtons(config: TypeDrawerConfig): Record<string, TypeNavBarButtonConfig> {
   const { cgpv } = window as TypeWindow;
   const { createElement } = cgpv.reactUtilities.react;
 
@@ -50,7 +49,7 @@ export function createDrawerButtons(config: TypeDrawerConfig, t: (key: string) =
   buttonConfigs.geometryPicker = {
     buttonProps: {
       id: 'drawer-geometry-picker',
-      'aria-label': t('drawer.geometryPicker'),
+      'aria-label': 'drawer.geometryPicker',
       tooltipPlacement: 'left',
       children: createElement(GeometryPickerButton),
       visible: true,
@@ -69,7 +68,7 @@ export function createDrawerButtons(config: TypeDrawerConfig, t: (key: string) =
   buttonConfigs.style = {
     buttonProps: {
       id: 'drawer-style',
-      'aria-label': t('drawer.style'),
+      'aria-label': 'drawer.style',
       tooltipPlacement: 'left',
       children: createElement(StyleButton),
       visible: true,
@@ -88,7 +87,7 @@ export function createDrawerButtons(config: TypeDrawerConfig, t: (key: string) =
   buttonConfigs.edit = {
     buttonProps: {
       id: 'drawer-edit',
-      'aria-label': t('drawer.edit'),
+      'aria-label': 'drawer.edit',
       tooltipPlacement: 'left',
       children: createElement(Edit),
       visible: true,
@@ -100,7 +99,7 @@ export function createDrawerButtons(config: TypeDrawerConfig, t: (key: string) =
   buttonConfigs.snap = {
     buttonProps: {
       id: 'drawer-snap',
-      'aria-label': t('drawer.toggleSnapping'),
+      'aria-label': 'drawer.toggleSnapping',
       tooltipPlacement: 'left',
       children: createElement(Snapping),
       visible: true,
@@ -112,7 +111,7 @@ export function createDrawerButtons(config: TypeDrawerConfig, t: (key: string) =
   buttonConfigs.measure = {
     buttonProps: {
       id: 'drawer-measure',
-      'aria-label': t('drawer.toggleMeasurements'),
+      'aria-label': 'drawer.toggleMeasurements',
       tooltipPlacement: 'left',
       children: createElement(Measurements),
       visible: true,
@@ -124,7 +123,7 @@ export function createDrawerButtons(config: TypeDrawerConfig, t: (key: string) =
   buttonConfigs.undo = {
     buttonProps: {
       id: 'drawer-undo',
-      'aria-label': t('drawer.undoTooltip'),
+      'aria-label': 'drawer.undoTooltip',
       tooltipPlacement: 'left',
       children: createElement(Undo),
       visible: true,
@@ -136,7 +135,7 @@ export function createDrawerButtons(config: TypeDrawerConfig, t: (key: string) =
   buttonConfigs.redo = {
     buttonProps: {
       id: 'drawer-redo',
-      'aria-label': t('drawer.redoTooltip'),
+      'aria-label': 'drawer.redoTooltip',
       tooltipPlacement: 'left',
       children: createElement(Redo),
       visible: true,
@@ -148,7 +147,7 @@ export function createDrawerButtons(config: TypeDrawerConfig, t: (key: string) =
   buttonConfigs.download = {
     buttonProps: {
       id: 'drawer-download',
-      'aria-label': t('drawer.downloadTooltip'),
+      'aria-label': 'drawer.downloadTooltip',
       tooltipPlacement: 'left',
       children: createElement(Download),
       visible: true,
@@ -160,7 +159,7 @@ export function createDrawerButtons(config: TypeDrawerConfig, t: (key: string) =
   buttonConfigs.upload = {
     buttonProps: {
       id: 'drawer-upload',
-      'aria-label': t('drawer.uploadTooltip'),
+      'aria-label': 'drawer.uploadTooltip',
       tooltipPlacement: 'left',
       children: createElement(Upload),
       visible: true,
@@ -172,7 +171,7 @@ export function createDrawerButtons(config: TypeDrawerConfig, t: (key: string) =
   buttonConfigs.clear = {
     buttonProps: {
       id: 'drawer-clear',
-      'aria-label': t('drawer.clearTooltip'),
+      'aria-label': 'drawer.clearTooltip',
       tooltipPlacement: 'left',
       children: createElement(Clear),
       visible: true,

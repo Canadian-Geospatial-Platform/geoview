@@ -269,7 +269,7 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
    * Builds mobile tab dropdown.
    */
   const memoMobileTabsDropdownValues = useMemo((): TypeMenuItemProps[] => {
-    logger.logTraceUseMemo('UI.TABS - memoMobileTabsDropdownValues', tabs, t);
+    logger.logTraceUseMemo('UI.TABS - memoMobileTabsDropdownValues', tabs);
 
     const newTabs = tabs.map((tab) => ({
       type: 'item',

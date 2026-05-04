@@ -226,7 +226,7 @@ export function StylePanel(): JSX.Element {
 
   // Add close button to MUIColorInputs
   useEffect(() => {
-    logger.logTraceUseEffect('STYLE PANEL - Color picker close button setup', t);
+    logger.logTraceUseEffect('STYLE PANEL - Color picker close button setup');
 
     const addCloseButtons = (): void => {
       // Find all color picker popovers

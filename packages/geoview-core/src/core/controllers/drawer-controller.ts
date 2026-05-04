@@ -1263,6 +1263,9 @@ export class DrawerController extends AbstractMapViewerController {
     // Check if state exist and if draw instance is enable, solve error when switch lang and no draw instance
     if (!isStoreDrawerInitialized(mapId)) return [];
 
+    // Check if the geometry group exists (it may have been destroyed during language switch/map reload)
+    if (!this.getGeometryApi().hasGeometryGroup(DrawerController.DRAW_GROUP_KEY)) return [];
+
     // Get features from drawing group
     const geometryGroup = this.getGeometryApi().getGeometryGroup(DrawerController.DRAW_GROUP_KEY);
     const features = geometryGroup?.vectorSource.getFeatures();
