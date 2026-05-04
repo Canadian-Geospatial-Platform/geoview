@@ -211,7 +211,7 @@ export function NavBar(props: NavBarProps): JSX.Element {
           <IconButton
             key={buttonPanel.button.id}
             id={buttonPanel.button.id}
-            aria-label={t(buttonPanel.button['aria-label'] as string)}
+            aria-label={t(buttonPanel.button['aria-label'])}
             tooltip={buttonPanel.button.tooltip}
             tooltipPlacement={buttonPanel.button.tooltipPlacement}
             sx={memoSxClasses.navButton}
