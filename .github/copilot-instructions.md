@@ -203,15 +203,15 @@ let isActive: boolean = false;
 const count: number = 0;
 function reset(force: boolean = true): void {}
 
-// ✅ Good: Let TypeScript infer from literals
+// ✅ Good: Let TypeScript infer from literals and function return types
 const name = "default";
 let isActive = false;
 const count = 0;
+const zoom = getStoreMapZoom(mapId);
 function reset(force = true): void {}
 
-// ✅ Good: Type annotation IS needed when not inferrable from literal
+// ✅ Good: Type annotation IS needed when TypeScript cannot infer
 const layers: string[] = [];
-const zoom: number = getStoreMapZoom(mapId);
 useState<TypeBasemapProps[]>([]);
 ```
 
