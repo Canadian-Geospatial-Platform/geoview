@@ -5,5 +5,5 @@
  *
  * @returns The rotation indicator
  */
-export declare const MapInfoRotationButton: import("react").NamedExoticComponent<object>;
+export declare const MapInfoRotationButton: import("react").MemoExoticComponent<() => JSX.Element>;
 //# sourceMappingURL=map-info-rotation-button.d.ts.map

@@ -1,4 +1,4 @@
-import type { TypeFeatureInfoEntry, TypeLayerData, TypeResultSet, TypeResultSetEntry } from '@/api/types/map-schema-types';
+import type { TypeFeatureInfoEntry, TypeLayerData, TypeQueryStatus, TypeResultSetEntry } from '@/api/types/map-schema-types';
 import { type TypeSetStore, type TypeGetStore } from '@/core/stores/geoview-store';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 /**
@@ -24,21 +24,21 @@ export interface IDataTableState {
     /**
      * Applies default configuration values from the map config to the data table store.
      *
-     * @param geoviewConfig - The map features configuration to extract defaults from.
+     * @param geoviewConfig - The map features configuration to extract defaults from
      */
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
     /** Store actions callable from adaptors. */
     actions: {
-        setActiveLayersData: (layers: TypeLayerData[]) => void;
         setAllFeaturesDataArray: (allFeaturesDataArray: TypeAllFeatureInfoResultSetEntry[]) => void;
-        setColumnFiltersEntry: (filtered: TypeColumnFiltersState, layerPath: string) => void;
-        setColumnFilterModesEntry: (filterModes: Record<string, string>, layerPath: string) => void;
+        setColumnFiltersRecord: (filtered: TypeColumnFiltersState, layerPath: string) => void;
+        setColumnFilterModesRecord: (filterModes: Record<string, string>, layerPath: string) => void;
         setColumnsFiltersVisibility: (visible: boolean, layerPath: string) => void;
         setInitiallayerDataTableSetting: (layerPath: string) => void;
-        setGlobalFilteredEntry: (globalFilterValue: string, layerPath: string) => void;
-        setMapFilteredEntry: (mapFiltered: boolean, layerPath: string) => void;
+        setColumnVisibilityRecord: (columnVisibility: Record<string, boolean>, layerPath: string) => void;
+        setGlobalFilterRecord: (globalFilterValue: string, layerPath: string) => void;
+        setMapFilteredRecord: (mapFiltered: boolean, layerPath: string) => void;
         setFilterDataToExtent: (filterDataToExtent: boolean, layerPath: string) => void;
-        setRowsFilteredEntry: (rows: number, layerPath: string) => void;
+        setRowsFilteredRecord: (rows: number, layerPath: string) => void;
         setSelectedFeature: (feature: TypeFeatureInfoEntry) => void;
         setSelectedLayerPath: (layerPath: string) => void;
         setTableFilters(newTableFilters: Record<string, string>): void;
@@ -67,19 +67,19 @@ export declare const useStoreDataTableFilters: () => Record<string, string>;
  * @param layerPath - The path of the layer
  * @returns The data table filter(s) for the layer
  */
-export declare const getStoreTableFilter: (mapId: string, layerPath: string) => string | undefined;
+export declare const getStoreDataTableFilter: (mapId: string, layerPath: string) => string | undefined;
 /**
  * Hook that returns the table filter for a specific layer.
  *
- * @param layerPath - The layer path to get the filter for.
- * @returns The filter string for the layer, or undefined if not set.
+ * @param layerPath - The layer path to get the filter for
+ * @returns The filter string for the layer, or undefined if not set
  */
-export declare const useStoreTableFilter: (layerPath: string) => string | undefined;
+export declare const useStoreDataTableFilter: (layerPath: string) => string | undefined;
 /**
  * Gets the selected data table layer path for the given map.
  *
- * @param mapId - The map identifier.
- * @returns The selected layer path, or an empty string if none is selected.
+ * @param mapId - The map identifier
+ * @returns The selected layer path, or an empty string if none is selected
  */
 export declare const getStoreDataTableSelectedLayerPath: (mapId: string) => string;
 /** Hook that returns the currently selected data table layer path. */
@@ -87,20 +87,45 @@ export declare const useStoreDataTableSelectedLayerPath: () => string;
 /**
  * Gets the aggregated feature info array for all layers in the data table.
  *
- * @param mapId - The map identifier.
- * @returns The array of feature info result set entries.
+ * @param mapId - The map identifier
+ * @returns The array of feature info result set entries
  */
 export declare const getStoreDataTableAllFeaturesDataArray: (mapId: string) => TypeAllFeatureInfoResultSetEntry[];
 /** Hook that returns the aggregated feature info result set entries for all layers. */
 export declare const useStoreDataTableAllFeaturesDataArray: () => TypeAllFeatureInfoResultSetEntry[];
 /**
+ * Gets the aggregated query status for the given layer path.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to get the query status for
+ * @returns The query status for the layer, or undefined if the layer is not found
+ */
+export declare const getStoreDataTableQueryStatus: (mapId: string, layerPath: string) => TypeQueryStatus | undefined;
+/**
+ * Hook that returns the query status for a specific layer in the data table.
+ *
+ * @param layerPath - The layer path to get the query status for
+ * @returns The query status for the layer, or undefined if the layer is not found
+ */
+export declare const useStoreDataTableQueryStatus: (layerPath: string) => TypeQueryStatus | undefined;
+/** Hook that returns the per-layer query status record. */
+export declare const useStoreDataTableQueryStatusSet: () => Record<string, TypeQueryStatus>;
+/**
+ * Gets the feature info entries for a specific layer from the data table store.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to retrieve features for
+ * @returns The feature info entries for the layer, or undefined if not found
+ */
+export declare const getStoreDataTableFeaturesByPath: (mapId: string, layerPath: string) => TypeFeatureInfoEntry[] | undefined;
+/**
  * Gets whether the data table is filtered to the current map extent for a specific layer.
  *
- * @param mapId - The map identifier.
- * @param layerPath - The layer path to check.
- * @returns True if map extent filtering is enabled, or undefined if the layer has no settings.
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to check
+ * @returns True if map extent filtering is enabled, or undefined if the layer has no settings
  */
-export declare const getStoreMapFilteredRecord: (mapId: string, layerPath: string) => boolean | undefined;
+export declare const getStoreDataTableMapFilteredRecord: (mapId: string, layerPath: string) => boolean | undefined;
 /** Hook that returns the per-layer data table settings record. */
 export declare const useStoreDataTableLayerSettings: () => Record<string, IDataTableSettings>;
 /** Hook that returns the currently selected feature in the data table. */
@@ -108,116 +133,119 @@ export declare const useStoreDataTableSelectedFeature: () => TypeFeatureInfoEntr
 /**
  * Gets whether the data table is filtered to the current map extent for a specific layer.
  *
- * @param mapId - The map identifier.
- * @param layerPath - The layer path to check.
- * @returns True if map extent filtering is enabled, or undefined if the layer has no settings.
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to check
+ * @returns True if map extent filtering is enabled, or undefined if the layer has no settings
  */
 export declare const getStoreDataTableFilterDataToExtent: (mapId: string, layerPath: string) => boolean | undefined;
 /**
  * Initializes default data table settings for a layer in the store.
  *
- * @param mapId - The map identifier.
- * @param layerPath - The layer path to initialize settings for.
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to initialize settings for
  */
-export declare const setStoreInitialSettings: (mapId: string, layerPath: string) => void;
+export declare const setStoreDataTableInitialSettings: (mapId: string, layerPath: string) => void;
 /**
  * Sets the selected data table layer path in the store.
  *
- * @param mapId - The map identifier.
- * @param layerPath - The layer path to select.
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to select
  */
-export declare const setStoreSelectedLayerPath: (mapId: string, layerPath: string) => void;
+export declare const setStoreDataTableSelectedLayerPath: (mapId: string, layerPath: string) => void;
 /**
  * Sets the selected feature in the data table store.
  *
- * @param mapId - The map identifier.
- * @param feature - The feature entry to select.
+ * @param mapId - The map identifier
+ * @param feature - The feature entry to select
  */
-export declare const setStoreSelectedFeature: (mapId: string, feature: TypeFeatureInfoEntry) => void;
-/**
- * Sets the active layer data in the data table store.
- *
- * @param mapId - The map identifier.
- * @param activeLayerData - The layer data objects to set as active.
- */
-export declare const setStoreActiveLayersData: (mapId: string, activeLayerData: TypeLayerData[]) => void;
+export declare const setStoreDataTableSelectedFeature: (mapId: string, feature: TypeFeatureInfoEntry) => void;
 /**
  * Sets the column filters for a specific layer in the store.
  *
- * @param mapId - The map identifier.
- * @param filtered - The column filter state to apply.
- * @param layerPath - The target layer path.
+ * @param mapId - The map identifier
+ * @param filtered - The column filter state to apply
+ * @param layerPath - The target layer path
  */
-export declare const setStoreColumnFiltersEntry: (mapId: string, filtered: TypeColumnFiltersState, layerPath: string) => void;
+export declare const setStoreDataTableColumnFiltersRecord: (mapId: string, filtered: TypeColumnFiltersState, layerPath: string) => void;
+/**
+ * Sets the column visibility for a specific layer in the store.
+ *
+ * @param mapId - The map identifier
+ * @param columnVisibility - A record mapping column ids to their visibility state
+ * @param layerPath - The target layer path
+ */
+export declare const setStoreDataTableColumnVisibilityRecord: (mapId: string, columnVisibility: Record<string, boolean>, layerPath: string) => void;
 /**
  * Sets the column filter modes for a specific layer in the store.
  *
- * @param mapId - The map identifier.
- * @param filterModes - A record mapping column ids to their filter mode.
- * @param layerPath - The target layer path.
+ * @param mapId - The map identifier
+ * @param filterModes - A record mapping column ids to their filter mode
+ * @param layerPath - The target layer path
  */
-export declare const setStoreColumnFilterModesEntry: (mapId: string, filterModes: Record<string, string>, layerPath: string) => void;
+export declare const setStoreDataTableColumnFilterModesRecord: (mapId: string, filterModes: Record<string, string>, layerPath: string) => void;
 /**
  * Sets the column filters visibility for a specific layer in the store.
  *
- * @param mapId - The map identifier.
- * @param visible - Whether column filters should be visible.
- * @param layerPath - The target layer path.
+ * @param mapId - The map identifier
+ * @param visible - Whether column filters should be visible
+ * @param layerPath - The target layer path
  */
-export declare const setStoreColumnsFiltersVisibility: (mapId: string, visible: boolean, layerPath: string) => void;
+export declare const setStoreDataTableColumnsFiltersVisibility: (mapId: string, visible: boolean, layerPath: string) => void;
 /**
  * Sets the global filter value for a specific layer in the store.
  *
- * @param mapId - The map identifier.
- * @param globalFilterValue - The global filter string.
- * @param layerPath - The target layer path.
+ * @param mapId - The map identifier
+ * @param globalFilterValue - The global filter string
+ * @param layerPath - The target layer path
  */
-export declare const setStoreGlobalFilteredEntry: (mapId: string, globalFilterValue: string, layerPath: string) => void;
+export declare const setStoreDataTableGlobalFilterRecord: (mapId: string, globalFilterValue: string, layerPath: string) => void;
 /**
  * Sets whether the map feature is filtered to the data table filters for a specific layer in the store.
  *
- * @param mapId - The map identifier.
- * @param mapFiltered - Whether map extent filtering is enabled.
- * @param layerPath - The target layer path.
+ * @param mapId - The map identifier
+ * @param mapFiltered - Whether map extent filtering is enabled
+ * @param layerPath - The target layer path
  */
-export declare const setStoreMapFilteredEntry: (mapId: string, mapFiltered: boolean, layerPath: string) => void;
+export declare const setStoreDataTableMapFilteredRecord: (mapId: string, mapFiltered: boolean, layerPath: string) => void;
 /**
  * Sets whether the data table is filtered to the current map extent for a layer in the store.
  *
- * @param mapId - The map identifier.
- * @param filterDataToExtent - Whether filtering data to extent is enabled.
- * @param layerPath - The target layer path.
+ * @param mapId - The map identifier
+ * @param filterDataToExtent - Whether filtering data to extent is enabled
+ * @param layerPath - The target layer path
  */
-export declare const setStoreFilterDataToExtent: (mapId: string, filterDataToExtent: boolean, layerPath: string) => void;
+export declare const setStoreDataTableFilterDataToExtent: (mapId: string, filterDataToExtent: boolean, layerPath: string) => void;
 /**
  * Sets the filtered row count for a specific layer in the store.
  *
- * @param mapId - The map identifier.
- * @param rows - The filtered row count.
- * @param layerPath - The target layer path.
+ * @param mapId - The map identifier
+ * @param rows - The filtered row count
+ * @param layerPath - The target layer path
  */
-export declare const setStoreRowsFilteredEntry: (mapId: string, rows: number, layerPath: string) => void;
+export declare const setStoreDataTableRowsFilteredRecord: (mapId: string, rows: number, layerPath: string) => void;
 /**
  * Adds or updates a table filter for a specific layer in the store.
  *
  * Merges the provided filter with existing filters, overwriting
  * the entry for the given layer path.
  *
- * @param mapId - The map identifier.
- * @param layerPath - The layer path to set the filter for.
- * @param filter - The filter expression string.
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to set the filter for
+ * @param filter - The filter expression string
  */
-export declare const addOrUpdateStoreTableFilter: (mapId: string, layerPath: string, filter: string) => void;
+export declare const addOrUpdateStoreDataTableFilter: (mapId: string, layerPath: string, filter: string) => void;
 /**
  * Propagates a feature info result set entry to the data table store.
  *
- * If an entry for the same layer path does not already exist in the
- * allFeaturesDataArray, it is appended.
+ * If an entry for the same layer path already exists, its queryStatus
+ * and features are updated. Otherwise a new entry is appended.
  *
- * @param mapId - The map identifier.
- * @param resultSetEntry - The feature info result set entry to propagate.
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to propagate data for
+ * @param queryStatus - The current query status
+ * @param features - Optional array of feature info entries for the layer
  */
-export declare const propagateFeatureInfoDataTableToStore: (mapId: string, resultSetEntry: TypeAllFeatureInfoResultSetEntry) => void;
+export declare const setStoreDataTableQueryStatusAndFeatures: (mapId: string, layerPath: string, queryStatus: TypeQueryStatus, features: TypeFeatureInfoEntry[] | undefined) => void;
 /**
  * Removes all feature info for a layer from the data table store.
  *
@@ -225,11 +253,11 @@ export declare const propagateFeatureInfoDataTableToStore: (mapId: string, resul
  * If the resulting array is empty, invokes the provided callback to
  * hide the data table tab.
  *
- * @param mapId - The map identifier.
- * @param layerPath - The layer path whose feature info should be removed.
- * @param callbackWhenEmpty - Callback invoked when no layer data remains.
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path whose feature info should be removed
+ * @param callbackWhenEmpty - Callback invoked when no layer data remains
  */
-export declare const deleteStoreFeatureAllInfo: (mapId: string, layerPath: string, callbackWhenEmpty: () => void) => void;
+export declare const deleteStoreDataTableFeatureAllInfo: (mapId: string, layerPath: string, callbackWhenEmpty: () => void) => void;
 /** An array of column filter entries, mimicking MRTColumnFiltersState from material-react-table. */
 export type TypeColumnFiltersState = ColumnFilter[];
 /**
@@ -265,9 +293,9 @@ export interface IDataTableSettings {
     rowsFilteredRecord: number;
     /** The current global filter string applied across all columns. */
     globalFilterRecord: string;
+    /** A record mapping column ids to their visibility state. */
+    columnVisibilityRecord: Record<string, boolean>;
 }
 /** A feature info result set entry that combines result set entry metadata with layer data. */
 export type TypeAllFeatureInfoResultSetEntry = TypeResultSetEntry & TypeLayerData;
-/** A full result set of feature info entries for all layers. */
-export type TypeAllFeatureInfoResultSet = TypeResultSet<TypeAllFeatureInfoResultSetEntry>;
 //# sourceMappingURL=data-table-state.d.ts.map

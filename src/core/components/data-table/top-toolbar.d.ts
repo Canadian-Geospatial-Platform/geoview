@@ -39,6 +39,5 @@ interface TopToolbarProps<TData extends ColumnsType> {
  * @returns The toolbar element
  */
 declare function TopToolbar(props: TopToolbarProps<ColumnsType>): JSX.Element;
-declare const _default: import("react").MemoExoticComponent<typeof TopToolbar>;
-export default _default;
+export default TopToolbar;
 //# sourceMappingURL=top-toolbar.d.ts.map

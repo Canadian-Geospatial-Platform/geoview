@@ -22,6 +22,6 @@ interface FullScreenDialogProps extends DialogProps {
  * @param props - Fullscreen dialog configuration (see FullScreenDialogProps)
  * @returns Fullscreen dialog component
  */
-export declare const FullScreenDialog: import("react").NamedExoticComponent<FullScreenDialogProps>;
+export declare const FullScreenDialog: import("react").MemoExoticComponent<({ open, onClose, onExited, title, children, ...dialogProps }: FullScreenDialogProps) => JSX.Element>;
 export {};
 //# sourceMappingURL=full-screen-dialog.d.ts.map

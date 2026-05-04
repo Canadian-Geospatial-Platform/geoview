@@ -4,6 +4,7 @@ import type OLMap from 'ol/Map';
 import { OverviewMap as OLOverviewMap } from 'ol/control';
 import type { TypeBasemapOptions, TypeValidMapProjectionCodes, TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import type { TypeBasemapProps, BasemapCreationList } from '@/geo/layer/basemap/basemap-types';
+import type { MapController } from '@/core/controllers/map-controller';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import type { MapViewer } from '@/geo/map/map-viewer';
@@ -18,8 +19,6 @@ export declare class BasemapApi {
     static DEFAULT_WAIT_PERIOD_BASEMAP_WARNING: number;
     /** Indicates if the basemap has been created successfully */
     created: boolean;
-    /** The map viewer */
-    mapViewer: MapViewer;
     /** The active basemap */
     activeBasemap?: TypeBasemapProps;
     /** The default origin */
@@ -38,9 +37,10 @@ export declare class BasemapApi {
      * Initializes the basemap API.
      *
      * @param mapViewer - The map viewer
+     * @param mapController - The map controller
      * @param basemapOptions - The basemap option properties, passed in from map config
      */
-    constructor(mapViewer: MapViewer, basemapOptions: TypeBasemapOptions);
+    constructor(mapViewer: MapViewer, mapController: MapController, basemapOptions: TypeBasemapOptions);
     /** The basemap creation configuration list */
     basemapsList: BasemapCreationList;
     /**
@@ -63,6 +63,12 @@ export declare class BasemapApi {
      * @returns A promise that resolves when the overview map basemap has been created and set
      */
     setOverviewMap(): Promise<void>;
+    /**
+     * Gets the visibility state of the overview map control.
+     *
+     * @returns True if the overview map control is visible, false otherwise
+     */
+    getOverviewMapControlVisibility(): boolean;
     /**
      * Sets the visibility of the overview map control.
      *

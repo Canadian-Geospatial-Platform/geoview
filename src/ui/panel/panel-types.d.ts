@@ -1,27 +1,21 @@
 import type { ReactNode } from 'react';
 import type { TooltipProps, ButtonProps, TextFieldProps } from '@mui/material';
 import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
-/**
- * Interface used to initialize a button panel.
- */
+/** Interface used to initialize a button panel. */
 export type TypeButtonPanelProps = {
     /** Panel properties. */
     panel: TypePanelProps;
     /** Button properties. */
     button: TypeButtonProps;
 };
-/**
- * Configuration for button groups
- */
+/** Configuration for button groups. */
 export type TypeButtonGroupConfig = {
     /** Group name */
     groupName: string;
     /** Threshold for accordion expansion (default: 4) */
     accordionThreshold?: number;
 };
-/**
- * type for the panel properties used when creating a new panel.
- */
+/** Type for the panel properties used when creating a new panel. */
 export type TypePanelProps = {
     /** Panel id. */
     panelId?: string;
@@ -130,8 +124,6 @@ export type TypeButtonPanel = {
     button: IconButtonPropsExtend;
     /** Group name. */
     groupName?: string;
-    /** callback triggered when a panel is fully opened */
-    onOpen?: () => void;
 };
 /**
  * constant that defines the panel types.

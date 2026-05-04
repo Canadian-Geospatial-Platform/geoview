@@ -10,6 +10,6 @@ interface MapInfoProps {
  *
  * @returns The map information bar
  */
-export declare const MapInfo: import("react").NamedExoticComponent<MapInfoProps>;
+export declare const MapInfo: import("react").MemoExoticComponent<({ onScrollShellIntoView }: MapInfoProps) => JSX.Element>;
 export {};
 //# sourceMappingURL=map-info.d.ts.map

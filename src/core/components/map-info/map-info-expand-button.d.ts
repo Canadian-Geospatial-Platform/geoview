@@ -12,6 +12,6 @@ interface MapInfoExpandButtonProps {
  *
  * @returns The expand button
  */
-export declare const MapInfoExpandButton: import("react").NamedExoticComponent<MapInfoExpandButtonProps>;
+export declare const MapInfoExpandButton: import("react").MemoExoticComponent<({ onExpand, expanded }: MapInfoExpandButtonProps) => JSX.Element>;
 export {};
 //# sourceMappingURL=map-info-expand-button.d.ts.map

@@ -12,6 +12,6 @@ interface GuideType {
  * @param props - Properties defined in GuideType interface
  * @returns The guide component
  */
-export declare const Guide: import("react").NamedExoticComponent<GuideType>;
+export declare const Guide: import("react").MemoExoticComponent<({ containerType }: GuideType) => JSX.Element>;
 export {};
 //# sourceMappingURL=guide.d.ts.map

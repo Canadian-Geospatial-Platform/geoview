@@ -1,6 +1,7 @@
 import type { TypeDisplayLanguage, TypeDisplayTheme } from '@/api/types/map-schema-types';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
-import { type FocusItemProps } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
+import { type FocusItemProps, type TypeFooterTabEntry } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { type TimeIANA } from '@/core/utils/date-mgt';
 import type { TypeHTMLElement } from '@/core/types/global-types';
 import type { SnackbarType } from '@/core/utils/notifications';
@@ -18,9 +19,10 @@ export declare class UIController extends AbstractMapViewerController {
      * Creates an instance of UIController.
      *
      * @param mapViewer - The map viewer instance
+     * @param controllerRegistry - The controller registry for accessing sibling controllers
      * @param uiDomain - The UI domain instance
      */
-    constructor(mapViewer: MapViewer, uiDomain: UIDomain);
+    constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry, uiDomain: UIDomain);
     /**
      * Hooks the controller into action.
      */
@@ -48,11 +50,35 @@ export declare class UIController extends AbstractMapViewerController {
      */
     hideTabButton(tab: string): void;
     /**
+     * Adds a tab to the footer bar with the given properties.
+     *
+     * @param tab - The properties of the tab to add
+     */
+    addFooterTab(tab: TypeFooterTabEntry): void;
+    /**
+     * Removes a tab from the footer bar by its identifier.
+     *
+     * @param id - The identifier of the tab to remove
+     */
+    removeFooterTab(id: string): void;
+    /**
      * Sets the active footer bar tab.
      *
      * @param tab - The tab identifier to activate, or undefined to deactivate
      */
     setActiveFooterBarTab(tab: string | undefined): void;
+    /**
+     * Adds an app-bar panel id to the store, which will make the app-bar show the corresponding panel.
+     *
+     * @param id - The id of the panel to be added and shown in the app-bar
+     */
+    addAppBarPanelId(id: string): void;
+    /**
+     * Removes an app-bar panel id from the store, which will make the app-bar hide the corresponding panel.
+     *
+     * @param id - The id of the panel to be removed and hidden in the app-bar
+     */
+    removeAppBarPanelId(id: string): void;
     /**
      * Sets the active app bar tab with its open and focus trap states.
      *
@@ -67,6 +93,14 @@ export declare class UIController extends AbstractMapViewerController {
      * @param isOpen - Whether the footer bar is open
      */
     setFooterBarIsOpen(isOpen: boolean): void;
+    /**
+     * Bumps the nav-bar button panel version to trigger a re-render in the nav-bar component when button panels are
+     * added or removed without necessarily adding or removing a panel id (ex: when all buttons are removed from a panel
+     * but the panel itself is not removed from the store to avoid losing its state).
+     * This is a workaround and eventually the store structure should be refactored to better accommodate button panel
+     * state and avoid this type of workaround.
+     */
+    bumpNavBarButtonPanelVersion(): void;
     /**
      * Enables the focus trap with the given focus item properties.
      *

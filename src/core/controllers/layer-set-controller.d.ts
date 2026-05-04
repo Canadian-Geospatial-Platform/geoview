@@ -1,6 +1,7 @@
 import type { Coordinate } from 'ol/coordinate';
 import type { TypeFeatureInfoResult } from '@/api/types/map-schema-types';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
+import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import type { LayerDomain } from '@/core/domains/layer-domain';
 import { type TypeFeatureInfoResultSet } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { AllFeatureInfoLayerSet } from '@/geo/layer/layer-sets/all-feature-info-layer-set';
@@ -9,7 +10,6 @@ import { LegendsLayerSet } from '@/geo/layer/layer-sets/legends-layer-set';
 import type { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import { FeatureInfoLayerSet } from '@/geo/layer/layer-sets/feature-info-layer-set';
-import { type TypeLegendResultSetEntry } from '@/core/stores/store-interface-and-intial-values/layer-state';
 /**
  * LayerSetController class that extends the AbstractMapViewerController and provides methods to interact with map layers.
  */
@@ -29,9 +29,10 @@ export declare class LayerSetController extends AbstractMapViewerController {
      * Creates an instance of LayerSetController.
      *
      * @param mapViewer - The map viewer instance to associate with this controller
+     * @param controllerRegistry - The controller registry for accessing sibling controllers
      * @param layerDomain - The layer domain instance to associate with this controller
      */
-    constructor(mapViewer: MapViewer, layerDomain: LayerDomain);
+    constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry, layerDomain: LayerDomain);
     /**
      * Hooks the controller into action.
      */
@@ -46,7 +47,7 @@ export declare class LayerSetController extends AbstractMapViewerController {
      * @param layerPath - The layer path to query the features from
      * @returns A promise that resolves with the feature info result
      */
-    triggerGetAllFeatureInfo(layerPath: string): Promise<TypeFeatureInfoResult>;
+    triggerGetAllFeatureInfo(layerPath: string, waitForLayer?: boolean): Promise<TypeFeatureInfoResult>;
     /**
      * Resets the data-table features for a given layer path.
      *
@@ -110,6 +111,6 @@ export declare class LayerSetController extends AbstractMapViewerController {
      * @param legendResultSetEntry - The legend result set entry that triggered the propagation
      * @deprecated This function should be replaced, it's called too often and does too many things, see TODO.
      */
-    propagateLegendToStore(legendResultSetEntry: TypeLegendResultSetEntry): void;
+    propagateLegendToStore(layerPath: string): void;
 }
 //# sourceMappingURL=layer-set-controller.d.ts.map

@@ -1,5 +1,4 @@
 import { type GeoChartStoreByLayerPath, type TypeGeochartResultSetEntry } from './store-interface-and-intial-values/geochart-state';
-import { type TypeOrderedLayerInfo } from './store-interface-and-intial-values/map-state';
 import type { TimeSliderLayerSet } from './store-interface-and-intial-values/time-slider-state';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import type { LayerController } from '@/core/controllers/layer-controller';
@@ -39,6 +38,16 @@ export declare class StateApi {
      * @param layerPath - The path of the layer to set
      */
     setSelectedLayersTabLayer(layerPath: string): void;
+    /**
+     * Reorders a layer and its children within the ordered layers list by a given number of positions.
+     *
+     * The layer (along with any child paths) is extracted from its current position and re-inserted
+     * at the target index, skipping only siblings at the same depth. Updates the store, reorders the
+     * legend layers, and emits a layers reordered event.
+     *
+     * @param layerPath - The path of the layer to move
+     * @param move - The number of sibling positions to move (negative = toward index 0, positive = toward end)
+     */
     reorderLayers(layerPath: string, move: number): void;
     /**
      * Registers a layers reordered event handler.
@@ -59,7 +68,7 @@ type LayersReorderedDelegate = EventDelegateBase<StateApi, LayersReorderedEvent,
  * Define an event for the delegate
  */
 export type LayersReorderedEvent = {
-    orderedLayers: TypeOrderedLayerInfo[];
+    orderedLayers: string[];
 };
 export {};
 //# sourceMappingURL=state-api.d.ts.map

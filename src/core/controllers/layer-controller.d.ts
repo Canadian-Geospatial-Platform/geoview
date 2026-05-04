@@ -8,15 +8,14 @@ import type { ConfigBaseClass } from '@/api/config/validation-classes/config-bas
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import type { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
-import { type TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
+import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import type { LayerDomain } from '@/core/domains/layer-domain';
 import type { TemporalMode, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
-import type { TypeLegendItem } from '@/core/components/layers/types';
+import type { TypeLayersViewDisplayState, TypeLegendItem } from '@/core/components/layers/types';
 import { MapViewer } from '@/geo/map/map-viewer';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
-import { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 /**
  * LayerController class that extends the AbstractMapViewerController and provides methods to interact with map layers.
  */
@@ -28,9 +27,10 @@ export declare class LayerController extends AbstractMapViewerController {
      * Creates an instance of LayerController.
      *
      * @param mapViewer - The map viewer instance to associate with this controller
+     * @param controllerRegistry - The controller registry for accessing sibling controllers
      * @param layerDomain - The layer domain instance to associate with this controller
      */
-    constructor(mapViewer: MapViewer, layerDomain: LayerDomain);
+    constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry, layerDomain: LayerDomain);
     /**
      * Hooks layer domain listeners.
      */
@@ -177,6 +177,18 @@ export declare class LayerController extends AbstractMapViewerController {
      */
     getOLLayerAsync(layerPath: string, timeout?: number, checkFrequency?: number): Promise<BaseLayer>;
     /**
+     * Sets the layer panel display state.
+     *
+     * @param displayState - The new display state for the layers view
+     */
+    setLayerDisplayState(displayState: TypeLayersViewDisplayState): void;
+    /**
+     * Sets the selected layer path in the layers tab.
+     *
+     * @param layerPath - The layer path to select
+     */
+    setSelectedLayerPath(layerPath: string): void;
+    /**
      * Gets the max extent of all layers on the map, or of a provided subset of layers.
      *
      * @param layerIds - Identifiers or layerPaths of layers to get max extents from
@@ -197,18 +209,13 @@ export declare class LayerController extends AbstractMapViewerController {
     /**
      * Retrieves the service (metadata) projection code for a specific raster layer.
      *
-     * @param layerPath - The fully qualified path of the layer
-     * @returns The projection code (e.g., "EPSG:4326") defined in the layer's service metadata,
-     *          or `undefined` if:
-     *          - the layer does not exist,
-     *          - the layer is not a raster layer,
-     *          - or the metadata projection is not available.
-     * @description
-     *
-     * This method looks up the GeoView layer associated with the provided `layerPath`.
+     * Looks up the GeoView layer associated with the provided `layerPath`.
      * If the layer exists and is an instance of `AbstractGVRaster`, it retrieves the
      * projection defined in the service metadata via `getMetadataProjection()`.
-     * The projection code is then returned using `projection.getCode()`.
+     *
+     * @param layerPath - The fully qualified path of the layer
+     * @returns The projection code (e.g., "EPSG:4326") defined in the layer's service metadata,
+     * or `undefined` if the layer does not exist, is not a raster layer, or the metadata projection is not available
      */
     getLayerMetatadaProjectionEPSG(layerPath: string): string | undefined;
     /**
@@ -276,19 +283,6 @@ export declare class LayerController extends AbstractMapViewerController {
      */
     setLayerHoverable(layerPath: string, hoverable: boolean): void;
     /**
-     * Sets or toggles the visibility of a specific layer within a map.
-     *
-     * If the layer exists at the provided layer path for the given map, the method delegates
-     * the visibility change to the map viewer's layer API. If `newValue` is provided, the layer
-     * visibility is explicitly set to that value; otherwise, the visibility is toggled.
-     *
-     * @param layerPath - The path of the layer whose visibility is being changed
-     * @param newValue - Optional. The new visibility value. If omitted, the visibility is toggled
-     * @returns The resulting visibility state of the layer after the operation, or `false`
-     * if the layer does not exist at the given path.
-     */
-    setOrToggleMapLayerVisibility(layerPath: string, newValue?: boolean): boolean;
-    /**
      * Sets or toggles the visibility of a layer within the current map.
      *
      * Retrieves the current visibility of the layer, determines the resulting visibility
@@ -303,34 +297,48 @@ export declare class LayerController extends AbstractMapViewerController {
      */
     setOrToggleLayerVisibility(layerPath: string, newValue?: boolean): boolean;
     /**
-     * Sets the visibility of all geoview layers on the map.
+     * Sets or toggles the visibility of a specific layer within a map.
      *
-     * @param newValue - The new visibility
+     * If the layer exists at the provided layer path for the given map, the method delegates
+     * the visibility change to the map viewer's layer API. If `newValue` is provided, the layer
+     * visibility is explicitly set to that value; otherwise, the visibility is toggled.
+     *
+     * @param layerPath - The path of the layer whose visibility is being changed
+     * @param newValue - Optional. The new visibility value. If omitted, the visibility is toggled
+     * @returns The resulting visibility state of the layer after the operation, or `false`
+     * if the layer does not exist at the given path.
+     * @deprecated Seems not used anymore by codebase (2026-04-20) - remove the function?
+     */
+    setOrToggleLayerVisibilityIfExists(layerPath: string, newValue?: boolean): boolean;
+    /**
+     * Sets the visibility of all GeoView layers on the map, including basemaps.
+     *
+     * Iterates through every registered GeoView layer and applies the provided
+     * visibility value unconditionally via `setOrToggleLayerVisibility`.
+     *
+     * @param newValue - The visibility state to apply to all layers (`true` to show, `false` to hide)
      */
     setAllLayersVisibility(newValue: boolean): void;
     /**
-     * Sets the visibility of the Geoview basemap layer.
+     * Sets the visibility of basemap layers only.
      *
-     * @param newVisibility - The visibility state to apply to the basemap layer (`true` to show, `false` to hide)
+     * Iterates through all GeoView layers and applies the provided visibility
+     * value only to layers marked as basemaps (`useAsBasemap === true`). Layers
+     * whose visibility already matches the desired state are skipped.
+     *
+     * @param newVisibility - The visibility state to apply to basemap layers (`true` to show, `false` to hide)
      */
-    setVisibilityOfGeoviewBasemapLayers(newVisibility: boolean): void;
+    setAllLayersVisibilityBasemapsOnly(newVisibility: boolean): void;
     /**
-     * Sets the visibility of **all layers** in a given map.
+     * Sets the visibility of all non-basemap layers.
      *
-     * Iterates through all GeoView layers associated with the specified map ID and
-     * applies the provided visibility value. Only layers whose current visibility
-     * differs from the desired state will be updated.
+     * Iterates through all GeoView layers and applies the provided visibility
+     * value only to layers that are not marked as basemaps (`useAsBasemap !== true`).
+     * Layers whose visibility already matches the desired state are skipped.
      *
-     * @param newVisibility - The visibility state to apply to all layers (`true` to show, `false` to hide)
+     * @param newVisibility - The visibility state to apply to non-basemap layers (`true` to show, `false` to hide)
      */
-    setAllMapLayerVisibility(newVisibility: boolean): void;
-    /**
-     * Sets the visibility of a layer in the store ordered layer info.
-     *
-     * @param layerPath - The layer path of the layer to change
-     * @param visibility - The visibility to set
-     */
-    setMapLayerVisibility(layerPath: string, visibility: boolean): void;
+    setAllLayersVisibilityExceptBasemaps(newVisibility: boolean): void;
     /**
      * Updates the visible-range settings (min/max zoom) of a GeoView layer and
      * stores whether the layer is currently within the visible range based on
@@ -361,38 +369,58 @@ export declare class LayerController extends AbstractMapViewerController {
      */
     setLayerZIndices(): void;
     /**
-     * Replaces a layer in the orderedLayerInfo array.
+     * Toggles the legend collapsed state for a layer in the store.
+     *
+     * @param layerPath - The path of the layer to toggle the legend collapsed state for
+     */
+    toggleLegendCollapsed(layerPath: string): void;
+    /**
+     * Sets the legend collapsed state for a layer in the store.
+     *
+     * @param layerPath - The path of the layer to set the legend collapsed state for
+     * @param legendCollapsed - The new collapsed state of the legend
+     */
+    setLegendCollapsed(layerPath: string, legendCollapsed: boolean): void;
+    /**
+     * Sets the legend collapsed state for all layers in the store.
+     *
+     * @param newCollapsed - The new collapsed state of the legends
+     */
+    setAllLayerCollapsed(newCollapsed: boolean): void;
+    /**
+     * Replaces a layer's paths in the ordered layers array.
      *
      * @param layerConfig - The config of the layer to add
-     * @param layerPathToReplace - The layerPath of the info to replace
+     * @param layerPathToReplace - The layerPath of the entry to replace
      */
-    replaceOrderedLayerInfo(layerConfig: ConfigBaseClass, layerPathToReplace?: string): void;
+    replaceOrderedLayerPaths(layerConfig: ConfigBaseClass, layerPathToReplace?: string): void;
     /**
-     * Adds a new layer to the orderedLayerInfo array using a layer config.
+     * Adds a new layer to the ordered layers array using a layer config.
      *
      * @param geoviewLayerConfig - The config of the layer to add
+     * @param index - Optional position to insert at
      */
-    addOrderedLayerInfoByConfig(geoviewLayerConfig: TypeGeoviewLayerConfig | TypeLayerEntryConfig, index?: number): void;
+    addOrderedLayerPathsByConfig(geoviewLayerConfig: TypeGeoviewLayerConfig | TypeLayerEntryConfig, index?: number): void;
     /**
-     * Adds new layer info to the orderedLayerInfo array.
+     * Adds a new layer path to the ordered layers array.
      *
-     * @param layerInfo - The ordered layer info to add
+     * @param layerPath - The layer path to add
+     * @param index - Optional position to insert at
      */
-    addOrderedLayerInfo(layerInfo: TypeOrderedLayerInfo, index?: number): void;
+    addOrderedLayerPath(layerPath: string, index?: number): void;
     /**
-     * Removes a layer from the orderedLayerInfo array.
+     * Removes a layer from the ordered layers array.
      *
      * @param layerPath - The path of the layer to remove
      * @param removeSublayers - Should sublayers be removed
      */
-    removeOrderedLayerInfo(layerPath: string, removeSublayers?: boolean): void;
+    removeOrderedLayerPath(layerPath: string, removeSublayers?: boolean): void;
     /**
-     * Updates the ordered layer info in the store and recalculates layer Z indices.
+     * Updates the ordered layers in the store and recalculates layer Z indices.
      *
-     * @param orderedLayerInfo - The new ordered layer info array
-     * @deprecated This function shouldn't exist as it breaks the separation of concern between the controller and the store implementation.
+     * @param orderedLayers - The new ordered layers array
      */
-    setMapOrderedLayerInfoDirectly(orderedLayerInfo: TypeOrderedLayerInfo[]): void;
+    setMapOrderedLayersDirectly(orderedLayers: string[]): void;
     /**
      * Reorders a layer by moving it up or down in the layer stack.
      *
@@ -436,28 +464,15 @@ export declare class LayerController extends AbstractMapViewerController {
      * @param layerPath - The layer path
      * @param mosaicRule - The mosaic rule to apply or undefined to remove it
      * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
+     * @throws {LayerWrongTypeError} When the layer is not an ESRI Image layer
      */
     setLayerMosaicRule(layerPath: string, mosaicRule: TypeMosaicRule | undefined): void;
     /**
-     * Applies all available filters to layer.
-     *
-     * @param layerPath - The path of the layer to apply filters to
-     * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path
-     */
-    applyLayerFilters(layerPath: string): void;
-    /**
-     * Gets all active filters for layer.
-     *
-     * @param layerPath - The path for the layer to get filters from
-     * @returns The active layer filters
-     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
-     * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path
-     */
-    getActiveFilters(layerPath: string): LayerFilters;
-    /**
      * Checks if the layer results sets are all greater than or equal to the provided status.
      *
-     * @returns Indicates if all layers passed the callback and how many have passed the callback
+     * @param status - The layer status threshold to check against
+     * @param callbackNotGood - Optional callback invoked for each layer that does not meet the status threshold
+     * @returns Indicates if all layers passed the check and how many have passed
      */
     checkLayerStatus(status: TypeLayerStatus, callbackNotGood?: (layerConfig: ConfigBaseClass) => void): [boolean, number];
     /**
@@ -612,8 +627,7 @@ export declare class LayerController extends AbstractMapViewerController {
      * The value is stored in the application state via the LayerController.
      *
      * @param layerPath - The unique path identifying the layer
-     * @param temporalMode - The date format to apply
-     * for displaying date values associated with this layer.
+     * @param temporalMode - The temporal mode to apply for interpreting date values associated with this layer
      */
     setLayerDateTemporalMode(layerPath: string, temporalMode: TemporalMode): void;
     /**
@@ -636,15 +650,16 @@ export declare class LayerController extends AbstractMapViewerController {
      * The value is stored in the application state via the LayerController.
      *
      * @param layerPath - The unique path identifying the layer
-     * @param displayDateFormat - The date format to apply
-     * for displaying date values associated with this layer.
+     * @param displayDateFormat - The date format to apply for displaying date values associated with this layer
      */
     setLayerDisplayDateFormatShort(layerPath: string, displayDateFormat: TypeDisplayDateFormat | string): void;
     /**
      * Sets the WMS style for a WMS layer.
      *
      * @param layerPath - The layer path
-     * @param wmsStyle - The WMS style to apply, if any
+     * @param wmsStyleName - The WMS style name to apply
+     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
+     * @throws {LayerWrongTypeError} When the layer is not a WMS layer
      */
     setLayerWmsStyle(layerPath: string, wmsStyleName: string | undefined): void;
     /**

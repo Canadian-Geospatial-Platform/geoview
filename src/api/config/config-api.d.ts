@@ -95,7 +95,10 @@ export declare class ConfigApi {
      * @param mapId - Optional map id, used for the geocore layer types, to determine the layer id
      * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
      * @returns A promise that resolves with a fully initialized TypeGeoviewLayerConfig
-     * @throws {NotSupportedError} When the provided layer type is not recognized or supported
+     * @throws {LayerGeoCoreServiceFailError} When the Geocore service fails to respond
+     * @throws {LayerGeoCoreInvalidResponseError} When the Geocore service fails to respond with a valid payload
+     * @throws {LayerGeoCoreNoLayersError} When the Geocore service responds a 'valid' payload with missing layers information
+     * @throws {NotSupportedError} When the provided layer type or the layer type read in the layerType property from Geocore payload isn't a supported type
      */
     static createInitConfigFromType(layerType: TypeInitialGeoviewLayerType, geoviewLayerId: string, geoviewLayerName: string, layerURL: string, isTimeAware?: boolean, language?: TypeDisplayLanguage, mapId?: string, abortSignal?: AbortSignal): Promise<TypeGeoviewLayerConfig>;
     /**
@@ -130,6 +133,8 @@ export declare class ConfigApi {
      *
      * @param uuid - The uuid to test
      * @returns True if the provided uuid is a valid uuid
+     * @deprecated This function is deprecated and will be removed in future versions.
+     * Please use the exported `isValidUUID` function from utilities instead.
      */
     static isValidUUID(uuid: string): boolean;
 }

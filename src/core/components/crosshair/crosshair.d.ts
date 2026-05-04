@@ -10,6 +10,6 @@ type CrosshairProps = {
  * @param props - Crosshair properties containing the map target element
  * @returns The crosshair component, or null if inactive
  */
-export declare const Crosshair: import("react").NamedExoticComponent<CrosshairProps>;
+export declare const Crosshair: import("react").MemoExoticComponent<({ mapTargetElement }: CrosshairProps) => JSX.Element | null>;
 export {};
 //# sourceMappingURL=crosshair.d.ts.map

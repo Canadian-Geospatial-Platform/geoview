@@ -5,5 +5,5 @@
  *
  * @returns The skeleton component
  */
-export declare const DetailsSkeleton: import("react").NamedExoticComponent<object>;
+export declare const DetailsSkeleton: import("react").MemoExoticComponent<() => JSX.Element>;
 //# sourceMappingURL=details-skeleton.d.ts.map

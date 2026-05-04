@@ -1,6 +1,6 @@
 import type { TypeButtonGroupConfig, TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
 import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
-import type { EventDelegateBase } from '@/api/events/event-helper';
+import type { UIController } from '@/core/controllers/ui-controller';
 /**
  * Class to manage buttons on the nav-bar.
  */
@@ -12,32 +12,10 @@ export declare class NavBarApi {
     groupConfigs: Record<string, TypeButtonGroupConfig>;
     /**
      * Instantiates a NavBarApi class.
-     */
-    constructor();
-    /**
-     * Registers an event handler for NavBar created events.
      *
-     * @param callback - The callback to be executed whenever the event is emitted
+     * @param uiController - The UI controller instance
      */
-    onNavbarCreated(callback: NavBarCreatedDelegate): void;
-    /**
-     * Unregisters an event handler for NavBar created events.
-     *
-     * @param callback - The callback to stop being called whenever the event is emitted
-     */
-    offNavbarCreated(callback: NavBarCreatedDelegate): void;
-    /**
-     * Registers an event handler for NavBar removed events.
-     *
-     * @param callback - The callback to be executed whenever the event is emitted
-     */
-    onNavbarRemoved(callback: NavBarRemovedDelegate): void;
-    /**
-     * Unregisters an event handler for NavBar removed events.
-     *
-     * @param callback - The callback to stop being called whenever the event is emitted
-     */
-    offNavbarRemoved(callback: NavBarRemovedDelegate): void;
+    constructor(uiController: UIController);
     /**
      * Creates a nav-bar button panel.
      *
@@ -83,25 +61,4 @@ export declare class NavBarApi {
      */
     getGroupConfig(groupName: string): TypeButtonGroupConfig;
 }
-/** Event payload when a nav-bar button panel is created. */
-export type NavBarCreatedEvent = {
-    /** The button panel identifier. */
-    buttonPanelId: string;
-    /** The group the button panel belongs to. */
-    group: string;
-    /** The created button panel. */
-    buttonPanel: TypeButtonPanel;
-};
-/** Delegate type for NavBar created event handlers. */
-type NavBarCreatedDelegate = EventDelegateBase<NavBarApi, NavBarCreatedEvent, void>;
-/** Event payload when a nav-bar button panel is removed. */
-export type NavBarRemovedEvent = {
-    /** The button panel identifier. */
-    buttonPanelId: string;
-    /** The group the button panel belonged to. */
-    group: string;
-};
-/** Delegate type for NavBar removed event handlers. */
-type NavBarRemovedDelegate = EventDelegateBase<NavBarApi, NavBarRemovedEvent, void>;
-export {};
 //# sourceMappingURL=nav-bar-api.d.ts.map

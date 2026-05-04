@@ -5,5 +5,5 @@
  *
  * @returns The crosshair icon element
  */
-export declare const CrosshairIcon: import("react").NamedExoticComponent<object>;
+export declare const CrosshairIcon: import("react").MemoExoticComponent<() => JSX.Element>;
 //# sourceMappingURL=crosshair-icon.d.ts.map

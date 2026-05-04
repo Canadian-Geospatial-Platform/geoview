@@ -1,6 +1,5 @@
 import type { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
 import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
-import type { EventDelegateBase } from '@/api/events/event-helper';
 import { type ActiveAppBarTabType } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import type { UIController } from '@/core/controllers/ui-controller';
 /**
@@ -8,7 +7,7 @@ import type { UIController } from '@/core/controllers/ui-controller';
  */
 export declare class AppBarApi {
     #private;
-    /** Button panels registered on the app-bar, keyed by panel id. */
+    /** Button panels registered on the app-bar, keyed by panel id (content registry — ReactNodes stay outside the store). */
     buttons: Record<string, TypeButtonPanel>;
     /**
      * Instantiates an AppBarApi class.
@@ -16,30 +15,6 @@ export declare class AppBarApi {
      * @param uiController - The UI controller this app bar api belongs to
      */
     constructor(uiController: UIController);
-    /**
-     * Registers an event handler for AppBar created events.
-     *
-     * @param callback - The callback to be executed whenever the event is emitted
-     */
-    onAppBarCreated(callback: AppBarCreatedDelegate): void;
-    /**
-     * Unregisters an event handler for AppBar created events.
-     *
-     * @param callback - The callback to stop being called whenever the event is emitted
-     */
-    offAppBarCreated(callback: AppBarCreatedDelegate): void;
-    /**
-     * Registers an event handler for AppBar removed events.
-     *
-     * @param callback - The callback to be executed whenever the event is emitted
-     */
-    onAppBarRemoved(callback: AppBarRemovedDelegate): void;
-    /**
-     * Unregisters an event handler for AppBar removed events.
-     *
-     * @param callback - The callback to stop being called whenever the event is emitted
-     */
-    offAppBarRemoved(callback: AppBarRemovedDelegate): void;
     /**
      * Creates a button on the app-bar that will open a panel.
      *
@@ -58,7 +33,7 @@ export declare class AppBarApi {
     /**
      * Gets the active app bar tab.
      *
-     * @returns The active app bar tab info.
+     * @returns The active app bar tab info
      * @deprecated Legacy support. Should be removed.
      */
     getActiveAppBarTab(): ActiveAppBarTabType;
@@ -78,18 +53,4 @@ export declare class AppBarApi {
      */
     selectTab(tabId: string, open?: boolean, isFocusTrapped?: boolean): void;
 }
-/** Event payload emitted when an AppBar button panel is created. */
-export type AppBarCreatedEvent = {
-    buttonPanelId: string;
-    buttonPanel: TypeButtonPanel;
-};
-/** Delegate type for AppBar created event handlers. */
-type AppBarCreatedDelegate = EventDelegateBase<AppBarApi, AppBarCreatedEvent, void>;
-/** Event payload emitted when an AppBar button panel is removed. */
-export type AppBarRemovedEvent = {
-    buttonPanelId: string;
-};
-/** Delegate type for AppBar removed event handlers. */
-type AppBarRemovedDelegate = EventDelegateBase<AppBarApi, AppBarRemovedEvent, void>;
-export {};
 //# sourceMappingURL=app-bar-api.d.ts.map

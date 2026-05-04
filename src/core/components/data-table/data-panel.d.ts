@@ -1,6 +1,7 @@
 import type { TypeContainerBox } from '@/core/types/global-types';
 /** Properties for the Datapanel component. */
 interface DataPanelType {
+    /** The container type (app-bar or footer-bar). */
     containerType: TypeContainerBox;
 }
 /**

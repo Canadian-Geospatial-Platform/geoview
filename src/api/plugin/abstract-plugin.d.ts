@@ -2,6 +2,7 @@ import type * as React from 'react';
 import type { createRoot } from 'react-dom/client';
 import type i18next from 'react-i18next';
 import type { useTheme } from '@mui/material/styles';
+import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import type { MapViewer } from '@/geo/map/map-viewer';
 /**
  * Plugin abstract base class.
@@ -12,6 +13,8 @@ export declare abstract class AbstractPlugin {
     pluginId: string;
     /** The map viewer for the plugin */
     mapViewer: MapViewer;
+    /** The controller registry for the plugin */
+    controllerRegistry: ControllerRegistry;
     /** The plugin properties */
     pluginProps?: unknown;
     /** The plugin react object */
@@ -27,9 +30,10 @@ export declare abstract class AbstractPlugin {
      *
      * @param pluginId - Unique identifier for the plugin instance
      * @param mapViewer - The map viewer
+     * @param controllerRegistry - The controller registry
      * @param props - Optional plugin options and properties
      */
-    constructor(pluginId: string, mapViewer: MapViewer, props: unknown | undefined);
+    constructor(pluginId: string, mapViewer: MapViewer, controllerRegistry: ControllerRegistry, props: unknown | undefined);
     /**
      * Sets the config (which happens post creation).
      *

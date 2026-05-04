@@ -14,13 +14,13 @@ export declare class OgcFeatureLayerEntryConfig extends VectorLayerEntryConfig {
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
      *
-     * @returns The strongly-typed layer configuration specific to this layer.
+     * @returns The strongly-typed layer configuration specific to this layer
      */
     getGeoviewLayerConfig(): TypeOgcFeatureLayerConfig;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
      *
-     * @returns The strongly-typed layer metadata specific to this layer entry config.
+     * @returns The strongly-typed layer metadata specific to this layer entry config
      */
     getLayerMetadata(): TypeLayerMetadataOGC | undefined;
     /**

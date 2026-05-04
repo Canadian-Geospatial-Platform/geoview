@@ -5,7 +5,6 @@ interface UseMapResizeProps {
     footerPanelResizeValue: number;
     isFooterBar: boolean;
     geoviewElement: HTMLElement;
-    footerTabContainer: HTMLElement | null;
     appHeight: number;
 }
 /** Return type for the useMapResize hook. */
@@ -18,6 +17,6 @@ type TypeUseMapResize = {
  * @param props - The resize hook configuration properties
  * @returns An object containing the mapShellContainerRef
  */
-export declare const useMapResize: ({ isMapFullScreen, isFooterBarOpen, footerPanelResizeValue, isFooterBar, geoviewElement, footerTabContainer, appHeight, }: UseMapResizeProps) => TypeUseMapResize;
+export declare const useMapResize: ({ isMapFullScreen, isFooterBarOpen, footerPanelResizeValue, isFooterBar, geoviewElement, appHeight, }: UseMapResizeProps) => TypeUseMapResize;
 export {};
 //# sourceMappingURL=use-map-resize.d.ts.map

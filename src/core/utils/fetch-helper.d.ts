@@ -99,7 +99,7 @@ export declare abstract class Fetch {
      * @throws {ResponseContentError} When the fetched blob is of type 'text/xml', indicating an unexpected server error
      * @throws {NetworkError} When a network issue happened
      */
-    static fetchBlobImage(url: string, init?: RequestInit, timeoutMs?: number): Promise<string | ArrayBuffer | null>;
+    static fetchBlobImage(url: string, init?: RequestInit, timeoutMs?: number): Promise<string>;
     /**
      * Fetches a url for a blob response.
      *
@@ -128,6 +128,21 @@ export declare abstract class Fetch {
      */
     static fetchXMLToJson<T = Record<string, unknown>>(url: string, init?: RequestInit, timeoutMs?: number): Promise<T>;
     /**
+     * Fetches a URL and returns the response text regardless of the HTTP status code.
+     *
+     * Unlike `fetchText`, this method does **not** throw on non-2xx responses. This is useful
+     * for probing OGC services that may return valid capabilities XML even with 4xx/5xx status codes.
+     *
+     * @param url - The URL to fetch
+     * @param init - Optional initialization parameters for the fetch
+     * @param timeoutMs - Optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError
+     * @returns A promise that resolves with the response text (may be empty)
+     * @throws {RequestTimeoutError} When the request exceeds the timeout duration
+     * @throws {RequestAbortedError} When the request was aborted by the caller's signal
+     * @throws {NetworkError} When a network issue happened
+     */
+    static fetchTextPermissive(url: string, init?: RequestInit, timeoutMs?: number): Promise<string>;
+    /**
      * Performs a HEAD request to check URL reachability without downloading the body.
      *
      * Returns a structured result indicating what happened:
@@ -141,6 +156,18 @@ export declare abstract class Fetch {
      * @returns A promise that resolves with a structured result containing the response (if any) and a reason
      */
     static fetchHeadWithTimeout(url: string, timeoutMs?: number): Promise<HeadResult>;
+    /**
+     * Probes a file URL for reachability using a minimal GET request with a Range header.
+     *
+     * Uses `Range: bytes=0-0` to minimize data transfer and does not consume the response body.
+     * Unlike `fetchHeadWithTimeout`, this uses GET because some file servers do not support HEAD.
+     * Returns a structured result identical to `fetchHeadWithTimeout`.
+     *
+     * @param url - The URL to probe
+     * @param timeoutMs - Optional timeout in milliseconds before aborting the request
+     * @returns A promise that resolves with a structured result containing the response (if any) and a reason
+     */
+    static fetchProbeUrl(url: string, timeoutMs?: number): Promise<HeadResult>;
     /**
      * Performs a fetch request with timeout capability.
      *

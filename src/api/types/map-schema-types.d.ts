@@ -55,8 +55,27 @@ export type TypeDisplayTheme = 'dark' | 'light' | 'geo.ca';
 export declare const VALID_DISPLAY_THEME: TypeDisplayTheme[];
 /** Valid values for the navBar array. */
 export type TypeValidNavBarProps = 'zoom' | 'rotation' | 'fullscreen' | 'home' | 'location' | 'basemap-select' | 'measurement' | 'projection' | 'drawer';
+/** Built-in nav bar core components that are not plugins. */
+export declare const DEFAULT_NAVBAR_CORE: {
+    readonly ZOOM: "zoom";
+    readonly ROTATION: "rotation";
+    readonly FULLSCREEN: "fullscreen";
+    readonly HOME: "home";
+    readonly LOCATION: "location";
+    readonly BASEMAP_SELECT: "basemap-select";
+    readonly MEASUREMENT: "measurement";
+    readonly PROJECTION: "projection";
+};
 /** Supported footer bar tabs */
 export type TypeValidFooterBarTabsCoreProps = 'legend' | 'layers' | 'details' | 'data-table' | 'time-slider' | 'geochart' | 'guide';
+/** Built-in footer bar core components that are not plugins. */
+export declare const DEFAULT_FOOTERBAR_CORE: {
+    readonly LEGEND: "legend";
+    readonly LAYERS: "layers";
+    readonly DETAILS: "details";
+    readonly DATA_TABLE: "data-table";
+    readonly GUIDE: "guide";
+};
 /** Default tabs order */
 export declare const DEFAULT_FOOTER_TABS_ORDER: string[];
 /** Footer bar tabs custom definition. */
@@ -273,7 +292,7 @@ export declare const BASEMAP_SHADED: Record<TypeValidMapProjectionCodes, boolean
 export declare const BASEMAP_LABEL: Record<TypeValidMapProjectionCodes, boolean[]>;
 export declare const VALID_MAP_CENTER: Record<TypeValidMapProjectionCodes, Record<string, number[]>>;
 export declare const MAP_EXTENTS: Record<TypeValidMapProjectionCodes, number[]>;
-export declare const MAX_EXTENTS_RESTRICTION: Record<TypeValidMapProjectionCodes, number[]>;
+export declare const MAX_EXTENTS_RESTRICTION_LONLAT: Record<TypeValidMapProjectionCodes, number[]>;
 export declare const MAP_CENTER: Record<TypeValidMapProjectionCodes, [number, number]>;
 export declare const MAP_ZOOM_LEVEL: Record<TypeValidMapProjectionCodes, number>;
 /** Type used to define valid highlight colors. */
@@ -355,12 +374,30 @@ export declare const DEFAULT_APPBAR_CORE: {
     readonly DATA_TABLE: "data-table";
     readonly LAYERS: "layers";
 };
-export declare const STYLE_GEOMETRY_TYPES: readonly ["Point", "MultiPoint", "LineString", "MultiLineString", "Polygon", "MultiPolygon"];
+export declare const STYLE_GEOMETRY_TYPES: readonly ["Point", "MultiPoint", "LineString", "MultiLineString", "Polygon", "MultiPolygon", "GeometryCollection"];
 /** Valid keys for the geometryType property. */
 export type TypeStyleGeometry = (typeof STYLE_GEOMETRY_TYPES)[number];
 export type SerializedGeometry = {
-    type: TypeStyleGeometry;
-    coordinates: Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][];
+    type: 'Point';
+    coordinates: Coordinate;
+} | {
+    type: 'MultiPoint';
+    coordinates: Coordinate[];
+} | {
+    type: 'LineString';
+    coordinates: Coordinate[];
+} | {
+    type: 'MultiLineString';
+    coordinates: Coordinate[][];
+} | {
+    type: 'Polygon';
+    coordinates: Coordinate[][];
+} | {
+    type: 'MultiPolygon';
+    coordinates: Coordinate[][][];
+} | {
+    type: 'GeometryCollection';
+    geometries: SerializedGeometry[];
 };
 /** Definition of the range object that is part of the temporal dimension. */
 export type TypeRangeItems = {
@@ -414,6 +451,7 @@ export type TypeLayerStyleSettings = {
     hasDefault: boolean;
     info: TypeLayerStyleConfigInfo[];
     visualVariables?: TypeLayerStyleVisualVariable[];
+    valueExpression?: string;
 };
 /** Information needed to render the feature. */
 export type TypeLayerStyleConfigInfo = {
@@ -581,6 +619,8 @@ export interface TypeLineStringVectorConfig extends TypeBaseVectorGeometryConfig
     graphicStrokes?: GraphicStrokeWithPlacement[];
     /** The text / label settings */
     text?: TypeLayerTextConfig;
+    /** Z-index for controlling render order (higher values render on top) */
+    zIndex?: number;
 }
 export interface GraphicStrokeWithPlacement {
     placement?: string;
@@ -625,6 +665,8 @@ export interface TypePolygonVectorConfig extends TypeBaseVectorGeometryConfig {
     graphicFills?: GraphicFillWithPattern[];
     /** The text / label settings */
     text?: TypeLayerTextConfig;
+    /** Z-index for controlling render order (higher values render on top) */
+    zIndex?: number;
 }
 /** Valid values to specify fill styles. */
 export type TypeFillStyle = 'null' | 'solid' | 'backwardDiagonal' | 'cross' | 'diagonalCross' | 'forwardDiagonal' | 'horizontal' | 'vertical' | 'dot';
@@ -646,6 +688,8 @@ export interface TypeSimpleSymbolVectorConfig extends TypeBaseVectorGeometryConf
     symbol: TypeSymbol;
     /** The text / label settings */
     text?: TypeLayerTextConfig;
+    /** Z-index for controlling render order (higher values render on top) */
+    zIndex?: number;
 }
 /** Valid values to specify symbol shapes. */
 export type TypeSymbol = 'circle' | '+' | 'diamond' | 'square' | 'triangle' | 'X' | 'star';
@@ -674,6 +718,8 @@ export interface TypeIconSymbolVectorConfig extends TypeBaseVectorGeometryConfig
      * with the Canvas renderer.
      */
     crossOrigin?: string;
+    /** Z-index for controlling render order (higher values render on top) */
+    zIndex?: number;
 }
 export type TypeQueryStatus = 'init' | 'processing' | 'processed' | 'error';
 export type QueryType = 'at_pixel' | 'at_coordinate' | 'at_lon_lat' | 'using_a_bounding_box' | 'using_a_polygon' | 'all';
@@ -711,7 +757,6 @@ export type TypeFeatureInfoEntryPartial = Pick<TypeFeatureInfoEntry, 'fieldInfo'
 export type TypeLayerData = {
     queryStatus: TypeQueryStatus;
     features?: TypeFeatureInfoEntry[];
-    isDisabled?: boolean;
 };
 export interface TypeUtmZoneFeature {
     type: 'Feature';

@@ -10,6 +10,6 @@ interface NavigateToTabOptions {
  *
  * Handles opening the tab, collapsing/expanding footer, and scrolling behavior.
  */
-export declare function useNavigateToTab(tabId: string, onNavigate?: (mapId: string, layerPath: string) => void): (options?: NavigateToTabOptions) => void;
+export declare function useNavigateToTab(tabId: string, onNavigate?: (layerPath: string) => void): (options?: NavigateToTabOptions) => void;
 export {};
 //# sourceMappingURL=use-navigate-to-tab.d.ts.map

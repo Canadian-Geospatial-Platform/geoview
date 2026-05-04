@@ -28,5 +28,5 @@ export interface LightboxProps {
  *
  * @returns The lightbox element
  */
-export declare const LightboxImg: import("react").NamedExoticComponent<LightboxProps>;
+export declare const LightboxImg: import("react").MemoExoticComponent<({ open, slides, index, exited, onSlideChange }: LightboxProps) => JSX.Element>;
 //# sourceMappingURL=lightbox.d.ts.map

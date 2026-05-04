@@ -1,6 +1,7 @@
 import type { AbstractPlugin } from '@/api/plugin/abstract-plugin';
 import type { PluginsContainer } from '@/api/plugin/plugin-types';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
+import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import type { MapViewer } from '@/geo/map/map-viewer';
 /**
  * Controller responsible for Plugin interactions.
@@ -11,8 +12,9 @@ export declare class PluginController extends AbstractMapViewerController {
      * Creates an instance of PluginController.
      *
      * @param mapViewer - The map viewer instance to associate with this controller
+     * @param controllerRegistry - The controller registry for accessing sibling controllers
      */
-    constructor(mapViewer: MapViewer);
+    constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry);
     /**
      * Shortcut to get the Map Viewer plugins instance for a given map id
      * This is use to reduce the use of api.getMapViewer(mapId).plugins and be more explicit
@@ -27,6 +29,15 @@ export declare class PluginController extends AbstractMapViewerController {
      * @returns A promise that resolves to the plugin instance if found, or `undefined` otherwise
      */
     getMapViewerPluginIfExists(pluginId: string): Promise<AbstractPlugin | undefined>;
+    /**
+     * Loads plugins referenced in the footer-bar, app-bar, and nav-bar configuration.
+     *
+     * Collects tab/component names from all three configs, filters out built-in core components,
+     * deduplicates the remaining plugin names, and loads each one.
+     *
+     * @returns A promise that resolves when all configured plugins are loaded
+     */
+    loadConfiguredPlugins(): Promise<void[]>;
     /**
      * Loads a plugin script dynamically and adds the plugin to a map.
      * This method first loads the plugin script by name, then registers the

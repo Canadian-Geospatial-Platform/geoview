@@ -1,4 +1,4 @@
-import type { TypeSetStore, TypeGetStore, GeoviewStoreType } from '@/core/stores/geoview-store';
+import { type TypeSetStore, type TypeGetStore, type GeoviewStoreType } from '@/core/stores/geoview-store';
 import type { TypeFeatureInfoEntry, TypeResultSet, TypeResultSetEntry, TypeQueryStatus, TypeFieldEntry } from '@/api/types/map-schema-types';
 import type { TypeGeoviewLayerType } from '@/api/types/layer-schema-types';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
@@ -27,7 +27,7 @@ export interface IFeatureInfoState {
     /**
      * Applies default configuration values from the map config to the store.
      *
-     * @param geoviewConfig - The map features configuration to extract defaults from.
+     * @param geoviewConfig - The map features configuration to extract defaults from
      */
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
     /** Store actions callable from adaptors. */
@@ -47,8 +47,8 @@ export declare const LAYER_PATH_COORDINATE_INFO = "coordinate-info";
 /**
  * Gets the selected layer path in the details panel for the given map.
  *
- * @param mapId - The map identifier.
- * @returns The selected layer path.
+ * @param mapId - The map identifier
+ * @returns The selected layer path
  */
 export declare const getStoreDetailsSelectedLayerPath: (mapId: string) => string;
 /** Hook that returns the selected layer path in the details panel. */
@@ -56,18 +56,20 @@ export declare const useStoreDetailsSelectedLayerPath: () => string;
 /**
  * Gets the layer query status for a given layer path.
  *
- * @param mapId - The map identifier.
- * @param layerPath - The layer path to get the query status for.
- * @returns The query status for the layer, or undefined if the layer is not found.
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to get the query status for
+ * @returns The query status for the layer, or undefined if the layer is not found
  */
 export declare const getStoreDetailsQueryStatus: (mapId: string, layerPath: string) => TypeQueryStatus | undefined;
 /** Hook that returns the selected layer path in the details panel. */
 export declare const useStoreDetailsQueryStatus: (layerPath: string) => TypeQueryStatus | undefined;
+/** Hook that returns the per-layer query status record. */
+export declare const useStoreDetailsQueryStatusSet: () => Record<string, TypeQueryStatus>;
 /**
  * Gets the coordinate info enabled state for the given map.
  *
- * @param mapId - The map identifier.
- * @returns Whether coordinate info is enabled.
+ * @param mapId - The map identifier
+ * @returns Whether coordinate info is enabled
  */
 export declare const getStoreDetailsCoordinateInfoEnabled: (mapId: string) => boolean;
 /** Hook that returns whether coordinate info is enabled. */
@@ -75,8 +77,8 @@ export declare const useStoreDetailsCoordinateInfoEnabled: () => boolean;
 /**
  * Gets the feature info entry for the coordinate info layer from the details store.
  *
- * @param mapId - The map identifier.
- * @returns The feature info entry for the coordinate info layer, or undefined if not found.
+ * @param mapId - The map identifier
+ * @returns The feature info entry for the coordinate info layer, or undefined if not found
  */
 export declare const getStoreDetailsLayerDataArrayFeature: (mapId: string) => TypeFeatureInfoEntry | undefined;
 /** Hook that returns the feature info for the coordinate info layer data array. */
@@ -84,13 +86,15 @@ export declare const useStoreDetailsLayerDataArrayFeature: () => TypeFeatureInfo
 /**
  * Gets the feature info entries for a specific layer.
  *
- * @param mapId - The map identifier.
- * @param layerPath - The layer path to get features for.
- * @returns The feature info entries, or undefined if the layer is not found.
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to get features for
+ * @returns The feature info entries, or undefined if the layer is not found
  */
 export declare const getStoreDetailsFeatures: (mapId: string, layerPath: string) => TypeFeatureInfoEntry[] | undefined;
 /** Hook that returns the list of checked/selected features. */
 export declare const useStoreDetailsCheckedFeatures: () => TypeFeatureInfoEntry[];
+/** Hook that returns the live (non-batched) feature info layer data array. */
+export declare const useStoreDetailsLayerDataArray: () => TypeFeatureInfoResultSetEntry[];
 /** Hook that returns the batched feature info layer data array. */
 export declare const useStoreDetailsLayerDataArrayBatch: () => TypeFeatureInfoResultSetEntry[];
 /** Hook that returns whether the coordinate info switch is hidden. */
@@ -98,69 +102,81 @@ export declare const useStoreDetailsHideCoordinateInfoSwitch: () => boolean;
 /**
  * Sets the feature info layer data array in the store.
  *
- * @param mapId - The map identifier.
- * @param layerDataArray - The feature info result set entries to set.
+ * @param mapId - The map identifier
+ * @param layerDataArray - The feature info result set entries to set
  */
 export declare const setStoreDetailsLayerDataArray: (mapId: string, layerDataArray: TypeFeatureInfoResultSetEntry[]) => void;
 /**
  * Sets the batched feature info layer data array in the store.
  *
- * @param mapId - The map identifier.
- * @param layerDataArrayBatch - The batched feature info result set entries to set.
+ * @param mapId - The map identifier
+ * @param layerDataArrayBatch - The batched feature info result set entries to set
  */
 export declare const setStoreDetailsLayerDataArrayBatch: (mapId: string, layerDataArrayBatch: TypeFeatureInfoResultSetEntry[]) => void;
 /**
  * Sets the layer path that bypasses the batch propagation delay.
  *
- * @param mapId - The map identifier.
- * @param layerDataArrayBatchLayerPathBypass - The layer path to bypass.
+ * @param mapId - The map identifier
+ * @param layerDataArrayBatchLayerPathBypass - The layer path to bypass
  */
 export declare const setStoreDetailsLayerDataArrayBatchLayerPathBypass: (mapId: string, layerDataArrayBatchLayerPathBypass: string) => void;
 /**
  * Sets the selected layer path in the details panel store.
  *
- * @param mapId - The map identifier.
- * @param selectedLayerPath - The layer path to select.
+ * @param mapId - The map identifier
+ * @param selectedLayerPath - The layer path to select
  */
 export declare const setStoreDetailsSelectedLayerPath: (mapId: string, selectedLayerPath: string) => void;
 /**
  * Adds a feature to the checked features list in the store.
  *
- * @param mapId - The map identifier.
- * @param feature - The feature entry to add.
+ * @param mapId - The map identifier
+ * @param feature - The feature entry to add
  */
 export declare const addStoreDetailsCheckedFeature: (mapId: string, feature: TypeFeatureInfoEntry) => void;
 /**
  * Removes a feature from the checked features list in the store, or clears all.
  *
- * @param mapId - The map identifier.
- * @param feature - The feature to remove, or 'all' to clear the list.
+ * @param mapId - The map identifier
+ * @param feature - The feature to remove, or 'all' to clear the list
  */
 export declare const removeStoreDetailsCheckedFeature: (mapId: string, feature: TypeFeatureInfoEntry | "all") => void;
 /**
  * Sets whether the coordinate info feature is enabled in the store.
  *
- * @param mapId - The map identifier.
+ * @param mapId - The map identifier
  */
 export declare const setStoreDetailsCoordinateInfoEnabled: (mapId: string, coordinateInfoEnabled: boolean) => void;
 /**
  * Propagates a feature info result set entry to the details store.
  *
- * If an entry for the same layer path does not already exist in the
- * layerDataArray, it is appended.
+ * If an entry for the same layer path already exists, its queryStatus,
+ * features, and featuresHaveGeometry are updated. Otherwise a new entry
+ * is appended.
  *
- * @param mapId - The map identifier.
- * @param resultSetEntry - The feature info result set entry to propagate.
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to propagate data for
+ * @param queryStatus - The current query status
+ * @param features - The feature info entries for the layer
+ * @param featuresHaveGeometry - Whether the features have associated geometry
  */
-export declare const propagateStoreFeatureInfoDetails: (mapId: string, resultSetEntry: TypeFeatureInfoResultSetEntry) => void;
+export declare const setStoreFeatureInfoDetails: (mapId: string, layerPath: string, queryStatus: TypeQueryStatus, features: TypeFeatureInfoEntry[] | undefined, featuresHaveGeometry: boolean) => void;
+/**
+ * Sets the 'featuresHaveGeometry' property for a specific layer in the details store.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to update
+ * @param featuresHaveGeometry - Whether the features for the layer have geometry
+ */
+export declare const setStoreFeatureInfoDetailsUpdateFeaturesHaveGeometry: (mapId: string, layerPath: string, featuresHaveGeometry: boolean) => void;
 /**
  * Deletes feature info for a layer from the details store.
  *
  * Clears the selected layer path and batch bypass if they match the removed layer.
  * Removes the entry from layerDataArray via the helper function.
  *
- * @param mapId - The map identifier.
- * @param layerPath - The layer path whose feature info should be removed.
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path whose feature info should be removed
  */
 export declare const deleteStoreDetailsFeatureInfo: (mapId: string, layerPath: string) => void;
 /**
@@ -169,9 +185,9 @@ export declare const deleteStoreDetailsFeatureInfo: (mapId: string, layerPath: s
  * Builds a synthetic layer data entry with a specific layer path
  * and appends it to the current layer data array.
  *
- * @param mapId - The map identifier.
- * @param features - Optional feature entries to include in the coordinate info layer.
- * @param queryStatus - The status of the query.
+ * @param mapId - The map identifier
+ * @param features - Optional feature entries to include in the coordinate info layer
+ * @param queryStatus - The status of the query
  */
 export declare const updateStoreCoordinateInfoLayer: (mapId: string, features: TypeFeatureInfoEntry[], queryStatus: TypeQueryStatus) => void;
 /**
@@ -209,7 +225,7 @@ export declare function initFeatureInfoState(set: TypeSetStore, get: TypeGetStor
  * click coordinate changes (to create/delete coordinate info), and
  * coordinateInfoEnabled toggling.
  *
- * @param store - The GeoView Zustand store instance.
+ * @param store - The GeoView Zustand store instance
  */
 export declare function initDetailsStateSubscriptions(store: GeoviewStoreType): void;
 /**

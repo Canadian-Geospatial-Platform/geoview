@@ -414,8 +414,12 @@ export interface TypeUserStyleRuleFilterPropertyDetails {
     'ogc:Function'?: TypeUserStyleRuleFilterFunction;
 }
 export interface TypeUserStyleRuleFilterFunction {
+    '@attributes': TypeUserStyleRuleFilterFunctionAttributes;
     'ogc:PropertyName': string;
     'ogc:Literal': string;
+}
+export interface TypeUserStyleRuleFilterFunctionAttributes {
+    name: string;
 }
 export interface TypeUserStyleSymbolizer {
     'se:Stroke'?: TypeUserStyleParameter;
@@ -816,10 +820,6 @@ export interface TypeMetadataEsriLayerSummary {
     minScale: number;
     maxScale: number;
     type?: string;
-}
-export interface TypeLayerMetadataVector {
-    maxRecordCount: number;
-    fields?: TypeLayerMetadataFields[];
 }
 export interface TypeLayerMetadataFields {
     name: string;

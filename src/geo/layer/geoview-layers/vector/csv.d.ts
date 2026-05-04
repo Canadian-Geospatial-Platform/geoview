@@ -28,7 +28,7 @@ export declare class CSV extends AbstractGeoViewVector {
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
      *
-     * @returns The strongly-typed layer configuration specific to this layer.
+     * @returns The strongly-typed layer configuration specific to this layer
      */
     getGeoviewLayerConfig(): TypeCSVLayerConfig;
     /**
@@ -71,11 +71,11 @@ export declare class CSV extends AbstractGeoViewVector {
      * ID, name, and metadata access path URL. It then initializes the layer entries by calling
      * `initGeoViewLayerEntries`, which may involve fetching metadata or sublayer info.
      *
-     * @param geoviewLayerId - A unique identifier for the layer.
-     * @param geoviewLayerName - The display name of the layer.
-     * @param metadataAccessPath - The full service URL to the layer endpoint.
-     * @param isTimeAware - Indicates whether the layer supports time-based filtering.
-     * @returns A promise that resolves to an initialized GeoView layer configuration with layer entries.
+     * @param geoviewLayerId - A unique identifier for the layer
+     * @param geoviewLayerName - The display name of the layer
+     * @param metadataAccessPath - The full service URL to the layer endpoint
+     * @param isTimeAware - Indicates whether the layer supports time-based filtering
+     * @returns A promise that resolves to an initialized GeoView layer configuration with layer entries
      */
     static initGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware?: boolean): Promise<TypeGeoviewLayerConfig>;
     /**
@@ -84,12 +84,12 @@ export declare class CSV extends AbstractGeoViewVector {
      * This function constructs a `TypeCSVLayerConfig` object that describes a CSV Feature layer
      * and its associated entry configurations based on the provided parameters.
      *
-     * @param geoviewLayerId - A unique identifier for the GeoView layer.
-     * @param geoviewLayerName - The display name of the GeoView layer.
-     * @param metadataAccessPath - The full service URL to the layer endpoint.
-     * @param isTimeAware - Indicates whether the layer supports time-based filtering.
-     * @param layerEntries - An array of layer entries objects to be included in the configuration.
-     * @returns The constructed configuration object for the CSV Feature layer.
+     * @param geoviewLayerId - A unique identifier for the GeoView layer
+     * @param geoviewLayerName - The display name of the GeoView layer
+     * @param metadataAccessPath - The full service URL to the layer endpoint
+     * @param isTimeAware - Indicates whether the layer supports time-based filtering
+     * @param layerEntries - An array of layer entries objects to be included in the configuration
+     * @returns The constructed configuration object for the CSV Feature layer
      */
     static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware: boolean | undefined, layerEntries: TypeLayerEntryShell[]): TypeCSVLayerConfig;
     /**

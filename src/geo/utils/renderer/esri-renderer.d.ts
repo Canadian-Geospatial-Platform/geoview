@@ -118,18 +118,21 @@ export type EsriRendererTypes = 'uniqueValue' | 'simple' | 'classBreaks';
 export type EsriBaseRenderer = {
     type: EsriRendererTypes;
     visualVariables?: TypeLayerStyleVisualVariable[];
+    drawInClassOrder?: boolean;
 };
 type TypeEsriColor = [number, number, number, number];
 export interface EsriUniqueValueRenderer extends EsriBaseRenderer {
     type: 'uniqueValue';
     defaultLabel: string;
     defaultSymbol: EsriSymbol;
-    field1: string;
-    field2: string;
-    field3: string;
+    field1?: string;
+    field2?: string;
+    field3?: string;
     fieldDelimiter: string;
     rotationType: 'arithmetic' | 'geographic';
     uniqueValueInfos: EsriUniqueValueInfo[];
+    valueExpression?: string;
+    valueExpressionTitle?: string;
 }
 export type EsriUniqueValueInfo = {
     description: string;
@@ -197,10 +200,12 @@ export interface EsriClassBreakRenderer extends EsriBaseRenderer {
     classBreakInfos: EsriClassBreakInfoEntry[];
     defaultLabel: string;
     defaultSymbol: EsriSymbol;
-    field: string;
+    field?: string;
     minValue: number;
     rotationExpression: string;
     rotationType: 'arithmetic' | 'geographic';
+    valueExpression?: string;
+    valueExpressionTitle?: string;
 }
 export {};
 //# sourceMappingURL=esri-renderer.d.ts.map

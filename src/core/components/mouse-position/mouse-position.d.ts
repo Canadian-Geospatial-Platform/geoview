@@ -10,6 +10,6 @@ interface MousePositionProps {
  *
  * @returns The mouse position component
  */
-export declare const MousePosition: import("react").NamedExoticComponent<MousePositionProps>;
+export declare const MousePosition: import("react").MemoExoticComponent<({ expanded }: MousePositionProps) => JSX.Element>;
 export {};
 //# sourceMappingURL=mouse-position.d.ts.map

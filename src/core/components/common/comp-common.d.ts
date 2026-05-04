@@ -11,5 +11,5 @@ import type { LayerListEntry } from '@/core/components/common';
  * @param memoLayerSelectedItem - The selected item LayerListEntry
  * @param memoLayersList - The list of layers available for selection
  */
-export declare function checkSelectedLayerPathList(mapId: string, callbackSetStoreLayerDataArrayBatch: (mapId: string, layerPath: string) => void, callbackSetStoreSelectedLayerPath: (mapId: string, layerPath: string) => void, memoLayerSelectedItem: LayerListEntry | undefined, memoLayersList: LayerListEntry[]): void;
+export declare function checkSelectedLayerPathList(callbackSetStoreLayerDataArrayBatch: (layerPath: string) => void, callbackSetStoreSelectedLayerPath: (layerPath: string) => void, memoLayerSelectedItem: LayerListEntry | undefined, memoLayersList: LayerListEntry[]): void;
 //# sourceMappingURL=comp-common.d.ts.map

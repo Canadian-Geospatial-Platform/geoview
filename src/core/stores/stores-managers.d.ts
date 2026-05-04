@@ -11,7 +11,7 @@ export declare const useStoresManager: import("zustand").StoreApi<StoresManagerS
 export declare const getGeoViewStore: (id: string) => GeoviewStoreType;
 export declare const getGeoViewStoreAsync: (id: string) => Promise<GeoviewStoreType>;
 export declare function hasTimeSliderPlugin(store: GeoviewStoreType): boolean;
-export declare function hasGeochartPlugin(store: GeoviewStoreType): boolean;
+export declare function hasGeoChartPlugin(store: GeoviewStoreType): boolean;
 export declare function hasSwiperPlugin(store: GeoviewStoreType): boolean;
 export declare function hasDrawerPlugin(store: GeoviewStoreType): boolean;
 export declare const addGeoViewStore: (config: TypeMapFeaturesConfig) => void;

@@ -10,6 +10,6 @@ interface CollapsibleContentProps {
     collapseContainerId: string;
     layerNameId: string;
 }
-export declare const CollapsibleContent: import("react").NamedExoticComponent<CollapsibleContentProps>;
+export declare const CollapsibleContent: import("react").MemoExoticComponent<({ layerPath, initLightBox, LegendLayerComponent, showControls, containerType, collapseContainerId, layerNameId, }: CollapsibleContentProps) => JSX.Element | null>;
 export {};
 //# sourceMappingURL=legend-layer-container.d.ts.map

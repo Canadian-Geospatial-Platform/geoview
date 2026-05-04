@@ -5,6 +5,7 @@ import type { Extent } from 'ol/extent';
 import type { Projection as OLProjection } from 'ol/proj';
 import type { Map as OLMap } from 'ol';
 import { type EventDelegateBase } from '@/api/events/event-helper';
+import type { LayerBaseEvent } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import type { OgcWfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
@@ -245,6 +246,19 @@ export declare class GVWMS extends AbstractGVRaster {
      * @param callback - The callback to stop being called whenever the event is emitted
      */
     offImageLoadRescue(callback: ImageLoadRescueDelegate | undefined): void;
+    /**
+     * Registers a WMS style changed event handler.
+     *
+     * @param callback - The callback to be executed whenever the event is emitted
+     * @returns The registered callback, which can be used to unregister the event handler later
+     */
+    onWmsStyleChanged(callback: WMSStyleChangedDelegate): WMSStyleChangedDelegate;
+    /**
+     * Unregisters a WMS style changed event handler.
+     *
+     * @param callback - The callback to stop being called whenever the event is emitted
+     */
+    offWmsStyleChanged(callback: WMSStyleChangedDelegate | undefined): void;
 }
 export type CRSOverride = {
     layerProjection: string;
@@ -260,4 +274,15 @@ export type ImageLoadRescueEvent = {
  * Define a delegate for the event handler function signature
  */
 export type ImageLoadRescueDelegate = EventDelegateBase<GVWMS, ImageLoadRescueEvent, boolean>;
+/**
+ * Define an event for the delegate.
+ */
+export interface WMSStyleChangedEvent extends LayerBaseEvent {
+    /** The WMS style name that was applied. */
+    wmsStyleName: string;
+}
+/**
+ * Define a delegate for the event handler function signature.
+ */
+export type WMSStyleChangedDelegate = EventDelegateBase<GVWMS, WMSStyleChangedEvent, void>;
 //# sourceMappingURL=gv-wms.d.ts.map

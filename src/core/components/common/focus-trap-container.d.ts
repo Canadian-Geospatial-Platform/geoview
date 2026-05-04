@@ -13,6 +13,6 @@ interface FocusTrapContainerProps {
  * @param props - FocusTrapContainer properties
  * @returns The focus trap wrapper element
  */
-export declare const FocusTrapContainer: import("react").NamedExoticComponent<FocusTrapContainerProps>;
+export declare const FocusTrapContainer: import("react").MemoExoticComponent<({ children, open, id, containerType, }: FocusTrapContainerProps) => JSX.Element>;
 export {};
 //# sourceMappingURL=focus-trap-container.d.ts.map
