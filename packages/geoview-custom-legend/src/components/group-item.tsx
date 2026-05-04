@@ -140,10 +140,7 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
 
             {/* Sublayer count */}
             <Typography variant="caption" sx={sxClasses.groupSubLayerCount}>
-              {item.children.length}{' '}
-              {item.children.length === 1
-                ? t('CustomLegend.layer')
-                : t('CustomLegend.sublayers')}
+              {item.children.length} {item.children.length === 1 ? t('CustomLegend.layer') : t('CustomLegend.sublayers')}
             </Typography>
 
             {/* Action buttons */}

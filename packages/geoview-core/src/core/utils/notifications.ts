@@ -208,7 +208,12 @@ export class Notifications {
    * @param withNotification - Optional, indicates if the message should also be added as a notification (default true)
    * @param button - Optional snackbar button
    */
-  showMessage(messageKey: string, params: Record<string, unknown> = {}, withNotification: boolean = true, button: ISnackbarButton = {}): void {
+  showMessage(
+    messageKey: string,
+    params: Record<string, unknown> = {},
+    withNotification: boolean = true,
+    button: ISnackbarButton = {}
+  ): void {
     // Redirect
     this.#addSnackbarMessage('info', messageKey, params, withNotification, button);
     if (withNotification) this.addNotificationMessage(messageKey, params);
@@ -222,7 +227,12 @@ export class Notifications {
    * @param withNotification - Optional, indicates if the message should also be added as a notification (default true)
    * @param button - Optional snackbar button
    */
-  showSuccess(messageKey: string, params: Record<string, unknown> = {}, withNotification: boolean = true, button: ISnackbarButton = {}): void {
+  showSuccess(
+    messageKey: string,
+    params: Record<string, unknown> = {},
+    withNotification: boolean = true,
+    button: ISnackbarButton = {}
+  ): void {
     // Redirect
     this.#addSnackbarMessage('success', messageKey, params, withNotification, button);
     if (withNotification) this.addNotificationSuccess(messageKey, params);
@@ -236,7 +246,12 @@ export class Notifications {
    * @param withNotification - Optional, indicates if the message should also be added as a notification (default true)
    * @param button - Optional snackbar button
    */
-  showWarning(messageKey: string, params: Record<string, unknown> = {}, withNotification: boolean = true, button: ISnackbarButton = {}): void {
+  showWarning(
+    messageKey: string,
+    params: Record<string, unknown> = {},
+    withNotification: boolean = true,
+    button: ISnackbarButton = {}
+  ): void {
     // Also log the warning in console
     logger.logWarning(getLocalizedMessage(this.#uiController.getDisplayLanguage(), messageKey, params));
 
@@ -253,7 +268,12 @@ export class Notifications {
    * @param withNotification - Optional, indicates if the message should also be added as a notification (default true)
    * @param button - Optional snackbar button
    */
-  showError(messageKey: string, params: Record<string, unknown> = {}, withNotification: boolean = true, button: ISnackbarButton = {}): void {
+  showError(
+    messageKey: string,
+    params: Record<string, unknown> = {},
+    withNotification: boolean = true,
+    button: ISnackbarButton = {}
+  ): void {
     // Log the error in console
     logger.logError(getLocalizedMessage(this.#uiController.getDisplayLanguage(), messageKey, params));
 

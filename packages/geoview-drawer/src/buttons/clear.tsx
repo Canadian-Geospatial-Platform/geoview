@@ -33,13 +33,7 @@ export default function Clear(): JSX.Element {
   };
 
   return (
-    <IconButton
-      id="clear"
-      aria-label={t('drawer.clearTooltip')}
-      tooltipPlacement="left"
-      onClick={handleClear}
-      sx={sxClasses.navButton}
-    >
+    <IconButton id="clear" aria-label={t('drawer.clearTooltip')} tooltipPlacement="left" onClick={handleClear} sx={sxClasses.navButton}>
       <DeleteIcon />
     </IconButton>
   );

@@ -43,13 +43,7 @@ export default function Upload(): JSX.Element {
   }, [drawerController]);
 
   return (
-    <IconButton
-      id="upload"
-      aria-label={t('drawer.uploadTooltip')}
-      tooltipPlacement="left"
-      onClick={handleUpload}
-      sx={sxClasses.navButton}
-    >
+    <IconButton id="upload" aria-label={t('drawer.uploadTooltip')} tooltipPlacement="left" onClick={handleUpload} sx={sxClasses.navButton}>
       <UploadIcon />
     </IconButton>
   );
