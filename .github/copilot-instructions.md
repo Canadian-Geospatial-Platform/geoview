@@ -198,13 +198,13 @@ GeoView uses a lightweight typed delegate event system (see [event-helper.md](..
 
 ```typescript
 // ❌ Bad: Type is trivially inferrable from the literal
-const name: string = 'default';
+const name: string = "default";
 let isActive: boolean = false;
 const count: number = 0;
 function reset(force: boolean = true): void {}
 
 // ✅ Good: Let TypeScript infer from literals
-const name = 'default';
+const name = "default";
 let isActive = false;
 const count = 0;
 function reset(force = true): void {}
@@ -379,6 +379,7 @@ const handleClickWrapper = useCallback(
 **Dependency Array Hygiene:**
 
 **Remove any variable from a `useEffect`/`useCallback`/`useMemo` dependency array that is not actually used inside the hook body.** Do this proactively — do not wait to be asked. This includes:
+
 - Stable `useCallback(fn, [])` references listed out of habit
 - `useState` setters (always stable, never needed as deps)
 - Ref objects (`useRef` — always stable)
