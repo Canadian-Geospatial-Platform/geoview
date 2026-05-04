@@ -244,11 +244,7 @@ export class GVEsriImage extends AbstractGVRaster {
    * @param queryGeometry - Whether to include geometry in the query, default is true.
    * @returns A promise that resolves with the feature info result
    */
-  protected override getFeatureInfoAtCoordinate(
-    map: OLMap,
-    location: Coordinate,
-    queryGeometry: boolean = true
-  ): Promise<TypeFeatureInfoResult> {
+  protected override getFeatureInfoAtCoordinate(map: OLMap, location: Coordinate, queryGeometry = true): Promise<TypeFeatureInfoResult> {
     // Transform coordinate from map projection to lntlat
     const projCoordinate = Projection.transformToLonLat(location, map.getView().getProjection());
 
@@ -264,11 +260,7 @@ export class GVEsriImage extends AbstractGVRaster {
    * @param queryGeometry - Optional, whether to include geometry in the query, default is true.
    * @returns A promise that resolves with the feature info result
    */
-  protected override async getFeatureInfoAtLonLat(
-    map: OLMap,
-    lonlat: Coordinate,
-    queryGeometry: boolean = true
-  ): Promise<TypeFeatureInfoResult> {
+  protected override async getFeatureInfoAtLonLat(map: OLMap, lonlat: Coordinate, queryGeometry = true): Promise<TypeFeatureInfoResult> {
     const featureInfoResult: TypeFeatureInfoResult = { results: [] };
 
     // If invisible or not queryable, return empty result
@@ -585,7 +577,7 @@ export class GVEsriImage extends AbstractGVRaster {
    * @param size - The size of the preview image (width and height)
    * @returns A map of raster function names to their preview image promises
    */
-  getRasterFunctionPreviews(size: number = 400): Map<string, Promise<string>> {
+  getRasterFunctionPreviews(size = 400): Map<string, Promise<string>> {
     const promises = new Map<string, Promise<string>>();
     const rasterFunctionInfos = this.getMetadataRasterFunctionInfos();
     const layerConfig = this.getLayerConfig();

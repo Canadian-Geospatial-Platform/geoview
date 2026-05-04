@@ -1,12 +1,11 @@
 import ReactDOMServer from 'react-dom/server';
 import type { TypeWindow } from 'geoview-core';
-import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 import {
   useStoreDrawerActiveGeom,
   useStoreDrawerIsDrawing,
   useStoreDrawerStyle,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
-import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
+import { useTranslation } from 'geoview-core/core/translation/i18n';
 
 import { logger } from 'geoview-core/core/utils/logger';
 import { useDrawerController } from 'geoview-core/core/controllers/use-controllers';
@@ -136,7 +135,7 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
   const { geomTypes, closePanel } = props;
 
   // Store
-  const displayLanguage = useStoreAppDisplayLanguage();
+  const { t } = useTranslation<string>();
   const style = useStoreDrawerStyle();
   const activeGeom = useStoreDrawerActiveGeom();
   const isDrawing = useStoreDrawerIsDrawing();
@@ -256,14 +255,14 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
         <ListItem sx={sxClasses.listItem}>
           <IconButton
             id="button-point"
-            aria-label={getLocalizedMessage(displayLanguage, 'drawer.point')}
+            aria-label={t('drawer.point')}
             tooltipPlacement="left"
             size="small"
             onClick={handleGeometrySelectPoint}
             sx={{ ...sxClasses.iconButton, ...(activeGeom === 'Point' && sxClasses.activeButton) }}
           >
             <PointIcon IconComponent={PlaceIcon} />
-            {getLocalizedMessage(displayLanguage, 'drawer.point')}
+            {t('drawer.point')}
           </IconButton>
         </ListItem>
       )}
@@ -271,14 +270,14 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
         <ListItem sx={sxClasses.listItem}>
           <IconButton
             id="button-text"
-            aria-label={getLocalizedMessage(displayLanguage, 'drawer.text')}
+            aria-label={t('drawer.text')}
             tooltipPlacement="left"
             size="small"
             onClick={handleGeometrySelectText}
             sx={{ ...sxClasses.iconButton, ...(activeGeom === 'Text' && sxClasses.activeButton) }}
           >
             <TextFieldsIcon sx={{ color: memoIconStyle.textColor }} stroke={memoIconStyle.textHaloColor} />
-            {getLocalizedMessage(displayLanguage, 'drawer.text')}
+            {t('drawer.text')}
           </IconButton>
         </ListItem>
       )}
@@ -286,14 +285,14 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
         <ListItem sx={sxClasses.listItem}>
           <IconButton
             id="button-linestring"
-            aria-label={getLocalizedMessage(displayLanguage, 'drawer.linestring')}
+            aria-label={t('drawer.linestring')}
             tooltipPlacement="left"
             size="small"
             onClick={handleGeometrySelectLineString}
             sx={{ ...sxClasses.iconButton, ...(activeGeom === 'LineString' && sxClasses.activeButton) }}
           >
             <ShowChartIcon sx={{ color: memoIconStyle.stroke }} />
-            {getLocalizedMessage(displayLanguage, 'drawer.linestring')}
+            {t('drawer.linestring')}
           </IconButton>
         </ListItem>
       )}
@@ -301,14 +300,14 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
         <ListItem sx={sxClasses.listItem}>
           <IconButton
             id="button-polygon"
-            aria-label={getLocalizedMessage(displayLanguage, 'drawer.polygon')}
+            aria-label={t('drawer.polygon')}
             tooltipPlacement="left"
             size="small"
             onClick={handleGeometrySelectPolygon}
             sx={{ ...sxClasses.iconButton, ...(activeGeom === 'Polygon' && sxClasses.activeButton) }}
           >
             <HexagonIcon sx={{ color: memoIconStyle.color }} stroke={memoIconStyle.stroke} />
-            {getLocalizedMessage(displayLanguage, 'drawer.polygon')}
+            {t('drawer.polygon')}
           </IconButton>
         </ListItem>
       )}
@@ -316,14 +315,14 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
         <ListItem sx={sxClasses.listItem}>
           <IconButton
             id="button-rectangle"
-            aria-label={getLocalizedMessage(displayLanguage, 'drawer.rectangle')}
+            aria-label={t('drawer.rectangle')}
             tooltipPlacement="left"
             size="small"
             onClick={handleGeometrySelectRectangle}
             sx={{ ...sxClasses.iconButton, ...(activeGeom === 'Rectangle' && sxClasses.activeButton) }}
           >
             <RectangleIcon sx={{ color: memoIconStyle.color }} stroke={memoIconStyle.stroke} />
-            {getLocalizedMessage(displayLanguage, 'drawer.rectangle')}
+            {t('drawer.rectangle')}
           </IconButton>
         </ListItem>
       )}
@@ -331,14 +330,14 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
         <ListItem sx={sxClasses.listItem}>
           <IconButton
             id="button-circle"
-            aria-label={getLocalizedMessage(displayLanguage, 'drawer.circle')}
+            aria-label={t('drawer.circle')}
             tooltipPlacement="left"
             size="small"
             onClick={handleGeometrySelectCircle}
             sx={{ ...sxClasses.iconButton, ...(activeGeom === 'Circle' && sxClasses.activeButton) }}
           >
             <CircleIcon sx={{ color: memoIconStyle.color }} stroke={memoIconStyle.stroke} />
-            {getLocalizedMessage(displayLanguage, 'drawer.circle')}
+            {t('drawer.circle')}
           </IconButton>
         </ListItem>
       )}
@@ -346,14 +345,14 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
         <ListItem sx={sxClasses.listItem}>
           <IconButton
             id="button-star"
-            aria-label={getLocalizedMessage(displayLanguage, 'drawer.star')}
+            aria-label={t('drawer.star')}
             tooltipPlacement="left"
             size="small"
             onClick={handleGeometrySelectStar}
             sx={{ ...sxClasses.iconButton, ...(activeGeom === 'Star' && sxClasses.activeButton) }}
           >
             <StarIcon sx={{ color: memoIconStyle.color }} stroke={memoIconStyle.stroke} />
-            {getLocalizedMessage(displayLanguage, 'drawer.star')}
+            {t('drawer.star')}
           </IconButton>
         </ListItem>
       )}

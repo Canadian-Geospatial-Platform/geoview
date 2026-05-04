@@ -10,9 +10,9 @@ export const GEO_URL_TEXT = {
 };
 
 /** OpenLayers zoom animation duration in milliseconds. */
-export const OL_ZOOM_DURATION: number = 500;
+export const OL_ZOOM_DURATION = 500;
 /** OpenLayers default maximum zoom level. */
-export const OL_ZOOM_MAXZOOM: number = 13;
+export const OL_ZOOM_MAXZOOM = 13;
 /** OpenLayers zoom padding values [top, right, bottom, left]. */
 export const OL_ZOOM_PADDING: [number, number, number, number] = [100, 100, 100, 100];
 /** Default OpenLayers fit options combining padding, max zoom, and duration. */

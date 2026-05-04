@@ -33,7 +33,7 @@ import { RequestTimeoutError } from '@/core/exceptions/core-exceptions';
  *     body: JSON.stringify({ id: 123 })
  *   }, 3000);
  */
-export const fetchWithTimeout = async <T>(url: string, init: RequestInit = {}, timeoutMs: number = 7000): Promise<T> => {
+export const fetchWithTimeout = async <T>(url: string, init: RequestInit = {}, timeoutMs = 7000): Promise<T> => {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
 

@@ -199,7 +199,7 @@ export function SingleLayer({
    * @param openPanel - Whether to open the details panel (default: true)
    */
   const selectLayerIfNeeded = useCallback(
-    (openPanel: boolean = true): void => {
+    (openPanel = true): void => {
       if (!layerIsSelected && ['processed', 'loaded'].includes(layerStatus!)) {
         layerController.setSelectedLayerPath(layerPath);
         if (openPanel) {
@@ -459,13 +459,13 @@ export function SingleLayer({
     if (parentHidden) return t('layers.parentHidden');
 
     if (layerChildPaths && layerChildPaths.length > 0) {
-      return t('legend.subLayersCount').replace('{count}', layerChildPaths.length.toString());
+      return t('legend.subLayersCount', { count: layerChildPaths.length });
     }
 
     const count = layerItems?.filter((d) => d.isVisible !== false).length || 0;
     const totalCount = layerItems?.length || 0;
 
-    let itemsLengthDesc = t('legend.itemsCount').replace('{count}', count.toString()).replace('{totalCount}', totalCount.toString());
+    let itemsLengthDesc = t('legend.itemsCount', { count, totalCount });
 
     if (totalCount <= 1) {
       itemsLengthDesc = '';
@@ -798,7 +798,7 @@ export function SingleLayer({
           </ListItemButton>
         </Tooltip>
         {!isLayoutEnlarged && (
-          <Box className="rightIcons-container" role="group" aria-label={t('layers.layerControls')!}>
+          <Box className="rightIcons-container" role="group" aria-label={t('layers.layerControls')}>
             {memoEditModeButtons}
             {memoMoreLayerButtons}
             {memoArrowButtons}
@@ -806,7 +806,7 @@ export function SingleLayer({
         )}
         {layerStatus === 'loading' && (
           <Box sx={memoSxClasses.progressBarSingleLayer}>
-            <ProgressBar aria-label={t('layers.status.layerLoadingDescriptive', { layerName })!} />
+            <ProgressBar aria-label={t('layers.status.layerLoadingDescriptive', { layerName })} />
           </Box>
         )}
       </Box>

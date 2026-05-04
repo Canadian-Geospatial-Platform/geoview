@@ -86,7 +86,7 @@ export class GeoChartParsing {
         layerDataSimplified.forEach((lyrDataSimp) => {
           // Read the id and from the found data
           const id = lyrDataSimp[configChartLayer.propertyValue] as string;
-          let display: string = 'Feature';
+          let display = 'Feature';
           if (configChartLayer.propertyDisplay) display = (lyrDataSimp[configChartLayer.propertyDisplay] as string) ?? display;
 
           // Add a datasource

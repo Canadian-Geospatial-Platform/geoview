@@ -87,7 +87,7 @@ export function ExportModal(): JSX.Element {
   logger.logTraceRender('components/export/export-modal');
 
   // Hooks
-  const { t } = useTranslation();
+  const { t } = useTranslation<string>();
   const theme = useTheme();
 
   /**
@@ -129,7 +129,7 @@ export function ExportModal(): JSX.Element {
    * Builds menu items for format selection.
    */
   const memoFormatMenuItems = useMemo<TypeMenuItemProps[]>((): TypeMenuItemProps[] => {
-    logger.logTraceUseMemo('EXPORT-MODAL - memoFormatMenuItems', t);
+    logger.logTraceUseMemo('EXPORT-MODAL - memoFormatMenuItems');
 
     return [
       { item: { value: 'pdf', children: t('exportModal.pdf') } },
@@ -142,7 +142,7 @@ export function ExportModal(): JSX.Element {
    * Builds menu items for DPI selection.
    */
   const memoDpiMenuItems = useMemo<TypeMenuItemProps[]>((): TypeMenuItemProps[] => {
-    logger.logTraceUseMemo('EXPORT-MODAL - memoDpiMenuItems', t);
+    logger.logTraceUseMemo('EXPORT-MODAL - memoDpiMenuItems');
 
     return [
       { item: { value: 96, children: `96 ${t('exportModal.dpi')}` } },
@@ -439,7 +439,7 @@ export function ExportModal(): JSX.Element {
             if (pngPreviewUrls) {
               return pngPreviewUrls.map((imageUrl) => {
                 const key = imageUrl.substring(imageUrl.length - 10);
-                return <Box component="img" key={key} src={imageUrl} alt={t('exportModal.previewAlt')!} sx={memoSxClasses.mapPreview} />;
+                return <Box component="img" key={key} src={imageUrl} alt={t('exportModal.previewAlt')} sx={memoSxClasses.mapPreview} />;
               });
             }
 

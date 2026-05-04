@@ -12,7 +12,7 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { ConfigApi } from '@/api/config/config-api';
 import { logger } from '@/core/utils/logger';
-import { generateId, getLocalizedMessage, isValidUUID, validateAndPingUrl } from '@/core/utils/utilities';
+import { generateId, isValidUUID, validateAndPingUrl } from '@/core/utils/utilities';
 import { VALID_FILE_EXTENSIONS_ACCEPT } from '@/core/utils/constant';
 import { Config } from '@/api/config/config';
 import type { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -112,7 +112,7 @@ function FileUploadSection({
       onFileSelected(file, fileURL, fileName);
     } else {
       // Handle error
-      uiController.addMessage('error', 'layers.errorFile', [], true);
+      uiController.addMessage('error', 'layers.errorFile', {}, true);
     }
   };
 
@@ -323,7 +323,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const emitErrorEmpty = (textField: string): void => {
     setIsLoading(false);
-    uiController.addMessage('error', 'layers.errorEmpty', [textField], false);
+    uiController.addMessage('error', 'layers.errorEmpty', { textFieldName: textField }, false);
   };
 
   /**
@@ -333,7 +333,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const emitErrorNone = (): void => {
     setIsLoading(false);
-    uiController.addMessage('error', 'layers.errorNone', [], false);
+    uiController.addMessage('error', 'layers.errorNone', {}, false);
   };
 
   /**
@@ -343,7 +343,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const emitErrorDisabled = (disabledType: string): void => {
     setIsLoading(false);
-    uiController.addMessage('error', 'layers.errorDisabled', [disabledType], false);
+    uiController.addMessage('error', 'layers.errorDisabled', { layerType: disabledType }, false);
   };
 
   /**
@@ -353,7 +353,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const emitErrorServer = (serviceName: string): void => {
     setIsLoading(false);
-    uiController.addMessage('error', 'layers.errorServer', [serviceName], false);
+    uiController.addMessage('error', 'layers.errorServer', { serviceTypeName: serviceName }, false);
   };
 
   // #endregion
@@ -379,10 +379,10 @@ export function AddNewLayer(): JSX.Element {
 
   const doneAddedShowMessage = (layerBeingAdded: AbstractGeoViewLayer): void => {
     if (layerBeingAdded.allLayerStatusAreGreaterThanOrEqualTo('error'))
-      uiController.addMessage('error', 'layers.layerAddedWithError', [layerName]);
+      uiController.addMessage('error', 'layers.layerAddedWithError', { layerName });
     else if (layerBeingAdded?.allLayerStatusAreGreaterThanOrEqualTo('loaded'))
-      uiController.addMessage('info', 'layers.layerAdded', [layerName]);
-    else uiController.addMessage('info', 'layers.layerAddedAndLoading', [layerName]);
+      uiController.addMessage('info', 'layers.layerAdded', { layerName });
+    else uiController.addMessage('info', 'layers.layerAddedAndLoading', { layerName });
   };
 
   // #region HANDLERS FOR THE STEPS
@@ -452,7 +452,7 @@ export function AddNewLayer(): JSX.Element {
         setLayerName(nameOfFirstLayerEntryConfig?.split('.')[0] || geoviewLayerConfig.geoviewLayerName || idOfFirstLayerEntryConfig);
 
         // XYZ Tile layer generic name will be {x} here, so we replace it
-        if (layerName === '{x}' || layerName === '{X}') setLayerName(getLocalizedMessage(language, 'layers.serviceRasterTile'));
+        if (layerName === '{x}' || layerName === '{X}') setLayerName(t('layers.serviceRasterTile'));
 
         setLayerTree(geoviewLayerConfig);
 
@@ -638,7 +638,7 @@ export function AddNewLayer(): JSX.Element {
     else {
       // Remove spinning circle if failed.
       doneAdding();
-      uiController.addMessage('error', 'layers.errorNotLoaded', [layerName]);
+      uiController.addMessage('error', 'layers.errorNotLoaded', { layerName });
       logger.logError('Unable to load layer');
     }
   };
@@ -776,9 +776,9 @@ export function AddNewLayer(): JSX.Element {
             const isOk = check.isValid && check.isReachable;
             setStepButtonEnabled(isOk);
             if (!isOk && check.error) {
-              uiController.addMessage('error', 'layers.errorUrlUnreachable', [], false);
+              uiController.addMessage('error', 'layers.errorUrlUnreachable', {}, false);
             } else if (!isOk && !check.isValid) {
-              uiController.addMessage('error', 'layers.errorUrlInvalid', [], false);
+              uiController.addMessage('error', 'layers.errorUrlInvalid', {}, false);
             }
           } finally {
             setIsLoading(false);
@@ -790,9 +790,9 @@ export function AddNewLayer(): JSX.Element {
             const trimmedUrl = layerURL.trim();
             if (!isValidUUID(trimmedUrl) && !trimmedUrl.includes('.') && !trimmedUrl.includes('/')) {
               // No dots or slashes means it's not a URL — likely a malformed UUID
-              uiController.addMessage('error', 'layers.errorUrlInvalidUUID', [], false);
+              uiController.addMessage('error', 'layers.errorUrlInvalidUUID', {}, false);
             } else {
-              uiController.addMessage('error', 'layers.errorUrlHttps', [], false);
+              uiController.addMessage('error', 'layers.errorUrlHttps', {}, false);
             }
           }
         }
@@ -801,7 +801,7 @@ export function AddNewLayer(): JSX.Element {
       validateUrl().catch((error: unknown) => {
         logger.logError('URL validation failed', error);
         setStepButtonEnabled(false);
-        uiController.addMessage('error', 'layers.errorUrlUnreachable', [], false);
+        uiController.addMessage('error', 'layers.errorUrlUnreachable', {}, false);
       });
     }
     if (activeStep === 1) {

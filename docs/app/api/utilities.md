@@ -39,7 +39,7 @@ const merged = cgpv.api.utilities.core.deepMergeObjects(defaults, overrides);
 const safe = cgpv.api.utilities.core.sanitizeHtmlContent(untrustedHtml);
 
 // Localized messages with parameter substitution
-const msg = cgpv.api.utilities.core.getLocalizedMessage('en', 'layers.total', [42]);
+const msg = cgpv.api.utilities.core.getLocalizedMessage('en', 'layers.fetchProgress', { processed: 50, total: 200 });
 
 // Add a React component to a DOM element
 const root = cgpv.api.utilities.core.addUiComponent('my-div-id', <MyComponent />);

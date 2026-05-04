@@ -11,7 +11,7 @@ export class TestError extends Error {
    *
    * @param message - Error message
    */
-  constructor(message: string = 'Test failed') {
+  constructor(message = 'Test failed') {
     // Call the base Error constructor with the provided message
     super(message);
 
@@ -38,7 +38,7 @@ export class TestSuiteRunningError extends Error {
    *
    * @param message - Error message
    */
-  constructor(message: string = 'The Test Suite is currently running.') {
+  constructor(message = 'The Test Suite is currently running.') {
     // Call the base Error constructor with the provided message
     super(message);
 
@@ -95,7 +95,7 @@ export abstract class AssertionError extends Error {
    * @param expected - Expected value
    */
   protected constructor(
-    message: string = 'Assertion failed',
+    message = 'Assertion failed',
     public actual?: unknown,
     public expected?: unknown
   ) {
@@ -207,7 +207,7 @@ export class AssertionManualFailError extends AssertionError {
    *
    * @param message - Custom message explaining why the test was manually failed
    */
-  constructor(message: string = 'Test manually failed') {
+  constructor(message = 'Test manually failed') {
     // Call the base Error constructor with the provided message
     super(message);
 

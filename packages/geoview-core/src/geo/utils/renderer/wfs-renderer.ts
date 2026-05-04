@@ -72,8 +72,8 @@ export abstract class WfsRenderer {
 
     const infos: TypeLayerStyleConfigInfo[] = [];
     const fields: string[] = [];
-    let hasClassBreaks: boolean = false;
-    let hasDefault: boolean = false;
+    let hasClassBreaks = false;
+    let hasDefault = false;
 
     rules.forEach((userRule) => {
       // Check the filter for the rule if any
@@ -316,7 +316,7 @@ export abstract class WfsRenderer {
    */
   static #readFilterInfoNumberOptionFromFilter(filter: TypeUserStyleRuleFilter): FilterInfo | undefined {
     // Read equal to first
-    let hasGreaterOrLessThan: boolean = false;
+    let hasGreaterOrLessThan = false;
     let filterOption = filter?.['ogc:PropertyIsEqualTo'];
     let propertyName = filterOption?.['ogc:PropertyName'];
     let values: (number | string)[] = [filterOption?.['ogc:Literal']!];
@@ -325,8 +325,8 @@ export abstract class WfsRenderer {
     let valuesConditions: TypeLayerStyleValueCondition[] | undefined = undefined;
 
     if (!filterOption) {
-      let min: number = -99999999999;
-      let max: number = 99999999999;
+      let min = -99999999999;
+      let max = 99999999999;
 
       filterOption = filter?.['ogc:PropertyIsGreaterThan'];
       if (filterOption) {
@@ -1097,7 +1097,7 @@ export abstract class WfsRenderer {
       return [bbox.x, bbox.y, bbox.width, bbox.height];
     } catch (error: unknown) {
       // Error
-      throw new GeoViewError('Error computing viewBox for svg __param__', [svgString], formatError(error));
+      throw new GeoViewError(`Error computing viewBox for svg ${svgString}`, undefined, formatError(error));
     } finally {
       // clean up DOM node
       temp.remove();
@@ -1317,7 +1317,7 @@ export abstract class WfsRenderer {
    * @param minify - Optional if true, removes all unnecessary whitespace and line breaks
    * @returns The formatted (or minified) SVG string
    */
-  static #prettyPrintSVG(svg: string, indent: number = 2, minify: boolean = false): string {
+  static #prettyPrintSVG(svg: string, indent = 2, minify = false): string {
     const parser = new DOMParser();
     const xml = parser.parseFromString(svg, 'image/svg+xml');
 

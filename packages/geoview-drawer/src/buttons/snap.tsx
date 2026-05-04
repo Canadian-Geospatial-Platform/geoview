@@ -1,8 +1,7 @@
 import { createSvgIcon } from '@mui/material/utils';
 import type { TypeWindow } from 'geoview-core';
 import { getSxClasses } from 'geoview-core/core/components/nav-bar/nav-bar-style';
-import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
-import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
+import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { useStoreDrawerIsSnapping } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
 
 import { IconButton } from 'geoview-core/ui';
@@ -34,8 +33,8 @@ export default function Snapping(): JSX.Element {
 
   // Get store values
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
-  const displayLanguage = useStoreAppDisplayLanguage();
+  const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const { t } = useTranslation<string>();
   const isSnapping = useStoreDrawerIsSnapping();
   const drawerController = useDrawerController();
 
@@ -49,11 +48,11 @@ export default function Snapping(): JSX.Element {
   return (
     <IconButton
       id="snap"
-      aria-label={getLocalizedMessage(displayLanguage, 'drawer.toggleSnapping')}
+      aria-label={t('drawer.toggleSnapping')}
       tooltipPlacement="left"
       onClick={handleToggleSnapping}
       className={isSnapping ? 'highlighted active' : ''}
-      sx={sxClasses.navButton}
+      sx={memoSxClasses.navButton}
     >
       <SnappingIcon />
     </IconButton>

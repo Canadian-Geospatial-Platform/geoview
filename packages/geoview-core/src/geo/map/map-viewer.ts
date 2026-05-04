@@ -121,7 +121,7 @@ export class MapViewer {
   static readonly #MAX_DELAY_TO_WAIT_ON_MAP = 120 * 1000; // 2 minutes
 
   /** Default densification number when forming layer extents, to make ture to compensate for earth curvature */
-  static DEFAULT_STOPS: number = 25;
+  static DEFAULT_STOPS = 25;
 
   /** Default DPI values */
   static readonly DEFAULT_DPI_OPEN_LAYERS_LEGACY: number = 25.4 / 0.28; // <-- 90.71428571428571
@@ -198,7 +198,7 @@ export class MapViewer {
   controllers: ControllerRegistry;
 
   /** Max number of icons cached */
-  iconImageCacheSize: number = 1;
+  iconImageCacheSize = 1;
 
   /** Indicates if the map has been initialized */
   #mapInit = false;
@@ -234,7 +234,7 @@ export class MapViewer {
   #onMapMoveEndHandlers: MapMoveEndDelegate[] = [];
 
   /** Whether pointer events should be handled */
-  #pointerHandlersEnabled: boolean = true;
+  #pointerHandlersEnabled = true;
 
   /** Callback delegates for the map pointer move event */
   #onMapPointerMoveHandlers: MapPointerMoveDelegate[] = [];
@@ -1799,7 +1799,7 @@ export class MapViewer {
   replaceMapConfigLayerNames(
     namePairs: string[][],
     mapConfig?: TypeMapFeaturesConfig,
-    removeUnlisted: boolean = false
+    removeUnlisted = false
   ): TypeMapFeaturesInstance | undefined {
     return this.controllers.mapController.replaceMapConfigLayerNames(namePairs, mapConfig, removeUnlisted);
   }

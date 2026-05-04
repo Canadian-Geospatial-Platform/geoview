@@ -129,7 +129,7 @@ export class MapController extends AbstractMapViewerController {
   #projectionChangeResolve: (() => void) | undefined;
 
   /** Indicates if the overview map visibility state before the map projection happened */
-  #projectionChangingOverviewMapVisibility: boolean = false;
+  #projectionChangingOverviewMapVisibility = false;
 
   /**
    * Creates an instance of MapController.
@@ -203,7 +203,7 @@ export class MapController extends AbstractMapViewerController {
     }
 
     // Invalid extent
-    this.getMapViewer().notifications.showError('error.map.invalidZoomExtent', [], true);
+    this.getMapViewer().notifications.showError('error.map.invalidZoomExtent', {}, true);
     throw new InvalidExtentError(extent);
   }
 
@@ -666,7 +666,7 @@ export class MapController extends AbstractMapViewerController {
    * @param size - The new map size
    * @param resizeMap - Optional flag to also resize the OpenLayers map element
    */
-  setMapSize(size: Size, resizeMap: boolean = false): void {
+  setMapSize(size: Size, resizeMap = false): void {
     if (resizeMap) this.getMapViewer().map.setSize(size);
 
     // Save in store
@@ -682,7 +682,7 @@ export class MapController extends AbstractMapViewerController {
    * @param offsetX - The horizontal offset in map units (default: 0.00001)
    * @param offsetY - The vertical offset in map units (default: 0)
    */
-  nudgeMapCenter(offsetX: number = 0.00001, offsetY: number = 0): void {
+  nudgeMapCenter(offsetX = 0.00001, offsetY = 0): void {
     const view = this.getMapViewer().map.getView();
     const currentCenter = view.getCenter()!;
 
@@ -702,7 +702,7 @@ export class MapController extends AbstractMapViewerController {
    * @param rotation - The target rotation angle in radians
    * @param animate - Whether to animate the rotation change, defaults to true
    */
-  rotate(rotation: number, animate: boolean = true): void {
+  rotate(rotation: number, animate = true): void {
     // Do the actual view map rotation
     const view = this.getMapViewer().map.getView();
 
@@ -1085,7 +1085,7 @@ export class MapController extends AbstractMapViewerController {
   replaceMapConfigLayerNames(
     namePairs: string[][],
     mapConfig?: TypeMapFeaturesConfig,
-    removeUnlisted: boolean = false
+    removeUnlisted = false
   ): TypeMapFeaturesInstance | undefined {
     const mapConfigToUse = mapConfig || this.createMapConfigFromMapState();
     if (mapConfigToUse) return MapController.utilReplaceMapConfigLayerNames(namePairs, mapConfigToUse, removeUnlisted);
@@ -1103,7 +1103,7 @@ export class MapController extends AbstractMapViewerController {
   static utilReplaceMapConfigLayerNames(
     namePairs: string[][],
     mapConfig: TypeMapFeaturesInstance,
-    removeUnlisted: boolean = false
+    removeUnlisted = false
   ): TypeMapFeaturesInstance {
     const pairsDict: Record<string, string> = {};
     namePairs.forEach((pair) => {
@@ -1210,7 +1210,7 @@ export class MapController extends AbstractMapViewerController {
         this.getControllersRegistry().layerCreatorController.removeLayerUsingPath(layer.getLayerPath());
 
         // Log
-        this.getMapViewer().notifications.showWarning('warning.layer.vectorTileRemoved', [layer.getLayerName()], true);
+        this.getMapViewer().notifications.showWarning('warning.layer.vectorTileRemoved', { layerName: layer.getLayerName() }, true);
       });
   }
 

@@ -76,7 +76,7 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
   const panelHeader = useRef<HTMLButtonElement>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
   const panelWidth = panel?.width ?? 100; //percentage
-  const sxClasses = useMemo(() => getSxClasses(theme, open, panelWidth), [theme, open, panelWidth]);
+  const memoSxClasses = useMemo(() => getSxClasses(theme, open, panelWidth), [theme, open, panelWidth]);
 
   // Store
   const mapId = useStoreGeoViewMapId();
@@ -115,11 +115,11 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
     <Box
       component="section"
       role={open && activeTrapGeoView ? 'dialog' : undefined}
-      aria-label={t('general.panelLabel', { title: t(panel.title) })!}
+      aria-label={t('general.panelLabel', { title: t(panel.title) })}
       aria-hidden={!open}
       aria-modal={open && activeTrapGeoView ? true : undefined}
       sx={{
-        ...sxClasses.panelContainer,
+        ...memoSxClasses.panelContainer,
         ...(panelStyles?.panelContainer && { ...panelStyles.panelContainer }),
       }}
       ref={panelContainerRef}
@@ -129,7 +129,7 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
       <FocusTrapContainer open={isFocusTrapped} id="app-bar-focus-trap" containerType={CONTAINER_TYPE.APP_BAR}>
         <Card
           sx={{
-            ...sxClasses.panelCard,
+            ...memoSxClasses.panelCard,
             display: open ? 'block' : 'none',
             ...(panelStyles?.panelCard && { ...panelStyles.panelCard }),
           }}
@@ -168,7 +168,7 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
             }
           />
 
-          <CardContent sx={{ ...sxClasses.panelCardContent, ...(panelStyles ? panelStyles.panelCardContent : {}) }}>
+          <CardContent sx={{ ...memoSxClasses.panelCardContent, ...(panelStyles ? panelStyles.panelCardContent : {}) }}>
             {typeof panel.content === 'string' ? <UseHtmlToReact htmlContent={panel.content} /> : panel.content}
           </CardContent>
         </Card>

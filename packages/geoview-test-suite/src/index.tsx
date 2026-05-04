@@ -23,7 +23,7 @@ class TestSuitePlugin extends AbstractPlugin {
   testSuites: GVAbstractTestSuite[] = [];
 
   /** Indicates the number of suites that completed their tests (the suites are run synchronously) */
-  #suitesCompleted: number = 0;
+  #suitesCompleted = 0;
 
   /** Callback delegates for the test started event */
   #onSuiteTestersTestStartedHandlers: SuiteTesterTestDelegate[] = [];

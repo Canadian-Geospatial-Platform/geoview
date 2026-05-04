@@ -117,7 +117,7 @@ export class LayerController extends AbstractMapViewerController {
   #layerDomain: LayerDomain;
 
   /** Used to keep a reference of highlighted layer */
-  #highlightedLayerPath: string = '';
+  #highlightedLayerPath = '';
 
   /** Stores the original opacity of the highlighted layer (and its leaf children for groups) so it can be restored on unhighlight. */
   #highlightedLayerOriginalOpacity: Map<string, number> = new Map();
@@ -126,7 +126,7 @@ export class LayerController extends AbstractMapViewerController {
   #layersBeingDeleted: Record<string, LayerDeletionJob> = {};
 
   /** Flag indicating if the controller is currently handling layer item visibility adjustments (batch processing) */
-  #isBatchingLayerItemsVisibility: boolean = false;
+  #isBatchingLayerItemsVisibility = false;
 
   /** The bounded reference to the handle layer entry config registered */
   #boundedHandleDomainLayerEntryConfigRegistered: DomainLayerStatusChangedDelegate;
@@ -1090,7 +1090,7 @@ export class LayerController extends AbstractMapViewerController {
    * @param layerPath - The path of the layer to remove
    * @param removeSublayers - Should sublayers be removed
    */
-  removeOrderedLayerPath(layerPath: string, removeSublayers: boolean = true): void {
+  removeOrderedLayerPath(layerPath: string, removeSublayers = true): void {
     const orderedLayers = getStoreLayerOrderedLayerPaths(this.getMapId());
     const newOrderedLayers = removeSublayers
       ? orderedLayers.filter((path) => !path.startsWith(`${layerPath}/`) && path !== layerPath)
@@ -2282,7 +2282,11 @@ export class LayerController extends AbstractMapViewerController {
           });
 
           // Notify the user
-          this.getMapViewer().notifications.showWarning('warning.layer.layerCRSNotSupported', [mapProj, event.layer.getLayerName()], true);
+          this.getMapViewer().notifications.showWarning(
+            'warning.layer.layerCRSNotSupported',
+            { mapProj, layerName: event.layer.getLayerName() },
+            true
+          );
 
           // Force a refresh so the layer gets drawn with the overridden CRS
           event.layer.refresh(this.getMapViewer().getProjection());

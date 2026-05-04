@@ -235,21 +235,28 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
       const chunks = [];
       let i = 0;
 
-      uiController.addMessage('info', 'dataTable.downloadAsGeoJSONMessage', [`${t('general.started')}...`]);
+      uiController.addMessage('info', 'dataTable.downloadAsGeoJSONMessage', {
+        message: `${t('general.started')}...`,
+      });
       for await (const chunk of jsonGenerator) {
         chunks.push(chunk);
         i++;
 
         // Update progress here
         const count = i * 100 < rows.length ? i * 100 : rows.length;
-        uiController.addMessage('info', 'general.processing', [String(count), String(rows.length)]);
+        uiController.addMessage('info', 'general.processing', {
+          count: String(count),
+          total: String(rows.length),
+        });
       }
 
       const fullJson = chunks.join('');
       const blob = new Blob([fullJson], { type: 'application/json' });
       exportBlob(blob, `table-${layerName.replaceAll(' ', '-')}.json`);
     } catch (error: unknown) {
-      uiController.addMessage('error', 'dataTable.downloadAsGeoJSONMessage', [t('general.failed')]);
+      uiController.addMessage('error', 'dataTable.downloadAsGeoJSONMessage', {
+        message: t('general.failed'),
+      });
       logger.logError('Download GeoJSON failed:', error);
     } finally {
       setIsExporting(false);

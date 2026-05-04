@@ -687,7 +687,7 @@ export class EsriUtilities {
   static async queryRecordsByUrl(
     url: string,
     geometryType: TypeStyleGeometry | undefined,
-    parseFeatureInfoEntries: boolean = true
+    parseFeatureInfoEntries = true
   ): Promise<TypeFeatureInfoEntryPartial[]> {
     // Query the data
     const respJson = await Fetch.fetchEsriJson<EsriRelatedRecordsJsonResponse>(url);
@@ -738,7 +738,7 @@ export class EsriUtilities {
     geometry: boolean,
     outSR?: number,
     maxOffset?: number,
-    parseFeatureInfoEntries: boolean = true
+    parseFeatureInfoEntries = true
   ): Promise<TypeFeatureInfoEntryPartial[]> {
     // Offset
     const offset = maxOffset !== undefined ? `&maxAllowableOffset=${maxOffset}` : '';

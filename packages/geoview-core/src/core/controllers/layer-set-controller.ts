@@ -143,7 +143,7 @@ export class LayerSetController extends AbstractMapViewerController {
    * @param layerPath - The layer path to query the features from
    * @returns A promise that resolves with the feature info result
    */
-  async triggerGetAllFeatureInfo(layerPath: string, waitForLayer: boolean = false): Promise<TypeFeatureInfoResult> {
+  async triggerGetAllFeatureInfo(layerPath: string, waitForLayer = false): Promise<TypeFeatureInfoResult> {
     // If the layer isn't in the domain yet, give it a chance to get registered
     if (waitForLayer) {
       // Wait for the layer to be available, this can happen if the trigger is called too soon (or between the layer config registration and the actual layer registration)
@@ -309,7 +309,7 @@ export class LayerSetController extends AbstractMapViewerController {
 
     const layerPathNodes = layerPath.split('/');
 
-    const setLayerControls = (layerConfig: ConfigBaseClass, isChild: boolean = false, layer?: AbstractBaseGVLayer): TypeLayerControls => {
+    const setLayerControls = (layerConfig: ConfigBaseClass, isChild = false, layer?: AbstractBaseGVLayer): TypeLayerControls => {
       const removeDefault = isChild ? getStoreMapConfigGlobalSettings(this.getMapId())?.canRemoveSublayers !== false : true;
 
       // Check if the layer has a minZoom or maxZoom defined, so we know if it needs the visible scale button.

@@ -67,7 +67,7 @@ export class MapFeatureConfig {
   serviceUrls: TypeServiceUrls;
 
   /** Indicates whether schema validation errors were detected during configuration parsing. */
-  hasSchemaErrors: boolean = false;
+  hasSchemaErrors = false;
 
   /**
    * The schema version used to validate the configuration file. The schema should enumerate the list of versions accepted by

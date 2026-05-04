@@ -253,7 +253,7 @@ export abstract class DateMgt {
     inputFormat?: string | string[],
     inputTimezone?: TimeIANA,
     temporalMode: TemporalMode = this.DEFAULT_TEMPORAL_MODE,
-    strict: boolean = false
+    strict = false
   ): Dayjs {
     // Epoch / Date inputs
     if (typeof date === 'number' || date instanceof Date) {
@@ -292,12 +292,7 @@ export abstract class DateMgt {
    * @returns A Dayjs object representing the parsed instant
    * @throws {InvalidTimezoneError} When the time zone is not a valid or supported IANA identifier
    */
-  static parseInstantDate(
-    date: string,
-    inputFormat?: string | string[],
-    inputTimezone: TimeIANA = this.TIME_UTC,
-    strict: boolean = false
-  ): Dayjs {
+  static parseInstantDate(date: string, inputFormat?: string | string[], inputTimezone: TimeIANA = this.TIME_UTC, strict = false): Dayjs {
     let formats = undefined;
     if (inputFormat) {
       formats = this.#buildInputFormats(inputFormat);
@@ -334,7 +329,7 @@ export abstract class DateMgt {
    * @param strict - Optional, whether to enforce strict parsing when using custom formats
    * @returns Dayjs instance normalized to UTC using calendar semantics
    */
-  static parseCalendarDate(date: string, inputFormat?: string | string[], strict: boolean = false): Dayjs {
+  static parseCalendarDate(date: string, inputFormat?: string | string[], strict = false): Dayjs {
     let formats = undefined;
     if (inputFormat) {
       formats = this.#buildInputFormats(inputFormat);
@@ -472,7 +467,7 @@ export abstract class DateMgt {
     temporalMode: TemporalMode = this.DEFAULT_TEMPORAL_MODE,
     inputFormat?: string | string[],
     inputTimezone?: TimeIANA,
-    withZ: boolean = false
+    withZ = false
   ): string {
     // Parse the output timezone
     let theOutputTimezone = outputTimezone;
@@ -822,7 +817,7 @@ export abstract class DateMgt {
   static createDimensionFromESRI(
     timeDimensionESRI: TimeDimensionESRI,
     displayDateMode: DisplayDateMode | undefined,
-    singleHandle: boolean = false
+    singleHandle = false
   ): TimeDimension {
     const { startTimeField, timeExtent, timeInterval, timeIntervalUnits } = timeDimensionESRI;
 

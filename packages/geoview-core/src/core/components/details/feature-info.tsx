@@ -102,9 +102,12 @@ const FeatureHeader = memo(function FeatureHeader({
   onCheckChange,
   onZoomIn,
   onGeochart,
-}: FeatureHeaderProps) {
+}: FeatureHeaderProps): JSX.Element {
+  // Log
+  logger.logTraceRender('components/details/feature-info > FeatureHeader');
+
   // Hooks
-  const { t } = useTranslation();
+  const { t } = useTranslation<string>();
   const theme = useTheme();
   const memoSxClasses = useMemo(() => {
     logger.logTraceUseMemo('FEATURE-INFO - FeatureHeader - memoSxClasses', theme);
@@ -149,7 +152,7 @@ const FeatureHeader = memo(function FeatureHeader({
           ...memoSxClasses.flexBoxAlignCenter,
           [theme.breakpoints.down('sm')]: { display: 'none' },
         }}
-        aria-label={t('details.featureActions')!}
+        aria-label={t('details.featureActions')}
       >
         {/* Hidden in WCAG mode - keyboard users can Tab to layer panel instead */}
         {hasGeochart && !isFocusTrap && (

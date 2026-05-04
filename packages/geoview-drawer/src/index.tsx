@@ -148,8 +148,7 @@ class DrawerPlugin extends NavBarPlugin {
     // TO.DOCONT: on language switch, the tooltip for both button are not updated as well...
     // TO.DOCONT: Related to nav-bar.tsx.handleNavApiAddButtonPanel and nav-bar.tsx.renderButtonPanelGroup via an event from nav-bar-api and the UI-react isn't aware of the button creation
     // TO.DOCONT: Need cleanup of nav-bar, app-bar and footer-bar api's
-    const t = (key: string): string => this.translate?.getI18n().t(key) ?? key;
-    return createDrawerButtons(this.getConfig(), t);
+    return createDrawerButtons(this.getConfig());
   }
 }
 

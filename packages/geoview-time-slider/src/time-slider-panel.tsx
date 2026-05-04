@@ -18,7 +18,7 @@ import {
   useStoreLayerStatusSet,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
 import { Box } from 'geoview-core/ui';
-import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
+import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { logger } from 'geoview-core/core/utils/logger';
 import { CONTAINER_TYPE, TABS } from 'geoview-core/core/utils/constant';
 
@@ -48,6 +48,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
 
   // get values from store
   const displayLanguage = useStoreAppDisplayLanguage();
+  const { t } = useTranslation<string>();
   const layerHiddenSet = useStoreLayerIsHiddenOnMapSet();
   const visibleInRangeLayers = useStoreLayerAllVisibleAndInRangeLayers();
   const layerNames = useStoreLayerNameSet();
@@ -224,7 +225,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
       layerList={memoLayersList}
       guideContentIds={['timeSlider']}
       containerType={CONTAINER_TYPE.FOOTER_BAR}
-      titleFullscreen={getLocalizedMessage(displayLanguage, 'timeSlider.title')}
+      titleFullscreen={t('timeSlider.title')}
     >
       {renderContent()}
     </Layout>

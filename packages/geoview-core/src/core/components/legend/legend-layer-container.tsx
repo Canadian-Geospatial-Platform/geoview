@@ -58,7 +58,7 @@ const WMSLegendImage = memo(
     // Log
     logger.logTraceRender('components/legend/legend-layer-container - WMSLegendImage');
 
-    const { t } = useTranslation();
+    const { t } = useTranslation<string>();
     const id = useId();
     const buttonId = `${mapId}-${containerType}-legend-image-btn-${id}`; // Create unique ID for focus management after lightbox closes
     const altText = title ? `${t('legend.title')}, ${title}` : t('legend.title');
@@ -72,7 +72,7 @@ const WMSLegendImage = memo(
           onClick={() => initLightBox(imgSrc, altText, buttonId, 0)}
           tooltip={t('general.enlargeImage')}
           tooltipPlacement="top"
-          aria-label={title ? t('general.enlargeImageName', { title })! : t('general.enlargeImage')} // WCAG - Descriptive aria-label for screen readers
+          aria-label={title ? t('general.enlargeImageName', { title }) : t('general.enlargeImage')} // WCAG - Descriptive aria-label for screen readers
           disableRipple
         >
           <Box component="img" src={imgSrc} alt={altText} sx={sxClasses.wmsImage} />
@@ -98,7 +98,7 @@ export const CollapsibleContent = memo(function CollapsibleContent({
   // Hooks
   const mapId = useStoreGeoViewMapId();
   const theme = useTheme();
-  const sxClasses = useMemo(() => {
+  const memoSxClasses = useMemo(() => {
     logger.logTraceUseMemo('components/legend/legend-layer-container - CollapsibleContent - sxClasses', theme);
     return getSxClasses(theme);
   }, [theme]);
@@ -122,7 +122,7 @@ export const CollapsibleContent = memo(function CollapsibleContent({
         imgSrc={layerIcons[0].iconImage!}
         initLightBox={initLightBox}
         legendExpanded={!isCollapsed}
-        sxClasses={sxClasses}
+        sxClasses={memoSxClasses}
         title={layerName}
         mapId={mapId}
         containerType={containerType}
@@ -137,7 +137,7 @@ export const CollapsibleContent = memo(function CollapsibleContent({
       role="region" // WCAG - aria-labelledby requires the region role to be announced by screen readers
       aria-labelledby={layerNameId} // WCAG - Link collapsible content to its header using aria-labelledby and matching IDs
       in={!isCollapsed}
-      sx={sxClasses.collapsibleContainer}
+      sx={memoSxClasses.collapsibleContainer}
       timeout="auto"
       unmountOnExit
     >

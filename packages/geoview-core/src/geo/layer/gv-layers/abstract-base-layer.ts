@@ -13,7 +13,7 @@ import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
  */
 export abstract class AbstractBaseGVLayer {
   /** Indicates if the layer has become in loaded status at least once already */
-  loadedOnce: boolean = false;
+  loadedOnce = false;
 
   /** The OpenLayer layer // '!' is used here, because the children constructors are supposed to create the olLayer. */
   #olLayer!: BaseLayer;
@@ -90,7 +90,7 @@ export abstract class AbstractBaseGVLayer {
    * @param emitOpacityChanged - Optional, whether to emit a layer opacity changed event after
    * updating the opacity. Defaults to true.
    */
-  protected onSetOpacity(opacity: number, emitOpacityChanged: boolean = true): void {
+  protected onSetOpacity(opacity: number, emitOpacityChanged = true): void {
     // Get the parent of the layer
     const parent = this.getParent();
 
@@ -130,7 +130,7 @@ export abstract class AbstractBaseGVLayer {
    * @param zIndex - The desired z-index for the layer.
    * @param emitZIndexChanged - Optional, whether to emit a z-index changed event after updating the z-index. Defaults to true.
    */
-  protected onSetZIndex(zIndex: number, emitZIndexChanged: boolean = true): void {
+  protected onSetZIndex(zIndex: number, emitZIndexChanged = true): void {
     // Internally set the z-index on the actual OL object
     this.getOLLayer().setZIndex(zIndex);
 
@@ -391,7 +391,7 @@ export abstract class AbstractBaseGVLayer {
    * @param emitOpacityChanged - Optional, whether to emit a layer opacity change event after
    * updating the opacity. Defaults to true.
    */
-  setOpacity(opacity: number, emitOpacityChanged: boolean = true): void {
+  setOpacity(opacity: number, emitOpacityChanged = true): void {
     // Redirect
     this.onSetOpacity(opacity, emitOpacityChanged);
   }
@@ -461,7 +461,7 @@ export abstract class AbstractBaseGVLayer {
    * @param zIndex - The z-index of the layer.
    * @param emitZIndexChanged - Optional, whether to emit a z-index changed event after updating the z-index. Defaults to true.
    */
-  setZIndex(zIndex: number, emitZIndexChanged: boolean = true): void {
+  setZIndex(zIndex: number, emitZIndexChanged = true): void {
     this.onSetZIndex(zIndex, emitZIndexChanged);
   }
 

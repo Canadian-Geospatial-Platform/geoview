@@ -102,8 +102,8 @@ export class ConfigTester extends GVAbstractTester {
     expectedTypeFirstLayerEntry: ClassType<GroupLayerEntryConfig | EsriDynamicLayerEntryConfig>
   ): Promise<Test<TypeGeoviewLayerConfig>> {
     // Dummy names
-    const gvLayerId: string = 'gvLayerId';
-    const gvLayerName: string = 'gvLayerName';
+    const gvLayerId = 'gvLayerId';
+    const gvLayerName = 'gvLayerName';
     const gvLayerType: TypeGeoviewLayerType = 'esriDynamic';
 
     // Complete the expected config by adding the geoviewLayerId and geoviewLayerName
@@ -226,8 +226,8 @@ export class ConfigTester extends GVAbstractTester {
    */
   testEsriFeature(testName: string, url: string, expectedConfig: Record<string, unknown>): Promise<Test<TypeGeoviewLayerConfig>> {
     // Dummy names
-    const gvLayerId: string = 'gvLayerId';
-    const gvLayerName: string = 'gvLayerName';
+    const gvLayerId = 'gvLayerId';
+    const gvLayerName = 'gvLayerName';
     const gvLayerType: TypeGeoviewLayerType = 'esriFeature';
 
     // Complete the expected config by adding the geoviewLayerId and geoviewLayerName
@@ -314,8 +314,8 @@ export class ConfigTester extends GVAbstractTester {
    */
   testEsriImage(testName: string, url: string, expectedConfig: Record<string, unknown>): Promise<Test<TypeGeoviewLayerConfig>> {
     // Dummy names
-    const gvLayerId: string = 'gvLayerId';
-    const gvLayerName: string = 'gvLayerName';
+    const gvLayerId = 'gvLayerId';
+    const gvLayerName = 'gvLayerName';
     const gvLayerType: TypeGeoviewLayerType = 'esriImage';
 
     // Complete the expected config by adding the geoviewLayerId and geoviewLayerName
@@ -385,10 +385,10 @@ export class ConfigTester extends GVAbstractTester {
     const url = ConfigTester.OWS_MUNDIALIS;
 
     // Dummy names
-    const gvLayerId: string = 'gvLayerId';
+    const gvLayerId = 'gvLayerId';
     const gvLayerType: TypeGeoviewLayerType = 'ogcWms';
-    const gvLayerName: string = 'OpenStreetMap WMS';
-    const fullSubLayers: boolean = true;
+    const gvLayerName = 'OpenStreetMap WMS';
+    const fullSubLayers = true;
 
     // Expected config
     const expectedConfig = {
@@ -444,10 +444,10 @@ export class ConfigTester extends GVAbstractTester {
     const url = ConfigTester.OWS_MUNDIALIS;
 
     // Dummy names
-    const gvLayerId: string = 'gvLayerId';
+    const gvLayerId = 'gvLayerId';
     const gvLayerType: TypeGeoviewLayerType = 'ogcWms';
-    const gvLayerName: string = 'OpenStreetMap WMS';
-    const fullSubLayers: boolean = false;
+    const gvLayerName = 'OpenStreetMap WMS';
+    const fullSubLayers = false;
 
     // Expected config
     const expectedConfig = {
@@ -496,10 +496,10 @@ export class ConfigTester extends GVAbstractTester {
     const url = GVAbstractTester.DATACUBE_MSI;
 
     // Dummy names
-    const gvLayerId: string = 'gvLayerId';
+    const gvLayerId = 'gvLayerId';
     const gvLayerType: TypeGeoviewLayerType = 'ogcWms';
-    const gvLayerName: string = 'Layers / Couches';
-    const fullSubLayers: boolean = true;
+    const gvLayerName = 'Layers / Couches';
+    const fullSubLayers = true;
 
     // Expected config
     const expectedConfig = {
@@ -561,10 +561,10 @@ export class ConfigTester extends GVAbstractTester {
     const url = GVAbstractTester.DATACUBE_MSI;
 
     // Dummy names
-    const gvLayerId: string = 'gvLayerId';
+    const gvLayerId = 'gvLayerId';
     const gvLayerType: TypeGeoviewLayerType = 'ogcWms';
-    const gvLayerName: string = 'Layers / Couches';
-    const fullSubLayers: boolean = false;
+    const gvLayerName = 'Layers / Couches';
+    const fullSubLayers = false;
 
     // Expected config
     const expectedConfig = {
@@ -643,9 +643,9 @@ export class ConfigTester extends GVAbstractTester {
     const url = GVAbstractTester.GEOMET_URL;
 
     // Dummy names
-    const gvLayerId: string = 'gvLayerId';
+    const gvLayerId = 'gvLayerId';
     const gvLayerType: TypeGeoviewLayerType = 'ogcWfs';
-    const gvLayerName: string = 'Current Conditions';
+    const gvLayerName = 'Current Conditions';
 
     // Expected config
     const expectedConfig = {
@@ -746,9 +746,9 @@ export class ConfigTester extends GVAbstractTester {
     const url = GVAbstractTester.GEOJSON_METADATA_META;
 
     // Dummy names
-    const gvLayerId: string = 'gvLayerId';
+    const gvLayerId = 'gvLayerId';
     const gvLayerType: TypeGeoviewLayerType = 'GeoJSON';
-    const gvLayerName: string = 'GeojsonLayer';
+    const gvLayerName = 'GeojsonLayer';
 
     // Expected config
     const expectedConfig = {
@@ -797,9 +797,9 @@ export class ConfigTester extends GVAbstractTester {
     const url = `${GVAbstractTester.GEOJSON_DATASET_ROOT}/${GVAbstractTester.GEOJSON_GEOMETRY_COLLECTION}`;
 
     // Dummy names
-    const gvLayerId: string = 'gvLayerId';
+    const gvLayerId = 'gvLayerId';
     const gvLayerType: TypeGeoviewLayerType = 'GeoJSON';
-    const gvLayerName: string = 'GeojsonGeometryCollectionLayer';
+    const gvLayerName = 'GeojsonGeometryCollectionLayer';
 
     // Expected config
     const expectedConfig = {
@@ -874,7 +874,7 @@ export class ConfigTester extends GVAbstractTester {
    */
   testGeoJSONBadUrlExpectError(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
     // The bad url ending in .meta
-    const urlBad: string = 'https://badurl/oops/metadata.meta';
+    const urlBad = 'https://badurl/oops/metadata.meta';
 
     // Test
     return this.testError(
@@ -904,9 +904,9 @@ export class ConfigTester extends GVAbstractTester {
     const url = GVAbstractTester.CSV_STATION_LIST;
 
     // Dummy names
-    const gvLayerId: string = 'gvLayerId';
+    const gvLayerId = 'gvLayerId';
     const gvLayerType: TypeGeoviewLayerType = 'CSV';
-    const gvLayerName: string = 'CSVLayer';
+    const gvLayerName = 'CSVLayer';
 
     // Expected config
     const expectedConfig = {
@@ -987,9 +987,9 @@ export class ConfigTester extends GVAbstractTester {
     const url = GVAbstractTester.PYGEOAPI_B6RYUVAKK5;
 
     // Dummy names
-    const gvLayerId: string = 'gvLayerId';
+    const gvLayerId = 'gvLayerId';
     const gvLayerType: TypeGeoviewLayerType = 'ogcFeature';
-    const gvLayerName: string = 'OGCLayer';
+    const gvLayerName = 'OGCLayer';
 
     // Expected config
     const expectedConfig = {
@@ -1065,9 +1065,9 @@ export class ConfigTester extends GVAbstractTester {
     const url = GVAbstractTester.WKB_SOUTH_AFRICA;
 
     // Dummy names
-    const gvLayerId: string = 'gvLayerId';
+    const gvLayerId = 'gvLayerId';
     const gvLayerType: TypeGeoviewLayerType = 'WKB';
-    const gvLayerName: string = 'WKBLayer';
+    const gvLayerName = 'WKBLayer';
 
     // Expected config
     const expectedConfig = {
@@ -1117,7 +1117,7 @@ export class ConfigTester extends GVAbstractTester {
    */
   testWKBBadUrlExpectFail(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
     // The bad url
-    const urlBad: string = 'https://badurl/oops/metadata.meta';
+    const urlBad = 'https://badurl/oops/metadata.meta';
 
     // Test
     return this.testError(`Test a WKB config with a bad url...`, LayerServiceMetadataUnableToFetchError, async (test) => {
@@ -1143,9 +1143,9 @@ export class ConfigTester extends GVAbstractTester {
     const url = GVAbstractTester.KML_TORNADO;
 
     // Dummy names
-    const gvLayerId: string = 'gvLayerId';
+    const gvLayerId = 'gvLayerId';
     const gvLayerType: TypeGeoviewLayerType = 'KML';
-    const gvLayerName: string = 'KMLLayer';
+    const gvLayerName = 'KMLLayer';
 
     // Expected config
     const expectedConfig = {
@@ -1227,9 +1227,9 @@ export class ConfigTester extends GVAbstractTester {
     const url = GVAbstractTester.GEOTIFF_VEGETATION;
 
     // Dummy names
-    const gvLayerId: string = 'gvLayerId';
+    const gvLayerId = 'gvLayerId';
     const gvLayerType: TypeGeoviewLayerType = 'GeoTIFF';
-    const gvLayerName: string = 'GeoTIFFLayer';
+    const gvLayerName = 'GeoTIFFLayer';
 
     // Expected config
     const expectedConfig = {

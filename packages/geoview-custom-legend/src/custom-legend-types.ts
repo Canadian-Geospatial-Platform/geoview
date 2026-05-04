@@ -80,7 +80,7 @@ export const isGroupLayer = (item: TypeLegendItem): item is TypeGroupLayer => {
  * @param parentPath - Optional parent path for nested items
  * @returns A unique identifier
  */
-export function generateLegendItemId(item: TypeLegendItem, index: number, language: 'en' | 'fr', parentPath: string = ''): string {
+export function generateLegendItemId(item: TypeLegendItem, index: number, language: 'en' | 'fr', parentPath = ''): string {
   const basePath = parentPath ? `${parentPath}/` : '';
 
   if (isLegendLayer(item)) {

@@ -32,7 +32,7 @@ import { GeoviewTextRenderer } from '@/geo/utils/renderer/geoview-text-renderer'
  */
 export abstract class AbstractGVVector extends AbstractGVLayer {
   /** Indicates if the style has been applied on the layer yet */
-  styleApplied: boolean = false;
+  styleApplied = false;
 
   /** Callback delegates for the style applied event */
   #onStyleAppliedHandlers: StyleAppliedDelegate[] = [];
@@ -41,7 +41,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   #textOLLayer?: VectorLayer<VectorSource<Feature<Geometry>>>;
 
   /** Indicates if the text layer is visible */
-  #textVisible: boolean = true;
+  #textVisible = true;
 
   /** Callback delegates for the text visible changed event */
   #onTextVisibleChangedHandlers: TextVisibleChangedDelegate[] = [];
@@ -186,7 +186,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * @param opacity - The opacity value to set.
    * @param emitOpacityChanged - Whether to emit the opacity changed event.
    */
-  protected override onSetOpacity(opacity: number, emitOpacityChanged: boolean = true): void {
+  protected override onSetOpacity(opacity: number, emitOpacityChanged = true): void {
     // Call parent to handle geometry layer
     super.onSetOpacity(opacity, emitOpacityChanged);
 
@@ -200,7 +200,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * @param zIndex - The z-index value to set.
    * @param emitZIndexChanged - Whether to emit the z-index changed event.
    */
-  protected override onSetZIndex(zIndex: number, emitZIndexChanged: boolean = true): void {
+  protected override onSetZIndex(zIndex: number, emitZIndexChanged = true): void {
     // Set z-index for geometry layer
     super.onSetZIndex(zIndex, emitZIndexChanged);
 
@@ -312,7 +312,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     map: OLMap,
     location: Coordinate,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    queryGeometry: boolean = true,
+    queryGeometry = true,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoResult> {
@@ -333,7 +333,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     map: OLMap,
     lonlat: Coordinate,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    queryGeometry: boolean = true,
+    queryGeometry = true,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoResult> {

@@ -13,9 +13,9 @@ import {
   useStoreSwiperOrientation,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/swiper-state';
 import { logger } from 'geoview-core/core/utils/logger';
-import { getLocalizedMessage, delay } from 'geoview-core/core/utils/utilities';
+import { delay } from 'geoview-core/core/utils/utilities';
+import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { debounce } from 'geoview-core/core/utils/debounce';
-import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 import { useStoreMapSize } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
 import { useStoreLayerVisibleLayers } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
@@ -94,7 +94,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
 
   // Get store values
   const layerPaths = useStoreSwiperLayerPaths();
-  const displayLanguage = useStoreAppDisplayLanguage();
+  const { t } = useTranslation<string>();
   const visibleLayers = useStoreLayerVisibleLayers();
   const orientation = useStoreSwiperOrientation();
 
@@ -377,7 +377,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
             tabIndex={0}
             ref={swiperRef}
           >
-            <Tooltip title={getLocalizedMessage(displayLanguage, 'swiper.tooltip')}>
+            <Tooltip title={t('swiper.tooltip')}>
               <Box className="handleContainer">
                 <HandleIcon sx={memoSxClasses.handle} className="handleL" />
                 <HandleIcon sx={memoSxClasses.handle} className="handleR" />

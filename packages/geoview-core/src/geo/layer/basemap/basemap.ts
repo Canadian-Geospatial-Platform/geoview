@@ -46,7 +46,7 @@ export class BasemapApi {
   static DEFAULT_WAIT_PERIOD_BASEMAP_WARNING = 5 * 1000; // 5 seconds
 
   /** Indicates if the basemap has been created successfully */
-  created: boolean = false;
+  created = false;
 
   /** The active basemap */
   activeBasemap?: TypeBasemapProps;

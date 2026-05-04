@@ -48,7 +48,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
   #fetchWorkerPool: FetchEsriWorkerPool;
 
   /** The default hit tolerance the query should be using */
-  static override DEFAULT_HIT_TOLERANCE: number = 7;
+  static override DEFAULT_HIT_TOLERANCE = 7;
 
   /**
    * Constructs a GVEsriDynamic layer to manage an OpenLayer layer.
@@ -345,7 +345,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
   protected override getFeatureInfoAtCoordinate(
     map: OLMap,
     location: Coordinate,
-    queryGeometry: boolean = true,
+    queryGeometry = true,
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoResult> {
     // Transform coordinate from map projection to lntlat
@@ -368,7 +368,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
   protected override async getFeatureInfoAtLonLat(
     map: OLMap,
     lonlat: Coordinate,
-    queryGeometry: boolean = true,
+    queryGeometry = true,
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoResult> {
     // The FeatureInfoResult object that will be returned
@@ -675,11 +675,11 @@ export class GVEsriDynamic extends AbstractGVRaster {
           messageKey = 'layers.fetchProgress';
         }
 
-        this.emitMessage(messageKey, [processed, total], 'info');
+        this.emitMessage(messageKey, { processed, total }, 'info');
         break;
       }
       case 'error':
-        this.emitMessage('error.layer.notAbleToQuery', [this.getLayerName()], 'error');
+        this.emitMessage('error.layer.notAbleToQuery', { layerName: this.getLayerName() }, 'error');
         break;
       default:
         break;

@@ -35,7 +35,7 @@ export class Notifications {
    * @param messageKey - The message or a locale key to retrieve
    * @param params - Array of parameters to replace, i.e. ['short']
    */
-  #addNotification(type: NotificationType, messageKey: string, params: unknown[]): void {
+  #addNotification(type: NotificationType, messageKey: string, params: Record<string, unknown>): void {
     const notification: NotificationDetailsType = {
       key: generateId(18),
       notificationType: type,
@@ -59,7 +59,7 @@ export class Notifications {
    * @param messageKey - The message or a locale key to retrieve
    * @param params - Optional array of parameters to replace, i.e. ['short']
    */
-  addNotificationMessage(messageKey: string, params: unknown[] = []): void {
+  addNotificationMessage(messageKey: string, params: Record<string, unknown> = {}): void {
     // Redirect
     this.#addNotification('info', messageKey, params);
   }
@@ -70,7 +70,7 @@ export class Notifications {
    * @param messageKey - The message or a locale key to retrieve
    * @param params - Optional array of parameters to replace, i.e. ['short']
    */
-  addNotificationSuccess(messageKey: string, params: unknown[] = []): void {
+  addNotificationSuccess(messageKey: string, params: Record<string, unknown> = {}): void {
     // Redirect
     this.#addNotification('success', messageKey, params);
   }
@@ -81,7 +81,7 @@ export class Notifications {
    * @param messageKey - The message or a locale key to retrieve
    * @param params - Optional array of parameters to replace, i.e. ['short']
    */
-  addNotificationWarning(messageKey: string, params: unknown[] = []): void {
+  addNotificationWarning(messageKey: string, params: Record<string, unknown> = {}): void {
     // Redirect
     this.#addNotification('warning', messageKey, params);
   }
@@ -92,7 +92,7 @@ export class Notifications {
    * @param messageKey - The message or a locale key to retrieve
    * @param params - Optional array of parameters to replace, i.e. ['short']
    */
-  addNotificationError(messageKey: string, params: unknown[] = []): void {
+  addNotificationError(messageKey: string, params: Record<string, unknown> = {}): void {
     // Redirect
     this.#addNotification('error', messageKey, params);
   }
@@ -109,7 +109,7 @@ export class Notifications {
    * @param params - Array of parameters to replace, i.e. ['short']
    * @param button - Optional snackbar button
    */
-  #showSnackbarMessage(type: SnackbarType, messageKey: string, params: unknown[], button?: ISnackbarButton): void {
+  #showSnackbarMessage(type: SnackbarType, messageKey: string, params: Record<string, unknown>, button?: ISnackbarButton): void {
     // Get the localized message
     const message = getLocalizedMessage(this.#uiController.getDisplayLanguage(), messageKey, params);
 
@@ -134,7 +134,7 @@ export class Notifications {
   #addSnackbarMessage(
     type: SnackbarType,
     messageKey: string,
-    params: unknown[],
+    params: Record<string, unknown>,
     withNotification: boolean,
     button?: ISnackbarButton
   ): void {
@@ -208,7 +208,7 @@ export class Notifications {
    * @param withNotification - Optional, indicates if the message should also be added as a notification (default true)
    * @param button - Optional snackbar button
    */
-  showMessage(messageKey: string, params: unknown[] = [], withNotification: boolean = true, button: ISnackbarButton = {}): void {
+  showMessage(messageKey: string, params: Record<string, unknown> = {}, withNotification = true, button: ISnackbarButton = {}): void {
     // Redirect
     this.#addSnackbarMessage('info', messageKey, params, withNotification, button);
     if (withNotification) this.addNotificationMessage(messageKey, params);
@@ -222,7 +222,7 @@ export class Notifications {
    * @param withNotification - Optional, indicates if the message should also be added as a notification (default true)
    * @param button - Optional snackbar button
    */
-  showSuccess(messageKey: string, params: unknown[] = [], withNotification: boolean = true, button: ISnackbarButton = {}): void {
+  showSuccess(messageKey: string, params: Record<string, unknown> = {}, withNotification = true, button: ISnackbarButton = {}): void {
     // Redirect
     this.#addSnackbarMessage('success', messageKey, params, withNotification, button);
     if (withNotification) this.addNotificationSuccess(messageKey, params);
@@ -236,7 +236,7 @@ export class Notifications {
    * @param withNotification - Optional, indicates if the message should also be added as a notification (default true)
    * @param button - Optional snackbar button
    */
-  showWarning(messageKey: string, params: unknown[] = [], withNotification: boolean = true, button: ISnackbarButton = {}): void {
+  showWarning(messageKey: string, params: Record<string, unknown> = {}, withNotification = true, button: ISnackbarButton = {}): void {
     // Also log the warning in console
     logger.logWarning(getLocalizedMessage(this.#uiController.getDisplayLanguage(), messageKey, params));
 
@@ -253,7 +253,7 @@ export class Notifications {
    * @param withNotification - Optional, indicates if the message should also be added as a notification (default true)
    * @param button - Optional snackbar button
    */
-  showError(messageKey: string, params: unknown[] = [], withNotification: boolean = true, button: ISnackbarButton = {}): void {
+  showError(messageKey: string, params: Record<string, unknown> = {}, withNotification = true, button: ISnackbarButton = {}): void {
     // Log the error in console
     logger.logError(getLocalizedMessage(this.#uiController.getDisplayLanguage(), messageKey, params));
 
@@ -269,7 +269,7 @@ export class Notifications {
    * @param withNotification - Optional, indicates if the message should also be added as a notification (default true)
    * @param button - Optional snackbar button
    */
-  showErrorFromError(error: Error | unknown, withNotification: boolean = true, button: ISnackbarButton = {}): void {
+  showErrorFromError(error: Error | unknown, withNotification = true, button: ISnackbarButton = {}): void {
     // If a GeoViewError, we know we have messageKeys for us as that's how we build our Errors
     if (error instanceof GeoViewError) {
       // Show the GeoViewError message
@@ -296,10 +296,10 @@ export class Notifications {
    * @param withNotification - Optional, indicates if the message should also be added as a notification (default true)
    * @param button - Optional snackbar button
    */
-  showErrorGeneric(withNotification: boolean = true, button: ISnackbarButton = {}): void {
+  showErrorGeneric(withNotification = true, button: ISnackbarButton = {}): void {
     // Redirect
-    this.#addSnackbarMessage('error', 'error.generic', [], withNotification, button);
-    if (withNotification) this.addNotificationError('error.generic', []);
+    this.#addSnackbarMessage('error', 'error.generic', {}, withNotification, button);
+    if (withNotification) this.addNotificationError('error.generic', {});
   }
 
   // #endregion MESSAGES
@@ -362,6 +362,6 @@ export type SnackbarType = 'success' | 'error' | 'info' | 'warning';
 export type SnackbarProps = {
   type: SnackbarType;
   messageKey: string;
-  params: unknown[];
+  params: Record<string, unknown>;
   button?: ISnackbarButton;
 };

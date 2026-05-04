@@ -1,8 +1,7 @@
 import { createSvgIcon } from '@mui/material/utils';
 import type { TypeWindow } from 'geoview-core';
 import { getSxClasses } from 'geoview-core/core/components/nav-bar/nav-bar-style';
-import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
-import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
+import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { useStoreDrawerHideMeasurements } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
 
 import { IconButton, StraightenIcon } from 'geoview-core/ui';
@@ -34,8 +33,8 @@ export default function Measurements(): JSX.Element {
 
   // Get store values
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
-  const displayLanguage = useStoreAppDisplayLanguage();
+  const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const { t } = useTranslation<string>();
   const hideMeasurements = useStoreDrawerHideMeasurements();
   const drawerController = useDrawerController();
 
@@ -49,10 +48,10 @@ export default function Measurements(): JSX.Element {
   return (
     <IconButton
       id="measure"
-      aria-label={getLocalizedMessage(displayLanguage, 'drawer.toggleMeasurements')}
+      aria-label={t('drawer.toggleMeasurements')}
       tooltipPlacement="left"
       onClick={handleToggleMeasurements}
-      sx={sxClasses.navButton}
+      sx={memoSxClasses.navButton}
     >
       {!hideMeasurements ? <StraightenIcon /> : <HideMeasurementIcon />}
     </IconButton>

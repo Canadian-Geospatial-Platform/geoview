@@ -681,7 +681,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
       <Box
         role="group"
         sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '15px', flexWrap: 'wrap', justifyContent: 'flex-end' }}
-        aria-label={t('layers.layerControls')!}
+        aria-label={t('layers.layerControls')}
       >
         {hasDataTable && renderDetailsButton()}
         {timeSliderButton}
@@ -701,7 +701,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
     if (parentHidden) return t('layers.parentHidden');
     if (!layerVisible) return t('layers.hidden');
     if (layerChildPaths && layerChildPaths.length > 0) {
-      return t('legend.subLayersCount').replace('{count}', layerChildPaths.length.toString());
+      return t('legend.subLayersCount', { count: layerChildPaths.length });
     }
     const count = layerItems?.filter((d) => d.isVisible !== false).length ?? 0;
     const totalCount = layerItems?.length ?? 0;
@@ -709,7 +709,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
     if (totalCount <= 1) {
       return null;
     }
-    return t('legend.itemsCount').replace('{count}', count.toString()).replace('{totalCount}', totalCount.toString());
+    return t('legend.itemsCount', { count, totalCount });
   })();
 
   const renderWMSImage = (): JSX.Element | null => {

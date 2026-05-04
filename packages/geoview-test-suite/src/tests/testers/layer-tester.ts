@@ -1803,8 +1803,8 @@ export class LayerTester extends GVAbstractTester {
   async helperStepCheckLayerAtLayerPath<T>(
     test: Test<T>,
     layerPath: string,
-    timeoutOnLoad: number = 30000,
-    waitStyle: boolean = true
+    timeoutOnLoad = 30000,
+    waitStyle = true
   ): Promise<AbstractGVLayer> {
     // Creating the configuration
     test.addStep(`Find the layer ${layerPath} on the map...`);

@@ -707,7 +707,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
    * @param layerConfig - The layer entry config to unregister
    * @param unregisterOrderedLayer - Should it be unregistered from orderedLayers
    */
-  #unregisterLayerConfig(layerConfig: ConfigBaseClass, unregisterOrderedLayer: boolean = true): void {
+  #unregisterLayerConfig(layerConfig: ConfigBaseClass, unregisterOrderedLayer = true): void {
     // Unregister from ordered layers
     if (unregisterOrderedLayer) {
       // Remove from ordered layers
@@ -884,7 +884,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
    * @example
    * handleLayerMessage(myLayer, {
    *   messageKey: 'layers.fetchProgress',
-   *   messageParams: [50, 100],
+   *   messageParams: { processed: 50, total: 100 },
    *   messageType: 'error',
    *   notification: true
    * });
@@ -927,7 +927,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
 
       // GV: KML currently has no style or symbology associated with it, so we warn the user
       if (geoviewLayerConfig.geoviewLayerType === CONST_LAYER_TYPES.KML)
-        this.getMapViewer().notifications.showWarning('warning.layer.kmlLayerWarning', [], true);
+        this.getMapViewer().notifications.showWarning('warning.layer.kmlLayerWarning', {}, true);
 
       // Set the layer z indices
       this.getControllersRegistry().layerController.setLayerZIndices();
@@ -993,7 +993,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
     logger.logError(`Duplicate use of geoview layer identifier ${mapConfigLayerEntry.geoviewLayerId} on map ${this.getMapId()}`);
 
     // Show the error
-    this.getMapViewer().notifications.showError('validation.layer.usedtwice', [mapConfigLayerEntry.geoviewLayerId]);
+    this.getMapViewer().notifications.showError('validation.layer.usedtwice', { layerId: mapConfigLayerEntry.geoviewLayerId });
   }
 
   // #endregion PRIVATE METHODS

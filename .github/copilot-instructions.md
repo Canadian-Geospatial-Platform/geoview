@@ -194,6 +194,27 @@ GeoView uses a lightweight typed delegate event system (see [event-helper.md](..
 
 - **NEVER use `any`** without disabling ESLint + comment explaining why
 - **Always define hook types**: `useState<TypeBasemapProps[]>([])` not `useState([])`
+- **No redundant type annotations on inferrable literals** (`@typescript-eslint/no-inferrable-types` is enforced):
+
+```typescript
+// ❌ Bad: Type is trivially inferrable from the literal
+const name: string = "default";
+let isActive: boolean = false;
+const count: number = 0;
+function reset(force: boolean = true): void {}
+
+// ✅ Good: Let TypeScript infer from literals and function return types
+const name = "default";
+let isActive = false;
+const count = 0;
+const zoom = getStoreMapZoom(mapId);
+function reset(force = true): void {}
+
+// ✅ Good: Type annotation IS needed when TypeScript cannot infer
+const layers: string[] = [];
+useState<TypeBasemapProps[]>([]);
+```
+
 - **Avoid name collisions**: Use `GVLayer` not `Layer` when OpenLayers has a `Layer` class
 
 ### String Concatenation
@@ -358,6 +379,7 @@ const handleClickWrapper = useCallback(
 **Dependency Array Hygiene:**
 
 **Remove any variable from a `useEffect`/`useCallback`/`useMemo` dependency array that is not actually used inside the hook body.** Do this proactively — do not wait to be asked. This includes:
+
 - Stable `useCallback(fn, [])` references listed out of habit
 - `useState` setters (always stable, never needed as deps)
 - Ref objects (`useRef` — always stable)

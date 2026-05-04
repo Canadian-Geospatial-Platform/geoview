@@ -1,7 +1,6 @@
 import type { TypeWindow } from 'geoview-core';
 import { getSxClasses } from 'geoview-core/core/components/nav-bar/nav-bar-style';
-import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
-import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
+import { useTranslation } from 'geoview-core/core/translation/i18n';
 
 import { IconButton, UploadIcon } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
@@ -22,8 +21,8 @@ export default function Upload(): JSX.Element {
 
   // Get store values
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
-  const displayLanguage = useStoreAppDisplayLanguage();
+  const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const { t } = useTranslation<string>();
   const drawerController = useDrawerController();
 
   /**
@@ -46,10 +45,10 @@ export default function Upload(): JSX.Element {
   return (
     <IconButton
       id="upload"
-      aria-label={getLocalizedMessage(displayLanguage, 'drawer.uploadTooltip')}
+      aria-label={t('drawer.uploadTooltip')}
       tooltipPlacement="left"
       onClick={handleUpload}
-      sx={sxClasses.navButton}
+      sx={memoSxClasses.navButton}
     >
       <UploadIcon />
     </IconButton>

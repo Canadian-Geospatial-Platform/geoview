@@ -19,7 +19,7 @@ class WorkerLogger {
    *
    * @param prefix - Optional prefix to be added to all log messages
    */
-  constructor(prefix: string = '') {
+  constructor(prefix = '') {
     this.#prefix = prefix;
   }
 

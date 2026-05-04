@@ -177,7 +177,7 @@ export class API {
    * @returns A promise that resolves with the MapViewer (after the onMapReady is triggered) which will be created from the configuration
    */
   // This function is called by the template, and since the template use the instance of the object from cgpv.api, this function has to be on the instance, not static. Refactor this?
-  async createMapFromConfig(divId: string, mapConfig: string, divHeight?: number, waitOnMapReady: boolean = true): Promise<MapViewer> {
+  async createMapFromConfig(divId: string, mapConfig: string, divHeight?: number, waitOnMapReady = true): Promise<MapViewer> {
     // Get the map div
     const mapDiv = document.getElementById(divId);
     if (!mapDiv) throw new InitDivNotExistError(divId);
@@ -257,7 +257,7 @@ export class API {
    *                                    Set to false after a language change to update the layer names with the new language
    * @returns A promise that resolves with the MapViewer which will be created once reloaded
    */
-  reloadWithCurrentState(mapId: string, maintainGeocoreLayerNames: boolean = true): Promise<MapViewer> {
+  reloadWithCurrentState(mapId: string, maintainGeocoreLayerNames = true): Promise<MapViewer> {
     // Get the map viewer
     const mapViewer = this.getMapViewer(mapId);
 

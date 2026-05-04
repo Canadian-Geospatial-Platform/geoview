@@ -195,7 +195,7 @@ export function LegendLayer({ layerPath, showControls, containerType }: LegendLa
       </Box>
       {layerStatus === 'loading' && (
         <Box sx={memoSxClasses.loading}>
-          <ProgressBar aria-label={t('layers.status.layerLoadingDescriptive', { layerName })!} />
+          <ProgressBar aria-label={t('layers.status.layerLoadingDescriptive', { layerName })} />
         </Box>
       )}
 

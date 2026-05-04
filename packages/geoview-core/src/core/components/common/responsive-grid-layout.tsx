@@ -505,12 +505,12 @@ const ResponsiveGridLayout = forwardRef(
           tooltip={isFullScreen ? t('general.closeFullscreen') : t('general.openFullscreen')}
           aria-label={
             isGuideOpen
-              ? t('general.fullScreenAriaLabel', { title: t('guide.title') })!
-              : t('general.fullScreenAriaLabel', { title: titleFullscreen })!
+              ? t('general.fullScreenAriaLabel', { title: t('guide.title') })
+              : t('general.fullScreenAriaLabel', { title: titleFullscreen })
           }
           startIcon={<FullscreenIcon />}
         >
-          {t('general.fullScreen')!}
+          {t('general.fullScreen')}
         </Button>
       );
     };

@@ -1,5 +1,8 @@
 import i18n from 'i18next';
-import { initReactI18next } from 'react-i18next';
+import { initReactI18next, useTranslation } from 'react-i18next';
+
+// Re-export useTranslation so plugin packages can import it from geoview-core
+export { useTranslation };
 
 import translationEn from '@public/locales/en/translation.json';
 import translationFr from '@public/locales/fr/translation.json';

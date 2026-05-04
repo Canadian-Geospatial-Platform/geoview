@@ -1,7 +1,6 @@
 import type { TypeWindow } from 'geoview-core';
 import { getSxClasses } from 'geoview-core/core/components/nav-bar/nav-bar-style';
-import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
-import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
+import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { useStoreDrawerIsEditing } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
 
 import { IconButton, EditIcon, EditOffIcon } from 'geoview-core/ui';
@@ -23,8 +22,8 @@ export default function Edit(): JSX.Element {
 
   // Get store values
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
-  const displayLanguage = useStoreAppDisplayLanguage();
+  const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const { t } = useTranslation<string>();
   const isEditing = useStoreDrawerIsEditing();
   const drawerController = useDrawerController();
 
@@ -38,11 +37,11 @@ export default function Edit(): JSX.Element {
   return (
     <IconButton
       id="clear"
-      aria-label={getLocalizedMessage(displayLanguage, 'drawer.edit')}
+      aria-label={t('drawer.edit')}
       tooltipPlacement="left"
       className={isEditing ? 'highlighted active' : ''}
       onClick={handleToggleEditing}
-      sx={sxClasses.navButton}
+      sx={memoSxClasses.navButton}
     >
       {isEditing ? <EditOffIcon /> : <EditIcon />}
     </IconButton>

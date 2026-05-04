@@ -256,7 +256,7 @@ export abstract class AbstractLayerSet {
     geoviewLayer: AbstractGVLayer,
     queryType: QueryType,
     location: TypeLocation,
-    queryGeometry: boolean = true,
+    queryGeometry = true,
     abortController?: AbortController
   ): Promise<TypeFeatureInfoResult> {
     // If the layer is invisible (or any of its parent(s) is invisible)

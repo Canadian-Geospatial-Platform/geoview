@@ -2,7 +2,7 @@ import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 import { logger } from 'geoview-core/core/utils/logger';
 import { useStoreLayerArrayVisibility } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
-import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
+import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { useLayerController } from 'geoview-core/core/controllers/use-controllers';
 
 import type { TypeGroupLayer, TypeLegendItem } from '../custom-legend-types';
@@ -68,6 +68,7 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
 
   const displayLanguage = useStoreAppDisplayLanguage();
   const layerController = useLayerController();
+  const { t } = useTranslation<string>();
 
   const [collapsed, setCollapsed] = useState<boolean>(isGroupLayer(item) ? (item.collapsed ?? false) : false);
 
@@ -139,10 +140,7 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
 
             {/* Sublayer count */}
             <Typography variant="caption" sx={sxClasses.groupSubLayerCount}>
-              {item.children.length}{' '}
-              {item.children.length === 1
-                ? getLocalizedMessage(displayLanguage, 'CustomLegend.layer')
-                : getLocalizedMessage(displayLanguage, 'CustomLegend.sublayers')}
+              {item.children.length} {item.children.length === 1 ? t('CustomLegend.layer') : t('CustomLegend.sublayers')}
             </Typography>
 
             {/* Action buttons */}
@@ -151,7 +149,7 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
                 onClick={handleToggleVisibility}
                 className="buttonOutline"
                 size="small"
-                aria-label={getLocalizedMessage(displayLanguage, 'layers.toggleVisibility')}
+                aria-label={t('layers.toggleVisibility')}
                 sx={{ padding: '4px' }}
               >
                 {allVisible ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon />}
@@ -165,7 +163,7 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
               onClick={handleToggleCollapse}
               size="small"
               className="buttonOutline"
-              aria-label={getLocalizedMessage(displayLanguage, 'layers.toggleCollapse')}
+              aria-label={t('layers.toggleCollapse')}
               sx={{ padding: '4px' }}
             >
               {collapsed ? <KeyboardArrowDownIcon /> : <KeyboardArrowUpIcon />}

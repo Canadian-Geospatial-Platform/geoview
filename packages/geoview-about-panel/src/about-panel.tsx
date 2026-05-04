@@ -1,6 +1,5 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
-import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
-import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
+import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { logger } from 'geoview-core/core/utils/logger';
 import { Fetch } from 'geoview-core/core/utils/fetch-helper';
 
@@ -31,13 +30,12 @@ function MarkdownFromPath(props: TypeMarkdownFromPathProps): JSX.Element {
   const { useEffect, useState } = react;
   const { Box, Typography } = ui.elements;
 
-  const displayLanguage = useStoreAppDisplayLanguage();
-
   const [content, setContent] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
 
   const theme = ui.useTheme();
   const sxClasses = getSxClasses(theme);
+  const { t } = useTranslation<string>();
 
   /**
    * Fetches and loads the markdown content when the path changes.
@@ -63,7 +61,7 @@ function MarkdownFromPath(props: TypeMarkdownFromPathProps): JSX.Element {
     return (
       <Box sx={sxClasses.errorContainer}>
         <Typography color="error">
-          {getLocalizedMessage(displayLanguage, 'AboutPanel.failed')}
+          {t('AboutPanel.failed')}
           {error}
         </Typography>
       </Box>
@@ -73,7 +71,7 @@ function MarkdownFromPath(props: TypeMarkdownFromPathProps): JSX.Element {
   if (!content) {
     return (
       <Box sx={sxClasses.loadingContainer}>
-        <Typography>{getLocalizedMessage(displayLanguage, 'AboutPanel.loading')}</Typography>
+        <Typography>{t('AboutPanel.loading')}</Typography>
       </Box>
     );
   }

@@ -29,7 +29,7 @@ export function useEventListener<T extends HTMLElement | Window = Window>(
     ? (event: WindowEventMap[keyof WindowEventMap]) => void
     : (event: HTMLElementEventMap[keyof HTMLElementEventMap]) => void,
   element?: T | null,
-  enabled: boolean = true // Add enabled parameter with default true
+  enabled = true // Add enabled parameter with default true
 ): void {
   // Keep track of the handler
   const savedHandler = useRef(handler);

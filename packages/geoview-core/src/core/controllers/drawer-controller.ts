@@ -109,7 +109,7 @@ export class DrawerController extends AbstractMapViewerController {
   #drawerHistory: DrawerHistoryAction[] = [];
 
   /** Current position in history stack for each map */
-  #historyIndex: number = -1;
+  #historyIndex = -1;
 
   /** The default icon source as a base64-encoded SVG data URI */
   static readonly DEFAULT_ICON_SOURCE =
@@ -466,7 +466,7 @@ export class DrawerController extends AbstractMapViewerController {
    *
    * @param saveHistory - Optional flag to determine whether to save this action to history (default: true)
    */
-  clearDrawings(saveHistory: boolean = true): void {
+  clearDrawings(saveHistory = true): void {
     // Get the map id
     const mapId = this.getMapId();
 
@@ -1263,6 +1263,9 @@ export class DrawerController extends AbstractMapViewerController {
     // Check if state exist and if draw instance is enable, solve error when switch lang and no draw instance
     if (!isStoreDrawerInitialized(mapId)) return [];
 
+    // Check if the geometry group exists (it may have been destroyed during language switch/map reload)
+    if (!this.getGeometryApi().hasGeometryGroup(DrawerController.DRAW_GROUP_KEY)) return [];
+
     // Get features from drawing group
     const geometryGroup = this.getGeometryApi().getGeometryGroup(DrawerController.DRAW_GROUP_KEY);
     const features = geometryGroup?.vectorSource.getFeatures();
@@ -1335,7 +1338,7 @@ export class DrawerController extends AbstractMapViewerController {
    * @param action - The action to save
    * @param insertAtCurrentIndex - Whether to create the action as the next action / as a redo
    */
-  #saveToHistory(action: DrawerHistoryAction, insertAtCurrentIndex: boolean = false): void {
+  #saveToHistory(action: DrawerHistoryAction, insertAtCurrentIndex = false): void {
     const history = this.#drawerHistory;
     const currentIndex = this.#historyIndex;
 

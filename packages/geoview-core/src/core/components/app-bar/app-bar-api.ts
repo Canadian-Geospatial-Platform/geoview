@@ -117,7 +117,7 @@ export class AppBarApi {
    * @param isFocusTrapped - Optional whether focus should be trapped (default: true)
    * @deprecated Legacy support. Should use uiController.setActiveAppBarTab directly instead.
    */
-  selectTab(tabId: string, open: boolean = true, isFocusTrapped: boolean = true): void {
+  selectTab(tabId: string, open = true, isFocusTrapped = true): void {
     // Redirect to ui controller
     this.#uiController.setActiveAppBarTab(tabId, open, isFocusTrapped);
   }

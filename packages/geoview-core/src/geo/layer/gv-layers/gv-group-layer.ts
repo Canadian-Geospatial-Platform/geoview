@@ -128,7 +128,7 @@ export class GVGroupLayer extends AbstractBaseGVLayer {
    * @param emitOpacityChanged - Optional, whether to emit a layer opacity change event after
    * updating the opacity. Defaults to true.
    */
-  protected override onSetOpacity(opacity: number, emitOpacityChanged: boolean = true): void {
+  protected override onSetOpacity(opacity: number, emitOpacityChanged = true): void {
     // Sure
     super.onSetOpacity(opacity, emitOpacityChanged);
 

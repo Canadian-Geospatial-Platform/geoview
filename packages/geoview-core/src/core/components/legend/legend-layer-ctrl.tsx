@@ -151,7 +151,7 @@ const useControlActions = (layerPath: string): ControlActions => {
 // Create subtitle
 const useSubtitle = (layerPath: string, childPaths: string[], items: TypeLegendItem[]): string => {
   // Hooks
-  const { t } = useTranslation();
+  const { t } = useTranslation<string>();
   const parentHidden = useStoreLayerIsParentHiddenOnMap(layerPath);
 
   return useMemo(() => {
@@ -159,12 +159,10 @@ const useSubtitle = (layerPath: string, childPaths: string[], items: TypeLegendI
     if (parentHidden) return t('layers.parentHidden');
 
     if (childPaths.length) {
-      return t('legend.subLayersCount').replace('{count}', childPaths.length.toString());
+      return t('legend.subLayersCount', { count: childPaths.length });
     }
     if (items.length > 1) {
-      return t('legend.itemsCount')
-        .replace('{count}', items.filter((item) => item.isVisible).length.toString())
-        .replace('{totalCount}', items.length.toString());
+      return t('legend.itemsCount', { count: items.filter((item) => item.isVisible).length, totalCount: items.length });
     }
     return '';
   }, [childPaths.length, items, parentHidden, t]);
@@ -247,7 +245,7 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
   return (
     <Stack direction="row" alignItems="center" sx={memoSxClasses.layerStackIcons}>
       {!!subTitle.length && <Typography fontSize={14}>{subTitle}</Typography>}
-      <Box role="group" aria-label={t('layers.layerControls')!} sx={{ ...memoSxClasses.subtitle, display: 'flex', alignItems: 'center' }}>
+      <Box role="group" aria-label={t('layers.layerControls')} sx={{ ...memoSxClasses.subtitle, display: 'flex', alignItems: 'center' }}>
         {/* Button to select layer in panel and scroll to footer
             Hidden in WCAG mode - keyboard users can Tab to layer panel instead
           */}

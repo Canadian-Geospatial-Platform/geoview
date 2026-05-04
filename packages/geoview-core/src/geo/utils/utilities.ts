@@ -91,7 +91,7 @@ export abstract class GeoUtilities {
    * @param version - The default service version to enforce if not already present
    * @returns The normalized and fully qualified service request URL
    */
-  static ensureServiceRequestUrl(url: string, service: string, request: string, version: string = '1.3.0'): string {
+  static ensureServiceRequestUrl(url: string, service: string, request: string, version = '1.3.0'): string {
     return ensureServiceRequestUrl(url, service, request, version);
   }
 
@@ -133,7 +133,7 @@ export abstract class GeoUtilities {
    * @param format - Optional image format for the legend (e.g., "image/png")
    * @returns A fully qualified GetLegendGraphic request URL
    */
-  static ensureServiceRequestUrlGetLegendGraphic(url: string, layerId: string, version: string, format: string = 'image/png'): string {
+  static ensureServiceRequestUrlGetLegendGraphic(url: string, layerId: string, version: string, format = 'image/png'): string {
     // Redirect
     return `${this.ensureServiceRequestUrl(url, 'WMS', 'GetLegendGraphic', version)}&LAYER=${encodeURIComponent(layerId)}&FORMAT=${encodeURIComponent(format)}`;
   }
@@ -647,7 +647,7 @@ export abstract class GeoUtilities {
    * @returns The map server url
    * @deprecated
    */
-  static getMapServerUrl(url: string, rest: boolean = false): string {
+  static getMapServerUrl(url: string, rest = false): string {
     let mapServerUrl = url;
     if (mapServerUrl.includes('MapServer')) {
       mapServerUrl = mapServerUrl.slice(0, mapServerUrl.indexOf('MapServer') + 'MapServer'.length);
@@ -1340,7 +1340,7 @@ export abstract class GeoUtilities {
    * @param code - The projection code of the extent. Default EPSG:4326
    * @returns The validated extent
    */
-  static validateExtent(extent: Extent, code: string = 'EPSG:4326'): Extent {
+  static validateExtent(extent: Extent, code = 'EPSG:4326'): Extent {
     // Max extents for projections
     const maxExtents: Record<string, number[]> = {
       'EPSG:4326': [-180, -90, 180, 90],
@@ -1373,7 +1373,7 @@ export abstract class GeoUtilities {
    * @param code - The projection code of the extent. Default EPSG:4326
    * @returns The validated extent if it was defined, or undefined
    */
-  static validateExtentWhenDefined(extent: Extent | undefined, code: string = 'EPSG:4326'): Extent | undefined {
+  static validateExtentWhenDefined(extent: Extent | undefined, code = 'EPSG:4326'): Extent | undefined {
     // Validate extent if it is defined
     if (extent) return this.validateExtent(extent, code);
     return undefined;
@@ -1527,7 +1527,7 @@ export abstract class GeoUtilities {
    * @param bufferSize - Buffer size in map units (default: 5000)
    * @returns Buffered extent
    */
-  static bufferExtent(extent: Extent, bufferSize: number = 5000): Extent {
+  static bufferExtent(extent: Extent, bufferSize = 5000): Extent {
     return buffer(extent, bufferSize);
   }
 

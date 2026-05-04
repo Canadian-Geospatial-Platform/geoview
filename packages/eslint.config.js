@@ -109,6 +109,7 @@ export default [
       'no-unused-vars': 'off',
       '@typescript-eslint/no-unused-vars': 'warn',
       '@typescript-eslint/no-unnecessary-type-assertion': 'warn',
+      '@typescript-eslint/no-inferrable-types': 'warn',
       'no-use-before-define': 'off',
       '@typescript-eslint/no-use-before-define': 'error',
       'no-shadow': 'off',

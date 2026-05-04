@@ -516,7 +516,7 @@ export abstract class ConfigBaseClass {
    * @param includeGroups - Whether to include entries of type 'group' in the result. False by default
    * @returns An array of sibling layer configurations. Returns an empty array if there is no parent
    */
-  getSiblings(includeGroups: boolean = false): ConfigBaseClass[] {
+  getSiblings(includeGroups = false): ConfigBaseClass[] {
     // Get the parent layer config, if any
     const parentLayerConfig = this.getParentLayerConfig();
 
