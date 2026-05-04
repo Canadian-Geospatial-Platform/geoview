@@ -362,7 +362,7 @@ export class ResponseTypeError extends Error {
   constructor(
     expectedType: string,
     receivedContent: unknown,
-    message: string = `Expected response type invalid, was expecting '${expectedType}'.`
+    message = `Expected response type invalid, was expecting '${expectedType}'.`
   ) {
     // Pass the provided message (or default message) to the parent Error class
     super(message);

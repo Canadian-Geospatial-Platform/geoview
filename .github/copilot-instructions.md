@@ -194,6 +194,27 @@ GeoView uses a lightweight typed delegate event system (see [event-helper.md](..
 
 - **NEVER use `any`** without disabling ESLint + comment explaining why
 - **Always define hook types**: `useState<TypeBasemapProps[]>([])` not `useState([])`
+- **No redundant type annotations on inferrable literals** (`@typescript-eslint/no-inferrable-types` is enforced):
+
+```typescript
+// ❌ Bad: Type is trivially inferrable from the literal
+const name: string = 'default';
+let isActive: boolean = false;
+const count: number = 0;
+function reset(force: boolean = true): void {}
+
+// ✅ Good: Let TypeScript infer from literals
+const name = 'default';
+let isActive = false;
+const count = 0;
+function reset(force = true): void {}
+
+// ✅ Good: Type annotation IS needed when not inferrable from literal
+const layers: string[] = [];
+const zoom: number = getStoreMapZoom(mapId);
+useState<TypeBasemapProps[]>([]);
+```
+
 - **Avoid name collisions**: Use `GVLayer` not `Layer` when OpenLayers has a `Layer` class
 
 ### String Concatenation
