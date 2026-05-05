@@ -210,6 +210,10 @@ After generating all code:
 - ALWAYS use `generateId()` for layer IDs in layer/config tests
 - ALWAYS ask clarifying questions before generating test code — do not guess test requirements
 - ALWAYS follow the JSDoc, comment, and TypeScript conventions from `.github/copilot-instructions.md`
+- When a `useStore*` hook exists but no corresponding `getStore*` getter is available, **create the getter** in the same store file (immediately after the hook) rather than working around it via `getStoreLayerLegendLayerByPath()?.property`. Tests run outside React and cannot use hooks — they need `getStore*` getters. Follow the naming convention `getStore{Slice}{Property}(mapId, ...)` and match the return type of the hook.
+  - Getter location: same file as the hook, immediately after it.
+  - Pattern: `export const getStore{Slice}{Property} = (mapId: string, ...args): ReturnType => { return getStoreLayer...(...); };`
+  - Example: Created `getStoreLayerControls(mapId, layerPath)` alongside existing `useStoreLayerControls` hook.
 
 ## Creating a New Suite & Tester (Full Stack)
 

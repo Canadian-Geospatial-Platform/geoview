@@ -216,6 +216,10 @@ export class GVGroupLayer extends AbstractBaseGVLayer {
     // Set its parent right away
     layer.setParent(this);
 
+    // Re-apply the child's opacity through setOpacity to trigger capping by the parent's opacity.
+    // The initial opacity was set via OL constructor options which bypasses the GV onSetOpacity capping logic.
+    layer.setOpacity(layer.getOpacity(), false);
+
     // Add the layer to our list
     this.#layers.push(layer);
 

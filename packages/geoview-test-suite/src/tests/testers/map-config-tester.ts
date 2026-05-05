@@ -14,8 +14,12 @@ import {
   getStoreDataTableAllFeaturesDataArray,
   getStoreDataTableSelectedLayerPath,
 } from 'geoview-core/core/stores/states/data-table-state';
-import { getStoreLayerBounds } from 'geoview-core/core/stores/states/layer-state';
-import { getStoreMapPointMarkers, getStoreMapConfigOverviewMap } from 'geoview-core/core/stores/states/map-state';
+import { getStoreLayerBounds, getStoreLayerControls, getStoreLayerLegendLayerByPath } from 'geoview-core/core/stores/states/layer-state';
+import {
+  getStoreMapPointMarkers,
+  getStoreMapConfigOverviewMap,
+  getStoreMapConfigComponents,
+} from 'geoview-core/core/stores/states/map-state';
 
 /**
  * Main Map Config testing class.
@@ -669,6 +673,611 @@ export class MapConfigTester extends GVAbstractTester {
         Test.assertIsEqual(isVisibleFinal, true);
       }
     );
+  }
+
+  // #region Initial Settings Controls Tests
+
+  /**
+   * Tests that setting all controls to false is reflected in the store.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testInitialSettingsControlsAllFalse(): Promise<Test> {
+    const mapId = this.getMapId();
+    const layerPath = 'geojsonLYR5/polygons.json';
+    const controlNames = ['highlight', 'hover', 'opacity', 'query', 'remove', 'table', 'visibility', 'zoom'];
+
+    return this.test(
+      'Test initialSettings all controls = false...',
+      (test) => {
+        test.addStep('Creating map with all controls set to false...');
+        const controls: Record<string, boolean> = {};
+        controlNames.forEach((name) => {
+          controls[name] = false;
+        });
+        return this.#helperCreateMapConfigWithInitialSettings(test, mapId, controls);
+      },
+      (test) => {
+        // Verify each control is false in store
+        const controls = getStoreLayerControls(mapId, layerPath);
+        Test.assertIsDefined('controls', controls);
+
+        controlNames.forEach((name) => {
+          test.addStep(`Verifying controls.${name} = false in store...`);
+          Test.assertIsEqual((controls as Record<string, unknown>)[name], false);
+        });
+
+        // Verify the layer is still registered in featureInfoLayerSet (controls.query only hides the UI toggle, not the layer set registration)
+        test.addStep('Verifying layer is still registered in featureInfoLayerSet...');
+        const featureInfoPaths = this.getControllersRegistry().layerSetController.featureInfoLayerSet.getRegisteredLayerPaths();
+        Test.assertArrayIncludes(featureInfoPaths, layerPath);
+
+        // Verify the layer is still registered in allFeatureInfoLayerSet
+        test.addStep('Verifying layer is still registered in allFeatureInfoLayerSet...');
+        const allFeatureInfoPaths = this.getControllersRegistry().layerSetController.allFeatureInfoLayerSet.getRegisteredLayerPaths();
+        Test.assertArrayIncludes(allFeatureInfoPaths, layerPath);
+      }
+    );
+  }
+
+  /**
+   * Tests that setting states.visible to false makes the layer initially hidden.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testInitialSettingsStateVisibleFalse(): Promise<Test> {
+    const mapId = this.getMapId();
+    const layerPath = 'geojsonLYR5/polygons.json';
+
+    return this.test(
+      'Test initialSettings states.visible = false...',
+      (test) => {
+        test.addStep('Creating map with states.visible = false...');
+        return this.#helperCreateMapConfigWithInitialSettings(test, mapId, undefined, { visible: false });
+      },
+      (test) => {
+        test.addStep('Verifying layer is not visible in store...');
+        const legendLayer = getStoreLayerLegendLayerByPath(mapId, layerPath);
+        Test.assertIsDefined('legendLayer', legendLayer);
+        Test.assertIsEqual(legendLayer!.visible, false);
+
+        test.addStep('Verifying layer is not visible on OL layer...');
+        const gvLayer = this.getControllersRegistry().layerController.getGeoviewLayer(layerPath);
+        Test.assertIsEqual(gvLayer.getVisible(), false);
+      }
+    );
+  }
+
+  /**
+   * Tests that setting states.opacity to 0.5 makes the layer semi-transparent.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testInitialSettingsStateOpacity(): Promise<Test> {
+    const mapId = this.getMapId();
+    const layerPath = 'geojsonLYR5/polygons.json';
+
+    return this.test(
+      'Test initialSettings states.opacity = 0.5...',
+      (test) => {
+        test.addStep('Creating map with states.opacity = 0.5...');
+        return this.#helperCreateMapConfigWithInitialSettings(test, mapId, undefined, { opacity: 0.5 });
+      },
+      (test) => {
+        test.addStep('Verifying layer opacity on OL layer...');
+        const gvLayer = this.getControllersRegistry().layerController.getGeoviewLayer(layerPath);
+        Test.assertIsEqual(gvLayer.getOpacity(), 0.5, 1);
+      }
+    );
+  }
+
+  /**
+   * Tests that setting states.queryable to false makes the layer not queryable.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testInitialSettingsStateQueryableFalse(): Promise<Test> {
+    const mapId = this.getMapId();
+    const layerPath = 'geojsonLYR5/polygons.json';
+
+    return this.test(
+      'Test initialSettings states.queryable = false...',
+      (test) => {
+        test.addStep('Creating map with states.queryable = false...');
+        return this.#helperCreateMapConfigWithInitialSettings(test, mapId, undefined, { queryable: false });
+      },
+      (test) => {
+        test.addStep('Verifying layer is not queryable in store...');
+        const legendLayer = getStoreLayerLegendLayerByPath(mapId, layerPath);
+        Test.assertIsDefined('legendLayer', legendLayer);
+        Test.assertIsEqual(legendLayer!.queryable, false);
+
+        test.addStep('Verifying layer is not queryable on GV layer...');
+        const gvLayer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
+        Test.assertIsEqual(gvLayer.getQueryable(), false);
+      }
+    );
+  }
+
+  /**
+   * Tests that setting states.hoverable to false makes the layer not hoverable.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testInitialSettingsStateHoverableFalse(): Promise<Test> {
+    const mapId = this.getMapId();
+    const layerPath = 'geojsonLYR5/polygons.json';
+
+    return this.test(
+      'Test initialSettings states.hoverable = false...',
+      (test) => {
+        test.addStep('Creating map with states.hoverable = false...');
+        return this.#helperCreateMapConfigWithInitialSettings(test, mapId, undefined, { hoverable: false });
+      },
+      (test) => {
+        test.addStep('Verifying layer is not hoverable in store...');
+        const legendLayer = getStoreLayerLegendLayerByPath(mapId, layerPath);
+        Test.assertIsDefined('legendLayer', legendLayer);
+        Test.assertIsEqual(legendLayer!.hoverable, false);
+
+        test.addStep('Verifying layer is not hoverable on GV layer...');
+        const gvLayer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
+        Test.assertIsEqual(gvLayer.getHoverable(), false);
+      }
+    );
+  }
+
+  // #endregion
+
+  // #region Initial Settings Opacity Cascading Tests
+
+  /**
+   * Tests that a child layer's opacity is capped by its parent group's opacity when child opacity exceeds the parent.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testInitialSettingsOpacityCascadingChildCappedByParent(): Promise<Test> {
+    const mapId = this.getMapId();
+    const groupLayerPath = 'geojsonLYR5/pointGroup1';
+    const childLayerPath = 'geojsonLYR5/pointGroup1/icon_points.json';
+
+    return this.test(
+      'Test opacity cascading: child (1.0) capped by parent (0.5) = effective 0.5...',
+      (test) => {
+        test.addStep('Creating map with parent opacity 0.5 and child opacity 1.0...');
+        return this.#helperCreateMapConfigWithGroupInitialSettings(test, mapId, { opacity: 0.5 }, { opacity: 1.0 });
+      },
+      (test) => {
+        // Verify parent group opacity is 0.5
+        test.addStep('Verifying parent group opacity is 0.5...');
+        const parentLayer = this.getControllersRegistry().layerController.getGeoviewLayer(groupLayerPath);
+        Test.assertIsEqual(parentLayer.getOpacity(), 0.5, 1);
+
+        // Verify child effective opacity is capped at parent's 0.5 (not 1.0)
+        test.addStep('Verifying child effective opacity is capped at 0.5...');
+        const childLayer = this.getControllersRegistry().layerController.getGeoviewLayer(childLayerPath);
+        Test.assertIsEqual(childLayer.getOpacity(), 0.5, 1);
+      }
+    );
+  }
+
+  /**
+   * Tests that a child layer's opacity is preserved when it is already below the parent group's opacity.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testInitialSettingsOpacityCascadingChildBelowParent(): Promise<Test> {
+    const mapId = this.getMapId();
+    const groupLayerPath = 'geojsonLYR5/pointGroup1';
+    const childLayerPath = 'geojsonLYR5/pointGroup1/icon_points.json';
+
+    return this.test(
+      'Test opacity cascading: child (0.3) below parent (0.5) = effective 0.3...',
+      (test) => {
+        test.addStep('Creating map with parent opacity 0.5 and child opacity 0.3...');
+        return this.#helperCreateMapConfigWithGroupInitialSettings(test, mapId, { opacity: 0.5 }, { opacity: 0.3 });
+      },
+      (test) => {
+        // Verify parent group opacity is 0.5
+        test.addStep('Verifying parent group opacity is 0.5...');
+        const parentLayer = this.getControllersRegistry().layerController.getGeoviewLayer(groupLayerPath);
+        Test.assertIsEqual(parentLayer.getOpacity(), 0.5, 1);
+
+        // Verify child effective opacity stays at 0.3 (within parent cap)
+        test.addStep('Verifying child effective opacity is 0.3...');
+        const childLayer = this.getControllersRegistry().layerController.getGeoviewLayer(childLayerPath);
+        Test.assertIsEqual(childLayer.getOpacity(), 0.3, 1);
+      }
+    );
+  }
+
+  /**
+   * Tests that changing parent group opacity at runtime cascades to cap child layer opacity.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testInitialSettingsOpacityCascadingRuntimeParentChange(): Promise<Test> {
+    const mapId = this.getMapId();
+    const groupLayerPath = 'geojsonLYR5/pointGroup1';
+    const childLayerPath = 'geojsonLYR5/pointGroup1/icon_points.json';
+
+    return this.test(
+      'Test opacity cascading: runtime parent change cascades to children...',
+      (test) => {
+        test.addStep('Creating map with parent opacity 1.0 and child opacity 0.8...');
+        return this.#helperCreateMapConfigWithGroupInitialSettings(test, mapId, { opacity: 1.0 }, { opacity: 0.8 });
+      },
+      (test) => {
+        // Verify initial state: child at 0.8, parent at 1.0
+        test.addStep('Verifying initial child opacity is 0.8...');
+        const childLayer = this.getControllersRegistry().layerController.getGeoviewLayer(childLayerPath);
+        Test.assertIsEqual(childLayer.getOpacity(), 0.8, 1);
+
+        // Lower parent opacity to 0.4 at runtime — GVGroupLayer.onSetOpacity cascades to children
+        test.addStep('Setting parent opacity to 0.4 at runtime...');
+        this.getControllersRegistry().layerController.setLayerOpacity(groupLayerPath, 0.4);
+
+        // Verify parent is now 0.4
+        test.addStep('Verifying parent group opacity is now 0.4...');
+        const parentLayer = this.getControllersRegistry().layerController.getGeoviewLayer(groupLayerPath);
+        Test.assertIsEqual(parentLayer.getOpacity(), 0.4, 1);
+
+        // Verify child opacity was cascaded to 0.4 (group cascade sets child.setOpacity(0.4), capped by parent 0.4)
+        test.addStep('Verifying child opacity cascaded to 0.4...');
+        Test.assertIsEqual(childLayer.getOpacity(), 0.4, 1);
+      }
+    );
+  }
+
+  /**
+   * Tests that controls.remove = false on a parent group cascades to descendants that do not explicitly override it,
+   * but a descendant that explicitly sets controls.remove = true keeps its value.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testInitialSettingsControlRemoveCascadingToDescendants(): Promise<Test> {
+    const mapId = this.getMapId();
+    const groupLayerPath = 'geojsonLYR5/pointGroup1';
+    const subGroupLayerPath = 'geojsonLYR5/pointGroup1/pointGroup2';
+    const childLayerPath = 'geojsonLYR5/pointGroup1/pointGroup2/points_1.json';
+
+    return this.test(
+      'Test controls.remove cascading: parent false cascades unless child explicitly overrides with true...',
+      (test) => {
+        test.addStep('Creating map with parent controls.remove = false, subgroup default, child controls.remove = true...');
+        return this.#helperCreateMapConfigWithNestedGroupInitialSettings(
+          test,
+          mapId,
+          { controls: { remove: false } },
+          {},
+          { controls: { remove: true } }
+        );
+      },
+      (test) => {
+        // Verify parent group has remove = false
+        test.addStep('Verifying controls.remove = false on parent group...');
+        const parentControls = getStoreLayerControls(mapId, groupLayerPath);
+        Test.assertIsDefined('parentControls', parentControls);
+        Test.assertIsEqual((parentControls as Record<string, unknown>).remove, false);
+
+        // Verify subgroup has remove = false (inherited from parent, no explicit override)
+        test.addStep('Verifying controls.remove = false on subgroup (inherited, not explicitly set)...');
+        const subGroupControls = getStoreLayerControls(mapId, subGroupLayerPath);
+        Test.assertIsDefined('subGroupControls', subGroupControls);
+        Test.assertIsEqual((subGroupControls as Record<string, unknown>).remove, false);
+
+        // Verify child leaf has remove = true (explicitly overrides parent cascade)
+        test.addStep('Verifying controls.remove = true on child leaf (explicit override)...');
+        const childControls = getStoreLayerControls(mapId, childLayerPath);
+        Test.assertIsDefined('childControls', childControls);
+        Test.assertIsEqual((childControls as Record<string, unknown>).remove, true);
+      }
+    );
+  }
+
+  /**
+   * Tests that states.visible = false on a parent group makes all descendants not visible on the map,
+   * but children keep their own visible state as true in the store (greyed out in the legend UI).
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testInitialSettingsStateVisibleCascadingToDescendants(): Promise<Test> {
+    const mapId = this.getMapId();
+    const groupLayerPath = 'geojsonLYR5/pointGroup1';
+    const subGroupLayerPath = 'geojsonLYR5/pointGroup1/pointGroup2';
+    const childLayerPath = 'geojsonLYR5/pointGroup1/pointGroup2/points_1.json';
+
+    return this.test(
+      'Test states.visible cascading: parent false hides all descendants on map, children keep visible true in store...',
+      (test) => {
+        test.addStep('Creating map with parent states.visible = false, child states.visible = true...');
+        return this.#helperCreateMapConfigWithNestedGroupInitialSettings(
+          test,
+          mapId,
+          { states: { visible: false } },
+          {},
+          { states: { visible: true } }
+        );
+      },
+      (test) => {
+        // Verify parent group OL layer is not visible
+        test.addStep('Verifying parent group OL layer is not visible...');
+        const parentLayer = this.getControllersRegistry().layerController.getGeoviewLayer(groupLayerPath);
+        Test.assertIsEqual(parentLayer.getVisible(), false);
+
+        // Verify parent is not visible in store legend
+        test.addStep('Verifying parent group is not visible in store legend...');
+        const parentLegend = getStoreLayerLegendLayerByPath(mapId, groupLayerPath);
+        Test.assertIsDefined('parentLegend', parentLegend);
+        Test.assertIsEqual(parentLegend!.visible, false);
+
+        // Verify subgroup OL layer is visible (its own state is not set to false)
+        test.addStep('Verifying subgroup OL layer is visible (own state defaults to true)...');
+        const subGroupLayer = this.getControllersRegistry().layerController.getGeoviewLayer(subGroupLayerPath);
+        Test.assertIsEqual(subGroupLayer.getVisible(), true);
+
+        // Verify subgroup is not effectively visible when considering parents
+        test.addStep('Verifying subgroup is not effectively visible including parents...');
+        Test.assertIsEqual(subGroupLayer.getVisibleIncludingParents(), false);
+
+        // Verify child OL layer is visible (its own state is true)
+        test.addStep('Verifying child OL layer is visible (own state is true)...');
+        const childLayer = this.getControllersRegistry().layerController.getGeoviewLayer(childLayerPath);
+        Test.assertIsEqual(childLayer.getVisible(), true);
+
+        // Verify child is not effectively visible when considering parents
+        test.addStep('Verifying child is not effectively visible including parents...');
+        Test.assertIsEqual(childLayer.getVisibleIncludingParents(), false);
+      }
+    );
+  }
+
+  // #endregion
+
+  // #region Initial Settings Controls + States Combo Tests
+
+  /**
+   * Tests that controls.query = true with states.queryable = false shows the query UI toggle but makes the layer not queryable at runtime.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testInitialSettingsComboQueryControlTrueStateQueryableFalse(): Promise<Test> {
+    const mapId = this.getMapId();
+    const layerPath = 'geojsonLYR5/polygons.json';
+
+    return this.test(
+      'Test initialSettings controls.query = true + states.queryable = false...',
+      (test) => {
+        test.addStep('Creating map with controls.query = true and states.queryable = false...');
+        return this.#helperCreateMapConfigWithInitialSettings(test, mapId, { query: true }, { queryable: false });
+      },
+      (test) => {
+        // Verify control is true in store (UI toggle is available)
+        test.addStep('Verifying controls.query = true in store...');
+        const controls = getStoreLayerControls(mapId, layerPath);
+        Test.assertIsDefined('controls', controls);
+        Test.assertIsEqual((controls as Record<string, unknown>).query, true);
+
+        // Verify states.queryable is false in store
+        test.addStep('Verifying states.queryable = false in store...');
+        const legendLayer = getStoreLayerLegendLayerByPath(mapId, layerPath);
+        Test.assertIsDefined('legendLayer', legendLayer);
+        Test.assertIsEqual(legendLayer!.queryable, false);
+
+        // Verify getQueryable() returns false on the GV layer
+        test.addStep('Verifying getQueryable() = false on GV layer...');
+        const gvLayer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
+        Test.assertIsEqual(gvLayer.getQueryable(), false);
+
+        // Verify the layer is still registered in featureInfoLayerSet (registration uses source.featureInfo.queryable, not states.queryable)
+        test.addStep('Verifying layer is still registered in featureInfoLayerSet...');
+        const featureInfoPaths = this.getControllersRegistry().layerSetController.featureInfoLayerSet.getRegisteredLayerPaths();
+        Test.assertArrayIncludes(featureInfoPaths, layerPath);
+
+        // Verify the layer is still registered in allFeatureInfoLayerSet
+        test.addStep('Verifying layer is still registered in allFeatureInfoLayerSet...');
+        const allFeatureInfoPaths = this.getControllersRegistry().layerSetController.allFeatureInfoLayerSet.getRegisteredLayerPaths();
+        Test.assertArrayIncludes(allFeatureInfoPaths, layerPath);
+
+        // Verify the layer is still registered in hoverFeatureInfoLayerSet
+        test.addStep('Verifying layer is still registered in hoverFeatureInfoLayerSet...');
+        const hoverPaths = this.getControllersRegistry().layerSetController.hoverFeatureInfoLayerSet.getRegisteredLayerPaths();
+        Test.assertArrayIncludes(hoverPaths, layerPath);
+      }
+    );
+  }
+
+  /**
+   * Tests that controls.hover = true with states.hoverable = false shows the hover UI toggle but makes the layer not hoverable at runtime.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testInitialSettingsComboHoverControlTrueStateHoverableFalse(): Promise<Test> {
+    const mapId = this.getMapId();
+    const layerPath = 'geojsonLYR5/polygons.json';
+
+    return this.test(
+      'Test initialSettings controls.hover = true + states.hoverable = false...',
+      (test) => {
+        test.addStep('Creating map with controls.hover = true and states.hoverable = false...');
+        return this.#helperCreateMapConfigWithInitialSettings(test, mapId, { hover: true }, { hoverable: false });
+      },
+      (test) => {
+        // Verify control is true in store (UI toggle is available)
+        test.addStep('Verifying controls.hover = true in store...');
+        const controls = getStoreLayerControls(mapId, layerPath);
+        Test.assertIsDefined('controls', controls);
+        Test.assertIsEqual((controls as Record<string, unknown>).hover, true);
+
+        // Verify states.hoverable is false in store
+        test.addStep('Verifying states.hoverable = false in store...');
+        const legendLayer = getStoreLayerLegendLayerByPath(mapId, layerPath);
+        Test.assertIsDefined('legendLayer', legendLayer);
+        Test.assertIsEqual(legendLayer!.hoverable, false);
+
+        // Verify getHoverable() returns false on the GV layer
+        test.addStep('Verifying getHoverable() = false on GV layer...');
+        const gvLayer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
+        Test.assertIsEqual(gvLayer.getHoverable(), false);
+
+        // Verify the layer is still registered in hoverFeatureInfoLayerSet (registration uses source.featureInfo.queryable, not states.hoverable)
+        test.addStep('Verifying layer is still registered in hoverFeatureInfoLayerSet...');
+        const hoverPaths = this.getControllersRegistry().layerSetController.hoverFeatureInfoLayerSet.getRegisteredLayerPaths();
+        Test.assertArrayIncludes(hoverPaths, layerPath);
+
+        // Verify the layer is still registered in featureInfoLayerSet
+        test.addStep('Verifying layer is still registered in featureInfoLayerSet...');
+        const featureInfoPaths = this.getControllersRegistry().layerSetController.featureInfoLayerSet.getRegisteredLayerPaths();
+        Test.assertArrayIncludes(featureInfoPaths, layerPath);
+      }
+    );
+  }
+
+  // #endregion
+
+  /**
+   * Helper to create a map config with initialSettings on the GeoJSON layer.
+   *
+   * @param test - The test instance used to log steps
+   * @param mapId - The map identifier
+   * @param controls - Optional controls overrides for the layer
+   * @param states - Optional states overrides for the layer
+   * @returns A promise that resolves to the created map viewer
+   */
+  #helperCreateMapConfigWithInitialSettings(
+    test: Test,
+    mapId: string,
+    controls?: Record<string, unknown>,
+    states?: Record<string, unknown>
+  ): Promise<MapViewer> {
+    const initialSettings: Record<string, unknown> = {};
+    if (controls) initialSettings.controls = controls;
+    if (states) initialSettings.states = states;
+
+    return this.#helperCreateMapConfig(test, mapId, [
+      [
+        'map.listOfGeoviewLayerConfig',
+        [
+          {
+            geoviewLayerId: 'geojsonLYR5',
+            geoviewLayerName: 'GeoJSON Sample',
+            metadataAccessPath: GVAbstractTester.GEOJSON_METADATA_META,
+            geoviewLayerType: 'GeoJSON' as TypeGeoviewLayerType,
+            serviceDateFormat: 'DD/MM/YYYYTHH:mm:ss',
+            listOfLayerEntryConfig: [
+              {
+                layerId: 'polygons.json',
+                layerName: 'Polygons',
+                initialSettings,
+              },
+            ],
+          },
+        ],
+      ],
+    ]);
+  }
+
+  /**
+   * Helper to create a map config with a group layer and initialSettings on parent and child.
+   *
+   * @param test - The test instance used to log steps
+   * @param mapId - The map identifier
+   * @param parentStates - Optional states overrides for the parent group layer
+   * @param childStates - Optional states overrides for the child layer
+   * @returns A promise that resolves to the created map viewer
+   */
+  #helperCreateMapConfigWithGroupInitialSettings(
+    test: Test,
+    mapId: string,
+    parentStates?: Record<string, unknown>,
+    childStates?: Record<string, unknown>
+  ): Promise<MapViewer> {
+    const parentInitialSettings: Record<string, unknown> = {};
+    if (parentStates) parentInitialSettings.states = parentStates;
+
+    const childInitialSettings: Record<string, unknown> = {};
+    if (childStates) childInitialSettings.states = childStates;
+
+    return this.#helperCreateMapConfig(test, mapId, [
+      [
+        'map.listOfGeoviewLayerConfig',
+        [
+          {
+            geoviewLayerId: 'geojsonLYR5',
+            geoviewLayerName: 'GeoJSON Sample',
+            metadataAccessPath: GVAbstractTester.GEOJSON_METADATA_META,
+            geoviewLayerType: 'GeoJSON' as TypeGeoviewLayerType,
+            serviceDateFormat: 'DD/MM/YYYYTHH:mm:ss',
+            listOfLayerEntryConfig: [
+              {
+                entryType: 'group',
+                layerId: 'pointGroup1',
+                initialSettings: parentInitialSettings,
+                listOfLayerEntryConfig: [
+                  {
+                    layerId: 'icon_points.json',
+                    initialSettings: childInitialSettings,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      ],
+    ]);
+  }
+
+  /**
+   * Helper to create a map config with a nested group layer (group → subgroup → child) and initialSettings on each level.
+   *
+   * @param test - The test instance used to log steps
+   * @param mapId - The map identifier
+   * @param groupSettings - Optional initialSettings for the parent group layer
+   * @param subGroupSettings - Optional initialSettings for the subgroup layer
+   * @param childSettings - Optional initialSettings for the child leaf layer
+   * @returns A promise that resolves to the created map viewer
+   */
+  #helperCreateMapConfigWithNestedGroupInitialSettings(
+    test: Test,
+    mapId: string,
+    groupSettings?: Record<string, unknown>,
+    subGroupSettings?: Record<string, unknown>,
+    childSettings?: Record<string, unknown>
+  ): Promise<MapViewer> {
+    return this.#helperCreateMapConfig(test, mapId, [
+      [
+        'map.listOfGeoviewLayerConfig',
+        [
+          {
+            geoviewLayerId: 'geojsonLYR5',
+            geoviewLayerName: 'GeoJSON Sample',
+            metadataAccessPath: GVAbstractTester.GEOJSON_METADATA_META,
+            geoviewLayerType: 'GeoJSON' as TypeGeoviewLayerType,
+            serviceDateFormat: 'DD/MM/YYYYTHH:mm:ss',
+            listOfLayerEntryConfig: [
+              {
+                entryType: 'group',
+                layerId: 'pointGroup1',
+                initialSettings: groupSettings || {},
+                listOfLayerEntryConfig: [
+                  {
+                    entryType: 'group',
+                    layerId: 'pointGroup2',
+                    initialSettings: subGroupSettings || {},
+                    listOfLayerEntryConfig: [
+                      {
+                        layerId: 'points_1.json',
+                        initialSettings: childSettings || {},
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      ],
+    ]);
   }
 
   /**
