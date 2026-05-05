@@ -2,7 +2,7 @@ import type { TypeGeoviewLayerType } from 'geoview-core/api/types/layer-schema-t
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
-import { delay } from 'geoview-core/core/utils/utilities';
+import { delay, whenThisThen } from 'geoview-core/core/utils/utilities';
 import {
   getStoreUIActiveAppBarTab,
   getStoreUIActiveFooterBarTab,
@@ -15,7 +15,11 @@ import {
   getStoreDataTableSelectedLayerPath,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/data-table-state';
 import { getStoreLayerBounds } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
-import { getStoreMapPointMarkers } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
+import {
+  getStoreMapConfigComponents,
+  getStoreMapConfigOverviewMap,
+  getStoreMapPointMarkers,
+} from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
 
 /**
  * Main Map Config testing class.
@@ -443,6 +447,230 @@ export class MapConfigTester extends GVAbstractTester {
         await newMapViewer.setMapZoomLevel(10);
         const zoomAt10 = view.getZoom();
         Test.assertIsEqual(zoomAt10, 8); // Should be constrained to maxZoom
+      }
+    );
+  }
+
+  /**
+   * Test that overview map is present when 'overview-map' is in components config.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testOverviewMapPresent(): Promise<Test> {
+    const mapId = this.getMapId();
+
+    return this.test(
+      'Test overview map is present when configured in components',
+      async (test) => {
+        // Create the mapViewer with overview-map in components
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [['components', ['overview-map', 'north-arrow']]]);
+        return mapViewer;
+      },
+      async (test) => {
+        // Wait for the overview map to become visible (hideOnZoom=0 means always visible once initialized)
+        test.addStep('Waiting for overview map to initialize...');
+        // prettier-ignore
+        await whenThisThen(() => this.getControllersRegistry().mapController.getOverviewMapVisibility() === true, 5000);
+
+        // Verify overview-map is in the components config
+        test.addStep('Verifying overview-map is in components config...');
+        const components = getStoreMapConfigComponents(mapId);
+        Test.assertIsDefined('components', components);
+        Test.assertArrayIncludes(components!, 'overview-map');
+
+        // Verify overview map config exists with default hideOnZoom of 0
+        test.addStep('Verifying overview map config has hideOnZoom 0...');
+        const overviewMapConfig = getStoreMapConfigOverviewMap(mapId);
+        Test.assertIsDefined('overviewMapConfig', overviewMapConfig);
+        Test.assertIsEqual(overviewMapConfig!.hideOnZoom, 0);
+
+        // Verify overview map visibility is true (hideOnZoom=0 means always visible)
+        test.addStep('Verifying overview map is visible...');
+        const isVisible = this.getControllersRegistry().mapController.getOverviewMapVisibility();
+        Test.assertIsEqual(isVisible, true);
+      }
+    );
+  }
+
+  /**
+   * Test that overview map is absent when 'overview-map' is not in components config.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testOverviewMapAbsent(): Promise<Test> {
+    const mapId = this.getMapId();
+
+    return this.test(
+      'Test overview map is absent when not in components',
+      async (test) => {
+        // Create the mapViewer with only north-arrow (no overview-map)
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [['components', ['north-arrow']]]);
+        return mapViewer;
+      },
+      (test) => {
+        // No need to wait — overview map was never created, visibility defaults to false
+
+        // Verify overview-map is NOT in the components config
+        test.addStep('Verifying overview-map is not in components config...');
+        const components = getStoreMapConfigComponents(mapId);
+        Test.assertIsDefined('components', components);
+        Test.assertArrayExcludes(components!, 'overview-map');
+
+        // Verify overview map visibility is false
+        test.addStep('Verifying overview map is not visible...');
+        const isVisible = this.getControllersRegistry().mapController.getOverviewMapVisibility();
+        Test.assertIsEqual(isVisible, false);
+      }
+    );
+  }
+
+  /**
+   * Test that hideOnZoom config hides the overview map at low zoom and shows it above the threshold.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testOverviewMapHideOnZoom(): Promise<Test> {
+    const mapId = this.getMapId();
+
+    return this.test(
+      'Test overview map hideOnZoom hides at low zoom, shows above threshold',
+      async (test) => {
+        // Create the mapViewer with overview-map and hideOnZoom=7, initial zoom 4.5
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [
+          ['components', ['overview-map', 'north-arrow']],
+          ['overviewMap', { hideOnZoom: 7 }],
+        ]);
+        return mapViewer;
+      },
+      async (test) => {
+        // Verify hideOnZoom config is set to 7
+        test.addStep('Verifying hideOnZoom config is 7...');
+        const overviewMapConfig = getStoreMapConfigOverviewMap(mapId);
+        Test.assertIsDefined('overviewMapConfig', overviewMapConfig);
+        Test.assertIsEqual(overviewMapConfig!.hideOnZoom, 7);
+
+        // At initial zoom 4.5, overview map should be hidden (below threshold of 7)
+        // Wait for the overview map useEffect to settle (it sets visibility to false)
+        test.addStep('Waiting for overview map to initialize and be hidden at zoom 4.5...');
+        // prettier-ignore
+        await whenThisThen(() => this.getControllersRegistry().mapController.getOverviewMapVisibility() === false, 5000);
+
+        test.addStep('Verifying overview map is hidden at zoom 4.5 (below threshold 7)...');
+        const isVisibleAtLowZoom = this.getControllersRegistry().mapController.getOverviewMapVisibility();
+        Test.assertIsEqual(isVisibleAtLowZoom, false);
+
+        // Zoom to 8 (above threshold)
+        test.addStep('Zooming to level 8 (above threshold)...');
+        await this.getControllersRegistry().mapController.zoomMap(8);
+
+        // Wait for the React useEffect to update visibility
+        // prettier-ignore
+        await whenThisThen(() => this.getControllersRegistry().mapController.getOverviewMapVisibility() === true, 5000);
+
+        // Verify overview map is now visible
+        test.addStep('Verifying overview map is visible at zoom 8...');
+        const isVisibleAtHighZoom = this.getControllersRegistry().mapController.getOverviewMapVisibility();
+        Test.assertIsEqual(isVisibleAtHighZoom, true);
+
+        // Zoom back to 4 (below threshold)
+        test.addStep('Zooming back to level 4 (below threshold)...');
+        await this.getControllersRegistry().mapController.zoomMap(4);
+
+        // Wait for visibility to turn false
+        // prettier-ignore
+        await whenThisThen(() => this.getControllersRegistry().mapController.getOverviewMapVisibility() === false, 5000);
+
+        // Verify overview map is hidden again
+        test.addStep('Verifying overview map is hidden again at zoom 4...');
+        const isVisibleBackToLow = this.getControllersRegistry().mapController.getOverviewMapVisibility();
+        Test.assertIsEqual(isVisibleBackToLow, false);
+      }
+    );
+  }
+
+  /**
+   * Test that overview map visibility is correctly preserved through a projection change cycle with hideOnZoom.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testOverviewMapHideOnZoomWithReprojection(): Promise<Test> {
+    const mapId = this.getMapId();
+
+    return this.test(
+      'Test overview map hideOnZoom with reprojection preserves visibility',
+      async (test) => {
+        // Create the mapViewer with overview-map, hideOnZoom=7, projection 3978
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [
+          ['components', ['overview-map', 'north-arrow']],
+          ['overviewMap', { hideOnZoom: 7 }],
+        ]);
+        return mapViewer;
+      },
+      async (test) => {
+        // Zoom to 8 (above threshold) so overview map is visible
+        test.addStep('Zooming to level 8 (above threshold)...');
+        await this.getControllersRegistry().mapController.zoomMap(8);
+
+        // Wait for overview map to become visible
+        // prettier-ignore
+        await whenThisThen(() => this.getControllersRegistry().mapController.getOverviewMapVisibility() === true, 5000);
+
+        // Verify overview map is visible at zoom 8
+        test.addStep('Verifying overview map is visible at zoom 8...');
+        const isVisibleBefore = this.getControllersRegistry().mapController.getOverviewMapVisibility();
+        Test.assertIsEqual(isVisibleBefore, true);
+
+        // Reproject to 3857
+        test.addStep('Reprojecting to EPSG:3857...');
+        await this.getControllersRegistry().mapController.setProjection(3857);
+
+        // Wait for overview map visibility to be restored after reprojection
+        // prettier-ignore
+        await whenThisThen(() => this.getControllersRegistry().mapController.getOverviewMapVisibility() === true, 10000);
+
+        // Verify overview map visibility is restored after reprojection
+        test.addStep('Verifying overview map is visible after reprojection to 3857...');
+        const isVisibleAfterReproject = this.getControllersRegistry().mapController.getOverviewMapVisibility();
+        Test.assertIsEqual(isVisibleAfterReproject, true);
+
+        // Zoom below threshold in 3857
+        test.addStep('Zooming to level 4 in 3857 (below threshold)...');
+        await this.getControllersRegistry().mapController.zoomMap(4);
+
+        // Wait for visibility to turn false
+        // prettier-ignore
+        await whenThisThen(() => this.getControllersRegistry().mapController.getOverviewMapVisibility() === false, 5000);
+
+        // Verify overview map is hidden
+        test.addStep('Verifying overview map is hidden at zoom 4 in 3857...');
+        const isVisibleLowIn3857 = this.getControllersRegistry().mapController.getOverviewMapVisibility();
+        Test.assertIsEqual(isVisibleLowIn3857, false);
+
+        // Reproject back to 3978
+        test.addStep('Reprojecting back to EPSG:3978...');
+        await this.getControllersRegistry().mapController.setProjection(3978);
+
+        // Wait for reprojection to complete — visibility should stay false (was hidden before)
+        // prettier-ignore
+        await whenThisThen(() => this.getControllersRegistry().mapController.getOverviewMapVisibility() === false, 10000);
+
+        // Verify overview map is still hidden (was hidden before reprojection)
+        test.addStep('Verifying overview map is still hidden after reprojecting back to 3978...');
+        const isVisibleAfterReturn = this.getControllersRegistry().mapController.getOverviewMapVisibility();
+        Test.assertIsEqual(isVisibleAfterReturn, false);
+
+        // Zoom above threshold in 3978
+        test.addStep('Zooming to level 8 in 3978 (above threshold)...');
+        await this.getControllersRegistry().mapController.zoomMap(8);
+
+        // Wait for visibility to turn true
+        // prettier-ignore
+        await whenThisThen(() => this.getControllersRegistry().mapController.getOverviewMapVisibility() === true, 5000);
+
+        // Verify overview map is visible again
+        test.addStep('Verifying overview map is visible at zoom 8 in 3978...');
+        const isVisibleFinal = this.getControllersRegistry().mapController.getOverviewMapVisibility();
+        Test.assertIsEqual(isVisibleFinal, true);
       }
     );
   }

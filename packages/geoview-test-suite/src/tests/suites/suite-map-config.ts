@@ -94,6 +94,22 @@ export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
     const pViewSettingsZoomConstraints = this.#mapConfigTester.testViewSettingsZoomConstraints();
     await pViewSettingsZoomConstraints;
 
+    // Test overview map is present when configured
+    const pOverviewMapPresent = this.#mapConfigTester.testOverviewMapPresent();
+    await pOverviewMapPresent;
+
+    // Test overview map is absent when not configured
+    const pOverviewMapAbsent = this.#mapConfigTester.testOverviewMapAbsent();
+    await pOverviewMapAbsent;
+
+    // Test overview map hideOnZoom behavior
+    const pOverviewMapHideOnZoom = this.#mapConfigTester.testOverviewMapHideOnZoom();
+    await pOverviewMapHideOnZoom;
+
+    // Test overview map hideOnZoom with reprojection
+    const pOverviewMapHideOnZoomReproject = this.#mapConfigTester.testOverviewMapHideOnZoomWithReprojection();
+    await pOverviewMapHideOnZoomReproject;
+
     // Resolve when all
     return Promise.all([
       pDataTableInFooterBar,
@@ -105,6 +121,10 @@ export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
       pInitialViewLayerIds,
       pOverlayObjectsPointMarkers,
       pViewSettingsZoomConstraints,
+      pOverviewMapPresent,
+      pOverviewMapAbsent,
+      pOverviewMapHideOnZoom,
+      pOverviewMapHideOnZoomReproject,
     ]);
   }
 }
