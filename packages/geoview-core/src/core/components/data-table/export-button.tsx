@@ -9,14 +9,14 @@ import type { MRT_ColumnDef as MRTColumnDef } from 'material-react-table';
 
 import { IconButton, DownloadIcon, Menu, MenuItem } from '@/ui';
 import { logger } from '@/core/utils/logger';
-import type { ColumnsType } from './data-table-types';
+import type { DataTableRow } from './data-table-types';
 import { useStoreLayerName } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 /** Properties for the ExportButton component. */
 interface ExportButtonProps {
   layerPath: string;
-  rows: ColumnsType[];
-  columns: MRTColumnDef<ColumnsType>[];
+  rows: DataTableRow[];
+  columns: MRTColumnDef<DataTableRow>[];
   children?: ReactElement | undefined;
 }
 
@@ -24,9 +24,9 @@ interface ExportButtonProps {
 const COLUMNS_TO_REMOVE = ['ICON', 'ZOOM', 'DETAILS', 'geoviewID'];
 
 /**
- * Renders an export button with a menu for downloading data table data.
+ * Creates an export button component with CSV download menu.
  *
- * @param props - ExportButton properties
+ * @param props - Properties defined in ExportButtonProps interface
  * @returns The export button element
  */
 function ExportButton({ layerPath, rows, columns, children }: ExportButtonProps): JSX.Element {
@@ -38,6 +38,8 @@ function ExportButton({ layerPath, rows, columns, children }: ExportButtonProps)
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
+
+  // #region Handlers
 
   /**
    * Shows the export menu.
@@ -52,6 +54,8 @@ function ExportButton({ layerPath, rows, columns, children }: ExportButtonProps)
   const handleClose = useCallback((): void => {
     setAnchorEl(null);
   }, []);
+
+  // #endregion
 
   /**
    * Builds CSV options for download.
@@ -84,8 +88,12 @@ function ExportButton({ layerPath, rows, columns, children }: ExportButtonProps)
         (acc, curr) => {
           // Only add the field if it's not a utility column
           if (!COLUMNS_TO_REMOVE.includes(curr)) {
-            // eslint-disable-next-line no-param-reassign
-            acc[curr] = String(row[curr]?.value ?? '');
+            const value = row[curr];
+            // Only extract value from TypeFieldEntry objects (not ReactElements)
+            if (value && typeof value === 'object' && 'value' in value) {
+              // eslint-disable-next-line no-param-reassign
+              acc[curr] = String(value.value ?? '');
+            }
           }
           return acc;
         },
