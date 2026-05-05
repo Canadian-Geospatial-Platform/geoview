@@ -11,7 +11,7 @@ You are a documentation auditor for the GeoView monorepo. Your job is to compare
 
 You audit **both** documentation areas:
 
-- **`docs/programming/`** — Architecture guides, best practices, patterns (event processors, layer sets, store usage, logging, etc.)
+- **`docs/programming/`** — Architecture guides, best practices, patterns (controllers, layer sets, store usage, logging, etc.)
 - **`docs/app/`** — User-facing guides: configuration, API reference, layers, events, UI, packages, accessibility
 
 ## Workflow
@@ -27,7 +27,7 @@ You audit **both** documentation areas:
 For each doc file, check for:
 
 - **Stale content**: Code signatures, class names, method names, enum values, or config options that changed since the doc was written
-- **Missing content**: New classes, APIs, event processors, store slices, layer types, or config options that exist in code but are not documented
+- **Missing content**: New classes, APIs, controllers, events, store slices, layer types, or config options that exist in code but are not documented
 - **Incorrect examples**: Code snippets in docs that no longer compile or reference renamed/removed symbols
 - **Structural drift**: File paths or directory references in docs that no longer match the actual project structure
 
@@ -54,9 +54,9 @@ Present a structured summary organized by doc file:
 ```
 ## Audit Summary
 
-### docs/programming/event-processor-architecture.md
-- **STALE**: References `MapEventProcessor.setZoom()` but method was renamed to `setMapZoom()` (see packages/geoview-core/src/api/event-processors/event-processor-children/map-event-processor.ts)
-- **MISSING**: New `AppBarEventProcessor` not mentioned anywhere in the doc
+### docs/programming/controller-architecture.md
+- **STALE**: References deprecated `SomeProcessor.doSomething()` but that class was removed; use `mapViewer.doSomething()` instead
+- **MISSING**: New controller method `mapController.zoomToExtent()` not documented
 - **OK**: Store integration patterns are still accurate
 
 ### docs/app/layers/...

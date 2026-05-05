@@ -7,6 +7,7 @@ GeoView uses its own custom test framework (NOT Jest/Vitest/Mocha). The `geoview
 - **[Using the Test Suite](./using-test-suite.md)** — How to configure, run tests, and interpret results
 - **[Test Architecture](./test-architecture.md)** — Framework design and execution model
 - **[Creating Custom Tests](./creating-tests.md)** — Developer guide for adding new test suites and testers
+- **[Test Templates](./test-templates.md)** — Copy-paste templates for every test category (A–H)
 - **[API Reference](./api-reference.md)** — Assertion methods and helper utilities
 
 ## Quick Start

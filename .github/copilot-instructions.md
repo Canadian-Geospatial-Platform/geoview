@@ -1474,7 +1474,7 @@ protected override onLaunchTestSuite(): Promise<unknown> {
 **Critical requirements:**
 
 - **Wait for `allFeatureInfoLayerSet` registration** using `whenThisThen()` before querying
-- **Set zoom level** using `await this.getMapViewer().setMapZoomLevel(zoom)` — NOT `MapEventProcessor.setZoom()` (see Gotchas)
+- **Set zoom level** using `await this.getMapViewer().setMapZoomLevel(zoom)` (direct) or `await this.getControllersRegistry().mapController.zoomMap(zoom)` (animated)
 - **Run sequentially** at the end of the suite to avoid zoom conflicts with other tests
 
 **Template:**
@@ -1598,9 +1598,19 @@ testMyLayerConfigValidation(): Promise<Test<TypeGeoviewLayerConfig>> {
 1. **Add test method** to `MapTester`
 2. **Register in Suite** (`suite-map-varia.ts` → `onLaunchTestSuite` — use **sequential `await`** if test depends on map state)
 
-**Key pattern:** Tests that modify shared map state (zoom, projection) must run **sequentially** via `await`. Independent tests can be grouped in `Promise.all()`.
+**Key pattern:** Controllers are the preferred public API for map operations. MapViewer provides low-level OpenLayers access for cases where immediate (non-animated) manipulation is needed. This is a **transitional architecture** — MapViewer will eventually become internal. Tests that modify shared map state must run **sequentially** via `await`.
 
-**Template:**
+| Operation            | Controller (preferred)                                                        | MapViewer (low-level)                                             |
+| -------------------- | ----------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| **Zoom (animated)**  | `this.getControllersRegistry().mapController.zoomMap(zoom, duration)`         |                                                                   |
+| **Zoom (immediate)** |                                                                               | `this.getMapViewer().setMapZoomLevel(zoom)`                       |
+| **Zoom to extent**   | `this.getControllersRegistry().mapController.zoomToExtent(extent)`            | `this.getMapViewer().setExtent(extent)` — delegates to controller |
+| **Zoom to initial**  | `this.getControllersRegistry().mapController.zoomToInitialExtent()`           | _(none)_                                                          |
+| **Projection**       | `this.getControllersRegistry().mapController.setProjection(code)` → `Promise` | `this.getMapViewer().setProjection(code)` → `boolean`             |
+| **Language**         | _(none)_                                                                      | `this.getMapViewer().setLanguage(lang)`                           |
+| **Rotation**         | `this.getControllersRegistry().mapController.rotate(degree, animate)`         | `this.getMapViewer().rotate(degree)`                              |
+
+**Template (Controller pattern):**
 
 ```typescript
 // In map-tester.ts
@@ -1609,8 +1619,7 @@ testMyMapInteraction(): Promise<Test<SomeResultType>> {
     `Test my map interaction...`,
     async (test) => {
       test.addStep('Setting up map state...');
-      MapEventProcessor.setZoom(this.getMapId(), 5);
-      await someWaitCondition();
+      await this.getControllersRegistry().mapController.zoomMap(5);
       return getResult();
     },
     (test, result) => {
@@ -1618,7 +1627,7 @@ testMyMapInteraction(): Promise<Test<SomeResultType>> {
     },
     (test) => {
       // Cleanup: reset to initial state
-      MapEventProcessor.zoomToInitialExtent(this.getMapId());
+      this.getControllersRegistry().mapController.zoomToInitialExtent();
     }
   );
 }
@@ -1789,11 +1798,13 @@ import { GVTestSuiteMyFeature } from './tests/suites/suite-my-feature';
 
 ### Gotchas & Pitfalls
 
-**`MapEventProcessor.setZoom()` vs `mapViewer.setMapZoomLevel()`:**
+**Controllers vs MapViewer for zoom:**
 
-- `MapEventProcessor.setZoom(mapId, zoom)` only updates the **Zustand store** — it does NOT change the actual OpenLayers map view zoom. The map will not visually zoom and `getView().getZoom()` will return the old value.
-- `await this.getMapViewer().setMapZoomLevel(zoom)` sets the **actual OL view zoom** via `getView().setZoom()` and returns a Promise that resolves on `rendercomplete`.
-- **Always use `setMapZoomLevel()`** in tests when you need the map to actually change zoom (e.g., before querying features that have visibility range constraints).
+Controllers are the preferred path. MapViewer provides low-level OL access (transitional — will eventually become internal):
+
+- `await this.getControllersRegistry().mapController.zoomMap(zoom, duration)` — Preferred. Animated zoom with validation. Returns a Promise that resolves when the animation completes.
+- `await this.getMapViewer().setMapZoomLevel(zoom)` — Low-level. Sets the OL view zoom directly (no animation). Returns a Promise that resolves on `rendercomplete`.
+- Use `setMapZoomLevel()` only when you need an immediate zoom without animation (e.g., before querying features that have visibility range constraints).
 
 **`queryLayerFeatures()` visibility guards:**
 
