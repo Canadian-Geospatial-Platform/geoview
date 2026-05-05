@@ -160,6 +160,7 @@
     <!-- Group 5: Packages -->
     <div id="group5-tabs" class="tabs group-tabs">
       <button class="tab-button" onclick="openTab(event, 'map5-test')">Geochart</button>
+      <button class="tab-button" onclick="openTab(event, 'map10-test')">Swiper</button>
     </div>
 
     <!-- Run All Tests Tab -->
@@ -284,6 +285,15 @@
       </button>
       <div class="panel">
         <div id="runAllMap5Results"></div>
+      </div>
+
+      <!-- Map 10 Results -->
+      <button id="collapsibleMap10" class="collapsible" onclick="toggleCollapsible(this)">
+        <span style="font-weight: bold">Map 10 - Swiper Tests</span>
+        <span id="statsMap10" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Done success: 0 | Done failed: 0 | Done: 0/0</span>
+      </button>
+      <div class="panel">
+        <div id="runAllMap10Results"></div>
       </div>
     </div>
 
@@ -864,6 +874,90 @@
                 'legend',
                 'layers',
                 'details'
+              ]
+            }
+          }
+        }"
+      ></div>
+    </div>
+
+    <!-- Map 10 Tab -->
+    <div id="map10-test" class="tab-content">
+      <div class="map-title-holder">
+        <h4 id="HEVNT10">10. Tests on map 10 (Swiper)</h4>
+        <a class="ref-link" href="#top">Top</a>
+      </div>
+
+      <div id="testSuiteTable-map10"></div>
+      <br />
+      <div
+        id="map10"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'projection': 3857
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': false,
+              'labeled': false
+            },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerId': 'swiperWms',
+                'geoviewLayerName': 'MSI',
+                'metadataAccessPath': 'https://datacube.services.geo.ca/ows/msi',
+                'geoviewLayerType': 'ogcWms',
+                'listOfLayerEntryConfig': [
+                  {
+                    'layerId': 'msi-94-or-more'
+                  }
+                ]
+              },
+              {
+                'geoviewLayerId': 'swiperGeojson',
+                'geoviewLayerName': 'GeoJSON Sample',
+                'metadataAccessPath': './datasets/geojson/metadata.meta',
+                'geoviewLayerType': 'GeoJSON',
+                'listOfLayerEntryConfig': [
+                  {
+                    'layerId': 'polygons.json'
+                  }
+                ]
+              },
+              {
+                'geoviewLayerId': 'swiperOgcFeature',
+                'geoviewLayerName': 'Large Lakes',
+                'metadataAccessPath': 'https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev',
+                'geoviewLayerType': 'ogcFeature',
+                'listOfLayerEntryConfig': [
+                  {
+                    'layerId': 'lakes'
+                  }
+                ]
+              }
+            ]
+          },
+          'components': [],
+          'corePackages': ['swiper', 'test-suite'],
+          'corePackagesConfig': [
+            {
+              'swiper': {
+                'orientation': 'vertical',
+                'layers': []
+              },
+              'test-suite': { 'suites': ['suite-swiper'] }
+            }
+          ],
+          'theme': 'geo.ca',
+          'footerBar': {
+            'tabs': {
+              'core': [
+                'legend',
+                'layers'
               ]
             }
           }
