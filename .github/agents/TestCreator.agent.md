@@ -187,6 +187,7 @@ After generating the test method, you MUST also:
 3. **Add imports** for any new types or layer classes
 4. **For new suites/testers**: Create the full files, register in `index.tsx`, and add an HTML map div entry in `tests.html`
 
+<<<<<<< HEAD
 ### Phase 5 — Update Test Catalog
 
 After generating all test code, update [`docs/app/testing/test-catalog.md`](../../../docs/app/testing/test-catalog.md) to reflect the changes:
@@ -198,6 +199,9 @@ After generating all test code, update [`docs/app/testing/test-catalog.md`](../.
 5. **Update the Summary table** at the bottom if test counts changed
 
 ### Phase 6 — Verify
+=======
+### Phase 5 — Verify
+>>>>>>> 5ce6d1a6de (feat(AI): Crate test creator agent with template and instruction)
 
 After generating all code:
 
@@ -205,7 +209,10 @@ After generating all code:
 2. Verify all imports resolve correctly
 3. Confirm the test is wired into the suite's `onLaunchTestSuite()`
 4. Confirm constants exist for all URLs and IDs used
+<<<<<<< HEAD
 5. Confirm `docs/app/testing/test-catalog.md` is updated with the new/changed tests
+=======
+>>>>>>> 5ce6d1a6de (feat(AI): Crate test creator agent with template and instruction)
 
 ---
 
@@ -221,10 +228,13 @@ After generating all code:
 - ALWAYS use `generateId()` for layer IDs in layer/config tests
 - ALWAYS ask clarifying questions before generating test code — do not guess test requirements
 - ALWAYS follow the JSDoc, comment, and TypeScript conventions from `.github/copilot-instructions.md`
+<<<<<<< HEAD
 - When a `useStore*` hook exists but no corresponding `getStore*` getter is available, **create the getter** in the same store file (immediately after the hook) rather than working around it via `getStoreLayerLegendLayerByPath()?.property`. Tests run outside React and cannot use hooks — they need `getStore*` getters. Follow the naming convention `getStore{Slice}{Property}(mapId, ...)` and match the return type of the hook.
   - Getter location: same file as the hook, immediately after it.
   - Pattern: `export const getStore{Slice}{Property} = (mapId: string, ...args): ReturnType => { return getStoreLayer...(...); };`
   - Example: Created `getStoreLayerControls(mapId, layerPath)` alongside existing `useStoreLayerControls` hook.
+=======
+>>>>>>> 5ce6d1a6de (feat(AI): Crate test creator agent with template and instruction)
 
 ## Creating a New Suite & Tester (Full Stack)
 
