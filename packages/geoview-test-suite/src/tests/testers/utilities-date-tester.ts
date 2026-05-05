@@ -33,6 +33,8 @@ export class UtilitiesDateTester extends GVAbstractTester {
           DateMgt.formatDate('2024-06-15T12:30:00Z', 'DD/MM/YYYY', 'fr'),
           DateMgt.formatDate(new Date('2024-01-01T00:00:00Z'), 'YYYY', 'en'),
           DateMgt.formatDate(946684800000, 'YYYY-MM-DD', 'en'),
+          DateMgt.formatDate('2026-02-20', 'll', 'en'),
+          DateMgt.formatDate('2026-02-20', 'll', 'fr'),
         ];
       },
       (test, results) => {
@@ -47,6 +49,12 @@ export class UtilitiesDateTester extends GVAbstractTester {
 
         test.addStep('Verifying format from epoch number...');
         Test.assertIsEqual(results[3], '2000-01-01');
+
+        test.addStep('Verifying short localized date in English...');
+        Test.assertIsEqual(results[4], 'Feb 20, 2026');
+
+        test.addStep('Verifying short localized date in French...');
+        Test.assertIsEqual(results[5], '20 févr. 2026');
       }
     );
   }

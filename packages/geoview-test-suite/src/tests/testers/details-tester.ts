@@ -191,7 +191,7 @@ export class DetailsTester extends GVAbstractTester {
 
   //       // Check that geochart is the active footer bar
   //       test.addStep("Verifying 'geochart' is the selected footer tab...");
-  //       Test.assertIsEqual(UIContyroller.getActiveFooterBarTab(this.getMapId()), 'geochart');
+  //       Test.assertIsEqual(UIController.getActiveFooterBarTab(this.getMapId()), 'geochart');
 
   //       // Check that layer path is selected
   //       test.addStep(`Verifying ${layerPathAdd} is the selected layer for the geochart...`);
