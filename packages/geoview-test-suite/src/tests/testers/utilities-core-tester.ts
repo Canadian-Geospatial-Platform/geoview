@@ -716,30 +716,50 @@ export class UtilitiesCoreTester extends GVAbstractTester {
     return this.test(
       'Test formatMeasurementValue(), formatLength(), formatArea()...',
       (test) => {
-        test.addStep('Formatting various measurements...');
+        test.addStep('Formatting various measurements in en and fr...');
         return [
           formatMeasurementValue(1234.56, 'en'),
+          formatMeasurementValue(1234.56, 'fr'),
           formatLength(50, 'en'),
+          formatLength(50, 'fr'),
           formatLength(1500, 'en'),
+          formatLength(1500, 'fr'),
           formatArea(500, 'en'),
+          formatArea(500, 'fr'),
           formatArea(50000, 'en'),
+          formatArea(50000, 'fr'),
         ];
       },
       (test, results) => {
-        test.addStep('Verifying measurement value format...');
-        Test.assertIsDefined('measurementValue', results[0]);
+        test.addStep('Verifying en measurement value format...');
+        Test.assertIsEqual(results[0], '1,234.56');
 
-        test.addStep('Verifying short length in meters...');
-        Test.assertIsEqual(results[1].includes('m'), true);
+        test.addStep('Verifying fr measurement value format...');
+        Test.assertIsEqual(results[1], '1\u00a0234,56');
 
-        test.addStep('Verifying long length in km...');
-        Test.assertIsEqual(results[2].includes('km'), true);
+        test.addStep('Verifying en short length in meters...');
+        Test.assertIsEqual(results[2], '50.00 m');
 
-        test.addStep('Verifying small area in m²...');
-        Test.assertIsDefined('smallArea', results[3]);
+        test.addStep('Verifying fr short length in meters...');
+        Test.assertIsEqual(results[3], '50,00 m');
 
-        test.addStep('Verifying large area in km²...');
-        Test.assertIsEqual(results[4].includes('km'), true);
+        test.addStep('Verifying en long length in km...');
+        Test.assertIsEqual(results[4], '1.50 km');
+
+        test.addStep('Verifying fr long length in km...');
+        Test.assertIsEqual(results[5], '1,50 km');
+
+        test.addStep('Verifying en small area in m²...');
+        Test.assertIsEqual(results[6], '500.00 m<sup>2</sup>');
+
+        test.addStep('Verifying fr small area in m²...');
+        Test.assertIsEqual(results[7], '500,00 m<sup>2</sup>');
+
+        test.addStep('Verifying en large area in km²...');
+        Test.assertIsEqual(results[8], '0.05 km<sup>2</sup>');
+
+        test.addStep('Verifying fr large area in km²...');
+        Test.assertIsEqual(results[9], '0,05 km<sup>2</sup>');
       }
     );
   }
@@ -856,7 +876,16 @@ export class UtilitiesCoreTester extends GVAbstractTester {
       'Test getLocalizedMessage() returns translated strings...',
       (test) => {
         test.addStep('Getting localized messages...');
-        return [getLocalizedMessage('en', 'general.close'), getLocalizedMessage('fr', 'general.close')];
+        return [
+          getLocalizedMessage('en', 'general.close'),
+          getLocalizedMessage('fr', 'general.close'),
+          getLocalizedMessage('en', 'general.panelLabel', { title: 'Legend' }),
+          getLocalizedMessage('fr', 'general.panelLabel', { title: 'Légende' }),
+          getLocalizedMessage('en', 'legend.subLayersCount', { count: 5 }),
+          getLocalizedMessage('fr', 'legend.subLayersCount', { count: 5 }),
+          getLocalizedMessage('en', 'general.processing', { count: 3, total: 10 }),
+          getLocalizedMessage('fr', 'general.processing', { count: 3, total: 10 }),
+        ];
       },
       (test, results) => {
         test.addStep('Verifying English message returned...');
@@ -869,6 +898,24 @@ export class UtilitiesCoreTester extends GVAbstractTester {
 
         test.addStep('Verifying translations differ...');
         Test.assertIsNotEqual(results[0], results[1]);
+
+        test.addStep('Verifying single param interpolation (en)...');
+        Test.assertIsEqual(results[2], 'Legend panel');
+
+        test.addStep('Verifying single param interpolation (fr)...');
+        Test.assertIsEqual(results[3], 'Panneau de Légende');
+
+        test.addStep('Verifying numeric param interpolation (en)...');
+        Test.assertIsEqual(results[4], '5 sublayers');
+
+        test.addStep('Verifying numeric param interpolation (fr)...');
+        Test.assertIsEqual(results[5], '5 sous-couches');
+
+        test.addStep('Verifying multi-param interpolation (en)...');
+        Test.assertIsEqual(results[6], 'Processing 3 element(s) of 10');
+
+        test.addStep('Verifying multi-param interpolation (fr)...');
+        Test.assertIsEqual(results[7], 'Traitement de 3 élément(s) sur 10');
       }
     );
   }
