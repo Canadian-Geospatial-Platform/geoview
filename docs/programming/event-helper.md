@@ -205,6 +205,6 @@ useEffect(() => {
 
 ## See Also
 
-- **[Using Zustand Store](programming/using-store.md)** — Store access patterns
-- **[Layer Set Architecture](programming/layerset-architecture.md)** — Layer sets use this event system
-- **[Best Practices](programming/best-practices.md)** — Coding standards
+- **[Using Zustand Store](using-store.md)** — Store access patterns
+- **[Layer Set Architecture](layerset-architecture.md)** — Layer sets use this event system
+- **[Best Practices](best-practices.md)** — Coding standards
