@@ -831,8 +831,6 @@ export class GVWMS extends AbstractGVRaster {
     // Log the various info format supported for the layer, keeping the line commented, useful for debugging
     // logger.logDebug(layerConfig.getLayerNameCascade(), featureInfoFormat);
 
-    // TODO: WMS - Add support for application/vnd.ogc.gml GV issue #3134
-
     // If the info format includes GEOJSON
     let featureMember: Record<string, unknown>[] | undefined;
     if (featureInfoFormat.includes('application/geojson')) {
@@ -883,6 +881,32 @@ export class GVWMS extends AbstractGVRaster {
         // Failed to retrieve featureMember using Json, eat the error, we'll try with another format
         logger.logError(
           `${wmsLayerConfig.getLayerNameCascade()} - Failed to retrieve featureMember using JSON, eat the error, we'll try with another format`,
+          error
+        );
+      }
+    }
+
+    // If not found and format includes application/vnd.ogc.gml
+    if (!featureMember && featureInfoFormat.includes('application/vnd.ogc.gml')) {
+      try {
+        // Try to get the feature member using GML format
+        featureMember = await GVWMS.#getFeatureInfoUsingGML(
+          wmsLayerConfig,
+          wmsSource,
+          clickCoordinate,
+          viewResolution,
+          this.getGetFeatureInfoTolerance(),
+          projectionCode,
+          this.getGetFeatureInfoFeatureCount(),
+          abortController
+        );
+
+        // Keep in mind, this output format works
+        this.#featureOutputFormatWMSWorked = 'application/vnd.ogc.gml';
+      } catch (error: unknown) {
+        // Failed to retrieve featureMember using GML, eat the error, we'll try with another format
+        logger.logError(
+          `${wmsLayerConfig.getLayerNameCascade()} - Failed to retrieve featureMember using GML, eat the error, we'll try with another format`,
           error
         );
       }
@@ -1140,6 +1164,97 @@ export class GVWMS extends AbstractGVRaster {
 
     // If found
     if (featureMember) {
+      // Success!
+      return featureMember;
+    }
+
+    // Failed
+    throw new LayerInvalidFeatureInfoFormatWMSError(layerConfig.layerPath, infoFormat, layerConfig.getLayerNameCascade());
+  }
+
+  /**
+   * Retrieves feature information from a WMS layer using the `application/vnd.ogc.gml` info format.
+   *
+   * This method performs a `GetFeatureInfo` request and parses namespaced GML responses into a
+   * standardized array of feature-member records. It supports both standard `gml:featureMember`
+   * payloads and fallback payloads that omit that wrapper.
+   *
+   * @param layerConfig - Configuration object for the target WMS layer
+   * @param wmsSource - The OpenLayers WMS source used to construct the request
+   * @param clickCoordinate - The coordinate on the map where the user clicked
+   * @param viewResolution - The current resolution of the map view
+   * @param qgisServerTolerance - The QGIS Server feature info pixel tolerance
+   * @param projectionCode - The projection in which the request should be made (e.g., 'EPSG:3857')
+   * @param maxFeatures - Optional maximum number of features to include in response when we want more than 1
+   * @param abortController - Optional {@link AbortController} to allow cancellation of the request
+   * @returns A promise that resolves with an array of feature member records
+   */
+  static async #getFeatureInfoUsingGML(
+    layerConfig: OgcWmsLayerEntryConfig,
+    wmsSource: ImageWMS,
+    clickCoordinate: Coordinate,
+    viewResolution: number,
+    qgisServerTolerance: number,
+    projectionCode: ProjectionLike,
+    maxFeatures: number | undefined,
+    abortController: AbortController | undefined = undefined
+  ): Promise<Record<string, unknown>[]> {
+    // The info format
+    const infoFormat = 'application/vnd.ogc.gml';
+
+    // Try to get the information using GML format
+    const responseData = await GVWMS.#readFeatureInfo(
+      layerConfig,
+      wmsSource,
+      clickCoordinate,
+      viewResolution,
+      qgisServerTolerance,
+      projectionCode,
+      infoFormat,
+      maxFeatures,
+      abortController
+    );
+
+    // Parse the content as XML
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(responseData, 'application/xml');
+
+    // Abort if XML could not be parsed
+    if (xmlDoc.getElementsByTagName('parsererror').length > 0) {
+      throw new LayerInvalidFeatureInfoFormatWMSError(layerConfig.layerPath, infoFormat, layerConfig.getLayerNameCascade());
+    }
+
+    // Preferred path: parse standard gml:featureMember entries using localName for namespace safety.
+    const allElements = Array.from(xmlDoc.getElementsByTagName('*'));
+    const featureMemberElements = allElements.filter((element) => element.localName === 'featureMember');
+
+    const featureMember: Record<string, unknown>[] = [];
+    featureMemberElements.forEach((featureMemberElement): void => {
+      const featureElements = GVWMS.#getXmlChildElements(featureMemberElement);
+
+      // A featureMember usually wraps exactly one feature element, but process all to be safe.
+      featureElements.forEach((featureElement): void => {
+        featureMember.push(GVWMS.#convertXmlElementToRecord(featureElement));
+      });
+    });
+
+    // Fallback path: some services don't use gml:featureMember.
+    if (featureMember.length === 0 && xmlDoc.documentElement) {
+      const fallbackCandidates = allElements.filter((element) => {
+        const children = GVWMS.#getXmlChildElements(element);
+        if (children.length === 0) return false;
+
+        // Candidate features have at least one non-GML direct child field.
+        return children.some((child) => child.prefix !== 'gml' && GVWMS.#getXmlChildElements(child).length === 0);
+      });
+
+      fallbackCandidates.forEach((candidate): void => {
+        featureMember.push(GVWMS.#convertXmlElementToRecord(candidate));
+      });
+    }
+
+    // If found
+    if (featureMember.length > 0) {
       // Success!
       return featureMember;
     }
@@ -1488,6 +1603,65 @@ export class GVWMS extends AbstractGVRaster {
   }
 
   /**
+   * Filters child nodes and returns only direct child Element nodes.
+   *
+   * @param element - The parent element whose children will be filtered
+   * @returns An array containing only Element-type child nodes
+   */
+  static #getXmlChildElements(element: Element): Element[] {
+    return Array.from(element.childNodes).filter((node): node is Element => node.nodeType === Node.ELEMENT_NODE);
+  }
+
+  /**
+   * Adds a property to a record, aggregating duplicate keys as arrays.
+   *
+   * When a property key already exists, the values are collected into an array.
+   * This is useful for XML elements that can have multiple children with the same tag name.
+   *
+   * @param record - The record to update
+   * @param key - The property key to add or update
+   * @param value - The value to add
+   * @returns A new record with the property added or updated
+   */
+  static #addXmlRecordProperty(record: Record<string, unknown>, key: string, value: unknown): Record<string, unknown> {
+    const currentValue = record[key];
+    if (currentValue === undefined) {
+      return { ...record, [key]: value };
+    }
+
+    if (Array.isArray(currentValue)) {
+      return { ...record, [key]: [...currentValue, value] };
+    }
+
+    return { ...record, [key]: [currentValue, value] };
+  }
+
+  /**
+   * Recursively converts an XML element and its children into an object record.
+   *
+   * Nested elements are converted to nested records. Text content is preserved,
+   * with empty strings maintained to distinguish from missing content.
+   *
+   * @param element - The XML element to convert
+   * @returns An object record representing the element and its descendants
+   */
+  static #convertXmlElementToRecord(element: Element): Record<string, unknown> {
+    let record: Record<string, unknown> = {};
+    const children = GVWMS.#getXmlChildElements(element);
+
+    children.forEach((child): void => {
+      const key = child.nodeName;
+      const childElements = GVWMS.#getXmlChildElements(child);
+
+      // Preserve empty values while still supporting nested structures.
+      const value: unknown = childElements.length > 0 ? GVWMS.#convertXmlElementToRecord(child) : (child.textContent?.trim() ?? '');
+      record = GVWMS.#addXmlRecordProperty(record, key, value);
+    });
+
+    return record;
+  }
+
+  /**
    * Gets the legend image of a layer.
    *
    * @param layerConfig - The layer configuration.
@@ -1650,6 +1824,7 @@ export class GVWMS extends AbstractGVRaster {
   // #endregion EVENTS
 }
 
+/** Defines the CRS override used to request WMS images in a different projection. */
 export type CRSOverride = { layerProjection: string; mapProjection: string };
 
 /**
