@@ -2,7 +2,7 @@ import type { TypeGeoviewLayerType } from 'geoview-core/api/types/layer-schema-t
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
-import { delay, whenThisThen } from 'geoview-core/core/utils/utilities';
+import { delay } from 'geoview-core/core/utils/utilities';
 import {
   getStoreUIActiveAppBarTab,
   getStoreUIActiveFooterBarTab,
