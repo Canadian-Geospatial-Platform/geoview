@@ -4,7 +4,7 @@ import { useTheme } from '@mui/material/styles';
 import { IconButton, FullscreenIcon, FullscreenExitIcon } from '@/ui';
 import type { TypeHTMLElement } from '@/core/types/global-types';
 import { getSxClasses } from '@/core/components/nav-bar/nav-bar-style';
-import { useStoreAppIsFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreAppIsFullscreenActive } from '@/core/stores/states/app-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 import { useUIController } from '@/core/controllers/use-controllers';

@@ -8,7 +8,7 @@ import {
   setStoreSwiperLayerPaths,
   setStoreSwiperOrientation,
   type SwipeOrientation,
-} from '@/core/stores/store-interface-and-intial-values/swiper-state';
+} from '@/core/stores/states/swiper-state';
 
 /**
  * Controller responsible for time swiper interactions and

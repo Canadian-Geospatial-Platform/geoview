@@ -7,7 +7,7 @@ import type { TypeGeoviewLayerType } from 'geoview-core/api/types/layer-schema-t
 import type { TypeLegendItem } from 'geoview-core/core/components/layers/types';
 import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
 import { Test } from '../core/test';
-import { getStoreLayerLegendLayerByPath } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
+import { getStoreLayerLegendLayerByPath } from 'geoview-core/core/stores/states/layer-state';
 import type { GeometryApi } from 'geoview-core/geo/layer/geometry/geometry';
 
 /**

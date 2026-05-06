@@ -6,7 +6,7 @@ import {
   useStoreDrawerStyle,
   useStoreDrawerActiveGeom,
   useStoreDrawerSelectedDrawingType,
-} from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
+} from 'geoview-core/core/stores/states/drawer-state';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { logger } from 'geoview-core/core/utils/logger';
 

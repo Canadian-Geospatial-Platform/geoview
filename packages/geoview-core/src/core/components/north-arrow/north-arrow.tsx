@@ -6,7 +6,7 @@ import { Box } from '@/ui';
 import { Projection } from '@/geo/utils/projection';
 import { NorthArrowIcon, NorthPoleIcon } from './north-arrow-icon';
 import { getSxClasses } from './north-arrow-style';
-import { useStoreMapNorthArrowElement, useStoreMapCurrentProjectionEPSG } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useStoreMapNorthArrowElement, useStoreMapCurrentProjectionEPSG } from '@/core/stores/states/map-state';
 
 import { useManageArrow } from './hooks/useManageArrow';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';

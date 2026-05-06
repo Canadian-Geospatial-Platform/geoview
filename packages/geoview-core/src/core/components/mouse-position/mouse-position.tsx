@@ -4,7 +4,7 @@ import type { Coordinate } from 'ol/coordinate';
 import { useTheme } from '@mui/material/styles';
 import { Box, Button, CheckIcon } from '@/ui';
 
-import { useStoreMapPointerPosition } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useStoreMapPointerPosition } from '@/core/stores/states/map-state';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { getSxClasses } from './mouse-position-style';
 

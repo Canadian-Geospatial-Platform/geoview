@@ -13,7 +13,7 @@ import { Box } from '@/ui';
 import type { LayerListEntry } from '@/core/components/common';
 import { Layout } from '@/core/components/common';
 import type { TypeContainerBox } from '@/core/types/global-types';
-import { useStoreAppGuide } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreAppGuide } from '@/core/stores/states/app-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { TABS } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';

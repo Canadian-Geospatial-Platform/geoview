@@ -1,4 +1,4 @@
-import type { TypeAllFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import type { TypeAllFeatureInfoResultSetEntry } from '@/core/stores/states/data-table-state';
 import type { TypeFieldEntry, TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import type { ReactElement } from 'react';

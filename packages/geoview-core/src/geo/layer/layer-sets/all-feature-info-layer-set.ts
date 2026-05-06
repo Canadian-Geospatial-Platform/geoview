@@ -7,7 +7,7 @@ import {
   deleteStoreDataTableFeatureAllInfo,
   setStoreDataTableQueryStatusAndFeatures,
   setStoreDataTableInitialSettings,
-} from '@/core/stores/store-interface-and-intial-values/data-table-state';
+} from '@/core/stores/states/data-table-state';
 import { RequestAbortedError } from '@/core/exceptions/core-exceptions';
 import { logger } from '@/core/utils/logger';
 

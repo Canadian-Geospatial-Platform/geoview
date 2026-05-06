@@ -3,7 +3,7 @@ import { CONST_PANEL_TYPES } from '@/ui/panel/panel-types';
 import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 
 import { generateId } from '@/core/utils/utilities';
-import { getStoreUIActiveAppBarTab, type ActiveAppBarTabType } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { getStoreUIActiveAppBarTab, type ActiveAppBarTabType } from '@/core/stores/states/ui-state';
 import type { UIController } from '@/core/controllers/ui-controller';
 import { logger } from '@/core/utils/logger';
 

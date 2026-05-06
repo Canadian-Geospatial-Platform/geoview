@@ -7,11 +7,7 @@ import type { Mark } from '@mui/base';
 
 import { getSxClasses } from './layer-opacity-control-styles';
 import { Box, Slider, Typography } from '@/ui';
-import {
-  useStoreLayerIsHiddenOnMap,
-  useStoreLayerOpacity,
-  useStoreLayerOpacityMaxFromParent,
-} from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useStoreLayerIsHiddenOnMap, useStoreLayerOpacity, useStoreLayerOpacityMaxFromParent } from '@/core/stores/states/layer-state';
 import { logger } from '@/core/utils/logger';
 import { useLayerController } from '@/core/controllers/use-controllers';
 

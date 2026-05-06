@@ -21,7 +21,7 @@ import NavbarPanelButton from '@/core/components/nav-bar/nav-bar-panel-button';
 import { formatLength, formatArea } from '@/core/utils/utilities';
 import type { Draw } from '@/geo/interaction/draw';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
-import { useStoreAppDisplayLanguage, useStoreAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreAppDisplayLanguage, useStoreAppGeoviewHTMLElement } from '@/core/stores/states/app-state';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { useMapController } from '@/core/controllers/use-controllers';
 

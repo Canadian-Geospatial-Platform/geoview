@@ -1,7 +1,7 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
-import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/states/app-state';
 import { logger } from 'geoview-core/core/utils/logger';
-import { useStoreLayerArrayVisibility } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
+import { useStoreLayerArrayVisibility } from 'geoview-core/core/stores/states/layer-state';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { useLayerController } from 'geoview-core/core/controllers/use-controllers';
 

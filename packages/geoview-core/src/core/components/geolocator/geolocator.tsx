@@ -9,7 +9,7 @@ import { debounce } from '@/core/utils/debounce';
 import { Box, ProgressBar, Typography } from '@/ui';
 
 import { useUIController } from '@/core/controllers/use-controllers';
-import { useStoreUIActiveAppBarTab, useStoreUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useStoreUIActiveAppBarTab, useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
 import { GeolocatorResult } from '@/core/components/geolocator/geolocator-result';
 import { getSxClasses } from '@/core/components/geolocator/geolocator-style';
 import { DEFAULT_APPBAR_CORE } from '@/api/types/map-schema-types';

@@ -50,10 +50,10 @@ import {
   setStoreLayerOrderedLayers,
   setStoreLayerSelectedLayersTabLayer,
   utilFindLayerAndChildrenPaths,
-} from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { getStoreAppShowLayerHighlightLayerBbox } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { setStoreDataTableFilter } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { isStoreTimeSliderInitialized, setStoreTimeSliderFilter } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
+} from '@/core/stores/states/layer-state';
+import { getStoreAppShowLayerHighlightLayerBbox } from '@/core/stores/states/app-state';
+import { setStoreDataTableFilter } from '@/core/stores/states/data-table-state';
+import { isStoreTimeSliderInitialized, setStoreTimeSliderFilter } from '@/core/stores/states/time-slider-state';
 import type {
   DomainLayerBaseDelegate,
   DomainLayerBaseEvent,

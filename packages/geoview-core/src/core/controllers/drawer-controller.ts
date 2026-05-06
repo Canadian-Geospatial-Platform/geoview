@@ -50,7 +50,7 @@ import {
   setStoreIsEditing,
   setStoreIsSnapping,
   type StyleProps,
-} from '@/core/stores/store-interface-and-intial-values/drawer-state';
+} from '@/core/stores/states/drawer-state';
 import type { DomainLanguageChangedDelegate, DomainLanguageChangedEvent, UIDomain } from '@/core/domains/ui-domain';
 import type { MapProjectionChangedDelegate, MapProjectionChangedEvent, MapViewer } from '@/geo/map/map-viewer';
 import type {
@@ -63,7 +63,7 @@ import type { Draw } from '@/geo/interaction/draw';
 import type { Snap } from '@/geo/interaction/snap';
 import { formatArea, formatLength, generateId } from '@/core/utils/utilities';
 import { GeoUtilities } from '@/geo/utils/utilities';
-import { getStoreAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { getStoreAppDisplayLanguage } from '@/core/stores/states/app-state';
 import { logger } from '@/core/utils/logger';
 
 /**

@@ -10,8 +10,8 @@ import {
   setStoreFeatureInfoDetails,
   setStoreFeatureInfoDetailsUpdateFeaturesHaveGeometry,
   type TypeFeatureInfoResultSet,
-} from '@/core/stores/store-interface-and-intial-values/feature-info-state';
-import { getStoreAppShowUnsymbolizedFeatures } from '@/core/stores/store-interface-and-intial-values/app-state';
+} from '@/core/stores/states/feature-info-state';
+import { getStoreAppShowUnsymbolizedFeatures } from '@/core/stores/states/app-state';
 import { RequestAbortedError } from '@/core/exceptions/core-exceptions';
 import { LayerNoLastQueryToPerformError } from '@/core/exceptions/geoview-exceptions';
 import { logger } from '@/core/utils/logger';

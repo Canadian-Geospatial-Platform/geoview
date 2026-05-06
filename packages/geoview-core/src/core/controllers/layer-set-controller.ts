@@ -6,16 +6,9 @@ import type { ConfigBaseClass } from '@/api/config/validation-classes/config-bas
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import type { LayerDomain } from '@/core/domains/layer-domain';
-import {
-  getStoreDetailsSelectedLayerPath,
-  type TypeFeatureInfoResultSet,
-} from '@/core/stores/store-interface-and-intial-values/feature-info-state';
-import {
-  getStoreUIActiveFooterBarTab,
-  getStoreUIAppBarComponents,
-  getStoreUIFooterBarComponents,
-} from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { getStoreMapConfigGlobalSettings } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { getStoreDetailsSelectedLayerPath, type TypeFeatureInfoResultSet } from '@/core/stores/states/feature-info-state';
+import { getStoreUIActiveFooterBarTab, getStoreUIAppBarComponents, getStoreUIFooterBarComponents } from '@/core/stores/states/ui-state';
+import { getStoreMapConfigGlobalSettings } from '@/core/stores/states/map-state';
 import { logger } from '@/core/utils/logger';
 import { whenThisThen } from '@/core/utils/utilities';
 import { LayerNoLastQueryToPerformError } from '@/core/exceptions/geoview-exceptions';
@@ -42,7 +35,7 @@ import {
   getStoreLayerStyleConfig,
   getStoreLayerOrderedLayerIndexByPath,
   setStoreLegendLayersDirectly,
-} from '@/core/stores/store-interface-and-intial-values/layer-state';
+} from '@/core/stores/states/layer-state';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';

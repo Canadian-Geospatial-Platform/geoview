@@ -20,7 +20,7 @@ import {
   useStoreLayerStatus,
   useStoreLayerSchemaTag,
   useStoreLayerLegendCollapsed,
-} from '@/core/stores/store-interface-and-intial-values/layer-state';
+} from '@/core/stores/states/layer-state';
 
 interface CollapsibleContentProps {
   layerPath: string;

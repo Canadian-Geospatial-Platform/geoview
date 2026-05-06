@@ -1,7 +1,7 @@
 import type { TypeTabs } from '@/ui/tabs/tabs';
 import { logger } from '@/core/utils/logger';
 import { AbstractPlugin } from './abstract-plugin';
-import { getStoreUIFooterTabs } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { getStoreUIFooterTabs } from '@/core/stores/states/ui-state';
 
 /**
  * Footer Plugin abstract class.

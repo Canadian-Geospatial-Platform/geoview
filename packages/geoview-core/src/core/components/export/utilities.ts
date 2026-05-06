@@ -3,17 +3,17 @@ import { Buffer } from 'buffer';
 import { renderToString } from 'react-dom/server';
 
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
-import type { TypeNorthArrow, TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
+import type { TypeNorthArrow, TypeScaleInfo } from '@/core/stores/states/map-state';
 import type { TypeLegendLayer } from '@/core/components/layers/types';
 import {
   type TypeTimeSliderValues,
   type TimeSliderLayerSet,
   getStoreTimeSliderLayers,
   isStoreTimeSliderInitialized,
-} from '@/core/stores/store-interface-and-intial-values/time-slider-state';
-import { getStoreMapStateForExportLayout } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { getStoreAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { getStoreLayerLegendLayers } from '@/core/stores/store-interface-and-intial-values/layer-state';
+} from '@/core/stores/states/time-slider-state';
+import { getStoreMapStateForExportLayout } from '@/core/stores/states/map-state';
+import { getStoreAppGeoviewHTMLElement } from '@/core/stores/states/app-state';
+import { getStoreLayerLegendLayers } from '@/core/stores/states/layer-state';
 
 import { logger } from '@/core/utils/logger';
 import { getLocalizedMessage } from '@/core/utils/utilities';

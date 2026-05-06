@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useStoreAppGeolocatorServiceURL, useStoreAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreAppGeolocatorServiceURL, useStoreAppDisplayLanguage } from '@/core/stores/states/app-state';
 import { cleanPostalCode, getDecimalDegreeItem } from '@/core/components/geolocator/utilities';
 import type { GeoListItem } from '@/core/components/geolocator/geolocator';
 import { logger } from '@/core/utils/logger';

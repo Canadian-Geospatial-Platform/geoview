@@ -2,7 +2,7 @@ import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { IconButton, ZoomInIcon } from '@/ui';
 import { getSxClasses } from '@/core/components/nav-bar/nav-bar-style';
-import { useStoreMapZoom } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useStoreMapZoom } from '@/core/stores/states/map-state';
 import { logger } from '@/core/utils/logger';
 import { useMapController } from '@/core/controllers/use-controllers';
 

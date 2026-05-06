@@ -41,7 +41,7 @@ import {
   isLineStringVectorConfig,
   isSimpleSymbolVectorConfig,
 } from '@/api/types/map-schema-types';
-import type { TypeLayerMetadataFields } from '@/api/types/layer-schema-types';
+import type { TypeLayerMetadataFields, TypeVectorLayerStyles } from '@/api/types/layer-schema-types';
 import type { FillPatternLine, FillPatternSettings, FilterNodeType } from './geoview-renderer-types';
 import { binaryKeywors, defaultColor, groupKeywords, NodeType, operatorPriority, unaryKeywords } from './geoview-renderer-types';
 import { logger } from '@/core/utils/logger';
@@ -3209,14 +3209,3 @@ export abstract class GeoviewRenderer {
     }
   }
 } // END CLASS
-
-export type TypeStyleRepresentation = {
-  /** The defaultCanvas property is used by Simple styles and default styles when defined in unique value and class
-   * break styles.
-   */
-  defaultCanvas?: HTMLCanvasElement | null;
-  /** The arrayOfCanvas property is used by unique value and class break styles. */
-  arrayOfCanvas?: (HTMLCanvasElement | null)[];
-};
-
-export type TypeVectorLayerStyles = Partial<Record<TypeStyleGeometry, TypeStyleRepresentation>>;

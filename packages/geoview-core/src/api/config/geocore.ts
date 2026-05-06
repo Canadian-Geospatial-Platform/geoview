@@ -8,7 +8,7 @@ import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import { DEFAULT_MAP_FEATURE_CONFIG } from '@/api/types/map-schema-types';
 import type { GeoCoreLayerConfig, TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
 import type { GeoViewError } from '@/core/exceptions/geoview-exceptions';
-import { getStoreMapConfigServiceUrls, getStoreMapConfigState } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { getStoreMapConfigServiceUrls, getStoreMapConfigState } from '@/core/stores/states/map-state';
 
 /** Class used to add GeoCore layers to the map. */
 export class GeoCore {

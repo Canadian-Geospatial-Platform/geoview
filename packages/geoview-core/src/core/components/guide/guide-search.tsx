@@ -11,7 +11,7 @@ import Markdown from 'markdown-to-jsx';
 import { Box, TextField, InputAdornment, IconButton } from '@/ui';
 import { SearchIcon, CloseIcon, KeyboardArrowUpIcon, KeyboardArrowDownIcon } from '@/ui/icons';
 import type { TypeContainerBox } from '@/core/types/global-types';
-import type { TypeGuideObject } from '@/core/stores/store-interface-and-intial-values/app-state';
+import type { TypeGuideObject } from '@/core/stores/states/app-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { TIMEOUT, TABS } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';

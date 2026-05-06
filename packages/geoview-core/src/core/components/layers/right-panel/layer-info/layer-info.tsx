@@ -10,9 +10,9 @@ import { logger } from '@/core/utils/logger';
 import { isValidUUID } from '@/core/utils/utilities';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { UtilAddLayer } from '@/core/components/layers/left-panel/add-new-layer/add-layer-utils';
-import { useStoreAppDisplayLanguage, useStoreAppMetadataServiceURL } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { useStoreMapCurrentProjectionEPSG } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { useStoreDataTableFilter } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { useStoreAppDisplayLanguage, useStoreAppMetadataServiceURL } from '@/core/stores/states/app-state';
+import { useStoreMapCurrentProjectionEPSG } from '@/core/stores/states/map-state';
+import { useStoreDataTableFilter } from '@/core/stores/states/data-table-state';
 import {
   useStoreLayerDateTemporalMode,
   useStoreLayerDisplayDateFormat,
@@ -25,8 +25,8 @@ import {
   useStoreLayerTimeDimension,
   useStoreLayerSchemaTag,
   useStoreLayerUrl,
-} from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { useStoreTimeSliderFilter, useStoreTimeSliderLayer } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
+} from '@/core/stores/states/layer-state';
+import { useStoreTimeSliderFilter, useStoreTimeSliderLayer } from '@/core/stores/states/time-slider-state';
 import { useLayerController } from '@/core/controllers/use-controllers';
 
 // OGC/ESRI service capability request suffixes

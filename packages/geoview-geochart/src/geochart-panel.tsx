@@ -5,19 +5,19 @@ import { Layout } from 'geoview-core/core/components/common';
 import { checkSelectedLayerPathList } from 'geoview-core/core/components/common/comp-common';
 import { Typography } from 'geoview-core/ui/typography/typography';
 import { Box } from 'geoview-core/ui';
-import { useStoreMapClickCoordinates } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
+import { useStoreMapClickCoordinates } from 'geoview-core/core/stores/states/map-state';
 import {
   useStoreLayerAllVisibleAndInRangeLayers,
   useStoreLayerIsHiddenOnMapSet,
   useStoreLayerNameSet,
   useStoreLayerStatusSet,
-} from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
-import type { TypeGeochartResultSetEntry } from 'geoview-core/core/stores/store-interface-and-intial-values/geochart-state';
+} from 'geoview-core/core/stores/states/layer-state';
+import type { TypeGeochartResultSetEntry } from 'geoview-core/core/stores/states/geochart-state';
 import {
   useStoreGeochartChartsConfig,
   useStoreGeochartLayerDataArrayBatch,
   useStoreGeochartSelectedLayerPath,
-} from 'geoview-core/core/stores/store-interface-and-intial-values/geochart-state';
+} from 'geoview-core/core/stores/states/geochart-state';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { logger } from 'geoview-core/core/utils/logger';
 import { CONTAINER_TYPE, TABS } from 'geoview-core/core/utils/constant';

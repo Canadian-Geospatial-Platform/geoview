@@ -10,7 +10,6 @@ import { Polygon } from 'ol/geom';
 
 import EventHelper, { type EventDelegateBase } from '@/api/events/event-helper';
 import type { LayerBaseEvent } from '@/geo/layer/gv-layers/abstract-base-layer';
-import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { parseXMLToJson } from '@/core/utils/utilities';
 import { GeoUtilities } from '@/geo/utils/utilities';
@@ -19,7 +18,7 @@ import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-v
 import type { OgcWfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import type { TypeFeatureInfoEntry, TypeOutfieldsType, TypeFeatureInfoResult } from '@/api/types/map-schema-types';
 import { CONFIG_PROXY_URL } from '@/api/types/map-schema-types';
-import type { TypeMetadataFeatureInfo } from '@/api/types/layer-schema-types';
+import type { TypeLegend, TypeMetadataFeatureInfo } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';

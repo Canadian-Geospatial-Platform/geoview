@@ -29,17 +29,10 @@ import type { SelectChangeEvent } from '@mui/material';
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, LoadingButton, Select, Skeleton, TextField } from '@/ui';
 import type { TypeMenuItemProps } from '@/ui/select/select';
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
-import { useStoreUIActiveFocusItem } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useStoreUIActiveFocusItem } from '@/core/stores/states/ui-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
-import {
-  useStoreAppDisplayLanguage,
-  useStoreAppGeoviewHTMLElement,
-  useStoreAppShellContainer,
-} from '@/core/stores/store-interface-and-intial-values/app-state';
-import {
-  useStoreLayerDateTemporalModeSet,
-  useStoreLayerDisplayDateFormatSet,
-} from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useStoreAppDisplayLanguage, useStoreAppGeoviewHTMLElement, useStoreAppShellContainer } from '@/core/stores/states/app-state';
+import { useStoreLayerDateTemporalModeSet, useStoreLayerDisplayDateFormatSet } from '@/core/stores/states/layer-state';
 import { exportFile } from '@/core/utils/utilities';
 
 import { useUIController } from '@/core/controllers/use-controllers';

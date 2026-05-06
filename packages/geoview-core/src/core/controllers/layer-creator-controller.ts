@@ -39,20 +39,17 @@ import { formatError, NotSupportedError } from '@/core/exceptions/core-exception
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { LayerEntryConfigError } from '@/core/exceptions/layer-entry-config-exceptions';
 import { LayerCreatedTwiceError } from '@/core/exceptions/layer-exceptions';
-import { getStoreAppDisplayDateMode } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { getStoreAppDisplayDateMode } from '@/core/stores/states/app-state';
 import {
   getStoreLayerLegendLayers,
   getStoreLayerSelectedLayerPath,
   setStoreLayerSelectedLayersTabLayer,
   getStoreLayerOrderedLayerPaths,
   addStoreLayerInitialFilter,
-} from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { isStoreGeochartInitialized } from '@/core/stores/store-interface-and-intial-values/geochart-state';
-import { isStoreSwiperInitialized } from '@/core/stores/store-interface-and-intial-values/swiper-state';
-import {
-  isStoreTimeSliderInitialized,
-  removeStoreTimeSliderLayer,
-} from '@/core/stores/store-interface-and-intial-values/time-slider-state';
+} from '@/core/stores/states/layer-state';
+import { isStoreGeochartInitialized } from '@/core/stores/states/geochart-state';
+import { isStoreSwiperInitialized } from '@/core/stores/states/swiper-state';
+import { isStoreTimeSliderInitialized, removeStoreTimeSliderLayer } from '@/core/stores/states/time-slider-state';
 import { logger } from '@/core/utils/logger';
 import type {
   AbstractGeoViewLayer,

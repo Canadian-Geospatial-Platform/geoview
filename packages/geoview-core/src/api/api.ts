@@ -16,7 +16,7 @@ import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { removeGeoviewStore } from '@/core/stores/stores-managers';
 import { InitDivNotExistError, MapViewerAlreadyExistsError, MapViewerNotFoundError } from '@/core/exceptions/geoview-exceptions';
 import type { TypeMapFeaturesInstance } from '@/api/types/map-schema-types';
-import { getStoreMapConfigState } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { getStoreMapConfigState } from '@/core/stores/states/map-state';
 
 /** Class used to handle api calls (events, functions etc...). */
 export class API {

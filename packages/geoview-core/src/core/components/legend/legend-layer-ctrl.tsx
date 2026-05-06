@@ -29,12 +29,8 @@ import {
   useStoreLayerIsParentHiddenOnMap,
   useStoreLayerInVisibleRange,
   useStoreLayerVisible,
-} from '@/core/stores/store-interface-and-intial-values/layer-state';
-import {
-  useStoreUIFooterBarComponents,
-  useStoreUIAppbarComponents,
-  useStoreUIActiveTrapGeoView,
-} from '@/core/stores/store-interface-and-intial-values/ui-state';
+} from '@/core/stores/states/layer-state';
+import { useStoreUIFooterBarComponents, useStoreUIAppbarComponents, useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
 import type { TypeLegendItem } from '@/core/components/layers/types';
 import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';

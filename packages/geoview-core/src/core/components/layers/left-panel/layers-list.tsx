@@ -5,7 +5,7 @@ import { logger } from '@/core/utils/logger';
 import { SingleLayer } from './single-layer';
 import { getSxClasses } from './left-panel-styles';
 import type { TypeContainerBox } from '@/core/types/global-types';
-import { useStoreLayerOrderedLayerPaths } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useStoreLayerOrderedLayerPaths } from '@/core/stores/states/layer-state';
 
 interface LayerListProps {
   depth: number;

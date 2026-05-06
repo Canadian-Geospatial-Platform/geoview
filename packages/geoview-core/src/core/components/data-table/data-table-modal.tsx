@@ -13,10 +13,10 @@ import { Modal, MRTTable as Table, type MRT_ColumnDef as MRTColumnDef, Box, Circ
 import { useUIController } from '@/core/controllers/use-controllers';
 import type { TypeFieldEntry } from '@/api/types/map-schema-types';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
-import { useStoreUIActiveFocusItem } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { useStoreAppDisplayLanguage, useStoreAppShellContainer } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { useStoreDataTableAllFeaturesDataArray } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { useStoreLayerNameSet, useStoreLayerSelectedLayerPath } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useStoreUIActiveFocusItem } from '@/core/stores/states/ui-state';
+import { useStoreAppDisplayLanguage, useStoreAppShellContainer } from '@/core/stores/states/app-state';
+import { useStoreDataTableAllFeaturesDataArray } from '@/core/stores/states/data-table-state';
+import { useStoreLayerNameSet, useStoreLayerSelectedLayerPath } from '@/core/stores/states/layer-state';
 import { logger } from '@/core/utils/logger';
 import { sanitizeHtmlContent, enhanceLinksAccessibility } from '@/core/utils/utilities';
 import { getSxClasses } from './data-table-style';

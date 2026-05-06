@@ -9,21 +9,17 @@ import {
   useStoreDataTableAllFeaturesDataArray,
   useStoreDataTableLayerSettings,
   getStoreDataTableFeaturesByPath,
-} from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { useStoreAppShowUnsymbolizedFeatures } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { useStoreMapExtent } from '@/core/stores/store-interface-and-intial-values/map-state';
+} from '@/core/stores/states/data-table-state';
+import { useStoreAppShowUnsymbolizedFeatures } from '@/core/stores/states/app-state';
+import { useStoreMapExtent } from '@/core/stores/states/map-state';
 import {
   useStoreLayerAllVisibleAndInRangeLayers,
   useStoreLayerIsHiddenOnMapSet,
   useStoreLayerNameSet,
   useStoreLayerStatusSet,
-} from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { useStoreDataTableQueryStatusSet } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import {
-  useStoreUIActiveAppBarTab,
-  useStoreUIActiveFooterBarTab,
-  useStoreUIAppbarComponents,
-} from '@/core/stores/store-interface-and-intial-values/ui-state';
+} from '@/core/stores/states/layer-state';
+import { useStoreDataTableQueryStatusSet } from '@/core/stores/states/data-table-state';
+import { useStoreUIActiveAppBarTab, useStoreUIActiveFooterBarTab, useStoreUIAppbarComponents } from '@/core/stores/states/ui-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import type { LayerListEntry } from '@/core/components/common';
 import { Layout } from '@/core/components/common';

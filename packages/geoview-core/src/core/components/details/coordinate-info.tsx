@@ -10,8 +10,8 @@ import {
   useStoreDetailsCoordinateInfoEnabled,
   useStoreDetailsQueryStatus,
   LAYER_PATH_COORDINATE_INFO,
-} from '@/core/stores/store-interface-and-intial-values/feature-info-state';
-import { useStoreMapClickCoordinates } from '@/core/stores/store-interface-and-intial-values/map-state';
+} from '@/core/stores/states/feature-info-state';
+import { useStoreMapClickCoordinates } from '@/core/stores/states/map-state';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { useMapController } from '@/core/controllers/use-controllers';

@@ -8,9 +8,9 @@ import type { GeoListItem } from '@/core/components/geolocator/geolocator';
 import { GeoList } from '@/core/components/geolocator/geo-list';
 import { createMenuItems } from '@/core/components/geolocator/utilities';
 import { getSxClasses } from '@/core/components/geolocator/geolocator-style';
-import { useStoreMapSize } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useStoreMapSize } from '@/core/stores/states/map-state';
 import { logger } from '@/core/utils/logger';
-import { useStoreAppShellContainer } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreAppShellContainer } from '@/core/stores/states/app-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 
 /** Props for the GeolocatorResult component. */

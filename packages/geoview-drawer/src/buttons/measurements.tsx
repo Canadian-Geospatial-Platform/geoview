@@ -2,7 +2,7 @@ import { createSvgIcon } from '@mui/material/utils';
 import type { TypeWindow } from 'geoview-core';
 import { getSxClasses } from 'geoview-core/core/components/nav-bar/nav-bar-style';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
-import { useStoreDrawerHideMeasurements } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
+import { useStoreDrawerHideMeasurements } from 'geoview-core/core/stores/states/drawer-state';
 
 import { IconButton, StraightenIcon } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';

@@ -7,7 +7,7 @@ import { Box, CircularProgress, Collapse, Typography } from '@/ui';
 import { ImageNotSupportedIcon, FunctionsIcon, ExpandMoreIcon, ExpandLessIcon } from '@/ui';
 
 import { getSxClasses } from './layer-settings-style';
-import { useStoreLayerRasterFunctionInfos, useStoreLayerRasterFunction } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useStoreLayerRasterFunctionInfos, useStoreLayerRasterFunction } from '@/core/stores/states/layer-state';
 import type { TypeMetadataEsriRasterFunctionInfos } from '@/api/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';
 import { useLayerController } from '@/core/controllers/use-controllers';

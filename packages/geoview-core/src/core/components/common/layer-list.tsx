@@ -10,9 +10,9 @@ import type { TypeFeatureInfoEntry, TypeQueryStatus } from '@/api/types/map-sche
 import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
 import { getSxClasses } from './layer-list-style';
 import { LayerIcon } from './layer-icon';
-import { useStoreLayerStatus } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useStoreLayerStatus } from '@/core/stores/states/layer-state';
 import { logger } from '@/core/utils/logger';
-import { LAYER_PATH_COORDINATE_INFO } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import { LAYER_PATH_COORDINATE_INFO } from '@/core/stores/states/feature-info-state';
 
 /** Represents an entry in the layer list. */
 export interface LayerListEntry {

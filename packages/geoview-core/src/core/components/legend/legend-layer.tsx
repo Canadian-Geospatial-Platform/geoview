@@ -14,7 +14,7 @@ import {
   useStoreLayerSchemaTag,
   useStoreLayerIsHiddenOnMap,
   useStoreLayerLegendCollapsed,
-} from '@/core/stores/store-interface-and-intial-values/layer-state';
+} from '@/core/stores/states/layer-state';
 import { useLightBox } from '@/core/components/common';
 import { LayerIcon } from '@/core/components/common/layer-icon';
 import { SecondaryControls } from './legend-layer-ctrl';

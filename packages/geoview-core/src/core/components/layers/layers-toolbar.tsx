@@ -6,7 +6,7 @@ import { useTheme } from '@mui/material';
 
 import { Box, AddCircleOutlineIcon, Button } from '@/ui';
 import { ToggleAll } from '@/core/components/toggle-all/toggle-all';
-import { useStoreLayerDisplayState, useStoreLayerTopLevelLayerPaths } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useStoreLayerDisplayState, useStoreLayerTopLevelLayerPaths } from '@/core/stores/states/layer-state';
 import type { TypeLayersViewDisplayState } from './types';
 import { logger } from '@/core/utils/logger';
 import type { TypeContainerBox } from '@/core/types/global-types';

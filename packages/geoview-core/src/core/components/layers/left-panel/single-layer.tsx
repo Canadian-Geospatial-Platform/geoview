@@ -31,7 +31,7 @@ import {
   useStoreLayerInVisibleRange,
   useStoreLayerIsParentHiddenOnMap,
   useStoreLayerLegendCollapsed,
-} from '@/core/stores/store-interface-and-intial-values/layer-state';
+} from '@/core/stores/states/layer-state';
 import { DeleteUndoButton } from '@/core/components/layers/delete-undo-button';
 import { LayersList } from './layers-list';
 import { LayerIcon } from '@/core/components/common/layer-icon';
@@ -42,7 +42,7 @@ import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { scrollListItemIntoView } from '@/core/utils/utilities';
 import { TIMEOUT, TABS } from '@/core/utils/constant';
 import type { TypeContainerBox } from '@/core/types/global-types';
-import { useStoreUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
 import { useLayerController, useLayerCreatorController } from '@/core/controllers/use-controllers';
 
 /** Static Tooltip slotProps — offset popper by [0, -8]. */

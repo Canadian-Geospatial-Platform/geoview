@@ -16,8 +16,8 @@ import {
   setStoreTimeSliderValues,
   type TypeTimeSliderProps,
   type TypeTimeSliderValues,
-} from '@/core/stores/store-interface-and-intial-values/time-slider-state';
-import { getStoreMapConfigCorePackagesConfig } from '@/core/stores/store-interface-and-intial-values/map-state';
+} from '@/core/stores/states/time-slider-state';
+import { getStoreMapConfigCorePackagesConfig } from '@/core/stores/states/map-state';
 import { logger } from '@/core/utils/logger';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';

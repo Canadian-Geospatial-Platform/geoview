@@ -27,9 +27,9 @@ import {
   useStoreUIActiveAppBarTab,
   useStoreUIHiddenTabs,
   useStoreUIAppBarPanelIds,
-} from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { useStoreMapInteraction } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { useStoreAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
+} from '@/core/stores/states/ui-state';
+import { useStoreMapInteraction } from '@/core/stores/states/map-state';
+import { useStoreAppGeoviewHTMLElement } from '@/core/stores/states/app-state';
 import { useStoreGeoViewConfig, useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 import type { AppBarApi } from '@/core/components';

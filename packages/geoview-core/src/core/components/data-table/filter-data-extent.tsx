@@ -4,7 +4,7 @@ import { useCallback } from 'react';
 
 import { getSxClasses } from './data-table-style';
 import { Switch } from '@/ui';
-import { useStoreDataTableLayerSettings } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { useStoreDataTableLayerSettings } from '@/core/stores/states/data-table-state';
 import { useMapController, useDataTableController } from '@/core/controllers/use-controllers';
 
 import { logger } from '@/core/utils/logger';

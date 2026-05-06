@@ -4,7 +4,7 @@ import { useTheme } from '@mui/material/styles';
 
 import { getSxClasses } from './data-table-style';
 import { Switch } from '@/ui';
-import { useStoreDataTableLayerSettings } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { useStoreDataTableLayerSettings } from '@/core/stores/states/data-table-state';
 import { logger } from '@/core/utils/logger';
 import { useDataTableController } from '@/core/controllers/use-controllers';
 

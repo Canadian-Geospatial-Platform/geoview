@@ -11,7 +11,7 @@ import type { Color } from 'ol/color';
 
 import { type TypeHighlightColors, type TypeFeatureInfoEntry, DEFAULT_HIGHLIGHT_COLOR } from '@/api/types/map-schema-types';
 import { logger } from '@/core/utils/logger';
-import { getStoreMapFeatureHighlightColor } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { getStoreMapFeatureHighlightColor } from '@/core/stores/states/map-state';
 import { TIMEOUT } from '@/core/utils/constant';
 import type { MapController } from '@/core/controllers/map-controller';
 import type { MapViewer } from '@/geo/map/map-viewer';

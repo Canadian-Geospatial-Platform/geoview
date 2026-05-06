@@ -21,7 +21,7 @@ import type {
   BasemapJsonResponse,
 } from '@/geo/layer/basemap/basemap-types';
 import { Projection } from '@/geo/utils/projection';
-import { getStoreMapCurrentBasemapOptionsOrInitial } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { getStoreMapCurrentBasemapOptionsOrInitial } from '@/core/stores/states/map-state';
 import type { MapController } from '@/core/controllers/map-controller';
 import { logger } from '@/core/utils/logger';
 import type { EventDelegateBase } from '@/api/events/event-helper';

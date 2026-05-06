@@ -14,13 +14,13 @@ import { DateMgt } from '@/core/utils/date-mgt';
 import type {
   TypeGeoviewLayerType,
   TypeLayerStatus,
+  TypeLegend,
   TypeMetadataEsriRasterFunctionInfos,
   TypeMetadataWMSCapabilityLayerStyle,
   TypeMosaicMethod,
   TypeMosaicRule,
 } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
-import type { TypeVectorLayerStyles } from '@/geo/utils/renderer/geoview-renderer';
 import { getStoreAppDisplayDateFormatDefault, getStoreAppDisplayDateTimezone } from './app-state';
 import { logger } from '@/core/utils/logger';
 import { Projection } from '@/geo/utils/projection';
@@ -2117,21 +2117,6 @@ export type TypeLegendResultInfo = {
 
 /** The possible states of a legend query. */
 export type LegendQueryStatus = 'init' | 'querying' | 'queried' | 'error';
-
-/**
- * Represents the legend data for a layer.
- */
-export type TypeLegend = {
-  /** The GeoView layer type this legend belongs to. */
-  type: TypeGeoviewLayerType;
-
-  /** The legend content - vector styles, an HTML canvas, or null. */
-  // Layers other than vector layers use the HTMLCanvasElement type for their legend.
-  legend: TypeVectorLayerStyles | HTMLCanvasElement | null;
-
-  /** Optional style configuration associated with the legend. */
-  styleConfig?: TypeLayerStyleConfig;
-};
 
 /** A legend result set entry combining result set metadata with legend result info. */
 export type TypeLegendResultSetEntry = TypeResultSetEntry & TypeLegendResultInfo;

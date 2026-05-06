@@ -6,7 +6,7 @@ import { Box, Checkbox, Collapse, FormControl, Select, Typography } from '@/ui';
 import { CollectionsIcon, ExpandMoreIcon, ExpandLessIcon } from '@/ui';
 
 import { getSxClasses } from './layer-settings-style';
-import { useStoreLayerMosaicRule, useStoreLayerAllowedMosaicMethods } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useStoreLayerMosaicRule, useStoreLayerAllowedMosaicMethods } from '@/core/stores/states/layer-state';
 
 import type { TypeMosaicMethod, TypeMosaicOperation } from '@/api/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';

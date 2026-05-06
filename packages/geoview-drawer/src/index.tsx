@@ -1,5 +1,5 @@
 import React from 'react'; // GV This import is to validate that we're on the right React at the end of the file
-import type { TypeDrawerConfig } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
+import type { TypeDrawerConfig } from 'geoview-core/core/stores/states/drawer-state';
 import type { TypeNavBarButtonConfig } from 'geoview-core/api/plugin/navbar-plugin';
 import { NavBarPlugin } from 'geoview-core/api/plugin/navbar-plugin';
 

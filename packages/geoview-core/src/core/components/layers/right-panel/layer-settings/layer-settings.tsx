@@ -12,7 +12,7 @@ import {
   useStoreLayerControls,
   useStoreLayerHoverable,
   useStoreLayerQueryable,
-} from '@/core/stores/store-interface-and-intial-values/layer-state';
+} from '@/core/stores/states/layer-state';
 
 import { getSxClasses } from '../layer-details-style';
 import { RasterFunctionPanel } from './raster-function-selector';

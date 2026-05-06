@@ -12,11 +12,8 @@ import {
   Typography,
   ZoomInSearchIcon,
 } from '@/ui';
-import { useStoreDetailsCheckedFeatures } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
-import {
-  useStoreGeochartChartsConfig,
-  useStoreGeochartLayerDataArrayBatch,
-} from '@/core/stores/store-interface-and-intial-values/geochart-state';
+import { useStoreDetailsCheckedFeatures } from '@/core/stores/states/feature-info-state';
+import { useStoreGeochartChartsConfig, useStoreGeochartLayerDataArrayBatch } from '@/core/stores/states/geochart-state';
 import { useNavigateToTab } from '@/core/components/common/hooks/use-navigate-to-tab';
 import { logger } from '@/core/utils/logger';
 import { GeoUtilities } from '@/geo/utils/utilities';
@@ -24,7 +21,7 @@ import type { TypeFeatureInfoEntry, TypeFieldEntry } from '@/api/types/map-schem
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { FeatureInfoTable } from './feature-info-table';
 import { getSxClasses } from './details-style';
-import { useStoreUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
 import { useDetailsController, useGeoChartControllerIfExists, useMapController } from '@/core/controllers/use-controllers';
 
 /** Properties for the FeatureInfo component. */

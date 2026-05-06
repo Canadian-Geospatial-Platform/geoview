@@ -6,12 +6,12 @@ import linkifyHtml from 'linkify-html';
 import { Box, Button, Table, TableHead, TableBody, TableRow, TableCell, TableContainer } from '@/ui';
 import { isImage, stringify, sanitizeHtmlContent, enhanceLinksAccessibility } from '@/core/utils/utilities';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
-import { useStoreAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreAppDisplayLanguage } from '@/core/stores/states/app-state';
 import {
   useStoreLayerDateTemporalMode,
   useStoreLayerDisplayDateFormat,
   useStoreLayerDisplayDateTimezone,
-} from '@/core/stores/store-interface-and-intial-values/layer-state';
+} from '@/core/stores/states/layer-state';
 import { logger } from '@/core/utils/logger';
 import type { TypeDisplayLanguage, TypeFieldEntry } from '@/api/types/map-schema-types';
 import type { TypeContainerBox } from '@/core/types/global-types';

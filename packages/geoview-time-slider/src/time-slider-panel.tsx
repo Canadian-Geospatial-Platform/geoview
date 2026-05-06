@@ -2,12 +2,9 @@ import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import type { LayerListEntry } from 'geoview-core/core/components/common';
 import { Layout } from 'geoview-core/core/components/common';
 import type { TypeDisplayLanguage } from 'geoview-core/api/types/map-schema-types';
-import type { TypeTimeSliderValues } from 'geoview-core/core/stores/store-interface-and-intial-values/time-slider-state';
-import {
-  useStoreTimeSliderLayers,
-  useStoreTimeSliderSelectedLayerPath,
-} from 'geoview-core/core/stores/store-interface-and-intial-values/time-slider-state';
-import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
+import type { TypeTimeSliderValues } from 'geoview-core/core/stores/states/time-slider-state';
+import { useStoreTimeSliderLayers, useStoreTimeSliderSelectedLayerPath } from 'geoview-core/core/stores/states/time-slider-state';
+import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/states/app-state';
 import {
   useStoreLayerAllVisibleAndInRangeLayers,
   useStoreLayerDateTemporalModeSet,
@@ -16,7 +13,7 @@ import {
   useStoreLayerIsHiddenOnMapSet,
   useStoreLayerNameSet,
   useStoreLayerStatusSet,
-} from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
+} from 'geoview-core/core/stores/states/layer-state';
 import { Box } from 'geoview-core/ui';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { logger } from 'geoview-core/core/utils/logger';

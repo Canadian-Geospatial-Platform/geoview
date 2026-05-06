@@ -1,14 +1,14 @@
 import { Box } from 'geoview-core/ui';
-import { useStoreTimeSliderLayer } from 'geoview-core/core/stores/store-interface-and-intial-values/time-slider-state';
+import { useStoreTimeSliderLayer } from 'geoview-core/core/stores/states/time-slider-state';
 import {
   useStoreLayerDateTemporalMode,
   useStoreLayerDisplayDateFormat,
   useStoreLayerDisplayDateFormatShort,
   useStoreLayerDisplayDateTimezone,
   useStoreLayerNameSet,
-} from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
+} from 'geoview-core/core/stores/states/layer-state';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
-import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/states/app-state';
 import { logger } from 'geoview-core/core/utils/logger';
 
 import { DateMgt } from 'geoview-core/core/utils/date-mgt';

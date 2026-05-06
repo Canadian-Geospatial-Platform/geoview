@@ -8,7 +8,7 @@ import {
   removeStoreDetailsCheckedFeature,
   setStoreDetailsLayerDataArrayBatchLayerPathBypass,
   setStoreDetailsSelectedLayerPath,
-} from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+} from '@/core/stores/states/feature-info-state';
 
 /**
  * Controller responsible for details interactions and

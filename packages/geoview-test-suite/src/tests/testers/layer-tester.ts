@@ -20,7 +20,7 @@ import { KML } from 'geoview-core/geo/layer/geoview-layers/vector/kml';
 import type { GeoViewLayerAddedResult } from 'geoview-core/core/controllers/layer-creator-controller';
 import type { TypeMapFeaturesInstance, TypeFeatureInfoResult, codedValueType } from 'geoview-core/api/types/map-schema-types';
 import type { TypeLegendItem } from 'geoview-core/core/components/layers/types';
-import { getStoreLayerLegendLayerByPath } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
+import { getStoreLayerLegendLayerByPath } from 'geoview-core/core/stores/states/layer-state';
 
 /**
  * Main Layer testing class.

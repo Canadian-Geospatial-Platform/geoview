@@ -5,16 +5,16 @@ import {
   getStoreGeochartSelectedLayerPath,
   type GeoChartStoreByLayerPath,
   type TypeGeochartResultSetEntry,
-} from './store-interface-and-intial-values/geochart-state';
-import type { TimeSliderLayerSet } from './store-interface-and-intial-values/time-slider-state';
-import { getStoreTimeSliderLayers } from './store-interface-and-intial-values/time-slider-state';
-import { getStoreSwiperLayerPaths } from './store-interface-and-intial-values/swiper-state';
+} from './states/geochart-state';
+import type { TimeSliderLayerSet } from './states/time-slider-state';
+import { getStoreTimeSliderLayers } from './states/time-slider-state';
+import { getStoreSwiperLayerPaths } from './states/swiper-state';
 import {
   getStoreLayerLegendCollapsed,
   getStoreLayerOrderedLayerPaths,
   setStoreReorderLegendLayers,
   utilFindLayerAndChildrenPaths,
-} from './store-interface-and-intial-values/layer-state';
+} from './states/layer-state';
 import { logger } from '@/core/utils/logger';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';

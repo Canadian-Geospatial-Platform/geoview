@@ -5,11 +5,7 @@ import type { SelectChangeEvent } from '@mui/material';
 import type { ButtonPropsLayerPanel } from '@/ui';
 import { Box, Button, IconButton, ButtonGroup, CircularProgressBase, FileUploadIcon, Paper, Select, Stepper, TextField } from '@/ui';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
-import {
-  useStoreAppDisabledLayerTypes,
-  useStoreAppDisplayLanguage,
-  useStoreAppShellContainer,
-} from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreAppDisabledLayerTypes, useStoreAppDisplayLanguage, useStoreAppShellContainer } from '@/core/stores/states/app-state';
 import { ConfigApi } from '@/api/config/config-api';
 import { logger } from '@/core/utils/logger';
 import { generateId, isValidUUID, validateAndPingUrl } from '@/core/utils/utilities';

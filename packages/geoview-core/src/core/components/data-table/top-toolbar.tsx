@@ -19,7 +19,7 @@ import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { SxStyles } from '@/ui/style/types';
 import { ClearFiltersIcon } from '@/ui/icons';
-import { useStoreAppShowUnsymbolizedFeatures } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useStoreAppShowUnsymbolizedFeatures } from '@/core/stores/states/app-state';
 import { logger } from '@/core/utils/logger';
 
 /** Properties for the TopToolbar component. */

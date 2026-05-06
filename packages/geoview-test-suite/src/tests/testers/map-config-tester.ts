@@ -9,13 +9,13 @@ import {
   getStoreUIAppBarComponents,
   getStoreUIFooterBarComponents,
   getStoreUINavBarComponents,
-} from 'geoview-core/core/stores/store-interface-and-intial-values/ui-state';
+} from 'geoview-core/core/stores/states/ui-state';
 import {
   getStoreDataTableAllFeaturesDataArray,
   getStoreDataTableSelectedLayerPath,
-} from 'geoview-core/core/stores/store-interface-and-intial-values/data-table-state';
-import { getStoreLayerBounds } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
-import { getStoreMapPointMarkers } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
+} from 'geoview-core/core/stores/states/data-table-state';
+import { getStoreLayerBounds } from 'geoview-core/core/stores/states/layer-state';
+import { getStoreMapPointMarkers } from 'geoview-core/core/stores/states/map-state';
 
 /**
  * Main Map Config testing class.

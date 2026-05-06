@@ -14,19 +14,19 @@ import type { TypeModalProps, ModalApi, ModalEvent } from '@/ui';
 import { Box, CircularProgress, Link, Modal, Snackbar, Button } from '@/ui';
 import { getShellSxClasses } from './containers-style';
 import { useUIController } from '@/core/controllers/use-controllers';
-import { useStoreMapInteraction, useStoreMapLoaded } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useStoreMapInteraction, useStoreMapLoaded } from '@/core/stores/states/map-state';
 import {
   useStoreAppIsCircularProgressActive,
   useStoreAppIsFullscreenActive,
   useStoreAppGeoviewHTMLElement,
   useStoreAppHeight,
-} from '@/core/stores/store-interface-and-intial-values/app-state';
+} from '@/core/stores/states/app-state';
 import {
   useStoreUIActiveFocusItem,
   useStoreUIActiveTrapGeoView,
   useStoreUIFooterPanelResizeValue,
   useStoreUIActiveFooterBarTab,
-} from '@/core/stores/store-interface-and-intial-values/ui-state';
+} from '@/core/stores/states/ui-state';
 import { ExportModal } from '@/core/components/export/export-modal';
 import DataTableModal from '@/core/components/data-table/data-table-modal';
 import FeatureDetailModal from '@/core/components/details/feature-detail-modal';

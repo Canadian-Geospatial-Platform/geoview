@@ -6,7 +6,7 @@ import { useTheme } from '@mui/material/styles';
 import { ClickAwayListener } from '@mui/material';
 
 import { Box, CopyrightIcon, Popper, Paper, IconButton, Typography } from '@/ui';
-import { useStoreMapAttribution, useStoreMapInteraction } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useStoreMapAttribution, useStoreMapInteraction } from '@/core/stores/states/map-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 

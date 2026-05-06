@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { createElement, useCallback } from 'react';
-import { useStoreMapCurrentProjection } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useStoreMapCurrentProjection } from '@/core/stores/states/map-state';
 import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from '@/core/components/nav-bar/nav-bar-panel-button';
 import type { TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';

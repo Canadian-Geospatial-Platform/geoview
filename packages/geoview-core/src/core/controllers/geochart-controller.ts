@@ -8,7 +8,7 @@ import {
   removeStoreGeochartChart,
   setStoreGeochartLayerDataArrayBatchLayerPathBypass,
   setStoreGeochartSelectedLayerPath,
-} from '@/core/stores/store-interface-and-intial-values/geochart-state';
+} from '@/core/stores/states/geochart-state';
 
 /**
  * Controller responsible for geochart interactions and

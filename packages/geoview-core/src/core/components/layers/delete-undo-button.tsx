@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Box, CircularProgressBase, DeleteOutlineIcon, IconButton, UndoIcon } from '@/ui';
-import { useStoreLayerDeletionStartTime } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useStoreLayerDeletionStartTime } from '@/core/stores/states/layer-state';
 import { logger } from '@/core/utils/logger';
 import { TIMEOUT } from '@/core/utils/constant';
 import { useLayerController } from '@/core/controllers/use-controllers';

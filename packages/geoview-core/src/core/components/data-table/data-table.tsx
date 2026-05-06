@@ -37,17 +37,17 @@ import {
 } from '@/ui';
 
 import TopToolbar from './top-toolbar';
-import { getStoreMapCurrentProjectionEPSG } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { getStoreMapCurrentProjectionEPSG } from '@/core/stores/states/map-state';
 import {
   useStoreLayerDateTemporalMode,
   useStoreLayerDisplayDateFormat,
   useStoreLayerDisplayDateTimezone,
   useStoreLayerFilterClass,
   useStoreLayerName,
-} from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { useStoreDataTableLayerSettings } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { useStoreTimeSliderFilter } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
-import { useStoreAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
+} from '@/core/stores/states/layer-state';
+import { useStoreDataTableLayerSettings } from '@/core/stores/states/data-table-state';
+import { useStoreTimeSliderFilter } from '@/core/stores/states/time-slider-state';
+import { useStoreAppDisplayLanguage } from '@/core/stores/states/app-state';
 import { DateMgt } from '@/core/utils/date-mgt';
 import linkifyHtml from 'linkify-html';
 import { isImage, delay, sanitizeHtmlContent, enhanceLinksAccessibility } from '@/core/utils/utilities';
@@ -955,7 +955,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
     },
     // Improve table accessibility
     muiTableProps: {
-      'aria-label': t('dataTable.tableAriaLabelWithLayer', { layerName })!,
+      'aria-label': t('dataTable.tableAriaLabelWithLayer', { layerName }),
       'aria-rowcount': memoRows.length + 1, // +1 to account for the header row
     },
     muiTableBodyRowProps: ({ row }) => ({

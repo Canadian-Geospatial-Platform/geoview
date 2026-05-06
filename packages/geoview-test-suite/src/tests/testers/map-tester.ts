@@ -10,20 +10,16 @@ import {
   getStoreDetailsSelectedLayerPath,
   type TypeFeatureInfoResultSetEntry,
   type TypeHoverFeatureInfo,
-} from 'geoview-core/core/stores/store-interface-and-intial-values/feature-info-state';
+} from 'geoview-core/core/stores/states/feature-info-state';
 import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
 import { Projection } from 'geoview-core/geo/utils/projection';
-import {
-  getStoreUIActiveAppBarTab,
-  getStoreUIActiveFooterBarTab,
-  getStoreUIFooterTabs,
-} from 'geoview-core/core/stores/store-interface-and-intial-values/ui-state';
-import { getStoreAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
+import { getStoreUIActiveAppBarTab, getStoreUIActiveFooterBarTab, getStoreUIFooterTabs } from 'geoview-core/core/stores/states/ui-state';
+import { getStoreAppDisplayLanguage } from 'geoview-core/core/stores/states/app-state';
 import {
   getStoreMapConfigViewSettingsProjection,
   getStoreMapHoverFeatureInfo,
   getStoreMapStateJson,
-} from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
+} from 'geoview-core/core/stores/states/map-state';
 
 /**
  * Main Map testing class.

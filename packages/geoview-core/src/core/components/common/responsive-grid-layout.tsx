@@ -22,8 +22,8 @@ import {
   useStoreAppGuide,
   useStoreAppIsFullscreenActive,
   useStoreAppShellContainer,
-} from '@/core/stores/store-interface-and-intial-values/app-state';
-import { useStoreUIActiveTrapGeoView, useStoreUIActiveFocusItem } from '@/core/stores/store-interface-and-intial-values/ui-state';
+} from '@/core/stores/states/app-state';
+import { useStoreUIActiveTrapGeoView, useStoreUIActiveFocusItem } from '@/core/stores/states/ui-state';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE, TIMEOUT, LIGHTBOX_SELECTORS } from '@/core/utils/constant';
 

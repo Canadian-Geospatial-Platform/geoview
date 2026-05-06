@@ -10,7 +10,7 @@ import type {
   TypeMosaicMethod,
   TypeMosaicRule,
 } from '@/api/types/layer-schema-types';
-import type { LegendQueryStatus } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import type { LegendQueryStatus } from '@/core/stores/states/layer-state';
 import type { TemporalMode, TimeDimension, TimeIANA, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 
 export type TypeLayersViewDisplayState = 'add' | 'view';
