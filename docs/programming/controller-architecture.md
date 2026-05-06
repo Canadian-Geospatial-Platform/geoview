@@ -853,15 +853,9 @@ packages/geoview-core/src/
 │   └── stores/
 │       ├── geoview-store.ts                    # Store composition (all slices)
 │       ├── stores-managers.ts                  # Store registry (getGeoViewStore)
-<<<<<<< HEAD
 │       └── states/                             # State slices
 │           ├── map-state.ts                    # useStoreMapZoom(), getStoreMapZoom(), etc.
 │           ├── layer-state.ts                  # useStoreLayerSelectedLayerPath(), etc.
-=======
-│       └── states/  # State slices
-│           ├── map-state.ts                    # useMapZoom(), getStoreMapZoom(), etc.
-│           ├── layer-state.ts                  # useLayerLegendLayers(), etc.
->>>>>>> 137f21581e (rebase)
 │           ├── ui-state.ts                     # useUIActiveFooterBarTab(), etc.
 │           ├── feature-info-state.ts
 │           ├── data-table-state.ts
