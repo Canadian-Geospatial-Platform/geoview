@@ -162,6 +162,23 @@ cgpv.init();
 - `LegendsLayerSet`, `DetailsLayerSet` - extend `AbstractLayerSet`
 - Event-driven sync with layer changes via result sets
 
+**Group Layer Config** — When defining group layers in `listOfLayerEntryConfig`, the `entryType: 'group'` property is **required**. Without it, config validation does not recognize the entry as a group and ignores any nested `listOfLayerEntryConfig`, resulting in child layers not being created:
+
+```typescript
+// ❌ Bad: missing entryType — children will be ignored
+{
+  layerId: 'myGroup',
+  listOfLayerEntryConfig: [{ layerId: 'child.json' }]
+}
+
+// ✅ Good: entryType tells config validation this is a group
+{
+  entryType: 'group',
+  layerId: 'myGroup',
+  listOfLayerEntryConfig: [{ layerId: 'child.json' }]
+}
+```
+
 **Layer Name Resolution** — `ConfigBaseClass` has two methods for getting a layer's name:
 
 - **`getLayerName()`** — Returns only the entry-level `#layerName` field. Can be `undefined` for layers whose name is set at the GeoView layer config level (e.g., geocore/UUID layers).
@@ -183,6 +200,19 @@ cgpv.init();
 - `getLayersAllLeafs()` returns only leaf layers (non-groups); `getLayersAll()` includes intermediate groups — use the latter when you need to store/restore opacities at every level
 
 **Snapshot/restore pattern** — When temporarily modifying layer opacities (e.g., highlight), store the entire map's opacity state upfront using a `Map<string, number>` keyed by layer path, then restore all values on cleanup. This is safer than ratio-based arithmetic (multiply/divide) which accumulates floating-point drift over repeated operations.
+
+**`addLayer()` opacity re-application** — When a child layer is added to a `GVGroupLayer` via `addLayer()`, the child's opacity was originally set during OL layer construction (`new Layer({ opacity: value })`), which bypasses the GV `onSetOpacity()` capping logic. After `setParent(this)` establishes the parent-child relationship, `addLayer()` calls `layer.setOpacity(layer.getOpacity(), false)` to re-apply the child's opacity through the GV capping logic (`Math.min(parent.getOpacity(), opacity)`). The `false` parameter avoids emitting change events during construction.
+
+### Layer Visibility System
+
+**Two levels of visibility** — Each layer has two visibility perspectives:
+
+- **`getVisible()`** — Returns the layer's own OL visibility (`this.getOLLayer().getVisible()`). This reflects only the layer's direct setting, independent of parents.
+- **`getVisibleIncludingParents()`** — Walks the parent chain upward. Returns `false` immediately if any ancestor is not visible. A layer is only effectively visible on the map if it AND all its parents are visible.
+
+**Parent-child visibility independence** — When a parent group is hidden (`visible = false`), child layers keep their own `getVisible() === true`. The children are not rendered because the parent OL group layer hides everything, but each child's individual visibility state is preserved. In the legend UI, children appear "greyed out" — their visibility icon shows `true` but they are not rendering.
+
+**Config validation behavior for visibility** — In `ConfigValidation.#processLayerEntryConfig()`, when `parentInitialSettingsTrue?.states?.visible === false`, the child's `visible` property is **deleted** from the merged config (`delete initSettingsMerged.states?.visible`). This means the child defaults to `visible = true` in the store/legend, but is visually hidden because the parent OL layer is not visible.
 
 ### Event Delegate System
 
@@ -666,6 +696,29 @@ items.forEach((item) => {
 - Config validation happens via `src/api` files in geoview-core
 - Plugin packages have their own config schemas (default-config-\*.json) but rely on core's validation APIs
 - Use `ConfigApi` and `ConfigValidation` classes from geoview-core for config operations
+
+### `initialSettings` Cascading (Parent → Child)
+
+The `ConfigValidation.#processLayerEntryConfig()` method handles how `initialSettings` propagate from parent layers to children. Understanding this cascading is critical for writing correct config tests.
+
+**Merge strategy** — `deepMerge(parentInitialSettingsMergedRoot, initialSettings)` merges parent settings into child settings. **Child explicit values win** over parent values.
+
+**`parentInitialSettingsMergedRoot`** — For entries at root level (no parent group), this falls back to `geoviewLayerConfig.initialSettings` (the GeoView layer's top-level initial settings). For entries inside a group, it uses the parent group's already-merged initial settings.
+
+**Special cascading rules (applied AFTER the deep merge):**
+
+| Setting           | Behavior                                                                                                                                                                                             | Code                                        |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| `states.visible`  | When parent `visible === false`, child's `visible` is **deleted** from merged config. Child defaults to `true` in store/legend (greyed out in UI). Parent OL layer hides everything.                 | `delete initSettingsMerged.states?.visible` |
+| `controls.remove` | When parent `remove === false`, sets `initialSettings.controls.remove = false` **on the child's source config** (not the merged result). This becomes the parent input for the next recursion level. | `initialSettings.controls.remove = false`   |
+
+**Override semantics for `controls.remove`:**
+
+- Parent `remove = false`, child has no explicit setting → child inherits `false` via deepMerge
+- Parent `remove = false`, child explicitly sets `remove = true` → child keeps `true` (deepMerge: child wins), then `initialSettings.controls.remove = false` is set for the NEXT level's parent input
+- Parent `remove = false`, grandchild has no explicit setting → grandchild inherits `false` from child's modified initialSettings
+
+**Practical implication for tests:** When testing cascading behavior with 3 levels (group → subgroup → child), the intermediate subgroup's effective value depends on whether it explicitly overrides or inherits from its parent's merged output.
 
 ### URL Validation & File Extension Constants
 
@@ -1700,29 +1753,43 @@ protected override async onLaunchTestSuite(): Promise<unknown> {
 1. **Add test method** to `MapConfigTester`
 2. **Register in Suite** (`suite-map-config.ts` → `onLaunchTestSuite` — always **sequential `await`**)
 
-**Key pattern:** Each test uses `#helperCreateMapConfig(test, mapId, configOverrides)` to create a **new map instance**, runs assertions, then destroys it. This ensures config-level isolation.
+**Key pattern:** Each test uses `#helperCreateMapConfig(test, mapId, overrides)` to create a **new map instance** via `api.createMapFromConfigFast()`, runs assertions, then the next test destroys it. This ensures config-level isolation.
+
+**Helper lifecycle inside `#helperCreateMapConfig`:**
+
+1. `api.deleteMapViewer(mapId, false)` — Destroys current map
+2. `api.createMapFromConfigFast(mapId, configJson, timeout)` — Creates new map from JSON config string
+3. `this.reassignMapViewerAndControllers(mapViewer)` — Updates the tester's internal `mapViewer` and `controllersRegistry` references to the new map instance (critical — without this, subsequent assertions use stale references)
+4. `mapViewer.waitForLayersLoaded()` — Waits for all layers to finish loading
+
+**Override system:** The helper takes `[path, value][]` pairs using dot-notation paths (e.g., `['map.viewSettings.projection', 3857]`). A `#setValueByPath()` utility applies these to the base config object. Setting a value to `null` removes that key (used to test default behavior when a config section is absent).
+
+**Specialized helpers for `initialSettings` testing:**
+
+- `#helperCreateMapConfigWithInitialSettings(test, mapId, controls?, states?)` — Flat layer (polygons.json) with controls/states overrides
+- `#helperCreateMapConfigWithGroupInitialSettings(test, mapId, parentStates?, childStates?)` — 2-level: group → child (states-only)
+- `#helperCreateMapConfigWithNestedGroupInitialSettings(test, mapId, groupSettings?, subGroupSettings?, childSettings?)` — 3-level: group → subgroup → child (full `initialSettings` objects)
 
 **Template:**
 
 ```typescript
 // In map-config-tester.ts
-testMyConfigScenario(): Promise<Test<TypeMapFeaturesInstance>> {
+testMyConfigScenario(): Promise<Test<MapViewer>> {
+  const mapId = this.getMapId();
+
   return this.test(
     `Test my config scenario...`,
     async (test) => {
       test.addStep('Creating map with custom config...');
-      return this.#helperCreateMapConfig(test, 'test-map-id', {
-        footerBar: { tabs: { core: ['legend'] } },
-        navBar: { zoom: true },
-      });
+      return this.#helperCreateMapConfig(test, mapId, [
+        ['footerBar', { tabs: { core: ['legend'] } }],
+        ['navBar', ['zoom', 'rotation']],
+      ]);
     },
-    (test, result) => {
-      Test.assertIsDefined('map config', result);
-      // Assert config was applied
-      Test.assertIsEqual(result.footerBar?.tabs?.core?.length, 1);
-    },
-    (test) => {
-      // Map destruction happens automatically in the helper
+    (test, mapViewer) => {
+      // Assert on store state, controllers, or DOM
+      const footerBarTabs = getStoreUIFooterBarComponents(mapId);
+      Test.assertIsArrayEqual(footerBarTabs, ['legend']);
     }
   );
 }
@@ -1839,6 +1906,7 @@ import { GVTestSuiteMyFeature } from './tests/suites/suite-my-feature';
 6. **Add constants to `GVAbstractTester`** — URLs, UUIDs, expected icon lists go there
 7. **True negative tests** use `testError()` with an expected error class
 8. **Import layer classes directly** — e.g., `EsriDynamic`, `WMS`, `GeoJSON` for `createGeoviewLayerConfig()`
+9. **Update the test catalog** — Each time you create, remove, or rename a test, update [`docs/app/testing/test-catalog.md`](../docs/app/testing/test-catalog.md) to keep it in sync with the actual test code
 
 ### Gotchas & Pitfalls
 

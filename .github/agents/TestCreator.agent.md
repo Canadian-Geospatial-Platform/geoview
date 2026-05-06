@@ -187,7 +187,17 @@ After generating the test method, you MUST also:
 3. **Add imports** for any new types or layer classes
 4. **For new suites/testers**: Create the full files, register in `index.tsx`, and add an HTML map div entry in `tests.html`
 
-### Phase 5 — Verify
+### Phase 5 — Update Test Catalog
+
+After generating all test code, update [`docs/app/testing/test-catalog.md`](../../../docs/app/testing/test-catalog.md) to reflect the changes:
+
+1. **New tests**: Add a row to the appropriate suite table with method name, type (`test`/`testError`), and description
+2. **Removed tests**: Remove the corresponding row from the table
+3. **Renamed tests**: Update the method name and/or description in the table
+4. **New suite/tester**: Add a new section with the suite header and tester table
+5. **Update the Summary table** at the bottom if test counts changed
+
+### Phase 6 — Verify
 
 After generating all code:
 
@@ -195,6 +205,7 @@ After generating all code:
 2. Verify all imports resolve correctly
 3. Confirm the test is wired into the suite's `onLaunchTestSuite()`
 4. Confirm constants exist for all URLs and IDs used
+5. Confirm `docs/app/testing/test-catalog.md` is updated with the new/changed tests
 
 ---
 
