@@ -672,16 +672,17 @@ try {
 // ✅ CRITICAL: After batch, manually update the store
 items.forEach((item) => {
   setStoreLayerItemVisibility(
-    this.getMapId(), 
-    layerPath, 
-    item, 
-    item.isVisible, 
-    layer.getLayerFilters().getClassFilter() // also update related filters
+    this.getMapId(),
+    layerPath,
+    item,
+    item.isVisible,
+    layer.getLayerFilters().getClassFilter(), // also update related filters
   );
 });
 ```
 
 **Why this matters:** Domain layer changes (OL rendering, filter objects) happen during the batch, but the Zustand store isn't updated because event handlers were suppressed. Stale store data breaks:
+
 - Data table feature counts and filters
 - "Active Filters" UI display
 - Any component reading derived state from the store
@@ -1256,7 +1257,9 @@ packages/geoview-test-suite/src/
     │   ├── suite-map-config.ts          # Map config creation/destruction tests
     │   ├── suite-geochart.ts            # Geochart plugin tests
     │   ├── suite-details.ts             # Details panel tests
-    │   └── suite-ui.ts                  # UI/DOM tests
+    │   ├── suite-ui.ts                  # UI/DOM tests
+    │   ├── suite-utilities.ts           # Utility function tests (core, date, geo, projection)
+    │   └── suite-swiper.ts              # Swiper plugin tests
     └── testers/                         # GeoView-specific testers
         ├── abstract-gv-tester.ts        # GV base — constants, URLs, helper methods
         ├── core-tester.ts               # Date parsing tests
@@ -1266,7 +1269,12 @@ packages/geoview-test-suite/src/
         ├── map-config-tester.ts         # Map config override tests
         ├── geochart-tester.ts           # Geochart tests
         ├── details-tester.ts            # Details panel tests
-        └── ui-tester.ts                 # DOM-level UI tests
+        ├── ui-tester.ts                 # DOM-level UI tests
+        ├── swiper-tester.ts             # Swiper plugin tests
+        ├── utilities-core-tester.ts     # Core utility function tests
+        ├── utilities-date-tester.ts     # Date utility function tests
+        ├── utilities-geo-tester.ts      # Geo utility function tests
+        └── utilities-projection-tester.ts # Projection utility function tests
 ```
 
 ### How Tests Run
@@ -1280,7 +1288,7 @@ Tests are triggered from HTML pages in `packages/geoview-core/public/templates/t
 }
 ```
 
-Suite names: `suite-core`, `suite-config`, `suite-layer`, `suite-map`, `suite-geochart`, `suite-map-config`, `suite-ui`, `suite-details`
+Suite names: `suite-core`, `suite-config`, `suite-layer`, `suite-map`, `suite-geochart`, `suite-map-config`, `suite-ui`, `suite-details`, `suite-utilities`, `suite-swiper`
 
 ### Test Lifecycle (in AbstractTester)
 
@@ -1836,15 +1844,20 @@ export class MyFeatureTester extends GVAbstractTester {
 ```typescript
 import type { API } from "geoview-core/api/api";
 import type { MapViewer } from "geoview-core/geo/map/map-viewer";
+import type { ControllerRegistry } from "geoview-core/core/controllers/base/controller-registry";
 import { GVAbstractTestSuite } from "./abstract-gv-test-suite";
 import { MyFeatureTester } from "../testers/my-feature-tester";
 
 export class GVTestSuiteMyFeature extends GVAbstractTestSuite {
   #tester: MyFeatureTester;
 
-  constructor(api: API, mapViewer: MapViewer) {
-    super(api, mapViewer);
-    this.#tester = new MyFeatureTester(api, mapViewer);
+  constructor(
+    api: API,
+    mapViewer: MapViewer,
+    controllerRegistry: ControllerRegistry,
+  ) {
+    super(api, mapViewer, controllerRegistry);
+    this.#tester = new MyFeatureTester(api, mapViewer, controllerRegistry);
     this.addTester(this.#tester);
   }
 
@@ -1875,7 +1888,7 @@ import { GVTestSuiteMyFeature } from './tests/suites/suite-my-feature';
 
 // In onAdd():
 } else if (suite === 'suite-my-feature') {
-  this.addTestSuite(new GVTestSuiteMyFeature(window.cgpv.api, this.mapViewer));
+  this.addTestSuite(new GVTestSuiteMyFeature(window.cgpv.api, this.mapViewer, this.controllerRegistry));
 }
 ```
 

@@ -626,7 +626,7 @@ export class UtilitiesCoreTester extends GVAbstractTester {
         // Normal object
         const normal = JSON.parse(safeStringify({ a: 1, b: 'two' }));
 
-        // Circular reference
+        // Circular reference — `any` needed because we intentionally create a self-referencing object to test circular handling
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const circular: any = { name: 'root' };
         circular.self = circular;
