@@ -494,7 +494,7 @@ if (hasCustomPlugin(getGeoViewStore(mapViewer.mapId))) {
 Each state slice follows this pattern:
 
 ```typescript
-// In store-interface-and-initial-values/custom-state.ts
+// In states/custom-state.ts
 export interface ICustomState {
   someValue: string;
   items: CustomItem[];
@@ -849,7 +849,7 @@ packages/geoview-core/src/
 │   └── stores/
 │       ├── geoview-store.ts                    # Store composition (all slices)
 │       ├── stores-managers.ts                  # Store registry (getGeoViewStore)
-│       └── store-interface-and-intial-values/  # State slices
+│       └── states/  # State slices
 │           ├── map-state.ts                    # useMapZoom(), getStoreMapZoom(), etc.
 │           ├── layer-state.ts                  # useLayerLegendLayers(), etc.
 │           ├── ui-state.ts                     # useUIActiveFooterBarTab(), etc.

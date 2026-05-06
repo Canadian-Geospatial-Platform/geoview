@@ -114,7 +114,7 @@ When auditing, pay special attention to these high-drift areas:
 | Doc Topic               | Code Location                                                                |
 | ----------------------- | ---------------------------------------------------------------------------- |
 | Controllers             | `packages/geoview-core/src/core/controllers/`                                |
-| Store slices & hooks    | `packages/geoview-core/src/core/stores/store-interface-and-initial-values/`  |
+| Store slices & hooks    | `packages/geoview-core/src/core/stores/states/`  |
 | Layer types & GV layers | `packages/geoview-core/src/geo/layer/`                                       |
 | Config & schema         | `packages/geoview-core/schema.json`, `packages/geoview-core/src/api/config/` |
 | UI components           | `packages/geoview-core/src/ui/`                                              |

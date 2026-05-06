@@ -1,10 +1,7 @@
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
 import { delay, whenThisThen } from 'geoview-core/core/utils/utilities';
-import {
-  getStoreSwiperLayerPaths,
-  getStoreSwiperOrientation,
-} from 'geoview-core/core/stores/store-interface-and-intial-values/swiper-state';
+import { getStoreSwiperLayerPaths, getStoreSwiperOrientation } from 'geoview-core/core/stores/states/swiper-state';
 
 /**
  * Main Swiper testing class.

@@ -578,7 +578,7 @@ One MUI icon can have multiple aliases. Custom SVG icons (`LegendIcon`, `ClearHi
 
 ### Store Hook Naming Convention
 
-Store hooks live in `packages/geoview-core/src/core/stores/store-interface-and-intial-values/` with files per slice: `map-state.ts`, `layer-state.ts`, `ui-state.ts`, `data-table-state.ts`, etc.
+Store hooks live in `packages/geoview-core/src/core/stores/states/` with files per slice: `map-state.ts`, `layer-state.ts`, `ui-state.ts`, `data-table-state.ts`, etc.
 
 Each slice exports three types of functions with consistent naming:
 
@@ -633,7 +633,7 @@ mapController.zoomToExtent(extent);
 import {
   getStoreMapZoom,
   setStoreMapClickMarker,
-} from "@/core/stores/store-interface-and-intial-values/map-state";
+} from "@/core/stores/states/map-state";
 
 const currentZoom = getStoreMapZoom(this.getMapId());
 setStoreMapClickMarker(this.getMapId(), projectedCoords[0]);
@@ -2004,7 +2004,7 @@ packages/geoview-core/src/
 │   │   └── time-slider-controller.ts
 │   ├── domains/      # Domain models (LayerDomain, UIDomain) - own GV layer instances, emit events
 │   ├── stores/       # Zustand store slices
-│   │   └── store-interface-and-intial-values/  # Hook exports per slice
+│   │   └── states/  # Hook exports per slice
 │   ├── components/   # Shared React components
 │   │   └── layers/   # Layer panel, details, settings
 │   │       └── right-panel/
