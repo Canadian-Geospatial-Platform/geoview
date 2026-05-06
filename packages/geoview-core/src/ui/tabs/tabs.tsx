@@ -350,7 +350,7 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
           width: '100%',
           paddingLeft: '9px',
           border: 'unset',
-          borderBottom: isCollapsed ? 'none' : `2px solid ${theme.palette.geoViewColor.primary.main} !important`,
+          borderBottom: isCollapsed ? 'none' : `2px solid ${theme.palette.geoViewColor?.primary.main} !important`,
         }}
       >
         <Grid size={{ xs: 7, sm: 10 }}>
