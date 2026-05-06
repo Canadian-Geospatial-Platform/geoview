@@ -5,7 +5,6 @@ import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/ab
 import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import EventHelper, { type EventDelegateBase } from '@/api/events/event-helper';
 import {
-  CONST_LAYER_TYPES,
   mapConfigLayerEntryIsGeoCore,
   mapConfigLayerEntryIsGeoPackage,
   mapConfigLayerEntryIsRCS,
@@ -60,6 +59,7 @@ import type {
 import type { AbstractGVLayer, LayerMessageEvent } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
+import { GVKML } from '@/geo/layer/gv-layers/vector/gv-kml';
 import { GeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
 import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
 import { WMTS } from '@/geo/layer/geoview-layers/raster/wmts';
@@ -538,9 +538,6 @@ export class LayerCreatorController extends AbstractMapViewerController {
 
         // If it is a single layer, remove geoview layer
         if (layerPathNodes.length === 1 || (layerPathNodes.length === 2 && geoviewLayer.listOfLayerEntryConfig.length === 1)) {
-          geoviewLayer.olRootLayer?.dispose();
-          if (geoviewLayer.olRootLayer) delete geoviewLayer.olRootLayer;
-
           delete this.#geoviewLayers[layerPathNodes[0]];
           const { mapFeaturesConfig } = this.getMapViewer();
 
@@ -678,9 +675,6 @@ export class LayerCreatorController extends AbstractMapViewerController {
       layerBeingAdded
         .createGeoViewLayers(getStoreAppDisplayDateMode(this.getMapId()), this.getMapViewer().getProjection(), abortSignal)
         .then(() => {
-          // Add the layer on the map
-          this.#addToMap(layerBeingAdded, geoviewLayerConfig);
-
           // If there were partial errors (some sub-layers failed but valid ones were added), report them
           const partialErrors = layerBeingAdded.getLayerLoadErrors();
           if (partialErrors.length > 0) {
@@ -838,6 +832,18 @@ export class LayerCreatorController extends AbstractMapViewerController {
     // Register in the domain
     this.#layerDomain.registerGVLayer(gvLayer);
 
+    // Add the OpenLayers layer to the map officially
+    this.getMapViewer().map.addLayer(gvLayer.getOLLayer());
+
+    // Log
+    logger.logInfo(`GeoView Layer ${geoviewLayer.getGeoviewLayerId()} added to map ${this.getMapId()}`, geoviewLayer);
+
+    // GV: KML currently has no style or symbology associated with it, so we warn the user
+    if (gvLayer instanceof GVKML) this.getMapViewer().notifications.showWarning('warning.layer.kmlLayerWarning', {}, true);
+
+    // Set the layer z indices
+    this.getControllersRegistry().layerController.setLayerZIndices();
+
     // Handle text layer for vector layers
     if (gvLayer instanceof AbstractGVVector) {
       const textLayer = gvLayer.getTextOLLayer();
@@ -917,33 +923,6 @@ export class LayerCreatorController extends AbstractMapViewerController {
       this.getMapViewer().notifications.showError(messageKey, messageParams, notification);
     } else if (messageType === 'success') {
       this.getMapViewer().notifications.showSuccess(messageKey, messageParams, notification);
-    }
-  }
-
-  /**
-   * Continues the addition of the geoview layer.
-   * Adds the layer to the map if valid. If not (is a string) emits an error.
-   *
-   * @param geoviewLayer - The layer
-   */
-  #addToMap(geoviewLayer: AbstractGeoViewLayer, geoviewLayerConfig: TypeGeoviewLayerConfig): void {
-    // If no root layer is set, forget about it
-    if (!geoviewLayer.olRootLayer) return;
-
-    // If all layer status are good
-    if (!geoviewLayer.allLayerStatusAreGreaterThanOrEqualTo('error')) {
-      // Add the OpenLayers layer to the map officially
-      this.getMapViewer().map.addLayer(geoviewLayer.olRootLayer);
-
-      // Log
-      logger.logInfo(`GeoView Layer ${geoviewLayer.getGeoviewLayerId()} added to map ${this.getMapId()}`, geoviewLayer);
-
-      // GV: KML currently has no style or symbology associated with it, so we warn the user
-      if (geoviewLayerConfig.geoviewLayerType === CONST_LAYER_TYPES.KML)
-        this.getMapViewer().notifications.showWarning('warning.layer.kmlLayerWarning', {}, true);
-
-      // Set the layer z indices
-      this.getControllersRegistry().layerController.setLayerZIndices();
     }
   }
 

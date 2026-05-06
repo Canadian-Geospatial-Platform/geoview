@@ -1,4 +1,3 @@
-import type BaseLayer from 'ol/layer/Base';
 import type { Options as LayerGroupOptions } from 'ol/layer/Group';
 import type { Projection as OLProjection } from 'ol/proj';
 import Collection from 'ol/Collection';
@@ -91,9 +90,6 @@ export abstract class AbstractGeoViewLayer {
    * configuration does not provide a value, we use an empty array instead of an undefined attribute.
    */
   listOfLayerEntryConfig: TypeLayerEntryConfig[] = [];
-
-  /** The OpenLayer root layer representing this GeoView Layer. */
-  olRootLayer?: BaseLayer;
 
   /** The Geoview Layer Config used to create the class */
   #geoviewLayerConfig: TypeGeoviewLayerConfig;
@@ -452,17 +448,10 @@ export abstract class AbstractGeoViewLayer {
     }
 
     // Process list of layers and await
-    const layer = await this.#processListOfLayerEntryConfig(this.listOfLayerEntryConfig);
+    await this.#processListOfLayerEntryConfig(this.listOfLayerEntryConfig);
 
-    // Keep the OL reference before checking errors, so valid layers can still be added to the map
-    this.olRootLayer = layer?.getOLLayer();
-
-    // If errors were compiled, only throw when ALL layers failed (no valid OL root layer was created).
-    // When some sub-layers are valid, the errors are recorded on individual configs (status='error')
-    // and will be reported by the caller via getLayerLoadErrors().
-    if (!this.olRootLayer) {
-      this.#throwAggregatedLayerLoadErrors();
-    }
+    // If any errors were compiled, throw about it
+    this.#throwAggregatedLayerLoadErrors();
 
     // Log the time it took thus far
     logger.logMarkerCheck(logTimingsKey, 'to create the layers');
