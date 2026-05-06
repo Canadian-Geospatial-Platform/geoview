@@ -39,7 +39,7 @@ import {
   MAP_ZOOM_LEVEL,
   MAX_EXTENTS_RESTRICTION_LONLAT,
 } from '@/api/types/map-schema-types';
-import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
+import type { TypeLayerStatus, TypeLegend } from '@/api/types/layer-schema-types';
 
 import { BasemapApi } from '@/geo/layer/basemap/basemap';
 import { LayerApi } from '@/geo/layer/layer';
@@ -92,7 +92,7 @@ import {
   type TypeScaleInfo,
 } from '@/core/stores/states/map-state';
 import { getStoreAppDisplayTheme } from '@/core/stores/states/app-state';
-import { getStoreLayerOrderedLayerPaths, type TypeLegend } from '@/core/stores/states/layer-state';
+import { getStoreLayerOrderedLayerPaths } from '@/core/stores/states/layer-state';
 import { TIME_DELAY_BETWEEN_PROPAGATION_FOR_BATCH } from '@/core/stores/states/feature-info-state';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';

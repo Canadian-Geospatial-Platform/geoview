@@ -16,6 +16,7 @@ import type {
   TypeLayerInitialSettings,
   TypeLayerStatus,
   TypeGeoviewLayerType,
+  TypeLegend,
 } from '@/api/types/layer-schema-types';
 import {
   LayerMetadataAccessPathMandatoryError,
@@ -28,7 +29,6 @@ import {
   LayerEntryConfigUnableToCreateGroupLayerError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
-import type { TypeLegend } from '@/core/stores/states/layer-state';
 import type { SnackbarType } from '@/core/utils/notifications';
 import { CancelledError, ResponseEmptyError, PromiseRejectErrorWrapper, formatError } from '@/core/exceptions/core-exceptions';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';

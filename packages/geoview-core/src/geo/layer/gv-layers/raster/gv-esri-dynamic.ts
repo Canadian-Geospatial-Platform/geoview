@@ -23,14 +23,13 @@ import type {
   TypeIconSymbolVectorConfig,
   TypeFeatureInfoEntryPartial,
 } from '@/api/types/map-schema-types';
-import type { TypeLayerMetadataEsriExtent } from '@/api/types/layer-schema-types';
+import type { TypeLayerMetadataEsriExtent, TypeLegend } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { GeometryJson } from '@/geo/layer/gv-layers/utils';
 import { EsriUtilities } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
-import type { TypeLegend } from '@/core/stores/states/layer-state';
 import type { TypeEsriImageLayerLegend } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { FetchEsriWorkerPool } from '@/core/workers/fetch-esri-worker-pool';
 import type { QueryParams } from '@/core/workers/fetch-esri-worker-script';

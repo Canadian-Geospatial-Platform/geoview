@@ -3,6 +3,7 @@ import type {
   LayerStatusChangedDelegate,
   LayerStatusChangedEvent,
 } from '@/api/config/validation-classes/config-base-class';
+import type { TypeLegend } from '@/api/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';
 import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import type { TypeLegendItem, TypeLegendLayerItem } from '@/core/components/layers/types';
@@ -13,7 +14,6 @@ import {
   setStoreLayerStatus,
   setStoreLegendQueryStatus,
   type LegendQueryStatus,
-  type TypeLegend,
 } from '@/core/stores/states/layer-state';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import type { LayerDomain } from '@/core/domains/layer-domain';

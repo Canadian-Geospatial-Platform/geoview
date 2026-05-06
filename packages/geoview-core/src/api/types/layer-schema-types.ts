@@ -1,4 +1,12 @@
-import type { codedValueType, Extent, rangeDomainType, TypeEsriFormatParameter, TypeOutfields } from '@/api/types/map-schema-types';
+import type {
+  codedValueType,
+  Extent,
+  rangeDomainType,
+  TypeEsriFormatParameter,
+  TypeLayerStyleConfig,
+  TypeOutfields,
+  TypeStyleGeometry,
+} from '@/api/types/map-schema-types';
 import type {
   AbstractBaseLayerEntryConfig,
   AbstractBaseLayerEntryConfigProps,
@@ -644,6 +652,32 @@ export const serializeTypeGeoviewLayerConfig = (geoviewLayerConfig: MapConfigLay
   // Return it
   return serializedGeoviewLayerConfig;
 };
+
+/**
+ * Represents the legend data for a layer.
+ */
+export type TypeLegend = {
+  /** The GeoView layer type this legend belongs to. */
+  type: TypeGeoviewLayerType;
+
+  /** The legend content - vector styles, an HTML canvas, or null. */
+  // Layers other than vector layers use the HTMLCanvasElement type for their legend.
+  legend: TypeVectorLayerStyles | HTMLCanvasElement | null;
+
+  /** Optional style configuration associated with the legend. */
+  styleConfig?: TypeLayerStyleConfig;
+};
+
+export type TypeStyleRepresentation = {
+  /** The defaultCanvas property is used by Simple styles and default styles when defined in unique value and class
+   * break styles.
+   */
+  defaultCanvas?: HTMLCanvasElement | null;
+  /** The arrayOfCanvas property is used by unique value and class break styles. */
+  arrayOfCanvas?: (HTMLCanvasElement | null)[];
+};
+
+export type TypeVectorLayerStyles = Partial<Record<TypeStyleGeometry, TypeStyleRepresentation>>;
 
 export interface TypeMetadataWMSRoot {
   WMS_Capabilities?: TypeMetadataWMS;

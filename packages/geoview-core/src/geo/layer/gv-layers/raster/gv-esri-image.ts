@@ -25,8 +25,7 @@ import type {
   TypeLayerStyleSettings,
 } from '@/api/types/map-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
-import type { TypeMetadataEsriRasterFunctionInfos, TypeMosaicRule } from '@/api/types/layer-schema-types';
-import type { TypeLegend } from '@/core/stores/states/layer-state';
+import type { TypeLegend, TypeMetadataEsriRasterFunctionInfos, TypeMosaicRule } from '@/api/types/layer-schema-types';
 import type { TemporalMode } from '@/core/utils/date-mgt';
 import type { GeometryJson } from '@/geo/layer/gv-layers/utils';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
