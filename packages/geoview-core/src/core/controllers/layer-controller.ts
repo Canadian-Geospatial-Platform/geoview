@@ -24,7 +24,6 @@ import {
   getStoreLayerMosaicRule,
   getStoreLayerHighlightedLayer,
   getStoreLayerLegendLayerByPath,
-  getStoreLayerLegendLayers,
   getStoreLayerOrderedLayerIndexByPath,
   getStoreLayerOrderedLayerPaths,
   setStoreLayerAllMapLayerCollapsed,
@@ -50,17 +49,24 @@ import {
   setStoreLayerLegendCollapsed,
   setStoreLayerOrderedLayers,
   setStoreLayerSelectedLayersTabLayer,
-  setStoreLegendLayersDirectly,
   utilFindLayerAndChildrenPaths,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { getStoreAppShowLayerHighlightLayerBbox } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { setStoreDataTableFilter } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { isStoreTimeSliderInitialized, setStoreTimeSliderFilter } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 import type {
-  DomainLayerHoverableChangedDelegate,
-  DomainLayerHoverableChangedEvent,
   DomainLayerBaseDelegate,
   DomainLayerBaseEvent,
+  DomainLayerFilterAppliedDelegate,
+  DomainLayerFilterAppliedEvent,
+  DomainLayerGroupChildrenUpdatedEvent,
+  DomainLayerGroupChildrenUpdatedDelegate,
+  DomainLayerHoverableChangedDelegate,
+  DomainLayerHoverableChangedEvent,
   DomainLayerItemVisibilityChangedDelegate,
   DomainLayerItemVisibilityChangedEvent,
+  DomainLayerMessageDelegate,
+  DomainLayerMessageEvent,
   DomainLayerMosaicRuleChangedDelegate,
   DomainLayerMosaicRuleChangedEvent,
   DomainLayerNameChangedDelegate,
@@ -81,10 +87,6 @@ import type {
   DomainLayerWMSImageLoadRescueDelegate,
   DomainLayerWMSStyleChangedDelegate,
   DomainLayerWMSStyleChangedEvent,
-  DomainLayerGroupChildrenUpdatedEvent,
-  DomainLayerGroupChildrenUpdatedDelegate,
-  DomainLayerMessageDelegate,
-  DomainLayerMessageEvent,
   LayerDomain,
 } from '@/core/domains/layer-domain';
 import { doTimeout, isValidUUID, type DelayJob } from '@/core/utils/utilities';
@@ -173,6 +175,9 @@ export class LayerController extends AbstractMapViewerController {
   /** The bounded reference to the handle layer item visibility changed */
   #boundedHandleDomainLayerItemVisibilityChanged: DomainLayerItemVisibilityChangedDelegate;
 
+  /** The bounded reference to the handle layer filter applied */
+  #boundedHandleDomainLayerFilterApplied: DomainLayerFilterAppliedDelegate;
+
   /** The bounded reference to the handle layer group layer added */
   #boundedHandleDomainLayerGroupLayerAdded: DomainLayerGroupChildrenUpdatedDelegate;
 
@@ -252,6 +257,9 @@ export class LayerController extends AbstractMapViewerController {
     // Keep a bounded reference to the handle layer item visibility changed
     this.#boundedHandleDomainLayerItemVisibilityChanged = this.#handleDomainLayerItemVisibilityChanged.bind(this);
 
+    // Keep a bounded reference to the handle layer filter applied
+    this.#boundedHandleDomainLayerFilterApplied = this.#handleDomainLayerFilterApplied.bind(this);
+
     // Keep a bounded reference to the handle layer group layer added
     this.#boundedHandleDomainLayerGroupLayerAdded = this.#handleDomainLayerGroupLayerAdded.bind(this);
 
@@ -322,6 +330,9 @@ export class LayerController extends AbstractMapViewerController {
     // Listens when the layer item visibility state is changed in the Layer domain
     this.#layerDomain.onLayerItemVisibilityChanged(this.#boundedHandleDomainLayerItemVisibilityChanged);
 
+    // Listens when the layer item visibility state is changed in the Layer domain
+    this.#layerDomain.onLayerFilterApplied(this.#boundedHandleDomainLayerFilterApplied);
+
     // Listens when a layer is added to a group layer in the Layer domain
     this.#layerDomain.onLayerGroupLayerAdded(this.#boundedHandleDomainLayerGroupLayerAdded);
 
@@ -362,6 +373,12 @@ export class LayerController extends AbstractMapViewerController {
 
     // Unhooks when a layer is added to a group layer in the Layer domain
     this.#layerDomain.offLayerGroupLayerAdded(this.#boundedHandleDomainLayerGroupLayerAdded);
+
+    // Listens when the layer item visibility state is changed in the Layer domain
+    this.#layerDomain.offLayerFilterApplied(this.#boundedHandleDomainLayerFilterApplied);
+
+    // Listens when the layer item visibility state is changed in the Layer domain
+    this.#layerDomain.offLayerItemVisibilityChanged(this.#boundedHandleDomainLayerItemVisibilityChanged);
 
     // Unhooks when the layer queryable state is changed in the Layer domain
     this.#layerDomain.offLayerQueryableChanged(this.#boundedHandleDomainLayerQueryableChanged);
@@ -1296,6 +1313,7 @@ export class LayerController extends AbstractMapViewerController {
    * optional legend store updated, filters applied, and render completed if requested
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
    * @throws {LayerWrongTypeError} When the layer was of wrong type
+   * @throws {LayerStyleGeometryNotFoundError} When the geometry type of the item doesn't match any geometry type in the layer style configuration
    */
   setItemVisibility(layerPath: string, item: TypeLegendItem, visible: boolean, waitForRender: boolean): Promise<void> {
     // Get registered layer and set visibility
@@ -1356,10 +1374,6 @@ export class LayerController extends AbstractMapViewerController {
     // Set layer to visible
     layer.setVisible(true);
 
-    // Get legend layers and legend layer to update
-    // GV This object is about to get mutated multiple times, that's why we can use it to set legend layers later... (pattern should be changed..)
-    const curLayers = getStoreLayerLegendLayers(this.getMapId());
-
     // Get the particular object holding the items array itself from the store
     const layerStore = getStoreLayerLegendLayerByPath(this.getMapId(), layerPath)!;
 
@@ -1394,14 +1408,11 @@ export class LayerController extends AbstractMapViewerController {
       this.#isBatchingLayerItemsVisibility = false;
     }
 
-    // Shadow-copy this specific array so that the hooks are triggered for this items array and this one only
-    layerStore.items = [...layerStore.items];
-
-    // Now, set the layer filters on class
-    layer.setLayerFiltersClass();
-
-    // Set updated legend layers
-    setStoreLegendLayersDirectly(this.getMapId(), curLayers);
+    // Now that the loop is done for the batch mode, update the store as well
+    layerStore.items.forEach((item) => {
+      // Save in the store
+      setStoreLayerItemVisibility(this.getMapId(), layerPath, item, visible, layer.getLayerFilters().getClassFilter());
+    });
 
     // If must wait for the renderer
     if (waitForRender) {
@@ -2159,7 +2170,6 @@ export class LayerController extends AbstractMapViewerController {
     }
 
     // Here, the item visibility was set on the GV Layer directly, we're not in batch mode.
-    event.layer.setLayerFiltersClass();
 
     // Get the layer path
     const layerPath = event.layer.getLayerPath();
@@ -2175,6 +2185,36 @@ export class LayerController extends AbstractMapViewerController {
 
     // Emit event
     this.#emitLayerItemVisibilityChanged({ layer: event.layer, item: event.layerEvent.item, visible: event.layerEvent.visible });
+  }
+
+  /**
+   * Handles when a layer's filter is applied in the domain.
+   *
+   * Propagates the change to the store.
+   *
+   * @param sender - The layer domain that fired the event
+   * @param event - The event containing the layer and filter information
+   */
+  #handleDomainLayerFilterApplied(sender: LayerDomain, event: DomainLayerFilterAppliedEvent): void {
+    // TODO: REFACTOR - Ideally, this handler wouldn't exist and the layer would have custom events when adjusting their data/time filters.
+    // TO.DOCONT: It'd have to be a custom event, because it'd have to be more elaborate than a single query string if we
+    // TO.DOCONT: want to update the UI based on a query filter that happened. Refer to setStyleItemVisibility for the
+    // TO.DOCONT: correct pattern (which does update the UI automatically). Search id: 0ecb948f
+    // Depending on the layer category
+    switch (event.layerEvent.filterCategory) {
+      case 'data':
+        // Save in the store
+        setStoreDataTableFilter(this.getMapId(), event.layer.getLayerPath(), event.layerEvent.filter.getDataFilter());
+        break;
+
+      case 'time':
+        // If the time slider is initialized
+        if (isStoreTimeSliderInitialized(this.getMapId())) {
+          // Save in the store
+          setStoreTimeSliderFilter(this.getMapId(), event.layer.getLayerPath(), event.layerEvent.filter.getTimeFilter());
+        }
+        break;
+    }
   }
 
   /**

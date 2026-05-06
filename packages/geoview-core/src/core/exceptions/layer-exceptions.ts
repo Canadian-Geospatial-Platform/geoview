@@ -4,6 +4,7 @@
 // Classes in this file mostly inherit LayerError errors.
 
 import type { TypeGeoviewLayerType, TypeLayerEntryType } from '@/api/types/layer-schema-types';
+import type { TypeStyleGeometry } from '@/api/types/map-schema-types';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 /**
@@ -623,5 +624,19 @@ export class LayerFeatureParsingError extends LayerError {
 
     // Ensure correct inheritance (important for transpilation targets)
     Object.setPrototypeOf(this, LayerFeatureParsingError.prototype);
+  }
+}
+
+/**
+ * Custom error class thrown when a style for a given geometry type cannot be found.
+ *
+ * This error is typically used when a style configuration is missing for a specific geometry type.
+ */
+export class LayerStyleGeometryNotFoundError extends LayerError {
+  constructor(layerName: string, geomType: TypeStyleGeometry) {
+    super(layerName, 'error.layer.styleGeometryNotFound', { layerName, geomType });
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, LayerStyleGeometryNotFoundError.prototype);
   }
 }

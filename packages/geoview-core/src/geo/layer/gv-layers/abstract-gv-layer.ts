@@ -41,9 +41,9 @@ import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values
 import { AbstractBaseGVLayer, type LayerBaseDelegate, type LayerBaseEvent } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { SnackbarType } from '@/core/utils/notifications';
 import { formatError, NotImplementedError, NotSupportedError } from '@/core/exceptions/core-exceptions';
-import { LayerNotQueryableError, LayerStatusErrorError } from '@/core/exceptions/layer-exceptions';
+import { LayerNotQueryableError, LayerStatusErrorError, LayerStyleGeometryNotFoundError } from '@/core/exceptions/layer-exceptions';
 import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
-import { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
+import { LayerFilters, type FilterCategory } from '@/geo/layer/gv-layers/layer-filters';
 import { delay, whenThisThen } from '@/core/utils/utilities';
 import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 
@@ -508,6 +508,10 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * If the source isn't ready, it registers to the source ready event to pursue initialization of the layer once its source is ready.
    */
   init(): void {
+    // Set the layer filters right away for the initial view
+    this.#setLayerFiltersInitial(this.getLayerConfig().getLayerFilter());
+    this.#setLayerFiltersClass();
+
     // Activation of the load end/error listeners
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (this.#olSource as any).on(['featuresloadstart', 'imageloadstart', 'tileloadstart'], this.#handleLoading.bind(this));
@@ -612,10 +616,14 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param waitForRender - When `true`, waits for the next layer render to complete before resolving
    * @returns A promise that resolves after the visibility has been
    * updated and, if requested, the layer has finished rendering
+   * @throws {LayerStyleGeometryNotFoundError} When the geometry type of the item doesn't match any geometry type in the layer style configuration
    */
   async setStyleItemVisibility(item: TypeLegendItem, visible: boolean, waitForRender: boolean): Promise<void> {
     // Get the style config
-    const geometryStyleConfig = this.getStyle()![item.geometryType];
+    const geometryStyleConfig = this.getStyle()?.[item.geometryType];
+
+    // If the style was not found, throw
+    if (!geometryStyleConfig) throw new LayerStyleGeometryNotFoundError(this.getLayerName(), item.geometryType);
 
     // Get all styles with the label matching the name of the clicked item and update their visibility
     const styleInfos = geometryStyleConfig?.info.filter((styleInfo) => styleInfo.label === item.name);
@@ -624,11 +632,8 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
       styleInfo.visible = visible;
     });
 
-    // Update the class filter immediately so the filter equation is correct before the render.
-    this.getLayerFilters()?.setClassFilter(this.getFilterFromStyle());
-
-    // Force a re-render of the layer source (this is required if there are classes)
-    this.getOLLayer().changed();
+    // Also refresh the filter class, this will force a re-render of the layer source (this is required if there are classes)
+    this.#setLayerFiltersClass();
 
     // Emit about it
     this.#emitLayerItemVisibilityChanged({ item, visible });
@@ -757,58 +762,65 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   }
 
   /**
-   * Sets the class filter on the layer, derived from the current style configuration.
-   *
-   * @param classFilter - Optional class filter expression to apply. Defaults to the filter derived from the current style.
-   */
-  setLayerFiltersClass(classFilter: string | undefined = this.getFilterFromStyle()): void {
-    // Get the current layer filter
-    const curLayerFilter = this.getLayerFilters();
-
-    // Set it
-    curLayerFilter.setClassFilter(classFilter);
-
-    // Redirect
-    this.setLayerFilters(curLayerFilter, true);
-  }
-
-  /**
    * Sets the data filter on the layer.
    *
-   * @param dataFilter - Optional data filter expression to apply
+   * This function only updates the data filter query string inside the layer filters object.
+   * The active filter applied on the layer will update accordingly, however, the UI component elements themselves won't update.
+   *
+   * @param dataFilterQueryString - Optional data filter expression to apply
    */
-  setLayerFiltersData(dataFilter: string | undefined): void {
+  setLayerFiltersData(dataFilterQueryString: string | undefined): void {
+    // TODO: REFACTOR - We should probably replace this function with a public-facing one which filters using time properties (other than
+    // TO.DOCONT: a single query string) which raises an event on the domain to update which updates the UI accordingly.
+    // TO.DOCONT: This would be more user-friendly and less error prone than having to create the query string outside
+    // TO.DOCONT: of the layer and then set it here, which requires the user to know the exact syntax of the query string
+    // TO.DOCONT: to apply a data filter on the layer. In order to be able to update the UI based on a query, more information than a single
+    // TO.DOCONT: query string would have to get carried. Search id: 0ecb948f
     // Get the current layer filter
     const curLayerFilter = this.getLayerFilters();
 
     // Set it
-    curLayerFilter.setDataFilter(dataFilter);
+    curLayerFilter.setDataFilter(dataFilterQueryString);
 
     // Redirect
-    this.setLayerFilters(curLayerFilter, true);
+    this.#setLayerFilters(curLayerFilter, 'data');
   }
 
   /**
    * Sets the time filter on the layer.
    *
-   * @param timeFilter - Optional time filter expression to apply
+   * This function only updates the time filter query string inside the layer filters object.
+   * The active filter applied on the layer will update accordingly, however, the UI component elements themselves won't update.
+   *
+   * @param timeFilterQueryString - Optional time filter expression to apply
    */
-  setLayerFiltersTime(timeFilter: string | undefined): void {
+  setLayerFiltersTime(timeFilterQueryString: string | undefined): void {
+    // TODO: REFACTOR - We should probably replace this function with a public-facing one which filters using time properties (other than
+    // TO.DOCONT: a single query string) which raises an event on the domain to update which updates the UI accordingly.
+    // TO.DOCONT: This would be more user-friendly and less error prone than having to create the query string outside
+    // TO.DOCONT: of the layer and then set it here, which requires the user to know the exact syntax of the query string
+    // TO.DOCONT: to apply a time filter on the layer. In order to be able to update the UI based on a query, more information than a single
+    // TO.DOCONT: query string would have to get carried. Search id: 0ecb948f
     // Get the current layer filter
     const curLayerFilter = this.getLayerFilters();
 
     // Set it
-    curLayerFilter.setTimeFilter(timeFilter);
+    curLayerFilter.setTimeFilter(timeFilterQueryString);
 
     // Redirect
-    this.setLayerFilters(curLayerFilter, true);
+    this.#setLayerFilters(curLayerFilter, 'time');
   }
 
   /**
    * Applies a time filter on a date range.
    *
+   * This function only updates the time filter query string inside the layer filters object.
+   * The active filter applied on the layer will update accordingly, however, the UI component elements themselves won't update.
+   *
    * @param date1 - The start date
    * @param date2 - The end date
+   * @deprecated This method should be removed in favor of setLayerFiltersTime so that future enhancements regarding time filtering
+   * and UI synchronization can be made.
    */
   setLayerFiltersDate(date1: string, date2: string): void {
     // Get the time dimension field
@@ -819,32 +831,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     layerFilters.setTimeFilter(`${field} >= date '${date1}' and ${field} <= date '${date2}'`);
 
     // Redirect
-    this.setLayerFilters(layerFilters, true);
-  }
-
-  /**
-   * Sets the layer filters associated to the layer.
-   *
-   * @param layerFilters - The layer filters to apply
-   * @param refresh - Whether to trigger a layer re-render after setting filters
-   */
-  setLayerFilters(layerFilters: LayerFilters, refresh: boolean | undefined): void {
-    // Keep it
-    this.#layerFilters = layerFilters;
-
-    // Redirect
-    this.onSetLayerFilters(layerFilters);
-
-    // If refreshing
-    if (refresh) {
-      // Refresh
-      this.getOLLayer().changed();
-    }
-
-    // Emit event
-    this.emitLayerFilterApplied({
-      filter: layerFilters,
-    });
+    this.#setLayerFilters(layerFilters, 'time');
   }
 
   /**
@@ -1320,6 +1307,69 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   #emitError(gvError: GeoViewError): void {
     // Emit about the error
     this.emitMessage(gvError.messageKey, gvError.messageParams, 'error', true);
+  }
+
+  /**
+   * Sets the initial filter on the layer, which is the base filter that will be applied on the layer and
+   * combined with the other filters (class, data, time) when they get set.
+   *
+   * @param initialFilter - Optional initial filter expression to apply on the layer, this is the filter that
+   * will be combined with the other filters (class, data, time) when they get set. It can be used to set a
+   * fixed filter on the layer that will always be applied and combined with the other filters.
+   * If not provided, it will just keep the current initial filter on the layer (which can be empty if it was never set before).
+   */
+  #setLayerFiltersInitial(initialFilter: string | undefined): void {
+    // Get the current layer filter
+    const curLayerFilter = this.getLayerFilters();
+
+    // Set it
+    curLayerFilter.setInitialFilter(initialFilter);
+
+    // Redirect
+    this.#setLayerFilters(curLayerFilter, 'initial');
+  }
+
+  /**
+   * Sets the class filter on the layer, derived from the current style configuration.
+   *
+   * This function only updates the class filter query string inside the layer filters object.
+   * The active filter applied on the layer, on the map, will update accordingly, however, the UI component elements themselves won't update.
+   * Consider using the setStyleItemVisibility function to change a class filter to benefit from a better UI interaction.
+   *
+   * @param classFilter - Optional class filter expression to apply. Defaults to the filter derived from the current style.
+   */
+  #setLayerFiltersClass(classFilter: string | undefined = this.getFilterFromStyle()): void {
+    // Get the current layer filter
+    const curLayerFilter = this.getLayerFilters();
+
+    // Set it
+    curLayerFilter.setClassFilter(classFilter);
+
+    // Redirect
+    this.#setLayerFilters(curLayerFilter, 'class');
+  }
+
+  /**
+   * Sets the layer filters associated to the layer.
+   *
+   * @param layerFilters - The layer filters to apply
+   * @param refresh - Whether to trigger a layer re-render after setting filters
+   */
+  #setLayerFilters(layerFilters: LayerFilters, filterCategoryChanged: FilterCategory): void {
+    // Keep it
+    this.#layerFilters = layerFilters;
+
+    // Redirect
+    this.onSetLayerFilters(layerFilters);
+
+    // Refresh
+    this.getOLLayer().changed();
+
+    // Emit event
+    this.emitLayerFilterApplied({
+      filter: layerFilters,
+      filterCategory: filterCategoryChanged,
+    });
   }
 
   // #endregion PRIVATE METHODS
@@ -2118,8 +2168,11 @@ export type LegendQueriedDelegate = EventDelegateBase<AbstractGVLayer, LegendQue
  * Define an event for the delegate
  */
 export interface LayerFilterAppliedEvent extends LayerBaseEvent {
-  // The filter
+  /** The filter */
   filter: LayerFilters;
+
+  /** The filter category */
+  filterCategory: FilterCategory;
 }
 
 /**

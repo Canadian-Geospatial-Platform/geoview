@@ -566,8 +566,19 @@ export const getStoreLayerLegendLayers = (mapId: string): TypeLegendLayer[] => {
   return getStoreLayerState(mapId).legendLayers;
 };
 
-// Don't do this, see note in the getter above.
+// Don't create a useStoreLayerStateLegendLayers hook here, see note in the getter above.
 // export const useStoreLayerStateLegendLayers = ...
+
+/**
+ * Gets a specific legend layer by its path for the given map.
+ *
+ * @param mapId - The map identifier.
+ * @param layerPath - The layer path to look up.
+ * @returns The matching legend layer, or undefined if not found.
+ */
+export const getStoreLayerLegendLayerByPath = (mapId: string, layerPath: string): TypeLegendLayer | undefined => {
+  return utilLegendLayerByPathRec(getStoreLayerLegendLayers(mapId), layerPath);
+};
 
 /**
  * Returns all layer paths from the ordered layers.
@@ -704,17 +715,6 @@ export const getStoreLayerAreLayersLoading = (mapId: string): boolean => {
  * @returns True if layers are loading
  */
 export const useStoreLayerAreLayersLoading = (): boolean => useStore(useGeoViewStore(), (state) => state.layerState.layersAreLoading);
-
-/**
- * Gets a specific legend layer by its path for the given map.
- *
- * @param mapId - The map identifier
- * @param layerPath - The layer path to look up
- * @returns The matching legend layer, or undefined if not found
- */
-export const getStoreLayerLegendLayerByPath = (mapId: string, layerPath: string): TypeLegendLayer | undefined => {
-  return utilLegendLayerByPathRec(getStoreLayerLegendLayers(mapId), layerPath);
-};
 
 /**
  * Gets the selected layer path for the given map.
@@ -1808,6 +1808,20 @@ export const setStoreLayerItemVisibility = (
 };
 
 /**
+ * Sets the class filter query string of a specific legend item and updates the class filter.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path containing the item
+ * @param classFilter - Optional class filter string to apply
+ */
+export const setStoreLayerClassFilter = (mapId: string, layerPath: string, classFilter: string | undefined): void => {
+  getStoreLayerState(mapId).actions.updateLayerByPath(layerPath, (layer) => ({
+    ...layer,
+    layerFilterClass: classFilter,
+  }));
+};
+
+/**
  * Sets the opacity for a specific layer and propagates it to children.
  *
  * @param mapId - The map identifier
@@ -2056,6 +2070,7 @@ export const setStoreLayerDeletionStartTime = (mapId: string, layerPath: string,
  *
  * @param mapId - The map identifier
  * @param legendLayers - The legend layers to set
+ * @deprecated Try to use another more direct method to update the store
  */
 export const setStoreLegendLayersDirectly = (mapId: string, legendLayers: TypeLegendLayer[]): void => {
   // Set updated legend layers
