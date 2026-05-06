@@ -2,7 +2,7 @@ import type { TypeGeoviewLayerType } from 'geoview-core/api/types/layer-schema-t
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
-import { delay, whenThisThen } from 'geoview-core/core/utils/utilities';
+import { delay } from 'geoview-core/core/utils/utilities';
 import {
   getStoreUIActiveAppBarTab,
   getStoreUIActiveFooterBarTab,
@@ -469,8 +469,7 @@ export class MapConfigTester extends GVAbstractTester {
       async (test) => {
         // Wait for the overview map to become visible (hideOnZoom=0 means always visible once initialized)
         test.addStep('Waiting for overview map to initialize...');
-        // prettier-ignore
-        await whenThisThen(() => this.getControllersRegistry().mapController.getOverviewMapVisibility() === true, 5000);
+        await this.getControllersRegistry().mapController.waitOverviewMapVisibility(true);
 
         // Verify overview-map is in the components config
         test.addStep('Verifying overview-map is in components config...');
@@ -552,8 +551,7 @@ export class MapConfigTester extends GVAbstractTester {
         // At initial zoom 4.5, overview map should be hidden (below threshold of 7)
         // Wait for the overview map useEffect to settle (it sets visibility to false)
         test.addStep('Waiting for overview map to initialize and be hidden at zoom 4.5...');
-        // prettier-ignore
-        await whenThisThen(() => this.getControllersRegistry().mapController.getOverviewMapVisibility() === false, 5000);
+        await this.getControllersRegistry().mapController.waitOverviewMapVisibility(false);
 
         test.addStep('Verifying overview map is hidden at zoom 4.5 (below threshold 7)...');
         const isVisibleAtLowZoom = this.getControllersRegistry().mapController.getOverviewMapVisibility();
@@ -564,8 +562,7 @@ export class MapConfigTester extends GVAbstractTester {
         await this.getControllersRegistry().mapController.zoomMap(8);
 
         // Wait for the React useEffect to update visibility
-        // prettier-ignore
-        await whenThisThen(() => this.getControllersRegistry().mapController.getOverviewMapVisibility() === true, 5000);
+        await this.getControllersRegistry().mapController.waitOverviewMapVisibility(true);
 
         // Verify overview map is now visible
         test.addStep('Verifying overview map is visible at zoom 8...');
@@ -577,8 +574,7 @@ export class MapConfigTester extends GVAbstractTester {
         await this.getControllersRegistry().mapController.zoomMap(4);
 
         // Wait for visibility to turn false
-        // prettier-ignore
-        await whenThisThen(() => this.getControllersRegistry().mapController.getOverviewMapVisibility() === false, 5000);
+        await this.getControllersRegistry().mapController.waitOverviewMapVisibility(false);
 
         // Verify overview map is hidden again
         test.addStep('Verifying overview map is hidden again at zoom 4...');
@@ -612,8 +608,7 @@ export class MapConfigTester extends GVAbstractTester {
         await this.getControllersRegistry().mapController.zoomMap(8);
 
         // Wait for overview map to become visible
-        // prettier-ignore
-        await whenThisThen(() => this.getControllersRegistry().mapController.getOverviewMapVisibility() === true, 5000);
+        await this.getControllersRegistry().mapController.waitOverviewMapVisibility(true);
 
         // Verify overview map is visible at zoom 8
         test.addStep('Verifying overview map is visible at zoom 8...');
@@ -625,8 +620,7 @@ export class MapConfigTester extends GVAbstractTester {
         await this.getControllersRegistry().mapController.setProjection(3857);
 
         // Wait for overview map visibility to be restored after reprojection
-        // prettier-ignore
-        await whenThisThen(() => this.getControllersRegistry().mapController.getOverviewMapVisibility() === true, 10000);
+        await this.getControllersRegistry().mapController.waitOverviewMapVisibility(true, 10000);
 
         // Verify overview map visibility is restored after reprojection
         test.addStep('Verifying overview map is visible after reprojection to 3857...');
@@ -638,8 +632,7 @@ export class MapConfigTester extends GVAbstractTester {
         await this.getControllersRegistry().mapController.zoomMap(4);
 
         // Wait for visibility to turn false
-        // prettier-ignore
-        await whenThisThen(() => this.getControllersRegistry().mapController.getOverviewMapVisibility() === false, 5000);
+        await this.getControllersRegistry().mapController.waitOverviewMapVisibility(false);
 
         // Verify overview map is hidden
         test.addStep('Verifying overview map is hidden at zoom 4 in 3857...');
@@ -651,8 +644,7 @@ export class MapConfigTester extends GVAbstractTester {
         await this.getControllersRegistry().mapController.setProjection(3978);
 
         // Wait for reprojection to complete — visibility should stay false (was hidden before)
-        // prettier-ignore
-        await whenThisThen(() => this.getControllersRegistry().mapController.getOverviewMapVisibility() === false, 10000);
+        await this.getControllersRegistry().mapController.waitOverviewMapVisibility(false, 10000);
 
         // Verify overview map is still hidden (was hidden before reprojection)
         test.addStep('Verifying overview map is still hidden after reprojecting back to 3978...');
@@ -664,8 +656,7 @@ export class MapConfigTester extends GVAbstractTester {
         await this.getControllersRegistry().mapController.zoomMap(8);
 
         // Wait for visibility to turn true
-        // prettier-ignore
-        await whenThisThen(() => this.getControllersRegistry().mapController.getOverviewMapVisibility() === true, 5000);
+        await this.getControllersRegistry().mapController.waitOverviewMapVisibility(true);
 
         // Verify overview map is visible again
         test.addStep('Verifying overview map is visible at zoom 8 in 3978...');

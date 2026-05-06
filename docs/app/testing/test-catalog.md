@@ -2,93 +2,119 @@
 
 > **Auto-maintained** — This file must be updated each time a test is added, removed, or renamed in the `geoview-test-suite` package.
 
-This catalog lists every test in the GeoView test suite, organized by suite and tester. Each entry shows the test method name, type (`test` for happy-path, `testError` for true-negative), and the runtime description string.
+This catalog lists every test in the GeoView test suite, organized by group, suite, and tester. Each entry shows the test method name, type (`test` for happy-path, `testError` for true-negative), and the runtime description string.
 
 ---
 
 ## Table of Contents
 
-- [1. Suite: `suite-config` — Config Validation](#1-suite-suite-config--config-validation)
-  - [1.1 Esri Dynamic](#11-esri-dynamic)
-  - [1.2 Esri Feature](#12-esri-feature)
-  - [1.3 Esri Image](#13-esri-image)
-  - [1.4 WMS](#14-wms)
-  - [1.5 WFS](#15-wfs)
-  - [1.6 GeoJSON](#16-geojson)
-  - [1.7 CSV](#17-csv)
-  - [1.8 OGC Feature](#18-ogc-feature)
-  - [1.9 WKB](#19-wkb)
-  - [1.10 KML](#110-kml)
-  - [1.11 GeoTIFF](#111-geotiff)
-  - [1.12 Geocore](#112-geocore)
-  - [1.13 Settings Cascade](#113-settings-cascade)
-- [2. Suite: `suite-core` — Core Framework](#2-suite-suite-core--core-framework)
-- [3. Suite: `suite-utilities` — Utility Functions](#3-suite-suite-utilities--utility-functions)
-  - [3.1 UtilitiesCoreTester](#31-utilitiescoretester)
-  - [3.2 UtilitiesDateTester](#32-utilitiesdatetester)
-  - [3.3 UtilitiesGeoTester](#33-utilitiesgeotester)
-  - [3.4 UtilitiesProjectionTester](#34-utilitiesprojectiontester)
-- [4. Suite: `suite-layer` — Layer Lifecycle](#4-suite-suite-layer--layer-lifecycle)
-  - [4.1 Esri Dynamic — Lifecycle](#41-esri-dynamic--lifecycle)
-  - [4.2 Esri Feature — Lifecycle](#42-esri-feature--lifecycle)
-  - [4.3 Esri Image — Lifecycle](#43-esri-image--lifecycle)
-  - [4.4 WMS — Lifecycle](#44-wms--lifecycle)
-  - [4.5 WFS — Lifecycle](#45-wfs--lifecycle)
-  - [4.6 GeoJSON — Lifecycle](#46-geojson--lifecycle)
-  - [4.7 GeoTIFF — Lifecycle](#47-geotiff--lifecycle)
-  - [4.8 CSV — Lifecycle](#48-csv--lifecycle)
-  - [4.9 OGC Feature — Lifecycle](#49-ogc-feature--lifecycle)
-  - [4.10 WKB — Lifecycle](#410-wkb--lifecycle)
-  - [4.11 KML — Lifecycle](#411-kml--lifecycle)
-  - [4.12 Initial Settings](#412-initial-settings)
-  - [4.13 Domain Fields (sequential)](#413-domain-fields-sequential)
-  - [4.14 Domain Field Query (sequential)](#414-domain-field-query-sequential)
-- [5. Suite: `suite-map-varia` — Map Interactions](#5-suite-suite-map-varia--map-interactions)
-- [6. Suite: `suite-map-config` — Map Config Overrides](#6-suite-suite-map-config--map-config-overrides)
-  - [6.1 Footer Bar / App Bar / Nav Bar](#61-footer-bar--app-bar--nav-bar)
-  - [6.2 Initial View](#62-initial-view)
-  - [6.3 Overlay Objects](#63-overlay-objects)
-  - [6.4 View Settings](#64-view-settings)
-  - [6.5 Overview Map](#65-overview-map)
-  - [6.6 Initial Settings — Controls](#66-initial-settings--controls)
-  - [6.7 Initial Settings — States](#67-initial-settings--states)
-  - [6.8 Initial Settings — Opacity Cascading](#68-initial-settings--opacity-cascading)
-  - [6.9 Initial Settings — Cascading (Controls & Visibility)](#69-initial-settings--cascading-controls--visibility)
-  - [6.10 Initial Settings — Combo Tests](#610-initial-settings--combo-tests)
-- [7. Suite: `suite-details` — Details Panel](#7-suite-suite-details--details-panel)
-- [8. Suite: `suite-geochart` — Geochart Plugin](#8-suite-suite-geochart--geochart-plugin)
-- [9. Suite: `suite-swiper` — Swiper Plugin](#9-suite-suite-swiper--swiper-plugin)
-- [10. Suite: `suite-ui` — UI / DOM](#10-suite-suite-ui--ui--dom)
+- [1. Core / Utility](#1-core--utility)
+  - [1.1 Core (EPSG: 3978)](#11-core-epsg-3978)
+  - [1.2 Config Validation](#12-config-validation)
+    - [1.2.1 Esri Dynamic](#121-esri-dynamic)
+    - [1.2.2 Esri Feature](#122-esri-feature)
+    - [1.2.3 Esri Image](#123-esri-image)
+    - [1.2.4 WMS](#124-wms)
+    - [1.2.5 WFS](#125-wfs)
+    - [1.2.6 GeoJSON](#126-geojson)
+    - [1.2.7 CSV](#127-csv)
+    - [1.2.8 OGC Feature](#128-ogc-feature)
+    - [1.2.9 WKB](#129-wkb)
+    - [1.2.10 KML](#1210-kml)
+    - [1.2.11 GeoTIFF](#1211-geotiff)
+    - [1.2.12 Geocore](#1212-geocore)
+    - [1.2.13 Settings Cascade](#1213-settings-cascade)
+  - [1.3 Utilities](#13-utilities)
+    - [1.3.1 UtilitiesCoreTester](#131-utilitiescoretester)
+    - [1.3.2 UtilitiesDateTester](#132-utilitiesdatetester)
+    - [1.3.3 UtilitiesGeoTester](#133-utilitiesgeotester)
+    - [1.3.4 UtilitiesProjectionTester](#134-utilitiesprojectiontester)
+- [2. Layers](#2-layers)
+  - [2.1 Layers (EPSG: 3978 & 3857)](#21-layers-epsg-3978--3857)
+    - [2.1.1 Esri Dynamic — Lifecycle](#211-esri-dynamic--lifecycle)
+    - [2.1.2 Esri Feature — Lifecycle](#212-esri-feature--lifecycle)
+    - [2.1.3 Esri Image — Lifecycle](#213-esri-image--lifecycle)
+    - [2.1.4 WMS — Lifecycle](#214-wms--lifecycle)
+    - [2.1.5 WFS — Lifecycle](#215-wfs--lifecycle)
+    - [2.1.6 GeoJSON — Lifecycle](#216-geojson--lifecycle)
+    - [2.1.7 GeoTIFF — Lifecycle](#217-geotiff--lifecycle)
+    - [2.1.8 CSV — Lifecycle](#218-csv--lifecycle)
+    - [2.1.9 OGC Feature — Lifecycle](#219-ogc-feature--lifecycle)
+    - [2.1.10 WKB — Lifecycle](#2110-wkb--lifecycle)
+    - [2.1.11 KML — Lifecycle](#2111-kml--lifecycle)
+    - [2.1.12 Initial Settings](#2112-initial-settings)
+    - [2.1.13 Domain Fields (sequential)](#2113-domain-fields-sequential)
+    - [2.1.14 Domain Field Query (sequential)](#2114-domain-field-query-sequential)
+- [3. Map](#3-map)
+  - [3.1 Map Functions](#31-map-functions)
+  - [3.2 Map Config](#32-map-config)
+    - [3.2.1 Footer Bar / App Bar / Nav Bar](#321-footer-bar--app-bar--nav-bar)
+    - [3.2.2 Initial View](#322-initial-view)
+    - [3.2.3 Overlay Objects](#323-overlay-objects)
+    - [3.2.4 View Settings](#324-view-settings)
+    - [3.2.5 Overview Map](#325-overview-map)
+    - [3.2.6 Initial Settings — Controls](#326-initial-settings--controls)
+    - [3.2.7 Initial Settings — States](#327-initial-settings--states)
+    - [3.2.8 Initial Settings — Opacity Cascading](#328-initial-settings--opacity-cascading)
+    - [3.2.9 Initial Settings — Cascading (Controls & Visibility)](#329-initial-settings--cascading-controls--visibility)
+    - [3.2.10 Initial Settings — Combo Tests](#3210-initial-settings--combo-tests)
+- [4. Components](#4-components)
+  - [4.1 UI Tests](#41-ui-tests)
+  - [4.2 Details](#42-details)
+- [5. Packages](#5-packages)
+  - [5.1 Geochart](#51-geochart)
+  - [5.2 Swiper](#52-swiper)
 - [Summary](#summary)
 
 ---
 
 ### Summary
 
-| Suite              | Tester(s)                                                                                       | Test Count | Execution                   |
-| ------------------ | ----------------------------------------------------------------------------------------------- | ---------- | --------------------------- |
-| `suite-config`     | `ConfigTester`                                                                                  | 33         | Parallel                    |
-| `suite-core`       | `CoreTester`                                                                                    | 8          | Parallel                    |
-| `suite-utilities`  | `UtilitiesCoreTester`, `UtilitiesDateTester`, `UtilitiesGeoTester`, `UtilitiesProjectionTester` | 49         | Parallel                    |
-| `suite-layer`      | `LayerTester`                                                                                   | 34         | Mixed parallel + sequential |
-| `suite-map-varia`  | `MapTester`                                                                                     | 15         | Complex mixed               |
-| `suite-map-config` | `MapConfigTester`                                                                               | 25         | Fully sequential            |
-| `suite-details`    | `DetailsTester`                                                                                 | 1          | Guarded sequential          |
-| `suite-geochart`   | `GeochartTester`                                                                                | 3          | Guarded sequential          |
-| `suite-swiper`     | `SwiperTester`                                                                                  | 1          | Guarded                     |
-| `suite-ui`         | `UITester`                                                                                      | 1          | Parallel                    |
-| **Total**          |                                                                                                 | **170**    |                             |
+| Group             | Suite              | Tester(s)                                                                                       | Test Count | Execution                   |
+| ----------------- | ------------------ | ----------------------------------------------------------------------------------------------- | ---------- | --------------------------- |
+| 1. Core / Utility | `suite-core`       | `CoreTester`                                                                                    | 5          | Parallel                    |
+| 1. Core / Utility | `suite-config`     | `ConfigTester`                                                                                  | 33         | Parallel                    |
+| 1. Core / Utility | `suite-utilities`  | `UtilitiesCoreTester`, `UtilitiesDateTester`, `UtilitiesGeoTester`, `UtilitiesProjectionTester` | 52         | Parallel                    |
+| 2. Layers         | `suite-layer`      | `LayerTester`                                                                                   | 34         | Mixed parallel + sequential |
+| 3. Map            | `suite-map-varia`  | `MapTester`                                                                                     | 15         | Complex mixed               |
+| 3. Map            | `suite-map-config` | `MapConfigTester`                                                                               | 25         | Fully sequential            |
+| 4. Components     | `suite-ui`         | `UITester`                                                                                      | 1          | Parallel                    |
+| 4. Components     | `suite-details`    | `DetailsTester`                                                                                 | 1          | Guarded sequential          |
+| 5. Packages       | `suite-geochart`   | `GeochartTester`                                                                                | 3          | Guarded sequential          |
+| 5. Packages       | `suite-swiper`     | `SwiperTester`                                                                                  | 1          | Guarded                     |
+| **Total**         |                    |                                                                                                 | **170**    |                             |
 
 ---
 
-## 1. Suite: `suite-config` — Config Validation
+## 1. Core / Utility
 
 [↑ Back to top](#table-of-contents)
 
-**File:** `tests/suites/suite-config.ts` · **Tester:** `ConfigTester` (`tests/testers/config-tester.ts`)
+### 1.1 Core (EPSG: 3978)
+
+[↑ Back to top](#table-of-contents)
+
+**Suite:** `suite-core` · **File:** `tests/suites/suite-core.ts` · **Tester:** `CoreTester` (`tests/testers/core-tester.ts`)
 **Execution:** Fully parallel (`Promise.all`) · **Guard:** None
 
-### 1.1 Esri Dynamic
+| #   | Method                               | Type | Description                                           |
+| --- | ------------------------------------ | ---- | ----------------------------------------------------- |
+| 1   | `testValidateAndPingUrlReachable`    | test | Test validateAndPingUrl with a valid reachable URL... |
+| 2   | `testValidateAndPingUrlInvalid`      | test | Test validateAndPingUrl with an invalid URL format... |
+| 3   | `testValidateAndPingUrlUnreachable`  | test | Test validateAndPingUrl with an unreachable URL...    |
+| 4   | `testValidateAndPingUrlWMS`          | test | Test validateAndPingUrl with a WMS service URL...     |
+| 5   | `testGeometryCollectionLegendStyles` | test | Test GeometryCollection legend style generation...    |
+
+---
+
+### 1.2 Config Validation
+
+[↑ Back to top](#table-of-contents)
+
+**Suite:** `suite-config` · **File:** `tests/suites/suite-config.ts` · **Tester:** `ConfigTester` (`tests/testers/config-tester.ts`)
+**Execution:** Fully parallel (`Promise.all`) · **Guard:** None
+
+#### 1.2.1 Esri Dynamic
 
 [↑ Back to top](#table-of-contents)
 
@@ -98,7 +124,7 @@ This catalog lists every test in the GeoView test suite, organized by suite and 
 | 2   | `testEsriDynamicWithCESI`                  | test      | Test an Esri Dynamic with CESI                                                                    |
 | 3   | `testEsriDynamicBadUrl`                    | testError | Test an EsriDynamic config with a bad url... _(expects `LayerServiceMetadataUnableToFetchError`)_ |
 
-### 1.2 Esri Feature
+#### 1.2.2 Esri Feature
 
 [↑ Back to top](#table-of-contents)
 
@@ -109,7 +135,7 @@ This catalog lists every test in the GeoView test suite, organized by suite and 
 | 6   | `testEsriFeatureWithForestIndustry`        | test      | Test an Esri Feature with Forest Industry                                                         |
 | 7   | `testEsriFeatureBadUrl`                    | testError | Test an EsriFeature config with a bad url... _(expects `LayerServiceMetadataUnableToFetchError`)_ |
 
-### 1.3 Esri Image
+#### 1.2.3 Esri Image
 
 [↑ Back to top](#table-of-contents)
 
@@ -118,7 +144,7 @@ This catalog lists every test in the GeoView test suite, organized by suite and 
 | 8   | `testEsriImageWithElevation` | test      | Test an Esri Image with Elevation                                                               |
 | 9   | `testEsriImageBadUrl`        | testError | Test an EsriImage config with a bad url... _(expects `LayerServiceMetadataUnableToFetchError`)_ |
 
-### 1.4 WMS
+#### 1.2.4 WMS
 
 [↑ Back to top](#table-of-contents)
 
@@ -130,7 +156,7 @@ This catalog lists every test in the GeoView test suite, organized by suite and 
 | 13  | `testWMSLayerWithDatacubeMSINoFullSubLayers`  | test      | Test a WMS with Datacube MSI                                                             |
 | 14  | `testWMSBadUrl`                               | testError | Test a WMS config with a bad url... _(expects `LayerServiceMetadataUnableToFetchError`)_ |
 
-### 1.5 WFS
+#### 1.2.5 WFS
 
 [↑ Back to top](#table-of-contents)
 
@@ -140,7 +166,7 @@ This catalog lists every test in the GeoView test suite, organized by suite and 
 | 16  | `testWFSBadUrl`                           | testError | Test a WFS config with a bad url... _(expects `LayerServiceMetadataUnableToFetchError`)_        |
 | 17  | `testWFSOkayUrlNoCap`                     | testError | Test a WFS config with a okay url but no capabilities... _(expects `LayerNoCapabilitiesError`)_ |
 
-### 1.6 GeoJSON
+#### 1.2.6 GeoJSON
 
 [↑ Back to top](#table-of-contents)
 
@@ -151,7 +177,7 @@ This catalog lists every test in the GeoView test suite, organized by suite and 
 | 20  | `testGeoJSONBadUrlExpectSkip`       | test      | Test a GeoJSON config with a bad url expecting a skip...                                                      |
 | 21  | `testGeoJSONBadUrlExpectError`      | testError | Test a GeoJSON config with a bad url expecting a fail... _(expects `LayerServiceMetadataUnableToFetchError`)_ |
 
-### 1.7 CSV
+#### 1.2.7 CSV
 
 [↑ Back to top](#table-of-contents)
 
@@ -160,7 +186,7 @@ This catalog lists every test in the GeoView test suite, organized by suite and 
 | 22  | `testCSVWithStationList`  | test | Test a CSV with CSV file                             |
 | 23  | `testCSVBadUrlExpectSkip` | test | Test a CSV config with a bad url expecting a skip... |
 
-### 1.8 OGC Feature
+#### 1.2.8 OGC Feature
 
 [↑ Back to top](#table-of-contents)
 
@@ -169,7 +195,7 @@ This catalog lists every test in the GeoView test suite, organized by suite and 
 | 24  | `testOGCFeatureWithPygeoapi` | test      | Test an OGC Feature with Pygeoapi                                                                 |
 | 25  | `testOGCFeatureBadUrl`       | testError | Test an OGC Feature config with a bad url... _(expects `LayerServiceMetadataUnableToFetchError`)_ |
 
-### 1.9 WKB
+#### 1.2.9 WKB
 
 [↑ Back to top](#table-of-contents)
 
@@ -178,7 +204,7 @@ This catalog lists every test in the GeoView test suite, organized by suite and 
 | 26  | `testWKBWithSouthAfrica`  | test      | Test a WKB with South Africa                                                             |
 | 27  | `testWKBBadUrlExpectFail` | testError | Test a WKB config with a bad url... _(expects `LayerServiceMetadataUnableToFetchError`)_ |
 
-### 1.10 KML
+#### 1.2.10 KML
 
 [↑ Back to top](#table-of-contents)
 
@@ -187,7 +213,7 @@ This catalog lists every test in the GeoView test suite, organized by suite and 
 | 28  | `testKMLWithTornado`      | test | Test a KML with Tornado file                         |
 | 29  | `testKMLBadUrlExpectSkip` | test | Test a KML config with a bad url expecting a skip... |
 
-### 1.11 GeoTIFF
+#### 1.2.11 GeoTIFF
 
 [↑ Back to top](#table-of-contents)
 
@@ -196,7 +222,7 @@ This catalog lists every test in the GeoView test suite, organized by suite and 
 | 30  | `testGeoTIFFWithVegetation`   | test | Test a GeoTIFF with Vegetation                           |
 | 31  | `testGeoTIFFBadUrlExpectSkip` | test | Test a GeoTIFF config with a bad url expecting a skip... |
 
-### 1.12 Geocore
+#### 1.2.12 Geocore
 
 [↑ Back to top](#table-of-contents)
 
@@ -204,7 +230,7 @@ This catalog lists every test in the GeoView test suite, organized by suite and 
 | --- | ----------------------------------- | ---- | -------------------------- |
 | 32  | `testStandaloneGeocoreWithAirborne` | test | Test Geocore with Airborne |
 
-### 1.13 Settings Cascade
+#### 1.2.13 Settings Cascade
 
 [↑ Back to top](#table-of-contents)
 
@@ -214,34 +240,14 @@ This catalog lists every test in the GeoView test suite, organized by suite and 
 
 ---
 
-## 2. Suite: `suite-core` — Core Framework
+### 1.3 Utilities
 
 [↑ Back to top](#table-of-contents)
 
-**File:** `tests/suites/suite-core.ts` · **Tester:** `CoreTester` (`tests/testers/core-tester.ts`)
-**Execution:** Fully parallel (`Promise.all`) · **Guard:** None
-
-| #   | Method                               | Type | Description                                           |
-| --- | ------------------------------------ | ---- | ----------------------------------------------------- |
-| 1   | `testValidateAndPingUrlReachable`    | test | Test validateAndPingUrl with a valid reachable URL... |
-| 2   | `testValidateAndPingUrlInvalid`      | test | Test validateAndPingUrl with an invalid URL format... |
-| 3   | `testValidateAndPingUrlUnreachable`  | test | Test validateAndPingUrl with an unreachable URL...    |
-| 4   | `testValidateAndPingUrlWMS`          | test | Test validateAndPingUrl with a WMS service URL...     |
-| 5   | `testGeometryCollectionLegendStyles` | test | Test GeometryCollection legend style generation...    |
-| 6   | `testDatesFromEpoch`                 | test | Test Dates from Epoch Timestamps and Dates...         |
-| 7   | `testDatesFromUS`                    | test | Test Dates from US Standards...                       |
-| 8   | `testDatesFromCustom`                | test | Test Dates from Custom Formats...                     |
-
----
-
-## 3. Suite: `suite-utilities` — Utility Functions
-
-[↑ Back to top](#table-of-contents)
-
-**File:** `tests/suites/suite-utilities.ts` · **Guard:** None
+**Suite:** `suite-utilities` · **File:** `tests/suites/suite-utilities.ts` · **Guard:** None
 **Execution:** Fully parallel (`Promise.all`)
 
-### 3.1 UtilitiesCoreTester
+#### 1.3.1 UtilitiesCoreTester
 
 [↑ Back to top](#table-of-contents)
 
@@ -273,7 +279,7 @@ This catalog lists every test in the GeoView test suite, organized by suite and 
 | 22  | `testEnhanceLinksAccessibility`   | test | Test enhanceLinksAccessibility() adds screen reader text...    |
 | 23  | `testGetLocalizedMessage`         | test | Test getLocalizedMessage() returns translated strings...       |
 
-### 3.2 UtilitiesDateTester
+#### 1.3.2 UtilitiesDateTester
 
 [↑ Back to top](#table-of-contents)
 
@@ -290,8 +296,11 @@ This catalog lists every test in the GeoView test suite, organized by suite and 
 | 7   | `testCreateRangeOGC`        | test | Test DateMgt.createRangeOGC() parses OGC time values...   |
 | 8   | `testDateConstants`         | test | Test DateMgt static constants are defined...              |
 | 9   | `testParseDateToDayjs`      | test | Test DateMgt.parseDateToDayjs() parses date inputs...     |
+| 10  | `testDatesEpochTimestamps`  | test | Test Dates from Epoch Timestamps and Dates...             |
+| 11  | `testDatesUSStandard`       | test | Test Dates from US Standards...                           |
+| 12  | `testDatesSpecialFormats`   | test | Test Dates from Custom Formats...                         |
 
-### 3.3 UtilitiesGeoTester
+#### 1.3.3 UtilitiesGeoTester
 
 [↑ Back to top](#table-of-contents)
 
@@ -311,7 +320,7 @@ This catalog lists every test in the GeoView test suite, organized by suite and 
 | 10  | `testEnsureServiceRequestUrl` | test | Test GeoUtilities.ensureServiceRequestUrl() normalizes params...   |
 | 11  | `testGetExtentIntersection`   | test | Test GeoUtilities.getExtentIntersection() computes intersection... |
 
-### 3.4 UtilitiesProjectionTester
+#### 1.3.4 UtilitiesProjectionTester
 
 [↑ Back to top](#table-of-contents)
 
@@ -328,14 +337,20 @@ This catalog lists every test in the GeoView test suite, organized by suite and 
 
 ---
 
-## 4. Suite: `suite-layer` — Layer Lifecycle
+## 2. Layers
 
 [↑ Back to top](#table-of-contents)
 
-**File:** `tests/suites/suite-layer.ts` · **Tester:** `LayerTester` (`tests/testers/layer-tester.ts`)
+### 2.1 Layers (EPSG: 3978 & 3857)
+
+[↑ Back to top](#table-of-contents)
+
+**Suite:** `suite-layer` · **File:** `tests/suites/suite-layer.ts` · **Tester:** `LayerTester` (`tests/testers/layer-tester.ts`)
 **Execution:** Mixed — parallel for add/remove tests, then sequential for query tests (they change zoom level) · **Guard:** None
 
-### 4.1 Esri Dynamic — Lifecycle
+> **Note:** This suite runs on two separate maps — one with EPSG: 3978 and one with EPSG: 3857 — executing the same tests under both projections.
+
+#### 2.1.1 Esri Dynamic — Lifecycle
 
 [↑ Back to top](#table-of-contents)
 
@@ -345,7 +360,7 @@ This catalog lists every test in the GeoView test suite, organized by suite and 
 | 2   | `testAddEsriDynamicWithRasterLayersViaGeocore` | test      | Test Adding Esri Dynamic with Raster Layers via Geocore...                                    |
 | 3   | `testAddEsriDynamicBadUrl`                     | testError | Test Adding Esri Dynamic with bad url... _(expects `LayerServiceMetadataUnableToFetchError`)_ |
 
-### 4.2 Esri Feature — Lifecycle
+#### 2.1.2 Esri Feature — Lifecycle
 
 [↑ Back to top](#table-of-contents)
 
@@ -355,7 +370,7 @@ This catalog lists every test in the GeoView test suite, organized by suite and 
 | 5   | `testAddEsriFeatureBadUrl`          | testError | Test Adding Esri Feature with bad url... _(expects `LayerServiceMetadataUnableToFetchError`)_ |
 | 6   | `testAddEsriFeatureInvalidGeometry` | test      | Test Adding 'Yukon Low head' on map...                                                        |
 
-### 4.3 Esri Image — Lifecycle
+#### 2.1.3 Esri Image — Lifecycle
 
 [↑ Back to top](#table-of-contents)
 
@@ -365,7 +380,7 @@ This catalog lists every test in the GeoView test suite, organized by suite and 
 | 8   | `testAddEsriImageWithUSA`       | test      | Test Adding Esri Image USA on map...                                                        |
 | 9   | `testAddEsriImageBadUrl`        | testError | Test Adding Esri Image with bad url... _(expects `LayerServiceMetadataUnableToFetchError`)_ |
 
-### 4.4 WMS — Lifecycle
+#### 2.1.4 WMS — Lifecycle
 
 [↑ Back to top](#table-of-contents)
 
@@ -376,7 +391,7 @@ This catalog lists every test in the GeoView test suite, organized by suite and 
 | 12  | `testAddWMSLayerWithDatacubeRingOfFire` | test      | Test Adding WMS Datacube Ring of Fire XML Halifax on map...                          |
 | 13  | `testAddWMSBadUrl`                      | testError | Test Adding WMS with bad url... _(expects `LayerServiceMetadataUnableToFetchError`)_ |
 
-### 4.5 WFS — Lifecycle
+#### 2.1.5 WFS — Lifecycle
 
 [↑ Back to top](#table-of-contents)
 
@@ -386,7 +401,7 @@ This catalog lists every test in the GeoView test suite, organized by suite and 
 | 15  | `testAddWFSBadUrl`                               | testError | Test Adding WFS with bad url... _(expects `LayerServiceMetadataUnableToFetchError`)_    |
 | 16  | `testAddWFSOkayUrlNoCap`                         | testError | Test Adding WFS with okay url no capabilities... _(expects `LayerNoCapabilitiesError`)_ |
 
-### 4.6 GeoJSON — Lifecycle
+#### 2.1.6 GeoJSON — Lifecycle
 
 [↑ Back to top](#table-of-contents)
 
@@ -396,7 +411,7 @@ This catalog lists every test in the GeoView test suite, organized by suite and 
 | 18  | `testAddGeoJSONWithGeometryCollection` | test      | Test Adding GeoJSON GeometryCollection layer on map...                  |
 | 19  | `testAddGeoJSONBadUrl`                 | testError | Test Adding GeoJSON with bad url... _(expects `LayerStatusErrorError`)_ |
 
-### 4.7 GeoTIFF — Lifecycle
+#### 2.1.7 GeoTIFF — Lifecycle
 
 [↑ Back to top](#table-of-contents)
 
@@ -405,7 +420,7 @@ This catalog lists every test in the GeoView test suite, organized by suite and 
 | 20  | `testAddGeotiffLayerWithDatacubeVegetation` | test      | Test Adding GeoTIFF Datacube Vegetation on map...                       |
 | 21  | `testAddGeoTIFFWithBadUrl`                  | testError | Test Adding GeoTIFF with bad url... _(expects `LayerStatusErrorError`)_ |
 
-### 4.8 CSV — Lifecycle
+#### 2.1.8 CSV — Lifecycle
 
 [↑ Back to top](#table-of-contents)
 
@@ -414,7 +429,7 @@ This catalog lists every test in the GeoView test suite, organized by suite and 
 | 22  | `testAddCSVWithStationList` | test      | Test Adding a CSV with Station List layer on map...                 |
 | 23  | `testAddCSVWithBadUrl`      | testError | Test Adding CSV with bad url... _(expects `LayerStatusErrorError`)_ |
 
-### 4.9 OGC Feature — Lifecycle
+#### 2.1.9 OGC Feature — Lifecycle
 
 [↑ Back to top](#table-of-contents)
 
@@ -423,7 +438,7 @@ This catalog lists every test in the GeoView test suite, organized by suite and 
 | 24  | `testAddOGCFeatureWithPygeoapi` | test      | Test Adding an OGC Feature with Pygeoapi layer on map...                                     |
 | 25  | `testAddOGCFeatureWithBadUrl`   | testError | Test Adding OGC Feature with bad url... _(expects `LayerServiceMetadataUnableToFetchError`)_ |
 
-### 4.10 WKB — Lifecycle
+#### 2.1.10 WKB — Lifecycle
 
 [↑ Back to top](#table-of-contents)
 
@@ -432,7 +447,7 @@ This catalog lists every test in the GeoView test suite, organized by suite and 
 | 26  | `testAddWKBWithSouthAfrica` | test      | Test Adding a WKB with South Africa layer on map...                 |
 | 27  | `testAddWKBWithBadUrl`      | testError | Test Adding WKB with bad url... _(expects `LayerStatusErrorError`)_ |
 
-### 4.11 KML — Lifecycle
+#### 2.1.11 KML — Lifecycle
 
 [↑ Back to top](#table-of-contents)
 
@@ -441,7 +456,7 @@ This catalog lists every test in the GeoView test suite, organized by suite and 
 | 28  | `testAddKMLWithTornado` | test      | Test Adding a KML with Tornado layer on map...                      |
 | 29  | `testAddKMLWithBadUrl`  | testError | Test Adding KML with bad url... _(expects `LayerStatusErrorError`)_ |
 
-### 4.12 Initial Settings
+#### 2.1.12 Initial Settings
 
 [↑ Back to top](#table-of-contents)
 
@@ -449,7 +464,7 @@ This catalog lists every test in the GeoView test suite, organized by suite and 
 | --- | ---------------------------- | ---- | ----------------------------- |
 | 30  | `testInitialSettingsCascade` | test | Test initial settings cascade |
 
-### 4.13 Domain Fields (sequential)
+#### 2.1.13 Domain Fields (sequential)
 
 [↑ Back to top](#table-of-contents)
 
@@ -458,7 +473,7 @@ This catalog lists every test in the GeoView test suite, organized by suite and 
 | 31  | `testAddEsriDynamicWithDomainField` | test | Test Adding Esri Dynamic Water Network and checking domain field... |
 | 32  | `testAddEsriFeatureWithDomainField` | test | Test Adding Esri Feature Water Network and checking domain field... |
 
-### 4.14 Domain Field Query (sequential)
+#### 2.1.14 Domain Field Query (sequential)
 
 [↑ Back to top](#table-of-contents)
 
@@ -469,11 +484,15 @@ This catalog lists every test in the GeoView test suite, organized by suite and 
 
 ---
 
-## 5. Suite: `suite-map-varia` — Map Interactions
+## 3. Map
 
 [↑ Back to top](#table-of-contents)
 
-**File:** `tests/suites/suite-map-varia.ts` · **Tester:** `MapTester` (`tests/testers/map-tester.ts`)
+### 3.1 Map Functions
+
+[↑ Back to top](#table-of-contents)
+
+**Suite:** `suite-map-varia` · **File:** `tests/suites/suite-map-varia.ts` · **Tester:** `MapTester` (`tests/testers/map-tester.ts`)
 **Execution:** Complex mixed — sequential `await` for state-modifying tests · **Guard:** None
 
 | #   | Method                                 | Type | Description                                                            |
@@ -496,14 +515,14 @@ This catalog lists every test in the GeoView test suite, organized by suite and 
 
 ---
 
-## 6. Suite: `suite-map-config` — Map Config Overrides
+### 3.2 Map Config
 
 [↑ Back to top](#table-of-contents)
 
-**File:** `tests/suites/suite-map-config.ts` · **Tester:** `MapConfigTester` (`tests/testers/map-config-tester.ts`)
+**Suite:** `suite-map-config` · **File:** `tests/suites/suite-map-config.ts` · **Tester:** `MapConfigTester` (`tests/testers/map-config-tester.ts`)
 **Execution:** Fully sequential (`await` each test) — each test creates/destroys a fresh map · **Guard:** None
 
-### 6.1 Footer Bar / App Bar / Nav Bar
+#### 3.2.1 Footer Bar / App Bar / Nav Bar
 
 [↑ Back to top](#table-of-contents)
 
@@ -516,7 +535,7 @@ This catalog lists every test in the GeoView test suite, organized by suite and 
 | 5   | `testNoNavBarHasDefaults`                 | test | Test no navBar config value creates default navigation controls                                                         |
 | 6   | `testEmptyNavBarHasZoomRotate`            | test | Test navBar with empty array has only zoom and rotate                                                                   |
 
-### 6.2 Initial View
+#### 3.2.2 Initial View
 
 [↑ Back to top](#table-of-contents)
 
@@ -524,7 +543,7 @@ This catalog lists every test in the GeoView test suite, organized by suite and 
 | --- | ---------------------------------- | ---- | --------------------------------------------------------------- |
 | 7   | `testInitialViewLayerIdsSetExtent` | test | Test initial view with layerIds sets map extent to layer extent |
 
-### 6.3 Overlay Objects
+#### 3.2.3 Overlay Objects
 
 [↑ Back to top](#table-of-contents)
 
@@ -532,7 +551,7 @@ This catalog lists every test in the GeoView test suite, organized by suite and 
 | --- | -------------------------------- | ---- | ------------------------------------------------- |
 | 8   | `testOverlayObjectsPointMarkers` | test | Test overlayObjects with pointMarkers are created |
 
-### 6.4 View Settings
+#### 3.2.4 View Settings
 
 [↑ Back to top](#table-of-contents)
 
@@ -540,7 +559,7 @@ This catalog lists every test in the GeoView test suite, organized by suite and 
 | --- | --------------------------------- | ---- | ------------------------------------------------- |
 | 9   | `testViewSettingsZoomConstraints` | test | Test viewSettings minZoom and maxZoom constraints |
 
-### 6.5 Overview Map
+#### 3.2.5 Overview Map
 
 [↑ Back to top](#table-of-contents)
 
@@ -551,7 +570,7 @@ This catalog lists every test in the GeoView test suite, organized by suite and 
 | 12  | `testOverviewMapHideOnZoom`                 | test | Test overview map hideOnZoom hides at low zoom, shows above threshold |
 | 13  | `testOverviewMapHideOnZoomWithReprojection` | test | Test overview map hideOnZoom with reprojection preserves visibility   |
 
-### 6.6 Initial Settings — Controls
+#### 3.2.6 Initial Settings — Controls
 
 [↑ Back to top](#table-of-contents)
 
@@ -559,7 +578,7 @@ This catalog lists every test in the GeoView test suite, organized by suite and 
 | --- | ------------------------------------- | ---- | -------------------------------------------- |
 | 14  | `testInitialSettingsControlsAllFalse` | test | Test initialSettings all controls = false... |
 
-### 6.7 Initial Settings — States
+#### 3.2.7 Initial Settings — States
 
 [↑ Back to top](#table-of-contents)
 
@@ -570,7 +589,7 @@ This catalog lists every test in the GeoView test suite, organized by suite and 
 | 17  | `testInitialSettingsStateQueryableFalse` | test | Test initialSettings states.queryable = false... |
 | 18  | `testInitialSettingsStateHoverableFalse` | test | Test initialSettings states.hoverable = false... |
 
-### 6.8 Initial Settings — Opacity Cascading
+#### 3.2.8 Initial Settings — Opacity Cascading
 
 [↑ Back to top](#table-of-contents)
 
@@ -580,7 +599,7 @@ This catalog lists every test in the GeoView test suite, organized by suite and 
 | 20  | `testInitialSettingsOpacityCascadingChildBelowParent`    | test | Test opacity cascading: child (0.3) below parent (0.5) = effective 0.3...     |
 | 21  | `testInitialSettingsOpacityCascadingRuntimeParentChange` | test | Test opacity cascading: runtime parent change cascades to children...         |
 
-### 6.9 Initial Settings — Cascading (Controls & Visibility)
+#### 3.2.9 Initial Settings — Cascading (Controls & Visibility)
 
 [↑ Back to top](#table-of-contents)
 
@@ -589,7 +608,7 @@ This catalog lists every test in the GeoView test suite, organized by suite and 
 | 22  | `testInitialSettingsControlRemoveCascadingToDescendants` | test | Test controls.remove cascading: parent false cascades unless child explicitly overrides with true...             |
 | 23  | `testInitialSettingsStateVisibleCascadingToDescendants`  | test | Test states.visible cascading: parent false hides all descendants on map, children keep visible true in store... |
 
-### 6.10 Initial Settings — Combo Tests
+#### 3.2.10 Initial Settings — Combo Tests
 
 [↑ Back to top](#table-of-contents)
 
@@ -600,11 +619,28 @@ This catalog lists every test in the GeoView test suite, organized by suite and 
 
 ---
 
-## 7. Suite: `suite-details` — Details Panel
+## 4. Components
 
 [↑ Back to top](#table-of-contents)
 
-**File:** `tests/suites/suite-details.ts` · **Tester:** `DetailsTester` (`tests/testers/details-tester.ts`)
+### 4.1 UI Tests
+
+[↑ Back to top](#table-of-contents)
+
+**Suite:** `suite-ui` · **File:** `tests/suites/suite-ui.ts` · **Tester:** `UITester` (`tests/testers/ui-tester.ts`)
+**Execution:** Fully parallel (`Promise.all`) · **Guard:** None
+
+| #   | Method                           | Type | Description                                     |
+| --- | -------------------------------- | ---- | ----------------------------------------------- |
+| 1   | `testGuideDetailsPanelTopAnchor` | test | Test Details Panel - Select and Find Top Anchor |
+
+---
+
+### 4.2 Details
+
+[↑ Back to top](#table-of-contents)
+
+**Suite:** `suite-details` · **File:** `tests/suites/suite-details.ts` · **Tester:** `DetailsTester` (`tests/testers/details-tester.ts`)
 **Execution:** Sequential + parallel · **Guard:** `details` must be in `footerBar.tabs.core`
 
 | #   | Method               | Type | Description                             |
@@ -613,11 +649,15 @@ This catalog lists every test in the GeoView test suite, organized by suite and 
 
 ---
 
-## 8. Suite: `suite-geochart` — Geochart Plugin
+## 5. Packages
 
 [↑ Back to top](#table-of-contents)
 
-**File:** `tests/suites/suite-geochart.ts` · **Tester:** `GeochartTester` (`tests/testers/geochart-tester.ts`)
+### 5.1 Geochart
+
+[↑ Back to top](#table-of-contents)
+
+**Suite:** `suite-geochart` · **File:** `tests/suites/suite-geochart.ts` · **Tester:** `GeochartTester` (`tests/testers/geochart-tester.ts`)
 **Execution:** Sequential + parallel · **Guard:** `geochart` must be in `footerBar.tabs.core`
 
 | #   | Method                                       | Type | Description                              |
@@ -628,26 +668,13 @@ This catalog lists every test in the GeoView test suite, organized by suite and 
 
 ---
 
-## 9. Suite: `suite-swiper` — Swiper Plugin
+### 5.2 Swiper
 
 [↑ Back to top](#table-of-contents)
 
-**File:** `tests/suites/suite-swiper.ts` · **Tester:** `SwiperTester` (`tests/testers/swiper-tester.ts`)
+**Suite:** `suite-swiper` · **File:** `tests/suites/suite-swiper.ts` · **Tester:** `SwiperTester` (`tests/testers/swiper-tester.ts`)
 **Execution:** Single test · **Guard:** `swiper` must be in `corePackages` and swiper controller must exist
 
 | #   | Method                | Type | Description                                                                              |
 | --- | --------------------- | ---- | ---------------------------------------------------------------------------------------- |
 | 1   | `testSwiperLifecycle` | test | Test Swiper lifecycle: activate, deactivate, multi-layer, orientation, deactivate all... |
-
----
-
-## 10. Suite: `suite-ui` — UI / DOM
-
-[↑ Back to top](#table-of-contents)
-
-**File:** `tests/suites/suite-ui.ts` · **Tester:** `UITester` (`tests/testers/ui-tester.ts`)
-**Execution:** Fully parallel (`Promise.all`) · **Guard:** None
-
-| #   | Method                           | Type | Description                                     |
-| --- | -------------------------------- | ---- | ----------------------------------------------- |
-| 1   | `testGuideDetailsPanelTopAnchor` | test | Test Details Panel - Select and Find Top Anchor |

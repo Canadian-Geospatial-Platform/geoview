@@ -50,11 +50,6 @@ export class GVTestSuiteCore extends GVAbstractTestSuite {
    * @returns A promise that resolves when tests are completed
    */
   protected override onLaunchTestSuite(): Promise<unknown> {
-    // Test Dates
-    const pDatesEpoch = this.#coreTester.testDatesEpochTimestamps();
-    const pDatesUSStandard = this.#coreTester.testDatesUSStandard();
-    const pDatesCustomFormat = this.#coreTester.testDatesSpecialFormats();
-
     // Test validateAndPingUrl
     const pPingValidReachable = this.#coreTester.testValidateAndPingUrlValidReachable();
     const pPingInvalidFormat = this.#coreTester.testValidateAndPingUrlInvalidFormat();
@@ -63,15 +58,6 @@ export class GVTestSuiteCore extends GVAbstractTestSuite {
     const pGeometryCollectionLegendStyles = this.#coreTester.testGeometryCollectionLegendStyles();
 
     // Resolve when all
-    return Promise.all([
-      pDatesEpoch,
-      pDatesUSStandard,
-      pDatesCustomFormat,
-      pPingValidReachable,
-      pPingInvalidFormat,
-      pPingUnreachable,
-      pPingWmsService,
-      pGeometryCollectionLegendStyles,
-    ]);
+    return Promise.all([pPingValidReachable, pPingInvalidFormat, pPingUnreachable, pPingWmsService, pGeometryCollectionLegendStyles]);
   }
 }

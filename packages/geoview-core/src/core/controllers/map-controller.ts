@@ -96,7 +96,7 @@ import {
 } from '@/core/stores/states/feature-info-state';
 import { DEFAULT_OL_FITOPTIONS, OL_ZOOM_DURATION, OL_ZOOM_PADDING, TIMEOUT } from '@/core/utils/constant';
 import { DateMgt, type TimeDimension } from '@/core/utils/date-mgt';
-import { delay, doTimeout, isValidUUID } from '@/core/utils/utilities';
+import { delay, doTimeout, isValidUUID, whenThisThen } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { logger } from '@/core/utils/logger';
 import type { MapProjectionChangedDelegate, MapProjectionChangedEvent, MapViewer } from '@/geo/map/map-viewer';
@@ -915,6 +915,18 @@ export class MapController extends AbstractMapViewerController {
   setOverviewMapVisibility(visible: boolean): void {
     const olMap = this.getMapViewer().map;
     this.getMapViewer().basemap.setOverviewMapControlVisibility(olMap, visible);
+  }
+
+  /**
+   * Waits until the overview map visibility matches the expected state.
+   *
+   * @param expectedVisible - The expected visibility state to wait for
+   * @param timeoutMs - Optional maximum time in milliseconds to wait (defaults to 5000)
+   * @returns A promise that resolves when the visibility matches the expected state
+   */
+  async waitOverviewMapVisibility(expectedVisible: boolean, timeoutMs = 5000): Promise<void> {
+    // prettier-ignore
+    await whenThisThen(() => this.getOverviewMapVisibility() === expectedVisible, timeoutMs);
   }
 
   /**

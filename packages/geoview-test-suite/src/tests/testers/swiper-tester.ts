@@ -1,6 +1,6 @@
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
-import { delay, whenThisThen } from 'geoview-core/core/utils/utilities';
+import { whenThisThen } from 'geoview-core/core/utils/utilities';
 import { getStoreSwiperLayerPaths, getStoreSwiperOrientation } from 'geoview-core/core/stores/states/swiper-state';
 
 /**
@@ -56,7 +56,6 @@ export class SwiperTester extends GVAbstractTester {
         // Step 4: Activate swiper for WMS layer
         test.addStep('Activating swiper for WMS layer...');
         this.getControllersRegistry().swiperController!.addLayerPath(SwiperTester.SWIPER_WMS_LAYER_PATH);
-        await delay(500);
 
         // Step 5: Assert swiper is active with 1 layer in vertical mode
         test.addStep('Verifying swiper is active with 1 layer...');
@@ -68,7 +67,6 @@ export class SwiperTester extends GVAbstractTester {
         // Step 6: Remove the WMS layer from swiper
         test.addStep('Removing WMS layer from swiper...');
         this.getControllersRegistry().swiperController!.removeLayerPath(SwiperTester.SWIPER_WMS_LAYER_PATH);
-        await delay(500);
 
         // Step 7: Assert swiper has no layers
         test.addStep('Verifying swiper has no active layers after removal...');
@@ -78,11 +76,9 @@ export class SwiperTester extends GVAbstractTester {
         // Step 8: Add WMS layer back and add GeoJSON layer
         test.addStep('Adding WMS layer back to swiper...');
         this.getControllersRegistry().swiperController!.addLayerPath(SwiperTester.SWIPER_WMS_LAYER_PATH);
-        await delay(300);
 
         test.addStep('Adding GeoJSON layer to swiper...');
         this.getControllersRegistry().swiperController!.addLayerPath(SwiperTester.SWIPER_GEOJSON_LAYER_PATH);
-        await delay(500);
 
         // Step 9: Assert swiper is active with 2 layers
         test.addStep('Verifying swiper is active with 2 layers...');
@@ -94,7 +90,6 @@ export class SwiperTester extends GVAbstractTester {
         // Step 10: Set orientation to horizontal
         test.addStep('Setting swiper orientation to horizontal...');
         this.getControllersRegistry().swiperController!.setOrientation('horizontal');
-        await delay(300);
 
         // Step 11: Assert orientation changed
         test.addStep('Verifying orientation is now horizontal...');
@@ -103,7 +98,6 @@ export class SwiperTester extends GVAbstractTester {
         // Step 12: Set orientation back to vertical
         test.addStep('Setting swiper orientation back to vertical...');
         this.getControllersRegistry().swiperController!.setOrientation('vertical');
-        await delay(300);
 
         // Step 13: Assert orientation is vertical again
         test.addStep('Verifying orientation is back to vertical...');
@@ -112,7 +106,6 @@ export class SwiperTester extends GVAbstractTester {
         // Step 14: Deactivate all layers
         test.addStep('Deactivating all layers from swiper...');
         this.getControllersRegistry().swiperController!.removeAllLayerPaths();
-        await delay(500);
 
         // Step 15: Assert swiper has no layers
         test.addStep('Verifying swiper has no active layers after deactivate all...');

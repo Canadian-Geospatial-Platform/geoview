@@ -101,6 +101,9 @@ export class GVTestSuiteUtilities extends GVAbstractTestSuite {
     const pCreateRangeOGC = this.#dateTester.testCreateRangeOGC();
     const pDateConstants = this.#dateTester.testDateConstants();
     const pParseDateToDayjs = this.#dateTester.testParseDateToDayjs();
+    const pDatesEpochTimestamps = this.#dateTester.testDatesEpochTimestamps();
+    const pDatesUSStandard = this.#dateTester.testDatesUSStandard();
+    const pDatesSpecialFormats = this.#dateTester.testDatesSpecialFormats();
 
     // Geo tester tests
     const pGetBaseUrl = this.#geoTester.testGetBaseUrl();
@@ -158,6 +161,9 @@ export class GVTestSuiteUtilities extends GVAbstractTestSuite {
       pCreateRangeOGC,
       pDateConstants,
       pParseDateToDayjs,
+      pDatesEpochTimestamps,
+      pDatesUSStandard,
+      pDatesSpecialFormats,
       // Geo
       pGetBaseUrl,
       pGetMapServerUrl,
