@@ -10,8 +10,12 @@ import type { DrawEvent, GeometryFunction, SketchCoordType } from 'ol/interactio
 import { createBox } from 'ol/interaction/Draw';
 import Overlay from 'ol/Overlay';
 import { getArea, getLength } from 'ol/sphere';
-import { Text, Fill, Icon as OLIcon, Stroke, Style } from 'ol/style';
+import { Fill, Stroke, Style } from 'ol/style';
 import type { StyleLike } from 'ol/style/Style';
+
+import { DrawerIcon } from '@/geo/style/drawer-icon';
+import { DrawerText } from '@/geo/style/drawer-text';
+import { DrawerStyle } from '@/geo/style/drawer-style';
 
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
@@ -809,70 +813,62 @@ export class DrawerController extends AbstractMapViewerController {
       }
 
       // Apply the new style
-      let featureStyle;
-      let geomType: string;
-      const isTextFeature = selectedFeature.get('text') !== undefined;
+      const isTextFeature = DrawerController.#isTextFeature(selectedFeature);
 
       if (selectedFeature.getGeometry() instanceof Point && !isTextFeature) {
-        geomType = 'Point';
-        featureStyle = new Style({
-          image: new OLIcon({
-            src: getStoreDrawerIconSrc(mapId),
-            anchor: [0.5, 1],
-            anchorXUnits: 'fraction',
-            anchorYUnits: 'fraction',
-            scale: (newStyle.iconSize || 24) / 24,
-          }),
-        });
+        const currentStyle = selectedFeature.getStyle() as DrawerStyle;
+        const drawerIcon = currentStyle.getDrawerIcon();
+
+        if (drawerIcon) {
+          // Mutate icon properties
+          drawerIcon.setStrokeColor(newStyle.strokeColor);
+          drawerIcon.setStrokeWidth(newStyle.strokeWidth);
+          drawerIcon.setFillColor(newStyle.fillColor);
+          drawerIcon.setScale((newStyle.iconSize || DrawerIcon.BASE_ICON_SIZE) / DrawerIcon.BASE_ICON_SIZE);
+
+          // Regenerate the icon with the new colors
+          drawerIcon.setSrc(getStoreDrawerIconSrc(mapId));
+
+          selectedFeature.changed();
+        }
       } else if (isTextFeature) {
-        geomType = 'Text';
+        const currentStyle = selectedFeature.getStyle() as DrawerStyle;
+        const drawerText = currentStyle.getDrawerText();
 
-        // New style values from the store
-        let currentTextSize = newStyle.textSize;
-        let currentRotation = newStyle.textRotation;
+        if (drawerText) {
+          // Mutate text properties
+          drawerText.setText(newStyle.text);
+          drawerText.setSize(newStyle.textSize!);
+          drawerText.setBold(newStyle.textBold!);
+          drawerText.setItalic(newStyle.textItalic!);
+          drawerText.setRotation(newStyle.textRotation);
+          drawerText.setFontFamily(newStyle.textFont!);
 
-        // Styles from the feature properties
-        const featureSize = selectedFeature.get('textSize') as number;
-        const featureRotation = selectedFeature.get('textRotation') as number;
+          // Mutate Fill/Stroke (OL objects)
+          drawerText.getFill()?.setColor(newStyle.textColor!);
+          const stroke = drawerText.getStroke();
+          if (stroke) {
+            stroke.setColor(newStyle.textHaloColor!);
+            stroke.setWidth(newStyle.textHaloWidth);
+          }
 
-        // Size is different from store, so the handles were used. Update the style and properties
-        if (newStyle.textSize && Math.abs(newStyle.textSize - featureSize) < DrawerController.STYLE_TOLERANCE) {
-          currentTextSize = featureSize;
+          selectedFeature.changed();
         }
-
-        // Rotation is different from the store, so the handle was used. Update the style and properties
-        // GV Currently the only way to change the rotation is with the handle, but if a UI element is added, then this will be needed
-        if (newStyle.textRotation && Math.abs(newStyle.textRotation - featureRotation) < DrawerController.STYLE_TOLERANCE) {
-          currentRotation = featureRotation;
-        }
-
-        featureStyle = new Style({
-          text: new Text({
-            text: newStyle.text || selectedFeature.get('text'),
-            fill: new Fill({ color: newStyle.textColor }),
-            stroke: new Stroke({ color: newStyle.textHaloColor, width: newStyle.textHaloWidth }),
-            font: `${newStyle.textItalic ? 'italic ' : ''}${newStyle.textBold ? 'bold ' : ''}${currentTextSize}px ${newStyle.textFont}`,
-            rotation: currentRotation,
-          }),
-        });
       } else {
-        geomType = 'Other'; // Just something to differentiate from Point & Text. It will be skipped
-        featureStyle = new Style({
-          stroke: new Stroke({
-            color: newStyle.strokeColor,
-            width: newStyle.strokeWidth,
-          }),
-          fill: new Fill({
-            color: newStyle.fillColor,
-          }),
-        });
+        const currentStyle = selectedFeature.getStyle() as DrawerStyle;
+        const stroke = currentStyle.getStroke();
+        const fill = currentStyle.getFill();
+
+        if (stroke) {
+          stroke.setColor(newStyle.strokeColor);
+          stroke.setWidth(newStyle.strokeWidth);
+        }
+        if (fill) {
+          fill.setColor(newStyle.fillColor);
+        }
+
+        selectedFeature.changed();
       }
-
-      // Update properties for point and other geometries
-      DrawerController.#setFeatureProperties(selectedFeature, geomType, newStyle, getStoreDrawerIconSrc(mapId));
-
-      // Set the new feature properties and style
-      selectedFeature.setStyle(featureStyle);
     }
   }
 
@@ -1052,7 +1048,7 @@ export class DrawerController extends AbstractMapViewerController {
       type: 'FeatureCollection',
       features: features
         .map((feature) => {
-          const olStyle = feature.getStyle() as Style;
+          const olStyle = feature.getStyle() as DrawerStyle;
           const geometry = feature.getGeometry();
 
           // Extract style properties from feature style
@@ -1121,33 +1117,39 @@ export class DrawerController extends AbstractMapViewerController {
           if (olGeometry instanceof Point) {
             if (styleProps?.text !== undefined) {
               // Handle text styling
-              featureStyle = new Style({
-                text: new Text({
+              featureStyle = new DrawerStyle({
+                text: new DrawerText({
                   text: styleProps.text,
                   fill: new Fill({ color: styleProps.textColor }),
                   stroke: new Stroke({
                     color: styleProps.textHaloColor,
                     width: styleProps.textHaloWidth,
                   }),
-                  font: `${styleProps.textItalic ? 'italic ' : ''}${styleProps.textBold ? 'bold ' : ''}${styleProps.textSize}px ${styleProps.textFont}`,
                   rotation: styleProps.textRotation,
+                  italic: styleProps.textItalic,
+                  bold: styleProps.textBold,
+                  size: styleProps.textSize,
+                  fontFamily: styleProps.textFont,
                 }),
               });
             } else {
               // Handle points with icons
-              featureStyle = new Style({
-                image: new OLIcon({
+              featureStyle = new DrawerStyle({
+                image: new DrawerIcon({
                   src: iconSrc,
                   anchor: [0.5, 1],
                   anchorXUnits: 'fraction',
                   anchorYUnits: 'fraction',
-                  scale: (styleProps.iconSize || 24) / 24,
+                  scale: (styleProps.iconSize || DrawerIcon.BASE_ICON_SIZE) / DrawerIcon.BASE_ICON_SIZE,
+                  strokeColor: styleProps.strokeColor as string,
+                  strokeWidth: styleProps.strokeWidth as number,
+                  fillColor: styleProps.fillColor as string,
                 }),
               });
             }
           } else {
             // handle lines / polygons
-            featureStyle = new Style({
+            featureStyle = new DrawerStyle({
               stroke: new Stroke({
                 color: styleProps?.strokeColor,
                 width: styleProps?.strokeWidth,
@@ -1162,10 +1164,11 @@ export class DrawerController extends AbstractMapViewerController {
           const featureId = geoFeature.properties.id || generateId();
           feature.setStyle(featureStyle);
 
+          // TODO: setting properties here is unnecessary
           if (styleProps?.text !== undefined) {
-            DrawerController.#setFeatureProperties(feature, 'Text', styleProps as StyleProps, undefined, featureId);
+            DrawerController.#setFeatureProperties(feature, featureId);
           } else {
-            DrawerController.#setFeatureProperties(feature, 'Point', {} as StyleProps, iconSrc, featureId);
+            DrawerController.#setFeatureProperties(feature, featureId);
           }
 
           // Add overlays to non-point features
@@ -1257,12 +1260,6 @@ export class DrawerController extends AbstractMapViewerController {
    * @throws {InvaliGeometryGroupIdError} When the provided geometry group id does not exist
    */
   #getDrawingFeatures(): Feature[] {
-    // Get the map id
-    const mapId = this.getMapId();
-
-    // Check if state exist and if draw instance is enable, solve error when switch lang and no draw instance
-    if (!isStoreDrawerInitialized(mapId)) return [];
-
     // Check if the geometry group exists (it may have been destroyed during language switch/map reload)
     if (!this.getGeometryApi().hasGeometryGroup(DrawerController.DRAW_GROUP_KEY)) return [];
 
@@ -1530,11 +1527,6 @@ export class DrawerController extends AbstractMapViewerController {
    * @param action - The select action to be applied
    */
   #selectFeaturesAction(action: DrawerHistoryAction): void {
-    // Get the map id
-    const mapId = this.getMapId();
-
-    if (!isStoreDrawerInitialized(mapId)) return;
-
     const transformInstance = this.#transformInstance;
     if (transformInstance) {
       transformInstance.selectFeature(action.features[0], false);
@@ -1548,8 +1540,6 @@ export class DrawerController extends AbstractMapViewerController {
   #updateUndoRedoState(): void {
     // Get the map id
     const mapId = this.getMapId();
-
-    if (!isStoreDrawerInitialized(mapId)) return;
 
     const transformInstance = this.#transformInstance;
     if (transformInstance && transformInstance.getSelectedFeature()) {
@@ -1650,8 +1640,6 @@ export class DrawerController extends AbstractMapViewerController {
     const mapId = this.getMapId();
 
     return (_sender: unknown, event: DrawEvent): void => {
-      if (!isStoreDrawerInitialized(mapId)) return;
-
       const currentGeomType = getStoreDrawerActiveGeom(mapId);
       const currentStyle = getStoreDrawerStyle(mapId);
 
@@ -1666,23 +1654,29 @@ export class DrawerController extends AbstractMapViewerController {
 
       if (currentGeomType === 'Point') {
         // For points, use a circle style
-        featureStyle = new Style({
-          image: new OLIcon({
+        featureStyle = new DrawerStyle({
+          image: new DrawerIcon({
             src: getStoreDrawerIconSrc(mapId),
             anchor: [0.5, 1], // 50% of X = Middle, 100% Y = Bottom
             anchorXUnits: 'fraction',
             anchorYUnits: 'fraction',
-            scale: (currentStyle.iconSize || 24) / 24,
+            scale: (currentStyle.iconSize || DrawerIcon.BASE_ICON_SIZE) / DrawerIcon.BASE_ICON_SIZE,
+            strokeColor: currentStyle.strokeColor,
+            strokeWidth: currentStyle.strokeWidth,
+            fillColor: currentStyle.fillColor,
           }),
         });
       } else if (currentGeomType === 'Text') {
-        featureStyle = new Style({
-          text: new Text({
+        featureStyle = new DrawerStyle({
+          text: new DrawerText({
             text: currentStyle.text,
             fill: new Fill({ color: currentStyle.textColor }),
             stroke: new Stroke({ color: currentStyle.textHaloColor, width: currentStyle.textHaloWidth }),
-            font: `${currentStyle.textItalic ? 'italic ' : ''}${currentStyle.textBold ? 'bold ' : ''}${currentStyle.textSize}px ${currentStyle.textFont}`,
             rotation: 0,
+            italic: currentStyle.textItalic,
+            bold: currentStyle.textBold,
+            size: currentStyle.textSize,
+            fontFamily: currentStyle.textFont,
           }),
         });
       } else {
@@ -1693,7 +1687,7 @@ export class DrawerController extends AbstractMapViewerController {
         }
 
         // Set the styles for lines / polygons
-        featureStyle = new Style({
+        featureStyle = new DrawerStyle({
           stroke: new Stroke({
             color: currentStyle.strokeColor,
             width: currentStyle.strokeWidth,
@@ -1708,7 +1702,7 @@ export class DrawerController extends AbstractMapViewerController {
       feature.setStyle(featureStyle);
 
       // Set the feature properties for proper download / upload
-      DrawerController.#setFeatureProperties(feature, currentGeomType, currentStyle, getStoreDrawerIconSrc(mapId));
+      DrawerController.#setFeatureProperties(feature);
 
       // Add overlays to non-point features
       if (!(geom instanceof Point)) {
@@ -1811,11 +1805,11 @@ export class DrawerController extends AbstractMapViewerController {
       const { feature } = event;
       if (!feature) return;
 
-      const isTextFeature = feature.get('text') !== undefined;
+      const isTextFeature = DrawerController.#isTextFeature(feature);
       // Update Text Styles
       if (isTextFeature) {
         const currentStyle = feature.getStyle();
-        if (currentStyle instanceof Style && isStoreDrawerInitialized(mapId)) {
+        if (currentStyle instanceof DrawerStyle) {
           const styleProps = DrawerController.#getStyleProperties(currentStyle);
 
           // Update store
@@ -1871,10 +1865,7 @@ export class DrawerController extends AbstractMapViewerController {
 
     return (_sender: unknown, event: TransformSelectionEvent) => {
       // GV Get hideMeasurements here so the value is not stale
-      let hideMeasurements = false;
-      if (isStoreDrawerInitialized(mapId)) {
-        hideMeasurements = getStoreDrawerHideMeasurements(mapId);
-      }
+      const hideMeasurements = getStoreDrawerHideMeasurements(mapId);
 
       const { previousFeature, newFeature, createSelectAction } = event;
 
@@ -1948,14 +1939,15 @@ export class DrawerController extends AbstractMapViewerController {
           newTooltip.getElement().hidden = true;
         }
 
-        if (!isStoreDrawerInitialized(mapId)) return;
-
         const featureProperties = DrawerController.#getFeatureStyleProperties(newFeature);
         updateStoreStateStyle(mapId, featureProperties);
-      }
 
-      const geomType = newFeature?.get('text') ? 'Text' : newFeature?.getGeometry()?.getType() || undefined;
-      setStoreSelectedDrawingType(mapId, geomType);
+        const geomType = DrawerController.#isTextFeature(newFeature) ? 'Text' : newFeature?.getGeometry()?.getType() || undefined;
+        setStoreSelectedDrawingType(mapId, geomType);
+      } else {
+        // Clear selected drawing type when no feature is selected
+        setStoreSelectedDrawingType(mapId, undefined);
+      }
 
       // Update the undo redo state
       this.#updateUndoRedoState();
@@ -2002,7 +1994,7 @@ export class DrawerController extends AbstractMapViewerController {
    * @returns The extracted style properties
    */
   static #getFeatureStyleProperties(feature: Feature): StyleProps {
-    return this.#getStyleProperties(feature.getStyle() as Style);
+    return this.#getStyleProperties(feature.getStyle() as DrawerStyle);
   }
 
   /**
@@ -2011,15 +2003,13 @@ export class DrawerController extends AbstractMapViewerController {
    * @param style - The style object to extract properties from
    * @returns The extracted style properties
    */
-  static #getStyleProperties(style: Style): StyleProps {
+  static #getStyleProperties(style: DrawerStyle): StyleProps {
     const styleProps: StyleProps = {} as StyleProps;
 
     // Extract stroke/fill properties from the feature's style
     if (style) {
       const stroke = style.getStroke();
       const fill = style.getFill();
-      const text = style.getText();
-      const image = style.getImage();
 
       if (stroke) {
         styleProps.strokeColor = stroke.getColor() as string;
@@ -2031,44 +2021,25 @@ export class DrawerController extends AbstractMapViewerController {
       }
 
       // Extract text properties from the Text style
-      if (text) {
-        styleProps.text = text.getText();
-        styleProps.textColor = text.getFill()?.getColor() as string;
-        styleProps.textHaloColor = text.getStroke()?.getColor() as string;
-        styleProps.textHaloWidth = text.getStroke()?.getWidth() || 0;
-        styleProps.textRotation = text.getRotation() || 0;
-
-        const font = text.getFont();
-        if (font) {
-          const fontParts = font.split(' ');
-          const sizeStr = fontParts.find((part) => part.endsWith('px'));
-          if (sizeStr) {
-            styleProps.textSize = parseFloat(sizeStr);
-          }
-
-          // Extract font family which comes after the size
-          const sizeIndex = fontParts.findIndex((part) => part.endsWith('px'));
-          if (sizeIndex !== -1 && sizeIndex < fontParts.length - 1) {
-            styleProps.textFont = fontParts.slice(sizeIndex + 1).join(' ');
-          }
-
-          styleProps.textBold = fontParts.includes('bold');
-          styleProps.textItalic = fontParts.includes('italic');
-        }
+      if (style.isTextStyle()) {
+        styleProps.text = style.getTextContent();
+        styleProps.textBold = style.getTextBold();
+        styleProps.textItalic = style.getTextItalic();
+        styleProps.textSize = style.getTextSize();
+        styleProps.textFont = style.getTextFontFamily();
+        styleProps.textColor = style.getTextColor();
+        styleProps.textHaloColor = style.getTextHaloColor();
+        styleProps.textHaloWidth = style.getTextHaloWidth();
+        styleProps.textRotation = style.getTextRotation();
       }
 
       // Extract icon properties from the Image style
-      if (image instanceof OLIcon) {
-        styleProps.iconSrc = image.getSrc();
-        const scale = image.getScale();
-        if (scale !== undefined) {
-          // In our situation, it should always be a single number
-          if (typeof scale === 'number') {
-            styleProps.iconSize = scale * 24;
-          } else {
-            styleProps.iconSize = scale[0] * 24;
-          }
-        }
+      if (style.isIconStyle()) {
+        styleProps.iconSrc = style.getIconSrc();
+        styleProps.strokeColor = style.getIconStrokeColor() ?? styleProps.strokeColor;
+        styleProps.strokeWidth = style.getIconStrokeWidth() ?? styleProps.strokeWidth;
+        styleProps.fillColor = style.getIconFillColor() ?? styleProps.fillColor;
+        styleProps.iconSize = style.getIconSize();
       }
     }
 
@@ -2076,37 +2047,29 @@ export class DrawerController extends AbstractMapViewerController {
   }
 
   /**
+   * Checks if a feature has a text style.
+   *
+   * @param feature - The feature to check
+   * @returns True if the feature has a DrawerText style
+   */
+  static #isTextFeature(feature: Feature): boolean {
+    const style = feature.getStyle();
+    return style instanceof DrawerStyle && style.isTextStyle();
+  }
+
+  /**
    * Sets up a feature with ID, geometry group, and type-specific properties.
    *
    * @param feature - The feature to set up
-   * @param geomType - The geometry type
-   * @param style - The style properties
-   * @param iconSrc - Optional icon source for point features
    * @param featureId - Optional feature ID (generates one if not provided)
    */
-  static #setFeatureProperties(feature: Feature, geomType: string, style: StyleProps, iconSrc?: string, featureId?: string): void {
+  static #setFeatureProperties(feature: Feature, featureId?: string): void {
     // Set up basic feature properties
     if (feature.get('featureId') === undefined) {
       const id = featureId || generateId();
       feature.setId(id);
       feature.set('featureId', id);
       feature.set('geometryGroup', this.DRAW_GROUP_KEY);
-    }
-
-    // Set type-specific properties
-    if (geomType === 'Point' && iconSrc) {
-      feature.set('iconSrc', iconSrc);
-      feature.set('iconSize', style.iconSize);
-    } else if (geomType === 'Text') {
-      feature.set('text', style.text);
-      feature.set('textSize', style.textSize);
-      feature.set('textFont', style.textFont);
-      feature.set('textColor', style.textColor);
-      feature.set('textHaloColor', style.textHaloColor);
-      feature.set('textHaloWidth', style.textHaloWidth);
-      feature.set('textBold', style.textBold);
-      feature.set('textItalic', style.textItalic);
-      feature.set('textRotation', style.textRotation);
     }
   }
 
@@ -2343,7 +2306,7 @@ export class DrawerController extends AbstractMapViewerController {
     if (!style1 || !style2) return true;
 
     // If either isn't a Style instance, can't compare
-    if (!(style1 instanceof Style) || !(style2 instanceof Style)) return true;
+    if (!(style1 instanceof DrawerStyle) || !(style2 instanceof DrawerStyle)) return true;
 
     // Compare extracted properties
     const props1 = this.#getStyleProperties(style1);
