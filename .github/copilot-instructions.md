@@ -1247,6 +1247,44 @@ const handleToggleKeyDown = useCallback(
 - `role="checkbox"` with `aria-checked` for toggle-visibility buttons
 - `role="search"` on `<form>` elements containing search inputs
 
+## UI Component Styling & Theme Safety
+
+### Theme Extension Optional Chaining Rule (Critical)
+
+**Scope:** All components in `packages/geoview-core/src/core/components/ui/**` that reference custom theme extensions.
+
+**Problem:** External consumers of UI components inject standard MUI theme objects that do NOT include GeoView's custom theme extensions like `geoViewColor`. Direct access without optional chaining causes crashes in external applications.
+
+**Rule:** ALL references to custom theme extensions must use optional chaining (`?.`).
+
+**Pattern:**
+
+✅ **CORRECT** — Safe for external consumers:
+```typescript
+// In style files and components
+theme.palette.geoViewColor?.primary.main
+theme.palette.geoViewColor?.secondary
+theme.palette.geoViewColor?.white
+theme.palette.geoViewColor?.textColor.main
+theme.palette.geoViewColor?.bgColor.dark[100]
+```
+
+❌ **INCORRECT** — Crashes if external theme lacks extension:
+```typescript
+theme.palette.geoViewColor.primary.main  // ❌ No optional chaining
+```
+
+**Examples:**
+- `packages/geoview-core/src/ui/slider/slider-style.ts` — ✅ Correct (all geoViewColor references use `?.`)
+- `packages/geoview-core/src/ui/tabs/tabs.tsx` — ✅ Correct (all geoViewColor references use `?.`)
+
+**Enforcement:**
+- During code generation: Auto-apply optional chaining to all custom theme extension refs
+- During branch reviews: Scan all `@/ui` and `@/core/components/ui` files for direct access violations
+- Add to pre-commit hook checklist: No direct `theme.palette.geoViewColor.` without `?.`
+
+**Future-Proofing:** This rule applies to any custom theme extensions, not just `geoViewColor`. Always use optional chaining for any non-standard MUI theme properties.
+
 ## Internationalization (i18n)
 
 ### Translation Key Structure
