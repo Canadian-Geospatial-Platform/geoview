@@ -55,6 +55,10 @@
       "projectFolder": "packages/geoview-time-slider"
     },
     {
+      "packageName": "geoview-stac-browser",
+      "projectFolder": "packages/geoview-stac-browser"
+    },
+    {
       "packageName": "eslint-and-prettier-config",
       "projectFolder": "packages"
     }

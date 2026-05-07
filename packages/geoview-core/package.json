@@ -50,6 +50,7 @@
     "material-react-table": "^3.2.1",
     "ol": "10.9.0",
     "ol-mapbox-style": "^12.3.5",
+    "ol-stac": "^1.4.0",
     "proj4": "^2.20.8",
     "prop-types": "^15.8.1",
     "query-string": "^9.3.1",

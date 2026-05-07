@@ -1,0 +1,15 @@
+{
+  "stacUrl": "https://datacube.services.geo.ca/stac/api",
+  "filters": {
+    "collections": true,
+    "temporal": true,
+    "spatial": true,
+    "keyword": true
+  },
+  "defaults": {
+    "limit": 20
+  },
+  "displayPreview": true,
+  "isOpen": false,
+  "version": "1.0"
+}

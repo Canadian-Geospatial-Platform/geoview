@@ -1,0 +1,85 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GeoView STAC Browser Schema",
+  "type": "object",
+  "version": "1.0",
+  "comments": "Configuration for GeoView STAC Browser package.",
+  "additionalProperties": false,
+  "properties": {
+    "stacUrl": {
+      "description": "Base URL of the STAC API",
+      "type": "string"
+    },
+    "filters": {
+      "description": "Filter panel options",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "collections": {
+          "description": "Enable collection filter",
+          "type": "boolean",
+          "default": true
+        },
+        "temporal": {
+          "description": "Enable temporal extent filter",
+          "type": "boolean",
+          "default": true
+        },
+        "spatial": {
+          "description": "Enable spatial extent filter (bbox from map)",
+          "type": "boolean",
+          "default": true
+        },
+        "keyword": {
+          "description": "Enable keyword/text search",
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+    "defaults": {
+      "description": "Default filter values",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "collections": {
+          "description": "Pre-selected collection IDs",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "bbox": {
+          "description": "Default bbox [west, south, east, north]",
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": { "type": "number" }
+        },
+        "datetime": {
+          "description": "Default datetime filter (ISO 8601 interval)",
+          "type": "string"
+        },
+        "limit": {
+          "description": "Items per page",
+          "type": "number",
+          "default": 20
+        }
+      }
+    },
+    "displayPreview": {
+      "description": "Show preview thumbnails on map",
+      "type": "boolean",
+      "default": true
+    },
+    "isOpen": {
+      "description": "Whether panel opens automatically",
+      "type": "boolean",
+      "default": false
+    },
+    "version": {
+      "type": "string",
+      "enum": ["1.0"],
+      "description": "The schema version used to validate the configuration file."
+    }
+  },
+  "required": ["stacUrl"]
+}
