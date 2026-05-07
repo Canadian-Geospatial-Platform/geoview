@@ -584,11 +584,15 @@ Each slice exports three types of functions with consistent naming:
 
 | Type                 | Pattern                                           | Context                             |
 | -------------------- | ------------------------------------------------- | ----------------------------------- |
-| **Selector hooks**   | `useStore{SliceName}{PropertyName}`               | React components only               |
 | **Getter functions** | `getStore{SliceName}{PropertyName}(mapId)`        | Controllers and non-React code      |
+| **Selector hooks**   | `useStore{SliceName}{PropertyName}`               | React components only               |
 | **Setter functions** | `setStore{SliceName}{PropertyName}(mapId, value)` | Controllers only — never from React |
 
 ```typescript
+// Getter functions — point-in-time snapshots for controllers AND react components (no re-render)
+export const getStoreMapZoom = (mapId: string): number =>
+  getStoreMapState(mapId).zoom;
+
 // Selector hooks — React components only (re-render on change)
 export const useStoreMapZoom = (): number =>
   useStore(useGeoViewStore(), (state) => state.mapState.zoom);
@@ -598,10 +602,6 @@ export const useStoreLayerSelectedLayerPath = (): string | undefined | null =>
 
 export const useStoreUIActiveFooterBarTab = (): string =>
   useStore(useGeoViewStore(), (state) => state.uiState.activeFooterBarTab);
-
-// Getter functions — point-in-time snapshots for controllers AND react components (no re-render)
-export const getStoreMapZoom = (mapId: string): number =>
-  getStoreMapState(mapId).zoom;
 
 // Setter functions — mutate state from controllers
 export const setStoreMapClickMarker = (

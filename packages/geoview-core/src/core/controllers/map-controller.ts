@@ -924,9 +924,8 @@ export class MapController extends AbstractMapViewerController {
    * @param timeoutMs - Optional maximum time in milliseconds to wait (defaults to 5000)
    * @returns A promise that resolves when the visibility matches the expected state
    */
-  async waitOverviewMapVisibility(expectedVisible: boolean, timeoutMs = 5000): Promise<void> {
-    // prettier-ignore
-    await whenThisThen(() => this.getOverviewMapVisibility() === expectedVisible, timeoutMs);
+  waitOverviewMapVisibility(expectedVisible: boolean, timeoutMs = 5000): Promise<boolean> {
+    return whenThisThen(() => this.getOverviewMapVisibility() === expectedVisible, timeoutMs);
   }
 
   /**

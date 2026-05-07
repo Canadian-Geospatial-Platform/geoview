@@ -1366,9 +1366,6 @@ export const useStoreLayerHasDisabledVisibility = (layerPath: string): boolean =
   });
 };
 
-/** Hook that returns the controls configuration for a specific layer. */
-export const useStoreLayerControls = createLayerSelectorHook('controls');
-
 /**
  * Gets the controls configuration for a specific layer.
  *
@@ -1379,6 +1376,9 @@ export const useStoreLayerControls = createLayerSelectorHook('controls');
 export const getStoreLayerControls = (mapId: string, layerPath: string): TypeLayerControls | undefined => {
   return getStoreLayerLegendLayerByPath(mapId, layerPath)?.controls;
 };
+
+/** Hook that returns the controls configuration for a specific layer. */
+export const useStoreLayerControls = createLayerSelectorHook('controls');
 
 /** Hook that returns the deletion start time for a specific layer. */
 export const useStoreLayerDeletionStartTime = createLayerSelectorHook('deletionStartTime');
