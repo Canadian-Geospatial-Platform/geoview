@@ -495,7 +495,7 @@ export class EsriUtilities {
       layerConfig.initOutfieldsAliases();
 
       // Initialize the name field
-      layerConfig.initNameField(layerMetadataEsriDynamicLayer.displayField ?? outfields?.[0]?.name);
+      layerConfig.initNameField(layerMetadataEsriDynamicLayer.displayField);
     }
   }
 

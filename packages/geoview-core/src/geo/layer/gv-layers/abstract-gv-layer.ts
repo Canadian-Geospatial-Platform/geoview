@@ -31,6 +31,8 @@ import type {
   TypeFeatureInfoResult,
   codedValueType,
   rangeDomainType,
+  TypeDisplayLanguage,
+  TypeFieldEntry,
 } from '@/api/types/map-schema-types';
 import type {
   TypeLayerMetadataFields,
@@ -60,6 +62,22 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
   /** The default loading period before we show a message to the user about a layer taking a long time to render on map */
   static readonly DEFAULT_LOADING_PERIOD: number = 8 * 1000; // 8 seconds
+
+  /** Keywords used to identify name fields in the layer's outfields when none specified. */
+  static readonly NAME_FIELD_KEYWORDS = [
+    '^name$',
+    '^name_lang$', // GV Here, _lang is a placeholder to favor the current language of the application
+    '^title$',
+    '^title_lang$',
+    '^label$',
+    '^label_lang$',
+    '^project_name$',
+    '^project_name_lang$',
+    '^display*',
+    '^id$',
+    '^objectid$',
+    '^oid$',
+  ];
 
   /** Counts the number of times the loading happened. */
   loadingCounter = 0;
@@ -366,12 +384,21 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    *
    * @param map - The Map so that we can grab the resolution/projection we want to get features on
    * @param layerFilters - The layer filters to apply when querying the features
+   * @param language - The display language, used to guess the best name field if `nameField` is not provided
    * @param abortController - Optional {@link AbortController} to cancel the operation
    * @returns A promise that resolves with the feature info result
    * @throws {NotImplementedError} When the function isn't overridden by the children class
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getAllFeatureInfo(map: OLMap, layerFilters: LayerFilters, abortController?: AbortController): Promise<TypeFeatureInfoResult> {
+  protected getAllFeatureInfo(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    map: OLMap,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    layerFilters: LayerFilters,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    language: TypeDisplayLanguage, // Used if we have to guess the field name for the 'nameField'
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    abortController?: AbortController
+  ): Promise<TypeFeatureInfoResult> {
     // Crash on purpose
     throw new NotImplementedError(`getAllFeatureInfo not implemented on layer path ${this.getLayerPath()}`);
   }
@@ -382,6 +409,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param map - The Map where to get Feature Info At Pixel from
    * @param location - The pixel coordinate that will be used by the query
    * @param queryGeometry - Whether to include geometry in the query, default is true
+   * @param language - The display language, used to guess the best name field if `nameField` is not provided
    * @param abortController - Optional {@link AbortController} to cancel the operation
    * @returns A promise that resolves with the feature info result
    */
@@ -389,10 +417,11 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     map: OLMap,
     location: Pixel,
     queryGeometry = true,
+    language: TypeDisplayLanguage, // Used if we have to guess the field name for the 'nameField'
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoResult> {
     // Redirect to getFeatureInfoAtCoordinate
-    return this.getFeatureInfoAtCoordinate(map, map.getCoordinateFromPixel(location), queryGeometry, abortController);
+    return this.getFeatureInfoAtCoordinate(map, map.getCoordinateFromPixel(location), queryGeometry, language, abortController);
   }
 
   /**
@@ -401,6 +430,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param map - The Map where to get Feature Info At Coordinate from
    * @param location - The coordinate that will be used by the query
    * @param queryGeometry - Whether to include geometry in the query, default is true
+   * @param language - The display language, used to guess the best name field if `nameField` is not provided
    * @param abortController - Optional {@link AbortController} to cancel the operation
    * @returns A promise that resolves with the feature info result
    * @throws {NotImplementedError} When the function isn't overridden by the children class
@@ -410,6 +440,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     location: Coordinate,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     queryGeometry = true,
+    language: TypeDisplayLanguage, // Used if we have to guess the field name for the 'nameField'
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoResult> {
@@ -423,6 +454,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param map - The Map where to get Feature Info At LonLat from
    * @param lonlat - The coordinate that will be used by the query
    * @param queryGeometry - Whether to include geometry in the query, default is true
+   * @param language - The display language, used to guess the best name field if `nameField` is not provided
    * @param abortController - Optional {@link AbortController} to cancel the operation
    * @returns A promise that resolves with the feature info result
    * @throws {NotImplementedError} When the function isn't overridden by the children class
@@ -432,6 +464,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     lonlat: Coordinate,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     queryGeometry = true,
+    language: TypeDisplayLanguage, // Used if we have to guess the field name for the 'nameField'
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoResult> {
@@ -445,6 +478,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param map - The Map where to get Feature using BBox from
    * @param location - The bounding box that will be used by the query
    * @param queryGeometry - Whether to include geometry in the query, default is true
+   * @param language - The display language, used to guess the best name field if `nameField` is not provided
    * @param abortController - Optional {@link AbortController} to cancel the operation
    * @returns A promise that resolves with the feature info result
    * @throws {NotImplementedError} When the function isn't overridden by the children class
@@ -454,6 +488,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     location: Coordinate[],
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     queryGeometry = true,
+    language: TypeDisplayLanguage, // Used if we have to guess the field name for the 'nameField'
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoResult> {
@@ -467,6 +502,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param map - The Map where to get Feature Info using Polygon from
    * @param location - The polygon that will be used by the query
    * @param queryGeometry - Whether to include geometry in the query, default is true
+   * @param language - The display language, used to guess the best name field if `nameField` is not provided
    * @param abortController - Optional {@link AbortController} to cancel the operation
    * @returns A promise that resolves with the feature info result
    * @throws {NotImplementedError} When the function isn't overridden by the children class
@@ -476,6 +512,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     location: Coordinate[],
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     queryGeometry = true,
+    language: TypeDisplayLanguage, // Used if we have to guess the field name for the 'nameField'
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoResult> {
@@ -845,6 +882,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param queryType - The type of query to perform
    * @param location - A pixel, coordinate or polygon that will be used by the query
    * @param queryGeometry - Whether to include geometry in the query, default is true
+   * @param language - The display language, used to guess the best name field if `nameField` is not provided
    * @param abortController - Optional {@link AbortController} to cancel the operation
    * @returns A promise that resolves with the feature info result
    */
@@ -853,6 +891,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     queryType: QueryType,
     location: TypeLocation,
     queryGeometry = true,
+    language: TypeDisplayLanguage, // Used if we have to guess the field name for the 'nameField'
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoResult> {
     // Log
@@ -867,23 +906,23 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
         const layerFilters = new LayerFilters(this.getLayerFilters().getInitialFilter());
 
         // Get all feature info
-        promiseGetFeature = this.getAllFeatureInfo(map, layerFilters, abortController);
+        promiseGetFeature = this.getAllFeatureInfo(map, layerFilters, language, abortController);
         break;
       }
       case 'at_pixel':
-        promiseGetFeature = this.getFeatureInfoAtPixel(map, location as Pixel, queryGeometry, abortController);
+        promiseGetFeature = this.getFeatureInfoAtPixel(map, location as Pixel, queryGeometry, language, abortController);
         break;
       case 'at_coordinate':
-        promiseGetFeature = this.getFeatureInfoAtCoordinate(map, location as Coordinate, queryGeometry, abortController);
+        promiseGetFeature = this.getFeatureInfoAtCoordinate(map, location as Coordinate, queryGeometry, language, abortController);
         break;
       case 'at_lon_lat':
-        promiseGetFeature = this.getFeatureInfoAtLonLat(map, location as Coordinate, queryGeometry, abortController);
+        promiseGetFeature = this.getFeatureInfoAtLonLat(map, location as Coordinate, queryGeometry, language, abortController);
         break;
       case 'using_a_bounding_box':
-        promiseGetFeature = this.getFeatureInfoUsingBBox(map, location as Coordinate[], queryGeometry, abortController);
+        promiseGetFeature = this.getFeatureInfoUsingBBox(map, location as Coordinate[], queryGeometry, language, abortController);
         break;
       case 'using_a_polygon':
-        promiseGetFeature = this.getFeatureInfoUsingPolygon(map, location as Coordinate[], queryGeometry, abortController);
+        promiseGetFeature = this.getFeatureInfoUsingPolygon(map, location as Coordinate[], queryGeometry, language, abortController);
         break;
       default:
         // Not implemented
@@ -1080,6 +1119,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    *
    * @param features - Array of features to format
    * @param layerConfig - Configuration of the associated layer
+   * @param language - The display language, used to guess the best name field if `nameField` is not provided
    * @param serviceDateFormat - Optional date format used by the service
    * @param serviceDateIANA - Optional IANA time zone identifier used by the service
    * @param serviceDateTemporalMode - Optional temporal mode for date handling
@@ -1088,6 +1128,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   protected formatFeatureInfoResult(
     features: Feature[],
     layerConfig: OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig | VectorLayerEntryConfig,
+    language: TypeDisplayLanguage,
     serviceDateFormat: string | undefined,
     serviceDateIANA: string | undefined,
     serviceDateTemporalMode: TemporalMode | undefined
@@ -1101,12 +1142,15 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     // Get the fields from metadata if any
     const domainsLookup = layerMetadataEsriDynamicLayer?.fields;
 
+    // Find the best name field and validate its existance at the same time when one was initially configured
+    const nameField = AbstractGVLayer.findBestNameField(layerConfig.getNameField(), layerConfig.getOutfields(), language);
+
     // Redirect
     return AbstractGVLayer.helperFormatFeatureInfoResult(
       features,
       layerConfig.layerPath,
       layerConfig.getSchemaTag(),
-      layerConfig.getNameField(),
+      nameField,
       layerConfig.getOutfields(),
       true,
       domainsLookup,
@@ -1357,7 +1401,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * Sets the layer filters associated to the layer.
    *
    * @param layerFilters - The layer filters to apply
-   * @param refresh - Whether to trigger a layer re-render after setting filters
+   * @param filterCategoryChanged - The filter category that changed
    */
   #setLayerFilters(layerFilters: LayerFilters, filterCategoryChanged: FilterCategory): void {
     // Keep it
@@ -1775,6 +1819,58 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     if (layerConfig.getInitialSettings()?.states?.opacity !== undefined)
       // eslint-disable-next-line no-param-reassign
       layerOptions.opacity = layerConfig.getInitialSettings()?.states!.opacity;
+  }
+
+  /**
+   * Finds the best field to use as a name field by searching for common name-like field patterns.
+   *
+   * Searches field names for predefined keywords (name, title, label) in priority order.
+   * Supports both outfields arrays and field info dictionaries keyed by field name.
+   * If no keyword match is found, returns the first available field name as a fallback.
+   *
+   * @param nameField - Optional provided name field to validate and use first
+   * @param outfields - Outfields array or field info dictionary to search
+   * @param lang - The display language used to resolve `_lang` placeholders in keyword patterns
+   * @returns The name of the best matching field, or undefined if no fields available
+   */
+  static findBestNameField(
+    nameField: string | undefined,
+    outfields: TypeOutfields[] | Partial<Record<string, TypeFieldEntry>> | undefined = [],
+    lang: TypeDisplayLanguage = 'en'
+  ): string | undefined {
+    // Normalize to a simple list of field names regardless of input shape.
+    const fieldNames = Array.isArray(outfields)
+      ? outfields.map((field) => field.name)
+      : Object.keys(outfields).filter((key) => outfields[key] !== undefined);
+
+    if (!fieldNames.length) return undefined;
+
+    // If a nameField was provided, only keep it when it actually exists in the outfields.
+    const validProvidedNameField = nameField && fieldNames.includes(nameField) ? nameField : undefined;
+    if (validProvidedNameField) return validProvidedNameField;
+
+    const languagePriority: TypeDisplayLanguage[] = [
+      lang,
+      ...(['en', 'fr'] as TypeDisplayLanguage[]).filter((language) => language !== lang),
+    ];
+
+    // Try to find a field matching name keywords in priority order.
+    // For _lang keywords, try the requested language first, then the alternate language.
+    const resolvedNameField = this.NAME_FIELD_KEYWORDS.reduce<string | undefined>((found, keyword) => {
+      if (found) return found;
+
+      const resolvedKeywords = keyword.includes('_lang')
+        ? languagePriority.map((language) => keyword.replace('_lang', `_${language}`))
+        : [keyword];
+
+      return resolvedKeywords.reduce<string | undefined>((matchedFieldName, resolvedKeyword) => {
+        if (matchedFieldName) return matchedFieldName;
+        return fieldNames.find((fieldName) => new RegExp(resolvedKeyword, 'i').test(fieldName));
+      }, undefined);
+    }, undefined);
+
+    // Return the matched field name, or fall back to the first field.
+    return resolvedNameField ?? fieldNames[0];
   }
 
   /**
