@@ -26,8 +26,8 @@ export class GVGroupLayer extends AbstractBaseGVLayer {
   /**
    * Constructs a Group layer to manage an OpenLayer Group Layer.
    *
-   * @param layerGroupOptions - The OpenLayer group layer.
-   * @param layerConfig - The layer configuration.
+   * @param layerGroupOptions - The OpenLayer group layer
+   * @param layerConfig - The layer configuration
    */
   constructor(layerGroupOptions: LayerGroupOptions, layerConfig: GroupLayerEntryConfig) {
     super(layerConfig);
@@ -207,7 +207,7 @@ export class GVGroupLayer extends AbstractBaseGVLayer {
   /**
    * Adds a layer to the group layer.
    *
-   * @param layer - The layer to add.
+   * @param layer - The layer to add
    */
   addLayer(layer: AbstractBaseGVLayer): void {
     // Officially add it to the OL object
@@ -215,6 +215,9 @@ export class GVGroupLayer extends AbstractBaseGVLayer {
 
     // Set its parent right away
     layer.setParent(this);
+
+    // Ensure the child respects the parent opacity cap as soon as it joins the group.
+    if (layer.getOpacity() > this.getOpacity()) layer.setOpacity(this.getOpacity(), false);
 
     // Add the layer to our list
     this.#layers.push(layer);
@@ -226,7 +229,8 @@ export class GVGroupLayer extends AbstractBaseGVLayer {
   /**
    * Removes a layer from the group layer.
    *
-   * @param layer - The layer to remove.
+   * @param layer - The layer to remove
+   * @throws {LayerNotFoundError} When the layer is not found in the group
    */
   removeLayer(layer: AbstractBaseGVLayer): void {
     // Try to find it
@@ -337,14 +341,10 @@ export class GVGroupLayer extends AbstractBaseGVLayer {
   // #endregion EVENTS
 }
 
-/**
- * Define an event for the delegate
- */
+/** Defines an event for the delegate. */
 export interface LayerGroupChildrenUpdatedEvent<T extends AbstractBaseGVLayer = AbstractBaseGVLayer> extends LayerBaseEvent {
   child: T;
 }
 
-/**
- * Define a delegate for the event handler function signature
- */
+/** Defines a delegate for the event handler function signature. */
 export type LayerGroupChildrenUpdatedDelegate = EventDelegateBase<GVGroupLayer, LayerGroupChildrenUpdatedEvent, void>;
