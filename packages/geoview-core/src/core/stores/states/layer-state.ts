@@ -1384,17 +1384,6 @@ export const getStoreLayerControls = (mapId: string, layerPath: string): TypeLay
 /** Hook that returns the controls configuration for a specific layer. */
 export const useStoreLayerControls = createLayerSelectorHook('controls');
 
-/**
- * Gets the controls configuration for a specific layer.
- *
- * @param mapId - The map identifier
- * @param layerPath - The layer path to look up
- * @returns The layer controls configuration, or undefined if not found
- */
-export const getStoreLayerControls = (mapId: string, layerPath: string): TypeLayerControls | undefined => {
-  return getStoreLayerLegendLayerByPath(mapId, layerPath)?.controls;
-};
-
 /** Hook that returns the deletion start time for a specific layer. */
 export const useStoreLayerDeletionStartTime = createLayerSelectorHook('deletionStartTime');
 
