@@ -955,7 +955,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
     },
     // Improve table accessibility
     muiTableProps: {
-      'aria-label': t('dataTable.tableAriaLabelWithLayer', { layerName })!,
+      'aria-label': t('dataTable.tableAriaLabelWithLayer', { layerName }),
       'aria-rowcount': memoRows.length + 1, // +1 to account for the header row
     },
     muiTableBodyRowProps: ({ row }) => ({

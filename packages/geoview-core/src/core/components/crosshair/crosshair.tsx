@@ -6,11 +6,12 @@ import { Box, Fade, Typography } from '@/ui';
 import { getSxClasses } from './crosshair-style';
 import { CrosshairIcon } from './crosshair-icon';
 import { useStoreAppIsCrosshairsActive } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { getStoreMapPointerPosition } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { getStoreMapPointerPosition, useStoreMapZoom } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { getStoreDrawerIsEditing, getStoreDrawerIsDrawing } from '@/core/stores/store-interface-and-intial-values/drawer-state';
 import { logger } from '@/core/utils/logger';
 import { useEventListener } from '@/core/components/common/hooks/use-event-listener';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
-import { useMapController, useUIController } from '@/core/controllers/use-controllers';
+import { useDrawerControllerIfExists, useLayerSetController, useMapController, useUIController } from '@/core/controllers/use-controllers';
 
 /** Properties for the Crosshair component. */
 type CrosshairProps = {
@@ -33,55 +34,30 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
-  // Pan delta for keyboard pan interactions
-  const panDelta = useRef(128);
-
   //  Store
   const mapId = useStoreGeoViewMapId();
+  const mapZoom = useStoreMapZoom();
   const isCrosshairsActive = useStoreAppIsCrosshairsActive();
   const uiController = useUIController();
   const mapController = useMapController();
+  const drawerController = useDrawerControllerIfExists();
+  const layerSetController = useLayerSetController();
+
+  // Pan delta for keyboard pan interactions
+  const panDelta = useRef(128);
 
   // AbortController ref - aborts any in-flight coordinate info fetch on re-click
   const abortControllerRef = useRef<AbortController | null>(null);
-
-  /**
-   * Simulates a map mouse click to trigger the details panel.
-   */
-  const simulateClick = useCallback(
-    (event: HTMLElementEventMap[keyof HTMLElementEventMap]): void => {
-      if (!isCrosshairsActive || !(event instanceof KeyboardEvent) || event.key !== 'Enter') {
-        return;
-      }
-
-      // Use store getter, we do not subcribe to modification
-      const currentPointerPosition = getStoreMapPointerPosition(mapId);
-      if (currentPointerPosition) {
-        // Abort any previous in-flight request
-        abortControllerRef.current?.abort();
-
-        // Create a new AbortController for this click
-        const controller = new AbortController();
-        abortControllerRef.current = controller;
-
-        // Set the click coordinates
-        mapController.setClickCoordinates(currentPointerPosition, controller.signal);
-      }
-    },
-    [isCrosshairsActive, mapId, mapController]
-  );
 
   /**
    * Modifies the pixelDelta value for keyboard pan on Shift+Arrow up or down.
    */
   const managePanDelta = useCallback(
     (event: HTMLElementEventMap[keyof HTMLElementEventMap]): void => {
-      // Early return in callback
-      if (!isCrosshairsActive) return;
+      if (!isCrosshairsActive || !(event instanceof KeyboardEvent)) return;
 
-      const myEvent = event as KeyboardEvent;
-      if ((myEvent.key === 'ArrowDown' && myEvent.shiftKey) || (myEvent.key === 'ArrowUp' && myEvent.shiftKey)) {
-        panDelta.current = myEvent.key === 'ArrowDown' ? Math.max(10, panDelta.current - 10) : panDelta.current + 10;
+      if ((event.key === 'ArrowDown' && event.shiftKey) || (event.key === 'ArrowUp' && event.shiftKey)) {
+        panDelta.current = event.key === 'ArrowDown' ? Math.max(10, panDelta.current - 10) : panDelta.current + 10;
 
         uiController.setMapKeyboardPanInteractions(panDelta.current);
       }
@@ -90,17 +66,122 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
   );
 
   /**
+   * Handles zoom controls via Ctrl+Arrow keys.
+   */
+  const handleZoomControls = useCallback(
+    (event: HTMLElementEventMap[keyof HTMLElementEventMap]): void => {
+      if (!isCrosshairsActive || !(event instanceof KeyboardEvent)) return;
+
+      // Ctrl+Up: Zoom in
+      if (event.key === 'ArrowUp' && event.ctrlKey) {
+        event.preventDefault();
+        mapController.zoomMapAndForget(mapZoom + 1);
+      }
+      // Ctrl+Down: Zoom out
+      else if (event.key === 'ArrowDown' && event.ctrlKey) {
+        event.preventDefault();
+        mapController.zoomMapAndForget(mapZoom - 1);
+      }
+    },
+    [isCrosshairsActive, mapController, mapZoom]
+  );
+
+  /**
+   * Handles Enter key for crosshair
+   */
+  const handleCrosshairInteraction = useCallback(
+    (event: HTMLElementEventMap[keyof HTMLElementEventMap]): void => {
+      if (!isCrosshairsActive || !(event instanceof KeyboardEvent)) {
+        return;
+      }
+
+      const currentPointerPosition = getStoreMapPointerPosition(mapId);
+      if (!currentPointerPosition) return;
+
+      // Check drawer state if drawer plugin is loaded
+      if (!drawerController) {
+        // Drawer not available - only handle default Enter behavior
+        if (event.key === 'Enter') {
+          abortControllerRef.current?.abort();
+          const controller = new AbortController();
+          abortControllerRef.current = controller;
+          mapController.setClickCoordinates(currentPointerPosition, controller.signal);
+        }
+        return;
+      }
+
+      // Drawer is available - check if we're in drawing or editing mode
+      const isDrawerDrawing = getStoreDrawerIsDrawing(mapId);
+      const isDrawerEditing = getStoreDrawerIsEditing(mapId);
+
+      if (isDrawerDrawing) {
+        // DRAWING MODE
+        if (event.key === 'Enter' && event.shiftKey) {
+          // Shift+Enter: Finish drawing
+          event.preventDefault();
+          drawerController.finishCurrentDrawing();
+        } else if (event.key === 'Enter') {
+          // Enter: Add vertex
+          event.preventDefault();
+          drawerController.addCoordinateToDrawing(currentPointerPosition.projected);
+        }
+      } else if (isDrawerEditing) {
+        // EDITING MODE
+        if (event.key === 'Enter') {
+          event.preventDefault();
+
+          // If actively moving a handle
+          if (drawerController.isHandleGrabbed()) {
+            // DROP: Apply transformation from grab coordinate to current coordinate
+            drawerController.applyGrabbedTransform(currentPointerPosition.projected);
+          } else {
+            // GRAB: Check what's at the crosshair
+            const grabbed = drawerController.grabHandleForKeyboard(currentPointerPosition.projected);
+            if (!grabbed) {
+              // No handle - try to select a feature instead
+              drawerController.handleEditingAtCoordinate(currentPointerPosition.projected);
+            }
+          }
+        } else if (event.key === 'Escape') {
+          // CANCEL: Release the grab without applying transformation
+          event.preventDefault();
+          drawerController.cancelGrabbedTransform();
+        }
+      } else if (event.key === 'Enter') {
+        // Not in draw or edit mode
+        // Default behavior: open details panel
+        abortControllerRef.current?.abort();
+        const controller = new AbortController();
+        abortControllerRef.current = controller;
+        mapController.setClickCoordinates(currentPointerPosition, controller.signal);
+      }
+    },
+    [isCrosshairsActive, mapId, mapController, drawerController]
+  );
+
+  /**
    * Aborts any in-flight coordinate info request on unmount.
    */
   useEffect(() => {
     return (): void => {
       abortControllerRef.current?.abort();
+      drawerController?.cancelGrabbedTransform();
     };
-  }, []);
+  }, [drawerController]);
 
-  // Use custom hook for event listeners
-  useEventListener<HTMLElement>('keydown', simulateClick, mapTargetElement, isCrosshairsActive);
+  /**
+   * Clears hover tooltip when crosshair becomes active.
+   */
+  useEffect(() => {
+    if (isCrosshairsActive) {
+      layerSetController.hoverFeatureInfoLayerSet.clearResults();
+    }
+  }, [isCrosshairsActive, layerSetController]);
+
+  // Event listeners
+  useEventListener<HTMLElement>('keydown', handleCrosshairInteraction, mapTargetElement, isCrosshairsActive);
   useEventListener<HTMLElement>('keydown', managePanDelta, mapTargetElement, isCrosshairsActive);
+  useEventListener<HTMLElement>('keydown', handleZoomControls, mapTargetElement, isCrosshairsActive);
 
   return (
     <Box sx={{ ...sxClasses.crosshairContainer, visibility: isCrosshairsActive ? 'visible' : 'hidden' }}>
