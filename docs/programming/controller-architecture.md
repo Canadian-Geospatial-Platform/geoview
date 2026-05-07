@@ -36,14 +36,14 @@ UI Components  --> Controllers  --> Trigger actions / domain operations
 ### Design Principles
 
 1. **UI components** should:
-   - Read state values directly from store hooks (`useMapZoom()`, `useLayerLegendLayers()`)
+   - Read state values directly from store hooks (`useStoreMapZoom()`, `useStoreLayerSelectedLayerPath()`)
    - Access controllers via `useControllers()` hook to trigger actions
    - Never import Domains or store setter functions directly
 
 2. **Controllers** should:
    - Subscribe to Domain events and MapViewer events in `onHook()`
    - Perform actions on the domain
-   - Update the store via store helper functions (e.g., `setStoreActiveFooterBarTab()`) (at the moment the controllers also act as a store state adaptor)
+   - Update the store via store helper functions (e.g., `setStoreUIActiveFooterBarTab()`) (at the moment the controllers also act as a store state adaptor)
    - Delegate to other controllers via `getControllersRegistry()`
    - Clean up subscriptions in `onUnhook()`
 
@@ -54,7 +54,7 @@ UI Components  --> Controllers  --> Trigger actions / domain operations
 
 4. **Store state files** should:
    - Define the state interface (`IMapState`, `ILayerState`, etc.)
-   - Export React hooks for component consumption (`useMapZoom()`)
+   - Export React hooks for component consumption (`useStoreMapZoom()`)
    - Export store getter functions for non-component code (`getStoreMapZoom(mapId)`)
    - Define store adaptor functions to update the store via store actions
    - Define `actions` (setter functions that update state via `set()`)
@@ -71,7 +71,7 @@ MapEventProcessor.setZoom("mapId", 10);
 controllers.uiController.setActiveFooterBarTab("layers");
 
 // ✅ New: Direct store update from within a controller
-setStoreActiveFooterBarTab(this.getMapId(), tab);
+setStoreUIActiveFooterBarTab(this.getMapId(), tab);
 ```
 
 ## Base Classes
@@ -107,10 +107,12 @@ Extends `AbstractController` with MapViewer access — the base class for all fr
 ```typescript
 export class AbstractMapViewerController extends AbstractController {
   #mapViewer: MapViewer;
+  #controllerRegistry: ControllerRegistry;
 
-  constructor(mapViewer: MapViewer) {
+  constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry) {
     super();
     this.#mapViewer = mapViewer;
+    this.#controllerRegistry = controllerRegistry;
   }
 
   protected getMapViewer(): MapViewer {
@@ -122,7 +124,7 @@ export class AbstractMapViewerController extends AbstractController {
   }
 
   protected getControllersRegistry(): ControllerRegistry {
-    return this.getMapViewer().controllers;
+    return this.#controllerRegistry;
   }
 }
 ```
@@ -295,8 +297,8 @@ export class CustomController extends AbstractMapViewerController {
   /** The bounded reference to the handle value changed */
   #boundedHandleValueChanged: DomainValueChangedDelegate;
 
-  constructor(mapViewer: MapViewer, customDomain: CustomDomain) {
-    super(mapViewer);
+  constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry, customDomain: CustomDomain) {
+    super(mapViewer, controllerRegistry);
     this.#customDomain = customDomain;
 
     // Create bounded references in constructor for proper unhooking
@@ -356,8 +358,8 @@ For controllers that react to map events (clicks, pointer moves, etc.).
 
 ```typescript
 export class MapInteractionController extends AbstractMapViewerController {
-  constructor(mapViewer: MapViewer) {
-    super(mapViewer);
+  constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry) {
+    super(mapViewer, controllerRegistry);
   }
 
   protected override onHook(): void {
@@ -368,13 +370,13 @@ export class MapInteractionController extends AbstractMapViewerController {
   #handleMapClicked(mapViewer: MapViewer, event: MapSingleClickEvent): void {
     // Query layers, update store, etc.
     this.getControllersRegistry().layerSetController.queryAtLonLat(
-      event.longlat,
+      event.lonlat,
     );
   }
 
   #handlePointerMoved(mapViewer: MapViewer, event: MapPointerMoveEvent): void {
     // Update hover state in store
-    setStorePointerPosition(this.getMapId(), event.coordinate);
+    setStoreMapPointerPosition(this.getMapId(), event.coordinate);
   }
 }
 ```
@@ -385,8 +387,8 @@ For controllers that expose actions without subscribing to any events.
 
 ```typescript
 export class TimeSliderController extends AbstractMapViewerController {
-  constructor(mapViewer: MapViewer) {
-    super(mapViewer);
+  constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry) {
+    super(mapViewer, controllerRegistry);
   }
 
   // No onHook()/onUnhook() overrides needed
@@ -451,7 +453,7 @@ export class ControllerRegistry {
     geometryApi: GeometryApi,
   ) {
     // ... existing controllers ...
-    this.customController = new CustomController(mapViewer, customDomain);
+    this.customController = new CustomController(mapViewer, this, customDomain);
     this.allControllers.push(this.customController);
   }
 }
@@ -464,7 +466,7 @@ readonly customController?: CustomController;
 
 // In constructor
 if (hasCustomPlugin(getGeoViewStore(mapViewer.mapId))) {
-  this.customController = new CustomController(mapViewer);
+  this.customController = new CustomController(mapViewer, this, customDomain);
   this.allControllers.push(this.customController);
 }
 ```
@@ -476,7 +478,7 @@ if (hasCustomPlugin(getGeoViewStore(mapViewer.mapId))) {
 Each state slice follows this pattern:
 
 ```typescript
-// In store-interface-and-initial-values/custom-state.ts
+// In states/custom-state.ts
 export interface ICustomState {
   someValue: string;
   items: CustomItem[];
@@ -493,11 +495,11 @@ export interface ICustomState {
 Components read state through selector hooks — one per state property:
 
 ```typescript
-// Naming pattern: use{SliceName}{PropertyName}
-export const useCustomSomeValue = (): string =>
+// Naming pattern: useStore{SliceName}{PropertyName}
+export const useStoreCustomSomeValue = (): string =>
   useStore(useGeoViewStore(), (state) => state.customState.someValue);
 
-export const useCustomItems = (): CustomItem[] =>
+export const useStoreCustomItems = (): CustomItem[] =>
   useStore(useGeoViewStore(), (state) => state.customState.items);
 ```
 
@@ -545,7 +547,7 @@ Controller calls store setter function (e.g., addStoreLayerEntry(mapId, layer))
   ↓
 Store updates state via actions
   ↓
-React hook (e.g., useLayerLegendLayers()) re-renders component
+React hook (e.g., useStoreLayerSelectedLayerPath()) re-renders component
 ```
 
 For UI-initiated actions:
@@ -581,7 +583,7 @@ checkInitTimeSliderLayerAndApplyFilters(layer: AbstractGVLayer): void {
 ```typescript
 // Inside LayerSetController
 #handleMapClicked(mapViewer: MapViewer, event: MapSingleClickEvent): void {
-  this.queryAtLonLat(event.longlat).catch((error: unknown) => {
+  this.queryAtLonLat(event.lonlat).catch((error: unknown) => {
     logger.logPromiseFailed('performQueryAtLonLat in #handleMapClicked', error);
   });
 }
@@ -617,7 +619,7 @@ checkInitTimeSliderLayerAndApplyFilters(layer: AbstractGVLayer): void {
 3. **Use store helper functions for state updates**
 
    ```typescript
-   setStoreActiveFooterBarTab(this.getMapId(), tab); // ✅ Clear intent
+   setStoreUIActiveFooterBarTab(this.getMapId(), tab); // ✅ Clear intent
    ```
 
 4. **Access sibling controllers through the registry**
@@ -671,10 +673,10 @@ checkInitTimeSliderLayerAndApplyFilters(layer: AbstractGVLayer): void {
 
    ```typescript
    // ❌ Bad: controller created but never hooked
-   this.customController = new CustomController(mapViewer);
+   this.customController = new CustomController(mapViewer, this, customDomain);
 
    // ✅ Good: added to the list for lifecycle management
-   this.customController = new CustomController(mapViewer);
+   this.customController = new CustomController(mapViewer, this, customDomain);
    this.allControllers.push(this.customController);
    ```
 
@@ -682,8 +684,8 @@ checkInitTimeSliderLayerAndApplyFilters(layer: AbstractGVLayer): void {
 
    ```typescript
    // ❌ Bad: subscribing in constructor (no cleanup guarantee)
-   constructor(mapViewer: MapViewer) {
-     super(mapViewer);
+   constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry) {
+     super(mapViewer, controllerRegistry);
      this.#domain.onEvent(this.#handler);
    }
 
@@ -705,9 +707,11 @@ The following table summarizes all controllers, their purpose, dependencies, and
 | `LayerCreatorController` | Layer creation, removal, reload, GeoCore UUID resolution                                        | `LayerDomain`             | No (subscribes to GeoViewLayer events per-layer) | No                 |
 | `LayerSetController`     | Feature info queries, legends, layer sets                                                       | `LayerDomain`             | Yes (map click/pointer)                          | No                 |
 | `PluginController`       | Plugin loading, adding, removing                                                                | —                         | No                                               | No                 |
+| `DetailsController`      | Details panel feature info state and selection                                                  | —                         | No                                               | No                 |
 | `DataTableController`    | Data table filter operations                                                                    | —                         | No                                               | No                 |
 | `DrawerController`       | Drawing tools, transforms, undo/redo, styles                                                    | `UIDomain`, `GeometryApi` | Yes (language, projection)                       | Yes (drawer)       |
 | `TimeSliderController`   | Temporal filtering, time slider values                                                          | —                         | No                                               | Yes (time-slider)  |
+| `GeoChartController`     | Geochart panel state and chart-related actions                                                  | —                         | No                                               | Yes (geochart)     |
 
 ### UIController
 
@@ -801,7 +805,7 @@ LayerController.#handleLayerVisibleChanged receives it
   ↓
 LayerController updates the store via setStoreLayerVisibility()
   ↓
-React component re-renders via useLayerVisible() hook
+React component re-renders via useStoreLayerVisible() hook
 ```
 
 ## File Structure
@@ -831,9 +835,9 @@ packages/geoview-core/src/
 │   └── stores/
 │       ├── geoview-store.ts                    # Store composition (all slices)
 │       ├── stores-managers.ts                  # Store registry (getGeoViewStore)
-│       └── store-interface-and-intial-values/  # State slices
-│           ├── map-state.ts                    # useMapZoom(), getStoreMapZoom(), etc.
-│           ├── layer-state.ts                  # useLayerLegendLayers(), etc.
+│       └── states/                             # State slices
+│           ├── map-state.ts                    # useStoreMapZoom(), getStoreMapZoom(), etc.
+│           ├── layer-state.ts                  # useStoreLayerSelectedLayerPath(), etc.
 │           ├── ui-state.ts                     # useUIActiveFooterBarTab(), etc.
 │           ├── feature-info-state.ts
 │           ├── data-table-state.ts

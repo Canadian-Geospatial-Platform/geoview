@@ -195,10 +195,9 @@ interface TypeGeoviewLayerConfig {
 
   // Temporal settings
   serviceDateFormat?: string; // Server date format
-  externalDateFormat?: string; // User-facing date format
-
-  // Filter
-  layerFilter?: string; // OGC CQL filter
+  displayDateFormat?: string; // User-facing date format
+  displayDateFormatShort?: string; // Optional short display date format
+  displayDateTimezone?: string; // Optional display timezone
 }
 ```
 
@@ -327,7 +326,7 @@ If your service uses a different date format:
   serviceDateFormat: 'MM/DD/YYYY HH:mm:ss-05:00',
 
   // Tell GeoView how to display dates to users
-  externalDateFormat: 'YYYY-MM-DD[THH:mm:ssZ]'
+  displayDateFormat: 'YYYY-MM-DD[THH:mm:ssZ]'
 }
 ```
 
@@ -349,18 +348,18 @@ Use square brackets to remove date/time components from display:
 
 ```typescript
 // Show only date, hide time
-externalDateFormat: "YYYY-MM-DD[THH:MM:SSZ]";
+displayDateFormat: "YYYY-MM-DD[THH:MM:SSZ]";
 
 // Show only year
-externalDateFormat: "YYYY[-MM-DDTHH:MM:SSZ]";
+displayDateFormat: "YYYY[-MM-DDTHH:MM:SSZ]";
 
 // Show month and year
-externalDateFormat: "MM-YYYY[THH:MM:SSZ]";
+displayDateFormat: "MM-YYYY[THH:MM:SSZ]";
 ```
 
 ### Temporal Filtering
 
-Temporal layers can be filtered using the layer's built-in filter mechanisms. Layer filters are applied through the layer configuration:
+Temporal layers can be filtered using the layer's built-in filter mechanisms. Layer filters are applied on layer entry configuration:
 
 ```typescript
 // Set a layer filter in the configuration

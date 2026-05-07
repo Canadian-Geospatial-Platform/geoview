@@ -22,7 +22,7 @@ useEffect hook
 
 ## Three Function Types per Store Slice
 
-Each store state file in `src/core/stores/store-interface-and-intial-values/` exports three types of functions:
+Each store state file in `src/core/stores/states/` exports three types of functions:
 
 ### Selector Hooks (`useStore*`) — React components only
 
@@ -74,7 +74,7 @@ export const setStoreMapClickMarker = (
 Components read state through `useStore*` selector hooks and mutate through controller methods. **Never call `setStore*` functions directly from components.**
 
 ```ts
-import { useStoreMapZoom, useStoreMapClickMarker } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useStoreMapZoom, useStoreMapClickMarker } from '@/core/stores/states/map-state';
 import { useMapController } from '@/core/controllers/use-controllers';
 
 export function MyComponent(): JSX.Element {
@@ -102,7 +102,7 @@ import {
   getStoreMapZoom,
   setStoreMapZoom,
   setStoreMapProjection,
-} from "@/core/stores/store-interface-and-intial-values/map-state";
+} from "@/core/stores/states/map-state";
 
 export class MapController extends AbstractMapViewerController {
   zoomToLevel(zoom: number): void {
@@ -123,7 +123,7 @@ Inside a controller, access other controllers through `this.getControllersRegist
 
 ```ts
 // Inside a controller method
-this.getControllersRegistry().mapController.applyLayerFilters(layerPath);
+this.getControllersRegistry().layerSetController.triggerResetFeatureInfo(layerPath);
 this.getControllersRegistry().uiController.setCircularProgress(true);
 ```
 
@@ -152,5 +152,5 @@ this.mapViewer.controllers.timeSliderController?.checkInitTimeSliderLayerAndAppl
 
 ## See Also
 
-- **[Best Practices](programming/best-practices.md)** - Coding standards
-- **[Event Helper](programming/event-helper.md)** - Delegate event system
+- **[Best Practices](best-practices.md)** - Coding standards
+- **[Event Helper](event-helper.md)** - Delegate event system
