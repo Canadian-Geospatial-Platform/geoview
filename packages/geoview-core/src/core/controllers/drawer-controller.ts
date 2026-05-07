@@ -54,14 +54,17 @@ import {
   setStoreIsEditing,
   setStoreIsSnapping,
   type StyleProps,
+  getStoreDrawerGeomTypes,
 } from '@/core/stores/states/drawer-state';
+import { getStoreAppGeoviewHTMLElement, getStoreAppIsCrosshairsActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 import type { DomainLanguageChangedDelegate, DomainLanguageChangedEvent, UIDomain } from '@/core/domains/ui-domain';
 import type { MapProjectionChangedDelegate, MapProjectionChangedEvent, MapViewer } from '@/geo/map/map-viewer';
-import type {
-  Transform,
-  TransformDeleteFeatureEvent,
-  TransformEvent,
-  TransformSelectionEvent,
+import {
+  HandleType,
+  type Transform,
+  type TransformDeleteFeatureEvent,
+  type TransformEvent,
+  type TransformSelectionEvent,
 } from '@/geo/interaction/transform/transform';
 import type { Draw } from '@/geo/interaction/draw';
 import type { Snap } from '@/geo/interaction/snap';
@@ -86,6 +89,12 @@ export class DrawerController extends AbstractMapViewerController {
 
   /** Keyboard event handlers for each map keyed by map id. */
   #keyboardHandler?: (event: KeyboardEvent) => void;
+
+  /** Hit tolerance for mouse-based editing interactions */
+  static readonly MOUSE_HIT_TOLERANCE = 5;
+
+  /** Hit tolerance for keyboard-based editing interactions (crosshair) */
+  static readonly KEYBOARD_HIT_TOLERANCE = 30;
 
   /** The current draw interaction instance */
   #drawInstance?: Draw;
@@ -114,6 +123,15 @@ export class DrawerController extends AbstractMapViewerController {
 
   /** Current position in history stack for each map */
   #historyIndex = -1;
+
+  /** Pending first coordinate for two-step geometries (Circle, Rectangle, Star) - Keyboard Only */
+  #pendingFirstCoordinate?: number[];
+
+  /** Temporary overlay marker to visualize the pending first coordinate */
+  #pendingFirstCoordinateOverlay?: Overlay;
+
+  /** Grabbed handle state for keyboard/crosshair editing */
+  #grabbedHandle?: { coordinate: number[]; handleType: HandleType };
 
   /** The default icon source as a base64-encoded SVG data URI */
   static readonly DEFAULT_ICON_SOURCE =
@@ -278,6 +296,10 @@ export class DrawerController extends AbstractMapViewerController {
       viewer.registerMapPointerHandlers(viewer.map);
     }
 
+    // Clear any pending coordinates
+    this.#clearPendingMarker();
+    this.#pendingFirstCoordinate = undefined;
+
     this.#drawInstance?.stopInteraction();
 
     // Update state
@@ -334,7 +356,14 @@ export class DrawerController extends AbstractMapViewerController {
 
     // Only start editing if the drawing group exists
     if (geometryApi.hasGeometryGroup(DrawerController.DRAW_GROUP_KEY)) {
-      const transformInstance = viewer.initTransformInteractions({ geometryGroupKey: DrawerController.DRAW_GROUP_KEY, hitTolerance: 5 });
+      // Use larger hit tolerance when crosshair is active for easier keyboard targeting
+      const isCrosshairActive = getStoreAppIsCrosshairsActive(this.getMapId());
+      const hitTolerance = isCrosshairActive ? DrawerController.KEYBOARD_HIT_TOLERANCE : DrawerController.MOUSE_HIT_TOLERANCE;
+
+      const transformInstance = viewer.initTransformInteractions({
+        geometryGroupKey: DrawerController.DRAW_GROUP_KEY,
+        hitTolerance,
+      });
 
       // Handle Transform Events (A feature was edited, the feature is still being edited)
       transformInstance.onTransformEnd(this.#handleTransformEnd());
@@ -375,6 +404,9 @@ export class DrawerController extends AbstractMapViewerController {
       const viewer = this.getMapViewer();
       viewer.registerMapPointerHandlers(viewer.map);
     }
+
+    // Clear any grabbed handle state
+    this.#grabbedHandle = undefined;
 
     const transformInstance = this.#transformInstance;
 
@@ -554,7 +586,6 @@ export class DrawerController extends AbstractMapViewerController {
 
     const hideMeasurements = getStoreDrawerHideMeasurements(mapId);
     const selectedFeature = this.#selectedFeatureState?.feature;
-    if (!selectedFeature) return;
 
     const selectedDrawingId = selectedFeature?.get('featureId');
 
@@ -873,6 +904,495 @@ export class DrawerController extends AbstractMapViewerController {
   }
 
   // #endregion PUBLIC METHODS - DRAWING
+
+  // #region PUBLIC METHODS - KEYBOARD / CROSSHAIR
+
+  /**
+   * Adds a coordinate to the current drawing when using keyboard/crosshair input.
+   *
+   * @param coordinate - The map coordinate to add as a vertex
+   * @returns Whether the coordinate was added successfully
+   */
+  addCoordinateToDrawing(coordinate: number[]): boolean {
+    const mapId = this.getMapId();
+
+    if (!isStoreDrawerInitialized(mapId)) return false;
+    if (!getStoreDrawerIsDrawing(mapId)) return false;
+
+    const drawInstance = this.#drawInstance;
+    if (!drawInstance) return false;
+
+    try {
+      const activeGeom = getStoreDrawerActiveGeom(mapId);
+      const isAutoCompleteGeom = activeGeom === 'Circle' || activeGeom === 'Rectangle' || activeGeom === 'Star';
+
+      // If we have a pending first coordinate, this is the second one and we can create the feature
+      if (this.#pendingFirstCoordinate && isAutoCompleteGeom) {
+        // Create the feature manually instead of using appendCoordinates
+        this.#createAutoCompleteFeature(activeGeom, this.#pendingFirstCoordinate, coordinate);
+        this.#clearPendingMarker();
+        this.#pendingFirstCoordinate = undefined;
+
+        return true;
+      }
+
+      // Check if there's an active sketch or start a new one
+      if (!drawInstance.hasActiveSketch()) {
+        if (isAutoCompleteGeom) {
+          // Two-step drawing: store the first coordinate
+          this.#pendingFirstCoordinate = coordinate;
+          this.#createPendingMarker(coordinate);
+          return true;
+        }
+
+        // For other geometries, restart and append
+        this.startDrawing();
+        const newDrawInstance = this.#drawInstance;
+        if (!newDrawInstance) return false;
+
+        newDrawInstance.appendCoordinates([coordinate]);
+        if (activeGeom === 'Point' || activeGeom === 'Text') {
+          newDrawInstance.finishDrawing();
+        }
+        return true;
+      }
+
+      // Points and Text: add coordinate then immediately finish
+      if (activeGeom === 'Point' || activeGeom === 'Text') {
+        drawInstance.appendCoordinates([coordinate]);
+        drawInstance.finishDrawing();
+        return true;
+      }
+
+      // For LineString, Polygon, append the coordinate
+      drawInstance.appendCoordinates([coordinate]);
+      return true;
+    } catch (error) {
+      logger.logError('Failed to add coordinate to drawing', error);
+      // Clear pending coordinate on error
+      this.#clearPendingMarker();
+      this.#pendingFirstCoordinate = undefined;
+      return false;
+    }
+  }
+
+  /**
+   * Creates an auto-complete feature (Circle, Rectangle, Star) manually from two coordinates.
+   *
+   * @param geomType - The geometry type to create
+   * @param firstCoord - The center or first corner coordinate
+   * @param secondCoord - The edge or second corner coordinate
+   */
+  #createAutoCompleteFeature(geomType: string, firstCoord: number[], secondCoord: number[]): void {
+    // Calculate geometry based on type
+    let geometry: Geometry;
+
+    if (geomType === 'Circle') {
+      const radius = Math.sqrt(Math.pow(secondCoord[0] - firstCoord[0], 2) + Math.pow(secondCoord[1] - firstCoord[1], 2));
+      geometry = new CircleGeom(firstCoord, radius);
+    } else if (geomType === 'Rectangle') {
+      const minX = Math.min(firstCoord[0], secondCoord[0]);
+      const minY = Math.min(firstCoord[1], secondCoord[1]);
+      const maxX = Math.max(firstCoord[0], secondCoord[0]);
+      const maxY = Math.max(firstCoord[1], secondCoord[1]);
+
+      geometry = new Polygon([
+        [
+          [minX, minY],
+          [minX, maxY],
+          [maxX, maxY],
+          [maxX, minY],
+          [minX, minY],
+        ],
+      ]);
+    } else if (geomType === 'Star') {
+      const svgPath =
+        'm 7.61,20.13 8.22,7.04 -2.51,10.53 9.24,-5.64 9.24,5.64 L29.29,27.17 37.51,20.13 26.72,19.27 22.56,9.27 18.4,19.27 Z';
+      geometry = DrawerController.#svgPathToGeometry(svgPath, [firstCoord, secondCoord]);
+    } else {
+      return;
+    }
+
+    // Create and finalize the feature (reuses shared logic from #handleDrawEnd)
+    const feature = new Feature({ geometry });
+    this.#finalizeFeature(feature, geomType);
+  }
+
+  /**
+   * Finalizes a drawn feature by applying style, properties, tooltips, and adding to map.
+   *
+   * @param feature - The feature to finalize
+   * @param geomType - The geometry type
+   */
+  #finalizeFeature(feature: Feature, geomType: string): void {
+    const mapId = this.getMapId();
+    const currentStyle = getStoreDrawerStyle(mapId);
+    const viewer = this.getMapViewer();
+
+    let geom = feature.getGeometry();
+    if (!geom) return;
+
+    // Create style based on geometry type
+    let featureStyle;
+
+    if (geomType === 'Point') {
+      featureStyle = new DrawerStyle({
+        image: new DrawerIcon({
+          src: getStoreDrawerIconSrc(mapId),
+          anchor: [0.5, 1],
+          anchorXUnits: 'fraction',
+          anchorYUnits: 'fraction',
+          scale: (currentStyle.iconSize || DrawerIcon.BASE_ICON_SIZE) / DrawerIcon.BASE_ICON_SIZE,
+          strokeColor: currentStyle.strokeColor,
+          strokeWidth: currentStyle.strokeWidth,
+          fillColor: currentStyle.fillColor,
+        }),
+      });
+    } else if (geomType === 'Text') {
+      featureStyle = new DrawerStyle({
+        text: new DrawerText({
+          text: currentStyle.text,
+          fill: new Fill({ color: currentStyle.textColor }),
+          stroke: new Stroke({ color: currentStyle.textHaloColor, width: currentStyle.textHaloWidth }),
+          rotation: 0,
+          italic: currentStyle.textItalic,
+          bold: currentStyle.textBold,
+          size: currentStyle.textSize,
+          fontFamily: currentStyle.textFont,
+        }),
+      });
+    } else {
+      // Convert Circle to Polygon for GeoJSON compatibility
+      if (geomType === 'Circle' && geom instanceof CircleGeom) {
+        geom = fromCircle(geom, 64);
+        feature.setGeometry(geom);
+      }
+
+      featureStyle = new DrawerStyle({
+        stroke: new Stroke({
+          color: currentStyle.strokeColor,
+          width: currentStyle.strokeWidth,
+        }),
+        fill: new Fill({
+          color: currentStyle.fillColor,
+        }),
+      });
+    }
+
+    // Apply style and properties
+    feature.setStyle(featureStyle);
+    DrawerController.#setFeatureProperties(feature);
+
+    // Add measurement tooltip for non-point features
+    if (!(geom instanceof Point)) {
+      const hideMeasurements = getStoreDrawerHideMeasurements(mapId);
+      const overlay = DrawerController.#createMeasureTooltip(feature, hideMeasurements, getStoreAppDisplayLanguage(mapId));
+      if (overlay) {
+        viewer.map.addOverlay(overlay);
+      }
+    }
+
+    // Add to map
+    this.getGeometryApi().geometries.push(feature);
+    this.getGeometryApi().addToGeometryGroup(feature, DrawerController.DRAW_GROUP_KEY);
+
+    // Save to history (non-text features)
+    if (geomType !== 'Text') {
+      this.#saveToHistory({
+        type: 'add',
+        features: [feature],
+      });
+    }
+  }
+
+  /**
+   * Finishes the current drawing when using keyboard/crosshair input.
+   */
+  finishCurrentDrawing(): void {
+    const mapId = this.getMapId();
+
+    if (!isStoreDrawerInitialized(mapId)) return;
+    if (!getStoreDrawerIsDrawing(mapId)) return;
+
+    const drawInstance = this.#drawInstance;
+    if (!drawInstance) return;
+
+    drawInstance.finishDrawing();
+  }
+
+  /**
+   * Creates a temporary overlay marker at the pending first coordinate.
+   */
+  #createPendingMarker(coordinate: number[]): void {
+    this.#clearPendingMarker();
+
+    // Create a simple visual element
+    const markerElement = document.createElement('div');
+    markerElement.className = 'drawer-pending-marker';
+    markerElement.style.cssText = `
+    width: 12px;
+    height: 12px;
+    background: rgba(255, 165, 0, 0.4);
+    border: 2px solid rgba(255, 165, 0, 0.8);
+    border-radius: 50%;
+    pointer-events: none;
+  `;
+
+    const overlay = new Overlay({
+      position: coordinate,
+      positioning: 'center-center',
+      element: markerElement,
+      stopEvent: false,
+    });
+
+    this.getMapViewer().map.addOverlay(overlay);
+    this.#pendingFirstCoordinateOverlay = overlay;
+  }
+
+  #clearPendingMarker(): void {
+    if (this.#pendingFirstCoordinateOverlay) {
+      this.getMapViewer().map.removeOverlay(this.#pendingFirstCoordinateOverlay);
+      this.#pendingFirstCoordinateOverlay = undefined;
+    }
+  }
+
+  /**
+   * Selects or deselects a feature at the given coordinate for editing.
+   *
+   * @param coordinate - The map coordinate to check for features
+   * @returns Whether a feature was selected/deselected
+   */
+  handleEditingAtCoordinate(coordinate: number[]): boolean {
+    const mapId = this.getMapId();
+
+    if (!isStoreDrawerInitialized(mapId)) return false;
+    if (!getStoreDrawerIsEditing(mapId)) return false;
+
+    const transformInstance = this.#transformInstance;
+    if (!transformInstance) return false;
+
+    const selectedFeature = transformInstance.getSelectedFeature();
+
+    // If a feature is already selected, check if we're clicking on a handle
+    if (selectedFeature) {
+      // Check if coordinate is on a handle
+      if (transformInstance.hasHandleAtCoordinate(coordinate)) {
+        return true;
+      }
+    }
+
+    // No selected feature or not on handle - find and select feature at coordinate
+    const pixel = this.getMapViewer().map.getPixelFromCoordinate(coordinate);
+    const features: Feature[] = [];
+
+    this.getMapViewer().map.forEachFeatureAtPixel(pixel, (feature) => {
+      if (feature.get('geometryGroup') === DrawerController.DRAW_GROUP_KEY) {
+        features.push(feature as Feature);
+      }
+    });
+
+    if (features.length > 0) {
+      // Select the top-most feature
+      transformInstance.selectFeature(features[0]);
+      return true;
+    }
+
+    // No handle or feature found at coordinate
+    return false;
+  }
+
+  /**
+   * Grabs a handle at the given coordinate for keyboard-based transformation.
+   *
+   * @param coordinate - The map coordinate to check for handles
+   * @returns Whether a handle was successfully grabbed
+   */
+  grabHandleForKeyboard(coordinate: number[]): boolean {
+    const grabbed = this.grabHandleAtCoordinate(coordinate);
+    if (grabbed) {
+      this.#grabbedHandle = {
+        coordinate,
+        handleType: grabbed.handleType,
+      };
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Grabs a handle at the given coordinate for keyboard-based transformation (Keyboard / Crosshair).
+   *
+   * @param coordinate - The map coordinate to check for handles
+   * @returns The handle type if a handle was grabbed, otherwise undefined
+   */
+  grabHandleAtCoordinate(coordinate: number[]): { handleType: HandleType } | undefined {
+    const transformInstance = this.#transformInstance;
+    if (!transformInstance) return undefined;
+
+    const handleType = transformInstance.getHandleTypeAtCoordinate(coordinate);
+    if (!handleType) {
+      // No handle found, but check if we're clicking on the selected feature itself
+      // If so, treat it as a TRANSLATE operation
+      const selectedFeature = transformInstance.getSelectedFeature();
+      if (selectedFeature) {
+        const started = transformInstance.beginKeyboardTransform(coordinate, HandleType.TRANSLATE);
+        if (started) {
+          return { handleType: HandleType.TRANSLATE };
+        }
+      }
+      return undefined;
+    }
+
+    // Attempt to begin the transformation
+    const started = transformInstance.beginKeyboardTransform(coordinate, handleType);
+
+    // If transformation didn't start (e.g., edge-midpoint or delete), return undefined
+    if (!started) {
+      return undefined;
+    }
+
+    return { handleType };
+  }
+
+  /**
+   * Applies the currently grabbed transformation to a new coordinate.
+   *
+   * @param newCoordinate - The coordinate to apply the transformation to
+   * @returns Whether the transformation was successfully applied
+   */
+  applyGrabbedTransform(newCoordinate: number[]): boolean {
+    if (!this.#grabbedHandle) return false;
+
+    const success = this.applyTransformFromCoordinates(this.#grabbedHandle.coordinate, newCoordinate, this.#grabbedHandle.handleType);
+
+    if (success) {
+      this.#grabbedHandle = undefined;
+    }
+
+    return success;
+  }
+
+  /**
+   * Cancels any currently grabbed transformation and restores handle highlights.
+   */
+  cancelGrabbedTransform(): void {
+    if (this.#grabbedHandle) {
+      const transformInstance = this.#transformInstance;
+      if (transformInstance) {
+        transformInstance.restoreHandleHighlight();
+      }
+      this.#grabbedHandle = undefined;
+    }
+  }
+
+  /**
+   * Checks if a handle is currently grabbed for transformation.
+   *
+   * @returns Whether a handle is grabbed
+   */
+  isHandleGrabbed(): boolean {
+    return this.#grabbedHandle !== undefined;
+  }
+
+  /**
+   * Applies a transformation from a start coordinate to an end coordinate using the specified handle type (Keyboard / Crosshair).
+   *
+   * @param startCoordinate - The starting coordinate where the handle was grabbed
+   * @param endCoordinate - The ending coordinate where the handle should be moved to
+   * @param handleType - The type of handle being transformed
+   * @returns Whether the transformation was successfully applied
+   */
+  applyTransformFromCoordinates(startCoordinate: number[], endCoordinate: number[], handleType: HandleType): boolean {
+    const mapId = this.getMapId();
+
+    if (!isStoreDrawerInitialized(mapId)) return false;
+    if (!getStoreDrawerIsEditing(mapId)) return false;
+
+    const transformInstance = this.#transformInstance;
+    if (!transformInstance) return false;
+
+    return transformInstance.applyKeyboardTransformFromCoordinates(startCoordinate, endCoordinate, handleType);
+  }
+
+  /**
+   * Cycles to the next or previous geometry type.
+   *
+   * @param forward - Whether to cycle forward (true) or backward (false)
+   */
+  cycleGeometryType(forward = true): void {
+    const mapId = this.getMapId();
+    if (!isStoreDrawerInitialized(mapId)) return;
+
+    const currentGeomType = getStoreDrawerActiveGeom(mapId);
+    const availableGeomTypes = getStoreDrawerGeomTypes(mapId);
+
+    const currentIndex = availableGeomTypes.indexOf(currentGeomType);
+
+    // If current geometry isn't in the list, default to first item
+    if (currentIndex === -1) {
+      if (availableGeomTypes.length > 0) {
+        this.setActiveGeom(availableGeomTypes[0]);
+      }
+      return;
+    }
+
+    let nextIndex;
+    if (forward) {
+      nextIndex = (currentIndex + 1) % availableGeomTypes.length;
+    } else {
+      nextIndex = (currentIndex - 1 + availableGeomTypes.length) % availableGeomTypes.length;
+    }
+
+    const nextGeomType = availableGeomTypes[nextIndex];
+    this.setActiveGeom(nextGeomType);
+  }
+
+  /**
+   * Opens the style menu and focuses the first input.
+   */
+  openStyleMenu(): void {
+    const mapId = this.getMapId();
+    const mapElement = getStoreAppGeoviewHTMLElement(mapId);
+
+    // Find the style button within this map's container
+    const styleButton = mapElement.querySelector('#drawer-style') as HTMLElement;
+    if (styleButton) {
+      styleButton.click();
+    } else {
+      logger.logWarning('Style button not found - drawer plugin may not be loaded');
+    }
+  }
+
+  /**
+   * Triggers the file upload dialog for importing drawings.
+   */
+  triggerUploadDialog(): void {
+    const mapId = this.getMapId();
+    if (!isStoreDrawerInitialized(mapId)) return;
+
+    // Create a hidden file input element
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = '.geojson';
+    fileInput.style.display = 'none';
+
+    // Handle file selection
+    fileInput.addEventListener('change', (event) => {
+      const target = event.target as HTMLInputElement;
+      const file = target.files?.[0];
+      if (file) {
+        this.uploadDrawings(file);
+      }
+      // Clean up
+      fileInput.remove();
+    });
+
+    // Trigger the file picker
+    document.body.appendChild(fileInput);
+    fileInput.click();
+  }
+
+  // #endregion PUBLIC METHODS - KEYBOARD / CROSSHAIR DRAWING
 
   // #region PUBLIC METHODS - HISTORY
 
@@ -1641,89 +2161,11 @@ export class DrawerController extends AbstractMapViewerController {
 
     return (_sender: unknown, event: DrawEvent): void => {
       const currentGeomType = getStoreDrawerActiveGeom(mapId);
-      const currentStyle = getStoreDrawerStyle(mapId);
-
       const viewer = this.getMapViewer();
       const { feature } = event;
 
-      const geom = feature.getGeometry();
-      if (!geom) return;
-
-      // Create a style based on current color settings
-      let featureStyle;
-
-      if (currentGeomType === 'Point') {
-        // For points, use a circle style
-        featureStyle = new DrawerStyle({
-          image: new DrawerIcon({
-            src: getStoreDrawerIconSrc(mapId),
-            anchor: [0.5, 1], // 50% of X = Middle, 100% Y = Bottom
-            anchorXUnits: 'fraction',
-            anchorYUnits: 'fraction',
-            scale: (currentStyle.iconSize || DrawerIcon.BASE_ICON_SIZE) / DrawerIcon.BASE_ICON_SIZE,
-            strokeColor: currentStyle.strokeColor,
-            strokeWidth: currentStyle.strokeWidth,
-            fillColor: currentStyle.fillColor,
-          }),
-        });
-      } else if (currentGeomType === 'Text') {
-        featureStyle = new DrawerStyle({
-          text: new DrawerText({
-            text: currentStyle.text,
-            fill: new Fill({ color: currentStyle.textColor }),
-            stroke: new Stroke({ color: currentStyle.textHaloColor, width: currentStyle.textHaloWidth }),
-            rotation: 0,
-            italic: currentStyle.textItalic,
-            bold: currentStyle.textBold,
-            size: currentStyle.textSize,
-            fontFamily: currentStyle.textFont,
-          }),
-        });
-      } else {
-        // Convert Circle to a Polygon because geojson can't handle circles (for download / upload)
-        if (currentGeomType === 'Circle') {
-          // Default sides is 32, doubling makes it smoother
-          feature.setGeometry(fromCircle(geom as CircleGeom, 64));
-        }
-
-        // Set the styles for lines / polygons
-        featureStyle = new DrawerStyle({
-          stroke: new Stroke({
-            color: currentStyle.strokeColor,
-            width: currentStyle.strokeWidth,
-          }),
-          fill: new Fill({
-            color: currentStyle.fillColor,
-          }),
-        });
-      }
-
-      // Apply the style to the feature
-      feature.setStyle(featureStyle);
-
-      // Set the feature properties for proper download / upload
-      DrawerController.#setFeatureProperties(feature);
-
-      // Add overlays to non-point features
-      if (!(geom instanceof Point)) {
-        // GV hideMeasurements has to be here, otherwise the value can be stale, unlike style and geomType which restart the interaction
-        const hideMeasurements = getStoreDrawerHideMeasurements(mapId);
-        const newOverlay = DrawerController.#createMeasureTooltip(feature, hideMeasurements, getStoreAppDisplayLanguage(mapId));
-        if (newOverlay) {
-          viewer.map.addOverlay(newOverlay);
-        }
-      }
-
-      this.getGeometryApi().geometries.push(feature);
-      this.getGeometryApi().addToGeometryGroup(feature, DrawerController.DRAW_GROUP_KEY);
-
-      // For non-text features, save to history immediately
-      if (currentGeomType !== 'Text') {
-        this.#saveToHistory({
-          type: 'add',
-          features: [feature],
-        });
-      }
+      // Finalize the feature (shared logic)
+      this.#finalizeFeature(feature, currentGeomType);
 
       // For text features, create a temporary transform for immediate editing
       if (currentGeomType === 'Text') {
@@ -1757,6 +2199,7 @@ export class DrawerController extends AbstractMapViewerController {
         // Handle when the temporary editing is done
         tempTransform.onSelectionChange((_textSender, textEvent) => {
           const { previousFeature, newFeature } = textEvent;
+
           if (!newFeature && previousFeature && !isDeselected) {
             isDeselected = true;
 
@@ -1770,7 +2213,7 @@ export class DrawerController extends AbstractMapViewerController {
             this.#cleanupTempTransform();
 
             // Reset the selected drawing type
-            setStoreSelectedDrawingType(mapId, getStoreDrawerActiveGeom(mapId));
+            setStoreSelectedDrawingType(mapId, undefined);
 
             // Resume drawing
             if (drawInstance) {
@@ -1927,9 +2370,12 @@ export class DrawerController extends AbstractMapViewerController {
 
       // Only show the tooltip again if not hiding measurements
       if (previousFeature && !hideMeasurements) {
-        const prevTooltip = previousFeature.get('measureTooltip');
-        if (prevTooltip) {
-          prevTooltip.getElement().hidden = false;
+        const geom = previousFeature.getGeometry();
+        if (geom && !(geom instanceof Point)) {
+          const overlay = DrawerController.#createMeasureTooltip(previousFeature, false, getStoreAppDisplayLanguage(mapId));
+          if (overlay) {
+            this.getMapViewer().map.addOverlay(overlay);
+          }
         }
       }
 
@@ -1955,12 +2401,61 @@ export class DrawerController extends AbstractMapViewerController {
   }
 
   /**
-   * Sets up keyboard event handling for undo (Ctrl+Z) and redo (Ctrl+Shift+Z / Ctrl+Y).
+   * Sets up keyboard event handling for drawer shortcuts.
+   *
+   * Shortcuts:
+   * - Ctrl+Z: Undo
+   * - Ctrl+Shift+Z / Ctrl+Y: Redo
+   * - Ctrl+D: Toggle Drawing
+   * - Ctrl+E: Toggle Editing
+   * - Ctrl+G: Cycle Geometry Type (forward)
+   * - Ctrl+Shift+G: Cycle Geometry Type (backward)
+   * - Ctrl+S: Open Style Menu
+   * - Ctrl+Shift+S: Download drawings
+   * - Ctrl+M: Toggle Measurements
+   * - Ctrl+N: Toggle Snapping
+   * - Ctrl+Shift+C: Clear All
+   * - Ctrl+Shift+O: Upload drawings
    */
   #hookKeyboardHandlers(): void {
     if (this.#keyboardHandler) return;
 
     const handler = (event: KeyboardEvent): void => {
+      // Handle Escape key separately (not Ctrl modified)
+      if (event.key === 'Escape') {
+        const mapId = this.getMapId();
+        if (!isStoreDrawerInitialized(mapId)) return;
+
+        // If there's a temp text transform, clear its selection to exit edit mode
+        if (this.#tempTextTransformInstance) {
+          this.#tempTextTransformInstance.clearSelection();
+          event.preventDefault();
+
+          // Return focus to the map so arrow keys work (Necessary for Text Transforms)
+          const mapElement = this.getMapViewer().map.getTargetElement();
+          if (mapElement instanceof HTMLElement) {
+            mapElement.focus();
+          }
+          return;
+        }
+
+        // If editing with a selected feature, clear selection
+        const transformInstance = this.#transformInstance;
+        if (transformInstance && transformInstance.getSelectedFeature()) {
+          transformInstance.clearSelection();
+          event.preventDefault();
+
+          // Return focus to the map so arrow keys work (Necessary for Text Transforms)
+          const mapElement = this.getMapViewer().map.getTargetElement();
+          if (mapElement instanceof HTMLElement) {
+            mapElement.focus();
+          }
+          return;
+        }
+
+        return;
+      }
+
       if (event.ctrlKey || event.metaKey) {
         switch (event.key.toLowerCase()) {
           case 'z':
@@ -1970,9 +2465,69 @@ export class DrawerController extends AbstractMapViewerController {
               event.preventDefault();
             }
             break;
+
           case 'y':
             if (this.redo()) event.preventDefault();
             break;
+
+          case 'd':
+            // Toggle Drawing
+            this.toggleDrawing();
+            event.preventDefault();
+            break;
+
+          case 'e':
+            // Toggle Editing
+            this.toggleEditing();
+            event.preventDefault();
+            break;
+
+          case 'g':
+            // Cycle Geometry Type
+            if (event.shiftKey) {
+              this.cycleGeometryType(false); // Backward
+            } else {
+              this.cycleGeometryType(true); // Forward
+            }
+            event.preventDefault();
+            break;
+
+          case 's':
+            // Save (Download) or Style Menu
+            if (event.shiftKey) {
+              this.downloadDrawings(); // Ctrl+Shift+S
+            } else {
+              this.openStyleMenu(); // Ctrl+S
+            }
+            event.preventDefault();
+            break;
+
+          case 'm':
+            // Toggle Measurements
+            this.toggleHideMeasurements();
+            event.preventDefault();
+            break;
+
+          case 'n':
+            // Toggle Snapping
+            this.toggleSnapping();
+            event.preventDefault();
+            break;
+
+          case 'c':
+            // Clear All (with Shift)
+            if (event.shiftKey) {
+              this.clearDrawings();
+              event.preventDefault();
+            }
+            break;
+
+          case 'o':
+            // Upload (with Shift)
+            this.triggerUploadDialog();
+            event.preventDefault();
+            break;
+
           default:
             break;
         }
