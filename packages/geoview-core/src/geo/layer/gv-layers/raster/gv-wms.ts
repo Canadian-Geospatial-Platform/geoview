@@ -48,6 +48,9 @@ export class GVWMS extends AbstractGVRaster {
   /** The default Get Feature Info tolerance to use for QGIS Server services which are more picky by default (really needs to be zoomed in to get results, by default) */
   static readonly DEFAULT_GET_FEATURE_INFO_TOLERANCE: number = 20;
 
+  /** The favored field names to use when displaying feature info title, in order of priority, most to least */
+  static readonly DEFAULT_FAVORED_FIELD_NAME: string[] = ['name', 'title', 'label', 'display', 'project_name', 'id', 'objectid', 'oid'];
+
   /** The Get Feature Info feature count to use */
   #getFeatureInfoFeatureCount: number = GVWMS.DEFAULT_MAX_FEATURE_COUNT;
 
@@ -1596,6 +1599,15 @@ export class GVWMS extends AbstractGVRaster {
           };
         }
       });
+
+      // If no nameField already defined
+      if (!featureInfo.nameField) {
+        // Pick the first field name matching a favored title (case-insensitive, in priority order); leave nameField undefined if none match
+        const fieldKeys = Object.keys(featureInfo.fieldInfo);
+        featureInfo.nameField = GVWMS.DEFAULT_FAVORED_FIELD_NAME.flatMap((title) =>
+          fieldKeys.filter((key) => key.toLowerCase() === title.toLowerCase())
+        )[0];
+      }
     };
 
     extractFields(feature);
