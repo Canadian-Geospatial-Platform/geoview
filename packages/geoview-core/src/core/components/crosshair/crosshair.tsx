@@ -87,7 +87,7 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
   );
 
   /**
-   * Handles Enter key for crosshair
+   * Handles Enter and Space key for crosshair
    */
   const handleCrosshairInteraction = useCallback(
     (event: HTMLElementEventMap[keyof HTMLElementEventMap]): void => {
@@ -116,18 +116,18 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
 
       if (isDrawerDrawing) {
         // DRAWING MODE
-        if (event.key === 'Enter' && event.shiftKey) {
-          // Shift+Enter: Finish drawing
+        if ((event.key === 'Enter' && event.shiftKey) || (event.key === ' ' && event.shiftKey)) {
+          // Shift+Enter or Shift+Space: Finish drawing
           event.preventDefault();
           drawerController.finishCurrentDrawing();
-        } else if (event.key === 'Enter') {
-          // Enter: Add vertex
+        } else if (event.key === 'Enter' || event.key === ' ') {
+          // Enter or Space: Add vertex
           event.preventDefault();
           drawerController.addCoordinateToDrawing(currentPointerPosition.projected);
         }
       } else if (isDrawerEditing) {
         // EDITING MODE
-        if (event.key === 'Enter') {
+        if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault();
 
           // If actively moving a handle
@@ -147,7 +147,7 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
           event.preventDefault();
           drawerController.cancelGrabbedTransform();
         }
-      } else if (event.key === 'Enter') {
+      } else if (event.key === 'Enter' || event.key === ' ') {
         // Not in draw or edit mode
         // Default behavior: open details panel
         abortControllerRef.current?.abort();
