@@ -263,6 +263,74 @@ export class Transform extends Interaction {
   }
 
   /**
+   * Checks if there is a handle at the given coordinate (Keyboard / Crosshair).
+   *
+   * @param coordinate - The map coordinate to check
+   * @returns True if a handle exists at the coordinate
+   */
+  hasHandleAtCoordinate(coordinate: number[]): boolean {
+    if (!this.mapViewer) return false;
+
+    const pixel = this.mapViewer.map.getPixelFromCoordinate(coordinate);
+    const features = this.mapViewer.map.getFeaturesAtPixel(pixel, {
+      layerFilter: (layer) => layer === this.#ol_transform.handleLayer,
+      hitTolerance: this.#ol_transform.options.hitTolerance,
+    });
+
+    return features && features.length > 0;
+  }
+
+  /**
+   * Gets the handle type at the given coordinate (Keyboard / Crosshair).
+   *
+   * @param coordinate - The map coordinate to check
+   * @returns The handle type if a handle exists at the coordinate, otherwise undefined
+   */
+  getHandleTypeAtCoordinate(coordinate: number[]): HandleType | undefined {
+    if (!this.mapViewer) return undefined;
+
+    const pixel = this.mapViewer.map.getPixelFromCoordinate(coordinate);
+    const features = this.mapViewer.map.getFeaturesAtPixel(pixel, {
+      layerFilter: (layer) => layer === this.#ol_transform.handleLayer,
+      hitTolerance: this.#ol_transform.options.hitTolerance,
+    });
+
+    return features && features.length > 0 ? (features[0].get('handleType') as HandleType) : undefined;
+  }
+
+  /**
+   * Initializes transformation state for keyboard-based transformations (Keyboard / Crosshair).
+   * Must be called after grabbing a handle and before applying transformations.
+   *
+   * @param coordinate - The coordinate where the transformation begins
+   * @param handleType - The type of handle being transformed
+   * @return True if the keyboard transform was successfully initiated, false otherwise (e.g. if no handle at coordinate or transform instance not initialized)
+   */
+  beginKeyboardTransform(coordinate: number[], handleType: HandleType): boolean {
+    return this.#ol_transform.beginKeyboardTransform(coordinate, handleType);
+  }
+
+  /**
+   * Applies a transformation from a grabbed coordinate to a new coordinate (Keyboard / Crosshair).
+   * Handles all transformation types internally based on the handle type.
+   *
+   * @param startCoordinate - The coordinate where the handle was grabbed
+   * @param endCoordinate - The coordinate to transform to
+   * @param handleType - The type of handle being transformed
+   * @returns Whether the transformation was successfully applied
+   */
+  applyKeyboardTransformFromCoordinates(startCoordinate: number[], endCoordinate: number[], handleType: HandleType): boolean {
+    return this.#ol_transform.applyKeyboardTransformFromCoordinates(startCoordinate, endCoordinate, handleType);
+  }
+
+  /**
+   * Restores the original style of any highlighted handle (Keyboard / Crosshair).
+   */
+  restoreHandleHighlight(): void {
+    this.#ol_transform.restoreHandleStyle();
+  }
+
+  /**
    * Emits a transform start event to all handlers.
    *
    * @param event - The event to emit
