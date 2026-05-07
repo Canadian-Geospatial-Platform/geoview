@@ -243,17 +243,15 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
     logger.logTraceUseMemo('FEATURE-INFO - memoFeatureInfoList', feature.fieldInfo);
     if (!feature?.fieldInfo) return [];
 
-    return Object.entries(feature.fieldInfo)
-      .filter(([key]) => key !== feature.nameField)
-      .map(([fieldName, field]) => ({
-        fieldKey: field!.fieldKey,
-        value: field!.value,
-        dataType: field!.dataType,
-        alias:
-          feature.geoviewLayerType !== 'ogcWms' && feature.geoviewLayerType !== 'ogcWfs'
-            ? field!.alias || fieldName
-            : (field!.alias || fieldName).split('.').pop() || '',
-      }));
+    return Object.entries(feature.fieldInfo).map(([fieldName, field]) => ({
+      fieldKey: field!.fieldKey,
+      value: field!.value,
+      dataType: field!.dataType,
+      alias:
+        feature.geoviewLayerType !== 'ogcWms' && feature.geoviewLayerType !== 'ogcWfs'
+          ? field!.alias || fieldName
+          : (field!.alias || fieldName).split('.').pop() || '',
+    }));
   }, [feature]);
 
   /**
