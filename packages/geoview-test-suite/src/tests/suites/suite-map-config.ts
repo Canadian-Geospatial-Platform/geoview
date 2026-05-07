@@ -94,6 +94,64 @@ export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
     const pViewSettingsZoomConstraints = this.#mapConfigTester.testViewSettingsZoomConstraints();
     await pViewSettingsZoomConstraints;
 
+    // Test overview map is present when configured
+    const pOverviewMapPresent = this.#mapConfigTester.testOverviewMapPresent();
+    await pOverviewMapPresent;
+
+    // Test overview map is absent when not configured
+    const pOverviewMapAbsent = this.#mapConfigTester.testOverviewMapAbsent();
+    await pOverviewMapAbsent;
+
+    // Test overview map hideOnZoom behavior
+    const pOverviewMapHideOnZoom = this.#mapConfigTester.testOverviewMapHideOnZoom();
+    await pOverviewMapHideOnZoom;
+
+    // Test overview map hideOnZoom with reprojection
+    const pOverviewMapHideOnZoomReproject = this.#mapConfigTester.testOverviewMapHideOnZoomWithReprojection();
+    await pOverviewMapHideOnZoomReproject;
+
+    // Test initialSettings all controls set to false
+    const pControlsAllFalse = this.#mapConfigTester.testInitialSettingsControlsAllFalse();
+    await pControlsAllFalse;
+
+    // Test initialSettings states
+    const pStateVisible = this.#mapConfigTester.testInitialSettingsStateVisibleFalse();
+    await pStateVisible;
+
+    const pStateOpacity = this.#mapConfigTester.testInitialSettingsStateOpacity();
+    await pStateOpacity;
+
+    const pStateQueryable = this.#mapConfigTester.testInitialSettingsStateQueryableFalse();
+    await pStateQueryable;
+
+    const pStateHoverable = this.#mapConfigTester.testInitialSettingsStateHoverableFalse();
+    await pStateHoverable;
+
+    // Test initialSettings controls + states combo
+    const pComboQueryControlTrueStateQueryableFalse = this.#mapConfigTester.testInitialSettingsComboQueryControlTrueStateQueryableFalse();
+    await pComboQueryControlTrueStateQueryableFalse;
+
+    const pComboHoverControlTrueStateHoverableFalse = this.#mapConfigTester.testInitialSettingsComboHoverControlTrueStateHoverableFalse();
+    await pComboHoverControlTrueStateHoverableFalse;
+
+    // Test controls.remove cascading through group hierarchy
+    const pRemoveCascading = this.#mapConfigTester.testInitialSettingsControlRemoveCascadingToDescendants();
+    await pRemoveCascading;
+
+    // Test states.visible cascading through group hierarchy
+    const pVisibleCascading = this.#mapConfigTester.testInitialSettingsStateVisibleCascadingToDescendants();
+    await pVisibleCascading;
+
+    // Test opacity cascading with parent/child layers
+    const pOpacityCappedByParent = this.#mapConfigTester.testInitialSettingsOpacityCascadingChildCappedByParent();
+    await pOpacityCappedByParent;
+
+    const pOpacityBelowParent = this.#mapConfigTester.testInitialSettingsOpacityCascadingChildBelowParent();
+    await pOpacityBelowParent;
+
+    const pOpacityRuntimeCascade = this.#mapConfigTester.testInitialSettingsOpacityCascadingRuntimeParentChange();
+    await pOpacityRuntimeCascade;
+
     // Resolve when all
     return Promise.all([
       pDataTableInFooterBar,
@@ -105,6 +163,22 @@ export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
       pInitialViewLayerIds,
       pOverlayObjectsPointMarkers,
       pViewSettingsZoomConstraints,
+      pOverviewMapPresent,
+      pOverviewMapAbsent,
+      pOverviewMapHideOnZoom,
+      pOverviewMapHideOnZoomReproject,
+      pControlsAllFalse,
+      pStateVisible,
+      pStateOpacity,
+      pStateQueryable,
+      pStateHoverable,
+      pComboQueryControlTrueStateQueryableFalse,
+      pComboHoverControlTrueStateHoverableFalse,
+      pRemoveCascading,
+      pVisibleCascading,
+      pOpacityCappedByParent,
+      pOpacityBelowParent,
+      pOpacityRuntimeCascade,
     ]);
   }
 }

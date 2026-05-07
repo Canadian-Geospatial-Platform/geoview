@@ -1553,9 +1553,12 @@ packages/
     +-- src/
     │   +-- index.tsx
     │   +-- my-package-panel.tsx
-    │   +-- my-package-event-processor.ts
+    │   +-- my-package-style.ts
+    │   +-- my-package-types.ts
     +-- default-config-my-package.json
 ```
+
+> **Note:** Controllers live in `geoview-core/src/core/controllers/`, not inside the plugin package. If your package needs a controller, create it at `packages/geoview-core/src/core/controllers/my-package-controller.ts` and register it in the `ControllerRegistry`.
 
 2. **package.json:**
 
@@ -1643,7 +1646,7 @@ See [Core Packages Guide](./core-packages.md) for the full steps to register in 
 4. **Internationalization:** Support both English and French
 5. **Error Handling:** Gracefully handle errors and provide user feedback
 6. **Documentation:** Document all public APIs and configuration options
-7. **Testing:** Write unit tests for event processors and integration tests for UI
+7. **Testing:** Write tests for controllers and integration tests for UI
 
 ---
 

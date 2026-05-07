@@ -886,7 +886,7 @@ export abstract class DateMgt {
       unitSymbol: dimensionObject.unitSymbol || '',
       rangeItems,
       nearestValues: rangeItems.type === 'relative' ? 'continuous' : 'discrete',
-      singleHandle: true, // TODO: WMS time dimensions enhancements to support dual handles? Would need to also update the TimeSliderEventProcessor.updateFilters function accordingly
+      singleHandle: true, // TODO: WMS time dimensions enhancements to support dual handles? Would need to also update the controller updateFilters function accordingly
       displayDateFormat: guessedInfo?.displayDateFormat,
       displayDateFormatShort: guessedInfo?.displayDateFormatShort,
       displayDateTimezone: guessedInfo?.displayDateTimezone,

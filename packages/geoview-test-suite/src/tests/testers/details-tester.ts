@@ -186,16 +186,16 @@ export class DetailsTester extends GVAbstractTester {
   //     (test) => {
   //       // Perform assertions
   //       test.addStep('Verifying expected geochart config...');
-  //       const geochartsConfig = GeochartEventProcessor.getSingleGeochartState(this.getMapId(), 'geochartChartsConfig');
+  //       const geochartsConfig = GeochartController.getSingleGeochartState(this.getMapId(), 'geochartChartsConfig');
   //       Test.assertJsonObject(geochartsConfig, expectedGeochartChartsConfig);
 
   //       // Check that geochart is the active footer bar
   //       test.addStep("Verifying 'geochart' is the selected footer tab...");
-  //       Test.assertIsEqual(UIEventProcessor.getActiveFooterBarTab(this.getMapId()), 'geochart');
+  //       Test.assertIsEqual(UIController.getActiveFooterBarTab(this.getMapId()), 'geochart');
 
   //       // Check that layer path is selected
   //       test.addStep(`Verifying ${layerPathAdd} is the selected layer for the geochart...`);
-  //       Test.assertIsEqual(GeochartEventProcessor.getSingleGeochartState(this.getMapId(), 'selectedLayerPath'), layerPathAdd);
+  //       Test.assertIsEqual(GeochartController.getSingleGeochartState(this.getMapId(), 'selectedLayerPath'), layerPathAdd);
   //     },
   //     (test) => {
   //       // Redirect to LayerTest to help test the removal of the layer

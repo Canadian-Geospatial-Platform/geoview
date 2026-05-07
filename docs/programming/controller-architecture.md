@@ -61,14 +61,14 @@ UI Components  --> Controllers  --> Trigger actions / domain operations
 
 ### Why This Pattern?
 
-**Compared to Event Processors:**
+**Compared to the old Event Processor pattern:**
 
 ```typescript
-// ❌ Old: Event Processor (static singleton, store reference in base class)
-MapEventProcessor.setZoom("mapId", 10);
+// ❌ Old: Event Processor (removed — static singleton, store reference in base class)
+// MapEventProcessor.setZoom("mapId", 10);
 
 // ✅ New: Controller (instance with injected dependencies)
-controllers.uiController.setActiveFooterBarTab("layers");
+controllers.mapController.zoomMap(10);
 
 // ✅ New: Direct store update from within a controller
 setStoreActiveFooterBarTab(this.getMapId(), tab);
@@ -157,13 +157,25 @@ export class ControllerRegistry {
 
   readonly allControllers: AbstractController[] = [];
 
-  constructor(mapViewer: MapViewer, uiDomain: UIDomain, layerDomain: LayerDomain) {
+  constructor(
+    mapViewer: MapViewer,
+    uiDomain: UIDomain,
+    layerDomain: LayerDomain,
+  ) {
     // Always-present controllers
     this.uiController = new UIController(mapViewer, this, uiDomain);
     this.mapController = new MapController(mapViewer, this);
     this.layerController = new LayerController(mapViewer, this, layerDomain);
-    this.layerCreatorController = new LayerCreatorController(mapViewer, this, layerDomain);
-    this.layerSetController = new LayerSetController(mapViewer, this, layerDomain);
+    this.layerCreatorController = new LayerCreatorController(
+      mapViewer,
+      this,
+      layerDomain,
+    );
+    this.layerSetController = new LayerSetController(
+      mapViewer,
+      this,
+      layerDomain,
+    );
     this.pluginController = new PluginController(mapViewer, this);
     this.detailsController = new DetailsController(mapViewer, this);
     this.dataTableController = new DataTableController(mapViewer, this);
@@ -194,8 +206,10 @@ export class ControllerRegistry {
     );
     if (this.swiperController) this.allControllers.push(this.swiperController);
     if (this.drawerController) this.allControllers.push(this.drawerController);
-    if (this.timeSliderController) this.allControllers.push(this.timeSliderController);
-    if (this.geoChartController) this.allControllers.push(this.geoChartController);
+    if (this.timeSliderController)
+      this.allControllers.push(this.timeSliderController);
+    if (this.geoChartController)
+      this.allControllers.push(this.geoChartController);
   }
 
   hookControllers(): void {
@@ -218,7 +232,11 @@ this.#uiDomain = new UIDomain(i18instance, displayLanguage);
 this.#layerDomain = new LayerDomain();
 
 // Create and hook all controllers
-this.controllers = new ControllerRegistry(this, this.#uiDomain, this.#layerDomain);
+this.controllers = new ControllerRegistry(
+  this,
+  this.#uiDomain,
+  this.#layerDomain,
+);
 this.controllers.hookControllers();
 ```
 
@@ -476,7 +494,7 @@ if (hasCustomPlugin(getGeoViewStore(mapViewer.mapId))) {
 Each state slice follows this pattern:
 
 ```typescript
-// In store-interface-and-initial-values/custom-state.ts
+// In states/custom-state.ts
 export interface ICustomState {
   someValue: string;
   items: CustomItem[];
@@ -831,7 +849,7 @@ packages/geoview-core/src/
 │   └── stores/
 │       ├── geoview-store.ts                    # Store composition (all slices)
 │       ├── stores-managers.ts                  # Store registry (getGeoViewStore)
-│       └── store-interface-and-intial-values/  # State slices
+│       └── states/  # State slices
 │           ├── map-state.ts                    # useMapZoom(), getStoreMapZoom(), etc.
 │           ├── layer-state.ts                  # useLayerLegendLayers(), etc.
 │           ├── ui-state.ts                     # useUIActiveFooterBarTab(), etc.

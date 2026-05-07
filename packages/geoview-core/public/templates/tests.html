@@ -94,6 +94,22 @@
       .tableResults tr.expanded .test-title::before {
         transform: rotate(90deg);
       }
+
+      /* Group sub-navigation */
+      .group-tabs {
+        display: none;
+        margin-bottom: 0;
+      }
+
+      .group-header {
+        margin: 15px 0 5px 0;
+        padding: 5px 10px;
+        background-color: #e8eaf6;
+        font-weight: bold;
+        font-size: 14px;
+        color: #515ba5;
+        border-left: 4px solid #515ba5;
+      }
     </style>
   </head>
 
@@ -103,21 +119,52 @@
 
       <div class="back-to-main">
         <a href="./index.html?tab=testing">← Back to Main</a>
+        &nbsp;|&nbsp;
+        <a href="https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/docs/app/testing/test-catalog.md" target="_blank"
+          >Test Catalog</a
+        >
       </div>
     </div>
 
-    <!-- Tabs Navigation -->
-    <div class="tabs">
-      <button class="tab-button active" onclick="openTab(event, 'run-all')">Run All Tests</button>
-      <button class="tab-button" onclick="openTab(event, 'map0-test')">Map Core (EPSG: 3978)</button>
-      <button class="tab-button" onclick="openTab(event, 'map1-test')">Layer Configs</button>
-      <button class="tab-button" onclick="openTab(event, 'map2-test')">Layers on Map (EPSG:3978)</button>
-      <button class="tab-button" onclick="openTab(event, 'map3-test')">Layers on Map (EPSG:3857)</button>
+    <!-- Group Navigation -->
+    <div class="tabs" id="group-nav">
+      <button class="tab-button active" onclick="openGroup(event, 'run-all')">Run All Tests</button>
+      <button class="tab-button" onclick="openGroup(event, 'group1')">1 - Core / Utility</button>
+      <button class="tab-button" onclick="openGroup(event, 'group2')">2 - Layers</button>
+      <button class="tab-button" onclick="openGroup(event, 'group3')">3 - Map</button>
+      <button class="tab-button" onclick="openGroup(event, 'group4')">4 - Components</button>
+      <button class="tab-button" onclick="openGroup(event, 'group5')">5 - Packages</button>
+    </div>
+
+    <!-- Group 1: Core / Utility -->
+    <div id="group1-tabs" class="tabs group-tabs">
+      <button class="tab-button" onclick="openTab(event, 'map0-test')">Core (EPSG: 3978)</button>
+      <button class="tab-button" onclick="openTab(event, 'map1-test')">Config Validation</button>
+      <button class="tab-button" onclick="openTab(event, 'map9-test')">Utilities</button>
+    </div>
+
+    <!-- Group 2: Layers -->
+    <div id="group2-tabs" class="tabs group-tabs">
+      <button class="tab-button" onclick="openTab(event, 'map2-test')">Layers (EPSG: 3978)</button>
+      <button class="tab-button" onclick="openTab(event, 'map3-test')">Layers (EPSG: 3857)</button>
+    </div>
+
+    <!-- Group 3: Map -->
+    <div id="group3-tabs" class="tabs group-tabs">
       <button class="tab-button" onclick="openTab(event, 'map4-test')">Map Functions</button>
-      <button class="tab-button" onclick="openTab(event, 'map5-test')">Geochart</button>
       <button class="tab-button" onclick="openTab(event, 'map6-test')">Map Config</button>
+    </div>
+
+    <!-- Group 4: Components -->
+    <div id="group4-tabs" class="tabs group-tabs">
       <button class="tab-button" onclick="openTab(event, 'map7-test')">UI Tests</button>
       <button class="tab-button" onclick="openTab(event, 'map8-test')">Details</button>
+    </div>
+
+    <!-- Group 5: Packages -->
+    <div id="group5-tabs" class="tabs group-tabs">
+      <button class="tab-button" onclick="openTab(event, 'map5-test')">Geochart</button>
+      <button class="tab-button" onclick="openTab(event, 'map10-test')">Swiper</button>
     </div>
 
     <!-- Run All Tests Tab -->
@@ -137,7 +184,10 @@
       </div>
       <button class="btnLaunchTests" onclick="launchTestsAll()">LAUNCH TESTS ALL MAPS!</button>
 
-      <h3 style="margin-top: 30px">Test Results by Map</h3>
+      <h3 style="margin-top: 30px">Test Results by Group</h3>
+
+      <!-- Group 1: Core / Utility -->
+      <div class="group-header">Group 1 — Core / Utility</div>
 
       <!-- Map 0 Results -->
       <button id="collapsibleMap0" class="collapsible" onclick="toggleCollapsible(this)">
@@ -157,6 +207,18 @@
         <div id="runAllMap1Results"></div>
       </div>
 
+      <!-- Map 9 Results -->
+      <button id="collapsibleMap9" class="collapsible" onclick="toggleCollapsible(this)">
+        <span style="font-weight: bold">Map 9 - Utilities Tests</span>
+        <span id="statsMap9" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Done success: 0 | Done failed: 0 | Done: 0/0</span>
+      </button>
+      <div class="panel">
+        <div id="runAllMap9Results"></div>
+      </div>
+
+      <!-- Group 2: Layers -->
+      <div class="group-header">Group 2 — Layers</div>
+
       <!-- Map 2 Results -->
       <button id="collapsibleMap2" class="collapsible" onclick="toggleCollapsible(this)">
         <span style="font-weight: bold">Map 2 - Layer Tests (EPSG: 3978)</span>
@@ -175,6 +237,9 @@
         <div id="runAllMap3Results"></div>
       </div>
 
+      <!-- Group 3: Map -->
+      <div class="group-header">Group 3 — Map</div>
+
       <!-- Map 4 Results -->
       <button id="collapsibleMap4" class="collapsible" onclick="toggleCollapsible(this)">
         <span style="font-weight: bold">Map 4 - Map Functions Tests</span>
@@ -182,15 +247,6 @@
       </button>
       <div class="panel">
         <div id="runAllMap4Results"></div>
-      </div>
-
-      <!-- Map 5 Results -->
-      <button id="collapsibleMap5" class="collapsible" onclick="toggleCollapsible(this)">
-        <span style="font-weight: bold">Map 5 - Geochart Tests</span>
-        <span id="statsMap5" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Done success: 0 | Done failed: 0 | Done: 0/0</span>
-      </button>
-      <div class="panel">
-        <div id="runAllMap5Results"></div>
       </div>
 
       <!-- Map 6 Results -->
@@ -201,6 +257,9 @@
       <div class="panel">
         <div id="runAllMap6Results"></div>
       </div>
+
+      <!-- Group 4: Components -->
+      <div class="group-header">Group 4 — Components</div>
 
       <!-- Map 7 Results -->
       <button id="collapsibleMap7" class="collapsible" onclick="toggleCollapsible(this)">
@@ -218,6 +277,27 @@
       </button>
       <div class="panel">
         <div id="runAllMap8Results"></div>
+      </div>
+
+      <!-- Group 5: Plugins -->
+      <div class="group-header">Group 5 — Packages</div>
+
+      <!-- Map 5 Results -->
+      <button id="collapsibleMap5" class="collapsible" onclick="toggleCollapsible(this)">
+        <span style="font-weight: bold">Map 5 - Geochart Tests</span>
+        <span id="statsMap5" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Done success: 0 | Done failed: 0 | Done: 0/0</span>
+      </button>
+      <div class="panel">
+        <div id="runAllMap5Results"></div>
+      </div>
+
+      <!-- Map 10 Results -->
+      <button id="collapsibleMap10" class="collapsible" onclick="toggleCollapsible(this)">
+        <span style="font-weight: bold">Map 10 - Swiper Tests</span>
+        <span id="statsMap10" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Done success: 0 | Done failed: 0 | Done: 0/0</span>
+      </button>
+      <div class="panel">
+        <div id="runAllMap10Results"></div>
       </div>
     </div>
 
@@ -759,28 +839,194 @@
       ></div>
     </div>
 
+    <!-- Map 9 Tab -->
+    <div id="map9-test" class="tab-content">
+      <div class="map-title-holder">
+        <h4 id="HEVNT9">9. Tests on map 9 (Utilities)</h4>
+        <a class="ref-link" href="#top">Top</a>
+      </div>
+
+      <div id="testSuiteTable-map9"></div>
+      <br />
+      <div
+        id="map9"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'projection': 3978
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': true,
+              'labeled': true
+            }
+          },
+          'components': [],
+          'corePackages': ['test-suite'],
+          'corePackagesConfig': [
+            {
+              'test-suite': { 'suites': ['suite-utilities'] }
+            }
+          ],
+          'theme': 'geo.ca',
+          'footerBar': {
+            'tabs': {
+              'core': [
+                'legend',
+                'layers',
+                'details'
+              ]
+            }
+          }
+        }"
+      ></div>
+    </div>
+
+    <!-- Map 10 Tab -->
+    <div id="map10-test" class="tab-content">
+      <div class="map-title-holder">
+        <h4 id="HEVNT10">10. Tests on map 10 (Swiper)</h4>
+        <a class="ref-link" href="#top">Top</a>
+      </div>
+
+      <div id="testSuiteTable-map10"></div>
+      <br />
+      <div
+        id="map10"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'projection': 3857
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': false,
+              'labeled': false
+            },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerId': 'swiperWms',
+                'geoviewLayerName': 'MSI',
+                'metadataAccessPath': 'https://datacube.services.geo.ca/ows/msi',
+                'geoviewLayerType': 'ogcWms',
+                'listOfLayerEntryConfig': [
+                  {
+                    'layerId': 'msi-94-or-more'
+                  }
+                ]
+              },
+              {
+                'geoviewLayerId': 'swiperGeojson',
+                'geoviewLayerName': 'GeoJSON Sample',
+                'metadataAccessPath': './datasets/geojson/metadata.meta',
+                'geoviewLayerType': 'GeoJSON',
+                'listOfLayerEntryConfig': [
+                  {
+                    'layerId': 'polygons.json'
+                  }
+                ]
+              },
+              {
+                'geoviewLayerId': 'swiperOgcFeature',
+                'geoviewLayerName': 'Large Lakes',
+                'metadataAccessPath': 'https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev',
+                'geoviewLayerType': 'ogcFeature',
+                'listOfLayerEntryConfig': [
+                  {
+                    'layerId': 'lakes'
+                  }
+                ]
+              }
+            ]
+          },
+          'components': [],
+          'corePackages': ['swiper', 'test-suite'],
+          'corePackagesConfig': [
+            {
+              'swiper': {
+                'orientation': 'vertical',
+                'layers': []
+              },
+              'test-suite': { 'suites': ['suite-swiper'] }
+            }
+          ],
+          'theme': 'geo.ca',
+          'footerBar': {
+            'tabs': {
+              'core': [
+                'legend',
+                'layers'
+              ]
+            }
+          }
+        }"
+      ></div>
+    </div>
+
     <script>
       insertPageHeader();
 
       let mapsInitialized = false;
 
-      function openTab(evt, tabName) {
-        // For "Run All Tests", make all tab contents visible so maps can initialize
-        if (tabName !== 'runAllTestsTab') {
-          // Normal tab switching - hide all tab contents
-          var tabContents = document.getElementsByClassName('tab-content');
-          for (var i = 0; i < tabContents.length; i++) {
-            tabContents[i].classList.remove('active');
-          }
-
-          // Show the current tab
-          document.getElementById(tabName).classList.add('active');
+      function openGroup(evt, groupName) {
+        // Hide all tab contents
+        var tabContents = document.getElementsByClassName('tab-content');
+        for (var i = 0; i < tabContents.length; i++) {
+          tabContents[i].classList.remove('active');
         }
 
-        // Remove active class from all tab buttons
-        var tabButtons = document.getElementsByClassName('tab-button');
+        // Hide all group sub-tabs
+        var groupTabs = document.getElementsByClassName('group-tabs');
+        for (var i = 0; i < groupTabs.length; i++) {
+          groupTabs[i].style.display = 'none';
+        }
+
+        // Remove active from all group buttons
+        var tabButtons = document.getElementById('group-nav').getElementsByClassName('tab-button');
         for (var i = 0; i < tabButtons.length; i++) {
           tabButtons[i].classList.remove('active');
+        }
+
+        // Mark clicked button as active
+        evt.currentTarget.classList.add('active');
+
+        if (groupName === 'run-all') {
+          // Show run-all content directly
+          document.getElementById('run-all').classList.add('active');
+        } else {
+          // Show the group's sub-tabs and click the first sub-tab
+          var groupTabsDiv = document.getElementById(groupName + '-tabs');
+          if (groupTabsDiv) {
+            groupTabsDiv.style.display = 'flex';
+            var firstButton = groupTabsDiv.querySelector('.tab-button');
+            if (firstButton) {
+              firstButton.click();
+            }
+          }
+        }
+      }
+
+      function openTab(evt, tabName) {
+        // Hide all tab contents
+        var tabContents = document.getElementsByClassName('tab-content');
+        for (var i = 0; i < tabContents.length; i++) {
+          tabContents[i].classList.remove('active');
+        }
+
+        // Show the current tab
+        document.getElementById(tabName).classList.add('active');
+
+        // Remove active from all sub-tab buttons in the current group
+        var parentGroupTabs = evt.currentTarget.parentElement;
+        var subButtons = parentGroupTabs.getElementsByClassName('tab-button');
+        for (var i = 0; i < subButtons.length; i++) {
+          subButtons[i].classList.remove('active');
         }
 
         // Mark button as active

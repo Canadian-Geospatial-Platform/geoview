@@ -162,6 +162,23 @@ cgpv.init();
 - `LegendsLayerSet`, `DetailsLayerSet` - extend `AbstractLayerSet`
 - Event-driven sync with layer changes via result sets
 
+**Group Layer Config** — When defining group layers in `listOfLayerEntryConfig`, the `entryType: 'group'` property is **required**. Without it, config validation does not recognize the entry as a group and ignores any nested `listOfLayerEntryConfig`, resulting in child layers not being created:
+
+```typescript
+// ❌ Bad: missing entryType — children will be ignored
+{
+  layerId: 'myGroup',
+  listOfLayerEntryConfig: [{ layerId: 'child.json' }]
+}
+
+// ✅ Good: entryType tells config validation this is a group
+{
+  entryType: 'group',
+  layerId: 'myGroup',
+  listOfLayerEntryConfig: [{ layerId: 'child.json' }]
+}
+```
+
 **Layer Name Resolution** — `ConfigBaseClass` has two methods for getting a layer's name:
 
 - **`getLayerName()`** — Returns only the entry-level `#layerName` field. Can be `undefined` for layers whose name is set at the GeoView layer config level (e.g., geocore/UUID layers).
@@ -183,6 +200,19 @@ cgpv.init();
 - `getLayersAllLeafs()` returns only leaf layers (non-groups); `getLayersAll()` includes intermediate groups — use the latter when you need to store/restore opacities at every level
 
 **Snapshot/restore pattern** — When temporarily modifying layer opacities (e.g., highlight), store the entire map's opacity state upfront using a `Map<string, number>` keyed by layer path, then restore all values on cleanup. This is safer than ratio-based arithmetic (multiply/divide) which accumulates floating-point drift over repeated operations.
+
+**`addLayer()` opacity re-application** — When a child layer is added to a `GVGroupLayer` via `addLayer()`, the child's opacity was originally set during OL layer construction (`new Layer({ opacity: value })`), which bypasses the GV `onSetOpacity()` capping logic. After `setParent(this)` establishes the parent-child relationship, `addLayer()` calls `layer.setOpacity(layer.getOpacity(), false)` to re-apply the child's opacity through the GV capping logic (`Math.min(parent.getOpacity(), opacity)`). The `false` parameter avoids emitting change events during construction.
+
+### Layer Visibility System
+
+**Two levels of visibility** — Each layer has two visibility perspectives:
+
+- **`getVisible()`** — Returns the layer's own OL visibility (`this.getOLLayer().getVisible()`). This reflects only the layer's direct setting, independent of parents.
+- **`getVisibleIncludingParents()`** — Walks the parent chain upward. Returns `false` immediately if any ancestor is not visible. A layer is only effectively visible on the map if it AND all its parents are visible.
+
+**Parent-child visibility independence** — When a parent group is hidden (`visible = false`), child layers keep their own `getVisible() === true`. The children are not rendered because the parent OL group layer hides everything, but each child's individual visibility state is preserved. In the legend UI, children appear "greyed out" — their visibility icon shows `true` but they are not rendering.
+
+**Config validation behavior for visibility** — In `ConfigValidation.#processLayerEntryConfig()`, when `parentInitialSettingsTrue?.states?.visible === false`, the child's `visible` property is **deleted** from the merged config (`delete initSettingsMerged.states?.visible`). This means the child defaults to `visible = true` in the store/legend, but is visually hidden because the parent OL layer is not visible.
 
 ### Event Delegate System
 
@@ -548,17 +578,21 @@ One MUI icon can have multiple aliases. Custom SVG icons (`LegendIcon`, `ClearHi
 
 ### Store Hook Naming Convention
 
-Store hooks live in `packages/geoview-core/src/core/stores/store-interface-and-intial-values/` with files per slice: `map-state.ts`, `layer-state.ts`, `ui-state.ts`, `data-table-state.ts`, etc.
+Store hooks live in `packages/geoview-core/src/core/stores/states/` with files per slice: `map-state.ts`, `layer-state.ts`, `ui-state.ts`, `data-table-state.ts`, etc.
 
 Each slice exports three types of functions with consistent naming:
 
 | Type                 | Pattern                                           | Context                             |
 | -------------------- | ------------------------------------------------- | ----------------------------------- |
-| **Selector hooks**   | `useStore{SliceName}{PropertyName}`               | React components only               |
 | **Getter functions** | `getStore{SliceName}{PropertyName}(mapId)`        | Controllers and non-React code      |
+| **Selector hooks**   | `useStore{SliceName}{PropertyName}`               | React components only               |
 | **Setter functions** | `setStore{SliceName}{PropertyName}(mapId, value)` | Controllers only — never from React |
 
 ```typescript
+// Getter functions — point-in-time snapshots for controllers AND react components (no re-render)
+export const getStoreMapZoom = (mapId: string): number =>
+  getStoreMapState(mapId).zoom;
+
 // Selector hooks — React components only (re-render on change)
 export const useStoreMapZoom = (): number =>
   useStore(useGeoViewStore(), (state) => state.mapState.zoom);
@@ -568,10 +602,6 @@ export const useStoreLayerSelectedLayerPath = (): string | undefined | null =>
 
 export const useStoreUIActiveFooterBarTab = (): string =>
   useStore(useGeoViewStore(), (state) => state.uiState.activeFooterBarTab);
-
-// Getter functions — point-in-time snapshots for controllers AND react components (no re-render)
-export const getStoreMapZoom = (mapId: string): number =>
-  getStoreMapState(mapId).zoom;
 
 // Setter functions — mutate state from controllers
 export const setStoreMapClickMarker = (
@@ -603,7 +633,7 @@ mapController.zoomToExtent(extent);
 import {
   getStoreMapZoom,
   setStoreMapClickMarker,
-} from "@/core/stores/store-interface-and-intial-values/map-state";
+} from "@/core/stores/states/map-state";
 
 const currentZoom = getStoreMapZoom(this.getMapId());
 setStoreMapClickMarker(this.getMapId(), projectedCoords[0]);
@@ -642,16 +672,17 @@ try {
 // ✅ CRITICAL: After batch, manually update the store
 items.forEach((item) => {
   setStoreLayerItemVisibility(
-    this.getMapId(), 
-    layerPath, 
-    item, 
-    item.isVisible, 
-    layer.getLayerFilters().getClassFilter() // also update related filters
+    this.getMapId(),
+    layerPath,
+    item,
+    item.isVisible,
+    layer.getLayerFilters().getClassFilter(), // also update related filters
   );
 });
 ```
 
 **Why this matters:** Domain layer changes (OL rendering, filter objects) happen during the batch, but the Zustand store isn't updated because event handlers were suppressed. Stale store data breaks:
+
 - Data table feature counts and filters
 - "Active Filters" UI display
 - Any component reading derived state from the store
@@ -666,6 +697,29 @@ items.forEach((item) => {
 - Config validation happens via `src/api` files in geoview-core
 - Plugin packages have their own config schemas (default-config-\*.json) but rely on core's validation APIs
 - Use `ConfigApi` and `ConfigValidation` classes from geoview-core for config operations
+
+### `initialSettings` Cascading (Parent → Child)
+
+The `ConfigValidation.#processLayerEntryConfig()` method handles how `initialSettings` propagate from parent layers to children. Understanding this cascading is critical for writing correct config tests.
+
+**Merge strategy** — `deepMerge(parentInitialSettingsMergedRoot, initialSettings)` merges parent settings into child settings. **Child explicit values win** over parent values.
+
+**`parentInitialSettingsMergedRoot`** — For entries at root level (no parent group), this falls back to `geoviewLayerConfig.initialSettings` (the GeoView layer's top-level initial settings). For entries inside a group, it uses the parent group's already-merged initial settings.
+
+**Special cascading rules (applied AFTER the deep merge):**
+
+| Setting           | Behavior                                                                                                                                                                                             | Code                                        |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| `states.visible`  | When parent `visible === false`, child's `visible` is **deleted** from merged config. Child defaults to `true` in store/legend (greyed out in UI). Parent OL layer hides everything.                 | `delete initSettingsMerged.states?.visible` |
+| `controls.remove` | When parent `remove === false`, sets `initialSettings.controls.remove = false` **on the child's source config** (not the merged result). This becomes the parent input for the next recursion level. | `initialSettings.controls.remove = false`   |
+
+**Override semantics for `controls.remove`:**
+
+- Parent `remove = false`, child has no explicit setting → child inherits `false` via deepMerge
+- Parent `remove = false`, child explicitly sets `remove = true` → child keeps `true` (deepMerge: child wins), then `initialSettings.controls.remove = false` is set for the NEXT level's parent input
+- Parent `remove = false`, grandchild has no explicit setting → grandchild inherits `false` from child's modified initialSettings
+
+**Practical implication for tests:** When testing cascading behavior with 3 levels (group → subgroup → child), the intermediate subgroup's effective value depends on whether it explicitly overrides or inherits from its parent's merged output.
 
 ### URL Validation & File Extension Constants
 
@@ -1203,7 +1257,9 @@ packages/geoview-test-suite/src/
     │   ├── suite-map-config.ts          # Map config creation/destruction tests
     │   ├── suite-geochart.ts            # Geochart plugin tests
     │   ├── suite-details.ts             # Details panel tests
-    │   └── suite-ui.ts                  # UI/DOM tests
+    │   ├── suite-ui.ts                  # UI/DOM tests
+    │   ├── suite-utilities.ts           # Utility function tests (core, date, geo, projection)
+    │   └── suite-swiper.ts              # Swiper plugin tests
     └── testers/                         # GeoView-specific testers
         ├── abstract-gv-tester.ts        # GV base — constants, URLs, helper methods
         ├── core-tester.ts               # Date parsing tests
@@ -1213,7 +1269,12 @@ packages/geoview-test-suite/src/
         ├── map-config-tester.ts         # Map config override tests
         ├── geochart-tester.ts           # Geochart tests
         ├── details-tester.ts            # Details panel tests
-        └── ui-tester.ts                 # DOM-level UI tests
+        ├── ui-tester.ts                 # DOM-level UI tests
+        ├── swiper-tester.ts             # Swiper plugin tests
+        ├── utilities-core-tester.ts     # Core utility function tests
+        ├── utilities-date-tester.ts     # Date utility function tests
+        ├── utilities-geo-tester.ts      # Geo utility function tests
+        └── utilities-projection-tester.ts # Projection utility function tests
 ```
 
 ### How Tests Run
@@ -1227,7 +1288,7 @@ Tests are triggered from HTML pages in `packages/geoview-core/public/templates/t
 }
 ```
 
-Suite names: `suite-core`, `suite-config`, `suite-layer`, `suite-map`, `suite-geochart`, `suite-map-config`, `suite-ui`, `suite-details`
+Suite names: `suite-core`, `suite-config`, `suite-layer`, `suite-map`, `suite-geochart`, `suite-map-config`, `suite-ui`, `suite-details`, `suite-utilities`, `suite-swiper`
 
 ### Test Lifecycle (in AbstractTester)
 
@@ -1518,7 +1579,7 @@ protected override onLaunchTestSuite(): Promise<unknown> {
 **Critical requirements:**
 
 - **Wait for `allFeatureInfoLayerSet` registration** using `whenThisThen()` before querying
-- **Set zoom level** using `await this.getMapViewer().setMapZoomLevel(zoom)` — NOT `MapEventProcessor.setZoom()` (see Gotchas)
+- **Set zoom level** using `await this.getMapViewer().setMapZoomLevel(zoom)` (direct) or `await this.getControllersRegistry().mapController.zoomMap(zoom)` (animated)
 - **Run sequentially** at the end of the suite to avoid zoom conflicts with other tests
 
 **Template:**
@@ -1642,9 +1703,19 @@ testMyLayerConfigValidation(): Promise<Test<TypeGeoviewLayerConfig>> {
 1. **Add test method** to `MapTester`
 2. **Register in Suite** (`suite-map-varia.ts` → `onLaunchTestSuite` — use **sequential `await`** if test depends on map state)
 
-**Key pattern:** Tests that modify shared map state (zoom, projection) must run **sequentially** via `await`. Independent tests can be grouped in `Promise.all()`.
+**Key pattern:** Controllers are the preferred public API for map operations. MapViewer provides low-level OpenLayers access for cases where immediate (non-animated) manipulation is needed. This is a **transitional architecture** — MapViewer will eventually become internal. Tests that modify shared map state must run **sequentially** via `await`.
 
-**Template:**
+| Operation            | Controller (preferred)                                                        | MapViewer (low-level)                                             |
+| -------------------- | ----------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| **Zoom (animated)**  | `this.getControllersRegistry().mapController.zoomMap(zoom, duration)`         |                                                                   |
+| **Zoom (immediate)** |                                                                               | `this.getMapViewer().setMapZoomLevel(zoom)`                       |
+| **Zoom to extent**   | `this.getControllersRegistry().mapController.zoomToExtent(extent)`            | `this.getMapViewer().setExtent(extent)` — delegates to controller |
+| **Zoom to initial**  | `this.getControllersRegistry().mapController.zoomToInitialExtent()`           | _(none)_                                                          |
+| **Projection**       | `this.getControllersRegistry().mapController.setProjection(code)` → `Promise` | `this.getMapViewer().setProjection(code)` → `boolean`             |
+| **Language**         | _(none)_                                                                      | `this.getMapViewer().setLanguage(lang)`                           |
+| **Rotation**         | `this.getControllersRegistry().mapController.rotate(degree, animate)`         | `this.getMapViewer().rotate(degree)`                              |
+
+**Template (Controller pattern):**
 
 ```typescript
 // In map-tester.ts
@@ -1653,8 +1724,7 @@ testMyMapInteraction(): Promise<Test<SomeResultType>> {
     `Test my map interaction...`,
     async (test) => {
       test.addStep('Setting up map state...');
-      MapEventProcessor.setZoom(this.getMapId(), 5);
-      await someWaitCondition();
+      await this.getControllersRegistry().mapController.zoomMap(5);
       return getResult();
     },
     (test, result) => {
@@ -1662,7 +1732,7 @@ testMyMapInteraction(): Promise<Test<SomeResultType>> {
     },
     (test) => {
       // Cleanup: reset to initial state
-      MapEventProcessor.zoomToInitialExtent(this.getMapId());
+      this.getControllersRegistry().mapController.zoomToInitialExtent();
     }
   );
 }
@@ -1691,29 +1761,43 @@ protected override async onLaunchTestSuite(): Promise<unknown> {
 1. **Add test method** to `MapConfigTester`
 2. **Register in Suite** (`suite-map-config.ts` → `onLaunchTestSuite` — always **sequential `await`**)
 
-**Key pattern:** Each test uses `#helperCreateMapConfig(test, mapId, configOverrides)` to create a **new map instance**, runs assertions, then destroys it. This ensures config-level isolation.
+**Key pattern:** Each test uses `#helperCreateMapConfig(test, mapId, overrides)` to create a **new map instance** via `api.createMapFromConfigFast()`, runs assertions, then the next test destroys it. This ensures config-level isolation.
+
+**Helper lifecycle inside `#helperCreateMapConfig`:**
+
+1. `api.deleteMapViewer(mapId, false)` — Destroys current map
+2. `api.createMapFromConfigFast(mapId, configJson, timeout)` — Creates new map from JSON config string
+3. `this.reassignMapViewerAndControllers(mapViewer)` — Updates the tester's internal `mapViewer` and `controllersRegistry` references to the new map instance (critical — without this, subsequent assertions use stale references)
+4. `mapViewer.waitForLayersLoaded()` — Waits for all layers to finish loading
+
+**Override system:** The helper takes `[path, value][]` pairs using dot-notation paths (e.g., `['map.viewSettings.projection', 3857]`). A `#setValueByPath()` utility applies these to the base config object. Setting a value to `null` removes that key (used to test default behavior when a config section is absent).
+
+**Specialized helpers for `initialSettings` testing:**
+
+- `#helperCreateMapConfigWithInitialSettings(test, mapId, controls?, states?)` — Flat layer (polygons.json) with controls/states overrides
+- `#helperCreateMapConfigWithGroupInitialSettings(test, mapId, parentStates?, childStates?)` — 2-level: group → child (states-only)
+- `#helperCreateMapConfigWithNestedGroupInitialSettings(test, mapId, groupSettings?, subGroupSettings?, childSettings?)` — 3-level: group → subgroup → child (full `initialSettings` objects)
 
 **Template:**
 
 ```typescript
 // In map-config-tester.ts
-testMyConfigScenario(): Promise<Test<TypeMapFeaturesInstance>> {
+testMyConfigScenario(): Promise<Test<MapViewer>> {
+  const mapId = this.getMapId();
+
   return this.test(
     `Test my config scenario...`,
     async (test) => {
       test.addStep('Creating map with custom config...');
-      return this.#helperCreateMapConfig(test, 'test-map-id', {
-        footerBar: { tabs: { core: ['legend'] } },
-        navBar: { zoom: true },
-      });
+      return this.#helperCreateMapConfig(test, mapId, [
+        ['footerBar', { tabs: { core: ['legend'] } }],
+        ['navBar', ['zoom', 'rotation']],
+      ]);
     },
-    (test, result) => {
-      Test.assertIsDefined('map config', result);
-      // Assert config was applied
-      Test.assertIsEqual(result.footerBar?.tabs?.core?.length, 1);
-    },
-    (test) => {
-      // Map destruction happens automatically in the helper
+    (test, mapViewer) => {
+      // Assert on store state, controllers, or DOM
+      const footerBarTabs = getStoreUIFooterBarComponents(mapId);
+      Test.assertIsArrayEqual(footerBarTabs, ['legend']);
     }
   );
 }
@@ -1760,15 +1844,20 @@ export class MyFeatureTester extends GVAbstractTester {
 ```typescript
 import type { API } from "geoview-core/api/api";
 import type { MapViewer } from "geoview-core/geo/map/map-viewer";
+import type { ControllerRegistry } from "geoview-core/core/controllers/base/controller-registry";
 import { GVAbstractTestSuite } from "./abstract-gv-test-suite";
 import { MyFeatureTester } from "../testers/my-feature-tester";
 
 export class GVTestSuiteMyFeature extends GVAbstractTestSuite {
   #tester: MyFeatureTester;
 
-  constructor(api: API, mapViewer: MapViewer) {
-    super(api, mapViewer);
-    this.#tester = new MyFeatureTester(api, mapViewer);
+  constructor(
+    api: API,
+    mapViewer: MapViewer,
+    controllerRegistry: ControllerRegistry,
+  ) {
+    super(api, mapViewer, controllerRegistry);
+    this.#tester = new MyFeatureTester(api, mapViewer, controllerRegistry);
     this.addTester(this.#tester);
   }
 
@@ -1799,7 +1888,7 @@ import { GVTestSuiteMyFeature } from './tests/suites/suite-my-feature';
 
 // In onAdd():
 } else if (suite === 'suite-my-feature') {
-  this.addTestSuite(new GVTestSuiteMyFeature(window.cgpv.api, this.mapViewer));
+  this.addTestSuite(new GVTestSuiteMyFeature(window.cgpv.api, this.mapViewer, this.controllerRegistry));
 }
 ```
 
@@ -1830,14 +1919,17 @@ import { GVTestSuiteMyFeature } from './tests/suites/suite-my-feature';
 6. **Add constants to `GVAbstractTester`** — URLs, UUIDs, expected icon lists go there
 7. **True negative tests** use `testError()` with an expected error class
 8. **Import layer classes directly** — e.g., `EsriDynamic`, `WMS`, `GeoJSON` for `createGeoviewLayerConfig()`
+9. **Update the test catalog** — Each time you create, remove, or rename a test, update [`docs/app/testing/test-catalog.md`](../docs/app/testing/test-catalog.md) to keep it in sync with the actual test code
 
 ### Gotchas & Pitfalls
 
-**`MapEventProcessor.setZoom()` vs `mapViewer.setMapZoomLevel()`:**
+**Controllers vs MapViewer for zoom:**
 
-- `MapEventProcessor.setZoom(mapId, zoom)` only updates the **Zustand store** — it does NOT change the actual OpenLayers map view zoom. The map will not visually zoom and `getView().getZoom()` will return the old value.
-- `await this.getMapViewer().setMapZoomLevel(zoom)` sets the **actual OL view zoom** via `getView().setZoom()` and returns a Promise that resolves on `rendercomplete`.
-- **Always use `setMapZoomLevel()`** in tests when you need the map to actually change zoom (e.g., before querying features that have visibility range constraints).
+Controllers are the preferred path. MapViewer provides low-level OL access (transitional — will eventually become internal):
+
+- `await this.getControllersRegistry().mapController.zoomMap(zoom, duration)` — Preferred. Animated zoom with validation. Returns a Promise that resolves when the animation completes.
+- `await this.getMapViewer().setMapZoomLevel(zoom)` — Low-level. Sets the OL view zoom directly (no animation). Returns a Promise that resolves on `rendercomplete`.
+- Use `setMapZoomLevel()` only when you need an immediate zoom without animation (e.g., before querying features that have visibility range constraints).
 
 **`queryLayerFeatures()` visibility guards:**
 
@@ -1925,7 +2017,7 @@ packages/geoview-core/src/
 │   │   └── time-slider-controller.ts
 │   ├── domains/      # Domain models (LayerDomain, UIDomain) - own GV layer instances, emit events
 │   ├── stores/       # Zustand store slices
-│   │   └── store-interface-and-intial-values/  # Hook exports per slice
+│   │   └── states/  # Hook exports per slice
 │   ├── components/   # Shared React components
 │   │   └── layers/   # Layer panel, details, settings
 │   │       └── right-panel/
