@@ -103,6 +103,7 @@ export {
   RemoveCircleOutline as RemoveCircleOutlineIcon,
   RestartAlt as RestartAltIcon,
   Satellite as SatelliteIcon,
+  SatelliteAlt as StacBrowserIcon,
   School as SchoolIcon,
   Search as SearchIcon,
   Send as SendIcon,

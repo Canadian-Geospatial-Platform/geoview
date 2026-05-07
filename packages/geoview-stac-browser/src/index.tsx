@@ -1,0 +1,109 @@
+import React from 'react';
+import { AppBarPlugin } from 'geoview-core/api/plugin/appbar-plugin';
+import { StacBrowserIcon } from 'geoview-core/ui/icons';
+import type { IconButtonPropsExtend } from 'geoview-core/ui/icon-button/icon-button';
+import type { TypePanelProps } from 'geoview-core/ui/panel/panel-types';
+import type { StacBrowserConfig } from './stac-browser-types';
+import { StacBrowser } from './stac-browser';
+import schema from '../schema.json';
+import defaultConfig from '../default-config-stac-browser.json';
+
+/**
+ * STAC Browser plugin — provides a panel for browsing and filtering STAC API catalogs.
+ */
+class StacBrowserPlugin extends AppBarPlugin {
+  override schema(): unknown {
+    return schema;
+  }
+
+  override defaultConfig(): unknown {
+    return defaultConfig;
+  }
+
+  override defaultTranslations(): Record<string, unknown> {
+    return {
+      en: {
+        stacBrowser: {
+          title: 'STAC Browser',
+          search: 'Search',
+          collections: 'Collections',
+          temporal: 'Temporal Extent',
+          spatial: 'Spatial Extent',
+          keywords: 'Keywords',
+          noResults: 'No results found',
+          addToMap: 'Add to Map',
+          addedToMap: 'Added to Map',
+          zoomTo: 'Zoom To',
+          description: 'Description',
+          assets: 'Assets',
+          useMapExtent: 'Use current map extent',
+          loading: 'Loading...',
+          error: 'An error occurred',
+          loadMore: 'Load More',
+          back: 'Back to results',
+          datetime: 'Date',
+          collection: 'Collection',
+        },
+      },
+      fr: {
+        stacBrowser: {
+          title: 'Navigateur STAC',
+          search: 'Rechercher',
+          collections: 'Collections',
+          temporal: 'Étendue temporelle',
+          spatial: 'Étendue spatiale',
+          keywords: 'Mots-clés',
+          noResults: 'Aucun résultat trouvé',
+          addToMap: 'Ajouter à la carte',
+          addedToMap: 'Ajouté à la carte',
+          zoomTo: 'Zoomer vers',
+          description: 'Description',
+          assets: 'Actifs',
+          useMapExtent: "Utiliser l'étendue actuelle de la carte",
+          loading: 'Chargement...',
+          error: 'Une erreur est survenue',
+          loadMore: 'Charger plus',
+          back: 'Retour aux résultats',
+          datetime: 'Date',
+          collection: 'Collection',
+        },
+      },
+    };
+  }
+
+  override getConfig(): StacBrowserConfig {
+    return super.getConfig() as StacBrowserConfig;
+  }
+
+  override onCreateButtonProps(): IconButtonPropsExtend {
+    return {
+      id: 'stac-browser',
+      'aria-label': 'stacBrowser.title',
+      tooltipPlacement: 'right',
+      children: <StacBrowserIcon />,
+      visible: true,
+    };
+  }
+
+  override onCreateContentProps(): TypePanelProps {
+    return {
+      title: 'stacBrowser.title',
+      icon: <StacBrowserIcon />,
+      width: 40,
+      status: this.getConfig().isOpen,
+    };
+  }
+
+  override onCreateContent = (): JSX.Element => {
+    return <StacBrowser config={this.getConfig()} mapId={this.mapViewer.mapId} />;
+  };
+
+  override onRemoved(): void {}
+}
+
+export default StacBrowserPlugin;
+
+if (React === window.cgpv.reactUtilities.react) {
+  window.geoviewPlugins = window.geoviewPlugins || {};
+  window.geoviewPlugins['stac-browser'] = StacBrowserPlugin;
+}
