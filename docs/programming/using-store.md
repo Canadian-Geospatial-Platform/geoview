@@ -123,7 +123,7 @@ Inside a controller, access other controllers through `this.getControllersRegist
 
 ```ts
 // Inside a controller method
-this.getControllersRegistry().mapController.applyLayerFilters(layerPath);
+this.getControllersRegistry().layerSetController.triggerResetFeatureInfo(layerPath);
 this.getControllersRegistry().uiController.setCircularProgress(true);
 ```
 
@@ -152,5 +152,5 @@ this.mapViewer.controllers.timeSliderController?.checkInitTimeSliderLayerAndAppl
 
 ## See Also
 
-- **[Best Practices](programming/best-practices.md)** - Coding standards
-- **[Event Helper](programming/event-helper.md)** - Delegate event system
+- **[Best Practices](best-practices.md)** - Coding standards
+- **[Event Helper](event-helper.md)** - Delegate event system
