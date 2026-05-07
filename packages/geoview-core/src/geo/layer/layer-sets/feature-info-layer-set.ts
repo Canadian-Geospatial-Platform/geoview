@@ -182,6 +182,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
         FeatureInfoLayerSet.QUERY_TYPE,
         lonLatCoordinate,
         true,
+        this.mapViewer.getDisplayLanguage(),
         this.#abortController
       );
 

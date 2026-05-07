@@ -1,4 +1,10 @@
-import type { QueryType, TypeFeatureInfoEntry, TypeFeatureInfoResult, TypeLocation } from '@/api/types/map-schema-types';
+import type {
+  QueryType,
+  TypeDisplayLanguage,
+  TypeFeatureInfoEntry,
+  TypeFeatureInfoResult,
+  TypeLocation,
+} from '@/api/types/map-schema-types';
 import { generateId, whenThisThen } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import type { LayerDomain } from '@/core/domains/layer-domain';
@@ -249,6 +255,7 @@ export abstract class AbstractLayerSet {
    * @param queryType - The query type
    * @param location - The location for the query
    * @param queryGeometry - Optional whether to query geometry
+   * @param language - The display language to use for the query
    * @param abortController - Optional abort controller
    * @returns A promise that resolves with the query results
    */
@@ -257,6 +264,7 @@ export abstract class AbstractLayerSet {
     queryType: QueryType,
     location: TypeLocation,
     queryGeometry = true,
+    language: TypeDisplayLanguage,
     abortController?: AbortController
   ): Promise<TypeFeatureInfoResult> {
     // If the layer is invisible (or any of its parent(s) is invisible)
@@ -266,7 +274,7 @@ export abstract class AbstractLayerSet {
     if (!geoviewLayer.getInVisibleRange(this.mapViewer.getView().getZoom())) return Promise.resolve({ results: [] });
 
     // Get Feature Info
-    return geoviewLayer.getFeatureInfo(this.mapViewer.map, queryType, location, queryGeometry, abortController);
+    return geoviewLayer.getFeatureInfo(this.mapViewer.map, queryType, location, queryGeometry, language, abortController);
   }
 
   // #endregion PROTECTED METHODS

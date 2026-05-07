@@ -112,7 +112,14 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
 
     try {
       // Process query on results data
-      const promiseResult = await this.queryLayerFeatures(layer, queryType, layerPath, false, this.#abortControllers[layerPath]);
+      const promiseResult = await this.queryLayerFeatures(
+        layer,
+        queryType,
+        layerPath,
+        false,
+        this.mapViewer.getDisplayLanguage(),
+        this.#abortControllers[layerPath]
+      );
 
       // Get the array of records in the results
       const arrayOfRecords = promiseResult.results;

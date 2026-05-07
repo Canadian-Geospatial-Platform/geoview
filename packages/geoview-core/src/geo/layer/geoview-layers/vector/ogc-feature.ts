@@ -292,9 +292,6 @@ export class OgcFeature extends AbstractGeoViewVector {
 
     // Initialize the aliases
     layerConfig.initOutfieldsAliases();
-
-    // Initialize the name field
-    layerConfig.initNameField(outfields?.[0]?.name);
   }
 
   /**

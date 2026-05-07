@@ -106,6 +106,10 @@ const FeatureHeader = memo(function FeatureHeader({
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
+
+  /**
+   * Memoizes the style classes for the feature header.
+   */
   const memoSxClasses = useMemo(() => {
     logger.logTraceUseMemo('FEATURE-INFO - FeatureHeader - memoSxClasses', theme);
     return getSxClasses(theme);
@@ -202,6 +206,10 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
 
   // Hooks
   const theme = useTheme();
+
+  /**
+   * Memoizes the style classes for the feature info component.
+   */
   const memoSxClasses = useMemo(() => {
     logger.logTraceUseMemo('FEATURE-INFO - FeatureInfo - memoSxClasses', theme);
     return getSxClasses(theme);
@@ -243,17 +251,15 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
     logger.logTraceUseMemo('FEATURE-INFO - memoFeatureInfoList', feature.fieldInfo);
     if (!feature?.fieldInfo) return [];
 
-    return Object.entries(feature.fieldInfo)
-      .filter(([key]) => key !== feature.nameField)
-      .map(([fieldName, field]) => ({
-        fieldKey: field!.fieldKey,
-        value: field!.value,
-        dataType: field!.dataType,
-        alias:
-          feature.geoviewLayerType !== 'ogcWms' && feature.geoviewLayerType !== 'ogcWfs'
-            ? field!.alias || fieldName
-            : (field!.alias || fieldName).split('.').pop() || '',
-      }));
+    return Object.entries(feature.fieldInfo).map(([fieldName, field]) => ({
+      fieldKey: field!.fieldKey,
+      value: field!.value,
+      dataType: field!.dataType,
+      alias:
+        feature.geoviewLayerType !== 'ogcWms' && feature.geoviewLayerType !== 'ogcWfs'
+          ? field!.alias || fieldName
+          : (field!.alias || fieldName).split('.').pop() || '',
+    }));
   }, [feature]);
 
   /**

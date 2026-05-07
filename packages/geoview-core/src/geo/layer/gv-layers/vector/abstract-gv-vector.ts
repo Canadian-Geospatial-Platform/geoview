@@ -15,7 +15,7 @@ import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
 import { logger } from '@/core/utils/logger';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
-import type { TypeFeatureInfoResult, TypeLayerStyleConfig } from '@/api/types/map-schema-types';
+import type { TypeDisplayLanguage, TypeFeatureInfoResult, TypeLayerStyleConfig } from '@/api/types/map-schema-types';
 import type { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
@@ -235,14 +235,14 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    *
    * @param map - The Map so that we can grab the resolution/projection we want to get features on.
    * @param layerFilters - The layer filters to apply when querying the features.
+   * @param language - The display language, used to guess the best name field if `nameField` is not provided
    * @param abortController - Optional {@link AbortController} to cancel the request.
    * @returns A promise that resolves with the feature info result.
    */
   protected override getAllFeatureInfo(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     map: OLMap,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     layerFilters: LayerFilters,
+    language: TypeDisplayLanguage,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     abortController?: AbortController
   ): Promise<TypeFeatureInfoResult> {
@@ -253,6 +253,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
       results: this.formatFeatureInfoResult(
         features,
         layerConfig,
+        language,
         layerConfig.getServiceDateFormat(),
         layerConfig.getServiceDateTimezone(),
         layerConfig.getServiceDateTemporalMode()
@@ -263,11 +264,22 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   /**
    * Overrides the return of feature information at a given pixel location.
    *
-   * @param map - The Map where to get Feature Info At Pixel from.
-   * @param location - The pixel coordinate that will be used by the query.
-   * @returns A promise that resolves with the feature info result.
+   * @param map - The Map where to get Feature Info At Pixel from
+   * @param location - The pixel coordinate that will be used by the query
+   * @param queryGeometry - Whether to include geometry in the query, default is true
+   * @param language - The display language, used to guess the best name field if `nameField` is not provided
+   * @param abortController - Optional {@link AbortController} to cancel the operation
+   * @returns A promise that resolves with the feature info result
    */
-  protected override getFeatureInfoAtPixel(map: OLMap, location: Pixel): Promise<TypeFeatureInfoResult> {
+  protected override getFeatureInfoAtPixel(
+    map: OLMap,
+    location: Pixel,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    queryGeometry = true,
+    language: TypeDisplayLanguage, // Used if we have to guess the field name for the 'nameField'
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    abortController: AbortController | undefined = undefined
+  ): Promise<TypeFeatureInfoResult> {
     // Get the layer source
     const layerSource = this.getOLSource();
 
@@ -292,6 +304,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
       results: this.formatFeatureInfoResult(
         features,
         layerConfig,
+        language,
         layerConfig.getServiceDateFormat(),
         layerConfig.getServiceDateTimezone(),
         layerConfig.getServiceDateTemporalMode()
@@ -302,46 +315,46 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   /**
    * Overrides the return of feature information at a given coordinate.
    *
-   * @param map - The Map where to get Feature Info At Coordinate from.
-   * @param location - The coordinate that will be used by the query.
-   * @param queryGeometry - Whether to include geometry in the query, default is true.
-   * @param abortController - Optional {@link AbortController} to cancel the request.
-   * @returns A promise that resolves with the feature info result.
+   * @param map - The Map where to get Feature Info At Coordinate from
+   * @param location - The coordinate that will be used by the query
+   * @param queryGeometry - Whether to include geometry in the query, default is true
+   * @param language - The display language, used to guess the best name field for the 'nameField'
+   * @param abortController - Optional {@link AbortController} to cancel the request
+   * @returns A promise that resolves with the feature info result
    */
   protected override getFeatureInfoAtCoordinate(
     map: OLMap,
     location: Coordinate,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     queryGeometry = true,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    language: TypeDisplayLanguage,
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoResult> {
     // Redirect to getFeatureInfoAtPixel
-    return this.getFeatureInfoAtPixel(map, map.getPixelFromCoordinate(location));
+    return this.getFeatureInfoAtPixel(map, map.getPixelFromCoordinate(location), queryGeometry, language, abortController);
   }
 
   /**
    * Overrides the return of feature information at the provided long lat coordinate.
    *
-   * @param map - The Map where to get Feature Info At LonLat from.
-   * @param lonlat - The coordinate that will be used by the query.
-   * @param queryGeometry - Whether to include geometry in the query, default is true.
-   * @param abortController - Optional {@link AbortController} to cancel the request.
-   * @returns A promise that resolves with the feature info result.
+   * @param map - The Map where to get Feature Info At LonLat from
+   * @param lonlat - The coordinate that will be used by the query
+   * @param queryGeometry - Whether to include geometry in the query, default is true
+   * @param language - The display language, used to guess the best name field if `nameField` is not provided
+   * @param abortController - Optional {@link AbortController} to cancel the operation
+   * @returns A promise that resolves with the feature info result
    */
   protected override getFeatureInfoAtLonLat(
     map: OLMap,
     lonlat: Coordinate,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     queryGeometry = true,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    language: TypeDisplayLanguage,
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoResult> {
     // Convert Coordinates LonLat to map projection
     const projCoordinate = Projection.transformFromLonLat(lonlat, map.getView().getProjection());
 
     // Redirect to getFeatureInfoAtPixel
-    return this.getFeatureInfoAtPixel(map, map.getPixelFromCoordinate(projCoordinate));
+    return this.getFeatureInfoAtPixel(map, map.getPixelFromCoordinate(projCoordinate), queryGeometry, language, abortController);
   }
 
   /**

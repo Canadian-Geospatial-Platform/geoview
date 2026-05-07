@@ -34,7 +34,6 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     .concat(this.EXCLUDED_HEADERS_GEN)
     .concat(this.EXCLUDED_HEADERS_STYLE);
 
-  static readonly NAME_FIELD_KEYWORDS = ['^name$', '^title$', '^label$'];
   static readonly MAX_ESRI_FEATURES = 200000;
 
   // #region OVERRIDES
@@ -269,56 +268,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     // Initialize the aliases
     layerConfig.initOutfieldsAliases();
 
-    // If no name field
-    const nameField = layerConfig.getNameField();
-    if (nameField) {
-      // A nameField was provided (likely from metadata) - validate it exists in outfields
-      const fieldExists = outfields.some((field) => field.name === nameField);
-
-      if (!fieldExists) {
-        // The provided nameField doesn't exist in the actual data - need to replace it
-        logger.logWarning(
-          `The configured nameField '${nameField}' does not exist in the layer's outfields. Replacing with a default value.`
-        );
-
-        // Replace the invalid nameField with a smart default
-        layerConfig.setNameField(this.findBestNameField(outfields));
-      }
-      // If fieldExists is true, the nameField is valid - no action needed
-    } else {
-      // No nameField provided - try to set nameField to a name field
-      const newNameField = this.findBestNameField(outfields);
-
-      // Set the name field to the first attribute by default if no nameField is specified already
-      layerConfig.initNameField(newNameField ?? outfields?.[0]?.name);
-    }
-
     // Vector layer only queryable if there are fields
     layerConfig.initQueryableSource(outfields.length > 0);
-  }
-
-  /**
-   * Finds the best field to use as a name field by searching for common name-like field patterns.
-   *
-   * Searches the outfields array for fields matching predefined keywords (name, title, label) in priority order.
-   * If no keyword match is found, returns the first field as a fallback.
-   *
-   * @param outfields - Array of outfields to search
-   * @returns The name of the best matching field, or undefined if no fields available
-   */
-  static findBestNameField(outfields: TypeOutfields[]): string | undefined {
-    if (!outfields.length) return undefined;
-
-    // Try to find a field matching name keywords in priority order
-    const nameField = this.NAME_FIELD_KEYWORDS.reduce<TypeOutfields | undefined>((found, keyword) => {
-      if (found) return found;
-      return outfields.find((field) => {
-        return new RegExp(keyword, 'i').test(field.name);
-      });
-    }, undefined);
-
-    // Return the matched field name, or fall back to the first field
-    return nameField?.name ?? outfields[0]?.name;
   }
 
   /**

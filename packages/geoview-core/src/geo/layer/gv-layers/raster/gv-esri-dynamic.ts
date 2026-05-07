@@ -22,6 +22,7 @@ import type {
   TypeValidMapProjectionCodes,
   TypeIconSymbolVectorConfig,
   TypeFeatureInfoEntryPartial,
+  TypeDisplayLanguage,
 } from '@/api/types/map-schema-types';
 import type { TypeLayerMetadataEsriExtent, TypeLegend } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
@@ -282,14 +283,16 @@ export class GVEsriDynamic extends AbstractGVRaster {
   /**
    * Overrides the get all feature information for all the features stored in the layer.
    *
-   * @param map - The Map so that we can grab the resolution/projection we want to get features on.
-   * @param layerFilters - The layer filters to apply when querying the features.
-   * @param abortController - Optional {@link AbortController} to cancel the operation.
+   * @param map - The Map so that we can grab the resolution/projection we want to get features on
+   * @param layerFilters - The layer filters to apply when querying the features
+   * @param language - The display language, used to guess the best name field for the 'nameField'
+   * @param abortController - Optional {@link AbortController} to cancel the operation
    * @returns A promise that resolves with the feature info result
    */
   protected override async getAllFeatureInfo(
     map: OLMap,
     layerFilters: LayerFilters,
+    language: TypeDisplayLanguage,
     abortController?: AbortController
   ): Promise<TypeFeatureInfoResult> {
     // Get the layer config in a loaded phase
@@ -321,6 +324,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
         results: this.formatFeatureInfoResult(
           features,
           layerConfig,
+          language,
           layerConfig.getServiceDateFormat(),
           layerConfig.getServiceDateTimezone(),
           layerConfig.getServiceDateTemporalMode()
@@ -335,32 +339,35 @@ export class GVEsriDynamic extends AbstractGVRaster {
   /**
    * Overrides the return of feature information at a given coordinate.
    *
-   * @param map - The Map where to get Feature Info At Coordinate from.
-   * @param location - The coordinate that will be used by the query.
-   * @param queryGeometry - Whether to include geometry in the query, default is true.
-   * @param abortController - Optional {@link AbortController} to cancel the operation.
+   * @param map - The Map where to get Feature Info At Coordinate from
+   * @param location - The coordinate that will be used by the query
+   * @param queryGeometry - Whether to include geometry in the query, default is true
+   * @param language - The display language, used to guess the best name field for the 'nameField'
+   * @param abortController - Optional {@link AbortController} to cancel the operation
    * @returns A promise that resolves with the feature info result
    */
   protected override getFeatureInfoAtCoordinate(
     map: OLMap,
     location: Coordinate,
     queryGeometry = true,
+    language: TypeDisplayLanguage,
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoResult> {
     // Transform coordinate from map projection to lntlat
     const projCoordinate = Projection.transformToLonLat(location, map.getView().getProjection());
 
     // Redirect to getFeatureInfoAtLonLat
-    return this.getFeatureInfoAtLonLat(map, projCoordinate, queryGeometry, abortController);
+    return this.getFeatureInfoAtLonLat(map, projCoordinate, queryGeometry, language, abortController);
   }
 
   /**
    * Overrides the return of feature information at the provided long lat coordinate.
    *
-   * @param map - The Map where to get Feature Info At LonLat from.
-   * @param lonlat - The coordinate that will be used by the query.
-   * @param queryGeometry - Whether to include geometry in the query, default is true.
-   * @param abortController - Optional {@link AbortController} to cancel the operation.
+   * @param map - The Map where to get Feature Info At LonLat from
+   * @param lonlat - The coordinate that will be used by the query
+   * @param queryGeometry - Whether to include geometry in the query, default is true
+   * @param language - The display language, used to guess the best name field if `nameField` is not provided
+   * @param abortController - Optional {@link AbortController} to cancel the operation
    * @returns A promise that resolves with the feature info result
    * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
    */
@@ -368,6 +375,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     map: OLMap,
     lonlat: Coordinate,
     queryGeometry = true,
+    language: TypeDisplayLanguage,
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoResult> {
     // The FeatureInfoResult object that will be returned
@@ -445,6 +453,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     featureInfoResult.results = this.formatFeatureInfoResult(
       features,
       layerConfig,
+      language,
       layerConfig.getServiceDateFormatIdentify(),
       layerConfig.getServiceDateTimezone(),
       layerConfig.getServiceDateTemporalMode()
