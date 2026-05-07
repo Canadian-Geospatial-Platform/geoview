@@ -739,6 +739,35 @@ const mapViewer = cgpv.api.getMapViewer("mapId");
 }
 ```
 
+### Keyboard Shortcuts
+
+The Drawer package provides comprehensive keyboard shortcuts for efficient drawing and editing:
+
+| Shortcut | Action |
+|----------|--------|
+| **Ctrl+D** | Toggle Drawing mode |
+| **Ctrl+E** | Toggle Editing mode |
+| **Ctrl+G** | Cycle Geometry Type (forward) |
+| **Ctrl+Shift+G** | Cycle Geometry Type (backward) |
+| **Ctrl+S** | Open Style Menu |
+| **Ctrl+M** | Toggle Measurements visibility |
+| **Ctrl+N** | Toggle Snapping |
+| **Ctrl+Z** | Undo last action |
+| **Ctrl+Y / Ctrl+Shift+Z** | Redo action |
+| **Ctrl+Shift+S** | Download drawings (GeoJSON) |
+| **Ctrl+O** | Upload drawings |
+| **Ctrl+Shift+C** | Clear all drawings |
+| **Escape** | Clear selection / Exit edit mode |
+
+### Crosshair Integration
+
+When keyboard navigation is enabled (crosshair mode), the Drawer tool provides enhanced interaction capabilities:
+
+- **Drawing with Crosshairs**: Use the crosshairs to place vertices when drawing geometries. Press **Enter** to add a coordinate at the crosshair position.
+- **Editing with Crosshairs**: Use the crosshairs to select and manipulate geometry handles. The hit tolerance is increased (30px vs 5px for mouse) for easier targeting.
+- **Zoom Control**: While in drawing or editing mode with crosshairs active, use **Ctrl+Up Arrow** to zoom in and **Ctrl+Down Arrow** to zoom out centered on the crosshair position.
+- **Finishing Drawings**: Press **Shift+Enter** to finish drawing multi-point geometries (lines, polygons).
+
 ### API Methods
 
 The drawer functionality is managed through the `DrawerController`. The drawer plugin wraps the controller and provides the UI.

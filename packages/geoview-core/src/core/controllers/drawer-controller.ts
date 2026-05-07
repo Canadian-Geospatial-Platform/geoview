@@ -2523,7 +2523,7 @@ export class DrawerController extends AbstractMapViewerController {
             break;
 
           case 'o':
-            // Upload (with Shift)
+            // Upload Drawings
             this.triggerUploadDialog();
             event.preventDefault();
             break;
