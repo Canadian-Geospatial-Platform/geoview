@@ -278,7 +278,7 @@ export class Test<T = unknown> {
    * @param actualValue - The actual value being checked
    * @throws {AssertionUndefinedError} When the value isn't defined.
    */
-  static assertIsDefined<T = unknown>(propertyPath: string, actualValue: T | undefined): void {
+  static assertIsDefined<T = unknown>(propertyPath: string, actualValue: T | undefined): asserts actualValue is T {
     // Checks if the value is defined
     if (actualValue !== undefined && actualValue !== null) return;
 
