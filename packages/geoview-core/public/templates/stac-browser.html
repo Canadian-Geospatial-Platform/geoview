@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>GeoView - STAC Browser</title>
+    <style>
+      .geoview-map {
+        height: 1000px;
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="mapSTAC"
+      class="geoview-map"
+      data-lang="en"
+      data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'projection': 3978,
+            'zoom': 4,
+            'center': [-90, 60]
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': false,
+            'labeled': true
+          }
+        },
+        'appBar': {
+          'tabs': {
+            'core': ['stac-browser']
+          }
+        },
+        'corePackagesConfig': [{
+          'stac-browser': {
+            'stacUrl': 'https://datacube.services.geo.ca/stac/api',
+            'filters': {
+              'collections': true,
+              'temporal': true,
+              'spatial': true,
+              'keyword': true
+            },
+            'defaults': {
+              'limit': 20
+            },
+            'displayPreview': true,
+            'isOpen': true
+          }
+        }]
+      }"
+    ></div>
+    <script>
+      cgpv.init();
+    </script>
+  </body>
+</html>
