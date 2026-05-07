@@ -220,6 +220,7 @@ export class GVGroupLayer extends AbstractBaseGVLayer {
     // The initial opacity was set via OL constructor options which bypasses the GV onSetOpacity capping logic.
     // Uses layer.getOpacity() (the child's own opacity) rather than this.getOpacity() (the parent's opacity),
     // because onSetOpacity will clamp it to Math.min(parent.getOpacity(), childOpacity) internally.
+    // TODO: check why layer.setOpacity(this.getOpacity(), false) is not working properly for test Group 3, map config
     layer.setOpacity(layer.getOpacity(), false);
 
     // Add the layer to our list
