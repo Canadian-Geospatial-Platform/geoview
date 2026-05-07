@@ -7,6 +7,7 @@ import Feature from 'ol/Feature';
 import type { Geometry } from 'ol/geom';
 import { Point, Polygon, LineString, Circle } from 'ol/geom';
 import { Fill, Stroke, Circle as CircleStyle, RegularShape, Text as OLText } from 'ol/style';
+import type { StyleLike } from 'ol/style/Style';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import type { Coordinate } from 'ol/coordinate';
@@ -20,6 +21,7 @@ import { GeoUtilities } from '@/geo/utils/utilities';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import { TIMEOUT } from '@/core/utils/constant';
 import { DrawerStyle } from '@/geo/style/drawer-style';
+import type { DrawerIcon } from '@/geo/style/drawer-icon';
 
 // #region Constants
 
@@ -141,6 +143,14 @@ const ROTATE_LINE_STYLE = new DrawerStyle({
   }),
 });
 
+const HIGHLIGHT_OVERLAY_STYLE = new DrawerStyle({
+  image: new CircleStyle({
+    radius: 12,
+    fill: new Fill({ color: 'rgba(255, 235, 59, 0.3)' }), // Semi-transparent yellow fill
+    stroke: new Stroke({ color: 'rgba(255, 235, 59, 0.8)', width: 3 }), // Yellow stroke
+  }),
+});
+
 /**
  * Handle types for the transform interaction
  */
@@ -243,6 +253,9 @@ export class OLTransform extends OLPointer {
 
   /** Flag to track if we're currently transforming */
   #isTransforming = false;
+
+  /** Stores the original feature style when highlighting for translation */
+  #highlightedFeature?: { originalStyle: StyleLike };
 
   /** The type of transformation being performed */
   #transformType?: HandleType;
@@ -457,6 +470,228 @@ export class OLTransform extends OLPointer {
 
     // 30 pixels converted to map units
     return resolution * 15;
+  }
+
+  /**
+   * Initializes transformation state for keyboard-based transformations (Keyboard / Crosshair).
+   * Sets up all necessary state that would normally be set by mouse-down event.
+   *
+   * @param coordinate - The coordinate where the transformation begins
+   * @param handleType - The type of handle being transformed
+   * @returns True if a transformation was started, false if just an action was performed (e.g., vertex added, feature deleted)
+   */
+  beginKeyboardTransform(coordinate: Coordinate, handleType: HandleType): boolean {
+    if (!this.selectedFeature) return false;
+
+    // Reset vertex added flag (same as mouse flow does in handleDownEvent)
+    this.#vertexAdded = false;
+
+    // Get the map to find the actual handle feature
+    const map = this.mapViewer?.map;
+    if (!map) return false;
+
+    // Special handling for delete - just delete the feature immediately
+    if (handleType === HandleType.DELETE) {
+      const handleFeature = this.#getHandleAtCoordinate(coordinate, map);
+      if (handleFeature) {
+        const feature = handleFeature.get('feature');
+        if (feature) {
+          this.features.remove(feature);
+          this.onDeletefeature?.(new TransformDeleteFeatureEvent(feature as Feature));
+        }
+      }
+      return false; // No transformation started, just deleted
+    }
+
+    // Special handling for edge midpoints - just add the vertex, don't start dragging
+    if (handleType === HandleType.EDGE_MIDPOINT) {
+      const handleFeature = this.#getHandleAtCoordinate(coordinate, map);
+      if (handleFeature) {
+        this.handleAddVertex(coordinate, handleFeature);
+        this.updateHandles(); // Refresh handles to show the new vertex
+      }
+      return false; // No transformation started, just added vertex
+    }
+
+    // For TRANSLATE without a handle (clicking on feature itself), we don't need a handle feature
+    if (handleType === HandleType.TRANSLATE) {
+      // Set up transformation state for translation
+      this.startCoordinate = coordinate;
+      this.startGeometry = this.selectedFeature.getGeometry()?.clone();
+      this.#transformType = HandleType.TRANSLATE;
+      this.#isTransforming = true;
+
+      // For text features, store original properties
+      if (this.#isTextFeature()) {
+        this.#originalTextExtent = this.#calculateTextExtent()!;
+        const currentStyle = this.selectedFeature.getStyle() as DrawerStyle;
+        this.#originalTextSize = currentStyle.getTextSize();
+      }
+
+      // Highlight the feature itself (not a handle)
+      this.#highlightFeature();
+
+      // Clear handles so only the highlighted feature is visible
+      this.clearHandles();
+
+      return true; // Transformation started
+    }
+
+    // Find the handle feature at the coordinate (for all other handle types)
+    const handleFeature = this.#getHandleAtCoordinate(coordinate, map);
+    if (!handleFeature) return false;
+
+    // Set up transformation state (same as mouse-down on handle)
+    this.currentHandle = handleFeature;
+    this.startCoordinate = coordinate;
+    this.startGeometry = this.selectedFeature.getGeometry()?.clone();
+    this.#transformType = handleType;
+    this.#isTransforming = true;
+
+    // For text features, store original properties for rotation/scaling
+    if (this.#isTextFeature()) {
+      if (handleType === HandleType.ROTATE) {
+        const currentStyle = this.selectedFeature.getStyle() as DrawerStyle;
+        this.#originalTextRotation = currentStyle.getTextRotation();
+      }
+      if (handleType.startsWith('scale')) {
+        this.#originalTextExtent = this.#calculateTextExtent()!;
+        const currentStyle = this.selectedFeature.getStyle() as DrawerStyle;
+        this.#originalTextSize = currentStyle.getTextSize();
+      }
+    }
+
+    // Apply visual feedback - highlight the grabbed handle
+    this.#highlightHandle(handleFeature);
+
+    return true; // Transformation started
+  }
+
+  /**
+   * Applies a transformation from a grabbed coordinate to a new coordinate (Keyboard / Crosshair).
+   * Handles all transformation types internally based on the handle type.
+   *
+   * @param startCoordinate - The coordinate where the handle was grabbed
+   * @param endCoordinate - The coordinate to transform to
+   * @param handleType - The type of handle being transformed
+   * @returns Whether the transformation was successfully applied
+   */
+  applyKeyboardTransformFromCoordinates(startCoordinate: number[], endCoordinate: number[], handleType: HandleType): boolean {
+    if (!this.selectedFeature) return false;
+
+    // Calculate the delta for translation-based transforms
+    const deltaX = endCoordinate[0] - startCoordinate[0];
+    const deltaY = endCoordinate[1] - startCoordinate[1];
+
+    // Apply the appropriate transformation based on handle type
+    if (handleType === HandleType.TRANSLATE || handleType.startsWith('translate')) {
+      this.handleTranslate(deltaX, deltaY);
+    } else if (handleType === HandleType.ROTATE) {
+      this.handleRotate(endCoordinate);
+    } else if (handleType.startsWith('scale')) {
+      this.handleScale(endCoordinate, handleType, false);
+    } else if (handleType.startsWith('stretch')) {
+      this.handleStretch(endCoordinate, handleType);
+    } else if (handleType === HandleType.VERTEX) {
+      this.handleVertexMove(endCoordinate, this.currentHandle);
+    } else {
+      // Unknown handle type
+      return false;
+    }
+
+    // Update handles and restore original style
+    this.updateHandles();
+    this.restoreHandleStyle();
+
+    return true;
+  }
+
+  /**
+   * Highlights a handle to indicate it's been grabbed.
+   *
+   * @param handle - The handle to highlight
+   */
+  #highlightHandle(handle: Feature): void {
+    const handleType = handle.get('handleType') as HandleType;
+
+    // For translate (moving the whole feature), highlight the feature itself
+    if (handleType === HandleType.TRANSLATE || handleType === HandleType.TRANSLATE_CENTER) {
+      this.#highlightFeature();
+    }
+
+    // Clear ALL handles
+    this.clearHandles();
+
+    // Recreate just the highlighted handle with overlay style
+    const coordinate = (handle.getGeometry() as Point).getCoordinates();
+    const properties = {
+      vertexIndex: handle.get('vertexIndex'),
+      isCircleCenter: handle.get('isCircleCenter'),
+      isCircleEdge: handle.get('isCircleEdge'),
+      edgeIndex: handle.get('edgeIndex'),
+    };
+
+    this.createHandle(coordinate, handleType, properties);
+
+    // Apply highlight overlay to the handle
+    const highlightedHandle = this.handleSource.getFeatures()[0];
+    if (highlightedHandle) {
+      const originalStyle = highlightedHandle.getStyle() as DrawerStyle;
+      // Apply both original style and highlight overlay
+      highlightedHandle.setStyle([originalStyle, HIGHLIGHT_OVERLAY_STYLE]);
+    }
+  }
+
+  /**
+   * Highlights the feature to indicate it's being translated.
+   */
+  #highlightFeature(): void {
+    if (!this.selectedFeature) return;
+
+    const originalStyle = this.selectedFeature.getStyle() as DrawerStyle;
+    this.#highlightedFeature = { originalStyle };
+
+    // Create a highlighted version with yellow glow
+    const currentStyle = originalStyle;
+
+    const highlightedStyle = new DrawerStyle({
+      stroke: currentStyle.getStroke()
+        ? new Stroke({
+            color: 'rgba(255, 235, 59, 0.8)', // Yellow
+            width: (currentStyle.getStroke()?.getWidth() || 1.3) + 2, // Thicker
+          })
+        : undefined,
+      fill: currentStyle.getFill()
+        ? new Fill({
+            color: currentStyle.getFill()!.getColor() as string,
+          })
+        : undefined,
+      image: currentStyle.getImage() as DrawerIcon,
+      text: currentStyle.getText() as DrawerText,
+    });
+
+    this.selectedFeature.setStyle(highlightedStyle);
+  }
+
+  /**
+   * Restores the original style of the highlighted feature.
+   */
+  #restoreFeatureStyle(): void {
+    if (this.#highlightedFeature && this.selectedFeature) {
+      this.selectedFeature.setStyle(this.#highlightedFeature.originalStyle);
+      this.#highlightedFeature = undefined;
+    }
+  }
+
+  /**
+   * Restores all handles by recreating them.
+   */
+  restoreHandleStyle(): void {
+    // Restore feature style if it was highlighted
+    this.#restoreFeatureStyle();
+
+    // Recreate all handles
+    this.updateHandles();
   }
 
   // #endregion

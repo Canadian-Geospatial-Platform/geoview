@@ -7,7 +7,8 @@ import {
   useStoreDrawerActiveGeom,
   useStoreDrawerSelectedDrawingType,
 } from 'geoview-core/core/stores/states/drawer-state';
-import { useTranslation } from 'geoview-core/core/translation/i18n';
+import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
+import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
 import { logger } from 'geoview-core/core/utils/logger';
 
 import { FONT_OPTIONS, DEFAULT_FONT, loadGoogleFont } from '../utils/fonts';
@@ -65,7 +66,7 @@ export function StylePanel(): JSX.Element {
   const style = useStoreDrawerStyle();
   const activeGeom = useStoreDrawerActiveGeom();
   const selectedDrawingType = useStoreDrawerSelectedDrawingType();
-  const { t } = useTranslation<string>();
+  const displayLanguage = useStoreAppDisplayLanguage();
   const drawerController = useDrawerController();
 
   /** The current geometry type, using the selected drawing type or active geometry as fallback. */
@@ -226,7 +227,7 @@ export function StylePanel(): JSX.Element {
 
   // Add close button to MUIColorInputs
   useEffect(() => {
-    logger.logTraceUseEffect('STYLE PANEL - Color picker close button setup');
+    logger.logTraceUseEffect('STYLE PANEL - Color picker close button setup', displayLanguage);
 
     const addCloseButtons = (): void => {
       // Find all color picker popovers
@@ -246,7 +247,7 @@ export function StylePanel(): JSX.Element {
         font-size: 14px;
         font-weight: 500;
       `;
-        header.textContent = t('drawer.colourPicker');
+        header.textContent = getLocalizedMessage(displayLanguage, 'drawer.colourPicker');
 
         // Create close button
         const closeBtn = document.createElement('button');
@@ -294,7 +295,7 @@ export function StylePanel(): JSX.Element {
     observer.observe(document.body, { childList: true, subtree: true });
 
     return () => observer.disconnect();
-  }, [t]);
+  }, [displayLanguage]);
 
   // Preload all Google Fonts
   useEffect(() => {
@@ -314,14 +315,14 @@ export function StylePanel(): JSX.Element {
         <>
           <ListItem sx={sxClasses.listItem}>
             <Typography variant="subtitle2" sx={sxClasses.label}>
-              {t('drawer.text')}
+              {getLocalizedMessage(displayLanguage, 'drawer.text')}
             </Typography>
             <TextField value={style.text || ''} onChange={handleTextChange} sx={sxClasses.input} placeholder="Enter text" multiline />
           </ListItem>
 
           <ListItem sx={sxClasses.listItem}>
             <Typography variant="subtitle2" sx={sxClasses.label}>
-              {t('drawer.textFont')}
+              {getLocalizedMessage(displayLanguage, 'drawer.textFont')}
             </Typography>
             <TextField
               select
@@ -352,7 +353,7 @@ export function StylePanel(): JSX.Element {
             <Box sx={{ display: 'flex', gap: 3, width: '100%' }}>
               <Box sx={{ flex: 1 }}>
                 <Typography variant="subtitle2" sx={sxClasses.label}>
-                  {t('drawer.textColour')}
+                  {getLocalizedMessage(displayLanguage, 'drawer.textColour')}
                 </Typography>
                 <MuiColorInput
                   value={localTextColor}
@@ -363,7 +364,7 @@ export function StylePanel(): JSX.Element {
               </Box>
               <Box sx={{ flex: 1 }}>
                 <Typography variant="subtitle2" sx={sxClasses.label}>
-                  {t('drawer.textSize')}
+                  {getLocalizedMessage(displayLanguage, 'drawer.textSize')}
                 </Typography>
                 <TextField
                   value={style.textSize || 14}
@@ -385,7 +386,7 @@ export function StylePanel(): JSX.Element {
             <Box sx={{ display: 'flex', gap: 3, width: '100%' }}>
               <Box sx={{ flex: 1 }}>
                 <Typography variant="subtitle2" sx={sxClasses.label}>
-                  {t('drawer.textHaloColour')}
+                  {getLocalizedMessage(displayLanguage, 'drawer.textHaloColour')}
                 </Typography>
                 <MuiColorInput
                   value={localTextHaloColor}
@@ -396,7 +397,7 @@ export function StylePanel(): JSX.Element {
               </Box>
               <Box sx={{ flex: 1 }}>
                 <Typography variant="subtitle2" sx={sxClasses.label}>
-                  {t('drawer.textHaloWidth')}
+                  {getLocalizedMessage(displayLanguage, 'drawer.textHaloWidth')}
                 </Typography>
                 <TextField
                   value={style.textHaloWidth}
@@ -414,11 +415,11 @@ export function StylePanel(): JSX.Element {
           </ListItem>
           <ListItem sx={sxClasses.listItem}>
             <Typography variant="subtitle2" sx={sxClasses.label}>
-              {t('drawer.textFormatting')}
+              {getLocalizedMessage(displayLanguage, 'drawer.textFormatting')}
             </Typography>
             <Box sx={{ display: 'flex', gap: 1, width: '100%' }}>
               <IconButton
-                aria-label={t('drawer.textBold')}
+                aria-label={getLocalizedMessage(displayLanguage, 'drawer.textBold')}
                 tooltipPlacement="bottom"
                 onClick={handleToggleBold}
                 className={style.textBold ? 'highlighted active' : ''}
@@ -427,7 +428,7 @@ export function StylePanel(): JSX.Element {
                 <FormatBoldIcon />
               </IconButton>
               <IconButton
-                aria-label={t('drawer.textItalic')}
+                aria-label={getLocalizedMessage(displayLanguage, 'drawer.textItalic')}
                 tooltipPlacement="bottom"
                 onClick={handleToggleItalic}
                 className={style.textItalic ? 'highlighted active' : ''}
@@ -444,7 +445,7 @@ export function StylePanel(): JSX.Element {
       {currentGeomType !== 'LineString' && currentGeomType !== 'Text' && (
         <ListItem sx={sxClasses.listItem}>
           <Typography variant="subtitle2" sx={sxClasses.label}>
-            {t('drawer.fillColour')}
+            {getLocalizedMessage(displayLanguage, 'drawer.fillColour')}
           </Typography>
           <MuiColorInput value={localFillColor} onChange={handleFillColorChange} onBlur={handleFillColorClose} sx={sxClasses.input} />
         </ListItem>
@@ -454,7 +455,7 @@ export function StylePanel(): JSX.Element {
       {currentGeomType === 'Point' && (
         <ListItem sx={sxClasses.listItem}>
           <Typography variant="subtitle2" sx={sxClasses.label}>
-            {t('drawer.iconSize')}
+            {getLocalizedMessage(displayLanguage, 'drawer.iconSize')}
           </Typography>
           <TextField
             value={style.iconSize || 24}
@@ -475,7 +476,7 @@ export function StylePanel(): JSX.Element {
         <>
           <ListItem sx={sxClasses.listItem}>
             <Typography variant="subtitle2" sx={sxClasses.label}>
-              {t('drawer.strokeColour')}
+              {getLocalizedMessage(displayLanguage, 'drawer.strokeColour')}
             </Typography>
             <MuiColorInput
               value={localStrokeColor}
@@ -487,7 +488,7 @@ export function StylePanel(): JSX.Element {
 
           <ListItem sx={sxClasses.listItem}>
             <Typography variant="subtitle2" sx={sxClasses.label}>
-              {t('drawer.strokeWidth')}
+              {getLocalizedMessage(displayLanguage, 'drawer.strokeWidth')}
             </Typography>
             <TextField
               value={style.strokeWidth}
