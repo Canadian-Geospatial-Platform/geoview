@@ -39,12 +39,17 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
+  // Get the OL map reference once at component level
+  const olMap = cgpv.api.getMapViewer(mapId).map;
+
   // State
   const [selectedCollections, setSelectedCollections] = useState<string[]>(config.defaults?.collections ?? []);
   const [useMapExtent, setUseMapExtent] = useState(false);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [keyword, setKeyword] = useState('');
+
+  // #region Handlers
 
   /**
    * Handles collection checkbox toggle.
@@ -94,8 +99,7 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
 
     if (useMapExtent) {
       // Get the actual map extent transformed to EPSG:4326 for STAC API
-      const mapViewer = cgpv.api.getMapViewer(mapId);
-      params.bbox = StacLayerHelper.getMapExtentAsWgs84Bbox(mapViewer.map);
+      params.bbox = StacLayerHelper.getMapExtentAsWgs84Bbox(olMap);
     }
 
     if (startDate || endDate) {
@@ -118,7 +122,9 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
     }
 
     onSearch(params);
-  }, [selectedCollections, useMapExtent, startDate, endDate, keyword, collections, onSearch, mapId]);
+  }, [selectedCollections, useMapExtent, startDate, endDate, keyword, collections, onSearch, olMap]);
+
+  // #endregion
 
   return (
     <Box sx={sxClasses.filterPanel}>

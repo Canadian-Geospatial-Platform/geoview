@@ -37,18 +37,42 @@ export function StacResultsList(props: StacResultsListProps): JSX.Element {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
+  // #region Handlers
+
   /**
-   * Handles click on a result card.
+   * Handles click on a result card, resolving the item from its ID.
    */
   const handleCardClick = useCallback(
-    (item: StacItem): void => {
-      onItemClick(item);
+    (event: React.MouseEvent<HTMLDivElement>): void => {
+      const { itemId } = event.currentTarget.dataset;
+      const item = items.find((i) => i.id === itemId);
+      if (item) onItemClick(item);
     },
-    [onItemClick]
+    [items, onItemClick]
   );
 
   /**
+   * Handles keyboard activation on a result card.
+   */
+  const handleCardKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLDivElement>): void => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        const { itemId } = event.currentTarget.dataset;
+        const item = items.find((i) => i.id === itemId);
+        if (item) onItemClick(item);
+      }
+    },
+    [items, onItemClick]
+  );
+
+  // #endregion
+
+  /**
    * Gets the thumbnail URL from item assets.
+   *
+   * @param item - The STAC item
+   * @returns The thumbnail URL, or undefined if no thumbnail asset exists
    */
   const getThumbnailUrl = useCallback((item: StacItem): string | undefined => {
     if (!item.assets) return undefined;
@@ -58,6 +82,9 @@ export function StacResultsList(props: StacResultsListProps): JSX.Element {
 
   /**
    * Gets the display title for an item.
+   *
+   * @param item - The STAC item
+   * @returns The item title string
    */
   const getItemTitle = useCallback((item: StacItem): string => {
     return item.properties.title ?? item.id;
@@ -65,6 +92,9 @@ export function StacResultsList(props: StacResultsListProps): JSX.Element {
 
   /**
    * Gets the display datetime for an item.
+   *
+   * @param item - The STAC item
+   * @returns The formatted date string, or empty string if no datetime
    */
   const getItemDatetime = useCallback((item: StacItem): string => {
     const dt = item.properties.datetime ?? item.properties.start_datetime;
@@ -77,7 +107,15 @@ export function StacResultsList(props: StacResultsListProps): JSX.Element {
       {items.map((item) => {
         const thumbnailUrl = getThumbnailUrl(item);
         return (
-          <Box key={item.id} sx={sxClasses.resultCard} onClick={(): void => handleCardClick(item)} role="button" tabIndex={0}>
+          <Box
+            key={item.id}
+            data-item-id={item.id}
+            sx={sxClasses.resultCard}
+            onClick={handleCardClick}
+            onKeyDown={handleCardKeyDown}
+            role="button"
+            tabIndex={0}
+          >
             {thumbnailUrl && <Box component="img" src={thumbnailUrl} alt={getItemTitle(item)} sx={sxClasses.thumbnail} />}
             <Typography sx={sxClasses.resultTitle}>{getItemTitle(item)}</Typography>
             <Typography sx={sxClasses.resultMeta}>
