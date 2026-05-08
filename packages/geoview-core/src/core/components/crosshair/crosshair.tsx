@@ -7,7 +7,7 @@ import { getSxClasses } from './crosshair-style';
 import { CrosshairIcon } from './crosshair-icon';
 import { useStoreAppIsCrosshairsActive } from '@/core/stores/states/app-state';
 import { getStoreMapPointerPosition, useStoreMapZoom } from '@/core/stores/states/map-state';
-import { getStoreDrawerIsEditing, getStoreDrawerIsDrawing } from '@/core/stores/store-interface-and-intial-values/drawer-state';
+import { getStoreDrawerIsEditing, getStoreDrawerIsDrawing } from '@/core/stores/states/drawer-state';
 import { logger } from '@/core/utils/logger';
 import { useEventListener } from '@/core/components/common/hooks/use-event-listener';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
