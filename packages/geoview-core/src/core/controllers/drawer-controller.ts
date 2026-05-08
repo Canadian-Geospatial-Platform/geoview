@@ -56,7 +56,7 @@ import {
   type StyleProps,
   getStoreDrawerGeomTypes,
 } from '@/core/stores/states/drawer-state';
-import { getStoreAppGeoviewHTMLElement, getStoreAppIsCrosshairsActive } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { getStoreAppGeoviewHTMLElement, getStoreAppIsCrosshairsActive } from '@/core/stores/states/app-state';
 import type { DomainLanguageChangedDelegate, DomainLanguageChangedEvent, UIDomain } from '@/core/domains/ui-domain';
 import type { MapProjectionChangedDelegate, MapProjectionChangedEvent, MapViewer } from '@/geo/map/map-viewer';
 import {
