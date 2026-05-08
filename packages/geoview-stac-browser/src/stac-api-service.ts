@@ -45,6 +45,7 @@ export class StacApiService {
       if (params.collections?.length) body.collections = params.collections;
       if (params.bbox) body.bbox = params.bbox;
       if (params.datetime) body.datetime = params.datetime;
+      if (params.q) body.q = params.q;
       if (params.limit) body.limit = params.limit;
       if (params.token) body.token = params.token;
 
