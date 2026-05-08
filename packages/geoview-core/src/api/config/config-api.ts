@@ -32,7 +32,7 @@ import { NotSupportedError } from '@/core/exceptions/core-exceptions';
 
 import { isJsonString, isValidUUID, parseXMLToJson, removeCommentsFromJSON } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
-import { GeoCore } from '@/api/config/geocore';
+import { GeoCore, type GeoCoreLayerConfigResponse } from '@/api/config/geocore';
 import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import { GeoPackageReader } from '@/api/config/reader/geopackage-reader';
 import { ShapefileReader } from '@/api/config/reader/shapefile-reader';
@@ -451,13 +451,13 @@ export class ConfigApi {
     language?: TypeDisplayLanguage,
     mapId?: string,
     abortSignal?: AbortSignal
-  ): Promise<TypeGeoviewLayerConfig> {
+  ): Promise<ConfigFromTypeInfo> {
     // If working with geoCore
+    let geocoreInfo: GeoCoreLayerConfigResponse | undefined;
     if (layerType === 'geoCore') {
       // For GeoCore, we build the Config from the Geocore service
-      const response = await GeoCore.createLayerConfigFromUUID(layerURL, [], language || 'en', mapId, undefined, abortSignal);
-      const layerConfigFromGeocore = response.config;
-      // TODO: We are dropping response.geochart here, so the layers that end up being added will not have a chart, even if they should
+      geocoreInfo = await GeoCore.createLayerConfigFromUUID(layerURL, [], language || 'en', mapId, undefined, abortSignal);
+      const layerConfigFromGeocore = geocoreInfo.config;
 
       // Get the layer entries that GeoCore has configured
       const layerIdsFromGeocoreEntries = layerConfigFromGeocore.listOfLayerEntryConfig?.map((layerEntry) => layerEntry.layerId);
@@ -488,47 +488,65 @@ export class ConfigApi {
         return includedLayerEntryConfigs;
       };
 
-      layerConfigForGeoview.listOfLayerEntryConfig = checkIfLayerEntryShouldBeIncluded(layerConfigForGeoview.listOfLayerEntryConfig);
+      layerConfigForGeoview.configInfo.listOfLayerEntryConfig = checkIfLayerEntryShouldBeIncluded(
+        layerConfigForGeoview.configInfo.listOfLayerEntryConfig
+      );
 
       // Return
-      return layerConfigForGeoview;
+      return { configInfo: layerConfigForGeoview.configInfo, geocoreInfo };
     }
 
     // Depending on the type
+    let configInfo: TypeGeoviewLayerConfig;
     switch (layerType) {
       case 'esriDynamic':
-        return EsriDynamic.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
+        configInfo = await EsriDynamic.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
+        break;
       case 'esriImage':
-        return EsriImage.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
+        configInfo = await EsriImage.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
+        break;
       case 'imageStatic':
-        return ImageStatic.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
+        configInfo = await ImageStatic.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
+        break;
       case 'GeoTIFF':
-        return GeoTIFF.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
+        configInfo = await GeoTIFF.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
+        break;
       case 'vectorTiles':
-        return VectorTiles.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
+        configInfo = await VectorTiles.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
+        break;
       case 'ogcWms':
-        return WMS.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
+        configInfo = await WMS.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
+        break;
       case 'ogcWmts':
-        return WMTS.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
+        configInfo = await WMTS.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
+        break;
       case 'xyzTiles':
-        return XYZTiles.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
+        configInfo = await XYZTiles.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
+        break;
       case 'CSV':
-        return CSV.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
+        configInfo = await CSV.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
+        break;
       case 'esriFeature':
-        return EsriFeature.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
+        configInfo = await EsriFeature.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
+        break;
       case 'GeoJSON':
-        return GeoJSON.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
+        configInfo = await GeoJSON.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
+        break;
       case 'KML':
-        return KML.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
+        configInfo = await KML.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
+        break;
       case 'WKB':
-        return WKB.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
+        configInfo = await WKB.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
+        break;
       case 'ogcFeature':
-        return OgcFeature.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
+        configInfo = await OgcFeature.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
+        break;
       case 'ogcWfs':
-        return WFS.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
+        configInfo = await WFS.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
+        break;
       case 'GeoPackage':
         // For GeoPackage, we build a WKB config
-        return await GeoPackageReader.createLayerConfigFromGeoPackage(
+        configInfo = await GeoPackageReader.createLayerConfigFromGeoPackage(
           {
             geoviewLayerId,
             geoviewLayerType: 'GeoPackage',
@@ -536,17 +554,22 @@ export class ConfigApi {
           },
           abortSignal
         );
+        break;
       case 'shapefile':
         // For Shapefile, we build the Config from GeoJson
-        return await ShapefileReader.convertShapefileConfigToGeoJson({
+        configInfo = await ShapefileReader.convertShapefileConfigToGeoJson({
           geoviewLayerId,
           geoviewLayerType: 'shapefile',
           metadataAccessPath: layerURL,
         });
+        break;
       default:
         // Unsupported
         throw new NotSupportedError(`Unsupported layer type ${layerType}`);
     }
+
+    // Return the config info
+    return { configInfo, geocoreInfo };
   }
 
   /**
@@ -674,3 +697,12 @@ export class ConfigApi {
 
   // #endregion INITIALIZERS AND PROCESSORS
 }
+
+/** Represents the result of creating an initial layer config from a layer type. */
+export type ConfigFromTypeInfo = {
+  /** The initialized GeoView layer configuration. */
+  configInfo: TypeGeoviewLayerConfig;
+
+  /** Optional GeoCore payload containing additional layer and geochart information. */
+  geocoreInfo?: GeoCoreLayerConfigResponse;
+};

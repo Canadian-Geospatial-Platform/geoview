@@ -348,7 +348,7 @@
         );
 
         // Output instanciation result
-        editorResultInit.setValue(cgpv.api.config.serializeGeoviewLayerConfig(initializedLayerConfig));
+        editorResultInit.setValue(cgpv.api.config.serializeGeoviewLayerConfig(initializedLayerConfig.configInfo));
       } finally {
         // Hide loading
         showHideLoadingInit(false);
@@ -373,8 +373,8 @@
           );
 
           // Tweak the parameters
-          layerType = initializedLayerConfig.geoviewLayerType;
-          layerUrl = initializedLayerConfig.metadataAccessPath;
+          layerType = initializedLayerConfig.configInfo.geoviewLayerType;
+          layerUrl = initializedLayerConfig.configInfo.metadataAccessPath;
         }
 
         // Call the ConfigApi to process the layers into actual layer config classes
