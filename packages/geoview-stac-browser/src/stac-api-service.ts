@@ -67,7 +67,7 @@ export class StacApiService {
    * @param itemUrl - Full URL of the item
    * @returns A promise that resolves with the STAC item, or null on failure
    */
-  async fetchItem(itemUrl: string): Promise<StacItem | null> {
+  static async fetchItem(itemUrl: string): Promise<StacItem | null> {
     try {
       return await Fetch.fetchJson<StacItem>(itemUrl);
     } catch (error) {
