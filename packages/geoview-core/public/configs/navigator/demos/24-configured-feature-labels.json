@@ -345,6 +345,18 @@
             }
           }
         ]
+      },
+      {
+        "geoviewLayerId": "geojsonLYR1",
+        "geoviewLayerName": "GeoJSON Text from Metadata",
+        "metadataAccessPath": "./datasets/geojson/metadata1.meta",
+        "geoviewLayerType": "GeoJSON",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "projects.json",
+            "layerName": "Projects"
+          }
+        ]
       }
     ]
   },
