@@ -258,6 +258,13 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
     this.#layerText = layerText;
   }
 
+  initLayerTextFromMetadata(layerTextMetadata: TypeLayerTextConfig | undefined): void {
+    // If no metadata, nothing to do
+    if (!layerTextMetadata) return;
+
+    this.#layerText = deepMerge(layerTextMetadata, this.#layerText);
+  }
+
   /**
    * The first TypeStyleSetting associated with the TypeStyleGeometry associated with the style as could be read from the layer config metadata.
    *
