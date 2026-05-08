@@ -184,6 +184,9 @@ export class WKB extends AbstractGeoViewVector {
         // Initialize the layer style by filling the blanks with the information from the metadata
         layerConfig.initLayerStyleFromMetadata(layerMetadataFound.layerStyle);
 
+        // Initialize the layer text by filling the blanks with the information from the metadata
+        layerConfig.initLayerTextFromMetadata(layerMetadataFound.layerText);
+
         // Init min and max scales
         layerConfig.initMinScaleFromMetadata(layerMetadataFound.minScale);
         layerConfig.initMaxScaleFromMetadata(layerMetadataFound.maxScale);
