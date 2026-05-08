@@ -171,14 +171,14 @@ export class UtilitiesGeoTester extends GVAbstractTester {
       (test, results) => {
         test.addStep('Verifying union of overlapping extents...');
         Test.assertIsDefined('union', results[0]);
-        Test.assertIsEqual(results[0]![0], -100);
-        Test.assertIsEqual(results[0]![1], 40);
-        Test.assertIsEqual(results[0]![2], -70);
-        Test.assertIsEqual(results[0]![3], 55);
+        Test.assertIsEqual(results[0][0], -100);
+        Test.assertIsEqual(results[0][1], 40);
+        Test.assertIsEqual(results[0][2], -70);
+        Test.assertIsEqual(results[0][3], 55);
 
         test.addStep('Verifying union with undefined returns the other...');
         Test.assertIsDefined('singleExtent', results[1]);
-        Test.assertIsEqual(results[1]![0], -100);
+        Test.assertIsEqual(results[1][0], -100);
 
         test.addStep('Verifying both undefined returns undefined...');
         Test.assertIsUndefined('bothUndefined', results[2]);
@@ -385,24 +385,24 @@ export class UtilitiesGeoTester extends GVAbstractTester {
       (test, results) => {
         test.addStep('Verifying intersection of overlapping extents...');
         Test.assertIsDefined('intersection', results[0]);
-        Test.assertIsEqual(results[0]![0], -90);
-        Test.assertIsEqual(results[0]![1], 45);
-        Test.assertIsEqual(results[0]![2], -80);
-        Test.assertIsEqual(results[0]![3], 50);
+        Test.assertIsEqual(results[0][0], -90);
+        Test.assertIsEqual(results[0][1], 45);
+        Test.assertIsEqual(results[0][2], -80);
+        Test.assertIsEqual(results[0][3], 50);
 
         test.addStep('Verifying non-overlapping extents return degenerate extent...');
         Test.assertIsDefined('noOverlap', results[1]);
-        Test.assertIsEqual(results[1]![0], -60);
-        Test.assertIsEqual(results[1]![1], 60);
-        Test.assertIsEqual(results[1]![2], -80);
-        Test.assertIsEqual(results[1]![3], 50);
+        Test.assertIsEqual(results[1][0], -60);
+        Test.assertIsEqual(results[1][1], 60);
+        Test.assertIsEqual(results[1][2], -80);
+        Test.assertIsEqual(results[1][3], 50);
 
         test.addStep('Verifying undefined extentB returns extentA...');
         Test.assertIsDefined('undefinedInput', results[2]);
-        Test.assertIsEqual(results[2]![0], -100);
-        Test.assertIsEqual(results[2]![1], 40);
-        Test.assertIsEqual(results[2]![2], -80);
-        Test.assertIsEqual(results[2]![3], 50);
+        Test.assertIsEqual(results[2][0], -100);
+        Test.assertIsEqual(results[2][1], 40);
+        Test.assertIsEqual(results[2][2], -80);
+        Test.assertIsEqual(results[2][3], 50);
       }
     );
   }

@@ -475,7 +475,7 @@ export class MapConfigTester extends GVAbstractTester {
         test.addStep('Verifying overview-map is in components config...');
         const components = getStoreMapConfigComponents(mapId);
         Test.assertIsDefined('components', components);
-        Test.assertArrayIncludes(components!, 'overview-map');
+        Test.assertArrayIncludes(components, 'overview-map');
 
         // Verify overview map config exists with default hideOnZoom of 0
         test.addStep('Verifying overview map config has hideOnZoom 0...');
@@ -513,7 +513,7 @@ export class MapConfigTester extends GVAbstractTester {
         test.addStep('Verifying overview-map is not in components config...');
         const components = getStoreMapConfigComponents(mapId);
         Test.assertIsDefined('components', components);
-        Test.assertArrayExcludes(components!, 'overview-map');
+        Test.assertArrayExcludes(components, 'overview-map');
 
         // Verify overview map visibility is false
         test.addStep('Verifying overview map is not visible...');
