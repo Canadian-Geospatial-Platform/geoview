@@ -87,22 +87,10 @@ export const getSxClasses = (theme: any): any => ({
     objectFit: 'cover',
     borderRadius: theme.shape.borderRadius,
   },
-  detailPanel: {
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100%',
-    overflow: 'auto',
-  },
   detailTitle: {
     fontWeight: 600,
     fontSize: theme.palette.geoViewFontSize.lg,
     color: theme.palette.geoViewColor.textColor.main,
-  },
-  detailContent: {
-    padding: theme.spacing(1.5),
-    display: 'flex',
-    flexDirection: 'column',
-    gap: theme.spacing(1.5),
   },
   detailDescription: {
     fontSize: theme.palette.geoViewFontSize.default,
@@ -122,12 +110,6 @@ export const getSxClasses = (theme: any): any => ({
     '&:hover': {
       backgroundColor: theme.palette.action.hover,
     },
-  },
-  actionButtons: {
-    display: 'flex',
-    gap: theme.spacing(1),
-    padding: theme.spacing(1.5),
-    borderTop: `1px solid ${theme.palette.divider}`,
   },
   loading: {
     display: 'flex',

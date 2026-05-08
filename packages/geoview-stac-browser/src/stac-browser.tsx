@@ -41,6 +41,9 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
+  // Get the OL map reference once at component level
+  const olMap = cgpv.api.getMapViewer(mapId).map;
+
   // State
   const [view, setView] = useState<PanelView>('search');
   const [collections, setCollections] = useState<StacCollection[]>([]);
@@ -72,6 +75,8 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
     };
   }, [memoApiService]);
 
+  // #region Handlers
+
   /**
    * Handles search submission from the filter panel.
    */
@@ -82,10 +87,12 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
           setIsLoading(true);
           setSelectedItem(null);
           logger.logInfo('STAC-BROWSER - Searching with params:', params);
+
           const result = await memoApiService.searchItems({
             ...params,
             limit: config.defaults?.limit ?? 20,
           });
+
           logger.logInfo(`STAC-BROWSER - Search returned ${result.features.length} features`);
           setSearchResult(result);
           setNextToken(memoApiService.getNextPageToken(result));
@@ -113,6 +120,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
         if (!prev) return result;
         return { ...result, features: [...prev.features, ...result.features] };
       });
+
       setNextToken(memoApiService.getNextPageToken(result));
       setIsLoading(false);
     };
@@ -160,13 +168,16 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
    * Handles clearing all STAC layers from the map and resetting toggle states.
    */
   const handleClearMap = useCallback((): void => {
-    const mapViewer = cgpv.api.getMapViewer(mapId);
-    StacLayerHelper.removeAllStacBrowserLayers(mapViewer.map);
+    StacLayerHelper.removeAllStacBrowserLayers(olMap);
     setSelectedItem(null);
     setView('search');
-  }, [cgpv.api, mapId]);
+  }, [olMap]);
 
-  // Render the active view
+  // #endregion
+
+  /**
+   * Renders the active view based on the current panel state.
+   */
   const renderContent = (): JSX.Element => {
     if (view === 'detail' && selectedItem) {
       return <StacItemDetail item={selectedItem} mapId={mapId} onBackToResults={handleBackToResults} onBackToSearch={handleBackToSearch} />;
