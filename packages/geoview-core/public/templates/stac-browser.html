@@ -21,8 +21,7 @@
           'interaction': 'dynamic',
           'viewSettings': {
             'projection': 3978,
-            'zoom': 4,
-            'center': [-90, 60]
+            'zoomAndCenter': [4, [-90, 60]]
           },
           'basemapOptions': {
             'basemapId': 'transport',
@@ -35,6 +34,7 @@
             'core': ['stac-browser']
           }
         },
+        'navBar': ['zoom', 'rotation', 'fullscreen', 'home', 'location', 'measurement', 'basemap-select', 'projection'],
         'corePackagesConfig': [{
           'stac-browser': {
             'stacUrl': 'https://datacube.services.geo.ca/stac/api',
