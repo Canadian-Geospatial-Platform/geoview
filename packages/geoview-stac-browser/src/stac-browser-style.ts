@@ -10,14 +10,41 @@ export const getSxClasses = (theme: any): any => ({
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
+    overflow: 'hidden',
+  },
+  panelContent: {
+    display: 'flex',
+    flexDirection: 'column',
+    flex: 1,
+    overflow: 'auto',
     gap: theme.spacing(1),
+  },
+  backLink: {
+    display: 'flex',
+    gap: theme.spacing(1),
+    padding: theme.spacing(1, 1.5, 0),
+  },
+  clearMapFooter: {
+    flexShrink: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-end',
+  },
+  mapControls: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: theme.spacing(1),
+    alignItems: 'center',
   },
   filterPanel: {
     display: 'flex',
     flexDirection: 'column',
     gap: theme.spacing(1.5),
     padding: theme.spacing(1.5),
-    borderBottom: `1px solid ${theme.palette.divider}`,
+    flex: 1,
+  },
+  searchButton: {
+    marginTop: 'auto',
   },
   filterRow: {
     display: 'flex',
@@ -29,12 +56,7 @@ export const getSxClasses = (theme: any): any => ({
     fontSize: theme.palette.geoViewFontSize.sm,
     color: theme.palette.geoViewColor.textColor.main,
   },
-  searchButton: {
-    marginTop: theme.spacing(1),
-  },
   resultsList: {
-    flex: 1,
-    overflow: 'auto',
     padding: theme.spacing(1),
   },
   resultCard: {
@@ -70,13 +92,6 @@ export const getSxClasses = (theme: any): any => ({
     flexDirection: 'column',
     height: '100%',
     overflow: 'auto',
-  },
-  detailHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: theme.spacing(1),
-    padding: theme.spacing(1.5),
-    borderBottom: `1px solid ${theme.palette.divider}`,
   },
   detailTitle: {
     fontWeight: 600,

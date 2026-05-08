@@ -5,7 +5,7 @@ import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { Box, Button, Checkbox, FormControlLabel, TextField, Typography } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
-import { getStoreMapStateJson } from 'geoview-core/core/stores/states/map-state';
+import { StacLayerHelper } from 'geoview-core/geo/utils/stac-layer-helper';
 
 import type { StacBrowserConfig, StacCollection } from './stac-browser-types';
 import { getSxClasses } from './stac-browser-style';
@@ -17,7 +17,7 @@ interface StacFilterPanelProps {
   /** Plugin configuration. */
   config: StacBrowserConfig;
   /** Callback when search is submitted. */
-  onSearch: (params: { collections?: string[]; bbox?: [number, number, number, number]; datetime?: string }) => void;
+  onSearch: (params: { collections?: string[]; bbox?: [number, number, number, number]; datetime?: string; q?: string }) => void;
   /** The map ID. */
   mapId: string;
 }
@@ -88,19 +88,14 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
    * Handles search button click.
    */
   const handleSearchClick = useCallback((): void => {
-    const params: { collections?: string[]; bbox?: [number, number, number, number]; datetime?: string } = {};
+    const params: { collections?: string[]; bbox?: [number, number, number, number]; datetime?: string; q?: string } = {};
 
     if (selectedCollections.length > 0) params.collections = selectedCollections;
 
     if (useMapExtent) {
-      // Get the current map extent as bbox in EPSG:4326
-      // For now, use a simple approach based on map center and zoom
-      const mapState = getStoreMapStateJson(mapId);
-      const center = mapState.mapCenterCoordinates;
-      const zoom = mapState.currentZoom;
-      // Approximate bbox from center and zoom level
-      const span = 180 / Math.pow(2, zoom);
-      params.bbox = [center[0] - span, center[1] - span / 2, center[0] + span, center[1] + span / 2];
+      // Get the actual map extent transformed to EPSG:4326 for STAC API
+      const mapViewer = cgpv.api.getMapViewer(mapId);
+      params.bbox = StacLayerHelper.getMapExtentAsWgs84Bbox(mapViewer.map);
     }
 
     if (startDate || endDate) {
@@ -109,8 +104,21 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
       params.datetime = `${start}/${end}`;
     }
 
+    // Add keyword as free-text query and also filter collections client-side
+    if (keyword.trim()) {
+      params.q = keyword.trim();
+      // Also auto-select collections whose id or title match the keyword (if user hasn't manually selected any)
+      if (!params.collections?.length && collections.length > 0) {
+        const kw = keyword.trim().toLowerCase();
+        const matchingCollections = collections
+          .filter((c) => c.id.toLowerCase().includes(kw) || (c.title && c.title.toLowerCase().includes(kw)))
+          .map((c) => c.id);
+        if (matchingCollections.length > 0) params.collections = matchingCollections;
+      }
+    }
+
     onSearch(params);
-  }, [selectedCollections, useMapExtent, startDate, endDate, onSearch, mapId]);
+  }, [selectedCollections, useMapExtent, startDate, endDate, keyword, collections, onSearch, mapId]);
 
   return (
     <Box sx={sxClasses.filterPanel}>

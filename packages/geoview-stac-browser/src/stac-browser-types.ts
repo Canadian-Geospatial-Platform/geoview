@@ -82,6 +82,8 @@ export interface StacSearchParams {
   bbox?: [number, number, number, number];
   /** ISO 8601 datetime interval (e.g., "2020-01-01T00:00:00Z/2023-12-31T23:59:59Z"). */
   datetime?: string;
+  /** Free-text search query (STAC API free-text extension). */
+  q?: string;
   /** Maximum number of items per page. */
   limit?: number;
   /** Pagination token from previous response. */
