@@ -37,30 +37,32 @@ export function StacItemDetail(props: StacItemDetailProps): JSX.Element {
   const { t } = useTranslation();
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
+
+  // Get the OL map reference once at component level (like time-slider gets its controller once)
+  const olMap = cgpv.api.getMapViewer(mapId).map;
+
   const [footprintVisible, setFootprintVisible] = useState(false);
   const [previewVisible, setPreviewVisible] = useState(false);
   const [selectedAssetKey, setSelectedAssetKey] = useState<string | null>(null);
   const footprintLayerRef = useRef<unknown>(null);
   const previewLayerRef = useRef<unknown>(null);
 
+  // #region Handlers
+
   /**
    * Handles zoom to item extent with capped zoom level.
    */
   const handleZoomTo = useCallback((): void => {
     if (item.bbox && item.bbox.length >= 4) {
-      const mapViewer = cgpv.api.getMapViewer(mapId);
-      const extent = StacLayerHelper.transformBboxToMapProjection(mapViewer.map, [item.bbox[0], item.bbox[1], item.bbox[2], item.bbox[3]]);
-      void mapViewer.map.getView().fit(extent, { maxZoom: 12, duration: 500, padding: [100, 100, 100, 100] });
+      const extent = StacLayerHelper.transformBboxToMapProjection(olMap, [item.bbox[0], item.bbox[1], item.bbox[2], item.bbox[3]]);
+      void olMap.getView().fit(extent, { maxZoom: 12, duration: 500, padding: [100, 100, 100, 100] });
     }
-  }, [cgpv.api, mapId, item.bbox]);
+  }, [olMap, item.bbox]);
 
   /**
    * Handles toggling footprint visibility on the map.
    */
   const handleToggleFootprint = useCallback((): void => {
-    const mapViewer = cgpv.api.getMapViewer(mapId);
-    const olMap = mapViewer.map;
-
     if (footprintVisible && footprintLayerRef.current) {
       // Remove footprint layer
       StacLayerHelper.removeStacLayer(olMap, footprintLayerRef.current);
@@ -84,28 +86,27 @@ export function StacItemDetail(props: StacItemDetailProps): JSX.Element {
       };
       void addFootprint();
     }
-  }, [cgpv.api, mapId, item, footprintVisible]);
+  }, [olMap, item, footprintVisible]);
 
   /**
    * Removes the currently displayed preview layer from the map.
    */
   const handleRemovePreview = useCallback((): void => {
     if (previewLayerRef.current) {
-      const mapViewer = cgpv.api.getMapViewer(mapId);
-      StacLayerHelper.removeStacLayer(mapViewer.map, previewLayerRef.current);
+      StacLayerHelper.removeStacLayer(olMap, previewLayerRef.current);
       previewLayerRef.current = null;
       setPreviewVisible(false);
       setSelectedAssetKey(null);
     }
-  }, [cgpv.api, mapId]);
+  }, [olMap]);
 
   /**
    * Handles displaying a specific asset on the map.
    */
   const handleShowAsset = useCallback(
-    (assetKey: string, asset: StacAsset): void => {
-      const mapViewer = cgpv.api.getMapViewer(mapId);
-      const olMap = mapViewer.map;
+    (assetKey: string): void => {
+      const asset = item.assets?.[assetKey];
+      if (!asset) return;
 
       // Remove previous preview layer if any
       if (previewLayerRef.current) {
@@ -133,11 +134,41 @@ export function StacItemDetail(props: StacItemDetailProps): JSX.Element {
       };
       void addAsset();
     },
-    [cgpv.api, mapId, selectedAssetKey]
+    [olMap, selectedAssetKey, item.assets]
   );
 
   /**
+   * Handles click on an asset row.
+   */
+  const handleAssetClick = useCallback(
+    (event: React.MouseEvent<HTMLDivElement>): void => {
+      const { assetKey } = event.currentTarget.dataset;
+      if (assetKey) handleShowAsset(assetKey);
+    },
+    [handleShowAsset]
+  );
+
+  /**
+   * Handles keyboard activation on an asset row.
+   */
+  const handleAssetKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLDivElement>): void => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        const { assetKey } = event.currentTarget.dataset;
+        if (assetKey) handleShowAsset(assetKey);
+      }
+    },
+    [handleShowAsset]
+  );
+
+  // #endregion
+
+  /**
    * Checks if an asset is a GeoTIFF by media type or file extension.
+   *
+   * @param asset - The STAC asset to check
+   * @returns Whether the asset is a GeoTIFF
    */
   const isGeoTiffAsset = useCallback((asset: StacAsset): boolean => {
     const geotiffTypes = ['image/tiff', 'image/geotiff', 'image/x-geotiff', 'application/x-geotiff'];
@@ -150,6 +181,8 @@ export function StacItemDetail(props: StacItemDetailProps): JSX.Element {
 
   /**
    * Gets the thumbnail or overview URL from item assets.
+   *
+   * @returns The preview image URL, or undefined if no suitable asset exists
    */
   const getPreviewUrl = useCallback((): string | undefined => {
     if (!item.assets) return undefined;
@@ -196,6 +229,7 @@ export function StacItemDetail(props: StacItemDetailProps): JSX.Element {
               return (
                 <Box
                   key={key}
+                  data-asset-key={key}
                   sx={{
                     ...sxClasses.assetItem,
                     cursor: isGeotiff ? 'pointer' : 'default',
@@ -204,19 +238,10 @@ export function StacItemDetail(props: StacItemDetailProps): JSX.Element {
                     borderRadius: '4px',
                     padding: '4px 8px',
                   }}
-                  onClick={isGeotiff ? () => handleShowAsset(key, asset) : undefined}
+                  onClick={isGeotiff ? handleAssetClick : undefined}
                   role={isGeotiff ? 'button' : undefined}
                   tabIndex={isGeotiff ? 0 : undefined}
-                  onKeyDown={
-                    isGeotiff
-                      ? (e: React.KeyboardEvent): void => {
-                          if (e.key === 'Enter' || e.key === ' ') {
-                            e.preventDefault();
-                            handleShowAsset(key, asset);
-                          }
-                        }
-                      : undefined
-                  }
+                  onKeyDown={isGeotiff ? handleAssetKeyDown : undefined}
                 >
                   <Typography sx={{ ...sxClasses.resultMeta, fontWeight: isSelected ? 600 : 400 }}>
                     {isGeotiff ? '🗺️ ' : ''}

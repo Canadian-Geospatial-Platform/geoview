@@ -12,14 +12,29 @@ import defaultConfig from '../default-config-stac-browser.json';
  * STAC Browser plugin — provides a panel for browsing and filtering STAC API catalogs.
  */
 class StacBrowserPlugin extends AppBarPlugin {
+  /**
+   * Returns the schema that is defined for this package.
+   *
+   * @returns The schema for this package
+   */
   override schema(): unknown {
     return schema;
   }
 
+  /**
+   * Returns the default config for this package.
+   *
+   * @returns The default config
+   */
   override defaultConfig(): unknown {
     return defaultConfig;
   }
 
+  /**
+   * Overrides the default translations for the Plugin.
+   *
+   * @returns The translations object for the particular Plugin
+   */
   override defaultTranslations(): Record<string, unknown> {
     return {
       en: {
@@ -79,10 +94,21 @@ class StacBrowserPlugin extends AppBarPlugin {
     };
   }
 
+  /**
+   * Overrides the getConfig in order to return the right type.
+   *
+   * @returns The STAC browser config
+   */
   override getConfig(): StacBrowserConfig {
+    // Redirect
     return super.getConfig() as StacBrowserConfig;
   }
 
+  /**
+   * Overrides the creation of the button properties of this STAC Browser AppBar Plugin.
+   *
+   * @returns The IconButtonPropsExtend for the STAC Browser AppBar Plugin
+   */
   override onCreateButtonProps(): IconButtonPropsExtend {
     return {
       id: 'stac-browser',
@@ -93,6 +119,11 @@ class StacBrowserPlugin extends AppBarPlugin {
     };
   }
 
+  /**
+   * Overrides the creation of the content properties of this STAC Browser AppBar Plugin.
+   *
+   * @returns The TypePanelProps for the STAC Browser AppBar Plugin
+   */
   override onCreateContentProps(): TypePanelProps {
     return {
       title: 'stacBrowser.title',
@@ -102,10 +133,18 @@ class StacBrowserPlugin extends AppBarPlugin {
     };
   }
 
+  /**
+   * Overrides the creation of the content of this STAC Browser AppBar Plugin.
+   *
+   * @returns The JSX.Element representing the STAC Browser panel content
+   */
   override onCreateContent = (): JSX.Element => {
     return <StacBrowser config={this.getConfig()} mapId={this.mapViewer.mapId} />;
   };
 
+  /**
+   * Handles cleanup when the plugin is removed.
+   */
   override onRemoved(): void {}
 }
 
