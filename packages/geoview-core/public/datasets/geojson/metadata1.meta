@@ -127,6 +127,13 @@
             }
           ]
         }
+      },
+      "layerText": {
+        "field": "project_id",
+        "haloColor": "#ffffff",
+        "haloWidth": 3,
+        "wrap": true,
+        "declutterMode": "declutter"
       }
     }
   ]
