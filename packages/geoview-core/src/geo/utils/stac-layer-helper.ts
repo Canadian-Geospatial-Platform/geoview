@@ -219,7 +219,7 @@ export class StacLayerHelper {
     if (!source) return;
 
     // Get the COG URL from the source's TileJSON or internal sources array
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- accessing internal ol source config
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-underscore-dangle -- accessing internal ol source config
     const sourceInfo = (source as any).sourceInfo_ ?? (source as any).sourceOptions_;
     let cogUrl: string | undefined;
 

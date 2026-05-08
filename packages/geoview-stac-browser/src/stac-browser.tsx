@@ -130,24 +130,21 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
   /**
    * Handles clicking on a result item to show its details.
    */
-  const handleItemClick = useCallback(
-    (item: StacItem): void => {
-      // Fetch the full item (search results often omit assets)
-      const selfLink = item.links?.find((link) => link.rel === 'self');
-      if (selfLink?.href) {
-        const doFetch = async (): Promise<void> => {
-          const fullItem = await memoApiService.fetchItem(selfLink.href);
-          setSelectedItem(fullItem ?? item);
-          setView('detail');
-        };
-        void doFetch();
-      } else {
-        setSelectedItem(item);
+  const handleItemClick = useCallback((item: StacItem): void => {
+    // Fetch the full item (search results often omit assets)
+    const selfLink = item.links?.find((link) => link.rel === 'self');
+    if (selfLink?.href) {
+      const doFetch = async (): Promise<void> => {
+        const fullItem = await StacApiService.fetchItem(selfLink.href);
+        setSelectedItem(fullItem ?? item);
         setView('detail');
-      }
-    },
-    [memoApiService]
-  );
+      };
+      void doFetch();
+    } else {
+      setSelectedItem(item);
+      setView('detail');
+    }
+  }, []);
 
   /**
    * Handles going back to the search panel.
