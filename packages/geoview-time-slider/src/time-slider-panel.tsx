@@ -1,5 +1,5 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
-import type { LayerListEntry } from 'geoview-core/core/components/common';
+import type { LayerListEntry, LayoutExposedMethods } from 'geoview-core/core/components/common';
 import { Layout } from 'geoview-core/core/components/common';
 import type { TypeDisplayLanguage } from 'geoview-core/api/types/map-schema-types';
 import type { TypeTimeSliderValues } from 'geoview-core/core/stores/states/time-slider-state';
@@ -41,7 +41,9 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   const { mapId } = props;
   const { cgpv } = window as TypeWindow;
   const { reactUtilities } = cgpv;
-  const { useCallback, useMemo, useEffect } = reactUtilities.react;
+  const { useCallback, useMemo, useEffect, useRef } = reactUtilities.react;
+
+  const layoutRef = useRef<LayoutExposedMethods>(null);
 
   // get values from store
   const displayLanguage = useStoreAppDisplayLanguage();
@@ -71,6 +73,13 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
     },
     [timeSliderController]
   );
+
+  /**
+   * Handles panel close requests from the TimeSlider component.
+   */
+  const handleRequestClose = useCallback((): void => {
+    layoutRef.current?.showRightPanel(false);
+  }, []);
 
   /**
    * Gets dates for current filters.
@@ -209,7 +218,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
    */
   const renderContent = (): JSX.Element | null => {
     if (selectedLayerPath && timeSliderLayers && selectedLayerPath in timeSliderLayers) {
-      return <TimeSlider layerPath={selectedLayerPath} key={selectedLayerPath} />;
+      return <TimeSlider layerPath={selectedLayerPath} onRequestClose={handleRequestClose} key={selectedLayerPath} />;
     }
 
     return null;
@@ -217,6 +226,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
 
   return (
     <Layout
+      ref={layoutRef}
       selectedLayerPath={selectedLayerPath}
       onLayerListClicked={handleClickLayerList}
       layerList={memoLayersList}

@@ -87,6 +87,9 @@ const Layout = forwardRef(
       (layer: LayerListEntry): void => {
         onLayerListClicked?.(layer);
 
+        // Close the guide when selecting a new layer to show content
+        responsiveLayoutRef.current?.closeGuide();
+
         // Show the panel (hiding the layers list in the process if we're on mobile)
         responsiveLayoutRef.current?.setIsRightPanelVisible(true);
 

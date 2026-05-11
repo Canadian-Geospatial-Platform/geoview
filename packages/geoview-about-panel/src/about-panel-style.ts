@@ -1,3 +1,5 @@
+import type { SxStyles } from 'geoview-core/ui/style/types';
+
 /**
  * Returns the sx style classes for the About Panel components.
  *
@@ -5,23 +7,23 @@
  * @returns The sx style classes
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const getSxClasses = (theme: any): any => ({
+export const getSxClasses = (theme: any): SxStyles => ({
   container: {
-    padding: theme.spacing(3),
+    padding: theme.spacing(11),
     height: '100%',
     overflow: 'auto',
   },
   markdownContainer: {
     '& h1, & h2, & h3, & h4, & h5, & h6': {
-      marginTop: theme.spacing(2),
-      marginBottom: theme.spacing(1),
+      marginTop: theme.spacing(11),
+      marginBottom: theme.spacing(7),
     },
     '& p': {
-      marginBottom: theme.spacing(2),
+      marginBottom: theme.spacing(11),
     },
     '& ul, & ol': {
-      paddingLeft: theme.spacing(3),
-      marginBottom: theme.spacing(2),
+      paddingLeft: theme.spacing(11),
+      marginBottom: theme.spacing(11),
     },
     '& a': {
       color: theme.palette.primary.main,
@@ -42,7 +44,7 @@ export const getSxClasses = (theme: any): any => ({
     },
     '& pre': {
       backgroundColor: theme.palette.action.hover,
-      padding: theme.spacing(2),
+      padding: theme.spacing(11),
       borderRadius: theme.shape.borderRadius,
       overflow: 'auto',
       '& code': {
@@ -57,23 +59,24 @@ export const getSxClasses = (theme: any): any => ({
   defaultContainer: {
     display: 'flex',
     flexDirection: 'column',
-    gap: theme.spacing(3),
+    gap: theme.spacing(11),
   },
   title: {
+    marginTop: '1rem',
+    fontSize: '2rem',
     fontWeight: 600,
-    color: theme.palette.primary.main,
   },
   logoContainer: {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: theme.spacing(2),
+    padding: theme.spacing(11),
   },
   description: {
     lineHeight: 1.6,
   },
   linkContainer: {
-    marginTop: theme.spacing(2),
+    marginTop: theme.spacing(11),
   },
   loadingContainer: {
     display: 'flex',
@@ -82,6 +85,6 @@ export const getSxClasses = (theme: any): any => ({
     minHeight: '200px',
   },
   errorContainer: {
-    padding: theme.spacing(2),
+    padding: theme.spacing(11),
   },
 });

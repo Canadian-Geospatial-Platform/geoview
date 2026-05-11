@@ -18,11 +18,7 @@ import { FullScreenDialog } from './full-screen-dialog';
 import { logger } from '@/core/utils/logger';
 import { ArrowBackIcon, ArrowForwardIcon, CloseIcon, QuestionMarkIcon } from '@/ui/icons';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
-import {
-  useStoreAppGuide,
-  useStoreAppIsFullscreenActive,
-  useStoreAppShellContainer,
-} from '@/core/stores/states/app-state';
+import { useStoreAppGuide, useStoreAppIsFullscreenActive, useStoreAppShellContainer } from '@/core/stores/states/app-state';
 import { useStoreUIActiveTrapGeoView, useStoreUIActiveFocusItem } from '@/core/stores/states/ui-state';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE, TIMEOUT, LIGHTBOX_SELECTORS } from '@/core/utils/constant';
@@ -56,6 +52,7 @@ interface ResponsiveGridLayoutProps {
 interface ResponsiveGridLayoutExposedMethods {
   setIsRightPanelVisible: (isVisible: boolean) => void;
   setRightPanelFocus: () => void;
+  closeGuide: () => void;
   closeBtnRef?: React.RefObject<HTMLButtonElement | null>;
 }
 
@@ -111,6 +108,8 @@ const ResponsiveGridLayout = forwardRef(
     const guideToggleBtnRef = useRef<HTMLButtonElement>(null);
     const fullScreenBtnRef = useRef<HTMLButtonElement>(null);
     const closeBtnRef = useRef<HTMLButtonElement>(null);
+    // Tracks whether the guide was auto-opened (vs explicitly toggled by user)
+    const wasAutoOpenedRef = useRef(false);
 
     // Store
     const mapId = useStoreGeoViewMapId();
@@ -187,6 +186,10 @@ const ResponsiveGridLayout = forwardRef(
               }
             });
           },
+          closeGuide: () => {
+            setIsGuideOpen(false);
+            wasAutoOpenedRef.current = false;
+          },
           closeBtnRef,
         };
       },
@@ -194,18 +197,30 @@ const ResponsiveGridLayout = forwardRef(
     );
 
     /**
-     * Toggles guide visibility based on rightMain content availability.
+     * Auto-opens guide when no content is available and guide content exists.
+     *
+     * Auto-closes if the guide was auto-opened and either:
+     * - Content becomes available (rightMain is truthy), OR
+     * - Guide content becomes unavailable (guideContentIds is empty/undefined)
      */
     useEffect(() => {
-      logger.logTraceUseEffect('RESPONSIVE-GRID-LAYOUT - guide visibility toggle', rightMain, guideContentIds);
-      if (rightMain) {
-        setIsGuideOpen(false);
-      } else if (guideContentIds) {
+      logger.logTraceUseEffect('RESPONSIVE-GRID-LAYOUT - guide auto-open/close', rightMain, guideContentIds, wasAutoOpenedRef.current);
+
+      // Determine if we have guide content to show
+      const hasGuideContent = guideContentIds && guideContentIds.length > 0;
+
+      // Auto-open: no content AND has guide content
+      if (!rightMain && hasGuideContent && !isGuideOpen) {
         setIsGuideOpen(true);
-      } else {
-        setIsGuideOpen(false);
+        wasAutoOpenedRef.current = true;
       }
-    }, [rightMain, guideContentIds]);
+
+      // Auto-close: guide was auto-opened AND (content appears OR no guide content)
+      if (wasAutoOpenedRef.current && (rightMain || !hasGuideContent)) {
+        setIsGuideOpen(false);
+        wasAutoOpenedRef.current = false;
+      }
+    }, [rightMain, guideContentIds, isGuideOpen]);
 
     /**
      * Notifies parent when guide open state changes.
@@ -276,10 +291,12 @@ const ResponsiveGridLayout = forwardRef(
     );
 
     /**
-     * Toggles the guide panel open or closed.
+     * Toggles the guide panel open or closed (user action).
      */
     const handleOpenGuide = useCallback((): void => {
       setIsGuideOpen((prev) => !prev);
+      // Clear auto-opened flag - user is taking explicit control
+      wasAutoOpenedRef.current = false;
     }, []);
 
     /**

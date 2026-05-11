@@ -491,6 +491,9 @@
     "searchNavigationAnnouncement": "Showing match {{current}} of {{total}}",
     "searchMatchCountLabel": "Match {{current}} of {{total}}"
   },
+  "aio": {
+    "zoomToHighlight": "Zoom to and highlight {{name}}"
+  },
   "footerBar": {
     "resizeTooltip": "Resize",
     "noTab": "No tab",
