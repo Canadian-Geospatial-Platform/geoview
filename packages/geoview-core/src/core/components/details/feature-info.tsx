@@ -116,6 +116,8 @@ const FeatureHeader = memo(function FeatureHeader({
   }, [theme]);
   const isFocusTrap = useStoreUIActiveTrapGeoView();
 
+  // #region Handlers
+
   /**
    * Handles when the checked button is toggled.
    */
@@ -123,6 +125,8 @@ const FeatureHeader = memo(function FeatureHeader({
     // Callback about the checked state providing the checked information
     onCheckChange(!checked);
   }, [checked, onCheckChange]);
+
+  // #endregion
 
   return (
     <Box sx={HEADER_STYLES.container}>
@@ -234,7 +238,7 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
   /**
    * Memoizes the feature name.
    */
-  const memoFeatureName = useMemo(() => {
+  const memoFeatureName = useMemo<string>((): string => {
     logger.logTraceUseMemo('FEATURE-INFO - memoFeatureName', feature.nameField);
 
     // Try to get the value at the fieldName
@@ -254,7 +258,7 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
   /**
    * Memoizes the feature info list.
    */
-  const memoFeatureInfoList: TypeFieldEntry[] = useMemo(() => {
+  const memoFeatureInfoList: TypeFieldEntry[] = useMemo<TypeFieldEntry[]>((): TypeFieldEntry[] => {
     logger.logTraceUseMemo('FEATURE-INFO - memoFeatureInfoList', feature.fieldInfo);
     if (!feature?.fieldInfo) return [];
 
@@ -272,13 +276,15 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
   /**
    * Memoizes whether the feature has a geochart.
    */
-  const memoHasGeochart = useMemo(() => {
+  const memoHasGeochart = useMemo<boolean>((): boolean => {
     logger.logTraceUseMemo('FEATURE-INFO - memoHasGeochart', feature.layerPath);
     return (
       !!geochartConfigs?.[feature.layerPath] &&
       (geochartLayerDataArrayBatch?.some((entry) => entry.layerPath === feature.layerPath && (entry.features?.length ?? 0) > 0) ?? false)
     );
   }, [feature.layerPath, geochartConfigs, geochartLayerDataArrayBatch]);
+
+  // #region Handlers
 
   /**
    * Handles when the feature checked state changes.
@@ -338,6 +344,8 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
     },
     [feature, navigateToGeochart]
   );
+
+  // #endregion
 
   /**
    * Syncs the checked state with the store checkedFeatures.
