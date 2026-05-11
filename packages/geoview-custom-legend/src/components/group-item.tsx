@@ -50,12 +50,12 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
 
   const { cgpv } = window as TypeWindow;
   const { ui, reactUtilities } = cgpv;
-  const { useState, useCallback, useMemo } = reactUtilities.react;
+  const { useState, useCallback, useMemo, useId } = reactUtilities.react;
   const {
     Box,
+    List,
     ListItem,
     ListItemIcon,
-    ListItemButton,
     IconButton,
     Collapse,
     Typography,
@@ -72,6 +72,11 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
 
   const [collapsed, setCollapsed] = useState<boolean>(isGroupLayer(item) ? (item.collapsed ?? false) : false);
 
+  // WCAG - Generate unique IDs for ARIA relationships
+  const collapseButtonId = useId();
+  const collapseRegionId = useId();
+  const groupTitleId = useId();
+
   // Collect all layer paths from children
   const memoLayerPaths = useMemo(() => {
     logger.logTraceUseMemo('GROUP-ITEM - memoLayerPaths', item.children);
@@ -86,27 +91,32 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
   /**
    * Handles when the user toggles the group collapse state.
    */
-  const handleToggleCollapse = useCallback((): void => {
+  const handleToggleCollapse = useCallback((event: React.MouseEvent<HTMLButtonElement>): void => {
+    event.stopPropagation(); // Prevent event from bubbling to parent ListItemButton
     setCollapsed((prev) => !prev);
   }, []);
 
   /**
    * Handles when the user toggles the visibility of all child layers.
    */
-  const handleToggleVisibility = useCallback((): void => {
-    const newVisibility = !allVisible;
+  const handleToggleVisibility = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>): void => {
+      event.stopPropagation(); // Prevent event from bubbling to parent ListItemButton
+      const newVisibility = !allVisible;
 
-    // Toggle all child layers
-    memoLayerPaths.forEach((layerPath) => {
-      try {
-        // Toggle the visibility
-        layerController.setOrToggleLayerVisibility(layerPath, newVisibility);
-      } catch (error) {
-        // Log
-        logger.logWarning(`Failed to toggle visibility for layer at path ${layerPath}:`, error);
-      }
-    });
-  }, [allVisible, layerController, memoLayerPaths]);
+      // Toggle all child layers
+      memoLayerPaths.forEach((layerPath) => {
+        try {
+          // Toggle the visibility
+          layerController.setOrToggleLayerVisibility(layerPath, newVisibility);
+        } catch (error) {
+          // Log
+          logger.logWarning(`Failed to toggle visibility for layer at path ${layerPath}:`, error);
+        }
+      });
+    },
+    [allVisible, layerController, memoLayerPaths]
+  );
 
   // #endregion HANDLERS
 
@@ -116,69 +126,74 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
   if (!isGroupLayer(item)) return;
 
   return (
-    <ListItem sx={sxClasses.legendListItem} disablePadding className="layerListItem groupItem">
+    <ListItem sx={sxClasses.legendListItem} disablePadding className="layerListItem groupItem" aria-labelledby={groupTitleId}>
       <Box sx={{ width: '100%' }}>
-        <ListItemButton disableRipple sx={sxClasses.groupItemButton} className="layerListItemButton groupHeader">
+        <Box sx={sxClasses.groupItemButton}>
           {/* Group Icon*/}
-          <ListItemIcon sx={{ alignSelf: 'center' }}>
-            <Box sx={{ display: 'flex', padding: '0 18px 0 18px', margin: '0 -18px 0 -18px' }}>
+          <ListItemIcon sx={{ minWidth: '24px' }}>
+            <Box>
               <Box sx={sxClasses.groupIcon}>
                 <LayerGroupIcon />
               </Box>
             </Box>
           </ListItemIcon>
-
           {/* Title, subtext, and visibility button */}
-          <Box sx={{ flex: 1 }}>
+          <Box sx={sxClasses.groupItemContent}>
             {/* Group title */}
-            <Typography noWrap sx={sxClasses.groupTitle}>
+            <Typography id={groupTitleId} noWrap sx={sxClasses.groupTitle}>
               {item.text}
             </Typography>
 
             {/* Description */}
             {item.description && <DescriptionText description={item.description} sxClasses={sxClasses} />}
 
-            {/* Sublayer count */}
-            <Typography variant="caption" sx={sxClasses.groupSubLayerCount}>
-              {item.children.length} {item.children.length === 1 ? t('CustomLegend.layer') : t('CustomLegend.sublayers')}
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+              {/* Sublayer count */}
+              <Typography variant="caption" sx={sxClasses.groupSubLayerCount}>
+                {item.children.length} {item.children.length === 1 ? t('CustomLegend.layer') : t('CustomLegend.sublayers')}
+              </Typography>
 
-            {/* Action buttons */}
-            <Box sx={sxClasses.groupButtonRow}>
-              <IconButton
-                onClick={handleToggleVisibility}
-                className="buttonOutline"
-                size="small"
-                aria-label={t('layers.toggleVisibility')}
-                sx={{ padding: '4px' }}
-              >
-                {allVisible ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon />}
-              </IconButton>
+              {/* Action buttons */}
+              <Box sx={sxClasses.groupButtonRow}>
+                <IconButton
+                  onClick={handleToggleVisibility}
+                  className="buttonOutline"
+                  size="small"
+                  tooltip={t('layers.toggleVisibility')}
+                  aria-label={`${t('layers.toggleVisibility')}, ${item.text}`}
+                  aria-pressed={allVisible}
+                  sx={{ padding: '4px' }}
+                >
+                  {allVisible ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon />}
+                </IconButton>
+              </Box>
             </Box>
           </Box>
-
           {/* Collapse button */}
           <Box sx={{ alignSelf: 'center' }}>
             <IconButton
+              id={collapseButtonId}
               onClick={handleToggleCollapse}
               size="small"
               className="buttonOutline"
-              aria-label={t('layers.toggleCollapse')}
+              aria-label={`${t('layers.toggleCollapse')}, ${item.text}`}
+              aria-expanded={!collapsed}
+              aria-controls={collapseRegionId}
               sx={{ padding: '4px' }}
             >
               {collapsed ? <KeyboardArrowDownIcon /> : <KeyboardArrowUpIcon />}
             </IconButton>
           </Box>
-        </ListItemButton>
+        </Box>
 
         {/* Collapsible children */}
-        <Collapse in={!collapsed}>
-          <Box sx={sxClasses.groupChildren}>
+        <Collapse id={collapseRegionId} role="region" aria-labelledby={collapseButtonId} in={!collapsed} sx={{ marginRight: '6px' }}>
+          <List sx={sxClasses.groupChildren}>
             {item.children.map((child, index) => {
               const childId = generateLegendItemId(child, index, displayLanguage);
               return <LegendItem key={childId} item={child} sxClasses={sxClasses} itemPath={`${currentPath}/${childId}`} />;
             })}
-          </Box>
+          </List>
         </Collapse>
       </Box>
     </ListItem>

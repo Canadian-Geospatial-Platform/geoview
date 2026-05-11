@@ -144,7 +144,14 @@ const useControlActions = (layerPath: string): ControlActions => {
   }, [layerPath, mapId, layerController]);
 };
 
-// Create subtitle
+/**
+ * Creates a subtitle for the layer based on child count or parent visibility state.
+ *
+ * @param layerPath - The path to the layer
+ * @param childPaths - Array of child layer paths
+ * @param items - Array of legend items for the layer
+ * @returns A localized subtitle string describing layer state (parent hidden, child count, or item count)
+ */
 const useSubtitle = (layerPath: string, childPaths: string[], items: TypeLegendItem[]): string => {
   // Hooks
   const { t } = useTranslation<string>();
@@ -241,7 +248,7 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
   return (
     <Stack direction="row" alignItems="center" sx={memoSxClasses.layerStackIcons}>
       {!!subTitle.length && <Typography fontSize={14}>{subTitle}</Typography>}
-      <Box role="group" aria-label={t('layers.layerControls')} sx={{ ...memoSxClasses.subtitle, display: 'flex', alignItems: 'center' }}>
+      <Box sx={{ ...memoSxClasses.subtitle, display: 'flex', alignItems: 'center' }}>
         {/* Button to select layer in panel and scroll to footer
             Hidden in WCAG mode - keyboard users can Tab to layer panel instead
           */}

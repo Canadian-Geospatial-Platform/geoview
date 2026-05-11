@@ -166,8 +166,6 @@ function SliderUI(props: SliderProps): JSX.Element {
    */
   const memoFinalClassName = useMemo((): string | undefined => {
     // Log
-    logger.logTraceUseMemo('SLIDER - memoFinalClassName', sliderValue, orientation);
-
     logger.logTraceUseMemo('SLIDER - memoFinalClassName', sliderValue, orientation, className);
     const shouldSpreadLabel = Array.isArray(sliderValue) && sliderValue.length >= 2 && (!orientation || orientation === 'horizontal');
 
@@ -183,6 +181,9 @@ function SliderUI(props: SliderProps): JSX.Element {
    */
   const handleChange = useCallback(
     (event: React.SyntheticEvent | Event, newValue: number | number[], activeThumb: number): void => {
+      // Track active thumb for refocusing after arrow key interactions (see handleKeyDown workaround)
+      activeThumbRef.current = activeThumb;
+
       // Update the internal state if not controlled, meaning 'value' isn't provided by the parent component
       if (!isControlled) {
         setInternalValue(newValue);

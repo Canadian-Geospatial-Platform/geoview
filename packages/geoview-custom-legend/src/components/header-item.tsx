@@ -35,7 +35,9 @@ export function HeaderItem({ item, sxClasses }: HeaderItemProps): JSX.Element | 
 
   return (
     <Box sx={sxClasses.headerItem}>
-      <Typography sx={{ ...sxClasses.headerText, ...styleOverrides }}>{item.text}</Typography>
+      <Typography component="h3" sx={{ ...sxClasses.headerText, ...styleOverrides }}>
+        {item.text}
+      </Typography>
       {item.description && <DescriptionText description={item.description} sxClasses={sxClasses} />}
     </Box>
   );
