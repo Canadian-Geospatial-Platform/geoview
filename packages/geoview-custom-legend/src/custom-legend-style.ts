@@ -1,5 +1,4 @@
-/** Record mapping class names to MUI sx style objects. */
-type SxClasses = Record<string, object>;
+import type { SxStyles } from 'geoview-core/ui/style/types';
 
 /**
  * Returns the sx style classes for the Custom Legend components.
@@ -8,7 +7,7 @@ type SxClasses = Record<string, object>;
  * @returns The sx style classes
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const getSxClasses = (theme: any): SxClasses => ({
+export const getSxClasses = (theme: any): SxStyles => ({
   // Main container styles
   container: {
     padding: '16px',
@@ -27,7 +26,6 @@ export const getSxClasses = (theme: any): SxClasses => ({
 
   // Individual legend list item
   legendListItem: {
-    padding: '6px 4px',
     flexDirection: 'column',
     alignItems: 'flex-start',
     '& .MuiCollapse-vertical': {
@@ -61,9 +59,6 @@ export const getSxClasses = (theme: any): SxClasses => ({
     paddingLeft: '16px',
     marginTop: 0,
     width: '100%',
-    '& .MuiCollapse-vertical': {
-      marginLeft: '6px',
-    },
   },
 
   // Group title styling
@@ -78,16 +73,10 @@ export const getSxClasses = (theme: any): SxClasses => ({
 
   // Group item button
   groupItemButton: {
+    display: 'flex',
+    alignItems: 'center',
     padding: '6px 4px',
     width: '100%',
-    '&:hover': {
-      backgroundColor: theme.palette.geoViewColor.bgColor.light[300],
-    },
-    cursor: 'default',
-    '&.MuiListItemButton-root': {
-      paddingLeft: '4px',
-      paddingRight: '4px',
-    },
   },
 
   // Group icon styling
@@ -95,13 +84,20 @@ export const getSxClasses = (theme: any): SxClasses => ({
     border: '1px solid #515BA5',
     backgroundColor: theme.palette.geoViewColor.bgColor.light[800],
     padding: '2px',
-    maxWidth: '1.875rem',
-    maxHeight: '1.875rem',
+    width: '24px',
+    height: '24px',
     transform: 'scaleX(-1)', // Mirror to face right
     borderRadius: '5px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+
+  groupItemContent: {
+    margin: '6px 6px 6px 12px',
+    display: 'flex',
+    flexDirection: 'column',
+    flex: '1 1 auto',
   },
 
   // Sublayer count caption
@@ -117,7 +113,6 @@ export const getSxClasses = (theme: any): SxClasses => ({
     display: 'flex',
     alignItems: 'center',
     gap: '4px',
-    marginTop: '8px',
     '& .MuiSvgIcon-root': {
       fontSize: '1.25rem',
     },
@@ -141,15 +136,24 @@ export const getSxClasses = (theme: any): SxClasses => ({
   },
 
   descriptionToggleButton: {
-    padding: 0,
-  },
-
-  descriptionToggleText: {
+    padding: '0 2px 0 0',
+    minWidth: 'auto',
     fontSize: '0.75rem',
     fontStyle: 'italic',
     fontWeight: 300,
-    color: theme.palette.geoViewColor.textColor.dark,
-    cursor: 'pointer',
+    textTransform: 'none',
+    color: theme.palette.geoViewColor.textColor.dark[200],
+    '&:hover': {
+      backgroundColor: 'transparent',
+    },
+    '&.keyboard-focused': {
+      border: 'none !important',
+    },
+    '&:focus-visible': {
+      outline: '2px solid',
+      color: theme.palette.geoViewColor.textColor.dark[200],
+      outlineOffset: '2px',
+    },
   },
 
   descriptionText: {

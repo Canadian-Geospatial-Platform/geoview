@@ -18,11 +18,7 @@ import { FullScreenDialog } from './full-screen-dialog';
 import { logger } from '@/core/utils/logger';
 import { ArrowBackIcon, ArrowForwardIcon, CloseIcon, QuestionMarkIcon } from '@/ui/icons';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
-import {
-  useStoreAppGuide,
-  useStoreAppIsFullscreenActive,
-  useStoreAppShellContainer,
-} from '@/core/stores/states/app-state';
+import { useStoreAppGuide, useStoreAppIsFullscreenActive, useStoreAppShellContainer } from '@/core/stores/states/app-state';
 import { useStoreUIActiveTrapGeoView, useStoreUIActiveFocusItem } from '@/core/stores/states/ui-state';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE, TIMEOUT, LIGHTBOX_SELECTORS } from '@/core/utils/constant';
@@ -46,6 +42,7 @@ interface ResponsiveGridLayoutProps {
   onGuideIsOpen?: (isGuideOpen: boolean) => void;
   onRightPanelClosed?: () => void;
   onRightPanelVisibilityChanged?: (isVisible: boolean) => void;
+  onFullScreenChanged?: (isFullScreen: boolean) => void;
   hideEnlargeBtn?: boolean;
   containerType: TypeContainerBox;
   titleFullscreen: string;
@@ -54,8 +51,15 @@ interface ResponsiveGridLayoutProps {
 
 /** Methods exposed by the ResponsiveGridLayout component via ref. */
 interface ResponsiveGridLayoutExposedMethods {
+  /** Shows or hides the right panel. */
   setIsRightPanelVisible: (isVisible: boolean) => void;
+  /** Sets focus on the right panel's close button (if guide is not open). */
   setRightPanelFocus: () => void;
+  /** Closes the guide panel and clears auto-open state. */
+  closeGuide: () => void;
+  /** Closes the right panel and triggers the onRightPanelClosed callback. */
+  closeRightPanel: () => void;
+  /** Optional ref to the close button element. */
   closeBtnRef?: React.RefObject<HTMLButtonElement | null>;
 }
 
@@ -87,6 +91,7 @@ const ResponsiveGridLayout = forwardRef(
       onGuideIsOpen,
       onRightPanelClosed,
       onRightPanelVisibilityChanged,
+      onFullScreenChanged,
       hideEnlargeBtn = false,
       containerType,
       titleFullscreen,
@@ -111,6 +116,8 @@ const ResponsiveGridLayout = forwardRef(
     const guideToggleBtnRef = useRef<HTMLButtonElement>(null);
     const fullScreenBtnRef = useRef<HTMLButtonElement>(null);
     const closeBtnRef = useRef<HTMLButtonElement>(null);
+    /** Tracks whether the guide was auto-opened (vs explicitly toggled by user). */
+    const wasAutoOpenedRef = useRef(false);
 
     // Store
     const mapId = useStoreGeoViewMapId();
@@ -125,6 +132,16 @@ const ResponsiveGridLayout = forwardRef(
     const [isGuideOpen, setIsGuideOpen] = useState(false);
     const [isEnlarged, setIsEnlarged] = useState(false);
     const [isFullScreen, setIsFullScreen] = useState(false);
+
+    // #region Handlers
+
+    /**
+     * Handles the right panel close action, triggered by the close button or ESC key.
+     */
+    const handleClosePanel = useCallback((): void => {
+      setIsRightPanelVisible(false);
+      onRightPanelClosed?.();
+    }, [onRightPanelClosed]);
 
     /**
      * Notifies parent when right panel visibility changes.
@@ -174,9 +191,10 @@ const ResponsiveGridLayout = forwardRef(
     // Expose imperative methods to parent component
     useImperativeHandle(
       ref,
-      function handleRef() {
+      function handleRef(): ResponsiveGridLayoutExposedMethods {
         return {
           setIsRightPanelVisible: (isVisible: boolean) => setIsRightPanelVisible(isVisible),
+          closeRightPanel: handleClosePanel,
           setRightPanelFocus: () => {
             if (isGuideOpen) return;
 
@@ -187,25 +205,41 @@ const ResponsiveGridLayout = forwardRef(
               }
             });
           },
+          closeGuide: () => {
+            setIsGuideOpen(false);
+            wasAutoOpenedRef.current = false;
+          },
           closeBtnRef,
         };
       },
-      [isGuideOpen]
+      [isGuideOpen, handleClosePanel]
     );
 
     /**
-     * Toggles guide visibility based on rightMain content availability.
+     * Auto-opens guide when no content is available and guide content exists.
+     *
+     * Auto-closes if the guide was auto-opened and either:
+     * - Content becomes available (rightMain is truthy), OR
+     * - Guide content becomes unavailable (guideContentIds is empty/undefined)
      */
     useEffect(() => {
-      logger.logTraceUseEffect('RESPONSIVE-GRID-LAYOUT - guide visibility toggle', rightMain, guideContentIds);
-      if (rightMain) {
-        setIsGuideOpen(false);
-      } else if (guideContentIds) {
+      logger.logTraceUseEffect('RESPONSIVE-GRID-LAYOUT - guide auto-open/close', rightMain, guideContentIds, wasAutoOpenedRef.current);
+
+      // Determine if we have guide content to show
+      const hasGuideContent = guideContentIds && guideContentIds.length > 0;
+
+      // Auto-open: no content AND has guide content
+      if (!rightMain && hasGuideContent && !isGuideOpen) {
         setIsGuideOpen(true);
-      } else {
-        setIsGuideOpen(false);
+        wasAutoOpenedRef.current = true;
       }
-    }, [rightMain, guideContentIds]);
+
+      // Auto-close: guide was auto-opened AND (content appears OR no guide content)
+      if (wasAutoOpenedRef.current && (rightMain || !hasGuideContent)) {
+        setIsGuideOpen(false);
+        wasAutoOpenedRef.current = false;
+      }
+    }, [rightMain, guideContentIds, isGuideOpen]);
 
     /**
      * Notifies parent when guide open state changes.
@@ -257,7 +291,7 @@ const ResponsiveGridLayout = forwardRef(
           onRightPanelClosed?.();
         }
       }
-    }, [isGuideOpen, hasContent, isRightPanelVisible, isFocusTrap, closeBtnRef, onRightPanelClosed]);
+    }, [isGuideOpen, hasContent, isRightPanelVisible, isFocusTrap, onRightPanelClosed]);
 
     /**
      * Handles click on the enlarge button.
@@ -276,10 +310,12 @@ const ResponsiveGridLayout = forwardRef(
     );
 
     /**
-     * Toggles the guide panel open or closed.
+     * Toggles the guide panel open or closed (user action).
      */
     const handleOpenGuide = useCallback((): void => {
       setIsGuideOpen((prev) => !prev);
+      // Clear auto-opened flag - user is taking explicit control
+      wasAutoOpenedRef.current = false;
     }, []);
 
     /**
@@ -301,6 +337,14 @@ const ResponsiveGridLayout = forwardRef(
         });
       }
     }, [isGuideOpen, mapId, containerType]);
+
+    /**
+     * Notifies parent when fullscreen state changes.
+     */
+    useEffect(() => {
+      logger.logTraceUseEffect('RESPONSIVE-GRID-LAYOUT - fullscreen state changed', isFullScreen);
+      onFullScreenChanged?.(isFullScreen);
+    }, [isFullScreen, onFullScreenChanged]);
 
     /**
      * Closes the guide and returns focus to the guide toggle button.
@@ -327,23 +371,28 @@ const ResponsiveGridLayout = forwardRef(
     /**
      * Handles the enlarge toggle button click.
      */
-    const handleEnlargeToggle = useCallback(() => {
+    const handleEnlargeToggle = useCallback((): void => {
       handleIsEnlarge(!isEnlarged);
     }, [isEnlarged, handleIsEnlarge]);
-
-    /**
-     * Handles the right panel close action, triggered by the close button or ESC key.
-     */
-    const handleClosePanel = useCallback(() => {
-      setIsRightPanelVisible(false);
-      onRightPanelClosed?.();
-    }, [onRightPanelClosed]);
 
     /**
      * Toggles fullscreen mode for the right panel.
      */
     const handleToggleFullScreen = useCallback((): void => {
       setIsFullScreen((prev) => !prev);
+    }, []);
+
+    /**
+     * Handles the fullscreen dialog close event.
+     */
+    const handleFullScreenClose = useCallback((event?: {}, reason?: 'escapeKeyDown' | 'backdropClick'): void => {
+      if (reason === 'escapeKeyDown') {
+        const isLightboxOpen = document.querySelector(LIGHTBOX_SELECTORS.ROOT) !== null;
+        if (isLightboxOpen) {
+          return;
+        }
+      }
+      setIsFullScreen(false);
     }, []);
 
     /**
@@ -386,6 +435,8 @@ const ResponsiveGridLayout = forwardRef(
       },
       [isFullScreen, isGuideOpen, isFocusTrap, hasContent, handleEscapeKeyCallback]
     );
+
+    // #endregion
 
     // If we're on mobile
     // TODO: CHECK - theme.breakpoints.down('md') returns a CSS media query string which is always truthy
@@ -651,20 +702,7 @@ const ResponsiveGridLayout = forwardRef(
         <>
           <FullScreenDialog
             open={isFullScreen}
-            onClose={(event, reason) => {
-              // Don't close fullscreen if ESC was pressed while lightbox is open
-              // The lightbox should handle ESC, not the fullscreen dialog
-              if (reason === 'escapeKeyDown') {
-                const isLightboxOpen = document.querySelector(LIGHTBOX_SELECTORS.ROOT) !== null;
-                if (isLightboxOpen) {
-                  // Let lightbox handle ESC - don't close fullscreen
-                  return;
-                }
-              }
-
-              // Otherwise, close fullscreen normally
-              setIsFullScreen(false);
-            }}
+            onClose={handleFullScreenClose}
             title={isGuideOpen ? `${t('guide.title')} - ${titleFullscreen}` : titleFullscreen}
             onExited={() => {
               // Use onExited callback to restore focus to the fullscreen button after the dialog exit animation completes

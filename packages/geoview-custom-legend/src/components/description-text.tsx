@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useId, useCallback } from 'react';
 
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
@@ -16,6 +16,9 @@ interface DescriptionTextProps {
 /**
  * Renders a collapsible description text component.
  *
+ * Uses the custom GeoView Button wrapper with domain-specific props
+ * (see @/ui/panel/panel-types.ts TypeButtonProps interface).
+ *
  * @param props - Component props
  * @returns The rendered description
  */
@@ -24,34 +27,43 @@ export function DescriptionText({ description, sxClasses }: DescriptionTextProps
 
   const { cgpv } = window as TypeWindow;
   const { ui } = cgpv;
-  const { Box, Typography, KeyboardArrowDownIcon, KeyboardArrowUpIcon, IconButton, Collapse } = ui.elements;
+  const { Box, Typography, KeyboardArrowDownIcon, KeyboardArrowUpIcon, Button, Collapse } = ui.elements;
 
   const { t } = useTranslation<string>();
   const [expanded, setExpanded] = useState<boolean>(!description.collapsed);
 
+  // WCAG - Generate unique IDs for ARIA relationships
+  const buttonId = useId();
+  const regionId = useId();
+
+  // #region Handlers
+
   /**
-   * Handles when the user toggles the description visibility
+   * Handles when the user toggles the description visibility.
    */
-  const handleToggle = (): void => {
-    setExpanded(!expanded);
-  };
+  const handleToggle = useCallback((event: React.MouseEvent<HTMLButtonElement>): void => {
+    event.stopPropagation(); // Prevent event from bubbling to parent
+    setExpanded((prev) => !prev);
+  }, []);
+
+  // #endregion
 
   return (
     <Box>
-      <Box sx={sxClasses.descriptionContainer}>
-        <IconButton
-          size="small"
-          onClick={handleToggle}
-          aria-label={t('CustomLegend.descriptionToggle')}
-          sx={sxClasses.descriptionToggleButton}
-        >
-          {expanded ? <KeyboardArrowUpIcon fontSize="small" /> : <KeyboardArrowDownIcon fontSize="small" />}
-        </IconButton>
-        <Typography sx={sxClasses.descriptionToggleText} onClick={handleToggle}>
-          {expanded ? t('CustomLegend.hideDescription') : t('CustomLegend.showDescription')}
-        </Typography>
-      </Box>
-      <Collapse in={expanded} sx={sxClasses.descriptionCollapse}>
+      <Button
+        id={buttonId}
+        type="textWithIcon"
+        size="small"
+        disableRipple
+        onClick={handleToggle}
+        aria-expanded={expanded}
+        aria-controls={regionId}
+        startIcon={expanded ? <KeyboardArrowUpIcon fontSize="small" /> : <KeyboardArrowDownIcon fontSize="small" />}
+        sx={sxClasses.descriptionToggleButton}
+      >
+        {expanded ? t('CustomLegend.hideDescription') : t('CustomLegend.showDescription')}
+      </Button>
+      <Collapse id={regionId} role="region" aria-labelledby={buttonId} in={expanded} sx={sxClasses.descriptionCollapse}>
         <Typography sx={sxClasses.descriptionText}>{description.text}</Typography>
       </Collapse>
     </Box>

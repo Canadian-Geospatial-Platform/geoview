@@ -301,3 +301,25 @@ Some content within the GeoView app may not include a lang attribute to identify
 
 - [WCAG - Understanding Success Criterion 3.1.2: Language of Parts](https://www.w3.org/WAI/WCAG22/Understanding/language-of-parts.html)
 - [GC - Accessible Canada Regulations](https://laws.justice.gc.ca/eng/regulations/SOR-2021-241/nifnev.html)
+
+### Other Issues
+
+#### Time Slider
+
+**Esc key behavior in normal mode:**
+
+When the time slider panel is open and either animation is playing OR layers are loading, pressing Esc initiates a deferred close:
+
+1. Animation stops immediately (if playing)
+2. The Esc key press is blocked from propagating
+3. The panel remains open until both conditions clear (animation stopped AND layers finished loading)
+4. During this brief period, tabbing through the right panel remains possible
+5. Once conditions stabilize, the panel auto-closes and focus returns to the layer button in the left panel
+
+**Esc key behavior in fullscreen mode:**
+
+When the time slider is in fullscreen mode, Esc stops any active animation and immediately closes the fullscreen dialog. Focus management is handled by the dialog component.
+
+**Rationale:**
+
+This deferred-close pattern prevents focus trap corruption that occurs when the panel DOM is removed mid-animation or while layers are still loading.

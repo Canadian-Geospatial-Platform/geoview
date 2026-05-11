@@ -12,6 +12,7 @@ import type { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
 import { useStoreLayerName } from '@/core/stores/states/layer-state';
+import { useUIController } from '@/core/controllers/use-controllers';
 
 /** Properties for the Layout component. */
 interface LayoutProps {
@@ -25,6 +26,7 @@ interface LayoutProps {
   onGuideIsOpen?: (isGuideOpen: boolean) => void;
   onRightPanelClosed?: () => void;
   onRightPanelVisibilityChanged?: (isVisible: boolean) => void;
+  onFullScreenChanged?: (isFullScreen: boolean) => void;
   containerType: TypeContainerBox;
   titleFullscreen: string;
   hideEnlargeBtn?: boolean;
@@ -38,8 +40,13 @@ const TITLE_STYLES = {
 
 /** Methods exposed by the Layout component via ref. */
 interface LayoutExposedMethods {
-  /** Shows or hides the right panel. */
+  /**
+   * Shows or hides the right panel.
+   * When hiding (false), delegates to closeRightPanel to ensure proper cleanup.
+   */
   showRightPanel: (visible: boolean) => void;
+  /** Closes the right panel. Focus restoration handled via onRightPanelClosed callback. */
+  closeRightPanel: () => void;
 }
 
 /**
@@ -62,6 +69,7 @@ const Layout = forwardRef(
       onGuideIsOpen,
       onRightPanelClosed,
       onRightPanelVisibilityChanged,
+      onFullScreenChanged,
       containerType,
       titleFullscreen,
       hideEnlargeBtn,
@@ -75,6 +83,7 @@ const Layout = forwardRef(
     const responsiveLayoutRef = useRef<ResponsiveGridLayoutExposedMethods>(null);
     const theme = useTheme();
     const layerName = useStoreLayerName(selectedLayerPath!);
+    const uiController = useUIController();
 
     // #region Handlers
 
@@ -86,6 +95,9 @@ const Layout = forwardRef(
     const handleLayerChange = useCallback(
       (layer: LayerListEntry): void => {
         onLayerListClicked?.(layer);
+
+        // Close the guide when selecting a new layer to show content
+        responsiveLayoutRef.current?.closeGuide();
 
         // Show the panel (hiding the layers list in the process if we're on mobile)
         responsiveLayoutRef.current?.setIsRightPanelVisible(true);
@@ -142,7 +154,27 @@ const Layout = forwardRef(
       showRightPanel: (visible: boolean) => {
         responsiveLayoutRef.current?.setIsRightPanelVisible(visible);
       },
+      closeRightPanel: () => {
+        responsiveLayoutRef.current?.closeRightPanel();
+      },
     }));
+
+    /**
+     * Handles right panel close - restores focus to the LayerListItem that opened it.
+     */
+    const handleRightPanelClosed = useCallback((): void => {
+      onRightPanelClosed?.();
+
+      // Compute focus target once
+      const focusTargetId = (() => {
+        if (!selectedLayerPath) return 'no-focus';
+
+        const layer = layerList.find((l) => l.layerPath === selectedLayerPath);
+        return layer?.layerUniqueId ?? 'no-focus';
+      })();
+
+      uiController.disableFocusTrap(focusTargetId);
+    }, [onRightPanelClosed, selectedLayerPath, layerList, uiController]);
 
     return (
       <ResponsiveGridLayout
@@ -154,8 +186,9 @@ const Layout = forwardRef(
         guideContentIds={guideContentIds}
         onIsEnlargeClicked={onIsEnlargeClicked}
         onGuideIsOpen={onGuideIsOpen}
-        onRightPanelClosed={onRightPanelClosed}
+        onRightPanelClosed={handleRightPanelClosed}
         onRightPanelVisibilityChanged={onRightPanelVisibilityChanged}
+        onFullScreenChanged={onFullScreenChanged}
         hideEnlargeBtn={hideEnlargeBtn}
         containerType={containerType}
         titleFullscreen={titleFullscreen}

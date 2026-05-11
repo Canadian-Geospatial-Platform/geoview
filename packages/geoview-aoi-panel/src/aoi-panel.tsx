@@ -5,6 +5,7 @@ import { useStoreMapCurrentProjectionEPSG } from 'geoview-core/core/stores/state
 import { logger } from 'geoview-core/core/utils/logger';
 import { getSxClasses } from './area-of-interest-style';
 import { useMapController } from 'geoview-core/core/controllers/use-controllers';
+import { useTranslation } from 'geoview-core/core/translation/i18n';
 
 /** Props for the AoiPanel component. */
 interface AoiPanelProps {
@@ -50,17 +51,20 @@ export function AoiPanel(props: AoiPanelProps): JSX.Element {
 
   const theme = ui.useTheme();
   const sxClasses = getSxClasses(theme);
+  const { t } = useTranslation<string>();
 
   // Store
   const mapProjectionEPSG = useStoreMapCurrentProjectionEPSG();
   const mapController = useMapController();
 
+  // #region Handlers
+
   /**
-   * Handles when the user clicks on an AOI card
+   * Handles when the user clicks on an AOI card.
    */
   const handleOnClick = useCallback(
-    (aoiItem: AoiItem) => {
-      // Project the extent from lonlatto map projection
+    (aoiItem: AoiItem): void => {
+      // Project the extent from lonlat to map projection
       const extentInMapProjection = Projection.transformExtentFromProj(
         aoiItem.extent,
         Projection.getProjectionLonLat(),
@@ -82,28 +86,41 @@ export function AoiPanel(props: AoiPanelProps): JSX.Element {
     [mapProjectionEPSG, mapController]
   );
 
+  /**
+   * Handles keyboard events on AOI cards.
+   */
+  const handleKeyDown = useCallback(
+    (aoiItem: AoiItem): ((event: React.KeyboardEvent<HTMLDivElement>) => void) =>
+      (event: React.KeyboardEvent<HTMLDivElement>): void => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          handleOnClick(aoiItem);
+        }
+      },
+    [handleOnClick]
+  );
+
+  // #endregion
+
   return (
     <Box sx={sxClasses.aoiCard}>
-      {aoiList.map((aoiItem: AoiItem, index) => {
-        return (
-          <Card
-            tabIndex={0}
-            className="aoiCardThumbnail"
-            onClick={() => handleOnClick(aoiItem)}
-            key={aoiItem.aoiTitle}
-            title={aoiItem.aoiTitle}
-            contentCard={
-              // eslint-disable-next-line react/jsx-no-useless-fragment
-              <>
-                {typeof aoiItem.imageUrl === 'string' && (
-                  // eslint-disable-next-line react/no-array-index-key
-                  <Box component="img" key={index} src={aoiItem.imageUrl} alt="" className="aoiCardThumbnail" />
-                )}
-              </>
-            }
-          />
-        );
-      })}
+      {aoiList.map((aoiItem: AoiItem) => (
+        <Card
+          key={aoiItem.aoiTitle}
+          role="button"
+          aria-label={t('aio.zoomToHighlight', { name: aoiItem.aoiTitle })}
+          tabIndex={0}
+          className="aoiCardThumbnail"
+          onClick={() => handleOnClick(aoiItem)}
+          onKeyDown={handleKeyDown(aoiItem)}
+          title={aoiItem.aoiTitle}
+          headerComponent="h3"
+          sx={sxClasses.aoiCardButton}
+          contentCard={
+            typeof aoiItem.imageUrl === 'string' && <Box component="img" src={aoiItem.imageUrl} alt="" className="aoiCardThumbnail" />
+          }
+        />
+      ))}
     </Box>
   );
 }

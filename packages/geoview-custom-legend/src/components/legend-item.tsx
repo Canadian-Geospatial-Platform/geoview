@@ -28,15 +28,15 @@ export function LegendItem({ item, sxClasses, itemPath }: LegendItemProps): JSX.
   const { ListItem } = ui.elements;
 
   if (isLegendLayer(item)) {
-    return (
-      <ListItem sx={sxClasses.legendListItem} disablePadding>
-        <LegendLayerItem item={item} />
-      </ListItem>
-    );
+    return <LegendLayerItem item={item} />;
   }
 
   if (isHeaderLayer(item)) {
-    return <HeaderItem item={item} sxClasses={sxClasses} />;
+    return (
+      <ListItem sx={sxClasses.legendListItem} disablePadding>
+        <HeaderItem item={item} sxClasses={sxClasses} />
+      </ListItem>
+    );
   }
 
   if (isGroupLayer(item)) {
