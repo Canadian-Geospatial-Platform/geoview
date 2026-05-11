@@ -32,33 +32,37 @@ export class Config {
     listOfGeoviewLayerConfig: MapConfigLayerEntry[],
     onErrorCallback: ErrorCallbackDelegate
   ): MapConfigLayerEntry[] {
-    // Validate the layer configs
-    if (listOfGeoviewLayerConfig) {
-      listOfGeoviewLayerConfig.forEach((geoviewLayerEntry, index, layerArray) => {
-        // Add duplicate marker for duplicate IDs
-        const firstIndex = layerArray.findIndex((layerEntry) => geoviewLayerEntry.geoviewLayerId === layerEntry.geoviewLayerId);
-        if (firstIndex !== index && mapConfigLayerEntryIsGeoCore(geoviewLayerEntry)) {
-          // eslint-disable-next-line no-param-reassign
-          geoviewLayerEntry.geoviewLayerId = `${geoviewLayerEntry.geoviewLayerId}:${generateId(8)}`;
-        }
+    const validLayerEntries = listOfGeoviewLayerConfig?.filter((geoviewLayerEntry, index, layerArray) => {
+      // Add duplicate marker for duplicate IDs
+      const firstIndex = layerArray.findIndex((layerEntry) => geoviewLayerEntry.geoviewLayerId === layerEntry.geoviewLayerId);
+      if (firstIndex !== index && mapConfigLayerEntryIsGeoCore(geoviewLayerEntry)) {
+        // eslint-disable-next-line no-param-reassign
+        geoviewLayerEntry.geoviewLayerId = `${geoviewLayerEntry.geoviewLayerId}:${generateId(8)}`;
+      }
 
-        if (
-          mapConfigLayerEntryIsGeoCore(geoviewLayerEntry) ||
-          mapConfigLayerEntryIsShapefile(geoviewLayerEntry) ||
-          mapConfigLayerEntryIsGeoPackage(geoviewLayerEntry) ||
-          mapConfigLayerEntryIsRCS(geoviewLayerEntry)
-        ) {
-          //  Skip it, because we don't validate the GeoCore configuration anymore. Not the same way as typical GeoView Layer Types at least.
-          // TODO Why not do GeoCore request here? Then could easily replace listOfLayerEntries and validate / process along with other layers
-        } else if (Object.values(CONST_LAYER_TYPES).includes(geoviewLayerEntry.geoviewLayerType)) {
-          const geoViewLayerEntryCasted = geoviewLayerEntry;
-          this.#setLayerEntryType(geoViewLayerEntryCasted.listOfLayerEntryConfig, geoViewLayerEntryCasted.geoviewLayerType);
-        } else throw new LayerInvalidGeoviewLayerTypeError(geoviewLayerEntry.geoviewLayerId, geoviewLayerEntry.geoviewLayerType);
-      });
-    }
+      if (
+        mapConfigLayerEntryIsGeoCore(geoviewLayerEntry) ||
+        mapConfigLayerEntryIsShapefile(geoviewLayerEntry) ||
+        mapConfigLayerEntryIsGeoPackage(geoviewLayerEntry) ||
+        mapConfigLayerEntryIsRCS(geoviewLayerEntry)
+      ) {
+        //  Skip it, because we don't validate the GeoCore configuration anymore. Not the same way as typical GeoView Layer Types at least.
+        // TODO Why not do GeoCore request here? Then could easily replace listOfLayerEntries and validate / process along with other layers
+        return true;
+      }
+
+      if (Object.values(CONST_LAYER_TYPES).includes(geoviewLayerEntry.geoviewLayerType)) {
+        const geoViewLayerEntryCasted = geoviewLayerEntry;
+        this.#setLayerEntryType(geoViewLayerEntryCasted.listOfLayerEntryConfig, geoViewLayerEntryCasted.geoviewLayerType);
+        return true;
+      }
+
+      onErrorCallback(new LayerInvalidGeoviewLayerTypeError(geoviewLayerEntry.geoviewLayerId, geoviewLayerEntry.geoviewLayerType));
+      return false;
+    });
 
     // TODO: refactor - return only the layers
-    const validLayers = ConfigValidation.validateLayersConfigAgainstSchema(listOfGeoviewLayerConfig, onErrorCallback);
+    const validLayers = ConfigValidation.validateLayersConfigAgainstSchema(validLayerEntries, onErrorCallback);
 
     // Log (leave the line commented, for quick debug when needed)
     // logger.logDebug('CONFIG-LAYERS-VALIDATED', validLayers);
