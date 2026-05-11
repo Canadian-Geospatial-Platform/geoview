@@ -1,4 +1,5 @@
 import { Box } from 'geoview-core/ui';
+import { useStoreLayerAreLayersLoading } from 'geoview-core/core/stores/states/layer-state';
 import { useStoreTimeSliderLayer } from 'geoview-core/core/stores/states/time-slider-state';
 import {
   useStoreLayerDateTemporalMode,
@@ -20,6 +21,8 @@ import { useTimeSliderController } from 'geoview-core/core/controllers/use-contr
 /** Properties for the TimeSlider component. */
 interface TimeSliderProps {
   layerPath: string;
+  onRequestClose?: () => void;
+  isFullScreen?: boolean;
 }
 
 /**
@@ -33,7 +36,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   logger.logTraceRender('geoview-time-slider/time-slider', props);
 
   const { cgpv } = window;
-  const { layerPath } = props;
+  const { layerPath, onRequestClose, isFullScreen = false } = props;
   const { reactUtilities, ui } = cgpv;
   const { useTheme } = ui;
   const { useState, useRef, useEffect, useCallback, useId } = reactUtilities.react;
@@ -64,6 +67,8 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   // References for play button
   const sliderValueRef = useRef<number | undefined>(undefined);
   const sliderDeltaRef = useRef<number | undefined>(undefined);
+
+  const pendingCloseRef = useRef<boolean>(false);
 
   const displayLanguage = useStoreAppDisplayLanguage();
   const { t } = useTranslation<string>();
@@ -112,6 +117,8 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   const additionalNames = additionalLayerpaths?.map((additionalLayerPath) => names[additionalLayerPath]);
   const combinedNames = additionalNames ? `${name}, ${additionalNames.join(', ')}` : name;
   const displayTitle = title ? title : combinedNames;
+
+  const layersAreLoading = useStoreLayerAreLayersLoading();
 
   const timeStampRange = range.map((entry: string | number | Date) =>
     typeof entry !== 'number' ? DateMgt.convertToMilliseconds(entry) : entry
@@ -366,6 +373,60 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   );
 
   /**
+   * Handles keyboard events on the time slider panel.
+   *
+   * When a close callback is provided, blocks Esc key during animation or layer
+   * loading to prevent focus trap corruption during UI re-renders. Automatically
+   * closes the panel once conditions stabilize. Without a close callback, stops
+   * animation if needed and lets Esc bubble to parent handlers.
+   */
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLDivElement>): void => {
+      if (event.key === 'Escape') {
+        // When in fullscreen mode, stop animation and let ESC bubble to close the dialog
+        if (isFullScreen) {
+          // Stop animation if playing to ensure clean state when returning to normal mode
+          if (isPlaying) {
+            clearTimeout(playIntervalRef.current);
+            setIsPlaying(false);
+          }
+          // Clear any pending close flag from normal mode
+          pendingCloseRef.current = false;
+          // Let ESC bubble up to FullScreenDialog
+          return;
+        }
+
+        // If we have a close callback and need to defer closing
+        if (onRequestClose && (isPlaying || layersAreLoading)) {
+          event.stopPropagation();
+          event.preventDefault();
+
+          // Mark that user wants to close
+          pendingCloseRef.current = true;
+
+          // Stop animation if playing
+          if (isPlaying) {
+            clearTimeout(playIntervalRef.current);
+            setIsPlaying(false);
+          }
+
+          return;
+        }
+
+        // If no close callback but animation is playing, stop it and let Escape bubble
+        if (isPlaying) {
+          clearTimeout(playIntervalRef.current);
+          setIsPlaying(false);
+        }
+
+        // Clear pending flag when Esc proceeds normally
+        pendingCloseRef.current = false;
+      }
+    },
+    [isFullScreen, isPlaying, layersAreLoading, onRequestClose]
+  );
+
+  /**
    * Handles when the slider changes in the UI.
    *
    * Adjusts the local state so the Slider thumb updates.
@@ -481,10 +542,41 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
     setValues(storeValues);
   }, [storeValues]);
 
+  /**
+   * Auto-closes the panel when conditions stabilize after blocked Esc press.
+   */
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('TIME-SLIDER - auto-close on stabilization', isPlaying, layersAreLoading, pendingCloseRef.current);
+
+    // When both conditions clear and user had pressed Esc, close the panel
+    if (!isPlaying && !layersAreLoading && pendingCloseRef.current) {
+      pendingCloseRef.current = false;
+      onRequestClose?.();
+    }
+  }, [isPlaying, layersAreLoading, onRequestClose]);
+
+  /**
+   * Stops animation when entering or exiting fullscreen mode to ensure clean state.
+   */
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('TIME-SLIDER - fullscreen transition cleanup', isFullScreen, isPlaying);
+
+    // Stop animation when transitioning into fullscreen or out of fullscreen
+    if (isPlaying) {
+      clearTimeout(playIntervalRef.current);
+      setIsPlaying(false);
+    }
+    // Clear any pending close flag when transitioning between modes
+    pendingCloseRef.current = false;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isFullScreen]);
+
   // #endregion
 
   return (
-    <Grid>
+    <Grid onKeyDown={handleKeyDown}>
       <Box sx={{ padding: '10px 10px' }}>
         <Grid
           container

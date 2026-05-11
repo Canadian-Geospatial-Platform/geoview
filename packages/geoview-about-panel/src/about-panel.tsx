@@ -13,6 +13,36 @@ import type {
   TypeMarkdownFromPathProps,
 } from './about-panel-types';
 
+// TODO: Optimize CSS see issue #3477
+
+/**
+ * Custom link component that opens in a new tab with screen reader announcement.
+ *
+ * @param props - Standard anchor element props
+ * @returns An anchor element with accessible external link indicator
+ */
+function ExternalLink({ children, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>): JSX.Element {
+  logger.logTraceRender('geoview-about-panel/about-panel > ExternalLink');
+
+  const { t } = useTranslation<string>();
+
+  return (
+    <a {...props} target="_blank" rel="noopener noreferrer">
+      {children}
+      <span className="visually-hidden">{t('general.opensInNewTab')}</span>
+    </a>
+  );
+}
+
+/** Markdown options for both file-based and content-based rendering. Ensures all links open in external tabs with accessibility announcements. */
+const MARKDOWN_OPTIONS = {
+  overrides: {
+    a: {
+      component: ExternalLink,
+    },
+  },
+};
+
 /**
  * Component to render markdown content from a file path / markdown document.
  *
@@ -41,7 +71,7 @@ function MarkdownFromPath(props: TypeMarkdownFromPathProps): JSX.Element {
    * Fetches and loads the markdown content when the path changes.
    */
   useEffect(() => {
-    logger.logTraceUseEffect('ABOUT-PANEL - fetch markdown', { mdPath });
+    logger.logTraceUseEffect('ABOUT PANEL - FETCH MARKDOWN', mdPath);
 
     const fetchMarkdown = async (): Promise<void> => {
       try {
@@ -78,7 +108,7 @@ function MarkdownFromPath(props: TypeMarkdownFromPathProps): JSX.Element {
 
   return (
     <Box sx={sxClasses.markdownContainer}>
-      <Markdown>{content}</Markdown>
+      <Markdown options={MARKDOWN_OPTIONS}>{content}</Markdown>
     </Box>
   );
 }
@@ -105,7 +135,7 @@ function MarkdownFromContent(props: TypeMarkdownFromContentProps): JSX.Element {
       {mdContent.map((item, index) => (
         // eslint-disable-next-line react/no-array-index-key
         <Box key={index} sx={sxClasses.markdownItem}>
-          <Markdown>{item}</Markdown>
+          <Markdown options={MARKDOWN_OPTIONS}>{item}</Markdown>
         </Box>
       ))}
     </Box>
@@ -128,11 +158,12 @@ function DefaultContent(props: TypeDefaultContentProps): JSX.Element {
 
   const theme = ui.useTheme();
   const sxClasses = getSxClasses(theme);
+  const { t } = useTranslation<string>();
 
   return (
     <Box sx={sxClasses.defaultContainer}>
       {title && (
-        <Typography variant="h4" sx={sxClasses.title}>
+        <Typography variant="h3" component="h3" sx={sxClasses.title}>
           {title}
         </Typography>
       )}
@@ -151,8 +182,9 @@ function DefaultContent(props: TypeDefaultContentProps): JSX.Element {
 
       {link && (
         <Box sx={sxClasses.linkContainer}>
-          <Link href={link} underline="hover">
+          <Link href={link} underline="hover" target="_blank" rel="noopener noreferrer">
             {link}
+            <span className="visually-hidden">{t('general.opensInNewTab')}</span>
           </Link>
         </Box>
       )}
