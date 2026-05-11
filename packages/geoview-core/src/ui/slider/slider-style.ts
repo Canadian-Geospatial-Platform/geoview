@@ -5,6 +5,10 @@ import { visuallyHidden } from '@/ui/style/default';
 /**
  * Gets custom sx classes for the slider component.
  *
+ * Uses optional chaining (?.) for theme.palette.geoViewColor properties
+ * because plugins may render before GeoView's custom theme is fully initialized.
+ * Standard MUI properties (theme.palette.common) do not require this.
+ *
  * @param theme - The MUI theme object
  * @returns The sx classes object
  */
@@ -26,7 +30,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       },
       '&.Mui-focusVisible': {
         boxShadow: `
-    0 0 0 2px ${theme.palette.geoViewColor.white},
+    0 0 0 2px ${theme.palette.common.white},
     0 0 0 4px ${theme.palette.common.black}
   `,
       },
@@ -70,9 +74,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       color: '#000',
     },
     '& .MuiSlider-markLabel': {
-      color: theme.palette.geoViewColor.textColor.light[200],
+      color: theme.palette.geoViewColor?.textColor.light[200],
       '&.MuiSlider-markLabelActive': {
-        color: theme.palette.geoViewColor.textColor.main,
+        color: theme.palette.geoViewColor?.textColor.main,
       },
     },
     '& .MuiSlider-markLabel-overlap': {

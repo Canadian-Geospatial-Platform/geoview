@@ -491,6 +491,9 @@
     "searchNavigationAnnouncement": "Résultat {{current}} sur {{total}}",
     "searchMatchCountLabel": "Correspondance {{current}} sur {{total}}"
   },
+  "aio": {
+    "zoomToHighlight": "Zoomer et mettre en surbrillance {{name}}"
+  },
   "footerBar": {
     "resizeTooltip": "Redimensionner",
     "noTab": "Pas d'onglet",

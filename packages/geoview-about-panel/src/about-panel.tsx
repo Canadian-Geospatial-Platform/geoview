@@ -13,6 +13,8 @@ import type {
   TypeMarkdownFromPathProps,
 } from './about-panel-types';
 
+// TODO: Optimize CSS see issue #3477
+
 /**
  * Component to render markdown content from a file path / markdown document.
  *
@@ -41,7 +43,7 @@ function MarkdownFromPath(props: TypeMarkdownFromPathProps): JSX.Element {
    * Fetches and loads the markdown content when the path changes.
    */
   useEffect(() => {
-    logger.logTraceUseEffect('ABOUT-PANEL - fetch markdown', { mdPath });
+    logger.logTraceUseEffect('ABOUT PANEL - FETCH MARKDOWN', mdPath);
 
     const fetchMarkdown = async (): Promise<void> => {
       try {
@@ -132,7 +134,7 @@ function DefaultContent(props: TypeDefaultContentProps): JSX.Element {
   return (
     <Box sx={sxClasses.defaultContainer}>
       {title && (
-        <Typography variant="h4" sx={sxClasses.title}>
+        <Typography variant="h3" component="h3" sx={sxClasses.title}>
           {title}
         </Typography>
       )}
@@ -151,7 +153,7 @@ function DefaultContent(props: TypeDefaultContentProps): JSX.Element {
 
       {link && (
         <Box sx={sxClasses.linkContainer}>
-          <Link href={link} underline="hover">
+          <Link href={link} underline="hover" target="_blank" rel="noopener noreferrer">
             {link}
           </Link>
         </Box>
