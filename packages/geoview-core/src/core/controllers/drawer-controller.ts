@@ -2506,20 +2506,22 @@ export class DrawerController extends AbstractMapViewerController {
     document.addEventListener('keydown', handler);
   }
 
+  // TODO: If we end up with more packages with multiple shortcuts, it may be a good idea to centralize shortcut handling in a single location that can delegate to the appropriate package controllers, instead of each controller hooking into document events separately
+  // TO.DOCONT: This could also include a way for users to edit shorcuts in the UI
   /**
    * Sets up keyboard event handling for drawer shortcuts.
    *
    * Shortcuts:
-   * - Ctrl+D: Toggle Drawing
-   * - Ctrl+E: Toggle Editing
-   * - Ctrl+G: Cycle Geometry Type (forward)
-   * - Ctrl+Shift+G: Cycle Geometry Type (backward)
-   * - Ctrl+S: Open Style Menu
-   * - Ctrl+Shift+S: Download drawings
-   * - Ctrl+Shift+M: Toggle Measurements
-   * - Ctrl+N: Toggle Snapping
-   * - Ctrl+Shift+C: Clear All
-   * - Ctrl+Shift+O: Upload drawings
+   * - Alt+D: Toggle Drawing
+   * - Alt+E: Toggle Editing
+   * - Alt+G: Cycle Geometry Type (forward)
+   * - Alt+Shift+G: Cycle Geometry Type (backward)
+   * - Alt+S: Open Style Menu
+   * - Alt+M: Toggle Measurements
+   * - Alt+N: Toggle Snapping
+   * - Alt+Shift+C: Clear All
+   * - Alt+Shift+S: Download drawings
+   * - Alt+Shift+O: Upload drawings
    */
   #hookShortcutsHandler(): void {
     if (this.#shortcutsHandler) return;
@@ -2571,7 +2573,8 @@ export class DrawerController extends AbstractMapViewerController {
         return;
       }
 
-      if (event.ctrlKey || event.metaKey) {
+      // Only proceed with shortcuts if Alt key is held
+      if (event.altKey) {
         switch (event.key.toLowerCase()) {
           case 'd':
             // Toggle Drawing
@@ -2598,19 +2601,17 @@ export class DrawerController extends AbstractMapViewerController {
           case 's':
             // Save (Download) or Style Menu
             if (event.shiftKey) {
-              this.downloadDrawings(); // Ctrl+Shift+S
+              this.downloadDrawings();
             } else {
-              this.openStyleMenu(); // Ctrl+S
+              this.openStyleMenu();
             }
             event.preventDefault();
             break;
 
           case 'm':
             // Toggle Measurements
-            if (event.shiftKey) {
-              this.toggleHideMeasurements(); // Ctrl+Shift+M
-              event.preventDefault();
-            }
+            this.toggleHideMeasurements();
+            event.preventDefault();
             break;
 
           case 'n':
@@ -2620,7 +2621,7 @@ export class DrawerController extends AbstractMapViewerController {
             break;
 
           case 'c':
-            // Clear All (with Shift)
+            // Clear All
             if (event.shiftKey) {
               this.clearDrawings();
               event.preventDefault();
@@ -2629,8 +2630,10 @@ export class DrawerController extends AbstractMapViewerController {
 
           case 'o':
             // Upload Drawings
-            this.triggerUploadDialog();
-            event.preventDefault();
+            if (event.shiftKey) {
+              this.triggerUploadDialog();
+              event.preventDefault();
+            }
             break;
 
           default:
