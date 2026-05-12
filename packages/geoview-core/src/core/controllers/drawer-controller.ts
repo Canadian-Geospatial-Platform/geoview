@@ -23,12 +23,14 @@ import type { ControllerRegistry } from '@/core/controllers/base/controller-regi
 import {
   DEFAULT_TEXT_VALUES,
   getStoreDrawerActiveGeom,
+  getStoreDrawerGeomTypes,
   getStoreDrawerHideMeasurements,
   getStoreDrawerIconSrc,
   getStoreDrawerIsDrawing,
   getStoreDrawerIsEditing,
   getStoreDrawerIsSnapping,
   getStoreDrawerStyle,
+  getStoreDrawerShortcutsEnabled,
   isStoreDrawerInitialized,
   updateStoreStateStyle,
   setStoreActiveGeom,
@@ -53,8 +55,8 @@ import {
   setStoreIsDrawing,
   setStoreIsEditing,
   setStoreIsSnapping,
+  setStoreDrawerShortcutsEnabled,
   type StyleProps,
-  getStoreDrawerGeomTypes,
 } from '@/core/stores/states/drawer-state';
 import { getStoreAppGeoviewHTMLElement, getStoreAppIsCrosshairsActive } from '@/core/stores/states/app-state';
 import type { DomainLanguageChangedDelegate, DomainLanguageChangedEvent, UIDomain } from '@/core/domains/ui-domain';
@@ -72,6 +74,7 @@ import { formatArea, formatLength, generateId } from '@/core/utils/utilities';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { getStoreAppDisplayLanguage } from '@/core/stores/states/app-state';
 import { logger } from '@/core/utils/logger';
+import { removeStoreMapStatusIndicator, setStoreMapStatusIndicator } from '../stores';
 
 /**
  * Controller responsible for drawer interactions, keyboard shortcuts, and
@@ -87,14 +90,22 @@ export class DrawerController extends AbstractMapViewerController {
   /** Tolerance for comparing style values */
   static readonly STYLE_TOLERANCE = 0.1;
 
-  /** Keyboard event handlers for each map keyed by map id. */
-  #keyboardHandler?: (event: KeyboardEvent) => void;
-
   /** Hit tolerance for mouse-based editing interactions */
   static readonly MOUSE_HIT_TOLERANCE = 5;
 
   /** Hit tolerance for keyboard-based editing interactions (crosshair) */
   static readonly KEYBOARD_HIT_TOLERANCE = 30;
+
+  static readonly SHORTCUTS_INDICATOR_ID = 'shortcuts-enabled';
+
+  /** Keyboard handler for undo/redo - always active */
+  #undoRedoHandler?: (event: KeyboardEvent) => void;
+
+  /** Keyboard handler for other shortcuts - togglable */
+  #shortcutsHandler?: (event: KeyboardEvent) => void;
+
+  /** Track whether optional shortcuts are enabled */
+  #shortcutsEnabled = false;
 
   /** The current draw interaction instance */
   #drawInstance?: Draw;
@@ -167,7 +178,7 @@ export class DrawerController extends AbstractMapViewerController {
    */
   protected override onHook(): void {
     // Setup the keyboard handlers for undo/redo
-    this.#hookKeyboardHandlers();
+    this.#hookUndoRedoHandler();
 
     // Listen when the language is changed in the UI domain
     this.#hookLanguageChanged = this.#uiDomain.onLanguageChanged(this.#handleDisplayLanguageChanged.bind(this));
@@ -192,12 +203,19 @@ export class DrawerController extends AbstractMapViewerController {
       this.#hookMapProjectionChanged = undefined;
     }
 
-    // Remove keyboard handler
-    const handler = this.#keyboardHandler;
-    if (handler) {
-      document.removeEventListener('keydown', handler);
-      this.#keyboardHandler = undefined;
+    // Remove undo/redo handler
+    if (this.#undoRedoHandler) {
+      document.removeEventListener('keydown', this.#undoRedoHandler);
+      this.#undoRedoHandler = undefined;
     }
+
+    // Remove shortcuts handler if enabled
+    if (this.#shortcutsHandler) {
+      document.removeEventListener('keydown', this.#shortcutsHandler);
+      this.#shortcutsHandler = undefined;
+    }
+
+    this.#shortcutsEnabled = false;
   }
 
   // #endregion OVERRIDES
@@ -903,6 +921,20 @@ export class DrawerController extends AbstractMapViewerController {
     }
   }
 
+  setShortcutsEnabled(enabled: boolean): void {
+    // Get the map id
+    const mapId = this.getMapId();
+
+    if (!isStoreDrawerInitialized(mapId)) return;
+
+    if (enabled) {
+      this.enableKeyboardShortcuts();
+    } else {
+      this.disableKeyboardShortcuts();
+    }
+    setStoreDrawerShortcutsEnabled(mapId, enabled);
+  }
+
   // #endregion PUBLIC METHODS - DRAWING
 
   // #region PUBLIC METHODS - KEYBOARD / CROSSHAIR
@@ -1390,6 +1422,49 @@ export class DrawerController extends AbstractMapViewerController {
     // Trigger the file picker
     document.body.appendChild(fileInput);
     fileInput.click();
+  }
+
+  /**
+   * Enables keyboard shortcuts for drawing operations.
+   *
+   * Note: Undo/redo shortcuts are always enabled and not affected by this method.
+   */
+  enableKeyboardShortcuts(): void {
+    if (this.#shortcutsEnabled) return;
+
+    this.#hookShortcutsHandler();
+    this.#shortcutsEnabled = true;
+
+    setStoreMapStatusIndicator(this.getMapId(), DrawerController.SHORTCUTS_INDICATOR_ID, {
+      message: 'drawer.shortcutsEnabled',
+      type: 'info',
+    });
+  }
+
+  /**
+   * Disables keyboard shortcuts for drawing operations.
+   *
+   * Note: Undo/redo shortcuts remain active and are not affected by this method.
+   */
+  disableKeyboardShortcuts(): void {
+    if (!this.#shortcutsEnabled) return;
+
+    if (this.#shortcutsHandler) {
+      document.removeEventListener('keydown', this.#shortcutsHandler);
+      this.#shortcutsHandler = undefined;
+    }
+
+    this.#shortcutsEnabled = false;
+    removeStoreMapStatusIndicator(this.getMapId(), DrawerController.SHORTCUTS_INDICATOR_ID);
+  }
+
+  /**
+   * Checks if keyboard shortcuts are currently enabled.
+   *
+   * @returns Whether keyboard shortcuts are enabled
+   */
+  isKeyboardShortcutsEnabled(): boolean {
+    return this.#shortcutsEnabled;
   }
 
   // #endregion PUBLIC METHODS - KEYBOARD / CROSSHAIR DRAWING
@@ -2401,29 +2476,69 @@ export class DrawerController extends AbstractMapViewerController {
   }
 
   /**
+   * Sets up keyboard event handling for undo and redo shortcuts (Ctrl+Z and Ctrl+Y)
+   */
+  #hookUndoRedoHandler(): void {
+    if (this.#undoRedoHandler) return;
+
+    const handler = (event: KeyboardEvent): void => {
+      if (event.ctrlKey || event.metaKey) {
+        switch (event.key.toLowerCase()) {
+          case 'z':
+            if (event.shiftKey) {
+              if (this.redo()) event.preventDefault();
+            } else if (this.undo()) {
+              event.preventDefault();
+            }
+            break;
+
+          case 'y':
+            if (this.redo()) event.preventDefault();
+            break;
+
+          default:
+            break;
+        }
+      }
+    };
+
+    this.#undoRedoHandler = handler;
+    document.addEventListener('keydown', handler);
+  }
+
+  /**
    * Sets up keyboard event handling for drawer shortcuts.
    *
    * Shortcuts:
-   * - Ctrl+Z: Undo
-   * - Ctrl+Shift+Z / Ctrl+Y: Redo
    * - Ctrl+D: Toggle Drawing
    * - Ctrl+E: Toggle Editing
    * - Ctrl+G: Cycle Geometry Type (forward)
    * - Ctrl+Shift+G: Cycle Geometry Type (backward)
    * - Ctrl+S: Open Style Menu
    * - Ctrl+Shift+S: Download drawings
-   * - Ctrl+M: Toggle Measurements
+   * - Ctrl+Shift+M: Toggle Measurements
    * - Ctrl+N: Toggle Snapping
    * - Ctrl+Shift+C: Clear All
    * - Ctrl+Shift+O: Upload drawings
    */
-  #hookKeyboardHandlers(): void {
-    if (this.#keyboardHandler) return;
+  #hookShortcutsHandler(): void {
+    if (this.#shortcutsHandler) return;
 
     const handler = (event: KeyboardEvent): void => {
-      // Handle Escape key separately (not Ctrl modified)
+      const mapId = this.getMapId();
+
+      // Check if shortcuts are enabled via store (can be toggled by navbar button)
+      if (!getStoreDrawerShortcutsEnabled(mapId)) return;
+
+      // Check if focus is within this map's container (multi-map safety)
+      const { activeElement } = document;
+      const geoviewElement = getStoreAppGeoviewHTMLElement(mapId);
+      if (!activeElement || !geoviewElement.contains(activeElement)) {
+        return;
+      }
+
+      // Handle Escape key separately for exiting transform interactions
       if (event.key === 'Escape') {
-        const mapId = this.getMapId();
         if (!isStoreDrawerInitialized(mapId)) return;
 
         // If there's a temp text transform, clear its selection to exit edit mode
@@ -2458,18 +2573,6 @@ export class DrawerController extends AbstractMapViewerController {
 
       if (event.ctrlKey || event.metaKey) {
         switch (event.key.toLowerCase()) {
-          case 'z':
-            if (event.shiftKey) {
-              if (this.redo()) event.preventDefault();
-            } else if (this.undo()) {
-              event.preventDefault();
-            }
-            break;
-
-          case 'y':
-            if (this.redo()) event.preventDefault();
-            break;
-
           case 'd':
             // Toggle Drawing
             this.toggleDrawing();
@@ -2504,8 +2607,10 @@ export class DrawerController extends AbstractMapViewerController {
 
           case 'm':
             // Toggle Measurements
-            this.toggleHideMeasurements();
-            event.preventDefault();
+            if (event.shiftKey) {
+              this.toggleHideMeasurements(); // Ctrl+Shift+M
+              event.preventDefault();
+            }
             break;
 
           case 'n':
@@ -2534,7 +2639,7 @@ export class DrawerController extends AbstractMapViewerController {
       }
     };
 
-    this.#keyboardHandler = handler;
+    this.#shortcutsHandler = handler;
     document.addEventListener('keydown', handler);
   }
 
