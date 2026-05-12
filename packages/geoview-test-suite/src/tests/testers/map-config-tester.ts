@@ -481,7 +481,7 @@ export class MapConfigTester extends GVAbstractTester {
         test.addStep('Verifying overview map config has hideOnZoom 0...');
         const overviewMapConfig = getStoreMapConfigOverviewMap(mapId);
         Test.assertIsDefined('overviewMapConfig', overviewMapConfig);
-        Test.assertIsEqual(overviewMapConfig!.hideOnZoom, 0);
+        Test.assertIsEqual(overviewMapConfig.hideOnZoom, 0);
 
         // Verify overview map visibility is true (hideOnZoom=0 means always visible)
         test.addStep('Verifying overview map is visible...');
@@ -546,7 +546,7 @@ export class MapConfigTester extends GVAbstractTester {
         test.addStep('Verifying hideOnZoom config is 7...');
         const overviewMapConfig = getStoreMapConfigOverviewMap(mapId);
         Test.assertIsDefined('overviewMapConfig', overviewMapConfig);
-        Test.assertIsEqual(overviewMapConfig!.hideOnZoom, 7);
+        Test.assertIsEqual(overviewMapConfig.hideOnZoom, 7);
 
         // At initial zoom 4.5, overview map should be hidden (below threshold of 7)
         // Wait for the overview map useEffect to settle (it sets visibility to false)
@@ -730,7 +730,7 @@ export class MapConfigTester extends GVAbstractTester {
         test.addStep('Verifying layer is not visible in store...');
         const legendLayer = getStoreLayerLegendLayerByPath(mapId, layerPath);
         Test.assertIsDefined('legendLayer', legendLayer);
-        Test.assertIsEqual(legendLayer!.visible, false);
+        Test.assertIsEqual(legendLayer.visible, false);
 
         test.addStep('Verifying layer is not visible on OL layer...');
         const gvLayer = this.getControllersRegistry().layerController.getGeoviewLayer(layerPath);
@@ -781,7 +781,7 @@ export class MapConfigTester extends GVAbstractTester {
         test.addStep('Verifying layer is not queryable in store...');
         const legendLayer = getStoreLayerLegendLayerByPath(mapId, layerPath);
         Test.assertIsDefined('legendLayer', legendLayer);
-        Test.assertIsEqual(legendLayer!.queryable, false);
+        Test.assertIsEqual(legendLayer.queryable, false);
 
         test.addStep('Verifying layer is not queryable on GV layer...');
         const gvLayer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
@@ -809,7 +809,7 @@ export class MapConfigTester extends GVAbstractTester {
         test.addStep('Verifying layer is not hoverable in store...');
         const legendLayer = getStoreLayerLegendLayerByPath(mapId, layerPath);
         Test.assertIsDefined('legendLayer', legendLayer);
-        Test.assertIsEqual(legendLayer!.hoverable, false);
+        Test.assertIsEqual(legendLayer.hoverable, false);
 
         test.addStep('Verifying layer is not hoverable on GV layer...');
         const gvLayer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
@@ -1000,7 +1000,7 @@ export class MapConfigTester extends GVAbstractTester {
         test.addStep('Verifying parent group is not visible in store legend...');
         const parentLegend = getStoreLayerLegendLayerByPath(mapId, groupLayerPath);
         Test.assertIsDefined('parentLegend', parentLegend);
-        Test.assertIsEqual(parentLegend!.visible, false);
+        Test.assertIsEqual(parentLegend.visible, false);
 
         // Verify subgroup OL layer is visible (its own state is not set to false)
         test.addStep('Verifying subgroup OL layer is visible (own state defaults to true)...');
@@ -1053,7 +1053,7 @@ export class MapConfigTester extends GVAbstractTester {
         test.addStep('Verifying states.queryable = false in store...');
         const legendLayer = getStoreLayerLegendLayerByPath(mapId, layerPath);
         Test.assertIsDefined('legendLayer', legendLayer);
-        Test.assertIsEqual(legendLayer!.queryable, false);
+        Test.assertIsEqual(legendLayer.queryable, false);
 
         // Verify getQueryable() returns false on the GV layer
         test.addStep('Verifying getQueryable() = false on GV layer...');
@@ -1104,7 +1104,7 @@ export class MapConfigTester extends GVAbstractTester {
         test.addStep('Verifying states.hoverable = false in store...');
         const legendLayer = getStoreLayerLegendLayerByPath(mapId, layerPath);
         Test.assertIsDefined('legendLayer', legendLayer);
-        Test.assertIsEqual(legendLayer!.hoverable, false);
+        Test.assertIsEqual(legendLayer.hoverable, false);
 
         // Verify getHoverable() returns false on the GV layer
         test.addStep('Verifying getHoverable() = false on GV layer...');
