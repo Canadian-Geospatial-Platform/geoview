@@ -236,8 +236,15 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
    */
   const memoFeatureName = useMemo(() => {
     logger.logTraceUseMemo('FEATURE-INFO - memoFeatureName', feature.nameField);
+
     // Try to get the value at the fieldName
-    const value = feature.nameField && (feature.fieldInfo?.[feature.nameField]?.value as string);
+    let value = feature.nameField && (feature.fieldInfo?.[feature.nameField]?.value as string);
+    // If nameField is 'html' or 'plain_text', treat it as undefined (WMS special fields)
+    if (feature.nameField === 'html' || feature.nameField === 'plain_text') {
+      value = undefined; // Clear the header value, because html or plain_text isn't a property -> value response
+    }
+
+    // Return the header value
     return value ?? 'No name / Sans nom';
   }, [feature]);
 

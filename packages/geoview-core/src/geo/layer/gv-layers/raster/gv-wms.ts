@@ -1410,7 +1410,17 @@ export class GVWMS extends AbstractGVRaster {
       abortController
     );
 
-    // Read the response as json
+    // Check if the response is a WMS ServiceException XML
+    const parser = new DOMParser();
+    const xmlTestDoc = parser.parseFromString(responseData, 'application/xml');
+    if (
+      xmlTestDoc.documentElement?.localName?.toLowerCase() === 'serviceexceptionreport' ||
+      xmlTestDoc.documentElement?.localName?.toLowerCase() === 'serviceexception'
+    ) {
+      throw new LayerInvalidFeatureInfoFormatWMSError(layerConfig.layerPath, infoFormat, layerConfig.getLayerNameCascade());
+    }
+
+    // Read the response as html
     const xmlDomResponse = new DOMParser().parseFromString(responseData, 'text/html');
 
     // Get body text content and trim it
@@ -1463,9 +1473,19 @@ export class GVWMS extends AbstractGVRaster {
       abortController
     );
 
+    // Sanitize response by stripping any HTML/XML nodes and keeping only text content
+    const parser = new DOMParser();
+    const htmlDoc = parser.parseFromString(responseData, 'text/html');
+    const sanitizedText = htmlDoc.body?.textContent?.trim() || '';
+
+    // If no meaningful text remains after sanitization, treat as invalid
+    if (!sanitizedText) {
+      throw new LayerInvalidFeatureInfoFormatWMSError(layerConfig.layerPath, 'text/plain', layerConfig.getLayerNameCascade());
+    }
+
     // The response is in plain format
     // eslint-disable-next-line camelcase
-    return { plain_text: { '#text': responseData } };
+    return { plain_text: { '#text': sanitizedText } };
   }
 
   /**
