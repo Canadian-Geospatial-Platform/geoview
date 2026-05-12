@@ -115,14 +115,14 @@ When the drawer package is enabled, drawing and geometry editing tools become av
 
 ## Drawing Mode
 
-Activate drawing mode by clicking the **Draw** button in the navigation bar or pressing **Ctrl+D**. Select a geometry type, then:
+Activate drawing mode by clicking the **Draw** button in the navigation bar or pressing **Alt+D**. Select a geometry type, then:
 
 - **Mouse**: Click on the map to place vertices. Double-click to finish multi-vertex geometries (lines, polygons).
 - **Crosshair** (keyboard navigation): Press **Enter** or **Spacebar** to place a vertex at the crosshair position. Press **Shift+Enter** or **Shift+Spacebar** to finish the geometry.
 
 ## Editing Mode
 
-Activate editing mode by clicking the **Edit** button or pressing **Ctrl+E**. In editing mode:
+Activate editing mode by clicking the **Edit** button or pressing **Alt+E**. In editing mode:
 
 - **Select a geometry** by clicking on it (mouse) or positioning the crosshair over it and pressing **Enter** or **Spacebar**
 - **Move vertices** by dragging handles (mouse) or using arrow keys with a grabbed handle (crosshair)
@@ -133,18 +133,18 @@ Activate editing mode by clicking the **Edit** button or pressing **Ctrl+E**. In
 
 | Shortcut | Action |
 |----------|--------|
-| **Ctrl+D** | Toggle Drawing mode |
-| **Ctrl+E** | Toggle Editing mode |
-| **Ctrl+G** | Cycle to next Geometry Type |
-| **Ctrl+Shift+G** | Cycle to previous Geometry Type |
-| **Ctrl+S** | Open Style Menu (customize colors, stroke width, text properties) |
-| **Ctrl+M** | Toggle Measurements visibility (show/hide distance and area measurements) |
-| **Ctrl+N** | Toggle Snapping (snap to existing geometry vertices while drawing) |
+| **Alt+D** | Toggle Drawing mode |
+| **Alt+E** | Toggle Editing mode |
+| **Alt+G** | Cycle to next Geometry Type |
+| **Alt+Shift+G** | Cycle to previous Geometry Type |
+| **Alt+S** | Open Style Menu (customize colors, stroke width, text properties) |
+| **Alt+M** | Toggle Measurements visibility (show/hide distance and area measurements) |
+| **Alt+N** | Toggle Snapping (snap to existing geometry vertices while drawing) |
 | **Ctrl+Z** | Undo last action |
 | **Ctrl+Y** or **Ctrl+Shift+Z** | Redo action |
-| **Ctrl+Shift+S** | Download all drawings as GeoJSON |
-| **Ctrl+O** | Upload drawings from GeoJSON file |
-| **Ctrl+Shift+C** | Clear all drawings from the map |
+| **Alt+Shift+S** | Download all drawings as GeoJSON |
+| **Alt+Shift+O** | Upload drawings from GeoJSON file |
+| **Alt+Shift+C** | Clear all drawings from the map |
 | **Escape** | Clear current selection / Exit edit mode |
 
 ## Crosshair Drawing and Editing
@@ -154,15 +154,15 @@ When keyboard navigation is enabled (crosshair active), the drawing tools provid
 ### Drawing with Crosshairs
 
 1. Enable keyboard navigation (**Tab** to the map, then **Enable**)
-2. Activate drawing mode (**Ctrl+D**)
-3. Select a geometry type (**Ctrl+G** to cycle)
+2. Activate drawing mode (**Alt+D**)
+3. Select a geometry type (**Alt+G** to cycle)
 4. Position the crosshair using **arrow keys**
 5. Press **Enter** or **Spacebar** to place a vertex at the crosshair position
 6. Press **Shift+Enter** or **Shift+Spacebar** to complete the geometry (for lines and polygons)
 
 ### Editing with Crosshairs
 
-1. Activate editing mode (**Ctrl+E**)
+1. Activate editing mode (**Alt+E**)
 2. Position the crosshair over a geometry and press **Enter** or **Spacebar** to select it
 3. Position the crosshair over a vertex handle
 4. Press **Enter** or **Spacebar** to grab the handle
@@ -186,15 +186,15 @@ Measurement overlays automatically appear on line and polygon geometries showing
 - **Lines**: Total length in meters or kilometers
 - **Polygons**: Perimeter and area in square meters or square kilometers
 
-Toggle measurement visibility using **Ctrl+M** or the measurements button in the drawer toolbar.
+Toggle measurement visibility using **Alt+M** or the measurements button in the drawer toolbar.
 
 ## Snapping
 
-Enable snapping (**Ctrl+N**) to automatically snap to existing geometry vertices while drawing. This helps create geometries that precisely align with existing features.
+Enable snapping (**Alt+N**) to automatically snap to existing geometry vertices while drawing. This helps create geometries that precisely align with existing features.
 
 ## Style Customization
 
-Press **Ctrl+S** or click the style button to open the style menu. Customize:
+Press **Alt+S** or click the style button to open the style menu. Customize:
 
 - **Stroke color and width**
 - **Fill color and opacity**
@@ -205,8 +205,8 @@ Press **Ctrl+S** or click the style button to open the style menu. Customize:
 
 Drawings can be saved and shared:
 
-- **Export** (**Ctrl+Shift+S**): Downloads all drawings as a GeoJSON file with embedded style properties
-- **Import** (**Ctrl+O**): Loads geometries from a GeoJSON file
+- **Export** (**Alt+Shift+S**): Downloads all drawings as a GeoJSON file with embedded style properties
+- **Import** (**Alt+Shift+O**): Loads geometries from a GeoJSON file
 
 _Note: The Drawer package must be included in the map configuration to use these features. See the [Core Packages documentation](../../docs/app/packages/geoview-core-packages.md) for configuration details._
 
