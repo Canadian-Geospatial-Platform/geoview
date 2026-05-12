@@ -66,6 +66,7 @@ export {
   ImportExport as ReorderIcon,
   Info as InfoIcon,
   InfoOutlined as InfoOutlinedIcon,
+  Keyboard as KeyboardIcon,
   KeyboardArrowDown as KeyboardArrowDownIcon,
   KeyboardArrowUp as KeyboardArrowUpIcon,
   KeyboardArrowRight as KeyboardArrowRightIcon,

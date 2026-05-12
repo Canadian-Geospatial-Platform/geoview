@@ -15,6 +15,7 @@ import Redo from './buttons/redo';
 import Download from './buttons/download';
 import Upload from './buttons/upload';
 import Clear from './buttons/clear';
+import Shortcuts from './buttons/shortcuts';
 
 /**
  * Creates all drawer button configurations for the NavBar.
@@ -174,6 +175,18 @@ export function createDrawerButtons(config: TypeDrawerConfig): Record<string, Ty
       'aria-label': 'drawer.clearTooltip',
       tooltipPlacement: 'left',
       children: createElement(Clear),
+      visible: true,
+    },
+    groupName: 'drawer',
+  };
+
+  // Create shortcuts button
+  buttonConfigs.shortcuts = {
+    buttonProps: {
+      id: 'drawer-shortcuts',
+      'aria-label': 'drawer.shortcutsTooltip',
+      tooltipPlacement: 'left',
+      children: createElement(Shortcuts),
       visible: true,
     },
     groupName: 'drawer',
