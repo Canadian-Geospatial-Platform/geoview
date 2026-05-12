@@ -114,14 +114,14 @@ Lorsque le module drawer est activé, les outils de dessin et d'édition de géo
 
 ## Mode dessin
 
-Activez le mode dessin en cliquant sur le bouton **Dessiner** dans la barre de navigation ou en appuyant sur **Ctrl+D**. Sélectionnez un type de géométrie, puis :
+Activez le mode dessin en cliquant sur le bouton **Dessiner** dans la barre de navigation ou en appuyant sur **Alt+D**. Sélectionnez un type de géométrie, puis :
 
 - **Souris** : Cliquez sur la carte pour placer des sommets. Double-cliquez pour terminer les géométries multi-sommets (lignes, polygones).
 - **Pointeur en croix** (navigation au clavier) : Appuyez sur **Entrée** ou **Barre d'espace** pour placer un sommet à la position du pointeur en croix. Appuyez sur **Maj.+Entrée** ou **Maj.+Barre d'espace** pour terminer la géométrie.
 
 ## Mode édition
 
-Activez le mode édition en cliquant sur le bouton **Éditer** ou en appuyant sur **Ctrl+E**. En mode édition :
+Activez le mode édition en cliquant sur le bouton **Éditer** ou en appuyant sur **Alt+E**. En mode édition :
 
 - **Sélectionnez une géométrie** en cliquant dessus (souris) ou en positionnant le pointeur en croix dessus et en appuyant sur **Entrée** ou **Barre d'espace**
 - **Déplacez les sommets** en faisant glisser les poignées (souris) ou en utilisant les touches fléchées avec une poignée saisie (pointeur en croix)
@@ -132,18 +132,18 @@ Activez le mode édition en cliquant sur le bouton **Éditer** ou en appuyant su
 
 | Raccourci | Action |
 |----------|--------|
-| **Ctrl+D** | Activer/désactiver le mode Dessin |
-| **Ctrl+E** | Activer/désactiver le mode Édition |
-| **Ctrl+G** | Passer au type de géométrie suivant |
-| **Ctrl+Maj.+G** | Passer au type de géométrie précédent |
-| **Ctrl+S** | Ouvrir le menu Style (personnaliser couleurs, épaisseur du trait, propriétés du texte) |
-| **Ctrl+M** | Activer/désactiver la visibilité des mesures (afficher/masquer les mesures de distance et d'aire) |
-| **Ctrl+N** | Activer/désactiver l'accrochage (accrocher aux sommets de géométries existantes lors du dessin) |
+| **Alt+D** | Activer/désactiver le mode Dessin |
+| **Alt+E** | Activer/désactiver le mode Édition |
+| **Alt+G** | Passer au type de géométrie suivant |
+| **Alt+Maj.+G** | Passer au type de géométrie précédent |
+| **Alt+S** | Ouvrir le menu Style (personnaliser couleurs, épaisseur du trait, propriétés du texte) |
+| **Alt+M** | Activer/désactiver la visibilité des mesures (afficher/masquer les mesures de distance et d'aire) |
+| **Alt+N** | Activer/désactiver l'accrochage (accrocher aux sommets de géométries existantes lors du dessin) |
 | **Ctrl+Z** | Annuler la dernière action |
 | **Ctrl+Y** ou **Ctrl+Maj.+Z** | Rétablir l'action |
-| **Ctrl+Maj.+S** | Télécharger tous les dessins en format GeoJSON |
-| **Ctrl+O** | Charger des dessins à partir d'un fichier GeoJSON |
-| **Ctrl+Maj.+C** | Effacer tous les dessins de la carte |
+| **Alt+Maj.+S** | Télécharger tous les dessins en format GeoJSON |
+| **Alt+Maj.+O** | Charger des dessins à partir d'un fichier GeoJSON |
+| **Alt+Maj.+C** | Effacer tous les dessins de la carte |
 | **Échap** | Effacer la sélection actuelle / Quitter le mode édition |
 
 ## Dessin et édition avec le pointeur en croix
@@ -153,15 +153,15 @@ Lorsque la navigation au clavier est activée (pointeur en croix actif), les out
 ### Dessiner avec le pointeur en croix
 
 1. Activez la navigation au clavier (touche **Tab** vers la carte, puis **Activer**)
-2. Activez le mode dessin (**Ctrl+D**)
-3. Sélectionnez un type de géométrie (**Ctrl+G** pour parcourir)
+2. Activez le mode dessin (**Alt+D**)
+3. Sélectionnez un type de géométrie (**Alt+G** pour parcourir)
 4. Positionnez le pointeur en croix avec les **touches fléchées**
 5. Appuyez sur **Entrée** ou **Barre d'espace** pour placer un sommet à la position du pointeur en croix
 6. Appuyez sur **Maj.+Entrée** ou **Maj.+Barre d'espace** pour terminer la géométrie (pour les lignes et polygones)
 
 ### Éditer avec le pointeur en croix
 
-1. Activez le mode édition (**Ctrl+E**)
+1. Activez le mode édition (**Alt+E**)
 2. Positionnez le pointeur en croix sur une géométrie et appuyez sur **Entrée** ou **Barre d'espace** pour la sélectionner
 3. Positionnez le pointeur en croix sur une poignée de sommet
 4. Appuyez sur **Entrée** ou **Barre d'espace** pour saisir la poignée
@@ -185,15 +185,15 @@ Des indicateurs de mesure apparaissent automatiquement sur les géométries de t
 - **Lignes** : Longueur totale en mètres ou kilomètres
 - **Polygones** : Périmètre et superficie en mètres carrés ou kilomètres carrés
 
-Activez/désactivez la visibilité des mesures avec **Ctrl+M** ou le bouton de mesures dans la barre d'outils du drawer.
+Activez/désactivez la visibilité des mesures avec **Alt+M** ou le bouton de mesures dans la barre d'outils du drawer.
 
 ## Accrochage
 
-Activez l'accrochage (**Ctrl+N**) pour accrocher automatiquement aux sommets de géométries existantes lors du dessin. Cela aide à créer des géométries qui s'alignent précisément avec les éléments existants.
+Activez l'accrochage (**Alt+N**) pour accrocher automatiquement aux sommets de géométries existantes lors du dessin. Cela aide à créer des géométries qui s'alignent précisément avec les éléments existants.
 
 ## Personnalisation du style
 
-Appuyez sur **Ctrl+S** ou cliquez sur le bouton de style pour ouvrir le menu de style. Personnalisez :
+Appuyez sur **Alt+S** ou cliquez sur le bouton de style pour ouvrir le menu de style. Personnalisez :
 
 - **Couleur et épaisseur du trait**
 - **Couleur et opacité de remplissage**
@@ -204,8 +204,8 @@ Appuyez sur **Ctrl+S** ou cliquez sur le bouton de style pour ouvrir le menu de 
 
 Les dessins peuvent être sauvegardés et partagés :
 
-- **Exporter** (**Ctrl+Maj.+S**) : Télécharge tous les dessins sous forme de fichier GeoJSON avec propriétés de style intégrées
-- **Importer** (**Ctrl+O**) : Charge des géométries à partir d'un fichier GeoJSON
+- **Exporter** (**Alt+Maj.+S**) : Télécharge tous les dessins sous forme de fichier GeoJSON avec propriétés de style intégrées
+- **Importer** (**Alt+Maj.+O**) : Charge des géométries à partir d'un fichier GeoJSON
 
 _N.B. : Le module Drawer doit être inclus dans la configuration de la carte pour utiliser ces fonctionnalités. Consultez la [documentation des modules de base](../../docs/app/packages/geoview-core-packages.md) pour les détails de configuration._
 =1!mapInformationBar=
