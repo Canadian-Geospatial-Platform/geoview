@@ -60,6 +60,7 @@ import {
   getStoreMapPointMarkers,
   getStoreMapRotation,
   isStoreMapConfigInitialized,
+  removeStoreMapStatusIndicator,
   setStoreMapAttribution,
   setStoreMapClickCoordinates,
   setStoreMapClickMarkerIconHide,
@@ -70,6 +71,8 @@ import {
   setStoreMapPointMarkers,
   setStoreMapProjection,
   setStoreMapSize,
+  setStoreMapStatusIndicator,
+  type StatusIndicator,
 } from '@/core/stores/states/map-state';
 import { getStoreDataTableSelectedLayerPath } from '@/core/stores/states/data-table-state';
 import { getStoreUIActiveAppBarTab, getStoreUIActiveFooterBarTab } from '@/core/stores/states/ui-state';
@@ -879,6 +882,26 @@ export class MapController extends AbstractMapViewerController {
       // Keep throwing
       throw error;
     }
+  }
+
+  /**
+   * Adds or updates a status indicator message.
+   *
+   * @param id - Unique identifier for the indicator
+   * @param message - The message text (translation key)
+   * @param type - The indicator type (defaults to 'info')
+   */
+  addStatusIndicator(id: string, message: string, status: StatusIndicator): void {
+    setStoreMapStatusIndicator(this.getMapId(), id, status);
+  }
+
+  /**
+   * Removes a status indicator message.
+   *
+   * @param id - The indicator ID to remove
+   */
+  removeStatusIndicator(id: string): void {
+    removeStoreMapStatusIndicator(this.getMapId(), id);
   }
 
   // #endregion PUBLIC METHODS - OTHERS
