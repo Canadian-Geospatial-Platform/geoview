@@ -150,6 +150,7 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
       } else if (event.key === 'Enter' || event.key === ' ') {
         // Not in draw or edit mode
         // Default behavior: open details panel
+        event.preventDefault();
         abortControllerRef.current?.abort();
         const controller = new AbortController();
         abortControllerRef.current = controller;
