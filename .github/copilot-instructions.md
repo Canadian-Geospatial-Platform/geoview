@@ -698,6 +698,12 @@ items.forEach((item) => {
 - Plugin packages have their own config schemas (default-config-\*.json) but rely on core's validation APIs
 - Use `ConfigApi` and `ConfigValidation` classes from geoview-core for config operations
 
+### Invalid `geoviewLayerType` Prevalidation
+
+- `Config.prevalidateGeoviewLayersConfig()` must **not throw** when a root `geoviewLayerType` is invalid or misspelled. It should report the `LayerInvalidGeoviewLayerTypeError` through the provided `onErrorCallback` and filter that layer out of the returned list.
+- This keeps the map viewer initialization path alive so the basemap and UI still render with the remaining valid layers.
+- Treat this as the expected fix pattern for bad root layer types: **report-and-skip**, not fail-fast.
+
 ### `initialSettings` Cascading (Parent → Child)
 
 The `ConfigValidation.#processLayerEntryConfig()` method handles how `initialSettings` propagate from parent layers to children. Understanding this cascading is critical for writing correct config tests.
