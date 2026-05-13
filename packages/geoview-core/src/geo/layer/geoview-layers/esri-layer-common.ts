@@ -751,6 +751,55 @@ export class EsriUtilities {
   }
 
   /**
+   * Inherits metadata from parent layer for Annotation SubLayers.
+   *
+   * Annotation SubLayers lack critical properties (fields, timeInfo, geometryType, etc.)
+   * in their own metadata. This method fetches the parent layer's metadata and copies
+   * those properties to the annotation sublayer.
+   *
+   * @param layerMetadata - The annotation sublayer metadata to populate
+   * @param baseUrl - The base service URL for constructing the parent query URL
+   * @param layerConfig - The layer configuration (used for logging)
+   * @param abortSignal - Optional abort signal for request cancellation
+   */
+  static async #inheritAnnotationSubLayerMetadata(
+    layerMetadata: TypeMetadataEsriDynamicLayer | TypeMetadataEsriFeatureLayer,
+    baseUrl: string,
+    layerConfig: EsriDynamicLayerEntryConfig | EsriFeatureLayerEntryConfig,
+    abortSignal?: AbortSignal
+  ): Promise<void> {
+    // Early return if not an annotation sublayer with parent
+    if (layerMetadata.type !== 'Annotation SubLayer' || !layerMetadata.parentLayer) {
+      return Promise.resolve();
+    }
+
+    const parentLayerId = layerMetadata.parentLayer.id;
+    const parentQueryUrl = `${baseUrl}/${parentLayerId}`;
+
+    try {
+      // Fetch parent layer metadata (Has to be Dynamic)
+      const parentMetadata = await Fetch.fetchJson<TypeMetadataEsriDynamicLayer>(`${parentQueryUrl}?f=json`, { signal: abortSignal });
+
+      // Inherit critical properties from parent
+      // eslint-disable-next-line no-param-reassign
+      layerMetadata.fields = parentMetadata.fields;
+      // eslint-disable-next-line no-param-reassign
+      layerMetadata.timeInfo = parentMetadata.timeInfo;
+      // eslint-disable-next-line no-param-reassign
+      layerMetadata.geometryType = parentMetadata.geometryType;
+      // eslint-disable-next-line no-param-reassign
+      layerMetadata.geometryField = parentMetadata.geometryField;
+      // eslint-disable-next-line no-param-reassign
+      layerMetadata.capabilities = parentMetadata.capabilities;
+      // eslint-disable-next-line no-param-reassign
+      layerMetadata.maxRecordCount = parentMetadata.maxRecordCount;
+    } catch (error: unknown) {
+      // Rethrow
+      throw new LayerServiceMetadataUnableToFetchError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerName(), formatError(error));
+    }
+  }
+
+  /**
    * Processes ESRI Image Server metadata to set the default raster function if one wasn't configured.
    *
    * The first non-"None" raster function is used as the default.

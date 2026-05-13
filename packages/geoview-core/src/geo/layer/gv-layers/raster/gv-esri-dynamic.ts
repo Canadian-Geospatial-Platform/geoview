@@ -727,7 +727,15 @@ export class GVEsriDynamic extends AbstractGVRaster {
       filterValueToUse = GVLayerUtilities.parseDateTimeValuesEsriDynamic(filterValueToUse, layerConfig.getServiceDateTimezone());
 
       // Create the source parameter to update
-      const layerDefs = layerConfig.getLayerMetadata()?.type === 'Raster Layer' ? '' : `{"${layerConfig.layerId}": "${filterValueToUse}"}`;
+      let targetLayerId = layerConfig.layerId;
+
+      // For Annotation SubLayers, filters must target the parent layer
+      const metadata = layerConfig.getLayerMetadata();
+      if (metadata?.type === 'Annotation SubLayer' && metadata?.parentLayer?.id !== undefined) {
+        targetLayerId = String(metadata.parentLayer.id);
+      }
+
+      const layerDefs = metadata?.type === 'Raster Layer' ? '' : `{"${targetLayerId}": "${filterValueToUse}"}`;
 
       // Define what is considered the default filter (e.g., "1=1")
       const isDefaultFilter = filterValueToUse === GeoviewRenderer.DEFAULT_FILTER_1EQUALS1;
