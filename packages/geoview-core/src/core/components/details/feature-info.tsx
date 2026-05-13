@@ -106,6 +106,10 @@ const FeatureHeader = memo(function FeatureHeader({
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
+
+  /**
+   * Memoizes the style classes for the feature header.
+   */
   const memoSxClasses = useMemo(() => {
     logger.logTraceUseMemo('FEATURE-INFO - FeatureHeader - memoSxClasses', theme);
     return getSxClasses(theme);
@@ -202,6 +206,10 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
 
   // Hooks
   const theme = useTheme();
+
+  /**
+   * Memoizes the style classes for the feature info component.
+   */
   const memoSxClasses = useMemo(() => {
     logger.logTraceUseMemo('FEATURE-INFO - FeatureInfo - memoSxClasses', theme);
     return getSxClasses(theme);
@@ -228,8 +236,15 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
    */
   const memoFeatureName = useMemo(() => {
     logger.logTraceUseMemo('FEATURE-INFO - memoFeatureName', feature.nameField);
+
     // Try to get the value at the fieldName
-    const value = feature.nameField && (feature.fieldInfo?.[feature.nameField]?.value as string);
+    let value = feature.nameField && (feature.fieldInfo?.[feature.nameField]?.value as string);
+    // If nameField is 'html' or 'plain_text', treat it as undefined (WMS special fields)
+    if (feature.nameField === 'html' || feature.nameField === 'plain_text') {
+      value = undefined; // Clear the header value, because html or plain_text isn't a property -> value response
+    }
+
+    // Return the header value
     return value ?? 'No name / Sans nom';
   }, [feature]);
 
@@ -243,17 +258,15 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
     logger.logTraceUseMemo('FEATURE-INFO - memoFeatureInfoList', feature.fieldInfo);
     if (!feature?.fieldInfo) return [];
 
-    return Object.entries(feature.fieldInfo)
-      .filter(([key]) => key !== feature.nameField)
-      .map(([fieldName, field]) => ({
-        fieldKey: field!.fieldKey,
-        value: field!.value,
-        dataType: field!.dataType,
-        alias:
-          feature.geoviewLayerType !== 'ogcWms' && feature.geoviewLayerType !== 'ogcWfs'
-            ? field!.alias || fieldName
-            : (field!.alias || fieldName).split('.').pop() || '',
-      }));
+    return Object.entries(feature.fieldInfo).map(([fieldName, field]) => ({
+      fieldKey: field!.fieldKey,
+      value: field!.value,
+      dataType: field!.dataType,
+      alias:
+        feature.geoviewLayerType !== 'ogcWms' && feature.geoviewLayerType !== 'ogcWfs'
+          ? field!.alias || fieldName
+          : (field!.alias || fieldName).split('.').pop() || '',
+    }));
   }, [feature]);
 
   /**

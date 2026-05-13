@@ -16,7 +16,7 @@ import { GeoUtilities } from '@/geo/utils/utilities';
 import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
 import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import type { OgcWfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
-import type { TypeFeatureInfoEntry, TypeOutfieldsType, TypeFeatureInfoResult } from '@/api/types/map-schema-types';
+import type { TypeFeatureInfoEntry, TypeOutfieldsType, TypeFeatureInfoResult, TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import { CONFIG_PROXY_URL } from '@/api/types/map-schema-types';
 import type { TypeLegend, TypeMetadataFeatureInfo } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
@@ -45,7 +45,10 @@ export class GVWMS extends AbstractGVRaster {
   /** The max feature count returned by the GetFeatureInfo */
   static readonly DEFAULT_MAX_FEATURE_COUNT: number = 100;
 
-  /** The default Get Feature Info tolerance to use for QGIS Server services which are more picky by default (really needs to be zoomed in to get results, by default) */
+  /**
+   * The default Get Feature Info tolerance to use for QGIS Server services which are more picky by default (really needs to be zoomed in to get results, by default).
+   * WMS needed a bigger tolerance to pick up more results during the spatial queries (to make it look more like the tolerance for other layer types)
+   */
   static readonly DEFAULT_GET_FEATURE_INFO_TOLERANCE: number = 20;
 
   /** The Get Feature Info feature count to use */
@@ -219,32 +222,35 @@ export class GVWMS extends AbstractGVRaster {
   /**
    * Overrides the return of feature information at a given coordinate.
    *
-   * @param map - The Map where to get Feature Info At Coordinate from.
-   * @param location - The coordinate that will be used by the query.
-   * @param queryGeometry - Whether to include geometry in the query, default is true.
-   * @param abortController - Optional {@link AbortController} to cancel the operation.
+   * @param map - The Map where to get Feature Info At Coordinate from
+   * @param location - The coordinate that will be used by the query
+   * @param queryGeometry - Whether to include geometry in the query, default is true
+   * @param language - The display language, used to guess the best name field for the 'nameField'
+   * @param abortController - Optional {@link AbortController} to cancel the operation
    * @returns A promise that resolves with the feature info result
    */
   protected override getFeatureInfoAtCoordinate(
     map: OLMap,
     location: Coordinate,
     queryGeometry = true,
+    language: TypeDisplayLanguage, // Used if we have to guess the field name for the 'nameField'
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoResult> {
     // Transform coordinate from map projection to lntlat
     const projCoordinate = Projection.transformToLonLat(location, map.getView().getProjection());
 
     // Redirect to getFeatureInfoAtLonLat
-    return this.getFeatureInfoAtLonLat(map, projCoordinate, queryGeometry, abortController);
+    return this.getFeatureInfoAtLonLat(map, projCoordinate, queryGeometry, language, abortController);
   }
 
   /**
    * Overrides the return of feature information at the provided long lat coordinate.
    *
-   * @param map - The Map where to get Feature Info At LonLat from.
-   * @param lonlat - The coordinate that will be used by the query.
-   * @param queryGeometry - Whether to include geometry in the query, default is true.
-   * @param abortController - Optional {@link AbortController} to cancel the operation.
+   * @param map - The Map where to get Feature Info At LonLat from
+   * @param lonlat - The coordinate that will be used by the query
+   * @param queryGeometry - Whether to include geometry in the query, default is true
+   * @param language - The display language, used to guess the best name field if `nameField` is not provided
+   * @param abortController - Optional {@link AbortController} to cancel the operation
    * @returns A promise that resolves with the feature info result
    * @throws {LayerConfigWFSMissingError} When no WFS layer configuration is defined for this WMS layer.
    */
@@ -253,6 +259,7 @@ export class GVWMS extends AbstractGVRaster {
     lonlat: Coordinate,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     queryGeometry = true,
+    language: TypeDisplayLanguage, // Used if we have to guess the field name for the 'nameField'
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoResult> {
     // The FeatureInfoResult object that will be returned
@@ -305,6 +312,7 @@ export class GVWMS extends AbstractGVRaster {
           clickCoordinate,
           viewResolution,
           projectionCode,
+          language,
           this.getLayerFilters(),
           abortController
         );
@@ -315,7 +323,7 @@ export class GVWMS extends AbstractGVRaster {
     }
 
     // Try various info formats patterns to get feature info
-    return this.#getFeatureInfoUsingWMS(wmsLayerConfig, clickCoordinate, viewResolution, projectionCode, abortController);
+    return this.#getFeatureInfoUsingWMS(wmsLayerConfig, clickCoordinate, viewResolution, projectionCode, language, abortController);
   }
 
   /**
@@ -325,6 +333,7 @@ export class GVWMS extends AbstractGVRaster {
    *
    * @param map - The Map so that we can grab the resolution/projection we want to get features on.
    * @param layerFilters - The layer filters to apply when querying the features.
+   * @param language - The display language, used to guess the best name field if `nameField` is not provided
    * @param abortController - Optional {@link AbortController} to cancel the operation.
    * @returns A promise that resolves with the feature info result
    * @throws {LayerConfigWFSMissingError} When no WFS layer configuration is defined for this WMS layer.
@@ -337,6 +346,7 @@ export class GVWMS extends AbstractGVRaster {
   protected override getAllFeatureInfo(
     map: OLMap,
     layerFilters: LayerFilters,
+    language: TypeDisplayLanguage,
     abortController?: AbortController
   ): Promise<TypeFeatureInfoResult> {
     // Get the layer config and its initial settings
@@ -352,6 +362,7 @@ export class GVWMS extends AbstractGVRaster {
       undefined,
       undefined,
       map.getView().getProjection().getCode(),
+      language,
       layerFilters,
       abortController
     );
@@ -525,7 +536,12 @@ export class GVWMS extends AbstractGVRaster {
     );
 
     // Fetch and parse features
-    const parsedFeatures = await GVWMS.fetchAndParseFeaturesFromWFSUrl(urlWithOutputJson, wmsLayerConfig, wfsLayerConfig);
+    const parsedFeatures = await GVWMS.fetchAndParseFeaturesFromWFSUrl(
+      urlWithOutputJson,
+      wmsLayerConfig,
+      wfsLayerConfig,
+      'en' // Language isn't necessary here as we're interested in the features extent
+    );
 
     // For each feature
     let calculatedExtent: Extent | undefined;
@@ -647,12 +663,13 @@ export class GVWMS extends AbstractGVRaster {
    * - Returns an array of standardized `TypeFeatureInfoEntry` objects.
    *
    * @param urlWithOutputJson - The full WFS GetFeature request URL. Must specify an output format compatible
-   *   with GeoJSON (e.g., `outputFormat=application/json`).
+   *   with GeoJSON (e.g., `outputFormat=application/json`)
    * @param wmsLayerConfig - The associated WMS layer configuration. Styling and filter settings from this
-   *   config are applied when formatting the Feature Info results.
+   *   config are applied when formatting the Feature Info results
    * @param wfsLayerConfig - The WFS layer configuration used for schema tags, outfields, metadata, and
-   *   date formatting.
-   * @param abortController - Optional {@link AbortController} used to cancel the fetch request.
+   *   date formatting
+   * @param language - The display language, used to guess the best name field if `nameField` is not provided in the WMS layer config
+   * @param abortController - Optional {@link AbortController} used to cancel the fetch request
    * @returns A promise that resolves with the feature info result
    * @throws {ResponseError} When the response is not OK (non-2xx).
    * @throws {ResponseEmptyError} When the JSON response is empty.
@@ -664,6 +681,7 @@ export class GVWMS extends AbstractGVRaster {
     urlWithOutputJson: string,
     wmsLayerConfig: OgcWmsLayerEntryConfig,
     wfsLayerConfig: OgcWfsLayerEntryConfig,
+    language: TypeDisplayLanguage,
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoResult> {
     // Call the GetFeature
@@ -678,13 +696,16 @@ export class GVWMS extends AbstractGVRaster {
     // Read the features
     const features = GeoUtilities.readFeaturesFromGeoJSON(responseData, undefined);
 
+    // Find the best name field and validate its existance at the same time when one was initially configured
+    const nameField = AbstractGVLayer.findBestNameField(wmsLayerConfig.getNameField(), wfsLayerConfig.getOutfields(), language);
+
     // Parse the features
     const results = AbstractGVLayer.helperFormatFeatureInfoResult(
       features,
       wfsLayerConfig.layerPath,
       wfsLayerConfig.getSchemaTag(),
-      wmsLayerConfig.getNameField(),
-      wmsLayerConfig.getOutfields(),
+      nameField,
+      wfsLayerConfig.getOutfields(),
       wmsLayerConfig.hasOutfieldsPK(),
       undefined,
       wmsLayerConfig.getLayerStyle(), // The styles as read from the WMS layer config (not WFS in case it was overridden in the WMS)
@@ -710,15 +731,16 @@ export class GVWMS extends AbstractGVRaster {
    * 4. Builds a WFS GetFeature URL with the appropriate output format and filter.
    * 5. Fetches the WFS features and parses them into a consistent format.
    *
-   * @param wmsLayerConfig - The current WMS layer config of the WMS layer.
-   * @param wfsLayerConfig - The current WFS layer config of the WMS layer.
+   * @param wmsLayerConfig - The current WMS layer config of the WMS layer
+   * @param wfsLayerConfig - The current WFS layer config of the WMS layer
    * @param clickCoordinate - The clicked map coordinate
-   *        in the map projection. If undefined, the query is non-spatial.
+   *        in the map projection. If undefined, the query is non-spatial
    * @param viewResolution - Current map view resolution
-   *        (map units per pixel). Required for buffering the click location.
+   *        (map units per pixel). Required for buffering the click location
    * @param projectionCode - The map projection code (e.g., 'EPSG:3857')
-   *        to use for the WFS request and geometry serialization.
-   * @param layerFilters - Optional layer filters to use to filter the query.
+   *        to use for the WFS request and geometry serialization
+   * @param language - The display language, used to guess the best name field if `nameField` is not provided in the WMS layer config
+   * @param layerFilters - Optional layer filters to use to filter the query
    * @param abortController - Optional {@link AbortController} to
    *        allow cancellation of the WFS request.
    * @returns A promise that resolves with the feature info result
@@ -729,6 +751,7 @@ export class GVWMS extends AbstractGVRaster {
     clickCoordinate: Coordinate | undefined,
     viewResolution: number | undefined,
     projectionCode: string,
+    language: TypeDisplayLanguage,
     layerFilters?: LayerFilters,
     abortController?: AbortController
   ): Promise<TypeFeatureInfoResult> {
@@ -794,7 +817,7 @@ export class GVWMS extends AbstractGVRaster {
     );
 
     // Fetch and parse features
-    return GVWMS.fetchAndParseFeaturesFromWFSUrl(urlWithOutputJson, wmsLayerConfig, wfsLayerConfig, abortController);
+    return GVWMS.fetchAndParseFeaturesFromWFSUrl(urlWithOutputJson, wmsLayerConfig, wfsLayerConfig, language, abortController);
   }
 
   /**
@@ -808,6 +831,7 @@ export class GVWMS extends AbstractGVRaster {
    * @param clickCoordinate - The coordinate on the map where the user clicked.
    * @param viewResolution - The current resolution of the map view.
    * @param projectionCode - The projection used for the request (e.g., 'EPSG:3857').
+   * @param language - The display language, used to guess the best name field if `nameField` is not provided
    * @param abortController - Optional {@link AbortController} to cancel the request if needed.
    * @returns A promise that resolves with the feature info result
    * @throws {LayerInvalidFeatureInfoFormatWMSError} When no supported format returns usable feature info data.
@@ -817,6 +841,7 @@ export class GVWMS extends AbstractGVRaster {
     clickCoordinate: Coordinate,
     viewResolution: number,
     projectionCode: ProjectionLike,
+    language: TypeDisplayLanguage, // Used if we have to guess the field name for the 'nameField'
     abortController?: AbortController
   ): Promise<TypeFeatureInfoResult> {
     // Get the layer source
@@ -830,8 +855,6 @@ export class GVWMS extends AbstractGVRaster {
 
     // Log the various info format supported for the layer, keeping the line commented, useful for debugging
     // logger.logDebug(layerConfig.getLayerNameCascade(), featureInfoFormat);
-
-    // TODO: WMS - Add support for application/vnd.ogc.gml GV issue #3134
 
     // If the info format includes GEOJSON
     let featureMember: Record<string, unknown>[] | undefined;
@@ -883,6 +906,32 @@ export class GVWMS extends AbstractGVRaster {
         // Failed to retrieve featureMember using Json, eat the error, we'll try with another format
         logger.logError(
           `${wmsLayerConfig.getLayerNameCascade()} - Failed to retrieve featureMember using JSON, eat the error, we'll try with another format`,
+          error
+        );
+      }
+    }
+
+    // If not found and format includes application/vnd.ogc.gml
+    if (!featureMember && featureInfoFormat.includes('application/vnd.ogc.gml')) {
+      try {
+        // Try to get the feature member using GML format
+        featureMember = await GVWMS.#getFeatureInfoUsingGML(
+          wmsLayerConfig,
+          wmsSource,
+          clickCoordinate,
+          viewResolution,
+          this.getGetFeatureInfoTolerance(),
+          projectionCode,
+          this.getGetFeatureInfoFeatureCount(),
+          abortController
+        );
+
+        // Keep in mind, this output format works
+        this.#featureOutputFormatWMSWorked = 'application/vnd.ogc.gml';
+      } catch (error: unknown) {
+        // Failed to retrieve featureMember using GML, eat the error, we'll try with another format
+        logger.logError(
+          `${wmsLayerConfig.getLayerNameCascade()} - Failed to retrieve featureMember using GML, eat the error, we'll try with another format`,
           error
         );
       }
@@ -963,7 +1012,13 @@ export class GVWMS extends AbstractGVRaster {
     if (featureMember) {
       // Format and return the information
       return {
-        results: GVWMS.#formatWmsFeatureInfoResult(wmsLayerConfig.layerPath, wmsLayerConfig.getNameField(), featureMember, clickCoordinate),
+        results: GVWMS.#formatWmsFeatureInfoResult(
+          wmsLayerConfig.layerPath,
+          wmsLayerConfig.getNameField(),
+          language,
+          featureMember,
+          clickCoordinate
+        ),
       };
     }
 
@@ -1149,6 +1204,97 @@ export class GVWMS extends AbstractGVRaster {
   }
 
   /**
+   * Retrieves feature information from a WMS layer using the `application/vnd.ogc.gml` info format.
+   *
+   * This method performs a `GetFeatureInfo` request and parses namespaced GML responses into a
+   * standardized array of feature-member records. It supports both standard `gml:featureMember`
+   * payloads and fallback payloads that omit that wrapper.
+   *
+   * @param layerConfig - Configuration object for the target WMS layer
+   * @param wmsSource - The OpenLayers WMS source used to construct the request
+   * @param clickCoordinate - The coordinate on the map where the user clicked
+   * @param viewResolution - The current resolution of the map view
+   * @param qgisServerTolerance - The QGIS Server feature info pixel tolerance
+   * @param projectionCode - The projection in which the request should be made (e.g., 'EPSG:3857')
+   * @param maxFeatures - Optional maximum number of features to include in response when we want more than 1
+   * @param abortController - Optional {@link AbortController} to allow cancellation of the request
+   * @returns A promise that resolves with an array of feature member records
+   */
+  static async #getFeatureInfoUsingGML(
+    layerConfig: OgcWmsLayerEntryConfig,
+    wmsSource: ImageWMS,
+    clickCoordinate: Coordinate,
+    viewResolution: number,
+    qgisServerTolerance: number,
+    projectionCode: ProjectionLike,
+    maxFeatures: number | undefined,
+    abortController: AbortController | undefined = undefined
+  ): Promise<Record<string, unknown>[]> {
+    // The info format
+    const infoFormat = 'application/vnd.ogc.gml';
+
+    // Try to get the information using GML format
+    const responseData = await GVWMS.#readFeatureInfo(
+      layerConfig,
+      wmsSource,
+      clickCoordinate,
+      viewResolution,
+      qgisServerTolerance,
+      projectionCode,
+      infoFormat,
+      maxFeatures,
+      abortController
+    );
+
+    // Parse the content as XML
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(responseData, 'application/xml');
+
+    // Abort if XML could not be parsed
+    if (xmlDoc.getElementsByTagName('parsererror').length > 0) {
+      throw new LayerInvalidFeatureInfoFormatWMSError(layerConfig.layerPath, infoFormat, layerConfig.getLayerNameCascade());
+    }
+
+    // Preferred path: parse standard gml:featureMember entries using localName for namespace safety.
+    const allElements = Array.from(xmlDoc.getElementsByTagName('*'));
+    const featureMemberElements = allElements.filter((element) => element.localName === 'featureMember');
+
+    const featureMember: Record<string, unknown>[] = [];
+    featureMemberElements.forEach((featureMemberElement): void => {
+      const featureElements = GVWMS.#getXmlChildElements(featureMemberElement);
+
+      // A featureMember usually wraps exactly one feature element, but process all to be safe.
+      featureElements.forEach((featureElement): void => {
+        featureMember.push(GVWMS.#convertXmlElementToRecord(featureElement));
+      });
+    });
+
+    // Fallback path: some services don't use gml:featureMember.
+    if (featureMember.length === 0 && xmlDoc.documentElement) {
+      const fallbackCandidates = allElements.filter((element) => {
+        const children = GVWMS.#getXmlChildElements(element);
+        if (children.length === 0) return false;
+
+        // Candidate features have at least one non-GML direct child field.
+        return children.some((child) => child.prefix !== 'gml' && GVWMS.#getXmlChildElements(child).length === 0);
+      });
+
+      fallbackCandidates.forEach((candidate): void => {
+        featureMember.push(GVWMS.#convertXmlElementToRecord(candidate));
+      });
+    }
+
+    // If found
+    if (featureMember.length > 0) {
+      // Success!
+      return featureMember;
+    }
+
+    // Failed
+    throw new LayerInvalidFeatureInfoFormatWMSError(layerConfig.layerPath, infoFormat, layerConfig.getLayerNameCascade());
+  }
+
+  /**
    * Retrieves feature information from a WMS layer using the `text/xml` info format.
    *
    * This method performs a `GetFeatureInfo` request at the specified map coordinate,
@@ -1267,7 +1413,17 @@ export class GVWMS extends AbstractGVRaster {
       abortController
     );
 
-    // Read the response as json
+    // Check if the response is a WMS ServiceException XML
+    const parser = new DOMParser();
+    const xmlTestDoc = parser.parseFromString(responseData, 'application/xml');
+    if (
+      xmlTestDoc.documentElement?.localName?.toLowerCase() === 'serviceexceptionreport' ||
+      xmlTestDoc.documentElement?.localName?.toLowerCase() === 'serviceexception'
+    ) {
+      throw new LayerInvalidFeatureInfoFormatWMSError(layerConfig.layerPath, infoFormat, layerConfig.getLayerNameCascade());
+    }
+
+    // Read the response as html
     const xmlDomResponse = new DOMParser().parseFromString(responseData, 'text/html');
 
     // Get body text content and trim it
@@ -1320,9 +1476,19 @@ export class GVWMS extends AbstractGVRaster {
       abortController
     );
 
+    // Sanitize response by stripping any HTML/XML nodes and keeping only text content
+    const parser = new DOMParser();
+    const htmlDoc = parser.parseFromString(responseData, 'text/html');
+    const sanitizedText = htmlDoc.body?.textContent?.trim() || '';
+
+    // If no meaningful text remains after sanitization, treat as invalid
+    if (!sanitizedText) {
+      throw new LayerInvalidFeatureInfoFormatWMSError(layerConfig.layerPath, 'text/plain', layerConfig.getLayerNameCascade());
+    }
+
     // The response is in plain format
     // eslint-disable-next-line camelcase
-    return { plain_text: { '#text': responseData } };
+    return { plain_text: { '#text': sanitizedText } };
   }
 
   /**
@@ -1386,6 +1552,8 @@ export class GVWMS extends AbstractGVRaster {
    * Formats one or more WMS feature members into standardized feature info entries.
    *
    * @param layerPath - The layer path used to identify the WMS layer.
+   * @param nameField - The field name to use as the display name for features, if available.
+   * @param language - The display language, used to guess the best name field if `nameField` is not provided
    * @param featureMember - A single feature member or an array of feature members.
    * @param clickCoordinate - The coordinate where the user clicked on the map.
    * @returns An array of formatted feature info entries
@@ -1393,6 +1561,7 @@ export class GVWMS extends AbstractGVRaster {
   static #formatWmsFeatureInfoResult(
     layerPath: string,
     nameField: string | undefined,
+    language: TypeDisplayLanguage, // Used if we have to guess the field name for the 'nameField'
     featureMember: Record<string, unknown> | Record<string, unknown>[],
     clickCoordinate: Coordinate
   ): TypeFeatureInfoEntry[] {
@@ -1402,11 +1571,15 @@ export class GVWMS extends AbstractGVRaster {
     if (Array.isArray(featureMember)) {
       featureMember.forEach((feature) => {
         if (feature && typeof feature === 'object') {
-          results.push(this.#formatWmsFeatureInfoResultParser(feature, layerPath, nameField, clickCoordinate, featureKeyCounter++));
+          results.push(
+            this.#formatWmsFeatureInfoResultParser(feature, layerPath, nameField, language, clickCoordinate, featureKeyCounter++)
+          );
         }
       });
     } else if (featureMember && typeof featureMember === 'object') {
-      results.push(this.#formatWmsFeatureInfoResultParser(featureMember, layerPath, nameField, clickCoordinate, featureKeyCounter++));
+      results.push(
+        this.#formatWmsFeatureInfoResultParser(featureMember, layerPath, nameField, language, clickCoordinate, featureKeyCounter++)
+      );
     }
 
     return results;
@@ -1417,6 +1590,8 @@ export class GVWMS extends AbstractGVRaster {
    *
    * @param feature - The raw feature object from a WMS GetFeatureInfo response.
    * @param layerPath - The WMS layer path.
+   * @param nameField - The field name to use as the display name for the feature, if available.
+   * @param language - The display language, used to guess the best name field if `nameField` is not provided
    * @param clickCoordinate - The map click coordinate.
    * @param featureKey - The unique feature key.
    * @returns The formatted feature info entry
@@ -1425,6 +1600,7 @@ export class GVWMS extends AbstractGVRaster {
     feature: unknown,
     layerPath: string,
     nameField: string | undefined,
+    language: TypeDisplayLanguage, // Used if we have to guess the field name for the 'nameField'
     clickCoordinate: Coordinate,
     featureKey: number
   ): TypeFeatureInfoEntry {
@@ -1483,8 +1659,73 @@ export class GVWMS extends AbstractGVRaster {
       });
     };
 
+    // Call sub-function
     extractFields(feature);
+
+    // Find the best name field and validate its existance at the same time when one was initially configured
+    featureInfo.nameField = AbstractGVLayer.findBestNameField(featureInfo.nameField, featureInfo.fieldInfo, language);
+
+    // Return the gathered feature information
     return featureInfo;
+  }
+
+  /**
+   * Filters child nodes and returns only direct child Element nodes.
+   *
+   * @param element - The parent element whose children will be filtered
+   * @returns An array containing only Element-type child nodes
+   */
+  static #getXmlChildElements(element: Element): Element[] {
+    return Array.from(element.childNodes).filter((node): node is Element => node.nodeType === Node.ELEMENT_NODE);
+  }
+
+  /**
+   * Adds a property to a record, aggregating duplicate keys as arrays.
+   *
+   * When a property key already exists, the values are collected into an array.
+   * This is useful for XML elements that can have multiple children with the same tag name.
+   *
+   * @param record - The record to update
+   * @param key - The property key to add or update
+   * @param value - The value to add
+   * @returns A new record with the property added or updated
+   */
+  static #addXmlRecordProperty(record: Record<string, unknown>, key: string, value: unknown): Record<string, unknown> {
+    const currentValue = record[key];
+    if (currentValue === undefined) {
+      return { ...record, [key]: value };
+    }
+
+    if (Array.isArray(currentValue)) {
+      return { ...record, [key]: [...currentValue, value] };
+    }
+
+    return { ...record, [key]: [currentValue, value] };
+  }
+
+  /**
+   * Recursively converts an XML element and its children into an object record.
+   *
+   * Nested elements are converted to nested records. Text content is preserved,
+   * with empty strings maintained to distinguish from missing content.
+   *
+   * @param element - The XML element to convert
+   * @returns An object record representing the element and its descendants
+   */
+  static #convertXmlElementToRecord(element: Element): Record<string, unknown> {
+    let record: Record<string, unknown> = {};
+    const children = GVWMS.#getXmlChildElements(element);
+
+    children.forEach((child): void => {
+      const key = child.nodeName;
+      const childElements = GVWMS.#getXmlChildElements(child);
+
+      // Preserve empty values while still supporting nested structures.
+      const value: unknown = childElements.length > 0 ? GVWMS.#convertXmlElementToRecord(child) : (child.textContent?.trim() ?? '');
+      record = GVWMS.#addXmlRecordProperty(record, key, value);
+    });
+
+    return record;
   }
 
   /**
@@ -1650,6 +1891,7 @@ export class GVWMS extends AbstractGVRaster {
   // #endregion EVENTS
 }
 
+/** Defines the CRS override used to request WMS images in a different projection. */
 export type CRSOverride = { layerProjection: string; mapProjection: string };
 
 /**

@@ -95,6 +95,7 @@ export const FeatureItem = memo(function FeatureItem({
   const { t } = useTranslation<string>();
   const theme = useTheme();
   const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const featureInfoItemIsTableFormat = featureInfoItem.alias !== 'html' && featureInfoItem.alias !== 'plain_text';
 
   /**
    * Gets the linkify options for converting text URLs into clickable links, memoized to avoid unnecessary recalculations.
@@ -114,7 +115,7 @@ export const FeatureItem = memo(function FeatureItem({
     [alias]
   );
 
-  if (alias === 'html') {
+  if (!featureInfoItemIsTableFormat) {
     return (
       <Box sx={memoSxClasses.featureInfoItemValue}>
         <UseHtmlToReact htmlContent={sanitizeHtmlContent(item)} />
@@ -182,6 +183,7 @@ export const FeatureRow = memo(function FeatureRow({
   const theme = useTheme();
   const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
   const { alias, value } = featureInfoItem;
+  const featureInfoItemIsTableFormat = alias !== 'html' && alias !== 'plain_text';
 
   // Get the original value in an array
   let stringValues = useMemo(() => [''], []);
@@ -212,7 +214,7 @@ export const FeatureRow = memo(function FeatureRow({
 
   return (
     <TableRow className="feature-info-row" sx={memoSxClasses.featureInfoRow}>
-      {featureInfoItem.alias !== 'html' ? (
+      {featureInfoItemIsTableFormat ? (
         <>
           <TableCell component="th" scope="row">
             {alias}

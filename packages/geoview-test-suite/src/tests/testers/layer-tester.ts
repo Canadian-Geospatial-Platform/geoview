@@ -1471,20 +1471,20 @@ export class LayerTester extends GVAbstractTester {
 
         // Find the "material" field
         test.addStep(`Finding the "${GVAbstractTester.WATER_NETWORK_DOMAIN_FIELD_NAME}" field...`);
-        const materialField = outfields!.find((f) => f.name === GVAbstractTester.WATER_NETWORK_DOMAIN_FIELD_NAME);
+        const materialField = outfields.find((f) => f.name === GVAbstractTester.WATER_NETWORK_DOMAIN_FIELD_NAME);
         Test.assertIsDefined('materialField', materialField);
 
         // Verify it has a domain
         test.addStep('Verifying the field has a domain...');
-        Test.assertIsDefined('materialField.domain', materialField!.domain);
+        Test.assertIsDefined('materialField.domain', materialField.domain);
 
         // Verify the domain type is codedValue
         test.addStep('Verifying the domain type is codedValue...');
-        Test.assertIsEqual(materialField!.domain!.type, 'codedValue');
+        Test.assertIsEqual(materialField.domain.type, 'codedValue');
 
         // Verify the domain has coded values
         test.addStep('Verifying the domain has coded values...');
-        const codedDomain = materialField!.domain! as { type: string; codedValues: unknown[] };
+        const codedDomain = materialField.domain as { type: string; codedValues: unknown[] };
         Test.assertIsDefined('codedValues', codedDomain.codedValues);
         Test.assertIsArrayLengthMinimal(codedDomain.codedValues, 1);
       },
@@ -1534,20 +1534,20 @@ export class LayerTester extends GVAbstractTester {
 
         // Find the "material" field
         test.addStep(`Finding the "${GVAbstractTester.WATER_NETWORK_DOMAIN_FIELD_NAME}" field...`);
-        const materialField = outfields!.find((f) => f.name === GVAbstractTester.WATER_NETWORK_DOMAIN_FIELD_NAME);
+        const materialField = outfields.find((f) => f.name === GVAbstractTester.WATER_NETWORK_DOMAIN_FIELD_NAME);
         Test.assertIsDefined('materialField', materialField);
 
         // Verify it has a domain
         test.addStep('Verifying the field has a domain...');
-        Test.assertIsDefined('materialField.domain', materialField!.domain);
+        Test.assertIsDefined('materialField.domain', materialField.domain);
 
         // Verify the domain type is codedValue
         test.addStep('Verifying the domain type is codedValue...');
-        Test.assertIsEqual(materialField!.domain!.type, 'codedValue');
+        Test.assertIsEqual(materialField.domain.type, 'codedValue');
 
         // Verify the domain has coded values
         test.addStep('Verifying the domain has coded values...');
-        const codedDomain = materialField!.domain! as { type: string; codedValues: unknown[] };
+        const codedDomain = materialField.domain as { type: string; codedValues: unknown[] };
         Test.assertIsDefined('codedValues', codedDomain.codedValues);
         Test.assertIsArrayLengthMinimal(codedDomain.codedValues, 1);
       },
@@ -1614,27 +1614,27 @@ export class LayerTester extends GVAbstractTester {
         test.addStep(`Getting the "${fieldName}" field from the feature...`);
         const materialFieldEntry = firstFeature.fieldInfo[fieldName];
         Test.assertIsDefined('materialFieldEntry', materialFieldEntry);
-        Test.assertIsDefined('materialFieldEntry.value', materialFieldEntry!.value);
+        Test.assertIsDefined('materialFieldEntry.value', materialFieldEntry.value);
 
         // Get the coded values from the domain on the field entry
         test.addStep('Verifying the field has a codedValue domain...');
-        Test.assertIsDefined('materialFieldEntry.domain', materialFieldEntry!.domain);
-        Test.assertIsEqual(materialFieldEntry!.domain!.type, 'codedValue');
+        Test.assertIsDefined('materialFieldEntry.domain', materialFieldEntry.domain);
+        Test.assertIsEqual(materialFieldEntry.domain.type, 'codedValue');
 
-        const codedDomain = materialFieldEntry!.domain! as codedValueType;
+        const codedDomain = materialFieldEntry.domain as codedValueType;
         const codedValueNames = codedDomain.codedValues.map((cv) => cv.name);
         const codedValueCodes = codedDomain.codedValues.map((cv) => cv.code);
 
         // Verify the value is one of the translated names, not a raw code
         test.addStep('Verifying the value is a domain-translated name...');
-        Test.assertArrayIncludes(codedValueNames, materialFieldEntry!.value as string);
+        Test.assertArrayIncludes(codedValueNames, materialFieldEntry.value as string);
 
         // Verify the value is NOT a raw code (unless name === code, which is unlikely)
         test.addStep('Verifying the value is not a raw code...');
         // Only assert if the translated name differs from the code for this value
-        const matchingEntry = codedDomain.codedValues.find((cv) => cv.name === materialFieldEntry!.value);
+        const matchingEntry = codedDomain.codedValues.find((cv) => cv.name === materialFieldEntry.value);
         if (matchingEntry && matchingEntry.code !== matchingEntry.name) {
-          Test.assertArrayExcludes(codedValueCodes as string[], materialFieldEntry!.value as string);
+          Test.assertArrayExcludes(codedValueCodes as string[], materialFieldEntry.value as string);
         }
       },
       (test) => {
@@ -1700,26 +1700,26 @@ export class LayerTester extends GVAbstractTester {
         test.addStep(`Getting the "${fieldName}" field from the feature...`);
         const materialFieldEntry = firstFeature.fieldInfo[fieldName];
         Test.assertIsDefined('materialFieldEntry', materialFieldEntry);
-        Test.assertIsDefined('materialFieldEntry.value', materialFieldEntry!.value);
+        Test.assertIsDefined('materialFieldEntry.value', materialFieldEntry.value);
 
         // Get the coded values from the domain on the field entry
         test.addStep('Verifying the field has a codedValue domain...');
-        Test.assertIsDefined('materialFieldEntry.domain', materialFieldEntry!.domain);
-        Test.assertIsEqual(materialFieldEntry!.domain!.type, 'codedValue');
+        Test.assertIsDefined('materialFieldEntry.domain', materialFieldEntry.domain);
+        Test.assertIsEqual(materialFieldEntry.domain.type, 'codedValue');
 
-        const codedDomain = materialFieldEntry!.domain! as codedValueType;
+        const codedDomain = materialFieldEntry.domain as codedValueType;
         const codedValueNames = codedDomain.codedValues.map((cv) => cv.name);
         const codedValueCodes = codedDomain.codedValues.map((cv) => cv.code);
 
         // Verify the value is one of the translated names, not a raw code
         test.addStep('Verifying the value is a domain-translated name...');
-        Test.assertArrayIncludes(codedValueNames, materialFieldEntry!.value as string);
+        Test.assertArrayIncludes(codedValueNames, materialFieldEntry.value as string);
 
         // Verify the value is NOT a raw code (unless name === code, which is unlikely)
         test.addStep('Verifying the value is not a raw code...');
-        const matchingEntry = codedDomain.codedValues.find((cv) => cv.name === materialFieldEntry!.value);
+        const matchingEntry = codedDomain.codedValues.find((cv) => cv.name === materialFieldEntry.value);
         if (matchingEntry && matchingEntry.code !== matchingEntry.name) {
-          Test.assertArrayExcludes(codedValueCodes as string[], materialFieldEntry!.value as string);
+          Test.assertArrayExcludes(codedValueCodes as string[], materialFieldEntry.value as string);
         }
       },
       (test) => {

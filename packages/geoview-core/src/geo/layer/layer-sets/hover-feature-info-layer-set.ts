@@ -123,7 +123,14 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
 
     try {
       // Process query on results data using the shared abort controller for this call
-      const promiseResult = await this.queryLayerFeatures(layer, queryType, coordinate, false, this.#abortController);
+      const promiseResult = await this.queryLayerFeatures(
+        layer,
+        queryType,
+        coordinate,
+        false,
+        this.mapViewer.getDisplayLanguage(),
+        this.#abortController
+      );
 
       // If a newer queryLayers call has aborted this one, discard stale results
       if (signal.aborted) return;

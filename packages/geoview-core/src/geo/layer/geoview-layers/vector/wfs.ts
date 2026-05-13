@@ -624,9 +624,6 @@ export class WFS extends AbstractGeoViewVector {
       // Set it
       layerConfig.setOutfields(outfields);
     }
-
-    // Set the name field to the first attribute by default if no nameField is specified already
-    layerConfig.initNameField(outfields?.[0]?.name);
   }
 
   /**

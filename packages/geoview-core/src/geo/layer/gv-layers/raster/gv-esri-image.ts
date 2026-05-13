@@ -16,6 +16,7 @@ import { logger } from '@/core/utils/logger';
 import { Fetch } from '@/core/utils/fetch-helper';
 import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import type {
+  TypeDisplayLanguage,
   TypeFeatureInfoEntry,
   TypeFeatureInfoResult,
   TypeFieldEntry,
@@ -238,28 +239,45 @@ export class GVEsriImage extends AbstractGVRaster {
   /**
    * Overrides the return of feature information at a given coordinate.
    *
-   * @param map - The Map where to get Feature Info At Coordinate from.
-   * @param location - The coordinate that will be used by the query.
-   * @param queryGeometry - Whether to include geometry in the query, default is true.
+   * @param map - The Map where to get Feature Info At Coordinate from
+   * @param location - The coordinate that will be used by the query
+   * @param queryGeometry - Whether to include geometry in the query, default is true
+   * @param language - The display language, used to guess the best name field for the 'nameField'
+   * @param abortController - Optional {@link AbortController} to cancel the operation
    * @returns A promise that resolves with the feature info result
    */
-  protected override getFeatureInfoAtCoordinate(map: OLMap, location: Coordinate, queryGeometry = true): Promise<TypeFeatureInfoResult> {
+  protected override getFeatureInfoAtCoordinate(
+    map: OLMap,
+    location: Coordinate,
+    queryGeometry = true,
+    language: TypeDisplayLanguage,
+    abortController?: AbortController
+  ): Promise<TypeFeatureInfoResult> {
     // Transform coordinate from map projection to lntlat
     const projCoordinate = Projection.transformToLonLat(location, map.getView().getProjection());
 
     // Redirect to getFeatureInfoAtLonLat
-    return this.getFeatureInfoAtLonLat(map, projCoordinate, queryGeometry);
+    return this.getFeatureInfoAtLonLat(map, projCoordinate, queryGeometry, language, abortController);
   }
 
   /**
    * Overrides the return of feature information at the provided long lat coordinate.
    *
-   * @param map - The Map where to get Feature Info At LonLat from.
-   * @param lonlat - The coordinate that will be used by the query.
-   * @param queryGeometry - Optional, whether to include geometry in the query, default is true.
+   * @param map - The Map where to get Feature Info At LonLat from
+   * @param lonlat - The coordinate that will be used by the query
+   * @param queryGeometry - Whether to include geometry in the query, default is true
+   * @param language - The display language, used to guess the best name field if `nameField` is not provided
+   * @param abortController - Optional {@link AbortController} to cancel the operation
    * @returns A promise that resolves with the feature info result
    */
-  protected override async getFeatureInfoAtLonLat(map: OLMap, lonlat: Coordinate, queryGeometry = true): Promise<TypeFeatureInfoResult> {
+  protected override async getFeatureInfoAtLonLat(
+    map: OLMap,
+    lonlat: Coordinate,
+    queryGeometry = true,
+    language: TypeDisplayLanguage,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    abortController?: AbortController
+  ): Promise<TypeFeatureInfoResult> {
     const featureInfoResult: TypeFeatureInfoResult = { results: [] };
 
     // If invisible or not queryable, return empty result
@@ -373,6 +391,7 @@ export class GVEsriImage extends AbstractGVRaster {
     featureInfoResult.results = this.formatFeatureInfoResult(
       [feature],
       layerConfig,
+      language,
       layerConfig.getServiceDateFormat(),
       layerConfig.getServiceDateTimezone(),
       layerConfig.getServiceDateTemporalMode()
@@ -395,6 +414,7 @@ export class GVEsriImage extends AbstractGVRaster {
   protected override formatFeatureInfoResult(
     features: Feature[],
     layerConfig: EsriImageLayerEntryConfig,
+    language: TypeDisplayLanguage,
     serviceDateFormat: string | undefined,
     serviceDateIANA: string | undefined,
     serviceDateTemporalMode: TemporalMode | undefined
@@ -408,7 +428,14 @@ export class GVEsriImage extends AbstractGVRaster {
     }));
 
     // Call parent to get base formatting
-    const baseResults = super.formatFeatureInfoResult(features, layerConfig, serviceDateFormat, serviceDateIANA, serviceDateTemporalMode);
+    const baseResults = super.formatFeatureInfoResult(
+      features,
+      layerConfig,
+      language,
+      serviceDateFormat,
+      serviceDateIANA,
+      serviceDateTemporalMode
+    );
 
     // Get legend data for RGBA extraction and icon assignment
     const legend = this.getLegend();
