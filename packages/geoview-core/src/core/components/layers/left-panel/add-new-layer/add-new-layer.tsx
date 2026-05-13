@@ -27,9 +27,15 @@ import { UtilAddLayer } from '@/core/components/layers/left-panel/add-new-layer/
 import { AddLayerTree } from '@/core/components/layers/left-panel/add-new-layer/add-layer-tree';
 import { ShapefileReader } from '@/api/config/reader/shapefile-reader';
 import { GeoPackageReader } from '@/api/config/reader/geopackage-reader';
+import type { GeoViewGeoChartConfig } from '@/api/config/reader/uuid-config-reader';
 import type { GeoViewLayerAddedResult } from '@/core/controllers/layer-creator-controller';
 import type { GeoViewError } from '@/core/exceptions/geoview-exceptions';
-import { useLayerController, useLayerCreatorController, useUIController } from '@/core/controllers/use-controllers';
+import {
+  useGeoChartControllerIfExists,
+  useLayerController,
+  useLayerCreatorController,
+  useUIController,
+} from '@/core/controllers/use-controllers';
 
 const sxClasses = {
   buttonGroup: {
@@ -291,6 +297,7 @@ export function AddNewLayer(): JSX.Element {
   const [stepButtonEnabled, setStepButtonEnabled] = useState<boolean>(false);
   const [abortController, setAbortController] = useState<AbortController>(new AbortController());
   const [isGeoCore, setIsGeoCore] = useState<boolean>(false);
+  const [geochartsToAdd, setGeochartsToAdd] = useState<Record<string, GeoViewGeoChartConfig> | undefined>();
   const isSingle = !isMultiple;
 
   // Ref
@@ -304,6 +311,7 @@ export function AddNewLayer(): JSX.Element {
   const language = useStoreAppDisplayLanguage();
   const shellContainer = useStoreAppShellContainer();
   const uiController = useUIController();
+  const geoChartController = useGeoChartControllerIfExists();
   const layerController = useLayerController();
   const layerCreatorController = useLayerCreatorController();
 
@@ -420,7 +428,7 @@ export function AddNewLayer(): JSX.Element {
     const populateLayerList = async (curlayerType: TypeInitialGeoviewLayerType): Promise<boolean> => {
       try {
         // Initialize a temporary GeoviewLayer config depending on the layer type.
-        const geoviewLayerConfig = await ConfigApi.createInitConfigFromType(
+        const configFromType = await ConfigApi.createInitConfigFromType(
           curlayerType,
           generateId(18),
           layerName,
@@ -430,6 +438,12 @@ export function AddNewLayer(): JSX.Element {
           mapId,
           abortController.signal
         );
+
+        // Get the config info from the created config
+        const geoviewLayerConfig = configFromType.configInfo;
+
+        // Keep in state the geocharts to load if the user goes through all steps
+        setGeochartsToAdd(configFromType.geocoreInfo?.geocharts);
 
         // Capture if this is a GeoCore layer before changing the type
         if (curlayerType === 'geoCore') {
@@ -588,6 +602,14 @@ export function AddNewLayer(): JSX.Element {
 
       logger.logDebug('newGeoViewLayer to add', configObj[0]);
 
+      // If GeoChart plugin is active, add pending GeoCharts before adding the layer.
+      if (geoChartController && geochartsToAdd) {
+        Object.entries(geochartsToAdd).forEach(([layerPath, geochartConfig]): void => {
+          geoChartController.addChart(layerPath, geochartConfig);
+          uiController.showTabButton('geochart');
+        });
+      }
+
       // Add the layer through the controller
       const addedLayer: GeoViewLayerAddedResult = layerCreatorController.addGeoviewLayer(
         configObj[0] as TypeGeoviewLayerConfig,
@@ -668,6 +690,7 @@ export function AddNewLayer(): JSX.Element {
     setLayerTree(undefined);
     setLayerIdsToAdd([]);
     setIsGeoCore(false);
+    setGeochartsToAdd(undefined);
 
     setStepButtonEnabled(true);
   };
@@ -731,6 +754,7 @@ export function AddNewLayer(): JSX.Element {
     setLayerName(fileName.split('/').pop()?.split('.')[0] || fileName.split('.')[0]);
     setLayerIdsToAdd([]);
     setIsGeoCore(false);
+    setGeochartsToAdd(undefined);
     setStepButtonEnabled(true);
   };
 
@@ -745,6 +769,7 @@ export function AddNewLayer(): JSX.Element {
     setLayerName(url.split('/').pop()?.split('.')[0] || url.split('.')[0]);
     setLayerIdsToAdd([]);
     setIsGeoCore(false);
+    setGeochartsToAdd(undefined);
   };
 
   // #endregion
