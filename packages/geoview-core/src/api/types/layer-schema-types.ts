@@ -1127,6 +1127,8 @@ export interface TypeMetadataEsriDynamicLayer {
 
   fields: TypeLayerMetadataFields[];
 
+  parentLayer?: TypeMetadataEsriLayerSummary;
+
   drawingInfo?: TypeLayerMetadataEsriDrawingInfo;
 
   timeInfo?: TimeDimensionESRI;
@@ -1187,6 +1189,8 @@ export interface TypeMetadataEsriFeatureLayer {
   types?: unknown[];
 
   templates?: unknown;
+
+  parentLayer?: TypeMetadataEsriLayerSummary;
 
   drawingInfo?: TypeLayerMetadataEsriDrawingInfo;
 
