@@ -45,7 +45,10 @@ export class GVWMS extends AbstractGVRaster {
   /** The max feature count returned by the GetFeatureInfo */
   static readonly DEFAULT_MAX_FEATURE_COUNT: number = 100;
 
-  /** The default Get Feature Info tolerance to use for QGIS Server services which are more picky by default (really needs to be zoomed in to get results, by default) */
+  /**
+   * The default Get Feature Info tolerance to use for QGIS Server services which are more picky by default (really needs to be zoomed in to get results, by default).
+   * WMS needed a bigger tolerance to pick up more results during the spatial queries (to make it look more like the tolerance for other layer types)
+   */
   static readonly DEFAULT_GET_FEATURE_INFO_TOLERANCE: number = 20;
 
   /** The Get Feature Info feature count to use */
