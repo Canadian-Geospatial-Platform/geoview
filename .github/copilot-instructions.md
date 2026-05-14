@@ -741,6 +741,12 @@ When the same geocore UUID appears multiple times in a map config, `Config.preva
 
 **Critical rule:** A group with at least one loaded child is a **valid, loaded** group. The previous behavior (setting parent to `error` on any error child) caused groups with valid sub-layers to show as error/missing in the legend, even though their valid children were rendering on the map.
 
+**UI handling of error sublayers** — When a group has error children, the UI must handle them consistently across three places:
+
+1. **Toggle-all visibility** (`handleToggleAllVisibility` in `layer-details.tsx`): Skip children with `layerStatus === LAYER_STATUS.ERROR` — they have no valid GV layer on the map, so toggling them is meaningless and would cause errors.
+2. **"All visible" state check** (`utilAllChildrenVisible` in `layer-state.ts`): Treat error children as "don't care" in `Array.every()` — return `true` for error children so they don't prevent the toggle-all switch from reflecting the state of the remaining valid children.
+3. **Individual sublayer UI** (`Sublayer` component in `layer-details.tsx`): Disable the checkbox and force it unchecked for error layers. Style the label with grey/italic to visually indicate the broken state.
+
 **`#processListOfLayerEntryConfig` behavior with error children:**
 
 - CASE 2 (multiple entries): Error entries return `undefined` and are skipped. Valid entries are processed and added to the group. The group is always returned (even if empty — empty groups get added to the parent OL tree).

@@ -188,6 +188,7 @@
     "errorUrlUnreachable": "L'URL n'est pas accessible.",
     "errorUrlHttps": "Seules les URL HTTPS sont prises en charge.",
     "errorUrlInvalidUUID": "Le format UUID n'est pas valide.",
+    "errorUrlDuplicateUUID": "Cette couche (UUID) est déjà chargée sur la carte.",
     "errorNotLoaded": "Une erreur est survenue avec la couche '{{layerName}}'.",
     "errorImageLoad": "Une erreur est survenue avec l'image source pour la couche '{{layerName}}'.",
     "errorImageLoadSizeLimitExceededWidth": "L'image demandée pour la couche '{{layerName}}' dépasse la taille maximale en largeur autorisée par le serveur ({{requestedWidth}}px > {{maxWidth}}px).",

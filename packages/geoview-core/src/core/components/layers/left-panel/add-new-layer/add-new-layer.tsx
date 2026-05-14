@@ -784,6 +784,12 @@ export function AddNewLayer(): JSX.Element {
       const validateUrl = async (): Promise<void> => {
         // Allow blob URLs (local files) and GeoCore UUIDs without validation
         if (layerURL.startsWith('blob') || isValidUUID(layerURL.trim())) {
+          // Check if this UUID is already loaded on the map
+          if (isValidUUID(layerURL.trim()) && layerController.getGeoviewLayerIds().includes(layerURL.trim())) {
+            setStepButtonEnabled(false);
+            uiController.addMessage('error', 'layers.errorUrlDuplicateUUID', {}, false);
+            return;
+          }
           setStepButtonEnabled(true);
           return;
         }
