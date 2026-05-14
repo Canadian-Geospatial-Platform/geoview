@@ -12,7 +12,6 @@ import { Crosshair } from '@/core/components/crosshair/crosshair';
 import { OverviewMap } from '@/core/components/overview-map/overview-map';
 import { ClickMarker } from '@/core/components/click-marker/click-marker';
 import { HoverTooltip } from '@/core/components/hover-tooltip/hover-tooltip';
-import { MapStatusIndicators } from '@/core/components/map/status-indicator/status-indicator';
 
 import type { MapViewer } from '@/geo/map/map-viewer';
 
@@ -131,7 +130,6 @@ export function Map(props: MapProps): JSX.Element {
           {northArrow && <NorthArrow />}
           <NorthPoleFlag />
           <Crosshair mapTargetElement={mapElement.current!} />
-          <MapStatusIndicators />
           <ClickMarker />
           <HoverTooltip />
           {deviceSizeMedUp && overviewMap && viewer.map && <OverviewMap i18n={viewer.getI18nInstance()} />}

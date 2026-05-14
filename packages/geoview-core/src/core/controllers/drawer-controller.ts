@@ -74,7 +74,6 @@ import { formatArea, formatLength, generateId } from '@/core/utils/utilities';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { getStoreAppDisplayLanguage } from '@/core/stores/states/app-state';
 import { logger } from '@/core/utils/logger';
-import { removeStoreMapStatusIndicator, setStoreMapStatusIndicator } from '../stores';
 
 /**
  * Controller responsible for drawer interactions, keyboard shortcuts, and
@@ -1434,11 +1433,6 @@ export class DrawerController extends AbstractMapViewerController {
 
     this.#hookShortcutsHandler();
     this.#shortcutsEnabled = true;
-
-    setStoreMapStatusIndicator(this.getMapId(), DrawerController.SHORTCUTS_INDICATOR_ID, {
-      message: 'drawer.shortcutsEnabled',
-      type: 'info',
-    });
   }
 
   /**
@@ -1455,7 +1449,6 @@ export class DrawerController extends AbstractMapViewerController {
     }
 
     this.#shortcutsEnabled = false;
-    removeStoreMapStatusIndicator(this.getMapId(), DrawerController.SHORTCUTS_INDICATOR_ID);
   }
 
   /**
