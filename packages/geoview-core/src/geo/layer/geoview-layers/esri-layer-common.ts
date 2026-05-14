@@ -443,9 +443,13 @@ export class EsriUtilities {
     const hasFields = !!fields?.length;
     const isGroupLayer = layerMetadataEsriDynamicLayer.type === 'Group Layer';
     const isMetadataGroup = layerConfig.getIsMetadataLayerGroup();
+    const isAnnotationSubLayer =
+      (layerConfig instanceof EsriDynamicLayerEntryConfig || layerConfig instanceof EsriFeatureLayerEntryConfig) &&
+      'type' in layerMetadata &&
+      layerMetadata.type === 'Annotation SubLayer';
 
     // Initialize the queryable source
-    layerConfig.initQueryableSource(queryable && hasFields && !isGroupLayer && !isMetadataGroup);
+    layerConfig.initQueryableSource(queryable && hasFields && !isGroupLayer && !isMetadataGroup && !isAnnotationSubLayer);
 
     // Initialize the outfields
     // dynamic group layer doesn't have fields definition
