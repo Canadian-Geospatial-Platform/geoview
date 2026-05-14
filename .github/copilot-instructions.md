@@ -732,12 +732,12 @@ When the same geocore UUID appears multiple times in a map config, `Config.preva
 
 **Parent status propagation** — `#updateLayerStatusParentRec` in `config-base-class.ts` determines a parent group's status from its children:
 
-| Sibling states              | Parent status | Reason                                    |
-| --------------------------- | ------------- | ----------------------------------------- |
-| Any sibling is `loading`    | `loading`     | Still processing                          |
-| ALL siblings are `loaded`   | `loaded`      | Complete success                          |
+| Sibling states              | Parent status | Reason                                     |
+| --------------------------- | ------------- | ------------------------------------------ |
+| Any sibling is `loading`    | `loading`     | Still processing                           |
+| ALL siblings are `loaded`   | `loaded`      | Complete success                           |
 | Mix of `loaded` and `error` | `loaded`      | Partial success — at least one child works |
-| ALL siblings are `error`    | `error`       | Complete failure                          |
+| ALL siblings are `error`    | `error`       | Complete failure                           |
 
 **Critical rule:** A group with at least one loaded child is a **valid, loaded** group. The previous behavior (setting parent to `error` on any error child) caused groups with valid sub-layers to show as error/missing in the legend, even though their valid children were rendering on the map.
 
