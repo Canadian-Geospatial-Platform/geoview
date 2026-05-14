@@ -16,12 +16,12 @@ import { AllFeatureInfoLayerSet } from '@/geo/layer/layer-sets/all-feature-info-
 import { HoverFeatureInfoLayerSet } from '@/geo/layer/layer-sets/hover-feature-info-layer-set';
 import { LegendsLayerSet } from '@/geo/layer/layer-sets/legends-layer-set';
 import type { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
-import type {
-  MapPointerMoveDelegate,
-  MapPointerMoveEvent,
-  MapSingleClickDelegate,
-  MapSingleClickEvent,
+import {
   MapViewer,
+  type MapPointerMoveDelegate,
+  type MapPointerMoveEvent,
+  type MapSingleClickDelegate,
+  type MapSingleClickEvent,
 } from '@/geo/map/map-viewer';
 import { FeatureInfoLayerSet } from '@/geo/layer/layer-sets/feature-info-layer-set';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
@@ -36,7 +36,6 @@ import {
   getStoreLayerOrderedLayerIndexByPath,
   setStoreLegendLayersDirectly,
 } from '@/core/stores/states/layer-state';
-import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
@@ -300,16 +299,28 @@ export class LayerSetController extends AbstractMapViewerController {
     // TO.DOCONT: as far as react is concerned, it's the same array object.
     // TO.DOCONT: UPDATE: Recently the stores have been fixed so that children are now a new array when updated. Refactoring this should be a bit more straightforward.
 
+    const currentMapResolution = this.getMapViewer().getView().getResolution();
+    const currentMapZoom = this.getMapViewer().getView().getZoom();
+    const calculatedMapResolution =
+      currentMapResolution ??
+      this.getMapViewer()
+        .getView()
+        .getResolutionForZoom(currentMapZoom ?? 0);
     const layerPathNodes = layerPath.split('/');
 
-    const setLayerControls = (layerConfig: ConfigBaseClass, isChild = false, layer?: AbstractBaseGVLayer): TypeLayerControls => {
+    const setLayerControls = (layerConfig: ConfigBaseClass, isChild = false): TypeLayerControls => {
       const removeDefault = isChild ? getStoreMapConfigGlobalSettings(this.getMapId())?.canRemoveSublayers !== false : true;
-
-      // Check if the layer has a minZoom or maxZoom defined, so we know if it needs the visible scale button.
-      const visibleScale: boolean = Number.isFinite(layer?.getMinZoom()) || Number.isFinite(layer?.getMaxZoom());
 
       // Get the initial settings
       const initialSettings = layerConfig.getInitialSettings();
+
+      // Show zoom-to-visible-scale control whenever the layer has any scale or zoom range constraint.
+      // Do not rely only on layer min/max zoom because constraints can be provided as minScale/maxScale.
+      const visibleScale: boolean =
+        layerConfig.getMinScale() !== undefined ||
+        layerConfig.getMaxScale() !== undefined ||
+        initialSettings?.minZoom !== undefined ||
+        initialSettings?.maxZoom !== undefined;
 
       // Get the layer controls using default values when needed
       return {
@@ -412,7 +423,7 @@ export class LayerSetController extends AbstractMapViewerController {
         // Not a group
         const layerConfigCasted = layerConfig as AbstractBaseLayerEntryConfig;
 
-        const controls: TypeLayerControls = setLayerControls(layerConfig, currentLevel > 2, layer);
+        const controls: TypeLayerControls = setLayerControls(layerConfig, currentLevel > 2);
 
         // Get the schema tag
         const schemaTag = legendSchemaTag ?? layerConfig.getSchemaTag();
@@ -421,6 +432,11 @@ export class LayerSetController extends AbstractMapViewerController {
         // TODO: TEST - Attempt to set the visible state to false by default (it'd make more sense?) and see if it works...
         // TO.DOCONT: When attempted, it wasn't working for the Hydro - Scale WMS group layers of group layers and the 'Show all' toggle.
         const visible = layer?.getVisible() ?? layerConfigCasted.getInitialSettings()?.states?.visible ?? true;
+
+        // Get the effective visibility scales
+        const effectiveScales = MapViewer.computeEffectiveLayerScales(this.getMapViewer(), layerConfig);
+        const { maxScale, minScale } = effectiveScales;
+        const calculatedMapScale = this.getMapViewer().getMapScaleFromZoom(this.getMapViewer().getView().getZoom() ?? 0);
 
         const legendLayerEntry: TypeLegendLayer = {
           url: layerConfig.getMetadataAccessPath(),
@@ -442,7 +458,9 @@ export class LayerSetController extends AbstractMapViewerController {
           hoverable: layerConfig.getInitialSettings()?.states?.hoverable, // default: true
           queryable: layerConfig.getInitialSettings()?.states?.queryable, // default: true
           visible,
-          inVisibleRange: layer?.inVisibleRange(this.getMapViewer().getView().getZoom() ?? 0) ?? true,
+          inVisibleRange: layer?.isInVisibleRange(calculatedMapResolution, calculatedMapScale, effectiveScales) ?? true,
+          maxScale: maxScale,
+          minScale: minScale,
           legendCollapsed: layerConfig.getInitialSettings()?.states?.legendCollapsed ?? false, // default: false
           children: [] as TypeLegendLayer[],
           items: getStoreLayerItems(this.getMapId(), layerConfig.layerPath) ?? [],

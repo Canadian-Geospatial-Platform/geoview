@@ -952,30 +952,34 @@ export class LayerController extends AbstractMapViewerController {
    */
   updateLayerInVisibleRange(gvLayer: AbstractBaseGVLayer): void {
     // Get the layer config
-    const layerConfig = gvLayer.getLayerConfig();
+    const mapViewer = this.getMapViewer();
+    const view = mapViewer.getView();
+    const effectiveScales = MapViewer.computeEffectiveLayerScales(mapViewer, gvLayer.getLayerConfig());
 
-    // Set the final maxZoom and minZoom values
-    // Skip the GVGroupLayers since we don't want to prevent the children from loading if they aren't initially
-    // in visible range. Inheritance has already been passed in the config and the group layer visibility will
-    // be handled in the map-viewer's handleMapZoomEnd by checking the children visibility
-    if ((layerConfig.getInitialSettings()?.maxZoom || layerConfig.getMaxScale()) && !(gvLayer instanceof GVGroupLayer)) {
-      // Calculate the map zoom for the corresponding max scale
-      const scaleZoomLevel = this.getMapViewer().getMapZoomFromScale(layerConfig.getMaxScale()) ?? Infinity;
+    // Set OL rendering limits via resolution (avoids zoom-level discretization).
+    // Skip GVGroupLayers — their children already carry their own limits, and locking the
+    // group zoom/resolution would prevent children from loading when initially out of range.
+    if (!(gvLayer instanceof GVGroupLayer)) {
+      // Compute effective scales from the layer config, converting zoom-based limits to scale as needed
+      const { maxScale, minScale } = effectiveScales;
 
-      const maxZoom = Math.min(layerConfig.getInitialSettings()?.maxZoom ?? Infinity, scaleZoomLevel);
-      gvLayer.setMaxZoom(maxZoom);
+      // maxScale → OL minResolution: layer hidden when too zoomed in (resolution too small)
+      const minResolution = maxScale ? mapViewer.getMapResolutionFromScale(maxScale) : undefined;
+      if (minResolution) gvLayer.setMinResolution(minResolution);
+
+      // minScale → OL maxResolution: layer hidden when too zoomed out (resolution too large)
+      const maxResolution = minScale ? mapViewer.getMapResolutionFromScale(minScale) : undefined;
+      if (maxResolution) gvLayer.setMaxResolution(maxResolution);
     }
 
-    if ((layerConfig.getInitialSettings()?.minZoom || layerConfig.getMinScale()) && !(gvLayer instanceof GVGroupLayer)) {
-      // Calculate the map zoom for the corresponding min scale
-      const scaleZoomLevel = this.getMapViewer().getMapZoomFromScale(layerConfig.getMinScale()) ?? -Infinity;
+    // Determine the UI in-visible-range state from the OL resolution thresholds set above.
+    // Using resolution directly matches OL rendering behavior and covers both scale-sourced
+    // and zoom-sourced limits without any conversion.
+    const currentResolution = view.getResolution() ?? view.getResolutionForZoom(view.getZoom() ?? 0);
+    const currentScale = (view.getZoom() ?? undefined) !== undefined ? mapViewer.getMapScaleFromZoom(view.getZoom()!) : undefined;
 
-      const minZoom = Math.max(layerConfig.getInitialSettings()?.minZoom ?? -Infinity, scaleZoomLevel);
-      gvLayer.setMinZoom(minZoom);
-    }
-
-    const zoom = this.getMapViewer().getView().getZoom()!;
-    const inVisibleRange = gvLayer.inVisibleRange(zoom);
+    // Check if the layer falls in visible resolution range
+    const inVisibleRange = currentResolution ? gvLayer.isInVisibleRange(currentResolution, currentScale, effectiveScales) : true;
 
     // Redirect
     this.setLayerInVisibleRange(gvLayer.getLayerPath(), inVisibleRange);
@@ -1623,35 +1627,55 @@ export class LayerController extends AbstractMapViewerController {
   /**
    * Zooms to layer visible scale.
    *
+   * Animates the view to a resolution that brings the layer within its visible range.
+   * Uses resolution directly instead of converting through zoom level to avoid discretization.
+   *
    * @param layerPath - Path of layer to zoom to
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
    */
   zoomToLayerVisibleScale(layerPath: string): void {
-    const view = this.getMapViewer().getView();
+    const mapViewer = this.getMapViewer();
+    const view = mapViewer.getView();
     const mapZoom = view.getZoom();
+    const currentScale = mapZoom !== undefined ? mapViewer.getMapScaleFromZoom(mapZoom) : undefined;
     const geoviewLayer = this.getGeoviewLayer(layerPath);
-    const layerMaxZoom = geoviewLayer.getMaxZoom();
-    const layerMinZoom = geoviewLayer.getMinZoom();
 
-    // Set the right zoom (Infinity will act as a no change in zoom level)
-    let layerZoom = Infinity;
-    if (layerMinZoom !== -Infinity && layerMinZoom >= mapZoom!) layerZoom = layerMinZoom + 0.25;
-    else if (layerMaxZoom !== Infinity && layerMaxZoom <= mapZoom!) layerZoom = layerMaxZoom - 0.25;
+    // Compute effective scales from the layer config, converting zoom-based limits to scale as needed
+    const { maxScaleZoomAt, minScaleZoomAt } = MapViewer.computeEffectiveLayerScales(mapViewer, geoviewLayer.getLayerConfig());
 
-    // Change view to go to proper zoom centered in the middle of layer extent
-    // If there is no layerExtent or if the zoom needs to zoom out, the center will be undefined and not use
-    // Check if the map center is already in the layer extent and if so, do not center
+    // Set the target scale that brings the current view inside the visible range.
+    // minScale is the zoomed-out limit (larger denominator), maxScale is the zoomed-in limit (smaller denominator).
+    let targetScale: number | undefined;
+    if (currentScale && maxScaleZoomAt && currentScale < maxScaleZoomAt) {
+      // Too zoomed in, zoom out to the maxScale boundary.
+      targetScale = maxScaleZoomAt;
+    } else if (currentScale && minScaleZoomAt && currentScale > minScaleZoomAt) {
+      // Too zoomed out, zoom in to the minScale boundary.
+      targetScale = minScaleZoomAt;
+    }
+
+    // Convert target scale directly to resolution (more direct than scale → zoom → resolution).
+    const targetResolution = targetScale ? mapViewer.getMapResolutionFromScale(targetScale) : undefined;
+    if (targetResolution === undefined) return;
+
+    // Animate view to the target resolution centered on the layer extent if applicable.
+    // If there is no layerExtent or if the zoom needs to zoom out, the center will be undefined and not change.
+    // Check if the map center is already in the layer extent and if so, do not recenter.
     geoviewLayer
       .getBounds(this.getMapViewer().getProjection(), MapViewer.DEFAULT_STOPS)
       .then((layerExtent) => {
         const centerExtent =
-          layerExtent && layerMinZoom > mapZoom! && !GeoUtilities.isPointInExtent(view.getCenter()!, layerExtent)
+          layerExtent &&
+          currentScale &&
+          targetScale &&
+          targetScale < currentScale &&
+          !GeoUtilities.isPointInExtent(view.getCenter()!, layerExtent)
             ? [(layerExtent[2] + layerExtent[0]) / 2, (layerExtent[1] + layerExtent[3]) / 2]
             : undefined;
 
         view.animate({
           center: centerExtent,
-          zoom: layerZoom,
+          resolution: targetResolution,
           duration: OL_ZOOM_DURATION,
         });
       })

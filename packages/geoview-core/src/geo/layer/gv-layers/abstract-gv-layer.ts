@@ -723,17 +723,6 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   }
 
   /**
-   * Gets the in visible range value.
-   *
-   * @param currentZoom - Optional. The map current zoom
-   * @returns True if the layer is in visible range
-   */
-  getInVisibleRange(currentZoom: number | undefined): boolean {
-    if (!currentZoom) return false;
-    return currentZoom > this.getMinZoom() && currentZoom <= this.getMaxZoom();
-  }
-
-  /**
    * Indicates if the layer is currently queryable.
    *
    * @returns The currently queryable flag.

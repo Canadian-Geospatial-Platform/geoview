@@ -103,6 +103,7 @@ import { UIDomain } from '@/core/domains/ui-domain';
 import { LayerDomain } from '@/core/domains/layer-domain';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { FeatureHighlight } from './feature-highlight';
+import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 
 /**
  * Class used to manage created maps.
@@ -130,6 +131,9 @@ export class MapViewer {
 
   /** Default inches per meter used by OpenLayers */
   static readonly DEFAULT_INCHES_PER_METER = 39.3700787;
+
+  /** Buffer applied to effective scale calculations to account for visibility thresholds */
+  static readonly EFFECTIVE_SCALE_VISIBILITY_BUFFER = 0.1;
 
   /** Map features configuration properties */
   mapFeaturesConfig: TypeMapFeaturesConfig;
@@ -971,7 +975,7 @@ export class MapViewer {
    * Converts a zoom level to a map scale.
    *
    * @param zoom - The desired zoom (e.g. 50000 for 1:50,000)
-   * @returns The closest scale for the given zoom number, or undefined if meters per unit is unavailable
+   * @returns The closest scale for the given zoom number, rounded to the nearest unit, or undefined if meters per unit is unavailable
    */
   getMapScaleFromZoom(zoom: number): number | undefined {
     const projection = this.getProjection();
@@ -983,7 +987,10 @@ export class MapViewer {
 
     // Calculate scale from resolution
     // Scale = Resolution * metersPerUnit * inchesPerMeter * DPI
-    return resolution * mpu * MapViewer.DEFAULT_INCHES_PER_METER * MapViewer.DEFAULT_DPI;
+    const scale = resolution * mpu * MapViewer.DEFAULT_INCHES_PER_METER * MapViewer.DEFAULT_DPI;
+
+    // Round the scale to the nearest unit
+    return Math.round(scale);
   }
 
   /**
@@ -1610,6 +1617,56 @@ export class MapViewer {
   }
 
   /**
+   * Computes the effective minimum and maximum scales for a layer from its configuration and initial settings.
+   *
+   * Combines scales from configuration and initial settings zoom levels, selecting the most restrictive value.
+   *
+   * @param mapViewer - The map viewer used for zoom-to-scale conversions
+   * @param layerConfig - The layer configuration to compute scales from
+   * @returns Object with effective scale thresholds and buffered visibility limits
+   */
+  static computeEffectiveLayerScales(mapViewer: MapViewer, layerConfig: ConfigBaseClass): EffectiveLayerScales {
+    const initialSettings = layerConfig.getInitialSettings();
+
+    // Zoom-in limit (maxScale: smaller denominator, e.g. 1:50 000)
+    // Most restrictive = largest value (requires being less zoomed-in to be visible)
+    const maxScaleFromConfig = layerConfig.getMaxScale();
+    const maxScaleFromInitialSettingsZoom =
+      initialSettings?.maxZoom !== undefined ? mapViewer.getMapScaleFromZoom(initialSettings.maxZoom) : undefined;
+    const effectiveMaxScaleCandidates = [maxScaleFromConfig, maxScaleFromInitialSettingsZoom].filter(
+      (scale): scale is number => scale !== undefined
+    );
+    const effectiveMaxScale = effectiveMaxScaleCandidates.length ? Math.max(...effectiveMaxScaleCandidates) : undefined;
+
+    // Zoom-out limit (minScale: larger denominator, e.g. 1:1 000 000)
+    // Most restrictive = smallest value (restricts how far out the user can zoom)
+    const minScaleFromConfig = layerConfig.getMinScale();
+    const minScaleFromInitialSettingsZoom =
+      initialSettings?.minZoom !== undefined ? mapViewer.getMapScaleFromZoom(initialSettings.minZoom) : undefined;
+    const effectiveMinScaleCandidates = [minScaleFromConfig, minScaleFromInitialSettingsZoom].filter(
+      (scale): scale is number => scale !== undefined
+    );
+    const effectiveMinScale = effectiveMinScaleCandidates.length ? Math.min(...effectiveMinScaleCandidates) : undefined;
+
+    // Round the effective scales
+    const roundedMaxScale = effectiveMaxScale ? Math.round(effectiveMaxScale) : undefined;
+    const roundedMinScale = effectiveMinScale ? Math.round(effectiveMinScale) : undefined;
+
+    // Calculate the max/min scale tolerances for which the layer should be considered non-visible, because we can't guarantee the service will actually return information or not (too close to limit)
+    const maxScaleTolerance = roundedMaxScale ? Math.round(roundedMaxScale * (1 + MapViewer.EFFECTIVE_SCALE_VISIBILITY_BUFFER)) : undefined;
+    const minScaleTolerance = roundedMinScale ? Math.round(roundedMinScale * (1 - MapViewer.EFFECTIVE_SCALE_VISIBILITY_BUFFER)) : undefined;
+
+    return {
+      maxScale: roundedMaxScale,
+      maxScaleTolerance,
+      maxScaleZoomAt: maxScaleTolerance, // Same as the tolerance, adjust this to add an additional offset if necessary
+      minScale: roundedMinScale,
+      minScaleTolerance,
+      minScaleZoomAt: minScaleTolerance, // Same as the tolerance, adjust this to add an additional offset if necessary
+    };
+  }
+
+  /**
    * Gets if north pole is visible. This is not a perfect solution and is more a work around.
    *
    * @returns A promise that resolves with true if visible, false otherwise
@@ -2002,7 +2059,7 @@ export class MapViewer {
     try {
       // Read the zoom value
       const zoom = this.getView().getZoom();
-      if (!zoom) return;
+      if (zoom === undefined || zoom === null || Number.isNaN(zoom)) return;
 
       // Save to the store
       setStoreMapZoom(this.mapId, zoom);
@@ -2010,14 +2067,20 @@ export class MapViewer {
       // Get all layers
       const allLayers = this.controllers.layerController.getGeoviewLayers();
 
-      // Get the inVisibleRange property based on the layer's minZoom and maxZoom values
+      // Current map resolution used for resolution-based visibility checks.
+      // Using resolution directly matches OL rendering behavior (OL uses minResolution/maxResolution
+      // thresholds set in updateLayerInVisibleRange), avoiding scale conversion artifacts.
+      const currentResolution = this.getView().getResolution() ?? this.getView().getResolutionForZoom(this.getView().getZoom() ?? 0);
+      const currentScale = this.getMapScaleFromZoom(zoom);
+
+      // Get the inVisibleRange property by checking each layer's OL resolution thresholds.
       allLayers.forEach((layer) => {
         const layerPath = layer.getLayerPath();
-        let inVisibleRange = layer.inVisibleRange(zoom);
+        const effectiveScales = MapViewer.computeEffectiveLayerScales(this, layer.getLayerConfig());
+        let inVisibleRange = currentResolution ? layer.isInVisibleRange(currentResolution, currentScale, effectiveScales) : true;
 
-        // Group layer maxZoom and minZoom are never set so that the sub layers can load
-        // This means that the "inVisibleRange" method will always return "true".
-        // To get around this, the inVisibleRange for groups is set based on the sub layer visibility
+        // Group layer min/max resolution are never set so that sub layers can load independently.
+        // For groups, derive in-visible-range from whether any leaf child is currently visible.
         if (layer instanceof GVGroupLayer) {
           const childLayers = allLayers.filter((childLayer) => {
             const childPath = childLayer.getLayerPath();
@@ -2025,7 +2088,12 @@ export class MapViewer {
           });
 
           // Group is in visible range if any child is visible
-          inVisibleRange = childLayers.some((childLayer) => childLayer.inVisibleRange(zoom));
+          inVisibleRange = currentResolution
+            ? childLayers.some((childLayer) => {
+                const childEffectiveScales = MapViewer.computeEffectiveLayerScales(this, childLayer.getLayerConfig());
+                return childLayer.isInVisibleRange(currentResolution, currentScale, childEffectiveScales);
+              })
+            : childLayers.length > 0;
         }
 
         // Save to the store
@@ -2717,7 +2785,7 @@ export class MapViewer {
   }
 
   /**
-   * Registers a map projection change event callback.
+   * Registers a map projection changed event callback.
    *
    * @param callback - The callback to be executed whenever the event is emitted
    * @returns The callback delegate that was registered
@@ -2987,4 +3055,17 @@ export type SimulatedMapClick = {
   promiseQuery: Promise<void>;
   /** Promise resolving when the query of the map click is complete and the UI has been updated */
   promiseQueryBatched: Promise<void>;
+};
+
+/**
+ * Type defining the effective scales of a layer, which are the ones that are actually applied on the map and can differ
+ * from the configured ones if the layer is outside of its original configured scales or if the map is outside of them.
+ */
+export type EffectiveLayerScales = {
+  maxScale?: number;
+  maxScaleTolerance?: number;
+  maxScaleZoomAt?: number;
+  minScale?: number;
+  minScaleTolerance?: number;
+  minScaleZoomAt?: number;
 };
