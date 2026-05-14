@@ -2403,9 +2403,10 @@ export class LayerController extends AbstractMapViewerController {
       // Get the parent layer config, if any
       const parentLayerConfig = layerConfig.getParentLayerConfig();
 
-      // If the map index of a parent layer path has been set and it is a valid UUID, the ordered layer entry is a placeholder
-      // registered while the geocore layer info was fetched
-      if (getStoreLayerOrderedLayerIndexByPath(this.getMapId(), parentLayerPath) !== -1 && isValidUUID(parentLayerPath)) {
+      // If the map index of a parent layer path has been set and it is a valid UUID (or a suffixed UUID like uuid:suffix
+      // for duplicate geocore layers), the ordered layer entry is a placeholder registered while the geocore layer info was fetched
+      const parentLayerPathBase = parentLayerPath.includes(':') ? parentLayerPath.split(':')[0] : parentLayerPath;
+      if (getStoreLayerOrderedLayerIndexByPath(this.getMapId(), parentLayerPath) !== -1 && isValidUUID(parentLayerPathBase)) {
         // Replace the placeholder ordered layer paths
         this.replaceOrderedLayerPaths(layerConfig, parentLayerPath);
       } else if (parentLayerConfig) {

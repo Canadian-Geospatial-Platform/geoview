@@ -704,6 +704,24 @@ items.forEach((item) => {
 - This keeps the map viewer initialization path alive so the basemap and UI still render with the remaining valid layers.
 - Treat this as the expected fix pattern for bad root layer types: **report-and-skip**, not fail-fast.
 
+### Duplicate Geocore UUID Handling & `orderedLayers`
+
+When the same geocore UUID appears multiple times in a map config, `Config.prevalidateGeoviewLayersConfig()` appends a `:generateId(8)` suffix to the duplicate's `geoviewLayerId` (e.g., `ccc75c12-...:eb637201`). This suffix must propagate correctly through the entire layer lifecycle:
+
+**Suffix propagation chain:**
+
+1. **`prevalidateGeoviewLayersConfig`** (config.ts) — Detects duplicate geocore `geoviewLayerId`s and appends `:suffix` to duplicates. Only modifies geocore entries; non-geocore duplicates are filtered out by `#deleteDuplicateAndMultipleUuidGeoviewLayerConfig`.
+2. **`GeoCore.createLayerConfigFromUUID`** (geocore.ts) — Strips suffix via `uuid.split(':')[0]` for the API call, then restores it on the response: `response.layers[0].geoviewLayerId = uuid`. **Critical:** This only updates `geoviewLayerId` on the parent config — it does NOT update `layerPath` on sub-entries in `listOfLayerEntryConfig`.
+3. **`generateOrderedLayerPaths`** (abstract-map-viewer-controller.ts) — For single-entry JSON configs, must use `geoviewLayerConfig.geoviewLayerId` (which includes the suffix) as the base path, NOT `layerEntryConfig.layerPath` (which is stale and lacks the suffix). The multi-entry branch already correctly uses `geoviewLayerId`.
+4. **`#registerForOrderedLayerInfo`** (layer-controller.ts) — Detects geocore placeholders in `orderedLayers` by checking if the parent path is a valid UUID. Must handle suffixed UUIDs by stripping the suffix before the `isValidUUID()` check (e.g., `parentLayerPath.split(':')[0]`), because `isValidUUID()` uses a strict regex that rejects `uuid:suffix` format.
+
+**`orderedLayers` population — two paths:**
+
+- **Initial load** (`loadListOfGeoviewLayer`): Generates paths via `generateOrderedLayerPaths` → pushes to local array → writes to store via `setMapOrderedLayersDirectly`. Must use `validGeoviewLayerConfigs` (filtered, no duplicates) not the original `mapConfigLayerEntries`. If `addGeoviewLayer` throws (e.g., `LayerCreatedTwiceError`), the catch block must remove the paths that were just pushed.
+- **Runtime add** (`addGeoviewLayerByGeoCoreUUID`): Adds a UUID placeholder to `orderedLayers`, then `#registerForOrderedLayerInfo` replaces it with actual layer paths when the layer registers.
+
+**Key pitfall:** `isValidUUID()` in `core/utils/utilities.ts` uses strict regex `/^[0-9a-f]{8}-...-[0-9a-f]{12}$/i` — it rejects suffixed UUIDs like `uuid:ab123456`. Any code using `isValidUUID` to detect geocore entries must account for the `:suffix` format.
+
 ### `initialSettings` Cascading (Parent → Child)
 
 The `ConfigValidation.#processLayerEntryConfig()` method handles how `initialSettings` propagate from parent layers to children. Understanding this cascading is critical for writing correct config tests.
