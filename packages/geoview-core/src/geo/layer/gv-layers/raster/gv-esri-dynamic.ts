@@ -129,8 +129,19 @@ export class GVEsriDynamic extends AbstractGVRaster {
     // Get the config
     const layerConfig = this.getLayerConfig();
 
+    // If layer is Annotation SubLayer, return generic Text icon
+    const layerType = layerConfig.getLayerMetadata()?.type;
+    if (layerType === 'Annotation Layer' || layerType === 'Annotation SubLayer') {
+      // Return a custom legend with a text icon
+      return {
+        type: CONST_LAYER_TYPES.ESRI_DYNAMIC,
+        legend: GVEsriDynamic.createTextAnnotationIcon(),
+        styleConfig: undefined,
+      };
+    }
+
     // If not a Raster Layer type
-    if (layerConfig.getLayerMetadata()?.type !== 'Raster Layer') {
+    if (layerType !== 'Raster Layer') {
       // Regular fetch
       return super.onFetchLegend();
     }
@@ -764,6 +775,38 @@ export class GVEsriDynamic extends AbstractGVRaster {
         formatError(error)
       );
     }
+  }
+
+  /**
+   * Creates a simple text annotation icon for Annotation SubLayers.
+   *
+   * @returns An HTML canvas element with a "T" icon
+   */
+  static createTextAnnotationIcon(): HTMLCanvasElement {
+    const canvas = document.createElement('canvas');
+    canvas.width = 20;
+    canvas.height = 20;
+
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      // Draw background
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, 20, 20);
+
+      // Draw border
+      ctx.strokeStyle = '#666666';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(0, 0, 20, 20);
+
+      // Draw "T" text
+      ctx.fillStyle = '#333333';
+      ctx.font = 'bold 14px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('T', 9, 11);
+    }
+
+    return canvas;
   }
 
   // #endregion STATIC METHODS
