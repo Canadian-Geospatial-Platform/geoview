@@ -837,7 +837,7 @@ export function AddNewLayer(): JSX.Element {
     }
     if (activeStep === 2 && layerIdsToAdd.length > 0) setStepButtonEnabled(true);
     if (activeStep === 2 && !layerIdsToAdd.length) setStepButtonEnabled(false);
-  }, [layerURL, activeStep, layerIdsToAdd, layerType, uiController]);
+  }, [layerURL, activeStep, layerIdsToAdd, layerType, uiController, layerController]);
 
   /**
    * Manages input focus when the active step changes.
