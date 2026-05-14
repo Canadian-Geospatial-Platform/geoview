@@ -847,13 +847,18 @@ export abstract class ConfigBaseClass {
       return;
     }
 
-    // Get all siblings which are in error or loaded
-    const siblingsInError = siblings.filter((lyrConfig) => lyrConfig.layerStatus === 'error' || lyrConfig.layerStatus === 'loaded');
+    // Get all siblings which are in error or loaded (terminal states)
+    const siblingsInTerminalState = siblings.filter((lyrConfig) => lyrConfig.layerStatus === 'error' || lyrConfig.layerStatus === 'loaded');
 
-    // If all siblings are in fact in error or loaded
-    if (siblings.length === siblingsInError.length) {
-      // Set the parent layer status as error
-      parentLayerConfig.setLayerStatusError();
+    // If all siblings are in a terminal state (error or loaded)
+    if (siblings.length === siblingsInTerminalState.length) {
+      // If at least one sibling is loaded, the parent is loaded (partial success — some children loaded, some errored)
+      if (siblingsInLoaded.length > 0) {
+        parentLayerConfig.setLayerStatusLoaded();
+      } else {
+        // All siblings are in error
+        parentLayerConfig.setLayerStatusError();
+      }
       // Continue with the parent
       ConfigBaseClass.#updateLayerStatusParentRec(parentLayerConfig);
     }

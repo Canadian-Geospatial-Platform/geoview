@@ -454,11 +454,15 @@ export abstract class AbstractGeoViewLayer {
     // Process list of layers and await
     const layer = await this.#processListOfLayerEntryConfig(this.listOfLayerEntryConfig);
 
-    // If any errors were compiled, throw about it
-    this.#throwAggregatedLayerLoadErrors();
-
-    // Keep the OL reference
+    // Keep the OL reference before checking errors, so valid layers can still be added to the map
     this.olRootLayer = layer?.getOLLayer();
+
+    // If errors were compiled, only throw when ALL layers failed (no valid OL root layer was created).
+    // When some sub-layers are valid, the errors are recorded on individual configs (status='error')
+    // and will be reported by the caller via getLayerLoadErrors().
+    if (!this.olRootLayer) {
+      this.#throwAggregatedLayerLoadErrors();
+    }
 
     // Log the time it took thus far
     logger.logMarkerCheck(logTimingsKey, 'to create the layers');
@@ -589,6 +593,15 @@ export abstract class AbstractGeoViewLayer {
 
     // Set the layer status to error
     layerConfig?.setLayerStatusError();
+  }
+
+  /**
+   * Gets the list of errors accumulated during layer loading.
+   *
+   * @returns A shallow copy of the layer load error list
+   */
+  getLayerLoadErrors(): Error[] {
+    return [...this.#layerLoadError];
   }
 
   /**

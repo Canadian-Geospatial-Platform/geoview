@@ -681,6 +681,13 @@ export class LayerCreatorController extends AbstractMapViewerController {
           // Add the layer on the map
           this.#addToMap(layerBeingAdded, geoviewLayerConfig);
 
+          // If there were partial errors (some sub-layers failed but valid ones were added), report them
+          const partialErrors = layerBeingAdded.getLayerLoadErrors();
+          if (partialErrors.length > 0) {
+            const error = partialErrors.length === 1 ? partialErrors[0] : new AggregateError(partialErrors);
+            this.showLayerError(error, geoviewLayerConfig.geoviewLayerId);
+          }
+
           // Resolve, done
           resolve();
 
