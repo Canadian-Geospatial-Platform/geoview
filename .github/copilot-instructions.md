@@ -722,6 +722,31 @@ When the same geocore UUID appears multiple times in a map config, `Config.preva
 
 **Key pitfall:** `isValidUUID()` in `core/utils/utilities.ts` uses strict regex `/^[0-9a-f]{8}-...-[0-9a-f]{12}$/i` — it rejects suffixed UUIDs like `uuid:ab123456`. Any code using `isValidUUID` to detect geocore entries must account for the `:suffix` format.
 
+### Partial Layer Loading & Group Status Propagation
+
+**Partial loading** — When a GeoView layer has multiple sub-layers and some fail validation (e.g., invalid layer IDs), the valid sub-layers must still load and render. In `createGeoViewLayers()` (`abstract-geoview-layers.ts`):
+
+1. `this.olRootLayer = layer?.getOLLayer()` must be set **before** checking for errors
+2. Only throw (`#throwAggregatedLayerLoadErrors()`) when `!this.olRootLayer` (ALL sub-layers failed)
+3. When some sub-layers are valid, errors are recorded on individual configs (`status='error'`) and reported by the caller via `getLayerLoadErrors()` + `showLayerError()`
+
+**Parent status propagation** — `#updateLayerStatusParentRec` in `config-base-class.ts` determines a parent group's status from its children:
+
+| Sibling states              | Parent status | Reason                                    |
+| --------------------------- | ------------- | ----------------------------------------- |
+| Any sibling is `loading`    | `loading`     | Still processing                          |
+| ALL siblings are `loaded`   | `loaded`      | Complete success                          |
+| Mix of `loaded` and `error` | `loaded`      | Partial success — at least one child works |
+| ALL siblings are `error`    | `error`       | Complete failure                          |
+
+**Critical rule:** A group with at least one loaded child is a **valid, loaded** group. The previous behavior (setting parent to `error` on any error child) caused groups with valid sub-layers to show as error/missing in the legend, even though their valid children were rendering on the map.
+
+**`#processListOfLayerEntryConfig` behavior with error children:**
+
+- CASE 2 (multiple entries): Error entries return `undefined` and are skipped. Valid entries are processed and added to the group. The group is always returned (even if empty — empty groups get added to the parent OL tree).
+- CASE 1 (single entry): If the entry is a group, it recurses into children. If all children fail, the recursive call returns an empty group (non-null in CASE 2), so `groupReturned` is truthy and the empty group is still added.
+- Groups in CASE 2 have **no** `layerStatus === 'error'` guard — they're always processed regardless of status. Only non-group entries skip on error.
+
 ### `initialSettings` Cascading (Parent → Child)
 
 The `ConfigValidation.#processLayerEntryConfig()` method handles how `initialSettings` propagate from parent layers to children. Understanding this cascading is critical for writing correct config tests.
