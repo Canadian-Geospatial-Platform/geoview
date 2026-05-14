@@ -11,6 +11,17 @@
     },
     "listOfGeoviewLayerConfig": [
       {
+        "geoviewLayerId": "annotation",
+        "geoviewLayerName": "Test Annotation",
+        "metadataAccessPath": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/FGP/TE/MapServer",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "1"
+          }
+        ]
+      },
+      {
         "geoviewLayerId": "historical-flood",
         "geoviewLayerName": "Historical Flood Events (HFE)",
         "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer",
