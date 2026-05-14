@@ -31,7 +31,7 @@ import type {
 import { DEFAULT_HIGHLIGHT_COLOR, MAP_CENTER, MAP_ZOOM_LEVEL } from '@/api/types/map-schema-types';
 import type { MapConfigLayerEntry } from '@/api/types/layer-schema-types';
 import { getGeoViewStore, useGeoViewStore } from '@/core/stores/stores-managers';
-import { type TypeSetStore, type TypeGetStore, useStableSelector } from '@/core/stores/geoview-store';
+import type { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import type { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import type { TypeHoverFeatureInfo } from './feature-info-state';
@@ -75,7 +75,6 @@ export interface IMapState {
   rotation: number;
   scale: TypeScaleInfo;
   size: Size;
-  statusIndicators: Record<string, StatusIndicator>;
   zoom: number;
 
   setDefaultConfigValues: (config: TypeMapFeaturesConfig) => void;
@@ -110,8 +109,6 @@ export interface IMapState {
     setHighlightedFeatures: (highlightedFeatures: TypeFeatureInfoEntry[]) => void;
     setClickMarker: (coord: number[] | undefined) => void;
     setHoverFeatureInfo: (hoverFeatureInfo: TypeHoverFeatureInfo) => void;
-    setStatusIndicator: (id: string, status: StatusIndicator) => void;
-    removeStatusIndicator: (id: string) => void;
   };
 }
 
@@ -164,7 +161,6 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       labelNumeric: '',
     },
     size: [0, 0] as Size,
-    statusIndicators: {},
     zoom: 0,
     /**
      * Initializes default stores section from config information when store receive configuration file
@@ -534,40 +530,6 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
           },
         });
       },
-
-      /**
-       * Sets the status indicator of the map.
-       *
-       * @param id - The identifier of the status indicator
-       * @param status - The status indicator
-       */
-      setStatusIndicator(id: string, status: StatusIndicator) {
-        set({
-          mapState: {
-            ...get().mapState,
-            statusIndicators: {
-              ...get().mapState.statusIndicators,
-              [id]: status,
-            },
-          },
-        });
-      },
-
-      /**
-       * Removes the status indicator of the map.
-       *
-       * @param id - The identifier of the status indicator
-       */
-      removeStatusIndicator(id: string) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { [id]: removed, ...rest } = get().mapState.statusIndicators;
-        set({
-          mapState: {
-            ...get().mapState,
-            statusIndicators: rest,
-          },
-        });
-      },
     },
   } as IMapState;
 
@@ -759,18 +721,6 @@ export const getStoreMapHighlightedFeatures = (mapId: string): TypeFeatureInfoEn
 export const getStoreMapHighlightedFeaturesByUid = (mapId: string, featureUid: string | undefined): TypeFeatureInfoEntry[] => {
   return getStoreMapState(mapId).highlightedFeatures.filter((feature) => feature.uid === featureUid);
 };
-
-/**
- * Gets all status indicators.
- *
- * @param mapId - The map identifier
- * @returns Record of status indicators keyed by ID
- */
-export const getStoreMapStatusIndicators = (mapId: string): Record<string, StatusIndicator> => getStoreMapState(mapId).statusIndicators;
-
-/** Hook that returns all status indicators */
-export const useStoreMapStatusIndicators = (): Record<string, StatusIndicator> =>
-  useStableSelector(useGeoViewStore(), (state) => state.mapState.statusIndicators);
 
 // #endregion STATE GETTERS & HOOKS
 
@@ -1045,27 +995,6 @@ export const setStoreMapFixNorth = (mapId: string, fixNorth: boolean): void => {
   getStoreMapState(mapId).actions.setFixNorth(fixNorth);
 };
 
-/**
- * Sets a status indicator (adds or updates).
- *
- * @param mapId - The map identifier
- * @param id - Unique identifier for the indicator
- * @param status - The status indicator information to set
- */
-export const setStoreMapStatusIndicator = (mapId: string, id: string, status: StatusIndicator): void => {
-  getStoreMapState(mapId).actions.setStatusIndicator(id, status);
-};
-
-/**
- * Removes a status indicator.
- *
- * @param mapId - The map identifier
- * @param id - The indicator ID to remove
- */
-export const removeStoreMapStatusIndicator = (mapId: string, id: string): void => {
-  getStoreMapState(mapId).actions.removeStatusIndicator(id);
-};
-
 // #endregion STATE ADAPTORS
 
 /** Represents the map scale display information for metric and imperial units. */
@@ -1093,16 +1022,4 @@ export interface TypeNorthArrow {
 
   /** Whether the north direction is currently visible on the map. */
   isNorthVisible: boolean;
-}
-
-/** Type of status indicator. */
-export type StatusIndicatorType = 'info' | 'warning' | 'error' | 'success';
-
-/** A single status indicator message. */
-export interface StatusIndicator {
-  /** The message text to display (translation key). */
-  message: string;
-
-  /** The type/severity of the indicator. */
-  type: StatusIndicatorType;
 }
