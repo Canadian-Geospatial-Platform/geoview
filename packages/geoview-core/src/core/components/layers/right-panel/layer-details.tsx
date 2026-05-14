@@ -101,7 +101,11 @@ const Sublayer = memo(function Sublayer({ layerPath }: SubLayerProps): JSX.Eleme
   const layerHidden = useStoreLayerIsHiddenOnMap(layerPath);
   const parentHidden = useStoreLayerIsParentHiddenOnMap(layerPath);
   const layerVisible = useStoreLayerVisible(layerPath);
+  const layerStatus = useStoreLayerStatus(layerPath);
   const layerController = useLayerController();
+
+  // A layer in error has no valid GV layer on the map — disable and uncheck its visibility control
+  const isError = layerStatus === LAYER_STATUS.ERROR;
 
   // Return the ui
   return (
@@ -111,9 +115,9 @@ const Sublayer = memo(function Sublayer({ layerPath }: SubLayerProps): JSX.Eleme
         control={
           <Checkbox
             color="primary"
-            checked={layerVisible === true}
+            checked={!isError && layerVisible === true}
             onChange={() => layerController.setOrToggleLayerVisibility(layerPath)}
-            disabled={parentHidden}
+            disabled={isError || parentHidden}
           />
         }
         label={
@@ -121,7 +125,7 @@ const Sublayer = memo(function Sublayer({ layerPath }: SubLayerProps): JSX.Eleme
             <LayerIcon layerPath={layerPath} />
             <Box
               component="span"
-              sx={{ ...sxClasses.tableIconLabel, ...(layerHidden && { color: theme.palette.grey[600], fontStyle: 'italic' }) }}
+              sx={{ ...sxClasses.tableIconLabel, ...((isError || layerHidden) && { color: theme.palette.grey[600], fontStyle: 'italic' }) }}
             >
               {layerName}
             </Box>
@@ -415,7 +419,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
   }, []);
 
   /**
-   * Sets visibility for all children of the layer.
+   * Sets visibility for all children of the layer, skipping children in error state.
    */
   const handleToggleAllVisibility = useCallback((): void => {
     // Use the non-reactive getter to walk the tree — only needed at click time
@@ -424,6 +428,8 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
 
     const setRecursive = (legendLayer: typeof layer, newVisibility: boolean): void => {
       legendLayer.children.forEach((child) => {
+        // Skip children in error state — they have no valid GV layer on the map
+        if (child.layerStatus === LAYER_STATUS.ERROR) return;
         if (newVisibility) {
           if (!visibleLayers.includes(child.layerPath)) layerController.setOrToggleLayerVisibility(child.layerPath, true);
         } else if (visibleLayers.includes(child.layerPath)) layerController.setOrToggleLayerVisibility(child.layerPath, false);
