@@ -117,8 +117,11 @@ export class AbstractMapViewerController extends AbstractController {
           addSubLayerPathToLayerOrder(layerEntryConfig, layerPath);
         });
       } else {
+        // GV: Use geoviewLayerId instead of layerEntryConfig.layerPath because for duplicate geocore layers,
+        // GV: geocore.ts updates geoviewLayerId with the ':suffix' but does not propagate it to the sub-entries'
+        // GV: layerPath property. Using geoviewLayerId ensures the suffix is included in the ordered layer path.
         const layerEntryConfig = geoviewLayerConfig.listOfLayerEntryConfig[0];
-        addSubLayerPathToLayerOrder(layerEntryConfig, layerEntryConfig.layerPath);
+        addSubLayerPathToLayerOrder(layerEntryConfig, geoviewLayerConfig.geoviewLayerId);
       }
     } else {
       addSubLayerPathToLayerOrder(geoviewLayerConfig as TypeLayerEntryConfig, geoviewLayerConfig.layerPath);

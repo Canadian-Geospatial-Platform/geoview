@@ -704,6 +704,55 @@ items.forEach((item) => {
 - This keeps the map viewer initialization path alive so the basemap and UI still render with the remaining valid layers.
 - Treat this as the expected fix pattern for bad root layer types: **report-and-skip**, not fail-fast.
 
+### Duplicate Geocore UUID Handling & `orderedLayers`
+
+When the same geocore UUID appears multiple times in a map config, `Config.prevalidateGeoviewLayersConfig()` appends a `:generateId(8)` suffix to the duplicate's `geoviewLayerId` (e.g., `ccc75c12-...:eb637201`). This suffix must propagate correctly through the entire layer lifecycle:
+
+**Suffix propagation chain:**
+
+1. **`prevalidateGeoviewLayersConfig`** (config.ts) — Detects duplicate geocore `geoviewLayerId`s and appends `:suffix` to duplicates. Only modifies geocore entries; non-geocore duplicates are filtered out by `#deleteDuplicateAndMultipleUuidGeoviewLayerConfig`.
+2. **`GeoCore.createLayerConfigFromUUID`** (geocore.ts) — Strips suffix via `uuid.split(':')[0]` for the API call, then restores it on the response: `response.layers[0].geoviewLayerId = uuid`. **Critical:** This only updates `geoviewLayerId` on the parent config — it does NOT update `layerPath` on sub-entries in `listOfLayerEntryConfig`.
+3. **`generateOrderedLayerPaths`** (abstract-map-viewer-controller.ts) — For single-entry JSON configs, must use `geoviewLayerConfig.geoviewLayerId` (which includes the suffix) as the base path, NOT `layerEntryConfig.layerPath` (which is stale and lacks the suffix). The multi-entry branch already correctly uses `geoviewLayerId`.
+4. **`#registerForOrderedLayerInfo`** (layer-controller.ts) — Detects geocore placeholders in `orderedLayers` by checking if the parent path is a valid UUID. Must handle suffixed UUIDs by stripping the suffix before the `isValidUUID()` check (e.g., `parentLayerPath.split(':')[0]`), because `isValidUUID()` uses a strict regex that rejects `uuid:suffix` format.
+
+**`orderedLayers` population — two paths:**
+
+- **Initial load** (`loadListOfGeoviewLayer`): Generates paths via `generateOrderedLayerPaths` → pushes to local array → writes to store via `setMapOrderedLayersDirectly`. Must use `validGeoviewLayerConfigs` (filtered, no duplicates) not the original `mapConfigLayerEntries`. If `addGeoviewLayer` throws (e.g., `LayerCreatedTwiceError`), the catch block must remove the paths that were just pushed.
+- **Runtime add** (`addGeoviewLayerByGeoCoreUUID`): Adds a UUID placeholder to `orderedLayers`, then `#registerForOrderedLayerInfo` replaces it with actual layer paths when the layer registers.
+
+**Key pitfall:** `isValidUUID()` in `core/utils/utilities.ts` uses strict regex `/^[0-9a-f]{8}-...-[0-9a-f]{12}$/i` — it rejects suffixed UUIDs like `uuid:ab123456`. Any code using `isValidUUID` to detect geocore entries must account for the `:suffix` format.
+
+### Partial Layer Loading & Group Status Propagation
+
+**Partial loading** — When a GeoView layer has multiple sub-layers and some fail validation (e.g., invalid layer IDs), the valid sub-layers must still load and render. In `createGeoViewLayers()` (`abstract-geoview-layers.ts`):
+
+1. `this.olRootLayer = layer?.getOLLayer()` must be set **before** checking for errors
+2. Only throw (`#throwAggregatedLayerLoadErrors()`) when `!this.olRootLayer` (ALL sub-layers failed)
+3. When some sub-layers are valid, errors are recorded on individual configs (`status='error'`) and reported by the caller via `getLayerLoadErrors()` + `showLayerError()`
+
+**Parent status propagation** — `#updateLayerStatusParentRec` in `config-base-class.ts` determines a parent group's status from its children:
+
+| Sibling states              | Parent status | Reason                                     |
+| --------------------------- | ------------- | ------------------------------------------ |
+| Any sibling is `loading`    | `loading`     | Still processing                           |
+| ALL siblings are `loaded`   | `loaded`      | Complete success                           |
+| Mix of `loaded` and `error` | `loaded`      | Partial success — at least one child works |
+| ALL siblings are `error`    | `error`       | Complete failure                           |
+
+**Critical rule:** A group with at least one loaded child is a **valid, loaded** group. The previous behavior (setting parent to `error` on any error child) caused groups with valid sub-layers to show as error/missing in the legend, even though their valid children were rendering on the map.
+
+**UI handling of error sublayers** — When a group has error children, the UI must handle them consistently across three places:
+
+1. **Toggle-all visibility** (`handleToggleAllVisibility` in `layer-details.tsx`): Skip children with `layerStatus === LAYER_STATUS.ERROR` — they have no valid GV layer on the map, so toggling them is meaningless and would cause errors.
+2. **"All visible" state check** (`utilAllChildrenVisible` in `layer-state.ts`): Treat error children as "don't care" in `Array.every()` — return `true` for error children so they don't prevent the toggle-all switch from reflecting the state of the remaining valid children.
+3. **Individual sublayer UI** (`Sublayer` component in `layer-details.tsx`): Disable the checkbox and force it unchecked for error layers. Style the label with grey/italic to visually indicate the broken state.
+
+**`#processListOfLayerEntryConfig` behavior with error children:**
+
+- CASE 2 (multiple entries): Error entries return `undefined` and are skipped. Valid entries are processed and added to the group. The group is always returned (even if empty — empty groups get added to the parent OL tree).
+- CASE 1 (single entry): If the entry is a group, it recurses into children. If all children fail, the recursive call returns an empty group (non-null in CASE 2), so `groupReturned` is truthy and the empty group is still added.
+- Groups in CASE 2 have **no** `layerStatus === 'error'` guard — they're always processed regardless of status. Only non-group entries skip on error.
+
 ### `initialSettings` Cascading (Parent → Child)
 
 The `ConfigValidation.#processLayerEntryConfig()` method handles how `initialSettings` propagate from parent layers to children. Understanding this cascading is critical for writing correct config tests.

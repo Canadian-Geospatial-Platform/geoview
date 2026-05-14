@@ -188,6 +188,7 @@
     "errorUrlUnreachable": "The URL is not reachable.",
     "errorUrlHttps": "Only HTTPS URLs are supported.",
     "errorUrlInvalidUUID": "The UUID format is not valid.",
+    "errorUrlDuplicateUUID": "This layer (UUID) is already loaded on the map.",
     "errorNotLoaded": "An error occurred with the layer '{{layerName}}'.",
     "errorImageLoad": "An error occured with source image for layer '{{layerName}}'.",
     "errorImageLoadSizeLimitExceededWidth": "The image requested for layer '{{layerName}}' exceeds the maximum width allowed by the server ({{requestedWidth}}px > {{maxWidth}}px).",

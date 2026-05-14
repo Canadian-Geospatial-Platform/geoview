@@ -120,12 +120,12 @@ export class LayerCreatorController extends AbstractMapViewerController {
   async loadListOfGeoviewLayer(mapConfigLayerEntries: MapConfigLayerEntry[]): Promise<void> {
     const validGeoviewLayerConfigs = this.#deleteDuplicateAndMultipleUuidGeoviewLayerConfig(mapConfigLayerEntries);
 
-    // Make sure to convert all map config layer entry into a GeoviewLayerConfig
+    // Make sure to convert all valid map config layer entry into a GeoviewLayerConfig (use filtered list to exclude duplicates)
     const promisesOfGeoviewLayers = LayerCreatorController.convertMapConfigsToGeoviewLayerConfig(
       this.getMapId(),
       this.getControllersRegistry().layerController.getGeoviewLayerIds(),
       this.getMapViewer().getDisplayLanguage(),
-      mapConfigLayerEntries,
+      validGeoviewLayerConfigs,
       (layerPath: string, geochartConfig: GeoViewGeoChartConfig) => {
         // Add the chart to the store
         this.getControllersRegistry().geoChartController?.addChart(layerPath, geochartConfig);
@@ -173,6 +173,15 @@ export class LayerCreatorController extends AbstractMapViewerController {
         } catch (error: unknown) {
           // An error happening here likely means a particular, trivial, config error.
           // The majority of typicaly errors happen in the addGeoviewLayer promise catcher, not here.
+
+          // Remove the layer paths that were added to orderedLayers before the error
+          if (geoviewLayerConfig.useAsBasemap !== true) {
+            const failedPaths = AbstractMapViewerController.generateOrderedLayerPaths(geoviewLayerConfig);
+            failedPaths.forEach((failedPath) => {
+              const idx = orderedLayers.indexOf(failedPath);
+              if (idx !== -1) orderedLayers.splice(idx, 1);
+            });
+          }
 
           // Show the error(s)
           this.showLayerError(error, geoviewLayerConfig.geoviewLayerId);
@@ -671,6 +680,13 @@ export class LayerCreatorController extends AbstractMapViewerController {
         .then(() => {
           // Add the layer on the map
           this.#addToMap(layerBeingAdded, geoviewLayerConfig);
+
+          // If there were partial errors (some sub-layers failed but valid ones were added), report them
+          const partialErrors = layerBeingAdded.getLayerLoadErrors();
+          if (partialErrors.length > 0) {
+            const error = partialErrors.length === 1 ? partialErrors[0] : new AggregateError(partialErrors);
+            this.showLayerError(error, geoviewLayerConfig.geoviewLayerId);
+          }
 
           // Resolve, done
           resolve();

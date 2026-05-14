@@ -224,7 +224,11 @@ const utilDeleteLayerFromLegendLayers = (legendLayers: TypeLegendLayer[], layerP
  */
 const utilAllChildrenVisible = (layer: TypeLegendLayer, visibleLayers: string[]): boolean => {
   return layer.children.every(
-    (child) => visibleLayers.includes(child.layerPath) && (!child.children?.length || utilAllChildrenVisible(child, visibleLayers))
+    // Error children have no valid GV layer on the map — treat them as "don't care" so they
+    // don't prevent the toggle-all switch from reflecting the state of the remaining valid children.
+    (child) =>
+      child.layerStatus === 'error' ||
+      (visibleLayers.includes(child.layerPath) && (!child.children?.length || utilAllChildrenVisible(child, visibleLayers)))
   );
 };
 
