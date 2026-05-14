@@ -853,6 +853,16 @@ export abstract class GeoUtilities {
       });
     }
 
+    // Also handle any non-vector layers (like annotation layers) that have iconImage but no iconList
+    if (items.length === 0 && icons.length > 0 && icons[0].iconImage) {
+      items.push({
+        geometryType: 'Point',
+        name: 'layer',
+        icon: icons[0].iconImage || null,
+        isVisible: true,
+      });
+    }
+
     // Return
     return items;
   }
@@ -867,7 +877,7 @@ export abstract class GeoUtilities {
    * @returns True if the payload is valid
    */
   static isVectorLegend(verifyIfLegend: TypeLegend, schemaTag: TypeGeoviewLayerType): verifyIfLegend is TypeVectorLegend {
-    return validVectorLayerLegendTypes.includes(schemaTag);
+    return validVectorLayerLegendTypes.includes(schemaTag) && verifyIfLegend.styleConfig !== undefined;
   }
 
   // #endregion LEGEND
