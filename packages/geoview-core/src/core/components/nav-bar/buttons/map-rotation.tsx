@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { createElement, useCallback, useEffect, useState } from 'react';
+import { createElement, useCallback, useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   useStoreMapRotation,
@@ -15,8 +15,9 @@ import { Projection } from '@/geo/utils/projection';
 import { useManageArrow } from '@/core/components/north-arrow/hooks/useManageArrow';
 import type { TypePanelProps } from '@/ui/panel/panel-types';
 import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
-import { IconButton } from '@/ui/icon-button/icon-button';
+import { Button } from '@/ui/button/button';
 import { useMapController } from '@/core/controllers/use-controllers';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 
 /**
  * Creates a map rotation button to open the rotation control panel.
@@ -28,6 +29,7 @@ export default function MapRotation(): JSX.Element {
   logger.logTraceRender('components/nav-bar/buttons/map-rotation');
 
   const { t } = useTranslation<string>();
+  const mapId = useStoreGeoViewMapId();
 
   // Get values from store
   const mapRotation = useStoreMapRotation();
@@ -52,6 +54,9 @@ export default function MapRotation(): JSX.Element {
   // Indicates whether the user is actively dragging the slider.
   const [isSliderDragging, setIsSliderDragging] = useState<boolean>(false);
 
+  // Add ref for slider
+  const sliderInputRef = useRef<HTMLInputElement>(null);
+
   // The rotation value currently displayed in the UI.
   const displayedRotationDegrees = isSliderDragging ? sliderRotationDegrees : rotationDegrees;
 
@@ -75,6 +80,8 @@ export default function MapRotation(): JSX.Element {
       setSliderRotationDegrees(rotationDegrees);
     }
   }, [rotationDegrees, isSliderDragging]);
+
+  // #region Handlers
 
   /**
    * Handles rotation slider change.
@@ -128,7 +135,14 @@ export default function MapRotation(): JSX.Element {
     setSliderRotationDegrees(0);
     setIsSliderDragging(false);
     mapController.rotate(0);
+
+    // Move focus to slider after reset
+    requestAnimationFrame(() => {
+      sliderInputRef.current?.focus();
+    });
   }, [mapController]);
+
+  // #endregion Handlers
 
   /**
    * Renders the rotation control panel content.
@@ -137,14 +151,20 @@ export default function MapRotation(): JSX.Element {
    */
   const renderRotationControl = (): ReactNode => {
     return (
-      <Box sx={{ width: '300px' }}>
+      <Box sx={{ width: '300px', padding: '0 20px' }}>
         <Box sx={{ display: 'flex', justifyContent: 'center', paddingTop: '10px' }}>
-          <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+          <Typography
+            variant="body2"
+            sx={{ fontWeight: 'bold' }}
+            role="status"
+            aria-live={isSliderDragging ? 'off' : 'polite'}
+            aria-atomic="true"
+          >
             {rotationLabel}
           </Typography>
         </Box>
         <Slider
-          value={displayedRotationDegrees}
+          value={sliderRotationDegrees}
           onChange={handleSliderChange}
           onChangeCommitted={handleSliderChangeCommitted}
           min={-180}
@@ -161,19 +181,23 @@ export default function MapRotation(): JSX.Element {
           valueLabelFormat={(value) => `${value}°`}
           disabled={isFixNorth}
           track={false}
+          slotProps={{
+            input: {
+              ref: sliderInputRef,
+            },
+          }}
         />
         <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
           <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-            <IconButton
-              id="rotation-reset"
-              aria-label={t('mapnav.rotation.reset')}
-              tooltipPlacement="right"
+            <Button
+              type="text"
+              id={`${mapId}-rotation-reset`}
               size="small"
               onClick={handleReset}
               disabled={displayedRotationDegrees === 0 || isFixNorth}
             >
               {t('mapnav.rotation.reset')}
-            </IconButton>
+            </Button>
             {showFixNorthSwitch && (
               <Switch size="small" onChange={handleFixNorth} label={t('mapctrl.rotation.fixedNorth') || ''} checked={isFixNorth} />
             )}

@@ -14,8 +14,9 @@ import { HexagonOutlined as HexagonOutlinedIcon } from '@mui/icons-material';
 import type { TypePanelProps } from '@/ui/panel/panel-types';
 import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 import { IconButton } from '@/ui/icon-button/icon-button';
-import { Box, Switch, ToggleButtonGroup, ToggleButton } from '@/ui';
+import { Box, Switch, ToggleButtonGroup, ToggleButton, Typography } from '@/ui';
 import { ShowChartIcon, DeleteIcon, StraightenIcon } from '@/ui/icons';
+import { visuallyHidden } from '@/ui/style/default';
 import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from '@/core/components/nav-bar/nav-bar-panel-button';
 import { formatLength, formatArea } from '@/core/utils/utilities';
@@ -85,6 +86,9 @@ export default function Measurement(): JSX.Element {
   const [drawInstance, setDrawInstance] = useState<Draw | null>(null);
   const [showSegmentLabels, setShowSegmentLabels] = useState<boolean>(true);
   const [measurementFeatures, setMeasurementFeatures] = useState<Feature<Geometry>[]>([]);
+  const [statusMessage, setStatusMessage] = useState<string>('');
+
+  // #region Handlers
 
   /**
    * Creates a style function that shows segment lengths.
@@ -260,18 +264,40 @@ export default function Measurement(): JSX.Element {
 
           // Store feature reference
           setMeasurementFeatures((prev) => [...prev, feature]);
+
+          // Announce measurement completion with actual values
+          if (geometry instanceof LineString) {
+            const length = GeoUtilities.getLength(geometry);
+            const distance = formatLength(length, displayLanguage);
+            setStatusMessage(t('measurement.status.completedLine', { distance }));
+          } else if (geometry instanceof Polygon) {
+            const perimeter = GeoUtilities.getLength(geometry);
+            const area = GeoUtilities.getArea(geometry);
+            const perimeterFormatted = formatLength(perimeter, displayLanguage);
+            const areaFormatted = formatArea(area, displayLanguage);
+            setStatusMessage(
+              t('measurement.status.completedArea', {
+                perimeter: perimeterFormatted,
+                area: areaFormatted,
+              })
+            );
+          }
         }
       });
 
       setDrawInstance(draw);
       setActiveMeasurement(type);
 
+      // Announce measurement mode started
+      const measurementType = type === 'line' ? t('measurement.line') : t('measurement.area');
+      setStatusMessage(t('measurement.status.started', { type: measurementType }));
+
       // Set focus to map for WCAG keyboard interaction
       if (mapElement) {
         mapElement.focus();
       }
     },
-    [drawInstance, mapElement, createSegmentStyle, mapController]
+    [drawInstance, mapElement, createSegmentStyle, mapController, displayLanguage, t]
   );
 
   /**
@@ -283,12 +309,17 @@ export default function Measurement(): JSX.Element {
       setDrawInstance(null);
     }
     setActiveMeasurement(null);
-  }, [drawInstance]);
+
+    // Announce measurement stopped
+    setStatusMessage(t('measurement.status.stopped'));
+  }, [drawInstance, t]);
 
   /**
    * Clears all measurements.
    */
   const clearMeasurements = useCallback((): void => {
+    const featureCount = measurementFeatures.length;
+
     // Clear stored feature references
     setMeasurementFeatures([]);
 
@@ -297,7 +328,12 @@ export default function Measurement(): JSX.Element {
 
     // Stop current drawing
     stopMeasurement();
-  }, [stopMeasurement, mapController]);
+
+    // Announce cleared with count
+    if (featureCount > 0) {
+      setStatusMessage(t('measurement.status.cleared', { count: featureCount }));
+    }
+  }, [stopMeasurement, mapController, measurementFeatures.length, t]);
 
   /**
    * Handles measurement mode toggle.
@@ -350,6 +386,8 @@ export default function Measurement(): JSX.Element {
     [startMeasurement]
   );
 
+  // #endregion Handlers
+
   /**
    * Cleans up measurement resources on unmount.
    */
@@ -380,7 +418,12 @@ export default function Measurement(): JSX.Element {
     const isMeasurementActive = activeMeasurement !== null;
 
     return (
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        {/* WCAG - Screen reader status announcements */}
+        <Typography role="status" aria-live="polite" aria-atomic="true" sx={visuallyHidden}>
+          {statusMessage}
+        </Typography>
+
         {/* On/Off Switch */}
         <Switch
           label={!isMeasurementActive ? t('general.enable') : t('general.disable')}
@@ -407,6 +450,9 @@ export default function Measurement(): JSX.Element {
             size="small"
             disabled={!isMeasurementActive}
             sx={{
+              '& .MuiToggleButton-root': {
+                gap: 6, // Adds 8px spacing between icon and text
+              },
               '& .MuiToggleButton-root.Mui-selected': {
                 backgroundColor: 'primary.main',
                 color: 'primary.contrastText',
@@ -432,8 +478,10 @@ export default function Measurement(): JSX.Element {
           id="button-clear-measurements"
           aria-label={t('measurement.clear')}
           onClick={clearMeasurements}
+          className="buttonOutline"
           disabled={measurementFeatures.length === 0}
           size="small"
+          sx={{ alignSelf: 'center' }}
         >
           <DeleteIcon fontSize="small" />
         </IconButton>
