@@ -1,6 +1,9 @@
 import { useEffect } from 'react';
+
 import { useTranslation } from 'react-i18next';
+
 import { useTheme } from '@mui/material/styles';
+
 import { IconButton, FullscreenIcon, FullscreenExitIcon } from '@/ui';
 import type { TypeHTMLElement } from '@/core/types/global-types';
 import { getSxClasses } from '@/core/components/nav-bar/nav-bar-style';
@@ -27,6 +30,8 @@ export default function Fullscreen(): JSX.Element {
   const isFullScreen = useStoreAppIsFullscreenActive();
   const uiController = useUIController();
 
+  // #region Handlers
+
   /**
    * Toggles between fullscreen and window mode.
    */
@@ -36,6 +41,8 @@ export default function Fullscreen(): JSX.Element {
       uiController.setFullScreen(!isFullScreen, element as TypeHTMLElement);
     }
   }
+
+  // #endregion Handlers
 
   /**
    * Registers fullscreen change listeners to detect ESC key exit.
@@ -66,8 +73,9 @@ export default function Fullscreen(): JSX.Element {
 
   return (
     <IconButton
-      id="fullscreen"
+      id={`${mapId}-button-fullscreen`}
       aria-label={t('mapnav.fullscreen')}
+      aria-pressed={isFullScreen}
       tooltipPlacement="left"
       onClick={handleSetFullscreen}
       sx={sxClasses.navButton}

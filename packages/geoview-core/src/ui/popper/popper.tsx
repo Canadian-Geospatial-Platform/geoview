@@ -1,21 +1,33 @@
-import type { ReactElement } from 'react';
+import type { ReactElement, AriaRole } from 'react';
 import { useEffect, useRef, useCallback } from 'react';
+
 import type { PopperProps } from '@mui/material';
 import { Popper as MaterialPopper, useTheme } from '@mui/material';
+
 import { animated } from '@react-spring/web';
+
 import { useFadeIn } from '@/core/utils/useSpringAnimations';
 import { logger } from '@/core/utils/logger';
 import { FocusTrap } from '@/ui';
 import { delay } from '@/core/utils/utilities';
 
 /**
- * Properties for the Popper component extending Material-UI's PopperProps
+ * Properties for the Popper component extending Material-UI's PopperProps.
  */
 interface PopperPropsExtend extends PopperProps {
+  /** Callback fired when the popper should close. */
   onClose?: () => void;
+  /** Custom keyboard event handler with key and callback parameters. */
   handleKeyDown?: (key: string, callbackFn: () => void) => void;
+  /** CSS selector for the element to focus when popper opens. */
   focusSelector?: string;
+  /** Whether to trap focus within the popper. */
   focusTrap?: boolean;
+  /** ARIA role for accessibility. */
+  role?: AriaRole;
+  /** ID of the element that labels the popper. */
+  'aria-labelledby'?: string;
+  /** The content to display in the popper. */
   children: ReactElement<Record<string, unknown>>;
 }
 
@@ -82,13 +94,25 @@ function PopperUI({ open, onClose, handleKeyDown, focusSelector, focusTrap = fal
 
   // Ref
   const popperRef = useRef<HTMLDivElement | null>(null);
-  const setPopperRef = useCallback((node: HTMLDivElement | null) => {
+
+  // #region Handlers
+
+  /**
+   * Sets the popper ref callback.
+   */
+  const setPopperRef = useCallback((node: HTMLDivElement | null): void => {
     popperRef.current = node;
   }, []);
 
+  // #endregion Handlers
+
   useEffect(() => {
     logger.logTraceUseEffect('UI.POPPER - handleKeyDown/onClose');
+    if (!open) return;
 
+    /**
+     * Handles keyboard events for the popper.
+     */
     const onKeyDown = (event: KeyboardEvent): void => {
       handleKeyDown?.(event.key, () => open && onClose?.());
     };
@@ -99,6 +123,9 @@ function PopperUI({ open, onClose, handleKeyDown, focusSelector, focusTrap = fal
     };
   }, [open, onClose, handleKeyDown]);
 
+  /**
+   * Manages focus when the popper opens.
+   */
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('UI.POPPER - handle focus management', open, focusSelector);
