@@ -27,6 +27,8 @@ export default function Fullscreen(): JSX.Element {
   const isFullScreen = useStoreAppIsFullscreenActive();
   const uiController = useUIController();
 
+  // #region Handlers
+
   /**
    * Toggles between fullscreen and window mode.
    */
@@ -36,6 +38,8 @@ export default function Fullscreen(): JSX.Element {
       uiController.setFullScreen(!isFullScreen, element as TypeHTMLElement);
     }
   }
+
+  // #endregion Handlers
 
   /**
    * Registers fullscreen change listeners to detect ESC key exit.
@@ -66,8 +70,9 @@ export default function Fullscreen(): JSX.Element {
 
   return (
     <IconButton
-      id="fullscreen"
+      id={`${mapId}-button-fullscreen`}
       aria-label={t('mapnav.fullscreen')}
+      aria-pressed={isFullScreen}
       tooltipPlacement="left"
       onClick={handleSetFullscreen}
       sx={sxClasses.navButton}

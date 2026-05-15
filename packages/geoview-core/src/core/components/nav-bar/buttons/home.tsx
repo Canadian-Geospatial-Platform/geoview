@@ -3,6 +3,7 @@ import { useTheme } from '@mui/material/styles';
 
 import { IconButton, HomeIcon } from '@/ui';
 import { getSxClasses } from '@/core/components/nav-bar/nav-bar-style';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 import { useMapController } from '@/core/controllers/use-controllers';
 
@@ -22,6 +23,9 @@ export default function Home(): JSX.Element {
 
   // Store
   const mapController = useMapController();
+  const mapId = useStoreGeoViewMapId();
+
+  // #region Handlers
 
   /**
    * Handles when the user clicks the home button.
@@ -33,8 +37,16 @@ export default function Home(): JSX.Element {
     });
   };
 
+  // #endregion
+
   return (
-    <IconButton id="home" aria-label={t('mapnav.home')} tooltipPlacement="left" onClick={handleZoom} sx={sxClasses.navButton}>
+    <IconButton
+      id={`${mapId}-button-home`}
+      aria-label={t('mapnav.home')}
+      tooltipPlacement="left"
+      onClick={handleZoom}
+      sx={sxClasses.navButton}
+    >
       <HomeIcon />
     </IconButton>
   );
