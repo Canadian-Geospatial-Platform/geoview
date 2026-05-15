@@ -6,7 +6,7 @@ interface FilterMapProps {
 /**
  * Renders a toggle switch to filter the map based on data table filters.
  *
- * @param props - FilterMap properties
+ * @param props - Properties defined in FilterMapProps interface
  * @returns The filter map toggle switch element
  */
 declare function FilterMap({ layerPath, isGlobalFilterOn }: FilterMapProps): JSX.Element;

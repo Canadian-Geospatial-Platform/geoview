@@ -1,9 +1,9 @@
 import type { GeoviewStoreType } from './geoview-store';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import type { TypeResultSetEntry } from '@/api/types/map-schema-types';
-import { type TypeFeatureInfoResultSetEntry, type TypeHoverResultSetEntry } from './store-interface-and-intial-values/feature-info-state';
-import type { TypeAllFeatureInfoResultSetEntry } from './store-interface-and-intial-values/data-table-state';
-import { type TypeGeochartResultSetEntry } from './store-interface-and-intial-values/geochart-state';
+import { type TypeFeatureInfoResultSetEntry, type TypeHoverResultSetEntry } from './states/feature-info-state';
+import type { TypeAllFeatureInfoResultSetEntry } from './states/data-table-state';
+import { type TypeGeochartResultSetEntry } from './states/geochart-state';
 export interface StoresManagerState {
     stores: Record<string, GeoviewStoreType>;
 }

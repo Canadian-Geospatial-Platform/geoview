@@ -1,5 +1,5 @@
 import type { MRT_TableInstance as MRTTableInstance, MRT_ColumnFiltersState as MRTColumnFiltersState } from 'material-react-table';
-import type { ColumnsType } from '@/core/components/data-table/data-table-types';
+import type { DataTableRow } from '@/core/components/data-table/data-table-types';
 import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 /** Properties for the useToolbarActionMessage hook. */
 interface UseSelectedRowMessageProps {
@@ -7,7 +7,7 @@ interface UseSelectedRowMessageProps {
         features?: TypeFeatureInfoEntry[] | null;
     };
     layerPath: string;
-    tableInstance: MRTTableInstance<ColumnsType>;
+    tableInstance: MRTTableInstance<DataTableRow> | null;
     columnFilters: MRTColumnFiltersState;
     globalFilter: string;
     showUnsymbolizedFeatures: boolean;

@@ -1,13 +1,13 @@
 export * from './geoview-store';
-export * from './store-interface-and-intial-values/app-state';
-export * from './store-interface-and-intial-values/data-table-state';
-export * from './store-interface-and-intial-values/drawer-state';
-export * from './store-interface-and-intial-values/feature-info-state';
-export * from './store-interface-and-intial-values/geochart-state';
-export * from './store-interface-and-intial-values/layer-state';
-export * from './store-interface-and-intial-values/map-state';
-export * from './store-interface-and-intial-values/swiper-state';
-export * from './store-interface-and-intial-values/time-slider-state';
-export * from './store-interface-and-intial-values/ui-state';
+export * from './states/app-state';
+export * from './states/data-table-state';
+export * from './states/drawer-state';
+export * from './states/feature-info-state';
+export * from './states/geochart-state';
+export * from './states/layer-state';
+export * from './states/map-state';
+export * from './states/swiper-state';
+export * from './states/time-slider-state';
+export * from './states/ui-state';
 export { getGeoViewStore } from './stores-managers';
 //# sourceMappingURL=index.d.ts.map

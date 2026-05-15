@@ -224,7 +224,7 @@ export declare const setStoreDataTableFilterDataToExtent: (mapId: string, filter
  */
 export declare const setStoreDataTableRowsFilteredRecord: (mapId: string, rows: number, layerPath: string) => void;
 /**
- * Adds or updates a table filter for a specific layer in the store.
+ * Sets a table filter for a specific layer in the store.
  *
  * Merges the provided filter with existing filters, overwriting
  * the entry for the given layer path.
@@ -233,7 +233,7 @@ export declare const setStoreDataTableRowsFilteredRecord: (mapId: string, rows: 
  * @param layerPath - The layer path to set the filter for
  * @param filter - The filter expression string
  */
-export declare const addOrUpdateStoreDataTableFilter: (mapId: string, layerPath: string, filter: string) => void;
+export declare const setStoreDataTableFilter: (mapId: string, layerPath: string, filter?: string) => void;
 /**
  * Propagates a feature info result set entry to the data table store.
  *

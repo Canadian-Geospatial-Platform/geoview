@@ -13,14 +13,13 @@ import type { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/ras
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import type { EventDelegateBase } from '@/api/events/event-helper';
-import type { TypeLayerStyleConfig, TypeFeatureInfoEntry, TypeLocation, QueryType, TypeStyleGeometry, TypeOutfieldsType, TypeOutfields, TypeLayerStyleSettings, TypeFeatureInfoResult, codedValueType, rangeDomainType } from '@/api/types/map-schema-types';
-import type { TypeLayerMetadataFields, TypeGeoviewLayerType } from '@/api/types/layer-schema-types';
+import type { TypeLayerStyleConfig, TypeFeatureInfoEntry, TypeLocation, QueryType, TypeStyleGeometry, TypeOutfieldsType, TypeOutfields, TypeLayerStyleSettings, TypeFeatureInfoResult, codedValueType, rangeDomainType, TypeDisplayLanguage, TypeFieldEntry } from '@/api/types/map-schema-types';
+import type { TypeLayerMetadataFields, TypeGeoviewLayerType, TypeLegend } from '@/api/types/layer-schema-types';
 import type { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import type { TypeLegendItem } from '@/core/components/layers/types';
-import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { AbstractBaseGVLayer, type LayerBaseDelegate, type LayerBaseEvent } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { SnackbarType } from '@/core/utils/notifications';
-import { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
+import { LayerFilters, type FilterCategory } from '@/geo/layer/gv-layers/layer-filters';
 import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 /**
  * Abstract Geoview Layer managing an OpenLayer layer.
@@ -31,6 +30,8 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     static readonly DEFAULT_HIT_TOLERANCE: number;
     /** The default loading period before we show a message to the user about a layer taking a long time to render on map */
     static readonly DEFAULT_LOADING_PERIOD: number;
+    /** Keywords used to identify name fields in the layer's outfields when none specified. */
+    static readonly NAME_FIELD_KEYWORDS: string[];
     /** Counts the number of times the loading happened. */
     loadingCounter: number;
     /** Marks the latest loading count for the layer. Useful to know when to put the layer loaded status back correctly with parallel processing happening. */
@@ -124,65 +125,77 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      *
      * @param map - The Map so that we can grab the resolution/projection we want to get features on
      * @param layerFilters - The layer filters to apply when querying the features
+     * @param language - The display language, used to guess the best name field if `nameField` is not provided
      * @param abortController - Optional {@link AbortController} to cancel the operation
      * @returns A promise that resolves with the feature info result
      * @throws {NotImplementedError} When the function isn't overridden by the children class
      */
-    protected getAllFeatureInfo(map: OLMap, layerFilters: LayerFilters, abortController?: AbortController): Promise<TypeFeatureInfoResult>;
+    protected getAllFeatureInfo(map: OLMap, layerFilters: LayerFilters, language: TypeDisplayLanguage, // Used if we have to guess the field name for the 'nameField'
+    abortController?: AbortController): Promise<TypeFeatureInfoResult>;
     /**
      * Overridable function to return of feature information at a given pixel location.
      *
      * @param map - The Map where to get Feature Info At Pixel from
      * @param location - The pixel coordinate that will be used by the query
      * @param queryGeometry - Whether to include geometry in the query, default is true
+     * @param language - The display language, used to guess the best name field if `nameField` is not provided
      * @param abortController - Optional {@link AbortController} to cancel the operation
      * @returns A promise that resolves with the feature info result
      */
-    protected getFeatureInfoAtPixel(map: OLMap, location: Pixel, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoResult>;
+    protected getFeatureInfoAtPixel(map: OLMap, location: Pixel, queryGeometry: boolean | undefined, language: TypeDisplayLanguage, // Used if we have to guess the field name for the 'nameField'
+    abortController?: AbortController | undefined): Promise<TypeFeatureInfoResult>;
     /**
      * Overridable function to return of feature information at a given coordinate.
      *
      * @param map - The Map where to get Feature Info At Coordinate from
      * @param location - The coordinate that will be used by the query
      * @param queryGeometry - Whether to include geometry in the query, default is true
+     * @param language - The display language, used to guess the best name field if `nameField` is not provided
      * @param abortController - Optional {@link AbortController} to cancel the operation
      * @returns A promise that resolves with the feature info result
      * @throws {NotImplementedError} When the function isn't overridden by the children class
      */
-    protected getFeatureInfoAtCoordinate(map: OLMap, location: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoResult>;
+    protected getFeatureInfoAtCoordinate(map: OLMap, location: Coordinate, queryGeometry: boolean | undefined, language: TypeDisplayLanguage, // Used if we have to guess the field name for the 'nameField'
+    abortController?: AbortController | undefined): Promise<TypeFeatureInfoResult>;
     /**
      * Overridable function to return of feature information at the provided long lat coordinate.
      *
      * @param map - The Map where to get Feature Info At LonLat from
      * @param lonlat - The coordinate that will be used by the query
      * @param queryGeometry - Whether to include geometry in the query, default is true
+     * @param language - The display language, used to guess the best name field if `nameField` is not provided
      * @param abortController - Optional {@link AbortController} to cancel the operation
      * @returns A promise that resolves with the feature info result
      * @throws {NotImplementedError} When the function isn't overridden by the children class
      */
-    protected getFeatureInfoAtLonLat(map: OLMap, lonlat: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoResult>;
+    protected getFeatureInfoAtLonLat(map: OLMap, lonlat: Coordinate, queryGeometry: boolean | undefined, language: TypeDisplayLanguage, // Used if we have to guess the field name for the 'nameField'
+    abortController?: AbortController | undefined): Promise<TypeFeatureInfoResult>;
     /**
      * Overridable function to return of feature information at the provided bounding box.
      *
      * @param map - The Map where to get Feature using BBox from
      * @param location - The bounding box that will be used by the query
      * @param queryGeometry - Whether to include geometry in the query, default is true
+     * @param language - The display language, used to guess the best name field if `nameField` is not provided
      * @param abortController - Optional {@link AbortController} to cancel the operation
      * @returns A promise that resolves with the feature info result
      * @throws {NotImplementedError} When the function isn't overridden by the children class
      */
-    protected getFeatureInfoUsingBBox(map: OLMap, location: Coordinate[], queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoResult>;
+    protected getFeatureInfoUsingBBox(map: OLMap, location: Coordinate[], queryGeometry: boolean | undefined, language: TypeDisplayLanguage, // Used if we have to guess the field name for the 'nameField'
+    abortController?: AbortController | undefined): Promise<TypeFeatureInfoResult>;
     /**
      * Overridable function to return of feature information at the provided polygon.
      *
      * @param map - The Map where to get Feature Info using Polygon from
      * @param location - The polygon that will be used by the query
      * @param queryGeometry - Whether to include geometry in the query, default is true
+     * @param language - The display language, used to guess the best name field if `nameField` is not provided
      * @param abortController - Optional {@link AbortController} to cancel the operation
      * @returns A promise that resolves with the feature info result
      * @throws {NotImplementedError} When the function isn't overridden by the children class
      */
-    protected getFeatureInfoUsingPolygon(map: OLMap, location: Coordinate[], queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoResult>;
+    protected getFeatureInfoUsingPolygon(map: OLMap, location: Coordinate[], queryGeometry: boolean | undefined, language: TypeDisplayLanguage, // Used if we have to guess the field name for the 'nameField'
+    abortController?: AbortController | undefined): Promise<TypeFeatureInfoResult>;
     /**
      * Overridable function set the style according to the fetched legend information.
      *
@@ -255,6 +268,7 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      * @param waitForRender - When `true`, waits for the next layer render to complete before resolving
      * @returns A promise that resolves after the visibility has been
      * updated and, if requested, the layer has finished rendering
+     * @throws {LayerStyleGeometryNotFoundError} When the geometry type of the item doesn't match any geometry type in the layer style configuration
      */
     setStyleItemVisibility(item: TypeLegendItem, visible: boolean, waitForRender: boolean): Promise<void>;
     /**
@@ -326,37 +340,35 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      */
     getLayerFilters(): LayerFilters;
     /**
-     * Sets the class filter on the layer, derived from the current style configuration.
-     *
-     * @param classFilter - Optional class filter expression to apply. Defaults to the filter derived from the current style.
-     */
-    setLayerFiltersClass(classFilter?: string | undefined): void;
-    /**
      * Sets the data filter on the layer.
      *
-     * @param dataFilter - Optional data filter expression to apply
+     * This function only updates the data filter query string inside the layer filters object.
+     * The active filter applied on the layer will update accordingly, however, the UI component elements themselves won't update.
+     *
+     * @param dataFilterQueryString - Optional data filter expression to apply
      */
-    setLayerFiltersData(dataFilter: string | undefined): void;
+    setLayerFiltersData(dataFilterQueryString: string | undefined): void;
     /**
      * Sets the time filter on the layer.
      *
-     * @param timeFilter - Optional time filter expression to apply
+     * This function only updates the time filter query string inside the layer filters object.
+     * The active filter applied on the layer will update accordingly, however, the UI component elements themselves won't update.
+     *
+     * @param timeFilterQueryString - Optional time filter expression to apply
      */
-    setLayerFiltersTime(timeFilter: string | undefined): void;
+    setLayerFiltersTime(timeFilterQueryString: string | undefined): void;
     /**
      * Applies a time filter on a date range.
      *
+     * This function only updates the time filter query string inside the layer filters object.
+     * The active filter applied on the layer will update accordingly, however, the UI component elements themselves won't update.
+     *
      * @param date1 - The start date
      * @param date2 - The end date
+     * @deprecated This method should be removed in favor of setLayerFiltersTime so that future enhancements regarding time filtering
+     * and UI synchronization can be made.
      */
     setLayerFiltersDate(date1: string, date2: string): void;
-    /**
-     * Sets the layer filters associated to the layer.
-     *
-     * @param layerFilters - The layer filters to apply
-     * @param refresh - Whether to trigger a layer re-render after setting filters
-     */
-    setLayerFilters(layerFilters: LayerFilters, refresh: boolean | undefined): void;
     /**
      * Returns feature information for the layer specified.
      *
@@ -364,10 +376,12 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      * @param queryType - The type of query to perform
      * @param location - A pixel, coordinate or polygon that will be used by the query
      * @param queryGeometry - Whether to include geometry in the query, default is true
+     * @param language - The display language, used to guess the best name field if `nameField` is not provided
      * @param abortController - Optional {@link AbortController} to cancel the operation
      * @returns A promise that resolves with the feature info result
      */
-    getFeatureInfo(map: OLMap, queryType: QueryType, location: TypeLocation, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoResult>;
+    getFeatureInfo(map: OLMap, queryType: QueryType, location: TypeLocation, queryGeometry: boolean | undefined, language: TypeDisplayLanguage, // Used if we have to guess the field name for the 'nameField'
+    abortController?: AbortController | undefined): Promise<TypeFeatureInfoResult>;
     /**
      * Queries the legend.
      *
@@ -428,12 +442,13 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      *
      * @param features - Array of features to format
      * @param layerConfig - Configuration of the associated layer
+     * @param language - The display language, used to guess the best name field if `nameField` is not provided
      * @param serviceDateFormat - Optional date format used by the service
      * @param serviceDateIANA - Optional IANA time zone identifier used by the service
      * @param serviceDateTemporalMode - Optional temporal mode for date handling
      * @returns An array of TypeFeatureInfoEntry objects
      */
-    protected formatFeatureInfoResult(features: Feature[], layerConfig: OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig | VectorLayerEntryConfig, serviceDateFormat: string | undefined, serviceDateIANA: string | undefined, serviceDateTemporalMode: TemporalMode | undefined): TypeFeatureInfoEntry[];
+    protected formatFeatureInfoResult(features: Feature[], layerConfig: OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig | VectorLayerEntryConfig, language: TypeDisplayLanguage, serviceDateFormat: string | undefined, serviceDateIANA: string | undefined, serviceDateTemporalMode: TemporalMode | undefined): TypeFeatureInfoEntry[];
     /**
      * Emits a layer-specific message event with localization support.
      *
@@ -450,7 +465,7 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      *   true
      * );
      */
-    protected emitMessage(messageKey: string, messageParams: unknown[] | undefined, messageType?: SnackbarType, notification?: boolean): void;
+    protected emitMessage(messageKey: string, messageParams: Record<string, unknown> | undefined, messageType?: SnackbarType, notification?: boolean): void;
     /**
      * Registers a legend querying event handler.
      *
@@ -621,6 +636,19 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      */
     protected static initOptionsWithInitialSettings(layerOptions: Options, layerConfig: AbstractBaseLayerEntryConfig): void;
     /**
+     * Finds the best field to use as a name field by searching for common name-like field patterns.
+     *
+     * Searches field names for predefined keywords (name, title, label) in priority order.
+     * Supports both outfields arrays and field info dictionaries keyed by field name.
+     * If no keyword match is found, returns the first available field name as a fallback.
+     *
+     * @param nameField - Optional provided name field to validate and use first
+     * @param outfields - Outfields array or field info dictionary to search
+     * @param lang - The display language used to resolve `_lang` placeholders in keyword patterns
+     * @returns The name of the best matching field, or undefined if no fields available
+     */
+    static findBestNameField(nameField: string | undefined, outfields?: TypeOutfields[] | Partial<Record<string, TypeFieldEntry>> | undefined, lang?: TypeDisplayLanguage): string | undefined;
+    /**
      * Creates a legend object based on a given GeoView layer type and style configuration.
      *
      * This method builds a legend representation by combining the provided style settings
@@ -722,7 +750,10 @@ export type LegendQueriedDelegate = EventDelegateBase<AbstractGVLayer, LegendQue
  * Define an event for the delegate
  */
 export interface LayerFilterAppliedEvent extends LayerBaseEvent {
+    /** The filter */
     filter: LayerFilters;
+    /** The filter category */
+    filterCategory: FilterCategory;
 }
 /**
  * Define a delegate for the event handler function signature
@@ -743,7 +774,7 @@ export type LayerErrorDelegate = EventDelegateBase<AbstractGVLayer, LayerErrorEv
  */
 export interface LayerMessageEvent extends LayerBaseEvent {
     messageKey: string;
-    messageParams: unknown[] | undefined;
+    messageParams: Record<string, unknown> | undefined;
     messageType: SnackbarType;
     notification: boolean;
 }

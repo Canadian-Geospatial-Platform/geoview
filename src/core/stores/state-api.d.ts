@@ -1,5 +1,5 @@
-import { type GeoChartStoreByLayerPath, type TypeGeochartResultSetEntry } from './store-interface-and-intial-values/geochart-state';
-import type { TimeSliderLayerSet } from './store-interface-and-intial-values/time-slider-state';
+import { type GeoChartStoreByLayerPath, type TypeGeochartResultSetEntry } from './states/geochart-state';
+import type { TimeSliderLayerSet } from './states/time-slider-state';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import type { LayerController } from '@/core/controllers/layer-controller';
 /**

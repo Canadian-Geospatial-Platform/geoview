@@ -8,7 +8,7 @@ import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
 import type { AbstractBaseGVLayer, LayerBaseEvent, LayerNameChangedEvent, LayerOpacityChangedEvent, LayerVisibleChangedEvent } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { GVGroupLayer, type LayerGroupChildrenUpdatedEvent } from '@/geo/layer/gv-layers/gv-group-layer';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
-import type { LayerErrorEvent, LayerHoverableChangedEvent, LayerItemVisibilityChangedEvent, LayerMessageEvent, LayerQueryableChangedEvent } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import type { LayerErrorEvent, LayerFilterAppliedEvent, LayerHoverableChangedEvent, LayerItemVisibilityChangedEvent, LayerMessageEvent, LayerQueryableChangedEvent } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { GVWMS, type ImageLoadRescueEvent, type WMSStyleChangedEvent } from '@/geo/layer/gv-layers/raster/gv-wms';
 import { GVEsriImage, type RasterFunctionChangedEvent, type MosaicRuleChangedEvent } from '@/geo/layer/gv-layers/raster/gv-esri-image';
@@ -441,6 +441,19 @@ export declare class LayerDomain {
      */
     offLayerItemVisibilityChanged(callback: DomainLayerItemVisibilityChangedDelegate | undefined): void;
     /**
+     * Registers a layer filter applied event handler.
+     *
+     * @param callback - The callback to be executed whenever the event is emitted
+     * @returns The callback registered, for chaining or unregistration purposes
+     */
+    onLayerFilterApplied(callback: DomainLayerFilterAppliedDelegate): DomainLayerFilterAppliedDelegate;
+    /**
+     * Unregisters a layer filter applied event handler.
+     *
+     * @param callback - The callback to stop being called whenever the event is emitted
+     */
+    offLayerFilterApplied(callback: DomainLayerFilterAppliedDelegate | undefined): void;
+    /**
      * Registers a layer WMS image load rescue event handler.
      *
      * @param callback - The callback to be executed whenever the event is emitted
@@ -613,6 +626,13 @@ export interface DomainLayerItemVisibilityChangedEvent extends DomainLayerBaseEv
 }
 /** Define a delegate for the layer item visibility changed event handler function signature. */
 export type DomainLayerItemVisibilityChangedDelegate = EventDelegateBase<LayerDomain, DomainLayerItemVisibilityChangedEvent, void>;
+/**
+ * Define an event for the delegate
+ */
+export interface DomainLayerFilterAppliedEvent extends DomainLayerBaseEvent<AbstractGVLayer, LayerFilterAppliedEvent> {
+}
+/** Define a delegate for the layer filter applied event handler function signature. */
+export type DomainLayerFilterAppliedDelegate = EventDelegateBase<LayerDomain, DomainLayerFilterAppliedEvent, void>;
 /**
  * Define an event for the delegate
  */

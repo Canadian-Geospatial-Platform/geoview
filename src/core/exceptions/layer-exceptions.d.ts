@@ -1,4 +1,5 @@
 import type { TypeGeoviewLayerType, TypeLayerEntryType } from '@/api/types/layer-schema-types';
+import type { TypeStyleGeometry } from '@/api/types/map-schema-types';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 /**
  * Error related to a specific GeoView layer, extending GeoViewError with the layer ID.
@@ -14,7 +15,7 @@ export declare class LayerError extends GeoViewError {
      * @param params - Optional localization parameters
      * @param options - Optional error options, including `cause`
      */
-    constructor(layerPathOrId: string, messageKey: string, params?: unknown[], options?: ErrorOptions);
+    constructor(layerPathOrId: string, messageKey: string, params?: Record<string, unknown>, options?: ErrorOptions);
 }
 /**
  * Error thrown when a specified layer cannot be found.
@@ -419,5 +420,13 @@ export declare class LayerFeatureParsingError extends LayerError {
      * @param cause - Optional underlying error that caused this exception
      */
     constructor(geoviewLayerId: string, layerName: string | undefined, cause?: Error);
+}
+/**
+ * Custom error class thrown when a style for a given geometry type cannot be found.
+ *
+ * This error is typically used when a style configuration is missing for a specific geometry type.
+ */
+export declare class LayerStyleGeometryNotFoundError extends LayerError {
+    constructor(layerName: string, geomType: TypeStyleGeometry);
 }
 //# sourceMappingURL=layer-exceptions.d.ts.map

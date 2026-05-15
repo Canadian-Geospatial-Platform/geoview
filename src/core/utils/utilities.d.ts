@@ -1,6 +1,6 @@
 import type { Root } from 'react-dom/client';
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
-import type { TypeGuideObject } from '@/core/stores/store-interface-and-intial-values/app-state';
+import type { TypeGuideObject } from '@/core/stores/states/app-state';
 import type { TypeHTMLElement } from '@/core/types/global-types';
 /** Result of a URL reachability ping check. */
 export type PingResult = {
@@ -116,22 +116,14 @@ export declare function shallowObjectEqual<T>(a: T, b: T): boolean;
  */
 export declare function shallowArrayEqual<T>(a: T[], b: T[]): boolean;
 /**
- * Take string like "My string is __param__" and replace parameters (__param__) from array of values.
- *
- * @param params - An array of parameters to replace, i.e. ['short']
- * @param message - The original message, i.e. "My string is __param__"
- * @returns Message with values replaced "My string is short"
- */
-export declare function replaceParams(params: unknown[], message: string): string;
-/**
- * Return proper language Geoview localized values from map i18n instance.
+ * Returns proper language GeoView localized values from map i18n instance.
  *
  * @param language - The language to get the message in
  * @param messageKey - The localize key to read the message from
- * @param params - Optional array of parameters to replace, i.e. ['short']
+ * @param params - Optional record of named parameters for i18next interpolation
  * @returns The translated message with values replaced
  */
-export declare function getLocalizedMessage(language: TypeDisplayLanguage, messageKey: string, params?: unknown[] | undefined): string;
+export declare function getLocalizedMessage(language: TypeDisplayLanguage, messageKey: string, params?: Record<string, unknown> | undefined): string;
 /**
  * Deep merge objects together. Latest object will overwrite value on previous one
  * if property exist.

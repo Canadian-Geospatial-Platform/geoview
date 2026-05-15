@@ -3,7 +3,7 @@ import type { TypeFeatureInfoResult } from '@/api/types/map-schema-types';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import type { LayerDomain } from '@/core/domains/layer-domain';
-import { type TypeFeatureInfoResultSet } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import { type TypeFeatureInfoResultSet } from '@/core/stores/states/feature-info-state';
 import { AllFeatureInfoLayerSet } from '@/geo/layer/layer-sets/all-feature-info-layer-set';
 import { HoverFeatureInfoLayerSet } from '@/geo/layer/layer-sets/hover-feature-info-layer-set';
 import { LegendsLayerSet } from '@/geo/layer/layer-sets/legends-layer-set';

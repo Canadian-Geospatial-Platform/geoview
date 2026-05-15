@@ -520,6 +520,7 @@ export declare class LayerController extends AbstractMapViewerController {
      * optional legend store updated, filters applied, and render completed if requested
      * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
      * @throws {LayerWrongTypeError} When the layer was of wrong type
+     * @throws {LayerStyleGeometryNotFoundError} When the geometry type of the item doesn't match any geometry type in the layer style configuration
      */
     setItemVisibility(layerPath: string, item: TypeLegendItem, visible: boolean, waitForRender: boolean): Promise<void>;
     /**

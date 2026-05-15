@@ -1,7 +1,7 @@
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
-import type { TypeNorthArrow, TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
+import type { TypeNorthArrow, TypeScaleInfo } from '@/core/stores/states/map-state';
 import type { TypeLegendLayer } from '@/core/components/layers/types';
-import { type TypeTimeSliderValues } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
+import { type TypeTimeSliderValues } from '@/core/stores/states/time-slider-state';
 import type { TemporalMode, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 /** Constants for export configuration. */
 export declare const EXPORT_CONSTANTS: {

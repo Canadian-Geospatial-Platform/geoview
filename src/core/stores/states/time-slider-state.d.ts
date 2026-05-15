@@ -240,14 +240,14 @@ export declare const setStoreTimeSliderFiltering: (mapId: string, layerPath: str
  */
 export declare const setStoreTimeSliderValues: (mapId: string, layerPath: string, values: number[]) => void;
 /**
- * Adds or updates a filter expression for a specific layer path in the time slider store.
+ * Sets a filter expression for a specific layer path in the time slider store.
  *
  * @param mapId - The map id.
  * @param layerPath - The layer path to set the filter for.
  * @param filter - The filter expression string.
  * @throws {PluginStateUninitializedError} When the TimeSlider plugin is uninitialized.
  */
-export declare const addOrUpdateStoreTimeSliderFilter: (mapId: string, layerPath: string, filter: string) => void;
+export declare const setStoreTimeSliderFilter: (mapId: string, layerPath: string, filter?: string) => void;
 /** A lookup of time-slider values keyed by layer path. */
 export type TimeSliderLayerSet = {
     [layerPath: string]: TypeTimeSliderValues;

@@ -2,8 +2,8 @@ import WebGLTile from 'ol/layer/WebGLTile';
 import type GeoTIFFSource from 'ol/source/GeoTIFF';
 import type { Extent } from 'ol/extent';
 import type { Projection as OLProjection } from 'ol/proj';
+import { type TypeLegend } from '@/api/types/layer-schema-types';
 import type { GeoTIFFLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/geotiff-layer-entry-config';
-import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { AbstractGVTile } from '@/geo/layer/gv-layers/tile/abstract-gv-tile';
 /**
  * Manages a GeoTIFF layer.

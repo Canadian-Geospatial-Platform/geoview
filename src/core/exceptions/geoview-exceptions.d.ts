@@ -8,15 +8,15 @@ export declare class GeoViewError extends Error {
     /** The localized key or message */
     readonly messageKey: string;
     /** The parameters to be translated using the localizedKey */
-    readonly messageParams: unknown[] | undefined;
+    readonly messageParams: Record<string, unknown> | undefined;
     /**
      * Constructs a new GeoViewError.
      *
      * @param messageKey - A localization key or a raw error message
-     * @param messageParams - Optional parameters for localization formatting
+     * @param messageParams - Optional named parameters for i18next interpolation
      * @param options - Optional error options, including `cause`
      */
-    constructor(messageKey: string, messageParams?: unknown[], options?: ErrorOptions);
+    constructor(messageKey: string, messageParams?: Record<string, unknown>, options?: ErrorOptions);
     /**
      * Returns a localized version of the error message using the given display language.
      *

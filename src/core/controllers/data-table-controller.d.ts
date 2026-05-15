@@ -1,7 +1,7 @@
 import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
-import { type TypeColumnFiltersState } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { type TypeColumnFiltersState } from '@/core/stores/states/data-table-state';
 import type { MapViewer } from '@/geo/map/map-viewer';
 /**
  * Controller responsible for Data Table interactions.

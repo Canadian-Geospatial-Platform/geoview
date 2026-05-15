@@ -2,10 +2,10 @@ interface FilterDataToExtentProps {
     layerPath: string;
 }
 /**
- * Custom Filter map toggle button.
+ * Creates a toggle switch to filter data table rows to the current map extent.
  *
- * @param props - The props for the filter map component
- * @returns The filter switch
+ * @param props - Properties defined in FilterDataToExtentProps interface
+ * @returns The filter data to extent toggle element
  */
 declare function FilterDataToExtent(props: FilterDataToExtentProps): JSX.Element;
 export default FilterDataToExtent;

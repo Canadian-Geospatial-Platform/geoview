@@ -1,6 +1,6 @@
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
-import { type TypeTimeSliderProps } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
+import { type TypeTimeSliderProps } from '@/core/stores/states/time-slider-state';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { type TypeDisplayDateFormat } from '@/core/utils/date-mgt';

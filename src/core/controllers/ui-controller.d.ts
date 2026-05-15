@@ -1,7 +1,7 @@
 import type { TypeDisplayLanguage, TypeDisplayTheme } from '@/api/types/map-schema-types';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
-import { type FocusItemProps, type TypeFooterTabEntry } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { type FocusItemProps, type TypeFooterTabEntry } from '@/core/stores/states/ui-state';
 import { type TimeIANA } from '@/core/utils/date-mgt';
 import type { TypeHTMLElement } from '@/core/types/global-types';
 import type { SnackbarType } from '@/core/utils/notifications';
@@ -189,7 +189,7 @@ export declare class UIController extends AbstractMapViewerController {
      * @param messageParams - Optional parameters for message interpolation
      * @param notification - Optional flag indicating whether to also create a notification
      */
-    addMessage(type: SnackbarType, messageKey: string, messageParams?: unknown[], notification?: boolean): void;
+    addMessage(type: SnackbarType, messageKey: string, messageParams?: Record<string, unknown>, notification?: boolean): void;
     /**
      * Adds a notification to the notification center.
      *

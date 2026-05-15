@@ -1,4 +1,4 @@
-import type { QueryType, TypeFeatureInfoEntry, TypeFeatureInfoResult, TypeLocation } from '@/api/types/map-schema-types';
+import type { QueryType, TypeDisplayLanguage, TypeFeatureInfoEntry, TypeFeatureInfoResult, TypeLocation } from '@/api/types/map-schema-types';
 import type { LayerDomain } from '@/core/domains/layer-domain';
 import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
@@ -121,10 +121,11 @@ export declare abstract class AbstractLayerSet {
      * @param queryType - The query type
      * @param location - The location for the query
      * @param queryGeometry - Optional whether to query geometry
+     * @param language - The display language to use for the query
      * @param abortController - Optional abort controller
      * @returns A promise that resolves with the query results
      */
-    protected queryLayerFeatures(geoviewLayer: AbstractGVLayer, queryType: QueryType, location: TypeLocation, queryGeometry?: boolean, abortController?: AbortController): Promise<TypeFeatureInfoResult>;
+    protected queryLayerFeatures(geoviewLayer: AbstractGVLayer, queryType: QueryType, location: TypeLocation, queryGeometry: boolean | undefined, language: TypeDisplayLanguage, abortController?: AbortController): Promise<TypeFeatureInfoResult>;
     /**
      * Checks if the layer is of queryable type based on its class definition.
      *

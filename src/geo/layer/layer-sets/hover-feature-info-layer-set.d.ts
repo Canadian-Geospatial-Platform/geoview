@@ -2,7 +2,7 @@ import type { Coordinate } from 'ol/coordinate';
 import type { QueryType } from '@/api/types/map-schema-types';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
-import type { TypeHoverResultSet } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import type { TypeHoverResultSet } from '@/core/stores/states/feature-info-state';
 /**
  * A Layer-set working with the LayerSetController at handling a result set of registered layers and synchronizing
  * events happening on them (in this case when the user hovers on the map) with a store

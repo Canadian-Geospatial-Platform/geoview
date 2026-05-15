@@ -11,11 +11,9 @@ import { Polygon } from 'ol/geom';
 import type { Coordinate } from 'ol/coordinate';
 import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import type { TypeMapMouseInfo, TypeOutfields, TypeStyleGeometry, TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
-import type { TypeGeoviewLayerType, TypeMetadataWMS, TypeStylesWMS } from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerType, TypeLegend, TypeMetadataWMS, TypeStylesWMS, TypeVectorLayerStyles } from '@/api/types/layer-schema-types';
 import type { TypeMetadataWMTS } from '@/api/config/validation-classes/raster-validation-classes/ogc-wmts-layer-entry-config';
-import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import type { TypeLegendItem, TypeLegendLayerItem } from '@/core/components/layers/types';
-import type { TypeVectorLayerStyles } from './renderer/geoview-renderer';
 export declare const layerTypes: Record<"CSV" | "KML" | "WKB" | "ESRI_DYNAMIC" | "ESRI_FEATURE" | "ESRI_IMAGE" | "IMAGE_STATIC" | "GEOJSON" | "GEOTIFF" | "XYZ_TILES" | "VECTOR_TILES" | "OGC_FEATURE" | "WFS" | "WMS" | "WMTS", TypeGeoviewLayerType>;
 interface EsriJSONReadResult {
     features: Feature<Geometry>[];

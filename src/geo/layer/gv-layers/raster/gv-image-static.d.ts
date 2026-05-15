@@ -4,7 +4,7 @@ import type { Extent } from 'ol/extent';
 import type { Projection as OLProjection } from 'ol/proj';
 import type { ImageStaticLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
-import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { type TypeLegend } from '@/api/types/layer-schema-types';
 /**
  * Manages an Image static layer.
  */

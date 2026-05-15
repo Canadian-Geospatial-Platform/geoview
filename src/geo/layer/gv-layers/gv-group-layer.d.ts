@@ -14,8 +14,8 @@ export declare class GVGroupLayer extends AbstractBaseGVLayer {
     /**
      * Constructs a Group layer to manage an OpenLayer Group Layer.
      *
-     * @param layerGroupOptions - The OpenLayer group layer.
-     * @param layerConfig - The layer configuration.
+     * @param layerGroupOptions - The OpenLayer group layer
+     * @param layerConfig - The layer configuration
      */
     constructor(layerGroupOptions: LayerGroupOptions, layerConfig: GroupLayerEntryConfig);
     /**
@@ -95,13 +95,14 @@ export declare class GVGroupLayer extends AbstractBaseGVLayer {
     /**
      * Adds a layer to the group layer.
      *
-     * @param layer - The layer to add.
+     * @param layer - The layer to add
      */
     addLayer(layer: AbstractBaseGVLayer): void;
     /**
      * Removes a layer from the group layer.
      *
-     * @param layer - The layer to remove.
+     * @param layer - The layer to remove
+     * @throws {LayerNotFoundError} When the layer is not found in the group
      */
     removeLayer(layer: AbstractBaseGVLayer): void;
     /**
@@ -129,14 +130,10 @@ export declare class GVGroupLayer extends AbstractBaseGVLayer {
      */
     offLayerRemoved(callback: LayerGroupChildrenUpdatedDelegate): void;
 }
-/**
- * Define an event for the delegate
- */
+/** Defines an event for the delegate. */
 export interface LayerGroupChildrenUpdatedEvent<T extends AbstractBaseGVLayer = AbstractBaseGVLayer> extends LayerBaseEvent {
     child: T;
 }
-/**
- * Define a delegate for the event handler function signature
- */
+/** Defines a delegate for the event handler function signature. */
 export type LayerGroupChildrenUpdatedDelegate = EventDelegateBase<GVGroupLayer, LayerGroupChildrenUpdatedEvent, void>;
 //# sourceMappingURL=gv-group-layer.d.ts.map
