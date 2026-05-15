@@ -84,6 +84,8 @@ function ButtonUI(props: ButtonProps, ref: Ref<HTMLButtonElement>): JSX.Element 
     'aria-controls': ariaControls,
     'aria-haspopup': ariaHaspopup,
     'aria-hidden': ariaHidden,
+    'aria-disabled': ariaDisabled,
+    role,
   } = props;
 
   // Hooks
@@ -93,10 +95,10 @@ function ButtonUI(props: ButtonProps, ref: Ref<HTMLButtonElement>): JSX.Element 
   // #region Handlers
 
   /**
-   * Handles when the user clicks on the button
+   * Handles when the user clicks on the button.
    */
   const handleClick = useCallback(
-    (event: React.MouseEvent<HTMLButtonElement>) => {
+    (event: React.MouseEvent<HTMLButtonElement>): void => {
       if (!disabled && onClick) {
         onClick(event);
       }
@@ -104,8 +106,13 @@ function ButtonUI(props: ButtonProps, ref: Ref<HTMLButtonElement>): JSX.Element 
     [disabled, onClick]
   );
 
-  // #endregion
+  // #endregion Handlers
 
+  /**
+   * Creates the button UI element.
+   *
+   * @returns The Material-UI button component
+   */
   function createButtonUI(): JSX.Element {
     return (
       <MaterialButton
@@ -128,6 +135,8 @@ function ButtonUI(props: ButtonProps, ref: Ref<HTMLButtonElement>): JSX.Element 
         aria-controls={ariaControls}
         aria-haspopup={ariaHaspopup}
         aria-hidden={ariaHidden}
+        aria-disabled={ariaDisabled}
+        role={role}
         {...(onKeyDown && { onKeyDown })}
         ref={ref}
       >

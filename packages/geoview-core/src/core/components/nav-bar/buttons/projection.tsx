@@ -1,16 +1,20 @@
-import type { ReactNode } from 'react';
-import { createElement, useCallback } from 'react';
+import type { ReactNode, MouseEvent } from 'react';
+import { createElement, useCallback, useMemo } from 'react';
 import { useStoreMapCurrentProjection } from '@/core/stores/states/map-state';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from '@/core/components/nav-bar/nav-bar-panel-button';
+import { getSxClasses } from '@/core/components/nav-bar/nav-bar-style';
 import type { TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
 import type { TypePanelProps } from '@/ui/panel/panel-types';
 import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
-import { IconButton } from '@/ui/icon-button/icon-button';
+import { Button } from '@/ui/button/button';
 import { List, ListItem } from '@/ui/list';
 import { ProjectionIcon, PublicIcon } from '@/ui/icons';
 import { useTranslation } from 'react-i18next';
+import { useTheme } from '@mui/material/styles';
 import { useMapController } from '@/core/controllers/use-controllers';
+import type { SxStyles } from '@/ui/style/types';
 
 /** Mapping of projection codes to their display names. */
 const projectionChoiceOptions: {
@@ -32,23 +36,60 @@ export default function Projection(): JSX.Element {
   // Log
   logger.logTraceRender('components/nav-bar/buttons/projection');
 
+  const theme = useTheme();
+
+  /**
+   * Memoizes style classes for the projection component.
+   */
+  const memoSxClasses = useMemo<SxStyles>(() => {
+    // Log
+    logger.logTraceUseMemo('PROJECTION - memoSxClasses', theme);
+    return getSxClasses(theme);
+  }, [theme]);
+
   const { t } = useTranslation<string>();
+  const mapId = useStoreGeoViewMapId();
 
   // Store
   const projection = useStoreMapCurrentProjection();
   const mapController = useMapController();
 
+  // #region Handlers
+
   /**
-   * Handles map projection choice.
+   * Handles map projection choice by extracting projection code from button ID.
    *
-   * @param projectionCode - The projection code to switch to
+   * @param event - The button click event
    */
   const handleChoice = useCallback(
-    (projectionCode: TypeValidMapProjectionCodes): void => {
+    (event: MouseEvent<HTMLButtonElement>): void => {
+      // Extract projection code from button ID (format: "mapId-proj-3857")
+      const projCodeStr = event.currentTarget.id.split('-').pop();
+      const projectionCode = Number(projCodeStr) as TypeValidMapProjectionCodes;
+
+      // Runtime validation
+      if (Number.isNaN(projectionCode)) {
+        logger.logError('Invalid projection code in button ID');
+        return;
+      }
+
+      if (!Object.values(projectionChoiceOptions).some((opt) => opt.code === projectionCode)) {
+        logger.logError(`Unsupported projection code: ${projectionCode}`);
+        return;
+      }
+
+      // Prevent action if this projection is already selected
+      if (projection === projectionCode) return;
+
       mapController.setProjectionAndForget(projectionCode);
+
+      // Keep focus on the button that was pressed
+      event.currentTarget.focus();
     },
-    [mapController]
+    [mapController, projection]
   );
+
+  // #endregion Handlers
 
   /**
    * Renders the projection choice buttons.
@@ -57,33 +98,23 @@ export default function Projection(): JSX.Element {
    */
   const renderButtons = (): ReactNode => {
     return (
-      <List key="projectionButtons">
-        <ListItem>
-          <IconButton
-            id="button-wm"
-            aria-label={projectionChoiceOptions['3857'].name}
-            tooltipPlacement="left"
-            size="small"
-            onClick={() => handleChoice(projectionChoiceOptions['3857'].code)}
-            disabled={projection === 3857}
-          >
-            <PublicIcon />
-            {projectionChoiceOptions['3857'].name}
-          </IconButton>
-        </ListItem>
-        <ListItem>
-          <IconButton
-            id="button-lcc"
-            aria-label={projectionChoiceOptions['3978'].name}
-            tooltipPlacement="left"
-            size="small"
-            onClick={() => handleChoice(projectionChoiceOptions['3978'].code)}
-            disabled={projection === 3978}
-          >
-            <PublicIcon />
-            {projectionChoiceOptions['3978'].name}
-          </IconButton>
-        </ListItem>
+      <List key="projectionButtons" role="group" aria-label={t('mapnav.projection')}>
+        {Object.entries(projectionChoiceOptions).map(([key, proj]) => (
+          <ListItem key={key}>
+            <Button
+              id={`${mapId}-proj-${proj.code}`}
+              type="textWithIcon"
+              startIcon={<PublicIcon />}
+              size="small"
+              onClick={handleChoice}
+              aria-pressed={projection === proj.code}
+              fullWidth
+              sx={memoSxClasses.button}
+            >
+              {proj.name}
+            </Button>
+          </ListItem>
+        ))}
       </List>
     );
   };

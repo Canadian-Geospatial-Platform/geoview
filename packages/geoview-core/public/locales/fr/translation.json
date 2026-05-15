@@ -61,7 +61,14 @@
     "line": "Distance",
     "area": "Surface",
     "clear": "Effacer",
-    "segmentLabels": "Afficher les étiquettes des segments"
+    "segmentLabels": "Afficher les étiquettes des segments",
+    "status": {
+      "started": "Mesure {{type}} démarrée. Cliquez sur la carte pour commencer.",
+      "stopped": "Mode de mesure désactivé.",
+      "cleared": "{{count}} mesure(s) effacée(s) de la carte.",
+      "completedLine": "Mesure de distance terminée : {{distance}}.",
+      "completedArea": "Mesure de surface terminée : {{perimeter}} de périmètre, {{area}} de surface."
+    }
   },
   "basemaps": {
     "select": "Choisir une carte de base",
