@@ -1,5 +1,8 @@
-// React 19 removed the global JSX namespace. This file restores it for backward compatibility.
-// See: https://react.dev/blog/2024/04/25/react-19-upgrade-guide#the-jsx-namespace-in-typescript
+/**
+ * React 19 removed the global JSX namespace. This file restores it for backward compatibility.
+ *
+ * @see https://react.dev/blog/2024/04/25/react-19-upgrade-guide#the-jsx-namespace-in-typescript
+ */
 export {};
 
 declare global {

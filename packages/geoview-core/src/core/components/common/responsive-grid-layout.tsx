@@ -104,7 +104,7 @@ const ResponsiveGridLayout = forwardRef(
     const hasContent = !!rightMain;
 
     // Ref for right panel
-    const rightMainRef = useRef<HTMLDivElement | undefined>(undefined);
+    const rightMainRef = useRef<HTMLDivElement>(null);
 
     // Refs for focus management
     const guideContainerRef = useRef<HTMLDivElement>(null);

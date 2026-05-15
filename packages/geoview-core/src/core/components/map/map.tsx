@@ -46,7 +46,7 @@ export function Map(props: MapProps): JSX.Element {
   const defaultTheme = useTheme();
 
   // internal state - get ref to div element
-  const mapElement = useRef<HTMLElement | undefined>(undefined);
+  const mapElement = useRef<HTMLElement>(null);
   const deviceSizeMedUp = useMediaQuery(defaultTheme.breakpoints.up('md')); // if screen size is medium and up
 
   // get values from the store

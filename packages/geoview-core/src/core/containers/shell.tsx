@@ -69,7 +69,7 @@ export function Shell(props: ShellProps): JSX.Element {
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
-  const shellRef = useRef<HTMLDivElement | undefined>(undefined);
+  const shellRef = useRef<HTMLDivElement>(null);
 
   // State render additional components if added by api
   const [components, setComponents] = useState<Record<string, JSX.Element>>({});
