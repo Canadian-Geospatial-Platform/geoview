@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { IconButton, ZoomInIcon } from '@/ui';
 import { getSxClasses } from '@/core/components/nav-bar/nav-bar-style';
 import { useStoreMapZoom } from '@/core/stores/states/map-state';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 import { useMapController } from '@/core/controllers/use-controllers';
 
@@ -22,10 +23,11 @@ export default function ZoomIn(): JSX.Element {
   // get store values
   const zoom = useStoreMapZoom();
   const mapController = useMapController();
+  const mapId = useStoreGeoViewMapId();
 
   return (
     <IconButton
-      id="zoomIn"
+      id={`${mapId}-button-zoom-in`}
       aria-label={t('mapnav.zoomIn')}
       tooltipPlacement="left"
       onClick={() => mapController.zoomMapAndForget(zoom + 0.5)}

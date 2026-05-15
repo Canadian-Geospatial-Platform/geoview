@@ -1,17 +1,21 @@
-import type { ReactNode } from 'react';
-import { createElement, useState, useCallback } from 'react';
+import type { ReactNode, MouseEvent } from 'react';
+import { createElement, useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useTheme } from '@mui/material/styles';
 import { useStoreMapHasGeoviewBasemapLayer, useStoreMapBasemapOptions } from '@/core/stores/states/map-state';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from '@/core/components/nav-bar/nav-bar-panel-button';
+import { getSxClasses } from '@/core/components/nav-bar/nav-bar-style';
 import type { TypeBasemapOptions } from '@/api/types/map-schema-types';
 import { MapIcon } from '@/ui';
 import type { TypePanelProps } from '@/ui/panel/panel-types';
 import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
-import { IconButton } from '@/ui/icon-button/icon-button';
+import { Button } from '@/ui/button/button';
 import { List, ListItem } from '@/ui/list';
 import { BlockIcon, PublicIcon, SatelliteIcon, SignpostIcon } from '@/ui/icons';
 import { useLayerController, useMapController } from '@/core/controllers/use-controllers';
+import type { SxStyles } from '@/ui/style/types';
 
 /** Mapping of basemap choice identifiers to their options. */
 const basemapChoiceOptions: Record<string, TypeBasemapOptions> = {
@@ -31,6 +35,17 @@ export default function BasemapSelect(): JSX.Element {
   logger.logTraceRender('components/nav-bar/buttons/basemap');
 
   const { t } = useTranslation<string>();
+  const theme = useTheme();
+  /**
+   * Memoizes style classes for the basemap select component.
+   */
+  const memoSxClasses = useMemo((): SxStyles => {
+    // Log
+    logger.logTraceUseMemo('BASEMAP-SELECT - memoSxClasses', theme);
+
+    return getSxClasses(theme);
+  }, [theme]);
+  const mapId = useStoreGeoViewMapId();
 
   // Get values from store
   const configBasemapOptions = useStoreMapBasemapOptions();
@@ -47,13 +62,20 @@ export default function BasemapSelect(): JSX.Element {
 
   const [selectedBasemap, setSelectedBasemap] = useState<string>(noDefault ? configBasemapOptions.basemapId : 'default');
 
+  // #region Handlers
+
   /**
    * Handles basemap selection and updates the map basemap.
    *
    * @param basemapChoice - The selected basemap identifier
+   * @param event - The button click event
    */
   const handleChoice = useCallback(
-    (basemapChoice: string): void => {
+    (basemapChoice: string, event: MouseEvent<HTMLButtonElement>): void => {
+      // Prevent action if this basemap is already selected
+      if (selectedBasemap === basemapChoice) return;
+
+      // Update state to the new selection
       setSelectedBasemap(basemapChoice);
 
       // If the Geoview basemap layer is present, toggle visibility based on selection. We hide it on nogeom.
@@ -69,14 +91,13 @@ export default function BasemapSelect(): JSX.Element {
           logger.logPromiseFailed('setBaseMap in basemaps.ts', error);
         });
 
-      // Focus the close button after selection
-      const closeButton = document.querySelector('.MuiDialogTitle-root button') as HTMLButtonElement;
-      if (closeButton) {
-        closeButton.focus();
-      }
+      // Keep focus on the button that was pressed
+      event.currentTarget.focus();
     },
-    [configBasemapOptions, hasGeoviewBasemapLayer, layerController, mapController]
+    [configBasemapOptions, hasGeoviewBasemapLayer, layerController, mapController, selectedBasemap]
   );
+
+  // #endregion Handlers
 
   /**
    * Renders the basemap choice buttons.
@@ -85,73 +106,78 @@ export default function BasemapSelect(): JSX.Element {
    */
   const renderButtons = (): ReactNode => {
     return (
-      <List key="basemapButtons">
+      <List key="basemapButtons" role="group" aria-label={t('mapnav.basemap')}>
         {!noDefault && (
           <ListItem>
-            <IconButton
-              id="button-default"
-              aria-label={t('basemaps.default')}
-              tooltipPlacement="left"
+            <Button
+              id={`${mapId}-button-default`}
+              type="textWithIcon"
+              startIcon={<MapIcon />}
               size="small"
-              onClick={() => handleChoice('default')}
-              disabled={selectedBasemap === 'default'}
+              onClick={(event) => handleChoice('default', event)}
+              aria-pressed={selectedBasemap === 'default'}
+              fullWidth
+              sx={memoSxClasses.button}
             >
-              <MapIcon />
               {t('basemaps.default')}
-            </IconButton>
+            </Button>
           </ListItem>
         )}
         <ListItem>
-          <IconButton
-            id="button-transport"
-            aria-label={t('basemaps.transport')}
-            tooltipPlacement="left"
+          <Button
+            id={`${mapId}-button-transport`}
+            type="textWithIcon"
+            startIcon={<SignpostIcon />}
             size="small"
-            onClick={() => handleChoice('transport')}
-            disabled={selectedBasemap === 'transport'}
+            onClick={(event) => handleChoice('transport', event)}
+            aria-pressed={selectedBasemap === 'transport'}
+            fullWidth
+            sx={memoSxClasses.button}
           >
-            <SignpostIcon />
             {t('basemaps.transport')}
-          </IconButton>
+          </Button>
         </ListItem>
         <ListItem>
-          <IconButton
-            id="button-imagery"
-            aria-label={t('basemaps.imagery')}
-            tooltipPlacement="left"
+          <Button
+            id={`${mapId}-button-imagery`}
+            type="textWithIcon"
+            startIcon={<SatelliteIcon />}
             size="small"
-            onClick={() => handleChoice('imagery')}
-            disabled={selectedBasemap === 'imagery'}
+            onClick={(event) => handleChoice('imagery', event)}
+            aria-pressed={selectedBasemap === 'imagery'}
+            fullWidth
+            sx={memoSxClasses.button}
           >
-            <SatelliteIcon />
             {t('basemaps.imagery')}
-          </IconButton>
+          </Button>
         </ListItem>
         <ListItem>
-          <IconButton
-            id="button-simple"
-            aria-label={t('basemaps.simple')}
-            tooltipPlacement="left"
+          <Button
+            id={`${mapId}-button-simple`}
+            type="textWithIcon"
+            startIcon={<PublicIcon />}
             size="small"
-            onClick={() => handleChoice('simple')}
-            disabled={selectedBasemap === 'simple'}
+            onClick={(event) => handleChoice('simple', event)}
+            aria-pressed={selectedBasemap === 'simple'}
+            fullWidth
+            sx={memoSxClasses.button}
           >
-            <PublicIcon />
             {t('basemaps.simple')}
-          </IconButton>
+          </Button>
         </ListItem>
         <ListItem>
-          <IconButton
-            id="button-nogeom"
-            aria-label={t('basemaps.nogeom')}
-            tooltipPlacement="left"
+          <Button
+            id={`${mapId}-button-nogeom`}
+            type="textWithIcon"
+            startIcon={<BlockIcon />}
             size="small"
-            onClick={() => handleChoice('nogeom')}
-            disabled={selectedBasemap === 'nogeom'}
+            onClick={(event) => handleChoice('nogeom', event)}
+            aria-pressed={selectedBasemap === 'nogeom'}
+            fullWidth
+            sx={memoSxClasses.button}
           >
-            <BlockIcon />
             {t('basemaps.nogeom')}
-          </IconButton>
+          </Button>
         </ListItem>
       </List>
     );
