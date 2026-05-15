@@ -1,4 +1,4 @@
-import { useMemo, useState, cloneElement, isValidElement } from 'react';
+import { useMemo, useState, cloneElement, isValidElement, useId } from 'react';
 import { ClickAwayListener } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
@@ -11,6 +11,7 @@ import { logger } from '@/core/utils/logger';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { handleEscapeKey } from '@/core/utils/utilities';
 import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
+import type { SxStyles } from '@/ui/style/types';
 
 /** The properties for the navbar panel button. */
 interface NavbarPanelButtonType {
@@ -33,7 +34,16 @@ export default function NavbarPanelButton({ buttonPanel, isActive = false }: Nav
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  /**
+   * Memoizes style classes for the navbar panel button.
+   */
+  const memoSxClasses = useMemo((): SxStyles => {
+    // Log
+    logger.logTraceUseMemo('NAV-BAR-PANEL-BUTTON - memoSxClasses', theme);
+
+    return getSxClasses(theme);
+  }, [theme]);
+  const dialogTitleId = useId();
 
   // Store
   const activeTrapGeoView = useStoreUIActiveTrapGeoView();
@@ -42,6 +52,8 @@ export default function NavbarPanelButton({ buttonPanel, isActive = false }: Nav
   // States
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [open, setOpen] = useState(false);
+
+  // #region Handlers
 
   /**
    * Closes the panel and clears the anchor element.
@@ -72,6 +84,8 @@ export default function NavbarPanelButton({ buttonPanel, isActive = false }: Nav
     }
   };
 
+  // #endregion Handlers
+
   /**
    * Renders the panel content based on the button panel configuration.
    *
@@ -96,9 +110,11 @@ export default function NavbarPanelButton({ buttonPanel, isActive = false }: Nav
           key={buttonPanel.button.id}
           id={buttonPanel.button.id}
           aria-label={t(buttonPanel.button['aria-label'])}
+          aria-expanded={open}
+          aria-haspopup="dialog"
           tooltip={buttonPanel.button.tooltip}
           tooltipPlacement={buttonPanel.button.tooltipPlacement}
-          sx={sxClasses.navButton}
+          sx={memoSxClasses.navButton}
           onClick={(e) => handleClick(e)}
           className={open || isActive ? 'highlighted active' : ''}
         >
@@ -112,12 +128,14 @@ export default function NavbarPanelButton({ buttonPanel, isActive = false }: Nav
           onClose={handleClickAway}
           container={shellContainer}
           focusSelector="button"
+          role="dialog"
+          aria-labelledby={dialogTitleId}
           focusTrap={activeTrapGeoView}
           sx={{ marginRight: '5px !important' }}
           handleKeyDown={(key, callBackFn) => handleEscapeKey(key, '', false, callBackFn)}
         >
           <Paper sx={{ width: `${buttonPanel.panel?.width ?? 300}px`, maxHeight: '500px' }}>
-            <DialogTitle sx={sxClasses.popoverTitle}>
+            <DialogTitle id={dialogTitleId} sx={memoSxClasses.popoverTitle}>
               <span style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
                 {t(buttonPanel.panel?.title as string) ?? ''}
                 <IconButton
@@ -130,7 +148,7 @@ export default function NavbarPanelButton({ buttonPanel, isActive = false }: Nav
                 </IconButton>
               </span>
             </DialogTitle>
-            <DialogContent>{renderPanelContent()}</DialogContent>
+            <DialogContent sx={memoSxClasses.popoverContent}>{renderPanelContent()}</DialogContent>
           </Paper>
         </Popper>
       </Box>

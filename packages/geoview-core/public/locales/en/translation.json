@@ -61,7 +61,14 @@
     "line": "Distance",
     "area": "Area",
     "clear": "Clear",
-    "segmentLabels": "Show segment labels"
+    "segmentLabels": "Show segment labels",
+    "status": {
+      "started": "{{type}} measurement started. Click on the map to begin.",
+      "stopped": "Measurement mode disabled.",
+      "cleared": "{{count}} measurement(s) cleared from map.",
+      "completedLine": "Distance measurement completed: {{distance}}.",
+      "completedArea": "Area measurement completed: {{perimeter}} perimeter, {{area}} area."
+    }
   },
   "basemaps": {
     "select": "Select a basemap",

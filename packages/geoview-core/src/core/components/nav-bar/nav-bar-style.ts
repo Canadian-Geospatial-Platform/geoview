@@ -86,5 +86,25 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     fontWeight: '700',
     color: theme.palette.geoViewColor.textColor.main,
     borderBottom: `1px solid ${theme.palette.geoViewColor.bgColor.dark[100]}`,
+    paddingTop: theme.spacing(11),
+    paddingBottom: theme.spacing(11),
+    paddingLeft: theme.spacing(11),
+  },
+  popoverContent: {
+    '&.MuiDialogContent-root': {
+      paddingTop: theme.spacing(11),
+      paddingBottom: theme.spacing(11),
+      paddingLeft: theme.spacing(11),
+    },
+  },
+  button: {
+    justifyContent: 'flex-start',
+    '&[aria-pressed="true"]': {
+      backgroundColor: theme.palette.geoViewColor?.primary.main ?? theme.palette.primary.main,
+      color: theme.palette.geoViewColor?.white ?? theme.palette.common.white,
+      '&:hover': {
+        backgroundColor: theme.palette.geoViewColor?.primary.dark[200] ?? theme.palette.primary.dark,
+      },
+    },
   },
 });
