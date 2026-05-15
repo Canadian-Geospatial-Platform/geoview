@@ -59,7 +59,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   }, [theme]);
 
   // State & ref
-  const tabsContainerRef = useRef<HTMLDivElement>();
+  const tabsContainerRef = useRef<HTMLDivElement | undefined>(undefined);
 
   // Store
   const mapId = useStoreGeoViewMapId();

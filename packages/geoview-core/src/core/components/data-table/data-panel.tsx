@@ -51,7 +51,7 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
   const { t } = useTranslation();
   const theme = useTheme();
 
-  const dataTableRef = useRef<HTMLDivElement>();
+  const dataTableRef = useRef<HTMLDivElement | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
 
   const mapId = useStoreGeoViewMapId();

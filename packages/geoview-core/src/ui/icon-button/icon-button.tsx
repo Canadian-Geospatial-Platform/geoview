@@ -24,7 +24,7 @@ export interface IconButtonPropsExtend extends Omit<IconButtonProps, 'aria-label
   tooltip?: string | null;
   tooltipPlacement?: TooltipProps['placement'];
   tabIndex?: number;
-  iconRef?: RefObject<HTMLButtonElement>;
+  iconRef?: RefObject<HTMLButtonElement | null>;
   visible?: boolean;
 }
 

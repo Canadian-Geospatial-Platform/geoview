@@ -73,7 +73,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
   const mapSize = useRef<number[]>(viewer.map?.getSize() || [0, 0]);
   const swiperValueVertical = useRef(50);
   const swiperValueHorizontal = useRef(50);
-  const swiperRef = useRef<HTMLElement>();
+  const swiperRef = useRef<HTMLElement>(null);
 
   // SxClasses
   const mapHeight = useStoreMapSize()[1];
@@ -360,6 +360,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
     return (
       <Box sx={memoSxClasses.layerSwipe}>
         <Draggable
+          nodeRef={swiperRef}
           key={orientation} // This forces recreation when orientation changes
           axis={orientation === 'vertical' ? 'x' : 'y'}
           bounds="parent"

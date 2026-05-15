@@ -12,7 +12,7 @@ interface UndoButtonProps {
   progressValue: number;
   onUndo: (event: MouseEvent) => void;
   handleKeyDown: (event: KeyboardEvent) => void;
-  iconRef: React.RefObject<HTMLButtonElement>;
+  iconRef: React.RefObject<HTMLButtonElement | null>;
 }
 
 function UndoButtonWithProgress(props: UndoButtonProps): JSX.Element {

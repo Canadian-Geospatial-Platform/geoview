@@ -15,7 +15,7 @@ interface UseMapResizeProps {
 
 /** Return type for the useMapResize hook. */
 type TypeUseMapResize = {
-  mapShellContainerRef: React.RefObject<HTMLDivElement>;
+  mapShellContainerRef: React.RefObject<HTMLDivElement | null>;
 };
 
 /**

@@ -107,7 +107,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   const [selectedLayerPathLocal, setSelectedLayerPathLocal] = useState<string>(selectedLayerPath);
   const [arrayOfLayerListLocal, setArrayOfLayerListLocal] = useState<LayerListStructureEntry[]>([]);
   const [isRightPanelVisible, setIsRightPanelVisible] = useState<boolean>(false);
-  const prevLayerFeatures = useRef<TypeFeatureInfoEntry[] | undefined | null>();
+  const prevLayerFeatures = useRef<TypeFeatureInfoEntry[] | undefined | null>(undefined);
   const prevFeatureIndex = useRef<number>(0); // 0 because that's the default index for the features
   const prevMapClickCoordinates = useRef<TypeMapMouseInfo | undefined>(mapClickCoordinates);
   const layoutRef = useRef<LayoutExposedMethods>(null);

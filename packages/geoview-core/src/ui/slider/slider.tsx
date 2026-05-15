@@ -3,7 +3,7 @@ import { useLayoutEffect, useCallback, useRef, useMemo, useState } from 'react';
 import type { SxProps, Theme } from '@mui/material/styles';
 import { useTheme } from '@mui/material/styles';
 import { Slider as MaterialSlider, type SliderProps as MuiSliderProps } from '@mui/material';
-import type { Mark } from '@mui/base';
+import type { Mark } from '@mui/material/Slider/useSlider.types';
 import { logger } from '@/core/utils/logger';
 
 import { getSxClasses } from '@/ui/slider/slider-style';

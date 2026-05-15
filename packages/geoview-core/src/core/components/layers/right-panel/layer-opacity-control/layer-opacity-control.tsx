@@ -3,7 +3,7 @@ import { useCallback, useEffect, useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
-import type { Mark } from '@mui/base';
+import type { Mark } from '@mui/material/Slider/useSlider.types';
 
 import { getSxClasses } from './layer-opacity-control-styles';
 import { Box, Slider, Typography } from '@/ui';

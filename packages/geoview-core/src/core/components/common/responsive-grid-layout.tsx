@@ -56,7 +56,7 @@ interface ResponsiveGridLayoutProps {
 interface ResponsiveGridLayoutExposedMethods {
   setIsRightPanelVisible: (isVisible: boolean) => void;
   setRightPanelFocus: () => void;
-  closeBtnRef?: React.RefObject<HTMLButtonElement>;
+  closeBtnRef?: React.RefObject<HTMLButtonElement | null>;
 }
 
 /**
@@ -104,7 +104,7 @@ const ResponsiveGridLayout = forwardRef(
     const hasContent = !!rightMain;
 
     // Ref for right panel
-    const rightMainRef = useRef<HTMLDivElement>();
+    const rightMainRef = useRef<HTMLDivElement | undefined>(undefined);
 
     // Refs for focus management
     const guideContainerRef = useRef<HTMLDivElement>(null);

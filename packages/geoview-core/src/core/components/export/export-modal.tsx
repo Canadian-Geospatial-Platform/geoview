@@ -20,7 +20,7 @@ Legend Distribution Logic:
 - Canvas/PDF rendering uses measured dimensions for consistent output
 */
 
-import type { ChangeEvent, RefObject } from 'react';
+import type { ChangeEvent } from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
@@ -110,10 +110,10 @@ export function ExportModal(): JSX.Element {
   const [exportTitle, setExportTitle] = useState<string>('');
   const [exportMapResolution, setExportMapResolution] = useState(300);
   const [exportFormat, setExportFormat] = useState<FileFormat>('png');
-  const exportContainerRef = useRef(null) as RefObject<HTMLDivElement>;
+  const exportContainerRef = useRef<HTMLDivElement>(null);
   const [jpegQuality, setJpegQuality] = useState(90); // Default 90%
   const [pngPreviewUrls, setPngPreviewUrls] = useState<string[]>([]);
-  const dialogRef = useRef(null) as RefObject<HTMLDivElement>;
+  const dialogRef = useRef<HTMLDivElement>(null);
   const titleInputRef = useRef<HTMLInputElement>(null);
 
   const fileExportDefaultPrefixName = t('exportModal.fileExportDefaultPrefixName');
