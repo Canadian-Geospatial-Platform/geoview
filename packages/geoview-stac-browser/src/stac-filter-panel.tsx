@@ -5,17 +5,15 @@ import { logger } from 'geoview-core/core/utils/logger';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { StacLayerHelper } from 'geoview-core/geo/utils/stac-layer-helper';
 
-import type { StacBrowserConfig, StacCollection } from './stac-browser-types';
+import type { StacBrowserConfig } from './stac-browser-types';
 import { getSxClasses } from './stac-browser-style';
 
 /** Props for the StacFilterPanel component. */
 interface StacFilterPanelProps {
-  /** Available collections. */
-  collections: StacCollection[];
   /** Plugin configuration. */
   config: StacBrowserConfig;
   /** Callback when search is submitted. */
-  onSearch: (params: { collections?: string[]; bbox?: [number, number, number, number]; datetime?: string; q?: string }) => void;
+  onSearch: (params: { bbox?: [number, number, number, number]; datetime?: string; q?: string }) => void;
   /** The map ID. */
   mapId: string;
 }
@@ -30,35 +28,24 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
   // Log
   logger.logTraceRender('geoview-stac-browser/stac-filter-panel');
 
-  const { collections, config, onSearch, mapId } = props;
+  const { config, onSearch, mapId } = props;
   const { cgpv } = window as TypeWindow;
   const { useTheme } = cgpv.ui;
   const { t } = useTranslation();
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
-  const { useCallback, useState } = cgpv.reactUtilities.react;
+  const { useCallback, useMemo, useState } = cgpv.reactUtilities.react;
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Get the OL map reference once at component level
   const olMap = cgpv.api.getMapViewer(mapId).map;
 
   // State
-  const [selectedCollections, setSelectedCollections] = useState<string[]>(config.defaults?.collections ?? []);
   const [useMapExtent, setUseMapExtent] = useState(false);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [keyword, setKeyword] = useState('');
 
   // #region Handlers
-
-  /**
-   * Handles collection checkbox toggle.
-   */
-  const handleCollectionToggle = useCallback((collectionId: string): void => {
-    setSelectedCollections((prev) => {
-      if (prev.includes(collectionId)) return prev.filter((id) => id !== collectionId);
-      return [...prev, collectionId];
-    });
-  }, []);
 
   /**
    * Handles the use map extent checkbox change.
@@ -92,9 +79,7 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
    * Handles search button click.
    */
   const handleSearchClick = useCallback((): void => {
-    const params: { collections?: string[]; bbox?: [number, number, number, number]; datetime?: string; q?: string } = {};
-
-    if (selectedCollections.length > 0) params.collections = selectedCollections;
+    const params: { bbox?: [number, number, number, number]; datetime?: string; q?: string } = {};
 
     if (useMapExtent) {
       // Get the actual map extent transformed to EPSG:4326 for STAC API
@@ -107,47 +92,22 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
       params.datetime = `${start}/${end}`;
     }
 
-    // Add keyword as free-text query and also filter collections client-side
     if (keyword.trim()) {
       params.q = keyword.trim();
-      // Also auto-select collections whose id or title match the keyword (if user hasn't manually selected any)
-      if (!params.collections?.length && collections.length > 0) {
-        const kw = keyword.trim().toLowerCase();
-        const matchingCollections = collections
-          .filter((c) => c.id.toLowerCase().includes(kw) || (c.title && c.title.toLowerCase().includes(kw)))
-          .map((c) => c.id);
-        if (matchingCollections.length > 0) params.collections = matchingCollections;
-      }
     }
 
     onSearch(params);
-  }, [selectedCollections, useMapExtent, startDate, endDate, keyword, collections, onSearch, olMap]);
+  }, [useMapExtent, startDate, endDate, keyword, onSearch, olMap]);
 
   // #endregion
 
   return (
     <Box sx={sxClasses.filterPanel}>
-      {/* Collection filter */}
-      {config.filters?.collections !== false && collections.length > 0 && (
-        <Box sx={sxClasses.filterRow}>
-          <Typography sx={sxClasses.filterLabel}>{t('stacBrowser.collections')}</Typography>
-          <Box sx={{ maxHeight: 150, overflow: 'auto' }}>
-            {collections.map((collection) => (
-              <FormControlLabel
-                key={collection.id}
-                control={
-                  <Checkbox
-                    checked={selectedCollections.includes(collection.id)}
-                    onChange={(): void => handleCollectionToggle(collection.id)}
-                    size="small"
-                  />
-                }
-                label={collection.title ?? collection.id}
-              />
-            ))}
-          </Box>
-        </Box>
-      )}
+      {/* Text search */}
+      <Box sx={sxClasses.filterRow}>
+        <Typography sx={sxClasses.filterLabel}>{t('stacBrowser.textSearch')}</Typography>
+        <TextField size="small" placeholder={t('stacBrowser.keywords')} value={keyword} onChange={handleKeywordChange} fullWidth />
+      </Box>
 
       {/* Temporal filter */}
       {config.filters?.temporal !== false && (
@@ -168,13 +128,6 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
             control={<Checkbox checked={useMapExtent} onChange={handleUseMapExtentChange} size="small" />}
             label={t('stacBrowser.useMapExtent')}
           />
-        </Box>
-      )}
-
-      {/* Keyword filter */}
-      {config.filters?.keyword !== false && (
-        <Box sx={sxClasses.filterRow}>
-          <TextField size="small" placeholder={t('stacBrowser.keywords')} value={keyword} onChange={handleKeywordChange} fullWidth />
         </Box>
       )}
 
