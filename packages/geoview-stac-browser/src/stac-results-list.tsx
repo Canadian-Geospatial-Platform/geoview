@@ -1,5 +1,3 @@
-import React, { useCallback } from 'react';
-
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { Box, Button, Typography } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
@@ -36,6 +34,7 @@ export function StacResultsList(props: StacResultsListProps): JSX.Element {
   const { t } = useTranslation();
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
+  const { useCallback } = cgpv.reactUtilities.react;
 
   // #region Handlers
 

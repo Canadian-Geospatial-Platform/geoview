@@ -1,5 +1,3 @@
-import React, { useCallback, useState } from 'react';
-
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 
 import { Box, Button, Checkbox, FormControlLabel, TextField, Typography } from 'geoview-core/ui';
@@ -38,6 +36,7 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
   const { t } = useTranslation();
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
+  const { useCallback, useState } = cgpv.reactUtilities.react;
 
   // Get the OL map reference once at component level
   const olMap = cgpv.api.getMapViewer(mapId).map;
