@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'; // GV This import is to validate that we're on the right React at the end of the file
 import { AppBarPlugin } from 'geoview-core/api/plugin/appbar-plugin';
 import { StacBrowserIcon } from 'geoview-core/ui/icons';
 import type { IconButtonPropsExtend } from 'geoview-core/ui/icon-button/icon-button';
