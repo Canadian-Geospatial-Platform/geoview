@@ -83,7 +83,7 @@ export default function NavbarPanelButton({ buttonPanel, isActive = false }: Nav
     }
 
     if (isValidElement(buttonPanel.panel?.content)) {
-      return cloneElement(buttonPanel.panel.content as React.ReactElement, { closePanel });
+      return cloneElement(buttonPanel.panel.content as React.ReactElement<{ closePanel?: () => void }>, { closePanel });
     }
 
     return buttonPanel.panel?.content as JSX.Element;

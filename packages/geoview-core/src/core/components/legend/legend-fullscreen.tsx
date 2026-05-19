@@ -32,7 +32,7 @@ interface LegendFullscreenProps {
   containerType: TypeContainerBox;
   isOpen: boolean;
   onClose: () => void;
-  buttonRef: React.RefObject<HTMLButtonElement>;
+  buttonRef: React.RefObject<HTMLButtonElement | null>;
 }
 
 /**
@@ -45,7 +45,7 @@ interface LegendFullscreenProps {
 interface FullscreenButtonProps {
   containerType: TypeContainerBox;
   onClick: () => void;
-  buttonRef: React.RefObject<HTMLButtonElement>;
+  buttonRef: React.RefObject<HTMLButtonElement | null>;
 }
 
 // Constant style outside of render (styles)

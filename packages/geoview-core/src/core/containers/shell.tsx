@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, Fragment, useMemo, useRef } from 'rea
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
-import { FocusTrap } from '@mui/base/FocusTrap';
+import FocusTrap from '@mui/material/Unstable_TrapFocus';
 
 import { Map } from '@/core/components/map/map';
 import { AppBar } from '@/core/components/app-bar/app-bar';
@@ -69,7 +69,7 @@ export function Shell(props: ShellProps): JSX.Element {
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
-  const shellRef = useRef<HTMLDivElement>();
+  const shellRef = useRef<HTMLDivElement>(null);
 
   // State render additional components if added by api
   const [components, setComponents] = useState<Record<string, JSX.Element>>({});

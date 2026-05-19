@@ -16,7 +16,7 @@ interface PopperPropsExtend extends PopperProps {
   handleKeyDown?: (key: string, callbackFn: () => void) => void;
   focusSelector?: string;
   focusTrap?: boolean;
-  children: ReactElement;
+  children: ReactElement<Record<string, unknown>>;
 }
 
 /**

@@ -47,7 +47,7 @@ export const useGeolocator = (): UseGeolocatorReturn => {
   const searchValueRef = useRef(searchValue);
   searchValueRef.current = searchValue;
   const abortControllerRef = useRef<AbortController | null>(null);
-  const fetchTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>();
+  const fetchTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   /**
    * Resets the hook state and aborts any pending request.

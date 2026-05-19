@@ -248,7 +248,7 @@ export default memo(function Notifications(): JSX.Element {
 
   // Animation
   const shakeAnimation = useShake();
-  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const AnimatedSpan = animated('span');
 
   // #region Handlers

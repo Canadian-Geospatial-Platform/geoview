@@ -72,7 +72,7 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
   const { t } = useTranslation<string>();
   const theme = useTheme();
   const panelContainerRef = useRef<HTMLDivElement>(null);
-  const panelRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const panelHeader = useRef<HTMLButtonElement>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
   const panelWidth = panel?.width ?? 100; //percentage
@@ -133,7 +133,7 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
             display: open ? 'block' : 'none',
             ...(panelStyles?.panelCard && { ...panelStyles.panelCard }),
           }}
-          ref={panelRef as React.MutableRefObject<null>}
+          ref={panelRef}
           onKeyDown={(event: KeyboardEvent) => onKeyDown?.(event)}
           {...{ 'data-id': button.id }}
           className="panel-card"

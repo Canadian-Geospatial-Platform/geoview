@@ -152,10 +152,13 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   }, []);
 
   // Create an object to store shared functions (avoid circular dependencies)
-  const handlers = useRef<{
-    exit: () => void;
-    handleKeyDown: (evt: KeyboardEvent) => void;
-  }>();
+  const handlers = useRef<
+    | {
+        exit: () => void;
+        handleKeyDown: (evt: KeyboardEvent) => void;
+      }
+    | undefined
+  >(undefined);
 
   /**
    * Initializes the handlers ref with exit and keydown functions to avoid circular dependencies.

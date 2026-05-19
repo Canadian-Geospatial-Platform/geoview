@@ -99,7 +99,7 @@ function PopoverUI({ open, children, ...props }: PopoverProps): JSX.Element {
   return (
     <MaterialPopover open={open} disableScrollLock {...props}>
       <FocusTrap open={open} disableAutoFocus>
-        {isValidElement(children) ? children : <span />}
+        {(isValidElement(children) ? children : <span />) as React.ReactElement<Record<string, unknown>>}
       </FocusTrap>
     </MaterialPopover>
   );

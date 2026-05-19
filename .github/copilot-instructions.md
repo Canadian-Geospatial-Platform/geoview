@@ -375,6 +375,44 @@ const handleChange = useCallback(
 - Downcast only after `instanceof` check or type guard function
 - Avoid spreading objects with deep nesting - use `lodash.cloneDeep` instead
 
+### useRef Patterns (React 19)
+
+React 19 requires an explicit initial value for `useRef`. Choose the pattern based on **how the ref is used**:
+
+| Pattern                             | When to Use                                                                                                          | Returns                     |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------- | --------------------------- |
+| `useRef<T>(null)`                   | **DOM refs** — passed as the JSX `ref` prop. React manages `.current` (sets to element on mount, `null` on unmount). | `RefObject<T \| null>`      |
+| `useRef<T \| undefined>(undefined)` | **Mutable data refs** — timers, counters, previous values, cached objects. You manage `.current` yourself.           | `RefObject<T \| undefined>` |
+
+```typescript
+// ✅ Good: DOM ref — React manages .current (element or null)
+const containerRef = useRef<HTMLDivElement>(null);
+<Box ref={containerRef} />
+
+// ✅ Good: Mutable data ref — you manage .current
+const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+timerRef.current = setTimeout(...);
+
+// ✅ Good: Mutable previous-value ref
+const prevValueRef = useRef<string | undefined>(undefined);
+prevValueRef.current = currentValue;
+
+// ❌ Bad: DOM ref with undefined (React writes null, not undefined, on unmount)
+const containerRef = useRef<HTMLDivElement | undefined>(undefined);
+
+// ❌ Bad: No initial value (removed in React 19)
+const timerRef = useRef<number>();
+```
+
+**Interface props that accept DOM refs** must include `| null`:
+
+```typescript
+// ✅ Good: Accepts what useRef<T>(null) returns
+interface MyProps {
+  inputRef?: React.RefObject<HTMLInputElement | null>;
+}
+```
+
 ### React Performance Patterns
 
 **Avoid inline arrow functions in event handlers** - they create new function references on every render:

@@ -59,11 +59,11 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
-  const playIntervalRef = useRef<number>();
+  const playIntervalRef = useRef<number | undefined>(undefined);
 
   // References for play button
-  const sliderValueRef = useRef<number>();
-  const sliderDeltaRef = useRef<number>();
+  const sliderValueRef = useRef<number | undefined>(undefined);
+  const sliderDeltaRef = useRef<number | undefined>(undefined);
 
   const displayLanguage = useStoreAppDisplayLanguage();
   const { t } = useTranslation<string>();
@@ -245,20 +245,21 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
         if (!isForward && rightHandle === leftHandle) [, rightHandle] = minAndMax;
       }
       // Handle unlocked case
+      else if (sliderValueRef.current === undefined || sliderDeltaRef.current === undefined) return;
       else if (isForward) {
-        if (leftHandle < sliderValueRef.current! && rightHandle === sliderValueRef.current) leftHandle = sliderValueRef.current;
+        if (leftHandle < sliderValueRef.current && rightHandle === sliderValueRef.current) leftHandle = sliderValueRef.current;
         else leftHandle += delta;
         if (leftHandle >= minAndMax[1]) [leftHandle] = minAndMax;
         rightHandle = leftHandle + sliderDeltaRef.current;
         if (rightHandle > minAndMax[1]) [, rightHandle] = minAndMax;
-        if (rightHandle > sliderValueRef.current! && leftHandle < sliderValueRef.current!) rightHandle = sliderValueRef.current as number;
+        if (rightHandle > sliderValueRef.current && leftHandle < sliderValueRef.current) rightHandle = sliderValueRef.current;
       } else {
-        if (rightHandle > sliderValueRef.current! && leftHandle === sliderValueRef.current) rightHandle = sliderValueRef.current;
+        if (rightHandle > sliderValueRef.current && leftHandle === sliderValueRef.current) rightHandle = sliderValueRef.current;
         else rightHandle += delta;
         if (rightHandle <= minAndMax[0]) [, rightHandle] = minAndMax;
         leftHandle = rightHandle - sliderDeltaRef.current;
         if (leftHandle < minAndMax[0]) [leftHandle] = minAndMax;
-        if (leftHandle < sliderValueRef.current! && rightHandle > sliderValueRef.current!) leftHandle = sliderValueRef.current as number;
+        if (leftHandle < sliderValueRef.current && rightHandle > sliderValueRef.current) leftHandle = sliderValueRef.current;
       }
 
       timeSliderController.updateTimeSliderValues(layerPath, [leftHandle, rightHandle]);
