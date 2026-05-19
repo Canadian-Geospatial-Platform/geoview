@@ -6,10 +6,10 @@ import type { Projection as OLProjection } from 'ol/proj';
 import type { Map as OLMap } from 'ol';
 import { type EventDelegateBase } from '@/api/events/event-helper';
 import type { LayerBaseEvent } from '@/geo/layer/gv-layers/abstract-base-layer';
-import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import type { OgcWfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
-import type { TypeFeatureInfoResult } from '@/api/types/map-schema-types';
+import type { TypeFeatureInfoResult, TypeDisplayLanguage } from '@/api/types/map-schema-types';
+import type { TypeLegend } from '@/api/types/layer-schema-types';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import type { GeoViewError } from '@/core/exceptions/geoview-exceptions';
@@ -21,7 +21,10 @@ export declare class GVWMS extends AbstractGVRaster {
     #private;
     /** The max feature count returned by the GetFeatureInfo */
     static readonly DEFAULT_MAX_FEATURE_COUNT: number;
-    /** The default Get Feature Info tolerance to use for QGIS Server services which are more picky by default (really needs to be zoomed in to get results, by default) */
+    /**
+     * The default Get Feature Info tolerance to use for QGIS Server services which are more picky by default (really needs to be zoomed in to get results, by default).
+     * WMS needed a bigger tolerance to pick up more results during the spatial queries (to make it look more like the tolerance for other layer types)
+     */
     static readonly DEFAULT_GET_FEATURE_INFO_TOLERANCE: number;
     /**
      * Constructs a GVWMS layer to manage an OpenLayer layer.
@@ -74,24 +77,28 @@ export declare class GVWMS extends AbstractGVRaster {
     /**
      * Overrides the return of feature information at a given coordinate.
      *
-     * @param map - The Map where to get Feature Info At Coordinate from.
-     * @param location - The coordinate that will be used by the query.
-     * @param queryGeometry - Whether to include geometry in the query, default is true.
-     * @param abortController - Optional {@link AbortController} to cancel the operation.
+     * @param map - The Map where to get Feature Info At Coordinate from
+     * @param location - The coordinate that will be used by the query
+     * @param queryGeometry - Whether to include geometry in the query, default is true
+     * @param language - The display language, used to guess the best name field for the 'nameField'
+     * @param abortController - Optional {@link AbortController} to cancel the operation
      * @returns A promise that resolves with the feature info result
      */
-    protected getFeatureInfoAtCoordinate(map: OLMap, location: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoResult>;
+    protected getFeatureInfoAtCoordinate(map: OLMap, location: Coordinate, queryGeometry: boolean | undefined, language: TypeDisplayLanguage, // Used if we have to guess the field name for the 'nameField'
+    abortController?: AbortController | undefined): Promise<TypeFeatureInfoResult>;
     /**
      * Overrides the return of feature information at the provided long lat coordinate.
      *
-     * @param map - The Map where to get Feature Info At LonLat from.
-     * @param lonlat - The coordinate that will be used by the query.
-     * @param queryGeometry - Whether to include geometry in the query, default is true.
-     * @param abortController - Optional {@link AbortController} to cancel the operation.
+     * @param map - The Map where to get Feature Info At LonLat from
+     * @param lonlat - The coordinate that will be used by the query
+     * @param queryGeometry - Whether to include geometry in the query, default is true
+     * @param language - The display language, used to guess the best name field if `nameField` is not provided
+     * @param abortController - Optional {@link AbortController} to cancel the operation
      * @returns A promise that resolves with the feature info result
      * @throws {LayerConfigWFSMissingError} When no WFS layer configuration is defined for this WMS layer.
      */
-    protected getFeatureInfoAtLonLat(map: OLMap, lonlat: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoResult>;
+    protected getFeatureInfoAtLonLat(map: OLMap, lonlat: Coordinate, queryGeometry: boolean | undefined, language: TypeDisplayLanguage, // Used if we have to guess the field name for the 'nameField'
+    abortController?: AbortController | undefined): Promise<TypeFeatureInfoResult>;
     /**
      * Overrides the get all feature information for all the features stored in the layer.
      *
@@ -99,6 +106,7 @@ export declare class GVWMS extends AbstractGVRaster {
      *
      * @param map - The Map so that we can grab the resolution/projection we want to get features on.
      * @param layerFilters - The layer filters to apply when querying the features.
+     * @param language - The display language, used to guess the best name field if `nameField` is not provided
      * @param abortController - Optional {@link AbortController} to cancel the operation.
      * @returns A promise that resolves with the feature info result
      * @throws {LayerConfigWFSMissingError} When no WFS layer configuration is defined for this WMS layer.
@@ -108,7 +116,7 @@ export declare class GVWMS extends AbstractGVRaster {
      * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
      * @throws {NetworkError} When a network issue happened.
      */
-    protected getAllFeatureInfo(map: OLMap, layerFilters: LayerFilters, abortController?: AbortController): Promise<TypeFeatureInfoResult>;
+    protected getAllFeatureInfo(map: OLMap, layerFilters: LayerFilters, language: TypeDisplayLanguage, abortController?: AbortController): Promise<TypeFeatureInfoResult>;
     /**
      * Overrides the fetching of the legend for a WMS layer.
      *
@@ -207,12 +215,13 @@ export declare class GVWMS extends AbstractGVRaster {
      * - Returns an array of standardized `TypeFeatureInfoEntry` objects.
      *
      * @param urlWithOutputJson - The full WFS GetFeature request URL. Must specify an output format compatible
-     *   with GeoJSON (e.g., `outputFormat=application/json`).
+     *   with GeoJSON (e.g., `outputFormat=application/json`)
      * @param wmsLayerConfig - The associated WMS layer configuration. Styling and filter settings from this
-     *   config are applied when formatting the Feature Info results.
+     *   config are applied when formatting the Feature Info results
      * @param wfsLayerConfig - The WFS layer configuration used for schema tags, outfields, metadata, and
-     *   date formatting.
-     * @param abortController - Optional {@link AbortController} used to cancel the fetch request.
+     *   date formatting
+     * @param language - The display language, used to guess the best name field if `nameField` is not provided in the WMS layer config
+     * @param abortController - Optional {@link AbortController} used to cancel the fetch request
      * @returns A promise that resolves with the feature info result
      * @throws {ResponseError} When the response is not OK (non-2xx).
      * @throws {ResponseEmptyError} When the JSON response is empty.
@@ -220,7 +229,7 @@ export declare class GVWMS extends AbstractGVRaster {
      * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
      * @throws {NetworkError} When a network issue happened.
      */
-    static fetchAndParseFeaturesFromWFSUrl(urlWithOutputJson: string, wmsLayerConfig: OgcWmsLayerEntryConfig, wfsLayerConfig: OgcWfsLayerEntryConfig, abortController?: AbortController | undefined): Promise<TypeFeatureInfoResult>;
+    static fetchAndParseFeaturesFromWFSUrl(urlWithOutputJson: string, wmsLayerConfig: OgcWmsLayerEntryConfig, wfsLayerConfig: OgcWfsLayerEntryConfig, language: TypeDisplayLanguage, abortController?: AbortController | undefined): Promise<TypeFeatureInfoResult>;
     /**
      * Applies a view filter to a WMS or an Esri Image layer's source by updating the source parameters.
      *
@@ -260,6 +269,7 @@ export declare class GVWMS extends AbstractGVRaster {
      */
     offWmsStyleChanged(callback: WMSStyleChangedDelegate | undefined): void;
 }
+/** Defines the CRS override used to request WMS images in a different projection. */
 export type CRSOverride = {
     layerProjection: string;
     mapProjection: string;

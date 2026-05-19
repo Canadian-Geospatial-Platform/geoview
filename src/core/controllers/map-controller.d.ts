@@ -273,6 +273,14 @@ export declare class MapController extends AbstractMapViewerController {
      */
     setOverviewMapVisibility(visible: boolean): void;
     /**
+     * Waits until the overview map visibility matches the expected state.
+     *
+     * @param expectedVisible - The expected visibility state to wait for
+     * @param timeoutMs - Optional maximum time in milliseconds to wait (defaults to 5000)
+     * @returns A promise that resolves when the visibility matches the expected state
+     */
+    waitOverviewMapVisibility(expectedVisible: boolean, timeoutMs?: number): Promise<boolean>;
+    /**
      * Resets the basemap using the current display language and projection.
      *
      * @returns A promise that resolves when the basemap has been reloaded

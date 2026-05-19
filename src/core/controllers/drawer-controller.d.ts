@@ -1,6 +1,6 @@
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
-import { type StyleProps } from '@/core/stores/store-interface-and-intial-values/drawer-state';
+import { type StyleProps } from '@/core/stores/states/drawer-state';
 import type { UIDomain } from '@/core/domains/ui-domain';
 import type { MapViewer } from '@/geo/map/map-viewer';
 /**

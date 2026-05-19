@@ -23,6 +23,12 @@ export declare class LayerFilters {
      */
     getInitialFilter(): string | undefined;
     /**
+     * Sets the initial base filter.
+     *
+     * @param initialFilter - The initial base filter
+     */
+    setInitialFilter(initialFilter: string | undefined): void;
+    /**
      * Gets if the layer has an initial base filter.
      *
      * @returns True when the layer has an initial base filter
@@ -122,4 +128,6 @@ export declare class LayerFilters {
      */
     static joinWithAnd(filters: (string | undefined)[], extraSpacing?: string): string;
 }
+/** Represents the types of filters that can be composed: initial, class, data, or time-based filters. */
+export type FilterCategory = 'initial' | 'class' | 'data' | 'time';
 //# sourceMappingURL=layer-filters.d.ts.map

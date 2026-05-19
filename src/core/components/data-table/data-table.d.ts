@@ -4,7 +4,7 @@ import type { DataTableProps } from './data-table-types';
  *
  * Memoized to avoid re-rendering all layer tables when only one layer's data changes.
  *
- * @param props - DataTable properties
+ * @param props - Properties defined in DataTableProps interface
  * @returns The data table element
  */
 declare function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: DataTableProps): JSX.Element;

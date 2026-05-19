@@ -10,7 +10,7 @@ import type { Pixel } from 'ol/pixel';
 import type { Projection as OLProjection } from 'ol/proj';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
-import type { TypeFeatureInfoResult, TypeLayerStyleConfig } from '@/api/types/map-schema-types';
+import type { TypeDisplayLanguage, TypeFeatureInfoResult, TypeLayerStyleConfig } from '@/api/types/map-schema-types';
 import type { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVVectorSource } from '@/geo/layer/source/vector-source';
@@ -82,38 +82,45 @@ export declare abstract class AbstractGVVector extends AbstractGVLayer {
      *
      * @param map - The Map so that we can grab the resolution/projection we want to get features on.
      * @param layerFilters - The layer filters to apply when querying the features.
+     * @param language - The display language, used to guess the best name field if `nameField` is not provided
      * @param abortController - Optional {@link AbortController} to cancel the request.
      * @returns A promise that resolves with the feature info result.
      */
-    protected getAllFeatureInfo(map: OLMap, layerFilters: LayerFilters, abortController?: AbortController): Promise<TypeFeatureInfoResult>;
+    protected getAllFeatureInfo(map: OLMap, layerFilters: LayerFilters, language: TypeDisplayLanguage, abortController?: AbortController): Promise<TypeFeatureInfoResult>;
     /**
      * Overrides the return of feature information at a given pixel location.
      *
-     * @param map - The Map where to get Feature Info At Pixel from.
-     * @param location - The pixel coordinate that will be used by the query.
-     * @returns A promise that resolves with the feature info result.
+     * @param map - The Map where to get Feature Info At Pixel from
+     * @param location - The pixel coordinate that will be used by the query
+     * @param queryGeometry - Whether to include geometry in the query, default is true
+     * @param language - The display language, used to guess the best name field if `nameField` is not provided
+     * @param abortController - Optional {@link AbortController} to cancel the operation
+     * @returns A promise that resolves with the feature info result
      */
-    protected getFeatureInfoAtPixel(map: OLMap, location: Pixel): Promise<TypeFeatureInfoResult>;
+    protected getFeatureInfoAtPixel(map: OLMap, location: Pixel, queryGeometry: boolean | undefined, language: TypeDisplayLanguage, // Used if we have to guess the field name for the 'nameField'
+    abortController?: AbortController | undefined): Promise<TypeFeatureInfoResult>;
     /**
      * Overrides the return of feature information at a given coordinate.
      *
-     * @param map - The Map where to get Feature Info At Coordinate from.
-     * @param location - The coordinate that will be used by the query.
-     * @param queryGeometry - Whether to include geometry in the query, default is true.
-     * @param abortController - Optional {@link AbortController} to cancel the request.
-     * @returns A promise that resolves with the feature info result.
+     * @param map - The Map where to get Feature Info At Coordinate from
+     * @param location - The coordinate that will be used by the query
+     * @param queryGeometry - Whether to include geometry in the query, default is true
+     * @param language - The display language, used to guess the best name field for the 'nameField'
+     * @param abortController - Optional {@link AbortController} to cancel the request
+     * @returns A promise that resolves with the feature info result
      */
-    protected getFeatureInfoAtCoordinate(map: OLMap, location: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoResult>;
+    protected getFeatureInfoAtCoordinate(map: OLMap, location: Coordinate, queryGeometry: boolean | undefined, language: TypeDisplayLanguage, abortController?: AbortController | undefined): Promise<TypeFeatureInfoResult>;
     /**
      * Overrides the return of feature information at the provided long lat coordinate.
      *
-     * @param map - The Map where to get Feature Info At LonLat from.
-     * @param lonlat - The coordinate that will be used by the query.
-     * @param queryGeometry - Whether to include geometry in the query, default is true.
-     * @param abortController - Optional {@link AbortController} to cancel the request.
-     * @returns A promise that resolves with the feature info result.
+     * @param map - The Map where to get Feature Info At LonLat from
+     * @param lonlat - The coordinate that will be used by the query
+     * @param queryGeometry - Whether to include geometry in the query, default is true
+     * @param language - The display language, used to guess the best name field if `nameField` is not provided
+     * @param abortController - Optional {@link AbortController} to cancel the operation
+     * @returns A promise that resolves with the feature info result
      */
-    protected getFeatureInfoAtLonLat(map: OLMap, lonlat: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoResult>;
+    protected getFeatureInfoAtLonLat(map: OLMap, lonlat: Coordinate, queryGeometry: boolean | undefined, language: TypeDisplayLanguage, abortController?: AbortController | undefined): Promise<TypeFeatureInfoResult>;
     /**
      * Overrides the way to get the bounds for this layer type.
      *

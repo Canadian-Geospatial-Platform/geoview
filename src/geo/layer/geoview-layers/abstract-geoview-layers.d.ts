@@ -3,9 +3,8 @@ import type { Projection as OLProjection } from 'ol/proj';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import type { DisplayDateMode } from '@/api/types/map-schema-types';
-import type { TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeLayerStatus } from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeLayerStatus, TypeLegend } from '@/api/types/layer-schema-types';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
-import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import type { SnackbarType } from '@/core/utils/notifications';
 import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
@@ -250,7 +249,7 @@ export declare abstract class AbstractGeoViewLayer {
      *   true
      * );
      */
-    protected emitMessage(messageKey: string, messageParams?: string[] | undefined, messageType?: SnackbarType, notification?: boolean): void;
+    protected emitMessage(messageKey: string, messageParams?: Record<string, unknown> | undefined, messageType?: SnackbarType, notification?: boolean): void;
     /**
      * Adds a GeoViewLayerLoadedFailedError in the internal list of errors for a layer being loaded.
      * It also sets the layer status to error.
@@ -259,6 +258,12 @@ export declare abstract class AbstractGeoViewLayer {
      * @param layerConfig - Optional layer config
      */
     addLayerLoadError(error: Error, layerConfig: ConfigBaseClass | undefined): void;
+    /**
+     * Gets the list of errors accumulated during layer loading.
+     *
+     * @returns A shallow copy of the layer load error list
+     */
+    getLayerLoadErrors(): Error[];
     /**
      * Recursively processes the list of layer entries to see if all of them are greater than or equal to the provided layer status.
      *
@@ -452,7 +457,7 @@ export type LayerMessageEvent = {
     /** The i18n key (or literal string) for the message to display. */
     messageKey: string;
     /** Parameters to interpolate into the localized message. */
-    messageParams: string[];
+    messageParams: Record<string, unknown>;
     /** The severity type of the message. */
     messageType: SnackbarType;
     /** Whether to show the message as a notification. */

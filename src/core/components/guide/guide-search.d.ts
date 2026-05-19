@@ -1,5 +1,5 @@
 import type { TypeContainerBox } from '@/core/types/global-types';
-import type { TypeGuideObject } from '@/core/stores/store-interface-and-intial-values/app-state';
+import type { TypeGuideObject } from '@/core/stores/states/app-state';
 /** Props for the GuideSearch component. */
 interface GuideSearchProps {
     /** The container type (footerBar, appBar, etc.). */

@@ -1,9 +1,9 @@
 import type { MRT_TableInstance as MRTTableInstance, MRT_ColumnDef } from 'material-react-table';
-import type { ColumnsType } from './data-table-types';
+import type { DataTableRow } from './data-table-types';
 import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 import type { SxStyles } from '@/ui/style/types';
 /** Properties for the TopToolbar component. */
-interface TopToolbarProps<TData extends ColumnsType> {
+interface TopToolbarProps<TData extends DataTableRow> {
     /** Classes or styles for the component. */
     sxClasses: SxStyles;
     /** The path for the current layer being processed. */
@@ -22,22 +22,22 @@ interface TopToolbarProps<TData extends ColumnsType> {
         };
     } | null;
     /** Column definitions for the table. */
-    columns: MRT_ColumnDef<ColumnsType, unknown>[];
+    columns: MRT_ColumnDef<DataTableRow, unknown>[];
     /** The data object containing features for the table. */
     data: {
         features?: TypeFeatureInfoEntry[] | null;
     };
     /** The Material React Table instance. */
-    table: MRTTableInstance<ColumnsType>;
+    table: MRTTableInstance<DataTableRow>;
     /** The count of features before any filters are applied. */
     unfilteredFeaturesCount?: number;
 }
 /**
- * Renders the top toolbar for the data table with filters, search, and export controls.
+ * Creates the top toolbar for the data table with filters, search, and export controls.
  *
- * @param props - TopToolbar properties
- * @returns The toolbar element
+ * @param props - Properties defined in TopToolbarProps interface
+ * @returns The top toolbar element
  */
-declare function TopToolbar(props: TopToolbarProps<ColumnsType>): JSX.Element;
+declare function TopToolbar(props: TopToolbarProps<DataTableRow>): JSX.Element;
 export default TopToolbar;
 //# sourceMappingURL=top-toolbar.d.ts.map

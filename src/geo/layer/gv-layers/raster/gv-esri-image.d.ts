@@ -7,9 +7,8 @@ import type { Projection as OLProjection } from 'ol/proj';
 import type { Map as OLMap } from 'ol';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
-import type { TypeFeatureInfoEntry, TypeFeatureInfoResult } from '@/api/types/map-schema-types';
-import type { TypeMetadataEsriRasterFunctionInfos, TypeMosaicRule } from '@/api/types/layer-schema-types';
-import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import type { TypeDisplayLanguage, TypeFeatureInfoEntry, TypeFeatureInfoResult } from '@/api/types/map-schema-types';
+import type { TypeLegend, TypeMetadataEsriRasterFunctionInfos, TypeMosaicRule } from '@/api/types/layer-schema-types';
 import type { TemporalMode } from '@/core/utils/date-mgt';
 import type { GeometryJson } from '@/geo/layer/gv-layers/utils';
 import type { LayerBaseEvent } from '@/geo/layer/gv-layers/abstract-base-layer';
@@ -74,21 +73,25 @@ export declare class GVEsriImage extends AbstractGVRaster {
     /**
      * Overrides the return of feature information at a given coordinate.
      *
-     * @param map - The Map where to get Feature Info At Coordinate from.
-     * @param location - The coordinate that will be used by the query.
-     * @param queryGeometry - Whether to include geometry in the query, default is true.
+     * @param map - The Map where to get Feature Info At Coordinate from
+     * @param location - The coordinate that will be used by the query
+     * @param queryGeometry - Whether to include geometry in the query, default is true
+     * @param language - The display language, used to guess the best name field for the 'nameField'
+     * @param abortController - Optional {@link AbortController} to cancel the operation
      * @returns A promise that resolves with the feature info result
      */
-    protected getFeatureInfoAtCoordinate(map: OLMap, location: Coordinate, queryGeometry?: boolean): Promise<TypeFeatureInfoResult>;
+    protected getFeatureInfoAtCoordinate(map: OLMap, location: Coordinate, queryGeometry: boolean | undefined, language: TypeDisplayLanguage, abortController?: AbortController): Promise<TypeFeatureInfoResult>;
     /**
      * Overrides the return of feature information at the provided long lat coordinate.
      *
-     * @param map - The Map where to get Feature Info At LonLat from.
-     * @param lonlat - The coordinate that will be used by the query.
-     * @param queryGeometry - Optional, whether to include geometry in the query, default is true.
+     * @param map - The Map where to get Feature Info At LonLat from
+     * @param lonlat - The coordinate that will be used by the query
+     * @param queryGeometry - Whether to include geometry in the query, default is true
+     * @param language - The display language, used to guess the best name field if `nameField` is not provided
+     * @param abortController - Optional {@link AbortController} to cancel the operation
      * @returns A promise that resolves with the feature info result
      */
-    protected getFeatureInfoAtLonLat(map: OLMap, lonlat: Coordinate, queryGeometry?: boolean): Promise<TypeFeatureInfoResult>;
+    protected getFeatureInfoAtLonLat(map: OLMap, lonlat: Coordinate, queryGeometry: boolean | undefined, language: TypeDisplayLanguage, abortController?: AbortController): Promise<TypeFeatureInfoResult>;
     /**
      * Overrides the formatting of feature info results to skip icon rendering for pixel-based queries.
      *
@@ -101,7 +104,7 @@ export declare class GVEsriImage extends AbstractGVRaster {
      * @param serviceDateTemporalMode - Optional temporal mode for date handling
      * @returns The formatted feature info entries
      */
-    protected formatFeatureInfoResult(features: Feature[], layerConfig: EsriImageLayerEntryConfig, serviceDateFormat: string | undefined, serviceDateIANA: string | undefined, serviceDateTemporalMode: TemporalMode | undefined): TypeFeatureInfoEntry[];
+    protected formatFeatureInfoResult(features: Feature[], layerConfig: EsriImageLayerEntryConfig, language: TypeDisplayLanguage, serviceDateFormat: string | undefined, serviceDateIANA: string | undefined, serviceDateTemporalMode: TemporalMode | undefined): TypeFeatureInfoEntry[];
     /**
      * Gets the list of rasterFunctionInfos that are available in the ImageServer
      *

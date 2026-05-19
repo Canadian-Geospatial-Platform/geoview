@@ -11,7 +11,7 @@ export declare class LayerGeoCoreError extends GeoViewError {
      * @param messageParams - Optional parameters for localization formatting
      * @param options - Optional error options, including `cause`
      */
-    protected constructor(uuids: string[], messageKey: string, messageParams?: unknown[], options?: ErrorOptions);
+    protected constructor(uuids: string[], messageKey: string, messageParams?: Record<string, unknown>, options?: ErrorOptions);
 }
 /**
  * Error thrown when the Geocore service fails to respond.

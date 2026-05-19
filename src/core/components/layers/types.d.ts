@@ -1,7 +1,7 @@
 import type { Extent } from 'ol/extent';
 import type { TypeLayerStyleConfig, TypeStyleGeometry } from '@/api/types/map-schema-types';
 import type { TypeGeoviewLayerType, TypeLayerControls, TypeLayerEntryType, TypeLayerStatus, TypeMetadataEsriRasterFunctionInfos, TypeMetadataWMSCapabilityLayerStyle, TypeMosaicMethod, TypeMosaicRule } from '@/api/types/layer-schema-types';
-import type { LegendQueryStatus } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import type { LegendQueryStatus } from '@/core/stores/states/layer-state';
 import type { TemporalMode, TimeDimension, TimeIANA, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 export type TypeLayersViewDisplayState = 'add' | 'view';
 /** Represents a single legend layer item (icon/symbol entry). */

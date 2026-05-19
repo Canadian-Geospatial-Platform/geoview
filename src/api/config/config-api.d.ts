@@ -1,6 +1,7 @@
 import { MapFeatureConfig } from '@/api/config/map-feature-config';
 import type { TypeDisplayLanguage, TypeLayerStyleConfig } from '@/api/types/map-schema-types';
 import type { TypeGeoviewLayerConfig, TypeInitialGeoviewLayerType } from '@/api/types/layer-schema-types';
+import { type GeoCoreLayerConfigResponse } from '@/api/config/geocore';
 import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 /**
  * The API class that creates configuration objects. It is used to validate and read the service and layer metadata.
@@ -100,7 +101,7 @@ export declare class ConfigApi {
      * @throws {LayerGeoCoreNoLayersError} When the Geocore service responds a 'valid' payload with missing layers information
      * @throws {NotSupportedError} When the provided layer type or the layer type read in the layerType property from Geocore payload isn't a supported type
      */
-    static createInitConfigFromType(layerType: TypeInitialGeoviewLayerType, geoviewLayerId: string, geoviewLayerName: string, layerURL: string, isTimeAware?: boolean, language?: TypeDisplayLanguage, mapId?: string, abortSignal?: AbortSignal): Promise<TypeGeoviewLayerConfig>;
+    static createInitConfigFromType(layerType: TypeInitialGeoviewLayerType, geoviewLayerId: string, geoviewLayerName: string, layerURL: string, isTimeAware?: boolean, language?: TypeDisplayLanguage, mapId?: string, abortSignal?: AbortSignal): Promise<ConfigFromTypeInfo>;
     /**
      * Processes the layer to generate a list of ConfigBaseClass objects.
      *
@@ -138,4 +139,11 @@ export declare class ConfigApi {
      */
     static isValidUUID(uuid: string): boolean;
 }
+/** Represents the result of creating an initial layer config from a layer type. */
+export type ConfigFromTypeInfo = {
+    /** The initialized GeoView layer configuration. */
+    configInfo: TypeGeoviewLayerConfig;
+    /** Optional GeoCore payload containing additional layer and geochart information. */
+    geocoreInfo?: GeoCoreLayerConfigResponse;
+};
 //# sourceMappingURL=config-api.d.ts.map

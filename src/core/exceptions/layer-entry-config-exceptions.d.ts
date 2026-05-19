@@ -17,7 +17,7 @@ export declare class LayerEntryConfigError extends LayerError {
      * @param messageKey - A localization key (defaults to 'validation.layer.loadfailed')
      * @param params - Optional parameters to customize the error message
      */
-    protected constructor(layerConfig: ConfigBaseClass, messageKey?: string | undefined, params?: unknown[]);
+    protected constructor(layerConfig: ConfigBaseClass, messageKey?: string | undefined, params?: Record<string, unknown>);
 }
 /**
  * Custom error class thrown when a GeoView layer configuration fails due to a missing or invalid layer ID.

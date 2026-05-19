@@ -1,6 +1,6 @@
 import type { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
 import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
-import { type ActiveAppBarTabType } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { type ActiveAppBarTabType } from '@/core/stores/states/ui-state';
 import type { UIController } from '@/core/controllers/ui-controller';
 /**
  * Class to manage buttons on the app-bar.

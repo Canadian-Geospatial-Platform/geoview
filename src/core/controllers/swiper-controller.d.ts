@@ -1,7 +1,7 @@
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import type { MapViewer } from '@/geo/map/map-viewer';
-import { type SwipeOrientation } from '@/core/stores/store-interface-and-intial-values/swiper-state';
+import { type SwipeOrientation } from '@/core/stores/states/swiper-state';
 /**
  * Controller responsible for time swiper interactions and
  * bridging the swiper state with the UI domain.

@@ -1,4 +1,6 @@
 import i18n from 'i18next';
+import { useTranslation } from 'react-i18next';
+export { useTranslation };
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 export default i18n;
 /**

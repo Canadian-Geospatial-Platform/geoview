@@ -1,15 +1,25 @@
-import type { TypeAllFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import type { TypeFieldEntry } from '@/api/types/map-schema-types';
+import type { TypeAllFeatureInfoResultSetEntry } from '@/core/stores/states/data-table-state';
+import type { TypeFieldEntry, TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 import type { TypeContainerBox } from '@/core/types/global-types';
+import type { ReactElement } from 'react';
 /** Mapped layer data with field info columns. */
 export interface MappedLayerDataType extends TypeAllFeatureInfoResultSetEntry {
     fieldInfos: Partial<Record<string, TypeFieldEntry>>;
 }
-/** Column type for the data table rows. */
-export interface ColumnsType {
-    ICON: TypeFieldEntry;
-    ZOOM: TypeFieldEntry;
-    [key: string]: TypeFieldEntry;
+/**
+ * Data table row type combining action columns, feature reference, and dynamic field data.
+ */
+export interface DataTableRow {
+    /** The full feature information object for handler access. */
+    gvFeature: TypeFeatureInfoEntry;
+    /** Icon column rendering. */
+    ICON: ReactElement;
+    /** Zoom action button column rendering. */
+    ZOOM: ReactElement;
+    /** Details action button column rendering. */
+    DETAILS: ReactElement;
+    /** Dynamic field columns from the feature's fieldInfo. */
+    [key: string]: TypeFieldEntry | ReactElement | TypeFeatureInfoEntry;
 }
 /** Properties for the DataTable component. */
 export interface DataTableProps {

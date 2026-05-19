@@ -5,11 +5,10 @@ import type { Extent } from 'ol/extent';
 import type { Projection as OLProjection } from 'ol/proj';
 import type { Map as OLMap } from 'ol';
 import type { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
-import type { TypeFeatureInfoResult, TypeFeatureInfoEntryPartial } from '@/api/types/map-schema-types';
-import type { TypeLayerMetadataEsriExtent } from '@/api/types/layer-schema-types';
+import type { TypeFeatureInfoResult, TypeFeatureInfoEntryPartial, TypeDisplayLanguage } from '@/api/types/map-schema-types';
+import type { TypeLayerMetadataEsriExtent, TypeLegend } from '@/api/types/layer-schema-types';
 import type { GeometryJson } from '@/geo/layer/gv-layers/utils';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
-import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import type { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 /**
  * Manages an Esri Dynamic layer.
@@ -89,33 +88,36 @@ export declare class GVEsriDynamic extends AbstractGVRaster {
     /**
      * Overrides the get all feature information for all the features stored in the layer.
      *
-     * @param map - The Map so that we can grab the resolution/projection we want to get features on.
-     * @param layerFilters - The layer filters to apply when querying the features.
-     * @param abortController - Optional {@link AbortController} to cancel the operation.
+     * @param map - The Map so that we can grab the resolution/projection we want to get features on
+     * @param layerFilters - The layer filters to apply when querying the features
+     * @param language - The display language, used to guess the best name field for the 'nameField'
+     * @param abortController - Optional {@link AbortController} to cancel the operation
      * @returns A promise that resolves with the feature info result
      */
-    protected getAllFeatureInfo(map: OLMap, layerFilters: LayerFilters, abortController?: AbortController): Promise<TypeFeatureInfoResult>;
+    protected getAllFeatureInfo(map: OLMap, layerFilters: LayerFilters, language: TypeDisplayLanguage, abortController?: AbortController): Promise<TypeFeatureInfoResult>;
     /**
      * Overrides the return of feature information at a given coordinate.
      *
-     * @param map - The Map where to get Feature Info At Coordinate from.
-     * @param location - The coordinate that will be used by the query.
-     * @param queryGeometry - Whether to include geometry in the query, default is true.
-     * @param abortController - Optional {@link AbortController} to cancel the operation.
+     * @param map - The Map where to get Feature Info At Coordinate from
+     * @param location - The coordinate that will be used by the query
+     * @param queryGeometry - Whether to include geometry in the query, default is true
+     * @param language - The display language, used to guess the best name field for the 'nameField'
+     * @param abortController - Optional {@link AbortController} to cancel the operation
      * @returns A promise that resolves with the feature info result
      */
-    protected getFeatureInfoAtCoordinate(map: OLMap, location: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoResult>;
+    protected getFeatureInfoAtCoordinate(map: OLMap, location: Coordinate, queryGeometry: boolean | undefined, language: TypeDisplayLanguage, abortController?: AbortController | undefined): Promise<TypeFeatureInfoResult>;
     /**
      * Overrides the return of feature information at the provided long lat coordinate.
      *
-     * @param map - The Map where to get Feature Info At LonLat from.
-     * @param lonlat - The coordinate that will be used by the query.
-     * @param queryGeometry - Whether to include geometry in the query, default is true.
-     * @param abortController - Optional {@link AbortController} to cancel the operation.
+     * @param map - The Map where to get Feature Info At LonLat from
+     * @param lonlat - The coordinate that will be used by the query
+     * @param queryGeometry - Whether to include geometry in the query, default is true
+     * @param language - The display language, used to guess the best name field if `nameField` is not provided
+     * @param abortController - Optional {@link AbortController} to cancel the operation
      * @returns A promise that resolves with the feature info result
      * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
      */
-    protected getFeatureInfoAtLonLat(map: OLMap, lonlat: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoResult>;
+    protected getFeatureInfoAtLonLat(map: OLMap, lonlat: Coordinate, queryGeometry: boolean | undefined, language: TypeDisplayLanguage, abortController?: AbortController | undefined): Promise<TypeFeatureInfoResult>;
     /**
      * Overrides the way an EsriDynamic layer applies a view filter. It does so by updating the source layerDefs parameter.
      *

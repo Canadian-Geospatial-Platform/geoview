@@ -5,8 +5,7 @@ import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import type { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 import type { TypeLayerStyleConfig, TypeResultSet, TypeResultSetEntry } from '@/api/types/map-schema-types';
 import type { TemporalMode, TimeDimension, TimeIANA, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
-import type { TypeGeoviewLayerType, TypeLayerStatus, TypeMetadataEsriRasterFunctionInfos, TypeMetadataWMSCapabilityLayerStyle, TypeMosaicMethod, TypeMosaicRule } from '@/api/types/layer-schema-types';
-import type { TypeVectorLayerStyles } from '@/geo/utils/renderer/geoview-renderer';
+import type { TypeGeoviewLayerType, TypeLayerControls, TypeLayerStatus, TypeLegend, TypeMetadataEsriRasterFunctionInfos, TypeMetadataWMSCapabilityLayerStyle, TypeMosaicMethod, TypeMosaicRule } from '@/api/types/layer-schema-types';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 /**
  * Represents the layer Zustand store slice.
@@ -78,6 +77,14 @@ export declare function initializeLayerState(set: TypeSetStore, get: TypeGetStor
  * @returns The legend layers array
  */
 export declare const getStoreLayerLegendLayers: (mapId: string) => TypeLegendLayer[];
+/**
+ * Gets a specific legend layer by its path for the given map.
+ *
+ * @param mapId - The map identifier.
+ * @param layerPath - The layer path to look up.
+ * @returns The matching legend layer, or undefined if not found.
+ */
+export declare const getStoreLayerLegendLayerByPath: (mapId: string, layerPath: string) => TypeLegendLayer | undefined;
 /**
  * Returns all layer paths from the ordered layers.
  *
@@ -177,14 +184,6 @@ export declare const getStoreLayerAreLayersLoading: (mapId: string) => boolean;
  * @returns True if layers are loading
  */
 export declare const useStoreLayerAreLayersLoading: () => boolean;
-/**
- * Gets a specific legend layer by its path for the given map.
- *
- * @param mapId - The map identifier
- * @param layerPath - The layer path to look up
- * @returns The matching legend layer, or undefined if not found
- */
-export declare const getStoreLayerLegendLayerByPath: (mapId: string, layerPath: string) => TypeLegendLayer | undefined;
 /**
  * Gets the selected layer path for the given map.
  *
@@ -574,8 +573,16 @@ export declare const useStoreLayerChildPaths: (layerPath: string) => string[] | 
  * @returns True if any node in the subtree has controls.visibility === false
  */
 export declare const useStoreLayerHasDisabledVisibility: (layerPath: string) => boolean;
+/**
+ * Gets the controls configuration for a specific layer.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to look up
+ * @returns The layer controls configuration, or undefined if not found
+ */
+export declare const getStoreLayerControls: (mapId: string, layerPath: string) => TypeLayerControls | undefined;
 /** Hook that returns the controls configuration for a specific layer. */
-export declare const useStoreLayerControls: (layerPath: string) => import("@/api/types/layer-schema-types").TypeLayerControls | undefined;
+export declare const useStoreLayerControls: (layerPath: string) => TypeLayerControls | undefined;
 /** Hook that returns the deletion start time for a specific layer. */
 export declare const useStoreLayerDeletionStartTime: (layerPath: string) => number | undefined;
 /** Hook that returns the entry type for a specific layer. */
@@ -782,6 +789,14 @@ export declare const setStoreLayerBoundsForLayerAndParentsAndForget: (mapId: str
  */
 export declare const setStoreLayerItemVisibility: (mapId: string, layerPath: string, item: TypeLegendItem, visibility: boolean, classFilter: string | undefined) => void;
 /**
+ * Sets the class filter query string of a specific legend item and updates the class filter.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path containing the item
+ * @param classFilter - Optional class filter string to apply
+ */
+export declare const setStoreLayerClassFilter: (mapId: string, layerPath: string, classFilter: string | undefined) => void;
+/**
  * Sets the opacity for a specific layer and propagates it to children.
  *
  * @param mapId - The map identifier
@@ -938,6 +953,7 @@ export declare const setStoreLayerDeletionStartTime: (mapId: string, layerPath: 
  *
  * @param mapId - The map identifier
  * @param legendLayers - The legend layers to set
+ * @deprecated Try to use another more direct method to update the store
  */
 export declare const setStoreLegendLayersDirectly: (mapId: string, legendLayers: TypeLegendLayer[]) => void;
 /**
@@ -968,17 +984,6 @@ export type TypeLegendResultInfo = {
 };
 /** The possible states of a legend query. */
 export type LegendQueryStatus = 'init' | 'querying' | 'queried' | 'error';
-/**
- * Represents the legend data for a layer.
- */
-export type TypeLegend = {
-    /** The GeoView layer type this legend belongs to. */
-    type: TypeGeoviewLayerType;
-    /** The legend content - vector styles, an HTML canvas, or null. */
-    legend: TypeVectorLayerStyles | HTMLCanvasElement | null;
-    /** Optional style configuration associated with the legend. */
-    styleConfig?: TypeLayerStyleConfig;
-};
 /** A legend result set entry combining result set metadata with legend result info. */
 export type TypeLegendResultSetEntry = TypeResultSetEntry & TypeLegendResultInfo;
 /** A full result set of legend entries for all layers. */

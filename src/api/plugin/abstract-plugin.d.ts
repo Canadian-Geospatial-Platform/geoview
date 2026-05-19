@@ -1,6 +1,6 @@
 import type * as React from 'react';
 import type { createRoot } from 'react-dom/client';
-import type i18next from 'react-i18next';
+import type * as i18next from 'react-i18next';
 import type { useTheme } from '@mui/material/styles';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import type { MapViewer } from '@/geo/map/map-viewer';

@@ -53,14 +53,19 @@ interface LayerListItemProps {
  *
  * Memoized to avoid re-rendering all items when only the selected layer changes.
  *
- * @param props - LayerListItem properties
+ * @param props - Properties defined in LayerListItemProps interface
  * @returns The layer list item element
  */
 export declare const LayerListItem: import("react").MemoExoticComponent<({ id, isSelected, layer, onListItemClick }: LayerListItemProps) => JSX.Element>;
 /**
  * Renders a list of layers with selection and status indicators.
  *
- * @param props - LayerList properties
+ * Memoized to prevent re-rendering when unrelated parent state changes.
+ * Note: Props (selectedLayerPath, layerList) do change frequently on layer interaction.
+ * Kept for now to protect against parent component re-renders; can be removed
+ * if profiling shows overhead exceeds benefits.
+ *
+ * @param props - Properties defined in LayerListProps interface
  * @returns The layer list element
  */
 export declare const LayerList: import("react").MemoExoticComponent<({ layerList, selectedLayerPath, onListItemClick }: LayerListProps) => JSX.Element>;

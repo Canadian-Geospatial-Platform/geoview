@@ -16,28 +16,28 @@ export declare class Notifications {
      * @param messageKey - The message or a locale key to retrieve
      * @param params - Optional array of parameters to replace, i.e. ['short']
      */
-    addNotificationMessage(messageKey: string, params?: unknown[]): void;
+    addNotificationMessage(messageKey: string, params?: Record<string, unknown>): void;
     /**
      * Adds a notification success.
      *
      * @param messageKey - The message or a locale key to retrieve
      * @param params - Optional array of parameters to replace, i.e. ['short']
      */
-    addNotificationSuccess(messageKey: string, params?: unknown[]): void;
+    addNotificationSuccess(messageKey: string, params?: Record<string, unknown>): void;
     /**
      * Adds a notification warning.
      *
      * @param messageKey - The message or a locale key to retrieve
      * @param params - Optional array of parameters to replace, i.e. ['short']
      */
-    addNotificationWarning(messageKey: string, params?: unknown[]): void;
+    addNotificationWarning(messageKey: string, params?: Record<string, unknown>): void;
     /**
      * Adds a notification error.
      *
      * @param messageKey - The message or a locale key to retrieve
      * @param params - Optional array of parameters to replace, i.e. ['short']
      */
-    addNotificationError(messageKey: string, params?: unknown[]): void;
+    addNotificationError(messageKey: string, params?: Record<string, unknown>): void;
     /**
      * Display next message in snackbar message queue, if there is one.
      */
@@ -50,7 +50,7 @@ export declare class Notifications {
      * @param withNotification - Optional, indicates if the message should also be added as a notification (default true)
      * @param button - Optional snackbar button
      */
-    showMessage(messageKey: string, params?: unknown[], withNotification?: boolean, button?: ISnackbarButton): void;
+    showMessage(messageKey: string, params?: Record<string, unknown>, withNotification?: boolean, button?: ISnackbarButton): void;
     /**
      * Displays a success message in the snackbar.
      *
@@ -59,7 +59,7 @@ export declare class Notifications {
      * @param withNotification - Optional, indicates if the message should also be added as a notification (default true)
      * @param button - Optional snackbar button
      */
-    showSuccess(messageKey: string, params?: unknown[], withNotification?: boolean, button?: ISnackbarButton): void;
+    showSuccess(messageKey: string, params?: Record<string, unknown>, withNotification?: boolean, button?: ISnackbarButton): void;
     /**
      * Displays a warning message in the snackbar.
      *
@@ -68,7 +68,7 @@ export declare class Notifications {
      * @param withNotification - Optional, indicates if the message should also be added as a notification (default true)
      * @param button - Optional snackbar button
      */
-    showWarning(messageKey: string, params?: unknown[], withNotification?: boolean, button?: ISnackbarButton): void;
+    showWarning(messageKey: string, params?: Record<string, unknown>, withNotification?: boolean, button?: ISnackbarButton): void;
     /**
      * Displays an error message in the snackbar.
      *
@@ -77,7 +77,7 @@ export declare class Notifications {
      * @param withNotification - Optional, indicates if the message should also be added as a notification (default true)
      * @param button - Optional snackbar button
      */
-    showError(messageKey: string, params?: unknown[], withNotification?: boolean, button?: ISnackbarButton): void;
+    showError(messageKey: string, params?: Record<string, unknown>, withNotification?: boolean, button?: ISnackbarButton): void;
     /**
      * Displays an error which can be a GeoViewError or a generic Error.
      *
@@ -125,7 +125,7 @@ export type SnackbarType = 'success' | 'error' | 'info' | 'warning';
 export type SnackbarProps = {
     type: SnackbarType;
     messageKey: string;
-    params: unknown[];
+    params: Record<string, unknown>;
     button?: ISnackbarButton;
 };
 export {};
