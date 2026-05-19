@@ -538,6 +538,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
 
         // If it is a single layer, remove geoview layer
         if (layerPathNodes.length === 1 || (layerPathNodes.length === 2 && geoviewLayer.listOfLayerEntryConfig.length === 1)) {
+          // Dispose of the root layer reference
           geoviewLayer.olRootLayer?.dispose();
           if (geoviewLayer.olRootLayer) delete geoviewLayer.olRootLayer;
 
