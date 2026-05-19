@@ -110,6 +110,7 @@ export {
   Settings as SettingsIcon,
   Share as ShareIcon,
   ShapeLine as ShapeLineIcon,
+  SortByAlpha as SortByAlphaIcon,
   ShowChart as ShowChartIcon,
   Signpost as SignpostIcon,
   Star as StarIcon,

@@ -1,6 +1,6 @@
 import { Fetch } from 'geoview-core/core/utils/fetch-helper';
 import { logger } from 'geoview-core/core/utils/logger';
-import type { StacCollection, StacItem, StacSearchParams, StacSearchResult } from './stac-browser-types';
+import type { StacCollection, StacItem, StacItemsResponse, StacSearchParams, StacSearchResult } from './stac-browser-types';
 
 /**
  * Service class for interacting with STAC APIs.
@@ -89,5 +89,45 @@ export class StacApiService {
     // Token can be in the href as a query param or in the link body
     const url = new URL(nextLink.href, this.#stacUrl);
     return url.searchParams.get('token') ?? undefined;
+  }
+
+  /**
+   * Fetches items belonging to a specific collection.
+   *
+   * @param collectionId - The collection ID to fetch items for
+   * @param limit - Optional max items per page
+   * @param nextUrl - Optional full URL from pagination link for next page
+   * @returns A promise that resolves with the items response
+   */
+  async fetchCollectionItems(collectionId: string, limit?: number, nextUrl?: string): Promise<StacItemsResponse> {
+    try {
+      const url = nextUrl ?? `${this.#stacUrl}/collections/${encodeURIComponent(collectionId)}/items${limit ? `?limit=${limit}` : ''}`;
+      return await Fetch.fetchJson<StacItemsResponse>(url);
+    } catch (error) {
+      logger.logError(`StacApiService.fetchCollectionItems - Failed to fetch items for collection ${collectionId}`, error);
+      return { type: 'FeatureCollection', features: [] };
+    }
+  }
+
+  /**
+   * Extracts the next page URL from an items response's links.
+   *
+   * @param response - The items response to extract pagination from
+   * @returns The full next page URL, or undefined if no more pages
+   */
+  getNextPageUrl(response: StacItemsResponse): string | undefined {
+    const nextLink = response.links?.find((link) => link.rel === 'next');
+    return nextLink?.href;
+  }
+
+  /**
+   * Extracts the previous page URL from an items response's links.
+   *
+   * @param response - The items response to extract pagination from
+   * @returns The full previous page URL, or undefined if on first page
+   */
+  getPrevPageUrl(response: StacItemsResponse): string | undefined {
+    const prevLink = response.links?.find((link) => link.rel === 'prev' || link.rel === 'previous');
+    return prevLink?.href;
   }
 }

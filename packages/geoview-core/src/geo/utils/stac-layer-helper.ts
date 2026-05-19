@@ -8,9 +8,17 @@ import type GeoTIFFSource from 'ol/source/GeoTIFF';
 import ImageLayer from 'ol/layer/Image';
 import Static from 'ol/source/ImageStatic';
 import { transformExtent } from 'ol/proj';
+import VectorLayer from 'ol/layer/Vector';
+import VectorSource from 'ol/source/Vector';
+import GeoJSON from 'ol/format/GeoJSON';
+import Feature from 'ol/Feature';
+import Polygon from 'ol/geom/Polygon';
+import { get as getProjection } from 'ol/proj';
+import { Fill, Stroke, Style } from 'ol/style';
 
 import { logger } from '@/core/utils/logger';
 import { extractGeotiffColorMap, type RGBA } from '@/core/utils/utilities';
+import { Projection } from '@/geo/utils/projection';
 
 /** Options for creating a STAC layer. */
 export interface StacLayerOptions {
@@ -248,15 +256,27 @@ export class StacLayerHelper {
 
   /**
    * Transforms a bbox from EPSG:4326 to the map's current projection.
+   * Uses densified polygon edges for accurate extent in curvilinear projections.
    *
    * @param map - The OpenLayers map instance
    * @param bbox - Bounding box in EPSG:4326 [west, south, east, north]
    * @returns The transformed extent in the map's projection
    */
   static transformBboxToMapProjection(map: OlMap, bbox: [number, number, number, number]): [number, number, number, number] {
-    const mapProjection = map.getView().getProjection().getCode();
-    const extent = transformExtent(bbox, 'EPSG:4326', mapProjection);
-    return [extent[0], extent[1], extent[2], extent[3]];
+    const mapProjection = map.getView().getProjection();
+    const srcProj = getProjection('EPSG:4326')!;
+    const coords = Projection.transformAndDensifyExtent(bbox, srcProj, mapProjection);
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+    for (const [x, y] of coords) {
+      if (x < minX) minX = x;
+      if (y < minY) minY = y;
+      if (x > maxX) maxX = x;
+      if (y > maxY) maxY = y;
+    }
+    return [minX, minY, maxX, maxY];
   }
 
   /**
@@ -352,7 +372,7 @@ export class StacLayerHelper {
     /** Checks if an asset is a GeoTIFF by media type or file extension. */
     const isGeoTiff = (asset: { href: string; type?: string }): boolean => {
       if (asset.type) {
-        return geotiffTypes.some((t) => asset.type!.toLowerCase().startsWith(t));
+        return geotiffTypes.some((mediaType) => asset.type!.toLowerCase().startsWith(mediaType));
       }
       // Fallback: check file extension
       const url = asset.href.toLowerCase().split('?')[0];
@@ -372,6 +392,93 @@ export class StacLayerHelper {
     if (any) return any.href;
 
     return undefined;
+  }
+
+  /**
+   * Adds a vector footprint layer from a bounding box with a specified color.
+   * Uses densified polygon edges to handle curvilinear projections (e.g., LCC) correctly.
+   *
+   * @param map - The OpenLayers map instance
+   * @param bbox - Bounding box in EPSG:4326 [west, south, east, north]
+   * @param color - CSS color string for the stroke (e.g., 'blue', '#FF8C00')
+   * @param fillOpacity - Optional fill opacity (0-1), defaults to 0.1
+   * @returns The created VectorLayer
+   */
+  static addBboxFootprintLayer(
+    map: OlMap,
+    bbox: [number, number, number, number],
+    color: string,
+    fillOpacity = 0.1
+  ): VectorLayer<VectorSource> {
+    const mapProjection = map.getView().getProjection();
+    const srcProj = getProjection('EPSG:4326')!;
+    const coords = Projection.transformAndDensifyExtent(bbox, srcProj, mapProjection);
+    const polygon = new Polygon([coords]);
+    const feature = new Feature(polygon);
+
+    const vectorSource = new VectorSource({ features: [feature] });
+    const vectorLayer = new VectorLayer({
+      source: vectorSource,
+      style: new Style({
+        stroke: new Stroke({ color, width: 2 }),
+        fill: new Fill({ color: StacLayerHelper.#colorWithAlpha(color, fillOpacity) }),
+      }),
+    });
+
+    vectorLayer.set(STAC_BROWSER_TAG, true);
+    map.addLayer(vectorLayer);
+    return vectorLayer;
+  }
+
+  /**
+   * Adds a vector footprint layer from a GeoJSON geometry with a specified color.
+   *
+   * @param map - The OpenLayers map instance
+   * @param geometry - GeoJSON geometry object
+   * @param color - CSS color string for the stroke
+   * @param fillOpacity - Optional fill opacity (0-1), defaults to 0.1
+   * @returns The created VectorLayer
+   */
+  static addGeometryFootprintLayer(map: OlMap, geometry: unknown, color: string, fillOpacity = 0.1): VectorLayer<VectorSource> {
+    const mapProjection = map.getView().getProjection().getCode();
+    const format = new GeoJSON();
+    const features = format.readFeatures(
+      { type: 'Feature', geometry, properties: {} },
+      { dataProjection: 'EPSG:4326', featureProjection: mapProjection }
+    );
+
+    const vectorSource = new VectorSource({ features });
+    const vectorLayer = new VectorLayer({
+      source: vectorSource,
+      style: new Style({
+        stroke: new Stroke({ color, width: 2 }),
+        fill: new Fill({ color: StacLayerHelper.#colorWithAlpha(color, fillOpacity) }),
+      }),
+    });
+
+    vectorLayer.set(STAC_BROWSER_TAG, true);
+    map.addLayer(vectorLayer);
+    return vectorLayer;
+  }
+
+  /**
+   * Converts a CSS color string to an rgba string with the given alpha.
+   *
+   * @param color - CSS color string (hex or named)
+   * @param alpha - Alpha value (0-1)
+   * @returns The rgba color string
+   */
+  static #colorWithAlpha(color: string, alpha: number): string {
+    // For hex colors, parse and add alpha
+    if (color.startsWith('#')) {
+      const hex = color.replace('#', '');
+      const r = parseInt(hex.substring(0, 2), 16);
+      const g = parseInt(hex.substring(2, 4), 16);
+      const b = parseInt(hex.substring(4, 6), 16);
+      return `rgba(${r},${g},${b},${alpha})`;
+    }
+    // For named colors, use canvas-based conversion
+    return `rgba(0,0,0,${alpha})`;
   }
 
   /**

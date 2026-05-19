@@ -104,6 +104,26 @@ export interface StacSearchResult {
   links?: StacLink[];
 }
 
+/** The panel views for the STAC browser. */
+export type PanelView = 'collections' | 'collection-detail' | 'search' | 'search-results' | 'item-detail';
+
+/** Top-level mode toggle. */
+export type BrowseMode = 'browse' | 'search';
+
+/** Response from GET /collections/{id}/items. */
+export interface StacItemsResponse {
+  /** Result type (always "FeatureCollection"). */
+  type: 'FeatureCollection';
+  /** Array of STAC items. */
+  features: StacItem[];
+  /** Number of features returned. */
+  numberReturned?: number;
+  /** Number of features matched. */
+  numberMatched?: number;
+  /** Links for pagination. */
+  links?: StacLink[];
+}
+
 /** Plugin configuration type. */
 export interface StacBrowserConfig {
   /** Base URL of the STAC API. */

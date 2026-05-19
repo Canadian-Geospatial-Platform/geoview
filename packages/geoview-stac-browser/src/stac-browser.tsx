@@ -1,18 +1,16 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
-import { Box, Button, Divider, Typography } from 'geoview-core/ui';
+import { Box, Typography } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
-import { StacLayerHelper } from 'geoview-core/geo/utils/stac-layer-helper';
 
-import type { StacBrowserConfig, StacCollection, StacItem, StacSearchResult } from './stac-browser-types';
+import type { BrowseMode, PanelView, StacBrowserConfig, StacCollection, StacItem, StacSearchResult } from './stac-browser-types';
 import { StacApiService } from './stac-api-service';
 import { StacFilterPanel } from './stac-filter-panel';
-import { StacResultsList } from './stac-results-list';
+import { StacCollectionList } from './stac-collection-list';
+import { StacCollectionDetail } from './stac-collection-detail';
+import { StacSearchResults } from './stac-search-results';
 import { StacItemDetail } from './stac-item-detail';
 import { getSxClasses } from './stac-browser-style';
-
-/** The three possible panel views. */
-type PanelView = 'search' | 'results' | 'detail';
 
 /** Props for the StacBrowser component. */
 interface StacBrowserProps {
@@ -23,7 +21,7 @@ interface StacBrowserProps {
 }
 
 /**
- * Creates the STAC browser main component.
+ * Creates the STAC browser main component with browse and search modes.
  *
  * @param props - Properties defined in StacBrowserProps interface
  * @returns The STAC browser component
@@ -37,19 +35,20 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
   const { useTheme } = cgpv.ui;
   const { t } = useTranslation();
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
   const { useCallback, useEffect, useMemo, useState } = cgpv.reactUtilities.react;
-
-  // Get the OL map reference once at component level
-  const olMap = cgpv.api.getMapViewer(mapId).map;
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // State
-  const [view, setView] = useState<PanelView>('search');
+  const [mode, setMode] = useState<BrowseMode>('browse');
+  const [view, setView] = useState<PanelView>('collections');
   const [collections, setCollections] = useState<StacCollection[]>([]);
-  const [searchResult, setSearchResult] = useState<StacSearchResult | null>(null);
+  const [selectedCollection, setSelectedCollection] = useState<StacCollection | null>(null);
   const [selectedItem, setSelectedItem] = useState<StacItem | null>(null);
+  const [searchResult, setSearchResult] = useState<StacSearchResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [nextToken, setNextToken] = useState<string | undefined>(undefined);
+  /** Tracks which view the item-detail was opened from. */
+  const [itemDetailOrigin, setItemDetailOrigin] = useState<PanelView>('collections');
 
   /** The STAC API service instance. */
   const memoApiService = useMemo((): StacApiService => {
@@ -77,6 +76,53 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
   // #region Handlers
 
   /**
+   * Handles switching between browse and search modes.
+   */
+  const handleModeChange = useCallback((newMode: BrowseMode): void => {
+    setMode(newMode);
+    if (newMode === 'browse') {
+      setView('collections');
+    } else {
+      setView('search');
+    }
+    // Clear selection when switching modes
+    setSelectedItem(null);
+    setSelectedCollection(null);
+    setSearchResult(null);
+  }, []);
+
+  /**
+   * Handles clicking on a collection card to view its details.
+   */
+  const handleCollectionClick = useCallback((collection: StacCollection): void => {
+    setSelectedCollection(collection);
+    setView('collection-detail');
+  }, []);
+
+  /**
+   * Handles clicking on an item to view its details.
+   */
+  const handleItemClick = useCallback(
+    (item: StacItem): void => {
+      const selfLink = item.links?.find((link) => link.rel === 'self');
+      if (selfLink?.href) {
+        const doFetch = async (): Promise<void> => {
+          const fullItem = await StacApiService.fetchItem(selfLink.href);
+          setSelectedItem(fullItem ?? item);
+          setItemDetailOrigin(view);
+          setView('item-detail');
+        };
+        void doFetch();
+      } else {
+        setSelectedItem(item);
+        setItemDetailOrigin(view);
+        setView('item-detail');
+      }
+    },
+    [view]
+  );
+
+  /**
    * Handles search submission from the filter panel.
    */
   const handleSearch = useCallback(
@@ -95,7 +141,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
           logger.logInfo(`STAC-BROWSER - Search returned ${result.features.length} features`);
           setSearchResult(result);
           setNextToken(memoApiService.getNextPageToken(result));
-          setView('results');
+          setView('search-results');
         } catch (error) {
           logger.logError('STAC-BROWSER - Search failed:', error);
         } finally {
@@ -108,7 +154,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
   );
 
   /**
-   * Handles loading the next page of results.
+   * Handles loading more search results.
    */
   const handleLoadMore = useCallback((): void => {
     if (!nextToken) return;
@@ -119,7 +165,6 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
         if (!prev) return result;
         return { ...result, features: [...prev.features, ...result.features] };
       });
-
       setNextToken(memoApiService.getNextPageToken(result));
       setIsLoading(false);
     };
@@ -127,22 +172,19 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
   }, [nextToken, memoApiService, config.defaults?.limit]);
 
   /**
-   * Handles clicking on a result item to show its details.
+   * Handles going back from item detail to its origin view.
    */
-  const handleItemClick = useCallback((item: StacItem): void => {
-    // Fetch the full item (search results often omit assets)
-    const selfLink = item.links?.find((link) => link.rel === 'self');
-    if (selfLink?.href) {
-      const doFetch = async (): Promise<void> => {
-        const fullItem = await StacApiService.fetchItem(selfLink.href);
-        setSelectedItem(fullItem ?? item);
-        setView('detail');
-      };
-      void doFetch();
-    } else {
-      setSelectedItem(item);
-      setView('detail');
-    }
+  const handleBackFromItemDetail = useCallback((): void => {
+    setSelectedItem(null);
+    setView(itemDetailOrigin);
+  }, [itemDetailOrigin]);
+
+  /**
+   * Handles going back to the collections list.
+   */
+  const handleBackToCollections = useCallback((): void => {
+    setSelectedCollection(null);
+    setView('collections');
   }, []);
 
   /**
@@ -153,21 +195,19 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
   }, []);
 
   /**
-   * Handles going back to the results list.
+   * Handles navigating from item detail up to its parent collection.
    */
-  const handleBackToResults = useCallback((): void => {
-    setSelectedItem(null);
-    setView('results');
-  }, []);
-
-  /**
-   * Handles clearing all STAC layers from the map and resetting toggle states.
-   */
-  const handleClearMap = useCallback((): void => {
-    StacLayerHelper.removeAllStacBrowserLayers(olMap);
-    setSelectedItem(null);
-    setView('search');
-  }, [olMap]);
+  const handleGoToCollection = useCallback(
+    (collectionId: string): void => {
+      const collection = collections.find((c) => c.id === collectionId);
+      if (collection) {
+        setSelectedItem(null);
+        setSelectedCollection(collection);
+        setView('collection-detail');
+      }
+    },
+    [collections]
+  );
 
   // #endregion
 
@@ -175,61 +215,108 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
    * Renders the active view based on the current panel state.
    */
   const renderContent = (): JSX.Element => {
-    if (view === 'detail' && selectedItem) {
-      return <StacItemDetail item={selectedItem} mapId={mapId} onBackToResults={handleBackToResults} onBackToSearch={handleBackToSearch} />;
+    // Item detail — shared by both modes
+    if (view === 'item-detail' && selectedItem) {
+      return <StacItemDetail item={selectedItem} mapId={mapId} onBack={handleBackFromItemDetail} onGoToCollection={handleGoToCollection} />;
     }
 
-    if (view === 'results') {
+    // Collection detail — browse mode
+    if (view === 'collection-detail' && selectedCollection) {
       return (
-        <Box sx={sxClasses.panelContent}>
-          {/* Back link */}
-          <Box sx={sxClasses.backLink}>
-            <Button type="text" size="small" onClick={handleBackToSearch}>
-              ← {t('stacBrowser.backToSearch')}
-            </Button>
-          </Box>
+        <StacCollectionDetail
+          collection={selectedCollection}
+          apiService={memoApiService}
+          mapId={mapId}
+          onItemClick={handleItemClick}
+          onBack={handleBackToCollections}
+        />
+      );
+    }
 
+    // Search results — search mode
+    if (view === 'search-results' && searchResult) {
+      return (
+        <>
           {isLoading && (
             <Box sx={sxClasses.loading}>
               <Typography>{t('stacBrowser.loading')}</Typography>
             </Box>
           )}
-          {!isLoading && searchResult && searchResult.features.length === 0 && (
+          {!isLoading && searchResult.features.length === 0 && (
             <Box sx={sxClasses.noResults}>
               <Typography>{t('stacBrowser.noResults')}</Typography>
             </Box>
           )}
-          {!isLoading && searchResult && searchResult.features.length > 0 && (
-            <StacResultsList
-              items={searchResult.features}
+          {!isLoading && searchResult.features.length > 0 && (
+            <StacSearchResults
+              results={searchResult}
+              collections={collections}
               onItemClick={handleItemClick}
+              onBack={handleBackToSearch}
               hasMore={!!nextToken}
               onLoadMore={handleLoadMore}
             />
           )}
+        </>
+      );
+    }
+
+    // Search panel — search mode
+    if (mode === 'search') {
+      return (
+        <Box sx={sxClasses.panelContent}>
+          <StacFilterPanel config={config} onSearch={handleSearch} mapId={mapId} />
         </Box>
       );
     }
 
-    // Default: search view
+    // Default: collections list — browse mode
+    if (collections.length === 0) {
+      return (
+        <Box sx={sxClasses.loading}>
+          <Typography>{t('stacBrowser.loading')}</Typography>
+        </Box>
+      );
+    }
+
     return (
       <Box sx={sxClasses.panelContent}>
-        <StacFilterPanel collections={collections} config={config} onSearch={handleSearch} mapId={mapId} />
+        <StacCollectionList collections={collections} onCollectionClick={handleCollectionClick} />
       </Box>
     );
   };
 
   return (
     <Box sx={sxClasses.mainContainer}>
-      {renderContent()}
+      {/* Mode toggle — Browse / Search (hide when in item-detail) */}
+      {view !== 'item-detail' && (
+        <Box sx={sxClasses.modeToggle}>
+          <Box
+            sx={[sxClasses.modeButton, mode === 'browse' && sxClasses.modeButtonActive]}
+            onClick={(): void => handleModeChange('browse')}
+            role="tab"
+            tabIndex={0}
+            onKeyDown={(e: React.KeyboardEvent): void => {
+              if (e.key === 'Enter' || e.key === ' ') handleModeChange('browse');
+            }}
+          >
+            {t('stacBrowser.browse')}
+          </Box>
+          <Box
+            sx={[sxClasses.modeButton, mode === 'search' && sxClasses.modeButtonActive]}
+            onClick={(): void => handleModeChange('search')}
+            role="tab"
+            tabIndex={0}
+            onKeyDown={(e: React.KeyboardEvent): void => {
+              if (e.key === 'Enter' || e.key === ' ') handleModeChange('search');
+            }}
+          >
+            {t('stacBrowser.search')}
+          </Box>
+        </Box>
+      )}
 
-      {/* Clear Map button — always visible at the bottom */}
-      <Box sx={sxClasses.clearMapFooter}>
-        <Divider />
-        <Button type="text" variant="outlined" color="error" size="small" onClick={handleClearMap} sx={{ margin: '12px' }}>
-          {t('stacBrowser.clearMap')}
-        </Button>
-      </Box>
+      {renderContent()}
     </Box>
   );
 }
