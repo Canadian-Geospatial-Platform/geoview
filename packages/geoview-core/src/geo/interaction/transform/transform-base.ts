@@ -21,7 +21,6 @@ import { GeoUtilities } from '@/geo/utils/utilities';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import { TIMEOUT } from '@/core/utils/constant';
 import { DrawerStyle } from '@/geo/style/drawer-style';
-import type { DrawerIcon } from '@/geo/style/drawer-icon';
 
 // #region Constants
 
@@ -98,19 +97,6 @@ const STRETCH_STYLE = new DrawerStyle({
   }),
 });
 
-const TRANSLATE_STYLE = new DrawerStyle({
-  image: new CircleStyle({
-    radius: 8,
-    fill: new Fill({
-      color: 'rgba(0, 0, 0, 0.8)',
-    }),
-    stroke: new Stroke({
-      color: '#333',
-      width: 1,
-    }),
-  }),
-});
-
 const VERTEX_STYLE = new DrawerStyle({
   image: new CircleStyle({
     radius: 6,
@@ -160,7 +146,6 @@ export enum HandleType {
   ROTATE_LINE = 'rotate-line',
   SCALE = 'scale',
   TRANSLATE = 'translate',
-  TRANSLATE_CENTER = 'translate-center',
   STRETCH_N = 'stretch-n',
   STRETCH_E = 'stretch-e',
   STRETCH_S = 'stretch-s',
@@ -255,7 +240,7 @@ export class OLTransform extends OLPointer {
   #isTransforming = false;
 
   /** Stores the original feature style when highlighting for translation */
-  #highlightedFeature?: { originalStyle: StyleLike };
+  #originalStyleBeforeHighlight?: StyleLike;
 
   /** The type of transformation being performed */
   #transformType?: HandleType;
@@ -518,7 +503,7 @@ export class OLTransform extends OLPointer {
       // Set up transformation state for translation
       this.startCoordinate = coordinate;
       this.startGeometry = this.selectedFeature.getGeometry()?.clone();
-      this.#transformType = HandleType.TRANSLATE;
+      this.#transformType = handleType;
       this.#isTransforming = true;
 
       // For text features, store original properties
@@ -615,7 +600,7 @@ export class OLTransform extends OLPointer {
     const handleType = handle.get('handleType') as HandleType;
 
     // For translate (moving the whole feature), highlight the feature itself
-    if (handleType === HandleType.TRANSLATE || handleType === HandleType.TRANSLATE_CENTER) {
+    if (handleType === HandleType.TRANSLATE) {
       this.#highlightFeature();
     }
 
@@ -649,37 +634,71 @@ export class OLTransform extends OLPointer {
     if (!this.selectedFeature) return;
 
     const originalStyle = this.selectedFeature.getStyle() as DrawerStyle;
-    this.#highlightedFeature = { originalStyle };
+    // Save reference to the ORIGINAL style before any modifications
+    this.#originalStyleBeforeHighlight = originalStyle;
 
-    // Create a highlighted version with yellow glow
-    const currentStyle = originalStyle;
+    // Handle different feature types with appropriate highlight styles
+    if (this.#isTextFeature()) {
+      // For text: create a completely new highlighted style
+      const originalText = originalStyle.getDrawerText();
+      if (originalText) {
+        const highlightedStyle = new DrawerStyle({
+          text: new DrawerText({
+            text: originalText.getText(),
+            fill: originalText.getFill()!,
+            stroke: new Stroke({
+              color: 'rgba(255, 235, 59, 0.8)', // Yellow highlight
+              width: (originalText.getStroke()?.getWidth() || 1) + 2, // Thicker
+            }),
+            rotation: originalText.getRotation(),
+            italic: originalText.getItalic(),
+            bold: originalText.getBold(),
+            size: originalText.getSize(),
+            fontFamily: originalText.getFontFamily(),
+            offsetX: originalText.getOffsetX(),
+            offsetY: originalText.getOffsetY(),
+          }),
+        });
+        this.selectedFeature.setStyle(highlightedStyle);
+      }
+    } else if (this.selectedFeature.getGeometry() instanceof Point) {
+      // For icons: replace with a simple yellow circle highlight during translation
+      const highlightedStyle = new DrawerStyle({
+        image: new CircleStyle({
+          radius: 8,
+          fill: new Fill({ color: 'rgba(255, 235, 59, 0.5)' }), // Semi-transparent yellow
+          stroke: new Stroke({ color: 'rgba(255, 235, 59, 1)', width: 3 }), // Solid yellow border
+        }),
+      });
+      this.selectedFeature.setStyle(highlightedStyle);
+      this.selectedFeature.changed();
+    } else {
+      // Stroke/fill highlighting for LineString, Polygon, Circle
+      const highlightedStyle = new DrawerStyle({
+        stroke: originalStyle.getStroke()
+          ? new Stroke({
+              color: 'rgba(255, 235, 59, 0.8)', // Yellow
+              width: (originalStyle.getStroke()?.getWidth() || 1.3) + 2, // Thicker
+            })
+          : undefined,
+        fill: originalStyle.getFill()
+          ? new Fill({
+              color: originalStyle.getFill()!.getColor() as string,
+            })
+          : undefined,
+      });
 
-    const highlightedStyle = new DrawerStyle({
-      stroke: currentStyle.getStroke()
-        ? new Stroke({
-            color: 'rgba(255, 235, 59, 0.8)', // Yellow
-            width: (currentStyle.getStroke()?.getWidth() || 1.3) + 2, // Thicker
-          })
-        : undefined,
-      fill: currentStyle.getFill()
-        ? new Fill({
-            color: currentStyle.getFill()!.getColor() as string,
-          })
-        : undefined,
-      image: currentStyle.getImage() as DrawerIcon,
-      text: currentStyle.getText() as DrawerText,
-    });
-
-    this.selectedFeature.setStyle(highlightedStyle);
+      this.selectedFeature.setStyle(highlightedStyle);
+    }
   }
 
   /**
    * Restores the original style of the highlighted feature.
    */
   #restoreFeatureStyle(): void {
-    if (this.#highlightedFeature && this.selectedFeature) {
-      this.selectedFeature.setStyle(this.#highlightedFeature.originalStyle);
-      this.#highlightedFeature = undefined;
+    if (this.#originalStyleBeforeHighlight && this.selectedFeature) {
+      this.selectedFeature.setStyle(this.#originalStyleBeforeHighlight);
+      this.#originalStyleBeforeHighlight = undefined;
     }
   }
 
@@ -936,9 +955,6 @@ export class OLTransform extends OLPointer {
       case HandleType.STRETCH_W:
         handle.setStyle(STRETCH_STYLE);
         break;
-      case HandleType.TRANSLATE_CENTER:
-        handle.setStyle(TRANSLATE_STYLE);
-        break;
       default:
         break;
     }
@@ -1130,9 +1146,6 @@ export class OLTransform extends OLPointer {
 
       case HandleType.STRETCH_W:
         return 'ew-resize';
-
-      case HandleType.TRANSLATE_CENTER:
-        return 'move';
 
       default:
         return 'default';
@@ -1639,7 +1652,6 @@ export class OLTransform extends OLPointer {
       // Perform the transformation based on the handle type
       switch (this.#transformType) {
         case HandleType.TRANSLATE:
-        case HandleType.TRANSLATE_CENTER:
           // Delta X and Delta Y
           this.handleTranslate(coordinate[0] - this.startCoordinate[0], coordinate[1] - this.startCoordinate[1]);
           break;
@@ -1900,14 +1912,14 @@ export class OLTransform extends OLPointer {
     if (!(geometry instanceof Point)) return;
 
     const position = geometry.getCoordinates();
-    const currentStyle = this.selectedFeature.getStyle() as DrawerStyle;
+    const currentStyle = (this.#originalStyleBeforeHighlight || this.selectedFeature.getStyle()) as DrawerStyle;
     const currentText = currentStyle.getTextContent() as string;
     const currentSize = currentStyle.getTextSize();
     const currentColor = currentStyle.getTextColor();
     const currentFont = currentStyle.getTextFontFamily();
 
     // Hide the original text on the map by assigning an empty text style
-    this.#originalTextStyle = this.selectedFeature.getStyle() as DrawerStyle;
+    this.#originalTextStyle = currentStyle;
     this.selectedFeature.setStyle(new DrawerStyle());
 
     // Create simple text editor element
@@ -1948,11 +1960,13 @@ export class OLTransform extends OLPointer {
         switch (e.key.toLowerCase()) {
           case 'b':
             e.preventDefault();
+            e.stopPropagation();
             this.#toggleBold();
             this.onTransformend?.(new TransformEvent('transformend', this.selectedFeature));
             break;
           case 'i':
             e.preventDefault();
+            e.stopPropagation();
             this.#toggleItalic();
             this.onTransformend?.(new TransformEvent('transformend', this.selectedFeature));
             break;
@@ -1963,10 +1977,12 @@ export class OLTransform extends OLPointer {
 
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
+        e.stopPropagation();
         this.#applyTextChanges();
         this.onTransformend?.(new TransformEvent('transformend', this.selectedFeature));
       } else if (e.key === 'Escape') {
         e.preventDefault();
+        e.stopPropagation();
         this.#cancelTextEditing();
       }
     });
