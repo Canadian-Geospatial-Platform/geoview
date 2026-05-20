@@ -19,7 +19,7 @@ const STAC_BROWSER_TAG = 'gv-stac-browser';
  * removing, and querying STAC layers. It does NOT integrate with the GeoView
  * layer system (no layerPath, no legend, no store entry).
  */
-export class StacLayerHelper {
+export abstract class StacLayerHelper {
   /**
    * Creates a WebGLTile layer with a GeoTIFF source directly, bypassing ol-stac.
    *
