@@ -193,7 +193,8 @@
         "layers",
         "share",
         "aoi-panel",
-        "custom-legend"
+        "custom-legend",
+        "stac-browser"
       ]
     },
     "TypeAppBarProps": {

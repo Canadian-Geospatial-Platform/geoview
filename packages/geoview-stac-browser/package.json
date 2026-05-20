@@ -1,0 +1,29 @@
+{
+  "name": "geoview-stac-browser",
+  "version": "1.0.0",
+  "description": "A STAC catalog browser plugin for the geoview project",
+  "main": "src/index.tsx",
+  "keywords": [
+    "stac-browser",
+    "stac",
+    "catalog"
+  ],
+  "author": "Canadian Geospatial Platform",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc --build",
+    "build-dev": "tsc --build"
+  },
+  "peerDependencies": {
+    "geoview-core": "workspace:^2.0.0",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "zustand": "~5.0.12"
+  },
+  "devDependencies": {
+    "geoview-core": "workspace:^2.0.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "typescript": "^6.0.3"
+  }
+}
