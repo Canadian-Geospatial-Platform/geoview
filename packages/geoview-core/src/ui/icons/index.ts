@@ -26,6 +26,7 @@ export {
   Circle as CircleIcon,
   Close as CloseIcon,
   Collections as CollectionsIcon,
+  ContentCopy as CopyIcon,
   Copyright as CopyrightIcon,
   CropOriginal as AoiIcon,
   Delete as DeleteIcon,

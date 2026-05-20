@@ -164,6 +164,7 @@ export const getSxClasses = (theme: any): any => ({
   pagination: {
     display: 'flex',
     justifyContent: 'center',
+    gap: theme.spacing(1),
     padding: theme.spacing(1),
   },
   dateInputRow: {
@@ -194,7 +195,6 @@ export const getSxClasses = (theme: any): any => ({
     padding: theme.spacing(1.5),
     marginBottom: theme.spacing(1),
     border: `1px solid ${theme.palette.divider}`,
-    borderRadius: theme.shape.borderRadius,
     cursor: 'pointer',
     '&:hover': {
       backgroundColor: theme.palette.action.hover,
@@ -222,7 +222,6 @@ export const getSxClasses = (theme: any): any => ({
     display: 'inline-block',
     padding: '2px 8px',
     fontSize: '0.75rem',
-    borderRadius: '12px',
     backgroundColor: theme.palette.action.selected,
     color: theme.palette.geoViewColor.textColor.main,
     whiteSpace: 'nowrap',
@@ -234,6 +233,22 @@ export const getSxClasses = (theme: any): any => ({
     flexDirection: 'column',
     gap: theme.spacing(1),
     padding: theme.spacing(0, 1.5, 1),
+  },
+  metadataColumnsRow: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing(2),
+    padding: theme.spacing(0, 1.5, 1),
+    '@media (min-width: 500px)': {
+      flexDirection: 'row',
+    },
+  },
+  metadataColumn: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing(1),
+    flex: 1,
+    minWidth: 0,
   },
   metadataRow: {
     display: 'flex',
@@ -258,11 +273,10 @@ export const getSxClasses = (theme: any): any => ({
   },
   itemRow: {
     display: 'flex',
-    gap: theme.spacing(1),
-    padding: theme.spacing(1),
-    marginBottom: theme.spacing(0.5),
+    gap: theme.spacing(4),
+    padding: theme.spacing(5, 3),
+    marginBottom: theme.spacing(10),
     border: `1px solid ${theme.palette.divider}`,
-    borderRadius: theme.shape.borderRadius,
     cursor: 'pointer',
     alignItems: 'center',
     '&:hover': {
@@ -301,6 +315,12 @@ export const getSxClasses = (theme: any): any => ({
     border: `1px solid ${theme.palette.divider}`,
     color: theme.palette.geoViewColor.textColor.light[200],
     textTransform: 'uppercase',
+  },
+  assetActions: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(0.5),
+    flexShrink: 0,
   },
   paginationBar: {
     display: 'flex',

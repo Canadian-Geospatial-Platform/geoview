@@ -5,6 +5,7 @@ import { logger } from 'geoview-core/core/utils/logger';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
 
 import type { StacCollection } from './stac-browser-types';
+import { StacApiService } from './stac-api-service';
 import { getSxClasses } from './stac-browser-style';
 
 /** Props for the StacCollectionList component. */
@@ -105,20 +106,6 @@ export function StacCollectionList(props: StacCollectionListProps): JSX.Element 
 
   // #endregion
 
-  /**
-   * Formats a temporal extent interval for display.
-   *
-   * @param collection - The collection to extract temporal extent from
-   * @returns Formatted date range string, or empty string if unavailable
-   */
-  const formatTemporalExtent = useCallback((collection: StacCollection): string => {
-    const interval = collection.extent?.temporal?.interval?.[0];
-    if (!interval) return '';
-    const start = interval[0] ? new Date(interval[0]).getFullYear() : '...';
-    const end = interval[1] ? new Date(interval[1]).getFullYear() : 'present';
-    return `${start} – ${end}`;
-  }, []);
-
   return (
     <Box sx={sxClasses.resultsList}>
       {/* Search box and sort button */}
@@ -134,14 +121,18 @@ export function StacCollectionList(props: StacCollectionListProps): JSX.Element 
           aria-label={t('stacBrowser.sortAlphabetical')}
           onClick={handleToggleSort}
           size="small"
-          sx={{ color: sortAsc ? theme.palette.geoViewColor.primary.main : theme.palette.geoViewColor.textColor.light[200] }}
+          sx={{
+            color: sortAsc ? theme.palette.geoViewColor.primary.main : theme.palette.geoViewColor.textColor.light[200],
+            backgroundColor: sortAsc ? theme.palette.action.selected : 'transparent',
+            borderRadius: '4px',
+          }}
         >
           <SortByAlphaIcon />
         </IconButton>
       </Box>
 
       {memoFilteredCollections.map((collection) => {
-        const temporal = formatTemporalExtent(collection);
+        const temporal = StacApiService.formatTemporalExtent(collection, true);
         return (
           <Box
             key={collection.id}

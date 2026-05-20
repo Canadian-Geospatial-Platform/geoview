@@ -1,53 +1,13 @@
 import type OlMap from 'ol/Map';
-import type { Extent } from 'ol/extent';
-import type BaseLayer from 'ol/layer/Base';
-import type LayerGroup from 'ol/layer/Group';
 import WebGLTile from 'ol/layer/WebGLTile';
 import GeoTIFF from 'ol/source/GeoTIFF';
-import type GeoTIFFSource from 'ol/source/GeoTIFF';
-import ImageLayer from 'ol/layer/Image';
-import Static from 'ol/source/ImageStatic';
-import { transformExtent } from 'ol/proj';
-import VectorLayer from 'ol/layer/Vector';
-import VectorSource from 'ol/source/Vector';
-import GeoJSON from 'ol/format/GeoJSON';
-import Feature from 'ol/Feature';
-import Polygon from 'ol/geom/Polygon';
-import { get as getProjection } from 'ol/proj';
-import { Fill, Stroke, Style } from 'ol/style';
 
 import { logger } from '@/core/utils/logger';
+import { getStoreMapCurrentProjectionEPSG, getStoreMapExtent } from '@/core/stores/states/map-state';
 import { extractGeotiffColorMap, type RGBA } from '@/core/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
-
-/** Options for creating a STAC layer. */
-export interface StacLayerOptions {
-  /** URL to a STAC Item, Collection, or Catalog JSON. */
-  url?: string;
-  /** Pre-loaded STAC JSON data (alternative to url). */
-  data?: unknown;
-  /** Whether to display preview/thumbnail images. */
-  displayPreview?: boolean;
-  /** Whether to display overview images (COGs). */
-  displayOverview?: boolean;
-  /** Whether to display footprint geometry. */
-  displayFootprint?: boolean;
-  /** Whether to display GeoTIFF assets by default. */
-  displayGeoTiffByDefault?: boolean;
-  /** Whether to display web map link layers (WMS/WMTS/XYZ). */
-  displayWebMapLink?: boolean;
-  /** Explicit asset keys to render. null shows default, empty array shows none. */
-  assets?: string[] | null;
-  /** Cross-origin setting for image requests. */
-  crossOrigin?: string;
-}
-
-/** Default options applied to all STAC layers. */
-const DEFAULT_OPTIONS: Partial<StacLayerOptions> = {
-  displayPreview: true,
-  displayFootprint: true,
-  crossOrigin: 'anonymous',
-};
+import type { GeometryApi } from '@/geo/layer/geometry/geometry';
+import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 
 /** Property key used to tag layers added by the STAC browser plugin. */
 const STAC_BROWSER_TAG = 'gv-stac-browser';
@@ -60,239 +20,6 @@ const STAC_BROWSER_TAG = 'gv-stac-browser';
  * layer system (no layerPath, no legend, no store entry).
  */
 export class StacLayerHelper {
-  /**
-   * Creates and adds an ol-stac layer to the map.
-   *
-   * @param map - The OpenLayers map instance
-   * @param options - STAC layer options
-   * @returns A promise that resolves with the created layer, or null on failure
-   */
-  static async addStacLayer(map: OlMap, options: StacLayerOptions): Promise<unknown> {
-    try {
-      // Dynamic import to avoid bundling ol-stac when not used
-      const { default: STACLayer } = await import('ol-stac');
-
-      const mergedOptions = { ...DEFAULT_OPTIONS, ...options };
-      const stacLayer = new STACLayer(mergedOptions);
-
-      // Tag the layer so we can find/remove it later
-      stacLayer.set(STAC_BROWSER_TAG, true);
-
-      // Listen for errors from ol-stac (asset loading failures, CORS, etc.)
-      stacLayer.on('error', (event: unknown) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- ol-stac error event structure
-        const errorEvent = event as any;
-        logger.logError('StacLayerHelper.addStacLayer - ol-stac error event', errorEvent?.error ?? errorEvent);
-      });
-
-      map.addLayer(stacLayer);
-      logger.logInfo(`StacLayerHelper.addStacLayer - Added STAC layer: ${options.url ?? 'inline data'}`);
-      return stacLayer;
-    } catch (error) {
-      logger.logError('StacLayerHelper.addStacLayer - Failed to add STAC layer', error);
-      return null;
-    }
-  }
-
-  /**
-   * Removes an ol-stac layer from the map.
-   *
-   * @param map - The OpenLayers map instance
-   * @param layer - The STAC layer to remove
-   */
-  static removeStacLayer(map: OlMap, layer: unknown): void {
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- ol-stac layer type not statically available
-      map.removeLayer(layer as any);
-      logger.logInfo('StacLayerHelper.removeStacLayer - Removed STAC layer');
-    } catch (error) {
-      logger.logError('StacLayerHelper.removeStacLayer - Failed to remove STAC layer', error);
-    }
-  }
-
-  /**
-   * Gets the extent of a STAC layer.
-   *
-   * @param layer - The STAC layer
-   * @returns The extent, or undefined if not available
-   */
-  static getStacLayerExtent(layer: unknown): Extent | undefined {
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- ol-stac layer type not statically available
-      const stacLayer = layer as any;
-      if (stacLayer && typeof stacLayer.getExtent === 'function') {
-        return stacLayer.getExtent() as Extent;
-      }
-      return undefined;
-    } catch (error) {
-      logger.logError('StacLayerHelper.getStacLayerExtent - Failed to get extent', error);
-      return undefined;
-    }
-  }
-
-  /**
-   * Adds a preview image as an ImageStatic layer positioned at the given geographic extent.
-   *
-   * @param map - The OpenLayers map instance
-   * @param imageUrl - URL of the preview/thumbnail image
-   * @param bbox - Bounding box in EPSG:4326 [west, south, east, north]
-   * @returns The created ImageLayer, or null on failure
-   */
-  static addPreviewImageLayer(map: OlMap, imageUrl: string, bbox: [number, number, number, number]): ImageLayer<Static> | null {
-    try {
-      const mapProjection = map.getView().getProjection().getCode();
-
-      // Transform bbox from EPSG:4326 to the map's projection
-      const extent = transformExtent(bbox, 'EPSG:4326', mapProjection);
-
-      const imageLayer = new ImageLayer({
-        source: new Static({
-          url: imageUrl,
-          imageExtent: extent,
-          projection: mapProjection,
-          crossOrigin: 'anonymous',
-        }),
-      });
-
-      // Tag the layer so we can find/remove it later
-      imageLayer.set(STAC_BROWSER_TAG, true);
-
-      map.addLayer(imageLayer);
-      logger.logInfo(`StacLayerHelper.addPreviewImageLayer - Added preview image at extent: ${bbox.join(', ')}`);
-      return imageLayer;
-    } catch (error) {
-      logger.logError('StacLayerHelper.addPreviewImageLayer - Failed to add preview image layer', error);
-      return null;
-    }
-  }
-
-  /**
-   * Removes all layers added by the STAC browser plugin from the map.
-   *
-   * @param map - The OpenLayers map instance
-   */
-  static removeAllStacBrowserLayers(map: OlMap): void {
-    const layersToRemove = map
-      .getLayers()
-      .getArray()
-      .filter((layer) => layer.get(STAC_BROWSER_TAG) === true);
-
-    layersToRemove.forEach((layer) => {
-      map.removeLayer(layer);
-    });
-
-    logger.logInfo(`StacLayerHelper.removeAllStacBrowserLayers - Removed ${layersToRemove.length} STAC layers`);
-  }
-
-  /**
-   * Applies embedded colormaps to any WebGLTile (COG) sub-layers within an ol-stac layer group.
-   *
-   * ol-stac creates GeoTIFF sources with normalize=true by default, which renders palette-indexed
-   * rasters as grayscale. This method extracts the embedded colormap from each COG and applies
-   * a WebGL palette style, matching the behavior of GVGeoTIFF.
-   *
-   * @param stacLayer - The ol-stac STACLayer (a LayerGroup)
-   */
-  static async applyColorMapsToStacLayer(stacLayer: unknown): Promise<void> {
-    try {
-      const layerGroup = stacLayer as LayerGroup;
-      if (!layerGroup || typeof layerGroup.getLayers !== 'function') return;
-
-      const layers = layerGroup.getLayers().getArray();
-      const promises = layers.map((layer: BaseLayer) => StacLayerHelper.#processLayerForColorMap(layer));
-      await Promise.all(promises);
-    } catch (error) {
-      logger.logError('StacLayerHelper.applyColorMapsToStacLayer - Failed to apply color maps', error);
-    }
-  }
-
-  /**
-   * Recursively processes a layer (or layer group) to find WebGLTile layers and apply colormaps.
-   *
-   * @param layer - An OL layer or layer group
-   */
-  static async #processLayerForColorMap(layer: BaseLayer): Promise<void> {
-    // If it's a group, recurse into children
-    if ('getLayers' in layer && typeof (layer as LayerGroup).getLayers === 'function') {
-      const children = (layer as LayerGroup).getLayers().getArray();
-      const promises = children.map((child: BaseLayer) => StacLayerHelper.#processLayerForColorMap(child));
-      await Promise.all(promises);
-      return;
-    }
-
-    // Only process WebGLTile layers (COG renderers)
-    if (!(layer instanceof WebGLTile)) return;
-
-    const source = layer.getSource() as GeoTIFFSource | null;
-    if (!source) return;
-
-    // Get the COG URL from the source's TileJSON or internal sources array
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-underscore-dangle -- accessing internal ol source config
-    const sourceInfo = (source as any).sourceInfo_ ?? (source as any).sourceOptions_;
-    let cogUrl: string | undefined;
-
-    if (Array.isArray(sourceInfo)) {
-      cogUrl = sourceInfo[0]?.url;
-    } else if (sourceInfo?.url) {
-      cogUrl = sourceInfo.url;
-    }
-
-    if (!cogUrl) {
-      logger.logDebug('StacLayerHelper.#processLayerForColorMap - No COG URL found, skipping');
-      return;
-    }
-
-    // Extract colormap from the GeoTIFF
-    const palette = await extractGeotiffColorMap(cogUrl);
-    if (!palette) {
-      logger.logDebug(`StacLayerHelper.#processLayerForColorMap - No embedded colormap for: ${cogUrl}`);
-      return;
-    }
-
-    // Apply the palette style (same logic as GVGeoTIFF.#applyColorMapStyle)
-    StacLayerHelper.#applyPaletteStyle(layer, palette);
-    logger.logInfo(`StacLayerHelper.#processLayerForColorMap - Applied colormap to COG: ${cogUrl}`);
-  }
-
-  /**
-   * Transforms a bbox from EPSG:4326 to the map's current projection.
-   * Uses densified polygon edges for accurate extent in curvilinear projections.
-   *
-   * @param map - The OpenLayers map instance
-   * @param bbox - Bounding box in EPSG:4326 [west, south, east, north]
-   * @returns The transformed extent in the map's projection
-   */
-  static transformBboxToMapProjection(map: OlMap, bbox: [number, number, number, number]): [number, number, number, number] {
-    const mapProjection = map.getView().getProjection();
-    const srcProj = getProjection('EPSG:4326')!;
-    const coords = Projection.transformAndDensifyExtent(bbox, srcProj, mapProjection);
-    let minX = Infinity;
-    let minY = Infinity;
-    let maxX = -Infinity;
-    let maxY = -Infinity;
-    for (const [x, y] of coords) {
-      if (x < minX) minX = x;
-      if (y < minY) minY = y;
-      if (x > maxX) maxX = x;
-      if (y > maxY) maxY = y;
-    }
-    return [minX, minY, maxX, maxY];
-  }
-
-  /**
-   * Transforms the map's current extent to EPSG:4326 bbox.
-   *
-   * @param map - The OpenLayers map instance
-   * @returns The map extent as [west, south, east, north] in EPSG:4326, clamped to valid bounds
-   */
-  static getMapExtentAsWgs84Bbox(map: OlMap): [number, number, number, number] {
-    const view = map.getView();
-    const extent = view.calculateExtent(map.getSize());
-    const mapProjection = view.getProjection().getCode();
-    const bbox4326 = transformExtent(extent, mapProjection, 'EPSG:4326');
-    return [Math.max(bbox4326[0], -180), Math.max(bbox4326[1], -90), Math.min(bbox4326[2], 180), Math.min(bbox4326[3], 90)];
-  }
-
   /**
    * Creates a WebGLTile layer with a GeoTIFF source directly, bypassing ol-stac.
    *
@@ -311,7 +38,7 @@ export class StacLayerHelper {
       try {
         palette = await extractGeotiffColorMap(geotiffUrl);
       } catch (error) {
-        logger.logDebug(
+        logger.logError(
           `StacLayerHelper.addGeoTiffLayer - Could not extract colormap (falling back to default rendering): ${geotiffUrl}`,
           error
         );
@@ -332,19 +59,29 @@ export class StacLayerHelper {
         convertToRGB: hasColorMap ? undefined : 'auto',
       });
 
+      // Read the TIFF headers to discover the source projection and register it if missing.
+      // Without this, OL cannot transform between the GeoTIFF's native CRS and the map projection.
+      const sourceView = await source.getView();
+      if (sourceView.projection) {
+        const epsgCode = Projection.readEPSGNumber(sourceView.projection);
+        if (epsgCode) {
+          await Projection.addProjectionIfMissing({ wkid: epsgCode });
+        }
+      }
+
       const layer = new WebGLTile({ source });
 
       // Tag the layer so we can find/remove it later
       layer.set(STAC_BROWSER_TAG, true);
 
+      // Render above GeometryApi footprint layers (z-index 9999)
+      layer.setZIndex(10000);
+
       // Apply colormap palette style if present
       if (palette) {
         StacLayerHelper.#applyPaletteStyle(layer, palette);
-        logger.logInfo(`StacLayerHelper.addGeoTiffLayer - Applied colormap to: ${geotiffUrl}`);
       }
-
       map.addLayer(layer);
-      logger.logInfo(`StacLayerHelper.addGeoTiffLayer - Added GeoTIFF layer: ${geotiffUrl}`);
 
       return layer;
     } catch (error) {
@@ -354,131 +91,131 @@ export class StacLayerHelper {
   }
 
   /**
-   * Finds the best GeoTIFF asset URL from a STAC item's assets record.
-   *
-   * Searches by media type first (application/geo+json excluded), then falls back
-   * to file extension (.tif, .tiff). Prefers assets with role "visual" or "overview",
-   * then "data", then any GeoTIFF.
-   *
-   * @param assets - Record of asset key to asset object
-   * @returns The GeoTIFF asset href, or undefined if none found
-   */
-  static findGeoTiffAssetUrl(assets: Record<string, { href: string; type?: string; roles?: string[] }>): string | undefined {
-    const entries = Object.values(assets);
-
-    /** GeoTIFF media type patterns. */
-    const geotiffTypes = ['image/tiff', 'image/geotiff', 'image/x-geotiff', 'application/x-geotiff'];
-
-    /** Checks if an asset is a GeoTIFF by media type or file extension. */
-    const isGeoTiff = (asset: { href: string; type?: string }): boolean => {
-      if (asset.type) {
-        return geotiffTypes.some((mediaType) => asset.type!.toLowerCase().startsWith(mediaType));
-      }
-      // Fallback: check file extension
-      const url = asset.href.toLowerCase().split('?')[0];
-      return url.endsWith('.tif') || url.endsWith('.tiff');
-    };
-
-    // Prefer assets with visual/overview role
-    const visual = entries.find((a) => isGeoTiff(a) && a.roles?.some((r) => ['visual', 'overview'].includes(r)));
-    if (visual) return visual.href;
-
-    // Then data role
-    const data = entries.find((a) => isGeoTiff(a) && a.roles?.includes('data'));
-    if (data) return data.href;
-
-    // Then any GeoTIFF
-    const any = entries.find((a) => isGeoTiff(a));
-    if (any) return any.href;
-
-    return undefined;
-  }
-
-  /**
-   * Adds a vector footprint layer from a bounding box with a specified color.
-   * Uses densified polygon edges to handle curvilinear projections (e.g., LCC) correctly.
+   * Removes a STAC layer from the map.
    *
    * @param map - The OpenLayers map instance
-   * @param bbox - Bounding box in EPSG:4326 [west, south, east, north]
-   * @param color - CSS color string for the stroke (e.g., 'blue', '#FF8C00')
-   * @param fillOpacity - Optional fill opacity (0-1), defaults to 0.1
-   * @returns The created VectorLayer
+   * @param layer - The STAC layer to remove
    */
-  static addBboxFootprintLayer(
-    map: OlMap,
-    bbox: [number, number, number, number],
-    color: string,
-    fillOpacity = 0.1
-  ): VectorLayer<VectorSource> {
-    const mapProjection = map.getView().getProjection();
-    const srcProj = getProjection('EPSG:4326')!;
-    const coords = Projection.transformAndDensifyExtent(bbox, srcProj, mapProjection);
-    const polygon = new Polygon([coords]);
-    const feature = new Feature(polygon);
-
-    const vectorSource = new VectorSource({ features: [feature] });
-    const vectorLayer = new VectorLayer({
-      source: vectorSource,
-      style: new Style({
-        stroke: new Stroke({ color, width: 2 }),
-        fill: new Fill({ color: StacLayerHelper.#colorWithAlpha(color, fillOpacity) }),
-      }),
-    });
-
-    vectorLayer.set(STAC_BROWSER_TAG, true);
-    map.addLayer(vectorLayer);
-    return vectorLayer;
-  }
-
-  /**
-   * Adds a vector footprint layer from a GeoJSON geometry with a specified color.
-   *
-   * @param map - The OpenLayers map instance
-   * @param geometry - GeoJSON geometry object
-   * @param color - CSS color string for the stroke
-   * @param fillOpacity - Optional fill opacity (0-1), defaults to 0.1
-   * @returns The created VectorLayer
-   */
-  static addGeometryFootprintLayer(map: OlMap, geometry: unknown, color: string, fillOpacity = 0.1): VectorLayer<VectorSource> {
-    const mapProjection = map.getView().getProjection().getCode();
-    const format = new GeoJSON();
-    const features = format.readFeatures(
-      { type: 'Feature', geometry, properties: {} },
-      { dataProjection: 'EPSG:4326', featureProjection: mapProjection }
-    );
-
-    const vectorSource = new VectorSource({ features });
-    const vectorLayer = new VectorLayer({
-      source: vectorSource,
-      style: new Style({
-        stroke: new Stroke({ color, width: 2 }),
-        fill: new Fill({ color: StacLayerHelper.#colorWithAlpha(color, fillOpacity) }),
-      }),
-    });
-
-    vectorLayer.set(STAC_BROWSER_TAG, true);
-    map.addLayer(vectorLayer);
-    return vectorLayer;
-  }
-
-  /**
-   * Converts a CSS color string to an rgba string with the given alpha.
-   *
-   * @param color - CSS color string (hex or named)
-   * @param alpha - Alpha value (0-1)
-   * @returns The rgba color string
-   */
-  static #colorWithAlpha(color: string, alpha: number): string {
-    // For hex colors, parse and add alpha
-    if (color.startsWith('#')) {
-      const hex = color.replace('#', '');
-      const r = parseInt(hex.substring(0, 2), 16);
-      const g = parseInt(hex.substring(2, 4), 16);
-      const b = parseInt(hex.substring(4, 6), 16);
-      return `rgba(${r},${g},${b},${alpha})`;
+  static removeStacLayer(map: OlMap, layer: unknown): void {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- ol-stac layer type not statically available
+      map.removeLayer(layer as any);
+    } catch (error) {
+      logger.logError('StacLayerHelper.removeStacLayer - Failed to remove STAC layer', error);
     }
-    // For named colors, use canvas-based conversion
-    return `rgba(0,0,0,${alpha})`;
+  }
+
+  /**
+   * Adds a footprint polygon to the map using the GeometryApi.
+   *
+   * Accepts either a bounding box or a GeoJSON geometry. Bbox edges are densified
+   * with intermediate points to render accurately in curvilinear projections (e.g., LCC).
+   *
+   * @param geometryApi - The GeometryApi instance for the target map
+   * @param footprint - Either a bbox [west, south, east, north] in EPSG:4326, or a GeoJSON geometry object
+   * @param color - CSS color string for stroke and fill (e.g., '#1976d2', '#FF8C00')
+   * @param fillOpacity - Optional fill opacity (0-1), defaults to 0.1
+   * @param groupId - Optional geometry group ID for managing footprint lifecycle
+   */
+  static addFootprintLayer(
+    geometryApi: GeometryApi,
+    footprint: { bbox?: [number, number, number, number]; geometry?: unknown },
+    color: string,
+    fillOpacity = 0.1,
+    groupId?: string
+  ): void {
+    const style: TypeFeatureStyle = { strokeColor: color, strokeWidth: 2, fillColor: color, fillOpacity };
+
+    if (footprint.geometry) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- GeoJSON geometry type/coordinates access
+      const geom = footprint.geometry as any;
+      if (geom.type === 'MultiPolygon' && Array.isArray(geom.coordinates)) {
+        for (const polygonCoords of geom.coordinates) {
+          geometryApi.addPolygon(polygonCoords, { projection: 4326, style }, undefined, groupId);
+        }
+      } else if (Array.isArray(geom.coordinates)) {
+        geometryApi.addPolygon(geom.coordinates, { projection: 4326, style }, undefined, groupId);
+      }
+      return;
+    }
+
+    if (footprint.bbox) {
+      const ring = StacLayerHelper.#densifyBboxRing(footprint.bbox);
+      geometryApi.addPolygon([ring], { projection: 4326, style }, undefined, groupId);
+    }
+  }
+
+  /**
+   * Removes all footprint geometries for a given group and deletes the group.
+   *
+   * @param geometryApi - The GeometryApi instance
+   * @param groupId - The geometry group ID to clear
+   */
+  static clearFootprints(geometryApi: GeometryApi, groupId: string): void {
+    if (geometryApi.hasGeometryGroup(groupId)) {
+      geometryApi.deleteGeometryGroup(groupId);
+    }
+  }
+
+  /**
+   * Transforms a bbox from EPSG:4326 to the map's current projection.
+   * Uses densified polygon edges for accurate extent in curvilinear projections.
+   *
+   * @param mapId - The map identifier
+   * @param bbox - Bounding box in EPSG:4326 [west, south, east, north]
+   * @returns The transformed extent in the map's projection
+   */
+  static transformBboxToMapProjection(mapId: string, bbox: [number, number, number, number]): [number, number, number, number] {
+    const destProj = Projection.getProjectionFromString(getStoreMapCurrentProjectionEPSG(mapId));
+    const srcProj = Projection.getProjectionLonLat();
+    const coords = Projection.transformAndDensifyExtent(bbox, srcProj, destProj);
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+    for (const [x, y] of coords) {
+      if (x < minX) minX = x;
+      if (y < minY) minY = y;
+      if (x > maxX) maxX = x;
+      if (y > maxY) maxY = y;
+    }
+    return [minX, minY, maxX, maxY];
+  }
+
+  /**
+   * Returns the map's current extent as a WGS84 bbox.
+   *
+   * @param mapId - The map identifier
+   * @returns The map extent as [west, south, east, north] in EPSG:4326, clamped to valid bounds
+   */
+  static getMapExtentAsWgs84Bbox(mapId: string): [number, number, number, number] {
+    const extent = getStoreMapExtent(mapId);
+    if (!extent) return [-180, -90, 180, 90];
+    const srcProj = Projection.getProjectionFromString(getStoreMapCurrentProjectionEPSG(mapId));
+    const destProj = Projection.getProjectionLonLat();
+    const bbox4326 = Projection.transformExtentFromProj(extent, srcProj, destProj) as [number, number, number, number];
+    return [Math.max(bbox4326[0], -180), Math.max(bbox4326[1], -90), Math.min(bbox4326[2], 180), Math.min(bbox4326[3], 90)];
+  }
+
+  /**
+   * Densifies a bounding box into a closed polygon ring with intermediate points along each edge.
+   *
+   * @param bbox - Bounding box [west, south, east, north]
+   * @param stops - Optional number of segments per edge, defaults to 25
+   * @returns A closed ring of [lon, lat] coordinate pairs
+   */
+  static #densifyBboxRing(bbox: [number, number, number, number], stops = 25): number[][] {
+    const [west, south, east, north] = bbox;
+    const ring: number[][] = [];
+    // South edge: SW → SE
+    for (let i = 0; i <= stops; i++) ring.push([west + (east - west) * (i / stops), south]);
+    // East edge: SE → NE
+    for (let i = 1; i <= stops; i++) ring.push([east, south + (north - south) * (i / stops)]);
+    // North edge: NE → NW
+    for (let i = 1; i <= stops; i++) ring.push([east - (east - west) * (i / stops), north]);
+    // West edge: NW → SW (closes the ring)
+    for (let i = 1; i <= stops; i++) ring.push([west, north - (north - south) * (i / stops)]);
+    return ring;
   }
 
   /**

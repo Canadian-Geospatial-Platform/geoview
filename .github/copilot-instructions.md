@@ -375,6 +375,22 @@ const handleChange = useCallback(
 - Downcast only after `instanceof` check or type guard function
 - Avoid spreading objects with deep nesting - use `lodash.cloneDeep` instead
 
+### Reuse Over Duplication
+
+Before writing new logic, check whether a utility or helper already exists in the codebase. Do not duplicate logic that is available in a shared module.
+
+- **Geo utilities** (`GeoUtilities` in `@/geo/utils/utilities.ts`): extent union/intersection, coordinate transforms, UUID validation, URL probing
+- **Fetch helpers** (`Fetch` in `@/core/utils/fetch-helper.ts`): all HTTP operations
+- **Date utilities** (`DateUtilities` in `@/core/utils/date-utilities.ts`): date parsing and formatting
+- **Constants** (`@/core/utils/constant.ts`): file extensions, regex patterns, shared enums
+
+When the same logic appears in two or more files, extract it to the nearest shared location:
+
+- **Within a plugin**: a service class or utility file in the plugin package (e.g., `StacApiService` for shared STAC constants and formatting)
+- **Across plugins or core components**: a utility class in `geoview-core` (e.g., `GeoUtilities`, `DateUtilities`)
+
+Shared constants (colors, URLs, magic numbers) used by multiple files must be exported from a single source of truth — never duplicated as local `const` declarations.
+
 ### useRef Patterns (React 19)
 
 React 19 requires an explicit initial value for `useRef`. Choose the pattern based on **how the ref is used**:
