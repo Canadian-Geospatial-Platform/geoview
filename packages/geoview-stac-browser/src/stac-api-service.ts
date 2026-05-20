@@ -2,6 +2,12 @@ import { Fetch } from 'geoview-core/core/utils/fetch-helper';
 import { logger } from 'geoview-core/core/utils/logger';
 import type { StacCollection, StacItem, StacItemsResponse, StacSearchParams, StacSearchResult } from './stac-browser-types';
 
+/** Color for collection-level footprint (bbox). */
+export const COLLECTION_COLOR = '#1976d2';
+
+/** Color for item-level footprints. */
+export const ITEM_COLOR = '#FF8C00';
+
 /**
  * Service class for interacting with STAC APIs.
  */
@@ -47,7 +53,6 @@ export class StacApiService {
       if (params.datetime) body.datetime = params.datetime;
       if (params.q) body.q = params.q;
       if (params.limit) body.limit = params.limit;
-      if (params.token) body.token = params.token;
 
       const response = await Fetch.fetchJson<StacSearchResult>(`${this.#stacUrl}/search`, {
         method: 'POST',
@@ -77,18 +82,18 @@ export class StacApiService {
   }
 
   /**
-   * Extracts the next page token from a search result's links.
+   * Fetches the next page of search results by following the next link URL directly.
    *
-   * @param result - The search result to extract pagination from
-   * @returns The next page token, or undefined if no more pages
+   * @param nextUrl - Full URL from the search result's next link
+   * @returns A promise that resolves with the search result
    */
-  getNextPageToken(result: StacSearchResult): string | undefined {
-    const nextLink = result.links?.find((link) => link.rel === 'next');
-    if (!nextLink) return undefined;
-
-    // Token can be in the href as a query param or in the link body
-    const url = new URL(nextLink.href, this.#stacUrl);
-    return url.searchParams.get('token') ?? undefined;
+  static async fetchSearchNextPage(nextUrl: string): Promise<StacSearchResult> {
+    try {
+      return await Fetch.fetchJson<StacSearchResult>(nextUrl);
+    } catch (error) {
+      logger.logError('StacApiService.fetchSearchNextPage - Failed to fetch next page', error);
+      return { type: 'FeatureCollection', features: [] };
+    }
   }
 
   /**
@@ -110,24 +115,72 @@ export class StacApiService {
   }
 
   /**
-   * Extracts the next page URL from an items response's links.
+   * Extracts the next page URL from a global /search response's links.
+   *
+   * @param result - The search result to extract pagination from
+   * @returns The full next page URL, or undefined if no more pages
+   */
+  static getNextSearchPageUrl(result: StacSearchResult): string | undefined {
+    const nextLink = result.links?.find((link) => link.rel === 'next');
+    return nextLink?.href;
+  }
+
+  /**
+   * Extracts the previous page URL from a global /search response's links.
+   *
+   * @param result - The search result to extract pagination from
+   * @returns The full previous page URL, or undefined if on first page
+   */
+  static getPrevSearchPageUrl(result: StacSearchResult): string | undefined {
+    const prevLink = result.links?.find((link) => link.rel === 'prev' || link.rel === 'previous');
+    return prevLink?.href;
+  }
+
+  /**
+   * Extracts the next page URL from a /collections/{id}/items response's links.
    *
    * @param response - The items response to extract pagination from
    * @returns The full next page URL, or undefined if no more pages
    */
-  getNextPageUrl(response: StacItemsResponse): string | undefined {
+  static getNextPageUrl(response: StacItemsResponse): string | undefined {
     const nextLink = response.links?.find((link) => link.rel === 'next');
     return nextLink?.href;
   }
 
   /**
-   * Extracts the previous page URL from an items response's links.
+   * Extracts the previous page URL from a /collections/{id}/items response's links.
    *
    * @param response - The items response to extract pagination from
    * @returns The full previous page URL, or undefined if on first page
    */
-  getPrevPageUrl(response: StacItemsResponse): string | undefined {
+  static getPrevPageUrl(response: StacItemsResponse): string | undefined {
     const prevLink = response.links?.find((link) => link.rel === 'prev' || link.rel === 'previous');
     return prevLink?.href;
+  }
+
+  /**
+   * Formats a collection's temporal extent interval for display.
+   *
+   * @param collection - The STAC collection to extract temporal extent from
+   * @param yearOnly - Optional whether to show year only instead of full date
+   * @returns Formatted date range string, or empty string if unavailable
+   */
+  static formatTemporalExtent(collection: StacCollection, yearOnly?: boolean): string {
+    const interval = collection.extent?.temporal?.interval?.[0];
+    if (!interval) return '';
+
+    let start: string | number = '...';
+    if (interval[0]) {
+      const date = new Date(interval[0]);
+      start = yearOnly ? date.getFullYear() : date.toLocaleDateString();
+    }
+
+    let end: string | number = 'present';
+    if (interval[1]) {
+      const date = new Date(interval[1]);
+      end = yearOnly ? date.getFullYear() : date.toLocaleDateString();
+    }
+
+    return `${start} – ${end}`;
   }
 }

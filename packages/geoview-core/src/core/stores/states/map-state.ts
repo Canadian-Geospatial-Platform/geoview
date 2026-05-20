@@ -736,6 +736,9 @@ export const useStoreMapCenterCoordinates = (): Coordinate => useStore(useGeoVie
 /** Selects the click marker state from the store. */
 export const useStoreMapClickMarker = (): TypeClickMarker | undefined => useStore(useGeoViewStore(), (state) => state.mapState.clickMarker);
 
+/** Returns the current map extent in the map's projection, or undefined if not yet set. */
+export const getStoreMapExtent = (mapId: string): Extent | undefined => getStoreMapState(mapId).mapExtent;
+
 /** Selects the current map extent from the store. */
 export const useStoreMapExtent = (): Extent | undefined => useStore(useGeoViewStore(), (state) => state.mapState.mapExtent);
 

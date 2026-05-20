@@ -2,17 +2,12 @@ import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { Box, Button, Typography } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
+import { GeoUtilities } from 'geoview-core/geo/utils/utilities';
 import { StacLayerHelper } from 'geoview-core/geo/utils/stac-layer-helper';
 
 import type { StacCollection, StacItem } from './stac-browser-types';
-import type { StacApiService } from './stac-api-service';
+import { COLLECTION_COLOR, ITEM_COLOR, StacApiService } from './stac-api-service';
 import { getSxClasses } from './stac-browser-style';
-
-/** Color for collection-level footprint (bbox). */
-const COLLECTION_COLOR = '#1976d2';
-
-/** Color for item-level footprints. */
-const ITEM_COLOR = '#FF8C00';
 
 /** Props for the StacCollectionDetail component. */
 interface StacCollectionDetailProps {
@@ -43,10 +38,12 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
   const { useTheme } = cgpv.ui;
   const { t } = useTranslation();
   const theme = useTheme();
-  const { useCallback, useEffect, useMemo, useRef, useState } = cgpv.reactUtilities.react;
+  const { useCallback, useEffect, useMemo, useState } = cgpv.reactUtilities.react;
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
-  const olMap = cgpv.api.getMapViewer(mapId).map;
+  const mapViewer = cgpv.api.getMapViewer(mapId);
+  const olMap = mapViewer.map;
+  const geometryApi = mapViewer.geometry;
 
   /** Items for the current page. */
   const [items, setItems] = useState<StacItem[]>([]);
@@ -59,11 +56,6 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
   /** Whether the description is expanded. */
   const [descExpanded, setDescExpanded] = useState(false);
 
-  /** Ref to the collection bbox footprint layer. */
-  const collectionFootprintRef = useRef<unknown | undefined>(undefined);
-  /** Ref to item footprint layers. */
-  const itemFootprintLayersRef = useRef<unknown[]>([]);
-
   /**
    * Computes the union bounding box of the collection extent and all loaded items.
    */
@@ -71,20 +63,18 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
     logger.logTraceUseMemo('STAC-COLLECTION-DETAIL - memoUnionExtent', items.length);
 
     const collBbox = collection.extent?.spatial?.bbox?.[0];
-    let union: [number, number, number, number] | null = collBbox ? [collBbox[0], collBbox[1], collBbox[2], collBbox[3]] : null;
+    let union = collBbox ? ([collBbox[0], collBbox[1], collBbox[2], collBbox[3]] as [number, number, number, number]) : undefined;
 
     for (const item of items) {
       const iBbox = item.bbox;
       if (iBbox && iBbox.length >= 4) {
-        if (union) {
-          union = [Math.min(union[0], iBbox[0]), Math.min(union[1], iBbox[1]), Math.max(union[2], iBbox[2]), Math.max(union[3], iBbox[3])];
-        } else {
-          union = [iBbox[0], iBbox[1], iBbox[2], iBbox[3]];
-        }
+        union = GeoUtilities.getExtentUnion(union, [iBbox[0], iBbox[1], iBbox[2], iBbox[3]]) as
+          | [number, number, number, number]
+          | undefined;
       }
     }
 
-    return union;
+    return union ?? null;
   }, [collection.extent, items]);
 
   /**
@@ -93,43 +83,33 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
   useEffect(() => {
     logger.logTraceUseEffect('STAC-COLLECTION-DETAIL - Show footprints', items.length);
 
-    // Clean previous
-    if (collectionFootprintRef.current) {
-      StacLayerHelper.removeStacLayer(olMap, collectionFootprintRef.current);
-      collectionFootprintRef.current = undefined;
-    }
-    for (const layer of itemFootprintLayersRef.current) {
-      StacLayerHelper.removeStacLayer(olMap, layer);
-    }
-    itemFootprintLayersRef.current = [];
+    // Clean previous footprints
+    StacLayerHelper.clearFootprints(geometryApi, 'stac-collection-footprints');
 
     // Draw collection footprint with union extent (blue)
     if (memoUnionExtent) {
-      collectionFootprintRef.current = StacLayerHelper.addBboxFootprintLayer(olMap, memoUnionExtent, COLLECTION_COLOR, 0.08);
+      StacLayerHelper.addFootprintLayer(geometryApi, { bbox: memoUnionExtent }, COLLECTION_COLOR, 0.08, 'stac-collection-footprints');
     }
 
     // Draw individual item footprints (orange)
     for (const item of items) {
       if (item.geometry) {
-        itemFootprintLayersRef.current.push(StacLayerHelper.addGeometryFootprintLayer(olMap, item.geometry, ITEM_COLOR, 0.15));
+        StacLayerHelper.addFootprintLayer(geometryApi, { geometry: item.geometry }, ITEM_COLOR, 0.15, 'stac-collection-footprints');
       } else if (item.bbox && item.bbox.length >= 4) {
-        itemFootprintLayersRef.current.push(
-          StacLayerHelper.addBboxFootprintLayer(olMap, [item.bbox[0], item.bbox[1], item.bbox[2], item.bbox[3]], ITEM_COLOR, 0.15)
+        StacLayerHelper.addFootprintLayer(
+          geometryApi,
+          { bbox: [item.bbox[0], item.bbox[1], item.bbox[2], item.bbox[3]] },
+          ITEM_COLOR,
+          0.15,
+          'stac-collection-footprints'
         );
       }
     }
 
     return (): void => {
-      if (collectionFootprintRef.current) {
-        StacLayerHelper.removeStacLayer(olMap, collectionFootprintRef.current);
-        collectionFootprintRef.current = undefined;
-      }
-      for (const layer of itemFootprintLayersRef.current) {
-        StacLayerHelper.removeStacLayer(olMap, layer);
-      }
-      itemFootprintLayersRef.current = [];
+      StacLayerHelper.clearFootprints(geometryApi, 'stac-collection-footprints');
     };
-  }, [olMap, items, memoUnionExtent]);
+  }, [geometryApi, items, memoUnionExtent]);
 
   /**
    * Fetches items for the collection on mount.
@@ -143,8 +123,8 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
       const response = await apiService.fetchCollectionItems(collection.id, 10);
       if (!cancelled) {
         setItems(response.features);
-        setNextUrl(apiService.getNextPageUrl(response));
-        setPrevUrl(apiService.getPrevPageUrl(response));
+        setNextUrl(StacApiService.getNextPageUrl(response));
+        setPrevUrl(StacApiService.getPrevPageUrl(response));
         setIsLoading(false);
       }
     };
@@ -165,8 +145,8 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
       setIsLoading(true);
       const response = await apiService.fetchCollectionItems(collection.id, undefined, nextUrl);
       setItems(response.features);
-      setNextUrl(apiService.getNextPageUrl(response));
-      setPrevUrl(apiService.getPrevPageUrl(response));
+      setNextUrl(StacApiService.getNextPageUrl(response));
+      setPrevUrl(StacApiService.getPrevPageUrl(response));
       setIsLoading(false);
     };
     void doFetch();
@@ -181,8 +161,8 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
       setIsLoading(true);
       const response = await apiService.fetchCollectionItems(collection.id, undefined, prevUrl);
       setItems(response.features);
-      setNextUrl(apiService.getNextPageUrl(response));
-      setPrevUrl(apiService.getPrevPageUrl(response));
+      setNextUrl(StacApiService.getNextPageUrl(response));
+      setPrevUrl(StacApiService.getPrevPageUrl(response));
       setIsLoading(false);
     };
     void doFetch();
@@ -200,10 +180,10 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
    */
   const handleZoomToExtent = useCallback((): void => {
     if (memoUnionExtent) {
-      const extent = StacLayerHelper.transformBboxToMapProjection(olMap, memoUnionExtent);
+      const extent = StacLayerHelper.transformBboxToMapProjection(mapId, memoUnionExtent);
       void olMap.getView().fit(extent, { maxZoom: 12, duration: 500, padding: [100, 100, 100, 100] });
     }
-  }, [olMap, memoUnionExtent]);
+  }, [mapId, olMap, memoUnionExtent]);
 
   /**
    * Handles click on an item card.
@@ -239,12 +219,8 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
    */
   const memoTemporalDisplay = useMemo((): string => {
     logger.logTraceUseMemo('STAC-COLLECTION-DETAIL - memoTemporalDisplay', collection.extent);
-    const interval = collection.extent?.temporal?.interval?.[0];
-    if (!interval) return '';
-    const start = interval[0] ? new Date(interval[0]).toLocaleDateString() : '...';
-    const end = interval[1] ? new Date(interval[1]).toLocaleDateString() : 'present';
-    return `${start} – ${end}`;
-  }, [collection.extent]);
+    return StacApiService.formatTemporalExtent(collection);
+  }, [collection]);
 
   /**
    * Gets the asset type badge for an item (e.g., "COG").

@@ -86,8 +86,6 @@ export interface StacSearchParams {
   q?: string;
   /** Maximum number of items per page. */
   limit?: number;
-  /** Pagination token from previous response. */
-  token?: string;
 }
 
 /** STAC API search response. */

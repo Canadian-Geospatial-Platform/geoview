@@ -46,7 +46,9 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
   const [selectedItem, setSelectedItem] = useState<StacItem | null>(null);
   const [searchResult, setSearchResult] = useState<StacSearchResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [nextToken, setNextToken] = useState<string | undefined>(undefined);
+  const [nextPageUrl, setNextPageUrl] = useState<string | undefined>(undefined);
+  const [prevPageUrl, setPrevPageUrl] = useState<string | undefined>(undefined);
+  const [currentPage, setCurrentPage] = useState(1);
   /** Tracks which view the item-detail was opened from. */
   const [itemDetailOrigin, setItemDetailOrigin] = useState<PanelView>('collections');
 
@@ -126,21 +128,62 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
    * Handles search submission from the filter panel.
    */
   const handleSearch = useCallback(
-    (params: { collections?: string[]; bbox?: [number, number, number, number]; datetime?: string; q?: string }): void => {
+    (params: {
+      collections?: string[];
+      bbox?: [number, number, number, number];
+      datetime?: string;
+      q?: string;
+      containedInExtent?: boolean;
+    }): void => {
       const doSearch = async (): Promise<void> => {
         try {
           setIsLoading(true);
           setSelectedItem(null);
           logger.logInfo('STAC-BROWSER - Searching with params:', params);
 
-          const result = await memoApiService.searchItems({
-            ...params,
-            limit: config.defaults?.limit ?? 20,
-          });
+          if (params.containedInExtent && params.bbox) {
+            // Pre-filter: find collections whose spatial extent is fully contained in the search bbox.
+            // This avoids paginating through thousands of items from national-scale collections.
+            const [filterW, filterS, filterE, filterN] = params.bbox;
+            const containedCollections = collections.filter((col) => {
+              const colBbox = col.extent?.spatial?.bbox?.[0];
+              if (!colBbox || colBbox.length < 4) return false;
+              const [w, s, e, n] = colBbox;
+              return w >= filterW && s >= filterS && e <= filterE && n <= filterN;
+            });
 
-          logger.logInfo(`STAC-BROWSER - Search returned ${result.features.length} features`);
-          setSearchResult(result);
-          setNextToken(memoApiService.getNextPageToken(result));
+            if (containedCollections.length === 0) {
+              logger.logInfo('STAC-BROWSER - No collections fully contained in extent');
+              setSearchResult({ type: 'FeatureCollection', features: [] });
+              setNextPageUrl(undefined);
+              setPrevPageUrl(undefined);
+              setCurrentPage(1);
+            } else {
+              const collectionIds = containedCollections.map((col) => col.id);
+              logger.logInfo(`STAC-BROWSER - Searching ${collectionIds.length} contained collections:`, collectionIds);
+
+              const result = await memoApiService.searchItems({
+                ...params,
+                collections: collectionIds,
+                limit: 20,
+              });
+
+              logger.logInfo(`STAC-BROWSER - Contained search returned ${result.features.length} features`);
+              setSearchResult(result);
+              setNextPageUrl(StacApiService.getNextSearchPageUrl(result));
+              setPrevPageUrl(StacApiService.getPrevSearchPageUrl(result));
+              setCurrentPage(1);
+            }
+          } else {
+            const result = await memoApiService.searchItems({ ...params, limit: 20 });
+
+            logger.logInfo(`STAC-BROWSER - Search returned ${result.features.length} features`);
+            setSearchResult(result);
+            setNextPageUrl(StacApiService.getNextSearchPageUrl(result));
+            setPrevPageUrl(StacApiService.getPrevSearchPageUrl(result));
+            setCurrentPage(1);
+          }
+
           setView('search-results');
         } catch (error) {
           logger.logError('STAC-BROWSER - Search failed:', error);
@@ -150,26 +193,42 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
       };
       void doSearch();
     },
-    [memoApiService, config.defaults?.limit]
+    [memoApiService, collections]
   );
 
   /**
-   * Handles loading more search results.
+   * Handles navigating to the next page of search results.
    */
-  const handleLoadMore = useCallback((): void => {
-    if (!nextToken) return;
-    const doLoadMore = async (): Promise<void> => {
+  const handleNextPage = useCallback((): void => {
+    if (!nextPageUrl) return;
+    const doFetch = async (): Promise<void> => {
       setIsLoading(true);
-      const result = await memoApiService.searchItems({ token: nextToken, limit: config.defaults?.limit ?? 20 });
-      setSearchResult((prev) => {
-        if (!prev) return result;
-        return { ...result, features: [...prev.features, ...result.features] };
-      });
-      setNextToken(memoApiService.getNextPageToken(result));
+      const result = await StacApiService.fetchSearchNextPage(nextPageUrl);
+      setSearchResult(result);
+      setNextPageUrl(StacApiService.getNextSearchPageUrl(result));
+      setPrevPageUrl(StacApiService.getPrevSearchPageUrl(result));
+      setCurrentPage((prev) => prev + 1);
       setIsLoading(false);
     };
-    void doLoadMore();
-  }, [nextToken, memoApiService, config.defaults?.limit]);
+    void doFetch();
+  }, [nextPageUrl]);
+
+  /**
+   * Handles navigating to the previous page of search results.
+   */
+  const handlePrevPage = useCallback((): void => {
+    if (!prevPageUrl) return;
+    const doFetch = async (): Promise<void> => {
+      setIsLoading(true);
+      const result = await StacApiService.fetchSearchNextPage(prevPageUrl);
+      setSearchResult(result);
+      setNextPageUrl(StacApiService.getNextSearchPageUrl(result));
+      setPrevPageUrl(StacApiService.getPrevSearchPageUrl(result));
+      setCurrentPage((prev) => Math.max(1, prev - 1));
+      setIsLoading(false);
+    };
+    void doFetch();
+  }, [prevPageUrl]);
 
   /**
    * Handles going back from item detail to its origin view.
@@ -253,8 +312,11 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
               collections={collections}
               onItemClick={handleItemClick}
               onBack={handleBackToSearch}
-              hasMore={!!nextToken}
-              onLoadMore={handleLoadMore}
+              hasNext={!!nextPageUrl}
+              hasPrev={!!prevPageUrl}
+              onNextPage={handleNextPage}
+              onPrevPage={handlePrevPage}
+              currentPage={currentPage}
             />
           )}
         </>

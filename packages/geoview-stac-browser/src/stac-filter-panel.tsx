@@ -13,7 +13,7 @@ interface StacFilterPanelProps {
   /** Plugin configuration. */
   config: StacBrowserConfig;
   /** Callback when search is submitted. */
-  onSearch: (params: { bbox?: [number, number, number, number]; datetime?: string; q?: string }) => void;
+  onSearch: (params: { bbox?: [number, number, number, number]; datetime?: string; q?: string; containedInExtent?: boolean }) => void;
   /** The map ID. */
   mapId: string;
 }
@@ -36,11 +36,9 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
   const { useCallback, useMemo, useState } = cgpv.reactUtilities.react;
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
-  // Get the OL map reference once at component level
-  const olMap = cgpv.api.getMapViewer(mapId).map;
-
   // State
   const [useMapExtent, setUseMapExtent] = useState(false);
+  const [containedInExtent, setContainedInExtent] = useState(false);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [keyword, setKeyword] = useState('');
@@ -52,6 +50,13 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
    */
   const handleUseMapExtentChange = useCallback((): void => {
     setUseMapExtent((prev) => !prev);
+  }, []);
+
+  /**
+   * Handles the contained in extent checkbox change.
+   */
+  const handleContainedInExtentChange = useCallback((): void => {
+    setContainedInExtent((prev) => !prev);
   }, []);
 
   /**
@@ -79,11 +84,14 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
    * Handles search button click.
    */
   const handleSearchClick = useCallback((): void => {
-    const params: { bbox?: [number, number, number, number]; datetime?: string; q?: string } = {};
+    const params: { bbox?: [number, number, number, number]; datetime?: string; q?: string; containedInExtent?: boolean } = {};
 
     if (useMapExtent) {
       // Get the actual map extent transformed to EPSG:4326 for STAC API
-      params.bbox = StacLayerHelper.getMapExtentAsWgs84Bbox(olMap);
+      params.bbox = StacLayerHelper.getMapExtentAsWgs84Bbox(mapId);
+      if (containedInExtent) {
+        params.containedInExtent = true;
+      }
     }
 
     if (startDate || endDate) {
@@ -97,7 +105,7 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
     }
 
     onSearch(params);
-  }, [useMapExtent, startDate, endDate, keyword, onSearch, olMap]);
+  }, [useMapExtent, containedInExtent, startDate, endDate, keyword, onSearch, mapId]);
 
   // #endregion
 
@@ -128,6 +136,13 @@ export function StacFilterPanel(props: StacFilterPanelProps): JSX.Element {
             control={<Checkbox checked={useMapExtent} onChange={handleUseMapExtentChange} size="small" />}
             label={t('stacBrowser.useMapExtent')}
           />
+          {useMapExtent && (
+            <FormControlLabel
+              control={<Checkbox checked={containedInExtent} onChange={handleContainedInExtentChange} size="small" />}
+              label={t('stacBrowser.containedInExtent')}
+              sx={{ marginLeft: theme.spacing(2) }}
+            />
+          )}
         </Box>
       )}
 

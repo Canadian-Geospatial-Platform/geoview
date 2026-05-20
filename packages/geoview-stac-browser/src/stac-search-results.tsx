@@ -16,10 +16,16 @@ interface StacSearchResultsProps {
   onItemClick: (item: StacItem) => void;
   /** Callback to go back to the search panel. */
   onBack: () => void;
-  /** Whether there are more results to load. */
-  hasMore: boolean;
-  /** Callback to load more results. */
-  onLoadMore: () => void;
+  /** Whether there is a next page of results. */
+  hasNext: boolean;
+  /** Whether there is a previous page of results. */
+  hasPrev: boolean;
+  /** Callback to navigate to the next page. */
+  onNextPage: () => void;
+  /** Callback to navigate to the previous page. */
+  onPrevPage: () => void;
+  /** Current page number (1-based). */
+  currentPage: number;
 }
 
 /**
@@ -32,7 +38,7 @@ export function StacSearchResults(props: StacSearchResultsProps): JSX.Element {
   // Log
   logger.logTraceRender('geoview-stac-browser/stac-search-results');
 
-  const { results, collections, onItemClick, onBack, hasMore, onLoadMore } = props;
+  const { results, collections, onItemClick, onBack, hasNext, hasPrev, onNextPage, onPrevPage, currentPage } = props;
   const { cgpv } = window as TypeWindow;
   const { useTheme } = cgpv.ui;
   const { t } = useTranslation();
@@ -178,13 +184,29 @@ export function StacSearchResults(props: StacSearchResultsProps): JSX.Element {
           </Box>
         ))}
 
-        {hasMore && (
-          <Box sx={sxClasses.pagination}>
-            <Button type="text" variant="outlined" onClick={onLoadMore}>
-              {t('stacBrowser.loadMore')}
-            </Button>
-          </Box>
-        )}
+        {(hasPrev || hasNext) &&
+          (() => {
+            const pageSize = 20;
+            const startItem = (currentPage - 1) * pageSize + 1;
+            const endItem = startItem + results.features.length - 1;
+            return (
+              <Box sx={sxClasses.pagination}>
+                {hasPrev && (
+                  <Button type="text" variant="outlined" onClick={onPrevPage}>
+                    ← {t('stacBrowser.previous')}
+                  </Button>
+                )}
+                {hasNext && (
+                  <Button type="text" variant="outlined" onClick={onNextPage}>
+                    {t('stacBrowser.next')} →
+                  </Button>
+                )}
+                <Typography sx={{ marginLeft: 'auto', alignSelf: 'center', fontSize: '0.85rem' }}>
+                  {startItem}–{endItem}
+                </Typography>
+              </Box>
+            );
+          })()}
       </Box>
     </Box>
   );
