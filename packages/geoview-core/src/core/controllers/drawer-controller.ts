@@ -1,5 +1,6 @@
 import Collection from 'ol/Collection';
 import Feature from 'ol/Feature';
+import type { Extent } from 'ol/extent';
 import GeoJSON from 'ol/format/GeoJSON';
 import { Circle as CircleGeom, LineString } from 'ol/geom';
 import type Geometry from 'ol/geom/Geometry';
@@ -177,7 +178,7 @@ export class DrawerController extends AbstractMapViewerController {
    */
   protected override onHook(): void {
     // Setup the keyboard handlers for undo/redo
-    this.#hookUndoRedoHandler();
+    this.#hookUndoRedoEscapeHandler();
 
     // Listen when the language is changed in the UI domain
     this.#hookLanguageChanged = this.#uiDomain.onLanguageChanged(this.#handleDisplayLanguageChanged.bind(this));
@@ -1188,6 +1189,48 @@ export class DrawerController extends AbstractMapViewerController {
   }
 
   /**
+   * Handles a double-click action at the given coordinate (keyboard equivalent: Shift+Enter/Space).
+   * Opens text editor if a text feature is selected and the coordinate is within its bounds.
+   *
+   * @param coordinate - The map coordinate where the double-click occurred
+   * @returns Whether the double-click was handled (text editor opened)
+   */
+  handleDoubleClickAtCoordinate(coordinate: number[]): boolean {
+    const mapId = this.getMapId();
+
+    if (!isStoreDrawerInitialized(mapId)) return false;
+
+    // Check if we have any transform instance (main or temp)
+    const transformInstance = this.#transformInstance || this.#tempTextTransformInstance;
+    if (!transformInstance) return false; // No transform instance
+
+    // Get the currently selected feature
+    const selectedFeature = transformInstance.getSelectedFeature();
+    if (!selectedFeature) return false; // No transform active, no feature selected
+
+    // Check if the selected feature is a text feature
+    const isTextFeature = DrawerController.#isTextFeature(selectedFeature);
+    if (!isTextFeature) return false; // No transform active, non-text feature selected
+
+    // Transform active, text feature selected
+    // Check if coordinate is within the text's bounding box
+    const textExtent = this.#calculateTextExtent(selectedFeature);
+    if (!textExtent) return false;
+
+    const [minX, minY, maxX, maxY] = textExtent;
+    const isInsideTextBounds = coordinate[0] >= minX && coordinate[0] <= maxX && coordinate[1] >= minY && coordinate[1] <= maxY;
+
+    if (isInsideTextBounds) {
+      // Inside text bounds - open text editor
+      transformInstance.showTextEditor();
+      return true;
+    }
+
+    // Outside text bounds - treat as regular click (will exit selection)
+    return false;
+  }
+
+  /**
    * Selects or deselects a feature at the given coordinate for editing.
    *
    * @param coordinate - The map coordinate to check for features
@@ -1197,9 +1240,12 @@ export class DrawerController extends AbstractMapViewerController {
     const mapId = this.getMapId();
 
     if (!isStoreDrawerInitialized(mapId)) return false;
-    if (!getStoreDrawerIsEditing(mapId)) return false;
 
-    const transformInstance = this.#transformInstance;
+    const isEditing = getStoreDrawerIsEditing(mapId);
+    const hasTempTextTransform = !!this.#tempTextTransformInstance;
+    if (!isEditing && !hasTempTextTransform) return false;
+
+    const transformInstance = this.#transformInstance || this.#tempTextTransformInstance;
     if (!transformInstance) return false;
 
     const selectedFeature = transformInstance.getSelectedFeature();
@@ -1208,19 +1254,33 @@ export class DrawerController extends AbstractMapViewerController {
     if (selectedFeature) {
       // Check if coordinate is on a handle
       if (transformInstance.hasHandleAtCoordinate(coordinate)) {
+        return true; // Let the transform handle it
+      }
+
+      // Check if clicking on the selected feature itself (for translation)
+      const featuresAtPixel = this.#getFeaturesAtCoordinate(coordinate);
+
+      // If clicking on the same feature, start translation (don't re-select)
+      if (featuresAtPixel.length > 0 && featuresAtPixel[0] === selectedFeature) {
+        // Feature is already selected and we're clicking on it again
+        // The transform's handleDownEvent will start translation
         return true;
       }
+
+      // Clicking elsewhere (not on handle, not on feature)
+      // For temp text transforms, clean up and resume drawing
+      if (hasTempTextTransform) {
+        this.#cleanupTempTransformAndResume();
+        return false;
+      }
+
+      // For regular editing, clear selection
+      transformInstance.clearSelection();
+      return false;
     }
 
-    // No selected feature or not on handle - find and select feature at coordinate
-    const pixel = this.getMapViewer().map.getPixelFromCoordinate(coordinate);
-    const features: Feature[] = [];
-
-    this.getMapViewer().map.forEachFeatureAtPixel(pixel, (feature) => {
-      if (feature.get('geometryGroup') === DrawerController.DRAW_GROUP_KEY) {
-        features.push(feature as Feature);
-      }
-    });
+    // No selected feature - find and select feature at coordinate
+    const features = this.#getFeaturesAtCoordinate(coordinate);
 
     if (features.length > 0) {
       // Select the top-most feature
@@ -1239,11 +1299,11 @@ export class DrawerController extends AbstractMapViewerController {
    * @returns Whether a handle was successfully grabbed
    */
   grabHandleForKeyboard(coordinate: number[]): boolean {
-    const grabbed = this.grabHandleAtCoordinate(coordinate);
-    if (grabbed) {
+    const grabbedHandleType = this.grabHandleAtCoordinate(coordinate);
+    if (grabbedHandleType) {
       this.#grabbedHandle = {
         coordinate,
-        handleType: grabbed.handleType,
+        handleType: grabbedHandleType,
       };
       return true;
     }
@@ -1256,21 +1316,56 @@ export class DrawerController extends AbstractMapViewerController {
    * @param coordinate - The map coordinate to check for handles
    * @returns The handle type if a handle was grabbed, otherwise undefined
    */
-  grabHandleAtCoordinate(coordinate: number[]): { handleType: HandleType } | undefined {
-    const transformInstance = this.#transformInstance;
+  grabHandleAtCoordinate(coordinate: number[]): HandleType | undefined {
+    const transformInstance = this.#transformInstance || this.#tempTextTransformInstance;
     if (!transformInstance) return undefined;
 
     const handleType = transformInstance.getHandleTypeAtCoordinate(coordinate);
-    if (!handleType) {
+    if (!handleType || handleType === HandleType.BOUNDARY || handleType === HandleType.ROTATE_LINE) {
       // No handle found, but check if we're clicking on the selected feature itself
       // If so, treat it as a TRANSLATE operation
       const selectedFeature = transformInstance.getSelectedFeature();
       if (selectedFeature) {
-        const started = transformInstance.beginKeyboardTransform(coordinate, HandleType.TRANSLATE);
-        if (started) {
-          return { handleType: HandleType.TRANSLATE };
+        // Check if we're actually clicking on the selected feature
+        const isTextFeature = DrawerController.#isTextFeature(selectedFeature);
+
+        if (isTextFeature) {
+          // For text features, check bounding box
+          const geometry = selectedFeature.getGeometry();
+          if (geometry instanceof Point) {
+            const textExtent = this.#calculateTextExtent(selectedFeature);
+            if (textExtent) {
+              const [minX, minY, maxX, maxY] = textExtent;
+              if (coordinate[0] >= minX && coordinate[0] <= maxX && coordinate[1] >= minY && coordinate[1] <= maxY) {
+                // Inside text bounds - start translation
+                const started = transformInstance.beginKeyboardTransform(coordinate, HandleType.TRANSLATE);
+                if (started) {
+                  return HandleType.TRANSLATE;
+                }
+              }
+            }
+          }
+        } else {
+          // For non-text features (including icons), check if coordinate is on the feature
+          const featuresAtCoordinate = this.#getFeaturesAtCoordinate(coordinate);
+          if (featuresAtCoordinate.includes(selectedFeature)) {
+            // Clicking on the selected feature - start translation
+            const started = transformInstance.beginKeyboardTransform(coordinate, HandleType.TRANSLATE);
+            if (started) {
+              return HandleType.TRANSLATE;
+            }
+          }
+        }
+
+        // Clicking elsewhere (not on handle, not on feature) - clear selection
+        transformInstance.clearSelection();
+
+        // For temp text transforms, clean up and resume drawing
+        if (this.#tempTextTransformInstance) {
+          this.#cleanupTempTransformAndResume();
         }
       }
+
       return undefined;
     }
 
@@ -1282,7 +1377,7 @@ export class DrawerController extends AbstractMapViewerController {
       return undefined;
     }
 
-    return { handleType };
+    return handleType;
   }
 
   /**
@@ -1308,7 +1403,7 @@ export class DrawerController extends AbstractMapViewerController {
    */
   cancelGrabbedTransform(): void {
     if (this.#grabbedHandle) {
-      const transformInstance = this.#transformInstance;
+      const transformInstance = this.#transformInstance || this.#tempTextTransformInstance;
       if (transformInstance) {
         transformInstance.restoreHandleHighlight();
       }
@@ -1337,9 +1432,12 @@ export class DrawerController extends AbstractMapViewerController {
     const mapId = this.getMapId();
 
     if (!isStoreDrawerInitialized(mapId)) return false;
-    if (!getStoreDrawerIsEditing(mapId)) return false;
 
-    const transformInstance = this.#transformInstance;
+    const isEditing = getStoreDrawerIsEditing(mapId);
+    const hasTempTextTransform = !!this.#tempTextTransformInstance;
+    if (!isEditing && !hasTempTextTransform) return false;
+
+    const transformInstance = this.#transformInstance || this.#tempTextTransformInstance;
     if (!transformInstance) return false;
 
     return transformInstance.applyKeyboardTransformFromCoordinates(startCoordinate, endCoordinate, handleType);
@@ -1807,6 +1905,25 @@ export class DrawerController extends AbstractMapViewerController {
   }
 
   /**
+   * Cleans up the temporary text transform and restores drawing mode.
+   */
+  #cleanupTempTransformAndResume(): void {
+    const mapId = this.getMapId();
+
+    // Cleanup the temporary transform
+    this.#cleanupTempTransform();
+
+    // Reset the selected drawing type
+    setStoreSelectedDrawingType(mapId, undefined);
+
+    // Resume drawing
+    this.startDrawing();
+
+    // Reset text rotation to 0
+    this.setTextRotation(0);
+  }
+
+  /**
    * Gets a feature by its ID.
    *
    * @param featureId - Feature ID to search for
@@ -1858,6 +1975,59 @@ export class DrawerController extends AbstractMapViewerController {
       return [];
     }
     return features;
+  }
+
+  /**
+   * Gets drawing features at the specified coordinate.
+   *
+   * @param coordinate - The map coordinate to check
+   * @returns Array of drawing features at the coordinate
+   */
+  #getFeaturesAtCoordinate(coordinate: number[]): Feature[] {
+    const pixel = this.getMapViewer().map.getPixelFromCoordinate(coordinate);
+    const features: Feature[] = [];
+
+    this.getMapViewer().map.forEachFeatureAtPixel(pixel, (feature) => {
+      if (feature.get('geometryGroup') === DrawerController.DRAW_GROUP_KEY) {
+        features.push(feature as Feature);
+      }
+    });
+
+    return features;
+  }
+
+  /**
+   * Calculates the visual extent of a text feature.
+   *
+   * @param feature - The text feature
+   * @returns The text extent or null if calculation fails
+   */
+  #calculateTextExtent(feature: Feature): Extent | null {
+    const geometry = feature.getGeometry();
+    if (!(geometry instanceof Point)) return null;
+
+    const coords = geometry.getCoordinates();
+    const style = feature.getStyle() as DrawerStyle;
+    const text = style.getTextContent();
+    const fontSize = style.getTextSize();
+
+    const resolution = this.getMapViewer().map.getView().getResolution() || 1;
+
+    const charWidth = fontSize * 0.6;
+    const textWidth = text.length * charWidth;
+    const textHeight = fontSize * 1.2;
+
+    const mapWidth = textWidth * resolution;
+    const mapHeight = textHeight * resolution;
+
+    // Text is centered
+    const textCenterY = coords[1];
+    const textLeft = coords[0] - mapWidth / 2.5;
+    const textRight = coords[0] + mapWidth / 2.5;
+    const textBottom = textCenterY - mapHeight / 1.25;
+    const textTop = textCenterY + mapHeight / 1.25;
+
+    return [textLeft, textBottom, textRight, textTop];
   }
 
   /**
@@ -2240,10 +2410,15 @@ export class DrawerController extends AbstractMapViewerController {
         const drawInstance = this.#drawInstance;
         drawInstance?.stopInteraction();
 
+        // Use larger hit tolerance when crosshair is active for easier keyboard targeting
+        const isCrosshairActive = getStoreAppIsCrosshairsActive(mapId);
+        const hitTolerance = isCrosshairActive ? DrawerController.KEYBOARD_HIT_TOLERANCE : DrawerController.MOUSE_HIT_TOLERANCE;
+
         const featureCollection = new Collection([feature]); // Only select this specific feature
         const tempTransform = viewer.initTransformInteractions({
           geometryGroupKey: DrawerController.DRAW_GROUP_KEY,
           features: featureCollection,
+          hitTolerance,
         });
 
         // Keep track of this temp transform instance for cleanup
@@ -2277,19 +2452,8 @@ export class DrawerController extends AbstractMapViewerController {
               features: [previousFeature],
             });
 
-            // Cleanup the temporary transform
-            this.#cleanupTempTransform();
-
-            // Reset the selected drawing type
-            setStoreSelectedDrawingType(mapId, undefined);
-
-            // Resume drawing
-            if (drawInstance) {
-              drawInstance.startInteraction();
-            }
-
-            // Reset text rotation to 0. Can be removed in the future if added to UI
-            this.setTextRotation(0);
+            // Cleanup the temporary transform and resume drawing
+            this.#cleanupTempTransformAndResume();
           }
         });
 
@@ -2329,6 +2493,15 @@ export class DrawerController extends AbstractMapViewerController {
           setStoreTextValue(mapId, styleProps.text || '');
           setStoreTextBold(mapId, styleProps.textBold || false);
           setStoreTextItalic(mapId, styleProps.textItalic || false);
+        }
+
+        // Restore map focus after hitting enter for text - only if crosshairs are active
+        const isCrosshairActive = getStoreAppIsCrosshairsActive(mapId);
+        if (isCrosshairActive) {
+          const mapElement = this.getMapViewer().map.getTargetElement();
+          if (mapElement instanceof HTMLElement) {
+            mapElement.focus();
+          }
         }
       }
 
@@ -2469,24 +2642,60 @@ export class DrawerController extends AbstractMapViewerController {
   }
 
   /**
-   * Sets up keyboard event handling for undo and redo shortcuts (Ctrl+Z and Ctrl+Y)
+   * Sets up keyboard event handling for undo, redo, and escape shortcuts (Ctrl+Z, Ctrl+Y, and Escape)
    */
-  #hookUndoRedoHandler(): void {
+  #hookUndoRedoEscapeHandler(): void {
     if (this.#undoRedoHandler) return;
 
     const handler = (event: KeyboardEvent): void => {
+      // Handle Escape key separately for exiting transform interactions
+      if (event.key === 'Escape') {
+        const mapId = this.getMapId();
+        if (!isStoreDrawerInitialized(mapId)) return;
+
+        // If editing with a selected feature, clear selection
+        const transformInstance = this.#transformInstance || this.#tempTextTransformInstance;
+        if (transformInstance && transformInstance.getSelectedFeature()) {
+          transformInstance.clearSelection();
+
+          // If this was a temp text transform, clean it up
+          if (this.#tempTextTransformInstance) {
+            this.#cleanupTempTransformAndResume();
+          }
+
+          event.preventDefault();
+          event.stopPropagation();
+          return;
+        }
+
+        return;
+      }
+
       if (event.ctrlKey || event.metaKey) {
         switch (event.key.toLowerCase()) {
           case 'z':
             if (event.shiftKey) {
-              if (this.redo()) event.preventDefault();
+              if (this.redo()) {
+                event.preventDefault();
+                event.stopPropagation();
+              }
             } else if (this.undo()) {
               event.preventDefault();
+              event.stopPropagation();
             }
             break;
 
           case 'y':
-            if (this.redo()) event.preventDefault();
+            if (this.redo()) {
+              event.preventDefault();
+              event.stopPropagation();
+            }
+            break;
+
+          case 's':
+            if (event.shiftKey) {
+              this.setShortcutsEnabled(!this.#shortcutsEnabled);
+            }
             break;
 
           default:
@@ -2499,22 +2708,20 @@ export class DrawerController extends AbstractMapViewerController {
     document.addEventListener('keydown', handler);
   }
 
-  // TODO: If we end up with more packages with multiple shortcuts, it may be a good idea to centralize shortcut handling in a single location that can delegate to the appropriate package controllers, instead of each controller hooking into document events separately
-  // TO.DOCONT: This could also include a way for users to edit shorcuts in the UI
   /**
    * Sets up keyboard event handling for drawer shortcuts.
    *
    * Shortcuts:
-   * - Alt+D: Toggle Drawing
-   * - Alt+E: Toggle Editing
-   * - Alt+G: Cycle Geometry Type (forward)
-   * - Alt+Shift+G: Cycle Geometry Type (backward)
-   * - Alt+S: Open Style Menu
-   * - Alt+M: Toggle Measurements
-   * - Alt+N: Toggle Snapping
-   * - Alt+Shift+C: Clear All
-   * - Alt+Shift+S: Download drawings
-   * - Alt+Shift+O: Upload drawings
+   * - D: Toggle Drawing
+   * - E: Toggle Editing
+   * - G: Cycle Geometry Type (forward)
+   * - Shift+G: Cycle Geometry Type (backward)
+   * - S: Open Style Menu
+   * - M: Toggle Measurements
+   * - N: Toggle Snapping
+   * - Shift+C: Clear All
+   * - Shift+S: Download drawings
+   * - Shift+O: Upload drawings
    */
   #hookShortcutsHandler(): void {
     if (this.#shortcutsHandler) return;
@@ -2527,111 +2734,96 @@ export class DrawerController extends AbstractMapViewerController {
 
       // Check if focus is within this map's container (multi-map safety)
       const { activeElement } = document;
-      const geoviewElement = getStoreAppGeoviewHTMLElement(mapId);
-      if (!activeElement || !geoviewElement.contains(activeElement)) {
+      const mapElement = this.getMapViewer().map.getTargetElement();
+      if (!activeElement || !mapElement?.contains(activeElement)) {
         return;
       }
 
-      // Handle Escape key separately for exiting transform interactions
-      if (event.key === 'Escape') {
-        if (!isStoreDrawerInitialized(mapId)) return;
-
-        // If there's a temp text transform, clear its selection to exit edit mode
-        if (this.#tempTextTransformInstance) {
-          this.#tempTextTransformInstance.clearSelection();
-          event.preventDefault();
-
-          // Return focus to the map so arrow keys work (Necessary for Text Transforms)
-          const mapElement = this.getMapViewer().map.getTargetElement();
-          if (mapElement instanceof HTMLElement) {
-            mapElement.focus();
-          }
-          return;
-        }
-
-        // If editing with a selected feature, clear selection
-        const transformInstance = this.#transformInstance;
-        if (transformInstance && transformInstance.getSelectedFeature()) {
-          transformInstance.clearSelection();
-          event.preventDefault();
-
-          // Return focus to the map so arrow keys work (Necessary for Text Transforms)
-          const mapElement = this.getMapViewer().map.getTargetElement();
-          if (mapElement instanceof HTMLElement) {
-            mapElement.focus();
-          }
-          return;
-        }
-
+      // Prevent shortcuts when typing in input fields
+      if (
+        activeElement instanceof HTMLInputElement ||
+        activeElement instanceof HTMLTextAreaElement ||
+        (activeElement as HTMLElement).isContentEditable
+      ) {
         return;
       }
 
       // Only proceed with shortcuts if Alt key is held
-      if (event.altKey) {
-        switch (event.key.toLowerCase()) {
-          case 'd':
-            // Toggle Drawing
-            this.toggleDrawing();
-            event.preventDefault();
-            break;
+      if (event.altKey && event.ctrlKey && event.metaKey) return;
 
-          case 'e':
-            // Toggle Editing
-            this.toggleEditing();
-            event.preventDefault();
-            break;
+      switch (event.key.toLowerCase()) {
+        case 'd':
+          // Toggle Drawing
+          this.toggleDrawing();
+          event.preventDefault();
+          event.stopPropagation();
+          break;
 
-          case 'g':
-            // Cycle Geometry Type
-            if (event.shiftKey) {
-              this.cycleGeometryType(false); // Backward
-            } else {
-              this.cycleGeometryType(true); // Forward
-            }
-            event.preventDefault();
-            break;
+        case 'e':
+          // Toggle Editing
+          this.toggleEditing();
+          event.preventDefault();
+          event.stopPropagation();
+          break;
 
-          case 's':
-            // Save (Download) or Style Menu
-            if (event.shiftKey) {
-              this.downloadDrawings();
-            } else {
-              this.openStyleMenu();
-            }
-            event.preventDefault();
-            break;
+        case 'g':
+          // Cycle Geometry Type
+          if (event.shiftKey) {
+            this.cycleGeometryType(false); // Backward
+          } else {
+            this.cycleGeometryType(true); // Forward
+          }
+          event.preventDefault();
+          event.stopPropagation();
+          break;
 
-          case 'm':
+        case 's':
+          // Save (Download) or Style Menu
+          if (event.shiftKey) {
+            this.downloadDrawings();
+          } else {
+            this.openStyleMenu();
+          }
+          event.preventDefault();
+          event.stopPropagation();
+          break;
+
+        case 'm':
+          if (!event.ctrlKey && !event.metaKey) {
             // Toggle Measurements
             this.toggleHideMeasurements();
             event.preventDefault();
-            break;
+            event.stopPropagation();
+          }
+          break;
 
-          case 'n':
-            // Toggle Snapping
-            this.toggleSnapping();
+        case 'n':
+          // Toggle Snapping
+          this.toggleSnapping();
+          event.preventDefault();
+          event.stopPropagation();
+          break;
+
+        case 'c':
+          // Clear All
+          if (event.shiftKey) {
+            this.clearDrawings();
             event.preventDefault();
-            break;
+            event.stopPropagation();
+          }
+          break;
 
-          case 'c':
-            // Clear All
-            if (event.shiftKey) {
-              this.clearDrawings();
-              event.preventDefault();
-            }
-            break;
+        case 'o':
+          // Upload Drawings
+          if (event.shiftKey) {
+            this.triggerUploadDialog();
+            event.preventDefault();
+            event.stopPropagation();
+          }
+          break;
 
-          case 'o':
-            // Upload Drawings
-            if (event.shiftKey) {
-              this.triggerUploadDialog();
-              event.preventDefault();
-            }
-            break;
-
-          default:
-            break;
-        }
+        default:
+          break;
       }
     };
 
