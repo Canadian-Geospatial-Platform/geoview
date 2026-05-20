@@ -7,7 +7,7 @@ import { getSxClasses } from './crosshair-style';
 import { CrosshairIcon } from './crosshair-icon';
 import { useStoreAppIsCrosshairsActive } from '@/core/stores/states/app-state';
 import { getStoreMapPointerPosition, useStoreMapZoom } from '@/core/stores/states/map-state';
-import { getStoreDrawerIsEditing, getStoreDrawerIsDrawing } from '@/core/stores/states/drawer-state';
+import { getStoreDrawerIsEditing, getStoreDrawerIsDrawing, getStoreDrawerSelectedDrawingType } from '@/core/stores/states/drawer-state';
 import { logger } from '@/core/utils/logger';
 import { useEventListener } from '@/core/components/common/hooks/use-event-listener';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
@@ -56,6 +56,16 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
     (event: HTMLElementEventMap[keyof HTMLElementEventMap]): void => {
       if (!isCrosshairsActive || !(event instanceof KeyboardEvent)) return;
 
+      // Prevent interactions when typing in input fields
+      const { activeElement } = document;
+      if (
+        activeElement instanceof HTMLInputElement ||
+        activeElement instanceof HTMLTextAreaElement ||
+        (activeElement as HTMLElement).isContentEditable
+      ) {
+        return;
+      }
+
       if ((event.key === 'ArrowDown' && event.shiftKey) || (event.key === 'ArrowUp' && event.shiftKey)) {
         panDelta.current = event.key === 'ArrowDown' ? Math.max(10, panDelta.current - 10) : panDelta.current + 10;
 
@@ -75,11 +85,13 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
       // Ctrl+Up: Zoom in
       if (event.key === 'ArrowUp' && event.ctrlKey) {
         event.preventDefault();
+        event.stopPropagation();
         mapController.zoomMapAndForget(mapZoom + 1);
       }
       // Ctrl+Down: Zoom out
       else if (event.key === 'ArrowDown' && event.ctrlKey) {
         event.preventDefault();
+        event.stopPropagation();
         mapController.zoomMapAndForget(mapZoom - 1);
       }
     },
@@ -92,6 +104,16 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
   const handleCrosshairInteraction = useCallback(
     (event: HTMLElementEventMap[keyof HTMLElementEventMap]): void => {
       if (!isCrosshairsActive || !(event instanceof KeyboardEvent)) {
+        return;
+      }
+
+      // Prevent crosshair interactions when typing in input fields
+      const { activeElement } = document;
+      if (
+        activeElement instanceof HTMLInputElement ||
+        activeElement instanceof HTMLTextAreaElement ||
+        (activeElement as HTMLElement).isContentEditable
+      ) {
         return;
       }
 
@@ -110,26 +132,76 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
         return;
       }
 
-      // Drawer is available - check if we're in drawing or editing mode
+      // Drawer is available
+      // Check for double-click equivalent (Shift+Enter or Shift+Space) FIRST
+      // This handles text editing when a text feature is selected
+      if ((event.key === 'Enter' || event.key === ' ') && event.shiftKey) {
+        const handled = drawerController.handleDoubleClickAtCoordinate(currentPointerPosition.projected);
+
+        if (handled) {
+          // Text editor opened - stop processing
+          event.preventDefault();
+          event.stopPropagation();
+          return;
+        }
+
+        // Not handled as double-click - fall through to other Shift+Enter/Space uses
+      }
+
+      // Check if we're in drawing or editing mode
       const isDrawerDrawing = getStoreDrawerIsDrawing(mapId);
       const isDrawerEditing = getStoreDrawerIsEditing(mapId);
 
       if (isDrawerDrawing) {
         // DRAWING MODE
+        // Skip Enter/Space handling for Text geometry - it's handled by drawer shortcuts
+        const selectedDrawingType = getStoreDrawerSelectedDrawingType(mapId);
+        if (selectedDrawingType === 'Text') {
+          // Only skip if actively typing in the text editor
+          if ((activeElement as HTMLElement).isContentEditable) {
+            return;
+          }
+
+          // Use editing mode logic for text transform handles
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            event.stopPropagation();
+
+            if (drawerController.isHandleGrabbed()) {
+              // DROP: Apply transformation
+              drawerController.applyGrabbedTransform(currentPointerPosition.projected);
+            } else {
+              // GRAB: Try to grab a handle
+              const grabbed = drawerController.grabHandleForKeyboard(currentPointerPosition.projected);
+              if (!grabbed) {
+                // No handle - try to select the feature
+                drawerController.handleEditingAtCoordinate(currentPointerPosition.projected);
+              }
+            }
+          } else if (event.key === 'Escape') {
+            event.preventDefault();
+            drawerController.cancelGrabbedTransform();
+          }
+          return; // Don't fall through to regular drawing logic
+        }
+
+        // Regular drawing mode for non-text geometries
         if ((event.key === 'Enter' && event.shiftKey) || (event.key === ' ' && event.shiftKey)) {
           // Shift+Enter or Shift+Space: Finish drawing
           event.preventDefault();
+          event.stopPropagation();
           drawerController.finishCurrentDrawing();
         } else if (event.key === 'Enter' || event.key === ' ') {
           // Enter or Space: Add vertex
           event.preventDefault();
+          event.stopPropagation();
           drawerController.addCoordinateToDrawing(currentPointerPosition.projected);
         }
       } else if (isDrawerEditing) {
         // EDITING MODE
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault();
-
+          event.stopPropagation();
           // If actively moving a handle
           if (drawerController.isHandleGrabbed()) {
             // DROP: Apply transformation from grab coordinate to current coordinate
@@ -145,12 +217,14 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
         } else if (event.key === 'Escape') {
           // CANCEL: Release the grab without applying transformation
           event.preventDefault();
+
           drawerController.cancelGrabbedTransform();
         }
       } else if (event.key === 'Enter' || event.key === ' ') {
         // Not in draw or edit mode
         // Default behavior: open details panel
         event.preventDefault();
+        event.stopPropagation();
         abortControllerRef.current?.abort();
         const controller = new AbortController();
         abortControllerRef.current = controller;
