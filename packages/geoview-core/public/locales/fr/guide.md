@@ -130,7 +130,7 @@ Activez le mode édition en cliquant sur le bouton **Éditer** ou en appuyant su
 
 ## Raccourcis clavier des outils de dessin
 
-_Note : Les raccourcis clavier (sauf annuler/rétablir/échap) peuvent être activés/désactivés via le bouton de raccourcis dans la barre d'outils du drawer. Les raccourcis annuler, rétablir et échap sont toujours actifs._
+_Note : Les raccourcis clavier (sauf annuler/rétablir/échap) peuvent être activés/désactivés via le bouton de raccourcis dans la barre d'outils du drawer ou en utilisant la touche backtick ` . Les raccourcis annuler, rétablir et échap sont toujours actifs._
 
 | Raccourci | Action |
 |----------|--------|

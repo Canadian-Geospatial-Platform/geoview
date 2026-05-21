@@ -131,7 +131,7 @@ Activate editing mode by clicking the **Edit** button or pressing **Alt+E**. In 
 
 ## Drawing Tools Keyboard Shortcuts
 
-_Note: Keyboard shortcuts (except undo/redo/escape) can be toggled on/off via the shortcuts button in the drawer toolbar. The undo, redo, and escape shortcuts are always active._
+_Note: Keyboard shortcuts (except undo/redo/escape) can be toggled on/off via the shortcuts button in the drawer toolbar or using the backtick ` key. The undo, redo, and escape shortcuts are always active._
 
 | Shortcut | Action |
 |----------|--------|
