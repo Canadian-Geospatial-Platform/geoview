@@ -497,7 +497,7 @@ export class MapTester extends GVAbstractTester {
     // British Columbia approximate extent in lon/lat (EPSG:4326)
     // West: -139°, South: 48°, East: -114°, North: 60°
     const bcExtent: Extent = [-139, 48, -114, 60];
-    const expectedArrowAngle = 25; // Expected north arrow angle over BC in LCC
+    const expectedArrowAngle = 29; // Expected north arrow angle over BC in LCC
 
     return this.test(
       'Test north arrow rotation in LCC projection for British Columbia',

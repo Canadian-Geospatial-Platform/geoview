@@ -628,7 +628,7 @@ export const addStoreAppNotification = async (mapId: string, notification: Notif
   );
 
   if (!existingNotif) {
-    curNotifications.push({
+    curNotifications.unshift({
       key: notification.key,
       notificationType: notification.notificationType,
       message: notification.message,

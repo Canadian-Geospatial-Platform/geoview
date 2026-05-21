@@ -202,7 +202,7 @@
     "errorNoExtent": "Aucune étendue définie pour la couche '{{layerPath}}'.",
     "errorInvalidExtent": "Étendue invalide '{{extent}}'.",
     "fetchProgress": "Téléchargement des données... Téléchargé {{processed}} de {{total}} enregistrements.",
-    "fetchDoneDeprecated": "Données téléchargées - {{count}} enregistrements.",
+    "fetchDone": "Données téléchargées - {{count}} enregistrements.",
     "fetchStart": "Téléchargement des données...",
     "only": "seulement",
     "opacity": "Opacité (%)",

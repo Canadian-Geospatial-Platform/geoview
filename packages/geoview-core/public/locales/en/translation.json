@@ -202,7 +202,7 @@
     "errorNoExtent": "No extent for layer '{{layerPath}}'.",
     "errorInvalidExtent": "Invalid extent '{{extent}}'.",
     "fetchProgress": "Fetching data... Retrieved {{processed}} of {{total}} records.",
-    "fetchDoneDeprecated": "Data fetched - {{count}} records.",
+    "fetchDone": "Data fetched - {{count}} records.",
     "fetchStart": "Fetching data...",
     "only": "only",
     "opacity": "Opacity (%)",
