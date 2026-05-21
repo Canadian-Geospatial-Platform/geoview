@@ -59,7 +59,7 @@ export const useManageArrow = (): ArrowReturn => {
    */
   const { memoCalculatedRotation, memoCalculatedOffset } = useMemo(() => {
     // Log
-    logger.logTraceUseMemo('USE-MANAGE-ARROW - calculatedRotation, calculatedOffset');
+    logger.logTraceUseMemo('USE-MANAGE-ARROW - calculatedRotation, calculatedOffset', mapZoom, mapRotation);
 
     // Constants
     const ARROW_WIDTH = 24;
@@ -207,7 +207,7 @@ export const useManageArrow = (): ArrowReturn => {
 
     setRotationAngle(memoCalculatedRotation);
     setNorthOffset(memoCalculatedOffset);
-  }, [memoCalculatedRotation, memoCalculatedOffset, rotationAngle, northOffset]);
+  }, [memoCalculatedRotation, memoCalculatedOffset]);
 
   return { rotationAngle, northOffset };
 };

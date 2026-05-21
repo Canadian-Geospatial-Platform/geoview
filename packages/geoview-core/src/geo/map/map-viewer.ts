@@ -2873,7 +2873,39 @@ export class MapViewer {
   }
 
   /**
+   * Emits a language changed event to all handlers.
+   */
+  #emitMapLanguageChanged(event: MapLanguageChangedEvent): void {
+    // Emit the language changed event for all handlers
+    EventHelper.emitEvent(this, this.#onMapLanguageChangedHandlers, event);
+  }
+
+  /**
+   * Registers a language changed event callback.
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback delegate that was registered
+   */
+  onMapLanguageChanged(callback: MapLanguageChangedDelegate): MapLanguageChangedDelegate {
+    // Register the language changed event handler
+    return EventHelper.onEvent(this.#onMapLanguageChangedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a language changed event callback.
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
+   */
+  offMapLanguageChanged(callback: MapLanguageChangedDelegate): void {
+    // Unregister the language changed event handler
+    EventHelper.offEvent(this.#onMapLanguageChangedHandlers, callback);
+  }
+
+  /**
    * Emits a geolocator search event to all handlers.
+   *
+   * Unlike other emit methods which are private (#emit), this method is public because it is called
+   * from MapController.zoomToGeoLocatorLocation() — a separate class that cannot access #private members.
    *
    * @param event - The geolocator search event payload
    */
@@ -2901,35 +2933,6 @@ export class MapViewer {
   offGeolocatorSearch(callback: GeolocatorSearchDelegate): void {
     // Unregister the geolocator search event handler
     EventHelper.offEvent(this.#onGeolocatorSearchHandlers, callback);
-  }
-
-  /**
-   * Emits a language changed event to all handlers.
-   */
-  #emitMapLanguageChanged(event: MapLanguageChangedEvent): void {
-    // Emit the component removed event for all handlers
-    EventHelper.emitEvent(this, this.#onMapLanguageChangedHandlers, event);
-  }
-
-  /**
-   * Registers a language changed event callback.
-   *
-   * @param callback - The callback to be executed whenever the event is emitted
-   * @returns The callback delegate that was registered
-   */
-  onMapLanguageChanged(callback: MapLanguageChangedDelegate): MapLanguageChangedDelegate {
-    // Register the component removed event handler
-    return EventHelper.onEvent(this.#onMapLanguageChangedHandlers, callback);
-  }
-
-  /**
-   * Unregisters a language changed event callback.
-   *
-   * @param callback - The callback to stop being called whenever the event is emitted
-   */
-  offMapLanguageChanged(callback: MapLanguageChangedDelegate): void {
-    // Unregister the component removed event handler
-    EventHelper.offEvent(this.#onMapLanguageChangedHandlers, callback);
   }
 
   // #endregion
