@@ -1038,6 +1038,8 @@ export class DrawerController extends AbstractMapViewerController {
         ],
       ]);
     } else if (geomType === 'Star') {
+      // TODO: This needs to be reworked to get the svgPath from a central location
+      // TO.DOCONT: incase other shapes are added in the future
       const svgPath =
         'm 7.61,20.13 8.22,7.04 -2.51,10.53 9.24,-5.64 9.24,5.64 L29.29,27.17 37.51,20.13 26.72,19.27 22.56,9.27 18.4,19.27 Z';
       geometry = DrawerController.#svgPathToGeometry(svgPath, [firstCoord, secondCoord]);
@@ -1190,10 +1192,6 @@ export class DrawerController extends AbstractMapViewerController {
 
   /**
    * Handles a shift-click action at the given coordinate (keyboard equivalent: Shift+Enter/Space).
-   * Priority order:
-   * 1. If on a vertex handle of a non-text feature → delete the vertex
-   * 2. If on a text feature (inside bounds) → open text editor
-   * 3. Otherwise → not handled
    *
    * @param coordinate - The map coordinate where the shift-click occurred
    * @returns Whether the shift-click was handled
@@ -1203,7 +1201,7 @@ export class DrawerController extends AbstractMapViewerController {
 
     if (!isStoreDrawerInitialized(mapId)) return false;
 
-    // Check if we have any transform instance (main or temp)
+    // Check if we have any transform instance active
     const transformInstance = this.#transformInstance || this.#tempTextTransformInstance;
     if (!transformInstance) return false;
 
@@ -1211,7 +1209,7 @@ export class DrawerController extends AbstractMapViewerController {
     const selectedFeature = transformInstance.getSelectedFeature();
     if (!selectedFeature) return false;
 
-    // Priority 1: Check if we're on a vertex handle (takes precedence over text editing)
+    // Check if we're on a vertex handle
     const handleType = transformInstance.getHandleTypeAtCoordinate(coordinate);
     if (handleType === HandleType.VERTEX) {
       // Check if this is a text feature - don't delete vertices from text
@@ -1223,7 +1221,7 @@ export class DrawerController extends AbstractMapViewerController {
       return true;
     }
 
-    // Priority 2: Not on a vertex - check if it's a text feature and we're clicking inside it
+    // Check if it's a text feature and we're clicking inside it
     const isTextFeature = DrawerController.#isTextFeature(selectedFeature);
     if (!isTextFeature) return false;
 
