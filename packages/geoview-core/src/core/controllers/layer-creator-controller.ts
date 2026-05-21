@@ -449,6 +449,9 @@ export class LayerCreatorController extends AbstractMapViewerController {
         // Create and register new layer
         const layer = geoviewLayer.createGVLayer(layerEntryConfig as AbstractBaseLayerEntryConfig);
 
+        // Initialize the GV Layer
+        layer.init();
+
         // Re-register in the domain
         this.#layerDomain.registerGVLayer(layer);
 
