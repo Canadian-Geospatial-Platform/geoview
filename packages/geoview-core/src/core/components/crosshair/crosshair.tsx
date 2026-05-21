@@ -133,10 +133,10 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
       }
 
       // Drawer is available
-      // Check for double-click equivalent (Shift+Enter or Shift+Space) FIRST
+      // Check for shift-click equivalent (Shift+Enter or Shift+Space) FIRST
       // This handles text editing when a text feature is selected
       if ((event.key === 'Enter' || event.key === ' ') && event.shiftKey) {
-        const handled = drawerController.handleDoubleClickAtCoordinate(currentPointerPosition.projected);
+        const handled = drawerController.handleShiftClickAtCoordinate(currentPointerPosition.projected);
 
         if (handled) {
           // Text editor opened - stop processing
@@ -145,7 +145,7 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
           return;
         }
 
-        // Not handled as double-click - fall through to other Shift+Enter/Space uses
+        // Not handled as shift-click - fall through to other Shift+Enter/Space uses
       }
 
       // Check if we're in drawing or editing mode
