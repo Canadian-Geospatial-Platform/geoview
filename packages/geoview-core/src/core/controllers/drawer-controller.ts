@@ -94,7 +94,7 @@ export class DrawerController extends AbstractMapViewerController {
   static readonly MOUSE_HIT_TOLERANCE = 5;
 
   /** Hit tolerance for keyboard-based editing interactions (crosshair) */
-  static readonly KEYBOARD_HIT_TOLERANCE = 30;
+  static readonly KEYBOARD_HIT_TOLERANCE = 20;
 
   static readonly SHORTCUTS_INDICATOR_ID = 'shortcuts-enabled';
 
@@ -1189,30 +1189,44 @@ export class DrawerController extends AbstractMapViewerController {
   }
 
   /**
-   * Handles a double-click action at the given coordinate (keyboard equivalent: Shift+Enter/Space).
-   * Opens text editor if a text feature is selected and the coordinate is within its bounds.
+   * Handles a shift-click action at the given coordinate (keyboard equivalent: Shift+Enter/Space).
+   * Priority order:
+   * 1. If on a vertex handle of a non-text feature → delete the vertex
+   * 2. If on a text feature (inside bounds) → open text editor
+   * 3. Otherwise → not handled
    *
-   * @param coordinate - The map coordinate where the double-click occurred
-   * @returns Whether the double-click was handled (text editor opened)
+   * @param coordinate - The map coordinate where the shift-click occurred
+   * @returns Whether the shift-click was handled
    */
-  handleDoubleClickAtCoordinate(coordinate: number[]): boolean {
+  handleShiftClickAtCoordinate(coordinate: number[]): boolean {
     const mapId = this.getMapId();
 
     if (!isStoreDrawerInitialized(mapId)) return false;
 
     // Check if we have any transform instance (main or temp)
     const transformInstance = this.#transformInstance || this.#tempTextTransformInstance;
-    if (!transformInstance) return false; // No transform instance
+    if (!transformInstance) return false;
 
     // Get the currently selected feature
     const selectedFeature = transformInstance.getSelectedFeature();
-    if (!selectedFeature) return false; // No transform active, no feature selected
+    if (!selectedFeature) return false;
 
-    // Check if the selected feature is a text feature
+    // Priority 1: Check if we're on a vertex handle (takes precedence over text editing)
+    const handleType = transformInstance.getHandleTypeAtCoordinate(coordinate);
+    if (handleType === HandleType.VERTEX) {
+      // Check if this is a text feature - don't delete vertices from text
+      const isTextFeature = DrawerController.#isTextFeature(selectedFeature);
+      if (isTextFeature) return false;
+
+      // Delete the vertex
+      transformInstance.deleteVertexAtCoordinate(coordinate);
+      return true;
+    }
+
+    // Priority 2: Not on a vertex - check if it's a text feature and we're clicking inside it
     const isTextFeature = DrawerController.#isTextFeature(selectedFeature);
-    if (!isTextFeature) return false; // No transform active, non-text feature selected
+    if (!isTextFeature) return false;
 
-    // Transform active, text feature selected
     // Check if coordinate is within the text's bounding box
     const textExtent = this.#calculateTextExtent(selectedFeature);
     if (!textExtent) return false;
@@ -1226,7 +1240,7 @@ export class DrawerController extends AbstractMapViewerController {
       return true;
     }
 
-    // Outside text bounds - treat as regular click (will exit selection)
+    // Shift-click not handled
     return false;
   }
 
