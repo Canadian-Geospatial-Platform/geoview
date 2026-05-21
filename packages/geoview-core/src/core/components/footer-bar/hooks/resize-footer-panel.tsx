@@ -32,6 +32,9 @@ const TRANSFORM_ORIGIN = {
 /** Available resize percentage values. */
 const RESIZE_VALUES = [35, 50, 100];
 
+/** Snap threshold in percentage points — slider snaps to a mark when within this distance. */
+const SNAP_THRESHOLD = 3;
+
 /**
  * Creates the popover to resize the map container and footer panel.
  *
@@ -53,6 +56,7 @@ export const ResizeFooterPanel = memo(function ResizeFooterPanel(): JSX.Element 
 
   // States
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+  const [pendingValue, setPendingValue] = useState<number | undefined>(undefined);
 
   // Get container
   const mapId = useStoreGeoViewMapId();
@@ -79,14 +83,36 @@ export const ResizeFooterPanel = memo(function ResizeFooterPanel(): JSX.Element 
   }, []);
 
   /**
-   * Handles slider value change and closes the popover.
+   * Handles slider drag, updating the preview value with snap logic without resizing.
    */
-  const handleOnSliderChange = useCallback(
-    (event: Event, value: number | number[]): void => {
-      uiController.setFooterPanelResizeValue(value as number);
+  const handleOnSliderChange = useCallback((_event: Event, value: number | number[]): void => {
+    let snapped = value as number;
+    for (const mark of RESIZE_VALUES) {
+      if (Math.abs(snapped - mark) <= SNAP_THRESHOLD) {
+        snapped = mark;
+        break;
+      }
+    }
+    setPendingValue(snapped);
+  }, []);
+
+  /**
+   * Handles committing the slider value on release, applying the resize and closing the popover.
+   */
+  const handleOnSliderChangeCommitted = useCallback(
+    (_event: React.SyntheticEvent | Event, value: number | number[]): void => {
+      let snapped = value as number;
+      for (const mark of RESIZE_VALUES) {
+        if (Math.abs(snapped - mark) <= SNAP_THRESHOLD) {
+          snapped = mark;
+          break;
+        }
+      }
+      uiController.setFooterPanelResizeValue(snapped);
+      setPendingValue(undefined);
       handleClose();
     },
-    [handleClose, uiController]
+    [uiController, handleClose]
   );
 
   // #endregion Handlers
@@ -109,11 +135,12 @@ export const ResizeFooterPanel = memo(function ResizeFooterPanel(): JSX.Element 
           <Slider
             sx={SLIDER_STYLES}
             orientation="vertical"
-            value={footerPanelResizeValue}
-            step={null} // so that slider jump to values based on marks array.
-            valueLabelDisplay="off"
+            value={pendingValue ?? footerPanelResizeValue}
+            step={1}
+            valueLabelDisplay="auto"
             marks={marks}
             onChange={handleOnSliderChange}
+            onChangeCommitted={handleOnSliderChangeCommitted}
             min={RESIZE_VALUES[0]}
             max={RESIZE_VALUES[RESIZE_VALUES.length - 1]}
           />

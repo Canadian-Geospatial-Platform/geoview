@@ -8,7 +8,7 @@ import type { SxStyles } from '@/ui/style/types';
 export const getSxClasses = (): SxStyles => ({
   slider: {
     height: 300,
-    padding: '1.5rem 0.5rem 1.5rem 1rem',
+    padding: '1.5rem 0.5rem 1.5rem 3.5rem',
     '& .MuiSlider-markLabel': {
       left: '33px',
       '&:nth-of-type(1)': {
