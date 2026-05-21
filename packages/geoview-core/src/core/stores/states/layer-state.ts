@@ -748,6 +748,12 @@ export const getStoreLayerBounds = (mapId: string, layerPath: string): Extent | 
 /** Hook that returns the bounds extent for a specific layer. */
 export const useStoreLayerBounds = createLayerSelectorHook('bounds');
 
+/** Hook that returns the minimum scale denominator for a specific layer. */
+export const useStoreLayerMinScale = createLayerSelectorHook('minScale');
+
+/** Hook that returns the maximum scale denominator for a specific layer. */
+export const useStoreLayerMaxScale = createLayerSelectorHook('maxScale');
+
 /**
  * Gets the layer status for a specific layer.
  *

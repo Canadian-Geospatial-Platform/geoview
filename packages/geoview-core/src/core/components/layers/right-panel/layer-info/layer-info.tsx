@@ -20,6 +20,8 @@ import {
   useStoreLayerDisplayDateTimezone,
   useStoreLayerBounds,
   useStoreLayerBounds4326,
+  useStoreLayerMinScale,
+  useStoreLayerMaxScale,
   useStoreLayerFilter,
   useStoreLayerFilterClass,
   useStoreLayerTimeDimension,
@@ -29,8 +31,10 @@ import {
 import { useStoreTimeSliderFilter, useStoreTimeSliderLayer } from '@/core/stores/states/time-slider-state';
 import { useLayerController } from '@/core/controllers/use-controllers';
 
-// OGC/ESRI service capability request suffixes
+/** OGC/ESRI WFS GetCapabilities request suffix. */
 const WFS_PARAMS = '?service=WFS&version=2.0.0&request=GetCapabilities';
+
+/** OGC/ESRI WMS GetCapabilities request suffix. */
 const WMS_PARAMS = '?service=WMS&version=1.3.0&request=GetCapabilities';
 
 interface LayerInfoPanelProps {
@@ -39,13 +43,14 @@ interface LayerInfoPanelProps {
 }
 
 /**
- * Panel view for layer information content.
+ * Creates the layer information panel component.
  *
  * Displays layer type, projection, bounds, active filters, temporal settings,
  * resource links, and metadata links. The header and back navigation are
  * handled by the parent.
  *
- * @param layerPath - The layer path to display information for.
+ * @param props - Properties defined in LayerInfoPanelProps interface
+ * @returns The layer information panel component, or null if unavailable
  */
 export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element | null {
   // Log
@@ -54,7 +59,8 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
-  const memoSxClasses = useMemo(() => {
+  /** Builds the style classes for the current theme. */
+  const memoSxClasses = useMemo((): ReturnType<typeof getSxClasses> => {
     logger.logTraceUseMemo('LAYER-INFO - memoSxClasses', theme);
     return getSxClasses(theme);
   }, [theme]);
@@ -71,6 +77,9 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
   const url = useStoreLayerUrl(layerPath);
   const bounds = useStoreLayerBounds(layerPath);
   const bounds4326 = useStoreLayerBounds4326(layerPath);
+  const minScale = useStoreLayerMinScale(layerPath);
+  const maxScale = useStoreLayerMaxScale(layerPath);
+  const layerScaleDependant = minScale !== undefined || maxScale !== undefined;
   const layerDisplayDateFormat = useStoreLayerDisplayDateFormat(layerPath);
   const layerDisplayDateFormatShort = useStoreLayerDisplayDateFormatShort(layerPath);
   const layerDateTemporalMode = useStoreLayerDateTemporalMode(layerPath);
@@ -83,14 +92,15 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
   const layerNativeProjection = layerController.getLayerMetatadaProjectionEPSG(layerPath);
 
   // Derived values
-  const memoLocalizedLayerType = useMemo(() => {
+  /** Builds localized layer type labels for the current language. */
+  const memoLocalizedLayerType = useMemo((): ReturnType<typeof UtilAddLayer.getLocalizeLayerType> => {
     logger.logTraceUseMemo('LAYER-INFO - memoLocalizedLayerType', language);
     return UtilAddLayer.getLocalizeLayerType(language, true);
   }, [language]);
   const boundsRounded = bounds?.map((value) => Math.round(value));
   const boundsRounded4326 = bounds4326?.map((value) => Math.round(value * 100) / 100);
 
-  // Build resource URL based on layer type
+  /** Builds the service resource URL based on layer type. */
   const memoResources = useMemo((): string => {
     logger.logTraceUseMemo('LAYER-INFO - memoResources', url, schemaTag, layerPath);
     if (!url) return '';
@@ -123,7 +133,7 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
   const id = layerPath.split('/')[0].split(':')[0];
   const validId = isValidUUID(id) && metadataUrl !== '';
 
-  // Find the localized name for the current layer type
+  /** Builds the localized display name for the current layer type. */
   const memoLocalizedTypeName = useMemo((): string => {
     logger.logTraceUseMemo('LAYER-INFO - memoLocalizedTypeName', schemaTag, url);
     const localizedTypeEntry = memoLocalizedLayerType.find(([memoType]) => memoType === schemaTag);
@@ -164,6 +174,8 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
           )}
           <Box>{`${t('layers.layerBounds', { mapProjectionEPSG })}: ${boundsRounded?.join(', ')}`}</Box>
           <Box>{`${t('layers.layerBounds4326')}: ${boundsRounded4326?.join(', ')}`}</Box>
+          {layerScaleDependant && <Box>{`${t('layers.layerMaxScale')}: ${maxScale}`}</Box>}
+          {layerScaleDependant && <Box>{`${t('layers.layerMinScale')}: ${minScale}`}</Box>}
         </Box>
       </Box>
 

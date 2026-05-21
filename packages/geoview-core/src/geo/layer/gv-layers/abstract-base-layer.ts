@@ -6,6 +6,7 @@ import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
 import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
+import type { EffectiveLayerScales } from '@/geo/map/map-viewer';
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
 
 /**
@@ -502,15 +503,67 @@ export abstract class AbstractBaseGVLayer {
   }
 
   /**
-   * Checks if layer is visible at the given zoom level.
+   * Sets the minimum resolution at which the OL layer starts rendering.
    *
-   * @param zoom - Zoom level to be compared
-   * @returns If the layer is visible at this zoom level
+   * A layer is visible when resolution > minResolution (i.e., not too zoomed in).
+   * Set from the effective maxScale of the layer configuration.
+   *
+   * @param minResolution - The minimum resolution (map units per pixel)
    */
-  inVisibleRange(zoom: number): boolean {
-    const minZoom = this.getOLLayer().getMinZoom();
-    const maxZoom = this.getOLLayer().getMaxZoom();
-    return (!minZoom || zoom > minZoom) && (!maxZoom || zoom <= maxZoom);
+  setMinResolution(minResolution: number): void {
+    this.getOLLayer().setMinResolution(minResolution);
+  }
+
+  /**
+   * Sets the maximum resolution at which the OL layer stops rendering.
+   *
+   * A layer is visible when resolution <= maxResolution (i.e., not too zoomed out).
+   * Set from the effective minScale of the layer configuration.
+   *
+   * @param maxResolution - The maximum resolution (map units per pixel)
+   */
+  setMaxResolution(maxResolution: number): void {
+    this.getOLLayer().setMaxResolution(maxResolution);
+  }
+
+  /**
+   * Gets the in visible range value.
+   *
+   * Compares against the OL layer's minResolution/maxResolution thresholds, which are
+   * set by updateLayerInVisibleRange from both config scale values and initialSettings zoom values.
+   * Uses inclusive boundaries on both ends (`<=`) to match ESRI/ArcGIS semantics where
+   * minScale and maxScale are both inclusive. This ensures a layer with maxScale=41999
+   * is visible at exactly scale 41999.
+   *
+   * @param currentResolution - Optional. The current map resolution in map units per pixel
+   * @param currentScale - Optional. The current map scale denominator (1:X)
+   * @param effectiveScales - Optional. Effective layer scales with buffer thresholds
+   * @returns True if the layer is in visible range
+   */
+  isInVisibleRange(currentResolution: number | undefined, currentScale?: number, effectiveScales?: EffectiveLayerScales): boolean {
+    if (!currentResolution || Number.isNaN(currentResolution)) return false;
+    const minResolution = this.getOLLayer().getMinResolution(); // defaults to 0
+    const maxResolution = this.getOLLayer().getMaxResolution(); // defaults to Infinity
+    const inResolutionRange = currentResolution >= minResolution && currentResolution <= maxResolution;
+    if (!inResolutionRange) return false;
+
+    // If scale context is provided, enforce a strict "safe zone" by excluding values
+    // that fall inside configured visibility buffers around min/max scale thresholds.
+    if (currentScale && effectiveScales) {
+      const { maxScale, maxScaleTolerance, minScale, minScaleTolerance } = effectiveScales;
+
+      // Too close to zoom-in boundary (maxScale)
+      if (maxScale && maxScaleTolerance && currentScale >= maxScale && currentScale < maxScaleTolerance) {
+        return false;
+      }
+
+      // Too close to zoom-out boundary (minScale)
+      if (minScale && minScaleTolerance && currentScale > minScaleTolerance && currentScale <= minScale) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   // #endregion METHODS

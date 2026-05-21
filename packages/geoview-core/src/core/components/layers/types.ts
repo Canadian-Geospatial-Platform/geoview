@@ -13,6 +13,7 @@ import type {
 import type { LegendQueryStatus } from '@/core/stores/states/layer-state';
 import type { TemporalMode, TimeDimension, TimeIANA, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 
+/** Represents the layer panel display state. */
 export type TypeLayersViewDisplayState = 'add' | 'view';
 
 /** Represents a single legend layer item (icon/symbol entry). */
@@ -99,6 +100,12 @@ export interface TypeLegendLayer {
 
   /** Whether the layer is visible at the current map zoom. */
   inVisibleRange: boolean;
+
+  /** Minimum scale denominator at which the layer is visible. */
+  minScale?: number;
+
+  /** Maximum scale denominator at which the layer is visible. */
+  maxScale?: number;
 
   /** Whether the layer legend is collapsed. */
   legendCollapsed: boolean;

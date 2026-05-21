@@ -231,6 +231,8 @@
     "layerType": "Type: ",
     "layerBounds": "Bounds ({{mapProjectionEPSG}})",
     "layerBounds4326": "Bounds (EPSG:4326)",
+    "layerMaxScale": "Max Scale",
+    "layerMinScale": "Min Scale",
     "layerResource": "Resource: ",
     "layerMetadata": "Metadata: ",
     "layerActiveFilters": "Active filters: ",
