@@ -143,8 +143,8 @@ _Note : Les raccourcis clavier (sauf annuler/rétablir/échap) peuvent être act
 | **N** | Activer/désactiver l'accrochage (accrocher aux sommets de géométries existantes lors du dessin) |
 | **Ctrl+Z** | Annuler la dernière action |
 | **Ctrl+Y** ou **Ctrl+Maj.+Z** | Rétablir l'action |
-| **Maj.+S** | Télécharger tous les dessins en format GeoJSON |
-| **Maj.+O** | Charger des dessins à partir d'un fichier GeoJSON |
+| **Maj.+S** | Enregistrer / Télécharger tous les dessins au format GeoJSON |
+| **Maj.+O** | Ouvrir / Charger des dessins à partir d'un fichier GeoJSON |
 | **Maj.+C** | Effacer tous les dessins de la carte |
 | **Échap** | Effacer la sélection actuelle / Quitter le mode édition |
 
