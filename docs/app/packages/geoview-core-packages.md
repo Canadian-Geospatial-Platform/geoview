@@ -756,8 +756,8 @@ The Drawer package provides comprehensive keyboard shortcuts for efficient drawi
 | **N** | Toggle Snapping |
 | **Ctrl+Z** | Undo last action |
 | **Ctrl+Y / Ctrl+Shift+Z** | Redo action |
-| **Shift+S** | Download drawings (GeoJSON) |
-| **Shift+O** | Upload drawings |
+| **Shift+S** | Save / Download drawings (GeoJSON) |
+| **Shift+O** | Open / Upload drawings |
 | **Shift+C** | Clear all drawings |
 | **Escape** | Clear selection / Exit edit mode |
 
