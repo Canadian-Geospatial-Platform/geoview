@@ -741,7 +741,7 @@ const mapViewer = cgpv.api.getMapViewer("mapId");
 
 ### Keyboard Shortcuts
 
-The Drawer package provides comprehensive keyboard shortcuts for efficient drawing and editing. These shortcuts (except undo/redo/escape) can be toggled on/off via the shortcuts button in the drawer toolbar or programmatically via `DrawerController.setShortcutsEnabled()`.
+The Drawer package provides comprehensive keyboard shortcuts for efficient drawing and editing. These shortcuts (except undo/redo/escape) can be toggled on/off via the shortcuts button in the drawer toolbar, with the backtick key \`,  or programmatically via `DrawerController.setShortcutsEnabled()`.
 
 **Note:** Undo (**Ctrl+Z**), Redo (**Ctrl+Y** / **Ctrl+Shift+Z**), and Escape remain active at all times, regardless of the shortcuts toggle state.
 
