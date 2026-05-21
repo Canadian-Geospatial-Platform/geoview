@@ -214,6 +214,31 @@ cgpv.init();
 
 **Config validation behavior for visibility** — In `ConfigValidation.#processLayerEntryConfig()`, when `parentInitialSettingsTrue?.states?.visible === false`, the child's `visible` property is **deleted** from the merged config (`delete initSettingsMerged.states?.visible`). This means the child defaults to `visible = true` in the store/legend, but is visually hidden because the parent OL layer is not visible.
 
+### Scale Limits & Visibility Range
+
+**Scale calculation normalization** — `MapViewer.getMapScaleFromZoom()` now rounds the computed denominator to the nearest unit (`Math.round`). This avoids floating-point artifacts like `159499.99999999983` and keeps visibility comparisons stable.
+
+**Effective scale computation** — `MapViewer.computeEffectiveLayerScales()` is the single source of truth for layer scale limits. It combines:
+
+- Config limits (`layerConfig.getMaxScale()`, `layerConfig.getMinScale()`)
+- Zoom-derived limits from initial settings (`initialSettings.maxZoom/minZoom` converted through `getMapScaleFromZoom()`)
+
+**Restrictive merge rules**:
+
+- `effectiveMaxScale = Math.max(...candidates)`
+- `effectiveMinScale = Math.min(...candidates)`
+
+Both effective scales are rounded, then expanded into tolerance boundaries using `MapViewer.EFFECTIVE_SCALE_VISIBILITY_BUFFER` (currently `0.1` / 10%):
+
+- `maxScaleTolerance = round(maxScale * (1 + buffer))`
+- `minScaleTolerance = round(minScale * (1 - buffer))`
+
+**Resolution-first visibility checks** — `LayerController.updateLayerInVisibleRange()` maps effective scales to OL resolution limits (`setMinResolution` / `setMaxResolution`) and computes `inVisibleRange` via `AbstractBaseGVLayer.isInVisibleRange(currentResolution, currentScale, effectiveScales)`.
+
+**Boundary semantics** — Base checks are inclusive (`>= minResolution` and `<= maxResolution`), but scale tolerance bands intentionally mark near-boundary scales as not visible to avoid unstable service behavior near thresholds.
+
+**Feature-query gating** — `AbstractLayerSet.queryLayerFeatures()` must gate queries with `isInVisibleRange(...)` using current resolution, current scale, and `computeEffectiveLayerScales(...)`, not zoom-only checks.
+
 ### Event Delegate System
 
 GeoView uses a lightweight typed delegate event system (see [event-helper.md](../docs/programming/event-helper.md)). Classes own private handler arrays (`#onXxxHandlers`) and expose `onXxx()`/`offXxx()` subscribe/unsubscribe methods. Events are emitted via `EventHelper.emitEvent()`. Controllers subscribe in `onHook()` and unsubscribe in `onUnhook()`.

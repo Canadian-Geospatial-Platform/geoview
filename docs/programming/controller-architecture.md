@@ -753,6 +753,13 @@ The most heavily-connected controller. Subscribes to 15+ `LayerDomain` events in
 
 Exposes domain getters (config access, GV layer access) and orchestration methods (layer deletion, querying, filtering, layer highlighting via `highlightLayer`/`removeHighlightLayer`, and layer zoom via `zoomToLayerExtent`/`zoomToLayerVisibleScale`).
 
+For scale-limited visibility, `LayerController` now uses a resolution-first model:
+
+- Computes effective scale limits via `MapViewer.computeEffectiveLayerScales(...)` (merging config scale limits and initialSettings zoom-derived limits)
+- Applies OpenLayers resolution thresholds on non-group layers (`setMinResolution` / `setMaxResolution`)
+- Computes and stores `inVisibleRange` using `isInVisibleRange(currentResolution, currentScale, effectiveScales)`
+- `zoomToLayerVisibleScale` targets effective visible boundaries (`maxScaleZoomAt` / `minScaleZoomAt`) and animates by resolution to avoid zoom discretization artifacts
+
 ### LayerCreatorController
 
 No domain subscriptions in `onHook()`. Instead, subscribes to individual `AbstractGeoViewLayer` events per-layer as they are created (e.g., `onLayerEntryRegisterInit`, `onLayerGVCreated`, `onLayerGroupCreated`, `onLayerMessage`). Provides the full layer lifecycle API:

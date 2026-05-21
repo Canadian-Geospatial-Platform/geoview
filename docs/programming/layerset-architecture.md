@@ -147,6 +147,17 @@ async queryLayers(location?: TypeLocation, extent?: Extent): Promise<void> {
 }
 ```
 
+**Visibility and Scale Gating:**
+
+- `AbstractLayerSet.queryLayerFeatures()` short-circuits with empty results when `getVisibleIncludingParents()` is `false`.
+- It also short-circuits when the layer is outside visible range using:
+  - current view resolution,
+  - current map scale from `MapViewer.getMapScaleFromZoom()`,
+  - effective scales from `MapViewer.computeEffectiveLayerScales(...)`.
+- The visible-range check is performed through `AbstractBaseGVLayer.isInVisibleRange(currentResolution, currentScale, effectiveScales)`.
+
+This keeps feature-query behavior aligned with rendering visibility, including min/max scale constraints and near-threshold tolerance bands.
+
 **Key Features:**
 
 - Queries features at clicked location
