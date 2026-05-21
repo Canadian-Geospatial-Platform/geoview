@@ -109,7 +109,6 @@ import type { Draw } from '@/geo/interaction/draw';
 import type { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import type { FitOptions } from 'ol/View';
 import { GeoUtilities } from '@/geo/utils/utilities';
-import { InvalidExtentError } from '@/core/exceptions/geoview-exceptions';
 import { AbstractGVVectorTile } from '@/geo/layer/gv-layers/vector/abstract-gv-vector-tile';
 
 /**
@@ -181,9 +180,8 @@ export class MapController extends AbstractMapViewerController {
    * @param extent - The extent to zoom to
    * @param options - The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 13, duration: 500 })
    * @returns A promise that resolves when the zoom animation is complete
-   * @throws {InvalidExtentError} When the extent is invalid
    */
-  zoomToExtent(extent: Extent, options: FitOptions = DEFAULT_OL_FITOPTIONS): Promise<void> {
+  async zoomToExtent(extent: Extent, options: FitOptions = DEFAULT_OL_FITOPTIONS): Promise<void> {
     // Merge user options with defaults
     const mergedOptions: FitOptions = { ...DEFAULT_OL_FITOPTIONS, ...options };
 
@@ -199,12 +197,13 @@ export class MapController extends AbstractMapViewerController {
       this.getMapViewer().getView().fit(extent, mergedOptions);
 
       // Wait a bit and return.
-      return delay(mergedOptions.duration! + MapController.ZOOM_MIN_DELAY);
+      await delay(mergedOptions.duration! + MapController.ZOOM_MIN_DELAY);
+      return;
     }
 
     // Invalid extent
-    this.getMapViewer().notifications.showError('error.map.invalidZoomExtent', {}, true);
-    throw new InvalidExtentError(extent);
+    this.getMapViewer().notifications.showWarning('error.map.invalidZoomExtent', {}, false);
+    logger.logWarning(`Unable to zoom, the provided extent is invalid: [${extent.join(', ')}]`);
   }
 
   /**
