@@ -144,8 +144,8 @@ _Note: Keyboard shortcuts (except undo/redo/escape) can be toggled on/off via th
 | **N** | Toggle Snapping (snap to existing geometry vertices while drawing) |
 | **Ctrl+Z** | Undo last action |
 | **Ctrl+Y** or **Ctrl+Shift+Z** | Redo action |
-| **Shift+S** | Download all drawings as GeoJSON |
-| **Shift+O** | Upload drawings from GeoJSON file |
+| **Shift+S** | Save / Download all drawings as GeoJSON |
+| **Shift+O** | Open / Upload drawings from GeoJSON file |
 | **Shift+C** | Clear all drawings from the map |
 | **Escape** | Clear current selection / Exit edit mode |
 
