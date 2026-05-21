@@ -4,6 +4,7 @@ import type {
   TypeLayerStyleSettings,
   TypeOutfields,
   TypeLayerTextConfig,
+  DisplayDateMode,
 } from '@/api/types/map-schema-types';
 import type {
   ConfigClassOrType,
@@ -132,6 +133,17 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
     // None
     return undefined;
+  }
+
+  /**
+   * Overridable function to refresh the metadata of the layer.
+   *
+   * @param displayDateMode - The display date mode that should be used
+   */
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this, @typescript-eslint/no-unused-vars
+  protected onRefreshMetadata(displayDateMode: DisplayDateMode): Promise<void> {
+    // Override this function to refresh the metadata
+    return Promise.resolve();
   }
 
   /**
@@ -541,6 +553,18 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
     // Set it if not already set.
     this.getSource().projection ??= projection;
+  }
+
+  /**
+   * Refreshes the layer metadata information by re-fetching the WMS GetCapabilities response and updating the layer configuration accordingly.
+   *
+   * This method is typically used when the display date mode changes, as the metadata may contain time-sensitive information that needs to be updated on-the-fly.
+   *
+   * @param displayDateMode - The display date mode that should be used
+   */
+  refreshMetadata(displayDateMode: DisplayDateMode): Promise<void> {
+    // Call overridable method
+    return this.onRefreshMetadata(displayDateMode);
   }
 
   /**

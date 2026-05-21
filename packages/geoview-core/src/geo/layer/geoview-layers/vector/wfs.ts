@@ -231,13 +231,17 @@ export class WFS extends AbstractGeoViewVector {
     );
 
     // If supporting application/json format
+    let featureProps;
     if (outputFormat === 'application/json') {
       // Process using Json
-      await WFS.#processDescribeFeatureJson(describeFeatureUrl, layerConfig, abortSignal);
+      featureProps = await WFS.fetchDescribeFeatureJson(describeFeatureUrl, abortSignal);
     } else if (outputFormat.toUpperCase().includes('XML')) {
       // Process using XML
-      await WFS.#processDescribeFeatureXml(describeFeatureUrl, layerConfig, abortSignal);
+      featureProps = await WFS.fetchDescribeFeatureXML(describeFeatureUrl, abortSignal);
     }
+
+    // Set it
+    WFS.initLayerMetadata(layerConfig as OgcWfsLayerEntryConfig, featureProps);
 
     // Try
     const layerStyle = await WFS.#tryProcessLayerStylingInformationIfAny(layerConfigWFS);
@@ -350,50 +354,52 @@ export class WFS extends AbstractGeoViewVector {
   // #region STATIC METHODS
 
   /**
-   * Fetches the metadata for a typical WFS class.
+   * Creates a configuration object for an WFS Feature layer.
    *
-   * @param url - The url to query the metadata from
-   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
-   * @returns A promise that resolves with the metadata when fetched or undefined when capabilities weren't found
+   * This function constructs a `TypeWFSLayerConfig` object that describes an WFS Feature layer
+   * and its associated entry configurations based on the provided parameters.
+   *
+   * @param geoviewLayerId - A unique identifier for the GeoView layer
+   * @param geoviewLayerName - The display name of the GeoView layer
+   * @param metadataAccessPath - The full service URL to the layer endpoint
+   * @param isTimeAware - Indicates whether the layer supports time-based filtering
+   * @param strategy - Indicates the strategy to use to fetch vector data
+   * @param layerEntries - An array of layer entries objects to be included in the configuration
+   * @returns The constructed configuration object for the WFS Feature layer
    */
-  static async fetchMetadata(url: string, abortSignal?: AbortSignal): Promise<TypeMetadataWFS | undefined> {
-    // Get the GetCapabilities url
-    const urlGetCap = GeoUtilities.ensureServiceRequestUrlGetCapabilities(url, 'WFS');
+  static createGeoviewLayerConfig(
+    geoviewLayerId: string,
+    geoviewLayerName: string,
+    metadataAccessPath: string,
+    isTimeAware: boolean | undefined,
+    strategy: VectorStrategy,
+    layerEntries: TypeLayerEntryShell[] // TODO: ALEX: Change this (and in all siblings) to receive a OgcWfsLayerEntryConfigProps[]
+  ): TypeWFSLayerConfig {
+    const geoviewLayerConfig: TypeWFSLayerConfig = {
+      geoviewLayerId,
+      geoviewLayerName,
+      metadataAccessPath,
+      geoviewLayerType: CONST_LAYER_TYPES.WFS,
+      isTimeAware,
+      listOfLayerEntryConfig: [],
+    };
+    geoviewLayerConfig.listOfLayerEntryConfig = layerEntries.map((layerEntry) => {
+      const props = {
+        geoviewLayerConfig,
+        layerId: `${layerEntry.id}`,
+        ...(layerEntry.layerName && { layerName: `${layerEntry.layerName}` }),
+        source: {
+          strategy,
+        },
+      } as unknown as TypeLayerEntryShell;
 
-    // Query XML to Json
-    const responseJson = await Fetch.fetchXMLToJson(`${urlGetCap}`, { signal: abortSignal });
+      if (layerEntry.wmsLayerId) props.wmsLayerId = layerEntry.wmsLayerId;
+      const layerEntryConfig = new OgcWfsLayerEntryConfig(props as OgcWfsLayerEntryConfigProps);
+      return layerEntryConfig;
+    });
 
-    // Parse the WFS_Capabilities opening the root node right away to skip to the meat.
-    return findPropertyByRegexPath(responseJson, /(?:WFS_Capabilities)/);
-  }
-
-  /**
-   * Fetches WFS metadata for a given service URL and layer ID, then retrieves
-   * the corresponding geometry type from the DescribeFeatureType response.
-   *
-   * This method performs the following steps:
-   * 1. Normalizes the base service URL.
-   * 2. Fetches WFS capabilities or metadata from the service.
-   * 3. Determines the WFS version and the proper output format for DescribeFeatureType.
-   * 4. Builds and executes the DescribeFeatureType request.
-   * 5. Extracts and returns the geometry type (e.g., `"Point"`, `"LineString"`, `"Polygon"`).
-   *
-   * @param url - The full WFS or WMS service URL from which to derive the base endpoint
-   * @param layerId - The name or identifier of the layer to inspect
-   * @param abortSignal - Optional {@link AbortSignal} that allows the request to be aborted
-   * @returns A promise that resolves with the list of fields for the layer
-   */
-  static async fetchMetadataAndRetrieveFieldsInfo(url: string, layerId: string, abortSignal?: AbortSignal): Promise<TypeOutfields[]> {
-    // Fetch the WFS metadata
-    const metadata = await WFS.fetchMetadata(url, abortSignal);
-    const version = metadata?.['@attributes'].version || '1.1.0';
-    const outputFormat = WFS.extractDescribeFeatureOutputFormat(metadata!);
-
-    // Build a describe feature url
-    const describeFeatureUrl = GeoUtilities.ensureServiceRequestUrlDescribeFeatureType(url, layerId, version, outputFormat);
-
-    // Call the describe feature url to try to get the geometry type
-    return WFS.fetchDescribeFeature(describeFeatureUrl, outputFormat);
+    // Return it
+    return geoviewLayerConfig;
   }
 
   /**
@@ -418,6 +424,114 @@ export class WFS extends AbstractGeoViewVector {
     // Create the Layer config
     const myLayer = new WFS({ geoviewLayerId, geoviewLayerName, metadataAccessPath, isTimeAware } as TypeWFSLayerConfig);
     return myLayer.initGeoViewLayerEntries();
+  }
+
+  /**
+   * Initializes the layer metadata for a WFS layer entry configuration based on the provided feature type properties.
+   *
+   * This method processes the list of feature type properties obtained from a DescribeFeatureType response, identifies geometry fields,
+   * and sets the appropriate metadata on the layer configuration.
+   *
+   * @param layerConfig - The vector layer entry to configure
+   * @param fields - An array of field names and its aliases
+   */
+  static initLayerMetadata(layerConfig: OgcWfsLayerEntryConfig, fields: TypeOutfields[] | undefined): void {
+    // When no fields, skip
+    if (!fields) return;
+
+    // The the layer metadata
+    layerConfig.setLayerMetadata(fields);
+
+    // Get the outfields
+    let outfields = layerConfig.getOutfields();
+
+    // Process undefined outfields or aliasFields
+    if (!outfields?.length) {
+      // Create it
+      outfields = [];
+
+      // For each field
+      fields.forEach((fieldEntry) => {
+        // If field entry is gml geometry type
+        if (this.isGmlGeometryField(fieldEntry)) {
+          // Keep the geometry field for future use
+          layerConfig.setGeometryField(fieldEntry);
+
+          // Skip that geometry field
+          return;
+        }
+
+        const newOutfield: TypeOutfields = {
+          name: fieldEntry.name,
+          alias: fieldEntry.alias ?? fieldEntry.name,
+          type: WFS.getFieldType(fieldEntry.name, layerConfig),
+        };
+
+        outfields!.push(newOutfield);
+      });
+
+      // Set it
+      layerConfig.setOutfields(outfields);
+    }
+  }
+
+  /**
+   * Processes a WFS (Web Feature Service) GeoviewLayerConfig and returns a promise
+   * that resolves to an array of `ConfigBaseClass` layer entry configurations.
+   *
+   * This method:
+   * 1. Creates a Geoview layer configuration using the provided parameters.
+   * 2. Instantiates a layer with that configuration.
+   * 3. Processes the layer configuration and returns the result.
+   *
+   * @param geoviewLayerId - The unique identifier for the GeoView layer
+   * @param geoviewLayerName - The display name for the GeoView layer
+   * @param url - The URL of the service endpoint
+   * @param layerIds - An array of layer IDs to include in the configuration
+   * @param isTimeAware - Indicates if the layer is time aware
+   * @returns A promise that resolves to an array of layer configurations
+   */
+  static processGeoviewLayerConfig(
+    geoviewLayerId: string,
+    geoviewLayerName: string,
+    url: string,
+    layerIds: string[],
+    isTimeAware: boolean,
+    vectorStrategy: VectorStrategy,
+    fetchStylesOnWMS: boolean,
+    callbackCreateLayerEntryConfig?: (wfsEntry: TypeLayerEntryShell) => TypeLayerEntryShell // TODO: ALEX: Review this to simplify it (linked to the TODO about changing the last param of the all the createGeoviewLayerConfig functions)
+  ): Promise<ConfigBaseClass[]> {
+    // Create the Layer config
+    const layerConfig = WFS.createGeoviewLayerConfig(
+      geoviewLayerId,
+      geoviewLayerName,
+      url,
+      isTimeAware,
+      vectorStrategy,
+      layerIds.map((layerId) => {
+        // Create the entry config
+        let entryConfig = { id: layerId } as TypeLayerEntryShell;
+
+        // Callback in case we want to tweak the config
+        if (callbackCreateLayerEntryConfig) {
+          entryConfig = callbackCreateLayerEntryConfig(entryConfig);
+        }
+
+        // Return the entry config
+        return entryConfig;
+      })
+    );
+
+    // If not fetching styles on the WMS
+    if (!fetchStylesOnWMS) {
+      layerConfig.fetchStylesOnWMS = false;
+    }
+
+    // Create the class from geoview-layers package
+    const myLayer = new WFS(layerConfig);
+
+    // Process it
+    return AbstractGeoViewVector.processConfig(myLayer);
   }
 
   /**
@@ -482,6 +596,53 @@ export class WFS extends AbstractGeoViewVector {
 
     // Not found
     return '';
+  }
+
+  /**
+   * Fetches the metadata for a typical WFS class.
+   *
+   * @param url - The url to query the metadata from
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+   * @returns A promise that resolves with the metadata when fetched or undefined when capabilities weren't found
+   */
+  static async fetchMetadata(url: string, abortSignal?: AbortSignal): Promise<TypeMetadataWFS | undefined> {
+    // Get the GetCapabilities url
+    const urlGetCap = GeoUtilities.ensureServiceRequestUrlGetCapabilities(url, 'WFS');
+
+    // Query XML to Json
+    const responseJson = await Fetch.fetchXMLToJson(`${urlGetCap}`, { signal: abortSignal });
+
+    // Parse the WFS_Capabilities opening the root node right away to skip to the meat.
+    return findPropertyByRegexPath(responseJson, /(?:WFS_Capabilities)/);
+  }
+
+  /**
+   * Fetches WFS metadata for a given service URL and layer ID, then retrieves
+   * the corresponding geometry type from the DescribeFeatureType response.
+   *
+   * This method performs the following steps:
+   * 1. Normalizes the base service URL.
+   * 2. Fetches WFS capabilities or metadata from the service.
+   * 3. Determines the WFS version and the proper output format for DescribeFeatureType.
+   * 4. Builds and executes the DescribeFeatureType request.
+   * 5. Extracts and returns the geometry type (e.g., `"Point"`, `"LineString"`, `"Polygon"`).
+   *
+   * @param url - The full WFS or WMS service URL from which to derive the base endpoint
+   * @param layerId - The name or identifier of the layer to inspect
+   * @param abortSignal - Optional {@link AbortSignal} that allows the request to be aborted
+   * @returns A promise that resolves with the list of fields for the layer
+   */
+  static async fetchMetadataAndRetrieveFieldsInfo(url: string, layerId: string, abortSignal?: AbortSignal): Promise<TypeOutfields[]> {
+    // Fetch the WFS metadata
+    const metadata = await WFS.fetchMetadata(url, abortSignal);
+    const version = metadata?.['@attributes'].version || '1.1.0';
+    const outputFormat = WFS.extractDescribeFeatureOutputFormat(metadata!);
+
+    // Build a describe feature url
+    const describeFeatureUrl = GeoUtilities.ensureServiceRequestUrlDescribeFeatureType(url, layerId, version, outputFormat);
+
+    // Call the describe feature url to try to get the geometry type
+    return WFS.fetchDescribeFeature(describeFeatureUrl, outputFormat);
   }
 
   /**
@@ -551,79 +712,16 @@ export class WFS extends AbstractGeoViewVector {
   }
 
   /**
-   * Fetches a WFS DescribeFeatureType response in JSON format and updates the layer metadata configuration
-   * with the parsed feature type properties.
+   * Determines whether a given WFS feature type field represents a geometry property.
    *
-   * @param url - The full URL to the DescribeFeatureType request for the layer
-   * @param layerConfig - The layer configuration object to populate with metadata
-   * @param abortSignal - Optional {@link AbortSignal} to cancel the fetch request
-   * @returns A promise that resolves once the layer metadata configuration has been updated with the feature type properties
-   */
-  static async #processDescribeFeatureJson(url: string, layerConfig: VectorLayerEntryConfig, abortSignal?: AbortSignal): Promise<void> {
-    // Fetch
-    const featureProps = await WFS.fetchDescribeFeatureJson(url, abortSignal);
-
-    // Set it
-    layerConfig.setLayerMetadata(featureProps);
-    WFS.#processFeatureInfoConfig(featureProps, layerConfig as OgcWfsLayerEntryConfig);
-  }
-
-  /**
-   * Fetches a WFS DescribeFeatureType XML, converts it to JSON, and updates the layer metadata configuration
-   * with the parsed feature type properties.
+   * Checks if the field's type string starts with the `"gml:"` prefix, which indicates
+   * a GML geometry type such as `gml:PointPropertyType`, `gml:PolygonPropertyType`, etc.
    *
-   * @param url - The full URL to the DescribeFeatureType request for the layer
-   * @param layerConfig - The layer configuration object to populate with metadata
-   * @param abortSignal - Optional {@link AbortSignal} to cancel the fetch request
-   * @returns A promise that resolves once the layer metadata configuration has been updated with the feature type properties
+   * @param field - The feature type field definition to evaluate
+   * @returns `true` if the field is a geometry field; otherwise, `false`
    */
-  static async #processDescribeFeatureXml(url: string, layerConfig: VectorLayerEntryConfig, abortSignal?: AbortSignal): Promise<void> {
-    // Fetch
-    const featureProps = await WFS.fetchDescribeFeatureXML(url, abortSignal);
-
-    // Set it
-    layerConfig.setLayerMetadata(featureProps);
-    WFS.#processFeatureInfoConfig(featureProps, layerConfig as OgcWfsLayerEntryConfig);
-  }
-
-  /**
-   * This method sets the outfields and aliasFields of the source feature info.
-   *
-   * @param fields - An array of field names and its aliases
-   * @param layerConfig - The vector layer entry to configure
-   */
-  static #processFeatureInfoConfig(fields: TypeOutfields[], layerConfig: OgcWfsLayerEntryConfig): void {
-    // Get the outfields
-    let outfields = layerConfig.getOutfields();
-
-    // Process undefined outfields or aliasFields
-    if (!outfields?.length) {
-      // Create it
-      outfields = [];
-
-      // For each field
-      fields.forEach((fieldEntry) => {
-        // If field entry is gml geometry type
-        if (this.isGmlGeometryField(fieldEntry)) {
-          // Keep the geometry field for future use
-          layerConfig.setGeometryField(fieldEntry);
-
-          // Skip that geometry field
-          return;
-        }
-
-        const newOutfield: TypeOutfields = {
-          name: fieldEntry.name,
-          alias: fieldEntry.alias ?? fieldEntry.name,
-          type: WFS.getFieldType(fieldEntry.name, layerConfig),
-        };
-
-        outfields!.push(newOutfield);
-      });
-
-      // Set it
-      layerConfig.setOutfields(outfields);
-    }
+  static isGmlGeometryField(field: TypeOutfields): boolean {
+    return field.type.startsWith('gml:');
   }
 
   /**
@@ -653,126 +751,9 @@ export class WFS extends AbstractGeoViewVector {
     return 'string';
   }
 
-  /**
-   * Determines whether a given WFS feature type field represents a geometry property.
-   *
-   * Checks if the field's type string starts with the `"gml:"` prefix, which indicates
-   * a GML geometry type such as `gml:PointPropertyType`, `gml:PolygonPropertyType`, etc.
-   *
-   * @param field - The feature type field definition to evaluate
-   * @returns `true` if the field is a geometry field; otherwise, `false`
-   */
-  static isGmlGeometryField(field: TypeOutfields): boolean {
-    return field.type.startsWith('gml:');
-  }
+  // #endregion STATIC PUBLIC METHODS
 
-  /**
-   * Creates a configuration object for an WFS Feature layer.
-   *
-   * This function constructs a `TypeWFSLayerConfig` object that describes an WFS Feature layer
-   * and its associated entry configurations based on the provided parameters.
-   *
-   * @param geoviewLayerId - A unique identifier for the GeoView layer
-   * @param geoviewLayerName - The display name of the GeoView layer
-   * @param metadataAccessPath - The full service URL to the layer endpoint
-   * @param isTimeAware - Indicates whether the layer supports time-based filtering
-   * @param strategy - Indicates the strategy to use to fetch vector data
-   * @param layerEntries - An array of layer entries objects to be included in the configuration
-   * @returns The constructed configuration object for the WFS Feature layer
-   */
-  static createGeoviewLayerConfig(
-    geoviewLayerId: string,
-    geoviewLayerName: string,
-    metadataAccessPath: string,
-    isTimeAware: boolean | undefined,
-    strategy: VectorStrategy,
-    layerEntries: TypeLayerEntryShell[] // TODO: ALEX: Change this (and in all siblings) to receive a OgcWfsLayerEntryConfigProps[]
-  ): TypeWFSLayerConfig {
-    const geoviewLayerConfig: TypeWFSLayerConfig = {
-      geoviewLayerId,
-      geoviewLayerName,
-      metadataAccessPath,
-      geoviewLayerType: CONST_LAYER_TYPES.WFS,
-      isTimeAware,
-      listOfLayerEntryConfig: [],
-    };
-    geoviewLayerConfig.listOfLayerEntryConfig = layerEntries.map((layerEntry) => {
-      const props = {
-        geoviewLayerConfig,
-        layerId: `${layerEntry.id}`,
-        ...(layerEntry.layerName && { layerName: `${layerEntry.layerName}` }),
-        source: {
-          strategy,
-        },
-      } as unknown as TypeLayerEntryShell;
-
-      if (layerEntry.wmsLayerId) props.wmsLayerId = layerEntry.wmsLayerId;
-      const layerEntryConfig = new OgcWfsLayerEntryConfig(props as OgcWfsLayerEntryConfigProps);
-      return layerEntryConfig;
-    });
-
-    // Return it
-    return geoviewLayerConfig;
-  }
-
-  /**
-   * Processes a WFS (Web Feature Service) GeoviewLayerConfig and returns a promise
-   * that resolves to an array of `ConfigBaseClass` layer entry configurations.
-   *
-   * This method:
-   * 1. Creates a Geoview layer configuration using the provided parameters.
-   * 2. Instantiates a layer with that configuration.
-   * 3. Processes the layer configuration and returns the result.
-   *
-   * @param geoviewLayerId - The unique identifier for the GeoView layer
-   * @param geoviewLayerName - The display name for the GeoView layer
-   * @param url - The URL of the service endpoint
-   * @param layerIds - An array of layer IDs to include in the configuration
-   * @param isTimeAware - Indicates if the layer is time aware
-   * @returns A promise that resolves to an array of layer configurations
-   */
-  static processGeoviewLayerConfig(
-    geoviewLayerId: string,
-    geoviewLayerName: string,
-    url: string,
-    layerIds: string[],
-    isTimeAware: boolean,
-    vectorStrategy: VectorStrategy,
-    fetchStylesOnWMS: boolean,
-    callbackCreateLayerEntryConfig?: (wfsEntry: TypeLayerEntryShell) => TypeLayerEntryShell // TODO: ALEX: Review this to simplify it (linked to the TODO about changing the last param of the all the createGeoviewLayerConfig functions)
-  ): Promise<ConfigBaseClass[]> {
-    // Create the Layer config
-    const layerConfig = WFS.createGeoviewLayerConfig(
-      geoviewLayerId,
-      geoviewLayerName,
-      url,
-      isTimeAware,
-      vectorStrategy,
-      layerIds.map((layerId) => {
-        // Create the entry config
-        let entryConfig = { id: layerId } as TypeLayerEntryShell;
-
-        // Callback in case we want to tweak the config
-        if (callbackCreateLayerEntryConfig) {
-          entryConfig = callbackCreateLayerEntryConfig(entryConfig);
-        }
-
-        // Return the entry config
-        return entryConfig;
-      })
-    );
-
-    // If not fetching styles on the WMS
-    if (!fetchStylesOnWMS) {
-      layerConfig.fetchStylesOnWMS = false;
-    }
-
-    // Create the class from geoview-layers package
-    const myLayer = new WFS(layerConfig);
-
-    // Process it
-    return AbstractGeoViewVector.processConfig(myLayer);
-  }
+  // #region STATIC PRIVATE METHODS
 
   /**
    * Attempts to derive and apply styling information to a WFS layer using corresponding WMS styles.
@@ -818,5 +799,5 @@ export class WFS extends AbstractGeoViewVector {
     return undefined;
   }
 
-  // #endregion STATIC METHODS
+  // #endregion STATIC PRIVATE METHODS
 }

@@ -151,38 +151,8 @@ export class XYZTiles extends AbstractGeoViewRaster {
     // Get the metadata
     const metadata = this.getMetadata();
 
-    if (metadata) {
-      let metadataLayerConfigFound;
-      if (metadata.listOfLayerEntryConfig) {
-        metadataLayerConfigFound = metadata.listOfLayerEntryConfig.find(
-          (metadataLayerConfig) => metadataLayerConfig.layerId === layerConfig.layerId
-        );
-      }
-
-      // For ESRI MapServer XYZ Tiles
-      if (metadata.layers) {
-        metadataLayerConfigFound = metadata.layers.find((metadataLayerConfig) => metadataLayerConfig.id === layerConfig.layerId);
-      }
-
-      // If found
-      if (metadataLayerConfigFound) {
-        // Set the layer metadata. metadataLayerConfigFound can't be undefined because we have already validated the config exist
-        layerConfig.setLayerMetadata(metadataLayerConfigFound);
-
-        // Initialize the source by filling the blanks with the information from the metadata
-        layerConfig.initSourceFromMetadata(metadataLayerConfigFound.source);
-
-        // Initialize the initial settings by filling the blanks with the information from the metadata
-        layerConfig.initInitialSettingsFromMetadata(metadataLayerConfigFound.initialSettings);
-
-        // Set zoom limits for max / min zooms
-        // GV MinScaleDenominator is actually the maxScale and MaxScaleDenominator is actually the minScale
-        const minScale = metadataLayerConfigFound?.minScale || metadataLayerConfigFound?.maxScaleDenominator;
-        layerConfig.initMinScaleFromMetadata(minScale);
-        const maxScale = metadataLayerConfigFound?.maxScale || metadataLayerConfigFound?.minScaleDenominator;
-        layerConfig.initMaxScaleFromMetadata(maxScale);
-      }
-    }
+    // Process the metadata and set it on the layer config
+    XYZTiles.initLayerMetadata(layerConfig, metadata);
 
     // Return the layer config
     return Promise.resolve(layerConfig);
@@ -207,31 +177,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
 
   // #endregion OVERRIDES
 
-  // #region STATIC METHODS
-
-  /**
-   * Initializes a GeoView layer configuration for a XYZ Tiles layer.
-   *
-   * This method creates a basic TypeGeoviewLayerConfig using the provided
-   * ID, name, and metadata access path URL. It then initializes the layer entries by calling
-   * `initGeoViewLayerEntries`, which may involve fetching metadata or sublayer info.
-   *
-   * @param geoviewLayerId - A unique identifier for the layer.
-   * @param geoviewLayerName - The display name of the layer.
-   * @param metadataAccessPath - The full service URL to the layer endpoint.
-   * @param isTimeAware - Optional to indicates whether the layer supports time-based filtering.
-   * @returns A promise that resolves to an initialized GeoView layer configuration with layer entries.
-   */
-  static initGeoviewLayerConfig(
-    geoviewLayerId: string,
-    geoviewLayerName: string,
-    metadataAccessPath: string,
-    isTimeAware?: boolean
-  ): Promise<TypeGeoviewLayerConfig> {
-    // Create the Layer config
-    const myLayer = new XYZTiles({ geoviewLayerId, geoviewLayerName, metadataAccessPath, isTimeAware } as TypeXYZTilesConfig);
-    return myLayer.initGeoViewLayerEntries();
-  }
+  // #region STATIC PUBLIC METHODS
 
   /**
    * Creates a configuration object for a XYZTiles layer.
@@ -273,6 +219,75 @@ export class XYZTiles extends AbstractGeoViewRaster {
 
     // Return it
     return geoviewLayerConfig;
+  }
+
+  /**
+   * Initializes a GeoView layer configuration for a XYZ Tiles layer.
+   *
+   * This method creates a basic TypeGeoviewLayerConfig using the provided
+   * ID, name, and metadata access path URL. It then initializes the layer entries by calling
+   * `initGeoViewLayerEntries`, which may involve fetching metadata or sublayer info.
+   *
+   * @param geoviewLayerId - A unique identifier for the layer.
+   * @param geoviewLayerName - The display name of the layer.
+   * @param metadataAccessPath - The full service URL to the layer endpoint.
+   * @param isTimeAware - Optional to indicates whether the layer supports time-based filtering.
+   * @returns A promise that resolves to an initialized GeoView layer configuration with layer entries.
+   */
+  static initGeoviewLayerConfig(
+    geoviewLayerId: string,
+    geoviewLayerName: string,
+    metadataAccessPath: string,
+    isTimeAware?: boolean
+  ): Promise<TypeGeoviewLayerConfig> {
+    // Create the Layer config
+    const myLayer = new XYZTiles({ geoviewLayerId, geoviewLayerName, metadataAccessPath, isTimeAware } as TypeXYZTilesConfig);
+    return myLayer.initGeoViewLayerEntries();
+  }
+
+  /**
+   * Initializes the metadata for a given XYZTiles layer entry configuration.
+   *
+   * This method searches for the corresponding metadata entry in the provided metadata object based on the layer ID.
+   * If a matching metadata entry is found, it sets the layer metadata on the configuration and initializes the source and initial settings using the metadata.
+   *
+   * @param layerConfig - The XYZTiles layer entry configuration to initialize with metadata
+   * @param metadata - The metadata object containing information about the layers, which may include a list of layer entry configurations or a list of layers (for ESRI MapServer XYZ Tiles).
+   */
+  static initLayerMetadata(layerConfig: XYZTilesLayerEntryConfig, metadata: TypeMetadataXYZTiles | undefined): void {
+    // If not metadata, skip
+    if (!metadata) return;
+
+    let metadataLayerConfigFound;
+    if (metadata.listOfLayerEntryConfig) {
+      metadataLayerConfigFound = metadata.listOfLayerEntryConfig.find(
+        (metadataLayerConfig) => metadataLayerConfig.layerId === layerConfig.layerId
+      );
+    }
+
+    // For ESRI MapServer XYZ Tiles
+    if (metadata.layers) {
+      metadataLayerConfigFound = metadata.layers.find((metadataLayerConfig) => metadataLayerConfig.id === layerConfig.layerId);
+    }
+
+    // If found
+    if (metadataLayerConfigFound) {
+      // Set the layer metadata. metadataLayerConfigFound can't be undefined because we have already validated the config exist
+      layerConfig.setLayerMetadata(metadataLayerConfigFound);
+
+      // Initialize the source by filling the blanks with the information from the metadata
+      layerConfig.initSourceFromMetadata(metadataLayerConfigFound.source);
+
+      // Initialize the initial settings by filling the blanks with the information from the metadata
+      layerConfig.initInitialSettingsFromMetadata(metadataLayerConfigFound.initialSettings);
+
+      // Set zoom limits for max / min zooms
+      // GV MinScaleDenominator is actually the maxScale and MaxScaleDenominator is actually the minScale
+      const minScale = metadataLayerConfigFound?.minScale || metadataLayerConfigFound?.maxScaleDenominator;
+      layerConfig.initMinScaleFromMetadata(minScale);
+      const maxScale = metadataLayerConfigFound?.maxScale || metadataLayerConfigFound?.minScaleDenominator;
+      layerConfig.initMaxScaleFromMetadata(maxScale);
+    }
   }
 
   /**
@@ -352,5 +367,5 @@ export class XYZTiles extends AbstractGeoViewRaster {
     return new XYZ(sourceOptions);
   }
 
-  // #endregion STATIC METHODS
+  // #endregion STATIC PUBLIC METHODS
 }

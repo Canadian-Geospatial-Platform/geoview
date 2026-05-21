@@ -173,7 +173,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param layerConfig - The layer entry config to validate.
    */
   protected override onValidateLayerEntryConfig(layerConfig: ConfigBaseClass): void {
-    const layerFound = this.getLayerCapabilities(layerConfig.layerId);
+    const layerFound = WMS.findLayerMetadataInCapability(layerConfig.layerId, this.getMetadata()?.Capability.Layer);
     if (!layerFound) {
       // Add a layer load error
       this.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(layerConfig), layerConfig);
@@ -229,56 +229,13 @@ export class WMS extends AbstractGeoViewRaster {
     abortSignal?: AbortSignal
   ): Promise<OgcWmsLayerEntryConfig> {
     // Get the layer capabilities
-    const layerCapabilities = this.getLayerCapabilities(layerConfig.layerId)!;
+    const layerCapabilities = WMS.findLayerMetadataInCapability(layerConfig.layerId, this.getMetadata()?.Capability.Layer)!;
 
-    // Set the layer metadata (capabilities)
-    layerConfig.setLayerMetadata(layerCapabilities);
+    // Init the layer metadata
+    WMS.initLayerMetadata(layerConfig, layerCapabilities, displayDateMode);
 
     // If found
     if (layerCapabilities) {
-      // Check if metadata says it's queryable
-      const raw = layerCapabilities['@attributes']?.queryable;
-      const queryable = raw === '1' || raw === true;
-
-      // Initialize the queryable
-      layerConfig.initQueryableSource(queryable);
-
-      // Set Min/Max Scale Limits (MaxScale should be set to the largest and MinScale should be set to the smallest)
-      // Example: If MinScaleDenominator is 100,000 and maxScale is 50,000, then 100,000 should be used. This is because
-      // the service will stop at 100,000 and if you zoom in more, you will get no data anyway.
-      // GV MinScaleDenominator is actually the maxScale and MaxScaleDenominator is actually the minScale
-      layerConfig.initMinScaleFromMetadata(layerCapabilities.MaxScaleDenominator);
-      layerConfig.initMaxScaleFromMetadata(layerCapabilities.MinScaleDenominator);
-
-      // If no bounds defined in the initial settings and an extent is defined in the layer capabilities metadata
-      if (!layerConfig.getInitialSettingsBounds() && layerCapabilities.EX_GeographicBoundingBox?.extent) {
-        // Validate and update the bounds initial settings
-        layerConfig.initInitialSettingsBoundsFromMetadata(layerCapabilities.EX_GeographicBoundingBox.extent);
-      }
-
-      // If there's a dimension
-      if (layerCapabilities.Dimension) {
-        // TODO: Validate the layerCapabilities.Dimension for example if an interval is even possible
-
-        // TODO: Validate the layerConfig.layerFilter is compatible with the layerCapabilities.Dimension and if not remove it completely like `delete layerConfig.layerFilter`
-
-        const timeDimension = layerCapabilities.Dimension.find((dimension) => dimension.name === 'time');
-
-        // If a temporal dimension was found
-        if (timeDimension) {
-          try {
-            // Try to create the time dimension value
-            const layerTimeDimension = DateMgt.createDimensionFromOGC(timeDimension, displayDateMode);
-
-            // Set the time dimension
-            layerConfig.setTimeDimension(layerTimeDimension);
-          } catch (error: unknown) {
-            // Log and continue
-            logger.logError(error);
-          }
-        }
-      }
-
       // Try processing vectorial information on the WMS, if any
       const layerStyle = await WMS.#tryProcessLayerVectorialInformationIfAny(layerConfig);
 
@@ -312,35 +269,6 @@ export class WMS extends AbstractGeoViewRaster {
   // #region PUBLIC METHODS
 
   /**
-   * Recursively gets the layer capability for a given layer id.
-   *
-   * @param layerId - The layer identifier to get the capabilities for.
-   * @param layer - Optional current layer entry from the capabilities that will be recursively searched.
-   * @returns The found layer from the capabilities or undefined if not found.
-   */
-  getLayerCapabilities(
-    layerId: string,
-    layer: TypeMetadataWMSCapabilityLayer | undefined = this.getMetadata()?.Capability.Layer
-  ): TypeMetadataWMSCapabilityLayer | undefined {
-    if (!layer) return undefined;
-
-    // Direct match
-    if (layer.Name === layerId) return layer;
-
-    // Recurse into sublayers
-    const subLayers = layer.Layer;
-    if (!subLayers) return undefined;
-
-    // For each sub layer
-    for (const subLayer of subLayers) {
-      const match = this.getLayerCapabilities(layerId, subLayer);
-      if (match) return match;
-    }
-
-    return undefined;
-  }
-
-  /**
    * Creates an ImageWMS source from a layer config.
    *
    * @param layerConfig - The configuration for the WMS layer.
@@ -349,7 +277,7 @@ export class WMS extends AbstractGeoViewRaster {
    */
   createImageWMSSource(layerConfig: OgcWmsLayerEntryConfig): ImageWMS {
     // Get the layer capabilities
-    const layerCapabilities = this.getLayerCapabilities(layerConfig.layerId);
+    const layerCapabilities = WMS.findLayerMetadataInCapability(layerConfig.layerId, this.getMetadata()?.Capability.Layer);
 
     // Validate capabilities exist for the layer
     if (!layerCapabilities) {
@@ -480,7 +408,7 @@ export class WMS extends AbstractGeoViewRaster {
         }
 
         // Check if this layer's metadata is already included in the base structure
-        const alreadyExists = this.getLayerCapabilities(layerConfig.layerId, baseMetadata?.Capability?.Layer);
+        const alreadyExists = WMS.findLayerMetadataInCapability(layerConfig.layerId, baseMetadata?.Capability?.Layer);
         if (!alreadyExists) {
           const layerPath = this.#getMetadataLayerPath(layerConfig.layerId, metadata.Capability.Layer);
 
@@ -778,7 +706,220 @@ export class WMS extends AbstractGeoViewRaster {
 
   // #endregion PRIVATE METHODS
 
-  // #region STATIC METHODS
+  // #region STATIC PUBLIC METHODS
+
+  /**
+   * Creates a complete configuration object for a WMS GeoView layer.
+   *
+   * This function constructs a `TypeWMSLayerConfig` object that defines a WMS layer and its associated
+   * entries. It supports both individual layers and nested group layers through recursive processing.
+   *
+   * @param geoviewLayerId - A unique identifier for the GeoView layer.
+   * @param geoviewLayerName - The display name of the GeoView layer.
+   * @param metadataAccessPath - The full service URL to the layer endpoint.
+   * @param serverType - The type of WMS server (e.g., 'geoserver', 'mapserver').
+   * @param isTimeAware - Indicates whether the layer supports time-based filtering.
+   * @param layerEntries - The root array of parsed layer entries (may include nested groups).
+   * @param useFullWmsSublayers - Optional to indicates if we want the full sublayers of all wms or grouped (default is all sublayers).
+   * @param customGeocoreLayerConfig - Optional custom layer configuration to merge into leaf layers.
+   * @returns The fully constructed WMS layer configuration object.
+   */
+  static createGeoviewLayerConfig(
+    geoviewLayerId: string,
+    geoviewLayerName: string,
+    metadataAccessPath: string,
+    serverType: TypeOfServer | undefined,
+    isTimeAware: boolean | undefined,
+    layerEntries: TypeLayerEntryShell[],
+    useFullWmsSublayers: boolean = this.DEFAULT_WMS_LAYER_GROUP_FULL_SUB_LAYERS,
+    customGeocoreLayerConfig: unknown = {}
+  ): TypeWMSLayerConfig {
+    const geoviewLayerConfig: TypeWMSLayerConfig = {
+      geoviewLayerId,
+      geoviewLayerName,
+      metadataAccessPath,
+      geoviewLayerType: CONST_LAYER_TYPES.WMS,
+      useFullWmsSublayers,
+      isTimeAware,
+      listOfLayerEntryConfig: [],
+    };
+
+    // Recursively map layer entries
+    geoviewLayerConfig.listOfLayerEntryConfig = layerEntries.map((layerEntry) =>
+      WMS.#createLayerEntryConfig(layerEntry, geoviewLayerConfig, serverType, customGeocoreLayerConfig)
+    ) as OgcWmsLayerEntryConfig[]; // Untrue 'as' operation, but we'll fix later
+
+    // Return it
+    return geoviewLayerConfig;
+  }
+
+  /**
+   * Initializes a GeoView layer configuration for a WMS layer.
+   *
+   * This method creates a basic TypeGeoviewLayerConfig using the provided
+   * ID, name, and metadata access path URL. It then initializes the layer entries by calling
+   * `initGeoViewLayerEntries`, which may involve fetching metadata or sublayer info.
+   *
+   * @param geoviewLayerId - A unique identifier for the layer.
+   * @param geoviewLayerName - The display name of the layer.
+   * @param metadataAccessPath - The full service URL to the layer endpoint.
+   * @param isTimeAware - Optional to indicates whether the layer supports time-based filtering.
+   * @param useFullWmsSublayers - Optional to indicates if we want the full sublayers of all wms or grouped (default is all sublayers).
+   * @returns A promise that resolves to an initialized GeoView layer configuration with layer entries.
+   */
+  static initGeoviewLayerConfig(
+    geoviewLayerId: string,
+    geoviewLayerName: string,
+    metadataAccessPath: string,
+    isTimeAware?: boolean,
+    useFullWmsSublayers: boolean = this.DEFAULT_WMS_LAYER_GROUP_FULL_SUB_LAYERS
+  ): Promise<TypeGeoviewLayerConfig> {
+    // Create the Layer config
+    const myLayer = new WMS({
+      geoviewLayerId,
+      geoviewLayerName,
+      metadataAccessPath,
+      isTimeAware,
+      useFullWmsSublayers,
+    } as TypeWMSLayerConfig);
+    return myLayer.initGeoViewLayerEntries();
+  }
+
+  /**
+   * Initializes the layer metadata information in the provided layer config.
+   *
+   * @param layerConfig - The layer configuration to initialize.
+   * @param layerCapabilities - The WMS capabilities metadata for the specific layer.
+   * @param displayDateMode - The display date mode to use when creating time dimensions.
+   */
+  static initLayerMetadata(
+    layerConfig: OgcWmsLayerEntryConfig,
+    layerCapabilities: TypeMetadataWMSCapabilityLayer | undefined,
+    displayDateMode: DisplayDateMode
+  ): void {
+    // Set the layer metadata (capabilities)
+    layerConfig.setLayerMetadata(layerCapabilities);
+
+    // If found
+    if (layerCapabilities) {
+      // Check if metadata says it's queryable
+      const raw = layerCapabilities['@attributes']?.queryable;
+      const queryable = raw === '1' || raw === true;
+
+      // Initialize the queryable
+      layerConfig.initQueryableSource(queryable);
+
+      // Set Min/Max Scale Limits (MaxScale should be set to the largest and MinScale should be set to the smallest)
+      // Example: If MinScaleDenominator is 100,000 and maxScale is 50,000, then 100,000 should be used. This is because
+      // the service will stop at 100,000 and if you zoom in more, you will get no data anyway.
+      // GV MinScaleDenominator is actually the maxScale and MaxScaleDenominator is actually the minScale
+      layerConfig.initMinScaleFromMetadata(layerCapabilities.MaxScaleDenominator);
+      layerConfig.initMaxScaleFromMetadata(layerCapabilities.MinScaleDenominator);
+
+      // If no bounds defined in the initial settings and an extent is defined in the layer capabilities metadata
+      if (!layerConfig.getInitialSettingsBounds() && layerCapabilities.EX_GeographicBoundingBox?.extent) {
+        // Validate and update the bounds initial settings
+        layerConfig.initInitialSettingsBoundsFromMetadata(layerCapabilities.EX_GeographicBoundingBox.extent);
+      }
+
+      // If there's a dimension
+      if (layerCapabilities.Dimension) {
+        // TODO: Validate the layerCapabilities.Dimension for example if an interval is even possible
+
+        // TODO: Validate the layerConfig.layerFilter is compatible with the layerCapabilities.Dimension and if not remove it completely like `delete layerConfig.layerFilter`
+
+        const timeDimension = layerCapabilities.Dimension.find((dimension) => dimension.name === 'time');
+
+        // If a temporal dimension was found
+        if (timeDimension) {
+          try {
+            // Try to create the time dimension value
+            const layerTimeDimension = DateMgt.createDimensionFromOGC(timeDimension, displayDateMode);
+
+            // Set the time dimension
+            layerConfig.setTimeDimension(layerTimeDimension);
+          } catch (error: unknown) {
+            // Log and continue
+            logger.logError(error);
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Processes a WMS GeoviewLayerConfig and returns a promise
+   * that resolves to an array of `ConfigBaseClass` layer entry configurations.
+   *
+   * This method:
+   * 1. Creates a Geoview layer configuration using the provided parameters.
+   * 2. Instantiates a layer with that configuration.
+   * 3. Processes the layer configuration and returns the result.
+   *
+   * @param geoviewLayerId - The unique identifier for the GeoView layer.
+   * @param geoviewLayerName - The display name for the GeoView layer.
+   * @param url - The URL of the service endpoint.
+   * @param layerIds - An array of layer IDs to include in the configuration.
+   * @param isTimeAware - Indicates if the layer is time aware.
+   * @param useFullWmsSublayers - Optional - Indicates if we want the full sublayers of all wms or grouped (default is all sublayers).
+   * @returns A promise that resolves to an array of layer configurations.
+   */
+  static processGeoviewLayerConfig(
+    geoviewLayerId: string,
+    geoviewLayerName: string,
+    url: string,
+    layerIds: number[],
+    isTimeAware: boolean,
+    useFullWmsSublayers?: boolean
+  ): Promise<ConfigBaseClass[]> {
+    // Create the Layer config
+    const layerConfig = WMS.createGeoviewLayerConfig(
+      geoviewLayerId,
+      geoviewLayerName,
+      url,
+      undefined,
+      isTimeAware,
+      layerIds.map((layerId) => {
+        return { id: layerId };
+      }),
+      useFullWmsSublayers
+    );
+
+    // Create the class from geoview-layers package
+    const myLayer = new WMS(layerConfig);
+
+    // Process it
+    return AbstractGeoViewLayer.processConfig(myLayer);
+  }
+
+  /**
+   * Recursively gets the layer capability for a given layer id.
+   *
+   * @param layerId - The layer identifier to get the capabilities for.
+   * @param layer - Optional current layer entry from the capabilities that will be recursively searched.
+   * @returns The found layer from the capabilities or undefined if not found.
+   */
+  static findLayerMetadataInCapability(
+    layerId: string,
+    layerCapability: TypeMetadataWMSCapabilityLayer | undefined
+  ): TypeMetadataWMSCapabilityLayer | undefined {
+    if (!layerCapability) return undefined;
+
+    // Direct match
+    if (layerCapability.Name === layerId) return layerCapability;
+
+    // Recurse into sublayers
+    const subLayers = layerCapability.Layer;
+    if (!subLayers) return undefined;
+
+    // For each sub layer
+    for (const subLayer of subLayers) {
+      const match = WMS.findLayerMetadataInCapability(layerId, subLayer);
+      if (match) return match;
+    }
+
+    return undefined;
+  }
 
   /**
    * Fetches the metadata for WMS Capabilities.
@@ -875,82 +1016,9 @@ export class WMS extends AbstractGeoViewRaster {
     return layerStyle;
   }
 
-  /**
-   * Initializes a GeoView layer configuration for a WMS layer.
-   *
-   * This method creates a basic TypeGeoviewLayerConfig using the provided
-   * ID, name, and metadata access path URL. It then initializes the layer entries by calling
-   * `initGeoViewLayerEntries`, which may involve fetching metadata or sublayer info.
-   *
-   * @param geoviewLayerId - A unique identifier for the layer.
-   * @param geoviewLayerName - The display name of the layer.
-   * @param metadataAccessPath - The full service URL to the layer endpoint.
-   * @param isTimeAware - Optional to indicates whether the layer supports time-based filtering.
-   * @param useFullWmsSublayers - Optional to indicates if we want the full sublayers of all wms or grouped (default is all sublayers).
-   * @returns A promise that resolves to an initialized GeoView layer configuration with layer entries.
-   */
-  static initGeoviewLayerConfig(
-    geoviewLayerId: string,
-    geoviewLayerName: string,
-    metadataAccessPath: string,
-    isTimeAware?: boolean,
-    useFullWmsSublayers: boolean = this.DEFAULT_WMS_LAYER_GROUP_FULL_SUB_LAYERS
-  ): Promise<TypeGeoviewLayerConfig> {
-    // Create the Layer config
-    const myLayer = new WMS({
-      geoviewLayerId,
-      geoviewLayerName,
-      metadataAccessPath,
-      isTimeAware,
-      useFullWmsSublayers,
-    } as TypeWMSLayerConfig);
-    return myLayer.initGeoViewLayerEntries();
-  }
+  // #endregion STATIC PUBLIC METHODS
 
-  /**
-   * Creates a complete configuration object for a WMS GeoView layer.
-   *
-   * This function constructs a `TypeWMSLayerConfig` object that defines a WMS layer and its associated
-   * entries. It supports both individual layers and nested group layers through recursive processing.
-   *
-   * @param geoviewLayerId - A unique identifier for the GeoView layer.
-   * @param geoviewLayerName - The display name of the GeoView layer.
-   * @param metadataAccessPath - The full service URL to the layer endpoint.
-   * @param serverType - The type of WMS server (e.g., 'geoserver', 'mapserver').
-   * @param isTimeAware - Indicates whether the layer supports time-based filtering.
-   * @param layerEntries - The root array of parsed layer entries (may include nested groups).
-   * @param useFullWmsSublayers - Optional to indicates if we want the full sublayers of all wms or grouped (default is all sublayers).
-   * @param customGeocoreLayerConfig - Optional custom layer configuration to merge into leaf layers.
-   * @returns The fully constructed WMS layer configuration object.
-   */
-  static createGeoviewLayerConfig(
-    geoviewLayerId: string,
-    geoviewLayerName: string,
-    metadataAccessPath: string,
-    serverType: TypeOfServer | undefined,
-    isTimeAware: boolean | undefined,
-    layerEntries: TypeLayerEntryShell[],
-    useFullWmsSublayers: boolean = this.DEFAULT_WMS_LAYER_GROUP_FULL_SUB_LAYERS,
-    customGeocoreLayerConfig: unknown = {}
-  ): TypeWMSLayerConfig {
-    const geoviewLayerConfig: TypeWMSLayerConfig = {
-      geoviewLayerId,
-      geoviewLayerName,
-      metadataAccessPath,
-      geoviewLayerType: CONST_LAYER_TYPES.WMS,
-      useFullWmsSublayers,
-      isTimeAware,
-      listOfLayerEntryConfig: [],
-    };
-
-    // Recursively map layer entries
-    geoviewLayerConfig.listOfLayerEntryConfig = layerEntries.map((layerEntry) =>
-      WMS.#createLayerEntryConfig(layerEntry, geoviewLayerConfig, serverType, customGeocoreLayerConfig)
-    ) as OgcWmsLayerEntryConfig[]; // Untrue 'as' operation, but we'll fix later
-
-    // Return it
-    return geoviewLayerConfig;
-  }
+  // #region STATIC PRIVATE METHODS
 
   /**
    * Creates a WMS layer entry configuration object, handling both group and leaf layers.
@@ -1006,51 +1074,6 @@ export class WMS extends AbstractGeoViewRaster {
 
     // Construct and return layer entry
     return new OgcWmsLayerEntryConfig(mergedConfig);
-  }
-
-  /**
-   * Processes a WMS GeoviewLayerConfig and returns a promise
-   * that resolves to an array of `ConfigBaseClass` layer entry configurations.
-   *
-   * This method:
-   * 1. Creates a Geoview layer configuration using the provided parameters.
-   * 2. Instantiates a layer with that configuration.
-   * 3. Processes the layer configuration and returns the result.
-   *
-   * @param geoviewLayerId - The unique identifier for the GeoView layer.
-   * @param geoviewLayerName - The display name for the GeoView layer.
-   * @param url - The URL of the service endpoint.
-   * @param layerIds - An array of layer IDs to include in the configuration.
-   * @param isTimeAware - Indicates if the layer is time aware.
-   * @param useFullWmsSublayers - Optional - Indicates if we want the full sublayers of all wms or grouped (default is all sublayers).
-   * @returns A promise that resolves to an array of layer configurations.
-   */
-  static processGeoviewLayerConfig(
-    geoviewLayerId: string,
-    geoviewLayerName: string,
-    url: string,
-    layerIds: number[],
-    isTimeAware: boolean,
-    useFullWmsSublayers?: boolean
-  ): Promise<ConfigBaseClass[]> {
-    // Create the Layer config
-    const layerConfig = WMS.createGeoviewLayerConfig(
-      geoviewLayerId,
-      geoviewLayerName,
-      url,
-      undefined,
-      isTimeAware,
-      layerIds.map((layerId) => {
-        return { id: layerId };
-      }),
-      useFullWmsSublayers
-    );
-
-    // Create the class from geoview-layers package
-    const myLayer = new WMS(layerConfig);
-
-    // Process it
-    return AbstractGeoViewLayer.processConfig(myLayer);
   }
 
   /**
@@ -1216,7 +1239,7 @@ export class WMS extends AbstractGeoViewRaster {
     return undefined;
   }
 
-  // #endregion STATIC METHODS
+  // #endregion STATIC PRIVATE METHODS
 }
 
 /** Delegate type for the callback when processing group layers */

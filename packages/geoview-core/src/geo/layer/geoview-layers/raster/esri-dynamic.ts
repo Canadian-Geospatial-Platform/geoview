@@ -129,7 +129,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     mapProjection?: OLProjection,
     abortSignal?: AbortSignal
   ): Promise<EsriDynamicLayerEntryConfig> {
-    return EsriUtilities.commonProcessLayerMetadata(this, layerConfig, displayDateMode, abortSignal);
+    return EsriUtilities.initLayerMetadata(this, layerConfig, displayDateMode, abortSignal);
   }
 
   /**

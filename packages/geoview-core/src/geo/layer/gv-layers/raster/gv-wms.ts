@@ -60,9 +60,6 @@ export class GVWMS extends AbstractGVRaster {
   /** The feature out put format for the WMS that we know have worked */
   #featureOutputFormatWMSWorked?: string;
 
-  /** Callback delegates for the image load rescue event */
-  #onImageLoadRescueHandlers: ImageLoadRescueDelegate[] = [];
-
   /** Callback delegates for the WMS style changed event */
   #onWmsStyleChangedHandlers: WMSStyleChangedDelegate[] = [];
 
@@ -151,24 +148,6 @@ export class GVWMS extends AbstractGVRaster {
   override getLayerConfig(): OgcWmsLayerEntryConfig {
     // Call parent and cast
     return super.getLayerConfig() as OgcWmsLayerEntryConfig;
-  }
-
-  /**
-   * Overrides when the layer image is in error and couldn't be loaded correctly.
-   *
-   * @param error - The error which has been triggered.
-   */
-  protected override onImageLoadError(error: GeoViewError): void {
-    // The WMS image failed to load.. check if there's something we can do..
-    const rescued: boolean[] = this.#emitImageLoadRescue({ imageLoadErrorEvent: error });
-
-    // If rescued
-    if (rescued.length > 0 && rescued[0]) {
-      // We've rescued(?) the situation, eat the error for now
-    } else {
-      // Not rescued, call parent
-      super.onImageLoadError(error);
-    }
   }
 
   /**
@@ -1826,38 +1805,6 @@ export class GVWMS extends AbstractGVRaster {
   // #region EVENTS
 
   /**
-   * Emits an event to all handlers when the layer's image failed to load.
-   *
-   * @param event - The event to emit
-   * @returns An array of boolean values returned by each event handler, indicating whether the event was handled
-   */
-  #emitImageLoadRescue(event: ImageLoadRescueEvent): boolean[] {
-    // Emit the event for all handlers
-    return EventHelper.emitEvent(this, this.#onImageLoadRescueHandlers, event);
-  }
-
-  /**
-   * Registers an image load callback event handler.
-   *
-   * @param callback - The callback to be executed whenever the event is emitted
-   * @returns A function that can be called to unregister the event handler
-   */
-  onImageLoadRescue(callback: ImageLoadRescueDelegate): ImageLoadRescueDelegate {
-    // Register the event handler
-    return EventHelper.onEvent(this.#onImageLoadRescueHandlers, callback);
-  }
-
-  /**
-   * Unregisters an image load callback event handler.
-   *
-   * @param callback - The callback to stop being called whenever the event is emitted
-   */
-  offImageLoadRescue(callback: ImageLoadRescueDelegate | undefined): void {
-    // Unregister the event handler
-    EventHelper.offEvent(this.#onImageLoadRescueHandlers, callback);
-  }
-
-  /**
    * Emits a WMS style changed event to all handlers.
    *
    * @param event - The event to emit
@@ -1893,16 +1840,6 @@ export class GVWMS extends AbstractGVRaster {
 
 /** Defines the CRS override used to request WMS images in a different projection. */
 export type CRSOverride = { layerProjection: string; mapProjection: string };
-
-/**
- * Define an event for the delegate
- */
-export type ImageLoadRescueEvent = { imageLoadErrorEvent: Error };
-
-/**
- * Define a delegate for the event handler function signature
- */
-export type ImageLoadRescueDelegate = EventDelegateBase<GVWMS, ImageLoadRescueEvent, boolean>;
 
 /**
  * Define an event for the delegate.

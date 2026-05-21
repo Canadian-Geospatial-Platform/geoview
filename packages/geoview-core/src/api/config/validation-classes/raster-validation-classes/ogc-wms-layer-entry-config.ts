@@ -9,12 +9,13 @@ import type {
   TypeOfServer,
   TypeSourceImageWmsInitialConfig,
 } from '@/api/types/layer-schema-types';
+import type { DisplayDateMode } from '@/api/types/map-schema-types';
 import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { LayerConfigWFSMissingError } from '@/core/exceptions/layer-exceptions';
 import type { OgcWfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import type { AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
-import type { TypeWMSLayerConfig } from '@/geo/layer/geoview-layers/raster/wms';
+import { WMS, type TypeWMSLayerConfig } from '@/geo/layer/geoview-layers/raster/wms';
 import { normalizeDatacubeAccessPath } from '@/core/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { WFS } from '@/geo/layer/geoview-layers/vector/wfs';
@@ -389,6 +390,25 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   }
 
   /**
+   * Refreshes the layer metadata information by re-fetching the WMS GetCapabilities response and updating the layer configuration accordingly.
+   *
+   * This method is typically used when the display date mode changes, as the metadata may contain time-sensitive information that needs to be updated on-the-fly.
+   *
+   * @param displayDateMode - The display date mode that should be used
+   * @returns A promise that resolves when the metadata refresh operation has completed
+   */
+  override async onRefreshMetadata(displayDateMode: DisplayDateMode): Promise<void> {
+    // Refetch the metadata again with the new date mode and update the config
+    const layerMetadata = await WMS.fetchMetadataWMSForLayer(this.getMetadataAccessPath()!, this.layerId);
+
+    // Read the capabilities
+    const layerCapabilities = WMS.findLayerMetadataInCapability(this.layerId, layerMetadata.Capability.Layer);
+
+    // Init the layer metadata
+    WMS.initLayerMetadata(this, layerCapabilities, displayDateMode);
+  }
+
+  /**
    * Normalizes both the metadata and data access paths by replacing legacy wrapper segments in the URL.
    *
    * Specifically, this method replaces `wrapper/ramp/ogc` with `ows` in the metadata access path,
@@ -423,7 +443,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     this.setDataAccessPath(dataAccessPath);
   }
 
-  // #region OVERRIDES
+  // #endregion METHODS
 
   // #region STATIC METHODS
 

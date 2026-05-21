@@ -30,6 +30,7 @@ import {
   type LayerGroupChildrenUpdatedEvent,
 } from '@/geo/layer/gv-layers/gv-group-layer';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import { AbstractGVRaster, type ImageLoadRescueDelegate, type ImageLoadRescueEvent } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import type {
   LayerErrorDelegate,
   LayerErrorEvent,
@@ -45,13 +46,7 @@ import type {
   LayerQueryableChangedEvent,
 } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
-import {
-  GVWMS,
-  type ImageLoadRescueDelegate,
-  type ImageLoadRescueEvent,
-  type WMSStyleChangedDelegate,
-  type WMSStyleChangedEvent,
-} from '@/geo/layer/gv-layers/raster/gv-wms';
+import { GVWMS, type WMSStyleChangedDelegate, type WMSStyleChangedEvent } from '@/geo/layer/gv-layers/raster/gv-wms';
 import {
   GVEsriImage,
   type RasterFunctionChangedEvent,
@@ -124,8 +119,8 @@ export class LayerDomain {
   /** Keep a bounded reference to the handle Group Layer Removed Callbacks */
   #boundedHandleLayerGroupLayerRemoved: LayerGroupChildrenUpdatedDelegate;
 
-  /** Keep a bounded reference to the handle WMS Layer Image Load Callbacks */
-  #boundedHandleLayerWMSImageLoadRescue: ImageLoadRescueDelegate;
+  /** Keep a bounded reference to the handle Layer Image Load Callbacks */
+  #boundedHandleLayerImageLoadRescue: ImageLoadRescueDelegate;
 
   /** Keep a bounded reference to the handle WMS style changed */
   #boundedHandleLayerWMSStyleChanged: WMSStyleChangedDelegate;
@@ -196,8 +191,8 @@ export class LayerDomain {
   /** Callback delegates for the group layer removed event. */
   #onLayerGroupLayerRemovedHandlers: DomainLayerGroupChildrenUpdatedDelegate[] = [];
 
-  /** Callback delegates for the WMS image load rescue event. */
-  #onLayerWMSImageLoadRescueHandlers: DomainLayerWMSImageLoadRescueDelegate[] = [];
+  /** Callback delegates for the image load rescue event. */
+  #onLayerImageLoadRescueHandlers: DomainLayerImageLoadRescueDelegate[] = [];
 
   /** Callback delegates for the WMS style changed event. */
   #onLayerWMSStyleChangedHandlers: DomainLayerWMSStyleChangedDelegate[] = [];
@@ -228,7 +223,7 @@ export class LayerDomain {
     this.#boundedHandleLayerFilterApplied = this.#handleLayerFilterApplied.bind(this);
     this.#boundedHandleLayerGroupLayerAdded = this.#handleLayerGroupLayerAdded.bind(this);
     this.#boundedHandleLayerGroupLayerRemoved = this.#handleLayerGroupLayerRemoved.bind(this);
-    this.#boundedHandleLayerWMSImageLoadRescue = this.#handleLayerWMSImageLoadRescue.bind(this);
+    this.#boundedHandleLayerImageLoadRescue = this.#handleLayerImageLoadRescue.bind(this);
     this.#boundedHandleLayerWMSStyleChanged = this.#handleLayerWmsStyleChanged.bind(this);
     this.#boundedHandleLayerRasterFunctionChanged = this.#handleLayerRasterFunctionChanged.bind(this);
     this.#boundedHandleLayerMosaicRuleChanged = this.#handleLayerMosaicRuleChanged.bind(this);
@@ -572,8 +567,8 @@ export class LayerDomain {
       // Register a hook when a layer filter changed
       gvLayer.onLayerFilterApplied(this.#boundedHandleLayerFilterApplied);
 
-      // For a WMS, register a hook when the image fails to load so that we can try to rescue it
-      if (gvLayer instanceof GVWMS) gvLayer.onImageLoadRescue(this.#boundedHandleLayerWMSImageLoadRescue);
+      // For a raster layer, register a hook when the image fails to load so that we can try to rescue it
+      if (gvLayer instanceof AbstractGVRaster) gvLayer.onImageLoadRescue(this.#boundedHandleLayerImageLoadRescue);
 
       // For a WMS, register a hook when the WMS style is changed so that we can update the layer accordingly
       if (gvLayer instanceof GVWMS) gvLayer.onWmsStyleChanged(this.#boundedHandleLayerWMSStyleChanged);
@@ -621,8 +616,8 @@ export class LayerDomain {
       // For a WMS, unregister the hook when the WMS style is changed
       if (gvLayer instanceof GVWMS) gvLayer.offWmsStyleChanged(this.#boundedHandleLayerWMSStyleChanged);
 
-      // For a WMS, unregister the hook when the image fails to load
-      if (gvLayer instanceof GVWMS) gvLayer.offImageLoadRescue(this.#boundedHandleLayerWMSImageLoadRescue);
+      // For a raster layer, unregister the hook when the image fails to load
+      if (gvLayer instanceof AbstractGVRaster) gvLayer.offImageLoadRescue(this.#boundedHandleLayerImageLoadRescue);
 
       // Unregister a hook when a layer style item visibility changes
       gvLayer.offLayerItemVisibilityChanged(this.#boundedHandleLayerItemVisibilityChanged);
@@ -953,20 +948,20 @@ export class LayerDomain {
   }
 
   /**
-   * Handles WMS image load rescue events.
+   * Handles raster layer image load rescue events.
    *
    * Forwards the rescue event to domain listeners and returns the first
    * handler's result. Returns `undefined` (falsy) if no listener is
-   * registered, which causes the WMS layer to fall through to its
+   * registered, which causes the raster layer to fall through to its
    * default error handling.
    *
-   * @param layer - The WMS layer whose image failed to load
+   * @param layer - The raster layer whose image failed to load
    * @param event - The image load rescue event
    * @returns Whether the error was rescued by a listener
    */
-  #handleLayerWMSImageLoadRescue(layer: GVWMS, event: ImageLoadRescueEvent): boolean {
+  #handleLayerImageLoadRescue(layer: AbstractGVRaster, event: ImageLoadRescueEvent): Promise<boolean> {
     // Emit about it
-    return this.#emitLayerWMSImageLoadRescue({ layer, layerEvent: event })?.[0];
+    return this.#emitLayerImageLoadRescue({ layer, layerEvent: event })?.[0];
   }
 
   /**
@@ -1575,34 +1570,34 @@ export class LayerDomain {
   }
 
   /**
-   * Emits layer WMS image load rescue event.
+   * Emits layer raster layer image load rescue event.
    *
    * @param event - The event to emit
    */
-  #emitLayerWMSImageLoadRescue(event: DomainLayerWMSImageLoadRescueEvent): boolean[] {
+  #emitLayerImageLoadRescue(event: DomainLayerImageLoadRescueEvent): Promise<boolean>[] {
     // Emit the event for all handlers
-    return EventHelper.emitEvent(this, this.#onLayerWMSImageLoadRescueHandlers, event);
+    return EventHelper.emitEvent(this, this.#onLayerImageLoadRescueHandlers, event);
   }
 
   /**
-   * Registers a layer WMS image load rescue event handler.
+   * Registers a raster layer image load rescue event handler.
    *
    * @param callback - The callback to be executed whenever the event is emitted
    * @returns The callback registered, for chaining or unregistration purposes
    */
-  onLayerWMSImageLoadRescue(callback: DomainLayerWMSImageLoadRescueDelegate): DomainLayerWMSImageLoadRescueDelegate {
+  onLayerImageLoadRescue(callback: DomainLayerImageLoadRescueDelegate): DomainLayerImageLoadRescueDelegate {
     // Register the event handler
-    return EventHelper.onEvent(this.#onLayerWMSImageLoadRescueHandlers, callback);
+    return EventHelper.onEvent(this.#onLayerImageLoadRescueHandlers, callback);
   }
 
   /**
-   * Unregisters a layer WMS image load rescue event handler.
+   * Unregisters a raster layer image load rescue event handler.
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offLayerWMSImageLoadRescue(callback: DomainLayerWMSImageLoadRescueDelegate | undefined): void {
+  offLayerImageLoadRescue(callback: DomainLayerImageLoadRescueDelegate | undefined): void {
     // Unregister the event handler
-    EventHelper.offEvent(this.#onLayerWMSImageLoadRescueHandlers, callback);
+    EventHelper.offEvent(this.#onLayerImageLoadRescueHandlers, callback);
   }
 
   /**
@@ -1884,12 +1879,12 @@ export type DomainLayerFilterAppliedDelegate = EventDelegateBase<LayerDomain, Do
 /**
  * Define an event for the delegate
  */
-export interface DomainLayerWMSImageLoadRescueEvent extends DomainLayerBaseEvent<GVWMS, ImageLoadRescueEvent> {}
+export interface DomainLayerImageLoadRescueEvent extends DomainLayerBaseEvent<AbstractGVRaster, ImageLoadRescueEvent> {}
 
 /**
  * Define a delegate for the event handler function signature
  */
-export type DomainLayerWMSImageLoadRescueDelegate = EventDelegateBase<LayerDomain, DomainLayerWMSImageLoadRescueEvent, boolean>;
+export type DomainLayerImageLoadRescueDelegate = EventDelegateBase<LayerDomain, DomainLayerImageLoadRescueEvent, Promise<boolean>>;
 
 /**
  * Define an event for the delegate

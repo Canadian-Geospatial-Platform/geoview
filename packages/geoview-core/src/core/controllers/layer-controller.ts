@@ -51,7 +51,7 @@ import {
   setStoreLayerSelectedLayersTabLayer,
   utilFindLayerAndChildrenPaths,
 } from '@/core/stores/states/layer-state';
-import { getStoreAppShowLayerHighlightLayerBbox } from '@/core/stores/states/app-state';
+import { getStoreAppDisplayDateMode, getStoreAppShowLayerHighlightLayerBbox } from '@/core/stores/states/app-state';
 import { setStoreDataTableFilter } from '@/core/stores/states/data-table-state';
 import { isStoreTimeSliderInitialized, setStoreTimeSliderFilter } from '@/core/stores/states/time-slider-state';
 import type {
@@ -83,8 +83,8 @@ import type {
   DomainLayerStatusChangedEvent,
   DomainLayerVisibleChangedDelegate,
   DomainLayerVisibleChangedEvent,
-  DomainLayerWMSImageLoadRescueEvent,
-  DomainLayerWMSImageLoadRescueDelegate,
+  DomainLayerImageLoadRescueEvent,
+  DomainLayerImageLoadRescueDelegate,
   DomainLayerWMSStyleChangedDelegate,
   DomainLayerWMSStyleChangedEvent,
   LayerDomain,
@@ -115,6 +115,9 @@ export class LayerController extends AbstractMapViewerController {
   /** The opacity ratio to use when highlighting a layer vs the other layers */
   static readonly HIGHLIGHT_OPACITY_RATIO = 4;
 
+  /** The timeout duration for metadata refresh in milliseconds */
+  static readonly #METADATA_REFRESHED_TIMEOUT = 5000; // When the metadata is already fresh of 5 seconds, we consider it as still fresh and we avoid trying to refresh it again to prevent multiple rapid refresh attempts.
+
   /** The Layer Domain instance associated with this controller */
   #layerDomain: LayerDomain;
 
@@ -123,6 +126,9 @@ export class LayerController extends AbstractMapViewerController {
 
   /** Stores the original opacity of the highlighted layer (and its leaf children for groups) so it can be restored on unhighlight. */
   #highlightedLayerOriginalOpacity: Map<string, number> = new Map();
+
+  /** Holds all the layers latest date they had their metadata refreshed */
+  #layersBeingMetadataRefreshed: Record<string, number> = {};
 
   /** Holds all the layers in process of being deleted from the map */
   #layersBeingDeleted: Record<string, LayerDeletionJob> = {};
@@ -184,8 +190,8 @@ export class LayerController extends AbstractMapViewerController {
   /** The bounded reference to the handle layer group layer removed */
   #boundedHandleDomainLayerGroupLayerRemoved: DomainLayerGroupChildrenUpdatedDelegate;
 
-  /** The bounded reference to the handle WMS Layer Image Load Callbacks */
-  #boundedHandleDomainLayerWMSImageLoadRescue: DomainLayerWMSImageLoadRescueDelegate;
+  /** The bounded reference to the handle Layer Image Load Callbacks */
+  #boundedHandleDomainLayerImageLoadRescue: DomainLayerImageLoadRescueDelegate;
 
   /** The bounded reference to the handle WMS style changed */
   #boundedHandleDomainLayerWMSStyleChanged: DomainLayerWMSStyleChangedDelegate;
@@ -266,8 +272,8 @@ export class LayerController extends AbstractMapViewerController {
     // Keep a bounded reference to the handle layer group layer removed
     this.#boundedHandleDomainLayerGroupLayerRemoved = this.#handleDomainLayerGroupLayerRemoved.bind(this);
 
-    // Keep a bounded reference to the handle WMS Layer Image Load Callbacks
-    this.#boundedHandleDomainLayerWMSImageLoadRescue = this.#handleDomainLayerWMSImageLoadRescue.bind(this);
+    // Keep a bounded reference to the handle Layer Image Load Callbacks
+    this.#boundedHandleDomainLayerImageLoadRescue = this.#handleDomainLayerImageLoadRescue.bind(this);
 
     // Keep a bounded reference to the handle WMS style changed
     this.#boundedHandleDomainLayerWMSStyleChanged = this.#handleDomainLayerWMSStyleChanged.bind(this);
@@ -339,8 +345,8 @@ export class LayerController extends AbstractMapViewerController {
     // Listens when a layer is added to a group layer in the Layer domain
     this.#layerDomain.onLayerGroupLayerRemoved(this.#boundedHandleDomainLayerGroupLayerRemoved);
 
-    // Listens when a WMS image load rescue event occurs
-    this.#layerDomain.onLayerWMSImageLoadRescue(this.#boundedHandleDomainLayerWMSImageLoadRescue);
+    // Listens when an image load rescue event occurs
+    this.#layerDomain.onLayerImageLoadRescue(this.#boundedHandleDomainLayerImageLoadRescue);
 
     // Listens when a WMS style is changed in the Layer domain
     this.#layerDomain.onLayerWmsStyleChanged(this.#boundedHandleDomainLayerWMSStyleChanged);
@@ -365,8 +371,8 @@ export class LayerController extends AbstractMapViewerController {
     // Unhooks when a WMS style is changed in the Layer domain
     this.#layerDomain.offLayerWmsStyleChanged(this.#boundedHandleDomainLayerWMSStyleChanged);
 
-    // Unhooks when a WMS image load rescue event occurs
-    this.#layerDomain.offLayerWMSImageLoadRescue(this.#boundedHandleDomainLayerWMSImageLoadRescue);
+    // Unhooks when an image load rescue event occurs
+    this.#layerDomain.offLayerImageLoadRescue(this.#boundedHandleDomainLayerImageLoadRescue);
 
     // Unhooks when a layer is added to a group layer in the Layer domain
     this.#layerDomain.offLayerGroupLayerRemoved(this.#boundedHandleDomainLayerGroupLayerRemoved);
@@ -957,17 +963,17 @@ export class LayerController extends AbstractMapViewerController {
     const effectiveScales = MapViewer.computeEffectiveLayerScales(mapViewer, gvLayer.getLayerConfig());
 
     // Set OL rendering limits via resolution (avoids zoom-level discretization).
-    // Skip GVGroupLayers — their children already carry their own limits, and locking the
+    // Skip GVGroupLayers -> their children already carry their own limits, and locking the
     // group zoom/resolution would prevent children from loading when initially out of range.
     if (!(gvLayer instanceof GVGroupLayer)) {
       // Compute effective scales from the layer config, converting zoom-based limits to scale as needed
       const { maxScale, minScale } = effectiveScales;
 
-      // maxScale → OL minResolution: layer hidden when too zoomed in (resolution too small)
+      // maxScale -> OL minResolution: layer hidden when too zoomed in (resolution too small)
       const minResolution = maxScale ? mapViewer.getMapResolutionFromScale(maxScale) : undefined;
       if (minResolution) gvLayer.setMinResolution(minResolution);
 
-      // minScale → OL maxResolution: layer hidden when too zoomed out (resolution too large)
+      // minScale -> OL maxResolution: layer hidden when too zoomed out (resolution too large)
       const maxResolution = minScale ? mapViewer.getMapResolutionFromScale(minScale) : undefined;
       if (maxResolution) gvLayer.setMaxResolution(maxResolution);
     }
@@ -1487,12 +1493,12 @@ export class LayerController extends AbstractMapViewerController {
     this.#highlightedLayerOriginalOpacity.clear();
     this.#storeAllLayerOpacities();
 
-    // Get the ancestor groups of the highlighted layer (immediate parent → root).
+    // Get the ancestor groups of the highlighted layer (immediate parent -> root).
     // They must be boosted to 1.0 so the highlighted layer isn't capped.
     const ancestors = layer.getParents();
 
-    // Boost ancestors from root down (reverse of getParents() order which is child→root).
-    // Each setOpacity(1) cascades to children, but that's fine — we'll override afterward.
+    // Boost ancestors from root down (reverse of getParents() order which is child -> root).
+    // Each setOpacity(1) cascades to children, but that's fine - we'll override afterward.
     for (let i = ancestors.length - 1; i >= 0; i--) {
       ancestors[i].setOpacity(1);
     }
@@ -1654,7 +1660,7 @@ export class LayerController extends AbstractMapViewerController {
       targetScale = minScaleZoomAt;
     }
 
-    // Convert target scale directly to resolution (more direct than scale → zoom → resolution).
+    // Convert target scale directly to resolution (more direct than scale -> zoom -> resolution).
     const targetResolution = targetScale ? mapViewer.getMapResolutionFromScale(targetScale) : undefined;
     if (targetResolution === undefined) return;
 
@@ -1904,13 +1910,13 @@ export class LayerController extends AbstractMapViewerController {
     const result = await delayedJob.promise;
 
     // Check if our job is still the current one. A subsequent call to deleteLayerStartTimer
-    // may have replaced it while we were awaiting — in that case, let the newer call own the lifecycle.
+    // may have replaced it while we were awaiting - in that case, let the newer call own the lifecycle.
     const currentJob = this.#getLayerBeingDeleted(layerPath);
     if (currentJob?.delayedJob !== delayedJob) {
       return false;
     }
 
-    // Our job is still current — remove it from the stack
+    // Our job is still current - remove it from the stack
     this.#removeLayerBeingDeleted(layerPath);
 
     if (result === 'timeout') {
@@ -1919,7 +1925,7 @@ export class LayerController extends AbstractMapViewerController {
       return true;
     }
 
-    // Undo deletion — restore original visibility
+    // Undo deletion - restore original visibility
     gvLayer?.setVisible(originalVisibility);
 
     // Negative
@@ -2189,7 +2195,7 @@ export class LayerController extends AbstractMapViewerController {
   #handleDomainLayerItemVisibilityChanged(sender: LayerDomain, event: DomainLayerItemVisibilityChangedEvent): void {
     // Check if we're controlling the visibility adjustments
     if (this.#isBatchingLayerItemsVisibility) {
-      // Ignore — we initiated this by batch process
+      // Ignore - we initiated this by batch process
       return;
     }
 
@@ -2295,74 +2301,23 @@ export class LayerController extends AbstractMapViewerController {
   }
 
   /**
-   * Handles when a WMS layer failed to render an image on the map and we're trying to rescue it on-the-fly before officializing the error.
+   * Handles when a raster layer failed to render an image on the map and we're trying to rescue it on-the-fly before officializing the error.
    *
-   * This callback is useful when a WMS doesn't officially support the map projection, but we still want to attempt to pull an image and put it on the map.
+   * This callback is useful when either (1) a WMS doesn't officially support the map projection, but we still want to attempt to pull an
+   * image and put it on the map or (2) when the layer metadata has expired (time dimension) and needs to be refreshed.
    *
-   * @param sender - The WMS layer which is attempting to render its image on the map
+   * @param sender - The layer domain that fired the event
    * @param event - The error event which happened when the image tried to be rendered
-   * @returns True if the rescue was attempted, false if we let it fail
+   * @returns A promise that resolves with true if the rescue was a success, false if we let it fail and the layer should turn to error status
    */
-  #handleDomainLayerWMSImageLoadRescue(sender: LayerDomain, event: DomainLayerWMSImageLoadRescueEvent): boolean {
-    // Get the supported CRS projections
-    const supportedCRSs = event.layer.getLayerConfig().getSupportedCRSs();
-
-    // Get the map projection
-    const mapProj = this.getMapViewer().getProjection().getCode();
-
-    // If the map projection isn't supported by the WMS, that might be the issue
-    if (!supportedCRSs.includes(mapProj)) {
-      // Log warning
-      logger.logWarning(`The map projection '${mapProj}' is not officially supported by the layer '${event.layer.getLayerPath()}'...`);
-
-      // If we're not already overriding the CRS
-      if (!event.layer.getOverrideCRS()) {
-        // Get prioritized lists of projections to retry with (we want to attempt with higher priority projections)
-        const highlyPrioritizedProjections = VALID_PROJECTION_CODES.map((projCode) => 'EPSG:' + projCode);
-        const moderatePrioritizedProjections = Object.values(Projection.PROJECTION_NAMES);
-
-        // Attempt to find a suitable CRS
-        let selectedCRS: string | undefined;
-
-        // 1. Look in high priority list
-        selectedCRS = highlyPrioritizedProjections.find((crs) => supportedCRSs.includes(crs));
-
-        // 2. If not found, look in moderate priority list
-        if (!selectedCRS) {
-          selectedCRS = moderatePrioritizedProjections.find((crs) => supportedCRSs.includes(crs));
-        }
-
-        // 3. If still not found, just take the first supported CRS (fallback)
-        if (!selectedCRS && supportedCRSs.length > 0) {
-          selectedCRS = supportedCRSs[0];
-        }
-
-        // 4. If we found one, override
-        if (selectedCRS) {
-          // Override the CRS in the layer
-          event.layer.setOverrideCRS({
-            layerProjection: selectedCRS,
-            mapProjection: mapProj,
-          });
-
-          // Notify the user
-          this.getMapViewer().notifications.showWarning(
-            'warning.layer.layerCRSNotSupported',
-            { mapProj, layerName: event.layer.getLayerName() },
-            true
-          );
-
-          // Force a refresh so the layer gets drawn with the overridden CRS
-          event.layer.refresh(this.getMapViewer().getProjection());
-
-          // Rescued
-          return true;
-        }
-      }
+  #handleDomainLayerImageLoadRescue(sender: LayerDomain, event: DomainLayerImageLoadRescueEvent): Promise<boolean> {
+    // Try WMS projection rescue first.
+    if (this.#attemptWmsProjectionRescue(event)) {
+      return Promise.resolve(true);
     }
 
-    // Nothing to tweak, couldn't rescue the error, let it fail
-    return false;
+    // Try time-dimension metadata rescue as fallback.
+    return this.#attemptTimeDimensionRescue(event);
   }
 
   /**
@@ -2410,6 +2365,91 @@ export class LayerController extends AbstractMapViewerController {
   // #endregion DOMAIN HANDLERS
 
   // #region PRIVATE METHODS
+
+  /**
+   * Attempts to rescue an image load failure on a WMS layer by overriding CRS.
+   *
+   * @param event - The image load rescue event
+   * @returns True when a rescue was attempted successfully
+   */
+  #attemptWmsProjectionRescue(event: DomainLayerImageLoadRescueEvent): boolean {
+    // Only WMS layers are eligible for this rescue path.
+    if (!(event.layer instanceof GVWMS)) return false;
+
+    // Get the supported CRSs
+    const supportedCRSs = event.layer.getLayerConfig().getSupportedCRSs();
+    const mapProj = this.getMapViewer().getProjection().getCode();
+
+    // If the projection is already supported, this rescue path does not apply.
+    if (supportedCRSs.includes(mapProj)) return false;
+
+    // If we're already overriding, avoid retry loops.
+    if (event.layer.getOverrideCRS()) return false;
+
+    // Log warning
+    logger.logWarning(`The map projection '${mapProj}' is not officially supported by the layer '${event.layer.getLayerPath()}'...`);
+
+    // Get prioritized lists of projections to retry with (we want to attempt with higher priority projections)
+    const highlyPrioritizedProjections = VALID_PROJECTION_CODES.map((projCode) => `EPSG:${projCode}`);
+    const moderatePrioritizedProjections = Object.values(Projection.PROJECTION_NAMES);
+
+    // Attempt to find a suitable CRS
+    const selectedCRS =
+      highlyPrioritizedProjections.find((crs) => supportedCRSs.includes(crs)) ||
+      moderatePrioritizedProjections.find((crs) => supportedCRSs.includes(crs)) ||
+      supportedCRSs[0];
+
+    // If no fallback CRS was found, this rescue path fails.
+    if (!selectedCRS) return false;
+
+    // Override the CRS in the layer
+    event.layer.setOverrideCRS({
+      layerProjection: selectedCRS,
+      mapProjection: mapProj,
+    });
+
+    // Notify the user
+    this.getMapViewer().notifications.showWarning(
+      'warning.layer.layerCRSNotSupported',
+      { mapProj, layerName: event.layer.getLayerName() },
+      true
+    );
+
+    // Force a refresh so the layer gets drawn with the overridden CRS
+    event.layer.refresh(this.getMapViewer().getProjection());
+
+    // Rescued
+    return true;
+  }
+
+  /**
+   * Attempts to rescue an image load failure by refreshing expired temporal metadata.
+   *
+   * @param event - The image load rescue event
+   * @returns A promise that resolves with true when rescue succeeded, else false
+   */
+  async #attemptTimeDimensionRescue(event: DomainLayerImageLoadRescueEvent): Promise<boolean> {
+    // Get the layer config
+    const layerConfig = event.layer.getLayerConfig();
+
+    // If the layer has no temporal dimension, this rescue path does not apply.
+    if (!layerConfig.getTimeDimension()) return false;
+
+    // If metadata has been refreshed fairly recently already, let the layer fail naturally.
+    const dateLastRefreshIfAny = this.#layersBeingMetadataRefreshed[layerConfig.layerPath];
+    if (dateLastRefreshIfAny && Date.now() - dateLastRefreshIfAny < LayerController.#METADATA_REFRESHED_TIMEOUT) return false;
+
+    // Refresh metadata on-the-fly and retry time slider registration.
+    this.#layersBeingMetadataRefreshed[layerConfig.layerPath] = Date.now();
+    await layerConfig.refreshMetadata(getStoreAppDisplayDateMode(this.getMapId()));
+    this.getControllersRegistry().timeSliderController?.tryRegisterLayer(event.layer);
+
+    // Force a refresh so the layer gets drawn again to confirm if the layer was rescued or not by the metadata refresh operation
+    event.layer.refresh(undefined);
+
+    // Rescued
+    return true;
+  }
 
   /**
    * Registers layer information for the ordered layers in the store.

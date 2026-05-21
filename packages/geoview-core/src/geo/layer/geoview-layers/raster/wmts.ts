@@ -201,91 +201,11 @@ export class WMTS extends AbstractGeoViewRaster {
     // Get the metadata
     const metadata = this.getMetadata();
 
-    // If no metadata (e.g. no metadataAccessPath was provided), skip metadata processing entirely
-    if (!metadata) return layerConfig;
-
-    // Find the TileMatrixSet and Layer in the metadata that corresponds to the layer entry config
-    const metadataLayerFound: TypeMetadataWMTSLayer | undefined =
-      metadata && Array.isArray(metadata?.Capabilities?.Contents?.Layer)
-        ? metadata?.Capabilities?.Contents?.Layer.find((layer) => layer['ows:Identifier'] === layerConfig.layerId)
-        : (metadata?.Capabilities?.Contents?.Layer as TypeMetadataWMTSLayer | undefined);
-
-    let tileMatrixIdentifier = layerConfig.tileMatrixSet;
-    if (!tileMatrixIdentifier && metadataLayerFound?.TileMatrixSetLink) {
-      if (Array.isArray(metadataLayerFound.TileMatrixSetLink)) {
-        tileMatrixIdentifier = metadataLayerFound.TileMatrixSetLink[0].TileMatrixSet;
-      } else {
-        tileMatrixIdentifier = metadataLayerFound.TileMatrixSetLink.TileMatrixSet;
-      }
-    }
-
-    const metadataTileMatrixFound: TypeWMTSTileMatrixSet | undefined =
-      metadata && Array.isArray(metadata?.Capabilities?.Contents?.TileMatrixSet)
-        ? metadata?.Capabilities?.Contents?.TileMatrixSet?.find((tileMatrix) => tileMatrix['ows:Identifier'] === tileMatrixIdentifier)
-        : (metadata?.Capabilities?.Contents?.TileMatrixSet as TypeWMTSTileMatrixSet | undefined);
-
-    // If not found
-    if (!metadataTileMatrixFound || !metadataLayerFound) {
-      // Throw
-      throw new LayerWMTSMetadataError(this.getGeoviewLayerId(), this.getLayerEntryNameOrGeoviewLayerName(), `TileMatrixSet/Layer`);
-    }
-
-    // Check if there is a TileMatrixSetLink in the layer metadata that matches the tileMatrixSet of the layer entry config
-    if (!layerConfig.tileMatrixSet) {
-      const layerMetadataTileMatrixSetLink: boolean = Array.isArray(metadataLayerFound.TileMatrixSetLink)
-        ? metadataLayerFound.TileMatrixSetLink.some((link) => link.TileMatrixSet === tileMatrixIdentifier)
-        : metadataLayerFound.TileMatrixSetLink.TileMatrixSet === tileMatrixIdentifier;
-
-      // If not found
-      if (!layerMetadataTileMatrixSetLink) {
-        // Throw
-        throw new LayerWMTSMetadataError(this.getGeoviewLayerId(), this.getLayerEntryNameOrGeoviewLayerName(), `TileMatrixSetLink`);
-      }
-    }
-
-    // If the layer entry config doesn't have a data access path, try to get it from the metadata's GetTile operation
-    if (!layerConfig.hasDataAccessPath()) {
-      const getTileOperation = metadata?.Capabilities?.['ows:OperationsMetadata']?.['ows:Operation']?.find(
-        (operation) => operation['@attributes'].name === 'GetTile'
-      );
-
-      const tileLink = Array.isArray(getTileOperation?.['ows:DCP']['ows:HTTP']?.['ows:Get'])
-        ? getTileOperation?.['ows:DCP']?.['ows:HTTP']?.['ows:Get']?.find(
-            (get) => get['ows:Constraint']?.['ows:AllowedValues']?.['ows:Value'] === 'KVP' // KVP encoding is default
-          )?.['@attributes']?.['xlink:href']
-        : getTileOperation?.['ows:DCP']?.['ows:HTTP']?.['ows:Get']?.['@attributes']?.['xlink:href'];
-
-      // Set the data access path from the metadata if it wasn't already set and a link was found in the metadata
-      if (tileLink) {
-        layerConfig.setDataAccessPath(tileLink);
-      } else {
-        // Throw
-        throw new LayerWMTSMetadataError(this.getGeoviewLayerId(), this.getLayerEntryNameOrGeoviewLayerName(), `KVP GetTile`);
-      }
-    }
-
-    // If the metadata layer has a bounding box, set it as the initial bounds of the layer entry config
-    if (metadataLayerFound['ows:WGS84BoundingBox']) {
-      const lowerCorner = metadataLayerFound['ows:WGS84BoundingBox']['ows:LowerCorner'];
-      const upperCorner = metadataLayerFound['ows:WGS84BoundingBox']['ows:UpperCorner'];
-      const lowerCornerCoords = typeof lowerCorner === 'string' ? lowerCorner.split(' ').map(Number) : lowerCorner;
-      const upperCornerCoords = typeof upperCorner === 'string' ? upperCorner.split(' ').map(Number) : upperCorner;
-      layerConfig.initInitialSettingsBoundsFromMetadata([...lowerCornerCoords, ...upperCornerCoords] as [number, number, number, number]);
-    }
-
-    // Extract the projection code from the TileMatrixSet's SupportedCRS.
-    let metadataProjectionCode = metadataTileMatrixFound['ows:SupportedCRS'].split(':').slice(-1)[0];
-    if (metadataProjectionCode === 'CRS84') metadataProjectionCode = '4326'; // CRS84 is equivalent to EPSG:4326
-
-    // Check if we support that projection and if not add it on-the-fly
-    await Projection.addProjectionIfMissing(`EPSG:${metadataProjectionCode}`);
-
-    // Set the metadata on the layer config
-    const layerMetadata = { Layer: metadataLayerFound, TileMatrixSet: metadataTileMatrixFound };
-    layerConfig.setLayerMetadata(layerMetadata);
+    // Init the layer metadata
+    await WMTS.initLayerMetadata(layerConfig, metadata);
 
     // Return the layer config
-    return Promise.resolve(layerConfig);
+    return layerConfig;
   }
 
   /**
@@ -307,48 +227,7 @@ export class WMTS extends AbstractGeoViewRaster {
 
   // #endregion OVERRIDES
 
-  // #region STATIC METHODS
-
-  /**
-   * Fetches the metadata for WMS Capabilities.
-   *
-   * @param url - The url to query the metadata from.
-   * @param abortSignal - Optional abort signal to handle cancelling of the process.
-   * @returns A promise that resolves to the parsed metadata object.
-   * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
-   * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
-   * @throws {ResponseError} When the response is not OK (non-2xx).
-   * @throws {ResponseEmptyError} When the JSON response is empty.
-   * @throws {NetworkError} When a network issue happened.
-   */
-  static override fetchMetadata<T = TypeMetadataWMTS>(url: string, abortSignal?: AbortSignal): Promise<T> {
-    // Redirect
-    return GeoUtilities.getWMTSServiceMetadata(url, undefined, abortSignal) as Promise<T>;
-  }
-
-  /**
-   * Initializes a GeoView layer configuration for a WMTS layer.
-   *
-   * This method creates a basic TypeGeoviewLayerConfig using the provided
-   * ID, name, and metadata access path URL. It then initializes the layer entries by calling
-   * `initGeoViewLayerEntries`, which may involve fetching metadata or sublayer info.
-   *
-   * @param geoviewLayerId - A unique identifier for the layer.
-   * @param geoviewLayerName - The display name of the layer.
-   * @param metadataAccessPath - The full service URL to the layer endpoint.
-   * @param isTimeAware - Optional - Indicates whether the layer supports time-based filtering.
-   * @returns A promise that resolves to an initialized GeoView layer configuration with layer entries.
-   */
-  static initGeoviewLayerConfig(
-    geoviewLayerId: string,
-    geoviewLayerName: string,
-    metadataAccessPath: string,
-    isTimeAware?: boolean
-  ): Promise<TypeGeoviewLayerConfig> {
-    // Create the Layer config
-    const myLayer = new WMTS({ geoviewLayerId, geoviewLayerName, metadataAccessPath, isTimeAware } as TypeWmtsLayerConfig);
-    return myLayer.initGeoViewLayerEntries();
-  }
+  // #region STATIC PUBLIC METHODS
 
   /**
    * Creates a configuration object for a WMTS layer.
@@ -393,6 +272,126 @@ export class WMTS extends AbstractGeoViewRaster {
   }
 
   /**
+   * Initializes a GeoView layer configuration for a WMTS layer.
+   *
+   * This method creates a basic TypeGeoviewLayerConfig using the provided
+   * ID, name, and metadata access path URL. It then initializes the layer entries by calling
+   * `initGeoViewLayerEntries`, which may involve fetching metadata or sublayer info.
+   *
+   * @param geoviewLayerId - A unique identifier for the layer.
+   * @param geoviewLayerName - The display name of the layer.
+   * @param metadataAccessPath - The full service URL to the layer endpoint.
+   * @param isTimeAware - Optional - Indicates whether the layer supports time-based filtering.
+   * @returns A promise that resolves to an initialized GeoView layer configuration with layer entries.
+   */
+  static initGeoviewLayerConfig(
+    geoviewLayerId: string,
+    geoviewLayerName: string,
+    metadataAccessPath: string,
+    isTimeAware?: boolean
+  ): Promise<TypeGeoviewLayerConfig> {
+    // Create the Layer config
+    const myLayer = new WMTS({ geoviewLayerId, geoviewLayerName, metadataAccessPath, isTimeAware } as TypeWmtsLayerConfig);
+    return myLayer.initGeoViewLayerEntries();
+  }
+
+  /**
+   * Initializes the layer metadata for a WMTS layer entry configuration.
+   *
+   * This method takes a layer entry configuration and the corresponding metadata,
+   * then extracts and validates necessary information such as TileMatrixSet, Layer details,
+   * data access paths, bounding boxes, and projections. It ensures that the layer entry config
+   * is properly populated with metadata information required for creating the WMTS source and layer.
+   *
+   * @param layerConfig - The layer entry configuration
+   * @param metadata - The WMTS metadata
+   */
+  static async initLayerMetadata(layerConfig: OgcWmtsLayerEntryConfig, metadata: TypeMetadataWMTS | undefined): Promise<void> {
+    // If no metadata (e.g. no metadataAccessPath was provided), skip metadata processing entirely
+    if (!metadata) return;
+
+    // Find the TileMatrixSet and Layer in the metadata that corresponds to the layer entry config
+    const metadataLayerFound: TypeMetadataWMTSLayer | undefined =
+      metadata && Array.isArray(metadata?.Capabilities?.Contents?.Layer)
+        ? metadata?.Capabilities?.Contents?.Layer.find((layer) => layer['ows:Identifier'] === layerConfig.layerId)
+        : (metadata?.Capabilities?.Contents?.Layer as TypeMetadataWMTSLayer | undefined);
+
+    let tileMatrixIdentifier = layerConfig.tileMatrixSet;
+    if (!tileMatrixIdentifier && metadataLayerFound?.TileMatrixSetLink) {
+      if (Array.isArray(metadataLayerFound.TileMatrixSetLink)) {
+        tileMatrixIdentifier = metadataLayerFound.TileMatrixSetLink[0].TileMatrixSet;
+      } else {
+        tileMatrixIdentifier = metadataLayerFound.TileMatrixSetLink.TileMatrixSet;
+      }
+    }
+
+    const metadataTileMatrixFound: TypeWMTSTileMatrixSet | undefined =
+      metadata && Array.isArray(metadata?.Capabilities?.Contents?.TileMatrixSet)
+        ? metadata?.Capabilities?.Contents?.TileMatrixSet?.find((tileMatrix) => tileMatrix['ows:Identifier'] === tileMatrixIdentifier)
+        : (metadata?.Capabilities?.Contents?.TileMatrixSet as TypeWMTSTileMatrixSet | undefined);
+
+    // If not found
+    if (!metadataTileMatrixFound || !metadataLayerFound) {
+      // Throw
+      throw new LayerWMTSMetadataError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerNameCascade(), `TileMatrixSet/Layer`);
+    }
+
+    // Check if there is a TileMatrixSetLink in the layer metadata that matches the tileMatrixSet of the layer entry config
+    if (!layerConfig.tileMatrixSet) {
+      const layerMetadataTileMatrixSetLink: boolean = Array.isArray(metadataLayerFound.TileMatrixSetLink)
+        ? metadataLayerFound.TileMatrixSetLink.some((link) => link.TileMatrixSet === tileMatrixIdentifier)
+        : metadataLayerFound.TileMatrixSetLink.TileMatrixSet === tileMatrixIdentifier;
+
+      // If not found
+      if (!layerMetadataTileMatrixSetLink) {
+        // Throw
+        throw new LayerWMTSMetadataError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerNameCascade(), `TileMatrixSetLink`);
+      }
+    }
+
+    // If the layer entry config doesn't have a data access path, try to get it from the metadata's GetTile operation
+    if (!layerConfig.hasDataAccessPath()) {
+      const getTileOperation = metadata?.Capabilities?.['ows:OperationsMetadata']?.['ows:Operation']?.find(
+        (operation) => operation['@attributes'].name === 'GetTile'
+      );
+
+      const tileLink = Array.isArray(getTileOperation?.['ows:DCP']['ows:HTTP']?.['ows:Get'])
+        ? getTileOperation?.['ows:DCP']?.['ows:HTTP']?.['ows:Get']?.find(
+            (get) => get['ows:Constraint']?.['ows:AllowedValues']?.['ows:Value'] === 'KVP' // KVP encoding is default
+          )?.['@attributes']?.['xlink:href']
+        : getTileOperation?.['ows:DCP']?.['ows:HTTP']?.['ows:Get']?.['@attributes']?.['xlink:href'];
+
+      // Set the data access path from the metadata if it wasn't already set and a link was found in the metadata
+      if (tileLink) {
+        layerConfig.setDataAccessPath(tileLink);
+      } else {
+        // Throw
+        throw new LayerWMTSMetadataError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerNameCascade(), `KVP GetTile`);
+      }
+    }
+
+    // If the metadata layer has a bounding box, set it as the initial bounds of the layer entry config
+    if (metadataLayerFound['ows:WGS84BoundingBox']) {
+      const lowerCorner = metadataLayerFound['ows:WGS84BoundingBox']['ows:LowerCorner'];
+      const upperCorner = metadataLayerFound['ows:WGS84BoundingBox']['ows:UpperCorner'];
+      const lowerCornerCoords = typeof lowerCorner === 'string' ? lowerCorner.split(' ').map(Number) : lowerCorner;
+      const upperCornerCoords = typeof upperCorner === 'string' ? upperCorner.split(' ').map(Number) : upperCorner;
+      layerConfig.initInitialSettingsBoundsFromMetadata([...lowerCornerCoords, ...upperCornerCoords] as [number, number, number, number]);
+    }
+
+    // Extract the projection code from the TileMatrixSet's SupportedCRS.
+    let metadataProjectionCode = metadataTileMatrixFound['ows:SupportedCRS'].split(':').slice(-1)[0];
+    if (metadataProjectionCode === 'CRS84') metadataProjectionCode = '4326'; // CRS84 is equivalent to EPSG:4326
+
+    // Check if we support that projection and if not add it on-the-fly
+    await Projection.addProjectionIfMissing(`EPSG:${metadataProjectionCode}`);
+
+    // Set the metadata on the layer config
+    const layerMetadata = { Layer: metadataLayerFound, TileMatrixSet: metadataTileMatrixFound };
+    layerConfig.setLayerMetadata(layerMetadata);
+  }
+
+  /**
    * Processes an  WMTS GeoviewLayerConfig and returns a promise
    * that resolves to an array of `ConfigBaseClass` layer entry configurations.
    *
@@ -434,6 +433,23 @@ export class WMTS extends AbstractGeoViewRaster {
   }
 
   /**
+   * Fetches the metadata for WMS Capabilities.
+   *
+   * @param url - The url to query the metadata from.
+   * @param abortSignal - Optional abort signal to handle cancelling of the process.
+   * @returns A promise that resolves to the parsed metadata object.
+   * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
+   * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
+   * @throws {ResponseError} When the response is not OK (non-2xx).
+   * @throws {ResponseEmptyError} When the JSON response is empty.
+   * @throws {NetworkError} When a network issue happened.
+   */
+  static override fetchMetadata<T = TypeMetadataWMTS>(url: string, abortSignal?: AbortSignal): Promise<T> {
+    // Redirect
+    return GeoUtilities.getWMTSServiceMetadata(url, undefined, abortSignal) as Promise<T>;
+  }
+
+  /**
    * Creates a WMTS source from a layer config.
    *
    * @param layerConfig - The configuration for the WMTS layer.
@@ -462,6 +478,10 @@ export class WMTS extends AbstractGeoViewRaster {
     // If we don't have enough info to create a source, throw
     throw new LayerWMTSMetadataError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerName(), 'items');
   }
+
+  // #endregion STATIC PUBLIC METHODS
+
+  // #region STATIC PRIVATE METHODS
 
   /**
    * Creates a WMTS source from metadata (TileMatrixSet and Layer info from GetCapabilities).
@@ -596,5 +616,5 @@ export class WMTS extends AbstractGeoViewRaster {
     return new WMTSSource(sourceOptions);
   }
 
-  // #endregion STATIC METHODS
+  // #endregion STATIC PRIVATE METHODS
 }
