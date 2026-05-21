@@ -375,8 +375,7 @@ export class DrawerController extends AbstractMapViewerController {
     // Only start editing if the drawing group exists
     if (geometryApi.hasGeometryGroup(DrawerController.DRAW_GROUP_KEY)) {
       // Use larger hit tolerance when crosshair is active for easier keyboard targeting
-      const isCrosshairActive = getStoreAppIsCrosshairsActive(this.getMapId());
-      const hitTolerance = isCrosshairActive ? DrawerController.KEYBOARD_HIT_TOLERANCE : DrawerController.MOUSE_HIT_TOLERANCE;
+      const hitTolerance = this.#getHitTolerance();
 
       const transformInstance = viewer.initTransformInteractions({
         geometryGroupKey: DrawerController.DRAW_GROUP_KEY,
@@ -1493,10 +1492,10 @@ export class DrawerController extends AbstractMapViewerController {
    */
   openStyleMenu(): void {
     const mapId = this.getMapId();
-    const mapElement = getStoreAppGeoviewHTMLElement(mapId);
+    const geoViewElement = getStoreAppGeoviewHTMLElement(mapId);
 
     // Find the style button within this map's container
-    const styleButton = mapElement.querySelector('#drawer-style') as HTMLElement;
+    const styleButton = geoViewElement.querySelector('#drawer-style') as HTMLElement;
     if (styleButton) {
       styleButton.click();
     } else {
@@ -1999,13 +1998,28 @@ export class DrawerController extends AbstractMapViewerController {
     const pixel = this.getMapViewer().map.getPixelFromCoordinate(coordinate);
     const features: Feature[] = [];
 
-    this.getMapViewer().map.forEachFeatureAtPixel(pixel, (feature) => {
-      if (feature.get('geometryGroup') === DrawerController.DRAW_GROUP_KEY) {
-        features.push(feature as Feature);
-      }
-    });
+    this.getMapViewer().map.forEachFeatureAtPixel(
+      pixel,
+      (feature) => {
+        if (feature.get('geometryGroup') === DrawerController.DRAW_GROUP_KEY) {
+          features.push(feature as Feature);
+        }
+      },
+      { hitTolerance: this.#getHitTolerance() }
+    );
 
     return features;
+  }
+
+  /**
+   * Gets the hit tolerance based on whether the crosshair is active.
+   *
+   * @returns The hit tolerance value
+   */
+  #getHitTolerance(): number {
+    const mapId = this.getMapId();
+    const isCrosshairActive = getStoreAppIsCrosshairsActive(mapId);
+    return isCrosshairActive ? DrawerController.KEYBOARD_HIT_TOLERANCE : DrawerController.MOUSE_HIT_TOLERANCE;
   }
 
   /**
@@ -2423,8 +2437,7 @@ export class DrawerController extends AbstractMapViewerController {
         drawInstance?.stopInteraction();
 
         // Use larger hit tolerance when crosshair is active for easier keyboard targeting
-        const isCrosshairActive = getStoreAppIsCrosshairsActive(mapId);
-        const hitTolerance = isCrosshairActive ? DrawerController.KEYBOARD_HIT_TOLERANCE : DrawerController.MOUSE_HIT_TOLERANCE;
+        const hitTolerance = this.#getHitTolerance();
 
         const featureCollection = new Collection([feature]); // Only select this specific feature
         const tempTransform = viewer.initTransformInteractions({
@@ -2660,9 +2673,16 @@ export class DrawerController extends AbstractMapViewerController {
     if (this.#undoRedoHandler) return;
 
     const handler = (event: KeyboardEvent): void => {
+      // Check if focus is within the GeoView shell
+      const mapId = this.getMapId();
+      const { activeElement } = document;
+      const geoViewElement = getStoreAppGeoviewHTMLElement(mapId);
+      if (!activeElement || !geoViewElement?.contains(activeElement)) {
+        return;
+      }
+
       // Handle Escape key separately for exiting transform interactions
       if (event.key === 'Escape') {
-        const mapId = this.getMapId();
         if (!isStoreDrawerInitialized(mapId)) return;
 
         // If editing with a selected feature, clear selection
@@ -2683,6 +2703,11 @@ export class DrawerController extends AbstractMapViewerController {
         return;
       }
 
+      // Toggle shortcuts on/off with the ` key
+      if (event.key === '`') {
+        this.setShortcutsEnabled(!this.#shortcutsEnabled);
+      }
+
       if (event.ctrlKey || event.metaKey) {
         switch (event.key.toLowerCase()) {
           case 'z':
@@ -2701,12 +2726,6 @@ export class DrawerController extends AbstractMapViewerController {
             if (this.redo()) {
               event.preventDefault();
               event.stopPropagation();
-            }
-            break;
-
-          case 's':
-            if (event.shiftKey) {
-              this.setShortcutsEnabled(!this.#shortcutsEnabled);
             }
             break;
 
@@ -2760,8 +2779,8 @@ export class DrawerController extends AbstractMapViewerController {
         return;
       }
 
-      // Only proceed with shortcuts if Alt key is held
-      if (event.altKey && event.ctrlKey && event.metaKey) return;
+      // Only proceed with shortcuts no modifier keys are pressed
+      if (event.altKey || event.ctrlKey || event.metaKey) return;
 
       switch (event.key.toLowerCase()) {
         case 'd':
