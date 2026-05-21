@@ -380,6 +380,9 @@ export class MapController extends AbstractMapViewerController {
         (indicatorBox[i] as HTMLElement).style.display = '';
       }
     }
+
+    // Emit the geolocator search event
+    this.getMapViewer().emitGeolocatorSearch({ searchItem, coords, bbox });
   }
 
   // #endregion PUBLIC METHODS - ZOOM FUNCTIONS
