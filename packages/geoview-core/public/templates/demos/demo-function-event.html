@@ -349,6 +349,7 @@
         <li>layer.onVisibleChanged for Water Quantity</li>
         <li>layer.onLayerOpacityChanged for Water Quantity</li>
         <li>layer.onLayerFilterApplied for Water Quantity</li>
+        <li>mapViewer.onGeolocatorSearch when a geolocator result is selected and zoomed to</li>
       </ul>
     </div>
     <br />
@@ -411,6 +412,13 @@
         // listen to map projection changed event
         mapViewer.onMapProjectionChanged((sender, payload) => {
           mapViewer.notifications.addNotificationSuccess(`MapViewer: Map projection changed to ${payload.projection}`);
+        });
+
+        // listen to geolocator search event
+        mapViewer.onGeolocatorSearch((sender, payload) => {
+          mapViewer.notifications.addNotificationSuccess(
+            `MapViewer: Geolocator search selected "${payload.searchItem}" at [${payload.coords[0].toFixed(4)}, ${payload.coords[1].toFixed(4)}]`
+          );
         });
 
         // listen to ANY/ALL layer status at ANY time (generic event catcher)

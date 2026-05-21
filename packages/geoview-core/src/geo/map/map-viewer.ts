@@ -273,6 +273,9 @@ export class MapViewer {
   /** Callback delegates for the map language changed event */
   #onMapLanguageChangedHandlers: MapLanguageChangedDelegate[] = [];
 
+  /** Callback delegates for the geolocator search event. */
+  #onGeolocatorSearchHandlers: GeolocatorSearchDelegate[] = [];
+
   /** The starting time of the timer for the map ready */
   #checkMapReadyStartTime: number | undefined;
 
@@ -2870,6 +2873,37 @@ export class MapViewer {
   }
 
   /**
+   * Emits a geolocator search event to all handlers.
+   *
+   * @param event - The geolocator search event payload
+   */
+  emitGeolocatorSearch(event: GeolocatorSearchEvent): void {
+    // Emit the geolocator search event for all handlers
+    EventHelper.emitEvent(this, this.#onGeolocatorSearchHandlers, event);
+  }
+
+  /**
+   * Registers a geolocator search event callback.
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback delegate that was registered
+   */
+  onGeolocatorSearch(callback: GeolocatorSearchDelegate): GeolocatorSearchDelegate {
+    // Register the geolocator search event handler
+    return EventHelper.onEvent(this.#onGeolocatorSearchHandlers, callback);
+  }
+
+  /**
+   * Unregisters a geolocator search event callback.
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
+   */
+  offGeolocatorSearch(callback: GeolocatorSearchDelegate): void {
+    // Unregister the geolocator search event handler
+    EventHelper.offEvent(this.#onGeolocatorSearchHandlers, callback);
+  }
+
+  /**
    * Emits a language changed event to all handlers.
    */
   #emitMapLanguageChanged(event: MapLanguageChangedEvent): void {
@@ -3052,6 +3086,23 @@ export type MapLanguageChangedEvent = {
  * Delegate for the map language changed event handler function signature.
  */
 export type MapLanguageChangedDelegate = EventDelegateBase<MapViewer, MapLanguageChangedEvent, void>;
+
+/**
+ * Event for the geolocator search delegate.
+ */
+export type GeolocatorSearchEvent = {
+  /** The search description string. */
+  searchItem: string;
+  /** The lon/lat coordinates of the selected result. */
+  coords: Coordinate;
+  /** Optional bounding box extent of the selected result. */
+  bbox?: Extent;
+};
+
+/**
+ * Delegate for the geolocator search event handler function signature.
+ */
+export type GeolocatorSearchDelegate = EventDelegateBase<MapViewer, GeolocatorSearchEvent, void>;
 
 /**
  * Define a return type for a map click simulation to be able to await on different promises.
