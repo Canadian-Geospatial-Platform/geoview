@@ -698,6 +698,7 @@ export class OLTransform extends OLPointer {
   #restoreFeatureStyle(): void {
     if (this.#originalStyleBeforeHighlight && this.selectedFeature) {
       this.selectedFeature.setStyle(this.#originalStyleBeforeHighlight);
+      this.selectedFeature.changed();
       this.#originalStyleBeforeHighlight = undefined;
     }
   }
@@ -1882,6 +1883,31 @@ export class OLTransform extends OLPointer {
     this.#vertexAdded = true;
 
     this.clearHandles();
+  }
+
+  /**
+   * Deletes a vertex at the specified coordinate if one exists.
+   *
+   * @param coordinate - The coordinate to check for a vertex
+   * @returns Whether a vertex was deleted
+   */
+  deleteVertexAtCoordinate(coordinate: Coordinate): boolean {
+    if (!this.selectedFeature) return false;
+
+    const map = this.mapViewer?.map;
+    if (!map) return false;
+
+    // Find the vertex handle at this coordinate
+    const handleFeature = this.#getHandleAtCoordinate(coordinate, map);
+    if (!handleFeature) return false;
+
+    const handleType = handleFeature.get('handleType') as HandleType;
+    if (handleType !== HandleType.VERTEX) return false;
+
+    // Delete the vertex
+    this.#deleteVertex(handleFeature);
+
+    return true;
   }
 
   // #endregion

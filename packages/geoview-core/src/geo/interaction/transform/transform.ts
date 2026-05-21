@@ -324,6 +324,16 @@ export class Transform extends Interaction {
   }
 
   /**
+   * Deletes a vertex at the specified coordinate if one exists.
+   *
+   * @param coordinate - The coordinate to check for a vertex
+   * @returns Whether a vertex was deleted
+   */
+  deleteVertexAtCoordinate(coordinate: number[]): boolean {
+    return this.#ol_transform.deleteVertexAtCoordinate(coordinate);
+  }
+
+  /**
    * Restores the original style of any highlighted handle (Keyboard / Crosshair).
    */
   restoreHandleHighlight(): void {
