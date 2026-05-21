@@ -150,6 +150,30 @@ cgpv.init();
 - **`cgpv.api.getMapViewer(mapId)`** — Returns the `MapViewer` instance for a specific map
 - **`cgpv.api.getMapViewerAsync(mapId)`** — Async version that waits for the map to be available
 
+### Coordinate Format Pitfall: `NORTH_POLE_POSITION_LONLAT`
+
+`NORTH_POLE_POSITION_LONLAT` in `constant.ts` is `[90, -95]` — stored as **`[lat, lon]`**, NOT `[lon, lat]`. Every function that expects `[lon, lat]` (proj4, OpenLayers, `Projection.transformFromLonLat`, `Projection.transformPoints`, `getPixelFromCoordinate`) requires swapping: `[NORTH_POLE_POSITION_LONLAT[1], NORTH_POLE_POSITION_LONLAT[0]]`.
+
+Passing it directly without swapping interprets `[90, -95]` as map projection meters (EPSG:3978), which is a valid but completely wrong coordinate near the projection origin.
+
+### North Arrow & Rotation-Aware Patterns
+
+**Viewport containment checks** — To test whether a geographic point is visible in the viewport regardless of map rotation, use the pixel-projection approach (do NOT sample a single pixel like top-center):
+
+```typescript
+// ✅ Rotation-agnostic: project coordinate → pixel → bounds check
+const mapCoord = Projection.transformFromLonLat([lon, lat], projection);
+const pixel = map.getPixelFromCoordinate(mapCoord);
+const size = map.getSize();
+const isVisible = pixel && size
+  && pixel[0] >= 0 && pixel[0] <= size[0]
+  && pixel[1] >= 0 && pixel[1] <= size[1];
+```
+
+**Screen-direction calculations** — When computing the visual direction from the viewport center to a map feature (e.g., north arrow pointing toward the pole), use pixel positions via `getPixelFromCoordinate` and `atan2`. Do NOT use geographic bearing formulas — they degenerate at projection singularities (e.g., `cos(90°) = 0` at the north pole). OL's `getPixelFromCoordinate` already accounts for view rotation internally.
+
+**CSS transitions on show/hide elements** — When a component is hidden via CSS `visibility: hidden` and shown via `visibility: visible`, always compute the correct transform values even while hidden. Otherwise, CSS transitions animate from a stale/default value (e.g., `rotate(0deg)`) to the target value when the element becomes visible, causing a visual glitch at viewport edges.
+
 ### Layer Architecture
 
 **Two-tier system** — both tiers are mandatory for every layer:
