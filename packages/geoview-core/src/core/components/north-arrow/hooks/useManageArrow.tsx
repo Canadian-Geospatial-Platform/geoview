@@ -84,21 +84,28 @@ export const useManageArrow = (): ArrowReturn => {
       };
     }
 
-    // Early return if zoom level is smaller than 5 and map center is near central meridian (keep rotation to 0)
+    // Early return if zoom level is smaller than 5 and map center is near central meridian (keep rotation to map rotation only)
     const mapCenterLongitude: number = Projection.transformCoordinates(mapCenterCoord, 'EPSG:3978', 'EPSG:4326')![0] as number;
     if (mapZoom < 5 && Math.abs(CENTRAL_MERIDIAN - mapCenterLongitude) < 10) {
-      return { memoCalculatedRotation: { angle: 0 }, memoCalculatedOffset: offsetX };
+      return { memoCalculatedRotation: { angle: mapRotation * (180 / Math.PI) }, memoCalculatedOffset: offsetX };
     }
 
-    // Early return if north is visible
-    if (northArrowElement.isNorthVisible) {
-      return { memoCalculatedRotation: { angle: 0 }, memoCalculatedOffset: offsetX };
-    }
+    // Note: we do NOT early-return when isNorthVisible is true.
+    // The arrow is hidden via CSS visibility in north-arrow.tsx, but we must still compute the correct
+    // angle so that when the north pole leaves the viewport, the CSS transition starts from the right position
+    // instead of animating from 0° to the target angle.
 
     // Handle LCC Projection
     if (isLCCProjection) {
+      // Transform north pole to map projection coordinates (used for both angle and offset)
+      const northPoleMapCoord = Projection.transformPoints(
+        [[NORTH_POLE_POSITION_LONLAT[1], NORTH_POLE_POSITION_LONLAT[0]]],
+        Projection.PROJECTION_NAMES.LONLAT,
+        mapProjectionEPSG
+      )[0];
+      const northPolePixel = northPoleMapCoord ? mapController.getPixelFromCoordinate(northPoleMapCoord) : null;
+
       const arrowAngle = parseFloat(northArrowElement.degreeRotation);
-      const angleDegrees = 270 - arrowAngle;
 
       // Calculate rotation
       let newRotation = { angle: 0 };
@@ -129,17 +136,23 @@ export const useManageArrow = (): ArrowReturn => {
           }
           // Otherwise, do nothing (skip setting rotation)
         }
+      } else if (northPolePixel) {
+        // Calculate arrow angle from screen pixel positions (rotation-agnostic)
+        const centerPixelX = mapSize[0] / 2;
+        const centerPixelY = mapSize[1] / 2;
+        const dx = northPolePixel[0] - centerPixelX;
+        const dy = northPolePixel[1] - centerPixelY;
+        newRotation = { angle: Math.atan2(dy, dx) * (180 / Math.PI) + 90 };
       } else {
-        const mapRotationValue = mapRotation * (180 / Math.PI);
-        newRotation = { angle: 90 - angleDegrees + mapRotationValue };
+        // Fallback to map rotation only
+        newRotation = { angle: mapRotation * (180 / Math.PI) };
       }
 
       // Calculate offset
       let newOffset = offsetX;
-      const northPolePosition = mapController.getPixelFromCoordinate(NORTH_POLE_POSITION_LONLAT);
 
-      if (!fixNorth && northPolePosition !== null) {
-        const screenNorthPoint = northPolePosition;
+      if (!fixNorth && northPolePixel !== null) {
+        const screenNorthPoint = northPolePixel;
         const mapCenter = mapController.getPixelFromCoordinate(mapCenterCoord);
 
         // Calculate distance from north pole using triangle
@@ -169,7 +182,18 @@ export const useManageArrow = (): ArrowReturn => {
 
     // Should never goes here but failover to default values
     return { memoCalculatedRotation: { angle: 0 }, memoCalculatedOffset: 0 };
-  }, [mapSize, northArrowElement, isLCCProjection, isWebMercator, mapCenterCoord, mapZoom, mapRotation, fixNorth, mapController]);
+  }, [
+    mapSize,
+    northArrowElement,
+    isLCCProjection,
+    isWebMercator,
+    mapProjectionEPSG,
+    mapCenterCoord,
+    mapZoom,
+    mapRotation,
+    fixNorth,
+    mapController,
+  ]);
 
   /**
    * Updates local state with the calculated rotation and offset values.

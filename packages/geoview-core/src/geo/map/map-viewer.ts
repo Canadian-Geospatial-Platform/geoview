@@ -68,7 +68,7 @@ import { delay, generateId, getLocalizedMessage, whenThisThen } from '@/core/uti
 import { debounce } from '@/core/utils/debounce';
 import type { TimeIANA } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
-import { NORTH_POLE_POSITION_LONLAT, TIMEOUT } from '@/core/utils/constant';
+import { NORTH_POLE_POSITION_LONLAT } from '@/core/utils/constant';
 import type { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';
 import type { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import { Notifications } from '@/core/utils/notifications';
@@ -1669,21 +1669,28 @@ export class MapViewer {
   /**
    * Gets if north pole is visible. This is not a perfect solution and is more a work around.
    *
-   * @returns A promise that resolves with true if visible, false otherwise
+   * This approach is rotation-agnostic — it works regardless of the map's current rotation angle.
+   *
+   * @returns True if the north pole is visible in the viewport, false otherwise
    */
-  async getNorthPoleVisibility(): Promise<boolean> {
-    // Check the container value for top middle of the screen
-    // Convert this value to a lat long coordinate
-    const size = await this.getMapSize();
-    const pointXY: [number, number] = [size[0] / 2, 1];
+  getNorthPoleVisibility(): boolean {
+    // Transform north pole from lon/lat to map projection coordinates
+    const northPoleMapCoord = Projection.transformFromLonLat(
+      [NORTH_POLE_POSITION_LONLAT[1], NORTH_POLE_POSITION_LONLAT[0]],
+      this.getProjection()
+    );
 
-    // GV: Sometime, the getCoordinateFromPixel return null... use await
-    const pixel = await this.getCoordinateFromPixel(pointXY, TIMEOUT.northPoleVisibility);
-    const pt = Projection.transformToLonLat(pixel, this.getProjection());
+    if (!northPoleMapCoord) return false;
 
-    // If user is pass north, long value will start to be positive (other side of the earth).
-    // This will work only for LCC Canada.
-    return pt ? pt[0] > 0 : true;
+    // Convert map coordinates to pixel position on the viewport
+    const northPolePixel = this.map.getPixelFromCoordinate(northPoleMapCoord);
+    if (!northPolePixel) return false;
+
+    // Check if the pixel is within the map canvas
+    const size = this.map.getSize();
+    if (!size) return false;
+
+    return northPolePixel[0] >= 0 && northPolePixel[0] <= size[0] && northPolePixel[1] >= 0 && northPolePixel[1] <= size[1];
   }
 
   /**
@@ -1697,9 +1704,8 @@ export class MapViewer {
       // north value
       const pointA = { x: NORTH_POLE_POSITION_LONLAT[1], y: NORTH_POLE_POSITION_LONLAT[0] };
 
-      // map center (we use botton parallel to introduce less distortion)
-      const extent = this.getView().calculateExtent();
-      const center: Coordinate = Projection.transformToLonLat([(extent[0] + extent[2]) / 2, extent[1]], this.getProjection());
+      // map center in lon/lat — rotation-safe since getCenter() returns the true view center
+      const center: Coordinate = Projection.transformToLonLat(this.getView().getCenter()!, this.getProjection());
       const pointB = { x: center[0], y: center[1] };
 
       // set info on longitude and latitude
@@ -2306,7 +2312,7 @@ export class MapViewer {
     const degreeRotation = this.getNorthArrowAngle();
 
     // Get the north pole visibility
-    const isNorthVisible = await this.getNorthPoleVisibility();
+    const isNorthVisible = this.getNorthPoleVisibility();
 
     // Get the map Extent
     const extent = this.getView().calculateExtent();
