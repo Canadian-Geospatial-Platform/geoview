@@ -134,12 +134,12 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
 
       // Drawer is available
       // Check for shift-click equivalent (Shift+Enter or Shift+Space) FIRST
-      // This handles text editing when a text feature is selected
+      // This handles vertex deletion and text editing
       if ((event.key === 'Enter' || event.key === ' ') && event.shiftKey) {
         const handled = drawerController.handleShiftClickAtCoordinate(currentPointerPosition.projected);
 
         if (handled) {
-          // Text editor opened - stop processing
+          // Vertex deleted or text editor opened - stop processing
           event.preventDefault();
           event.stopPropagation();
           return;
