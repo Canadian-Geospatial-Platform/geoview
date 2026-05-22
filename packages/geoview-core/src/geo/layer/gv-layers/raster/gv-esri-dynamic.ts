@@ -135,7 +135,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       // Return a string to identify that it's an annotation layer
       return {
         type: CONST_LAYER_TYPES.ESRI_DYNAMIC,
-        legend: 'Annotation Layer',
+        legend: 'AnnotationLayer',
         styleConfig: undefined,
       };
     }
