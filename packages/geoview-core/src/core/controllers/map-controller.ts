@@ -110,6 +110,8 @@ import type { TypeClickMarker } from '@/core/components/click-marker/click-marke
 import type { FitOptions } from 'ol/View';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { AbstractGVVectorTile } from '@/geo/layer/gv-layers/vector/abstract-gv-vector-tile';
+import type { EventDelegateBase } from '@/api/events/event-helper';
+import EventHelper from '@/api/events/event-helper';
 
 /**
  * Controller responsible for Map interactions.
@@ -129,6 +131,9 @@ export class MapController extends AbstractMapViewerController {
 
   /** Indicates if the overview map visibility state before the map projection happened */
   #projectionChangingOverviewMapVisibility = false;
+
+  /** Callback delegates for the geolocator search event. */
+  #onGeolocatorSearchHandlers: GeolocatorSearchDelegate[] = [];
 
   /**
    * Creates an instance of MapController.
@@ -188,13 +193,12 @@ export class MapController extends AbstractMapViewerController {
     // Validate the extent coordinates - need to make sure we aren't excluding zero with !number or using invalid extents
     const validatedExtent = GeoUtilities.validateExtent(extent, this.getMapViewer().getProjectionEPSG());
     if (
-      !extent.some((number) => {
+      !validatedExtent.some((number) => {
         return (!number && number !== 0) || Number.isNaN(number);
-      }) &&
-      JSON.stringify(extent) === JSON.stringify(validatedExtent)
+      })
     ) {
-      // Store state will be updated by map event
-      this.getMapViewer().getView().fit(extent, mergedOptions);
+      // Use the validated (clamped) extent so out-of-bounds coordinates are accepted after clamping
+      this.getMapViewer().getView().fit(validatedExtent, mergedOptions);
 
       // Wait a bit and return.
       await delay(mergedOptions.duration! + MapController.ZOOM_MIN_DELAY);
@@ -382,7 +386,7 @@ export class MapController extends AbstractMapViewerController {
     }
 
     // Emit the geolocator search event
-    this.getMapViewer().emitGeolocatorSearch({ searchItem, coords, bbox });
+    this.#emitGeolocatorSearch({ searchItem, coords, bbox });
   }
 
   // #endregion PUBLIC METHODS - ZOOM FUNCTIONS
@@ -1577,4 +1581,59 @@ export class MapController extends AbstractMapViewerController {
   }
 
   // #endregion STATIC PRIVATE METHODS - CONFIG CREATION
+
+  // #region EVENTS
+
+  /**
+   * Emits a geolocator search event to all handlers.
+   *
+   * Unlike other emit methods which are private (#emit), this method is public because it is called
+   * from MapController.zoomToGeoLocatorLocation() — a separate class that cannot access #private members.
+   *
+   * @param event - The geolocator search event payload
+   */
+  #emitGeolocatorSearch(event: GeolocatorSearchEvent): void {
+    // Emit the geolocator search event for all handlers
+    EventHelper.emitEvent(this, this.#onGeolocatorSearchHandlers, event);
+  }
+
+  /**
+   * Registers a geolocator search event callback.
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback delegate that was registered
+   */
+  onGeolocatorSearch(callback: GeolocatorSearchDelegate): GeolocatorSearchDelegate {
+    // Register the geolocator search event handler
+    return EventHelper.onEvent(this.#onGeolocatorSearchHandlers, callback);
+  }
+
+  /**
+   * Unregisters a geolocator search event callback.
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
+   */
+  offGeolocatorSearch(callback: GeolocatorSearchDelegate): void {
+    // Unregister the geolocator search event handler
+    EventHelper.offEvent(this.#onGeolocatorSearchHandlers, callback);
+  }
+
+  // #endregion EVENTS
 }
+
+/**
+ * Event for the geolocator search delegate.
+ */
+export type GeolocatorSearchEvent = {
+  /** The search description string. */
+  searchItem: string;
+  /** The lon/lat coordinates of the selected result. */
+  coords: Coordinate;
+  /** Optional bounding box extent of the selected result. */
+  bbox?: Extent;
+};
+
+/**
+ * Delegate for the geolocator search event handler function signature.
+ */
+export type GeolocatorSearchDelegate = EventDelegateBase<MapController, GeolocatorSearchEvent, void>;
