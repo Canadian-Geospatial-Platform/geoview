@@ -112,6 +112,7 @@ import { GeoUtilities } from '@/geo/utils/utilities';
 import { AbstractGVVectorTile } from '@/geo/layer/gv-layers/vector/abstract-gv-vector-tile';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
+import { InvalidExtentError } from '@/core/exceptions/geoview-exceptions';
 
 /**
  * Controller responsible for Map interactions.
@@ -185,6 +186,7 @@ export class MapController extends AbstractMapViewerController {
    * @param extent - The extent to zoom to
    * @param options - The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 13, duration: 500 })
    * @returns A promise that resolves when the zoom animation is complete
+   * @throws {InvalidExtentError} When the extent is invalid
    */
   async zoomToExtent(extent: Extent, options: FitOptions = DEFAULT_OL_FITOPTIONS): Promise<void> {
     // Merge user options with defaults
@@ -207,7 +209,7 @@ export class MapController extends AbstractMapViewerController {
 
     // Invalid extent
     this.getMapViewer().notifications.showWarning('error.map.invalidZoomExtent', {}, false);
-    logger.logWarning(`Unable to zoom, the provided extent is invalid: [${extent.join(', ')}]`);
+    throw new InvalidExtentError(extent);
   }
 
   /**
