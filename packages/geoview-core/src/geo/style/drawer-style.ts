@@ -63,6 +63,19 @@ export class DrawerStyle extends Style {
     return this.#drawerIcon !== undefined;
   }
 
+  // #region Overrides
+
+  /**
+   * Override the clone method to ensure proper type.
+   *
+   * @returns A cloned DrawerStyle instance
+   */
+  override clone(): DrawerStyle {
+    return super.clone() as DrawerStyle;
+  }
+
+  // #endregion
+
   // #region Text property delegation
 
   /**
