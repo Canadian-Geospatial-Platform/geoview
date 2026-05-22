@@ -25,7 +25,7 @@ const SnappingIcon = createSvgIcon(
  */
 export default function Snapping(): JSX.Element {
   // Log
-  logger.logTraceRender('geoview-drawer/src/buttons/clear');
+  logger.logTraceRender('geoview-drawer/src/buttons/snap');
 
   const { cgpv } = window as TypeWindow;
   const { useTheme } = cgpv.ui;
@@ -39,7 +39,7 @@ export default function Snapping(): JSX.Element {
   const drawerController = useDrawerController();
 
   /**
-   * Handles a click on the clear button
+   * Handles a click on the snapping button
    */
   const handleToggleSnapping = (): void => {
     drawerController.toggleSnapping();
