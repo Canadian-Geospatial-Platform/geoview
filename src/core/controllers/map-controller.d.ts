@@ -12,6 +12,7 @@ import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import type { Draw } from '@/geo/interaction/draw';
 import type { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import type { FitOptions } from 'ol/View';
+import type { EventDelegateBase } from '@/api/events/event-helper';
 /**
  * Controller responsible for Map interactions.
  */
@@ -342,5 +343,33 @@ export declare class MapController extends AbstractMapViewerController {
      * @returns The init draw interactions object
      */
     initDrawInteractions(geomGroupKey: string, type: string, style: TypeFeatureStyle): Draw;
+    /**
+     * Registers a geolocator search event callback.
+     *
+     * @param callback - The callback to be executed whenever the event is emitted
+     * @returns The callback delegate that was registered
+     */
+    onGeolocatorSearch(callback: GeolocatorSearchDelegate): GeolocatorSearchDelegate;
+    /**
+     * Unregisters a geolocator search event callback.
+     *
+     * @param callback - The callback to stop being called whenever the event is emitted
+     */
+    offGeolocatorSearch(callback: GeolocatorSearchDelegate): void;
 }
+/**
+ * Event for the geolocator search delegate.
+ */
+export type GeolocatorSearchEvent = {
+    /** The search description string. */
+    searchItem: string;
+    /** The lon/lat coordinates of the selected result. */
+    coords: Coordinate;
+    /** Optional bounding box extent of the selected result. */
+    bbox?: Extent;
+};
+/**
+ * Delegate for the geolocator search event handler function signature.
+ */
+export type GeolocatorSearchDelegate = EventDelegateBase<MapController, GeolocatorSearchEvent, void>;
 //# sourceMappingURL=map-controller.d.ts.map

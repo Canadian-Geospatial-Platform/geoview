@@ -11,6 +11,7 @@ interface ResponsiveGridLayoutProps {
     onGuideIsOpen?: (isGuideOpen: boolean) => void;
     onRightPanelClosed?: () => void;
     onRightPanelVisibilityChanged?: (isVisible: boolean) => void;
+    onFullScreenChanged?: (isFullScreen: boolean) => void;
     hideEnlargeBtn?: boolean;
     containerType: TypeContainerBox;
     titleFullscreen: string;
@@ -18,9 +19,16 @@ interface ResponsiveGridLayoutProps {
 }
 /** Methods exposed by the ResponsiveGridLayout component via ref. */
 interface ResponsiveGridLayoutExposedMethods {
+    /** Shows or hides the right panel. */
     setIsRightPanelVisible: (isVisible: boolean) => void;
+    /** Sets focus on the right panel's close button (if guide is not open). */
     setRightPanelFocus: () => void;
-    closeBtnRef?: React.RefObject<HTMLButtonElement>;
+    /** Closes the guide panel and clears auto-open state. */
+    closeGuide: () => void;
+    /** Closes the right panel and triggers the onRightPanelClosed callback. */
+    closeRightPanel: () => void;
+    /** Optional ref to the close button element. */
+    closeBtnRef?: React.RefObject<HTMLButtonElement | null>;
 }
 /**
  * Two-panel responsive grid layout with guide, enlarge, and fullscreen support.

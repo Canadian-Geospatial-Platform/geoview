@@ -3,6 +3,7 @@ import type { TypeLayerStyleConfig, TypeStyleGeometry } from '@/api/types/map-sc
 import type { TypeGeoviewLayerType, TypeLayerControls, TypeLayerEntryType, TypeLayerStatus, TypeMetadataEsriRasterFunctionInfos, TypeMetadataWMSCapabilityLayerStyle, TypeMosaicMethod, TypeMosaicRule } from '@/api/types/layer-schema-types';
 import type { LegendQueryStatus } from '@/core/stores/states/layer-state';
 import type { TemporalMode, TimeDimension, TimeIANA, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
+/** Represents the layer panel display state. */
 export type TypeLayersViewDisplayState = 'add' | 'view';
 /** Represents a single legend layer item (icon/symbol entry). */
 export type TypeLegendLayerItem = {
@@ -84,6 +85,10 @@ export interface TypeLegendLayer {
     visible: boolean;
     /** Whether the layer is visible at the current map zoom. */
     inVisibleRange: boolean;
+    /** Minimum scale denominator at which the layer is visible. */
+    minScale?: number;
+    /** Maximum scale denominator at which the layer is visible. */
+    maxScale?: number;
     /** Whether the layer legend is collapsed. */
     legendCollapsed: boolean;
     /** Whether the layer has text symbols. */

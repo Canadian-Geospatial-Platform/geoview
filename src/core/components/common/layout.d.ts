@@ -13,6 +13,7 @@ interface LayoutProps {
     onGuideIsOpen?: (isGuideOpen: boolean) => void;
     onRightPanelClosed?: () => void;
     onRightPanelVisibilityChanged?: (isVisible: boolean) => void;
+    onFullScreenChanged?: (isFullScreen: boolean) => void;
     containerType: TypeContainerBox;
     titleFullscreen: string;
     hideEnlargeBtn?: boolean;
@@ -20,8 +21,15 @@ interface LayoutProps {
 }
 /** Methods exposed by the Layout component via ref. */
 interface LayoutExposedMethods {
-    /** Shows or hides the right panel. */
+    /**
+     * Shows or hides the right panel.
+     *
+     * Note: This directly sets panel visibility without triggering cleanup callbacks.
+     * Use closeRightPanel() when hiding to ensure proper focus-trap cleanup.
+     */
     showRightPanel: (visible: boolean) => void;
+    /** Closes the right panel. Focus restoration handled via onRightPanelClosed callback. */
+    closeRightPanel: () => void;
 }
 /**
  * Creates a two-panel layout with a layer list on the left and content on the right.

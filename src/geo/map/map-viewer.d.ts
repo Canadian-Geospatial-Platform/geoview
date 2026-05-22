@@ -39,6 +39,7 @@ import type { PluginsContainer } from '@/api/plugin/plugin-types';
 import type { AbstractPlugin } from '@/api/plugin/abstract-plugin';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { FeatureHighlight } from './feature-highlight';
+import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 /**
  * Class used to manage created maps.
  */
@@ -57,6 +58,8 @@ export declare class MapViewer {
     static DEFAULT_DPI: number;
     /** Default inches per meter used by OpenLayers */
     static readonly DEFAULT_INCHES_PER_METER = 39.3700787;
+    /** Buffer applied to effective scale calculations to account for visibility thresholds */
+    static readonly EFFECTIVE_SCALE_VISIBILITY_BUFFER = 0.1;
     /** Map features configuration properties */
     mapFeaturesConfig: TypeMapFeaturesConfig;
     /** The id of the map */
@@ -328,7 +331,7 @@ export declare class MapViewer {
      * Converts a zoom level to a map scale.
      *
      * @param zoom - The desired zoom (e.g. 50000 for 1:50,000)
-     * @returns The closest scale for the given zoom number, or undefined if meters per unit is unavailable
+     * @returns The closest scale for the given zoom number, rounded to the nearest unit, or undefined if meters per unit is unavailable
      */
     getMapScaleFromZoom(zoom: number): number | undefined;
     /**
@@ -556,11 +559,23 @@ export declare class MapViewer {
      */
     static getScaleInfoFromDomElement(mapId: string): TypeScaleInfo;
     /**
+     * Computes the effective minimum and maximum scales for a layer from its configuration and initial settings.
+     *
+     * Combines scales from configuration and initial settings zoom levels, selecting the most restrictive value.
+     *
+     * @param mapViewer - The map viewer used for zoom-to-scale conversions
+     * @param layerConfig - The layer configuration to compute scales from
+     * @returns Object with effective scale thresholds and buffered visibility limits
+     */
+    static computeEffectiveLayerScales(mapViewer: MapViewer, layerConfig: ConfigBaseClass): EffectiveLayerScales;
+    /**
      * Gets if north pole is visible. This is not a perfect solution and is more a work around.
      *
-     * @returns A promise that resolves with true if visible, false otherwise
+     * This approach is rotation-agnostic — it works regardless of the map's current rotation angle.
+     *
+     * @returns True if the north pole is visible in the viewport, false otherwise
      */
-    getNorthPoleVisibility(): Promise<boolean>;
+    getNorthPoleVisibility(): boolean;
     /**
      * Get north arrow bearing. Angle use to rotate north arrow for non Web Mercator projection.
      * https://www.movable-type.co.uk/scripts/latlong.html
@@ -816,7 +831,7 @@ export declare class MapViewer {
      */
     offMapProjectionChangeStarted(callback: MapProjectionChangedDelegate): void;
     /**
-     * Registers a map projection change event callback.
+     * Registers a map projection changed event callback.
      *
      * @param callback - The callback to be executed whenever the event is emitted
      * @returns The callback delegate that was registered
@@ -1002,5 +1017,17 @@ export type SimulatedMapClick = {
     promiseQuery: Promise<void>;
     /** Promise resolving when the query of the map click is complete and the UI has been updated */
     promiseQueryBatched: Promise<void>;
+};
+/**
+ * Type defining the effective scales of a layer, which are the ones that are actually applied on the map and can differ
+ * from the configured ones if the layer is outside of its original configured scales or if the map is outside of them.
+ */
+export type EffectiveLayerScales = {
+    maxScale?: number;
+    maxScaleTolerance?: number;
+    maxScaleZoomAt?: number;
+    minScale?: number;
+    minScaleTolerance?: number;
+    minScaleZoomAt?: number;
 };
 //# sourceMappingURL=map-viewer.d.ts.map

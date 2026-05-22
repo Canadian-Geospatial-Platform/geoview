@@ -9,7 +9,7 @@ interface UseMapResizeProps {
 }
 /** Return type for the useMapResize hook. */
 type TypeUseMapResize = {
-    mapShellContainerRef: React.RefObject<HTMLDivElement>;
+    mapShellContainerRef: React.RefObject<HTMLDivElement | null>;
 };
 /**
  * Hook that manages map shell container resizing based on fullscreen and footer panel state.
