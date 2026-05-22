@@ -1,5 +1,5 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
-import type { LayerListEntry } from 'geoview-core/core/components/common';
+import type { LayerListEntry, LayoutExposedMethods } from 'geoview-core/core/components/common';
 import { Layout } from 'geoview-core/core/components/common';
 import type { TypeDisplayLanguage } from 'geoview-core/api/types/map-schema-types';
 import type { TypeTimeSliderValues } from 'geoview-core/core/stores/states/time-slider-state';
@@ -41,7 +41,11 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   const { mapId } = props;
   const { cgpv } = window as TypeWindow;
   const { reactUtilities } = cgpv;
-  const { useCallback, useMemo, useEffect } = reactUtilities.react;
+  const { useCallback, useMemo, useEffect, useRef, useState } = reactUtilities.react;
+
+  const layoutRef = useRef<LayoutExposedMethods | null>(null);
+
+  const [isFullScreen, setIsFullScreen] = useState(false);
 
   // get values from store
   const displayLanguage = useStoreAppDisplayLanguage();
@@ -60,17 +64,29 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   // #region Handlers
 
   /**
-   * Handles Layer list when clicked on each layer.
-   *
-   * @param layer - Layer clicked by the user
+   * Handles when the user clicks on a layer in the layer list.
    */
   const handleClickLayerList = useCallback(
-    (layer: LayerListEntry) => {
+    (layer: LayerListEntry): void => {
       // Set the layer path
       timeSliderController.setSelectedLayerPathTimeSlider(layer.layerPath);
     },
     [timeSliderController]
   );
+
+  /**
+   * Handles panel close requests from the TimeSlider component.
+   */
+  const handleRequestClose = useCallback((): void => {
+    layoutRef.current?.closeRightPanel();
+  }, []);
+
+  /**
+   * Handles when the panel fullscreen state changes.
+   */
+  const handleFullScreenChanged = useCallback((fullscreen: boolean): void => {
+    setIsFullScreen(fullscreen);
+  }, []);
 
   /**
    * Gets dates for current filters.
@@ -209,7 +225,9 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
    */
   const renderContent = (): JSX.Element | null => {
     if (selectedLayerPath && timeSliderLayers && selectedLayerPath in timeSliderLayers) {
-      return <TimeSlider layerPath={selectedLayerPath} key={selectedLayerPath} />;
+      return (
+        <TimeSlider layerPath={selectedLayerPath} onRequestClose={handleRequestClose} isFullScreen={isFullScreen} key={selectedLayerPath} />
+      );
     }
 
     return null;
@@ -217,12 +235,14 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
 
   return (
     <Layout
+      ref={layoutRef}
       selectedLayerPath={selectedLayerPath}
       onLayerListClicked={handleClickLayerList}
       layerList={memoLayersList}
       guideContentIds={['timeSlider']}
       containerType={CONTAINER_TYPE.FOOTER_BAR}
       titleFullscreen={t('timeSlider.title')}
+      onFullScreenChanged={handleFullScreenChanged}
     >
       {renderContent()}
     </Layout>
