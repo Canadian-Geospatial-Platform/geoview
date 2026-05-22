@@ -1587,9 +1587,6 @@ export class MapController extends AbstractMapViewerController {
   /**
    * Emits a geolocator search event to all handlers.
    *
-   * Unlike other emit methods which are private (#emit), this method is public because it is called
-   * from MapController.zoomToGeoLocatorLocation() — a separate class that cannot access #private members.
-   *
    * @param event - The geolocator search event payload
    */
   #emitGeolocatorSearch(event: GeolocatorSearchEvent): void {
