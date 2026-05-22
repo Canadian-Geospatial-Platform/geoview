@@ -85,6 +85,8 @@ Lorsque la carte est focalisée, un pointeur en croix s'affiche en son centre :
 
 <img src="{{assetsURL}}/img/guide/navigation/crosshair.svg" alt="Pointeur en croix affiché au centre de la carte pour la navigation au clavier" style="width: 90%; height: 100px;"/>
 
+La carte peut être rapidement centrée en appuyant sur **Ctrl+M** n'importe où dans l'application GeoView.
+
 Utilisez les touches **fléchées** pour déplacer la carte et les touches **+** et **-** ou **Ctrl+Flèche haut** / **Ctrl+Flèche bas** pour faire un zoom avant ou arrière. Appuyez sur **Maj.+Flèche haut** / **Maj.+Flèche bas** pour augmenter ou diminuer la distance de déplacement de la carte à chaque touche fléchée. Appuyez sur **Entrée** pour sélectionner un élément sous le pointeur en croix et en voir les données dans le panneau **Détails**.
 
 Pour les éléments pris en charge, l’information s’affiche lorsque le pointeur en croix les survole.
@@ -98,7 +100,7 @@ _N.B. : La carte doit être focalisée pour que les combinaisons de touches fonc
 La carte n’est pas pleinement conforme au niveau AA des Règles pour l’accessibilité des contenus Web (WCAG) 2.0.
 =1!drawingTools=
 
-# Outils de dessin (Drawer)
+# Outils de dessin
 
 Lorsque le module drawer est activé, les outils de dessin et d'édition de géométries deviennent disponibles dans la barre de navigation. Ces outils permettent de créer, modifier et gérer des géométries directement sur la carte.
 

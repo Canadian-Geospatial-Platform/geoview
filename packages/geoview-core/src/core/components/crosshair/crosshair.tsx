@@ -12,6 +12,7 @@ import { logger } from '@/core/utils/logger';
 import { useEventListener } from '@/core/components/common/hooks/use-event-listener';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useDrawerControllerIfExists, useLayerSetController, useMapController, useUIController } from '@/core/controllers/use-controllers';
+import type { TypeMapMouseInfo } from '@/api/types/map-schema-types';
 
 /** Properties for the Crosshair component. */
 type CrosshairProps = {
@@ -99,7 +100,141 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
   );
 
   /**
-   * Handles Enter and Space key for crosshair
+   * Handles the universal Shift + Click logic before falling back to other modes.
+   */
+  const handleShiftClick = useCallback(
+    (event: KeyboardEvent, currentPointerPosition: TypeMapMouseInfo): boolean => {
+      if (!drawerController || !(event.key === 'Enter' || event.key === ' ')) {
+        return false; // Not a Shift+Click interaction
+      }
+
+      if (event.shiftKey) {
+        const handled = drawerController.handleShiftClickAtCoordinate(currentPointerPosition.projected);
+        if (handled) {
+          event.preventDefault();
+          event.stopPropagation();
+          return true; // Handled
+        }
+      }
+      return false; // Not handled
+    },
+    [drawerController]
+  );
+
+  /**
+   * Handles the default interaction when no drawer is present.
+   */
+  const handleDefaultInteraction = useCallback(
+    (event: KeyboardEvent, currentPointerPosition: TypeMapMouseInfo): void => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        event.stopPropagation();
+
+        abortControllerRef.current?.abort();
+        const controller = new AbortController();
+        abortControllerRef.current = controller;
+        mapController.setClickCoordinates(currentPointerPosition, controller.signal);
+      }
+    },
+    [mapController]
+  );
+
+  /**
+   * Handles logic for Text Drawing Mode.
+   */
+  const handleTextDrawingMode = useCallback(
+    (event: KeyboardEvent, currentPointerPosition: TypeMapMouseInfo): void => {
+      const { activeElement } = document;
+      if (activeElement instanceof HTMLElement && activeElement.isContentEditable) {
+        return;
+      }
+
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        event.stopPropagation();
+        if (drawerController?.isHandleGrabbed()) {
+          drawerController.applyGrabbedTransform(currentPointerPosition.projected);
+        } else {
+          const grabbed = drawerController?.grabHandleForKeyboard(currentPointerPosition.projected);
+          if (!grabbed) {
+            drawerController?.handleEditingAtCoordinate(currentPointerPosition.projected);
+          }
+        }
+      } else if (event.key === 'Escape') {
+        event.preventDefault();
+        drawerController?.cancelGrabbedTransform();
+      }
+    },
+    [drawerController]
+  );
+
+  /**
+   * Handles logic for Drawing Mode within the drawer.
+   */
+  const handleDrawingMode = useCallback(
+    (event: KeyboardEvent, currentPointerPosition: TypeMapMouseInfo): void => {
+      const selectedDrawingType = getStoreDrawerSelectedDrawingType(mapId);
+
+      if (selectedDrawingType === 'Text') {
+        handleTextDrawingMode(event, currentPointerPosition);
+      } else if ((event.key === 'Enter' && event.shiftKey) || (event.key === ' ' && event.shiftKey)) {
+        event.preventDefault();
+        event.stopPropagation();
+        drawerController?.finishCurrentDrawing();
+      } else if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        event.stopPropagation();
+        drawerController?.addCoordinateToDrawing(currentPointerPosition.projected);
+      }
+    },
+    [mapId, handleTextDrawingMode, drawerController]
+  );
+
+  /**
+   * Handles logic for Editing Mode within the drawer.
+   */
+  const handleEditingMode = useCallback(
+    (event: KeyboardEvent, currentPointerPosition: TypeMapMouseInfo): void => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        event.stopPropagation();
+        if (drawerController?.isHandleGrabbed()) {
+          drawerController.applyGrabbedTransform(currentPointerPosition.projected);
+        } else {
+          const grabbed = drawerController?.grabHandleForKeyboard(currentPointerPosition.projected);
+          if (!grabbed) {
+            drawerController?.handleEditingAtCoordinate(currentPointerPosition.projected);
+          }
+        }
+      } else if (event.key === 'Escape') {
+        event.preventDefault();
+        drawerController?.cancelGrabbedTransform();
+      }
+    },
+    [drawerController]
+  );
+
+  /**
+   * Handles drawer-specific interactions (drawing, editing, etc.).
+   */
+  const handleDrawerInteraction = useCallback(
+    (event: KeyboardEvent, currentPointerPosition: TypeMapMouseInfo): void => {
+      const isDrawerDrawing = getStoreDrawerIsDrawing(mapId);
+      const isDrawerEditing = getStoreDrawerIsEditing(mapId);
+
+      if (isDrawerDrawing) {
+        handleDrawingMode(event, currentPointerPosition);
+      } else if (isDrawerEditing) {
+        handleEditingMode(event, currentPointerPosition);
+      } else {
+        handleDefaultInteraction(event, currentPointerPosition);
+      }
+    },
+    [mapId, handleDrawingMode, handleEditingMode, handleDefaultInteraction]
+  );
+
+  /**
+   * Handles the main crosshair interaction (Enter/Space).
    */
   const handleCrosshairInteraction = useCallback(
     (event: HTMLElementEventMap[keyof HTMLElementEventMap]): void => {
@@ -107,7 +242,7 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
         return;
       }
 
-      // Prevent crosshair interactions when typing in input fields
+      // Prevent interactions when typing in input fields
       const { activeElement } = document;
       if (
         activeElement instanceof HTMLInputElement ||
@@ -120,118 +255,19 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
       const currentPointerPosition = getStoreMapPointerPosition(mapId);
       if (!currentPointerPosition) return;
 
-      // Check drawer state if drawer plugin is loaded
+      // Handle Shift+Click logic first
+      if (handleShiftClick(event, currentPointerPosition)) {
+        return; // Stop here if Shift+Click was handled
+      }
+
+      // If Shift+Click is not handled, proceed to other logic
       if (!drawerController) {
-        // Drawer not available - only handle default Enter behavior
-        if (event.key === 'Enter') {
-          abortControllerRef.current?.abort();
-          const controller = new AbortController();
-          abortControllerRef.current = controller;
-          mapController.setClickCoordinates(currentPointerPosition, controller.signal);
-        }
-        return;
-      }
-
-      // Drawer is available
-      // Check for shift-click equivalent (Shift+Enter or Shift+Space) FIRST
-      // This handles vertex deletion and text editing
-      if ((event.key === 'Enter' || event.key === ' ') && event.shiftKey) {
-        const handled = drawerController.handleShiftClickAtCoordinate(currentPointerPosition.projected);
-
-        if (handled) {
-          // Vertex deleted or text editor opened - stop processing
-          event.preventDefault();
-          event.stopPropagation();
-          return;
-        }
-
-        // Not handled as shift-click - fall through to other Shift+Enter/Space uses
-      }
-
-      // Check if we're in drawing or editing mode
-      const isDrawerDrawing = getStoreDrawerIsDrawing(mapId);
-      const isDrawerEditing = getStoreDrawerIsEditing(mapId);
-
-      if (isDrawerDrawing) {
-        // DRAWING MODE
-        // Skip Enter/Space handling for Text geometry - it's handled by drawer shortcuts
-        const selectedDrawingType = getStoreDrawerSelectedDrawingType(mapId);
-        if (selectedDrawingType === 'Text') {
-          // Only skip if actively typing in the text editor
-          if ((activeElement as HTMLElement).isContentEditable) {
-            return;
-          }
-
-          // Use editing mode logic for text transform handles
-          if (event.key === 'Enter' || event.key === ' ') {
-            event.preventDefault();
-            event.stopPropagation();
-
-            if (drawerController.isHandleGrabbed()) {
-              // DROP: Apply transformation
-              drawerController.applyGrabbedTransform(currentPointerPosition.projected);
-            } else {
-              // GRAB: Try to grab a handle
-              const grabbed = drawerController.grabHandleForKeyboard(currentPointerPosition.projected);
-              if (!grabbed) {
-                // No handle - try to select the feature
-                drawerController.handleEditingAtCoordinate(currentPointerPosition.projected);
-              }
-            }
-          } else if (event.key === 'Escape') {
-            event.preventDefault();
-            drawerController.cancelGrabbedTransform();
-          }
-          return; // Don't fall through to regular drawing logic
-        }
-
-        // Regular drawing mode for non-text geometries
-        if ((event.key === 'Enter' && event.shiftKey) || (event.key === ' ' && event.shiftKey)) {
-          // Shift+Enter or Shift+Space: Finish drawing
-          event.preventDefault();
-          event.stopPropagation();
-          drawerController.finishCurrentDrawing();
-        } else if (event.key === 'Enter' || event.key === ' ') {
-          // Enter or Space: Add vertex
-          event.preventDefault();
-          event.stopPropagation();
-          drawerController.addCoordinateToDrawing(currentPointerPosition.projected);
-        }
-      } else if (isDrawerEditing) {
-        // EDITING MODE
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          event.stopPropagation();
-          // If actively moving a handle
-          if (drawerController.isHandleGrabbed()) {
-            // DROP: Apply transformation from grab coordinate to current coordinate
-            drawerController.applyGrabbedTransform(currentPointerPosition.projected);
-          } else {
-            // GRAB: Check what's at the crosshair
-            const grabbed = drawerController.grabHandleForKeyboard(currentPointerPosition.projected);
-            if (!grabbed) {
-              // No handle - try to select a feature instead
-              drawerController.handleEditingAtCoordinate(currentPointerPosition.projected);
-            }
-          }
-        } else if (event.key === 'Escape') {
-          // CANCEL: Release the grab without applying transformation
-          event.preventDefault();
-
-          drawerController.cancelGrabbedTransform();
-        }
-      } else if (event.key === 'Enter' || event.key === ' ') {
-        // Not in draw or edit mode
-        // Default behavior: open details panel
-        event.preventDefault();
-        event.stopPropagation();
-        abortControllerRef.current?.abort();
-        const controller = new AbortController();
-        abortControllerRef.current = controller;
-        mapController.setClickCoordinates(currentPointerPosition, controller.signal);
+        handleDefaultInteraction(event, currentPointerPosition);
+      } else {
+        handleDrawerInteraction(event, currentPointerPosition);
       }
     },
-    [isCrosshairsActive, mapId, mapController, drawerController]
+    [isCrosshairsActive, mapId, handleShiftClick, handleDefaultInteraction, handleDrawerInteraction, drawerController]
   );
 
   /**
