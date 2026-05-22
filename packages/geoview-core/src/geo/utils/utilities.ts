@@ -789,8 +789,12 @@ export abstract class GeoUtilities {
         if (htmlElement?.toDataURL) {
           iconDetailsEntry.iconImage = htmlElement.toDataURL();
         } else {
-          // No styles or image, no icon
-          iconDetailsEntry.iconImage = 'no data';
+          if (layerLegend.legend === 'Annotation Layer') {
+            iconDetailsEntry.iconImage = 'annotation';
+          } else {
+            // No styles or image, no icon
+            iconDetailsEntry.iconImage = 'no data';
+          }
         }
         iconDetails.push(iconDetailsEntry);
       }
