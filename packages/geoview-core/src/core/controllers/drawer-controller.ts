@@ -683,8 +683,6 @@ export class DrawerController extends AbstractMapViewerController {
     // Save to the store
     setStoreDrawerIconSrc(this.getMapId(), iconSrc);
 
-    // TODO: DRAWER - Drawing icon issue when you click on a different point icon, it will have it's style overwritten by the current style
-
     // Update the feature style at large
     this.updateFeatureStyle();
   }
@@ -1869,12 +1867,8 @@ export class DrawerController extends AbstractMapViewerController {
           const featureId = geoFeature.properties.id || generateId();
           feature.setStyle(featureStyle);
 
-          // TODO: setting properties here is unnecessary
-          if (styleProps?.text !== undefined) {
-            DrawerController.#setFeatureProperties(feature, featureId);
-          } else {
-            DrawerController.#setFeatureProperties(feature, featureId);
-          }
+          // Setup necessary properties for each feature: id and geometry group
+          DrawerController.#setFeatureProperties(feature, featureId);
 
           // Add overlays to non-point features
           if (!(olGeometry instanceof Point)) {
