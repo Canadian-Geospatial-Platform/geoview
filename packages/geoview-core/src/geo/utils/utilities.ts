@@ -789,7 +789,7 @@ export abstract class GeoUtilities {
         if (htmlElement?.toDataURL) {
           iconDetailsEntry.iconImage = htmlElement.toDataURL();
         } else {
-          if (layerLegend.legend === 'Annotation Layer') {
+          if (layerLegend.legend === 'AnnotationLayer') {
             iconDetailsEntry.iconImage = 'annotation';
           } else {
             // No styles or image, no icon
