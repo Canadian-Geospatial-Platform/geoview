@@ -126,7 +126,6 @@ export class DrawerController extends AbstractMapViewerController {
     feature: Feature;
     originalGeometry: Geometry;
     originalStyle?: StyleLike | undefined;
-    originalStyleStored?: boolean;
   };
 
   /** History stack for undo/redo functionality */
@@ -855,11 +854,6 @@ export class DrawerController extends AbstractMapViewerController {
 
     // Store original style if not already stored
     if (this.#selectedFeatureState) {
-      if (!this.#selectedFeatureState.originalStyleStored) {
-        this.#selectedFeatureState.originalStyle = selectedFeature.getStyle();
-        this.#selectedFeatureState.originalStyleStored = true;
-      }
-
       // Apply the new style
       const isTextFeature = DrawerController.#isTextFeature(selectedFeature);
 
@@ -932,6 +926,23 @@ export class DrawerController extends AbstractMapViewerController {
       this.disableKeyboardShortcuts();
     }
     setStoreDrawerShortcutsEnabled(mapId, enabled);
+  }
+
+  /**
+   * Clones a given style or array of styles.
+   *
+   * @param styleLike - The style or array of styles to clone
+   * @returns A cloned style or array of cloned styles
+   */
+  static cloneStyle(styleLike: StyleLike): DrawerStyle | DrawerStyle[] {
+    if (styleLike instanceof Style) {
+      // Single Style — just clone it.
+      return (styleLike as DrawerStyle).clone();
+    } else if (Array.isArray(styleLike)) {
+      // Array of Styles — clone each one.
+      return styleLike.map((style) => (style as DrawerStyle).clone());
+    }
+    throw new Error('Unsupported StyleLike type');
   }
 
   // #endregion PUBLIC METHODS - DRAWING
@@ -1592,10 +1603,7 @@ export class DrawerController extends AbstractMapViewerController {
         return true;
       }
 
-      // If undo not possible, stop drawing
-      drawInstance.stopInteraction();
-      this.#setDrawInstance(undefined);
-      return true;
+      // Otherwise fall back to history for completed actions
     }
 
     // If editing, undo the transform instance
@@ -2123,10 +2131,15 @@ export class DrawerController extends AbstractMapViewerController {
     const history = this.#drawerHistory;
     const currentIndex = this.#historyIndex;
 
-    // Clone all features to prevent shared references with map features
+    // Clone all features and their styles to prevent shared references with map features
     const clonedAction: DrawerHistoryAction = {
       ...action,
-      features: action.features.map((feature) => feature.clone()),
+      features: action.features.map((feature) => {
+        const newFeature = feature.clone();
+        const newStyle = DrawerController.cloneStyle(newFeature.getStyle()!);
+        newFeature.setStyle(newStyle);
+        return newFeature;
+      }),
     };
 
     if (insertAtCurrentIndex) {
@@ -2458,7 +2471,6 @@ export class DrawerController extends AbstractMapViewerController {
           this.#selectedFeatureState = {
             feature,
             originalGeometry: currentGeometry.clone(),
-            originalStyleStored: false,
           };
         }
 
@@ -2597,9 +2609,7 @@ export class DrawerController extends AbstractMapViewerController {
             // Check for changes
             const geometryChanged = currentGeometry && !GeoUtilities.geometriesAreEqual(savedState.originalGeometry, currentGeometry);
             const styleChanged =
-              savedState.originalStyleStored &&
-              savedState.originalStyle &&
-              DrawerController.#stylesAreDifferent(savedState.originalStyle, previousFeature.getStyle());
+              savedState.originalStyle && DrawerController.#stylesAreDifferent(savedState.originalStyle, previousFeature.getStyle());
 
             if (geometryChanged || styleChanged) {
               // Save modify action - include geometry and style only if it was changed
@@ -2612,7 +2622,7 @@ export class DrawerController extends AbstractMapViewerController {
                 }),
                 ...(styleChanged && {
                   originalStyles: [savedState.originalStyle],
-                  modifiedStyles: [previousFeature.getStyle()],
+                  modifiedStyles: [DrawerController.cloneStyle(previousFeature.getStyle()!)],
                 }),
               });
             }
@@ -2628,8 +2638,7 @@ export class DrawerController extends AbstractMapViewerController {
           this.#selectedFeatureState = {
             feature: newFeature,
             originalGeometry: currentGeometry.clone(),
-            originalStyle: newFeature.getStyle(),
-            originalStyleStored: true,
+            originalStyle: DrawerController.cloneStyle(newFeature.getStyle()!),
           };
         }
       }
