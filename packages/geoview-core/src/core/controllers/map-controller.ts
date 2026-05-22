@@ -109,8 +109,10 @@ import type { Draw } from '@/geo/interaction/draw';
 import type { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import type { FitOptions } from 'ol/View';
 import { GeoUtilities } from '@/geo/utils/utilities';
-import { InvalidExtentError } from '@/core/exceptions/geoview-exceptions';
 import { AbstractGVVectorTile } from '@/geo/layer/gv-layers/vector/abstract-gv-vector-tile';
+import type { EventDelegateBase } from '@/api/events/event-helper';
+import EventHelper from '@/api/events/event-helper';
+import { InvalidExtentError } from '@/core/exceptions/geoview-exceptions';
 
 /**
  * Controller responsible for Map interactions.
@@ -130,6 +132,9 @@ export class MapController extends AbstractMapViewerController {
 
   /** Indicates if the overview map visibility state before the map projection happened */
   #projectionChangingOverviewMapVisibility = false;
+
+  /** Callback delegates for the geolocator search event. */
+  #onGeolocatorSearchHandlers: GeolocatorSearchDelegate[] = [];
 
   /**
    * Creates an instance of MapController.
@@ -183,27 +188,27 @@ export class MapController extends AbstractMapViewerController {
    * @returns A promise that resolves when the zoom animation is complete
    * @throws {InvalidExtentError} When the extent is invalid
    */
-  zoomToExtent(extent: Extent, options: FitOptions = DEFAULT_OL_FITOPTIONS): Promise<void> {
+  async zoomToExtent(extent: Extent, options: FitOptions = DEFAULT_OL_FITOPTIONS): Promise<void> {
     // Merge user options with defaults
     const mergedOptions: FitOptions = { ...DEFAULT_OL_FITOPTIONS, ...options };
 
     // Validate the extent coordinates - need to make sure we aren't excluding zero with !number or using invalid extents
     const validatedExtent = GeoUtilities.validateExtent(extent, this.getMapViewer().getProjectionEPSG());
     if (
-      !extent.some((number) => {
+      !validatedExtent.some((number) => {
         return (!number && number !== 0) || Number.isNaN(number);
-      }) &&
-      JSON.stringify(extent) === JSON.stringify(validatedExtent)
+      })
     ) {
-      // Store state will be updated by map event
-      this.getMapViewer().getView().fit(extent, mergedOptions);
+      // Use the validated (clamped) extent so out-of-bounds coordinates are accepted after clamping
+      this.getMapViewer().getView().fit(validatedExtent, mergedOptions);
 
       // Wait a bit and return.
-      return delay(mergedOptions.duration! + MapController.ZOOM_MIN_DELAY);
+      await delay(mergedOptions.duration! + MapController.ZOOM_MIN_DELAY);
+      return;
     }
 
     // Invalid extent
-    this.getMapViewer().notifications.showError('error.map.invalidZoomExtent', {}, true);
+    this.getMapViewer().notifications.showWarning('error.map.invalidZoomExtent', {}, false);
     throw new InvalidExtentError(extent);
   }
 
@@ -381,6 +386,9 @@ export class MapController extends AbstractMapViewerController {
         (indicatorBox[i] as HTMLElement).style.display = '';
       }
     }
+
+    // Emit the geolocator search event
+    this.#emitGeolocatorSearch({ searchItem, coords, bbox });
   }
 
   // #endregion PUBLIC METHODS - ZOOM FUNCTIONS
@@ -1575,4 +1583,56 @@ export class MapController extends AbstractMapViewerController {
   }
 
   // #endregion STATIC PRIVATE METHODS - CONFIG CREATION
+
+  // #region EVENTS
+
+  /**
+   * Emits a geolocator search event to all handlers.
+   *
+   * @param event - The geolocator search event payload
+   */
+  #emitGeolocatorSearch(event: GeolocatorSearchEvent): void {
+    // Emit the geolocator search event for all handlers
+    EventHelper.emitEvent(this, this.#onGeolocatorSearchHandlers, event);
+  }
+
+  /**
+   * Registers a geolocator search event callback.
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback delegate that was registered
+   */
+  onGeolocatorSearch(callback: GeolocatorSearchDelegate): GeolocatorSearchDelegate {
+    // Register the geolocator search event handler
+    return EventHelper.onEvent(this.#onGeolocatorSearchHandlers, callback);
+  }
+
+  /**
+   * Unregisters a geolocator search event callback.
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
+   */
+  offGeolocatorSearch(callback: GeolocatorSearchDelegate): void {
+    // Unregister the geolocator search event handler
+    EventHelper.offEvent(this.#onGeolocatorSearchHandlers, callback);
+  }
+
+  // #endregion EVENTS
 }
+
+/**
+ * Event for the geolocator search delegate.
+ */
+export type GeolocatorSearchEvent = {
+  /** The search description string. */
+  searchItem: string;
+  /** The lon/lat coordinates of the selected result. */
+  coords: Coordinate;
+  /** Optional bounding box extent of the selected result. */
+  bbox?: Extent;
+};
+
+/**
+ * Delegate for the geolocator search event handler function signature.
+ */
+export type GeolocatorSearchDelegate = EventDelegateBase<MapController, GeolocatorSearchEvent, void>;
