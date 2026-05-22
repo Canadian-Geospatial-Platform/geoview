@@ -8,11 +8,11 @@ import {
   useStoreDrawerSelectedDrawingType,
 } from 'geoview-core/core/stores/states/drawer-state';
 import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/states/app-state';
-import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
+import { useDrawerController } from 'geoview-core/core/controllers/use-controllers';
+import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { logger } from 'geoview-core/core/utils/logger';
 
 import { FONT_OPTIONS, DEFAULT_FONT, loadGoogleFont } from '../utils/fonts';
-import { useDrawerController } from 'geoview-core/core/controllers/use-controllers';
 
 // Styles
 const sxClasses = {
@@ -58,6 +58,7 @@ export function StylePanel(): JSX.Element {
   const { cgpv } = window as TypeWindow;
   const { ui, reactUtilities } = cgpv;
   const { useCallback, useEffect } = reactUtilities.react;
+  const { t } = useTranslation<string>();
 
   // Components
   const { Box, List, ListItem, Typography, TextField, IconButton, FormatBoldIcon, FormatItalicIcon } = ui.elements;
@@ -247,7 +248,7 @@ export function StylePanel(): JSX.Element {
         font-size: 14px;
         font-weight: 500;
       `;
-        header.textContent = getLocalizedMessage(displayLanguage, 'drawer.colourPicker');
+        header.textContent = t('drawer.colourPicker');
 
         // Create close button
         const closeBtn = document.createElement('button');
@@ -295,7 +296,7 @@ export function StylePanel(): JSX.Element {
     observer.observe(document.body, { childList: true, subtree: true });
 
     return () => observer.disconnect();
-  }, [displayLanguage]);
+  }, [displayLanguage, t]);
 
   // Preload all Google Fonts
   useEffect(() => {
@@ -315,14 +316,14 @@ export function StylePanel(): JSX.Element {
         <>
           <ListItem sx={sxClasses.listItem}>
             <Typography variant="subtitle2" sx={sxClasses.label}>
-              {getLocalizedMessage(displayLanguage, 'drawer.text')}
+              {t('drawer.text')}
             </Typography>
             <TextField value={style.text || ''} onChange={handleTextChange} sx={sxClasses.input} placeholder="Enter text" multiline />
           </ListItem>
 
           <ListItem sx={sxClasses.listItem}>
             <Typography variant="subtitle2" sx={sxClasses.label}>
-              {getLocalizedMessage(displayLanguage, 'drawer.textFont')}
+              {t('drawer.textFont')}
             </Typography>
             <TextField
               select
@@ -353,7 +354,7 @@ export function StylePanel(): JSX.Element {
             <Box sx={{ display: 'flex', gap: 3, width: '100%' }}>
               <Box sx={{ flex: 1 }}>
                 <Typography variant="subtitle2" sx={sxClasses.label}>
-                  {getLocalizedMessage(displayLanguage, 'drawer.textColour')}
+                  {t('drawer.textColour')}
                 </Typography>
                 <MuiColorInput
                   value={localTextColor}
@@ -364,7 +365,7 @@ export function StylePanel(): JSX.Element {
               </Box>
               <Box sx={{ flex: 1 }}>
                 <Typography variant="subtitle2" sx={sxClasses.label}>
-                  {getLocalizedMessage(displayLanguage, 'drawer.textSize')}
+                  {t('drawer.textSize')}
                 </Typography>
                 <TextField
                   value={style.textSize || 14}
@@ -386,7 +387,7 @@ export function StylePanel(): JSX.Element {
             <Box sx={{ display: 'flex', gap: 3, width: '100%' }}>
               <Box sx={{ flex: 1 }}>
                 <Typography variant="subtitle2" sx={sxClasses.label}>
-                  {getLocalizedMessage(displayLanguage, 'drawer.textHaloColour')}
+                  {t('drawer.textHaloColour')}
                 </Typography>
                 <MuiColorInput
                   value={localTextHaloColor}
@@ -397,7 +398,7 @@ export function StylePanel(): JSX.Element {
               </Box>
               <Box sx={{ flex: 1 }}>
                 <Typography variant="subtitle2" sx={sxClasses.label}>
-                  {getLocalizedMessage(displayLanguage, 'drawer.textHaloWidth')}
+                  {t('drawer.textHaloWidth')}
                 </Typography>
                 <TextField
                   value={style.textHaloWidth}
@@ -415,11 +416,11 @@ export function StylePanel(): JSX.Element {
           </ListItem>
           <ListItem sx={sxClasses.listItem}>
             <Typography variant="subtitle2" sx={sxClasses.label}>
-              {getLocalizedMessage(displayLanguage, 'drawer.textFormatting')}
+              {t('drawer.textFormatting')}
             </Typography>
             <Box sx={{ display: 'flex', gap: 1, width: '100%' }}>
               <IconButton
-                aria-label={getLocalizedMessage(displayLanguage, 'drawer.textBold')}
+                aria-label={t('drawer.textBold')}
                 tooltipPlacement="bottom"
                 onClick={handleToggleBold}
                 className={style.textBold ? 'highlighted active' : ''}
@@ -428,7 +429,7 @@ export function StylePanel(): JSX.Element {
                 <FormatBoldIcon />
               </IconButton>
               <IconButton
-                aria-label={getLocalizedMessage(displayLanguage, 'drawer.textItalic')}
+                aria-label={t('drawer.textItalic')}
                 tooltipPlacement="bottom"
                 onClick={handleToggleItalic}
                 className={style.textItalic ? 'highlighted active' : ''}
@@ -445,7 +446,7 @@ export function StylePanel(): JSX.Element {
       {currentGeomType !== 'LineString' && currentGeomType !== 'Text' && (
         <ListItem sx={sxClasses.listItem}>
           <Typography variant="subtitle2" sx={sxClasses.label}>
-            {getLocalizedMessage(displayLanguage, 'drawer.fillColour')}
+            {t('drawer.fillColour')}
           </Typography>
           <MuiColorInput value={localFillColor} onChange={handleFillColorChange} onBlur={handleFillColorClose} sx={sxClasses.input} />
         </ListItem>
@@ -455,7 +456,7 @@ export function StylePanel(): JSX.Element {
       {currentGeomType === 'Point' && (
         <ListItem sx={sxClasses.listItem}>
           <Typography variant="subtitle2" sx={sxClasses.label}>
-            {getLocalizedMessage(displayLanguage, 'drawer.iconSize')}
+            {t('drawer.iconSize')}
           </Typography>
           <TextField
             value={style.iconSize || 24}
@@ -476,7 +477,7 @@ export function StylePanel(): JSX.Element {
         <>
           <ListItem sx={sxClasses.listItem}>
             <Typography variant="subtitle2" sx={sxClasses.label}>
-              {getLocalizedMessage(displayLanguage, 'drawer.strokeColour')}
+              {t('drawer.strokeColour')}
             </Typography>
             <MuiColorInput
               value={localStrokeColor}
@@ -488,7 +489,7 @@ export function StylePanel(): JSX.Element {
 
           <ListItem sx={sxClasses.listItem}>
             <Typography variant="subtitle2" sx={sxClasses.label}>
-              {getLocalizedMessage(displayLanguage, 'drawer.strokeWidth')}
+              {t('drawer.strokeWidth')}
             </Typography>
             <TextField
               value={style.strokeWidth}

@@ -662,7 +662,7 @@ export type TypeLegend = {
 
   /** The legend content - vector styles, an HTML canvas, or null. */
   // Layers other than vector layers use the HTMLCanvasElement type for their legend.
-  legend: TypeVectorLayerStyles | HTMLCanvasElement | null;
+  legend: TypeVectorLayerStyles | HTMLCanvasElement | 'Annotation Layer' | null;
 
   /** Optional style configuration associated with the legend. */
   styleConfig?: TypeLayerStyleConfig;

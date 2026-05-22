@@ -85,6 +85,8 @@ When the map gains focus, a crosshair is displayed in the center of the map:
 
 <img src="{{assetsURL}}/img/guide/navigation/crosshair.svg" alt="Crosshair marker displayed in the center of the map for keyboard navigation" style="width: 90%; height: 100px;"/>
 
+The map can quickly be focused using **Ctrl+M** anywhere within the GeoView application.
+
 Use the **arrow** keys to move the map and **+** / **-** keys or **Ctrl+Up** / **Ctrl+Down** to zoom in and out. Press **Shift+Up** / **Shift+Down** to increase or decrease how far the map pans with each arrow key press. Press **Enter** to select a feature under the crosshairs and display associated data in the **Details** panel.
 
 Information will be shown for supported features when the crosshair is positioned over them.
@@ -99,7 +101,7 @@ This map is not fully compliant with Web Content Accessibility Guidelines (WCAG)
 
 =1!drawingTools=
 
-# Drawing Tools (Drawer)
+# Drawing Tools
 
 When the drawer package is enabled, drawing and geometry editing tools become available in the navigation bar. These tools allow you to create, modify, and manage geometries directly on the map.
 
