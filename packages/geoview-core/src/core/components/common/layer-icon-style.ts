@@ -62,6 +62,31 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     borderColor: theme.palette.geoViewColor.bgColor.dark[600],
     borderRadius: 0.5,
   },
+  titleIcon: {
+    '&.MuiSvgIcon-root': {
+      border: '1px solid',
+      backgroundColor: theme.palette.geoViewColor.white,
+      borderColor: theme.palette.geoViewColor.primary.main,
+      borderRadius: 0.5,
+      '& path': {
+        fill: theme.palette.geoViewColor.bgColor.dark[800],
+      },
+    },
+  },
+  iconBox: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '30px',
+    height: '30px',
+    backgroundColor: theme.palette.geoViewColor.white,
+    border: '1px solid',
+    borderColor: theme.palette.geoViewColor.primary.main,
+    borderRadius: '4px',
+  },
+  groupIcon: {
+    transform: 'scaleX(-1)',
+  },
   stackIconsBox: {
     width: 24,
     height: 24,
