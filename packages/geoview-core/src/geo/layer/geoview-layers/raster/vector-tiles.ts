@@ -174,7 +174,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
     const resolutions = layer.getOLSource()?.getTileGrid()?.getResolutions();
 
     // Get the style
-    let appliedStyle = layerConfig.getStyleUrl() || this.getMetadata()?.defaultStyles;
+    let appliedStyle = layerConfig.getStyleUrl();
 
     if (appliedStyle) {
       // GV When viewing a style in AGOL, it will typically be given and shown to the user with f=pjson
