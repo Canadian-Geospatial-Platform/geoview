@@ -2635,6 +2635,8 @@ export class DrawerController extends AbstractMapViewerController {
             originalStyle: DrawerController.cloneStyle(newFeature.getStyle()!),
           };
         }
+      } else {
+        this.#selectedFeatureState = undefined;
       }
 
       // Only show the tooltip again if not hiding measurements
