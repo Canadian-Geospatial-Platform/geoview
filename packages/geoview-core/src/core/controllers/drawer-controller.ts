@@ -2501,7 +2501,8 @@ export class DrawerController extends AbstractMapViewerController {
   /**
    * Creates a handler for transform end events.
    *
-   * The current transform action has ended and the new geometry and style are applied to the feature.
+   * The current transform action (rotate, scale, translate) has ended and the new geometry and style are applied to the feature.
+   * The feature is still selected and in transform mode at this point. Deselection is handled in handleTransformSelectionChange.
    */
   #handleTransformEnd() {
     // Get the map id
