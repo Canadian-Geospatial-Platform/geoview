@@ -45,6 +45,6 @@ export * from './text-field/text-field';
 export * from './toolbar/toolbar';
 export * from './tooltip/tooltip';
 export * from './typography/typography';
-export * from '@mui/base/FocusTrap';
+export { default as FocusTrap } from '@mui/material/Unstable_TrapFocus';
 export { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, FormControl, FormControlLabel, InputLabel, NativeSelect, } from '@mui/material';
 //# sourceMappingURL=index.d.ts.map

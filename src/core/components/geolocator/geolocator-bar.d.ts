@@ -12,7 +12,7 @@ interface GeolocatorBarProps {
     /** Loading state to disable search while fetching */
     isLoading: boolean;
     /** Ref for the search input element */
-    inputRef?: React.RefObject<HTMLInputElement>;
+    inputRef?: React.RefObject<HTMLInputElement | null>;
 }
 /**
  * Creates the geolocator search bar component.

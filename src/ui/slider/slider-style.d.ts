@@ -3,6 +3,10 @@ import type { SxStyles } from '@/ui/style/types';
 /**
  * Gets custom sx classes for the slider component.
  *
+ * Uses optional chaining (?.) for theme.palette.geoViewColor properties
+ * because plugins may render before GeoView's custom theme is fully initialized.
+ * Standard MUI properties (theme.palette.common) do not require this.
+ *
  * @param theme - The MUI theme object
  * @returns The sx classes object
  */

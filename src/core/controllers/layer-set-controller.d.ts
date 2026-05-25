@@ -8,7 +8,7 @@ import { AllFeatureInfoLayerSet } from '@/geo/layer/layer-sets/all-feature-info-
 import { HoverFeatureInfoLayerSet } from '@/geo/layer/layer-sets/hover-feature-info-layer-set';
 import { LegendsLayerSet } from '@/geo/layer/layer-sets/legends-layer-set';
 import type { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
-import type { MapViewer } from '@/geo/map/map-viewer';
+import { MapViewer } from '@/geo/map/map-viewer';
 import { FeatureInfoLayerSet } from '@/geo/layer/layer-sets/feature-info-layer-set';
 /**
  * LayerSetController class that extends the AbstractMapViewerController and provides methods to interact with map layers.

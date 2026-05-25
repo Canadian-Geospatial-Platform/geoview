@@ -15,7 +15,7 @@ interface LegendFullscreenProps {
     containerType: TypeContainerBox;
     isOpen: boolean;
     onClose: () => void;
-    buttonRef: React.RefObject<HTMLButtonElement>;
+    buttonRef: React.RefObject<HTMLButtonElement | null>;
 }
 /**
  * Properties for the LegendFullscreenButton component.
@@ -27,7 +27,7 @@ interface LegendFullscreenProps {
 interface FullscreenButtonProps {
     containerType: TypeContainerBox;
     onClick: () => void;
-    buttonRef: React.RefObject<HTMLButtonElement>;
+    buttonRef: React.RefObject<HTMLButtonElement | null>;
 }
 /**
  * Renders a button that opens the legend in fullscreen mode.

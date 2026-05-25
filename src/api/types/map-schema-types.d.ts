@@ -96,7 +96,7 @@ export type TypeFooterBarProps = {
     selectedTimeSliderLayerPath: string;
 };
 /** Supported app bar values. */
-export type TypeValidAppBarCoreProps = 'geolocator' | 'export' | 'aoi-panel' | 'about-panel' | 'custom-legend' | 'guide' | 'legend' | 'details' | 'data-table' | 'layers';
+export type TypeValidAppBarCoreProps = 'geolocator' | 'export' | 'aoi-panel' | 'about-panel' | 'custom-legend' | 'guide' | 'legend' | 'details' | 'data-table' | 'layers' | 'stac-browser';
 /** Configuration available on the application bar. Default = ['geolocator']. The about GeoView and notification are always there. */
 export type TypeAppBarProps = {
     tabs: {

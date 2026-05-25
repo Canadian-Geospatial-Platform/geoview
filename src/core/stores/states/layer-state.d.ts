@@ -203,6 +203,10 @@ export declare const useStoreLayerId: (layerPath: string) => string | undefined;
 export declare const getStoreLayerBounds: (mapId: string, layerPath: string) => Extent | undefined;
 /** Hook that returns the bounds extent for a specific layer. */
 export declare const useStoreLayerBounds: (layerPath: string) => Extent | undefined;
+/** Hook that returns the minimum scale denominator for a specific layer. */
+export declare const useStoreLayerMinScale: (layerPath: string) => number | undefined;
+/** Hook that returns the maximum scale denominator for a specific layer. */
+export declare const useStoreLayerMaxScale: (layerPath: string) => number | undefined;
 /**
  * Gets the layer status for a specific layer.
  *

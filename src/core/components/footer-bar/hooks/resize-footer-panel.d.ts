@@ -1,5 +1,5 @@
 /**
- * Creates the popover to resize the map container and footer panel.
+ * Creates the popper to resize the map container and footer panel.
  *
  * Memoized to prevent re-renders since this component has no props.
  *

@@ -602,6 +602,9 @@ export declare class LayerController extends AbstractMapViewerController {
     /**
      * Zooms to layer visible scale.
      *
+     * Animates the view to a resolution that brings the layer within its visible range.
+     * Uses resolution directly instead of converting through zoom level to avoid discretization.
+     *
      * @param layerPath - Path of layer to zoom to
      * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
      */

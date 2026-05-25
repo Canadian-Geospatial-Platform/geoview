@@ -168,6 +168,8 @@ export declare const useStoreMapAttribution: () => string[];
 export declare const useStoreMapCenterCoordinates: () => Coordinate;
 /** Selects the click marker state from the store. */
 export declare const useStoreMapClickMarker: () => TypeClickMarker | undefined;
+/** Returns the current map extent in the map's projection, or undefined if not yet set. */
+export declare const getStoreMapExtent: (mapId: string) => Extent | undefined;
 /** Selects the current map extent from the store. */
 export declare const useStoreMapExtent: () => Extent | undefined;
 /** Selects whether the map has a geoview basemap layer from the store. */

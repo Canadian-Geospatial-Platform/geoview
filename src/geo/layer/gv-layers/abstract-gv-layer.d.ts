@@ -294,13 +294,6 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      */
     getIsTimeAware(): boolean;
     /**
-     * Gets the in visible range value.
-     *
-     * @param currentZoom - Optional. The map current zoom
-     * @returns True if the layer is in visible range
-     */
-    getInVisibleRange(currentZoom: number | undefined): boolean;
-    /**
      * Indicates if the layer is currently queryable.
      *
      * @returns The currently queryable flag.
