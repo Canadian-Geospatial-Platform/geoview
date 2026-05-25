@@ -61,8 +61,8 @@ function IconStack({ layerPath }: TypeIconStackProps): JSX.Element | null {
   const renderIconContent = useCallback((): JSX.Element | null => {
     if (iconImage === 'annotation') {
       return (
-        <Box component="span" sx={sxClasses.legendIcon}>
-          <TitleIcon />
+        <Box component="span" sx={sxClasses.iconBox}>
+          <TitleIcon sx={sxClasses.titleIcon} />
         </Box>
       );
     }
@@ -76,7 +76,7 @@ function IconStack({ layerPath }: TypeIconStackProps): JSX.Element | null {
         <Box component="img" alt="" src={iconImage} sx={sxClasses.maxIconImg} />
       </Box>
     );
-  }, [iconImage, sxClasses.legendIcon, sxClasses.maxIconImg]);
+  }, [iconImage, sxClasses.iconBox, sxClasses.legendIcon, sxClasses.maxIconImg, sxClasses.titleIcon]);
 
   const renderSingleIcon = useCallback((): JSX.Element => {
     return (
@@ -145,6 +145,8 @@ export function LayerIcon({ layerPath }: LayerIconProps): JSX.Element {
   logger.logTraceRenderDetailed('components/common/layer-icon', layerPath);
 
   // Hooks
+  const theme = useTheme();
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
   const layerStatus = useStoreLayerStatus(layerPath);
   const legendQueryStatus = useStoreLayerLegendQueryStatus(layerPath);
   const layerChildPaths = useStoreLayerChildPaths(layerPath);
@@ -170,20 +172,8 @@ export function LayerIcon({ layerPath }: LayerIconProps): JSX.Element {
 
   if (hasChildren) {
     return (
-      <Box
-        sx={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: '30px',
-          height: '30px',
-          backgroundColor: 'white',
-          border: '1px solid',
-          borderColor: 'primary.main',
-          borderRadius: '4px',
-        }}
-      >
-        <LayerGroupIcon sx={{ transform: 'scaleX(-1)' }} />
+      <Box sx={sxClasses.iconBox}>
+        <LayerGroupIcon sx={sxClasses.groupIcon} />
       </Box>
     );
   }
