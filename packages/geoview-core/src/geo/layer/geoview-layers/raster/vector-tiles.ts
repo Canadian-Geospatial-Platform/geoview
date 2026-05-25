@@ -134,6 +134,17 @@ export class VectorTiles extends AbstractGeoViewRaster {
       // Second, set the min/max zoom levels based on the service / config.
       layerConfig.initInitialSettingsMinZoomFromMetadata(minZoom);
       layerConfig.initInitialSettingsMaxZoomFromMetadata(maxZoom);
+
+      if (!layerConfig.getStyleUrl()) {
+        // If the style URL is not set in the layer entry config, set it to the default style provided in the metadata
+        if (metadata.defaultStyles.includes('https://') || metadata.defaultStyles.includes('http://')) {
+          // If the default style is a full URL, use it as is
+          layerConfig.setStyleUrl(metadata.defaultStyles);
+        } else {
+          // Otherwise, assume it's a relative path and construct the full URL using the metadata access path
+          layerConfig.setStyleUrl(`${this.getMetadataAccessPath()}/${metadata.defaultStyles}`);
+        }
+      }
     }
 
     // Get the source projection
