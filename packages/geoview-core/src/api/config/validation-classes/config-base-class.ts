@@ -6,6 +6,7 @@ import type {
   TypeBaseSourceInitialConfig,
   TypeGeoviewLayerConfig,
   TypeGeoviewLayerType,
+  TypeLayerEntryConfig,
   TypeLayerEntryType,
   TypeLayerInitialSettings,
   TypeLayerStatus,
@@ -1080,6 +1081,22 @@ export abstract class ConfigBaseClass {
       // eslint-disable-next-line no-param-reassign
       layerConfig.parentLayerConfig = parentLayerConfig;
     }
+  }
+
+  /**
+   * Helper function to support when a layerConfig is either a class instance or a regular json object.
+   *
+   * @param layerConfig - The layer config class instance or regular json object
+   * @returns The layer id or undefined
+   */
+  static getClassOrTypeLayerId(
+    layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig | TypeLayerEntryConfig | undefined
+  ): string | undefined {
+    if (layerConfig instanceof ConfigBaseClass) {
+      return layerConfig.layerId;
+    }
+
+    return (layerConfig as ConfigBaseClassProps | TypeLayerEntryConfig)?.layerId;
   }
 
   /**
