@@ -1,4 +1,4 @@
-﻿import type { Extent } from 'ol/extent';
+import type { Extent } from 'ol/extent';
 
 import { Projection } from '@/geo/utils/projection';
 import type { TimeDimensionESRI } from '@/core/utils/date-mgt';

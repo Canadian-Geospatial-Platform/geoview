@@ -107,7 +107,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    *
    * This method is called when the data access path is being set.
    *
-   * @param dataAccessPath - The path string used to access data.
+   * @param dataAccessPath - The path string used to access data
    */
   protected override onSetDataAccessPath(dataAccessPath: string): void {
     this.#source.dataAccessPath = dataAccessPath;

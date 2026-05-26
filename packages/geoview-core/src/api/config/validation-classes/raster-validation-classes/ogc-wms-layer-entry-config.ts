@@ -63,7 +63,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    *
-   * @returns The strongly-typed layer configuration specific to this layer.
+   * @returns The strongly-typed layer configuration specific to this layer
    */
   override getGeoviewLayerConfig(): TypeWMSLayerConfig {
     return super.getGeoviewLayerConfig() as TypeWMSLayerConfig;
@@ -72,7 +72,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    *
-   * @returns The strongly-typed source configuration specific to this layer entry config.
+   * @returns The strongly-typed source configuration specific to this layer entry config
    */
   override getSource(): TypeSourceImageWmsInitialConfig {
     return super.getSource();
@@ -81,7 +81,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    *
-   * @returns The strongly-typed service metadata specific to this layer entry config.
+   * @returns The strongly-typed service metadata specific to this layer entry config
    */
   override getServiceMetadata(): TypeMetadataWMS | undefined {
     return super.getServiceMetadata() as TypeMetadataWMS | undefined;
@@ -90,7 +90,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    *
-   * @returns The strongly-typed layer metadata specific to this layer entry config.
+   * @returns The strongly-typed layer metadata specific to this layer entry config
    */
   override getLayerMetadata(): TypeMetadataWMSCapabilityLayer | undefined {
     return super.getLayerMetadata() as TypeMetadataWMSCapabilityLayer | undefined;
@@ -103,7 +103,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    * to read them from the layer's metadata (via the `Attribution.Title` property)
    * and sets them accordingly. Once set, the attributions are cached in the layer.
    *
-   * @returns The list of layer attributions, or `undefined` if none are available.
+   * @returns The list of layer attributions, or `undefined` if none are available
    */
   override getAttributions(): string[] | undefined {
     // If no attributions defined
@@ -182,7 +182,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    * and initializes the internal style list. The styles correspond to named
    * style definitions advertised by the WMS service (from the `Style` section of the metadata).
    *
-   * @returns The list of available style names, or `undefined` if none are defined.
+   * @returns The list of available style names, or `undefined` if none are defined
    */
   getStyles(): string[] | undefined {
     // If no styles defined
@@ -206,7 +206,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    * Returns the complete `TypeMetadataWMSCapabilityLayerStyle` objects from the layer metadata,
    * which include style names, legend URLs, and other style-related information.
    *
-   * @returns The list of available style metadata objects, or `undefined` if none are defined.
+   * @returns The list of available style metadata objects, or `undefined` if none are defined
    */
   getStylesMetadata(): TypeMetadataWMSCapabilityLayerStyle[] | undefined {
     return this.getLayerMetadata()?.Style;

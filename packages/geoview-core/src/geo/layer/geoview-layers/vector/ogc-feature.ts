@@ -51,7 +51,7 @@ export class OgcFeature extends AbstractGeoViewVector {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    *
-   * @returns The strongly-typed layer configuration specific to this layer.
+   * @returns The strongly-typed layer configuration specific to this layer
    */
   override getGeoviewLayerConfig(): TypeOgcFeatureLayerConfig {
     return super.getGeoviewLayerConfig() as TypeOgcFeatureLayerConfig;
@@ -60,7 +60,7 @@ export class OgcFeature extends AbstractGeoViewVector {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    *
-   * @returns The strongly-typed metadata specific to this layer.
+   * @returns The strongly-typed metadata specific to this layer
    */
   override getMetadata(): TypeMetadataOGCFeature | undefined {
     return super.getMetadata() as TypeMetadataOGCFeature | undefined;
@@ -256,11 +256,11 @@ export class OgcFeature extends AbstractGeoViewVector {
    * This function constructs a `TypeOgcFeatureLayerConfig` object that describes an OGC Feature layer
    * and its associated entry configurations based on the provided parameters.
    *
-   * @param geoviewLayerId - A unique identifier for the GeoView layer.
-   * @param geoviewLayerName - The display name of the GeoView layer.
-   * @param metadataAccessPath - The full service URL to the layer endpoint.
-   * @param isTimeAware - Indicates whether the layer supports time-based filtering.
-   * @param layerEntries - An array of layer entries objects to be included in the configuration.
+   * @param geoviewLayerId - A unique identifier for the GeoView layer
+   * @param geoviewLayerName - The display name of the GeoView layer
+   * @param metadataAccessPath - The full service URL to the layer endpoint
+   * @param isTimeAware - Indicates whether the layer supports time-based filtering
+   * @param layerEntries - An array of layer entries objects to be included in the configuration
    * @returns The constructed configuration object for the OGC Feature layer
    */
   static createGeoviewLayerConfig(
@@ -298,11 +298,11 @@ export class OgcFeature extends AbstractGeoViewVector {
    * ID, name, and metadata access path URL. It then initializes the layer entries by calling
    * `initGeoViewLayerEntries`, which may involve fetching metadata or sublayer info.
    *
-   * @param geoviewLayerId - A unique identifier for the layer.
-   * @param geoviewLayerName - The display name of the layer.
-   * @param metadataAccessPath - The full service URL to the layer endpoint.
-   * @param isTimeAware - Indicates whether the layer supports time-based filtering.
-   * @returns A promise that resolves to an initialized GeoView layer configuration with layer entries.
+   * @param geoviewLayerId - A unique identifier for the layer
+   * @param geoviewLayerName - The display name of the layer
+   * @param metadataAccessPath - The full service URL to the layer endpoint
+   * @param isTimeAware - Indicates whether the layer supports time-based filtering
+   * @returns A promise that resolves to an initialized GeoView layer configuration with layer entries
    */
   static initGeoviewLayerConfig(
     geoviewLayerId: string,
