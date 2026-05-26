@@ -11,7 +11,6 @@ import type {
 } from '@/api/types/layer-schema-types';
 import type { DisplayDateMode } from '@/api/types/map-schema-types';
 import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
-import { LayerConfigWFSMissingError } from '@/core/exceptions/layer-exceptions';
 import type { OgcWfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import type { AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
@@ -322,24 +321,12 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   }
 
   /**
-   * Gets if the WMS layer has an associated WFS layer configuration.
-   *
-   * @returns True if the WMS layer has an associated WFS layer configuration
-   */
-  hasWfsLayerConfig(): boolean {
-    return !!this.#wfsLayerConfig;
-  }
-
-  /**
    * Gets the associated WFS layer configuration for this WMS layer.
-   * Throws an error if the configuration has not been set.
    *
-   * @returns The WFS layer configuration instance
-   * @throws {LayerConfigWFSMissingError} When no WFS layer configuration is defined for this WMS layer
+   * @returns The WFS layer configuration instance associated with this WMS layer, or `undefined` if no association exists
    */
-  getWfsLayerConfig(): OgcWfsLayerEntryConfig {
-    if (this.#wfsLayerConfig) return this.#wfsLayerConfig;
-    throw new LayerConfigWFSMissingError(this.layerPath);
+  getWfsLayerConfig(): OgcWfsLayerEntryConfig | undefined {
+    return this.#wfsLayerConfig;
   }
 
   /**

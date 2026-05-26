@@ -103,6 +103,10 @@ export class ConfigValidation {
         ConfigValidation.#printSchemaError(validate, listOfLayerEntryConfig[i]);
         return false;
       }
+
+      // Cleanup the '/' in the name
+      // eslint-disable-next-line no-param-reassign
+      listOfLayerEntryConfig[i].layerId = listOfLayerEntryConfig[i].layerId.replace(/\//g, '_');
     }
 
     for (let i = 0; i < listOfLayerEntryConfig.length; i++) {
