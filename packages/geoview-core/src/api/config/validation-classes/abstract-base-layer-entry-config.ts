@@ -556,13 +556,15 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   }
 
   /**
-   * Refreshes the layer metadata information by re-fetching the WMS GetCapabilities response and updating the layer configuration accordingly.
+   * Refreshes the layer metadata information.
    *
    * This method is typically used when the display date mode changes, as the metadata may contain time-sensitive information that needs to be updated on-the-fly.
+   * This method calls onRefreshMetadata so that child classes can implement their own logic to refresh the metadata.
    *
    * @param displayDateMode - The display date mode that should be used
    */
   refreshMetadata(displayDateMode: DisplayDateMode): Promise<void> {
+    // TODO: Add onRefreshMetadata overrides for all layer types (only WMS for now)
     // Call overridable method
     return this.onRefreshMetadata(displayDateMode);
   }
