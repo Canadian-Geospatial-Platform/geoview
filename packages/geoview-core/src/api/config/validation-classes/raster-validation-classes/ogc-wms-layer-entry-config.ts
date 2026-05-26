@@ -9,12 +9,13 @@ import type {
   TypeOfServer,
   TypeSourceImageWmsInitialConfig,
 } from '@/api/types/layer-schema-types';
+import type { DisplayDateMode } from '@/api/types/map-schema-types';
 import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { LayerConfigWFSMissingError } from '@/core/exceptions/layer-exceptions';
 import type { OgcWfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import type { AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
-import type { TypeWMSLayerConfig } from '@/geo/layer/geoview-layers/raster/wms';
+import { WMS, type TypeWMSLayerConfig } from '@/geo/layer/geoview-layers/raster/wms';
 import { normalizeDatacubeAccessPath } from '@/core/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { WFS } from '@/geo/layer/geoview-layers/vector/wfs';
@@ -62,7 +63,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    *
-   * @returns The strongly-typed layer configuration specific to this layer.
+   * @returns The strongly-typed layer configuration specific to this layer
    */
   override getGeoviewLayerConfig(): TypeWMSLayerConfig {
     return super.getGeoviewLayerConfig() as TypeWMSLayerConfig;
@@ -71,7 +72,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    *
-   * @returns The strongly-typed source configuration specific to this layer entry config.
+   * @returns The strongly-typed source configuration specific to this layer entry config
    */
   override getSource(): TypeSourceImageWmsInitialConfig {
     return super.getSource();
@@ -80,7 +81,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    *
-   * @returns The strongly-typed service metadata specific to this layer entry config.
+   * @returns The strongly-typed service metadata specific to this layer entry config
    */
   override getServiceMetadata(): TypeMetadataWMS | undefined {
     return super.getServiceMetadata() as TypeMetadataWMS | undefined;
@@ -89,7 +90,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    *
-   * @returns The strongly-typed layer metadata specific to this layer entry config.
+   * @returns The strongly-typed layer metadata specific to this layer entry config
    */
   override getLayerMetadata(): TypeMetadataWMSCapabilityLayer | undefined {
     return super.getLayerMetadata() as TypeMetadataWMSCapabilityLayer | undefined;
@@ -102,7 +103,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    * to read them from the layer's metadata (via the `Attribution.Title` property)
    * and sets them accordingly. Once set, the attributions are cached in the layer.
    *
-   * @returns The list of layer attributions, or `undefined` if none are available.
+   * @returns The list of layer attributions, or `undefined` if none are available
    */
   override getAttributions(): string[] | undefined {
     // If no attributions defined
@@ -181,7 +182,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    * and initializes the internal style list. The styles correspond to named
    * style definitions advertised by the WMS service (from the `Style` section of the metadata).
    *
-   * @returns The list of available style names, or `undefined` if none are defined.
+   * @returns The list of available style names, or `undefined` if none are defined
    */
   getStyles(): string[] | undefined {
     // If no styles defined
@@ -205,7 +206,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    * Returns the complete `TypeMetadataWMSCapabilityLayerStyle` objects from the layer metadata,
    * which include style names, legend URLs, and other style-related information.
    *
-   * @returns The list of available style metadata objects, or `undefined` if none are defined.
+   * @returns The list of available style metadata objects, or `undefined` if none are defined
    */
   getStylesMetadata(): TypeMetadataWMSCapabilityLayerStyle[] | undefined {
     return this.getLayerMetadata()?.Style;
@@ -389,6 +390,25 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   }
 
   /**
+   * Refreshes the layer metadata information by re-fetching the WMS GetCapabilities response and updating the layer configuration accordingly.
+   *
+   * This method is typically used when the display date mode changes, as the metadata may contain time-sensitive information that needs to be updated on-the-fly.
+   *
+   * @param displayDateMode - The display date mode that should be used
+   * @returns A promise that resolves when the metadata refresh operation has completed
+   */
+  override async onRefreshMetadata(displayDateMode: DisplayDateMode): Promise<void> {
+    // Refetch the metadata again with the new date mode and update the config
+    const layerMetadata = await WMS.fetchMetadataWMSForLayer(this.getMetadataAccessPath()!, this.layerId);
+
+    // Read the capabilities
+    const layerCapabilities = WMS.findLayerMetadataInCapability(this.layerId, layerMetadata.Capability.Layer);
+
+    // Init the layer metadata
+    WMS.initLayerMetadata(this, layerCapabilities, displayDateMode);
+  }
+
+  /**
    * Normalizes both the metadata and data access paths by replacing legacy wrapper segments in the URL.
    *
    * Specifically, this method replaces `wrapper/ramp/ogc` with `ows` in the metadata access path,
@@ -423,7 +443,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     this.setDataAccessPath(dataAccessPath);
   }
 
-  // #region OVERRIDES
+  // #endregion METHODS
 
   // #region STATIC METHODS
 

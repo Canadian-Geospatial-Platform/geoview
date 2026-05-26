@@ -165,33 +165,8 @@ export class WKB extends AbstractGeoViewVector {
     // Get the metadata
     const metadata = this.getMetadata();
 
-    // If metadata was previously found
-    if (metadata) {
-      // Search for the layer metadata
-      const layerMetadataFound = WKB.#recursiveSearch(layerConfig.layerId, metadata.listOfLayerEntryConfig) as VectorLayerEntryConfigProps;
-
-      // If the layer metadata was found
-      if (layerMetadataFound) {
-        // Initialize the layer name by filling the blanks with the name from the metadata
-        layerConfig.initLayerNameFromMetadata(layerMetadataFound.layerName);
-
-        // Initialize the source by filling the blanks with the information from the metadata
-        layerConfig.initSourceFromMetadata(layerMetadataFound.source);
-
-        // Initialize the initial settings by filling the blanks with the information from the metadata
-        layerConfig.initInitialSettingsFromMetadata(layerMetadataFound.initialSettings);
-
-        // Initialize the layer style by filling the blanks with the information from the metadata
-        layerConfig.initLayerStyleFromMetadata(layerMetadataFound.layerStyle);
-
-        // Init min and max scales
-        layerConfig.initMinScaleFromMetadata(layerMetadataFound.minScale);
-        layerConfig.initMaxScaleFromMetadata(layerMetadataFound.maxScale);
-      }
-    }
-
-    // Setting the layer metadata now with the updated config values. Setting the layer metadata with the config, directly, like it's done in CSV
-    layerConfig.setLayerMetadata(layerConfig);
+    // Initialize the layer metadata from the service metadata
+    WKB.initLayerMetadata(layerConfig, metadata);
 
     // Return the layer config
     return Promise.resolve(layerConfig);
@@ -256,63 +231,7 @@ export class WKB extends AbstractGeoViewVector {
 
   // #endregion OVERRIDES
 
-  // #region STATIC METHODS
-
-  /**
-   * This method is used to do a recursive search in the array of layer entry config.
-   *
-   * @param searchKey - The layer list to search
-   * @param metadataLayerList - The layer list to search
-   * @returns The found layer or undefined if not found
-   */
-  static #recursiveSearch(searchKey: string, metadataLayerList: TypeLayerEntryShell[]): TypeLayerEntryShell | undefined {
-    for (const layerMetadata of metadataLayerList) {
-      if (searchKey === layerMetadata.layerId) return layerMetadata;
-      if ('isLayerGroup' in layerMetadata && (layerMetadata.isLayerGroup as boolean) && layerMetadata.listOfLayerEntryConfig) {
-        const foundLayer = this.#recursiveSearch(searchKey, layerMetadata.listOfLayerEntryConfig);
-        if (foundLayer) return foundLayer;
-      }
-    }
-    return undefined;
-  }
-
-  /**
-   * Fetches the metadata for a typical GeoJson class.
-   *
-   * @param url - The url to query the metadata from
-   * @throws {RequestTimeoutError} When the request exceeds the timeout duration
-   * @throws {RequestAbortedError} When the request was aborted by the caller's signal
-   * @throws {ResponseError} When the response is not OK (non-2xx)
-   * @throws {ResponseEmptyError} When the JSON response is empty
-   */
-  static fetchMetadata(url: string, abortSignal?: AbortSignal): Promise<TypeMetadataGeoJSON> {
-    // Return it
-    return Fetch.fetchJson<TypeMetadataGeoJSON>(url, { signal: abortSignal });
-  }
-
-  /**
-   * Initializes a GeoView layer configuration for a WKB layer.
-   *
-   * This method creates a basic TypeGeoviewLayerConfig using the provided
-   * ID, name, and metadata access path URL. It then initializes the layer entries by calling
-   * `initGeoViewLayerEntries`, which may involve fetching metadata or sublayer info.
-   *
-   * @param geoviewLayerId - A unique identifier for the layer
-   * @param geoviewLayerName - The display name of the layer
-   * @param metadataAccessPath - The full service URL to the layer endpoint
-   * @param isTimeAware - Indicates whether the layer supports time-based filtering
-   * @returns A promise that resolves to an initialized GeoView layer configuration with layer entries
-   */
-  static initGeoviewLayerConfig(
-    geoviewLayerId: string,
-    geoviewLayerName: string,
-    metadataAccessPath: string,
-    isTimeAware?: boolean
-  ): Promise<TypeGeoviewLayerConfig> {
-    // Create the Layer config
-    const myLayer = new WKB({ geoviewLayerId, geoviewLayerName, metadataAccessPath, isTimeAware } as TypeWkbLayerConfig);
-    return myLayer.initGeoViewLayerEntries();
-  }
+  // #region STATIC PUBLIC METHODS
 
   /**
    * Creates a configuration object for a WKB Feature layer.
@@ -359,6 +278,70 @@ export class WKB extends AbstractGeoViewVector {
   }
 
   /**
+   * Initializes a GeoView layer configuration for a WKB layer.
+   *
+   * This method creates a basic TypeGeoviewLayerConfig using the provided
+   * ID, name, and metadata access path URL. It then initializes the layer entries by calling
+   * `initGeoViewLayerEntries`, which may involve fetching metadata or sublayer info.
+   *
+   * @param geoviewLayerId - A unique identifier for the layer
+   * @param geoviewLayerName - The display name of the layer
+   * @param metadataAccessPath - The full service URL to the layer endpoint
+   * @param isTimeAware - Indicates whether the layer supports time-based filtering
+   * @returns A promise that resolves to an initialized GeoView layer configuration with layer entries
+   */
+  static initGeoviewLayerConfig(
+    geoviewLayerId: string,
+    geoviewLayerName: string,
+    metadataAccessPath: string,
+    isTimeAware?: boolean
+  ): Promise<TypeGeoviewLayerConfig> {
+    // Create the Layer config
+    const myLayer = new WKB({ geoviewLayerId, geoviewLayerName, metadataAccessPath, isTimeAware } as TypeWkbLayerConfig);
+    return myLayer.initGeoViewLayerEntries();
+  }
+
+  /**
+   * Initializes the layer metadata from the provided service metadata.
+   *
+   * This method searches for the corresponding metadata entry in the provided metadata object based on the layer ID.
+   * If a matching metadata entry is found, it sets the layer metadata on the configuration and initializes the source,
+   * initial settings, layer style, and scale range using the metadata.
+   *
+   * @param layerConfig - The WKB layer entry configuration to initialize with metadata
+   * @param metadata - The metadata object containing information about the layers, which may include a list of layer entry configurations
+   */
+  static initLayerMetadata(layerConfig: VectorLayerEntryConfig, metadata: TypeMetadataGeoJSON | undefined): void {
+    // If metadata was previously found
+    if (metadata) {
+      // Search for the layer metadata
+      const layerMetadataFound = WKB.#recursiveSearch(layerConfig.layerId, metadata.listOfLayerEntryConfig) as VectorLayerEntryConfigProps;
+
+      // If the layer metadata was found
+      if (layerMetadataFound) {
+        // Initialize the layer name by filling the blanks with the name from the metadata
+        layerConfig.initLayerNameFromMetadata(layerMetadataFound.layerName);
+
+        // Initialize the source by filling the blanks with the information from the metadata
+        layerConfig.initSourceFromMetadata(layerMetadataFound.source);
+
+        // Initialize the initial settings by filling the blanks with the information from the metadata
+        layerConfig.initInitialSettingsFromMetadata(layerMetadataFound.initialSettings);
+
+        // Initialize the layer style by filling the blanks with the information from the metadata
+        layerConfig.initLayerStyleFromMetadata(layerMetadataFound.layerStyle);
+
+        // Init min and max scales
+        layerConfig.initMinScaleFromMetadata(layerMetadataFound.minScale);
+        layerConfig.initMaxScaleFromMetadata(layerMetadataFound.maxScale);
+      }
+    }
+
+    // Setting the layer metadata now with the updated config values. Setting the layer metadata with the config, directly, like it's done in CSV
+    layerConfig.setLayerMetadata(layerConfig);
+  }
+
+  /**
    * Processes a WKB GeoviewLayerConfig and returns a promise
    * that resolves to an array of `ConfigBaseClass` layer entry configurations.
    *
@@ -399,5 +382,41 @@ export class WKB extends AbstractGeoViewVector {
     return AbstractGeoViewVector.processConfig(myLayer);
   }
 
-  // #endregion STATIC METHODS
+  /**
+   * Fetches the metadata for a typical GeoJson class.
+   *
+   * @param url - The url to query the metadata from
+   * @throws {RequestTimeoutError} When the request exceeds the timeout duration
+   * @throws {RequestAbortedError} When the request was aborted by the caller's signal
+   * @throws {ResponseError} When the response is not OK (non-2xx)
+   * @throws {ResponseEmptyError} When the JSON response is empty
+   */
+  static fetchMetadata(url: string, abortSignal?: AbortSignal): Promise<TypeMetadataGeoJSON> {
+    // Return it
+    return Fetch.fetchJson<TypeMetadataGeoJSON>(url, { signal: abortSignal });
+  }
+
+  // #endregion STATIC PUBLIC METHODS
+
+  // #region STATIC PRIVATE METHODS
+
+  /**
+   * This method is used to do a recursive search in the array of layer entry config.
+   *
+   * @param searchKey - The layer list to search
+   * @param metadataLayerList - The layer list to search
+   * @returns The found layer or undefined if not found
+   */
+  static #recursiveSearch(searchKey: string, metadataLayerList: TypeLayerEntryShell[]): TypeLayerEntryShell | undefined {
+    for (const layerMetadata of metadataLayerList) {
+      if (searchKey === layerMetadata.layerId) return layerMetadata;
+      if ('isLayerGroup' in layerMetadata && (layerMetadata.isLayerGroup as boolean) && layerMetadata.listOfLayerEntryConfig) {
+        const foundLayer = this.#recursiveSearch(searchKey, layerMetadata.listOfLayerEntryConfig);
+        if (foundLayer) return foundLayer;
+      }
+    }
+    return undefined;
+  }
+
+  // #endregion STATIC PRIVATE METHODS
 }

@@ -88,7 +88,7 @@ export class EsriImage extends AbstractGeoViewRaster {
     mapProjection?: OLProjection,
     abortSignal?: AbortSignal
   ): Promise<EsriImageLayerEntryConfig> {
-    return EsriUtilities.commonProcessLayerMetadata(this, layerConfig, displayDateMode, abortSignal);
+    return EsriUtilities.initLayerMetadata(this, layerConfig, displayDateMode, abortSignal);
   }
 
   /**

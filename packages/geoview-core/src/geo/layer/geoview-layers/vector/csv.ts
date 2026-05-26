@@ -129,31 +129,7 @@ export class CSV extends AbstractGeoViewVector {
 
   // #endregion OVERRIDES
 
-  // #region STATIC METHODS
-
-  /**
-   * Initializes a GeoView layer configuration for a CSV layer.
-   *
-   * This method creates a basic TypeGeoviewLayerConfig using the provided
-   * ID, name, and metadata access path URL. It then initializes the layer entries by calling
-   * `initGeoViewLayerEntries`, which may involve fetching metadata or sublayer info.
-   *
-   * @param geoviewLayerId - A unique identifier for the layer
-   * @param geoviewLayerName - The display name of the layer
-   * @param metadataAccessPath - The full service URL to the layer endpoint
-   * @param isTimeAware - Indicates whether the layer supports time-based filtering
-   * @returns A promise that resolves to an initialized GeoView layer configuration with layer entries
-   */
-  static initGeoviewLayerConfig(
-    geoviewLayerId: string,
-    geoviewLayerName: string,
-    metadataAccessPath: string,
-    isTimeAware?: boolean
-  ): Promise<TypeGeoviewLayerConfig> {
-    // Create the Layer config
-    const myLayer = new CSV({ geoviewLayerId, geoviewLayerName, metadataAccessPath, isTimeAware } as TypeCSVLayerConfig);
-    return myLayer.initGeoViewLayerEntries();
-  }
+  // #region STATIC PUBLIC METHODS
 
   /**
    * Creates a configuration object for a CSV Feature layer.
@@ -194,6 +170,30 @@ export class CSV extends AbstractGeoViewVector {
 
     // Return it
     return geoviewLayerConfig;
+  }
+
+  /**
+   * Initializes a GeoView layer configuration for a CSV layer.
+   *
+   * This method creates a basic TypeGeoviewLayerConfig using the provided
+   * ID, name, and metadata access path URL. It then initializes the layer entries by calling
+   * `initGeoViewLayerEntries`, which may involve fetching metadata or sublayer info.
+   *
+   * @param geoviewLayerId - A unique identifier for the layer
+   * @param geoviewLayerName - The display name of the layer
+   * @param metadataAccessPath - The full service URL to the layer endpoint
+   * @param isTimeAware - Indicates whether the layer supports time-based filtering
+   * @returns A promise that resolves to an initialized GeoView layer configuration with layer entries
+   */
+  static initGeoviewLayerConfig(
+    geoviewLayerId: string,
+    geoviewLayerName: string,
+    metadataAccessPath: string,
+    isTimeAware?: boolean
+  ): Promise<TypeGeoviewLayerConfig> {
+    // Create the Layer config
+    const myLayer = new CSV({ geoviewLayerId, geoviewLayerName, metadataAccessPath, isTimeAware } as TypeCSVLayerConfig);
+    return myLayer.initGeoViewLayerEntries();
   }
 
   /**
@@ -294,6 +294,10 @@ export class CSV extends AbstractGeoViewVector {
     return features;
   }
 
+  // #endregion STATIC PUBLIC METHODS
+
+  // #region STATIC PRIVATE METHODS
+
   /**
    * Converts csv to array of rows of separated values.
    *
@@ -333,5 +337,5 @@ export class CSV extends AbstractGeoViewVector {
     return parsedData;
   }
 
-  // #endregion STATIC METHODS
+  // #endregion STATIC PRIVATE METHODS
 }

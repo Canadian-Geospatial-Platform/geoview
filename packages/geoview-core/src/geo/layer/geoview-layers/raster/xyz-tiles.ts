@@ -54,7 +54,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    *
-   * @returns The strongly-typed layer configuration specific to this layer.
+   * @returns The strongly-typed layer configuration specific to this layer
    */
   override getGeoviewLayerConfig(): TypeXYZTilesConfig {
     return super.getGeoviewLayerConfig() as TypeXYZTilesConfig;
@@ -63,7 +63,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    *
-   * @returns The strongly-typed metadata specific to this layer.
+   * @returns The strongly-typed metadata specific to this layer
    */
   override getMetadata(): TypeMetadataXYZTiles | undefined {
     return super.getMetadata() as TypeMetadataXYZTiles | undefined;
@@ -72,7 +72,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
   /**
    * Overrides the way a geoview layer config initializes its layer entries.
    *
-   * @returns A promise that resolves once the layer entries have been initialized.
+   * @returns A promise that resolves once the layer entries have been initialized
    */
   protected override onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Redirect
@@ -90,7 +90,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
   /**
    * Overrides the validation of a layer entry config.
    *
-   * @param layerConfig - The layer entry config to validate.
+   * @param layerConfig - The layer entry config to validate
    */
   protected override onValidateLayerEntryConfig(layerConfig: ConfigBaseClass): void {
     // TODO: Update to properly use metadata from map server
@@ -128,11 +128,11 @@ export class XYZTiles extends AbstractGeoViewRaster {
   /**
    * Overrides the way the layer metadata is processed.
    *
-   * @param layerConfig - The layer entry configuration to process.
-   * @param displayDateMode - The display date mode to use for processing time dimensions in the metadata.
-   * @param mapProjection - Optional map projection.
-   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
-   * @returns A promise that resolves once the layer entry configuration has gotten its metadata processed.
+   * @param layerConfig - The layer entry configuration to process
+   * @param displayDateMode - The display date mode to use for processing time dimensions in the metadata
+   * @param mapProjection - Optional map projection
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+   * @returns A promise that resolves once the layer entry configuration has gotten its metadata processed
    */
   protected override onProcessLayerMetadata(
     layerConfig: XYZTilesLayerEntryConfig,
@@ -151,38 +151,8 @@ export class XYZTiles extends AbstractGeoViewRaster {
     // Get the metadata
     const metadata = this.getMetadata();
 
-    if (metadata) {
-      let metadataLayerConfigFound;
-      if (metadata.listOfLayerEntryConfig) {
-        metadataLayerConfigFound = metadata.listOfLayerEntryConfig.find(
-          (metadataLayerConfig) => metadataLayerConfig.layerId === layerConfig.layerId
-        );
-      }
-
-      // For ESRI MapServer XYZ Tiles
-      if (metadata.layers) {
-        metadataLayerConfigFound = metadata.layers.find((metadataLayerConfig) => metadataLayerConfig.id === layerConfig.layerId);
-      }
-
-      // If found
-      if (metadataLayerConfigFound) {
-        // Set the layer metadata. metadataLayerConfigFound can't be undefined because we have already validated the config exist
-        layerConfig.setLayerMetadata(metadataLayerConfigFound);
-
-        // Initialize the source by filling the blanks with the information from the metadata
-        layerConfig.initSourceFromMetadata(metadataLayerConfigFound.source);
-
-        // Initialize the initial settings by filling the blanks with the information from the metadata
-        layerConfig.initInitialSettingsFromMetadata(metadataLayerConfigFound.initialSettings);
-
-        // Set zoom limits for max / min zooms
-        // GV MinScaleDenominator is actually the maxScale and MaxScaleDenominator is actually the minScale
-        const minScale = metadataLayerConfigFound?.minScale || metadataLayerConfigFound?.maxScaleDenominator;
-        layerConfig.initMinScaleFromMetadata(minScale);
-        const maxScale = metadataLayerConfigFound?.maxScale || metadataLayerConfigFound?.minScaleDenominator;
-        layerConfig.initMaxScaleFromMetadata(maxScale);
-      }
-    }
+    // Process the metadata and set it on the layer config
+    XYZTiles.initLayerMetadata(layerConfig, metadata);
 
     // Return the layer config
     return Promise.resolve(layerConfig);
@@ -191,7 +161,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
   /**
    * Overrides the creation of the GV Layer
    *
-   * @param layerConfig - The layer entry configuration.
+   * @param layerConfig - The layer entry configuration
    * @returns The GV Layer
    */
   protected override onCreateGVLayer(layerConfig: XYZTilesLayerEntryConfig): GVXYZTiles {
@@ -207,31 +177,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
 
   // #endregion OVERRIDES
 
-  // #region STATIC METHODS
-
-  /**
-   * Initializes a GeoView layer configuration for a XYZ Tiles layer.
-   *
-   * This method creates a basic TypeGeoviewLayerConfig using the provided
-   * ID, name, and metadata access path URL. It then initializes the layer entries by calling
-   * `initGeoViewLayerEntries`, which may involve fetching metadata or sublayer info.
-   *
-   * @param geoviewLayerId - A unique identifier for the layer.
-   * @param geoviewLayerName - The display name of the layer.
-   * @param metadataAccessPath - The full service URL to the layer endpoint.
-   * @param isTimeAware - Optional to indicates whether the layer supports time-based filtering.
-   * @returns A promise that resolves to an initialized GeoView layer configuration with layer entries.
-   */
-  static initGeoviewLayerConfig(
-    geoviewLayerId: string,
-    geoviewLayerName: string,
-    metadataAccessPath: string,
-    isTimeAware?: boolean
-  ): Promise<TypeGeoviewLayerConfig> {
-    // Create the Layer config
-    const myLayer = new XYZTiles({ geoviewLayerId, geoviewLayerName, metadataAccessPath, isTimeAware } as TypeXYZTilesConfig);
-    return myLayer.initGeoViewLayerEntries();
-  }
+  // #region STATIC PUBLIC METHODS
 
   /**
    * Creates a configuration object for a XYZTiles layer.
@@ -239,13 +185,13 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * This function constructs a `TypeXYZTilesConfig` object that describes an XYZTiles layer
    * and its associated entry configurations based on the provided parameters.
    *
-   * @param geoviewLayerId - A unique identifier for the GeoView layer.
-   * @param geoviewLayerName - The display name of the GeoView layer.
-   * @param metadataAccessPath - The URL or path to access metadata.
-   * @param isTimeAware - Indicates whether the layer supports time-based filtering.
+   * @param geoviewLayerId - A unique identifier for the GeoView layer
+   * @param geoviewLayerName - The display name of the GeoView layer
+   * @param metadataAccessPath - The URL or path to access metadata
+   * @param isTimeAware - Indicates whether the layer supports time-based filtering
    * @param layerEntries - An array of layer entries objects to be included
    * in the configuration.
-   * @returns The constructed configuration object for the XYZTiles layer.
+   * @returns The constructed configuration object for the XYZTiles layer
    */
   static createGeoviewLayerConfig(
     geoviewLayerId: string,
@@ -276,6 +222,75 @@ export class XYZTiles extends AbstractGeoViewRaster {
   }
 
   /**
+   * Initializes a GeoView layer configuration for a XYZ Tiles layer.
+   *
+   * This method creates a basic TypeGeoviewLayerConfig using the provided
+   * ID, name, and metadata access path URL. It then initializes the layer entries by calling
+   * `initGeoViewLayerEntries`, which may involve fetching metadata or sublayer info.
+   *
+   * @param geoviewLayerId - A unique identifier for the layer
+   * @param geoviewLayerName - The display name of the layer
+   * @param metadataAccessPath - The full service URL to the layer endpoint
+   * @param isTimeAware - Optional to indicates whether the layer supports time-based filtering
+   * @returns A promise that resolves to an initialized GeoView layer configuration with layer entries
+   */
+  static initGeoviewLayerConfig(
+    geoviewLayerId: string,
+    geoviewLayerName: string,
+    metadataAccessPath: string,
+    isTimeAware?: boolean
+  ): Promise<TypeGeoviewLayerConfig> {
+    // Create the Layer config
+    const myLayer = new XYZTiles({ geoviewLayerId, geoviewLayerName, metadataAccessPath, isTimeAware } as TypeXYZTilesConfig);
+    return myLayer.initGeoViewLayerEntries();
+  }
+
+  /**
+   * Initializes the metadata for a given XYZTiles layer entry configuration.
+   *
+   * This method searches for the corresponding metadata entry in the provided metadata object based on the layer ID.
+   * If a matching metadata entry is found, it sets the layer metadata on the configuration and initializes the source and initial settings using the metadata.
+   *
+   * @param layerConfig - The XYZTiles layer entry configuration to initialize with metadata
+   * @param metadata - The metadata object containing information about the layers, which may include a list of layer entry configurations or a list of layers (for ESRI MapServer XYZ Tiles)
+   */
+  static initLayerMetadata(layerConfig: XYZTilesLayerEntryConfig, metadata: TypeMetadataXYZTiles | undefined): void {
+    // If not metadata, skip
+    if (!metadata) return;
+
+    let metadataLayerConfigFound;
+    if (metadata.listOfLayerEntryConfig) {
+      metadataLayerConfigFound = metadata.listOfLayerEntryConfig.find(
+        (metadataLayerConfig) => metadataLayerConfig.layerId === layerConfig.layerId
+      );
+    }
+
+    // For ESRI MapServer XYZ Tiles
+    if (metadata.layers) {
+      metadataLayerConfigFound = metadata.layers.find((metadataLayerConfig) => metadataLayerConfig.id === layerConfig.layerId);
+    }
+
+    // If found
+    if (metadataLayerConfigFound) {
+      // Set the layer metadata. metadataLayerConfigFound can't be undefined because we have already validated the config exist
+      layerConfig.setLayerMetadata(metadataLayerConfigFound);
+
+      // Initialize the source by filling the blanks with the information from the metadata
+      layerConfig.initSourceFromMetadata(metadataLayerConfigFound.source);
+
+      // Initialize the initial settings by filling the blanks with the information from the metadata
+      layerConfig.initInitialSettingsFromMetadata(metadataLayerConfigFound.initialSettings);
+
+      // Set zoom limits for max / min zooms
+      // GV MinScaleDenominator is actually the maxScale and MaxScaleDenominator is actually the minScale
+      const minScale = metadataLayerConfigFound?.minScale || metadataLayerConfigFound?.maxScaleDenominator;
+      layerConfig.initMinScaleFromMetadata(minScale);
+      const maxScale = metadataLayerConfigFound?.maxScale || metadataLayerConfigFound?.minScaleDenominator;
+      layerConfig.initMaxScaleFromMetadata(maxScale);
+    }
+  }
+
+  /**
    * Processes an XYZ Tiles GeoviewLayerConfig and returns a promise
    * that resolves to an array of `ConfigBaseClass` layer entry configurations.
    *
@@ -284,12 +299,12 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * 2. Instantiates a layer with that configuration.
    * 3. Processes the layer configuration and returns the result.
    *
-   * @param geoviewLayerId - The unique identifier for the GeoView layer.
-   * @param geoviewLayerName - The display name for the GeoView layer.
-   * @param url - The URL of the service endpoint.
-   * @param layerIds - An array of layer IDs to include in the configuration.
-   * @param isTimeAware - Indicates if the layer is time aware.
-   * @returns A promise that resolves to an array of layer configurations.
+   * @param geoviewLayerId - The unique identifier for the GeoView layer
+   * @param geoviewLayerName - The display name for the GeoView layer
+   * @param url - The URL of the service endpoint
+   * @param layerIds - An array of layer IDs to include in the configuration
+   * @param isTimeAware - Indicates if the layer is time aware
+   * @returns A promise that resolves to an array of layer configurations
    */
   static processGeoviewLayerConfig(
     geoviewLayerId: string,
@@ -319,9 +334,9 @@ export class XYZTiles extends AbstractGeoViewRaster {
   /**
    * Creates an XYZ source from a layer config.
    *
-   * @param layerConfig - The configuration for the XYZ layer.
-   * @returns A fully configured XYZ source.
-   * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
+   * @param layerConfig - The configuration for the XYZ layer
+   * @returns A fully configured XYZ source
+   * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called
    */
   static createXYZSource(layerConfig: XYZTilesLayerEntryConfig): XYZ {
     const sourceOptions: SourceOptions = {
@@ -352,5 +367,5 @@ export class XYZTiles extends AbstractGeoViewRaster {
     return new XYZ(sourceOptions);
   }
 
-  // #endregion STATIC METHODS
+  // #endregion STATIC PUBLIC METHODS
 }

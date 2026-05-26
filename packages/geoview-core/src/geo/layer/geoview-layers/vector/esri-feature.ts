@@ -195,7 +195,7 @@ export class EsriFeature extends AbstractGeoViewVector {
     mapProjection?: OLProjection,
     abortSignal?: AbortSignal
   ): Promise<EsriFeatureLayerEntryConfig> {
-    return EsriUtilities.commonProcessLayerMetadata(this, layerConfig, displayDateMode, abortSignal);
+    return EsriUtilities.initLayerMetadata(this, layerConfig, displayDateMode, abortSignal);
   }
 
   /**
