@@ -164,7 +164,9 @@ export class UtilAddLayer {
     layersToAdd: (TypeGeoviewLayerConfig | TypeLayerEntryConfig)[],
     layerIdsToAdd: string[],
     removedLayerIds: string[],
-    groupLayer: TypeGeoviewLayerConfig | GroupLayerEntryConfig | GroupLayerEntryConfigProps
+    layerTree: TypeGeoviewLayerConfig,
+    groupLayer: TypeGeoviewLayerConfig | GroupLayerEntryConfig | GroupLayerEntryConfigProps,
+    allowCollapse = true
   ): LayerEntryConfigShell {
     // Casts
     const groupLayerAsLayerEntryConfig = groupLayer as GroupLayerEntryConfig;
@@ -172,20 +174,37 @@ export class UtilAddLayer {
     // The ID depending on the config type
     const groupLayerId = `${groupLayerAsLayerEntryConfig.layerId || (groupLayer as TypeGeoviewLayerConfig).geoviewLayerId}`;
 
+    // Find the current group view id from the actual tree structure.
+    const findLayerViewId = (entries: TypeLayerEntryConfig[], parentViewId?: string): string | undefined => {
+      for (const entry of entries) {
+        const entryViewId = `${parentViewId ? `${parentViewId}/` : ''}${entry.layerId}`;
+        if (entry === groupLayerAsLayerEntryConfig) return entryViewId;
+        if (entry.listOfLayerEntryConfig?.length) {
+          const found = findLayerViewId(entry.listOfLayerEntryConfig, entryViewId);
+          if (found) return found;
+        }
+      }
+      return undefined;
+    };
+
+    const treeGroupViewId = findLayerViewId(layerTree.listOfLayerEntryConfig);
+    const groupLayerViewId = treeGroupViewId || groupLayerId;
+
     // Add IDs of sublayers to the layerIdsToRemove array so they are not added multiple times
-    const longLayerIdsToRemove = layerIdsToAdd.filter((layerId) => layerId.split('/').includes(groupLayerId));
-    if (longLayerIdsToRemove.length) {
-      const layerIdsToRemove = longLayerIdsToRemove.map((layerId) => layerId.split('/').pop()).filter((id) => id !== undefined);
-      removedLayerIds.push(...layerIdsToRemove);
+    const layerPathPrefix = `${groupLayerViewId}/`;
+    const childLayerIdsToRemove = layerIdsToAdd.filter((layerId) => layerId.startsWith(layerPathPrefix));
+    const groupedSelectionCount = childLayerIdsToRemove.length + 1;
+    if (childLayerIdsToRemove.length) {
+      removedLayerIds.push(...childLayerIdsToRemove);
     }
 
     // If all sub layers are included, simply add the layer
-    if (layerType === CONST_LAYER_TYPES.ESRI_DYNAMIC && UtilAddLayer.allSubLayersAreIncluded(groupLayer, layerIds)) {
+    if (allowCollapse && layerType === CONST_LAYER_TYPES.ESRI_DYNAMIC && UtilAddLayer.allSubLayersAreIncluded(groupLayer, layerIds)) {
       return {
         layerId: groupLayerAsLayerEntryConfig?.layerId,
         // If there is only one layer, or a single group layer, use the provided name from the text field
         layerName:
-          layersToAdd.length === 1 || layersToAdd.length === longLayerIdsToRemove.length
+          layersToAdd.length === 1 || layersToAdd.length === groupedSelectionCount
             ? layerName
             : ConfigBaseClass.getClassOrTypeLayerName(groupLayer),
       };
@@ -198,7 +217,7 @@ export class UtilAddLayer {
       entryType: 'group',
       // If there is only one layer, or a single group layer, use the provided name from the text field
       layerName:
-        layersToAdd.length === 1 || layersToAdd.length === longLayerIdsToRemove.length
+        layersToAdd.length === 1 || layersToAdd.length === groupedSelectionCount
           ? layerName
           : ConfigBaseClass.getClassOrTypeLayerName(groupLayer),
       listOfLayerEntryConfig: groupLayer.listOfLayerEntryConfig
@@ -211,7 +230,9 @@ export class UtilAddLayer {
               layersToAdd,
               layerIdsToAdd,
               removedLayerIds,
-              layerEntryConfig as GroupLayerEntryConfig
+              layerTree,
+              layerEntryConfig as GroupLayerEntryConfig,
+              false
             );
           if (layerIds.includes(layerEntryConfig.layerId))
             return {
@@ -257,7 +278,13 @@ export class UtilAddLayer {
     }
 
     const listOfLayerEntryConfig: LayerEntryConfigShell[] = [];
-    const layersToAdd = layerIdsToAdd.map((layerId) => UtilAddLayer.getLayerById(layerTree, layerId)).filter((layerToAdd) => !!layerToAdd);
+    const selectedLayers = layerIdsToAdd
+      .map((layerViewId) => ({ layerViewId, layerToAdd: UtilAddLayer.getLayerById(layerTree, layerViewId) }))
+      .filter(
+        (selectedLayer): selectedLayer is { layerViewId: string; layerToAdd: TypeGeoviewLayerConfig | TypeLayerEntryConfig } =>
+          !!selectedLayer.layerToAdd
+      );
+    const layersToAdd = selectedLayers.map((selectedLayer) => selectedLayer.layerToAdd);
 
     // If the layers to add is only 1 and it's already a group, go as-is
     if (layersToAdd.length === 1 && layersToAdd[0].listOfLayerEntryConfig?.length > 0) {
@@ -273,16 +300,16 @@ export class UtilAddLayer {
 
     if (layersToAdd.length) {
       const removedLayerIds: string[] = [];
-      const layerIds = layerIdsToAdd.map((layerId) => layerId.split('/').pop()!);
+      const layerIds = layersToAdd.map((layerEntry) => ConfigBaseClass.getClassOrTypeLayerId(layerEntry)!);
 
       // Create an entry config shell for each layer if it is not in the removedLayerIds
-      layersToAdd.forEach((layerToAdd) => {
+      selectedLayers.forEach(({ layerViewId, layerToAdd }) => {
         // Casts
         const layerToAddAsGeoviewLayerConfig = layerToAdd as TypeGeoviewLayerConfig;
         const layerToAddAsLayerEntryConfig = layerToAdd as TypeLayerEntryConfig;
 
         // Skip if the layer is in the list of layer ids to be removed
-        if (removedLayerIds.includes(layerToAddAsLayerEntryConfig.layerId)) return;
+        if (removedLayerIds.includes(layerViewId) || removedLayerIds.includes(layerToAddAsLayerEntryConfig.layerId)) return;
 
         // If it's a TypeGeoviewLayerConfig or a entry group
         if ((layerToAdd as TypeGeoviewLayerConfig).geoviewLayerId || layerToAddAsLayerEntryConfig.getEntryTypeIsGroup()) {
@@ -295,6 +322,7 @@ export class UtilAddLayer {
               layersToAdd,
               layerIdsToAdd,
               removedLayerIds,
+              layerTree,
               layerToAddAsGeoviewLayerConfig
             )
           );

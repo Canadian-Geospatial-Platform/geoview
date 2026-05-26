@@ -23,7 +23,11 @@ import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import { Projection } from '@/geo/utils/projection';
-import { LayerInvalidFeatureInfoFormatWMSError, LayerInvalidLayerFilterError } from '@/core/exceptions/layer-exceptions';
+import {
+  LayerConfigWFSMissingError,
+  LayerInvalidFeatureInfoFormatWMSError,
+  LayerInvalidLayerFilterError,
+} from '@/core/exceptions/layer-exceptions';
 import { formatError, NetworkError, ResponseContentError } from '@/core/exceptions/core-exceptions';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
@@ -231,7 +235,6 @@ export class GVWMS extends AbstractGVRaster {
    * @param language - The display language, used to guess the best name field if `nameField` is not provided
    * @param abortController - Optional {@link AbortController} to cancel the operation
    * @returns A promise that resolves with the feature info result
-   * @throws {LayerConfigWFSMissingError} When no WFS layer configuration is defined for this WMS layer
    */
   protected override async getFeatureInfoAtLonLat(
     map: OLMap,
@@ -278,12 +281,12 @@ export class GVWMS extends AbstractGVRaster {
     const viewResolution = map.getView().getResolution()!;
     const projectionCode = map.getView().getProjection().getCode();
 
-    // If the layer has a WFS associated
-    if (wmsLayerConfig.hasWfsLayerConfig()) {
-      try {
-        // Get the Geoview Layer Config WFS equivalent
-        const wfsLayerConfig = wmsLayerConfig.getWfsLayerConfig();
+    // Get the Geoview Layer Config WFS equivalent if any
+    const wfsLayerConfig = wmsLayerConfig.getWfsLayerConfig();
 
+    // If the layer has a WFS associated
+    if (wfsLayerConfig) {
+      try {
         // We're going to try performing a GetFeature using the WFS query instead of WMS, better chance to retrieve the geometry that way
         return await this.#getFeatureInfoUsingWFS(
           wmsLayerConfig,
@@ -333,6 +336,7 @@ export class GVWMS extends AbstractGVRaster {
 
     // Get the Geoview Layer Config WFS equivalent
     const wfsLayerConfig = wmsLayerConfig.getWfsLayerConfig();
+    if (!wfsLayerConfig) throw new LayerConfigWFSMissingError(this.getLayerPath());
 
     // Redirect
     return this.#getFeatureInfoUsingWFS(
@@ -484,6 +488,7 @@ export class GVWMS extends AbstractGVRaster {
 
     // Get the Geoview Layer Config WFS equivalent
     const wfsLayerConfig = wmsLayerConfig.getWfsLayerConfig();
+    if (!wfsLayerConfig) throw new LayerConfigWFSMissingError(this.getLayerPath());
 
     // Get the primary key field name (equivalent of objectid for Esri Dynamic)
     const pkFieldName = wfsLayerConfig.getOutfieldsPK().name;
