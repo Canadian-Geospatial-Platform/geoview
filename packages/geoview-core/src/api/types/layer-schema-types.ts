@@ -919,6 +919,7 @@ export interface TypeMetadataWMSCapabilityLayerDimension {
   '#text': string;
   '@attributes': TypeMetadataWMSCapabilityLayerDimensionAttribute;
   default?: string;
+  multipleValues?: boolean;
   name?: string;
   units?: string;
   values?: string;
@@ -926,6 +927,7 @@ export interface TypeMetadataWMSCapabilityLayerDimension {
 
 export interface TypeMetadataWMSCapabilityLayerDimensionAttribute {
   default: string;
+  multipleValues?: string;
   name: string;
   units: string;
 }

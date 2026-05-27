@@ -62,12 +62,28 @@
       },
       {
         "geoviewLayerId": "historical-flood-wms",
-        "geoviewLayerName": "Hist. Flood - WMS (known issue, turn off time-slider toggle)",
+        "geoviewLayerName": "Hist. Flood - WMS",
         "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/services/NRCan/historical_flood_event_en/MapServer/WMSServer",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
             "layerId": "0",
+            "initialSettings": {
+              "states": {
+                "visible": false
+              }
+            }
+          }
+        ]
+      },
+       {
+        "geoviewLayerId": "archive-flood-wms",
+        "geoviewLayerName": "Archive Flood - WMS CDTK",
+        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/EGS_Flood_Archive_DEV_en?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "egs_flood_archive_dev_en",
             "initialSettings": {
               "states": {
                 "visible": false

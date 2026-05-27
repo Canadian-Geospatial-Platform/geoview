@@ -603,6 +603,11 @@ export abstract class GeoUtilities {
       dimension.default ??= dimension['@attributes'].default;
       // eslint-disable-next-line no-param-reassign
       dimension.units ??= dimension['@attributes'].units;
+      // Only set multipleValues when the attribute is explicitly present in the XML (absent means unknown, not false)
+      if (dimension.multipleValues === undefined && dimension['@attributes'].multipleValues !== undefined) {
+        // eslint-disable-next-line no-param-reassign
+        dimension.multipleValues = dimension['@attributes'].multipleValues === '1';
+      }
       // eslint-disable-next-line no-param-reassign
       dimension.values ??= dimension['#text'];
     });

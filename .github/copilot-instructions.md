@@ -165,9 +165,13 @@ Passing it directly without swapping interprets `[90, -95]` as map projection me
 const mapCoord = Projection.transformFromLonLat([lon, lat], projection);
 const pixel = map.getPixelFromCoordinate(mapCoord);
 const size = map.getSize();
-const isVisible = pixel && size
-  && pixel[0] >= 0 && pixel[0] <= size[0]
-  && pixel[1] >= 0 && pixel[1] <= size[1];
+const isVisible =
+  pixel &&
+  size &&
+  pixel[0] >= 0 &&
+  pixel[0] <= size[0] &&
+  pixel[1] >= 0 &&
+  pixel[1] <= size[1];
 ```
 
 **Screen-direction calculations** — When computing the visual direction from the viewport center to a map feature (e.g., north arrow pointing toward the pole), use pixel positions via `getPixelFromCoordinate` and `atan2`. Do NOT use geographic bearing formulas — they degenerate at projection singularities (e.g., `cos(90°) = 0` at the north pole). OL's `getPixelFromCoordinate` already accounts for view rotation internally.
@@ -262,6 +266,33 @@ Both effective scales are rounded, then expanded into tolerance boundaries using
 **Boundary semantics** — Base checks are inclusive (`>= minResolution` and `<= maxResolution`), but scale tolerance bands intentionally mark near-boundary scales as not visible to avoid unstable service behavior near thresholds.
 
 **Feature-query gating** — `AbstractLayerSet.queryLayerFeatures()` must gate queries with `isInVisibleRange(...)` using current resolution, current scale, and `computeEffectiveLayerScales(...)`, not zoom-only checks.
+
+### Time Dimension & Time Slider
+
+See [time-dimension.md](../docs/programming/time-dimension.md) for the full architecture documentation.
+
+**Two standards, one internal model** — OGC WMS uses `<Dimension>` XML in GetCapabilities; ESRI uses `timeInfo` JSON. Both are normalized into a `TimeDimension` type via `DateMgt.createDimensionFromOGC()` / `DateMgt.createDimensionFromESRI()`. ESRI metadata is converted to OGC-style strings so `createRangeOGC()` is the single shared parser.
+
+**Three range types** (detected from the OGC `values` string):
+
+| Type         | Format                          | Example                                         | `nearestValues` |
+| ------------ | ------------------------------- | ----------------------------------------------- | --------------- |
+| **Discrete** | Comma-separated dates           | `1696,1701,1734`                                | `'discrete'`    |
+| **Absolute** | `start/end/period`              | `2002-09-01T00:00:00Z/2025-01-01T00:00:00Z/P1Y` | `'discrete'`    |
+| **Relative** | `start/end` or `start/duration` | `2026-05-27T11:12:00Z/PT10M`                    | `'continuous'`  |
+
+**Handle count is driven by the `default` array length**, not `singleHandle` alone. The MUI Slider renders one thumb for `[value]` and two thumbs for `[start, end]`. For OGC WMS, `default` and `multipleValues` attributes are the two signals:
+
+- OGC `<Dimension default="...">` present → `defaultValues = [default]` → **1 thumb** (definitive signal)
+- OGC `<Dimension>` without `default`, `multipleValues="0"` → `defaultValues = [range[last]]` → **1 thumb** (server only accepts single value)
+- OGC `<Dimension>` without `default`, `multipleValues="1"` or absent → `defaultValues = [range[0], range[last]]` → **2 thumbs** (best guess)
+- ESRI → always `[range[0], range[last]]` → **2 thumbs**
+
+**Filter generation differs by layer type:**
+
+- **WMS**: `TIME=date1` or `TIME=date1/date2` (ISO range)
+- **ESRI Image**: `time=epoch1,epoch2` (raw milliseconds)
+- **ESRI Dynamic/Vector**: SQL-like `field >= date AND field <= date`
 
 ### Event Delegate System
 
@@ -1363,25 +1394,29 @@ const handleToggleKeyDown = useCallback(
 **Pattern:**
 
 ✅ **CORRECT** — Safe for external consumers:
+
 ```typescript
 // In style files and components
-theme.palette.geoViewColor?.primary.main
-theme.palette.geoViewColor?.secondary
-theme.palette.geoViewColor?.white
-theme.palette.geoViewColor?.textColor.main
-theme.palette.geoViewColor?.bgColor.dark[100]
+theme.palette.geoViewColor?.primary.main;
+theme.palette.geoViewColor?.secondary;
+theme.palette.geoViewColor?.white;
+theme.palette.geoViewColor?.textColor.main;
+theme.palette.geoViewColor?.bgColor.dark[100];
 ```
 
 ❌ **INCORRECT** — Crashes if external theme lacks extension:
+
 ```typescript
-theme.palette.geoViewColor.primary.main  // ❌ No optional chaining
+theme.palette.geoViewColor.primary.main; // ❌ No optional chaining
 ```
 
 **Examples:**
+
 - `packages/geoview-core/src/ui/slider/slider-style.ts` — ✅ Correct (all geoViewColor references use `?.`)
 - `packages/geoview-core/src/ui/tabs/tabs.tsx` — ✅ Correct (all geoViewColor references use `?.`)
 
 **Enforcement:**
+
 - During code generation: Auto-apply optional chaining to all custom theme extension refs
 - During branch reviews: Scan all `@/ui` and `@/core/components/ui` files for direct access violations
 - Add to pre-commit hook checklist: No direct `theme.palette.geoViewColor.` without `?.`
@@ -2170,6 +2205,7 @@ Controllers are the preferred path. MapViewer provides low-level OL access (tran
 - [using-store.md](../docs/programming/using-store.md) - Zustand usage patterns
 - [event-helper.md](../docs/programming/event-helper.md) - Delegate event system
 - [controller-architecture.md](../docs/programming/controller-architecture.md) - Controller design & domain integration
+- [time-dimension.md](../docs/programming/time-dimension.md) - OGC/ESRI time dimension parsing & time slider
 - [troubleshooting.md](../docs/programming/troubleshooting.md) - Service-specific fixes & known issues
 
 ## TypeDoc-First API Documentation Policy
