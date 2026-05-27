@@ -93,6 +93,8 @@ export class EsriUtilities {
         // Rethrow
         throw new LayerServiceMetadataUnableToFetchError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerName(), formatError(error));
       }
+      // If it's an annotation sub layer, update the metadata with the inherited metadata from the parent layer
+      await this.#inheritAnnotationSubLayerMetadata(layerMetadata, baseUrl, layerConfig, abortSignal);
     } else {
       // In the case of an EsriImage, the layer metadata was already queried (same as the service metadata), use that
       layerMetadata = layerConfig.getServiceMetadata()!;
@@ -764,17 +766,23 @@ export class EsriUtilities {
    * @param abortSignal - Optional abort signal for request cancellation
    */
   static async #inheritAnnotationSubLayerMetadata(
-    layerMetadata: TypeMetadataEsriDynamicLayer | TypeMetadataEsriFeatureLayer,
+    layerMetadata: TypeMetadataEsriDynamicLayer | TypeMetadataEsriFeatureLayer | TypeMetadataEsriImage,
     baseUrl: string,
-    layerConfig: EsriDynamicLayerEntryConfig | EsriFeatureLayerEntryConfig,
+    layerConfig: EsriDynamicLayerEntryConfig | EsriFeatureLayerEntryConfig | EsriImageLayerEntryConfig,
     abortSignal?: AbortSignal
   ): Promise<void> {
-    // Early return if not an annotation sublayer with parent
-    if (layerMetadata.type !== 'Annotation SubLayer' || !layerMetadata.parentLayer) {
+    // Early return if an ESRI Image layer
+    if (layerConfig instanceof EsriImageLayerEntryConfig) {
       return Promise.resolve();
     }
 
-    const parentLayerId = layerMetadata.parentLayer.id;
+    const castedLayerMetadata = layerMetadata as TypeMetadataEsriDynamicLayer | TypeMetadataEsriFeatureLayer;
+    // Early return if not an annotation sublayer with parent
+    if (castedLayerMetadata.type !== 'Annotation SubLayer' || !castedLayerMetadata.parentLayer) {
+      return Promise.resolve();
+    }
+
+    const parentLayerId = castedLayerMetadata.parentLayer.id;
     const parentQueryUrl = `${baseUrl}/${parentLayerId}`;
 
     try {
@@ -782,18 +790,12 @@ export class EsriUtilities {
       const parentMetadata = await Fetch.fetchJson<TypeMetadataEsriDynamicLayer>(`${parentQueryUrl}?f=json`, { signal: abortSignal });
 
       // Inherit critical properties from parent
-      // eslint-disable-next-line no-param-reassign
-      layerMetadata.fields = parentMetadata.fields;
-      // eslint-disable-next-line no-param-reassign
-      layerMetadata.timeInfo = parentMetadata.timeInfo;
-      // eslint-disable-next-line no-param-reassign
-      layerMetadata.geometryType = parentMetadata.geometryType;
-      // eslint-disable-next-line no-param-reassign
-      layerMetadata.geometryField = parentMetadata.geometryField;
-      // eslint-disable-next-line no-param-reassign
-      layerMetadata.capabilities = parentMetadata.capabilities;
-      // eslint-disable-next-line no-param-reassign
-      layerMetadata.maxRecordCount = parentMetadata.maxRecordCount;
+      castedLayerMetadata.fields = parentMetadata.fields;
+      castedLayerMetadata.timeInfo = parentMetadata.timeInfo;
+      castedLayerMetadata.geometryType = parentMetadata.geometryType;
+      castedLayerMetadata.geometryField = parentMetadata.geometryField;
+      castedLayerMetadata.capabilities = parentMetadata.capabilities;
+      castedLayerMetadata.maxRecordCount = parentMetadata.maxRecordCount;
     } catch (error: unknown) {
       // Rethrow
       throw new LayerServiceMetadataUnableToFetchError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerName(), formatError(error));
