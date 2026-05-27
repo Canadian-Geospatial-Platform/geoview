@@ -989,6 +989,19 @@ export class LayerController extends AbstractMapViewerController {
 
     // Redirect
     this.setLayerInVisibleRange(gvLayer.getLayerPath(), inVisibleRange);
+
+    // Continue with each parent of the layer if any
+    let parentLayer = gvLayer.getParent();
+    while (parentLayer) {
+      // Check if the parent layer falls in visible resolution range
+      const parentInVisibleRange = currentResolution ? parentLayer.isInVisibleRange(currentResolution, currentScale) : true;
+
+      // Redirect
+      this.setLayerInVisibleRange(parentLayer.getLayerPath(), parentInVisibleRange);
+
+      // Move up to the next parent
+      parentLayer = parentLayer.getParent();
+    }
   }
 
   /**

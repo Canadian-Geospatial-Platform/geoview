@@ -301,6 +301,8 @@ export class LayerSetController extends AbstractMapViewerController {
 
     const currentMapResolution = this.getMapViewer().getView().getResolution();
     const currentMapZoom = this.getMapViewer().getView().getZoom();
+    const calculatedMapScale = this.getMapViewer().getMapScaleFromZoom(currentMapZoom ?? 0);
+
     const calculatedMapResolution =
       currentMapResolution ??
       this.getMapViewer()
@@ -350,6 +352,10 @@ export class LayerSetController extends AbstractMapViewerController {
 
       // If not found, skip
       if (!layerConfig) return;
+
+      // Get the effective visibility scales
+      const effectiveScales = MapViewer.computeEffectiveLayerScales(this.getMapViewer(), layerConfig);
+      const { maxScale, minScale } = effectiveScales;
 
       // Get the layer if exists
       const layer = this.getControllersRegistry().layerController.getGeoviewLayerIfExists(entryLayerPath);
@@ -432,11 +438,6 @@ export class LayerSetController extends AbstractMapViewerController {
         // TODO: TEST - Attempt to set the visible state to false by default (it'd make more sense?) and see if it works...
         // TO.DOCONT: When attempted, it wasn't working for the Hydro - Scale WMS group layers of group layers and the 'Show all' toggle.
         const visible = layer?.getVisible() ?? layerConfigCasted.getInitialSettings()?.states?.visible ?? true;
-
-        // Get the effective visibility scales
-        const effectiveScales = MapViewer.computeEffectiveLayerScales(this.getMapViewer(), layerConfig);
-        const { maxScale, minScale } = effectiveScales;
-        const calculatedMapScale = this.getMapViewer().getMapScaleFromZoom(this.getMapViewer().getView().getZoom() ?? 0);
 
         const legendLayerEntry: TypeLegendLayer = {
           url: layerConfig.getMetadataAccessPath(),
