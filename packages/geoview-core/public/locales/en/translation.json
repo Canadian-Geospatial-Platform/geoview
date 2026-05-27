@@ -38,6 +38,15 @@
       "info": "Information"
     }
   },
+  "map": {
+    "container": "Interactive map {{mapId}}",
+    "status": {
+      "loadingMap": "Loading map",
+      "mapLoaded": "Map loaded",
+      "processing": "Processing",
+      "processingComplete": "Processing complete"
+    }
+  },
   "mapnav": {
     "arianavbar": "Vertical button group for map navigation",
     "basemap": "Change basemap",
@@ -45,8 +54,10 @@
     "home": "Zoom to initial view",
     "zoomIn": "Zoom in",
     "zoomOut": "Zoom out",
-    "coordinates": "Toggle coordinates format",
     "scale": "Toggle between scale and resolution",
+    "cycleHint": "Click, press Enter/Space, or use arrow keys to cycle scale display mode",
+    "selectFormat": "Select scale format",
+    "graphicScale": "graphic scale",
     "location": "Zoom to my location",
     "measurement": "Measure on map",
     "projection": "Change map projection",
@@ -88,7 +99,14 @@
       "east": "E",
       "west": "W",
       "north": "N",
-      "south": "S"
+      "south": "S",
+      "selectFormat": "Select coordinate format",
+      "cycleHint": "Click, press Enter/Space, or use arrow keys to cycle coordinate format",
+      "dms": "Degrees Minutes Seconds",
+      "dd": "Decimal Degrees",
+      "projected": "Projected Coordinates",
+      "coordinates": "Toggle coordinates format",
+      "notAvailable": "Position not available"
     },
     "overviewmap": {
       "toggle": "Toggle overview map",

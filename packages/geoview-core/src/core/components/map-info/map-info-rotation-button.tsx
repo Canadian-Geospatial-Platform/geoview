@@ -58,7 +58,7 @@ export const MapInfoRotationButton = memo(function MapInfoRotationButton(): JSX.
 
   return (
     <Tooltip title={tooltipText} placement="top">
-      <Box sx={containerStyles} tabIndex={0} role="note">
+      <Box sx={containerStyles} tabIndex={0} role="note" aria-label={tooltipText}>
         <Box
           className={`map-info-rotation-${mapId}`}
           sx={{
