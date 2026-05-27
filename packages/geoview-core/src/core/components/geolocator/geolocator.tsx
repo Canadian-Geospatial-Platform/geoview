@@ -164,7 +164,7 @@ export function Geolocator(): JSX.Element {
 
     const panel = panelRef.current;
     const handleKeyDown = (event: KeyboardEvent): void => {
-      handleEscapeKey(event.key, `${mapId}-${CONTAINER_TYPE.APP_BAR}-${DEFAULT_APPBAR_CORE.GEOLOCATOR}-panel-btn`, false, handleReset);
+      handleEscapeKey(event.key, handleReset, `${mapId}-${CONTAINER_TYPE.APP_BAR}-${DEFAULT_APPBAR_CORE.GEOLOCATOR}-panel-btn`, false);
     };
 
     if (isOpen && tabId === DEFAULT_APPBAR_CORE.GEOLOCATOR && panel) {

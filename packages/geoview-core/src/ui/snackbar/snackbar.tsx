@@ -17,9 +17,16 @@ interface SnackBarProps {
   open: boolean;
   type: SnackbarType;
   button?: JSX.Element;
+  closeButtonText?: string;
   onClose?: (event?: React.SyntheticEvent | Event, reason?: string) => void;
 }
 
+/**
+ * Material-UI Alert wrapper component with elevated styling.
+ *
+ * @param props - Alert properties from Material-UI AlertProps
+ * @returns Alert component with filled variant and elevation
+ */
 const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) {
   return <MaterialAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
@@ -61,7 +68,7 @@ function SnackbarUI(props: SnackBarProps): JSX.Element {
   logger.logTraceRenderDetailed('ui/snackbar/snackbar', props);
 
   // Get constant from props
-  const { snackBarId, open, message, type, button, onClose, ...rest } = props;
+  const { snackBarId, open, message, type, button, closeButtonText, onClose, ...rest } = props;
 
   // Hooks
   const fadeInAnimation = useFadeIn();
@@ -77,13 +84,13 @@ function SnackbarUI(props: SnackBarProps): JSX.Element {
   );
 
   // Memoize static snackbar props
-  const memoSnackbarProps = useMemo(
-    () => ({
+  const memoSnackbarProps = useMemo(() => {
+    logger.logTraceUseMemo('SNACKBAR - memoSnackbarProps');
+    return {
       anchorOrigin: { vertical: 'bottom' as const, horizontal: 'center' as const },
       autoHideDuration: 5000,
-    }),
-    []
-  );
+    };
+  }, []);
 
   return (
     <AnimatedSnackbar
@@ -91,11 +98,18 @@ function SnackbarUI(props: SnackBarProps): JSX.Element {
       sx={memoSnackbarStyles}
       id={snackBarId}
       open={open}
-      onClose={() => onClose?.()}
+      {...(onClose && { onClose })} // Only spreads { onClose: fn } when onClose exists
       {...memoSnackbarProps}
       {...rest}
     >
-      <Alert onClose={() => onClose?.()} severity={type} sx={{ width: '100%' }}>
+      <Alert
+        {...(onClose && {
+          onClose,
+          ...(closeButtonText && { closeText: closeButtonText }),
+        })}
+        severity={type}
+        sx={{ width: '100%' }}
+      >
         {message}
         {button !== undefined && button}
       </Alert>

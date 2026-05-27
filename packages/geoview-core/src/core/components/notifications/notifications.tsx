@@ -404,7 +404,7 @@ export default memo(function Notifications(): JSX.Element {
             pointerEvents: 'auto',
             zIndex: theme.zIndex.modal + 100,
           }}
-          handleKeyDown={(key, callBackFn) => handleEscapeKey(key, '', false, callBackFn)}
+          handleKeyDown={handleEscapeKey}
         >
           <Paper component="section" sx={memoSxClasses.notificationPanel}>
             <NotificationHeader

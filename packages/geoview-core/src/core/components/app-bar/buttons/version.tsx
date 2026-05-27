@@ -169,7 +169,7 @@ export default function Version(): JSX.Element {
             pointerEvents: 'auto',
             zIndex: theme.zIndex.modal + 100,
           }}
-          handleKeyDown={(key, callBackFn) => handleEscapeKey(key, '', false, callBackFn)}
+          handleKeyDown={handleEscapeKey}
         >
           <FocusTrapContainer
             id={`${mapId}-${CONTAINER_TYPE.APP_BAR}-version-ft`}

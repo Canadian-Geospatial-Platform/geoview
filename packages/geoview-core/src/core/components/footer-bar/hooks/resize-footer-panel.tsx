@@ -170,7 +170,7 @@ export const ResizeFooterPanel = memo(function ResizeFooterPanel(): JSX.Element 
           container={mapElem}
           focusSelector={`#${closeButtonId}`}
           focusTrap={activeTrapGeoView}
-          handleKeyDown={(key, callBackFn): void => handleEscapeKey(key, '', false, callBackFn)}
+          handleKeyDown={handleEscapeKey}
           onClose={handleClose}
           sx={{
             position: 'fixed',

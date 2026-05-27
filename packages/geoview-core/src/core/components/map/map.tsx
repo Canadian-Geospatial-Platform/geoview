@@ -124,7 +124,14 @@ export function Map(props: MapProps): JSX.Element {
 
   return (
     // ? the map is focusable and needs to be tabbable for keyboard navigation (only when interaction is dynamic)
-    <Box id={`mapTargetElement-${mapId}`} ref={mapElement} sx={sxClasses.mapContainer} tabIndex={mapInteraction === 'static' ? -1 : 0}>
+    <Box
+      id={`mapTargetElement-${mapId}`}
+      ref={mapElement}
+      sx={sxClasses.mapContainer}
+      tabIndex={mapInteraction === 'static' ? -1 : 0}
+      role="region"
+      aria-label={t('map.container', { mapId })}
+    >
       {mapLoaded && (
         <>
           {northArrow && <NorthArrow />}
