@@ -3,6 +3,7 @@ import { useTheme } from '@mui/material/styles';
 
 import { IconButton, EmojiPeopleIcon } from '@/ui';
 import { getSxClasses } from '@/core/components/nav-bar/nav-bar-style';
+import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 import { useMapController, useUIController } from '@/core/controllers/use-controllers';
 
@@ -22,6 +23,9 @@ export default function Location(): JSX.Element {
   // get store actions
   const uiController = useUIController();
   const mapController = useMapController();
+  const mapId = useStoreGeoViewMapId();
+
+  // #region Handlers
 
   /**
    * Handles successful geolocation by zooming to the user position.
@@ -58,8 +62,16 @@ export default function Location(): JSX.Element {
     navigator.geolocation.getCurrentPosition(successCallback, errorCallback);
   };
 
+  // #endregion Handlers
+
   return (
-    <IconButton id="location" aria-label={t('mapnav.location')} tooltipPlacement="left" onClick={handleZoomToMe} sx={sxClasses.navButton}>
+    <IconButton
+      id={`${mapId}-button-location`}
+      aria-label={t('mapnav.location')}
+      tooltipPlacement="left"
+      onClick={handleZoomToMe}
+      sx={sxClasses.navButton}
+    >
       <EmojiPeopleIcon />
     </IconButton>
   );

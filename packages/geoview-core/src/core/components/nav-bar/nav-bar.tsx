@@ -1,7 +1,16 @@
 import { useRef, useState, useEffect, Fragment, useMemo, isValidElement } from 'react';
+
 import { useTranslation } from 'react-i18next';
+
 import { useTheme } from '@mui/material/styles';
 
+import { ButtonGroup, Box, IconButton } from '@/ui';
+import { ExpandLessIcon, ExpandMoreIcon } from '@/ui/icons';
+import type { TypeButtonPanel } from '@/ui/panel/panel-types';
+import type { SxStyles } from '@/ui/style/types';
+import type { NavBarApi } from '@/core/components';
+import { useStoreUINavbarComponents, useStoreUINavBarButtonPanelVersion } from '@/core/stores/states/ui-state';
+import { logger } from '@/core/utils/logger';
 import BasemapSelect from './buttons/basemap-select';
 import Measurement from './buttons/measurement';
 import ZoomIn from './buttons/zoom-in';
@@ -11,13 +20,7 @@ import Home from './buttons/home';
 import Location from './buttons/location';
 import Projection from './buttons/projection';
 import MapRotation from './buttons/map-rotation';
-import { ButtonGroup, Box, IconButton } from '@/ui';
-import { ExpandLessIcon, ExpandMoreIcon } from '@/ui/icons';
-import type { TypeButtonPanel } from '@/ui/panel/panel-types';
 import { getSxClasses } from './nav-bar-style';
-import type { NavBarApi } from '@/core/components';
-import { useStoreUINavbarComponents, useStoreUINavBarButtonPanelVersion } from '@/core/stores/states/ui-state';
-import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from './nav-bar-panel-button';
 
 /** The properties for the nav-bar component. */
@@ -70,7 +73,16 @@ export function NavBar(props: NavBarProps): JSX.Element {
   // Hooks
   const { t } = useTranslation();
   const theme = useTheme();
-  const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
+
+  /**
+   * Memoizes style classes for the navbar component.
+   */
+  const memoSxClasses = useMemo((): SxStyles => {
+    // Log
+    logger.logTraceUseMemo('NAV-BAR - memoSxClasses', theme);
+
+    return getSxClasses(theme);
+  }, [theme]);
 
   // Store
   const navBarComponents = useStoreUINavbarComponents();
@@ -211,7 +223,7 @@ export function NavBar(props: NavBarProps): JSX.Element {
           <IconButton
             key={buttonPanel.button.id}
             id={buttonPanel.button.id}
-            aria-label={t(buttonPanel.button['aria-label'])}
+            aria-label={buttonPanel.button['aria-label']}
             tooltip={buttonPanel.button.tooltip}
             tooltipPlacement={buttonPanel.button.tooltipPlacement}
             sx={memoSxClasses.navButton}
@@ -257,6 +269,9 @@ export function NavBar(props: NavBarProps): JSX.Element {
       columns.push(visibleButtonKeys.slice(i, i + buttonsPerColumn));
     }
 
+    /**
+     * Toggles the expansion state of the button group.
+     */
     const toggleExpansion = (): void => {
       setExpandedGroups((prev) => {
         const newSet = new Set(prev);
