@@ -85,6 +85,7 @@ export class EsriImage extends AbstractGeoViewRaster {
   protected override onProcessLayerMetadata(
     layerConfig: EsriImageLayerEntryConfig,
     displayDateMode: DisplayDateMode,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     mapProjection?: OLProjection,
     abortSignal?: AbortSignal
   ): Promise<EsriImageLayerEntryConfig> {

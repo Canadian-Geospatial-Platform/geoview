@@ -1,5 +1,4 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
-import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/states/app-state';
 import { logger } from 'geoview-core/core/utils/logger';
 import { useStoreLayerArrayVisibility } from 'geoview-core/core/stores/states/layer-state';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
@@ -66,7 +65,6 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
     KeyboardArrowUpIcon,
   } = ui.elements;
 
-  const displayLanguage = useStoreAppDisplayLanguage();
   const layerController = useLayerController();
   const { t } = useTranslation<string>();
 
@@ -190,7 +188,7 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
         <Collapse id={collapseRegionId} role="region" aria-labelledby={collapseButtonId} in={!collapsed} sx={{ marginRight: '6px' }}>
           <List sx={sxClasses.groupChildren}>
             {item.children.map((child, index) => {
-              const childId = generateLegendItemId(child, index, displayLanguage);
+              const childId = generateLegendItemId(child, index);
               return <LegendItem key={childId} item={child} sxClasses={sxClasses} itemPath={`${currentPath}/${childId}`} />;
             })}
           </List>

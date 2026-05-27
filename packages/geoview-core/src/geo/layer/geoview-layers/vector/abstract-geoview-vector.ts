@@ -95,7 +95,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     sourceOptions.strategy = layerConfig.getSource().strategy === 'bbox' ? bbox : all;
 
     // eslint-disable-next-line no-param-reassign
-    sourceOptions.loader = (extent: Extent, resolution: number, projection: OLProjection, successCallback, failureCallback): void => {
+    sourceOptions.loader = (extent: Extent, _resolution: number, projection: OLProjection, successCallback, failureCallback): void => {
       // GV Use void IIFE so the outer function stays sync and avoids @typescript-eslint/no-misused-promises
       void (async (): Promise<void> => {
         try {

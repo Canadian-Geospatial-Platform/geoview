@@ -752,20 +752,20 @@ export class LayerDomain {
    * Internal callback that is invoked when a layer configuration's status changes.
    * Forwards the event to domain listeners via emitLayerStatusChanged.
    *
-   * @param layerConfig - The layer configuration whose status changed
+   * @param sender - The layer configuration whose status changed
    * @param event - The layer status changed event
    */
-  #handleLayerStatusChanged(layerConfig: ConfigBaseClass, event: LayerStatusChangedEvent): void {
+  #handleLayerStatusChanged(sender: ConfigBaseClass, event: LayerStatusChangedEvent): void {
     // Emit about it
-    this.#emitLayerStatusChanged({ config: layerConfig, status: event.layerStatus });
+    this.#emitLayerStatusChanged({ config: sender, status: event.layerStatus });
 
     // If the config is a layer entry (not a group)
-    if (layerConfig instanceof AbstractBaseLayerEntryConfig) {
+    if (sender instanceof AbstractBaseLayerEntryConfig) {
       // Check if all layers are loaded/error right now
       const allLoaded = this.checkLayerStatusLoaded();
       if (allLoaded) {
         // Emit about it
-        this.#emitLayerAllLoaded({ config: layerConfig, status: event.layerStatus });
+        this.#emitLayerAllLoaded({ config: sender, status: event.layerStatus });
       }
     }
   }
@@ -776,12 +776,12 @@ export class LayerDomain {
    * Internal callback that is invoked when a layer's name changes.
    * Forwards the event to domain listeners via emitLayerNameChanged.
    *
-   * @param layer - The layer whose name changed
+   * @param sender - The layer whose name changed
    * @param event - The layer name changed event
    */
-  #handleLayerNameChanged(layer: AbstractBaseGVLayer, event: LayerNameChangedEvent): void {
+  #handleLayerNameChanged(sender: AbstractBaseGVLayer, event: LayerNameChangedEvent): void {
     // Emit about it
-    this.#emitLayerNameChanged({ layer, layerEvent: event });
+    this.#emitLayerNameChanged({ layer: sender, layerEvent: event });
   }
 
   /**
@@ -790,91 +790,91 @@ export class LayerDomain {
    * Internal callback that is invoked when a layer's visible state changes.
    * Forwards the event to domain listeners via emitLayerVisibleChanged.
    *
-   * @param layer - The layer whose visible state changed
+   * @param sender - The layer whose visible state changed
    * @param event - The layer visible changed event
    */
-  #handleLayerVisibleChanged(layer: AbstractBaseGVLayer, event: LayerVisibleChangedEvent): void {
+  #handleLayerVisibleChanged(sender: AbstractBaseGVLayer, event: LayerVisibleChangedEvent): void {
     // Emit about it
-    this.#emitLayerVisibleChanged({ layer, layerEvent: event });
+    this.#emitLayerVisibleChanged({ layer: sender, layerEvent: event });
   }
 
   /**
    * Handles layer loading events from registered layers.
    *
-   * @param layer - The layer entering the loading state
+   * @param sender - The layer entering the loading state
    * @param event - The layer base event
    */
-  #handleLayerLoading(layer: AbstractBaseGVLayer, event: LayerBaseEvent): void {
+  #handleLayerLoading(sender: AbstractBaseGVLayer, event: LayerBaseEvent): void {
     // Emit about it
-    this.#emitLayerLoading({ layer, layerEvent: event });
+    this.#emitLayerLoading({ layer: sender, layerEvent: event });
   }
 
   /**
    * Handles layer first loaded events from registered layers.
    *
-   * @param layer - The layer that has been loaded for the first time
+   * @param sender - The layer that has been loaded for the first time
    * @param event - The layer base event
    */
 
-  #handleLayerFirstLoaded(layer: AbstractBaseGVLayer, event: LayerBaseEvent): void {
+  #handleLayerFirstLoaded(sender: AbstractBaseGVLayer, event: LayerBaseEvent): void {
     // Emit about it
-    this.#emitLayerFirstLoaded({ layer, layerEvent: event });
+    this.#emitLayerFirstLoaded({ layer: sender, layerEvent: event });
   }
 
   /**
    * Handles layer loaded events from registered layers.
    *
-   * @param layer - The layer that finished loading
+   * @param sender - The layer that finished loading
    * @param event - The layer base event
    */
 
-  #handleLayerLoaded(layer: AbstractBaseGVLayer, event: LayerBaseEvent): void {
+  #handleLayerLoaded(sender: AbstractBaseGVLayer, event: LayerBaseEvent): void {
     // Emit about it
-    this.#emitLayerLoaded({ layer, layerEvent: event });
+    this.#emitLayerLoaded({ layer: sender, layerEvent: event });
   }
 
   /**
    * Handles layer error events from registered layers.
    *
-   * @param layer - The layer that encountered an error
+   * @param sender - The layer that encountered an error
    * @param event - The layer error event
    */
-  #handleLayerError(layer: AbstractGVLayer, event: LayerErrorEvent): void {
+  #handleLayerError(sender: AbstractGVLayer, event: LayerErrorEvent): void {
     // Emit about it
-    this.#emitLayerError({ layer, layerEvent: event });
+    this.#emitLayerError({ layer: sender, layerEvent: event });
   }
 
   /**
    * Handles layer message events from registered layers.
    *
-   * @param layer - The layer that emitted a message
+   * @param sender - The layer that emitted a message
    * @param event - The layer message event
    */
-  #handleLayerMessage(layer: AbstractGVLayer, event: LayerMessageEvent): void {
+  #handleLayerMessage(sender: AbstractGVLayer, event: LayerMessageEvent): void {
     // Emit about it
-    this.#emitLayerMessage({ layer, layerEvent: event });
+    this.#emitLayerMessage({ layer: sender, layerEvent: event });
   }
 
   /**
    * Handles when a layer is added to a group layer.
    *
-   * @param layer - The group layer that received the new child
+   * @param sender - The group layer that received the new child
    * @param event - The layer event containing the added layer
    */
-  #handleLayerGroupLayerAdded(layer: GVGroupLayer, event: LayerGroupChildrenUpdatedEvent): void {
+  #handleLayerGroupLayerAdded(sender: GVGroupLayer, event: LayerGroupChildrenUpdatedEvent): void {
     // Emit about it
-    this.#emitLayerGroupLayerAdded({ layer, layerEvent: event });
+    this.#emitLayerGroupLayerAdded({ layer: sender, layerEvent: event });
   }
 
   /**
    * Handles when a layer is removed from a group layer.
    *
-   * @param layer - The group layer that lost a child
+   * @param sender - The group layer that lost a child
    * @param event - The layer event containing the removed layer
    */
-  #handleLayerGroupLayerRemoved(layer: GVGroupLayer, event: LayerGroupChildrenUpdatedEvent): void {
+  #handleLayerGroupLayerRemoved(sender: GVGroupLayer, event: LayerGroupChildrenUpdatedEvent): void {
     // Emit about it
-    this.#emitLayerGroupLayerRemoved({ layer, layerEvent: event });
+    this.#emitLayerGroupLayerRemoved({ layer: sender, layerEvent: event });
   }
 
   /**
@@ -883,12 +883,12 @@ export class LayerDomain {
    * Internal callback that is invoked when a layer's opacity state changes.
    * Forwards the event to domain listeners via emitLayerOpacityChanged.
    *
-   * @param layer - The layer whose opacity state changed
+   * @param sender - The layer whose opacity state changed
    * @param event - The layer opacity changed event
    */
-  #handleLayerOpacityChanged(layer: AbstractBaseGVLayer, event: LayerOpacityChangedEvent): void {
+  #handleLayerOpacityChanged(sender: AbstractBaseGVLayer, event: LayerOpacityChangedEvent): void {
     // Emit about it
-    this.#emitLayerOpacityChanged({ layer, layerEvent: event });
+    this.#emitLayerOpacityChanged({ layer: sender, layerEvent: event });
   }
 
   /**
@@ -897,12 +897,12 @@ export class LayerDomain {
    * Internal callback that is invoked when a layer's hoverable state changes.
    * Forwards the event to domain listeners via emitLayerHoverableChanged.
    *
-   * @param layer - The layer whose hoverable state changed
+   * @param sender - The layer whose hoverable state changed
    * @param event - The layer hoverable changed event
    */
-  #handleLayerHoverableChanged(layer: AbstractGVLayer, event: LayerHoverableChangedEvent): void {
+  #handleLayerHoverableChanged(sender: AbstractGVLayer, event: LayerHoverableChangedEvent): void {
     // Emit about it
-    this.#emitLayerHoverableChanged({ layer, layerEvent: event });
+    this.#emitLayerHoverableChanged({ layer: sender, layerEvent: event });
   }
 
   /**
@@ -911,12 +911,12 @@ export class LayerDomain {
    * Internal callback that is invoked when a layer's queryable state changes.
    * Forwards the event to domain listeners via emitLayerQueryableChanged.
    *
-   * @param layer - The layer whose queryable state changed
+   * @param sender - The layer whose queryable state changed
    * @param event - The layer queryable changed event
    */
-  #handleLayerQueryableChanged(layer: AbstractGVLayer, event: LayerQueryableChangedEvent): void {
+  #handleLayerQueryableChanged(sender: AbstractGVLayer, event: LayerQueryableChangedEvent): void {
     // Emit about it
-    this.#emitLayerQueryableChanged({ layer, layerEvent: event });
+    this.#emitLayerQueryableChanged({ layer: sender, layerEvent: event });
   }
 
   /**
@@ -925,12 +925,12 @@ export class LayerDomain {
    * Internal callback that is invoked when a layer's item visibility state changes.
    * Forwards the event to domain listeners via emitLayerItemVisibilityChanged.
    *
-   * @param layer - The layer whose item visibility state changed
+   * @param sender - The layer whose item visibility state changed
    * @param event - The layer item visibility changed event
    */
-  #handleLayerItemVisibilityChanged(layer: AbstractGVLayer, event: LayerItemVisibilityChangedEvent): void {
+  #handleLayerItemVisibilityChanged(sender: AbstractGVLayer, event: LayerItemVisibilityChangedEvent): void {
     // Emit about it
-    this.#emitLayerItemVisibilityChanged({ layer, layerEvent: event });
+    this.#emitLayerItemVisibilityChanged({ layer: sender, layerEvent: event });
   }
 
   /**
@@ -939,12 +939,12 @@ export class LayerDomain {
    * Internal callback that is invoked when a layer's filter is applied.
    * Forwards the event to domain listeners via emitLayerFilterApplied.
    *
-   * @param layer - The layer whose filter was applied
+   * @param sender - The layer whose filter was applied
    * @param event - The layer filter applied event
    */
-  #handleLayerFilterApplied(layer: AbstractGVLayer, event: LayerFilterAppliedEvent): void {
+  #handleLayerFilterApplied(sender: AbstractGVLayer, event: LayerFilterAppliedEvent): void {
     // Emit about it
-    this.#emitLayerFilterApplied({ layer, layerEvent: event });
+    this.#emitLayerFilterApplied({ layer: sender, layerEvent: event });
   }
 
   /**
@@ -955,13 +955,13 @@ export class LayerDomain {
    * registered, which causes the raster layer to fall through to its
    * default error handling.
    *
-   * @param layer - The raster layer whose image failed to load
+   * @param sender - The raster layer whose image failed to load
    * @param event - The image load rescue event
    * @returns Whether the error was rescued by a listener
    */
-  #handleLayerImageLoadRescue(layer: AbstractGVRaster, event: ImageLoadRescueEvent): Promise<boolean> {
+  #handleLayerImageLoadRescue(sender: AbstractGVRaster, event: ImageLoadRescueEvent): Promise<boolean> {
     // Emit about it
-    return this.#emitLayerImageLoadRescue({ layer, layerEvent: event })?.[0];
+    return this.#emitLayerImageLoadRescue({ layer: sender, layerEvent: event })?.[0];
   }
 
   /**
@@ -969,12 +969,12 @@ export class LayerDomain {
    *
    * Forwards the event to domain listeners via emitLayerRasterFunctionChanged.
    *
-   * @param layer - The layer whose raster function changed
+   * @param sender - The layer whose raster function changed
    * @param event - The raster function changed event
    */
-  #handleLayerRasterFunctionChanged(layer: GVEsriImage, event: RasterFunctionChangedEvent): void {
+  #handleLayerRasterFunctionChanged(sender: GVEsriImage, event: RasterFunctionChangedEvent): void {
     // Emit about it
-    this.#emitLayerRasterFunctionChanged({ layer, layerEvent: event });
+    this.#emitLayerRasterFunctionChanged({ layer: sender, layerEvent: event });
   }
 
   /**
@@ -982,12 +982,12 @@ export class LayerDomain {
    *
    * Forwards the event to domain listeners via emitLayerMosaicRuleChanged.
    *
-   * @param layer - The layer whose mosaic rule changed
+   * @param sender - The layer whose mosaic rule changed
    * @param event - The mosaic rule changed event
    */
-  #handleLayerMosaicRuleChanged(layer: GVEsriImage, event: MosaicRuleChangedEvent): void {
+  #handleLayerMosaicRuleChanged(sender: GVEsriImage, event: MosaicRuleChangedEvent): void {
     // Emit about it
-    this.#emitLayerMosaicRuleChanged({ layer, layerEvent: event });
+    this.#emitLayerMosaicRuleChanged({ layer: sender, layerEvent: event });
   }
 
   /**
@@ -995,12 +995,12 @@ export class LayerDomain {
    *
    * Forwards the event to domain listeners via emitLayerWmsStyleChanged.
    *
-   * @param layer - The layer whose WMS style changed
+   * @param sender - The layer whose WMS style changed
    * @param event - The WMS style changed event
    */
-  #handleLayerWmsStyleChanged(layer: GVWMS, event: WMSStyleChangedEvent): void {
+  #handleLayerWmsStyleChanged(sender: GVWMS, event: WMSStyleChangedEvent): void {
     // Emit about it
-    this.#emitLayerWmsStyleChanged({ layer, layerEvent: event });
+    this.#emitLayerWmsStyleChanged({ layer: sender, layerEvent: event });
   }
 
   // #endregion PRIVATE LAYER HANDLERS

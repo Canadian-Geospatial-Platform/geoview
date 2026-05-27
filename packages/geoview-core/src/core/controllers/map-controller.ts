@@ -861,8 +861,6 @@ export class MapController extends AbstractMapViewerController {
               alias: 'Elevation',
             },
           },
-          extent: undefined,
-          geometry: undefined,
           featureKey: 0,
           geoviewLayerType: 'CSV',
           supportZoomTo: true,
@@ -1195,11 +1193,10 @@ export class MapController extends AbstractMapViewerController {
    * Shows a loading indicator, clears stale WMS override CRS layers and vector feature data,
    * hides the overview map, removes layer highlights, and strips incompatible vector tile layers.
    *
-   * @param mapViewer - The MapViewer instance that emitted the event
+   * @param sender - The MapViewer instance that emitted the event
    * @param event - The projection changed event containing the new and previous projections
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  #handleMapProjectionChangeStarted(mapViewer: MapViewer, event: MapProjectionChangedEvent): void {
+  #handleMapProjectionChangeStarted(sender: MapViewer, event: MapProjectionChangedEvent): void {
     // Show loading indicator while the projection change is being processed
     this.getControllersRegistry().uiController.setCircularProgress(true);
 
@@ -1240,10 +1237,10 @@ export class MapController extends AbstractMapViewerController {
    * restores the overview map, repeats the last feature query, and resolves the
    * pending projection change promise.
    *
-   * @param mapViewer - The MapViewer instance that emitted the event
+   * @param sender - The MapViewer instance that emitted the event
    * @param event - The projection changed event containing the new and previous projections
    */
-  #handleMapProjectionChanged(mapViewer: MapViewer, event: MapProjectionChangedEvent): void {
+  #handleMapProjectionChanged(sender: MapViewer, event: MapProjectionChangedEvent): void {
     // Save in the store
     setStoreMapProjection(this.getMapId(), Projection.readEPSGNumber(event.projection) as TypeValidMapProjectionCodes);
 

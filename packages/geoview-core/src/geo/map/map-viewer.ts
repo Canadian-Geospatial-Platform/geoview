@@ -1943,7 +1943,7 @@ export class MapViewer {
    * @param event - The map event associated with the ending of the map movement
    * @returns A promise that resolves when done processing the map move
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   async #handleMapMoveEnd(event: MapEvent): Promise<void> {
     try {
       // Update the store
@@ -2031,7 +2031,7 @@ export class MapViewer {
    *
    * @param event - The event associated with the zoom end
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   #handleMapZoomEnd(event: ObjectEvent): void {
     try {
       // Read the zoom value
@@ -2073,7 +2073,7 @@ export class MapViewer {
    *
    * @param event - The event associated with rotation
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   #handleMapRotation(event: ObjectEvent): void {
     try {
       // Get the map rotation
@@ -2096,7 +2096,7 @@ export class MapViewer {
    * @param event - The event associated with size change
    * @returns A promise that resolves when done processing the map change size
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   async #handleMapChangeSize(event: ObjectEvent): Promise<void> {
     try {
       // Get the scale information

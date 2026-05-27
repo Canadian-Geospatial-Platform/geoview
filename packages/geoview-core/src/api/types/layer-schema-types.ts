@@ -468,7 +468,7 @@ export type RCSLayerConfig = {
   /**
    * The display name of the layer (English/French). This overrides the default name coming from the GeoCore API.
    */
-  geoviewLayerName?: string | undefined;
+  geoviewLayerName?: string;
 
   /** Initial settings to apply to the GeoCore layer at creation time. */
   initialSettings?: TypeLayerInitialSettings;
@@ -491,7 +491,7 @@ export type GeoPackageLayerConfig = {
   metadataAccessPath: string;
 
   /** The display name of the layer. This overrides the default name coming from the GeoCore API. */
-  geoviewLayerName?: string | undefined;
+  geoviewLayerName?: string;
 
   /** Initial settings to apply to the layer at creation time. */
   initialSettings?: TypeLayerInitialSettings;
@@ -514,7 +514,7 @@ export type ShapefileLayerConfig = {
   metadataAccessPath: string;
 
   /** The display name of the layer. This overrides the default name coming from the GeoCore API. */
-  geoviewLayerName?: string | undefined;
+  geoviewLayerName?: string;
 
   /** Initial settings to apply to the layer at creation time. */
   initialSettings?: TypeLayerInitialSettings;

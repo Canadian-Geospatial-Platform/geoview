@@ -634,7 +634,7 @@ export class MapTester extends GVAbstractTester {
         Test.assertIsArray(layerDataOn2?.features);
         Test.assertIsArrayLengthEqual(layerDataOn2.features, 2);
       },
-      (test, result) => {
+      (_test, result) => {
         // Make sure to turn it back to queryable
         result.layer.setQueryable(true);
       }
@@ -721,7 +721,7 @@ export class MapTester extends GVAbstractTester {
         test.addStep('Verifying layer data features when hoverable again...');
         Test.assertJsonObject(result.results[2], { fieldInfo: { value: 'Ontario' } });
       },
-      (test, result) => {
+      (_test, result) => {
         // Make sure to turn it back to hoverable
         result.layer.setHoverable(true);
       }

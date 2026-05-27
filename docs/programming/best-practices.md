@@ -38,6 +38,27 @@ async fetchMetadata(id: string): Promise<void> {
 const handleClick = useCallback((): void => { ... }, []);
 ```
 
+Prefer optional property syntax (`?:`) for class attributes and type/interface properties that may be absent. In most cases, this is clearer than using an explicit `| undefined` union.
+
+```ts
+// Preferred in most cases
+class LayerInfo {
+  layerName?: string;
+}
+
+type TypeLayerConfig = {
+  sourceUrl?: string;
+};
+
+// Use only when presence-vs-absence must be distinguished
+class LayerState {
+  // Property is always present, but value can be undefined
+  sourceUrl: string | undefined;
+}
+```
+
+Use `property: Type | undefined` only when that distinction is intentional and required by behavior (for example: serialization differences, merge semantics, or APIs that depend on checking whether a key exists).
+
 ## 2- Avoid using variable names that are too short.
 
 It is difficult to know what a variable with the name `e` refers to. Is it an `element`, an `event` or anything else whose name starts

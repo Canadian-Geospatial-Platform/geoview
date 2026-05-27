@@ -1646,7 +1646,7 @@ export abstract class GeoviewRenderer {
   static evaluateArcadeExpression(expression: string, feature: Feature): string | number | boolean | null {
     try {
       // Replace $feature.fieldName with actual values
-      let evaluableExpression = expression.replace(/\$feature\.([a-zA-Z_][\w]*)/g, (match, fieldName) => {
+      let evaluableExpression = expression.replace(/\$feature\.([a-zA-Z_][\w]*)/g, (_match, fieldName) => {
         const value = feature.get(fieldName);
         if (value === undefined || value === null) return 'null';
         // Escape backslashes and then wrap strings in quotes for JavaScript evaluation
@@ -1655,7 +1655,7 @@ export abstract class GeoviewRenderer {
       });
 
       // Replace $feature["fieldName"] or $feature['fieldName'] with actual values
-      evaluableExpression = evaluableExpression.replace(/\$feature\[["']([^"']+)["']\]/g, (match, fieldName) => {
+      evaluableExpression = evaluableExpression.replace(/\$feature\[["']([^"']+)["']\]/g, (_match, fieldName) => {
         const value = feature.get(fieldName);
         if (value === undefined || value === null) return 'null';
         // Escape backslashes and then wrap strings in quotes for JavaScript evaluation
@@ -1730,7 +1730,7 @@ export abstract class GeoviewRenderer {
       }
 
       // Replace $feature["fieldName"] or $feature['fieldName'] with actual values
-      const evaluableExpression = expression.replace(/\$feature\[["']([^"']+)["']\]/g, (match, fieldName) => {
+      const evaluableExpression = expression.replace(/\$feature\[["']([^"']+)["']\]/g, (_match, fieldName) => {
         const value = feature.get(fieldName);
         if (value === undefined || value === null) {
           return 'null';

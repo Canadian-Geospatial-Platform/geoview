@@ -349,8 +349,6 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param event - The event which is being triggered
    * @returns A LayerFailedToLoadError error
    */
-  // We need to keep the 'this' context and the event param for overrides.
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected onErrorDecipherError(event: Event): GeoViewError {
     // Try to read an error in the source object
     // eslint-disable-next-line no-underscore-dangle, @typescript-eslint/no-explicit-any
@@ -367,8 +365,6 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param event - The event which is being triggered
    * @returns A LayerImageFailedToLoadError error
    */
-  // We need to keep the 'this' context and the event param for overrides.
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected onImageLoadErrorDecipherError(event: Event): GeoViewError {
     // Try to read an error in the source object
     // eslint-disable-next-line no-underscore-dangle, @typescript-eslint/no-explicit-any
@@ -436,10 +432,13 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @throws {NotImplementedError} When the function isn't overridden by the children class
    */
   protected getFeatureInfoAtCoordinate(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     map: OLMap,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     location: Coordinate,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     queryGeometry = true,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     language: TypeDisplayLanguage, // Used if we have to guess the field name for the 'nameField'
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     abortController: AbortController | undefined = undefined
@@ -460,10 +459,13 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @throws {NotImplementedError} When the function isn't overridden by the children class
    */
   protected getFeatureInfoAtLonLat(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     map: OLMap,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     lonlat: Coordinate,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     queryGeometry = true,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     language: TypeDisplayLanguage, // Used if we have to guess the field name for the 'nameField'
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     abortController: AbortController | undefined = undefined
@@ -484,10 +486,13 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @throws {NotImplementedError} When the function isn't overridden by the children class
    */
   protected getFeatureInfoUsingBBox(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     map: OLMap,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     location: Coordinate[],
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     queryGeometry = true,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     language: TypeDisplayLanguage, // Used if we have to guess the field name for the 'nameField'
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     abortController: AbortController | undefined = undefined
@@ -508,10 +513,13 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @throws {NotImplementedError} When the function isn't overridden by the children class
    */
   protected getFeatureInfoUsingPolygon(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     map: OLMap,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     location: Coordinate[],
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     queryGeometry = true,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     language: TypeDisplayLanguage, // Used if we have to guess the field name for the 'nameField'
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     abortController: AbortController | undefined = undefined

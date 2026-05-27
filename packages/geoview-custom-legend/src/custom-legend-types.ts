@@ -76,11 +76,10 @@ export const isGroupLayer = (item: TypeLegendItem): item is TypeGroupLayer => {
  *
  * @param item - The legend item
  * @param index - The item's position in the list
- * @param language - The language of the current text
  * @param parentPath - Optional parent path for nested items
  * @returns A unique identifier
  */
-export function generateLegendItemId(item: TypeLegendItem, index: number, language: 'en' | 'fr', parentPath = ''): string {
+export function generateLegendItemId(item: TypeLegendItem, index: number, parentPath = ''): string {
   const basePath = parentPath ? `${parentPath}/` : '';
 
   if (isLegendLayer(item)) {

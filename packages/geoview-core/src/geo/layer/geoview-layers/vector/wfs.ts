@@ -213,7 +213,9 @@ export class WFS extends AbstractGeoViewVector {
    */
   protected override async onProcessLayerMetadata(
     layerConfig: VectorLayerEntryConfig,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     displayDateMode: DisplayDateMode,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     mapProjection?: OLProjection,
     abortSignal?: AbortSignal
   ): Promise<VectorLayerEntryConfig> {

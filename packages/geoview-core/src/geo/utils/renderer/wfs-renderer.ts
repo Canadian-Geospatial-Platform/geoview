@@ -803,17 +803,17 @@ export abstract class WfsRenderer {
     color?: string;
     width?: number;
     opacity?: number;
-    dasharray?: number[] | undefined;
-    lineJoin?: string | undefined;
-    lineCap?: string | undefined;
+    dasharray?: number[];
+    lineJoin?: string;
+    lineCap?: string;
   } {
     const out: {
       color?: string;
       width?: number;
       opacity?: number;
-      dasharray?: number[] | undefined;
-      lineJoin?: string | undefined;
-      lineCap?: string | undefined;
+      dasharray?: number[];
+      lineJoin?: string;
+      lineCap?: string;
     } = {};
 
     if (!strokeNode) return out;
@@ -1448,7 +1448,7 @@ export abstract class WfsRenderer {
    * @returns The XML string with comparison operators unescaped inside <Literal> elements
    */
   static #unescapeComparisonOperatorsInLiterals(xml: string): string {
-    return xml.replace(/<Literal>([\s\S]*?)<\/Literal>/g, (match, literalContent) => {
+    return xml.replace(/<Literal>([\s\S]*?)<\/Literal>/g, (_match, literalContent) => {
       const fixed = literalContent.replace(/&gt;/g, '>').replace(/&lt;/g, '<');
 
       return `<Literal>${fixed}</Literal>`;
