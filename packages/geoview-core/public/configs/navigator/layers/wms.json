@@ -167,7 +167,7 @@
       },
       {
         "geoviewLayerId": "Nfi",
-        "geoviewLayerName": "Nfi Plot",
+        "geoviewLayerName": "Nfi Plot No Sublayers",
         "metadataAccessPath": "https://nfi.nfis.org/mapserver/cgi-bin/nfi_plot_summaries_en.cgi",
         "geoviewLayerType": "ogcWms",
         "useFullWmsSublayers": false,
@@ -175,6 +175,36 @@
           {
             "layerId": "Photo_Plot",
             "layerName": "Photo Plot"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "nfi-group-with-slash",
+        "geoviewLayerName": "Nfi Plot Test Slash",
+        "metadataAccessPath": "https://nfi.nfis.org/mapserver/cgi-bin/nfi_plot_summaries_en.cgi?service=WMS",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "photo/plot/with/slash",
+            "layerName": "Photo/Plot/Group",
+            "entryType": "group",
+            "listOfLayerEntryConfig": [
+              {
+                "layerId": "ca_nfiphotoplot_lc_a_en"
+              },
+              {
+                "layerId": "ca_nfiphotoplot_lu_a_en"
+              },
+              {
+                "layerId": "ca_nfiphotoplot_ow_a_en"
+              },
+              {
+                "layerId": "ca_nfiphotoplot_ps_a_en"
+              }
+            ]
+          },
+          {
+            "layerId": "ca_nfigroundplot_cartographic_a"
           }
         ]
       },
@@ -213,36 +243,6 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "cdsm.color-shaded-relief"
-          }
-        ]
-      },
-      {
-        "geoviewLayerId": "nfi-group-with-slash",
-        "geoviewLayerName": "Nfi Plot Test Slash",
-        "metadataAccessPath": "https://nfi.nfis.org/mapserver/cgi-bin/nfi_plot_summaries_en.cgi?service=WMS",
-        "geoviewLayerType": "ogcWms",
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "photo/plot/with/slash",
-            "layerName": "Photo/Plot/Group",
-            "entryType": "group",
-            "listOfLayerEntryConfig": [
-              {
-                "layerId": "ca_nfiphotoplot_lc_a_en"
-              },
-              {
-                "layerId": "ca_nfiphotoplot_lu_a_en"
-              },
-              {
-                "layerId": "ca_nfiphotoplot_ow_a_en"
-              },
-              {
-                "layerId": "ca_nfiphotoplot_ps_a_en"
-              }
-            ]
-          },
-          {
-            "layerId": "ca_nfigroundplot_cartographic_a"
           }
         ]
       }
