@@ -122,6 +122,7 @@ export const getShellSxClasses = (theme: Theme, appHeight: number): SxStyles => 
       width: 'auto',
       height: 'auto',
       overflow: 'visible',
+      padding: theme.spacing(3),
     },
   },
 });

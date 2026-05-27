@@ -9,9 +9,20 @@ import { AppBar } from '@/core/components/app-bar/app-bar';
 import { NavBar } from '@/core/components/nav-bar/nav-bar';
 import { FooterBar } from '@/core/components/footer-bar/footer-bar';
 import { MapInfo } from '@/core/components/map-info/map-info';
+import { TIMEOUT } from '@/core/utils/constant';
 
-import type { TypeModalProps, ModalApi, ModalEvent } from '@/ui';
-import { Box, CircularProgress, Link, Modal, Snackbar, Button } from '@/ui';
+import {
+  Box,
+  CircularProgress,
+  Link,
+  Modal,
+  Snackbar,
+  Button,
+  Typography,
+  type TypeModalProps,
+  type ModalApi,
+  type ModalEvent,
+} from '@/ui';
 import { getShellSxClasses } from './containers-style';
 import { useUIController } from '@/core/controllers/use-controllers';
 import { useStoreMapInteraction, useStoreMapLoaded } from '@/core/stores/states/map-state';
@@ -39,6 +50,7 @@ import type { Notifications, SnackBarOpenEvent, SnackbarType } from '@/core/util
 import { useMapResize } from './use-map-resize';
 import { delay, scrollIfNotVisible } from '@/core/utils/utilities';
 import type { SxStyles } from '@/ui/style/types';
+import { visuallyHidden } from '@/ui/style/default';
 
 /** The properties for the shell component. */
 type ShellProps = {
@@ -82,6 +94,10 @@ export function Shell(props: ShellProps): JSX.Element {
   const [snackbarType, setSnackbarType] = useState<SnackbarType>('info');
   const [snackbarButton, setSnackbarButton] = useState<JSX.Element>();
 
+  // State for transient status announcements
+  const [mapLoadedAnnouncement, setMapLoadedAnnouncement] = useState('');
+  const [processingCompleteAnnouncement, setProcessingCompleteAnnouncement] = useState('');
+
   // Store
   const mapLoaded = useStoreMapLoaded();
   const circularProgressActive = useStoreAppIsCircularProgressActive();
@@ -96,8 +112,16 @@ export function Shell(props: ShellProps): JSX.Element {
   const appHeight = useStoreAppHeight();
   const uiController = useUIController();
 
-  // SxClasses
-  const memoSxClasses = useMemo((): SxStyles => getShellSxClasses(theme, appHeight), [theme, appHeight]);
+  const prevMapLoadedRef = useRef<boolean>(mapLoaded);
+  const prevCircularProgressActiveRef = useRef<boolean>(circularProgressActive);
+
+  /**
+   * Computes the style classes for the shell container.
+   */
+  const memoSxClasses = useMemo((): SxStyles => {
+    logger.logTraceUseMemo('SHELL - memoSxClasses', appHeight);
+    return getShellSxClasses(theme, appHeight);
+  }, [theme, appHeight]);
 
   // Ref for container height
   const { mapShellContainerRef } = useMapResize({
@@ -113,9 +137,6 @@ export function Shell(props: ShellProps): JSX.Element {
 
   /**
    * Handles when a component is being added to the map.
-   *
-   * @param sender - The map viewer instance
-   * @param event - The component added event
    */
   const handleMapAddComponent = useCallback((sender: MapViewer, event: MapComponentAddedEvent): void => {
     setComponents((tempComponents) => ({
@@ -126,9 +147,6 @@ export function Shell(props: ShellProps): JSX.Element {
 
   /**
    * Handles when a component is being removed from the map.
-   *
-   * @param sender - The map viewer instance
-   * @param event - The component removed event
    */
   const handleMapRemoveComponent = useCallback(
     (sender: MapViewer, event: MapComponentRemovedEvent): void => {
@@ -144,9 +162,6 @@ export function Shell(props: ShellProps): JSX.Element {
 
   /**
    * Handles when a modal needs to open.
-   *
-   * @param sender - The modal API instance
-   * @param event - The modal event
    */
   const handleModalOpen = useCallback(
     (sender: ModalApi, event: ModalEvent): void => {
@@ -165,9 +180,6 @@ export function Shell(props: ShellProps): JSX.Element {
 
   /**
    * Handles when a SnackBar needs to open.
-   *
-   * @param sender - The notifications instance
-   * @param payload - The snackbar open event payload
    */
   const handleSnackBarOpen = useCallback(
     (sender: Notifications, payload: SnackBarOpenEvent): void => {
@@ -209,9 +221,6 @@ export function Shell(props: ShellProps): JSX.Element {
 
   /**
    * Handles when a SnackBar needs to close.
-   *
-   * @param event - Optional synthetic or native event that triggered the close
-   * @param reason - Optional reason for the close action
    */
   const handleSnackBarClose = useCallback(
     (event?: React.SyntheticEvent | Event, reason?: string): void => {
@@ -244,8 +253,6 @@ export function Shell(props: ShellProps): JSX.Element {
 
   /**
    * Handles skip link navigation by focusing the target element.
-   *
-   * @param targetId - The ID of the element to focus
    */
   const handleSkipLinkClick = useCallback((targetId: string): void => {
     const targetElement = document.getElementById(targetId);
@@ -296,6 +303,62 @@ export function Shell(props: ShellProps): JSX.Element {
     };
   }, [mapViewer, handleMapRemoveComponent, handleModalOpen, handleSnackBarOpen, handleModalClose, handleMapAddComponent]);
 
+  /**
+   * Announces when the map finishes loading, then clears the announcement.
+   */
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('SHELL - map loaded announcement', mapLoaded);
+
+    // Capture previous value before updating
+    const prevMapLoaded = prevMapLoadedRef.current;
+
+    // Update ref immediately (unconditionally)
+    prevMapLoadedRef.current = mapLoaded;
+
+    // Only announce on the transition from NOT loaded → loaded
+    if (mapLoaded && !prevMapLoaded) {
+      setMapLoadedAnnouncement(t('map.status.mapLoaded'));
+
+      // Clear the announcement after screen readers have time to speak it
+      const timer = setTimeout(() => {
+        setMapLoadedAnnouncement('');
+      }, TIMEOUT.screenReaderAnnouncement);
+
+      return () => clearTimeout(timer);
+    }
+
+    return undefined;
+  }, [mapLoaded, t]);
+
+  /**
+   * Announces when processing completes, then clears the announcement.
+   */
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('SHELL - processing complete announcement', circularProgressActive);
+
+    // Capture previous value before updating
+    const prevCircularProgressActive = prevCircularProgressActiveRef.current;
+
+    // Update ref immediately (unconditionally)
+    prevCircularProgressActiveRef.current = circularProgressActive;
+
+    // Only announce on the transition from active → inactive
+    if (!circularProgressActive && prevCircularProgressActive) {
+      setProcessingCompleteAnnouncement(t('map.status.processingComplete'));
+
+      // Clear the announcement after screen readers have time to speak it
+      const timer = setTimeout(() => {
+        setProcessingCompleteAnnouncement('');
+      }, TIMEOUT.screenReaderAnnouncement);
+
+      return () => clearTimeout(timer);
+    }
+
+    return undefined;
+  }, [circularProgressActive, t]);
+
   return (
     <Box sx={memoSxClasses.all}>
       <Link
@@ -309,8 +372,19 @@ export function Shell(props: ShellProps): JSX.Element {
       </Link>
       <FocusTrap open={activeTrapGeoView}>
         <Box ref={shellRef} id={`shell-${mapViewer.mapId}`} sx={memoSxClasses.shell} className="geoview-shell" tabIndex={-1}>
-          <CircularProgress isLoaded={mapLoaded} />
-          <CircularProgress isLoaded={!circularProgressActive} />
+          {/* Map loading */}
+          <Box role="status" aria-live="polite" aria-atomic="true" aria-busy={!mapLoaded}>
+            <CircularProgress isLoaded={mapLoaded} />
+            {!mapLoaded && <Typography sx={visuallyHidden}>{t('map.status.loadingMap')}</Typography>}
+            {mapLoadedAnnouncement && <Typography sx={visuallyHidden}>{mapLoadedAnnouncement}</Typography>}
+          </Box>
+
+          {/* Processing */}
+          <Box role="status" aria-live="polite" aria-atomic="true" aria-busy={circularProgressActive}>
+            <CircularProgress isLoaded={!circularProgressActive} />
+            {circularProgressActive && <Typography sx={visuallyHidden}>{t('map.status.processing')}</Typography>}
+            {processingCompleteAnnouncement && <Typography sx={visuallyHidden}>{processingCompleteAnnouncement}</Typography>}
+          </Box>
           {interaction === 'dynamic' && (
             <Link
               id={`main-map-${mapViewer.mapId}`}

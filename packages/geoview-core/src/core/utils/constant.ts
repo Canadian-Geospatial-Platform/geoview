@@ -133,6 +133,8 @@ export const TIMEOUT: Record<string, number> = {
   notification: 1000,
   northPoleVisibility: 1000,
 
+  screenReaderAnnouncement: 1500,
+
   deleteLayerUndoWindow: 2500,
 
   delayBeforeShowingSlowCoordinateInfoWarning: 3000,

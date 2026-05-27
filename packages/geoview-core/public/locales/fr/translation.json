@@ -38,6 +38,15 @@
       "info": "Information"
     }
   },
+  "map": {
+    "container": "Carte interactive {{mapId}}",
+    "status": {
+      "loadingMap": "Chargement de la carte",
+      "mapLoaded": "Carte chargée",
+      "processing": "Traitement en cours",
+      "processingComplete": "Traitement terminé"
+    }
+  },
   "mapnav": {
     "arianavbar": "Groupe de buttons vertical pour navigation sur la carte",
     "basemap": "Changer la carte de base",
@@ -45,8 +54,10 @@
     "home": "Zoom à la vue initiale",
     "zoomIn": "Zoom avant",
     "zoomOut": "Zoom arrière",
-    "coordinates": "Basculer le format des coordonnées",
     "scale": "Basculer entre l'échelle et la résolution",
+    "cycleHint": "Cliquez, appuyez sur Entrée/Espace ou utilisez les touches fléchées pour faire défiler le mode d'affichage de l'échelle",
+    "selectFormat": "Sélectionner le format d'échelle",
+    "graphicScale": "échelle graphique",
     "location": "Zoom sur ma position",
     "measurement": "Mesurer sur la carte",
     "projection": "Changer la projection de la carte",
@@ -88,7 +99,14 @@
       "east": "E",
       "west": "O",
       "north": "N",
-      "south": "S"
+      "south": "S",
+      "selectFormat": "Sélectionner le format de coordonnées",
+      "cycleHint": "Cliquer, appuyer sur Entrée/Espace ou utiliser les touches fléchées pour changer le format de coordonnées",
+      "dms": "Degrés Minutes Secondes",
+      "dd": "Degrés Décimaux",
+      "projected": "Coordonnées Projetées",
+      "coordinates": "Basculer le format des coordonnées",
+      "notAvailable": "Position non disponible"
     },
     "overviewmap": {
       "toggle": "Basculer la carte d'aperçu",
