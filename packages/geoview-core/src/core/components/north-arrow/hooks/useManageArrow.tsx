@@ -55,6 +55,17 @@ export const useManageArrow = (): ArrowReturn => {
   const equalCountRef = useRef(0);
 
   /**
+   * Resets rotation tracking refs when fixNorth is toggled to ensure fresh calculation.
+   */
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('USE-MANAGE-ARROW - fixNorth changed', fixNorth);
+
+    prevRotationRef.current = 0;
+    equalCountRef.current = 0;
+  }, [fixNorth]);
+
+  /**
    * Calculates the north arrow rotation and offset based on projection and map state.
    */
   const { memoCalculatedRotation, memoCalculatedOffset } = useMemo(() => {
