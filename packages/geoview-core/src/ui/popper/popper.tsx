@@ -17,7 +17,7 @@ import { delay } from '@/core/utils/utilities';
 interface PopperPropsExtend extends PopperProps {
   /** Callback fired when the popper should close. */
   onClose?: () => void;
-  /** Custom keyboard event handler with key and callback parameters. */
+  /** Keyboard event handler that receives the key pressed and a callback to close the popper. */
   handleKeyDown?: (key: string, callbackFn: () => void) => void;
   /** CSS selector for the element to focus when popper opens. */
   focusSelector?: string;

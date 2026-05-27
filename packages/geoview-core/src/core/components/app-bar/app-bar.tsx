@@ -424,9 +424,14 @@ export function AppBar(props: AppBarProps): JSX.Element {
                     return;
                   }
                 }
-                handleEscapeKey(event.key, getButtonElementId(buttonPanel.button?.id ?? '', '-panel-btn'), isFocusTrapped, () => {
-                  uiController.setActiveAppBarTab(buttonPanel.button?.id ?? '', false, false);
-                });
+                handleEscapeKey(
+                  event.key,
+                  () => {
+                    uiController.setActiveAppBarTab(buttonPanel.button?.id ?? '', false, false);
+                  },
+                  getButtonElementId(buttonPanel.button?.id ?? '', '-panel-btn'),
+                  isFocusTrapped
+                );
               }}
               onGeneralClose={() => {
                 handleGeneralCloseClicked(buttonPanel.button?.id ?? '');

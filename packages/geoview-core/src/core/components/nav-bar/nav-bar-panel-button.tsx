@@ -137,7 +137,7 @@ export default function NavbarPanelButton({ buttonPanel, isActive = false }: Nav
           aria-labelledby={dialogTitleId}
           focusTrap={activeTrapGeoView}
           sx={{ marginRight: '5px !important' }}
-          handleKeyDown={(key, callBackFn) => handleEscapeKey(key, '', false, callBackFn)}
+          handleKeyDown={handleEscapeKey}
         >
           <Paper sx={{ width: `${buttonPanel.panel?.width ?? 300}px`, maxHeight: '500px' }}>
             <DialogTitle id={dialogTitleId} sx={memoSxClasses.popoverTitle}>

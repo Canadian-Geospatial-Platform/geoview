@@ -11,7 +11,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   mousePosition: {
     display: 'flex',
     minWidth: 'fit-content',
-    paddingRight: '1rem',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
     overflow: 'hidden',
