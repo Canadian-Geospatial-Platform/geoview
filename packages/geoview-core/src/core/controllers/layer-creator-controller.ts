@@ -886,10 +886,6 @@ export class LayerCreatorController extends AbstractMapViewerController {
 
     // Register in the domain
     this.#layerDomain.registerGVLayer(groupLayer);
-
-    // TODO: REFACTOR - Think about moving this call somewhere else
-    // Set in visible range property for all newly added layers
-    this.getControllersRegistry().layerController.updateLayerInVisibleRange(groupLayer);
   }
 
   /**
