@@ -128,12 +128,10 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
     }
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleDeleteClick = (event: MouseEvent): void => {
     performDelete(false);
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleUndoClick = (event: MouseEvent): void => {
     performUndo(false);
   };

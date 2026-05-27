@@ -43,8 +43,8 @@ export const layerTypes = CONST_LAYER_TYPES;
 interface EsriFeature {
   attributes?: Record<string, unknown>;
   geometry?: {
-    x?: number | string | undefined;
-    y?: number | string | undefined;
+    x?: number | string;
+    y?: number | string;
     rings?: (number | string)[][][];
     paths?: (number | string)[][][];
     points?: (number | string)[][];

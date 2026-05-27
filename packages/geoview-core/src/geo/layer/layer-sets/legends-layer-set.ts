@@ -286,13 +286,13 @@ export class LegendsLayerSet extends AbstractLayerSet {
   /**
    * Handles when a layer status changed on a layer config.
    *
-   * @param layerConfig - The layer config
+   * @param sender - The layer config
    * @param layerStatusEvent - The new layer status
    */
-  #handleLayerStatusChanged(layerConfig: ConfigBaseClass, layerStatusEvent: LayerStatusChangedEvent): void {
+  #handleLayerStatusChanged(sender: ConfigBaseClass, layerStatusEvent: LayerStatusChangedEvent): void {
     try {
       // Save to the store
-      setStoreLayerStatus(this.getMapId(), layerConfig.layerPath, layerStatusEvent.layerStatus);
+      setStoreLayerStatus(this.getMapId(), sender.layerPath, layerStatusEvent.layerStatus);
 
       // TODO: CLEANUP - Remove commented code. In this refactoring of legends-layer-set, I'm not checking for query legend on
       // TO.DOCONT: every layer status change 2026-05-01
@@ -301,33 +301,33 @@ export class LegendsLayerSet extends AbstractLayerSet {
       // this.#checkQueryLegend(layer, false);
     } catch (error: unknown) {
       // Log
-      logger.logError('CAUGHT in handleLayerStatusChanged', layerConfig.layerPath, error);
+      logger.logError('CAUGHT in handleLayerStatusChanged', sender.layerPath, error);
     }
   }
 
   /**
    * Handles when a layer style changes on a registered layer.
    *
-   * @param layer - The layer which changed its styles
+   * @param sender - The layer which changed its styles
    * @param event - The layer style changed event
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  #handleLayerStyleChanged(layer: AbstractGVLayer, event: StyleChangedEvent): void {
+
+  #handleLayerStyleChanged(sender: AbstractGVLayer, event: StyleChangedEvent): void {
     // Force query the legend as we have a new style
-    this.#checkQueryLegend(layer, true);
+    this.#checkQueryLegend(sender, true);
   }
 
   /**
    * Handles when a layer style has been applied on a registered AbstractGVVector layer.
    *
-   * @param layer - The layer which got its style applied
+   * @param sender - The layer which got its style applied
    * @param event - The StyleAppliedEvent
    */
-  #handleStyleApplied(layer: AbstractGVVector, event: StyleAppliedEvent): void {
+  #handleStyleApplied(sender: AbstractGVVector, event: StyleAppliedEvent): void {
     // If the style has been applied
     if (event.styleApplied) {
       // Force query the legend as we have a new style
-      this.#checkQueryLegend(layer, true);
+      this.#checkQueryLegend(sender, true);
     }
   }
 

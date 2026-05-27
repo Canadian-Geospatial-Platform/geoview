@@ -185,7 +185,9 @@ export class OgcFeature extends AbstractGeoViewVector {
    */
   protected override async onProcessLayerMetadata(
     layerConfig: VectorLayerEntryConfig,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     displayDateMode: DisplayDateMode,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     mapProjection?: OLProjection,
     abortSignal?: AbortSignal
   ): Promise<VectorLayerEntryConfig> {
@@ -215,6 +217,7 @@ export class OgcFeature extends AbstractGeoViewVector {
    */
   protected override async onCreateVectorSourceLoadFeatures(
     layerConfig: VectorLayerEntryConfig,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     sourceOptions: SourceOptions<Feature>,
     readOptions: ReadOptions
   ): Promise<Feature[]> {

@@ -192,6 +192,7 @@ export class EsriFeature extends AbstractGeoViewVector {
   protected override onProcessLayerMetadata(
     layerConfig: EsriFeatureLayerEntryConfig,
     displayDateMode: DisplayDateMode,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     mapProjection?: OLProjection,
     abortSignal?: AbortSignal
   ): Promise<EsriFeatureLayerEntryConfig> {
@@ -209,6 +210,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    */
   protected override async onCreateVectorSourceLoadFeatures(
     layerConfig: VectorLayerEntryConfig,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     sourceOptions: SourceOptions<Feature>,
     readOptions: ReadOptions
   ): Promise<Feature[]> {

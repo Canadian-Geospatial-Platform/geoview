@@ -206,7 +206,6 @@ export class LayerApi {
     });
 
     // Listen on the domain layer message
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     layerDomain.onLayerMessage((sender, event) => {
       // Do something? Wasn't doing anything before..
     });

@@ -127,7 +127,7 @@ export class DrawerController extends AbstractMapViewerController {
   #selectedFeatureState?: {
     feature: Feature;
     originalGeometry: Geometry;
-    originalStyle?: StyleLike | undefined;
+    originalStyle?: StyleLike;
   };
 
   /** History stack for undo/redo functionality */

@@ -1049,7 +1049,7 @@ export type TypeFeatureInfoEntry = {
   uid?: string;
   feature?: Feature<Geometry>;
   geometry?: Geometry;
-  extent: Extent | undefined;
+  extent?: Extent;
   featureIcon?: string;
   fieldInfo: Partial<Record<string, TypeFieldEntry>>;
   nameField?: string;

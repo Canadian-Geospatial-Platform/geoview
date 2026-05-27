@@ -193,6 +193,7 @@ export class GeoJSON extends AbstractGeoViewVector {
    */
   protected override async onCreateVectorSourceLoadFeatures(
     layerConfig: VectorLayerEntryConfig,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     sourceOptions: SourceOptions<Feature>,
     readOptions: ReadOptions
   ): Promise<Feature[]> {

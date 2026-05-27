@@ -107,7 +107,7 @@ export default [
       'no-useless-constructor': 'off',
       '@typescript-eslint/no-useless-constructor': 'error',
       'no-unused-vars': 'off',
-      '@typescript-eslint/no-unused-vars': 'warn',
+      '@typescript-eslint/no-unused-vars': ["warn", { "args": "all", "argsIgnorePattern": "^_|^event$|^sender$" }],
       '@typescript-eslint/no-unnecessary-type-assertion': 'warn',
       '@typescript-eslint/no-inferrable-types': 'warn',
       'no-use-before-define': 'off',

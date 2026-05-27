@@ -274,12 +274,14 @@ export class GVWMS extends AbstractGVRaster {
       );
     }
 
+    // Get the map projection
+    const mapProjection = map.getView().getProjection();
+
     // Project the lon/lat to the map's projection
-    const clickCoordinate = Projection.transformFromLonLat(lonlat, map.getView().getProjection());
+    const clickCoordinate = Projection.transformFromLonLat(lonlat, mapProjection);
 
     // Get the source and resolution
     const viewResolution = map.getView().getResolution()!;
-    const projectionCode = map.getView().getProjection().getCode();
 
     // Get the Geoview Layer Config WFS equivalent if any
     const wfsLayerConfig = wmsLayerConfig.getWfsLayerConfig();
@@ -293,7 +295,7 @@ export class GVWMS extends AbstractGVRaster {
           wfsLayerConfig,
           clickCoordinate,
           viewResolution,
-          projectionCode,
+          mapProjection.getCode(),
           language,
           this.getLayerFilters(),
           abortController
@@ -305,7 +307,14 @@ export class GVWMS extends AbstractGVRaster {
     }
 
     // Try various info formats patterns to get feature info
-    return this.#getFeatureInfoUsingWMS(wmsLayerConfig, clickCoordinate, viewResolution, projectionCode, language, abortController);
+    return this.#getFeatureInfoUsingWMS(
+      wmsLayerConfig,
+      clickCoordinate,
+      viewResolution,
+      mapProjection.getCode(),
+      language,
+      abortController
+    );
   }
 
   /**
@@ -771,7 +780,7 @@ export class GVWMS extends AbstractGVRaster {
       const geomFieldName = wfsLayerConfig.getGeometryField()?.name || 'geometry'; // default: geometry
 
       // Buffer the point into a polygon-circle to get features around the click point
-      const bufferedPoint = GVWMS.#buildBufferPolygon(clickCoordinate, projectionCode, viewResolution, this.getGetFeatureInfoTolerance());
+      const bufferedPoint = GVWMS.#buildBufferPolygon(clickCoordinate, viewResolution, this.getGetFeatureInfoTolerance());
 
       // Write the polygon to GML
       const polygonGML = GeoUtilities.writeGeometryToGML(bufferedPoint, projectionCode);
@@ -1780,12 +1789,11 @@ export class GVWMS extends AbstractGVRaster {
    * Build a buffered polygon (GML) around a clicked coordinate.
    *
    * @param clickCoordinate - coordinate in map projection
-   * @param srsName - The srs name
    * @param resolution - The map resolution
    * @param pixelTolerance - number of screen pixels (like ArcGIS Identify)
    * @returns The buffered polygon
    */
-  static #buildBufferPolygon(clickCoordinate: Coordinate, srsName: string, resolution: number, pixelTolerance = 10): Polygon {
+  static #buildBufferPolygon(clickCoordinate: Coordinate, resolution: number, pixelTolerance = 10): Polygon {
     // The buffer radius
     const bufferRadius = resolution * (pixelTolerance / 2); // buffer in map units
 

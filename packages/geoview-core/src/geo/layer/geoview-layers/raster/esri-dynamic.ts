@@ -126,6 +126,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   protected override onProcessLayerMetadata(
     layerConfig: EsriDynamicLayerEntryConfig,
     displayDateMode: DisplayDateMode,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     mapProjection?: OLProjection,
     abortSignal?: AbortSignal
   ): Promise<EsriDynamicLayerEntryConfig> {

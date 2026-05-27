@@ -788,10 +788,10 @@ export class LayerCreatorController extends AbstractMapViewerController {
    *     cleanup actions tied to removal).
    *  3. Registers the new layer-entry configuration using `registerLayerConfigInit`.
    *
-   * @param geoviewLayer - The GeoView layer associated with this registration event
+   * @param sender - The GeoView layer associated with this registration event
    * @param event - The event containing the layer-entry configuration to be registered
    */
-  #handleLayerEntryRegisterInit(geoviewLayer: AbstractGeoViewLayer, event: LayerEntryRegisterInitEvent): void {
+  #handleLayerEntryRegisterInit(sender: AbstractGeoViewLayer, event: LayerEntryRegisterInitEvent): void {
     // Log
     logger.logTraceCore(
       `LAYERS - 1.5 - Registering an extra layer entry config ${event.config.layerPath} on map ${this.getMapId()}`,
@@ -824,10 +824,10 @@ export class LayerCreatorController extends AbstractMapViewerController {
    *  3. Emits a "layer created" event so external code can bind to it immediately.
    *  4. Calls the layer's `init()` method to finalize initialization.
    *
-   * @param geoviewLayer - The parent or context GeoView layer associated with this creation event
+   * @param sender - The parent or context GeoView layer associated with this creation event
    * @param event - The event containing the newly created GV layer instance and its configuration
    */
-  #handleLayerGVCreated(geoviewLayer: AbstractGeoViewLayer, event: LayerGVCreatedEvent): void {
+  #handleLayerGVCreated(sender: AbstractGeoViewLayer, event: LayerGVCreatedEvent): void {
     // Get the GV Layer and the config
     const gvLayer = event.layer;
     const layerConfig = gvLayer.getLayerConfig();
@@ -867,12 +867,10 @@ export class LayerCreatorController extends AbstractMapViewerController {
    *  2. Registers internal event handlers specific to group layers.
    *  3. Computes and stores the layer's initial "in visible range" state.
    *
-   * @param geoviewLayer - The parent or context layer
-   *   associated with this creation event.
-   * @param event - The event containing the newly
-   *   created group layer instance and its configuration.
+   * @param sender - The parent or context layer associated with this creation event.
+   * @param event - The event containing the newly created group layer instance and its configuration.
    */
-  #handleLayerGroupCreated(geoviewLayer: AbstractGeoViewLayer, event: LayerGroupCreatedEvent): void {
+  #handleLayerGroupCreated(sender: AbstractGeoViewLayer, event: LayerGroupCreatedEvent): void {
     // Get the Group Layer and the config
     const groupLayer = event.layer;
     const layerConfig = groupLayer.getLayerConfig();
@@ -891,7 +889,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
   /**
    * Handles layer-specific messages and displays them through the map viewer's notification system.
    *
-   * @param layer - The layer instance that triggered the message
+   * @param sender - The layer instance that triggered the message
    * @param layerMessageEvent - The message event containing notification details
    *
    * @example
@@ -902,7 +900,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
    *   notification: true
    * });
    */
-  #handleLayerMessage(layer: AbstractGeoViewLayer, layerMessageEvent: LayerMessageEvent): void {
+  #handleLayerMessage(sender: AbstractGeoViewLayer, layerMessageEvent: LayerMessageEvent): void {
     // Read event params for clarity
     const { messageType } = layerMessageEvent;
     const { messageKey } = layerMessageEvent;
