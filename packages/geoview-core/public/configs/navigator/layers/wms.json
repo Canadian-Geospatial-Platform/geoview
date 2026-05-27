@@ -224,7 +224,7 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "photo/plot/with/slash",
-            "layerName": "Photo Plot Group",
+            "layerName": "Photo/Plot/Group",
             "entryType": "group",
             "listOfLayerEntryConfig": [
               {
