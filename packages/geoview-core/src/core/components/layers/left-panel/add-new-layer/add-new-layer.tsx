@@ -1,7 +1,10 @@
 import type { ChangeEvent, KeyboardEvent } from 'react';
 import { useEffect, useRef, useState } from 'react';
+
 import { useTranslation } from 'react-i18next';
+
 import type { SelectChangeEvent } from '@mui/material';
+
 import type { ButtonPropsLayerPanel } from '@/ui';
 import { Box, Button, IconButton, ButtonGroup, CircularProgressBase, FileUploadIcon, Paper, Select, Stepper, TextField } from '@/ui';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
@@ -55,14 +58,10 @@ interface FileUploadSectionProps {
 }
 
 /**
- * A component that handles file uploads through drag-and-drop or file input
- * @component
- * @param props - Component props
- * @param props.onFileSelected - Callback when a file is selected, receives (file, fileURL, fileName)
- * @param props.onUrlChanged - Callback when the URL input changes, receives the new URL
- * @param props.displayURL - The URL to display in the text field
- * @param props.disabledLayerTypes - Array of layer types that are disabled
- * @returns The rendered component
+ * Creates the file upload section component.
+ *
+ * @param props - Properties defined in FileUploadSectionProps interface
+ * @returns The file upload section component
  */
 function FileUploadSection({
   onFileSelected,
@@ -154,6 +153,47 @@ function FileUploadSection({
       processFile(event.dataTransfer.files[0]);
     }
   };
+
+  /**
+   * Handles drag-over behavior for the file dropzone.
+   *
+   * @param event - The drag event over the dropzone
+   */
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>): void => {
+    event.preventDefault();
+    event.stopPropagation();
+  };
+
+  /**
+   * Handles drag-enter behavior for the file dropzone.
+   *
+   * @param event - The drag-enter event for the dropzone
+   */
+  const handleDragEnter = (event: React.DragEvent<HTMLDivElement>): void => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.target !== dragPopover.current) setDrag(true);
+  };
+
+  /**
+   * Handles drag-leave behavior for the file dropzone.
+   *
+   * @param event - The drag-leave event for the dropzone
+   */
+  const handleDragLeave = (event: React.DragEvent<HTMLDivElement>): void => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.target === dragPopover.current) setDrag(false);
+  };
+
+  /**
+   * Opens the hidden file input.
+   */
+  const handleOpenFileInput = (): void => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
   // TODO: WCAG Issue #3117 -  aria-label(layers.fileTypes) needs to include button text (layers.upload)...
   // TODO: WCAG Issue #3117 -  ... button text (Choose a file) does not begin with sane word aria-label (Upload a...)
   return (
@@ -161,20 +201,9 @@ function FileUploadSection({
       className="dropzone"
       style={{ position: 'relative' }}
       onDrop={handleDrop}
-      onDragOver={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-      }}
-      onDragEnter={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (e.target !== dragPopover.current) setDrag(true);
-      }}
-      onDragLeave={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (e.target === dragPopover.current) setDrag(false);
-      }}
+      onDragOver={handleDragOver}
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
     >
       {drag && (
         <Box
@@ -212,11 +241,7 @@ function FileUploadSection({
         size="small"
         sx={{ width: '100%' }}
         type="text"
-        onClick={() => {
-          if (fileInputRef.current) {
-            fileInputRef.current.click();
-          }
-        }}
+        onClick={handleOpenFileInput}
         className="buttonOutlineFilled"
         aria-label={t('layers.fileTypes')}
         tooltip={t('layers.fileTypes')}
@@ -265,14 +290,9 @@ function FileUploadSection({
 }
 
 /**
- * A component that provides a step-by-step interface for adding new layers to the map
+ * Creates the add-new-layer component.
  *
- * @component
- * @description This component guides users through the process of adding a new layer to the map,
- * including uploading files (JSON, GeoJSON, CSV, ZIP, SHP), entering URLs, selecting layer types,
- * and configuring layer options. It uses a stepper UI to break the process into manageable steps.
- *
- * @returns The rendered component with a multi-step form for adding layers
+ * @returns The add-new-layer component
  */
 export function AddNewLayer(): JSX.Element {
   // Log
@@ -387,6 +407,13 @@ export function AddNewLayer(): JSX.Element {
     else if (layerBeingAdded?.allLayerStatusAreGreaterThanOrEqualTo('loaded'))
       uiController.addMessage('info', 'layers.layerAdded', { layerName });
     else uiController.addMessage('info', 'layers.layerAddedAndLoading', { layerName });
+  };
+
+  /**
+   * Handles cancel behavior for the add-layer workflow.
+   */
+  const handleCancelAddLayer = (): void => {
+    layerController.setLayerDisplayState('view');
   };
 
   // #region HANDLERS FOR THE STEPS
@@ -552,7 +579,7 @@ export function AddNewLayer(): JSX.Element {
 
     if (valid) {
       // If a single layer is added, use its name instead of service name
-      const firstLayerName = UtilAddLayer.getLayerNameById(layerTree, layerIdsToAdd[0]);
+      const firstLayerName = UtilAddLayer.findLayerNameById(layerTree, layerIdsToAdd[0]);
       const isSingleGroupLayer = layerIdsToAdd.every((layerId) => layerId.split('/')[0] === layerIdsToAdd[0]);
       if ((layerIdsToAdd.length === 1 || isSingleGroupLayer) && firstLayerName) setLayerName(firstLayerName);
       setActiveStep(3);
@@ -643,7 +670,7 @@ export function AddNewLayer(): JSX.Element {
     const newGeoViewLayer = UtilAddLayer.buildGeoLayerToAdd({
       layerIdsToAdd,
       layerName,
-      layerType,
+      layerType: layerType as TypeInitialGeoviewLayerType,
       layerURL,
       layerTree: layerTree!,
       isGeoCore,
@@ -910,13 +937,7 @@ export function AddNewLayer(): JSX.Element {
           </Button>
         )}
         {isFirst && (
-          <Button
-            variant="contained"
-            className="buttonOutlineFilled"
-            size="small"
-            type="text"
-            onClick={() => layerController.setLayerDisplayState('view')}
-          >
+          <Button variant="contained" className="buttonOutlineFilled" size="small" type="text" onClick={handleCancelAddLayer}>
             {t('general.cancel')}
           </Button>
         )}

@@ -2,8 +2,10 @@
  * This component improves Mui's TreeView component to be able to process Layers data.
  */
 import { useEffect, useState } from 'react';
+
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
 import { TreeItem } from '@mui/x-tree-view/TreeItem';
+
 import { logger } from '@/core/utils/logger';
 import type { TypeGeoviewLayerConfig, TypeLayerEntryConfig } from '@/api/types/layer-schema-types';
 import { UtilAddLayer } from '@/core/components/layers/left-panel/add-new-layer/add-layer-utils';
@@ -15,6 +17,12 @@ export interface AddLayerTreeProps {
   onSelectedItemsChange(items: string[]): void;
 }
 
+/**
+ * Creates the add-layer tree component.
+ *
+ * @param props - Properties defined in AddLayerTreeProps interface
+ * @returns The add-layer tree component
+ */
 export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
   // Log
   logger.logTraceRender('components/layers/left-panel/add-layer-tree/add-layer-tree');
@@ -22,9 +30,12 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
   const { layerTree, onSelectedItemsChange } = props;
   const [selectedItems, setSelectedItems] = useState<string[]>([]); // e.g. ["group1/layer1", "group2/layer2"]
 
+  /**
+   * Propagates selected tree items to the parent component.
+   */
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('Add Layer Tree - selectedItems ', selectedItems);
+    logger.logTraceUseEffect('ADD-LAYER-TREE - selectedItems', selectedItems);
     onSelectedItemsChange(selectedItems);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedItems]);
@@ -67,7 +78,7 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
     function populateLayerChildren(origLayerId: string, parentViewId: string | undefined): void {
       const viewLayerId = `${parentViewId ?? ''}${parentViewId ? '/' : ''}${origLayerId}`;
       result.push(viewLayerId);
-      const layerDetails = UtilAddLayer.getLayerById(layerTree, origLayerId);
+      const layerDetails = UtilAddLayer.findLayerById(layerTree, origLayerId);
 
       const childLayerIds: string[] | undefined = layerDetails?.listOfLayerEntryConfig?.map((child) => {
         return child.layerId;
@@ -131,9 +142,7 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
       multiSelect
       checkboxSelection
       selectedItems={selectedItems}
-      onItemSelectionToggle={(event: React.SyntheticEvent, itemId: string, isSelected: boolean) =>
-        handleItemSelectionToggle(event, itemId, isSelected)
-      }
+      onItemSelectionToggle={handleItemSelectionToggle}
     >
       {renderTreeItems()}
     </SimpleTreeView>
