@@ -242,6 +242,33 @@ const isVisible =
 
 **Config validation behavior for visibility** — In `ConfigValidation.#processLayerEntryConfig()`, when `parentInitialSettingsTrue?.states?.visible === false`, the child's `visible` property is **deleted** from the merged config (`delete initSettingsMerged.states?.visible`). This means the child defaults to `visible = true` in the store/legend, but is visually hidden because the parent OL layer is not visible.
 
+### Layer Style Item Visibility & Class Filters
+
+See [layer-filters.md](../docs/programming/layer-filters.md) for the full filter architecture documentation.
+
+**Four filter sources** — Layer filtering in GeoView comes from four independent sources, combined with AND logic:
+
+| Source                 | Store key                 | Producer                                                                             | Consumer                      |
+| ---------------------- | ------------------------- | ------------------------------------------------------------------------------------ | ----------------------------- |
+| **Style class filter** | `layerFilterClass`        | `GeoviewRenderer.getFilterFromStyle()` via `AbstractGVLayer.#setLayerFiltersClass()` | Data table, feature queries   |
+| **Time filter**        | `layerFilterTime`         | `TimeSliderController.#generateFilterString()`                                       | Data table, WMS/ESRI requests |
+| **Data filter**        | `tableFilters[layerPath]` | `buildFilterList()` → `DataTableController.applyMapFilters()`                        | Map rendering (source params) |
+| **Config filter**      | `#initialFilter`          | Map config `initialSettings.filters`                                                 | Feature queries               |
+
+These filters are joined by `LayerFilters.joinWithAnd()` when applied.
+
+**`getFilterFromStyle()` behavior by style type:**
+
+| Style type        | Returns     | Example                                             | Data table filtering       |
+| ----------------- | ----------- | --------------------------------------------------- | -------------------------- |
+| **`uniqueValue`** | SQL string  | `"status" = 'active' OR "status" = 'pending'`       | ✅ Rows filtered           |
+| **`classBreaks`** | SQL string  | `"population" >= 100000 AND "population" <= 500000` | ✅ Rows filtered           |
+| **`simple`**      | `undefined` | —                                                   | ❌ All rows remain visible |
+
+**Simple style limitation** — When a layer has multiple geometry types (e.g., Point + Polygon), toggling a geometry type's visibility in the legend works **only at the renderer level**. `processSimplePoint/LineString/Polygon` in `GeoviewRenderer` returns `undefined` (no OL style = invisible on map) when `styleSettings.info[0]?.visible === false`. However, `getFilterFromStyle()` returns `undefined` for simple styles because geometry type is not an attribute field — there is no SQL equivalent of `WHERE geometryType = 'Point'`. This means the data table cannot filter rows by geometry type and always shows all features regardless of which geometry types are toggled off.
+
+**Style item identity** — `setStoreLayerItemVisibility()` in `layer-state.ts` matches items by **both `name` AND `geometryType`** to disambiguate items that share the same name across different geometry types (e.g., a "Default" point style vs a "Default" polygon style on the same layer).
+
 ### Scale Limits & Visibility Range
 
 **Scale calculation normalization** — `MapViewer.getMapScaleFromZoom()` now rounds the computed denominator to the nearest unit (`Math.round`). This avoids floating-point artifacts like `159499.99999999983` and keeps visibility comparisons stable.
@@ -2206,6 +2233,7 @@ Controllers are the preferred path. MapViewer provides low-level OL access (tran
 - [event-helper.md](../docs/programming/event-helper.md) - Delegate event system
 - [controller-architecture.md](../docs/programming/controller-architecture.md) - Controller design & domain integration
 - [time-dimension.md](../docs/programming/time-dimension.md) - OGC/ESRI time dimension parsing & time slider
+- [layer-filters.md](../docs/programming/layer-filters.md) - Layer filter architecture (class, time, config filters)
 - [troubleshooting.md](../docs/programming/troubleshooting.md) - Service-specific fixes & known issues
 
 ## TypeDoc-First API Documentation Policy
