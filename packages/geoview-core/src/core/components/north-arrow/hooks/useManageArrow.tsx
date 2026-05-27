@@ -61,6 +61,7 @@ export const useManageArrow = (): ArrowReturn => {
     // Log
     logger.logTraceUseEffect('USE-MANAGE-ARROW - fixNorth changed', fixNorth);
 
+    angle.current = 0;
     prevRotationRef.current = 0;
     equalCountRef.current = 0;
   }, [fixNorth]);
