@@ -572,10 +572,12 @@ export class MapController extends AbstractMapViewerController {
    * Converts a map coordinate to a pixel position.
    *
    * @param coord - The map coordinate
-   * @returns The pixel position on the map viewport
+   * @returns The pixel position on the map viewport, or null if the map is not yet initialized
    */
-  getPixelFromCoordinate(coord: Coordinate): Pixel {
-    return this.getMapViewer().map.getPixelFromCoordinate(coord);
+  getPixelFromCoordinate(coord: Coordinate): Pixel | null {
+    const olMap = this.getMapViewer().map;
+    if (!olMap) return null;
+    return olMap.getPixelFromCoordinate(coord);
   }
 
   /**
