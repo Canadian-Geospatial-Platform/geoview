@@ -288,7 +288,7 @@ export class WMS extends AbstractGeoViewRaster {
     // Create the source params
     const sourceParams: Record<string, unknown> = {
       LAYERS: layerConfig.layerId,
-      VERSION: layerConfig.getVersion(),
+      VERSION: layerConfig.getVersionOrDefault(),
     };
 
     // Get the style to use

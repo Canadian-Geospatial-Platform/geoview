@@ -497,10 +497,10 @@ export class GVWMS extends AbstractGVRaster {
     const sqlFilter = objectIds.length === 1 ? `${pkFieldName} = ${objectIds[0]}` : `${pkFieldName} in (${objectIds.join(', ')})`;
 
     // The xml filter
-    const xmlFilter = WfsRenderer.sqlToOlFilterXml(sqlFilter, wfsLayerConfig.getVersion(), pkFieldName);
+    const xmlFilter = WfsRenderer.sqlToOlFilterXml(sqlFilter, wfsLayerConfig.getVersionOrDefault(), pkFieldName);
 
     // Wrap the ogc filter request
-    const xmlFilterReady = WfsRenderer.wrapOGCFilter(xmlFilter, 'wfs', wfsLayerConfig.getVersion());
+    const xmlFilterReady = WfsRenderer.wrapOGCFilter(xmlFilter, 'wfs', wfsLayerConfig.getVersionOrDefault());
 
     // Get the supported info formats
     const featureInfoFormat = wfsLayerConfig.getSupportedFormats('application/json'); // application/json by default (QGIS Server doesn't seem to provide the metadata for the output formats, use application/json)
@@ -512,7 +512,7 @@ export class GVWMS extends AbstractGVRaster {
     const urlWithOutputJson = GeoUtilities.ensureServiceRequestUrlGetFeature(
       wfsLayerConfig.getMetadataAccessPath()!,
       wfsLayerConfig.layerId,
-      wfsLayerConfig.getVersion(),
+      wfsLayerConfig.getVersionOrDefault(),
       outputFormat,
       [],
       xmlFilterReady,
@@ -760,7 +760,7 @@ export class GVWMS extends AbstractGVRaster {
       // Build a OGC Filter for the filter
       gmlFilterAttribute = WfsRenderer.sqlToOlFilterXml(
         totalFilter,
-        wfsLayerConfig.getVersion(),
+        wfsLayerConfig.getVersionOrDefault(),
         wfsLayerConfig.getOutfields()?.[0]?.name!
       );
     }
@@ -787,13 +787,13 @@ export class GVWMS extends AbstractGVRaster {
     const xmlFilterTotal = WfsRenderer.combineGmlFilters(gmlFilterSpatial, gmlFilterAttribute);
 
     // Wrap the ogc filter request
-    const xmlFilterReady = WfsRenderer.wrapOGCFilter(xmlFilterTotal, 'wfs', wfsLayerConfig.getVersion());
+    const xmlFilterReady = WfsRenderer.wrapOGCFilter(xmlFilterTotal, 'wfs', wfsLayerConfig.getVersionOrDefault());
 
     // Format the url
     const urlWithOutputJson = GeoUtilities.ensureServiceRequestUrlGetFeature(
       wfsLayerConfig.getMetadataAccessPath()!,
       wfsLayerConfig.layerId,
-      wfsLayerConfig.getVersion(),
+      wfsLayerConfig.getVersionOrDefault(),
       outputFormat,
       fieldsToReturn,
       xmlFilterReady,
@@ -1058,12 +1058,12 @@ export class GVWMS extends AbstractGVRaster {
           // Build a OGC Filter for the filter
           const ogcXmlFilter = WfsRenderer.sqlToOlFilterXml(
             newDataFilter,
-            layerConfig.getVersion(),
+            layerConfig.getVersionOrDefault(),
             layerConfig.getOutfields()?.[0]?.name!
           );
 
           // Wrap the ogc filter request
-          sourceParams.FILTER = WfsRenderer.wrapOGCFilter(ogcXmlFilter, 'wms', layerConfig.getVersion());
+          sourceParams.FILTER = WfsRenderer.wrapOGCFilter(ogcXmlFilter, 'wms', layerConfig.getVersionOrDefault());
         }
       }
 
@@ -1731,7 +1731,7 @@ export class GVWMS extends AbstractGVRaster {
         queryUrl = GeoUtilities.ensureServiceRequestUrlGetLegendGraphic(
           layerConfig.getMetadataAccessPath()!,
           layerConfig.layerId,
-          layerConfig.getVersion()
+          layerConfig.getVersionOrDefault()
         );
       }
     }

@@ -236,6 +236,7 @@
     "layerInfoTemporalDimension": "Temporal Dimension (Time Slider)",
     "layerInfoInteraction": "Interaction",
     "layerType": "Type: ",
+    "layerOgcVersion": "OGC Version",
     "layerBounds": "Bounds ({{mapProjectionEPSG}})",
     "layerBounds4326": "Bounds (EPSG:4326)",
     "layerMaxScale": "Max Scale",

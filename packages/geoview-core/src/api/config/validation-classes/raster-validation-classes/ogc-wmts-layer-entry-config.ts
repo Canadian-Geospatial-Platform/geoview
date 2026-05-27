@@ -67,6 +67,28 @@ export class OgcWmtsLayerEntryConfig extends TileLayerEntryConfig {
 
   // #endregion OVERRIDES
 
+  // #region METHODS
+
+  /**
+   * Gets the version.
+   *
+   * @returns The service version as read from the metadata attribute
+   */
+  getVersion(): string | undefined {
+    return this.getServiceMetadata()?.Capabilities?.['@attributes']?.version;
+  }
+
+  /**
+   * Gets the version and defaults to 1.0.0 when couldn't be determined as it's the most stable in testing.
+   *
+   * @returns The service version as read from the metadata attribute, or '1.0.0' if not available
+   */
+  getVersionOrDefault(): string {
+    return this.getVersion() ?? '1.0.0';
+  }
+
+  // #endregion METHODS
+
   // #region STATIC METHODS
 
   /**
@@ -87,6 +109,9 @@ export class OgcWmtsLayerEntryConfig extends TileLayerEntryConfig {
 
 export interface TypeMetadataWMTS {
   Capabilities: {
+    '@attributes': {
+      version: string;
+    };
     'ows:OperationsMetadata': TypeMetadataWMTSOperations;
     Contents: TypeMetadataWMTSContents;
   };

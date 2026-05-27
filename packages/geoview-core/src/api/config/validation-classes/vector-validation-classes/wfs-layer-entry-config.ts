@@ -156,13 +156,22 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
   }
 
   /**
-   * Gets the version. Defaults to 1.3.0.
+   * Gets the version.
    *
    * @returns The service version as read from the metadata attribute
    */
-  getVersion(): string {
+  getVersion(): string | undefined {
     // Redirect
-    return this.getServiceMetadata()?.['@attributes'].version || '1.3.0';
+    return this.getServiceMetadata()?.['@attributes'].version;
+  }
+
+  /**
+   * Gets the version and defaults to 1.3.0 when couldn't be determined as it's the most stable in testing.
+   *
+   * @returns The service version as read from the metadata attribute, or '1.3.0' if not available
+   */
+  getVersionOrDefault(): string {
+    return this.getVersion() ?? '1.3.0';
   }
 
   /**
