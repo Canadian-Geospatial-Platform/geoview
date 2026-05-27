@@ -901,7 +901,7 @@ export const setStoreMapCurrentBasemapOptions = (mapId: string, basemapOptions: 
 };
 
 /** Sets the click marker position in the store. */
-export const setStoreMapClickMarker = (mapId: string, projectedCoords: number[]): void => {
+export const setStoreMapClickMarker = (mapId: string, projectedCoords: number[] | undefined): void => {
   getStoreMapState(mapId).actions.setClickMarker(projectedCoords);
 };
 

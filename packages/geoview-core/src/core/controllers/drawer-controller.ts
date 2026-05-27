@@ -59,8 +59,12 @@ import {
   setStoreDrawerShortcutsEnabled,
   type StyleProps,
 } from '@/core/stores/states/drawer-state';
-import { getStoreAppGeoviewHTMLElement, getStoreAppIsCrosshairsActive } from '@/core/stores/states/app-state';
+import { getStoreAppGeoviewHTMLElement, getStoreAppIsCrosshairsActive, getStoreAppDisplayLanguage } from '@/core/stores/states/app-state';
+import { setStoreMapClickMarker } from '@/core/stores/states/map-state';
 import type { DomainLanguageChangedDelegate, DomainLanguageChangedEvent, UIDomain } from '@/core/domains/ui-domain';
+import { formatArea, formatLength, generateId } from '@/core/utils/utilities';
+import { logger } from '@/core/utils/logger';
+
 import type { MapProjectionChangedDelegate, MapProjectionChangedEvent, MapViewer } from '@/geo/map/map-viewer';
 import {
   HandleType,
@@ -71,10 +75,7 @@ import {
 } from '@/geo/interaction/transform/transform';
 import type { Draw } from '@/geo/interaction/draw';
 import type { Snap } from '@/geo/interaction/snap';
-import { formatArea, formatLength, generateId } from '@/core/utils/utilities';
 import { GeoUtilities } from '@/geo/utils/utilities';
-import { getStoreAppDisplayLanguage } from '@/core/stores/states/app-state';
-import { logger } from '@/core/utils/logger';
 
 /**
  * Controller responsible for drawer interactions, keyboard shortcuts, and
@@ -241,12 +242,16 @@ export class DrawerController extends AbstractMapViewerController {
     const viewer = this.getMapViewer();
     if (!getStoreDrawerIsEditing(mapId)) {
       viewer.unregisterMapPointerHandlers(viewer.map);
+
+      // Clear the hover state and any click marker
+      this.getControllersRegistry().layerSetController.hoverFeatureInfoLayerSet.clearResults();
+      setStoreMapClickMarker(mapId, undefined);
     }
 
     // If editing already, stop it
     // GV Moved the stop editing up so the rotation is set properly for any active text drawing
     if (getStoreDrawerIsEditing(mapId)) {
-      this.stopEditing();
+      this.stopEditing(false);
     }
 
     // Get current state values if not provided
@@ -299,7 +304,7 @@ export class DrawerController extends AbstractMapViewerController {
   /**
    * Stops the current drawing operation.
    */
-  stopDrawing(): void {
+  stopDrawing(registerHandlers = true): void {
     // Get the map id
     const mapId = this.getMapId();
 
@@ -309,7 +314,7 @@ export class DrawerController extends AbstractMapViewerController {
     if (!isStoreDrawerInitialized(mapId)) return;
 
     // Restart Map Pointer handlers that place the details icon when clicking on the map
-    if (!getStoreDrawerIsEditing(mapId)) {
+    if (registerHandlers) {
       const viewer = this.getMapViewer();
       viewer.registerMapPointerHandlers(viewer.map);
     }
@@ -362,6 +367,10 @@ export class DrawerController extends AbstractMapViewerController {
 
     if (!getStoreDrawerIsDrawing(mapId)) {
       viewer.unregisterMapPointerHandlers(viewer.map);
+
+      // Clear the hover state and any click marker
+      this.getControllersRegistry().layerSetController.hoverFeatureInfoLayerSet.clearResults();
+      setStoreMapClickMarker(mapId, undefined);
     }
 
     const oldTransformInstance = this.#transformInstance;
@@ -400,7 +409,7 @@ export class DrawerController extends AbstractMapViewerController {
     // If we have an active drawing instance, stop it
     const drawInstance = this.#drawInstance;
     if (drawInstance) {
-      this.stopDrawing();
+      this.stopDrawing(false);
     }
 
     if (getStoreDrawerIsSnapping(mapId)) {
@@ -411,13 +420,13 @@ export class DrawerController extends AbstractMapViewerController {
   /**
    * Stops the editing interaction for all groups.
    */
-  stopEditing(): void {
+  stopEditing(registerHandlers = true): void {
     // Get the map id
     const mapId = this.getMapId();
 
     if (!isStoreDrawerInitialized(mapId)) return;
 
-    if (!getStoreDrawerIsDrawing(mapId)) {
+    if (registerHandlers) {
       const viewer = this.getMapViewer();
       viewer.registerMapPointerHandlers(viewer.map);
     }
