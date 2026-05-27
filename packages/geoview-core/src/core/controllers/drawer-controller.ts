@@ -96,6 +96,7 @@ export class DrawerController extends AbstractMapViewerController {
   /** Hit tolerance for keyboard-based editing interactions (crosshair) */
   static readonly KEYBOARD_HIT_TOLERANCE = 20;
 
+  /** The ID for the shortcuts indicator element */
   static readonly SHORTCUTS_INDICATOR_ID = 'shortcuts-enabled';
 
   /** Keyboard handler for undo/redo - always active */
@@ -912,6 +913,11 @@ export class DrawerController extends AbstractMapViewerController {
     }
   }
 
+  /**
+   * Enables or disables keyboard shortcuts for the drawer.
+   *
+   * @param enabled - Whether to enable or disable keyboard shortcuts
+   */
   setShortcutsEnabled(enabled: boolean): void {
     // Get the map id
     const mapId = this.getMapId();
@@ -924,23 +930,6 @@ export class DrawerController extends AbstractMapViewerController {
       this.disableKeyboardShortcuts();
     }
     setStoreDrawerShortcutsEnabled(mapId, enabled);
-  }
-
-  /**
-   * Clones a given style or array of styles.
-   *
-   * @param styleLike - The style or array of styles to clone
-   * @returns A cloned style or array of cloned styles
-   */
-  static cloneStyle(styleLike: StyleLike): DrawerStyle | DrawerStyle[] {
-    if (styleLike instanceof Style) {
-      // Single Style — just clone it.
-      return (styleLike as DrawerStyle).clone();
-    } else if (Array.isArray(styleLike)) {
-      // Array of Styles — clone each one.
-      return styleLike.map((style) => (style as DrawerStyle).clone());
-    }
-    throw new Error('Unsupported StyleLike type');
   }
 
   // #endregion PUBLIC METHODS - DRAWING
@@ -3198,6 +3187,23 @@ export class DrawerController extends AbstractMapViewerController {
     const props2 = this.#getStyleProperties(style2);
 
     return JSON.stringify(props1) !== JSON.stringify(props2);
+  }
+
+  /**
+   * Clones a given style or array of styles.
+   *
+   * @param styleLike - The style or array of styles to clone
+   * @returns A cloned style or array of cloned styles
+   */
+  static cloneStyle(styleLike: StyleLike): DrawerStyle | DrawerStyle[] {
+    if (styleLike instanceof Style) {
+      // Single Style — just clone it.
+      return (styleLike as DrawerStyle).clone();
+    } else if (Array.isArray(styleLike)) {
+      // Array of Styles — clone each one.
+      return styleLike.map((style) => (style as DrawerStyle).clone());
+    }
+    throw new Error('Unsupported StyleLike type');
   }
 
   // #endregion STATIC METHODS

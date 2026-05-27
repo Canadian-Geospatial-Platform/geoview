@@ -742,6 +742,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
       // For Annotation SubLayers, filters must target the parent layer
       const metadata = layerConfig.getLayerMetadata();
+      // TODO: Add readonly constants for the "Annotation SubLayer" sting and the "Raster Layer" string
       if (metadata?.type === 'Annotation SubLayer' && metadata?.parentLayer?.id !== undefined) {
         targetLayerId = String(metadata.parentLayer.id);
       }

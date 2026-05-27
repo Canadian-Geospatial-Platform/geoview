@@ -138,7 +138,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
       // If the style URL is not set in the layer entry config, set it to the default style provided in the metadata
       if (!layerConfig.getStyleUrl()) {
         // If the default style is a full URL, use it as is
-        if (metadata.defaultStyles.includes('https://') || metadata.defaultStyles.includes('http://')) {
+        if (metadata.defaultStyles.toLowerCase().startsWith('https://') || metadata.defaultStyles.toLowerCase().startsWith('http://')) {
           layerConfig.setStyleUrl(metadata.defaultStyles);
         } else {
           // Otherwise, assume it's a relative path and construct the full URL using the metadata access path

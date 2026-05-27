@@ -258,6 +258,11 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
     this.#layerText = layerText;
   }
 
+  /**
+   * Initializes the layer text configuration by filling the blanks in our config with the information from the metadata.
+   *
+   * @param layerTextMetadata - Optional layer text metadata to use to help fill the blanks in our layer text config
+   */
   initLayerTextFromMetadata(layerTextMetadata: TypeLayerTextConfig | undefined): void {
     // If no metadata, nothing to do
     if (!layerTextMetadata) return;
