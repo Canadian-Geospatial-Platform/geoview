@@ -331,7 +331,6 @@ export class WKB extends AbstractGeoViewVector {
         // Initialize the layer style by filling the blanks with the information from the metadata
         layerConfig.initLayerStyleFromMetadata(layerMetadataFound.layerStyle);
 
-        
         // Initialize the layer text by filling the blanks with the information from the metadata
         layerConfig.initLayerTextFromMetadata(layerMetadataFound.layerText);
 
