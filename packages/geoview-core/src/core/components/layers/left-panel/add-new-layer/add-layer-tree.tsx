@@ -67,7 +67,7 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
     function populateLayerChildren(origLayerId: string, parentViewId: string | undefined): void {
       const viewLayerId = `${parentViewId ?? ''}${parentViewId ? '/' : ''}${origLayerId}`;
       result.push(viewLayerId);
-      const layerDetails = UtilAddLayer.getLayerById(layerTree, origLayerId);
+      const layerDetails = UtilAddLayer.findLayerById(layerTree, origLayerId);
 
       const childLayerIds: string[] | undefined = layerDetails?.listOfLayerEntryConfig?.map((child) => {
         return child.layerId;

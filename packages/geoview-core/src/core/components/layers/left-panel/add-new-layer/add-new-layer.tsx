@@ -552,7 +552,7 @@ export function AddNewLayer(): JSX.Element {
 
     if (valid) {
       // If a single layer is added, use its name instead of service name
-      const firstLayerName = UtilAddLayer.getLayerNameById(layerTree, layerIdsToAdd[0]);
+      const firstLayerName = UtilAddLayer.findLayerNameById(layerTree, layerIdsToAdd[0]);
       const isSingleGroupLayer = layerIdsToAdd.every((layerId) => layerId.split('/')[0] === layerIdsToAdd[0]);
       if ((layerIdsToAdd.length === 1 || isSingleGroupLayer) && firstLayerName) setLayerName(firstLayerName);
       setActiveStep(3);
@@ -643,7 +643,7 @@ export function AddNewLayer(): JSX.Element {
     const newGeoViewLayer = UtilAddLayer.buildGeoLayerToAdd({
       layerIdsToAdd,
       layerName,
-      layerType,
+      layerType: layerType as TypeInitialGeoviewLayerType,
       layerURL,
       layerTree: layerTree!,
       isGeoCore,
