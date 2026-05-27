@@ -28,6 +28,7 @@ import type {
   TypeMetadataWMS,
   TypeMetadataWMSCapabilityLayer,
   TypeMetadataWMSRoot,
+  TypeOGCService,
   TypeStylesWMS,
   TypeVectorLayerStyles,
 } from '@/api/types/layer-schema-types';
@@ -83,7 +84,7 @@ export abstract class GeoUtilities {
    *
    * The function normalizes query parameter keys, removes lowercase variants (`service`, `request`),
    * and ensures the final URL contains correctly capitalized parameters with the specified values.
-   * If the `VERSION` parameter is missing, a default value is added.
+   * If the `VERSION` parameter is missing, a default value of 1.3.0 is added for WMS/WMTS and 2.0.0 for WFS.
    *
    * @param url - The input service URL, which may be absolute or relative
    * @param service - The OGC service type (e.g., `"WMS"`, `"WFS"`, `"WMTS"`)
@@ -91,8 +92,16 @@ export abstract class GeoUtilities {
    * @param version - The default service version to enforce if not already present
    * @returns The normalized and fully qualified service request URL
    */
-  static ensureServiceRequestUrl(url: string, service: string, request: string, version = '1.3.0'): string {
-    return ensureServiceRequestUrl(url, service, request, version);
+  static ensureServiceRequestUrl(url: string, service: TypeOGCService, request: string, version?: string): string {
+    let serviceVersion = version;
+    if (!serviceVersion) {
+      if (service === 'WMS' || service === 'WMTS') {
+        serviceVersion = '1.3.0';
+      } else if (service === 'WFS') {
+        serviceVersion = '2.0.0';
+      }
+    }
+    return ensureServiceRequestUrl(url, service, request, serviceVersion);
   }
 
   /**
@@ -103,11 +112,11 @@ export abstract class GeoUtilities {
    * @param layers - Optional layer name(s) to include in the request
    * @returns A fully qualified GetCapabilities request URL
    */
-  static ensureServiceRequestUrlGetCapabilities(url: string, service: string, layers?: string): string {
+  static ensureServiceRequestUrlGetCapabilities(url: string, service: TypeOGCService, layers?: string): string {
     // Redirect
     const layersClause = layers ? `&Layers=${encodeURIComponent(layers)}` : '';
     // Send version='' on purpose to let the server respond with its latest version
-    return `${this.ensureServiceRequestUrl(url, service, 'GetCapabilities', '')}${layersClause}`;
+    return `${this.ensureServiceRequestUrl(url, service, 'GetCapabilities')}${layersClause}`;
   }
 
   /**

@@ -27,15 +27,11 @@ import {
   useStoreLayerTimeDimension,
   useStoreLayerSchemaTag,
   useStoreLayerUrl,
+  useStoreLayerOgcVersion,
 } from '@/core/stores/states/layer-state';
 import { useStoreTimeSliderFilter, useStoreTimeSliderLayer } from '@/core/stores/states/time-slider-state';
 import { useLayerController } from '@/core/controllers/use-controllers';
-
-/** OGC/ESRI WFS GetCapabilities request suffix. */
-const WFS_PARAMS = '?service=WFS&version=2.0.0&request=GetCapabilities';
-
-/** OGC/ESRI WMS GetCapabilities request suffix. */
-const WMS_PARAMS = '?service=WMS&version=1.3.0&request=GetCapabilities';
+import { GeoUtilities } from '@/geo/utils/utilities';
 
 interface LayerInfoPanelProps {
   /** The layer path to display information for. */
@@ -75,6 +71,7 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
   const timeFilter = useStoreTimeSliderFilter(layerPath);
   const schemaTag = useStoreLayerSchemaTag(layerPath);
   const url = useStoreLayerUrl(layerPath);
+  const ogcVersion = useStoreLayerOgcVersion(layerPath);
   const bounds = useStoreLayerBounds(layerPath);
   const bounds4326 = useStoreLayerBounds4326(layerPath);
   const minScale = useStoreLayerMinScale(layerPath);
@@ -109,8 +106,7 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
     switch (schemaTag) {
       case CONST_LAYER_TYPES.WMS:
         // Check if URL already includes WMS GetCapabilities parameters
-        // eslint-disable-next-line no-nested-ternary
-        return url.toLowerCase().endsWith('.xml') ? url : url.includes('?') ? url : `${url}${WMS_PARAMS}&layers=${leafSegment}`;
+        return url.toLowerCase().endsWith('.xml') ? url : GeoUtilities.ensureServiceRequestUrlGetCapabilities(url, 'WMS', leafSegment);
       case CONST_LAYER_TYPES.ESRI_DYNAMIC:
       case CONST_LAYER_TYPES.ESRI_FEATURE:
         return `${url}${url.endsWith('/') ? '' : '/'}${leafSegment}`;
@@ -119,7 +115,7 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
         return url;
       case CONST_LAYER_TYPES.WFS:
         // Check if URL already includes WFS GetCapabilities parameters
-        return url.includes('?') ? url : `${url}${WFS_PARAMS}`;
+        return GeoUtilities.ensureServiceRequestUrlGetCapabilities(url, 'WFS');
       case CONST_LAYER_TYPES.OGC_FEATURE:
         return `${url}/collections/${leafSegment}`;
       case CONST_LAYER_TYPES.VECTOR_TILES:
@@ -172,6 +168,7 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
               </a>
             </Box>
           )}
+          {ogcVersion && <Box>{`${t('layers.layerOgcVersion')}: ${ogcVersion}`}</Box>}
           <Box>{`${t('layers.layerBounds', { mapProjectionEPSG })}: ${boundsRounded?.join(', ')}`}</Box>
           <Box>{`${t('layers.layerBounds4326')}: ${boundsRounded4326?.join(', ')}`}</Box>
           {layerScaleDependant && <Box>{`${t('layers.layerMaxScale')}: ${maxScale}`}</Box>}

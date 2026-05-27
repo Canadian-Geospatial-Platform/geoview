@@ -191,6 +191,9 @@ export const CONST_LAYER_ENTRY_TYPES: Record<LayerEntryTypesKey, TypeLayerEntryT
   RCS: 'rcs',
 };
 
+/** The possible OGC Service types */
+export type TypeOGCService = 'WMS' | 'WMTS' | 'WFS';
+
 /** Type used to define valid source projection codes. */
 export type TypeValidSourceProjectionCodes = 3978 | 3857 | 4326;
 

@@ -1200,6 +1200,20 @@ export const getStoreLayerWmsStyles = (mapId: string, layerPath: string): TypeMe
 export const useStoreLayerWmsStyles = createLayerSelectorHook('wmsStyles');
 
 /**
+ * Gets the OGC Version for a OGC (WMS/WMTS/WFS) layer.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to look up
+ * @returns The OGC version, or undefined
+ */
+export const getStoreLayerOgcVersion = (mapId: string, layerPath: string): string | undefined => {
+  return getStoreLayerLegendLayerByPath(mapId, layerPath)?.ogcVersion;
+};
+
+/** Hook that returns the OGC version for a specific layer. */
+export const useStoreLayerOgcVersion = createLayerSelectorHook('ogcVersion');
+
+/**
  * Gets the mosaic rule for a specific layer.
  *
  * @param mapId - The map identifier
