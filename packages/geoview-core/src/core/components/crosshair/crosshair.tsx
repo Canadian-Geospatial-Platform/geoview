@@ -53,7 +53,7 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
   /**
    * Modifies the pixelDelta value for keyboard pan on Shift+Arrow up or down.
    */
-  const managePanDelta = useCallback(
+  const handlePanDelta = useCallback(
     (event: HTMLElementEventMap[keyof HTMLElementEventMap]): void => {
       if (!isCrosshairsActive || !(event instanceof KeyboardEvent)) return;
 
@@ -291,7 +291,7 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
 
   // Event listeners
   useEventListener<HTMLElement>('keydown', handleCrosshairInteraction, mapTargetElement, isCrosshairsActive);
-  useEventListener<HTMLElement>('keydown', managePanDelta, mapTargetElement, isCrosshairsActive);
+  useEventListener<HTMLElement>('keydown', handlePanDelta, mapTargetElement, isCrosshairsActive);
   useEventListener<HTMLElement>('keydown', handleZoomControls, mapTargetElement, isCrosshairsActive);
 
   return (

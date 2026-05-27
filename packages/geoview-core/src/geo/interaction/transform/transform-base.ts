@@ -14,13 +14,14 @@ import type { Coordinate } from 'ol/coordinate';
 import type { Extent } from 'ol/extent';
 import { getCenter } from 'ol/extent';
 
+import { TIMEOUT } from '@/core/utils/constant';
+
+import type { MapViewer } from '@/geo/map/map-viewer';
+import { GeoUtilities } from '@/geo/utils/utilities';
 import { DrawerText } from '@/geo/style/drawer-text';
+import { DrawerStyle } from '@/geo/style/drawer-style';
 
 import { TransformEvent, TransformSelectionEvent, TransformDeleteFeatureEvent } from './transform-events';
-import { GeoUtilities } from '@/geo/utils/utilities';
-import type { MapViewer } from '@/geo/map/map-viewer';
-import { TIMEOUT } from '@/core/utils/constant';
-import { DrawerStyle } from '@/geo/style/drawer-style';
 
 // #region Constants
 

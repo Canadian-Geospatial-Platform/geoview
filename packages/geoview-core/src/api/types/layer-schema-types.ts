@@ -1204,6 +1204,7 @@ export interface TypeMetadataEsriImage {
   currentVersion: number;
 
   name: string;
+  type?: string;
   serviceDescription?: string;
   description?: string;
 
