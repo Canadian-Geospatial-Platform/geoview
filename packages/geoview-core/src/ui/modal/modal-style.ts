@@ -41,6 +41,7 @@ export const getSxClasses = (theme: Theme, width?: string | number, height?: str
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: '5px 10px',
+    borderBottom: `1px solid ${theme.palette.geoViewColor?.bgColor.dark[300]}`,
   },
   modalTitleLabel: {
     display: 'flex',
