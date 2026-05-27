@@ -162,7 +162,6 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
     },
     size: [0, 0] as Size,
     zoom: 0,
-
     /**
      * Initializes default stores section from config information when store receive configuration file
      */
@@ -902,7 +901,7 @@ export const setStoreMapCurrentBasemapOptions = (mapId: string, basemapOptions: 
 };
 
 /** Sets the click marker position in the store. */
-export const setStoreMapClickMarker = (mapId: string, projectedCoords: number[]): void => {
+export const setStoreMapClickMarker = (mapId: string, projectedCoords: number[] | undefined): void => {
   getStoreMapState(mapId).actions.setClickMarker(projectedCoords);
 };
 

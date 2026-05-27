@@ -129,8 +129,19 @@ export class GVEsriDynamic extends AbstractGVRaster {
     // Get the config
     const layerConfig = this.getLayerConfig();
 
+    // If layer is Annotation SubLayer, return generic Text icon
+    const layerType = layerConfig.getLayerMetadata()?.type;
+    if (layerType === 'Annotation Layer' || layerType === 'Annotation SubLayer') {
+      // Return a string to identify that it's an annotation layer
+      return {
+        type: CONST_LAYER_TYPES.ESRI_DYNAMIC,
+        legend: 'AnnotationLayer',
+        styleConfig: undefined,
+      };
+    }
+
     // If not a Raster Layer type
-    if (layerConfig.getLayerMetadata()?.type !== 'Raster Layer') {
+    if (layerType !== 'Raster Layer') {
       // Regular fetch
       return super.onFetchLegend();
     }
@@ -727,7 +738,16 @@ export class GVEsriDynamic extends AbstractGVRaster {
       filterValueToUse = GVLayerUtilities.parseDateTimeValuesEsriDynamic(filterValueToUse, layerConfig.getServiceDateTimezone());
 
       // Create the source parameter to update
-      const layerDefs = layerConfig.getLayerMetadata()?.type === 'Raster Layer' ? '' : `{"${layerConfig.layerId}": "${filterValueToUse}"}`;
+      let targetLayerId = layerConfig.layerId;
+
+      // For Annotation SubLayers, filters must target the parent layer
+      const metadata = layerConfig.getLayerMetadata();
+      // TODO: Add readonly constants for the "Annotation SubLayer" sting and the "Raster Layer" string
+      if (metadata?.type === 'Annotation SubLayer' && metadata?.parentLayer?.id !== undefined) {
+        targetLayerId = String(metadata.parentLayer.id);
+      }
+
+      const layerDefs = metadata?.type === 'Raster Layer' ? '' : `{"${targetLayerId}": "${filterValueToUse}"}`;
 
       // Define what is considered the default filter (e.g., "1=1")
       const isDefaultFilter = filterValueToUse === GeoviewRenderer.DEFAULT_FILTER_1EQUALS1;

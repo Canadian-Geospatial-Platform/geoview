@@ -739,6 +739,52 @@ const mapViewer = cgpv.api.getMapViewer("mapId");
 }
 ```
 
+### Keyboard Shortcuts
+
+The Drawer package provides comprehensive keyboard shortcuts for efficient drawing and editing. These shortcuts (except undo/redo/escape) can be toggled on/off via the shortcuts button in the drawer toolbar, with the backtick key \`,  or programmatically via `DrawerController.setShortcutsEnabled()`.
+
+**Note:** Undo (**Ctrl+Z**), Redo (**Ctrl+Y** / **Ctrl+Shift+Z**), and Escape remain active at all times, regardless of the shortcuts toggle state.
+
+| Shortcut | Action |
+|----------|--------|
+| **D** | Toggle Drawing mode |
+| **E** | Toggle Editing mode |
+| **G** | Cycle Geometry Type (forward) |
+| **Shift+G** | Cycle Geometry Type (backward) |
+| **S** | Open Style Menu |
+| **M** | Toggle Measurements visibility |
+| **N** | Toggle Snapping |
+| **Ctrl+Z** | Undo last action |
+| **Ctrl+Y / Ctrl+Shift+Z** | Redo action |
+| **Shift+S** | Save / Download drawings (GeoJSON) |
+| **Shift+O** | Open / Upload drawings |
+| **Shift+C** | Clear all drawings |
+| **Escape** | Clear selection / Exit edit mode |
+
+### Crosshair Integration
+
+When keyboard navigation is enabled (crosshair mode), the Drawer tool provides enhanced interaction capabilities:
+
+#### Drawing with Crosshairs
+
+- **Multi-vertex geometries** (LineString, Polygon): Press **Enter** or **Spacebar** to add a vertex at the crosshair position. Press **Shift+Enter** or **Shift+Spacebar** to finish the geometry.
+- **Two-coordinate geometries** (Circle, Rectangle, Star): Press **Enter** or **Spacebar** to set the first coordinate (center or first corner). A marker visualizes the pending coordinate. Press **Enter** or **Spacebar** again to set the second coordinate (edge or opposite corner), completing the geometry automatically.
+- **Point and Text geometries**: Press **Enter** or **Spacebar** to place the feature at the crosshair position.
+- **Text geometry behavior**: Text features default to horizontal orientation (rotation=0) when created via keyboard, regardless of the style state.
+
+#### Editing with Crosshairs
+
+- **Select geometries**: Position the crosshair over a geometry and press **Enter** or **Spacebar** to select it.
+- **Manipulate handles**: Position the crosshair over a vertex handle, press **Enter** or **Spacebar** to grab it, use **arrow keys** to move it, then press **Enter** or **Spacebar** again to release. Press **Escape** to cancel.
+- **Edit text content**: With a text feature selected, press **Shift+Enter** or **Shift+Spacebar** when the crosshair is inside the text bounds to open the text editor (keyboard double-click equivalent).
+- **Hit tolerance**: The hit tolerance is increased (30px vs 5px for mouse) for easier targeting with the crosshair.
+
+#### Zoom Control with Crosshairs
+
+While in drawing or editing mode with crosshairs active:
+- **Ctrl+Up Arrow**: Zoom in centered on the crosshair position
+- **Ctrl+Down Arrow**: Zoom out centered on the crosshair position
+
 ### API Methods
 
 The drawer functionality is managed through the `DrawerController`. The drawer plugin wraps the controller and provides the UI.

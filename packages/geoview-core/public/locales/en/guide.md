@@ -85,7 +85,9 @@ When the map gains focus, a crosshair is displayed in the center of the map:
 
 <img src="{{assetsURL}}/img/guide/navigation/crosshair.svg" alt="Crosshair marker displayed in the center of the map for keyboard navigation" style="width: 90%; height: 100px;"/>
 
-Use the **arrow** keys to move the map and **+** / **-** keys to zoom in and out. Press **Enter** to select a feature under the crosshairs and display associated data in the **Details** panel.
+The map can quickly be focused using **Ctrl+M** anywhere within the GeoView application.
+
+Use the **arrow** keys to move the map and **+** / **-** keys or **Ctrl+Up** / **Ctrl+Down** to zoom in and out. Press **Shift+Up** / **Shift+Down** to increase or decrease how far the map pans with each arrow key press. Press **Enter** to select a feature under the crosshairs and display associated data in the **Details** panel.
 
 Information will be shown for supported features when the crosshair is positioned over them.
 
@@ -96,6 +98,130 @@ _Note: The map must be focused for key binding to work. The map has focus when t
 **Accessibility**
 
 This map is not fully compliant with Web Content Accessibility Guidelines (WCAG) 2.0 Level AA.
+
+=1!drawingTools=
+
+# Drawing Tools
+
+When the drawer package is enabled, drawing and geometry editing tools become available in the navigation bar. These tools allow you to create, modify, and manage geometries directly on the map.
+
+## Available Geometry Types
+
+- **Point** - Place single point markers
+- **Text** - Add text annotations with customizable styling
+- **LineString** - Draw lines and paths
+- **Polygon** - Create closed polygon areas
+- **Rectangle** - Draw rectangular shapes
+- **Circle** - Create circular areas
+- **Star** - Draw star-shaped geometries
+
+## Drawing Mode
+
+Activate drawing mode by clicking the **Draw** button in the navigation bar or pressing **Alt+D**. Select a geometry type, then:
+
+- **Mouse**: Click on the map to place vertices. Double-click to finish multi-vertex geometries (lines, polygons).
+- **Crosshair** (keyboard navigation): Press **Enter** or **Spacebar** to place a vertex at the crosshair position. Press **Shift+Enter** or **Shift+Spacebar** to finish the geometry.
+
+## Editing Mode
+
+Activate editing mode by clicking the **Edit** button or pressing **Alt+E**. In editing mode:
+
+- **Select a geometry** by clicking on it (mouse) or positioning the crosshair over it and pressing **Enter** or **Spacebar**
+- **Move vertices** by dragging handles (mouse) or using arrow keys with a grabbed handle (crosshair)
+- **Delete a geometry** by selecting it and pressing the Delete button or key
+- **Deselect** by pressing **Escape**
+
+## Drawing Tools Keyboard Shortcuts
+
+_Note: Keyboard shortcuts (except undo/redo/escape) can be toggled on/off via the shortcuts button in the drawer toolbar or using the backtick ` key. The undo, redo, and escape shortcuts are always active._
+
+| Shortcut | Action |
+|----------|--------|
+| **D** | Toggle Drawing mode |
+| **E** | Toggle Editing mode |
+| **G** | Cycle to next Geometry Type |
+| **Shift+G** | Cycle to previous Geometry Type |
+| **S** | Open Style Menu (customize colors, stroke width, text properties) |
+| **M** | Toggle Measurements visibility (show/hide distance and area measurements) |
+| **N** | Toggle Snapping (snap to existing geometry vertices while drawing) |
+| **Ctrl+Z** | Undo last action |
+| **Ctrl+Y** or **Ctrl+Shift+Z** | Redo action |
+| **Shift+S** | Save / Download all drawings as GeoJSON |
+| **Shift+O** | Open / Upload drawings from GeoJSON file |
+| **Shift+C** | Clear all drawings from the map |
+| **Escape** | Clear current selection / Exit edit mode |
+
+## Crosshair Drawing and Editing
+
+When keyboard navigation is enabled (crosshair active), the drawing tools provide enhanced keyboard control:
+
+### Drawing with Crosshairs
+
+1. Enable keyboard navigation (**Tab** to the map, then **Enable**)
+2. Activate drawing mode (**D**)
+3. Select a geometry type (**G** to cycle)
+4. Position the crosshair using **arrow keys**
+5. Press **Enter** or **Spacebar** to place a vertex or coordinate
+6. Press **Shift+Enter** or **Shift+Spacebar** to complete multi-vertex geometries (lines and polygons)
+
+**Geometry-specific workflows:**
+
+- **LineString, Polygon**: Press **Enter**/**Spacebar** for each vertex, then **Shift+Enter**/**Shift+Spacebar** to finish.
+- **Circle, Rectangle, Star**: Press **Enter**/**Spacebar** to set the first coordinate (center or corner). A marker appears. Press **Enter**/**Spacebar** again to set the second coordinate, completing the geometry automatically.
+- **Point, Text**: Press **Enter**/**Spacebar** once to place the feature.
+- **Text features**: Default to horizontal orientation when created via keyboard.
+
+### Editing with Crosshairs
+
+1. Activate editing mode (**E**)
+2. Position the crosshair over a geometry and press **Enter** or **Spacebar** to select it
+3. Position the crosshair over a vertex handle
+4. Press **Enter** or **Spacebar** to grab the handle
+5. Use **arrow keys** to move the grabbed handle
+6. Press **Enter** or **Spacebar** again to release the handle
+7. Press **Escape** to cancel the grab or deselect the geometry
+
+**Text editing:** With a text feature selected, press **Shift+Enter** or **Shift+Spacebar** when the crosshair is inside the text bounds to open the text editor (keyboard double-click equivalent).
+
+### Zoom Control with Crosshairs
+
+While using the drawing tools with keyboard navigation:
+
+- **Ctrl+Up Arrow** - Zoom in centered on the crosshair position
+- **Ctrl+Down Arrow** - Zoom out centered on the crosshair position
+
+This allows you to zoom to the exact location where you're drawing without losing your position.
+
+## Measurements
+
+Measurement overlays automatically appear on line and polygon geometries showing:
+
+- **Lines**: Total length in meters or kilometers
+- **Polygons**: Perimeter and area in square meters or square kilometers
+
+Toggle measurement visibility using **M** or the measurements button in the drawer toolbar.
+
+## Snapping
+
+Enable snapping (**N**) to automatically snap to existing geometry vertices while drawing. This helps create geometries that precisely align with existing features.
+
+## Style Customization
+
+Press **S** or click the style button to open the style menu. Customize:
+
+- **Stroke color and width**
+- **Fill color and opacity**
+- **Text properties** (font, size, color, bold, italic, rotation)
+- **Icon properties** (for point markers)
+
+## Export and Import
+
+Drawings can be saved and shared:
+
+- **Export** (**Shift+S**): Downloads all drawings as a GeoJSON file with embedded style properties
+- **Import** (**Shift+O**): Loads geometries from a GeoJSON file
+
+_Note: The Drawer package must be included in the map configuration to use these features. See the [Core Packages documentation](../../docs/app/packages/geoview-core-packages.md) for configuration details._
 
 =1!mapInformationBar=
 

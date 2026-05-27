@@ -42,6 +42,9 @@ export interface IDrawerState {
   /** Whether the redo action is disabled. */
   redoDisabled: boolean;
 
+  /** Whether keyboard shortcuts are enabled. */
+  shortcutsEnabled: boolean;
+
   /** Sets default drawer configuration values from the map features config. */
   setDefaultConfigValues: (config: TypeMapFeaturesConfig) => void;
 
@@ -71,6 +74,7 @@ export interface IDrawerState {
     setUndoDisabled: (undoDisabled: boolean) => void;
     setRedoDisabled: (redoDisabled: boolean) => void;
     updateStateStyle: (style: StyleProps) => void;
+    setShortcutsEnabled: (shortcutsEnabled: boolean) => void;
   };
 }
 
@@ -118,6 +122,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
     iconSrc: '',
     undoDisabled: true,
     redoDisabled: true,
+    shortcutsEnabled: false,
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
       const configObj = geoviewConfig.corePackagesConfig?.find((config) =>
         Object.keys(config).includes('drawer')
@@ -529,6 +534,20 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
           },
         });
       },
+
+      /**
+       * Sets whether keyboard shortcuts are enabled.
+       *
+       * @param shortcutsEnabled - Whether keyboard shortcuts are enabled
+       */
+      setShortcutsEnabled: (shortcutsEnabled: boolean): void => {
+        set({
+          drawerState: {
+            ...get().drawerState,
+            shortcutsEnabled,
+          },
+        });
+      },
     },
   } as IDrawerState;
 
@@ -666,6 +685,19 @@ export const getStoreDrawerHideMeasurements = (mapId: string): boolean => {
 
 /** Hooks whether measurements are hidden. */
 export const useStoreDrawerHideMeasurements = (): boolean => useStore(useGeoViewStore(), (state) => state.drawerState.hideMeasurements);
+
+/**
+ * Checks whether keyboard shortcuts are enabled.
+ *
+ * @param mapId - The map identifier
+ * @returns True if shortcuts are enabled
+ */
+export const getStoreDrawerShortcutsEnabled = (mapId: string): boolean => {
+  return getStoreDrawerState(mapId).shortcutsEnabled;
+};
+
+/** Hooks whether keyboard shortcuts are enabled. */
+export const useStoreDrawerShortcutsEnabled = (): boolean => useStore(useGeoViewStore(), (state) => state.drawerState.shortcutsEnabled);
 
 // #endregion STATE GETTERS & HOOKS
 
@@ -930,6 +962,16 @@ export const setStoreRedoDisabled = (mapId: string, redoDisabled: boolean): void
  */
 export const updateStoreStateStyle = (mapId: string, style: StyleProps): void => {
   getStoreDrawerState(mapId).actions.updateStateStyle(style);
+};
+
+/**
+ * Sets the shortcuts enabled state in the drawer store.
+ *
+ * @param mapId - The map identifier
+ * @param enabled - Whether shortcuts should be enabled
+ */
+export const setStoreDrawerShortcutsEnabled = (mapId: string, enabled: boolean): void => {
+  getStoreDrawerState(mapId).actions.setShortcutsEnabled(enabled);
 };
 
 // #endregion STATE ADAPTORS

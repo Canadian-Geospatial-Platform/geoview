@@ -15,6 +15,7 @@ import Redo from './buttons/redo';
 import Download from './buttons/download';
 import Upload from './buttons/upload';
 import Clear from './buttons/clear';
+import Shortcuts from './buttons/shortcuts';
 
 /**
  * Creates all drawer button configurations for the NavBar.
@@ -42,7 +43,7 @@ export function createDrawerButtons(config: TypeDrawerConfig): Record<string, Ty
     },
     groupName: 'drawer',
     // Only need to set the accordionThreshold once and the first in the list will take priority
-    groupConfig: { accordionThreshold: 4 },
+    groupConfig: { accordionThreshold: 5 },
   };
 
   // Create geometry picker button / panel
@@ -90,6 +91,18 @@ export function createDrawerButtons(config: TypeDrawerConfig): Record<string, Ty
       'aria-label': 'drawer.edit',
       tooltipPlacement: 'left',
       children: createElement(Edit),
+      visible: true,
+    },
+    groupName: 'drawer',
+  };
+
+  // Create shortcuts button
+  buttonConfigs.shortcuts = {
+    buttonProps: {
+      id: 'drawer-shortcuts',
+      'aria-label': 'drawer.shortcutsTooltip',
+      tooltipPlacement: 'left',
+      children: createElement(Shortcuts),
       visible: true,
     },
     groupName: 'drawer',

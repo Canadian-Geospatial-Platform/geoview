@@ -101,7 +101,7 @@
     "disclaimer": {
       "message": "Avertissement : Cette carte est fournie à des fins d'illustration seulement. Les repères indiquent des emplacements approximatifs fondés sur les données disponibles au moment de la publication. Toutes les dates et heures sont affichées en temps universel coordonné (UTC) à des fins de cohérence et de partage. Le gouvernement du Canada décline toute responsabilité quant à l'interprétation ou à l'utilisation de ces renseignements par des tiers. Le gouvernement du Canada se réserve le droit de modifier, de mettre à jour ou de réviser ces renseignements en tout temps et sans préavis."
     },
-    "crosshair": "Utiliser les touches <strong>fléchées</strong>, <strong>+</strong> et <strong>-</strong> pour naviguer sur la carte, <strong>Entrée</strong> pour sélectionner et <strong>Shift+fléchées</strong> <strong>Haut</strong> et <strong>Bas</strong> pour modfier le déplacement."
+    "crosshair": "Utiliser les touches <strong>fléchées</strong>, <strong>CTRL + Haut/Bas</strong> ou <strong>+/-</strong> pour naviguer sur la carte, <strong>Entrée/Espace</strong> pour sélectionner et <strong>Shift+fléchées</strong> <strong>Haut</strong> et <strong>Bas</strong> pour modfier le déplacement."
   },
   "appbar": {
     "export": "Exporter la carte",

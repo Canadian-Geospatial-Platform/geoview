@@ -662,7 +662,7 @@ export type TypeLegend = {
 
   /** The legend content - vector styles, an HTML canvas, or null. */
   // Layers other than vector layers use the HTMLCanvasElement type for their legend.
-  legend: TypeVectorLayerStyles | HTMLCanvasElement | null;
+  legend: TypeVectorLayerStyles | HTMLCanvasElement | 'AnnotationLayer' | null;
 
   /** Optional style configuration associated with the legend. */
   styleConfig?: TypeLayerStyleConfig;
@@ -1127,6 +1127,8 @@ export interface TypeMetadataEsriDynamicLayer {
 
   fields: TypeLayerMetadataFields[];
 
+  parentLayer?: TypeMetadataEsriLayerSummary;
+
   drawingInfo?: TypeLayerMetadataEsriDrawingInfo;
 
   timeInfo?: TimeDimensionESRI;
@@ -1188,6 +1190,8 @@ export interface TypeMetadataEsriFeatureLayer {
 
   templates?: unknown;
 
+  parentLayer?: TypeMetadataEsriLayerSummary;
+
   drawingInfo?: TypeLayerMetadataEsriDrawingInfo;
 
   editingInfo?: unknown;
@@ -1200,6 +1204,7 @@ export interface TypeMetadataEsriImage {
   currentVersion: number;
 
   name: string;
+  type?: string;
   serviceDescription?: string;
   description?: string;
 

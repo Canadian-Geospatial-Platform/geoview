@@ -259,6 +259,18 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   }
 
   /**
+   * Initializes the layer text configuration by filling the blanks in our config with the information from the metadata.
+   *
+   * @param layerTextMetadata - Optional layer text metadata to use to help fill the blanks in our layer text config
+   */
+  initLayerTextFromMetadata(layerTextMetadata: TypeLayerTextConfig | undefined): void {
+    // If no metadata, nothing to do
+    if (!layerTextMetadata) return;
+
+    this.#layerText = deepMerge(layerTextMetadata, this.#layerText);
+  }
+
+  /**
    * The first TypeStyleSetting associated with the TypeStyleGeometry associated with the style as could be read from the layer config metadata.
    *
    * @returns The array of TypeStyleSettings, or undefined if not available

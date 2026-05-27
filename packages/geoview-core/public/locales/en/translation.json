@@ -101,7 +101,7 @@
     "disclaimer": {
       "message": "Disclaimer: This map is provided for illustrative purposes only. The markers indicate approximate locations based on the data available at the time of publication. All dates and times are displayed in Coordinated Universal Time (UTC) for consistency and sharing purposes. The Government of Canada assumes no responsibility for any third-party interpretation or use of the information presented. The Government of Canada reserves the right to modify, update, or revise this information at any time without notice."
     },
-    "crosshair": "Use <strong>Arrows</strong>, <strong>+</strong> and <strong>-</strong> keys to navigate the map, <strong>Enter</strong> to select and <strong>Shift+Arrow</strong> <strong>Up</strong> or <strong>Down</strong> to modify the pan value."
+    "crosshair": "Use <strong>Arrows</strong>, <strong>CTRL + Up/Down</strong> or <strong>+/-</strong> keys to navigate the map, <strong>Enter/Space</strong> to select and <strong>Shift+Arrow</strong> <strong>Up</strong> or <strong>Down</strong> to modify the pan value."
   },
   "appbar": {
     "export": "Export map",

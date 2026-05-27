@@ -6,22 +6,27 @@ import Collection from 'ol/Collection';
 import Feature from 'ol/Feature';
 import type { Geometry } from 'ol/geom';
 import { Point, Polygon, LineString, Circle } from 'ol/geom';
-import { Style, Fill, Stroke, Circle as CircleStyle, Text, RegularShape } from 'ol/style';
+import { Fill, Stroke, Circle as CircleStyle, RegularShape, Text as OLText } from 'ol/style';
+import type { StyleLike } from 'ol/style/Style';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import type { Coordinate } from 'ol/coordinate';
 import type { Extent } from 'ol/extent';
 import { getCenter } from 'ol/extent';
 
-import { TransformEvent, TransformSelectionEvent, TransformDeleteFeatureEvent } from './transform-events';
-import { GeoUtilities } from '@/geo/utils/utilities';
-import type { MapViewer } from '@/geo/map/map-viewer';
 import { TIMEOUT } from '@/core/utils/constant';
+
+import type { MapViewer } from '@/geo/map/map-viewer';
+import { GeoUtilities } from '@/geo/utils/utilities';
+import { DrawerText } from '@/geo/style/drawer-text';
+import { DrawerStyle } from '@/geo/style/drawer-style';
+
+import { TransformEvent, TransformSelectionEvent, TransformDeleteFeatureEvent } from './transform-events';
 
 // #region Constants
 
 // Handle style constants
-const ROTATE_STYLE = new Style({
+const ROTATE_STYLE = new DrawerStyle({
   image: new RegularShape({
     points: 50,
     radius: 10,
@@ -33,7 +38,7 @@ const ROTATE_STYLE = new Style({
       width: 1,
     }),
   }),
-  text: new Text({
+  text: new OLText({
     text: '↻',
     fill: new Fill({
       color: 'rgba(100, 100, 100, 0.95)',
@@ -42,7 +47,7 @@ const ROTATE_STYLE = new Style({
   }),
 });
 
-const DELETE_STYLE = new Style({
+const DELETE_STYLE = new DrawerStyle({
   image: new RegularShape({
     points: 50,
     radius: 10,
@@ -54,7 +59,7 @@ const DELETE_STYLE = new Style({
       width: 1,
     }),
   }),
-  text: new Text({
+  text: new OLText({
     text: '✕',
     fill: new Fill({
       color: '#fff',
@@ -64,7 +69,7 @@ const DELETE_STYLE = new Style({
   }),
 });
 
-const SCALE_STYLE = new Style({
+const SCALE_STYLE = new DrawerStyle({
   image: new RegularShape({
     points: 50,
     radius: 8,
@@ -78,7 +83,7 @@ const SCALE_STYLE = new Style({
   }),
 });
 
-const STRETCH_STYLE = new Style({
+const STRETCH_STYLE = new DrawerStyle({
   image: new RegularShape({
     points: 4,
     radius: 8,
@@ -93,20 +98,7 @@ const STRETCH_STYLE = new Style({
   }),
 });
 
-const TRANSLATE_STYLE = new Style({
-  image: new CircleStyle({
-    radius: 8,
-    fill: new Fill({
-      color: 'rgba(0, 0, 0, 0.8)',
-    }),
-    stroke: new Stroke({
-      color: '#333',
-      width: 1,
-    }),
-  }),
-});
-
-const VERTEX_STYLE = new Style({
+const VERTEX_STYLE = new DrawerStyle({
   image: new CircleStyle({
     radius: 6,
     fill: new Fill({ color: 'rgba(255, 255, 255, 0.9)' }),
@@ -114,7 +106,7 @@ const VERTEX_STYLE = new Style({
   }),
 });
 
-const EDGE_MIDPOINT_STYLE = new Style({
+const EDGE_MIDPOINT_STYLE = new DrawerStyle({
   image: new CircleStyle({
     radius: 4,
     fill: new Fill({ color: 'rgba(0, 255, 255, 0.7)' }),
@@ -122,7 +114,7 @@ const EDGE_MIDPOINT_STYLE = new Style({
   }),
 });
 
-const EXTENT_BOUNDARY_STYLE = new Style({
+const EXTENT_BOUNDARY_STYLE = new DrawerStyle({
   stroke: new Stroke({
     color: 'rgba(100, 100, 100, 0.5)',
     width: 1,
@@ -130,11 +122,19 @@ const EXTENT_BOUNDARY_STYLE = new Style({
   }),
 });
 
-const ROTATE_LINE_STYLE = new Style({
+const ROTATE_LINE_STYLE = new DrawerStyle({
   stroke: new Stroke({
     color: 'rgba(100, 100, 100, 0.5)',
     width: 1,
     lineDash: [5, 5],
+  }),
+});
+
+const HIGHLIGHT_OVERLAY_STYLE = new DrawerStyle({
+  image: new CircleStyle({
+    radius: 12,
+    fill: new Fill({ color: 'rgba(255, 235, 59, 0.3)' }), // Semi-transparent yellow fill
+    stroke: new Stroke({ color: 'rgba(255, 235, 59, 0.8)', width: 3 }), // Yellow stroke
   }),
 });
 
@@ -147,7 +147,6 @@ export enum HandleType {
   ROTATE_LINE = 'rotate-line',
   SCALE = 'scale',
   TRANSLATE = 'translate',
-  TRANSLATE_CENTER = 'translate-center',
   STRETCH_N = 'stretch-n',
   STRETCH_E = 'stretch-e',
   STRETCH_S = 'stretch-s',
@@ -241,6 +240,9 @@ export class OLTransform extends OLPointer {
   /** Flag to track if we're currently transforming */
   #isTransforming = false;
 
+  /** Stores the original feature style when highlighting for translation */
+  #originalStyleBeforeHighlight?: StyleLike;
+
   /** The type of transformation being performed */
   #transformType?: HandleType;
 
@@ -257,7 +259,7 @@ export class OLTransform extends OLPointer {
   #textEditorElement?: HTMLDivElement;
 
   /** Original feature style (to restore after editing) */
-  #originalTextStyle?: Style;
+  #originalTextStyle?: DrawerStyle;
 
   /** Original text extent when scaling starts */
   #originalTextExtent?: Extent;
@@ -381,7 +383,8 @@ export class OLTransform extends OLPointer {
 
     // Set angle to actual rotation value for text features
     if (this.#isTextFeature(feature)) {
-      this.angle = feature.get('textRotation') || 0;
+      const style = feature.getStyle() as DrawerStyle;
+      this.angle = style.getTextRotation() || 0;
     } else {
       this.angle = 0;
     }
@@ -453,6 +456,263 @@ export class OLTransform extends OLPointer {
 
     // 30 pixels converted to map units
     return resolution * 15;
+  }
+
+  /**
+   * Initializes transformation state for keyboard-based transformations (Keyboard / Crosshair).
+   * Sets up all necessary state that would normally be set by mouse-down event.
+   *
+   * @param coordinate - The coordinate where the transformation begins
+   * @param handleType - The type of handle being transformed
+   * @returns True if a transformation was started, false if just an action was performed (e.g., vertex added, feature deleted)
+   */
+  beginKeyboardTransform(coordinate: Coordinate, handleType: HandleType): boolean {
+    if (!this.selectedFeature) return false;
+
+    // Reset vertex added flag (same as mouse flow does in handleDownEvent)
+    this.#vertexAdded = false;
+
+    // Get the map to find the actual handle feature
+    const map = this.mapViewer?.map;
+    if (!map) return false;
+
+    // Special handling for delete - just delete the feature immediately
+    if (handleType === HandleType.DELETE) {
+      const handleFeature = this.#getHandleAtCoordinate(coordinate, map);
+      if (handleFeature) {
+        const feature = handleFeature.get('feature');
+        if (feature) {
+          this.features.remove(feature);
+          this.onDeletefeature?.(new TransformDeleteFeatureEvent(feature as Feature));
+        }
+      }
+      return false; // No transformation started, just deleted
+    }
+
+    // Special handling for edge midpoints - just add the vertex, don't start dragging
+    if (handleType === HandleType.EDGE_MIDPOINT) {
+      const handleFeature = this.#getHandleAtCoordinate(coordinate, map);
+      if (handleFeature) {
+        this.handleAddVertex(coordinate, handleFeature);
+        this.updateHandles(); // Refresh handles to show the new vertex
+      }
+      return false; // No transformation started, just added vertex
+    }
+
+    // For TRANSLATE without a handle (clicking on feature itself), we don't need a handle feature
+    if (handleType === HandleType.TRANSLATE) {
+      // Set up transformation state for translation
+      this.startCoordinate = coordinate;
+      this.startGeometry = this.selectedFeature.getGeometry()?.clone();
+      this.#transformType = handleType;
+      this.#isTransforming = true;
+
+      // For text features, store original properties
+      if (this.#isTextFeature()) {
+        this.#originalTextExtent = this.#calculateTextExtent()!;
+        const currentStyle = this.selectedFeature.getStyle() as DrawerStyle;
+        this.#originalTextSize = currentStyle.getTextSize();
+      }
+
+      // Highlight the feature itself (not a handle)
+      this.#highlightFeature();
+
+      // Clear handles so only the highlighted feature is visible
+      this.clearHandles();
+
+      return true; // Transformation started
+    }
+
+    // Find the handle feature at the coordinate (for all other handle types)
+    const handleFeature = this.#getHandleAtCoordinate(coordinate, map);
+    if (!handleFeature) return false;
+
+    // Set up transformation state (same as mouse-down on handle)
+    this.currentHandle = handleFeature;
+    this.startCoordinate = coordinate;
+    this.startGeometry = this.selectedFeature.getGeometry()?.clone();
+    this.#transformType = handleType;
+    this.#isTransforming = true;
+
+    // For text features, store original properties for rotation/scaling
+    if (this.#isTextFeature()) {
+      if (handleType === HandleType.ROTATE) {
+        const currentStyle = this.selectedFeature.getStyle() as DrawerStyle;
+        this.#originalTextRotation = currentStyle.getTextRotation();
+      }
+      if (handleType.startsWith('scale')) {
+        this.#originalTextExtent = this.#calculateTextExtent()!;
+        const currentStyle = this.selectedFeature.getStyle() as DrawerStyle;
+        this.#originalTextSize = currentStyle.getTextSize();
+      }
+    }
+
+    // Apply visual feedback - highlight the grabbed handle
+    this.#highlightHandle(handleFeature);
+
+    return true; // Transformation started
+  }
+
+  /**
+   * Applies a transformation from a grabbed coordinate to a new coordinate (Keyboard / Crosshair).
+   * Handles all transformation types internally based on the handle type.
+   *
+   * @param startCoordinate - The coordinate where the handle was grabbed
+   * @param endCoordinate - The coordinate to transform to
+   * @param handleType - The type of handle being transformed
+   * @returns Whether the transformation was successfully applied
+   */
+  applyKeyboardTransformFromCoordinates(startCoordinate: number[], endCoordinate: number[], handleType: HandleType): boolean {
+    if (!this.selectedFeature) return false;
+
+    // Calculate the delta for translation-based transforms
+    const deltaX = endCoordinate[0] - startCoordinate[0];
+    const deltaY = endCoordinate[1] - startCoordinate[1];
+
+    // Apply the appropriate transformation based on handle type
+    if (handleType === HandleType.TRANSLATE || handleType.startsWith('translate')) {
+      this.handleTranslate(deltaX, deltaY);
+    } else if (handleType === HandleType.ROTATE) {
+      this.handleRotate(endCoordinate);
+    } else if (handleType.startsWith('scale')) {
+      this.handleScale(endCoordinate, handleType, false);
+    } else if (handleType.startsWith('stretch')) {
+      this.handleStretch(endCoordinate, handleType);
+    } else if (handleType === HandleType.VERTEX) {
+      this.handleVertexMove(endCoordinate, this.currentHandle);
+    } else {
+      // Unknown handle type
+      return false;
+    }
+
+    // Update handles and restore original style
+    this.updateHandles();
+    this.restoreHandleStyle();
+
+    return true;
+  }
+
+  /**
+   * Highlights a handle to indicate it's been grabbed.
+   *
+   * @param handle - The handle to highlight
+   */
+  #highlightHandle(handle: Feature): void {
+    const handleType = handle.get('handleType') as HandleType;
+
+    // For translate (moving the whole feature), highlight the feature itself
+    if (handleType === HandleType.TRANSLATE) {
+      this.#highlightFeature();
+    }
+
+    // Clear ALL handles
+    this.clearHandles();
+
+    // Recreate just the highlighted handle with overlay style
+    const coordinate = (handle.getGeometry() as Point).getCoordinates();
+    const properties = {
+      vertexIndex: handle.get('vertexIndex'),
+      isCircleCenter: handle.get('isCircleCenter'),
+      isCircleEdge: handle.get('isCircleEdge'),
+      edgeIndex: handle.get('edgeIndex'),
+    };
+
+    this.createHandle(coordinate, handleType, properties);
+
+    // Apply highlight overlay to the handle
+    const highlightedHandle = this.handleSource.getFeatures()[0];
+    if (highlightedHandle) {
+      const originalStyle = highlightedHandle.getStyle() as DrawerStyle;
+      // Apply both original style and highlight overlay
+      highlightedHandle.setStyle([originalStyle, HIGHLIGHT_OVERLAY_STYLE]);
+    }
+  }
+
+  /**
+   * Highlights the feature to indicate it's being translated.
+   */
+  #highlightFeature(): void {
+    if (!this.selectedFeature) return;
+
+    const originalStyle = this.selectedFeature.getStyle() as DrawerStyle;
+    // Save reference to the ORIGINAL style before any modifications
+    this.#originalStyleBeforeHighlight = originalStyle;
+
+    // Handle different feature types with appropriate highlight styles
+    if (this.#isTextFeature()) {
+      // For text: create a completely new highlighted style
+      const originalText = originalStyle.getDrawerText();
+      if (originalText) {
+        const highlightedStyle = new DrawerStyle({
+          text: new DrawerText({
+            text: originalText.getText(),
+            fill: originalText.getFill()!,
+            stroke: new Stroke({
+              color: 'rgba(255, 235, 59, 0.8)', // Yellow highlight
+              width: (originalText.getStroke()?.getWidth() || 1) + 2, // Thicker
+            }),
+            rotation: originalText.getRotation(),
+            italic: originalText.getItalic(),
+            bold: originalText.getBold(),
+            size: originalText.getSize(),
+            fontFamily: originalText.getFontFamily(),
+            offsetX: originalText.getOffsetX(),
+            offsetY: originalText.getOffsetY(),
+          }),
+        });
+        this.selectedFeature.setStyle(highlightedStyle);
+      }
+    } else if (this.selectedFeature.getGeometry() instanceof Point) {
+      // For icons: replace with a simple yellow circle highlight during translation
+      const highlightedStyle = new DrawerStyle({
+        image: new CircleStyle({
+          radius: 8,
+          fill: new Fill({ color: 'rgba(255, 235, 59, 0.5)' }), // Semi-transparent yellow
+          stroke: new Stroke({ color: 'rgba(255, 235, 59, 1)', width: 3 }), // Solid yellow border
+        }),
+      });
+      this.selectedFeature.setStyle(highlightedStyle);
+      this.selectedFeature.changed();
+    } else {
+      // Stroke/fill highlighting for LineString, Polygon, Circle
+      const highlightedStyle = new DrawerStyle({
+        stroke: originalStyle.getStroke()
+          ? new Stroke({
+              color: 'rgba(255, 235, 59, 0.8)', // Yellow
+              width: (originalStyle.getStroke()?.getWidth() || 1.3) + 2, // Thicker
+            })
+          : undefined,
+        fill: originalStyle.getFill()
+          ? new Fill({
+              color: originalStyle.getFill()!.getColor() as string,
+            })
+          : undefined,
+      });
+
+      this.selectedFeature.setStyle(highlightedStyle);
+    }
+  }
+
+  /**
+   * Restores the original style of the highlighted feature.
+   */
+  #restoreFeatureStyle(): void {
+    if (this.#originalStyleBeforeHighlight && this.selectedFeature) {
+      this.selectedFeature.setStyle(this.#originalStyleBeforeHighlight);
+      this.selectedFeature.changed();
+      this.#originalStyleBeforeHighlight = undefined;
+    }
+  }
+
+  /**
+   * Restores all handles by recreating them.
+   */
+  restoreHandleStyle(): void {
+    // Restore feature style if it was highlighted
+    this.#restoreFeatureStyle();
+
+    // Recreate all handles
+    this.updateHandles();
   }
 
   // #endregion
@@ -697,9 +957,6 @@ export class OLTransform extends OLPointer {
       case HandleType.STRETCH_W:
         handle.setStyle(STRETCH_STYLE);
         break;
-      case HandleType.TRANSLATE_CENTER:
-        handle.setStyle(TRANSLATE_STYLE);
-        break;
       default:
         break;
     }
@@ -891,9 +1148,6 @@ export class OLTransform extends OLPointer {
 
       case HandleType.STRETCH_W:
         return 'ew-resize';
-
-      case HandleType.TRANSLATE_CENTER:
-        return 'move';
 
       default:
         return 'default';
@@ -1288,7 +1542,8 @@ export class OLTransform extends OLPointer {
 
           // Store initial rotation for text features when starting rotation
           if (handleType === HandleType.ROTATE && this.#isTextFeature()) {
-            this.#originalTextRotation = this.selectedFeature.get('textRotation') || 0;
+            const currentStyle = this.selectedFeature.getStyle() as DrawerStyle;
+            this.#originalTextRotation = currentStyle.getTextRotation();
           }
 
           // Clear Handles
@@ -1343,7 +1598,8 @@ export class OLTransform extends OLPointer {
 
             if (this.#isTextFeature(this.selectedFeature)) {
               this.#originalTextExtent = this.#calculateTextExtent()!;
-              this.#originalTextSize = this.selectedFeature?.get('textSize') || 14;
+              const currentStyle = this.selectedFeature?.getStyle() as DrawerStyle;
+              this.#originalTextSize = currentStyle.getTextSize();
             }
 
             this.clearHandles();
@@ -1398,7 +1654,6 @@ export class OLTransform extends OLPointer {
       // Perform the transformation based on the handle type
       switch (this.#transformType) {
         case HandleType.TRANSLATE:
-        case HandleType.TRANSLATE_CENTER:
           // Delta X and Delta Y
           this.handleTranslate(coordinate[0] - this.startCoordinate[0], coordinate[1] - this.startCoordinate[1]);
           break;
@@ -1462,21 +1717,21 @@ export class OLTransform extends OLPointer {
         // For text features, update handles to match new text size
         if (this.#isTextFeature()) {
           // Apply final style update
-          const finalSize = this.selectedFeature.get('textSize') || 14;
-          const isBold = this.selectedFeature.get('textBold') || false;
-          const isItalic = this.selectedFeature.get('textItalic') || false;
-          const currentText = this.selectedFeature.get('text') || 'Text';
+          const currentStyle = this.selectedFeature.getStyle() as DrawerStyle;
 
-          const finalStyle = new Style({
-            text: new Text({
-              text: currentText,
-              fill: new Fill({ color: this.selectedFeature.get('textColor') || '#000000' }),
+          const finalStyle = new DrawerStyle({
+            text: new DrawerText({
+              text: currentStyle.getTextContent(),
+              fill: new Fill({ color: currentStyle.getTextColor() }),
               stroke: new Stroke({
-                color: this.selectedFeature.get('textHaloColor') || 'rgba(255,255,255,0.7)',
-                width: this.selectedFeature.get('textHaloWidth') || 3,
+                color: currentStyle.getTextHaloColor(),
+                width: currentStyle.getTextHaloWidth(),
               }),
-              font: `${isItalic ? 'italic ' : ''}${isBold ? 'bold ' : ''}${finalSize}px ${this.selectedFeature.get('textFont') || 'Arial'}`,
-              rotation: this.selectedFeature.get('textRotation') || 0,
+              bold: currentStyle.getTextBold(),
+              italic: currentStyle.getTextItalic(),
+              size: currentStyle.getTextSize(),
+              fontFamily: currentStyle.getTextFontFamily(),
+              rotation: currentStyle.getTextRotation(),
             }),
           });
 
@@ -1631,6 +1886,31 @@ export class OLTransform extends OLPointer {
     this.clearHandles();
   }
 
+  /**
+   * Deletes a vertex at the specified coordinate if one exists.
+   *
+   * @param coordinate - The coordinate to check for a vertex
+   * @returns Whether a vertex was deleted
+   */
+  deleteVertexAtCoordinate(coordinate: Coordinate): boolean {
+    if (!this.selectedFeature) return false;
+
+    const map = this.mapViewer?.map;
+    if (!map) return false;
+
+    // Find the vertex handle at this coordinate
+    const handleFeature = this.#getHandleAtCoordinate(coordinate, map);
+    if (!handleFeature) return false;
+
+    const handleType = handleFeature.get('handleType') as HandleType;
+    if (handleType !== HandleType.VERTEX) return false;
+
+    // Delete the vertex
+    this.#deleteVertex(handleFeature);
+
+    return true;
+  }
+
   // #endregion
 
   // #region Text Editing
@@ -1642,7 +1922,11 @@ export class OLTransform extends OLPointer {
    * @returns True if it's a text feature
    */
   #isTextFeature(feature?: Feature): boolean {
-    return (feature || this.selectedFeature)?.get('text') !== undefined;
+    const targetFeature = feature || this.selectedFeature;
+    if (!targetFeature) return false;
+
+    const style = targetFeature.getStyle();
+    return style instanceof DrawerStyle && style.isTextStyle();
   }
 
   /**
@@ -1655,18 +1939,15 @@ export class OLTransform extends OLPointer {
     if (!(geometry instanceof Point)) return;
 
     const position = geometry.getCoordinates();
-    const currentText = this.selectedFeature.get('text') || 'Text';
-    const currentSize = this.selectedFeature.get('textSize') || 14;
-    const currentColor = this.selectedFeature.get('textColor') || '#000000';
-    const currentFont = this.selectedFeature.get('textFont') || 'Arial';
+    const currentStyle = (this.#originalStyleBeforeHighlight || this.selectedFeature.getStyle()) as DrawerStyle;
+    const currentText = currentStyle.getTextContent() as string;
+    const currentSize = currentStyle.getTextSize();
+    const currentColor = currentStyle.getTextColor();
+    const currentFont = currentStyle.getTextFontFamily();
 
     // Hide the original text on the map by assigning an empty text style
-    this.#originalTextStyle = this.selectedFeature.getStyle() as Style;
-    this.selectedFeature.setStyle(
-      new Style({
-        text: new Text({ text: '' }),
-      })
-    );
+    this.#originalTextStyle = currentStyle;
+    this.selectedFeature.setStyle(new DrawerStyle());
 
     // Create simple text editor element
     this.#textEditorElement = document.createElement('div');
@@ -1706,11 +1987,13 @@ export class OLTransform extends OLPointer {
         switch (e.key.toLowerCase()) {
           case 'b':
             e.preventDefault();
+            e.stopPropagation();
             this.#toggleBold();
             this.onTransformend?.(new TransformEvent('transformend', this.selectedFeature));
             break;
           case 'i':
             e.preventDefault();
+            e.stopPropagation();
             this.#toggleItalic();
             this.onTransformend?.(new TransformEvent('transformend', this.selectedFeature));
             break;
@@ -1721,10 +2004,12 @@ export class OLTransform extends OLPointer {
 
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
+        e.stopPropagation();
         this.#applyTextChanges();
         this.onTransformend?.(new TransformEvent('transformend', this.selectedFeature));
       } else if (e.key === 'Escape') {
         e.preventDefault();
+        e.stopPropagation();
         this.#cancelTextEditing();
       }
     });
@@ -1756,8 +2041,9 @@ export class OLTransform extends OLPointer {
     if (!(geometry instanceof Point)) return null;
 
     const coords = geometry.getCoordinates();
-    const text = this.selectedFeature.get('text') || 'Text';
-    const fontSize = this.selectedFeature.get('textSize') || 14;
+    const currentStyle = this.selectedFeature.getStyle() as DrawerStyle;
+    const text = currentStyle.getTextContent();
+    const fontSize = currentStyle.getTextSize();
 
     const resolution = this.mapViewer?.map?.getView().getResolution() || 1;
 
@@ -1792,13 +2078,13 @@ export class OLTransform extends OLPointer {
     // Use the original text extent from when dragging started (fixed reference)
     if (!this.#originalTextExtent && textExtent) {
       this.#originalTextExtent = textExtent;
-      this.#originalTextSize = this.selectedFeature.get('textSize') || 14;
+      const currentStyle = this.selectedFeature.getStyle() as DrawerStyle;
+      this.#originalTextSize = currentStyle.getTextSize();
     }
 
     if (!this.#originalTextExtent) return;
 
     const [minX, minY, maxX, maxY] = this.#originalTextExtent;
-
     const centerX = (minX + maxX) / 2;
     const centerY = (minY + maxY) / 2;
 
@@ -1831,29 +2117,13 @@ export class OLTransform extends OLPointer {
     const newSize = Math.max(8, Math.round(this.#originalTextSize! * scaleFactor));
 
     // Only update if size actually changed
-    if (newSize !== this.selectedFeature.get('textSize')) {
-      this.selectedFeature.set('textSize', newSize);
-
-      // Update the actual text style on the feature for real-time feedback
-      const currentText = this.selectedFeature.get('text') || 'Text';
-      const isBold = this.selectedFeature.get('textBold') || false;
-      const isItalic = this.selectedFeature.get('textItalic') || false;
-      const rotation = this.selectedFeature.get('textRotation') || 0;
-
-      const updatedStyle = new Style({
-        text: new Text({
-          text: currentText,
-          fill: new Fill({ color: this.selectedFeature.get('textColor') || '#000000' }),
-          stroke: new Stroke({
-            color: this.selectedFeature.get('textHaloColor') || 'rgba(255,255,255,0.7)',
-            width: this.selectedFeature.get('textHaloWidth') || 3,
-          }),
-          font: `${isItalic ? 'italic ' : ''}${isBold ? 'bold ' : ''}${newSize}px ${this.selectedFeature.get('textFont') || 'Arial'}`,
-          rotation,
-        }),
-      });
-
-      this.selectedFeature.setStyle(updatedStyle);
+    const currentStyle = this.selectedFeature.getStyle() as DrawerStyle;
+    if (newSize !== currentStyle.getTextSize()) {
+      const drawerText = currentStyle.getDrawerText();
+      if (drawerText) {
+        drawerText.setSize(newSize);
+        this.selectedFeature.changed();
+      }
 
       // Update text editor element if exists
       if (this.#textEditorElement) {
@@ -1876,28 +2146,14 @@ export class OLTransform extends OLPointer {
     const deltaAngle = -(currentAngle - startAngle);
 
     this.angle = this.#originalTextRotation! + deltaAngle;
-    this.selectedFeature.set('textRotation', this.angle);
 
     // Update text style with rotation
-    const currentText = this.selectedFeature.get('text') || 'Text';
-    const currentSize = this.selectedFeature.get('textSize') || 14;
-    const isBold = this.selectedFeature.get('textBold') || false;
-    const isItalic = this.selectedFeature.get('textItalic') || false;
-
-    const rotatedStyle = new Style({
-      text: new Text({
-        text: currentText,
-        fill: new Fill({ color: this.selectedFeature.get('textColor') || '#000000' }),
-        stroke: new Stroke({
-          color: this.selectedFeature.get('textHaloColor') || 'rgba(255,255,255,0.7)',
-          width: this.selectedFeature.get('textHaloWidth') || 3,
-        }),
-        font: `${isItalic ? 'italic ' : ''}${isBold ? 'bold ' : ''}${currentSize}px ${this.selectedFeature.get('textFont') || 'Arial'}`,
-        rotation: this.angle,
-      }),
-    });
-
-    this.selectedFeature.setStyle(rotatedStyle);
+    const currentStyle = this.selectedFeature.getStyle() as DrawerStyle;
+    const drawerText = currentStyle.getDrawerText();
+    if (drawerText) {
+      drawerText.setRotation(this.angle);
+      this.selectedFeature.changed();
+    }
   }
 
   /**
@@ -1906,10 +2162,13 @@ export class OLTransform extends OLPointer {
   #toggleBold(): void {
     if (!this.#textEditorElement || !this.selectedFeature) return;
 
-    const isBold = this.selectedFeature.get('textBold') || false;
+    const drawerText = this.#originalTextStyle?.getDrawerText();
+    if (!drawerText) return;
+
+    const isBold = drawerText.getBold();
     const newBold = !isBold;
 
-    this.selectedFeature.set('textBold', newBold);
+    drawerText.setBold(newBold);
     this.#textEditorElement.style.fontWeight = newBold ? 'bold' : 'normal';
   }
 
@@ -1919,10 +2178,13 @@ export class OLTransform extends OLPointer {
   #toggleItalic(): void {
     if (!this.#textEditorElement || !this.selectedFeature) return;
 
-    const isItalic = this.selectedFeature.get('textItalic') || false;
+    const drawerText = this.#originalTextStyle?.getDrawerText();
+    if (!drawerText) return;
+
+    const isItalic = drawerText.getItalic();
     const newItalic = !isItalic;
 
-    this.selectedFeature.set('textItalic', newItalic);
+    drawerText.setItalic(newItalic);
     this.#textEditorElement.style.fontStyle = newItalic ? 'italic' : 'normal';
   }
 
@@ -1933,23 +2195,21 @@ export class OLTransform extends OLPointer {
     if (!this.#textEditorElement || !this.selectedFeature) return;
 
     const finalText = this.#textEditorElement.innerHTML.replace(/<br\s*\/?>/gi, '\n') || 'Text';
-    const isBold = this.selectedFeature.get('textBold') || false;
-    const isItalic = this.selectedFeature.get('textItalic') || false;
-    const currentSize = this.selectedFeature.get('textSize') || 14;
-    const rotation = this.selectedFeature.get('textRotation') || 0;
+    const originalStyle = this.#originalTextStyle as DrawerStyle;
 
-    this.selectedFeature.set('text', finalText);
-
-    const finalStyle = new Style({
-      text: new Text({
+    const finalStyle = new DrawerStyle({
+      text: new DrawerText({
         text: finalText,
-        fill: new Fill({ color: this.selectedFeature.get('textColor') || '#000000' }),
+        fill: new Fill({ color: originalStyle.getTextColor() }),
         stroke: new Stroke({
-          color: this.selectedFeature.get('textHaloColor') || 'rgba(255,255,255,0.7)',
-          width: this.selectedFeature.get('textHaloWidth') || 3,
+          color: originalStyle.getTextHaloColor(),
+          width: originalStyle.getTextHaloWidth(),
         }),
-        font: `${isItalic ? 'italic ' : ''}${isBold ? 'bold ' : ''}${currentSize}px ${this.selectedFeature.get('textFont') || 'Arial'}`,
-        rotation,
+        bold: originalStyle.getTextBold() || false,
+        italic: originalStyle.getTextItalic() || false,
+        size: originalStyle.getTextSize(),
+        fontFamily: originalStyle.getTextFontFamily(),
+        rotation: originalStyle.getTextRotation(),
       }),
     });
 
@@ -1978,7 +2238,8 @@ export class OLTransform extends OLPointer {
 
     // Get the center and text rotation
     this.center = [(minX + maxX) / 2, (minY + maxY) / 2];
-    const textRotation = this.selectedFeature.get('textRotation');
+    const currentStyle = this.selectedFeature.getStyle() as DrawerStyle;
+    const textRotation = currentStyle.getTextRotation();
 
     // Calculate rotated handle positions
     const corners = [

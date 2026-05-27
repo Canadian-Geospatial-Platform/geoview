@@ -134,6 +134,17 @@ export class VectorTiles extends AbstractGeoViewRaster {
       // Second, set the min/max zoom levels based on the service / config.
       layerConfig.initInitialSettingsMinZoomFromMetadata(minZoom);
       layerConfig.initInitialSettingsMaxZoomFromMetadata(maxZoom);
+
+      // If the style URL is not set in the layer entry config, set it to the default style provided in the metadata
+      if (!layerConfig.getStyleUrl()) {
+        // If the default style is a full URL, use it as is
+        if (metadata.defaultStyles.toLowerCase().startsWith('https://') || metadata.defaultStyles.toLowerCase().startsWith('http://')) {
+          layerConfig.setStyleUrl(metadata.defaultStyles);
+        } else {
+          // Otherwise, assume it's a relative path and construct the full URL using the metadata access path
+          layerConfig.setStyleUrl(`${this.getMetadataAccessPath()}/${metadata.defaultStyles}`);
+        }
+      }
     }
 
     // Get the source projection
@@ -163,7 +174,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
     const resolutions = layer.getOLSource()?.getTileGrid()?.getResolutions();
 
     // Get the style
-    let appliedStyle = layerConfig.getStyleUrl() || this.getMetadata()?.defaultStyles;
+    let appliedStyle = layerConfig.getStyleUrl();
 
     if (appliedStyle) {
       // GV When viewing a style in AGOL, it will typically be given and shown to the user with f=pjson

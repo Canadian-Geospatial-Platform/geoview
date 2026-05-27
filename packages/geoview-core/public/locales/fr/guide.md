@@ -85,7 +85,9 @@ Lorsque la carte est focalisée, un pointeur en croix s'affiche en son centre :
 
 <img src="{{assetsURL}}/img/guide/navigation/crosshair.svg" alt="Pointeur en croix affiché au centre de la carte pour la navigation au clavier" style="width: 90%; height: 100px;"/>
 
-Utilisez les touches **fléchées** pour déplacer la carte et les touches **+** et **-** pour faire un zoom avant ou arrière. Appuyez sur **Entrée** pour sélectionner un élément sous le pointeur en croix et en voir les données dans le panneau **Détails**.
+La carte peut être rapidement centrée en appuyant sur **Ctrl+M** n'importe où dans l'application GeoView.
+
+Utilisez les touches **fléchées** pour déplacer la carte et les touches **+** et **-** ou **Ctrl+Flèche haut** / **Ctrl+Flèche bas** pour faire un zoom avant ou arrière. Appuyez sur **Maj.+Flèche haut** / **Maj.+Flèche bas** pour augmenter ou diminuer la distance de déplacement de la carte à chaque touche fléchée. Appuyez sur **Entrée** pour sélectionner un élément sous le pointeur en croix et en voir les données dans le panneau **Détails**.
 
 Pour les éléments pris en charge, l’information s’affiche lorsque le pointeur en croix les survole.
 
@@ -96,7 +98,129 @@ _N.B. : La carte doit être focalisée pour que les combinaisons de touches fonc
 **Accessibilité**
 
 La carte n’est pas pleinement conforme au niveau AA des Règles pour l’accessibilité des contenus Web (WCAG) 2.0.
+=1!drawingTools=
 
+# Outils de dessin
+
+Lorsque le module drawer est activé, les outils de dessin et d'édition de géométries deviennent disponibles dans la barre de navigation. Ces outils permettent de créer, modifier et gérer des géométries directement sur la carte.
+
+## Types de géométries disponibles
+
+- **Point** - Placer des marqueurs ponctuels
+- **Texte** - Ajouter des annotations textuelles avec style personnalisable
+- **Ligne** - Dessiner des lignes et des tracés
+- **Polygone** - Créer des zones polygonales fermées
+- **Rectangle** - Dessiner des formes rectangulaires
+- **Cercle** - Créer des zones circulaires
+- **Étoile** - Dessiner des géométries en forme d'étoile
+
+## Mode dessin
+
+Activez le mode dessin en cliquant sur le bouton **Dessiner** dans la barre de navigation ou en appuyant sur **Alt+D**. Sélectionnez un type de géométrie, puis :
+
+- **Souris** : Cliquez sur la carte pour placer des sommets. Double-cliquez pour terminer les géométries multi-sommets (lignes, polygones).
+- **Pointeur en croix** (navigation au clavier) : Appuyez sur **Entrée** ou **Barre d'espace** pour placer un sommet à la position du pointeur en croix. Appuyez sur **Maj.+Entrée** ou **Maj.+Barre d'espace** pour terminer la géométrie.
+
+## Mode édition
+
+Activez le mode édition en cliquant sur le bouton **Éditer** ou en appuyant sur **Alt+E**. En mode édition :
+
+- **Sélectionnez une géométrie** en cliquant dessus (souris) ou en positionnant le pointeur en croix dessus et en appuyant sur **Entrée** ou **Barre d'espace**
+- **Déplacez les sommets** en faisant glisser les poignées (souris) ou en utilisant les touches fléchées avec une poignée saisie (pointeur en croix)
+- **Supprimez une géométrie** en la sélectionnant et en appuyant sur le bouton ou la touche Supprimer
+- **Désélectionnez** en appuyant sur **Échap**
+
+## Raccourcis clavier des outils de dessin
+
+_Note : Les raccourcis clavier (sauf annuler/rétablir/échap) peuvent être activés/désactivés via le bouton de raccourcis dans la barre d'outils du drawer ou en utilisant la touche backtick ` . Les raccourcis annuler, rétablir et échap sont toujours actifs._
+
+| Raccourci | Action |
+|----------|--------|
+| **D** | Activer/désactiver le mode Dessin |
+| **E** | Activer/désactiver le mode Édition |
+| **G** | Passer au type de géométrie suivant |
+| **Maj.+G** | Passer au type de géométrie précédent |
+| **S** | Ouvrir le menu Style (personnaliser couleurs, épaisseur du trait, propriétés du texte) |
+| **M** | Activer/désactiver la visibilité des mesures (afficher/masquer les mesures de distance et d'aire) |
+| **N** | Activer/désactiver l'accrochage (accrocher aux sommets de géométries existantes lors du dessin) |
+| **Ctrl+Z** | Annuler la dernière action |
+| **Ctrl+Y** ou **Ctrl+Maj.+Z** | Rétablir l'action |
+| **Maj.+S** | Enregistrer / Télécharger tous les dessins au format GeoJSON |
+| **Maj.+O** | Ouvrir / Charger des dessins à partir d'un fichier GeoJSON |
+| **Maj.+C** | Effacer tous les dessins de la carte |
+| **Échap** | Effacer la sélection actuelle / Quitter le mode édition |
+
+## Dessin et édition avec le pointeur en croix
+
+Lorsque la navigation au clavier est activée (pointeur en croix actif), les outils de dessin offrent un contrôle clavier amélioré :
+
+### Dessiner avec le pointeur en croix
+
+1. Activez la navigation au clavier (touche **Tab** vers la carte, puis **Activer**)
+2. Activez le mode dessin (**D**)
+3. Sélectionnez un type de géométrie (**G** pour parcourir)
+4. Positionnez le pointeur en croix avec les **touches fléchées**
+5. Appuyez sur **Entrée** ou **Barre d'espace** pour placer un sommet ou une coordonnée
+6. Appuyez sur **Maj.+Entrée** ou **Maj.+Barre d'espace** pour terminer les géométries multi-sommets (lignes et polygones)
+
+**Workflows spécifiques par géométrie :**
+
+- **Ligne, Polygone** : Appuyez sur **Entrée**/**Barre d'espace** pour chaque sommet, puis **Maj.+Entrée**/**Maj.+Barre d'espace** pour terminer.
+- **Cercle, Rectangle, Étoile** : Appuyez sur **Entrée**/**Barre d'espace** pour définir la première coordonnée (centre ou coin). Un marqueur apparaît. Appuyez à nouveau sur **Entrée**/**Barre d'espace** pour définir la deuxième coordonnée, complétant automatiquement la géométrie.
+- **Point, Texte** : Appuyez une fois sur **Entrée**/**Barre d'espace** pour placer l'élément.
+- **Éléments textuels** : Par défaut horizontaux lors de la création au clavier.
+
+### Éditer avec le pointeur en croix
+
+1. Activez le mode édition (**E**)
+2. Positionnez le pointeur en croix sur une géométrie et appuyez sur **Entrée** ou **Barre d'espace** pour la sélectionner
+3. Positionnez le pointeur en croix sur une poignée de sommet
+4. Appuyez sur **Entrée** ou **Barre d'espace** pour saisir la poignée
+5. Utilisez les **touches fléchées** pour déplacer la poignée saisie
+6. Appuyez à nouveau sur **Entrée** ou **Barre d'espace** pour relâcher la poignée
+7. Appuyez sur **Échap** pour annuler la saisie ou désélectionner la géométrie
+
+**Édition de texte :** Avec un élément textuel sélectionné, appuyez sur **Maj.+Entrée** ou **Maj.+Barre d'espace** lorsque le pointeur en croix est à l'intérieur des limites du texte pour ouvrir l'éditeur de texte (équivalent du double-clic au clavier).
+
+### Contrôle du zoom avec le pointeur en croix
+
+Lors de l'utilisation des outils de dessin avec la navigation au clavier :
+
+- **Ctrl+Flèche haut** - Zoom avant centré sur la position du pointeur en croix
+- **Ctrl+Flèche bas** - Zoom arrière centré sur la position du pointeur en croix
+
+Cela permet de zoomer à l'emplacement exact où vous dessinez sans perdre votre position.
+
+## Mesures
+
+Des indicateurs de mesure apparaissent automatiquement sur les géométries de type ligne et polygone, affichant :
+
+- **Lignes** : Longueur totale en mètres ou kilomètres
+- **Polygones** : Périmètre et superficie en mètres carrés ou kilomètres carrés
+
+Activez/désactivez la visibilité des mesures avec **M** ou le bouton de mesures dans la barre d'outils du drawer.
+
+## Accrochage
+
+Activez l'accrochage (**N**) pour accrocher automatiquement aux sommets de géométries existantes lors du dessin. Cela aide à créer des géométries qui s'alignent précisément avec les éléments existants.
+
+## Personnalisation du style
+
+Appuyez sur **S** ou cliquez sur le bouton de style pour ouvrir le menu de style. Personnalisez :
+
+- **Couleur et épaisseur du trait**
+- **Couleur et opacité de remplissage**
+- **Propriétés du texte** (police, taille, couleur, gras, italique, rotation)
+- **Propriétés de l'icône** (pour les marqueurs ponctuels)
+
+## Exportation et importation
+
+Les dessins peuvent être sauvegardés et partagés :
+
+- **Exporter** (**Maj.+S**) : Télécharge tous les dessins sous forme de fichier GeoJSON avec propriétés de style intégrées
+- **Importer** (**Maj.+O**) : Charge des géométries à partir d'un fichier GeoJSON
+
+_N.B. : Le module Drawer doit être inclus dans la configuration de la carte pour utiliser ces fonctionnalités. Consultez la [documentation des modules de base](../../docs/app/packages/geoview-core-packages.md) pour les détails de configuration._
 =1!mapInformationBar=
 
 # Barre d’information sur la carte

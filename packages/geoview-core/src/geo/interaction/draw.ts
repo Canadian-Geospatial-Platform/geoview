@@ -1,6 +1,7 @@
 import type { Type as OLGeomType } from 'ol/geom/Geometry';
 import { Draw as OLDraw } from 'ol/interaction';
 import type { GeometryFunction, DrawEvent as OLDrawEvent, Options as OLDrawOptions } from 'ol/interaction/Draw';
+import type { Coordinate } from 'ol/coordinate';
 
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
@@ -111,12 +112,36 @@ export class Draw extends Interaction {
   }
 
   /**
+   * Gets the current sketch feature being drawn.
+   *
+   * @returns True if there is an active sketch, false otherwise
+   */
+  hasActiveSketch(): boolean {
+    const sketch = this.#olDraw.getOverlay()?.getSource()?.getFeatures()[0];
+    return sketch !== undefined && sketch.getGeometry()?.getType() !== 'Point';
+  }
+
+  /**
+   * Appends coordinates to the current drawing sketch.
+   * This allows programmatic addition of vertices to an in-progress drawing.
+   *
+   * @param coordinates - The coordinate(s) to append to the sketch
+   */
+  appendCoordinates(coordinates: Coordinate[]): void {
+    this.#olDraw.appendCoordinates(coordinates);
+  }
+
+  /**
    * Removes the last point added to the current drawing, allowing the user to undo the last step while drawing.
    *
    * @returns True if a point was removed, false if there were no points to remove
    */
   undo(): boolean {
     const sketch = this.#olDraw.getOverlay()?.getSource()?.getFeatures()[0];
+
+    // No active sketch to undo
+    if (!sketch) return false;
+
     // LineString and Polygons will change to 'Point' (the cursor point overlay) if no features in array
     if (sketch.getGeometry()?.getType() === 'Point') {
       return false; // No points to remove

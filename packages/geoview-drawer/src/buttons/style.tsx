@@ -7,11 +7,12 @@ import {
   useStoreDrawerActiveGeom,
   useStoreDrawerSelectedDrawingType,
 } from 'geoview-core/core/stores/states/drawer-state';
+import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/states/app-state';
+import { useDrawerController } from 'geoview-core/core/controllers/use-controllers';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { logger } from 'geoview-core/core/utils/logger';
 
 import { FONT_OPTIONS, DEFAULT_FONT, loadGoogleFont } from '../utils/fonts';
-import { useDrawerController } from 'geoview-core/core/controllers/use-controllers';
 
 // Styles
 const sxClasses = {
@@ -57,6 +58,7 @@ export function StylePanel(): JSX.Element {
   const { cgpv } = window as TypeWindow;
   const { ui, reactUtilities } = cgpv;
   const { useCallback, useEffect } = reactUtilities.react;
+  const { t } = useTranslation<string>();
 
   // Components
   const { Box, List, ListItem, Typography, TextField, IconButton, FormatBoldIcon, FormatItalicIcon } = ui.elements;
@@ -65,7 +67,7 @@ export function StylePanel(): JSX.Element {
   const style = useStoreDrawerStyle();
   const activeGeom = useStoreDrawerActiveGeom();
   const selectedDrawingType = useStoreDrawerSelectedDrawingType();
-  const { t } = useTranslation<string>();
+  const displayLanguage = useStoreAppDisplayLanguage();
   const drawerController = useDrawerController();
 
   /** The current geometry type, using the selected drawing type or active geometry as fallback. */
@@ -226,7 +228,7 @@ export function StylePanel(): JSX.Element {
 
   // Add close button to MUIColorInputs
   useEffect(() => {
-    logger.logTraceUseEffect('STYLE PANEL - Color picker close button setup');
+    logger.logTraceUseEffect('STYLE PANEL - Color picker close button setup', displayLanguage);
 
     const addCloseButtons = (): void => {
       // Find all color picker popovers
@@ -294,7 +296,7 @@ export function StylePanel(): JSX.Element {
     observer.observe(document.body, { childList: true, subtree: true });
 
     return () => observer.disconnect();
-  }, [t]);
+  }, [displayLanguage, t]);
 
   // Preload all Google Fonts
   useEffect(() => {

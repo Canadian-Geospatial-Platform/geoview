@@ -93,6 +93,8 @@ export class EsriUtilities {
         // Rethrow
         throw new LayerServiceMetadataUnableToFetchError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerName(), formatError(error));
       }
+      // If it's an annotation sub layer, update the metadata with the inherited metadata from the parent layer
+      await this.#inheritAnnotationSubLayerMetadata(layerMetadata, baseUrl, layerConfig, abortSignal);
     } else {
       // In the case of an EsriImage, the layer metadata was already queried (same as the service metadata), use that
       layerMetadata = layerConfig.getServiceMetadata()!;
@@ -628,9 +630,10 @@ export class EsriUtilities {
     const hasFields = !!fields?.length;
     const isGroupLayer = layerMetadataEsriDynamicLayer.type === 'Group Layer';
     const isMetadataGroup = layerConfig.getIsMetadataLayerGroup();
+    const isAnnotationSubLayer = layerMetadata.type === 'Annotation SubLayer';
 
     // Initialize the queryable source
-    layerConfig.initQueryableSource(queryable && hasFields && !isGroupLayer && !isMetadataGroup);
+    layerConfig.initQueryableSource(queryable && hasFields && !isGroupLayer && !isMetadataGroup && !isAnnotationSubLayer);
 
     // Initialize the outfields
     // dynamic group layer doesn't have fields definition
@@ -748,6 +751,55 @@ export class EsriUtilities {
     // TO.DOCONT: but the default values could be / should be overwritten by the config. Also, the defaultValues seem like the actual way to make the timeslider a single handle?
     // Create the time dimension
     layerConfig.setTimeDimension(DateMgt.createDimensionFromESRI(esriTimeDimension, displayDateMode, singleHandle));
+  }
+
+  /**
+   * Inherits metadata from parent layer for Annotation SubLayers.
+   *
+   * Annotation SubLayers lack critical properties (fields, timeInfo, geometryType, etc.)
+   * in their own metadata. This method fetches the parent layer's metadata and copies
+   * those properties to the annotation sublayer.
+   *
+   * @param layerMetadata - The annotation sublayer metadata to populate
+   * @param baseUrl - The base service URL for constructing the parent query URL
+   * @param layerConfig - The layer configuration (used for logging)
+   * @param abortSignal - Optional abort signal for request cancellation
+   */
+  static async #inheritAnnotationSubLayerMetadata(
+    layerMetadata: TypeMetadataEsriDynamicLayer | TypeMetadataEsriFeatureLayer | TypeMetadataEsriImage,
+    baseUrl: string,
+    layerConfig: EsriDynamicLayerEntryConfig | EsriFeatureLayerEntryConfig | EsriImageLayerEntryConfig,
+    abortSignal?: AbortSignal
+  ): Promise<void> {
+    // Early return if an ESRI Image layer
+    if (layerConfig instanceof EsriImageLayerEntryConfig) {
+      return Promise.resolve();
+    }
+
+    const castedLayerMetadata = layerMetadata as TypeMetadataEsriDynamicLayer | TypeMetadataEsriFeatureLayer;
+    // Early return if not an annotation sublayer with parent
+    if (castedLayerMetadata.type !== 'Annotation SubLayer' || !castedLayerMetadata.parentLayer) {
+      return Promise.resolve();
+    }
+
+    const parentLayerId = castedLayerMetadata.parentLayer.id;
+    const parentQueryUrl = `${baseUrl}/${parentLayerId}`;
+
+    try {
+      // Fetch parent layer metadata (Has to be Dynamic)
+      const parentMetadata = await Fetch.fetchJson<TypeMetadataEsriDynamicLayer>(`${parentQueryUrl}?f=json`, { signal: abortSignal });
+
+      // Inherit critical properties from parent
+      castedLayerMetadata.fields = parentMetadata.fields;
+      castedLayerMetadata.timeInfo = parentMetadata.timeInfo;
+      castedLayerMetadata.geometryType = parentMetadata.geometryType;
+      castedLayerMetadata.geometryField = parentMetadata.geometryField;
+      castedLayerMetadata.capabilities = parentMetadata.capabilities;
+      castedLayerMetadata.maxRecordCount = parentMetadata.maxRecordCount;
+    } catch (error: unknown) {
+      // Rethrow
+      throw new LayerServiceMetadataUnableToFetchError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerName(), formatError(error));
+    }
   }
 
   /**

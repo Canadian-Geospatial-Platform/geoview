@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import { useTheme } from '@mui/material/styles';
-import { Box, CircularProgressBase, ErrorIcon, Icon, BrowserNotSupportedIcon, LayerGroupIcon } from '@/ui';
+import { Box, CircularProgressBase, ErrorIcon, Icon, BrowserNotSupportedIcon, LayerGroupIcon, TitleIcon } from '@/ui';
 
 import { getSxClasses } from '@/core/components/common/layer-icon-style';
 import {
@@ -58,19 +58,33 @@ function IconStack({ layerPath }: TypeIconStackProps): JSX.Element | null {
   );
 
   // TODO: WCAG Issue #3109 - Add meaningful alt text to image icons if needed
+  const renderIconContent = useCallback((): JSX.Element | null => {
+    if (iconImage === 'annotation') {
+      return (
+        <Box component="span" sx={sxClasses.iconBox}>
+          <TitleIcon sx={sxClasses.titleIcon} />
+        </Box>
+      );
+    }
+
+    if (iconImage === 'no data') {
+      return <BrowserNotSupportedIcon />;
+    }
+
+    return (
+      <Box component="span" sx={sxClasses.legendIcon}>
+        <Box component="img" alt="" src={iconImage} sx={sxClasses.maxIconImg} />
+      </Box>
+    );
+  }, [iconImage, sxClasses.iconBox, sxClasses.legendIcon, sxClasses.maxIconImg, sxClasses.titleIcon]);
+
   const renderSingleIcon = useCallback((): JSX.Element => {
     return (
       <Icon {...ICON_BUTTON_BASE_PROPS} sx={sxClasses.iconPreview}>
-        {iconImage === 'no data' ? (
-          <BrowserNotSupportedIcon />
-        ) : (
-          <Box component="span" sx={sxClasses.legendIcon}>
-            <Box component="img" alt="" src={iconImage} sx={sxClasses.maxIconImg} />
-          </Box>
-        )}
+        {renderIconContent()}
       </Icon>
     );
-  }, [iconImage, sxClasses.iconPreview, sxClasses.legendIcon, sxClasses.maxIconImg]);
+  }, [renderIconContent, sxClasses.iconPreview]);
 
   const renderStackedIcons = useCallback((): JSX.Element => {
     return (
@@ -131,6 +145,8 @@ export function LayerIcon({ layerPath }: LayerIconProps): JSX.Element {
   logger.logTraceRenderDetailed('components/common/layer-icon', layerPath);
 
   // Hooks
+  const theme = useTheme();
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
   const layerStatus = useStoreLayerStatus(layerPath);
   const legendQueryStatus = useStoreLayerLegendQueryStatus(layerPath);
   const layerChildPaths = useStoreLayerChildPaths(layerPath);
@@ -156,20 +172,8 @@ export function LayerIcon({ layerPath }: LayerIconProps): JSX.Element {
 
   if (hasChildren) {
     return (
-      <Box
-        sx={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: '30px',
-          height: '30px',
-          backgroundColor: 'white',
-          border: '1px solid',
-          borderColor: 'primary.main',
-          borderRadius: '4px',
-        }}
-      >
-        <LayerGroupIcon sx={{ transform: 'scaleX(-1)' }} />
+      <Box sx={sxClasses.iconBox}>
+        <LayerGroupIcon sx={sxClasses.groupIcon} />
       </Box>
     );
   }
