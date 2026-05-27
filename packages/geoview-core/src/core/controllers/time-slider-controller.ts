@@ -439,7 +439,11 @@ export class TimeSliderController extends AbstractMapViewerController {
     if (filtering) {
       // ---- GVWMS ----
       if (layer instanceof GVWMS) {
-        filter = `${field} = ${helperEsriDate(values[0])}`;
+        if (values.length > 1) {
+          filter = `${field} = ${helperEsriDate(values[0])}/${helperEsriDate(values[1])}`;
+        } else {
+          filter = `${field} = ${helperEsriDate(values[0])}`;
+        }
       } else if (layer instanceof GVEsriImage) {
         // ---- Esri Image ----
         // Esri Image layers expect the date to be an Epoch timestamp, not an ISO format
