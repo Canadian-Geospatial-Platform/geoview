@@ -251,11 +251,16 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
   /**
    * Determines if a style configuration allows item visibility toggling.
    *
-   * Simple styles cannot be toggled. UniqueValue/classBreaks styles
-   * require multiple non-default classes to enable toggling.
+   * Simple styles can be toggled when the layer has multiple geometry types.
+   * UniqueValue/classBreaks styles require multiple non-default classes to enable toggling.
    */
   const canToggleStyleItems = (styleConfig: TypeLayerStyleSettings | undefined): boolean => {
-    if (!styleConfig || styleConfig.type === 'simple') return false;
+    if (!styleConfig) return false;
+
+    if (styleConfig.type === 'simple') {
+      // Simple styles can be toggled when there are multiple geometry types in the layer
+      return layerStyleConfig ? Object.keys(layerStyleConfig).length > 1 : false;
+    }
 
     if (styleConfig.type === 'uniqueValue' || styleConfig.type === 'classBreaks') {
       const nonDefaultCount = styleConfig.hasDefault ? styleConfig.info.length - 1 : styleConfig.info.length;

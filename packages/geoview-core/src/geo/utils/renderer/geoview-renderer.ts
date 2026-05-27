@@ -994,10 +994,13 @@ export abstract class GeoviewRenderer {
     options?: TypeStyleProcessorOptions
   ): Style | undefined {
     // Read options
-    const { filterEquation, visualVariables } = options || {};
+    const { filterEquation, bypassVisibility, visualVariables } = options || {};
 
     // If feature doesn't respect filter, no style
     if (feature && !this.featureRespectsFilterEquation(feature, filterEquation)) return undefined;
+
+    // If the simple style info is not visible and we're not bypassing visibility, no style
+    if (!bypassVisibility && styleSettings.type === 'simple' && styleSettings.info[0]?.visible === false) return undefined;
 
     const settings = (styleSettings.type === 'simple' ? styleSettings.info[0].settings : styleSettings) as TypeKindOfVectorSettings;
     let style: Style | undefined;
@@ -1032,10 +1035,13 @@ export abstract class GeoviewRenderer {
     options?: TypeStyleProcessorOptions
   ): Style | undefined {
     // Read options
-    const { filterEquation, visualVariables } = options || {};
+    const { filterEquation, bypassVisibility, visualVariables } = options || {};
 
     // If feature doesn't respect filter, no style
     if (feature && !this.featureRespectsFilterEquation(feature, filterEquation)) return undefined;
+
+    // If the simple style info is not visible and we're not bypassing visibility, no style
+    if (!bypassVisibility && styleSettings.type === 'simple' && styleSettings.info[0]?.visible === false) return undefined;
 
     const settings = (styleSettings.type === 'simple' ? styleSettings.info[0].settings : styleSettings) as TypeKindOfVectorSettings;
     const geometry = feature?.getGeometry() as Geometry;
@@ -1264,10 +1270,13 @@ export abstract class GeoviewRenderer {
     options?: TypeStyleProcessorOptions
   ): Style | undefined {
     // Read options
-    const { filterEquation, visualVariables } = options || {};
+    const { filterEquation, bypassVisibility, visualVariables } = options || {};
 
     // If feature doesn't respect filter, no style
     if (feature && !this.featureRespectsFilterEquation(feature, filterEquation)) return undefined;
+
+    // If the simple style info is not visible and we're not bypassing visibility, no style
+    if (!bypassVisibility && styleSettings.type === 'simple' && styleSettings.info[0]?.visible === false) return undefined;
 
     const settings = (styleSettings.type === 'simple' ? styleSettings.info[0].settings : styleSettings) as TypeKindOfVectorSettings;
     const geometry = feature?.getGeometry() as Geometry;

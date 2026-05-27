@@ -632,6 +632,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
                 aria-pressed={locked}
                 tooltip={getLockTooltip()}
                 tooltipPlacement="top"
+                aria-disabled={isPlaying}
                 onClick={handleLock}
               >
                 {locked ? <LockIcon /> : <LockOpenIcon />}
@@ -678,6 +679,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
               aria-pressed={reversed}
               tooltip={t('timeSlider.slider.changeDirection')}
               tooltipPlacement="top"
+              aria-disabled={isPlaying}
               onClick={handleReverse}
             >
               {reversed ? <SwitchRightIcon /> : <SwitchLeftIcon />}

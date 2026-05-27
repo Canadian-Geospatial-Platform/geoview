@@ -154,6 +154,7 @@ export const useManageArrow = (): ArrowReturn => {
       if (!fixNorth && northPolePixel !== null) {
         const screenNorthPoint = northPolePixel;
         const mapCenter = mapController.getPixelFromCoordinate(mapCenterCoord);
+        if (!mapCenter) return { memoCalculatedRotation: newRotation, memoCalculatedOffset: offsetX };
 
         // Calculate distance from north pole using triangle
         const deltaX = screenNorthPoint[0] - mapCenter[0];
