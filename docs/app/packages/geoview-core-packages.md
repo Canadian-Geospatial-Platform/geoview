@@ -423,7 +423,7 @@ interface TypeTimeSliderValues {
   isMainLayerPath: boolean; // Is this the primary layer
   locked?: boolean; // Are handles locked together
   reversed?: boolean; // Is animation reversed
-  singleHandle: boolean; // Single vs range selection
+  singleHandle: boolean; // Single vs range selection (auto-detected from WMS metadata, overridable via config)
   title?: string; // Display title
   // Data
   minAndMax: number[]; // [min, max] timestamps (ms)
