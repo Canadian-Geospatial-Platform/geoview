@@ -937,7 +937,7 @@ export interface TypeMetadataWMSCapabilityLayerDimension {
   '#text': string;
   '@attributes': TypeMetadataWMSCapabilityLayerDimensionAttribute;
   default?: string;
-  multipleValues?: boolean; // string for raw XML attribute (below), boolean for normalized value) is intentional
+  multipleValues?: boolean; // string for raw XML attribute (below), boolean for normalized value is intentional
   name?: string;
   units?: string;
   values?: string;

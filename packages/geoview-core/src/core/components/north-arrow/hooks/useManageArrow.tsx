@@ -163,7 +163,7 @@ export const useManageArrow = (): ArrowReturn => {
       // Calculate offset
       let newOffset = offsetX;
 
-      if (!fixNorth && northPolePixel !== undefined) {
+      if (!fixNorth && northPolePixel) {
         const screenNorthPoint = northPolePixel;
         const mapCenter = mapController.getPixelFromCoordinate(mapCenterCoord);
         if (!mapCenter) return { memoCalculatedRotation: newRotation, memoCalculatedOffset: offsetX };
