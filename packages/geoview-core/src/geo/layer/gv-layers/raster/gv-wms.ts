@@ -973,7 +973,7 @@ export class GVWMS extends AbstractGVRaster {
     if (!featureMember && featureInfoFormat.includes(GVWMS.MIME_TYPE_FORMAT_TEXT_XML)) {
       try {
         // Try to get the feature member using XML format
-        const featMember = await GVWMS.#getFeatureInfoUsingXML(
+        featureMember = await GVWMS.#getFeatureInfoUsingXML(
           wmsLayerConfig,
           wmsSource,
           clickCoordinate,
@@ -982,7 +982,6 @@ export class GVWMS extends AbstractGVRaster {
           projectionCode,
           abortController
         );
-        featureMember = [featMember];
 
         // Keep in mind, this output format works
         this.#featureOutputFormatWMSWorked = GVWMS.MIME_TYPE_FORMAT_TEXT_XML;
@@ -1311,16 +1310,15 @@ export class GVWMS extends AbstractGVRaster {
       fallbackCandidates.forEach((candidate): void => {
         featureMember.push(GVWMS.#convertXmlElementToRecord(candidate));
       });
+
+      // A valid GML response can legitimately contain zero features.
+      if (fallbackCandidates.length === 0) {
+        return [];
+      }
     }
 
-    // If found
-    if (featureMember.length > 0) {
-      // Success!
-      return featureMember;
-    }
-
-    // Failed
-    throw new LayerInvalidFeatureInfoFormatWMSError(layerConfig.layerPath, GVWMS.MIME_TYPE_FORMAT_GML, layerConfig.getLayerNameCascade());
+    // Success, including valid empty feature collections.
+    return featureMember;
   }
 
   /**
@@ -1335,7 +1333,7 @@ export class GVWMS extends AbstractGVRaster {
    * @param viewResolution - The current resolution of the map view
    * @param projectionCode - The projection in which the request should be made (e.g., 'EPSG:3857')
    * @param abortController - Optional {@link AbortController} to allow cancellation of the request
-   * @returns A promise that resolves with the feature member record
+   * @returns A promise that resolves with an array of feature member records
    */
   static async #getFeatureInfoUsingXML(
     layerConfig: OgcWmsLayerEntryConfig,
@@ -1345,7 +1343,7 @@ export class GVWMS extends AbstractGVRaster {
     qgisServerTolerance: number,
     projectionCode: ProjectionLike,
     abortController: AbortController | undefined = undefined
-  ): Promise<Record<string, unknown>> {
+  ): Promise<Record<string, unknown>[]> {
     // Try to get the information using xml format
     const responseData = await GVWMS.#readFeatureInfo(
       layerConfig,
@@ -1365,12 +1363,19 @@ export class GVWMS extends AbstractGVRaster {
     // Try to get the feature member
     let featureMember: Record<string, unknown> | undefined;
     const featureCollection = GVWMS.#getAttribute(jsonResponse, 'FeatureCollection');
-    if (featureCollection) featureMember = GVWMS.#getAttribute(featureCollection, 'featureMember');
-    else {
+    if (featureCollection) {
+      featureMember = GVWMS.#getAttribute(featureCollection, 'featureMember');
+
+      // A recognized FeatureCollection without a feature member is a valid empty response.
+      if (!featureMember) {
+        return [];
+      }
+    } else {
       const featureInfoResponse = GVWMS.#getAttribute(jsonResponse, 'FeatureInfoResponse');
       if (featureInfoResponse) {
         featureMember = GVWMS.#getAttribute(featureInfoResponse, 'FIELDS');
         if (featureMember) featureMember = GVWMS.#getAttribute(featureMember, '@attributes');
+        else return [];
       } else {
         const getFeatureInfoResponse = GVWMS.#getAttribute(jsonResponse, 'GetFeatureInfoResponse');
 
@@ -1385,6 +1390,8 @@ export class GVWMS extends AbstractGVRaster {
             const fieldValue = getFeatureInfoResponseCasted.Layer.Attribute['@attributes'].value;
             featureMember[fieldName] = fieldValue;
           }
+        } else if (getFeatureInfoResponse) {
+          return [];
         }
       }
     }
@@ -1392,7 +1399,7 @@ export class GVWMS extends AbstractGVRaster {
     // If found
     if (featureMember) {
       // Success!
-      return featureMember;
+      return [featureMember];
     }
 
     // Failed
