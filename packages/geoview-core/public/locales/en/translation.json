@@ -62,7 +62,6 @@
     "area": "Area",
     "clear": "Clear",
     "segmentLabels": "Show segment labels",
-    "keyboardHint": "Enable keyboard navigation (Tab to map) to draw measurements with the keyboard. See the Guide for details.",
     "status": {
       "started": "{{type}} measurement started. Click on the map to begin.",
       "stopped": "Measurement mode disabled.",

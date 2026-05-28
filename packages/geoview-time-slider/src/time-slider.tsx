@@ -312,9 +312,11 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
    * Handles when the user clicks the lock button.
    */
   const handleLock = useCallback((): void => {
+    if (isPlaying) return;
+
     clearTimeout(playIntervalRef.current);
     timeSliderController.setLocked(layerPath, !locked);
-  }, [timeSliderController, layerPath, locked]);
+  }, [timeSliderController, layerPath, locked, isPlaying]);
 
   /**
    * Handles when the user clicks the play/pause button.
@@ -330,13 +332,11 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
    * Handles when the user clicks the reverse button.
    */
   const handleReverse = useCallback((): void => {
+    if (isPlaying) return;
+
     clearTimeout(playIntervalRef.current);
     timeSliderController.setReversed(layerPath, !reversed);
-    if (isPlaying) {
-      if (reversed) moveBack();
-      else moveForward();
-    }
-  }, [isPlaying, timeSliderController, layerPath, moveBack, moveForward, reversed]);
+  }, [isPlaying, timeSliderController, layerPath, reversed]);
 
   /**
    * Handles when the user changes the time delay.

@@ -486,11 +486,6 @@ export default function Measurement(): JSX.Element {
         >
           <DeleteIcon fontSize="small" />
         </IconButton>
-
-        {/* Keyboard accessibility hint */}
-        <Typography variant="caption" sx={{ fontStyle: 'italic', opacity: 0.8 }}>
-          {t('measurement.keyboardHint')}
-        </Typography>
       </Box>
     );
   };

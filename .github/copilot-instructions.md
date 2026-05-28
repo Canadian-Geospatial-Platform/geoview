@@ -482,6 +482,33 @@ const handleChange = useCallback(
 - Downcast only after `instanceof` check or type guard function
 - Avoid spreading objects with deep nesting - use `lodash.cloneDeep` instead
 
+### Prefer `undefined` Over `null`
+
+Use `undefined` as the default "no value" sentinel. Reserve `null` only for cases where it is semantically required:
+
+| Use `null`                                                                                               | Use `undefined`                                    |
+| -------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| React node return (`JSX.Element \| null`)                                                                | Optional function parameters and return values     |
+| DOM refs managed by React (`useRef<T>(null)`)                                                            | Mutable data refs (`useRef<T \| undefined>`)       |
+| Values coming from external APIs that use `null` (OpenLayers, browser DOM)                               | GeoView internal APIs and controller return values |
+| Explicit "set to nothing" in JSON / store state where `undefined` would be stripped during serialization | Optional properties on interfaces and types        |
+
+**Why:** `undefined` enables optional chaining (`value?.prop`) and nullish coalescing (`value ?? fallback`) without extra `null` checks. It also aligns with TypeScript's `?` optional property syntax, which produces `T | undefined`, not `T | null`.
+
+**Wrapping external `null` returns:** When an external API (e.g., OpenLayers) returns `null`, convert it to `undefined` at the boundary:
+
+```typescript
+// ✅ Good: Convert OL's null to undefined at the GeoView API boundary
+getPixelFromCoordinate(coord: Coordinate): Pixel | undefined {
+  return olMap.getPixelFromCoordinate(coord) ?? undefined;
+}
+
+// ❌ Bad: Propagating null through GeoView code
+getPixelFromCoordinate(coord: Coordinate): Pixel | null {
+  return olMap.getPixelFromCoordinate(coord);
+}
+```
+
 ### Reuse Over Duplication
 
 Before writing new logic, check whether a utility or helper already exists in the codebase. Do not duplicate logic that is available in a shared module.

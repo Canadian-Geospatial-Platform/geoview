@@ -899,7 +899,7 @@ export abstract class DateMgt {
       unitSymbol: dimensionObject.unitSymbol || '',
       rangeItems,
       nearestValues: rangeItems.type === 'relative' ? 'continuous' : 'discrete',
-      singleHandle: false,
+      singleHandle: defaultValues.length === 1,
       displayDateFormat: guessedInfo?.displayDateFormat,
       displayDateFormatShort: guessedInfo?.displayDateFormatShort,
       displayDateTimezone: guessedInfo?.displayDateTimezone,

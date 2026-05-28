@@ -115,7 +115,7 @@ export const useManageArrow = (): ArrowReturn => {
         Projection.PROJECTION_NAMES.LONLAT,
         mapProjectionEPSG
       )[0];
-      const northPolePixel = northPoleMapCoord ? mapController.getPixelFromCoordinate(northPoleMapCoord) : null;
+      const northPolePixel = northPoleMapCoord ? mapController.getPixelFromCoordinate(northPoleMapCoord) : undefined;
 
       const arrowAngle = parseFloat(northArrowElement.degreeRotation);
 
@@ -163,7 +163,7 @@ export const useManageArrow = (): ArrowReturn => {
       // Calculate offset
       let newOffset = offsetX;
 
-      if (!fixNorth && northPolePixel !== null) {
+      if (!fixNorth && northPolePixel !== undefined) {
         const screenNorthPoint = northPolePixel;
         const mapCenter = mapController.getPixelFromCoordinate(mapCenterCoord);
         if (!mapCenter) return { memoCalculatedRotation: newRotation, memoCalculatedOffset: offsetX };
