@@ -43,13 +43,13 @@
       },
       {
         "geoviewLayerId": "ElevationHRDEM110",
-        "geoviewLayerName": "Elevation HRDEM Mosaic 1.1.0",
+        "geoviewLayerName": "Elevation HRDEM Mosaic DSM 1.1.0",
         "metadataAccessPath": "https://datacube.services.geo.ca/wrapper/ramp/ogc/elevation-hrdem-mosaic?VERSION=1.1.0",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
             "layerId": "dsm-hillshade",
-            "layerName": "Elevation HRDEM Mosaic Hillshade DSM 1.1.0"
+            "layerName": "Elevation Hillshade 1.1.0"
           }
         ]
       },
@@ -61,7 +61,7 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "dsm-hillshade",
-            "layerName": "Elevation HRDEM Mosaic Hillshade DSM 1.3.0"
+            "layerName": "Elevation Hillshade 1.3.0"
           }
         ]
       },
