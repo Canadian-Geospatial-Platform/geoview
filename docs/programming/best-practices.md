@@ -270,7 +270,25 @@ In classes, functions should be ordered in the following way:
 - static private
 - event types
 
-## 12- React Performance Patterns
+## 12- EventHelper handler parameter naming
+
+When subscribing to events emitted through our `EventHelper` delegates, handler methods should use the parameter names `sender` and `event`.
+
+This naming is required for consistency and readability across the codebase. These names are also treated as exceptions in our no-unused-parameter ESLint rule, so they should be used even when one of the arguments is not consumed in the implementation.
+
+```ts
+// ✅ Good: EventHelper delegate naming convention
+this.getMapViewer().onMapMoveEnd((sender, event): void => {
+  logger.logDebug('Map moved', event.lonlat);
+});
+
+// ✅ Also good when one parameter is intentionally unused
+this.getMapViewer().onMapInit((sender, event): void => {
+  initializeSomething();
+});
+```
+
+## 13- React Performance Patterns
 
 ### useMemo Naming Convention
 

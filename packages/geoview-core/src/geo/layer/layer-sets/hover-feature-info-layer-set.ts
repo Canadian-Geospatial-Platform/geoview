@@ -58,7 +58,6 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
     // Abort all in-flight queries from a previous call and create a fresh controller for this call
     this.#abortController.abort();
     this.#abortController = new AbortController();
-    const { signal } = this.#abortController;
 
     // The result set to be returned
     const querySet: TypeHoverResultSet = {};
@@ -79,7 +78,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
     // Query each hoverable layer and collect the promises
     const allPromises = orderedLayerPaths
       .filter((layerPath) => this.layerDomain.getGeoviewLayerRegular(layerPath).getHoverable())
-      .map((layerPath) => this.#queryLayerAndProcess(layerPath, coordinate, queryType, querySet, orderedLayerPaths, signal));
+      .map((layerPath) => this.#queryLayerAndProcess(layerPath, coordinate, queryType, querySet, orderedLayerPaths));
 
     // Await for the promises to settle
     await Promise.allSettled(allPromises);
@@ -108,15 +107,13 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
    * @param queryType - The query type
    * @param querySet - The result set to update with the query results
    * @param orderedLayerPaths - The ordered layer paths used to determine store update priority
-   * @param signal - The abort signal for this query call
    */
   async #queryLayerAndProcess(
     layerPath: string,
     coordinate: Coordinate,
     queryType: QueryType,
     querySet: TypeHoverResultSet,
-    orderedLayerPaths: string[],
-    signal: AbortSignal
+    orderedLayerPaths: string[]
   ): Promise<void> {
     // Get the layer associated with the layer path
     const layer = this.layerDomain.getGeoviewLayerRegular(layerPath);
@@ -133,7 +130,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
       );
 
       // If a newer queryLayers call has aborted this one, discard stale results
-      if (signal.aborted) return;
+      if (this.#abortController.signal.aborted) return;
 
       // Get the array of records in the results
       const arrayOfRecords = promiseResult.results;
@@ -176,7 +173,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
       }
     } catch (error: unknown) {
       // If aborted
-      if (error instanceof RequestAbortedError || signal.aborted) {
+      if (error instanceof RequestAbortedError || this.#abortController.signal.aborted) {
         // Log
         logger.logDebug('Query aborted and replaced by another one.. keep spinning..');
       } else {
