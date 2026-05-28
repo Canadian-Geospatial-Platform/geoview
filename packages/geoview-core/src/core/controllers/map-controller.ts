@@ -579,9 +579,7 @@ export class MapController extends AbstractMapViewerController {
    * @returns The pixel position on the map viewport, or undefined if the map is not yet initialized
    */
   getPixelFromCoordinate(coord: Coordinate): Pixel | undefined {
-    const olMap = this.getMapViewer().map;
-    if (!olMap) return undefined;
-    return olMap.getPixelFromCoordinate(coord) ?? undefined;
+    return this.getMapViewer().map?.getPixelFromCoordinate(coord) ?? undefined;
   }
 
   /**
