@@ -6,7 +6,7 @@ import { Box, Fade, Typography } from '@/ui';
 import { getSxClasses } from './crosshair-style';
 import { CrosshairIcon } from './crosshair-icon';
 import { useStoreAppIsCrosshairsActive } from '@/core/stores/states/app-state';
-import { getStoreMapPointerPosition, useStoreMapZoom } from '@/core/stores/states/map-state';
+import { getStoreMapPointerPosition, setStoreMapPointerPosition, useStoreMapZoom } from '@/core/stores/states/map-state';
 import { getStoreDrawerIsEditing, getStoreDrawerIsDrawing, getStoreDrawerSelectedDrawingType } from '@/core/stores/states/drawer-state';
 import { logger } from '@/core/utils/logger';
 import { useEventListener } from '@/core/components/common/hooks/use-event-listener';
@@ -130,6 +130,17 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
         event.preventDefault();
         event.stopPropagation();
 
+        // Check if measurement drawing is active
+        const measurementDraw = mapController.getActiveMeasurementDraw();
+        if (measurementDraw) {
+          if (event.shiftKey) {
+            measurementDraw.finishDrawing();
+          } else {
+            measurementDraw.appendCoordinates([currentPointerPosition.projected]);
+          }
+          return;
+        }
+
         abortControllerRef.current?.abort();
         const controller = new AbortController();
         abortControllerRef.current = controller;
@@ -252,8 +263,7 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
         return;
       }
 
-      const currentPointerPosition = getStoreMapPointerPosition(mapId);
-      if (!currentPointerPosition) return;
+      const currentPointerPosition = getStoreMapPointerPosition(mapId) ?? mapController.getMapCenterPosition();
 
       // Handle Shift+Click logic first
       if (handleShiftClick(event, currentPointerPosition)) {
@@ -267,7 +277,7 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
         handleDrawerInteraction(event, currentPointerPosition);
       }
     },
-    [isCrosshairsActive, mapId, handleShiftClick, handleDefaultInteraction, handleDrawerInteraction, drawerController]
+    [isCrosshairsActive, mapId, mapController, handleShiftClick, handleDefaultInteraction, handleDrawerInteraction, drawerController]
   );
 
   /**
@@ -281,13 +291,18 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
   }, [drawerController]);
 
   /**
-   * Clears hover tooltip when crosshair becomes active.
+   * Clears hover tooltip and initializes pointer position when crosshair becomes active.
    */
   useEffect(() => {
     if (isCrosshairsActive) {
       layerSetController.hoverFeatureInfoLayerSet.clearResults();
+
+      // Initialize pointer position to map center so the coordinate display updates immediately
+      if (!getStoreMapPointerPosition(mapId)) {
+        setStoreMapPointerPosition(mapId, mapController.getMapCenterPosition());
+      }
     }
-  }, [isCrosshairsActive, layerSetController]);
+  }, [isCrosshairsActive, mapId, mapController, layerSetController]);
 
   // Event listeners
   useEventListener<HTMLElement>('keydown', handleCrosshairInteraction, mapTargetElement, isCrosshairsActive);

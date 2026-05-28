@@ -62,6 +62,7 @@ import {
   isStoreMapConfigInitialized,
   setStoreMapAttribution,
   setStoreMapClickCoordinates,
+  setStoreMapClickMarker,
   setStoreMapClickMarkerIconHide,
   setStoreMapCurrentBasemapOptions,
   setStoreMapFixNorth,
@@ -135,6 +136,9 @@ export class MapController extends AbstractMapViewerController {
 
   /** Callback delegates for the geolocator search event. */
   #onGeolocatorSearchHandlers: GeolocatorSearchDelegate[] = [];
+
+  /** The active measurement Draw interaction, if any. */
+  #activeMeasurementDraw: Draw | null = null;
 
   /**
    * Creates an instance of MapController.
@@ -578,6 +582,23 @@ export class MapController extends AbstractMapViewerController {
     const olMap = this.getMapViewer().map;
     if (!olMap) return null;
     return olMap.getPixelFromCoordinate(coord);
+  }
+
+  /**
+   * Gets the current map center as a TypeMapMouseInfo object.
+   *
+   * Useful as a fallback when the pointer position store has not been set yet
+   * (e.g., when the crosshair is first activated and the user hasn't panned).
+   *
+   * @returns The map center position info
+   */
+  getMapCenterPosition(): TypeMapMouseInfo {
+    const mapViewer = this.getMapViewer();
+    const view = mapViewer.map.getView();
+    const projected = view.getCenter()!;
+    const lonlat = Projection.transformToLonLat(projected, mapViewer.getProjection());
+    const pixel = mapViewer.map.getPixelFromCoordinate(projected);
+    return { lonlat, pixel, projected, dragging: false };
   }
 
   /**
@@ -1185,6 +1206,39 @@ export class MapController extends AbstractMapViewerController {
    */
   initDrawInteractions(geomGroupKey: string, type: string, style: TypeFeatureStyle): Draw {
     return this.getMapViewer().initDrawInteractions(geomGroupKey, type, style);
+  }
+
+  /**
+   * Sets the active measurement Draw interaction for keyboard accessibility.
+   *
+   * When activating, suppresses hover and click-marker handlers (like drawer does).
+   * When deactivating, restores them.
+   *
+   * @param draw - The Draw interaction to register, or null to unregister
+   */
+  setActiveMeasurementDraw(draw: Draw | null): void {
+    const viewer = this.getMapViewer();
+
+    if (draw) {
+      // Suppress hover and details while measuring
+      viewer.unregisterMapPointerHandlers(viewer.map);
+      this.getControllersRegistry().layerSetController.hoverFeatureInfoLayerSet.clearResults();
+      setStoreMapClickMarker(this.getMapId(), undefined);
+    } else if (this.#activeMeasurementDraw) {
+      // Restore hover and details when stopping measurement
+      viewer.registerMapPointerHandlers(viewer.map);
+    }
+
+    this.#activeMeasurementDraw = draw;
+  }
+
+  /**
+   * Gets the active measurement Draw interaction.
+   *
+   * @returns The active measurement Draw interaction, or null if none
+   */
+  getActiveMeasurementDraw(): Draw | null {
+    return this.#activeMeasurementDraw;
   }
 
   // #endregion PUBLIC METHODS - GEOMETRY API FOR DRAWING TOOLS
