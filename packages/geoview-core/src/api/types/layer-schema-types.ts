@@ -85,11 +85,13 @@ export const CONST_LAYER_TYPES: Record<LayerTypesKey, TypeGeoviewLayerType> = {
 export type TypeFeatureInfoLayerConfig = {
   /** Allow querying. */
   queryable?: boolean;
+
   /**
    * The display field of the layer. If it is not present the viewer will make an attempt to find the first valid
    * field.
    */
   nameField?: string;
+
   /** The list of fields to be displayed by the UI. */
   outfields?: TypeOutfields[];
 
@@ -188,6 +190,9 @@ export const CONST_LAYER_ENTRY_TYPES: Record<LayerEntryTypesKey, TypeLayerEntryT
   SHAPEFILE: 'shapefile',
   RCS: 'rcs',
 };
+
+/** The possible OGC Service types */
+export type TypeOGCService = 'WMS' | 'WMTS' | 'WFS';
 
 /** Type used to define valid source projection codes. */
 export type TypeValidSourceProjectionCodes = 3978 | 3857 | 4326;
@@ -519,6 +524,19 @@ export type ShapefileLayerConfig = {
 
   /** Should the layer be used as basemap. */
   useAsBasemap?: boolean;
+};
+
+/**
+ * Type defining the effective scales of a layer, which are the ones that are actually applied on the map and can differ
+ * from the configured ones if the layer is outside of its original configured scales or if the map is outside of them.
+ */
+export type EffectiveLayerScales = {
+  maxScale?: number;
+  maxScaleTolerance?: number;
+  maxScaleZoomAt?: number;
+  minScale?: number;
+  minScaleTolerance?: number;
+  minScaleZoomAt?: number;
 };
 
 /**

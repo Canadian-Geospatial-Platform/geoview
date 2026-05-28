@@ -236,6 +236,7 @@
     "layerInfoTemporalDimension": "Dimension temporelle (curseur temporel)",
     "layerInfoInteraction": "Interaction",
     "layerType": "Type : ",
+    "layerOgcVersion": "Version OGC",
     "layerBounds": "Étendu ({{mapProjectionEPSG}})",
     "layerBounds4326": "Étendu (EPSG:4326)",
     "layerMaxScale": "Échelle maximale",

@@ -61,7 +61,7 @@ export class Config {
       return false;
     });
 
-    // TODO: refactor - return only the layers
+    // TODO: refactor - return only the valid layers
     const validLayers = ConfigValidation.validateLayersConfigAgainstSchema(validLayerEntries, onErrorCallback);
 
     // Log (leave the line commented, for quick debug when needed)

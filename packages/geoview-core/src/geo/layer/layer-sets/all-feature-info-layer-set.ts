@@ -42,7 +42,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
     // In the case of a GVWMS, also check if we has a way to retrieve vector data
     if (isQueryable && layer instanceof GVWMS) {
       // If we have a WFS layer config associated with the WMS
-      isQueryable = layer.getLayerConfig().hasWfsLayerConfig();
+      isQueryable = !!layer.getLayerConfig().getWfsLayerConfig();
     }
 
     if (isQueryable) {

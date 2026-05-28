@@ -226,7 +226,7 @@ export class WFS extends AbstractGeoViewVector {
     const describeFeatureUrl = GeoUtilities.ensureServiceRequestUrlDescribeFeatureType(
       url,
       layerConfig.layerId,
-      layerConfigWFS.getVersion(),
+      layerConfigWFS.getVersionOrDefault(),
       outputFormat
     );
 
@@ -285,7 +285,7 @@ export class WFS extends AbstractGeoViewVector {
     let wfsUrl = GeoUtilities.ensureServiceRequestUrlGetFeature(
       layerConfigWFS.getDataAccessPath(),
       layerConfigWFS.layerId,
-      layerConfigWFS.getVersion(),
+      layerConfigWFS.getVersionOrDefault(),
       outputFormat,
       undefined,
       undefined,
@@ -331,7 +331,7 @@ export class WFS extends AbstractGeoViewVector {
     readOptions.dataProjection = dataEPSG || 'EPSG:4326'; // default: 4326
 
     // Read the features
-    return GeoUtilities.readFeaturesFromWFS(responseData, layerConfigWFS.getVersion(), readOptions);
+    return GeoUtilities.readFeaturesFromWFS(responseData, layerConfigWFS.getVersionOrDefault(), readOptions);
   }
 
   /**

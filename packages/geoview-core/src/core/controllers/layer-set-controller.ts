@@ -3,6 +3,10 @@ import type { Coordinate } from 'ol/coordinate';
 import type { TypeFeatureInfoResult } from '@/api/types/map-schema-types';
 import { CONST_LAYER_TYPES, type TypeLayerControls, type TypeMosaicMethod } from '@/api/types/layer-schema-types';
 import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
+import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import { OgcWmtsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wmts-layer-entry-config';
+import { OgcWfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import type { LayerDomain } from '@/core/domains/layer-domain';
@@ -36,10 +40,8 @@ import {
   getStoreLayerOrderedLayerIndexByPath,
   setStoreLegendLayersDirectly,
 } from '@/core/stores/states/layer-state';
-import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
-import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 
 /**
@@ -301,6 +303,8 @@ export class LayerSetController extends AbstractMapViewerController {
 
     const currentMapResolution = this.getMapViewer().getView().getResolution();
     const currentMapZoom = this.getMapViewer().getView().getZoom();
+    const calculatedMapScale = this.getMapViewer().getMapScaleFromZoom(currentMapZoom ?? 0);
+
     const calculatedMapResolution =
       currentMapResolution ??
       this.getMapViewer()
@@ -350,6 +354,10 @@ export class LayerSetController extends AbstractMapViewerController {
 
       // If not found, skip
       if (!layerConfig) return;
+
+      // Get the effective visibility scales
+      const effectiveScales = MapViewer.computeEffectiveLayerScales(this.getMapViewer(), layerConfig);
+      const { maxScale, minScale } = effectiveScales;
 
       // Get the layer if exists
       const layer = this.getControllersRegistry().layerController.getGeoviewLayerIfExists(entryLayerPath);
@@ -433,11 +441,6 @@ export class LayerSetController extends AbstractMapViewerController {
         // TO.DOCONT: When attempted, it wasn't working for the Hydro - Scale WMS group layers of group layers and the 'Show all' toggle.
         const visible = layer?.getVisible() ?? layerConfigCasted.getInitialSettings()?.states?.visible ?? true;
 
-        // Get the effective visibility scales
-        const effectiveScales = MapViewer.computeEffectiveLayerScales(this.getMapViewer(), layerConfig);
-        const { maxScale, minScale } = effectiveScales;
-        const calculatedMapScale = this.getMapViewer().getMapScaleFromZoom(this.getMapViewer().getView().getZoom() ?? 0);
-
         const legendLayerEntry: TypeLegendLayer = {
           url: layerConfig.getMetadataAccessPath(),
           bounds: existingStoreEntry?.bounds, // Reassigning the value, because we try to not manage this property from within this function anymore
@@ -481,6 +484,7 @@ export class LayerSetController extends AbstractMapViewerController {
         };
 
         // If layer is regular (not group)
+        // TODO: CHECK - This condition is irrelevant, because we're already in a else case when the layer is not a group, right?
         if (layer instanceof AbstractGVLayer) {
           // Store the layer filter
           legendLayerEntry.layerFilter = layer.getLayerFilters().getInitialFilter();
@@ -489,6 +493,15 @@ export class LayerSetController extends AbstractMapViewerController {
           legendLayerEntry.displayDateFormat = layerConfigCasted.getDisplayDateFormat();
           legendLayerEntry.displayDateFormatShort = layerConfigCasted.getDisplayDateFormatShort();
           legendLayerEntry.displayDateTimezone = layerConfigCasted.getDisplayDateTimezone();
+        }
+
+        // If layer config is WMS
+        if (
+          layerConfig instanceof OgcWmsLayerEntryConfig ||
+          layerConfig instanceof OgcWfsLayerEntryConfig ||
+          layerConfig instanceof OgcWmtsLayerEntryConfig
+        ) {
+          legendLayerEntry.ogcVersion = layerConfig.getVersion(); // Don't use getVersionOrDefault here, we want the truth
         }
 
         // If non existing in the store yet
