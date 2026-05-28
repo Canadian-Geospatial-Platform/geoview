@@ -308,7 +308,7 @@ export default function Measurement(): JSX.Element {
     setActiveMeasurement(null);
 
     // Unregister the draw instance for keyboard accessibility
-    mapController.setActiveMeasurementDraw(null);
+    mapController.setActiveMeasurementDraw(undefined);
 
     // Announce measurement stopped
     setStatusMessage(t('measurement.status.stopped'));

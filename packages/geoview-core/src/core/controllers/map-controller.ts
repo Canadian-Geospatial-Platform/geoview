@@ -138,7 +138,7 @@ export class MapController extends AbstractMapViewerController {
   #onGeolocatorSearchHandlers: GeolocatorSearchDelegate[] = [];
 
   /** The active measurement Draw interaction, if any. */
-  #activeMeasurementDraw: Draw | null = null;
+  #activeMeasurementDraw: Draw | undefined;
 
   /**
    * Creates an instance of MapController.
@@ -579,9 +579,7 @@ export class MapController extends AbstractMapViewerController {
    * @returns The pixel position on the map viewport, or undefined if the map is not yet initialized
    */
   getPixelFromCoordinate(coord: Coordinate): Pixel | undefined {
-    const olMap = this.getMapViewer().map;
-    if (!olMap) return undefined;
-    return olMap.getPixelFromCoordinate(coord) ?? undefined;
+    return this.getMapViewer().map?.getPixelFromCoordinate(coord) ?? undefined;
   }
 
   /**
@@ -1214,9 +1212,9 @@ export class MapController extends AbstractMapViewerController {
    * When activating, suppresses hover and click-marker handlers (like drawer does).
    * When deactivating, restores them.
    *
-   * @param draw - The Draw interaction to register, or null to unregister
+   * @param draw - The Draw interaction to register, or undefined to unregister
    */
-  setActiveMeasurementDraw(draw: Draw | null): void {
+  setActiveMeasurementDraw(draw: Draw | undefined): void {
     const viewer = this.getMapViewer();
 
     if (draw) {
@@ -1235,9 +1233,9 @@ export class MapController extends AbstractMapViewerController {
   /**
    * Gets the active measurement Draw interaction.
    *
-   * @returns The active measurement Draw interaction, or null if none
+   * @returns The active measurement Draw interaction, or undefined if none
    */
-  getActiveMeasurementDraw(): Draw | null {
+  getActiveMeasurementDraw(): Draw | undefined {
     return this.#activeMeasurementDraw;
   }
 
