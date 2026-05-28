@@ -929,8 +929,11 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     // Wait for results
     const arrayOfFeatureInfoEntries = await promiseGetFeature;
 
-    // Log
-    logger.logMarkerCheck(logMarkerKey, `to getFeatureInfo on ${this.getLayerPath()}`, arrayOfFeatureInfoEntries);
+    // If not aborted
+    if (!abortController?.signal.aborted) {
+      // Log
+      logger.logMarkerCheck(logMarkerKey, `to getFeatureInfo on ${this.getLayerPath()}`, arrayOfFeatureInfoEntries);
+    }
 
     // Return the result
     return arrayOfFeatureInfoEntries;
