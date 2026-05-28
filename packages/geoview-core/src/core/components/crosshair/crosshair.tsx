@@ -2,11 +2,12 @@ import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { Box, Fade, Typography } from '@/ui';
+import type { SxStyles } from '@/ui/style/types';
 
 import { getSxClasses } from './crosshair-style';
 import { CrosshairIcon } from './crosshair-icon';
 import { useStoreAppIsCrosshairsActive } from '@/core/stores/states/app-state';
-import { getStoreMapPointerPosition, useStoreMapZoom } from '@/core/stores/states/map-state';
+import { getStoreMapPointerPosition, setStoreMapPointerPosition, useStoreMapZoom } from '@/core/stores/states/map-state';
 import { getStoreDrawerIsEditing, getStoreDrawerIsDrawing, getStoreDrawerSelectedDrawingType } from '@/core/stores/states/drawer-state';
 import { logger } from '@/core/utils/logger';
 import { useEventListener } from '@/core/components/common/hooks/use-event-listener';
@@ -33,7 +34,9 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo((): SxStyles => {
+    return getSxClasses(theme);
+  }, [theme]);
 
   //  Store
   const mapId = useStoreGeoViewMapId();
@@ -49,6 +52,8 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
 
   // AbortController ref - aborts any in-flight coordinate info fetch on re-click
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  // #region Handlers
 
   /**
    * Modifies the pixelDelta value for keyboard pan on Shift+Arrow up or down.
@@ -129,6 +134,17 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
       if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();
         event.stopPropagation();
+
+        // Check if measurement drawing is active
+        const measurementDraw = mapController.getActiveMeasurementDraw();
+        if (measurementDraw) {
+          if (event.shiftKey) {
+            measurementDraw.finishDrawing();
+          } else {
+            measurementDraw.appendCoordinates([currentPointerPosition.projected]);
+          }
+          return;
+        }
 
         abortControllerRef.current?.abort();
         const controller = new AbortController();
@@ -252,8 +268,7 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
         return;
       }
 
-      const currentPointerPosition = getStoreMapPointerPosition(mapId);
-      if (!currentPointerPosition) return;
+      const currentPointerPosition = getStoreMapPointerPosition(mapId) ?? mapController.getMapCenterPosition();
 
       // Handle Shift+Click logic first
       if (handleShiftClick(event, currentPointerPosition)) {
@@ -267,13 +282,18 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
         handleDrawerInteraction(event, currentPointerPosition);
       }
     },
-    [isCrosshairsActive, mapId, handleShiftClick, handleDefaultInteraction, handleDrawerInteraction, drawerController]
+    [isCrosshairsActive, mapId, mapController, handleShiftClick, handleDefaultInteraction, handleDrawerInteraction, drawerController]
   );
+
+  // #endregion
 
   /**
    * Aborts any in-flight coordinate info request on unmount.
    */
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('CROSSHAIR - cleanup on unmount');
+
     return (): void => {
       abortControllerRef.current?.abort();
       drawerController?.cancelGrabbedTransform();
@@ -281,13 +301,21 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
   }, [drawerController]);
 
   /**
-   * Clears hover tooltip when crosshair becomes active.
+   * Clears hover tooltip and initializes pointer position when crosshair becomes active.
    */
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('CROSSHAIR - isCrosshairsActive changed', isCrosshairsActive);
+
     if (isCrosshairsActive) {
       layerSetController.hoverFeatureInfoLayerSet.clearResults();
+
+      // Initialize pointer position to map center so the coordinate display updates immediately
+      if (!getStoreMapPointerPosition(mapId)) {
+        setStoreMapPointerPosition(mapId, mapController.getMapCenterPosition());
+      }
     }
-  }, [isCrosshairsActive, layerSetController]);
+  }, [isCrosshairsActive, mapId, mapController, layerSetController]);
 
   // Event listeners
   useEventListener<HTMLElement>('keydown', handleCrosshairInteraction, mapTargetElement, isCrosshairsActive);
@@ -295,13 +323,13 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
   useEventListener<HTMLElement>('keydown', handleZoomControls, mapTargetElement, isCrosshairsActive);
 
   return (
-    <Box sx={{ ...sxClasses.crosshairContainer, visibility: isCrosshairsActive ? 'visible' : 'hidden' }}>
+    <Box sx={{ ...memoSxClasses.crosshairContainer, visibility: isCrosshairsActive ? 'visible' : 'hidden' }}>
       <Fade in={isCrosshairsActive}>
-        <Box sx={sxClasses.crosshairIcon}>
+        <Box sx={memoSxClasses.crosshairIcon}>
           <CrosshairIcon />
         </Box>
       </Fade>
-      <Box sx={sxClasses.crosshairInfo}>
+      <Box sx={memoSxClasses.crosshairInfo}>
         <Typography dangerouslySetInnerHTML={{ __html: t('mapctrl.crosshair') }} />
       </Box>
     </Box>

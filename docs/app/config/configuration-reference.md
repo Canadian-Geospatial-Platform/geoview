@@ -2458,7 +2458,7 @@ interface SliderConfig {
   - **nearestValues**: Slider behavior mode
     - `'discrete'` - Slider snaps only to values in the range array (default)
     - `'continuous'` - Slider allows any value between min/max, uses step for filtering
-  - **singleHandle**: Use single handle (true) or range handles (false)
+  - **singleHandle**: Use single handle (true) or range handles (false). GeoView auto-detects this from WMS metadata: if the `<Dimension>` has a `default` attribute or `multipleValues="0"`, it defaults to single handle; otherwise dual handle. Use this config property to override the auto-detected value.
   - **displayPattern**: Date/time display format configuration
   - **rangeItems**: Temporal range definition
     - **type**: Range type ('discrete', 'continuous')

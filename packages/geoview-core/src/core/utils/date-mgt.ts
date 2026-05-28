@@ -880,13 +880,26 @@ export abstract class DateMgt {
     // Guess the display time information
     const guessedInfo = this.guessDisplayDateInformationFromTimeDimension(rangeItems.range, displayDateMode);
 
+    // Determine the slider handle count from OGC metadata signals:
+    // 1. default attribute present → single-element array [default] → 1 thumb (definitive signal)
+    // 2. default absent + multipleValues=false → single-element array [last] → 1 thumb (server only accepts single value)
+    // 3. default absent + multipleValues=true or absent → two-element array [first, last] → 2 thumbs (best guess)
+    let defaultValues: string[];
+    if (dimensionObject.default) {
+      defaultValues = [dimensionObject.default];
+    } else if (dimensionObject.multipleValues === false) {
+      defaultValues = [rangeItems.range[rangeItems.range.length - 1]];
+    } else {
+      defaultValues = [rangeItems.range[0], rangeItems.range[rangeItems.range.length - 1]];
+    }
+
     const timeDimension: TimeDimension = {
       field: dimensionObject.name,
-      default: [dimensionObject.default || rangeItems.range[0]],
+      default: defaultValues,
       unitSymbol: dimensionObject.unitSymbol || '',
       rangeItems,
       nearestValues: rangeItems.type === 'relative' ? 'continuous' : 'discrete',
-      singleHandle: true, // TODO: WMS time dimensions enhancements to support dual handles? Would need to also update the controller updateFilters function accordingly
+      singleHandle: defaultValues.length === 1,
       displayDateFormat: guessedInfo?.displayDateFormat,
       displayDateFormatShort: guessedInfo?.displayDateFormatShort,
       displayDateTimezone: guessedInfo?.displayDateTimezone,

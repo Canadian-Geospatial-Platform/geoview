@@ -55,6 +55,18 @@ export const useManageArrow = (): ArrowReturn => {
   const equalCountRef = useRef(0);
 
   /**
+   * Resets rotation tracking refs when fixNorth is toggled to ensure fresh calculation.
+   */
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('USE-MANAGE-ARROW - fixNorth changed', fixNorth);
+
+    angle.current = 0;
+    prevRotationRef.current = 0;
+    equalCountRef.current = 0;
+  }, [fixNorth]);
+
+  /**
    * Calculates the north arrow rotation and offset based on projection and map state.
    */
   const { memoCalculatedRotation, memoCalculatedOffset } = useMemo(() => {
@@ -103,7 +115,7 @@ export const useManageArrow = (): ArrowReturn => {
         Projection.PROJECTION_NAMES.LONLAT,
         mapProjectionEPSG
       )[0];
-      const northPolePixel = northPoleMapCoord ? mapController.getPixelFromCoordinate(northPoleMapCoord) : null;
+      const northPolePixel = northPoleMapCoord ? mapController.getPixelFromCoordinate(northPoleMapCoord) : undefined;
 
       const arrowAngle = parseFloat(northArrowElement.degreeRotation);
 
@@ -151,9 +163,10 @@ export const useManageArrow = (): ArrowReturn => {
       // Calculate offset
       let newOffset = offsetX;
 
-      if (!fixNorth && northPolePixel !== null) {
+      if (!fixNorth && northPolePixel) {
         const screenNorthPoint = northPolePixel;
         const mapCenter = mapController.getPixelFromCoordinate(mapCenterCoord);
+        if (!mapCenter) return { memoCalculatedRotation: newRotation, memoCalculatedOffset: offsetX };
 
         // Calculate distance from north pole using triangle
         const deltaX = screenNorthPoint[0] - mapCenter[0];

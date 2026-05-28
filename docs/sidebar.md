@@ -53,6 +53,8 @@
   - [Controller Architecture](programming/controller-architecture.md)
   - [Using Store](programming/using-store.md)
   - [LayerSet Architecture](programming/layerset-architecture.md)
+  - [Layer Filters](programming/layer-filters.md)
+  - [Time Dimension](programming/time-dimension.md)
   - [Adding Layer Types](programming/adding-layer-types.md)
   - [Event Helper](programming/event-helper.md)
   - [Logging](programming/logging.md)

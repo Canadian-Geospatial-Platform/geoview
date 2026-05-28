@@ -44,16 +44,17 @@ Navigation controls provide adjustments to the viewing extent, projection, rotat
 
 Depending on the viewer configuration, the map's bottom right corner contains the following navigation controls:
 
-| Symbol                                                                                                                    | Name              | Description                                                                                                                                                                                                                               |
-| ------------------------------------------------------------------------------------------------------------------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| <img src="{{assetsURL}}/img/guide/navigation/fullscreen.svg" alt="An icon representing the Fullscreen function" />        | Fullscreen        | Full screen presents map content using the entire page. Full screen toggles between the entire page and the initial size of the map.                                                                                                      |
-| <img src="{{assetsURL}}/img/guide/navigation/plus.svg" alt="An icon representing the Zoom in function" />                 | Zoom in           | Zoom in one level on the map to see more detailed content - bound to Plus key (+).                                                                                                                                                        |
-| <img src="{{assetsURL}}/img/guide/navigation/minus.svg" alt="An icon representing the Zoom out function" />               | Zoom out          | Zoom out one level on the map to see less detailed content - bound to Minus key (-).                                                                                                                                                      |
-| <img src="{{assetsURL}}/img/guide/navigation/360.svg" alt="An icon representing the Map Rotation function" />             | Map Rotation      | Control map rotation with a slider from -180° to +180°. The panel includes a **Fix North** toggle (available for LCC projection) to keep the map oriented with north at the top, and a reset button to return to the initial orientation. |
-| <img src="{{assetsURL}}/img/guide/navigation/geolocation.svg" alt="An icon representing the Geolocation function" />      | Geolocation       | Zoom and pan to your current geographical location.                                                                                                                                                                                       |
-| <img src="{{assetsURL}}/img/guide/navigation/home.svg" alt="An icon representing the Initial extent function" />          | Zoom to initial extent    | Zoom and pan map such that initial extent is visible.                                                                                                                                                                                     |
-| <img src="{{assetsURL}}/img/guide/navigation/basemapSelect.svg" alt="An icon representing the Change Basemap function" /> | Change Basemap    | Change the basemap.                                                                                                                                                                                                                       |
-| <img src="{{assetsURL}}/img/guide/navigation/projection.svg" alt="An icon representing the Change Projection function" /> | Change Projection | Change the map projection between Web Mercator and LCC.                                                                                                                                                                                   |
+| Symbol                                                                                                                    | Name                   | Description                                                                                                                                                                                                                               |
+| ------------------------------------------------------------------------------------------------------------------------- | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| <img src="{{assetsURL}}/img/guide/navigation/fullscreen.svg" alt="An icon representing the Fullscreen function" />        | Fullscreen             | Full screen presents map content using the entire page. Full screen toggles between the entire page and the initial size of the map.                                                                                                      |
+| <img src="{{assetsURL}}/img/guide/navigation/plus.svg" alt="An icon representing the Zoom in function" />                 | Zoom in                | Zoom in one level on the map to see more detailed content - bound to Plus key (+).                                                                                                                                                        |
+| <img src="{{assetsURL}}/img/guide/navigation/minus.svg" alt="An icon representing the Zoom out function" />               | Zoom out               | Zoom out one level on the map to see less detailed content - bound to Minus key (-).                                                                                                                                                      |
+| <img src="{{assetsURL}}/img/guide/navigation/360.svg" alt="An icon representing the Map Rotation function" />             | Map Rotation           | Control map rotation with a slider from -180° to +180°. The panel includes a **Fix North** toggle (available for LCC projection) to keep the map oriented with north at the top, and a reset button to return to the initial orientation. |
+| <img src="{{assetsURL}}/img/guide/navigation/geolocation.svg" alt="An icon representing the Geolocation function" />      | Geolocation            | Zoom and pan to your current geographical location.                                                                                                                                                                                       |
+| <img src="{{assetsURL}}/img/guide/navigation/home.svg" alt="An icon representing the Initial extent function" />          | Zoom to initial extent | Zoom and pan map such that initial extent is visible.                                                                                                                                                                                     |
+| <img src="{{assetsURL}}/img/guide/navigation/measure.svg" alt="An icon representing the Measure function" />              | Measure                | Measure distances and areas on the map. Toggle between distance (line) and area (polygon) modes. Supports keyboard navigation — see the Keyboard Navigation section for details.                                                          |
+| <img src="{{assetsURL}}/img/guide/navigation/basemapSelect.svg" alt="An icon representing the Change Basemap function" /> | Change Basemap         | Change the basemap.                                                                                                                                                                                                                       |
+| <img src="{{assetsURL}}/img/guide/navigation/projection.svg" alt="An icon representing the Change Projection function" /> | Change Projection      | Change the map projection between Web Mercator and LCC.                                                                                                                                                                                   |
 
 You can also pan the map by using your left, right, up and down arrow keys, or by click-holding on the map and dragging. Using the mouse scroll wheel while hovering over the map will zoom the map in/out.
 
@@ -90,6 +91,16 @@ The map can quickly be focused using **Ctrl+M** anywhere within the GeoView appl
 Use the **arrow** keys to move the map and **+** / **-** keys or **Ctrl+Up** / **Ctrl+Down** to zoom in and out. Press **Shift+Up** / **Shift+Down** to increase or decrease how far the map pans with each arrow key press. Press **Enter** to select a feature under the crosshairs and display associated data in the **Details** panel.
 
 Information will be shown for supported features when the crosshair is positioned over them.
+
+### Measurement with Keyboard
+
+When the **Measure** tool is active and keyboard navigation is enabled, you can draw measurement geometries entirely from the keyboard:
+
+- Press **Enter** or **Spacebar** to place a vertex at the crosshair position
+- Press **Shift+Enter** or **Shift+Spacebar** to finish the geometry and complete the measurement
+- Use the **arrow** keys to move the crosshair between vertices
+
+The measurement result (distance or area) is announced to screen readers upon completion.
 
 Press **CTRL** and **Q** to exit keyboard navigation.
 
@@ -135,21 +146,21 @@ Activate editing mode by clicking the **Edit** button or pressing **Alt+E**. In 
 
 _Note: Keyboard shortcuts (except undo/redo/escape) can be toggled on/off via the shortcuts button in the drawer toolbar or using the backtick ` key. The undo, redo, and escape shortcuts are always active._
 
-| Shortcut | Action |
-|----------|--------|
-| **D** | Toggle Drawing mode |
-| **E** | Toggle Editing mode |
-| **G** | Cycle to next Geometry Type |
-| **Shift+G** | Cycle to previous Geometry Type |
-| **S** | Open Style Menu (customize colors, stroke width, text properties) |
-| **M** | Toggle Measurements visibility (show/hide distance and area measurements) |
-| **N** | Toggle Snapping (snap to existing geometry vertices while drawing) |
-| **Ctrl+Z** | Undo last action |
-| **Ctrl+Y** or **Ctrl+Shift+Z** | Redo action |
-| **Shift+S** | Save / Download all drawings as GeoJSON |
-| **Shift+O** | Open / Upload drawings from GeoJSON file |
-| **Shift+C** | Clear all drawings from the map |
-| **Escape** | Clear current selection / Exit edit mode |
+| Shortcut                       | Action                                                                    |
+| ------------------------------ | ------------------------------------------------------------------------- |
+| **D**                          | Toggle Drawing mode                                                       |
+| **E**                          | Toggle Editing mode                                                       |
+| **G**                          | Cycle to next Geometry Type                                               |
+| **Shift+G**                    | Cycle to previous Geometry Type                                           |
+| **S**                          | Open Style Menu (customize colors, stroke width, text properties)         |
+| **M**                          | Toggle Measurements visibility (show/hide distance and area measurements) |
+| **N**                          | Toggle Snapping (snap to existing geometry vertices while drawing)        |
+| **Ctrl+Z**                     | Undo last action                                                          |
+| **Ctrl+Y** or **Ctrl+Shift+Z** | Redo action                                                               |
+| **Shift+S**                    | Save / Download all drawings as GeoJSON                                   |
+| **Shift+O**                    | Open / Upload drawings from GeoJSON file                                  |
+| **Shift+C**                    | Clear all drawings from the map                                           |
+| **Escape**                     | Clear current selection / Exit edit mode                                  |
 
 ## Crosshair Drawing and Editing
 
@@ -367,7 +378,7 @@ When a layer has multiple symbols, you can toggle visibility for individual item
 
 | Symbol                                                                                                                      | Name                   | Description                                                                                                                                   |
 | --------------------------------------------------------------------------------------------------------------------------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| <img src="{{assetsURL}}/img/guide/footer/layers_30.svg" alt="An icon representing the Link to layer function" />            | Manage layer   | Navigate to the corresponding layer in the Layers panel.                                                                                      |
+| <img src="{{assetsURL}}/img/guide/footer/layers_30.svg" alt="An icon representing the Link to layer function" />            | Manage layer           | Navigate to the corresponding layer in the Layers panel.                                                                                      |
 | <img src="{{assetsURL}}/img/guide/layers/scaleVisible.svg" alt="An icon representing the Zoom to visible scale function" /> | Zoom to visibile scale | Zoom to the visible scale of the layer, moving the map may be necessary to locate features. _Note: Only available when layer is out of zoom_. |
 | <img src="{{assetsURL}}/img/guide/footer/view_25.svg" alt="An icon representing the Toggle visibility function" />          | Toggle visibiity       | Toggle the layer visibility.                                                                                                                  |
 | <img src="{{assetsURL}}/img/guide/layers/highlight_60.svg" alt="An icon representing the Highlight function" />             | Highlight              | Brings layer to the top, decreases opacity of other layers and displays layer boundary.                                                       |
@@ -455,17 +466,17 @@ The right section header shows the layer name, a subtitle (e.g. number of visibl
 
 _Note: Some buttons may not be available depending on various factors such as layer type or configuration._
 
-| Symbol                                                                                                                | Name                      | Description                                                                                                                                                                              |
-| --------------------------------------------------------------------------------------------------------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| <img src="{{assetsURL}}/img/guide/layers/settings_60.svg" alt="An icon representing the Settings function" />         | Settings                  | Opens the settings panel for the selected layer (_see Layer Settings Panel section below_). When active, the icon changes to a back arrow to return to the details view.                 |
-| <img src="{{assetsURL}}/img/guide/layers/info_60.svg" alt="An icon representing the Info function" />                 | Info                      | Opens the information panel for the selected layer (_see Layer Info Panel section below_). When active, the icon changes to a back arrow to return to the details view.                  |
-| <img src="{{assetsURL}}/img/guide/layers/table_view_60.svg" alt="An icon representing the Table details function" />  | Table details             | Opens the Data Table panel directly if available. Otherwise, opens a basic table view with simplified read-only functionality. |
-| <img src="{{assetsURL}}/img/guide/layers/time_slider_30.svg" alt="An icon representing the Time Slider function" />   | Access Time Slider panel | Opens the Time Slider panel for this layer, allowing you to visualize temporal data.                                                                                                     |
-| <img src="{{assetsURL}}/img/guide/layers/refresh_60.svg" alt="An icon representing the Reset layer function" />       | Reset layer               | Reset the layer to its initial state.                                                                                                                                                    |
-| <img src="{{assetsURL}}/img/guide/layers/highlight_60.svg" alt="An icon representing the Highlight layer function" /> | Highlight layer           | Brings layer to the top, decreases opacity of other layers and displays layer boundary.                                                                                                  |
-| <img src="{{assetsURL}}/img/guide/layers/zoom_60.svg" alt="An icon representing the Zoom to layer function" />        | Zoom to layer             | Pans and zooms the map so that the layer boundary is in view.                                                                                                                            |
-| <img src="{{assetsURL}}/img/guide/layers/remove_25.svg" alt="An icon representing the Remove function" />             | Remove                    | Remove the layer from the map.                                                                                                                                                           |
-| Slider                                                                                                                | Opacity                   | Slider to increase/decrease layer opacity.                                                                                                                                               |
+| Symbol                                                                                                                | Name                     | Description                                                                                                                                                              |
+| --------------------------------------------------------------------------------------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| <img src="{{assetsURL}}/img/guide/layers/settings_60.svg" alt="An icon representing the Settings function" />         | Settings                 | Opens the settings panel for the selected layer (_see Layer Settings Panel section below_). When active, the icon changes to a back arrow to return to the details view. |
+| <img src="{{assetsURL}}/img/guide/layers/info_60.svg" alt="An icon representing the Info function" />                 | Info                     | Opens the information panel for the selected layer (_see Layer Info Panel section below_). When active, the icon changes to a back arrow to return to the details view.  |
+| <img src="{{assetsURL}}/img/guide/layers/table_view_60.svg" alt="An icon representing the Table details function" />  | Table details            | Opens the Data Table panel directly if available. Otherwise, opens a basic table view with simplified read-only functionality.                                           |
+| <img src="{{assetsURL}}/img/guide/layers/time_slider_30.svg" alt="An icon representing the Time Slider function" />   | Access Time Slider panel | Opens the Time Slider panel for this layer, allowing you to visualize temporal data.                                                                                     |
+| <img src="{{assetsURL}}/img/guide/layers/refresh_60.svg" alt="An icon representing the Reset layer function" />       | Reset layer              | Reset the layer to its initial state.                                                                                                                                    |
+| <img src="{{assetsURL}}/img/guide/layers/highlight_60.svg" alt="An icon representing the Highlight layer function" /> | Highlight layer          | Brings layer to the top, decreases opacity of other layers and displays layer boundary.                                                                                  |
+| <img src="{{assetsURL}}/img/guide/layers/zoom_60.svg" alt="An icon representing the Zoom to layer function" />        | Zoom to layer            | Pans and zooms the map so that the layer boundary is in view.                                                                                                            |
+| <img src="{{assetsURL}}/img/guide/layers/remove_25.svg" alt="An icon representing the Remove function" />             | Remove                   | Remove the layer from the map.                                                                                                                                           |
+| Slider                                                                                                                | Opacity                  | Slider to increase/decrease layer opacity.                                                                                                                               |
 
 _Note: When the layer is hidden, functions affecting the layer on the map will be disabled._
 
@@ -594,12 +605,12 @@ The clear all higlights button <img src="{{assetsURL}}/img/guide/layers/clear_hi
 
 The feature details section displays information for the selected feature and provides the following tools:
 
-| Symbol                                                                                                                | Name                     | Description                                                                            |
-| --------------------------------------------------------------------------------------------------------------------- | ------------------------ | -------------------------------------------------------------------------------------- |
-| Arrows (← →)                                                                                                          | Feature navigation       | Browse through multiple features for the selected layer.                               |
-| <img src="{{assetsURL}}/img/guide/footer/chart_30.svg" alt="An icon representing the Access Chart panel function" /> | Access Chart panel      | Opens the Chart panel for this feature (only available if chart data is configured).   |
-| <img src="{{assetsURL}}/img/guide/layers/highlight_30.svg" alt="An icon representing the Highlight function" />       | Keep feature highlighted | Keep the feature highlighted on the map. When selected, the icon is filled with color. |
-| <img src="{{assetsURL}}/img/guide/datatable/zoom.svg" alt="An icon representing the Zoom function" />                 | Zoom to feature          | Zoom the map to the extent of the selected feature.                                    |
+| Symbol                                                                                                               | Name                     | Description                                                                            |
+| -------------------------------------------------------------------------------------------------------------------- | ------------------------ | -------------------------------------------------------------------------------------- |
+| Arrows (← →)                                                                                                         | Feature navigation       | Browse through multiple features for the selected layer.                               |
+| <img src="{{assetsURL}}/img/guide/footer/chart_30.svg" alt="An icon representing the Access Chart panel function" /> | Access Chart panel       | Opens the Chart panel for this feature (only available if chart data is configured).   |
+| <img src="{{assetsURL}}/img/guide/layers/highlight_30.svg" alt="An icon representing the Highlight function" />      | Keep feature highlighted | Keep the feature highlighted on the map. When selected, the icon is filled with color. |
+| <img src="{{assetsURL}}/img/guide/datatable/zoom.svg" alt="An icon representing the Zoom function" />                | Zoom to feature          | Zoom the map to the extent of the selected feature.                                    |
 
 The number of features for the selected layer is shown in the upper left of the details section.
 

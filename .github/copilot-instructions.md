@@ -165,9 +165,13 @@ Passing it directly without swapping interprets `[90, -95]` as map projection me
 const mapCoord = Projection.transformFromLonLat([lon, lat], projection);
 const pixel = map.getPixelFromCoordinate(mapCoord);
 const size = map.getSize();
-const isVisible = pixel && size
-  && pixel[0] >= 0 && pixel[0] <= size[0]
-  && pixel[1] >= 0 && pixel[1] <= size[1];
+const isVisible =
+  pixel &&
+  size &&
+  pixel[0] >= 0 &&
+  pixel[0] <= size[0] &&
+  pixel[1] >= 0 &&
+  pixel[1] <= size[1];
 ```
 
 **Screen-direction calculations** — When computing the visual direction from the viewport center to a map feature (e.g., north arrow pointing toward the pole), use pixel positions via `getPixelFromCoordinate` and `atan2`. Do NOT use geographic bearing formulas — they degenerate at projection singularities (e.g., `cos(90°) = 0` at the north pole). OL's `getPixelFromCoordinate` already accounts for view rotation internally.
@@ -238,6 +242,33 @@ const isVisible = pixel && size
 
 **Config validation behavior for visibility** — In `ConfigValidation.#processLayerEntryConfig()`, when `parentInitialSettingsTrue?.states?.visible === false`, the child's `visible` property is **deleted** from the merged config (`delete initSettingsMerged.states?.visible`). This means the child defaults to `visible = true` in the store/legend, but is visually hidden because the parent OL layer is not visible.
 
+### Layer Style Item Visibility & Class Filters
+
+See [layer-filters.md](../docs/programming/layer-filters.md) for the full filter architecture documentation.
+
+**Four filter sources** — Layer filtering in GeoView comes from four independent sources, combined with AND logic:
+
+| Source                 | Store key                 | Producer                                                                             | Consumer                      |
+| ---------------------- | ------------------------- | ------------------------------------------------------------------------------------ | ----------------------------- |
+| **Style class filter** | `layerFilterClass`        | `GeoviewRenderer.getFilterFromStyle()` via `AbstractGVLayer.#setLayerFiltersClass()` | Data table, feature queries   |
+| **Time filter**        | `layerFilterTime`         | `TimeSliderController.#generateFilterString()`                                       | Data table, WMS/ESRI requests |
+| **Data filter**        | `tableFilters[layerPath]` | `buildFilterList()` → `DataTableController.applyMapFilters()`                        | Map rendering (source params) |
+| **Config filter**      | `#initialFilter`          | Map config `initialSettings.filters`                                                 | Feature queries               |
+
+These filters are joined by `LayerFilters.joinWithAnd()` when applied.
+
+**`getFilterFromStyle()` behavior by style type:**
+
+| Style type        | Returns     | Example                                             | Data table filtering       |
+| ----------------- | ----------- | --------------------------------------------------- | -------------------------- |
+| **`uniqueValue`** | SQL string  | `"status" = 'active' OR "status" = 'pending'`       | ✅ Rows filtered           |
+| **`classBreaks`** | SQL string  | `"population" >= 100000 AND "population" <= 500000` | ✅ Rows filtered           |
+| **`simple`**      | `undefined` | —                                                   | ❌ All rows remain visible |
+
+**Simple style limitation** — When a layer has multiple geometry types (e.g., Point + Polygon), toggling a geometry type's visibility in the legend works **only at the renderer level**. `processSimplePoint/LineString/Polygon` in `GeoviewRenderer` returns `undefined` (no OL style = invisible on map) when `styleSettings.info[0]?.visible === false`. However, `getFilterFromStyle()` returns `undefined` for simple styles because geometry type is not an attribute field — there is no SQL equivalent of `WHERE geometryType = 'Point'`. This means the data table cannot filter rows by geometry type and always shows all features regardless of which geometry types are toggled off.
+
+**Style item identity** — `setStoreLayerItemVisibility()` in `layer-state.ts` matches items by **both `name` AND `geometryType`** to disambiguate items that share the same name across different geometry types (e.g., a "Default" point style vs a "Default" polygon style on the same layer).
+
 ### Scale Limits & Visibility Range
 
 **Scale calculation normalization** — `MapViewer.getMapScaleFromZoom()` now rounds the computed denominator to the nearest unit (`Math.round`). This avoids floating-point artifacts like `159499.99999999983` and keeps visibility comparisons stable.
@@ -262,6 +293,33 @@ Both effective scales are rounded, then expanded into tolerance boundaries using
 **Boundary semantics** — Base checks are inclusive (`>= minResolution` and `<= maxResolution`), but scale tolerance bands intentionally mark near-boundary scales as not visible to avoid unstable service behavior near thresholds.
 
 **Feature-query gating** — `AbstractLayerSet.queryLayerFeatures()` must gate queries with `isInVisibleRange(...)` using current resolution, current scale, and `computeEffectiveLayerScales(...)`, not zoom-only checks.
+
+### Time Dimension & Time Slider
+
+See [time-dimension.md](../docs/programming/time-dimension.md) for the full architecture documentation.
+
+**Two standards, one internal model** — OGC WMS uses `<Dimension>` XML in GetCapabilities; ESRI uses `timeInfo` JSON. Both are normalized into a `TimeDimension` type via `DateMgt.createDimensionFromOGC()` / `DateMgt.createDimensionFromESRI()`. ESRI metadata is converted to OGC-style strings so `createRangeOGC()` is the single shared parser.
+
+**Three range types** (detected from the OGC `values` string):
+
+| Type         | Format                          | Example                                         | `nearestValues` |
+| ------------ | ------------------------------- | ----------------------------------------------- | --------------- |
+| **Discrete** | Comma-separated dates           | `1696,1701,1734`                                | `'discrete'`    |
+| **Absolute** | `start/end/period`              | `2002-09-01T00:00:00Z/2025-01-01T00:00:00Z/P1Y` | `'discrete'`    |
+| **Relative** | `start/end` or `start/duration` | `2026-05-27T11:12:00Z/PT10M`                    | `'continuous'`  |
+
+**Handle count is driven by the `default` array length**, not `singleHandle` alone. The MUI Slider renders one thumb for `[value]` and two thumbs for `[start, end]`. For OGC WMS, `default` and `multipleValues` attributes are the two signals:
+
+- OGC `<Dimension default="...">` present → `defaultValues = [default]` → **1 thumb** (definitive signal)
+- OGC `<Dimension>` without `default`, `multipleValues="0"` → `defaultValues = [range[last]]` → **1 thumb** (server only accepts single value)
+- OGC `<Dimension>` without `default`, `multipleValues="1"` or absent → `defaultValues = [range[0], range[last]]` → **2 thumbs** (best guess)
+- ESRI → always `[range[0], range[last]]` → **2 thumbs**
+
+**Filter generation differs by layer type:**
+
+- **WMS**: `TIME=date1` or `TIME=date1/date2` (ISO range)
+- **ESRI Image**: `time=epoch1,epoch2` (raw milliseconds)
+- **ESRI Dynamic/Vector**: SQL-like `field >= date AND field <= date`
 
 ### Event Delegate System
 
@@ -423,6 +481,33 @@ const handleChange = useCallback(
 - Use inheritance to eliminate repetitive code (base classes for layer types)
 - Downcast only after `instanceof` check or type guard function
 - Avoid spreading objects with deep nesting - use `lodash.cloneDeep` instead
+
+### Prefer `undefined` Over `null`
+
+Use `undefined` as the default "no value" sentinel. Reserve `null` only for cases where it is semantically required:
+
+| Use `null`                                                                                               | Use `undefined`                                    |
+| -------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| React node return (`JSX.Element \| null`)                                                                | Optional function parameters and return values     |
+| DOM refs managed by React (`useRef<T>(null)`)                                                            | Mutable data refs (`useRef<T \| undefined>`)       |
+| Values coming from external APIs that use `null` (OpenLayers, browser DOM)                               | GeoView internal APIs and controller return values |
+| Explicit "set to nothing" in JSON / store state where `undefined` would be stripped during serialization | Optional properties on interfaces and types        |
+
+**Why:** `undefined` enables optional chaining (`value?.prop`) and nullish coalescing (`value ?? fallback`) without extra `null` checks. It also aligns with TypeScript's `?` optional property syntax, which produces `T | undefined`, not `T | null`.
+
+**Wrapping external `null` returns:** When an external API (e.g., OpenLayers) returns `null`, convert it to `undefined` at the boundary:
+
+```typescript
+// ✅ Good: Convert OL's null to undefined at the GeoView API boundary
+getPixelFromCoordinate(coord: Coordinate): Pixel | undefined {
+  return olMap.getPixelFromCoordinate(coord) ?? undefined;
+}
+
+// ❌ Bad: Propagating null through GeoView code
+getPixelFromCoordinate(coord: Coordinate): Pixel | null {
+  return olMap.getPixelFromCoordinate(coord);
+}
+```
 
 ### Reuse Over Duplication
 
@@ -622,13 +707,15 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
 
 **`SxStyles`** is defined in `@/ui/style/types` as `Record<string, SxProps<Theme> | SxProps>`.
 
-**Usage in component:**
+**Usage in component** — always wrap in `useMemo` with `memo` prefix. This is a lightweight memoization that does **not** require JSDoc or `logTraceUseMemo` (exception to the general `useMemo` rules):
 
 ```typescript
 const theme = useTheme();
-const sxClasses = getSxClasses(theme);
+const memoSxClasses = useMemo((): SxStyles => {
+  return getSxClasses(theme);
+}, [theme]);
 // ...
-<Box sx={sxClasses.container}>
+<Box sx={memoSxClasses.container}>
 ```
 
 ### Theme Tokens
@@ -1221,6 +1308,14 @@ const memoColumns = useMemo<MRTColumnDef<ColumnsType>[]>(() => {
 }, [dependencies]);
 ```
 
+**Exception — `memoSxClasses`**: The `getSxClasses` memoization is a lightweight, standardized pattern that does **not** require JSDoc or `logTraceUseMemo`. Use the compact form:
+
+```typescript
+const memoSxClasses = useMemo((): SxStyles => {
+  return getSxClasses(theme);
+}, [theme]);
+```
+
 ### useCallback Comment Pattern
 
 Non-handler `useCallback` functions (domain logic with specific parameters) need full JSDoc with `@param` / `@returns` tags:
@@ -1363,25 +1458,29 @@ const handleToggleKeyDown = useCallback(
 **Pattern:**
 
 ✅ **CORRECT** — Safe for external consumers:
+
 ```typescript
 // In style files and components
-theme.palette.geoViewColor?.primary.main
-theme.palette.geoViewColor?.secondary
-theme.palette.geoViewColor?.white
-theme.palette.geoViewColor?.textColor.main
-theme.palette.geoViewColor?.bgColor.dark[100]
+theme.palette.geoViewColor?.primary.main;
+theme.palette.geoViewColor?.secondary;
+theme.palette.geoViewColor?.white;
+theme.palette.geoViewColor?.textColor.main;
+theme.palette.geoViewColor?.bgColor.dark[100];
 ```
 
 ❌ **INCORRECT** — Crashes if external theme lacks extension:
+
 ```typescript
-theme.palette.geoViewColor.primary.main  // ❌ No optional chaining
+theme.palette.geoViewColor.primary.main; // ❌ No optional chaining
 ```
 
 **Examples:**
+
 - `packages/geoview-core/src/ui/slider/slider-style.ts` — ✅ Correct (all geoViewColor references use `?.`)
 - `packages/geoview-core/src/ui/tabs/tabs.tsx` — ✅ Correct (all geoViewColor references use `?.`)
 
 **Enforcement:**
+
 - During code generation: Auto-apply optional chaining to all custom theme extension refs
 - During branch reviews: Scan all `@/ui` and `@/core/components/ui` files for direct access violations
 - Add to pre-commit hook checklist: No direct `theme.palette.geoViewColor.` without `?.`
@@ -2170,6 +2269,8 @@ Controllers are the preferred path. MapViewer provides low-level OL access (tran
 - [using-store.md](../docs/programming/using-store.md) - Zustand usage patterns
 - [event-helper.md](../docs/programming/event-helper.md) - Delegate event system
 - [controller-architecture.md](../docs/programming/controller-architecture.md) - Controller design & domain integration
+- [time-dimension.md](../docs/programming/time-dimension.md) - OGC/ESRI time dimension parsing & time slider
+- [layer-filters.md](../docs/programming/layer-filters.md) - Layer filter architecture (class, time, config filters)
 - [troubleshooting.md](../docs/programming/troubleshooting.md) - Service-specific fixes & known issues
 
 ## TypeDoc-First API Documentation Policy

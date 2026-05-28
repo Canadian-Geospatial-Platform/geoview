@@ -32,6 +32,7 @@ import {
   setStoreAppFullScreenActive,
   setStoreAppGuide,
 } from '@/core/stores/states/app-state';
+import { getStoreMapConfigNavBar } from '@/core/stores/states/map-state';
 import { DateMgt, type TimeIANA } from '@/core/utils/date-mgt';
 import type { TypeHTMLElement } from '@/core/types/global-types';
 import { formatError } from '@/core/exceptions/core-exceptions';
@@ -484,6 +485,12 @@ export class UIController extends AbstractMapViewerController {
     try {
       // Create the guide
       const guide = await createGuideObject(language, getStoreAppGeoviewAssetsURL(mapId));
+
+      // Remove sections that depend on optional packages not present in this map config
+      const navBar = getStoreMapConfigNavBar(mapId);
+      if (!navBar?.includes('drawer')) {
+        delete guide.drawingTools;
+      }
 
       // Save in store
       setStoreAppGuide(mapId, guide);

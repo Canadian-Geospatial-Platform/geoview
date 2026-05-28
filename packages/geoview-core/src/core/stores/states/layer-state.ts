@@ -1838,7 +1838,7 @@ export const setStoreLayerItemVisibility = (
 ): void => {
   getStoreLayerState(mapId).actions.updateLayerByPath(layerPath, (layer) => ({
     ...layer,
-    items: layer.items.map((i) => (i.name === item.name ? { ...i, isVisible: visibility } : i)),
+    items: layer.items.map((i) => (i.name === item.name && i.geometryType === item.geometryType ? { ...i, isVisible: visibility } : i)),
     layerFilterClass: classFilter,
   }));
 };

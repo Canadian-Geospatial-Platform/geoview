@@ -9,20 +9,19 @@ import type { StyleFunction } from 'ol/style/Style';
 import type { FeatureLike } from 'ol/Feature';
 import type Feature from 'ol/Feature';
 import type { Geometry } from 'ol/geom';
-import { HexagonOutlined as HexagonOutlinedIcon } from '@mui/icons-material';
 
 import type { TypePanelProps } from '@/ui/panel/panel-types';
 import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 import { IconButton } from '@/ui/icon-button/icon-button';
 import { Box, Switch, ToggleButtonGroup, ToggleButton, Typography } from '@/ui';
-import { ShowChartIcon, DeleteIcon, StraightenIcon } from '@/ui/icons';
+import { ShowChartIcon, DeleteIcon, StraightenIcon, HexagonOutlinedIcon } from '@/ui/icons';
 import { visuallyHidden } from '@/ui/style/default';
 import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from '@/core/components/nav-bar/nav-bar-panel-button';
 import { formatLength, formatArea } from '@/core/utils/utilities';
 import type { Draw } from '@/geo/interaction/draw';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
-import { useStoreAppDisplayLanguage, useStoreAppGeoviewHTMLElement } from '@/core/stores/states/app-state';
+import { useStoreAppDisplayLanguage } from '@/core/stores/states/app-state';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { useMapController } from '@/core/controllers/use-controllers';
 
@@ -78,7 +77,6 @@ export default function Measurement(): JSX.Element {
   // Stores
   const mapId = useStoreGeoViewMapId();
   const displayLanguage = useStoreAppDisplayLanguage();
-  const mapElement = useStoreAppGeoviewHTMLElement().querySelector(`[id^="mapTargetElement-${mapId}"]`) as HTMLElement;
   const mapController = useMapController();
 
   // States
@@ -288,16 +286,15 @@ export default function Measurement(): JSX.Element {
       setDrawInstance(draw);
       setActiveMeasurement(type);
 
+      // Register the draw instance for keyboard accessibility via crosshair
+      // This also suppresses hover and click-marker handlers (like drawer does)
+      mapController.setActiveMeasurementDraw(draw);
+
       // Announce measurement mode started
       const measurementType = type === 'line' ? t('measurement.line') : t('measurement.area');
       setStatusMessage(t('measurement.status.started', { type: measurementType }));
-
-      // Set focus to map for WCAG keyboard interaction
-      if (mapElement) {
-        mapElement.focus();
-      }
     },
-    [drawInstance, mapElement, createSegmentStyle, mapController, displayLanguage, t]
+    [drawInstance, createSegmentStyle, mapController, displayLanguage, t]
   );
 
   /**
@@ -310,9 +307,12 @@ export default function Measurement(): JSX.Element {
     }
     setActiveMeasurement(null);
 
+    // Unregister the draw instance for keyboard accessibility
+    mapController.setActiveMeasurementDraw(undefined);
+
     // Announce measurement stopped
     setStatusMessage(t('measurement.status.stopped'));
-  }, [drawInstance, t]);
+  }, [drawInstance, mapController, t]);
 
   /**
    * Clears all measurements.
@@ -336,7 +336,7 @@ export default function Measurement(): JSX.Element {
   }, [stopMeasurement, mapController, measurementFeatures.length, t]);
 
   /**
-   * Handles measurement mode toggle.
+   * Handles the measurement enable/disable toggle switch.
    */
   const handleMeasurementToggle = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>): void => {
@@ -424,13 +424,14 @@ export default function Measurement(): JSX.Element {
           {statusMessage}
         </Typography>
 
-        {/* On/Off Switch */}
+        {/* Enable/Disable Toggle */}
         <Switch
           label={!isMeasurementActive ? t('general.enable') : t('general.disable')}
           checked={isMeasurementActive}
           onChange={handleMeasurementToggle}
           size="small"
         />
+
         {/* Segment Labels Toggle */}
         <Switch
           label={t('measurement.segmentLabels')}
