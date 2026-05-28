@@ -58,6 +58,7 @@ export {
   GitHub as GitHubIcon,
   Help as HelpIcon,
   Hexagon as HexagonIcon,
+  HexagonOutlined as HexagonOutlinedIcon,
   HighlightOutlined as HighlightOutlinedIcon,
   Highlight as HighlightIcon,
   Home as HomeIcon,

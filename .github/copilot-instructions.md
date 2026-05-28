@@ -680,13 +680,15 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
 
 **`SxStyles`** is defined in `@/ui/style/types` as `Record<string, SxProps<Theme> | SxProps>`.
 
-**Usage in component:**
+**Usage in component** — always wrap in `useMemo` with `memo` prefix. This is a lightweight memoization that does **not** require JSDoc or `logTraceUseMemo` (exception to the general `useMemo` rules):
 
 ```typescript
 const theme = useTheme();
-const sxClasses = getSxClasses(theme);
+const memoSxClasses = useMemo((): SxStyles => {
+  return getSxClasses(theme);
+}, [theme]);
 // ...
-<Box sx={sxClasses.container}>
+<Box sx={memoSxClasses.container}>
 ```
 
 ### Theme Tokens
@@ -1277,6 +1279,14 @@ const memoColumns = useMemo<MRTColumnDef<ColumnsType>[]>(() => {
 
   // Implementation
 }, [dependencies]);
+```
+
+**Exception — `memoSxClasses`**: The `getSxClasses` memoization is a lightweight, standardized pattern that does **not** require JSDoc or `logTraceUseMemo`. Use the compact form:
+
+```typescript
+const memoSxClasses = useMemo((): SxStyles => {
+  return getSxClasses(theme);
+}, [theme]);
 ```
 
 ### useCallback Comment Pattern

@@ -51,7 +51,8 @@ Selon la configuration de la visionneuse, le coin inférieur droit de la carte c
 | <img src="{{assetsURL}}/img/guide/navigation/minus.svg" alt="Une icône représentant la fonction « Zoom arrière »" />                     | Zoom arrière             | Permet de faire un zoom arrière d'un niveau à la fois pour voir le contenu moins en détail; fonctionne aussi avec la touche de soustraction du clavier (-).                                                                                                                                    |
 | <img src="{{assetsURL}}/img/guide/navigation/360.svg" alt="Une icône représentant la fonction « Rotation de la carte »" />               | Rotation de la carte     | Permet de contrôler la rotation de la carte avec un curseur de -180° à +180°. Le panneau comprend un bouton à bascule **Nord fixe** (disponible pour la projection LCC) pour garder la carte orientée le nord au haut, et un bouton de réinitialisation pour revenir à l'orientation initiale. |
 | <img src="{{assetsURL}}/img/guide/navigation/geolocation.svg" alt="Une icône représentant la fonction « Géolocalisation »" />            | Géolocalisation          | Permet de zoomer et de déplacer la carte sur votre position géographique.                                                                                                                                                                                                                      |
-| <img src="{{assetsURL}}/img/guide/navigation/home.svg" alt="Une icône représentant la fonction « Vue initiale »" />                      | Zoom à la vue initiale             | Permet de zoomer et de déplacer la carte pour retourner à la vue initiale.                                                                                                                                                                                                                     |
+| <img src="{{assetsURL}}/img/guide/navigation/home.svg" alt="Une icône représentant la fonction « Vue initiale »" />                      | Zoom à la vue initiale   | Permet de zoomer et de déplacer la carte pour retourner à la vue initiale.                                                                                                                                                                                                                     |
+| <img src="{{assetsURL}}/img/guide/navigation/measure.svg" alt="Une icône représentant la fonction « Mesurer »" />                        | Mesurer                  | Permet de mesurer des distances et des surfaces sur la carte. Basculez entre les modes distance (ligne) et surface (polygone). Prend en charge la navigation au clavier — consultez la section Navigation avec le clavier pour plus de détails.                                                |
 | <img src="{{assetsURL}}/img/guide/navigation/basemapSelect.svg" alt="Une icône représentant la fonction « Changer la carte de base »" /> | Changer la carte de base | Permet de changer la carte de base.                                                                                                                                                                                                                                                            |
 | <img src="{{assetsURL}}/img/guide/navigation/projection.svg" alt="Une icône représentant la fonction « Changer la projection »" />       | Changer la projection    | Permet de changer la projection de la carte entre Web Mercator et LCC.                                                                                                                                                                                                                         |
 
@@ -91,6 +92,15 @@ Utilisez les touches **fléchées** pour déplacer la carte et les touches **+**
 
 Pour les éléments pris en charge, l’information s’affiche lorsque le pointeur en croix les survole.
 
+### Mesure avec le clavier
+
+Lorsque l'outil **Mesurer** est actif et que la navigation au clavier est activée, vous pouvez tracer des géométries de mesure entièrement au clavier :
+
+- Appuyez sur **Entrée** ou la **barre d'espace** pour placer un sommet à la position du pointeur en croix
+- Appuyez sur **Maj.+Entrée** ou **Maj.+barre d'espace** pour terminer la géométrie et compléter la mesure
+- Utilisez les touches **fléchées** pour déplacer le pointeur en croix entre les sommets
+
+Le résultat de la mesure (distance ou surface) est annoncé aux lecteurs d'écran une fois la mesure terminée.
 Appuyez sur **Ctrl** et **Q** pour quitter la navigation avec le clavier.
 
 _N.B. : La carte doit être focalisée pour que les combinaisons de touches fonctionnent. La carte est focalisée lorsque le pointeur en croix s’affiche._
@@ -134,21 +144,21 @@ Activez le mode édition en cliquant sur le bouton **Éditer** ou en appuyant su
 
 _Note : Les raccourcis clavier (sauf annuler/rétablir/échap) peuvent être activés/désactivés via le bouton de raccourcis dans la barre d'outils du drawer ou en utilisant la touche backtick ` . Les raccourcis annuler, rétablir et échap sont toujours actifs._
 
-| Raccourci | Action |
-|----------|--------|
-| **D** | Activer/désactiver le mode Dessin |
-| **E** | Activer/désactiver le mode Édition |
-| **G** | Passer au type de géométrie suivant |
-| **Maj.+G** | Passer au type de géométrie précédent |
-| **S** | Ouvrir le menu Style (personnaliser couleurs, épaisseur du trait, propriétés du texte) |
-| **M** | Activer/désactiver la visibilité des mesures (afficher/masquer les mesures de distance et d'aire) |
-| **N** | Activer/désactiver l'accrochage (accrocher aux sommets de géométries existantes lors du dessin) |
-| **Ctrl+Z** | Annuler la dernière action |
-| **Ctrl+Y** ou **Ctrl+Maj.+Z** | Rétablir l'action |
-| **Maj.+S** | Enregistrer / Télécharger tous les dessins au format GeoJSON |
-| **Maj.+O** | Ouvrir / Charger des dessins à partir d'un fichier GeoJSON |
-| **Maj.+C** | Effacer tous les dessins de la carte |
-| **Échap** | Effacer la sélection actuelle / Quitter le mode édition |
+| Raccourci                     | Action                                                                                            |
+| ----------------------------- | ------------------------------------------------------------------------------------------------- |
+| **D**                         | Activer/désactiver le mode Dessin                                                                 |
+| **E**                         | Activer/désactiver le mode Édition                                                                |
+| **G**                         | Passer au type de géométrie suivant                                                               |
+| **Maj.+G**                    | Passer au type de géométrie précédent                                                             |
+| **S**                         | Ouvrir le menu Style (personnaliser couleurs, épaisseur du trait, propriétés du texte)            |
+| **M**                         | Activer/désactiver la visibilité des mesures (afficher/masquer les mesures de distance et d'aire) |
+| **N**                         | Activer/désactiver l'accrochage (accrocher aux sommets de géométries existantes lors du dessin)   |
+| **Ctrl+Z**                    | Annuler la dernière action                                                                        |
+| **Ctrl+Y** ou **Ctrl+Maj.+Z** | Rétablir l'action                                                                                 |
+| **Maj.+S**                    | Enregistrer / Télécharger tous les dessins au format GeoJSON                                      |
+| **Maj.+O**                    | Ouvrir / Charger des dessins à partir d'un fichier GeoJSON                                        |
+| **Maj.+C**                    | Effacer tous les dessins de la carte                                                              |
+| **Échap**                     | Effacer la sélection actuelle / Quitter le mode édition                                           |
 
 ## Dessin et édition avec le pointeur en croix
 
@@ -365,7 +375,7 @@ Lorsqu'une couche comporte plusieurs symboles, vous pouvez activer ou désactive
 
 | Symbole                                                                                                                                  | Nom                                | Description                                                                                                                                                                        |
 | ---------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| <img src="{{assetsURL}}/img/guide/footer/layers_30.svg" alt="Une icône représentant la fonction « Lien vers la couche »" />              | Gérer la couche       | Naviguer vers la couche correspondante dans le panneau Couches.                                                                                                                    |
+| <img src="{{assetsURL}}/img/guide/footer/layers_30.svg" alt="Une icône représentant la fonction « Lien vers la couche »" />              | Gérer la couche                    | Naviguer vers la couche correspondante dans le panneau Couches.                                                                                                                    |
 | <img src="{{assetsURL}}/img/guide/layers/scaleVisible.svg" alt="Une icône représentant la fonction « Zoom sur l'échelle visible »" />    | Zoom sur l'échelle visible         | Zoom sur l'échelle visible de la couche, un déplacement de la carte peut être nécessaire pour localiser les éléments. _N.B. : Seulement disponible quand la couche est hors zoom_. |
 | <img src="{{assetsURL}}/img/guide/footer/view_25.svg" alt="Une icône représentant la fonction « Basculer la visibilité »" />             | Basculer la visibilité             | Basculer la visibilité de la couche.                                                                                                                                               |
 | <img src="{{assetsURL}}/img/guide/layers/highlight_60.svg" alt="Une icône représentant la fonction « Couche mise en évidence »" />       | Couche mise en évidence            | Place la couche au premier plan, diminue l'opacité des autres couches et affiche le périmètre de la couche.                                                                        |
@@ -453,17 +463,17 @@ L'en-tête de la section de droite affiche le nom de la couche, un sous-titre (p
 
 _N.B. : Les boutons accessibles dépendent de plusieurs facteurs, comme le type de couche et la configuration._
 
-| Symbole                                                                                                                            | Nom                                   | Description                                                                                                                                                                                                 |
-| ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| <img src="{{assetsURL}}/img/guide/layers/settings_60.svg" alt="Une icône représentant la fonction « Paramètres »" />               | Paramètres                            | Ouvre le panneau des paramètres pour la couche sélectionnée (_voir la section Panneau des paramètres ci-dessous_). L'icône se change en flèche de retour pour revenir à la vue des détails.                 |
-| <img src="{{assetsURL}}/img/guide/layers/info_60.svg" alt="Une icône représentant la fonction « Info »" />                         | Info                                  | Ouvre le panneau d'information pour la couche sélectionnée (_voir la section Panneau d'information ci-dessous_). L'icône se change en flèche de retour pour revenir à la vue des détails.                   |
-| <img src="{{assetsURL}}/img/guide/layers/table_view_60.svg" alt="Une icône représentant la fonction « Table détaillée »" />        | Table détaillée                       | Ouvre le panneau Tableau de Données directement s'il est disponible. Sinon, ouvre une vue de table de base en lecture seule avec des fonctionnalités simplifiées. |
-| <img src="{{assetsURL}}/img/guide/layers/time_slider_30.svg" alt="Une icône représentant la fonction « Curseur Temporel »" />      | Accéder au panneau Curseur Temporel | Ouvre le panneau Curseur Temporel pour cette couche, vous permettant de visualiser les données temporelles.                                                                                                 |
-| <img src="{{assetsURL}}/img/guide/layers/refresh_60.svg" alt="Une icône représentant la fonction « Réinitialiser la couche »" />   | Réinitialiser la couche               | Réinitialiser la couche dans sont état initial.                                                                                                                                                             |
-| <img src="{{assetsURL}}/img/guide/layers/highlight_60.svg" alt="Une icône représentant la fonction « Couche mise en évidence »" /> | Couche mise en évidence               | Place la couche au premier plan, diminue l'opacité des autres couches et affiche le périmètre de la couche.                                                                                                 |
-| <img src="{{assetsURL}}/img/guide/layers/zoom_60.svg" alt="Une icône représentant la fonction « Zoom sur la couche »" />           | Zoom sur la couche                    | Déplace la carte et fait un zoom pour que le périmètre de la couche soit visible.                                                                                                                           |
-| <img src="{{assetsURL}}/img/guide/layers/remove_25.svg" alt="Une icône représentant la fonction Retirer" />                        | Retirer                               | Retirer cette couche de la carte.                                                                                                                                                                           |
-| Curseur                                                                                                                            | Opacité                               | Curseur permettant d'augmenter ou de diminuer l'opacité de la couche.                                                                                                                                       |
+| Symbole                                                                                                                            | Nom                                 | Description                                                                                                                                                                                 |
+| ---------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| <img src="{{assetsURL}}/img/guide/layers/settings_60.svg" alt="Une icône représentant la fonction « Paramètres »" />               | Paramètres                          | Ouvre le panneau des paramètres pour la couche sélectionnée (_voir la section Panneau des paramètres ci-dessous_). L'icône se change en flèche de retour pour revenir à la vue des détails. |
+| <img src="{{assetsURL}}/img/guide/layers/info_60.svg" alt="Une icône représentant la fonction « Info »" />                         | Info                                | Ouvre le panneau d'information pour la couche sélectionnée (_voir la section Panneau d'information ci-dessous_). L'icône se change en flèche de retour pour revenir à la vue des détails.   |
+| <img src="{{assetsURL}}/img/guide/layers/table_view_60.svg" alt="Une icône représentant la fonction « Table détaillée »" />        | Table détaillée                     | Ouvre le panneau Tableau de Données directement s'il est disponible. Sinon, ouvre une vue de table de base en lecture seule avec des fonctionnalités simplifiées.                           |
+| <img src="{{assetsURL}}/img/guide/layers/time_slider_30.svg" alt="Une icône représentant la fonction « Curseur Temporel »" />      | Accéder au panneau Curseur Temporel | Ouvre le panneau Curseur Temporel pour cette couche, vous permettant de visualiser les données temporelles.                                                                                 |
+| <img src="{{assetsURL}}/img/guide/layers/refresh_60.svg" alt="Une icône représentant la fonction « Réinitialiser la couche »" />   | Réinitialiser la couche             | Réinitialiser la couche dans sont état initial.                                                                                                                                             |
+| <img src="{{assetsURL}}/img/guide/layers/highlight_60.svg" alt="Une icône représentant la fonction « Couche mise en évidence »" /> | Couche mise en évidence             | Place la couche au premier plan, diminue l'opacité des autres couches et affiche le périmètre de la couche.                                                                                 |
+| <img src="{{assetsURL}}/img/guide/layers/zoom_60.svg" alt="Une icône représentant la fonction « Zoom sur la couche »" />           | Zoom sur la couche                  | Déplace la carte et fait un zoom pour que le périmètre de la couche soit visible.                                                                                                           |
+| <img src="{{assetsURL}}/img/guide/layers/remove_25.svg" alt="Une icône représentant la fonction Retirer" />                        | Retirer                             | Retirer cette couche de la carte.                                                                                                                                                           |
+| Curseur                                                                                                                            | Opacité                             | Curseur permettant d'augmenter ou de diminuer l'opacité de la couche.                                                                                                                       |
 
 _N.B. : Lorsque la couche est cachée, les fonctions affectant la couche sur la carte sont désactivées._
 
@@ -592,12 +602,12 @@ Le bouton <img src="{{assetsURL}}/img/guide/layers/clear_highlight_30.svg" alt="
 
 La section des détails affiche les informations de l'élément sélectionné et fournit les outils suivants :
 
-| Symbole                                                                                                                               | Nom                              | Description                                                                                          |
-| ------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| Flèches (← →)                                                                                                                         | Navigation entre les éléments    | Parcourir les éléments multiples de la couche sélectionnée.                                          |
-| <img src="{{assetsURL}}/img/guide/footer/chart_30.svg" alt="Une icône représentant la fonction « Accéder au panneau Graphique »" /> | Accéder au panneau Graphique   | Ouvre le panneau Graphique pour cet élément (disponible uniquement si un graphique est configuré).   |
-| <img src="{{assetsURL}}/img/guide/layers/highlight_30.svg" alt="Une icône représentant la fonction « Mise en surbrillance »" />       | Garder l'élément en surbrillance | Garder l'élément en surbrillance sur la carte. Lorsque sélectionnée, l'icône est remplie de couleur. |
-| <img src="{{assetsURL}}/img/guide/datatable/zoom.svg" alt="Une icône représentant la fonction « Zoom »" />                            | Zoomer sur l'élément             | Zoomer la carte sur l'étendue de l'élément sélectionné.                                              |
+| Symbole                                                                                                                             | Nom                              | Description                                                                                          |
+| ----------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Flèches (← →)                                                                                                                       | Navigation entre les éléments    | Parcourir les éléments multiples de la couche sélectionnée.                                          |
+| <img src="{{assetsURL}}/img/guide/footer/chart_30.svg" alt="Une icône représentant la fonction « Accéder au panneau Graphique »" /> | Accéder au panneau Graphique     | Ouvre le panneau Graphique pour cet élément (disponible uniquement si un graphique est configuré).   |
+| <img src="{{assetsURL}}/img/guide/layers/highlight_30.svg" alt="Une icône représentant la fonction « Mise en surbrillance »" />     | Garder l'élément en surbrillance | Garder l'élément en surbrillance sur la carte. Lorsque sélectionnée, l'icône est remplie de couleur. |
+| <img src="{{assetsURL}}/img/guide/datatable/zoom.svg" alt="Une icône représentant la fonction « Zoom »" />                          | Zoomer sur l'élément             | Zoomer la carte sur l'étendue de l'élément sélectionné.                                              |
 
 Le nombre d'éléments pour la couche sélectionnée est indiqué en haut à gauche de la section des détails.
 

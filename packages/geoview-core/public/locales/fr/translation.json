@@ -62,6 +62,7 @@
     "area": "Surface",
     "clear": "Effacer",
     "segmentLabels": "Afficher les étiquettes des segments",
+    "keyboardHint": "Activez la navigation au clavier (Tab vers la carte) pour tracer des mesures au clavier. Consultez le Guide pour plus de détails.",
     "status": {
       "started": "Mesure {{type}} démarrée. Cliquez sur la carte pour commencer.",
       "stopped": "Mode de mesure désactivé.",

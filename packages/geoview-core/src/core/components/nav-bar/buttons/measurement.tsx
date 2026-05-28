@@ -9,13 +9,12 @@ import type { StyleFunction } from 'ol/style/Style';
 import type { FeatureLike } from 'ol/Feature';
 import type Feature from 'ol/Feature';
 import type { Geometry } from 'ol/geom';
-import { HexagonOutlined as HexagonOutlinedIcon } from '@mui/icons-material';
 
 import type { TypePanelProps } from '@/ui/panel/panel-types';
 import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 import { IconButton } from '@/ui/icon-button/icon-button';
 import { Box, Switch, ToggleButtonGroup, ToggleButton, Typography } from '@/ui';
-import { ShowChartIcon, DeleteIcon, StraightenIcon } from '@/ui/icons';
+import { ShowChartIcon, DeleteIcon, StraightenIcon, HexagonOutlinedIcon } from '@/ui/icons';
 import { visuallyHidden } from '@/ui/style/default';
 import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from '@/core/components/nav-bar/nav-bar-panel-button';
@@ -487,6 +486,11 @@ export default function Measurement(): JSX.Element {
         >
           <DeleteIcon fontSize="small" />
         </IconButton>
+
+        {/* Keyboard accessibility hint */}
+        <Typography variant="caption" sx={{ fontStyle: 'italic', opacity: 0.8 }}>
+          {t('measurement.keyboardHint')}
+        </Typography>
       </Box>
     );
   };

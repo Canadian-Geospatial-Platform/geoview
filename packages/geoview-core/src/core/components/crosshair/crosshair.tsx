@@ -2,6 +2,7 @@ import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { Box, Fade, Typography } from '@/ui';
+import type { SxStyles } from '@/ui/style/types';
 
 import { getSxClasses } from './crosshair-style';
 import { CrosshairIcon } from './crosshair-icon';
@@ -33,7 +34,9 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const memoSxClasses = useMemo((): SxStyles => {
+    return getSxClasses(theme);
+  }, [theme]);
 
   //  Store
   const mapId = useStoreGeoViewMapId();
@@ -49,6 +52,8 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
 
   // AbortController ref - aborts any in-flight coordinate info fetch on re-click
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  // #region Handlers
 
   /**
    * Modifies the pixelDelta value for keyboard pan on Shift+Arrow up or down.
@@ -280,10 +285,15 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
     [isCrosshairsActive, mapId, mapController, handleShiftClick, handleDefaultInteraction, handleDrawerInteraction, drawerController]
   );
 
+  // #endregion
+
   /**
    * Aborts any in-flight coordinate info request on unmount.
    */
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('CROSSHAIR - cleanup on unmount');
+
     return (): void => {
       abortControllerRef.current?.abort();
       drawerController?.cancelGrabbedTransform();
@@ -294,6 +304,9 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
    * Clears hover tooltip and initializes pointer position when crosshair becomes active.
    */
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('CROSSHAIR - isCrosshairsActive changed', isCrosshairsActive);
+
     if (isCrosshairsActive) {
       layerSetController.hoverFeatureInfoLayerSet.clearResults();
 
@@ -310,13 +323,13 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
   useEventListener<HTMLElement>('keydown', handleZoomControls, mapTargetElement, isCrosshairsActive);
 
   return (
-    <Box sx={{ ...sxClasses.crosshairContainer, visibility: isCrosshairsActive ? 'visible' : 'hidden' }}>
+    <Box sx={{ ...memoSxClasses.crosshairContainer, visibility: isCrosshairsActive ? 'visible' : 'hidden' }}>
       <Fade in={isCrosshairsActive}>
-        <Box sx={sxClasses.crosshairIcon}>
+        <Box sx={memoSxClasses.crosshairIcon}>
           <CrosshairIcon />
         </Box>
       </Fade>
-      <Box sx={sxClasses.crosshairInfo}>
+      <Box sx={memoSxClasses.crosshairInfo}>
         <Typography dangerouslySetInnerHTML={{ __html: t('mapctrl.crosshair') }} />
       </Box>
     </Box>
