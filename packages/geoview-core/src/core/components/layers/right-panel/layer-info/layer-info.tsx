@@ -7,7 +7,7 @@ import { ListItemText } from '@/ui/list';
 
 import { getSxClasses } from '../layer-details-style';
 import { logger } from '@/core/utils/logger';
-import { isValidUUID } from '@/core/utils/utilities';
+import { isLocalhost, isValidUUID } from '@/core/utils/utilities';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { UtilAddLayer } from '@/core/components/layers/left-panel/add-new-layer/add-layer-utils';
 import { useStoreAppDisplayLanguage, useStoreAppMetadataServiceURL } from '@/core/stores/states/app-state';
@@ -20,14 +20,17 @@ import {
   useStoreLayerDisplayDateTimezone,
   useStoreLayerBounds,
   useStoreLayerBounds4326,
-  useStoreLayerMinScale,
-  useStoreLayerMaxScale,
+  useStoreLayerEntryType,
   useStoreLayerFilter,
   useStoreLayerFilterClass,
-  useStoreLayerTimeDimension,
-  useStoreLayerSchemaTag,
-  useStoreLayerUrl,
+  useStoreLayerMinScale,
+  useStoreLayerMaxScale,
   useStoreLayerOgcVersion,
+  useStoreLayerQueryable,
+  useStoreLayerQueryableSource,
+  useStoreLayerSchemaTag,
+  useStoreLayerTimeDimension,
+  useStoreLayerUrl,
 } from '@/core/stores/states/layer-state';
 import { useStoreTimeSliderFilter, useStoreTimeSliderLayer } from '@/core/stores/states/time-slider-state';
 import { useLayerController } from '@/core/controllers/use-controllers';
@@ -76,6 +79,11 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
   const bounds4326 = useStoreLayerBounds4326(layerPath);
   const minScale = useStoreLayerMinScale(layerPath);
   const maxScale = useStoreLayerMaxScale(layerPath);
+  const layerEntryType = useStoreLayerEntryType(layerPath);
+  const isLayerGroup = layerEntryType === 'group';
+  const layerQueryableSource = useStoreLayerQueryableSource(layerPath);
+  // For UI simplicity, when queryable state is undefined, it means it's queryable as long as the source is queryable
+  const layerQueryable = useStoreLayerQueryable(layerPath) ?? layerQueryableSource;
   const layerScaleDependant = minScale !== undefined || maxScale !== undefined;
   const layerDisplayDateFormat = useStoreLayerDisplayDateFormat(layerPath);
   const layerDisplayDateFormatShort = useStoreLayerDisplayDateFormatShort(layerPath);
@@ -150,6 +158,7 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
       <Box sx={memoSxClasses.infoSection}>
         <Typography sx={memoSxClasses.infoSectionTitle}>{t('layers.layerInfoServiceInfo')}</Typography>
         <Box sx={memoSxClasses.infoSectionContent}>
+          {isLocalhost() && <Box>{`${t('layers.layerPath')}: ${layerPath}`}</Box>}
           <Box>{`${t('layers.layerType')}${memoLocalizedTypeName}`}</Box>
           {layerNativeProjection && <Box>{`${t('layers.layerServiceProjection')}${layerNativeProjection}`}</Box>}
           {memoResources !== '' && (
@@ -173,6 +182,8 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
           <Box>{`${t('layers.layerBounds4326')}: ${boundsRounded4326?.join(', ')}`}</Box>
           {layerScaleDependant && <Box>{`${t('layers.layerMaxScale')}: ${maxScale}`}</Box>}
           {layerScaleDependant && <Box>{`${t('layers.layerMinScale')}: ${minScale}`}</Box>}
+          {!isLayerGroup && <Box>{`${t('layers.layerQueryableSource')}: ${layerQueryableSource}`}</Box>}
+          {!isLayerGroup && <Box>{`${t('layers.layerQueryable')}: ${layerQueryable}`}</Box>}
         </Box>
       </Box>
 

@@ -441,10 +441,21 @@ export class LayerSetController extends AbstractMapViewerController {
         // TO.DOCONT: When attempted, it wasn't working for the Hydro - Scale WMS group layers of group layers and the 'Show all' toggle.
         const visible = layer?.getVisible() ?? layerConfigCasted.getInitialSettings()?.states?.visible ?? true;
 
+        // Reuse existing value, because we try to not manage this property from within this function anymore
+        let bounds = existingStoreEntry?.bounds;
+        let bounds4326 = existingStoreEntry?.bounds4326;
+
+        // Double-check, because this whole 'propagateLegendToStore' function has issues in its recursion and it fails to retrieve existing layer information notably in WMS processing with sub-groups!
+        if (!bounds) {
+          // Instead of assigning undefined in the store, try to get the values from the layer at least
+          bounds = layer?.getBounds();
+          bounds4326 = layer?.getBoundsLonLat();
+        }
+
         const legendLayerEntry: TypeLegendLayer = {
           url: layerConfig.getMetadataAccessPath(),
-          bounds: existingStoreEntry?.bounds, // Reassigning the value, because we try to not manage this property from within this function anymore
-          bounds4326: existingStoreEntry?.bounds4326, // Reassigning the value, because we try to not manage this property from within this function anymore
+          bounds,
+          bounds4326,
           controls,
           layerId: layerPathNodes[currentLevel - 1],
           layerPath: entryLayerPath,
@@ -456,12 +467,13 @@ export class LayerSetController extends AbstractMapViewerController {
           schemaTag: schemaTag,
           entryType: layerConfig.getEntryType(),
           canToggle: schemaTag !== CONST_LAYER_TYPES.ESRI_IMAGE,
-          opacity: existingStoreEntry?.opacity ?? layerConfig.getInitialSettings()?.states?.opacity ?? 1, // Reassigning the value, because we try to not manage this property from within this function anymore
-          opacityMaxFromParent: existingStoreEntry?.opacityMaxFromParent ?? 1, // Reassigning the value, because we try to not manage this property from within this function anymore
-          hoverable: layerConfig.getInitialSettings()?.states?.hoverable, // default: true
-          queryable: layerConfig.getInitialSettings()?.states?.queryable, // default: true
+          opacity: existingStoreEntry?.opacity ?? layerConfig.getInitialSettings()?.states?.opacity ?? 1, // Reuse existing value, because we try to not manage this property from within this function anymore, only when not set assign the config values
+          opacityMaxFromParent: existingStoreEntry?.opacityMaxFromParent ?? 1, // Reuse existing value, because we try to not manage this property from within this function anymore, only when not set assign default
+          hoverable: layerConfig.getInitialSettings()?.states?.hoverable,
+          queryableSource: layerConfigCasted.getQueryableSourceDefaulted(),
+          queryable: layerConfig.getInitialSettings()?.states?.queryable,
           visible,
-          inVisibleRange: layer?.isInVisibleRange(calculatedMapResolution, calculatedMapScale, effectiveScales) ?? true,
+          inVisibleRange: layer?.isInVisibleRange(calculatedMapResolution, calculatedMapScale, effectiveScales) ?? true, // default: true
           maxScale: maxScale,
           minScale: minScale,
           legendCollapsed: layerConfig.getInitialSettings()?.states?.legendCollapsed ?? false, // default: false
@@ -477,7 +489,7 @@ export class LayerSetController extends AbstractMapViewerController {
               : undefined,
           mosaicRule: layer instanceof GVEsriImage ? layer.getMosaicRule() : undefined,
           timeDimension: layer instanceof AbstractGVLayer ? layer.getTimeDimension() : undefined,
-          hasText: layer instanceof AbstractGVVector ? layer.getTextOLLayer() !== undefined : undefined,
+          hasText: layer instanceof AbstractGVVector ? !!layer.getTextOLLayer() : undefined,
           textVisible: layer instanceof AbstractGVVector ? layer.getTextVisible() : undefined,
           wmsStyle: layer instanceof GVWMS ? layer.getWmsStyle() : undefined,
           wmsStyles: layerConfigCasted instanceof OgcWmsLayerEntryConfig ? layerConfigCasted.getStylesMetadata() : undefined,

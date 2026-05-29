@@ -1,6 +1,7 @@
 import type BaseLayer from 'ol/layer/Base';
 import type { GeoJSONObject } from 'ol/format/GeoJSON';
 import type { FitOptions } from 'ol/View';
+import type { Projection as OLProjection } from 'ol/proj';
 
 import { VALID_PROJECTION_CODES, type Extent, type TypeFeatureInfoEntryPartial } from '@/api/types/map-schema-types';
 import type {
@@ -27,7 +28,6 @@ import {
   getStoreLayerOrderedLayerIndexByPath,
   getStoreLayerOrderedLayerPaths,
   setStoreLayerAllMapLayerCollapsed,
-  setStoreLayerBoundsForLayerAndParentsAndForget,
   setStoreLayerDateTemporal,
   setStoreLayerDeletionStartTime,
   setStoreLayerDisplayDateFormat,
@@ -50,6 +50,7 @@ import {
   setStoreLayerOrderedLayers,
   setStoreLayerSelectedLayersTabLayer,
   utilFindLayerAndChildrenPaths,
+  setStoreLayerBounds,
 } from '@/core/stores/states/layer-state';
 import { getStoreAppDisplayDateMode, getStoreAppShowLayerHighlightLayerBbox } from '@/core/stores/states/app-state';
 import { setStoreDataTableFilter } from '@/core/stores/states/data-table-state';
@@ -668,11 +669,11 @@ export class LayerController extends AbstractMapViewerController {
    * Gets the max extent of all layers on the map, or of a provided subset of layers.
    *
    * @param layerIds - Identifiers or layerPaths of layers to get max extents from
-   * @returns A promise that resolves with the overall extent or undefined when no bounds are found
+   * @returns The overall extent or undefined when no bounds are found
    */
-  getExtentOfMultipleLayers(layerIds: string[] = this.getLayerEntryLayerPaths()): Promise<Extent | undefined> {
+  getExtentOfMultipleLayers(layerIds: string[] = this.getLayerEntryLayerPaths()): Extent | undefined {
     // Retrieve from the domain
-    return this.#layerDomain.getExtentOfMultipleLayers(layerIds, this.getMapViewer().getProjection(), MapViewer.DEFAULT_STOPS);
+    return this.#layerDomain.getExtentOfMultipleLayers(layerIds);
   }
 
   /**
@@ -1273,6 +1274,14 @@ export class LayerController extends AbstractMapViewerController {
   refreshLayers(): void {
     // For each geoview layer
     this.getGeoviewLayers().forEach((geoviewLayer) => {
+      // Recalculate the bounds
+      LayerController.initBoundsForLayerAndParentsAndForget(
+        this.getMapId(),
+        geoviewLayer,
+        this.getMapViewer().getProjection(),
+        MapViewer.DEFAULT_STOPS
+      );
+
       // Call the layer refresh function
       geoviewLayer.refresh(this.getMapViewer().getProjection());
     });
@@ -1677,31 +1686,26 @@ export class LayerController extends AbstractMapViewerController {
     const targetResolution = targetScale ? mapViewer.getMapResolutionFromScale(targetScale) : undefined;
     if (targetResolution === undefined) return;
 
+    // Get the bounds as stored in the layer
+    const layerExtent = geoviewLayer.getBounds();
+
     // Animate view to the target resolution centered on the layer extent if applicable.
     // If there is no layerExtent or if the zoom needs to zoom out, the center will be undefined and not change.
     // Check if the map center is already in the layer extent and if so, do not recenter.
-    geoviewLayer
-      .getBounds(this.getMapViewer().getProjection(), MapViewer.DEFAULT_STOPS)
-      .then((layerExtent) => {
-        const centerExtent =
-          layerExtent &&
-          currentScale &&
-          targetScale &&
-          targetScale < currentScale &&
-          !GeoUtilities.isPointInExtent(view.getCenter()!, layerExtent)
-            ? [(layerExtent[2] + layerExtent[0]) / 2, (layerExtent[1] + layerExtent[3]) / 2]
-            : undefined;
+    const centerExtent =
+      layerExtent &&
+      currentScale &&
+      targetScale &&
+      targetScale < currentScale &&
+      !GeoUtilities.isPointInExtent(view.getCenter()!, layerExtent)
+        ? [(layerExtent[2] + layerExtent[0]) / 2, (layerExtent[1] + layerExtent[3]) / 2]
+        : undefined;
 
-        view.animate({
-          center: centerExtent,
-          resolution: targetResolution,
-          duration: OL_ZOOM_DURATION,
-        });
-      })
-      .catch((error: unknown) => {
-        // Log error
-        logger.logPromiseFailed('in getBounds in layerController.zoomToLayerVisibleScale', error);
-      });
+    view.animate({
+      center: centerExtent,
+      resolution: targetResolution,
+      duration: OL_ZOOM_DURATION,
+    });
   }
 
   /**
@@ -2016,7 +2020,7 @@ export class LayerController extends AbstractMapViewerController {
    */
   #handleDomainLayerRegistered(sender: LayerDomain, event: DomainLayerRegisteredEvent): void {
     // Calculate the bounds upon creation
-    setStoreLayerBoundsForLayerAndParentsAndForget(
+    LayerController.initBoundsForLayerAndParentsAndForget(
       this.getMapId(),
       event.layer,
       this.getMapViewer().getProjection(),
@@ -2110,7 +2114,7 @@ export class LayerController extends AbstractMapViewerController {
     // If a vector layer has been loaded
     if (event.layer instanceof AbstractGVVector) {
       // Calculate the bounds as those depend on the actual features in the layer
-      setStoreLayerBoundsForLayerAndParentsAndForget(
+      LayerController.initBoundsForLayerAndParentsAndForget(
         this.getMapId(),
         event.layer,
         this.getMapViewer().getProjection(),
@@ -2273,7 +2277,7 @@ export class LayerController extends AbstractMapViewerController {
    */
   #handleDomainLayerGroupLayerAdded(sender: LayerDomain, event: DomainLayerGroupChildrenUpdatedEvent): void {
     // Calculate the bounds on the group layer which had a layer added
-    setStoreLayerBoundsForLayerAndParentsAndForget(
+    LayerController.initBoundsForLayerAndParentsAndForget(
       this.getMapId(),
       event.layer,
       this.getMapViewer().getProjection(),
@@ -2303,7 +2307,7 @@ export class LayerController extends AbstractMapViewerController {
    */
   #handleDomainLayerGroupLayerRemoved(sender: LayerDomain, event: DomainLayerGroupChildrenUpdatedEvent): void {
     // Calculate the bounds on the group layer which had a layer removed
-    setStoreLayerBoundsForLayerAndParentsAndForget(
+    LayerController.initBoundsForLayerAndParentsAndForget(
       this.getMapId(),
       event.layer,
       this.getMapViewer().getProjection(),
@@ -2566,6 +2570,74 @@ export class LayerController extends AbstractMapViewerController {
   }
 
   // #endregion PRIVATE METHODS
+
+  // #region STATIC METHODS
+
+  /**
+   * Starts bounds calculation and stores bounds as they get calculated.
+   *
+   * Uses a fire-and-forget pattern and handles completion or failure in promise handlers.
+   *
+   * @param mapId - The unique identifier of the map instance
+   * @param gvLayer - The layer from which bounds recalculation should begin
+   * @param projection - The projection to initialize the bounds into
+   * @param stops - Number of interpolation stops for bounds initialization
+   */
+  static initBoundsForLayerAndParentsAndForget(mapId: string, gvLayer: AbstractBaseGVLayer, projection: OLProjection, stops: number): void {
+    // Redirect and forget about it
+    const promise = LayerController.#initBoundsForLayerAndParents(mapId, gvLayer, projection, stops);
+    promise
+      .then((_bounds) => {
+        // Log for troubleshooting, leave the line here commented
+        // logger.logDebug('BOUNDS CALCULATED AND STORED', gvLayer.getLayerPath(), bounds);
+      })
+      .catch((error: unknown) => {
+        // Log the error
+        logger.logPromiseFailed('in layer-state.setStoreLayerBoundsForLayerAndParentsAndForget', error);
+      });
+  }
+
+  /**
+   * Recalculates and stores bounds for a layer and all of its parent groups.
+   *
+   * Initializes bounds for the provided layer, then walks up the parent hierarchy.
+   *
+   * @param mapId - The unique identifier of the map instance
+   * @param gvLayer - The starting layer for which bounds should be computed
+   * @param projection - The projection to initialize the bounds into
+   * @param stops - Number of interpolation stops for bounds initialization
+   * @returns A promise that resolves with the bounds computed for the input layer, or undefined
+   */
+  static async #initBoundsForLayerAndParents(
+    mapId: string,
+    gvLayer: AbstractBaseGVLayer,
+    projection: OLProjection,
+    stops: number
+  ): Promise<Extent | undefined> {
+    // Walk current layer + parents upward once
+    let current: AbstractBaseGVLayer | undefined = gvLayer;
+    let returnedBounds: Extent | undefined;
+    while (current) {
+      // Get the bounds of the layer
+      // Must await sequentially: parent bounds depend on child bounds
+      // eslint-disable-next-line no-await-in-loop
+      const bounds = await current.initBounds(projection, stops);
+
+      // Store it
+      setStoreLayerBounds(mapId, current.getLayerPath(), current.getBounds(), current.getBoundsLonLat());
+
+      // If the current layer is the layer we were calculating bounds for
+      returnedBounds = bounds;
+
+      // Advance to parent
+      current = current.getParent();
+    }
+
+    // Return the bounds on the layer we were calculating the bounds for
+    return returnedBounds;
+  }
+
+  // #endregion STATIC METHODS
 
   // #region EVENTS
 

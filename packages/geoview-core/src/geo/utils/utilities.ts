@@ -1280,21 +1280,25 @@ export abstract class GeoUtilities {
    *
    * @param extentA - First extent
    * @param extentB - Optional second extent
-   * @returns The union of the extents, or undefined if both are undefined
+   * @returns The union of the extents, or the valid extent when the other one is undefined or contains NaN values
    */
   static getExtentUnion(extentA: Extent | undefined, extentB?: Extent | undefined): Extent | undefined {
-    // If no A, return B which may be undefined too
-    if (!extentA) return extentB;
+    // Treat extents containing NaN as invalid and ignore them for union purposes.
+    const validExtentA = extentA && !extentA.some((coord) => Number.isNaN(coord)) ? extentA : undefined;
+    const validExtentB = extentB && !extentB.some((coord) => Number.isNaN(coord)) ? extentB : undefined;
 
-    // If no B, return A
-    if (!extentB) return extentA;
+    // If no valid A, return valid B which may be undefined too.
+    if (!validExtentA) return validExtentB;
+
+    // If no valid B, return valid A.
+    if (!validExtentB) return validExtentA;
 
     // Return the union of A and B
     return [
-      Math.min(extentA[0], extentB[0]),
-      Math.min(extentA[1], extentB[1]),
-      Math.max(extentA[2], extentB[2]),
-      Math.max(extentA[3], extentB[3]),
+      Math.min(validExtentA[0], validExtentB[0]),
+      Math.min(validExtentA[1], validExtentB[1]),
+      Math.max(validExtentA[2], validExtentB[2]),
+      Math.max(validExtentA[3], validExtentB[3]),
     ];
   }
 
@@ -1303,21 +1307,25 @@ export abstract class GeoUtilities {
    *
    * @param extentA - First extent
    * @param extentB - Optional second extent
-   * @returns The intersection of the extents, or undefined if both are undefined
+   * @returns The intersection of the extents, or the valid extent when the other one is undefined or contains NaN values
    */
   static getExtentIntersection(extentA: Extent | undefined, extentB?: Extent | undefined): Extent | undefined {
-    // If no B, return A
-    if (!extentB) return extentA;
+    // Treat extents containing NaN as invalid and ignore them for intersection purposes.
+    const validExtentA = extentA && !extentA.some((coord) => Number.isNaN(coord)) ? extentA : undefined;
+    const validExtentB = extentB && !extentB.some((coord) => Number.isNaN(coord)) ? extentB : undefined;
 
-    // If no A, return B which may be undefined too
-    if (!extentA) return extentB;
+    // If no valid B, return valid A.
+    if (!validExtentB) return validExtentA;
+
+    // If no valid A, return valid B.
+    if (!validExtentA) return validExtentB;
 
     // Return the intersection of A and B
     return [
-      Math.max(extentA[0], extentB[0]),
-      Math.max(extentA[1], extentB[1]),
-      Math.min(extentA[2], extentB[2]),
-      Math.min(extentA[3], extentB[3]),
+      Math.max(validExtentA[0], validExtentB[0]),
+      Math.max(validExtentA[1], validExtentB[1]),
+      Math.min(validExtentA[2], validExtentB[2]),
+      Math.min(validExtentA[3], validExtentB[3]),
     ];
   }
 

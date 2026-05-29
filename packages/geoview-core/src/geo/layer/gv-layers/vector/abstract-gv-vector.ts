@@ -360,14 +360,14 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   }
 
   /**
-   * Overrides the way to get the bounds for this layer type.
+   * Overrides the way to initialize the bounds for this layer type.
    *
-   * @param projection - The projection to get the bounds into.
+   * @param projection - The projection to initialize the bounds into.
    * @param stops - The number of stops to use to generate the extent.
    * @returns A promise that resolves with the layer bounding box, or undefined if not available.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  override async onGetBounds(projection: OLProjection, stops: number): Promise<Extent | undefined> {
+  override async onInitBounds(projection: OLProjection, stops: number): Promise<Extent | undefined> {
     // Wait for the features to be loaded, because this is a vector layer the features have to be loaded for the extent to be valid
     await this.waitLoadedStatus();
 

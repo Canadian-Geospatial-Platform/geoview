@@ -221,7 +221,7 @@ export class MapController extends AbstractMapViewerController {
    *
    * @returns A promise that resolves when the zoom animation is complete
    */
-  async zoomToInitialExtent(): Promise<void> {
+  zoomToInitialExtent(): Promise<void> {
     // Get the map id
     const mapId = this.getMapId();
 
@@ -256,7 +256,7 @@ export class MapController extends AbstractMapViewerController {
     }
 
     // If layer IDs are in the config, use them
-    if (homeView.layerIds) extent = await this.getControllersRegistry().layerController.getExtentOfMultipleLayers(homeView.layerIds);
+    if (homeView.layerIds) extent = this.getControllersRegistry().layerController.getExtentOfMultipleLayers(homeView.layerIds);
 
     // If extent is not valid, take the default one for the current projection
     if (!extent || extent.length !== 4 || extent.includes(Infinity))

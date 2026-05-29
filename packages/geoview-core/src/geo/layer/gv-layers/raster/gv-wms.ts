@@ -445,13 +445,13 @@ export class GVWMS extends AbstractGVRaster {
   }
 
   /**
-   * Overrides the way to get the bounds for this layer type.
+   * Overrides the way to initialize the bounds for this layer type.
    *
-   * @param projection - The projection to get the bounds into
+   * @param projection - The projection to initialize the bounds into
    * @param stops - The number of stops to use to generate the extent
    * @returns A promise that resolves with the layer bounding box or undefined when not found
    */
-  override onGetBounds(projection: OLProjection, stops: number): Promise<Extent | undefined> {
+  override onInitBounds(projection: OLProjection, stops: number): Promise<Extent | undefined> {
     const layerConfig = this.getLayerConfig();
 
     // Get the layer config bounds
@@ -475,6 +475,7 @@ export class GVWMS extends AbstractGVRaster {
       if (metadataProj) {
         const metadataProjConv = Projection.getProjectionFromString(metadataProj);
         layerBounds = Projection.transformExtentFromProj(metadataBounds, metadataProjConv, projection, stops);
+        layerBounds = GeoUtilities.validateExtentWhenDefined(layerBounds, projection.getCode());
       }
     }
 

@@ -1,5 +1,4 @@
 ﻿import type BaseLayer from 'ol/layer/Base';
-import type { Projection as OLProjection } from 'ol/proj';
 
 import {
   ConfigBaseClass,
@@ -710,10 +709,10 @@ export class LayerDomain {
    * Gets the max extent of all layers on the map, or of a provided subset of layers.
    *
    * @param layerIds - Identifiers or layerPaths of layers to get max extents from
-   * @returns A promise that resolves with the overall extent or undefined when no bounds are found
+   * @returns The overall extent or undefined when no bounds are found
    */
-  async getExtentOfMultipleLayers(layerIds: string[], projection: OLProjection, stops: number): Promise<Extent | undefined> {
-    const layerBoundsPromises: Promise<Extent | undefined>[] = [];
+  getExtentOfMultipleLayers(layerIds: string[]): Extent | undefined {
+    const allBounds: (Extent | undefined)[] = [];
     layerIds.forEach((layerId) => {
       // Get sublayerpaths and layerpaths from layer IDs.
       const subLayerPaths = this.getLayerEntryLayerPaths().filter(
@@ -724,14 +723,10 @@ export class LayerDomain {
         // Get max extents from all selected layers.
         subLayerPaths.forEach((layerPath) => {
           // Get the GV layer and get its bounds
-          const layerBoundsPromise = this.getGeoviewLayer(layerPath).getBounds(projection, stops);
-          layerBoundsPromises.push(layerBoundsPromise);
+          allBounds.push(this.getGeoviewLayer(layerPath).getBounds());
         });
       }
     });
-
-    // Once all promises resolve
-    const allBounds = await Promise.all(layerBoundsPromises);
 
     // For each bounds found
     let boundsUnion: Extent | undefined;

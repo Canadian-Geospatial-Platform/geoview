@@ -84,18 +84,19 @@ export class GVGroupLayer extends AbstractBaseGVLayer {
   }
 
   /**
-   * Overrides the way to get the bounds for this layer type.
+   * Overrides the way to initialize the bounds for this layer type.
    *
-   * @param projection - The projection to get the bounds into
+   * @param projection - The projection to initialize the bounds into
    * @param stops - The number of stops to use to generate the extent
    * @returns A promise that resolves with the layer bounding box or undefined when not found
    */
-  override async onGetBounds(projection: OLProjection, stops: number): Promise<Extent | undefined> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  override onInitBounds(projection: OLProjection, stops: number): Promise<Extent | undefined> {
     // Current bounds
     const boundsArray = [] as Extent[];
 
     // Redirect
-    await this.#gatherAllBoundsRec(boundsArray, this, projection, stops);
+    this.#gatherAllBoundsRec(boundsArray, this);
 
     // For each bounds found
     let boundsUnion: Extent | undefined;
@@ -105,7 +106,7 @@ export class GVGroupLayer extends AbstractBaseGVLayer {
     });
 
     // Return the unioned bounds
-    return boundsUnion;
+    return Promise.resolve(boundsUnion);
   }
 
   /**
@@ -282,16 +283,15 @@ export class GVGroupLayer extends AbstractBaseGVLayer {
    * @param stops - The number of stops to use to generate the extent
    * @returns A promise that resolves when all bounds have been gathered and stored in the bounds parameter
    */
-  async #gatherAllBoundsRec(bounds: Extent[], layer: AbstractBaseGVLayer, projection: OLProjection, stops: number): Promise<void> {
+  #gatherAllBoundsRec(bounds: Extent[], layer: AbstractBaseGVLayer): void {
     // If a leaf
     if (layer instanceof AbstractGVLayer) {
       // Get the bounds of the layer
-      const calculatedBounds = await layer.getBounds(projection, stops);
+      const calculatedBounds = layer.getBounds();
       if (calculatedBounds) bounds.push(calculatedBounds);
     } else if (layer instanceof GVGroupLayer) {
-      // Recursively get all promises of all bounds for all children layers
-      const promises = layer.getLayers().map((childLayer) => this.#gatherAllBoundsRec(bounds, childLayer, projection, stops));
-      await Promise.all(promises);
+      // Recursively get all bounds for all children layers
+      layer.getLayers().forEach((childLayer) => this.#gatherAllBoundsRec(bounds, childLayer));
     }
   }
 

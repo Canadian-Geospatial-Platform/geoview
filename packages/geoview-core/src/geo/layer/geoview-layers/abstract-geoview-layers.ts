@@ -661,16 +661,7 @@ export abstract class AbstractGeoViewLayer {
 
     // Single layer: assign default name and use directly
     if (listOfLayerEntryConfig.length === 1) {
-      // TODO: CLEANUP - Remove commented code 2026-03-06 - as it seemed to be more coherent without it, setting list as-is instead.
       this.listOfLayerEntryConfig = listOfLayerEntryConfig;
-
-      // const [layerEntry] = listOfLayerEntryConfig;
-
-      // if (!layerEntry.getLayerName() && geoviewLayerConfig.geoviewLayerName) {
-      //   layerEntry.setLayerName(geoviewLayerConfig.geoviewLayerName);
-      // }
-
-      // this.listOfLayerEntryConfig = [layerEntry];
       return;
     }
 

@@ -1,7 +1,6 @@
 ﻿import { useStore } from 'zustand';
 
 import type { Extent } from 'ol/extent';
-import type { Projection as OLProjection } from 'ol/proj';
 
 import { getGeoViewStore, useGeoViewStore } from '@/core/stores/stores-managers';
 import type { TypeLayersViewDisplayState, TypeLegendItem, TypeLegendLayer, TypeLegendLayerItem } from '@/core/components/layers/types';
@@ -23,9 +22,6 @@ import type {
 } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { getStoreAppDisplayDateFormatDefault, getStoreAppDisplayDateTimezone } from './app-state';
-import { logger } from '@/core/utils/logger';
-import { Projection } from '@/geo/utils/projection';
-import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 
 // #region INTERFACE DEFINITION
 
@@ -781,6 +777,20 @@ export const getStoreLayerQueryable = (mapId: string, layerPath: string): boolea
 
 /** Hook that returns the queryable state for a specific layer. */
 export const useStoreLayerQueryable = createLayerSelectorHook('queryable');
+
+/**
+ * Gets the queryable source metadata state for a specific layer.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to look up
+ * @returns The layer queryable source metadata state, defaults to true
+ */
+export const getStoreLayerQueryableSource = (mapId: string, layerPath: string): boolean => {
+  return getStoreLayerLegendLayerByPath(mapId, layerPath)?.queryableSource ?? true;
+};
+
+/** Hook that returns the queryable source metadata state for a specific layer. */
+export const useStoreLayerQueryableSource = createLayerSelectorHook('queryableSource');
 
 /**
  * Hooks on the queryable states for multiple layer paths.
@@ -1743,81 +1753,14 @@ export const setStoreLayerHoverable = (mapId: string, layerPath: string, hoverab
  * @param mapId - The map identifier
  * @param layerPath - The layer path to update
  * @param bounds - The new bounds extent, or undefined to clear
- * @param mapProjection - The current map projection
- * @param stops - The number of interpolation stops for reprojection
+ * @param bounds4326 - The new bounds extent in 4326, or undefined to clear
  */
-export const setStoreLayerBounds = (
-  mapId: string,
-  layerPath: string,
-  bounds: Extent | undefined,
-  mapProjection: OLProjection,
-  stops: number
-): void => {
+export const setStoreLayerBounds = (mapId: string, layerPath: string, bounds: Extent | undefined, bounds4326: Extent | undefined): void => {
   getStoreLayerState(mapId).actions.updateLayerByPath(layerPath, (layer) => ({
     ...layer,
     bounds,
-    bounds4326: bounds ? Projection.transformExtentFromProj(bounds, mapProjection, Projection.getProjectionLonLat(), stops) : undefined,
+    bounds4326,
   }));
-};
-
-/**
- * Recalculates and stores bounds for a layer and all of its parent groups.
- *
- * This method recalculates the bounds for the provided layer and then
- * iteratively walks up the layer hierarchy, recalculating and storing
- * bounds for each parent group layer.
- *
- * @param mapId - The unique identifier of the map instance
- * @param gvLayer - The starting layer for which bounds should be computed
- * @returns A promise that resolves once bounds have been computed and
- * propagated up the entire parent hierarchy.
- */
-export const setStoreLayerBoundsForLayerAndParents = async (
-  mapId: string,
-  gvLayer: AbstractBaseGVLayer,
-  mapProjection: OLProjection,
-  stops: number
-): Promise<void> => {
-  // Walk current layer + parents upward once
-  let current: AbstractBaseGVLayer | undefined = gvLayer;
-  while (current) {
-    // Get the bounds of the layer
-    // Must await sequentially: parent bounds depend on child bounds
-    // eslint-disable-next-line no-await-in-loop
-    const bounds = await current.getBounds(mapProjection, stops);
-
-    // Store it
-    setStoreLayerBounds(mapId, current.getLayerPath(), bounds, mapProjection, stops);
-
-    // Advance to parent
-    current = current.getParent();
-  }
-};
-
-/**
- * Triggers asynchronous bounds recalculation and propagation for a layer
- * and its parent hierarchy without awaiting completion.
- *
- * This method invokes {@link setLayerBoundsForLayerAndParentsInStore} using a
- * fire-and-forget pattern. The returned promise is intentionally not awaited,
- * allowing bounds recalculation and propagation to occur in the background.
- * Callers requiring completion guarantees should use the awaited version instead.
- *
- * @param mapId - The unique identifier of the map instance
- * @param gvLayer - The layer from which bounds recalculation should begin
- */
-export const setStoreLayerBoundsForLayerAndParentsAndForget = (
-  mapId: string,
-  gvLayer: AbstractBaseGVLayer,
-  mapProjection: OLProjection,
-  stops: number
-): void => {
-  // Redirect and forget about it
-  const promise = setStoreLayerBoundsForLayerAndParents(mapId, gvLayer, mapProjection, stops);
-  promise.catch((error: unknown) => {
-    // Log the error
-    logger.logPromiseFailed('in layer-state.setStoreLayerBoundsForLayerAndParentsAndForget', error);
-  });
 };
 
 /**

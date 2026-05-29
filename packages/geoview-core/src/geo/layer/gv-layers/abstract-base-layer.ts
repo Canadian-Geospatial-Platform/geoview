@@ -7,6 +7,7 @@ import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
 import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
+import { Projection } from '@/geo/utils/projection';
 
 /**
  * Abstract Base GV Layer managing an OpenLayer layer, including a layer group.
@@ -25,7 +26,16 @@ export abstract class AbstractBaseGVLayer {
   #layerConfig: ConfigBaseClass;
 
   /** The layer name */
-  #layerName: string | undefined;
+  #layerName?: string;
+
+  /** The projection in which the bounds were initialized */
+  #boundsProjection?: OLProjection;
+
+  /** The bounds in native projection as they were initialized */
+  #bounds?: Extent;
+
+  /** The bounds in 4326 as they were initialized */
+  #bounds4326?: Extent;
 
   /** Callback delegates for the layer name changed event */
   #onLayerNameChangedHandlers: LayerNameChangedDelegate[] = [];
@@ -52,20 +62,20 @@ export abstract class AbstractBaseGVLayer {
   // #region OVERRIDES
 
   /**
+   * Must override method to initialize the layer bounds.
+   *
+   * @param projection - The projection to initialize the bounds into
+   * @param stops - The number of stops to use to generate the extent
+   * @returns A promise that resolves with the layer bounding box or undefined when not found
+   */
+  protected abstract onInitBounds(projection: OLProjection, stops: number): Promise<Extent | undefined>;
+
+  /**
    * Must override method to get the layer attributions
    *
    * @returns The layer attributions
    */
   protected abstract onGetAttributions(): string[];
-
-  /**
-   * Must override method to get the layer bounds.
-   *
-   * @param projection - The projection to get the bounds into
-   * @param stops - The number of stops to use to generate the extent
-   * @returns A promise that resolves with the layer bounding box or undefined when not found
-   */
-  protected abstract onGetBounds(projection: OLProjection, stops: number): Promise<Extent | undefined>;
 
   /**
    * Must override method to refresh a layer.
@@ -198,17 +208,52 @@ export abstract class AbstractBaseGVLayer {
   }
 
   /**
-   * Gets the bounds for the layer in the given projection.
+   * Initializes the bounds for the layer in the given projection.
    * When the layer is a GVLayer, its layer bounds are returned.
    * When the layer is a GVGroup, an Extent union of all layers bounds in the group is returned.
    *
-   * @param projection - The projection to get the bounds into
+   * @param projection - The projection to initialize the bounds into
    * @param stops - The number of stops to use to generate the extent
    * @returns A promise that resolves with the layer bounding box or undefined when not found
    */
-  getBounds(projection: OLProjection, stops: number): Promise<Extent | undefined> {
+  async initBounds(projection: OLProjection, stops: number): Promise<Extent | undefined> {
     // Redirect to overridable method
-    return this.onGetBounds(projection, stops);
+    const bounds = await this.onInitBounds(projection, stops);
+
+    // Store the initialized bounds in both the map projection and 4326 for later use if needed
+    this.#boundsProjection = projection;
+    this.#bounds = bounds;
+    this.#bounds4326 = bounds ? Projection.transformExtentFromProj(bounds, projection, Projection.getProjectionLonLat(), stops) : undefined;
+
+    // Return the calculated bounds as initialized
+    return bounds;
+  }
+
+  /**
+   * Gets the projection in which the layer bounds are defined.
+   *
+   * @returns The projection of the layer bounds, or undefined if not initialized
+   */
+  getBoundsProjection(): OLProjection | undefined {
+    return this.#boundsProjection;
+  }
+
+  /**
+   * Gets the bounds of the layer in the projection they were defined.
+   *
+   * @returns The layer bounds in the projection they were defined, or undefined if not initialized
+   */
+  getBounds(): Extent | undefined {
+    return this.#bounds;
+  }
+
+  /**
+   * Gets the bounds of the layer in EPSG:4326 projection.
+   *
+   * @returns The layer bounds in EPSG:4326 projection, or undefined if not initialized
+   */
+  getBoundsLonLat(): Extent | undefined {
+    return this.#bounds4326;
   }
 
   /**

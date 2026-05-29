@@ -202,13 +202,13 @@ export class GVEsriImage extends AbstractGVRaster {
   }
 
   /**
-   * Overrides the way to get the bounds for this layer type.
+   * Overrides the way to initialize the bounds for this layer type.
    *
-   * @param projection - The projection to get the bounds into.
+   * @param projection - The projection to initialize the bounds into.
    * @param stops - The number of stops to use to generate the extent.
    * @returns A promise that resolves with the layer bounding box or undefined when not found
    */
-  override onGetBounds(projection: OLProjection, stops: number): Promise<Extent | undefined> {
+  override onInitBounds(projection: OLProjection, stops: number): Promise<Extent | undefined> {
     // Get the metadata projection
     const metadataProjection = this.getMetadataProjection();
 
