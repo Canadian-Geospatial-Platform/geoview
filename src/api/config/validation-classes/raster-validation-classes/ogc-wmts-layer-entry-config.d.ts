@@ -41,6 +41,18 @@ export declare class OgcWmtsLayerEntryConfig extends TileLayerEntryConfig {
      */
     getLayerMetadata(): TypeMetadataWMTSContents | undefined;
     /**
+     * Gets the version.
+     *
+     * @returns The service version as read from the metadata attribute
+     */
+    getVersion(): string | undefined;
+    /**
+     * Gets the version and defaults to 1.0.0 when couldn't be determined as it's the most stable in testing.
+     *
+     * @returns The service version as read from the metadata attribute, or '1.0.0' if not available
+     */
+    getVersionOrDefault(): string;
+    /**
      * Type guard that checks whether the given configuration (class instance or plain object) represents a WMTS layer type.
      *
      * Supports `ConfigClassOrType` (class instance or plain object) and plain layer config objects (`TypeGeoviewLayerConfig`).
@@ -52,6 +64,9 @@ export declare class OgcWmtsLayerEntryConfig extends TileLayerEntryConfig {
 }
 export interface TypeMetadataWMTS {
     Capabilities: {
+        '@attributes': {
+            version: string;
+        };
         'ows:OperationsMetadata': TypeMetadataWMTSOperations;
         Contents: TypeMetadataWMTSContents;
     };

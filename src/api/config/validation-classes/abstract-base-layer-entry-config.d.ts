@@ -1,4 +1,4 @@
-import type { TypeLayerStyleConfig, TypeStyleGeometry, TypeLayerStyleSettings, TypeOutfields, TypeLayerTextConfig } from '@/api/types/map-schema-types';
+import type { TypeLayerStyleConfig, TypeStyleGeometry, TypeLayerStyleSettings, TypeOutfields, TypeLayerTextConfig, DisplayDateMode } from '@/api/types/map-schema-types';
 import type { ConfigClassOrType, TypeBaseSourceInitialConfig, TypeFeatureInfoLayerConfig, TypeGeoviewLayerType, TypeLayerEntryType, TypeValidSourceProjectionCodes } from '@/api/types/layer-schema-types';
 import type { ConfigBaseClassProps } from '@/api/config/validation-classes/config-base-class';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
@@ -35,7 +35,7 @@ export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseCla
      *
      * This method is called when the data access path is being set.
      *
-     * @param dataAccessPath - The path string used to access data.
+     * @param dataAccessPath - The path string used to access data
      */
     protected onSetDataAccessPath(dataAccessPath: string): void;
     /**
@@ -47,6 +47,12 @@ export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseCla
      * @throws {NotSupportedError} When the geometry type is not supported
      */
     protected onGetGeometryType(): TypeStyleGeometry | undefined;
+    /**
+     * Overridable function to refresh the metadata of the layer.
+     *
+     * @param displayDateMode - The display date mode that should be used
+     */
+    protected onRefreshMetadata(displayDateMode: DisplayDateMode): Promise<void>;
     /**
      * Overrides the toJson of the mother class.
      *
@@ -101,6 +107,12 @@ export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseCla
      * @param layerText - The layer text
      */
     setLayerText(layerText: TypeLayerTextConfig): void;
+    /**
+     * Initializes the layer text configuration by filling the blanks in our config with the information from the metadata.
+     *
+     * @param layerTextMetadata - Optional layer text metadata to use to help fill the blanks in our layer text config
+     */
+    initLayerTextFromMetadata(layerTextMetadata: TypeLayerTextConfig | undefined): void;
     /**
      * The first TypeStyleSetting associated with the TypeStyleGeometry associated with the style as could be read from the layer config metadata.
      *
@@ -260,6 +272,15 @@ export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseCla
      * @param projection - Optional source projection
      */
     initProjectionFromMetadata(projection: TypeValidSourceProjectionCodes | undefined): void;
+    /**
+     * Refreshes the layer metadata information.
+     *
+     * This method is typically used when the display date mode changes, as the metadata may contain time-sensitive information that needs to be updated on-the-fly.
+     * This method calls onRefreshMetadata so that child classes can implement their own logic to refresh the metadata.
+     *
+     * @param displayDateMode - The display date mode that should be used
+     */
+    refreshMetadata(displayDateMode: DisplayDateMode): Promise<void>;
     /**
      * Gets the source outfields from the source object.
      *

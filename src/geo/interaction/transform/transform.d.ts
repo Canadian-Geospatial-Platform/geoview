@@ -118,6 +118,50 @@ export declare class Transform extends Interaction {
      */
     canRedo(): boolean;
     /**
+     * Checks if there is a handle at the given coordinate (Keyboard / Crosshair).
+     *
+     * @param coordinate - The map coordinate to check
+     * @returns True if a handle exists at the coordinate
+     */
+    hasHandleAtCoordinate(coordinate: number[]): boolean;
+    /**
+     * Gets the handle type at the given coordinate (Keyboard / Crosshair).
+     *
+     * @param coordinate - The map coordinate to check
+     * @returns The handle type if a handle exists at the coordinate, otherwise undefined
+     */
+    getHandleTypeAtCoordinate(coordinate: number[]): HandleType | undefined;
+    /**
+     * Initializes transformation state for keyboard-based transformations (Keyboard / Crosshair).
+     * Must be called after grabbing a handle and before applying transformations.
+     *
+     * @param coordinate - The coordinate where the transformation begins
+     * @param handleType - The type of handle being transformed
+     * @return True if the keyboard transform was successfully initiated, false otherwise (e.g. if no handle at coordinate or transform instance not initialized)
+     */
+    beginKeyboardTransform(coordinate: number[], handleType: HandleType): boolean;
+    /**
+     * Applies a transformation from a grabbed coordinate to a new coordinate (Keyboard / Crosshair).
+     * Handles all transformation types internally based on the handle type.
+     *
+     * @param startCoordinate - The coordinate where the handle was grabbed
+     * @param endCoordinate - The coordinate to transform to
+     * @param handleType - The type of handle being transformed
+     * @returns Whether the transformation was successfully applied
+     */
+    applyKeyboardTransformFromCoordinates(startCoordinate: number[], endCoordinate: number[], handleType: HandleType): boolean;
+    /**
+     * Deletes a vertex at the specified coordinate if one exists.
+     *
+     * @param coordinate - The coordinate to check for a vertex
+     * @returns Whether a vertex was deleted
+     */
+    deleteVertexAtCoordinate(coordinate: number[]): boolean;
+    /**
+     * Restores the original style of any highlighted handle (Keyboard / Crosshair).
+     */
+    restoreHandleHighlight(): void;
+    /**
      * Registers a transform start event handler.
      *
      * @param callback - The callback to be executed whenever the event is emitted

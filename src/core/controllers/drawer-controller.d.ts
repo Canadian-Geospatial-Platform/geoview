@@ -1,8 +1,11 @@
+import type { StyleLike } from 'ol/style/Style';
+import { DrawerStyle } from '@/geo/style/drawer-style';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import { type StyleProps } from '@/core/stores/states/drawer-state';
 import type { UIDomain } from '@/core/domains/ui-domain';
 import type { MapViewer } from '@/geo/map/map-viewer';
+import { HandleType } from '@/geo/interaction/transform/transform';
 /**
  * Controller responsible for drawer interactions, keyboard shortcuts, and
  * bridging the drawer state with the UI domain and map projection changes.
@@ -15,6 +18,12 @@ export declare class DrawerController extends AbstractMapViewerController {
     static readonly MAX_HISTORY_SIZE = 50;
     /** Tolerance for comparing style values */
     static readonly STYLE_TOLERANCE = 0.1;
+    /** Hit tolerance for mouse-based editing interactions */
+    static readonly MOUSE_HIT_TOLERANCE = 5;
+    /** Hit tolerance for keyboard-based editing interactions (crosshair) */
+    static readonly KEYBOARD_HIT_TOLERANCE = 20;
+    /** The ID for the shortcuts indicator element */
+    static readonly SHORTCUTS_INDICATOR_ID = "shortcuts-enabled";
     /** The default icon source as a base64-encoded SVG data URI */
     static readonly DEFAULT_ICON_SOURCE = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBkPSJNMTIgMkM4LjEzIDIgNSA1LjEzIDUgOWMwIDUuMjUgNyAxMyA3IDEzczctNy43NSA3LTEzYzAtMy44Ny0zLjEzLTctNy03bTAgOS41Yy0xLjM4IDAtMi41LTEuMTItMi41LTIuNXMxLjEyLTIuNSAyLjUtMi41IDIuNSAxLjEyIDIuNSAyLjUtMS4xMiAyLjUtMi41IDIuNSIgZmlsbD0icmdiYSgyNTIsIDI0MSwgMCwgMC4zKSIgc3Ryb2tlPSIjMDAwMDAwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjwvc3ZnPg==";
     /**
@@ -43,7 +52,7 @@ export declare class DrawerController extends AbstractMapViewerController {
     /**
      * Stops the current drawing operation.
      */
-    stopDrawing(): void;
+    stopDrawing(registerHandlers?: boolean): void;
     /**
      * Toggles the drawing state.
      */
@@ -55,7 +64,7 @@ export declare class DrawerController extends AbstractMapViewerController {
     /**
      * Stops the editing interaction for all groups.
      */
-    stopEditing(): void;
+    stopEditing(registerHandlers?: boolean): void;
     /**
      * Toggles the editing state.
      */
@@ -200,6 +209,109 @@ export declare class DrawerController extends AbstractMapViewerController {
      */
     updateTransformingFeatureStyle(newStyle: StyleProps): void;
     /**
+     * Enables or disables keyboard shortcuts for the drawer.
+     *
+     * @param enabled - Whether to enable or disable keyboard shortcuts
+     */
+    setShortcutsEnabled(enabled: boolean): void;
+    /**
+     * Adds a coordinate to the current drawing when using keyboard/crosshair input.
+     *
+     * @param coordinate - The map coordinate to add as a vertex
+     * @returns Whether the coordinate was added successfully
+     */
+    addCoordinateToDrawing(coordinate: number[]): boolean;
+    /**
+     * Finishes the current drawing when using keyboard/crosshair input.
+     */
+    finishCurrentDrawing(): void;
+    /**
+     * Handles a shift-click action at the given coordinate (keyboard equivalent: Shift+Enter/Space).
+     *
+     * @param coordinate - The map coordinate where the shift-click occurred
+     * @returns Whether the shift-click was handled
+     */
+    handleShiftClickAtCoordinate(coordinate: number[]): boolean;
+    /**
+     * Selects or deselects a feature at the given coordinate for editing.
+     *
+     * @param coordinate - The map coordinate to check for features
+     * @returns Whether a feature was selected/deselected
+     */
+    handleEditingAtCoordinate(coordinate: number[]): boolean;
+    /**
+     * Grabs a handle at the given coordinate for keyboard-based transformation.
+     *
+     * @param coordinate - The map coordinate to check for handles
+     * @returns Whether a handle was successfully grabbed
+     */
+    grabHandleForKeyboard(coordinate: number[]): boolean;
+    /**
+     * Grabs a handle at the given coordinate for keyboard-based transformation (Keyboard / Crosshair).
+     *
+     * @param coordinate - The map coordinate to check for handles
+     * @returns The handle type if a handle was grabbed, otherwise undefined
+     */
+    grabHandleAtCoordinate(coordinate: number[]): HandleType | undefined;
+    /**
+     * Applies the currently grabbed transformation to a new coordinate.
+     *
+     * @param newCoordinate - The coordinate to apply the transformation to
+     * @returns Whether the transformation was successfully applied
+     */
+    applyGrabbedTransform(newCoordinate: number[]): boolean;
+    /**
+     * Cancels any currently grabbed transformation and restores handle highlights.
+     */
+    cancelGrabbedTransform(): void;
+    /**
+     * Checks if a handle is currently grabbed for transformation.
+     *
+     * @returns Whether a handle is grabbed
+     */
+    isHandleGrabbed(): boolean;
+    /**
+     * Applies a transformation from a start coordinate to an end coordinate using the specified handle type (Keyboard / Crosshair).
+     *
+     * @param startCoordinate - The starting coordinate where the handle was grabbed
+     * @param endCoordinate - The ending coordinate where the handle should be moved to
+     * @param handleType - The type of handle being transformed
+     * @returns Whether the transformation was successfully applied
+     */
+    applyTransformFromCoordinates(startCoordinate: number[], endCoordinate: number[], handleType: HandleType): boolean;
+    /**
+     * Cycles to the next or previous geometry type.
+     *
+     * @param forward - Whether to cycle forward (true) or backward (false)
+     */
+    cycleGeometryType(forward?: boolean): void;
+    /**
+     * Opens the style menu and focuses the first input.
+     */
+    openStyleMenu(): void;
+    /**
+     * Triggers the file upload dialog for importing drawings.
+     */
+    triggerUploadDialog(): void;
+    /**
+     * Enables keyboard shortcuts for drawing operations.
+     *
+     * Note: Undo/redo shortcuts are always enabled and not affected by this method.
+     */
+    enableKeyboardShortcuts(): void;
+    /**
+     * Disables keyboard shortcuts for drawing operations.
+     *
+     * Note: Undo/redo shortcuts remain active and are not affected by this method.
+     */
+    disableKeyboardShortcuts(): void;
+    /**
+     * Checks if keyboard shortcuts are currently enabled.
+     *
+     * @returns Whether keyboard shortcuts are enabled
+     */
+    isKeyboardShortcutsEnabled(): boolean;
+    /**
      * Undoes the last drawer action.
      *
      * @returns Whether the action was successful
@@ -226,5 +338,12 @@ export declare class DrawerController extends AbstractMapViewerController {
      * @param file - The GeoJSON file
      */
     uploadDrawings(file: File): void;
+    /**
+     * Clones a given style or array of styles.
+     *
+     * @param styleLike - The style or array of styles to clone
+     * @returns A cloned style or array of cloned styles
+     */
+    static cloneStyle(styleLike: StyleLike): DrawerStyle | DrawerStyle[];
 }
 //# sourceMappingURL=drawer-controller.d.ts.map

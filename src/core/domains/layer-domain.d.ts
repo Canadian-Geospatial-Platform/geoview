@@ -8,9 +8,10 @@ import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
 import type { AbstractBaseGVLayer, LayerBaseEvent, LayerNameChangedEvent, LayerOpacityChangedEvent, LayerVisibleChangedEvent } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { GVGroupLayer, type LayerGroupChildrenUpdatedEvent } from '@/geo/layer/gv-layers/gv-group-layer';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import { AbstractGVRaster, type ImageLoadRescueEvent } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import type { LayerErrorEvent, LayerFilterAppliedEvent, LayerHoverableChangedEvent, LayerItemVisibilityChangedEvent, LayerMessageEvent, LayerQueryableChangedEvent } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
-import { GVWMS, type ImageLoadRescueEvent, type WMSStyleChangedEvent } from '@/geo/layer/gv-layers/raster/gv-wms';
+import { GVWMS, type WMSStyleChangedEvent } from '@/geo/layer/gv-layers/raster/gv-wms';
 import { GVEsriImage, type RasterFunctionChangedEvent, type MosaicRuleChangedEvent } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 /**
  * Domain class responsible for managing layer registrations and lifecycle.
@@ -454,18 +455,18 @@ export declare class LayerDomain {
      */
     offLayerFilterApplied(callback: DomainLayerFilterAppliedDelegate | undefined): void;
     /**
-     * Registers a layer WMS image load rescue event handler.
+     * Registers a raster layer image load rescue event handler.
      *
      * @param callback - The callback to be executed whenever the event is emitted
      * @returns The callback registered, for chaining or unregistration purposes
      */
-    onLayerWMSImageLoadRescue(callback: DomainLayerWMSImageLoadRescueDelegate): DomainLayerWMSImageLoadRescueDelegate;
+    onLayerImageLoadRescue(callback: DomainLayerImageLoadRescueDelegate): DomainLayerImageLoadRescueDelegate;
     /**
-     * Unregisters a layer WMS image load rescue event handler.
+     * Unregisters a raster layer image load rescue event handler.
      *
      * @param callback - The callback to stop being called whenever the event is emitted
      */
-    offLayerWMSImageLoadRescue(callback: DomainLayerWMSImageLoadRescueDelegate | undefined): void;
+    offLayerImageLoadRescue(callback: DomainLayerImageLoadRescueDelegate | undefined): void;
     /**
      * Registers a layer raster function changed event handler.
      *
@@ -636,12 +637,12 @@ export type DomainLayerFilterAppliedDelegate = EventDelegateBase<LayerDomain, Do
 /**
  * Define an event for the delegate
  */
-export interface DomainLayerWMSImageLoadRescueEvent extends DomainLayerBaseEvent<GVWMS, ImageLoadRescueEvent> {
+export interface DomainLayerImageLoadRescueEvent extends DomainLayerBaseEvent<AbstractGVRaster, ImageLoadRescueEvent> {
 }
 /**
  * Define a delegate for the event handler function signature
  */
-export type DomainLayerWMSImageLoadRescueDelegate = EventDelegateBase<LayerDomain, DomainLayerWMSImageLoadRescueEvent, boolean>;
+export type DomainLayerImageLoadRescueDelegate = EventDelegateBase<LayerDomain, DomainLayerImageLoadRescueEvent, Promise<boolean>>;
 /**
  * Define an event for the delegate
  */

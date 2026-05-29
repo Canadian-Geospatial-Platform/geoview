@@ -87,17 +87,19 @@ export declare class GeoJSON extends AbstractGeoViewVector {
      */
     protected onCreateGVLayer(layerConfig: GeoJSONLayerEntryConfig): GVGeoJSON;
     /**
-     * Fetches the metadata for a typical GeoJson class.
+     * Creates a configuration object for a GeoJson Feature layer.
      *
-     * @param url - The url to query the metadata from
-     * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
-     * @returns A promise that resolves to the metadata object
-     * @throws {RequestTimeoutError} When the request exceeds the timeout duration
-     * @throws {RequestAbortedError} When the request was aborted by the caller's signal
-     * @throws {ResponseError} When the response is not OK (non-2xx)
-     * @throws {ResponseEmptyError} When the JSON response is empty
+     * This function constructs a `TypeGeoJSONLayerConfig` object that describes an GeoJson Feature layer
+     * and its associated entry configurations based on the provided parameters.
+     *
+     * @param geoviewLayerId - A unique identifier for the GeoView layer
+     * @param geoviewLayerName - The display name of the GeoView layer
+     * @param metadataAccessPath - The URL or path to access metadata or feature data
+     * @param isTimeAware - Indicates whether the layer supports time-based filtering
+     * @param layerEntries - An array of layer entries objects to be included in the configuration
+     * @returns The constructed configuration object for the GeoJson Feature layer
      */
-    static fetchMetadata(url: string, abortSignal?: AbortSignal): Promise<TypeMetadataGeoJSON>;
+    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string | undefined, isTimeAware: boolean | undefined, layerEntries: TypeLayerEntryShell[]): TypeGeoJSONLayerConfig;
     /**
      * Initializes a GeoView layer configuration for a GeoJson layer.
      *
@@ -113,19 +115,14 @@ export declare class GeoJSON extends AbstractGeoViewVector {
      */
     static initGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware?: boolean): Promise<TypeGeoviewLayerConfig>;
     /**
-     * Creates a configuration object for a GeoJson Feature layer.
+     * Initializes the layer metadata by filling in the blanks with the information from the provided metadata.
      *
-     * This function constructs a `TypeGeoJSONLayerConfig` object that describes an GeoJson Feature layer
-     * and its associated entry configurations based on the provided parameters.
+     * This method searches for the corresponding metadata entry in the provided metadata object based on the layer ID.
      *
-     * @param geoviewLayerId - A unique identifier for the GeoView layer
-     * @param geoviewLayerName - The display name of the GeoView layer
-     * @param metadataAccessPath - The URL or path to access metadata or feature data
-     * @param isTimeAware - Indicates whether the layer supports time-based filtering
-     * @param layerEntries - An array of layer entries objects to be included in the configuration
-     * @returns The constructed configuration object for the GeoJson Feature layer
+     * @param layerConfig - The layer entry configuration to initialize
+     * @param metadata - The metadata object containing the layer information
      */
-    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string | undefined, isTimeAware: boolean | undefined, layerEntries: TypeLayerEntryShell[]): TypeGeoJSONLayerConfig;
+    static initLayerMetadata(layerConfig: VectorLayerEntryConfig, metadata: TypeMetadataGeoJSON | undefined): void;
     /**
      * Processes a GeoJSON GeoviewLayerConfig and returns a promise
      * that resolves to an array of `ConfigBaseClass` layer entry configurations.
@@ -143,5 +140,17 @@ export declare class GeoJSON extends AbstractGeoViewVector {
      * @returns A promise that resolves to an array of layer configurations
      */
     static processGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, url: string, layerIds: string[], isTimeAware: boolean): Promise<ConfigBaseClass[]>;
+    /**
+     * Fetches the metadata for a typical GeoJson class.
+     *
+     * @param url - The url to query the metadata from
+     * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+     * @returns A promise that resolves to the metadata object
+     * @throws {RequestTimeoutError} When the request exceeds the timeout duration
+     * @throws {RequestAbortedError} When the request was aborted by the caller's signal
+     * @throws {ResponseError} When the response is not OK (non-2xx)
+     * @throws {ResponseEmptyError} When the JSON response is empty
+     */
+    static fetchMetadata(url: string, abortSignal?: AbortSignal): Promise<TypeMetadataGeoJSON>;
 }
 //# sourceMappingURL=geojson.d.ts.map

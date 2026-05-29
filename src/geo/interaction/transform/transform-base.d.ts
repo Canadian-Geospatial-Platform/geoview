@@ -8,8 +8,8 @@ import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import type { Coordinate } from 'ol/coordinate';
 import type { Extent } from 'ol/extent';
-import { TransformEvent, TransformSelectionEvent, TransformDeleteFeatureEvent } from './transform-events';
 import type { MapViewer } from '@/geo/map/map-viewer';
+import { TransformEvent, TransformSelectionEvent, TransformDeleteFeatureEvent } from './transform-events';
 /**
  * Handle types for the transform interaction
  */
@@ -19,7 +19,6 @@ export declare enum HandleType {
     ROTATE_LINE = "rotate-line",
     SCALE = "scale",
     TRANSLATE = "translate",
-    TRANSLATE_CENTER = "translate-center",
     STRETCH_N = "stretch-n",
     STRETCH_E = "stretch-e",
     STRETCH_S = "stretch-s",
@@ -134,6 +133,29 @@ export declare class OLTransform extends OLPointer {
      * @param keepHistory - Whether the history should be kept when clearing the selection
      */
     clearSelection(keepHistory?: boolean): void;
+    /**
+     * Initializes transformation state for keyboard-based transformations (Keyboard / Crosshair).
+     * Sets up all necessary state that would normally be set by mouse-down event.
+     *
+     * @param coordinate - The coordinate where the transformation begins
+     * @param handleType - The type of handle being transformed
+     * @returns True if a transformation was started, false if just an action was performed (e.g., vertex added, feature deleted)
+     */
+    beginKeyboardTransform(coordinate: Coordinate, handleType: HandleType): boolean;
+    /**
+     * Applies a transformation from a grabbed coordinate to a new coordinate (Keyboard / Crosshair).
+     * Handles all transformation types internally based on the handle type.
+     *
+     * @param startCoordinate - The coordinate where the handle was grabbed
+     * @param endCoordinate - The coordinate to transform to
+     * @param handleType - The type of handle being transformed
+     * @returns Whether the transformation was successfully applied
+     */
+    applyKeyboardTransformFromCoordinates(startCoordinate: number[], endCoordinate: number[], handleType: HandleType): boolean;
+    /**
+     * Restores all handles by recreating them.
+     */
+    restoreHandleStyle(): void;
     /**
      * Rotates a coordinate around a center point by an angle.
      *
@@ -306,6 +328,13 @@ export declare class OLTransform extends OLPointer {
      * @param midpointHandle - The midpoint handle being dragged
      */
     handleAddVertex(coordinate: Coordinate, midpointHandle?: Feature): void;
+    /**
+     * Deletes a vertex at the specified coordinate if one exists.
+     *
+     * @param coordinate - The coordinate to check for a vertex
+     * @returns Whether a vertex was deleted
+     */
+    deleteVertexAtCoordinate(coordinate: Coordinate): boolean;
     /**
      * Creates a simple text editor for text features
      */

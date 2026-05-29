@@ -74,6 +74,17 @@ export declare function useDataTableController(): DataTableController;
  */
 export declare function useDrawerController(): DrawerController;
 /**
+ * Hook to optionally access the DrawerController from the controller context.
+ *
+ * Unlike `useDrawerController`, this hook does not throw when the Drawer
+ * plugin is not configured. Use this in shared components that may or may not
+ * have the drawer plugin active.
+ *
+ * @returns The drawer controller instance, or undefined if the plugin is not configured
+ * @throws {Error} When used outside of a ControllerContext.Provider
+ */
+export declare function useDrawerControllerIfExists(): DrawerController | undefined;
+/**
  * Hook to access the TimeSliderController from the controller context.
  *
  * @returns The time slider controller instance

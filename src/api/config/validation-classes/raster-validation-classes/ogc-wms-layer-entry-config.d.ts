@@ -1,9 +1,10 @@
 import type { Extent } from 'ol/extent';
 import type { ConfigClassOrType, TypeGeoviewLayerConfig, TypeMetadataWMS, TypeMetadataWMSCapabilityLayer, TypeMetadataWMSCapabilityLayerStyle, TypeOfServer, TypeSourceImageWmsInitialConfig } from '@/api/types/layer-schema-types';
+import type { DisplayDateMode } from '@/api/types/map-schema-types';
 import type { OgcWfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import type { AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
-import type { TypeWMSLayerConfig } from '@/geo/layer/geoview-layers/raster/wms';
+import { type TypeWMSLayerConfig } from '@/geo/layer/geoview-layers/raster/wms';
 export interface OgcWmsLayerEntryConfigProps extends AbstractBaseLayerEntryConfigProps {
     /** Source settings to apply to the GeoView layer source at creation time. */
     source?: TypeSourceImageWmsInitialConfig;
@@ -20,25 +21,25 @@ export declare class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
      *
-     * @returns The strongly-typed layer configuration specific to this layer.
+     * @returns The strongly-typed layer configuration specific to this layer
      */
     getGeoviewLayerConfig(): TypeWMSLayerConfig;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
      *
-     * @returns The strongly-typed source configuration specific to this layer entry config.
+     * @returns The strongly-typed source configuration specific to this layer entry config
      */
     getSource(): TypeSourceImageWmsInitialConfig;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
      *
-     * @returns The strongly-typed service metadata specific to this layer entry config.
+     * @returns The strongly-typed service metadata specific to this layer entry config
      */
     getServiceMetadata(): TypeMetadataWMS | undefined;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
      *
-     * @returns The strongly-typed layer metadata specific to this layer entry config.
+     * @returns The strongly-typed layer metadata specific to this layer entry config
      */
     getLayerMetadata(): TypeMetadataWMSCapabilityLayer | undefined;
     /**
@@ -48,15 +49,21 @@ export declare class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig
      * to read them from the layer's metadata (via the `Attribution.Title` property)
      * and sets them accordingly. Once set, the attributions are cached in the layer.
      *
-     * @returns The list of layer attributions, or `undefined` if none are available.
+     * @returns The list of layer attributions, or `undefined` if none are available
      */
     getAttributions(): string[] | undefined;
     /**
-     * Gets the version. Defaults to 1.1.0.
+     * Gets the version.
      *
      * @returns The service version as read from the metadata attribute
      */
-    getVersion(): string;
+    getVersion(): string | undefined;
+    /**
+     * Gets the version and defaults to 1.1.0 when couldn't be determined as it's the most stable in testing.
+     *
+     * @returns The service version as read from the metadata attribute, or '1.1.0' if not available
+     */
+    getVersionOrDefault(): string;
     /**
      * Gets the server type as read from the config or as read from the service GetCapabilities metadata response.
      *
@@ -89,7 +96,7 @@ export declare class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig
      * and initializes the internal style list. The styles correspond to named
      * style definitions advertised by the WMS service (from the `Style` section of the metadata).
      *
-     * @returns The list of available style names, or `undefined` if none are defined.
+     * @returns The list of available style names, or `undefined` if none are defined
      */
     getStyles(): string[] | undefined;
     /**
@@ -98,7 +105,7 @@ export declare class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig
      * Returns the complete `TypeMetadataWMSCapabilityLayerStyle` objects from the layer metadata,
      * which include style names, legend URLs, and other style-related information.
      *
-     * @returns The list of available style metadata objects, or `undefined` if none are defined.
+     * @returns The list of available style metadata objects, or `undefined` if none are defined
      */
     getStylesMetadata(): TypeMetadataWMSCapabilityLayerStyle[] | undefined;
     /**
@@ -140,19 +147,11 @@ export declare class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig
      */
     getWfsStylesLayerId(): string;
     /**
-     * Gets if the WMS layer has an associated WFS layer configuration.
-     *
-     * @returns True if the WMS layer has an associated WFS layer configuration
-     */
-    hasWfsLayerConfig(): boolean;
-    /**
      * Gets the associated WFS layer configuration for this WMS layer.
-     * Throws an error if the configuration has not been set.
      *
-     * @returns The WFS layer configuration instance
-     * @throws {LayerConfigWFSMissingError} When no WFS layer configuration is defined for this WMS layer
+     * @returns The WFS layer configuration instance associated with this WMS layer, or `undefined` if no association exists
      */
-    getWfsLayerConfig(): OgcWfsLayerEntryConfig;
+    getWfsLayerConfig(): OgcWfsLayerEntryConfig | undefined;
     /**
      * Associates a WFS layer configuration with this WMS layer.
      *
@@ -171,6 +170,15 @@ export declare class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig
      * @returns A promise that resolves with the first generated WFS layer entry configuration
      */
     createGeoviewLayerConfigWfs(): Promise<OgcWfsLayerEntryConfig>;
+    /**
+     * Refreshes the layer metadata information by re-fetching the WMS GetCapabilities response and updating the layer configuration accordingly.
+     *
+     * This method is typically used when the display date mode changes, as the metadata may contain time-sensitive information that needs to be updated on-the-fly.
+     *
+     * @param displayDateMode - The display date mode that should be used
+     * @returns A promise that resolves when the metadata refresh operation has completed
+     */
+    onRefreshMetadata(displayDateMode: DisplayDateMode): Promise<void>;
     /**
      * Type guard that checks whether the given configuration (class instance or plain object) represents a WMS layer type.
      *

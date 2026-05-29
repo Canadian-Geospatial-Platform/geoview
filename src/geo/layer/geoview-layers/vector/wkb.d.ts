@@ -87,15 +87,19 @@ export declare class WKB extends AbstractGeoViewVector {
      */
     protected onCreateGVLayer(layerConfig: WkbLayerEntryConfig): GVWKB;
     /**
-     * Fetches the metadata for a typical GeoJson class.
+     * Creates a configuration object for a WKB Feature layer.
      *
-     * @param url - The url to query the metadata from
-     * @throws {RequestTimeoutError} When the request exceeds the timeout duration
-     * @throws {RequestAbortedError} When the request was aborted by the caller's signal
-     * @throws {ResponseError} When the response is not OK (non-2xx)
-     * @throws {ResponseEmptyError} When the JSON response is empty
+     * This function constructs a `TypeWkbLayerConfig` object that describes an WKB Feature layer
+     * and its associated entry configurations based on the provided parameters.
+     *
+     * @param geoviewLayerId - A unique identifier for the GeoView layer
+     * @param geoviewLayerName - The display name of the GeoView layer
+     * @param metadataAccessPath - The full service URL to the layer endpoint
+     * @param isTimeAware - Indicates whether the layer supports time-based filtering
+     * @param layerEntries - An array of layer entries objects to be included in the configuration
+     * @returns The constructed configuration object for the WKB Feature layer
      */
-    static fetchMetadata(url: string, abortSignal?: AbortSignal): Promise<TypeMetadataGeoJSON>;
+    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware: boolean | undefined, layerEntries: TypeLayerEntryShell[]): TypeWkbLayerConfig;
     /**
      * Initializes a GeoView layer configuration for a WKB layer.
      *
@@ -111,19 +115,16 @@ export declare class WKB extends AbstractGeoViewVector {
      */
     static initGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware?: boolean): Promise<TypeGeoviewLayerConfig>;
     /**
-     * Creates a configuration object for a WKB Feature layer.
+     * Initializes the layer metadata from the provided service metadata.
      *
-     * This function constructs a `TypeWkbLayerConfig` object that describes an WKB Feature layer
-     * and its associated entry configurations based on the provided parameters.
+     * This method searches for the corresponding metadata entry in the provided metadata object based on the layer ID.
+     * If a matching metadata entry is found, it sets the layer metadata on the configuration and initializes the source,
+     * initial settings, layer style, and scale range using the metadata.
      *
-     * @param geoviewLayerId - A unique identifier for the GeoView layer
-     * @param geoviewLayerName - The display name of the GeoView layer
-     * @param metadataAccessPath - The full service URL to the layer endpoint
-     * @param isTimeAware - Indicates whether the layer supports time-based filtering
-     * @param layerEntries - An array of layer entries objects to be included in the configuration
-     * @returns The constructed configuration object for the WKB Feature layer
+     * @param layerConfig - The WKB layer entry configuration to initialize with metadata
+     * @param metadata - The metadata object containing information about the layers, which may include a list of layer entry configurations
      */
-    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware: boolean | undefined, layerEntries: TypeLayerEntryShell[]): TypeWkbLayerConfig;
+    static initLayerMetadata(layerConfig: VectorLayerEntryConfig, metadata: TypeMetadataGeoJSON | undefined): void;
     /**
      * Processes a WKB GeoviewLayerConfig and returns a promise
      * that resolves to an array of `ConfigBaseClass` layer entry configurations.
@@ -141,5 +142,15 @@ export declare class WKB extends AbstractGeoViewVector {
      * @returns A promise that resolves to an array of layer configurations
      */
     static processGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, url: string, layerIds: string[], isTimeAware: boolean): Promise<ConfigBaseClass[]>;
+    /**
+     * Fetches the metadata for a typical GeoJson class.
+     *
+     * @param url - The url to query the metadata from
+     * @throws {RequestTimeoutError} When the request exceeds the timeout duration
+     * @throws {RequestAbortedError} When the request was aborted by the caller's signal
+     * @throws {ResponseError} When the response is not OK (non-2xx)
+     * @throws {ResponseEmptyError} When the JSON response is empty
+     */
+    static fetchMetadata(url: string, abortSignal?: AbortSignal): Promise<TypeMetadataGeoJSON>;
 }
 //# sourceMappingURL=wkb.d.ts.map

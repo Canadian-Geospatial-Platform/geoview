@@ -11,7 +11,7 @@ import { Polygon } from 'ol/geom';
 import type { Coordinate } from 'ol/coordinate';
 import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import type { TypeMapMouseInfo, TypeOutfields, TypeStyleGeometry, TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
-import type { TypeGeoviewLayerType, TypeLegend, TypeMetadataWMS, TypeStylesWMS, TypeVectorLayerStyles } from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerType, TypeLegend, TypeMetadataWMS, TypeOGCService, TypeStylesWMS, TypeVectorLayerStyles } from '@/api/types/layer-schema-types';
 import type { TypeMetadataWMTS } from '@/api/config/validation-classes/raster-validation-classes/ogc-wmts-layer-entry-config';
 import type { TypeLegendItem, TypeLegendLayerItem } from '@/core/components/layers/types';
 export declare const layerTypes: Record<"CSV" | "KML" | "WKB" | "ESRI_DYNAMIC" | "ESRI_FEATURE" | "ESRI_IMAGE" | "IMAGE_STATIC" | "GEOJSON" | "GEOTIFF" | "XYZ_TILES" | "VECTOR_TILES" | "OGC_FEATURE" | "WFS" | "WMS" | "WMTS", TypeGeoviewLayerType>;
@@ -35,7 +35,7 @@ export declare abstract class GeoUtilities {
      *
      * The function normalizes query parameter keys, removes lowercase variants (`service`, `request`),
      * and ensures the final URL contains correctly capitalized parameters with the specified values.
-     * If the `VERSION` parameter is missing, a default value is added.
+     * If the `VERSION` parameter is missing, a default value of 1.3.0 is added for WMS/WMTS and 2.0.0 for WFS.
      *
      * @param url - The input service URL, which may be absolute or relative
      * @param service - The OGC service type (e.g., `"WMS"`, `"WFS"`, `"WMTS"`)
@@ -43,7 +43,7 @@ export declare abstract class GeoUtilities {
      * @param version - The default service version to enforce if not already present
      * @returns The normalized and fully qualified service request URL
      */
-    static ensureServiceRequestUrl(url: string, service: string, request: string, version?: string): string;
+    static ensureServiceRequestUrl(url: string, service: TypeOGCService, request: string, version?: string): string;
     /**
      * Builds a complete GetCapabilities URL for a specific OGC service.
      *
@@ -52,7 +52,7 @@ export declare abstract class GeoUtilities {
      * @param layers - Optional layer name(s) to include in the request
      * @returns A fully qualified GetCapabilities request URL
      */
-    static ensureServiceRequestUrlGetCapabilities(url: string, service: string, layers?: string): string;
+    static ensureServiceRequestUrlGetCapabilities(url: string, service: TypeOGCService, layers?: string): string;
     /**
      * Builds a complete GetStyles URL for a WMS service.
      *

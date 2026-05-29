@@ -22,7 +22,7 @@ export interface LayerListEntry {
     /** Number of features in the layer. */
     numOffeatures?: number;
     /** Array of feature info entries. */
-    features?: TypeFeatureInfoEntry[] | undefined;
+    features?: TypeFeatureInfoEntry[];
     /** Unique DOM id for the layer list item. */
     layerUniqueId?: string;
     /** Whether the layer item is disabled. */

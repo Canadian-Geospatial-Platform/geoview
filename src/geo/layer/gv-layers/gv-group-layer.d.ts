@@ -2,6 +2,7 @@ import LayerGroup from 'ol/layer/Group';
 import type { Options as LayerGroupOptions } from 'ol/layer/Group';
 import type { Projection as OLProjection } from 'ol/proj';
 import type { Extent } from 'ol/extent';
+import type { EffectiveLayerScales } from '@/api/types/layer-schema-types';
 import { type EventDelegateBase } from '@/api/events/event-helper';
 import type { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import { AbstractBaseGVLayer, type LayerBaseEvent } from '@/geo/layer/gv-layers/abstract-base-layer';
@@ -59,6 +60,18 @@ export declare class GVGroupLayer extends AbstractBaseGVLayer {
      * updating the opacity. Defaults to true.
      */
     protected onSetOpacity(opacity: number, emitOpacityChanged?: boolean): void;
+    /**
+     * Overrides visible-range evaluation for group layers.
+     *
+     * A group layer is considered in range when at least one descendant leaf layer
+     * is in visible range for the provided resolution and effective scale context.
+     *
+     * @param currentResolution - The current map resolution used for visibility checks
+     * @param currentScale - Optional current map scale denominator
+     * @param effectiveScales - Optional effective min/max scale constraints
+     * @returns True when at least one leaf child layer is in visible range
+     */
+    protected onIsInVisibleRange(currentResolution: number | undefined, currentScale?: number, effectiveScales?: EffectiveLayerScales): boolean;
     /**
      * Gets the immediate layers in the group.
      *

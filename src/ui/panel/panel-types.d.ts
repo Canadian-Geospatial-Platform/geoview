@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { ReactNode, AriaRole } from 'react';
 import type { TooltipProps, ButtonProps, TextFieldProps } from '@mui/material';
 import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 /** Interface used to initialize a button panel. */
@@ -94,6 +94,8 @@ export interface TypeButtonProps extends Omit<ButtonProps, 'type'> {
     'aria-haspopup'?: boolean | 'menu' | 'listbox' | 'tree' | 'grid' | 'dialog';
     /** Indicates whether the element is hidden from accessibility API */
     'aria-hidden'?: boolean;
+    /** Defines the ARIA role for the element. */
+    role?: AriaRole;
 }
 /**
  * Interface for the text properties used when creating a new text field.

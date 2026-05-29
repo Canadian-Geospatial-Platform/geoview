@@ -27,7 +27,7 @@ export declare class KML extends AbstractGeoViewVector {
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
      *
-     * @returns The strongly-typed layer configuration specific to this layer.
+     * @returns The strongly-typed layer configuration specific to this layer
      */
     getGeoviewLayerConfig(): TypeKmlLayerConfig;
     /**
@@ -64,33 +64,41 @@ export declare class KML extends AbstractGeoViewVector {
      */
     protected onCreateGVLayer(layerConfig: KmlLayerEntryConfig): GVKML;
     /**
+     * Creates a configuration object for a KML Feature layer.
+     *
+     * This function constructs a `TypeKmlLayerConfig` object that describes an KML Feature layer
+     * and its associated entry configurations based on the provided parameters.
+     *
+     * @param geoviewLayerId - A unique identifier for the GeoView layer
+     * @param geoviewLayerName - The display name of the GeoView layer
+     * @param metadataAccessPath - The full service URL to the layer endpoint
+     * @param isTimeAware - Indicates whether the layer supports time-based filtering
+     * @param layerEntries - An array of layer entries objects to be included in the configuration
+     * @returns The constructed configuration object for the KML Feature layer
+     */
+    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware: boolean | undefined, layerEntries: TypeLayerEntryShell[]): TypeKmlLayerConfig;
+    /**
      * Initializes a GeoView layer configuration for a KML layer.
      *
      * This method creates a basic TypeGeoviewLayerConfig using the provided
      * ID, name, and metadata access path URL. It then initializes the layer entries by calling
      * `initGeoViewLayerEntries`, which may involve fetching metadata or sublayer info.
      *
-     * @param geoviewLayerId - A unique identifier for the layer.
-     * @param geoviewLayerName - The display name of the layer.
-     * @param metadataAccessPath - The full service URL to the layer endpoint.
-     * @param isTimeAware - Indicates whether the layer supports time-based filtering.
-     * @returns A promise that resolves to an initialized GeoView layer configuration with layer entries.
+     * @param geoviewLayerId - A unique identifier for the layer
+     * @param geoviewLayerName - The display name of the layer
+     * @param metadataAccessPath - The full service URL to the layer endpoint
+     * @param isTimeAware - Indicates whether the layer supports time-based filtering
+     * @returns A promise that resolves to an initialized GeoView layer configuration with layer entries
      */
     static initGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware?: boolean): Promise<TypeGeoviewLayerConfig>;
     /**
-     * Creates a configuration object for a KML Feature layer.
+     * Initializes the metadata for a KML layer entry configuration.
      *
-     * This function constructs a `TypeKmlLayerConfig` object that describes an KML Feature layer
-     * and its associated entry configurations based on the provided parameters.
+     * This method processes the service metadata and sets the relevant information on the layer entry configuration.
      *
-     * @param geoviewLayerId - A unique identifier for the GeoView layer.
-     * @param geoviewLayerName - The display name of the GeoView layer.
-     * @param metadataAccessPath - The full service URL to the layer endpoint.
-     * @param isTimeAware - Indicates whether the layer supports time-based filtering.
-     * @param layerEntries - An array of layer entries objects to be included in the configuration.
-     * @returns The constructed configuration object for the KML Feature layer.
+     * @param layerConfig - The KML layer entry configuration to initialize with metadata
      */
-    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware: boolean | undefined, layerEntries: TypeLayerEntryShell[]): TypeKmlLayerConfig;
+    static initLayerMetadata(layerConfig: VectorLayerEntryConfig): void;
     /**
      * Processes a KML GeoviewLayerConfig and returns a promise
      * that resolves to an array of `ConfigBaseClass` layer entry configurations.

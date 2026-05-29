@@ -1,10 +1,9 @@
 import type BaseLayer from 'ol/layer/Base';
 import type { Projection as OLProjection } from 'ol/proj';
 import type { Extent } from '@/api/types/map-schema-types';
-import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
+import type { TypeLayerStatus, EffectiveLayerScales } from '@/api/types/layer-schema-types';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
-import type { EffectiveLayerScales } from '@/geo/map/map-viewer';
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
 /**
  * Abstract Base GV Layer managing an OpenLayer layer, including a layer group.
@@ -69,6 +68,20 @@ export declare abstract class AbstractBaseGVLayer {
      * @param emitZIndexChanged - Optional, whether to emit a z-index changed event after updating the z-index. Defaults to true.
      */
     protected onSetZIndex(zIndex: number, emitZIndexChanged?: boolean): void;
+    /**
+     * Overridable method to get if the layer is in visible range.
+     *
+     * Compares against the OL layer's minResolution/maxResolution threshold.
+     * Uses inclusive boundaries on both ends (`<=`) to match ESRI/ArcGIS semantics where
+     * minScale and maxScale are both inclusive. This ensures a layer with maxScale=41999
+     * is visible at exactly scale 41999.
+     *
+     * @param currentResolution - Optional. The current map resolution in map units per pixel
+     * @param currentScale - Optional. The current map scale denominator (1:X)
+     * @param effectiveScales - Optional. Effective layer scales with buffer thresholds
+     * @returns True if the layer is in visible range
+     */
+    protected onIsInVisibleRange(currentResolution: number | undefined, currentScale?: number, effectiveScales?: EffectiveLayerScales): boolean;
     /**
      * Gets the attributions for the layer by calling the overridable function 'onGetAttributions'.
      * When the layer is a GVLayer, its layer attributions are returned.
@@ -310,8 +323,7 @@ export declare abstract class AbstractBaseGVLayer {
     /**
      * Gets the in visible range value.
      *
-     * Compares against the OL layer's minResolution/maxResolution thresholds, which are
-     * set by updateLayerInVisibleRange from both config scale values and initialSettings zoom values.
+     * Compares against the OL layer's minResolution/maxResolution thresholds.
      * Uses inclusive boundaries on both ends (`<=`) to match ESRI/ArcGIS semantics where
      * minScale and maxScale are both inclusive. This ensures a layer with maxScale=41999
      * is visible at exactly scale 41999.

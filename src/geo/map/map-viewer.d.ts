@@ -11,7 +11,7 @@ import type { Condition } from 'ol/events/condition';
 import type { Size } from 'ol/size';
 import type { GeometryFunction } from 'ol/interaction/Draw';
 import type { TypeMapFeaturesInstance, TypeViewSettings, TypeInteraction, TypeValidMapProjectionCodes, TypeDisplayLanguage, TypeDisplayTheme, TypeMapViewSettings, TypeMapMouseInfo, TypeMapState } from '@/api/types/map-schema-types';
-import type { TypeLayerStatus, TypeLegend } from '@/api/types/layer-schema-types';
+import type { EffectiveLayerScales, TypeLayerStatus, TypeLegend } from '@/api/types/layer-schema-types';
 import { BasemapApi } from '@/geo/layer/basemap/basemap';
 import { LayerApi } from '@/geo/layer/layer';
 import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
@@ -45,11 +45,6 @@ import type { ConfigBaseClass } from '@/api/config/validation-classes/config-bas
  */
 export declare class MapViewer {
     #private;
-    /** A zoom level buffer to guarantee that the calculations being done via the resolutions, inches per meter, dpi are more strict than not enough
-     * The value 0.21 seems rather specific, but it was the value giving us the best result during testing on layer
-     * National Forest Inventory Photo Plot Summary (6433173f-bca8-44e6-be8e-3e8a19d3c299) at zoom level 3.78 +/- 0.25
-     * It could be increased slightly if ever we need to, but it might offer worse precision depending on various layers */
-    static readonly ZOOM_LEVEL_FROM_SCALE_BUFFER = 0.21;
     /** Default densification number when forming layer extents, to make ture to compensate for earth curvature */
     static DEFAULT_STOPS: number;
     /** Default DPI values */
@@ -59,7 +54,7 @@ export declare class MapViewer {
     /** Default inches per meter used by OpenLayers */
     static readonly DEFAULT_INCHES_PER_METER = 39.3700787;
     /** Buffer applied to effective scale calculations to account for visibility thresholds */
-    static readonly EFFECTIVE_SCALE_VISIBILITY_BUFFER = 0.1;
+    static readonly EFFECTIVE_SCALE_VISIBILITY_BUFFER = 0.11;
     /** Map features configuration properties */
     mapFeaturesConfig: TypeMapFeaturesConfig;
     /** The id of the map */
@@ -344,16 +339,6 @@ export declare class MapViewer {
      * @returns The map resolution in map units per pixel, or `undefined` if `targetScale` is not provided
      */
     getMapResolutionFromScale(targetScale: number | undefined, dpiValue?: number): number | undefined;
-    /**
-     * Converts a map scale denominator (1:X) into the corresponding OpenLayers zoom level.
-     *
-     * Uses `getMapResolutionFromScale` internally and then computes the zoom for that resolution.
-     *
-     * @param targetScale - The scale denominator (e.g., 50000000 for 1:50,000,000). Optional; returns undefined if not provided
-     * @param dpiValue - Dots per inch to use for conversion. Defaults to `MapViewer.DEFAULT_DPI`
-     * @returns The OpenLayers zoom level corresponding to the scale, or `undefined` if `targetScale` is not provided
-     */
-    getMapZoomFromScale(targetScale: number | undefined, dpiValue?: number): number | undefined;
     /**
      * Set the map zoom level.
      *
@@ -1017,17 +1002,5 @@ export type SimulatedMapClick = {
     promiseQuery: Promise<void>;
     /** Promise resolving when the query of the map click is complete and the UI has been updated */
     promiseQueryBatched: Promise<void>;
-};
-/**
- * Type defining the effective scales of a layer, which are the ones that are actually applied on the map and can differ
- * from the configured ones if the layer is outside of its original configured scales or if the map is outside of them.
- */
-export type EffectiveLayerScales = {
-    maxScale?: number;
-    maxScaleTolerance?: number;
-    maxScaleZoomAt?: number;
-    minScale?: number;
-    minScaleTolerance?: number;
-    minScaleZoomAt?: number;
 };
 //# sourceMappingURL=map-viewer.d.ts.map

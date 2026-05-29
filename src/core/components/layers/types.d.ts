@@ -115,6 +115,8 @@ export interface TypeLegendLayer {
     wmsStyle?: string;
     /** Available WMS styles metadata from WMS capabilities. */
     wmsStyles?: TypeMetadataWMSCapabilityLayerStyle[];
+    /** The Version of the OGC (WMS/WMTS/WFS) used to communicate with the server. */
+    ogcVersion?: string;
     /** Current opacity value (0–1). */
     opacity?: number;
     /** Maximum opacity allowed by the parent layer. */

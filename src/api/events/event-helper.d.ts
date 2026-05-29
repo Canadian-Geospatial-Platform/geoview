@@ -10,6 +10,7 @@ export default class EventHelper {
      * @param sender - The object emitting the event
      * @param handlersList - The list of handlers to be called with the event
      * @param event - The event to emit
+     * @returns The array of values returned by each handler in execution order
      */
     static emitEvent<T, U, Z>(sender: T, handlersList: EventDelegateBase<T, U, Z>[], event: U): Z[];
     /**
@@ -17,6 +18,7 @@ export default class EventHelper {
      *
      * @param handlersList - The list of handlers to be called with the event
      * @param callback - The callback to be executed whenever the event is raised
+     * @returns The registered callback reference
      */
     static onEvent<T, U, Z>(handlersList: EventDelegateBase<T, U, Z>[], callback: EventDelegateBase<T, U, Z>): EventDelegateBase<T, U, Z>;
     /**

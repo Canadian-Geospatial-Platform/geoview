@@ -93,6 +93,74 @@ export declare class WFS extends AbstractGeoViewVector {
      */
     protected onCreateGVLayer(layerConfig: OgcWfsLayerEntryConfig): GVWFS;
     /**
+     * Creates a configuration object for an WFS Feature layer.
+     *
+     * This function constructs a `TypeWFSLayerConfig` object that describes an WFS Feature layer
+     * and its associated entry configurations based on the provided parameters.
+     *
+     * @param geoviewLayerId - A unique identifier for the GeoView layer
+     * @param geoviewLayerName - The display name of the GeoView layer
+     * @param metadataAccessPath - The full service URL to the layer endpoint
+     * @param isTimeAware - Indicates whether the layer supports time-based filtering
+     * @param strategy - Indicates the strategy to use to fetch vector data
+     * @param layerEntries - An array of layer entries objects to be included in the configuration
+     * @returns The constructed configuration object for the WFS Feature layer
+     */
+    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware: boolean | undefined, strategy: VectorStrategy, layerEntries: TypeLayerEntryShell[]): TypeWFSLayerConfig;
+    /**
+     * Initializes a GeoView layer configuration for a WFS layer.
+     *
+     * This method creates a basic TypeGeoviewLayerConfig using the provided
+     * ID, name, and metadata access path URL. It then initializes the layer entries by calling
+     * `initGeoViewLayerEntries`, which may involve fetching metadata or sublayer info.
+     *
+     * @param geoviewLayerId - A unique identifier for the layer
+     * @param geoviewLayerName - The display name of the layer
+     * @param metadataAccessPath - The full service URL to the layer endpoint
+     * @param isTimeAware - Optional to indicates whether the layer supports time-based filtering
+     * @returns A promise that resolves to an initialized GeoView layer configuration with layer entries
+     */
+    static initGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware?: boolean): Promise<TypeGeoviewLayerConfig>;
+    /**
+     * Initializes the layer metadata for a WFS layer entry configuration based on the provided feature type properties.
+     *
+     * This method processes the list of feature type properties obtained from a DescribeFeatureType response, identifies geometry fields,
+     * and sets the appropriate metadata on the layer configuration.
+     *
+     * @param layerConfig - The vector layer entry to configure
+     * @param fields - An array of field names and its aliases
+     */
+    static initLayerMetadata(layerConfig: OgcWfsLayerEntryConfig, fields: TypeOutfields[] | undefined): void;
+    /**
+     * Processes a WFS (Web Feature Service) GeoviewLayerConfig and returns a promise
+     * that resolves to an array of `ConfigBaseClass` layer entry configurations.
+     *
+     * This method:
+     * 1. Creates a Geoview layer configuration using the provided parameters.
+     * 2. Instantiates a layer with that configuration.
+     * 3. Processes the layer configuration and returns the result.
+     *
+     * @param geoviewLayerId - The unique identifier for the GeoView layer
+     * @param geoviewLayerName - The display name for the GeoView layer
+     * @param url - The URL of the service endpoint
+     * @param layerIds - An array of layer IDs to include in the configuration
+     * @param isTimeAware - Indicates if the layer is time aware
+     * @returns A promise that resolves to an array of layer configurations
+     */
+    static processGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, url: string, layerIds: string[], isTimeAware: boolean, vectorStrategy: VectorStrategy, fetchStylesOnWMS: boolean, callbackCreateLayerEntryConfig?: (wfsEntry: TypeLayerEntryShell) => TypeLayerEntryShell): Promise<ConfigBaseClass[]>;
+    /**
+     * Extracts the preferred output format value for a WFS DescribeFeatureType operation
+     * from the parsed WFS capabilities metadata.
+     *
+     * The method navigates through the `ows:OperationsMetadata` section of the capabilities
+     * document to locate the `"DescribeFeatureType"` operation and returns the first available
+     * output format value.
+     *
+     * @param metadata - The parsed WFS capabilities metadata object
+     * @returns The detected output format string for the DescribeFeatureType operation, or an empty string if no suitable value is found
+     */
+    static extractDescribeFeatureOutputFormat(metadata: TypeMetadataWFS): string;
+    /**
      * Fetches the metadata for a typical WFS class.
      *
      * @param url - The url to query the metadata from
@@ -117,32 +185,6 @@ export declare class WFS extends AbstractGeoViewVector {
      * @returns A promise that resolves with the list of fields for the layer
      */
     static fetchMetadataAndRetrieveFieldsInfo(url: string, layerId: string, abortSignal?: AbortSignal): Promise<TypeOutfields[]>;
-    /**
-     * Initializes a GeoView layer configuration for a WFS layer.
-     *
-     * This method creates a basic TypeGeoviewLayerConfig using the provided
-     * ID, name, and metadata access path URL. It then initializes the layer entries by calling
-     * `initGeoViewLayerEntries`, which may involve fetching metadata or sublayer info.
-     *
-     * @param geoviewLayerId - A unique identifier for the layer
-     * @param geoviewLayerName - The display name of the layer
-     * @param metadataAccessPath - The full service URL to the layer endpoint
-     * @param isTimeAware - Optional to indicates whether the layer supports time-based filtering
-     * @returns A promise that resolves to an initialized GeoView layer configuration with layer entries
-     */
-    static initGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware?: boolean): Promise<TypeGeoviewLayerConfig>;
-    /**
-     * Extracts the preferred output format value for a WFS DescribeFeatureType operation
-     * from the parsed WFS capabilities metadata.
-     *
-     * The method navigates through the `ows:OperationsMetadata` section of the capabilities
-     * document to locate the `"DescribeFeatureType"` operation and returns the first available
-     * output format value.
-     *
-     * @param metadata - The parsed WFS capabilities metadata object
-     * @returns The detected output format string for the DescribeFeatureType operation, or an empty string if no suitable value is found
-     */
-    static extractDescribeFeatureOutputFormat(metadata: TypeMetadataWFS): string;
     /**
      * Fetches and parses a WFS `DescribeFeatureType` response from the given URL,
      * automatically selecting the appropriate parsing method (JSON or XML)
@@ -180,6 +222,16 @@ export declare class WFS extends AbstractGeoViewVector {
      */
     static fetchDescribeFeatureXML(url: string, abortSignal?: AbortSignal): Promise<TypeOutfields[]>;
     /**
+     * Determines whether a given WFS feature type field represents a geometry property.
+     *
+     * Checks if the field's type string starts with the `"gml:"` prefix, which indicates
+     * a GML geometry type such as `gml:PointPropertyType`, `gml:PolygonPropertyType`, etc.
+     *
+     * @param field - The feature type field definition to evaluate
+     * @returns `true` if the field is a geometry field; otherwise, `false`
+     */
+    static isGmlGeometryField(field: TypeOutfields): boolean;
+    /**
      * Determines the simplified data type of a specified field from a WFS layer configuration.
      *
      * Extracts the field definition from the layer's metadata, interprets its WFS type
@@ -191,47 +243,5 @@ export declare class WFS extends AbstractGeoViewVector {
      * @returns The normalized field type (`'string'`, `'number'`, or `'date'`)
      */
     static getFieldType(fieldName: string, layerConfig: OgcWfsLayerEntryConfig): TypeOutfieldsType;
-    /**
-     * Determines whether a given WFS feature type field represents a geometry property.
-     *
-     * Checks if the field's type string starts with the `"gml:"` prefix, which indicates
-     * a GML geometry type such as `gml:PointPropertyType`, `gml:PolygonPropertyType`, etc.
-     *
-     * @param field - The feature type field definition to evaluate
-     * @returns `true` if the field is a geometry field; otherwise, `false`
-     */
-    static isGmlGeometryField(field: TypeOutfields): boolean;
-    /**
-     * Creates a configuration object for an WFS Feature layer.
-     *
-     * This function constructs a `TypeWFSLayerConfig` object that describes an WFS Feature layer
-     * and its associated entry configurations based on the provided parameters.
-     *
-     * @param geoviewLayerId - A unique identifier for the GeoView layer
-     * @param geoviewLayerName - The display name of the GeoView layer
-     * @param metadataAccessPath - The full service URL to the layer endpoint
-     * @param isTimeAware - Indicates whether the layer supports time-based filtering
-     * @param strategy - Indicates the strategy to use to fetch vector data
-     * @param layerEntries - An array of layer entries objects to be included in the configuration
-     * @returns The constructed configuration object for the WFS Feature layer
-     */
-    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware: boolean | undefined, strategy: VectorStrategy, layerEntries: TypeLayerEntryShell[]): TypeWFSLayerConfig;
-    /**
-     * Processes a WFS (Web Feature Service) GeoviewLayerConfig and returns a promise
-     * that resolves to an array of `ConfigBaseClass` layer entry configurations.
-     *
-     * This method:
-     * 1. Creates a Geoview layer configuration using the provided parameters.
-     * 2. Instantiates a layer with that configuration.
-     * 3. Processes the layer configuration and returns the result.
-     *
-     * @param geoviewLayerId - The unique identifier for the GeoView layer
-     * @param geoviewLayerName - The display name for the GeoView layer
-     * @param url - The URL of the service endpoint
-     * @param layerIds - An array of layer IDs to include in the configuration
-     * @param isTimeAware - Indicates if the layer is time aware
-     * @returns A promise that resolves to an array of layer configurations
-     */
-    static processGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, url: string, layerIds: string[], isTimeAware: boolean, vectorStrategy: VectorStrategy, fetchStylesOnWMS: boolean, callbackCreateLayerEntryConfig?: (wfsEntry: TypeLayerEntryShell) => TypeLayerEntryShell): Promise<ConfigBaseClass[]>;
 }
 //# sourceMappingURL=wfs.d.ts.map
