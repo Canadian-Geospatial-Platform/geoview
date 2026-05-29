@@ -293,12 +293,6 @@ export class LegendsLayerSet extends AbstractLayerSet {
     try {
       // Save to the store
       setStoreLayerStatus(this.getMapId(), sender.layerPath, layerStatusEvent.layerStatus);
-
-      // TODO: CLEANUP - Remove commented code. In this refactoring of legends-layer-set, I'm not checking for query legend on
-      // TO.DOCONT: every layer status change 2026-05-01
-      // Check if ready to query legend
-      // const layer = this.layerDomain.getGeoviewLayerIfExists(layerConfig.layerPath);
-      // this.#checkQueryLegend(layer, false);
     } catch (error: unknown) {
       // Log
       logger.logError('CAUGHT in handleLayerStatusChanged', sender.layerPath, error);

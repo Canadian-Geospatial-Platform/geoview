@@ -13,6 +13,12 @@ import type { LayerDomain } from '@/core/domains/layer-domain';
 import { getStoreDetailsSelectedLayerPath, type TypeFeatureInfoResultSet } from '@/core/stores/states/feature-info-state';
 import { getStoreUIActiveFooterBarTab, getStoreUIAppBarComponents, getStoreUIFooterBarComponents } from '@/core/stores/states/ui-state';
 import { getStoreMapConfigGlobalSettings } from '@/core/stores/states/map-state';
+import {
+  getStoreLayerLegendLayerByPath,
+  getStoreLayerLegendLayers,
+  getStoreLayerOrderedLayerIndexByPath,
+  setStoreLegendLayersDirectly,
+} from '@/core/stores/states/layer-state';
 import { logger } from '@/core/utils/logger';
 import { whenThisThen } from '@/core/utils/utilities';
 import { LayerNoLastQueryToPerformError } from '@/core/exceptions/geoview-exceptions';
@@ -30,16 +36,7 @@ import {
 import { FeatureInfoLayerSet } from '@/geo/layer/layer-sets/feature-info-layer-set';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 import type { TypeLegendItem, TypeLegendLayer, TypeLegendLayerItem } from '@/core/components/layers/types';
-import {
-  getStoreLayerIcons,
-  getStoreLayerItems,
-  getStoreLayerLegendLayers,
-  getStoreLayerLegendQueryStatus,
-  getStoreLayerLegendSchemaTag,
-  getStoreLayerStyleConfig,
-  getStoreLayerOrderedLayerIndexByPath,
-  setStoreLegendLayersDirectly,
-} from '@/core/stores/states/layer-state';
+import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
@@ -287,267 +284,340 @@ export class LayerSetController extends AbstractMapViewerController {
   /**
    * Propagates the information stored in the legend layer set to the store.
    *
-   * @param legendResultSetEntry - The legend result set entry that triggered the propagation
+   * @param layerPath - The layer path that triggered the propagation
    * @deprecated This function should be replaced, it's called too often and does too many things, see TODO.
    */
   propagateLegendToStore(layerPath: string): void {
     // TODO: REFACTOR - propagateLegendToStore - This whole function should be refactored to an initial propagation into the store and then only specific propagations in the store.
     // TO.DOCONT: Right now things are sometimes recalculated, sometimes reset, sometimes unsure processing, for every single propagation in the store...
 
-    // TODO: REFACTOR - propagateLegendToStore - IMPORTANT, this function uses 'createNewLegendEntries' recursively which sends the children array (existingEntries[entryIndex].children)
+    // TODO: REFACTOR - propagateLegendToStore - IMPORTANT, this function uses '#createOrUpdateLegendEntriesRec' recursively which sends the children array (existingEntries[entryIndex].children)
     // TO.DOCONT: in a loop and pushes objects into the array... However, when pushing objects into an array coming from a Zustand store (or react in general)
     // TO.DOCONT: the array remains the same object and a hook on the array
     // TO.DOCONT: (for example here the "useStoreLayerChildren = createLayerSelectorHook('children')") will never trigger, because
     // TO.DOCONT: as far as react is concerned, it's the same array object.
     // TO.DOCONT: UPDATE: Recently the stores have been fixed so that children are now a new array when updated. Refactoring this should be a bit more straightforward.
 
-    const currentMapResolution = this.getMapViewer().getView().getResolution();
-    const currentMapZoom = this.getMapViewer().getView().getZoom();
-    const calculatedMapScale = this.getMapViewer().getMapScaleFromZoom(currentMapZoom ?? 0);
-
-    const calculatedMapResolution =
-      currentMapResolution ??
-      this.getMapViewer()
-        .getView()
-        .getResolutionForZoom(currentMapZoom ?? 0);
-    const layerPathNodes = layerPath.split('/');
-
-    const setLayerControls = (layerConfig: ConfigBaseClass, isChild = false): TypeLayerControls => {
-      const removeDefault = isChild ? getStoreMapConfigGlobalSettings(this.getMapId())?.canRemoveSublayers !== false : true;
-
-      // Get the initial settings
-      const initialSettings = layerConfig.getInitialSettings();
-
-      // Show zoom-to-visible-scale control whenever the layer has any scale or zoom range constraint.
-      // Do not rely only on layer min/max zoom because constraints can be provided as minScale/maxScale.
-      const visibleScale: boolean =
-        layerConfig.getMinScale() !== undefined ||
-        layerConfig.getMaxScale() !== undefined ||
-        initialSettings?.minZoom !== undefined ||
-        initialSettings?.maxZoom !== undefined;
-
-      // Get the layer controls using default values when needed
-      return {
-        highlight: initialSettings?.controls?.highlight ?? true, // default: true
-        hover: initialSettings?.controls?.hover ?? false, // default: false
-        opacity: initialSettings?.controls?.opacity ?? true, // default: true
-        query: initialSettings?.controls?.query ?? false, // default: false
-        remove: initialSettings?.controls?.remove ?? removeDefault, // default: removeDefault
-        table: initialSettings?.controls?.table ?? true, // default: true
-        visibility: initialSettings?.controls?.visibility ?? true, // default: true
-        zoom: initialSettings?.controls?.zoom ?? true, // default: true
-        visibleScale, // default: false
-      };
-    };
-
-    // TODO: REFACTOR - propagateLegendToStore - Avoid nested function relying on outside parameter like layerPathNodes
-    // TO.DOCONT: The layerId set by this array has the map identifier in front... remove
-    const createNewLegendEntries = (currentLevel: number, existingEntries: TypeLegendLayer[]): void => {
-      // If outside of range of layer paths, stop
-      if (layerPathNodes.length < currentLevel) return;
-
-      const suffix = layerPathNodes.slice(0, currentLevel);
-      const entryLayerPath = suffix.join('/');
-
-      // Get the layer config
-      const layerConfig = this.getControllersRegistry().layerController.getLayerEntryConfigIfExists(entryLayerPath);
-
-      // If not found, skip
-      if (!layerConfig) return;
-
-      // Get the effective visibility scales
-      const effectiveScales = MapViewer.computeEffectiveLayerScales(this.getMapViewer(), layerConfig);
-      const { maxScale, minScale } = effectiveScales;
-
-      // Get the layer if exists
-      const layer = this.getControllersRegistry().layerController.getGeoviewLayerIfExists(entryLayerPath);
-
-      // Interpret the layer name the best we can
-      const layerName = layer?.getLayerName() || layerConfig.getLayerNameCascade();
-
-      let entryIndex = existingEntries.findIndex((entry) => entry.layerPath === entryLayerPath);
-
-      // Get the existing store entry if any
-      const existingStoreEntry: TypeLegendLayer | undefined = existingEntries[entryIndex];
-
-      // Get the layer status
-      const { layerStatus } = layerConfig;
-
-      // Get the legend query status
-      const legendQueryStatus = getStoreLayerLegendQueryStatus(this.getMapId(), layerConfig.layerPath);
-
-      // Get the legend info
-      const legendSchemaTag = getStoreLayerLegendSchemaTag(this.getMapId(), layerConfig.layerPath);
-
-      // Get the style config
-      const legendStyleConfig = getStoreLayerStyleConfig(this.getMapId(), layerConfig.layerPath);
-
-      if (layerConfig.getEntryTypeIsGroup()) {
-        // Get the schema tag
-        const schemaTag = legendSchemaTag ?? layerConfig.getSchemaTag();
-
-        const controls: TypeLayerControls = setLayerControls(layerConfig, currentLevel > 2);
-        if (entryIndex === -1) {
-          const legendLayerEntry: TypeLegendLayer = {
-            controls,
-            layerId: layerConfig.layerId,
-            layerPath: entryLayerPath,
-            layerName,
-            layerStatus,
-            legendQueryStatus: legendQueryStatus ?? 'init',
-            legendSchemaTag,
-            schemaTag: schemaTag,
-            entryType: 'group',
-            canToggle: legendSchemaTag !== CONST_LAYER_TYPES.ESRI_IMAGE,
-            opacity: layerConfig.getInitialSettings()?.states?.opacity ?? 1, // GV: This is call all the time, if set on OL use value, default to config or 1
-            visible: true,
-            inVisibleRange: true,
-            legendCollapsed: layerConfig.getInitialSettings()?.states?.legendCollapsed ?? false, // default: false
-            icons: [] as TypeLegendLayerItem[],
-            items: [] as TypeLegendItem[],
-            children: [] as TypeLegendLayer[],
-            rasterFunction: undefined,
-            mosaicRule: undefined,
-          };
-
-          existingEntries.push(legendLayerEntry);
-          entryIndex = existingEntries.length - 1;
-        } else {
-          // TODO: REFACTOR - propagateLegendToStore - Is it missing group layer entry config properties in the store?
-          // TO.DOCONT: At the time of writing this, it was just updating the layerStatus on the group layer entry.
-          // TO.DOCONT: It seemed to me it should also at least update the name and the bounds (the bounds are tricky, as they get generated only when the children are loaded)
-          // TO.DOCONT: Is there any other group layer entry attributes we would like to propagate in the legends store? I'd think so?
-          // eslint-disable-next-line no-param-reassign
-          existingEntries[entryIndex].layerStatus = layerConfig.layerStatus;
-          // eslint-disable-next-line no-param-reassign
-          existingEntries[entryIndex].layerName = layerName;
-          // eslint-disable-next-line no-param-reassign
-          existingEntries[entryIndex].entryType = 'group';
-        }
-
-        // Continue recursively
-        createNewLegendEntries(currentLevel + 1, existingEntries[entryIndex].children);
-      } else {
-        // Not a group
-        const layerConfigCasted = layerConfig as AbstractBaseLayerEntryConfig;
-
-        const controls: TypeLayerControls = setLayerControls(layerConfig, currentLevel > 2);
-
-        // Get the schema tag
-        const schemaTag = legendSchemaTag ?? layerConfig.getSchemaTag();
-
-        // Get the visibility flag, use the gv layer if we can, or use the initial settings of the config or default true if none are specified
-        // TODO: TEST - Attempt to set the visible state to false by default (it'd make more sense?) and see if it works...
-        // TO.DOCONT: When attempted, it wasn't working for the Hydro - Scale WMS group layers of group layers and the 'Show all' toggle.
-        const visible = layer?.getVisible() ?? layerConfigCasted.getInitialSettings()?.states?.visible ?? true;
-
-        // Reuse existing value, because we try to not manage this property from within this function anymore
-        let bounds = existingStoreEntry?.bounds;
-        let bounds4326 = existingStoreEntry?.bounds4326;
-
-        // Double-check, because this whole 'propagateLegendToStore' function has issues in its recursion and it fails to retrieve existing layer information notably in WMS processing with sub-groups!
-        if (!bounds) {
-          // Instead of assigning undefined in the store, try to get the values from the layer at least
-          bounds = layer?.getBounds();
-          bounds4326 = layer?.getBoundsLonLat();
-        }
-
-        const legendLayerEntry: TypeLegendLayer = {
-          url: layerConfig.getMetadataAccessPath(),
-          bounds,
-          bounds4326,
-          controls,
-          layerId: layerPathNodes[currentLevel - 1],
-          layerPath: entryLayerPath,
-          layerAttribution: layer?.getAttributions(),
-          layerName,
-          layerStatus,
-          legendQueryStatus: legendQueryStatus ?? 'init',
-          styleConfig: legendStyleConfig,
-          schemaTag: schemaTag,
-          entryType: layerConfig.getEntryType(),
-          canToggle: schemaTag !== CONST_LAYER_TYPES.ESRI_IMAGE,
-          opacity: existingStoreEntry?.opacity ?? layerConfig.getInitialSettings()?.states?.opacity ?? 1, // Reuse existing value, because we try to not manage this property from within this function anymore, only when not set assign the config values
-          opacityMaxFromParent: existingStoreEntry?.opacityMaxFromParent ?? 1, // Reuse existing value, because we try to not manage this property from within this function anymore, only when not set assign default
-          hoverable: layerConfig.getInitialSettings()?.states?.hoverable,
-          queryableSource: layerConfigCasted.getQueryableSourceDefaulted(),
-          queryable: layerConfig.getInitialSettings()?.states?.queryable,
-          visible,
-          inVisibleRange: layer?.isInVisibleRange(calculatedMapResolution, calculatedMapScale, effectiveScales) ?? true, // default: true
-          maxScale: maxScale,
-          minScale: minScale,
-          legendCollapsed: layerConfig.getInitialSettings()?.states?.legendCollapsed ?? false, // default: false
-          children: [] as TypeLegendLayer[],
-          items: getStoreLayerItems(this.getMapId(), layerConfig.layerPath) ?? [],
-          icons: getStoreLayerIcons(this.getMapId(), layerConfig.layerPath) ?? [],
-          // TODO: Encapsulate rasterFunction and possibly other 'settings' into their own object
-          rasterFunction: layer instanceof GVEsriImage ? layer.getRasterFunction() : undefined,
-          rasterFunctionInfos: layer instanceof GVEsriImage ? layer.getMetadataRasterFunctionInfos() : undefined,
-          allowedMosaicMethods:
-            layer instanceof GVEsriImage
-              ? ((layer.getLayerConfig().getAllowedMosaicMethods()?.split(',') as TypeMosaicMethod[]) ?? undefined)
-              : undefined,
-          mosaicRule: layer instanceof GVEsriImage ? layer.getMosaicRule() : undefined,
-          timeDimension: layer instanceof AbstractGVLayer ? layer.getTimeDimension() : undefined,
-          hasText: layer instanceof AbstractGVVector ? !!layer.getTextOLLayer() : undefined,
-          textVisible: layer instanceof AbstractGVVector ? layer.getTextVisible() : undefined,
-          wmsStyle: layer instanceof GVWMS ? layer.getWmsStyle() : undefined,
-          wmsStyles: layerConfigCasted instanceof OgcWmsLayerEntryConfig ? layerConfigCasted.getStylesMetadata() : undefined,
-        };
-
-        // If layer is regular (not group)
-        // TODO: CHECK - This condition is irrelevant, because we're already in a else case when the layer is not a group, right?
-        if (layer instanceof AbstractGVLayer) {
-          // Store the layer filter
-          legendLayerEntry.layerFilter = layer.getLayerFilters().getInitialFilter();
-          legendLayerEntry.layerFilterClass = layer.getLayerFilters().getClassFilter();
-          legendLayerEntry.dateTemporalMode = layerConfigCasted.getServiceDateTemporalMode();
-          legendLayerEntry.displayDateFormat = layerConfigCasted.getDisplayDateFormat();
-          legendLayerEntry.displayDateFormatShort = layerConfigCasted.getDisplayDateFormatShort();
-          legendLayerEntry.displayDateTimezone = layerConfigCasted.getDisplayDateTimezone();
-        }
-
-        // If layer config is WMS
-        if (
-          layerConfig instanceof OgcWmsLayerEntryConfig ||
-          layerConfig instanceof OgcWfsLayerEntryConfig ||
-          layerConfig instanceof OgcWmtsLayerEntryConfig
-        ) {
-          legendLayerEntry.ogcVersion = layerConfig.getVersion(); // Don't use getVersionOrDefault here, we want the truth
-        }
-
-        // If non existing in the store yet
-        if (entryIndex === -1) {
-          // Add it
-          existingEntries.push(legendLayerEntry);
-        } else {
-          // Replace it
-          // eslint-disable-next-line no-param-reassign
-          existingEntries[entryIndex] = legendLayerEntry;
-        }
-      }
-    };
+    // Build the propagation context helper
+    const propagationContext = this.#buildLegendPropagationContext(layerPath);
 
     // Obtain the list of layers currently in the store
     const layers = getStoreLayerLegendLayers(this.getMapId());
 
     // Process creation of legend entries
-    createNewLegendEntries(2, layers);
+    this.#createOrUpdateLegendEntriesRec(2, layers, propagationContext);
 
     // Update the legend layers with the updated array, triggering the subscribe
     // Reorder the array so legend tab is in synch
-    const sortedLayers = layers.sort(
-      (a, b) =>
-        getStoreLayerOrderedLayerIndexByPath(this.getMapId(), a.layerPath) -
-        getStoreLayerOrderedLayerIndexByPath(this.getMapId(), b.layerPath)
-    );
-    this.#sortLegendLayersChildren(sortedLayers);
+    const sortedLayers = LayerSetController.#sortLegendLayers(this.getMapId(), layers);
 
     // Set updated legend layers
     setStoreLegendLayersDirectly(this.getMapId(), sortedLayers);
   }
 
   // #endregion PUBLIC METHODS - STORE PROPAGATION
+
+  // #region PRIVATE METHODS - STORE PROPAGATION
+
+  /**
+   * Recursively creates or updates legend entries for the provided layer path nodes.
+   *
+   * @param currentLevel - The current depth level in the layer path nodes
+   * @param existingEntries - The legend entries array to mutate in place
+   * @param context - Context used for recursion and visible-range computation
+   */
+  #createOrUpdateLegendEntriesRec(currentLevel: number, existingEntries: TypeLegendLayer[], context: TypeLegendPropagationContext): void {
+    // If outside of range of layer paths, stop
+    if (context.layerPathNodes.length < currentLevel) return;
+
+    // Create the layer path for the current level
+    const entryLayerPath = context.layerPathNodes.slice(0, currentLevel).join('/');
+
+    // Get the layer config
+    const layerConfig = this.getControllersRegistry().layerController.getLayerEntryConfigIfExists(entryLayerPath);
+
+    // If not found, skip
+    if (!layerConfig) return;
+
+    // Get the layer if it exists
+    const layer = this.getControllersRegistry().layerController.getGeoviewLayerIfExists(entryLayerPath);
+
+    // Find the entry index
+    let entryIndex = existingEntries.findIndex((entry) => entry.layerPath === entryLayerPath);
+
+    if (layerConfig.getEntryTypeIsGroup()) {
+      entryIndex = this.#createOrUpdateLegendGroupEntry(existingEntries, entryIndex, entryLayerPath, layerConfig, layer);
+
+      // Continue recursively
+      this.#createOrUpdateLegendEntriesRec(currentLevel + 1, existingEntries[entryIndex].children, context);
+      return;
+    }
+
+    this.#createOrUpdateLegendLeafEntry(existingEntries, entryIndex, entryLayerPath, layerConfig, layer, context);
+  }
+
+  /**
+   * Creates or updates a group legend entry and returns its index in the entry array.
+   *
+   * @param existingEntries - The legend entries array to mutate in place
+   * @param entryIndex - The current index for the target entry, or -1 if missing
+   * @param entryLayerPath - The target layer path for this entry
+   * @param layerConfig - The layer configuration associated with the entry
+   * @param layer - The layer instance associated with the entry, if available
+   * @returns The index of the group entry in existingEntries
+   */
+  #createOrUpdateLegendGroupEntry(
+    existingEntries: TypeLegendLayer[],
+    entryIndex: number,
+    entryLayerPath: string,
+    layerConfig: ConfigBaseClass,
+    layer: AbstractBaseGVLayer | undefined
+  ): number {
+    // Get the layer name
+    const layerName = LayerSetController.#getLayerName(layer, layerConfig);
+
+    if (entryIndex === -1) {
+      // Get if the layer is a child, use the gv layer if we can or use the layerConfig.getParent
+      const isChild = LayerSetController.#isLegendLayerChild(layerConfig, layer);
+
+      // Build the controls
+      const controls: TypeLayerControls = this.#buildLegendLayerControls(layerConfig, isChild);
+
+      const opacity = layerConfig.getInitialSettings()?.states?.opacity ?? 1; // default: 1
+      const legendCollapsed = layerConfig.getInitialSettings()?.states?.legendCollapsed ?? false; // default: false
+
+      const legendLayerEntry: TypeLegendLayer = {
+        controls,
+        layerId: layerConfig.layerId,
+        layerPath: entryLayerPath,
+        layerName,
+        layerStatus: layerConfig.layerStatus,
+        legendQueryStatus: 'init',
+        legendSchemaTag: undefined,
+        schemaTag: layerConfig.getSchemaTag(),
+        entryType: 'group',
+        canToggle: true,
+        opacity,
+        visible: true,
+        inVisibleRange: true,
+        legendCollapsed,
+        icons: [] as TypeLegendLayerItem[],
+        items: [] as TypeLegendItem[],
+        children: [] as TypeLegendLayer[],
+        rasterFunction: undefined,
+        mosaicRule: undefined,
+      };
+
+      existingEntries.push(legendLayerEntry);
+      return existingEntries.length - 1;
+    }
+
+    // Make sure the entry type for that store entry is 'group', because if the layer was previously a leaf and now is a group, it needs to be updated
+    // TODO: REFACTOR - propagateLegendToStore - this should be refactored so that the entry type is not 'magically' updated in this function
+    // eslint-disable-next-line no-param-reassign
+    existingEntries[entryIndex].entryType = 'group';
+    return entryIndex;
+  }
+
+  /**
+   * Creates or updates a non-group legend entry.
+   *
+   * @param existingEntries - The legend entries array to mutate in place
+   * @param entryIndex - The current index for the target entry, or -1 if missing
+   * @param entryLayerPath - The target layer path for this entry
+   * @param layerConfig - The layer configuration associated with the entry
+   * @param layer - The layer instance associated with the entry, if available
+   * @param context - Context used for visible-range computation
+   */
+  #createOrUpdateLegendLeafEntry(
+    existingEntries: TypeLegendLayer[],
+    entryIndex: number,
+    entryLayerPath: string,
+    layerConfig: ConfigBaseClass,
+    layer: AbstractBaseGVLayer | undefined,
+    context: TypeLegendPropagationContext
+  ): void {
+    // Cast the layer config
+    const layerConfigCasted = layerConfig as AbstractBaseLayerEntryConfig;
+
+    // Get existing store entry if any (for updates)
+    const existingStoreEntry = getStoreLayerLegendLayerByPath(this.getMapId(), entryLayerPath);
+
+    // Get the layer name
+    const layerName = LayerSetController.#getLayerName(layer, layerConfig);
+
+    // Get if the layer is a child, use the gv layer if we can or use the layerConfig.getParent
+    const isChild = LayerSetController.#isLegendLayerChild(layerConfig, layer);
+
+    // Build the controls
+    const controls: TypeLayerControls = this.#buildLegendLayerControls(layerConfig, isChild);
+
+    // Get the visibility flag, use the gv layer if we can, or use the initial settings of the config or default true if none are specified
+    // TODO: TEST - Attempt to set the visible state to false by default (it'd make more sense?) and see if it works...
+    // TO.DOCONT: When attempted, it wasn't working for the Hydro - Scale WMS group layers of group layers and the 'Show all' toggle.
+    const visible = layer?.getVisible() ?? layerConfigCasted.getInitialSettings()?.states?.visible ?? true;
+
+    // Compute effective layer scales to get the in visible range flag
+    const effectiveScales = MapViewer.computeEffectiveLayerScales(this.getMapViewer(), layerConfig);
+    const { maxScale, minScale } = effectiveScales;
+    const inVisibleRange = layer?.isInVisibleRange(context.calculatedMapResolution, context.calculatedMapScale, effectiveScales) ?? true; // default: true
+
+    // Reuse existing value to make sure we don't override it when we shouldn't have (should be refactored, view note of this function)
+    const schemaTag = existingStoreEntry?.legendSchemaTag ?? layerConfig.getSchemaTag();
+    const opacity = existingStoreEntry?.opacity ?? layerConfig.getInitialSettings()?.states?.opacity ?? 1; // default: 1
+    const opacityMaxFromParent = existingStoreEntry?.opacityMaxFromParent ?? 1; // default: 1
+    const legendQueryStatus = existingStoreEntry?.legendQueryStatus ?? 'init'; // default: 'init'
+    const styleConfig = existingStoreEntry?.styleConfig;
+    const items = existingStoreEntry?.items ?? [];
+    const icons = existingStoreEntry?.icons ?? [];
+
+    const legendLayerEntry: TypeLegendLayer = {
+      url: layerConfig.getMetadataAccessPath(),
+      bounds: layer?.getBounds(),
+      bounds4326: layer?.getBoundsLonLat(),
+      controls,
+      layerId: layerConfig.layerId,
+      layerPath: entryLayerPath,
+      layerAttribution: layer?.getAttributions(),
+      layerName,
+      layerStatus: layerConfig.layerStatus,
+      legendQueryStatus,
+      styleConfig,
+      schemaTag,
+      entryType: layerConfig.getEntryType(),
+      canToggle: schemaTag !== CONST_LAYER_TYPES.ESRI_IMAGE,
+      opacity,
+      opacityMaxFromParent,
+      hoverable: layerConfig.getInitialSettings()?.states?.hoverable,
+      queryableSource: layerConfigCasted.getQueryableSourceDefaulted(),
+      queryable: layerConfig.getInitialSettings()?.states?.queryable,
+      visible,
+      inVisibleRange,
+      maxScale,
+      minScale,
+      legendCollapsed: layerConfig.getInitialSettings()?.states?.legendCollapsed ?? false, // default: false
+      children: [] as TypeLegendLayer[],
+      items,
+      icons,
+    };
+
+    // If layer is regular (not group and not undefined!)
+    if (layer instanceof AbstractGVLayer) {
+      // Store the time dimension if any
+      legendLayerEntry.timeDimension = layer.getTimeDimension();
+
+      // Store the layer filter
+      legendLayerEntry.layerFilter = layer.getLayerFilters().getInitialFilter();
+      legendLayerEntry.layerFilterClass = layer.getLayerFilters().getClassFilter();
+      legendLayerEntry.dateTemporalMode = layerConfigCasted.getServiceDateTemporalMode();
+      legendLayerEntry.displayDateFormat = layerConfigCasted.getDisplayDateFormat();
+      legendLayerEntry.displayDateFormatShort = layerConfigCasted.getDisplayDateFormatShort();
+      legendLayerEntry.displayDateTimezone = layerConfigCasted.getDisplayDateTimezone();
+
+      // If the layer is vector
+      if (layer instanceof AbstractGVVector) {
+        legendLayerEntry.hasText = !!layer.getTextOLLayer();
+        legendLayerEntry.textVisible = layer.getTextVisible();
+      }
+
+      // If the layer is GVEsriImage
+      if (layer instanceof GVEsriImage) {
+        // TODO: Encapsulate rasterFunction and possibly other 'settings' into their own object
+        legendLayerEntry.rasterFunction = layer.getRasterFunction();
+        legendLayerEntry.rasterFunctionInfos = layer.getMetadataRasterFunctionInfos();
+        legendLayerEntry.mosaicRule = layer.getMosaicRule();
+        legendLayerEntry.allowedMosaicMethods = layer.getLayerConfig().getAllowedMosaicMethods()?.split(',') as
+          | TypeMosaicMethod[]
+          | undefined;
+      }
+
+      // If the layer is WMS
+      if (layer instanceof GVWMS) {
+        legendLayerEntry.wmsStyle = layer.getWmsStyle();
+      }
+    }
+
+    // If the layer config is WMS
+    if (layerConfig instanceof OgcWmsLayerEntryConfig) {
+      legendLayerEntry.wmsStyles = layerConfig.getStylesMetadata();
+    }
+
+    // If layer config is OGC
+    if (
+      layerConfig instanceof OgcWmsLayerEntryConfig ||
+      layerConfig instanceof OgcWfsLayerEntryConfig ||
+      layerConfig instanceof OgcWmtsLayerEntryConfig
+    ) {
+      legendLayerEntry.ogcVersion = layerConfig.getVersion(); // Don't use getVersionOrDefault() here - we want the truth
+    }
+
+    // If non existing in the store yet
+    if (entryIndex === -1) {
+      // Add it
+      existingEntries.push(legendLayerEntry);
+      return;
+    }
+
+    // Replace it
+    // eslint-disable-next-line no-param-reassign
+    existingEntries[entryIndex] = legendLayerEntry;
+  }
+
+  /**
+   * Builds the legend controls object for a layer config.
+   *
+   * @param layerConfig - The layer config used to derive controls
+   * @param isChild - Indicates if the layer is nested under another layer
+   * @returns The computed legend controls object
+   */
+  #buildLegendLayerControls(layerConfig: ConfigBaseClass, isChild: boolean): TypeLayerControls {
+    const removeDefault = isChild ? getStoreMapConfigGlobalSettings(this.getMapId())?.canRemoveSublayers !== false : true;
+
+    // Get the initial settings
+    const initialSettings = layerConfig.getInitialSettings();
+
+    // Show zoom-to-visible-scale control whenever the layer has any scale or zoom range constraint.
+    // Do not rely only on layer min/max zoom because constraints can be provided as minScale/maxScale.
+    const visibleScale: boolean =
+      layerConfig.getMinScale() !== undefined ||
+      layerConfig.getMaxScale() !== undefined ||
+      initialSettings?.minZoom !== undefined ||
+      initialSettings?.maxZoom !== undefined;
+
+    // Get the layer controls using default values when needed
+    return {
+      highlight: initialSettings?.controls?.highlight ?? true, // default: true
+      hover: initialSettings?.controls?.hover ?? false, // default: false
+      opacity: initialSettings?.controls?.opacity ?? true, // default: true
+      query: initialSettings?.controls?.query ?? false, // default: false
+      remove: initialSettings?.controls?.remove ?? removeDefault, // default: removeDefault
+      table: initialSettings?.controls?.table ?? true, // default: true
+      visibility: initialSettings?.controls?.visibility ?? true, // default: true
+      zoom: initialSettings?.controls?.zoom ?? true, // default: true
+      visibleScale, // default: false
+    };
+  }
+
+  /**
+   * Builds propagation context for legend updates.
+   *
+   * @param layerPath - The layer path to propagate
+   * @returns The context object used while propagating legend entries
+   */
+  #buildLegendPropagationContext(layerPath: string): TypeLegendPropagationContext {
+    const mapViewer = this.getMapViewer();
+    const mapView = mapViewer.getView();
+    const currentMapZoom = mapView.getZoom();
+    const currentMapResolution = mapView.getResolution();
+
+    return {
+      layerPathNodes: layerPath.split('/'),
+      calculatedMapScale: mapViewer.getMapScaleFromZoom(currentMapZoom ?? 0),
+      calculatedMapResolution: currentMapResolution ?? mapView.getResolutionForZoom(currentMapZoom ?? 0),
+    };
+  }
+
+  // #endregion PRIVATE METHODS - STORE PROPAGATION
 
   // #region ACTION HANDLERS
 
@@ -598,24 +668,90 @@ export class LayerSetController extends AbstractMapViewerController {
 
   // #endregion DOMAIN HANDLERS
 
-  // #region PRIVATE METHODS - STORE PROPAGATION
+  // #region STATIC METHODS
+
+  /**
+   * Gets the best available layer display name.
+   *
+   * @param layer - The layer, if it exists
+   * @param layerConfig - The layer config associated with the path
+   * @returns The layer display name
+   */
+  static #getLayerName(layer: AbstractBaseGVLayer | undefined, layerConfig: ConfigBaseClass): string {
+    return layer?.getLayerName() || layerConfig.getLayerNameCascade();
+  }
+
+  /**
+   * Checks if the legend entry belongs to a nested layer.
+   *
+   * @param layerConfig - The layer config associated with the entry
+   * @param layer - The runtime layer instance, when available
+   * @returns True when the layer is nested under a parent
+   */
+  static #isLegendLayerChild(layerConfig: ConfigBaseClass, layer: AbstractBaseGVLayer | undefined): boolean {
+    return layer ? !!layer.getParent() : !!layerConfig.getParentLayerConfig();
+  }
+
+  /**
+   * Sorts top-level and nested legend layers by ordered layer index.
+   *
+   * @param mapId - The map ID to use for retrieving layer order information from the store
+   * @param legendLayers - The legend layers list to sort in place
+   * @returns The same list instance after sorting
+   */
+  static #sortLegendLayers(mapId: string, legendLayers: TypeLegendLayer[]): TypeLegendLayer[] {
+    const orderedLayerIndexByPath = LayerSetController.#createOrderedLayerIndexByPathGetter(mapId);
+
+    legendLayers.sort((a, b) => orderedLayerIndexByPath(a.layerPath) - orderedLayerIndexByPath(b.layerPath));
+    LayerSetController.#sortLegendLayersChildren(legendLayers, orderedLayerIndexByPath);
+
+    return legendLayers;
+  }
 
   /**
    * Sorts legend layers children recursively in the given legend layers list.
    *
    * @param legendLayerList - The legend layer list to sort
+   * @param orderedLayerIndexByPath - Function returning the store order index for a layer path
    */
-  #sortLegendLayersChildren(legendLayerList: TypeLegendLayer[]): void {
+  static #sortLegendLayersChildren(legendLayerList: TypeLegendLayer[], orderedLayerIndexByPath: (layerPath: string) => number): void {
     legendLayerList.forEach((legendLayer) => {
       if (legendLayer.children.length)
-        legendLayer.children.sort(
-          (a, b) =>
-            getStoreLayerOrderedLayerIndexByPath(this.getMapId(), a.layerPath) -
-            getStoreLayerOrderedLayerIndexByPath(this.getMapId(), b.layerPath)
-        );
-      this.#sortLegendLayersChildren(legendLayer.children);
+        legendLayer.children.sort((a, b) => orderedLayerIndexByPath(a.layerPath) - orderedLayerIndexByPath(b.layerPath));
+      LayerSetController.#sortLegendLayersChildren(legendLayer.children, orderedLayerIndexByPath);
     });
   }
 
-  // #endregion PRIVATE METHODS - STORE PROPAGATION
+  /**
+   * Creates a memoized getter for ordered layer indexes by path.
+   *
+   * @param mapId - The map ID to query from the store
+   * @returns A function that returns a cached ordered index for each requested path
+   */
+  static #createOrderedLayerIndexByPathGetter(mapId: string): (layerPath: string) => number {
+    const indexByLayerPath = new Map<string, number>();
+
+    return (layerPath: string): number => {
+      const cachedValue = indexByLayerPath.get(layerPath);
+      if (cachedValue !== undefined) return cachedValue;
+
+      const orderedIndex = getStoreLayerOrderedLayerIndexByPath(mapId, layerPath);
+      indexByLayerPath.set(layerPath, orderedIndex);
+      return orderedIndex;
+    };
+  }
+
+  // #endregion STATIC METHODS
 }
+
+/** Context used while recursively propagating legend entries to the store. */
+type TypeLegendPropagationContext = {
+  /** Layer path tokens split by '/'. */
+  layerPathNodes: string[];
+
+  /** Map resolution used by in-visible-range checks. */
+  calculatedMapResolution: number | undefined;
+
+  /** Map scale used by in-visible-range checks. */
+  calculatedMapScale: number | undefined;
+};

@@ -28,6 +28,7 @@ import {
   getStoreLayerOrderedLayerIndexByPath,
   getStoreLayerOrderedLayerPaths,
   setStoreLayerAllMapLayerCollapsed,
+  setStoreLayerBounds,
   setStoreLayerDateTemporal,
   setStoreLayerDeletionStartTime,
   setStoreLayerDisplayDateFormat,
@@ -50,7 +51,6 @@ import {
   setStoreLayerOrderedLayers,
   setStoreLayerSelectedLayersTabLayer,
   utilFindLayerAndChildrenPaths,
-  setStoreLayerBounds,
 } from '@/core/stores/states/layer-state';
 import { getStoreAppDisplayDateMode, getStoreAppShowLayerHighlightLayerBbox } from '@/core/stores/states/app-state';
 import { setStoreDataTableFilter } from '@/core/stores/states/data-table-state';
