@@ -98,6 +98,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
    */
   protected override async onProcessLayerMetadata(
     layerConfig: VectorTilesLayerEntryConfig,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     displayDateMode: DisplayDateMode,
     mapProjection?: OLProjection,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

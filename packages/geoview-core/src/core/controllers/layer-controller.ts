@@ -2030,7 +2030,7 @@ export class LayerController extends AbstractMapViewerController {
    * @param sender - The layer domain that fired the event
    * @param event - The event containing the unregistered layer
    */
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this, @typescript-eslint/no-unused-vars
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   #handleDomainLayerUnregistered(sender: LayerDomain, event: DomainLayerRegisteredEvent): void {
     //
     // Do something here....
@@ -2078,7 +2078,6 @@ export class LayerController extends AbstractMapViewerController {
    * @param sender - The layer domain that fired the event
    * @param event - The event containing the loading state change
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   #handleDomainLayerLoadingChanged(sender: LayerDomain, event: DomainLayerBaseEvent): void {
     // Update the store that at least 1 layer is loading
     setStoreLayersAreLoading(this.getMapId(), true);
@@ -2126,7 +2125,6 @@ export class LayerController extends AbstractMapViewerController {
    * @param sender - The layer domain that fired the event
    * @param event - The event containing the loaded state change
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   #handleDomainLayerAllLoaded(sender: LayerDomain, event: DomainLayerStatusChangedEvent): void {
     // Update the store that all layers are loaded at this point
     setStoreLayersAreLoading(this.getMapId(), false);

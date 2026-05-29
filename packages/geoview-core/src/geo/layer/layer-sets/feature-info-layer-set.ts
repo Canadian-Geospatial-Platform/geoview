@@ -85,7 +85,6 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     // Abort all in-flight queries from a previous call and create a fresh controller for this call
     this.#abortController.abort();
     this.#abortController = new AbortController();
-    const { signal } = this.#abortController;
 
     // The result set to be returned
     const querySet: TypeFeatureInfoResultSet = {};
@@ -115,7 +114,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
         setStoreFeatureInfoDetails(this.getMapId(), layerPath, 'processing', undefined, false);
 
         // Process query and handle results
-        return this.#queryLayerAndProcess(layerPath, lonLatCoordinate, querySet, signal, callbackWhenFirstQueryStarted);
+        return this.#queryLayerAndProcess(layerPath, lonLatCoordinate, querySet, callbackWhenFirstQueryStarted);
       });
 
     // Await for the promises to settle
@@ -169,7 +168,6 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     layerPath: string,
     lonLatCoordinate: Coordinate,
     querySet: TypeFeatureInfoResultSet,
-    signal: AbortSignal,
     callbackWhenFirstQueryStarted?: () => void
   ): Promise<void> {
     // Get the layer associated with the layer path
@@ -203,7 +201,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
             querySet[layerPath].featuresHaveGeometry = true;
 
             // Only propagate to the store if this query has not been superseded
-            if (!signal.aborted) {
+            if (!this.#abortController.signal.aborted) {
               setStoreFeatureInfoDetailsUpdateFeaturesHaveGeometry(this.getMapId(), layerPath, true);
             }
           })
@@ -237,12 +235,12 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
       querySet[layerPath].features = arrayOfRecords;
 
       // Only propagate to the store if this query has not been superseded
-      if (!signal.aborted) {
+      if (!this.#abortController.signal.aborted) {
         setStoreFeatureInfoDetails(this.getMapId(), layerPath, 'processed', arrayOfRecords, !promiseResult.promiseGeometries);
       }
     } catch (error: unknown) {
       // If aborted
-      if (error instanceof RequestAbortedError || signal.aborted) {
+      if (error instanceof RequestAbortedError || this.#abortController.signal.aborted) {
         // Log
         logger.logDebug('Query aborted and replaced by another one.. keep spinning..');
       } else {

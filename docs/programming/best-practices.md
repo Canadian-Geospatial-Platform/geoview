@@ -38,6 +38,27 @@ async fetchMetadata(id: string): Promise<void> {
 const handleClick = useCallback((): void => { ... }, []);
 ```
 
+Prefer optional property syntax (`?:`) for class attributes and type/interface properties that may be absent. In most cases, this is clearer than using an explicit `| undefined` union.
+
+```ts
+// Preferred in most cases
+class LayerInfo {
+  layerName?: string;
+}
+
+type TypeLayerConfig = {
+  sourceUrl?: string;
+};
+
+// Use only when presence-vs-absence must be distinguished
+class LayerState {
+  // Property is always present, but value can be undefined
+  sourceUrl: string | undefined;
+}
+```
+
+Use `property: Type | undefined` only when that distinction is intentional and required by behavior (for example: serialization differences, merge semantics, or APIs that depend on checking whether a key exists).
+
 ## 2- Avoid using variable names that are too short.
 
 It is difficult to know what a variable with the name `e` refers to. Is it an `element`, an `event` or anything else whose name starts
@@ -249,7 +270,25 @@ In classes, functions should be ordered in the following way:
 - static private
 - event types
 
-## 12- React Performance Patterns
+## 12- EventHelper handler parameter naming
+
+When subscribing to events emitted through our `EventHelper` delegates, handler methods should use the parameter names `sender` and `event`.
+
+This naming is required for consistency and readability across the codebase. These names are also treated as exceptions in our no-unused-parameter ESLint rule, so they should be used even when one of the arguments is not consumed in the implementation.
+
+```ts
+// ✅ Good: EventHelper delegate naming convention
+this.getMapViewer().onMapMoveEnd((sender, event): void => {
+  logger.logDebug('Map moved', event.lonlat);
+});
+
+// ✅ Also good when one parameter is intentionally unused
+this.getMapViewer().onMapInit((sender, event): void => {
+  initializeSomething();
+});
+```
+
+## 13- React Performance Patterns
 
 ### useMemo Naming Convention
 

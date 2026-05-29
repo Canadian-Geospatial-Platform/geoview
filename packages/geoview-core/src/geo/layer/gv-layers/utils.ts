@@ -176,7 +176,7 @@ export class GVLayerUtilities {
     const likeRegex = new RegExp(`\\b(${escapedFields.join('|')})\\b\\s+like\\s+('([^']*)')`, 'gi');
 
     // Proceed
-    filterValueToUse = filterValueToUse.replace(likeRegex, (_match, field: string, quotedValue: string, rawValue: string) => {
+    filterValueToUse = filterValueToUse.replace(likeRegex, (_match: string, field: string, _quotedValue: string, rawValue: string) => {
       // Uppercase the literal content, not the quotes
       const upperValue = rawValue.toUpperCase();
       return `UPPER(${field}) LIKE '${upperValue}'`;

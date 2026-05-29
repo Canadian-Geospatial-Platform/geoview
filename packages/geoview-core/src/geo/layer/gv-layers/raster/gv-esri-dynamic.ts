@@ -301,6 +301,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @returns A promise that resolves with the feature info result
    */
   protected override async getAllFeatureInfo(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     map: OLMap,
     layerFilters: LayerFilters,
     language: TypeDisplayLanguage,

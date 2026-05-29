@@ -17,7 +17,7 @@ interface ExportButtonProps {
   layerPath: string;
   rows: DataTableRow[];
   columns: MRTColumnDef<DataTableRow>[];
-  children?: ReactElement | undefined;
+  children?: ReactElement;
 }
 
 /** The columns to remove from the data when exporting */

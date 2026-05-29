@@ -240,7 +240,9 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * @returns A promise that resolves with the feature info result.
    */
   protected override getAllFeatureInfo(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     map: OLMap,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     layerFilters: LayerFilters,
     language: TypeDisplayLanguage,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

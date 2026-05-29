@@ -542,10 +542,10 @@ export class LayerSetController extends AbstractMapViewerController {
   /**
    * Handles a single click on the map by querying all queryable layers at the click location.
    *
-   * @param mapViewer - The map viewer instance that fired the event
+   * @param sender - The map viewer instance that fired the event
    * @param event - The map single click event containing the click coordinates
    */
-  #handleMapClicked(mapViewer: MapViewer, event: MapSingleClickEvent): void {
+  #handleMapClicked(sender: MapViewer, event: MapSingleClickEvent): void {
     // Perform a query at the clicked lonlat
     this.queryAtLonLat(event.lonlat).catch((error: unknown) => {
       // Log
@@ -556,11 +556,10 @@ export class LayerSetController extends AbstractMapViewerController {
   /**
    * Handles the map pointer move event by clearing all hover feature info results.
    *
-   * @param mapViewer - The map viewer instance that fired the event
+   * @param sender - The map viewer instance that fired the event
    * @param event - The map pointer move event
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  #handleMapPointerMoved(mapViewer: MapViewer, event: MapPointerMoveEvent): void {
+  #handleMapPointerMoved(sender: MapViewer, event: MapPointerMoveEvent): void {
     // Clear all hover features
     this.hoverFeatureInfoLayerSet.clearResults();
   }
@@ -568,10 +567,10 @@ export class LayerSetController extends AbstractMapViewerController {
   /**
    * Handles the map pointer stop event by querying hoverable layers at the pointer position.
    *
-   * @param mapViewer - The map viewer instance that fired the event
+   * @param sender - The map viewer instance that fired the event
    * @param event - The map pointer move event containing the pixel coordinates
    */
-  #handleMapPointerStopped(mapViewer: MapViewer, event: MapPointerMoveEvent): void {
+  #handleMapPointerStopped(sender: MapViewer, event: MapPointerMoveEvent): void {
     // Query
     this.hoverFeatureInfoLayerSet.queryLayers(event.pixel).catch((error: unknown) => {
       // Log

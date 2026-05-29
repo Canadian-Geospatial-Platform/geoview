@@ -325,6 +325,24 @@ See [time-dimension.md](../docs/programming/time-dimension.md) for the full arch
 
 GeoView uses a lightweight typed delegate event system (see [event-helper.md](../docs/programming/event-helper.md)). Classes own private handler arrays (`#onXxxHandlers`) and expose `onXxx()`/`offXxx()` subscribe/unsubscribe methods. Events are emitted via `EventHelper.emitEvent()`. Controllers subscribe in `onHook()` and unsubscribe in `onUnhook()`.
 
+**Handler parameter naming convention (required):** For EventHelper delegate handlers, always name parameters `sender` and `event`.
+
+- Use `(sender, event)` even if one parameter is not used in the body.
+- `sender` and `event` are exception names in the no-unused-parameter ESLint rule.
+- Apply this convention in controllers, domains, APIs, and any callback wired to `onXxx()` EventHelper delegates.
+
+```typescript
+// ✅ Good
+mapViewer.onMapMoveEnd((sender, event) => {
+  logger.logDebug(event.lonlat);
+});
+
+// ❌ Avoid
+mapViewer.onMapMoveEnd((map, e) => {
+  logger.logDebug(e.lonlat);
+});
+```
+
 ## TypeScript Conventions
 
 ### Type Safety (Strict Enforcement)
@@ -350,6 +368,25 @@ function reset(force = true): void {}
 // ✅ Good: Type annotation IS needed when TypeScript cannot infer
 const layers: string[] = [];
 useState<TypeBasemapProps[]>([]);
+```
+
+- **Prefer optional property syntax for optional attributes/properties**: For class attributes and type/interface properties that may be absent, prefer `prop?: Type` over `prop?: Type | undefined`.
+
+```typescript
+// ✅ Good: concise optional property
+interface LayerConfig {
+  layerName?: string;
+}
+
+// ❌ Avoid in most cases: redundant undefined union on optional property
+interface LayerConfig {
+  layerName?: string | undefined;
+}
+
+// ✅ Exception: use this only when presence-vs-absence must be distinguished
+interface LayerState {
+  layerName: string | undefined;
+}
 ```
 
 - **Avoid name collisions**: Use `GVLayer` not `Layer` when OpenLayers has a `Layer` class

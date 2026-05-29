@@ -984,7 +984,7 @@ export function safeStringify(obj: any, space = 2): string {
 
   return JSON.stringify(
     obj,
-    (key, value) => {
+    (_key, value) => {
       if (typeof value === 'object' && value !== null) {
         if (seen.has(value)) {
           return '{Circular JSON}'; // Or return undefined to remove the property

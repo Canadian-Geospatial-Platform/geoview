@@ -309,18 +309,18 @@ export abstract class AbstractLayerSet {
    * from the layer domain and registers it into the system's layer set. If registration fails, errors
    * are logged appropriately.
    *
-   * @param layerConfig - The configuration object for the layer
+   * @param sender - The configuration object for the layer
    * @param event - The layer status change event
    */
-  #handleLayerStatusChanged(layerConfig: ConfigBaseClass, event: LayerStatusChangedEvent): void {
+  #handleLayerStatusChanged(sender: ConfigBaseClass, event: LayerStatusChangedEvent): void {
     try {
       // If the layer status is 'loaded', otherwise, don't even try yet
       if (event.layerStatus === 'loaded') {
         // The layer has become loaded
-        layerConfig.offLayerStatusChanged(this.#boundedHandleLayerStatusChanged);
+        sender.offLayerStatusChanged(this.#boundedHandleLayerStatusChanged);
 
         // Get the layer
-        const layer = this.layerDomain.getGeoviewLayer(layerConfig.layerPath);
+        const layer = this.layerDomain.getGeoviewLayer(sender.layerPath);
 
         // Register the layer itself (not the layer config) automatically in the layer set
         this.registerLayer(layer).catch((error: unknown) => {

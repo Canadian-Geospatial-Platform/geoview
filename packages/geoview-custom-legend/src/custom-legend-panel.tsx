@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
-import { useStoreAppDisplayLanguage } from 'geoview-core/core/stores/states/app-state';
 import { logger } from 'geoview-core/core/utils/logger';
 
 import { getSxClasses } from './custom-legend-style';
@@ -33,13 +32,11 @@ export function CustomLegendPanel(props: CustomLegendPanelProps): JSX.Element {
   const theme = ui.useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
-  const appDisplayLanguage = useStoreAppDisplayLanguage();
-
   return (
     <Box sx={sxClasses.container}>
       <List className="legendList" sx={sxClasses.legendList}>
         {legendList.map((item, index) => {
-          const itemId = generateLegendItemId(item, index, appDisplayLanguage);
+          const itemId = generateLegendItemId(item, index);
           return <LegendItem key={itemId} item={item} sxClasses={sxClasses} itemPath={itemId} />;
         })}
       </List>

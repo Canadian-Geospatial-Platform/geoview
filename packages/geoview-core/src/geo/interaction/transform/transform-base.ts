@@ -1699,7 +1699,6 @@ export class OLTransform extends OLPointer {
    * @returns Whether the event was handled
    */
   // TODO: Rewrite the function name, if this function overrides a mother function, it probably shouldn't be prefixed with 'handle'.
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   override handleUpEvent(event: MapBrowserEvent<PointerEvent>): boolean {
     if (this.#inHandleUpEvent) return false;
     this.#inHandleUpEvent = true;

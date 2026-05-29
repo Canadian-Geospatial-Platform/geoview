@@ -68,7 +68,7 @@ export const Guide = memo(function GuidePanel({ containerType }: GuideType): JSX
    * Handles search state changes from GuideSearch component.
    */
   const handleSearchStateChange = useCallback(
-    (newSearchTerm: string, newHighlightFunction: (content: string, sectionIndex: number) => string): void => {
+    (_newSearchTerm: string, newHighlightFunction: (content: string, sectionIndex: number) => string): void => {
       setHighlightFunction(() => newHighlightFunction);
     },
     []

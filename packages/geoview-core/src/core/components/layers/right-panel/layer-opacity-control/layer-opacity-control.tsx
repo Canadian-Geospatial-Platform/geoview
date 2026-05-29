@@ -74,6 +74,7 @@ export function LayerOpacityControl({ layerPath }: LayerOpacityControlProps): JS
    * @param updateStore - Should the store be updated.
    */
   const handleSliderChange = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     (value: number | number[], activeThumb: number, updateStore = false): void => {
       const val = (Array.isArray(value) ? value[0] : value) / 100;
       const newValue = Math.min(val, layerParentOpacity);
