@@ -17,13 +17,7 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "0",
-            "layerName": "Toronto Neighbourhoods",
-            "source": {
-              "featureInfo": {
-                "queryable": true,
-                "nameField": "AREA_NA7"
-              }
-            }
+            "layerName": "Toronto Neighbourhoods"
           }
         ]
       },
@@ -34,20 +28,7 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "0",
-            "layerName": "U2 Tour Locations",
-            "source": {
-              "featureInfo": {
-                "queryable": true,
-                "nameField": "Venue",
-                "outfields": [
-                  { "name": "Venue", "alias": "Venue", "type": "string", "domain": null },
-                  { "name": "Event", "alias": "Event", "type": "string", "domain": null },
-                  { "name": "Tour", "alias": "Tour", "type": "string", "domain": null },
-                  { "name": "City", "alias": "City", "type": "string", "domain": null },
-                  { "name": "Date", "alias": "Date", "type": "date", "domain": null }
-                ]
-              }
-            }
+            "layerName": "U2 Tour Locations"
           }
         ]
       },

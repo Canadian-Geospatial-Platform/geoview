@@ -37,5 +37,7 @@
     "ntsSheetUrl": "https://geogratis.gc.ca/services/delimitation/en/nts",
     "altitudeUrl": "https://geogratis.gc.ca/services/elevation/cdem/altitude"
   },
-  "version": "1.0"
+  "configMeta": {
+    "version": "1.0"
+  }
 }

@@ -18,11 +18,7 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "0",
-            "layerName": "World Topo Map",
-            "initialSettings": {
-              "minZoom": 3,
-              "maxZoom": 8
-            }
+            "layerName": "World Topo Map"
           }
         ]
       },

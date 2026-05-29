@@ -48,7 +48,7 @@ import {
   getStoreMapConfigListOfGeoviewLayerConfig,
   getStoreMapConfigNavBar,
   getStoreMapConfigOverviewMap,
-  getStoreMapConfigSchemaVersionUsed,
+  getStoreMapConfigMeta,
   getStoreMapConfigServiceUrls,
   getStoreMapConfigViewSettings,
   getStoreMapCurrentBasemapOptions,
@@ -1076,7 +1076,7 @@ export class MapController extends AbstractMapViewerController {
         corePackagesConfig,
         externalPackages: getStoreMapConfigExternalPackages(mapId),
         serviceUrls: getStoreMapConfigServiceUrls(mapId),
-        schemaVersionUsed: getStoreMapConfigSchemaVersionUsed(mapId),
+        configMeta: getStoreMapConfigMeta(mapId),
         globalSettings: getStoreMapConfigGlobalSettings(mapId),
       };
 

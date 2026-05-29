@@ -26,7 +26,7 @@ import type {
   TypeValidMapCorePackageProps,
   TypeExternalPackagesProps,
   TypeServiceUrls,
-  TypeValidVersions,
+  TypeConfigMeta,
 } from '@/api/types/map-schema-types';
 import { DEFAULT_HIGHLIGHT_COLOR, MAP_CENTER, MAP_ZOOM_LEVEL } from '@/api/types/map-schema-types';
 import type { MapConfigLayerEntry } from '@/api/types/layer-schema-types';
@@ -850,9 +850,8 @@ export const getStoreMapConfigGlobalSettings = (mapId: string): TypeGlobalSettin
 /** Returns the service URLs from the map config. */
 export const getStoreMapConfigServiceUrls = (mapId: string): TypeServiceUrls => getStoreMapConfigState(mapId).serviceUrls;
 
-/** Returns the schema version used in the map config. */
-export const getStoreMapConfigSchemaVersionUsed = (mapId: string): TypeValidVersions | undefined =>
-  getStoreMapConfigState(mapId).schemaVersionUsed;
+/** Returns the config metadata from the map config. */
+export const getStoreMapConfigMeta = (mapId: string): TypeConfigMeta | undefined => getStoreMapConfigState(mapId).configMeta;
 
 /** Returns the view settings from the map config. */
 export const getStoreMapConfigViewSettings = (mapId: string): TypeViewSettings => getStoreMapConfigState(mapId).map.viewSettings;

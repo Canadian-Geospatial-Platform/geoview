@@ -97,7 +97,7 @@ Config
 ├── externalPackages[]
 ├── serviceUrls
 ├── globalSettings
-└── schemaVersionUsed
+└── configMeta
 ```
 
 ## 🔗 Related Documentation

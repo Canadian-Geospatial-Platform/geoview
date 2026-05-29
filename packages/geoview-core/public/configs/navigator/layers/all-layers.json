@@ -16,18 +16,18 @@
       },
       {
         "geoviewLayerId": "geojsonLYR1",
-        "geoviewLayerName": "GeoJSON Sample",
+        "geoviewLayerName": "GeoJSON Sample - GeoJSON",
         "metadataAccessPath": "./datasets/geojson/metadata.meta",
         "geoviewLayerType": "GeoJSON",
         "serviceDateFormat": "DD/MM/YYYYTHH:mm:ss",
         "listOfLayerEntryConfig": [
           {
             "layerId": "polygons.json",
-            "layerName": "Polygons"
+            "layerName": "Polygons - GeoJSON"
           },
           {
             "layerId": "lines.json",
-            "layerName": "Lines"
+            "layerName": "Lines - GeoJSON"
           },
           {
             "entryType": "group",
@@ -36,12 +36,11 @@
             "listOfLayerEntryConfig": [
               {
                 "layerId": "icon_points.json",
-                "layerName": "Icons",
-                "initialSettings": { "states": { "visible": false } }
+                "layerName": "Icons - GeoJSON"
               },
               {
                 "layerId": "points.json",
-                "layerName": "Points"
+                "layerName": "Points - GeoJSON"
               }
             ]
           }
@@ -49,12 +48,12 @@
       },
       {
         "geoviewLayerId": "csvLYR1",
-        "geoviewLayerName": "NPRI",
+        "geoviewLayerName": "NPRI - CSV",
         "geoviewLayerType": "CSV",
         "listOfLayerEntryConfig": [
           {
             "layerId": "NPRI-INRP_WaterEau_MediaGroupMilieu_2022",
-            "layerName": "NPRI Water Media Group 2022",
+            "layerName": "NPRI Water Media Group 2022 - CSV",
             "source": {
               "dataAccessPath": "./datasets/csv-files/NPRI-INRP_WaterEau_MediaGroupMilieu_2022.csv",
               "separator": ","
@@ -63,8 +62,20 @@
         ]
       },
       {
-        "geoviewLayerId": "historical-flood",
-        "geoviewLayerName": "Historical Flood Events (HFE)",
+        "geoviewLayerId": "esriDynamicLYR1",
+        "geoviewLayerName": "Forest Industry - esriDynamic",
+        "metadataAccessPath": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/FGP/TE/MapServer",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "1",
+            "layerName": "Annotation 1867 - esriDynamic"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "historical-flood-feature",
+        "geoviewLayerName": "Historical Flood Events (HFE) - esriFeature",
         "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer",
         "geoviewLayerType": "esriFeature",
         "listOfLayerEntryConfig": [
@@ -73,9 +84,20 @@
           }
         ]
       },
+            {
+        "geoviewLayerId": "historical-flood-dynamic",
+        "geoviewLayerName": "Historical Flood Events (HFE) - esriDynamic",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0"
+          }
+        ]
+      },
       {
         "geoviewLayerId": "ESRIImageLYR3",
-        "geoviewLayerName": "Heat Wave",
+        "geoviewLayerName": "Heat Wave - esriImage",
         "geoviewLayerType": "esriImage",
         "metadataAccessPath": "https://agriculture.canada.ca/imagery-images/rest/services/agclimate/heat_wave/ImageServer",
         "listOfLayerEntryConfig": [
@@ -85,25 +107,27 @@
         ]
       },
       {
-        "geoviewLayerId": "wfsLYR2",
-        "geoviewLayerName": "Current Conditions",
-        "metadataAccessPath": "https://geo.weather.gc.ca/geomet?REQUEST=GetCapabilities&VERSION=2.0.0&SERVICE=WFS",
-        "geoviewLayerType": "ogcWfs",
+        "geoviewLayerId": "geotiffLYR1",
+        "geoviewLayerName": "Montreal True Color - GeoTIFF",
+        "geoviewLayerType": "GeoTIFF",
+        "metadataAccessPath": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/18/T/YR/2020/7/S2A_18TYR_20200706_0_L2A/",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "ec-msc:CURRENT_CONDITIONS",
-            "layerName": "Current Conditions"
+            "layerId": "TCI",
+            "source": {
+              "dataAccessPath": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/18/T/YR/2020/7/S2A_18TYR_20200706_0_L2A/TCI.tif"
+            }
           }
         ]
       },
       {
         "geoviewLayerId": "staticLYR10",
-        "geoviewLayerName": "Static Image",
+        "geoviewLayerName": "Static Image - imageStatic",
         "geoviewLayerType": "imageStatic",
         "listOfLayerEntryConfig": [
           {
             "layerId": "napl-ring-of-fire-1954",
-            "layerName": "Static Image",
+            "layerName": "Static Image - imageStatic",
             "source": {
               "dataAccessPath": "https://datacube-prod-data-public.s3.ca-central-1.amazonaws.com/store/imagery/aerial/napl/napl-ring-of-fire/napl-ring-of-fire-1954-08-07-60k-thumbnail.png",
               "extent": [-87.77486341686723, 51.62285357468582, -84.57727128084842, 53.833354975551075],
@@ -113,8 +137,21 @@
         ]
       },
       {
+        "geoviewLayerId": "kmlLYR1",
+        "geoviewLayerName": "Canadian Tornado Database - KML",
+        "geoviewLayerType": "KML",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "CanadianNationalTornadoDatabase_1980-2009",
+            "source": {
+              "dataAccessPath": "./datasets/kml-files/CanadianNationalTornadoDatabase_1980-2009.kml"
+            }
+          }
+        ]
+      },
+      {
         "geoviewLayerId": "ogcFeatureLYR1",
-        "geoviewLayerName": "Large Lakes",
+        "geoviewLayerName": "Large Lakes - ogcFeature",
         "metadataAccessPath": "https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev",
         "geoviewLayerType": "ogcFeature",
         "listOfLayerEntryConfig": [
@@ -124,14 +161,26 @@
         ]
       },
       {
+        "geoviewLayerId": "wfsLYR2",
+        "geoviewLayerName": "Current Conditions - ogcWfs",
+        "metadataAccessPath": "https://geo.weather.gc.ca/geomet?REQUEST=GetCapabilities&VERSION=2.0.0&SERVICE=WFS",
+        "geoviewLayerType": "ogcWfs",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "ec-msc:CURRENT_CONDITIONS",
+            "layerName": "Current Conditions - ogcWfs"
+          }
+        ]
+      },
+      {
         "geoviewLayerId": "wmsLYR1-msi",
-        "geoviewLayerName": "MSI",
+        "geoviewLayerName": "MSI - ogcWms",
         "metadataAccessPath": "https://datacube.services.geo.ca/ows/msi",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
             "layerId": "msi-94-or-more",
-            "layerName": "Permanent Snow",
+            "layerName": "Permanent Snow - ogcWms",
             "source": {
               "wmsStyle": "msi-binary",
               "featureInfo": {
@@ -151,29 +200,50 @@
         ]
       },
       {
-        "geoviewLayerId": "xyzTilesLYR1",
-        "geoviewLayerName": "World_Topo_Map",
-        "metadataAccessPath": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/",
-        "geoviewLayerType": "xyzTiles",
+        "geoviewLayerId": "wmtsLYR1",
+        "geoviewLayerName": "Shaded Basemap - ogcWmts",
+        "geoviewLayerType": "ogcWmts",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/CBME_CBCE_HS_RO_3978/MapServer/WMTS/1.0.0/WMTSCapabilities.xml",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "0",
-            "layerName": "World Topo Map",
-            "initialSettings": { "minZoom": 3, "maxZoom": 8 }
+            "layerId": "BaseMaps_CBME_CBCE_HS_RO_3978",
+            "tileMatrixSet": "default028mm"
           }
         ]
       },
       {
         "geoviewLayerId": "vectorTilesLYR1",
-        "geoviewLayerName": "new basemap",
+        "geoviewLayerName": "Basemap French Style - vectorTiles",
         "geoviewLayerType": "vectorTiles",
         "metadataAccessPath": "https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT_CBCT_3978_V_OSM/VectorTileServer/",
         "listOfLayerEntryConfig": [
           {
             "layerId": "CBMT_CBCT_3978_V_OSM",
-            "layerName": "Vector Tile basemap - French Style",
-            "styleUrl": "https://nrcan-rncan.maps.arcgis.com/sharing/rest/content/items/88ad9e2ef6e040a19472985e6606a2f9/resources/styles/root.json",
-            "initialSettings": { "minZoom": 3, "maxZoom": 18 }
+            "layerName": "Vector Tile basemap - vectorTiles",
+            "styleUrl": "https://nrcan-rncan.maps.arcgis.com/sharing/rest/content/items/88ad9e2ef6e040a19472985e6606a2f9/resources/styles/root.json"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "wkbLYR1",
+        "geoviewLayerName": "South Africa - WKB",
+        "geoviewLayerType": "WKB",
+        "metadataAccessPath": "0103000000010000000500000054E3A59BC4602540643BDF4F8D1739C05C8FC2F5284C4140EC51B81E852B34C0D578E926316843406F1283C0CAD141C01B2FDD2406012B40A4703D0AD79343C054E3A59BC4602540643BDF4F8D1739C0",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "1"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "xyzTilesLYR1",
+        "geoviewLayerName": "World Topo Map - xyzTiles",
+        "metadataAccessPath": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/",
+        "geoviewLayerType": "xyzTiles",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "layerName": "World Topo Map - xyzTiles"
           }
         ]
       }

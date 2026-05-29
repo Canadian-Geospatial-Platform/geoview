@@ -28,17 +28,7 @@
         "geoviewLayerType": "esriDynamic",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "ERROR",
-            "initialSettings": {
-              "controls": {
-                "query": true,
-                "hover": true
-              },
-              "states": {
-                "queryable": false,
-                "hoverable": false
-              }
-            }
+            "layerId": "ERROR"
           }
         ]
       }

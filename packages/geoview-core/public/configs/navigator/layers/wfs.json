@@ -18,8 +18,7 @@
         "geoviewLayerType": "ogcWfs",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "usa:states",
-            "layerFilter": "STATE_ABBR = 'NY'"
+            "layerId": "usa:states"
           }
         ]
       },
@@ -66,7 +65,6 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "ms:cities",
-            "layerFilter": "POPULATION >= 250000",
             "source": {
               "featureInfo": {
                 "nameField": "NAME"
@@ -83,7 +81,6 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "ms:cities",
-            "layerFilter": "POPULATION >= 250000",
             "wmsLayerId": "cities",
             "source": {
               "featureInfo": {

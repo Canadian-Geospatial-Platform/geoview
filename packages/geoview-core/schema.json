@@ -45,8 +45,8 @@
         "serviceUrls": {
           "$ref": "#/definitions/TypeServiceUrls"
         },
-        "schemaVersionUsed": {
-          "$ref": "#/definitions/TypeValidVersions"
+        "configMeta": {
+          "$ref": "#/definitions/TypeConfigMeta"
         },
         "globalSettings": {
           "$ref": "#/definitions/TypeGlobalSettings"
@@ -220,7 +220,19 @@
         },
         "selectedTab": {
           "type": "string",
-          "enum": ["", "geolocator", "geochart", "details", "legend", "guide", "data-table", "layers", "aoi-panel", "custom-legend", "about-panel"],
+          "enum": [
+            "",
+            "geolocator",
+            "geochart",
+            "details",
+            "legend",
+            "guide",
+            "data-table",
+            "layers",
+            "aoi-panel",
+            "custom-legend",
+            "about-panel"
+          ],
           "description": "App bar tab to be selected at map load, it will open the panel"
         },
         "selectedDataTableLayerPath": {
@@ -355,6 +367,28 @@
           "type": "string",
           "description": "Service end point to access altitude of a point.",
           "default": "https://geogratis.gc.ca/services/elevation/cdem/altitude"
+        }
+      }
+    },
+    "TypeConfigMeta": {
+      "additionalProperties": false,
+      "type": "object",
+      "description": "Metadata about the configuration file, including version, description, author, and date.",
+      "properties": {
+        "version": {
+          "$ref": "#/definitions/TypeValidVersions"
+        },
+        "description": {
+          "type": "string",
+          "description": "A free-text description of the map configuration."
+        },
+        "author": {
+          "type": "string",
+          "description": "The author or creator of the map configuration."
+        },
+        "date": {
+          "type": "string",
+          "description": "The creation or last-modified date of the map configuration (ISO 8601 format recommended)."
         }
       }
     },

@@ -17,10 +17,7 @@
         "metadataAccessPath": "https://agriculture.canada.ca/imagery-images/rest/services/agclimate/dry_spell/ImageServer",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "dry_spell",
-            "source": {
-              "rasterFunction": "ds_gs"
-            }
+            "layerId": "dry_spell"
           }
         ]
       },

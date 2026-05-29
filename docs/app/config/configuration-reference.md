@@ -111,7 +111,7 @@ interface TypeMapFeaturesInstance {
   externalPackages?: TypeExternalPackages;
   serviceUrls?: TypeServiceUrls;
   globalSettings?: TypeGlobalSettings;
-  schemaVersionUsed?: TypeValidVersions;
+  configMeta?: TypeConfigMeta;
 }
 ```
 

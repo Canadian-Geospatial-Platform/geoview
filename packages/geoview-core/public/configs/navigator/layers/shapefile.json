@@ -23,12 +23,7 @@
         "metadataAccessPath": "./datasets/shapefiles/DIG_2012_0028.zip",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "sunchild_aquifer_py_tm",
-            "initialSettings": {
-              "states": {
-                "visible": false
-              }
-            }
+            "layerId": "sunchild_aquifer_py_tm"
           }
         ]
       },

@@ -31,8 +31,7 @@
             "listOfLayerEntryConfig": [
               {
                 "layerId": "icon_points.json",
-                "layerName": "Icons",
-                "initialSettings": { "states": { "visible": false } }
+                "layerName": "Icons"
               },
               {
                 "layerId": "points.json",
@@ -79,8 +78,7 @@
             "listOfLayerEntryConfig": [
               {
                 "layerId": "icon_points.json",
-                "layerName": "Icons",
-                "initialSettings": { "states": { "visible": false } }
+                "layerName": "Icons"
               },
               {
                 "layerId": "points.json",

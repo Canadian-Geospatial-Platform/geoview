@@ -58,12 +58,7 @@
                 "layerId": "Lakes"
               },
               {
-                "layerId": "Countries",
-                "initialSettings": {
-                  "states": {
-                    "visible": false
-                  }
-                }
+                "layerId": "Countries"
               }
             ],
             "source": {

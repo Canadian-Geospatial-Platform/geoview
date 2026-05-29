@@ -938,13 +938,16 @@
         </div>
 
         <div class="option-item">
-          <p><strong>schemaVersionUsed</strong> <code>string</code> <em style="color: #6c757d">optional</em> (TypeValidVersions)</p>
-          <p>The schema version used to validate the configuration file.</p>
-          <p><strong>Valid values:</strong></p>
+          <p><strong>configMeta</strong> <code>object</code> <em style="color: #6c757d">optional</em> (TypeConfigMeta)</p>
+          <p>Metadata about the configuration file, including version, description, author, and date.</p>
           <ul>
-            <li><code>'1.0'</code> - Version 1.0 (default and only accepted version)</li>
+            <li>
+              <code>version</code> <em>string</em> - The schema version. Valid values: <code>'1.0'</code>. Default: <code>'1.0'</code>
+            </li>
+            <li><code>description</code> <em>string</em> - A free-text description of the map configuration.</li>
+            <li><code>author</code> <em>string</em> - The author or creator of the map configuration.</li>
+            <li><code>date</code> <em>string</em> - The creation or last-modified date (ISO 8601 format recommended).</li>
           </ul>
-          <p><strong>Default:</strong> <code>'1.0'</code></p>
         </div>
 
         <button type="button" class="collapsible">Example Configurations</button>
@@ -962,7 +965,9 @@
     "ntsSheetUrl": "https://geogratis.gc.ca/services/delimitation/en/nts",
     "altitudeUrl": "https://geogratis.gc.ca/services/elevation/cdem/altitude"
   },
-  "schemaVersionUsed": "1.0"
+  "configMeta": {
+    "version": "1.0"
+  }
 }
             </code></pre>
           <h3>Dark Theme Configuration:</h3>
@@ -1012,7 +1017,9 @@
     "coordinateInfoEnabled": true,
     "hideCoordinateInfoSwitch": false
   },
-  "schemaVersionUsed": "1.0"
+  "configMeta": {
+    "version": "1.0"
+  }
 }
             </code></pre>
         </div>

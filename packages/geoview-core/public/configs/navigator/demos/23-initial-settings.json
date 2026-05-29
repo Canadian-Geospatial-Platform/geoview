@@ -11,6 +11,160 @@
     },
     "listOfGeoviewLayerConfig": [
       {
+        "geoviewLayerId": "historical-flood",
+        "geoviewLayerName": "Historical Flood Events (HFE)",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "initialSettings": {
+              "controls": {
+                "query": true,
+                "hover": true
+              },
+              "states": {
+                "queryable": false,
+                "hoverable": false,
+                "opacity": 0.5
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "ESRIImageLYR1",
+        "geoviewLayerName": "Dry Spell",
+        "geoviewLayerType": "esriImage",
+        "metadataAccessPath": "https://agriculture.canada.ca/imagery-images/rest/services/agclimate/dry_spell/ImageServer",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "dry_spell",
+            "source": {
+              "rasterFunction": "ds_30"
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "ogcFeatureLYR1",
+        "geoviewLayerName": "Large Lakes",
+        "metadataAccessPath": "https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev",
+        "geoviewLayerType": "ogcFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "lakes",
+            "layerFilter": "name in ('Lake Victoria', 'Lake Superior', 'L. Erie', 'L. Ontario')"
+          }
+        ]
+      },
+       {
+        "geoviewLayerId": "wfsLYR1",
+        "geoviewLayerName": "US States",
+        "metadataAccessPath": "https://ahocevar.com/geoserver/wfs",
+        "geoviewLayerType": "ogcWfs",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "usa:states",
+            "layerFilter": "STATE_ABBR = 'NY'"
+          }
+        ]
+      },
+       {
+        "geoviewLayerId": "LYR15-qgis",
+        "geoviewLayerName": "Cities Experimental",
+        "metadataAccessPath": "https://demo.mapserver.org/cgi-bin/wfs",
+        "geoviewLayerType": "ogcWfs",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "ms:cities",
+            "layerFilter": "POPULATION >= 250000",
+            "wmsLayerId": "cities",
+            "source": {
+              "featureInfo": {
+                "nameField": "NAME"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "wmsLYR1-Root",
+        "geoviewLayerName": "Weather Group",
+        "metadataAccessPath": "https://geo.weather.gc.ca/geomet",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "entryType": "group",
+            "layerId": "wmsLYR1-Group",
+            "layerName": "Group",
+            "listOfLayerEntryConfig": [
+              {
+                "layerId": "CURRENT_CONDITIONS"
+              },
+              {
+                "layerId": "GDPS.ETA_ICEC",
+                "layerName": "Ice Cover",
+                "source": {
+                  "wmsStyle": "SEA_ICECONC"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "wmsLYR1-msi",
+        "geoviewLayerName": "MSI",
+        "metadataAccessPath": "https://datacube.services.geo.ca/ows/msi",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "msi-94-or-more",
+            "layerName": "Permanent Snow",
+            "source": {
+              "wmsStyle": "msi-binary",
+              "featureInfo": {
+                "queryable": true,
+                "nameField": "band-0-pixel-value",
+                "outfields": [
+                  {
+                    "name": "band-0-pixel-value",
+                    "alias": "Pixel value",
+                    "type": "number",
+                    "domain": null
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "FeatureServerLyr2",
+        "metadataAccessPath": "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/U2/FeatureServer/",
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "layerName": "U2 Tour Locations",
+            "source": {
+              "featureInfo": {
+                "queryable": true,
+                "nameField": "Tour",
+                "outfields": [
+                  { "name": "Venue", "alias": "Venue Set", "type": "string", "domain": null },
+                  { "name": "Event", "alias": "Event Set", "type": "string", "domain": null },
+                  { "name": "Tour", "alias": "Tour Set", "type": "string", "domain": null },
+                  { "name": "City", "alias": "City Set", "type": "string", "domain": null },
+                  { "name": "Date", "alias": "Date Set", "type": "date", "domain": null }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      {
         "geoviewLayerId": "geojsonLYR1",
         "geoviewLayerName": "Root Settings Layer",
         "metadataAccessPath": "./datasets/geojson/metadata.meta",

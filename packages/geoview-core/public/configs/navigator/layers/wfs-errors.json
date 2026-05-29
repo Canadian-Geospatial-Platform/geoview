@@ -19,8 +19,7 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "usa:states",
-            "layerName": "US States",
-            "layerFilter": "STATE_ABBR = 'NY'"
+            "layerName": "US States"
           }
         ]
       },
@@ -32,8 +31,7 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "usa:statesERROR",
-            "layerName": "US States",
-            "layerFilter": "STATE_ABBR = 'NY'"
+            "layerName": "US States"
           }
         ]
       }

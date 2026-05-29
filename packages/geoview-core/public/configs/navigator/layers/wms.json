@@ -20,7 +20,6 @@
           {
             "layerId": "cities",
             "wfsLayerId": "ms:cities",
-            "layerFilter": "POPULATION >= 250000",
             "source": {
               "featureInfo": {
                 "nameField": "NAME"
@@ -101,10 +100,7 @@
               },
               {
                 "layerId": "GDPS.ETA_ICEC",
-                "layerName": "Ice Cover",
-                "source": {
-                  "wmsStyle": "SEA_ICECONC"
-                }
+                "layerName": "Ice Cover"
               }
             ]
           }
@@ -118,22 +114,7 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "msi-94-or-more",
-            "layerName": "Permanent Snow",
-            "source": {
-              "wmsStyle": "msi-binary",
-              "featureInfo": {
-                "queryable": true,
-                "nameField": "band-0-pixel-value",
-                "outfields": [
-                  {
-                    "name": "band-0-pixel-value",
-                    "alias": "Pixel value",
-                    "type": "number",
-                    "domain": null
-                  }
-                ]
-              }
-            }
+            "layerName": "Permanent Snow"
           }
         ]
       },
@@ -145,10 +126,7 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "RADAR_1KM_RSNO",
-            "layerName": "Test Spatiotemporel",
-            "source": {
-              "wmsStyle": "Radar-Snow_14colors"
-            }
+            "layerName": "Test Spatiotemporel"
           }
         ]
       },
@@ -191,48 +169,13 @@
         ]
       },
       {
-        "geoviewLayerId": "nfi-group-with-slash",
-        "geoviewLayerName": "Nfi Plot Test Slash",
-        "metadataAccessPath": "https://nfi.nfis.org/mapserver/cgi-bin/nfi_plot_summaries_en.cgi?service=WMS",
-        "geoviewLayerType": "ogcWms",
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "photo/plot/with/slash",
-            "layerName": "Photo/Plot/Group",
-            "entryType": "group",
-            "listOfLayerEntryConfig": [
-              {
-                "layerId": "ca_nfiphotoplot_lc_a_en"
-              },
-              {
-                "layerId": "ca_nfiphotoplot_lu_a_en"
-              },
-              {
-                "layerId": "ca_nfiphotoplot_ow_a_en"
-              },
-              {
-                "layerId": "ca_nfiphotoplot_ps_a_en"
-              }
-            ]
-          },
-          {
-            "layerId": "ca_nfigroundplot_cartographic_a"
-          }
-        ]
-      },
-      {
         "geoviewLayerId": "ows-mundialis",
         "geoviewLayerName": "OWS Mundialis",
         "metadataAccessPath": "https://ows.mundialis.de/services/service",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "Dark",
-            "initialSettings": {
-              "states": {
-                "visible": false
-              }
-            }
+            "layerId": "Dark"
           }
         ]
       },

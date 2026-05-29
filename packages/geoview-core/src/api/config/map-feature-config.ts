@@ -1,5 +1,6 @@
 import type {
   TypeAppBarProps,
+  TypeConfigMeta,
   TypeDisplayTheme,
   TypeFooterBarProps,
   TypeGlobalSettings,
@@ -13,7 +14,6 @@ import type {
   TypeValidMapComponentProps,
   TypeValidNavBarProps,
   TypeExternalPackagesProps,
-  TypeValidVersions,
 } from '@/api/types/map-schema-types';
 import {
   DEFAULT_MAP_FEATURE_CONFIG,
@@ -69,11 +69,8 @@ export class MapFeatureConfig {
   /** Indicates whether schema validation errors were detected during configuration parsing. */
   hasSchemaErrors = false;
 
-  /**
-   * The schema version used to validate the configuration file. The schema should enumerate the list of versions accepted by
-   * this version of the viewer.
-   */
-  schemaVersionUsed?: TypeValidVersions;
+  /** Metadata about the configuration file, including version and optional description. */
+  configMeta?: TypeConfigMeta;
 
   /**
    * Creates an instance of MapFeatureConfig.
@@ -129,7 +126,7 @@ export class MapFeatureConfig {
     this.corePackagesConfig = [...(userMapFeatureConfig.corePackagesConfig ?? DEFAULT_MAP_FEATURE_CONFIG.corePackagesConfig ?? [])];
     this.externalPackages = [...(userMapFeatureConfig.externalPackages ?? DEFAULT_MAP_FEATURE_CONFIG.externalPackages ?? [])];
     this.globalSettings = deepMerge(DEFAULT_MAP_FEATURE_CONFIG.globalSettings, userMapFeatureConfig.globalSettings);
-    this.schemaVersionUsed = userMapFeatureConfig.schemaVersionUsed ?? DEFAULT_MAP_FEATURE_CONFIG.schemaVersionUsed;
+    this.configMeta = deepMerge(DEFAULT_MAP_FEATURE_CONFIG.configMeta, userMapFeatureConfig.configMeta);
   }
 
   /**

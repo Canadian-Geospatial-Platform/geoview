@@ -30,11 +30,8 @@ export type TypeMapFeaturesInstance = {
   corePackagesConfig?: TypeCorePackagesConfig;
   /** List of external packages. */
   externalPackages?: TypeExternalPackagesProps[];
-  /**
-   * The schema version used to validate the configuration file. The schema should enumerate the list of versions accepted by
-   * this version of the viewer.
-   */
-  schemaVersionUsed?: TypeValidVersions;
+  /** Metadata about the configuration file, including version and optional description. */
+  configMeta?: TypeConfigMeta;
   /** Global settings. */
   globalSettings?: TypeGlobalSettings;
 };
@@ -220,6 +217,18 @@ export type TypeServiceUrls = {
    * Default = CONFIG_ALTITUDE_URL ("https://geogratis.gc.ca/services/elevation/cdem/altitude")
    */
   altitudeUrl?: string;
+};
+
+/** Metadata about the configuration file. */
+export type TypeConfigMeta = {
+  /** The schema version used to validate the configuration file. */
+  version?: TypeValidVersions;
+  /** A free-text description of the map configuration. */
+  description?: string;
+  /** The author or creator of the map configuration. */
+  author?: string;
+  /** The creation or last-modified date of the map configuration (ISO 8601 format recommended). */
+  date?: string;
 };
 
 /** Valid schema version number. */
@@ -558,7 +567,7 @@ export const DEFAULT_MAP_FEATURE_CONFIG = {
     hideCoordinateInfoSwitch: false,
     displayDateMode: 'long',
   },
-  schemaVersionUsed: '1.0',
+  configMeta: { version: '1.0' },
 } as unknown as MapFeatureConfig;
 
 /** Definition of the default order of the tabs inside appbar. */

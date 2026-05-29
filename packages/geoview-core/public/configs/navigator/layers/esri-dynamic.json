@@ -28,18 +28,7 @@
         "geoviewLayerType": "esriDynamic",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "0",
-            "initialSettings": {
-              "controls": {
-                "query": true,
-                "hover": true
-              },
-              "states": {
-                "queryable": false,
-                "hoverable": false,
-                "opacity": 0.5
-              }
-            }
+            "layerId": "0"
           }
         ]
       },
@@ -51,12 +40,7 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "4",
-            "layerName": "Test",
-            "initialSettings": {
-              "states": {
-                "legendCollapsed": false
-              }
-            }
+            "layerName": "Test"
           },
           {
             "layerId": "1",

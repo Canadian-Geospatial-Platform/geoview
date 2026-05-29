@@ -1,4 +1,8 @@
 {
+  "configMeta": {
+    "version": "1.0",
+    "description": "Tests geocore with custom inline config to override the layerIds shown by the default UUID, set specific initialSettings states and controls, and apply custom styles."
+  },
   "map": {
     "interaction": "dynamic",
     "viewSettings": {

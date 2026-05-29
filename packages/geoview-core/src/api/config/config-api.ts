@@ -244,7 +244,9 @@ export class ConfigApi {
       }
 
       // update the version if provided from the map configuration.
-      jsonConfig.schemaVersionUsed = urlParams.v as TypeValidVersions | undefined;
+      if (urlParams.v) {
+        jsonConfig.configMeta = { ...jsonConfig.configMeta, version: urlParams.v as TypeValidVersions };
+      }
     }
 
     // Trace the detail config read from url

@@ -45,11 +45,6 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "completed",
-            "initialSettings": {
-              "states": {
-                "visible": false
-              }
-            },
             "layerStyle": {
               "Point": {
                 "type": "uniqueValue",
