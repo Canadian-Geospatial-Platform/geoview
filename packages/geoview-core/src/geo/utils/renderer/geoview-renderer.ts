@@ -52,6 +52,14 @@ type TypeStyleProcessor = (
   options?: TypeStyleProcessorOptions
 ) => Style | undefined;
 
+type TypeEsriLegendItem = {
+  label: string;
+  contentType: string;
+  imageData: string;
+  width: number;
+  height: number;
+};
+
 /**
  * Options object for processing styles with optional parameters
  */
@@ -222,6 +230,105 @@ export abstract class GeoviewRenderer {
   }
 
   /**
+   * Loads the image of an icon that compose the legend.
+   *
+   * This is an alternate method of loadImage because the latter had some issues? See the GV comments in the callers. Refactor them together?
+   *
+   * @param src - Source information (base64 image) of the image to load
+   * @returns A promise that resolves with the loaded image, or null if loading fails
+   */
+  static loadImageFromDataUrl(src: string): Promise<HTMLImageElement> {
+    return new Promise((resolve, reject) => {
+      const image = new Image();
+      image.onload = (): void => {
+        resolve(image);
+      };
+      image.onerror = (error): void => {
+        reject(error);
+      };
+      image.src = src;
+    });
+  }
+
+  /**
+   * Reads a blob as a data URL.
+   *
+   * @param blob - The blob to convert
+   * @returns A promise that resolves with the data URL or null if conversion fails
+   */
+  static readBlobAsDataUrl(blob: Blob): Promise<string | null> {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = (): void => {
+        resolve(typeof reader.result === 'string' ? reader.result : null);
+      };
+      reader.onerror = (): void => {
+        resolve(null);
+      };
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  /**
+   * Creates unique-value style infos from Esri legend entries.
+   *
+   * @param legendInfo - The legend entries returned by Esri legend endpoints
+   * @param visible - Default visibility value to assign to each entry
+   * @returns The unique-value style info array
+   */
+  static createUniqueValueStyleInfoFromEsriLegend(legendInfo: TypeEsriLegendItem[], visible = true): TypeLayerStyleConfigInfo[] {
+    return legendInfo.map((info) => {
+      return {
+        label: info.label,
+        visible,
+        values: info.label.split(','),
+        settings: {
+          type: 'iconSymbol',
+          mimeType: info.contentType,
+          src: info.imageData,
+          width: info.width,
+          height: info.height,
+        },
+      };
+    });
+  }
+
+  /**
+   * Creates a point style config from Esri legend entries.
+   *
+   * @param legendInfo - The legend entries returned by Esri legend endpoints
+   * @param visible - Default visibility value to assign to each entry
+   * @returns The point style configuration for legend rendering
+   */
+  static createPointStyleConfigFromEsriLegend(legendInfo: TypeEsriLegendItem[], visible = true): TypeLayerStyleConfig {
+    return {
+      Point: {
+        type: 'uniqueValue',
+        fields: ['default'],
+        hasDefault: false,
+        info: this.createUniqueValueStyleInfoFromEsriLegend(legendInfo, visible),
+      },
+    };
+  }
+
+  // #region CREATE CANVAS
+
+  /**
+   * Creates a canvas from a loaded image.
+   *
+   * @param image - The image to draw
+   * @returns The canvas containing the drawn image
+   */
+  static createCanvasFromImage(image: HTMLImageElement): HTMLCanvasElement {
+    const drawingCanvas = document.createElement('canvas');
+    drawingCanvas.width = image.width;
+    drawingCanvas.height = image.height;
+    const drawingContext = drawingCanvas.getContext('2d', { willReadFrequently: true })!;
+    drawingContext.drawImage(image, 0, 0);
+    return drawingCanvas;
+  }
+
+  /**
    * Creates a canvas with the image of an icon that is defined in the point style.
    *
    * @param pointStyle - Optional style associated to the point symbol
@@ -249,8 +356,6 @@ export abstract class GeoviewRenderer {
       return null;
     }
   }
-
-  // #region CREATE CANVAS
 
   /**
    * Creates a canvas with the vector point settings that are defined in the point style.

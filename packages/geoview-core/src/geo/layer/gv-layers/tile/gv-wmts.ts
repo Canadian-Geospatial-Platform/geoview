@@ -8,12 +8,14 @@ import type {
   OgcWmtsLayerEntryConfig,
   TypeMetadataWMTSLayer,
 } from '@/api/config/validation-classes/raster-validation-classes/ogc-wmts-layer-entry-config';
+import { CONST_LAYER_TYPES, type TypeLegend } from '@/api/types/layer-schema-types';
 import { AbstractGVTile } from '@/geo/layer/gv-layers/tile/abstract-gv-tile';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { Fetch } from '@/core/utils/fetch-helper';
-import { CONST_LAYER_TYPES, type TypeLegend } from '@/api/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';
+import type { TypeEsriImageLayerLegend } from '@/geo/layer/gv-layers/raster/gv-esri-image';
+import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 
 /**
  * Manages a WMTS layer.
@@ -105,36 +107,25 @@ export class GVWMTS extends AbstractGVTile {
    * Gets the legend image of a layer.
    *
    * @param layerConfig - The layer configuration.
-   * @returns A promise that resolves with an image blob or null
+   * @returns A promise that resolves with the legend image as a data URL or null
    */
-  static #getLegendImage(layerConfig: OgcWmtsLayerEntryConfig): Promise<string | ArrayBuffer | null> {
-    const promisedImage = new Promise<string | ArrayBuffer | null>((resolve) => {
-      const metadata = layerConfig.getLayerMetadata();
-      const layer = metadata?.Layer as TypeMetadataWMTSLayer | undefined;
-      const foundStyle = Array.isArray(layer?.Style)
-        ? layer.Style.find((style) => style['@attributes'].isDefault === 'true') || layer.Style[0]
-        : layer?.Style;
+  static async #getLegendImage(layerConfig: OgcWmtsLayerEntryConfig): Promise<string | null> {
+    const metadata = layerConfig.getLayerMetadata();
+    const layer = metadata?.Layer as TypeMetadataWMTSLayer | undefined;
+    const foundStyle = Array.isArray(layer?.Style)
+      ? layer.Style.find((style) => style['@attributes'].isDefault === 'true') || layer.Style[0]
+      : layer?.Style;
+    const legendUrl = foundStyle?.LegendURL?.['@attributes']?.['xlink:href'];
 
-      const legendUrl = foundStyle?.LegendURL?.['@attributes']?.['xlink:href'];
-
-      if (legendUrl) {
-        // Fetch the blob
-        Fetch.fetchBlob(legendUrl, { credentials: 'omit' })
-          .then((blob) => {
-            // The blob has been read, read it with a FileReader
-            const reader = new FileReader();
-            reader.onloadend = () => {
-              resolve(reader.result);
-            };
-            reader.onerror = () => {
-              resolve(null);
-            };
-            reader.readAsDataURL(blob);
-          })
-          .catch(() => resolve(null));
-      } else resolve(null);
-    });
-    return promisedImage;
+    if (legendUrl) {
+      try {
+        const legendBlob = await Fetch.fetchBlob(legendUrl, { credentials: 'omit' });
+        return await GeoviewRenderer.readBlobAsDataUrl(legendBlob);
+      } catch {
+        return null;
+      }
+    }
+    return null;
   }
 
   /**
@@ -152,50 +143,92 @@ export class GVWMTS extends AbstractGVTile {
 
       // If legend image was read
       if (legendImage) {
-        // Create image element directly to avoid recursion
+        // Create image element directly to avoid recursion.
         // GV: use direct Image constructor to avoid errors using GeoviewRenderer.loadImage
-        const image = new Image();
-
-        // Create promise for image loading
-        const imageLoaded = new Promise<HTMLImageElement>((resolve, reject) => {
-          image.onload = () => {
-            resolve(image);
-          };
-          image.onerror = (error) => {
-            reject(error);
-          };
-          // Set src to start loading
-          image.src = legendImage as string;
-        });
-
-        // Wait for image to load
-        const loadedImage = await imageLoaded;
+        const loadedImage = await GeoviewRenderer.loadImageFromDataUrl(legendImage);
 
         // If image was loaded successfully
-        if (loadedImage && loadedImage.width > 0 && loadedImage.height > 0) {
-          const drawingCanvas = document.createElement('canvas');
-          drawingCanvas.width = image.width;
-          drawingCanvas.height = image.height;
-          const drawingContext = drawingCanvas.getContext('2d', { willReadFrequently: true })!;
-          drawingContext.drawImage(image, 0, 0);
-
-          // Return legend information
+        if (loadedImage.width > 0 && loadedImage.height > 0) {
           return {
             type: CONST_LAYER_TYPES.WMTS,
-            legend: drawingCanvas,
+            legend: GeoviewRenderer.createCanvasFromImage(loadedImage),
+          };
+        }
+      }
+
+      // Here, no image could be found, try using a legend? endpoint (Esri ArcGIS WMTS layer?)
+      const metadataAccessPath = layerConfig.getMetadataAccessPath();
+      const { looksLikeArcGisWmtsService, normalizedMetadataAccessPath } = GVWMTS.#looksLikeArcGisWmtsServiceUrl(metadataAccessPath);
+      if (looksLikeArcGisWmtsService && normalizedMetadataAccessPath) {
+        const legendUrl = `${normalizedMetadataAccessPath}/legend?f=json`;
+
+        const legendJson = await Fetch.fetchEsriJson<TypeEsriImageLayerLegend>(legendUrl);
+        const layerInfo = legendJson.layers?.find((lyr) => lyr.layerId.toString() === layerConfig.layerId) ?? legendJson.layers?.[0];
+        const legendInfo = layerInfo?.legend;
+
+        if (legendInfo) {
+          const styleConfig = GeoviewRenderer.createPointStyleConfigFromEsriLegend(
+            legendInfo,
+            layerConfig.getInitialSettings()?.states?.visible ?? true // default: true
+          );
+
+          return {
+            type: CONST_LAYER_TYPES.ESRI_IMAGE,
+            styleConfig,
+            legend: await GeoviewRenderer.getLegendStyles(styleConfig),
           };
         }
       }
 
       // No good
       return {
-        type: CONST_LAYER_TYPES.WMTS,
+        type: CONST_LAYER_TYPES.ESRI_IMAGE,
+        styleConfig: this.getStyle(),
         legend: null,
       };
     } catch (error: unknown) {
       logger.logError(`Error getting legend for ${layerConfig.layerPath}`, error);
       return null;
     }
+  }
+
+  /**
+   * Checks whether a metadata access URL looks like an ArcGIS-backed WMTS service.
+   *
+   * @param metadataAccessPath - The metadata access URL to evaluate
+   * @returns A result object with ArcGIS WMTS detection status and normalized service URL
+   */
+  static #looksLikeArcGisWmtsServiceUrl(metadataAccessPath: string | undefined): {
+    looksLikeArcGisWmtsService: boolean;
+    normalizedMetadataAccessPath: string | undefined;
+  } {
+    if (!metadataAccessPath) {
+      return {
+        looksLikeArcGisWmtsService: false,
+        normalizedMetadataAccessPath: undefined,
+      };
+    }
+
+    const lowerUrl = metadataAccessPath?.toLowerCase() ?? '';
+    if (!(lowerUrl.includes('/mapserver') || lowerUrl.includes('/imageserver')) || !lowerUrl.includes('/wmts')) {
+      return {
+        looksLikeArcGisWmtsService: false,
+        normalizedMetadataAccessPath: undefined,
+      };
+    }
+
+    const strippedUrlMatch = metadataAccessPath.match(/^(.*\/(?:MapServer|ImageServer)\/WMTS)(?:[/?].*)?$/i);
+    if (!strippedUrlMatch?.[1]) {
+      return {
+        looksLikeArcGisWmtsService: false,
+        normalizedMetadataAccessPath: undefined,
+      };
+    }
+
+    return {
+      looksLikeArcGisWmtsService: true,
+      normalizedMetadataAccessPath: strippedUrlMatch[1],
+    };
   }
 
   // #endregion OVERRIDES

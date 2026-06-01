@@ -409,16 +409,10 @@ export class GVWMS extends AbstractGVRaster {
       if (legendImage) {
         const image = await GeoviewRenderer.loadImage(legendImage as string);
         if (image) {
-          const drawingCanvas = document.createElement('canvas');
-          drawingCanvas.width = image.width;
-          drawingCanvas.height = image.height;
-          const drawingContext = drawingCanvas.getContext('2d', { willReadFrequently: true })!;
-          drawingContext.drawImage(image, 0, 0);
-
           // Return the legend
           return {
             type: CONST_LAYER_TYPES.WMS,
-            legend: drawingCanvas,
+            legend: GeoviewRenderer.createCanvasFromImage(image),
           };
         }
       }

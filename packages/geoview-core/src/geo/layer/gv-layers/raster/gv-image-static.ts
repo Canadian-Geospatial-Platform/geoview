@@ -84,20 +84,14 @@ export class GVImageStatic extends AbstractGVRaster {
       // If legend image was read
       if (legendImage) {
         // Legend was read, load the image
-        const image = await GeoviewRenderer.loadImage(legendImage as string);
+        const image = await GeoviewRenderer.loadImage(legendImage);
 
         // If image was loaded
         if (image) {
-          const drawingCanvas = document.createElement('canvas');
-          drawingCanvas.width = image.width;
-          drawingCanvas.height = image.height;
-          const drawingContext = drawingCanvas.getContext('2d', { willReadFrequently: true })!;
-          drawingContext.drawImage(image, 0, 0);
-
           // Return legend information
           return {
             type: CONST_LAYER_TYPES.IMAGE_STATIC,
-            legend: drawingCanvas,
+            legend: GeoviewRenderer.createCanvasFromImage(image),
           };
         }
       }
@@ -149,29 +143,18 @@ export class GVImageStatic extends AbstractGVRaster {
    * Gets the legend image of a layer.
    *
    * @param layerConfig - The layer configuration.
-   * @returns A promise that resolves with the image blob or null when not found
+   * @returns A promise that resolves with the image data URL or null when not found
    */
-  static #getLegendImage(layerConfig: ImageStaticLayerEntryConfig): Promise<string | ArrayBuffer | null> {
-    const promisedImage = new Promise<string | ArrayBuffer | null>((resolve) => {
+  static #getLegendImage(layerConfig: ImageStaticLayerEntryConfig): Promise<string | null> {
+    const promisedImage = new Promise<string | null>((resolve) => {
       const legendUrl = layerConfig.getDataAccessPath().toLowerCase().startsWith('http:')
         ? `https${layerConfig.getDataAccessPath().slice(4)}`
         : layerConfig.getDataAccessPath();
 
       // Fetch the blob
       Fetch.fetchBlob(legendUrl, { credentials: 'omit' })
-        .then((blob) => {
-          // The blob has been read, read it with a FileReader
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            resolve(reader.result);
-          };
-          reader.onerror = () => {
-            // Failed, but resolve nonetheless with a warning
-            logger.logWarning(`The legend could not be fetched for static image ${layerConfig.layerPath}`);
-            resolve(null);
-          };
-          reader.readAsDataURL(blob);
-        })
+        .then((blob) => GeoviewRenderer.readBlobAsDataUrl(blob))
+        .then((dataUrl) => resolve(dataUrl))
         .catch(() => {
           // Failed, but resolve nonetheless with a warning
           logger.logWarning(`The legend could not be fetched for static image ${layerConfig.layerPath}`);
