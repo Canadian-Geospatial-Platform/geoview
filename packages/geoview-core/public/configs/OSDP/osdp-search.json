@@ -11,14 +11,24 @@
     },
     "listOfGeoviewLayerConfig": []
   },
-  "components": ["north-arrow", "overview-map"],
+  "components": [
+    "north-arrow",
+    "overview-map"
+  ],
   "overviewMap": {
     "hideOnZoom": 7
   },
-  "navBar": ["zoom", "rotation", "location", "basemap-select"],
+  "navBar": [
+    "zoom",
+    "rotation",
+    "location",
+    "basemap-select"
+  ],
   "appBar": {
     "tabs": {
-      "core": ["geolocator"]
+      "core": [
+        "geolocator"
+      ]
     }
   },
   "footerBar": {

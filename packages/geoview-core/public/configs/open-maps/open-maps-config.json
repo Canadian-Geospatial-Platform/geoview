@@ -11,20 +11,39 @@
     },
     "listOfGeoviewLayerConfig": []
   },
-  "navBar": ["zoom", "fullscreen", "home", "location", "measurement", "basemap-select"],
+  "components": [
+    "north-arrow",
+    "overview-map"
+  ],
+  "navBar": [
+    "zoom",
+    "fullscreen",
+    "home",
+    "location",
+    "measurement",
+    "basemap-select"
+  ],
   "appBar": {
     "tabs": {
-      "core": ["geolocator", "legend", "details", "export"]
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
     },
     "selectedTab": "legend"
   },
   "footerBar": {
     "tabs": {
-      "core": ["layers", "data-table", "geochart", "time-slider"]
+      "core": [
+        "layers",
+        "data-table",
+        "geochart",
+        "time-slider"
+      ]
     }
   },
-  "components": ["north-arrow", "overview-map"],
-  "theme": "geo.ca",
   "corePackages": [],
-  "externalPackages": []
+  "theme": "geo.ca"
 }

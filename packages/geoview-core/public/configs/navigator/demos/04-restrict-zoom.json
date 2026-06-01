@@ -1,4 +1,7 @@
 {
+  "configMeta": {
+    "description": "Restricted zoom range with minZoom 6 and maxZoom 8 on LCC projection."
+  },
   "map": {
     "interaction": "dynamic",
     "viewSettings": {
@@ -12,7 +15,10 @@
       "labeled": true
     }
   },
-  "components": ["overview-map", "north-arrow"],
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
   "corePackages": [],
   "theme": "geo.ca"
 }

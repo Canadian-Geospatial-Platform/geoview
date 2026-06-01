@@ -271,6 +271,13 @@ async function onConfigChange(mapId, e) {
     // fetch JSON config file to show in the text are section
     document.getElementById('configGeoview').textContent = JSON.stringify(data, null, 4);
 
+    // update description from configMeta if available
+    const descriptionElem = document.getElementById('configDescription');
+    if (descriptionElem) {
+      descriptionElem.textContent =
+        data.configMeta?.description || 'This map loads its configuration from the selected configuration file.';
+    }
+
     // set default number of lines
     const textarea = document.querySelector('textarea');
     const lineNumbers = document.querySelector('.line-numbers');

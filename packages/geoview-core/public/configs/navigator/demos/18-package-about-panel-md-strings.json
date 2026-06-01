@@ -1,4 +1,7 @@
 {
+  "configMeta": {
+    "description": "About-panel plugin using inline mdContent array."
+  },
   "map": {
     "interaction": "dynamic",
     "viewSettings": {
@@ -10,14 +13,19 @@
       "labeled": true
     }
   },
-  "theme": "geo.ca",
-  "components": ["north-arrow", "overview-map"],
-  "corePackages": [],
+  "components": [
+    "north-arrow",
+    "overview-map"
+  ],
   "appBar": {
     "tabs": {
-      "core": ["about-panel"]
+      "core": [
+        "about-panel"
+      ]
     }
   },
+  "corePackages": [],
+  "theme": "geo.ca",
   "corePackagesConfig": [
     {
       "about-panel": {

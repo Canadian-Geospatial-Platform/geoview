@@ -561,7 +561,12 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     this.#setLayerFiltersInitial(this.getLayerConfig().getLayerFilter());
     this.#setLayerFiltersClass();
 
-    // Activation of the load end/error listeners
+    // Activation of the load end/error listeners.
+    // Three categories of OL source events are handled:
+    //   - tileloaderror / featuresloaderror  → #handleError (always non-fatal, routes to #handleLoaded)
+    //   - imageloaderror                     → #handleImageLoadError (always fatal — single image = entire view)
+    //   - source 'change' with state='error' → #handleSourceChange (fatal only before first load)
+    // See copilot-instructions.md "Layer Load Error Handling Strategy" for the full rationale.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (this.#olSource as any).on(['featuresloadstart', 'imageloadstart', 'tileloadstart'], this.#handleLoading.bind(this));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -571,7 +576,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (this.#olSource as any).on(['imageloaderror'], this.#handleImageLoadError.bind(this));
 
-    // Activate source change listener to catch errors
+    // Activate source change listener to catch source-level errors (e.g., capabilities fetch failed)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (this.#olSource as any).on('change', this.#handleSourceChange.bind(this));
 
@@ -1217,6 +1222,12 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   /**
    * Handles when the layer goes into a loaded state.
    *
+   * Only calls onLoaded() when the event's loading counter matches the current global counter,
+   * meaning this is the last load cycle that started. Earlier cycles are silently skipped.
+   * Both successful loads (tileloadend/featuresloadend/imageloadend) and non-fatal errors
+   * (tileloaderror/featuresloaderror via #handleError) route through this method to resolve
+   * the loading counter.
+   *
    * @param event - The event which is being triggered
    */
   #handleLoaded(event: Event): void {
@@ -1235,23 +1246,36 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   }
 
   /**
-   * Handles when the layer is in error and couldn't be loaded correctly.
+   * Handles when a tile or feature fails to load.
+   *
+   * Individual tile/feature load errors are always non-fatal. A single failed tile (e.g., WMTS tile outside
+   * the tile matrix bounds, WMS tiled edge tile, XYZ 404, sparse vector tile, transient network failure)
+   * should never mark the entire layer as failed. Routes through #handleLoaded so the loading counter
+   * resolves normally and the layer status returns to (or stays at) 'loaded'.
+   *
+   * If the source itself is broken (e.g., capabilities fetch failed, service unreachable),
+   * #handleSourceChange will catch the source-level 'error' state and fire the fatal error path.
+   *
+   * For WMS Image layers (single image per view), errors are handled separately by #handleImageLoadError
+   * which always treats them as fatal.
    *
    * @param event - The event which is being triggered
    */
   #handleError(event: Event): void {
     // Log
-    logger.logError(`An error happened on the layer: ${this.getLayerPath()} after it was processed and added on the map.`, event);
+    logger.logWarning(`A tile or feature failed to load for layer: ${this.getLayerPath()}.`, event);
 
-    // Decipher the error, allowing children classes to be more specific (ex: Vector specific errors)
-    const gvError = this.onErrorDecipherError(event);
-
-    // Call overridable method
-    this.onError(gvError);
+    // Route through #handleLoaded to resolve the loading counter
+    this.#handleLoaded(event);
   }
 
   /**
-   * Handles when the layer is in error and couldn't be loaded correctly.
+   * Handles when the layer image source is in error and couldn't be loaded correctly.
+   *
+   * Unlike tile errors (where individual tile failures are non-fatal), an image load error means the entire
+   * layer is not rendering (WMS Image layers use a single image per view). This is always treated as fatal.
+   * The AbstractGVRaster subclass overrides onImageLoadError() with rescue logic for recoverable cases.
+   * When the map is panned/zoomed, a new image request may succeed and onLoaded() will restore the status.
    *
    * @param event - The event which is being triggered
    */
@@ -1267,13 +1291,26 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   }
 
   /**
-   * Method called when the layer source changes to check for errors.
+   * Handles when the source state changes to detect source-level errors.
+   *
+   * This is the fatal error path for source-level failures (e.g., capabilities fetch failed,
+   * service completely unreachable). Individual tile/feature errors do NOT trigger this handler —
+   * they are handled by #handleError which treats them as non-fatal.
+   *
+   * Once the layer has loaded successfully at least once (loadedOnce === true), source state errors
+   * are treated as transient and logged as warnings without changing the layer status.
    *
    * @param event - The event which is being triggered
    */
   #handleSourceChange(event: Event): void {
     const state = this.#olSource.getState();
     if (state === 'error') {
+      // If the layer has already loaded successfully, a transient source error is non-fatal
+      if (this.loadedOnce) {
+        logger.logWarning(`Source state changed to error for layer: ${this.getLayerPath()}. The layer remains functional.`, event);
+        return;
+      }
+
       // Decipher the error, allowing children classes to be more specific
       const gvError = this.onErrorDecipherError(event);
 

@@ -91,6 +91,22 @@
             },
             'theme': 'geo.ca',
             'components': ['north-arrow', 'overview-map'],
+            'navBar': [
+              'basemap-select',
+              'projection',
+              'fullscreen',
+              'drawer'
+            ],
+            'appBar': {
+              'tabs': {
+                'core': []
+              }
+            },
+            'footerBar': {
+              'tabs': {
+                'core': []
+              }
+            },
             'corePackages': [],
             'corePackagesConfig': [
               {
@@ -113,22 +129,6 @@
                   'hideMeasurements': false
                 }
               }
-            ],
-            'footerBar': {
-              'tabs': {
-                'core': []
-              }
-            },
-            'appBar': {
-              'tabs': {
-                'core': []
-              }
-            },
-            'navBar': [
-              'basemap-select',
-              'projection',
-              'fullscreen',
-              'drawer'
             ]
           }"
         ></div>
@@ -156,8 +156,22 @@
               }
             },
             'theme': 'dark',
-            'components': ['north-arrow', 'overview-map'],
-            'corePackages': [],
+            'components': ['north-arrow', 'overview-map'],            'navBar': [
+                'basemap-select',
+                'projection',
+                'fullscreen',
+                'drawer'
+            ],
+            'appBar': {
+              'tabs': {
+                'core': []
+              }
+            },
+            'footerBar': {
+              'tabs': {
+                'core': []
+              }
+            },            'corePackages': [],
             'corePackagesConfig': [
               {
                 'drawer': {
@@ -179,22 +193,6 @@
                   'hideMeasurements': false
                 }
               }
-            ],
-            'footerBar': {
-              'tabs': {
-                'core': []
-              }
-            },
-            'appBar': {
-              'tabs': {
-                'core': []
-              }
-            },
-            'navBar': [
-                'basemap-select',
-                'projection',
-                'fullscreen',
-                'drawer'
             ]
           }"
         ></div>
@@ -203,7 +201,10 @@
     <hr />
     <div class="keyboard-shortcuts">
       <h4>Keyboard Shortcuts Reference</h4>
-      <p><strong>Enable Shortcuts:</strong> Press <code>`</code> (backtick) when a GeoView element is focused to toggle keyboard shortcuts on/off</p>
+      <p>
+        <strong>Enable Shortcuts:</strong> Press <code>`</code> (backtick) when a GeoView element is focused to toggle keyboard shortcuts
+        on/off
+      </p>
       <p><strong>When shortcuts are enabled:</strong></p>
       <ul>
         <li><code>D</code> - Toggle Drawing mode</li>
@@ -226,7 +227,10 @@
       <p><strong>Crosshair mode (Ctrl+Alt+M):</strong></p>
       <ul>
         <li><code>Enter</code> or <code>Space</code> - Add drawing vertex / Select feature for editing</li>
-        <li><code>Shift+Enter</code> or <code>Shift+Space</code> - Finish drawing (While Drawing) or Delete vertex / Open text editor (While Editing)</li>
+        <li>
+          <code>Shift+Enter</code> or <code>Shift+Space</code> - Finish drawing (While Drawing) or Delete vertex / Open text editor (While
+          Editing)
+        </li>
         <li><code>Escape</code> - Cancel grabbed handle</li>
         <li><code>Ctrl+↑</code> - Zoom in</li>
         <li><code>Ctrl+↓</code> - Zoom out</li>

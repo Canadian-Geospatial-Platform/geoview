@@ -1,4 +1,7 @@
 {
+  "configMeta": {
+    "description": "Swiper plugin with horizontal orientation on esriFeature layer."
+  },
   "map": {
     "interaction": "dynamic",
     "viewSettings": {
@@ -26,21 +29,29 @@
       }
     ]
   },
-  "theme": "light",
-  "components": ["north-arrow", "overview-map"],
+  "components": [
+    "north-arrow",
+    "overview-map"
+  ],
   "appBar": {
     "tabs": {
-      "core": ["legend"]
+      "core": [
+        "legend"
+      ]
     }
   },
-  "corePackages": ["swiper"],
-  "externalPackages": [],
+  "corePackages": [
+    "swiper"
+  ],
+  "theme": "light",
   "corePackagesConfig": [
     {
       "swiper": {
         "orientation": "horizontal",
         "keyboardOffset": 10,
-        "layers": ["esriFeatureLYR4/0"]
+        "layers": [
+          "esriFeatureLYR4/0"
+        ]
       }
     }
   ]

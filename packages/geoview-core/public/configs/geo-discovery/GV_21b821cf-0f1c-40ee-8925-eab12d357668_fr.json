@@ -11,8 +11,8 @@
     },
     "listOfGeoviewLayerConfig": [
       {
-        "geoviewLayerId": "Radioactivité de l\u0027air",
-        "geoviewLayerName": "Radioactivité de l\u0027air",
+        "geoviewLayerId": "Radioactivité de l'air",
+        "geoviewLayerName": "Radioactivité de l'air",
         "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/airborne_radioactivity_fr/MapServer",
         "geoviewLayerType": "esriDynamic",
         "listOfLayerEntryConfig": [
@@ -34,14 +34,45 @@
       }
     ]
   },
-  "theme": "geo.ca",
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "navBar": [
+    "zoom",
+    "rotation",
+    "fullscreen",
+    "home",
+    "location",
+    "measurement",
+    "basemap-select",
+    "projection"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
   "footerBar": {
     "tabs": {
-      "core": ["legend", "layers", "details", "data-table", "geochart"]
+      "core": [
+        "layers",
+        "data-table",
+        "geochart"
+      ]
     },
     "selectedTab": "geochart"
   },
   "corePackages": [],
+  "theme": "geo.ca",
   "corePackagesConfig": [
     {
       "geochart": {
@@ -49,7 +80,7 @@
           {
             "layers": [
               {
-                "layerId": "Radioactivité de l\u0027air/1",
+                "layerId": "Radioactivité de l'air/1",
                 "propertyValue": "OBJECTID",
                 "propertyDisplay": "Location_Emplacement"
               }
@@ -62,9 +93,9 @@
                 "whereClauses": [
                   {
                     "field": "Location_Emplacement",
-                    "prefix": "\u0027",
+                    "prefix": "'",
                     "valueFrom": "Location_Emplacement",
-                    "suffix": "\u0027"
+                    "suffix": "'"
                   }
                 ],
                 "orderByField": "CollectionStart_DebutPrelevement"

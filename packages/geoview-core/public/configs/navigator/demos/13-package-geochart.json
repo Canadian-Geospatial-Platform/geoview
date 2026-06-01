@@ -1,4 +1,7 @@
 {
+  "configMeta": {
+    "description": "Full geochart with multiple layer types and inline chart definitions with xSlider and ySlider."
+  },
   "map": {
     "interaction": "dynamic",
     "viewSettings": {
@@ -89,20 +92,31 @@
       }
     ]
   },
-  "theme": "geo.ca",
+  "components": [
+    "north-arrow",
+    "overview-map"
+  ],
   "appBar": {
     "tabs": {
-      "core": ["geolocator", "legend", "details", "export"]
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
     }
   },
-  "components": ["north-arrow", "overview-map"],
   "footerBar": {
     "tabs": {
-      "core": ["layers", "geochart"]
+      "core": [
+        "layers",
+        "geochart"
+      ]
     },
     "selectedTab": "geochart"
   },
   "corePackages": [],
+  "theme": "geo.ca",
   "corePackagesConfig": [
     {
       "geochart": {
@@ -134,7 +148,9 @@
             "geochart": {
               "xAxis": {
                 "type": "time",
-                "grid": { "drawOnChartArea": false },
+                "grid": {
+                  "drawOnChartArea": false
+                },
                 "property": "CollectionStart_DebutPrelevement",
                 "label": "Collected date",
                 "timeFormat": {
@@ -144,7 +160,9 @@
               },
               "yAxis": {
                 "type": "linear",
-                "grid": { "drawOnChartArea": false },
+                "grid": {
+                  "drawOnChartArea": false
+                },
                 "property": "Activity_Activite_mBqm3",
                 "label": "Activity (mBqm3)",
                 "tooltipSuffix": "mBqm3"
@@ -163,7 +181,10 @@
                 "display": true
               },
               "stepsSwitcher": true,
-              "scalesSwitcher": ["linear", "logarithmic"],
+              "scalesSwitcher": [
+                "linear",
+                "logarithmic"
+              ],
               "description": "This is a description text",
               "download": true
             }

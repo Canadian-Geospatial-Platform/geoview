@@ -1,9 +1,18 @@
 {
+  "configMeta": {
+    "description": "Circumpolar arctic projection (EPSG:3573) with arctic-sdi WMTS as basemap."
+  },
   "map": {
     "interaction": "dynamic",
     "viewSettings": {
       "initialView": {
-        "zoomAndCenter": [3, [-110, 80]]
+        "zoomAndCenter": [
+          3,
+          [
+            -110,
+            80
+          ]
+        ]
       },
       "projection": 3573
     },
@@ -37,7 +46,12 @@
             "layerId": "arctic_cascading",
             "tileMatrixSet": "3573",
             "source": {
-              "extent": [-4889334.802955, -4889334.802955, 4889334.802955, 4889334.802955],
+              "extent": [
+                -4889334.802955,
+                -4889334.802955,
+                4889334.802955,
+                4889334.802955
+              ],
               "resolutionLevels": 11,
               "projection": 3573,
               "dataAccessPath": "https://basemap.arctic-sdi.org/mapcache/wmts"
@@ -47,18 +61,30 @@
       }
     ]
   },
-  "components": ["north-arrow"],
-  "navBar": ["zoom"],
+  "components": [
+    "north-arrow"
+  ],
+  "navBar": [
+    "zoom"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
   "footerBar": {
     "tabs": {
-      "core": ["layers", "data-table"]
+      "core": [
+        "layers",
+        "data-table"
+      ]
     }
   },
   "corePackages": [],
-  "theme": "geo.ca",
-  "appBar": {
-    "tabs": {
-      "core": ["geolocator", "legend", "details", "export"]
-    }
-  }
+  "theme": "geo.ca"
 }

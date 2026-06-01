@@ -1,4 +1,7 @@
 {
+  "configMeta": {
+    "description": "layerText config for feature labels with rich text options and multi-segment text arrays."
+  },
   "map": {
     "interaction": "dynamic",
     "viewSettings": {
@@ -50,7 +53,12 @@
               "backgroundFill": "rgba(150, 150, 200, 0.7)",
               "backgroundStrokeColor": "#000000",
               "backgroundStrokeWidth": 1,
-              "padding": [2, 4, 2, 4],
+              "padding": [
+                2,
+                4,
+                2,
+                4
+              ],
               "declutterMode": "declutter",
               "minZoomLevel": 5,
               "maxZoomLevel": 19,
@@ -74,19 +82,47 @@
                 "queryable": true,
                 "nameField": "Venue",
                 "outfields": [
-                  { "name": "Venue", "alias": "Venue", "type": "string", "domain": null },
-                  { "name": "Event", "alias": "Event", "type": "string", "domain": null },
-                  { "name": "Tour", "alias": "Tour", "type": "string", "domain": null },
-                  { "name": "City", "alias": "City", "type": "string", "domain": null },
-                  { "name": "Date", "alias": "Date", "type": "date", "domain": null }
+                  {
+                    "name": "Venue",
+                    "alias": "Venue",
+                    "type": "string",
+                    "domain": null
+                  },
+                  {
+                    "name": "Event",
+                    "alias": "Event",
+                    "type": "string",
+                    "domain": null
+                  },
+                  {
+                    "name": "Tour",
+                    "alias": "Tour",
+                    "type": "string",
+                    "domain": null
+                  },
+                  {
+                    "name": "City",
+                    "alias": "City",
+                    "type": "string",
+                    "domain": null
+                  },
+                  {
+                    "name": "Date",
+                    "alias": "Date",
+                    "type": "date",
+                    "domain": null
+                  }
                 ]
               }
             },
             "layerText": {
               "text": [
-                "{Tour}", "bold 14px sans-serif",
-                "\n", "",
-                "{Date:YYYY-MM}", "12px sans-serif"
+                "{Tour}",
+                "bold 14px sans-serif",
+                "\n",
+                "",
+                "{Date:YYYY-MM}",
+                "12px sans-serif"
               ],
               "fontSize": 12,
               "offsetY": -15,
@@ -149,17 +185,25 @@
               "Point": {
                 "type": "classBreaks",
                 "hasDefault": true,
-                "fields": ["Total_CSO_Volume"],
+                "fields": [
+                  "Total_CSO_Volume"
+                ],
                 "info": [
                   {
                     "label": "0 m3",
-                    "values": [0, 0],
+                    "values": [
+                      0,
+                      0
+                    ],
                     "visible": true,
                     "settings": {
                       "symbol": "circle",
                       "type": "simpleSymbol",
                       "color": "rgba(76,230,0,1)",
-                      "offset": [0, 0],
+                      "offset": [
+                        0,
+                        0
+                      ],
                       "rotation": 0,
                       "size": 2.6679999999999997,
                       "stroke": {
@@ -180,13 +224,19 @@
                   },
                   {
                     "label": "0.0001 - ≤ 5,000,000 m3",
-                    "values": [0.0001, 5000000],
+                    "values": [
+                      0.0001,
+                      5000000
+                    ],
                     "visible": true,
                     "settings": {
                       "symbol": "circle",
                       "type": "simpleSymbol",
                       "color": "rgba(226,176,255,1)",
-                      "offset": [0, 0],
+                      "offset": [
+                        0,
+                        0
+                      ],
                       "rotation": 0,
                       "size": 5.114407777777778,
                       "stroke": {
@@ -198,13 +248,19 @@
                   },
                   {
                     "label": "> 5,000,000 - ≤ 10,000,000 m3",
-                    "values": [5000000, 10000000],
+                    "values": [
+                      5000000,
+                      10000000
+                    ],
                     "visible": true,
                     "settings": {
                       "symbol": "circle",
                       "type": "simpleSymbol",
                       "color": "rgba(217,151,255,1)",
-                      "offset": [0, 0],
+                      "offset": [
+                        0,
+                        0
+                      ],
                       "rotation": 0,
                       "size": 7.560815555555555,
                       "stroke": {
@@ -216,13 +272,19 @@
                   },
                   {
                     "label": "> 10,000,000 - ≤ 15,000,000 m3",
-                    "values": [10000000, 15000000],
+                    "values": [
+                      10000000,
+                      15000000
+                    ],
                     "visible": true,
                     "settings": {
                       "symbol": "circle",
                       "type": "simpleSymbol",
                       "color": "rgba(207,125,255,1)",
-                      "offset": [0, 0],
+                      "offset": [
+                        0,
+                        0
+                      ],
                       "rotation": 0,
                       "size": 10.007223333333332,
                       "stroke": {
@@ -234,13 +296,19 @@
                   },
                   {
                     "label": "> 15,000,000 - ≤ 20,000,000 m3",
-                    "values": [15000000, 20000000],
+                    "values": [
+                      15000000,
+                      20000000
+                    ],
                     "visible": true,
                     "settings": {
                       "symbol": "circle",
                       "type": "simpleSymbol",
                       "color": "rgba(200,105,255,1)",
-                      "offset": [0, 0],
+                      "offset": [
+                        0,
+                        0
+                      ],
                       "rotation": 0,
                       "size": 12.453631111111111,
                       "stroke": {
@@ -252,13 +320,19 @@
                   },
                   {
                     "label": "> 20,000,000 - ≤ 25,000,000 m3",
-                    "values": [20000000, 25000000],
+                    "values": [
+                      20000000,
+                      25000000
+                    ],
                     "visible": true,
                     "settings": {
                       "symbol": "circle",
                       "type": "simpleSymbol",
                       "color": "rgba(190,80,255,1)",
-                      "offset": [0, 0],
+                      "offset": [
+                        0,
+                        0
+                      ],
                       "rotation": 0,
                       "size": 14.90003888888889,
                       "stroke": {
@@ -270,13 +344,19 @@
                   },
                   {
                     "label": "> 25,000,000 - ≤ 30,000,000 m3",
-                    "values": [25000000, 30000000],
+                    "values": [
+                      25000000,
+                      30000000
+                    ],
                     "visible": true,
                     "settings": {
                       "symbol": "circle",
                       "type": "simpleSymbol",
                       "color": "rgba(183,58,255,1)",
-                      "offset": [0, 0],
+                      "offset": [
+                        0,
+                        0
+                      ],
                       "rotation": 0,
                       "size": 17.346446666666665,
                       "stroke": {
@@ -288,13 +368,19 @@
                   },
                   {
                     "label": "> 30,000,000 - ≤ 35,000,000 m3",
-                    "values": [30000000, 35000000],
+                    "values": [
+                      30000000,
+                      35000000
+                    ],
                     "visible": true,
                     "settings": {
                       "symbol": "circle",
                       "type": "simpleSymbol",
                       "color": "rgba(175,37,255,1)",
-                      "offset": [0, 0],
+                      "offset": [
+                        0,
+                        0
+                      ],
                       "rotation": 0,
                       "size": 19.792854444444444,
                       "stroke": {
@@ -306,13 +392,19 @@
                   },
                   {
                     "label": "> 35,000,000 m3",
-                    "values": [35000000, 999000000],
+                    "values": [
+                      35000000,
+                      999000000
+                    ],
                     "visible": true,
                     "settings": {
                       "symbol": "circle",
                       "type": "simpleSymbol",
                       "color": "rgba(165,11,255,1)",
-                      "offset": [0, 0],
+                      "offset": [
+                        0,
+                        0
+                      ],
                       "rotation": 0,
                       "size": 22.239262222222223,
                       "stroke": {
@@ -330,7 +422,10 @@
                       "symbol": "circle",
                       "type": "simpleSymbol",
                       "color": "rgba(255,127,127,1)",
-                      "offset": [0, 0],
+                      "offset": [
+                        0,
+                        0
+                      ],
                       "rotation": 0,
                       "size": 2.0010000000000003,
                       "stroke": {
@@ -360,18 +455,31 @@
       }
     ]
   },
-  "components": ["overview-map", "north-arrow"],
-  "overviewMap": { "hideOnZoom": 7 },
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
   "footerBar": {
     "tabs": {
-      "core": ["layers", "data-table"]
+      "core": [
+        "layers",
+        "data-table"
+      ]
     }
   },
   "corePackages": [],
-  "theme": "geo.ca",
-  "appBar": {
-    "tabs": {
-      "core": ["geolocator", "legend", "details", "export"]
-    }
-  }
+  "theme": "geo.ca"
 }

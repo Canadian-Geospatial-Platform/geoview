@@ -1,0 +1,124 @@
+{
+  "configMeta": {
+    "description": "initialSettings for layer filters using layerFilter on multiple layer types: ogcFeature, ogcWfs, esriDynamic, esriFeature, and GeoJSON."
+  },
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": true,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "ogcFeatureLYR1",
+        "geoviewLayerName": "OGC Feature - Large Lakes",
+        "metadataAccessPath": "https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev",
+        "geoviewLayerType": "ogcFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "lakes",
+            "layerFilter": "name in ('Lake Victoria', 'Lake Superior', 'L. Erie', 'L. Ontario')"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "wfsLYR1",
+        "geoviewLayerName": "OGC WFS - US States",
+        "metadataAccessPath": "https://ahocevar.com/geoserver/wfs",
+        "geoviewLayerType": "ogcWfs",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "usa:states",
+            "layerFilter": "STATE_ABBR = 'NY'"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "LYR15-qgis",
+        "geoviewLayerName": "OGC WFS - Cities Experimental",
+        "metadataAccessPath": "https://demo.mapserver.org/cgi-bin/wfs",
+        "geoviewLayerType": "ogcWfs",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "ms:cities",
+            "layerFilter": "POPULATION >= 500000",
+            "wmsLayerId": "cities",
+            "source": {
+              "featureInfo": {
+                "nameField": "NAME"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "esriDynamicLYR1",
+        "geoviewLayerName": "ESRI Dynamic - Water Quantity",
+        "metadataAccessPath": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "5",
+            "layerFilter": "E_Province = 'Manitoba'"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "esriFeatureLYR1",
+        "geoviewLayerName": "ESRI Feature - Historical Flood Events",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer",
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "layerFilter": "death = 'yes'"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "geojsonLYR1",
+        "geoviewLayerName": "GeoJSON - Polygons",
+        "metadataAccessPath": "./datasets/geojson/metadata.meta",
+        "geoviewLayerType": "GeoJSON",
+        "serviceDateFormat": "DD/MM/YYYYTHH:mm:ss",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "polygons.json",
+            "layerFilter": "Province = 'Quebec'"
+          }
+        ]
+      }
+    ]
+  },
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "layers",
+        "data-table"
+      ]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca"
+}

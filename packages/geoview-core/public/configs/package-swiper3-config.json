@@ -17,21 +17,7 @@
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "msi-94-or-more",
-            "source": {
-              "featureInfo": {
-                "queryable": true,
-                "nameField": "band-0-pixel-value",
-                "outfields": [
-                  {
-                    "name": "band-0-pixel-value",
-                    "alias": "Pixel value",
-                    "type": "number",
-                    "domain": null
-                  }
-                ]
-              }
-            }
+            "layerId": "msi-94-or-more"
           }
         ]
       },
@@ -80,18 +66,18 @@
         "geoviewLayerType": "xyzTiles",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "0",
-            "initialSettings": {
-              "minZoom": 3,
-              "maxZoom": 8
-            }
+            "layerId": "0"
           }
         ]
       }
     ]
   },
-  "theme": "light",
-  "components": ["north-arrow", "overview-map"],
-  "corePackages": ["swiper"],
-  "externalPackages": []
+  "components": [
+    "north-arrow",
+    "overview-map"
+  ],
+  "corePackages": [
+    "swiper"
+  ],
+  "theme": "light"
 }

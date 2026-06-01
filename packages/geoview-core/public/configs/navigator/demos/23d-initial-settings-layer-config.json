@@ -1,0 +1,191 @@
+{
+  "configMeta": {
+    "description": "Layer-specific source settings: rasterFunction on esriImage (Dry Spell ds_30), wmsStyle on ogcWms, featureInfo with custom outfields including codedValue and range domains, nameField, and WMS group with nested sublayers."
+  },
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": true,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "ESRIImageLYR1",
+        "geoviewLayerName": "Dry Spell",
+        "geoviewLayerType": "esriImage",
+        "metadataAccessPath": "https://agriculture.canada.ca/imagery-images/rest/services/agclimate/dry_spell/ImageServer",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "dry_spell",
+            "source": {
+              "rasterFunction": "ds_30"
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "wmsLYR1-Root",
+        "geoviewLayerName": "Weather Group",
+        "metadataAccessPath": "https://geo.weather.gc.ca/geomet",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "entryType": "group",
+            "layerId": "wmsLYR1-Group",
+            "layerName": "Group",
+            "listOfLayerEntryConfig": [
+              {
+                "layerId": "CURRENT_CONDITIONS"
+              },
+              {
+                "layerId": "RADAR_1KM_RSNO",
+                "layerName": "Radar Snow"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "wmsLYR1-msi",
+        "geoviewLayerName": "MSI",
+        "metadataAccessPath": "https://datacube.services.geo.ca/ows/msi",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "msi-94-or-more",
+            "layerName": "Permanent Snow",
+            "source": {
+              "wmsStyle": "msi-binary",
+              "featureInfo": {
+                "queryable": true,
+                "nameField": "band-0-pixel-value",
+                "outfields": [
+                  {
+                    "name": "band-0-pixel-value",
+                    "alias": "Pixel value",
+                    "type": "number",
+                    "domain": null
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "FeatureServerLyr2",
+        "metadataAccessPath": "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/U2/FeatureServer/",
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "layerName": "U2 Tour Locations",
+            "source": {
+              "featureInfo": {
+                "queryable": true,
+                "nameField": "Tour",
+                "outfields": [
+                  {
+                    "name": "Venue",
+                    "alias": "Venue Set",
+                    "type": "string",
+                    "domain": null
+                  },
+                  {
+                    "name": "Event",
+                    "alias": "Event Set",
+                    "type": "string",
+                    "domain": null
+                  },
+                  {
+                    "name": "Tour",
+                    "alias": "Tour Name",
+                    "type": "string",
+                    "domain": {
+                      "type": "codedValue",
+                      "name": "TourDomain",
+                      "description": "Translates tour codes to display names",
+                      "codedValues": [
+                        {
+                          "name": "Zoo TV Tour Domain",
+                          "code": "Zoo tv 1st Leg"
+                        },
+                        {
+                          "name": "Zoo TV Outside Broadcast Domain",
+                          "code": "Zoo tv Outside Broadcast"
+                        },
+                        {
+                          "name": "Elevation Tour Domain",
+                          "code": "Elevation 1st Leg"
+                        },
+                        {
+                          "name": "U2 360° Tour Domain",
+                          "code": "U2 360 Tour 2nd Leg"
+                        },
+                        {
+                          "name": "Vertigo Tour Domain",
+                          "code": "Vertigo Tour 1st Leg"
+                        },
+                        {
+                          "name": "Joshua Tree Tour Domain",
+                          "code": "Joshua Tree 1st Leg"
+                        },
+                        {
+                          "name": "Popmart Tour Domain",
+                          "code": "Popmart 1st Leg"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "name": "City",
+                    "alias": "City Set",
+                    "type": "string",
+                    "domain": null
+                  },
+                  {
+                    "name": "Date",
+                    "alias": "Date Set",
+                    "type": "date",
+                    "domain": null
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "layers",
+        "data-table"
+      ]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca"
+}

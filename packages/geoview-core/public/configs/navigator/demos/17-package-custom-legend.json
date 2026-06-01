@@ -1,4 +1,7 @@
 {
+  "configMeta": {
+    "description": "Custom-legend plugin with structured legendList, headers, and groups with collapsed states."
+  },
   "map": {
     "interaction": "dynamic",
     "viewSettings": {
@@ -64,14 +67,19 @@
       }
     ]
   },
-  "theme": "geo.ca",
-  "components": ["north-arrow", "overview-map"],
-  "corePackages": [],
+  "components": [
+    "north-arrow",
+    "overview-map"
+  ],
   "appBar": {
     "tabs": {
-      "core": ["custom-legend"]
+      "core": [
+        "custom-legend"
+      ]
     }
   },
+  "corePackages": [],
+  "theme": "geo.ca",
   "corePackagesConfig": [
     {
       "custom-legend": {

@@ -45,14 +45,45 @@
       }
     ]
   },
-  "theme": "geo.ca",
-  "components": ["overview-map", "north-arrow"],
-  "footerBar": {
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "navBar": [
+    "zoom",
+    "rotation",
+    "fullscreen",
+    "home",
+    "location",
+    "measurement",
+    "basemap-select",
+    "projection"
+  ],
+  "appBar": {
     "tabs": {
-      "core": ["layers", "data-table", "geochart"]
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
     }
   },
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "layers",
+        "data-table",
+        "geochart"
+      ]
+    },
+    "selectedTab": "geochart"
+  },
   "corePackages": [],
+  "theme": "geo.ca",
   "corePackagesConfig": [
     {
       "geochart": {
@@ -66,7 +97,9 @@
               }
             ],
             "chart": "line",
-            "chartjsOptions": { "radius": 2 },
+            "chartjsOptions": {
+              "radius": 2
+            },
             "query": {
               "type": "esriRegular",
               "url": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/arc_fr/MapServer/4",
@@ -74,9 +107,9 @@
                 "whereClauses": [
                   {
                     "field": "nom_station",
-                    "prefix": "\u0027",
+                    "prefix": "'",
                     "valueFrom": "nom_station",
-                    "suffix": "\u0027"
+                    "suffix": "'"
                   }
                 ],
                 "orderByField": "heure_debut"
@@ -92,7 +125,7 @@
               "yAxis": {
                 "type": "logarithmic",
                 "property": "mesure",
-                "label": "Concentration de radionucléides dans l\u0027air (Bq/m³)",
+                "label": "Concentration de radionucléides dans l'air (Bq/m³)",
                 "tooltipSuffix": "Bq/m³"
               },
               "borderWidth": 2
@@ -108,10 +141,13 @@
               "ySlider": {
                 "display": false
               },
-              "scalesSwitcher": ["linear", "logarithmic"],
+              "scalesSwitcher": [
+                "linear",
+                "logarithmic"
+              ],
               "stepsSwitcher": false,
               "resetStates": true,
-              "description": "Concentrations de radionucléides dans l\u0027air",
+              "description": "Concentrations de radionucléides dans l'air",
               "download": true
             }
           },
@@ -124,7 +160,9 @@
               }
             ],
             "chart": "line",
-            "chartjsOptions": { "radius": 2 },
+            "chartjsOptions": {
+              "radius": 2
+            },
             "query": {
               "type": "esriRegular",
               "url": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/arc_fr/MapServer/4",
@@ -132,9 +170,9 @@
                 "whereClauses": [
                   {
                     "field": "nom_station",
-                    "prefix": "\u0027",
+                    "prefix": "'",
                     "valueFrom": "nom_station",
-                    "suffix": "\u0027"
+                    "suffix": "'"
                   }
                 ],
                 "orderByField": "heure_debut"
@@ -150,7 +188,7 @@
               "yAxis": {
                 "type": "logarithmic",
                 "property": "mesure",
-                "label": "Concentration de radionucléides dans l\u0027air (Bq/m³)",
+                "label": "Concentration de radionucléides dans l'air (Bq/m³)",
                 "tooltipSuffix": "Bq/m³"
               },
               "borderWidth": 2
@@ -166,21 +204,18 @@
               "ySlider": {
                 "display": false
               },
-              "scalesSwitcher": ["linear", "logarithmic"],
+              "scalesSwitcher": [
+                "linear",
+                "logarithmic"
+              ],
               "stepsSwitcher": false,
               "resetStates": true,
-              "description": "Concentrations de radionucléides dans l\u0027air",
+              "description": "Concentrations de radionucléides dans l'air",
               "download": true
             }
           }
         ]
       }
     }
-  ],
-  "externalPackages": [],
-  "appBar": {
-    "tabs": {
-      "core": ["legend", "details"]
-    }
-  }
+  ]
 }

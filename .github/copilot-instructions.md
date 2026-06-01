@@ -294,6 +294,38 @@ Both effective scales are rounded, then expanded into tolerance boundaries using
 
 **Feature-query gating** — `AbstractLayerSet.queryLayerFeatures()` must gate queries with `isInVisibleRange(...)` using current resolution, current scale, and `computeEffectiveLayerScales(...)`, not zoom-only checks.
 
+### Layer Load Error Handling Strategy
+
+`AbstractGVLayer` in `abstract-gv-layer.ts` handles three categories of load errors from OpenLayers sources. The strategy distinguishes between **partial failures** (individual tiles/features) and **total failures** (the source itself is broken).
+
+**Event registration** (in `init()`):
+
+| OL Events                            | Handler                 | Layer types affected                               |
+| ------------------------------------ | ----------------------- | -------------------------------------------------- |
+| `tileloaderror`, `featuresloaderror` | `#handleError`          | WMTS, WMS (tiled), XYZ, Vector Tiles, ESRI, Vector |
+| `imageloaderror`                     | `#handleImageLoadError` | WMS Image, ESRI Image, Static Image                |
+| Source `change` (state = `'error'`)  | `#handleSourceChange`   | All layer types                                    |
+
+**Error handling behavior:**
+
+| Handler                 | Fatal?                     | Behavior                                                                                                    | Rationale                                                                                                                                                                                                                                                                                              |
+| ----------------------- | -------------------------- | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `#handleError`          | **Never**                  | Routes to `#handleLoaded` to resolve the loading counter. Logs a warning.                                   | Individual tile/feature failures are normal (edge tiles outside bounds, sparse tile sets, transient 404s). Other tiles still render. The layer is partially functional.                                                                                                                                |
+| `#handleImageLoadError` | **Always**                 | Calls `onImageLoadError()` → sets status to `'error'`, shows notification.                                  | WMS Image uses a single image per view. If it fails, nothing renders. `AbstractGVRaster` overrides `onImageLoadError()` with rescue logic for recoverable cases. Recovery happens automatically when the next pan/zoom triggers a new GetMap request that succeeds → `onLoaded()` restores the status. |
+| `#handleSourceChange`   | **Only before first load** | If `loadedOnce === false`, calls `onError()` → fatal. If `loadedOnce === true`, logs a warning and returns. | Catches source-level failures (e.g., capabilities fetch failed, service completely unreachable). Once the layer has loaded successfully, transient source state errors are ignored.                                                                                                                    |
+
+**Loading counter system** — Each `tileloadstart`/`imageloadstart`/`featuresloadstart` increments `loadingCounter` and stamps the event wrapper with the current count. `#handleLoaded` only calls `onLoaded()` when the event's stamp matches the current counter (i.e., it's the last load that started). This ensures only the final load cycle determines the layer's status transition.
+
+**Why `#handleError` routes through `#handleLoaded`** — The loading counter must be resolved for every load cycle that started. If a tile error doesn't resolve the counter and the errored tile was the last to start loading, the counter stays stuck and `onLoaded()` never fires for that cycle. By routing through `#handleLoaded`, the counter resolves normally and the status transitions to `'loaded'` (since `onLoaded()` calls `setLayerStatusLoaded()`).
+
+**Recovery flow for WMS Image layers:**
+
+1. Image fails → `#handleImageLoadError` → `onImageLoadError()` → status = `'error'`, notification shown
+2. User pans/zooms → new GetMap request with different extent/size
+3. If new image succeeds → `#handleLoaded` → `onLoaded()` → `setLayerStatusLoaded()` → status back to `'loaded'`
+
+**Key invariant:** `onError()` and `onImageLoadError()` both check `if (layerStatusBefore !== 'error')` before emitting the error notification. This prevents spamming the user with repeated error messages for the same layer.
+
 ### Time Dimension & Time Slider
 
 See [time-dimension.md](../docs/programming/time-dimension.md) for the full architecture documentation.
@@ -924,6 +956,41 @@ items.forEach((item) => {
 - Config validation happens via `src/api` files in geoview-core
 - Plugin packages have their own config schemas (default-config-\*.json) but rely on core's validation APIs
 - Use `ConfigApi` and `ConfigValidation` classes from geoview-core for config operations
+
+### Canonical Config Property Order
+
+When creating or editing map configuration JSON files (navigator demos, test configs, inline `data-config` attributes), properties **must** follow the canonical order defined in `packages/geoview-core/schema-default-config.json`. This order groups properties logically — metadata first, then the map definition, then UI chrome, then services and extensions.
+
+**Root-level order:**
+
+```
+1. configMeta          — Config metadata (schema version)
+2. map                 — Map definition (view, basemap, layers)
+3. components          — Map components (overview-map, north-arrow)
+4. overviewMap         — Overview map settings
+5. navBar              — Navigation bar controls
+6. appBar              — Application bar tabs
+7. footerBar           — Footer bar tabs
+8. corePackages        — Core plugin packages to load
+9. globalSettings      — Universal map settings (sublayer removal, disabled types)
+10. serviceUrls        — Override service endpoints
+11. theme              — Display theme (geo.ca, dark, light)
+12. corePackagesConfig — Configuration for core packages
+13. externalPackages   — External plugin packages
+```
+
+**`map` sub-property order:**
+
+```
+1. interaction              — Map interaction mode (dynamic, static)
+2. viewSettings             — Projection, zoom, center, rotation, homeView
+3. basemapOptions           — Basemap type and visual options
+4. highlightColor           — Feature highlight color overrides
+5. listOfGeoviewLayerConfig — Layer definitions array
+6. extraOptions             — Pass-through OpenLayers map options
+```
+
+**Rationale:** The order mirrors the logical sequence: _what kind of map_ → _what it shows_ → _how the UI wraps it_ → _what services back it_ → _what extends it_. Following this order makes configs easier to read, review, and diff.
 
 ### Invalid `geoviewLayerType` Prevalidation
 

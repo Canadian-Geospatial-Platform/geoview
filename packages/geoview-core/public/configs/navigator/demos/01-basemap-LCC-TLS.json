@@ -1,11 +1,24 @@
 {
+  "configMeta": {
+    "description": "LCC projection (3978) with transport basemap, maxExtent, custom initialView extent (projected values)."
+  },
   "map": {
     "interaction": "dynamic",
     "viewSettings": {
       "projection": 3978,
-      "maxExtent": [-125, 30, -60, 89],
+      "maxExtent": [
+        -110,
+        30,
+        -60,
+        80
+      ],
       "initialView": {
-        "extent": [618157.4086582607, -950073.2626501226, 2039609.776216048, 476729.6157014831]
+        "extent": [
+          618157.4086582607,
+          -950073.2626501226,
+          2039609.776216048,
+          476729.6157014831
+        ]
       }
     },
     "basemapOptions": {
@@ -15,11 +28,16 @@
       "labelZIndex": 20
     }
   },
-  "navBar": ["measurement"],
-  "components": ["overview-map", "north-arrow"],
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
   "overviewMap": {
     "hideOnZoom": 7
   },
+  "navBar": [
+    "measurement"
+  ],
   "corePackages": [],
   "theme": "geo.ca"
 }

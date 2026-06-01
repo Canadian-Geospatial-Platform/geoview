@@ -2,7 +2,15 @@
   "map": {
     "interaction": "dynamic",
     "viewSettings": {
-      "initialView": { "zoomAndCenter": [6, [-90, 50]] },
+      "initialView": {
+        "zoomAndCenter": [
+          6,
+          [
+            -90,
+            50
+          ]
+        ]
+      },
       "projection": 3857
     },
     "basemapOptions": {
@@ -21,7 +29,12 @@
             "layerId": "napl-ring-of-fire-1954-08-07-60k-thumbnail.png",
             "layerName": "Static Image",
             "source": {
-              "extent": [-87.77486341686723, 51.62285357468582, -84.57727128084842, 53.833354975551075],
+              "extent": [
+                -87.77486341686723,
+                51.62285357468582,
+                -84.57727128084842,
+                53.833354975551075
+              ],
               "projection": 4326
             }
           }
@@ -29,19 +42,41 @@
       }
     ]
   },
-  "components": ["overview-map", "north-arrow"],
-  "overviewMap": { "hideOnZoom": 7 },
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "navBar": [
+    "zoom",
+    "rotation",
+    "fullscreen",
+    "home",
+    "location",
+    "measurement",
+    "basemap-select",
+    "projection"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
   "footerBar": {
     "tabs": {
-      "core": ["layers", "data-table"]
+      "core": [
+        "layers",
+        "data-table"
+      ]
     }
   },
   "corePackages": [],
-  "theme": "geo.ca",
-  "appBar": {
-    "tabs": {
-      "core": ["geolocator", "legend", "details", "export"]
-    }
-  },
-  "navBar": ["zoom", "rotation", "fullscreen", "home", "location", "measurement", "basemap-select", "projection"]
+  "theme": "geo.ca"
 }

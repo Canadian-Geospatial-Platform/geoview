@@ -75,29 +75,29 @@ await cgpv.api.createMapFromConfig("mapId", mapConfig);
 
 ## 📋 Configuration Schema
 
-The configuration follows a hierarchical structure:
+The configuration follows a hierarchical structure. Properties are listed in **canonical order** as defined in [`schema-default-config.json`](../../../packages/geoview-core/schema-default-config.json). This order should be followed in all config files for consistency.
 
 ```
 Config
+├── configMeta
 ├── map
 │   ├── interaction
-│   ├── viewSettings (projection, initialView, enableRotation, minZoom, maxZoom)
+│   ├── viewSettings (projection, zoom, center, rotation, homeView)
 │   ├── basemapOptions
-│   ├── listOfGeoviewLayerConfig[]
 │   ├── highlightColor
+│   ├── listOfGeoviewLayerConfig[]
 │   └── extraOptions
-├── theme
+├── components[]
+├── overviewMap
+├── navBar (controls)
 ├── appBar (tabs)
 ├── footerBar (tabs)
-├── navBar (controls)
-├── overviewMap
-├── components[]
 ├── corePackages[]
-├── corePackagesConfig[]
-├── externalPackages[]
-├── serviceUrls
 ├── globalSettings
-└── configMeta
+├── serviceUrls
+├── theme
+├── corePackagesConfig[]
+└── externalPackages[]
 ```
 
 ## 🔗 Related Documentation

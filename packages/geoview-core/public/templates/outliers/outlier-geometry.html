@@ -49,12 +49,7 @@
               'listOfLayerEntryConfig': [
                 {
                   'layerId': '0',
-                  'layerName': 'CSRS Layer',
-                  'initialSettings': {
-                    'states': {
-                      'visible': true
-                    }
-                  }
+                  'layerName': 'CSRS Layer'
                 }
               ]
             },
@@ -119,12 +114,7 @@
               'listOfLayerEntryConfig': [
                 {
                   'layerId': '0',
-                  'layerName': 'IACC FR',
-                  'initialSettings': {
-                    'states': {
-                      'visible': true
-                    }
-                  }
+                  'layerName': 'IACC FR'
                 }
               ]
             },
@@ -135,21 +125,21 @@
               'geoviewLayerType':'esriFeature',
               'listOfLayerEntryConfig': [
                 {
-                  'layerId':'1',
-                  'initialSettings': {
-                      'states': {
-                          'visible': true
-                      }
-                  }
+                  'layerId':'1'
                 }
               ]
             }
           ]
         },
         'components': ['overview-map'],
+        'appBar': {
+          'tabs': {
+            'core': ['legend', 'details', 'export']
+          }
+        },
         'footerBar': {
           'tabs': {
-            'core': ['legend', 'layers', 'details', 'data-table']
+            'core': ['layers', 'data-table']
           }
         },
         'corePackages': [],

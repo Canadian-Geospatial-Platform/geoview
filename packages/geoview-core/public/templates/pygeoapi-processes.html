@@ -77,13 +77,11 @@
           <button id="Add-GeoMet-Button" class="btn btn-primary">Raster Drill process</button><br />
           Latitude: <input id="GeoMet-Lat-Input" type="number" class="form-control" style="width: 250px; margin: 5px 0;" value=51.132831196692806></input><br />
           Longitude: <input id="GeoMet-Long-Input" type="number" class="form-control" style="width: 250px; margin: 5px 0;" value=-114.74968888274337></input><br />
-          <label> Added Layer ID : </label><label id="GeoMet-New-Layer-Id-Label"></label>
         </td>
         <td style="border: 1px solid black;padding: 15px; width: 5%;">
           <button id="Add-Hydro-Button" class="btn btn-success">Downstream Analysis</button><br />
           Latitude: <input id="Hydro-Lat-Input" type="number" class="form-control" style="width: 250px; margin: 5px 0;" value=47.02115799969316></input><br />
           Longitude: <input id="Hydro-Long-Input" type="number" class="form-control" style="width: 250px; margin: 5px 0;" value=-65.93753763004142></input><br />
-          <label> Added Layer ID : </label><label id="Hydro-New-Layer-Id-Label"></label>
         </td>
       </tr>
     </tbody>
@@ -110,8 +108,7 @@
 
     // add an event listener when a button is clicked
     addGeoJSONButton.addEventListener('click', async () => {
-      const layerPath = document.getElementById('GeoMet-New-Layer-Id-Label').innerText;
-      if (layerPath) cgpv.api.getMapViewer('map1').layer.removeLayerUsingPath(layerPath);
+      cgpv.api.getMapViewer('map1').layer.removeLayerUsingPath('GeoMetGeoJsonProcess/execution');
 
       // adding a geojson layer requires a type of geojson and url
       const lat = document.getElementById('GeoMet-Lat-Input').value;
@@ -152,8 +149,7 @@
 
     // add an event listener when a button is clicked
     addGeoJSONButton.addEventListener('click', async () => {
-      const layerPath = document.getElementById('Hydro-New-Layer-Id-Label').innerText;
-      if (layerPath) cgpv.api.getMapViewer('map1').layer.removeLayerUsingPath(layerPath);
+      cgpv.api.getMapViewer('map1').layer.removeLayerUsingPath('HydroGeoJsonProcess/execution');
 
       // adding a geojson layer requires a type of geojson and url
       const lat = document.getElementById('Hydro-Lat-Input').value;

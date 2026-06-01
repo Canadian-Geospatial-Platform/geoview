@@ -60,17 +60,15 @@
               'core': ['layers', 'data-table', 'time-slider']
             }
           },
-          'theme': 'geo.ca',
-          'corePackages': []
+          'corePackages': [],
+          'theme': 'geo.ca'
         }"
     ></div>
     <p></p>
     <hr />
 
     <!-- SLIDER SECTION START -->
-    <h4 style="padding-top: 10px; width: 90%; padding-left: 10%">
-      Filter EsriFeature from slider
-    </h4>
+    <h4 style="padding-top: 10px; width: 90%; padding-left: 10%">Filter EsriFeature from slider</h4>
     <div id="UI1-rangeslider1" class="Panel" style="padding-top: 20px; width: 90%; padding-left: 10%"></div>
     <hr />
 
@@ -153,9 +151,7 @@
               ],
               track: 'normal',
               onChangeCommitted: (dates) => {
-                mapViewer.layer
-                  .getGeoviewLayer('historical-flood/0')
-                  .setLayerFiltersDate(dates[0] + '-01-01', dates[1] + '-12-31');
+                mapViewer.layer.getGeoviewLayer('historical-flood/0').setLayerFiltersDate(dates[0] + '-01-01', dates[1] + '-12-31');
               },
             })
           );

@@ -115,6 +115,41 @@ interface TypeMapFeaturesInstance {
 }
 ```
 
+### Canonical Property Order
+
+When writing or editing map configuration JSON files, properties **must** follow the canonical order defined in [`schema-default-config.json`](../../../packages/geoview-core/schema-default-config.json). This order groups related properties logically — metadata first, then the map definition, then UI elements, then services and extensions — making configs easier to read, review, and diff.
+
+**Root-level property order:**
+
+| Order | Property             | Required | Purpose                                    |
+| ----- | -------------------- | -------- | ------------------------------------------ |
+| 1     | `configMeta`         | No       | Config metadata (schema version)           |
+| 2     | `map`                | **Yes**  | Map definition (view, basemap, layers)     |
+| 3     | `components`         | No       | Map components (overview-map, north-arrow) |
+| 4     | `overviewMap`        | No       | Overview map settings                      |
+| 5     | `navBar`             | No       | Navigation bar controls                    |
+| 6     | `appBar`             | No       | Application bar tabs                       |
+| 7     | `footerBar`          | No       | Footer bar tabs                            |
+| 8     | `corePackages`       | No       | Core plugin packages to load               |
+| 9     | `globalSettings`     | No       | Universal map settings                     |
+| 10    | `serviceUrls`        | No       | Override service endpoints                 |
+| 11    | `theme`              | No       | Display theme (`geo.ca`, `dark`, `light`)  |
+| 12    | `corePackagesConfig` | No       | Configuration for core packages            |
+| 13    | `externalPackages`   | No       | External plugin packages                   |
+
+**`map` sub-property order:**
+
+| Order | Property                   | Required | Purpose                             |
+| ----- | -------------------------- | -------- | ----------------------------------- |
+| 1     | `interaction`              | **Yes**  | Map interaction mode                |
+| 2     | `viewSettings`             | **Yes**  | Projection, zoom, center, rotation  |
+| 3     | `basemapOptions`           | **Yes**  | Basemap type and options            |
+| 4     | `highlightColor`           | No       | Feature highlight color overrides   |
+| 5     | `listOfGeoviewLayerConfig` | No       | Layer definitions                   |
+| 6     | `extraOptions`             | No       | Pass-through OpenLayers map options |
+
+> **Rationale:** The order mirrors the logical sequence of map configuration: _what kind of map_ → _what it shows_ → _how the UI wraps it_ → _what services back it_ → _what extends it_.
+
 ### TypeMapConfig
 
 Main map configuration object.

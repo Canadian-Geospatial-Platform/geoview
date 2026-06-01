@@ -1,4 +1,8 @@
 {
+  "configMeta": {
+    "version": "1.0",
+    "description": "Simple configuration file used in the default-config.html demo page."
+  },
   "map": {
     "interaction": "static",
     "viewSettings": {
@@ -52,7 +56,7 @@
       }
     ]
   },
-  "theme": "geo.ca",
   "components": [],
-  "corePackages": []
+  "corePackages": [],
+  "theme": "geo.ca"
 }

@@ -1,4 +1,7 @@
 {
+  "configMeta": {
+    "description": "LCC projection (3978) with simple basemap. Minimal config (default appBar, footerBar and navBar)."
+  },
   "map": {
     "interaction": "dynamic",
     "viewSettings": {
@@ -11,7 +14,10 @@
       "labelZIndex": 20
     }
   },
-  "components": ["overview-map", "north-arrow"],
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
   "overviewMap": {
     "hideOnZoom": 7
   },

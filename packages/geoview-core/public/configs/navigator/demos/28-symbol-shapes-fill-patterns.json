@@ -1,0 +1,596 @@
+{
+  "configMeta": {
+    "description": "All symbol shapes (circle, +, diamond, square, triangle, X, star), all fill patterns (solid, null, backwardDiagonal, cross, diagonalCross, forwardDiagonal, horizontal, vertical), lineString vector settings with various line styles, and iconSymbol vector settings."
+  },
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "initialView": {
+        "zoomAndCenter": [
+          4,
+          [
+            -90,
+            55
+          ]
+        ]
+      },
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "symbolShapesLYR",
+        "geoviewLayerName": "All Symbol Shapes (Points)",
+        "metadataAccessPath": "./datasets/geojson",
+        "geoviewLayerType": "GeoJSON",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "points.json",
+            "layerName": "Symbol Shapes by Red Value",
+            "source": {
+              "dataAccessPath": "./datasets/geojson/points.json"
+            },
+            "layerStyle": {
+              "Point": {
+                "type": "classBreaks",
+                "fields": [
+                  "Red"
+                ],
+                "hasDefault": true,
+                "defaultLabel": "Other",
+                "defaultVisible": true,
+                "defaultSettings": {
+                  "type": "simpleSymbol",
+                  "color": "rgba(180,180,180,1)",
+                  "stroke": {
+                    "color": "rgba(0,0,0,1)",
+                    "lineStyle": "solid",
+                    "width": 1
+                  },
+                  "size": 12,
+                  "symbol": "circle",
+                  "offset": [
+                    0,
+                    0
+                  ]
+                },
+                "info": [
+                  {
+                    "label": "Circle (Red < 100)",
+                    "visible": true,
+                    "values": [
+                      0,
+                      99
+                    ],
+                    "settings": {
+                      "type": "simpleSymbol",
+                      "color": "rgba(255,0,0,1)",
+                      "stroke": {
+                        "color": "rgba(0,0,0,1)",
+                        "lineStyle": "solid",
+                        "width": 1
+                      },
+                      "size": 14,
+                      "symbol": "circle",
+                      "offset": [
+                        0,
+                        0
+                      ]
+                    }
+                  },
+                  {
+                    "label": "Diamond (100-299)",
+                    "visible": true,
+                    "values": [
+                      100,
+                      299
+                    ],
+                    "settings": {
+                      "type": "simpleSymbol",
+                      "color": "rgba(0,128,255,1)",
+                      "stroke": {
+                        "color": "rgba(0,0,0,1)",
+                        "lineStyle": "dash",
+                        "width": 1
+                      },
+                      "size": 14,
+                      "symbol": "diamond",
+                      "offset": [
+                        0,
+                        0
+                      ]
+                    }
+                  },
+                  {
+                    "label": "Square (300-599)",
+                    "visible": true,
+                    "values": [
+                      300,
+                      599
+                    ],
+                    "settings": {
+                      "type": "simpleSymbol",
+                      "color": "rgba(0,200,0,1)",
+                      "stroke": {
+                        "color": "rgba(0,0,0,1)",
+                        "lineStyle": "dot",
+                        "width": 1.5
+                      },
+                      "size": 14,
+                      "symbol": "square",
+                      "offset": [
+                        0,
+                        0
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "moreSymbolsLYR",
+        "geoviewLayerName": "More Symbol Shapes (Points)",
+        "metadataAccessPath": "./datasets/geojson",
+        "geoviewLayerType": "GeoJSON",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "points.json",
+            "layerName": "Triangle, Star, +, X Symbols",
+            "source": {
+              "dataAccessPath": "./datasets/geojson/points.json"
+            },
+            "layerStyle": {
+              "Point": {
+                "type": "simple",
+                "fields": [],
+                "hasDefault": false,
+                "info": [
+                  {
+                    "visible": true,
+                    "values": [],
+                    "label": "Triangle",
+                    "settings": {
+                      "type": "simpleSymbol",
+                      "color": "rgba(255,165,0,1)",
+                      "stroke": {
+                        "color": "rgba(100,50,0,1)",
+                        "lineStyle": "dash-dot",
+                        "width": 1
+                      },
+                      "size": 14,
+                      "symbol": "triangle",
+                      "offset": [
+                        0,
+                        0
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "layerId": "points_1.json",
+            "layerName": "Star Symbols",
+            "source": {
+              "dataAccessPath": "./datasets/geojson/points_1.json"
+            },
+            "layerStyle": {
+              "Point": {
+                "type": "simple",
+                "fields": [],
+                "hasDefault": false,
+                "info": [
+                  {
+                    "visible": true,
+                    "values": [],
+                    "label": "Star",
+                    "settings": {
+                      "type": "simpleSymbol",
+                      "color": "rgba(255,215,0,1)",
+                      "stroke": {
+                        "color": "rgba(0,0,0,1)",
+                        "lineStyle": "dash-dot-dot",
+                        "width": 1.5
+                      },
+                      "size": 16,
+                      "symbol": "star",
+                      "offset": [
+                        0,
+                        0
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "layerId": "points_2.json",
+            "layerName": "Plus (+) Symbols",
+            "source": {
+              "dataAccessPath": "./datasets/geojson/points_2.json"
+            },
+            "layerStyle": {
+              "Point": {
+                "type": "simple",
+                "fields": [],
+                "hasDefault": false,
+                "info": [
+                  {
+                    "visible": true,
+                    "values": [],
+                    "label": "Plus",
+                    "settings": {
+                      "type": "simpleSymbol",
+                      "color": "rgba(128,0,128,1)",
+                      "stroke": {
+                        "color": "rgba(50,0,50,1)",
+                        "lineStyle": "longDash",
+                        "width": 2
+                      },
+                      "size": 14,
+                      "symbol": "+",
+                      "offset": [
+                        0,
+                        0
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "layerId": "points_3.json",
+            "layerName": "X Symbols",
+            "source": {
+              "dataAccessPath": "./datasets/geojson/points_3.json"
+            },
+            "layerStyle": {
+              "Point": {
+                "type": "simple",
+                "fields": [],
+                "hasDefault": false,
+                "info": [
+                  {
+                    "visible": true,
+                    "values": [],
+                    "label": "X Mark",
+                    "settings": {
+                      "type": "simpleSymbol",
+                      "color": "rgba(0,128,128,1)",
+                      "stroke": {
+                        "color": "rgba(0,0,0,1)",
+                        "lineStyle": "longDash-dot",
+                        "width": 1
+                      },
+                      "size": 14,
+                      "symbol": "X",
+                      "offset": [
+                        0,
+                        0
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "iconSymbolLYR",
+        "geoviewLayerName": "Icon Symbol (Points)",
+        "metadataAccessPath": "./datasets/geojson",
+        "geoviewLayerType": "GeoJSON",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "icon_points.json",
+            "layerName": "Custom Icon Markers",
+            "source": {
+              "dataAccessPath": "./datasets/geojson/icon_points.json"
+            },
+            "layerStyle": {
+              "Point": {
+                "type": "simple",
+                "fields": [],
+                "hasDefault": false,
+                "info": [
+                  {
+                    "visible": true,
+                    "values": [],
+                    "label": "Pin Icon",
+                    "settings": {
+                      "type": "iconSymbol",
+                      "mimeType": "image/png",
+                      "src": "iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAcNJREFUKJFjYSATsCBz/v//z/Tp8+fwO/cf273/+FmckZHxn6iQwBMVJbldXJyc27Bq/P//v8jVm3cmtUxf7rX+3nN+ZEVJ+srhd+8/3KikIFfMyMj4Fa7x////zBeu3JjuXDM55Ou//xjOmnfxrsS+8t7Uze1FLAwMDClwjU+fv0irmLzYH5smGHjw/TdTz7yVIe/ef9wiJMi/gYWBgYHhxp2HXgeev2dFVtjhb8Pw7dtPhqbdp+FiCy894E+4cz+IgYEBovHDp88qyJpmxngwxIf5wfnImt+9f68Ed+rff3/ZkTVycnDA2dxcHMhSDH/+/WeHa+Tm5HzJwMCgCJMsW7SZgYmZkeHHj18M5RsPo2jk4eJ+DdcoKSZyQoeX0+LK5+8MDAwMDC9+/WWImbkeI4D85MUZJMWED8A1qirKVjUlBvgETVqugqEa5mQmRoacKO9zWurKPXCNfHx8389evha5Njd8bfPCLXIXPn1F0eQgLshQGut7XUREOJCRkfEfXCMDAwODsa7WmQOnT+t150VMevn6ne33bz+kGBgZ/3FzcTyUEBXZxcb4p0RbTek3TD1KWnUwNf3IwMAQj8u5yAAAupehfivnXOEAAAAASUVORK5CYII=",
+                      "width": 14,
+                      "height": 14,
+                      "rotation": 0,
+                      "opacity": 1,
+                      "offset": [
+                        0,
+                        0
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "lineStylesLYR",
+        "geoviewLayerName": "Line Styles (Lines)",
+        "metadataAccessPath": "./datasets/geojson",
+        "geoviewLayerType": "GeoJSON",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "lines.json",
+            "layerName": "Lines with Various Styles",
+            "source": {
+              "dataAccessPath": "./datasets/geojson/lines.json"
+            },
+            "layerStyle": {
+              "LineString": {
+                "type": "uniqueValue",
+                "fields": [
+                  "Province"
+                ],
+                "hasDefault": true,
+                "defaultLabel": "Other Province",
+                "defaultVisible": true,
+                "defaultSettings": {
+                  "type": "lineString",
+                  "stroke": {
+                    "color": "rgba(128,128,128,1)",
+                    "lineStyle": "solid",
+                    "width": 3
+                  }
+                },
+                "info": [
+                  {
+                    "label": "Quebec - Dash-dot-dot",
+                    "visible": true,
+                    "values": [
+                      "Quebec"
+                    ],
+                    "settings": {
+                      "type": "lineString",
+                      "stroke": {
+                        "color": "rgba(0,0,255,1)",
+                        "lineStyle": "dash-dot-dot",
+                        "width": 3
+                      }
+                    }
+                  },
+                  {
+                    "label": "Ontario - ShortDash",
+                    "visible": true,
+                    "values": [
+                      "Ontario"
+                    ],
+                    "settings": {
+                      "type": "lineString",
+                      "stroke": {
+                        "color": "rgba(255,0,0,1)",
+                        "lineStyle": "shortDash",
+                        "width": 3
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "fillPatternsLYR",
+        "geoviewLayerName": "Fill Patterns (Polygons)",
+        "metadataAccessPath": "./datasets/geojson",
+        "geoviewLayerType": "GeoJSON",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "polygons.json",
+            "layerName": "Polygons with Fill Patterns",
+            "source": {
+              "dataAccessPath": "./datasets/geojson/polygons.json"
+            },
+            "layerStyle": {
+              "Polygon": {
+                "type": "uniqueValue",
+                "fields": [
+                  "Province"
+                ],
+                "hasDefault": true,
+                "defaultLabel": "Other",
+                "defaultVisible": true,
+                "defaultSettings": {
+                  "type": "filledPolygon",
+                  "color": "rgba(200,200,200,0.5)",
+                  "fillStyle": "solid",
+                  "stroke": {
+                    "color": "rgba(0,0,0,1)",
+                    "lineStyle": "solid",
+                    "width": 1
+                  }
+                },
+                "info": [
+                  {
+                    "label": "Quebec - BackwardDiagonal",
+                    "visible": true,
+                    "values": [
+                      "Quebec"
+                    ],
+                    "settings": {
+                      "type": "filledPolygon",
+                      "color": "rgba(0,0,255,0.6)",
+                      "fillStyle": "backwardDiagonal",
+                      "patternSize": 10,
+                      "patternWidth": 2,
+                      "stroke": {
+                        "color": "rgba(0,0,180,1)",
+                        "lineStyle": "solid",
+                        "width": 2
+                      }
+                    }
+                  },
+                  {
+                    "label": "Ontario - Cross",
+                    "visible": true,
+                    "values": [
+                      "Ontario"
+                    ],
+                    "settings": {
+                      "type": "filledPolygon",
+                      "color": "rgba(255,0,0,0.6)",
+                      "fillStyle": "cross",
+                      "patternSize": 8,
+                      "patternWidth": 1,
+                      "stroke": {
+                        "color": "rgba(180,0,0,1)",
+                        "lineStyle": "dash",
+                        "width": 2
+                      }
+                    }
+                  },
+                  {
+                    "label": "Alberta - DiagonalCross",
+                    "visible": true,
+                    "values": [
+                      "Alberta"
+                    ],
+                    "settings": {
+                      "type": "filledPolygon",
+                      "color": "rgba(0,180,0,0.6)",
+                      "fillStyle": "diagonalCross",
+                      "patternSize": 12,
+                      "patternWidth": 2,
+                      "stroke": {
+                        "color": "rgba(0,120,0,1)",
+                        "lineStyle": "dot",
+                        "width": 2
+                      }
+                    }
+                  },
+                  {
+                    "label": "Manitoba - ForwardDiagonal",
+                    "visible": true,
+                    "values": [
+                      "Manitoba"
+                    ],
+                    "settings": {
+                      "type": "filledPolygon",
+                      "color": "rgba(255,165,0,0.6)",
+                      "fillStyle": "forwardDiagonal",
+                      "patternSize": 10,
+                      "patternWidth": 2,
+                      "stroke": {
+                        "color": "rgba(200,120,0,1)",
+                        "lineStyle": "longDash",
+                        "width": 2
+                      }
+                    }
+                  },
+                  {
+                    "label": "Saskatchewan - Horizontal",
+                    "visible": true,
+                    "values": [
+                      "Saskatchewan"
+                    ],
+                    "settings": {
+                      "type": "filledPolygon",
+                      "color": "rgba(128,0,128,0.6)",
+                      "fillStyle": "horizontal",
+                      "patternSize": 8,
+                      "patternWidth": 1,
+                      "stroke": {
+                        "color": "rgba(100,0,100,1)",
+                        "lineStyle": "shortDash-dot",
+                        "width": 2
+                      }
+                    }
+                  },
+                  {
+                    "label": "BC - Vertical",
+                    "visible": true,
+                    "values": [
+                      "British Columbia"
+                    ],
+                    "settings": {
+                      "type": "filledPolygon",
+                      "color": "rgba(0,128,128,0.6)",
+                      "fillStyle": "vertical",
+                      "patternSize": 8,
+                      "patternWidth": 1,
+                      "stroke": {
+                        "color": "rgba(0,100,100,1)",
+                        "lineStyle": "shortDash-dot-dot",
+                        "width": 2
+                      }
+                    }
+                  },
+                  {
+                    "label": "Nova Scotia - Null Fill",
+                    "visible": true,
+                    "values": [
+                      "Nova Scotia"
+                    ],
+                    "settings": {
+                      "type": "filledPolygon",
+                      "color": "rgba(0,0,0,0)",
+                      "fillStyle": "null",
+                      "stroke": {
+                        "color": "rgba(0,0,0,1)",
+                        "lineStyle": "solid",
+                        "width": 3
+                      },
+                      "zIndex": 10
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "layers",
+        "data-table"
+      ]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca"
+}

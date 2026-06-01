@@ -1,33 +1,38 @@
 {
+  "configMeta": {
+    "version": "1.0"
+  },
   "map": {
     "interaction": "dynamic",
-    "controls": {
-      "boxZoom": true,
-      "selectBox": true
-    },
-    "projection": 3978,
     "viewSettings": {
-      "zoom": 12,
-      "center": [-106, 60]
+      "zoomAndCenter": [4.5, [-90, 60]],
+      "projection": 3978
     },
     "basemapOptions": {
       "id": "transport",
       "shaded": true,
       "labeled": true
     },
+    "highlightColor": "",
     "listOfGeoviewLayerConfig": []
   },
-  "theme": "geo.ca",
+  "components": ["overview-map", "north-arrow"],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "navBar": ["zoom", "fullscreen", "home"],
   "appBar": {
     "tabs": {
       "core": ["geolocator"]
     }
   },
-  "navBar": ["zoom", "fullscreen", "home"],
-  "components": [],
+  "footerBar": {
+    "tabs": {
+      "core": ["layers"]
+    }
+  },
   "corePackages": [],
-  "corePackagesConfig": [],
-  "externalPackages": [],
+  "globalSettings": {},
   "serviceUrls": {
     "geocoreUrl": "https://geocore.api.geo.ca",
     "rcsUrl": "https://gcgeo.gc.ca/geonetwork/srv/api/v2/docs/",
@@ -37,7 +42,7 @@
     "ntsSheetUrl": "https://geogratis.gc.ca/services/delimitation/en/nts",
     "altitudeUrl": "https://geogratis.gc.ca/services/elevation/cdem/altitude"
   },
-  "configMeta": {
-    "version": "1.0"
-  }
+  "theme": "geo.ca",
+  "corePackagesConfig": [],
+  "externalPackages": []
 }

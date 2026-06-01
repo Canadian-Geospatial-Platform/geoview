@@ -66,12 +66,7 @@
               'listOfLayerEntryConfig': [
                 {
                   'layerId': '0',
-                  'layerName': 'MPMO - Major Project',
-                  'initialSettings': {
-                    'states': {
-                      'visible': true
-                    }
-                  }
+                  'layerName': 'MPMO - Major Project'
                 }
               ]
             },
@@ -146,9 +141,14 @@
           ]
         },
         'components': ['overview-map'],
+        'appBar': {
+          'tabs': {
+            'core': ['legend', 'details', 'export']
+          }
+        },
         'footerBar': {
           'tabs': {
-            'core': ['legend', 'layers', 'details', 'data-table']
+            'core': ['layers', 'data-table']
           }
         },
         'corePackages': [],
@@ -209,9 +209,14 @@
           ]
         },
         'components': ['overview-map'],
+        'appBar': {
+          'tabs': {
+            'core': ['legend', 'details', 'export']
+          }
+        },
         'footerBar': {
           'tabs': {
-            'core': ['legend', 'layers', 'details', 'data-table']
+            'core': ['layers', 'data-table']
           }
         },
         'corePackages': [],
@@ -283,12 +288,12 @@
         'navBar': ['zoom', 'fullscreen', 'home', 'location', 'basemap-select'],
         'appBar': {
           'tabs': {
-            'core': ['geolocator', 'export']
+            'core': ['legend', 'details', 'export']
           }
         },
         'footerBar': {
           'tabs': {
-            'core': ['legend', 'layers', 'details', 'data-table']
+            'core': ['layers', 'data-table']
           }
         },
         'corePackages': [],

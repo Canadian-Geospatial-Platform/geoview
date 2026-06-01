@@ -1,4 +1,7 @@
 {
+  "configMeta": {
+    "description": "Map export with problematic legend entries for edge-case legend rendering."
+  },
   "map": {
     "interaction": "dynamic",
     "viewSettings": {
@@ -66,15 +69,24 @@
       }
     ]
   },
-  "components": ["overview-map", "north-arrow"],
-  "footerBar": {
-    "tabs": {
-      "core": ["layers"]
-    }
-  },
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
   "appBar": {
     "tabs": {
-      "core": ["geolocator", "export", "legend"]
+      "core": [
+        "geolocator",
+        "export",
+        "legend"
+      ]
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "layers"
+      ]
     }
   },
   "corePackages": [],

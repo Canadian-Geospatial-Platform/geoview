@@ -1,4 +1,7 @@
 {
+  "configMeta": {
+    "description": "Multiple custom time-slider configurations: one with multiple layers sharing a slider, one with range, custom displayDateFormat and single handle for the network dataset."
+  },
   "map": {
     "interaction": "dynamic",
     "viewSettings": {
@@ -91,27 +94,44 @@
       }
     ]
   },
-  "theme": "geo.ca",
+  "components": [
+    "north-arrow",
+    "overview-map"
+  ],
   "appBar": {
     "tabs": {
-      "core": ["geolocator", "legend", "details", "export"]
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
     }
   },
-  "components": ["north-arrow", "overview-map"],
   "footerBar": {
     "tabs": {
-      "core": ["layers", "data-table", "time-slider"]
+      "core": [
+        "layers",
+        "data-table",
+        "time-slider"
+      ]
     },
     "selectedTab": "time-slider",
     "selectedTimeSliderLayerPath": "wmsLYR1-spatiotemporel/RADAR_1KM_RSNO"
   },
   "corePackages": [],
+  "globalSettings": {
+    "displayDateMode": "iso"
+  },
+  "theme": "geo.ca",
   "corePackagesConfig": [
     {
       "time-slider": {
         "sliders": [
           {
-            "layerPaths": ["wmsLYR1-spatiotemporel/RADAR_1KM_RSNO"],
+            "layerPaths": [
+              "wmsLYR1-spatiotemporel/RADAR_1KM_RSNO"
+            ],
             "title": "Spatiotemporel - Custom",
             "description": "Custom inline description",
             "locked": true,
@@ -124,20 +144,32 @@
             }
           },
           {
-            "layerPaths": ["MSI/msi-94-or-more"],
+            "layerPaths": [
+              "MSI/msi-94-or-more"
+            ],
             "timeDimension": {
-              "default": ["2011-08-15T00:00:00Z"],
+              "default": [
+                "2011-08-15T00:00:00Z"
+              ],
               "displayDateTimezone": "UTC"
             }
           },
           {
-            "layerPaths": ["fire_progression/0", "fire_perimeters/1", "floods_canada/1", "historical-flood/0"],
+            "layerPaths": [
+              "fire_progression/0",
+              "fire_perimeters/1",
+              "floods_canada/1",
+              "historical-flood/0"
+            ],
             "title": "Progression and Perimeters of Fires and Floods",
             "delay": 5000,
             "filtering": false,
             "timeDimension": {
               "field": "DATE_",
-              "default": ["2023-04-19T00:00:00Z", "2025-09-15T00:00:00Z"],
+              "default": [
+                "2023-04-19T00:00:00Z",
+                "2025-09-15T00:00:00Z"
+              ],
               "nearestValues": "continuous",
               "displayDateFormat": {
                 "en": "YYYY-MM-DD",
@@ -145,56 +177,55 @@
               },
               "rangeItems": {
                 "type": "",
-                "range": ["2023-04-19T00:00:00+00:00", "2025-09-15T00:00:00+00:00"]
+                "range": [
+                  "2023-04-19T00:00:00+00:00",
+                  "2025-09-15T00:00:00+00:00"
+                ]
               },
               "singleHandle": false
             }
           },
           {
             "layerPaths": [
-                "df168bcf-4abc-4756/0"
+              "df168bcf-4abc-4756/0"
             ],
             "delay": 2000,
             "fields": [
-                "Year"
+              "Year"
             ],
             "filtering": true,
             "timeDimension": {
-                "field": "Year",
-                "default": [
-                    "2013-01-01T00:00:00Z"
-                ],
-                "nearestValues": "discrete",
-                "displayDateFormat": {
-                  "en": "YYYY",
-                  "fr": "YYYY"
-                },
-                "rangeItems": {
-                    "type": "",
-                    "range": [
-                        "2013-01-01T00:00:00Z",
-                        "2014-01-01T00:00:00Z",
-                        "2015-01-01T00:00:00Z",
-                        "2016-01-01T00:00:00Z",
-                        "2017-01-01T00:00:00Z",
-                        "2018-01-01T00:00:00Z",
-                        "2019-01-01T00:00:00Z",
-                        "2020-01-01T00:00:00Z",
-                        "2021-01-01T00:00:00Z",
-                        "2022-01-01T00:00:00Z",
-                        "2023-01-01T00:00:00Z",
-                        "2024-01-01T00:00:00Z"
-                    ]
-                },
-                "singleHandle": true
+              "field": "Year",
+              "default": [
+                "2013-01-01T00:00:00Z"
+              ],
+              "nearestValues": "discrete",
+              "displayDateFormat": {
+                "en": "YYYY",
+                "fr": "YYYY"
+              },
+              "rangeItems": {
+                "type": "",
+                "range": [
+                  "2013-01-01T00:00:00Z",
+                  "2014-01-01T00:00:00Z",
+                  "2015-01-01T00:00:00Z",
+                  "2016-01-01T00:00:00Z",
+                  "2017-01-01T00:00:00Z",
+                  "2018-01-01T00:00:00Z",
+                  "2019-01-01T00:00:00Z",
+                  "2020-01-01T00:00:00Z",
+                  "2021-01-01T00:00:00Z",
+                  "2022-01-01T00:00:00Z",
+                  "2023-01-01T00:00:00Z",
+                  "2024-01-01T00:00:00Z"
+                ]
+              },
+              "singleHandle": true
             }
-        }
+          }
         ]
       }
     }
-  ],
-  "externalPackages": [],
-  "globalSettings": {
-    "displayDateMode": "iso"
-  }
+  ]
 }

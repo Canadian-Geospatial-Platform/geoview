@@ -4,10 +4,22 @@
     "viewSettings": {
       "projection": 3978,
       "initialView": {
-        "zoomAndCenter": [4.5, [-90, 60]]
+        "zoomAndCenter": [
+          4.5,
+          [
+            -90,
+            60
+          ]
+        ]
       },
       "homeView": {
-        "zoomAndCenter": [4.5, [-90, 60]]
+        "zoomAndCenter": [
+          4.5,
+          [
+            -90,
+            60
+          ]
+        ]
       }
     },
     "basemapOptions": {
@@ -17,16 +29,33 @@
     },
     "listOfGeoviewLayerConfig": []
   },
-  "components": ["north-arrow", "overview-map"],
-  "navBar": ["zoom", "fullscreen", "home", "location", "basemap-select"],
+  "components": [
+    "north-arrow",
+    "overview-map"
+  ],
+  "navBar": [
+    "zoom",
+    "fullscreen",
+    "home",
+    "location",
+    "basemap-select"
+  ],
   "appBar": {
     "tabs": {
-      "core": ["geolocator", "legend", "details", "export"]
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
     }
   },
   "footerBar": {
     "tabs": {
-      "core": ["layers", "data-table"]
+      "core": [
+        "layers",
+        "data-table"
+      ]
     }
   },
   "corePackages": [],

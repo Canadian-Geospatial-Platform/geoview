@@ -1,4 +1,7 @@
 {
+  "configMeta": {
+    "description": "visualVariables on esriFeature with colorInfo, sizeInfo, and opacityInfo."
+  },
   "map": {
     "interaction": "dynamic",
     "viewSettings": {
@@ -11,13 +14,13 @@
     },
     "listOfGeoviewLayerConfig": [
       {
-        "geoviewLayerId":"WindDirection",
-        "geoviewLayerName":"Wind Direction with rotation",
-        "metadataAccessPath":"https://services9.arcgis.com/RHVPKKiFTONKtxq3/ArcGIS/rest/services/NOAA_METAR_current_wind_speed_direction_v1/FeatureServer",
-        "geoviewLayerType":"esriFeature",
+        "geoviewLayerId": "WindDirection",
+        "geoviewLayerName": "Wind Direction with rotation",
+        "metadataAccessPath": "https://services9.arcgis.com/RHVPKKiFTONKtxq3/ArcGIS/rest/services/NOAA_METAR_current_wind_speed_direction_v1/FeatureServer",
+        "geoviewLayerType": "esriFeature",
         "listOfLayerEntryConfig": [
           {
-              "layerId":"0"
+            "layerId": "0"
           }
         ]
       },
@@ -117,18 +120,31 @@
       }
     ]
   },
-  "components": ["overview-map", "north-arrow"],
-  "overviewMap": { "hideOnZoom": 7 },
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
   "footerBar": {
     "tabs": {
-      "core": ["layers", "data-table"]
+      "core": [
+        "layers",
+        "data-table"
+      ]
     }
   },
   "corePackages": [],
-  "theme": "geo.ca",
-  "appBar": {
-    "tabs": {
-      "core": ["geolocator", "legend", "details", "export"]
-    }
-  }
+  "theme": "geo.ca"
 }

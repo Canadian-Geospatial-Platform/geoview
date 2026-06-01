@@ -118,6 +118,7 @@
     }
   },
   "corePackages": [],
+  "theme": "geo.ca",
   "corePackagesConfig": [
     {
       "geochart": {
@@ -184,6 +185,5 @@
         ]
       }
     }
-  ],
-  "theme": "geo.ca"
+  ]
 }

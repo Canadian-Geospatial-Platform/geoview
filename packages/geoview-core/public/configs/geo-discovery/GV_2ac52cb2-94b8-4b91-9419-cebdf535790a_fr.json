@@ -23,14 +23,45 @@
       }
     ]
   },
-  "theme": "geo.ca",
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "navBar": [
+    "zoom",
+    "rotation",
+    "fullscreen",
+    "home",
+    "location",
+    "measurement",
+    "basemap-select",
+    "projection"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
   "footerBar": {
     "tabs": {
-      "core": ["legend", "layers", "details", "data-table", "geochart"]
+      "core": [
+        "layers",
+        "data-table",
+        "geochart"
+      ]
     },
     "selectedTab": "geochart"
   },
   "corePackages": [],
+  "theme": "geo.ca",
   "corePackagesConfig": [
     {
       "geochart": {
@@ -51,9 +82,9 @@
                 "whereClauses": [
                   {
                     "field": "installation_substance",
-                    "prefix": "\u0027",
+                    "prefix": "'",
                     "valueFrom": "installation_substance",
-                    "suffix": "\u0027"
+                    "suffix": "'"
                   }
                 ],
                 "orderByField": "annee"

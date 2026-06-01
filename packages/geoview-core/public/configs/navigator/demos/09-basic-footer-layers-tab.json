@@ -1,4 +1,7 @@
 {
+  "configMeta": {
+    "description": "FooterBar with layers tab, overlay markers, intentional bad URL layer, and canRemoveSublayers disabled."
+  },
   "map": {
     "interaction": "dynamic",
     "viewSettings": {
@@ -8,28 +11,6 @@
       "basemapId": "transport",
       "shaded": true,
       "labeled": true
-    },
-    "overlayObjects": {
-      "pointMarkers": {
-        "group1": [
-          {
-            "id": "1",
-            "coordinate": [-100, 60],
-            "color": "blue",
-            "opacity": 0.5
-          },
-          {
-            "id": "2",
-            "coordinate": [-80, 65],
-            "color": "rgb(0, 226, 0)"
-          },
-          {
-            "id": "3",
-            "coordinate": [-115, 66],
-            "color": "#C52022"
-          }
-        ]
-      }
     },
     "listOfGeoviewLayerConfig": [
       {
@@ -120,7 +101,9 @@
                 "layerId": "points_1.json",
                 "layerName": "Points 1",
                 "initialSettings": {
-                  "controls": { "remove": true }
+                  "controls": {
+                    "remove": true
+                  }
                 }
               },
               {
@@ -135,25 +118,66 @@
           }
         ]
       }
-    ]
+    ],
+    "overlayObjects": {
+      "pointMarkers": {
+        "group1": [
+          {
+            "id": "1",
+            "coordinate": [
+              -100,
+              60
+            ],
+            "color": "blue",
+            "opacity": 0.5
+          },
+          {
+            "id": "2",
+            "coordinate": [
+              -80,
+              65
+            ],
+            "color": "rgb(0, 226, 0)"
+          },
+          {
+            "id": "3",
+            "coordinate": [
+              -115,
+              66
+            ],
+            "color": "#C52022"
+          }
+        ]
+      }
+    }
   },
-  "theme": "geo.ca",
-  "components": ["north-arrow", "overview-map"],
+  "components": [
+    "north-arrow",
+    "overview-map"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "export"
+      ]
+    }
+  },
   "footerBar": {
     "tabs": {
-      "core": ["legend", "details", "layers", "data-table"]
+      "core": [
+        "legend",
+        "details",
+        "layers",
+        "data-table"
+      ]
     },
     "selectedTab": "layers",
     "selectedLayersLayerPath": "airborne_radioactivity/1"
   },
   "corePackages": [],
-  "externalPackages": [],
-  "appBar": {
-    "tabs": {
-      "core": ["geolocator", "export"]
-    }
-  },
   "globalSettings": {
     "canRemoveSublayers": false
-  }
+  },
+  "theme": "geo.ca"
 }

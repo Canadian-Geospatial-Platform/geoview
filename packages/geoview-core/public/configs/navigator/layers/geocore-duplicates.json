@@ -242,19 +242,48 @@
       }
     ]
   },
-  "components": ["overview-map", "north-arrow"],
-  "overviewMap": { "hideOnZoom": 7 },
-  "footerBar": {
-    "tabs": {
-      "core": ["layers", "data-table"]
-    }
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
   },
+  "navBar": [
+    "zoom",
+    "rotation",
+    "fullscreen",
+    "home",
+    "location",
+    "measurement",
+    "basemap-select",
+    "projection"
+  ],
   "appBar": {
     "tabs": {
-      "core": ["geolocator", "legend", "details", "export"]
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
     }
   },
-  "corePackages": ["swiper"],
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "layers",
+        "data-table"
+      ]
+    }
+  },
+  "corePackages": [
+    "swiper"
+  ],
+  "serviceUrls": {
+    "metadataUrl": "https://open.canada.ca/data/en/dataset/"
+  },
+  "theme": "geo.ca",
   "corePackagesConfig": [
     {
       "swiper": {
@@ -267,10 +296,5 @@
         ]
       }
     }
-  ],
-  "serviceUrls": {
-    "metadataUrl": "https://open.canada.ca/data/en/dataset/"
-  },
-  "theme": "geo.ca",
-  "navBar": ["zoom", "rotation", "fullscreen", "home", "location", "measurement", "basemap-select", "projection"]
+  ]
 }

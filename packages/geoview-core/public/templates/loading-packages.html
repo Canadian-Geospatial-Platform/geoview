@@ -25,15 +25,17 @@
         <p>This page is used to showcase loading / unloading packages at runtime.</p>
       </div>
     </div>
-    <div class="toolbar" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px">
+    <div class="toolbar" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px">
       <button class="btn btn-primary" id="load-aoi-panel-btn">Load Area of Interest Panel</button>
       <button class="btn btn-primary" id="load-custom-legend-btn">Load Custom Legend</button>
       <button class="btn btn-primary" id="load-about-panel-btn">Load About Panel</button>
       <button class="btn btn-primary" id="load-drawer-btn">Load Drawer</button>
+      <button class="btn btn-primary" id="load-stac-browser-btn">Load STAC Browser</button>
       <button class="btn btn-primary" id="unload-aoi-panel-btn">Unload Area of Interest Panel</button>
       <button class="btn btn-primary" id="unload-custom-legend-btn">Unload Custom Legend</button>
       <button class="btn btn-primary" id="unload-about-panel-btn">Unload About Panel</button>
       <button class="btn btn-primary" id="unload-drawer-btn">Unload Drawer</button>
+      <button class="btn btn-primary" id="unload-stac-browser-btn">Unload STAC Browser</button>
     </div>
 
     <div id="map1" class="geoview-map" data-lang="en" data-config-url="./configs/loading-packages-config.json"></div>
@@ -122,6 +124,27 @@
             cgpv.api.plugin.removePlugin('drawer', mapViewer.mapId);
           });
           // #endregion Drawer
+
+          // #region STAC Browser
+          // get load stac browser button element
+          var loadStacBrowserBtn = document.getElementById('load-stac-browser-btn');
+
+          // add event handler to the load stac browser button
+          loadStacBrowserBtn.addEventListener('click', function (e) {
+            // Load the stac-browser script first (it's not pre-loaded via config like other plugins)
+            cgpv.api.plugin.loadScript('stac-browser').then(function () {
+              cgpv.api.plugin.addPlugin('stac-browser', window.geoviewPlugins['stac-browser'], mapViewer.mapId);
+            });
+          });
+
+          // get unload stac browser button element
+          var unloadStacBrowserBtn = document.getElementById('unload-stac-browser-btn');
+
+          // add event handler to the unload stac browser button
+          unloadStacBrowserBtn.addEventListener('click', function (e) {
+            cgpv.api.plugin.removePlugin('stac-browser', mapViewer.mapId);
+          });
+          // #endregion STAC Browser
         }
       });
 

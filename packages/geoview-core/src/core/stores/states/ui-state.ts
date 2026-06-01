@@ -165,7 +165,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
           footerBarComponents: geoviewConfig.footerBar?.tabs.core || [],
           footerTabs: footerTabEntries,
           activeFooterBarTab: {
-            tabId: footerSelectedTab,
+            tabId: isFooterBarOpen ? footerSelectedTab : '',
             isOpen: isFooterBarOpen,
             isFocusTrapped: false,
           },

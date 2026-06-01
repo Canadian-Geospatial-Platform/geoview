@@ -1,4 +1,7 @@
 {
+  "configMeta": {
+    "description": "Web Mercator projection (3857) with transport basemap and measurement navBar."
+  },
   "map": {
     "interaction": "dynamic",
     "viewSettings": {
@@ -10,8 +13,13 @@
       "labeled": true
     }
   },
-  "navBar": ["measurement"],
-  "components": ["overview-map", "north-arrow"],
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "navBar": [
+    "measurement"
+  ],
   "corePackages": [],
   "theme": "geo.ca"
 }

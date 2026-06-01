@@ -1,0 +1,197 @@
+{
+  "configMeta": {
+    "description": "initialSettings testing all controls (highlight, hover, opacity, query, remove, table, visibility, zoom) and all states (visible, legendCollapsed, opacity, hoverable, queryable) across multiple layer types."
+  },
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": true,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "historical-flood",
+        "geoviewLayerName": "ESRI Dynamic - Controls query/hover, States queryable/hoverable off",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "initialSettings": {
+              "controls": {
+                "query": true,
+                "hover": true
+              },
+              "states": {
+                "queryable": false,
+                "hoverable": false,
+                "opacity": 0.5
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "esriFeatureLYR1",
+        "geoviewLayerName": "ESRI Feature - Controls highlight/zoom off, remove on",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer",
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "initialSettings": {
+              "controls": {
+                "highlight": false,
+                "zoom": false,
+                "remove": true
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "wmsLYR1-msi",
+        "geoviewLayerName": "OGC WMS - Controls opacity/table/visibility off",
+        "metadataAccessPath": "https://datacube.services.geo.ca/ows/msi",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "msi-94-or-more",
+            "initialSettings": {
+              "controls": {
+                "opacity": false,
+                "table": false,
+                "visibility": false
+              }
+            },
+            "source": {
+              "wmsStyle": "msi-binary"
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "geojsonLYR2",
+        "geoviewLayerName": "GeoJSON Group - States visible off, legendCollapsed on",
+        "metadataAccessPath": "./datasets/geojson/metadata.meta",
+        "geoviewLayerType": "GeoJSON",
+        "serviceDateFormat": "DD/MM/YYYYTHH:mm:ss",
+        "listOfLayerEntryConfig": [
+          {
+            "entryType": "group",
+            "layerId": "collapsed-group",
+            "layerName": "Collapsed Group",
+            "initialSettings": {
+              "states": {
+                "visible": false,
+                "legendCollapsed": true
+              }
+            },
+            "listOfLayerEntryConfig": [
+              {
+                "layerId": "lines.json",
+                "layerName": "Lines"
+              },
+              {
+                "layerId": "polygons.json",
+                "layerName": "Polygons"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "geojsonLYR1",
+        "geoviewLayerName": "GeoJSON - States opacity 0.3, minScale 10000000",
+        "metadataAccessPath": "./datasets/geojson/metadata.meta",
+        "geoviewLayerType": "GeoJSON",
+        "serviceDateFormat": "DD/MM/YYYYTHH:mm:ss",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "polygons.json",
+            "initialSettings": {
+              "states": {
+                "opacity": 0.3
+              }
+            },
+            "minScale": 10000000
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "wfsLYR1",
+        "geoviewLayerName": "OGC WFS - All controls off",
+        "metadataAccessPath": "https://ahocevar.com/geoserver/wfs",
+        "geoviewLayerType": "ogcWfs",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "usa:states",
+            "initialSettings": {
+              "controls": {
+                "highlight": false,
+                "hover": false,
+                "opacity": false,
+                "query": false,
+                "remove": false,
+                "table": false,
+                "visibility": false,
+                "zoom": false
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "ESRIImageLYR1",
+        "geoviewLayerName": "ESRI Image - All states set",
+        "geoviewLayerType": "esriImage",
+        "metadataAccessPath": "https://agriculture.canada.ca/imagery-images/rest/services/annual_crop_inventory/2022/ImageServer",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "annual_crop_inventory_2022",
+            "initialSettings": {
+              "states": {
+                "visible": true,
+                "legendCollapsed": false,
+                "opacity": 0.7,
+                "hoverable": true,
+                "queryable": true
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "layers",
+        "data-table"
+      ]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca"
+}

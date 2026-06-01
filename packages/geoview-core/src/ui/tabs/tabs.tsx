@@ -233,8 +233,10 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
       const { id } = event.currentTarget;
       // Extract base tab id by removing the prefix
       const baseId = extractTabId(id, mapId);
-      const tab = tabPanels.filter((item) => item !== undefined && item.id === baseId);
-      const index = tab.length > 0 ? tab[0].value : -1;
+      // Look up the tab from the `tabs` prop (always current) rather than `tabPanels` which can
+      // hold stale entries with outdated values when tabs are reordered (e.g. custom tabs added at mount).
+      const tab = tabs.find((item) => item.id === baseId);
+      const index = tab ? tab.value : -1;
 
       // toggle on -1, so that when no tab is selected on fullscreen
       // and tab is selected again to open the panel.
@@ -244,7 +246,7 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
       if (activeTrap) onOpenKeyboard?.({ activeElementId: id, callbackElementId: id });
       else onCloseKeyboard?.();
     },
-    [activeTrap, onCloseKeyboard, onOpenKeyboard, onToggleCollapse, value, tabPanels, mapId]
+    [activeTrap, onCloseKeyboard, onOpenKeyboard, onToggleCollapse, value, tabs, mapId]
   );
 
   // #endregion

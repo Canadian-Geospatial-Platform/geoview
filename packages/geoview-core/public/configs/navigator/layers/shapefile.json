@@ -38,13 +38,17 @@
             "layerStyle": {
               "Point": {
                 "type": "uniqueValue",
-                "fields": ["SOURCE"],
+                "fields": [
+                  "SOURCE"
+                ],
                 "hasDefault": true,
                 "info": [
                   {
                     "label": "NASA3",
                     "visible": true,
-                    "values": ["NASA3"],
+                    "values": [
+                      "NASA3"
+                    ],
                     "settings": {
                       "type": "simpleSymbol",
                       "rotation": 0,
@@ -56,13 +60,18 @@
                       },
                       "size": 4.002000000000001,
                       "symbol": "circle",
-                      "offset": [0, 0]
+                      "offset": [
+                        0,
+                        0
+                      ]
                     }
                   },
                   {
                     "label": "NASA_Can",
                     "visible": true,
-                    "values": ["NASA_Can"],
+                    "values": [
+                      "NASA_Can"
+                    ],
                     "settings": {
                       "type": "simpleSymbol",
                       "rotation": 0,
@@ -74,7 +83,10 @@
                       },
                       "size": 4.002000000000001,
                       "symbol": "circle",
-                      "offset": [0, 0]
+                      "offset": [
+                        0,
+                        0
+                      ]
                     }
                   },
                   {
@@ -92,7 +104,10 @@
                       },
                       "size": 4.002000000000001,
                       "symbol": "circle",
-                      "offset": [0, 0]
+                      "offset": [
+                        0,
+                        0
+                      ]
                     }
                   }
                 ]
@@ -103,19 +118,41 @@
       }
     ]
   },
-  "components": ["overview-map", "north-arrow"],
-  "overviewMap": { "hideOnZoom": 7 },
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "navBar": [
+    "zoom",
+    "rotation",
+    "fullscreen",
+    "home",
+    "location",
+    "measurement",
+    "basemap-select",
+    "projection"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
   "footerBar": {
     "tabs": {
-      "core": ["layers", "data-table"]
+      "core": [
+        "layers",
+        "data-table"
+      ]
     }
   },
   "corePackages": [],
-  "theme": "geo.ca",
-  "appBar": {
-    "tabs": {
-      "core": ["geolocator", "legend", "details", "export"]
-    }
-  },
-  "navBar": ["zoom", "rotation", "fullscreen", "home", "location", "measurement", "basemap-select", "projection"]
+  "theme": "geo.ca"
 }

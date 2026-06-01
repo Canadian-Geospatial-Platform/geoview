@@ -1,4 +1,7 @@
 {
+  "configMeta": {
+    "description": "Geochart plugin with CDTK/QGIS data sources (WMS, WFS)."
+  },
   "map": {
     "interaction": "dynamic",
     "viewSettings": {
@@ -51,20 +54,31 @@
       }
     ]
   },
-  "theme": "geo.ca",
+  "components": [
+    "north-arrow",
+    "overview-map"
+  ],
   "appBar": {
     "tabs": {
-      "core": ["geolocator", "legend", "details", "export"]
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
     }
   },
-  "components": ["north-arrow", "overview-map"],
   "footerBar": {
     "tabs": {
-      "core": ["layers", "geochart"]
+      "core": [
+        "layers",
+        "geochart"
+      ]
     },
     "selectedTab": "geochart"
   },
   "corePackages": [],
+  "theme": "geo.ca",
   "corePackagesConfig": [
     {
       "geochart": {

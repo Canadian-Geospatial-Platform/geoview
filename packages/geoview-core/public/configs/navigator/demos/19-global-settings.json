@@ -1,4 +1,7 @@
 {
+  "configMeta": {
+    "description": "globalSettings with canRemoveSublayers, disabledLayerTypes, showUnsymbolizedFeatures (visible in data table for permafrost features with no style), highlightLayer with no bbox, and hideCoordinateInfoSwitch that removes coordinate info from the details panel."
+  },
   "map": {
     "interaction": "dynamic",
     "viewSettings": {
@@ -65,16 +68,26 @@
       }
     ]
   },
-  "theme": "geo.ca",
-  "components": ["north-arrow", "overview-map"],
+  "components": [
+    "north-arrow",
+    "overview-map"
+  ],
   "appBar": {
     "tabs": {
-      "core": ["geolocator", "legend", "details", "export"]
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
     }
   },
   "footerBar": {
     "tabs": {
-      "core": ["layers", "data-table"]
+      "core": [
+        "layers",
+        "data-table"
+      ]
     },
     "selectedTab": "layers"
   },
@@ -99,6 +112,7 @@
     "showUnsymbolizedFeatures": true,
     "showLayerHighlightLayerBbox": false,
     "coordinateInfoEnabled": true,
-    "hideCoordinateInfoSwitch": false
-  }
+    "hideCoordinateInfoSwitch": true
+  },
+  "theme": "geo.ca"
 }

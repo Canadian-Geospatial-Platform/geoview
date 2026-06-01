@@ -1,0 +1,93 @@
+{
+  "configMeta": {
+    "description": "viewSettings with homeView (custom home button extent), rotation (45°), enableRotation, and serviceUrls overrides for geocoreUrl and geolocatorUrl."
+  },
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "initialView": {
+        "zoomAndCenter": [
+          7,
+          [
+            -75.7,
+            45.4
+          ]
+        ]
+      },
+      "homeView": {
+        "zoomAndCenter": [
+          4,
+          [
+            -95,
+            60
+          ]
+        ]
+      },
+      "enableRotation": true,
+      "rotation": 45,
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "geojsonLYR1",
+        "geoviewLayerName": "GeoJSON Sample",
+        "metadataAccessPath": "./datasets/geojson/metadata.meta",
+        "geoviewLayerType": "GeoJSON",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "polygons.json",
+            "layerName": "Polygons"
+          },
+          {
+            "layerId": "lines.json",
+            "layerName": "Lines"
+          },
+          {
+            "layerId": "points.json",
+            "layerName": "Points"
+          }
+        ]
+      }
+    ]
+  },
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "navBar": [
+    "zoom",
+    "fullscreen",
+    "home",
+    "basemap-select",
+    "rotation"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend"
+      ]
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "layers"
+      ]
+    }
+  },
+  "corePackages": [],
+  "serviceUrls": {
+    "geocoreUrl": "https://geocore.api.geo.ca",
+    "geolocatorUrl": "https://geolocator.api.geo.ca?keys=nominatim"
+  },
+  "theme": "geo.ca"
+}

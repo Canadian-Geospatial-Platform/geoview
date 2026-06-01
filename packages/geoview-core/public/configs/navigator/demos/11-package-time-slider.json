@@ -1,4 +1,7 @@
 {
+  "configMeta": {
+    "description": "Time-slider footerBar tab with multiple temporal layers including ESRI Image, WMS, esriDynamic, and esriFeature."
+  },
   "map": {
     "interaction": "dynamic",
     "viewSettings": {
@@ -76,7 +79,7 @@
           }
         ]
       },
-       {
+      {
         "geoviewLayerId": "archive-flood-wms",
         "geoviewLayerName": "Archive Flood - WMS CDTK",
         "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/EGS_Flood_Archive_DEV_en?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities",
@@ -113,27 +116,40 @@
           {
             "layerId": "msi-94-or-more",
             "source": {
-              "wmsStyle": ["msi-binary"]
+              "wmsStyle": [
+                "msi-binary"
+              ]
             }
           }
         ]
       }
     ]
   },
-  "theme": "geo.ca",
+  "components": [
+    "north-arrow",
+    "overview-map"
+  ],
   "appBar": {
     "tabs": {
-      "core": ["geolocator", "legend", "details", "export"]
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
     }
   },
-  "components": ["north-arrow", "overview-map"],
   "footerBar": {
     "tabs": {
-      "core": ["layers", "data-table", "time-slider"]
+      "core": [
+        "layers",
+        "data-table",
+        "time-slider"
+      ]
     },
     "selectedTab": "time-slider",
     "selectedTimeSliderLayerPath": "historical-flood-dynamic/0"
   },
   "corePackages": [],
-  "externalPackages": []
+  "theme": "geo.ca"
 }

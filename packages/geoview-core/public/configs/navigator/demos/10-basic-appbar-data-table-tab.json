@@ -1,4 +1,7 @@
 {
+  "configMeta": {
+    "description": "All core tabs in appBar including data-table, selectedTab data-table, and selectedDataTableLayerPath. FooterBar is set to [] to remove it from map instead of default tabs, to show that appBar and data-table can work without footerBar."
+  },
   "map": {
     "interaction": "dynamic",
     "viewSettings": {
@@ -78,10 +81,27 @@
       }
     ]
   },
-  "theme": "geo.ca",
+  "components": [
+    "north-arrow",
+    "overview-map"
+  ],
+  "navBar": [
+    "zoom",
+    "fullscreen",
+    "home",
+    "location"
+  ],
   "appBar": {
     "tabs": {
-      "core": ["geolocator", "export", "guide", "details", "legend", "data-table", "layers"]
+      "core": [
+        "geolocator",
+        "export",
+        "guide",
+        "details",
+        "legend",
+        "data-table",
+        "layers"
+      ]
     },
     "selectedTab": "data-table",
     "selectedDataTableLayerPath": "uniqueValueId/1"
@@ -91,8 +111,6 @@
       "core": []
     }
   },
-  "navBar": ["zoom", "fullscreen", "home", "location"],
-  "components": ["north-arrow", "overview-map"],
   "corePackages": [],
-  "externalPackages": []
+  "theme": "geo.ca"
 }

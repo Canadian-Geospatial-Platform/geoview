@@ -1,4 +1,7 @@
 {
+  "configMeta": {
+    "description": "Per-layer zoom and scale limits via minScale, initialSettings minZoom and maxZoom at group and child levels."
+  },
   "map": {
     "interaction": "dynamic",
     "viewSettings": {
@@ -70,15 +73,26 @@
       }
     ]
   },
-  "components": ["overview-map", "north-arrow"],
-  "footerBar": {
-    "tabs": {
-      "core": ["layers", "data-table"]
-    }
-  },
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
   "appBar": {
     "tabs": {
-      "core": ["geolocator", "legend", "details", "export"]
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "layers",
+        "data-table"
+      ]
     }
   },
   "corePackages": [],

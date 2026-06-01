@@ -59,15 +59,29 @@
           <option value="./configs/navigator/demos/17-package-custom-legend.json">Package - Custom Legend</option>
           <option value="./configs/navigator/demos/18-package-about-panel.json">Package - About Panel</option>
           <option value="./configs/navigator/demos/18-package-about-panel-md.json">Package - About Panel from MarkDown document</option>
-          <option value="./configs/navigator/demos/18-package-about-panel-md-strings.json">Package - About Panel from Markdown in config</option>
+          <option value="./configs/navigator/demos/18-package-about-panel-md-strings.json">
+            Package - About Panel from Markdown in config
+          </option>
           <option value="./configs/navigator/demos/19-global-settings.json">Global Settings Options</option>
           <option value="./configs/navigator/demos/20-export-map-large-legend.json">Map Export - Large Legend</option>
           <option value="./configs/navigator/demos/21-export-map-bad-legend.json">Map Export - Bad Legend</option>
           <option value="./configs/navigator/demos/22-circumpolar.json">Circumpolar View</option>
-          <option value="./configs/navigator/demos/23-initial-settings.json">Initial Settings</option>
+          <option value="./configs/navigator/demos/23-initial-settings.json">Initial Settings (All Combined)</option>
+          <option value="./configs/navigator/demos/23a-initial-settings-filters.json">Initial Settings - Filters</option>
+          <option value="./configs/navigator/demos/23b-initial-settings-states-controls.json">
+            Initial Settings - States &amp; Controls
+          </option>
+          <option value="./configs/navigator/demos/23c-initial-settings-cascading.json">Initial Settings - Cascading</option>
+          <option value="./configs/navigator/demos/23d-initial-settings-layer-config.json">Initial Settings - Layer Config</option>
           <option value="./configs/navigator/demos/24-configured-feature-labels.json">Layer Text / Label Settings</option>
           <option value="./configs/navigator/demos/25-feature-visual-variables.json">Feature Visual Variables from Renderer</option>
           <option value="./configs/navigator/demos/26-complex-classifications.json">Complex Classifications</option>
+          <option value="./configs/navigator/demos/27-view-settings-rotation-home.json">
+            View Settings - Rotation, Home View, Service URLs
+          </option>
+          <option value="./configs/navigator/demos/28-symbol-shapes-fill-patterns.json">
+            Symbol Shapes, Fill Patterns, Line &amp; Icon Styles
+          </option>
         </select>
       </div>
     </div>
@@ -107,11 +121,11 @@
         <div class="navigator-option-group">
           <label for="switchDatetimeTimezone" class="navigator-label">Date timezone:</label>
           <select id="switchDatetimeTimezone" class="navigator-select">
-            <option value='UTC'>UTC</option>
-            <option selected value='local'>Local</option>
-            <option value='America/Toronto'>Toronto</option>
-            <option value='America/Vancouver'>Vancouver</option>
-            <option value='Europe/Paris'>Paris</option>
+            <option value="UTC">UTC</option>
+            <option selected value="local">Local</option>
+            <option value="America/Toronto">Toronto</option>
+            <option value="America/Vancouver">Vancouver</option>
+            <option value="Europe/Paris">Paris</option>
           </select>
         </div>
       </div>
@@ -125,7 +139,9 @@
       <div id="mapSection" class="navigator-map-section">
         <div id="map1"></div>
       </div>
-      <p><em>This map loads its configuration from the selected configuration file.</em></p>
+      <p>
+        <em><span id="configDescription">This map loads its configuration from the selected configuration file.</span></em>
+      </p>
     </div>
 
     <div class="editor">

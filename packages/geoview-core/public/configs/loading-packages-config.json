@@ -10,13 +10,28 @@
       "labeled": true
     }
   },
-  "theme": "geo.ca",
-  "components": ["north-arrow", "overview-map"],
-  "corePackages": [],
+  "components": [
+    "north-arrow",
+    "overview-map"
+  ],
+  "navBar": [
+    "drawer"
+  ],
   "appBar": {
     "tabs": {
-      "core": ["geolocator", "export", "about-panel", "aoi-panel", "custom-legend", "guide", "details", "data-table", "layers"]
+      "core": [
+        "geolocator",
+        "export",
+        "about-panel",
+        "aoi-panel",
+        "custom-legend",
+        "guide",
+        "details",
+        "data-table",
+        "layers"
+      ]
     }
   },
-  "navBar": ["drawer"]
+  "corePackages": [],
+  "theme": "geo.ca"
 }
