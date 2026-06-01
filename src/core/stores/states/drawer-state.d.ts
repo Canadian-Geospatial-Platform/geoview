@@ -24,6 +24,8 @@ export interface IDrawerState {
     undoDisabled: boolean;
     /** Whether the redo action is disabled. */
     redoDisabled: boolean;
+    /** Whether keyboard shortcuts are enabled. */
+    shortcutsEnabled: boolean;
     /** Sets default drawer configuration values from the map features config. */
     setDefaultConfigValues: (config: TypeMapFeaturesConfig) => void;
     /** Actions to mutate the Drawer state. */
@@ -52,6 +54,7 @@ export interface IDrawerState {
         setUndoDisabled: (undoDisabled: boolean) => void;
         setRedoDisabled: (redoDisabled: boolean) => void;
         updateStateStyle: (style: StyleProps) => void;
+        setShortcutsEnabled: (shortcutsEnabled: boolean) => void;
     };
 }
 /** Default text values per language for new text drawings. */
@@ -137,6 +140,15 @@ export declare const useStoreDrawerSelectedDrawingType: () => string | undefined
 export declare const getStoreDrawerHideMeasurements: (mapId: string) => boolean;
 /** Hooks whether measurements are hidden. */
 export declare const useStoreDrawerHideMeasurements: () => boolean;
+/**
+ * Checks whether keyboard shortcuts are enabled.
+ *
+ * @param mapId - The map identifier
+ * @returns True if shortcuts are enabled
+ */
+export declare const getStoreDrawerShortcutsEnabled: (mapId: string) => boolean;
+/** Hooks whether keyboard shortcuts are enabled. */
+export declare const useStoreDrawerShortcutsEnabled: () => boolean;
 /**
  * Gets the available geometry types from the drawer store.
  *
@@ -316,6 +328,13 @@ export declare const setStoreRedoDisabled: (mapId: string, redoDisabled: boolean
  * @param style - The style properties to set
  */
 export declare const updateStoreStateStyle: (mapId: string, style: StyleProps) => void;
+/**
+ * Sets the shortcuts enabled state in the drawer store.
+ *
+ * @param mapId - The map identifier
+ * @param enabled - Whether shortcuts should be enabled
+ */
+export declare const setStoreDrawerShortcutsEnabled: (mapId: string, enabled: boolean) => void;
 /** Drawing style properties for fill, stroke, icon, and text. */
 export type StyleProps = {
     /** The fill color (CSS color string). */

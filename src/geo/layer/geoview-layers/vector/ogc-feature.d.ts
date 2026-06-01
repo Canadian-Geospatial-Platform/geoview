@@ -4,7 +4,7 @@ import type { Options as SourceOptions } from 'ol/source/Vector';
 import type { Projection as OLProjection } from 'ol/proj';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import type { DisplayDateMode } from '@/api/types/map-schema-types';
-import type { TypeGeoviewLayerConfig, TypeMetadataOGCFeature } from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerConfig, TypeMetadataOGCFeature, TypeLayerMetadataQueryables } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { OgcFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
@@ -28,13 +28,13 @@ export declare class OgcFeature extends AbstractGeoViewVector {
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
      *
-     * @returns The strongly-typed layer configuration specific to this layer.
+     * @returns The strongly-typed layer configuration specific to this layer
      */
     getGeoviewLayerConfig(): TypeOgcFeatureLayerConfig;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
      *
-     * @returns The strongly-typed metadata specific to this layer.
+     * @returns The strongly-typed metadata specific to this layer
      */
     getMetadata(): TypeMetadataOGCFeature | undefined;
     /**
@@ -88,16 +88,19 @@ export declare class OgcFeature extends AbstractGeoViewVector {
      */
     protected onCreateGVLayer(layerConfig: OgcFeatureLayerEntryConfig): GVOGCFeature;
     /**
-     * Fetches the metadata for a typical OGCFeature class.
+     * Creates a configuration object for an OGC Feature layer.
      *
-     * @param url - The url to query the metadata from
-     * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
-     * @throws {RequestTimeoutError} When the request exceeds the timeout duration
-     * @throws {RequestAbortedError} When the request was aborted by the caller's signal
-     * @throws {ResponseError} When the response is not OK (non-2xx)
-     * @throws {ResponseEmptyError} When the JSON response is empty
+     * This function constructs a `TypeOgcFeatureLayerConfig` object that describes an OGC Feature layer
+     * and its associated entry configurations based on the provided parameters.
+     *
+     * @param geoviewLayerId - A unique identifier for the GeoView layer
+     * @param geoviewLayerName - The display name of the GeoView layer
+     * @param metadataAccessPath - The full service URL to the layer endpoint
+     * @param isTimeAware - Indicates whether the layer supports time-based filtering
+     * @param layerEntries - An array of layer entries objects to be included in the configuration
+     * @returns The constructed configuration object for the OGC Feature layer
      */
-    static fetchMetadata(url: string, abortSignal?: AbortSignal): Promise<TypeMetadataOGCFeature>;
+    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware: boolean | undefined, layerEntries: TypeLayerEntryShell[]): TypeOgcFeatureLayerConfig;
     /**
      * Initializes a GeoView layer configuration for an OGC Feature layer.
      *
@@ -105,27 +108,24 @@ export declare class OgcFeature extends AbstractGeoViewVector {
      * ID, name, and metadata access path URL. It then initializes the layer entries by calling
      * `initGeoViewLayerEntries`, which may involve fetching metadata or sublayer info.
      *
-     * @param geoviewLayerId - A unique identifier for the layer.
-     * @param geoviewLayerName - The display name of the layer.
-     * @param metadataAccessPath - The full service URL to the layer endpoint.
-     * @param isTimeAware - Indicates whether the layer supports time-based filtering.
-     * @returns A promise that resolves to an initialized GeoView layer configuration with layer entries.
+     * @param geoviewLayerId - A unique identifier for the layer
+     * @param geoviewLayerName - The display name of the layer
+     * @param metadataAccessPath - The full service URL to the layer endpoint
+     * @param isTimeAware - Indicates whether the layer supports time-based filtering
+     * @returns A promise that resolves to an initialized GeoView layer configuration with layer entries
      */
     static initGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware?: boolean): Promise<TypeGeoviewLayerConfig>;
     /**
-     * Creates a configuration object for an OGC Feature layer.
+     * Initializes the metadata for a given OGC Feature layer entry configuration.
      *
-     * This function constructs a `TypeOgcFeatureLayerConfig` object that describes an OGC Feature layer
-     * and its associated entry configurations based on the provided parameters.
+     * This method processes the service metadata queryables and sets the relevant information on the layer entry configuration,
+     * such as outfields and their aliases, which are essential for configuring the feature info retrieval and display.
      *
-     * @param geoviewLayerId - A unique identifier for the GeoView layer.
-     * @param geoviewLayerName - The display name of the GeoView layer.
-     * @param metadataAccessPath - The full service URL to the layer endpoint.
-     * @param isTimeAware - Indicates whether the layer supports time-based filtering.
-     * @param layerEntries - An array of layer entries objects to be included in the configuration.
-     * @returns The constructed configuration object for the OGC Feature layer
+     * @param layerConfig - The OGC Feature layer entry configuration to initialize with metadata
+     * @param metadataQueryables - The queryables metadata retrieved from the OGC service, containing information about the fields and
+     * their types for the layer entry
      */
-    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware: boolean | undefined, layerEntries: TypeLayerEntryShell[]): TypeOgcFeatureLayerConfig;
+    static initLayerMetadata(layerConfig: VectorLayerEntryConfig, metadataQueryables: TypeLayerMetadataQueryables): void;
     /**
      * Processes an OGC Feature GeoviewLayerConfig and returns a promise
      * that resolves to an array of `ConfigBaseClass` layer entry configurations.
@@ -143,5 +143,16 @@ export declare class OgcFeature extends AbstractGeoViewVector {
      * @returns A promise that resolves to an array of layer configurations
      */
     static processGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, url: string, layerIds: string[], isTimeAware: boolean): Promise<ConfigBaseClass[]>;
+    /**
+     * Fetches the metadata for a typical OGCFeature class.
+     *
+     * @param url - The url to query the metadata from
+     * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+     * @throws {RequestTimeoutError} When the request exceeds the timeout duration
+     * @throws {RequestAbortedError} When the request was aborted by the caller's signal
+     * @throws {ResponseError} When the response is not OK (non-2xx)
+     * @throws {ResponseEmptyError} When the JSON response is empty
+     */
+    static fetchMetadata(url: string, abortSignal?: AbortSignal): Promise<TypeMetadataOGCFeature>;
 }
 //# sourceMappingURL=ogc-feature.d.ts.map

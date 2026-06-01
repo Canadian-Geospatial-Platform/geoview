@@ -481,6 +481,16 @@ export declare const getStoreLayerWmsStyles: (mapId: string, layerPath: string) 
 /** Hook that returns the available WMS styles metadata for a specific layer. */
 export declare const useStoreLayerWmsStyles: (layerPath: string) => TypeMetadataWMSCapabilityLayerStyle[] | undefined;
 /**
+ * Gets the OGC Version for a OGC (WMS/WMTS/WFS) layer.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to look up
+ * @returns The OGC version, or undefined
+ */
+export declare const getStoreLayerOgcVersion: (mapId: string, layerPath: string) => string | undefined;
+/** Hook that returns the OGC version for a specific layer. */
+export declare const useStoreLayerOgcVersion: (layerPath: string) => string | undefined;
+/**
  * Gets the mosaic rule for a specific layer.
  *
  * @param mapId - The map identifier

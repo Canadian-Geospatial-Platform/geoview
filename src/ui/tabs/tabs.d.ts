@@ -32,7 +32,7 @@ export interface TypeTabsProps {
     rightButtons?: unknown;
     isCollapsed?: boolean;
     activeTrap?: boolean;
-    TabContentVisibilty?: string | undefined;
+    TabContentVisibilty?: string;
     onToggleCollapse?: () => void;
     onSelectedTabChanged?: (tab: TypeTabs) => void;
     onOpenKeyboard?: (uiFocus: FocusItemProps) => void;

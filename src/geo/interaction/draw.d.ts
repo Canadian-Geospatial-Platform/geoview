@@ -1,4 +1,5 @@
 import type { GeometryFunction, DrawEvent as OLDrawEvent } from 'ol/interaction/Draw';
+import type { Coordinate } from 'ol/coordinate';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import type { InteractionOptions } from './interaction';
@@ -39,6 +40,19 @@ export declare class Draw extends Interaction {
      * This is equivalent to double-clicking or pressing Enter to complete a drawing.
      */
     finishDrawing(): void;
+    /**
+     * Gets the current sketch feature being drawn.
+     *
+     * @returns True if there is an active sketch, false otherwise
+     */
+    hasActiveSketch(): boolean;
+    /**
+     * Appends coordinates to the current drawing sketch.
+     * This allows programmatic addition of vertices to an in-progress drawing.
+     *
+     * @param coordinates - The coordinate(s) to append to the sketch
+     */
+    appendCoordinates(coordinates: Coordinate[]): void;
     /**
      * Removes the last point added to the current drawing, allowing the user to undo the last step while drawing.
      *

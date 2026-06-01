@@ -32,13 +32,13 @@ export declare class WMTS extends AbstractGeoViewRaster {
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
      *
-     * @returns The strongly-typed layer configuration specific to this layer.
+     * @returns The strongly-typed layer configuration specific to this layer
      */
     getGeoviewLayerConfig(): TypeWmtsLayerConfig;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
      *
-     * @returns The strongly-typed metadata specific to this layer.
+     * @returns The strongly-typed metadata specific to this layer
      */
     getMetadata(): TypeMetadataWMTS | undefined;
     /**
@@ -51,54 +51,55 @@ export declare class WMTS extends AbstractGeoViewRaster {
      *   - If no specific layer configs are provided, a single metadata fetch is made.
      *   - If layer configs are present (e.g., Geomet use case), individual layer metadata is merged.
      *
-     * @param abortSignal - Optional abort signal to handle cancelling of the process.
+     * @param abortSignal - Optional abort signal to handle cancelling of the process
      * @returns A promise that resolves to the parsed metadata object,
      * or `undefined` if metadata could not be retrieved or no capabilities were found.
-     * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
+     * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
      */
     protected onFetchServiceMetadata<T = TypeMetadataWMTS | undefined>(abortSignal?: AbortSignal): Promise<T>;
     /**
      * Overrides the way a geoview layer config initializes its layer entries.
      *
-     * @returns A promise that resolves once the layer entries have been initialized.
+     * @returns A promise that resolves once the layer entries have been initialized
      */
     protected onInitLayerEntries(): Promise<TypeGeoviewLayerConfig>;
     /**
      * Overrides the validation of a layer entry config.
      *
-     * @param layerConfig - The layer entry config to validate.
+     * @param layerConfig - The layer entry config to validate
      */
     protected onValidateLayerEntryConfig(layerConfig: ConfigBaseClass): void;
     /**
      * Overrides the way the layer metadata is processed.
      *
-     * @param layerConfig - The layer entry configuration to process.
-     * @param mapProjection - Optional map projection.
-     * @param abortSignal - Optional abort signal to handle cancelling of the process.
-     * @returns A promise that resolves once the layer entry configuration has gotten its metadata processed.
-     * @throws {LayerWMTSMetadataError} When the metadata is missing necessary information or contains an error.
+     * @param layerConfig - The layer entry configuration to process
+     * @param mapProjection - Optional map projection
+     * @param abortSignal - Optional abort signal to handle cancelling of the process
+     * @returns A promise that resolves once the layer entry configuration has gotten its metadata processed
+     * @throws {LayerWMTSMetadataError} When the metadata is missing necessary information or contains an error
      */
     protected onProcessLayerMetadata(layerConfig: OgcWmtsLayerEntryConfig, displayDateMode: DisplayDateMode, mapProjection?: OLProjection, abortSignal?: AbortSignal): Promise<OgcWmtsLayerEntryConfig>;
     /**
      * Overrides the creation of the GV Layer.
      *
-     * @param layerConfig - The layer entry configuration.
+     * @param layerConfig - The layer entry configuration
      * @returns The GV Layer
      */
     protected onCreateGVLayer(layerConfig: OgcWmtsLayerEntryConfig): GVWMTS;
     /**
-     * Fetches the metadata for WMS Capabilities.
+     * Creates a configuration object for a WMTS layer.
      *
-     * @param url - The url to query the metadata from.
-     * @param abortSignal - Optional abort signal to handle cancelling of the process.
-     * @returns A promise that resolves to the parsed metadata object.
-     * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
-     * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
-     * @throws {ResponseError} When the response is not OK (non-2xx).
-     * @throws {ResponseEmptyError} When the JSON response is empty.
-     * @throws {NetworkError} When a network issue happened.
+     * This function constructs a `TypeWMTSConfig` object that describes a WMTS layer
+     * and its associated entry configurations based on the provided parameters.
+     *
+     * @param geoviewLayerId - A unique identifier for the GeoView layer
+     * @param geoviewLayerName - The display name of the GeoView layer
+     * @param metadataAccessPath - The URL or path to access metadata
+     * @param isTimeAware - Indicates whether the layer supports time-based filtering
+     * @param layerEntries - An array of layer entries objects to be included in the configuration
+     * @returns The constructed configuration object for the WMTS layer
      */
-    static fetchMetadata<T = TypeMetadataWMTS>(url: string, abortSignal?: AbortSignal): Promise<T>;
+    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware: boolean | undefined, layerEntries: TypeLayerEntryShell[]): TypeWmtsLayerConfig;
     /**
      * Initializes a GeoView layer configuration for a WMTS layer.
      *
@@ -106,27 +107,25 @@ export declare class WMTS extends AbstractGeoViewRaster {
      * ID, name, and metadata access path URL. It then initializes the layer entries by calling
      * `initGeoViewLayerEntries`, which may involve fetching metadata or sublayer info.
      *
-     * @param geoviewLayerId - A unique identifier for the layer.
-     * @param geoviewLayerName - The display name of the layer.
-     * @param metadataAccessPath - The full service URL to the layer endpoint.
-     * @param isTimeAware - Optional - Indicates whether the layer supports time-based filtering.
-     * @returns A promise that resolves to an initialized GeoView layer configuration with layer entries.
+     * @param geoviewLayerId - A unique identifier for the layer
+     * @param geoviewLayerName - The display name of the layer
+     * @param metadataAccessPath - The full service URL to the layer endpoint
+     * @param isTimeAware - Optional - Indicates whether the layer supports time-based filtering
+     * @returns A promise that resolves to an initialized GeoView layer configuration with layer entries
      */
     static initGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware?: boolean): Promise<TypeGeoviewLayerConfig>;
     /**
-     * Creates a configuration object for a WMTS layer.
+     * Initializes the layer metadata for a WMTS layer entry configuration.
      *
-     * This function constructs a `TypeWMTSConfig` object that describes a WMTS layer
-     * and its associated entry configurations based on the provided parameters.
+     * This method takes a layer entry configuration and the corresponding metadata,
+     * then extracts and validates necessary information such as TileMatrixSet, Layer details,
+     * data access paths, bounding boxes, and projections. It ensures that the layer entry config
+     * is properly populated with metadata information required for creating the WMTS source and layer.
      *
-     * @param geoviewLayerId - A unique identifier for the GeoView layer.
-     * @param geoviewLayerName - The display name of the GeoView layer.
-     * @param metadataAccessPath - The URL or path to access metadata.
-     * @param isTimeAware - Indicates whether the layer supports time-based filtering.
-     * @param layerEntries - An array of layer entries objects to be included in the configuration.
-     * @returns The constructed configuration object for the WMTS layer.
+     * @param layerConfig - The layer entry configuration
+     * @param metadata - The WMTS metadata
      */
-    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware: boolean | undefined, layerEntries: TypeLayerEntryShell[]): TypeWmtsLayerConfig;
+    static initLayerMetadata(layerConfig: OgcWmtsLayerEntryConfig, metadata: TypeMetadataWMTS | undefined): Promise<void>;
     /**
      * Processes an  WMTS GeoviewLayerConfig and returns a promise
      * that resolves to an array of `ConfigBaseClass` layer entry configurations.
@@ -136,20 +135,33 @@ export declare class WMTS extends AbstractGeoViewRaster {
      * 2. Instantiates a layer with that configuration.
      * 3. Processes the layer configuration and returns the result.
      *
-     * @param geoviewLayerId - The unique identifier for the GeoView layer.
-     * @param geoviewLayerName - The display name for the GeoView layer.
-     * @param url - The URL of the service endpoint.
-     * @param layerIds - An array of layer IDs to include in the configuration.
-     * @param isTimeAware - Indicates if the layer is time aware.
-     * @returns A promise that resolves to an array of layer configurations.
+     * @param geoviewLayerId - The unique identifier for the GeoView layer
+     * @param geoviewLayerName - The display name for the GeoView layer
+     * @param url - The URL of the service endpoint
+     * @param layerIds - An array of layer IDs to include in the configuration
+     * @param isTimeAware - Indicates if the layer is time aware
+     * @returns A promise that resolves to an array of layer configurations
      */
     static processGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, url: string, layerIds: string[], isTimeAware: boolean): Promise<ConfigBaseClass[]>;
     /**
+     * Fetches the metadata for WMS Capabilities.
+     *
+     * @param url - The url to query the metadata from
+     * @param abortSignal - Optional abort signal to handle cancelling of the process
+     * @returns A promise that resolves to the parsed metadata object
+     * @throws {RequestTimeoutError} When the request exceeds the timeout duration
+     * @throws {RequestAbortedError} When the request was aborted by the caller's signal
+     * @throws {ResponseError} When the response is not OK (non-2xx)
+     * @throws {ResponseEmptyError} When the JSON response is empty
+     * @throws {NetworkError} When a network issue happened
+     */
+    static fetchMetadata<T = TypeMetadataWMTS>(url: string, abortSignal?: AbortSignal): Promise<T>;
+    /**
      * Creates a WMTS source from a layer config.
      *
-     * @param layerConfig - The configuration for the WMTS layer.
-     * @returns A fully configured WMTS source.
-     * @throws {LayerWMTSMetadataError} When we don't have enough info to create a source.
+     * @param layerConfig - The configuration for the WMTS layer
+     * @returns A fully configured WMTS source
+     * @throws {LayerWMTSMetadataError} When we don't have enough info to create a source
      */
     static createWMTSSource(layerConfig: OgcWmtsLayerEntryConfig): WMTSSource;
 }

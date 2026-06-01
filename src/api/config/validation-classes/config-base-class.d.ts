@@ -1,6 +1,6 @@
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import type { Extent, TypeLayerStyleConfig } from '@/api/types/map-schema-types';
-import type { ConfigClassOrType, TypeBaseSourceInitialConfig, TypeGeoviewLayerConfig, TypeGeoviewLayerType, TypeLayerEntryType, TypeLayerInitialSettings, TypeLayerStatus, TypeTileGrid, TypeValidSourceProjectionCodes } from '@/api/types/layer-schema-types';
+import type { ConfigClassOrType, TypeBaseSourceInitialConfig, TypeGeoviewLayerConfig, TypeGeoviewLayerType, TypeLayerEntryConfig, TypeLayerEntryType, TypeLayerInitialSettings, TypeLayerStatus, TypeTileGrid, TypeValidSourceProjectionCodes } from '@/api/types/layer-schema-types';
 import type { GroupLayerEntryConfig, GroupLayerEntryConfigProps } from './group-layer-entry-config';
 import type { TimeDimension } from '@/core/utils/date-mgt';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
@@ -524,6 +524,13 @@ export declare abstract class ConfigBaseClass {
      * @param parentLayerConfig - The parentLayerConfig to apply
      */
     static setClassOrTypeParentLayerConfig(layerConfig: ConfigClassOrType, parentLayerConfig: GroupLayerEntryConfig | undefined): void;
+    /**
+     * Helper function to support when a layerConfig is either a class instance or a regular json object.
+     *
+     * @param layerConfig - The layer config class instance or regular json object
+     * @returns The layer id or undefined
+     */
+    static getClassOrTypeLayerId(layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig | TypeLayerEntryConfig | undefined): string | undefined;
     /**
      * Helper function to support when a layerConfig is either a class instance or a regular json object.
      *

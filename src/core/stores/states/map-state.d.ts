@@ -258,7 +258,7 @@ export declare const setStoreMapHomeButtonView: (mapId: string, view: TypeMapVie
 /** Sets the current basemap options in the store. */
 export declare const setStoreMapCurrentBasemapOptions: (mapId: string, basemapOptions: TypeBasemapOptions) => void;
 /** Sets the click marker position in the store. */
-export declare const setStoreMapClickMarker: (mapId: string, projectedCoords: number[]) => void;
+export declare const setStoreMapClickMarker: (mapId: string, projectedCoords: number[] | undefined) => void;
 /** Hides the click marker icon by clearing its position in the store. */
 export declare const setStoreMapClickMarkerIconHide: (mapId: string) => void;
 /** Sets the map projection code in the store. */

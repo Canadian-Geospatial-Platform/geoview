@@ -2,7 +2,7 @@ import { EsriFeatureLayerEntryConfig } from '@/api/config/validation-classes/vec
 import { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import type { TypeFeatureInfoEntryPartial, TypeStyleGeometry, codedValueType, rangeDomainType, TypeOutfieldsType, DisplayDateMode } from '@/api/types/map-schema-types';
-import type { TypeMosaicRule, TypeLayerMetadataFields } from '@/api/types/layer-schema-types';
+import type { TypeLayerMetadataFields } from '@/api/types/layer-schema-types';
 import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import type { EsriRelatedRecordsJsonResponseRelatedRecord } from '@/geo/layer/gv-layers/utils';
@@ -11,19 +11,6 @@ import { EsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
 import type { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 export declare class EsriUtilities {
     #private;
-    /**
-     * This method validates recursively the configuration of the layer entries to ensure that
-     * it is a feature layer identified with a numeric layerId and creates a group entry
-     * when a layer is a group.
-     *
-     * This method performs **indirect recursion** by eventually delegating child validation to
-     * {@link validateListOfLayerEntryConfig} in a sub function called here.
-     *
-     * @param layer - The ESRI layer instance pointer
-     * @param listOfLayerEntryConfig - The list of layer entries configuration to validate
-     * @param callbackWhenRegisteringConfig - Called when a config needs to be registered
-     */
-    static commonValidateListOfLayerEntryConfig(layer: EsriDynamic | EsriFeature, listOfLayerEntryConfig: ConfigBaseClass[], callbackWhenRegisteringConfig: RegisterLayerEntryConfigDelegate): void;
     /**
      * This method is used to process the layer's metadata.
      *
@@ -37,21 +24,20 @@ export declare class EsriUtilities {
      * @returns A promise that resolves once the layer configuration has its metadata processed
      * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
      */
-    static commonProcessLayerMetadata<T extends EsriDynamic | EsriFeature | EsriImage, U extends EsriDynamicLayerEntryConfig | EsriFeatureLayerEntryConfig | EsriImageLayerEntryConfig>(layer: T, layerConfig: U, displayDateMode?: DisplayDateMode, abortSignal?: AbortSignal): Promise<U>;
+    static initLayerMetadata<T extends EsriDynamic | EsriFeature | EsriImage, U extends EsriDynamicLayerEntryConfig | EsriFeatureLayerEntryConfig | EsriImageLayerEntryConfig>(layer: T, layerConfig: U, displayDateMode?: DisplayDateMode, abortSignal?: AbortSignal): Promise<U>;
     /**
-     * Converts metadata mosaic method to ESRI REST API format.
+     * This method validates recursively the configuration of the layer entries to ensure that
+     * it is a feature layer identified with a numeric layerId and creates a group entry
+     * when a layer is a group.
      *
-     * @param method - The metadata mosaic method
-     * @returns The ESRI API mosaic method string
-     */
-    static convertMosaicMethod(method: string): TypeMosaicRule['mosaicMethod'];
-    /**
-     * Converts metadata mosaic operator to ESRI REST API format.
+     * This method performs **indirect recursion** by eventually delegating child validation to
+     * {@link validateListOfLayerEntryConfig} in a sub function called here.
      *
-     * @param operator - The metadata mosaic operator
-     * @returns The ESRI API mosaic operation string
+     * @param layer - The ESRI layer instance pointer
+     * @param listOfLayerEntryConfig - The list of layer entries configuration to validate
+     * @param callbackWhenRegisteringConfig - Called when a config needs to be registered
      */
-    static convertMosaicOperator(operator: string): TypeMosaicRule['mosaicOperation'];
+    static commonValidateListOfLayerEntryConfig(layer: EsriDynamic | EsriFeature, listOfLayerEntryConfig: ConfigBaseClass[], callbackWhenRegisteringConfig: RegisterLayerEntryConfigDelegate): void;
     /**
      * Asynchronously queries an Esri feature layer given the url and returns an array of `TypeFeatureInfoEntryPartial` records.
      *

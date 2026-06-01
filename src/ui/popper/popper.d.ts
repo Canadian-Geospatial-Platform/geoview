@@ -1,13 +1,22 @@
-import type { ReactElement } from 'react';
+import type { ReactElement, AriaRole } from 'react';
 import type { PopperProps } from '@mui/material';
 /**
- * Properties for the Popper component extending Material-UI's PopperProps
+ * Properties for the Popper component extending Material-UI's PopperProps.
  */
 interface PopperPropsExtend extends PopperProps {
+    /** Callback fired when the popper should close. */
     onClose?: () => void;
+    /** Custom keyboard event handler with key and callback parameters. */
     handleKeyDown?: (key: string, callbackFn: () => void) => void;
+    /** CSS selector for the element to focus when popper opens. */
     focusSelector?: string;
+    /** Whether to trap focus within the popper. */
     focusTrap?: boolean;
+    /** ARIA role for accessibility. */
+    role?: AriaRole;
+    /** ID of the element that labels the popper. */
+    'aria-labelledby'?: string;
+    /** The content to display in the popper. */
     children: ReactElement<Record<string, unknown>>;
 }
 /**

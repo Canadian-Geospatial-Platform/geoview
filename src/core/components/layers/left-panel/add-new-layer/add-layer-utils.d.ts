@@ -1,10 +1,10 @@
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
-import type { TypeLayerEntryConfig, MapConfigLayerEntry, TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
+import type { MapConfigLayerEntry, TypeGeoviewLayerConfig, TypeInitialGeoviewLayerType, TypeLayerEntryConfig } from '@/api/types/layer-schema-types';
 import type { GroupLayerEntryConfig, GroupLayerEntryConfigProps } from '@/api/config/validation-classes/group-layer-entry-config';
 type BuildGeoViewLayerInput = {
     layerIdsToAdd: string[];
     layerName: string;
-    layerType: string;
+    layerType: TypeInitialGeoviewLayerType;
     layerURL: string;
     layerTree: TypeGeoviewLayerConfig;
     isGeoCore: boolean;
@@ -18,42 +18,59 @@ export declare class UtilAddLayer {
     /**
      * Returns an array of tuples representing available GeoView layer types and their localized display names.
      *
-     * @param language - The display language to use for localization.
-     * @param includeStatic - True if we need to include static image layers, false otherwise.
-     * @returns An array where each item is a tuple: [layerType, localizedName].
+     * @param language - The display language to use for localization
+     * @param includeStatic - Indicates whether static image layers should be included
+     * @returns An array where each item is a tuple containing [layerType, localizedName]
      */
     static getLocalizeLayerType(language: TypeDisplayLanguage, includeStatic: boolean): Array<[string, string]>;
     /**
-     * Finds a layer entry config from an array with the given ID.
-     * @param layerTree - The layer config to start searching from.
-     * @param layerId - The ID of the layer to find.
-     * @returns The layer entry config of the found layer or null if none is found.
+     * Finds a layer or layer entry configuration by ID.
+     *
+     * @param layerTree - The layer tree to start searching from
+     * @param layerId - The layer ID or view ID to resolve
+     * @returns The matching layer configuration or layer entry configuration, or undefined when not found
      */
-    static getLayerById(layerTree: TypeGeoviewLayerConfig | undefined, layerId: string): TypeGeoviewLayerConfig | TypeLayerEntryConfig | undefined;
+    static findLayerById(layerTree: TypeGeoviewLayerConfig | undefined, layerId: string): TypeGeoviewLayerConfig | TypeLayerEntryConfig | undefined;
     /**
-     * Finds a layer name from an array of layer entry configs with the given ID.
-     * @param layerTree - The layer config to start searching from.
-     * @param layerId - The ID of the layer to find.
-     * @returns The name of the layer or undefined if none is found.
+     * Finds a layer display name by ID.
+     *
+     * @param layerTree - The layer tree to start searching from
+     * @param layerId - The layer ID or view ID to resolve
+     * @returns The resolved layer name, or undefined when no matching layer is found
      */
-    static getLayerNameById(layerTree: TypeGeoviewLayerConfig | undefined, layerId: string): string | undefined;
+    static findLayerNameById(layerTree: TypeGeoviewLayerConfig | undefined, layerId: string): string | undefined;
     /**
-     * Checks if all of a groups sublayers are to be added to the map.
-     * @param layerTree - The group layer to check
-     * @param layerIds - The layer ids for each layer entry config
-     * @returns Whether or not all of the sublayers are included
+     * Checks whether all sublayers of a group are included in the selected IDs.
+     *
+     * @param layerTree - The group layer or root layer entry to validate
+     * @param layerIds - The selected layer IDs to compare against
+     * @returns True when every descendant layer entry is included in the selection
      */
     static allSubLayersAreIncluded(layerTree: TypeGeoviewLayerConfig | TypeLayerEntryConfig | GroupLayerEntryConfigProps, layerIds: (string | undefined)[]): boolean;
     /**
-     * Creates a layer entry config shell for a group layer.
-     * @param groupLayer - The group layer
-     * @returns The resulting layer entry config shell
+     * Creates a layer entry configuration shell for a selected group layer.
+     *
+     * The method can collapse a fully-selected ESRI Dynamic group into its original
+     * group entry, or build a synthetic group entry that contains only selected
+     * descendants when the selection is partial.
+     *
+     * @param layerName - The display name provided by the user for the resulting layer selection
+     * @param layerType - The source layer type used to determine collapse behavior
+     * @param layerIds - The selected layer IDs resolved from the current selection
+     * @param layersToAdd - The selected layer objects to include in the resulting config
+     * @param layerIdsToAdd - The selected layer view IDs used to identify nested descendants
+     * @param removedLayerIds - The accumulator of layer IDs that must be skipped to avoid duplicate entries
+     * @param layerTree - The complete source layer tree used to resolve nested view paths
+     * @param groupLayer - The group layer currently being converted into a layer entry shell
+     * @param allowCollapse - Optional flag indicating whether full-group collapse is allowed
+     * @returns The layer entry configuration shell for the group selection
      */
-    static createLayerEntryConfigForGroupLayer(layerName: string, layerType: string, layerIds: string[], layersToAdd: (TypeGeoviewLayerConfig | TypeLayerEntryConfig)[], layerIdsToAdd: string[], removedLayerIds: string[], groupLayer: TypeGeoviewLayerConfig | GroupLayerEntryConfig | GroupLayerEntryConfigProps): LayerEntryConfigShell;
+    static createLayerEntryConfigForGroupLayer(layerName: string, layerType: TypeInitialGeoviewLayerType, layerIds: string[], layersToAdd: (TypeGeoviewLayerConfig | TypeLayerEntryConfig)[], layerIdsToAdd: string[], removedLayerIds: string[], layerTree: TypeGeoviewLayerConfig, groupLayer: TypeGeoviewLayerConfig | GroupLayerEntryConfig | GroupLayerEntryConfigProps, allowCollapse?: boolean): LayerEntryConfigShell;
     /**
-     * Builds a geoview layer config from provided layer IDs.
-     * @param inputProps - The layer information
-     * @returns The geoview layer config
+     * Builds a GeoView layer configuration from selected layer IDs.
+     *
+     * @param inputProps - The selected layer metadata and source tree context
+     * @returns The map configuration layer entry to add to the map config
      */
     static buildGeoLayerToAdd(inputProps: BuildGeoViewLayerInput): MapConfigLayerEntry;
 }

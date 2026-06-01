@@ -6,7 +6,7 @@ interface ExportButtonProps {
     layerPath: string;
     rows: DataTableRow[];
     columns: MRTColumnDef<DataTableRow>[];
-    children?: ReactElement | undefined;
+    children?: ReactElement;
 }
 /**
  * Creates an export button component with CSV download menu.

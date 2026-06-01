@@ -55,6 +55,8 @@ export type LayerEntryTypesKey = 'VECTOR' | 'VECTOR_TILE' | 'RASTER_TILE' | 'RAS
 export declare const CONST_GEOVIEW_SCHEMA_BY_TYPE: Record<TypeGeoviewLayerType, string>;
 export declare const validVectorLayerLegendTypes: TypeGeoviewLayerType[];
 export declare const CONST_LAYER_ENTRY_TYPES: Record<LayerEntryTypesKey, TypeLayerEntryType>;
+/** The possible OGC Service types */
+export type TypeOGCService = 'WMS' | 'WMTS' | 'WFS';
 /** Type used to define valid source projection codes. */
 export type TypeValidSourceProjectionCodes = 3978 | 3857 | 4326;
 /** Base type from which we derive the source properties for all the leaf nodes in the layer tree. */
@@ -284,7 +286,7 @@ export type RCSLayerConfig = {
     /**
      * The display name of the layer (English/French). This overrides the default name coming from the GeoCore API.
      */
-    geoviewLayerName?: string | undefined;
+    geoviewLayerName?: string;
     /** Initial settings to apply to the GeoCore layer at creation time. */
     initialSettings?: TypeLayerInitialSettings;
     /** The layer entries to use from the GeoCore layer. */
@@ -300,7 +302,7 @@ export type GeoPackageLayerConfig = {
     /** The path to the GeoPackage */
     metadataAccessPath: string;
     /** The display name of the layer. This overrides the default name coming from the GeoCore API. */
-    geoviewLayerName?: string | undefined;
+    geoviewLayerName?: string;
     /** Initial settings to apply to the layer at creation time. */
     initialSettings?: TypeLayerInitialSettings;
     /** The layer entries to use from the GeoPackage. */
@@ -316,13 +318,25 @@ export type ShapefileLayerConfig = {
     /** The path to the shapefile */
     metadataAccessPath: string;
     /** The display name of the layer. This overrides the default name coming from the GeoCore API. */
-    geoviewLayerName?: string | undefined;
+    geoviewLayerName?: string;
     /** Initial settings to apply to the layer at creation time. */
     initialSettings?: TypeLayerInitialSettings;
     /** The layer entries to use from the shapefile. */
     listOfLayerEntryConfig?: TypeLayerEntryConfig[];
     /** Should the layer be used as basemap. */
     useAsBasemap?: boolean;
+};
+/**
+ * Type defining the effective scales of a layer, which are the ones that are actually applied on the map and can differ
+ * from the configured ones if the layer is outside of its original configured scales or if the map is outside of them.
+ */
+export type EffectiveLayerScales = {
+    maxScale?: number;
+    maxScaleTolerance?: number;
+    maxScaleZoomAt?: number;
+    minScale?: number;
+    minScaleTolerance?: number;
+    minScaleZoomAt?: number;
 };
 /**
  * Type guard that checks if a given map layer configuration entry is of type GeoCore.
@@ -368,7 +382,7 @@ export type TypeLegend = {
     /** The GeoView layer type this legend belongs to. */
     type: TypeGeoviewLayerType;
     /** The legend content - vector styles, an HTML canvas, or null. */
-    legend: TypeVectorLayerStyles | HTMLCanvasElement | null;
+    legend: TypeVectorLayerStyles | HTMLCanvasElement | 'AnnotationLayer' | null;
     /** Optional style configuration associated with the legend. */
     styleConfig?: TypeLayerStyleConfig;
 };
@@ -582,12 +596,14 @@ export interface TypeMetadataWMSCapabilityLayerDimension {
     '#text': string;
     '@attributes': TypeMetadataWMSCapabilityLayerDimensionAttribute;
     default?: string;
+    multipleValues?: boolean;
     name?: string;
     units?: string;
     values?: string;
 }
 export interface TypeMetadataWMSCapabilityLayerDimensionAttribute {
     default: string;
+    multipleValues?: string;
     name: string;
     units: string;
 }
@@ -739,6 +755,7 @@ export interface TypeMetadataEsriDynamicLayer {
     sourceSpatialReference?: TypeEsriSpatialReference;
     maxRecordCount: number;
     fields: TypeLayerMetadataFields[];
+    parentLayer?: TypeMetadataEsriLayerSummary;
     drawingInfo?: TypeLayerMetadataEsriDrawingInfo;
     timeInfo?: TimeDimensionESRI;
 }
@@ -779,6 +796,7 @@ export interface TypeMetadataEsriFeatureLayer {
     fields: TypeLayerMetadataFields[];
     types?: unknown[];
     templates?: unknown;
+    parentLayer?: TypeMetadataEsriLayerSummary;
     drawingInfo?: TypeLayerMetadataEsriDrawingInfo;
     editingInfo?: unknown;
     timeInfo?: TimeDimensionESRI;
@@ -787,6 +805,7 @@ export interface TypeMetadataEsriFeatureLayer {
 export interface TypeMetadataEsriImage {
     currentVersion: number;
     name: string;
+    type?: string;
     serviceDescription?: string;
     description?: string;
     capabilities: string;

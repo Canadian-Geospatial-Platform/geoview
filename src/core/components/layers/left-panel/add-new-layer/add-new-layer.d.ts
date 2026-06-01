@@ -1,12 +1,7 @@
 /**
- * A component that provides a step-by-step interface for adding new layers to the map
+ * Creates the add-new-layer component.
  *
- * @component
- * @description This component guides users through the process of adding a new layer to the map,
- * including uploading files (JSON, GeoJSON, CSV, ZIP, SHP), entering URLs, selecting layer types,
- * and configuring layer options. It uses a stepper UI to break the process into manageable steps.
- *
- * @returns The rendered component with a multi-step form for adding layers
+ * @returns The add-new-layer component
  */
 export declare function AddNewLayer(): JSX.Element;
 //# sourceMappingURL=add-new-layer.d.ts.map
