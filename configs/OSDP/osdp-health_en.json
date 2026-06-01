@@ -1,0 +1,149 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "initialView": {
+        "zoomAndCenter": [
+          11,
+          [
+            -78.7860521310545,
+            43.957998016283646
+          ]
+        ]
+      },
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": true,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "d256b422-2834-40a2-9f0c-bd5fc32781b2",
+        "geoviewLayerName": "The Canadian Radiological Monitoring Network - Monitoring Stations",
+        "metadataAccessPath": "",
+        "geoviewLayerType": "geoCore",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "1",
+            "layerName": "CRNM Monitoring Stations",
+            "initialSettings": {
+              "states": {
+                "legendCollapsed": false,
+                "visible": true
+              }
+            }
+          },
+          {
+            "layerId": "2",
+            "layerName": "CTBT Stations",
+            "initialSettings": {
+              "states": {
+                "legendCollapsed": false,
+                "visible": true
+              }
+            }
+          },
+          {
+            "layerId": "3",
+            "layerName": "Fixed Point Surveillance Network (Group)",
+            "initialSettings": {
+              "states": {
+                "legendCollapsed": false,
+                "visible": true
+              }
+            }
+          },
+          {
+            "layerId": "4",
+            "layerName": "Fixed Point Surveillance Network",
+            "initialSettings": {
+              "states": {
+                "legendCollapsed": false,
+                "visible": true
+              }
+            }
+          },
+          {
+            "layerId": "5",
+            "layerName": "Station location range",
+            "initialSettings": {
+              "states": {
+                "legendCollapsed": false,
+                "visible": true
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "21b821cf-0f1c-40ee-8925-eab12d357668",
+        "geoviewLayerName": "The Canadian Radiological Monitoring Network - Airborne Radioactivity",
+        "metadataAccessPath": "",
+        "geoviewLayerType": "geoCore",
+        "initialSettings": {
+          "states": {
+            "legendCollapsed": true
+          }
+        },
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "1",
+            "layerName": "Airborne Radioactivity",
+            "initialSettings": {
+              "states": {
+                "legendCollapsed": true,
+                "visible": true
+              }
+            }
+          },
+          {
+            "layerId": "2",
+            "layerName": "Station location range",
+            "initialSettings": {
+              "states": {
+                "legendCollapsed": true,
+                "visible": true
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "components": [
+    "north-arrow",
+    "overview-map"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 6
+  },
+  "navBar": [
+    "zoom",
+    "fullscreen",
+    "home",
+    "location",
+    "basemap-select"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "layers",
+        "data-table"
+      ]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca"
+}

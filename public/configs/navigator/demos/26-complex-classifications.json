@@ -1,0 +1,222 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "WMSFunctionStyle",
+        "geoviewLayerName": "WMS with Concatenate Filter Function Style",
+        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/major_projects_inventory_en?SERVICE=WMS&REQUEST=GetCapabilities&VERSION=1.3.0",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "mpi-point"
+          },
+          {
+            "layerId": "mpi-line"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "WFSFunctionStyle",
+        "geoviewLayerName": "WFS with Concatenate Filter Function Style",
+        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/major_projects_inventory_en?SERVICE=WFS&REQUEST=GetCapabilities&VERSION=1.3.0",
+        "geoviewLayerType": "ogcWfs",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "mpi-point"
+          },
+          {
+            "layerId": "mpi-line"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "ESRIDynamicValueExpression",
+        "geoviewLayerName": "ESRI Dynamic with Value Expression to classify every 100 years",
+        "metadataAccessPath": "https://egisp.dfo-mpo.gc.ca/arcgis/rest/services/open_data_donnees_ouvertes/path/MapServer",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "ESRIValueExpression",
+        "geoviewLayerName": "ESRI Value Expression to classify every 100 years",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer",
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "layerStyle": {
+              "Point": {
+                "type": "uniqueValue",
+                "hasDefault": false,
+                "fields": [],
+                "valueExpression": "var yr = $feature.year;\r\n\r\nif (yr > 2000) {\r\n  return \"2000s\";\r\n}\r\n\r\nif (yr > 1900) {\r\n  return \"1900s\";\r\n}\r\n\r\nif (yr > 1800) {\r\n  return \"1800s\";\r\n}\r\n\r\nif (yr > 1700) {\r\n  return \"1700s\";\r\n}\r\n\r\nif (yr > 1600) {\r\n  return \"1600s\";\r\n}\r\n\r\nreturn \"ancient\";",
+                "info": [
+                  {
+                    "label": "1600s",
+                    "visible": true,
+                    "values": [
+                      "1600s"
+                    ],
+                    "settings": {
+                      "type": "simpleSymbol",
+                      "rotation": 0,
+                      "color": "rgba(252,146,31,1)",
+                      "stroke": {
+                        "color": "rgba(153,153,153,0.251)",
+                        "lineStyle": "solid",
+                        "width": 0.75
+                      },
+                      "size": 6,
+                      "symbol": "circle",
+                      "offset": [
+                        0,
+                        0
+                      ],
+                      "zIndex": 4
+                    }
+                  },
+                  {
+                    "label": "1700s",
+                    "visible": true,
+                    "values": [
+                      "1700s"
+                    ],
+                    "settings": {
+                      "type": "simpleSymbol",
+                      "rotation": 0,
+                      "color": "rgba(158,85,156,1)",
+                      "stroke": {
+                        "color": "rgba(153,153,153,0.251)",
+                        "lineStyle": "solid",
+                        "width": 0.75
+                      },
+                      "size": 6,
+                      "symbol": "circle",
+                      "offset": [
+                        0,
+                        0
+                      ],
+                      "zIndex": 3
+                    }
+                  },
+                  {
+                    "label": "1800s",
+                    "visible": true,
+                    "values": [
+                      "1800s"
+                    ],
+                    "settings": {
+                      "type": "simpleSymbol",
+                      "rotation": 0,
+                      "color": "rgba(167,198,54,1)",
+                      "stroke": {
+                        "color": "rgba(153,153,153,0.251)",
+                        "lineStyle": "solid",
+                        "width": 0.75
+                      },
+                      "size": 6,
+                      "symbol": "circle",
+                      "offset": [
+                        0,
+                        0
+                      ],
+                      "zIndex": 2
+                    }
+                  },
+                  {
+                    "label": "1900s",
+                    "visible": true,
+                    "values": [
+                      "1900s"
+                    ],
+                    "settings": {
+                      "type": "simpleSymbol",
+                      "rotation": 0,
+                      "color": "rgba(237,81,81,1)",
+                      "stroke": {
+                        "color": "rgba(153,153,153,0.251)",
+                        "lineStyle": "solid",
+                        "width": 0.75
+                      },
+                      "size": 6,
+                      "symbol": "circle",
+                      "offset": [
+                        0,
+                        0
+                      ],
+                      "zIndex": 1
+                    }
+                  },
+                  {
+                    "label": "2000s",
+                    "visible": true,
+                    "values": [
+                      "2000s"
+                    ],
+                    "settings": {
+                      "type": "simpleSymbol",
+                      "rotation": 0,
+                      "color": "rgba(20,158,206,1)",
+                      "stroke": {
+                        "color": "rgba(153,153,153,0.251)",
+                        "lineStyle": "solid",
+                        "width": 0.75
+                      },
+                      "size": 6,
+                      "symbol": "circle",
+                      "offset": [
+                        0,
+                        0
+                      ],
+                      "zIndex": 0
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "layers",
+        "data-table"
+      ]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca",
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  }
+}

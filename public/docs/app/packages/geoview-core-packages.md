@@ -1,0 +1,1738 @@
+# Core Packages Reference
+
+This document provides comprehensive API reference and configuration details for all GeoView core packages.
+
+## Table of Contents
+
+1. [geoview-time-slider](#_1-geoview-time-slider)
+2. [geoview-geochart](#_2-geoview-geochart)
+3. [geoview-swiper](#_3-geoview-swiper)
+4. [geoview-drawer](#_4-geoview-drawer)
+5. [geoview-aoi-panel](#_5-geoview-aoi-panel)
+6. [geoview-custom-legend](#_6-geoview-custom-legend)
+7. [geoview-about-panel](#_7-geoview-about-panel)
+
+---
+
+## 1. geoview-time-slider
+
+**Description:** A time slider package that provides temporal navigation and filtering capabilities for layers with time dimensions (WMS and ESRI Image layers). Supports both discrete and continuous temporal modes.
+
+**Version:** 2.0.x
+
+**Author:** Damon Ulmi
+
+**Repository:** `packages/geoview-time-slider/`
+
+**Features:**
+
+- Time slider UI in footer panel
+- Support for WMS and ESRI Image layers with time dimensions
+- **Discrete mode**: Snap to predefined time points (e.g., yearly data)
+- **Continuous mode**: Free movement with step-based filtering (e.g., hourly data)
+- Single handle and range (two-handle) selection modes
+- Play/pause animation controls
+- Configurable time step for continuous mode
+- Temporal filtering synchronized across multiple layers
+- Automatic timezone handling (UTC)
+
+**Dependencies:**
+
+- `geoview-core`: ^2.0.0
+- `react`: ^18.3.1
+- `zustand`: ~5.0.0
+
+### Installation
+
+The time slider is typically included in the GeoView build. To use it:
+
+**Via Configuration:**
+
+```json
+{
+  "footerBar": {
+    "tabs": {
+      "core": ["time-slider"]
+    },
+    "selectedTab": "time-slider",
+    "selectedTimeSliderLayerPath": "layerPath"
+  }
+}
+```
+
+```json
+"corePackagesConfig": [
+  {
+    "time-slider": {
+      "sliders": [
+        {
+          "layerPaths": ["layer-path"],
+          "timeDimension": {
+            "nearestValues": "discrete",  // or "continuous"
+            "rangeItems": {
+              "range": ["2020-01-01T00:00:00Z", "2021-01-01T00:00:00Z"]
+            }
+          }
+        }
+      ]
+    }
+  }
+]
+```
+
+**Programmatic:**
+
+```typescript
+// Access time slider state via store getter functions
+import {
+  isStoreTimeSliderInitialized,
+  getStoreTimeSliderLayers,
+  getStoreTimeSliderFilters,
+} from "geoview-core";
+
+// Check if time slider is initialized
+if (isStoreTimeSliderInitialized("mapId")) {
+  // Get time-enabled layers
+  const timeLayers = getStoreTimeSliderLayers("mapId");
+
+  // Get current filters
+  const filters = getStoreTimeSliderFilters("mapId");
+}
+```
+
+### Temporal Modes
+
+The time slider supports two distinct modes for handling temporal data:
+
+#### Discrete Mode (`nearestValues: 'discrete'`)
+
+**Use When:**
+
+- Data has distinct, predefined time points (e.g., yearly, monthly, specific dates)
+- Satellite imagery with specific collection dates
+- Model outputs at scheduled intervals
+- Census data for specific years
+
+**Behavior:**
+
+- Slider handle snaps only to values in the `range` array
+- No in-between positions allowed
+- Step selector is hidden (not applicable)
+- Animation moves through discrete time points
+- Filter uses exact range boundaries
+
+**Example Configuration:**
+
+```json
+{
+  "time-slider": {
+    "sliders": [
+      {
+        "layerPaths": ["census-data"],
+        "title": "Census Years",
+        "timeDimension": {
+          "field": "Year",
+          "nearestValues": "discrete",
+          "singleHandle": true,
+          "rangeItems": {
+            "type": "discrete",
+            "range": [
+              "2000-01-01T00:00:00Z",
+              "2005-01-01T00:00:00Z",
+              "2010-01-01T00:00:00Z",
+              "2015-01-01T00:00:00Z",
+              "2020-01-01T00:00:00Z"
+            ]
+          }
+        }
+      }
+    ]
+  }
+}
+```
+
+**Generated Filter:**
+
+```sql
+Year >= date '2010-01-01T00:00:00Z' AND Year < date '2015-01-01T00:00:00Z'
+```
+
+---
+
+#### Continuous Mode (`nearestValues: 'continuous'`)
+
+**Use When:**
+
+- Data has dense temporal coverage (hourly, daily measurements)
+- Streaming or real-time data
+- Weather data with frequent updates
+- Sensor data with continuous readings
+
+**Behavior:**
+
+- Slider allows free movement between min and max
+- Step selector visible to control filter range
+- User can position handle anywhere on timeline
+- Filter uses step-based ranges (e.g., "show data within 1 hour")
+- Animation advances by configured step
+
+**Example Configuration:**
+
+```json
+{
+  "time-slider": {
+    "sliders": [
+      {
+        "layerPaths": ["weather-data/temperature"],
+        "title": "Hourly Temperature",
+        "timeDimension": {
+          "field": "timestamp",
+          "nearestValues": "continuous",
+          "singleHandle": true,
+          "rangeItems": {
+            "type": "relative",
+            "range": ["2024-01-01T00:00:00Z", "2024-01-31T23:59:59Z"]
+          }
+        }
+      }
+    ]
+  }
+}
+```
+
+**Generated Filter (with 1-hour step):**
+
+```sql
+timestamp >= date '2024-01-15T14:30:00Z' AND timestamp < date '2024-01-15T15:30:00Z'
+```
+
+**Step Options (Continuous Mode Only):**
+
+- 1 hour (`3600000` ms)
+- 1 day (`86400000` ms)
+- 1 week (`604800000` ms)
+- 1 month (`2592000000` ms)
+- 1 year (`31536000000` ms)
+
+---
+
+### Configuration Examples
+
+**Example 1: Discrete Mode - Yearly Satellite Imagery**
+
+```json
+{
+  "map": {
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "satellite-yearly",
+        "geoviewLayerType": "esriImage",
+        "metadataAccessPath": "https://example.com/arcgis/rest/services/Satellite",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "layerName": "Annual Imagery"
+          }
+        ]
+      }
+    ]
+  },
+  "footerBar": {
+    "tabs": {
+      "core": ["time-slider"]
+    },
+    "selectedTab": "time-slider"
+  },
+  "corePackagesConfig": [
+    {
+      "time-slider": {
+        "sliders": [
+          {
+            "layerPaths": ["satellite-yearly/0"],
+            "title": "Satellite Imagery by Year",
+            "description": "Annual satellite imagery from 2015-2024",
+            "delay": 2000,
+            "filtering": true,
+            "timeDimension": {
+              "field": "AcquisitionDate",
+              "nearestValues": "discrete",
+              "singleHandle": true,
+              "displayPattern": [{ "datePrecision": "year" }],
+              "rangeItems": {
+                "type": "discrete",
+                "range": [
+                  "2015-01-01T00:00:00Z",
+                  "2016-01-01T00:00:00Z",
+                  "2017-01-01T00:00:00Z",
+                  "2018-01-01T00:00:00Z",
+                  "2019-01-01T00:00:00Z",
+                  "2020-01-01T00:00:00Z",
+                  "2021-01-01T00:00:00Z",
+                  "2022-01-01T00:00:00Z",
+                  "2023-01-01T00:00:00Z",
+                  "2024-01-01T00:00:00Z"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+**Example 2: Continuous Mode - Hourly Weather Data**
+
+```json
+{
+  "map": {
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "weather-wms",
+        "geoviewLayerType": "ogcWms",
+        "metadataAccessPath": "https://example.com/wms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "temperature",
+            "layerName": "Temperature",
+            "source": {
+              "featureInfo": {
+                "queryable": true
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "footerBar": {
+    "tabs": {
+      "core": ["time-slider"]
+    },
+    "selectedTab": "time-slider"
+  },
+  "corePackagesConfig": [
+    {
+      "time-slider": {
+        "sliders": [
+          {
+            "layerPaths": ["weather-wms/temperature"],
+            "title": "Hourly Temperature Forecast",
+            "description": "7-day temperature forecast with hourly resolution",
+            "delay": 500,
+            "filtering": true,
+            "timeDimension": {
+              "field": "time",
+              "nearestValues": "continuous",
+              "singleHandle": true,
+              "displayPattern": [
+                { "datePrecision": "day" },
+                { "timePrecision": "hour" }
+              ],
+              "rangeItems": {
+                "type": "relative",
+                "range": ["2024-01-01T00:00:00Z", "2024-01-07T23:00:00Z"]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+**Example 3: Multiple Layers with Range Handles (Discrete)**
+
+```json
+{
+  "corePackagesConfig": [
+    {
+      "time-slider": {
+        "sliders": [
+          {
+            "layerPaths": [
+              "temperature-layer/data",
+              "precipitation-layer/data"
+            ],
+            "fields": ["timestamp", "date"],
+            "title": "Climate Data Time Range",
+            "description": "Select a time range for temperature and precipitation",
+            "delay": 1000,
+            "filtering": true,
+            "locked": false,
+            "reversed": false,
+            "timeDimension": {
+              "nearestValues": "discrete",
+              "singleHandle": false,
+              "displayPattern": [{ "datePrecision": "month" }],
+              "rangeItems": {
+                "type": "discrete",
+                "range": [
+                  "2023-01-01T00:00:00Z",
+                  "2023-02-01T00:00:00Z",
+                  "2023-03-01T00:00:00Z",
+                  "2023-04-01T00:00:00Z",
+                  "2023-05-01T00:00:00Z",
+                  "2023-06-01T00:00:00Z",
+                  "2023-07-01T00:00:00Z",
+                  "2023-08-01T00:00:00Z",
+                  "2023-09-01T00:00:00Z",
+                  "2023-10-01T00:00:00Z",
+                  "2023-11-01T00:00:00Z",
+                  "2023-12-01T00:00:00Z"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+### API Methods
+
+The time slider state is managed through the `TimeSliderController` and Zustand store hooks. Configuration is the primary way to set up time slider behavior:
+
+```typescript
+const mapViewer = cgpv.api.getMapViewer("mapId");
+
+// Access time slider controller
+const timeSliderController = mapViewer.controllers.timeSliderController;
+
+// Time slider filtering is managed automatically by the UI
+// Configuration-driven setup is the recommended approach
+```
+
+### TypeTimeSliderValues Interface
+
+```typescript
+interface TypeTimeSliderValues {
+  // Configuration
+  additionalLayerpaths?: string[]; // Linked layers
+  delay: number; // Animation delay (ms)
+  description?: string; // Display description
+  discreteValues: boolean; // true = discrete mode, false = continuous mode
+  step?: number; // Step size for continuous mode (ms)
+  field: string; // Field name for filtering
+  fieldAlias: string; // Display name for field
+  filtering: boolean; // Is filtering active
+  isMainLayerPath: boolean; // Is this the primary layer
+  locked?: boolean; // Are handles locked together
+  reversed?: boolean; // Is animation reversed
+  singleHandle: boolean; // Single vs range selection (auto-detected from WMS metadata, overridable via config)
+  title?: string; // Display title
+  // Data
+  minAndMax: number[]; // [min, max] timestamps (ms)
+  range: string[]; // Array of ISO date strings
+  values: number[]; // Current position(s) (ms)
+  displayPattern: [DatePrecision, TimePrecision]; // Display format
+}
+```
+
+### Best Practices
+
+**Choosing the Right Mode:**
+
+| Data Characteristic                  | Recommended Mode |
+| ------------------------------------ | ---------------- |
+| Yearly, quarterly, monthly data      | Discrete         |
+| Specific collection dates            | Discrete         |
+| Model outputs at scheduled intervals | Discrete         |
+| Hourly, minute-level data            | Continuous       |
+| Real-time/streaming data             | Continuous       |
+| Dense temporal coverage              | Continuous       |
+| Sparse, irregular intervals          | Discrete         |
+
+**Performance Considerations:**
+
+- **Discrete mode**: Works efficiently with 50-100 time points
+- **Continuous mode**: Works well for any range size
+- Use appropriate `delay` based on data density (slower for many points)
+- Consider layer caching for frequently accessed time periods
+
+**UI/UX Tips:**
+
+- Provide clear `title` and `description` for user context
+- Use appropriate `displayPattern` for your data's temporal resolution
+- Set `delay` based on desired animation speed (500ms-5000ms)
+- Use `locked` handles for synchronized comparison in range mode
+- Consider `reversed` animation for countdown scenarios
+
+---
+
+## 2. geoview-geochart
+
+**Description:** A charting package that visualizes layer data in interactive charts using the geochart library.
+
+**Version:** 2.0.x
+
+**Author:** Alexandre Roy
+
+**Repository:** `packages/geoview-geochart/`
+
+**Features:**
+
+- Line charts, bar charts, pie charts
+- Interactive chart controls
+- Data filtering and aggregation
+- Chart export capabilities
+- Synchronized with map selections
+- Multiple chart instances per map
+
+**Dependencies:**
+
+- `geoview-core`: ^2.0.0
+- `geochart`: github:Canadian-Geospatial-Platform/geochart#develop
+- `react`: ^18.3.1
+- `zustand`: ~5.0.0
+
+### Installation
+
+**Via Configuration:**
+
+```json
+{
+  "footerBar": {
+    "tabs": {
+      "core": ["geochart"]
+    }
+  }
+}
+```
+
+**Programmatic:**
+
+```typescript
+const mapViewer = cgpv.api.getMapViewer("mapId");
+const geochartPlugin = mapViewer.plugins["geochart"];
+
+if (geochartPlugin) {
+  // Geochart state is managed via Zustand store
+  // Configure via corePackagesConfig in map config
+}
+```
+
+### Configuration Example
+
+```json
+{
+  "footerBar": {
+    "tabs": {
+      "core": ["geochart"]
+    },
+    "selectedTab": "geochart"
+  }
+}
+```
+
+```json
+"corePackagesConfig": [
+        {
+            "geochart": {
+                "charts": [
+                    {
+                      ...
+                    }]
+            }
+        }]
+```
+
+### API Methods
+
+```typescript
+const mapViewer = cgpv.api.getMapViewer("mapId");
+const geochartPlugin = mapViewer.plugins["geochart"];
+
+// Geochart state is managed through Zustand store hooks
+// Configure charts via corePackagesConfig in map configuration
+```
+
+**See Also:** [Controllers API](app/events/controllers.md)
+
+---
+
+## 3. geoview-swiper
+
+**Description:** A layer comparison tool that allows users to swipe between layers to compare them side-by-side.
+
+**Version:** 2.0.x
+
+**Author:** Saleh Yassin
+
+**Repository:** `packages/geoview-swiper/`
+
+**Features:**
+
+- Interactive swiper bar
+- Layer visibility toggle on each side
+- Draggable swiper control
+- Vertical or horizontal orientation
+- Synchronized map views
+
+**Dependencies:**
+
+- `geoview-core`: ^2.0.0
+- `react-draggable`: ^4.4.6
+- `lodash`: ^4.17.21
+- `ol`: 10.5.0
+- `react`: ^18.3.1
+- `zustand`: ~5.0.0
+
+**Based on:**
+
+- https://viglino.github.io/ol-ext/examples/control/map.control.swipe.html
+- https://openlayers.org/en/latest/examples/layer-swipe.html
+
+### Installation
+
+**Via Configuration:**
+
+```json
+{
+  "corePackages": ["swiper"]
+}
+```
+
+**Programmatic:**
+
+```typescript
+const mapViewer = cgpv.api.getMapViewer("mapId");
+const swiperPlugin = mapViewer.plugins["swiper"];
+
+if (swiperPlugin) {
+  swiperPlugin.activateForLayer("layerPath");
+  swiperPlugin.setOrientation("vertical");
+}
+```
+
+### Configuration Example
+
+```json
+{
+  "map": {
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "layer2020",
+        "geoviewLayerName": "2020 Imagery",
+        "geoviewLayerType": "xyzTiles",
+        "metadataAccessPath": "https://tiles.example.com/2020/{z}/{x}/{y}.png"
+      },
+      {
+        "geoviewLayerId": "layer2024",
+        "geoviewLayerName": "2024 Imagery",
+        "geoviewLayerType": "xyzTiles",
+        "metadataAccessPath": "https://tiles.example.com/2024/{z}/{x}/{y}.png"
+      }
+    ]
+  },
+  "corePackages": ["swiper"],
+  "corePackagesConfig": [
+    {
+      "swiper": {
+        "orientation": "horizontal",
+        "keyboardOffset": 10,
+        "layers": ["esriFeatureLYR4/0"]
+      }
+    }
+  ]
+}
+```
+
+### API Methods
+
+```typescript
+const mapViewer = cgpv.api.getMapViewer("mapId");
+const swiperPlugin = mapViewer.plugins["swiper"];
+
+if (swiperPlugin) {
+  // Activate swiper for a layer
+  swiperPlugin.activateForLayer("layerPath");
+
+  // Deactivate for a layer
+  swiperPlugin.deActivateForLayer("layerPath");
+
+  // Set orientation
+  swiperPlugin.setOrientation("vertical");
+
+  // Deactivate all
+  swiperPlugin.deActivateAll();
+}
+```
+
+**See Also:** [Controllers API](app/events/controllers.md)
+
+---
+
+## 4. geoview-drawer
+
+**Description:** A drawing and geometry editing package that allows users to create, modify, and manage geometries on the map.
+
+**Version:** 1.0.0
+
+**Repository:** `packages/geoview-drawer/`
+
+**Features:**
+
+- Draw points, lines, polygons, circles, rectangles
+- Edit and modify existing geometries
+- Delete geometries
+- Snap to features
+- Measure distances and areas
+- Export drawn geometries as GeoJSON
+- Import geometries
+
+**Dependencies:**
+
+- `geoview-core`: ^2.0.0
+- `react`: ^18.3.1
+- `zustand`: ~5.0.0
+
+### Installation
+
+**Via Configuration:**
+
+```json
+{
+  "navBar": ["drawer"]
+}
+```
+
+**Programmatic:**
+
+```typescript
+const mapViewer = cgpv.api.getMapViewer("mapId");
+// The drawer plugin wraps the DrawerController
+// Drawing operations are managed via the controller
+```
+
+### Configuration Example
+
+```json
+{
+  "navBar": ["drawer"],
+  "corePackagesConfig": [
+    {
+      "drawer": {
+        "style": {
+          "fillColor": "rgba(252, 241, 0, 0.3)",
+          "strokeColor": "#000000",
+          "strokeWidth": 1.3
+        },
+        "activeGeom": "LineString",
+        "geomTypes": [
+          "Point",
+          "Text",
+          "LineString",
+          "Polygon",
+          "Rectangle",
+          "Circle",
+          "Star"
+        ],
+        "hideMeasurements": false
+      }
+    }
+  ]
+}
+```
+
+### Keyboard Shortcuts
+
+The Drawer package provides comprehensive keyboard shortcuts for efficient drawing and editing. These shortcuts (except undo/redo/escape) can be toggled on/off via the shortcuts button in the drawer toolbar, with the backtick key \`,  or programmatically via `DrawerController.setShortcutsEnabled()`.
+
+**Note:** Undo (**Ctrl+Z**), Redo (**Ctrl+Y** / **Ctrl+Shift+Z**), and Escape remain active at all times, regardless of the shortcuts toggle state.
+
+| Shortcut | Action |
+|----------|--------|
+| **D** | Toggle Drawing mode |
+| **E** | Toggle Editing mode |
+| **G** | Cycle Geometry Type (forward) |
+| **Shift+G** | Cycle Geometry Type (backward) |
+| **S** | Open Style Menu |
+| **M** | Toggle Measurements visibility |
+| **N** | Toggle Snapping |
+| **Ctrl+Z** | Undo last action |
+| **Ctrl+Y / Ctrl+Shift+Z** | Redo action |
+| **Shift+S** | Save / Download drawings (GeoJSON) |
+| **Shift+O** | Open / Upload drawings |
+| **Shift+C** | Clear all drawings |
+| **Escape** | Clear selection / Exit edit mode |
+
+### Crosshair Integration
+
+When keyboard navigation is enabled (crosshair mode), the Drawer tool provides enhanced interaction capabilities:
+
+#### Drawing with Crosshairs
+
+- **Multi-vertex geometries** (LineString, Polygon): Press **Enter** or **Spacebar** to add a vertex at the crosshair position. Press **Shift+Enter** or **Shift+Spacebar** to finish the geometry.
+- **Two-coordinate geometries** (Circle, Rectangle, Star): Press **Enter** or **Spacebar** to set the first coordinate (center or first corner). A marker visualizes the pending coordinate. Press **Enter** or **Spacebar** again to set the second coordinate (edge or opposite corner), completing the geometry automatically.
+- **Point and Text geometries**: Press **Enter** or **Spacebar** to place the feature at the crosshair position.
+- **Text geometry behavior**: Text features default to horizontal orientation (rotation=0) when created via keyboard, regardless of the style state.
+
+#### Editing with Crosshairs
+
+- **Select geometries**: Position the crosshair over a geometry and press **Enter** or **Spacebar** to select it.
+- **Manipulate handles**: Position the crosshair over a vertex handle, press **Enter** or **Spacebar** to grab it, use **arrow keys** to move it, then press **Enter** or **Spacebar** again to release. Press **Escape** to cancel.
+- **Edit text content**: With a text feature selected, press **Shift+Enter** or **Shift+Spacebar** when the crosshair is inside the text bounds to open the text editor (keyboard double-click equivalent).
+- **Hit tolerance**: The hit tolerance is increased (30px vs 5px for mouse) for easier targeting with the crosshair.
+
+#### Zoom Control with Crosshairs
+
+While in drawing or editing mode with crosshairs active:
+- **Ctrl+Up Arrow**: Zoom in centered on the crosshair position
+- **Ctrl+Down Arrow**: Zoom out centered on the crosshair position
+
+### API Methods
+
+The drawer functionality is managed through the `DrawerController`. The drawer plugin wraps the controller and provides the UI.
+
+```typescript
+// Drawing operations are managed internally by the DrawerController
+// The controller provides methods like:
+// - startDrawing(geomType)
+// - stopDrawing()
+// - toggleDrawing()
+// - startEditing() / stopEditing()
+// - undo() / redo()
+// - clearDrawings()
+// - downloadDrawings() (exports as GeoJSON)
+// - uploadDrawings(file) (imports GeoJSON)
+```
+
+**See Also:** [Controllers API](app/events/controllers.md)
+
+---
+
+## 5. geoview-aoi-panel
+
+**Description:** An Area of Interest (AOI) selection panel that allows users to define and manage areas of interest on the map.
+
+**Version:** 2.0.x
+
+**Repository:** `packages/geoview-aoi-panel/`
+
+**Features:**
+
+- Define AOI by drawing or selecting features
+- Import AOI from file (GeoJSON, KML)
+- Export AOI to various formats
+- Multiple AOI management
+- AOI-based filtering and analysis
+- Saved AOI library
+
+**Dependencies:**
+
+- `geoview-core`: ^2.0.0
+- `react`: ^18.3.1
+- `zustand`: ~5.0.0
+
+### Installation
+
+**Via Configuration:**
+
+```json
+{
+  "appBar": {
+    "tabs": {
+      "core": ["aoi-panel"]
+    }
+  }
+}
+```
+
+### Configuration Example
+
+```json
+{
+  "appBar": {
+    "tabs": {
+      "core": ["aoi-panel"]
+    }
+  },
+  "corePackagesConfig": [
+    {
+      "aoi-panel": {
+        "isOpen": true,
+        "aoiList": [
+          {
+            "imageUrl": "https://encrypted-tbn1.gstatic.com/licensed-image?q=tbn:ANd9GcSbleN5tjC2Dilx77SCBJD9f3CxlnDEEGx5qY786BpVlu4JLzUd1ixjIOfO1WX5mJjUQLmSSg4JFuNWgqGZJZDV7LBH8y3QBz3KrjuHdg",
+            "aoiTitle": "CN Tower",
+            "extent": [-79.3881, 43.6416, -79.3861, 43.6436]
+          },
+          {
+            "imageUrl": "https://encrypted-tbn0.gstatic.com/licensed-image?q=tbn:ANd9GcTCSU8D4pV4fY9MfYa6NZvpcMrCDhxE-ySOSzbxqSCC67_loNeJ9WI-2Ki7zCfU36M0Iwt7-4aw0y3_Vg8t_8sxo86xS6HVewQdYjOOXA",
+            "aoiTitle": "Parliament Hill",
+            "extent": [-75.7019, 45.4226, -75.6999, 45.4246]
+          }
+        ],
+        "version": "1.0"
+      }
+    }
+  ]
+}
+```
+
+---
+
+## 6. geoview-custom-legend
+
+**Description:** A customizable legend panel that allows users to create highly customized legend layouts with headers, groups, and standard layer legends organized in a specific order.
+
+**Version:** 2.0.x
+
+**Repository:** `packages/geoview-custom-legend/`
+
+**Features:**
+
+- Custom legend organization with headers and groups
+- Collapsible group sections
+- Layer legend integration from GeoView core
+- Custom text descriptions for headers and groups
+- Configurable typography (font size, weight)
+- Nested group support
+- Layer visibility control
+
+**Dependencies:**
+
+- `geoview-core`: ^2.0.0
+- `react`: ^18.3.1
+- `zustand`: ~5.0.0
+
+### Installation
+
+**Via Configuration:**
+
+```json
+{
+  "appBar": {
+    "tabs": {
+      "core": ["custom-legend"]
+    }
+  }
+}
+```
+
+### Configuration Schema
+
+```typescript
+interface CustomLegendConfig {
+  // Optional
+  isOpen?: boolean;
+  title?: string;
+  legendList?: Array<TypeLegendItem>;
+  version?: string;
+}
+
+type TypeLegendItem = TypeLegendLayer | TypeHeaderLayer | TypeGroupLayer;
+
+interface TypeLegendLayer {
+  type: "layer";
+  layerPath: string;
+}
+
+interface TypeHeaderLayer {
+  type: "header";
+  text: string;
+  description?: TypeDescription;
+  fontSize?: number;
+  fontWeight?: "normal" | "bold";
+}
+
+interface TypeGroupLayer {
+  type: "group";
+  text: string;
+  description?: TypeDescription;
+  collapsed?: boolean;
+  children: Array<TypeLegendItem>;
+}
+
+interface TypeDescription {
+  text: string;
+  collapsed?: boolean;
+}
+```
+
+### Configuration Properties
+
+**Root Configuration:**
+
+- **isOpen** (boolean, default: false): Initial panel open state
+- **title** (string): Custom title for the legend panel
+- **legendList** (array): Ordered list of legend items to display
+- **version** (string, default: "1.0"): Schema version
+
+**Legend Item Types:**
+
+1. **TypeLegendLayer** - Display a standard GeoView layer legend:
+   - **type** (required): Must be `"layer"`
+   - **layerPath** (required): Layer path identifying the layer (e.g., "layerId/sublayerId")
+
+2. **TypeHeaderLayer** - Display a text header for organizing sections:
+   - **type** (required): Must be `"header"`
+   - **text** (required): Header text to display
+   - **description**: Optional description object with:
+     - **text** (required): Descriptive text to display below header
+     - **collapsed** (optional): Whether description starts collapsed (default: false)
+   - **fontSize** (number, range: 8-32, default: 16): Font size in pixels
+   - **fontWeight** (string, default: "bold"): Font weight ("normal" or "bold")
+
+3. **TypeGroupLayer** - Display a collapsible group of legend items:
+   - **type** (required): Must be `"group"`
+   - **text** (required): Group title text
+   - **description**: Optional description object with:
+     - **text** (required): Descriptive text to display below group title
+     - **collapsed** (optional): Whether description starts collapsed (default: false)
+   - **collapsed** (boolean, default: false): Initial collapsed state of the group itself
+   - **children** (required): Array of child legend items (minimum 1 item)
+
+### Configuration Examples
+
+**Basic Custom Legend:**
+
+```json
+{
+  "appBar": {
+    "tabs": {
+      "core": ["custom-legend"]
+    }
+  },
+  "corePackagesConfig": [
+    {
+      "custom-legend": {
+        "isOpen": false,
+        "title": "Map Layers",
+        "legendList": [
+          {
+            "type": "layer",
+            "layerPath": "weather-layer/temperature"
+          },
+          {
+            "type": "layer",
+            "layerPath": "weather-layer/precipitation"
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+**With Headers and Groups:**
+
+```json
+{
+  "appBar": {
+    "tabs": {
+      "core": ["custom-legend"]
+    }
+  },
+  "corePackagesConfig": [
+    {
+      "custom-legend": {
+        "isOpen": true,
+        "title": "Environmental Data",
+        "legendList": [
+          {
+            "type": "header",
+            "text": "Weather Layers",
+            "description": {
+              "text": "Current weather conditions and forecasts",
+              "collapsed": false
+            },
+            "fontSize": 18,
+            "fontWeight": "bold"
+          },
+          {
+            "type": "group",
+            "text": "Temperature Data",
+            "description": {
+              "text": "Temperature forecasts and historical data",
+              "collapsed": true
+            },
+            "collapsed": false,
+            "children": [
+              {
+                "type": "layer",
+                "layerPath": "weather/current-temp"
+              },
+              {
+                "type": "layer",
+                "layerPath": "weather/forecast-temp"
+              }
+            ]
+          },
+          {
+            "type": "header",
+            "text": "Administrative Boundaries",
+            "fontSize": 16
+          },
+          {
+            "type": "layer",
+            "layerPath": "boundaries/provinces"
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+**Nested Groups:**
+
+```json
+{
+  "appBar": {
+    "tabs": {
+      "core": ["custom-legend"]
+    }
+  },
+  "corePackagesConfig": [
+    {
+      "custom-legend": {
+        "title": "Advanced Legend",
+        "legendList": [
+          {
+            "type": "group",
+            "text": "Environmental",
+            "collapsed": false,
+            "children": [
+              {
+                "type": "group",
+                "text": "Weather",
+                "description": {
+                  "text": "Real-time weather data and forecasts",
+                  "collapsed": false
+                },
+                "collapsed": true,
+                "children": [
+                  {
+                    "type": "layer",
+                    "layerPath": "weather/temperature"
+                  },
+                  {
+                    "type": "layer",
+                    "layerPath": "weather/precipitation"
+                  }
+                ]
+              },
+              {
+                "type": "group",
+                "text": "Air Quality",
+                "description": {
+                  "text": "Air quality monitoring stations and measurements",
+                  "collapsed": true
+                },
+                "collapsed": true,
+                "children": [
+                  {
+                    "type": "layer",
+                    "layerPath": "air-quality/pm25"
+                  },
+                  {
+                    "type": "layer",
+                    "layerPath": "air-quality/ozone"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+### Usage Notes
+
+- **Layer Paths:** Must reference existing layers in your map configuration
+- **Groups:** Can be nested within other groups for hierarchical organization
+- **Headers:** Useful for visually separating sections of related layers
+- **Descriptions:** Optional text that provides additional context for headers and groups
+- **Description Collapsing:** Each description can be independently toggled by users
+- **Order:** Legend items appear in the order specified in the `legendList` array
+
+### Common Use Cases
+
+**1. Organizing by Data Type:**
+
+```json
+{
+  "legendList": [
+    {
+      "type": "header",
+      "text": "Satellite Imagery"
+    },
+    {
+      "type": "layer",
+      "layerPath": "satellite/2024"
+    },
+    {
+      "type": "layer",
+      "layerPath": "satellite/2020"
+    },
+    {
+      "type": "header",
+      "text": "Reference Layers"
+    },
+    {
+      "type": "layer",
+      "layerPath": "boundaries/provinces"
+    }
+  ]
+}
+```
+
+**2. Thematic Grouping:**
+
+```json
+{
+  "legendList": [
+    {
+      "type": "group",
+      "text": "Transportation",
+      "children": [
+        {
+          "type": "layer",
+          "layerPath": "transport/roads"
+        },
+        {
+          "type": "layer",
+          "layerPath": "transport/railways"
+        },
+        {
+          "type": "layer",
+          "layerPath": "transport/airports"
+        }
+      ]
+    }
+  ]
+}
+```
+
+**3. Multi-Level Organization:**
+
+```json
+{
+  "legendList": [
+    {
+      "type": "group",
+      "text": "Base Maps",
+      "collapsed": false,
+      "children": [
+        {
+          "type": "group",
+          "text": "Topographic",
+          "children": [
+            {
+              "type": "layer",
+              "layerPath": "basemap/topo-light"
+            },
+            {
+              "type": "layer",
+              "layerPath": "basemap/topo-dark"
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "text": "Satellite",
+          "children": [
+            {
+              "type": "layer",
+              "layerPath": "basemap/satellite"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
+**See Also:**
+
+- [Configuration Reference](app/config/configuration-reference.md) - Package configuration options
+
+---
+
+---
+
+## 7. geoview-about-panel
+
+**Description:** An information panel package that displays content about the map or application. Supports multiple content formats including Markdown documents, custom content arrays, or structured information with title, logo, description, and links.
+
+**Version:** 2.0.x
+
+**Repository:** `packages/geoview-about-panel/`
+
+**Features:**
+
+- Display Markdown documents from file paths
+- Render arrays of Markdown content strings
+- Show structured content (title, logo, description, link)
+- Custom icon support for panel button
+- Flexible content priority system
+- Fully customizable panel header
+- Empty panel support (for placeholder configurations)
+
+**Dependencies:**
+
+- `geoview-core`: ^2.0.0
+- `markdown-to-jsx`: ^7.5.0
+- `react`: ^18.3.1
+- `zustand`: ~5.0.0
+
+### Installation
+
+**Via Configuration:**
+
+```json
+{
+  "appBar": {
+    "tabs": {
+      "core": ["about-panel"]
+    }
+  }
+}
+```
+
+**Programmatic:**
+
+```typescript
+// About Panel is automatically loaded when included in appBar.tabs.core
+// Access via AppBar tabs
+const appBarApi = cgpv.api.maps["mapId"].appBar;
+```
+
+### Content Formats
+
+The About Panel supports three content formats with the following priority:
+
+1. **Markdown File Path** (`mdPath`) - Highest priority, displays content from a Markdown document
+2. **Markdown Content Array** (`mdContent`) - Displays multiple Markdown strings as separate sections
+3. **Default Content** (`title`, `logoPath`, `description`, `link`) - Lowest priority, displays structured content
+
+If no content is configured, an empty panel will be displayed.
+
+### Configuration Schema
+
+```typescript
+interface AboutPanelConfig {
+  // Optional
+  isOpen?: boolean;
+  aboutTitle?: string;
+  iconPath?: string;
+  mdPath?: string;
+  mdContent?: string[];
+  title?: string;
+  logoPath?: string;
+  description?: string;
+  link?: string;
+  version?: string;
+}
+```
+
+### Configuration Properties
+
+- **isOpen** (boolean, default: false): Initial panel open state
+- **aboutTitle** (string, default: "About"): Text for aria-label and panel header
+- **iconPath** (string): Custom icon path for the about button (uses default PublicIcon if not provided)
+- **mdPath** (string): Path to Markdown file to display (highest priority)
+- **mdContent** (string[]): Array of Markdown strings to display as sections
+- **title** (string): Title for default content view
+- **logoPath** (string): Path to logo image for default content view
+- **description** (string): Description text for default content view
+- **link** (string): URL link for default content view
+- **version** (string, default: "1.0"): Schema version
+
+### Configuration Examples
+
+**Example 1: Markdown File**
+
+```json
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "projection": 3978
+    }
+  },
+  "appBar": {
+    "tabs": {
+      "core": ["about-panel"]
+    }
+  },
+  "corePackagesConfig": [
+    {
+      "about-panel": {
+        "isOpen": true,
+        "aboutTitle": "About Atlas of Canada",
+        "iconPath": "./img/canada-icon.png",
+        "mdPath": "./img/about-atlas.md"
+      }
+    }
+  ]
+}
+```
+
+**Example 2: Markdown Content Array**
+
+```json
+{
+  "appBar": {
+    "tabs": {
+      "core": ["about-panel"]
+    }
+  },
+  "corePackagesConfig": [
+    {
+      "about-panel": {
+        "isOpen": false,
+        "mdContent": [
+          "# Atlas of Canada\n\n![Atlas Banner](./img/atlas_banner.png)",
+          "## Discover Canada through geography\n\nThe Atlas of Canada provides interactive and static maps of Canada.",
+          "## Key Features\n\n- **Interactive Maps** - Dynamic maps with multiple layers\n- **Historical Archive** - Digitized atlas editions from 1906\n- **Educational Resources** - Teaching materials and data",
+          "## Learn More\n\n[Visit the Atlas of Canada →](https://natural-resources.canada.ca/maps-tools-publications/maps/atlas-canada)"
+        ]
+      }
+    }
+  ]
+}
+```
+
+**Example 3: Default Content (Structured)**
+
+```json
+{
+  "appBar": {
+    "tabs": {
+      "core": ["about-panel"]
+    }
+  },
+  "corePackagesConfig": [
+    {
+      "about-panel": {
+        "isOpen": false,
+        "title": "GeoView Mapping Application",
+        "logoPath": "./img/logo.png",
+        "description": "A powerful and flexible geospatial viewer for the Canadian Geospatial Platform. Explore maps, analyze data, and discover geographic insights.",
+        "link": "https://canadian-geospatial-platform.github.io/geoview/"
+      }
+    }
+  ]
+}
+```
+
+**Example 4: Minimal Configuration**
+
+```json
+{
+  "appBar": {
+    "tabs": {
+      "core": ["about-panel"]
+    }
+  },
+  "corePackagesConfig": [
+    {
+      "about-panel": {
+        "title": "About This Map"
+      }
+    }
+  ]
+}
+```
+
+### Markdown Support
+
+When using `mdPath` or `mdContent`, the About Panel supports standard Markdown syntax including:
+
+- **Headers** - `# H1`, `## H2`, etc.
+- **Emphasis** - `**bold**`, `*italic*`
+- **Links** - `[text](url)`
+- **Images** - `![alt](path)`
+- **Lists** - `- item` or `1. item`
+- **Code** - `` `inline` `` or ` ```block``` `
+- **Line Breaks** - `\n` for new lines in strings
+
+**Markdown Example File:**
+
+```markdown
+# Atlas of Canada
+
+![Atlas Banner](../img/atlas_banner.png)
+
+## Discover Canada through geography
+
+The Atlas of Canada provides interactive and static maps of Canada, from past to present.
+
+## Key Features
+
+- **Interactive Maps** - Explore dynamic maps with layers covering physical geography, demographics, economy, and more
+- **Historical Archive** - Access digitized versions of atlas editions dating back to 1906
+- **Thematic Collections** - Browse curated map collections on topics like climate and natural resources
+
+## Learn More
+
+Visit the full Atlas of Canada and discover the stories told through maps:
+
+[Visit the Atlas of Canada →](https://natural-resources.canada.ca/maps-tools-publications/maps/atlas-canada)
+
+---
+
+_Mapping Canada's past, present, and future since 1906_
+```
+
+### Usage Notes
+
+- **Content Priority:** Only one content format will be displayed based on priority (mdPath > mdContent > default)
+- **Markdown Paths:** Can be relative or absolute paths
+- **Image Paths:** In Markdown, images use paths relative to the HTML page location
+- **Custom Icons:** Should be 24x24 pixels for optimal display in the app bar
+- **aboutTitle:** Customizes both the panel header text and accessibility label
+- **Empty Panel:** If no content is provided, the panel will be empty but functional
+
+### Common Use Cases
+
+**1. Simple About Page:**
+
+```json
+{
+  "about-panel": {
+    "title": "My Mapping Application",
+    "description": "A custom GeoView application for environmental monitoring.",
+    "link": "https://example.com/help"
+  }
+}
+```
+
+**2. Documentation from Markdown File:**
+
+```json
+{
+  "about-panel": {
+    "isOpen": false,
+    "aboutTitle": "User Guide",
+    "mdPath": "./docs/user-guide.md"
+  }
+}
+```
+
+**3. Multi-Section Content:**
+
+```json
+{
+  "about-panel": {
+    "isOpen": true,
+    "mdContent": [
+      "# About This Map\n\nWelcome to our interactive mapping application.",
+      "## Data Sources\n\n- Natural Resources Canada\n- Statistics Canada",
+      "## Terms of Use\n\nThis application is provided as-is..."
+    ]
+  }
+}
+```
+
+**4. Atlas of Canada Example:**
+
+```json
+{
+  "about-panel": {
+    "isOpen": true,
+    "title": "Atlas of Canada",
+    "logoPath": "../../../img/atlas_banner.png",
+    "description": "The Atlas of Canada provides interactive and static maps of Canada, from past to present. Find, explore and download a variety of maps and discover other sources of Canadian geographic information.",
+    "link": "https://natural-resources.canada.ca/maps-tools-publications/maps/atlas-canada"
+  }
+}
+```
+
+### Accessibility
+
+The About Panel includes:
+
+- Proper ARIA labels via `aboutTitle` property
+- Keyboard navigation support
+- Screen reader compatibility
+- Semantic HTML structure in rendered Markdown
+- Focus management when panel opens/closes
+
+### Performance Considerations
+
+- **Markdown Files:** Fetched asynchronously on panel open
+- **Large Content:** Markdown rendering is optimized but very large files may impact initial render
+- **Images:** Consider image size and format for optimal loading
+- **Caching:** Markdown files are cached after first load
+
+### Error Handling
+
+The panel gracefully handles:
+
+- **Missing Markdown Files:** Displays error message if `mdPath` fails to load
+- **Invalid Markdown:** Renders as plain text if parsing fails
+- **Missing Images:** Shows broken image placeholder
+- **Empty Configuration:** Displays empty panel (not an error)
+
+**See Also:**
+
+- [Configuration Reference](app/config/configuration-reference.md) - Package configuration options
+
+---
+
+## Package Development
+
+### Creating a Custom Package
+
+To create a custom GeoView package:
+
+1. **Create Package Structure:**
+
+```bash
+packages/
++-- geoview-my-package/
+    +-- package.json
+    +-- tsconfig.json
+    +-- README.md
+    +-- src/
+    │   +-- index.tsx
+    │   +-- my-package-panel.tsx
+    │   +-- my-package-style.ts
+    │   +-- my-package-types.ts
+    +-- default-config-my-package.json
+```
+
+> **Note:** Controllers live in `geoview-core/src/core/controllers/`, not inside the plugin package. If your package needs a controller, create it at `packages/geoview-core/src/core/controllers/my-package-controller.ts` and register it in the `ControllerRegistry`.
+
+2. **package.json:**
+
+```json
+{
+  "name": "geoview-my-package",
+  "version": "1.0.0",
+  "description": "My custom GeoView package",
+  "main": "src/index.tsx",
+  "peerDependencies": {
+    "geoview-core": "workspace:^2.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "zustand": "~5.0.0"
+  },
+  "devDependencies": {
+    "geoview-core": "workspace:^2.0.0",
+    "typescript": "^5.6.3"
+  }
+}
+```
+
+3. **Create UI Component:**
+
+Create a React component for your package panel:
+
+```typescript
+// my-package-panel.tsx
+import { useEffect } from 'react';
+
+export function MyPackagePanel({ mapId }: { mapId: string }): JSX.Element {
+  useEffect(() => {
+    console.log('Package initialized for map:', mapId);
+  }, [mapId]);
+
+  return (
+    <div className="my-package-panel">
+      <h2>My Package</h2>
+      {/* Package UI */}
+    </div>
+  );
+}
+```
+
+4. **Create Plugin Entry Point:**
+
+For app bar packages, extend `AppBarPlugin`. For nav bar packages, extend `NavBarPlugin`:
+
+```typescript
+// index.tsx
+import { AppBarPlugin } from "geoview-core/api/plugin/appbar-plugin";
+import { MyPackagePanel } from "./my-package-panel";
+import schema from "../schema.json";
+import defaultConfig from "../default-config-my-package.json";
+
+class MyPackagePlugin extends AppBarPlugin {
+  override schema(): unknown {
+    return schema;
+  }
+
+  override defaultConfig(): unknown {
+    return defaultConfig;
+  }
+
+  override defaultTranslations(): Record<string, unknown> {
+    return {
+      en: { MyPackage: { title: "My Package" } },
+      fr: { MyPackage: { title: "Mon Paquet" } },
+    };
+  }
+}
+
+export default MyPackagePlugin;
+```
+
+5. **Register in webpack and configuration:**
+
+See [Core Packages Guide](./core-packages.md) for the full steps to register in `webpack.common.js`, `rush.json`, `schema.json`, and `map-schema-types.ts`.
+
+### Package Best Practices
+
+1. **Use Controllers:** State management should go through controllers
+2. **Type Safety:** Leverage TypeScript for all interfaces and types
+3. **Accessibility:** Ensure package UI is accessible (WCAG 2.1 AA)
+4. **Internationalization:** Support both English and French
+5. **Error Handling:** Gracefully handle errors and provide user feedback
+6. **Documentation:** Document all public APIs and configuration options
+7. **Testing:** Write tests for controllers and integration tests for UI
+
+---
+
+## Package Management
+
+### Building Packages
+
+```bash
+# Build all packages
+rush build
+
+# Build specific package
+cd packages/geoview-time-slider
+npm run build
+```
+
+### Installing Dependencies
+
+```bash
+# Install all dependencies
+rush install
+
+# Update dependencies
+rush update
+```
+
+### Adding Dependencies
+
+```bash
+# Add to specific package
+cd packages/geoview-my-package
+rush add -p lodash --caret
+```
+
+---
+
+## See Also
+
+- **[Controllers API](app/events/controllers.md)** - Controllers for performing actions
+- **[Configuration Reference](app/config/configuration-reference.md)** - Package configuration options
+- **[API Reference](app/api/api.md)** - Core API methods
+- **[Core Package Development](./core-packages.md)** - Creating custom packages (detailed guide)
+- **[State Management](programming/using-store.md)** - Zustand store architecture

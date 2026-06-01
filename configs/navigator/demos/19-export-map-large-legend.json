@@ -1,0 +1,218 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "imagery",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "uniqueValueId",
+        "geoviewLayerName": "uniqueValue",
+        "metadataAccessPath": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/",
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "1"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "geojsonLYR1",
+        "geoviewLayerName": "GeoJSON Sample",
+        "metadataAccessPath": "./datasets/geojson/metadata.meta",
+        "geoviewLayerType": "GeoJSON",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "polygons.json",
+            "layerName": "Polygons"
+          },
+          {
+            "layerId": "lines.json",
+            "layerName": "Lines"
+          },
+          {
+            "entryType": "group",
+            "layerId": "point-feature-group",
+            "layerName": "point-feature-group",
+            "listOfLayerEntryConfig": [
+              {
+                "layerId": "icon_points.json",
+                "layerName": "Icons"
+              },
+              {
+                "layerId": "points.json",
+                "layerName": "Points"
+              },
+              {
+                "layerId": "points_1.json",
+                "layerName": "Points 1"
+              },
+              {
+                "layerId": "points_2.json",
+                "layerName": "Points 2"
+              },
+              {
+                "layerId": "points_3.json",
+                "layerName": "Points 3"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "Hydro",
+        "geoviewLayerName": "Hydro - Scale" ,
+        "metadataAccessPath": "https://maps.geogratis.gc.ca/wms/hydro_network_en",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "nhn:nhn",
+            "layerName": "National Hydro Network (NHN)"
+          },
+          {
+            "layerId": "nhn:nhnda",
+            "layerName": "Drainage Areas"
+          },
+          {
+            "layerId": "nhn:toponyms",
+            "layerName": "Toponyms"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "wmsLYR1-Root",
+        "geoviewLayerName": "Weather Group",
+        "metadataAccessPath": "https://geo.weather.gc.ca/geomet",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "entryType": "group",
+            "layerId": "wmsLYR1-Group",
+            "layerName": "Group",
+            "listOfLayerEntryConfig": [
+              {
+                "layerId": "CURRENT_CONDITIONS",
+                "source": {
+                  "featureInfo": {
+                    "queryable": true,
+                    "nameField": "plain_text",
+                    "outfields": [
+                      {
+                        "name": "plain_text",
+                        "alias": "Forcast",
+                        "type": "string",
+                        "domain": null
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "layerId": "GDPS.ETA_ICEC",
+                "layerName": "Ice Cover",
+                "source": {
+                  "wmsStyle": "SEA_ICECONC"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "wmsLYR1-msi",
+        "geoviewLayerName": "MSI",
+        "metadataAccessPath": "https://datacube.services.geo.ca/ows/msi",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "msi-94-or-more",
+            "layerName": "Permanent Snow",
+            "source": {
+              "wmsStyle": "msi-binary",
+              "featureInfo": {
+                "queryable": true,
+                "nameField": "band-0-pixel-value",
+                "outfields": [
+                  {
+                    "name": "band-0-pixel-value",
+                    "alias": "Pixel value",
+                    "type": "number",
+                    "domain": null
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "wmsLYR1-spatiotemporel",
+        "geoviewLayerName": "Spatiotemporel",
+        "metadataAccessPath": "https://geo.weather.gc.ca/geomet",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "RADAR_1KM_RSNO",
+            "layerName": "Test Spatiotemporel",
+            "source": {
+              "wmsStyle": "Radar-Snow_14colors"
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "LYR1",
+        "geoviewLayerName": "Canada Energy Regulator",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/services/NRCan/CER_Assessments_EN/MapServer/WMSServer",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "DatacubeXML-NAPL",
+        "geoviewLayerName": "NAPL",
+        "metadataAccessPath": "https://datacube.services.geo.ca/web/napl-ontario-ring-of-fire.xml",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "ontario-ring-of-fire",
+            "layerName": "Ontario ring of fire"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId":"DatacubeXML-Aerial",
+        "geoviewLayerName":"Datacube-Aerial",
+        "metadataAccessPath":"https://datacube.services.geo.ca/web/aerial.xml",
+        "geoviewLayerType":"ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "halifax",
+            "layerName": "Halifax"
+          },
+          {
+            "layerId": "victoria"
+          }
+        ]
+      }
+    ]
+  },
+  "theme": "geo.ca",
+  "appBar": {
+    "tabs": {
+      "core": ["geolocator", "export", "guide", "details", "legend", "data-table", "layers"]
+    }
+  },
+  "navBar": ["zoom", "fullscreen", "home", "location"],
+  "components": ["north-arrow", "overview-map"],
+  "corePackages": [],
+  "externalPackages": []
+}

@@ -1,0 +1,94 @@
+{
+  "schemaVersionUsed": "1,0",
+  "copyrightText": "© His Majesty the King in Right of Canada, as represented by the Minister of Natural Resources",
+  "listOfLayerEntryConfig": [
+    {
+      "layerId": "blank.json",
+      "layerName": "Programs",
+      "source": {
+        "dataAccessPath": "./datasets/geojson/blank.json",
+        "format": "GeoJSON",
+        "featureInfo": {
+          "queryable": true,
+          "nameField": "title_en",
+          "outfields": [
+            { "name": "linkToProject", "alias": "Link to record", "type": "string", "domain": null },
+            { "name": "program", "alias": "Program", "type": "string", "domain": null },
+            { "name": "project_id", "alias": "Project ID", "type": "string", "domain": null },
+            { "name": "title_en", "alias": "Project Title", "type": "string", "domain": null },
+            { "name": "project_leader", "alias": "Project Leader", "type": "string", "domain": null },
+            { "name": "geo_scope", "alias": "Geo Scope", "type": "string", "domain": null }
+          ]
+        }
+      },
+      "layerStyle": {
+        "Polygon": {
+          "type": "uniqueValue",
+          "fields": [ "program" ],
+          "hasDefault": true,
+          "info": [
+            {
+              "label": "CMGD",
+              "values": [ "CMGD" ],
+              "visible": true,
+              "settings": {
+                "type": "filledPolygon",
+                "color": "rgba(228,26,28,0.10)",
+                "paternSize": 10,
+                "paternWidth": 2,
+                "fillStyle": "solid",
+                "stroke": {
+                  "color": "rgba(228,26,28,1)",
+                  "lineStyle": "solid"
+                }
+              }
+            },
+            {
+              "label": "Other programs",
+              "values": [],
+              "visible": true,
+              "settings": {
+                "type": "filledPolygon",
+                "color": "rgba(255,255,51,0.10)",
+                "paternSize": 10,
+                "paternWidth": 2,
+                "fillStyle": "solid",
+                "stroke": {
+                  "color": "rgba(255,255,51,1)",
+                  "lineStyle": "solid"
+                }
+              }
+            }
+          ]
+        },
+        "Point": {
+          "type": "uniqueValue",
+          "fields": [ "program" ],
+          "hasDefault": true,
+          "info": [
+            {
+              "label": "CMGD",
+              "values": [ "CMGD" ],
+              "visible": true,
+              "settings": {
+                "type": "simpleSymbol",
+                "color": "rgba(228,26,28,0.70)",
+                "symbol": "circle"
+              }
+            },
+            {
+              "label": "Other programs",
+              "values": [],
+              "visible": true,
+              "settings": {
+                "type": "simpleSymbol",
+                "color": "rgba(255,255,51,0.70)",
+                "symbol": "circle"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

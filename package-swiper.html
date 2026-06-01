@@ -1,0 +1,48 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Package - Swiper (interactive) - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>Package - Swiper (interactive)</strong></h1></td></tr><tr><td><a href="./index.html">Main</a><br/><a href="#HUC3">1. Layers type Configuration</a><br/></td></tr></tbody></table><table><tbody><tr><td>This page is used to showcase loading "Swiper" package with different configuration.</td></tr></tbody></table></div><div class="map-title-holder"><h4 id="HUC3">1. Layers type Configuration</h4>&nbsp;<h5 id="HUC3-state">(undefined)</h5><a class="ref-link" href="#top">Top</a></div><div id="map1" class="geoview-map" data-lang="en" data-config-url="./configs/package-swiper3-config.json"></div><p>Configuration with supported layers type (WMS, XYZ, WFS, GeoJSON, OGC Feature API and GeoCore)</p><input id="mapWM3Input" placeholder="Type a layer path"/> <button onclick="addSwiper()">Add swiper functionality</button> <button onclick="removeSwiper()">Remove swiper functionality</button> <button onclick="removeSwiperAll()">Remove all swiper functionalities</button> <button onclick="toggleOrinataion()">Toggle orientation</button><ul><li>swipe0/0</li><li>swipe1/msi-94-or-more</li><li>swipe4/polygons.json</li><li>swipe5/ec-msc:CURRENT_CONDITIONS</li><li>swipe6/lakes</li><li>ccc75c12-5acc-4a6a-959f-ef6f621147b9/0</li></ul><hr/><script src="codedoc.js"></script><script>// Register handler when map has been initialized
+      cgpv.onMapInit((mapViewer) => {
+        if (mapViewer.mapId === 'map1') {
+          // Hook when the layers will be loaded
+          mapViewer.onMapLayersLoaded(() => {
+            // TODO: Check - Why delay it here? Safe to remove?
+            window.setInterval(() => {
+              const displayField1 = document.getElementById('HUC3-state');
+              const featureInfoLayerSet = mapViewer.layer.featureInfoLayerSet.resultSet;
+              if (featureInfoLayerSet) {
+                const output = Object.keys(featureInfoLayerSet).reduce((outputValue, layerId) => {
+                  const { layerStatus } = featureInfoLayerSet[layerId];
+                  return `${outputValue}${layerId.split('/')[layerId.split('/').length - 1]} - status: ${layerStatus}, `;
+                }, '(');
+                displayField1.textContent = output && output !== '(' ? `${output.slice(0, -2)})` : '(undefined)';
+              } else displayField1.textContent = '(undefined)';
+            }, 250);
+          });
+        }
+      });
+
+      // initialize cgpv
+      cgpv.init();
+
+      function addSwiper() {
+        cgpv.api.getMapViewer('map1').plugins['swiper'].activateForLayer(document.getElementById('mapWM3Input').value);
+      }
+
+      function removeSwiper() {
+        cgpv.api.getMapViewer('map1').plugins['swiper'].deActivateForLayer(document.getElementById('mapWM3Input').value);
+      }
+
+      function removeSwiperAll() {
+        cgpv.api.getMapViewer('map1').plugins['swiper'].deActivateAll();
+      }
+
+      let orientation = 'vertical';
+      function toggleOrinataion() {
+        const newOrientation = orientation === 'horizontal' ? 'vertical' : 'horizontal';
+        cgpv.api.getMapViewer('map1').plugins['swiper'].setOrientation(newOrientation);
+        orientation = newOrientation;
+      }
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });</script></body></html>

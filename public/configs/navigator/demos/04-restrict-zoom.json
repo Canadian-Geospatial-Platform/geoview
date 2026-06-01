@@ -1,0 +1,18 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "minZoom": 6,
+      "maxZoom": 8,
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": true,
+      "labeled": true
+    }
+  },
+  "components": ["overview-map", "north-arrow"],
+  "corePackages": [],
+  "theme": "geo.ca"
+}

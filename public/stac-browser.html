@@ -1,0 +1,38 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Package - STAC Browser (beta) - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div id="page-header"></div><div><div class="back-to-main"><a href="./index.html?tab=demos">← Back to Main</a></div><div class="demo-section"><h4>Package - STAC Browser (beta)</h4><p>This page is used to showcase the "STAC Browser" package for browsing and filtering STAC API catalogs.</p></div></div><div id="mapSTAC" class="geoview-map" data-lang="en" data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'projection': 3978,
+            'initialView': {
+            'zoomAndCenter': [4, [-90, 60]]
+            }
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': false,
+            'labeled': true
+          }
+        },
+        'appBar': {
+          'tabs': {
+            'core': ['stac-browser']
+          }
+        },
+        'navBar': ['zoom', 'rotation', 'fullscreen', 'home', 'location', 'measurement', 'basemap-select', 'projection'],
+        'corePackagesConfig': [{
+          'stac-browser': {
+            'stacUrl': 'https://datacube.services.geo.ca/stac/api',
+            'filters': {
+              'collections': true,
+              'temporal': true,
+              'spatial': true,
+              'keyword': true
+            },
+            'defaults': {
+              'limit': 20
+            },
+            'displayPreview': true,
+            'isOpen': true
+          }
+        }]
+      }"></div><script src="./js/page-header.js"></script><script>cgpv.init();</script></body></html>

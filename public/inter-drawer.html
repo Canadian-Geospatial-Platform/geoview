@@ -1,0 +1,154 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Multi-Map Drawer Keyboard Test - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><link rel="stylesheet" href="css/style.css"/><script src="codedoc.js"></script><style>.maps-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin: 20px 0;
+      }
+      .map-wrapper {
+        padding: 10px;
+        transition: border-color 0.3s;
+      }
+      .map-wrapper:focus-within {
+        border-color: #2196f3;
+      }
+      .map-wrapper h5 {
+        margin: 0 0 10px 0;
+        color: #333;
+      }
+      .geoview-map {
+        height: 600px !important;
+      }
+      .keyboard-shortcuts {
+        background: #fff3cd;
+        padding: 15px;
+        border-radius: 4px;
+        margin: 20px 0;
+        border-left: 4px solid #ffc107;
+      }
+      .keyboard-shortcuts code {
+        background: #e9ecef;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-family: monospace;
+      }</style><script src="cgpv-main.js"></script></head><body><div id="page-header"></div><div><div class="back-to-main"><a href="./index.html?tab=demos">← Back to Main</a></div><div class="demo-section"><h4>Multi-Map Drawer Keyboard Interaction Test</h4><p>This page demonstrates keyboard shortcuts and crosshair interactions with the drawer plugin across multiple maps. Each map has independent drawer state, and shortcuts should only affect the currently focused map.</p></div></div><div class="demo-section"><h4>Test Maps</h4></div><div class="maps-container"><div class="map-wrapper"><h5>Map 1 (Transport Basemap)</h5><div id="map1" class="geoview-map" data-lang="en" data-config="{
+            'map': {
+              'interaction': 'dynamic',
+              'viewSettings': {
+                'initialView': {
+                  'zoomAndCenter': [4, [-95, 60]]
+                },
+                'projection': 3857
+              },
+              'basemapOptions': {
+                'basemapId': 'transport',
+                'shaded': false,
+                'labeled': true
+              }
+            },
+            'theme': 'geo.ca',
+            'components': ['north-arrow', 'overview-map'],
+            'corePackages': [],
+            'corePackagesConfig': [
+              {
+                'drawer': {
+                  'style': {
+                      'fillColor': 'rgba(252, 241, 0, 0.3)',
+                      'strokeColor': '#000000',
+                      'strokeWidth': 1.3
+                  },
+                  'activeGeom': 'LineString',
+                  'geomTypes': [
+                      'Point',
+                      'Text',
+                      'LineString',
+                      'Polygon',
+                      'Rectangle',
+                      'Circle',
+                      'Star'
+                  ],
+                  'hideMeasurements': false
+                }
+              }
+            ],
+            'footerBar': {
+              'tabs': {
+                'core': []
+              }
+            },
+            'appBar': {
+              'tabs': {
+                'core': []
+              }
+            },
+            'navBar': [
+              'basemap-select',
+              'projection',
+              'fullscreen',
+              'drawer'
+            ]
+          }"></div></div><div class="map-wrapper"><h5>Map 2 (Simple Basemap)</h5><div id="map2" class="geoview-map" data-lang="en" data-config="{
+            'map': {
+              'interaction': 'dynamic',
+              'viewSettings': {
+                'initialView': {
+                  'zoomAndCenter': [4, [-75, 45]]
+                },
+                'projection': 3857
+              },
+              'basemapOptions': {
+                'basemapId': 'simple',
+                'shaded': false,
+                'labeled': true
+              }
+            },
+            'theme': 'dark',
+            'components': ['north-arrow', 'overview-map'],
+            'corePackages': [],
+            'corePackagesConfig': [
+              {
+                'drawer': {
+                  'style': {
+                      'fillColor': 'rgba(252, 241, 0, 0.3)',
+                      'strokeColor': '#000000',
+                      'strokeWidth': 1.3
+                  },
+                  'activeGeom': 'LineString',
+                  'geomTypes': [
+                      'Point',
+                      'Text',
+                      'LineString',
+                      'Polygon',
+                      'Rectangle',
+                      'Circle',
+                      'Star'
+                  ],
+                  'hideMeasurements': false
+                }
+              }
+            ],
+            'footerBar': {
+              'tabs': {
+                'core': []
+              }
+            },
+            'appBar': {
+              'tabs': {
+                'core': []
+              }
+            },
+            'navBar': [
+                'basemap-select',
+                'projection',
+                'fullscreen',
+                'drawer'
+            ]
+          }"></div></div></div><hr/><div class="keyboard-shortcuts"><h4>Keyboard Shortcuts Reference</h4><p><strong>Enable Shortcuts:</strong> Press <code>`</code> (backtick) when a GeoView element is focused to toggle keyboard shortcuts on/off</p><p><strong>When shortcuts are enabled:</strong></p><ul><li><code>D</code> - Toggle Drawing mode</li><li><code>E</code> - Toggle Editing mode</li><li><code>G</code> - Cycle geometry type forward</li><li><code>Shift+G</code> - Cycle geometry type backward</li><li><code>S</code> - Open style menu</li><li><code>M</code> - Toggle measurements</li><li><code>N</code> - Toggle snapping</li><li><code>Shift+C</code> - Clear all drawings</li><li><code>Shift+S</code> - Save / Download drawings</li><li><code>Shift+O</code> - Open / Upload drawings</li></ul><p><strong>Always available within GeoView Element:</strong></p><ul><li><code>Ctrl+Z</code> - Undo</li><li><code>Ctrl+Y</code> or <code>Ctrl+Shift+Z</code> - Redo</li><li><code>Escape</code> - Clear selection/exit editing</li></ul><p><strong>Crosshair mode (Ctrl+Alt+M):</strong></p><ul><li><code>Enter</code> or <code>Space</code> - Add drawing vertex / Select feature for editing</li><li><code>Shift+Enter</code> or <code>Shift+Space</code> - Finish drawing (While Drawing) or Delete vertex / Open text editor (While Editing)</li><li><code>Escape</code> - Cancel grabbed handle</li><li><code>Ctrl+↑</code> - Zoom in</li><li><code>Ctrl+↓</code> - Zoom out</li><li><code>Shift+↑</code> - Increase pan delta</li><li><code>Shift+↓</code> - Decrease pan delta</li></ul></div><hr/><button type="button" class="collapsible">Code Snippet</button><pre id="codeSnippet" class="panel"></pre><script>insertPageHeader();
+
+      // Initialize cgpv
+      cgpv.init();
+
+      // Create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });</script></body></html>

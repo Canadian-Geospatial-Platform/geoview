@@ -1,0 +1,122 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Outlier Geometry Layers - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>Outlier Geometry Layers</strong></h1></td></tr></tbody></table><table><tbody><tr><td><a href="./index.html">Main</a><br/><a href="./outliers.html">Outlier Layers</a><br/></td></tr><tr><td><p>This page is used to showcase layers with unusual geometries or features</p></td></tr><tr><td><a href="#Hmap1">1. Outlier Geometry Layers</a><br/></td></tr></tbody></table></div><div class="map-title-holder"><h4 id="Hmap1">1. Outlier Geometry Layers</h4><a class="ref-link" href="#top">Top</a></div><button class="collapsible active">Layers Status</button><pre id="Hmap1-state" class="panel map-title-holder"></pre><hr/><div id="map1" class="geoview-map" data-lang="fr" data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'projection': 3978
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': false,
+            'labeled': true
+          },
+          'listOfGeoviewLayerConfig': [
+            {
+              'geoviewLayerId': 'EPSG:4617',
+              'geoviewLayerName': 'CSRS Layer (EPSG: 4617)',
+              'metadataAccessPath': 'https://data.sac-isc.gc.ca/geomatics/rest/services/Donnees_Ouvertes-Open_Data/Communaute_inuite_Inuit_Community/MapServer',
+              'geoviewLayerType': 'esriDynamic',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '0',
+                  'layerName': 'CSRS Layer',
+                  'initialSettings': {
+                    'states': {
+                      'visible': true
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              'geoviewLayerId': 'geojsonlyr1',
+              'geoviewLayerName': 'Multi Polygon Layer',
+              'geoviewLayerType': 'GeoJSON',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': 'multipolygons',
+                  'layerName': 'Multi Polygon Layer',
+                  'initialSettings': {
+                    'states': {
+                      'visible': false
+                    }
+                  },
+                  'source': {
+                    'dataAccessPath': './datasets/geojson/multipolygons.geojson'
+                  }
+                }
+              ]
+            },
+            {
+              'geoviewLayerId': 'featureInfo',
+              'geoviewLayerName': 'Coral Sponge 2016',
+              'metadataAccessPath': 'https://gisp.dfo-mpo.gc.ca/arcgis/rest/services/FGP/KDE_Analyses_Coral_Sponge_2016_EN/MapServer',
+              'geoviewLayerType': 'esriDynamic',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '0',
+                  'layerName': 'Coral Sponge 2016',
+                  'initialSettings': {
+                    'states': {
+                      'visible': false
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              'geoviewLayerId': 'cpcad',
+              'geoviewLayerName': 'Protected and conserved area',
+              'metadataAccessPath': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CWS_SCF/CPCAD/MapServer/',
+              'geoviewLayerType': 'esriDynamic',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '0',
+                  'layerName': 'Protected and conserved area',
+                  'initialSettings': {
+                    'states': {
+                      'visible': false
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              'geoviewLayerId': 'layerDef',
+              'geoviewLayerName': 'IACC FR',
+              'metadataAccessPath': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/IAAC/assessment_inventory_fr/MapServer/',
+              'geoviewLayerType': 'esriDynamic',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '0',
+                  'layerName': 'IACC FR',
+                  'initialSettings': {
+                    'states': {
+                      'visible': true
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        'components': ['overview-map'],
+        'footerBar': {
+          'tabs': {
+            'core': ['legend', 'layers', 'details', 'data-table']
+          }
+        },
+        'corePackages': [],
+        'theme': 'geo.ca'
+      }"></div><hr/><div>Outlier Geometry Layers:<ul><li>CSRS Layer - EPSG: 4617 - Issue #1798</li><li>Multi Polygon Layer - Ensure multi polygon is working - Issue #550</li><li>Coral Sponge - had issues with get feature info - Issue #1996</li><li>Protected and conserved area - esri dynamic data table not fetching because of geometry in url - Issue #2200</li><li>Impact Assessment Agency of Canada – Environmental and Impact Assessments (French) - esri layer definition character in French - Issue #2413</li></ul></div><script src="codedoc.js"></script><script>// Register handler when map has been initialized
+      cgpv.onMapInit((mapViewer) => {
+        listenToLegendLayerSetChanges(`H${mapViewer.mapId}-state`, mapViewer);
+      });
+
+      // initialize cgpv
+      cgpv.init();
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });</script></body></html>

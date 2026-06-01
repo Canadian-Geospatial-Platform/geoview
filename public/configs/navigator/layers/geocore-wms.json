@@ -1,0 +1,70 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": true,
+      "labeled": false
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerType": "geoCore",
+        "geoviewLayerId": "4e615eae-b90c-420b-adee-2ca35896caf6"
+      },
+      {
+        "geoviewLayerType": "geoCore",
+        "geoviewLayerId": "f129611d-7ca1-418b-8390-ebac5adf958e"
+      },
+      {
+        "geoviewLayerType": "geoCore",
+        "geoviewLayerId": "a4b190fe-e090-4e6d-881e-b87956c07977"
+      },
+      {
+        "geoviewLayerType": "geoCore",
+        "geoviewLayerId": "7a5cda52-c7df-427f-9ced-26f19a8a64d6"
+      },
+      {
+        "geoviewLayerType": "geoCore",
+        "geoviewLayerId": "d8fa9a38-c4df-442a-8319-9bbcbdc29060"
+      },
+      {
+        "geoviewLayerType": "geoCore",
+        "geoviewLayerId": "0fe65119-e96e-4a57-8bfe-9d9245fba06b"
+      },
+      {
+        "geoviewLayerType": "geoCore",
+        "geoviewLayerId": "df106e11-4cee-425d-bd38-7e51ac674128"
+      },
+      {
+        "geoviewLayerType": "geoCore",
+        "geoviewLayerId": "cf29bdb2-bbdb-48c3-b09f-118600801836"
+      },
+      {
+        "geoviewLayerType": "geoCore",
+        "geoviewLayerId": "d7b177e0-274a-4be9-b69a-2030faf83c78"
+      },
+      {
+        "geoviewLayerType": "geoCore",
+        "geoviewLayerId": "d708877c-56b8-4255-99e3-3c4abc54597d"
+      }
+    ]
+  },
+  "components": ["overview-map", "north-arrow"],
+  "overviewMap": { "hideOnZoom": 7 },
+  "footerBar": {
+    "tabs": {
+      "core": ["layers", "data-table", "time-slider"]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca",
+  "appBar": {
+    "tabs": {
+      "core": ["geolocator", "legend", "details", "export"]
+    }
+  },
+  "navBar": ["zoom", "rotation", "fullscreen", "home", "location", "measurement", "basemap-select", "projection"]
+}

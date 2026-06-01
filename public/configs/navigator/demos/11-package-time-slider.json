@@ -1,0 +1,139 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "ESRIImageCrop",
+        "geoviewLayerName": "Weekly NDVI (issue with server?)",
+        "geoviewLayerType": "esriImage",
+        "metadataAccessPath": "https://agriculture.canada.ca/imagery-images/rest/services/agextent_mod_anomaly_best_quality_max_ndvi_weekly/ImageServer",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "annual_crop_inventory_2022"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "napl",
+        "geoviewLayerName": "NAPL",
+        "metadataAccessPath": "https://datacube.services.geo.ca/web/napl-ontario-ring-of-fire.xml",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "ontario-ring-of-fire",
+            "layerName": "Ontario ring of fire"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "historical-flood-dynamic",
+        "geoviewLayerName": "Hist. Flood - EsriDynamic",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "historical-flood-feature",
+        "geoviewLayerName": "Hist. Flood - EsriFeature",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer",
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "initialSettings": {
+              "states": {
+                "visible": false
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "historical-flood-wms",
+        "geoviewLayerName": "Hist. Flood - WMS",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/services/NRCan/historical_flood_event_en/MapServer/WMSServer",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "initialSettings": {
+              "states": {
+                "visible": false
+              }
+            }
+          }
+        ]
+      },
+       {
+        "geoviewLayerId": "archive-flood-wms",
+        "geoviewLayerName": "Archive Flood - WMS CDTK",
+        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/EGS_Flood_Archive_DEV_en?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "egs_flood_archive_dev_en",
+            "initialSettings": {
+              "states": {
+                "visible": false
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "wmsLYR1-spatiotemporel",
+        "geoviewLayerName": "Spatiotemporel",
+        "metadataAccessPath": "https://geo.weather.gc.ca/geomet",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "RADAR_1KM_RSNO",
+            "layerName": "Test Spatiotemporel"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "MSI",
+        "geoviewLayerName": "MSI",
+        "metadataAccessPath": "https://datacube.services.geo.ca/ows/msi",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "msi-94-or-more",
+            "source": {
+              "wmsStyle": ["msi-binary"]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "theme": "geo.ca",
+  "appBar": {
+    "tabs": {
+      "core": ["geolocator", "legend", "details", "export"]
+    }
+  },
+  "components": ["north-arrow", "overview-map"],
+  "footerBar": {
+    "tabs": {
+      "core": ["layers", "data-table", "time-slider"]
+    },
+    "selectedTab": "time-slider",
+    "selectedTimeSliderLayerPath": "historical-flood-dynamic/0"
+  },
+  "corePackages": [],
+  "externalPackages": []
+}

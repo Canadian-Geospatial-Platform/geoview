@@ -1,0 +1,17 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    }
+  },
+  "navBar": ["measurement"],
+  "components": ["overview-map", "north-arrow"],
+  "corePackages": [],
+  "theme": "geo.ca"
+}

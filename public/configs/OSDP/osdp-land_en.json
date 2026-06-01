@@ -1,0 +1,118 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "initialView": {
+        "zoomAndCenter": [
+          9,
+          [
+            -113.376,
+            57.86
+          ]
+        ]
+      },
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": true,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "0a309f2c-4f11-4ddb-bce1-e7ba6f8c20cf",
+        "geoviewLayerName": "Stories from the land: Indigenous Place Names in Canada",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/indigenous_place_names_en/MapServer",
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "layerName": "Indigenous Place Names",
+            "layerText": {
+              "field": "off_name_en",
+              "fontSize": 12,
+              "placement": "point",
+              "textBaseline": "bottom",
+              "offsetY": -12,
+              "fill": "#000000",
+              "haloColor": "rgba(255, 255, 255, 0.7)",
+              "haloWidth": 4,
+              "declutterMode": "declutter",
+              "minZoomLevel": 5
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "ee1580ab-a23d-4f86-a09b-79763677eb47",
+        "geoviewLayerType": "geoCore",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "landcover-2020",
+            "layerName": "2020 Land Cover of Canada",
+            "initialSettings": {
+              "states": {
+                "legendCollapsed": true
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "4e615eae-b90c-420b-adee-2ca35896caf6",
+        "geoviewLayerName": "2015 Land Cover of Canada",
+        "geoviewLayerType": "geoCore",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "landcover-2015",
+            "layerName": "2015 Land Cover of Canada"
+          }
+        ]
+      }
+    ]
+  },
+  "components": [
+    "north-arrow",
+    "overview-map"
+  ],
+  "navBar": [
+    "zoom",
+    "fullscreen",
+    "home",
+    "location",
+    "basemap-select"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "layers",
+        "data-table"
+      ]
+    }
+  },
+  "corePackages": [
+    "swiper"
+  ],
+  "theme": "geo.ca",
+  "corePackagesConfig": [
+    {
+      "swiper": {
+        "orientation": "vertical",
+        "keyboardOffset": 10,
+        "layers": [
+          "ee1580ab-a23d-4f86-a09b-79763677eb47"
+        ]
+      }
+    }
+  ]
+}

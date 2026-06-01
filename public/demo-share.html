@@ -1,0 +1,201 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Share Function Demo - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div id="page-header"></div><div><div class="back-to-main"><a href="./index.html?tab=specific-demos">← Back to Main</a></div><div class="demo-section"><h4>Share Function Demo</h4><p>This page demonstrates the share functionality using URL parameters with data-shared present on the map div.</p><div style="background-color: #f5f5f5; padding: 15px; margin-top: 15px; border-left: 4px solid #2196f3"><h5 style="margin-top: 0">How It Works:</h5><ul style="margin-bottom: 0"><li><strong>Configuration Merging:</strong> The map uses the base configuration defined in <strong>data-config</strong> OR <strong>data-config-url</strong> on the map div. URL parameters selectively update specific properties without replacing the entire config.</li><li><strong>Share Button:</strong> The Share button appears automatically because <strong>data-shared</strong> attribute is present on the map div.</li><li><strong>URL Parameters:</strong> When applying a share URL, the following properties are updated:<ul><li><strong>p</strong> - Projection (e.g., 3857, 3978)</li><li><strong>z</strong> - Zoom level</li><li><strong>c</strong> - Center coordinates (lon,lat in EPSG:4326)</li><li><strong>b</strong> - Basemap options (basemapId, shaded, labeled)</li><li><strong>keys</strong> - Layer UUIDs to add (comma-separated)</li></ul></li><li><strong>Layer Behavior:</strong> Layers from URL parameters (<strong>keys</strong>) are <strong>appended</strong> to existing layers defined in <strong>data-config</strong> OR <strong>data-config-url</strong>. Base config layers are preserved, not replaced.</li><li><strong>Example:</strong> If the base config has layer A, and the URL has keys=B,C, the final map will display layers A, B, and C.</li></ul></div></div><div class="demo-section"><h5>Static Demo Share URL</h5><textarea id="static-url-input" readonly="readonly" rows="6" style="width: 100%; padding: 8px; margin-bottom: 10px; font-family: monospace; resize: vertical"></textarea><div class="toolbar"><button class="btn btn-primary" id="apply-static-share-btn">Apply Static Share URL</button></div></div><div class="demo-section"><h5>Clipboard Share URL</h5><textarea id="clipboard-url-input" rows="6" style="width: 100%; padding: 8px; margin-bottom: 10px; font-family: monospace; resize: vertical" placeholder="No URL in clipboard yet..."></textarea><div class="toolbar"><button class="btn btn-primary" id="apply-clipboard-btn">Apply Clipboard URL</button></div></div><div class="demo-section"><div class="toolbar"><button class="btn btn-secondary" id="clear-url-btn">Clear URL Parameters</button></div></div></div><div id="Map1" class="geoview-map" data-lang="en" data-shared data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'projection': 3978
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': true,
+            'labeled': true
+          },
+          'listOfGeoviewLayerConfig': [
+            {
+              'geoviewLayerType': 'geoCore',
+              'geoviewLayerId': 'ccc75c12-5acc-4a6a-959f-ef6f621147b9'
+            }
+          ]
+        },
+        'navBar': ['zoom', 'rotation','fullscreen', 'home', 'location', 'measurement', 'basemap-select', 'projection'],
+        'appBar': {
+          'tabs': {
+            'core': ['geolocator', 'legend', 'details', 'export']
+          },
+          'selectedTab': 'legend'
+        },
+        'footerBar': {
+          'tabs': {
+            'core': ['layers', 'data-table', 'geochart', 'time-slider']
+          }
+        },
+        'components': ['north-arrow', 'overview-map'],
+        'theme': 'geo.ca',
+        'corePackages': [],
+        'externalPackages': []
+      }"></div><button type="button" class="collapsible">Configuration Snippet</button><pre id="Map1CS" class="panel"></pre><script src="codedoc.js"></script><script>insertPageHeader();
+
+      /**
+       * Example share URL with all supported parameters:
+       * - p: Projection code (3857, 3978, etc.)
+       * - z: Zoom level (integer)
+       * - c: Center coordinates as lon,lat in EPSG:4326
+       * - b: Basemap options as id:value,s:on/off,l:on/off
+       * - keys: Comma-separated list of GeoCore layer UUIDs to add
+       *
+       * How the URL parameters work:
+       * 1. The base configuration from data-config is used as the foundation
+       * 2. URL parameters selectively override specific properties:
+       *    - Projection is updated to the 'p' value
+       *    - Initial view (zoom and center) is updated to 'z' and 'c' values
+       *    - Basemap options are updated to the 'b' values
+       *    - Layers from 'keys' parameter are APPENDED to existing config layers
+       * 3. All base config layers are preserved - URL layers are added, not replaced
+       * 4. The Share button is enabled because data-shared attribute is present on the map div
+       */
+      const share =
+        '?p=3857&z=4&c=-100,40&b=id:transport,s:off,l:on&keys=0fca08b5-e9d0-414b-a3c4-092ff9c5e326,21b821cf-0f1c-40ee-8925-eab12d357668,fe83a604-aa5a-4e46-903c-685f8b0cc33c';
+
+      // Add event listeners when DOM is loaded
+      window.addEventListener('load', () => {
+        // Function to format URL with parameters on separate lines
+        const formatUrl = (url) => {
+          try {
+            const urlObj = new URL(url);
+            const baseUrl = urlObj.origin + urlObj.pathname;
+            const params = urlObj.searchParams;
+
+            if (params.toString()) {
+              const paramLines = [];
+              params.forEach((value, key) => {
+                paramLines.push(`${key}=${value}`);
+              });
+              return baseUrl + '?\n  ' + paramLines.join('\n  &');
+            }
+            return baseUrl;
+          } catch (e) {
+            return url;
+          }
+        };
+
+        // Populate the static URL input
+        const staticUrlInput = document.getElementById('static-url-input');
+        const staticUrl = window.location.origin + window.location.pathname + share;
+        staticUrlInput.value = formatUrl(staticUrl);
+
+        // Apply static share URL button
+        document.getElementById('apply-static-share-btn').addEventListener('click', function () {
+          // Remove all line breaks and trim whitespace around URL delimiters
+          const staticUrl = staticUrlInput.value
+            .replace(/[\n\r]/g, '') // Remove all newlines
+            .replace(/\s+&/g, '&') // Remove spaces before &
+            .replace(/\?\s+/g, '?') // Remove spaces after ?
+            .replace(/=\s+/g, '=') // Remove spaces after =
+            .replace(/\s+=/g, '='); // Remove spaces before =
+          if (staticUrl) {
+            try {
+              const urlObj = new URL(staticUrl);
+              // Security: Only allow http and https protocols
+              if (urlObj.protocol !== 'http:' && urlObj.protocol !== 'https:') {
+                alert('Invalid URL protocol. Only HTTP and HTTPS are allowed.');
+                return;
+              }
+              // Use the validated URL object's href property
+              window.location.href = urlObj.href;
+            } catch (e) {
+              alert('Invalid URL. Please check the URL format.');
+            }
+          }
+        });
+
+        // Clipboard URL handling
+        const clipboardUrlInput = document.getElementById('clipboard-url-input');
+        let lastClipboardText = '';
+
+        // Initialize lastClipboardText with current clipboard content (but don't display it)
+        navigator.clipboard.readText().then(
+          (text) => {
+            if (text && text.includes(window.location.pathname)) {
+              lastClipboardText = text;
+            }
+          },
+          (err) => console.log('Could not read clipboard:', err)
+        );
+
+        // Function to check clipboard for NEW share URLs only
+        const checkClipboard = () => {
+          // Only read clipboard when document is focused (required by browser security)
+          if (!document.hasFocus()) return;
+
+          navigator.clipboard.readText().then(
+            (text) => {
+              // Only update if clipboard has NEW content (different from last known value)
+              if (text && text !== lastClipboardText && text.includes(window.location.pathname)) {
+                try {
+                  // Validate URL before processing (security: ensures text is a valid URL)
+                  new URL(text);
+                  lastClipboardText = text;
+                  // Safe: .value on textarea doesn't interpret HTML, it sets plain text content
+                  clipboardUrlInput.value = formatUrl(text);
+                } catch (e) {
+                  // Invalid URL, ignore
+                  console.log('Clipboard contains invalid URL:', e);
+                }
+              }
+            },
+            (err) => console.log('Could not read clipboard:', err)
+          );
+        };
+
+        // Poll clipboard every 500ms to detect Share > Copy
+        setInterval(checkClipboard, 500);
+
+        // Also check clipboard when window regains focus (faster response after clicking Share > Copy)
+        window.addEventListener('focus', checkClipboard);
+
+        // Check clipboard when user clicks anywhere on the page (they're likely back after copying)
+        document.addEventListener('click', checkClipboard);
+
+        // Apply clipboard URL button
+        document.getElementById('apply-clipboard-btn').addEventListener('click', function () {
+          // Remove all line breaks and trim whitespace around URL delimiters
+          const clipboardUrl = clipboardUrlInput.value
+            .replace(/[\n\r]/g, '') // Remove all newlines
+            .replace(/\s+&/g, '&') // Remove spaces before &
+            .replace(/\?\s+/g, '?') // Remove spaces after ?
+            .replace(/=\s+/g, '=') // Remove spaces after =
+            .replace(/\s+=/g, '='); // Remove spaces before =
+          if (clipboardUrl) {
+            try {
+              const urlObj = new URL(clipboardUrl); // Validate URL
+              // Security: Only allow http and https protocols
+              if (urlObj.protocol !== 'http:' && urlObj.protocol !== 'https:') {
+                alert('Invalid URL protocol. Only HTTP and HTTPS are allowed.');
+                return;
+              }
+              // Use the validated URL object's href property
+              window.location.href = urlObj.href;
+            } catch (e) {
+              alert('Invalid URL. Please check the URL format.');
+            }
+          } else {
+            alert('No URL found. Please enter or paste a share URL first.');
+          }
+        });
+
+        // Clear URL parameters button
+        document.getElementById('clear-url-btn').addEventListener('click', function () {
+          // Clear the clipboard to prevent repopulation
+          navigator.clipboard.writeText('').catch(() => {});
+          // Remove all URL parameters and reload the page
+          window.location.href = window.location.pathname;
+        });
+      });
+
+      // initialize cgpv
+      cgpv.init();
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });</script></body></html>

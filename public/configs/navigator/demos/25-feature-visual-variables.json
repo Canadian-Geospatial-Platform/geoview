@@ -1,0 +1,134 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId":"WindDirection",
+        "geoviewLayerName":"Wind Direction with rotation",
+        "metadataAccessPath":"https://services9.arcgis.com/RHVPKKiFTONKtxq3/ArcGIS/rest/services/NOAA_METAR_current_wind_speed_direction_v1/FeatureServer",
+        "geoviewLayerType":"esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+              "layerId":"0"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "historical-flood",
+        "geoviewLayerName": "Variable Size Opacity and Color by field value",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer",
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "layerStyle": {
+              "Point": {
+                "type": "simple",
+                "fields": [],
+                "hasDefault": false,
+                "info": [
+                  {
+                    "visible": true,
+                    "values": [],
+                    "settings": {
+                      "type": "simpleSymbol",
+                      "rotation": 0,
+                      "color": "rgba(0,255,0,0)",
+                      "stroke": {
+                        "color": "rgba(0,0,0,1)",
+                        "lineStyle": "solid",
+                        "width": 1
+                      },
+                      "size": 4,
+                      "symbol": "circle",
+                      "offset": [
+                        0,
+                        0
+                      ]
+                    }
+                  }
+                ],
+                "visualVariables": [
+                  {
+                    "type": "colorInfo",
+                    "field": "OBJECTID",
+                    "stops": [
+                      {
+                        "value": 1,
+                        "color": [
+                          255,
+                          0,
+                          0,
+                          255
+                        ]
+                      },
+                      {
+                        "value": 1684,
+                        "color": [
+                          0,
+                          0,
+                          255,
+                          255
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "sizeInfo",
+                    "field": "OBJECTID",
+                    "stops": [
+                      {
+                        "value": 1,
+                        "size": 8
+                      },
+                      {
+                        "value": 1684,
+                        "size": 16
+                      }
+                    ]
+                  },
+                  {
+                    "type": "opacityInfo",
+                    "field": "OBJECTID",
+                    "stops": [
+                      {
+                        "value": 1,
+                        "opacity": 0.5
+                      },
+                      {
+                        "value": 1684,
+                        "opacity": 1
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "components": ["overview-map", "north-arrow"],
+  "overviewMap": { "hideOnZoom": 7 },
+  "footerBar": {
+    "tabs": {
+      "core": ["layers", "data-table"]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca",
+  "appBar": {
+    "tabs": {
+      "core": ["geolocator", "legend", "details", "export"]
+    }
+  }
+}

@@ -1,0 +1,916 @@
+<svg host="65bd71144e" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="843px" height="903px" viewBox="-0.5 -0.5 843 903" content="&lt;mxfile&gt;&lt;diagram id=&quot;vpRrH3L3aNmysDyzQwQT&quot; name=&quot;Page-1&quot;&gt;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&lt;/diagram&gt;&lt;/mxfile&gt;" style="background-color: rgb(255, 255, 255);">
+    <defs/>
+    <g>
+        <rect x="596" y="234" width="220" height="460" fill="none" stroke="#000000" stroke-width="3" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility" style="overflow: visible; text-align: left;">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe flex-start; justify-content: unsafe center; width: 218px; height: 1px; padding-top: 241px; margin-left: 597px;">
+                        <div data-drawio-colors="color: #000000; " style="box-sizing: border-box; font-size: 0px; text-align: center;">
+                            <div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; pointer-events: all; white-space: normal; overflow-wrap: normal;">
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px;">
+                                    <font style="font-size: 12px;">
+                                        FeatureInfoLayerSet
+                                    </font>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="706" y="253" fill="#000000" font-family="Helvetica" font-size="12px" text-anchor="middle">
+                    FeatureInfoLayerSet
+                </text>
+            </switch>
+        </g>
+        <rect x="616" y="274" width="180" height="140" fill="none" stroke="#0000ff" stroke-width="3" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility" style="overflow: visible; text-align: left;">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe flex-start; justify-content: unsafe center; width: 178px; height: 1px; padding-top: 281px; margin-left: 617px;">
+                        <div data-drawio-colors="color: #000000; " style="box-sizing: border-box; font-size: 0px; text-align: center;">
+                            <div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; pointer-events: all; white-space: normal; overflow-wrap: normal;">
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <font style="font-size: 11px;">
+                                        LayerSet
+                                    </font>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <font style="font-size: 11px;">
+                                        constructor(
+                                        <span lang="EN-CA" style="">
+                                            mapId, layerSetId, …
+                                        </span>
+                                        )
+                                    </font>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="706" y="293" fill="#000000" font-family="Helvetica" font-size="12px" text-anchor="middle">
+                    LayerSet...
+                </text>
+            </switch>
+        </g>
+        <path d="M 706 394 L 706 427.63" fill="none" stroke="#000000" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 706 432.88 L 702.5 425.88 L 706 427.63 L 709.5 425.88 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10" pointer-events="all"/>
+        <rect x="636" y="324" width="140" height="70" fill="none" stroke="#0000ff" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility" style="overflow: visible; text-align: left;">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe flex-start; justify-content: unsafe center; width: 138px; height: 1px; padding-top: 325px; margin-left: 637px;">
+                        <div data-drawio-colors="color: #000000; " style="box-sizing: border-box; font-size: 0px; text-align: center;">
+                            <div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; pointer-events: all; white-space: normal; overflow-wrap: normal;">
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <font style="font-size: 11px;">
+                                        On
+                                    </font>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <span lang="EN-CA" style="">
+                                        <font style="font-size: 11px;">
+                                            LayerSet
+                                        </font>
+                                    </span>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <font style="font-size: 11px;">
+                                        <span style="background-color: initial;">
+                                            Layer_registration
+                                        </span>
+                                        <br/>
+                                    </font>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <font style="font-size: 11px;">
+                                        <br/>
+                                        (mapId)
+                                    </font>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="706" y="337" fill="#000000" font-family="Helvetica" font-size="12px" text-anchor="middle">
+                    On...
+                </text>
+            </switch>
+        </g>
+        <rect x="6" y="4" width="830" height="890" fill="none" stroke="#000000" pointer-events="all"/>
+        <rect x="1" y="1" width="840" height="900" fill="none" stroke="#000000" stroke-width="3" pointer-events="all"/>
+        <path d="M 366 594 L 328.37 594" fill="none" stroke="#000000" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 323.12 594 L 330.12 590.5 L 328.37 594 L 330.12 597.5 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10" pointer-events="all"/>
+        <ellipse cx="416" cy="229" rx="110" ry="35" fill="none" stroke="#000000" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility" style="overflow: visible; text-align: left;">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe flex-start; justify-content: unsafe center; width: 218px; height: 1px; padding-top: 190px; margin-left: 307px;">
+                        <div data-drawio-colors="color: #000000; " style="box-sizing: border-box; font-size: 0px; text-align: center;">
+                            <div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; pointer-events: all; white-space: normal; overflow-wrap: normal;">
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <span lang="EN-CA" style="">
+                                        <font style="font-size: 11px;">
+                                            Emit
+                                        </font>
+                                    </span>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <font style="font-size: 11px;">
+                                        LayerSet
+                                    </font>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <font style="font-size: 11px;">
+                                        Layer_registration
+                                    </font>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 63%; font-size: 11px;">
+                                    <font style="font-size: 11px;">
+                                        (mapId, layerPath, 'add', layerSetId)
+                                    </font>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 100%; font-size: 11px;">
+                                    <br/>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="416" y="202" fill="#000000" font-family="Helvetica" font-size="12px" text-anchor="middle">
+                    Emit...
+                </text>
+            </switch>
+        </g>
+        <rect x="46" y="134" width="200" height="330" fill="none" stroke="#000000" stroke-width="3" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility" style="overflow: visible; text-align: left;">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe flex-start; justify-content: unsafe center; width: 198px; height: 1px; padding-top: 141px; margin-left: 47px;">
+                        <div data-drawio-colors="color: #000000; " style="box-sizing: border-box; font-size: 0px; text-align: center;">
+                            <div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; pointer-events: all; white-space: normal; overflow-wrap: normal;">
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px;">
+                                    <font style="font-size: 12px;">
+                                        AbstractGeoViewLayer
+                                    </font>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px;">
+                                    <font style="font-size: 12px;">
+                                        createGeoViewLayers()
+                                    </font>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="146" y="153" fill="#000000" font-family="Helvetica" font-size="12px" text-anchor="middle">
+                    AbstractGeoViewLayer...
+                </text>
+            </switch>
+        </g>
+        <ellipse cx="416" cy="319" rx="110" ry="35" fill="none" stroke="#000000" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility" style="overflow: visible; text-align: left;">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe flex-start; justify-content: unsafe center; width: 218px; height: 1px; padding-top: 285px; margin-left: 307px;">
+                        <div data-drawio-colors="color: #000000; " style="box-sizing: border-box; font-size: 0px; text-align: center;">
+                            <div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; pointer-events: all; white-space: normal; overflow-wrap: normal;">
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <span lang="EN-CA" style="">
+                                        <font style="font-size: 11px;">
+                                            Emit
+                                        </font>
+                                    </span>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <font style="font-size: 11px;">
+                                        LayerSet
+                                    </font>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <font style="font-size: 11px;">
+                                        Layer_registration
+                                    </font>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <font style="font-size: 11px;">
+                                        (mapId, layerPath, 'add')
+                                    </font>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <span style="">
+                                        <br/>
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="416" y="297" fill="#000000" font-family="Helvetica" font-size="12px" text-anchor="middle">
+                    Emit...
+                </text>
+            </switch>
+        </g>
+        <ellipse cx="416" cy="139" rx="110" ry="35" fill="none" stroke="#000000" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility" style="overflow: visible; text-align: left;">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe flex-start; justify-content: unsafe center; width: 218px; height: 1px; padding-top: 105px; margin-left: 307px;">
+                        <div data-drawio-colors="color: #000000; " style="box-sizing: border-box; font-size: 0px; text-align: center;">
+                            <div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; pointer-events: all; white-space: normal; overflow-wrap: normal;">
+                                <p class="MsoNormal" style="line-height: 1.2px; font-size: 11px;">
+                                    <span lang="EN-CA" style="">
+                                        <font style="font-size: 11px;">
+                                            Emit
+                                        </font>
+                                    </span>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <font style="font-size: 11px;">
+                                        LayerSet
+                                    </font>
+                                </p>
+                                <p class="MsoNormal" style="line-height: 1.2px; font-size: 11px;">
+                                    <span style="background-color: initial;">
+                                        <font style="font-size: 11px;">
+                                            Request_layer_inventory
+                                        </font>
+                                    </span>
+                                </p>
+                                <p class="MsoNormal" style="line-height: 1.2px; font-size: 11px;">
+                                    <span style="background-color: initial;">
+                                        <font style="font-size: 11px;">
+                                            (mapId, layerSetId)
+                                        </font>
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="416" y="117" fill="#000000" font-family="Helvetica" font-size="12px" text-anchor="middle">
+                    Emit...
+                </text>
+            </switch>
+        </g>
+        <rect x="66" y="194" width="160" height="70" fill="none" stroke="#000000" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility" style="overflow: visible; text-align: left;">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe flex-start; justify-content: unsafe center; width: 158px; height: 1px; padding-top: 195px; margin-left: 67px;">
+                        <div data-drawio-colors="color: #000000; " style="box-sizing: border-box; font-size: 0px; text-align: center;">
+                            <div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; pointer-events: all; white-space: normal; overflow-wrap: normal;">
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <font style="font-size: 11px;">
+                                        On
+                                    </font>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <font style="font-size: 11px;">
+                                        LayerSet
+                                    </font>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <font style="font-size: 11px;">
+                                        <span style="background-color: initial;">
+                                            Request_layer_inventory
+                                        </span>
+                                        <br/>
+                                    </font>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <font style="font-size: 11px;">
+                                        (mapId)
+                                    </font>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="146" y="207" fill="#000000" font-family="Helvetica" font-size="12px" text-anchor="middle">
+                    On...
+                </text>
+            </switch>
+        </g>
+        <path d="M 226 229 L 299.63 229" fill="none" stroke="#000000" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 304.88 229 L 297.88 232.5 L 299.63 229 L 297.88 225.5 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10" pointer-events="all"/>
+        <rect x="66" y="284" width="160" height="70" fill="none" stroke="#000000" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility" style="overflow: visible; text-align: left;">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe flex-start; justify-content: unsafe center; width: 158px; height: 1px; padding-top: 285px; margin-left: 67px;">
+                        <div data-drawio-colors="color: #000000; " style="box-sizing: border-box; font-size: 0px; text-align: center;">
+                            <div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; pointer-events: all; white-space: normal; overflow-wrap: normal;">
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <font style="font-size: 11px;">
+                                        On
+                                    </font>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <span lang="EN-CA" style="">
+                                        <font style="font-size: 11px;">
+                                            GetLegends
+                                        </font>
+                                    </span>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <font style="font-size: 11px;">
+                                        <span style="background-color: initial;">
+                                            Query_legend
+                                        </span>
+                                        <br/>
+                                    </font>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <font style="font-size: 11px;">
+                                        (mapId, layerPath)
+                                    </font>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="146" y="297" fill="#000000" font-family="Helvetica" font-size="12px" text-anchor="middle">
+                    On...
+                </text>
+            </switch>
+        </g>
+        <path d="M 146 444 L 146 499 Q 146 509 152.82 509 L 159.63 509" fill="none" stroke="#000000" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 164.88 509 L 157.88 512.5 L 159.63 509 L 157.88 505.5 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10" pointer-events="all"/>
+        <rect x="66" y="374" width="160" height="70" fill="none" stroke="#000000" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility" style="overflow: visible; text-align: left;">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe flex-start; justify-content: unsafe center; width: 158px; height: 1px; padding-top: 375px; margin-left: 67px;">
+                        <div data-drawio-colors="color: #000000; " style="box-sizing: border-box; font-size: 0px; text-align: center;">
+                            <div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; pointer-events: all; white-space: normal; overflow-wrap: normal;">
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <font style="font-size: 11px;">
+                                        On
+                                    </font>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <span lang="EN-CA" style="">
+                                        <font style="font-size: 11px;">
+                                            GetFeatureInfo
+                                        </font>
+                                    </span>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <font style="font-size: 11px;">
+                                        Query_layer
+                                        <br/>
+                                    </font>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <font style="font-size: 11px;">
+                                        (mapId)
+                                    </font>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="146" y="387" fill="#000000" font-family="Helvetica" font-size="12px" text-anchor="middle">
+                    On...
+                </text>
+            </switch>
+        </g>
+        <rect x="46" y="14" width="480" height="40" fill="none" stroke="none" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility" style="overflow: visible; text-align: left;">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe flex-start; justify-content: unsafe flex-start; width: 479px; height: 1px; padding-top: 4px; margin-left: 44px;">
+                        <div data-drawio-colors="color: #000000; " style="box-sizing: border-box; font-size: 0px; text-align: left; max-height: 50px; overflow: hidden;">
+                            <div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; pointer-events: all; white-space: normal; overflow-wrap: normal;">
+                                <h1>
+                                    <font>
+                                        FeatureInfoLayerSet state diagram
+                                    </font>
+                                </h1>
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="44" y="16" fill="#000000" font-family="Helvetica" font-size="12px">
+                    FeatureInfoLayerSet state diagram
+                </text>
+            </switch>
+        </g>
+        <path d="M 616 309 L 586 309 Q 576 309 576 299 L 576 149 Q 576 139 566 139 L 532.37 139" fill="none" stroke="#000000" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 527.12 139 L 534.12 135.5 L 532.37 139 L 534.12 142.5 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10" pointer-events="all"/>
+        <path d="M 246 299 L 266 299 Q 276 299 276 309 L 276 314 Q 276 319 286 319 L 299.63 319" fill="none" stroke="#000000" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 304.88 319 L 297.88 322.5 L 299.63 319 L 297.88 315.5 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10" pointer-events="all"/>
+        <path d="M 526 319 L 546 319 Q 556 319 556 329 L 556 349 Q 556 359 566 359 L 629.63 359" fill="none" stroke="#000000" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 634.88 359 L 627.88 362.5 L 629.63 359 L 627.88 355.5 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10" pointer-events="all"/>
+        <path d="M 306 139 L 286 139 Q 276 139 276 149 L 276 201.5 Q 276 211.5 266 211.5 L 232.37 211.5" fill="none" stroke="#000000" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 227.12 211.5 L 234.12 208 L 232.37 211.5 L 234.12 215 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10" pointer-events="all"/>
+        <path d="M 526 229 L 546 229 Q 556 229 556 239 L 556 349 Q 556 359 566 359 L 629.63 359" fill="none" stroke="#000000" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 634.88 359 L 627.88 362.5 L 629.63 359 L 627.88 355.5 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10" pointer-events="all"/>
+        <rect x="636" y="604" width="140" height="70" fill="none" stroke="#000000" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility" style="overflow: visible; text-align: left;">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe flex-start; justify-content: unsafe center; width: 138px; height: 1px; padding-top: 605px; margin-left: 637px;">
+                        <div data-drawio-colors="color: #000000; " style="box-sizing: border-box; font-size: 0px; text-align: center;">
+                            <div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; pointer-events: all; white-space: normal; overflow-wrap: normal;">
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <font style="font-size: 11px;">
+                                        On
+                                    </font>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <span lang="EN-CA" style="">
+                                        <font style="font-size: 11px;">
+                                            GetFeatureInfo
+                                        </font>
+                                    </span>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <font style="font-size: 11px;">
+                                        <span style="background-color: initial;">
+                                            Query_result
+                                        </span>
+                                        <br/>
+                                    </font>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <font style="font-size: 11px;">
+                                        <br/>
+                                        (mapId)
+                                    </font>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="706" y="617" fill="#000000" font-family="Helvetica" font-size="12px" text-anchor="middle">
+                    On...
+                </text>
+            </switch>
+        </g>
+        <path d="M 706 674 L 706 754 Q 706 764 696 764 L 672.37 764" fill="none" stroke="#000000" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 667.12 764 L 674.12 760.5 L 672.37 764 L 674.12 767.5 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10" pointer-events="all"/>
+        <path d="M 406 614 L 406 637.63" fill="none" stroke="#000000" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 406 642.88 L 402.5 635.88 L 406 637.63 L 409.5 635.88 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10" pointer-events="all"/>
+        <rect x="406" y="604" width="40" height="30" fill="none" stroke="none" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility" style="overflow: visible; text-align: left;">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 1px; height: 1px; padding-top: 619px; margin-left: 426px;">
+                        <div data-drawio-colors="color: #000000; " style="box-sizing: border-box; font-size: 0px; text-align: center;">
+                            <div style="display: inline-block; font-size: 10px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; pointer-events: all; white-space: nowrap;">
+                                Yes
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="426" y="622" fill="#000000" font-family="Helvetica" font-size="10px" text-anchor="middle">
+                    Yes
+                </text>
+            </switch>
+        </g>
+        <rect x="336" y="594" width="40" height="30" fill="none" stroke="none" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility" style="overflow: visible; text-align: left;">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 1px; height: 1px; padding-top: 609px; margin-left: 356px;">
+                        <div data-drawio-colors="color: #000000; " style="box-sizing: border-box; font-size: 0px; text-align: center;">
+                            <div style="display: inline-block; font-size: 10px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; pointer-events: all; white-space: nowrap;">
+                                No
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="356" y="612" fill="#000000" font-family="Helvetica" font-size="10px" text-anchor="middle">
+                    No
+                </text>
+            </switch>
+        </g>
+        <path d="M 406 714 L 406 737.63" fill="none" stroke="#000000" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 406 742.88 L 402.5 735.88 L 406 737.63 L 409.5 735.88 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10" pointer-events="all"/>
+        <ellipse cx="406" cy="679" rx="110" ry="35" fill="none" stroke="#000000" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility" style="overflow: visible; text-align: left;">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe flex-start; justify-content: unsafe center; width: 218px; height: 1px; padding-top: 645px; margin-left: 297px;">
+                        <div data-drawio-colors="color: #000000; " style="box-sizing: border-box; font-size: 0px; text-align: center;">
+                            <div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; pointer-events: all; white-space: normal; overflow-wrap: normal;">
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <span lang="EN-CA" style="">
+                                        <font style="font-size: 11px;">
+                                            Emit
+                                        </font>
+                                    </span>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <font style="font-size: 11px;">
+                                        GetFeatureIndo
+                                    </font>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <font style="font-size: 11px;">
+                                        All_queries_done
+                                    </font>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <font style="font-size: 11px;">
+                                        (mapId, layerSetId)
+                                    </font>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <br/>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="406" y="657" fill="#000000" font-family="Helvetica" font-size="12px" text-anchor="middle">
+                    Emit...
+                </text>
+            </switch>
+        </g>
+        <path d="M 636 549 L 586 549 Q 576 549 576 539 L 576 419 Q 576 409 566 409 L 512.37 409" fill="none" stroke="#000000" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 507.12 409 L 514.12 405.5 L 512.37 409 L 514.12 412.5 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10" pointer-events="all"/>
+        <rect x="636" y="514" width="140" height="70" fill="none" stroke="#000000" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility" style="overflow: visible; text-align: left;">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe flex-start; justify-content: unsafe center; width: 138px; height: 1px; padding-top: 515px; margin-left: 637px;">
+                        <div data-drawio-colors="color: #000000; " style="box-sizing: border-box; font-size: 0px; text-align: center;">
+                            <div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; pointer-events: all; white-space: normal; overflow-wrap: normal;">
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <font style="font-size: 11px;">
+                                        On
+                                    </font>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <font style="font-size: 11px;">
+                                        Map
+                                    </font>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <font style="font-size: 11px;">
+                                        Event_map_single_click
+                                    </font>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <font style="font-size: 11px;">
+                                        <br/>
+                                        (mapId)
+                                    </font>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="706" y="527" fill="#000000" font-family="Helvetica" font-size="12px" text-anchor="middle">
+                    On...
+                </text>
+            </switch>
+        </g>
+        <path d="M 406 574 L 446 594 L 406 614 L 366 594 Z" fill="none" stroke="#000000" stroke-miterlimit="10" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility" style="overflow: visible; text-align: left;">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 78px; height: 1px; padding-top: 594px; margin-left: 367px;">
+                        <div data-drawio-colors="color: rgb(0, 0, 0); " style="box-sizing: border-box; font-size: 0px; text-align: center;">
+                            <div style="display: inline-block; font-size: 10px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; pointer-events: all; white-space: normal; overflow-wrap: normal;">
+                                <font color="#000000" style="font-size: 11px;">
+                                    All done?
+                                </font>
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="406" y="597" fill="rgb(0, 0, 0)" font-family="Helvetica" font-size="10px" text-anchor="middle">
+                    All done?
+                </text>
+            </switch>
+        </g>
+        <rect x="306" y="744" width="200" height="130" fill="none" stroke="#000000" stroke-width="3" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility" style="overflow: visible; text-align: left;">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe flex-start; justify-content: unsafe center; width: 198px; height: 1px; padding-top: 751px; margin-left: 307px;">
+                        <div data-drawio-colors="color: #000000; " style="box-sizing: border-box; font-size: 0px; text-align: center;">
+                            <div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; pointer-events: all; white-space: normal; overflow-wrap: normal;">
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px;">
+                                    <span style="font-size: 8pt;">
+                                        UserObject
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="406" y="763" fill="#000000" font-family="Helvetica" font-size="12px" text-anchor="middle">
+                    UserObject
+                </text>
+            </switch>
+        </g>
+        <rect x="326" y="784" width="160" height="70" fill="none" stroke="#000000" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility" style="overflow: visible; text-align: left;">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe flex-start; justify-content: unsafe center; width: 158px; height: 1px; padding-top: 785px; margin-left: 327px;">
+                        <div data-drawio-colors="color: #000000; " style="box-sizing: border-box; font-size: 0px; text-align: center;">
+                            <div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; pointer-events: all; white-space: normal; overflow-wrap: normal;">
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px;">
+                                    <span lang="EN-CA" style="font-size: 8pt;">
+                                        GetFeatureInfo
+                                    </span>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px;">
+                                    <span lang="EN-CA" style="font-size: 8pt;">
+                                        On
+                                    </span>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px;">
+                                    <span lang="EN-CA" style="font-size: 8pt;">
+                                        All_query_done
+                                    </span>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px;">
+                                    <br/>
+                                    <span style="font-size: 8pt;">
+                                        (mapId, layerSetId)
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="406" y="797" fill="#000000" font-family="Helvetica" font-size="12px" text-anchor="middle">
+                    GetFeatureInfo...
+                </text>
+            </switch>
+        </g>
+        <path d="M 302 564 L 302 559 Q 302 554 312 554 L 546 554 Q 556 554 556 564 L 556 629 Q 556 639 566 639 L 630.1 639" fill="none" stroke="#000000" stroke-width="0.75" stroke-miterlimit="10" stroke-dasharray="2.25 2.25" pointer-events="stroke"/>
+        <path d="M 635.16 639 L 628.41 642.38 L 630.1 639 L 628.41 635.63 Z" fill="#000000" stroke="#000000" stroke-width="0.75" stroke-miterlimit="10" pointer-events="all"/>
+        <path d="M 212 624 L 232 564 L 332 564 L 312 624 Z" fill="none" stroke="#000000" stroke-miterlimit="10" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility" style="overflow: visible; text-align: left;">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 118px; height: 1px; padding-top: 594px; margin-left: 213px;">
+                        <div data-drawio-colors="color: rgb(0, 0, 0); " style="box-sizing: border-box; font-size: 0px; text-align: center;">
+                            <div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; pointer-events: all; white-space: normal; overflow-wrap: normal;">
+                                <font color="#000000" style="font-size: 11px;">
+                                    Wait for other
+                                    <br/>
+                                    Query_result
+                                    <br/>
+                                    events
+                                    <br/>
+                                </font>
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="272" y="598" fill="rgb(0, 0, 0)" font-family="Helvetica" font-size="12px" text-anchor="middle">
+                    Wait for other...
+                </text>
+            </switch>
+        </g>
+        <path d="M 306 409 L 296 409 Q 286 409 276 409 L 232.37 409" fill="none" stroke="#000000" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 227.12 409 L 234.12 405.5 L 232.37 409 L 234.12 412.5 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10" pointer-events="all"/>
+        <ellipse cx="406" cy="409" rx="100" ry="35" fill="none" stroke="#000000" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility" style="overflow: visible; text-align: left;">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe flex-start; justify-content: unsafe center; width: 198px; height: 1px; padding-top: 375px; margin-left: 307px;">
+                        <div data-drawio-colors="color: #000000; " style="box-sizing: border-box; font-size: 0px; text-align: center;">
+                            <div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; pointer-events: all; white-space: normal; overflow-wrap: normal;">
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <span lang="EN-CA" style="">
+                                        <font style="font-size: 11px;">
+                                            Emit
+                                        </font>
+                                    </span>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <span lang="EN-CA" style="">
+                                        <font style="font-size: 11px;">
+                                            GetFeatureInfo
+                                        </font>
+                                    </span>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <font style="font-size: 11px;">
+                                        Query_layer
+                                        <br/>
+                                    </font>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <font style="font-size: 11px;">
+                                        (mapId)
+                                    </font>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="406" y="387" fill="#000000" font-family="Helvetica" font-size="12px" text-anchor="middle">
+                    Emit...
+                </text>
+            </switch>
+        </g>
+        <ellipse cx="416" cy="499" rx="110" ry="35" fill="none" stroke="#000000" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility" style="overflow: visible; text-align: left;">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe flex-start; justify-content: unsafe center; width: 218px; height: 1px; padding-top: 465px; margin-left: 307px;">
+                        <div data-drawio-colors="color: #000000; " style="box-sizing: border-box; font-size: 0px; text-align: center;">
+                            <div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; pointer-events: all; white-space: normal; overflow-wrap: normal;">
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <span lang="EN-CA" style="">
+                                        <font style="font-size: 11px;">
+                                            Emit
+                                        </font>
+                                    </span>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <font style="font-size: 11px;">
+                                        GetFeatureInfo
+                                    </font>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <font style="font-size: 11px;">
+                                        Query_result
+                                    </font>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <font style="font-size: 11px;">
+                                        (mapId)
+                                    </font>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <span style="">
+                                        <br/>
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="416" y="477" fill="#000000" font-family="Helvetica" font-size="12px" text-anchor="middle">
+                    Emit...
+                </text>
+            </switch>
+        </g>
+        <path d="M 266 509 L 276 509 Q 286 509 286 504 L 286 501.5 Q 286 499 292.82 499 L 299.63 499" fill="none" stroke="#000000" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 304.88 499 L 297.88 502.5 L 299.63 499 L 297.88 495.5 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10" pointer-events="all"/>
+        <path d="M 156 539 L 176 479 L 276 479 L 256 539 Z" fill="none" stroke="#000000" stroke-miterlimit="10" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility" style="overflow: visible; text-align: left;">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 118px; height: 1px; padding-top: 509px; margin-left: 157px;">
+                        <div data-drawio-colors="color: rgb(0, 0, 0); " style="box-sizing: border-box; font-size: 0px; text-align: center;">
+                            <div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; pointer-events: all; white-space: normal; overflow-wrap: normal;">
+                                <font color="#000000" style="font-size: 11px;">
+                                    Execute feature
+                                    <br/>
+                                    info query and
+                                    <br/>
+                                    get the result
+                                    <br/>
+                                </font>
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="216" y="513" fill="rgb(0, 0, 0)" font-family="Helvetica" font-size="12px" text-anchor="middle">
+                    Execute feature...
+                </text>
+            </switch>
+        </g>
+        <path d="M 566 764 L 546 764 Q 536 764 536 754 L 536 604 Q 536 594 526 594 L 452.37 594" fill="none" stroke="#000000" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 447.12 594 L 454.12 590.5 L 452.37 594 L 454.12 597.5 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10" pointer-events="all"/>
+        <path d="M 556 794 L 576 734 L 676 734 L 656 794 Z" fill="none" stroke="#000000" stroke-miterlimit="10" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility" style="overflow: visible; text-align: left;">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 118px; height: 1px; padding-top: 764px; margin-left: 557px;">
+                        <div data-drawio-colors="color: rgb(0, 0, 0); " style="box-sizing: border-box; font-size: 0px; text-align: center;">
+                            <div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; pointer-events: all; white-space: normal; overflow-wrap: normal;">
+                                <font color="#000000" style="font-size: 11px;">
+                                    Save the query
+                                    <br/>
+                                    result in the
+                                    <br/>
+                                    LayerSet
+                                    <br/>
+                                </font>
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="616" y="768" fill="rgb(0, 0, 0)" font-family="Helvetica" font-size="12px" text-anchor="middle">
+                    Save the query...
+                </text>
+            </switch>
+        </g>
+        <path d="M 716 114 L 716 127.63" fill="none" stroke="#000000" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 716 132.88 L 712.5 125.88 L 716 127.63 L 719.5 125.88 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10" pointer-events="all"/>
+        <rect x="626" y="54" width="180" height="60" fill="none" stroke="#000000" stroke-width="3" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility" style="overflow: visible; text-align: left;">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe flex-start; justify-content: unsafe center; width: 178px; height: 1px; padding-top: 61px; margin-left: 627px;">
+                        <div data-drawio-colors="color: #000000; " style="box-sizing: border-box; font-size: 0px; text-align: center;">
+                            <div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; pointer-events: all; white-space: normal; overflow-wrap: normal;">
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    Layer
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    removeLayerUsingPath(path)
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="716" y="73" fill="#000000" font-family="Helvetica" font-size="12px" text-anchor="middle">
+                    Layer...
+                </text>
+            </switch>
+        </g>
+        <path d="M 606 169 L 579 169.54 M 573 169.66 M 573 169.66 L 564.5 169.83 Q 556 170 556 180 L 556 350 Q 556 360 566 359.88 L 629.63 359.08" fill="none" stroke="#010101" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 634.88 359.01 L 627.93 362.6 L 629.63 359.08 L 627.84 355.6 Z" fill="#010101" stroke="#010101" stroke-miterlimit="10" pointer-events="all"/>
+        <ellipse cx="716" cy="169" rx="110" ry="35" fill="none" stroke="#000000" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility" style="overflow: visible; text-align: left;">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe flex-start; justify-content: unsafe center; width: 218px; height: 1px; padding-top: 135px; margin-left: 607px;">
+                        <div data-drawio-colors="color: #000000; " style="box-sizing: border-box; font-size: 0px; text-align: center;">
+                            <div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; pointer-events: all; white-space: normal; overflow-wrap: normal;">
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <span lang="EN-CA" style="">
+                                        <font style="font-size: 11px;">
+                                            Emit
+                                        </font>
+                                    </span>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <font style="font-size: 11px;">
+                                        LayerSet
+                                    </font>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <font style="font-size: 11px;">
+                                        Layer_registration
+                                    </font>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <font style="font-size: 11px;">
+                                        (mapId, layerPath, 'remove')
+                                    </font>
+                                </p>
+                                <p class="MsoNormal" align="center" style="margin-bottom: 0cm; line-height: 1.2px; font-size: 11px;">
+                                    <span style="">
+                                        <br/>
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="716" y="147" fill="#000000" font-family="Helvetica" font-size="12px" text-anchor="middle">
+                    Emit...
+                </text>
+            </switch>
+        </g>
+        <path d="M 656 494 L 676 434 L 756 434 L 736 494 Z" fill="none" stroke="#000000" stroke-miterlimit="10" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility" style="overflow: visible; text-align: left;">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 98px; height: 1px; padding-top: 464px; margin-left: 657px;">
+                        <div data-drawio-colors="color: rgb(0, 0, 0); " style="box-sizing: border-box; font-size: 0px; text-align: center;">
+                            <div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; pointer-events: all; white-space: normal; overflow-wrap: normal;">
+                                <font color="#000000" style="font-size: 11px;">
+                                    update
+                                    <br/>
+                                    LayerSet
+                                    <br/>
+                                    (add/remove)
+                                    <br/>
+                                </font>
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="706" y="468" fill="rgb(0, 0, 0)" font-family="Helvetica" font-size="12px" text-anchor="middle">
+                    update...
+                </text>
+            </switch>
+        </g>
+        <path d="M 526 499 L 546 499 Q 556 499 556 509 L 556 629 Q 556 639 566 639 L 629.63 639" fill="none" stroke="#000000" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 634.88 639 L 627.88 642.5 L 629.63 639 L 627.88 635.5 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10" pointer-events="all"/>
+    </g>
+    <switch>
+        <g requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"/>
+        <a transform="translate(0,-5)" xlink:href="https://www.diagrams.net/doc/faq/svg-export-text-problems" target="_blank">
+            <text text-anchor="middle" font-size="10px" x="50%" y="100%">
+                Text is not SVG - cannot display
+            </text>
+        </a>
+    </switch>
+</svg>

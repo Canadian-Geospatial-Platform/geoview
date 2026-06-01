@@ -1,0 +1,111 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": false
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "airborne_radioactivity",
+        "geoviewLayerName": "Airborne Radioactivity",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/airborne_radioactivity_en/MapServer",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "1"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "tritium_agol",
+        "geoviewLayerName": "Tritium Radioactivity agol",
+        "metadataAccessPath": "https://services1.arcgis.com/HsjBaDykC1mjhXz9/ArcGIS/rest/services/CRMN___Tritium_in_Atmospheric_Water_Vapour_WFL1/FeatureServer",
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "1"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "shellfish_sites",
+        "geoviewLayerName": "Shellfish Sites",
+        "metadataAccessPath": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/Shellfish_Sites_Samples_Mollusques_Echantillons/MapServer",
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "1"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "ogcFeatureLakes",
+        "geoviewLayerName": "Large Lakes",
+        "metadataAccessPath": "https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev",
+        "geoviewLayerType": "ogcFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "lakes",
+            "layerFilter": "name in ('Lake Victoria', 'Lake Superior', 'L. Erie', 'L. Ontario')"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "cesi",
+        "geoviewLayerName": "CESI",
+        "metadataAccessPath": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer",
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "1",
+            "layerFilter": "E_Province = 'Alberta' or E_Province = 'Manitoba'"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "geojsonLYR5",
+        "geoviewLayerName": "GeoJSON Sample",
+        "metadataAccessPath": "https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/metadata.meta",
+        "geoviewLayerType": "GeoJSON",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "polygons.json",
+            "layerName": "Polygons"
+          },
+          {
+            "layerId": "lines.json",
+            "layerName": "Lines"
+          },
+          {
+            "entryType": "group",
+            "layerId": "point-feature-group",
+            "layerName": "Points",
+            "listOfLayerEntryConfig": [
+              {
+                "layerId": "icon_points.json",
+                "layerName": "Icons"
+              },
+              {
+                "layerId": "points.json",
+                "layerName": "Points"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "theme": "geo.ca",
+  "footerBar": {
+    "tabs": {
+      "core": ["legend", "layers", "details", "geochart"]
+    },
+    "selectedTab": "geochart"
+  },
+  "corePackages": []
+}

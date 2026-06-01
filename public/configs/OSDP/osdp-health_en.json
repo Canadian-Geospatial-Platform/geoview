@@ -1,0 +1,189 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "initialView": {
+        "zoomAndCenter": [
+          11,
+          [
+            -78.7860521310545,
+            43.957998016283646
+          ]
+        ]
+      },
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": true,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "21b821cf-0f1c-40ee-8925-eab12d357668",
+        "geoviewLayerName": "The Canadian Radiological Monitoring Network - Airborne Radioactivity",
+        "geoviewLayerType": "geoCore",
+        "initialSettings": {
+          "states": {
+            "legendCollapsed": true
+          }
+        },
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "1",
+            "layerName": "Airborne Radioactivity",
+            "initialSettings": {
+              "states": {
+                "legendCollapsed": true,
+                "visible": true
+              }
+            }
+          },
+          {
+            "layerId": "2",
+            "layerName": "Station location range",
+            "initialSettings": {
+              "states": {
+                "legendCollapsed": true,
+                "visible": true
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "d256b422-2834-40a2-9f0c-bd5fc32781b2",
+        "geoviewLayerName": "The Canadian Radiological Monitoring Network - Monitoring Stations",
+        "geoviewLayerType": "geoCore",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "1",
+            "layerName": "CRNM Monitoring Stations",
+            "initialSettings": {
+              "states": {
+                "legendCollapsed": false,
+                "visible": true
+              }
+            }
+          },
+          {
+            "layerId": "2",
+            "layerName": "CTBT Stations",
+            "initialSettings": {
+              "states": {
+                "legendCollapsed": false,
+                "visible": true
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "f0d1c3a9-cf78-4b07-af55-9e8d4303449e",
+        "geoviewLayerType": "geoCore"
+      }
+    ]
+  },
+  "components": [
+    "north-arrow",
+    "overview-map"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "navBar": [
+    "zoom",
+    "fullscreen",
+    "home",
+    "location",
+    "basemap-select"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "layers",
+        "data-table",
+        "geochart"
+      ]
+    }
+  },
+  "corePackages": [],
+  "corePackagesConfig": [
+    {
+      "geochart": {
+        "charts": [
+          {
+            "layers": [
+              {
+                "layerId": "21b821cf-0f1c-40ee-8925-eab12d357668/base-group/1",
+                "propertyValue": "OBJECTID",
+                "propertyDisplay": "Location_Emplacement"
+              }
+            ],
+            "chart": "line",
+            "query": {
+              "type": "esriRegular",
+              "url": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/airborne_radioactivity_en/MapServer/3",
+              "queryOptions": {
+                "whereClauses": [
+                  {
+                    "field": "Location_Emplacement",
+                    "prefix": "'",
+                    "valueFrom": "Location_Emplacement",
+                    "suffix": "'"
+                  }
+                ],
+                "orderByField": "CollectionStart_DebutPrelevement"
+              }
+            },
+            "geochart": {
+              "xAxis": {
+                "type": "time",
+                "property": "CollectionStart_DebutPrelevement",
+                "label": "Date"
+              },
+              "yAxis": {
+                "type": "logarithmic",
+                "property": "Activity_Activite_mBqm3",
+                "label": "Radioactivity Concentration (Bq/m³)",
+                "tooltipSuffix": "Bq/m³"
+              },
+              "borderWidth": 2
+            },
+            "category": {
+              "property": "Radionuclide_Radionucleide",
+              "usePalette": false
+            },
+            "ui": {
+              "xSlider": {
+                "display": true
+              },
+              "ySlider": {
+                "display": false
+              },
+              "scalesSwitcher": [
+                "linear",
+                "logarithmic"
+              ],
+              "stepsSwitcher": true,
+              "resetStates": true,
+              "description": "Airborne Radionuclide Concentrations",
+              "download": true
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "theme": "geo.ca"
+}

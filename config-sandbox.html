@@ -1,0 +1,670 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Sandbox Configuration - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link rel="stylesheet" href="css/style.css"/><style>.config-json-valid {
+        color: green;
+      }
+
+      .config-error {
+        color: red;
+      }
+
+      .tab-container {
+          width: 100%;
+          margin: 0 auto;
+      }
+
+      .tabs {
+          display: flex;
+          border-bottom: 1px solid #ccc;
+      }
+
+      .tab-link {
+          background-color: #f1f1f1;
+          border: 1px solid #ccc;
+          border-bottom: none;
+          outline: none;
+          cursor: pointer;
+          padding: 8px 10px;
+          transition: background-color 0.3s;
+          flex: none;
+          text-align: center;
+      }
+
+      .tab-link:hover {
+          background-color: #ddd;
+      }
+
+      .tab-link.active {
+          background-color: #ccc;
+      }
+
+      .tab-content {
+          padding: 16px;
+          border: 1px solid #ccc;
+          border-top: none;
+      }
+
+      .editor {
+        display: inline-flex;
+        gap: 10px;
+        font-family: monospace;
+        line-height: 21px;
+        background: #282a3a;
+        border-radius: 2px;
+        padding: 20px 10px;
+        height: 500px;
+        overflow-y: auto;
+      }
+
+      .line-numbers {
+        width: 20px;
+        text-align: right;
+        height: 9999px;
+      }
+
+      .line-numbers span {
+        counter-increment: linenumber;
+      }
+
+      .line-numbers span::before {
+        content: counter(linenumber);
+        display: block;
+        color: #506882;
+      }
+
+    textarea {
+      height: 99999px;
+      line-height: 21px;
+      overflow-y: hidden;
+      padding: 0;
+      border: 0;
+      background: #282a3a;
+      color: #fff;
+      min-width: 500px;
+      outline: none;
+      resize: none;
+      overflow-x: auto;
+      white-space: nowrap;
+    }</style><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>Sandbox Configuration</strong></h1></td></tr></tbody></table><table><tbody><tr><td><a href="./index.html">Main</a><br/></td></tr></tbody></table><table><tbody><tr><td>This page is used to test the ConfigApi.</td></tr></tbody></table></div><div class="tab-container"><div class="tabs"><button class="tab-link active" onclick="openTab(event, 'tab1')">Map Config</button> <button class="tab-link" onclick="openTab(event, 'tab2')">GeoView Config</button> <button class="tab-link" onclick="openTab(event, 'tab3')">URL Config</button> <button class="tab-link" onclick="openTab(event, 'tab4')">Metadata Layer Tree</button></div><div id="tab1" class="tab-content"><div>This section lets you select and edit a complete map configuration.<br/><div id="urlExecutionDescriptionTab1"></div><br/><br/><div>Configuration to load: <select id="configLoaderTab1"><option value="">--select--</option><option value="./configs/validator/01-simple-esri-feature.json">Simple EsriFeature</option><option value="./configs/validator/02-unique-value-esri-dynamic.json">Unique Value EsriDynamic</option><option value="./configs/validator/03-class-breaks-esri-feature.json">Class Breaks EsriFeature</option><option value="./configs/validator/04-geocore.json">Geocore</option><option value="./configs/validator/05-esri-feature-and-dynamic.json">EsriFeature And EsriDynamic</option><option value="./configs/validator/06-ogc-wms.json">OGC WMS</option><option value="./configs/validator/07-ogc-wfs.json">OGC WFS</option><option value="./configs/validator/08-geojson.json">GeoJSON</option><option value="./configs/validator/09-esri-image.json">Esri Image</option></select></div></div><div><select id="languageTab1"><option value="en">English</option><option value="fr">Français</option></select> <select id="urlExecutionChoiceTab1"><option value="getConfig">Create Map Config</option><option value="GetConfig-FetchAll">Create Map Config and Fetch All Metadata</option><option value="GetConfig-FetchAll-ApplyUserConfig">Create Map Config, Fetch All Metadata and Apply User Config</option><option value="GetConfig-LoopFetch">Create Map Config and Fetch Metadata One by One</option><option value="GetConfig-LoopFetch-ApplyUserConfig">Create Map Config, Fetch Metadata One by One and Apply User Config</option></select> <button id="executeOptionTab1" style="margin-top:10px;">Execute</button> <span id="executionTimeTab1"></span></div><div><table><tbody><tr><td><span>Input Configuration</span><div class="editor"><div class="line-numbers" id="inputLineNumbersTab1"><span></span></div><textarea id="inputTextAreaTab1" cols="110">
+                  </textarea></div><div>&nbsp;</div></td><td><span>Map configuration:</span> <span id="messageTab1">File not validated...</span><div class="editor"><div class="line-numbers" id="outputLineNumbersTab1"><span></span></div><textarea id="outputTextAreaTab1" cols="110">
+                  </textarea></div><div>Element Displayed: <select id="elementSelectorTab1"><option value="mapConfig">Map Config</option><option value="geoviewLayer">GeoView Layer</option><option value="metadata">Raw Metadata</option><option value="errorFlags">Error Flags</option></select></div></td></tr></tbody></table></div></div><div id="tab2" class="tab-content" style="display:none"><div>This section lets you enter and edit a GeoView service URL or a GeoCore identifier. Each time the URL input changes. The <b>ConfigApi.guessLayerType</b> is called to see if the URL meets a known patern.<br/>If the GeoView layer type selected is wrong or unknown, you can force its value to the one you want using the drop-down.<br/>You can also activate the chekbox to use the drop-down list as a sample URL selector in which case the URL input field is not longer editable.<br/><br/><div id="urlExecutionDescriptionTab2"></div><br/><form><label for="sampleUrlTab2">Use drop-down to get a sample URL</label> <input type="checkbox" id="sampleUrlTab2" name="sampleUrlTab2"></form>GeoView Layer Type: <select id="geoviewLayerTypeTab2"><option value="unknown">unknown</option><option value="esriDynamic">EsriDynamic</option><option value="esriFeature">EsriFeature</option><option value="geoCore">GeoCore</option><option value="ogcWms">WMS</option><option value="ogcWfs">WFS</option><option value="esriImage">EsriImage</option><option value="GeoJSON">GeoJSON</option></select></div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;URL:&nbsp; <input id="serviceUrlTab2" style="width: 90%;"/><br/>Layers:&nbsp; <input id="layerListTab2" style="width: 90%;"/><br/><div><select id="languageTab2"><option value="en">English</option><option value="fr">Français</option></select> <select id="urlExecutionChoiceTab2"><option value="getConfig">Get Config From URL</option><option value="getConfigAndFetch">Get Config From URL and Fetch</option></select> <button id="executeOptionTab2" style="margin-top:10px;">Execute</button> <span id="executionTimeTab2"></span><p></p></div><div style="width: 50%; margin: 0 auto; padding: 10px;"><span>GeoView Layer configuration:</span> <span id="messageTab2">File not validated...</span><br/><div class="editor"><div class="line-numbers" id="outputLineNumbersTab2"><span></span></div><textarea id="outputTextAreaTab2" cols="110">
+          </textarea></div><div>Element Displayed: <select id="elementSelectorTab2"><option value="geoviewLayer">GeoView Layer</option><option value="errorFlags">Error Flags</option></select></div></div></div><div id="tab3" class="tab-content" style="display:none">This section allows you to enter and edit a string of parameters that would be written at the end of a GeoView URL. Its initial value is a sample of URL parameters.<br><div id="urlExecutionDescriptionTab3"></div><br/><br/><span>Parameters following the URL:</span> <input id="inputTextAreaTab3" style="width: 85%;" value="p=3857&z=4&c=-100,40&l=en&t=dark&b=basemapId:transport,shaded:false,labeled:true&i=dynamic&cc=overview-map&keys=12acd145-626a-49eb-b850-0a59c9bc7506,ccc75c12-5acc-4a6a-959f-ef6f621147b9"><div><select id="urlExecutionChoiceTab3"><option value="getConfig">Get Config From URL</option><option value="GetConfig-FetchAll">Get Config From URL and Fetch All Metadata</option><option value="GetConfig-FetchAll-ApplyUserConfig">Get Config From URL, Fetch All Metadata and Apply User Config</option><option value="GetConfig-LoopFetch">Get Config From URL and Fetch Metadata One by One</option><option value="GetConfig-LoopFetch-ApplyUserConfig">Get Config From URL, Fetch Metadata One by One and Apply User Config</option></select> <button id="executeOptionTab3" style="margin-top:10px;">Execute</button> <span id="executionTimeTab3"></span></div><div style="width: 50%; margin: 0 auto; padding: 10px;"><span>Map configuration:</span> <span id="messageTab3">File not validated...</span><br/><div class="editor"><div class="line-numbers" id="outputLineNumbersTab3"><span></span></div><textarea id="outputTextAreaTab3" cols="110">
+          </textarea></div><div>Element Displayed: <select id="elementSelectorTab3"><option value="mapConfig">Map Config</option><option value="geoviewLayer">GeoView Layer</option><option value="metadata">Raw Metadata</option><option value="errorFlags">Error Flags</option></select></div></div></div><div id="tab4" class="tab-content" style="display:none"><div>This section lets you enter and edit a GeoView service URL or a GeoCore identifier. Each time the URL input changes. The <b>ConfigApi.guessLayerType</b> is called to see if the URL meets a known patern.<br/>If the GeoView layer type selected is wrong or unknown, you can force its value to the one you want using the drop-down.<br/>You can also activate the chekbox to use the drop-down list as a sample URL selector in which case the URL input field is not longer editable.<br/><br/>When you are ready, click the <b>Create Layer Tree</b> button to call the <b>ConfigApi.createInitConfigFromType</b> method and displays the resulting layer tree.<br/><br/><form><label for="sampleUrlTab4">Use drop-down to get a sample URL</label> <input type="checkbox" id="sampleUrlTab4" name="sampleUrlTab4"></form>GeoView Layer Type: <select id="geoviewLayerTypeTab4"><option value="unknown">unknown</option><option value="esriDynamic">EsriDynamic</option><option value="esriFeature">EsriFeature</option><option value="ogcWms">WMS</option><option value="ogcWfs">WFS</option><option value="esriImage">EsriImage</option><option value="GeoJSON">GeoJSON</option><option value="CSV">CSV</option><option value="ogcFeature">Ogc Feature</option><option value="GeoPackage">GeoPackage</option><option value="xyzTiles">xyz Tiles</option><option value="vectorTiles">Vector Tiles</option><option value="imageStatic">Image Static</option></select></div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;URL:&nbsp; <input id="serviceUrlTab4" style="width: 90%;"/><br/>Layers:&nbsp; <input id="layerListTab4" style="width: 90%;"/><br/><div><select id="languageTab4"><option value="en">English</option><option value="fr">Français</option></select> <button id="createLayerConfigTab4" style="margin-top:10px;">Create Layer Tree</button><p></p></div><div style="width: 50%; margin: 0 auto; padding: 10px;"><span>GeoView Layer configuration:</span> <span id="messageTab4">File not validated...</span><br/><div class="editor"><div class="line-numbers" id="outputLineNumbersTab4"><span></span></div><textarea id="outputTextAreaTab4" cols="110">
+          </textarea></div><div>Element Displayed: <select id="elementSelectorTab4"><option value="layerTree">Metadata Layer Tree</option><option value="errorFlags">Error Flags</option></select></div></div></div></div><div class="map-title-holder"><h4 id="HLCONF1">Sanbox Map</h4><a class="ref-link" href="#top">Top</a></div><div id="mapSection"><div id="sandboxMap"></div></div><p>This map loads its configurations from the text area.</p><hr/><button type="button" class="collapsible">Code Snippet</button><pre id="codeSnippet" class="panel"></pre><script src="codedoc.js"></script><script>// Utility functions ========================================================================================================
+
+    // Tab selection function. This function is called when you click on a tab to select and display its content.
+    function openTab(evt, tabName) {
+      var i, tabContent, tabLinks;
+
+      // Hide all tab contents
+      tabContent = document.getElementsByClassName("tab-content");
+      for (i = 0; i < tabContent.length; i++) {
+          tabContent[i].style.display = "none";
+      }
+
+      // Remove "active" class from all tab links
+      tabLinks = document.getElementsByClassName("tab-link");
+      for (i = 0; i < tabLinks.length; i++) {
+          tabLinks[i].className = tabLinks[i].className.replace(" active", "");
+      }
+
+      // Mount the current tab content and add the "active" class to the current tab link
+      document.getElementById(tabName).style.display = "block";
+      evt.currentTarget.className += " active";
+      switch (tabName) {
+        case 'tab1':
+          document.getElementById('configLoaderTab1').dispatchEvent(new Event('change'));
+          break;
+      }
+    }
+
+    // Element selector. ========================================================================================================
+    //global variables used by all tabs to keep the information to display for each type of item managed by the selector.
+    let mapConfigString = '', geoviewLayerString = '', metadataLayerTreeString = '',
+        layerPathErrorFlag = '', geoviewLayerMetadataString = '';
+
+    // This function creates the listener callback used when the selector drop-down at the bottom of the output zone changes.
+    createElementSelector = (elementSelectorId, outputId, outputLineId) => {
+      const elementSelector = document.getElementById(elementSelectorId);
+      const configOutput = document.getElementById(outputId);
+      elementSelector.addEventListener('change', (e) => {
+        if (e.target.value === 'mapConfig') configOutput.value = mapConfigString;
+        else if (e.target.value === 'geoviewLayer') configOutput.value = geoviewLayerString;
+        else if (e.target.value === 'layerTree') configOutput.value = metadataLayerTreeString;
+        else if (e.target.value === 'metadata') configOutput.value = geoviewLayerMetadataString;
+        else configOutput.value = layerPathErrorFlag;
+        generateLineNumbers(outputId, outputLineId);
+      });
+      elementSelector.dispatchEvent(new Event('change'));
+    }
+
+    // Function used to generate line numbers in the input and output containers.
+    generateLineNumbers = (textContainerId, lineNumbersContainerId) => {
+      const textarea = document.getElementById(textContainerId);
+      const lineNumbersContainer = document.getElementById(lineNumbersContainerId);
+      const lines = textarea.value.split('\n').length+1;
+      const lineNumbers = Array.from({ length: lines }, (_, index) => '').join('<span />');
+      lineNumbersContainer.innerHTML = lineNumbers;
+    };
+
+    // Function used to display messages to report progression of the process.
+    printMessage = (messageObject, messageString, status) => {
+      if (status === 'error') {
+        messageObject.classList.remove('config-json-valid');
+        messageObject.classList.add('config-error');
+      } else {
+        messageObject.classList.add('config-json-valid');
+        messageObject.classList.remove('config-error');
+      }
+      messageObject.innerHTML = messageString;
+    }
+
+    // Function used to create the string needed to display the error status of the different layerPath.
+    generateLayerPathErrorFlag = (listOfLayerEntryConfig, buffer = '', prefix = '') => {
+      listOfLayerEntryConfig.forEach((layer) => {
+        buffer = buffer ? `${buffer}\n` : '';
+        buffer = `${buffer}${layer?.getLayerPath?.() || layer.layerName}: ${layer?.getErrorDetectedFlag?.() ? 'ERROR' : 'Ok'}`;
+        if (layer.isLayerGroup) buffer = generateLayerPathErrorFlag(layer.listOfLayerEntryConfig, buffer, prefix ? `${prefix}.${layer.layerId}` : layer.layerId);
+      });
+      return buffer;
+    }
+
+    // Function used to compute and display execution time.
+    displayExecutionTime = (startTime, timeContainerId) => {
+      // Calculate the time span between now and start date
+      let timeSpan = new Date().getTime() - startTime;
+
+      const days = Math.floor(timeSpan / (1000 * 60 * 60 * 24));
+      timeSpan -= days * (1000 * 60 * 60 * 24);
+
+      const hours = Math.floor(timeSpan / (1000 * 60 * 60));
+      timeSpan -= hours * (1000 * 60 * 60);
+
+      const mins = Math.floor(timeSpan / (1000 * 60));
+      timeSpan -= mins * (1000 * 60);
+
+      const seconds = Math.floor(timeSpan / 1000);
+      timeSpan -= seconds * 1000;
+
+      // Let's say we always want seconds and milliseconds at least
+      let timeToDisplay = `${seconds} seconds, and ${timeSpan} ms`;
+      if (mins) timeToDisplay = `${mins} minutes, ${seconds} seconds, and ${timeSpan} ms`;
+      if (hours) timeToDisplay = `${hours} hours, ${mins} minutes, ${seconds} seconds, and ${timeSpan} ms`;
+
+      // display time in its container
+      document.getElementById(timeContainerId).innerHTML = `Execution time: ${timeToDisplay}`;
+    }
+
+    displayMapConfig = (mapConfig, tabId) => {
+      // Scan the layer structure to see if there is an eroneous layer.
+      const noErrorDetected = !mapConfig.map.listOfGeoviewLayerConfig.reduce((accumulator, geoviewLayer) => {
+        // Create a recursive function that scans the layer structure for erroneous sublayers. This function is used in the following line.
+        const subLayerError = (listOfLayerEntryConfig) => {
+          return listOfLayerEntryConfig.reduce((accumulator, subLayer) => {
+            if (subLayer.isLayerGroup) return accumulator || subLayer.getErrorDetectedFlag() || subLayerError(subLayer.listOfLayerEntryConfig);
+            return accumulator || subLayer.getErrorDetectedFlag();
+          }, false);
+        }
+        return accumulator || geoviewLayer.getErrorDetectedFlag() || subLayerError(geoviewLayer.listOfLayerEntryConfig);
+      }, false);
+
+      // Scan the layer structure to generate the raw metadata string.
+      geoviewLayerMetadataString = mapConfig.map.listOfGeoviewLayerConfig.reduce((accumulator, geoviewLayer) => {
+        // Create a recursive function that scans the layer structure for sublayers metadata. This function is used in the following line.
+        const subLayerMetadata = (listOfLayerEntryConfig) => {
+          return listOfLayerEntryConfig.reduce((accumulator, subLayer) => {
+            if (subLayer.isLayerGroup) return `${accumulator}\nLayer Group ${subLayer.layerId}\n${subLayerMetadata(subLayer.listOfLayerEntryConfig)}`;
+            return `${accumulator}\nLayer Leaf ${subLayer.layerId}\n${JSON.stringify(subLayer.getLayerMetadata(), undefined, 2)}`;
+          }, '');
+        }
+        const sublayerInfo = subLayerMetadata(geoviewLayer.listOfLayerEntryConfig);
+        const geoviewInfo = `Geoview Layer ${geoviewLayer.geoviewLayerId}\n${JSON.stringify(geoviewLayer.getServiceMetadata(), undefined, 2)}\n`;
+        return `${accumulator}\n${geoviewInfo}\n${sublayerInfo}`;
+      }, '');
+
+      // If no geoview and sub layer error was detected
+      if (noErrorDetected) printMessage(document.getElementById(`message${tabId}`), 'Map Config instance created and all layers are valid.');
+      else printMessage(document.getElementById(`message${tabId}`), 'Map Config instance created, but it contains invalid layers.', 'error');
+
+      // Set the global variables associated to the Element Display zone.
+      mapConfigString = mapConfig.serialize();
+      geoviewLayerString = mapConfig.map.listOfGeoviewLayerConfig.reduce((accumulator, geoviewLayer) => {
+        return `${accumulator}== ${geoviewLayer.geoviewLayerId} ===============================================================================================\n${geoviewLayer.serialize()}\n`;
+      }, '');
+      layerPathErrorFlag = mapConfig.map.listOfGeoviewLayerConfig.reduce((accumulator, geoviewLayer) => {
+        return `${accumulator}${generateLayerPathErrorFlag(geoviewLayer.listOfLayerEntryConfig, `geoviewLayerId ${geoviewLayer.geoviewLayerId}: ${geoviewLayer.getErrorDetectedFlag()? 'ERROR' : 'Ok'}\nlistOfLayerEntryConfig:`)}\n\n`;
+      }, '');
+    }
+
+    // ==========================================================================================================================
+    // Map Config Button (tab1) =================================================================================================
+
+    // Config Snippet Selection Button ==========================================================================================
+
+    // Definition of the descriptions for the execution mode.
+    const executionChoicesTab1 = {
+      getConfig: "The <b>Create Map Config</b> option calls the <b>ConfigApi.createMapConfig</b> method and displays the resulting map configuration.</br>",
+      'GetConfig-FetchAll': "The <b>Create Map Config and Fetch All Metadata</b> option calls the <b>ConfigApi.createMapConfig</b> method, <b>Fetch All GeoView Layer Metadata</b> and displays the resulting map configuration.</br>",
+      'GetConfig-LoopFetch': "The <b>Create Map Config and Fetch Metadata One by One</b> options calls the <b>ConfigApi.createMapConfig</b> method, <b>Fetch GeoView Layer metadata One by One</b> and displays the resulting map configuration.</br>",
+      'GetConfig-FetchAll-ApplyUserConfig': "The <b>Create Map Config, Fetch All Metadata and Apply User Config</b> option calls the <b>ConfigApi.createMapConfig</b> method, <b>Fetch All GeoView Layer Metadata</b>, <b>Apply User Config</b> and displays the resulting map configuration.</br>",
+      'GetConfig-LoopFetch-ApplyUserConfig': "The <b>Create Map Config, Fetch Metadata One by One and Apply User Config</b> options calls the <b>ConfigApi.createMapConfig</b> method, <b>Fetch GeoView Layer metadata One by One</b>, <b>Apply User Config</b> and displays the resulting map configuration.</br>",
+    }
+
+    //Create a listener for the execution options
+    const urlExecutionChoiceTab1 = document.getElementById('urlExecutionChoiceTab1');
+    urlExecutionChoiceTab1.addEventListener('change', function (e) {
+      const urlExecutionDescriptionTab1 = document.getElementById('urlExecutionDescriptionTab1');
+      urlExecutionDescriptionTab1.innerHTML = executionChoicesTab1[e.target.value];
+    });
+
+    // Initialize the execution choice to getConfig and display the explicative text.
+    urlExecutionChoiceTab1.value = 'getConfig';
+    urlExecutionChoiceTab1.dispatchEvent(new Event('change'));
+
+    // This listener is attached to the drop-down box that allow the users to select the configuration to test.
+    const configLoaderTab1 = document.getElementById('configLoaderTab1');
+    configLoaderTab1.addEventListener('change', (e) => {
+      // fetch JSON config file to show in the text are section
+      function fetchJSONData() {
+        fetch(e.target.value)
+          .then((res) => {
+            if (!res.ok) {
+              throw new Error
+                (`HTTP error! Status: ${res.status}`);
+            }
+            return res.text();
+          })
+          .then((data) => {
+            document.getElementById('inputTextAreaTab1').value = data;
+            generateLineNumbers('inputTextAreaTab1', 'inputLineNumbersTab1');
+          })
+          .catch((error) =>
+            console.error('Unable to fetch data:', error));
+      }
+      fetchJSONData();
+    });
+
+    // Set the initial configuration of the drop-down to 'Simple EsriFeature' and load it
+    configLoaderTab1.value = './configs/validator/01-simple-esri-feature.json';
+    configLoaderTab1.dispatchEvent(new Event('change'));
+
+    // Create the listener for the Element Displayed drop-down located at the bottom of the output zone.
+    elementSelectorTab1.value = 'mapConfig';
+    createElementSelector('elementSelectorTab1', 'outputTextAreaTab1', 'outputLineNumbersTab1');
+
+    // Create the listener for the 'Execute' button
+    document.getElementById('executeOptionTab1').addEventListener('click', async function (e) {
+      // Get the message field located at the top of the output zone.
+      const messageTab1 = document.getElementById('messageTab1');
+      // Get the value of the language button.
+      const languageTab1 = document.getElementById('languageTab1').value;
+      // Get the textarea used to input the configuration.
+      const inputTextAreaTab1 = document.getElementById('inputTextAreaTab1');
+      // Get the textarea used to output the resulting json object.
+      const outputTextAreaTab1 = document.getElementById('outputTextAreaTab1');
+
+      // get the start time
+      document.getElementById('executionTimeTab1').innerHTML = '';
+      const startTimeTab1 = new Date();
+      // Call the ConfigApi to get the mapFeatureConfig
+      const mapConfig = await cgpv.api.config.createMapConfig(inputTextAreaTab1.value.replaceAll('"', "'").replaceAll("\\'", "\'"), languageTab1);
+      if (urlExecutionChoiceTab1.value === 'getConfig') {
+        displayExecutionTime(startTimeTab1, 'executionTimeTab1')
+        displayMapConfig(mapConfig, 'Tab1');
+        elementSelectorTab1.dispatchEvent(new Event('change'));
+      }
+
+      if (urlExecutionChoiceTab1.value.includes('FetchAll')) {
+        // fetch service metadata for all map layers.
+        try {
+          await mapConfig.fetchAllServiceMetadata();
+          if (urlExecutionChoiceTab1.value.includes('ApplyUserConfig')) mapConfig.applyUserConfigToGeoviewLayers();
+          displayExecutionTime(startTimeTab1, 'executionTimeTab1');
+          displayMapConfig(mapConfig, 'Tab1');
+          elementSelectorTab1.dispatchEvent(new Event('change'));
+        } catch (error) {
+          throw new Error('Error while reading metadata. We should never get this message. Errors should be traped and resolve earlier.', error);
+        };
+      } else if (urlExecutionChoiceTab1.value.includes('LoopFetch')) {
+        mapConfig.map.listOfGeoviewLayerConfig.forEach(async (geoviewLayerConfig, i) => {
+          try {
+            await geoviewLayerConfig.fetchServiceMetadata();
+            if (urlExecutionChoiceTab1.value.includes('ApplyUserConfig')) geoviewLayerConfig.applyUserConfig();
+            displayExecutionTime(startTimeTab1, 'executionTimeTab1')
+            displayMapConfig(mapConfig, 'Tab1');
+            elementSelectorTab1.dispatchEvent(new Event('change'));
+          } catch (error) {
+            mapConfig.map.listOfGeoviewLayerConfig[i].setErrorDetectedFlag();
+            displayExecutionTime(startTimeTab1, 'executionTimeTab1')
+            displayMapConfig(mapConfig, 'Tab1');
+            elementSelectorTab1.dispatchEvent(new Event('change'));
+          };
+        });
+      }
+    });
+
+    // Create the listener that will update the input textarea and its line numbers while you edit it.
+    document.getElementById('inputTextAreaTab1').addEventListener('keyup', (event) => {
+      const numberOfLines = event.target.value.split('\n').length;
+      document.getElementById('inputLineNumbersTab1').innerHTML = Array(numberOfLines).fill('<span></span>').join('');
+    });
+
+    // GeoView Config Button (tab2) =============================================================================================
+
+    // Definition of the descriptions for the execution mode.
+    const executionChoicesTab2 = {
+      getConfig: "When you are ready, click the <b>Execute</b> button to call the <b>ConfigApi.createLayerConfig</b> method and displays the resulting GeoView layer configuration.</br>",
+      getConfigAndFetch: "When you are ready, click the <b>Execute</b> button to call the <b>ConfigApi.createLayerConfig</b> method, <b>Fetch The Metadata</b> and displays the resulting GeoView layer configuration.</br>",
+    }
+
+    // Create a listener for the execution options
+    const urlExecutionChoiceTab2 = document.getElementById('urlExecutionChoiceTab2');
+    urlExecutionChoiceTab2.addEventListener('change', function (e) {
+      const urlExecutionDescriptionTab2 = document.getElementById('urlExecutionDescriptionTab2');
+      urlExecutionDescriptionTab2.innerHTML = executionChoicesTab2[e.target.value];
+    });
+
+    urlExecutionChoiceTab2.value = 'getConfig';
+    urlExecutionChoiceTab2.dispatchEvent(new Event('change'));
+
+    // Definition of the samples that will be returned when you click on the 'Get a Sample URL' button.
+    const serviceUrlChoicesTab2 = {
+      geoCore: '12acd145-626a-49eb-b850-0a59c9bc7506',
+      esriDynamic: 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/',
+      esriFeature: 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Temporal_Test_Bed_en/MapServer/',
+      ogcWms: 'https://geo.weather.gc.ca/geomet',
+      ogcWfs: 'https://ahocevar.com/geoserver/wfs?REQUEST=GetCapabilities&VERSION=2.0.0&SERVICE=WFS',
+      esriImage: 'https://www5.agr.gc.ca/atlas/rest/services/imageservices/annual_crop_inventory_2022/ImageServer',
+      GeoJSON: 'https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/metadata-new.meta',
+    };
+
+    // Get the GeoView Layer Type drop-down object used to select the type of layer.
+    const GeoviewLayerTypeDropDownTab2 = document.getElementById('geoviewLayerTypeTab2');
+    // Get the 'Get a Sample URL' button object used to initialize the URL input field with a sample URL.
+    const sampleUrlTab2 = document.getElementById('sampleUrlTab2');
+    // Get the URL input field object used to enter and edit the service URL.
+    const serviceUrlAreaTab2 = document.getElementById('serviceUrlTab2');
+
+    // Sample checkbox listener that set the URL based on the GeoView Layer Type drop-down value.
+    sampleUrlTab2.addEventListener('click', (e) => {
+      serviceUrlAreaTab2.value = serviceUrlChoicesTab2[GeoviewLayerTypeDropDownTab2.value];
+    });
+
+    // Drop-down listener that set the URL based on the GeoView Layer Type drop-down value.
+    GeoviewLayerTypeDropDownTab2.addEventListener('change', (e) => {
+      if (!sampleUrlTab2.checked) return;
+      serviceUrlAreaTab2.value = serviceUrlChoicesTab2[GeoviewLayerTypeDropDownTab2.value];
+    });
+
+    // If the checkbox is checked, the URL input cannot be edited.
+    serviceUrlAreaTab2.addEventListener('keydown', (e) => {
+      if (sampleUrlTab2.checked) e.preventDefault();
+    });
+
+    // Input field listener that will call the config api guessLayerType service and set the GeoView Layer
+    // Type drop-down with the resulting value.
+    serviceUrlAreaTab2.addEventListener('keyup', (e) => {
+      if (sampleUrlTab2.checked) return;
+      const value = cgpv.api.config.guessLayerType(serviceUrlAreaTab2.value);
+      GeoviewLayerTypeDropDownTab2.value = value || 'unknown';
+    });
+
+    // Initialise the GeoView Layer Type drop-down value and set input field accordingly
+    serviceUrlAreaTab2.value = serviceUrlChoicesTab2['geoCore'];
+    serviceUrlAreaTab2.dispatchEvent(new Event('keyup'));
+
+    // Create the listener for the Element Displayed drop-down located at the bottom of the output zone.
+    elementSelectorTab2.value = 'geoviewLayer';
+    createElementSelector('elementSelectorTab2', 'outputTextAreaTab2', 'outputLineNumbersTab2');
+
+    // Get the Execute button object and attach to it a listener to trigger the service call
+    document.getElementById('executeOptionTab2').addEventListener('click', async function (e) {
+      // Get the Geoview layer Type value.
+      const layerTypeTab2 = document.getElementById('geoviewLayerTypeTab2').value;
+      // Get the message field located at the top of the output zone.
+      const messageTab2 = document.getElementById('messageTab2');
+      // Get the value of the language button.
+      const languageTab2 = document.getElementById('languageTab2').value;
+      // Get the input field object used to input the URL.
+      const serviceUrlAreaTab2 = document.getElementById('serviceUrlTab2');
+      // Get the output textarea object used to display the GeoView Layer Config.
+      const outputTextAreaTab2 = document.getElementById('outputTextAreaTab2');
+      // get the layer list
+      const csvLayers = document.getElementById('layerListTab2').value
+      const layerListTab2 = csvLayers ? csvLayers.split(',').map((item) => {
+        return item.trim();
+      }) : [];
+
+      // get the start time
+      const startTimeTab2 = new Date();
+      // Call the ConfigApi to get the GeoView Layer Config
+      const geoviewLayerConfig = await cgpv.api.config.createLayerConfig(
+        serviceUrlAreaTab2.value.trim(),
+        layerTypeTab2,
+        layerListTab2,
+        languageTab2);
+      if (urlExecutionChoiceTab2.value === 'getConfig') displayExecutionTime(startTimeTab2, 'executionTimeTab2');
+
+      if (geoviewLayerConfig) {
+        if (urlExecutionChoiceTab2.value === 'getConfigAndFetch') {
+          // Fetch service metadata
+          try {
+            await geoviewLayerConfig.fetchServiceMetadata();
+            displayExecutionTime(startTimeTab2, 'executionTimeTab2');
+          } catch (error) {
+            throw new Error('Error while reading metadata. We should never get this message. Errors should be traped and resolve earlier.', error);
+          };
+        }
+
+        // Create a recursive function that scans the layer structure for erroneous sublayers. This function is used in the following line.
+        const subLayerError = (listOfLayerEntryConfig) => {
+          return listOfLayerEntryConfig.reduce((accumulator, subLayer) => {
+            if (subLayer.isLayerGroup) return accumulator || subLayer.getErrorDetectedFlag() || subLayerError(subLayer.listOfLayerEntryConfig);
+            return accumulator || subLayer.getErrorDetectedFlag();
+          }, false);
+        }
+
+        // If an error is detected
+        if  (geoviewLayerConfig.getErrorDetectedFlag() || subLayerError(geoviewLayerConfig.listOfLayerEntryConfig))
+          printMessage(messageTab2, 'Execution completed, but the GeoView configuration contains invalid layers.', 'error');
+        else printMessage(messageTab2, 'Execution completed and no error detecteds');
+
+        // Set the global variables associated to the Element Display zone.
+        geoviewLayerString = geoviewLayerConfig?.serialize();
+        layerPathErrorFlag = generateLayerPathErrorFlag(
+          geoviewLayerConfig.listOfLayerEntryConfig,
+          `geoviewLayerId ${geoviewLayerConfig.geoviewLayerId}: ${geoviewLayerConfig.getErrorDetectedFlag()? 'ERROR' : 'Ok'}\nlistOfLayerEntryConfig:`
+        );
+
+        // Output the new GeoView Layer config representation.
+        elementSelectorTab2.dispatchEvent(new Event('change'));
+      } else {
+        printMessage(messageTab2, 'URL is invalid, see console for details...', 'error');
+      }
+    });
+
+    // Config Url Validate Button (tab3) ========================================================================================
+
+    // Definition of the descriptions for the execution mode.
+    const executionChoicesTab3 = {
+      getConfig: "The <b>Get Config From Url</b> option calls the <b>ConfigApi.createMapConfig</b> method and displays the resulting map configuration.</br>",
+      'GetConfig-FetchAll': "The <b>Get Config From Url and Fetch All Metadata</b> option calls the <b>ConfigApi.createMapConfig</b> method, <b>Fetch All GeoView Layer Metadata</b> and displays the resulting map configuration.</br>",
+      'GetConfig-LoopFetch': "The <b>Get Config From Url and Fetch Metadata One by One</b> options calls the <b>ConfigApi.createMapConfig</b> method, <b>Fetch GeoView Layer metadata One by One</b> and displays the resulting map configuration.</br>",
+      'GetConfig-FetchAll-ApplyUserConfig': "The <b>Get Config From Url, Fetch All Metadata and Apply User Config</b> option calls the <b>ConfigApi.createMapConfig</b> method, <b>Fetch All GeoView Layer Metadata</b>, <b>Apply User Config</b> and displays the resulting map configuration.</br>",
+      'GetConfig-LoopFetch-ApplyUserConfig': "The <b>Get Config From Url, Fetch Metadata One by One and Apply User Config</b> options calls the <b>ConfigApi.createMapConfig</b> method, <b>Fetch GeoView Layer metadata One by One</b>, <b>Apply User Config</b> and displays the resulting map configuration.</br>",
+    }
+
+    //Create a listener for the execution options
+    const urlExecutionChoiceTab3 = document.getElementById('urlExecutionChoiceTab3');
+    urlExecutionChoiceTab3.addEventListener('change', function (e) {
+      const urlExecutionDescriptionTab3 = document.getElementById('urlExecutionDescriptionTab3');
+      urlExecutionDescriptionTab3.innerHTML = executionChoicesTab3[e.target.value];
+    });
+
+    // Initialize the execution choice to getConfig and display the explicative text.
+    urlExecutionChoiceTab3.value = 'getConfig';
+    urlExecutionChoiceTab3.dispatchEvent(new Event('change'));
+
+    // Get the input field object used to enter and edit the URL parameter string.
+    const inputTextAreaTab3 = document.getElementById('inputTextAreaTab3');
+
+    // Create the listener for the Element Displayed drop-down located at the bottom of the output zone.
+    elementSelectorTab3.value = 'mapConfig';
+    createElementSelector('elementSelectorTab3', 'outputTextAreaTab3', 'outputLineNumbersTab3');
+
+    // Get the Execute button object and attach a listener to trigger the service call.
+    document.getElementById('executeOptionTab3').addEventListener('click', async function (e) {
+      // Get the message field located at the top of the output zone.
+      const messageTab3 = document.getElementById('messageTab3');
+      // Get the output textarea object used to display the Map Feature Config.
+      const outputTextAreaTab3 = document.getElementById('outputTextAreaTab3');
+
+      // get the start time
+      const startTimeTab3 = new Date();
+      // Call the ConfigApi to get the Map Feature Config using the getConfigFromUrl method.
+      const mapConfig = await cgpv.api.config.getConfigFromUrl(inputTextAreaTab3.value.trim())
+      if (urlExecutionChoiceTab3.value === 'getConfig') {
+        displayExecutionTime(startTimeTab3, 'executionTimeTab3');
+        displayMapConfig(mapConfig, 'Tab3');
+      }
+
+      if (urlExecutionChoiceTab3.value.includes('FetchAll')) {
+        // fetch service metadata for all map layers.
+        try {
+          await mapConfig.fetchAllServiceMetadata();
+          if (urlExecutionChoiceTab3.value.includes('ApplyUserConfig')) mapConfig.applyUserConfigToGeoviewLayers();
+          displayExecutionTime(startTimeTab3, 'executionTimeTab3');
+          displayMapConfig(mapConfig, 'Tab3');
+        } catch (error) {
+          throw new Error('Error while reading metadata. We should never get this message. Errors should be traped and resolve earlier.', error);
+        };
+      } else if (urlExecutionChoiceTab3.value.includes('LoopFetch')) {
+        mapConfig.map.listOfGeoviewLayerConfig.forEach(async (geoviewLayerConfig, i) => {
+          try {
+            await geoviewLayerConfig.fetchServiceMetadata();
+            if (urlExecutionChoiceTa31.value.includes('ApplyUserConfig')) geoviewLayerConfig.applyUserConfig();
+            displayMapConfig(mapConfig, 'Tab3');
+            displayExecutionTime(startTimeTab3, 'executionTimeTab3');
+          } catch (error) {
+            this.map.listOfGeoviewLayerConfig[i].setErrorDetectedFlag();
+            displayMapConfig(mapConfig, 'Tab3');
+            displayExecutionTime(startTimeTab3, 'executionTimeTab3');
+          };
+        });
+      }
+      elementSelectorTab3.dispatchEvent(new Event('change'));
+    });
+
+    // Metadata Layer Tree Button (tab4) ========================================================================================
+
+    // Definition of the samples that will be returned when you click on the 'Get a Sample URL' button.
+    const serviceUrlChoicesTab4 = {
+      unknown: 'unknown',
+      esriDynamic: 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer',
+      esriFeature: 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/canada_flood_map_inventory_en/MapServer',
+      ogcWms: 'https://geo.weather.gc.ca/geomet',
+      esriImage: 'https://www5.agr.gc.ca/atlas/rest/services/imageservices/annual_crop_inventory_2022/ImageServer',
+      GeoJSON: 'https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/metadata-new.meta',
+      CSV: 'https://canadian-geospatial-platform.github.io/geoview/public/datasets/csv-files/Station_List_Minus_HQ-MELCC.csv',
+      ogcFeature: 'https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev',
+      GeoPackage: 'https://canadian-geospatial-platform.github.io/geoview/public/datasets/geopackages/rivers.gpkg',
+      ogcWfs: 'https://ahocevar.com/geoserver/wfs?REQUEST=GetCapabilities&VERSION=2.0.0&SERVICE=WFS',
+      xyzTiles: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
+      vectorTiles: 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT3978_v11/VectorTileServer/tile/{z}/{y}/{x}.pbf',
+      imageStatic: 'https://datacube-prod-data-public.s3.ca-central-1.amazonaws.com/store/imagery/aerial/napl/napl-ring-of-fire/napl-ring-of-fire-1954-08-07-60k-thumbnail.png',
+    };
+
+    // Get the GeoView Layer Type drop-down object used to select the type of layer.
+    const GeoviewLayerTypeDropDownTab4 = document.getElementById('geoviewLayerTypeTab4');
+    // Get the 'Get a Sample URL' button object used to initialize the URL input field with a sample URL.
+    const sampleUrlTab4 = document.getElementById('sampleUrlTab4');
+    // Get the URL input field object used to enter and edit the service URL.
+    const serviceUrlAreaTab4 = document.getElementById('serviceUrlTab4');
+
+    // Sample checkbox listener that set the URL based on the GeoView Layer Type drop-down value.
+    sampleUrlTab4.addEventListener('click', (e) => {
+      serviceUrlAreaTab4.value = serviceUrlChoicesTab4[GeoviewLayerTypeDropDownTab4.value];
+    });
+
+    // Drop-down listener that set the URL based on the GeoView Layer Type drop-down value.
+    GeoviewLayerTypeDropDownTab4.addEventListener('change', (e) => {
+      if (!sampleUrlTab4.checked) return;
+      serviceUrlAreaTab4.value = serviceUrlChoicesTab4[GeoviewLayerTypeDropDownTab4.value];
+    });
+
+    // If the checkbox is checked, the URL input cannot be edited.
+    serviceUrlAreaTab4.addEventListener('keydown', (e) => {
+      if (sampleUrlTab4.checked) e.preventDefault();
+    });
+
+    // Input field listener that will call the config api guessLayerType service and set the GeoView Layer
+    // Type drop-down with the resulting value.
+    serviceUrlAreaTab4.addEventListener('keyup', (e) => {
+      if (sampleUrlTab4.checked) return;
+      GeoviewLayerTypeDropDownTab4.value = cgpv.api.config.guessLayerType(serviceUrlAreaTab4.value);
+      if (!GeoviewLayerTypeDropDownTab4.value) GeoviewLayerTypeDropDownTab4.value = 'unknown';
+    });
+
+    // Initialise the GeoView Layer Type drop-down value and set input field accordingly
+    serviceUrlAreaTab4.value = serviceUrlChoicesTab4['esriDynamic'];
+    serviceUrlAreaTab4.dispatchEvent(new Event('keyup'));
+
+    // Create the listener for the Element Displayed drop-down located at the bottom of the output zone.
+    const createLayerConfigButtonTab4 = document.getElementById('createLayerConfigTab4');
+
+    // Create the listener for the Element Displayed drop-down located at the bottom of the output zone.
+    createElementSelector('elementSelectorTab4', 'outputTextAreaTab4', 'outputLineNumbersTab4');
+
+    // Get the Create Layer Tree button object and attach to it a listener to trigger the service call
+    createLayerConfigButtonTab4.addEventListener('click', async function (e) {
+      // Clear
+      metadataLayerTreeString = '';
+      elementSelectorTab4.dispatchEvent(new Event('change'));
+
+      // Get the Geoview layer Type value.
+      const layerTypeTab4 = document.getElementById('geoviewLayerTypeTab4').value;
+      if (layerTypeTab4 === 'unknown') return;
+      // Get the message field located at the top of the output zone.
+      const messageTab4 = document.getElementById('messageTab4');
+      // Get the value of the language button.
+      const languageTab4 = document.getElementById('languageTab4').value;
+      // Get the input field object used to input the URL.
+      const serviceUrlAreaTab4 = document.getElementById('serviceUrlTab4');
+      // Get the output textarea object used to display the Layer Tree.
+      const outputTextAreaTab4 = document.getElementById('outputTextAreaTab4');
+      // get the layer list
+      const csvLayers = document.getElementById('layerListTab4').value;
+      const layerListTab4 = csvLayers ? csvLayers.split(',').map((item) => {
+        return item.trim();
+      }) : [];
+
+      try {
+        // Call the ConfigApi to get the Layer Tree
+        const metadataLayerTree = await cgpv.api.config.createInitConfigFromType(
+          'ExampleID',
+          'Example Name',
+          layerTypeTab4,
+          serviceUrlAreaTab4.value.trim(),
+          layerListTab4,
+          languageTab4
+        );
+
+        // Output instanciation result
+        metadataLayerTreeString = cgpv.api.layer.serializeGeoviewLayerConfig(metadataLayerTree);
+
+        layerPathErrorFlag = generateLayerPathErrorFlag(metadataLayerTree.listOfLayerEntryConfig);
+
+        printMessage(messageTab4, 'Layer tree is valid');
+      } catch (error) {
+        metadataLayerTreeString = '';
+        layerPathErrorFlag = '[]';
+        printMessage(messageTab4, 'Cannot generate layer tree, see console for details...', 'error');
+        cgpv.logger.logError('Cannot generate layer tree, see console for details\n', error);
+      }
+
+      elementSelectorTab4.dispatchEvent(new Event('change'));
+    });
+
+    // create snippets
+    window.addEventListener('load', () => {
+      createCodeSnippet();
+      createConfigSnippet();
+    });</script></body></html>
