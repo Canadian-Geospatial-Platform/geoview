@@ -513,24 +513,50 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
     );
   };
 
-  const renderItems = (): JSX.Element => {
-    return (
-      <Grid
-        className="layer-details-panel"
-        container
-        direction="column"
-        spacing={0}
-        sx={sxClasses.itemsGrid}
-        justifyContent="left"
-        justifyItems="stretch"
-      >
-        {layerItems?.map((item) => (
-          <Grid key={`${layerPath}/${item.geometryType}/${item.name}/${item.icon || 'no-icon'}`} sx={{ marginBottom: '5px' }}>
-            {renderItemCheckbox(item)}
+  const renderWMSImage = (): JSX.Element | null => {
+    // If it's a WMS and we have any iconImage and no items
+    if (
+      layerSchemaTag === CONST_LAYER_TYPES.WMS &&
+      layerIcons?.length &&
+      layerIcons[0].iconImage &&
+      layerIcons[0].iconImage !== 'no data' &&
+      !layerItems?.length
+    ) {
+      return (
+        <Grid sx={sxClasses.itemsGrid}>
+          <Grid container pt={6} pb={6}>
+            <Box component="img" alt="" src={layerIcons[0].iconImage} sx={sxClasses.wmsImage} />
           </Grid>
-        ))}
-      </Grid>
-    );
+        </Grid>
+      );
+    }
+
+    return null;
+  };
+
+  const renderItems = (): JSX.Element | null => {
+    // If we have any items
+    if (layerItems && layerItems.length > 0) {
+      return (
+        <Grid
+          className="layer-details-panel"
+          container
+          direction="column"
+          spacing={0}
+          sx={sxClasses.itemsGrid}
+          justifyContent="left"
+          justifyItems="stretch"
+        >
+          {layerItems?.map((item) => (
+            <Grid key={`${layerPath}/${item.geometryType}/${item.name}/${item.icon || 'no-icon'}`} sx={{ marginBottom: '5px' }}>
+              {renderItemCheckbox(item)}
+            </Grid>
+          ))}
+        </Grid>
+      );
+    }
+
+    return null;
   };
 
   const renderDetailsButton = (): JSX.Element => {
@@ -716,25 +742,6 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
     return t('legend.itemsCount', { count, totalCount });
   })();
 
-  const renderWMSImage = (): JSX.Element | null => {
-    if (
-      layerSchemaTag === CONST_LAYER_TYPES.WMS &&
-      layerIcons?.length &&
-      layerIcons[0].iconImage &&
-      layerIcons[0].iconImage !== 'no data'
-    ) {
-      return (
-        <Grid sx={sxClasses.itemsGrid}>
-          <Grid container pt={6} pb={6}>
-            <Box component="img" alt="" src={layerIcons[0].iconImage} sx={sxClasses.wmsImage} />
-          </Grid>
-        </Grid>
-      );
-    }
-
-    return null;
-  };
-
   // TODO: WCAG Issue #3116 - Consider using CSS rather than Divider for cleaner HTML structure
   // Render
   return (
@@ -794,7 +801,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
               <Divider sx={{ height: 'auto', marginTop: '10px', marginBottom: '10px' }} variant="middle" />
               {renderWMSImage()}
               <Box>
-                {layerItems && layerItems.length > 0 && renderItems()}
+                {renderItems()}
                 {layerChildPaths && layerChildPaths.length > 0 && (
                   <List>
                     {layerChildPaths.map((childPath) => (
