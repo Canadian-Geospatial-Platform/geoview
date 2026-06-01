@@ -21,9 +21,6 @@ import type {
   TypeFeatureInfoResult,
   TypeFieldEntry,
   TypeIconSymbolVectorConfig,
-  TypeLayerStyleConfig,
-  TypeLayerStyleConfigInfo,
-  TypeLayerStyleSettings,
 } from '@/api/types/map-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { TypeLegend, TypeMetadataEsriRasterFunctionInfos, TypeMosaicRule } from '@/api/types/layer-schema-types';
@@ -137,54 +134,28 @@ export class GVEsriImage extends AbstractGVRaster {
       }
 
       const legendJson = await Fetch.fetchEsriJson<TypeEsriImageLayerLegend>(legendUrl);
-      let legendInfo;
-      if (legendJson.layers && legendJson.layers.length === 1) {
-        legendInfo = legendJson.layers[0].legend;
-      } else if (legendJson.layers.length) {
-        const layerInfo = legendJson.layers.find((layer) => Number(layer.layerId) === Number(layerConfig.layerId));
-        if (layerInfo) legendInfo = layerInfo.legend;
-      }
-      if (!legendInfo) {
-        const legend: TypeLegend = {
+      const layerInfo = legendJson.layers?.find((lyr) => lyr.layerId.toString() === layerConfig.layerId) ?? legendJson.layers?.[0];
+      const legendInfo = layerInfo?.legend;
+
+      if (legendInfo) {
+        const styleConfig = GeoviewRenderer.createPointStyleConfigFromEsriLegend(
+          legendInfo,
+          layerConfig.getInitialSettings()?.states?.visible ?? true // default: true
+        );
+
+        return {
           type: CONST_LAYER_TYPES.ESRI_IMAGE,
-          styleConfig: this.getStyle(),
-          legend: null,
+          styleConfig,
+          legend: await GeoviewRenderer.getLegendStyles(styleConfig),
         };
-        return legend;
       }
-      const uniqueValueStyleInfo: TypeLayerStyleConfigInfo[] = [];
-      legendInfo.forEach((info) => {
-        const styleInfo: TypeLayerStyleConfigInfo = {
-          label: info.label,
-          visible: layerConfig.getInitialSettings()?.states?.visible ?? true, // default: true
-          values: info.label.split(','),
-          settings: {
-            type: 'iconSymbol',
-            mimeType: info.contentType,
-            src: info.imageData,
-            width: info.width,
-            height: info.height,
-          } as TypeIconSymbolVectorConfig,
-        };
-        uniqueValueStyleInfo.push(styleInfo);
-      });
-      const styleSettings: TypeLayerStyleSettings = {
-        type: 'uniqueValue',
-        fields: ['default'],
-        hasDefault: false,
-        info: uniqueValueStyleInfo,
-      };
-      const styleConfig: TypeLayerStyleConfig = {
-        Point: styleSettings,
-      };
 
-      const legend: TypeLegend = {
+      // No good
+      return {
         type: CONST_LAYER_TYPES.ESRI_IMAGE,
-        styleConfig,
-        legend: await GeoviewRenderer.getLegendStyles(styleConfig),
+        styleConfig: this.getStyle(),
+        legend: null,
       };
-
-      return legend;
     } catch (error: unknown) {
       logger.logError(`Get Legend for ${layerConfig.layerPath} error`, error);
       return null;

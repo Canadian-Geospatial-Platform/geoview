@@ -273,6 +273,9 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
       if (!this.#abortController.signal.aborted) {
         setStoreFeatureInfoDetails(this.getMapId(), layerPath, 'processed', arrayOfRecords, !promiseResult.promiseGeometries);
       }
+
+      // Callback about it
+      callbackWhenFirstQueryStarted?.();
     } catch (error: unknown) {
       // If aborted
       if (error instanceof RequestAbortedError || this.#abortController.signal.aborted) {
@@ -289,9 +292,6 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
         // Log
         logger.logPromiseFailed('queryLayerFeatures in queryLayers in FeatureInfoLayerSet', error);
       }
-    } finally {
-      // Callback about it
-      callbackWhenFirstQueryStarted?.();
     }
   }
 

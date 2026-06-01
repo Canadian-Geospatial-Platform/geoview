@@ -77,6 +77,18 @@
             "tileMatrixSet": "PM_0_18"
           }
         ]
+      },
+      {
+        "geoviewLayerId": "timeZonesLYR",
+        "metadataAccessPath": "https://sampleserver6.arcgisonline.com/arcgis/rest/services/WorldTimeZones/MapServer/WMTS",
+        "geoviewLayerName": "Timezones",
+        "geoviewLayerType": "ogcWmts",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "2",
+            "tileMatrixSet": "default028mm"
+          }
+        ]
       }
     ]
   },

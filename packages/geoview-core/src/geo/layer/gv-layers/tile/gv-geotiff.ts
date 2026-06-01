@@ -5,12 +5,13 @@ import type { Projection as OLProjection } from 'ol/proj';
 
 import { CONST_LAYER_TYPES, type TypeLegend } from '@/api/types/layer-schema-types';
 import type { GeoTIFFLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/geotiff-layer-entry-config';
-import { AbstractGVTile } from '@/geo/layer/gv-layers/tile/abstract-gv-tile';
-import { GeoUtilities } from '@/geo/utils/utilities';
-import { Projection } from '@/geo/utils/projection';
 import { logger } from '@/core/utils/logger';
 import { Fetch } from '@/core/utils/fetch-helper';
 import type { RGBA } from '@/core/utils/utilities';
+import { AbstractGVTile } from '@/geo/layer/gv-layers/tile/abstract-gv-tile';
+import { GeoUtilities } from '@/geo/utils/utilities';
+import { Projection } from '@/geo/utils/projection';
+import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 
 /**
  * Manages a GeoTIFF layer.
@@ -133,8 +134,8 @@ export class GVGeoTIFF extends AbstractGVTile {
    * @param layerConfig - The layer configuration
    * @returns A promise that resolves with the image data or null
    */
-  static #getLegendImage(layerConfig: GeoTIFFLayerEntryConfig): Promise<string | ArrayBuffer | null> {
-    const promisedImage = new Promise<string | ArrayBuffer | null>((resolve) => {
+  static #getLegendImage(layerConfig: GeoTIFFLayerEntryConfig): Promise<string | null> {
+    const promisedImage = new Promise<string | null>((resolve) => {
       const metadata = layerConfig.getServiceMetadata();
       // If there is a thumbnail asset in the metadata, use it as legend
       if (metadata?.assets?.thumbnail?.href) {
@@ -142,17 +143,8 @@ export class GVGeoTIFF extends AbstractGVTile {
 
         // Fetch the blob
         Fetch.fetchBlob(legendUrl, { credentials: 'omit' })
-          .then((blob) => {
-            // The blob has been read, read it with a FileReader
-            const reader = new FileReader();
-            reader.onloadend = () => {
-              resolve(reader.result);
-            };
-            reader.onerror = () => {
-              resolve(null);
-            };
-            reader.readAsDataURL(blob);
-          })
+          .then((blob) => GeoviewRenderer.readBlobAsDataUrl(blob))
+          .then((dataUrl) => resolve(dataUrl))
           .catch(() => resolve(null));
       } else resolve(null);
     });
@@ -176,35 +168,14 @@ export class GVGeoTIFF extends AbstractGVTile {
       if (legendImage) {
         // Create image element directly to avoid recursion
         // GV: use direct Image constructor to avoid errors using GeoviewRenderer.loadImage
-        const image = new Image();
-
-        // Create promise for image loading
-        const imageLoaded = new Promise<HTMLImageElement>((resolve, reject) => {
-          image.onload = () => {
-            resolve(image);
-          };
-          image.onerror = (error) => {
-            reject(error);
-          };
-          // Set src to start loading
-          image.src = legendImage as string;
-        });
-
-        // Wait for image to load
-        const loadedImage = await imageLoaded;
+        const loadedImage = await GeoviewRenderer.loadImageFromDataUrl(legendImage);
 
         // If image was loaded successfully
-        if (loadedImage && loadedImage.width > 0 && loadedImage.height > 0) {
-          const drawingCanvas = document.createElement('canvas');
-          drawingCanvas.width = image.width;
-          drawingCanvas.height = image.height;
-          const drawingContext = drawingCanvas.getContext('2d', { willReadFrequently: true })!;
-          drawingContext.drawImage(image, 0, 0);
-
+        if (loadedImage.width > 0 && loadedImage.height > 0) {
           // Return legend information
           return {
             type: CONST_LAYER_TYPES.GEOTIFF,
-            legend: drawingCanvas,
+            legend: GeoviewRenderer.createCanvasFromImage(loadedImage),
           };
         }
       }

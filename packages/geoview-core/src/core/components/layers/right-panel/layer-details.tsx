@@ -236,6 +236,9 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
   // Layer is ESRI Dynamic
   const isEsriDynamic = layerSchemaTag === CONST_LAYER_TYPES.ESRI_DYNAMIC;
 
+  // Layer is WMTS
+  const isWMTS = layerSchemaTag === CONST_LAYER_TYPES.WMTS;
+
   // Layer has a value expression in its style config
   const hasValueExpression = useMemo((): boolean => {
     // Log
@@ -458,7 +461,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
     const styleConfig = layerStyleConfig[item.geometryType];
     const canToggle = canToggleStyleItems(styleConfig);
 
-    const isDisabled = layerHidden || !layerCanToggle || (isEsriDynamic && !!hasValueExpression);
+    const isDisabled = layerHidden || !layerCanToggle || (isEsriDynamic && !!hasValueExpression) || isWMTS;
 
     // Build the label content with icon and text
     const labelContent = (
@@ -495,7 +498,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
    * Renders the header checkbox that toggles visibility of all legend items at once.
    */
   const renderHeaderCheckbox = (): JSX.Element => {
-    const isDisabled = layerHidden || !layerCanToggle || (isEsriDynamic && hasValueExpression);
+    const isDisabled = layerHidden || !layerCanToggle || (isEsriDynamic && hasValueExpression) || isWMTS;
 
     const labelContent = (
       <Box component="span" sx={{ fontWeight: 'bold', ...(layerHidden && hiddenStyle) }}>
