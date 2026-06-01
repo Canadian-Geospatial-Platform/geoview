@@ -1516,11 +1516,11 @@ export async function createGuideObject(language: TypeDisplayLanguage, assetsURL
  * Callback function which is fired when keyboard key is pressed.
  *
  * @param key - The keyboard key pressed by user
- * @param callbackId - The Id of element which init the focus trap
- * @param isFocusTrapped - Optional, component is focus trapped enabled
  * @param cb - Optional callback function to be fired
+ * @param callbackId - Optional The Id of element which init the focus trap
+ * @param isFocusTrapped - Optional, component is focus trapped enabled
  */
-export function handleEscapeKey(key: string, callbackId: string, isFocusTrapped?: boolean, cb?: () => void): void {
+export function handleEscapeKey(key: string, cb?: () => void, callbackId?: string, isFocusTrapped?: boolean): void {
   if (key === 'Escape') {
     if (isFocusTrapped && callbackId) {
       setTimeout(() => {

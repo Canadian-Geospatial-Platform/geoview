@@ -1,5 +1,8 @@
 import { memo, useCallback, useMemo, useState } from 'react';
+
 import { useTheme } from '@mui/material/styles';
+import type { SxProps } from '@mui/material';
+
 import { Box } from '@/ui';
 
 import { Attribution } from '@/core/components/attribution/attribution';
@@ -14,6 +17,7 @@ import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 /** Base styles for the map info bar container. */
 const MAP_INFO_BASE_STYLES = {
   display: 'flex',
+  gap: '6px',
   alignItems: 'center',
   position: 'absolute',
   bottom: 0,
@@ -54,8 +58,9 @@ export const MapInfo = memo(function MapInfo({ onScrollShellIntoView }: MapInfoP
   /**
    * Computes the dynamic container styles for the map info bar.
    */
-  const memoContainerStyles = useMemo(
-    () => ({
+  const memoContainerStyles = useMemo((): SxProps => {
+    logger.logTraceUseMemo('MAP-INFO - memoContainerStyles', expanded);
+    return {
       ...MAP_INFO_BASE_STYLES,
       height: expanded ? '80px' : '40px',
       borderBottom: `1px solid ${theme.palette.geoViewColor.bgColor.dark[650]}`,
@@ -64,23 +69,24 @@ export const MapInfo = memo(function MapInfo({ onScrollShellIntoView }: MapInfoP
       width: 'calc(100% - 50px)',
       zIndex: theme.zIndex.appBar + 100, // Above app-bar panels
       boxShadow: `0 0 5px ${theme.palette.geoViewColor.bgColor.dark[200]}`,
-    }),
-    [expanded, theme.palette.geoViewColor.bgColor, theme.zIndex.appBar]
-  );
+    };
+  }, [expanded, theme]);
 
   /**
    * Computes the static map container styles.
    */
-  const memoStaticContainerStyles = useMemo(
-    () => ({
+  const memoStaticContainerStyles = useMemo((): SxProps => {
+    logger.logTraceUseMemo('MAP-INFO - memoStaticContainerStyles');
+    return {
       ...MAP_INFO_BASE_STYLES,
       height: '50px',
       background: theme.palette.geoViewColor.grey.lighten(0.8, 0.8),
       width: 'fit-content',
       borderRadius: '70px',
-    }),
-    [theme.palette.geoViewColor.grey]
-  );
+    };
+  }, [theme]);
+
+  // #region Handlers
 
   /**
    * Handles toggling the expanded state.
@@ -88,6 +94,8 @@ export const MapInfo = memo(function MapInfo({ onScrollShellIntoView }: MapInfoP
   const handleExpand = useCallback((value: boolean): void => {
     setExpanded(value);
   }, []);
+
+  // #endregion Handlers
 
   return (
     <Box

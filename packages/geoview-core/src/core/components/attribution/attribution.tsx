@@ -8,6 +8,7 @@ import { ClickAwayListener } from '@mui/material';
 import { Box, CopyrightIcon, Popper, Paper, IconButton, Typography } from '@/ui';
 import { useStoreMapAttribution, useStoreMapInteraction } from '@/core/stores/states/map-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
+import { handleEscapeKey } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 
 /** Styles for the popper content box. */
@@ -22,11 +23,10 @@ const ICON_BUTTON_BASE_STYLES = {
 } as const;
 
 /**
- * Attribution component that displays a popover with map attribution text.
+ * Creates the attribution component that displays a popover with map attribution text.
  *
  * @returns The attribution icon button and popover
  */
-// Memoizes entire component, preventing re-renders if props haven't changed
 export const Attribution = memo(function Attribution(): JSX.Element {
   // Log
   logger.logTraceRender('components/attribution/attribution');
@@ -50,7 +50,7 @@ export const Attribution = memo(function Attribution(): JSX.Element {
   // Set style for type of interaction (dynamic vs static)
   const buttonStyles = {
     ...ICON_BUTTON_BASE_STYLES,
-    color: interaction === 'dynamic' ? theme.palette.geoViewColor.bgColor.dark[650] : theme.palette.geoViewColor.grey.dark[500],
+    color: interaction === 'dynamic' ? theme.palette.geoViewColor?.bgColor.dark[650] : theme.palette.geoViewColor?.grey.dark[500],
   };
 
   // Attribution values
@@ -74,26 +74,49 @@ export const Attribution = memo(function Attribution(): JSX.Element {
     if (open) setOpen(false);
   }, [open]);
 
-  // #endregion
+  /**
+   * Handles closing the attribution popper.
+   */
+  const handleClose = useCallback((): void => {
+    setOpen(false);
+  }, []);
+
+  /**
+   * Handles closing the popper when keyboard focus leaves the button.
+   */
+  const handleBlur = useCallback((): void => {
+    // Popper is informational-only, so any blur means focus left the button
+    if (open) setOpen(false);
+  }, [open]);
+
+  // #endregion Handlers
 
   return (
     <ClickAwayListener mouseEvent="onMouseDown" touchEvent="onTouchStart" onClickAway={handleClickAway}>
-      <Box>
+      <Box onBlur={handleBlur}>
         <IconButton
-          id="attribution"
+          id={`${mapId}-attribution`}
           onClick={handleOpenPopover}
           className={open ? 'active' : ''}
           aria-label={t('mapctrl.attribution.tooltip')}
+          aria-expanded={open}
+          aria-controls={open ? `${mapId}-attribution-popup` : undefined}
+          aria-haspopup="true"
           tooltipPlacement="top"
           sx={buttonStyles}
         >
           <CopyrightIcon />
         </IconButton>
         <Popper
+          id={`${mapId}-attribution-popup`}
+          role="region"
+          aria-label={t('mapctrl.attribution.tooltip')}
           open={open}
           anchorEl={anchorEl}
           placement="top-end"
           container={mapElem}
+          handleKeyDown={handleEscapeKey}
+          onClose={handleClose}
           sx={{
             pointerEvents: 'auto',
             zIndex: theme.zIndex.modal + 100,

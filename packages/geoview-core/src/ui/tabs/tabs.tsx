@@ -305,9 +305,14 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
 
         // Guard: only proceed if we have a valid tab with an id
         if (targetTab?.id) {
-          handleEscapeKey(event.key, createTabId(mapId, targetTab.id), true, () => {
-            onCloseKeyboard?.();
-          });
+          handleEscapeKey(
+            event.key,
+            () => {
+              onCloseKeyboard?.();
+            },
+            createTabId(mapId, targetTab.id),
+            true
+          );
         }
       }
     };

@@ -14,7 +14,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   scaleContainer: {
     display: 'flex',
     backgroundColor: 'transparent',
-    border: 'none',
     height: '100%',
     ':hover': {
       backgroundColor: 'transparent',
@@ -22,11 +21,8 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
   },
   scaleExpandedContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    height: '100%',
     gap: theme.spacing(5),
+    padding: theme.spacing(0, 6),
   },
   scaleExpandedCheckmarkText: {
     display: 'flex',
@@ -44,6 +40,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     textTransform: 'lowercase',
     position: 'relative',
     display: 'inline-block',
+    textAlign: 'center',
 
     '&.interaction-static': {
       fontSize: theme.palette.geoViewFontSize.md,
