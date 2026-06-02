@@ -30,6 +30,9 @@ export class XYZTilesLayerEntryConfig extends TileLayerEntryConfig {
     this.minScaleDenominator = layerConfig.minScaleDenominator || 0;
     this.maxScaleDenominator = layerConfig.maxScaleDenominator || 0;
 
+    // Value for this.source.featureInfo.queryable can only be false.
+    this.setQueryableSource(false);
+
     // If pointing to something else than {z}/{y}/{x}
     if (!this.getDataAccessPath().includes('{z}/{y}/{x}')) {
       // Set it
