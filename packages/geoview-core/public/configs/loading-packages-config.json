@@ -32,6 +32,11 @@
       ]
     }
   },
+   "footerBar": {
+    "tabs": {
+      "core": []
+    }
+  },
   "corePackages": [],
   "theme": "geo.ca"
 }

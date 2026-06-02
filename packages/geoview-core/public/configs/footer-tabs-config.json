@@ -27,16 +27,15 @@
       }
     ]
   },
-  "components": [
-    "north-arrow",
-    "overview-map"
-  ],
+  "components": ["north-arrow", "overview-map"],
+  "appBar": {
+    "tabs": {
+      "core": ["details", "geolocator"]
+    }
+  },
   "footerBar": {
     "tabs": {
-      "core": [
-        "legend",
-        "layers"
-      ]
+      "core": ["legend", "layers"]
     }
   },
   "corePackages": [],
