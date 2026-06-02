@@ -23,6 +23,7 @@ import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
+import type { Coordinate } from 'ol/coordinate';
 
 /**
  * A class to hold a set of layers associated with a value of any type.
@@ -281,6 +282,28 @@ export abstract class AbstractLayerSet {
 
     // Get Feature Info
     return geoviewLayer.getFeatureInfo(this.mapViewer.map, queryType, location, queryGeometry, language, abortController);
+  }
+
+  /**
+   * Checks if a pixel coordinate should be queried for a layer considering swiper clipping.
+   *
+   * @param layerPath - The layer path to check
+   * @param pixelCoordinate - The pixel coordinate relative to the map viewport
+   * @returns True if the coordinate should be queried (not clipped by swiper)
+   */
+  protected shouldQueryAtPixel(layerPath: string, pixelCoordinate: Coordinate): boolean {
+    // Check if swiper plugin is loaded via controller existence
+    const { swiperController } = this.controllerRegistry;
+    if (!swiperController) {
+      // Swiper plugin not loaded - no filtering needed
+      return true;
+    }
+
+    // Delegate to swiper controller
+    const mapSize = this.mapViewer.map.getSize();
+    if (!mapSize) return true;
+
+    return swiperController.shouldQueryAtPixel(layerPath, pixelCoordinate, mapSize);
   }
 
   // #endregion PROTECTED METHODS

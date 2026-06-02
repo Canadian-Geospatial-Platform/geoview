@@ -722,6 +722,11 @@ export const getStoreMapHighlightedFeaturesByUid = (mapId: string, featureUid: s
   return getStoreMapState(mapId).highlightedFeatures.filter((feature) => feature.uid === featureUid);
 };
 
+/** Returns the current map size. */
+export const getStoreMapSize = (mapId: string): Size => {
+  return getStoreMapState(mapId).size;
+};
+
 // #endregion STATE GETTERS & HOOKS
 
 // #region STATE GETTERS & HOOKS - OTHERS (no match between getter-hook)

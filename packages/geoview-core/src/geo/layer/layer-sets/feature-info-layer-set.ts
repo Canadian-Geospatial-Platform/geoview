@@ -15,6 +15,7 @@ import { getStoreAppShowUnsymbolizedFeatures } from '@/core/stores/states/app-st
 import { RequestAbortedError } from '@/core/exceptions/core-exceptions';
 import { LayerNoLastQueryToPerformError } from '@/core/exceptions/geoview-exceptions';
 import { logger } from '@/core/utils/logger';
+import { Projection } from '@/geo/utils/projection';
 
 /**
  * A Layer-set working with the LayerSetController at handling a result set of registered layers and synchronizing
@@ -103,9 +104,17 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     // Keep the lon/lat for possible repeat
     this.#lastQueryLonLat = lonLatCoordinate;
 
+    // Get pixel coordinate for should query check
+    const mapProjection = this.mapViewer.getProjection();
+    const transformedCoordinate = Projection.transformFromLonLat(lonLatCoordinate, mapProjection);
+    const pixelCoordinate = this.mapViewer.map.getPixelFromCoordinate(transformedCoordinate);
+
     // Query each queryable layer and collect the promises
     const allPromises = this.getRegisteredLayerPaths()
-      .filter((layerPath) => this.layerDomain.getGeoviewLayerRegular(layerPath).getQueryable())
+      .filter((layerPath) => {
+        const layer = this.layerDomain.getGeoviewLayerRegular(layerPath);
+        return layer.getQueryable() && this.shouldQueryAtPixel(layerPath, pixelCoordinate);
+      })
       .map((layerPath) => {
         // Update
         querySet[layerPath].queryStatus = 'processing';

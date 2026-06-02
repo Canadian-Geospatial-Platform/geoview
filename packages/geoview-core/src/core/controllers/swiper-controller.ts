@@ -1,12 +1,18 @@
+import type { Coordinate } from 'ol/coordinate';
+
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import {
   addStoreSwiperLayerPath,
+  getStoreSwiperLayerPaths,
+  getStoreSwiperOrientation,
+  getStoreSwiperPosition,
   removeAllStoreSwipers,
   removeStoreSwiperLayerPath,
   setStoreSwiperLayerPaths,
   setStoreSwiperOrientation,
+  setStoreSwiperPosition,
   type SwipeOrientation,
 } from '@/core/stores/states/swiper-state';
 
@@ -25,6 +31,15 @@ export class SwiperController extends AbstractMapViewerController {
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor
   constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry) {
     super(mapViewer, controllerRegistry);
+  }
+
+  /**
+   * Sets the swiper position, which determines the current position of the swipe comparison.
+   *
+   * @param position - The new swiper position, between 0 and 1.
+   */
+  setSwiperPosition(position: number): void {
+    setStoreSwiperPosition(this.getMapId(), position);
   }
 
   /**
@@ -91,5 +106,42 @@ export class SwiperController extends AbstractMapViewerController {
   removeAllLayerPaths(): void {
     // Remove all layers from the store
     removeAllStoreSwipers(this.getMapId());
+  }
+
+  /**
+   * Checks if a pixel coordinate should be queried for a layer considering swiper clipping.
+   *
+   * @param layerPath - The layer path to check
+   * @param pixelCoordinate - The pixel coordinate [x, y] relative to the map viewport
+   * @param mapSize - The current map size [width, height] in pixels
+   * @returns True if the coordinate should be queried (not clipped by swiper)
+   */
+  shouldQueryAtPixel(layerPath: string, pixelCoordinate: Coordinate, mapSize: number[]): boolean {
+    // Get swiper configuration from store
+    const swiperLayerPaths = getStoreSwiperLayerPaths(this.getMapId());
+
+    // No layers configured for swiping
+    if (!swiperLayerPaths || swiperLayerPaths.length === 0) {
+      return true;
+    }
+
+    // Check if this layer is affected by swiper
+    const isLayerSwiped = swiperLayerPaths.some((path) => layerPath.includes(path));
+    if (!isLayerSwiped) {
+      return true;
+    }
+
+    // Get swiper state from store
+    const swiperOrientation = getStoreSwiperOrientation(this.getMapId());
+    const swiperPosition = getStoreSwiperPosition(this.getMapId());
+
+    // Check if coordinate is in visible region
+    if (swiperOrientation === 'vertical') {
+      const swiperX = (mapSize[0] * swiperPosition) / 100;
+      return pixelCoordinate[0] <= swiperX;
+    }
+
+    const swiperY = (mapSize[1] * swiperPosition) / 100;
+    return pixelCoordinate[1] <= swiperY;
   }
 }

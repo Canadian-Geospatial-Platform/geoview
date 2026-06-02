@@ -178,12 +178,14 @@ export function Swiper(props: SwiperProps): JSX.Element {
         const [x] = getSwiperStyle();
         swiperValueVertical.current = (x / mapSize.current[0]) * 100;
         setXPositionVertical(x);
+        controllerRegistry.swiperController?.setSwiperPosition(swiperValueVertical.current);
         setYPositionVertical(0);
       } else {
         const [, y] = getSwiperStyle();
         swiperValueHorizontal.current = (y / mapSize.current[1]) * 100;
         setXPositionHorizontal(0);
         setYPositionHorizontal(y);
+        controllerRegistry.swiperController?.setSwiperPosition(swiperValueHorizontal.current);
       }
 
       // Force refresh

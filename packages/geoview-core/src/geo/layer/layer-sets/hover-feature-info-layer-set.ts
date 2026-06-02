@@ -77,7 +77,10 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
 
     // Query each hoverable layer and collect the promises
     const allPromises = orderedLayerPaths
-      .filter((layerPath) => this.layerDomain.getGeoviewLayerRegular(layerPath).getHoverable())
+      .filter((layerPath) => {
+        const layer = this.layerDomain.getGeoviewLayerRegular(layerPath);
+        return layer.getHoverable() && this.shouldQueryAtPixel(layerPath, coordinate);
+      })
       .map((layerPath) => this.#queryLayerAndProcess(layerPath, coordinate, queryType, querySet, orderedLayerPaths));
 
     // Await for the promises to settle

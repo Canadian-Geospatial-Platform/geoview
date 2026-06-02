@@ -13,6 +13,9 @@ import { logger } from '@/core/utils/logger';
  * Manages state for the swiper including layer paths and orientation.
  */
 export interface ISwiperState {
+  /** The position of the swiper divider, between 0 and 1. */
+  swiperPosition: number;
+
   /** The list of layer paths currently participating in the swiper. */
   layerPaths: string[];
 
@@ -21,6 +24,9 @@ export interface ISwiperState {
 
   /** Actions to mutate the Swiper state. */
   actions: {
+    /** Sets the swiper position. */
+    setSwiperPosition: (position: number) => void;
+
     /** Sets the full list of layer paths for the swiper. */
     setLayerPaths: (layerPaths: string[]) => void;
 
@@ -42,10 +48,25 @@ export interface ISwiperState {
  */
 export function initializeSwiperState(set: TypeSetStore, get: TypeGetStore): ISwiperState {
   const init = {
+    swiperPosition: 50,
     layerPaths: [],
     orientation: 'vertical',
 
     actions: {
+      /**
+       * Sets the swiper position in the store.
+       *
+       * @param position - The new swiper position, between 0 and 1.
+       */
+      setSwiperPosition(position: number) {
+        set({
+          swiperState: {
+            ...get().swiperState,
+            swiperPosition: position,
+          },
+        });
+      },
+
       /**
        * Sets the layer paths for the swiper.
        *
@@ -119,6 +140,18 @@ export const isStoreSwiperInitialized = (mapId: string): boolean => {
 };
 
 /**
+ * Gets the swiper position from the store.
+ *
+ * @param mapId - The map id to read swiper position from.
+ * @returns The swiper position as a number.
+ * @throws {PluginStateUninitializedError} When the Swiper plugin is uninitialized.
+ */
+export const getStoreSwiperPosition = (mapId: string): number => {
+  // Return the swiper position from the state
+  return getStoreSwiperState(mapId).swiperPosition;
+};
+
+/**
  * Gets the swiper layer paths from the store.
  *
  * @param mapId - The map id to read swiper layer paths from.
@@ -152,6 +185,21 @@ export const useStoreSwiperOrientation = (): SwipeOrientation => useStore(useGeo
 
 // #region STATE ADAPTORS
 // GV These methods should be called from a State Adaptor class listening on domain events triggered by controllers.
+
+/**
+ * Sets the swiper position in the store.
+ *
+ * @param mapId - The map id.
+ * @param position - The new swiper position, between 0 and 1.
+ * @throws {PluginStateUninitializedError} When the Swiper plugin is uninitialized.
+ */
+export const setStoreSwiperPosition = (mapId: string, position: number): void => {
+  // Get the swiper state which is only initialized if the Swiper Plugin exists.
+  const swiperState = getStoreSwiperState(mapId);
+
+  // set store position
+  swiperState.actions.setSwiperPosition(position);
+};
 
 /**
  * Sets the swiper layer paths in the store.
