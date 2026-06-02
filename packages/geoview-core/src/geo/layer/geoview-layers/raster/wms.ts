@@ -106,9 +106,9 @@ export class WMS extends AbstractGeoViewRaster {
       // Fetch the XML
       return this.#fetchXmlServiceMetadata(
         this.getMetadataAccessPath(),
-        (proxyUsed) => {
+        (proxiedUrl) => {
           // Update the access path to use the proxy if one was required
-          this.setMetadataAccessPath(`${proxyUsed}${this.getMetadataAccessPath()}`);
+          this.setMetadataAccessPath(proxiedUrl);
         },
         abortSignal
       ) as Promise<T>;
@@ -285,9 +285,18 @@ export class WMS extends AbstractGeoViewRaster {
       throw new LayerEntryConfigWMSSubLayerNotFoundError(layerConfig, this.getGeoviewLayerId());
     }
 
+    // The layers parameter
+    let layers = layerConfig.layerId;
+    // If using proxy
+    if (layerConfig.getIsUsingProxy()) {
+      if (GeoUtilities.DOUBLE_ENCODING_LAYERS_WHEN_BEHIND_PROXY) {
+        layers = encodeURIComponent(layers);
+      }
+    }
+
     // Create the source params
     const sourceParams: Record<string, unknown> = {
-      LAYERS: layerConfig.layerId,
+      LAYERS: layers,
       VERSION: layerConfig.getVersionOrDefault(),
     };
 
@@ -343,9 +352,9 @@ export class WMS extends AbstractGeoViewRaster {
     let metadata;
     try {
       // Fetch the WMS GetCapabilities document from the given URL
-      metadata = await WMS.fetchMetadataWMS(url, (proxyUsed) => {
-        // If a proxy was used, update the metadata access path accordingly
-        this.setMetadataAccessPath(`${proxyUsed}${this.getMetadataAccessPath()}`);
+      metadata = await WMS.fetchMetadataWMS(url, (proxiedUrl) => {
+        // Update the metadata access path accordingly
+        this.setMetadataAccessPath(proxiedUrl);
       });
     } catch (error: unknown) {
       // Throw
@@ -382,7 +391,7 @@ export class WMS extends AbstractGeoViewRaster {
    */
   async #fetchAndMergeMultipleWmsMetadata(url: string, layers: AbstractBaseLayerEntryConfig[]): Promise<TypeMetadataWMS | undefined> {
     // Create one metadata fetch promise per unique layerId
-    const metadataPromises = this.#createLayerMetadataPromises(url, layers);
+    const metadataPromises = WMS.#createLayerMetadataPromises(url, layers);
 
     // Wait for all requests to settle (either fulfilled or rejected)
     const results = await Promise.allSettled(metadataPromises);
@@ -438,7 +447,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param layers - An array of layer configurations to fetch metadata for
    * @returns A promise that resolves to an array of metadata fetch promises, one per layer config
    */
-  #createLayerMetadataPromises(url: string, layers: AbstractBaseLayerEntryConfig[]): Promise<MetatadaFetchResult>[] {
+  static #createLayerMetadataPromises(url: string, layers: AbstractBaseLayerEntryConfig[]): Promise<MetatadaFetchResult>[] {
     const seen = new Map<string, Promise<MetatadaFetchResult>>();
 
     return layers.map((layerConfig) => {
@@ -446,9 +455,12 @@ export class WMS extends AbstractGeoViewRaster {
       if (!seen.has(layerConfig.layerId)) {
         const promise = new Promise<MetatadaFetchResult>((resolve, reject) => {
           // Perform the actual metadata fetch
-          WMS.fetchMetadataWMSForLayer(url, layerConfig.layerId, (proxyUsed) => {
-            // If a proxy was used, update the layer's data access path
-            layerConfig.setDataAccessPath(`${proxyUsed}${this.getMetadataAccessPath()}`);
+          WMS.fetchMetadataWMSForLayer(url, layerConfig.layerId, (proxiedUrl) => {
+            // Indicate that we're using a proxy
+            layerConfig.setIsUsingProxy(true);
+
+            // Update the layer's data access path
+            layerConfig.setDataAccessPath(proxiedUrl);
           })
             .then((metadata) => {
               if (metadata.Capability) {

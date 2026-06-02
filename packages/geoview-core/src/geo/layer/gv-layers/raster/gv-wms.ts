@@ -28,6 +28,7 @@ import {
   LayerInvalidFeatureInfoFormatWMSError,
   LayerInvalidLayerFilterError,
 } from '@/core/exceptions/layer-exceptions';
+import { encodeLayersParam } from '@/core/utils/ogc-url-helper';
 import { formatError, NetworkError, RequestAbortedError, ResponseContentError } from '@/core/exceptions/core-exceptions';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
@@ -1814,7 +1815,15 @@ export class GVWMS extends AbstractGVRaster {
       // Retry with proxy if it's a network error (e.g., CORS)
       if (error instanceof NetworkError) {
         // Read the blob again, using the proxy this time
-        const proxyUrl = `${CONFIG_PROXY_URL}?${queryUrl}`;
+        let proxyUrl = `${CONFIG_PROXY_URL}?${queryUrl}`;
+
+        // If need to double layer encoding
+        if (GeoUtilities.DOUBLE_ENCODING_LAYERS_WHEN_BEHIND_PROXY) {
+          // Encode the layers parameter if present
+          proxyUrl = encodeLayersParam(proxyUrl);
+        }
+
+        // Requery
         return Fetch.fetchBlobImage(proxyUrl);
       }
 
