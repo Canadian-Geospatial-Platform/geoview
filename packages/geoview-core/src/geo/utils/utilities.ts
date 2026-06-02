@@ -16,7 +16,7 @@ import GML3 from 'ol/format/GML3';
 
 import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { parseXMLToJson } from '@/core/utils/utilities';
-import { ensureServiceRequestUrl } from '@/core/utils/ogc-url-helper';
+import { encodeLayersParam, ensureServiceRequestUrl } from '@/core/utils/ogc-url-helper';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { Projection } from '@/geo/utils/projection';
 import { CONFIG_PROXY_URL } from '@/api/types/map-schema-types';
@@ -63,6 +63,9 @@ interface EsriJSONReadResult {
 // #region FETCH METADATA
 
 export abstract class GeoUtilities {
+  /** Whether to double encode the layers when behind a proxy */
+  static readonly DOUBLE_ENCODING_LAYERS_WHEN_BEHIND_PROXY = true;
+
   /**
    * Extracts the base URL (origin + pathname) from a full URL string,
    * removing any query parameters, hash fragments, or authentication data.
@@ -270,6 +273,13 @@ export abstract class GeoUtilities {
     } catch (error: unknown) {
       // If a network error such as CORS
       if (error instanceof NetworkError) {
+        // If double encoding the layers param when behind proxy
+        if (GeoUtilities.DOUBLE_ENCODING_LAYERS_WHEN_BEHIND_PROXY) {
+          // Encode the layers parameter if present
+          // eslint-disable-next-line no-param-reassign
+          url = encodeLayersParam(url);
+        }
+
         // We're going to change the metadata url to use a proxy
         const newProxiedMetadataUrl = `${CONFIG_PROXY_URL}?${url}`;
 
@@ -277,7 +287,7 @@ export abstract class GeoUtilities {
         capabilitiesString = await Fetch.fetchText(newProxiedMetadataUrl);
 
         // Callback about it
-        callbackNewMetadataUrl?.(`${CONFIG_PROXY_URL}?`);
+        callbackNewMetadataUrl?.(newProxiedMetadataUrl, CONFIG_PROXY_URL);
 
         // Return it
         return capabilitiesString;
@@ -1666,7 +1676,7 @@ export abstract class GeoUtilities {
 }
 
 /** The type for the function callback for getWMSServiceMetadata() */
-export type CallbackNewMetadataDelegate = (proxyUsed: string) => void;
+export type CallbackNewMetadataDelegate = (proxiedUrl: string, proxyUsed: string) => void;
 
 export interface TypeVectorLegend extends TypeLegend {
   legend: TypeVectorLayerStyles;

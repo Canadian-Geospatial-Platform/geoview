@@ -40,3 +40,21 @@ export function ensureServiceRequestUrl(url: string, service: string, request: s
   // Return the parsed string
   return parsedUrl.toString();
 }
+
+/**
+ * Encodes the value of the `LAYERS` or `LAYER` query parameter in an OGC URL using `encodeURIComponent`.
+ *
+ * Some OGC services require the layer names to be percent-encoded. If the URL does not
+ * contain a `LAYERS` or `LAYER` parameter (case-insensitive), it is returned unchanged.
+ *
+ * @param url - The OGC service URL to process.
+ * @returns The URL with the `LAYERS`/`LAYER` parameter value(s) percent-encoded, or the original URL if no such parameter exists.
+ */
+export function encodeLayersParam(url: string): string {
+  // Use regex (not URL parsing) so we don't touch the rest of the URL.
+  // This preserves proxy-style URLs that embed another URL after `?`
+  // (e.g. ".../executeFromProxy?https://other?layer=foo").
+  return url.replace(/([?&])(layers?)=([^&]*)/gi, (_match, sep: string, key: string, value: string) => {
+    return `${sep}${key}=${encodeURIComponent(value)}`;
+  });
+}
