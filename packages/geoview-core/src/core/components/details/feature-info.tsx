@@ -22,7 +22,14 @@ import type { TypeContainerBox } from '@/core/types/global-types';
 import { FeatureInfoTable } from './feature-info-table';
 import { getSxClasses } from './details-style';
 import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
+import { useStoreAppDisplayLanguage } from '@/core/stores/states/app-state';
+import {
+  useStoreLayerDateTemporalMode,
+  useStoreLayerDisplayDateFormat,
+  useStoreLayerDisplayDateTimezone,
+} from '@/core/stores/states/layer-state';
 import { useDetailsController, useGeoChartControllerIfExists, useMapController } from '@/core/controllers/use-controllers';
+import { DateMgt } from '@/core/utils/date-mgt';
 
 /** Properties for the FeatureInfo component. */
 interface FeatureInfoProps {
@@ -226,6 +233,10 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
   const checkedFeatures = useStoreDetailsCheckedFeatures();
   const geochartLayerDataArrayBatch = useStoreGeochartLayerDataArrayBatch();
   const geochartConfigs = useStoreGeochartChartsConfig();
+  const language = useStoreAppDisplayLanguage();
+  const layerDateTemporalMode = useStoreLayerDateTemporalMode(feature.layerPath);
+  const displayDateFormat = useStoreLayerDisplayDateFormat(feature.layerPath);
+  const displayDateTimezone = useStoreLayerDisplayDateTimezone(feature.layerPath);
   const mapController = useMapController();
   const detailsController = useDetailsController();
   const geoChartController = useGeoChartControllerIfExists();
@@ -242,15 +253,20 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
     logger.logTraceUseMemo('FEATURE-INFO - memoFeatureName', feature.nameField);
 
     // Try to get the value at the fieldName
-    let value = feature.nameField && (feature.fieldInfo?.[feature.nameField]?.value as string);
+    let value = feature.nameField && feature.fieldInfo?.[feature.nameField]?.value;
     // If nameField is 'html' or 'plain_text', treat it as undefined (WMS special fields)
     if (feature.nameField === 'html' || feature.nameField === 'plain_text') {
       value = undefined; // Clear the header value, because html or plain_text isn't a property -> value response
     }
 
+    // If the value is a date type
+    if (value instanceof Date) {
+      value = DateMgt.formatDate(value, displayDateFormat[language], language, displayDateTimezone, layerDateTemporalMode);
+    }
+
     // Return the header value
-    return value ?? 'No name / Sans nom';
-  }, [feature]);
+    return (value as string) ?? 'No name / Sans nom';
+  }, [displayDateFormat, displayDateTimezone, feature.fieldInfo, feature.nameField, language, layerDateTemporalMode]);
 
   /** Whether the feature has a geometry. */
   const featureHasGeometry = !!feature.geometry;
@@ -372,7 +388,14 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
       />
 
       <Box sx={memoSxClasses.featureInfoListContainer}>
-        <FeatureInfoTable layerPath={feature.layerPath} featureInfoList={memoFeatureInfoList} containerType={containerType} />
+        <FeatureInfoTable
+          layerPath={feature.layerPath}
+          featureInfoList={memoFeatureInfoList}
+          layerDateTemporalMode={layerDateTemporalMode}
+          displayDateFormat={displayDateFormat}
+          displayDateTimezone={displayDateTimezone}
+          containerType={containerType}
+        />
       </Box>
     </Paper>
   );

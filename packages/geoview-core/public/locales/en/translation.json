@@ -382,6 +382,7 @@
   "validation": {
     "layer": {
       "loadfailed": "Layer '{{layerName}}' failed to load on map.",
+      "layerIdMissing": "Layer id missing from the layer entries for layer '{{layerName}}'.",
       "layerIdNotFound": "Layer id '{{layerId}}' not found for layer '{{layerName}}'.",
       "layerIdMustBeNumber": "ESRI layer id must be a number, was '{{badNumber}}' for layer '{{layerNameOrId}}'.",
       "fieldsNotFound": "The fields information couldn't be read from the vector metadata for layer '{{layerNameOrId}}'.",

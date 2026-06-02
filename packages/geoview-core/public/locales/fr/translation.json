@@ -382,6 +382,7 @@
   "validation": {
     "layer": {
       "loadfailed": "Le chargement de la couche '{{layerName}}' a échoué sur la carte.",
+      "layerIdMissing": "L'identifiant layerId parmi les entrées de la couche '{{layerName}}' est manquant.",
       "layerIdNotFound": "L'identifiant '{{layerId}}' de la couche '{{layerName}}' est introuvable.",
       "layerIdMustBeNumber": "L'identifiant de la couche ESRI doit être un nombre, mais était '{{badNumber}}' pour la couche '{{layerNameOrId}}'.",
       "fieldsNotFound": "Les informations sur les champs n'ont pu être obtenus à partir des métadonnées vectorielles pour la couche '{{layerNameOrId}}'.",

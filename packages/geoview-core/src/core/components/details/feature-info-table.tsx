@@ -7,11 +7,6 @@ import { Box, Button, Table, TableHead, TableBody, TableRow, TableCell, TableCon
 import { isImage, stringify, sanitizeHtmlContent, enhanceLinksAccessibility } from '@/core/utils/utilities';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { useStoreAppDisplayLanguage } from '@/core/stores/states/app-state';
-import {
-  useStoreLayerDateTemporalMode,
-  useStoreLayerDisplayDateFormat,
-  useStoreLayerDisplayDateTimezone,
-} from '@/core/stores/states/layer-state';
 import { logger } from '@/core/utils/logger';
 import type { TypeDisplayLanguage, TypeFieldEntry } from '@/api/types/map-schema-types';
 import type { TypeContainerBox } from '@/core/types/global-types';
@@ -27,6 +22,12 @@ interface FeatureInfoTableProps {
   layerPath: string;
   /** The list of field entries to display. */
   featureInfoList: TypeFieldEntry[];
+  /** The temporal mode for the layer. */
+  layerDateTemporalMode: TemporalMode;
+  /** The date display format for the layer. */
+  displayDateFormat: TypeDisplayDateFormat;
+  /** The timezone for date display. */
+  displayDateTimezone: TimeIANA;
   /** The container type (appBar or footerBar). */
   containerType: TypeContainerBox;
 }
@@ -267,6 +268,9 @@ export const FeatureRow = memo(function FeatureRow({
 export const FeatureInfoTable = memo(function FeatureInfoTable({
   layerPath,
   featureInfoList,
+  layerDateTemporalMode,
+  displayDateFormat,
+  displayDateTimezone,
   containerType,
 }: FeatureInfoTableProps): JSX.Element {
   logger.logTraceRender('components/details/feature-info-table');
@@ -278,9 +282,6 @@ export const FeatureInfoTable = memo(function FeatureInfoTable({
 
   // Store hooks
   const language = useStoreAppDisplayLanguage();
-  const layerDateTemporalMode = useStoreLayerDateTemporalMode(layerPath);
-  const displayDateFormat = useStoreLayerDisplayDateFormat(layerPath);
-  const displayDateTimezone = useStoreLayerDisplayDateTimezone(layerPath);
 
   // Store
   const { initLightBox, LightBoxComponent } = useLightBox();
