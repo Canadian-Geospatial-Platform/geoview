@@ -140,6 +140,27 @@ export class ConfigSchemaWrongPathError extends GeoViewError {
 }
 
 /**
+ * Custom error class thrown when a GeoView layer configuration fails due to a missing layerId.
+ *
+ * This error is specifically used when the configuration for a GeoView layer is missing the expected layerId.
+ */
+export class LayerEntryConfigLayerIdMissingError extends GeoViewError {
+  /**
+   * Creates an instance of LayerEntryConfigLayerIdMissingError.
+   *
+   * This error is typically thrown when a GeoView layer's configuration is missing a layerId.
+   *
+   * @param layerName - The layer name
+   */
+  constructor(layerName: string) {
+    super('validation.layer.layerIdMissing', { layerName });
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, LayerEntryConfigLayerIdMissingError.prototype);
+  }
+}
+
+/**
  * Error thrown when a map viewer with a specified ID is not found.
  */
 export class MapViewerNotFoundError extends GeoViewError {

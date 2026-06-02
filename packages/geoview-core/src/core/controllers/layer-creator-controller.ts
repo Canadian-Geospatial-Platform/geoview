@@ -36,7 +36,7 @@ import { AbstractMapViewerController } from '@/core/controllers/base/abstract-ma
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import type { DomainLayerBaseEvent, LayerDomain } from '@/core/domains/layer-domain';
 import { formatError, NotSupportedError } from '@/core/exceptions/core-exceptions';
-import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { GeoViewError, LayerEntryConfigLayerIdMissingError } from '@/core/exceptions/geoview-exceptions';
 import { LayerEntryConfigError } from '@/core/exceptions/layer-entry-config-exceptions';
 import { LayerCreatedTwiceError } from '@/core/exceptions/layer-exceptions';
 import { getStoreAppDisplayDateMode } from '@/core/stores/states/app-state';
@@ -162,6 +162,15 @@ export class LayerCreatorController extends AbstractMapViewerController {
         const geoviewLayerConfig = promise.value;
 
         try {
+          // Validate that the layer entry has at least 1 listOfLayerEntry with a layerId
+          if (
+            !geoviewLayerConfig.listOfLayerEntryConfig?.length ||
+            geoviewLayerConfig.listOfLayerEntryConfig.find((layerEntry) => layerEntry.layerId === undefined)
+          ) {
+            // Throw error for that geoview layer config
+            throw new LayerEntryConfigLayerIdMissingError(geoviewLayerConfig.geoviewLayerName ?? geoviewLayerConfig.geoviewLayerId);
+          }
+
           // Generate array of layer paths for non-basemap layers
           if (geoviewLayerConfig.useAsBasemap !== true) {
             const layerPaths = AbstractMapViewerController.generateOrderedLayerPaths(geoviewLayerConfig);
