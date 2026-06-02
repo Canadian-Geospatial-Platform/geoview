@@ -1,6 +1,6 @@
 {
   "configMeta": {
-    "description": "globalSettings with canRemoveSublayers, disabledLayerTypes, showUnsymbolizedFeatures (visible in data table for permafrost features with no style), highlightLayer with no bbox, and hideCoordinateInfoSwitch that removes coordinate info from the details panel."
+    "description": "globalSettings with canRemoveSublayers, disabledLayerTypes, showUnsymbolizedFeatures (visible in data table for permafrost features with no style), highlightLayer with no bbox, displayDateMode ISO and hideCoordinateInfoSwitch that removes coordinate info from the details panel."
   },
   "map": {
     "interaction": "dynamic",
@@ -13,6 +13,17 @@
       "labeled": true
     },
     "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "historical-flood",
+        "geoviewLayerName": "Historical Flood Events (HFE)",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer",
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0"
+          }
+        ]
+      },
       {
         "geoviewLayerId": "4baa66ad-aa29-4233-a6a8-7f5cbefb5ea8",
         "geoviewLayerType": "geoCore"
@@ -86,7 +97,8 @@
     "tabs": {
       "core": [
         "layers",
-        "data-table"
+        "data-table",
+        "time-slider"
       ]
     },
     "selectedTab": "layers"
@@ -112,7 +124,8 @@
     "showUnsymbolizedFeatures": true,
     "showLayerHighlightLayerBbox": false,
     "coordinateInfoEnabled": true,
-    "hideCoordinateInfoSwitch": true
+    "hideCoordinateInfoSwitch": true,
+    "displayDateMode": "iso"
   },
   "theme": "geo.ca"
 }

@@ -120,9 +120,6 @@
     "selectedTimeSliderLayerPath": "wmsLYR1-spatiotemporel/RADAR_1KM_RSNO"
   },
   "corePackages": [],
-  "globalSettings": {
-    "displayDateMode": "iso"
-  },
   "theme": "geo.ca",
   "corePackagesConfig": [
     {

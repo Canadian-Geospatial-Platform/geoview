@@ -54,18 +54,19 @@
   }]
   },
   'components': ['overview-map', 'north-arrow'],
-  'footerBar': {
-    'tabs': {
-      'core': ['layers', 'data-table', 'geochart']
-    }
-  },
+  'navBar': ['zoom', 'rotation', 'fullscreen', 'home', 'location', 'measurement', 'basemap-select', 'projection'],
   'appBar': {
     'tabs': {
       'core': ['legend', 'details', 'geolocator', 'export']
     }
   },
-  "navBar": ["zoom", "rotation", "fullscreen", "home", "location", "measurement", "basemap-select", "projection"],
+  'footerBar': {
+    'tabs': {
+      'core': ['layers', 'data-table', 'geochart']
+    }
+  },
   'corePackages': [],
+  'theme': 'geo.ca',
   'corePackagesConfig':[
     {
       'geochart': { 'charts': [
@@ -123,8 +124,7 @@
         }
       ]}
     }
-  ],
-  'theme': 'geo.ca'
+  ]
 }</textarea
       >
     </div>
@@ -161,6 +161,17 @@
 
     <div class="demo-section">
       <p><em>This map loads its configuration from the text area above.</em></p>
+    </div>
+
+    <div class="demo-section">
+      <p>
+        For more information about how to configure GeoView, see the
+        <a
+          href="https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/docs/app/config/configuration-reference.md"
+          target="_blank"
+          >Configuration Reference</a
+        >.
+      </p>
     </div>
 
     <!-- Tabs Navigation -->
@@ -529,6 +540,7 @@
           <pre id="other-example-4"><code>
 {
   "map": {
+    "interaction": "dynamic",
     "overlayObjects": {
       "pointMarkers": {
         "locations": [
@@ -549,7 +561,6 @@
         ]
       }
     },
-    "interaction": "dynamic",
     ... other map settings ...
   }
 }
@@ -558,6 +569,7 @@
           <pre id="other-example-5"><code>
 {
   "map": {
+    "interaction": "dynamic",
     "overlayObjects": {
       "pointMarkers": {
         "cities": [
@@ -577,7 +589,6 @@
         ]
       }
     },
-    "interaction": "dynamic",
     ... other map settings ...
   }
 }
@@ -715,6 +726,10 @@
           <h3>Basic UI Configuration:</h3>
           <pre id="ui-example-1"><code>
 {
+  "components": ["north-arrow", "overview-map"],
+  "overviewMap": {
+    "hideOnZoom": 0
+  },
   "navBar": ["zoom", "fullscreen", "home", "basemap-select"],
   "appBar": {
     "tabs": {
@@ -726,16 +741,13 @@
       "core": ["legend", "layers", "details", "data-table"],
       "custom": []
     }
-  },
-  "components": ["north-arrow", "overview-map"],
-  "overviewMap": {
-    "hideOnZoom": 0
   }
 }
               </code></pre>
           <h3>Minimal UI (No Nav Bar, Limited Panels):</h3>
           <pre id="ui-example-2"><code>
 {
+  "components": [],
   "navBar": [],
   "appBar": {
     "tabs": {
@@ -747,13 +759,16 @@
       "core": ["legend"],
       "custom": []
     }
-  },
-  "components": []
+  }
 }
             </code></pre>
           <h3>Full-Featured UI:</h3>
           <pre id="ui-example-3"><code>
 {
+  "components": ["overview-map", "north-arrow"],
+  "overviewMap": {
+    "hideOnZoom": 10
+  },
   "navBar": ["zoom", "fullscreen", "home", "location", "basemap-select", "projection", "drawer"],
   "appBar": {
     "tabs": {
@@ -767,10 +782,6 @@
       "custom": []
     },
     "selectedTab": "legend"
-  },
-  "components": ["overview-map", "north-arrow"],
-  "overviewMap": {
-    "hideOnZoom": 10
   }
 }
             </code></pre>
@@ -795,6 +806,7 @@
           <h3>App Bar with Specific Tools:</h3>
           <pre id="ui-example-5"><code>
 {
+  "components": ["north-arrow"],
   "navBar": ["zoom", "home"],
   "appBar": {
     "tabs": {
@@ -802,7 +814,6 @@
     },
     "selectedTab": "layers"
   },
-  "components": ["north-arrow"]
 }
             </code></pre>
         </div>
@@ -955,7 +966,10 @@
           <h5>Basic Configuration with Default Service URLs:</h5>
           <pre id="geoview-example-1"><code>
 {
-  "theme": "geo.ca",
+  "configMeta": {
+    "version": "1.0"
+  },
+  ... other settings ...
   "serviceUrls": {
     "geocoreUrl": "https://geocore.api.geo.ca",
     "rcsUrl": "https://gcgeo.gc.ca/geonetwork/srv/api/v2/docs",
@@ -965,18 +979,16 @@
     "ntsSheetUrl": "https://geogratis.gc.ca/services/delimitation/en/nts",
     "altitudeUrl": "https://geogratis.gc.ca/services/elevation/cdem/altitude"
   },
-  "configMeta": {
-    "version": "1.0"
-  }
+  "theme": "geo.ca"
 }
             </code></pre>
           <h3>Dark Theme Configuration:</h3>
           <pre id="geoview-example-2"><code>
 {
-  "theme": "dark",
   "serviceUrls": {
     "geocoreUrl": "https://geocore.api.geo.ca"
-  }
+  },
+  "theme": "dark"
 }
             </code></pre>
           <h3>Global Settings Configuration:</h3>
@@ -998,7 +1010,18 @@
           <h3>Complete Configuration:</h3>
           <pre id="geoview-example-4"><code>
 {
-  "theme": "geo.ca",
+  "configMeta": {
+    "version": "1.0"
+  },
+  ... other settings ...
+  "globalSettings": {
+    "canRemoveSublayers": true,
+    "disabledLayerTypes": [],
+    "showUnsymbolizedFeatures": false,
+    "showLayerHighlightLayerBbox": true,
+    "coordinateInfoEnabled": true,
+    "hideCoordinateInfoSwitch": false
+  },
   "serviceUrls": {
     "geocoreUrl": "https://geocore.api.geo.ca",
     "rcsUrl": "https://gcgeo.gc.ca/geonetwork/srv/api/v2/docs",
@@ -1009,17 +1032,7 @@
     "ntsSheetUrl": "https://geogratis.gc.ca/services/delimitation/en/nts",
     "altitudeUrl": "https://geogratis.gc.ca/services/elevation/cdem/altitude"
   },
-  "globalSettings": {
-    "canRemoveSublayers": true,
-    "disabledLayerTypes": [],
-    "showUnsymbolizedFeatures": false,
-    "showLayerHighlightLayerBbox": true,
-    "coordinateInfoEnabled": true,
-    "hideCoordinateInfoSwitch": false
-  },
-  "configMeta": {
-    "version": "1.0"
-  }
+  "theme": "geo.ca"
 }
             </code></pre>
         </div>

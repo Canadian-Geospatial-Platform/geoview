@@ -85,6 +85,7 @@ Config
 │   ├── viewSettings (projection, zoom, center, rotation, homeView)
 │   ├── basemapOptions
 │   ├── highlightColor
+│   ├── overlayObjects
 │   ├── listOfGeoviewLayerConfig[]
 │   └── extraOptions
 ├── components[]

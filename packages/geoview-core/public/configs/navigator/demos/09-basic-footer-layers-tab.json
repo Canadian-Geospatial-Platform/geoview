@@ -1,6 +1,6 @@
 {
   "configMeta": {
-    "description": "FooterBar with layers tab, overlay markers, intentional bad URL layer, and canRemoveSublayers disabled."
+    "description": "FooterBar with layers tab, overlay point markers, intentional bad URL layer, and canRemoveSublayers disabled."
   },
   "map": {
     "interaction": "dynamic",
@@ -11,6 +11,28 @@
       "basemapId": "transport",
       "shaded": true,
       "labeled": true
+    },
+    "overlayObjects": {
+      "pointMarkers": {
+        "group1": [
+          {
+            "id": "1",
+            "coordinate": [-100, 60],
+            "color": "blue",
+            "opacity": 0.5
+          },
+          {
+            "id": "2",
+            "coordinate": [-80, 65],
+            "color": "rgb(0, 226, 0)"
+          },
+          {
+            "id": "3",
+            "coordinate": [-115, 66],
+            "color": "#C52022"
+          }
+        ]
+      }
     },
     "listOfGeoviewLayerConfig": [
       {
@@ -118,59 +140,17 @@
           }
         ]
       }
-    ],
-    "overlayObjects": {
-      "pointMarkers": {
-        "group1": [
-          {
-            "id": "1",
-            "coordinate": [
-              -100,
-              60
-            ],
-            "color": "blue",
-            "opacity": 0.5
-          },
-          {
-            "id": "2",
-            "coordinate": [
-              -80,
-              65
-            ],
-            "color": "rgb(0, 226, 0)"
-          },
-          {
-            "id": "3",
-            "coordinate": [
-              -115,
-              66
-            ],
-            "color": "#C52022"
-          }
-        ]
-      }
-    }
+    ]
   },
-  "components": [
-    "north-arrow",
-    "overview-map"
-  ],
+  "components": ["north-arrow", "overview-map"],
   "appBar": {
     "tabs": {
-      "core": [
-        "geolocator",
-        "export"
-      ]
+      "core": ["geolocator", "export"]
     }
   },
   "footerBar": {
     "tabs": {
-      "core": [
-        "legend",
-        "details",
-        "layers",
-        "data-table"
-      ]
+      "core": ["legend", "details", "layers", "data-table"]
     },
     "selectedTab": "layers",
     "selectedLayersLayerPath": "airborne_radioactivity/1"

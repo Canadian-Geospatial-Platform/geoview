@@ -47,6 +47,12 @@
         ]
       },
       {
+        "geoviewLayerId": "shpLYR1",
+        "geoviewLayerName": "Crown lands - Shapefile",
+        "geoviewLayerType": "shapefile",
+        "metadataAccessPath": "./datasets/shapefiles/PLAN_CrownHarvestPlans_SHP_UT83.zip"
+      },
+      {
         "geoviewLayerId": "csvLYR1",
         "geoviewLayerName": "NPRI - CSV",
         "geoviewLayerType": "CSV",
@@ -63,7 +69,7 @@
       },
       {
         "geoviewLayerId": "esriDynamicLYR1",
-        "geoviewLayerName": "Forest Industry - esriDynamic",
+        "geoviewLayerName": "Forest Industry - Annotation esriDynamic",
         "metadataAccessPath": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/FGP/TE/MapServer",
         "geoviewLayerType": "esriDynamic",
         "listOfLayerEntryConfig": [

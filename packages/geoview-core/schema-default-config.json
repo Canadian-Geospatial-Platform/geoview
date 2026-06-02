@@ -14,6 +14,7 @@
       "labeled": true
     },
     "highlightColor": "",
+    "overlayObjects": {},
     "listOfGeoviewLayerConfig": []
   },
   "components": ["overview-map", "north-arrow"],

@@ -986,8 +986,9 @@ When creating or editing map configuration JSON files (navigator demos, test con
 2. viewSettings             — Projection, zoom, center, rotation, homeView
 3. basemapOptions           — Basemap type and visual options
 4. highlightColor           — Feature highlight color overrides
-5. listOfGeoviewLayerConfig — Layer definitions array
-6. extraOptions             — Pass-through OpenLayers map options
+5. overlayObjects           — Non-interactive markers and overlays
+6. listOfGeoviewLayerConfig — Layer definitions array
+7. extraOptions             — Pass-through OpenLayers map options
 ```
 
 **Rationale:** The order mirrors the logical sequence: _what kind of map_ → _what it shows_ → _how the UI wraps it_ → _what services back it_ → _what extends it_. Following this order makes configs easier to read, review, and diff.
