@@ -28,6 +28,9 @@ export class GeoTIFFLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   constructor(layerConfig: GeoTIFFLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.GEOTIFF, CONST_LAYER_ENTRY_TYPES.RASTER_TILE);
 
+    // Value for this.source.featureInfo.queryable can only be false.
+    this.setQueryableSource(false);
+
     // If not pointing to an image file directly
     if (!this.getDataAccessPath().toLowerCase().endsWith('.tif') && !this.getDataAccessPath().toLowerCase().startsWith('blob')) {
       // Set it

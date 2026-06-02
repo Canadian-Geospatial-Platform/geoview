@@ -489,7 +489,7 @@ export class LayerSetController extends AbstractMapViewerController {
       opacity,
       opacityMaxFromParent,
       hoverable: layerConfig.getInitialSettings()?.states?.hoverable,
-      queryableSource: layerConfigCasted.getQueryableSourceDefaulted(),
+      queryableSource: layerConfigCasted.getQueryableSource(), // No default, we want the truth if it was set or not
       queryable: layerConfig.getInitialSettings()?.states?.queryable,
       visible,
       inVisibleRange,
