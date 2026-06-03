@@ -75,7 +75,7 @@ interface LayerListItemProps {
 export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer, onListItemClick }: LayerListItemProps): JSX.Element {
   // Log
   logger.logTraceRender('components/common/layer-list > LayerListItem');
-
+  
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
@@ -259,7 +259,7 @@ export const LayerList = memo(function LayerList({ layerList, selectedLayerPath,
             // Reason:- (layer?.numOffeatures ?? 1) > 0
             // Some of layers will not have numOfFeatures, so to make layer look like selected, we need to set default value to 1.
             // Also we cant set numOfFeature initially, then it num of features will be display as sub title.
-            isSelected={(layer?.numOffeatures ?? 1) > 0 && layer.layerPath === selectedLayerPath}
+            isSelected={((layer?.numOffeatures ?? 1) > 0 || layer.layerPath === LAYER_PATH_COORDINATE_INFO) && layer.layerPath === selectedLayerPath}
             layer={layer}
             onListItemClick={onListItemClick}
           />

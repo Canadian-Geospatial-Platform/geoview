@@ -167,6 +167,14 @@
           "type": "string",
           "description": "Layerpath of data table tab layer to be selected at map load"
         },
+        "selectedDetailsLayerPath": {
+          "type": "string",
+          "description": "Layerpath of details tab layer to be selected at map load"
+        },
+        "selectedGeochartLayerPath": {
+          "type": "string",
+          "description": "Layerpath of geochart tab layer to be selected at map load"
+        },
         "selectedLayersLayerPath": {
           "type": "string",
           "description": "Layerpath of layer tab layer to be selected at map load"
@@ -238,6 +246,10 @@
         "selectedDataTableLayerPath": {
           "type": "string",
           "description": "Layerpath of data table tab layer to be selected at map load"
+        },
+        "selectedDetailsLayerPath": {
+          "type": "string",
+          "description": "Layerpath of details tab layer to be selected at map load"
         },
         "selectedLayersLayerPath": {
           "type": "string",
@@ -622,6 +634,15 @@
           "type": "boolean",
           "default": true,
           "description": "Enable rotation. If false, a rotation constraint that always sets the rotation to zero is used."
+        },
+        "initialClickCoordinate": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "number"
+          },
+          "description": "The initial coordinate for the map click interaction. Called with [longitude, latitude] coordinates."
         },
         "maxExtent": {
           "type": "array",

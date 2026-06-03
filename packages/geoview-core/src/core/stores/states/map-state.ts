@@ -173,6 +173,14 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
           centerCoordinates:
             (geoviewConfig.map.viewSettings.initialView?.zoomAndCenter?.[1] as Coordinate) ??
             MAP_CENTER[geoviewConfig.map.viewSettings.projection],
+          clickCoordinates: geoviewConfig.map.viewSettings.initialClickCoordinate
+            ? {
+                pixel: [],
+                lonlat: geoviewConfig.map.viewSettings.initialClickCoordinate,
+                projected: [],
+                dragging: false,
+              }
+            : undefined,
           currentProjection: geoviewConfig.map.viewSettings.projection,
           currentBasemapOptions: geoviewConfig.map.basemapOptions,
           featureHighlightColor: geoviewConfig.map.highlightColor ?? DEFAULT_HIGHLIGHT_COLOR,
