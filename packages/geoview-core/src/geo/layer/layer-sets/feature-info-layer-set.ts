@@ -104,7 +104,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     // Keep the lon/lat for possible repeat
     this.#lastQueryLonLat = lonLatCoordinate;
 
-    // Get pixel coordinate for should query check
+    // Get pixel coordinate for shouldQueryAtPixel check
     const mapProjection = this.mapViewer.getProjection();
     const transformedCoordinate = Projection.transformFromLonLat(lonLatCoordinate, mapProjection);
     const pixelCoordinate = this.mapViewer.map.getPixelFromCoordinate(transformedCoordinate);

@@ -36,7 +36,7 @@ export class SwiperController extends AbstractMapViewerController {
   /**
    * Sets the swiper position, which determines the current position of the swipe comparison.
    *
-   * @param position - The new swiper position, between 0 and 1.
+   * @param position - The new swiper position, between 0 and 100.
    */
   setSwiperPosition(position: number): void {
     setStoreSwiperPosition(this.getMapId(), position);
@@ -133,15 +133,11 @@ export class SwiperController extends AbstractMapViewerController {
 
     // Get swiper state from store
     const swiperOrientation = getStoreSwiperOrientation(this.getMapId());
-    const swiperPosition = getStoreSwiperPosition(this.getMapId());
+    const swiperPositionPercentage = getStoreSwiperPosition(this.getMapId()); // 0-100
 
     // Check if coordinate is in visible region
-    if (swiperOrientation === 'vertical') {
-      const swiperX = (mapSize[0] * swiperPosition) / 100;
-      return pixelCoordinate[0] <= swiperX;
-    }
-
-    const swiperY = (mapSize[1] * swiperPosition) / 100;
-    return pixelCoordinate[1] <= swiperY;
+    const orientationIndex = swiperOrientation === 'vertical' ? 0 : 1; // 0 for vertical (x-axis), 1 for horizontal (y-axis)
+    const swiperPositionPixelValue = (mapSize[orientationIndex] * swiperPositionPercentage) / 100; // Convert swiper position to pixel value
+    return pixelCoordinate[orientationIndex] <= swiperPositionPixelValue;
   }
 }

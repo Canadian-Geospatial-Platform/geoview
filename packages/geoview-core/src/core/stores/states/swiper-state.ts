@@ -13,7 +13,7 @@ import { logger } from '@/core/utils/logger';
  * Manages state for the swiper including layer paths and orientation.
  */
 export interface ISwiperState {
-  /** The position of the swiper divider, between 0 and 1. */
+  /** The position of the swiper divider, between 0 and 100. */
   swiperPosition: number;
 
   /** The list of layer paths currently participating in the swiper. */

@@ -722,10 +722,19 @@ export const getStoreMapHighlightedFeaturesByUid = (mapId: string, featureUid: s
   return getStoreMapState(mapId).highlightedFeatures.filter((feature) => feature.uid === featureUid);
 };
 
+/** Returns the current map extent in the map's projection, or undefined if not yet set. */
+export const getStoreMapExtent = (mapId: string): Extent | undefined => getStoreMapState(mapId).mapExtent;
+
+/** Selects the current map extent from the store. */
+export const useStoreMapExtent = (): Extent | undefined => useStore(useGeoViewStore(), (state) => state.mapState.mapExtent);
+
 /** Returns the current map size. */
 export const getStoreMapSize = (mapId: string): Size => {
   return getStoreMapState(mapId).size;
 };
+
+/** Selects the map size from the store. */
+export const useStoreMapSize = (): Size => useStore(useGeoViewStore(), (state) => state.mapState.size);
 
 // #endregion STATE GETTERS & HOOKS
 
@@ -739,12 +748,6 @@ export const useStoreMapCenterCoordinates = (): Coordinate => useStore(useGeoVie
 
 /** Selects the click marker state from the store. */
 export const useStoreMapClickMarker = (): TypeClickMarker | undefined => useStore(useGeoViewStore(), (state) => state.mapState.clickMarker);
-
-/** Returns the current map extent in the map's projection, or undefined if not yet set. */
-export const getStoreMapExtent = (mapId: string): Extent | undefined => getStoreMapState(mapId).mapExtent;
-
-/** Selects the current map extent from the store. */
-export const useStoreMapExtent = (): Extent | undefined => useStore(useGeoViewStore(), (state) => state.mapState.mapExtent);
 
 /** Selects whether the map has a geoview basemap layer from the store. */
 export const useStoreMapHasGeoviewBasemapLayer = (): boolean =>
@@ -773,9 +776,6 @@ export const useStoreMapOverviewMapHideZoom = (): number => useStore(useGeoViewS
 
 /** Selects the map scale information from the store. */
 export const useStoreMapScale = (): TypeScaleInfo => useStore(useGeoViewStore(), (state) => state.mapState.scale);
-
-/** Selects the map size from the store. */
-export const useStoreMapSize = (): Size => useStore(useGeoViewStore(), (state) => state.mapState.size);
 
 /** Selects the current zoom level from the store. */
 export const useStoreMapZoom = (): number => useStore(useGeoViewStore(), (state) => state.mapState.zoom);
