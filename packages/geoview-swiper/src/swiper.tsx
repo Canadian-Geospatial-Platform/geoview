@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 
 import { getRenderPixel } from 'ol/render';
 import type RenderEvent from 'ol/render/Event';
+import type BaseLayer from 'ol/layer/Base';
 import type { EventTypes } from 'ol/Observable';
 import type BaseEvent from 'ol/events/Event';
 
@@ -82,6 +83,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
   }, [mapHeight]);
 
   // States
+  const [olLayers, setOlLayers] = useState<BaseLayer[]>([]);
   const [xPositionVertical, setXPositionVertical] = useState(mapSize.current[0] / 2);
   const [yPositionVertical, setYPositionVertical] = useState(0);
   const [xPositionHorizontal, setXPositionHorizontal] = useState(0);
@@ -181,8 +183,10 @@ export function Swiper(props: SwiperProps): JSX.Element {
       swiperValueHorizontal.current = (y / mapSize.current[1]) * 100;
     }
 
-    // Single map render
-    viewer.map.render();
+    // Force refresh
+    olLayers.forEach((layer: BaseLayer) => {
+      layer.changed();
+    });
   }, 100);
 
   /**
@@ -209,9 +213,11 @@ export function Swiper(props: SwiperProps): JSX.Element {
       controllerRegistry.swiperController?.setSwiperPosition(swiperValueHorizontal.current);
     }
 
-    // Final render
-    viewer.map.render();
-  }, [layerPaths.length, viewer.map, orientation, controllerRegistry.swiperController]);
+    // Force refresh
+    olLayers.forEach((layer: BaseLayer) => {
+      layer.changed();
+    });
+  }, [layerPaths.length, viewer.map, orientation, olLayers, controllerRegistry.swiperController]);
 
   /**
    * Updates swiper and layers from keyboard CTRL + Arrow key.
@@ -263,6 +269,9 @@ export function Swiper(props: SwiperProps): JSX.Element {
       try {
         // Get the layer at the layer path
         const olLayer = await controllerRegistry.layerController.getOLLayerAsync(layerPath, CONST_LAYERS_WAIT, CONST_LAYERS_RETRY);
+
+        // Set the OL layers
+        setOlLayers((prevArray) => [...prevArray, olLayer]);
 
         // Wire events on the layer
         olLayer.on(['precompose' as EventTypes, 'prerender' as EventTypes], prerender);
@@ -331,6 +340,9 @@ export function Swiper(props: SwiperProps): JSX.Element {
           logger.logError('SWIPER - Failed to un-attach layer events', layerPath, error);
         }
       });
+
+      // Empty layers array
+      setOlLayers([]);
     };
   }, [controllerRegistry, layerPaths, attachLayerEventsOnPath, prerender, visibleLayers]);
 
