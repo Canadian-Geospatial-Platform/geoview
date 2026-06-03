@@ -448,6 +448,9 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
 
   const allItemsChecked = !!(layerItems && layerItems.every((i) => i.isVisible !== false));
 
+  /**
+   * Renders the checkbox (or static label) for a single legend item.
+   */
   const renderItemCheckbox = (item: TypeLegendItem): JSX.Element | null => {
     if (!layerStyleConfig) return null;
 
@@ -488,6 +491,9 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
     );
   };
 
+  /**
+   * Renders the header checkbox that toggles visibility of all legend items at once.
+   */
   const renderHeaderCheckbox = (): JSX.Element => {
     const isDisabled = layerHidden || !layerCanToggle || (isEsriDynamic && hasValueExpression);
 
@@ -513,6 +519,9 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
     );
   };
 
+  /**
+   * Renders the WMS legend graphic image when the layer is a WMS with an icon but no individual items.
+   */
   const renderWMSImage = (): JSX.Element | null => {
     // If it's a WMS and we have any iconImage and no items
     if (
@@ -534,6 +543,9 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
     return null;
   };
 
+  /**
+   * Renders the grid of legend items for the current layer.
+   */
   const renderItems = (): JSX.Element | null => {
     // If we have any items
     if (layerItems && layerItems.length > 0) {
@@ -559,6 +571,9 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
     return null;
   };
 
+  /**
+   * Renders the button that opens the data table for the current layer.
+   */
   const renderDetailsButton = (): JSX.Element => {
     return (
       <IconButton
@@ -573,6 +588,9 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
     );
   };
 
+  /**
+   * Renders the button that navigates to the time slider panel for the current layer, when applicable.
+   */
   const renderTimeSliderButton = (): JSX.Element | null => {
     // Check if layer is in time slider
     const isLayerInTimeSlider = timeSliderLayers && timeSliderLayers[layerPath];
@@ -596,6 +614,9 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
     return null;
   };
 
+  /**
+   * Renders the highlight toggle button for layers that support highlighting.
+   */
   const renderHighlightButton = (): JSX.Element | null => {
     if (isLayerHighlightCapable)
       return (
@@ -612,6 +633,9 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
     return null;
   };
 
+  /**
+   * Renders the zoom-to-extent button for layers that support it.
+   */
   const renderZoomButton = (): JSX.Element | null => {
     if (isLayerZoomToExtentCapable)
       return (
@@ -627,6 +651,9 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
     return null;
   };
 
+  /**
+   * Renders the delete/undo button when the layer is configured as removable.
+   */
   const renderDeleteButton = (): JSX.Element | null => {
     // Only render delete button if layer is removable (controls.remove must be explicitly true)
     const isRemovable = layerControls?.remove ?? false;
@@ -642,6 +669,9 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
     );
   };
 
+  /**
+   * Renders the settings button, toggling between opening the settings view and returning to details.
+   */
   const renderSettingsButton = (): JSX.Element | null => {
     const hasInteraction = layerControls?.hover || layerControls?.query;
     if (!availableSettings?.length && !hasInteraction && !hasText) return null;
@@ -673,6 +703,9 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
     );
   };
 
+  /**
+   * Renders the info button, toggling between opening the info view and returning to details.
+   */
   const renderInfoButton = (): JSX.Element => {
     if (activeView === 'info') {
       return (
@@ -701,6 +734,9 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
     );
   };
 
+  /**
+   * Renders the group of layer action buttons (details, time slider, highlight, zoom, delete, etc.).
+   */
   const renderLayerButtons = (): JSX.Element => {
     const timeSliderButton = renderTimeSliderButton();
     const hasDataTable = datatableSettings[layerPath];
@@ -727,6 +763,9 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
     );
   };
 
+  /**
+   * Computes the subtitle shown under the layer name, reflecting hidden state, sublayer count, or visible item count.
+   */
   const subTitle: string | null = ((): string | null => {
     if (parentHidden) return t('layers.parentHidden');
     if (!layerVisible) return t('layers.hidden');

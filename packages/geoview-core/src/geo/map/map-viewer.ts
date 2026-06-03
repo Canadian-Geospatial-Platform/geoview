@@ -2309,7 +2309,7 @@ export class MapViewer {
    *
    * @returns A promise that resolves when the zoom operation completes
    */
-  async #zoomOnLayerIdsMaybe(): Promise<void> {
+  #zoomOnLayerIdsMaybe(): Promise<void> {
     // If the layerIds property in initialView is defined
     if (this.mapFeaturesConfig.map.viewSettings.initialView?.layerIds) {
       // If the layerIds array is empty, use all layers
@@ -2317,7 +2317,7 @@ export class MapViewer {
         ? this.mapFeaturesConfig.map.viewSettings.initialView.layerIds
         : this.controllers.layerController.getGeoviewLayerIds();
 
-      let layerExtents = await this.controllers.layerController.getExtentOfMultipleLayers(layerIdsToZoomTo);
+      let layerExtents = this.controllers.layerController.getExtentOfMultipleLayers(layerIdsToZoomTo);
 
       // If extents have infinity, use default instead
       if (!layerExtents || layerExtents.includes(Infinity))
