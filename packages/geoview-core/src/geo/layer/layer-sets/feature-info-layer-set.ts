@@ -6,6 +6,7 @@ import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-la
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { GVKML } from '@/geo/layer/gv-layers/vector/gv-kml';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
+import type { MapViewer } from '@/geo/map/map-viewer';
 import {
   setStoreFeatureInfoDetails,
   setStoreFeatureInfoDetailsUpdateFeaturesHaveGeometry,
@@ -16,6 +17,8 @@ import { RequestAbortedError } from '@/core/exceptions/core-exceptions';
 import { LayerNoLastQueryToPerformError } from '@/core/exceptions/geoview-exceptions';
 import { logger } from '@/core/utils/logger';
 import { Projection } from '@/geo/utils/projection';
+import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
+import type { LayerDomain } from '@/core/domains/layer-domain';
 
 /**
  * A Layer-set working with the LayerSetController at handling a result set of registered layers and synchronizing
@@ -27,13 +30,27 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
   static QUERY_TYPE: QueryType = 'at_lon_lat';
 
   /** The lon/lat of the last query */
-  #lastQueryLonLat: Coordinate | null = null;
+  #lastQueryLonLat?: Coordinate;
 
   /** Callback delegates for the query ended event */
   #onQueryEndedHandlers: QueryEndedDelegate[] = [];
 
   /** The abort controller shared by all layer queries for the current queryLayers call. */
   #abortController: AbortController = new AbortController();
+
+  /**
+   * Constructs a FeatureInfo LayerSet to manage feature info queries.
+   *
+   * @param mapViewer - The map viewer
+   * @param controllerRegistry - The controller registry
+   * @param layerDomain - The layer domain
+   */
+  constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry, layerDomain: LayerDomain) {
+    super(mapViewer, controllerRegistry, layerDomain);
+
+    // We want to assign a provided initialClickCoordinates to #lastQueryLonLat in order to rerun it.
+    this.#lastQueryLonLat = mapViewer.mapFeaturesConfig?.map.viewSettings.initialClickCoordinate;
+  }
 
   // #region OVERRIDES
 
@@ -158,6 +175,15 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
   clearResults(layerPath: string): void {
     // Save in the store
     setStoreFeatureInfoDetails(this.getMapId(), layerPath, 'init', undefined, false);
+  }
+
+  /**
+   * Gets the last query longitude/latitude coordinate for the map.
+   *
+   * @returns The last query longitude/latitude coordinate, if available
+   */
+  getLastQueryLonLat(): Coordinate | undefined {
+    return this.#lastQueryLonLat || undefined;
   }
 
   // #endregion PUBLIC METHODS
