@@ -207,13 +207,15 @@ export class LayerSetController extends AbstractMapViewerController {
    * Repeats the last feature info query.
    * This method waits for the map viewer layers to be rendered before performing the query.
    *
+   * @param waitForRender - Whether to wait for the map viewer layers to be rendered before performing the query, defaults to true
    * @returns A promise that resolves with the result of the query
    * @throws {LayerNoLastQueryToPerformError} When there's no last query to perform
    */
-  async repeatLastQuery(): Promise<TypeFeatureInfoResultSet> {
+  async repeatLastQuery(waitForRender = true): Promise<TypeFeatureInfoResultSet> {
     // Wait until the render completes
-    await this.getMapViewer().waitForRender();
-
+    if (waitForRender) {
+      await this.getMapViewer().waitForRender();
+    }
     // Redirect
     return this.featureInfoLayerSet.repeatLastQuery();
   }
@@ -222,12 +224,13 @@ export class LayerSetController extends AbstractMapViewerController {
    * Repeats the last feature info query, if any.
    * This method waits for the map viewer layers to be rendered before performing the query.
    *
+   * @param waitForRender - Whether to wait for the map viewer layers to be rendered before performing the query, defaults to true
    * @returns A promise that resolves with the result of the query or undefined when no query to repeat
    */
-  async repeatLastQueryIfAny(): Promise<TypeFeatureInfoResultSet | undefined> {
+  async repeatLastQueryIfAny(waitForRender = true): Promise<TypeFeatureInfoResultSet | undefined> {
     try {
       // Redirect and leave the 'await' keyword here so the try/catch works as expected.
-      return await this.repeatLastQuery();
+      return await this.repeatLastQuery(waitForRender);
     } catch (error: unknown) {
       // If the error is LayerNoLastQueryToPerformError, no worries, skip
       if (error instanceof LayerNoLastQueryToPerformError) return;
@@ -235,6 +238,15 @@ export class LayerSetController extends AbstractMapViewerController {
       // Otherwise, keep throwing
       throw error;
     }
+  }
+
+  /**
+   * Gets the last query longitude/latitude coordinate.
+   *
+   * @returns The last query longitude/latitude coordinate, if available
+   */
+  getLastQueryLonLat(): Coordinate | undefined {
+    return this.featureInfoLayerSet.getLastQueryLonLat();
   }
 
   /**

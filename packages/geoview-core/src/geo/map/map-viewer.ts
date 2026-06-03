@@ -463,6 +463,10 @@ export class MapViewer {
     // After this call, all first level layers have been registered.
     await this.controllers.layerCreatorController.loadListOfGeoviewLayer(this.mapFeaturesConfig.map.listOfGeoviewLayerConfig);
 
+    // Repeat the last feature query performed once all layers are loaded, the last click coordinates are set from initialClickCoordinate at this point.
+    // This is mainly used to restore map state from createMapConfigFromMapState, but can be used through config to set an initial query.
+    this.#initLastQuery();
+
     // Here, all base-level "this.mapFeaturesConfig.map.listOfGeoviewLayerConfig" have been registered (layerStatus === 'registered').
     // However, careful, the layers are still processing and some sub-layer-entries can get registered on-the-fly (notably: EsriDynamic, WMS).
 
@@ -2368,6 +2372,34 @@ export class MapViewer {
     // Is ready
     this.#mapLayersLoaded = true;
     this.#emitMapLayersLoaded();
+  }
+
+  /**
+   * Function called to monitor when the map has its layers in loaded state and then repeat last query if any.
+   *
+   * This is done after the layers are loaded to ensure that the map features depending on the layers (details, geochart) are properly updated with the repeated query.
+   */
+  #initLastQuery(): void {
+    this.waitForLayersLoaded()
+      .then(() => {
+        this.controllers.layerSetController
+          .repeatLastQueryIfAny(false)
+          .then(() => {
+            // Set selected layer paths for details if available in the config.
+            if (this.mapFeaturesConfig.appBar?.selectedDetailsLayerPath || this.mapFeaturesConfig.footerBar?.selectedDetailsLayerPath) {
+              this.controllers.detailsController.setSelectedLayerPath(
+                this.mapFeaturesConfig.appBar?.selectedDetailsLayerPath || this.mapFeaturesConfig.footerBar?.selectedDetailsLayerPath!
+              );
+            }
+
+            // Set selected layer paths for geochart if available in the config.
+            if (this.controllers.geoChartController && this.mapFeaturesConfig.footerBar?.selectedGeochartLayerPath) {
+              this.controllers.geoChartController.setSelectedLayerPath(this.mapFeaturesConfig.footerBar?.selectedGeochartLayerPath);
+            }
+          })
+          .catch((error: unknown) => logger.logError('Failed to repeat last query', error));
+      })
+      .catch((error: unknown) => logger.logError('Failed while waiting for layers to load', error));
   }
 
   // #endregion
