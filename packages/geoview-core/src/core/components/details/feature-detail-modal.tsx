@@ -33,12 +33,14 @@ export default function FeatureDetailModal(): JSX.Element {
   const uiController = useUIController();
   const activeModalId = useStoreUIActiveFocusItem().activeElementId;
   const feature = useStoreDataTableSelectedFeature()!;
-  const [nameFieldValue, setNameFieldValue] = useState('');
   const shellContainer = useStoreAppShellContainer();
 
   // Determine which container (appBar or footerBar) the modal is rendered in
   const activeAppBarTab = useStoreUIActiveAppBarTab();
   const containerType = activeAppBarTab.tabId === TABS.DATA_TABLE && activeAppBarTab.isOpen ? 'appBar' : 'footerBar';
+
+  // State
+  const [nameFieldValue, setNameFieldValue] = useState('');
 
   /**
    * Builds the features list to display in the table.

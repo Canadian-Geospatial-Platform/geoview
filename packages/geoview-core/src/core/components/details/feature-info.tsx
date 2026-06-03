@@ -388,14 +388,7 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
       />
 
       <Box sx={memoSxClasses.featureInfoListContainer}>
-        <FeatureInfoTable
-          layerPath={feature.layerPath}
-          featureInfoList={memoFeatureInfoList}
-          layerDateTemporalMode={layerDateTemporalMode}
-          displayDateFormat={displayDateFormat}
-          displayDateTimezone={displayDateTimezone}
-          containerType={containerType}
-        />
+        <FeatureInfoTable layerPath={feature.layerPath} featureInfoList={memoFeatureInfoList} containerType={containerType} />
       </Box>
     </Paper>
   );
