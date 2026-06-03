@@ -750,8 +750,8 @@ type TypeLegendPropagationContext = {
   layerPathNodes: string[];
 
   /** Map resolution used by in-visible-range checks. */
-  calculatedMapResolution: number | undefined;
+  calculatedMapResolution?: number;
 
   /** Map scale used by in-visible-range checks. */
-  calculatedMapScale: number | undefined;
+  calculatedMapScale?: number;
 };

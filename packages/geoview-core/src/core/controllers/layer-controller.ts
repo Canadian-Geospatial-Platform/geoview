@@ -2593,7 +2593,7 @@ export class LayerController extends AbstractMapViewerController {
       })
       .catch((error: unknown) => {
         // Log the error
-        logger.logPromiseFailed('in layer-state.setStoreLayerBoundsForLayerAndParentsAndForget', error);
+        logger.logPromiseFailed('in LayerController.initBoundsForLayerAndParentsAndForget', error);
       });
   }
 
