@@ -92,9 +92,15 @@ import {
 import {
   updateStoreCoordinateInfoLayer,
   getStoreDetailsCoordinateInfoEnabled,
+  getStoreDetailsSelectedLayerPath,
   setStoreDetailsCoordinateInfoEnabled,
   LAYER_PATH_COORDINATE_INFO,
 } from '@/core/stores/states/feature-info-state';
+import {
+  getStoreGeochartSelectedLayerPath,
+  isStoreGeochartInitialized,
+  getStoreGeochartChartsConfig,
+} from '@/core/stores/states/geochart-state';
 import { DEFAULT_OL_FITOPTIONS, OL_ZOOM_DURATION, OL_ZOOM_PADDING, TIMEOUT } from '@/core/utils/constant';
 import { DateMgt, type TimeDimension } from '@/core/utils/date-mgt';
 import { delay, doTimeout, isValidUUID, whenThisThen } from '@/core/utils/utilities';
@@ -114,6 +120,7 @@ import { AbstractGVVectorTile } from '@/geo/layer/gv-layers/vector/abstract-gv-v
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
 import { InvalidExtentError } from '@/core/exceptions/geoview-exceptions';
+import type { GeoViewGeoChartConfig } from '@/api/config/reader/uuid-config-reader';
 
 /**
  * Controller responsible for Map interactions.
@@ -1034,6 +1041,7 @@ export class MapController extends AbstractMapViewerController {
         initialView: { zoomAndCenter: [currentView.getZoom() as number, centerLatLng] },
         homeView: getStoreMapHomeView(mapId),
         enableRotation: storeViewSettings?.enableRotation !== undefined ? storeViewSettings.enableRotation : undefined,
+        initialClickCoordinate: this.getControllersRegistry().layerSetController.getLastQueryLonLat(),
         rotation: getStoreMapRotation(mapId),
         minZoom: currentView.getMinZoom(),
         maxZoom: currentView.getMaxZoom(),
@@ -1063,6 +1071,16 @@ export class MapController extends AbstractMapViewerController {
         } else if (sliders) corePackagesConfig = [{ 'time-slider': { sliders } }];
       }
 
+      // Create geochart config and add to core package configs
+      if (isStoreGeochartInitialized(mapId)) {
+        const charts = MapController.#createGeochartConfigs(mapId);
+        if (corePackagesConfig && charts) {
+          const configObj = corePackagesConfig?.find((packageConfig) => Object.keys(packageConfig).includes('geochart'));
+          if (configObj) configObj['geochart'] = { charts };
+          else corePackagesConfig.push({ geochart: { charts } });
+        } else if (charts) corePackagesConfig = [{ geochart: { charts } }];
+      }
+
       // Construct map config
       const newMapConfig: TypeMapFeaturesInstance = {
         map,
@@ -1088,6 +1106,8 @@ export class MapController extends AbstractMapViewerController {
         if (selectedDataTableLayerPath) newMapConfig.appBar.selectedDataTableLayerPath = selectedDataTableLayerPath;
         const selectedLayerPath = getStoreLayerSelectedLayerPath(mapId);
         if (selectedLayerPath) newMapConfig.appBar.selectedLayersLayerPath = selectedLayerPath;
+        const selectedDetailsLayerPath = getStoreDetailsSelectedLayerPath(mapId);
+        if (selectedDetailsLayerPath) newMapConfig.appBar.selectedDetailsLayerPath = selectedDetailsLayerPath;
       }
 
       // Set footer bar tab settings
@@ -1098,6 +1118,12 @@ export class MapController extends AbstractMapViewerController {
         if (selectedDataTableLayerPath) newMapConfig.footerBar.selectedDataTableLayerPath = selectedDataTableLayerPath;
         const selectedLayerLayerPath = getStoreLayerSelectedLayerPath(mapId);
         if (selectedLayerLayerPath) newMapConfig.footerBar.selectedLayersLayerPath = selectedLayerLayerPath;
+        const selectedDetailsLayerPath = getStoreDetailsSelectedLayerPath(mapId);
+        if (selectedDetailsLayerPath) newMapConfig.footerBar.selectedDetailsLayerPath = selectedDetailsLayerPath;
+        if (isStoreGeochartInitialized(mapId)) {
+          const selectedGeochartLayerPath = getStoreGeochartSelectedLayerPath(mapId);
+          if (selectedGeochartLayerPath) newMapConfig.footerBar.selectedGeochartLayerPath = selectedGeochartLayerPath;
+        }
 
         // If the TimeSlider plugin is initialized
         if (isStoreTimeSliderInitialized(mapId)) {
@@ -1105,6 +1131,12 @@ export class MapController extends AbstractMapViewerController {
           newMapConfig.footerBar.selectedTimeSliderLayerPath = getStoreTimeSliderSelectedLayerPath(mapId);
         }
       }
+
+      // Update global settings with current coordinate info enabled state
+      const coordinateInfoEnabled = getStoreDetailsCoordinateInfoEnabled(mapId);
+      if (coordinateInfoEnabled !== undefined && newMapConfig.globalSettings)
+        newMapConfig.globalSettings.coordinateInfoEnabled = coordinateInfoEnabled;
+      else if (coordinateInfoEnabled) newMapConfig.globalSettings = { coordinateInfoEnabled };
 
       return newMapConfig;
     }
@@ -1580,6 +1612,31 @@ export class MapController extends AbstractMapViewerController {
       });
 
       return timeSliderProps;
+    }
+
+    return undefined;
+  }
+
+  /**
+   * Creates geochart configurations based on the current geochart state.
+   *
+   * Note: The last click coordinate query will be rerun to populate the geochart features, but this will not work
+   * for raster layers that have been zoomed/scrolled out of view, as they will be outside of the query area.
+   *
+   * @param mapId - The map identifier
+   * @returns An array of geochart configs, or undefined if no geochart layers exist
+   */
+  static #createGeochartConfigs(mapId: string): GeoViewGeoChartConfig[] | undefined {
+    // Get geochart info
+    const geochartsConfig = getStoreGeochartChartsConfig(mapId);
+
+    if (geochartsConfig) {
+      const geochartConfigs: GeoViewGeoChartConfig[] = [];
+      Object.keys(geochartsConfig).forEach((layerPath) => {
+        geochartConfigs.push(geochartsConfig[layerPath]);
+      });
+
+      return geochartConfigs;
     }
 
     return undefined;

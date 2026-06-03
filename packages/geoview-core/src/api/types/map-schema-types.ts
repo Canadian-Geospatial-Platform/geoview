@@ -114,6 +114,8 @@ export type TypeFooterBarProps = {
     custom: TypeFooterBarTabsCustomProps[]; // TODO: support custom tab by creating a Typeobject for it
   };
   selectedTab: TypeValidFooterBarTabsCoreProps;
+  selectedDetailsLayerPath: string;
+  selectedGeochartLayerPath: string;
   selectedLayersLayerPath: string;
   selectedDataTableLayerPath: string;
   selectedTimeSliderLayerPath: string;
@@ -142,6 +144,7 @@ export type TypeAppBarProps = {
   selectedLayersLayerPath: string;
   selectedDataTableLayerPath: string;
   selectedTimeSliderLayerPath: string;
+  selectedDetailsLayerPath: string;
 };
 
 /** Overview map options. Default none. */
@@ -302,6 +305,8 @@ export type TypeViewSettings = {
   homeView?: TypeMapViewSettings;
   /** Enable rotation. If false, a rotation constraint that always sets the rotation to zero is used. Default = true. */
   enableRotation?: boolean;
+  /** Lon lat to perform a click interaction at once layers are loaded. */
+  initialClickCoordinate?: Coordinate;
   /**
    * The initial rotation for the view in degree (positive rotation clockwise, 0 means North). Will be converted to radiant by
    * the viewer. Domain = [0..360], default = 0.
