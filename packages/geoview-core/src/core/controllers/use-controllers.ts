@@ -96,12 +96,28 @@ export function useDataTableController(): DataTableController {
   return useControllers().dataTableController;
 }
 
+/**
+ * Hook to access the SwiperController from the controller context.
+ *
+ * @returns The swiper controller instance
+ * @throws {Error} When used outside of a ControllerContext.Provider
+ */
 export function useSwiperController(): SwiperController {
   const controller = useControllers().swiperController;
   if (!controller) throw new Error('useSwiperController must be used with an initialized swiper plugin state');
   return controller;
 }
 
+/**
+ * Hook to optionally access the SwiperController from the controller context.
+ *
+ * Unlike `useSwiperController`, this hook does not throw when the Swiper
+ * plugin is not configured. Use this in shared components that may or may not
+ * have the swiper plugin active.
+ *
+ * @returns The swiper controller instance, or undefined if the plugin is not configured
+ * @throws {Error} When used outside of a ControllerContext.Provider
+ */
 export function useSwiperControllerIfExists(): SwiperController | undefined {
   return useControllers().swiperController;
 }

@@ -299,10 +299,11 @@ export abstract class AbstractLayerSet {
       return true;
     }
 
-    // Delegate to swiper controller
+    // Get map size. Required to check if the pixel coordinate is in the visible region considering the swiper position and orientation.
     const mapSize = this.mapViewer.map.getSize();
     if (!mapSize) return true;
 
+    // Delegate to swiper controller
     return swiperController.shouldQueryAtPixel(layerPath, pixelCoordinate, mapSize);
   }
 
