@@ -463,6 +463,27 @@ export class MapViewer {
     // After this call, all first level layers have been registered.
     await this.controllers.layerCreatorController.loadListOfGeoviewLayer(this.mapFeaturesConfig.map.listOfGeoviewLayerConfig);
 
+    // Repeat the last feature query performed once all layers are loaded, and set selected layer paths if available.
+    // The last click coordinates are set from initialClickCoordinate at this point.
+    // GV: This is mainly used to restore map state from createMapConfigFromMapState, but can be used through config to set an initial query.
+    this.waitForLayersLoaded()
+      .then(() => {
+        this.controllers.layerSetController
+          .repeatLastQueryIfAny(false)
+          .then(() => {
+            if (this.mapFeaturesConfig.appBar?.selectedDetailsLayerPath || this.mapFeaturesConfig.footerBar?.selectedDetailsLayerPath) {
+              this.controllers.detailsController.setSelectedLayerPath(
+                this.mapFeaturesConfig.appBar?.selectedDetailsLayerPath || this.mapFeaturesConfig.footerBar?.selectedDetailsLayerPath!
+              );
+            }
+            if (this.controllers.geoChartController && this.mapFeaturesConfig.footerBar?.selectedGeochartLayerPath) {
+              this.controllers.geoChartController.setSelectedLayerPath(this.mapFeaturesConfig.footerBar?.selectedGeochartLayerPath);
+            }
+          })
+          .catch((error: unknown) => logger.logError('Failed to repeat last query', error));
+      })
+      .catch((error: unknown) => logger.logError('Failed while waiting for layers to load', error));
+
     // Here, all base-level "this.mapFeaturesConfig.map.listOfGeoviewLayerConfig" have been registered (layerStatus === 'registered').
     // However, careful, the layers are still processing and some sub-layer-entries can get registered on-the-fly (notably: EsriDynamic, WMS).
 
