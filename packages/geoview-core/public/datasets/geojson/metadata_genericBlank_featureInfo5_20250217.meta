@@ -14,12 +14,12 @@
           "queryable": true,
           "nameField": "title_en",
           "outfields": [
-            { "name": "linkToProject", "alias": "Link to record", "type": "string", "domain": null },
-            { "name": "program", "alias": "Program", "type": "string", "domain": null },
-            { "name": "project_id", "alias": "Project ID", "type": "string", "domain": null },
-            { "name": "title_en", "alias": "Project Title", "type": "string", "domain": null },
-            { "name": "project_leader", "alias": "Project Leader", "type": "string", "domain": null },
-            { "name": "geo_scope", "alias": "Geo Scope", "type": "string", "domain": null }
+            { "name": "linkToProject", "alias": "Link to record", "type": "string" },
+            { "name": "program", "alias": "Program", "type": "string" },
+            { "name": "project_id", "alias": "Project ID", "type": "string" },
+            { "name": "title_en", "alias": "Project Title", "type": "string" },
+            { "name": "project_leader", "alias": "Project Leader", "type": "string" },
+            { "name": "geo_scope", "alias": "Geo Scope", "type": "string" }
           ]
         }
       },

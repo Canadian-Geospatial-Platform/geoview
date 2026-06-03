@@ -712,7 +712,7 @@
           ]
         }
       },
-      "required": ["name", "alias", "type", "domain"]
+      "required": ["name", "alias", "type"]
     },
     "TypeOutfieldsType": {
       "description": "The types supported by the outfields object.",

@@ -27,236 +27,197 @@
             {
               "name": "feature_date",
               "alias": "feature_date",
-              "type": "string",
-              "domain": []
+              "type": "string"
             },
             {
               "name": "groupe_id",
               "alias": "groupe_id",
-              "type": "number",
-              "domain": []
+              "type": "number"
             },
             {
               "name": "hydrosequence_id",
               "alias": "hydrosequence_id",
-              "type": "number",
-              "domain": []
+              "type": "number"
             },
             {
               "name": "level_path_id",
               "alias": "level_path_id",
-              "type": "number",
-              "domain": []
+              "type": "number"
             },
             {
               "name": "slope",
               "alias": "slope",
-              "type": "number",
-              "domain": []
+              "type": "number"
             },
             {
               "name": "fid",
               "alias": "fid",
-              "type": "number",
-              "domain": []
+              "type": "number"
             },
             {
               "name": "feature_type",
               "alias": "feature_type",
-              "type": "number",
-              "domain": []
+              "type": "number"
             },
             {
               "name": "name_id",
               "alias": "name_id",
-              "type": "number",
-              "domain": []
+              "type": "number"
             },
             {
               "name": "shreve_order",
               "alias": "shreve_order",
-              "type": "number",
-              "domain": []
+              "type": "number"
             },
             {
               "name": "downstream_main_path_hydro_seq",
               "alias": "downstream_main_path_hydro_seq",
-              "type": "number",
-              "domain": []
+              "type": "number"
             },
             {
               "name": "feature_id",
               "alias": "feature_id",
-              "type": "number",
-              "domain": []
+              "type": "number"
             },
             {
               "name": "feature_type_en",
               "alias": "feature_type_en",
-              "type": "string",
-              "domain": []
+              "type": "string"
             },
             {
               "name": "name_en",
               "alias": "name_en",
-              "type": "string",
-              "domain": []
+              "type": "string"
             },
             {
               "name": "strahler_order",
               "alias": "strahler_order",
-              "type": "number",
-              "domain": []
+              "type": "number"
             },
             {
               "name": "downstream_minor_path_hydro_seq",
               "alias": "downstream_minor_path_hydro_seq",
-              "type": "number",
-              "domain": []
+              "type": "number"
             },
             {
               "name": "md_id",
               "alias": "dmd_id",
-              "type": "string",
-              "domain": []
+              "type": "string"
             },
             {
               "name": "feature_type_fr",
               "alias": "feature_type_fr",
-              "type": "string",
-              "domain": []
+              "type": "string"
             },
             {
               "name": "name_fr",
               "alias": "name_fr",
-              "type": "string",
-              "domain": []
+              "type": "string"
             },
             {
               "name": "from_node",
               "alias": "from_node",
-              "type": "number",
-              "domain": []
+              "type": "number"
             },
             {
               "name": "start_flag",
               "alias": "start_flag",
-              "type": "number",
-              "domain": []
+              "type": "number"
             },
             {
               "name": "code_spec",
               "alias": "code_spec",
-              "type": "number",
-              "domain": []
+              "type": "number"
             },
             {
               "name": "permanency",
               "alias": "permanency",
-              "type": "number",
-              "domain": []
+              "type": "number"
             },
             {
               "name": "flow_priority",
               "alias": "flow_priority",
-              "type": "number",
-              "domain": []
+              "type": "number"
             },
             {
               "name": "to_node",
               "alias": "to_node",
-              "type": "number",
-              "domain": []
+              "type": "number"
             },
             {
               "name": "terminal_flag",
               "alias": "terminal_flag",
-              "type": "number",
-              "domain": []
+              "type": "number"
             },
             {
               "name": "mainstemid",
               "alias": "mainstemid",
-              "type": "number",
-              "domain": []
+              "type": "number"
             },
             {
               "name": "isolated",
               "alias": "isolated",
-              "type": "number",
-              "domain": []
+              "type": "number"
             },
             {
               "name": "flow_direction",
               "alias": "flow_direction",
-              "type": "number",
-              "domain": []
+              "type": "number"
             },
             {
               "name": "comid",
               "alias": "comid",
-              "type": "number",
-              "domain": []
+              "type": "number"
             },
             {
               "name": "divergence",
               "alias": "divergence",
-              "type": "number",
-              "domain": []
+              "type": "number"
             },
             {
               "name": "work_unit_code",
               "alias": "work_unit_code",
-              "type": "string",
-              "domain": []
+              "type": "string"
             },
             {
               "name": "in_isolated_network",
               "alias": "in_isolated_network",
-              "type": "number",
-              "domain": []
+              "type": "number"
             },
             {
               "name": "hack_order",
               "alias": "hack_order",
-              "type": "number",
-              "domain": []
+              "type": "number"
             },
             {
               "name": "tocomid",
               "alias": "tocomid",
-              "type": "number",
-              "domain": []
+              "type": "number"
             },
             {
               "name": "length_km",
               "alias": "length_km",
-              "type": "number",
-              "domain": []
+              "type": "number"
             },
             {
               "name": "drainage_area_code",
               "alias": "drainage_area_code",
-              "type": "string",
-              "domain": []
+              "type": "string"
             },
             {
               "name": "in_network",
               "alias": "in_network",
-              "type": "number",
-              "domain": []
+              "type": "number"
             },
             {
               "name": "horton_order",
               "alias": "horton_order",
-              "type": "number",
-              "domain": []
+              "type": "number"
             },
             {
               "name": "terminal_path_id",
               "alias": "terminal_path_id",
-              "type": "number",
-              "domain": []
+              "type": "number"
             }
           ]
         }

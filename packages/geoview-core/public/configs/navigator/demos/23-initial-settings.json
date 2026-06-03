@@ -131,8 +131,7 @@
                   {
                     "name": "band-0-pixel-value",
                     "alias": "Pixel value",
-                    "type": "number",
-                    "domain": null
+                    "type": "number"
                   }
                 ]
               }
@@ -156,32 +155,27 @@
                   {
                     "name": "Venue",
                     "alias": "Venue Set",
-                    "type": "string",
-                    "domain": null
+                    "type": "string"
                   },
                   {
                     "name": "Event",
                     "alias": "Event Set",
-                    "type": "string",
-                    "domain": null
+                    "type": "string"
                   },
                   {
                     "name": "Tour",
                     "alias": "Tour Set",
-                    "type": "string",
-                    "domain": null
+                    "type": "string"
                   },
                   {
                     "name": "City",
                     "alias": "City Set",
-                    "type": "string",
-                    "domain": null
+                    "type": "string"
                   },
                   {
                     "name": "Date",
                     "alias": "Date Set",
-                    "type": "date",
-                    "domain": null
+                    "type": "date"
                   }
                 ]
               }

@@ -109,8 +109,7 @@
                       {
                         "name": "plain_text",
                         "alias": "Forcast",
-                        "type": "string",
-                        "domain": null
+                        "type": "string"
                       }
                     ]
                   }
@@ -145,8 +144,7 @@
                   {
                     "name": "band-0-pixel-value",
                     "alias": "Pixel value",
-                    "type": "number",
-                    "domain": null
+                    "type": "number"
                   }
                 ]
               }

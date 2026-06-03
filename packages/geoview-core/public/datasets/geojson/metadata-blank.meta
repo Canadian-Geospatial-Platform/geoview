@@ -9,12 +9,12 @@
           "queryable": true,
           "nameField": "Red",
           "outfields": [
-            { "name": "Red", "alias": "Red", "type": "number", "domain": null },
-            { "name": "Green", "alias": "Green", "type": "number", "domain": null },
-            { "name": "Blue", "alias": "Blue", "type": "number", "domain": null },
-            { "name": "Yellow", "alias": "Yellow", "type": "number", "domain": null },
-            { "name": "Orange", "alias": "Orange", "type": "number", "domain": null },
-            { "name": "creationDate", "alias": "Creation Date", "type": "date", "domain": null }
+            { "name": "Red", "alias": "Red", "type": "number" },
+            { "name": "Green", "alias": "Green", "type": "number" },
+            { "name": "Blue", "alias": "Blue", "type": "number" },
+            { "name": "Yellow", "alias": "Yellow", "type": "number" },
+            { "name": "Orange", "alias": "Orange", "type": "number" },
+            { "name": "creationDate", "alias": "Creation Date", "type": "date" }
           ]
         }
       },
