@@ -6,6 +6,7 @@ import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-la
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { GVKML } from '@/geo/layer/gv-layers/vector/gv-kml';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
+import type { MapViewer } from '@/geo/map/map-viewer';
 import {
   setStoreFeatureInfoDetails,
   setStoreFeatureInfoDetailsUpdateFeaturesHaveGeometry,
@@ -15,6 +16,8 @@ import { getStoreAppShowUnsymbolizedFeatures } from '@/core/stores/states/app-st
 import { RequestAbortedError } from '@/core/exceptions/core-exceptions';
 import { LayerNoLastQueryToPerformError } from '@/core/exceptions/geoview-exceptions';
 import { logger } from '@/core/utils/logger';
+import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
+import type { LayerDomain } from '@/core/domains/layer-domain';
 
 /**
  * A Layer-set working with the LayerSetController at handling a result set of registered layers and synchronizing
@@ -33,6 +36,13 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
   /** The abort controller shared by all layer queries for the current queryLayers call. */
   #abortController: AbortController = new AbortController();
+
+  constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry, layerDomain: LayerDomain) {
+    super(mapViewer, controllerRegistry, layerDomain);
+    if (mapViewer.mapFeaturesConfig?.map.viewSettings?.initialClickCoordinate) {
+      this.#lastQueryLonLat = mapViewer.mapFeaturesConfig?.map.viewSettings.initialClickCoordinate;
+    }
+  }
 
   // #region OVERRIDES
 
@@ -149,6 +159,15 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
   clearResults(layerPath: string): void {
     // Save in the store
     setStoreFeatureInfoDetails(this.getMapId(), layerPath, 'init', undefined, false);
+  }
+
+  /**
+   * Gets the last query longitude/latitude coordinate for the map.
+   *
+   * @returns The last query longitude/latitude coordinate, if available
+   */
+  getLastQueryLonLat(): Coordinate | null {
+    return this.#lastQueryLonLat;
   }
 
   // #endregion PUBLIC METHODS
