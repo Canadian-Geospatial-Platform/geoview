@@ -74,6 +74,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   settingsCard: {
     display: 'flex',
     alignItems: 'center',
+    margin: '4px',
     padding: '12px',
     border: '1px solid',
     borderColor: theme.palette.divider,

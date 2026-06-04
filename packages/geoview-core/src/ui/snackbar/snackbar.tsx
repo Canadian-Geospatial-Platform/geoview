@@ -24,9 +24,10 @@ interface SnackBarProps {
  * Material-UI Alert wrapper component with elevated styling.
  *
  * @param props - Alert properties from Material-UI AlertProps
+ * @param ref - Forwarded ref to the underlying div element
  * @returns Alert component with filled variant and elevation
  */
-const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) {
+const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref): JSX.Element {
   return <MaterialAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
@@ -84,6 +85,7 @@ function SnackbarUI(props: SnackBarProps): JSX.Element {
 
   return (
     <AnimatedSnackbar
+      role="status"
       style={fadeInAnimation}
       sx={memoSnackbarStyles}
       id={snackBarId}

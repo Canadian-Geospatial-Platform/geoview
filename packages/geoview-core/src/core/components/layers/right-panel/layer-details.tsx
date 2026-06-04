@@ -580,7 +580,12 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
   /**
    * Renders the button that opens the data table for the current layer.
    */
-  const renderDetailsButton = (): JSX.Element => {
+  const renderDetailsButton = (): JSX.Element | null => {
+    // Hidden in WCAG mode - keyboard users can Tab to Data Table Panel instead
+    if (isFocusTrap) {
+      return null;
+    }
+
     return (
       <IconButton
         id={tableDetailsButtonId}
@@ -744,10 +749,11 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
    * Renders the group of layer action buttons (details, time slider, highlight, zoom, delete, etc.).
    */
   const renderLayerButtons = (): JSX.Element => {
-    const timeSliderButton = renderTimeSliderButton();
     const hasDataTable = datatableSettings[layerPath];
+    const detailsButton = hasDataTable ? renderDetailsButton() : null;
+    const timeSliderButton = renderTimeSliderButton();
     const deleteButton = renderDeleteButton();
-    const showDivider = hasDataTable || timeSliderButton;
+    const showDivider = detailsButton !== null || timeSliderButton !== null;
 
     return (
       <Box
@@ -755,7 +761,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
         sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '15px', flexWrap: 'wrap', justifyContent: 'flex-end' }}
         aria-label={t('layers.layerControls')}
       >
-        {hasDataTable && renderDetailsButton()}
+        {detailsButton}
         {timeSliderButton}
         {showDivider && <Box sx={sxClasses.verticalDivider} />}
         <IconButton className="buttonOutline" onClick={handleResetLayer} aria-label={t('legend.resetLayer')}>

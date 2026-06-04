@@ -2,6 +2,7 @@ import type { ReactNode, AriaRole } from 'react';
 import type { TooltipProps, ButtonProps, TextFieldProps } from '@mui/material';
 
 import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
+import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 
 /** Interface used to initialize a button panel. */
 export type TypeButtonPanelProps = {
@@ -15,8 +16,10 @@ export type TypeButtonPanelProps = {
 export type TypeButtonGroupConfig = {
   /** Group name */
   groupName: string;
-  /** Threshold for accordion expansion (default: 4) */
+  /** Threshold for accordion expansion (default: 10) */
   accordionThreshold?: number;
+  /** Optional display name for the group. Can be a single string or a partial localized record (allows any combination of languages). */
+  displayName?: string | Partial<Record<TypeDisplayLanguage, string>>;
 };
 
 /** Type for the panel properties used when creating a new panel. */

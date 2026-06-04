@@ -105,10 +105,22 @@ Appuyez sur **Ctrl** et **Q** pour quitter la navigation avec le clavier.
 
 _N.B. : La carte doit être focalisée pour que les combinaisons de touches fonctionnent. La carte est focalisée lorsque le pointeur en croix s’affiche._
 
-**Accessibilité**
+## Accessibilité
 
-La carte n’est pas pleinement conforme au niveau AA des Règles pour l’accessibilité des contenus Web (WCAG) 2.0.
-=1!drawingTools=
+La carte n'est pas pleinement conforme au niveau AA des Règles pour l'accessibilité des contenus Web (WCAG) 2.1. Cependant, l'accessibilité est une priorité dans le développement de GeoView. L'application suit les directives WCAG 2.1 niveau AA dans la mesure du possible.
+
+### Utilisateurs au clavier
+
+- L'ouverture des panneaux déclenche des pièges de focus pour accélérer la navigation ; la touche Échap ferme les panneaux et ramène le focus sur l'élément déclencheur.
+- En mode plein écran, la touche Échap permet de quitter le mode plein écran plutôt que de fermer les panneaux qui ont été ouverts.
+
+### Utilisateurs de lecteurs d'écran
+
+- Des points de repère sémantiques sont fournis pour chaque section principale de l'application afin de permettre une navigation rapide.
+- Les régions ARIA en direct annoncent les événements en temps réel, tels que l'état de chargement de la carte, la fin du traitement et les résultats des mesures.
+- Tous les éléments interactifs possèdent des attributs `aria-label` descriptifs, et les états de bascule utilisent `aria-pressed` pour un étiquetage stable et prévisible.
+
+  =1!drawingTools=
 
 # Outils de dessin
 
