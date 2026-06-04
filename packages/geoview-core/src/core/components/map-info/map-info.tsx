@@ -1,5 +1,7 @@
 import { memo, useCallback, useMemo, useState } from 'react';
 
+import { useTranslation } from 'react-i18next';
+
 import { useTheme } from '@mui/material/styles';
 import type { SxProps } from '@mui/material';
 
@@ -46,6 +48,7 @@ export const MapInfo = memo(function MapInfo({ onScrollShellIntoView }: MapInfoP
   logger.logTraceRender('components/map-info/map-info');
 
   // Hooks
+  const { t } = useTranslation();
   const theme = useTheme();
 
   // Store
@@ -99,6 +102,8 @@ export const MapInfo = memo(function MapInfo({ onScrollShellIntoView }: MapInfoP
 
   return (
     <Box
+      component="section"
+      aria-label={t('map.info')}
       id={`${mapId}-mapInfo`}
       sx={interaction === 'dynamic' ? memoContainerStyles : memoStaticContainerStyles}
       onClick={onScrollShellIntoView}

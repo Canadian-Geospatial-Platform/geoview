@@ -10,6 +10,7 @@ import type { TypeButtonPanel } from '@/ui/panel/panel-types';
 import type { SxStyles } from '@/ui/style/types';
 import type { NavBarApi } from '@/core/components';
 import { useStoreUINavbarComponents, useStoreUINavBarButtonPanelVersion } from '@/core/stores/states/ui-state';
+import { useStoreAppDisplayLanguage } from '@/core/stores/states/app-state';
 import { logger } from '@/core/utils/logger';
 import BasemapSelect from './buttons/basemap-select';
 import Measurement from './buttons/measurement';
@@ -73,6 +74,7 @@ export function NavBar(props: NavBarProps): JSX.Element {
   // Hooks
   const { t } = useTranslation();
   const theme = useTheme();
+  const language = useStoreAppDisplayLanguage();
 
   /**
    * Memoizes style classes for the navbar component.
@@ -252,7 +254,16 @@ export function NavBar(props: NavBarProps): JSX.Element {
 
     const buttonKeys = Object.keys(buttonPanelGroup);
     const groupConfig = navBarApi.getGroupConfig(groupName);
-    const threshold = groupConfig.accordionThreshold || 10; // Default threshold for collapse
+    // Extract displayName with language support
+    const pluginDisplayName = typeof groupConfig.displayName === 'string' ? groupConfig.displayName : groupConfig.displayName?.[language];
+
+    // Three-tier fallback with bilingual support
+    const groupDisplayName =
+      pluginDisplayName ??
+      t(`mapnav.groups.${groupName}`, {
+        defaultValue: t('mapnav.groups.generic'),
+      });
+    const threshold = groupConfig.accordionThreshold ?? 10; // Default threshold for collapse
     const needsExpansion = buttonKeys.length > threshold + 1;
 
     const isExpanded = expandedGroups.has(groupName);
@@ -290,7 +301,7 @@ export function NavBar(props: NavBarProps): JSX.Element {
           <ButtonGroup
             // eslint-disable-next-line react/no-array-index-key
             key={`${groupName}-column-${columnIndex}`}
-            aria-label={t('mapnav.arianavbar')}
+            aria-label={groupDisplayName}
             variant="contained"
             sx={memoSxClasses.navBtnGroup}
             orientation="vertical"
@@ -319,7 +330,7 @@ export function NavBar(props: NavBarProps): JSX.Element {
   }
 
   return (
-    <Box ref={navBarRef} sx={memoSxClasses.navBarRef}>
+    <Box ref={navBarRef} sx={memoSxClasses.navBarRef} role="toolbar" aria-label={t('mapnav.ariarole')}>
       {[...Object.keys(memoButtonPanelGroups)].map((key) => renderButtonPanelGroup(memoButtonPanelGroups[key], key))}
     </Box>
   );

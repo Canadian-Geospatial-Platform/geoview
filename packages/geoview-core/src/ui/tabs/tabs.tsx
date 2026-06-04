@@ -412,7 +412,7 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
           {rightButtons as ReactNode}
         </Grid>
       </Grid>
-      <Box id={`${mapId}-tabPanel`} sx={sxMerged} className="tab-panels-container">
+      <Box ref={tabPanelRef} id={`${mapId}-tabPanel`} sx={sxMerged} className="tab-panels-container">
         {tabPanels.map((tab, index) => {
           return tab ? (
             <TabPanel
@@ -423,7 +423,6 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
               id={createPanelId(mapId, tab.id)}
               tabId={createTabId(mapId, tab.id)}
               containerType={containerType}
-              ref={tabPanelRef}
               className="tab-panel"
             >
               {typeof tab?.content === 'string' ? <UseHtmlToReact htmlContent={tab?.content ?? ''} /> : tab.content}

@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { memo, useCallback, useMemo } from 'react';
+import { memo, useCallback, useMemo, useState, useRef, useEffect } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { Badge, Box, List, ListItem, ListItemButton, Tooltip, Typography, ProgressBar, LocationSearchingIcon } from '@/ui';
@@ -94,16 +94,12 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
   const layerStatus = useStoreLayerStatus(layer.layerPath) ?? layer.layerStatus;
   const layerQueryStatus = layer.queryStatus;
 
+  // Internal state - WCAG accessibility for screen reader announcements
+  const prevStatusRef = useRef<string | undefined>(undefined); // Ref to track previous status for status change detection
+  const [statusMessage, setStatusMessage] = useState<string>('');
+
   // Style
-  const containerClass = [
-    'layer-panel',
-    'bordered',
-    layerStatus ?? '',
-    `query-${layerQueryStatus}`,
-    isSelected ? 'selectedLayer bordered-primary' : '',
-  ]
-    .join(' ')
-    .trim();
+  const containerClass = ['layer-panel', 'bordered', layerStatus ?? '', `query-${layerQueryStatus}`, isSelected ? 'selectedLayer bordered-primary' : ''].join(' ').trim();
 
   // Constant for state
   const isLoading = layerQueryStatus === 'processing' || layerStatus === 'loading' || layerStatus === 'processing';
@@ -149,13 +145,49 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
         event.preventDefault();
       }
     },
-    [isDisabled, isLoading, onListItemClick]
+    [isDisabled, isLoading, onListItemClick],
   );
 
-  // #endregion
+  // #endregion Handlers
+
+  /**
+   * Tracks layer status changes for screen reader announcements.
+   */
+  // WCAG - Track layer status changes for screen reader announcements
+  useEffect(() => {
+    logger.logTraceUseEffect('LAYER-LIST - LayerListItem - WCAG track layer status changes', layerStatus);
+    if (layerStatus === 'loading' && prevStatusRef.current !== 'loading') {
+      // Announce when loading starts
+      setStatusMessage(t('layers.status.layerLoadingDescriptive', { layerName: layer.layerName }) || '');
+      prevStatusRef.current = layerStatus;
+    } else if (layerStatus === 'loaded' && prevStatusRef.current === 'loading') {
+      // Announce when loading completes successfully
+      setStatusMessage(t('layers.status.layerLoadedDescriptive', { layerName: layer.layerName }) || '');
+      prevStatusRef.current = layerStatus;
+    } else if (layerStatus === 'error' && prevStatusRef.current === 'loading') {
+      // Announce when loading fails
+      setStatusMessage(t('layers.status.layerErrorDescriptive', { layerName: layer.layerName }) || '');
+      prevStatusRef.current = layerStatus;
+    } else {
+      // Update ref for any other status changes
+      prevStatusRef.current = layerStatus;
+    }
+  }, [layerStatus, layer.layerName, t]);
 
   return (
-    <ListItem disablePadding className={containerClass}>
+    <ListItem
+      disablePadding
+      className={containerClass}
+    >
+      {/* WCAG - ARIA live region for screen reader announcements */}
+      <Box
+        sx={memoSxClasses.visuallyHidden}
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {statusMessage}
+      </Box>
       <Tooltip
         title={layer.tooltip}
         placement="top"
@@ -191,12 +223,28 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
           ) : (
             layer.layerPath && !layer.content && <LayerIcon layerPath={layer.layerPath} />
           )}
-          <Box component="span" sx={memoSxClasses.listPrimaryText} className="layerInfo">
-            <Typography component="span" className="layerTitle">
+          <Box
+            component="span"
+            sx={memoSxClasses.listPrimaryText}
+            className="layerInfo"
+          >
+            <Typography
+              component="span"
+              className="layerTitle"
+            >
               {layer.layerName}
             </Typography>
-            <Box component="span" display="flex" alignContent="center">
-              <Typography component="span" variant="subtitle1" noWrap display="block">
+            <Box
+              component="span"
+              display="flex"
+              alignContent="center"
+            >
+              <Typography
+                component="span"
+                variant="subtitle1"
+                noWrap
+                display="block"
+              >
                 {getLayerStatus()}
               </Typography>
             </Box>
@@ -214,7 +262,10 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
         </ListItemButton>
       </Tooltip>
       {layerStatus === 'loading' && (
-        <Box component="span" sx={memoSxClasses.progressBar}>
+        <Box
+          component="span"
+          sx={memoSxClasses.progressBar}
+        >
           <ProgressBar aria-label={t('layers.status.layerLoadingDescriptive', { layerName: layer.layerName })} />
         </Box>
       )}
@@ -269,16 +320,14 @@ export const LayerList = memo(function LayerList({ layerList, selectedLayerPath,
           id="dummyPath"
           key="dummyPath"
           isSelected={false}
-          layer={
-            {
-              layerPath: '',
-              layerName: t('layers.instructionsNoLayersTitle'),
-              layerFeatures: t('layers.instructionsNoLayersBody'),
-              layerStatus: 'processed',
-              queryStatus: 'processed',
-              numOffeatures: 0, // Just so it's disabled..
-            }
-          }
+          layer={{
+            layerPath: '',
+            layerName: t('layers.instructionsNoLayersTitle'),
+            layerFeatures: t('layers.instructionsNoLayersBody'),
+            layerStatus: 'processed',
+            queryStatus: 'processed',
+            numOffeatures: 0, // Just so it's disabled..
+          }}
           onListItemClick={onListItemClick}
         />
       )}
