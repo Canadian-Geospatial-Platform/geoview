@@ -34,8 +34,7 @@ const mapViewer = await cgpv.api.createMapFromConfig(
       viewSettings: { zoom: 4, center: [-95, 55], projection: 3978 },
       basemapOptions: { basemapId: "transport", shaded: true },
     },
-    theme: "dark",
-    language: "en",
+    theme: "dark"
   }),
   800,
 );

@@ -38,14 +38,14 @@ The map config file could be named **myMap.json** and it content is something si
       "labeled": true
     }
   },
-  "theme": "geo.ca",
   "components": ["north-arrow", "overview-map"],
-  "corePackages": [],
   "appBar": {
     "tabs": {
       "core": ["aoi-panel"] // This is were Geoview knows it needs to load the package
     }
-  }
+  },
+  "corePackages": [],
+  "theme": "geo.ca",
 }
 ```
 

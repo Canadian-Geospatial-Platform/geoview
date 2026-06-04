@@ -3113,7 +3113,7 @@ When using `mdPath` or `mdContent`, the About Panel supports standard Markdown s
       }
     ]
   },
-  "theme": "geo.ca",
+
   "navBar": ["zoom", "fullscreen", "home", "drawer"],
   "appBar": {
     "tabs": {
@@ -3126,6 +3126,7 @@ When using `mdPath` or `mdContent`, the About Panel supports standard Markdown s
     }
   },
   "corePackages": ["swiper"],
+  "theme": "geo.ca",
   "corePackagesConfig": [
     {
       "swiper": {

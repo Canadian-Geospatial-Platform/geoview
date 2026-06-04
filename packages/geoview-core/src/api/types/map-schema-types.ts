@@ -8,32 +8,32 @@ import type { MapConfigLayerEntry, TypeGeoviewLayerType } from './layer-schema-t
 
 /** Definition of the map feature instance according to what is specified in the schema. */
 export type TypeMapFeaturesInstance = {
+  /** Metadata about the configuration file, including version and optional description. */
+  configMeta?: TypeConfigMeta;
   /** map configuration. */
   map: TypeMapConfig;
-  /** Service URLs. */
-  serviceUrls: TypeServiceUrls;
-  /** Display theme, default = geo.ca. */
-  theme?: TypeDisplayTheme;
+  /** Map components. */
+  components?: TypeValidMapComponentProps[];
+  /** Overview map properties. */
+  overviewMap?: TypeOverviewMapProps;
   /** Nav bar properties. */
   navBar?: TypeValidNavBarProps[];
   /** App bar properties. */
   appBar?: TypeAppBarProps;
   /** Footer bar properties. */
   footerBar?: TypeFooterBarProps;
-  /** Overview map properties. */
-  overviewMap?: TypeOverviewMapProps;
-  /** Map components. */
-  components?: TypeValidMapComponentProps[];
   /** List of core packages. */
   corePackages?: TypeValidMapCorePackageProps[];
+  /** Global settings. */
+  globalSettings?: TypeGlobalSettings;
+  /** Service URLs. */
+  serviceUrls: TypeServiceUrls;
+  /** Display theme, default = geo.ca. */
+  theme?: TypeDisplayTheme;
   /** List of core packages. */
   corePackagesConfig?: TypeCorePackagesConfig;
   /** List of external packages. */
   externalPackages?: TypeExternalPackagesProps[];
-  /** Metadata about the configuration file, including version and optional description. */
-  configMeta?: TypeConfigMeta;
-  /** Global settings. */
-  globalSettings?: TypeGlobalSettings;
 };
 
 /** An array of numbers representing an extent: `[minx, miny, maxx, maxy]`. */
@@ -257,18 +257,18 @@ export type TypeGlobalSettings = {
 
 /** Definition of the map configuration settings. */
 export type TypeMapConfig = {
-  /** Basemap options settings for this map configuration. */
-  basemapOptions: TypeBasemapOptions;
   /** Type of interaction. */
   interaction: TypeInteraction;
-  /** List of GeoView Layers in the order which they should be added to the map. */
-  listOfGeoviewLayerConfig: MapConfigLayerEntry[];
   /** View settings. */
   viewSettings: TypeViewSettings;
+  /** Basemap options settings for this map configuration. */
+  basemapOptions: TypeBasemapOptions;
   /** Highlight color. */
   highlightColor?: TypeHighlightColors;
   /** Point markers to add to map. */
   overlayObjects?: TypeOverlayObjects;
+  /** List of GeoView Layers in the order which they should be added to the map. */
+  listOfGeoviewLayerConfig: MapConfigLayerEntry[];
   /** Additional options used for OpenLayers map options. */
   extraOptions?: Record<string, unknown>;
 };
@@ -510,17 +510,8 @@ export const VALID_ZOOM_LEVELS: number[] = [0, 20];
 // GV: We do that only to create an object that has the default values who can be accessed using the instance property names.
 export const DEFAULT_MAP_FEATURE_CONFIG = {
   map: {
-    basemapOptions: {
-      basemapId: 'transport',
-      shaded: true,
-      labeled: true,
-    },
+    configMeta: { version: '1.0' },
     interaction: 'dynamic',
-    listOfGeoviewLayerConfig: [],
-    highlightColor: DEFAULT_HIGHLIGHT_COLOR,
-    overlayObjects: {
-      pointMarkers: {},
-    },
     viewSettings: {
       initialView: {
         zoomAndCenter: [MAP_ZOOM_LEVEL[3978], MAP_CENTER[3978]],
@@ -532,22 +523,38 @@ export const DEFAULT_MAP_FEATURE_CONFIG = {
       maxExtent: MAP_EXTENTS[3978],
       projection: 3978,
     },
+    basemapOptions: {
+      basemapId: 'transport',
+      shaded: true,
+      labeled: true,
+    },
+    highlightColor: DEFAULT_HIGHLIGHT_COLOR,
+    overlayObjects: {
+      pointMarkers: {},
+    },
+    listOfGeoviewLayerConfig: [],
     extraOptions: {},
   },
-  theme: 'geo.ca',
+  components: ['north-arrow', 'overview-map'],
+  overviewMap: { hideOnZoom: 0 },
   navBar: ['zoom', 'rotation', 'fullscreen', 'home', 'basemap-select'],
+  appBar: { tabs: { core: ['geolocator', 'legend', 'details', 'export'] } },
   footerBar: {
     tabs: {
       core: ['layers', 'data-table'],
       custom: [],
     },
   },
-  components: ['north-arrow', 'overview-map'],
-  appBar: { tabs: { core: ['geolocator', 'legend', 'details', 'export'] } },
   corePackages: [],
-  corePackagesConfig: [],
-  overviewMap: { hideOnZoom: 0 },
-  externalPackages: [],
+  globalSettings: {
+    canRemoveSublayers: true,
+    disabledLayerTypes: [],
+    showUnsymbolizedFeatures: false,
+    showLayerHighlightLayerBbox: true,
+    coordinateInfoEnabled: false,
+    hideCoordinateInfoSwitch: false,
+    displayDateMode: 'long',
+  },
   serviceUrls: {
     geocoreUrl: CONFIG_GEOCORE_URL,
     rcsUrl: CONFIG_RCS_URL,
@@ -558,16 +565,9 @@ export const DEFAULT_MAP_FEATURE_CONFIG = {
     ntsSheetUrl: CONFIG_NTS_SHEET_URL,
     altitudeUrl: CONFIG_ALTITUDE_URL,
   },
-  globalSettings: {
-    canRemoveSublayers: true,
-    disabledLayerTypes: [],
-    showUnsymbolizedFeatures: false,
-    showLayerHighlightLayerBbox: true,
-    coordinateInfoEnabled: false,
-    hideCoordinateInfoSwitch: false,
-    displayDateMode: 'long',
-  },
-  configMeta: { version: '1.0' },
+  theme: 'geo.ca',
+  corePackagesConfig: [],
+  externalPackages: [],
 } as unknown as MapFeatureConfig;
 
 /** Definition of the default order of the tabs inside appbar. */

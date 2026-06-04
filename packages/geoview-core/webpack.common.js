@@ -38,7 +38,7 @@ const releaseNavigatorPlugin = new HtmlWebpackPlugin({
   inject: false, // Don't inject any scripts
 });
 
-// inject all demos files
+// inject all demos specific files
 const multipleHtmlPluginsDemos = globSync('./public/templates/demos/*.html').map((name) => {
   const filename = path.basename(name);
   return new HtmlWebpackPlugin({
@@ -51,8 +51,21 @@ const multipleHtmlPluginsDemos = globSync('./public/templates/demos/*.html').map
   });
 });
 
-// inject all outlier files
-const multipleHtmlPluginsOutliers = globSync('./public/templates/outliers/*.html').map((name) => {
+// inject all demos specific files
+const multipleHtmlPluginsDemosSpecific = globSync('./public/templates/demos-specific/*.html').map((name) => {
+  const filename = path.basename(name);
+  return new HtmlWebpackPlugin({
+    template: `${name}`,
+    filename: filename,
+    title: 'Canadian Geospatial Platform Viewer',
+    inject: 'head',
+    scriptLoading: 'blocking',
+    chunks: ['cgpv-main'],
+  });
+});
+
+// inject all test and outlier files
+const multipleHtmlPluginsOutliersTests = globSync('./public/templates/tests/*.html').map((name) => {
   const filename = path.basename(name);
   return new HtmlWebpackPlugin({
     template: `${name}`,
@@ -290,7 +303,8 @@ const config = {
     .concat(releaseNavigatorPlugin)
     .concat(multipleHtmlPluginsSamples)
     .concat(multipleHtmlPluginsDemos)
-    .concat(multipleHtmlPluginsOutliers),
+    .concat(multipleHtmlPluginsDemosSpecific)
+    .concat(multipleHtmlPluginsOutliersTests),
 
   performance: {
     maxEntrypointSize: 7 * 1024 * 1024, // 7 MiB

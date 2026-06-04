@@ -12,44 +12,44 @@
       "additionalProperties": false,
       "type": "object",
       "properties": {
+         "configMeta": {
+          "$ref": "#/definitions/TypeConfigMeta"
+        },
         "map": {
           "$ref": "#/definitions/TypeMapConfig"
-        },
-        "theme": {
-          "$ref": "#/definitions/TypeDisplayTheme"
-        },
-        "navBar": {
-          "$ref": "#/definitions/TypeNavBarProps"
-        },
-        "footerBar": {
-          "$ref": "#/definitions/TypeFooterBarProps"
-        },
-        "appBar": {
-          "$ref": "#/definitions/TypeAppBarProps"
-        },
-        "overviewMap": {
-          "$ref": "#/definitions/TypeOverviewMapProps"
         },
         "components": {
           "$ref": "#/definitions/TypeMapComponents"
         },
+        "overviewMap": {
+          "$ref": "#/definitions/TypeOverviewMapProps"
+        },
+        "navBar": {
+          "$ref": "#/definitions/TypeNavBarProps"
+        },
+        "appBar": {
+          "$ref": "#/definitions/TypeAppBarProps"
+        },
+        "footerBar": {
+          "$ref": "#/definitions/TypeFooterBarProps"
+        },
         "corePackages": {
           "$ref": "#/definitions/TypeMapCorePackages"
+        },
+        "globalSettings": {
+          "$ref": "#/definitions/TypeGlobalSettings"
+        },
+        "serviceUrls": {
+          "$ref": "#/definitions/TypeServiceUrls"
+        },
+        "theme": {
+          "$ref": "#/definitions/TypeDisplayTheme"
         },
         "corePackagesConfig": {
           "$ref": "#/definitions/TypeCorePackagesConfig"
         },
         "externalPackages": {
           "$ref": "#/definitions/TypeExternalPackages"
-        },
-        "serviceUrls": {
-          "$ref": "#/definitions/TypeServiceUrls"
-        },
-        "configMeta": {
-          "$ref": "#/definitions/TypeConfigMeta"
-        },
-        "globalSettings": {
-          "$ref": "#/definitions/TypeGlobalSettings"
         }
       },
       "required": ["map"]

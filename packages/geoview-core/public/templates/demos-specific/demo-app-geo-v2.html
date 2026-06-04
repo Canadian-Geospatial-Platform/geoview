@@ -74,21 +74,20 @@
             labeled: true,
           },
         },
-        theme: 'geo.ca',
         components: ['north-arrow', 'overview-map'],
-        corePackages: ['swiper'],
         appBar: {
           tabs: {
-            core: ['geolocator', 'legend'],
+            core: ['geolocator', 'legend', 'details', 'export'],
           },
         },
         footerBar: {
           tabs: {
-            core: ['layers', 'details', 'data-table', 'time-slider', 'geochart'],
+            core: ['layers', 'data-table', 'time-slider', 'geochart'],
           },
-          collapsed: true,
           selectedTab: 'time-slider',
         },
+        corePackages: ['swiper'],
+        theme: 'geo.ca',
         corePackagesConfig: [
           {
             swiper: {
