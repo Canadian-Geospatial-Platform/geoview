@@ -44,7 +44,15 @@ interface LegendLayerHeaderProps {
   collapseContainerId: string;
 }
 
-// Extracted Header Component
+/**
+ * Renders the legend layer header with expand/collapse control.
+ *
+ * Memoized to avoid re-rendering when parent legend state changes but this layer's
+ * specific props (layerPath, tooltip, sxClasses, etc.) remain unchanged.
+ *
+ * @param props - Properties defined in LegendLayerHeaderProps interface
+ * @returns The legend layer header component
+ */
 const LegendLayerHeader = memo(
   ({
     layerPath,
@@ -165,21 +173,29 @@ export function LegendLayer({ layerPath, showControls, containerType }: LegendLa
   );
 
   /**
-   * Tracks layer status changes for screen reader announcements.
+   * WCAG - Tracks layer status changes for screen reader announcements.
    */
-  // WCAG - Track layer status changes for screen reader announcements
   useEffect(() => {
+    // Log
     logger.logTraceUseEffect('LEGEND-LAYER - WCAG track layer status changes', layerStatus);
+
+    // Check if previous state was an in-progress state (loading or processing)
+    const prevStateWasInProgress = prevStatusRef.current === 'loading' || prevStatusRef.current === 'processing';
+
     if (layerStatus === 'loading' && prevStatusRef.current !== 'loading') {
       // Announce when loading starts
       setStatusMessage(t('layers.status.layerLoadingDescriptive', { layerName }) || '');
       prevStatusRef.current = layerStatus;
-    } else if (layerStatus === 'loaded' && prevStatusRef.current === 'loading') {
-      // Announce when loading completes successfully
+    } else if (layerStatus === 'processing' && prevStatusRef.current !== 'processing') {
+      // Announce when processing starts
+      setStatusMessage(t('layers.status.layerProcessingDescriptive', { layerName }) || '');
+      prevStatusRef.current = layerStatus;
+    } else if (layerStatus === 'loaded' && prevStateWasInProgress) {
+      // Announce when loading or processing completes successfully
       setStatusMessage(t('layers.status.layerLoadedDescriptive', { layerName }) || '');
       prevStatusRef.current = layerStatus;
-    } else if (layerStatus === 'error' && prevStatusRef.current === 'loading') {
-      // Announce when loading fails
+    } else if (layerStatus === 'error' && prevStateWasInProgress) {
+      // Announce when loading or processing fails
       setStatusMessage(t('layers.status.layerErrorDescriptive', { layerName }) || '');
       prevStatusRef.current = layerStatus;
     } else {

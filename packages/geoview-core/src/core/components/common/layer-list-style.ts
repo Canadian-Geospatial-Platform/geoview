@@ -1,5 +1,6 @@
 import type { Theme } from '@mui/material';
 import type { SxStyles } from '@/ui/style/types';
+import { visuallyHidden } from '@/ui/style/default';
 
 /**
  * Gets custom sx classes for the common layer list.
@@ -139,4 +140,5 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     width: '100%',
     cursor: 'pointer',
   },
+  visuallyHidden,
 });

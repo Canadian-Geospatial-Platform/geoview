@@ -1,5 +1,7 @@
 import { memo, useCallback, useMemo, useState } from 'react';
 
+import { useTranslation } from 'react-i18next';
+
 import { useTheme } from '@mui/material/styles';
 import type { SxProps } from '@mui/material';
 
@@ -38,14 +40,18 @@ interface MapInfoProps {
 /**
  * Creates the map information bar containing attribution, mouse position, and scale.
  *
- * Memoized to prevent re-renders when parent updates but the onScrollShellIntoView callback has not changed.
+ * Memoized to prevent re-renders when parent shell updates but the `onScrollShellIntoView`
+ * callback reference has not changed. Since the callback is typically stable (wrapped in
+ * useCallback in the parent), memo effectively shields MapInfo from unrelated parent re-renders.
  *
+ * @param props - Properties defined in MapInfoProps interface
  * @returns The map information bar
  */
 export const MapInfo = memo(function MapInfo({ onScrollShellIntoView }: MapInfoProps): JSX.Element {
   logger.logTraceRender('components/map-info/map-info');
 
   // Hooks
+  const { t } = useTranslation();
   const theme = useTheme();
 
   // Store
@@ -99,6 +105,8 @@ export const MapInfo = memo(function MapInfo({ onScrollShellIntoView }: MapInfoP
 
   return (
     <Box
+      component="section"
+      aria-label={t('map.info')}
       id={`${mapId}-mapInfo`}
       sx={interaction === 'dynamic' ? memoContainerStyles : memoStaticContainerStyles}
       onClick={onScrollShellIntoView}
