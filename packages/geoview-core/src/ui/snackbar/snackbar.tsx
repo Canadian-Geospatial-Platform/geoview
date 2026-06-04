@@ -94,6 +94,7 @@ function SnackbarUI(props: SnackBarProps): JSX.Element {
 
   return (
     <AnimatedSnackbar
+      role="status"
       style={fadeInAnimation}
       sx={memoSnackbarStyles}
       id={snackBarId}

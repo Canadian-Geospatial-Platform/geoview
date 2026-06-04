@@ -102,6 +102,10 @@ export function SingleLayer({
   // Ref to track if a reload has been requested
   const reloadRequestedRef = useRef<boolean>(false);
 
+  // Internal state - WCAG accessibility for screen reader announcements
+  const prevStatusRef = useRef<string | undefined>(undefined);
+  const [statusMessage, setStatusMessage] = useState<string>('');
+
   // Get store states
   const mapId = useStoreGeoViewMapId();
   const selectedLayerPath = useStoreLayerSelectedLayerPath();
@@ -755,6 +759,30 @@ export function SingleLayer({
     }
   }, [layerStatus, layerPath, reloadButtonId, layerListItemButtonId]);
 
+  /**
+   * Tracks layer status changes for screen reader announcements.
+   */
+  useEffect(() => {
+    logger.logTraceUseEffect('SINGLE-LAYER - WCAG track layer status changes', layerStatus);
+
+    if (layerStatus === 'loading' && prevStatusRef.current !== 'loading') {
+      // Announce when loading starts
+      setStatusMessage(t('layers.status.layerLoadingDescriptive', { layerName }) || '');
+      prevStatusRef.current = layerStatus;
+    } else if (layerStatus === 'loaded' && prevStatusRef.current === 'loading') {
+      // Announce when loading completes successfully
+      setStatusMessage(t('layers.status.layerLoadedDescriptive', { layerName }) || '');
+      prevStatusRef.current = layerStatus;
+    } else if (layerStatus === 'error' && prevStatusRef.current === 'loading') {
+      // Announce when loading fails
+      setStatusMessage(t('layers.status.layerErrorDescriptive', { layerName }) || '');
+      prevStatusRef.current = layerStatus;
+    } else {
+      // Update ref for any other status changes
+      prevStatusRef.current = layerStatus;
+    }
+  }, [layerStatus, layerName, t]);
+
   /** Memoized sx for the list item button. */
   const memoListItemButtonSx = useMemo(() => {
     // Log
@@ -777,6 +805,10 @@ export function SingleLayer({
       onBlurCapture={handleBlurWithin}
     >
       <Box sx={memoSxClasses.containerBox}>
+        {/* WCAG - ARIA live region for screen reader announcements */}
+        <Box sx={memoSxClasses.visuallyHidden} role="status" aria-live="polite" aria-atomic="true">
+          {statusMessage}
+        </Box>
         <Tooltip
           title={t('layers.selectLayer', { layerName })}
           placement="top"

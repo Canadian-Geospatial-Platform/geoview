@@ -272,14 +272,24 @@ Empty alt is not used as a substitute for informative images where a meaningful 
 
 ### SC 1.3.1 Info and Relationships
 
+#### Symbology Images
+
 This gap is a consequence of the **same issue described under SC 1.1.1.\*** Because symbology images cannot be programmatically described at this time, the relationship between a symbol's visual properties — such as colour, size, and shape — and the the map element it corresponds to cannot be conveyed to assistive technology (AT) users. Without a text alternative for what a symbol looks like, that relationship has no programmatic basis to be determined from.
 
 **Impact** for users: AT users are not blocked from interacting with map symbology — they can show and hide map elements by name — but cannot independently interpret what the associated symbols look like. This is a partial gap rather than a complete barrier to use.
 
-#### Examples:
+##### Examples:
 
 - Layers panel
 - Legend panel
+
+#### `<Select>` Components
+
+MUI `<Select>` components may be flagged by automated WCAG validators (such as axe or Lighthouse) as having orphaned form labels, even when the component is correctly implemented. This occurs because some scanners expect a `<label>`'s `for` attribute to target a native HTML form element (`<input>`, `<select>`, etc.), and do not recognize a `<div role="combobox">` as a valid target.
+
+In practice, MUI's rendered output correctly pairs the label's `for` attribute with the combobox `id`, and sets `aria-labelledby` on the interactive element — meaning screen readers will announce the label as expected.
+
+These validator warnings can be treated as false positives and suppressed or documented as known exceptions in your accessibility audit, provided the `FormControl`, `InputLabel`, and `Select` components are composed together as intended by MUI.
 
 #### References:
 
