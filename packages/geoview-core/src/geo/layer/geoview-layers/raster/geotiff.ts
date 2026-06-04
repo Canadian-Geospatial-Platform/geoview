@@ -66,33 +66,9 @@ export class GeoTIFF extends AbstractGeoViewRaster {
    * @returns A promise with the metadata or undefined when no metadata for the particular layer type.
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
    */
-  protected override async onFetchServiceMetadata<T = TypeMetadataGeoTIFF | undefined>(abortSignal?: AbortSignal): Promise<T> {
-    // If metadataAccessPath does not point to a .tif file, we try to fetch metadata
-    const metadataAccessPath = this.getMetadataAccessPath();
-
-    try {
-      // GV: This is currently only for datacube sources that provide a JSON metadata file
-      if (metadataAccessPath && !metadataAccessPath.endsWith('.tif')) {
-        const url = metadataAccessPath.endsWith('/') ? metadataAccessPath.slice(0, -1) : metadataAccessPath;
-
-        // Fetch it
-        return await Fetch.fetchJson<T>(url, { signal: abortSignal });
-      }
-
-      // The metadataAccessPath didn't seem like it was containing actual metadata, so it was skipped
-      logger.logWarning(
-        `The metadataAccessPath '${metadataAccessPath}' didn't seem like it was containing actual metadata, so it was skipped`
-      );
-
-      // None
-      return Promise.resolve(undefined) as Promise<T>;
-    } catch (error: unknown) {
-      // Error likely means there is no metadata to fetch
-      logger.logWarning(
-        `The metadataAccessPath '${metadataAccessPath}' didn't seem like it was containing actual metadata, so it was skipped. Error: ${error}`
-      );
-      return Promise.resolve(undefined) as Promise<T>;
-    }
+  protected override onFetchServiceMetadata<T = TypeMetadataGeoTIFF | undefined>(abortSignal?: AbortSignal): Promise<T> {
+    // Redirect
+    return this.fetchServiceMetadataGeoTiff(abortSignal) as Promise<T>;
   }
 
   /**
@@ -182,6 +158,45 @@ export class GeoTIFF extends AbstractGeoViewRaster {
   }
 
   // #endregion OVERRIDES
+
+  // #region PROTECTED METHODS
+
+  /**
+   * Fetches metadata for a GeoTIFF layer, if available.
+   *
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the metadata fetch.
+   * @returns A promise that resolves to the metadata or undefined if not available.
+   */
+  protected async fetchServiceMetadataGeoTiff(abortSignal?: AbortSignal): Promise<TypeMetadataGeoTIFF | undefined> {
+    // If metadataAccessPath does not point to a .tif file, we try to fetch metadata
+    const metadataAccessPath = this.getMetadataAccessPath();
+
+    try {
+      // GV: This is currently only for datacube sources that provide a JSON metadata file
+      if (metadataAccessPath && !metadataAccessPath.endsWith('.tif')) {
+        const url = metadataAccessPath.endsWith('/') ? metadataAccessPath.slice(0, -1) : metadataAccessPath;
+
+        // Fetch it
+        return await Fetch.fetchJson<TypeMetadataGeoTIFF>(url, { signal: abortSignal });
+      }
+
+      // The metadataAccessPath didn't seem like it was containing actual metadata, so it was skipped
+      logger.logWarning(
+        `The metadataAccessPath '${metadataAccessPath}' didn't seem like it was containing actual metadata, so it was skipped`
+      );
+
+      // None
+      return Promise.resolve(undefined);
+    } catch (error: unknown) {
+      // Error likely means there is no metadata to fetch
+      logger.logWarning(
+        `The metadataAccessPath '${metadataAccessPath}' didn't seem like it was containing actual metadata, so it was skipped. Error: ${error}`
+      );
+      return Promise.resolve(undefined);
+    }
+  }
+
+  // #endregion PROTECTED METHODS
 
   // #region STATIC METHODS
 

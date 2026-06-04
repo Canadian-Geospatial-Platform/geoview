@@ -71,32 +71,9 @@ export class WKB extends AbstractGeoViewVector {
    * @returns A promise that resolves with the metadata or undefined when no metadata for the particular layer type
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
    */
-  protected override async onFetchServiceMetadata<T = TypeMetadataGeoJSON | undefined>(abortSignal?: AbortSignal): Promise<T> {
-    // If metadataAccessPath ends with .meta or .json
-    if (
-      this.getMetadataAccessPathIfExists()?.toLowerCase().endsWith('.meta') ||
-      this.getMetadataAccessPathIfExists()?.toLowerCase().endsWith('.json')
-    ) {
-      try {
-        // Fetch it
-        return (await WKB.fetchMetadata(this.getMetadataAccessPath(), abortSignal)) as T;
-      } catch (error: unknown) {
-        // Throw
-        throw new LayerServiceMetadataUnableToFetchError(
-          this.getGeoviewLayerId(),
-          this.getLayerEntryNameOrGeoviewLayerName(),
-          formatError(error)
-        );
-      }
-    }
-
-    // The metadataAccessPath didn't seem like it was containing actual metadata, so it was skipped
-    logger.logWarning(
-      `The metadataAccessPath '${this.getMetadataAccessPathIfExists()}' didn't seem like it was containing actual metadata, so it was skipped`
-    );
-
-    // None
-    return Promise.resolve(undefined) as Promise<T>;
+  protected override onFetchServiceMetadata<T = TypeMetadataGeoJSON | undefined>(abortSignal?: AbortSignal): Promise<T> {
+    // Redirect
+    return this.fetchServiceMetadataWKB(abortSignal) as Promise<T>;
   }
 
   /**
@@ -111,7 +88,7 @@ export class WKB extends AbstractGeoViewVector {
     const id = this.getMetadataAccessPath().substring(idx + 1);
 
     // Attempt a fetch of the metadata
-    await this.onFetchServiceMetadata();
+    await this.fetchServiceMetadataWKB();
 
     // Redirect
     return Promise.resolve(
@@ -231,6 +208,45 @@ export class WKB extends AbstractGeoViewVector {
   }
 
   // #endregion OVERRIDES
+
+  // #region PROTECTED METHODS
+
+  /**
+   * Fetches the WKB service metadata.
+   *
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+   * @returns A promise that resolves with the metadata or undefined when no metadata for the particular layer type
+   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
+   */
+  protected async fetchServiceMetadataWKB(abortSignal?: AbortSignal): Promise<TypeMetadataGeoJSON | undefined> {
+    // If metadataAccessPath ends with .meta or .json
+    if (
+      this.getMetadataAccessPathIfExists()?.toLowerCase().endsWith('.meta') ||
+      this.getMetadataAccessPathIfExists()?.toLowerCase().endsWith('.json')
+    ) {
+      try {
+        // Fetch it
+        return await WKB.fetchMetadata(this.getMetadataAccessPath(), abortSignal);
+      } catch (error: unknown) {
+        // Throw
+        throw new LayerServiceMetadataUnableToFetchError(
+          this.getGeoviewLayerId(),
+          this.getLayerEntryNameOrGeoviewLayerName(),
+          formatError(error)
+        );
+      }
+    }
+
+    // The metadataAccessPath didn't seem like it was containing actual metadata, so it was skipped
+    logger.logWarning(
+      `The metadataAccessPath '${this.getMetadataAccessPathIfExists()}' didn't seem like it was containing actual metadata, so it was skipped`
+    );
+
+    // None
+    return Promise.resolve(undefined);
+  }
+
+  // #endregion PROTECTED METHODS
 
   // #region STATIC PUBLIC METHODS
 

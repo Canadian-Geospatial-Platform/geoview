@@ -71,39 +71,9 @@ export class GeoJSON extends AbstractGeoViewVector {
    * @returns A promise that resolves with the metadata or undefined when no metadata for the particular layer type
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
    */
-  protected override async onFetchServiceMetadata<T = TypeMetadataGeoJSON | undefined>(abortSignal?: AbortSignal): Promise<T> {
-    try {
-      // Get the metadataAccessPath if it exists
-      const metadataAccessPath = this.getMetadataAccessPathIfExists();
-
-      // If metadataAccessPath ends with .meta, .json or .geojson
-      if (
-        metadataAccessPath?.toLowerCase().endsWith('.meta') ||
-        metadataAccessPath?.toLowerCase().endsWith('.json') ||
-        metadataAccessPath?.toLowerCase().endsWith('.geojson')
-      ) {
-        // Fetch it
-        const metadata = await GeoJSON.fetchMetadata(metadataAccessPath, abortSignal);
-
-        // Return it
-        return metadata as T;
-      }
-
-      // The metadataAccessPath didn't seem like it was containing actual metadata, so it was skipped
-      logger.logWarning(
-        `The metadataAccessPath '${metadataAccessPath}' didn't seem like it was containing actual metadata, so it was skipped`
-      );
-
-      // None
-      return Promise.resolve(undefined) as Promise<T>;
-    } catch (error: unknown) {
-      // Throw
-      throw new LayerServiceMetadataUnableToFetchError(
-        this.getGeoviewLayerId(),
-        this.getLayerEntryNameOrGeoviewLayerName(),
-        formatError(error)
-      );
-    }
+  protected override onFetchServiceMetadata<T = TypeMetadataGeoJSON | undefined>(abortSignal?: AbortSignal): Promise<T> {
+    // Redirect
+    return this.fetchServiceMetadataGeoJSON(abortSignal) as Promise<T>;
   }
 
   /**
@@ -118,7 +88,7 @@ export class GeoJSON extends AbstractGeoViewVector {
     const id = this.getMetadataAccessPath().substring(idx + 1);
 
     // Attempt a fetch of the metadata
-    await this.onFetchServiceMetadata();
+    await this.fetchServiceMetadataGeoJSON();
 
     // Redirect
     return Promise.resolve(
@@ -247,6 +217,52 @@ export class GeoJSON extends AbstractGeoViewVector {
   }
 
   // #endregion OVERRIDES
+
+  // #region PROTECTED METHODS
+
+  /**
+   * Fetches the metadata for a GeoJSON layer, which is expected to be in a specific format defined by `TypeMetadataGeoJSON`.
+   *
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+   * @returns A promise that resolves with the metadata or undefined when no metadata for the particular layer type
+   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
+   */
+  protected async fetchServiceMetadataGeoJSON(abortSignal?: AbortSignal): Promise<TypeMetadataGeoJSON | undefined> {
+    try {
+      // Get the metadataAccessPath if it exists
+      const metadataAccessPath = this.getMetadataAccessPathIfExists();
+
+      // If metadataAccessPath ends with .meta, .json or .geojson
+      if (
+        metadataAccessPath?.toLowerCase().endsWith('.meta') ||
+        metadataAccessPath?.toLowerCase().endsWith('.json') ||
+        metadataAccessPath?.toLowerCase().endsWith('.geojson')
+      ) {
+        // Fetch it
+        const metadata = await GeoJSON.fetchMetadata(metadataAccessPath, abortSignal);
+
+        // Return it
+        return metadata;
+      }
+
+      // The metadataAccessPath didn't seem like it was containing actual metadata, so it was skipped
+      logger.logWarning(
+        `The metadataAccessPath '${metadataAccessPath}' didn't seem like it was containing actual metadata, so it was skipped`
+      );
+
+      // None
+      return Promise.resolve(undefined);
+    } catch (error: unknown) {
+      // Throw
+      throw new LayerServiceMetadataUnableToFetchError(
+        this.getGeoviewLayerId(),
+        this.getLayerEntryNameOrGeoviewLayerName(),
+        formatError(error)
+      );
+    }
+  }
+
+  // #endregion PROTECTED METHODS
 
   // #region STATIC PUBLIC METHODS
 

@@ -89,15 +89,8 @@ export class WMTS extends AbstractGeoViewRaster {
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
    */
   protected override onFetchServiceMetadata<T = TypeMetadataWMTS | undefined>(abortSignal?: AbortSignal): Promise<T> {
-    // Construct a proper WMTS GetCapabilities URL
-    let url = this.getMetadataAccessPath();
-    // Ensure HTTPS
-    if (url.toLowerCase().startsWith('http:')) {
-      url = `https${url.slice(4)}`;
-    }
-
-    // Fetch the XML
-    return this.#fetchXmlServiceMetadata(url, abortSignal) as Promise<T>;
+    // Redirect
+    return this.fetchServiceMetadataWMTS(abortSignal) as Promise<T>;
   }
 
   /**
@@ -133,7 +126,7 @@ export class WMTS extends AbstractGeoViewRaster {
    */
   protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Fetch the metadata
-    const metadata = await this.onFetchServiceMetadata();
+    const metadata = await this.fetchServiceMetadataWMTS();
 
     // Now that we have metadata
     const layers = metadata?.Capabilities?.Contents.Layer;
@@ -149,9 +142,9 @@ export class WMTS extends AbstractGeoViewRaster {
         })
       : [
           {
-            id: layers!['ows:Identifier'],
-            layerId: layers!['ows:Identifier'],
-            layerName: layers!['ows:Title'],
+            id: layers['ows:Identifier'],
+            layerId: layers['ows:Identifier'],
+            layerName: layers['ows:Title'],
           },
         ];
 
@@ -226,6 +219,28 @@ export class WMTS extends AbstractGeoViewRaster {
   }
 
   // #endregion OVERRIDES
+
+  // #region PROTECTED METHODS
+
+  /**
+   * Fetches and processes service metadata for the WMTS layer.
+   *
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+   * @returns A promise that resolves to the parsed metadata object, or `undefined` if metadata could not be retrieved or no capabilities were found.
+   */
+  protected fetchServiceMetadataWMTS(abortSignal?: AbortSignal): Promise<TypeMetadataWMTS> {
+    // Construct a proper WMTS GetCapabilities URL
+    let url = this.getMetadataAccessPath();
+    // Ensure HTTPS
+    if (url.toLowerCase().startsWith('http:')) {
+      url = `https${url.slice(4)}`;
+    }
+
+    // Fetch the XML
+    return this.#fetchXmlServiceMetadata(url, abortSignal);
+  }
+
+  // #endregion PROTECTED METHODS
 
   // #region STATIC PUBLIC METHODS
 

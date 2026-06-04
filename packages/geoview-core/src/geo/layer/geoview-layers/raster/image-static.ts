@@ -53,9 +53,11 @@ export class ImageStatic extends AbstractGeoViewRaster {
    *
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
    *
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
    * @returns A promise that resolves with the metadata or undefined when no metadata for the particular layer type.
    */
-  protected override onFetchServiceMetadata<T>(): Promise<T> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected override onFetchServiceMetadata<T>(abortSignal?: AbortSignal): Promise<T> {
     // No metadata
     return Promise.resolve(undefined as T);
   }

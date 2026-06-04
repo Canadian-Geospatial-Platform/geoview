@@ -60,7 +60,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    */
   protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Attempt a fetch of the metadata
-    await this.onFetchServiceMetadata();
+    await this.fetchServiceMetadataRaster();
 
     // Redirect
     return Promise.resolve(

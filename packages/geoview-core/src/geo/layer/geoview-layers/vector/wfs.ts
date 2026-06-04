@@ -89,25 +89,9 @@ export class WFS extends AbstractGeoViewVector {
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
    * @throws {LayerNoCapabilitiesError} When the metadata is empty (no Capabilities)
    */
-  protected override async onFetchServiceMetadata<T = TypeMetadataWFS>(abortSignal?: AbortSignal): Promise<T> {
-    let metadata;
-    try {
-      // Fetch it
-      metadata = await WFS.fetchMetadata(this.getMetadataAccessPath(), abortSignal);
-    } catch (error: unknown) {
-      // Throw
-      throw new LayerServiceMetadataUnableToFetchError(
-        this.getGeoviewLayerId(),
-        this.getLayerEntryNameOrGeoviewLayerName(),
-        formatError(error)
-      );
-    }
-
-    // If not found
-    if (!metadata) throw new LayerNoCapabilitiesError(this.getGeoviewLayerId(), this.getLayerEntryNameOrGeoviewLayerName());
-
-    // Return it
-    return metadata as T;
+  protected override onFetchServiceMetadata<T = TypeMetadataWFS>(abortSignal?: AbortSignal): Promise<T> {
+    // Redirect
+    return this.fetchServiceMetadataWFS(abortSignal) as Promise<T>;
   }
 
   /**
@@ -121,7 +105,7 @@ export class WFS extends AbstractGeoViewVector {
   protected override async onInitLayerEntries(abortSignal?: AbortSignal): Promise<TypeGeoviewLayerConfig> {
     // Fetch metadata
     const rootUrl = this.getMetadataAccessPath();
-    const metadata = await this.onFetchServiceMetadata(abortSignal);
+    const metadata = await this.fetchServiceMetadataWFS(abortSignal);
 
     // The entries
     let entries: TypeLayerEntryShell[] = [];
@@ -352,6 +336,39 @@ export class WFS extends AbstractGeoViewVector {
   }
 
   // #endregion OVERRIDES
+
+  // #region PROTECTED METHODS
+
+  /**
+   * Fetches the WFS service metadata.
+   *
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the fetch process
+   * @returns A promise that resolves with the WFS metadata
+   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
+   * @throws {LayerNoCapabilitiesError} When the metadata is empty (no Capabilities)
+   */
+  protected async fetchServiceMetadataWFS(abortSignal?: AbortSignal): Promise<TypeMetadataWFS> {
+    let metadata;
+    try {
+      // Fetch it
+      metadata = await WFS.fetchMetadata(this.getMetadataAccessPath(), abortSignal);
+    } catch (error: unknown) {
+      // Throw
+      throw new LayerServiceMetadataUnableToFetchError(
+        this.getGeoviewLayerId(),
+        this.getLayerEntryNameOrGeoviewLayerName(),
+        formatError(error)
+      );
+    }
+
+    // If not found
+    if (!metadata) throw new LayerNoCapabilitiesError(this.getGeoviewLayerId(), this.getLayerEntryNameOrGeoviewLayerName());
+
+    // Return it
+    return metadata;
+  }
+
+  // #endregion PROTECTED METHODS
 
   // #region STATIC METHODS
 

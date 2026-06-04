@@ -75,18 +75,9 @@ export class OgcFeature extends AbstractGeoViewVector {
    * @returns A promise that resolves with the metadata or undefined when no metadata for the particular layer type
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
    */
-  protected override async onFetchServiceMetadata<T = TypeMetadataOGCFeature>(abortSignal?: AbortSignal): Promise<T> {
-    try {
-      // Fetch it
-      return (await OgcFeature.fetchMetadata(this.getMetadataAccessPath(), abortSignal)) as T;
-    } catch (error: unknown) {
-      // Throw
-      throw new LayerServiceMetadataUnableToFetchError(
-        this.getGeoviewLayerId(),
-        this.getLayerEntryNameOrGeoviewLayerName(),
-        formatError(error)
-      );
-    }
+  protected override onFetchServiceMetadata<T = TypeMetadataOGCFeature>(abortSignal?: AbortSignal): Promise<T> {
+    // Redirect
+    return this.fetchServiceMetadataOGCFeature(abortSignal) as Promise<T>;
   }
 
   /**
@@ -111,7 +102,7 @@ export class OgcFeature extends AbstractGeoViewVector {
     // If no id
     if (!id) {
       // Fetch the metadata
-      const metadata = await this.onFetchServiceMetadata();
+      const metadata = await this.fetchServiceMetadataOGCFeature();
 
       // Now that we have metadata
       entries = metadata.collections.map((collection) => {
@@ -250,6 +241,31 @@ export class OgcFeature extends AbstractGeoViewVector {
   }
 
   // #endregion OVERRIDES
+
+  // #region PROTECTED METHODS
+
+  /**
+   * Fetches the OGC Feature metadata for the layer.
+   *
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the metadata fetch
+   * @returns A promise that resolves with the OGC Feature metadata
+   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
+   */
+  protected async fetchServiceMetadataOGCFeature(abortSignal?: AbortSignal): Promise<TypeMetadataOGCFeature> {
+    try {
+      // Fetch it
+      return await OgcFeature.fetchMetadata(this.getMetadataAccessPath(), abortSignal);
+    } catch (error: unknown) {
+      // Throw
+      throw new LayerServiceMetadataUnableToFetchError(
+        this.getGeoviewLayerId(),
+        this.getLayerEntryNameOrGeoviewLayerName(),
+        formatError(error)
+      );
+    }
+  }
+
+  // #endregion PROTECTED METHODS
 
   // #region STATIC PUBLIC METHODS
 

@@ -18,7 +18,23 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
    * @returns A promise with the metadata or undefined when no metadata for the particular layer type.
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
    */
-  protected override async onFetchServiceMetadata<T>(abortSignal?: AbortSignal): Promise<T> {
+  protected override onFetchServiceMetadata<T>(abortSignal?: AbortSignal): Promise<T> {
+    // Redirect
+    return this.fetchServiceMetadataRaster(abortSignal);
+  }
+
+  // #endregion OVERRIDES
+
+  // #region PROTECTED METHODS
+
+  /**
+   * Fetches and processes service metadata for the raster layer.
+   *
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
+   * @returns A promise that resolves to the parsed metadata object, or `undefined` if metadata could not be retrieved or no capabilities were found.
+   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
+   */
+  protected async fetchServiceMetadataRaster<T>(abortSignal?: AbortSignal): Promise<T> {
     let responseJson;
     try {
       // Fetch it
@@ -39,7 +55,7 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
     return responseJson;
   }
 
-  // #endregion OVERRIDES
+  // #endregion PROTECTED METHODS
 
   // #region STATIC METHODS
 

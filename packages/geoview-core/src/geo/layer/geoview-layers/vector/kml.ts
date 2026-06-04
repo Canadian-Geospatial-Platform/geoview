@@ -57,7 +57,7 @@ export class KML extends AbstractGeoViewVector {
     const id = this.getMetadataAccessPath().substring(idx + 1);
 
     // Attempt a fetch of the metadata
-    await this.onFetchServiceMetadata();
+    await this.fetchServiceMetadataVector();
 
     // Redirect
     return Promise.resolve(KML.createGeoviewLayerConfig(this.getGeoviewLayerId(), this.getGeoviewLayerName(), rootUrl, false, [{ id }]));

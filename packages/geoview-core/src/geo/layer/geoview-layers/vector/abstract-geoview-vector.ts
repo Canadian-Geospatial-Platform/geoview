@@ -67,9 +67,9 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    *
    * @returns A promise that resolves with the metadata or undefined when no metadata for the particular layer type
    */
-  protected override onFetchServiceMetadata<T>(): Promise<T> {
-    // None
-    return Promise.resolve(undefined as T);
+  protected override onFetchServiceMetadata<T>(abortSignal?: AbortSignal): Promise<T> {
+    // Redirect
+    return this.fetchServiceMetadataVector(abortSignal);
   }
 
   /**
@@ -152,7 +152,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
   // #endregion OVERRIDES
 
-  // #region METHODS
+  // #region PUBLIC METHODS
 
   /**
    * Creates a VectorSource from a layer config.
@@ -165,7 +165,23 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     return this.onCreateVectorSource(layerConfig, {});
   }
 
-  // #endregion METHODS
+  // #endregion PUBLIC METHODS
+
+  // #region PROTECTED METHODS
+
+  /**
+   * Fetches metadata for the vector layer.
+   *
+   * @returns A promise that resolves to the metadata or undefined if not available
+   */
+  // GV Leave the eslint disable here, we want to access this function from children class instances when necessary
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this, @typescript-eslint/no-unused-vars
+  protected fetchServiceMetadataVector<T>(abortSignal?: AbortSignal): Promise<T> {
+    // None
+    return Promise.resolve(undefined as T);
+  }
+
+  // #endregion PROTECTED METHODS
 
   // #region STATIC METHODS
 
