@@ -102,6 +102,10 @@ export function SingleLayer({
   // Ref to track if a reload has been requested
   const reloadRequestedRef = useRef<boolean>(false);
 
+  // Internal state - WCAG accessibility for screen reader announcements
+  const prevStatusRef = useRef<string | undefined>(undefined);
+  const [statusMessage, setStatusMessage] = useState<string>('');
+
   // Get store states
   const mapId = useStoreGeoViewMapId();
   const selectedLayerPath = useStoreLayerSelectedLayerPath();
@@ -755,6 +759,41 @@ export function SingleLayer({
     }
   }, [layerStatus, layerPath, reloadButtonId, layerListItemButtonId]);
 
+  /**
+   * WCAG  - Tracks layer status changes for screen reader announcements.
+   */
+  useEffect(() => {
+    logger.logTraceUseEffect('SINGLE-LAYER - WCAG track layer status changes', layerStatus);
+
+    // Helper to check if previous state was an in-progress state (loading or processing).
+    // Both states indicate the layer is being loaded, so completion/error announcements
+    // should trigger from either state to ensure screen readers don't miss status changes.
+    const prevStateWasInProgress = prevStatusRef.current === 'loading' || prevStatusRef.current === 'processing';
+
+    if (layerStatus === 'loading' && prevStatusRef.current !== 'loading') {
+      // Announce when loading starts
+      setStatusMessage(t('layers.status.layerLoadingDescriptive', { layerName }) || '');
+      prevStatusRef.current = layerStatus;
+    } else if (layerStatus === 'processing' && prevStatusRef.current !== 'processing') {
+      // Announce when processing starts (distinct phase after initial load)
+      setStatusMessage(t('layers.status.layerProcessingDescriptive', { layerName }) || '');
+      prevStatusRef.current = layerStatus;
+    } else if (layerStatus === 'loaded' && prevStateWasInProgress) {
+      // Announce when layer completes successfully from any in-progress state (loading or processing).
+      // This ensures transitions like processing→loaded are announced, not just loading→loaded.
+      setStatusMessage(t('layers.status.layerLoadedDescriptive', { layerName }) || '');
+      prevStatusRef.current = layerStatus;
+    } else if (layerStatus === 'error' && prevStateWasInProgress) {
+      // Announce when layer fails from any in-progress state (loading or processing).
+      // This ensures transitions like processing→error are announced, not just loading→error.
+      setStatusMessage(t('layers.status.layerErrorDescriptive', { layerName }) || '');
+      prevStatusRef.current = layerStatus;
+    } else {
+      // Update ref for any other status changes (no announcement needed)
+      prevStatusRef.current = layerStatus;
+    }
+  }, [layerStatus, layerName, t]);
+
   /** Memoized sx for the list item button. */
   const memoListItemButtonSx = useMemo(() => {
     // Log
@@ -777,6 +816,10 @@ export function SingleLayer({
       onBlurCapture={handleBlurWithin}
     >
       <Box sx={memoSxClasses.containerBox}>
+        {/* WCAG - ARIA live region for screen reader announcements */}
+        <Box sx={memoSxClasses.visuallyHidden} role="status" aria-live="polite" aria-atomic="true">
+          {statusMessage}
+        </Box>
         <Tooltip
           title={t('layers.selectLayer', { layerName })}
           placement="top"

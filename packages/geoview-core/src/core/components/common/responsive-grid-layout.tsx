@@ -709,7 +709,6 @@ const ResponsiveGridLayout = forwardRef(
               fullScreenBtnRef.current?.focus();
             }}
             container={shellContainer}
-            disableEnforceFocus={true}
           >
             <Box sx={memoSxClasses.rightMainContent} className="responsive-layout-right-main-content fullscreen-mode">
               {content}

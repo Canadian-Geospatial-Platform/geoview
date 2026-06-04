@@ -1,29 +1,84 @@
 # Accessibility
 
-_Work in progress_
+Accessibility is a priority in GeoView's development. The application follows WCAG 2.1 Level AA guidelines whenever possible, and this section highlights the key features implemented for visual, keyboard, and screen reader users.
 
-The viewer needs to be accessible for keyboard and screen reader. It's should follow WCAG 2.1 requirements: https://www.w3.org/TR/WCAG21
+## 001. Accessibility Features Overview
 
-React and accessibility documentation: https://reactjs.org/docs/accessibility.html
+### 1. For Keyboard Users
 
-We need to trap the navigation inside the map element: https://mui.com/base-ui/react-focus-trap and add a skip link to go over
+#### Keyboard Navigation Mode
 
-Manage focus (Modal Dialogs or any full-screen tasks): https://www.npmjs.com/package/react-focus-on
+On first tab into the map, users are prompted to enable keyboard navigation mode, which enables a focus trap within the map, and activates crosshair-based map interaction.
 
-Further documentation: https://simplyaccessible.com/article/react-a11y/
+- Press Ctrl + Q to exit keyboard navigation mode
+- Press Ctrl + M to focus on the crosshair within the map
 
-Additional tools:
-https://mn.gov/mnit/about-mnit/accessibility/maps/
-https://microsoftedge.microsoft.com/addons/detail/axe-devtools-web-access/kcenlimkmjjkdfcaleembgmldmnnlfkn
-https://accessibilityinsights.io/downloads/
-https://github.com/dequelabs/axe-core
+#### Focus Traps for Enhanced Navigation
 
-Reference:
-https://www.w3.org/WAI/WCAG22/quickref/?currentsidebar=%23col_overview&versions=2.1&levels=aaa#consistent-navigation
+Opening a panel (e.g., Layers, Legend, Details) triggers a focus trap that confines keyboard navigation within that panel:
 
-## 001. Best Practices
+- Speeds up navigation by preventing focus from cycling through the entire map
+- Close the panel by pressing **Esc** — focus automatically returns to the button that opened it
+- A **Close** or **Exit** button is provided within each trapped panel for explicit closure
 
-_Work in progress_
+Sub-panels provide similar functionality.
+
+#### Context-Aware Esc Key
+
+The Esc key intelligently handles different scenarios:
+
+- Closes the active panel and restores focus to the triggering button, or
+- Closes modal dialogs (lightbox, export, etc.) and restores focus to the triggering button
+
+### 2. For Screen Reader Users
+
+#### Semantic Landmarks
+
+Semantic landmarks are included for each important section of the app to enable quick navigation.
+
+#### ARIA Live Regions
+
+Real-time announcements for events such as:
+
+- Map loading status ("Loading map" → "Map loaded")
+- Processing completion ("Processing" → "Processing complete")
+- Measurement results (distance/area values)
+
+#### Descriptive Labels
+
+All interactive elements include context-specific aria-label attributes:
+
+- Icon buttons: "Zoom in", "Toggle visibility, Layer Name", "Close panel"
+- Panels: "Layers panel", "Legend panel", "Details panel"
+- Toggle states: Communicated via `aria-pressed` (stable labels, not dynamic text changes)
+
+---
+
+## 002 - Intentional Interaction Patterns
+
+### 1. Time Slider
+
+**Esc key behaviour in normal mode:**
+
+When the time slider panel is open and either animation is playing OR layers are loading, pressing Esc initiates a deferred close:
+
+1. Animation stops immediately (if playing)
+2. The Esc key press is blocked from propagating
+3. The panel remains open until both conditions clear (animation stopped AND layers finished loading)
+4. During this brief period, tabbing through the right panel remains possible
+5. Once conditions stabilize, the panel auto-closes and focus returns to the layer button in the left panel
+
+**Esc key behaviour in fullscreen mode:**
+
+When the time slider is in fullscreen mode, Esc stops any active animation and immediately closes the fullscreen dialog. Focus management is handled by the dialog component.
+
+**Rationale:**
+
+This deferred-close pattern prevents focus trap corruption that occurs when the panel DOM is removed mid-animation or while layers are still loading.
+
+---
+
+## 003. Best Practices
 
 ### 1. Use unique and valid element IDs
 
@@ -57,7 +112,7 @@ The IconButton component in GeoView has built-in accessibility support. Use Icon
 
 ### 4. Validate HTML Output and WCAG level 2.1 AA
 
-From the browsers's developer tools, copy a section of generated code from a map, or a map component, and validate it
+From the browser's developer tools, copy a section of generated code from a map, or a map component, and validate it
 
 - W3C.org validator
 - AI tools
@@ -136,7 +191,9 @@ Tooltips should not be placed on non-interactive elements like ListItem because 
 </Tooltip>
 ```
 
-## 002. ARIA Best Practices
+---
+
+## 004. ARIA Best Practices
 
 ### aria-current
 
@@ -187,8 +244,9 @@ Do not use aria-live when:
 - aria-atomic="true": the entire region is read as a single unit when any part of it changes. Use this for self-contained messages like "3 of 10 layers loaded" or "Search complete — 5 results found".
 - aria-atomic="false": only the changed node is announced. Use this when the region contains multiple independent pieces of information that update separately.
 
-\*\*Pattern
-The aria-live region and <ProgressBar> serve separate concerns — the live region handles screen reader announcements, while the progress bar provides visual feedback. Keep them decoupled:
+**Pattern**
+
+The aria-live region and progress bar serve separate concerns — the live region handles screen reader announcements, while the progress bar provides visual feedback. Keep them decoupled:
 
 ```typescript
 // Visually hidden live region — announces final outcome to screen readers.
@@ -228,7 +286,9 @@ The aria-pressed attribute is only relevant for toggle buttons. Use aria-pressed
 
 **Note:** The comma in "Toggle visibility, Layer Name" creates a natural spoken pause between the action and the target, improving clarity for screen reader users.
 
-## 003. Quick Testing Tips and Notes
+---
+
+## 005. Quick Testing Tips and Notes
 
 ### SC 1.4.4 - Resize text
 
@@ -245,9 +305,11 @@ The aria-pressed attribute is only relevant for toggle buttons. Use aria-pressed
 
 ### SC 1.4.11 - Text Spacing
 
-- [text spacing bookmarklet](https://www.html5accessibility.com/tests/tsbookmarklet.html)
+- [Text spacing bookmarklet](https://www.html5accessibility.com/tests/tsbookmarklet.html)
 
-## 004. Constraints and Limitations
+---
+
+## 006. Constraints and Limitations
 
 GeoView is built to meet WCAG 2.1 Level AA. Where full conformance is not technically achievable — due to the nature of the app's content or its reliance on third-party data sources — the constraint is documented with a rationale. **These are not failures;** they are considered exceptions within the bounds of what the WCAG specification allows, and will be revisited as the app evolves.
 
@@ -272,14 +334,24 @@ Empty alt is not used as a substitute for informative images where a meaningful 
 
 ### SC 1.3.1 Info and Relationships
 
-This gap is a consequence of the **same issue described under SC 1.1.1.\*** Because symbology images cannot be programmatically described at this time, the relationship between a symbol's visual properties — such as colour, size, and shape — and the the map element it corresponds to cannot be conveyed to assistive technology (AT) users. Without a text alternative for what a symbol looks like, that relationship has no programmatic basis to be determined from.
+#### Symbology Images
+
+This gap is a consequence of the **same issue described under SC 1.1.1.\*** Because symbology images cannot be programmatically described at this time, the relationship between a symbol's visual properties — such as colour, size, and shape — and the map element it corresponds to cannot be conveyed to assistive technology (AT) users. Without a text alternative for what a symbol looks like, that relationship has no programmatic basis to be determined from.
 
 **Impact** for users: AT users are not blocked from interacting with map symbology — they can show and hide map elements by name — but cannot independently interpret what the associated symbols look like. This is a partial gap rather than a complete barrier to use.
 
-#### Examples:
+##### Examples:
 
 - Layers panel
 - Legend panel
+
+#### Select Components
+
+MUI Select components may be flagged by automated WCAG validators (such as axe or Lighthouse) as having orphaned form labels, even when the component is correctly implemented. This occurs because some scanners expect a `<label>`'s `for` attribute to target a native HTML form element (`<input>`, `<select>`, etc.), and do not recognize a `<div role="combobox">` as a valid target.
+
+In practice, MUI's rendered output correctly pairs the label's `for` attribute with the combobox `id`, and sets `aria-labelledby` on the interactive element — meaning screen readers will announce the label as expected.
+
+These validator warnings can be treated as false positives and suppressed or documented as known exceptions in your accessibility audit, provided the `FormControl`, `InputLabel`, and `Select` components are composed together as intended by MUI.
 
 #### References:
 
@@ -302,24 +374,27 @@ Some content within the GeoView app may not include a lang attribute to identify
 - [WCAG - Understanding Success Criterion 3.1.2: Language of Parts](https://www.w3.org/WAI/WCAG22/Understanding/language-of-parts.html)
 - [GC - Accessible Canada Regulations](https://laws.justice.gc.ca/eng/regulations/SOR-2021-241/nifnev.html)
 
-### Other Issues
+---
 
-#### Time Slider
+## 007. Tools and Resources
 
-**Esc key behavior in normal mode:**
+### Resources
 
-When the time slider panel is open and either animation is playing OR layers are loading, pressing Esc initiates a deferred close:
+- [Web Content Accessibility Guidelines (WCAG) 2.1](https://www.w3.org/TR/WCAG21/)
+- [How to Meet WCAG (Quick Reference)](https://www.w3.org/WAI/WCAG22/quickref/?currentsidebar=%23col_overview&versions=2.1&levels=aaa#consistent-navigation)
+- [Accessibility – React (no longer updated)](https://legacy.reactjs.org/docs/accessibility.html)
+- [React Focus Trap component - MUI Base](https://mui.com/base-ui/react-focus-trap)
+- [Map Accessibility / Minnesota IT Services](https://mn.gov/mnit/about-mnit/accessibility/maps/)
 
-1. Animation stops immediately (if playing)
-2. The Esc key press is blocked from propagating
-3. The panel remains open until both conditions clear (animation stopped AND layers finished loading)
-4. During this brief period, tabbing through the right panel remains possible
-5. Once conditions stabilize, the panel auto-closes and focus returns to the layer button in the left panel
+### Tools and Browser Extensions:
 
-**Esc key behavior in fullscreen mode:**
+- [Accessibility Insights Downloads](https://accessibilityinsights.io/downloads/)
+- [axe DevTools](https://chromewebstore.google.com/detail/lhdoppojpmngadmnindnejefpokejbdd)
+- [axe Core](https://github.com/dequelabs/axe-core)
+- [Stark Accessibility Checker](https://chromewebstore.google.com/detail/stark-accessibility-check/fkfaapnmfippddbeemjjbclenphooipm)
+- [taba11y - Tab order accessibility testing](https://chromewebstore.google.com/detail/taba11y-tab-order-accessi/aocppmckdocdjkphmofnklcjhdidgmga)
+- [Text spacing bookmarklet](https://www.html5accessibility.com/tests/tsbookmarklet.html)
+- [WAVE Evaluation Tool](https://chromewebstore.google.com/detail/wave-evaluation-tool/jbbplnpkjmmeebjpijfedlgcdilocofh)
+- [WCAG Color contrast checker](https://chromewebstore.google.com/detail/wcag-color-contrast-check/plnahcmalebffmaghcpcmpaciebdhgdf)
 
-When the time slider is in fullscreen mode, Esc stops any active animation and immediately closes the fullscreen dialog. Focus management is handled by the dialog component.
-
-**Rationale:**
-
-This deferred-close pattern prevents focus trap corruption that occurs when the panel DOM is removed mid-animation or while layers are still loading.
+---

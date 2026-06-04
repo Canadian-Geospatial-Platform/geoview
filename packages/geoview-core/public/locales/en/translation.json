@@ -40,6 +40,7 @@
   },
   "map": {
     "container": "Interactive map {{mapId}}",
+    "info": "Map information",
     "status": {
       "loadingMap": "Loading map",
       "mapLoaded": "Map loaded",
@@ -48,7 +49,7 @@
     }
   },
   "mapnav": {
-    "arianavbar": "Vertical button group for map navigation",
+    "ariarole": "Map navigation",
     "basemap": "Change basemap",
     "fullscreen": "Full screen",
     "home": "Zoom to initial view",
@@ -65,6 +66,13 @@
       "title": "Map Rotation",
       "degrees": "Degrees",
       "reset": "Reset"
+    },
+    "groups": {
+      "generic": "Vertical button group for map navigation",
+      "zoom": "Zoom and rotation controls",
+      "display": "Display controls",
+      "drawer": "Drawing tools",
+      "default": "Additional map controls"
     }
   },
   "measurement": {
@@ -319,6 +327,7 @@
     },
     "status": {
       "layerLoadingDescriptive": "Loading layer, {{layerName}}",
+      "layerProcessingDescriptive": "Processing layer, {{layerName}}",
       "layerLoadedDescriptive": "Layer, {{layerName}}, loaded successfully",
       "layerErrorDescriptive": "Error loading layer, {{layerName}}"
     }

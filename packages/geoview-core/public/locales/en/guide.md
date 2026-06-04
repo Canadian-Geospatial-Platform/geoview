@@ -106,9 +106,20 @@ Press **CTRL** and **Q** to exit keyboard navigation.
 
 _Note: The map must be focused for key binding to work. The map has focus when the crosshairs marker is present._
 
-**Accessibility**
+## Accessibility
 
-This map is not fully compliant with Web Content Accessibility Guidelines (WCAG) 2.0 Level AA.
+This map is not fully compliant with Web Content Accessibility Guidelines (WCAG) 2.1 Level AA. However, accessibility is a priority in GeoView's development. The application follows WCAG 2.1 Level AA guidelines whenever possible.
+
+### Keyboard Users
+
+- Opening panels triggers focus traps to speed up navigation, with Esc closing panels and returning focus to the triggering element.
+- In full-screen mode, the Esc key will exit full-screen rather than close any panels that have been opened.
+
+### Screen Reader Users
+
+- Semantic landmarks are provided for each major app section to enable quick navigation.
+- ARIA live regions announce real-time events like map loading status, processing completion, and measurement results.
+- All interactive elements have descriptive `aria-label` attributes, and toggle states use `aria-pressed` for stable, predictable labeling.
 
 =1!drawingTools=
 

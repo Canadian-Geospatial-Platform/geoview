@@ -25,12 +25,29 @@ const EXIT_BUTTON_STYLES = {
 } as const;
 
 /**
+ * Extracts the tab name from a full tab ID.
+ *
+ * Tab IDs follow the format: {mapId}-tab-{tabName}
+ * This function strips the prefix to return just the tab name portion.
+ *
+ * @param fullTabId - The complete tab ID (e.g., "map1-tab-layers")
+ * @param mapId - The map identifier
+ * @returns The extracted tab name (e.g., "layers"), or the original ID if pattern doesn't match
+ */
+const extractTabName = (fullTabId: string, mapId: string): string => {
+  const prefix = `${mapId}-tab-`;
+  return fullTabId.startsWith(prefix) ? fullTabId.substring(prefix.length) : fullTabId;
+};
+
+/**
  * Traps keyboard tab focus within a container.
+ *
+ * TODO: Remove memo — children prop (ReactNode) creates new references on every parent render,
+ * making shallow comparison always fail and negating any memo performance benefit.
  *
  * @param props - FocusTrapContainer properties
  * @returns The focus trap wrapper element
  */
-// TODO: Remove memo — children prop (ReactNode) creates new references on every parent render, making shallow comparison always fail
 export const FocusTrapContainer = memo(function FocusTrapContainer({
   children,
   open = false,
@@ -67,8 +84,11 @@ export const FocusTrapContainer = memo(function FocusTrapContainer({
     }
   }, [uiController, id, containerType]);
 
-  // the exit button only ever appears in the footerBar so it's hardcoded here
-  const exitBtnId = `${mapId}-${CONTAINER_TYPE.FOOTER_BAR}-${id}-panel-close-btn`;
+  // Extract tab name from the full tab ID (e.g., "map1-tab-layers" → "layers")
+  const tabName = extractTabName(id, mapId);
+
+  // Construct exit button ID using clean format: {mapId}-{containerType}-{tabName}-panel-close-btn
+  const exitBtnId = `${mapId}-${containerType}-${tabName}-panel-close-btn`;
 
   const memoIsActive = useMemo(() => {
     // Log
