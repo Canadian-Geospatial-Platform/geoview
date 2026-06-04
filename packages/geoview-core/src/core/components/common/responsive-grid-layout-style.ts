@@ -56,6 +56,10 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
         color: theme.palette.geoViewColor.white,
         boxShadow: 1,
       },
+      '&.keyboard-focused': {
+        border: 'none !important',
+        outline: `2px solid ${theme.palette.common.black}`,
+      },
     },
     '& .MuiButtonGroup-firstButton': {
       borderLeft: 0,

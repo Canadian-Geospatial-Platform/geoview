@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { memo, useCallback, useMemo } from 'react';
+import { memo, useCallback, useMemo, useState, useRef, useEffect } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { Badge, Box, List, ListItem, ListItemButton, Tooltip, Typography, ProgressBar, LocationSearchingIcon } from '@/ui';
@@ -68,6 +68,8 @@ interface LayerListItemProps {
  * Renders a single layer list item with icon, status, and selection state.
  *
  * Memoized to avoid re-rendering all items when only the selected layer changes.
+ * When only one layer's `isSelected` state changes in the list, the other N-1 items
+ * skip re-rendering thanks to memo shallow comparison.
  *
  * @param props - Properties defined in LayerListItemProps interface
  * @returns The layer list item element
@@ -75,7 +77,7 @@ interface LayerListItemProps {
 export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer, onListItemClick }: LayerListItemProps): JSX.Element {
   // Log
   logger.logTraceRender('components/common/layer-list > LayerListItem');
-  
+
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
@@ -93,6 +95,10 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
   // TO.DOCONT: It should all be using store selector hooks instead. Fallback to layer query status if details query status is not available for now.
   const layerStatus = useStoreLayerStatus(layer.layerPath) ?? layer.layerStatus;
   const layerQueryStatus = layer.queryStatus;
+
+  // Internal state - WCAG accessibility for screen reader announcements
+  const prevStatusRef = useRef<string | undefined>(undefined); // Ref to track previous status for status change detection
+  const [statusMessage, setStatusMessage] = useState<string>('');
 
   // Style
   const containerClass = [
@@ -152,10 +158,49 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
     [isDisabled, isLoading, onListItemClick]
   );
 
-  // #endregion
+  // #endregion Handlers
+
+  /**
+   * WCAG - Tracks layer status changes for screen reader announcements.
+   */
+  useEffect(() => {
+    logger.logTraceUseEffect('LAYER-LIST - LayerListItem - WCAG track layer status changes', layerStatus);
+
+    // Helper to check if previous state was an in-progress state (loading or processing).
+    // Both states indicate the layer is being loaded, so completion/error announcements
+    // should trigger from either state to ensure screen readers don't miss status changes.
+    const prevStateWasInProgress = prevStatusRef.current === 'loading' || prevStatusRef.current === 'processing';
+
+    if (layerStatus === 'loading' && prevStatusRef.current !== 'loading') {
+      // Announce when loading starts
+      setStatusMessage(t('layers.status.layerLoadingDescriptive', { layerName: layer.layerName }) || '');
+      prevStatusRef.current = layerStatus;
+    } else if (layerStatus === 'processing' && prevStatusRef.current !== 'processing') {
+      // Announce when processing starts (distinct phase after initial load)
+      setStatusMessage(t('layers.status.layerProcessingDescriptive', { layerName: layer.layerName }) || '');
+      prevStatusRef.current = layerStatus;
+    } else if (layerStatus === 'loaded' && prevStateWasInProgress) {
+      // Announce when layer completes successfully from any in-progress state (loading or processing).
+      // This ensures transitions like processing→loaded are announced, not just loading→loaded.
+      setStatusMessage(t('layers.status.layerLoadedDescriptive', { layerName: layer.layerName }) || '');
+      prevStatusRef.current = layerStatus;
+    } else if (layerStatus === 'error' && prevStateWasInProgress) {
+      // Announce when layer fails from any in-progress state (loading or processing).
+      // This ensures transitions like processing→error are announced, not just loading→error.
+      setStatusMessage(t('layers.status.layerErrorDescriptive', { layerName: layer.layerName }) || '');
+      prevStatusRef.current = layerStatus;
+    } else {
+      // Update ref for any other status changes (no announcement needed)
+      prevStatusRef.current = layerStatus;
+    }
+  }, [layerStatus, layer.layerName, t]);
 
   return (
     <ListItem disablePadding className={containerClass}>
+      {/* WCAG - ARIA live region for screen reader announcements */}
+      <Box sx={memoSxClasses.visuallyHidden} role="status" aria-live="polite" aria-atomic="true">
+        {statusMessage}
+      </Box>
       <Tooltip
         title={layer.tooltip}
         placement="top"
@@ -225,10 +270,10 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
 /**
  * Renders a list of layers with selection and status indicators.
  *
- * Memoized to prevent re-rendering when unrelated parent state changes.
- * Note: Props (selectedLayerPath, layerList) do change frequently on layer interaction.
- * Kept for now to protect against parent component re-renders; can be removed
- * if profiling shows overhead exceeds benefits.
+ * Memoized to prevent re-rendering when unrelated parent state changes (e.g., other UI updates).
+ * While `selectedLayerPath` and `layerList` do change frequently on layer interactions, memo
+ * protects against unnecessary renders triggered by parent component updates that don't affect
+ * these props. The shallow comparison overhead is minimal compared to rendering all list items.
  *
  * @param props - Properties defined in LayerListProps interface
  * @returns The layer list element
@@ -259,7 +304,9 @@ export const LayerList = memo(function LayerList({ layerList, selectedLayerPath,
             // Reason:- (layer?.numOffeatures ?? 1) > 0
             // Some of layers will not have numOfFeatures, so to make layer look like selected, we need to set default value to 1.
             // Also we cant set numOfFeature initially, then it num of features will be display as sub title.
-            isSelected={((layer?.numOffeatures ?? 1) > 0 || layer.layerPath === LAYER_PATH_COORDINATE_INFO) && layer.layerPath === selectedLayerPath}
+            isSelected={
+              ((layer?.numOffeatures ?? 1) > 0 || layer.layerPath === LAYER_PATH_COORDINATE_INFO) && layer.layerPath === selectedLayerPath
+            }
             layer={layer}
             onListItemClick={onListItemClick}
           />
@@ -269,16 +316,14 @@ export const LayerList = memo(function LayerList({ layerList, selectedLayerPath,
           id="dummyPath"
           key="dummyPath"
           isSelected={false}
-          layer={
-            {
-              layerPath: '',
-              layerName: t('layers.instructionsNoLayersTitle'),
-              layerFeatures: t('layers.instructionsNoLayersBody'),
-              layerStatus: 'processed',
-              queryStatus: 'processed',
-              numOffeatures: 0, // Just so it's disabled..
-            }
-          }
+          layer={{
+            layerPath: '',
+            layerName: t('layers.instructionsNoLayersTitle'),
+            layerFeatures: t('layers.instructionsNoLayersBody'),
+            layerStatus: 'processed',
+            queryStatus: 'processed',
+            numOffeatures: 0, // Just so it's disabled..
+          }}
           onListItemClick={onListItemClick}
         />
       )}

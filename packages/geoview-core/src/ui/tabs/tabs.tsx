@@ -187,7 +187,7 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
   // #region Handlers
 
   /**
-   * Updates the active tab panel and triggers associated callbacks
+   * Updates the active tab panel and triggers associated callbacks.
    */
   const updateTabPanel = useCallback(
     (tabValue: number): void => {
@@ -214,7 +214,7 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
   );
 
   /**
-   * Handles when the user clicks on a tab to switch tabs
+   * Handles when the user clicks on a tab to switch tabs.
    */
   const handleChange = useCallback(
     (event: SyntheticEvent<Element, Event>, newValue: number): void => {
@@ -224,7 +224,7 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
   );
 
   /**
-   * Handles when the user clicks on a tab to expand/collapse the panel
+   * Handles when the user clicks on a tab to expand/collapse the panel.
    */
   const handleClick = useCallback(
     (event: MouseEvent<HTMLElement>): void => {
@@ -412,7 +412,7 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
           {rightButtons as ReactNode}
         </Grid>
       </Grid>
-      <Box id={`${mapId}-tabPanel`} sx={sxMerged} className="tab-panels-container">
+      <Box ref={tabPanelRef} id={`${mapId}-tabPanel`} sx={sxMerged} className="tab-panels-container">
         {tabPanels.map((tab, index) => {
           return tab ? (
             <TabPanel
@@ -423,7 +423,6 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
               id={createPanelId(mapId, tab.id)}
               tabId={createTabId(mapId, tab.id)}
               containerType={containerType}
-              ref={tabPanelRef}
               className="tab-panel"
             >
               {typeof tab?.content === 'string' ? <UseHtmlToReact htmlContent={tab?.content ?? ''} /> : tab.content}
