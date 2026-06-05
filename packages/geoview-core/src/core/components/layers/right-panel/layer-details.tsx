@@ -29,7 +29,7 @@ import {
 } from '@/ui';
 import { ArrowBackIcon } from '@/ui/icons';
 import { useTimeSliderControllerIfExists, useUIController, useDataTableController } from '@/core/controllers/use-controllers';
-import type { TypeLegendItem } from '@/core/components/layers/types';
+import { layerHasClassItems, layerHasLegendImage, type TypeLegendItem } from '@/core/components/layers/types';
 import { getSxClasses } from './layer-details-style';
 import {
   getStoreLayerLegendLayerByPath,
@@ -178,11 +178,11 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
   const layerName = useStoreLayerName(layerPath);
   const layerControls = useStoreLayerControls(layerPath);
   const layerStatus = useStoreLayerStatus(layerPath);
+  const layerIcons = useStoreLayerIcons(layerPath);
   const layerItems = useStoreLayerItems(layerPath);
   const layerStyleConfig = useStoreLayerStyleConfig(layerPath);
   const layerCanToggle = useStoreLayerCanToggle(layerPath);
   const layerSchemaTag = useStoreLayerSchemaTag(layerPath);
-  const layerIcons = useStoreLayerIcons(layerPath);
   const layerAttribution = useStoreLayerAttribution(layerPath);
   const layerChildPaths = useStoreLayerChildPaths(layerPath);
   const allSublayersVisible = useStoreLayerAllChildrenVisible(layerPath);
@@ -238,6 +238,12 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
 
   // Layer is WMTS
   const isWMTS = layerSchemaTag === CONST_LAYER_TYPES.WMTS;
+
+  // Has layer items and style config
+  const hasLayerItemsAndStyle = layerHasClassItems(layerItems, layerStyleConfig);
+
+  // Has layer legend image
+  const hasLayerLegendImage = layerHasLegendImage(layerSchemaTag, layerItems, layerIcons, layerStyleConfig);
 
   // Layer has a value expression in its style config
   const hasValueExpression = useMemo((): boolean => {
@@ -526,18 +532,15 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
    * Renders the WMS legend graphic image when the layer is a WMS with an icon but no individual items.
    */
   const renderWMSImage = (): JSX.Element | null => {
+    // If will render items, don't render image
+    if (hasLayerItemsAndStyle) return;
+
     // If it's a WMS and we have any iconImage and no items
-    if (
-      layerSchemaTag === CONST_LAYER_TYPES.WMS &&
-      layerIcons?.length &&
-      layerIcons[0].iconImage &&
-      layerIcons[0].iconImage !== 'no data' &&
-      !layerItems?.length
-    ) {
+    if (hasLayerLegendImage) {
       return (
         <Grid sx={sxClasses.itemsGrid}>
           <Grid container pt={6} pb={6}>
-            <Box component="img" alt="" src={layerIcons[0].iconImage} sx={sxClasses.wmsImage} />
+            <Box component="img" alt="" src={layerIcons![0].iconImage!} sx={sxClasses.wmsImage} />
           </Grid>
         </Grid>
       );
@@ -551,7 +554,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
    */
   const renderItems = (): JSX.Element | null => {
     // If we have any items
-    if (layerItems && layerItems.length > 0) {
+    if (hasLayerItemsAndStyle) {
       return (
         <Grid
           className="layer-details-panel"

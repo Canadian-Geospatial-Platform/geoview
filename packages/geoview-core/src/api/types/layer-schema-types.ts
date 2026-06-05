@@ -697,6 +697,8 @@ export type TypeStyleRepresentation = {
 
 export type TypeVectorLayerStyles = Partial<Record<TypeStyleGeometry, TypeStyleRepresentation>>;
 
+// #region METADATA TYPES
+
 export interface TypeMetadataWMSRoot {
   WMS_Capabilities?: TypeMetadataWMS;
   WMT_MS_Capabilities?: TypeMetadataWMS;
@@ -1444,3 +1446,5 @@ export interface TypeMetadataVectorTilesFullExtent {
   xmax: number;
   ymax: number;
 }
+
+// #endregion METADATA TYPES
