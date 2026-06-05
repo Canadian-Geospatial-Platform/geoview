@@ -1051,12 +1051,12 @@ export class MapController extends AbstractMapViewerController {
 
       // Set map config settings
       const map: TypeMapConfig = {
-        basemapOptions: getStoreMapCurrentBasemapOptions(mapId),
         interaction: getStoreMapInteraction(mapId),
-        listOfGeoviewLayerConfig,
+        viewSettings,
+        basemapOptions: getStoreMapCurrentBasemapOptions(mapId),
         highlightColor: getStoreMapConfigHighlightColor(mapId),
         overlayObjects: { pointMarkers: getStoreMapPointMarkers(mapId) },
-        viewSettings,
+        listOfGeoviewLayerConfig,
       };
 
       let corePackagesConfig = getStoreMapConfigCorePackagesConfig(mapId);
@@ -1083,19 +1083,19 @@ export class MapController extends AbstractMapViewerController {
 
       // Construct map config
       const newMapConfig: TypeMapFeaturesInstance = {
+        configMeta: getStoreMapConfigMeta(mapId),
         map,
-        theme: getStoreAppDisplayTheme(mapId),
-        navBar: getStoreMapConfigNavBar(mapId),
-        footerBar: getStoreMapConfigFooterBar(mapId),
-        appBar: getStoreMapConfigAppBar(mapId),
-        overviewMap: getStoreMapConfigOverviewMap(mapId),
         components: getStoreMapConfigComponents(mapId),
+        overviewMap: getStoreMapConfigOverviewMap(mapId),
+        navBar: getStoreMapConfigNavBar(mapId),
+        appBar: getStoreMapConfigAppBar(mapId),
+        footerBar: getStoreMapConfigFooterBar(mapId),
         corePackages: getStoreMapConfigCorePackages(mapId),
+        globalSettings: getStoreMapConfigGlobalSettings(mapId),
+        serviceUrls: getStoreMapConfigServiceUrls(mapId),
+        theme: getStoreAppDisplayTheme(mapId),
         corePackagesConfig,
         externalPackages: getStoreMapConfigExternalPackages(mapId),
-        serviceUrls: getStoreMapConfigServiceUrls(mapId),
-        configMeta: getStoreMapConfigMeta(mapId),
-        globalSettings: getStoreMapConfigGlobalSettings(mapId),
       };
 
       // Set app bar tab settings

@@ -14,6 +14,11 @@
     },
     "listOfGeoviewLayerConfig": [
       {
+        "geoviewLayerId": "16ec36d1-b320-4dcd-b71f-94670a59095a",
+        "geoviewLayerName": "Wireless Data Network - geocore slider config",
+        "geoviewLayerType": "geoCore"
+      },
+      {
         "geoviewLayerId": "ESRIImageCrop",
         "geoviewLayerName": "Weekly NDVI (issue with server?)",
         "geoviewLayerType": "esriImage",

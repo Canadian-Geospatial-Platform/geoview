@@ -85,3 +85,7 @@ common/config/rush/pnpm-lock.yaml
 
 rush.json
 common/
+
+# Navigator demo/test config files (keep human-readable multi-line formatting)
+**/public/configs/
+**/public/templates/

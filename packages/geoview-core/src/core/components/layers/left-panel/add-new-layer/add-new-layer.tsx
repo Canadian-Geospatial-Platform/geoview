@@ -30,7 +30,7 @@ import { UtilAddLayer } from '@/core/components/layers/left-panel/add-new-layer/
 import { AddLayerTree } from '@/core/components/layers/left-panel/add-new-layer/add-layer-tree';
 import { ShapefileReader } from '@/api/config/reader/shapefile-reader';
 import { GeoPackageReader } from '@/api/config/reader/geopackage-reader';
-import type { GeoViewGeoChartConfig } from '@/api/config/reader/uuid-config-reader';
+import type { GeoViewGeoChartConfig, GeoViewTimeSliderConfig } from '@/api/config/reader/uuid-config-reader';
 import type { GeoViewLayerAddedResult } from '@/core/controllers/layer-creator-controller';
 import type { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import {
@@ -318,6 +318,7 @@ export function AddNewLayer(): JSX.Element {
   const [abortController, setAbortController] = useState<AbortController>(new AbortController());
   const [isGeoCore, setIsGeoCore] = useState<boolean>(false);
   const [geochartsToAdd, setGeochartsToAdd] = useState<Record<string, GeoViewGeoChartConfig> | undefined>();
+  const [timeSliderToAdd, setTimeSliderToAdd] = useState<GeoViewTimeSliderConfig[] | undefined>();
   const isSingle = !isMultiple;
 
   // Ref
@@ -471,6 +472,9 @@ export function AddNewLayer(): JSX.Element {
 
         // Keep in state the geocharts to load if the user goes through all steps
         setGeochartsToAdd(configFromType.geocoreInfo?.geocharts);
+
+        // Keep in state the time-slider configs to load if the user goes through all steps
+        setTimeSliderToAdd(configFromType.geocoreInfo?.timeSliderConfigs);
 
         // Capture if this is a GeoCore layer before changing the type
         if (curlayerType === 'geoCore') {
@@ -637,6 +641,12 @@ export function AddNewLayer(): JSX.Element {
         });
       }
 
+      // If time-slider configs are pending, merge them into corePackagesConfig before adding the layer.
+      // The configs are stored for the time-slider plugin to pick up if it's configured in the footer bar.
+      if (timeSliderToAdd && timeSliderToAdd.length > 0) {
+        layerCreatorController.mergeTimeSliderConfigsIntoCorePackages(timeSliderToAdd);
+      }
+
       // Add the layer through the controller
       const addedLayer: GeoViewLayerAddedResult = layerCreatorController.addGeoviewLayer(
         configObj[0] as TypeGeoviewLayerConfig,
@@ -718,7 +728,7 @@ export function AddNewLayer(): JSX.Element {
     setLayerIdsToAdd([]);
     setIsGeoCore(false);
     setGeochartsToAdd(undefined);
-
+    setTimeSliderToAdd(undefined);
     setStepButtonEnabled(true);
   };
 
@@ -782,6 +792,7 @@ export function AddNewLayer(): JSX.Element {
     setLayerIdsToAdd([]);
     setIsGeoCore(false);
     setGeochartsToAdd(undefined);
+    setTimeSliderToAdd(undefined);
     setStepButtonEnabled(true);
   };
 
@@ -797,6 +808,7 @@ export function AddNewLayer(): JSX.Element {
     setLayerIdsToAdd([]);
     setIsGeoCore(false);
     setGeochartsToAdd(undefined);
+    setTimeSliderToAdd(undefined);
   };
 
   // #endregion

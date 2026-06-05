@@ -41,8 +41,9 @@
       'shaded': false,
       'labeled': true
     },
-    'listOfGeoviewLayerConfig': [{
-      'geoviewLayerId':'airborne_radioactivity',
+    'listOfGeoviewLayerConfig': [
+    {
+      'geoviewLayerId':'16ec36d1-b320-4dcd-b71f-94670a59095a',
       'geoviewLayerName':'Airborne Radioactivity',
       'metadataAccessPath':'https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/airborne_radioactivity_en/MapServer',
       'geoviewLayerType':'esriDynamic',
@@ -51,7 +52,13 @@
             'layerId':'0'
         }
       ]
-  }]
+    },
+    {
+      "geoviewLayerId": "16ec36d1-b320-4dcd-b71f-94670a59095a",
+      "geoviewLayerName": "Wireless Data Network - geocore slider config",
+      "geoviewLayerType": "geoCore"
+    }
+  ]
   },
   'components': ['overview-map', 'north-arrow'],
   'navBar': ['zoom', 'rotation', 'fullscreen', 'home', 'location', 'measurement', 'basemap-select', 'projection'],
@@ -62,7 +69,7 @@
   },
   'footerBar': {
     'tabs': {
-      'core': ['layers', 'data-table', 'geochart']
+      'core': ['layers', 'data-table', 'geochart', 'time-slider']
     }
   },
   'corePackages': [],
