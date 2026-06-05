@@ -85,6 +85,10 @@
         "geoviewLayerType": "ogcWmts",
         "listOfLayerEntryConfig": [
           {
+            "layerId": "0",
+            "tileMatrixSet": "default028mm"
+          },
+          {
             "layerId": "2",
             "tileMatrixSet": "default028mm"
           }

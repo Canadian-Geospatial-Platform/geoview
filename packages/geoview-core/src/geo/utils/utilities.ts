@@ -87,7 +87,7 @@ export abstract class GeoUtilities {
    *
    * The function normalizes query parameter keys, removes lowercase variants (`service`, `request`),
    * and ensures the final URL contains correctly capitalized parameters with the specified values.
-   * If the `VERSION` parameter is missing, a default value of 1.3.0 is added for WMS/WMTS and 2.0.0 for WFS.
+   * If the `VERSION` parameter is missing, a default value of 1.3.0 is added for WMS, 2.0.0 for WFS, and 1.0.0 for WMTS.
    *
    * @param url - The input service URL, which may be absolute or relative
    * @param service - The OGC service type (e.g., `"WMS"`, `"WFS"`, `"WMTS"`)
@@ -98,10 +98,12 @@ export abstract class GeoUtilities {
   static ensureServiceRequestUrl(url: string, service: TypeOGCService, request: string, version?: string): string {
     let serviceVersion = version;
     if (!serviceVersion) {
-      if (service === 'WMS' || service === 'WMTS') {
+      if (service === 'WMS') {
         serviceVersion = '1.3.0';
       } else if (service === 'WFS') {
         serviceVersion = '2.0.0';
+      } else if (service === 'WMTS') {
+        serviceVersion = '1.0.0';
       }
     }
     return ensureServiceRequestUrl(url, service, request, serviceVersion);

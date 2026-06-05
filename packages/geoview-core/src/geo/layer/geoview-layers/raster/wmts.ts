@@ -574,6 +574,7 @@ export class WMTS extends AbstractGeoViewRaster {
       style,
       tileGrid,
     };
+    // GV At the moment, version is purposely ignored and 1.0.0 is always used
 
     return new WMTSSource(sourceOptions);
   }
@@ -627,6 +628,7 @@ export class WMTS extends AbstractGeoViewRaster {
       style: sourceConfig.wmtsStyle || 'default',
       wrapX: true,
     };
+    // GV At the moment, version is purposely ignored and 1.0.0 is always used
 
     return new WMTSSource(sourceOptions);
   }

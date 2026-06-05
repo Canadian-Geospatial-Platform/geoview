@@ -499,9 +499,9 @@ export async function validateAndPingUrl(targetUrl: string, proxyBase: string = 
 
   // Build OGC GetCapabilities check URLs
   const ogcCheckUrls = [
-    ensureServiceRequestUrl(targetUrl, 'WMS', 'GetCapabilities', ''),
-    ensureServiceRequestUrl(targetUrl, 'WFS', 'GetCapabilities', ''),
-    ensureServiceRequestUrl(targetUrl, 'WMTS', 'GetCapabilities', ''),
+    ensureServiceRequestUrl(targetUrl, 'WMS', 'GetCapabilities'),
+    ensureServiceRequestUrl(targetUrl, 'WFS', 'GetCapabilities'),
+    ensureServiceRequestUrl(targetUrl, 'WMTS', 'GetCapabilities'),
   ];
 
   // HEAD request to see if the server responds
