@@ -104,31 +104,6 @@ export class GVWMTS extends AbstractGVTile {
   }
 
   /**
-   * Gets the legend image of a layer.
-   *
-   * @param layerConfig - The layer configuration.
-   * @returns A promise that resolves with the legend image as a data URL or null
-   */
-  static async #getLegendImage(layerConfig: OgcWmtsLayerEntryConfig): Promise<string | null> {
-    const metadata = layerConfig.getLayerMetadata();
-    const layer = metadata?.Layer as TypeMetadataWMTSLayer | undefined;
-    const foundStyle = Array.isArray(layer?.Style)
-      ? layer.Style.find((style) => style['@attributes'].isDefault === 'true') || layer.Style[0]
-      : layer?.Style;
-    const legendUrl = foundStyle?.LegendURL?.['@attributes']?.['xlink:href'];
-
-    if (legendUrl) {
-      try {
-        const legendBlob = await Fetch.fetchBlob(legendUrl, { credentials: 'omit' });
-        return await GeoviewRenderer.readBlobAsDataUrl(legendBlob);
-      } catch {
-        return null;
-      }
-    }
-    return null;
-  }
-
-  /**
    * Overrides the fetching of the legend for a WMTS layer.
    *
    * @returns A promise that resolves with the legend of the layer or null
@@ -192,6 +167,35 @@ export class GVWMTS extends AbstractGVTile {
     }
   }
 
+  // #endregion OVERRIDES
+
+  // #region STATIC METHODS
+
+  /**
+   * Gets the legend image of a layer.
+   *
+   * @param layerConfig - The layer configuration.
+   * @returns A promise that resolves with the legend image as a data URL or null
+   */
+  static async #getLegendImage(layerConfig: OgcWmtsLayerEntryConfig): Promise<string | null> {
+    const metadata = layerConfig.getLayerMetadata();
+    const layer = metadata?.Layer as TypeMetadataWMTSLayer | undefined;
+    const foundStyle = Array.isArray(layer?.Style)
+      ? layer.Style.find((style) => style['@attributes'].isDefault === 'true') || layer.Style[0]
+      : layer?.Style;
+    const legendUrl = foundStyle?.LegendURL?.['@attributes']?.['xlink:href'];
+
+    if (legendUrl) {
+      try {
+        const legendBlob = await Fetch.fetchBlob(legendUrl, { credentials: 'omit' });
+        return await GeoviewRenderer.readBlobAsDataUrl(legendBlob);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  }
+
   /**
    * Checks whether a metadata access URL looks like an ArcGIS-backed WMTS service.
    *
@@ -231,5 +235,5 @@ export class GVWMTS extends AbstractGVTile {
     };
   }
 
-  // #endregion OVERRIDES
+  // #endregion STATIC METHODS
 }
