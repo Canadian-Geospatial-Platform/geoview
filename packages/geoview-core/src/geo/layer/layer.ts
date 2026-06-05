@@ -542,6 +542,7 @@ export class LayerApi {
    * @param queryable - The new queryable state for the layer
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
    * @throws {LayerWrongTypeError} When the layer was of wrong type
+   * @throws {LayerNotQueryableError} When the underlying source is not queryable
    */
   setLayerQueryable(layerPath: string, queryable: boolean): void {
     // Redirect to controller
@@ -725,6 +726,7 @@ export class LayerApi {
    * optional legend store updated, filters applied, and render completed if requested
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
    * @throws {LayerWrongTypeError} When the layer was of wrong type
+   * @throws {LayerStyleGeometryNotFoundError} When the geometry type of the item doesn't match any geometry type in the layer style configuration (propagated from `setItemVisibility()`)
    */
   setItemVisibility(layerPath: string, item: TypeLegendItem, visibility: boolean, waitForRender: boolean): Promise<void> {
     // Redirect to controller
