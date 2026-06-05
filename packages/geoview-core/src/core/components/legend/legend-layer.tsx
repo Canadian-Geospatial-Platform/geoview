@@ -87,7 +87,8 @@ const LegendLayerHeader = memo(
         {showControls &&
           ((layerChildPaths && layerChildPaths.length > 0) ||
             (layerItems && layerItems.length > 1) ||
-            schemaTag === CONST_LAYER_TYPES.WMS) && (
+            schemaTag === CONST_LAYER_TYPES.WMS ||
+            schemaTag === CONST_LAYER_TYPES.WMTS) && (
             <IconButton
               className="buttonOutline"
               onClick={onExpandClick}
