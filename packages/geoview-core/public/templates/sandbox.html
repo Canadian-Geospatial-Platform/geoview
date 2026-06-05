@@ -347,6 +347,11 @@
         </div>
 
         <div class="option-item">
+          <p><strong>initialClickCoordinate</strong> <code>array</code> <em style="color: #6c757d">optional</em></p>
+          <p>The initial coordinate for the map click interaction. Called with [longitude, latitude] coordinates.</p>
+        </div>
+
+        <div class="option-item">
           <p><strong>maxExtent</strong> <code>array</code> <em style="color: #6c757d">optional</em></p>
           <p>The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates.</p>
           <p><strong>Note:</strong> Coordinate values depend on the projection.</p>
@@ -647,6 +652,7 @@
             </li>
             <li><code>selectedTab</code> - Initially selected tab</li>
             <li><code>selectedLayersLayerPath</code> - Initial selected layer in layers tab</li>
+            <li><code>selectedDetailsLayerPath</code> - Initial selected layer in details tab</li>
             <li><code>selectedDataTableLayerPath</code> - Initially selected layer in data table tab</li>
             <li><code>selectedTimeSliderLayerPath</code> - Initially selected layer in time slider tab</li>
           </ul>
@@ -681,8 +687,10 @@
             </li>
             <li><code>selectedTab</code> - Initially selected tab</li>
             <li><code>selectedLayersLayerPath</code> - Initial selected layer in layers tab</li>
+            <li><code>selectedDetailsLayerPath</code> - Initial selected layer in details tab</li>
             <li><code>selectedDataTableLayerPath</code> - Initially selected layer in data table tab</li>
             <li><code>selectedTimeSliderLayerPath</code> - Initially selected layer in time slider tab</li>
+            <li><code>selectedGeochartLayerPath</code> - Initial selected layer in geochart tab</li>
           </ul>
           <p><strong>Default:</strong> <code>{ tabs: { core: ['layers', 'data-table'], custom: [] } }</code></p>
           <p>

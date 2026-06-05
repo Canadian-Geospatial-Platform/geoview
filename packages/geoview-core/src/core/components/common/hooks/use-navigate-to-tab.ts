@@ -8,7 +8,8 @@ import { scrollIfNotVisible } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import type { TypeValidAppBarCoreProps, TypeValidFooterBarTabsCoreProps } from '@/api/types/map-schema-types';
 import { TIMEOUT } from '@/core/utils/constant';
-import { useMapController, useUIController } from '@/core/controllers/use-controllers';
+import { useStoreGeoViewMapId } from '@/core/stores';
+import { useUIController } from '@/core/controllers/use-controllers';
 
 /** Options for navigating to a tab. */
 interface NavigateToTabOptions {
@@ -29,7 +30,7 @@ export function useNavigateToTab(tabId: string, onNavigate?: (layerPath: string)
   const { isOpen: isFooterOpen } = useStoreUIActiveFooterBarTab();
   const footerBarComponents = useStoreUIFooterBarComponents();
   const appBarComponents = useStoreUIAppbarComponents();
-  const mapId = useMapController().getMapId();
+  const mapId = useStoreGeoViewMapId();
 
   // Check if tab exists in footer or appbar
   const hasFooterTab = footerBarComponents.includes(tabId as TypeValidFooterBarTabsCoreProps);

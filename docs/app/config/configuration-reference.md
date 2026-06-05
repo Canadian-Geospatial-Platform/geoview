@@ -39,7 +39,7 @@ GeoView uses JSON Schema validation to ensure configuration objects are valid be
 When a validation error occurs, you'll see a message in the console with the following information:
 
 ```
-======================================================================
+SCHEMA VALIDATION 
 SchemaPath: https://cgpv/schema#/definitions/TypeMapFeaturesInstance
 Schema error: {
   instancePath: '/map/viewSettings/projection',
@@ -207,6 +207,7 @@ viewSettings: {
   homeView?: TypeMapViewSettings;
   enableRotation?: boolean;
   rotation?: number;
+  initialClickCoordinate? : Coordinate;
   maxExtent?: Extent;
   minZoom?: number;
   maxZoom?: number;
@@ -236,6 +237,8 @@ TypeMapViewSettings: {
 - **enableRotation** (Optional): Enable rotation. If false, a rotation constraint that always sets the rotation to zero is used (default: true)
 
 - **rotation** (Optional): The initial rotation for the view in **degrees** (positive rotation clockwise, 0 means North). Will be converted to radians by the viewer. Domain = [0..360] (default: 0)
+
+- **initialClickCoordinate** (Optional): The initial coordinate for the map click interaction. Called with [longitude, latitude] coordinates.
 
 - **maxExtent** (Optional): The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates (default: [-135, 25, -50, 89])
 
@@ -544,6 +547,7 @@ appBar?: {
   collapsed: boolean;
   selectedTab: TypeValidAppBarCoreProps;
   selectedLayersLayerPath: string;
+  selectedDetailsLayerPath: string;
   selectedDataTableLayerPath: string;
   selectedTimeSliderLayerPath: string;
 };
@@ -560,24 +564,24 @@ TypeValidAppBarCoreProps = "about-panel" | "geolocator" | "export" | "aoi-panel"
     - `"export"` - Map export functionality
     - `"aoi-panel"` - **AOI Panel package** - Area of interest selection
     - `"custom-legend"` - **Custom Legend package** - Custom legend display
-    - `"stac-broswer"` - **Custom Stac Browser package** - Browse Stac
+    - `"stac-browser"` - **Custom Stac Browser package** - Browse Stac
     - `"guide"` - User guide tab
     - `"legend"` - Layer legend display
     - `"details"` - Feature details viewer
     - `"data-table"` - Tabular data view
     - `"layers"` - Layer list and management
 
-- **collapsed**: Whether the app bar is initially collapsed
-
 - **selectedTab**: The initially selected tab
 
 - **selectedLayersLayerPath**: Layer path for layers tab selection
+
+- **selectedDetailsLayerPath**:  Layer path for details tab selection
 
 - **selectedDataTableLayerPath**: Layer path for data table tab selection
 
 - **selectedTimeSliderLayerPath**: Layer path for time slider tab selection
 
-**Default:** `{ tabs: { core: ["geolocator"] }, collapsed: false }`
+**Default:** `{ tabs: { core: ["geolocator", "legend", "details", "export"] } }`
 
 **Example:**
 
@@ -637,11 +641,15 @@ TypeFooterBarTabsCustomProps = {
 
 - **selectedLayersLayerPath**: Layer path for layers tab selection
 
+- **selectedDetailsLayerPath**:  Layer path for details tab selection
+
 - **selectedDataTableLayerPath**: Layer path for data table tab selection
 
 - **selectedTimeSliderLayerPath**: Layer path for time slider tab selection
 
-**Default:** `{ tabs: { core: ["legend", "layers", "details", "data-table"], custom: [] }, collapsed: false }`
+- **selectedGeochartLayerPath**:  Layer path for geochart tab selection
+
+**Default:** `{ tabs: { core: ["layers", "data-table"] } }`
 
 **Example:**
 
@@ -669,7 +677,7 @@ corePackages?: Array<"swiper" | "test-suite">;
 
 **Available Packages:**
 
-- `"swiper"` - Layer swipe comparison tool
+- `"swiper"` - **Swiper package** - Layer swipe comparison tool
 - `"test-suite"` - GeoView test suite (for development/testing only)
 
 **Example:**
