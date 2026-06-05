@@ -229,19 +229,20 @@
           class="form-control"
           style="width: 400px"
           placeholder="Select or enter a GeoCore UUID"
+          onclick="this.value=''"
         />
         <datalist id="geocoreids" value="1dcd28aa-99da-4f62-b157-15631379b170">
-          <option value="1dcd28aa-99da-4f62-b157-15631379b170"></option>
-          <option value="fd4369a4-21fe-4070-914a-067474da0fd6"></option>
-          <option value="9d96e8c9-22fe-4ad2-b5e8-94a6991b744b"></option>
-          <option value="21b821cf-0f1c-40ee-8925-eab12d357668"></option>
-          <option value="ccc75c12-5acc-4a6a-959f-ef6f621147b9"></option>
-          <option value="0fca08b5-e9d0-414b-a3c4-092ff9c5e326"></option>
-          <option value="03ccfb5c-a06e-43e3-80fd-09d4f8f69703"></option>
-          <option value="ea4c0bdb-a63f-49a4-b14a-09c1560aad0b"></option>
-          <option value="0fe65119-e96e-4a57-8bfe-9d9245fba06b"></option>
-          <option value="ed9b204b-590c-4b17-9703-f6e167acd6c6"></option>
-          <option value="fe83a604-aa5a-4e46-903c-685f8b0cc33c"></option>
+          <option value="1dcd28aa-99da-4f62-b157-15631379b170">Fieldnotes (dynamic)- many groups and layers</option>
+          <option value="fd4369a4-21fe-4070-914a-067474da0fd6">Man made (WMS, scale) - Many groups and layers</option>
+          <option value="9d96e8c9-22fe-4ad2-b5e8-94a6991b744b">Hydro (WMS, scale) - Many groups and layers</option>
+          <option value="21b821cf-0f1c-40ee-8925-eab12d357668">Airborne (dynamic) - Geochart from geocore</option>
+          <option value="f0d1c3a9-cf78-4b07-af55-9e8d4303449e">Real time (dynamic) - Geochart from geocore</option>
+          <option value="ccc75c12-5acc-4a6a-959f-ef6f621147b9">Commemorative (dynamic) - Details with images</option>
+          <option value="03ccfb5c-a06e-43e3-80fd-09d4f8f69703">NAPL (WMS) - Time slider</option>
+          <option value="ea4c0bdb-a63f-49a4-b14a-09c1560aad0b">Major Project BC (WMS)- Fail getFeatureInfo</option>
+          <option value="0fe65119-e96e-4a57-8bfe-9d9245fba06b">HRDEM (Geotiff)</option>
+          <option value="fe83a604-aa5a-4e46-903c-685f8b0cc33c">HFE (dynamic) - Time slider</option>
+          <option value="16ec36d1-b320-4dcd-b71f-94670a59095a">Wireless network (feature)- Time slider from geocore</option>
         </datalist>
         <button type="button" onclick="addGeocore()" class="btn btn-success">Add layer</button>
       </div>

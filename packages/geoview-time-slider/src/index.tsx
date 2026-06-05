@@ -1,6 +1,7 @@
 import React from 'react'; // GV This import is to validate that we're on the right React at the end of the file
 import type { TypeTabs } from 'geoview-core/ui/tabs/tabs';
 import { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
+import { getStoreTimeSliderLayer } from 'geoview-core/core/stores/states/time-slider-state';
 import { TimeSliderIcon } from 'geoview-core/ui';
 import { DateMgt, type TimeIANA, type TypeDisplayDateFormat } from 'geoview-core/core/utils/date-mgt';
 import { FooterPlugin } from 'geoview-core/api/plugin/footer-plugin';
@@ -173,6 +174,9 @@ class TimeSliderPlugin extends FooterPlugin {
     const initialTimeSliderLayerPaths = this.#filterTimeSliderLayers(orderedLayerPaths);
     if (initialTimeSliderLayerPaths) {
       initialTimeSliderLayerPaths.forEach((layerPath) => {
+        // Skip layers already registered by tryRegisterLayer (which uses VCS-merged config from mapFeaturesConfig)
+        if (getStoreTimeSliderLayer(this.mapViewer.mapId, layerPath)) return;
+
         // Get the layer
         const layer = this.controllerRegistry.layerController.getGeoviewLayerIfExists(layerPath);
 

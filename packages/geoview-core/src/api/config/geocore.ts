@@ -1,4 +1,4 @@
-import type { GeoViewGeoChartConfig } from '@/api/config/reader/uuid-config-reader';
+import type { GeoViewGeoChartConfig, GeoViewTimeSliderConfig } from '@/api/config/reader/uuid-config-reader';
 import { UUIDmapConfigReader } from '@/api/config/reader/uuid-config-reader';
 import { Config } from '@/api/config/config';
 import { ConfigValidation } from '@/api/config/config-validation';
@@ -61,6 +61,9 @@ export class GeoCore {
       geocharts[geochartConfig.layers[0].layerId] = geochartConfig;
     });
 
+    // Collect all time-slider configs from the response
+    const timeSliderConfigs = response.timeSliderConfigs ?? [];
+
     // Use user supplied listOfLayerEntryConfig if provided
     if (layerConfig?.listOfLayerEntryConfig || layerConfig?.initialSettings) {
       const tempLayerConfig = { ...layerConfig } as unknown as TypeGeoviewLayerConfig;
@@ -78,7 +81,7 @@ export class GeoCore {
         throw error;
       });
       // Return the created layer config from the merged config informations
-      return { config: newLayerConfig[0] as TypeGeoviewLayerConfig, geocharts };
+      return { config: newLayerConfig[0] as TypeGeoviewLayerConfig, geocharts, timeSliderConfigs };
     }
 
     // If the config already has a name
@@ -101,7 +104,7 @@ export class GeoCore {
     }
 
     // Always only first one
-    return { config: response.layers[0], geocharts };
+    return { config: response.layers[0], geocharts, timeSliderConfigs };
   }
 
   /**
@@ -149,6 +152,10 @@ export class GeoCore {
 
 /** Response structure containing the layer configuration and associated geocharts. */
 export type GeoCoreLayerConfigResponse = {
+  /** The resolved layer configuration. */
   config: TypeGeoviewLayerConfig;
+  /** The geochart configurations keyed by layer path. */
   geocharts: { [key: string]: GeoViewGeoChartConfig };
+  /** The time-slider configurations from GeoCore. */
+  timeSliderConfigs: GeoViewTimeSliderConfig[];
 };

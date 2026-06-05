@@ -58,6 +58,7 @@ export class UUIDmapConfigReader {
       return {
         layers: this.#getLayerConfigFromResponse(uuids, result, lang),
         geocharts: this.#getGeoChartConfigFromResponse(result, lang),
+        timeSliderConfigs: this.#getTimeSliderConfigFromResponse(result, lang),
       };
     } catch (error: unknown) {
       // If the promise had failed
@@ -310,6 +311,26 @@ export class UUIDmapConfigReader {
     // Return all configs
     return parsedConfigs;
   }
+
+  /**
+   * Reads and parses time-slider configs from uuid request result.
+   *
+   * @param resultData - The uuid request result
+   * @param lang - The language to use to read results
+   * @returns The list of time-slider configs
+   */
+  static #getTimeSliderConfigFromResponse(resultData: GeoCoreConfigResponseRoot, lang: TypeDisplayLanguage): GeoViewTimeSliderConfig[] {
+    // If no time-slider information
+    if (!resultData || !resultData.response || !resultData.response.gcs || !Array.isArray(resultData.response.gcs)) return [];
+
+    // Find all time-slider configs
+    const foundConfigs = resultData.response.gcs
+      .flatMap((gcItem) => gcItem?.[lang]?.packages?.['time-slider'])
+      .filter((tsValue) => !!tsValue);
+
+    // Return all found configs as-is (no transformation needed unlike geochart)
+    return foundConfigs;
+  }
 }
 
 /** The GeoCore response JSON root. */
@@ -338,7 +359,10 @@ export type GeoCoreConfigResponseGCSLayer = {
 };
 
 export type GeoCoreConfigResponsePackages = {
+  /** The geochart configurations. */
   geochart: GeoChartGeoCoreConfig[];
+  /** Optional time-slider configurations. */
+  'time-slider'?: GeoViewTimeSliderConfig[];
 };
 
 export type GeoChartGeoCoreConfig = {
@@ -367,8 +391,18 @@ export type GeoViewGeoChartConfig = {
   layers: GeoChartGeoCoreConfigLayer[]; // For us, this is an array, compared to GeoCore where it's not.
 };
 
+/** The time-slider config object as returned by GeoCore. */
+export type GeoViewTimeSliderConfig = {
+  /** The slider configuration entries. */
+  sliders: Record<string, unknown>[];
+};
+
 /** The type representing the GeoCore parsed response */
 export type UUIDmapConfigReaderResponse = {
+  /** The parsed layer configurations. */
   layers: TypeGeoviewLayerConfig[];
+  /** Optional geochart configurations. */
   geocharts?: GeoViewGeoChartConfig[];
+  /** Optional time-slider configurations. */
+  timeSliderConfigs?: GeoViewTimeSliderConfig[];
 };

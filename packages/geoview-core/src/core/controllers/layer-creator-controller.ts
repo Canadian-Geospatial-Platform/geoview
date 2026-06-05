@@ -15,7 +15,7 @@ import {
   type TypeGeoviewLayerConfig,
 } from '@/api/types/layer-schema-types';
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
-import type { GeoViewGeoChartConfig } from '@/api/config/reader/uuid-config-reader';
+import type { GeoViewGeoChartConfig, GeoViewTimeSliderConfig } from '@/api/config/reader/uuid-config-reader';
 import type { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { CsvLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/csv-layer-entry-config';
@@ -135,6 +135,13 @@ export class LayerCreatorController extends AbstractMapViewerController {
 
         // Log
         logger.logInfo('Added GeoChart configs for layer path:', layerPath);
+      },
+      (timeSliderConfigs: GeoViewTimeSliderConfig[]) => {
+        // Merge time-slider configs into corePackagesConfig (stored for the plugin to pick up if it's configured)
+        this.mergeTimeSliderConfigsIntoCorePackages(timeSliderConfigs);
+
+        // Log
+        logger.logInfo('Added Time Slider configs from GeoCore');
       },
       (mapConfigLayerEntry: MapConfigLayerEntry, error: unknown) => {
         // Show the error(s)
@@ -293,6 +300,11 @@ export class LayerCreatorController extends AbstractMapViewerController {
           // Make sure geochart tab is shown
           this.getControllersRegistry().uiController.showTabButton('geochart');
         });
+      }
+
+      // If time-slider configs were returned from GeoCore, merge them into corePackagesConfig
+      if (response.timeSliderConfigs.length > 0) {
+        this.mergeTimeSliderConfigsIntoCorePackages(response.timeSliderConfigs);
       }
 
       if (geoviewLayerConfig.useAsBasemap === true) {
@@ -728,6 +740,45 @@ export class LayerCreatorController extends AbstractMapViewerController {
   }
 
   /**
+   * Merges time-slider configurations from GeoCore into the map's corePackagesConfig.
+   *
+   * The configs are stored for the time-slider plugin to pick up if it's configured in the footer bar.
+   *
+   * @param timeSliderConfigs - The time-slider configurations returned from GeoCore
+   */
+  mergeTimeSliderConfigsIntoCorePackages(timeSliderConfigs: GeoViewTimeSliderConfig[]): void {
+    // Get the current corePackagesConfig from the map config
+    const mapConfig = this.getMapViewer().mapFeaturesConfig;
+
+    // Initialize corePackagesConfig if not present
+    if (!mapConfig.corePackagesConfig) {
+      mapConfig.corePackagesConfig = [];
+    }
+
+    // For each time-slider config from GeoCore
+    timeSliderConfigs.forEach((tsConfig) => {
+      // Find existing time-slider entry in corePackagesConfig
+      const existingEntry = mapConfig.corePackagesConfig!.find((pkg) => Object.keys(pkg).includes('time-slider'));
+
+      if (existingEntry) {
+        // Merge sliders into existing entry
+        const existingSliders = (existingEntry['time-slider'] as Record<string, unknown>)?.sliders;
+        if (Array.isArray(existingSliders) && Array.isArray(tsConfig.sliders)) {
+          (existingSliders as Record<string, unknown>[]).push(...tsConfig.sliders);
+        } else if (tsConfig.sliders) {
+          (existingEntry['time-slider'] as Record<string, unknown>).sliders = tsConfig.sliders;
+        }
+      } else {
+        // Add new time-slider entry
+        mapConfig.corePackagesConfig!.push({ 'time-slider': tsConfig });
+      }
+    });
+
+    // Log
+    logger.logInfo('Merged time-slider configs from GeoCore into corePackagesConfig');
+  }
+
+  /**
    * Unregisters the layer in the Domain to stop managing it.
    *
    * @param layerConfig - The layer entry config to unregister
@@ -1093,6 +1144,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
    * @param language - The language setting used for layer labels and metadata
    * @param mapConfigLayerEntries - The array of layer entries to convert
    * @param addGeoChartCallback - Callback invoked when a geochart configuration is initialized during layer processing
+   * @param addTimeSliderCallback - Callback invoked when time-slider configurations are found during layer processing
    * @param errorCallback - Callback invoked when an error occurs during layer processing
    * @returns An array of promises, each resolving to a TypeGeoviewLayerConfig object
    */
@@ -1102,12 +1154,21 @@ export class LayerCreatorController extends AbstractMapViewerController {
     language: TypeDisplayLanguage,
     mapConfigLayerEntries: MapConfigLayerEntry[],
     addGeoChartCallback: (layerPath: string, geochartConfig: GeoViewGeoChartConfig) => void,
+    addTimeSliderCallback: (timeSliderConfigs: GeoViewTimeSliderConfig[]) => void,
     errorCallback: (mapConfigLayerEntry: MapConfigLayerEntry, error: unknown) => void
   ): Promise<TypeGeoviewLayerConfig>[] {
     // For each layer entry
     return mapConfigLayerEntries.map((entry) => {
       // Redirect
-      return this.convertMapConfigToGeoviewLayerConfig(mapId, currentLayerIds, language, entry, addGeoChartCallback, errorCallback);
+      return this.convertMapConfigToGeoviewLayerConfig(
+        mapId,
+        currentLayerIds,
+        language,
+        entry,
+        addGeoChartCallback,
+        addTimeSliderCallback,
+        errorCallback
+      );
     });
   }
 
@@ -1122,6 +1183,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
    * @param language - The language setting used for layer labels and metadata
    * @param entry - The array of layer entry to convert
    * @param addGeoChartCallback - Callback invoked when a geochart configuration is initialized during layer processing
+   * @param addTimeSliderCallback - Callback invoked when time-slider configurations are found during layer processing
    * @param errorCallback - Callback invoked when an error occurs during layer processing
    * @returns A promise that resolves to a TypeGeoviewLayerConfig object
    */
@@ -1131,6 +1193,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
     language: TypeDisplayLanguage,
     entry: MapConfigLayerEntry,
     addGeoChartCallback: (layerPath: string, geochartConfig: GeoViewGeoChartConfig) => void,
+    addTimeSliderCallback: (timeSliderConfigs: GeoViewTimeSliderConfig[]) => void,
     errorCallback: (mapConfigLayerEntry: MapConfigLayerEntry, error: unknown) => void
   ): Promise<TypeGeoviewLayerConfig> {
     // Depending on the map config layer entry type
@@ -1146,6 +1209,13 @@ export class LayerCreatorController extends AbstractMapViewerController {
             addGeoChartCallback(layerPath, geochartConfig);
           });
         }
+
+        // If time-slider configs were returned from GeoCore
+        if (response.timeSliderConfigs.length > 0) {
+          // Callback
+          addTimeSliderCallback(response.timeSliderConfigs);
+        }
+
         return response.config;
       });
     } else if (mapConfigLayerEntryIsGeoPackage(entry)) {

@@ -17,7 +17,7 @@ import {
   type TypeTimeSliderProps,
   type TypeTimeSliderValues,
 } from '@/core/stores/states/time-slider-state';
-import { getStoreMapConfigCorePackagesConfig } from '@/core/stores/states/map-state';
+
 import { logger } from '@/core/utils/logger';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
@@ -69,10 +69,18 @@ export class TimeSliderController extends AbstractMapViewerController {
     // If there is no Time Slider, ignore
     if (!isStoreTimeSliderInitialized(this.getMapId())) return;
 
-    // Get the temporal dimension, if any
-    const layerTimeDimension = layer.getTimeDimension();
+    // Try to get the temporal dimension from the layer's metadata
+    let layerTimeDimension = layer.getTimeDimension();
 
-    // If no temporal dimension or invalid
+    // If the VCS config provides a timeDimension, it overrides the metadata-derived one
+    if (timesliderConfig?.timeDimension) {
+      layerTimeDimension = {
+        ...timesliderConfig.timeDimension,
+        isValid: !!timesliderConfig.timeDimension.rangeItems?.range?.length,
+      };
+    }
+
+    // If still no temporal dimension or invalid
     if (!layerTimeDimension || !layerTimeDimension.isValid) return; // Skip
 
     // Get the time slider values
@@ -221,8 +229,8 @@ export class TimeSliderController extends AbstractMapViewerController {
    */
   tryRegisterLayer(layer: AbstractGVLayer): void {
     try {
-      // Get time slider config if present in map config
-      const timeSliderConfigs = getStoreMapConfigCorePackagesConfig(this.getMapId())?.find((config) =>
+      // Get time slider config if present in map config (read from mapFeaturesConfig, not store, because GeoCore merges at runtime)
+      const timeSliderConfigs = this.getMapViewer().mapFeaturesConfig.corePackagesConfig?.find((config) =>
         Object.keys(config).includes('time-slider')
       )?.['time-slider'] as Record<'sliders', TypeTimeSliderProps[]>;
 
@@ -230,8 +238,10 @@ export class TimeSliderController extends AbstractMapViewerController {
         slider.layerPaths.includes(layer.getLayerPath())
       );
 
-      // If the layer is loaded AND flag is true to use time dimension, continue
-      if (layer.getIsTimeAware() && layer.getTimeDimension()) {
+      // Only register the layer when there is a VCS config for it or the layer has a time dimension from metadata.
+      // The timeSliderController?. optional chaining ensures no registration happens when time-slider is not
+      // in the footer bar (the controller is only created when the plugin is configured).
+      if (layerSliderConfig || (layer.getIsTimeAware() && layer.getTimeDimension())) {
         // Check (if dimension is valid) and add time slider layer when needed
         this.getControllersRegistry().timeSliderController?.checkInitTimeSliderLayerAndApplyFilters(layer, layerSliderConfig);
       }
