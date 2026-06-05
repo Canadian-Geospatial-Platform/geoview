@@ -259,6 +259,8 @@ export abstract class AbstractLayerSet {
    * @param language - The display language to use for the query
    * @param abortController - Optional abort controller
    * @returns A promise that resolves with the query results
+   * @throws {NotSupportedError} When `queryType` is not one of the supported query types (propagated from `getFeatureInfo()`)
+   * @throws {NotImplementedError} When the underlying layer type does not implement the requested `queryType` (propagated from `getFeatureInfo()`)
    */
   protected queryLayerFeatures(
     geoviewLayer: AbstractGVLayer,

@@ -94,6 +94,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
    * @param layerPath - The layerPath that will be queried
    * @param queryType - The query type, default: AllFeatureInfoLayerSet.QUERY_TYPE
    * @returns A promise that resolves with the result of the query
+   * @throws {NotSupportedError} When `queryType` is not one of the supported query types
    */
   // TODO: (future development) The queryType is a door opened to allow the triggering using a bounding box or a polygon.
   async queryLayer(layerPath: string, queryType: QueryType = AllFeatureInfoLayerSet.QUERY_TYPE): Promise<TypeFeatureInfoResult> {

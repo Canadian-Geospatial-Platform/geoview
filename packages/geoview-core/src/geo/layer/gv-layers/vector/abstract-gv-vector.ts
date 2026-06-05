@@ -365,6 +365,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * @param projection - The projection to initialize the bounds into.
    * @param stops - The number of stops to use to generate the extent.
    * @returns A promise that resolves with the layer bounding box, or undefined if not available.
+   * @throws {LayerStatusErrorError} When the layer enters the `error` state before reaching `loaded` (propagated from `waitLoadedStatus()`)
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   override async onInitBounds(projection: OLProjection, stops: number): Promise<Extent | undefined> {

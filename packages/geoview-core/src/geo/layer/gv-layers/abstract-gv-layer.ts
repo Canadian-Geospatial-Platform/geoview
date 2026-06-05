@@ -57,10 +57,10 @@ import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/
  * Abstract Geoview Layer managing an OpenLayer layer.
  */
 export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
-  /** The default hit tolerance the query should be using */
+  /** The default hit tolerance the query should be using. */
   static readonly DEFAULT_HIT_TOLERANCE: number = 4;
 
-  /** The default loading period before we show a message to the user about a layer taking a long time to render on map */
+  /** The default loading period before we show a message to the user about a layer taking a long time to render on map. */
   static readonly DEFAULT_LOADING_PERIOD: number = 8 * 1000; // 8 seconds
 
   /** Keywords used to identify name fields in the layer's outfields when none specified. */
@@ -79,71 +79,76 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     '^oid$',
   ];
 
-  /** Counts the number of times the loading happened. */
-  loadingCounter = 0;
+  /**
+   * Number of in-flight load operations across all OL source event families (features, image, tile).
+   *
+   * Per OL's lifecycle contract each `*loadstart` is followed by exactly one terminator
+   * (`*loadend` or `*loaderror`), so reconciling on both keeps the count accurate.
+   */
+  #inFlightCount = 0;
 
-  /** Marks the latest loading count for the layer. Useful to know when to put the layer loaded status back correctly with parallel processing happening. */
-  loadingMarker = 0;
+  /** Per-wave session id bumped on each 0=>1 transition of `#inFlightCount`; used by the slow-render watcher to detect supersession. */
+  #loadingWaveId = 0;
 
-  /** The OpenLayer source */
+  /** The OpenLayer source. */
   #olSource: Source;
 
-  /** The legend as fetched */
+  /** The legend as fetched. */
   #layerLegend?: TypeLegend;
 
   /** Style to apply to the vector layer. */
   #layerStyle?: TypeLayerStyleConfig;
 
-  /** The layer filters currently applied on the layer, if any */
+  /** The layer filters currently applied on the layer, if any. */
   #layerFilters: LayerFilters;
 
-  /** Indicates if the layer is currently queryable */
+  /** Indicates if the layer is currently queryable. */
   #queryable: boolean;
 
-  /** Indicates if the layer is currently hoverable */
+  /** Indicates if the layer is currently hoverable. */
   #hoverable: boolean;
 
-  /** Callback delegates for the layer style changed event */
+  /** Callback delegates for the layer style changed event. */
   #onLayerStyleChangedHandlers: StyleChangedDelegate[] = [];
 
-  /** Callback delegates for the legend querying event */
+  /** Callback delegates for the legend querying event. */
   #onLegendQueryingHandlers: LegendQueryingDelegate[] = [];
 
-  /** Callback delegates for the legend queried event */
+  /** Callback delegates for the legend queried event. */
   #onLegendQueriedHandlers: LegendQueriedDelegate[] = [];
 
-  /** Callback delegates for the layer filter applied event */
+  /** Callback delegates for the layer filter applied event. */
   #onLayerFilterAppliedHandlers: LayerFilterAppliedDelegate[] = [];
 
-  /** Callback delegates for the layer first loaded event */
+  /** Callback delegates for the layer first loaded event. */
   #onLayerFirstLoadedHandlers: LayerBaseDelegate[] = [];
 
-  /** Callback delegates for the layer loading event */
+  /** Callback delegates for the layer loading event. */
   #onLayerLoadingHandlers: LayerBaseDelegate[] = [];
 
-  /** Callback delegates for the layer loaded event */
+  /** Callback delegates for the layer loaded event. */
   #onLayerLoadedHandlers: LayerBaseDelegate[] = [];
 
-  /** Callback delegates for the layer error event */
+  /** Callback delegates for the layer error event. */
   #onLayerErrorHandlers: LayerErrorDelegate[] = [];
 
-  /** Callback delegates for the layer message event */
+  /** Callback delegates for the layer message event. */
   #onLayerMessageHandlers: LayerMessageDelegate[] = [];
 
-  /** Callback delegates for the layer queryable changed event */
+  /** Callback delegates for the layer queryable changed event. */
   #onLayerQueryableChangedHandlers: LayerQueryableChangedDelegate[] = [];
 
-  /** Callback delegates for the layer hoverable changed event */
+  /** Callback delegates for the layer hoverable changed event. */
   #onLayerHoverableChangedHandlers: LayerHoverableChangedDelegate[] = [];
 
-  /** Callback delegates for the layer item visibility changed event */
+  /** Callback delegates for the layer item visibility changed event. */
   #onLayerItemVisibilityChangedHandlers: LayerItemVisibilityChangedDelegate[] = [];
 
   /**
    * Constructs a GeoView layer to manage an OpenLayer layer.
    *
-   * @param olSource - The OpenLayer Source.
-   * @param layerConfig - The layer configuration.
+   * @param olSource - The OpenLayer Source
+   * @param layerConfig - The layer configuration
    */
   protected constructor(olSource: Source, layerConfig: AbstractBaseLayerEntryConfig) {
     super(layerConfig);
@@ -245,48 +250,19 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * Overridable method called when the layer has started to load itself on the map.
    */
   protected onLoading(): void {
-    // Get the layer config
-    const layerConfig = this.getLayerConfig();
-
-    // Set the layer has loading
-    layerConfig.setLayerStatusLoading();
-
-    // Update the parent group if any
-    this.getLayerConfig().updateLayerStatusParent();
-
-    // Emit event for all layer load events
-    this.#emitLayerLoading();
+    // Redirect
+    this.#processLoading();
   }
 
   /**
    * Overridable method called when the layer has been loaded correctly.
+   *
+   * Fired only on the wave-terminating `*loadend` (i.e. when the in-flight counter transitions back to 0). Intermediate
+   * `*loadend` events while other loads are still in flight are absorbed by the counter and do not call this method.
    */
   protected onLoaded(): void {
-    // Get the layer config
-    const layerConfig = this.getLayerConfig();
-
-    // Set the layer config status to loaded to keep mirroring the AbstractGeoViewLayer for now
-    layerConfig.setLayerStatusLoaded();
-
-    // Update the parent group if any
-    this.getLayerConfig().updateLayerStatusParent();
-
-    // If first time
-    if (!this.loadedOnce) {
-      // If it's a basemap layer, put it at the bottom of the stack to avoid any issue with layers order on map.
-      if (this.getLayerConfig().getGeoviewLayerConfig().useAsBasemap === true) this.getOLLayer().setZIndex(-1);
-      // Now that the layer is loaded, set its visibility correctly (had to be done in the loaded event, not before, per prior note in pre-refactor)
-      this.setVisible(layerConfig.getInitialSettings()?.states?.visible ?? true); // default: true
-
-      // Emit event for the first time the layer got loaded
-      this.#emitLayerFirstLoaded();
-    }
-
-    // Flag
-    this.loadedOnce = true;
-
-    // Emit event for all layer load events
-    this.#emitLayerLoaded();
+    // Redirect
+    this.#processLoaded();
   }
 
   /**
@@ -294,53 +270,51 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    *
    * @param error - The error which is being raised
    */
-  protected onError(error: GeoViewError): void {
-    // Check the layer status before
-    const layerStatusBefore = this.getLayerConfig().layerStatus;
+  protected onSourceError(error: GeoViewError): void {
+    // Redirect
+    this.#processSourceOrFeaturesError(error);
+  }
 
-    // If we were not error before
-    if (layerStatusBefore !== 'error') {
-      // Set the layer config status to error to keep mirroring the AbstractGeoViewLayer for now
-      this.getLayerConfig().setLayerStatusError();
+  /**
+   * Overridable method called when the layer is in error and couldn't be loaded correctly.
+   *
+   * Fired only on the wave-terminating `featuresloaderror` (i.e. when the in-flight counter transitions back to 0).
+   * Errors arriving while other loads are still in flight are absorbed by the counter and do not reach this method,
+   * which naturally suppresses superseded errors.
+   *
+   * @param error - The error which is being raised
+   */
+  protected onFeaturesLoadError(error: GeoViewError): void {
+    // Redirect
+    this.#processSourceOrFeaturesError(error);
+  }
 
-      // Update the parent group if any
-      this.getLayerConfig().updateLayerStatusParent();
-
-      // Emit about the error
-      this.#emitError(error);
-    } else {
-      // We've already emitted an error to the user about the layer being in error, skip so that we don't spam
-    }
-
-    // Emit event for all layer error events
-    this.#emitLayerError({ error });
+  /**
+   * Overridable method called when the layer tile image is in error and couldn't be loaded correctly.
+   *
+   * Fired only on the wave-terminating `tileloaderror` (i.e. when the in-flight counter transitions back to 0). Tile
+   * errors arriving mid-burst, while other tiles are still loading, are absorbed by the counter and do not reach this
+   * method — only the error that closes out the wave is reported.
+   *
+   * @param error - The error which is being raised
+   */
+  protected onImageTileLoadError(error: GeoViewError): void {
+    // Redirect
+    this.#processTileLoadError(error);
   }
 
   /**
    * Overridable method called when the layer image is in error and couldn't be loaded correctly.
    *
+   * Fired only on the wave-terminating `imageloaderror` (i.e. when the in-flight counter transitions back to 0).
+   * Errors arriving while other loads are still in flight are absorbed by the counter and do not reach this method,
+   * which naturally suppresses superseded errors.
+   *
    * @param error - The error which is being raised
    */
   protected onImageLoadError(error: GeoViewError): void {
-    // Check the layer status before
-    const layerStatusBefore = this.getLayerConfig().layerStatus;
-
-    // If we were not error before
-    if (layerStatusBefore !== 'error') {
-      // Set the layer config status to error to keep mirroring the AbstractGeoViewLayer for now
-      this.getLayerConfig().setLayerStatusError();
-
-      // Update the parent group if any
-      this.getLayerConfig().updateLayerStatusParent();
-
-      // Emit about the error
-      this.#emitError(error);
-    } else {
-      // We've already emitted an error to the user about the layer being in error, skip so that we don't spam
-    }
-
-    // Emit event for all layer error events
-    this.#emitLayerError({ error });
+    // Redirect
+    this.#processImageLoadError(error);
   }
 
   /**
@@ -408,6 +382,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param language - The display language, used to guess the best name field if `nameField` is not provided
    * @param abortController - Optional {@link AbortController} to cancel the operation
    * @returns A promise that resolves with the feature info result
+   * @throws {NotImplementedError} When the subclass does not override `getFeatureInfoAtCoordinate` (propagated from `getFeatureInfoAtCoordinate()`)
    */
   protected getFeatureInfoAtPixel(
     map: OLMap,
@@ -553,23 +528,30 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   // #region PUBLIC METHODS
 
   /**
-   * Initializes the GVLayer. This function checks if the source is ready and if so it calls onLoaded() to pursue initialization of the layer.
-   * If the source isn't ready, it registers to the source ready event to pursue initialization of the layer once its source is ready.
+   * Initializes the GVLayer.
+   *
+   * Applies the initial layer filters, wires the OpenLayers source event listeners that drive the loading lifecycle
+   * (start/end shared across features/image/tile families plus one handler per error family), registers the source
+   * `change` listener to surface fatal source errors, and patches the renderer to guard against null-context errors.
    */
   init(): void {
     // Set the layer filters right away for the initial view
     this.#setLayerFiltersInitial(this.getLayerConfig().getLayerFilter());
     this.#setLayerFiltersClass();
 
-    // Activation of the load end/error listeners
+    // Activation of the load start/end/error listeners. Per OL's contract each *loadstart is followed by exactly one
+    // terminator (*loadend or *loaderror), so start/end share a single counter-based handler and the error handlers
+    // reconcile that same counter.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (this.#olSource as any).on(['featuresloadstart', 'imageloadstart', 'tileloadstart'], this.#handleLoading.bind(this));
+    (this.#olSource as any).on(['featuresloadstart', 'imageloadstart', 'tileloadstart'], this.#handleLoadStart.bind(this));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (this.#olSource as any).on(['featuresloadend', 'imageloadend', 'tileloadend'], this.#handleLoaded.bind(this));
+    (this.#olSource as any).on(['featuresloadend', 'imageloadend', 'tileloadend'], this.#handleLoadEnd.bind(this));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (this.#olSource as any).on(['featuresloaderror', 'tileloaderror'], this.#handleError.bind(this));
+    (this.#olSource as any).on(['featuresloaderror'], this.#handleFeaturesLoadError.bind(this));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (this.#olSource as any).on(['imageloaderror'], this.#handleImageLoadError.bind(this));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (this.#olSource as any).on(['tileloaderror'], this.#handleTileLoadError.bind(this));
 
     // Activate source change listener to catch error
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -638,7 +620,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   /**
    * Gets the style item visibility on the layer.
    *
-   * @param item - The style item to toggle visibility on
+   * @param item - The style item whose visibility to retrieve
    * @returns The visibility of the style item
    */
   getStyleItemVisibility(item: TypeLegendItem): boolean {
@@ -742,7 +724,8 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   /**
    * Sets if the layer is currently queryable.
    *
-   * @param queryable - The queryable value.
+   * @param queryable - The queryable value
+   * @throws {LayerNotQueryableError} When the underlying source is not queryable
    */
   setQueryable(queryable: boolean): void {
     // Get the layer config
@@ -768,7 +751,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   /**
    * Sets if the layer is currently hoverable.
    *
-   * @param hoverable - The hoverable value.
+   * @param hoverable - The hoverable value
    */
   setHoverable(hoverable: boolean): void {
     // Go for it
@@ -779,10 +762,11 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   /**
    * Gets the extent of an array of features.
    *
-   * @param objectIds - The IDs of the features to calculate the extent from.
-   * @param outProjection - The output projection for the extent.
-   * @param outfield - Optional. ID field to return for services that require a value in outfields.
-   * @returns A promise that resolves to the extent of the features, if available.
+   * @param objectIds - The IDs of the features to calculate the extent from
+   * @param outProjection - The output projection for the extent
+   * @param outfield - Optional ID field to return for services that require a value in outfields
+   * @returns A promise that resolves to the extent of the features, if available
+   * @throws {NotImplementedError} When the subclass does not override `onGetExtentFromFeatures` (propagated from `onGetExtentFromFeatures()`)
    */
   getExtentFromFeatures(objectIds: number[] | string[], outProjection: OLProjection, outfield?: string): Promise<Extent> {
     // Redirect
@@ -882,6 +866,8 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param language - The display language, used to guess the best name field if `nameField` is not provided
    * @param abortController - Optional {@link AbortController} to cancel the operation
    * @returns A promise that resolves with the feature info result
+   * @throws {NotSupportedError} When `queryType` is not one of the supported query types
+   * @throws {NotImplementedError} When the subclass does not override the underlying `get*FeatureInfo*` method for the requested `queryType` (propagated from the dispatched method)
    */
   async getFeatureInfo(
     map: OLMap,
@@ -1035,6 +1021,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    *
    * @param timeout - A timeout for the period to wait for. Defaults to 30,000 ms
    * @returns A promise that resolves when the layer has been loaded at least once
+   * @throws {LayerStatusErrorError} When the layer enters the `error` state before being loaded
    */
   waitLoadedOnce(timeout = 30000): Promise<boolean> {
     // Create a promise and wait until the layer is first loaded
@@ -1051,10 +1038,11 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   }
 
   /**
-   * Utility function allowing to wait for the layer to be loaded at least once.
+   * Utility function allowing to wait for the layer status to become `loaded`.
    *
    * @param timeout - A timeout for the period to wait for. Defaults to 30,000 ms
-   * @returns A promise that resolves when the layer has been loaded at least once
+   * @returns A promise that resolves when the layer status is `loaded`
+   * @throws {LayerStatusErrorError} When the layer enters the `error` state before reaching `loaded`
    */
   waitLoadedStatus(timeout = 30000): Promise<boolean> {
     // Create a promise and wait until the layer is first loaded
@@ -1075,6 +1063,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    *
    * @param timeout - A timeout for the period to wait for. Defaults to 30,000 ms
    * @returns A promise that resolves when the layer legend has been fetched
+   * @throws {LayerStatusErrorError} When the layer enters the `error` state before the legend is fetched
    */
   waitLegendFetched(timeout = 30000): Promise<TypeLegend> {
     // Create a promise and wait until the layer is first loaded
@@ -1095,6 +1084,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    *
    * @param timeout - A timeout for the period to wait for. Defaults to 30,000 ms
    * @returns A promise that resolves when the layer style has been applied
+   * @throws {LayerStatusErrorError} When the layer enters the `error` state before the style is applied
    */
   waitStyleApplied(timeout = 30000): Promise<TypeLayerStyleConfig> {
     // Create a promise and wait until the layer is first loaded
@@ -1185,66 +1175,67 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   // #region PRIVATE METHODS
 
   /**
-   * Handles when the layer goes into a loading state.
+   * Handles when an OL source signals that a load operation has started (features, image, or tile).
    *
-   * @param event - The event which is being triggered
+   * Bumps the in-flight counter and, on the 0=>1 transition, opens a new loading wave: increments the wave id, starts the
+   * slow-render watcher tied to that wave snapshot, and calls the overridable `onLoading()`.
    */
-  #handleLoading(event: Event): void {
-    // Increment the counter
-    this.loadingCounter++;
-
-    // Mark the current event with the loading counter, this is a trick using the wrapper to re-obtain it in the 'onLoaded' function below.
-    // eslint-disable-next-line no-underscore-dangle
-    this.#findWrapperBetweenEventHandlers(event)._loadingCounter = this.loadingCounter;
-
-    // Log it, leaving the logDebug for dev purposes
-    // logger.logDebug('PRIOR', this.#findWrapperBetweenEventHandlers(event)._loadingCounter);
-
-    // Start a watcher and bind the loadingCounter with it
-    this.#startLoadingPeriodWatcher(this.loadingCounter);
-
-    // Call overridable method
-    this.onLoading();
+  #handleLoadStart(): void {
+    // First load in flight => open a new loading wave
+    if (this.#inFlightCount === 0) {
+      this.#loadingWaveId++;
+      const waveSnapshot = this.#loadingWaveId;
+      this.#startLoadingPeriodWatcher(() => this.#loadingWaveId === waveSnapshot);
+      this.onLoading();
+    }
+    this.#inFlightCount++;
   }
 
   /**
-   * Handles when the layer goes into a loaded state.
+   * Handles when an OL source signals that a load operation has ended successfully (features, image, or tile).
    *
-   * @param event - The event which is being triggered
+   * Decrements the in-flight counter and, only on the 1=>0 transition, calls the overridable `onLoaded()`. Intermediate
+   * `*loadend` events while other loads are still in flight are absorbed silently.
    */
-  #handleLoaded(event: Event): void {
-    // Log it, leaving the logDebug for dev purposes
-    // logger.logDebug('AFTER', this.#findWrapperBetweenEventHandlers(event)._loadingCounter);
+  #handleLoadEnd(): void {
+    // Per OL contract, featuresloadend/imageloadend/tileloadend is a terminator like featuresloaderror/imageloaderror/tileloaderror => reconcile to keep the counter accurate for future waves
+    const wasLast = this.#decrementInFlight();
+    if (!wasLast) return;
 
-    // If it's not the 'loaded' that correspond to the last 'loading' (asynchronicity thing)
-    // eslint-disable-next-line no-underscore-dangle
-    if (this.loadingCounter !== this.#findWrapperBetweenEventHandlers(event)._loadingCounter) return;
-
-    // Log it, leaving the logDebug for dev purposes
-    // logger.logDebug('AFTER CHECKED', this.#findWrapperBetweenEventHandlers(event)._loadingCounter);
-
-    // Call overridable method
+    // Last load settled => the wave is complete
     this.onLoaded();
   }
 
   /**
-   * Handles when the layer is in error and couldn't be loaded correctly.
+   * Handles when the layer features failed to load.
+   *
+   * Reconciles the in-flight counter (errors are terminators per the OL contract). The overridable `onFeaturesLoadError`
+   * is fired only on the 1=>0 transition; errors arriving while other loads are still in flight are absorbed silently,
+   * which naturally suppresses superseded errors and lets the wave-terminating event decide the layer's final state.
    *
    * @param event - The event which is being triggered
    */
-  #handleError(event: Event): void {
+  #handleFeaturesLoadError(event: Event): void {
     // Log
     logger.logError(`An error happened on the layer: ${this.getLayerPath()} after it was processed and added on the map.`, event);
+
+    // Per OL contract, featuresloaderror is a terminator like featuresloadend => reconcile to keep the counter accurate for future waves
+    const wasLast = this.#decrementInFlight();
+    if (!wasLast) return;
 
     // Decipher the error, allowing children classes to be more specific (ex: Vector specific errors)
     const gvError = this.onErrorDecipherError(event);
 
-    // Call overridable method
-    this.onError(gvError);
+    // Call overridable method (sets layer status to error)
+    this.onFeaturesLoadError(gvError);
   }
 
   /**
-   * Handles when the layer is in error and couldn't be loaded correctly.
+   * Handles when the layer image failed to load.
+   *
+   * Reconciles the in-flight counter (errors are terminators per the OL contract). The overridable `onImageLoadError`
+   * is fired only on the 1=>0 transition; errors arriving while other loads are still in flight are absorbed silently,
+   * which naturally suppresses superseded errors and lets the wave-terminating event decide the layer's final state.
    *
    * @param event - The event which is being triggered
    */
@@ -1252,11 +1243,51 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     // Log
     logger.logError(`Error loading source image for layer: ${this.getLayerPath()}.`, event);
 
+    // Per OL contract, imageloaderror is a terminator like imageloadend => reconcile to keep the counter accurate for future waves
+    const wasLast = this.#decrementInFlight();
+    if (!wasLast) return;
+
     // Decipher the error, allowing children classes to be more specific (ex: WMS GetMap specific errors)
     const gvError = this.onImageLoadErrorDecipherError(event);
 
-    // Call overridable method
+    // Call overridable method (sets layer status to error)
     this.onImageLoadError(gvError);
+  }
+
+  /**
+   * Handles when a layer tile failed to load.
+   *
+   * Reconciles the in-flight counter (errors are terminators per the OL contract). The overridable `onImageTileLoadError`
+   * is fired only on the 1=>0 transition; per-tile errors that arrive while other tiles are still loading are absorbed
+   * silently — only the error that closes out the wave is reported. The handler does not call `onLoaded()`; status
+   * remains unchanged because `#processTileLoadError` treats tile errors as non-fatal for the layer.
+   *
+   * @param event - The event which is being triggered
+   */
+  #handleTileLoadError(event: Event): void {
+    // Log
+    logger.logWarning(`A tile couldn't be loaded on the layer: ${this.getLayerPath()}.`, event);
+
+    // Per OL contract, tileloaderror is a terminator like tileloadend => reconcile and, if last in flight, mark loaded
+    const wasLast = this.#decrementInFlight();
+    if (!wasLast) return;
+
+    // Decipher the error, allowing children classes to be more specific (ex: Vector specific errors)
+    const gvError = this.onErrorDecipherError(event);
+
+    // Call overridable method (does not flip status to error)
+    this.onImageTileLoadError(gvError);
+  }
+
+  /**
+   * Decrements the in-flight load counter, clamped at zero.
+   *
+   * @returns True when this decrement transitioned the counter to zero (i.e. this terminator was the last in-flight load)
+   */
+  #decrementInFlight(): boolean {
+    if (this.#inFlightCount === 0) return false;
+    this.#inFlightCount--;
+    return this.#inFlightCount === 0;
   }
 
   /**
@@ -1271,59 +1302,155 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
       const gvError = this.onErrorDecipherError(event);
 
       // Call overridable method
-      this.onError(gvError);
+      this.onSourceError(gvError);
     }
   }
 
   /**
-   * Extracts the relevant image, tile, or dispatching_ object from the event based on its structure.
-   *
-   * This method attempts to find the corresponding object (`image`, `tile`, or `dispatching_`) in the event.
-   *
-   * @param event - The event object, which could contain either an `image`, `tile`, or `dispatching_` property
-   * @returns The extracted object (either image, tile, or dispatching_)
-   * @throws {NotSupportedError} When the event doesn't match the expected structures
+   * Drives the side-effects of a layer loading transition: flips the layer config status to `loading`, cascades that
+   * status to the parent group (if any), and emits the layer loading event.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  #findWrapperBetweenEventHandlers(event: unknown): any {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const eventAny = event as any;
+  #processLoading(): void {
+    // Get the layer config
+    const layerConfig = this.getLayerConfig();
 
-    if ('image' in eventAny) {
-      return eventAny.image;
+    // Set the layer has loading
+    layerConfig.setLayerStatusLoading();
+
+    // Update the parent group if any
+    this.getLayerConfig().updateLayerStatusParent();
+
+    // Emit event for all layer load events
+    this.#emitLayerLoading();
+  }
+
+  /**
+   * Drives the side-effects of a layer loaded transition: flips the layer config status to `loaded`, cascades to the
+   * parent group, performs first-load-only setup (basemap z-index, initial visibility, first-loaded event), and emits
+   * the layer loaded event.
+   */
+  #processLoaded(): void {
+    // Get the layer config
+    const layerConfig = this.getLayerConfig();
+
+    // Set the layer config status to loaded to keep mirroring the AbstractGeoViewLayer for now
+    layerConfig.setLayerStatusLoaded();
+
+    // Update the parent group if any
+    this.getLayerConfig().updateLayerStatusParent();
+
+    // If first time
+    if (!this.loadedOnce) {
+      // If it's a basemap layer, put it at the bottom of the stack to avoid any issue with layers order on map.
+      if (this.getLayerConfig().getGeoviewLayerConfig().useAsBasemap === true) this.getOLLayer().setZIndex(-1);
+      // Now that the layer is loaded, set its visibility correctly (had to be done in the loaded event, not before, per prior note in pre-refactor)
+      this.setVisible(layerConfig.getInitialSettings()?.states?.visible ?? true); // default: true
+
+      // Emit event for the first time the layer got loaded
+      this.#emitLayerFirstLoaded();
     }
 
-    if ('tile' in eventAny) {
-      return eventAny.tile;
+    // Flag
+    this.loadedOnce = true;
+
+    // Emit event for all layer load events
+    this.#emitLayerLoaded();
+  }
+
+  /**
+   * Drives the side-effects of a fatal source or features load error: flips the layer config status to `error` (once,
+   * to avoid spamming), cascades to the parent group, surfaces a user-facing message, and emits the layer error event.
+   *
+   * @param error - The deciphered error to propagate
+   */
+  #processSourceOrFeaturesError(error: GeoViewError): void {
+    // Check the layer status before
+    const layerStatusBefore = this.getLayerConfig().layerStatus;
+
+    // If we were not error before
+    if (layerStatusBefore !== 'error') {
+      // Set the layer config status to error to keep mirroring the AbstractGeoViewLayer for now
+      this.getLayerConfig().setLayerStatusError();
+
+      // Update the parent group if any
+      this.getLayerConfig().updateLayerStatusParent();
+
+      // Emit about the error
+      this.#emitError(error);
+    } else {
+      // We've already emitted an error to the user about the layer being in error, skip so that we don't spam
     }
 
-    if ('target' in eventAny && 'dispatching_' in eventAny.target) {
-      // eslint-disable-next-line no-underscore-dangle
-      return eventAny.target.dispatching_;
+    // Emit event for all layer error events
+    this.#emitLayerError({ error });
+  }
+
+  /**
+   * Drives the side-effects of a non-fatal tile load error: only emits the layer error event without flipping the
+   * layer status, since tile errors are recoverable (other tiles can still render).
+   *
+   * @param error - The deciphered error to propagate
+   */
+  #processTileLoadError(error: GeoViewError): void {
+    // Check the layer status before
+    const layerStatusBefore = this.getLayerConfig().layerStatus;
+
+    // If we were not error before
+    if (layerStatusBefore !== 'error') {
+      // Tile errors are non-fatal => at this point it was the last tile in flight, we can process the layer as loaded
+      this.#processLoaded();
     }
 
-    // Throw error
-    throw new NotSupportedError(`Not supported event wrapper for layer ${this.getLayerPath()}`);
+    // Emit event for all layer error events
+    this.#emitLayerError({ error });
+  }
+
+  /**
+   * Drives the side-effects of a fatal image load error: flips the layer config status to `error` (once, to avoid
+   * spamming), cascades to the parent group, surfaces a user-facing message, and emits the layer error event.
+   *
+   * @param error - The deciphered error to propagate
+   */
+  #processImageLoadError(error: GeoViewError): void {
+    // Check the layer status before
+    const layerStatusBefore = this.getLayerConfig().layerStatus;
+
+    // If we were not error before
+    if (layerStatusBefore !== 'error') {
+      // Set the layer config status to error to keep mirroring the AbstractGeoViewLayer for now
+      this.getLayerConfig().setLayerStatusError();
+
+      // Update the parent group if any
+      this.getLayerConfig().updateLayerStatusParent();
+
+      // Emit about the error
+      this.#emitError(error);
+    } else {
+      // We've already emitted an error to the user about the layer being in error, skip so that we don't spam
+    }
+
+    // Emit event for all layer error events
+    this.#emitLayerError({ error });
   }
 
   /**
    * Monitors the loading status of a layer.
    *
-   * After `DEFAULT_LOADING_PERIOD` milliseconds, it checks whether the layer is still loading. If so, it emits a warning message indicating
-   * that the rendering is taking longer than expected. The interval stops automatically when the layer finishes loading
-   * or encounters an error, or if a new loading process supersedes the current one (based on the loading counter).
+   * After `DEFAULT_LOADING_PERIOD` milliseconds, it checks whether the layer is still loading. If so, it emits a warning
+   * message indicating that the rendering is taking longer than expected. The interval stops automatically when the layer
+   * finishes loading or encounters an error, or when the loading wave that started this watcher is superseded.
    *
-   * @param loadingCounter - A unique counter representing the loading instance. Only the interval tied to the current
-   *                                  loading process will continue monitoring; outdated intervals will self-terminate
+   * @param isStillCurrentWave - Predicate returning true while the loading wave that started this watcher is still the
+   *                             most recent one for the layer
    */
-  #startLoadingPeriodWatcher(loadingCounter: number): void {
+  #startLoadingPeriodWatcher(isStillCurrentWave: () => boolean): void {
     delay(AbstractGVLayer.DEFAULT_LOADING_PERIOD).then(
       () => {
         // This is the right interval that we want to be checking the layer status
         const { layerStatus } = this.getLayerConfig();
 
-        // Check if the loadingCounter is different than our current counter (we're on the wrong timer for the loading checker)
-        if (this.loadingCounter !== loadingCounter) return true;
+        // If the wave that started this watcher has been superseded, we're on a stale timer
+        if (!isStillCurrentWave()) return true;
 
         // If loaded or error, we're done
         if (layerStatus === 'loaded' || layerStatus === 'error') return true;
@@ -1785,7 +1912,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
   // #endregion EVENTS
 
-  // #region STATIC
+  // #region STATIC METHODS
 
   /**
    * Initializes common properties on a layer options.
@@ -2207,11 +2334,12 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     return fieldValue;
   }
 
-  // #endregion STATIC
+  // #endregion STATIC METHODS
 }
 
 // #region EVENT TYPES
 
+/** Callback signature used to extract and format the value of a single feature field. */
 export type GetFieldValueDelegate = (
   feature: Feature,
   fieldName: string,
@@ -2222,125 +2350,94 @@ export type GetFieldValueDelegate = (
   inputTemporalMode: TemporalMode | undefined
 ) => unknown;
 
-/**
- * Define an event for the delegate
- */
+/** Event payload emitted when the layer style changes. */
 export interface StyleChangedEvent extends LayerBaseEvent {
-  // The style
+  /** The newly applied layer style. */
   style: TypeLayerStyleConfig;
 }
 
-/**
- * Define a delegate for the event handler function signature
- */
+/** Delegate for the {@link StyleChangedEvent} handler. */
 export type StyleChangedDelegate = EventDelegateBase<AbstractGVLayer, StyleChangedEvent, void>;
 
-/**
- * Define an event for the delegate
- */
+/** Event payload emitted when a legend query starts. */
 export interface LegendQueryingEvent extends LayerBaseEvent {}
 
-/**
- * Define a delegate for the event handler function signature
- */
+/** Delegate for the {@link LegendQueryingEvent} handler. */
 export type LegendQueryingDelegate = EventDelegateBase<AbstractGVLayer, LegendQueryingEvent, void>;
 
-/**
- * Define an event for the delegate
- */
+/** Event payload emitted when a legend query completes. */
 export interface LegendQueriedEvent extends LayerBaseEvent {
+  /** The legend returned by the query. */
   legend: TypeLegend;
 }
 
-/**
- * Define a delegate for the event handler function signature
- */
+/** Delegate for the {@link LegendQueriedEvent} handler. */
 export type LegendQueriedDelegate = EventDelegateBase<AbstractGVLayer, LegendQueriedEvent, void>;
 
-/**
- * Define an event for the delegate
- */
+/** Event payload emitted when a layer filter is applied. */
 export interface LayerFilterAppliedEvent extends LayerBaseEvent {
-  /** The filter */
+  /** The filter currently applied on the layer. */
   filter: LayerFilters;
 
-  /** The filter category */
+  /** The filter category that changed and triggered this event. */
   filterCategory: FilterCategory;
 }
 
-/**
- * Define a delegate for the event handler function signature
- */
+/** Delegate for the {@link LayerFilterAppliedEvent} handler. */
 export type LayerFilterAppliedDelegate = EventDelegateBase<AbstractGVLayer, LayerFilterAppliedEvent, void>;
 
-/**
- * Define an event for the delegate
- */
+/** Event payload emitted when the layer enters an error state. */
 export interface LayerErrorEvent extends LayerBaseEvent {
-  // The error
+  /** The deciphered error that triggered this event. */
   error: GeoViewError;
 }
 
-/**
- * Define a delegate for the event handler function signature
- */
+/** Delegate for the {@link LayerErrorEvent} handler. */
 export type LayerErrorDelegate = EventDelegateBase<AbstractGVLayer, LayerErrorEvent, void>;
 
-/**
- * Define an event for the delegate
- */
+/** Event payload emitted when the layer surfaces a user-facing message. */
 export interface LayerMessageEvent extends LayerBaseEvent {
-  // The loaded layer
+  /** The i18n key used to look up the localized message (or the literal message). */
   messageKey: string;
+
+  /** Parameters interpolated into the localized message. */
   messageParams: Record<string, unknown> | undefined;
+
+  /** The severity / category of the message. */
   messageType: SnackbarType;
 }
 
-/**
- * Define a delegate for the event handler function signature
- */
+/** Delegate for the {@link LayerMessageEvent} handler. */
 export type LayerMessageDelegate = EventDelegateBase<AbstractGVLayer, LayerMessageEvent, void>;
 
-/**
- * Define an event for the delegate
- */
+/** Event payload emitted when the layer's queryable flag changes. */
 export interface LayerQueryableChangedEvent extends LayerBaseEvent {
-  // The flag
+  /** The new queryable value. */
   queryable: boolean;
 }
 
-/**
- * Define a delegate for the event handler function signature
- */
+/** Delegate for the {@link LayerQueryableChangedEvent} handler. */
 export type LayerQueryableChangedDelegate = EventDelegateBase<AbstractGVLayer, LayerQueryableChangedEvent, void>;
 
-/**
- * Define an event for the delegate
- */
+/** Event payload emitted when the layer's hoverable flag changes. */
 export interface LayerHoverableChangedEvent extends LayerBaseEvent {
-  // The flag
+  /** The new hoverable value. */
   hoverable: boolean;
 }
 
-/**
- * Define a delegate for the event handler function signature
- */
+/** Delegate for the {@link LayerHoverableChangedEvent} handler. */
 export type LayerHoverableChangedDelegate = EventDelegateBase<AbstractGVLayer, LayerHoverableChangedEvent, void>;
 
-/**
- * Define an event for the delegate
- */
+/** Event payload emitted when a style item's visibility is toggled. */
 export interface LayerItemVisibilityChangedEvent extends LayerBaseEvent {
-  /** The item being toggled */
+  /** The legend item being toggled. */
   item: TypeLegendItem;
 
-  /** The new visibility */
+  /** The new visibility of the item. */
   visible: boolean;
 }
 
-/**
- * Define a delegate for the event handler function signature
- */
+/** Delegate for the {@link LayerItemVisibilityChangedEvent} handler. */
 export type LayerItemVisibilityChangedDelegate = EventDelegateBase<AbstractGVLayer, LayerItemVisibilityChangedEvent, void>;
 
 // #endregion EVENT TYPES
