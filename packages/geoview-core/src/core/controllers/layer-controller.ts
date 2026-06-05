@@ -685,6 +685,7 @@ export class LayerController extends AbstractMapViewerController {
    * @returns A promise that resolves with the extent of the features
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
    * @throws {LayerWrongTypeError} When the layer was of wrong type
+   * @throws {NotImplementedError} When the underlying layer type does not implement extent-from-features (propagated from `getExtentFromFeatures()`)
    */
   getExtentFromFeatures(layerPath: string, objectIds: number[], outfield?: string): Promise<Extent> {
     // Get extent from features calling the GV Layer method
@@ -817,6 +818,7 @@ export class LayerController extends AbstractMapViewerController {
    * @param queryable - The value to set for the queryable property
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
    * @throws {LayerWrongTypeError} When the layer was of wrong type
+   * @throws {LayerNotQueryableError} When the underlying source is not queryable
    */
   setLayerQueryable(layerPath: string, queryable: boolean): void {
     // Act on the domain
@@ -1362,6 +1364,7 @@ export class LayerController extends AbstractMapViewerController {
    * @param item - The legend item whose visibility will be toggled
    * @param waitForRender - If true, the returned promise resolves only after the layer has completed its next render cycle
    * @returns A promise that resolves once the visibility change has been applied
+   * @throws {LayerStyleGeometryNotFoundError} When the geometry type of the item doesn't match any geometry type in the layer style configuration (propagated from `setItemVisibility()`)
    */
   toggleItemVisibility(layerPath: string, item: TypeLegendItem, waitForRender: boolean): Promise<void> {
     // Redirect to controller
@@ -1397,6 +1400,7 @@ export class LayerController extends AbstractMapViewerController {
    * @returns A promise that resolves once all item visibilities have been updated and the layer has rendered if requested
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
    * @throws {LayerWrongTypeError} When the layer was of wrong type
+   * @throws {LayerStyleGeometryNotFoundError} When the geometry type of an item doesn't match any geometry type in the layer style configuration (propagated from `setItemVisibility()`)
    */
   async setAllItemsVisibility(layerPath: string, visible: boolean, waitForRender: boolean): Promise<void> {
     // TODO: REFACTOR IMPORTANT - Move setAllItemsVisibility to the domain eventually and move the this.#isBatchingLayerItemsVisibility flag in the domain as well.
