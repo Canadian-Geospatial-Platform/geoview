@@ -1,5 +1,5 @@
 /**
- * Attribution component that displays a popover with map attribution text.
+ * Creates the attribution component that displays a popover with map attribution text.
  *
  * @returns The attribution icon button and popover
  */

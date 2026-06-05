@@ -68,6 +68,13 @@ export declare class GeoTIFF extends AbstractGeoViewRaster {
      */
     protected onCreateGVLayer(layerConfig: GeoTIFFLayerEntryConfig): GVGeoTIFF;
     /**
+     * Fetches metadata for a GeoTIFF layer, if available.
+     *
+     * @param abortSignal - Optional {@link AbortSignal} used to cancel the metadata fetch.
+     * @returns A promise that resolves to the metadata or undefined if not available.
+     */
+    protected fetchServiceMetadataGeoTiff(abortSignal?: AbortSignal): Promise<TypeMetadataGeoTIFF | undefined>;
+    /**
      * Creates a GeoTIFF source from a layer config.
      *
      * @param layerConfig - The configuration for the GeoTIFF layer.

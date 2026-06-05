@@ -87,6 +87,14 @@ export declare class GeoJSON extends AbstractGeoViewVector {
      */
     protected onCreateGVLayer(layerConfig: GeoJSONLayerEntryConfig): GVGeoJSON;
     /**
+     * Fetches the metadata for a GeoJSON layer, which is expected to be in a specific format defined by `TypeMetadataGeoJSON`.
+     *
+     * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+     * @returns A promise that resolves with the metadata or undefined when no metadata for the particular layer type
+     * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
+     */
+    protected fetchServiceMetadataGeoJSON(abortSignal?: AbortSignal): Promise<TypeMetadataGeoJSON | undefined>;
+    /**
      * Creates a configuration object for a GeoJson Feature layer.
      *
      * This function constructs a `TypeGeoJSONLayerConfig` object that describes an GeoJson Feature layer

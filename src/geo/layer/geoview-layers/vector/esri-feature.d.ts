@@ -97,6 +97,19 @@ export declare class EsriFeature extends AbstractGeoViewVector {
      */
     protected onCreateGVLayer(layerConfig: EsriFeatureLayerEntryConfig): GVEsriFeature;
     /**
+     * Fetches and processes service metadata for the EsriFeature layer.
+     *
+     * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
+     * Returns TypeMetadataEsriDynamic | TypeMetadataEsriDynamicLayer | TypeMetadataEsriFeature because sometimes
+     * the url is MapServer/?f=json, sometimes MapServer/{layerId}?f=json and sometimes FeatureServer/?f=json
+     * which all return different payloads.
+     *
+     * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+     * @returns A promise that resolves with the metadata or undefined when no metadata for the particular layer type
+     * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
+     */
+    protected fetchServiceMetadataEsriFeature(abortSignal?: AbortSignal): Promise<TypeMetadataEsriDynamic | TypeMetadataEsriDynamicLayer | TypeMetadataEsriFeature>;
+    /**
      * Initializes a GeoView layer configuration for a Esri Feature layer.
      *
      * This method creates a basic TypeGeoviewLayerConfig using the provided

@@ -32,9 +32,10 @@ export declare class ImageStatic extends AbstractGeoViewRaster {
      *
      * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
      *
+     * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
      * @returns A promise that resolves with the metadata or undefined when no metadata for the particular layer type.
      */
-    protected onFetchServiceMetadata<T>(): Promise<T>;
+    protected onFetchServiceMetadata<T>(abortSignal?: AbortSignal): Promise<T>;
     /**
      * Overrides the way a geoview layer config initializes its layer entries.
      *

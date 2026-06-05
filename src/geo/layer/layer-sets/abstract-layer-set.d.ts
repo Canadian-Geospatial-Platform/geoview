@@ -6,6 +6,7 @@ import type { ControllerRegistry } from '@/core/controllers/base/controller-regi
 import { MapViewer } from '@/geo/map/map-viewer';
 import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
+import type { Coordinate } from 'ol/coordinate';
 /**
  * A class to hold a set of layers associated with a value of any type.
  *
@@ -126,6 +127,14 @@ export declare abstract class AbstractLayerSet {
      * @returns A promise that resolves with the query results
      */
     protected queryLayerFeatures(geoviewLayer: AbstractGVLayer, queryType: QueryType, location: TypeLocation, queryGeometry: boolean | undefined, language: TypeDisplayLanguage, abortController?: AbortController): Promise<TypeFeatureInfoResult>;
+    /**
+     * Checks if a pixel coordinate should be queried for a layer considering swiper clipping.
+     *
+     * @param layerPath - The layer path to check
+     * @param pixelCoordinate - The pixel coordinate relative to the map viewport
+     * @returns True if the coordinate should be queried (not clipped by swiper)
+     */
+    protected shouldQueryAtPixel(layerPath: string, pixelCoordinate: Coordinate): boolean;
     /**
      * Checks if the layer is of queryable type based on its class definition.
      *

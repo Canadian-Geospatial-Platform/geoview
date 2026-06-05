@@ -8,8 +8,9 @@ interface MousePositionProps {
  *
  * Memoized to prevent re-renders when parent updates but expanded prop hasn't changed.
  *
+ * @param props - Properties defined in MousePositionProps interface
  * @returns The mouse position component
  */
-export declare const MousePosition: import("react").MemoExoticComponent<({ expanded }: MousePositionProps) => JSX.Element>;
+export declare const MousePosition: import("react").MemoExoticComponent<(props: MousePositionProps) => JSX.Element>;
 export {};
 //# sourceMappingURL=mouse-position.d.ts.map

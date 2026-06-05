@@ -108,7 +108,7 @@ export declare class LayerSetController extends AbstractMapViewerController {
     /**
      * Propagates the information stored in the legend layer set to the store.
      *
-     * @param legendResultSetEntry - The legend result set entry that triggered the propagation
+     * @param layerPath - The layer path that triggered the propagation
      * @deprecated This function should be replaced, it's called too often and does too many things, see TODO.
      */
     propagateLegendToStore(layerPath: string): void;

@@ -87,6 +87,14 @@ export declare class WKB extends AbstractGeoViewVector {
      */
     protected onCreateGVLayer(layerConfig: WkbLayerEntryConfig): GVWKB;
     /**
+     * Fetches the WKB service metadata.
+     *
+     * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+     * @returns A promise that resolves with the metadata or undefined when no metadata for the particular layer type
+     * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
+     */
+    protected fetchServiceMetadataWKB(abortSignal?: AbortSignal): Promise<TypeMetadataGeoJSON | undefined>;
+    /**
      * Creates a configuration object for a WKB Feature layer.
      *
      * This function constructs a `TypeWkbLayerConfig` object that describes an WKB Feature layer

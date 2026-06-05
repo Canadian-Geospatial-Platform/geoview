@@ -1,6 +1,7 @@
 import type BaseLayer from 'ol/layer/Base';
 import type { GeoJSONObject } from 'ol/format/GeoJSON';
 import type { FitOptions } from 'ol/View';
+import type { Projection as OLProjection } from 'ol/proj';
 import { type Extent, type TypeFeatureInfoEntryPartial } from '@/api/types/map-schema-types';
 import type { TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeLayerStatus, TypeMosaicMethod, TypeMosaicOperation, TypeMosaicRule } from '@/api/types/layer-schema-types';
 import type { EventDelegateBase } from '@/api/events/event-helper';
@@ -192,9 +193,9 @@ export declare class LayerController extends AbstractMapViewerController {
      * Gets the max extent of all layers on the map, or of a provided subset of layers.
      *
      * @param layerIds - Identifiers or layerPaths of layers to get max extents from
-     * @returns A promise that resolves with the overall extent or undefined when no bounds are found
+     * @returns The overall extent or undefined when no bounds are found
      */
-    getExtentOfMultipleLayers(layerIds?: string[]): Promise<Extent | undefined>;
+    getExtentOfMultipleLayers(layerIds?: string[]): Extent | undefined;
     /**
      * Gets the extent of a feature or group of features.
      *
@@ -720,6 +721,17 @@ export declare class LayerController extends AbstractMapViewerController {
      * @param layerPath - Unique path identifying the layer within the map
      */
     deleteLayerAbort(layerPath: string): void;
+    /**
+     * Starts bounds calculation and stores bounds as they get calculated.
+     *
+     * Uses a fire-and-forget pattern and handles completion or failure in promise handlers.
+     *
+     * @param mapId - The unique identifier of the map instance
+     * @param gvLayer - The layer from which bounds recalculation should begin
+     * @param projection - The projection to initialize the bounds into
+     * @param stops - Number of interpolation stops for bounds initialization
+     */
+    static initBoundsForLayerAndParentsAndForget(mapId: string, gvLayer: AbstractBaseGVLayer, projection: OLProjection, stops: number): void;
     /**
      * Registers a layer item visibility toggled event handler.
      *

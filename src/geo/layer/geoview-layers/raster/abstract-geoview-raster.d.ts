@@ -14,6 +14,14 @@ export declare abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer
      */
     protected onFetchServiceMetadata<T>(abortSignal?: AbortSignal): Promise<T>;
     /**
+     * Fetches and processes service metadata for the raster layer.
+     *
+     * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
+     * @returns A promise that resolves to the parsed metadata object, or `undefined` if metadata could not be retrieved or no capabilities were found.
+     * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
+     */
+    protected fetchServiceMetadataRaster<T>(abortSignal?: AbortSignal): Promise<T>;
+    /**
      * Fetches and validates metadata from a given URL for a GeoView raster layer.
      *
      * If the URL does not end with `.json`, the query string `?f=json` is appended to request JSON format.

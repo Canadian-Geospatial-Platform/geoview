@@ -1,3 +1,4 @@
+import type { Coordinate } from 'ol/coordinate';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import type { MapViewer } from '@/geo/map/map-viewer';
@@ -14,6 +15,12 @@ export declare class SwiperController extends AbstractMapViewerController {
      * @param controllerRegistry - The controller registry for accessing sibling controllers
      */
     constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry);
+    /**
+     * Sets the swiper position, which determines the current position of the swipe comparison.
+     *
+     * @param position - The new swiper position, between 0 and 100.
+     */
+    setSwiperPosition(position: number): void;
     /**
      * Sets the layer paths for the swiper, which determines which layers are included in the swipe comparison.
      *
@@ -50,5 +57,14 @@ export declare class SwiperController extends AbstractMapViewerController {
      * Removes all layer paths from the swiper, effectively deactivating the swiper for all layers.
      */
     removeAllLayerPaths(): void;
+    /**
+     * Checks if a pixel coordinate should be queried for a layer considering swiper clipping.
+     *
+     * @param layerPath - The layer path to check
+     * @param pixelCoordinate - The pixel coordinate [x, y] relative to the map viewport
+     * @param mapSize - The current map size [width, height] in pixels
+     * @returns True if the coordinate should be queried (not clipped by swiper)
+     */
+    shouldQueryAtPixel(layerPath: string, pixelCoordinate: Coordinate, mapSize: number[]): boolean;
 }
 //# sourceMappingURL=swiper-controller.d.ts.map

@@ -282,6 +282,18 @@ export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseCla
      */
     refreshMetadata(displayDateMode: DisplayDateMode): Promise<void>;
     /**
+     * Indicates whether the layer is using a proxy to connect to its service.
+     *
+     * @returns `true` if the layer is using a proxy; otherwise, `false`
+     */
+    getIsUsingProxy(): boolean;
+    /**
+     * Sets whether the layer is using a proxy to connect to its service.
+     *
+     * @param isUsingProxy - `true` if the layer is using a proxy; otherwise, `false`
+     */
+    setIsUsingProxy(isUsingProxy: boolean): void;
+    /**
      * Gets the source outfields from the source object.
      *
      * @returns The outfields, or undefined if not set

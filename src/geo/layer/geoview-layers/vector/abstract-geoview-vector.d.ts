@@ -42,7 +42,7 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
      *
      * @returns A promise that resolves with the metadata or undefined when no metadata for the particular layer type
      */
-    protected onFetchServiceMetadata<T>(): Promise<T>;
+    protected onFetchServiceMetadata<T>(abortSignal?: AbortSignal): Promise<T>;
     /**
      * Overridable function to create a source configuration for the vector layer.
      *
@@ -58,6 +58,12 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
      * @returns An initialized VectorSource ready for use in a layer
      */
     createVectorSource(layerConfig: VectorLayerEntryConfig): GVVectorSource;
+    /**
+     * Fetches metadata for the vector layer.
+     *
+     * @returns A promise that resolves to the metadata or undefined if not available
+     */
+    protected fetchServiceMetadataVector<T>(abortSignal?: AbortSignal): Promise<T>;
     /**
      * Fetches text data from the given URL using settings defined in the vector source configuration.
      *

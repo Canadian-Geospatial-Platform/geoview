@@ -5,12 +5,16 @@ import type { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
  * Manages state for the swiper including layer paths and orientation.
  */
 export interface ISwiperState {
+    /** The position of the swiper divider, between 0 and 100. */
+    swiperPosition: number;
     /** The list of layer paths currently participating in the swiper. */
     layerPaths: string[];
     /** The current orientation of the swiper divider. */
     orientation: SwipeOrientation;
     /** Actions to mutate the Swiper state. */
     actions: {
+        /** Sets the swiper position. */
+        setSwiperPosition: (position: number) => void;
         /** Sets the full list of layer paths for the swiper. */
         setLayerPaths: (layerPaths: string[]) => void;
         /** Sets the swiper orientation. */
@@ -33,6 +37,14 @@ export declare function initializeSwiperState(set: TypeSetStore, get: TypeGetSto
  */
 export declare const isStoreSwiperInitialized: (mapId: string) => boolean;
 /**
+ * Gets the swiper position from the store.
+ *
+ * @param mapId - The map id to read swiper position from.
+ * @returns The swiper position as a number.
+ * @throws {PluginStateUninitializedError} When the Swiper plugin is uninitialized.
+ */
+export declare const getStoreSwiperPosition: (mapId: string) => number;
+/**
  * Gets the swiper layer paths from the store.
  *
  * @param mapId - The map id to read swiper layer paths from.
@@ -52,6 +64,14 @@ export declare const useStoreSwiperLayerPaths: () => string[];
 export declare const getStoreSwiperOrientation: (mapId: string) => SwipeOrientation;
 /** Hooks the swiper orientation from the store. */
 export declare const useStoreSwiperOrientation: () => SwipeOrientation;
+/**
+ * Sets the swiper position in the store.
+ *
+ * @param mapId - The map id.
+ * @param position - The new swiper position, between 0 and 1.
+ * @throws {PluginStateUninitializedError} When the Swiper plugin is uninitialized.
+ */
+export declare const setStoreSwiperPosition: (mapId: string, position: number) => void;
 /**
  * Sets the swiper layer paths in the store.
  *
