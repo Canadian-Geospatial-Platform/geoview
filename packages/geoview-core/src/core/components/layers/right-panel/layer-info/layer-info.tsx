@@ -115,6 +115,8 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
       case CONST_LAYER_TYPES.WMS:
         // Check if URL already includes WMS GetCapabilities parameters
         return url.toLowerCase().endsWith('.xml') ? url : GeoUtilities.ensureServiceRequestUrlGetCapabilities(url, 'WMS', leafSegment);
+      case CONST_LAYER_TYPES.WMTS:
+        return GeoUtilities.ensureServiceRequestUrlGetCapabilities(url, 'WMTS', leafSegment);
       case CONST_LAYER_TYPES.ESRI_DYNAMIC:
       case CONST_LAYER_TYPES.ESRI_FEATURE:
         return `${url}${url.endsWith('/') ? '' : '/'}${leafSegment}`;
