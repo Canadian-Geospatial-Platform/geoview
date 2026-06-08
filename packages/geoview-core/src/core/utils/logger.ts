@@ -63,6 +63,9 @@ export class ConsoleLogger {
     useEffect: 0,
   };
 
+  /** The number of memo logs - per component. */
+  logCountMemoPerHook: { [memoHook: string]: number } = {};
+
   /** The number of render logs - per component. */
   logCountRenderPerComponent: { [component: string]: number } = {};
 
@@ -157,8 +160,18 @@ export class ConsoleLogger {
   logTraceUseMemo(useMemoFunction: string, ...messages: unknown[]): void {
     // Validate log active
     if (!LOG_ACTIVE) return;
+
+    // Keep track of the number of times the render happened, per component
+    if (!this.logCountMemoPerHook[useMemoFunction]) this.logCountMemoPerHook[useMemoFunction] = 0;
+
     // Redirect
-    this.#logLevel(LOG_TRACE_USE_MEMO, `U_MEM - ${this.logCount.useMemo++}`, 'orchid', useMemoFunction, ...messages);
+    this.#logLevel(
+      LOG_TRACE_USE_MEMO,
+      `U_MEM - ${this.logCount.useMemo++} - ${this.logCountMemoPerHook[useMemoFunction]++}`,
+      'orchid',
+      useMemoFunction,
+      ...messages
+    );
   }
 
   /**

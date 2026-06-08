@@ -29,6 +29,7 @@ export abstract class Projection {
     LCC: 'EPSG:3978',
     3979: 'EPSG:3979',
     42101: 'EPSG:42101',
+    102001: 'EPSG:102001', // GV The official name of this projection is ESRI:102001 (not EPSG:102001). However, for the purpose of simplification in GeoView code base, we name it with EPSG prefix.
     102100: 'EPSG:102100', // GV The official name of this projection is ESRI:102100 (not EPSG:102100). However, for the purpose of simplification in GeoView code base, we name it with EPSG prefix.
     102184: 'EPSG:102184', // GV The official name of this projection is ESRI:102184 (not EPSG:102184). However, for the purpose of simplification in GeoView code base, we name it with EPSG prefix.
     102190: 'EPSG:102190', // GV The official name of this projection is ESRI:102190 (not EPSG:102190). However, for the purpose of simplification in GeoView code base, we name it with EPSG prefix.
@@ -332,7 +333,7 @@ export abstract class Projection {
       const projectionObj = Projection.getProjectionFromObj(projection);
       if (projectionObj) return; // Already available
     } catch (error: unknown) {
-      logger.logWarning(`Unsupported projection, attempting to add projection ${projection} now.`, error);
+      logger.logWarning(`Unsupported projection, attempting to add projection ${JSON.stringify(projection)} now.`, error);
     }
     // If we got here, the projection wasn't found or threw an error, so add it
     await Projection.addProjection(projection);
@@ -715,6 +716,17 @@ function init3979Projection(): void {
   Projection.PROJECTIONS['3979'] = projection;
 }
 
+function init102001Projection(): void {
+  proj4.defs(
+    Projection.PROJECTION_NAMES[102001],
+    '+proj=aea +lat_0=40 +lon_0=-96 +lat_1=50 +lat_2=70 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs +type=crs'
+  );
+  register(proj4);
+
+  const projection = Projection.getProjectionFromString(Projection.PROJECTION_NAMES[102001]);
+  Projection.PROJECTIONS['102001'] = projection;
+}
+
 /**
  * Initializes the EPSG:102100 (ESRI:102100) projection
  */
@@ -847,6 +859,7 @@ init3578Projection();
 init3979Projection();
 init4269Projection();
 init42101Projection();
+init102001Projection();
 init102100Projection();
 init102184Projection();
 init102190Projection();
