@@ -497,7 +497,7 @@ export class LayerSetController extends AbstractMapViewerController {
       styleConfig,
       schemaTag,
       entryType: layerConfig.getEntryType(),
-      canToggle: schemaTag !== CONST_LAYER_TYPES.ESRI_IMAGE,
+      canToggle: schemaTag !== CONST_LAYER_TYPES.ESRI_IMAGE && schemaTag !== CONST_LAYER_TYPES.WMTS, // For now, only allow toggling for non-ESRI layers and non-WMTS layers, because of the complexity of the ESRI legend and the way we handle it in the store, but this should be refactored in the future to allow toggling for ESRI layers as well.
       opacity,
       opacityMaxFromParent,
       hoverable: layerConfig.getInitialSettings()?.states?.hoverable,
