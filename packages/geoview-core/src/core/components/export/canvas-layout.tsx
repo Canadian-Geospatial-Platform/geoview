@@ -6,6 +6,7 @@ import type { FileExportProps } from '@/core/components/export/export-modal';
 import type { FlattenedLegendItem, ElementFactory, NorthArrowSVG } from '@/core/components/export/utilities';
 import { ExportUtilities, EXPORT_CONSTANTS } from '@/core/components/export/utilities';
 import { CANVAS_STYLES, getScaledCanvasStyles } from '@/core/components/export/layout-styles';
+import { isLocalhost } from '@/core/utils/utilities';
 
 /** Properties for the Canvas export document component. */
 interface CanvasDocumentProps {
@@ -139,9 +140,10 @@ export function CanvasDocument({
 export async function createCanvasMapUrls(mapId: string, props: FileExportProps): Promise<string> {
   const { exportTitle, disclaimer, dpi, jpegQuality, format, layerDateFormats, layerDateTemporalModes, language } = props;
 
-  // Get map info with title/disclaimer for accurate height calculation
+  // Snapshot the map canvas + collect legend/scale/north-arrow/footer data needed for layout
   const mapInfo = await ExportUtilities.getMapInfo(mapId, language, exportTitle, disclaimer, layerDateFormats, layerDateTemporalModes);
-  // Create main page HTML
+
+  // Render the export document (map image + scale + legend + footer) to an HTML string via React SSR
   const mainPageHtml = renderToString(
     <CanvasDocument
       {...mapInfo}
@@ -152,16 +154,33 @@ export async function createCanvasMapUrls(mapId: string, props: FileExportProps)
       canvasWidth={mapInfo.canvasWidth}
     />
   );
+
+  // Inject the rendered HTML into the live DOM so the browser computes real layout/sizes for html2canvas
   const mainElement = document.createElement('div');
   mainElement.innerHTML = mainPageHtml;
   document.body.appendChild(mainElement);
 
-  // Convert to canvas
-  const renderedElement = mainElement.firstChild as HTMLElement;
+  // React 19 prepends a <link rel="preload" as="image"> to the rendered HTML
+  // for any <img> tag, so renderToString produces TWO root elements:
+  // 1) a zero-size <link> preload tag
+  // 2) the actual content <div>
+  // We must target the <div> explicitly — `firstChild` / `firstElementChild`
+  // would pick the <link>, giving html2canvas a 0x0 element and producing "data:,".
+  const renderedElement = (mainElement.querySelector('div') as HTMLElement | null) ?? mainElement;
   const quality = jpegQuality ?? 1;
-  const mainCanvas = await html2canvas.default(renderedElement, { scale: dpi / EXPORT_CONSTANTS.DEFAULT_DPI, logging: false });
+
+  // Rasterize the rendered DOM into a canvas (useCORS lets cross-origin legend icons draw without tainting)
+  const mainCanvas = await html2canvas.default(renderedElement, {
+    scale: dpi / EXPORT_CONSTANTS.DEFAULT_DPI,
+    logging: isLocalhost() ? true : false, // Enable html2canvas logging in local dev for easier debugging, disable in prod for performance
+    useCORS: true,
+    backgroundColor: '#ffffff',
+  });
+
+  // Encode the canvas as a data URL in the requested image format
   const dataUrl = mainCanvas.toDataURL(`image/${format}`, quality);
 
+  // Clean up the temporary DOM node we appended above
   document.body.removeChild(mainElement);
 
   return dataUrl;
