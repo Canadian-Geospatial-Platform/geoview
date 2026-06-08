@@ -1,7 +1,7 @@
 import type { Coordinate } from 'ol/coordinate';
 import type { Extent } from 'ol/extent';
 import type { Size } from 'ol/size';
-import type { TypeBasemapOptions, TypeHighlightColors, TypeInteraction, TypeMapViewSettings, TypeValidMapProjectionCodes, TypeZoomAndCenter, TypeFeatureInfoEntry, TypePointMarker, TypeMapMouseInfo, TypeMapState, TypeCorePackagesConfig, TypeGlobalSettings, TypeViewSettings, TypeValidNavBarProps, TypeFooterBarProps, TypeAppBarProps, TypeOverviewMapProps, TypeValidMapComponentProps, TypeValidMapCorePackageProps, TypeExternalPackagesProps, TypeServiceUrls, TypeValidVersions } from '@/api/types/map-schema-types';
+import type { TypeBasemapOptions, TypeHighlightColors, TypeInteraction, TypeMapViewSettings, TypeValidMapProjectionCodes, TypeZoomAndCenter, TypeFeatureInfoEntry, TypePointMarker, TypeMapMouseInfo, TypeMapState, TypeCorePackagesConfig, TypeGlobalSettings, TypeViewSettings, TypeValidNavBarProps, TypeFooterBarProps, TypeAppBarProps, TypeOverviewMapProps, TypeValidMapComponentProps, TypeValidMapCorePackageProps, TypeExternalPackagesProps, TypeServiceUrls, TypeConfigMeta } from '@/api/types/map-schema-types';
 import type { MapConfigLayerEntry } from '@/api/types/layer-schema-types';
 import type { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
@@ -162,16 +162,20 @@ export declare const useStoreMapInteraction: () => TypeInteraction;
 export declare const getStoreMapHighlightedFeatures: (mapId: string) => TypeFeatureInfoEntry[];
 /** Returns highlighted features matching the given feature UID. */
 export declare const getStoreMapHighlightedFeaturesByUid: (mapId: string, featureUid: string | undefined) => TypeFeatureInfoEntry[];
+/** Returns the current map extent in the map's projection, or undefined if not yet set. */
+export declare const getStoreMapExtent: (mapId: string) => Extent | undefined;
+/** Selects the current map extent from the store. */
+export declare const useStoreMapExtent: () => Extent | undefined;
+/** Returns the current map size. */
+export declare const getStoreMapSize: (mapId: string) => Size;
+/** Selects the map size from the store. */
+export declare const useStoreMapSize: () => Size;
 /** Selects the map attribution strings from the store. */
 export declare const useStoreMapAttribution: () => string[];
 /** Selects the map center coordinates from the store. */
 export declare const useStoreMapCenterCoordinates: () => Coordinate;
 /** Selects the click marker state from the store. */
 export declare const useStoreMapClickMarker: () => TypeClickMarker | undefined;
-/** Returns the current map extent in the map's projection, or undefined if not yet set. */
-export declare const getStoreMapExtent: (mapId: string) => Extent | undefined;
-/** Selects the current map extent from the store. */
-export declare const useStoreMapExtent: () => Extent | undefined;
 /** Selects whether the map has a geoview basemap layer from the store. */
 export declare const useStoreMapHasGeoviewBasemapLayer: () => boolean;
 /** Selects whether the map is fixed to north from the store. */
@@ -190,8 +194,6 @@ export declare const useStoreMapNorthArrowElement: () => TypeNorthArrow;
 export declare const useStoreMapOverviewMapHideZoom: () => number;
 /** Selects the map scale information from the store. */
 export declare const useStoreMapScale: () => TypeScaleInfo;
-/** Selects the map size from the store. */
-export declare const useStoreMapSize: () => Size;
 /** Selects the current zoom level from the store. */
 export declare const useStoreMapZoom: () => number;
 /**
@@ -233,8 +235,8 @@ export declare const getStoreMapConfigExternalPackages: (mapId: string) => TypeE
 export declare const getStoreMapConfigGlobalSettings: (mapId: string) => TypeGlobalSettings | undefined;
 /** Returns the service URLs from the map config. */
 export declare const getStoreMapConfigServiceUrls: (mapId: string) => TypeServiceUrls;
-/** Returns the schema version used in the map config. */
-export declare const getStoreMapConfigSchemaVersionUsed: (mapId: string) => TypeValidVersions | undefined;
+/** Returns the config metadata from the map config. */
+export declare const getStoreMapConfigMeta: (mapId: string) => TypeConfigMeta | undefined;
 /** Returns the view settings from the map config. */
 export declare const getStoreMapConfigViewSettings: (mapId: string) => TypeViewSettings;
 /**

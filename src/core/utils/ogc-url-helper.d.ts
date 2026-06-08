@@ -15,4 +15,14 @@
  * @returns The normalized, fully qualified service request URL.
  */
 export declare function ensureServiceRequestUrl(url: string, service: string, request: string, version?: string): string;
+/**
+ * Encodes the value of the `LAYERS` or `LAYER` query parameter in an OGC URL using `encodeURIComponent`.
+ *
+ * Some OGC services require the layer names to be percent-encoded. If the URL does not
+ * contain a `LAYERS` or `LAYER` parameter (case-insensitive), it is returned unchanged.
+ *
+ * @param url - The OGC service URL to process.
+ * @returns The URL with the `LAYERS`/`LAYER` parameter value(s) percent-encoded, or the original URL if no such parameter exists.
+ */
+export declare function encodeLayersParam(url: string): string;
 //# sourceMappingURL=ogc-url-helper.d.ts.map

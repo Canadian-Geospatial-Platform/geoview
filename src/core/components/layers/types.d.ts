@@ -80,6 +80,8 @@ export interface TypeLegendLayer {
     /** Whether the layer supports hover interaction. */
     hoverable?: boolean;
     /** Whether the layer supports feature queries. */
+    queryableSource?: boolean;
+    /** Whether the layer is currently queryable */
     queryable?: boolean;
     /** Whether the layer is visible. */
     visible: boolean;

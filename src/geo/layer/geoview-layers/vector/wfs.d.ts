@@ -93,6 +93,15 @@ export declare class WFS extends AbstractGeoViewVector {
      */
     protected onCreateGVLayer(layerConfig: OgcWfsLayerEntryConfig): GVWFS;
     /**
+     * Fetches the WFS service metadata.
+     *
+     * @param abortSignal - Optional {@link AbortSignal} used to cancel the fetch process
+     * @returns A promise that resolves with the WFS metadata
+     * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
+     * @throws {LayerNoCapabilitiesError} When the metadata is empty (no Capabilities)
+     */
+    protected fetchServiceMetadataWFS(abortSignal?: AbortSignal): Promise<TypeMetadataWFS>;
+    /**
      * Creates a configuration object for an WFS Feature layer.
      *
      * This function constructs a `TypeWFSLayerConfig` object that describes an WFS Feature layer

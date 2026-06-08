@@ -38,13 +38,13 @@ export declare class GVGroupLayer extends AbstractBaseGVLayer {
      */
     onGetAttributions(): string[];
     /**
-     * Overrides the way to get the bounds for this layer type.
+     * Overrides the way to initialize the bounds for this layer type.
      *
-     * @param projection - The projection to get the bounds into
+     * @param projection - The projection to initialize the bounds into
      * @param stops - The number of stops to use to generate the extent
      * @returns A promise that resolves with the layer bounding box or undefined when not found
      */
-    onGetBounds(projection: OLProjection, stops: number): Promise<Extent | undefined>;
+    onInitBounds(projection: OLProjection, stops: number): Promise<Extent | undefined>;
     /**
      * Overrides the refresh function to refresh each layer in the group.
      *

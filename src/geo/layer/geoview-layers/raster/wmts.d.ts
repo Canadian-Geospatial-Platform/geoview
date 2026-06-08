@@ -87,6 +87,13 @@ export declare class WMTS extends AbstractGeoViewRaster {
      */
     protected onCreateGVLayer(layerConfig: OgcWmtsLayerEntryConfig): GVWMTS;
     /**
+     * Fetches and processes service metadata for the WMTS layer.
+     *
+     * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+     * @returns A promise that resolves to the parsed metadata object, or `undefined` if metadata could not be retrieved or no capabilities were found.
+     */
+    protected fetchServiceMetadataWMTS(abortSignal?: AbortSignal): Promise<TypeMetadataWMTS>;
+    /**
      * Creates a configuration object for a WMTS layer.
      *
      * This function constructs a `TypeWMTSConfig` object that describes a WMTS layer

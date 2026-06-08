@@ -1,4 +1,4 @@
-import type { TypeAppBarProps, TypeDisplayTheme, TypeFooterBarProps, TypeGlobalSettings, TypeMapConfig, TypeCorePackagesConfig, TypeOverviewMapProps, TypeServiceUrls, TypeMapFeaturesInstance, TypeValidMapCorePackageProps, TypeValidMapComponentProps, TypeValidNavBarProps, TypeExternalPackagesProps, TypeValidVersions } from '@/api/types/map-schema-types';
+import type { TypeAppBarProps, TypeConfigMeta, TypeDisplayTheme, TypeFooterBarProps, TypeGlobalSettings, TypeMapConfig, TypeCorePackagesConfig, TypeOverviewMapProps, TypeServiceUrls, TypeMapFeaturesInstance, TypeValidMapCorePackageProps, TypeValidMapComponentProps, TypeValidNavBarProps, TypeExternalPackagesProps } from '@/api/types/map-schema-types';
 /**
  * The map feature configuration class.
  */
@@ -30,11 +30,8 @@ export declare class MapFeatureConfig {
     serviceUrls: TypeServiceUrls;
     /** Indicates whether schema validation errors were detected during configuration parsing. */
     hasSchemaErrors: boolean;
-    /**
-     * The schema version used to validate the configuration file. The schema should enumerate the list of versions accepted by
-     * this version of the viewer.
-     */
-    schemaVersionUsed?: TypeValidVersions;
+    /** Metadata about the configuration file, including version and optional description. */
+    configMeta?: TypeConfigMeta;
     /**
      * Creates an instance of MapFeatureConfig.
      *

@@ -1,5 +1,4 @@
 import type BaseLayer from 'ol/layer/Base';
-import type { Projection as OLProjection } from 'ol/proj';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import type { Extent } from '@/api/types/map-schema-types';
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
@@ -217,9 +216,9 @@ export declare class LayerDomain {
      * Gets the max extent of all layers on the map, or of a provided subset of layers.
      *
      * @param layerIds - Identifiers or layerPaths of layers to get max extents from
-     * @returns A promise that resolves with the overall extent or undefined when no bounds are found
+     * @returns The overall extent or undefined when no bounds are found
      */
-    getExtentOfMultipleLayers(layerIds: string[], projection: OLProjection, stops: number): Promise<Extent | undefined>;
+    getExtentOfMultipleLayers(layerIds: string[]): Extent | undefined;
     /**
      * Registers a layer entry config registered handler.
      *

@@ -98,6 +98,14 @@ export declare class WMS extends AbstractGeoViewRaster {
      */
     createImageWMSSource(layerConfig: OgcWmsLayerEntryConfig): ImageWMS;
     /**
+     * Fetches the service metadata for a WMS layer, handling both standard WMS GetCapabilities requests and direct XML metadata access.
+     *
+     * @param updateMetadataAccessPath - Whether to update the layer's metadata access path if a proxy is required to fetch the metadata
+     * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+     * @returns A promise that resolves to the parsed metadata object, or `undefined` if metadata could not be retrieved or no capabilities were found.
+     */
+    protected fetchServiceMetadataWMS(updateMetadataAccessPath: boolean, abortSignal?: AbortSignal): Promise<TypeMetadataWMS | undefined>;
+    /**
      * Creates a complete configuration object for a WMS GeoView layer.
      *
      * This function constructs a `TypeWMSLayerConfig` object that defines a WMS layer and its associated

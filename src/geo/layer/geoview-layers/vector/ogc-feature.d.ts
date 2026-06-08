@@ -88,6 +88,14 @@ export declare class OgcFeature extends AbstractGeoViewVector {
      */
     protected onCreateGVLayer(layerConfig: OgcFeatureLayerEntryConfig): GVOGCFeature;
     /**
+     * Fetches the OGC Feature metadata for the layer.
+     *
+     * @param abortSignal - Optional {@link AbortSignal} used to cancel the metadata fetch
+     * @returns A promise that resolves with the OGC Feature metadata
+     * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
+     */
+    protected fetchServiceMetadataOGCFeature(abortSignal?: AbortSignal): Promise<TypeMetadataOGCFeature>;
+    /**
      * Creates a configuration object for an OGC Feature layer.
      *
      * This function constructs a `TypeOgcFeatureLayerConfig` object that describes an OGC Feature layer

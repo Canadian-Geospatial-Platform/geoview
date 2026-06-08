@@ -1,12 +1,10 @@
 import type { Extent } from 'ol/extent';
-import type { Projection as OLProjection } from 'ol/proj';
 import type { TypeLayersViewDisplayState, TypeLegendItem, TypeLegendLayer, TypeLegendLayerItem } from '@/core/components/layers/types';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import type { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 import type { TypeLayerStyleConfig, TypeResultSet, TypeResultSetEntry } from '@/api/types/map-schema-types';
 import type { TemporalMode, TimeDimension, TimeIANA, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import type { TypeGeoviewLayerType, TypeLayerControls, TypeLayerStatus, TypeLegend, TypeMetadataEsriRasterFunctionInfos, TypeMetadataWMSCapabilityLayerStyle, TypeMosaicMethod, TypeMosaicRule } from '@/api/types/layer-schema-types';
-import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 /**
  * Represents the layer Zustand store slice.
  *
@@ -227,6 +225,16 @@ export declare const useStoreLayerStatus: (layerPath: string) => TypeLayerStatus
 export declare const getStoreLayerQueryable: (mapId: string, layerPath: string) => boolean;
 /** Hook that returns the queryable state for a specific layer. */
 export declare const useStoreLayerQueryable: (layerPath: string) => boolean | undefined;
+/**
+ * Gets the queryable source metadata state for a specific layer.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to look up
+ * @returns The layer queryable source metadata state, defaults to true
+ */
+export declare const getStoreLayerQueryableSource: (mapId: string, layerPath: string) => boolean;
+/** Hook that returns the queryable source metadata state for a specific layer. */
+export declare const useStoreLayerQueryableSource: (layerPath: string) => boolean | undefined;
 /**
  * Hooks on the queryable states for multiple layer paths.
  *
@@ -762,36 +770,9 @@ export declare const setStoreLayerHoverable: (mapId: string, layerPath: string, 
  * @param mapId - The map identifier
  * @param layerPath - The layer path to update
  * @param bounds - The new bounds extent, or undefined to clear
- * @param mapProjection - The current map projection
- * @param stops - The number of interpolation stops for reprojection
+ * @param bounds4326 - The new bounds extent in 4326, or undefined to clear
  */
-export declare const setStoreLayerBounds: (mapId: string, layerPath: string, bounds: Extent | undefined, mapProjection: OLProjection, stops: number) => void;
-/**
- * Recalculates and stores bounds for a layer and all of its parent groups.
- *
- * This method recalculates the bounds for the provided layer and then
- * iteratively walks up the layer hierarchy, recalculating and storing
- * bounds for each parent group layer.
- *
- * @param mapId - The unique identifier of the map instance
- * @param gvLayer - The starting layer for which bounds should be computed
- * @returns A promise that resolves once bounds have been computed and
- * propagated up the entire parent hierarchy.
- */
-export declare const setStoreLayerBoundsForLayerAndParents: (mapId: string, gvLayer: AbstractBaseGVLayer, mapProjection: OLProjection, stops: number) => Promise<void>;
-/**
- * Triggers asynchronous bounds recalculation and propagation for a layer
- * and its parent hierarchy without awaiting completion.
- *
- * This method invokes {@link setLayerBoundsForLayerAndParentsInStore} using a
- * fire-and-forget pattern. The returned promise is intentionally not awaited,
- * allowing bounds recalculation and propagation to occur in the background.
- * Callers requiring completion guarantees should use the awaited version instead.
- *
- * @param mapId - The unique identifier of the map instance
- * @param gvLayer - The layer from which bounds recalculation should begin
- */
-export declare const setStoreLayerBoundsForLayerAndParentsAndForget: (mapId: string, gvLayer: AbstractBaseGVLayer, mapProjection: OLProjection, stops: number) => void;
+export declare const setStoreLayerBounds: (mapId: string, layerPath: string, bounds: Extent | undefined, bounds4326: Extent | undefined) => void;
 /**
  * Sets the visibility of a specific legend item and updates the class filter.
  *

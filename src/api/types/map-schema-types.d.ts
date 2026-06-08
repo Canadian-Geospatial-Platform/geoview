@@ -6,35 +6,32 @@ import type { MapFeatureConfig } from '@/api/config/map-feature-config';
 import type { MapConfigLayerEntry, TypeGeoviewLayerType } from './layer-schema-types';
 /** Definition of the map feature instance according to what is specified in the schema. */
 export type TypeMapFeaturesInstance = {
+    /** Metadata about the configuration file, including version and optional description. */
+    configMeta?: TypeConfigMeta;
     /** map configuration. */
     map: TypeMapConfig;
-    /** Service URLs. */
-    serviceUrls: TypeServiceUrls;
-    /** Display theme, default = geo.ca. */
-    theme?: TypeDisplayTheme;
+    /** Map components. */
+    components?: TypeValidMapComponentProps[];
+    /** Overview map properties. */
+    overviewMap?: TypeOverviewMapProps;
     /** Nav bar properties. */
     navBar?: TypeValidNavBarProps[];
     /** App bar properties. */
     appBar?: TypeAppBarProps;
     /** Footer bar properties. */
     footerBar?: TypeFooterBarProps;
-    /** Overview map properties. */
-    overviewMap?: TypeOverviewMapProps;
-    /** Map components. */
-    components?: TypeValidMapComponentProps[];
     /** List of core packages. */
     corePackages?: TypeValidMapCorePackageProps[];
+    /** Global settings. */
+    globalSettings?: TypeGlobalSettings;
+    /** Service URLs. */
+    serviceUrls: TypeServiceUrls;
+    /** Display theme, default = geo.ca. */
+    theme?: TypeDisplayTheme;
     /** List of core packages. */
     corePackagesConfig?: TypeCorePackagesConfig;
     /** List of external packages. */
     externalPackages?: TypeExternalPackagesProps[];
-    /**
-     * The schema version used to validate the configuration file. The schema should enumerate the list of versions accepted by
-     * this version of the viewer.
-     */
-    schemaVersionUsed?: TypeValidVersions;
-    /** Global settings. */
-    globalSettings?: TypeGlobalSettings;
 };
 /** An array of numbers representing an extent: `[minx, miny, maxx, maxy]`. */
 export type Extent = Array<number>;
@@ -176,6 +173,17 @@ export type TypeServiceUrls = {
      */
     altitudeUrl?: string;
 };
+/** Metadata about the configuration file. */
+export type TypeConfigMeta = {
+    /** The schema version used to validate the configuration file. */
+    version?: TypeValidVersions;
+    /** A free-text description of the map configuration. */
+    description?: string;
+    /** The author or creator of the map configuration. */
+    author?: string;
+    /** The creation or last-modified date of the map configuration (ISO 8601 format recommended). */
+    date?: string;
+};
 /** Valid schema version number. */
 export type TypeValidVersions = '1.0';
 /** Array of schema versions accepted by the viewer. */
@@ -199,18 +207,18 @@ export type TypeGlobalSettings = {
 };
 /** Definition of the map configuration settings. */
 export type TypeMapConfig = {
-    /** Basemap options settings for this map configuration. */
-    basemapOptions: TypeBasemapOptions;
     /** Type of interaction. */
     interaction: TypeInteraction;
-    /** List of GeoView Layers in the order which they should be added to the map. */
-    listOfGeoviewLayerConfig: MapConfigLayerEntry[];
     /** View settings. */
     viewSettings: TypeViewSettings;
+    /** Basemap options settings for this map configuration. */
+    basemapOptions: TypeBasemapOptions;
     /** Highlight color. */
     highlightColor?: TypeHighlightColors;
     /** Point markers to add to map. */
     overlayObjects?: TypeOverlayObjects;
+    /** List of GeoView Layers in the order which they should be added to the map. */
+    listOfGeoviewLayerConfig: MapConfigLayerEntry[];
     /** Additional options used for OpenLayers map options. */
     extraOptions?: Record<string, unknown>;
 };

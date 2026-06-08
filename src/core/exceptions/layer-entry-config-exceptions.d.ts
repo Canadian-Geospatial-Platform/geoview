@@ -20,9 +20,9 @@ export declare class LayerEntryConfigError extends LayerError {
     protected constructor(layerConfig: ConfigBaseClass, messageKey?: string | undefined, params?: Record<string, unknown>);
 }
 /**
- * Custom error class thrown when a GeoView layer configuration fails due to a missing or invalid layer ID.
+ * Custom error class thrown when a GeoView layer configuration fails due to a layer ID not found.
  *
- * This error is specifically used when the configuration for a GeoView layer is missing the expected layer ID.
+ * This error is specifically used when the configuration for a GeoView layer has not found layer ID.
  */
 export declare class LayerEntryConfigLayerIdNotFoundError extends LayerEntryConfigError {
     /**
