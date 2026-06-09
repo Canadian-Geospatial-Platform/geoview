@@ -69,8 +69,8 @@ const LegendLayerHeader = memo(
     const schemaTag = useStoreLayerSchemaTag(layerPath);
     const layerStatus = useStoreLayerStatus(layerPath);
 
-    // Has layer items and style config
-    const hasLayerItemsAndStyle = layerHasClassItems(layerItems, layerStyleConfig);
+    // Has at least 2 layer items and style config
+    const hasMoreThanOneItemsAndStyle = layerHasClassItems(layerItems, layerStyleConfig, 2);
 
     // If the layer has a legend image
     const hasLegendImage = layerHasLegendImage(schemaTag, layerItems, layerIcons, layerStyleConfig);
@@ -97,7 +97,7 @@ const LegendLayerHeader = memo(
           disableTypography
           secondary={showControls ? <SecondaryControls layerPath={layerPath} /> : undefined}
         />
-        {showControls && (hasLegendImage || hasLayerItemsAndStyle || hasChildren) && (
+        {showControls && (hasLegendImage || hasMoreThanOneItemsAndStyle || hasChildren) && (
           <IconButton
             className="buttonOutline"
             onClick={onExpandClick}

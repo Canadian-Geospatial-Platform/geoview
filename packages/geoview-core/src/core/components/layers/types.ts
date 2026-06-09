@@ -194,11 +194,16 @@ export interface TypeLegendLayer {
  *
  * @param layerItems - The legend items for the layer
  * @param styleConfig - The active style configuration for the layer
+ * @param minItems - The minimum number of items for the function to return true
  * @returns True when the layer has at least one legend item and a style configuration
  */
-export function layerHasClassItems(layerItems: TypeLegendItem[] | undefined, styleConfig: TypeLayerStyleConfig | undefined): boolean {
+export function layerHasClassItems(
+  layerItems: TypeLegendItem[] | undefined,
+  styleConfig: TypeLayerStyleConfig | undefined,
+  minItems: number | undefined
+): boolean {
   // Has layer items and style config
-  return !!(layerItems && layerItems.length > 0 && styleConfig);
+  return !!(layerItems && layerItems.length >= (minItems ?? 1) && styleConfig);
 }
 
 /**

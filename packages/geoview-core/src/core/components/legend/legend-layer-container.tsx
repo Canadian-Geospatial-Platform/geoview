@@ -112,8 +112,8 @@ export const CollapsibleContent = memo(function CollapsibleContent({
   const layerStatus = useStoreLayerStatus(layerPath);
   const layerName = useStoreLayerName(layerPath);
 
-  // Has layer items and style config
-  const hasLayerItemsAndStyle = layerHasClassItems(layerItems, layerStyleConfig);
+  // Has at least 2 layer items and style config
+  const hasMoreThanOneItemsAndStyle = layerHasClassItems(layerItems, layerStyleConfig, 2);
 
   // If the layer has a legend image
   const hasLegendImage = layerHasLegendImage(schemaTag, layerItems, layerIcons, layerStyleConfig);
@@ -125,7 +125,7 @@ export const CollapsibleContent = memo(function CollapsibleContent({
   if ((layerChildPaths?.length === 0 && layerItems?.length === 1) || layerStatus === 'error') return null;
 
   // If it is a WMS legend, create a specific component
-  if (hasLayerItemsAndStyle || hasChildren) {
+  if (hasMoreThanOneItemsAndStyle || hasChildren) {
     return (
       <Collapse
         id={collapseContainerId}
