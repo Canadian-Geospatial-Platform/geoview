@@ -199,7 +199,7 @@ export class ExportUtilities {
     layerDateFormats: Record<string, TypeDisplayDateFormat>,
     layerDateTemporalModes: Record<string, TemporalMode>
   ): JSX.Element {
-    const { View, Text, Image, Span } = factory;
+    const { View, Text, Image, Span, Svg, Path } = factory;
 
     if (item.type === 'layer') {
       const marginValue = itemIndex > 0 ? '18px' : 0;
@@ -281,6 +281,19 @@ export class ExportUtilities {
 
     // Default: item type
     const legendItem = item.data.items[0];
+
+    // Annotation layers: inline <svg> via factory — html2canvas drops SVG data URLs from <img>.
+    if (legendItem?.icon === 'annotation') {
+      return createElement(
+        View,
+        { key: `item-${item.parentName}-${legendItem?.name}-${itemIndex}`, style: baseStyles.itemContainer(indentLevel) },
+        createElement(
+          Svg,
+          { width: 24, height: 24, viewBox: '0 0 24 24', style: scaledStyles.itemIcon },
+          createElement(Path, { d: 'M5 4v3h5.5v12h3V7H19V4z', fill: '#000' })
+        )
+      );
+    }
 
     // Extract native PNG dimensions and reduce by half for better layout
     let iconStyle = scaledStyles.itemIcon;
