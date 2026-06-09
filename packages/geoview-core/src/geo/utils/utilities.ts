@@ -883,15 +883,16 @@ export abstract class GeoUtilities {
       });
     }
 
-    // Also handle any non-vector layers (like annotation layers) that have iconImage but no iconList
-    if (items.length === 0 && icons.length > 0 && icons[0].iconImage) {
-      items.push({
-        geometryType: 'Point',
-        name: 'layer',
-        icon: icons[0].iconImage || null,
-        isVisible: true,
-      });
-    }
+    // TODO: CLEANUP - Commenting this out, because it was causing an issue where an regular layer with legend image was considered to have class render items, 2026-06-09
+    // // Also handle any non-vector layers (like annotation layers) that have iconImage but no iconList
+    // if (items.length === 0 && icons.length > 0 && icons[0].iconImage) {
+    //   items.push({
+    //     geometryType: 'Point',
+    //     name: 'layer',
+    //     icon: icons[0].iconImage || null,
+    //     isVisible: true,
+    //   });
+    // }
 
     // Return
     return items;

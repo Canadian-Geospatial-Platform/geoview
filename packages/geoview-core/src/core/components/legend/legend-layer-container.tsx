@@ -9,7 +9,7 @@ import { getSxClasses } from './legend-styles';
 import { ItemsList } from './legend-layer-items';
 import type { LegendLayerProps } from './legend-layer';
 import { logger } from '@/core/utils/logger';
-import { layerHasLegendImage } from '@/core/components/layers/types';
+import { layerHasClassItems, layerHasLegendImage } from '@/core/components/layers/types';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import {
@@ -112,13 +112,41 @@ export const CollapsibleContent = memo(function CollapsibleContent({
   const layerStatus = useStoreLayerStatus(layerPath);
   const layerName = useStoreLayerName(layerPath);
 
+  // Has layer items and style config
+  const hasLayerItemsAndStyle = layerHasClassItems(layerItems, layerStyleConfig);
+
   // If the layer has a legend image
   const hasLegendImage = layerHasLegendImage(schemaTag, layerItems, layerIcons, layerStyleConfig);
+
+  // If the layer has child layers
+  const hasChildren = layerChildPaths && layerChildPaths.length > 0;
 
   // TODO: PERFORMANCE - Early return when the no child or when layer items is 1 or when error. Search id: 39c51cfc
   if ((layerChildPaths?.length === 0 && layerItems?.length === 1) || layerStatus === 'error') return null;
 
   // If it is a WMS legend, create a specific component
+  if (hasLayerItemsAndStyle || hasChildren) {
+    return (
+      <Collapse
+        id={collapseContainerId}
+        role="region" // WCAG - aria-labelledby requires the region role to be announced by screen readers
+        aria-labelledby={layerNameId} // WCAG - Link collapsible content to its header using aria-labelledby and matching IDs
+        in={!isCollapsed}
+        sx={memoSxClasses.collapsibleContainer}
+        timeout="auto"
+        unmountOnExit
+      >
+        <List>
+          {hasChildren &&
+            layerChildPaths.map((childPath) => (
+              <LegendLayerComponent layerPath={childPath} key={childPath} showControls={showControls} containerType={containerType} />
+            ))}
+        </List>
+        {<ItemsList items={layerItems || []} layerPath={layerPath} />}
+      </Collapse>
+    );
+  }
+
   if (hasLegendImage) {
     return (
       <WMSLegendImage
@@ -134,23 +162,5 @@ export const CollapsibleContent = memo(function CollapsibleContent({
     );
   }
 
-  return (
-    <Collapse
-      id={collapseContainerId}
-      role="region" // WCAG - aria-labelledby requires the region role to be announced by screen readers
-      aria-labelledby={layerNameId} // WCAG - Link collapsible content to its header using aria-labelledby and matching IDs
-      in={!isCollapsed}
-      sx={memoSxClasses.collapsibleContainer}
-      timeout="auto"
-      unmountOnExit
-    >
-      <List>
-        {layerChildPaths &&
-          layerChildPaths.map((childPath) => (
-            <LegendLayerComponent layerPath={childPath} key={childPath} showControls={showControls} containerType={containerType} />
-          ))}
-      </List>
-      {layerItems && layerItems.length > 1 && <ItemsList items={layerItems || []} layerPath={layerPath} />}
-    </Collapse>
-  );
+  return null;
 });
