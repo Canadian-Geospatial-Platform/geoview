@@ -542,8 +542,8 @@ export class MapViewer {
     // Save to the store
     setStoreMapScale(mapId, scale);
 
-    // Save to the store
-    setStoreMapInteraction(mapId, getStoreMapInteraction(mapId));
+    // Set interaction (enable/disables map controls) and save value to the store
+    this.setInteraction(getStoreMapInteraction(mapId));
   }
 
   /**
