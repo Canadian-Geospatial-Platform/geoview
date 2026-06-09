@@ -239,8 +239,8 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
   // Layer is WMTS
   const isWMTS = layerSchemaTag === CONST_LAYER_TYPES.WMTS;
 
-  // Has layer items and style config
-  const hasLayerItemsAndStyle = layerHasClassItems(layerItems, layerStyleConfig);
+  // Has at least 1 layer items and style config
+  const hasLayerItemsAndStyle = layerHasClassItems(layerItems, layerStyleConfig, 1);
 
   // Has layer legend image
   const hasLayerLegendImage = layerHasLegendImage(layerSchemaTag, layerItems, layerIcons, layerStyleConfig);
