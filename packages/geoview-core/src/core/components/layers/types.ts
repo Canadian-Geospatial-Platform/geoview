@@ -228,6 +228,7 @@ export function layerHasLegendImage(
 
   const isWMSWithLegend =
     schemaTag === CONST_LAYER_TYPES.WMS && !hasLayerItemsAndStyle && layerIcons?.[0]?.iconImage && layerIcons[0].iconImage !== 'no data';
+
   const isWMTSWithLegend =
     schemaTag === CONST_LAYER_TYPES.WMTS && !hasLayerItemsAndStyle && layerIcons?.[0]?.iconImage && layerIcons[0].iconImage !== 'no data';
 
