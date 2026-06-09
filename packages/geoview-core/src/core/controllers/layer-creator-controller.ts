@@ -1210,8 +1210,8 @@ export class LayerCreatorController extends AbstractMapViewerController {
           });
         }
 
-        // If time-slider configs were returned from GeoCore
-        if (response.timeSliderConfigs.length > 0) {
+        // If time-slider is initialized and time-slider configs were returned from GeoCore
+        if (isStoreTimeSliderInitialized(mapId) && response.timeSliderConfigs.length > 0) {
           // Callback
           addTimeSliderCallback(response.timeSliderConfigs);
         }
