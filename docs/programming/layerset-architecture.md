@@ -112,6 +112,61 @@ protected override onRegisterLayerCheck(layer: AbstractBaseGVLayer): boolean {
 5. Legend data received → Store legend data, set `legendQueryStatus: 'queried'`, propagate to store
 6. Style changes → Re-query legend automatically
 
+#### Legend Data Flow: `styleConfig`, `icons`, and `items`
+
+Every legend entry in the store ([`TypeLegendLayer`](../../packages/geoview-core/src/core/components/layers/types.ts)) carries **three** related-but-distinct fields that the UI uses to decide what to render. Confusing them leads to "empty legends", "icons but no labels", or duplicate WMS-image renders, so this section documents how they are produced and how the UI distinguishes the three legend modes.
+
+##### The three fields
+
+| Field         | Type                                                                                                    | Origin                                                                            | Purpose                                                                                                                                                                                                       |
+| ------------- | ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `styleConfig` | [`TypeLayerStyleConfig`](../../packages/geoview-core/src/api/types/map-schema-types.ts) (per geometry)  | Returned by the layer's `getLegend()` (the rendering style — `simple`, `uniqueValue`, `classBreaks`) | Drives **map rendering** AND tells the UI that class-based items are available. Always present for vector / `ESRI_IMAGE` layers when the service exposes a classification.                                                          |
+| `icons`       | [`TypeLegendLayerItem[]`](../../packages/geoview-core/src/core/components/layers/types.ts)              | Computed by `GeoUtilities.getLayerIconImage()` from the `TypeLegend` payload      | Per **geometry type** entry containing a primary `iconImage` (data URL or `'no data'`) plus an `iconList` of nested items. Holds the **WMS / WMTS / static-image legend graphic** when the service returns one. |
+| `items`       | [`TypeLegendItem[]`](../../packages/geoview-core/src/core/components/layers/types.ts)                   | Flattened by `GeoUtilities.getLayerItemsFromIcons()` from `icons[*].iconList`     | Flat per-class entries (`{ name, icon, isVisible, geometryType }`) used to render the **clickable per-class legend list** under the layer.                                                                    |
+
+The pipeline: `gv-layer.getLegend()` → `TypeLegend { type, styleConfig, legend }` → [`LegendsLayerSet.#propagateToStoreLegendQueryStatus()`](../../packages/geoview-core/src/geo/layer/layer-sets/legends-layer-set.ts) → `GeoUtilities.getLayerIconImage()` + `getLayerItemsFromIcons()` → store fields `styleConfig`, `icons`, `items`.
+
+##### The three legend display modes
+
+The UI ([`legend-layer-container.tsx`](../../packages/geoview-core/src/core/components/legend/legend-layer-container.tsx), [`legend-layer.tsx`](../../packages/geoview-core/src/core/components/legend/legend-layer.tsx), [`layer-details.tsx`](../../packages/geoview-core/src/core/components/layers/right-panel/layer-details.tsx)) uses **two predicates** (`layerHasClassItems`, `layerHasLegendImage` — both in [`types.ts`](../../packages/geoview-core/src/core/components/layers/types.ts)) to pick exactly one of these modes per layer:
+
+| Mode                       | Predicate                                                | Triggered when                                                                                                                                  | UI rendered                                          |
+| -------------------------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| **Class-based items**      | `layerHasClassItems(items, styleConfig, minItems?)`      | `items.length >= minItems` (default `1`) **and** `styleConfig` is set                                                                           | Per-class clickable list (`ItemsList` / `renderItems`) |
+| **Service legend image**   | `layerHasLegendImage(schemaTag, items, icons, styleConfig)` | WMS/WMTS only; **no** class items; `icons[0].iconImage` exists **and is not the string `'no data'`**                                            | Single image (`WMSLegendImage` / `renderWMSImage`)   |
+| **Nothing**                | Neither predicate matches                                | (no `icons`, no `items`, no `styleConfig`)                                                                                                      | Nothing rendered                                     |
+
+> `layerHasClassItems` takes an optional `minItems` argument. `CollapsibleContent` uses `minItems = 2` so that a layer with a **single** class item collapses (no point in expanding a list of one), while the rest of the UI uses the default `1` to detect any presence of class data.
+
+##### Mode selection — the key insight
+
+The mode chosen depends on **which gv-layer produced the `TypeLegend`** and what its service returned:
+
+- **Vector / ESRI Dynamic / ESRI Image / ESRI WMTS** → `TypeLegend { styleConfig, legend: TypeVectorLayerStyles }` → `GeoUtilities.getLayerIconImage()` walks `styleConfig` and renders each style class to a canvas → multi-item `icons[*].iconList` → flattened to `items` → **Mode 1**.
+- **WMS / WMTS / static image / GeoTIFF** → `TypeLegend { legend: HTMLCanvasElement }` (no `styleConfig`) → `getLayerIconImage()` falls back to `iconImage = canvas.toDataURL()` (or `'no data'`) → single icon, **no** `iconList`, no `items` → **Mode 2** (for WMS/WMTS) or rendered via per-layer-type special cases in `getLayerItemsFromIcons()` (for `imageStatic` / `GeoTIFF`).
+
+##### The `'no data'` sentinel
+
+`GeoUtilities.getLayerIconImage()` writes the literal string `'no data'` into `iconImage` when a non-vector legend has no usable canvas. **All consumers that render a `<img>` for the legend must check for and exclude this sentinel** (`layerHasLegendImage` does this). Forgetting the check produces a broken-image icon in the UI and — because React 19 emits a `<link rel="preload" as="image" href="no data">` for every `<img>` it sees — can break downstream consumers like the PDF/PNG export pipeline (`createCanvasMapUrls`) by adding a zero-size element to the rendered HTML.
+
+##### `styleConfig` is the rendering authority — not the legend
+
+`styleConfig` is the **rendering** style. The `icons` and `items` are presentation artifacts derived from it. Two practical consequences:
+
+1. **A vector layer always has a `styleConfig`** even if it has no classes (`simple` style → exactly one item). When you see "no class items", check `styleSettings.type` before assuming the data is missing.
+2. **Toggling an `item`'s visibility** must propagate back to `styleConfig.info[*].visible` so the renderer hides the class on the map. The reverse is not true — modifying `styleConfig` does not automatically update `items`; the legend must be re-queried (or the store updated explicitly — see `setStoreLayerItemVisibility`).
+
+##### WMTS-specific quirk
+
+WMTS layers use `gv-wmts.ts#getLegendFromCapabilities()`. It first tries the standard `LegendURL` from the OGC capabilities. If that fails, it falls back to ArcGIS's `/legend?f=json` endpoint when the metadata URL looks like an ArcGIS-backed WMTS (`/MapServer/WMTS` or `/ImageServer/WMTS`). In that fallback, the returned `TypeLegend.type` is set to `ESRI_IMAGE` (not `WMTS`) so it flows through the same vector-style pipeline as ESRI Image / Dynamic. The legend appears as class-based items even though the layer is rendered as WMTS tiles. The store's `schemaTag` remains `WMTS` (from the config), but `legendSchemaTag` reflects what came back from the legend pipeline.
+
+##### Common pitfalls
+
+- **Checking `items.length > 0` without checking `styleConfig`** — yields false positives for layer-state in transition. Use `layerHasClassItems`.
+- **Checking `icons.length > 0` to render a WMS image** — yields false positives for `'no data'` icons and for ESRI layers (which also populate `icons` from their style canvases). Use `layerHasLegendImage`.
+- **Treating all three fields as independent** — they're produced atomically by `#propagateToStoreLegendQueryStatus`. If you find one populated and the others stale, you have a re-query bug, not a data shape bug.
+- **Forgetting that the "Toggle All" checkbox is disabled for WMTS** — WMTS classes come from the legend endpoint and have no map-renderer equivalent (the tiles are pre-baked). `layer-details.tsx` disables visibility toggles when `schemaTag === WMTS`.
+
 ---
 
 ### FeatureInfoLayerSet
