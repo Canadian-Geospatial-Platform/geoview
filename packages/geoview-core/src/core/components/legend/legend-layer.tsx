@@ -6,6 +6,7 @@ import { useTheme } from '@mui/material';
 
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { Box, ListItem, ListItemText, IconButton, KeyboardArrowDownIcon, KeyboardArrowUpIcon, ProgressBar } from '@/ui';
+import { Typography } from '@/ui/typography/typography';
 import {
   useStoreLayerChildPaths,
   useStoreLayerItems,
@@ -14,16 +15,17 @@ import {
   useStoreLayerSchemaTag,
   useStoreLayerIsHiddenOnMap,
   useStoreLayerLegendCollapsed,
+  useStoreLayerStyleConfig,
+  useStoreLayerIcons,
 } from '@/core/stores/states/layer-state';
 import { useLightBox } from '@/core/components/common';
 import { LayerIcon } from '@/core/components/common/layer-icon';
+import { layerHasClassItems, layerHasLegendImage } from '@/core/components/layers/types';
 import { SecondaryControls } from './legend-layer-ctrl';
 import { CollapsibleContent } from './legend-layer-container';
-import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';
 import type { TypeContainerBox } from '@/core/types/global-types';
-import { Typography } from '@/ui/typography/typography';
 import { useLayerController } from '@/core/controllers/use-controllers';
 
 export interface LegendLayerProps {
@@ -61,9 +63,20 @@ const LegendLayerHeader = memo(
     const layerHidden = useStoreLayerIsHiddenOnMap(layerPath);
     const layerName = useStoreLayerName(layerPath) ?? layerPath;
     const layerItems = useStoreLayerItems(layerPath);
+    const layerStyleConfig = useStoreLayerStyleConfig(layerPath);
     const layerChildPaths = useStoreLayerChildPaths(layerPath);
+    const layerIcons = useStoreLayerIcons(layerPath);
     const schemaTag = useStoreLayerSchemaTag(layerPath);
     const layerStatus = useStoreLayerStatus(layerPath);
+
+    // Has layer items and style config
+    const hasLayerItemsAndStyle = layerHasClassItems(layerItems, layerStyleConfig);
+
+    // If the layer has a legend image
+    const hasLegendImage = layerHasLegendImage(schemaTag, layerItems, layerIcons, layerStyleConfig);
+
+    // If the layer has child layers
+    const hasChildren = layerChildPaths && layerChildPaths.length > 0;
 
     // Return the ui
     return (
@@ -84,24 +97,20 @@ const LegendLayerHeader = memo(
           disableTypography
           secondary={showControls ? <SecondaryControls layerPath={layerPath} /> : undefined}
         />
-        {showControls &&
-          ((layerChildPaths && layerChildPaths.length > 0) ||
-            (layerItems && layerItems.length > 1) ||
-            schemaTag === CONST_LAYER_TYPES.WMS ||
-            schemaTag === CONST_LAYER_TYPES.WMTS) && (
-            <IconButton
-              className="buttonOutline"
-              onClick={onExpandClick}
-              edge="end"
-              size="small"
-              tooltip={tooltip}
-              aria-label={`${tooltip} - ${layerName}`} // WCAG - Provide descriptive aria-label for icon button tooltips
-              aria-expanded={!isCollapsed} // WCAG - Indicate expanded/collapsed state with aria-expanded
-              aria-controls={!isCollapsed ? collapseContainerId : undefined} // WCAG - Link button to collapsible content using aria-controls and matching IDs
-            >
-              {!isCollapsed ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-            </IconButton>
-          )}
+        {showControls && (hasLegendImage || hasLayerItemsAndStyle || hasChildren) && (
+          <IconButton
+            className="buttonOutline"
+            onClick={onExpandClick}
+            edge="end"
+            size="small"
+            tooltip={tooltip}
+            aria-label={`${tooltip} - ${layerName}`} // WCAG - Provide descriptive aria-label for icon button tooltips
+            aria-expanded={!isCollapsed} // WCAG - Indicate expanded/collapsed state with aria-expanded
+            aria-controls={!isCollapsed ? collapseContainerId : undefined} // WCAG - Link button to collapsible content using aria-controls and matching IDs
+          >
+            {!isCollapsed ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+          </IconButton>
+        )}
       </Box>
     );
   }
