@@ -90,13 +90,12 @@ export class EsriFeature extends AbstractGeoViewVector {
   /**
    * Overrides the way a geoview layer config initializes its layer entries.
    *
-   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves once the layer entries have been initialized
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
    */
-  protected override async onInitLayerEntries(abortSignal?: AbortSignal): Promise<TypeGeoviewLayerConfig> {
+  protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Fetch metadata, in this init context we fetch either via /MapServer/{layerId} or /FeatureServer url endpoints
-    const metadata = await this.fetchServiceMetadataEsriFeature(abortSignal);
+    const metadata = await this.fetchServiceMetadataEsriFeature();
 
     // If metadata was fetched successfully
     const entries = [];

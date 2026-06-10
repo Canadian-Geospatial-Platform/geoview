@@ -225,7 +225,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
   // Is zoom to extent button capable?
   const isLayerZoomToExtentCapable = layerControls?.zoom;
   // Is zoom button disabled?
-  const isZoomDisabled = layerHidden || bounds === undefined || Number.isNaN(bounds[0]);
+  const isZoomDisabled = layerHidden || !bounds || Number.isNaN(bounds[0]);
 
   // Is table button disabled?
   const isTableButtonDisabled = layerControls?.table === false || layerHidden || parentHidden;

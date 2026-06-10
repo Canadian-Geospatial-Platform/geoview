@@ -17,7 +17,7 @@ import { OgcWmtsLayerEntryConfig } from '@/api/config/validation-classes/raster-
 import { GVWMTS } from '@/geo/layer/gv-layers/tile/gv-wmts';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { GeoUtilities } from '@/geo/utils/utilities';
+import { GeoUtilities, type CallbackNewMetadataDelegate } from '@/geo/utils/utilities';
 import { LayerServiceMetadataUnableToFetchError, LayerWMTSMetadataError } from '@/core/exceptions/layer-exceptions';
 import { formatError } from '@/core/exceptions/core-exceptions';
 import type { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
@@ -90,22 +90,27 @@ export class WMTS extends AbstractGeoViewRaster {
    */
   protected override onFetchServiceMetadata<T = TypeMetadataWMTS | undefined>(abortSignal?: AbortSignal): Promise<T> {
     // Redirect
-    return this.fetchServiceMetadataWMTS(abortSignal) as Promise<T>;
+    return this.fetchServiceMetadataWMTS(true, abortSignal) as Promise<T>;
   }
 
   /**
    * This method reads the service metadata from a XML metadataAccessPath.
    *
    * @param metadataUrl - The metadataAccessPath
+   * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata
    * @param abortSignal - Optional abort signal to handle cancelling of the process
    * @returns A promise that resolves once the execution is completed
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
    */
-  async #fetchXmlServiceMetadata(metadataUrl: string, abortSignal?: AbortSignal): Promise<TypeMetadataWMTS> {
+  async #fetchXmlServiceMetadata(
+    metadataUrl: string,
+    callbackNewMetadataUrl: CallbackNewMetadataDelegate,
+    abortSignal?: AbortSignal
+  ): Promise<TypeMetadataWMTS> {
     let metadata;
     try {
       // Fetch it
-      metadata = await WMTS.fetchMetadata(metadataUrl, abortSignal);
+      metadata = await WMTS.fetchMetadata(metadataUrl, callbackNewMetadataUrl, abortSignal);
     } catch (error: unknown) {
       // Throw
       throw new LayerServiceMetadataUnableToFetchError(
@@ -126,7 +131,7 @@ export class WMTS extends AbstractGeoViewRaster {
    */
   protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Fetch the metadata
-    const metadata = await this.fetchServiceMetadataWMTS();
+    const metadata = await this.fetchServiceMetadataWMTS(false);
 
     // Now that we have metadata
     const layers = metadata?.Capabilities?.Contents.Layer;
@@ -225,10 +230,11 @@ export class WMTS extends AbstractGeoViewRaster {
   /**
    * Fetches and processes service metadata for the WMTS layer.
    *
+   * @param updateMetadataAccessPath - Whether to update the layer's metadata access path if a proxy is required to fetch the metadata
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves to the parsed metadata object, or `undefined` if metadata could not be retrieved or no capabilities were found.
    */
-  protected fetchServiceMetadataWMTS(abortSignal?: AbortSignal): Promise<TypeMetadataWMTS> {
+  protected fetchServiceMetadataWMTS(updateMetadataAccessPath: boolean, abortSignal?: AbortSignal): Promise<TypeMetadataWMTS> {
     // Construct a proper WMTS GetCapabilities URL
     let url = this.getMetadataAccessPath();
     // Ensure HTTPS
@@ -237,7 +243,17 @@ export class WMTS extends AbstractGeoViewRaster {
     }
 
     // Fetch the XML
-    return this.#fetchXmlServiceMetadata(url, abortSignal);
+    return this.#fetchXmlServiceMetadata(
+      url,
+      (proxiedUrl) => {
+        // If updating the metadataAccessPath as we go
+        if (updateMetadataAccessPath) {
+          // Update the access path to use the proxy if one was required
+          this.setMetadataAccessPath(proxiedUrl);
+        }
+      },
+      abortSignal
+    );
   }
 
   // #endregion PROTECTED METHODS
@@ -451,6 +467,7 @@ export class WMTS extends AbstractGeoViewRaster {
    * Fetches the metadata for WMS Capabilities.
    *
    * @param url - The url to query the metadata from
+   * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata
    * @param abortSignal - Optional abort signal to handle cancelling of the process
    * @returns A promise that resolves to the parsed metadata object
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration
@@ -459,9 +476,13 @@ export class WMTS extends AbstractGeoViewRaster {
    * @throws {ResponseEmptyError} When the JSON response is empty
    * @throws {NetworkError} When a network issue happened
    */
-  static override fetchMetadata<T = TypeMetadataWMTS>(url: string, abortSignal?: AbortSignal): Promise<T> {
+  static override fetchMetadata<T = TypeMetadataWMTS>(
+    url: string,
+    callbackNewMetadataUrl?: CallbackNewMetadataDelegate,
+    abortSignal?: AbortSignal
+  ): Promise<T> {
     // Redirect
-    return GeoUtilities.getWMTSServiceMetadata(url, undefined, abortSignal) as Promise<T>;
+    return GeoUtilities.getWMTSServiceMetadata(url, undefined, callbackNewMetadataUrl, abortSignal) as Promise<T>;
   }
 
   /**
