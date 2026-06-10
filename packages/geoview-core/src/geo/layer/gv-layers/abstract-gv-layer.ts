@@ -1360,6 +1360,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     // Keep the log line commented, for debugging
     // logger.logDebug('handleSourceChange', this.getLayerPath(), this.#inFlightCount);
 
+    // Get the source state
     const state = this.#olSource.getState();
 
     if (state === 'error') {

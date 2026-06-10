@@ -29,6 +29,11 @@
         ]
       },
       {
+        "geoviewLayerType": "geoCore",
+        "geoviewLayerName": "Major Projects Inventory",
+        "geoviewLayerId": "ea4c0bdb-a63f-49a4-b14a-09c1560aad0b"
+      },
+      {
         "geoviewLayerId": "DatacubeXML-NAPL",
         "geoviewLayerName": "NAPL",
         "metadataAccessPath": "https://datacube.services.geo.ca/web/napl-ontario-ring-of-fire.xml",

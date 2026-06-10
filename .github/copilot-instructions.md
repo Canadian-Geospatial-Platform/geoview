@@ -554,6 +554,29 @@ Before writing new logic, check whether a utility or helper already exists in th
 - **Fetch helpers** (`Fetch` in `@/core/utils/fetch-helper.ts`): all HTTP operations
 - **Date utilities** (`DateUtilities` in `@/core/utils/date-utilities.ts`): date parsing and formatting
 - **Constants** (`@/core/utils/constant.ts`): file extensions, regex patterns, shared enums
+- **Timing helpers** (`@/core/utils/utilities.ts`): `delay(ms)` for awaitable delays, `doTimeout(ms)` for cancellable delays, `whenThisThen(condition, timeout)` for waiting on async conditions
+
+**Never call `setTimeout` directly** for waiting/deferring. Use `delay(ms)` (returns a `Promise<void>`) or `doTimeout(ms)` (returns a cancellable `DelayJob`) instead. This keeps timing logic consistent, testable, and cancellable across the codebase.
+
+```typescript
+// ❌ Bad: raw setTimeout
+setTimeout(() => {
+  doSomething();
+}, 0);
+
+// ✅ Good: delay() returns a Promise
+delay(0)
+  .then(() => doSomething())
+  .catch(() => {
+    // Delay was cancelled — nothing to do
+  });
+
+// ✅ Good: in an async context
+await delay(100);
+doSomething();
+```
+
+The one legitimate exception is timer refs in React components (`useRef<ReturnType<typeof setTimeout>>`) where the callback-style API is part of the React idiom and cleanup happens via `clearTimeout`.
 
 When the same logic appears in two or more files, extract it to the nearest shared location:
 

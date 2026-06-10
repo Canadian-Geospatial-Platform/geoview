@@ -554,7 +554,7 @@ export const DEFAULT_MAP_FEATURE_CONFIG = {
   globalSettings: {
     canRemoveSublayers: true,
     disabledLayerTypes: [],
-    showUnsymbolizedFeatures: false,
+    showUnsymbolizedFeatures: true,
     showLayerHighlightLayerBbox: true,
     coordinateInfoEnabled: false,
     hideCoordinateInfoSwitch: false,
