@@ -26,7 +26,7 @@ Chaque fois que la carte est **déplacée** ou **zoomée**, certaines couches pe
 
 À tout moment, le visualiseur informe l’utilisateur de l’activité en cours en :
 
-- Affichant un message au bas de la carte, et/ou
+- Affichant un message au bas de la carte, toujours accompagné d'une notification
 - Ajoutant une notification accessible depuis le panneau des notifications dans la barre latérale. Lorsqu'une nouvelle notification est ajoutée, un compteur rouge s'incrémente pour indiquer une mise à jour.
 
 ## Changer le focus

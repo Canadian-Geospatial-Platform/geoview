@@ -26,7 +26,7 @@ Any time the map is **panned** or **zoomed**, certain layers may re-enter a load
 
 At any time, the viewer provides feedback about ongoing activity by:
 
-- Displaying a message at the bottom of the map, and/or
+- Displaying a message at the bottom of the map, always accompanied by a notification
 - Adding a notification accessible through the Notification panel in the sidebar. When a new notification is added, a red counter appears and increments to indicate an update.
 
 ## Switching Focus

@@ -1173,7 +1173,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * this.emitMessage(
    *   'layers.fetchProgress',
    *   ['50', '100'],
-   *   messageType: 'error',
+   *   'error',
    * );
    */
   protected emitMessage(messageKey: string, messageParams: Record<string, unknown> | undefined, messageType: SnackbarType = 'info'): void {

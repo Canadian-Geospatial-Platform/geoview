@@ -1557,6 +1557,9 @@ const handleToggleKeyDown = useCallback(
 
 - Add a `withNotification = false` parameter to snackbar methods
 - Create snackbar-only message paths that bypass the notification panel
+- Add interactive elements (buttons, links, actions) to snackbar messages — they auto-dismiss and are not accessible to assistive technology users. If an action is needed, use a persistent UI element (dialog, notification panel action, or inline component)
+
+**Layer message event chain:** Layer classes emit messages via `emitMessage(messageKey, params, messageType)` → `LayerMessageEvent` (no `notification` field) → domain event → controller handler → `notifications.show*()` (always notifies). The `notification` opt-out was removed from this entire chain to enforce the WCAG rule architecturally.
 
 ## UI Component Styling & Theme Safety
 

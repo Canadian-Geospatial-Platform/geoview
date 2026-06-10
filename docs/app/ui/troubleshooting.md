@@ -8,10 +8,10 @@ GeoView uses two main channels to inform you about issues:
 
 ### Notifications & Snackbar Messages (For You)
 
-When something goes wrong that affects your experience — a layer fails to load, a service is unavailable, or a configuration is invalid — GeoView displays a **notification** or a **snackbar message** directly in the map interface.
+When something goes wrong that affects your experience — a layer fails to load, a service is unavailable, or a configuration is invalid — GeoView displays a **snackbar message** and a **notification** directly in the map interface.
 
-- **Snackbar messages** appear briefly at the bottom of the map to inform you of transient issues (e.g., "Layer failed to load").
-- **Notifications** are accessible via the notification bell icon in the app bar. They persist so you can review them later.
+- **Snackbar messages** appear briefly at the bottom of the map to inform you of transient issues (e.g., "Layer failed to load"). Every snackbar message is also recorded as a notification.
+- **Notifications** are accessible via the notification bell icon in the app bar. They persist so you can review them later. Some notifications may be added without a snackbar (for non-urgent messages).
 
 **These are the messages you should pay attention to.** They are written in plain language and describe what happened and, when possible, what you can do about it.
 
