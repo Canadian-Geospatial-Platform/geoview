@@ -1306,17 +1306,21 @@ export class MapController extends AbstractMapViewerController {
       this.getControllersRegistry().layerController.changeOrRemoveLayerHighlight(highlightName, highlightName);
     }
 
-    // Remove all vector tiles from the map, because they don't allow on-the-fly reprojection (OpenLayers 10.5 exception issue)
-    // GV Experimental code, to test further... not problematic to keep it for now
+    // Show a warning about the existing vector tiles on the map
     this.getControllersRegistry()
       .layerController.getGeoviewLayers()
       .filter((layer) => layer instanceof AbstractGVVectorTile)
       .forEach((layer) => {
-        // Remove the layer through the controller
-        this.getControllersRegistry().layerCreatorController.removeLayerUsingPath(layer.getLayerPath());
+        // Get the config
+        const config = layer.getLayerConfig();
 
-        // Log
-        this.getMapViewer().notifications.showWarning('warning.layer.vectorTileRemoved', { layerName: layer.getLayerName() });
+        // If the projection of the layer isn't the same of the map projection, it means the vector tile layer won't be reprojected, show a warning
+        if (config.getProjectionCodeEPSG() !== event.projection.getCode()) {
+          // Log
+          this.getMapViewer().notifications.showWarning('warning.layer.vectorTileUnsupportedProjection', {
+            layerName: layer.getLayerName(),
+          });
+        }
       });
   }
 

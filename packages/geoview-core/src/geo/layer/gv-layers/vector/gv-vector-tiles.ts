@@ -30,20 +30,6 @@ export class GVVectorTiles extends AbstractGVVectorTile {
     this.setOLLayer(new VectorTileLayer({ ...tileLayerOptions, declutter }));
   }
 
-  // #region OVERRIDES
-
-  /**
-   * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   *
-   * @returns The strongly-typed layer configuration specific to this layer.
-   */
-  override getLayerConfig(): VectorTilesLayerEntryConfig {
-    // Call parent and cast
-    return super.getLayerConfig() as VectorTilesLayerEntryConfig;
-  }
-
-  // #endregion OVERRIDES
-
   // #region METHODS
 
   /**

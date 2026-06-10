@@ -3,6 +3,7 @@ import type VectorTileLayer from 'ol/layer/VectorTile';
 import type { Extent } from 'ol/extent';
 import type { Projection as OLProjection } from 'ol/proj';
 
+import type { VectorTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
@@ -31,6 +32,16 @@ export abstract class AbstractGVVectorTile extends AbstractGVLayer {
   override getOLSource(): VectorTile {
     // Get source from OL
     return super.getOLSource() as VectorTile;
+  }
+
+  /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   *
+   * @returns The strongly-typed layer configuration specific to this layer.
+   */
+  override getLayerConfig(): VectorTilesLayerEntryConfig {
+    // Call parent and cast
+    return super.getLayerConfig() as VectorTilesLayerEntryConfig;
   }
 
   /**

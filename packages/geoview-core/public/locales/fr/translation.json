@@ -552,7 +552,7 @@
       "basemapTakingLongTime": "La couche de base prend plus de temps que prévu à répondre...",
       "metadataTakingLongTime": "Les métadonnées pour la couche '{{layerName}}' prennent plus de temps que prévu à récupérer...",
       "metadatasTakingLongTime": "Le téléchargement des métadonnées de certaines couches prend plus de temps que...",
-      "vectorTileRemoved": "La tuile vectorielle '{{layerName}}' a dû être retirée en raison d'un conflit de projection.",
+      "vectorTileUnsupportedProjection": "La tuile vectorielle '{{layerName}}' ne supporte pas la projection de la carte, envisagez de désactiver sa visibilité.",
       "basemapLayerCreationError": "Erreur lors de la création de la couche de base {{basemapType}}.",
       "kmlLayerWarning": "Les couches KML n'afficheront pas les symboles appropriés dans les panneaux et ne comporteront pas d'entrées dans le tableau de données.",
       "layerCRSNotSupported": "La référence spatiale de la carte '{{mapProj}}' n'est pas officiellement supportée par la couche '{{layerName}}'. GeoView va tout de même tenté d'afficher la couche, mais celle-ci risque d'être désalignée..",

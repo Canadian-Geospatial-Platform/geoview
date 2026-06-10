@@ -552,7 +552,7 @@
       "basemapTakingLongTime": "The basemap is taking a long time to respond...",
       "metadataTakingLongTime": "The metadata for the layer '{{layerName}}' is taking longer than expected to fetch...",
       "metadatasTakingLongTime": "The metadata for some layers is taking longer than expected to fetch...",
-      "vectorTileRemoved": "The vector tile {{layerName}} had to be removed due to a projection conflict.",
+      "vectorTileUnsupportedProjection": "The vector tile {{layerName}} doesn't support the map projection, consider turning its visibility off.",
       "basemapLayerCreationError": "Error creating {{basemapType}} basemap.",
       "kmlLayerWarning": "KML layers will not have proper symbols in the panels or have entries in the data table.",
       "layerCRSNotSupported": "The spatial reference of the map '{{mapProj}}' is not officially supported by the layer '{{layerName}}'. GeoView will still attempt to load the layer on the map, but it might be misaligned.",

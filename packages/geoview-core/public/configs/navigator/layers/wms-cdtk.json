@@ -22,6 +22,11 @@
         ]
       },
       {
+        "geoviewLayerType": "geoCore",
+        "geoviewLayerName": "Major Projects Inventory",
+        "geoviewLayerId": "ea4c0bdb-a63f-49a4-b14a-09c1560aad0b"
+      },
+      {
         "geoviewLayerId": "LYR3-qgis",
         "geoviewLayerName": "Completed Inventory",
         "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/iaac/assessment_inventory_en",

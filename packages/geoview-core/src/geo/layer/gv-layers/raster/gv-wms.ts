@@ -706,6 +706,9 @@ export class GVWMS extends AbstractGVRaster {
     // Find the best name field and validate its existance at the same time when one was initially configured
     const nameField = AbstractGVLayer.findBestNameField(wmsLayerConfig.getNameField(), wfsLayerConfig.getOutfields(), language);
 
+    // The style favoring the style in the WMS layer config in case it was overridden otherwise take the WFS style if any
+    const layerStyle = wmsLayerConfig.getLayerStyle() ?? wfsLayerConfig.getLayerStyle();
+
     // Parse the features
     const results = AbstractGVLayer.helperFormatFeatureInfoResult(
       features,
@@ -715,7 +718,7 @@ export class GVWMS extends AbstractGVRaster {
       wfsLayerConfig.getOutfields(),
       wmsLayerConfig.hasOutfieldsPK(),
       undefined,
-      wmsLayerConfig.getLayerStyle(), // The styles as read from the WMS layer config (not WFS in case it was overridden in the WMS)
+      layerStyle,
       wmsLayerConfig.getServiceDateFormat(),
       wmsLayerConfig.getServiceDateTimezone(),
       wmsLayerConfig.getServiceDateTemporalMode(),
@@ -775,6 +778,16 @@ export class GVWMS extends AbstractGVRaster {
       // If one of those contain application/json, use that format to get features
       const outputFormat = featureInfoFormat.find((format) => format.toLowerCase().includes(GVWMS.MIME_TYPE_FORMAT_JSON));
 
+      // Get the version
+      const version = wfsLayerConfig.getVersionOrDefault();
+      const versionIs2OrHigher = version.startsWith('2.');
+
+      // The gml namespace to be used when generating the filter
+      let gmlNamespace = 'http://www.opengis.net/gml';
+      if (versionIs2OrHigher) {
+        gmlNamespace = 'http://www.opengis.net/gml/3.2';
+      }
+
       // TODO: WMS - Add support for other formats. Not quite the GV issue #3134, but similar
 
       // Create the filterXML from the sql filter
@@ -788,11 +801,7 @@ export class GVWMS extends AbstractGVRaster {
       // If any
       if (totalFilter) {
         // Build a OGC Filter for the filter
-        gmlFilterAttribute = WfsRenderer.sqlToOlFilterXml(
-          totalFilter,
-          wfsLayerConfig.getVersionOrDefault(),
-          wfsLayerConfig.getOutfields()?.[0]?.name!
-        );
+        gmlFilterAttribute = WfsRenderer.sqlToOlFilterXml(totalFilter, version, wfsLayerConfig.getOutfields()?.[0]?.name!);
       }
 
       // If performing a query based on a clicked coordinate, we want to filter spatially
@@ -804,10 +813,16 @@ export class GVWMS extends AbstractGVRaster {
         const bufferedPoint = GVWMS.#buildBufferPolygon(clickCoordinate, viewResolution, this.getGetFeatureInfoTolerance());
 
         // Write the polygon to GML
-        const polygonGML = GeoUtilities.writeGeometryToGML(bufferedPoint, projectionCode);
+        const polygonGML = GeoUtilities.writeGeometryToGML(bufferedPoint, projectionCode, gmlNamespace);
 
-        // Create the intersects filter
-        gmlFilterSpatial = `<Intersects><PropertyName>${geomFieldName}</PropertyName>${polygonGML}</Intersects>`;
+        // If the version of the service is 2.0.0 or later
+        if (versionIs2OrHigher) {
+          // Create the intersects filter
+          gmlFilterSpatial = `<Intersects><ValueReference>${geomFieldName}</ValueReference>${polygonGML}</Intersects>`;
+        } else {
+          // Create the intersects filter
+          gmlFilterSpatial = `<Intersects><PropertyName>${geomFieldName}</PropertyName>${polygonGML}</Intersects>`;
+        }
 
         // We want all fields in the response, to make sure the geometry is included, clear it
         fieldsToReturn = undefined;
@@ -1877,12 +1892,13 @@ export class GVWMS extends AbstractGVRaster {
    * @param message - The message to log alongside the error if it's not a `RequestAbortedError`
    * @throws {RequestAbortedError} When the error is an instance of `RequestAbortedError`, it is rethrown for the caller to handle
    */
-  static #logErrorThrowIfAborted(error: unknown, message: string): void {
+  static #logErrorThrowIfAborted(error: unknown, _message: string): void {
     // If the error is a RequestAborted error, rethrow it, we want it to be handled by the caller and not eaten by the various attempts to get the feature info
     if (error instanceof RequestAbortedError) throw error;
 
     // Failed to retrieve features, log it as a warning
-    logger.logWarning(message, error);
+    // TODO: CLEANUP - Remove this dead code if we determine it's better without. Was commented on 2026-06-12
+    // logger.logWarning(message, error);
   }
 
   // #endregion STATIC METHODS

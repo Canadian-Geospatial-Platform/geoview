@@ -121,7 +121,7 @@
       "imageStatic",
       "vectorTiles"
     ],
-    "showUnsymbolizedFeatures": true,
+    "showUnsymbolizedFeatures": false,
     "showLayerHighlightLayerBbox": false,
     "coordinateInfoEnabled": true,
     "hideCoordinateInfoSwitch": true,

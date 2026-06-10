@@ -16,9 +16,10 @@ import { getStoreAppShowUnsymbolizedFeatures } from '@/core/stores/states/app-st
 import { RequestAbortedError } from '@/core/exceptions/core-exceptions';
 import { LayerNoLastQueryToPerformError } from '@/core/exceptions/geoview-exceptions';
 import { logger } from '@/core/utils/logger';
-import { Projection } from '@/geo/utils/projection';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import type { LayerDomain } from '@/core/domains/layer-domain';
+import { Projection } from '@/geo/utils/projection';
+import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 
 /**
  * A Layer-set working with the LayerSetController at handling a result set of registered layers and synchronizing
@@ -271,9 +272,26 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
         }
       }
 
+      // If the layer is WMS and it has a WFS associated but that WFS has no layerStyle
+      let forceAcceptWithoutSymbol = false;
+      if (layer instanceof GVWMS) {
+        const wfsLayerConfig = layer.getLayerConfig().getWfsLayerConfig();
+
+        // If it has a WFS layer config associated with it
+        if (wfsLayerConfig && !wfsLayerConfig.getLayerStyle()) {
+          // The WFS layer config has no layer style defined, it means the vectorial features are unsymbolized and we shouldn't filter out their featureIcon
+          forceAcceptWithoutSymbol = true;
+        }
+      }
+
       // Filter out unsymbolized features if the showUnsymbolizedFeatures config is false
       // GV: KML and ESRI Image is excluded as they currently have no symbology.
-      if (!getStoreAppShowUnsymbolizedFeatures(this.getMapId()) && !(layer instanceof GVKML) && !(layer instanceof GVEsriImage)) {
+      if (
+        !forceAcceptWithoutSymbol &&
+        !getStoreAppShowUnsymbolizedFeatures(this.getMapId()) &&
+        !(layer instanceof GVKML) &&
+        !(layer instanceof GVEsriImage)
+      ) {
         arrayOfRecords = arrayOfRecords.filter((record) => record.featureIcon);
         promiseResult.results = arrayOfRecords;
       }

@@ -1597,7 +1597,7 @@ export abstract class GeoUtilities {
    * @param srsName - The spatial reference system (e.g., 'EPSG:3857') to assign to the GML geometry
    * @returns The serialized GML geometry as a string
    */
-  static writeGeometryToGML(geometry: Geometry, srsName: string): string {
+  static writeGeometryToGML(geometry: Geometry, srsName: string, gmlNamespace: string): string {
     // GV I've tried a simplified approach for this function, even some suggested by AI, and they all failed to some degree.
     // GV Sometimes doubling nodes like <Polygon> or sometimes adding extra node level like <geom> or sometimes forgetting the srsName attribute at the root.
     // GV This iteration seems the most stable.
@@ -1606,7 +1606,7 @@ export abstract class GeoUtilities {
     const gmlFormat = new GML3({ srsName });
 
     // Create a dummy parent node
-    const doc = document.implementation.createDocument('http://www.opengis.net/gml', 'dummy', null);
+    const doc = document.implementation.createDocument(gmlNamespace, 'dummy', null);
 
     // Write geometry inside the dummy node
     gmlFormat.writeGeometryElement(doc.documentElement, geometry, []);
@@ -1614,6 +1614,7 @@ export abstract class GeoUtilities {
     // Grab the actual geometry node (first child of dummy)
     const geomNode = doc.documentElement.firstChild as Element;
 
+    // If failed to create a geometry node
     if (!geomNode) {
       throw new Error('Failed to generate GML geometry');
     }
@@ -1622,7 +1623,14 @@ export abstract class GeoUtilities {
     geomNode.setAttribute('srsName', srsName);
 
     // Serialize and return
-    return new XMLSerializer().serializeToString(geomNode);
+    let serialized = new XMLSerializer().serializeToString(geomNode);
+
+    // The GML3 format unfortunately hardcodes the gml namespace in the root node, so we need to replace it with the provided gmlNamespace
+    serialized = serialized.replace('xmlns="http://www.opengis.net/gml"', `xmlns="${gmlNamespace}"`);
+    serialized = serialized.replace('xmlns:gml="http://www.opengis.net/gml"', `xmlns:gml="${gmlNamespace}"`);
+
+    // Return the serialized XML content
+    return serialized;
   }
 
   /**

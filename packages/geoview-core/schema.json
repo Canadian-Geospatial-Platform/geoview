@@ -440,7 +440,7 @@
         "showUnsymbolizedFeatures": {
           "type": "boolean",
           "description": "Whether or not to show unsymbolized features.",
-          "default": false
+          "default": true
         },
         "showLayerHighlightLayerBbox": {
           "type": "boolean",

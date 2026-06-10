@@ -123,7 +123,7 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
     isCrosshairsActive: false,
     isFullscreenActive: false,
     notifications: [],
-    showUnsymbolizedFeatures: false,
+    showUnsymbolizedFeatures: true, // default: true to always have features by default, some WMS will not expose the GetStyles for their WFS equivalent
     showLayerHighlightLayerBbox: true,
 
     // initialize default stores section from config information when store receive configuration file

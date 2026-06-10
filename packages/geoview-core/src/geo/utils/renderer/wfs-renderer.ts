@@ -1771,21 +1771,22 @@ export abstract class WfsRenderer {
         `.trim();
     }
 
-    // If the version is 1.3.0 or 2.0.0, use FES 2.0 filter
-    switch (version) {
-      case '2.0.0':
-        return `
-        <fes:Filter xmlns:fes="http://www.opengis.net/fes/2.0" xmlns:gml="http://www.opengis.net/gml">
+    // If the version is 2.0.0 or higher, use FES 2.0 filter with gml 3.2
+    const versionIs2OrHigher = version.startsWith('2.');
+    if (versionIs2OrHigher) {
+      return `
+        <fes:Filter xmlns:fes="http://www.opengis.net/fes/2.0" xmlns:gml="http://www.opengis.net/gml/3.2">
           ${ogcFilterToWrap}
         </fes:Filter>
         `.trim();
-      default:
-        return `
-        <ogc:Filter xmlns:ogc="http://www.opengis.net/ogc" xmlns:gml="http://www.opengis.net/gml">
-          ${ogcFilterToWrap}
-        </ogc:Filter>
-        `.trim();
     }
+
+    // Default to ogc:Filter for older WFS versions
+    return `
+      <ogc:Filter xmlns:ogc="http://www.opengis.net/ogc" xmlns:gml="http://www.opengis.net/gml">
+        ${ogcFilterToWrap}
+      </ogc:Filter>
+      `.trim();
   }
 
   // #endregion
