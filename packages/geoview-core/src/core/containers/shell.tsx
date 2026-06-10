@@ -11,18 +11,7 @@ import { FooterBar } from '@/core/components/footer-bar/footer-bar';
 import { MapInfo } from '@/core/components/map-info/map-info';
 import { TIMEOUT } from '@/core/utils/constant';
 
-import {
-  Box,
-  CircularProgress,
-  Link,
-  Modal,
-  Snackbar,
-  Button,
-  Typography,
-  type TypeModalProps,
-  type ModalApi,
-  type ModalEvent,
-} from '@/ui';
+import { Box, CircularProgress, Link, Modal, Snackbar, Typography, type TypeModalProps, type ModalApi, type ModalEvent } from '@/ui';
 import { getShellSxClasses } from './containers-style';
 import { useUIController } from '@/core/controllers/use-controllers';
 import { useStoreMapInteraction, useStoreMapLoaded } from '@/core/stores/states/map-state';
@@ -92,7 +81,6 @@ export function Shell(props: ShellProps): JSX.Element {
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarType, setSnackbarType] = useState<SnackbarType>('info');
-  const [snackbarButton, setSnackbarButton] = useState<JSX.Element>();
 
   // State for transient status announcements
   const [mapLoadedAnnouncement, setMapLoadedAnnouncement] = useState('');
@@ -183,14 +171,6 @@ export function Shell(props: ShellProps): JSX.Element {
    */
   const handleSnackBarOpen = useCallback(
     (sender: Notifications, payload: SnackBarOpenEvent): void => {
-      // Create button
-      const myButton = payload.button?.label ? (
-        <Button type="icon" onClick={payload.button.action}>
-          {payload.button.label}
-        </Button>
-      ) : undefined;
-      setSnackbarButton(myButton);
-
       // Set message and type
       setSnackbarMessage(payload.message);
       setSnackbarType(payload.snackbarType);
@@ -412,7 +392,6 @@ export function Shell(props: ShellProps): JSX.Element {
               message={snackbarMessage}
               open={snackbarOpen}
               type={snackbarType}
-              button={snackbarButton}
               closeButtonText={t('general.close')}
               onClose={handleSnackBarClose}
             />

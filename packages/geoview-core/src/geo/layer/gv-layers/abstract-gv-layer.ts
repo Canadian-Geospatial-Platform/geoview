@@ -1168,23 +1168,16 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param messageKey - The key used to lookup the localized message OR message
    * @param messageParams - Array of parameters to be interpolated into the localized message
    * @param messageType - The message type
-   * @param notification - Optional whether to show this as a notification. Defaults to false
    *
    * @example
    * this.emitMessage(
    *   'layers.fetchProgress',
    *   ['50', '100'],
    *   messageType: 'error',
-   *   true
    * );
    */
-  protected emitMessage(
-    messageKey: string,
-    messageParams: Record<string, unknown> | undefined,
-    messageType: SnackbarType = 'info',
-    notification = false
-  ): void {
-    this.#emitLayerMessage({ messageKey, messageParams, messageType, notification });
+  protected emitMessage(messageKey: string, messageParams: Record<string, unknown> | undefined, messageType: SnackbarType = 'info'): void {
+    this.#emitLayerMessage({ messageKey, messageParams, messageType });
   }
 
   // #endregion PROTECTED METHODS
@@ -1354,7 +1347,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    */
   #emitError(gvError: GeoViewError): void {
     // Emit about the error
-    this.emitMessage(gvError.messageKey, gvError.messageParams, 'error', true);
+    this.emitMessage(gvError.messageKey, gvError.messageParams, 'error');
   }
 
   /**
@@ -2301,7 +2294,6 @@ export interface LayerMessageEvent extends LayerBaseEvent {
   messageKey: string;
   messageParams: Record<string, unknown> | undefined;
   messageType: SnackbarType;
-  notification: boolean;
 }
 
 /**

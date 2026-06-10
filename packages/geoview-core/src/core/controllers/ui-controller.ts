@@ -417,21 +417,20 @@ export class UIController extends AbstractMapViewerController {
    * @param type - The snackbar type (info, success, warning, or error)
    * @param messageKey - The translation key for the message
    * @param messageParams - Optional parameters for message interpolation
-   * @param notification - Optional flag indicating whether to also create a notification
    */
-  addMessage(type: SnackbarType, messageKey: string, messageParams?: Record<string, unknown>, notification?: boolean): void {
+  addMessage(type: SnackbarType, messageKey: string, messageParams?: Record<string, unknown>): void {
     switch (type) {
       case 'info':
-        this.getMapViewer().notifications.showMessage(messageKey, messageParams, notification);
+        this.getMapViewer().notifications.showMessage(messageKey, messageParams);
         break;
       case 'success':
-        this.getMapViewer().notifications.showSuccess(messageKey, messageParams, notification);
+        this.getMapViewer().notifications.showSuccess(messageKey, messageParams);
         break;
       case 'warning':
-        this.getMapViewer().notifications.showWarning(messageKey, messageParams, notification);
+        this.getMapViewer().notifications.showWarning(messageKey, messageParams);
         break;
       case 'error':
-        this.getMapViewer().notifications.showError(messageKey, messageParams, notification);
+        this.getMapViewer().notifications.showError(messageKey, messageParams);
         break;
       default:
         break;

@@ -16,7 +16,6 @@ interface SnackBarProps {
   message: string;
   open: boolean;
   type: SnackbarType;
-  button?: JSX.Element;
   closeButtonText?: string;
   onClose?: (event?: React.SyntheticEvent | Event, reason?: string) => void;
 }
@@ -51,15 +50,6 @@ const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) 
  *   type="success"
  *   onClose={handleClose}
  * />
- *
- * // Error with action button
- * <Snackbar
- *   snackBarId="error-msg"
- *   message="An error occurred"
- *   open={isOpen}
- *   type="error"
- *   button={<Button onClick={handleRetry}>Retry</Button>}
- * />
  * ```
  *
  * @see {@link https://mui.com/material-ui/react-snackbar/}
@@ -68,7 +58,7 @@ function SnackbarUI(props: SnackBarProps): JSX.Element {
   logger.logTraceRenderDetailed('ui/snackbar/snackbar', props);
 
   // Get constant from props
-  const { snackBarId, open, message, type, button, closeButtonText, onClose, ...rest } = props;
+  const { snackBarId, open, message, type, closeButtonText, onClose, ...rest } = props;
 
   // Hooks
   const fadeInAnimation = useFadeIn();
@@ -111,7 +101,6 @@ function SnackbarUI(props: SnackBarProps): JSX.Element {
         sx={{ width: '100%' }}
       >
         {message}
-        {button !== undefined && button}
       </Alert>
     </AnimatedSnackbar>
   );

@@ -2145,16 +2145,15 @@ export class LayerController extends AbstractMapViewerController {
     const { messageType } = layerMessageEvent.layerEvent;
     const { messageKey } = layerMessageEvent.layerEvent;
     const { messageParams } = layerMessageEvent.layerEvent;
-    const { notification } = layerMessageEvent.layerEvent;
 
     if (messageType === 'info') {
-      this.getMapViewer().notifications.showMessage(messageKey, messageParams, notification);
+      this.getMapViewer().notifications.showMessage(messageKey, messageParams);
     } else if (messageType === 'warning') {
-      this.getMapViewer().notifications.showWarning(messageKey, messageParams, notification);
+      this.getMapViewer().notifications.showWarning(messageKey, messageParams);
     } else if (messageType === 'error') {
-      this.getMapViewer().notifications.showError(messageKey, messageParams, notification);
+      this.getMapViewer().notifications.showError(messageKey, messageParams);
     } else if (messageType === 'success') {
-      this.getMapViewer().notifications.showSuccess(messageKey, messageParams, notification);
+      this.getMapViewer().notifications.showSuccess(messageKey, messageParams);
     }
   }
 
@@ -2424,11 +2423,7 @@ export class LayerController extends AbstractMapViewerController {
     });
 
     // Notify the user
-    this.getMapViewer().notifications.showWarning(
-      'warning.layer.layerCRSNotSupported',
-      { mapProj, layerName: event.layer.getLayerName() },
-      true
-    );
+    this.getMapViewer().notifications.showWarning('warning.layer.layerCRSNotSupported', { mapProj, layerName: event.layer.getLayerName() });
 
     // Force a refresh so the layer gets drawn with the overridden CRS
     event.layer.refresh(this.getMapViewer().getProjection());

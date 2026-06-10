@@ -115,15 +115,10 @@
           });
 
           // snackbar notification
-          mapViewer.notifications.showWarning('templates.firstSnackbar');
+          mapViewer.notifications.showWarning('This is my first snackbar!');
 
           setInterval(() => {
-            mapViewer.notifications.showMessage('templates.canApplyFunction', [], false, {
-              label: 'Click me!',
-              action: () => {
-                alert('You clicked me!');
-              },
-            });
+            mapViewer.notifications.showMessage('Still hungry for a snack!');
 
             mapViewer.notifications.addNotificationSuccess('this is a success notification title');
           }, 10000);

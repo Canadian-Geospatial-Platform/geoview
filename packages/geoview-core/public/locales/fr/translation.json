@@ -597,9 +597,5 @@
     "geolocator": {
       "noService": "Service de géolocalisation non disponible"
     }
-  },
-  "templates": {
-    "firstSnackbar": "Ceci est ma première notification !",
-    "canApplyFunction": "Je peux même appliquer une fonction"
   }
 }

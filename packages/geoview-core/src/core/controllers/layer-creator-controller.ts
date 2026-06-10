@@ -643,7 +643,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
       }
 
       // Show error
-      this.getMapViewer().notifications.showErrorFromError(theError, true);
+      this.getMapViewer().notifications.showErrorFromError(theError);
 
       // If the Error is GeoViewError, it has a translation
       let { message } = theError;
@@ -957,7 +957,6 @@ export class LayerCreatorController extends AbstractMapViewerController {
    *   messageKey: 'layers.fetchProgress',
    *   messageParams: { processed: 50, total: 100 },
    *   messageType: 'error',
-   *   notification: true
    * });
    */
   #handleLayerMessage(sender: AbstractGeoViewLayer, layerMessageEvent: LayerMessageEvent): void {
@@ -965,16 +964,15 @@ export class LayerCreatorController extends AbstractMapViewerController {
     const { messageType } = layerMessageEvent;
     const { messageKey } = layerMessageEvent;
     const { messageParams } = layerMessageEvent;
-    const { notification } = layerMessageEvent;
 
     if (messageType === 'info') {
-      this.getMapViewer().notifications.showMessage(messageKey, messageParams, notification);
+      this.getMapViewer().notifications.showMessage(messageKey, messageParams);
     } else if (messageType === 'warning') {
-      this.getMapViewer().notifications.showWarning(messageKey, messageParams, notification);
+      this.getMapViewer().notifications.showWarning(messageKey, messageParams);
     } else if (messageType === 'error') {
-      this.getMapViewer().notifications.showError(messageKey, messageParams, notification);
+      this.getMapViewer().notifications.showError(messageKey, messageParams);
     } else if (messageType === 'success') {
-      this.getMapViewer().notifications.showSuccess(messageKey, messageParams, notification);
+      this.getMapViewer().notifications.showSuccess(messageKey, messageParams);
     }
   }
 
@@ -998,7 +996,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
 
       // GV: KML currently has no style or symbology associated with it, so we warn the user
       if (geoviewLayerConfig.geoviewLayerType === CONST_LAYER_TYPES.KML)
-        this.getMapViewer().notifications.showWarning('warning.layer.kmlLayerWarning', {}, true);
+        this.getMapViewer().notifications.showWarning('warning.layer.kmlLayerWarning');
 
       // Set the layer z indices
       this.getControllersRegistry().layerController.setLayerZIndices();

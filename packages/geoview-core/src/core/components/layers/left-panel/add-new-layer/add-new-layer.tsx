@@ -113,7 +113,7 @@ function FileUploadSection({
       onFileSelected(file, fileURL, fileName);
     } else {
       // Handle error
-      uiController.addMessage('error', 'layers.errorFile', {}, true);
+      uiController.addMessage('error', 'layers.errorFile', {});
     }
   };
 
@@ -348,7 +348,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const emitErrorEmpty = (textField: string): void => {
     setIsLoading(false);
-    uiController.addMessage('error', 'layers.errorEmpty', { textFieldName: textField }, false);
+    uiController.addMessage('error', 'layers.errorEmpty', { textFieldName: textField });
   };
 
   /**
@@ -358,7 +358,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const emitErrorNone = (): void => {
     setIsLoading(false);
-    uiController.addMessage('error', 'layers.errorNone', {}, false);
+    uiController.addMessage('error', 'layers.errorNone', {});
   };
 
   /**
@@ -368,7 +368,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const emitErrorDisabled = (disabledType: string): void => {
     setIsLoading(false);
-    uiController.addMessage('error', 'layers.errorDisabled', { layerType: disabledType }, false);
+    uiController.addMessage('error', 'layers.errorDisabled', { layerType: disabledType });
   };
 
   /**
@@ -378,7 +378,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const emitErrorServer = (serviceName: string): void => {
     setIsLoading(false);
-    uiController.addMessage('error', 'layers.errorServer', { serviceTypeName: serviceName }, false);
+    uiController.addMessage('error', 'layers.errorServer', { serviceTypeName: serviceName });
   };
 
   // #endregion
@@ -826,7 +826,7 @@ export function AddNewLayer(): JSX.Element {
           // Check if this UUID is already loaded on the map
           if (isValidUUID(layerURL.trim()) && layerController.getGeoviewLayerIds().includes(layerURL.trim())) {
             setStepButtonEnabled(false);
-            uiController.addMessage('error', 'layers.errorUrlDuplicateUUID', {}, false);
+            uiController.addMessage('error', 'layers.errorUrlDuplicateUUID', {});
             return;
           }
           setStepButtonEnabled(true);
@@ -842,9 +842,9 @@ export function AddNewLayer(): JSX.Element {
             const isOk = check.isValid && check.isReachable;
             setStepButtonEnabled(isOk);
             if (!isOk && check.error) {
-              uiController.addMessage('error', 'layers.errorUrlUnreachable', {}, false);
+              uiController.addMessage('error', 'layers.errorUrlUnreachable', {});
             } else if (!isOk && !check.isValid) {
-              uiController.addMessage('error', 'layers.errorUrlInvalid', {}, false);
+              uiController.addMessage('error', 'layers.errorUrlInvalid', {});
             }
           } finally {
             setIsLoading(false);
@@ -856,9 +856,9 @@ export function AddNewLayer(): JSX.Element {
             const trimmedUrl = layerURL.trim();
             if (!isValidUUID(trimmedUrl) && !trimmedUrl.includes('.') && !trimmedUrl.includes('/')) {
               // No dots or slashes means it's not a URL — likely a malformed UUID
-              uiController.addMessage('error', 'layers.errorUrlInvalidUUID', {}, false);
+              uiController.addMessage('error', 'layers.errorUrlInvalidUUID', {});
             } else {
-              uiController.addMessage('error', 'layers.errorUrlHttps', {}, false);
+              uiController.addMessage('error', 'layers.errorUrlHttps', {});
             }
           }
         }
@@ -867,7 +867,7 @@ export function AddNewLayer(): JSX.Element {
       validateUrl().catch((error: unknown) => {
         logger.logError('URL validation failed', error);
         setStepButtonEnabled(false);
-        uiController.addMessage('error', 'layers.errorUrlUnreachable', {}, false);
+        uiController.addMessage('error', 'layers.errorUrlUnreachable', {});
       });
     }
     if (activeStep === 1) {

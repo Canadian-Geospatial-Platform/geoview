@@ -239,7 +239,7 @@ export class EsriFeature extends AbstractGeoViewVector {
 
       // If we had to clean geometries, emit a warning message
       if (hadInvalidGeometries) {
-        this.emitMessage('warning.layer.invalidGeometry', { layerName: layerConfigEsriFeature.getLayerNameCascade() }, 'warning', true);
+        this.emitMessage('warning.layer.invalidGeometry', { layerName: layerConfigEsriFeature.getLayerNameCascade() }, 'warning');
       }
 
       return allFeatures;

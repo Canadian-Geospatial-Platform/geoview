@@ -107,16 +107,14 @@ export class Notifications {
    * @param type - The type of snackbar
    * @param messageKey - The message or a locale key to retrieve
    * @param params - Array of parameters to replace, i.e. ['short']
-   * @param button - Optional snackbar button
    */
-  #showSnackbarMessage(type: SnackbarType, messageKey: string, params: Record<string, unknown>, button?: ISnackbarButton): void {
+  #showSnackbarMessage(type: SnackbarType, messageKey: string, params: Record<string, unknown>): void {
     // Get the localized message
     const message = getLocalizedMessage(this.#uiController.getDisplayLanguage(), messageKey, params);
 
     const snackbar: SnackBarOpenEvent = {
       snackbarType: type,
       message,
-      button,
     };
     // Emit
     this.#emitSnackbarOpen(snackbar);
@@ -128,23 +126,10 @@ export class Notifications {
    * @param type - The type of snackbar
    * @param messageKey - The message or a locale key to retrieve
    * @param params - Array of parameters to replace, i.e. ['short']
-   * @param withNotification - Indicates if the message has also been added as a notification
-   * @param button - Optional snackbar button
    */
-  #addSnackbarMessage(
-    type: SnackbarType,
-    messageKey: string,
-    params: Record<string, unknown>,
-    withNotification: boolean,
-    button?: ISnackbarButton
-  ): void {
-    // If the snackbar message queue is already at four, push message to notifications, if it isn't there already
-    if (this.snackbarMessageQueue.length > 4 && !withNotification) {
-      if (type === 'error') this.addNotificationError(messageKey, params);
-      else if (type === 'success') this.addNotificationSuccess(messageKey, params);
-      else if (type === 'warning') this.addNotificationWarning(messageKey, params);
-      else this.addNotificationMessage(messageKey, params);
-    } else {
+  #addSnackbarMessage(type: SnackbarType, messageKey: string, params: Record<string, unknown>): void {
+    // If the snackbar message queue is not overflowing, add to it
+    if (this.snackbarMessageQueue.length <= 4) {
       // For multiple slow render warnings, replace individual layer messages with one generic one
       if (
         messageKey === 'warning.layer.slowRender' &&
@@ -183,7 +168,7 @@ export class Notifications {
       }
 
       // Add the message to the queue
-      this.snackbarMessageQueue.push({ type, messageKey, params, button });
+      this.snackbarMessageQueue.push({ type, messageKey, params });
 
       // Display the message if it is the only one
       if (this.snackbarMessageQueue.length === 1) this.displayNextSnackbarMessage();
@@ -196,53 +181,47 @@ export class Notifications {
   displayNextSnackbarMessage(): void {
     if (this.snackbarMessageQueue.length) {
       const nextMessage = this.snackbarMessageQueue[0];
-      this.#showSnackbarMessage(nextMessage.type, nextMessage.messageKey, nextMessage.params, nextMessage.button);
+      this.#showSnackbarMessage(nextMessage.type, nextMessage.messageKey, nextMessage.params);
     }
   }
 
   /**
-   * Displays a message in the snackbar.
+   * Displays a message in the snackbar and adds it to the notification panel.
    *
    * @param messageKey - The message or a locale key to retrieve
    * @param params - Optional array of parameters to replace, i.e. ['short']
-   * @param withNotification - Optional, indicates if the message should also be added as a notification (default true)
-   * @param button - Optional snackbar button
    */
-  showMessage(messageKey: string, params: Record<string, unknown> = {}, withNotification = true, button: ISnackbarButton = {}): void {
+  showMessage(messageKey: string, params: Record<string, unknown> = {}): void {
     // Redirect
-    this.#addSnackbarMessage('info', messageKey, params, withNotification, button);
-    if (withNotification) this.addNotificationMessage(messageKey, params);
+    this.#addSnackbarMessage('info', messageKey, params);
+    this.addNotificationMessage(messageKey, params);
   }
 
   /**
-   * Displays a success message in the snackbar.
+   * Displays a success message in the snackbar and adds it to the notification panel.
    *
    * @param messageKey - The message or a locale key to retrieve
    * @param params - Optional array of parameters to replace, i.e. ['short']
-   * @param withNotification - Optional, indicates if the message should also be added as a notification (default true)
-   * @param button - Optional snackbar button
    */
-  showSuccess(messageKey: string, params: Record<string, unknown> = {}, withNotification = true, button: ISnackbarButton = {}): void {
+  showSuccess(messageKey: string, params: Record<string, unknown> = {}): void {
     // Redirect
-    this.#addSnackbarMessage('success', messageKey, params, withNotification, button);
-    if (withNotification) this.addNotificationSuccess(messageKey, params);
+    this.#addSnackbarMessage('success', messageKey, params);
+    this.addNotificationSuccess(messageKey, params);
   }
 
   /**
-   * Displays a warning message in the snackbar.
+   * Displays a warning message in the snackbar and adds it to the notification panel.
    *
    * @param messageKey - The message or a locale key to retrieve
    * @param params - Optional array of parameters to replace, i.e. ['short']
-   * @param withNotification - Optional, indicates if the message should also be added as a notification (default true)
-   * @param button - Optional snackbar button
    */
-  showWarning(messageKey: string, params: Record<string, unknown> = {}, withNotification = true, button: ISnackbarButton = {}): void {
+  showWarning(messageKey: string, params: Record<string, unknown> = {}): void {
     // Also log the warning in console
     logger.logWarning(getLocalizedMessage(this.#uiController.getDisplayLanguage(), messageKey, params));
 
     // Redirect
-    this.#addSnackbarMessage('warning', messageKey, params, withNotification, button);
-    if (withNotification) this.addNotificationWarning(messageKey, params);
+    this.#addSnackbarMessage('warning', messageKey, params);
+    this.addNotificationWarning(messageKey, params);
   }
 
   /**
@@ -250,30 +229,26 @@ export class Notifications {
    *
    * @param messageKey - The message or a locale key to retrieve
    * @param params - Optional array of parameters to replace, i.e. ['short']
-   * @param withNotification - Optional, indicates if the message should also be added as a notification (default true)
-   * @param button - Optional snackbar button
    */
-  showError(messageKey: string, params: Record<string, unknown> = {}, withNotification = true, button: ISnackbarButton = {}): void {
+  showError(messageKey: string, params: Record<string, unknown> = {}): void {
     // Log the error in console
     logger.logError(getLocalizedMessage(this.#uiController.getDisplayLanguage(), messageKey, params));
 
     // Redirect
-    this.#addSnackbarMessage('error', messageKey, params, withNotification, button);
-    if (withNotification) this.addNotificationError(messageKey, params);
+    this.#addSnackbarMessage('error', messageKey, params);
+    this.addNotificationError(messageKey, params);
   }
 
   /**
    * Displays an error which can be a GeoViewError or a generic Error.
    *
    * @param error - The error to retrieve the message from and translate it
-   * @param withNotification - Optional, indicates if the message should also be added as a notification (default true)
-   * @param button - Optional snackbar button
    */
-  showErrorFromError(error: Error | unknown, withNotification = true, button: ISnackbarButton = {}): void {
+  showErrorFromError(error: Error | unknown): void {
     // If a GeoViewError, we know we have messageKeys for us as that's how we build our Errors
     if (error instanceof GeoViewError) {
       // Show the GeoViewError message
-      this.showError(error.messageKey, error.messageParams, withNotification, button);
+      this.showError(error.messageKey, error.messageParams);
       return;
     }
 
@@ -287,19 +262,16 @@ export class Notifications {
     logger.logError(message);
 
     // Show a generic error, because the error systems aren't necessarily for user to see nor translated.
-    this.showErrorGeneric(withNotification, button);
+    this.showErrorGeneric();
   }
 
   /**
-   * Displays a generic error message in the snackbar.
-   *
-   * @param withNotification - Optional, indicates if the message should also be added as a notification (default true)
-   * @param button - Optional snackbar button
+   * Displays a generic error message in the snackbar and adds it to the notification panel.
    */
-  showErrorGeneric(withNotification = true, button: ISnackbarButton = {}): void {
+  showErrorGeneric(): void {
     // Redirect
-    this.#addSnackbarMessage('error', 'error.generic', {}, withNotification, button);
-    if (withNotification) this.addNotificationError('error.generic', {});
+    this.#addSnackbarMessage('error', 'error.generic', {});
+    this.addNotificationError('error.generic', {});
   }
 
   // #endregion MESSAGES
@@ -346,14 +318,7 @@ type SnackBarOpenDelegate = EventDelegateBase<Notifications, SnackBarOpenEvent, 
 export type SnackBarOpenEvent = {
   snackbarType: SnackbarType;
   message: string;
-  button?: ISnackbarButton;
 };
-
-/** Snackbar button properties interface. */
-interface ISnackbarButton {
-  label?: string;
-  action?: () => void;
-}
 
 /** The supported snackbar message types. */
 export type SnackbarType = 'success' | 'error' | 'info' | 'warning';
@@ -363,5 +328,4 @@ export type SnackbarProps = {
   type: SnackbarType;
   messageKey: string;
   params: Record<string, unknown>;
-  button?: ISnackbarButton;
 };

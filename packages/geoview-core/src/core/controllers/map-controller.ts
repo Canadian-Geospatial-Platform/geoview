@@ -219,7 +219,7 @@ export class MapController extends AbstractMapViewerController {
     }
 
     // Invalid extent
-    this.getMapViewer().notifications.showWarning('error.map.invalidZoomExtent', {}, false);
+    this.getMapViewer().notifications.showWarning('error.map.invalidZoomExtent');
     throw new InvalidExtentError(extent);
   }
 
@@ -1312,7 +1312,7 @@ export class MapController extends AbstractMapViewerController {
         this.getControllersRegistry().layerCreatorController.removeLayerUsingPath(layer.getLayerPath());
 
         // Log
-        this.getMapViewer().notifications.showWarning('warning.layer.vectorTileRemoved', { layerName: layer.getLayerName() }, true);
+        this.getMapViewer().notifications.showWarning('warning.layer.vectorTileRemoved', { layerName: layer.getLayerName() });
       });
   }
 

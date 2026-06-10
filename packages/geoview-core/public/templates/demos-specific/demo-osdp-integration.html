@@ -234,7 +234,7 @@ function addLayers(layers) {
                   // Listen to layer removed event
                   mapViewer.layer.onLayerConfigRemoved((sender, payload) => {
                     mapViewer.notifications.addNotificationSuccess('LayerApi: ' + payload.layerName + ' removed'); // does not show on map
-                    mapViewer.notifications.showMessage('Layer '  + payload.layerName + ' removed', [], true); // true will add a notification
+                    mapViewer.notifications.showMessage('Layer '  + payload.layerName + ' removed');
                   });
                 });
               } catch (error) {
@@ -439,7 +439,7 @@ cgpv.api.getMapViewer('Map1').replaceMapConfigLayerNames(pairs, mapConfig, true)
             // Listen to layer removed event
             mapViewer.layer.onLayerConfigRemoved((sender, payload) => {
               mapViewer.notifications.addNotificationSuccess('LayerApi: ' + payload.layerName + ' removed'); // does not show on map
-              mapViewer.notifications.showMessage('Layer ' + payload.layerName + ' removed', [], true); // true will add a notification
+              mapViewer.notifications.showMessage('Layer ' + payload.layerName + ' removed');
             });
           });
         } catch (error) {
@@ -714,7 +714,7 @@ cgpv.api.getMapViewer('Map1').replaceMapConfigLayerNames(pairs, mapConfig, true)
         // Listen to layer removed event
         mapViewer.layer.onLayerConfigRemoved((sender, payload) => {
           mapViewer.notifications.addNotificationSuccess('LayerApi: ' + payload.layerName + ' removed'); // does not show on map
-          mapViewer.notifications.showMessage('Layer ' + payload.layerName + ' removed', [], true); // true will add a notification
+          mapViewer.notifications.showMessage('Layer ' + payload.layerName + ' removed');
         });
       });
 
