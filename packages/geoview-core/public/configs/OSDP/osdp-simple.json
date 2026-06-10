@@ -1,6 +1,6 @@
 {
   "map": {
-    "interaction": "static",
+    "interaction": "dynamic",
     "viewSettings": {
       "projection": 3978
     },
@@ -17,6 +17,17 @@
   ],
   "overviewMap": {
     "hideOnZoom": 7
+  },
+  "navBar": ["zoom"],
+  "appBar": {
+    "tabs": {
+      "core": []
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": []
+    }
   },
   "corePackages": [],
   "theme": "geo.ca"
