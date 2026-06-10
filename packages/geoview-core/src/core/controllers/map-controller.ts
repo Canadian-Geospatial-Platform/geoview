@@ -1003,9 +1003,13 @@ export class MapController extends AbstractMapViewerController {
    * Creates a map config based on current map state.
    *
    * @param overrideGeocoreServiceNames - Indicates if geocore layer names should be kept as is or returned to defaults
+   * @param includeFeatureInfo - Indicates if feature info should be included in the config for each layer
    * @returns The type map features instance
    */
-  createMapConfigFromMapState(overrideGeocoreServiceNames: boolean | 'hybrid' = true): TypeMapFeaturesInstance | undefined {
+  createMapConfigFromMapState(
+    overrideGeocoreServiceNames: boolean | 'hybrid' = true,
+    includeFeatureInfo = false
+  ): TypeMapFeaturesInstance | undefined {
     // Get the map id
     const mapId = this.getMapId();
 
@@ -1020,7 +1024,7 @@ export class MapController extends AbstractMapViewerController {
 
       // Build list of geoview layer configs
       const listOfGeoviewLayerConfig = layerOrder
-        .map((layerPath) => this.#createGeoviewLayerConfig(layerPath, overrideGeocoreServiceNames))
+        .map((layerPath) => this.#createGeoviewLayerConfig(layerPath, overrideGeocoreServiceNames, includeFeatureInfo))
         .filter((mapLayerEntry) => !!mapLayerEntry);
 
       // Get info for view
@@ -1372,9 +1376,14 @@ export class MapController extends AbstractMapViewerController {
    *
    * @param layerPath - Path of the layer to create config for
    * @param overrideGeocoreServiceNames - Indicates if geocore layer names should be kept as is or returned to defaults
+   * @param includeFeatureInfo - Whether to include feature info in the config
    * @returns Geoview layer config object
    */
-  #createGeoviewLayerConfig(layerPath: string, overrideGeocoreServiceNames: boolean | 'hybrid'): MapConfigLayerEntry | undefined {
+  #createGeoviewLayerConfig(
+    layerPath: string,
+    overrideGeocoreServiceNames: boolean | 'hybrid',
+    includeFeatureInfo: boolean
+  ): MapConfigLayerEntry | undefined {
     // Get the map id
     const mapId = this.getMapId();
 
@@ -1412,9 +1421,9 @@ export class MapController extends AbstractMapViewerController {
     const listOfLayerEntryConfig: TypeLayerEntryConfig[] = [];
     if (sublayerPaths.length && layerEntryConfig.layerId === 'base-group')
       sublayerPaths.forEach((sublayerPath) =>
-        listOfLayerEntryConfig.push(this.#createLayerEntryConfig(sublayerPath, isGeocore, overrideGeocoreServiceNames))
+        listOfLayerEntryConfig.push(this.#createLayerEntryConfig(sublayerPath, isGeocore, overrideGeocoreServiceNames, includeFeatureInfo))
       );
-    else listOfLayerEntryConfig.push(this.#createLayerEntryConfig(layerPath, isGeocore, overrideGeocoreServiceNames));
+    else listOfLayerEntryConfig.push(this.#createLayerEntryConfig(layerPath, isGeocore, overrideGeocoreServiceNames, includeFeatureInfo));
 
     // Get initial settings
     const initialSettings = MapController.#getInitialSettings(mapId, layerEntryConfig, legendLayerInfo!);
@@ -1456,10 +1465,16 @@ export class MapController extends AbstractMapViewerController {
    * @param layerPath - Path of the layer to create config for
    * @param isGeocore - Indicates if it is a geocore layer
    * @param overrideGeocoreServiceNames - Indicates if geocore layer names should be kept as is or returned to defaults
+   * @param includeFeatureInfo - Whether to include feature info in the config
    * @returns Entry config object
    * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path
    */
-  #createLayerEntryConfig(layerPath: string, isGeocore: boolean, overrideGeocoreServiceNames: boolean | 'hybrid'): TypeLayerEntryConfig {
+  #createLayerEntryConfig(
+    layerPath: string,
+    isGeocore: boolean,
+    overrideGeocoreServiceNames: boolean | 'hybrid',
+    includeFeatureInfo: boolean
+  ): TypeLayerEntryConfig {
     // Get needed info
     const mapId = this.getMapId();
 
@@ -1495,7 +1510,7 @@ export class MapController extends AbstractMapViewerController {
           entryLayerPath.startsWith(`${layerPath}/`) && entryLayerPath.split('/').length === layerPath.split('/').length + 1
       );
       sublayerPaths.forEach((sublayerPath) =>
-        listOfLayerEntryConfig.push(this.#createLayerEntryConfig(sublayerPath, isGeocore, overrideGeocoreServiceNames))
+        listOfLayerEntryConfig.push(this.#createLayerEntryConfig(sublayerPath, isGeocore, overrideGeocoreServiceNames, includeFeatureInfo))
       );
     }
 
@@ -1508,10 +1523,13 @@ export class MapController extends AbstractMapViewerController {
       source = layerEntryConfig.cloneSource();
     }
 
-    // Only use feature info specified in original config, not drawn from services
-    if (source?.featureInfo) delete source?.featureInfo;
-    const configLayerEntryConfigFeatureInfo = AbstractBaseLayerEntryConfig.getClassOrTypeFeatureInfo(configLayerEntryConfig);
-    if (source && configLayerEntryConfigFeatureInfo) source.featureInfo = configLayerEntryConfigFeatureInfo;
+    // Remove full feature info unless requested to reduce the size of the config file
+    if (!includeFeatureInfo) {
+      // We want to remove everything that was not specified in the original config and replace with metadata from layers on load
+      if (source?.featureInfo) delete source?.featureInfo;
+      const configLayerEntryConfigFeatureInfo = AbstractBaseLayerEntryConfig.getClassOrTypeFeatureInfo(configLayerEntryConfig);
+      if (source && configLayerEntryConfigFeatureInfo) source.featureInfo = configLayerEntryConfigFeatureInfo;
+    }
 
     if (source?.dataAccessPath && isGeocore && overrideGeocoreServiceNames !== true) source.dataAccessPath = undefined;
 
