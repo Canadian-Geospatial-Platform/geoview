@@ -985,6 +985,30 @@ When the same geocore UUID appears multiple times in a map config, `Config.preva
 
 **Key pitfall:** `isValidUUID()` in `core/utils/utilities.ts` uses strict regex `/^[0-9a-f]{8}-...-[0-9a-f]{12}$/i` — it rejects suffixed UUIDs like `uuid:ab123456`. Any code using `isValidUUID` to detect geocore entries must account for the `:suffix` format.
 
+### GeoCore VCS Package Config Extraction
+
+The GeoCore VCS API (`https://geocore.api.geo.ca/vcs?lang={lang}&id={uuid}`) returns per-layer package configs in `response.gcs[].{lang}.packages`. Each package type (geochart, time-slider, etc.) has its own extraction method in `UUIDmapConfigReader` — they are **not** handled by a generic extractor because each type has unique parsing needs (e.g., geochart requires `.layers` array transformation and `.trim()` cleanup; time-slider is passed through as-is).
+
+**Extraction pipeline:**
+
+1. `UUIDmapConfigReader.#getTimeSliderConfigFromResponse()` / `#getGeoChartConfigFromResponse()` — Parse VCS response per package type
+2. `GeoCore.createLayerConfigFromUUID()` — Passes configs through in `GeoCoreLayerConfigResponse`
+3. `LayerCreatorController` — Merges into `mapFeaturesConfig.corePackagesConfig` via `mergeTimeSliderConfigsIntoCorePackages()`
+
+**Three consumption paths** — When adding GeoCore VCS config support for a new package type, all three must be updated:
+
+1. **Initial load** (`loadListOfGeoviewLayer` → `convertMapConfigToGeoviewLayerConfig` callback)
+2. **Runtime UUID add** (`addGeoviewLayerByGeoCoreUUID` — direct merge after response)
+3. **Add Layer UI** (`add-new-layer.tsx` — state variable + merge before `addGeoviewLayer`)
+
+**Config source: `mapFeaturesConfig` vs Zustand store** — GeoCore merges package configs into `mapFeaturesConfig.corePackagesConfig` at runtime (after the layer resolves from the API). Controllers that read package configs during layer registration must read from `this.getMapViewer().mapFeaturesConfig.corePackagesConfig`, NOT from the store (`getStoreMapConfigCorePackagesConfig`), because the store snapshot may not yet reflect the merged configs.
+
+**Time-slider dual-init and override semantics:**
+
+- The time-slider has two init paths: (1) `tryRegisterLayer` triggered by domain layer-loaded events, (2) `initTimeSliderPlugin()` in the plugin's `onAdd`. Path 1 runs first and uses VCS-merged configs from `mapFeaturesConfig`. Path 2 must skip layers already registered by path 1.
+- VCS `timeDimension` **overrides** the layer's metadata-derived `timeDimension` (not a fallback). This is because VCS configs are curated by data publishers and may correct or customize the raw service metadata.
+- The `tryRegisterLayer` condition must accept layers that have either a VCS slider config OR a metadata time dimension: `if (layerSliderConfig || (layer.getIsTimeAware() && layer.getTimeDimension()))`.
+
 ### Partial Layer Loading & Group Status Propagation
 
 **Partial loading** — When a GeoView layer has multiple sub-layers and some fail validation (e.g., invalid layer IDs), the valid sub-layers must still load and render. In `createGeoViewLayers()` (`abstract-geoview-layers.ts`):

@@ -211,7 +211,7 @@ class TimeSliderPlugin extends FooterPlugin {
    * Sets the date display format for a given layer.
    * This controls how date values are rendered in the time slider UI.
    * @param layerPath - Path identifying the target layer
-   * @param displayDateFormatShort - Date format configuration to apply
+   * @param displayDateFormat - Date format configuration to apply
    */
   setDisplayDateFormatShort(layerPath: string, displayDateFormat: TypeDisplayDateFormat | string): void {
     // Make sure of the input format

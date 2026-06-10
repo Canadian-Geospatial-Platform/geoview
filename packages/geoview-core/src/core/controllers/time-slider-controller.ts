@@ -17,7 +17,6 @@ import {
   type TypeTimeSliderProps,
   type TypeTimeSliderValues,
 } from '@/core/stores/states/time-slider-state';
-
 import { logger } from '@/core/utils/logger';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
