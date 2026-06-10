@@ -18,12 +18,7 @@
   "overviewMap": {
     "hideOnZoom": 7
   },
-  "navBar": [
-    "zoom",
-    "rotation",
-    "location",
-    "basemap-select"
-  ],
+  "navBar": ["zoom"],
   "appBar": {
     "tabs": {
       "core": [
