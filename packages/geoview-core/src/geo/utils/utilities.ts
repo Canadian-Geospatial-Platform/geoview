@@ -371,6 +371,7 @@ export abstract class GeoUtilities {
    *
    * @param url - The url the url of the WMS server
    * @param layers - The layers to query separate by
+   * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
    * @param abortSignal - Optional abort signal to handle cancelling of the process
    * @returns A promise that resolves with the parsed WMTS metadata
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration
@@ -379,12 +380,17 @@ export abstract class GeoUtilities {
    * @throws {ResponseEmptyError} When the JSON response is empty
    * @throws {NetworkError} When a network issue happened
    */
-  static async getWMTSServiceMetadata(url: string, layers?: string, abortSignal?: AbortSignal): Promise<TypeMetadataWMTS> {
+  static async getWMTSServiceMetadata(
+    url: string,
+    layers?: string,
+    callbackNewMetadataUrl?: CallbackNewMetadataDelegate,
+    abortSignal?: AbortSignal
+  ): Promise<TypeMetadataWMTS> {
     // Make sure the URL has necessary information
     const capUrl = this.ensureServiceRequestUrlGetCapabilities(url, 'WMTS', layers);
 
     // Redirect
-    const metadataRaw = await this.getWMSServiceString(capUrl, undefined, abortSignal);
+    const metadataRaw = await this.getWMSServiceString(capUrl, callbackNewMetadataUrl, abortSignal);
 
     // Parse it
     const metadataParsed = parseXMLToJson<TypeMetadataWMTS>(metadataRaw);

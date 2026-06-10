@@ -107,13 +107,12 @@ export class WMS extends AbstractGeoViewRaster {
   /**
    * Overrides the way a geoview layer config initializes its layer entries.
    *
-   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves once the layer entries have been initialized
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
    */
-  protected override async onInitLayerEntries(abortSignal?: AbortSignal): Promise<TypeGeoviewLayerConfig> {
+  protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Get the metadata and leave the metadataAccessPath unchanged, even if a proxy had to be used
-    const metadata = await this.fetchServiceMetadataWMS(false, abortSignal);
+    const metadata = await this.fetchServiceMetadataWMS(false);
 
     // Based on the capabilities
     const layers = metadata!.Capability.Layer.Layer;
