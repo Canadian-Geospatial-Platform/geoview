@@ -294,7 +294,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    *
    * Fired only on the wave-terminating `tileloaderror` (i.e. when the in-flight counter transitions back to 0). Tile
    * errors arriving mid-burst, while other tiles are still loading, are absorbed by the counter and do not reach this
-   * method — only the error that closes out the wave is reported.
+   * method - only the error that closes out the wave is reported.
    *
    * @param error - The error which is being raised
    */
@@ -1259,7 +1259,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    *
    * Reconciles the in-flight counter (errors are terminators per the OL contract). The overridable `onImageTileLoadError`
    * is fired only on the 1=>0 transition; per-tile errors that arrive while other tiles are still loading are absorbed
-   * silently — only the error that closes out the wave is reported. The handler does not call `onLoaded()`; status
+   * silently - only the error that closes out the wave is reported. The handler does not call `onLoaded()`; status
    * remains unchanged because `#processTileLoadError` treats tile errors as non-fatal for the layer.
    *
    * @param event - The event which is being triggered
