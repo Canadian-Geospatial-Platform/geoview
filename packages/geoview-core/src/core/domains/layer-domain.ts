@@ -524,6 +524,13 @@ export class LayerDomain {
    * @param gvLayer - The GeoView layer to register
    */
   registerGVLayer(gvLayer: AbstractBaseGVLayer): void {
+    // Keep the log line commented, for debugging
+    // logger.logDebug('registerGVLayer', gvLayer.getLayerPath(), this.#layerEntryConfigs[gvLayer.getLayerPath()], gvLayer);
+
+    // Before registering the layer, validate if the layer entry is still there
+    // GV Maybe the user deleted/cancelled the process before the layer had a change to get created
+    if (!this.#layerEntryConfigs[gvLayer.getLayerPath()]) return;
+
     // Keep it
     this.#gvLayers[gvLayer.getLayerPath()] = gvLayer;
     this.#olLayers[gvLayer.getLayerPath()] = gvLayer.getOLLayer();

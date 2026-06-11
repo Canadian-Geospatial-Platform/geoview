@@ -346,13 +346,19 @@ export abstract class AbstractLayerSet {
         sender.offLayerStatusChanged(this.#boundedHandleLayerStatusChanged);
 
         // Get the layer
-        const layer = this.layerDomain.getGeoviewLayer(sender.layerPath);
+        const layer = this.layerDomain.getGeoviewLayerIfExists(sender.layerPath);
 
-        // Register the layer itself (not the layer config) automatically in the layer set
-        this.registerLayer(layer).catch((error: unknown) => {
+        // If the layer exists (hasn't been deleted meanwhile)
+        if (layer) {
+          // Register the layer itself (not the layer config) automatically in the layer set
+          this.registerLayer(layer).catch((error: unknown) => {
+            // Log
+            logger.logPromiseFailed('in registerLayer in #handleLayerStatusChanged', error);
+          });
+        } else {
           // Log
-          logger.logPromiseFailed('in registerLayer in #handleLayerStatusChanged', error);
-        });
+          logger.logWarning(`The layer ${sender.layerPath} turned into a 'loaded' state, but wasn't on the map anymore.`);
+        }
       }
     } catch (error: unknown) {
       // Error happened when trying to register the layer coming from the layer config
