@@ -1181,6 +1181,9 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * slow-render watcher tied to that wave snapshot, and calls the overridable `onLoading()`.
    */
   #handleLoadStart(): void {
+    // Keep the line error, commented, for debugging
+    // logger.logDebug('handleLoadStart', this.getLayerPath(), this.#inFlightCount);
+
     // First load in flight => open a new loading wave
     if (this.#inFlightCount === 0) {
       this.#loadingWaveId++;
@@ -1198,6 +1201,9 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * `*loadend` events while other loads are still in flight are absorbed silently.
    */
   #handleLoadEnd(): void {
+    // Keep the line error, commented, for debugging
+    // logger.logDebug('handleLoadEnd', this.getLayerPath(), this.#inFlightCount);
+
     // Per OL contract, featuresloadend/imageloadend/tileloadend is a terminator like featuresloaderror/imageloaderror/tileloaderror => reconcile to keep the counter accurate for future waves
     const wasLast = this.#decrementInFlight();
     if (!wasLast) return;
@@ -1216,6 +1222,9 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param event - The event which is being triggered
    */
   #handleFeaturesLoadError(event: Event): void {
+    // Keep the line error, commented, for debugging
+    // logger.logDebug('handleFeaturesLoadError', this.getLayerPath(), this.#inFlightCount);
+
     // Log
     logger.logError(`An error happened on the layer: ${this.getLayerPath()} after it was processed and added on the map.`, event);
 
@@ -1240,6 +1249,9 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param event - The event which is being triggered
    */
   #handleImageLoadError(event: Event): void {
+    // Keep the line error, commented, for debugging
+    // logger.logDebug('handleTileLoadError', this.getLayerPath(), this.#inFlightCount);
+
     // Log
     logger.logError(`Error loading source image for layer: ${this.getLayerPath()}.`, event);
 
@@ -1265,6 +1277,9 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param event - The event which is being triggered
    */
   #handleTileLoadError(event: Event): void {
+    // Keep the line error, commented, for debugging
+    // logger.logDebug('handleTileLoadError', this.getLayerPath(), this.#inFlightCount);
+
     // Log
     logger.logWarning(`A tile couldn't be loaded on the layer: ${this.getLayerPath()}.`, event);
 
@@ -1296,7 +1311,20 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param event - The event which is being triggered
    */
   #handleSourceChange(event: Event): void {
+    // Keep the line error, commented, for debugging
+    // logger.logDebug('handleTileLoadError', this.getLayerPath(), this.#inFlightCount);
+
     const state = this.#olSource.getState();
+
+    // Source was reconfigured (e.g., projection change). OL aborts in-flight tile XHRs without firing
+    // tileloadend/tileloaderror, so reconcile the counter and invalidate the dead wave's watcher.
+    // Do NOT call onLoaded() here — the new wave's terminator (tileloadend) will do that.
+    if (this.#inFlightCount > 0) {
+      logger.logDebug(`Source change on ${this.getLayerPath()}: discarding ${this.#inFlightCount} phantom in-flight loads`);
+      this.#inFlightCount = 0;
+      this.#loadingWaveId++; // invalidate the slow-render watcher tied to the dead wave
+    }
+
     if (state === 'error') {
       // Decipher the error, allowing children classes to be more specific
       const gvError = this.onErrorDecipherError(event);
