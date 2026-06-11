@@ -22,12 +22,11 @@
       {
         "geoviewLayerId": "wfsLYR1",
         "geoviewLayerName": "Error metadata",
-        "metadataAccessPath": "https://ahocevar.com/geoserver/wfs?REQUEST=GetCapabilities&VERSION=2.0.0&SERVICE=WFSERROR",
+        "metadataAccessPath": "https://ahocevar.com/geoserver/wfsERROR?REQUEST=GetCapabilities&VERSION=2.0.0",
         "geoviewLayerType": "ogcWfs",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "usa:states",
-            "layerName": "US States"
+            "layerId": "usa:states"
           }
         ]
       },
@@ -38,8 +37,7 @@
         "geoviewLayerType": "ogcWfs",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "usa:statesERROR",
-            "layerName": "US States"
+            "layerId": "usa:statesERROR"
           }
         ]
       }
