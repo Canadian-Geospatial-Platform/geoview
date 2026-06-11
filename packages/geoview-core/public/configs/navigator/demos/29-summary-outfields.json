@@ -1,0 +1,290 @@
+{
+  "configMeta": {
+    "description": "Demonstrates the summary flag on outfields across layer types. U2 esriFeature hides City and Date. NRCan esriDynamic hides Commodity Group, Longitude and Latitude. GeoJSON points hide Orange and creationDate. OGC Feature lakes hide admin_level. CSV Shoreline hides OBJECTID, SHAPE_LENGTH and CREATEDBY. CESI uses defaults (all fields visible)."
+  },
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": true,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "u2TourLyr",
+        "geoviewLayerName": "U2 Tour Locations",
+        "metadataAccessPath": "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/U2/FeatureServer/",
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "layerName": "U2 Tours (summary demo)",
+            "source": {
+              "featureInfo": {
+                "queryable": true,
+                "nameField": "Tour",
+                "outfields": [
+                  {
+                    "name": "Venue",
+                    "alias": "Venue",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Event",
+                    "alias": "Event",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Tour",
+                    "alias": "Tour Name",
+                    "type": "string"
+                  },
+                  {
+                    "name": "City",
+                    "alias": "City",
+                    "type": "string",
+                    "summary": false
+                  },
+                  {
+                    "name": "Date",
+                    "alias": "Date",
+                    "type": "date",
+                    "summary": false
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "cesiLyr",
+        "geoviewLayerName": "CESI Indicators",
+        "metadataAccessPath": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/",
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "1",
+            "layerName": "CESI (all fields visible no featureInfo config, default summary behaviour)",
+            "layerFilter": "E_Province = 'Alberta' or E_Province = 'Manitoba'"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "nrcanTopProjectsLyr",
+        "geoviewLayerName": "NRCan Top Projects (esriDynamic summary demo)",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/900A_and_top_100_en/MapServer",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "layerName": "Top Projects (summary demo)",
+            "source": {
+              "featureInfo": {
+                "queryable": true,
+                "nameField": "project_name",
+                "outfields": [
+                  {
+                    "name": "project_name",
+                    "alias": "Project Name",
+                    "type": "string"
+                  },
+                  {
+                    "name": "province_en",
+                    "alias": "Province",
+                    "type": "string"
+                  },
+                  {
+                    "name": "commodity_group_en",
+                    "alias": "Commodity Group",
+                    "type": "string",
+                    "summary": false
+                  },
+                  {
+                    "name": "longitude",
+                    "alias": "Longitude",
+                    "type": "number",
+                    "summary": false
+                  },
+                  {
+                    "name": "latitude",
+                    "alias": "Latitude",
+                    "type": "number",
+                    "summary": false
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "geojsonLyr",
+        "geoviewLayerName": "GeoJSON Points (summary demo)",
+        "metadataAccessPath": "./datasets/geojson/metadata.meta",
+        "geoviewLayerType": "GeoJSON",
+        "serviceDateFormat": "DD/MM/YYYYTHH:mm:ss",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "points.json",
+            "layerName": "Points (summary demo)",
+            "source": {
+              "featureInfo": {
+                "queryable": true,
+                "nameField": "Red",
+                "outfields": [
+                  {
+                    "name": "Red",
+                    "alias": "Red Value",
+                    "type": "number"
+                  },
+                  {
+                    "name": "Green",
+                    "alias": "Green Value",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Blue",
+                    "alias": "Blue Value",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Yellow",
+                    "alias": "Yellow Value",
+                    "type": "string"
+                  },
+                  {
+                    "name": "Orange",
+                    "alias": "Orange Value",
+                    "type": "number",
+                    "summary": false
+                  },
+                  {
+                    "name": "creationDate",
+                    "alias": "Creation Date",
+                    "type": "date",
+                    "summary": false
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "ogcFeatureLyr",
+        "geoviewLayerName": "Large Lakes (summary demo)",
+        "metadataAccessPath": "https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev",
+        "geoviewLayerType": "ogcFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "lakes",
+            "layerName": "Lakes (summary demo)",
+            "layerFilter": "name in ('Lake Victoria', 'Lake Superior', 'L. Erie', 'L. Ontario')",
+            "source": {
+              "featureInfo": {
+                "queryable": true,
+                "nameField": "name",
+                "outfields": [
+                  {
+                    "name": "name",
+                    "alias": "Lake Name",
+                    "type": "string"
+                  },
+                  {
+                    "name": "admin_level",
+                    "alias": "Admin Level",
+                    "type": "number",
+                    "summary": false
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "csvShorelineLyr",
+        "geoviewLayerName": "Shoreline Classification BC (CSV summary demo)",
+        "metadataAccessPath": "./datasets/csv-files/",
+        "geoviewLayerType": "CSV",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "ShorelineClassification_BC",
+            "layerName": "Shoreline BC (summary demo)",
+            "source": {
+              "separator": ";",
+              "dataProjection": "EPSG:3857",
+              "featureInfo": {
+                "queryable": true,
+                "nameField": "SCAT_CLASS_EN",
+                "outfields": [
+                  {
+                    "name": "SCAT_CLASS_EN",
+                    "alias": "Classification (EN)",
+                    "type": "string"
+                  },
+                  {
+                    "name": "SCAT_CLASS_FR",
+                    "alias": "Classification (FR)",
+                    "type": "string"
+                  },
+                  {
+                    "name": "PROVINCEEXTENT",
+                    "alias": "Province",
+                    "type": "string"
+                  },
+                  {
+                    "name": "OBJECTID",
+                    "alias": "Object ID",
+                    "type": "number",
+                    "summary": false
+                  },
+                  {
+                    "name": "SHAPE_LENGTH",
+                    "alias": "Shape Length",
+                    "type": "number",
+                    "summary": false
+                  },
+                  {
+                    "name": "CREATEDBY",
+                    "alias": "Created By",
+                    "type": "string",
+                    "summary": false
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "components": [
+    "overview-map",
+    "north-arrow"
+  ],
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "legend",
+        "details",
+        "export"
+      ]
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "layers",
+        "data-table"
+      ]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca"
+}

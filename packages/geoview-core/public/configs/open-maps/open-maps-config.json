@@ -21,7 +21,8 @@
     "home",
     "location",
     "measurement",
-    "basemap-select"
+    "basemap-select",
+    "projection"
   ],
   "appBar": {
     "tabs": {

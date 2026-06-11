@@ -12,7 +12,7 @@
       "additionalProperties": false,
       "type": "object",
       "properties": {
-         "configMeta": {
+        "configMeta": {
           "$ref": "#/definitions/TypeConfigMeta"
         },
         "map": {
@@ -731,6 +731,11 @@
               "$ref": "#/definitions/rangeDomainType"
             }
           ]
+        },
+        "summary": {
+          "description": "Whether this field appears in summary views (e.g., Details panel). Default = true.",
+          "type": "boolean",
+          "default": true
         }
       },
       "required": ["name", "alias", "type"]
