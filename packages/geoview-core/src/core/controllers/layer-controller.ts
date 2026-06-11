@@ -2023,13 +2023,17 @@ export class LayerController extends AbstractMapViewerController {
    * @param event - The event containing the registered layer
    */
   #handleDomainLayerRegistered(sender: LayerDomain, event: DomainLayerRegisteredEvent): void {
-    // Calculate the bounds upon creation
-    LayerController.initBoundsForLayerAndParentsAndForget(
-      this.getMapId(),
-      event.layer,
-      this.getMapViewer().getProjection(),
-      MapViewer.DEFAULT_STOPS
-    );
+    // If a non-vector layer has been registered
+    // GV Vector layers get their bounds set only when they are 'loaded'
+    if (!(event.layer instanceof AbstractGVVector)) {
+      // Calculate the bounds upon creation
+      LayerController.initBoundsForLayerAndParentsAndForget(
+        this.getMapId(),
+        event.layer,
+        this.getMapViewer().getProjection(),
+        MapViewer.DEFAULT_STOPS
+      );
+    }
   }
 
   /**
@@ -2116,6 +2120,7 @@ export class LayerController extends AbstractMapViewerController {
    */
   #handleDomainLayerLoadedChanged(sender: LayerDomain, event: DomainLayerBaseEvent): void {
     // If a vector layer has been loaded
+    // GV Vector layers get their bounds set only when they are 'loaded'
     if (event.layer instanceof AbstractGVVector) {
       // Calculate the bounds as those depend on the actual features in the layer
       LayerController.initBoundsForLayerAndParentsAndForget(

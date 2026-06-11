@@ -45,18 +45,6 @@
       },
       {
         "geoviewLayerType": "ogcWmts",
-        "metadataAccessPath": "https://data.geopf.fr/wmts",
-        "geoviewLayerId": "geopf",
-        "useAsBasemap": true,
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2",
-            "tileMatrixSet": "PM_0_19"
-          }
-        ]
-      },
-      {
-        "geoviewLayerType": "ogcWmts",
         "metadataAccessPath": "https://mrdata.usgs.gov/mapcache/wmts",
         "geoviewLayerId": "sgmc2",
         "geoviewLayerName": "sgmc2",
@@ -91,6 +79,18 @@
           {
             "layerId": "2",
             "tileMatrixSet": "default028mm"
+          }
+        ]
+      },
+      {
+        "geoviewLayerType": "ogcWmts",
+        "metadataAccessPath": "https://data.geopf.fr/wmts",
+        "geoviewLayerId": "geopf",
+        "useAsBasemap": true,
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2",
+            "tileMatrixSet": "PM_0_19"
           }
         ]
       }

@@ -6,6 +6,7 @@ import type { Extent } from 'ol/extent';
 import type Feature from 'ol/Feature';
 import type { Layer } from 'ol/layer';
 import type Source from 'ol/source/Source';
+import TileSource from 'ol/source/Tile';
 import type { Projection as OLProjection } from 'ol/proj';
 import type { Map as OLMap } from 'ol';
 import { getUid } from 'ol';
@@ -50,7 +51,7 @@ import { formatError, NotImplementedError, NotSupportedError } from '@/core/exce
 import { LayerNotQueryableError, LayerStatusErrorError, LayerStyleGeometryNotFoundError } from '@/core/exceptions/layer-exceptions';
 import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
 import { LayerFilters, type FilterCategory } from '@/geo/layer/gv-layers/layer-filters';
-import { delay, whenThisThen } from '@/core/utils/utilities';
+import { delay, doTimeout, whenThisThen, type DelayJob } from '@/core/utils/utilities';
 import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 
 /**
@@ -62,6 +63,9 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
   /** The default loading period before we show a message to the user about a layer taking a long time to render on map. */
   static readonly DEFAULT_LOADING_PERIOD: number = 8 * 1000; // 8 seconds
+
+  /** Quiescence period after a tile source change with no tile-load activity before remaining in-flight tiles are treated as orphans and force-closed. */
+  static readonly TILE_LOADING_QUIESCENCE_PERIOD: number = 3 * 1000; // 3 seconds
 
   /** Keywords used to identify name fields in the layer's outfields when none specified. */
   static readonly NAME_FIELD_KEYWORDS = [
@@ -89,6 +93,9 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
   /** Per-wave session id bumped on each 0=>1 transition of `#inFlightCount`; used by the slow-render watcher to detect supersession. */
   #loadingWaveId = 0;
+
+  /** Quiescence watcher armed after a tile source change; reconciles orphan in-flight tile loads when tile-load activity goes quiet. */
+  #tileSourceQuiescenceJob?: DelayJob;
 
   /** The OpenLayer source. */
   #olSource: Source;
@@ -1192,6 +1199,9 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
       this.onLoading();
     }
     this.#inFlightCount++;
+
+    // Activity => re-arm the tile-source quiescence watcher if armed (no-op when not armed, i.e. non-tile sources)
+    this.#rearmTileSourceQuiescenceWatcher();
   }
 
   /**
@@ -1206,6 +1216,11 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
     // Per OL contract, featuresloadend/imageloadend/tileloadend is a terminator like featuresloaderror/imageloaderror/tileloaderror => reconcile to keep the counter accurate for future waves
     const wasLast = this.#decrementInFlight();
+
+    // Activity => re-arm the tile-source quiescence watcher if armed (or cancel if the wave is now closed)
+    if (wasLast) this.#cancelTileSourceQuiescenceWatcher();
+    else this.#rearmTileSourceQuiescenceWatcher();
+
     if (!wasLast) return;
 
     // Last load settled => the wave is complete
@@ -1230,6 +1245,11 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
     // Per OL contract, featuresloaderror is a terminator like featuresloadend => reconcile to keep the counter accurate for future waves
     const wasLast = this.#decrementInFlight();
+
+    // Activity => re-arm the tile-source quiescence watcher if armed (or cancel if the wave is now closed)
+    if (wasLast) this.#cancelTileSourceQuiescenceWatcher();
+    else this.#rearmTileSourceQuiescenceWatcher();
+
     if (!wasLast) return;
 
     // Decipher the error, allowing children classes to be more specific (ex: Vector specific errors)
@@ -1257,6 +1277,11 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
     // Per OL contract, imageloaderror is a terminator like imageloadend => reconcile to keep the counter accurate for future waves
     const wasLast = this.#decrementInFlight();
+
+    // Activity => re-arm the tile-source quiescence watcher if armed (or cancel if the wave is now closed)
+    if (wasLast) this.#cancelTileSourceQuiescenceWatcher();
+    else this.#rearmTileSourceQuiescenceWatcher();
+
     if (!wasLast) return;
 
     // Decipher the error, allowing children classes to be more specific (ex: WMS GetMap specific errors)
@@ -1285,6 +1310,11 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
     // Per OL contract, tileloaderror is a terminator like tileloadend => reconcile and, if last in flight, mark loaded
     const wasLast = this.#decrementInFlight();
+
+    // Activity => re-arm the tile-source quiescence watcher if armed (or cancel if the wave is now closed)
+    if (wasLast) this.#cancelTileSourceQuiescenceWatcher();
+    else this.#rearmTileSourceQuiescenceWatcher();
+
     if (!wasLast) return;
 
     // Decipher the error, allowing children classes to be more specific (ex: Vector specific errors)
@@ -1306,7 +1336,23 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   }
 
   /**
-   * Method called when the layer source changes to check for errors.
+   * Handles a `change` event from the OL source: surfaces source errors and, for tile sources only, arms the
+   * orphan-load reconciliation watcher.
+   *
+   * Why tile-source-only? OL silently abandons in-flight tile loads when the tile grid is recomputed (e.g. on a
+   * projection switch) - those tiles never fire `tileloadend`/`tileloaderror`, so the in-flight counter would leak
+   * forever and the layer would stay stuck in `loading`. The other source families do not have this leak window:
+   *  - `VectorSource` fires `change` from `addFeatures()` mid-load, so arming on every change would clobber the
+   *    counter; vector loads always reach a terminator (`featuresloadend`/`featuresloaderror`) on their own.
+   *  - `ImageSource` (WMS/ArcGISRest/Static) only ever has one request in flight at a time and replaces it cleanly
+   *    on source mutation, so the leak window does not occur in practice.
+   *
+   * Reconciliation strategy: arm a quiescence watcher (see `#armTileSourceQuiescenceWatcher`). We cannot reset the
+   * counter eagerly because at source-change time the count may already include the new wave's `tileloadstart` events
+   * that fired synchronously between the projection switch and this source `change` event - wiping them out would
+   * leave their terminators clamped at zero in `#decrementInFlight` and the wave would never reach `onLoaded()`.
+   * Instead we wait for tile-load activity to genuinely settle; whatever is still in flight at that point is
+   * guaranteed orphan.
    *
    * @param event - The event which is being triggered
    */
@@ -1316,22 +1362,73 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
     const state = this.#olSource.getState();
 
-    // Source was reconfigured (e.g., projection change). OL aborts in-flight tile XHRs without firing
-    // tileloadend/tileloaderror, so reconcile the counter and invalidate the dead wave's watcher.
-    // Do NOT call onLoaded() here — the new wave's terminator (tileloadend) will do that.
-    if (this.#inFlightCount > 0) {
-      logger.logDebug(`Source change on ${this.getLayerPath()}: discarding ${this.#inFlightCount} phantom in-flight loads`);
-      this.#inFlightCount = 0;
-      this.#loadingWaveId++; // invalidate the slow-render watcher tied to the dead wave
-    }
-
     if (state === 'error') {
       // Decipher the error, allowing children classes to be more specific
       const gvError = this.onErrorDecipherError(event);
 
       // Call overridable method
       this.onSourceError(gvError);
+      return;
     }
+
+    // Tile sources are the only family that needs orphan-load reconciliation (see JSDoc for the per-source-type rationale)
+    if (this.#olSource instanceof TileSource) {
+      this.#armTileSourceQuiescenceWatcher();
+    }
+  }
+
+  /**
+   * Arms a tile-source quiescence watcher that fires after `TILE_LOADING_QUIESCENCE_PERIOD` ms of no tile-load activity.
+   *
+   * Only ever invoked from `#handleSourceChange` after a `TileSource` mutation. Any prior watcher is cancelled and
+   * replaced. The watcher is re-armed by every `*loadstart`/`*loadend`/`*loaderror` (see
+   * `#rearmTileSourceQuiescenceWatcher`), so as long as OL is actively loading tiles the timer keeps sliding forward.
+   * When it finally fires, tile-load activity has been quiet for the full period: if `#inFlightCount > 0` at that
+   * point, those remaining loads are orphans from the pre-mutation tile source and we force-close the wave.
+   */
+  #armTileSourceQuiescenceWatcher(): void {
+    this.#tileSourceQuiescenceJob?.cancel();
+    const job = doTimeout(AbstractGVLayer.TILE_LOADING_QUIESCENCE_PERIOD);
+    this.#tileSourceQuiescenceJob = job;
+    job.promise
+      .then((result) => {
+        // If this job is no longer the active one, a newer arm superseded us; bail out
+        if (this.#tileSourceQuiescenceJob !== job) return;
+        // Only the natural 'timeout' result indicates true quiescence; 'cancelled' means we were re-armed or stopped
+        if (result !== 'timeout') return;
+        this.#tileSourceQuiescenceJob = undefined;
+        if (this.#inFlightCount === 0) return;
+        logger.logDebug('handleSourceChange quiescence - discarding phantom loads', this.getLayerPath(), this.#inFlightCount);
+        this.#inFlightCount = 0;
+        this.#loadingWaveId++;
+        this.onLoaded();
+      })
+      .catch((error: unknown) => logger.logPromiseFailed('Quiescence watcher in #armTileSourceQuiescenceWatcher failed', error));
+  }
+
+  /**
+   * Re-arms the tile-source quiescence watcher if it is currently armed.
+   *
+   * Called from every load activity handler (`#handleLoadStart`, `#handleLoadEnd`, `#handleFeaturesLoadError`,
+   * `#handleImageLoadError`, `#handleTileLoadError`) so that ongoing tile loads keep the timer alive. No-op when no
+   * watcher is armed - which is the normal case for non-tile sources and for tile sources outside a source-change
+   * window - so the cost stays negligible during regular loading waves.
+   */
+  #rearmTileSourceQuiescenceWatcher(): void {
+    if (!this.#tileSourceQuiescenceJob) return;
+    this.#armTileSourceQuiescenceWatcher();
+  }
+
+  /**
+   * Cancels the tile-source quiescence watcher if armed.
+   *
+   * Called from `#handleLoadEnd`, `#handleFeaturesLoadError`, `#handleImageLoadError`, and `#handleTileLoadError`
+   * when the in-flight counter naturally reaches zero. At that point the wave closed cleanly and no orphan
+   * reconciliation is needed.
+   */
+  #cancelTileSourceQuiescenceWatcher(): void {
+    this.#tileSourceQuiescenceJob?.cancel();
+    this.#tileSourceQuiescenceJob = undefined;
   }
 
   /**
