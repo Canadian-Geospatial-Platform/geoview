@@ -523,7 +523,7 @@ export class GVWMS extends AbstractGVRaster {
     const xmlFilter = WfsRenderer.sqlToOlFilterXml(sqlFilter, wfsLayerConfig.getVersionOrDefault(), pkFieldName);
 
     // Wrap the ogc filter request
-    const xmlFilterReady = WfsRenderer.wrapOGCFilter(xmlFilter, 'wfs', wfsLayerConfig.getVersionOrDefault());
+    const xmlFilterReady = WfsRenderer.wrapOGCFilter(xmlFilter, 'wfs', wfsLayerConfig.getVersionIsHigherThan2());
 
     // Get the supported info formats
     const featureInfoFormat = wfsLayerConfig.getSupportedFormats(GVWMS.MIME_TYPE_FORMAT_JSON); // application/json by default (QGIS Server doesn't seem to provide the metadata for the output formats, use application/json)
@@ -780,11 +780,10 @@ export class GVWMS extends AbstractGVRaster {
 
       // Get the version
       const version = wfsLayerConfig.getVersionOrDefault();
-      const versionIs2OrHigher = version.startsWith('2.');
 
       // The gml namespace to be used when generating the filter
       let gmlNamespace = 'http://www.opengis.net/gml';
-      if (versionIs2OrHigher) {
+      if (wfsLayerConfig.getVersionIsHigherThan2()) {
         gmlNamespace = 'http://www.opengis.net/gml/3.2';
       }
 
@@ -816,7 +815,7 @@ export class GVWMS extends AbstractGVRaster {
         const polygonGML = GeoUtilities.writeGeometryToGML(bufferedPoint, projectionCode, gmlNamespace);
 
         // If the version of the service is 2.0.0 or later
-        if (versionIs2OrHigher) {
+        if (wfsLayerConfig.getVersionIsHigherThan2()) {
           // Create the intersects filter
           gmlFilterSpatial = `<Intersects><ValueReference>${geomFieldName}</ValueReference>${polygonGML}</Intersects>`;
         } else {
@@ -832,7 +831,7 @@ export class GVWMS extends AbstractGVRaster {
       const xmlFilterTotal = WfsRenderer.combineGmlFilters(gmlFilterSpatial, gmlFilterAttribute);
 
       // Wrap the ogc filter request
-      const xmlFilterReady = WfsRenderer.wrapOGCFilter(xmlFilterTotal, 'wfs', wfsLayerConfig.getVersionOrDefault());
+      const xmlFilterReady = WfsRenderer.wrapOGCFilter(xmlFilterTotal, 'wfs', wfsLayerConfig.getVersionIsHigherThan2());
 
       // Format the url
       const urlWithOutputJson = GeoUtilities.ensureServiceRequestUrlGetFeature(
@@ -1121,7 +1120,7 @@ export class GVWMS extends AbstractGVRaster {
           );
 
           // Wrap the ogc filter request
-          sourceParams.FILTER = WfsRenderer.wrapOGCFilter(ogcXmlFilter, 'wms', layerConfig.getVersionOrDefault());
+          sourceParams.FILTER = WfsRenderer.wrapOGCFilter(ogcXmlFilter, 'wms', false);
         }
       }
 

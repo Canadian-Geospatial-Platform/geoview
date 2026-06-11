@@ -197,7 +197,6 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
    * @param layerPath - The layer path to query
    * @param lonLatCoordinate - The longitude/latitude coordinate where to query the features
    * @param querySet - The result set to update with the query results
-   * @param signal - The abort signal for this query call
    * @param callbackWhenFirstQueryStarted - Optional callback to be executed when the first query has started progressing
    */
   async #queryLayerAndProcess(
