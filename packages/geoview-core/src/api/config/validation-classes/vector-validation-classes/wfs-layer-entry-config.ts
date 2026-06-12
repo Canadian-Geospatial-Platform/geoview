@@ -175,6 +175,15 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
   }
 
   /**
+   * Gets if the version is higher than 2.0.0.
+   *
+   * @returns True if the version is higher than 2.0.0, otherwise false
+   */
+  getVersionIsHigherThan2(): boolean {
+    return this.getVersionOrDefault().startsWith('2.');
+  }
+
+  /**
    * Gets if the config has specified that we should fetch the styles from the WMS.
    *
    * @returns True when the styles should be fetched from the WMS. True by default

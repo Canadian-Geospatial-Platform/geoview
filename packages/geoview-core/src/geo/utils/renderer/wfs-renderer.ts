@@ -1755,10 +1755,10 @@ export abstract class WfsRenderer {
    *
    * @param ogcFilterToWrap - The OGC filter XML string to wrap, or undefined
    * @param wmsOrWfs - Whether the service is WMS or WFS
-   * @param version - The service version
+   * @param versionIsHigherThan2 - Indicates if the version is higher than 2
    * @returns The wrapped filter XML string, or undefined if nothing to wrap
    */
-  static wrapOGCFilter(ogcFilterToWrap: string | undefined, wmsOrWfs: 'wms' | 'wfs', version: string): string | undefined {
+  static wrapOGCFilter(ogcFilterToWrap: string | undefined, wmsOrWfs: 'wms' | 'wfs', versionIsHigherThan2: boolean): string | undefined {
     // If nothing to wrap
     if (!ogcFilterToWrap) return undefined;
 
@@ -1772,8 +1772,7 @@ export abstract class WfsRenderer {
     }
 
     // If the version is 2.0.0 or higher, use FES 2.0 filter with gml 3.2
-    const versionIs2OrHigher = version.startsWith('2.');
-    if (versionIs2OrHigher) {
+    if (versionIsHigherThan2) {
       return `
         <fes:Filter xmlns:fes="http://www.opengis.net/fes/2.0" xmlns:gml="http://www.opengis.net/gml/3.2">
           ${ogcFilterToWrap}

@@ -520,6 +520,8 @@ export class LayerDomain {
    *
    * Keeps both the GeoView layer wrapper and the underlying OpenLayers layer by path.
    * For regular (non-group) layers, additionally registers a handler to track queryable state changes.
+   * If the layer entry config was deleted while the layer was being created (e.g. the user cancelled
+   * the process before the layer finished initializing), this method returns without registering.
    *
    * @param gvLayer - The GeoView layer to register
    */
@@ -528,7 +530,7 @@ export class LayerDomain {
     // logger.logDebug('registerGVLayer', gvLayer.getLayerPath(), this.#layerEntryConfigs[gvLayer.getLayerPath()], gvLayer);
 
     // Before registering the layer, validate if the layer entry is still there
-    // GV Maybe the user deleted/cancelled the process before the layer had a change to get created
+    // GV Maybe the user deleted/cancelled the process before the layer had a chance to get created
     if (!this.#layerEntryConfigs[gvLayer.getLayerPath()]) return;
 
     // Keep it
