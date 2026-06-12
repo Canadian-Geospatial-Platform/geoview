@@ -3,8 +3,8 @@ import type WMTSSource from 'ol/source/WMTS';
 import type { Extent } from 'ol/extent';
 import type { Projection as OLProjection } from 'ol/proj';
 import type { OgcWmtsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wmts-layer-entry-config';
-import { AbstractGVTile } from '@/geo/layer/gv-layers/tile/abstract-gv-tile';
 import { type TypeLegend } from '@/api/types/layer-schema-types';
+import { AbstractGVTile } from '@/geo/layer/gv-layers/tile/abstract-gv-tile';
 /**
  * Manages a WMTS layer.
  */

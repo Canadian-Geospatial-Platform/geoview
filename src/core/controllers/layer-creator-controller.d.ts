@@ -1,7 +1,7 @@
 import { type EventDelegateBase } from '@/api/events/event-helper';
 import { type MapConfigLayerEntry, type TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
-import type { GeoViewGeoChartConfig } from '@/api/config/reader/uuid-config-reader';
+import type { GeoViewGeoChartConfig, GeoViewTimeSliderConfig } from '@/api/config/reader/uuid-config-reader';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import type { LayerDomain } from '@/core/domains/layer-domain';
@@ -80,6 +80,14 @@ export declare class LayerCreatorController extends AbstractMapViewerController 
      */
     showLayerError(error: unknown, geoviewLayerId: string): void;
     /**
+     * Merges time-slider configurations from GeoCore into the map's corePackagesConfig.
+     *
+     * The configs are stored for the time-slider plugin to pick up if it's configured in the footer bar.
+     *
+     * @param timeSliderConfigs - The time-slider configurations returned from GeoCore
+     */
+    mergeTimeSliderConfigsIntoCorePackages(timeSliderConfigs: GeoViewTimeSliderConfig[]): void;
+    /**
      * Creates an instance of a specific `AbstractGeoViewLayer` subclass based on the given GeoView layer configuration.
      *
      * This function determines the correct layer type from the configuration and instantiates it accordingly.
@@ -101,10 +109,11 @@ export declare class LayerCreatorController extends AbstractMapViewerController 
      * @param language - The language setting used for layer labels and metadata
      * @param mapConfigLayerEntries - The array of layer entries to convert
      * @param addGeoChartCallback - Callback invoked when a geochart configuration is initialized during layer processing
+     * @param addTimeSliderCallback - Callback invoked when time-slider configurations are found during layer processing
      * @param errorCallback - Callback invoked when an error occurs during layer processing
      * @returns An array of promises, each resolving to a TypeGeoviewLayerConfig object
      */
-    static convertMapConfigsToGeoviewLayerConfig(mapId: string, currentLayerIds: string[], language: TypeDisplayLanguage, mapConfigLayerEntries: MapConfigLayerEntry[], addGeoChartCallback: (layerPath: string, geochartConfig: GeoViewGeoChartConfig) => void, errorCallback: (mapConfigLayerEntry: MapConfigLayerEntry, error: unknown) => void): Promise<TypeGeoviewLayerConfig>[];
+    static convertMapConfigsToGeoviewLayerConfig(mapId: string, currentLayerIds: string[], language: TypeDisplayLanguage, mapConfigLayerEntries: MapConfigLayerEntry[], addGeoChartCallback: (layerPath: string, geochartConfig: GeoViewGeoChartConfig) => void, addTimeSliderCallback: (timeSliderConfigs: GeoViewTimeSliderConfig[]) => void, errorCallback: (mapConfigLayerEntry: MapConfigLayerEntry, error: unknown) => void): Promise<TypeGeoviewLayerConfig>[];
     /**
      * Converts a map configuration layer entry into a promise of a GeoView layer configuration.
      *
@@ -116,10 +125,11 @@ export declare class LayerCreatorController extends AbstractMapViewerController 
      * @param language - The language setting used for layer labels and metadata
      * @param entry - The array of layer entry to convert
      * @param addGeoChartCallback - Callback invoked when a geochart configuration is initialized during layer processing
+     * @param addTimeSliderCallback - Callback invoked when time-slider configurations are found during layer processing
      * @param errorCallback - Callback invoked when an error occurs during layer processing
      * @returns A promise that resolves to a TypeGeoviewLayerConfig object
      */
-    static convertMapConfigToGeoviewLayerConfig(mapId: string, currentLayerIds: string[], language: TypeDisplayLanguage, entry: MapConfigLayerEntry, addGeoChartCallback: (layerPath: string, geochartConfig: GeoViewGeoChartConfig) => void, errorCallback: (mapConfigLayerEntry: MapConfigLayerEntry, error: unknown) => void): Promise<TypeGeoviewLayerConfig>;
+    static convertMapConfigToGeoviewLayerConfig(mapId: string, currentLayerIds: string[], language: TypeDisplayLanguage, entry: MapConfigLayerEntry, addGeoChartCallback: (layerPath: string, geochartConfig: GeoViewGeoChartConfig) => void, addTimeSliderCallback: (timeSliderConfigs: GeoViewTimeSliderConfig[]) => void, errorCallback: (mapConfigLayerEntry: MapConfigLayerEntry, error: unknown) => void): Promise<TypeGeoviewLayerConfig>;
     /**
      * Registers a layer config added event handler.
      *

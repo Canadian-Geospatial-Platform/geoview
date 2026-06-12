@@ -239,17 +239,15 @@ export declare abstract class AbstractGeoViewLayer {
      * @param messageKey - The key used to lookup the localized message OR message
      * @param messageParams - Optional array of parameters to be interpolated into the localized message
      * @param messageType - The message type
-     * @param notification - Optional whether to show this as a notification. Defaults to false
      *
      * @example
      * this.emitMessage(
      *   'layers.fetchProgress',
      *   ['50', '100'],
      *   'error',
-     *   true
      * );
      */
-    protected emitMessage(messageKey: string, messageParams?: Record<string, unknown> | undefined, messageType?: SnackbarType, notification?: boolean): void;
+    protected emitMessage(messageKey: string, messageParams?: Record<string, unknown> | undefined, messageType?: SnackbarType): void;
     /**
      * Adds a GeoViewLayerLoadedFailedError in the internal list of errors for a layer being loaded.
      * It also sets the layer status to error.
@@ -460,8 +458,6 @@ export type LayerMessageEvent = {
     messageParams: Record<string, unknown>;
     /** The severity type of the message. */
     messageType: SnackbarType;
-    /** Whether to show the message as a notification. */
-    notification: boolean;
 };
 export {};
 //# sourceMappingURL=abstract-geoview-layers.d.ts.map

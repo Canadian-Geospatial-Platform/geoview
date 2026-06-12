@@ -127,6 +127,7 @@ export declare abstract class AbstractGVVector extends AbstractGVLayer {
      * @param projection - The projection to initialize the bounds into.
      * @param stops - The number of stops to use to generate the extent.
      * @returns A promise that resolves with the layer bounding box, or undefined if not available.
+     * @throws {LayerStatusErrorError} When the layer enters the `error` state before reaching `loaded` (propagated from `waitLoadedStatus()`)
      */
     onInitBounds(projection: OLProjection, stops: number): Promise<Extent | undefined>;
     /**

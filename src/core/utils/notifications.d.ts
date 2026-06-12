@@ -43,56 +43,43 @@ export declare class Notifications {
      */
     displayNextSnackbarMessage(): void;
     /**
-     * Displays a message in the snackbar.
+     * Displays a message in the snackbar and adds it to the notification panel.
      *
      * @param messageKey - The message or a locale key to retrieve
      * @param params - Optional array of parameters to replace, i.e. ['short']
-     * @param withNotification - Optional, indicates if the message should also be added as a notification (default true)
-     * @param button - Optional snackbar button
      */
-    showMessage(messageKey: string, params?: Record<string, unknown>, withNotification?: boolean, button?: ISnackbarButton): void;
+    showMessage(messageKey: string, params?: Record<string, unknown>): void;
     /**
-     * Displays a success message in the snackbar.
+     * Displays a success message in the snackbar and adds it to the notification panel.
      *
      * @param messageKey - The message or a locale key to retrieve
      * @param params - Optional array of parameters to replace, i.e. ['short']
-     * @param withNotification - Optional, indicates if the message should also be added as a notification (default true)
-     * @param button - Optional snackbar button
      */
-    showSuccess(messageKey: string, params?: Record<string, unknown>, withNotification?: boolean, button?: ISnackbarButton): void;
+    showSuccess(messageKey: string, params?: Record<string, unknown>): void;
     /**
-     * Displays a warning message in the snackbar.
+     * Displays a warning message in the snackbar and adds it to the notification panel.
      *
      * @param messageKey - The message or a locale key to retrieve
      * @param params - Optional array of parameters to replace, i.e. ['short']
-     * @param withNotification - Optional, indicates if the message should also be added as a notification (default true)
-     * @param button - Optional snackbar button
      */
-    showWarning(messageKey: string, params?: Record<string, unknown>, withNotification?: boolean, button?: ISnackbarButton): void;
+    showWarning(messageKey: string, params?: Record<string, unknown>): void;
     /**
      * Displays an error message in the snackbar.
      *
      * @param messageKey - The message or a locale key to retrieve
      * @param params - Optional array of parameters to replace, i.e. ['short']
-     * @param withNotification - Optional, indicates if the message should also be added as a notification (default true)
-     * @param button - Optional snackbar button
      */
-    showError(messageKey: string, params?: Record<string, unknown>, withNotification?: boolean, button?: ISnackbarButton): void;
+    showError(messageKey: string, params?: Record<string, unknown>): void;
     /**
      * Displays an error which can be a GeoViewError or a generic Error.
      *
      * @param error - The error to retrieve the message from and translate it
-     * @param withNotification - Optional, indicates if the message should also be added as a notification (default true)
-     * @param button - Optional snackbar button
      */
-    showErrorFromError(error: Error | unknown, withNotification?: boolean, button?: ISnackbarButton): void;
+    showErrorFromError(error: Error | unknown): void;
     /**
-     * Displays a generic error message in the snackbar.
-     *
-     * @param withNotification - Optional, indicates if the message should also be added as a notification (default true)
-     * @param button - Optional snackbar button
+     * Displays a generic error message in the snackbar and adds it to the notification panel.
      */
-    showErrorGeneric(withNotification?: boolean, button?: ISnackbarButton): void;
+    showErrorGeneric(): void;
     /**
      * Registers a snackbar open event handler.
      *
@@ -112,13 +99,7 @@ type SnackBarOpenDelegate = EventDelegateBase<Notifications, SnackBarOpenEvent, 
 export type SnackBarOpenEvent = {
     snackbarType: SnackbarType;
     message: string;
-    button?: ISnackbarButton;
 };
-/** Snackbar button properties interface. */
-interface ISnackbarButton {
-    label?: string;
-    action?: () => void;
-}
 /** The supported snackbar message types. */
 export type SnackbarType = 'success' | 'error' | 'info' | 'warning';
 /** Properties for a queued snackbar message. */
@@ -126,7 +107,6 @@ export type SnackbarProps = {
     type: SnackbarType;
     messageKey: string;
     params: Record<string, unknown>;
-    button?: ISnackbarButton;
 };
 export {};
 //# sourceMappingURL=notifications.d.ts.map

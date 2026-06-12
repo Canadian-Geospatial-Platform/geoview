@@ -37,7 +37,7 @@ export declare abstract class GeoUtilities {
      *
      * The function normalizes query parameter keys, removes lowercase variants (`service`, `request`),
      * and ensures the final URL contains correctly capitalized parameters with the specified values.
-     * If the `VERSION` parameter is missing, a default value of 1.3.0 is added for WMS/WMTS and 2.0.0 for WFS.
+     * If the `VERSION` parameter is missing, a default value of 1.3.0 is added for WMS, 2.0.0 for WFS, and 1.0.0 for WMTS.
      *
      * @param url - The input service URL, which may be absolute or relative
      * @param service - The OGC service type (e.g., `"WMS"`, `"WFS"`, `"WMTS"`)
@@ -150,6 +150,7 @@ export declare abstract class GeoUtilities {
      *
      * @param url - The url the url of the WMS server
      * @param layers - The layers to query separate by
+     * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
      * @param abortSignal - Optional abort signal to handle cancelling of the process
      * @returns A promise that resolves with the parsed WMTS metadata
      * @throws {RequestTimeoutError} When the request exceeds the timeout duration
@@ -158,7 +159,7 @@ export declare abstract class GeoUtilities {
      * @throws {ResponseEmptyError} When the JSON response is empty
      * @throws {NetworkError} When a network issue happened
      */
-    static getWMTSServiceMetadata(url: string, layers?: string, abortSignal?: AbortSignal): Promise<TypeMetadataWMTS>;
+    static getWMTSServiceMetadata(url: string, layers?: string, callbackNewMetadataUrl?: CallbackNewMetadataDelegate, abortSignal?: AbortSignal): Promise<TypeMetadataWMTS>;
     /**
      * Fetch the json response from the XML response of a WMS getCapabilities request.
      *
