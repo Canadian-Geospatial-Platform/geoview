@@ -700,6 +700,10 @@
           "items": {
             "$ref": "#/definitions/TypeOutfields"
           }
+        },
+        "geometryField": {
+          "description": "The geometry field information.",
+          "$ref": "#/definitions/TypeOutfields"
         }
       }
     },
@@ -721,9 +725,6 @@
         "domain": {
           "description": "The domain of values.",
           "oneOf": [
-            {
-              "type": "null"
-            },
             {
               "$ref": "#/definitions/codedValueType"
             },
