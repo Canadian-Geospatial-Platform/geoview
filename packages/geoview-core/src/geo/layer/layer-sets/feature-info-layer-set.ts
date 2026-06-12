@@ -255,7 +255,8 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
         // Align fields with layerConfig fields
         AbstractLayerSet.alignRecordsWithOutFields(layerConfig, arrayOfRecords);
 
-        // Remove fields not meant for summary views (Details panel)
+        // GV: Remove fields marked with summary === false so they don't appear in the Details panel (summary view).
+        // GV: These fields remain available in the Data Table (full view) via AllFeatureInfoLayerSet which does not apply this filter.
         const outfields = layerConfig.getOutfields();
         if (outfields) {
           const nonSummaryFieldNames = outfields.filter((f) => f.summary === false).map((f) => f.name);
