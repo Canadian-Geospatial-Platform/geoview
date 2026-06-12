@@ -77,7 +77,7 @@ export class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
   // #region METHODS
 
   /**
-   * Get the projection WKID from the service metadata if available.
+   * Gets the projection WKID from the service metadata if available.
    *
    * @returns The projection WKID, or undefined if not available
    */
@@ -86,7 +86,7 @@ export class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
   }
 
   /**
-   * Get the projection code from the service metadata if available.
+   * Gets the projection code from the service metadata if available.
    *
    * @returns The projection code, or undefined if not available
    */

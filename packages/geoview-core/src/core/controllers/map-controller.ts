@@ -1281,7 +1281,8 @@ export class MapController extends AbstractMapViewerController {
    * Handles the pre-projection-change cleanup before the map view applies the new projection.
    *
    * Shows a loading indicator, clears stale WMS override CRS layers and vector feature data,
-   * hides the overview map, removes layer highlights, and strips incompatible vector tile layers.
+   * hides the overview map, removes layer highlights, and warns the user about vector tile
+   * layers whose source projection cannot be reprojected on-the-fly to the new map projection.
    *
    * @param sender - The MapViewer instance that emitted the event
    * @param event - The projection changed event containing the new and previous projections
