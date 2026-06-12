@@ -11,6 +11,7 @@ import { useTheme } from '@mui/material/styles';
 
 import { Box } from '@/ui/layout';
 import type { TypePanelProps } from '@/ui/panel/panel-types';
+import type { SxStyles } from '@/ui/style/types';
 import { CloseIcon } from '@/ui/icons';
 import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 import { IconButton } from '@/ui/icon-button/icon-button';
@@ -18,14 +19,12 @@ import { getSxClasses } from '@/ui/panel/panel-style';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
 import { FocusTrapContainer } from '@/core/components/common';
-import { delay } from '@/core/utils/utilities';
+import { doTimeout } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 
-/**
- * Interface for panel properties
- */
+/** Interface for panel properties. */
 export type TypePanelAppProps = {
   panel: TypePanelProps;
   button: IconButtonPropsExtend;
@@ -75,8 +74,12 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
   const panelRef = useRef<HTMLDivElement>(null);
   const panelHeader = useRef<HTMLButtonElement>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
+  /** Persists the panel's open state across renders to distinguish user-triggered opens from panels configured to start open by default. */
+  const prevOpenRef = useRef(open);
   const panelWidth = panel?.width ?? 100; //percentage
-  const memoSxClasses = useMemo(() => getSxClasses(theme, open, panelWidth), [theme, open, panelWidth]);
+  const memoSxClasses = useMemo((): SxStyles => {
+    return getSxClasses(theme, open, panelWidth);
+  }, [theme, open, panelWidth]);
 
   // Store
   const mapId = useStoreGeoViewMapId();
@@ -85,30 +88,56 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
   useEffect(() => {
     logger.logTraceUseEffect('UI.PANEL - open');
 
-    if (open) {
-      // set focus on close button on panel open
-      if (closeBtnRef && closeBtnRef.current) {
-        (closeBtnRef.current as HTMLElement).focus();
-      }
+    const prevOpen = prevOpenRef.current;
+    prevOpenRef.current = open;
 
+    // Create cancellable delay job
+    let delayJob: ReturnType<typeof doTimeout> | undefined = undefined;
+
+    if (open) {
       // Wait the transition period (+50 ms just to be sure of shenanigans)
-      delay(theme.transitions.duration.standard + 50)
-        .then(() => {
-          onOpen?.();
+      delayJob = doTimeout(theme.transitions.duration.standard + 50);
+
+      delayJob.promise
+        .then((result) => {
+          // Only proceed if delay completed normally (not cancelled)
+          if (result === 'timeout') {
+            // Focus close button only on user-triggered open (!prevOpen), not initial render.
+            // This prevents focus hijacking with configurations that have an appBar panel open by default,
+            // preserving the host page's natural tab order until GeoView is interacted with.
+            // Focus happens after transition to ensure the button ref is set.
+            if (!prevOpen && closeBtnRef?.current) {
+              closeBtnRef.current.focus();
+            }
+            onOpen?.();
+          }
         })
-        .catch(() => {
-          logger.logPromiseFailed('in delay in UI.PANEL - open');
+        .catch((error) => {
+          // Unexpected promise rejection (normal cancellation resolves, not rejects)
+          logger.logError('Panel open transition delay rejected unexpectedly:', error);
         });
     } else {
       // Wait the transition period (+50 ms just to be sure of shenanigans)
-      delay(theme.transitions.duration.standard + 50)
-        .then(() => {
-          onClose?.();
+      delayJob = doTimeout(theme.transitions.duration.standard + 50);
+
+      delayJob.promise
+        .then((result) => {
+          if (result === 'timeout') {
+            onClose?.();
+          }
         })
-        .catch(() => {
-          logger.logPromiseFailed('in delay in UI.PANEL - open');
+        .catch((error) => {
+          // Unexpected promise rejection (normal cancellation resolves, not rejects)
+          logger.logError('Panel close transition delay rejected unexpectedly:', error);
         });
     }
+
+    // Cleanup: cancel pending delay when effect re-runs or component unmounts
+    return () => {
+      if (delayJob) {
+        delayJob.cancel();
+      }
+    };
   }, [open, theme.transitions.duration.standard, onOpen, onClose]);
 
   return (
