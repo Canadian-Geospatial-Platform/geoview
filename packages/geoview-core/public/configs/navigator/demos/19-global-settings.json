@@ -1,6 +1,6 @@
 {
   "configMeta": {
-    "description": "globalSettings with canRemoveSublayers, disabledLayerTypes, showUnsymbolizedFeatures (visible in data table for permafrost features with no style), highlightLayer with no bbox, displayDateMode ISO and hideCoordinateInfoSwitch that removes coordinate info from the details panel."
+    "description": "globalSettings with canRemoveSublayers, disabledLayerTypes, showUnsymbolizedFeatures (visible in data table for permafrost features with no style), highlightLayer with no bbox, displayDateMode ISO and hideCoordinateInfoSwitch that removes coordinate info from the details panel. On the Major Projects Inventory layer, we will see no data records in the data table panel."
   },
   "map": {
     "interaction": "dynamic",
@@ -27,6 +27,11 @@
       {
         "geoviewLayerId": "4baa66ad-aa29-4233-a6a8-7f5cbefb5ea8",
         "geoviewLayerType": "geoCore"
+      },
+      {
+        "geoviewLayerType": "geoCore",
+        "geoviewLayerName": "Major Projects Inventory",
+        "geoviewLayerId": "ea4c0bdb-a63f-49a4-b14a-09c1560aad0b"
       },
       {
         "geoviewLayerId": "geojsonLYR1",
