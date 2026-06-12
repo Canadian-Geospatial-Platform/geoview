@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { SxProps } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { getSxClasses } from '@/core/components/common/layer-list-style';
 import {
@@ -128,6 +129,9 @@ export function SingleLayer({
   const layerController = useLayerController();
   const layerCreatorController = useLayerCreatorController();
 
+  // Ref to track previous selection state to distinguish initial render from user action
+  const prevIsSelectedRef = useRef<boolean>(layerIsSelected);
+
   // Build unique ID format
   const panelCloseButtonId = `${mapId}-${containerType}-${TABS.LAYERS}-panel-close-btn`;
   const layerListItemButtonId = `${mapId}-${containerType}-${TABS.LAYERS}-${layerPath}`;
@@ -184,11 +188,10 @@ export function SingleLayer({
   // Check if any layer in the subtree has visibility disabled
   const isLayerAlwaysVisible = useStoreLayerHasDisabledVisibility(layerPath);
 
-  // #region HANDLERS
+  // #region Handlers
 
   /**
-   * Blur any focused button element that is not within this layer.
-   * This ensures hasFocusWithin state is properly cleared on other layers.
+   * Blurs any focused button element that is not within this layer.
    */
   const blurOtherLayerButtons = useCallback((): void => {
     const activeElement = document.activeElement as HTMLElement;
@@ -198,9 +201,9 @@ export function SingleLayer({
   }, []);
 
   /**
-   * Select the layer if not already selected and status is valid.
+   * Selects the layer if not already selected and status is valid.
    *
-   * @param openPanel - Whether to open the details panel (default: true)
+   * @param openPanel - Optional parameter to open the details panel (default: true)
    */
   const selectLayerIfNeeded = useCallback(
     (openPanel = true): void => {
@@ -215,7 +218,7 @@ export function SingleLayer({
   );
 
   /**
-   * Handle expand/shrink of layer groups.
+   * Handles expand/shrink of layer groups.
    */
   const handleExpandGroupClick = useCallback((): void => {
     // Blur focused buttons on other layers
@@ -228,6 +231,9 @@ export function SingleLayer({
     layerController.toggleLegendCollapsed(layerPath);
   }, [layerPath, selectLayerIfNeeded, layerController, blurOtherLayerButtons]);
 
+  /**
+   * Handles keyboard events for expand/shrink of layer groups.
+   */
   const handleExpandGroupKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLButtonElement>): void => {
       if (event.key === 'Enter' || event.key === ' ') {
@@ -240,13 +246,16 @@ export function SingleLayer({
         // Set legend collapse value
         layerController.toggleLegendCollapsed(layerPath);
 
-        // Allow the toggle expansion action to work
+        // Prevent double-firing via native button click event
         event.preventDefault();
       }
     },
     [layerPath, layerController, blurOtherLayerButtons, selectLayerIfNeeded]
   );
 
+  /**
+   * Handles clicking on the layer list item.
+   */
   const handleLayerClick = useCallback((): void => {
     // Only clickable if the layer status is processed or loaded
     if (!['processed', 'loaded'].includes(layerStatus!)) {
@@ -261,8 +270,11 @@ export function SingleLayer({
     showLayerDetailsPanel?.(layerId || '');
   }, [layerController, layerPath, layerId, layerStatus, showLayerDetailsPanel, blurOtherLayerButtons]);
 
+  /**
+   * Handles clicking on the reorder arrow buttons.
+   */
   const handleArrowClick = useCallback(
-    (direction: number) => {
+    (direction: number): void => {
       // Select the layer if not already selected
       selectLayerIfNeeded();
 
@@ -286,7 +298,7 @@ export function SingleLayer({
         // Reorder
         layerController.reorderLayer(layerPath, direction);
 
-        // Allow the reorder action to work
+        // Prevent double-firing via native button click event
         event.preventDefault();
 
         // Scroll into view after DOM updates (scrollListItemIntoView utility does not work well for this)
@@ -348,6 +360,9 @@ export function SingleLayer({
     layerController.setOrToggleLayerVisibility(layerPath);
   }, [layerPath, layerController, selectLayerIfNeeded, inVisibleRange, parentHidden]);
 
+  /**
+   * Handles keyboard events for toggling layer visibility.
+   */
   const handleToggleVisibilityKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLButtonElement>): void => {
       // Only handle Enter and Space keys
@@ -364,7 +379,7 @@ export function SingleLayer({
         // Toggle visibility
         layerController.setOrToggleLayerVisibility(layerPath);
 
-        // Allow the toggle visibility action to work
+        // Prevent double-firing via native button click event
         event.preventDefault();
       }
     },
@@ -384,6 +399,9 @@ export function SingleLayer({
     layerController.zoomToLayerVisibleScale(layerPath);
   }, [layerPath, layerController, selectLayerIfNeeded, isZoomToVisibleScaleCapable]);
 
+  /**
+   * Handles keyboard events for zooming to the layer's visible scale.
+   */
   const handleZoomToLayerVisibleScaleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLButtonElement>): void => {
       if (event.key === 'Enter' || event.key === ' ') {
@@ -399,7 +417,7 @@ export function SingleLayer({
         // Zoom to visible scale
         layerController.zoomToLayerVisibleScale(layerPath);
 
-        // Allow the zoom to visible scale action to work
+        // Prevent double-firing via native button click event
         event.preventDefault();
       }
     },
@@ -414,6 +432,9 @@ export function SingleLayer({
     layerCreatorController.reloadLayer(layerPath);
   }, [layerCreatorController, layerPath, selectLayerIfNeeded]);
 
+  /**
+   * Handles keyboard events for reloading the layer.
+   */
   const handleReloadKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLButtonElement>): void => {
       if (event.key === 'Enter' || event.key === ' ') {
@@ -426,7 +447,7 @@ export function SingleLayer({
         // Reload layer
         layerCreatorController.reloadLayer(layerPath);
 
-        // Allow the reload action to work
+        // Prevent double-firing via native button click event
         event.preventDefault();
       }
     },
@@ -438,6 +459,9 @@ export function SingleLayer({
     setHasFocusWithin(true);
   }, []);
 
+  /**
+   * Handles focus leaving the layer item.
+   */
   const handleBlurWithin = useCallback((event: React.FocusEvent<HTMLElement>): void => {
     // Only blur if focus moved outside this layer item
     if (!event.currentTarget.contains(event.relatedTarget)) {
@@ -445,9 +469,11 @@ export function SingleLayer({
     }
   }, []);
 
-  // #endregion HANDLERS
+  // #endregion Handlers
 
-  // Get layer description
+  /**
+   * Computes the layer description text.
+   */
   const memoLayerDescription = useMemo((): JSX.Element | string | null => {
     // Log
     logger.logTraceUseMemo('SINGLE-LAYER - memoLayerDescription', layerPath, layerStatus);
@@ -478,8 +504,9 @@ export function SingleLayer({
     return itemsLengthDesc;
   }, [layerPath, layerStatus, parentHidden, t, layerChildPaths, layerItems]);
 
-  // Memoize the EditModeButtons component section
-
+  /**
+   * Renders the edit mode buttons (reorder arrows).
+   */
   const memoEditModeButtons = useMemo((): JSX.Element | null => {
     // Log
     logger.logTraceUseMemo('SINGLE-LAYER - memoEditModeButtons', layerPath);
@@ -538,7 +565,9 @@ export function SingleLayer({
     isKeyboardNavigationMode,
   ]);
 
-  // Memoize the MoreLayerButtons component section
+  /**
+   * Renders the additional layer action buttons.
+   */
   const memoMoreLayerButtons = useMemo((): JSX.Element | null => {
     // Log
     logger.logTraceUseMemo('SINGLE-LAYER - memoMoreLayerButtons', layerPath);
@@ -659,7 +688,9 @@ export function SingleLayer({
     memoSxClasses.zoomButton,
   ]);
 
-  // Memoize the arrow buttons component section
+  /**
+   * Renders the expand/collapse arrow button.
+   */
   const memoArrowButtons = useMemo((): JSX.Element | null => {
     // Log
     logger.logTraceUseMemo('SINGLE-LAYER - memoArrowButtons');
@@ -683,7 +714,9 @@ export function SingleLayer({
     return null;
   }, [handleExpandGroupClick, handleExpandGroupKeyDown, layerChildPaths, legendExpanded, t]);
 
-  // Memoize the collapse component section
+  /**
+   * Renders the collapsible child layers list.
+   */
   const memoCollapse = useMemo((): JSX.Element | null => {
     // Log
     logger.logTraceUseMemo('SINGLE-LAYER - memoCollapse', layerChildPaths);
@@ -705,8 +738,10 @@ export function SingleLayer({
     );
   }, [depth, isLayoutEnlarged, layerChildPaths, legendExpanded, showLayerDetailsPanel, containerType]);
 
-  // Memoize the container class section
-  const memoContainerClass = useMemo(() => {
+  /**
+   * Computes the CSS class names for the layer container.
+   */
+  const memoContainerClass = useMemo((): string => {
     // Log
     logger.logTraceUseMemo('SINGLE-LAYER - memoContainerClass');
 
@@ -730,10 +765,15 @@ export function SingleLayer({
 
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('SINGLE-LAYER - layerIsSelected');
+    logger.logTraceUseEffect('SINGLE-LAYER - layerIsSelected', layerIsSelected);
 
-    // Scroll into view when layer is selected
-    if (layerIsSelected) {
+    const prevIsSelected = prevIsSelectedRef.current;
+    prevIsSelectedRef.current = layerIsSelected;
+
+    // Only scroll into view on user-triggered selection (!prevIsSelected && layerIsSelected)
+    // NOT on initial render when layer is already selected via config
+    // This preserves the host page's natural tab order until GeoView is interacted with
+    if (!prevIsSelected && layerIsSelected) {
       layerListItemRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
     }
   }, [layerIsSelected]);
@@ -794,15 +834,17 @@ export function SingleLayer({
     }
   }, [layerStatus, layerName, t]);
 
-  /** Memoized sx for the list item button. */
-  const memoListItemButtonSx = useMemo(() => {
+  /**
+   * Computes the sx styles for the list item button.
+   */
+  const memoListItemButtonSx = useMemo((): SxProps => {
     // Log
     logger.logTraceUseMemo('SINGLE-LAYER - memoListItemButtonSx', inVisibleRange, parentHidden, isVisible, layerStatus);
 
-    return {
-      minHeight: '4.51rem',
-      ...(!inVisibleRange || parentHidden || !isVisible || layerStatus === 'error' ? memoSxClasses.outOfRange : {}),
-    };
+    return [
+      { minHeight: '4.51rem' },
+      (!inVisibleRange || parentHidden || !isVisible || layerStatus === 'error') && memoSxClasses.outOfRange,
+    ] as SxProps;
   }, [inVisibleRange, parentHidden, isVisible, layerStatus, memoSxClasses.outOfRange]);
 
   return (

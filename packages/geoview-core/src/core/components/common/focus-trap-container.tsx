@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { memo, useCallback, useEffect, useMemo } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FocusTrap, Box, Button } from '@/ui';
 
@@ -64,6 +64,9 @@ export const FocusTrapContainer = memo(function FocusTrapContainer({
   const uiController = useUIController();
   const activeTrapGeoView = useStoreUIActiveTrapGeoView();
   const focusItem = useStoreUIActiveFocusItem();
+  const prevOpenRef = useRef(open);
+
+  // #region Handlers
 
   /**
    * Handles closing the focus trap and restoring focus.
@@ -84,15 +87,20 @@ export const FocusTrapContainer = memo(function FocusTrapContainer({
     }
   }, [uiController, id, containerType]);
 
+  // #endregion Handlers
+
   // Extract tab name from the full tab ID (e.g., "map1-tab-layers" → "layers")
   const tabName = extractTabName(id, mapId);
 
   // Construct exit button ID using clean format: {mapId}-{containerType}-{tabName}-panel-close-btn
   const exitBtnId = `${mapId}-${containerType}-${tabName}-panel-close-btn`;
 
-  const memoIsActive = useMemo(() => {
+  /**
+   * Determines if the focus trap should be active.
+   */
+  const memoIsActive = useMemo((): boolean => {
     // Log
-    logger.logTraceUseMemo('FOCUS-TRAP-ELEMENT - isActive');
+    logger.logTraceUseMemo('FOCUS-TRAP-ELEMENT - memoIsActive', id, focusItem.activeElementId, open, containerType, activeTrapGeoView);
 
     // Don't activate if a modal is currently open (prevents competing FocusTraps)
     if (focusItem.activeElementId && focusItem.activeElementId !== id) {
@@ -107,10 +115,15 @@ export const FocusTrapContainer = memo(function FocusTrapContainer({
     return (id === focusItem.activeElementId || open) && activeTrapGeoView;
   }, [id, focusItem.activeElementId, open, containerType, activeTrapGeoView]);
 
-  const memoShowExitButton = useMemo(
-    () => containerType === CONTAINER_TYPE.FOOTER_BAR && activeTrapGeoView,
-    [containerType, activeTrapGeoView]
-  );
+  /**
+   * Determines if the exit button should be shown.
+   */
+  const memoShowExitButton = useMemo((): boolean => {
+    // Log
+    logger.logTraceUseMemo('FOCUS-TRAP-ELEMENT - memoShowExitButton', containerType, activeTrapGeoView);
+
+    return containerType === CONTAINER_TYPE.FOOTER_BAR && activeTrapGeoView;
+  }, [containerType, activeTrapGeoView]);
 
   const memoExitButtonStyles = useMemo(
     () => ({
@@ -144,13 +157,22 @@ export const FocusTrapContainer = memo(function FocusTrapContainer({
   }, [focusItem, id, exitBtnId]);
 
   /**
-   * Auto-activates the focus trap when a footer panel becomes active.
+   * Auto-activates the focus trap when a footer panel transitions to open.
+   *
+   * Only triggers on panel open events (not when keyboard navigation is enabled).
+   * This ensures focus management respects natural page flow until user interaction.
    */
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('FOCUS-TRAP-ELEMENT - enableFocusTrap', id, open);
 
-    if (containerType === CONTAINER_TYPE.FOOTER_BAR && activeTrapGeoView && open) {
+    // Track whether this is an actual panel open transition
+    const wasJustOpened = !prevOpenRef.current && open;
+    prevOpenRef.current = open;
+
+    // Only auto-enable trap when panel transitions from closed → open
+    // (not when activeTrapGeoView toggles for already-open panels)
+    if (containerType === CONTAINER_TYPE.FOOTER_BAR && activeTrapGeoView && wasJustOpened) {
       // Auto-enable focus trap when footer panel opens
       uiController.enableFocusTrap({ activeElementId: id, callbackElementId: id });
     }
@@ -184,14 +206,14 @@ export const FocusTrapContainer = memo(function FocusTrapContainer({
     return undefined;
   }, [containerType, activeTrapGeoView, open, id, focusItem.activeElementId, uiController]);
 
-  // disableAutoFocus: to allow autoFocus on exit button to work. Without this, First item inside FocusTrap (<Box>) gets focus first.
+  // disableAutoFocus: prevents MUI FocusTrap from auto-focusing first child. Without this, First item inside FocusTrap (<Box>) gets focus first.
   // disableRestoreFocus: to prevent fighting for focus between multiple FocusTraps
   // <Box tabIndex={-1}: MUI will add this automatically if not set. Adding here to prevent console log noise
   return (
     <FocusTrap open={memoIsActive} disableAutoFocus disableRestoreFocus>
       <Box tabIndex={-1} sx={{ height: '100%' }}>
         {memoShowExitButton && (
-          <Button id={exitBtnId} type="text" autoFocus onClick={handleClose} sx={memoExitButtonStyles}>
+          <Button id={exitBtnId} type="text" onClick={handleClose} sx={memoExitButtonStyles}>
             {t('general.exit')}
           </Button>
         )}
