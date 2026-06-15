@@ -227,6 +227,8 @@ export class StateApi {
 
   // #endregion EVENTS
 
+  // #region STATIC METHODS
+
   /**
    * Finds the sibling layer paths for a given layer by walking the legend tree.
    *
@@ -257,6 +259,8 @@ export class StateApi {
 
     return findInChildren(legendLayers) ?? [];
   }
+
+  /// #endregion STATIC METHODS
 }
 
 // #region EVENTS & DELEGATES

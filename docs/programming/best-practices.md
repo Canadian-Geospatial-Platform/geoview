@@ -270,6 +270,68 @@ In classes, functions should be ordered in the following way:
 - static private
 - event types
 
+Each group must be wrapped in `// #region` / `// #endregion` markers so that VS Code can collapse them. Use **UPPER CASE** labels that match the group:
+
+```ts
+export class MyController extends AbstractMapViewerController {
+  // properties …
+
+  // #region OVERRIDES
+  override onHook(): void { /* … */ }
+  // #endregion OVERRIDES
+
+  // #region PUBLIC METHODS
+  doSomething(): void { /* … */ }
+  // #endregion PUBLIC METHODS
+
+  // #region PROTECTED METHODS
+  protected helperMethod(): void { /* … */ }
+  // #endregion PROTECTED METHODS
+
+  // #region PRIVATE METHODS
+  #internalWork(): void { /* … */ }
+  // #endregion PRIVATE METHODS
+
+  // #region DOMAIN HANDLERS
+  #handleLayerLoaded(sender: unknown, event: LayerLoadedEvent): void { /* … */ }
+  // #endregion DOMAIN HANDLERS
+
+  // #region EVENTS
+  #emitMyEvent(event: MyEvent): void { /* … */ }
+  onMyEvent(callback: MyDelegate): void { /* … */ }
+  offMyEvent(callback: MyDelegate): void { /* … */ }
+  // #endregion EVENTS
+
+  // #region STATIC METHODS
+  static createConfig(): MyConfig { /* … */ }
+  // #endregion STATIC METHODS
+}
+
+// #region EVENT TYPES
+type MyDelegate = EventDelegateBase<MyController, MyEvent, void>;
+export type MyEvent = { /* … */ };
+// #endregion EVENT TYPES
+```
+
+**Common region labels used in the codebase:**
+
+| Region label | Contents |
+|---|---|
+| `OVERRIDES` | Abstract / override methods |
+| `PUBLIC METHODS` | Public instance methods (may have sub-regions like `PUBLIC METHODS - DOMAIN SIMPLE GETTERS`) |
+| `PROTECTED METHODS` | Protected instance methods |
+| `PRIVATE METHODS` | Private instance methods |
+| `DOMAIN HANDLERS` | Private handlers subscribed to domain events |
+| `EVENTS` | Event emit/on/off methods |
+| `STATIC METHODS` | Static public and private methods |
+| `EVENT TYPES` or `EVENTS & DELEGATES` | Delegate types and event interfaces (outside the class body) |
+
+**Rules:**
+- A region is only needed when the group has at least one member
+- Sub-regions are allowed for large classes (e.g., `PUBLIC METHODS - UI RELATED`)
+- The `// #endregion` comment should repeat the label for readability
+- Delegate types and event interfaces live **outside** the class, in their own region
+
 ## 12- EventHelper handler parameter naming
 
 When subscribing to events emitted through our `EventHelper` delegates, handler methods should use the parameter names `sender` and `event`.

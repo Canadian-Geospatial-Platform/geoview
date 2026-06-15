@@ -717,6 +717,21 @@ Per [best-practices.md](../docs/programming/best-practices.md), order functions 
 
 1. Class name → 2. Abstracts → 3. Overrides → 4. Public → 5. Private → 6. Event emits/hooks → 7. Static public → 8. Static private → 9. Event types
 
+Each group must be wrapped in `// #region LABEL` / `// #endregion LABEL` markers (UPPER CASE). Common labels:
+
+| Region label | Contents |
+|---|---|
+| `OVERRIDES` | Abstract / override methods |
+| `PUBLIC METHODS` | Public instance methods (sub-regions allowed, e.g., `PUBLIC METHODS - UI RELATED`) |
+| `PROTECTED METHODS` | Protected instance methods |
+| `PRIVATE METHODS` | Private instance methods |
+| `DOMAIN HANDLERS` | Private handlers subscribed to domain events |
+| `EVENTS` | Event emit/on/off methods |
+| `STATIC METHODS` | Static public and private methods |
+| `EVENT TYPES` or `EVENTS & DELEGATES` | Delegate types and event interfaces (outside the class body) |
+
+A region is only needed when the group has at least one member. The `// #endregion` comment should repeat the label.
+
 ## Styling System
 
 ### getSxClasses Pattern

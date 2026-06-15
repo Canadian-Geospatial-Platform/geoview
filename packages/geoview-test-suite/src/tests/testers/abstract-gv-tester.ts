@@ -312,6 +312,7 @@ export abstract class GVAbstractTester extends AbstractTester {
   /** Toronto */
   static readonly FEATURE_SERVER_TORONTO_NEIGHBOURHOODS_URL: string =
     'https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/Toronto_Neighbourhoods/FeatureServer';
+  static readonly FEATURE_SERVER_TORONTO_NEIGHBOURHOODS_FEATURE_SERVER: string = `${GVAbstractTester.FEATURE_SERVER_TORONTO_NEIGHBOURHOODS_URL}/0`;
   static readonly FEATURE_SERVER_TORONTO_NEIGHBOURHOODS_LAYER_NAME: string = 'Toronto_Neighbourhoods';
 
   /** Elevation */

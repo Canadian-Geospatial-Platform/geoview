@@ -171,11 +171,12 @@ export class ConfigTester extends GVAbstractTester {
    */
   testEsriFeatureWithTorontoNeighbourhoods(): Promise<Test<TypeGeoviewLayerConfig>> {
     // The url
-    const url = ConfigTester.FEATURE_SERVER_TORONTO_NEIGHBOURHOODS_URL;
+    const url = ConfigTester.FEATURE_SERVER_TORONTO_NEIGHBOURHOODS_FEATURE_SERVER;
+    const expectedUrl = ConfigTester.FEATURE_SERVER_TORONTO_NEIGHBOURHOODS_URL;
 
     // Test the Esri Feature config
     return this.testEsriFeature('Test an Esri Feature with Toronto Neighbourhoods', url, {
-      metadataAccessPath: url,
+      metadataAccessPath: expectedUrl,
       listOfLayerEntryConfig: [
         { layerEntryProps: { layerId: '0', layerName: ConfigTester.FEATURE_SERVER_TORONTO_NEIGHBOURHOODS_LAYER_NAME } },
       ],
