@@ -39,6 +39,10 @@
       "projectFolder": "packages/geoview-drawer"
     },
     {
+      "packageName": "geoview-filter-panel",
+      "projectFolder": "packages/geoview-filter-panel"
+    },
+    {
       "packageName": "geoview-geochart",
       "projectFolder": "packages/geoview-geochart"
     },

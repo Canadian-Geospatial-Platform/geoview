@@ -1,0 +1,17 @@
+{
+  "id": "filter-panel",
+  "enabled": true,
+  "isOpen": false,
+  "version": "1.0",
+  "layers": [],
+  "settings": {
+    "title": "Filter Layers",
+    "showLayerNames": true,
+    "collapsible": true,
+    "defaultCollapsed": false,
+    "showApplyButton": false,
+    "showResetButton": true,
+    "autoApply": true,
+    "showFeatureCount": true
+  }
+}

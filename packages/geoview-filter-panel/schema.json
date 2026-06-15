@@ -1,0 +1,132 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://geoview.ca/filter-panel-schema.json",
+  "title": "Filter Panel Configuration Schema",
+  "description": "Schema for configuring the GeoView Filter Panel plugin",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "enabled": {
+      "type": "boolean",
+      "description": "Whether the filter panel is enabled",
+      "default": true
+    },
+    "isOpen": {
+      "type": "boolean",
+      "description": "Whether the panel is open by default",
+      "default": false
+    },
+    "version": {
+      "type": "string",
+      "description": "Configuration version",
+      "default": "1.0"
+    },
+    "layers": {
+      "type": "array",
+      "description": "Array of layer configurations for filtering",
+      "items": {
+        "type": "object",
+        "required": ["layerPath", "layerName"],
+        "properties": {
+          "layerPath": {
+            "type": "string",
+            "description": "Unique identifier for the layer (layer path)"
+          },
+          "layerName": {
+            "type": "string",
+            "description": "Display name for the layer"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether filtering is enabled for this layer",
+            "default": true
+          },
+          "attributes": {
+            "type": "array",
+            "description": "Array of filterable attributes",
+            "items": {
+              "type": "object",
+              "required": ["fieldName", "displayLabel", "filterType"],
+              "properties": {
+                "fieldName": {
+                  "type": "string",
+                  "description": "Field name in the layer"
+                },
+                "displayLabel": {
+                  "type": "string",
+                  "description": "Display label for the filter"
+                },
+                "filterType": {
+                  "type": "string",
+                  "enum": ["select", "multiselect", "range", "date"],
+                  "description": "Type of filter control"
+                },
+                "enabled": {
+                  "type": "boolean",
+                  "description": "Whether this attribute filter is enabled",
+                  "default": true
+                },
+                "defaultValues": {
+                  "description": "Default filter values",
+                  "oneOf": [
+                    { "type": "null" },
+                    { "type": "string" },
+                    { "type": "number" },
+                    { "type": "array" },
+                    { "type": "object" }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "type": "object",
+      "description": "Global filter panel settings",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Panel title",
+          "default": "Filter Layers"
+        },
+        "showLayerNames": {
+          "type": "boolean",
+          "description": "Show layer names in the filter panel",
+          "default": true
+        },
+        "collapsible": {
+          "type": "boolean",
+          "description": "Allow collapsing/expanding layer sections",
+          "default": true
+        },
+        "defaultCollapsed": {
+          "type": "boolean",
+          "description": "Default collapsed state for layer sections",
+          "default": false
+        },
+        "showApplyButton": {
+          "type": "boolean",
+          "description": "Show apply button",
+          "default": false
+        },
+        "showResetButton": {
+          "type": "boolean",
+          "description": "Show reset button",
+          "default": true
+        },
+        "autoApply": {
+          "type": "boolean",
+          "description": "Auto-apply filters on change",
+          "default": true
+        },
+        "showFeatureCount": {
+          "type": "boolean",
+          "description": "Show feature count after filtering",
+          "default": true
+        }
+      }
+    }
+  }
+}

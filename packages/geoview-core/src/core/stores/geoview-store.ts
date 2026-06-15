@@ -22,6 +22,8 @@ import type { ISwiperState } from '@/core/stores/states/swiper-state';
 import { initializeSwiperState } from '@/core/stores/states/swiper-state';
 import type { IDrawerState } from './states/drawer-state';
 import { initializeDrawerState } from './states/drawer-state';
+import type { IFilterPanelState } from '@/core/stores/states/filter-panel-state';
+import { initializeFilterPanelState } from '@/core/stores/states/filter-panel-state';
 import type { IUIState } from '@/core/stores/states/ui-state';
 import { initializeUIState } from '@/core/stores/states/ui-state';
 
@@ -55,6 +57,7 @@ export interface IGeoviewState {
   timeSliderState: ITimeSliderState;
   swiperState: ISwiperState;
   drawerState: IDrawerState;
+  filterPanelState: IFilterPanelState;
 }
 
 export const geoviewStoreDefinition = (set: TypeSetStore, get: TypeGetStore): IGeoviewState => {
@@ -101,6 +104,7 @@ export const geoviewStoreDefinition = (set: TypeSetStore, get: TypeGetStore): IG
         set({ drawerState: initializeDrawerState(set, get) });
         get().drawerState.setDefaultConfigValues(config);
       }
+      if (config.appBar?.tabs?.core?.includes('filter-panel')) set({ filterPanelState: initializeFilterPanelState(set, get) });
     },
 
     // core states

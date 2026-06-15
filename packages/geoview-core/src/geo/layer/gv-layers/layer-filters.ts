@@ -20,6 +20,9 @@ export class LayerFilters {
   /** Filter on time */
   #timeFilter?: string;
 
+  /** Filter from the filter panel */
+  #panelFilter?: string;
+
   /** The cached filter equation which changes every filter change */
   #cachedFilterEquation?: FilterNodeType[];
 
@@ -33,13 +36,15 @@ export class LayerFilters {
    * @param classFilter - Optional filter regarding the class renderers
    * @param dataFilter - Optional filter regarding data
    * @param timeFilter - Optional filter regarding time
+   * @param panelFilter - Optional filter from the filter panel
    */
-  constructor(initialFilter?: string, classFilter?: string, dataFilter?: string, timeFilter?: string) {
+  constructor(initialFilter?: string, classFilter?: string, dataFilter?: string, timeFilter?: string, panelFilter?: string) {
     // Keep attributes
     this.#initialFilter = initialFilter;
     this.#classFilter = classFilter;
     this.#dataFilter = dataFilter;
     this.#timeFilter = timeFilter;
+    this.#panelFilter = panelFilter;
     this.#refreshFilterEquation();
   }
 
@@ -158,6 +163,34 @@ export class LayerFilters {
   }
 
   /**
+   * Gets the panel filter.
+   *
+   * @returns The panel filter or undefined when not set
+   */
+  getPanelFilter(): string | undefined {
+    return this.#panelFilter;
+  }
+
+  /**
+   * Sets the panel filter.
+   *
+   * @param panelFilter - The panel filter
+   */
+  setPanelFilter(panelFilter: string | undefined): void {
+    this.#panelFilter = panelFilter;
+    this.#refreshFilterEquation();
+  }
+
+  /**
+   * Gets if the layer has a panel filter.
+   *
+   * @returns True when the layer has a panel filter
+   */
+  hasPanelFilter(): boolean {
+    return !!this.#panelFilter;
+  }
+
+  /**
    * Returns all active data-related filters combined into a single expression
    * using the logical AND operator.
    *
@@ -202,7 +235,7 @@ export class LayerFilters {
    * @returns An array of active data filter expressions
    */
   #getDataRelatedFilters(): (string | undefined)[] {
-    return [this.#initialFilter, this.#classFilter, this.#dataFilter];
+    return [this.#initialFilter, this.#classFilter, this.#dataFilter, this.#panelFilter];
   }
 
   /**
@@ -213,7 +246,7 @@ export class LayerFilters {
    * @returns An array of all active filter expressions
    */
   #getAllFilters(): (string | undefined)[] {
-    return [this.#initialFilter, this.#classFilter, this.#dataFilter, this.#timeFilter];
+    return [this.#initialFilter, this.#classFilter, this.#dataFilter, this.#panelFilter, this.#timeFilter];
   }
 
   /**
@@ -254,5 +287,5 @@ export class LayerFilters {
   // #endregion STATIC METHODS
 }
 
-/** Represents the types of filters that can be composed: initial, class, data, or time-based filters. */
-export type FilterCategory = 'initial' | 'class' | 'data' | 'time';
+/** Represents the types of filters that can be composed: initial, class, data, panel, or time-based filters. */
+export type FilterCategory = 'initial' | 'class' | 'data' | 'panel' | 'time';
