@@ -53,7 +53,10 @@ export type GeoCoreConfigResponseGCSLayer = {
     layerName: string;
 };
 export type GeoCoreConfigResponsePackages = {
+    /** The geochart configurations. */
     geochart: GeoChartGeoCoreConfig[];
+    /** Optional time-slider configurations. */
+    'time-slider'?: GeoViewTimeSliderConfig[];
 };
 export type GeoChartGeoCoreConfig = {
     layers: GeoChartGeoCoreConfigLayer;
@@ -76,9 +79,18 @@ export type GeoCoreConfigResponseLayer = {
 export type GeoViewGeoChartConfig = {
     layers: GeoChartGeoCoreConfigLayer[];
 };
+/** The time-slider config object as returned by GeoCore. */
+export type GeoViewTimeSliderConfig = {
+    /** The slider configuration entries. */
+    sliders: Record<string, unknown>[];
+};
 /** The type representing the GeoCore parsed response */
 export type UUIDmapConfigReaderResponse = {
+    /** The parsed layer configurations. */
     layers: TypeGeoviewLayerConfig[];
+    /** Optional geochart configurations. */
     geocharts?: GeoViewGeoChartConfig[];
+    /** Optional time-slider configurations. */
+    timeSliderConfigs?: GeoViewTimeSliderConfig[];
 };
 //# sourceMappingURL=uuid-config-reader.d.ts.map

@@ -88,6 +88,8 @@ export type TypeFooterBarProps = {
         custom: TypeFooterBarTabsCustomProps[];
     };
     selectedTab: TypeValidFooterBarTabsCoreProps;
+    selectedDetailsLayerPath: string;
+    selectedGeochartLayerPath: string;
     selectedLayersLayerPath: string;
     selectedDataTableLayerPath: string;
     selectedTimeSliderLayerPath: string;
@@ -103,6 +105,7 @@ export type TypeAppBarProps = {
     selectedLayersLayerPath: string;
     selectedDataTableLayerPath: string;
     selectedTimeSliderLayerPath: string;
+    selectedDetailsLayerPath: string;
 };
 /** Overview map options. Default none. */
 export type TypeOverviewMapProps = {
@@ -247,6 +250,8 @@ export type TypeViewSettings = {
     homeView?: TypeMapViewSettings;
     /** Enable rotation. If false, a rotation constraint that always sets the rotation to zero is used. Default = true. */
     enableRotation?: boolean;
+    /** Lon lat to perform a click interaction at once layers are loaded. */
+    initialClickCoordinate?: Coordinate;
     /**
      * The initial rotation for the view in degree (positive rotation clockwise, 0 means North). Will be converted to radiant by
      * the viewer. Domain = [0..360], default = 0.
@@ -422,6 +427,8 @@ export type TypeOutfields = {
     alias: string;
     type: TypeOutfieldsType;
     domain?: codedValueType | rangeDomainType;
+    /** Whether this field appears in summary views. Default = true. */
+    summary?: boolean;
 };
 /** The types supported by the outfields object. */
 export type TypeOutfieldsType = 'string' | 'date' | 'number' | 'url' | 'oid';

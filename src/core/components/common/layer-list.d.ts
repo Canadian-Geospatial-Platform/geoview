@@ -52,6 +52,8 @@ interface LayerListItemProps {
  * Renders a single layer list item with icon, status, and selection state.
  *
  * Memoized to avoid re-rendering all items when only the selected layer changes.
+ * When only one layer's `isSelected` state changes in the list, the other N-1 items
+ * skip re-rendering thanks to memo shallow comparison.
  *
  * @param props - Properties defined in LayerListItemProps interface
  * @returns The layer list item element
@@ -60,10 +62,10 @@ export declare const LayerListItem: import("react").MemoExoticComponent<({ id, i
 /**
  * Renders a list of layers with selection and status indicators.
  *
- * Memoized to prevent re-rendering when unrelated parent state changes.
- * Note: Props (selectedLayerPath, layerList) do change frequently on layer interaction.
- * Kept for now to protect against parent component re-renders; can be removed
- * if profiling shows overhead exceeds benefits.
+ * Memoized to prevent re-rendering when unrelated parent state changes (e.g., other UI updates).
+ * While `selectedLayerPath` and `layerList` do change frequently on layer interactions, memo
+ * protects against unnecessary renders triggered by parent component updates that don't affect
+ * these props. The shallow comparison overhead is minimal compared to rendering all list items.
  *
  * @param props - Properties defined in LayerListProps interface
  * @returns The layer list element

@@ -3,7 +3,10 @@ import type { EventDelegateBase } from '@/api/events/event-helper';
 import type { QueryType, TypeResultSet } from '@/api/types/map-schema-types';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
+import type { MapViewer } from '@/geo/map/map-viewer';
 import { type TypeFeatureInfoResultSet } from '@/core/stores/states/feature-info-state';
+import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
+import type { LayerDomain } from '@/core/domains/layer-domain';
 /**
  * A Layer-set working with the LayerSetController at handling a result set of registered layers and synchronizing
  * events happening on them (in this case when the user click a location on the map) with a store
@@ -13,6 +16,14 @@ export declare class FeatureInfoLayerSet extends AbstractLayerSet {
     #private;
     /** The query type */
     static QUERY_TYPE: QueryType;
+    /**
+     * Constructs a FeatureInfo LayerSet to manage feature info queries.
+     *
+     * @param mapViewer - The map viewer
+     * @param controllerRegistry - The controller registry
+     * @param layerDomain - The layer domain
+     */
+    constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry, layerDomain: LayerDomain);
     /**
      * Overrides the behavior to apply when a feature-info-layer-set wants to check for condition to register a layer in its set.
      *
@@ -53,6 +64,12 @@ export declare class FeatureInfoLayerSet extends AbstractLayerSet {
      * @param layerPath - The layer path
      */
     clearResults(layerPath: string): void;
+    /**
+     * Gets the last query longitude/latitude coordinate for the map.
+     *
+     * @returns The last query longitude/latitude coordinate, if available
+     */
+    getLastQueryLonLat(): Coordinate | undefined;
     /**
      * Registers a query ended event handler.
      *

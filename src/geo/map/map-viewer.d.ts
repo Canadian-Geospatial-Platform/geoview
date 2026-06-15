@@ -635,9 +635,10 @@ export declare class MapViewer {
      *
      * @param overrideGeocoreServiceNames - Optional - Indicates if geocore layer names should be kept as is or returned to defaults.
      *   Set to false after a language change to update the layer names with the new language.
+     * @param includeFeatureInfo - Optional - Indicates if feature info should be included in the config for each layer.
      * @returns Map config with current map state, or undefined if unavailable
      */
-    createMapConfigFromMapState(overrideGeocoreServiceNames?: boolean | 'hybrid'): TypeMapFeaturesInstance | undefined;
+    createMapConfigFromMapState(overrideGeocoreServiceNames?: boolean | 'hybrid', includeFeatureInfo?: boolean): TypeMapFeaturesInstance | undefined;
     /**
      * Searches through a map config and replaces any matching layer names with their provided partner.
      *

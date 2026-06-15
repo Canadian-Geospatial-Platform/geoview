@@ -1,6 +1,6 @@
 import type { Extent } from 'ol/extent';
 import type { TypeLayerStyleConfig, TypeStyleGeometry } from '@/api/types/map-schema-types';
-import type { TypeGeoviewLayerType, TypeLayerControls, TypeLayerEntryType, TypeLayerStatus, TypeMetadataEsriRasterFunctionInfos, TypeMetadataWMSCapabilityLayerStyle, TypeMosaicMethod, TypeMosaicRule } from '@/api/types/layer-schema-types';
+import { type TypeGeoviewLayerType, type TypeLayerControls, type TypeLayerEntryType, type TypeLayerStatus, type TypeMetadataEsriRasterFunctionInfos, type TypeMetadataWMSCapabilityLayerStyle, type TypeMosaicMethod, type TypeMosaicRule } from '@/api/types/layer-schema-types';
 import type { LegendQueryStatus } from '@/core/stores/states/layer-state';
 import type { TemporalMode, TimeDimension, TimeIANA, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 /** Represents the layer panel display state. */
@@ -126,4 +126,25 @@ export interface TypeLegendLayer {
     /** Current map zoom level. */
     zoom?: number;
 }
+/**
+ * Checks whether a layer has class-based legend items (i.e. uniqueValue or classBreaks style entries) to render.
+ *
+ * @param layerItems - The legend items for the layer
+ * @param styleConfig - The active style configuration for the layer
+ * @param minItems - The minimum number of items for the function to return true
+ * @returns True when the layer has at least one legend item and a style configuration
+ */
+export declare function layerHasClassItems(layerItems: TypeLegendItem[] | undefined, styleConfig: TypeLayerStyleConfig | undefined, minItems: number | undefined): boolean;
+/**
+ * Checks whether a layer should render a server-provided legend image instead of class-based items.
+ *
+ * Applies to WMS and WMTS layers that lack class-based items but expose a non-empty legend icon from the service.
+ *
+ * @param schemaTag - The GeoView layer type tag (e.g. WMS, WMTS)
+ * @param layerItems - The legend items for the layer
+ * @param layerIcons - The legend icon entries for the layer
+ * @param styleConfig - The active style configuration for the layer
+ * @returns True when the layer is a WMS/WMTS that should display its service-provided legend image
+ */
+export declare function layerHasLegendImage(schemaTag: TypeGeoviewLayerType | undefined, layerItems: TypeLegendItem[] | undefined, layerIcons: TypeLegendLayerItem[] | undefined, styleConfig: TypeLayerStyleConfig | undefined): boolean;
 //# sourceMappingURL=types.d.ts.map

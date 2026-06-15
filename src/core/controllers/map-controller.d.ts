@@ -307,9 +307,10 @@ export declare class MapController extends AbstractMapViewerController {
      * Creates a map config based on current map state.
      *
      * @param overrideGeocoreServiceNames - Indicates if geocore layer names should be kept as is or returned to defaults
+     * @param includeFeatureInfo - Indicates if feature info should be included in the config for each layer
      * @returns The type map features instance
      */
-    createMapConfigFromMapState(overrideGeocoreServiceNames?: boolean | 'hybrid'): TypeMapFeaturesInstance | undefined;
+    createMapConfigFromMapState(overrideGeocoreServiceNames?: boolean | 'hybrid', includeFeatureInfo?: boolean): TypeMapFeaturesInstance | undefined;
     /**
      * Searches through a map config and replaces any matching layer names with their provided partner.
      *

@@ -7,6 +7,7 @@ import type { TypeMetadataWMTS } from '@/api/config/validation-classes/raster-va
 import { OgcWmtsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wmts-layer-entry-config';
 import { GVWMTS } from '@/geo/layer/gv-layers/tile/gv-wmts';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
+import { type CallbackNewMetadataDelegate } from '@/geo/utils/utilities';
 import type { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import type { DisplayDateMode } from '@/api/types/map-schema-types';
 export interface TypeSourceImageWMTSInitialConfig extends TypeSourceTileInitialConfig {
@@ -89,10 +90,11 @@ export declare class WMTS extends AbstractGeoViewRaster {
     /**
      * Fetches and processes service metadata for the WMTS layer.
      *
+     * @param updateMetadataAccessPath - Whether to update the layer's metadata access path if a proxy is required to fetch the metadata
      * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
      * @returns A promise that resolves to the parsed metadata object, or `undefined` if metadata could not be retrieved or no capabilities were found.
      */
-    protected fetchServiceMetadataWMTS(abortSignal?: AbortSignal): Promise<TypeMetadataWMTS>;
+    protected fetchServiceMetadataWMTS(updateMetadataAccessPath: boolean, abortSignal?: AbortSignal): Promise<TypeMetadataWMTS>;
     /**
      * Creates a configuration object for a WMTS layer.
      *
@@ -154,6 +156,7 @@ export declare class WMTS extends AbstractGeoViewRaster {
      * Fetches the metadata for WMS Capabilities.
      *
      * @param url - The url to query the metadata from
+     * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata
      * @param abortSignal - Optional abort signal to handle cancelling of the process
      * @returns A promise that resolves to the parsed metadata object
      * @throws {RequestTimeoutError} When the request exceeds the timeout duration
@@ -162,7 +165,7 @@ export declare class WMTS extends AbstractGeoViewRaster {
      * @throws {ResponseEmptyError} When the JSON response is empty
      * @throws {NetworkError} When a network issue happened
      */
-    static fetchMetadata<T = TypeMetadataWMTS>(url: string, abortSignal?: AbortSignal): Promise<T>;
+    static fetchMetadata<T = TypeMetadataWMTS>(url: string, callbackNewMetadataUrl?: CallbackNewMetadataDelegate, abortSignal?: AbortSignal): Promise<T>;
     /**
      * Creates a WMTS source from a layer config.
      *

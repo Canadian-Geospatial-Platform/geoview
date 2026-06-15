@@ -43,6 +43,10 @@ export declare class ConsoleLogger {
         useMemo: number;
         useEffect: number;
     };
+    /** The number of memo logs - per component. */
+    logCountMemoPerHook: {
+        [memoHook: string]: number;
+    };
     /** The number of render logs - per component. */
     logCountRenderPerComponent: {
         [component: string]: number;

@@ -1,4 +1,4 @@
-import type { GeoViewGeoChartConfig } from '@/api/config/reader/uuid-config-reader';
+import type { GeoViewGeoChartConfig, GeoViewTimeSliderConfig } from '@/api/config/reader/uuid-config-reader';
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import type { GeoCoreLayerConfig, TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
 /** Class used to add GeoCore layers to the map. */
@@ -35,9 +35,13 @@ export declare class GeoCore {
 }
 /** Response structure containing the layer configuration and associated geocharts. */
 export type GeoCoreLayerConfigResponse = {
+    /** The resolved layer configuration. */
     config: TypeGeoviewLayerConfig;
+    /** The geochart configurations keyed by layer path. */
     geocharts: {
         [key: string]: GeoViewGeoChartConfig;
     };
+    /** The time-slider configurations from GeoCore. */
+    timeSliderConfigs: GeoViewTimeSliderConfig[];
 };
 //# sourceMappingURL=geocore.d.ts.map

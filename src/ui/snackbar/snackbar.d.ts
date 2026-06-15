@@ -7,7 +7,6 @@ interface SnackBarProps {
     message: string;
     open: boolean;
     type: SnackbarType;
-    button?: JSX.Element;
     closeButtonText?: string;
     onClose?: (event?: React.SyntheticEvent | Event, reason?: string) => void;
 }
@@ -15,8 +14,8 @@ interface SnackBarProps {
  * Material-UI Snackbar component for displaying app/map notification messages.
  *
  * Combines Material-UI's Snackbar with Alert to provide animated feedback messages
- * with type-based styling (success, error, warning, info). Supports custom action buttons
- * and close callbacks. Uses React Spring animations for fade-in effect.
+ * with type-based styling (success, error, warning, info). Supports close callbacks.
+ * Uses React Spring animations for fade-in effect.
  *
  * @param props - Snackbar configuration (see SnackBarProps)
  * @returns Snackbar component with animated alert message
@@ -30,15 +29,6 @@ interface SnackBarProps {
  *   open={isOpen}
  *   type="success"
  *   onClose={handleClose}
- * />
- *
- * // Error with action button
- * <Snackbar
- *   snackBarId="error-msg"
- *   message="An error occurred"
- *   open={isOpen}
- *   type="error"
- *   button={<Button onClick={handleRetry}>Retry</Button>}
  * />
  * ```
  *

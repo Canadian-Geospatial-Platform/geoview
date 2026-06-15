@@ -187,9 +187,8 @@ export declare class UIController extends AbstractMapViewerController {
      * @param type - The snackbar type (info, success, warning, or error)
      * @param messageKey - The translation key for the message
      * @param messageParams - Optional parameters for message interpolation
-     * @param notification - Optional flag indicating whether to also create a notification
      */
-    addMessage(type: SnackbarType, messageKey: string, messageParams?: Record<string, unknown>, notification?: boolean): void;
+    addMessage(type: SnackbarType, messageKey: string, messageParams?: Record<string, unknown>): void;
     /**
      * Adds a notification to the notification center.
      *

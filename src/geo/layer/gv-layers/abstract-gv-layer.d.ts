@@ -26,21 +26,19 @@ import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/
  */
 export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     #private;
-    /** The default hit tolerance the query should be using */
+    /** The default hit tolerance the query should be using. */
     static readonly DEFAULT_HIT_TOLERANCE: number;
-    /** The default loading period before we show a message to the user about a layer taking a long time to render on map */
+    /** The default loading period before we show a message to the user about a layer taking a long time to render on map. */
     static readonly DEFAULT_LOADING_PERIOD: number;
+    /** Quiescence period after a tile source change with no tile-load activity before remaining in-flight tiles are treated as orphans and force-closed. */
+    static readonly TILE_LOADING_QUIESCENCE_PERIOD: number;
     /** Keywords used to identify name fields in the layer's outfields when none specified. */
     static readonly NAME_FIELD_KEYWORDS: string[];
-    /** Counts the number of times the loading happened. */
-    loadingCounter: number;
-    /** Marks the latest loading count for the layer. Useful to know when to put the layer loaded status back correctly with parallel processing happening. */
-    loadingMarker: number;
     /**
      * Constructs a GeoView layer to manage an OpenLayer layer.
      *
-     * @param olSource - The OpenLayer Source.
-     * @param layerConfig - The layer configuration.
+     * @param olSource - The OpenLayer Source
+     * @param layerConfig - The layer configuration
      */
     protected constructor(olSource: Source, layerConfig: AbstractBaseLayerEntryConfig);
     /**
@@ -92,6 +90,9 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     protected onLoading(): void;
     /**
      * Overridable method called when the layer has been loaded correctly.
+     *
+     * Fired only on the wave-terminating `*loadend` (i.e. when the in-flight counter transitions back to 0). Intermediate
+     * `*loadend` events while other loads are still in flight are absorbed by the counter and do not call this method.
      */
     protected onLoaded(): void;
     /**
@@ -99,9 +100,33 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      *
      * @param error - The error which is being raised
      */
-    protected onError(error: GeoViewError): void;
+    protected onSourceError(error: GeoViewError): void;
+    /**
+     * Overridable method called when the layer is in error and couldn't be loaded correctly.
+     *
+     * Fired only on the wave-terminating `featuresloaderror` (i.e. when the in-flight counter transitions back to 0).
+     * Errors arriving while other loads are still in flight are absorbed by the counter and do not reach this method,
+     * which naturally suppresses superseded errors.
+     *
+     * @param error - The error which is being raised
+     */
+    protected onFeaturesLoadError(error: GeoViewError): void;
+    /**
+     * Overridable method called when the layer tile image is in error and couldn't be loaded correctly.
+     *
+     * Fired only on the wave-terminating `tileloaderror` (i.e. when the in-flight counter transitions back to 0). Tile
+     * errors arriving mid-burst, while other tiles are still loading, are absorbed by the counter and do not reach this
+     * method - only the error that closes out the wave is reported.
+     *
+     * @param error - The error which is being raised
+     */
+    protected onImageTileLoadError(error: GeoViewError): void;
     /**
      * Overridable method called when the layer image is in error and couldn't be loaded correctly.
+     *
+     * Fired only on the wave-terminating `imageloaderror` (i.e. when the in-flight counter transitions back to 0).
+     * Errors arriving while other loads are still in flight are absorbed by the counter and do not reach this method,
+     * which naturally suppresses superseded errors.
      *
      * @param error - The error which is being raised
      */
@@ -141,6 +166,7 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      * @param language - The display language, used to guess the best name field if `nameField` is not provided
      * @param abortController - Optional {@link AbortController} to cancel the operation
      * @returns A promise that resolves with the feature info result
+     * @throws {NotImplementedError} When the subclass does not override `getFeatureInfoAtCoordinate` (propagated from `getFeatureInfoAtCoordinate()`)
      */
     protected getFeatureInfoAtPixel(map: OLMap, location: Pixel, queryGeometry: boolean | undefined, language: TypeDisplayLanguage, // Used if we have to guess the field name for the 'nameField'
     abortController?: AbortController | undefined): Promise<TypeFeatureInfoResult>;
@@ -209,8 +235,11 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      */
     protected onSetLayerFilters(filter?: LayerFilters): void;
     /**
-     * Initializes the GVLayer. This function checks if the source is ready and if so it calls onLoaded() to pursue initialization of the layer.
-     * If the source isn't ready, it registers to the source ready event to pursue initialization of the layer once its source is ready.
+     * Initializes the GVLayer.
+     *
+     * Applies the initial layer filters, wires the OpenLayers source event listeners that drive the loading lifecycle
+     * (start/end shared across features/image/tile families plus one handler per error family), registers the source
+     * `change` listener to surface fatal source errors, and patches the renderer to guard against null-context errors.
      */
     init(): void;
     /**
@@ -252,7 +281,7 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     /**
      * Gets the style item visibility on the layer.
      *
-     * @param item - The style item to toggle visibility on
+     * @param item - The style item whose visibility to retrieve
      * @returns The visibility of the style item
      */
     getStyleItemVisibility(item: TypeLegendItem): boolean;
@@ -302,7 +331,8 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     /**
      * Sets if the layer is currently queryable.
      *
-     * @param queryable - The queryable value.
+     * @param queryable - The queryable value
+     * @throws {LayerNotQueryableError} When the underlying source is not queryable
      */
     setQueryable(queryable: boolean): void;
     /**
@@ -314,16 +344,17 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     /**
      * Sets if the layer is currently hoverable.
      *
-     * @param hoverable - The hoverable value.
+     * @param hoverable - The hoverable value
      */
     setHoverable(hoverable: boolean): void;
     /**
      * Gets the extent of an array of features.
      *
-     * @param objectIds - The IDs of the features to calculate the extent from.
-     * @param outProjection - The output projection for the extent.
-     * @param outfield - Optional. ID field to return for services that require a value in outfields.
-     * @returns A promise that resolves to the extent of the features, if available.
+     * @param objectIds - The IDs of the features to calculate the extent from
+     * @param outProjection - The output projection for the extent
+     * @param outfield - Optional ID field to return for services that require a value in outfields
+     * @returns A promise that resolves to the extent of the features, if available
+     * @throws {NotImplementedError} When the subclass does not override `onGetExtentFromFeatures` (propagated from `onGetExtentFromFeatures()`)
      */
     getExtentFromFeatures(objectIds: number[] | string[], outProjection: OLProjection, outfield?: string): Promise<Extent>;
     /**
@@ -372,6 +403,8 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      * @param language - The display language, used to guess the best name field if `nameField` is not provided
      * @param abortController - Optional {@link AbortController} to cancel the operation
      * @returns A promise that resolves with the feature info result
+     * @throws {NotSupportedError} When `queryType` is not one of the supported query types
+     * @throws {NotImplementedError} When the subclass does not override the underlying `get*FeatureInfo*` method for the requested `queryType` (propagated from the dispatched method)
      */
     getFeatureInfo(map: OLMap, queryType: QueryType, location: TypeLocation, queryGeometry: boolean | undefined, language: TypeDisplayLanguage, // Used if we have to guess the field name for the 'nameField'
     abortController?: AbortController | undefined): Promise<TypeFeatureInfoResult>;
@@ -407,13 +440,15 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      *
      * @param timeout - A timeout for the period to wait for. Defaults to 30,000 ms
      * @returns A promise that resolves when the layer has been loaded at least once
+     * @throws {LayerStatusErrorError} When the layer enters the `error` state before being loaded
      */
     waitLoadedOnce(timeout?: number): Promise<boolean>;
     /**
-     * Utility function allowing to wait for the layer to be loaded at least once.
+     * Utility function allowing to wait for the layer status to become `loaded`.
      *
      * @param timeout - A timeout for the period to wait for. Defaults to 30,000 ms
-     * @returns A promise that resolves when the layer has been loaded at least once
+     * @returns A promise that resolves when the layer status is `loaded`
+     * @throws {LayerStatusErrorError} When the layer enters the `error` state before reaching `loaded`
      */
     waitLoadedStatus(timeout?: number): Promise<boolean>;
     /**
@@ -421,6 +456,7 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      *
      * @param timeout - A timeout for the period to wait for. Defaults to 30,000 ms
      * @returns A promise that resolves when the layer legend has been fetched
+     * @throws {LayerStatusErrorError} When the layer enters the `error` state before the legend is fetched
      */
     waitLegendFetched(timeout?: number): Promise<TypeLegend>;
     /**
@@ -428,6 +464,7 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      *
      * @param timeout - A timeout for the period to wait for. Defaults to 30,000 ms
      * @returns A promise that resolves when the layer style has been applied
+     * @throws {LayerStatusErrorError} When the layer enters the `error` state before the style is applied
      */
     waitStyleApplied(timeout?: number): Promise<TypeLayerStyleConfig>;
     /**
@@ -448,17 +485,15 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      * @param messageKey - The key used to lookup the localized message OR message
      * @param messageParams - Array of parameters to be interpolated into the localized message
      * @param messageType - The message type
-     * @param notification - Optional whether to show this as a notification. Defaults to false
      *
      * @example
      * this.emitMessage(
      *   'layers.fetchProgress',
      *   ['50', '100'],
-     *   messageType: 'error',
-     *   true
+     *   'error',
      * );
      */
-    protected emitMessage(messageKey: string, messageParams: Record<string, unknown> | undefined, messageType?: SnackbarType, notification?: boolean): void;
+    protected emitMessage(messageKey: string, messageParams: Record<string, unknown> | undefined, messageType?: SnackbarType): void;
     /**
      * Registers a legend querying event handler.
      *
@@ -709,103 +744,75 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      */
     static helperGetFieldValue(feature: Feature, fieldName: string, fieldType: TypeOutfieldsType, fieldDomain: codedValueType | rangeDomainType | undefined, inputFormat: string | string[] | undefined, inputTimezone: TimeIANA | undefined, inputTemporalMode: TemporalMode | undefined): unknown;
 }
+/** Callback signature used to extract and format the value of a single feature field. */
 export type GetFieldValueDelegate = (feature: Feature, fieldName: string, fieldType: TypeOutfieldsType, fieldDomain: codedValueType | rangeDomainType | undefined, inputFormat: string | string[] | undefined, inputTimezone: TimeIANA | undefined, inputTemporalMode: TemporalMode | undefined) => unknown;
-/**
- * Define an event for the delegate
- */
+/** Event payload emitted when the layer style changes. */
 export interface StyleChangedEvent extends LayerBaseEvent {
+    /** The newly applied layer style. */
     style: TypeLayerStyleConfig;
 }
-/**
- * Define a delegate for the event handler function signature
- */
+/** Delegate for the {@link StyleChangedEvent} handler. */
 export type StyleChangedDelegate = EventDelegateBase<AbstractGVLayer, StyleChangedEvent, void>;
-/**
- * Define an event for the delegate
- */
+/** Event payload emitted when a legend query starts. */
 export interface LegendQueryingEvent extends LayerBaseEvent {
 }
-/**
- * Define a delegate for the event handler function signature
- */
+/** Delegate for the {@link LegendQueryingEvent} handler. */
 export type LegendQueryingDelegate = EventDelegateBase<AbstractGVLayer, LegendQueryingEvent, void>;
-/**
- * Define an event for the delegate
- */
+/** Event payload emitted when a legend query completes. */
 export interface LegendQueriedEvent extends LayerBaseEvent {
+    /** The legend returned by the query. */
     legend: TypeLegend;
 }
-/**
- * Define a delegate for the event handler function signature
- */
+/** Delegate for the {@link LegendQueriedEvent} handler. */
 export type LegendQueriedDelegate = EventDelegateBase<AbstractGVLayer, LegendQueriedEvent, void>;
-/**
- * Define an event for the delegate
- */
+/** Event payload emitted when a layer filter is applied. */
 export interface LayerFilterAppliedEvent extends LayerBaseEvent {
-    /** The filter */
+    /** The filter currently applied on the layer. */
     filter: LayerFilters;
-    /** The filter category */
+    /** The filter category that changed and triggered this event. */
     filterCategory: FilterCategory;
 }
-/**
- * Define a delegate for the event handler function signature
- */
+/** Delegate for the {@link LayerFilterAppliedEvent} handler. */
 export type LayerFilterAppliedDelegate = EventDelegateBase<AbstractGVLayer, LayerFilterAppliedEvent, void>;
-/**
- * Define an event for the delegate
- */
+/** Event payload emitted when the layer enters an error state. */
 export interface LayerErrorEvent extends LayerBaseEvent {
+    /** The deciphered error that triggered this event. */
     error: GeoViewError;
 }
-/**
- * Define a delegate for the event handler function signature
- */
+/** Delegate for the {@link LayerErrorEvent} handler. */
 export type LayerErrorDelegate = EventDelegateBase<AbstractGVLayer, LayerErrorEvent, void>;
-/**
- * Define an event for the delegate
- */
+/** Event payload emitted when the layer surfaces a user-facing message. */
 export interface LayerMessageEvent extends LayerBaseEvent {
+    /** The i18n key used to look up the localized message (or the literal message). */
     messageKey: string;
+    /** Parameters interpolated into the localized message. */
     messageParams: Record<string, unknown> | undefined;
+    /** The severity / category of the message. */
     messageType: SnackbarType;
-    notification: boolean;
 }
-/**
- * Define a delegate for the event handler function signature
- */
+/** Delegate for the {@link LayerMessageEvent} handler. */
 export type LayerMessageDelegate = EventDelegateBase<AbstractGVLayer, LayerMessageEvent, void>;
-/**
- * Define an event for the delegate
- */
+/** Event payload emitted when the layer's queryable flag changes. */
 export interface LayerQueryableChangedEvent extends LayerBaseEvent {
+    /** The new queryable value. */
     queryable: boolean;
 }
-/**
- * Define a delegate for the event handler function signature
- */
+/** Delegate for the {@link LayerQueryableChangedEvent} handler. */
 export type LayerQueryableChangedDelegate = EventDelegateBase<AbstractGVLayer, LayerQueryableChangedEvent, void>;
-/**
- * Define an event for the delegate
- */
+/** Event payload emitted when the layer's hoverable flag changes. */
 export interface LayerHoverableChangedEvent extends LayerBaseEvent {
+    /** The new hoverable value. */
     hoverable: boolean;
 }
-/**
- * Define a delegate for the event handler function signature
- */
+/** Delegate for the {@link LayerHoverableChangedEvent} handler. */
 export type LayerHoverableChangedDelegate = EventDelegateBase<AbstractGVLayer, LayerHoverableChangedEvent, void>;
-/**
- * Define an event for the delegate
- */
+/** Event payload emitted when a style item's visibility is toggled. */
 export interface LayerItemVisibilityChangedEvent extends LayerBaseEvent {
-    /** The item being toggled */
+    /** The legend item being toggled. */
     item: TypeLegendItem;
-    /** The new visibility */
+    /** The new visibility of the item. */
     visible: boolean;
 }
-/**
- * Define a delegate for the event handler function signature
- */
+/** Delegate for the {@link LayerItemVisibilityChangedEvent} handler. */
 export type LayerItemVisibilityChangedDelegate = EventDelegateBase<AbstractGVLayer, LayerItemVisibilityChangedEvent, void>;
 //# sourceMappingURL=abstract-gv-layer.d.ts.map

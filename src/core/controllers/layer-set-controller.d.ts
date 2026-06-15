@@ -83,17 +83,25 @@ export declare class LayerSetController extends AbstractMapViewerController {
      * Repeats the last feature info query.
      * This method waits for the map viewer layers to be rendered before performing the query.
      *
+     * @param waitForRender - Whether to wait for the map viewer layers to be rendered before performing the query, defaults to true
      * @returns A promise that resolves with the result of the query
      * @throws {LayerNoLastQueryToPerformError} When there's no last query to perform
      */
-    repeatLastQuery(): Promise<TypeFeatureInfoResultSet>;
+    repeatLastQuery(waitForRender?: boolean): Promise<TypeFeatureInfoResultSet>;
     /**
      * Repeats the last feature info query, if any.
      * This method waits for the map viewer layers to be rendered before performing the query.
      *
+     * @param waitForRender - Whether to wait for the map viewer layers to be rendered before performing the query, defaults to true
      * @returns A promise that resolves with the result of the query or undefined when no query to repeat
      */
-    repeatLastQueryIfAny(): Promise<TypeFeatureInfoResultSet | undefined>;
+    repeatLastQueryIfAny(waitForRender?: boolean): Promise<TypeFeatureInfoResultSet | undefined>;
+    /**
+     * Gets the last query longitude/latitude coordinate.
+     *
+     * @returns The last query longitude/latitude coordinate, if available
+     */
+    getLastQueryLonLat(): Coordinate | undefined;
     /**
      * Clears all vector features from every layer in the All Feature Info Layer Set.
      */
