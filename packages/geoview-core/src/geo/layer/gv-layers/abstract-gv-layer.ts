@@ -841,6 +841,25 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   }
 
   /**
+   * Sets the panel filter on the layer.
+   *
+   * This function only updates the panel filter query string inside the layer filters object.
+   * The active filter applied on the layer will update accordingly, however, the UI component elements themselves won't update.
+   *
+   * @param panelFilterQueryString - Optional panel filter expression to apply
+   */
+  setLayerFiltersPanel(panelFilterQueryString: string | undefined): void {
+    // Get the current layer filter
+    const curLayerFilter = this.getLayerFilters();
+
+    // Set it
+    curLayerFilter.setPanelFilter(panelFilterQueryString);
+
+    // Redirect
+    this.#setLayerFilters(curLayerFilter, 'panel');
+  }
+
+  /**
    * Applies a time filter on a date range.
    *
    * This function only updates the time filter query string inside the layer filters object.
