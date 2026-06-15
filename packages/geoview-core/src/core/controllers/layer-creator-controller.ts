@@ -475,6 +475,13 @@ export class LayerCreatorController extends AbstractMapViewerController {
 
               // Re-add on the map
               this.getMapViewer().map.addLayer(layer.getOLLayer());
+
+              // GV Cheat by pretending the layer was loaded once immediately
+              // GV Otherwise on next "reload layer" call it'll think it never was loaded ever (though it was at least once)
+              layer.loadedOnce = true;
+
+              // Nonreloadable layer
+              this.getMapViewer().notifications.showSuccess('layers.layerReloaded', { layerName: layer.getLayerName() });
             } else {
               // Nonreloadable layer
               this.getMapViewer().notifications.showError('layers.errorNonreloadableLayer');
