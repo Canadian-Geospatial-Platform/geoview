@@ -16,6 +16,7 @@ import {
   setStoreReorderLegendLayers,
   utilFindLayerAndChildrenPaths,
 } from './states/layer-state';
+
 import type { TypeLegendLayer } from '@/core/components/layers/types';
 import { logger } from '@/core/utils/logger';
 import type { EventDelegateBase } from '@/api/events/event-helper';
@@ -29,22 +30,23 @@ export class StateApi {
   /** The layer controller instance */
   #layerController: LayerController;
 
-  /** Keep all callback delegates references */
+  /** Callback delegates for the layers reordered event. */
   #onLayersReorderedHandlers: LayersReorderedDelegate[] = [];
 
   /**
-   * Instantiates an StateApi class.
+   * Instantiates a StateApi class.
    *
-   * @param layerController - The layer controller instance to interact with layer-related states.
+   * @param layerController - The layer controller instance to interact with layer-related states
    */
   constructor(layerController: LayerController) {
     this.#layerController = layerController;
   }
 
   /**
-   * Get the collapsed state of layer's legend.
-   * @param layerPath - Path of the layer to get state for.
-   * @returns If the legend is collapsed.
+   * Gets the collapsed state of layer's legend.
+   *
+   * @param layerPath - Path of the layer to get state for
+   * @returns Whether the legend is collapsed
    */
   getLegendCollapsedState(layerPath: string): boolean {
     // Get from store
@@ -52,10 +54,11 @@ export class StateApi {
   }
 
   /**
-   * Get a specific state from a plugin.
-   * @param pluginId - The plugin to get state for.
-   * @param state - The state to get.
-   * @returns The requested state.
+   * Gets a specific state from a plugin.
+   *
+   * @param pluginId - The plugin to get state for
+   * @param state - The state to get
+   * @returns The requested state
    */
   getPluginState(
     pluginId: 'geochart' | 'swiper' | 'time-slider',
@@ -93,10 +96,10 @@ export class StateApi {
   }
 
   /**
-   * Set the collapsed state of layer's legend.
-   * @param layerPath - Path of the layer to get state for.
-   * @param collapsed - The new state
-   * @returns If the legend is collapsed.
+   * Sets the collapsed state of layer's legend.
+   *
+   * @param layerPath - Path of the layer to set state for
+   * @param collapsed - The new collapsed state
    */
   setLegendCollapsedState(layerPath: string, collapsed: boolean): void {
     // Redirect to controller
@@ -104,7 +107,8 @@ export class StateApi {
   }
 
   /**
-   * Set selected layer in layers tab.
+   * Sets the selected layer in layers tab.
+   *
    * @param layerPath - The path of the layer to set
    */
   setSelectedLayersTabLayer(layerPath: string): void {
@@ -193,6 +197,7 @@ export class StateApi {
 
   /**
    * Emits layers reordered event.
+   *
    * @param event - The event to emit
    */
   #emitLayersReordered(event: LayersReorderedEvent): void {
@@ -202,6 +207,7 @@ export class StateApi {
 
   /**
    * Registers a layers reordered event handler.
+   *
    * @param callback - The callback to be executed whenever the event is emitted
    */
   onLayersReordered(callback: LayersReorderedDelegate): void {
@@ -211,6 +217,7 @@ export class StateApi {
 
   /**
    * Unregisters a layers reordered event handler.
+   *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
   offLayersReordered(callback: LayersReorderedDelegate): void {
@@ -236,7 +243,7 @@ export class StateApi {
       return legendLayers.map((layer) => layer.layerPath).filter((path) => path !== layerPath);
     }
 
-    // Recursively search for the parent group containing this layer
+    // Walks children arrays to find the group that contains the target layer path.
     const findInChildren = (layers: TypeLegendLayer[]): string[] | undefined => {
       for (const layer of layers) {
         if (layer.children.some((child) => child.layerPath === layerPath)) {
@@ -254,16 +261,12 @@ export class StateApi {
 
 // #region EVENTS & DELEGATES
 
-/**
- * Define a delegate for the event handler function signature
- */
+/** Defines a delegate for the event handler function signature. */
 type LayersReorderedDelegate = EventDelegateBase<StateApi, LayersReorderedEvent, void>;
 
-/**
- * Define an event for the delegate
- */
+/** Defines an event for the delegate. */
 export type LayersReorderedEvent = {
-  // The layer paths in the new order
+  /** The layer paths in the new order. */
   orderedLayers: string[];
 };
 
