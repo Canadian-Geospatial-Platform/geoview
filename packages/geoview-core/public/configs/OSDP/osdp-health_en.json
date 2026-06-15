@@ -58,7 +58,7 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "1",
-            "layerName": "CRNM Monitoring Stations",
+            "layerName": "CRMN Monitoring Stations",
             "initialSettings": {
               "states": {
                 "legendCollapsed": false,

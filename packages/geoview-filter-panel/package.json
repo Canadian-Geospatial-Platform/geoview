@@ -1,0 +1,27 @@
+{
+  "name": "geoview-filter-panel",
+  "version": "1.0.0",
+  "description": "A customizable filter panel for the geoview project",
+  "main": "src/index.tsx",
+  "keywords": [
+    "filter-panel"
+  ],
+  "author": "GeoView Team",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc --build",
+    "build-dev": "tsc --build"
+  },
+  "peerDependencies": {
+    "geoview-core": "workspace:^2.0.0",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "zustand": "~5.0.12"
+  },
+  "devDependencies": {
+    "geoview-core": "workspace:^2.0.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "typescript": "^6.0.3"
+  }
+}

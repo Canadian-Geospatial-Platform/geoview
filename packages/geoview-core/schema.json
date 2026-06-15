@@ -202,7 +202,8 @@
         "share",
         "aoi-panel",
         "custom-legend",
-        "stac-browser"
+        "stac-browser",
+        "filter-panel"
       ]
     },
     "TypeAppBarProps": {

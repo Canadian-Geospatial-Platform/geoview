@@ -82,6 +82,10 @@ export function hasDrawerPlugin(store: GeoviewStoreType): boolean {
   return store.getState().mapConfig!.navBar?.includes('drawer') ?? false;
 }
 
+export function hasFilterPanelPlugin(store: GeoviewStoreType): boolean {
+  return store.getState().mapConfig!.appBar?.tabs?.core?.includes('filter-panel') ?? false;
+}
+
 export const addGeoViewStore = (config: TypeMapFeaturesConfig): void => {
   if (!config.mapId) {
     return;

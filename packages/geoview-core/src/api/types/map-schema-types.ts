@@ -133,7 +133,8 @@ export type TypeValidAppBarCoreProps =
   | 'details'
   | 'data-table'
   | 'layers'
-  | 'stac-browser';
+  | 'stac-browser'
+  | 'filter-panel';
 
 /** Configuration available on the application bar. Default = ['geolocator']. The about GeoView and notification are always there. */
 export type TypeAppBarProps = {
