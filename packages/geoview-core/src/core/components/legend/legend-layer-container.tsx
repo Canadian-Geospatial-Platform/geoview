@@ -82,7 +82,7 @@ const WMSLegendImage = memo(function WMSLegendImage({
 });
 WMSLegendImage.displayName = 'WMSLegendImage';
 
-export const CollapsibleContent = memo(function CollapsibleContent({
+export const CollapsibleContent = memo(function CollapsibleContentFct({
   layerPath,
   initLightBox,
   LegendLayerComponent,

@@ -33,7 +33,7 @@ const SNAP_THRESHOLD = 5;
  *
  * @returns The resize footer panel
  */
-export const ResizeFooterPanel = memo(function ResizeFooterPanel(): JSX.Element {
+export const ResizeFooterPanel = memo(function ResizeFooterPanelFct(): JSX.Element {
   // Log
   logger.logTraceRender('components/footer-bar/hooks/resize-footer-panel');
 

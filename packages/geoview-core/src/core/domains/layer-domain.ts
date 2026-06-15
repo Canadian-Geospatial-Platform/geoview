@@ -8,8 +8,8 @@ import {
 import type { Extent } from '@/api/types/map-schema-types';
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import EventHelper, { type EventDelegateBase } from '@/api/events/event-helper';
+
 import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
-import { whenThisThen } from '@/core/utils/utilities';
 import { LayerConfigNotFoundError } from '@/core/exceptions/geoview-exceptions';
 import { LayerWrongTypeError, LayerNotFoundError } from '@/core/exceptions/layer-exceptions';
 import type {
@@ -455,24 +455,30 @@ export class LayerDomain {
   /**
    * Asynchronously returns the OpenLayer layer associated to a specific layer path.
    *
-   * This function waits the timeout period before abandonning (or uses the default timeout when not provided).
+   * Resolves immediately if the layer is already registered; otherwise subscribes to the
+   * `onLayerRegistered` event and resolves as soon as a layer with the matching path is registered.
    * Note this function uses the 'Async' suffix to differentiate it from 'getOLLayer'.
    *
    * @param layerPath - The layer path to the layer's configuration
-   * @param timeout - Optionally indicate the timeout after which time to abandon the promise
-   * @param checkFrequency - Optionally indicate the frequency at which to check for the condition on the layerabstract
    * @returns A promise that resolves to an OpenLayer layer associated to the layer path
    */
-  getOLLayerAsync(layerPath: string, timeout?: number, checkFrequency?: number): Promise<BaseLayer> {
-    // Make sure the open layer has been created, sometimes it can still be in the process of being created
-    return whenThisThen(
-      () => {
-        // Get the ol layer if it exists yet
-        return this.getGeoviewLayerIfExists(layerPath)?.getOLLayer()!;
-      },
-      timeout,
-      checkFrequency
-    );
+  getOLLayerAsync(layerPath: string): Promise<BaseLayer> {
+    // Sync check: layer already registered
+    const existing = this.getGeoviewLayerIfExists(layerPath);
+    if (existing) return Promise.resolve(existing.getOLLayer());
+
+    // Subscribe to the layer-registered event; resolve when a layer with the matching path is registered.
+    return new Promise<BaseLayer>((resolve) => {
+      const registeredHandler: DomainLayerRegisteredDelegate = (sender, event): void => {
+        // Filter: ignore events for other layers and keep waiting
+        if (event.layer.getLayerPath() !== layerPath) return;
+        this.offLayerRegistered(registeredHandler);
+        resolve(event.layer.getOLLayer());
+      };
+
+      // Hook on the layer-registered event to resolve the promise in question
+      this.onLayerRegistered(registeredHandler);
+    });
   }
 
   // #endregion PUBLIC LAYER GETTERS

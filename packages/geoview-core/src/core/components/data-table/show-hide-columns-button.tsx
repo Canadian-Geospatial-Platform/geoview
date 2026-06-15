@@ -31,7 +31,7 @@ interface ColumnMenuItemProps {
  * @param props - Properties defined in ColumnMenuItemProps interface
  * @returns The column menu item element
  */
-const ColumnMenuItem = memo(function ColumnMenuItem({ column, isVisible, onToggle }: ColumnMenuItemProps): JSX.Element {
+const ColumnMenuItem = memo(function ColumnMenuItemFct({ column, isVisible, onToggle }: ColumnMenuItemProps): JSX.Element {
   // Log
   logger.logTraceRender('components/data-table/show-hide-columns-button > ColumnMenuItem');
 

@@ -65,12 +65,20 @@ import {
   setStoreMapClickMarker,
   setStoreMapClickMarkerIconHide,
   setStoreMapCurrentBasemapOptions,
+  setStoreMapDisplayed,
   setStoreMapFixNorth,
   setStoreMapGeolocatorSearchArea,
   setStoreMapHighlightedFeatures,
+  setStoreMapInteraction,
+  setStoreMapIsMouseInsideMap,
+  setStoreMapLoaded,
+  setStoreMapMoveEnd,
+  setStoreMapPointerPosition,
   setStoreMapPointMarkers,
   setStoreMapProjection,
+  setStoreMapRotation,
   setStoreMapSize,
+  setStoreMapZoom,
 } from '@/core/stores/states/map-state';
 import { getStoreDataTableSelectedLayerPath } from '@/core/stores/states/data-table-state';
 import { getStoreUIActiveAppBarTab, getStoreUIActiveFooterBarTab } from '@/core/stores/states/ui-state';
@@ -103,10 +111,27 @@ import {
 } from '@/core/stores/states/geochart-state';
 import { DEFAULT_OL_FITOPTIONS, OL_ZOOM_DURATION, OL_ZOOM_PADDING, TIMEOUT } from '@/core/utils/constant';
 import { DateMgt, type TimeDimension } from '@/core/utils/date-mgt';
-import { delay, doTimeout, isValidUUID, whenThisThen } from '@/core/utils/utilities';
+import { doTimeout, isValidUUID } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { logger } from '@/core/utils/logger';
-import type { MapProjectionChangedDelegate, MapProjectionChangedEvent, MapViewer } from '@/geo/map/map-viewer';
+import {
+  type MapInteractionChangedDelegate,
+  type MapInteractionChangedEvent,
+  type MapBaseEvent,
+  type MapMouseEnterDelegate,
+  type MapMouseLeaveDelegate,
+  type MapProjectionChangedDelegate,
+  type MapProjectionChangedEvent,
+  MapViewer,
+  type MapReadyDelegate,
+  type MapMoveEndDelegate,
+  type MapResolutionChangedDelegate,
+  type MapResolutionChangedEvent,
+  type MapRotationEvent,
+  type MapRotationDelegate,
+  type MapPointerMoveEvent,
+  type MapPointerMoveDelegate,
+} from '@/geo/map/map-viewer';
 import { Projection } from '@/geo/utils/projection';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
@@ -119,15 +144,35 @@ import { GeoUtilities } from '@/geo/utils/utilities';
 import { AbstractGVVectorTile } from '@/geo/layer/gv-layers/vector/abstract-gv-vector-tile';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
-import { InvalidExtentError } from '@/core/exceptions/geoview-exceptions';
 import type { GeoViewGeoChartConfig } from '@/api/config/reader/uuid-config-reader';
 
 /**
  * Controller responsible for Map interactions.
  */
 export class MapController extends AbstractMapViewerController {
-  /** The minimal delay in ms to wait after a zoom animation to ensure it has completed. */
-  static readonly ZOOM_MIN_DELAY = 500;
+  /** The bounded reference to the handle map ready method */
+  #boundedHandleMapReady: MapReadyDelegate;
+
+  /** The bounded reference to the handle map resolution changed method */
+  #boundedHandleMapResolutionChanged: MapResolutionChangedDelegate;
+
+  /** The bounded reference to the handle map rotation method */
+  #boundedHandleMapRotation: MapRotationDelegate;
+
+  /** The bounded reference to the handle map move end method */
+  #boundedHandleMapMoveEnd: MapMoveEndDelegate;
+
+  /** The bounded reference to the handle map pointer move method */
+  #boundedHandleMapPointerMove: MapPointerMoveDelegate;
+
+  /** The bounded reference to the handle map mouse enter method */
+  #boundedHandleMapMouseEnter: MapMouseEnterDelegate;
+
+  /** The bounded reference to the handle map mouse leave method */
+  #boundedHandleMapMouseLeave: MapMouseLeaveDelegate;
+
+  /** The bounded reference to the handle interaction changed method */
+  #boundedHandleMapInteractionChanged: MapInteractionChangedDelegate;
 
   /** The bounded reference to the handle map projection changed method */
   #boundedHandleMapProjectionChangeStarted: MapProjectionChangedDelegate;
@@ -156,7 +201,31 @@ export class MapController extends AbstractMapViewerController {
   constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry) {
     super(mapViewer, controllerRegistry);
 
-    // Keep a bounded reference to the handle map projection changed method
+    // Keep a bounded reference to the handle map ready
+    this.#boundedHandleMapReady = this.#handleMapReady.bind(this);
+
+    // Keep a bounded reference to the handle map resolution changed method
+    this.#boundedHandleMapResolutionChanged = this.#handleMapResolutionChanged.bind(this);
+
+    // Keep a bounded reference to the handle map rotation method
+    this.#boundedHandleMapRotation = this.#handleMapRotation.bind(this);
+
+    // Keep a bounded reference to the handle map move end method
+    this.#boundedHandleMapMoveEnd = this.#handleMapMoveEnd.bind(this);
+
+    // Keep a bounded reference to the handle map pointer move method
+    this.#boundedHandleMapPointerMove = this.#handleMapPointerMove.bind(this);
+
+    // Keep a bounded reference to the handle map mouse enter method
+    this.#boundedHandleMapMouseEnter = this.#handleMapMouseEnter.bind(this);
+
+    // Keep a bounded reference to the handle map mouse leave method
+    this.#boundedHandleMapMouseLeave = this.#handleMapMouseLeave.bind(this);
+
+    // Keep a bounded reference to the handle interaction changed method
+    this.#boundedHandleMapInteractionChanged = this.#handleMapInteractionChanged.bind(this);
+
+    // Keep a bounded reference to the handle map projection changed started method
     this.#boundedHandleMapProjectionChangeStarted = this.#handleMapProjectionChangeStarted.bind(this);
 
     // Keep a bounded reference to the handle map projection changed method
@@ -169,6 +238,30 @@ export class MapController extends AbstractMapViewerController {
    * Subscribes to the map projection changed event on the MapViewer.
    */
   protected override onHook(): void {
+    // Listens on the map ready event
+    this.getMapViewer().onMapReady(this.#boundedHandleMapReady);
+
+    // Listens on the map resolution changed event
+    this.getMapViewer().onMapResolutionChanged(this.#boundedHandleMapResolutionChanged);
+
+    // Listens on the map rotation event
+    this.getMapViewer().onMapRotation(this.#boundedHandleMapRotation);
+
+    // Listens on the map move end event
+    this.getMapViewer().onMapMoveEnd(this.#boundedHandleMapMoveEnd);
+
+    // Listens when the mouse moves on the map
+    this.getMapViewer().onMapPointerMove(this.#boundedHandleMapPointerMove);
+
+    // Listens when the mouse enters the map area
+    this.getMapViewer().onMapMouseEnter(this.#boundedHandleMapMouseEnter);
+
+    // Listens when the mouse leaves the map area
+    this.getMapViewer().onMapMouseLeave(this.#boundedHandleMapMouseLeave);
+
+    // Listens when the interaction mode changes
+    this.getMapViewer().onMapInteractionChanged(this.#boundedHandleMapInteractionChanged);
+
     // Listens when a map projection change start occurs
     this.getMapViewer().onMapProjectionChangeStarted(this.#boundedHandleMapProjectionChangeStarted);
 
@@ -183,8 +276,32 @@ export class MapController extends AbstractMapViewerController {
     // Unhooks when a map projection change occurs
     this.getMapViewer().offMapProjectionChanged(this.#boundedHandleMapProjectionChanged);
 
-    // Listens when a map projection change start occurs
+    // Unhooks when a map projection change start occurs
     this.getMapViewer().offMapProjectionChangeStarted(this.#boundedHandleMapProjectionChangeStarted);
+
+    // Unhooks when the interaction mode changes
+    this.getMapViewer().offMapInteractionChanged(this.#boundedHandleMapInteractionChanged);
+
+    // Unhooks when the mouse leaves the map area
+    this.getMapViewer().offMapMouseLeave(this.#boundedHandleMapMouseLeave);
+
+    // Unhooks when the mouse enters the map area
+    this.getMapViewer().offMapMouseEnter(this.#boundedHandleMapMouseEnter);
+
+    // Listens when the mouse moves on the map
+    this.getMapViewer().offMapPointerMove(this.#boundedHandleMapPointerMove);
+
+    // Unhooks when the mouse move ends
+    this.getMapViewer().offMapMoveEnd(this.#boundedHandleMapMoveEnd);
+
+    // Unhooks when the map rotation changes
+    this.getMapViewer().offMapRotation(this.#boundedHandleMapRotation);
+
+    // Listens on the map resolution changed event
+    this.getMapViewer().offMapResolutionChanged(this.#boundedHandleMapResolutionChanged);
+
+    // Unhooks when the map is ready
+    this.getMapViewer().offMapReady(this.#boundedHandleMapReady);
   }
 
   // #endregion OVERRIDES
@@ -195,40 +312,23 @@ export class MapController extends AbstractMapViewerController {
    * Zooms to the specified extent.
    *
    * @param extent - The extent to zoom to
+   * @param useAnimation - Indicates if a zoom animation should be used, default: true
    * @param options - The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 13, duration: 500 })
    * @returns A promise that resolves when the zoom animation is complete
    * @throws {InvalidExtentError} When the extent is invalid
    */
-  async zoomToExtent(extent: Extent, options: FitOptions = DEFAULT_OL_FITOPTIONS): Promise<void> {
-    // Merge user options with defaults
-    const mergedOptions: FitOptions = { ...DEFAULT_OL_FITOPTIONS, ...options };
-
-    // Validate the extent coordinates - need to make sure we aren't excluding zero with !number or using invalid extents
-    const validatedExtent = GeoUtilities.validateExtent(extent, this.getMapViewer().getProjectionEPSG());
-    if (
-      !validatedExtent.some((number) => {
-        return (!number && number !== 0) || Number.isNaN(number);
-      })
-    ) {
-      // Use the validated (clamped) extent so out-of-bounds coordinates are accepted after clamping
-      this.getMapViewer().getView().fit(validatedExtent, mergedOptions);
-
-      // Wait a bit and return.
-      await delay(mergedOptions.duration! + MapController.ZOOM_MIN_DELAY);
-      return;
-    }
-
-    // Invalid extent
-    this.getMapViewer().notifications.showWarning('error.map.invalidZoomExtent');
-    throw new InvalidExtentError(extent);
+  zoomToExtent(extent: Extent, useAnimation = true, options: FitOptions = DEFAULT_OL_FITOPTIONS): Promise<void> {
+    // Redirect
+    return this.getMapViewer().zoomToExtent(extent, useAnimation, options);
   }
 
   /**
    * Returns to initial view state of map using config.
    *
+   * @param useAnimation - Indicates if a zoom animation should be used, default: true
    * @returns A promise that resolves when the zoom animation is complete
    */
-  zoomToInitialExtent(): Promise<void> {
+  zoomToInitialExtent(useAnimation = true): Promise<void> {
     // Get the map id
     const mapId = this.getMapId();
 
@@ -273,7 +373,7 @@ export class MapController extends AbstractMapViewerController {
         Projection.getProjectionFromString(`EPSG:${currProjection}`)
       );
 
-    return this.zoomToExtent(extent, options);
+    return this.zoomToExtent(extent, useAnimation, options);
   }
 
   /**
@@ -301,20 +401,13 @@ export class MapController extends AbstractMapViewerController {
    * The store is updated automatically via the MapViewer move-end event.
    *
    * @param zoom - The target zoom level
+   * @param useAnimation - Indicates if a zoom animation should be used, default: true
    * @param duration - Optional animation duration in ms
    * @returns A promise that resolves when the zoom animation is complete
    */
-  zoomMap(zoom: number, duration: number = OL_ZOOM_DURATION): Promise<void> {
-    // Do the actual zoom
-    this.getMapViewer().map.getView().animate({ zoom, duration });
-
-    // Use a Promise and resolve it when the duration expired
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve();
-      }, duration + MapController.ZOOM_MIN_DELAY);
-    });
-    // GV No need to Save to the store, because this will trigger an event on MapViewer which will take care of updating the store
+  zoomMap(zoom: number, useAnimation = true, duration: number = OL_ZOOM_DURATION): Promise<void> {
+    // Redirect
+    return this.getMapViewer().zoomMap(zoom, useAnimation, duration);
   }
 
   /**
@@ -323,13 +416,27 @@ export class MapController extends AbstractMapViewerController {
    * Fires and forgets the zoom, logging any errors.
    *
    * @param zoom - The target zoom level
+   * @param useAnimation - Indicates if a zoom animation should be used, default: true
    * @param duration - Optional animation duration in ms
    */
-  zoomMapAndForget(zoom: number, duration: number = OL_ZOOM_DURATION): void {
+  zoomMapAndForget(zoom: number, useAnimation = true, duration: number = OL_ZOOM_DURATION): void {
     // Redirect
-    this.zoomMap(zoom, duration).catch((error: unknown) => {
+    this.zoomMap(zoom, useAnimation, duration).catch((error: unknown) => {
       logger.logError('Map-State Failed to zoom map', error);
     });
+  }
+
+  /**
+   * Zoom to specified extent or coordinate provided in lonlat.
+   *
+   * @param extent - The extent or coordinate to zoom to
+   * @param useAnimation - Indicates if a zoom animation should be used, default: true
+   * @param options - Optional options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11 })
+   * @returns A promise that resolves when the zoom operation completes
+   */
+  zoomToLonLatExtentOrCoordinate(extent: Extent | Coordinate, useAnimation = true, options?: FitOptions): Promise<void> {
+    // Redirect
+    return this.getMapViewer().zoomToLonLatExtentOrCoordinate(extent, useAnimation, options);
   }
 
   /**
@@ -339,10 +446,11 @@ export class MapController extends AbstractMapViewerController {
    *
    * @param searchItem - The search item description
    * @param coords - The lon/lat coordinates to zoom to
+   * @param useAnimation - Indicates if a zoom animation should be used, default: true
    * @param bbox - Optional bounding box extent for the search result
    * @returns A promise that resolves when the zoom is complete
    */
-  async zoomToGeoLocatorLocation(searchItem: string, coords: Coordinate, bbox?: Extent): Promise<void> {
+  async zoomToGeoLocatorLocation(searchItem: string, coords: Coordinate, useAnimation = true, bbox?: Extent): Promise<void> {
     // Get the map id
     const mapId = this.getMapId();
 
@@ -368,7 +476,7 @@ export class MapController extends AbstractMapViewerController {
       this.getMapViewer().featureHighlight.highlightGeolocatorBBox(convertedExtent);
 
       // Zoom to extent and await
-      await this.zoomToExtent(convertedExtent, {
+      await this.zoomToExtent(convertedExtent, useAnimation, {
         padding: [50, 50, 50, 50],
         maxZoom: 16,
         duration: OL_ZOOM_DURATION,
@@ -599,7 +707,7 @@ export class MapController extends AbstractMapViewerController {
    */
   getMapCenterPosition(): TypeMapMouseInfo {
     const mapViewer = this.getMapViewer();
-    const view = mapViewer.map.getView();
+    const view = mapViewer.getView();
     const projected = view.getCenter()!;
     const lonlat = Projection.transformToLonLat(projected, mapViewer.getProjection());
     const pixel = mapViewer.map.getPixelFromCoordinate(projected);
@@ -719,7 +827,7 @@ export class MapController extends AbstractMapViewerController {
    * @param offsetY - The vertical offset in map units (default: 0)
    */
   nudgeMapCenter(offsetX = 0.00001, offsetY = 0): void {
-    const view = this.getMapViewer().map.getView();
+    const view = this.getMapViewer().getView();
     const currentCenter = view.getCenter()!;
 
     // Shift center by imperceptible amount
@@ -740,7 +848,7 @@ export class MapController extends AbstractMapViewerController {
    */
   rotate(rotation: number, animate = true): void {
     // Do the actual view map rotation
-    const view = this.getMapViewer().map.getView();
+    const view = this.getMapViewer().getView();
 
     if (animate) {
       view.animate({ rotation });
@@ -955,11 +1063,10 @@ export class MapController extends AbstractMapViewerController {
    * Waits until the overview map visibility matches the expected state.
    *
    * @param expectedVisible - The expected visibility state to wait for
-   * @param timeoutMs - Optional maximum time in milliseconds to wait (defaults to 5000)
    * @returns A promise that resolves when the visibility matches the expected state
    */
-  waitOverviewMapVisibility(expectedVisible: boolean, timeoutMs = 5000): Promise<boolean> {
-    return whenThisThen(() => this.getOverviewMapVisibility() === expectedVisible, timeoutMs);
+  waitOverviewMapVisibility(expectedVisible: boolean): Promise<void> {
+    return this.getMapViewer().basemap.waitOverviewMapVisibility(expectedVisible);
   }
 
   /**
@@ -1029,7 +1136,7 @@ export class MapController extends AbstractMapViewerController {
 
       // Get info for view
       const projection = mapViewer.getProjectionNumber();
-      const currentView = mapViewer.map.getView();
+      const currentView = mapViewer.getView();
       const currentCenter = currentView.getCenter();
       const currentProjection = currentView.getProjection().getCode();
       const centerLatLng = Projection.transformPoints([currentCenter!], currentProjection, Projection.PROJECTION_NAMES.LONLAT)[0] as [
@@ -1276,6 +1383,107 @@ export class MapController extends AbstractMapViewerController {
   // #endregion PUBLIC METHODS - GEOMETRY API FOR DRAWING TOOLS
 
   // #region DOMAIN HANDLERS
+
+  /**
+   * Handles the map ready event by updating the store to reflect that the map is loaded and displayed.
+   *
+   * @param sender - The MapViewer instance that emitted the event
+   * @param event - The map ready event
+   */
+  #handleMapReady(sender: MapViewer, event: MapBaseEvent): void {
+    // Save to the store that the map is loaded
+    // GV This removes the spinning circle overlay and starts showing the map correctly in the html dom
+    setStoreMapLoaded(sender.mapId, true);
+
+    // Save to the store that the map is properly being displayed now
+    setStoreMapDisplayed(sender.mapId);
+
+    // Update the map controls based on the original map state
+    this.#updateMapControls();
+  }
+
+  /**
+   * Handles the map resolution change event by updating the store with the new zoom level.
+   *
+   * @param sender - The MapViewer instance that emitted the event
+   * @param event - The map resolution changed event containing the new zoom level
+   */
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  #handleMapResolutionChanged(sender: MapViewer, event: MapResolutionChangedEvent): void {
+    // Save to the store
+    setStoreMapZoom(sender.mapId, event.zoom);
+  }
+
+  /**
+   * Handles the map move end event by updating the store with the new map center, zoom, rotation, and extent.
+   *
+   * @param sender - The MapViewer instance that emitted the event
+   * @param event - The map move end event containing the new view information
+   */
+  #handleMapMoveEnd(sender: MapViewer, event: MapBaseEvent): void {
+    // Update the map controls based on the original map state
+    this.#updateMapControls();
+  }
+
+  /**
+   * Handles the map rotation event by updating the store with the new rotation value.
+   *
+   * @param sender - The MapViewer instance that emitted the event
+   * @param event - The map rotation event containing the new rotation value
+   */
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  #handleMapRotation(sender: MapViewer, event: MapRotationEvent): void {
+    // Save to the store
+    setStoreMapRotation(sender.mapId, event.rotation);
+  }
+
+  /**
+   * Handles the map pointer move event by updating the store with the new pointer position.
+   *
+   * @param sender - The MapViewer instance that emitted the event
+   * @param event - The map pointer move event containing the new pointer position
+   */
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  #handleMapPointerMove(sender: MapViewer, event: MapPointerMoveEvent): void {
+    // Save to the store
+    setStoreMapPointerPosition(sender.mapId, event);
+  }
+
+  /**
+   * Handles the map mouse enter event by updating the store to indicate that the mouse is inside the map viewport.
+   *
+   * @param sender - The MapViewer instance that emitted the event
+   * @param event - The map mouse enter event
+   */
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  #handleMapMouseEnter(sender: MapViewer, event: MapBaseEvent): void {
+    // Save to the store
+    setStoreMapIsMouseInsideMap(sender.mapId, true);
+  }
+
+  /**
+   * Handles the map mouse leave event by updating the store to indicate that the mouse is outside the map viewport.
+   *
+   * @param sender - The MapViewer instance that emitted the event
+   * @param event - The map mouse leave event
+   */
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  #handleMapMouseLeave(sender: MapViewer, event: MapBaseEvent): void {
+    // Save to the store
+    setStoreMapIsMouseInsideMap(sender.mapId, false);
+  }
+
+  /**
+   * Handles when the map interaction mode changes by updating the store.
+   *
+   * @param sender - The MapViewer instance that emitted the event
+   * @param event - The interaction changed event containing the new interaction mode
+   */
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  #handleMapInteractionChanged(sender: MapViewer, event: MapInteractionChangedEvent): void {
+    // Save to the store
+    setStoreMapInteraction(sender.mapId, event.interaction);
+  }
 
   /**
    * Handles the pre-projection-change cleanup before the map view applies the new projection.
@@ -1561,6 +1769,49 @@ export class MapController extends AbstractMapViewerController {
 
   // #endregion PRIVATE METHODS - CONFIG CREATION
 
+  /**
+   * Updates the map controls (the store) based on the current map view state.
+   *
+   * @returns A promise that resolves when the map controls are updated
+   */
+  #updateMapControls(): void {
+    // Get the mapViewer
+    const mapViewer = this.getMapViewer();
+
+    // Get the center coordinates
+    const centerCoordinates = mapViewer.getView().getCenter();
+    if (!centerCoordinates) return;
+
+    // Get the projection code
+    const projCode = mapViewer.getProjection().getCode();
+
+    // Get the pointer position
+    const pointerPosition = {
+      projected: centerCoordinates,
+      pixel: mapViewer.map.getPixelFromCoordinate(centerCoordinates),
+      lonlat: Projection.transformPoints([centerCoordinates], projCode, Projection.PROJECTION_NAMES.LONLAT)[0],
+      dragging: false,
+    };
+
+    // Get the degree rotation
+    const degreeRotation = mapViewer.getNorthArrowAngle();
+
+    // Get the north pole visibility
+    const isNorthVisible = mapViewer.getNorthPoleVisibility();
+
+    // Get the zoom
+    const zoom = mapViewer.getView().getZoom() ?? 0;
+
+    // Get the map Extent
+    const extent = mapViewer.getView().calculateExtent();
+
+    // Get the scale information
+    const scale = MapViewer.getScaleInfoFromDomElement(mapViewer.mapId);
+
+    // Save to the store
+    setStoreMapMoveEnd(mapViewer.mapId, centerCoordinates, pointerPosition, degreeRotation, isNorthVisible, zoom, extent, scale);
+  }
+
   // #region STATIC METHODS - CONFIG CREATION
 
   /**
@@ -1754,14 +2005,14 @@ export class MapController extends AbstractMapViewerController {
 /**
  * Event for the geolocator search delegate.
  */
-export type GeolocatorSearchEvent = {
+export interface GeolocatorSearchEvent {
   /** The search description string. */
   searchItem: string;
   /** The lon/lat coordinates of the selected result. */
   coords: Coordinate;
   /** Optional bounding box extent of the selected result. */
   bbox?: Extent;
-};
+}
 
 /**
  * Delegate for the geolocator search event handler function signature.

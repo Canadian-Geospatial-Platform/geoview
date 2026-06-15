@@ -324,7 +324,7 @@
       <ul class="demo-function-list">
         <li>mapViewer.onMapLanguageChanged</li>
         <li>mapViewer.onMapMoveEnd</li>
-        <li>mapViewer.onMapZoomEnd</li>
+        <li>mapViewer.onMapResolutionChanged</li>
         <li>mapViewer.onMapProjectionChanged</li>
         <li>mapViewer.basemap.onBasemapChanged</li>
         <li>mapViewer.layer.onLayerConfigAdded when a layer config has been added</li>
@@ -398,7 +398,7 @@
         });
 
         // listen to map zoom event
-        mapViewer.onMapZoomEnd((sender, payload) => {
+        mapViewer.onMapResolutionChanged((sender, payload) => {
           mapViewer.notifications.addNotificationSuccess(`MapViewer: Zoomed to level ${payload.zoom}`);
         });
 

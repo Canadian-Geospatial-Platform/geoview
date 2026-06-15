@@ -1989,31 +1989,35 @@ export const setStoreLayersAreLoading = (mapId: string, areLoading: boolean): vo
 };
 
 /**
- * Sets the legend query status and optional legend data for a specific layer.
+ * Sets the legend query status and associated legend data for a specific layer.
  *
- * Updates the layer's icon images and legend items when legend data with a type is provided.
+ * Updates the layer's `legendQueryStatus`, `legendSchemaTag`, `styleConfig`, `icons`, and `items` in one
+ * atomic mutation. Icons and items default to empty arrays when not provided.
  *
  * @param mapId - The map identifier
  * @param layerPath - The layer path to update
  * @param legendQueryStatus - The new legend query status
- * @param data - Optional legend data containing the layer type, legend styles, and style config
+ * @param legendSchemaTag - Optional GeoView layer type tag describing the legend schema
+ * @param styleConfig - Optional layer style configuration to associate with the legend
+ * @param icons - Optional legend icon images to associate with the layer
+ * @param items - Optional legend items to associate with the layer
  */
 export const setStoreLegendQueryStatus = (
   mapId: string,
   layerPath: string,
   legendQueryStatus: LegendQueryStatus,
   legendSchemaTag: TypeGeoviewLayerType | undefined,
+  styleConfig: TypeLayerStyleConfig | undefined,
   icons: TypeLegendLayerItem[] | undefined,
-  items: TypeLegendItem[] | undefined,
-  styleConfig: TypeLayerStyleConfig | undefined
+  items: TypeLegendItem[] | undefined
 ): void => {
   getStoreLayerState(mapId).actions.updateLayerByPath(layerPath, (layer) => ({
     ...layer,
     legendQueryStatus,
     legendSchemaTag,
+    styleConfig,
     icons: icons ?? [],
     items: items ?? [],
-    styleConfig,
   }));
 };
 

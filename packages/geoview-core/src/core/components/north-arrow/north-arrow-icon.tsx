@@ -16,7 +16,7 @@ interface NorthArrowIconProps {
  * @param props - The north arrow icon properties
  * @returns The north arrow SVG element
  */
-export const NorthArrowIcon = memo(function NorthArrowIcon(props: NorthArrowIconProps): JSX.Element {
+export const NorthArrowIcon = memo(function NorthArrowIconFct(props: NorthArrowIconProps): JSX.Element {
   const { width, height } = props;
 
   return (
@@ -65,7 +65,7 @@ export const NorthArrowIcon = memo(function NorthArrowIcon(props: NorthArrowIcon
  *
  * @returns The north pole SVG element
  */
-export const NorthPoleIcon = memo(function NorthPoleIcon(): JSX.Element {
+export const NorthPoleIcon = memo(function NorthPoleIconFct(): JSX.Element {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24">
       <path d="M0 0h24v24H0z" fill="none" />

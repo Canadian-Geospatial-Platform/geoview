@@ -392,7 +392,7 @@ export class WFS extends AbstractGeoViewVector {
     metadataAccessPath: string,
     isTimeAware: boolean | undefined,
     strategy: VectorStrategy,
-    layerEntries: TypeLayerEntryShell[] // TODO: ALEX: Change this (and in all siblings) to receive a OgcWfsLayerEntryConfigProps[] Search id: fec7d10d
+    layerEntries: TypeLayerEntryShell[] // TODO: Change this (and in all siblings) to receive a OgcWfsLayerEntryConfigProps[] Search id: fec7d10d
   ): TypeWFSLayerConfig {
     const geoviewLayerConfig: TypeWFSLayerConfig = {
       geoviewLayerId,
@@ -518,7 +518,7 @@ export class WFS extends AbstractGeoViewVector {
     isTimeAware: boolean,
     vectorStrategy: VectorStrategy,
     fetchStylesOnWMS: boolean,
-    callbackCreateLayerEntryConfig?: (wfsEntry: TypeLayerEntryShell) => TypeLayerEntryShell // TODO: ALEX: Review this to simplify it. Search id: fec7d10d
+    callbackCreateLayerEntryConfig?: (wfsEntry: TypeLayerEntryShell) => TypeLayerEntryShell // TODO: Review this to simplify it. Search id: fec7d10d
   ): Promise<ConfigBaseClass[]> {
     // Create the Layer config
     const layerConfig = WFS.createGeoviewLayerConfig(

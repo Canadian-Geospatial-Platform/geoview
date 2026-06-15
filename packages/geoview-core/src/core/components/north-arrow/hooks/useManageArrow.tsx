@@ -16,7 +16,7 @@ import { useMapController } from '@/core/controllers/use-controllers';
 /** Return type for the useManageArrow hook. */
 interface ArrowReturn {
   /** The current rotation angle for the north arrow. */
-  rotationAngle: { angle: number };
+  rotationAngle: number;
   /** The horizontal offset in pixels for the north arrow. */
   northOffset: number;
 }
@@ -31,13 +31,14 @@ const CENTRAL_MERIDIAN = -92;
  */
 export const useManageArrow = (): ArrowReturn => {
   // State
-  const [rotationAngle, setRotationAngle] = useState({ angle: 0 });
+  const [rotationAngle, setRotationAngle] = useState(0);
   const [northOffset, setNorthOffset] = useState(0);
   const angle = useRef(0); // keep track of rotation angle for fix north
 
   // Store
   const mapProjectionEPSG = useStoreMapCurrentProjectionEPSG();
   const northArrowElement = useStoreMapNorthArrowElement();
+  const northArrowDegreeRotation = northArrowElement?.degreeRotation ?? 0;
   const fixNorth = useStoreMapFixNorth();
   const mapZoom = useStoreMapZoom();
   const mapRotation = useStoreMapRotation();
@@ -80,18 +81,18 @@ export const useManageArrow = (): ArrowReturn => {
 
     // Early return if no arrow element
     if (!northArrowElement) {
-      return { memoCalculatedRotation: { angle: 0 }, memoCalculatedOffset: 0 };
+      return { memoCalculatedRotation: 0, memoCalculatedOffset: 0 };
     }
 
     // Early return if unsupported projection
     if (!isLCCProjection && !isWebMercator) {
-      return { memoCalculatedRotation: { angle: 0 }, memoCalculatedOffset: 0 };
+      return { memoCalculatedRotation: 0, memoCalculatedOffset: 0 };
     }
 
     // Handle Web Mercator Projection first - north is always up, only map rotation matters
     if (isWebMercator) {
       return {
-        memoCalculatedRotation: { angle: mapRotation * (180 / Math.PI) },
+        memoCalculatedRotation: mapRotation * (180 / Math.PI),
         memoCalculatedOffset: offsetX,
       };
     }
@@ -99,7 +100,7 @@ export const useManageArrow = (): ArrowReturn => {
     // Early return if zoom level is smaller than 5 and map center is near central meridian (keep rotation to map rotation only)
     const mapCenterLongitude: number = Projection.transformCoordinates(mapCenterCoord, 'EPSG:3978', 'EPSG:4326')![0] as number;
     if (mapZoom < 5 && Math.abs(CENTRAL_MERIDIAN - mapCenterLongitude) < 10) {
-      return { memoCalculatedRotation: { angle: mapRotation * (180 / Math.PI) }, memoCalculatedOffset: offsetX };
+      return { memoCalculatedRotation: mapRotation * (180 / Math.PI), memoCalculatedOffset: offsetX };
     }
 
     // Note: we do NOT early-return when isNorthVisible is true.
@@ -117,15 +118,13 @@ export const useManageArrow = (): ArrowReturn => {
       )[0];
       const northPolePixel = northPoleMapCoord ? mapController.getPixelFromCoordinate(northPoleMapCoord) : undefined;
 
-      const arrowAngle = parseFloat(northArrowElement.degreeRotation);
-
       // Calculate rotation
-      let newRotation = { angle: 0 };
-      if (fixNorth && (Math.round(angle.current) !== Math.round(arrowAngle) || mapZoom > 7)) {
-        angle.current = arrowAngle;
+      let newRotation = 0;
+      if (fixNorth && (Math.round(angle.current) !== Math.round(northArrowDegreeRotation) || mapZoom > 7)) {
+        angle.current = northArrowDegreeRotation;
 
         // Calculate the rotation delta
-        const rotationValue = ((180 - arrowAngle) * (2 * Math.PI)) / 360;
+        const rotationValue = ((180 - northArrowDegreeRotation) * (2 * Math.PI)) / 360;
         const diff = Math.abs(mapRotation - rotationValue);
 
         // Calculate longitude factor
@@ -154,10 +153,10 @@ export const useManageArrow = (): ArrowReturn => {
         const centerPixelY = mapSize[1] / 2;
         const dx = northPolePixel[0] - centerPixelX;
         const dy = northPolePixel[1] - centerPixelY;
-        newRotation = { angle: Math.atan2(dy, dx) * (180 / Math.PI) + 90 };
+        newRotation = Math.atan2(dy, dx) * (180 / Math.PI) + 90;
       } else {
         // Fallback to map rotation only
-        newRotation = { angle: mapRotation * (180 / Math.PI) };
+        newRotation = mapRotation * (180 / Math.PI);
       }
 
       // Calculate offset
@@ -194,10 +193,11 @@ export const useManageArrow = (): ArrowReturn => {
     }
 
     // Should never goes here but failover to default values
-    return { memoCalculatedRotation: { angle: 0 }, memoCalculatedOffset: 0 };
+    return { memoCalculatedRotation: 0, memoCalculatedOffset: 0 };
   }, [
     mapSize,
     northArrowElement,
+    northArrowDegreeRotation,
     isLCCProjection,
     isWebMercator,
     mapProjectionEPSG,

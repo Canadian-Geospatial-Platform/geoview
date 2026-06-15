@@ -474,10 +474,14 @@ async function probeFileUrl(url: string): Promise<boolean> {
  *
  * @param targetUrl - The URL to validate and ping
  * @param proxyBase - Optional proxy server base URL (defaults to CONFIG_PROXY_URL)
- * @param timeoutMs - Optional request timeout in milliseconds (defaults to 5000ms)
+ * @param timeoutMs - Optional request timeout in milliseconds (defaults to none)
  * @returns A promise that resolves with a result object containing isValid, isReachable, needsProxy, status, and optional error
  */
-export async function validateAndPingUrl(targetUrl: string, proxyBase: string = CONFIG_PROXY_URL, timeoutMs = 5000): Promise<PingResult> {
+export async function validateAndPingUrl(
+  targetUrl: string,
+  proxyBase: string = CONFIG_PROXY_URL,
+  timeoutMs = undefined
+): Promise<PingResult> {
   const result: PingResult = {
     isValid: false,
     isReachable: false,
@@ -1353,14 +1357,14 @@ function _whenThisThenThat<T>(
  * @param checkCallback - The function executed to verify a particular condition until it's passed
  * @param doCallback - The function executed when checkCallback returns true or some object
  * @param failCallback - The function executed when checkCallback has failed for too long (went over the timeout)
- * @param timeout - The duration in milliseconds until the task is aborted (defaults to 10 seconds)
+ * @param timeout - The duration in milliseconds until the task is aborted (defaults to Infinity seconds)
  * @param checkFrequency - The frequency in milliseconds to callback for a check (defaults to 100 milliseconds)
  */
 export function whenThisThenThat<T>(
   checkCallback: () => T,
   doCallback: (value: T) => void,
   failCallback: (reason?: unknown) => void,
-  timeout = 10000,
+  timeout = Infinity,
   checkFrequency = 100
 ): void {
   const startDate = new Date();
@@ -1369,10 +1373,10 @@ export function whenThisThenThat<T>(
 
 /**
  * This asynchronous generic function checks for a validity of something via the checkCallback() until it's found or until the timer runs out.
- * This method returns a Promise which the developper can use to await or use .then().catch().finally() principles.
+ * This method returns a Promise which the developer can use to await or use .then().catch().finally() principles.
  *
  * @param checkCallback - The function executed to verify a particular condition until it's passed
- * @param timeout - The duration in milliseconds until the task is aborted (defaults to 10 seconds)
+ * @param timeout - The duration in milliseconds until the task is aborted (defaults to Infinity seconds)
  * @param checkFrequency - The frequency in milliseconds to check for an update (defaults to 100 milliseconds)
  * @returns A Promise which resolves when the check passes
  */

@@ -63,7 +63,7 @@ export default function MapRotation(): JSX.Element {
   const displayedRotationDegrees = isSliderDragging ? sliderRotationDegrees : rotationDegrees;
 
   // Calculate projection rotation
-  const totalRotation = Math.round(rotationAngle.angle);
+  const totalRotation = Math.round(rotationAngle);
   const projectionRotation = totalRotation - displayedRotationDegrees;
 
   // Build label text

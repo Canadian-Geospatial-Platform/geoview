@@ -365,14 +365,14 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 }
 
 /**
+ * Define an event for the delegate
+ */
+export interface QueryEndedEvent {
+  coordinate: Coordinate;
+  resultSet: TypeResultSet;
+}
+
+/**
  * Define a delegate for the event handler function signature
  */
 type QueryEndedDelegate = EventDelegateBase<FeatureInfoLayerSet, QueryEndedEvent, void>;
-
-/**
- * Define an event for the delegate
- */
-export type QueryEndedEvent = {
-  coordinate: Coordinate;
-  resultSet: TypeResultSet;
-};

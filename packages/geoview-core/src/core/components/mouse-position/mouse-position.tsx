@@ -61,7 +61,7 @@ const formatCoordinates = (lonlat: Coordinate, DMS: boolean, t: (key: string) =>
  * @param props - Properties defined in MousePositionProps interface
  * @returns The mouse position component
  */
-export const MousePosition = memo(function MousePosition(props: MousePositionProps): JSX.Element {
+export const MousePosition = memo(function MousePositionFct(props: MousePositionProps): JSX.Element {
   const { expanded } = props;
   // Log too annoying
   // logger.logTraceRender('components/mouse-position/mouse-position');

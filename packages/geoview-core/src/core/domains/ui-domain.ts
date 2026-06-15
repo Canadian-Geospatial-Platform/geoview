@@ -104,10 +104,10 @@ export class UIDomain {
 }
 
 /** Event payload emitted when the display language changes */
-export type DomainLanguageChangedEvent = {
+export interface DomainLanguageChangedEvent {
   /** The new display language */
   language: TypeDisplayLanguage;
-};
+}
 
 /** Delegate type for language changed event handlers */
 export type DomainLanguageChangedDelegate = EventDelegateBase<UIDomain, DomainLanguageChangedEvent, void>;

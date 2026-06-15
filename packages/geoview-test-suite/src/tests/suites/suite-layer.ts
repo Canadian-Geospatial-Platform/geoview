@@ -1,7 +1,8 @@
 import type { API } from 'geoview-core/api/api';
-import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import { GVAbstractTestSuite } from './abstract-gv-test-suite';
 import { LayerTester } from '../testers/layer-tester';
+import { GVAbstractTester } from '../testers/abstract-gv-tester';
+import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
 
 /**
@@ -52,12 +53,12 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
   protected override async onLaunchTestSuite(): Promise<unknown> {
     // // GV START DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
     // // Test DEBUG
-    // const pDevTest0 = this.#layerTester.testAddWMSLayerWithOWSMundialis();
-    // // const pDevTest1 = this.#layerTester.testAddWKBWithBadUrl();
+    // const pDevTest0 = this.#layerTester.testAddWMSLayerWithDatacubeMSI();
+    // const pDevTest1 = this.#layerTester.testAddGeoJSONWithMetadataPolygons();
     // // const pDevTest2 = this.#layerTester.testAddOGCFeatureWithPygeoapi();
 
     // // Resolve when all
-    // return Promise.all([pDevTest0]);
+    // return Promise.all([pDevTest0, pDevTest1]);
     // // GV END DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
 
     // Test adding layer
@@ -190,7 +191,7 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
     await this.#layerTester.testEsriFeatureDomainFieldQueryValue();
 
     // Make sure the map is reset in its initial extent after the zooms
-    await this.getControllersRegistry().mapController.zoomToInitialExtent();
+    await this.getControllersRegistry().mapController.zoomToInitialExtent(GVAbstractTester.USE_ZOOM_ANIMATION);
 
     // Run the GeometryCollection layer test last to avoid perturbing icon color ordering used by earlier strict icon assertions.
     return this.#layerTester.testAddGeoJSONWithGeometryCollection();

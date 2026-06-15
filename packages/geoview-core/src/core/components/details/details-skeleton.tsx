@@ -19,7 +19,7 @@ const SKELETON_STYLES = {
  *
  * @returns The skeleton component
  */
-export const DetailsSkeleton = memo(function DetailsSkeleton(): JSX.Element {
+export const DetailsSkeleton = memo(function DetailsSkeletonFct(): JSX.Element {
   return (
     <Box sx={SKELETON_STYLES.box}>
       <Skeleton variant="text" width="60%" height={32} sx={SKELETON_STYLES.title} />

@@ -34,7 +34,7 @@ const BUTTON_BASE_STYLES = {
  *
  * Memoized to skip re-rendering when the expanded state has not changed.
  */
-const ExpandIcon = memo(function ExpandIcon({ expanded }: { expanded: boolean }): JSX.Element {
+const ExpandIcon = memo(function ExpandIconFct({ expanded }: { expanded: boolean }): JSX.Element {
   return expanded ? <ExpandMoreIcon /> : <ExpandLessIcon />;
 });
 
@@ -45,7 +45,7 @@ const ExpandIcon = memo(function ExpandIcon({ expanded }: { expanded: boolean })
  *
  * @returns The expand button
  */
-export const MapInfoExpandButton = memo(function MapInfoExpandButton({ onExpand, expanded }: MapInfoExpandButtonProps): JSX.Element {
+export const MapInfoExpandButton = memo(function MapInfoExpandButtonFct({ onExpand, expanded }: MapInfoExpandButtonProps): JSX.Element {
   logger.logTraceRender('components/map-info/map-info-expand-button');
 
   // Hooks

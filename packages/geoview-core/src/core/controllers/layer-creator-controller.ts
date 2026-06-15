@@ -1386,43 +1386,43 @@ export type GeoViewLayerAddedResult = {
 };
 
 /** Defines the event payload for the layer loaded delegate. */
-export type LayerEvent = {
+export interface LayerEvent {
   /** The loaded layer. */
   layer: AbstractGVLayer;
-};
+}
 
 /** Defines a delegate for the layer loaded event handler function signature. */
 export type LayerDelegate = EventDelegateBase<LayerCreatorController, LayerEvent, void>;
 
 /** Defines the event payload for the layer path delegate. */
-export type LayerPathEvent = {
+export interface LayerPathEvent {
   /** The layer path. */
   layerPath: string;
 
   /** The layer name. */
   layerName: string;
-};
+}
 
 /** Defines a delegate for the layer path event handler function signature. */
 export type LayerPathDelegate = EventDelegateBase<LayerCreatorController, LayerPathEvent, void>;
 
 /** Defines the event payload for the layer builder delegate. */
-export type LayerBuilderEvent = {
+export interface LayerBuilderEvent {
   /** The built layer. */
   layer: AbstractGeoViewLayer;
-};
+}
 
 /** Defines a delegate for the layer builder event handler function signature. */
 export type LayerBuilderDelegate = EventDelegateBase<LayerCreatorController, LayerBuilderEvent, void>;
 
 /** Defines the event payload for the layer config error delegate. */
-export type LayerConfigErrorEvent = {
+export interface LayerConfigErrorEvent {
   /** The layer path (or the geoview layer id) depending when the error occurs in the process. */
   layerPath: string;
 
   /** The error message. */
   error: string;
-};
+}
 
 /** Defines a delegate for the layer config error event handler function signature. */
 export type LayerConfigErrorDelegate = EventDelegateBase<LayerCreatorController, LayerConfigErrorEvent, void>;

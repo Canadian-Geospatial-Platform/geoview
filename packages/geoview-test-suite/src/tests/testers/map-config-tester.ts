@@ -43,6 +43,7 @@ export class MapConfigTester extends GVAbstractTester {
    */
   testDataTableSelectedTabFooterBar(): Promise<Test> {
     const mapId = this.getMapId();
+    const LAYER_PATH = 'geojsonLYR5/polygons.json';
 
     // Test
     return this.test(
@@ -52,11 +53,15 @@ export class MapConfigTester extends GVAbstractTester {
         const footerBarConfig = {
           tabs: { core: ['data-table'] },
           selectedTab: 'data-table',
-          selectedDataTableLayerPath: 'geojsonLYR5/polygons.json',
+          selectedDataTableLayerPath: LAYER_PATH,
         };
 
-        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [['footerBar', footerBarConfig]]);
-        return mapViewer;
+        // Create the map viewer from config
+        await this.#helperCreateMapConfig(test, mapId, [['footerBar', footerBarConfig]]);
+
+        // GV The fact that the selectedLayerPath is already set, means a query needs to happen to populate the data table, but we need to wait for it to happen before checking the content of the data table store
+        test.addStep('Waiting for the query in the data-table to get processed...');
+        await this.getControllersRegistry().layerSetController.allFeatureInfoLayerSet.waitForLayerQueryToFinish(LAYER_PATH);
       },
       (test) => {
         // Verify the footer bar tab is selected
@@ -67,7 +72,7 @@ export class MapConfigTester extends GVAbstractTester {
         // Verify the selected layer path in data table store
         test.addStep('Verifying selectedLayerPath in data table store...');
         const selectedLayerPath = getStoreDataTableSelectedLayerPath(mapId);
-        Test.assertIsEqual(selectedLayerPath, 'geojsonLYR5/polygons.json');
+        Test.assertIsEqual(selectedLayerPath, LAYER_PATH);
 
         // Verify that layer data exists (table was created)
         test.addStep('Verifying data table is defined...');
@@ -99,6 +104,7 @@ export class MapConfigTester extends GVAbstractTester {
    */
   testDataTableSelectedTabAppBar(): Promise<Test> {
     const mapId = this.getMapId();
+    const LAYER_PATH = 'geojsonLYR5/polygons.json';
 
     // Test
     return this.test(
@@ -108,11 +114,15 @@ export class MapConfigTester extends GVAbstractTester {
         const appBarConfig = {
           tabs: { core: ['data-table'] },
           selectedTab: 'data-table',
-          selectedDataTableLayerPath: 'geojsonLYR5/polygons.json',
+          selectedDataTableLayerPath: LAYER_PATH,
         };
 
-        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [['appBar', appBarConfig]]);
-        return mapViewer;
+        // Create the map viewer from config
+        await this.#helperCreateMapConfig(test, mapId, [['appBar', appBarConfig]]);
+
+        // GV The fact that the selectedLayerPath is already set, means a query needs to happen to populate the data table, but we need to wait for it to happen before checking the content of the data table store
+        test.addStep('Waiting for the query in the data-table to get processed...');
+        await this.getControllersRegistry().layerSetController.allFeatureInfoLayerSet.waitForLayerQueryToFinish(LAYER_PATH);
       },
       (test) => {
         // Verify that data-table is not in footer tabs
@@ -123,7 +133,7 @@ export class MapConfigTester extends GVAbstractTester {
         // Verify the selected layer path in data table store
         test.addStep('Verifying selectedLayerPath in data table store...');
         const selectedLayerPath = getStoreDataTableSelectedLayerPath(mapId);
-        Test.assertIsEqual(selectedLayerPath, 'geojsonLYR5/polygons.json');
+        Test.assertIsEqual(selectedLayerPath, LAYER_PATH);
 
         // Verify that layer data exists (table was created)
         test.addStep('Verifying data table is defined...');
@@ -291,13 +301,14 @@ export class MapConfigTester extends GVAbstractTester {
    */
   testInitialViewLayerIdsSetExtent(): Promise<Test> {
     const mapId = this.getMapId();
+    const LAYER_PATH = 'geojsonLYR5/polygons.json';
 
     // Test
     return this.test<MapViewer>(
       'Test initial view with layerIds sets map extent to layer extent',
       async (test) => {
         // Replace initialView with layerIds only
-        const initialViewConfig = { layerIds: ['geojsonLYR5/polygons.json'] };
+        const initialViewConfig = { layerIds: [LAYER_PATH] };
 
         const mapViewer = await this.#helperCreateMapConfig(test, mapId, [['map.viewSettings.initialView', initialViewConfig]]);
         return mapViewer;
@@ -310,9 +321,9 @@ export class MapConfigTester extends GVAbstractTester {
 
         // Get the layer bounds
         test.addStep('Getting layer bound extent...');
-        const geoviewLayer = this.getControllersRegistry().layerController.getGeoviewLayerRegular('geojsonLYR5/polygons.json');
+        const geoviewLayer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(LAYER_PATH);
         Test.assertIsDefined('geoviewLayer', geoviewLayer);
-        const layerExtent = getStoreLayerBounds(this.getMapId(), 'geojsonLYR5/polygons.json');
+        const layerExtent = getStoreLayerBounds(this.getMapId(), LAYER_PATH);
         Test.assertIsArray(layerExtent);
 
         await delay(2000);
@@ -420,31 +431,31 @@ export class MapConfigTester extends GVAbstractTester {
         const mapViewer = await this.#helperCreateMapConfig(test, mapId, [['map.viewSettings', viewSettingsConfig]]);
         return mapViewer;
       },
-      async (test, newMapViewer) => {
+      (test, newMapViewer) => {
         // Get the map view
         const view = newMapViewer.getView();
 
         // Test zooming to minimum allowed zoom (6)
         test.addStep('Testing zoom to minimum allowed level (6)...');
-        await newMapViewer.setMapZoomLevel(6);
+        newMapViewer.setMapZoomLevel(6);
         const zoomAt6 = view.getZoom();
         Test.assertIsEqual(zoomAt6, 6);
 
         // Test zooming below minimum (4) - should be constrained to minZoom
         test.addStep('Testing zoom below minimum level (4) - should be constrained...');
-        await newMapViewer.setMapZoomLevel(4);
+        newMapViewer.setMapZoomLevel(4);
         const zoomAt4 = view.getZoom();
         Test.assertIsEqual(zoomAt4, 6); // Should be constrained to minZoom
 
         // Test zooming to maximum allowed zoom (8)
         test.addStep('Testing zoom to maximum allowed level (8)...');
-        await newMapViewer.setMapZoomLevel(8);
+        newMapViewer.setMapZoomLevel(8);
         const zoomAt8 = view.getZoom();
         Test.assertIsEqual(zoomAt8, 8);
 
         // Test zooming above maximum (10) - should be constrained to maxZoom
         test.addStep('Testing zoom above maximum level (10) - should be constrained...');
-        await newMapViewer.setMapZoomLevel(10);
+        newMapViewer.setMapZoomLevel(10);
         const zoomAt10 = view.getZoom();
         Test.assertIsEqual(zoomAt10, 8); // Should be constrained to maxZoom
       }
@@ -559,7 +570,7 @@ export class MapConfigTester extends GVAbstractTester {
 
         // Zoom to 8 (above threshold)
         test.addStep('Zooming to level 8 (above threshold)...');
-        await this.getControllersRegistry().mapController.zoomMap(8);
+        await this.getControllersRegistry().mapController.zoomMap(8, GVAbstractTester.USE_ZOOM_ANIMATION);
 
         // Wait for the React useEffect to update visibility
         await this.getControllersRegistry().mapController.waitOverviewMapVisibility(true);
@@ -571,7 +582,7 @@ export class MapConfigTester extends GVAbstractTester {
 
         // Zoom back to 4 (below threshold)
         test.addStep('Zooming back to level 4 (below threshold)...');
-        await this.getControllersRegistry().mapController.zoomMap(4);
+        await this.getControllersRegistry().mapController.zoomMap(4, GVAbstractTester.USE_ZOOM_ANIMATION);
 
         // Wait for visibility to turn false
         await this.getControllersRegistry().mapController.waitOverviewMapVisibility(false);
@@ -605,7 +616,7 @@ export class MapConfigTester extends GVAbstractTester {
       async (test) => {
         // Zoom to 8 (above threshold) so overview map is visible
         test.addStep('Zooming to level 8 (above threshold)...');
-        await this.getControllersRegistry().mapController.zoomMap(8);
+        await this.getControllersRegistry().mapController.zoomMap(8, GVAbstractTester.USE_ZOOM_ANIMATION);
 
         // Wait for overview map to become visible
         await this.getControllersRegistry().mapController.waitOverviewMapVisibility(true);
@@ -620,7 +631,7 @@ export class MapConfigTester extends GVAbstractTester {
         await this.getControllersRegistry().mapController.setProjection(3857);
 
         // Wait for overview map visibility to be restored after reprojection
-        await this.getControllersRegistry().mapController.waitOverviewMapVisibility(true, 10000);
+        await this.getControllersRegistry().mapController.waitOverviewMapVisibility(true);
 
         // Verify overview map visibility is restored after reprojection
         test.addStep('Verifying overview map is visible after reprojection to 3857...');
@@ -629,7 +640,7 @@ export class MapConfigTester extends GVAbstractTester {
 
         // Zoom below threshold in 3857
         test.addStep('Zooming to level 4 in 3857 (below threshold)...');
-        await this.getControllersRegistry().mapController.zoomMap(4);
+        await this.getControllersRegistry().mapController.zoomMap(4, GVAbstractTester.USE_ZOOM_ANIMATION);
 
         // Wait for visibility to turn false
         await this.getControllersRegistry().mapController.waitOverviewMapVisibility(false);
@@ -644,7 +655,7 @@ export class MapConfigTester extends GVAbstractTester {
         await this.getControllersRegistry().mapController.setProjection(3978);
 
         // Wait for reprojection to complete — visibility should stay false (was hidden before)
-        await this.getControllersRegistry().mapController.waitOverviewMapVisibility(false, 10000);
+        await this.getControllersRegistry().mapController.waitOverviewMapVisibility(false);
 
         // Verify overview map is still hidden (was hidden before reprojection)
         test.addStep('Verifying overview map is still hidden after reprojecting back to 3978...');
@@ -653,7 +664,7 @@ export class MapConfigTester extends GVAbstractTester {
 
         // Zoom above threshold in 3978
         test.addStep('Zooming to level 8 in 3978 (above threshold)...');
-        await this.getControllersRegistry().mapController.zoomMap(8);
+        await this.getControllersRegistry().mapController.zoomMap(8, GVAbstractTester.USE_ZOOM_ANIMATION);
 
         // Wait for visibility to turn true
         await this.getControllersRegistry().mapController.waitOverviewMapVisibility(true);
@@ -675,7 +686,7 @@ export class MapConfigTester extends GVAbstractTester {
    */
   testInitialSettingsControlsAllFalse(): Promise<Test> {
     const mapId = this.getMapId();
-    const layerPath = 'geojsonLYR5/polygons.json';
+    const LAYER_PATH = 'geojsonLYR5/polygons.json';
     const controlNames = ['highlight', 'hover', 'opacity', 'query', 'remove', 'table', 'visibility', 'zoom'];
 
     return this.test(
@@ -690,7 +701,7 @@ export class MapConfigTester extends GVAbstractTester {
       },
       (test) => {
         // Verify each control is false in store
-        const controls = getStoreLayerControls(mapId, layerPath);
+        const controls = getStoreLayerControls(mapId, LAYER_PATH);
         Test.assertIsDefined('controls', controls);
 
         controlNames.forEach((name) => {
@@ -701,12 +712,12 @@ export class MapConfigTester extends GVAbstractTester {
         // Verify the layer is still registered in featureInfoLayerSet (controls.query only hides the UI toggle, not the layer set registration)
         test.addStep('Verifying layer is still registered in featureInfoLayerSet...');
         const featureInfoPaths = this.getControllersRegistry().layerSetController.featureInfoLayerSet.getRegisteredLayerPaths();
-        Test.assertArrayIncludes(featureInfoPaths, layerPath);
+        Test.assertArrayIncludes(featureInfoPaths, LAYER_PATH);
 
         // Verify the layer is still registered in allFeatureInfoLayerSet
         test.addStep('Verifying layer is still registered in allFeatureInfoLayerSet...');
         const allFeatureInfoPaths = this.getControllersRegistry().layerSetController.allFeatureInfoLayerSet.getRegisteredLayerPaths();
-        Test.assertArrayIncludes(allFeatureInfoPaths, layerPath);
+        Test.assertArrayIncludes(allFeatureInfoPaths, LAYER_PATH);
       }
     );
   }
@@ -718,7 +729,7 @@ export class MapConfigTester extends GVAbstractTester {
    */
   testInitialSettingsStateVisibleFalse(): Promise<Test> {
     const mapId = this.getMapId();
-    const layerPath = 'geojsonLYR5/polygons.json';
+    const LAYER_PATH = 'geojsonLYR5/polygons.json';
 
     return this.test(
       'Test initialSettings states.visible = false...',
@@ -728,12 +739,12 @@ export class MapConfigTester extends GVAbstractTester {
       },
       (test) => {
         test.addStep('Verifying layer is not visible in store...');
-        const legendLayer = getStoreLayerLegendLayerByPath(mapId, layerPath);
+        const legendLayer = getStoreLayerLegendLayerByPath(mapId, LAYER_PATH);
         Test.assertIsDefined('legendLayer', legendLayer);
         Test.assertIsEqual(legendLayer.visible, false);
 
         test.addStep('Verifying layer is not visible on OL layer...');
-        const gvLayer = this.getControllersRegistry().layerController.getGeoviewLayer(layerPath);
+        const gvLayer = this.getControllersRegistry().layerController.getGeoviewLayer(LAYER_PATH);
         Test.assertIsEqual(gvLayer.getVisible(), false);
       }
     );
@@ -746,7 +757,7 @@ export class MapConfigTester extends GVAbstractTester {
    */
   testInitialSettingsStateOpacity(): Promise<Test> {
     const mapId = this.getMapId();
-    const layerPath = 'geojsonLYR5/polygons.json';
+    const LAYER_PATH = 'geojsonLYR5/polygons.json';
 
     return this.test(
       'Test initialSettings states.opacity = 0.5...',
@@ -756,7 +767,7 @@ export class MapConfigTester extends GVAbstractTester {
       },
       (test) => {
         test.addStep('Verifying layer opacity on OL layer...');
-        const gvLayer = this.getControllersRegistry().layerController.getGeoviewLayer(layerPath);
+        const gvLayer = this.getControllersRegistry().layerController.getGeoviewLayer(LAYER_PATH);
         Test.assertIsEqual(gvLayer.getOpacity(), 0.5, 1);
       }
     );
@@ -769,7 +780,7 @@ export class MapConfigTester extends GVAbstractTester {
    */
   testInitialSettingsStateQueryableFalse(): Promise<Test> {
     const mapId = this.getMapId();
-    const layerPath = 'geojsonLYR5/polygons.json';
+    const LAYER_PATH = 'geojsonLYR5/polygons.json';
 
     return this.test(
       'Test initialSettings states.queryable = false...',
@@ -779,12 +790,12 @@ export class MapConfigTester extends GVAbstractTester {
       },
       (test) => {
         test.addStep('Verifying layer is not queryable in store...');
-        const legendLayer = getStoreLayerLegendLayerByPath(mapId, layerPath);
+        const legendLayer = getStoreLayerLegendLayerByPath(mapId, LAYER_PATH);
         Test.assertIsDefined('legendLayer', legendLayer);
         Test.assertIsEqual(legendLayer.queryable, false);
 
         test.addStep('Verifying layer is not queryable on GV layer...');
-        const gvLayer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
+        const gvLayer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(LAYER_PATH);
         Test.assertIsEqual(gvLayer.getQueryable(), false);
       }
     );
@@ -797,7 +808,7 @@ export class MapConfigTester extends GVAbstractTester {
    */
   testInitialSettingsStateHoverableFalse(): Promise<Test> {
     const mapId = this.getMapId();
-    const layerPath = 'geojsonLYR5/polygons.json';
+    const LAYER_PATH = 'geojsonLYR5/polygons.json';
 
     return this.test(
       'Test initialSettings states.hoverable = false...',
@@ -807,12 +818,12 @@ export class MapConfigTester extends GVAbstractTester {
       },
       (test) => {
         test.addStep('Verifying layer is not hoverable in store...');
-        const legendLayer = getStoreLayerLegendLayerByPath(mapId, layerPath);
+        const legendLayer = getStoreLayerLegendLayerByPath(mapId, LAYER_PATH);
         Test.assertIsDefined('legendLayer', legendLayer);
         Test.assertIsEqual(legendLayer.hoverable, false);
 
         test.addStep('Verifying layer is not hoverable on GV layer...');
-        const gvLayer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
+        const gvLayer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(LAYER_PATH);
         Test.assertIsEqual(gvLayer.getHoverable(), false);
       }
     );
@@ -1034,7 +1045,7 @@ export class MapConfigTester extends GVAbstractTester {
    */
   testInitialSettingsComboQueryControlTrueStateQueryableFalse(): Promise<Test> {
     const mapId = this.getMapId();
-    const layerPath = 'geojsonLYR5/polygons.json';
+    const LAYER_PATH = 'geojsonLYR5/polygons.json';
 
     return this.test(
       'Test initialSettings controls.query = true + states.queryable = false...',
@@ -1045,35 +1056,35 @@ export class MapConfigTester extends GVAbstractTester {
       (test) => {
         // Verify control is true in store (UI toggle is available)
         test.addStep('Verifying controls.query = true in store...');
-        const controls = getStoreLayerControls(mapId, layerPath);
+        const controls = getStoreLayerControls(mapId, LAYER_PATH);
         Test.assertIsDefined('controls', controls);
         Test.assertIsEqual((controls as Record<string, unknown>).query, true);
 
         // Verify states.queryable is false in store
         test.addStep('Verifying states.queryable = false in store...');
-        const legendLayer = getStoreLayerLegendLayerByPath(mapId, layerPath);
+        const legendLayer = getStoreLayerLegendLayerByPath(mapId, LAYER_PATH);
         Test.assertIsDefined('legendLayer', legendLayer);
         Test.assertIsEqual(legendLayer.queryable, false);
 
         // Verify getQueryable() returns false on the GV layer
         test.addStep('Verifying getQueryable() = false on GV layer...');
-        const gvLayer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
+        const gvLayer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(LAYER_PATH);
         Test.assertIsEqual(gvLayer.getQueryable(), false);
 
         // Verify the layer is still registered in featureInfoLayerSet (registration uses source.featureInfo.queryable, not states.queryable)
         test.addStep('Verifying layer is still registered in featureInfoLayerSet...');
         const featureInfoPaths = this.getControllersRegistry().layerSetController.featureInfoLayerSet.getRegisteredLayerPaths();
-        Test.assertArrayIncludes(featureInfoPaths, layerPath);
+        Test.assertArrayIncludes(featureInfoPaths, LAYER_PATH);
 
         // Verify the layer is still registered in allFeatureInfoLayerSet
         test.addStep('Verifying layer is still registered in allFeatureInfoLayerSet...');
         const allFeatureInfoPaths = this.getControllersRegistry().layerSetController.allFeatureInfoLayerSet.getRegisteredLayerPaths();
-        Test.assertArrayIncludes(allFeatureInfoPaths, layerPath);
+        Test.assertArrayIncludes(allFeatureInfoPaths, LAYER_PATH);
 
         // Verify the layer is still registered in hoverFeatureInfoLayerSet
         test.addStep('Verifying layer is still registered in hoverFeatureInfoLayerSet...');
         const hoverPaths = this.getControllersRegistry().layerSetController.hoverFeatureInfoLayerSet.getRegisteredLayerPaths();
-        Test.assertArrayIncludes(hoverPaths, layerPath);
+        Test.assertArrayIncludes(hoverPaths, LAYER_PATH);
       }
     );
   }
@@ -1085,7 +1096,7 @@ export class MapConfigTester extends GVAbstractTester {
    */
   testInitialSettingsComboHoverControlTrueStateHoverableFalse(): Promise<Test> {
     const mapId = this.getMapId();
-    const layerPath = 'geojsonLYR5/polygons.json';
+    const LAYER_PATH = 'geojsonLYR5/polygons.json';
 
     return this.test(
       'Test initialSettings controls.hover = true + states.hoverable = false...',
@@ -1096,30 +1107,30 @@ export class MapConfigTester extends GVAbstractTester {
       (test) => {
         // Verify control is true in store (UI toggle is available)
         test.addStep('Verifying controls.hover = true in store...');
-        const controls = getStoreLayerControls(mapId, layerPath);
+        const controls = getStoreLayerControls(mapId, LAYER_PATH);
         Test.assertIsDefined('controls', controls);
         Test.assertIsEqual((controls as Record<string, unknown>).hover, true);
 
         // Verify states.hoverable is false in store
         test.addStep('Verifying states.hoverable = false in store...');
-        const legendLayer = getStoreLayerLegendLayerByPath(mapId, layerPath);
+        const legendLayer = getStoreLayerLegendLayerByPath(mapId, LAYER_PATH);
         Test.assertIsDefined('legendLayer', legendLayer);
         Test.assertIsEqual(legendLayer.hoverable, false);
 
         // Verify getHoverable() returns false on the GV layer
         test.addStep('Verifying getHoverable() = false on GV layer...');
-        const gvLayer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
+        const gvLayer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(LAYER_PATH);
         Test.assertIsEqual(gvLayer.getHoverable(), false);
 
         // Verify the layer is still registered in hoverFeatureInfoLayerSet (registration uses source.featureInfo.queryable, not states.hoverable)
         test.addStep('Verifying layer is still registered in hoverFeatureInfoLayerSet...');
         const hoverPaths = this.getControllersRegistry().layerSetController.hoverFeatureInfoLayerSet.getRegisteredLayerPaths();
-        Test.assertArrayIncludes(hoverPaths, layerPath);
+        Test.assertArrayIncludes(hoverPaths, LAYER_PATH);
 
         // Verify the layer is still registered in featureInfoLayerSet
         test.addStep('Verifying layer is still registered in featureInfoLayerSet...');
         const featureInfoPaths = this.getControllersRegistry().layerSetController.featureInfoLayerSet.getRegisteredLayerPaths();
-        Test.assertArrayIncludes(featureInfoPaths, layerPath);
+        Test.assertArrayIncludes(featureInfoPaths, LAYER_PATH);
       }
     );
   }
@@ -1345,7 +1356,7 @@ export class MapConfigTester extends GVAbstractTester {
 
     // Wait for layer to load and data table to initialize
     test.addStep('Waiting for layers to get loaded...');
-    const loadedLayersCount = await mapViewer.waitForLayersLoaded();
+    const loadedLayersCount = await this.getControllersRegistry().layerController.waitForLayersLoaded();
 
     test.addStep(`Layers loaded (${loadedLayersCount})`);
     return mapViewer;

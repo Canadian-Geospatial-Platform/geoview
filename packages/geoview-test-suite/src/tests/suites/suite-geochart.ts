@@ -69,6 +69,18 @@ export class GVTestSuiteGeochart extends GVAbstractTestSuite {
    * @returns A promise that resolves when tests are completed
    */
   protected override async onLaunchTestSuite(): Promise<unknown> {
+    // // GV START DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
+    // // Test DEBUG
+    // const pDevTest0 = this.#geochartTester.testGeochartOpenForLayerMapClick(
+    //   'geojsonLYR5/polygons.json',
+    //   GVAbstractTester.ONTARIO_CENTER_LONLAT
+    // );
+    // // const pDevTest1 = await this.#mapTester.testZoomToExtent([-87, 51, -84, 53], [-88.584, 50.227, -82.142, 53.726]);
+
+    // // Resolve when all
+    // return Promise.all([pDevTest0]);
+    // // GV END DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
+
     // Test Geochart
     const pGeochartPolygons = this.#geochartTester.testGeochartOpenForLayerMapClick(
       'geojsonLYR5/polygons.json',

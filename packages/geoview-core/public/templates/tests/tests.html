@@ -14,7 +14,7 @@
     <script src="codedoc.js"></script>
 
     <style>
-      .btnLaunchTests {
+      .btnLaunchTests, .btnLaunchTestsAll {
         width: 100%;
         padding: 5px 0px;
       }
@@ -182,7 +182,7 @@
           >0</span
         >
       </div>
-      <button class="btnLaunchTests" onclick="launchTestsAll()">LAUNCH TESTS ALL MAPS!</button>
+      <button id="btnLaunchTestsAll" class="btnLaunchTestsAll" onclick="launchTestsAll()" disabled="true">LAUNCH TESTS ALL MAPS!</button>
 
       <h3 style="margin-top: 30px">Test Results by Group</h3>
 
@@ -1104,6 +1104,21 @@
         });
       });
 
+      // Register a handler when a map viewer is ready to start tests
+      cgpv.onMapReady((mapViewer) => {
+        // Activate the test button for the map in question
+        const btn = document.getElementById('btnLaunchTest-' + mapViewer.mapId);
+        if (btn) btn.disabled = false;
+        
+        // If all buttons are disabled
+        const allEnabled = Array.from(document.getElementsByClassName('btnLaunchTests')).every((button) => !button.disabled);
+        if (allEnabled) {
+          // Activate the test button for all maps
+          const btn = document.getElementById('btnLaunchTestsAll');
+          if (btn) btn.disabled = false;
+        }
+      });
+
       // Function to update the global statistics in "Run All Tests" tab
       function updateGlobalStats() {
         // Update the collapsible button stats for each map
@@ -1144,7 +1159,7 @@
         });
 
         // Disable "Launch All Tests" button if any test is running
-        const launchAllButton = document.querySelector('button[onclick="launchTestsAll()"]');
+        const launchAllButton = document.getElementById('btnLaunchTestsAll')
         if (launchAllButton) {
           launchAllButton.disabled = anyTestsRunning;
           launchAllButton.style.opacity = anyTestsRunning ? '0.5' : '1';
@@ -1153,7 +1168,7 @@
 
         // Disable individual map buttons if any test is running
         Object.keys(testSuitesPlugins).forEach((mapId) => {
-          const button = document.querySelector(`button[onclick="launchTests('${mapId}')"]`);
+          const button = document.getElementById('btnLaunchTest-' + mapId);
           if (button) {
             button.disabled = anyTestsRunning;
             button.style.opacity = anyTestsRunning ? '0.5' : '1';
@@ -1166,6 +1181,10 @@
       cgpv.init();
 
       function launchTestsAll() {
+        // Activate the test button for all maps
+        const btn = document.getElementById('btnLaunchTestsAll');
+        if (btn) btn.disabled = true;
+
         // Launch all tests
         Object.keys(testSuitesPlugins).forEach((mapId) => {
           // Redirect

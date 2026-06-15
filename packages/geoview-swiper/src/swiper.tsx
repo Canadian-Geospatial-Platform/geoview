@@ -47,11 +47,6 @@ export type ConfigProps = {
   orientation: SwipeOrientation;
 };
 
-/** Maximum wait time in milliseconds for layers to be ready. */
-const CONST_LAYERS_WAIT = 30000; // 30 seconds
-/** Retry interval in milliseconds for checking layer readiness. */
-const CONST_LAYERS_RETRY = 1000; // 1 second
-
 /**
  * Swiper component that provides a draggable bar to compare underlying layers.
  *
@@ -268,7 +263,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
     async (layerPath: string) => {
       try {
         // Get the layer at the layer path
-        const olLayer = await controllerRegistry.layerController.getOLLayerAsync(layerPath, CONST_LAYERS_WAIT, CONST_LAYERS_RETRY);
+        const olLayer = await controllerRegistry.layerController.getOLLayerAsync(layerPath);
 
         // Set the OL layers
         setOlLayers((prevArray) => [...prevArray, olLayer]);

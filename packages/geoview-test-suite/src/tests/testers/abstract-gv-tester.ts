@@ -1,12 +1,12 @@
 import type { Coordinate } from 'ol/coordinate';
 
 import { AbstractTester } from '../core/abstract-tester';
+import { Test } from '../core/test';
 import type { API } from 'geoview-core/api/api';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import type { TypeGeoviewLayerType } from 'geoview-core/api/types/layer-schema-types';
 import type { TypeLegendItem } from 'geoview-core/core/components/layers/types';
 import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
-import { Test } from '../core/test';
 import { getStoreLayerLegendLayerByPath } from 'geoview-core/core/stores/states/layer-state';
 import type { GeometryApi } from 'geoview-core/geo/layer/geometry/geometry';
 
@@ -24,6 +24,9 @@ export abstract class GVAbstractTester extends AbstractTester {
   static readonly OTTAWA_LONLAT: Coordinate = [-75.8, 45.24];
   static readonly ONTARIO_CENTER_LONLAT: Coordinate = [-87, 51];
   static readonly ALBERTA_CENTER_LONLAT: Coordinate = [-112, 51];
+
+  /** Indicates if using animation to perform zoom operations */
+  static readonly USE_ZOOM_ANIMATION = false;
 
   /** Bad url */
   static BAD_URL = 'https://badurl/oops';

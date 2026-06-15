@@ -31,7 +31,7 @@ interface UseLightBoxReturnType {
  * @param props - The properties defined in BaseLightBoxProps interface
  * @returns The base lightbox component
  */
-const BaseLightBoxComponent = memo(function BaseLightBoxComponent({
+const BaseLightBoxComponent = memo(function BaseLightBoxComponentFct({
   isLightBoxOpen,
   slides,
   slidesIndex,

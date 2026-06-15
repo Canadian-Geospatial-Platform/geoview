@@ -858,9 +858,12 @@ export abstract class GeoUtilities {
    * @returns A flattened array of legend items derived from the
    * provided icons, including any dynamically generated items for special layer types.
    */
-  static getLayerItemsFromIcons(schemaTag: TypeGeoviewLayerType, icons: TypeLegendLayerItem[]): TypeLegendItem[] {
+  static getLayerItemsFromIcons(schemaTag: TypeGeoviewLayerType, icons: TypeLegendLayerItem[] | undefined): TypeLegendItem[] {
     // The items to be returned
     const items: TypeLegendItem[] = [];
+
+    // If no icons
+    if (!icons) return items;
 
     // Add the icons as items on the layer entry
     icons.forEach((legendLayerItem) => {

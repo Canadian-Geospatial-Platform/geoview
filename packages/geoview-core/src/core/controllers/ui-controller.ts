@@ -392,7 +392,7 @@ export class UIController extends AbstractMapViewerController {
       // Store the extent and other relevant information
       const handleSizeChange = (): void => {
         this.getControllersRegistry()
-          .mapController.zoomToExtent(currentExtent, { padding: [0, 0, 0, 0] })
+          .mapController.zoomToExtent(currentExtent, true, { padding: [0, 0, 0, 0] })
           .then(() => {
             // Force render
             this.getMapViewer().map.renderSync();

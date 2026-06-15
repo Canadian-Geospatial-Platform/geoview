@@ -19,7 +19,7 @@ export type TypeClickMarker = {
  *
  * @returns The click marker element
  */
-export const ClickMarker = memo(function ClickMarker(): JSX.Element {
+export const ClickMarker = memo(function ClickMarkerFct(): JSX.Element {
   logger.logTraceRender('components/click-marker/click-marker');
 
   // State

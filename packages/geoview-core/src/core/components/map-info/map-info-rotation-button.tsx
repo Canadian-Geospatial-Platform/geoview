@@ -1,4 +1,3 @@
-import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { Box, Tooltip } from '@/ui';
@@ -16,7 +15,7 @@ import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
  *
  * @returns The rotation indicator
  */
-export const MapInfoRotationButton = memo(function MapInfoRotationButton(): JSX.Element {
+export function MapInfoRotationButton(): JSX.Element {
   logger.logTraceRender('components/map-info/map-info-rotation-button');
 
   // Hooks
@@ -32,7 +31,7 @@ export const MapInfoRotationButton = memo(function MapInfoRotationButton(): JSX.
   const rotationDegrees = Math.round((mapRotation * 180) / Math.PI);
 
   // The rotationAngle.angle includes both map rotation and projection-based rotation (e.g., LCC)
-  const totalRotation = Math.round(rotationAngle.angle);
+  const totalRotation = Math.round(rotationAngle);
 
   // Calculate the projection-specific rotation component
   const projectionRotation = totalRotation - rotationDegrees;
@@ -62,7 +61,7 @@ export const MapInfoRotationButton = memo(function MapInfoRotationButton(): JSX.
         <Box
           className={`map-info-rotation-${mapId}`}
           sx={{
-            transform: `rotate(${rotationAngle.angle}deg)`,
+            transform: `rotate(${rotationAngle}deg)`,
             transition: 'transform 0.3s ease-in-out',
             display: 'flex',
             alignItems: 'center',
@@ -74,4 +73,4 @@ export const MapInfoRotationButton = memo(function MapInfoRotationButton(): JSX.
       </Box>
     </Tooltip>
   );
-});
+}

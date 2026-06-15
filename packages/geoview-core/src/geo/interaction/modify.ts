@@ -192,7 +192,7 @@ export class Modify extends Interaction {
    */
   #emitModifyDragged(): void {
     if (this.#activeFeature) {
-      const event: olModifyEvent = { features: new Collection([this.#activeFeature]) } as olModifyEvent;
+      const event = { features: new Collection([this.#activeFeature]) } as olModifyEvent;
       EventHelper.emitEvent(this, this.#onModifyDraggedHandlers, event);
     }
   }

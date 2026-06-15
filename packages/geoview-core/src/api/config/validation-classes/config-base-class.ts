@@ -1328,10 +1328,10 @@ export type TypeLayerEntryShellSource = {
 // #region EVENT TYPES
 
 /** Defines an event for the delegate. */
-export type LayerStatusChangedEvent = {
+export interface LayerStatusChangedEvent {
   // The new layer status.
   layerStatus: TypeLayerStatus;
-};
+}
 
 /** Defines a delegate for the event handler function signature. */
 export type LayerStatusChangedDelegate = EventDelegateBase<ConfigBaseClass, LayerStatusChangedEvent, void>;

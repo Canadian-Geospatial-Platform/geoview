@@ -3,17 +3,22 @@ import type {
   LayerStatusChangedDelegate,
   LayerStatusChangedEvent,
 } from '@/api/config/validation-classes/config-base-class';
-import type { TypeLegend } from '@/api/types/layer-schema-types';
+import EventHelper, { type EventDelegateBase } from '@/api/events/event-helper';
+import type { TypeLayerStyleConfig } from '@/api/types/map-schema-types';
+import type { TypeGeoviewLayerType, TypeLegend } from '@/api/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';
 import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import type { TypeLegendItem, TypeLegendLayerItem } from '@/core/components/layers/types';
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
 import {
   deleteStoreLayerFromLegendLayers,
+  getStoreLayerIcons,
+  getStoreLayerItems,
   getStoreLayerLegendQueryStatus,
+  getStoreLayerLegendSchemaTag,
+  getStoreLayerStyleConfig,
   setStoreLayerStatus,
   setStoreLegendQueryStatus,
-  type LegendQueryStatus,
 } from '@/core/stores/states/layer-state';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import type { LayerDomain } from '@/core/domains/layer-domain';
@@ -42,6 +47,9 @@ export class LegendsLayerSet extends AbstractLayerSet {
 
   /** A bounded reference to the handle layer style applied */
   #boundedHandleLayerStyleApplied: StyleAppliedDelegate;
+
+  /** Callback delegates for the legend queried event. */
+  #onLegendQueriedHandlers: LegendQueriedDelegate[] = [];
 
   /**
    * Constructs a Legends LayerSet to manage layers legends.
@@ -166,6 +174,49 @@ export class LegendsLayerSet extends AbstractLayerSet {
     this.#checkQueryLegend(layer, forced);
   }
 
+  /**
+   * Waits for the legend of the given layer path to be queried.
+   *
+   * Sync-checks the store first and resolves immediately when the legend query status is already `queried`.
+   * Otherwise, subscribes to the legend-queried event and resolves when a valid legend payload arrives.
+   * Payloads without a legend are ignored, and `no data` icon payloads are also ignored unless `acceptNoData`
+   * is true, allowing the waiter to keep listening until a real legend is available.
+   *
+   * @param layerPath - The layer path to wait on
+   * @param acceptNoIconsOrNoData - Optional flag. When true, a legend whose first icon is `no data` is treated as a valid resolution. Defaults to false
+   * @returns A promise that resolves once the layer legend has been queried
+   */
+  waitLegendQueried(layerPath: string, acceptNoIconsOrNoData = false): Promise<LegendQueriedEvent> {
+    // Sync check: legend already queried
+    if (getStoreLayerLegendQueryStatus(this.getMapId(), layerPath) === 'queried')
+      return Promise.resolve({
+        layerPath,
+        legendSchemaTag: getStoreLayerLegendSchemaTag(this.getMapId(), layerPath),
+        styleConfig: getStoreLayerStyleConfig(this.getMapId(), layerPath),
+        icons: getStoreLayerIcons(this.getMapId(), layerPath),
+        items: getStoreLayerItems(this.getMapId(), layerPath),
+      });
+
+    // Subscribe to legend-changed and layer-error events; the first to fire settles the promise.
+    // GV The handlers cross-reference each other to cross-unsubscribe, so they must be forward-declared.
+    return new Promise<LegendQueriedEvent>((resolve) => {
+      const legendHandler: LegendQueriedDelegate = (sender, event): void => {
+        // Skip events from other layers — LegendsLayerSet emits for every layer registered to this map
+        if (event.layerPath !== layerPath) return;
+
+        // Skip if the not accepting no data and the icon is a 'no data' image; keep waiting for the next query
+        if (!acceptNoIconsOrNoData && (event.icons?.length === 0 || event.icons?.[0]?.iconImage === 'no data')) return;
+
+        // Unsubscribe both handlers as the promise is now resolved
+        this.offLegendQueried(legendHandler);
+        resolve(event);
+      };
+
+      // Hook on the legend-changed and error events to resolve the promise in question
+      this.onLegendQueried(legendHandler);
+    });
+  }
+
   // #endregion PUBLIC METHODS
 
   // #region PRIVATE METHODS
@@ -199,8 +250,8 @@ export class LegendsLayerSet extends AbstractLayerSet {
 
     // If the legend should be queried
     if (this.#legendShouldBeQueried(layer, layerConfig, forced)) {
-      // Propagate to the store about the querying happening
-      this.#propagateToStoreLegendQueryStatus(layerPath, 'querying', undefined);
+      // Save to the store about the querying happening
+      setStoreLegendQueryStatus(this.getMapId(), layerPath, 'querying', undefined, undefined, undefined, undefined);
 
       // Query the legend
       const legendPromise = layer.queryLegend();
@@ -213,8 +264,20 @@ export class LegendsLayerSet extends AbstractLayerSet {
             // Check for possible number of icons and set icon cache size
             this.mapViewer.updateIconImageCache(legend);
 
-            // Propagate to the store once the legend is received
-            this.#propagateToStoreLegendQueryStatus(layerPath, 'queried', legend);
+            // If any data type
+            let icons: TypeLegendLayerItem[] | undefined = undefined;
+            let items: TypeLegendItem[] | undefined = undefined;
+            if (legend?.type) {
+              // Calculate icons and items
+              icons = GeoUtilities.getLayerIconImage(legend?.type, legend);
+              items = GeoUtilities.getLayerItemsFromIcons(legend.type, icons);
+            }
+
+            // Save to the store once the legend is received
+            setStoreLegendQueryStatus(this.getMapId(), layerPath, 'queried', legend?.type, legend?.styleConfig, icons, items);
+
+            // Emit about the legend being queried
+            this.#emitLegendQueried({ layerPath, legendSchemaTag: legend?.type, styleConfig: legend?.styleConfig, icons, items });
           }
         })
         .catch((error: unknown) => {
@@ -222,27 +285,6 @@ export class LegendsLayerSet extends AbstractLayerSet {
           logger.logPromiseFailed('legendPromise in #checkQueryLegend in LegendsLayerSet', error);
         });
     }
-  }
-
-  /**
-   * Propagates the legend query status to the store.
-   *
-   * @param layerPath - The layer path to propagate the legend query status for
-   * @param queryStatus - The legend query status to propagate
-   * @param data - The legend data to propagate
-   */
-  #propagateToStoreLegendQueryStatus(layerPath: string, queryStatus: LegendQueryStatus, data: TypeLegend | undefined): void {
-    // If any data type
-    let icons: TypeLegendLayerItem[] = [];
-    let items: TypeLegendItem[] = [];
-    if (data?.type) {
-      // Calculate icons and items
-      icons = GeoUtilities.getLayerIconImage(data?.type, data) ?? [];
-      items = GeoUtilities.getLayerItemsFromIcons(data.type, icons);
-    }
-
-    // Propagate
-    setStoreLegendQueryStatus(this.getMapId(), layerPath, queryStatus, data?.type, icons, items, data?.styleConfig);
   }
 
   /**
@@ -305,7 +347,6 @@ export class LegendsLayerSet extends AbstractLayerSet {
    * @param sender - The layer which changed its styles
    * @param event - The layer style changed event
    */
-
   #handleLayerStyleChanged(sender: AbstractGVLayer, event: StyleChangedEvent): void {
     // Force query the legend as we have a new style
     this.#checkQueryLegend(sender, true);
@@ -326,4 +367,59 @@ export class LegendsLayerSet extends AbstractLayerSet {
   }
 
   // #endregion PRIVATE METHODS
+
+  // #region EVENTS
+
+  /**
+   * Emits a legend queried event to all handlers.
+   *
+   * @param event - The event to emit
+   */
+  #emitLegendQueried(event: LegendQueriedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLegendQueriedHandlers, event);
+  }
+
+  /**
+   * Registers a legend queried event handler.
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
+   */
+  onLegendQueried(callback: LegendQueriedDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLegendQueriedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a legend queried event handler.
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
+   */
+  offLegendQueried(callback: LegendQueriedDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLegendQueriedHandlers, callback);
+  }
+
+  // #endregion EVENTS
 }
+
+/** Event payload emitted when a layer legend has been queried successfully. */
+export interface LegendQueriedEvent {
+  /** The layer path for which the legend was queried. */
+  layerPath: string;
+
+  /** Optional legend schema tag. */
+  legendSchemaTag?: TypeGeoviewLayerType;
+
+  /** Optional style configuration associated with the legend. */
+  styleConfig?: TypeLayerStyleConfig;
+
+  /** Optional icons associated with the legend */
+  icons?: TypeLegendLayerItem[];
+
+  /** Optional items associated with the legend */
+  items?: TypeLegendItem[];
+}
+
+/** Delegate for the {@link LegendQueriedEvent} handler. */
+export type LegendQueriedDelegate = EventDelegateBase<LegendsLayerSet, LegendQueriedEvent, void>;

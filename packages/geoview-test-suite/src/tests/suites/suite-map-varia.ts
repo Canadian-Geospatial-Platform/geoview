@@ -1,7 +1,8 @@
 import type { API } from 'geoview-core/api/api';
-import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import { MapTester } from '../testers/map-tester';
+import { GVAbstractTester } from '../testers/abstract-gv-tester';
 import { GVAbstractTestSuite } from './abstract-gv-test-suite';
+import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
 
 /**
@@ -52,11 +53,11 @@ export class GVTestSuiteMapVaria extends GVAbstractTestSuite {
   protected override async onLaunchTestSuite(): Promise<unknown> {
     // // GV START DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
     // // Test DEBUG
-    // const pDevTest0 = this.#mapTester.testNonQueryableLayerNotInDetails('geojsonLYR5/polygons.json', [-88, 52]);
-    // const pDevTest1 = this.#mapTester.testLayerHoverableState('geojsonLYR5/polygons.json', [-88, 52]);
+    // const pDevTest0 = this.#mapTester.testNorthArrowRotationLCC();
+    // // const pDevTest1 = await this.#mapTester.testZoomToExtent([-87, 51, -84, 53], [-88.584, 50.227, -82.142, 53.726]);
 
     // // Resolve when all
-    // return Promise.all([pDevTest0, pDevTest1]);
+    // return Promise.all([pDevTest0]);
     // // GV END DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
 
     // #region STATE CHECK
@@ -72,7 +73,7 @@ export class GVTestSuiteMapVaria extends GVAbstractTestSuite {
     // #region PROMISES SYNCH ZOOMING
 
     // Test the zoom
-    const pZoom = this.#mapTester.testMapZoom(7, 1000);
+    const pZoom = this.#mapTester.testMapZoom(7);
 
     // Wait until the zoom finishes before continuing manipulating the map
     await pZoom;
@@ -108,7 +109,7 @@ export class GVTestSuiteMapVaria extends GVAbstractTestSuite {
     await pNorthArrowRotationLCC;
 
     // Make sure the map is reset in its initial extent after the zooms
-    await this.getControllersRegistry().mapController.zoomToInitialExtent();
+    await this.getControllersRegistry().mapController.zoomToInitialExtent(GVAbstractTester.USE_ZOOM_ANIMATION);
 
     // #endregion PROMISES SYNCH ZOOMING
 
@@ -143,7 +144,7 @@ export class GVTestSuiteMapVaria extends GVAbstractTestSuite {
     const pSetLanguage = this.#mapTester.testSetLanguage();
 
     // Make sure the map is in its initial extent
-    await this.getControllersRegistry().mapController.zoomToInitialExtent();
+    await this.getControllersRegistry().mapController.zoomToInitialExtent(GVAbstractTester.USE_ZOOM_ANIMATION);
 
     // Test non-queryable layer not in details
     const pNonQueryableLayerNotInDetails = this.#mapTester.testNonQueryableLayerNotInDetails('geojsonLYR5/polygons.json', [-88, 52]);

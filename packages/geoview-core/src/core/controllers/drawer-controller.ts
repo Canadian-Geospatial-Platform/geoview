@@ -2037,7 +2037,7 @@ export class DrawerController extends AbstractMapViewerController {
     const text = style.getTextContent();
     const fontSize = style.getTextSize();
 
-    const resolution = this.getMapViewer().map.getView().getResolution() || 1;
+    const resolution = this.getMapViewer().getView().getResolution() || 1;
 
     const charWidth = fontSize * 0.6;
     const textWidth = text.length * charWidth;
