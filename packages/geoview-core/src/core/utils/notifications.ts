@@ -112,10 +112,11 @@ export class Notifications {
     // Get the localized message
     const message = getLocalizedMessage(this.#uiController.getDisplayLanguage(), messageKey, params);
 
-    const snackbar: SnackBarOpenEvent = {
+    const snackbar = {
       snackbarType: type,
       message,
     };
+
     // Emit
     this.#emitSnackbarOpen(snackbar);
   }
@@ -315,10 +316,10 @@ export class Notifications {
 type SnackBarOpenDelegate = EventDelegateBase<Notifications, SnackBarOpenEvent, void>;
 
 /** Event payload for the snackbar open delegate. */
-export type SnackBarOpenEvent = {
+export interface SnackBarOpenEvent {
   snackbarType: SnackbarType;
   message: string;
-};
+}
 
 /** The supported snackbar message types. */
 export type SnackbarType = 'success' | 'error' | 'info' | 'warning';

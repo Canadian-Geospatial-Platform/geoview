@@ -451,7 +451,7 @@ export class OLTransform extends OLPointer {
   #getMapBasedPadding(): number {
     if (!this.mapViewer?.map) return 0; // fallback
 
-    const view = this.mapViewer.map.getView();
+    const view = this.mapViewer.getView();
     const resolution = view.getResolution() || 1;
 
     // 30 pixels converted to map units

@@ -70,7 +70,7 @@ const sxClasses = {
  * @param isTransitioning - Whether accordion is currently transitioning
  * @returns Loading spinner icon if both flags are true, otherwise expand arrow icon
  */
-const AccordionExpandIcon = memo(function AccordionExpandIcon({
+const AccordionExpandIcon = memo(function AccordionExpandIconFct({
   showLoadingIcon,
   isTransitioning,
 }: {

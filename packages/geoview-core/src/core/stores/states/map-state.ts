@@ -91,13 +91,15 @@ export interface IMapState {
     setInteraction: (interaction: TypeInteraction) => void;
     setIsMouseInsideMap: (isMouseInsideMap: boolean) => void;
     setZoom: (zoom: number) => void;
+    setMapExtent: (mapExtent: Extent) => void;
     setRotation: (rotation: number) => void;
     setProjection: (projectionCode: TypeValidMapProjectionCodes) => void;
     setMapMoveEnd: (
       centerCoordinates: Coordinate,
       pointerPosition: TypeMapMouseInfo,
-      degreeRotation: string,
+      degreeRotation: number,
       isNorthVisible: boolean,
+      zoom: number,
       mapExtent: Extent,
       scale: TypeScaleInfo
     ) => void;
@@ -147,7 +149,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
     mapLoaded: false,
     mapDisplayed: false,
     northArrow: false,
-    northArrowElement: { degreeRotation: '180.0', isNorthVisible: true },
+    northArrowElement: { degreeRotation: 180.0, isNorthVisible: true },
     overviewMap: false,
     overviewMapHideZoom: 0,
     pointerPosition: undefined,
@@ -377,6 +379,20 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       },
 
       /**
+       * Sets the map extent of the map.
+       *
+       * @param mapExtent - The map extent
+       */
+      setMapExtent: (mapExtent: Extent): void => {
+        set({
+          mapState: {
+            ...get().mapState,
+            mapExtent,
+          },
+        });
+      },
+
+      /**
        * Sets the rotation of the map.
        *
        * @param rotation - The rotation angle
@@ -430,8 +446,9 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       setMapMoveEnd: (
         centerCoordinates: Coordinate,
         pointerPosition: TypeMapMouseInfo,
-        degreeRotation: string,
+        degreeRotation: number,
         isNorthVisible: boolean,
+        zoom: number,
         mapExtent: Extent,
         scale: TypeScaleInfo
       ): void => {
@@ -443,6 +460,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
               degreeRotation,
               isNorthVisible,
             },
+            zoom,
             mapExtent,
             scale,
           },
@@ -932,6 +950,11 @@ export const setStoreMapZoom = (mapId: string, zoom: number): void => {
   getStoreMapState(mapId).actions.setZoom(zoom);
 };
 
+/** Sets the map extent in the store. */
+export const setStoreMapExtent = (mapId: string, mapExtent: Extent): void => {
+  getStoreMapState(mapId).actions.setMapExtent(mapExtent);
+};
+
 /** Sets the click coordinates in the store. */
 export const setStoreMapClickCoordinates = (mapId: string, clickCoordinates: TypeMapMouseInfo): void => {
   getStoreMapState(mapId).actions.setClickCoordinates(clickCoordinates);
@@ -997,12 +1020,13 @@ export const setStoreMapMoveEnd = (
   mapId: string,
   centerCoordinates: Coordinate,
   pointerPosition: TypeMapMouseInfo,
-  degreeRotation: string,
+  degreeRotation: number,
   isNorthVisible: boolean,
+  zoom: number,
   mapExtent: Extent,
   scale: TypeScaleInfo
 ): void => {
-  getStoreMapState(mapId).actions.setMapMoveEnd(centerCoordinates, pointerPosition, degreeRotation, isNorthVisible, mapExtent, scale);
+  getStoreMapState(mapId).actions.setMapMoveEnd(centerCoordinates, pointerPosition, degreeRotation, isNorthVisible, zoom, mapExtent, scale);
 };
 
 /** Sets the fix north state in the store. */
@@ -1033,7 +1057,7 @@ export interface TypeScaleInfo {
 /** Represents the north arrow display state. */
 export interface TypeNorthArrow {
   /** The rotation angle in degrees as a string. */
-  degreeRotation: string;
+  degreeRotation: number;
 
   /** Whether the north direction is currently visible on the map. */
   isNorthVisible: boolean;

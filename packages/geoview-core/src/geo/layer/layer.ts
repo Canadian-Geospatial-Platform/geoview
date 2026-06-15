@@ -446,17 +446,16 @@ export class LayerApi {
   /**
    * Asynchronously returns the OpenLayer layer associated to a specific layer path.
    *
-   * This function waits the timeout period before abandonning (or uses the default timeout when not provided).
+   * Resolves immediately if the layer is already registered; otherwise waits for the next
+   * layer-registered event matching the given path.
    * Note this function uses the 'Async' suffix to differentiate it from 'getOLLayer'.
    *
    * @param layerPath - The layer path to the layer's configuration
-   * @param timeout - Optionally indicate the timeout after which time to abandon the promise
-   * @param checkFrequency - Optionally indicate the frequency at which to check for the condition on the layer
    * @returns A promise that resolves to an OpenLayer layer associated to the layer path
    */
-  getOLLayerAsync(layerPath: string, timeout?: number, checkFrequency?: number): Promise<BaseLayer> {
+  getOLLayerAsync(layerPath: string): Promise<BaseLayer> {
     // Redirect to controller
-    return this.#controllers.layerController.getOLLayerAsync(layerPath, timeout, checkFrequency);
+    return this.#controllers.layerController.getOLLayerAsync(layerPath);
   }
 
   // #endregion LAYER CONTROLLER GETTERS REDIRECTIONS
@@ -699,13 +698,14 @@ export class LayerApi {
    * Zoom to extents of a layer.
    *
    * @param layerPath - The path of the layer to zoom to
+   * @param useAnimation - Indicates if a zoom animation should be used, default: true
    * @param fitOptions - Optional fit options for zooming
    * @returns A promise that resolves when the zoom operation is complete
    * @throws {NoBoundsError} When the layer doesn't have bounds
    */
-  zoomToLayerExtent(layerPath: string, fitOptions?: FitOptions): Promise<void> {
+  zoomToLayerExtent(layerPath: string, useAnimation = true, fitOptions?: FitOptions): Promise<void> {
     // Redirect to controller
-    return this.#controllers.layerController.zoomToLayerExtent(layerPath, fitOptions);
+    return this.#controllers.layerController.zoomToLayerExtent(layerPath, useAnimation, fitOptions);
   }
 
   /**

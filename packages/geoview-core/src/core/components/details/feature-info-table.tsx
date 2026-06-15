@@ -78,7 +78,7 @@ interface FeatureRowProps {
  * @returns The rendered feature item
  */
 // Extracted FeatureItem component
-export const FeatureItem = memo(function FeatureItem({
+export const FeatureItem = memo(function FeatureItemFct({
   item,
   alias,
   index,
@@ -167,7 +167,7 @@ export const FeatureItem = memo(function FeatureItem({
  * @returns The rendered table row
  */
 // Extracted FeatureRow component
-export const FeatureRow = memo(function FeatureRow({
+export const FeatureRow = memo(function FeatureRowFct({
   featureInfoItem,
   onInitLightBox,
   language,
@@ -264,7 +264,7 @@ export const FeatureRow = memo(function FeatureRow({
  * @param props - Properties defined in FeatureInfoTableProps interface
  * @returns The feature info table
  */
-export const FeatureInfoTable = memo(function FeatureInfoTable({
+export const FeatureInfoTable = memo(function FeatureInfoTableFct({
   layerPath,
   featureInfoList,
   containerType,

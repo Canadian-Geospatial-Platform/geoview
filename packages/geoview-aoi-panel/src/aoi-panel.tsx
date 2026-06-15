@@ -73,7 +73,7 @@ export function AoiPanel(props: AoiPanelProps): JSX.Element {
 
       // Zoom to extent and highlight
       mapController
-        .zoomToExtent(extentInMapProjection, { maxZoom: 14 })
+        .zoomToExtent(extentInMapProjection, true, { maxZoom: 14 })
         .then(() => {
           // Highlight
           mapController.highlightBBox(extentInMapProjection, false);

@@ -20,7 +20,6 @@ import {
   setStoreLegendLayersDirectly,
 } from '@/core/stores/states/layer-state';
 import { logger } from '@/core/utils/logger';
-import { whenThisThen } from '@/core/utils/utilities';
 import { LayerNoLastQueryToPerformError } from '@/core/exceptions/geoview-exceptions';
 import { AllFeatureInfoLayerSet } from '@/geo/layer/layer-sets/all-feature-info-layer-set';
 import { HoverFeatureInfoLayerSet } from '@/geo/layer/layer-sets/hover-feature-info-layer-set';
@@ -138,7 +137,7 @@ export class LayerSetController extends AbstractMapViewerController {
     // If the layer isn't in the domain yet, give it a chance to get registered
     if (waitForLayer) {
       // Wait for the layer to be available, this can happen if the trigger is called too soon (or between the layer config registration and the actual layer registration)
-      await whenThisThen(() => this.allFeatureInfoLayerSet.getRegisteredLayerPaths().includes(layerPath));
+      await this.allFeatureInfoLayerSet.waitForLayerToGetRegistered(layerPath);
     }
 
     // Query the registered layer

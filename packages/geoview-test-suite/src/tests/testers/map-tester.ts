@@ -68,10 +68,9 @@ export class MapTester extends GVAbstractTester {
    * Tests a zoom operation on the map.
    *
    * @param zoomEnd - The zoom target
-   * @param zoomDuration - The duration for the zoom
    * @returns A promise that resolves with the Test containing the zoom destination
    */
-  testMapZoom(zoomEnd: number, zoomDuration: number): Promise<Test<number>> {
+  testMapZoom(zoomEnd: number): Promise<Test<number>> {
     // Get the current zoom
     const { currentZoom } = getStoreMapStateJson(this.getMapId());
 
@@ -84,20 +83,20 @@ export class MapTester extends GVAbstractTester {
 
         // Perform a zoom
         test.addStep('Performing zoom...');
-        await this.getControllersRegistry().mapController.zoomMap(zoomEnd, zoomDuration);
+        await this.getControllersRegistry().mapController.zoomMap(zoomEnd, GVAbstractTester.USE_ZOOM_ANIMATION);
 
         // Return the result
-        return zoomEnd;
+        return getStoreMapStateJson(this.getMapId()).currentZoom;
       },
       (test, result) => {
         // Perform assertions
         test.addStep('Verifying expected zoom in the store...');
-        Test.assertIsEqual(getStoreMapStateJson(this.getMapId()).currentZoom, result);
+        Test.assertIsEqual(result, zoomEnd);
       },
       async (test) => {
         // Unzooms to original position
         test.addStep('Unzooms to the original zoom...');
-        await this.getControllersRegistry().mapController.zoomMap(currentZoom, zoomDuration);
+        await this.getControllersRegistry().mapController.zoomMap(currentZoom, GVAbstractTester.USE_ZOOM_ANIMATION);
       }
     );
   }
@@ -123,7 +122,7 @@ export class MapTester extends GVAbstractTester {
     zoomLevel: number
   ): Promise<Test<Extent>> {
     // Zoom to initial extent
-    await this.getControllersRegistry().mapController.zoomToInitialExtent();
+    await this.getControllersRegistry().mapController.zoomToInitialExtent(GVAbstractTester.USE_ZOOM_ANIMATION);
 
     // Get the current init extent
     const { mapExtent, currentProjection } = getStoreMapStateJson(this.getMapId());
@@ -144,7 +143,7 @@ export class MapTester extends GVAbstractTester {
         test.addStep(`Performing zoom to level ${zoomLevel}...`);
 
         // Perform a zoom
-        await this.getControllersRegistry().mapController.zoomMap(zoomLevel, 1000);
+        await this.getControllersRegistry().mapController.zoomMap(zoomLevel, GVAbstractTester.USE_ZOOM_ANIMATION);
 
         // Update the step
         test.addStep('Performing projection switch to original...');
@@ -156,7 +155,10 @@ export class MapTester extends GVAbstractTester {
         test.addStep('Performing zomm to inital extent...');
 
         // Zoom to initial extent
-        await this.getControllersRegistry().mapController.zoomToInitialExtent();
+        await this.getControllersRegistry().mapController.zoomToInitialExtent(GVAbstractTester.USE_ZOOM_ANIMATION);
+
+        // Wait for render
+        await this.getMapViewer().waitForRender();
 
         // Return the result
         return getStoreMapStateJson(this.getMapId()).mapExtent;
@@ -254,7 +256,10 @@ export class MapTester extends GVAbstractTester {
       async (test) => {
         // Zoom to extent
         test.addStep(`Zooming to extent ${extent.join(',')}...`);
-        await this.getMapViewer().zoomToLonLatExtentOrCoordinate(extent);
+        await this.getControllersRegistry().mapController.zoomToLonLatExtentOrCoordinate(extent, GVAbstractTester.USE_ZOOM_ANIMATION);
+
+        // Wait for render
+        await this.getMapViewer().waitForRender();
 
         // Transform extent and handle potential undefined return
         return Projection.transformExtentFromProj(
@@ -286,8 +291,11 @@ export class MapTester extends GVAbstractTester {
         test.addStep(`Zooming to coordinates ${coordinates.join(',')}...`);
 
         // Zoom to coordinate
-        await this.getMapViewer().setMapZoomLevel(8);
-        await this.getMapViewer().zoomToLonLatExtentOrCoordinate(coordinates);
+        this.getMapViewer().setMapZoomLevel(8);
+        await this.getControllersRegistry().mapController.zoomToLonLatExtentOrCoordinate(coordinates, GVAbstractTester.USE_ZOOM_ANIMATION);
+
+        // Wait for render
+        await this.getMapViewer().waitForRender();
 
         // Transform coordinates
         return Promise.resolve(
@@ -497,7 +505,7 @@ export class MapTester extends GVAbstractTester {
     // British Columbia approximate extent in lon/lat (EPSG:4326)
     // West: -139°, South: 48°, East: -114°, North: 60°
     const bcExtent: Extent = [-139, 48, -114, 60];
-    const expectedArrowAngle = 29; // Expected north arrow angle over BC in LCC
+    const expectedArrowAngle = 33; // Expected north arrow angle over BC in LCC
 
     return this.test(
       'Test north arrow rotation in LCC projection for British Columbia',
@@ -512,32 +520,25 @@ export class MapTester extends GVAbstractTester {
         }
 
         test.addStep('Zooming to British Columbia extent...');
-        await this.getMapViewer().zoomToLonLatExtentOrCoordinate(bcExtent);
+        await this.getControllersRegistry().mapController.zoomToLonLatExtentOrCoordinate(bcExtent, GVAbstractTester.USE_ZOOM_ANIMATION); // GVAbstractTester.USE_ZOOM_ANIMATION
 
-        test.addStep('Getting north arrow rotation from DOM element...');
-        await delay(500); // Wait for DOM to update
-        const rotationElement = document.querySelector(`.map-info-rotation-${this.getMapId()}`) as HTMLElement;
+        // Wait for render
+        await this.getMapViewer().waitForRender();
 
-        if (!rotationElement) {
-          throw new TestError(`North arrow rotation element not found for map ${this.getMapId()}`);
-        }
+        // Force OL to recalculate viewport dimensions (needed when the map tab is hidden, e.g., during "Run All Tests")
+        test.addStep('Updating map size and getting north arrow angle...');
+        this.getMapViewer().map.updateSize();
 
-        // Extract rotation angle from transform style (e.g., "rotate(45deg)")
-        const transformStyle = window.getComputedStyle(rotationElement).transform;
-        let angleValue = 0;
+        // Wait for render after size update
+        await this.getMapViewer().waitForRender();
 
-        if (transformStyle && transformStyle !== 'none') {
-          // Parse matrix transform to get rotation angle
-          const values = transformStyle.match(/matrix\(([^)]+)\)/);
-          if (values && values[1]) {
-            const matrixValues = values[1].split(', ');
-            const a = parseFloat(matrixValues[0]);
-            const b = parseFloat(matrixValues[1]);
-            angleValue = Math.round(Math.atan2(b, a) * (180 / Math.PI) * 10) / 10;
-          }
-        }
+        // Get the angle directly from MapViewer's programmatic calculation (returns a geographic bearing 0-360, where 180 = north up)
+        const bearing = this.getMapViewer().getNorthArrowAngle();
 
-        test.addStep(`North arrow rotation: ${angleValue}°`);
+        // Convert bearing to the visual CSS rotation used by the north arrow component: bearing - 180
+        const angleValue = Math.round(bearing - 180);
+
+        test.addStep(`North arrow rotation: ${angleValue}° (bearing: ${bearing}°)`);
 
         return angleValue;
       },

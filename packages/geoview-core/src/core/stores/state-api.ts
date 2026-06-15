@@ -269,9 +269,9 @@ export class StateApi {
 type LayersReorderedDelegate = EventDelegateBase<StateApi, LayersReorderedEvent, void>;
 
 /** Defines an event for the delegate. */
-export type LayersReorderedEvent = {
+export interface LayersReorderedEvent {
   /** The layer paths in the new order. */
   orderedLayers: string[];
-};
+}
 
 // #endregion EVENTS & DELEGATES

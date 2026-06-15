@@ -20,7 +20,7 @@ import { useMapController } from '@/core/controllers/use-controllers';
  *
  * @returns The north arrow component
  */
-export const NorthArrow = memo(function NorthArrow(): JSX.Element {
+export const NorthArrow = memo(function NorthArrowFct(): JSX.Element {
   logger.logTraceRender('components/north-arrow/north-arrow');
 
   // Hooks
@@ -57,7 +57,7 @@ export const NorthArrow = memo(function NorthArrow(): JSX.Element {
           duration: theme.transitions.duration.standard,
           easing: theme.transitions.easing.easeOut,
         }),
-        transform: `rotate(${rotationAngle.angle}deg)`,
+        transform: `rotate(${rotationAngle}deg)`,
         visibility: northArrowElement.isNorthVisible ? 'hidden' : 'visible',
         left: northOffset,
       }}
@@ -74,7 +74,7 @@ export const NorthArrow = memo(function NorthArrow(): JSX.Element {
  *
  * @returns The north pole marker component
  */
-export const NorthPoleFlag = memo(function NorthPoleFlag(): JSX.Element {
+export const NorthPoleFlag = memo(function NorthPoleFlagFct(): JSX.Element {
   // State
   const northPoleRef = useRef<HTMLDivElement | null>(null);
 

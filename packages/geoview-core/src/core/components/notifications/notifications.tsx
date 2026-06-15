@@ -62,7 +62,7 @@ export type NotificationType = 'success' | 'error' | 'info' | 'warning';
  * @param props - The notification item properties
  * @returns The notification item element
  */
-const NotificationItem = memo(function NotificationItem({
+const NotificationItem = memo(function NotificationItemFct({
   notification,
   onRemove,
   sxClasses,
@@ -146,7 +146,7 @@ const NotificationItem = memo(function NotificationItem({
  * @param props - The notification header properties
  * @returns The notification header element
  */
-const NotificationHeader = memo(function NotificationHeader({
+const NotificationHeader = memo(function NotificationHeaderFct({
   onClose,
   onRemoveAll,
   hasNotifications,

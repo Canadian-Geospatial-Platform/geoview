@@ -97,7 +97,7 @@ const EXTENT_BUFFER = 1000;
  * @param props - Properties defined in FeatureHeaderProps interface
  * @returns The feature header component
  */
-const FeatureHeader = memo(function FeatureHeader({
+const FeatureHeader = memo(function FeatureHeaderFct({
   iconSrc,
   name,
   hasGeometry,
@@ -333,7 +333,7 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
 
       // Zoom to extent and highlight the feature
       mapController
-        .zoomToExtent(zoomExtent, { padding: ZOOM_PADDING, maxZoom: ZOOM_MAX_LEVEL })
+        .zoomToExtent(zoomExtent, true, { padding: ZOOM_PADDING, maxZoom: ZOOM_MAX_LEVEL })
         .then(() => {
           // Highlight the bounding box
           if (feature.extent && !isPoint) {

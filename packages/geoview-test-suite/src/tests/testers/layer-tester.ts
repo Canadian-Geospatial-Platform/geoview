@@ -1,11 +1,15 @@
 ﻿import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
+import type { TypeMapFeaturesInstance, TypeFeatureInfoResult, codedValueType } from 'geoview-core/api/types/map-schema-types';
+import type { TypeGeoviewLayerConfig } from 'geoview-core/api/types/layer-schema-types';
+import type { TypeLegendItem } from 'geoview-core/core/components/layers/types';
+import { getStoreLayerLegendLayerByPath } from 'geoview-core/core/stores/states/layer-state';
+import type { GeoViewLayerAddedResult } from 'geoview-core/core/controllers/layer-creator-controller';
+import { generateId } from 'geoview-core/core/utils/utilities';
 import { LayerStatusErrorError } from 'geoview-core/core/exceptions/layer-exceptions';
 import { LayerNoCapabilitiesError, LayerServiceMetadataUnableToFetchError } from 'geoview-core/core/exceptions/layer-exceptions';
-import type { TypeGeoviewLayerConfig } from 'geoview-core/api/types/layer-schema-types';
 import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
 import { EsriDynamic } from 'geoview-core/geo/layer/geoview-layers/raster/esri-dynamic';
-import { generateId, whenThisThen } from 'geoview-core/core/utils/utilities';
 import { AbstractBaseLayerEntryConfig } from 'geoview-core/api/config/validation-classes/abstract-base-layer-entry-config';
 import { EsriFeature } from 'geoview-core/geo/layer/geoview-layers/vector/esri-feature';
 import { EsriImage } from 'geoview-core/geo/layer/geoview-layers/raster/esri-image';
@@ -17,10 +21,6 @@ import { CSV } from 'geoview-core/geo/layer/geoview-layers/vector/csv';
 import { OgcFeature } from 'geoview-core/geo/layer/geoview-layers/vector/ogc-feature';
 import { WKB } from 'geoview-core/geo/layer/geoview-layers/vector/wkb';
 import { KML } from 'geoview-core/geo/layer/geoview-layers/vector/kml';
-import type { GeoViewLayerAddedResult } from 'geoview-core/core/controllers/layer-creator-controller';
-import type { TypeMapFeaturesInstance, TypeFeatureInfoResult, codedValueType } from 'geoview-core/api/types/map-schema-types';
-import type { TypeLegendItem } from 'geoview-core/core/components/layers/types';
-import { getStoreLayerLegendLayerByPath } from 'geoview-core/core/stores/states/layer-state';
 
 /**
  * Main Layer testing class.
@@ -500,7 +500,7 @@ export class LayerTester extends GVAbstractTester {
         await this.helperStepAddLayerOnMap(test, gvConfig);
 
         // Find the layer and wait until its ready
-        return this.helperStepCheckLayerAtLayerPath(test, layerPath, undefined, false);
+        return this.helperStepCheckLayerAtLayerPath(test, layerPath);
       },
       (test) => {
         // Perform assertions
@@ -548,7 +548,7 @@ export class LayerTester extends GVAbstractTester {
         await this.helperStepAddLayerOnMap(test, gvConfig);
 
         // Find the layer and wait until its ready
-        return this.helperStepCheckLayerAtLayerPath(test, layerPath, undefined, false);
+        return this.helperStepCheckLayerAtLayerPath(test, layerPath);
       },
       (test) => {
         // Perform assertions
@@ -596,7 +596,7 @@ export class LayerTester extends GVAbstractTester {
         await this.helperStepAddLayerOnMap(test, gvConfig);
 
         // Find the layer and wait until its ready
-        return this.helperStepCheckLayerAtLayerPath(test, layerPath, undefined, false);
+        return this.helperStepCheckLayerAtLayerPath(test, layerPath);
       },
       (test) => {
         // Perform assertions
@@ -951,7 +951,7 @@ export class LayerTester extends GVAbstractTester {
         await this.helperStepAddLayerOnMap(test, gvConfig);
 
         // Find the layer and wait until its ready, wait longer than default timeout, because TIFF
-        return this.helperStepCheckLayerAtLayerPath(test, layerPath, 60000, false);
+        return this.helperStepCheckLayerAtLayerPath(test, layerPath, true);
       },
       (test) => {
         // Perform assertions
@@ -1223,7 +1223,7 @@ export class LayerTester extends GVAbstractTester {
         await this.helperStepAddLayerOnMap(test, gvConfig);
 
         // Find the layer and wait until its ready
-        return this.helperStepCheckLayerAtLayerPath(test, layerPath, undefined, false);
+        return this.helperStepCheckLayerAtLayerPath(test, layerPath, true);
       },
       (test) => {
         // Perform assertions
@@ -1270,7 +1270,7 @@ export class LayerTester extends GVAbstractTester {
         await this.helperStepAddLayerOnMap(test, gvConfig);
 
         // Find the layer and wait until its ready
-        await this.helperStepCheckLayerAtLayerPath(test, layerPath);
+        await this.helperStepCheckLayerAtLayerPath(test, layerPath, true);
       },
       undefined,
       (test) => {
@@ -1310,7 +1310,7 @@ export class LayerTester extends GVAbstractTester {
         await this.helperStepAddLayerOnMap(test, gvConfig);
 
         // Find the layer and wait until its ready
-        return this.helperStepCheckLayerAtLayerPath(test, layerPath, undefined, false);
+        return this.helperStepCheckLayerAtLayerPath(test, layerPath, true);
       },
       (test) => {
         // Perform assertions
@@ -1395,7 +1395,7 @@ export class LayerTester extends GVAbstractTester {
         await this.helperStepAddLayerOnMap(test, layerConfig);
 
         // Return created map config
-        return this.getMapViewer().createMapConfigFromMapState();
+        return this.getControllersRegistry().mapController.createMapConfigFromMapState();
       },
       (test, result) => {
         const layer = result?.map?.listOfGeoviewLayerConfig.find(
@@ -1583,14 +1583,11 @@ export class LayerTester extends GVAbstractTester {
 
         // Wait for the layer to be registered in the allFeatureInfoLayerSet
         test.addStep('Waiting for the layer to be registered in the allFeatureInfoLayerSet...');
-        await whenThisThen(
-          () => this.getMapViewer().layer.allFeatureInfoLayerSet.getRegisteredLayerPaths().includes(layerPath),
-          GVAbstractTester.LAYER_REGISTRATION_TIMEOUT_MS
-        );
+        await this.getControllersRegistry().layerSetController.allFeatureInfoLayerSet.waitForLayerToGetRegistered(layerPath);
 
         // Set the zoom to 17.4 so the layer is within its visible scale range for the query
         test.addStep('Setting zoom to 17.4 for the layer visible range...');
-        await this.getMapViewer().setMapZoomLevel(17.4);
+        this.getMapViewer().setMapZoomLevel(17.4);
 
         // Query all features
         test.addStep('Triggering getAllFeatureInfo query...');
@@ -1669,14 +1666,11 @@ export class LayerTester extends GVAbstractTester {
 
         // Wait for the layer to be registered in the allFeatureInfoLayerSet
         test.addStep('Waiting for the layer to be registered in the allFeatureInfoLayerSet...');
-        await whenThisThen(
-          () => this.getMapViewer().layer.allFeatureInfoLayerSet.getRegisteredLayerPaths().includes(layerPath),
-          GVAbstractTester.LAYER_REGISTRATION_TIMEOUT_MS
-        );
+        await this.getControllersRegistry().layerSetController.allFeatureInfoLayerSet.waitForLayerToGetRegistered(layerPath);
 
         // Set the zoom to 17.4 so the layer is within its visible scale range for the query
         test.addStep('Setting zoom to 17.4 for the layer visible range...');
-        await this.getMapViewer().setMapZoomLevel(17.4);
+        this.getMapViewer().setMapZoomLevel(17.4);
 
         // Query all features
         test.addStep('Triggering getAllFeatureInfo query...');
@@ -1787,25 +1781,20 @@ export class LayerTester extends GVAbstractTester {
   }
 
   /**
-   * Checks that a layer exists at the given layer path and waits for it to be fully loaded.
+   * Checks that a layer exists at the given layer path, waits until it has loaded once, and waits until its legend has been queried.
    *
    * Each step of the process is logged into the provided test instance for traceability and debugging.
+   * The legend wait ignores empty-icon and `no data` legend payloads by default; pass `acceptNoIconsOrNoData` as true
+   * to accept those payloads as a valid resolution (useful for layers whose service legitimately reports no icons).
    *
-   * @param test - The test instance used to log each step in the layer setup process
-   * @param mapViewer - The map viewer to which the layer will be added
+   * @param test - The test instance used to log each step in the layer check process
    * @param layerPath - The unique path or ID used to retrieve the added layer from the map viewer
-   * @param timeoutOnLoad - A timeout for the period to wait for the layer to be loaded. Defaults to 30,000 ms
-   * @param waitStyle - Optional indicates if should wait for the style to be applied (expecting a style icon). Default: true
+   * @param acceptNoIconsOrNoData - Optional. When true, a legend with no icons or with a `no data` first icon is accepted as a valid resolution. Defaults to false
    * @returns A promise that resolves to the fully loaded GeoView layer instance
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
    * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path
    */
-  async helperStepCheckLayerAtLayerPath<T>(
-    test: Test<T>,
-    layerPath: string,
-    timeoutOnLoad = 30000,
-    waitStyle = true
-  ): Promise<AbstractGVLayer> {
+  async helperStepCheckLayerAtLayerPath<T>(test: Test<T>, layerPath: string, acceptNoIconsOrNoData = false): Promise<AbstractGVLayer> {
     // Creating the configuration
     test.addStep(`Find the layer ${layerPath} on the map...`);
 
@@ -1816,17 +1805,11 @@ export class LayerTester extends GVAbstractTester {
     test.addStep(`Waiting for the layer to be loaded...`);
 
     // Wait until the layer has at least loaded once
-    await layer.waitLoadedOnce(timeoutOnLoad);
+    await layer.waitLoadedOnce();
 
-    // Wait until the legend has been fetched
-    test.addStep(`Wait for the legend to be fetched...`);
-    await layer.waitLegendFetched();
-
-    // Wait until the style has been applied
-    if (waitStyle) {
-      test.addStep(`Wait for the style to be applied...`);
-      await layer.waitStyleApplied();
-    }
+    // Wait until the legend has been queried
+    test.addStep(`Wait for the legend to be queried...`);
+    await this.getControllersRegistry().layerSetController.legendsLayerSet.waitLegendQueried(layerPath, acceptNoIconsOrNoData);
 
     // Return the layer
     return layer;

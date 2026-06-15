@@ -60,7 +60,7 @@ const DIALOG_TITLE_STYLES = (theme: Theme): SxProps => ({
  */
 // Memoizes entire component, preventing re-renders if props haven't changed
 // TODO: Unmemoize this component, probably, because it's in 'common' folder
-export const FullScreenDialog = memo(function FullScreenDialog({
+export const FullScreenDialog = memo(function FullScreenDialogFct({
   open,
   onClose,
   onExited,

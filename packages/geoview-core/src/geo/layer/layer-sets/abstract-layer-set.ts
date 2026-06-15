@@ -5,7 +5,8 @@ import type {
   TypeFeatureInfoResult,
   TypeLocation,
 } from '@/api/types/map-schema-types';
-import { generateId, whenThisThen } from '@/core/utils/utilities';
+import EventHelper, { type EventDelegateBase } from '@/api/events/event-helper';
+import { generateId } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import type { LayerDomain } from '@/core/domains/layer-domain';
 import type {
@@ -56,6 +57,12 @@ export abstract class AbstractLayerSet {
   /** Keep a bounded reference to the handle when the layer config status callbacks */
   #boundedHandleLayerStatusChanged: LayerStatusChangedDelegate;
 
+  /** Callback delegates for the layer config registered event */
+  #onLayerConfigRegisteredHandlers: LayerConfigRegisteredDelegate[] = [];
+
+  /** Callback delegates for the layer config registered event */
+  #onLayerRegisteredHandlers: LayerRegisteredDelegate[] = [];
+
   /**
    * Constructs a new LayerSet instance.
    *
@@ -104,6 +111,9 @@ export abstract class AbstractLayerSet {
   protected onRegisterLayerConfig(layerConfig: ConfigBaseClass): void {
     // Add the layer config to the registered layer configs
     this.#registeredLayerConfigs.push(layerConfig);
+
+    // Emit about it
+    this.#emitLayerConfigRegistered({ layerConfig });
   }
 
   /**
@@ -148,6 +158,9 @@ export abstract class AbstractLayerSet {
   protected onRegisterLayer(layer: AbstractBaseGVLayer): void {
     // Add to the registered layers array
     this.#registeredLayers.push(layer);
+
+    // Emit about it
+    this.#emitLayerRegistered({ layer });
   }
 
   // #endregion OVERRIDES
@@ -202,16 +215,34 @@ export abstract class AbstractLayerSet {
    * Registers the layer in the layer-set.
    *
    * If the layer is already registered, the function returns immediately.
+   * If the layer hasn't reached the `loaded` status yet, this method subscribes to the layer
+   * config's status change event and waits until the status becomes `loaded` before registering.
+   * This await is important when devs call this method directly to register ad-hoc layers.
    *
    * @param layer - The layer to register
+   * @returns A promise that resolves once the layer has been registered (or skipped)
    */
   async registerLayer(layer: AbstractBaseGVLayer): Promise<void> {
     // If the layer is already registered, skip it, we don't register twice
     if (this.getRegisteredLayerPaths().includes(layer.getLayerPath())) return;
 
-    // Wait a maximum of 20 seconds for the layer to get to loaded state so that it can get registered, otherwise another attempt will have to be made
-    // This await is important when devs call this method directly to register ad-hoc layers.
-    await whenThisThen(() => layer.getLayerStatus() === 'loaded', 20000);
+    // Early-exit on 'error'
+    if (layer.getLayerStatus() === 'error') return;
+
+    // Wait for the layer to reach 'loaded' status. Sync-check first, then subscribe to the
+    // config's status-change event if not loaded yet.
+    if (layer.getLayerStatus() !== 'loaded') {
+      const registered = await new Promise<boolean>((resolve) => {
+        const handler: LayerStatusChangedDelegate = (sender, event) => {
+          if (event.layerStatus === 'loaded' || event.layerStatus === 'error') {
+            sender.offLayerStatusChanged(handler);
+            resolve(event.layerStatus === 'loaded');
+          }
+        };
+        layer.getLayerConfig().onLayerStatusChanged(handler);
+      });
+      if (!registered) return;
+    }
 
     // Update the registration of all layer sets
     if (this.onRegisterLayerCheck(layer)) {
@@ -234,6 +265,54 @@ export abstract class AbstractLayerSet {
 
     // Remove layer from registered layers
     this.#registeredLayers = this.#registeredLayers.filter((layer) => layer.getLayerPath() !== layerPath);
+  }
+
+  /**
+   * Waits for a layer config to be registered in the all-feature-info-layer-set.
+   *
+   * This method returns a promise that resolves when the given `layerPath` is included in the registered layer config paths of the set.
+   *
+   * @param layerPath - The unique path identifying the layer to check for registration
+   * @returns A promise that resolves when the layer is registered
+   */
+  waitForLayerConfigToGetRegistered(layerPath: string): Promise<void> {
+    // First, check synchronously — it may ALREADY be registered
+    if (this.getRegisteredLayerConfigPaths().includes(layerPath)) return Promise.resolve();
+
+    // Otherwise, subscribe and wait
+    return new Promise<void>((resolve) => {
+      const handler = (sender: AbstractLayerSet, event: LayerConfigRegisteredEvent): void => {
+        if (event.layerConfig.layerPath === layerPath) {
+          this.offLayerConfigRegistered(handler);
+          resolve();
+        }
+      };
+      this.onLayerConfigRegistered(handler);
+    });
+  }
+
+  /**
+   * Waits for a layer config to be registered in the all-feature-info-layer-set.
+   *
+   * This method returns a promise that resolves when the given `layerPath` is included in the registered layer config paths of the set.
+   *
+   * @param layerPath - The unique path identifying the layer to check for registration
+   * @returns A promise that resolves when the layer is registered
+   */
+  waitForLayerToGetRegistered(layerPath: string): Promise<void> {
+    // First, check synchronously — it may ALREADY be registered
+    if (this.getRegisteredLayerPaths().includes(layerPath)) return Promise.resolve();
+
+    // Otherwise, subscribe and wait
+    return new Promise<void>((resolve) => {
+      const handler = (sender: AbstractLayerSet, event: LayerRegisteredEvent): void => {
+        if (event.layer.getLayerPath() === layerPath) {
+          this.offLayerRegistered(handler);
+          resolve();
+        }
+      };
+      this.onLayerRegistered(handler);
+    });
   }
 
   // #endregion PUBLIC METHODS
@@ -368,6 +447,72 @@ export abstract class AbstractLayerSet {
 
   // #endregion PRIVATE METHODS
 
+  // #region EVENTS
+
+  /**
+   * Emits a layer config registered event.
+   *
+   * @param event - The layer config registered event
+   */
+  #emitLayerConfigRegistered(event: LayerConfigRegisteredEvent): void {
+    // Emit the event
+    EventHelper.emitEvent(this, this.#onLayerConfigRegisteredHandlers, event);
+  }
+
+  /**
+   * Registers a layer config registered event callback.
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback delegate that was registered
+   */
+  onLayerConfigRegistered(callback: LayerConfigRegisteredDelegate): LayerConfigRegisteredDelegate {
+    // Register the event handler
+    return EventHelper.onEvent(this.#onLayerConfigRegisteredHandlers, callback);
+  }
+
+  /**
+   * Unregisters a layer config registered event callback.
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerConfigRegistered(callback: LayerConfigRegisteredDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerConfigRegisteredHandlers, callback);
+  }
+
+  /**
+   * Emits a layer registered event.
+   *
+   * @param event - The layer config registered event
+   */
+  #emitLayerRegistered(event: LayerRegisteredEvent): void {
+    // Emit the event
+    EventHelper.emitEvent(this, this.#onLayerRegisteredHandlers, event);
+  }
+
+  /**
+   * Registers a layer registered event callback.
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback delegate that was registered
+   */
+  onLayerRegistered(callback: LayerRegisteredDelegate): LayerRegisteredDelegate {
+    // Register the event handler
+    return EventHelper.onEvent(this.#onLayerRegisteredHandlers, callback);
+  }
+
+  /**
+   * Unregisters a layer registered event callback.
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerRegistered(callback: LayerRegisteredDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerRegisteredHandlers, callback);
+  }
+
+  // #endregion EVENTS
+
   // #region STATIC METHODS
 
   /**
@@ -483,3 +628,25 @@ export abstract class AbstractLayerSet {
 
   // #endregion STATIC METHODS
 }
+
+// #region EVENTS & DELEGATES
+
+/** Event emitted when a layer config is registered in the layer-set. */
+export interface LayerConfigRegisteredEvent {
+  /** The layer config */
+  layerConfig: ConfigBaseClass;
+}
+
+/** Delegate for the layer config registered event handler function signature. */
+export type LayerConfigRegisteredDelegate = EventDelegateBase<AbstractLayerSet, LayerConfigRegisteredEvent, void>;
+
+/** Event emitted when a layer is registered in the layer-set. */
+export interface LayerRegisteredEvent {
+  /** The layer */
+  layer: AbstractBaseGVLayer;
+}
+
+/** Delegate for the layer registered event handler function signature. */
+export type LayerRegisteredDelegate = EventDelegateBase<AbstractLayerSet, LayerRegisteredEvent, void>;
+
+// #endregion EVENTS & DELEGATES

@@ -16,7 +16,6 @@ import type {
   TypeLayerInitialSettings,
   TypeLayerStatus,
   TypeGeoviewLayerType,
-  TypeLegend,
 } from '@/api/types/layer-schema-types';
 import {
   LayerMetadataAccessPathMandatoryError,
@@ -1397,33 +1396,10 @@ export abstract class AbstractGeoViewLayer {
 /**
  * Define an event for the delegate
  */
-export type LegendQueryingEvent = {
-  layerPath: string;
-};
-
-/**
- * Define an event for the delegate
- */
-export type LegendQueriedEvent = {
-  layerPath: string;
-  legend: TypeLegend;
-};
-
-/**
- * Define an event for the delegate
- */
-export type VisibleChangedEvent = {
-  layerPath: string;
-  visible: boolean;
-};
-
-/**
- * Define an event for the delegate
- */
-export type LayerEntryRegisterInitEvent = {
+export interface LayerEntryRegisterInitEvent {
   /** The configuration associated with the layer entry that was initialized. */
   config: ConfigBaseClass;
-};
+}
 
 /**
  * Define a delegate for the event handler function signature
@@ -1433,10 +1409,10 @@ type LayerEntryRegisterInitDelegate = EventDelegateBase<AbstractGeoViewLayer, La
 /**
  * Define an event for the delegate
  */
-export type LayerEntryProcessedEvent = {
+export interface LayerEntryProcessedEvent {
   /** The configuration associated with the layer entry that was processed. */
   config: ConfigBaseClass;
-};
+}
 
 /**
  * Define a delegate for the event handler function signature
@@ -1446,13 +1422,13 @@ type LayerEntryProcessedDelegate = EventDelegateBase<AbstractGeoViewLayer, Layer
 /**
  * Define an event for the delegate
  */
-export type LayerConfigCreatedEvent = {
+export interface LayerConfigCreatedEvent {
   /** The configuration associated with the layer that was created. */
   config: ConfigBaseClass;
 
   /** The errors, if any, that occurred during config creation. */
   errors: Error[];
-};
+}
 
 /**
  * Define a delegate for the event handler function signature
@@ -1462,10 +1438,10 @@ type LayerConfigCreatedDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerC
 /**
  * Define an event for the delegate
  */
-export type LayerGVCreatedEvent = {
+export interface LayerGVCreatedEvent {
   /** The GV layer that was created. */
   layer: AbstractGVLayer;
-};
+}
 
 /**
  * Define a delegate for the event handler function signature
@@ -1475,10 +1451,10 @@ type LayerGVCreatedDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerGVCre
 /**
  * Define an event for the delegate
  */
-export type LayerGroupCreatedEvent = {
+export interface LayerGroupCreatedEvent {
   /** The GV group layer that was created. */
   layer: GVGroupLayer;
-};
+}
 
 /**
  * Define a delegate for the event handler function signature
@@ -1500,13 +1476,13 @@ type LayerMessageDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerMessage
 /**
  * Define an event for the delegate
  */
-export type LayerMessageEvent = {
+export interface LayerMessageEvent {
   /** The i18n key (or literal string) for the message to display. */
   messageKey: string;
   /** Parameters to interpolate into the localized message. */
   messageParams: Record<string, unknown>;
   /** The severity type of the message. */
   messageType: SnackbarType;
-};
+}
 
 // #endregion

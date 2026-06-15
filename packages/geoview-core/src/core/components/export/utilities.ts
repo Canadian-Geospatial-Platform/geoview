@@ -1016,8 +1016,7 @@ export class ExportUtilities {
     // For Web Mercator (3857), north is always up so only the map rotation matters.
     // Add 180 to match the degreeRotation convention (180 = pointing north) used by renderNorthArrow which subtracts 180.
     // For LCC (3978) and other projections, the bearing from the North Pole (degreeRotation) must be added.
-    const rotationAngle =
-      currentProjection === 3857 ? 180 + currentRotation : parseFloat(northArrowElement.degreeRotation) + currentRotation;
+    const rotationAngle = currentProjection === 3857 ? 180 + currentRotation : northArrowElement.degreeRotation + currentRotation;
 
     // Generate north arrow SVG
     // Hide north arrow for polar projections (e.g. EPSG:3573) where north direction is ambiguous

@@ -51,7 +51,7 @@ const LIGHTBOX_CONSTANTS = {
  *
  * @returns The lightbox element
  */
-export const LightboxImg = memo(function LightboxImg({ open, slides, index, exited, onSlideChange }: LightboxProps): JSX.Element {
+export const LightboxImg = memo(function LightboxImgFct({ open, slides, index, exited, onSlideChange }: LightboxProps): JSX.Element {
   logger.logTraceRender('components/lightbox/lightbox');
 
   // Hooks

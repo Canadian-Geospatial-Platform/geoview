@@ -151,9 +151,9 @@ export class ModalApi {
 /**
  * Event emitted when a modal's state changes (opened or closed).
  */
-export type ModalEvent = {
+export interface ModalEvent {
   modalId: string;
-};
+}
 
 /**
  * Handler callback type for modal opened events.

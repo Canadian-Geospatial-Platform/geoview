@@ -48,7 +48,7 @@ const extractTabName = (fullTabId: string, mapId: string): string => {
  * @param props - FocusTrapContainer properties
  * @returns The focus trap wrapper element
  */
-export const FocusTrapContainer = memo(function FocusTrapContainer({
+export const FocusTrapContainer = memo(function FocusTrapContainerFct({
   children,
   open = false,
   id,

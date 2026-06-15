@@ -39,6 +39,7 @@ export function GeoList({ geoListItems, searchValue }: GeoListProps): JSX.Elemen
         .zoomToGeoLocatorLocation(
           `${geoListItem.name}, ${geoListItem.province}, ${geoListItem.category}`,
           [geoListItem.lng, geoListItem.lat],
+          true,
           geoListItem.bbox
         )
         .catch((error: unknown) => {
