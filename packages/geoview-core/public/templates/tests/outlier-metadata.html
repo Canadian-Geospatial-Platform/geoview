@@ -125,6 +125,36 @@
               'listOfLayerEntryConfig': []
             },
             {
+              'geoviewLayerId': 'nfi-group-with-slash',
+              'geoviewLayerName': 'Nfi Plot Test Slash',
+              'metadataAccessPath': 'https://nfi.nfis.org/mapserver/cgi-bin/nfi_plot_summaries_en.cgi?service=WMS',
+              'geoviewLayerType': 'ogcWms',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': 'photo/plot/with/slash',
+                  'layerName': 'Photo/Plot/Group',
+                  'entryType': 'group',
+                  'listOfLayerEntryConfig': [
+                    {
+                      'layerId': 'ca_nfiphotoplot_lc_a_en'
+                    },
+                    {
+                      'layerId': 'ca_nfiphotoplot_lu_a_en'
+                    },
+                    {
+                      'layerId': 'ca_nfiphotoplot_ow_a_en'
+                    },
+                    {
+                      'layerId': 'ca_nfiphotoplot_ps_a_en'
+                    }
+                  ]
+                },
+                {
+                  'layerId': 'ca_nfigroundplot_cartographic_a'
+                }
+              ]
+            },
+            {
               'geoviewLayerId': 'u2-with-nameField-date',
               'metadataAccessPath': 'https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/U2/FeatureServer/',
               'geoviewLayerType': 'esriFeature',
@@ -134,7 +164,6 @@
                   'layerName': 'U2 with date nameField',
                   'source': {
                     'featureInfo': {
-                      'queryableeeeee': true,
                       'nameField': 'Date',
                       'outfields': [
                         { 'name': 'Venue', 'alias': 'Venue Set', 'type': 'string'},
@@ -145,36 +174,6 @@
                       ]
                     }
                   }
-                },
-                {
-                  'geoviewLayerId': 'nfi-group-with-slash',
-                  'geoviewLayerName': 'Nfi Plot Test Slash',
-                  'metadataAccessPath': 'https://nfi.nfis.org/mapserver/cgi-bin/nfi_plot_summaries_en.cgi?service=WMS',
-                  'geoviewLayerType': 'ogcWms',
-                  'listOfLayerEntryConfig': [
-                    {
-                      'layerId': 'photo/plot/with/slash',
-                      'layerName': 'Photo/Plot/Group',
-                      'entryType': 'group',
-                      'listOfLayerEntryConfig': [
-                        {
-                          'layerId': 'ca_nfiphotoplot_lc_a_en'
-                        },
-                        {
-                          'layerId': 'ca_nfiphotoplot_lu_a_en'
-                        },
-                        {
-                          'layerId': 'ca_nfiphotoplot_ow_a_en'
-                        },
-                        {
-                          'layerId': 'ca_nfiphotoplot_ps_a_en'
-                        }
-                      ]
-                    },
-                    {
-                      'layerId': 'ca_nfigroundplot_cartographic_a'
-                    }
-                  ]
                 }
               ]
             }
