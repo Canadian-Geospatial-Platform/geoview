@@ -11,10 +11,12 @@ import { getStoreTimeSliderLayers } from './states/time-slider-state';
 import { getStoreSwiperLayerPaths } from './states/swiper-state';
 import {
   getStoreLayerLegendCollapsed,
+  getStoreLayerLegendLayers,
   getStoreLayerOrderedLayerPaths,
   setStoreReorderLegendLayers,
   utilFindLayerAndChildrenPaths,
 } from './states/layer-state';
+import type { TypeLegendLayer } from '@/core/components/layers/types';
 import { logger } from '@/core/utils/logger';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
@@ -114,17 +116,16 @@ export class StateApi {
    * Reorders a layer and its children within the ordered layers list by a given number of positions.
    *
    * The layer (along with any child paths) is extracted from its current position and re-inserted
-   * at the target index, skipping only siblings at the same depth. Updates the store, reorders the
-   * legend layers, and emits a layers reordered event.
+   * at the target index. Only layers that are siblings in the legend tree are considered valid swap
+   * targets, so children can never escape their parent group.
    *
    * @param layerPath - The path of the layer to move
    * @param move - The number of sibling positions to move (negative = toward index 0, positive = toward end)
    */
   reorderLayers(layerPath: string, move: number): void {
-    // Apply some ordering logic
     const direction = move < 0 ? -1 : 1;
-    let absoluteMoves = Math.abs(move);
-    const orderedLayers = [...getStoreLayerOrderedLayerPaths(this.#layerController.getMapId())];
+    const mapId = this.#layerController.getMapId();
+    const orderedLayers = [...getStoreLayerOrderedLayerPaths(mapId)];
     const startingIndex = orderedLayers.indexOf(layerPath);
 
     // If layer not found, exit early
@@ -133,17 +134,50 @@ export class StateApi {
       return;
     }
 
+    // Extract the layer block (layer + all descendants)
     const movedLayers = utilFindLayerAndChildrenPaths(layerPath, orderedLayers);
     orderedLayers.splice(startingIndex, movedLayers.length);
-    let nextIndex = startingIndex;
-    const pathLength = layerPath.split('/').length;
-    while (absoluteMoves > 0) {
-      nextIndex += direction;
-      if (nextIndex === orderedLayers.length || nextIndex === 0) {
-        absoluteMoves = 0;
-      } else if (orderedLayers[nextIndex].split('/').length === pathLength) absoluteMoves--;
+
+    // Find sibling paths from the legend tree (same source of truth as the UI)
+    const legendLayers = getStoreLayerLegendLayers(mapId);
+    const siblingPaths = StateApi.#findSiblingPaths(layerPath, legendLayers);
+
+    // Collect indices of all siblings (excluding the moved layer) in the modified array
+    const siblingIndices: number[] = [];
+    for (let i = 0; i < orderedLayers.length; i++) {
+      if (siblingPaths.includes(orderedLayers[i])) {
+        siblingIndices.push(i);
+      }
     }
-    orderedLayers.splice(nextIndex, 0, ...movedLayers);
+
+    // Compute insertion index based on direction
+    let insertionIndex = startingIndex;
+
+    if (siblingIndices.length > 0) {
+      if (direction === 1) {
+        // Moving DOWN: find the first sibling at or after startingIndex, then advance past its subtree
+        const nextSiblingPos = siblingIndices.findIndex((idx) => idx >= startingIndex);
+        if (nextSiblingPos !== -1) {
+          const targetPos = Math.min(nextSiblingPos + Math.abs(move) - 1, siblingIndices.length - 1);
+          const targetSiblingIndex = siblingIndices[targetPos];
+          const targetSiblingPath = orderedLayers[targetSiblingIndex];
+          // Insert after the target sibling's subtree
+          insertionIndex = targetSiblingIndex + 1;
+          while (insertionIndex < orderedLayers.length && orderedLayers[insertionIndex].startsWith(`${targetSiblingPath}/`)) {
+            insertionIndex++;
+          }
+        }
+      } else {
+        // Moving UP: find siblings before startingIndex, then insert at the target sibling's position
+        const prevSiblings = siblingIndices.filter((idx) => idx < startingIndex);
+        if (prevSiblings.length > 0) {
+          const targetPos = Math.max(prevSiblings.length - Math.abs(move), 0);
+          insertionIndex = siblingIndices[targetPos];
+        }
+      }
+    }
+
+    orderedLayers.splice(insertionIndex, 0, ...movedLayers);
 
     // Redirect
     this.#layerController.setMapOrderedLayersDirectly(orderedLayers);
@@ -185,6 +219,37 @@ export class StateApi {
   }
 
   // #endregion EVENTS
+
+  /**
+   * Finds the sibling layer paths for a given layer by walking the legend tree.
+   *
+   * Top-level layers are siblings of each other regardless of their path prefix.
+   * Children within a group are siblings of each other.
+   *
+   * @param layerPath - The layer path to find siblings for
+   * @param legendLayers - The root legend layers array
+   * @returns The sibling paths (excluding the layer itself)
+   */
+  static #findSiblingPaths(layerPath: string, legendLayers: TypeLegendLayer[]): string[] {
+    // Check if it's a top-level layer
+    if (legendLayers.some((layer) => layer.layerPath === layerPath)) {
+      return legendLayers.map((layer) => layer.layerPath).filter((path) => path !== layerPath);
+    }
+
+    // Recursively search for the parent group containing this layer
+    const findInChildren = (layers: TypeLegendLayer[]): string[] | undefined => {
+      for (const layer of layers) {
+        if (layer.children.some((child) => child.layerPath === layerPath)) {
+          return layer.children.map((child) => child.layerPath).filter((path) => path !== layerPath);
+        }
+        const result = findInChildren(layer.children);
+        if (result) return result;
+      }
+      return undefined;
+    };
+
+    return findInChildren(legendLayers) ?? [];
+  }
 }
 
 // #region EVENTS & DELEGATES
