@@ -234,6 +234,7 @@
     "errorNoBounds": "Couldn't find bounds for layer '{{layerPath}}'.",
     "errorNoExtent": "No extent for layer '{{layerPath}}'.",
     "errorInvalidExtent": "Invalid extent '{{extent}}'.",
+    "errorNonreloadableLayer": "This layer cannot be reloaded.",
     "fetchProgress": "Fetching data... Retrieved {{processed}} of {{total}} records.",
     "fetchDone": "Data fetched - {{total}} records.",
     "fetchStart": "Fetching data...",
