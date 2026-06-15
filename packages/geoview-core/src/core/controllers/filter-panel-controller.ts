@@ -1,0 +1,482 @@
+import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
+import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
+import type { MapViewer } from '@/geo/map/map-viewer';
+import { logger } from '@/core/utils/logger';
+import {
+  getStoreFilterPanelFilterState,
+  getStoreFilterPanelLayerFilterState,
+  setStoreFilterPanelFilterState,
+  setStoreFilterPanelLayerFieldFilter,
+  clearStoreFilterPanelLayerFilters,
+  clearStoreFilterPanelAllFilters,
+  addStoreFilterPanelActiveLayerFilter,
+  removeStoreFilterPanelActiveLayerFilter,
+  clearStoreFilterPanelActiveLayerFilters,
+  type TypeFilterValue,
+  type TypeFilterState,
+  type TypeRangeValue,
+  type TypeDateRangeValue,
+} from '@/core/stores/states/filter-panel-state';
+import { getStoreDataTableFeaturesByPath } from '@/core/stores/states/data-table-state';
+import { getStoreLayerStatus } from '@/core/stores/states/layer-state';
+
+// #region TYPES (minimal config types for reading filter panel configuration)
+
+/** Minimal filter layer config for reading layer paths from map config. */
+interface TypeFilterLayerConfig {
+  layerPath: string;
+  enabled: boolean;
+}
+
+/** Minimal filter panel config for reading configured layers from map config. */
+interface TypeFilterPanelConfig {
+  layers?: TypeFilterLayerConfig[];
+}
+
+// #endregion TYPES
+
+/**
+ * Controller responsible for filter panel interactions and bridging
+ * the filter state with the layer filtering system.
+ *
+ * This controller manages filter state in the store and applies filter
+ * expressions to layers using GeoView's LayerFilters system.
+ */
+export class FilterPanelController extends AbstractMapViewerController {
+  /**
+   * Creates an instance of FilterPanelController.
+   *
+   * @param mapViewer - The map viewer instance to associate with this controller
+   * @param controllerRegistry - The controller registry for accessing sibling controllers
+   */
+  // GV Leave the constructor here, because we'll likely need it soon to inject dependencies.
+  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
+  constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry) {
+    super(mapViewer, controllerRegistry);
+  }
+
+  // #region PUBLIC METHODS - FILTER STATE MANAGEMENT
+
+  /**
+   * Sets the complete filter state for all layers.
+   *
+   * @param filterState - The new filter state
+   */
+  setFilterState(filterState: TypeFilterState): void {
+    setStoreFilterPanelFilterState(this.getMapId(), filterState);
+  }
+
+  /**
+   * Updates a filter value for a specific layer and field.
+   *
+   * @param layerPath - The layer path
+   * @param fieldName - The field name
+   * @param value - The filter value
+   */
+  updateLayerFieldFilter(layerPath: string, fieldName: string, value: TypeFilterValue): void {
+    setStoreFilterPanelLayerFieldFilter(this.getMapId(), layerPath, fieldName, value);
+  }
+
+  /**
+   * Initializes empty filter state for a layer.
+   *
+   * @param layerPath - The layer path
+   */
+  initializeLayerFilterState(layerPath: string): void {
+    const currentState = getStoreFilterPanelFilterState(this.getMapId());
+
+    setStoreFilterPanelFilterState(this.getMapId(), {
+      ...currentState,
+      [layerPath]: {},
+    });
+  }
+
+  // #endregion PUBLIC METHODS - FILTER STATE MANAGEMENT
+
+  // #region PUBLIC METHODS - FILTER APPLICATION
+
+  /**
+   * Checks if a layer is ready to have filters applied.
+   *
+   * @param layerPath - The layer path
+   * @returns True if the layer is in a 'processed' or 'loaded' state
+   */
+  isLayerReady(layerPath: string): boolean {
+    const status = getStoreLayerStatus(this.getMapId(), layerPath);
+    return status === 'processed' || status === 'loaded';
+  }
+
+  /**
+   * Builds a SQL-like filter expression for a layer based on its current filter state.
+   *
+   * @param layerPath - The layer path
+   * @returns SQL-like filter expression, or undefined if no filters active
+   */
+  buildFilterExpression(layerPath: string): string | undefined {
+    const layerFilterState = getStoreFilterPanelLayerFilterState(this.getMapId(), layerPath);
+    const expressions: string[] = [];
+
+    Object.entries(layerFilterState).forEach(([fieldName, value]) => {
+      // Skip empty filters
+      if (value === null || value === undefined || value === '') {
+        return;
+      }
+
+      // Handle multiselect (arrays)
+      if (Array.isArray(value)) {
+        if (value.length === 0) {
+          return; // Skip empty arrays
+        }
+        const valueList = value
+          .map((v) => {
+            if (typeof v === 'string') {
+              return `'${FilterPanelController.escapeString(v)}'`;
+            }
+            return v;
+          })
+          .join(', ');
+        expressions.push(`${fieldName} IN (${valueList})`);
+      }
+      // Handle range filters (objects with min/max)
+      else if (FilterPanelController.isRangeValue(value)) {
+        if (value.min !== null && value.max !== null) {
+          expressions.push(`${fieldName} BETWEEN ${value.min} AND ${value.max}`);
+        } else if (value.min !== null) {
+          expressions.push(`${fieldName} >= ${value.min}`);
+        } else if (value.max !== null) {
+          expressions.push(`${fieldName} <= ${value.max}`);
+        }
+      }
+      // Handle date range filters (objects with start/end)
+      else if (FilterPanelController.isDateRangeValue(value)) {
+        if (value.start !== null && value.end !== null) {
+          expressions.push(`${fieldName} BETWEEN '${value.start}' AND '${value.end}'`);
+        } else if (value.start !== null) {
+          expressions.push(`${fieldName} >= '${value.start}'`);
+        } else if (value.end !== null) {
+          expressions.push(`${fieldName} <= '${value.end}'`);
+        }
+      }
+      // Handle single value filters
+      else {
+        if (typeof value === 'string') {
+          expressions.push(`${fieldName} = '${FilterPanelController.escapeString(value)}'`);
+        } else {
+          expressions.push(`${fieldName} = ${value}`);
+        }
+      }
+    });
+
+    // Combine expressions with AND
+    return expressions.length > 0 ? expressions.join(' AND ') : undefined;
+  }
+
+  /**
+   * Applies filters to a specific layer.
+   *
+   * Builds the filter expression from the current filter state and applies it
+   * to the layer. Only applies if the layer is ready and exists.
+   *
+   * @param layerPath - The layer path
+   * @returns True if the filter was applied successfully, false otherwise
+   */
+  applyLayerFilter(layerPath: string): boolean {
+    try {
+      // Check if layer is ready
+      if (!this.isLayerReady(layerPath)) {
+        logger.logDebug(`Layer ${layerPath} is not ready yet - skipping filter application`);
+        return false;
+      }
+
+      // Get the layer
+      const gvLayer = this.getControllersRegistry().layerController.getGeoviewLayerRegularIfExists(layerPath);
+      if (!gvLayer) {
+        logger.logWarning(`Layer not found: ${layerPath}`);
+        return false;
+      }
+
+      // Build the filter expression from the current filter state
+      const expression = this.buildFilterExpression(layerPath);
+
+      // Apply or clear the panel filter using the proper LayerFilters API
+      gvLayer.setLayerFiltersPanel(expression);
+
+      // Track active filters in the store
+      if (expression) {
+        addStoreFilterPanelActiveLayerFilter(this.getMapId(), layerPath);
+        logger.logInfo(`Applied filter panel filter to layer ${layerPath}:`, expression);
+      } else {
+        removeStoreFilterPanelActiveLayerFilter(this.getMapId(), layerPath);
+        logger.logInfo(`Cleared filter panel filter for layer ${layerPath}`);
+      }
+
+      return true;
+    } catch (err) {
+      logger.logError(`Error applying filter panel filter to layer ${layerPath}:`, err);
+      return false;
+    }
+  }
+
+  /**
+   * Applies filters to all configured layers that are ready.
+   *
+   * Skips layers that are not yet loaded.
+   */
+  applyAllFilters(): void {
+    const filterState = getStoreFilterPanelFilterState(this.getMapId());
+
+    // Apply filters for each layer that has filter state
+    Object.keys(filterState).forEach((layerPath) => {
+      this.applyLayerFilter(layerPath);
+    });
+  }
+
+  /**
+   * Clears filters for a specific layer.
+   *
+   * Resets the filter state and removes the panel filter from the layer's filter system.
+   *
+   * @param layerPath - The layer path
+   */
+  clearLayerFilters(layerPath: string): void {
+    // Clear the filter state
+    clearStoreFilterPanelLayerFilters(this.getMapId(), layerPath);
+
+    // Remove the panel filter from the layer using the proper LayerFilters API
+    try {
+      const gvLayer = this.getControllersRegistry().layerController.getGeoviewLayerRegularIfExists(layerPath);
+      if (gvLayer) {
+        gvLayer.setLayerFiltersPanel(undefined);
+        removeStoreFilterPanelActiveLayerFilter(this.getMapId(), layerPath);
+        logger.logInfo(`Cleared filter panel filters for layer ${layerPath}`);
+      }
+    } catch (err) {
+      logger.logError(`Error clearing filter panel filter for layer ${layerPath}:`, err);
+    }
+  }
+
+  /**
+   * Clears all filters for all layers.
+   */
+  clearAllFilters(): void {
+    const filterState = getStoreFilterPanelFilterState(this.getMapId());
+
+    // Clear filter state
+    clearStoreFilterPanelAllFilters(this.getMapId());
+
+    // Remove panel filters from all layers using the proper LayerFilters API
+    Object.keys(filterState).forEach((layerPath) => {
+      try {
+        const gvLayer = this.getControllersRegistry().layerController.getGeoviewLayerRegularIfExists(layerPath);
+        if (gvLayer) {
+          gvLayer.setLayerFiltersPanel(undefined);
+        }
+      } catch (err) {
+        logger.logError(`Error clearing filter panel filter for layer ${layerPath}:`, err);
+      }
+    });
+
+    // Clear active layer filters
+    clearStoreFilterPanelActiveLayerFilters(this.getMapId());
+    logger.logInfo('Cleared all filter panel filters');
+  }
+
+  // #endregion PUBLIC METHODS - FILTER APPLICATION
+
+  // #region PUBLIC METHODS - UTILITIES
+
+  /**
+   * Checks if a layer has any active filters.
+   *
+   * @param layerPath - The layer path
+   * @returns Whether the layer has active filters
+   */
+  hasActiveFilters(layerPath: string): boolean {
+    const layerFilterState = getStoreFilterPanelLayerFilterState(this.getMapId(), layerPath);
+    return Object.values(layerFilterState).some((value) => {
+      if (Array.isArray(value)) return value.length > 0;
+      if (typeof value === 'object' && value !== null) {
+        return Object.values(value).some((v) => v !== null && v !== undefined);
+      }
+      return value !== null && value !== undefined && value !== '';
+    });
+  }
+
+  /**
+   * Gets unique values for a field from a layer's features.
+   *
+   * This method integrates with GeoView's AllFeatureInfoLayerSet infrastructure
+   * rather than directly accessing OpenLayers sources. It retrieves features that
+   * have already been queried and stored in the data table state.
+   *
+   * **Important**: This only works for layers that are queryable (vector sources,
+   * WMS with WFS config, etc.). Raster-only layers without feature data will return
+   * an empty array.
+   *
+   * @param layerPath - The layer path
+   * @param fieldName - The field name
+   * @returns An array of unique values, or empty array if the layer is not queryable
+   * or has not been queried yet
+   */
+  getLayerFieldUniqueValues(layerPath: string, fieldName: string): (string | number)[] {
+    try {
+      // Check if the layer is registered in the AllFeatureInfoLayerSet
+      // This ensures the layer is queryable (vector source, WMS with WFS, etc.)
+      const { allFeatureInfoLayerSet } = this.getControllersRegistry().layerSetController;
+      const isQueryable = allFeatureInfoLayerSet.getRegisteredLayerPaths().includes(layerPath);
+
+      if (!isQueryable) {
+        logger.logDebug(`Layer ${layerPath} is not queryable - cannot get unique values`);
+        return [];
+      }
+
+      // Get features from the data table store (populated by AllFeatureInfoLayerSet)
+      const features = getStoreDataTableFeaturesByPath(this.getMapId(), layerPath);
+
+      if (!features || features.length === 0) {
+        logger.logDebug(`No features available yet for layer ${layerPath} - may need to query first`);
+        return [];
+      }
+
+      // Extract unique values from the feature field info
+      const uniqueSet = new Set<string | number>();
+
+      features.forEach((feature) => {
+        const fieldEntry = feature.fieldInfo[fieldName];
+        if (fieldEntry) {
+          const { value } = fieldEntry;
+          // Only include non-null, non-undefined values
+          if (value !== null && value !== undefined) {
+            // Coerce to string or number for consistency
+            if (typeof value === 'string' || typeof value === 'number') {
+              uniqueSet.add(value);
+            } else {
+              // For other types (dates, objects), convert to string
+              uniqueSet.add(String(value));
+            }
+          }
+        }
+      });
+
+      return Array.from(uniqueSet).sort();
+    } catch (err) {
+      logger.logError(`Error fetching unique values for ${fieldName} in layer ${layerPath}:`, err);
+      return [];
+    }
+  }
+
+  /**
+   * Ensures that all configured layers have their features queried.
+   *
+   * This method reads the filter panel configuration and triggers feature queries
+   * for any enabled layers that:
+   * - Are registered in the AllFeatureInfoLayerSet (queryable layers)
+   * - Have not yet had their features queried
+   *
+   * This is typically called when the filter panel is opened to ensure unique
+   * field values can be populated for filter dropdowns.
+   *
+   * @returns A promise that resolves when all queries have been triggered (or skipped if not needed)
+   */
+  async ensureLayerFeaturesQueried(): Promise<void> {
+    try {
+      // Get the filter panel config from mapFeaturesConfig (not store, to support runtime config merges)
+      const filterPanelConfig = this.getMapViewer().mapFeaturesConfig.corePackagesConfig?.find((config) =>
+        Object.keys(config).includes('filter-panel')
+      )?.['filter-panel'] as TypeFilterPanelConfig | undefined;
+
+      if (!filterPanelConfig?.layers) {
+        logger.logDebug('No filter panel config found or no layers configured');
+        return;
+      }
+
+      // Get the layer set controller for querying
+      const { allFeatureInfoLayerSet } = this.getControllersRegistry().layerSetController;
+
+      // Trigger queries for each enabled layer that needs it
+      const queryPromises: Promise<unknown>[] = [];
+
+      filterPanelConfig.layers.forEach((layerConfig: TypeFilterLayerConfig) => {
+        // Skip disabled layers
+        if (!layerConfig.enabled) return;
+
+        const { layerPath } = layerConfig;
+
+        // Check if the layer is queryable (registered in AllFeatureInfoLayerSet)
+        const isQueryable = allFeatureInfoLayerSet.getRegisteredLayerPaths().includes(layerPath);
+
+        if (!isQueryable) {
+          logger.logDebug(`Layer ${layerPath} is not queryable - skipping feature query`);
+          return;
+        }
+
+        // Check if features are already available in the store
+        const existingFeatures = getStoreDataTableFeaturesByPath(this.getMapId(), layerPath);
+
+        if (existingFeatures && existingFeatures.length > 0) {
+          logger.logDebug(`Layer ${layerPath} already has ${existingFeatures.length} features - skipping query`);
+          return;
+        }
+
+        // Trigger the query
+        logger.logInfo(`Triggering feature query for filter panel layer: ${layerPath}`);
+        const queryPromise = this.getControllersRegistry()
+          .layerSetController.triggerGetAllFeatureInfo(layerPath)
+          .catch((error: unknown) => {
+            logger.logError(`Error querying features for layer ${layerPath}:`, error);
+          });
+
+        queryPromises.push(queryPromise);
+      });
+
+      // Wait for all queries to complete
+      await Promise.all(queryPromises);
+      logger.logDebug('Filter panel feature queries completed');
+    } catch (err) {
+      logger.logError('Error ensuring layer features are queried:', err);
+    }
+  }
+
+  // #endregion PUBLIC METHODS - UTILITIES
+
+  // #region PRIVATE HELPER METHODS
+
+  /**
+   * Checks if a filter value is a range value.
+   *
+   * @param value - Filter value to check
+   * @returns Whether the value is a TypeRangeValue
+   */
+  static isRangeValue(value: TypeFilterValue): value is TypeRangeValue {
+    return (
+      typeof value === 'object' &&
+      value !== null &&
+      !Array.isArray(value) &&
+      ('min' in value || 'max' in value) &&
+      !('start' in value) &&
+      !('end' in value)
+    );
+  }
+
+  /**
+   * Checks if a filter value is a date range value.
+   *
+   * @param value - Filter value to check
+   * @returns Whether the value is a TypeDateRangeValue
+   */
+  static isDateRangeValue(value: TypeFilterValue): value is TypeDateRangeValue {
+    return typeof value === 'object' && value !== null && !Array.isArray(value) && ('start' in value || 'end' in value);
+  }
+
+  /**
+   * Escapes single quotes in strings for SQL expressions.
+   *
+   * @param str - String to escape
+   * @returns Escaped string
+   */
+  static escapeString(str: string): string {
+    return str.replace(/'/g, "''");
+  }
+
+  // #endregion PRIVATE HELPER METHODS
+}
