@@ -457,27 +457,33 @@ export class LayerCreatorController extends AbstractMapViewerController {
 
             // If found
             if (innerGVLayer) {
-              // Remove actual OL layer from the map
-              const layer = innerGVLayer.getOLLayer();
-              if (layer) this.getMapViewer().map.removeLayer(layer);
+              // If the layer has already been loaded at least once
+              if (innerGVLayer.loadedOnce) {
+                // Remove actual OL layer from the map
+                const olLayer = innerGVLayer.getOLLayer();
+                if (olLayer) this.getMapViewer().map.removeLayer(olLayer);
 
-              // Remove from registered layers
-              this.#layerDomain.deleteGVLayer(innerGVLayer);
+                // Remove from registered layers
+                this.#layerDomain.deleteGVLayer(innerGVLayer);
+
+                // Create and register new layer
+                const layer = geoviewLayer.createGVLayer(layerEntryConfig as AbstractBaseLayerEntryConfig);
+
+                // Initialize the GV Layer
+                layer.init();
+
+                // Re-register in the domain
+                this.#layerDomain.registerGVLayer(layer);
+
+                // Re-add on the map
+                this.getMapViewer().map.addLayer(layer.getOLLayer());
+              }
+            } else {
+              // Nonreloadable layer
+              this.getMapViewer().notifications.showError('layers.errorNonreloadableLayer');
             }
           }
         });
-
-        // Create and register new layer
-        const layer = geoviewLayer.createGVLayer(layerEntryConfig as AbstractBaseLayerEntryConfig);
-
-        // Initialize the GV Layer
-        layer.init();
-
-        // Re-register in the domain
-        this.#layerDomain.registerGVLayer(layer);
-
-        // Re-add on the map
-        this.getMapViewer().map.addLayer(layer.getOLLayer());
       }
     }
   }
