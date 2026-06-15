@@ -48,6 +48,11 @@
   - [Accessibility](app/accessibility.md)
   - [Accessing Types](app/accessing-types.md)
 
+- **Release Testing**
+  - [Test Plan Overview](programming/release-testing/README.md)
+  - [Automated Suite](programming/release-testing/00-automated-suite.md)
+  - [Automation Candidates](programming/release-testing/23-automation-candidates.md)
+
 - **Developer Documentation**
   - [Best Practices](programming/best-practices.md)
   - [Controller Architecture](programming/controller-architecture.md)
