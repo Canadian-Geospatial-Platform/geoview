@@ -30,6 +30,16 @@ type TypeSelectProps = {
    */
   MenuProps?: Partial<MenuProps>;
   sx?: SxProps<Theme>;
+  /**
+   * If true, the selected value is rendered when the value is empty.
+   * Used with renderValue to display placeholder-style content.
+   */
+  displayEmpty?: boolean;
+  /**
+   * Render function for the selected value display.
+   * Allows custom rendering of the selected value in the input.
+   */
+  renderValue?: (value: unknown) => React.ReactNode;
 } & React.AriaAttributes;
 
 /**
@@ -84,6 +94,8 @@ function SelectUI(props: TypeSelectProps, ref: Ref<HTMLDivElement>): JSX.Element
     variant = 'standard',
     MenuProps,
     sx,
+    displayEmpty,
+    renderValue,
     ...selectProps
   } = props;
 
@@ -149,9 +161,11 @@ function SelectUI(props: TypeSelectProps, ref: Ref<HTMLDivElement>): JSX.Element
       variant,
       sx: sxClasses.formControl,
       ...(MenuProps ? { MenuProps } : {}),
+      ...(displayEmpty !== undefined ? { displayEmpty } : {}),
+      ...(renderValue ? { renderValue } : {}),
       ...selectProps,
     };
-  }, [labelId, id, value, onChange, disabled, variant, sxClasses.formControl, MenuProps, selectProps]);
+  }, [labelId, id, value, onChange, disabled, variant, sxClasses.formControl, MenuProps, displayEmpty, renderValue, selectProps]);
 
   /**
    * Merge sx with default and custom styles.
