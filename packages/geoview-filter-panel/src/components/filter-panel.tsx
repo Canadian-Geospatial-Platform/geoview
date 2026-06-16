@@ -1,5 +1,3 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
-
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { logger } from 'geoview-core/core/utils/logger';
 
@@ -32,8 +30,9 @@ export function FilterPanel(props: FilterPanelProps): JSX.Element {
 
   // Access UI components via window.cgpv pattern
   const { cgpv } = window as TypeWindow;
+  const { useState, useEffect, useCallback, useMemo } = cgpv.reactUtilities.react;
   const { ui } = cgpv;
-  const { Box, Typography } = ui.elements;
+  const { Box, Typography, Button } = ui.elements;
 
   const theme = ui.useTheme();
   const memoSxClasses = useMemo((): SxStyles => {
@@ -154,29 +153,23 @@ export function FilterPanel(props: FilterPanelProps): JSX.Element {
 
   if (!config) {
     return (
-      <Box sx={memoSxClasses.filterPanel}>
-        <Box sx={memoSxClasses.filterError}>No filter configuration provided</Box>
+      <Box sx={{ p: 2 }}>
+        <Typography color="error">No filter configuration provided</Typography>
       </Box>
     );
   }
 
   if (!filterPanelController) {
     return (
-      <Box sx={memoSxClasses.filterPanel}>
-        <Box sx={memoSxClasses.filterError}>Filter controller not initialized</Box>
+      <Box sx={{ p: 2 }}>
+        <Typography color="error">Filter controller not initialized</Typography>
       </Box>
     );
   }
 
   return (
     <Box sx={memoSxClasses.filterPanel}>
-      <Box sx={memoSxClasses.filterHeader}>
-        <Typography component="h2" sx={memoSxClasses.filterTitle}>
-          {config.settings?.title || 'Filter Layers'}
-        </Typography>
-      </Box>
-
-      <Box sx={memoSxClasses.filterContent}>
+      <Box sx={memoSxClasses.filterLayerContent}>
         {config.layers.map((layer) => (
           <LayerFilterSection
             key={layer.layerPath}
@@ -185,39 +178,31 @@ export function FilterPanel(props: FilterPanelProps): JSX.Element {
             onClearLayer={() => clearLayerFilters(layer.layerPath)}
             collapsible={config.settings?.collapsible ?? true}
             defaultCollapsed={config.settings?.defaultCollapsed ?? false}
-            sxClasses={memoSxClasses}
             autoApply={config.settings?.autoApply ?? true}
           />
         ))}
       </Box>
 
       {(config.settings?.showApplyButton || config.settings?.showResetButton) && (
-        <Box sx={memoSxClasses.filterActions}>
+        <Box
+          sx={{
+            display: 'flex',
+            gap: 1,
+            p: 2,
+            borderTop: 1,
+            borderColor: 'divider',
+            bgcolor: 'background.default',
+          }}
+        >
           {config.settings?.showResetButton && (
-            <button
-              style={{
-                ...(memoSxClasses.filterButton as React.CSSProperties),
-                ...(memoSxClasses.filterButtonSecondary as React.CSSProperties),
-              }}
-              onClick={handleReset}
-              disabled={!hasAnyFilters()}
-              type="button"
-            >
+            <Button type="text" variant="outlined" onClick={handleReset} disabled={!hasAnyFilters()} fullWidth>
               Reset All
-            </button>
+            </Button>
           )}
           {config.settings?.showApplyButton && config.settings?.autoApply === false && (
-            <button
-              style={{
-                ...(memoSxClasses.filterButton as React.CSSProperties),
-                ...(memoSxClasses.filterButtonPrimary as React.CSSProperties),
-              }}
-              onClick={handleApply}
-              disabled={isApplying || !hasAnyFilters()}
-              type="button"
-            >
+            <Button type="text" variant="contained" onClick={handleApply} disabled={isApplying || !hasAnyFilters()} fullWidth>
               {isApplying ? 'Applying...' : 'Apply Filters'}
-            </button>
+            </Button>
           )}
         </Box>
       )}
