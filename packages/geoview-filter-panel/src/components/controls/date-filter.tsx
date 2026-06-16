@@ -1,9 +1,11 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { logger } from 'geoview-core/core/utils/logger';
 
+import { useFilterPanelController } from 'geoview-core/core/controllers/use-controllers';
+import { useTranslation } from 'geoview-core/core/translation/i18n';
+
 import type { TypeFilterAttribute, TypeFilterValue, TypeDateRangeValue } from '../../types';
 import { getSxClasses } from './control-styles';
-import { useFilterPanelController } from 'geoview-core/core/controllers/use-controllers';
 
 /**
  * Props for DateFilter component.
@@ -41,6 +43,8 @@ export function DateFilter(props: DateFilterProps): JSX.Element {
 
   const theme = ui.useTheme();
   const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const { t } = useTranslation<string>();
+
   const controller = useFilterPanelController();
 
   /**
@@ -132,7 +136,7 @@ export function DateFilter(props: DateFilterProps): JSX.Element {
           {attribute.displayLabel}
         </Typography>
         <Typography variant="body2" sx={memoSxClasses.filterLoading}>
-          Loading values...
+          {t('FilterPanel.loading')}
         </Typography>
       </Box>
     );
@@ -145,7 +149,7 @@ export function DateFilter(props: DateFilterProps): JSX.Element {
           {attribute.displayLabel}
         </Typography>
         <Typography variant="body2" sx={memoSxClasses.filterLoading}>
-          No date values available
+          {t('FilterPanel.noDateValues')}
         </Typography>
       </Box>
     );
@@ -161,7 +165,7 @@ export function DateFilter(props: DateFilterProps): JSX.Element {
         <Slider
           value={memoSliderValue}
           onChange={handleSliderChange}
-          valueLabelDisplay="auto"
+          valueLabelDisplay={'off'}
           valueLabelFormat={formatValue}
           min={memoBounds.min}
           max={memoBounds.max}
@@ -174,7 +178,7 @@ export function DateFilter(props: DateFilterProps): JSX.Element {
       </Box>
 
       <Typography variant="caption" sx={memoSxClasses.filterDateInfo}>
-        Available: {memoBounds.minDate} to {memoBounds.maxDate}
+        {t('FilterPanel.available')}: {memoBounds.minDate} {t('FilterPanel.to')} {memoBounds.maxDate}
       </Typography>
     </Box>
   );

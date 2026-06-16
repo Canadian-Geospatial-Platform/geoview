@@ -40,7 +40,7 @@ type SliderProps = {
   track?: 'inverted' | 'normal' | false;
   ariaLabelledby?: string;
   valueLabelFormat?: string | ((value: number, index: number) => ReactNode);
-  valueLabelDisplay?: 'auto' | 'on';
+  valueLabelDisplay?: 'auto' | 'on' | 'off';
   slotProps?: MuiSliderProps['slotProps'];
 };
 
@@ -112,7 +112,7 @@ function SliderUI(props: SliderProps): JSX.Element {
 
   const containerId = generateId(18);
 
-  const valueLabelDisplayOption = valueLabelDisplay === undefined ? 'on' : 'auto';
+  const valueLabelDisplayOption = valueLabelDisplay === undefined ? 'on' : valueLabelDisplay;
 
   // TODO: Refactor - when refactor time slider, re work logic for marks and label to have all of them inside slider (geochart-time slider)
   /**

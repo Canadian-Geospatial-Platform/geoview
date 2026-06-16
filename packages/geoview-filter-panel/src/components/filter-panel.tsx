@@ -3,6 +3,7 @@ import { logger } from 'geoview-core/core/utils/logger';
 
 import type { SxStyles } from 'geoview-core/ui/style/types';
 import { useFilterPanelController } from 'geoview-core/core/controllers/use-controllers';
+import { useTranslation } from 'geoview-core/core/translation/i18n';
 
 import { getSxClasses } from './filter-panel-style';
 import type { TypeFilterPanelProps, TypeFilterValue } from '../types';
@@ -38,6 +39,7 @@ export function FilterPanel(props: FilterPanelProps): JSX.Element {
   const memoSxClasses = useMemo((): SxStyles => {
     return getSxClasses(theme);
   }, [theme]);
+  const { t } = useTranslation<string>();
 
   const filterPanelController = useFilterPanelController();
 
@@ -154,7 +156,7 @@ export function FilterPanel(props: FilterPanelProps): JSX.Element {
   if (!config) {
     return (
       <Box sx={{ p: 2 }}>
-        <Typography color="error">No filter configuration provided</Typography>
+        <Typography color="error">{t('FilterPanel.noConfig')}</Typography>
       </Box>
     );
   }
@@ -162,7 +164,7 @@ export function FilterPanel(props: FilterPanelProps): JSX.Element {
   if (!filterPanelController) {
     return (
       <Box sx={{ p: 2 }}>
-        <Typography color="error">Filter controller not initialized</Typography>
+        <Typography color="error">{t('FilterPanel.noController')}</Typography>
       </Box>
     );
   }
@@ -196,12 +198,12 @@ export function FilterPanel(props: FilterPanelProps): JSX.Element {
         >
           {config.settings?.showResetButton && (
             <Button type="text" variant="outlined" onClick={handleReset} disabled={!hasAnyFilters()} fullWidth>
-              Reset All
+              {t('FilterPanel.reset')}
             </Button>
           )}
           {config.settings?.showApplyButton && config.settings?.autoApply === false && (
             <Button type="text" variant="contained" onClick={handleApply} disabled={isApplying || !hasAnyFilters()} fullWidth>
-              {isApplying ? 'Applying...' : 'Apply Filters'}
+              {isApplying ? t('FilterPanel.applying') : t('FilterPanel.apply')}
             </Button>
           )}
         </Box>

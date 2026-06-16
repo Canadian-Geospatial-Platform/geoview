@@ -29,6 +29,16 @@ type TypeSelectProps = {
    * Example: MenuProps={{ container: shellContainer }}
    */
   MenuProps?: Partial<MenuProps>;
+  /**
+   * If true, the selected value is rendered when the value is empty.
+   * Used with renderValue to display placeholder-style content.
+   */
+  displayEmpty?: boolean;
+  /**
+   * Render function for the selected value display.
+   * Allows custom rendering of the selected value in the input.
+   */
+  renderValue?: (value: unknown) => React.ReactNode;
 };
 
 /**
@@ -82,6 +92,8 @@ function SelectUI(props: TypeSelectProps, ref: Ref<HTMLDivElement>): JSX.Element
     disabled,
     variant = 'standard',
     MenuProps,
+    displayEmpty,
+    renderValue,
     ...selectProps
   } = props;
 
@@ -131,9 +143,11 @@ function SelectUI(props: TypeSelectProps, ref: Ref<HTMLDivElement>): JSX.Element
       variant,
       sx: sxClasses.formControl,
       ...(MenuProps ? { MenuProps } : {}),
+      ...(displayEmpty !== undefined ? { displayEmpty } : {}),
+      ...(renderValue ? { renderValue } : {}),
       ...selectProps,
     }),
-    [labelId, id, value, onChange, disabled, variant, sxClasses.formControl, MenuProps, selectProps]
+    [labelId, id, value, onChange, disabled, variant, sxClasses.formControl, MenuProps, displayEmpty, renderValue, selectProps]
   );
 
   return (
