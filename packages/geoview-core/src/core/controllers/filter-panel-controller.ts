@@ -1,7 +1,9 @@
+import type { MapViewer } from '@/geo/map/map-viewer';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
-import type { MapViewer } from '@/geo/map/map-viewer';
 import { logger } from '@/core/utils/logger';
+import { whenThisThen } from '@/core/utils/utilities';
+import { DateMgt } from '@/core/utils/date-mgt';
 import {
   getStoreFilterPanelFilterState,
   getStoreFilterPanelLayerFilterState,
@@ -140,7 +142,7 @@ export class FilterPanelController extends AbstractMapViewerController {
       // Handle range filters (objects with min/max)
       else if (FilterPanelController.isRangeValue(value)) {
         if (value.min !== null && value.max !== null) {
-          expressions.push(`${fieldName} BETWEEN ${value.min} AND ${value.max}`);
+          expressions.push(`${fieldName} >= ${value.min} AND ${fieldName} <= ${value.max}`);
         } else if (value.min !== null) {
           expressions.push(`${fieldName} >= ${value.min}`);
         } else if (value.max !== null) {
@@ -150,7 +152,7 @@ export class FilterPanelController extends AbstractMapViewerController {
       // Handle date range filters (objects with start/end)
       else if (FilterPanelController.isDateRangeValue(value)) {
         if (value.start !== null && value.end !== null) {
-          expressions.push(`${fieldName} BETWEEN '${value.start}' AND '${value.end}'`);
+          expressions.push(`${fieldName} >= '${value.start}' AND ${fieldName} <= '${value.end}'`);
         } else if (value.start !== null) {
           expressions.push(`${fieldName} >= '${value.start}'`);
         } else if (value.end !== null) {
@@ -303,6 +305,42 @@ export class FilterPanelController extends AbstractMapViewerController {
   }
 
   /**
+   * Ensures that a specific layer has been registered in AllFeatureInfoLayerSet and queried.
+   *
+   * Waits for the layer to appear in the registered layer paths, then triggers
+   * a feature query if features aren't already available.
+   *
+   * @param layerPath - The layer path
+   * @returns A promise that resolves when the layer is registered and queried
+   * @throws {Error} When the timeout is reached before registration
+   */
+  async ensureLayerQueried(layerPath: string): Promise<void> {
+    const { allFeatureInfoLayerSet } = this.getControllersRegistry().layerSetController;
+    const REGISTRATION_TIMEOUT = 5000; // 5 seconds
+
+    try {
+      // Wait for the layer to be registered in AllFeatureInfoLayerSet
+      await whenThisThen(() => allFeatureInfoLayerSet.getRegisteredLayerPaths().includes(layerPath), REGISTRATION_TIMEOUT);
+
+      // Layer is now registered - check if we need to trigger a query
+      const existingFeatures = getStoreDataTableFeaturesByPath(this.getMapId(), layerPath);
+
+      if (existingFeatures && existingFeatures.length > 0) {
+        logger.logDebug(`Layer ${layerPath} already has ${existingFeatures.length} features`);
+        return;
+      }
+
+      // Trigger the query
+      logger.logInfo(`Triggering feature query for layer: ${layerPath}`);
+      await this.getControllersRegistry().layerSetController.triggerGetAllFeatureInfo(layerPath);
+      logger.logDebug(`Feature query completed for layer: ${layerPath}`);
+    } catch (error) {
+      logger.logWarning(`Timeout or error waiting for layer ${layerPath} to be registered:`, error);
+      throw error;
+    }
+  }
+
+  /**
    * Gets unique values for a field from a layer's features.
    *
    * This method integrates with GeoView's AllFeatureInfoLayerSet infrastructure
@@ -435,6 +473,82 @@ export class FilterPanelController extends AbstractMapViewerController {
     } catch (err) {
       logger.logError('Error ensuring layer features are queried:', err);
     }
+  }
+
+  /**
+   * Computes timestamp bounds from unique date values.
+   *
+   * Parses date values (strings or epoch numbers) using DateMgt and returns
+   * the min/max timestamps along with formatted display dates.
+   *
+   * @param uniqueValues - Array of date values from layer features
+   * @returns Object with min/max timestamps and formatted display dates, or null if no valid dates
+   */
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  getDateBounds(uniqueValues: (string | number)[]): { min: number; max: number; minDate: string; maxDate: string } | null {
+    if (!uniqueValues.length) {
+      return null;
+    }
+
+    // Convert values to timestamps using DateMgt
+    const timestamps: number[] = [];
+
+    uniqueValues.forEach((val) => {
+      try {
+        const timestamp = DateMgt.convertToMilliseconds(val);
+        if (!Number.isNaN(timestamp)) {
+          timestamps.push(timestamp);
+        }
+      } catch (err) {
+        logger.logWarning(`Failed to parse date value: ${val}`, err);
+      }
+    });
+
+    if (!timestamps.length) {
+      return null;
+    }
+
+    // Find min and max timestamps
+    const minTimestamp = Math.min(...timestamps);
+    const maxTimestamp = Math.max(...timestamps);
+
+    // Format as YYYY-MM-DD using DateMgt
+    const formatDateForDisplay = (timestamp: number): string => {
+      return DateMgt.formatDate(timestamp, DateMgt.ISO_DATE_FORMAT, 'en', DateMgt.TIME_UTC);
+    };
+
+    return {
+      min: minTimestamp,
+      max: maxTimestamp,
+      minDate: formatDateForDisplay(minTimestamp),
+      maxDate: formatDateForDisplay(maxTimestamp),
+    };
+  }
+
+  /**
+   * Formats a timestamp value for display in the UI.
+   *
+   * Uses DateMgt to format timestamps consistently across the application.
+   *
+   * @param timestamp - Milliseconds since epoch
+   * @returns Formatted date string (e.g., "Jan 15, 2020")
+   */
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  formatDateForDisplay(timestamp: number): string {
+    return DateMgt.formatDate(timestamp, DateMgt.LONG_DISPLAY_DATE_FORMAT.en, 'en', DateMgt.TIME_UTC);
+  }
+
+  /**
+   * Converts a timestamp to a YYYY-MM-DD date string for filter expressions.
+   *
+   * Uses DateMgt to ensure consistent date formatting in SQL filter strings.
+   *
+   * @param timestamp - Milliseconds since epoch
+   * @returns Date string in YYYY-MM-DD format
+   */
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  formatDateForFilter(timestamp: number): string {
+    return DateMgt.formatDate(timestamp, DateMgt.ISO_DATE_FORMAT, 'en', DateMgt.TIME_UTC);
   }
 
   // #endregion PUBLIC METHODS - UTILITIES

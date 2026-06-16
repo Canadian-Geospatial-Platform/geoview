@@ -1,10 +1,8 @@
-import { useCallback } from 'react';
-
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { logger } from 'geoview-core/core/utils/logger';
 
-import type { SxStyles } from 'geoview-core/ui/style/types';
 import type { TypeFilterAttribute, TypeFilterValue } from '../../types';
+import { getSxClasses } from './control-styles';
 
 /**
  * Props for SelectFilter component.
@@ -20,8 +18,6 @@ interface SelectFilterProps {
   uniqueValues: (string | number)[];
   /** Whether data is loading. */
   loading: boolean;
-  /** Style classes. */
-  sxClasses: SxStyles;
 }
 
 /**
@@ -34,39 +30,82 @@ export function SelectFilter(props: SelectFilterProps): JSX.Element {
   // Log
   logger.logTraceRender('geoview-filter-panel/components/select-filter');
 
-  const { attribute, value, onChange, uniqueValues, loading, sxClasses } = props;
+  const { attribute, value, onChange, uniqueValues, loading } = props;
 
   // Access UI components via window.cgpv pattern
   const { cgpv } = window as TypeWindow;
+  const { useCallback, useMemo } = cgpv.reactUtilities.react;
   const { ui } = cgpv;
-  const { Box } = ui.elements;
+  const { Box, Select, Typography } = ui.elements;
+
+  const theme = ui.useTheme();
+  const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
+
+  /**
+   * Memoized menu items for the select dropdown.
+   */
+  const memoMenuItems = useMemo(() => {
+    const items = [
+      {
+        type: 'item' as const,
+        item: {
+          value: '',
+          children: <em>All</em>,
+        },
+      },
+    ];
+
+    uniqueValues.forEach((val) => {
+      items.push({
+        type: 'item' as const,
+        item: {
+          value: val as string,
+          children: <span>{val !== null ? String(val) : '(null)'}</span>,
+        },
+      });
+    });
+
+    return items;
+  }, [uniqueValues]);
 
   /**
    * Handles when the select value changes.
    */
   const handleSelectChange = useCallback(
-    (event: React.ChangeEvent<HTMLSelectElement>): void => {
-      onChange(event.target.value || null);
+    (event: { target: { value: unknown } }): void => {
+      const newValue = event.target.value as string | number;
+      onChange(newValue !== '' ? newValue : null);
     },
     [onChange]
   );
 
+  if (loading) {
+    return (
+      <Box sx={memoSxClasses.filterControl}>
+        <Typography variant="body2" sx={memoSxClasses.filterLabel}>
+          {attribute.displayLabel}
+        </Typography>
+        <Typography variant="body2" sx={memoSxClasses.filterLoading}>
+          Loading options...
+        </Typography>
+      </Box>
+    );
+  }
+
   return (
-    <Box sx={sxClasses.filterControl}>
-      <label style={sxClasses.filterLabel as React.CSSProperties}>{attribute.displayLabel}</label>
-      <select
-        style={sxClasses.filterSelect as React.CSSProperties}
-        value={(value as string | number) || ''}
+    <Box sx={memoSxClasses.filterControl}>
+      <Typography variant="body2" sx={memoSxClasses.filterLabel}>
+        {attribute.displayLabel}
+      </Typography>
+      <Select
+        fullWidth
+        value={value || ''}
         onChange={handleSelectChange}
-        disabled={loading}
-      >
-        <option value="">All</option>
-        {uniqueValues.map((val) => (
-          <option key={String(val)} value={val}>
-            {val !== null ? String(val) : '(null)'}
-          </option>
-        ))}
-      </select>
+        label=""
+        inputLabel={{ shrink: true }}
+        menuItems={memoMenuItems}
+        disabled={loading || uniqueValues.length === 0}
+      />
     </Box>
   );
 }

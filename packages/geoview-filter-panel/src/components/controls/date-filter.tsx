@@ -1,10 +1,9 @@
-import { useCallback, useMemo } from 'react';
-
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { logger } from 'geoview-core/core/utils/logger';
 
-import type { SxStyles } from 'geoview-core/ui/style/types';
 import type { TypeFilterAttribute, TypeFilterValue, TypeDateRangeValue } from '../../types';
+import { getSxClasses } from './control-styles';
+import { useFilterPanelController } from 'geoview-core/core/controllers/use-controllers';
 
 /**
  * Props for DateFilter component.
@@ -16,8 +15,10 @@ interface DateFilterProps {
   value: TypeFilterValue;
   /** Callback when value changes. */
   onChange: (value: TypeFilterValue) => void;
-  /** Style classes. */
-  sxClasses: SxStyles;
+  /** Unique date values from the layer features. */
+  uniqueValues: (string | number)[];
+  /** Whether the filter is loading. */
+  loading: boolean;
 }
 
 /**
@@ -30,12 +31,17 @@ export function DateFilter(props: DateFilterProps): JSX.Element {
   // Log
   logger.logTraceRender('geoview-filter-panel/components/date-filter');
 
-  const { attribute, value, onChange, sxClasses } = props;
+  const { attribute, value, onChange, uniqueValues, loading } = props;
 
   // Access UI components via window.cgpv pattern
   const { cgpv } = window as TypeWindow;
+  const { useMemo, useCallback } = cgpv.reactUtilities.react;
   const { ui } = cgpv;
-  const { Box } = ui.elements;
+  const { Box, Slider, Typography } = ui.elements;
+
+  const theme = ui.useTheme();
+  const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const controller = useFilterPanelController();
 
   /**
    * Memoized date value to prevent dependency changes on every render.
@@ -45,49 +51,131 @@ export function DateFilter(props: DateFilterProps): JSX.Element {
   }, [value]);
 
   /**
-   * Handles when the date range start value changes.
+   * Compute the min and max date bounds as timestamps using the controller.
    */
-  const handleDateStartChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>): void => {
-      onChange({
-        ...memoDateValue,
-        start: event.target.value || null,
-      });
+  const memoBounds = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('DATE-FILTER - memoBounds', uniqueValues.length);
+
+    return controller.getDateBounds(uniqueValues);
+  }, [controller, uniqueValues]);
+
+  /**
+   * Compute the current slider value (array with two timestamp elements).
+   */
+  const memoSliderValue = useMemo((): [number, number] => {
+    // Log
+    logger.logTraceUseMemo('DATE-FILTER - memoSliderValue', memoDateValue);
+
+    if (!memoBounds) return [0, 0];
+
+    // Convert date strings to timestamps using the controller
+    let startTimestamp = memoBounds.min;
+    let endTimestamp = memoBounds.max;
+
+    if (memoDateValue.start) {
+      try {
+        // Parse the date string back to timestamp
+        const parsedStart = new Date(memoDateValue.start).getTime();
+        if (!Number.isNaN(parsedStart)) {
+          startTimestamp = parsedStart;
+        }
+      } catch (err) {
+        logger.logWarning('Failed to parse start date:', err);
+      }
+    }
+
+    if (memoDateValue.end) {
+      try {
+        const parsedEnd = new Date(memoDateValue.end).getTime();
+        if (!Number.isNaN(parsedEnd)) {
+          endTimestamp = parsedEnd;
+        }
+      } catch (err) {
+        logger.logWarning('Failed to parse end date:', err);
+      }
+    }
+
+    return [startTimestamp, endTimestamp];
+  }, [memoDateValue, memoBounds]);
+
+  /**
+   * Handles when the slider value changes.
+   */
+  const handleSliderChange = useCallback(
+    (newValue: number | number[]): void => {
+      if (Array.isArray(newValue) && newValue.length === 2) {
+        // Convert timestamps to YYYY-MM-DD strings using the controller
+        onChange({
+          start: controller.formatDateForFilter(newValue[0]),
+          end: controller.formatDateForFilter(newValue[1]),
+        });
+      }
     },
-    [memoDateValue, onChange]
+    [controller, onChange]
   );
 
   /**
-   * Handles when the date range end value changes.
+   * Formats the slider timestamp value for display in the tooltip.
    */
-  const handleDateEndChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>): void => {
-      onChange({
-        ...memoDateValue,
-        end: event.target.value || null,
-      });
+  const formatValue = useCallback(
+    (timestamp: number): string => {
+      return controller.formatDateForDisplay(timestamp);
     },
-    [memoDateValue, onChange]
+    [controller]
   );
 
+  if (loading) {
+    return (
+      <Box sx={memoSxClasses.filterControl}>
+        <Typography variant="body2" sx={memoSxClasses.filterLabel}>
+          {attribute.displayLabel}
+        </Typography>
+        <Typography variant="body2" sx={memoSxClasses.filterLoading}>
+          Loading values...
+        </Typography>
+      </Box>
+    );
+  }
+
+  if (!memoBounds) {
+    return (
+      <Box sx={memoSxClasses.filterControl}>
+        <Typography variant="body2" sx={memoSxClasses.filterLabel}>
+          {attribute.displayLabel}
+        </Typography>
+        <Typography variant="body2" sx={memoSxClasses.filterLoading}>
+          No date values available
+        </Typography>
+      </Box>
+    );
+  }
+
   return (
-    <Box sx={sxClasses.filterControl}>
-      <label style={sxClasses.filterLabel as React.CSSProperties}>{attribute.displayLabel}</label>
-      <Box sx={sxClasses.filterRange}>
-        <input
-          type="date"
-          style={{ ...(sxClasses.filterInput as React.CSSProperties), ...(sxClasses.filterInputSmall as React.CSSProperties) }}
-          value={memoDateValue.start || ''}
-          onChange={handleDateStartChange}
-        />
-        <span style={sxClasses.filterRangeSeparator as React.CSSProperties}>to</span>
-        <input
-          type="date"
-          style={{ ...(sxClasses.filterInput as React.CSSProperties), ...(sxClasses.filterInputSmall as React.CSSProperties) }}
-          value={memoDateValue.end || ''}
-          onChange={handleDateEndChange}
+    <Box sx={memoSxClasses.filterControl}>
+      <Typography variant="body2" sx={memoSxClasses.filterLabel}>
+        {attribute.displayLabel}
+      </Typography>
+
+      <Box sx={memoSxClasses.filterSliderContainer}>
+        <Slider
+          value={memoSliderValue}
+          onChange={handleSliderChange}
+          valueLabelDisplay="auto"
+          valueLabelFormat={formatValue}
+          min={memoBounds.min}
+          max={memoBounds.max}
         />
       </Box>
+
+      <Box sx={memoSxClasses.filterRangeValues}>
+        <span>{formatValue(memoSliderValue[0])}</span>
+        <span>{formatValue(memoSliderValue[1])}</span>
+      </Box>
+
+      <Typography variant="caption" sx={memoSxClasses.filterDateInfo}>
+        Available: {memoBounds.minDate} to {memoBounds.maxDate}
+      </Typography>
     </Box>
   );
 }
