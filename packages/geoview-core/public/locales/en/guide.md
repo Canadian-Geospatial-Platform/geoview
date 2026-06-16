@@ -352,7 +352,6 @@ Click the **Download** button at the bottom of the dialog to generate and downlo
 
 # Footer Bar
 
-<a id="footerSection"></a>
 The _Footer Bar_ appears below the map. The _Footer Bar_ can be expanded or collapsed by clicking on a tab in the _Footer Bar_ menu bar. To collapse the panel, simply click again on the active tab.
 
 **To switch between the map and the footer section, click on the Map Information Bar to bring the map into view, or click on the Footer Bar to display its content.**
@@ -373,9 +372,7 @@ _Note: Some tabs in the Footer Bar are also available as tools in the Side Bar, 
 
 =2!legend=
 
-<a id="legendSection"></a>
-
-## <img src="{{assetsURL}}/img/guide/sidebar/legend.svg" alt="Legend icon" /> Legend <a href="#footerSection">Top</a>
+## <img src="{{assetsURL}}/img/guide/sidebar/legend.svg" alt="Legend icon" /> Legend <a id="legendSection" href="#footer-bar" data-guide-nav="top">Top</a>
 
 The **Legend** tab displays the symbology associated with the layers displayed on the map.
 
@@ -399,9 +396,7 @@ _Note: When the layer is hidden, functions affecting the layer on the map will b
 
 =2!layers=
 
-<a id="layersSection"></a>
-
-## <img src="{{assetsURL}}/img/guide/footer/layers_30.svg" alt="Layers icon" /> Layers <a href="#footerSection">Top</a>
+## <img src="{{assetsURL}}/img/guide/footer/layers_30.svg" alt="Layers icon" /> Layers <a id="layersSection" href="#footer-bar" data-guide-nav="top">Top</a>
 
 The **Layers** tab has the following display state:
 
@@ -591,9 +586,7 @@ The viewer will automatically switch to the default view.
 
 =2!details=
 
-<a id="detailsSection"></a>
-
-## <img src="{{assetsURL}}/img/guide/sidebar/details_30.svg" alt="Details icon" /> Details <a href="#footerSection">Top</a>
+## <img src="{{assetsURL}}/img/guide/sidebar/details_30.svg" alt="Details icon" /> Details <a id="detailsSection" href="#footer-bar" data-guide-nav="top">Top</a>
 
 _**Note: A feature on the map must be selected to enable the layer in the list. Otherwise layers are disabled (greyed out).**_
 
@@ -640,9 +633,7 @@ When coordinate info is enabled, it will appear as the first element in the laye
 
 =2!dataTable=
 
-<a id="dataTableSection"></a>
-
-## <img src="{{assetsURL}}/img/guide/footer/data_table.svg" alt="Data Table icon" /> Data Table <a href="#footerSection">Top</a>
+## <img src="{{assetsURL}}/img/guide/footer/data_table.svg" alt="Data Table icon" /> Data Table <a id="dataTableSection" href="#footer-bar" data-guide-nav="top">Top</a>
 
 _**Note: Click on a layer to display its Data Table information in the right section.**_
 
@@ -732,9 +723,7 @@ To access the buttons and/or input fields within a cell, make sure the cell is h
 
 =2!timeSlider=
 
-<a id="timeSliderSection"></a>
-
-## <img src="{{assetsURL}}/img/guide/footer/time_slider_30.svg" alt="Time Slider icon" /> Time Slider <a href="#footerSection">Top</a>
+## <img src="{{assetsURL}}/img/guide/footer/time_slider_30.svg" alt="Time Slider icon" /> Time Slider <a id="timeSliderSection" href="#footer-bar" data-guide-nav="top">Top</a>
 
 _**Note: Click on a layer to display its Time Slider information in the right section.**_
 
@@ -759,9 +748,7 @@ The field being filtered on is displayed in the lower left of the Time Slider se
 
 =2!chart=
 
-<a id="chartSection"></a>
-
-## <img src="{{assetsURL}}/img/guide/footer/chart_30.svg" alt="Chart icon" /> Chart <a href="#footerSection">Top</a>
+## <img src="{{assetsURL}}/img/guide/footer/chart_30.svg" alt="Chart icon" /> Chart <a id="chartSection" href="#footer-bar" data-guide-nav="top">Top</a>
 
 _**Note: A feature on the map must be selected to enable the layer in the list. Otherwise layers are disabled (greyed out).**_
 

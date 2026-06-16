@@ -10,6 +10,7 @@ import Markdown from 'markdown-to-jsx';
 
 import { Box, FullscreenIcon, ButtonGroup, Button, Typography, IconButton } from '@/ui';
 import { FocusTrap } from '@/ui';
+import type { SxStyles } from '@/ui/style/types';
 
 import { ResponsiveGrid } from './responsive-grid';
 import { getSxClasses } from './responsive-grid-layout-style';
@@ -73,9 +74,9 @@ interface ResponsiveGridLayoutExposedMethods {
 const MODAL_ELEMENT_IDS = ['layerDataTable', 'featureDetailDataTable'] as const;
 
 /**
- * Two-panel responsive grid layout with guide, enlarge, and fullscreen support.
+ * Creates the two-panel responsive grid layout with guide, enlarge, and fullscreen support.
  *
- * @param props - ResponsiveGridLayout properties
+ * @param props - Properties defined in ResponsiveGridLayoutProps interface
  * @param ref - Ref exposing panel visibility and focus methods
  * @returns The responsive grid layout element
  */
@@ -98,7 +99,7 @@ const ResponsiveGridLayout = forwardRef(
       toggleMode = false,
     }: ResponsiveGridLayoutProps,
     ref: Ref<ResponsiveGridLayoutExposedMethods>
-  ) => {
+  ): JSX.Element => {
     logger.logTraceRender('components/common/responsive-grid-layout forwardRef');
 
     // Hooks
@@ -152,13 +153,13 @@ const ResponsiveGridLayout = forwardRef(
     }, [isRightPanelVisible, onRightPanelVisibilityChanged]);
 
     /** Memoized sx class definitions for the responsive layout. */
-    const memoSxClasses = useMemo(() => {
+    const memoSxClasses = useMemo((): SxStyles => {
       logger.logTraceUseMemo('RESPONSIVE-GRID-LAYOUT - memoSxClasses', theme);
       return getSxClasses(theme);
     }, [theme]);
 
     /** Memoized sx class definitions for the guide panel. */
-    const memoGuideSxClasses = useMemo(() => {
+    const memoGuideSxClasses = useMemo((): SxStyles => {
       logger.logTraceUseMemo('RESPONSIVE-GRID-LAYOUT - memoGuideSxClasses', theme);
       return getGuideSxClasses(theme);
     }, [theme]);
@@ -170,7 +171,7 @@ const ResponsiveGridLayout = forwardRef(
     const rightTopSxProps = { zIndex: isFullScreen ? 'unset' : 100, alignContent: 'flex-end' };
 
     /** Memoized sx for the right-top content box layout. */
-    const memoRightTopContentSx = useMemo(() => {
+    const memoRightTopContentSx = useMemo((): SxProps => {
       logger.logTraceUseMemo('RESPONSIVE-GRID-LAYOUT - memoRightTopContentSx', containerType, theme.breakpoints);
 
       return {
@@ -267,7 +268,7 @@ const ResponsiveGridLayout = forwardRef(
      * we want to prevent this behavior to avoid conflicts with their own focus management and ESC handling.
      */
     const handleEscapeKeyCallback = useCallback((): void => {
-      // Don't close sub panel if guide is open - let the guide handle its own ESC
+      // Don't close sub panel if guide is open - guide must close first
       if (isGuideOpen) {
         return;
       }
@@ -421,22 +422,27 @@ const ResponsiveGridLayout = forwardRef(
       (event: React.KeyboardEvent<HTMLDivElement>): void => {
         // Only handle ESC when not in fullscreen (fullscreen dialog handles its own ESC)
         if (event.key === 'Escape' && !isFullScreen) {
-          // Don't handle if guide is open - let guide handle it
-          if (!isGuideOpen) {
-            // Only trap ESC when the right panel can actually be closed via keyboard
-            if (isFocusTrap && hasContent) {
-              event.stopPropagation();
-              event.preventDefault();
-              handleEscapeKeyCallback();
-            }
-            // Otherwise, let ESC bubble up to parent handlers (e.g., main panel close)
+          // If guide is open, close guide first (handles ESC from outside guide container, like toolbar buttons)
+          if (isGuideOpen) {
+            event.stopPropagation();
+            event.preventDefault();
+            handleCloseGuide();
+            return;
+          }
+
+          // Guide is closed - handle sub-panel close.
+          // Keep this guard for keyboard event suppression; callback also guards actual close behavior.
+          if (isFocusTrap && hasContent) {
+            event.stopPropagation();
+            event.preventDefault();
+            handleEscapeKeyCallback();
           }
         }
       },
-      [isFullScreen, isGuideOpen, isFocusTrap, hasContent, handleEscapeKeyCallback]
+      [isFullScreen, isGuideOpen, isFocusTrap, hasContent, handleEscapeKeyCallback, handleCloseGuide]
     );
 
-    // #endregion
+    // #endregion Handlers
 
     // If we're on mobile
     // TODO: CHECK - theme.breakpoints.down('md') returns a CSS media query string which is always truthy
@@ -609,9 +615,8 @@ const ResponsiveGridLayout = forwardRef(
         .filter((item) => item !== undefined)
         // Use \n\n (blank line) so markdown-to-jsx treats each section as a new block
         .join('\n\n')
-        // Remove Top/Haut anchor links when rendering individual sections in tabs
-        .replace(/<a href="[^"]*">(Top|Haut de page)<\/a>/g, '');
-
+        // Remove back-to-top guide navigation links when rendering individual sections
+        .replace(/<a[^>]*data-guide-nav="top"[^>]*>.*?<\/a>/g, '');
       if (!content) return null;
 
       return (

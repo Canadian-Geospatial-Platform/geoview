@@ -1,5 +1,5 @@
 import type { KeyboardEvent } from 'react';
-import { useRef, useEffect, useMemo } from 'react';
+import { useRef, useEffect, useMemo, useCallback } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -24,6 +24,9 @@ import { logger } from '@/core/utils/logger';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 
+/** Extra milliseconds added to transition duration to ensure CSS transitions fully complete before callbacks fire. */
+const TRANSITION_BUFFER_MS = 50;
+
 /** Interface for panel properties. */
 export type TypePanelAppProps = {
   panel: TypePanelProps;
@@ -40,13 +43,13 @@ export type TypePanelAppProps = {
 };
 
 /**
- * Material-UI Panel component for displaying collapsible content with header and close button.
+ * Creates the Material-UI Panel component for displaying collapsible content with header and close button.
  *
  * Wraps card components with title, close button, and animated slide-in transitions.
  * Manages focus trapping and accessibility attributes for modal-like behavior when needed.
  * Content can be HTML strings or React elements.
  *
- * @param props - Panel configuration (see TypePanelAppProps interface)
+ * @param props - Properties defined in TypePanelAppProps interface
  * @returns Panel component with slide animation and focus management
  *
  * @example
@@ -85,6 +88,42 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
   const mapId = useStoreGeoViewMapId();
   const activeTrapGeoView = useStoreUIActiveTrapGeoView();
 
+  /**
+   * Creates a cancellable delay for panel transitions.
+   *
+   * @param callback - Function to execute after the transition delay (can be sync or async)
+   * @param context - Context string for error logging ('open' or 'close')
+   * @returns The delay job that can be cancelled
+   */
+  const createTransitionDelay = useCallback(
+    (callback: () => void | Promise<void>, context: 'open' | 'close'): ReturnType<typeof doTimeout> => {
+      const delay = doTimeout(theme.transitions.duration.standard + TRANSITION_BUFFER_MS);
+
+      delay.promise
+        .then((result) => {
+          if (result === 'timeout') {
+            // Defer callback execution to microtask to catch both sync throws and async rejections
+            Promise.resolve()
+              .then(() => callback())
+              .catch((error) => {
+                logger.logError(`Panel ${context} callback threw an error:`, error);
+              });
+          }
+        })
+        .catch((error) => {
+          // This catches promise rejections only (not callback exceptions)
+          logger.logError(`Panel ${context} transition delay rejected unexpectedly:`, error);
+        });
+
+      return delay;
+    },
+    [theme.transitions.duration.standard]
+  );
+
+  /**
+   * Manages panel open/close transitions and focus behavior after CSS transitions complete.
+   */
+
   useEffect(() => {
     logger.logTraceUseEffect('UI.PANEL - open');
 
@@ -95,41 +134,20 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
     let delayJob: ReturnType<typeof doTimeout> | undefined = undefined;
 
     if (open) {
-      // Wait the transition period (+50 ms just to be sure of shenanigans)
-      delayJob = doTimeout(theme.transitions.duration.standard + 50);
-
-      delayJob.promise
-        .then((result) => {
-          // Only proceed if delay completed normally (not cancelled)
-          if (result === 'timeout') {
-            // Focus close button only on user-triggered open (!prevOpen), not initial render.
-            // This prevents focus hijacking with configurations that have an appBar panel open by default,
-            // preserving the host page's natural tab order until GeoView is interacted with.
-            // Focus happens after transition to ensure the button ref is set.
-            if (!prevOpen && closeBtnRef?.current) {
-              closeBtnRef.current.focus();
-            }
-            onOpen?.();
-          }
-        })
-        .catch((error) => {
-          // Unexpected promise rejection (normal cancellation resolves, not rejects)
-          logger.logError('Panel open transition delay rejected unexpectedly:', error);
-        });
+      delayJob = createTransitionDelay(() => {
+        // Focus close button only on user-triggered open (!prevOpen), not initial render.
+        // This prevents focus hijacking with configurations that have an appBar panel open by default,
+        // preserving the host page's natural tab order until GeoView is interacted with.
+        // Focus happens after transition to ensure the button ref is set.
+        if (!prevOpen && closeBtnRef?.current) {
+          closeBtnRef.current.focus();
+        }
+        onOpen?.();
+      }, 'open');
     } else {
-      // Wait the transition period (+50 ms just to be sure of shenanigans)
-      delayJob = doTimeout(theme.transitions.duration.standard + 50);
-
-      delayJob.promise
-        .then((result) => {
-          if (result === 'timeout') {
-            onClose?.();
-          }
-        })
-        .catch((error) => {
-          // Unexpected promise rejection (normal cancellation resolves, not rejects)
-          logger.logError('Panel close transition delay rejected unexpectedly:', error);
-        });
+      delayJob = createTransitionDelay(() => {
+        onClose?.();
+      }, 'close');
     }
 
     // Cleanup: cancel pending delay when effect re-runs or component unmounts
@@ -138,7 +156,7 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
         delayJob.cancel();
       }
     };
-  }, [open, theme.transitions.duration.standard, onOpen, onClose]);
+  }, [open, createTransitionDelay, onOpen, onClose]);
 
   return (
     <Box

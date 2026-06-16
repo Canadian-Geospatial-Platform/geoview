@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { memo, useState, useMemo, useCallback, useEffect } from 'react';
+import { memo, useState, useRef, useMemo, useCallback, useEffect } from 'react';
 
 import { renderToStaticMarkup } from 'react-dom/server';
 
@@ -13,9 +13,10 @@ import { Box } from '@/ui';
 import type { LayerListEntry } from '@/core/components/common';
 import { Layout } from '@/core/components/common';
 import type { TypeContainerBox } from '@/core/types/global-types';
+import type { TypeGuideObject } from '@/core/stores/states/app-state';
 import { useStoreAppGuide } from '@/core/stores/states/app-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
-import { TABS } from '@/core/utils/constant';
+import { TABS, TIMEOUT } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
 import { getSxClasses } from './guide-style';
 import { GuideSearch } from './guide-search';
@@ -32,6 +33,9 @@ interface GuideType {
   /** The container box type for layout. */
   containerType: TypeContainerBox;
 }
+
+/** Individual guide item type (value of TypeGuideObject). */
+type GuideItem = TypeGuideObject[string];
 
 /**
  * Creates the guide component to display help content.
@@ -62,8 +66,17 @@ export const Guide = memo(function GuidePanel({ containerType }: GuideType): JSX
   const [highlightFunction, setHighlightFunction] = useState<(content: string, sectionIndex: number) => string>(
     () => (content: string) => content
   );
+  const [isFullScreen, setIsFullScreen] = useState(false);
 
-  // Callbacks & Memoize values
+  // Refs
+  const rootRef = useRef<HTMLDivElement>(null);
+  /** Tracks pending RAF for scroll reset to enable cleanup. */
+  const rafIdRef = useRef<number | undefined>(undefined);
+  /** Tracks pending focus timeout to enable cleanup. */
+  const focusTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  // #region Handlers
+
   /**
    * Handles search state changes from GuideSearch component.
    */
@@ -86,31 +99,43 @@ export const Guide = memo(function GuidePanel({ containerType }: GuideType): JSX
   );
 
   /**
+   * Concatenates guide content with all nested child and grandchild content.
+   *
+   * Uses \n\n (blank line) separators so markdown-to-jsx treats each section as a new block.
+   * A single \n after a list item causes the following heading to be parsed as a lazy
+   * continuation line inside the <li>.
+   *
+   * @param guideItem - The guide item to concatenate
+   * @returns The concatenated content string
+   */
+  const concatenateGuideContent = useCallback((guideItem: GuideItem): string => {
+    let { content } = guideItem;
+
+    if (guideItem.children) {
+      Object.entries(guideItem.children).forEach(([, child]: [string, GuideItem]) => {
+        content += `\n\n${child.content}`;
+
+        if (child.children) {
+          Object.values(child.children).forEach((grandChild: GuideItem) => {
+            content += `\n\n${grandChild.content}`;
+          });
+        }
+      });
+    }
+
+    return content;
+  }, []);
+
+  /**
    * Builds the memoized layer list with markdown content.
    */
   const memoLayersList = useMemo((): GuideListItem[] => {
-    logger.logTraceUseMemo('GUIDE - memoLayersList', guide, mapId, createMarkdownComponent, containerType);
+    logger.logTraceUseMemo('GUIDE - memoLayersList', guide, mapId, containerType);
 
     if (!guide) return [];
 
     return Object.keys(guide).map((item: string) => {
-      let { content } = guide[item];
-
-      // Appends the subsection content to the section content
-      // Use \n\n (blank line) so markdown-to-jsx treats the next section as a new block.
-      // A single \n after a list item causes the following heading to be parsed as a lazy continuation line inside the <li>.
-      if (guide[item].children) {
-        Object.entries(guide[item].children).forEach(([, child]) => {
-          content += `\n\n${child.content}`;
-
-          // Appends sub subsection content
-          if (child.children) {
-            Object.values(child.children).forEach((grandChild) => {
-              content += `\n\n${grandChild.content}`;
-            });
-          }
-        });
-      }
+      const content = concatenateGuideContent(guide[item]);
 
       return {
         layerName: guide[item].heading,
@@ -121,7 +146,7 @@ export const Guide = memo(function GuidePanel({ containerType }: GuideType): JSX
         layerUniqueId: `${mapId}-${containerType}-${TABS.GUIDE}-${item ?? ''}`,
       };
     });
-  }, [guide, mapId, createMarkdownComponent, containerType]);
+  }, [guide, mapId, containerType, concatenateGuideContent, createMarkdownComponent]);
 
   /**
    * Handles section change from GuideSearch component.
@@ -148,21 +173,7 @@ export const Guide = memo(function GuidePanel({ containerType }: GuideType): JSX
     const currentGuideKey = Object.keys(guide)[guideItemIndex];
     if (!currentGuideKey) return currentItem.content;
 
-    let { content } = guide[currentGuideKey];
-
-    // Append subsection content
-    // Use \n\n (blank line) so markdown-to-jsx treats the next section as a new block.
-    // A single \n after a list item causes the following heading to be parsed as a lazy continuation line inside the <li>.
-    if (guide[currentGuideKey].children) {
-      Object.entries(guide[currentGuideKey].children).forEach(([, child]) => {
-        content += `\n\n${child.content}`;
-        if (child.children) {
-          Object.values(child.children).forEach((grandChild) => {
-            content += `\n\n${grandChild.content}`;
-          });
-        }
-      });
-    }
+    const content = concatenateGuideContent(guide[currentGuideKey]);
 
     // Convert markdown to HTML React elements
     const markdownElement = <Markdown>{content}</Markdown>;
@@ -180,7 +191,7 @@ export const Guide = memo(function GuidePanel({ containerType }: GuideType): JSX
     // 4. No user-generated content is involved in this process
     // eslint-disable-next-line react/no-danger
     return <article dangerouslySetInnerHTML={{ __html: highlightedHTML }} />;
-  }, [memoLayersList, guideItemIndex, guide, highlightFunction]);
+  }, [memoLayersList, guideItemIndex, guide, highlightFunction, concatenateGuideContent]);
 
   /**
    * Handles guide layer list item click.
@@ -197,22 +208,45 @@ export const Guide = memo(function GuidePanel({ containerType }: GuideType): JSX
   );
 
   /**
+   * Handles fullscreen state changes from the Layout component.
+   */
+  const handleFullScreenChanged = useCallback((fullScreen: boolean): void => {
+    setIsFullScreen(fullScreen);
+  }, []);
+
+  // #endregion Handlers
+
+  /**
    * Resets scroll position and handles anchor link navigation when content changes.
    */
   useEffect(() => {
-    logger.logTraceUseEffect('GUIDE - anchor link navigation and scroll reset', selectedLayerPath, guideItemIndex);
+    logger.logTraceUseEffect('GUIDE - anchor link navigation and scroll reset', selectedLayerPath, guideItemIndex, isFullScreen);
 
-    const container = document.querySelector('.guidebox-container')!.parentElement;
+    // Find the guidebox-container (scoped when not fullscreen, global when fullscreen due to Portal)
+    const guideboxContainer = isFullScreen
+      ? document.querySelector(`.guidebox-container[data-map-id="${mapId}"]`)
+      : rootRef.current?.querySelector('.guidebox-container');
 
-    // Reset scroll position when content changes - use requestAnimationFrame to ensure DOM is ready
-    if (container) {
-      requestAnimationFrame(() => {
-        container.scrollTo({
-          top: 0,
-          behavior: 'instant',
-        });
-      });
+    if (!guideboxContainer) {
+      return;
     }
+
+    // Find the scrollable container by walking up from guidebox-container
+    const container = isFullScreen
+      ? guideboxContainer.closest('.MuiDialogContent-root') // Walk up to Dialog content
+      : guideboxContainer.parentElement; // Just get parent
+
+    if (!container) {
+      return;
+    }
+
+    // Reset scroll position when content changes
+    rafIdRef.current = requestAnimationFrame(() => {
+      container.scrollTo({
+        top: 0,
+        behavior: 'instant',
+      });
+    });
 
     const handleClick = (e: Event): void => {
       const target = e.target as HTMLAnchorElement;
@@ -220,8 +254,14 @@ export const Guide = memo(function GuidePanel({ containerType }: GuideType): JSX
         e.preventDefault();
         e.stopPropagation();
 
-        const element = container?.querySelector(target.hash);
-        if (element && container) {
+        const element = container.querySelector(target.hash);
+
+        if (element) {
+          // Add tabindex="-1" if the element doesn't have one
+          if (!element.hasAttribute('tabindex')) {
+            element.setAttribute('tabindex', '-1');
+          }
+
           const elementPosition = element.getBoundingClientRect().top;
           const containerPosition = container.getBoundingClientRect().top;
           const scrollPosition = elementPosition - containerPosition + container.scrollTop;
@@ -230,26 +270,44 @@ export const Guide = memo(function GuidePanel({ containerType }: GuideType): JSX
             top: scrollPosition,
             behavior: 'smooth',
           });
+
+          // Clear any existing timeout before scheduling a new one
+          if (focusTimeoutRef.current !== undefined) {
+            clearTimeout(focusTimeoutRef.current);
+          }
+
+          // Set focus on the target element after scrolling
+          focusTimeoutRef.current = setTimeout(() => {
+            (element as HTMLElement).focus({ preventScroll: true });
+          }, TIMEOUT.guideAnchorFocus);
         }
       }
     };
 
-    container?.addEventListener('click', handleClick);
+    container.addEventListener('click', handleClick);
 
-    // Cleanup function to remove the event listener
+    // Cleanup function to remove the event listener and cancel pending async operations
     return () => {
-      container?.removeEventListener('click', handleClick);
+      container.removeEventListener('click', handleClick);
+      if (rafIdRef.current !== undefined) {
+        cancelAnimationFrame(rafIdRef.current);
+      }
+      if (focusTimeoutRef.current !== undefined) {
+        clearTimeout(focusTimeoutRef.current);
+      }
     };
-  }, [selectedLayerPath, guideItemIndex]);
+    // Note: selectedLayerPath and guideItemIndex are trigger tokens — their identity change drives scroll reset even though values aren't consumed
+  }, [selectedLayerPath, guideItemIndex, isFullScreen, mapId]);
 
   const ariaLabel = t('guide.title');
   return (
-    <Box sx={memoSxClasses.guideContainer}>
+    <Box ref={rootRef} sx={memoSxClasses.guideContainer}>
       <Box sx={{ flex: 1, minHeight: 0 }}>
         <Layout
           containerType={containerType}
           titleFullscreen={t('guide.title')}
           selectedLayerPath={selectedLayerPath}
+          onFullScreenChanged={handleFullScreenChanged}
           layoutSwitch={
             <GuideSearch
               containerType={containerType}
@@ -262,7 +320,7 @@ export const Guide = memo(function GuidePanel({ containerType }: GuideType): JSX
           onLayerListClicked={handleGuideItemClick}
           aria-label={ariaLabel}
         >
-          <Box sx={memoSxClasses.rightPanelContainer} className="guidebox-container">
+          <Box sx={memoSxClasses.rightPanelContainer} className="guidebox-container" data-map-id={mapId}>
             <Box className="guideBox">{memoCurrentGuideContent}</Box>
           </Box>
         </Layout>
