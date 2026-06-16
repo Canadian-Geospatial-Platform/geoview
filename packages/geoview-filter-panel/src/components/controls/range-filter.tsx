@@ -1,6 +1,8 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { logger } from 'geoview-core/core/utils/logger';
 
+import { useTranslation } from 'geoview-core/core/translation/i18n';
+
 import type { TypeFilterAttribute, TypeFilterValue, TypeRangeValue } from '../../types';
 import { getSxClasses } from './control-styles';
 
@@ -40,6 +42,7 @@ export function RangeFilter(props: RangeFilterProps): JSX.Element {
 
   const theme = ui.useTheme();
   const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const { t } = useTranslation<string>();
 
   /**
    * Memoized range value to prevent dependency changes on every render.
@@ -111,7 +114,7 @@ export function RangeFilter(props: RangeFilterProps): JSX.Element {
           {attribute.displayLabel}
         </Typography>
         <Typography variant="body2" sx={memoSxClasses.filterLoading}>
-          Loading values...
+          {t('FilterPanel.loadingValues')}
         </Typography>
       </Box>
     );
@@ -124,7 +127,7 @@ export function RangeFilter(props: RangeFilterProps): JSX.Element {
           {attribute.displayLabel}
         </Typography>
         <Typography variant="body2" sx={memoSxClasses.filterLoading}>
-          No numeric values available
+          {t('FilterPanel.noNumericValuesAvailable')}
         </Typography>
       </Box>
     );
@@ -140,7 +143,7 @@ export function RangeFilter(props: RangeFilterProps): JSX.Element {
         <Slider
           value={memoSliderValue}
           onChange={handleSliderChange}
-          valueLabelDisplay="auto"
+          valueLabelDisplay={'off'}
           valueLabelFormat={formatValue}
           min={memoBounds.min}
           max={memoBounds.max}
