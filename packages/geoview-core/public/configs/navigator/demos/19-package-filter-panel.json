@@ -26,6 +26,17 @@
             "layerId": "0"
           }
         ]
+      },
+      {
+        "geoviewLayerId": "historical-flood",
+        "geoviewLayerName": "Historical Flood Events (HFE)",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer",
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0"
+          }
+        ]
       }
     ]
   },
@@ -63,7 +74,38 @@
               {
                 "fieldName": "commodity_group_en",
                 "displayLabel": "Commodity Group",
+                "filterType": "select",
+                "enabled": true
+              },
+              {
+                "fieldName": "longitude",
+                "displayLabel": "Longitude",
+                "filterType": "range",
+                "enabled": true
+              }
+            ]
+          },
+          {
+            "layerPath": "historical-flood/0",
+            "layerName": "Historical Flood Events (HFE)",
+            "enabled": true,
+            "attributes": [
+              {
+                "fieldName": "flood_cause",
+                "displayLabel": "Flood Cause",
+                "filterType": "select",
+                "enabled": true
+              },
+              {
+                "fieldName": "season",
+                "displayLabel": "Season",
                 "filterType": "multiselect",
+                "enabled": true
+              },
+              {
+                "fieldName": "start_date",
+                "displayLabel": "Start Date",
+                "filterType": "date",
                 "enabled": true
               }
             ]
