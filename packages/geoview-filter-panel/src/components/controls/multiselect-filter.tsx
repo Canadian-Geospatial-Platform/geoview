@@ -1,10 +1,8 @@
-import { useCallback } from 'react';
-
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { logger } from 'geoview-core/core/utils/logger';
 
-import type { SxStyles } from 'geoview-core/ui/style/types';
 import type { TypeFilterAttribute, TypeFilterValue } from '../../types';
+import { getSxClasses } from './control-styles';
 
 /**
  * Props for MultiselectFilter component.
@@ -20,8 +18,6 @@ interface MultiselectFilterProps {
   uniqueValues: (string | number)[];
   /** Whether data is loading. */
   loading: boolean;
-  /** Style classes. */
-  sxClasses: SxStyles;
 }
 
 /**
@@ -34,12 +30,16 @@ export function MultiselectFilter(props: MultiselectFilterProps): JSX.Element {
   // Log
   logger.logTraceRender('geoview-filter-panel/components/multiselect-filter');
 
-  const { attribute, value, onChange, uniqueValues, loading, sxClasses } = props;
+  const { attribute, value, onChange, uniqueValues, loading } = props;
 
   // Access UI components via window.cgpv pattern
   const { cgpv } = window as TypeWindow;
+  const { useCallback, useMemo } = cgpv.reactUtilities.react;
   const { ui } = cgpv;
-  const { Box } = ui.elements;
+  const { Box, Checkbox, FormControlLabel, Typography } = ui.elements;
+
+  const theme = ui.useTheme();
+  const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   /**
    * Handles when a checkbox value changes.
@@ -56,34 +56,49 @@ export function MultiselectFilter(props: MultiselectFilterProps): JSX.Element {
     [value, onChange]
   );
 
+  if (loading) {
+    return (
+      <Box sx={memoSxClasses.filterControl}>
+        <Typography variant="body2" sx={memoSxClasses.filterLabel}>
+          {attribute.displayLabel}
+        </Typography>
+        <Typography variant="body2" sx={memoSxClasses.filterLoading}>
+          Loading options...
+        </Typography>
+      </Box>
+    );
+  }
+
+  if (uniqueValues.length === 0) {
+    return (
+      <Box sx={memoSxClasses.filterControl}>
+        <Typography variant="body2" sx={memoSxClasses.filterLabel}>
+          {attribute.displayLabel}
+        </Typography>
+        <Typography variant="body2" sx={memoSxClasses.filterLoading}>
+          No values available
+        </Typography>
+      </Box>
+    );
+  }
+
   return (
-    <Box sx={sxClasses.filterControl}>
-      <label style={sxClasses.filterLabel as React.CSSProperties}>{attribute.displayLabel}</label>
-      <Box sx={sxClasses.filterMultiselect}>
-        {loading ? (
-          <Box sx={sxClasses.filterLoading}>Loading options...</Box>
-        ) : (
-          <Box sx={sxClasses.filterCheckboxList}>
-            {uniqueValues.length === 0 ? (
-              <Box sx={sxClasses.filterEmpty}>No values available</Box>
-            ) : (
-              uniqueValues.map((val) => {
-                const isSelected = Array.isArray(value) && value.includes(val);
-                return (
-                  <label key={String(val)} style={sxClasses.filterCheckboxItem as React.CSSProperties}>
-                    <input
-                      type="checkbox"
-                      style={sxClasses.filterCheckboxInput as React.CSSProperties}
-                      checked={isSelected}
-                      onChange={(e) => handleCheckboxChange(val, e.target.checked)}
-                    />
-                    <span style={sxClasses.filterCheckboxLabel as React.CSSProperties}>{val !== null ? String(val) : '(null)'}</span>
-                  </label>
-                );
-              })
-            )}
-          </Box>
-        )}
+    <Box sx={memoSxClasses.filterControl}>
+      <Typography variant="body2" sx={memoSxClasses.filterLabel}>
+        {attribute.displayLabel}
+      </Typography>
+      <Box sx={memoSxClasses.filterMultiselectContainer}>
+        {uniqueValues.map((val) => {
+          const isSelected = Array.isArray(value) && value.includes(val);
+          return (
+            <FormControlLabel
+              key={String(val)}
+              control={<Checkbox checked={isSelected} onChange={(e) => handleCheckboxChange(val, e.target.checked)} size="small" />}
+              label={val !== null ? String(val) : '(null)'}
+              sx={memoSxClasses.filterCheckboxItem}
+            />
+          );
+        })}
       </Box>
     </Box>
   );
