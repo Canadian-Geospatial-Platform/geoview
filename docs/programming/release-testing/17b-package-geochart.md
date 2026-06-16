@@ -1,4 +1,4 @@
-# 17 — Geochart
+# 17b — Geochart
 
 Geochart plugin for chart visualizations.
 
@@ -15,6 +15,8 @@ Config: `configs/navigator/demos/13-package-geochart.json`
 - [ ] **Click feature → chart** — Click on a feature on the map. Verify the geochart updates to show data for that feature.
 - [ ] **Slider** — If the chart has a time/data slider, drag it. Verify the chart updates.
 - [ ] **Stepper** — If the chart has a stepper control, step through values. Verify the chart updates for each step.
+- [ ] **Download chart** — Click the download button. Verify the chart is exported as an image file.
+- [ ] **Lock chart** — Click the lock button. Verify the chart stays fixed on the current feature even when clicking other features on the map. Unlock and verify it resumes updating on feature click.
 
 ## Geochart with CDTK
 
@@ -29,13 +31,3 @@ Config: `configs/navigator/demos/13-package-geochart-cdtk.json`
 ## Geocore Auto-Creation
 
 - [ ] **Geocore with geochart** — Load a geocore UUID config that includes geochart metadata. Verify the geochart auto-creates for the layer.
-
-## Hidden Tabs (WCAG)
-
-- [ ] **WCAG demo config** — Load the WCAG demo config. Verify that the time-slider and chart tabs are present in the footer bar (not hidden).
-
----
-
-## Issues Found
-
-<!-- Record any issues below -->

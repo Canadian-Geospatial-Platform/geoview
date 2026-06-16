@@ -33,9 +33,3 @@ Config: `configs/navigator/layers/esri-dynamic-projections.json` (WM with overvi
 Config: `configs/navigator/layers/esri-dynamic-projections.json` (`hideOnZoom: 7`)
 
 - [ ] **Full flow** — Start in LCC, zoom to a value above 7 where overview is visible. Switch to WM. Verify overview map is visible with correct basemap. Zoom out below level 7 in WM. Verify overview hides. Switch back to LCC. Verify correct behavior.
-
----
-
-## Issues Found
-
-<!-- Record any issues below -->

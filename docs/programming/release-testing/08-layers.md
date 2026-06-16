@@ -33,6 +33,11 @@ The Layers panel has two areas: the **left layer list** (reorder, visibility, co
 - [ ] **Toggle all visibility** — Use "Toggle All" on a group with sublayers. Verify all children toggle.
 - [ ] **Toggle all with error sublayers** — Toggle all on a group that has some sublayers in error. Verify error sublayers are skipped (no crash), valid sublayers toggle correctly.
 
+### Remove Layer
+
+- [ ] **Remove layer in error** — A layer that failed to load (error status) should be removable from the left panel. Verify the layer is removed and no crash occurs.
+- [ ] **Remove layer while loading** — Remove a layer while it is still loading (circular progress visible). Verify the layer is removed cleanly without errors or leftover state.
+
 ---
 
 ## Add Layer
@@ -44,7 +49,8 @@ Demo page: `templates/demos/add-layers.html`
 Test adding each supported layer type via URL:
 
 - [ ] **Esri Dynamic** — Add an Esri Dynamic layer by URL. Verify it loads and renders.
-- [ ] **Esri Feature** — Add an Esri Feature layer by URL. Verify it loads.
+- [ ] **Esri Feature (MapServer)** — Add an Esri Feature layer using a MapServer URL. Verify it loads.
+- [ ] **Esri Feature (FeatureServer)** — Add an Esri Feature layer using a FeatureServer URL. Verify it loads.
 - [ ] **Esri Image** — Add an Esri Image layer by URL. Verify it loads.
 - [ ] **WMS** — Add a WMS layer by URL. Verify it loads.
 - [ ] **WFS** — Add a WFS layer by URL. Verify it loads.
@@ -54,10 +60,31 @@ Test adding each supported layer type via URL:
 - [ ] **GeoPackage** — Add a GeoPackage layer by URL. Verify it loads.
 - [ ] **KML** — Add a KML layer by URL. Verify it loads.
 - [ ] **XYZ Tiles** — Add an XYZ Tiles layer by URL. Verify it loads.
+- [ ] **Vector Tiles** — Add a Vector Tiles layer by URL (ArcGIS VectorTileServer). Verify it loads and Mapbox GL styles are applied.
+- [ ] **WMTS** — Add a WMTS layer by URL (OGC GetCapabilities). Verify capabilities are parsed and tiles render.
+- [ ] **Static Image** — Add a Static Image layer by URL with extent. Verify the image renders at the correct geographic location.
+- [ ] **Shapefile (ZIP)** — Add a zipped Shapefile layer by URL. Verify it loads and renders.
+- [ ] **WKB** — Add a WKB layer by URL. Verify it loads and renders.
+- [ ] **GeoTIFF** — Add a GeoTIFF layer by URL. Verify it loads and renders as a tiled raster.
+
+### Add by File Upload (Drag & Drop)
+
+Demo page: `templates/demos/add-layers.html`
+
+- [ ] **Drag GeoJSON** — Drag a `.geojson` file onto the dropzone. Verify it is accepted and the layer loads.
+- [ ] **Drag CSV** — Drag a `.csv` file (with lat/lon columns) onto the dropzone. Verify it loads.
+- [ ] **Drag KML** — Drag a `.kml` file onto the dropzone. Verify it loads.
+- [ ] **Drag GeoPackage** — Drag a `.gpkg` file onto the dropzone. Verify it loads.
+- [ ] **Drag GeoTIFF** — Drag a `.tif` file onto the dropzone. Verify it loads.
+- [ ] **Drag Shapefile ZIP** — Drag a `.zip` shapefile onto the dropzone. Verify it loads.
+- [ ] **Reject invalid file** — Drag an unsupported file (e.g., `.pdf`, `.docx`). Verify it is rejected with an error message.
+- [ ] **Browse button** — Click "Choose a File" button. Verify the file picker opens filtered to valid extensions.
 
 ### Add by Geocore UUID
 
 - [ ] **Add geocore layer** — Add a layer via geocore UUID. Verify it loads.
+- [ ] **Add geocore layer with geochart** — Add a geocore layer that has geochart config (e.g., Airborne). Verify the layer loads and the geochart shortcut becomes available.
+- [ ] **Add geocore layer with time slider** — Add a geocore layer that has time slider config (e.g., Wireless Network). Verify the layer loads and the time slider shortcut becomes available.
 - [ ] **Add duplicate UUID** — Try to add the same geocore UUID a second time. Verify it is rejected (not allowed).
 
 ### Add Layer in Different Projections
@@ -69,6 +96,11 @@ Test adding each supported layer type via URL:
 
 - [ ] **Bad URL** — Enter an invalid or unreachable URL. Verify an error message is displayed and the viewer does not crash.
 - [ ] **Unsupported format** — Try to add a URL that resolves to an unsupported format. Verify an appropriate error is shown.
+
+### Add Layer Type Detection
+
+- [ ] **Type dropdown** — Open Add Layer. Verify the layer type dropdown lists all 15+ supported types (CSV, esriDynamic, esriFeature, esriImage, GeoJSON, GeoTIFF, imageStatic, KML, xyzTiles, vectorTiles, ogcFeature, ogcWfs, WKB, ogcWms, ogcWmts).
+- [ ] **Auto-detect from URL** — Paste a known service URL (e.g., MapServer). Verify the type is auto-detected.
 
 ---
 
@@ -82,7 +114,7 @@ Test adding each supported layer type via URL:
 ### Shortcuts
 
 - [ ] **Data Table shortcut** — Click the data table shortcut. Verify the Data Table panel opens for that layer.
-- [ ] **Data Table disabled** — Config: `configs/navigator/layers/esri-dynamic.json` (layer ID "8" has `table: false`). Verify the data table shortcut has `aria-disabled`.
+- [ ] **Data Table disabled** — Config: `configs/navigator/demos/23b-initial-settings-states-controls.json` (WMS layer `OGC WFS - All controls off` has `table: false`).
 - [ ] **Geochart shortcut** — For a layer with geochart config, click the chart shortcut. Verify the Geochart panel opens for that layer.
 - [ ] **Time Slider shortcut** — For a time-aware layer, click the time slider shortcut. Verify the Time Slider panel opens for that layer.
 
@@ -100,6 +132,24 @@ Test adding each supported layer type via URL:
 - [ ] **Nested group opacity** — Set opacity on parent group, then set different opacity on child group. Verify the child is capped by the parent.
 - [ ] **Opacity reset** — Set opacity back to 100%. Verify full opacity restored.
 
+### Group Layer — Right Panel Visibility
+
+- [ ] **Select group in left panel** — Select a group layer in the left panel. Verify the right panel shows group info with its child layers listed.
+- [ ] **Toggle child visibility from right panel** — Toggle a child layer's visibility from the right panel. Verify the map and legend update accordingly.
+- [ ] **Toggle group visibility from right panel** — Toggle the group's own visibility from the right panel. Verify all children are hidden on the map (greyed out in legend).
+
+### Style Classes Visibility
+
+- [ ] **Toggle style class** — In the right panel for a layer with unique value or class breaks style, toggle visibility of individual style classes. Verify that class disappears from the map.
+- [ ] **Style class count** — Verify the legend shows the count of visible classes (e.g., "3 of 5 classes").
+- [ ] **Toggle all classes off** — Turn off all style classes. Verify no features render for that layer.
+- [ ] **Toggle all classes on** — Turn all back on. Verify features reappear.
+
+### Settings Panel Navigation
+
+- [ ] **Open settings** — Click the settings icon on a layer. Verify the right panel opens with settings.
+- [ ] **Back button** — Click back to return to the layer info.
+
 ### Hoverable / Queryable
 
 Config: `configs/navigator/demos/23b-initial-settings-states-controls.json`
@@ -115,18 +165,6 @@ Config: `configs/navigator/demos/24-configured-feature-labels.json`
 - [ ] **Labels present** — Verify text labels appear on features on the map.
 - [ ] **Toggle labels off** — Toggle text labelling off in layer settings. Verify labels disappear.
 - [ ] **Toggle labels on** — Toggle back on. Verify labels reappear.
-
-### Feature Visual Variables
-
-Config: `configs/navigator/demos/25-feature-visual-variables.json`
-
-- [ ] **Visual variables render** — Verify features render with visual variable styling (size, color, rotation varies by attribute).
-- [ ] **Legend matches** — Verify the legend reflects the visual variable classifications.
-
-### Settings Panel Navigation
-
-- [ ] **Open settings** — Click the settings icon on a layer. Verify the right panel opens with settings.
-- [ ] **Back button** — Click back to return to the layer info.
 
 ### WMS Layer Settings
 
@@ -145,8 +183,11 @@ Config: `configs/navigator/layers/esri-image.json`
 - [ ] **Change mosaic method** — Change the mosaic method (e.g., Center, Nadir, NorthWest). Verify the map updates.
 - [ ] **Change mosaic operation** — Change the mosaic operation (e.g., First, Last, Min, Max, Mean). Verify the map updates.
 
----
+### Layer Zoom Levels
 
-## Issues Found
+Config: `configs/navigator/demos/07-layer-zoom-levels.json`
 
-<!-- Record any issues below -->
+- [ ] **Layer appears at zoom** — Zoom to the configured visible range. Verify the layer appears.
+- [ ] **Layer disappears** — Zoom outside the visible range. Verify the layer disappears.
+- [ ] **`inVisibleRange` store check** — Open the store and verify `inVisibleRange` is `false` when zoomed out of range and `true` when in range.
+- [ ] **OL layer visibility** — Check `getOLLayer().isVisible()` — should be `false` out of range, `true` in range.

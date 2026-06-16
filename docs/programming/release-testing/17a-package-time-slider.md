@@ -1,4 +1,4 @@
-# 16 — Time Slider
+# 17a — Time Slider
 
 Time slider plugin for time-aware layers.
 
@@ -26,13 +26,16 @@ Config: `configs/navigator/demos/12-package-time-slider-custom.json`
 - [ ] **Play button** — Click play. Verify the slider animates through time steps.
 - [ ] **Pause button** — Click pause during animation. Verify it stops.
 - [ ] **Step forward/backward** — Use step buttons to move one time step. Verify correct increment.
+- [ ] **Reverse direction** — Toggle reverse direction. Verify the animation plays backward through time steps.
+- [ ] **Lock handles** — For dual-handle sliders, lock both handles together. Verify dragging one moves both in sync (maintaining the range width).
 - [ ] **Speed control** — If available, change animation speed. Verify the animation rate changes.
 
 ## Time Filtering
 
 - [ ] **Filter applied to map** — Move the slider. Verify the map only shows features within the selected time range.
 - [ ] **Filter applied to table** — Open the data table while time slider is active. Verify the table shows only time-filtered features.
-- [ ] **Switch filter mode** — Switch the time filtering mode (if available). Verify the filter behavior changes accordingly.
+- [ ] **Filtering toggle off** — Toggle the filter switch off. Verify the time filter is cleared and all features display regardless of the slider position.
+- [ ] **Filtering toggle on** — Toggle the filter switch back on. Verify the time filter re-applies based on the current slider position.
 
 ## Loading Status
 
@@ -47,9 +50,3 @@ Config: `configs/navigator/demos/12-package-time-slider-custom.json`
 ## Geocore Auto-Creation
 
 - [ ] **Geocore with time slider** — Load a geocore UUID config that includes time slider metadata. Verify the time slider auto-creates for the layer.
-
----
-
-## Issues Found
-
-<!-- Record any issues below -->

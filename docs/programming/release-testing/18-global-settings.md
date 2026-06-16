@@ -1,4 +1,4 @@
-# 20 — Global Settings
+# 18 — Global Settings
 
 Global settings that affect all layers and panels.
 
@@ -36,8 +36,26 @@ Config: `configs/navigator/demos/19-global-settings.json`
 
 - [ ] **Disabled types setting** — If global settings disable certain layer types, verify those types cannot be added via Add Layer UI.
 
----
+## Theme
 
-## Issues Found
+Theme is set via config property `"theme"`: `"geo.ca"` (default), `"light"`, or `"dark"`.
 
-<!-- Record any issues below -->
+- [ ] **geo.ca theme** — Load default config. Verify the branded geo.ca theme renders (standard GeoView colors).
+- [ ] **Dark theme** — Load a config with `"theme": "dark"`. Verify dark backgrounds, light text, and correct icon colors.
+- [ ] **Light theme** — Load a config with `"theme": "light"`. Verify light backgrounds, dark text.
+- [ ] **Theme with open panels** — Open footer/app bar panels with dark theme. Verify panels use correct dark theme colors (no white flashes).
+
+## Highlight Color
+
+Config property: `map.highlightColor` — options: `black` (default), `white`, `red`, `green`, `aqua`.
+
+- [ ] **Default highlight** — Click a feature. Verify highlight uses the default color (black).
+- [ ] **Custom highlight color** — Load a config with `"highlightColor": "red"`. Click a feature. Verify the highlight uses the configured color.
+
+## Service URLs Override
+
+Config property: `serviceUrls` — overrides default service endpoints.
+
+- [ ] **Custom geolocator URL** — Set a custom `geolocatorUrl`. Verify the geolocator search uses the custom endpoint.
+- [ ] **Custom geocore URL** — Set a custom `geocoreUrl`. Verify GeoCore layer loading uses the custom endpoint.
+- [ ] **Custom proxy URL** — Set a custom `proxyUrl`. Verify CORS-proxied requests use the custom proxy.

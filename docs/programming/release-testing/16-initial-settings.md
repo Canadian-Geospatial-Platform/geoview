@@ -1,4 +1,4 @@
-# 19 — Initial Settings
+# 16 — Initial Settings
 
 Initial controls, states, selected tabs, and cascading behavior.
 
@@ -9,10 +9,6 @@ Config: `configs/navigator/demos/23-initial-settings.json`
 - [ ] **Footer bar selected tab** — Verify the footer bar opens to the configured initial tab.
 - [ ] **App bar selected tab** — Verify the app bar highlights the configured initial tab.
 - [ ] **Selected layer** — Verify the configured initial layer is selected in the relevant panels.
-
-## Package `isOpen`
-
-- [ ] **`isOpen: true`** — Load a config where a package has `isOpen: true`. Verify the package panel opens automatically on load.
 
 ## Initial Controls
 
@@ -34,9 +30,9 @@ Config: `configs/navigator/demos/23b-initial-settings-states-controls.json`
 
 Config: `configs/navigator/demos/23c-initial-settings-cascading.json`
 
-- [ ] **Parent visible false cascades** — Set parent group `visible: false`. Verify children are hidden on map but preserve their own visibility state (greyed in legend).
-- [ ] **Parent controls cascade** — Set parent `controls.remove: false`. Verify children inherit the setting unless they explicitly override.
-- [ ] **3-level cascade** — Test with group → subgroup → child. Verify settings cascade correctly through all levels.
+- [ ] **Parent visible false cascades** — Verify that when a parent group has `visible: false`, children are hidden on the map but preserve their own visibility state (greyed in legend).
+- [ ] **Parent controls cascade** — Verify that when a parent has `controls.remove: false`, children inherit the setting (remove button hidden) unless they explicitly override.
+- [ ] **3-level cascade** — Verify settings cascade correctly through group → subgroup → child levels.
 
 ## Opacity Cascading
 
@@ -51,14 +47,11 @@ Config: `configs/navigator/demos/23a-initial-settings-filters.json`
 - [ ] **Filter applied on load** — Verify the configured initial filter is applied to the layer on load.
 - [ ] **Filtered features** — Verify only features matching the filter are visible on the map and in the data table.
 
-## Layer Config Initial Settings
+## Layer Entry Source Config
 
 Config: `configs/navigator/demos/23d-initial-settings-layer-config.json`
 
-- [ ] **Layer-level settings** — Verify initial settings applied at the individual layer entry config level.
+For raster function and WMS style tests, see [08-layers.md — Esri Image Layer Settings](08-layers.md#esri-image-layer-settings) and [08-layers.md — WMS Layer Settings](08-layers.md#wms-layer-settings).
 
----
-
-## Issues Found
-
-<!-- Record any issues below -->
+- [ ] **Feature info field config** — Verify configured `featureInfo` field aliases and formatting are applied correctly in the details panel.
+- [ ] **nameField / outfields** — Verify the configured `nameField` is used as the feature label and `outfields` limits which fields are returned.

@@ -37,9 +37,3 @@ These demos show basemaps with specific label/shaded options pre-configured:
 Config: `configs/navigator/demos/22-circumpolar.json`
 
 - [ ] **Custom basemap layer** — Load the circumpolar config. Verify the WMTS layer with `useAsBasemap: true` renders as the basemap (below all other layers, excluded from legend and feature queries).
-
----
-
-## Issues Found
-
-<!-- Record any issues below -->

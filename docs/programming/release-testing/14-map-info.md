@@ -5,9 +5,10 @@ Map info bar components, attribution, and tooltips.
 ## Components
 
 - [ ] **Scale bar** — Verify the scale bar is displayed and updates on zoom.
+- [ ] **Scale click cycle** — Click the scale value to cycle through: scale in meters → scale in miles → resolution. Verify each format displays correctly.
 - [ ] **Coordinates** — Verify coordinate display updates on mouse move.
-- [ ] **Projection code** — Verify the current projection code is displayed.
-- [ ] **Rotation value** — Verify the rotation value is displayed (if rotation is non-zero).
+- [ ] **Coordinates click cycle** — Click the coordinate value to cycle through: DMS (degrees, minutes, seconds) → decimal degrees → projected coordinates. Verify each format displays correctly.
+- [ ] **Expand map info** — Click to expand the map info bar. Verify all three coordinate formats are displayed simultaneously.
 
 ## Attribution
 
@@ -17,12 +18,4 @@ Map info bar components, attribution, and tooltips.
 
 ## Tooltips
 
-- [ ] **Projection tooltip** — Hover over the projection indicator. Verify a tooltip shows the projection details.
 - [ ] **Rotation tooltip** — Hover over the rotation indicator. Verify a tooltip shows the rotation value.
-- [ ] **Arrow tooltip** — Verify tooltips on arrow controls in the map info bar.
-
----
-
-## Issues Found
-
-<!-- Record any issues below -->

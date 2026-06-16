@@ -1,13 +1,8 @@
 # 13 — Projection
 
-Projection switch interactions with geometry, tables, and north pole.
+Cross-feature interactions between projection switches and other features (geometry, data tables, north pole, extent).
 
-## Projection Switch
-
-- [ ] **LCC → WM** — Switch from LCC (EPSG:3978) to WM (EPSG:3857). Verify the map re-renders correctly.
-- [ ] **WM → LCC** — Switch back from WM to LCC. Verify correct re-rendering.
-- [ ] **LCC → 3573** — Switch to North Pole LAEA. Verify correct rendering.
-- [ ] **Layers survive switch** — Verify all loaded layers re-render after each projection switch.
+For basic projection switch and layer re-rendering tests, see [02-map.md — Projections](02-map.md#projections).
 
 ## Geometry & Projection
 
@@ -22,6 +17,8 @@ Projection switch interactions with geometry, tables, and north pole.
 
 ## North Pole Flag on Projection Switch
 
+For standalone north pole / north arrow tests per projection, see [02-map.md — North Pole & North Arrow](02-map.md#north-pole--north-arrow).
+
 - [ ] **WM → LCC north pole** — Start in WM. Switch to LCC. Zoom out. Verify the north pole flag appears.
 - [ ] **Full flow** — LCC full extent (see north pole, no arrow) → Zoom in (see arrow, no pole) → Zoom out (pole) → Switch to WM (see arrow, no pole).
 
@@ -30,9 +27,3 @@ Projection switch interactions with geometry, tables, and north pole.
 Config: `configs/navigator/demos/05-max-extent-override.json`
 
 - [ ] **Extent after switch** — Switch projection in the max extent override config. Verify the extent constraint still applies in the new projection.
-
----
-
-## Issues Found
-
-<!-- Record any issues below -->

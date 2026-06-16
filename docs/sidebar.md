@@ -51,7 +51,7 @@
 - **Release Testing**
   - [Test Plan Overview](programming/release-testing/README.md)
   - [Automated Suite](programming/release-testing/00-automated-suite.md)
-  - [Automation Candidates](programming/release-testing/23-automation-candidates.md)
+  - [Automation Candidates](programming/release-testing/21-automation-candidates.md)
 
 - **Developer Documentation**
   - [Best Practices](programming/best-practices.md)

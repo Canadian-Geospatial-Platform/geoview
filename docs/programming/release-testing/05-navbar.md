@@ -51,22 +51,13 @@ Detailed projection tests are in [02-map.md](02-map.md#projections) and [13-proj
 
 ## Drawer (Plugin)
 
-Requires the drawer plugin (`geoview-drawer`). Config: `configs/navigator/demos/15-package-drawer.json`. See also [22-edge-cases.md](22-edge-cases.md#drawer-plugin).
+> Full drawer testing in [17e — Package Drawer](17e-package-drawer.md). Only verify the navbar button here:
 
-- [ ] **Drawer button** — Verify the drawer button appears in the navbar when the plugin is loaded.
+- [ ] **Drawer button** — Verify the drawer button appears in the navbar when the drawer plugin is loaded.
 - [ ] **Open drawer** — Click the drawer button. Verify the drawing toolbar opens.
-- [ ] **Draw geometry** — Draw a point, line, and polygon using the drawer tools.
-- [ ] **Edit geometry** — Select and edit a drawn geometry.
-- [ ] **Delete geometry** — Delete a drawn geometry.
 
 ## Navbar Visibility
 
 - [ ] **Custom navbar** — Load a config with limited navbar controls (e.g., only zoom and rotation). Verify only those controls appear.
 - [ ] **Empty navbar** — Load a config with an empty `navBar` array. Verify only zoom and rotation appear (defaults).
 - [ ] **All buttons** — Load `sandbox.html` or `all-layers.json`. Verify all 8 core buttons render correctly.
-
----
-
-## Issues Found
-
-<!-- Record any issues below -->

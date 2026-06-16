@@ -32,17 +32,17 @@ Config: `configs/navigator/demos/28-symbol-shapes-fill-patterns.json`
 
 ## Style Item Visibility
 
-- [ ] **Toggle style item** — In the legend, toggle visibility of individual style items (e.g., one category in unique value). Verify that category disappears from the map.
-- [ ] **Toggle all style items off** — Turn off all style items. Verify no features render.
-- [ ] **Toggle all style items on** — Turn all back on. Verify features reappear.
+> Tested in [07 — Legend Panel](07-legend.md#style-classes-visibility) and [08 — Layers Panel](08-layers.md#style-classes-visibility).
 
 ## WMS Legend Images
 
-- [ ] **Legend images** — For WMS layers, verify legend images are displayed in the legend panel (collapsible section).
-- [ ] **Right panel images** — Verify the same legend images appear in the Layers right panel.
+> Tested in [07 — Legend Panel](07-legend.md#wms-legend-images) (legend images and lightbox) and [08 — Layers Panel](08-layers.md#wms-layer-settings) (right panel images).
 
----
+## Feature Labels
 
-## Issues Found
+Config: `configs/navigator/demos/24-configured-feature-labels.json`
 
-<!-- Record any issues below -->
+- [ ] **Labels render from config** — Load the feature labels config. Verify text labels appear on map features at appropriate positions.
+- [ ] **Label field** — Verify the label displays the correct field value as configured (not a random field).
+- [ ] **Label styling** — Verify label font size, color, and halo/outline are applied as configured.
+- [ ] **Labels at zoom levels** — Zoom in/out. Verify labels remain readable and don't overlap excessively.

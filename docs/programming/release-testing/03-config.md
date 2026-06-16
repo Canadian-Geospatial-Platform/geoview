@@ -24,7 +24,8 @@ Config: `configs/navigator/layers/esri-dynamic-errors.json` or CESI layer in sca
   - The bad sublayer shows as error in the legend
   - The group layer still loads (partial loading)
   - Other valid sublayers in the group render correctly
-- [ ] **Error layer reload** — Attempt to reload an error layer (bad URL or bad ID). Verify it stays in error state and does not crash.
+
+> Error layer reload tested in [20 — Edge Cases](20-edge-cases.md#error-layer-reload).
 
 ## Wrong Layer Type
 
@@ -57,8 +58,19 @@ For each: verify the viewer loads, error layers are flagged, valid layers still 
 - [ ] **Loaded status** — Once loaded, verify status changes to loaded.
 - [ ] **Error status** — For error layers, verify status shows error.
 
----
+## Notifications on Error
 
-## Issues Found
+- [ ] **Error notification appears** — Load a config with error layers. Verify a notification (snackbar + notification panel entry) appears for each failed layer.
+- [ ] **No duplicate notifications** — Reload the same error layer. Verify the notification count increments (stacks) rather than creating duplicate entries.
 
-<!-- Record any issues below -->
+## Default Config Behavior
+
+Test how the viewer handles missing or empty config properties.
+
+### footerBar / appBar Defaults
+
+- [ ] **No `footerBar` property** — Load a config that omits `footerBar` entirely. Verify the viewer uses default footer bar tabs (legend, layers, details, data-table).
+- [ ] **No `appBar` property** — Load a config that omits `appBar` entirely. Verify the viewer uses default app bar tabs (geolocator, export, etc.).
+- [ ] **Empty `footerBar.tabs.core` array** — Load a config with `"footerBar": { "tabs": { "core": [] } }`. Verify no footer bar tabs appear (empty footer).
+- [ ] **Empty `appBar.tabs.core` array** — Load a config with `"appBar": { "tabs": { "core": [] } }`. Verify no app bar tabs appear (empty app bar).
+- [ ] **No `navBar` property** — Load a config that omits `navBar` entirely. Verify only the default buttons appear (zoom, rotation).

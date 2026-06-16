@@ -48,9 +48,21 @@ Open browser DevTools and check the Zustand store:
 
 - [ ] **Export to CSV** — Export the table data. Verify the downloaded CSV contains correct data.
 - [ ] **Export filtered** — Apply a filter, then export. Verify only filtered rows are exported.
+- [ ] **Re-import exported CSV** — Add the exported CSV file as a new CSV layer. Verify it loads and the features match the original data.
 
----
+## Column Visibility
 
-## Issues Found
+- [ ] **Show/hide columns button** — Click the column visibility button in the toolbar. Verify a list of columns with toggles appears.
+- [ ] **Hide a column** — Toggle a column off. Verify it disappears from the table.
+- [ ] **Show a column** — Toggle it back on. Verify it reappears.
+- [ ] **Multiple columns hidden** — Hide multiple columns. Verify all hidden columns are removed and remaining columns fill the space.
 
-<!-- Record any issues below -->
+## Density Toggle
+
+- [ ] **Density button** — Click the density toggle in the toolbar. Verify options appear (compact, comfortable, spacious).
+- [ ] **Switch density** — Switch between densities. Verify row height changes accordingly.
+
+## Feature Highlight Sync
+
+- [ ] **Zoom to feature from table** — Click the zoom icon on a row. Verify the map zooms to that feature's extent.
+- [ ] **Open details from row** — Click the details icon on a row. Verify the Details panel opens showing the full feature information for that row.

@@ -50,11 +50,4 @@ For layers with multiple style classes (unique value or class breaks):
 ## WMS Legend Images
 
 - [ ] **WMS images in legend** — For WMS layers, verify legend images appear in a collapsible section.
-- [ ] **WMS images in Layers panel** — Verify the same WMS legend images appear in the right panel of the Layers panel.
 - [ ] **Lightbox on click** — Click a WMS legend image. Verify it opens in the lightbox for a larger view.
-
----
-
-## Issues Found
-
-<!-- Record any issues below -->

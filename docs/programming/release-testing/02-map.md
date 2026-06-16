@@ -38,9 +38,3 @@ Map rendering, projections, north pole, and north arrow.
 ## Static Map
 
 - [ ] **No interaction** — Load a static map config (`interaction: 'static'`). Verify no panning or zooming is possible.
-
----
-
-## Issues Found
-
-<!-- Record any issues below -->

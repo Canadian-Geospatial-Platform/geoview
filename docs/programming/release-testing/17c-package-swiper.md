@@ -1,13 +1,24 @@
-# 18 — Swiper
+# 17c — Swiper
 
 Swiper plugin for comparing layers.
 
 ## Lifecycle
 
-Config: `configs/navigator/demos/14-package-swiper.json`
+Demo: `templates/demos/package-swiper.html`
 
-- [ ] **Activate swiper** — Enable the swiper. Verify the split view appears on the map.
-- [ ] **Deactivate swiper** — Disable the swiper. Verify the map returns to normal single view.
+Swiper is activated/deactivated via the console API:
+
+```js
+cgpv.api.getMapViewer("mapId").plugins["swiper"].activateForLayer("layerPath");
+cgpv.api
+  .getMapViewer("mapId")
+  .plugins["swiper"].deActivateForLayer("layerPath");
+cgpv.api.getMapViewer("mapId").plugins["swiper"].deActivateAll();
+```
+
+- [ ] **Activate swiper** — Call `activateForLayer` with a valid layer path. Verify the split view appears on the map.
+- [ ] **Deactivate swiper** — Call `deActivateForLayer`. Verify the map returns to normal single view.
+- [ ] **Deactivate all** — Activate multiple layers, then call `deActivateAll`. Verify all swiper layers are removed.
 
 ## Layer Management
 
@@ -31,9 +42,3 @@ Config: `configs/navigator/demos/14-package-swiper.json`
 
 - [ ] **Features hidden by swiper** — Features hidden by the swiper should not be queryable. Click on the hidden side — verify no details appear for those features.
 - [ ] **Hover disabled** — Hover over features on the hidden side. Verify no tooltip appears.
-
----
-
-## Issues Found
-
-<!-- Record any issues below -->
