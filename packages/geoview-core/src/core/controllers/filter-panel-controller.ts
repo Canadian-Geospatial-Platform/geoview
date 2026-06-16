@@ -75,6 +75,7 @@ export class FilterPanelController extends AbstractMapViewerController {
    * @param fieldName - The field name
    * @param value - The filter value
    */
+  // TODO: Currently, data-table and filter-panel do not interact
   updateLayerFieldFilter(layerPath: string, fieldName: string, value: TypeFilterValue): void {
     setStoreFilterPanelLayerFieldFilter(this.getMapId(), layerPath, fieldName, value);
   }
