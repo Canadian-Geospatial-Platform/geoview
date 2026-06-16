@@ -1,15 +1,13 @@
-import { useState, useEffect, useCallback } from 'react';
-
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { logger } from 'geoview-core/core/utils/logger';
 
-import type { SxStyles } from 'geoview-core/ui/style/types';
 import { useFilterPanelController } from 'geoview-core/core/controllers/use-controllers';
 import { useStoreFilterPanelLayerFilterState } from 'geoview-core/core/stores/states/filter-panel-state';
 import { useStoreLayerStatus } from 'geoview-core/core/stores/states/layer-state';
 
 import { SelectFilter, MultiselectFilter, RangeFilter, DateFilter } from './controls';
 import type { TypeFilterLayer, TypeFilterValue } from '../types';
+import { getSxClasses } from './filter-panel-style';
 
 /**
  * Props for LayerFilterSection component.
@@ -25,8 +23,6 @@ interface LayerFilterSectionProps {
   collapsible: boolean;
   /** Default collapsed state. */
   defaultCollapsed: boolean;
-  /** Style classes. */
-  sxClasses: SxStyles;
   /** Whether filters should be applied automatically. */
   autoApply: boolean;
 }
@@ -41,15 +37,18 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
   // Log
   logger.logTraceRender('geoview-filter-panel/components/layer-filter-section');
 
-  const { layer, onFilterChange, onClearLayer, collapsible, defaultCollapsed, sxClasses, autoApply } = props;
-  const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
-  const [fieldValues, setFieldValues] = useState<Record<string, (string | number)[]>>({});
+  const { layer, onFilterChange, onClearLayer, collapsible, defaultCollapsed, autoApply } = props;
 
   // Access UI components via window.cgpv pattern
   const { cgpv } = window as TypeWindow;
+  const { useState, useEffect, useCallback, useMemo } = cgpv.reactUtilities.react;
   const { ui } = cgpv;
-  const { Box, Typography } = ui.elements;
+  const { Box, Typography, Collapse, Button, IconButton } = ui.elements;
+  const { ExpandMoreIcon, CloseIcon } = ui.elements;
   const controller = useFilterPanelController();
+
+  const theme = ui.useTheme();
+  const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Hook the filter state for this layer from the store
   const filterState = useStoreFilterPanelLayerFilterState(layer.layerPath);
@@ -57,8 +56,32 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
   // Hook the layer status to know if this specific layer is ready
   const layerStatus = useStoreLayerStatus(layer.layerPath);
 
+  // Local state
+  const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
+  const [fieldValues, setFieldValues] = useState<Record<string, (string | number)[]>>({});
+
   // Determine if this layer is ready for filtering
   const layerIsReady = layerStatus === 'processed' || layerStatus === 'loaded';
+
+  /**
+   * Memoized header styles based on collapsed state.
+   */
+  const memoHeaderSx = useMemo(() => {
+    return {
+      ...memoSxClasses.filterLayerHeader,
+      ...(isCollapsed ? memoSxClasses.filterLayerHeaderCollapsed : memoSxClasses.filterLayerHeaderExpanded),
+    };
+  }, [memoSxClasses, isCollapsed]);
+
+  /**
+   * Memoized toggle icon styles based on collapsed state.
+   */
+  const memoToggleIconSx = useMemo(() => {
+    return {
+      ...memoSxClasses.filterLayerToggleIcon,
+      ...(isCollapsed && memoSxClasses.filterLayerToggleIconCollapsed),
+    };
+  }, [memoSxClasses, isCollapsed]);
 
   /**
    * Handles when the toggle button is clicked.
@@ -68,33 +91,55 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
   }, []);
 
   /**
-   * Gets unique values for layer attributes once the layer is ready.
+   * Gets unique values for layer attributes once the layer is ready and registered.
    */
   useEffect((): void => {
-    // Log
-    logger.logTraceUseEffect('LAYER FILTER SECTION - Get unique values', layer.layerPath);
+    logger.logTraceUseEffect('LAYER FILTER SECTION - Get unique values', layer.layerPath, layerStatus);
 
+    // Only fetch unique values when the layer is ready
     if (!layer.enabled || !layerIsReady) return;
 
-    const values: Record<string, (string | number)[]> = {};
-
-    const enabledAttributes = layer.attributes.filter((attr) => attr.enabled);
-    const results = enabledAttributes.map((attr) => {
+    const getUniqueValues = async (): Promise<void> => {
       try {
-        const uniqueValues = controller.getLayerFieldUniqueValues(layer.layerPath, attr.fieldName);
-        return { fieldName: attr.fieldName, values: uniqueValues };
-      } catch (err) {
-        logger.logError(`Error fetching values for ${attr.fieldName}:`, err);
-        return { fieldName: attr.fieldName, values: [] };
+        // First, ensure the layer is registered and queried
+        await controller.ensureLayerQueried(layer.layerPath);
+
+        // Now we can safely get unique values
+        const values: Record<string, (string | number)[]> = {};
+
+        const enabledAttributes = layer.attributes.filter((attr) => attr.enabled);
+        const results = enabledAttributes.map((attr) => {
+          try {
+            const uniqueValues = controller.getLayerFieldUniqueValues(layer.layerPath, attr.fieldName);
+            return { fieldName: attr.fieldName, values: uniqueValues };
+          } catch (err) {
+            logger.logError(`Error fetching values for ${attr.fieldName}:`, err);
+            return { fieldName: attr.fieldName, values: [] };
+          }
+        });
+
+        results.forEach((result) => {
+          values[result.fieldName] = result.values;
+        });
+
+        setFieldValues(values);
+      } catch (error) {
+        logger.logError(`Error ensuring layer queried for ${layer.layerPath}:`, error);
+        // Set empty values on error so loading state clears
+        const emptyValues: Record<string, (string | number)[]> = {};
+        layer.attributes.forEach((attr) => {
+          if (attr.enabled) {
+            emptyValues[attr.fieldName] = [];
+          }
+        });
+        setFieldValues(emptyValues);
       }
-    });
+    };
 
-    results.forEach((result) => {
-      values[result.fieldName] = result.values;
+    getUniqueValues().catch((err: unknown) => {
+      logger.logError('Error in getUniqueValues:', err);
     });
-
-    setFieldValues(values);
-  }, [controller, layer, layerIsReady]);
+  }, [controller, layer, layerIsReady, layerStatus]);
 
   /**
    * Auto-applies filters when the layer becomes ready or when filter state changes.
@@ -131,7 +176,6 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
               onChange={(val) => onFilterChange(attr.fieldName, val)}
               uniqueValues={uniqueValues}
               loading={loading}
-              sxClasses={sxClasses}
             />
           );
 
@@ -144,7 +188,6 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
               onChange={(val) => onFilterChange(attr.fieldName, val)}
               uniqueValues={uniqueValues}
               loading={loading}
-              sxClasses={sxClasses}
             />
           );
 
@@ -155,7 +198,8 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
               attribute={attr}
               value={value}
               onChange={(val) => onFilterChange(attr.fieldName, val)}
-              sxClasses={sxClasses}
+              uniqueValues={uniqueValues as number[]}
+              loading={loading}
             />
           );
 
@@ -166,7 +210,8 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
               attribute={attr}
               value={value}
               onChange={(val) => onFilterChange(attr.fieldName, val)}
-              sxClasses={sxClasses}
+              uniqueValues={uniqueValues}
+              loading={loading}
             />
           );
 
@@ -174,46 +219,47 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
           return null;
       }
     },
-    [layer, filterState, fieldValues, onFilterChange, sxClasses]
+    [layer, filterState, fieldValues, onFilterChange]
   );
 
   if (!layer.enabled) return null;
 
   return (
-    <Box sx={sxClasses.filterLayerSection}>
-      <Box sx={sxClasses.filterLayerHeader}>
-        {collapsible ? (
-          <button style={sxClasses.filterLayerToggle as React.CSSProperties} onClick={handleToggle} type="button">
-            <span
-              style={
-                {
-                  ...(sxClasses.filterToggleIcon as React.CSSProperties),
-                  ...(isCollapsed ? sxClasses.filterToggleIconCollapsed : sxClasses.filterToggleIconExpanded),
-                } as React.CSSProperties
-              }
+    <Box sx={memoSxClasses.filterLayerSection}>
+      <Box sx={memoHeaderSx}>
+        <Box sx={memoSxClasses.filterLayerHeaderLeft}>
+          {collapsible && (
+            <IconButton
+              aria-label={isCollapsed ? 'Expand layer filters' : 'Collapse layer filters'}
+              tooltip={isCollapsed ? 'Expand' : 'Collapse'}
+              onClick={handleToggle}
+              size="small"
+              sx={memoToggleIconSx}
             >
-              ▼
-            </span>
-            <span style={sxClasses.filterLayerName as React.CSSProperties}>{layer.layerName}</span>
-          </button>
-        ) : (
-          <span style={sxClasses.filterLayerName as React.CSSProperties}>{layer.layerName}</span>
-        )}
-        <button
-          style={sxClasses.filterClearButton as React.CSSProperties}
+              <ExpandMoreIcon />
+            </IconButton>
+          )}
+          <Typography variant="body1" sx={memoSxClasses.filterLayerName}>
+            {layer.layerName}
+          </Typography>
+        </Box>
+        <Button
+          type="text"
+          variant="outlined"
+          size="small"
+          startIcon={<CloseIcon />}
           onClick={onClearLayer}
-          type="button"
-          title="Clear all filters for this layer"
+          sx={memoSxClasses.filterLayerClearButton}
         >
           Clear
-        </button>
+        </Button>
       </Box>
 
-      {!isCollapsed && (
-        <Box sx={sxClasses.filterLayerContent}>
+      <Collapse in={!isCollapsed}>
+        <Box sx={{ p: 1.5 }}>
           {!layerIsReady ? (
-            <Box sx={{ padding: '16px', textAlign: 'center' }}>
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+            <Box sx={memoSxClasses.filterLayerLoading}>
+              <Typography variant="body2" sx={memoSxClasses.filterLayerLoadingText}>
                 Loading layer...
               </Typography>
             </Box>
@@ -221,7 +267,7 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
             layer.attributes.map((attr) => renderFilterControl(attr))
           )}
         </Box>
-      )}
+      </Collapse>
     </Box>
   );
 }
