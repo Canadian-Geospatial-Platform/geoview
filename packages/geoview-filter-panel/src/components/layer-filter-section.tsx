@@ -4,6 +4,7 @@ import { logger } from 'geoview-core/core/utils/logger';
 import { useFilterPanelController } from 'geoview-core/core/controllers/use-controllers';
 import { useStoreFilterPanelLayerFilterState } from 'geoview-core/core/stores/states/filter-panel-state';
 import { useStoreLayerStatus } from 'geoview-core/core/stores/states/layer-state';
+import { useTranslation } from 'geoview-core/core/translation/i18n';
 
 import { SelectFilter, MultiselectFilter, RangeFilter, DateFilter } from './controls';
 import type { TypeFilterLayer, TypeFilterValue } from '../types';
@@ -49,6 +50,7 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
 
   const theme = ui.useTheme();
   const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const { t } = useTranslation<string>();
 
   // Hook the filter state for this layer from the store
   const filterState = useStoreFilterPanelLayerFilterState(layer.layerPath);
@@ -230,8 +232,8 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
         <Box sx={memoSxClasses.filterLayerHeaderLeft}>
           {collapsible && (
             <IconButton
-              aria-label={isCollapsed ? 'Expand layer filters' : 'Collapse layer filters'}
-              tooltip={isCollapsed ? 'Expand' : 'Collapse'}
+              aria-label={isCollapsed ? t('FilterPanel.expandFilters') : t('FilterPanel.collapseFilters')}
+              tooltip={isCollapsed ? t('FilterPanel.expand') : t('FilterPanel.collapse')}
               onClick={handleToggle}
               size="small"
               sx={memoToggleIconSx}
@@ -251,7 +253,7 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
           onClick={onClearLayer}
           sx={memoSxClasses.filterLayerClearButton}
         >
-          Clear
+          {t('FilterPanel.clear')}
         </Button>
       </Box>
 
@@ -260,7 +262,7 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
           {!layerIsReady ? (
             <Box sx={memoSxClasses.filterLayerLoading}>
               <Typography variant="body2" sx={memoSxClasses.filterLayerLoadingText}>
-                Loading layer...
+                {t('FilterPanel.loadingLayer')}
               </Typography>
             </Box>
           ) : (

@@ -1,6 +1,8 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { logger } from 'geoview-core/core/utils/logger';
 
+import { useTranslation } from 'geoview-core/core/translation/i18n';
+
 import type { TypeFilterAttribute, TypeFilterValue } from '../../types';
 import { getSxClasses } from './control-styles';
 
@@ -40,6 +42,7 @@ export function SelectFilter(props: SelectFilterProps): JSX.Element {
 
   const theme = ui.useTheme();
   const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const { t } = useTranslation<string>();
 
   /**
    * Memoized menu items for the select dropdown.
@@ -50,7 +53,7 @@ export function SelectFilter(props: SelectFilterProps): JSX.Element {
         type: 'item' as const,
         item: {
           value: '',
-          children: <em>All</em>,
+          children: <em>{t('FilterPanel.all')}</em>,
         },
       },
     ];
@@ -60,13 +63,13 @@ export function SelectFilter(props: SelectFilterProps): JSX.Element {
         type: 'item' as const,
         item: {
           value: val as string,
-          children: <span>{val !== null ? String(val) : '(null)'}</span>,
+          children: <span>{val !== null ? String(val) : t('FilterPanel.nullValue')}</span>,
         },
       });
     });
 
     return items;
-  }, [uniqueValues]);
+  }, [t, uniqueValues]);
 
   /**
    * Handles when the select value changes.
@@ -86,7 +89,7 @@ export function SelectFilter(props: SelectFilterProps): JSX.Element {
           {attribute.displayLabel}
         </Typography>
         <Typography variant="body2" sx={memoSxClasses.filterLoading}>
-          Loading options...
+          {t('FilterPanel.loading')}
         </Typography>
       </Box>
     );
@@ -105,6 +108,13 @@ export function SelectFilter(props: SelectFilterProps): JSX.Element {
         inputLabel={{ shrink: true }}
         menuItems={memoMenuItems}
         disabled={loading || uniqueValues.length === 0}
+        displayEmpty
+        renderValue={(selected: unknown) => {
+          if (!selected || selected === '') {
+            return <em style={{ color: '#999' }}>{t('FilterPanel.all')}</em>;
+          }
+          return selected as string | number;
+        }}
       />
     </Box>
   );
