@@ -350,7 +350,6 @@ Cliquez sur le bouton **Télécharger** au bas de la fenêtre pour générer et 
 
 # Pied de page
 
-<a id="footerSection"></a>
 Le _pied de page_ se trouve sous la carte. Vous pouvez le développer en cliquant sur un des onglets de son menu. Pour le réduire, vous n’avez qu’à recliquer sur l’onglet actif.
 
 **Pour passer de la carte à la section du pied de page, cliquez sur la barre d'information de la carte pour afficher la carte, ou cliquez sur la barre du pied de page pour afficher son contenu.**
@@ -371,9 +370,7 @@ _N.B. : Certains onglets dans la barre latérale se trouvent aussi sous forme d�
 
 =2!legend=
 
-<a id="legendSection"></a>
-
-## <img src="{{assetsURL}}/img/guide/sidebar/legend.svg" alt="Icône de légende" /> Légende <a href="#footerSection">Haut de page</a>
+## <img src="{{assetsURL}}/img/guide/sidebar/legend.svg" alt="Icône de légende" /> Légende <a id="legendSection" href="#pied-de-page" data-guide-nav="top">Haut de page</a>
 
 L'onglet **Légende** présente les symboles des couches affichées sur la carte.
 
@@ -397,9 +394,7 @@ _N.B. : Lorsque la couche est cachée, les fonctions affectant la couche sur la 
 
 =2!layers=
 
-<a id="layersSection"></a>
-
-## <img src="{{assetsURL}}/img/guide/footer/layers_30.svg" alt="Icône couches" /> Couches <a href="#footerSection">Haut de page</a>
+## <img src="{{assetsURL}}/img/guide/footer/layers_30.svg" alt="Icône couches" /> Couches <a id="layersSection" href="#pied-de-page" data-guide-nav="top">Haut de page</a>
 
 L’onglet **Couches** comprend les vues suivantes :
 
@@ -589,9 +584,7 @@ Le visualiseur passe automatiquement à la vue par défault.
 
 =2!details=
 
-<a id="detailsSection"></a>
-
-## <img src="{{assetsURL}}/img/guide/sidebar/details_30.svg" alt="Icône détails" /> Détails <a href="#footerSection">Haut de page</a>
+## <img src="{{assetsURL}}/img/guide/sidebar/details_30.svg" alt="Icône détails" /> Détails <a id="detailsSection" href="#pied-de-page" data-guide-nav="top">Haut de page</a>
 
 _**N.B. : Il faut sélectionner un élément sur la carte pour que la couche devienne cliquable dans la liste, sans quoi elle sera désactivée (grisée).**_
 
@@ -638,9 +631,7 @@ Lorsque les informations de coordonnées sont activées, elles apparaîtront com
 
 =2!dataTable=
 
-<a id="dataTableSection"></a>
-
-## <img src="{{assetsURL}}/img/guide/footer/data_table.svg" alt="Icône tableau de données" /> Données <a href="#footerSection">Haut de page</a>
+## <img src="{{assetsURL}}/img/guide/footer/data_table.svg" alt="Icône tableau de données" /> Données <a id="dataTableSection" href="#pied-de-page" data-guide-nav="top">Haut de page</a>
 
 _**N.B. : Cliquez sur une couche pour afficher ses données dans la section de droite.**_
 
@@ -730,9 +721,7 @@ Pour accéder aux boutons ou aux champs de saisie d’une cellule, assurez-vous 
 
 =2!timeSlider=
 
-<a id="timeSliderSection"></a>
-
-## <img src="{{assetsURL}}/img/guide/footer/time_slider_30.svg" alt="Icône curseur temporel" /> Curseur temporel <a href="#footerSection">Haut de page</a>
+## <img src="{{assetsURL}}/img/guide/footer/time_slider_30.svg" alt="Icône curseur temporel" /> Curseur temporel <a id="timeSliderSection" href="#pied-de-page" data-guide-nav="top">Haut de page</a>
 
 _**N.B. : Cliquez sur une couche pour afficher son curseur temporel dans la section de droite.**_
 
@@ -757,9 +746,7 @@ Le champ visé par le filtre s’affiche en bas à gauche de la section du curse
 
 =2!chart=
 
-<a id="chartSection"></a>
-
-## <img src="{{assetsURL}}/img/guide/footer/chart_30.svg" alt="Icône graphique" /> Graphique <a href="#footerSection">Haut de page</a>
+## <img src="{{assetsURL}}/img/guide/footer/chart_30.svg" alt="Icône graphique" /> Graphique <a id="chartSection" href="#pied-de-page" data-guide-nav="top">Haut de page</a>
 
 _**N.B. : Il faut sélectionner un élément sur la carte pour que la couche devienne cliquable dans la liste, sans quoi elle sera désactivée (grisée).**_
 
