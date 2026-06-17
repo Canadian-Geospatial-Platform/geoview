@@ -6,7 +6,7 @@
   "keywords": [
     "filter-panel"
   ],
-  "author": "GeoView Team",
+  "author": "Matthew Muehlhauser",
   "license": "MIT",
   "scripts": {
     "build": "tsc --build",
