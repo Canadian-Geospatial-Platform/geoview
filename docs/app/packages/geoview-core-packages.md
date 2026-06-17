@@ -11,6 +11,7 @@ This document provides comprehensive API reference and configuration details for
 5. [geoview-aoi-panel](#_5-geoview-aoi-panel)
 6. [geoview-custom-legend](#_6-geoview-custom-legend)
 7. [geoview-about-panel](#_7-geoview-about-panel)
+8. [geoview-filter-panel](#_8-geoview-filter-panel)
 
 ---
 
@@ -1575,6 +1576,481 @@ The panel gracefully handles:
 - **Invalid Markdown:** Renders as plain text if parsing fails
 - **Missing Images:** Shows broken image placeholder
 - **Empty Configuration:** Displays empty panel (not an error)
+
+**See Also:**
+
+- [Configuration Reference](app/config/configuration-reference.md) - Package configuration options
+
+---
+
+## 8. geoview-filter-panel
+
+**Description:** A customizable filter panel package that provides layer attribute filtering capabilities. Supports multiple filter types including select, multiselect, range, and date filters for querying and displaying map layer data based on attribute values.
+
+**Version:** 2.0.x
+
+**Repository:** `packages/geoview-filter-panel/`
+
+**Features:**
+
+- Multiple filter types (select, multiselect, range, date)
+- Real-time or manual filter application
+- Layer organization with collapsible sections
+- Feature count display
+- Theme-aware UI (adapts to geo.ca, light, dark themes)
+- Auto-apply or manual apply modes
+- Reset individual filters or all filters at once
+- Integration with GeoView's LayerFilters system
+
+**Dependencies:**
+
+- `geoview-core`: ^2.0.0
+- `react`: ^18.3.1
+- `zustand`: ~5.0.0
+
+### Installation
+
+**Via Configuration:**
+
+```json
+{
+  "appBar": {
+    "tabs": {
+      "core": ["filter-panel"]
+    }
+  }
+}
+```
+
+**Programmatic:**
+
+```typescript
+// Filter Panel is automatically loaded when included in appBar.tabs.core
+// Access via AppBar tabs
+const appBarApi = cgpv.api.maps["mapId"].appBar;
+```
+
+### Filter Types
+
+The Filter Panel supports four filter types:
+
+1. **Select** - Single-value dropdown selection
+2. **Multiselect** - Multiple-value checkbox list with "All" option
+3. **Range** - Numeric min/max range with slider
+4. **Date** - Date range picker with start/end dates
+
+### Configuration Schema
+
+```typescript
+interface FilterPanelConfig {
+  enabled?: boolean;
+  isOpen?: boolean;
+  version?: string;
+  layers?: Array<{
+    layerPath: string;
+    layerName: string;
+    enabled?: boolean;
+    attributes?: Array<{
+      fieldName: string;
+      displayLabel: string;
+      filterType: 'select' | 'multiselect' | 'range' | 'date';
+      enabled?: boolean;
+      defaultValues?: any;
+    }>;
+  }>;
+  settings?: {
+    title?: string;
+    showLayerNames?: boolean;
+    collapsible?: boolean;
+    defaultCollapsed?: boolean;
+    showApplyButton?: boolean;
+    showResetButton?: boolean;
+    autoApply?: boolean;
+    showFeatureCount?: boolean;
+  };
+}
+```
+
+### Configuration Properties
+
+**Top-level properties:**
+
+- **enabled** (boolean, default: true): Whether the filter panel is enabled
+- **isOpen** (boolean, default: false): Initial panel open state
+- **version** (string, default: "1.0"): Configuration version
+- **layers** (array): Array of layer configurations for filtering
+- **settings** (object): Panel display and behavior settings
+
+**Layer properties:**
+
+- **layerPath** (string, required): Unique layer path identifier
+- **layerName** (string, required): Display name for the layer
+- **enabled** (boolean, default: true): Whether filtering is enabled for this layer
+- **attributes** (array): Array of filterable attributes
+
+**Attribute properties:**
+
+- **fieldName** (string, required): Field name from the layer schema
+- **displayLabel** (string, required): Label displayed in the UI
+- **filterType** (string, required): One of: `"select"`, `"multiselect"`, `"range"`, `"date"`
+- **enabled** (boolean, default: true): Whether this filter is enabled
+- **defaultValues** (any): Initial filter values (varies by filter type)
+
+**Settings properties:**
+
+- **title** (string, default: "Filter Layers"): Panel header title
+- **showLayerNames** (boolean, default: true): Show layer names in the panel
+- **collapsible** (boolean, default: true): Allow collapsing layer sections
+- **defaultCollapsed** (boolean, default: false): Initial collapsed state
+- **showApplyButton** (boolean, default: false): Show manual apply button
+- **showResetButton** (boolean, default: true): Show reset all button
+- **autoApply** (boolean, default: true): Apply filters automatically on change
+- **showFeatureCount** (boolean, default: true): Display filtered feature counts
+
+### Configuration Examples
+
+**Example 1: Basic Multiselect Filter**
+
+```json
+{
+  "appBar": {
+    "tabs": {
+      "core": ["filter-panel"]
+    }
+  },
+  "corePackagesConfig": [
+    {
+      "filter-panel": {
+        "enabled": true,
+        "isOpen": false,
+        "layers": [
+          {
+            "layerPath": "cities-layer",
+            "layerName": "Canadian Cities",
+            "enabled": true,
+            "attributes": [
+              {
+                "fieldName": "province",
+                "displayLabel": "Province",
+                "filterType": "multiselect",
+                "enabled": true,
+                "defaultValues": []
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+**Example 2: Multiple Filter Types**
+
+```json
+{
+  "appBar": {
+    "tabs": {
+      "core": ["filter-panel"]
+    }
+  },
+  "corePackagesConfig": [
+    {
+      "filter-panel": {
+        "enabled": true,
+        "isOpen": true,
+        "layers": [
+          {
+            "layerPath": "population-data",
+            "layerName": "Population Data",
+            "enabled": true,
+            "attributes": [
+              {
+                "fieldName": "city_name",
+                "displayLabel": "City",
+                "filterType": "select",
+                "enabled": true
+              },
+              {
+                "fieldName": "population",
+                "displayLabel": "Population Range",
+                "filterType": "range",
+                "enabled": true,
+                "defaultValues": { "min": null, "max": null }
+              },
+              {
+                "fieldName": "census_date",
+                "displayLabel": "Census Date",
+                "filterType": "date",
+                "enabled": true,
+                "defaultValues": { "start": null, "end": null }
+              }
+            ]
+          }
+        ],
+        "settings": {
+          "title": "Filter Population Data",
+          "autoApply": true,
+          "showFeatureCount": true
+        }
+      }
+    }
+  ]
+}
+```
+
+**Example 3: Manual Apply Mode**
+
+```json
+{
+  "appBar": {
+    "tabs": {
+      "core": ["filter-panel"]
+    }
+  },
+  "corePackagesConfig": [
+    {
+      "filter-panel": {
+        "enabled": true,
+        "isOpen": false,
+        "layers": [
+          {
+            "layerPath": "environmental-data",
+            "layerName": "Environmental Monitoring",
+            "attributes": [
+              {
+                "fieldName": "pollutant_type",
+                "displayLabel": "Pollutant Type",
+                "filterType": "multiselect"
+              },
+              {
+                "fieldName": "concentration",
+                "displayLabel": "Concentration (ppm)",
+                "filterType": "range"
+              }
+            ]
+          }
+        ],
+        "settings": {
+          "autoApply": false,
+          "showApplyButton": true,
+          "showResetButton": true
+        }
+      }
+    }
+  ]
+}
+```
+
+**Example 4: Multiple Layers**
+
+```json
+{
+  "appBar": {
+    "tabs": {
+      "core": ["filter-panel"]
+    }
+  },
+  "corePackagesConfig": [
+    {
+      "filter-panel": {
+        "enabled": true,
+        "layers": [
+          {
+            "layerPath": "weather-stations",
+            "layerName": "Weather Stations",
+            "attributes": [
+              {
+                "fieldName": "station_type",
+                "displayLabel": "Station Type",
+                "filterType": "select"
+              },
+              {
+                "fieldName": "elevation",
+                "displayLabel": "Elevation (m)",
+                "filterType": "range"
+              }
+            ]
+          },
+          {
+            "layerPath": "climate-data",
+            "layerName": "Climate Data",
+            "attributes": [
+              {
+                "fieldName": "temperature",
+                "displayLabel": "Temperature (°C)",
+                "filterType": "range"
+              },
+              {
+                "fieldName": "observation_date",
+                "displayLabel": "Observation Date",
+                "filterType": "date"
+              }
+            ]
+          }
+        ],
+        "settings": {
+          "collapsible": true,
+          "defaultCollapsed": false
+        }
+      }
+    }
+  ]
+}
+```
+
+### Filter Type Details
+
+**Select Filter:**
+- Single-value dropdown
+- Automatically populated with unique field values
+- Default: no selection (all values pass)
+
+```json
+{
+  "fieldName": "status",
+  "displayLabel": "Status",
+  "filterType": "select"
+}
+```
+
+**Multiselect Filter:**
+- Multiple-value checkbox list
+- "All" option to select/deselect all values
+- Default: all values selected
+
+```json
+{
+  "fieldName": "category",
+  "displayLabel": "Category",
+  "filterType": "multiselect",
+  "defaultValues": []
+}
+```
+
+**Range Filter:**
+- Numeric min/max range with slider
+- Automatically detects field min/max values
+- Default: full range
+
+```json
+{
+  "fieldName": "population",
+  "displayLabel": "Population",
+  "filterType": "range",
+  "defaultValues": { "min": null, "max": null }
+}
+```
+
+**Date Filter:**
+- Date range picker
+- Start and end date selection
+- Default: no date restriction
+
+```json
+{
+  "fieldName": "date_created",
+  "displayLabel": "Date Created",
+  "filterType": "date",
+  "defaultValues": { "start": null, "end": null }
+}
+```
+
+### Usage Notes
+
+- **Layer Paths:** Must reference existing layers in the map configuration
+- **Field Names:** Must match actual field names in the layer schema
+- **Auto-Apply:** When `autoApply: true`, filters apply on every change. When `false`, user must click "Apply Filters" button
+- **Feature Count:** Shows the number of features matching current filters (requires `showFeatureCount: true`)
+- **Reset:** Individual filters can be reset, or all filters can be reset at once
+- **Theme Integration:** UI automatically adapts to the map's theme (geo.ca, light, dark)
+- **Performance:** Range and date filters are optimized for large datasets
+
+### Common Use Cases
+
+**1. City Explorer:**
+
+```json
+{
+  "filter-panel": {
+    "layers": [{
+      "layerPath": "canadian-cities",
+      "layerName": "Canadian Cities",
+      "attributes": [
+        { "fieldName": "province", "displayLabel": "Province", "filterType": "multiselect" },
+        { "fieldName": "population", "displayLabel": "Population", "filterType": "range" }
+      ]
+    }]
+  }
+}
+```
+
+**2. Environmental Monitoring:**
+
+```json
+{
+  "filter-panel": {
+    "layers": [{
+      "layerPath": "air-quality",
+      "layerName": "Air Quality Stations",
+      "attributes": [
+        { "fieldName": "pollutant", "displayLabel": "Pollutant Type", "filterType": "select" },
+        { "fieldName": "concentration", "displayLabel": "Concentration (ppm)", "filterType": "range" },
+        { "fieldName": "measurement_date", "displayLabel": "Date", "filterType": "date" }
+      ]
+    }],
+    "settings": { "autoApply": false, "showApplyButton": true }
+  }
+}
+```
+
+**3. Real Estate Search:**
+
+```json
+{
+  "filter-panel": {
+    "layers": [{
+      "layerPath": "properties",
+      "layerName": "Properties",
+      "attributes": [
+        { "fieldName": "property_type", "displayLabel": "Type", "filterType": "multiselect" },
+        { "fieldName": "price", "displayLabel": "Price Range", "filterType": "range" },
+        { "fieldName": "bedrooms", "displayLabel": "Bedrooms", "filterType": "range" },
+        { "fieldName": "listing_date", "displayLabel": "Listed", "filterType": "date" }
+      ]
+    }],
+    "settings": { "autoApply": true, "showFeatureCount": true }
+  }
+}
+```
+
+### Accessibility
+
+The Filter Panel includes:
+
+- Proper ARIA labels on all interactive elements
+- Keyboard navigation support (Tab, Enter, Space, Arrow keys)
+- Screen reader compatibility
+- Focus management when panel opens/closes
+- Collapsible sections with keyboard support
+- Clear visual indicators for filter states
+
+### Performance Considerations
+
+- **Large Datasets:** Range filters use debounced updates to avoid excessive map redraws
+- **Value Loading:** Unique values for select/multiselect filters are loaded asynchronously
+- **Auto-Apply:** May cause frequent map updates with large datasets. Consider using manual apply mode (`autoApply: false`)
+- **Multiple Layers:** Each layer's filters are managed independently
+
+### Error Handling
+
+The panel gracefully handles:
+
+- **Invalid Field Names:** Displays error message if field is not found in layer schema
+- **Missing Layer:** Shows warning if layer path does not exist
+- **No Values:** Displays "No values available" for empty select/multiselect fields
+- **Invalid Dates:** Date filters validate date ranges
+- **Type Mismatches:** Range filters validate that fields contain numeric data
 
 **See Also:**
 
