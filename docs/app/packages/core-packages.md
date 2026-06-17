@@ -324,7 +324,7 @@ For example, the time-slider package has a [schema](https://github.com/Canadian-
 
 ## Available core packages
 
-**App bar packages:** `aoi-panel`, `about-panel`, `custom-legend`
+**App bar packages:** `aoi-panel`, `about-panel`, `custom-legend`, `filter-panel`
 
 **Footer bar packages:** `geochart`, `time-slider`
 

@@ -15,7 +15,7 @@ This section contains comprehensive documentation for GeoView's package system, 
 
 ## 🔌 Core Packages
 
-GeoView includes six built-in packages that extend the viewer's functionality:
+GeoView includes eight built-in packages that extend the viewer's functionality:
 
 | Package           | Description                                | Location    |
 | ----------------- | ------------------------------------------ | ----------- |
@@ -25,6 +25,8 @@ GeoView includes six built-in packages that extend the viewer's functionality:
 | **drawer**        | Drawing and geometry editing tools         | Nav bar     |
 | **aoi-panel**     | Area of Interest selection and management  | App bar     |
 | **custom-legend** | Advanced legend customization              | App bar     |
+| **about-panel**   | Information panel with Markdown support    | App bar     |
+| **filter-panel**  | Layer attribute filtering and search       | App bar     |
 
 **See:** [Core Packages Reference](./geoview-core-packages.md) for detailed documentation.
 
