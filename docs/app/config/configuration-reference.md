@@ -552,7 +552,7 @@ appBar?: {
   selectedTimeSliderLayerPath: string;
 };
 
-TypeValidAppBarCoreProps = "about-panel" | "geolocator" | "export" | "aoi-panel" | "custom-legend" | "guide" | "legend" | "details" | "data-table" | "layers" | "stac-browser";
+TypeValidAppBarCoreProps = "about-panel" | "geolocator" | "export" | "aoi-panel" | "custom-legend" | "guide" | "legend" | "details" | "data-table" | "layers" | "stac-browser" | "filter-panel";
 ```
 
 **Properties:**
@@ -564,6 +564,7 @@ TypeValidAppBarCoreProps = "about-panel" | "geolocator" | "export" | "aoi-panel"
     - `"export"` - Map export functionality
     - `"aoi-panel"` - **AOI Panel package** - Area of interest selection
     - `"custom-legend"` - **Custom Legend package** - Custom legend display
+    - `"filter-panel"` - **Filter Panel package** - Layer attribute filtering
     - `"stac-browser"` - **Custom Stac Browser package** - Browse Stac
     - `"guide"` - User guide tab
     - `"legend"` - Layer legend display
@@ -2336,6 +2337,7 @@ Configuration schemas for GeoView packages. Packages are loaded and configured t
 - **[Custom Legend](#custom-legend-package)**: Loaded via `appBar.tabs.core: ["custom-legend"]`
 - **[Drawer](#drawer-package)**: Loaded via `navBar: ["drawer"]`
 - **[About Panel](#about-panel-package)**: Loaded via `appBar.tabs.core: ["about-panel"]`
+- **[Filter Panel](#filter-panel-package)**: Loaded via `appBar.tabs.core: ["filter-panel"]`
 
 ### Package Configuration Methods
 
@@ -3088,6 +3090,183 @@ When using `mdPath` or `mdContent`, the About Panel supports standard Markdown s
 - The `aboutTitle` property customizes the panel header and accessibility label
 - Custom icons should be 24x24 pixels for best display
 - If no content is provided, the panel will be empty but functional
+
+---
+
+### Filter Panel Package
+
+Layer attribute filtering panel with support for multiple filter types.
+
+**Loading:** Include `"filter-panel"` in `appBar.tabs.core` array to enable this package.
+
+#### Schema
+
+```typescript
+interface FilterPanelConfig {
+  enabled?: boolean;
+  isOpen?: boolean;
+  version?: string;
+  layers?: Array<{
+    layerPath: string;
+    layerName: string;
+    enabled?: boolean;
+    attributes?: Array<{
+      fieldName: string;
+      displayLabel: string;
+      filterType: 'select' | 'multiselect' | 'range' | 'date';
+      enabled?: boolean;
+      defaultValues?: any;
+    }>;
+  }>;
+  settings?: {
+    title?: string;
+    showLayerNames?: boolean;
+    collapsible?: boolean;
+    defaultCollapsed?: boolean;
+    showApplyButton?: boolean;
+    showResetButton?: boolean;
+    autoApply?: boolean;
+    showFeatureCount?: boolean;
+  };
+}
+```
+
+#### Properties
+
+- **enabled**: Whether the filter panel is enabled (default: true)
+- **isOpen**: Initial panel state (default: false)
+- **version**: Schema version (default: "1.0")
+- **layers**: Array of layer configurations for filtering
+  - **layerPath** (required): Unique layer path identifier
+  - **layerName** (required): Display name for the layer
+  - **enabled**: Whether filtering is enabled for this layer (default: true)
+  - **attributes**: Array of filterable attributes
+    - **fieldName** (required): Field name from the layer schema
+    - **displayLabel** (required): Label displayed in the UI
+    - **filterType** (required): One of: `"select"`, `"multiselect"`, `"range"`, `"date"`
+    - **enabled**: Whether this filter is enabled (default: true)
+    - **defaultValues**: Initial filter values (varies by filter type)
+- **settings**: Panel display and behavior settings
+  - **title**: Panel header title (default: "Filter Layers")
+  - **showLayerNames**: Show layer names in the panel (default: true)
+  - **collapsible**: Allow collapsing layer sections (default: true)
+  - **defaultCollapsed**: Initial collapsed state (default: false)
+  - **showApplyButton**: Show manual apply button (default: false)
+  - **showResetButton**: Show reset all button (default: true)
+  - **autoApply**: Apply filters automatically on change (default: true)
+  - **showFeatureCount**: Display filtered feature counts (default: true)
+
+#### Filter Types
+
+1. **Select** - Single-value dropdown
+2. **Multiselect** - Multiple-value checkbox list with "All" option
+3. **Range** - Numeric min/max range with slider
+4. **Date** - Date range picker with start/end dates
+
+#### Examples
+
+**Basic Multiselect:**
+
+```json
+"corePackagesConfig": [
+  {
+    "filter-panel": {
+      "enabled": true,
+      "isOpen": false,
+      "layers": [
+        {
+          "layerPath": "cities-layer",
+          "layerName": "Canadian Cities",
+          "attributes": [
+            {
+              "fieldName": "province",
+              "displayLabel": "Province",
+              "filterType": "multiselect"
+            }
+          ]
+        }
+      ]
+    }
+  }
+]
+```
+
+**Multiple Filter Types:**
+
+```json
+"corePackagesConfig": [
+  {
+    "filter-panel": {
+      "enabled": true,
+      "layers": [
+        {
+          "layerPath": "population-data",
+          "layerName": "Population Data",
+          "attributes": [
+            {
+              "fieldName": "city_name",
+              "displayLabel": "City",
+              "filterType": "select"
+            },
+            {
+              "fieldName": "population",
+              "displayLabel": "Population Range",
+              "filterType": "range"
+            },
+            {
+              "fieldName": "census_date",
+              "displayLabel": "Census Date",
+              "filterType": "date"
+            }
+          ]
+        }
+      ]
+    }
+  }
+]
+```
+
+**Manual Apply Mode:**
+
+```json
+"corePackagesConfig": [
+  {
+    "filter-panel": {
+      "layers": [
+        {
+          "layerPath": "environmental-data",
+          "layerName": "Environmental Monitoring",
+          "attributes": [
+            {
+              "fieldName": "pollutant_type",
+              "displayLabel": "Pollutant Type",
+              "filterType": "multiselect"
+            },
+            {
+              "fieldName": "concentration",
+              "displayLabel": "Concentration (ppm)",
+              "filterType": "range"
+            }
+          ]
+        }
+      ],
+      "settings": {
+        "autoApply": false,
+        "showApplyButton": true
+      }
+    }
+  }
+]
+```
+
+#### Notes
+
+- Layer paths must reference existing layers in the map configuration
+- Field names must match actual field names in the layer schema
+- When `autoApply: true`, filters apply on every change. When `false`, user must click "Apply Filters"
+- Feature count shows the number of features matching current filters
+- UI automatically adapts to the map's theme (geo.ca, light, dark)
+- Range and date filters are optimized for large datasets
 
 ---
 
