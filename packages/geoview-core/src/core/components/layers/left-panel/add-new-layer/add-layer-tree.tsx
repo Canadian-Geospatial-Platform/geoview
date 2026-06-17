@@ -59,8 +59,8 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
 
     const curLayerId = `${parentId ? `${parentId}/` : ''}${layerId}`;
     return (
-      <Tooltip title={layerName} placement="top">
-        <TreeItem key={curLayerId} itemId={curLayerId} label={layerName} aria-label={layerName}>
+      <Tooltip key={curLayerId} title={layerName} placement="top">
+        <TreeItem itemId={curLayerId} label={layerName} aria-label={layerName}>
           {layer.listOfLayerEntryConfig?.map((subLayer) => renderTreeItem(subLayer, curLayerId))}
         </TreeItem>
       </Tooltip>

@@ -40,6 +40,7 @@ import {
   useUIController,
 } from '@/core/controllers/use-controllers';
 
+/** Style classes for button groups. */
 const sxClasses = {
   buttonGroup: {
     paddingTop: 12,
@@ -47,14 +48,22 @@ const sxClasses = {
   },
 };
 
+/** Layer entry type constants from the schema. */
 const { GEOCORE, GEOPACKAGE, SHAPEFILE } = CONST_LAYER_ENTRY_TYPES;
 
 interface FileUploadSectionProps {
+  /** Callback invoked when a file is selected. */
   onFileSelected: (file: File, fileURL: string, fileName: string) => void;
+  /** Callback invoked when the URL input changes. */
   onUrlChanged: (url: string) => void;
+  /** Callback invoked on keydown events. */
   onKeyDown: (event: KeyboardEvent<HTMLDivElement>) => void;
+  /** The URL to display in the input field. */
   displayURL: string;
-  disabledLayerTypes: string[];
+  /** List of layer types that are disabled. */
+  disabledLayerTypes: TypeInitialGeoviewLayerType[];
+  /** Optional ref to the upload button element. */
+  uploadButtonRef?: React.RefObject<HTMLButtonElement | null>;
 }
 
 /**
@@ -69,6 +78,7 @@ function FileUploadSection({
   onKeyDown,
   displayURL,
   disabledLayerTypes,
+  uploadButtonRef,
 }: FileUploadSectionProps): JSX.Element {
   // Log
   logger.logTraceRender('components/layers/left-panel/add-new-layer/file-upload-section');
@@ -79,7 +89,7 @@ function FileUploadSection({
 
   // State
   const [localDisplayURL, setLocalDisplayURL] = useState<string>(displayURL);
-  const dragPopover = useRef(null);
+  const dragPopover = useRef<HTMLDivElement>(null);
   const [drag, setDrag] = useState<boolean>(false);
 
   // Ref
@@ -194,8 +204,7 @@ function FileUploadSection({
       fileInputRef.current.click();
     }
   };
-  // TODO: WCAG Issue #3117 -  aria-label(layers.fileTypes) needs to include button text (layers.upload)...
-  // TODO: WCAG Issue #3117 -  ... button text (Choose a file) does not begin with sane word aria-label (Upload a...)
+
   return (
     <Box
       className="dropzone"
@@ -227,7 +236,6 @@ function FileUploadSection({
       <Box>
         <input
           type="file"
-          id="fileUpload"
           ref={fileInputRef}
           style={{ display: 'none' }}
           onChange={handleChange}
@@ -245,6 +253,7 @@ function FileUploadSection({
         className="buttonOutlineFilled"
         aria-label={t('layers.fileTypes')}
         tooltip={t('layers.fileTypes')}
+        ref={uploadButtonRef}
       >
         <FileUploadIcon />
         <Box component="span">{t('layers.upload')}</Box>
@@ -254,7 +263,7 @@ function FileUploadSection({
       </p>
       <TextField
         sx={{ width: '100%' }}
-        label={disabledLayerTypes.includes(GEOCORE) ? t('layers.urlNoGeocore') : t('layers.url')}
+        label={disabledLayerTypes.includes(GEOCORE as TypeInitialGeoviewLayerType) ? t('layers.urlNoGeocore') : t('layers.url')}
         variant="standard"
         value={localDisplayURL}
         onChange={handleInput}
@@ -263,16 +272,16 @@ function FileUploadSection({
         slotProps={{
           inputLabel: {
             sx: {
-              color: (theme) => theme.palette.geoViewColor.textColor.light[200], // WCAG - Matches global placeholder text color
+              color: (theme) => theme.palette.geoViewColor?.textColor.light[200], // WCAG - Matches global placeholder text color
               '&.Mui-focused': {
-                color: (theme) => theme.palette.geoViewColor.primary.main, // Primary color when focused
+                color: (theme) => theme.palette.geoViewColor?.primary.main, // Primary color when focused
               },
             },
           },
           input: {
             sx: {
               '&:focus-visible': {
-                outline: (theme) => `2px solid ${theme.palette.geoViewColor.primary.main}`,
+                outline: (theme) => `2px solid ${theme.palette.geoViewColor?.primary.main}`,
                 outlineOffset: '2px',
               },
               '& textarea.keyboard-focused': {
@@ -305,12 +314,12 @@ export function AddNewLayer(): JSX.Element {
     CONST_LAYER_TYPES;
 
   // States
-  const [activeStep, setActiveStep] = useState(0);
-  const [layerURL, setLayerURL] = useState('');
-  const [displayURL, setDisplayURL] = useState('');
+  const [activeStep, setActiveStep] = useState<number>(0);
+  const [layerURL, setLayerURL] = useState<string>('');
+  const [displayURL, setDisplayURL] = useState<string>('');
   const [layerType, setLayerType] = useState<TypeInitialGeoviewLayerType | ''>('');
   const [layerTree, setLayerTree] = useState<TypeGeoviewLayerConfig | undefined>();
-  const [layerName, setLayerName] = useState('');
+  const [layerName, setLayerName] = useState<string>('');
   const [layerIdsToAdd, setLayerIdsToAdd] = useState<string[]>([]);
   const [isMultiple, setIsMultiple] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -323,8 +332,10 @@ export function AddNewLayer(): JSX.Element {
 
   // Ref
   const serviceTypeRef = useRef<HTMLDivElement>(null);
-  const isMultipleRef = useRef<HTMLDivElement>(null);
-  const isMultipleTextFieldRef = useRef<HTMLDivElement>(null);
+  const layerSelectionTreeContainerRef = useRef<HTMLDivElement>(null);
+  const configureLayerNameInputRef = useRef<HTMLInputElement>(null);
+  const finalLayerNameInputRef = useRef<HTMLInputElement>(null);
+  const uploadButtonRef = useRef<HTMLButtonElement>(null);
 
   // Store
   const mapId = useStoreGeoViewMapId();
@@ -381,7 +392,7 @@ export function AddNewLayer(): JSX.Element {
     uiController.addMessage('error', 'layers.errorServer', { serviceTypeName: serviceName });
   };
 
-  // #endregion
+  // #endregion ERRORS
 
   // Set layer type for "Select format" step if detected (Step 1)
   const setLayerTypeIfAllowed = (layerTypeValue: TypeInitialGeoviewLayerType): boolean => {
@@ -704,7 +715,7 @@ export function AddNewLayer(): JSX.Element {
     }
   };
 
-  // #endregion
+  // #endregion HANDLERS FOR THE STEPS
 
   // #region HANDLERS
 
@@ -817,7 +828,9 @@ export function AddNewLayer(): JSX.Element {
     setTimeSliderToAdd(undefined);
   };
 
-  // #endregion
+  // #endregion HANDLERS
+
+  // #region USE EFFECTS
 
   /**
    * Validates the URL and manages step button enabled state based on active step.
@@ -891,27 +904,41 @@ export function AddNewLayer(): JSX.Element {
     // Log
     logger.logTraceUseEffect('ADD-NEW-LAYER - step focus management', activeStep);
 
+    if (activeStep === 0) {
+      // Focus the upload button using the ref
+      const timeoutId = setTimeout(() => {
+        uploadButtonRef.current?.focus();
+      }, 0);
+
+      // Cleanup: cancel focus attempt if step changes or unmounts
+      return () => clearTimeout(timeoutId);
+    }
+
     if (activeStep === 1) {
-      (serviceTypeRef.current?.getElementsByTagName('input')[0].previousSibling as HTMLDivElement).focus();
+      const element = serviceTypeRef.current?.querySelector<HTMLElement>('[role="combobox"]');
+      element?.focus();
     }
 
     if (activeStep === 2) {
-      if (isMultipleRef.current) {
-        // handle is Multiple fields focus
-        const id = isMultipleRef.current?.dataset?.id;
-        const elem = isMultipleRef.current?.querySelector('#service-layer-label') as HTMLInputElement;
-        if (id === 'autocomplete' && elem) {
-          elem.focus();
-        } else {
-          isMultipleTextFieldRef.current?.getElementsByTagName('input')[0]?.focus();
-        }
+      if (isMultiple) {
+        // Focus the first tree item in the multi-layer selection tree
+        const treeItemToFocus = layerSelectionTreeContainerRef.current?.querySelector<HTMLElement>('[role="treeitem"]');
+        treeItemToFocus?.focus();
+      } else {
+        // Focus the layer name input of single layer configuration
+        configureLayerNameInputRef.current?.focus();
       }
     }
 
     if (activeStep === 3) {
-      isMultipleTextFieldRef.current?.getElementsByTagName('input')[0]?.focus();
+      finalLayerNameInputRef.current?.focus();
     }
-  }, [activeStep]);
+
+    // No cleanup needed for other steps (synchronous focus calls)
+    return undefined;
+  }, [activeStep, isMultiple]);
+
+  // #endregion USE EFFECTS
 
   /**
    * Creates a set of Continue / Back buttons
@@ -930,7 +957,6 @@ export function AddNewLayer(): JSX.Element {
           </IconButton>
         ) : (
           <Button
-            id="nextButton"
             variant="contained"
             className="buttonOutlineFilled"
             size="small"
@@ -970,7 +996,7 @@ export function AddNewLayer(): JSX.Element {
         orientation="vertical"
         sx={{
           '& .MuiStepLabel-label:not(.Mui-active):not(.Mui-completed)': {
-            color: (theme) => theme.palette.geoViewColor.textColor.light[200], // WCAG - Matches global placeholder text color
+            color: (theme) => theme.palette.geoViewColor?.textColor.light[200], // WCAG - Matches global placeholder text color
           },
         }}
         steps={[
@@ -987,6 +1013,7 @@ export function AddNewLayer(): JSX.Element {
                     onKeyDown={handleNextKeyDown}
                     displayURL={displayURL}
                     disabledLayerTypes={disabledLayerTypes}
+                    uploadButtonRef={uploadButtonRef}
                   />
                   <NavButtons isFirst handleNext={handleStep1} />{' '}
                 </Box>
@@ -1043,11 +1070,23 @@ export function AddNewLayer(): JSX.Element {
                       variant="standard"
                       value={layerName}
                       onChange={handleNameLayer}
-                      ref={isMultipleTextFieldRef}
+                      inputRef={configureLayerNameInputRef}
                       onKeyDown={handleNextKeyDown}
                     />
                   ) : (
-                    layerTree && <AddLayerTree layerTree={layerTree} onSelectedItemsChange={setLayerIdsToAdd} />
+                    layerTree && (
+                      <Box
+                        ref={layerSelectionTreeContainerRef}
+                        sx={{
+                          // Targets the inner content wrapper when the main item or root receives native JS focus
+                          '& .MuiTreeItem-root:focus > .MuiTreeItem-content, & .MuiTreeItem-root:focus-within > .MuiTreeItem-content': {
+                            backgroundColor: (theme) => theme.palette.action.hover,
+                          },
+                        }}
+                      >
+                        <AddLayerTree layerTree={layerTree} onSelectedItemsChange={setLayerIdsToAdd} />
+                      </Box>
+                    )
                   )}
                   <br />
                   <NavButtons isLast={!isMultiple} handleNext={isMultiple ? handleStep3 : handleStepLast} />
@@ -1070,6 +1109,7 @@ export function AddNewLayer(): JSX.Element {
                         value={layerName}
                         onChange={handleNameLayer}
                         onKeyDown={handleNextKeyDown}
+                        inputRef={finalLayerNameInputRef}
                       />
                       <br />
                       <NavButtons isLast handleNext={handleStepLast} />
