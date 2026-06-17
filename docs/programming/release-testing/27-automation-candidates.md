@@ -18,28 +18,32 @@ Use the **TestCreator** agent to generate the actual test code.
 
 These tests from the release plan are already covered by the existing test suite:
 
-| Release Plan Item                  | Existing Test                                                       |
-| ---------------------------------- | ------------------------------------------------------------------- |
-| North arrow rotation (LCC)         | `suite-map-varia` → `testNorthArrowRotationLCC`                     |
-| Projection switch                  | `suite-map-varia` → `testSwitchProjectionAndExtent`                 |
-| Map zoom                           | `suite-map-varia` → `testMapZoom`                                   |
-| Zoom to extent                     | `suite-map-varia` → `testZoomToExtent`                              |
-| Basemap create/switch              | `suite-map-varia` → `testCreateAndSetBasemap`                       |
-| Language switch                    | `suite-map-varia` → `testSetLanguage`                               |
-| Footer/app bar tabs                | `suite-map-varia` → `testFooterBarSelectTab`, `testAppBarSelectTab` |
-| Non-queryable layer not in details | `suite-map-varia` → `testNonQueryableLayerNotInDetails`             |
-| Hoverable state                    | `suite-map-varia` → `testLayerHoverableState`                       |
-| Overview map show/hide on zoom     | `suite-map-config` → `testOverviewMapHideOnZoom`                    |
-| Overview map + projection          | `suite-map-config` → `testOverviewMapHideOnZoomWithReprojection`    |
-| Initial settings states            | `suite-map-config` → `testInitialSettingsState*`                    |
-| Initial settings controls          | `suite-map-config` → `testInitialSettingsControlsAllFalse`          |
-| Opacity cascading                  | `suite-map-config` → `testInitialSettingsOpacityCascading*`         |
-| View settings zoom constraints     | `suite-map-config` → `testViewSettingsZoomConstraints`              |
-| Error layer configs (all types)    | `suite-config` → `test*BadUrl`                                      |
-| Settings cascade to sublayers      | `suite-config` → `testSettingsCascadeToSublayers`                   |
-| Swiper lifecycle                   | `suite-swiper` → `testSwiperLifecycle`                              |
-| All layer types load correctly     | `suite-layer` → 34 tests                                            |
-| All utility functions              | `suite-utilities` → 52 tests                                        |
+| Release Plan Item                  | Existing Test                                                          |
+| ---------------------------------- | ---------------------------------------------------------------------- |
+| North arrow rotation (LCC)         | `suite-map-varia` → `testNorthArrowRotationLCC`                        |
+| Projection switch                  | `suite-map-varia` → `testSwitchProjectionAndExtent`                    |
+| Map zoom                           | `suite-map-varia` → `testMapZoom`                                      |
+| Zoom to extent                     | `suite-map-varia` → `testZoomToExtent`                                 |
+| Basemap create/switch              | `suite-map-varia` → `testCreateAndSetBasemap`                          |
+| Language switch                    | `suite-map-varia` → `testSetLanguage`                                  |
+| Footer/app bar tabs                | `suite-map-varia` → `testFooterBarSelectTab`, `testAppBarSelectTab`    |
+| Non-queryable layer not in details | `suite-map-varia` → `testNonQueryableLayerNotInDetails`                |
+| Hoverable state                    | `suite-map-varia` → `testLayerHoverableState`                          |
+| Overview map show/hide on zoom     | `suite-map-config` → `testOverviewMapHideOnZoom`                       |
+| Overview map + projection          | `suite-map-config` → `testOverviewMapHideOnZoomWithReprojection`       |
+| Overview map present/absent        | `suite-map-config` → `testOverviewMapPresent`, `testOverviewMapAbsent` |
+| Initial settings states            | `suite-map-config` → `testInitialSettingsState*`                       |
+| Initial settings controls          | `suite-map-config` → `testInitialSettingsControlsAllFalse`             |
+| Opacity cascading                  | `suite-map-config` → `testInitialSettingsOpacityCascading*`            |
+| View settings zoom constraints     | `suite-map-config` → `testViewSettingsZoomConstraints`                 |
+| Initial view layerIds set extent   | `suite-map-config` → `testInitialViewLayerIdsSetExtent`                |
+| Config defaults (footer/app/nav)   | `suite-map-config` → `testNoFooterBar*`, `testEmptyNavBar*`            |
+| Data table appBar/footerBar tab    | `suite-map-config` → `testDataTableSelectedTab*`                       |
+| Error layer configs (all types)    | `suite-config` → `test*BadUrl`                                         |
+| Settings cascade to sublayers      | `suite-config` → `testSettingsCascadeToSublayers`                      |
+| Swiper lifecycle                   | `suite-swiper` → `testSwiperLifecycle`                                 |
+| All layer types load correctly     | `suite-layer` → 34 tests                                               |
+| All utility functions              | `suite-utilities` → 52 tests                                           |
 
 ---
 
@@ -125,6 +129,142 @@ These tests from the release plan are already covered by the existing test suite
 | 34  | **Notification stacking** — Generate same error multiple times, verify count increments (not duplicated) | P2       | Store-based, easy assertions         |
 | 35  | **Data table column visibility toggle** — Hide/show columns, verify store `columnVisibility` updates     | P2       | Store-based check                    |
 | 36  | **Geolocator search + zoom** — Search for location, verify map zooms to result extent                    | P2       | API integration, requires service up |
+
+### Fullscreen & DOM State (suite-ui or suite-map-config)
+
+| #   | Test                                                                                                | Priority | Notes                                                          |
+| --- | --------------------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------- |
+| 37  | **Panel fullscreen DOM** — Open panel, trigger fullscreen, check DOM element dimensions vs viewport | P2       | DOM size check: `element.offsetHeight` vs `window.innerHeight` |
+| 38  | **Viewer fullscreen DOM** — Trigger viewer fullscreen, check `document.fullscreenElement` is set    | P2       | Browser fullscreen API check                                   |
+
+### Basemap Store State (suite-map-config)
+
+| #   | Test                                                                                                                  | Priority | Notes                                              |
+| --- | --------------------------------------------------------------------------------------------------------------------- | -------- | -------------------------------------------------- |
+| 39  | **Basemap labeled/shaded config** — Create map with `labeled: false`, verify store basemap state has `labeled: false` | P1       | Store check via `getStoreMapBasemapOptions(mapId)` |
+| 40  | **Basemap persists across projection** — Switch projection, verify store `basemapId` unchanged                        | P1       | Store check after `mapController.setProjection()`  |
+| 41  | **TLS/SL config basemap state** — Load TLS/SL configs, verify store has correct labeled/shaded values                 | P1       | `createMapFromConfigFast` + store assertion        |
+
+### Navbar DOM Checks (suite-map-config or suite-ui)
+
+| #   | Test                                                                                                    | Priority | Notes                                                              |
+| --- | ------------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------ |
+| 42  | **Navbar button presence** — Load config, check DOM for each expected button element                    | P1       | Query `document.querySelector` for button class/id per button type |
+| 43  | **Zoom via API** — Call `mapController.zoomMap()`, verify store zoom changes                            | P1       | Already partially covered; explicit pre/post store check           |
+| 44  | **Home button zoom/center** — Pan/zoom away, call `zoomToInitialExtent()`, verify store matches initial | P1       | Store zoom + center comparison                                     |
+| 45  | **Rotation via API** — Call `mapController.rotate(45)`, verify store rotation = 45                      | P1       | Store-based check                                                  |
+| 46  | **Projection via API** — Call `mapController.setProjection(3857)`, verify store projection = 3857       | P1       | Already covered in suite-map-varia; confirm store value            |
+
+### Projection & Rotation Store Checks (suite-map-varia)
+
+| #   | Test                                                                                               | Priority | Notes                                           |
+| --- | -------------------------------------------------------------------------------------------------- | -------- | ----------------------------------------------- |
+| 47  | **3 projections load** — Create maps in 3978, 3857, 3573, verify store projection matches for each | P1       | `createMapFromConfigFast` × 3, store check each |
+| 48  | **Rotation reset to 0** — Rotate, reset, verify store rotation = 0                                 | P1       | `rotate(45)` → `rotate(0)` → store check        |
+
+### Legend Controls (suite-map-varia or new suite)
+
+| #   | Test                                                                                                              | Priority | Notes                                                          |
+| --- | ----------------------------------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------- |
+| 49  | **Collapse all legend entries** — Call `layerController.setAllLayerCollapsed(true)`, verify store collapsed state | P1       | Store check via `getStoreLayerLegendCollapsedSet(mapId)`       |
+| 50  | **Expand all legend entries** — Call `layerController.setAllLayerCollapsed(false)`, verify store collapsed state  | P1       | Store check via `getStoreLayerLegendCollapsedSet(mapId)`       |
+| 51  | **Toggle all layer visibility off** — Toggle all visibility off, verify store visibility for each layer is false  | P1       | Store check per layer path                                     |
+| 52  | **Toggle all layer visibility on** — Toggle all visibility on, verify store visibility for each layer is true     | P1       | Store check per layer path                                     |
+| 53  | **Toggle single layer visibility** — Call `layerController.setLayerVisibility()`, verify store updates            | P1       | Store check for single layer path                              |
+| 54  | **Zoom to layer extent from legend** — Call `mapController.zoomToExtent()` with layer bounds, verify map extent   | P2       | Overlaps with #5; legend-specific entry point                  |
+| 55  | **Class count DOM text** — Load layer with style classes, verify DOM text shows "y of x classes"                  | P1       | DOM `textContent` check on subtitle element                    |
+| 56  | **Toggle style class off updates filter** — Toggle one class off, verify `layerFilterClass` store updates         | P1       | Overlaps with #16; call `toggleItemVisibility()` + store check |
+| 57  | **Toggle all style classes off** — Toggle all classes off, verify filter excludes all and count shows "0 of x"    | P1       | Store filter check + DOM count text                            |
+| 58  | **Toggle all style classes on** — Toggle all back on, verify filter is cleared and count shows "x of x"           | P1       | Store filter check + DOM count text                            |
+
+### Layers Panel (suite-layer or suite-map-varia)
+
+| #   | Test                                                                                                                           | Priority | Notes                                                                           |
+| --- | ------------------------------------------------------------------------------------------------------------------------------ | -------- | ------------------------------------------------------------------------------- |
+| 59  | **Reorder layer store check** — Call `layerController.reorderLayer()`, verify store `orderedLayers` updates                    | P1       | Store check pre/post reorder                                                    |
+| 60  | **Reorder with groups** — Reorder a group layer, verify child paths remain under parent in `orderedLayers`                     | P1       | Store `orderedLayers` hierarchy check                                           |
+| 61  | **Collapse/Expand all layers panel** — Call `setAllLayerCollapsed()`, verify store collapsed state                             | P1       | Same API as legend #49-50; layers panel shares ToggleAll                        |
+| 62  | **Toggle layer visibility** — Call `layerController.setLayerVisibility()`, verify store visibility updates                     | P1       | Overlaps with legend #53; layers panel entry point                              |
+| 63  | **Toggle all on group** — Toggle all children visibility on a group, verify store per child                                    | P1       | Store visibility check per child path                                           |
+| 64  | **Toggle all with error sublayers** — Toggle all on group with error child, verify no crash, valid children toggle             | P1       | Error child skipped, valid children store check                                 |
+| 65  | **Add duplicate geocore UUID** — Call `addGeoviewLayerByGeoCoreUUID()` twice with same UUID, verify rejection                  | P1       | Overlaps with config #7; add-layer entry point                                  |
+| 66  | **Type dropdown count** — Check DOM for layer type dropdown options, verify 16+ types listed                                   | P1       | DOM option count check                                                          |
+| 67  | **Data Table shortcut (footer tab)** — Click shortcut with `data-table` in footerBar, verify active tab switches to data-table | P1       | Store check: `activeFooterBarTab` changes to `data-table`                       |
+| 78  | **Data Table shortcut button presence** — Verify button DOM exists for layer registered in `datatableSettings` store           | P1       | DOM `getElementById(mapId-footerBar-table-details)` + store `datatableSettings` |
+| 68  | **Zoom to layer extent** — Call `mapController.zoomToExtent()` for a layer, verify store extent                                | P2       | Overlaps with #5 and legend #54                                                 |
+| 69  | **Remove layer** — Call `layerController.deleteLayer()`, verify layer path removed from store                                  | P1       | Store `orderedLayers` no longer contains path                                   |
+| 70  | **Group opacity capping** — Set group opacity to 50%, verify children `getOpacity()` ≤ 0.5                                     | P1       | Overlaps with #13; `setOpacity()` + `getOpacity()` check per child              |
+| 71  | **Nested group opacity** — Set parent 50%, child group 80%, verify child effective = 50%                                       | P1       | `Math.min(parent, child)` capping verification                                  |
+| 72  | **Toggle child visibility from right panel** — Call `layerController.setLayerVisibility()` on child, verify store              | P1       | Store visibility check for child path                                           |
+| 73  | **Toggle style class from layers panel** — Toggle style item, verify `layerFilterClass` store                                  | P1       | Overlaps with legend #56; layers panel entry point                              |
+| 74  | **Style class count from layers panel** — Verify DOM subtitle shows "y of x classes"                                           | P1       | Overlaps with legend #55; layers panel DOM check                                |
+| 75  | **inVisibleRange store check** — Zoom in/out of layer's range, verify `isInVisibleRange()` returns correct boolean             | P1       | `setMapZoomLevel()` + `isInVisibleRange()` check                                |
+| 76  | **Vector tile projection warning** — Switch projection with vector tile layer loaded, verify notification emitted              | P1       | Notification store check after `setProjection()`                                |
+
+### Details Panel (suite-details or suite-map-varia)
+
+| #   | Test                                                                                                             | Priority | Notes                                                                 |
+| --- | ---------------------------------------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------- |
+| 79  | **Clear all highlights** — Call `clearHighlightsUnchecked()`, verify no highlighted features remain on the map   | P1       | Store/API check: no highlighted features after clear                  |
+| 80  | **Non-queryable layer excluded** — Load config with `queryable: false`, query map, verify layer not in results   | P1       | Already in suite-map-varia (`testNonQueryableLayerNotInDetails`)      |
+| 81  | **Zoom to feature** — Trigger zoom-to-feature on a query result, verify map extent changes                       | P2       | Store extent check after zoom                                         |
+| 82  | **nameField as label** — Query a layer with configured `nameField`, verify feature label matches the field value | P2       | `createMapFromConfigFast` with 29-summary config + query result check |
+
+### Data Table (suite-data-table or suite-map-varia)
+
+| #   | Test                                                                                                                               | Priority | Notes                                                                  |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------- |
+| 83  | **Row count matches store** — Open data table, verify displayed row count matches `allFeaturesDataArray` length for that layer     | P1       | Store `allFeaturesDataArray` count check                               |
+| 84  | **geoviewID column hidden by default** — Check store `columnVisibilityRecord.geoviewID === false`                                  | P1       | Store default state check                                              |
+| 85  | **Filter by extent unavailable for Esri Dynamic** — Select Esri Dynamic layer, verify filter toggle absent/disabled                | P1       | DOM/store check: `filterDataToExtent` not available for dynamic layers |
+| 86  | **Clear filters resets state** — Apply column filter, click Clear, verify store `columnFiltersRecord` is empty                     | P1       | Store check pre/post clear                                             |
+| 87  | **tableFilters store on apply** — Apply filter to map, verify `tableFilters[layerPath]` store contains filter string               | P1       | Store check after `applyMapFilters()`                                  |
+| 88  | **Apply-to-map disabled during global search** — Set global search text, verify `mapFilteredRecord` toggle disabled                | P1       | Store/DOM check: toggle disabled when `globalFilterRecord` non-empty   |
+| 89  | **layerFilterClass reflected in table** — Toggle style classes off, verify store `layerFilterClass` affects table                  | P1       | Overlaps with legend #56; table perspective                            |
+| 90  | **allFeaturesDataArray populated** — Open data table, verify store array has entries                                               | P1       | Store basic population check                                           |
+| 91  | **rowsFilteredRecord count** — Apply filter, verify `layersDataTableSetting[layerPath].rowsFilteredRecord` matches displayed count | P1       | Store value vs DOM count comparison                                    |
+| 92  | **mapFilteredRecord boolean** — Toggle "Apply filter to map" ON, verify store `mapFilteredRecord === true`                         | P1       | Store boolean check                                                    |
+
+### View Settings (suite-map-config)
+
+| #   | Test                                                                                                                                                            | Priority | Notes                                                                  |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------- |
+| 94  | **Initial view vs home view** — Load 27-view-settings config, verify initial zoom = 7 (Ottawa), call `zoomToInitialExtent()`, verify zoom changes to 4 (Canada) | P1       | `createMapFromConfigFast` + store zoom/center comparison pre/post Home |
+| 95  | **Home button navigates to homeView** — After `zoomToInitialExtent()`, verify store center ≈ `[-95, 60]` (homeView coordinates)                                 | P1       | Store center check with tolerance                                      |
+
+### Projection Interactions (suite-map-varia)
+
+| #   | Test                                                                                                                       | Priority | Notes                                                                      |
+| --- | -------------------------------------------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------- |
+| 98  | **Vector tile projection warning** — Switch projection with VT layer loaded, verify notification emitted and layer removed | P1       | Overlaps with layers #76; notification store check after `setProjection()` |
+
+### Initial Settings (suite-map-config)
+
+| #   | Test                                                                                                                                        | Priority | Notes                                                             |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------- |
+| 99  | **Remove control enabled** — Load 23b config, verify esriFeature layer has `controls.remove === true` in store                              | P1       | Store check: `getStoreLayerControls()` for that layer path        |
+| 100 | **Legend collapsed initial state** — Load 23b config, verify GeoJSON group store `legendCollapsed === true`                                 | P1       | Store check: `getStoreLayerLegendCollapsed()` for that layer path |
+| 101 | **Custom opacity 0.7** — Load 23b config, verify esriImage layer `getOpacity() === 0.7`                                                     | P1       | Same pattern as existing 0.5 test; OL layer opacity check         |
+| 102 | **Parent controls cascade to children** — Load 23c config, verify children of geojsonLYR1 inherit `highlight: false, zoom: false` from root | P1       | Store `getStoreLayerControls()` per child path                    |
+| 103 | **Group-level override** — Load 23c config, verify each geojsonLYR2 group has different controls inherited by children                      | P1       | Store `getStoreLayerControls()` per group path                    |
+| 104 | **OGC Feature initial filter** — Load 23a config, verify `layerFilter` store contains correct filter string for OGC Feature layer           | P1       | Store `getStoreLayerFilter()` or `getInitialFilter()` check       |
+| 105 | **WFS initial filter** — Load 23a config, verify WFS layer filter = `STATE_ABBR = 'NY'` in store                                            | P1       | Store filter string comparison                                    |
+| 106 | **Esri Dynamic initial filter** — Load 23a config, verify filter = `E_Province = 'Manitoba'` in store                                       | P1       | Store filter string comparison                                    |
+| 107 | **Esri Feature initial filter** — Load 23a config, verify filter = `death = 'yes'` in store                                                 | P1       | Store filter string comparison                                    |
+| 108 | **GeoJSON initial filter** — Load 23a config, verify filter = `Province = 'Quebec'` in store                                                | P1       | Store filter string comparison                                    |
+| 109 | **Filter reflected in data table** — Load 23a config, open data table, verify row count matches filtered feature count                      | P1       | Store `allFeaturesDataArray` count check against expected         |
+
+### Swiper Plugin (suite-swiper)
+
+| #   | Test                                                                                                                           | Priority | Notes                              |
+| --- | ------------------------------------------------------------------------------------------------------------------------------ | -------- | ---------------------------------- |
+| 110 | **Add layer to swiper** — Call `activateForLayer`, verify store `swiperLayerPaths` contains the layer path                     | P1       | Store array check after activate   |
+| 111 | **Remove layer from swiper** — Call `deActivateForLayer`, verify store `swiperLayerPaths` no longer contains path              | P1       | Store array check after deactivate |
+| 112 | **Remove all swiper layers** — Call `deActivateAll`, verify store `swiperLayerPaths` is empty                                  | P1       | Store array length = 0             |
+| 113 | **Add layer after remove all** — Call `deActivateAll` then `activateForLayer`, verify store has new path                       | P1       | Store recovery check               |
+| 114 | **Set vertical orientation** — Call `setOrientation('vertical')`, verify store `swiperOrientation === 'vertical'`              | P1       | Store string check                 |
+| 115 | **Set horizontal orientation** — Call `setOrientation('horizontal')`, verify store `swiperOrientation === 'horizontal'`        | P1       | Store string check                 |
+| 116 | **Switch orientation** — Call `setOrientation('vertical')` then `setOrientation('horizontal')`, verify store updates each time | P1       | Sequential store checks            |
 
 ---
 

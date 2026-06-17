@@ -1,52 +1,70 @@
 # 17a — Time Slider
 
-Time slider plugin for time-aware layers.
+> **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
+
+Time slider plugin for time-aware layers. The time slider is a core package plugin (`geoview-time-slider`) that appears in the footer bar for layers with time dimension metadata.
 
 ## Layer Types
 
 Config: `configs/navigator/demos/11-package-time-slider.json`
 
-- [ ] **WMS time-aware layer** — Verify the time slider loads for WMS layers with time dimension.
-- [ ] **Esri Dynamic time-aware layer** — Verify the time slider loads for Esri Dynamic layers with time info.
-- [ ] **Esri Feature time-aware layer** — Verify time slider for Esri Feature layers.
-- [ ] **Esri Image time-aware layer** — Verify time slider for Esri Image layers.
+| Test                    | Description                      | Steps                                                          | Expected Result                                  | Auto |
+| ----------------------- | -------------------------------- | -------------------------------------------------------------- | ------------------------------------------------ | ---- |
+| WMS time-aware layer    | Time slider loads for WMS        | 1. Load the config<br>2. Check a WMS layer with time dimension | Time slider appears in footer bar for that layer | M    |
+| Esri Dynamic time-aware | Time slider loads for Esri Dyn   | 1. Check an Esri Dynamic layer with time info                  | Time slider appears and shows correct time range | M    |
+| Esri Feature time-aware | Time slider loads for Esri Feat  | 1. Check an Esri Feature layer with time info                  | Time slider appears and shows correct time range | M    |
+| Esri Image time-aware   | Time slider loads for Esri Image | 1. Check an Esri Image layer with time info                    | Time slider appears and shows correct time range | M    |
 
 ## Custom Time Slider
 
 Config: `configs/navigator/demos/12-package-time-slider-custom.json`
 
-- [ ] **Custom slider config** — Verify custom time slider settings (custom range, default values) apply correctly.
-- [ ] **Custom description** — Verify custom description text appears.
+| Test                 | Description                 | Steps                                                 | Expected Result                                                    | Auto |
+| -------------------- | --------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------ | ---- |
+| Custom slider config | Custom range/defaults apply | 1. Load the custom time slider config                 | Custom time range and default values apply correctly to the slider | M    |
+| Custom description   | Custom text appears         | 1. Check the time slider panel for custom description | Custom description text appears below or above the slider          | M    |
 
 ## Slider Controls
 
-- [ ] **Drag slider thumb** — Drag the slider thumb(s). Verify the map updates to show features at the selected time.
-- [ ] **Single handle** — For layers with a single time value, verify one thumb appears.
-- [ ] **Dual handles (range)** — For layers with time ranges, verify two thumbs appear for start/end.
-- [ ] **Play button** — Click play. Verify the slider animates through time steps.
-- [ ] **Pause button** — Click pause during animation. Verify it stops.
-- [ ] **Step forward/backward** — Use step buttons to move one time step. Verify correct increment.
-- [ ] **Reverse direction** — Toggle reverse direction. Verify the animation plays backward through time steps.
-- [ ] **Lock handles** — For dual-handle sliders, lock both handles together. Verify dragging one moves both in sync (maintaining the range width).
-- [ ] **Speed control** — If available, change animation speed. Verify the animation rate changes.
+Config: `configs/navigator/demos/11-package-time-slider.json`
+
+| Test                  | Description                     | Steps                                                                        | Expected Result                                              | Auto |
+| --------------------- | ------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------ | ---- |
+| Drag slider thumb     | Map updates on drag             | 1. Drag the slider thumb(s)                                                  | Map updates to show features at the selected time            | M    |
+| Single handle         | One thumb for single time value | 1. Check a layer with a single time value (WMS with `default` attribute)     | One thumb appears on the slider                              | M    |
+| Dual handles (range)  | Two thumbs for time range       | 1. Check a layer with time range (Esri layers or WMS without `default`)      | Two thumbs appear for start/end time selection               | M    |
+| Play button           | Animation plays forward         | 1. Click play                                                                | Slider animates through time steps; map updates at each step | M    |
+| Pause button          | Animation stops                 | 1. Click pause during animation                                              | Animation stops at the current position                      | M    |
+| Step forward/backward | Single time step increment      | 1. Use step buttons to move one time step                                    | Slider moves exactly one time step; map updates              | M    |
+| Reverse direction     | Animation plays backward        | 1. Toggle reverse direction<br>2. Click play                                 | Animation plays backward through time steps                  | M    |
+| Lock handles          | Handles move in sync            | 1. For dual-handle sliders, lock both handles together<br>2. Drag one handle | Both handles move in sync maintaining the range width        | M    |
+| Speed control         | Animation rate changes          | 1. Change animation speed                                                    | Animation rate changes accordingly                           | M    |
 
 ## Time Filtering
 
-- [ ] **Filter applied to map** — Move the slider. Verify the map only shows features within the selected time range.
-- [ ] **Filter applied to table** — Open the data table while time slider is active. Verify the table shows only time-filtered features.
-- [ ] **Filtering toggle off** — Toggle the filter switch off. Verify the time filter is cleared and all features display regardless of the slider position.
-- [ ] **Filtering toggle on** — Toggle the filter switch back on. Verify the time filter re-applies based on the current slider position.
+Config: `configs/navigator/demos/11-package-time-slider.json`
 
-## Loading Status
-
-- [ ] **Green on loading** — Verify the layer shows green loading status while time-aware data loads.
+| Test                    | Description                   | Steps                                        | Expected Result                                                            | Auto |
+| ----------------------- | ----------------------------- | -------------------------------------------- | -------------------------------------------------------------------------- | ---- |
+| Filter applied to map   | Map shows time-filtered data  | 1. Move the slider to a specific time        | Map only shows features within the selected time range                     | M    |
+| Filter applied to table | Table shows filtered features | 1. Move the slider<br>2. Open the data table | Data table shows only time-filtered features                               | M    |
+| Filtering toggle off    | Filter cleared                | 1. Toggle the filter switch off              | Time filter is cleared; all features display regardless of slider position | M    |
+| Filtering toggle on     | Filter re-applies             | 1. Toggle the filter switch back on          | Time filter re-applies based on the current slider position                | M    |
 
 ## Store Verification
 
-- [ ] **`sliderFilters`** — Check the store for `sliderFilters`. Verify it contains the time filter.
-- [ ] **`timeSliderLayers`** — Check `timeSliderLayers` in the store. Verify range, type, min/max, and current values are correct.
-- [ ] **Modify values, re-check** — Move the slider, then re-check store values. Verify they update.
+Config: `configs/navigator/demos/11-package-time-slider.json`
+
+| Test                   | Description               | Steps                                                                                                    | Expected Result                                                      | Auto |
+| ---------------------- | ------------------------- | -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- | ---- |
+| sliderFilters in store | Filter string populated   | 1. Open React DevTools → Components → `getViewStore-'mapId'`<br>2. Check `timeSliderState.sliderFilters` | `sliderFilters` contains the time filter string for the active layer | C    |
+| timeSliderLayers       | Layer config in store     | 1. Check `timeSliderState.timeSliderLayers`                                                              | Range, type, min/max, and current values are correct                 | C    |
+| Values update on drag  | Store updates with slider | 1. Move the slider<br>2. Re-check store values                                                           | Store values update to reflect the new slider position               | C    |
 
 ## Geocore Auto-Creation
 
-- [ ] **Geocore with time slider** — Load a geocore UUID config that includes time slider metadata. Verify the time slider auto-creates for the layer.
+Demo page: `templates/demos/add-layers.html`
+
+| Test                     | Description                           | Steps                                                                                                                        | Expected Result                                                    | Auto |
+| ------------------------ | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ | ---- |
+| Geocore with time slider | Time slider auto-creates from geocore | 1. Open `add-layers.html` demo page<br>2. Add a geocore UUID with time slider metadata (e.g., Wireless Network geocore UUID) | Time slider auto-creates for the layer based on VCS package config | M    |

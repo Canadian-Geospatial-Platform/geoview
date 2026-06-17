@@ -1,63 +1,87 @@
 # 05 — Navigation Bar
 
+> **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
+
 Navbar controls and buttons. The navbar supports 9 button types: `zoom`, `rotation`, `fullscreen`, `home`, `location`, `basemap-select`, `projection`, `measurement`, `drawer`.
+
+Default navbar (when `navBar` is omitted from config): `["zoom", "rotation", "fullscreen", "home", "basemap-select"]`.
 
 Reference config with all buttons (except drawer): `sandbox.html` or `configs/navigator/layers/all-layers.json`
 
 ## Zoom Controls
 
-- [ ] **Zoom in button** — Click zoom in. Verify map zooms in one level.
-- [ ] **Zoom out button** — Click zoom out. Verify map zooms out one level.
-- [ ] **Zoom limits** — Zoom to min/max limits. Verify buttons disable at boundaries.
+| Test            | Description             | Steps                        | Expected Result         | Auto |
+| --------------- | ----------------------- | ---------------------------- | ----------------------- | ---- |
+| Zoom in button  | Map zooms in one level  | 1. Click the zoom in button  | Map zooms in one level  | C    |
+| Zoom out button | Map zooms out one level | 1. Click the zoom out button | Map zooms out one level | C    |
 
 ## Rotation
 
-Detailed rotation and north arrow tests are in [02-map.md](02-map.md#map-rotation).
+> Detailed rotation and north arrow tests are in [02 — Map](02-map.md#map-rotation).
 
-- [ ] **Rotation control** — Verify the rotation control appears in the navbar and rotates the map.
-- [ ] **Rotation value display** — Verify the rotation value is shown in the map info bar tooltip.
+| Test                   | Description                      | Steps                                                                               | Expected Result                                     | Auto |
+| ---------------------- | -------------------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------- | ---- |
+| Rotation control       | Rotation control rotates the map | 1. Verify the rotation control appears in the navbar<br>2. Use it to rotate the map | Map rotates according to the control                | C    |
+| Rotation value display | Rotation shown in map info bar   | 1. Rotate the map                                                                   | Rotation value is shown in the map info bar tooltip | M    |
 
 ## Home / Initial Extent
 
-- [ ] **Home button** — Pan/zoom away from the initial view. Click the Home button. Verify the map returns to the initial extent and zoom.
+| Test        | Description             | Steps                                                                  | Expected Result                                  | Auto |
+| ----------- | ----------------------- | ---------------------------------------------------------------------- | ------------------------------------------------ | ---- |
+| Home button | Returns to initial view | 1. Pan and zoom away from the initial view<br>2. Click the Home button | Map returns to the initial extent and zoom level | C    |
 
 ## Geolocation
 
-- [ ] **Geolocation button** — If available, click the geolocation button. Verify a prompt appears (or the map centers on the user's location if permission is granted).
+| Test               | Description                  | Steps                           | Expected Result                                                                          | Auto |
+| ------------------ | ---------------------------- | ------------------------------- | ---------------------------------------------------------------------------------------- | ---- |
+| Geolocation button | Centers map on user location | 1. Click the geolocation button | Browser prompt appears (or map centers on user's location if permission already granted) | M    |
 
 ## Full Screen
 
-- [ ] **Fullscreen toggle** — Click the fullscreen button. Verify the viewer goes fullscreen. Click again (or press ESC) to exit.
+| Test              | Description               | Steps                                                                   | Expected Result                                                     | Auto |
+| ----------------- | ------------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------- | ---- |
+| Fullscreen toggle | Enter and exit fullscreen | 1. Click the fullscreen button<br>2. Click again (or press ESC) to exit | Viewer goes fullscreen on first click, exits on second click or ESC | M    |
 
 ## Basemap Select
 
-Detailed basemap tests are in [04-basemap.md](04-basemap.md).
+> Detailed basemap tests are in [04 — Basemap](04-basemap.md).
 
-- [ ] **Basemap selector opens** — Verify the basemap selector button opens the basemap panel in the navbar.
+| Test                   | Description                | Steps                                              | Expected Result                   | Auto |
+| ---------------------- | -------------------------- | -------------------------------------------------- | --------------------------------- | ---- |
+| Basemap selector opens | Button opens basemap panel | 1. Click the basemap selector button in the navbar | Basemap panel opens in the navbar | M    |
 
 ## Projection Switch
 
-Detailed projection tests are in [02-map.md](02-map.md#projections) and [13-projection.md](13-projection.md).
+> Detailed projection tests are in [02 — Map](02-map.md#projections) and [13 — Projection](13-projection.md).
 
-- [ ] **Projection button** — Verify the projection button appears and switches between LCC and WM.
+| Test              | Description                 | Steps                                                                    | Expected Result                                                | Auto |
+| ----------------- | --------------------------- | ------------------------------------------------------------------------ | -------------------------------------------------------------- | ---- |
+| Projection button | Switches between LCC and WM | 1. Verify the projection button appears<br>2. Click to switch projection | Projection switches between LCC (EPSG:3978) and WM (EPSG:3857) | C    |
 
 ## Measurement Tool
 
-- [ ] **Measurement button** — Verify the measurement button appears in the navbar.
-- [ ] **Distance measurement** — Activate the measurement tool. Click points on the map to draw a line. Verify the distance is displayed.
-- [ ] **Area measurement** — Switch to area mode. Draw a polygon. Verify the area is displayed.
-- [ ] **Clear measurements** — Clear the measurements. Verify all measurement geometries are removed from the map.
-- [ ] **Deactivate measurement** — Deactivate the tool. Verify clicking on the map no longer creates measurement points.
+| Test                   | Description                | Steps                                                                         | Expected Result                                          | Auto |
+| ---------------------- | -------------------------- | ----------------------------------------------------------------------------- | -------------------------------------------------------- | ---- |
+| Measurement button     | Button appears in navbar   | 1. Load a config with `measurement` in `navBar`                               | Measurement button appears in the navbar                 | C    |
+| Distance measurement   | Line distance is displayed | 1. Activate the measurement tool<br>2. Click points on the map to draw a line | Distance is displayed along the line                     | M    |
+| Area measurement       | Polygon area is displayed  | 1. Switch to area mode<br>2. Draw a polygon on the map                        | Area is displayed for the polygon                        | M    |
+| Clear measurements     | Geometries are removed     | 1. Clear the measurements                                                     | All measurement geometries are removed from the map      | M    |
+| Deactivate measurement | Tool stops creating points | 1. Deactivate the measurement tool<br>2. Click on the map                     | Clicking on the map no longer creates measurement points | M    |
 
 ## Drawer (Plugin)
 
-> Full drawer testing in [17e — Package Drawer](17e-package-drawer.md). Only verify the navbar button here:
+> Full drawer testing in [17e — Package Drawer](17e-package-drawer.md). Only verify the navbar button here.
 
-- [ ] **Drawer button** — Verify the drawer button appears in the navbar when the drawer plugin is loaded.
-- [ ] **Open drawer** — Click the drawer button. Verify the drawing toolbar opens.
+| Test          | Description                       | Steps                                   | Expected Result                     | Auto |
+| ------------- | --------------------------------- | --------------------------------------- | ----------------------------------- | ---- |
+| Drawer button | Button appears when plugin loaded | 1. Load a config with the drawer plugin | Drawer button appears in the navbar | C    |
+| Open drawer   | Drawing toolbar opens             | 1. Click the drawer button              | Drawing toolbar opens               | M    |
 
 ## Navbar Visibility
 
-- [ ] **Custom navbar** — Load a config with limited navbar controls (e.g., only zoom and rotation). Verify only those controls appear.
-- [ ] **Empty navbar** — Load a config with an empty `navBar` array. Verify only zoom and rotation appear (defaults).
-- [ ] **All buttons** — Load `sandbox.html` or `all-layers.json`. Verify all 8 core buttons render correctly.
+> Default behavior tested in [03 — Config](03-config.md#ui-chrome-defaults).
+
+| Test          | Description                    | Steps                                                  | Expected Result                                      | Auto |
+| ------------- | ------------------------------ | ------------------------------------------------------ | ---------------------------------------------------- | ---- |
+| Custom navbar | Only specified controls appear | 1. Load a config with `"navBar": ["zoom", "rotation"]` | Only zoom and rotation controls appear in the navbar | C    |
+| All buttons   | All core buttons render        | 1. Load `sandbox.html` or `all-layers.json`            | All configured navbar buttons render correctly       | C    |

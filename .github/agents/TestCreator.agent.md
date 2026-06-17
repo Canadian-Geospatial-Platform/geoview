@@ -235,6 +235,7 @@ After ANY of these changes, verify the other two are updated:
 | Add/remove/rename a **test file**              | README table + issue template (add/remove entire section block) |
 | Change a **section heading**                   | Issue template (update anchor link)                             |
 | Change **time estimate**                       | README table (update Est. Time column)                          |
+| Change **Auto flag** (M→A, C→A, M→C)           | README table (update "Tests (A/C/M)" column + TOTAL row)        |
 
 ### Phase 6 — Verify
 

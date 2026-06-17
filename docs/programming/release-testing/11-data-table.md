@@ -1,68 +1,130 @@
 # 11 — Data Table
 
-Data table display, filtering, global search, and export.
+> **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
+
+Data table display, column/global filtering, map filter sync, export, and row actions. The data table uses Material React Table (MRT) with a custom toolbar for map-specific features. Two display modes exist: interactive panel (footer bar or app bar tab) and read-only modal (opened via layer shortcut when no `data-table` tab configured).
 
 ## Basic Display
 
-- [ ] **Table loads** — Open the Data Table panel and select a layer. Verify the table loads with correct columns and rows.
-- [ ] **Column headers** — Verify column headers match the layer's field names / aliases.
-- [ ] **Row count** — Verify the row count matches the expected number of features.
+Config: `configs/navigator/layers/all-layers.json` (footerBar includes `data-table`, multiple queryable layers)
+
+| Test                  | Description                        | Steps                                                                              | Expected Result                                                 | Auto |
+| --------------------- | ---------------------------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------------------- | ---- |
+| Table loads           | Table populated for selected layer | 1. Open the Data Table footer bar tab<br>2. Select a layer from the layer selector | Table loads with columns and rows matching the layer's features | M    |
+| Column headers        | Headers match field aliases        | 1. Check the column headers in the loaded table                                    | Column headers match the layer's field names/aliases            | M    |
+| Row count             | Correct feature count              | 1. Check the row count displayed in the toolbar                                    | Row count matches the total number of features for that layer   | C    |
+| Default hidden column | geoviewID hidden                   | 1. Open column visibility menu<br>2. Check the geoviewID column                    | The `geoviewID` column is hidden by default (toggle is off)     | C    |
 
 ## Filter by Map Extent
 
-- [ ] **Filter map toggle** — Enable "Filter by map extent". Verify only features visible in the current viewport are shown in the table.
-- [ ] **Pan map** — Pan the map while filter is active. Verify the table updates to show features in the new extent.
-- [ ] **Zoom map** — Zoom in/out while filter is active. Verify the table updates accordingly.
-- [ ] **Disable filter** — Turn off "Filter by map extent". Verify all features reappear.
+Config: `configs/navigator/layers/all-layers.json` (vector layers — NOT Esri Dynamic which lacks geometry in responses)
+
+| Test                           | Description                  | Steps                                                                               | Expected Result                                                                                 | Auto |
+| ------------------------------ | ---------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ---- |
+| Enable filter                  | Only viewport features shown | 1. Open the data table for a vector layer<br>2. Toggle "Filter by extent" switch ON | Only features within the current map viewport are shown in the table                            | M    |
+| Pan map                        | Table updates on pan         | 1. With filter active, pan the map to a new area                                    | Table updates to show features in the new extent                                                | M    |
+| Zoom map                       | Table updates on zoom        | 1. With filter active, zoom in or out                                               | Table updates — zooming in shows fewer features, zooming out shows more                         | M    |
+| Disable filter                 | All features return          | 1. Toggle "Filter by extent" OFF                                                    | All features reappear in the table regardless of map extent                                     | M    |
+| Not available for Esri Dynamic | Toggle absent or disabled    | 1. Select an Esri Dynamic layer in the data table                                   | The "Filter by extent" toggle is not available (Esri Dynamic responses do not include geometry) | C    |
 
 ## Column Filtering
 
-- [ ] **Text filter** — Apply a text filter on a string column. Verify only matching rows appear.
-- [ ] **Numeric filter** — Apply a numeric range filter. Verify only rows within range appear.
-- [ ] **Multiple column filters** — Apply filters on multiple columns simultaneously. Verify AND logic applies.
-- [ ] **Clear filters** — Clear all column filters. Verify all rows reappear.
+Config: `configs/navigator/layers/all-layers.json`
+
+| Test                     | Description            | Steps                                                                         | Expected Result                                         | Auto |
+| ------------------------ | ---------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------- | ---- |
+| Show filter row          | Filter inputs appear   | 1. Click the "Show/Hide Filters" button in the toolbar                        | A filter input row appears below the column headers     | M    |
+| Text filter (contains)   | Matching rows only     | 1. Type a search term in a string column's filter input                       | Only rows where that column contains the text are shown | M    |
+| Numeric filter (between) | Rows within range      | 1. Set a numeric range filter (e.g., between 100 and 500) on a numeric column | Only rows within the range appear                       | M    |
+| Date filter              | Rows within date range | 1. Set a date range filter on a date column                                   | Only rows within the date range appear                  | M    |
+| Multiple column filters  | AND logic applied      | 1. Apply filters on two or more columns simultaneously                        | Only rows matching ALL filters appear (AND logic)       | M    |
+| Clear filters            | All rows return        | 1. Click the "Clear Filters" button in the toolbar                            | All column filters are removed and all rows reappear    | C    |
 
 ## Map Filtering from Table
 
-- [ ] **Apply filter to map** — Apply a table filter and enable "Apply to map". Verify the map only shows features matching the filter.
-- [ ] **Remove map filter** — Remove the table filter. Verify the map shows all features again.
+Config: `configs/navigator/layers/all-layers.json`
+
+| Test                          | Description               | Steps                                                                                               | Expected Result                                                 | Auto |
+| ----------------------------- | ------------------------- | --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- | ---- |
+| Apply filter to map           | Map features filtered     | 1. Apply a column filter to reduce visible rows<br>2. Toggle "Apply filter to map" ON               | The map only renders features matching the table filter         | M    |
+| Store check tableFilters      | Store updated with filter | 1. After applying filter to map, in React DevTools inspect `dataTableState.tableFilters[layerPath]` | Store contains the filter expression string for that layer path | C    |
+| Remove map filter             | Map shows all features    | 1. Toggle "Apply filter to map" OFF or clear the column filter                                      | Map renders all features again                                  | M    |
+| Disabled during global search | Toggle greyed out         | 1. Type text in the global search box<br>2. Check the "Apply filter to map" toggle                  | Toggle is disabled (cannot apply global search as a map filter) | C    |
 
 ## Global Search
 
-- [ ] **Search text** — Type a search term in the global search box. Verify the table filters rows that contain the term in any column.
-- [ ] **Search clear** — Clear the search. Verify all rows reappear.
+Config: `configs/navigator/layers/all-layers.json`
+
+| Test         | Description                      | Steps                                                 | Expected Result                                                 | Auto |
+| ------------ | -------------------------------- | ----------------------------------------------------- | --------------------------------------------------------------- | ---- |
+| Search text  | Rows filtered across all columns | 1. Type a search term in the global search text field | Table shows only rows containing the term in any visible column | M    |
+| Search clear | All rows return                  | 1. Clear the global search text field                 | All rows reappear in the table                                  | M    |
 
 ## Table with Style Classes
 
-- [ ] **Create table, toggle classes** — Create a data table for a layer. Go to Layers panel, toggle some visibility style classes off. Recreate the table. Verify the table reflects the class filter (rows for hidden classes are filtered).
+Config: `configs/navigator/layers/esri-feature.json` (layer with uniqueValue or classBreaks style)
 
-## Store Verification
-
-Open browser DevTools and check the Zustand store:
-
-- [ ] **`allFeaturesDataArray`** — Verify the table is populated with the correct data.
-- [ ] **Apply filter, check `tableFilters`** — After applying a filter, verify `tableFilters` in the store contains the filter.
-- [ ] **Check `rowsFilteredRecord`** — Verify the filtered row count matches what the table shows.
+| Test                         | Description                        | Steps                                                                                                                                              | Expected Result                                                                            | Auto |
+| ---------------------------- | ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ---- |
+| Class filter reflected       | Hidden classes excluded from table | 1. Open data table for a layer with style classes<br>2. Go to Legend/Layers panel and toggle OFF some style classes<br>3. Return to the data table | Table excludes rows belonging to the hidden style classes (filtered by `layerFilterClass`) | M    |
+| Store check layerFilterClass | Store filter string matches        | 1. After toggling style classes, in React DevTools inspect `layerState.layerFilterClass` for that layer path                                       | Store contains a SQL-like filter string representing visible classes                       | C    |
 
 ## Export
 
-- [ ] **Export to CSV** — Export the table data. Verify the downloaded CSV contains correct data.
-- [ ] **Export filtered** — Apply a filter, then export. Verify only filtered rows are exported.
-- [ ] **Re-import exported CSV** — Add the exported CSV file as a new CSV layer. Verify it loads and the features match the original data.
+Config: `configs/navigator/layers/all-layers.json`
+
+| Test                       | Description                 | Steps                                                                                                    | Expected Result                                                                                           | Auto |
+| -------------------------- | --------------------------- | -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ---- |
+| Export to CSV              | CSV file downloaded         | 1. Click the CSV export button in the toolbar                                                            | A CSV file is downloaded with filename `table-{layerName}.csv` containing correct column headers and data | M    |
+| Export to GeoJSON          | GeoJSON file downloaded     | 1. Click the GeoJSON export button in the toolbar                                                        | A GeoJSON file is downloaded with features including geometry                                             | M    |
+| Export filtered            | Only filtered rows exported | 1. Apply a column filter<br>2. Export to CSV                                                             | Only the filtered rows are included in the exported file                                                  | M    |
+| Re-import exported GeoJSON | Round-trip data integrity   | 1. Export table to GeoJSON<br>2. Add the exported GeoJSON as a new GeoJSON layer via the Add Layer panel | New layer loads with features matching the original data                                                  | M    |
 
 ## Column Visibility
 
-- [ ] **Show/hide columns button** — Click the column visibility button in the toolbar. Verify a list of columns with toggles appears.
-- [ ] **Hide a column** — Toggle a column off. Verify it disappears from the table.
-- [ ] **Show a column** — Toggle it back on. Verify it reappears.
-- [ ] **Multiple columns hidden** — Hide multiple columns. Verify all hidden columns are removed and remaining columns fill the space.
+Config: `configs/navigator/layers/all-layers.json`
+
+| Test                    | Description                | Steps                                                  | Expected Result                                                       | Auto |
+| ----------------------- | -------------------------- | ------------------------------------------------------ | --------------------------------------------------------------------- | ---- |
+| Show/hide columns menu  | Column toggle list appears | 1. Click the "Show/Hide Columns" button in the toolbar | A menu appears listing all columns with toggle switches               | M    |
+| Hide a column           | Column removed from table  | 1. Toggle a column OFF in the menu                     | That column disappears from the table                                 | M    |
+| Show a column           | Column restored            | 1. Toggle the column back ON                           | Column reappears in the table                                         | M    |
+| Multiple columns hidden | All hidden columns removed | 1. Hide multiple columns                               | All toggled-off columns are removed; remaining columns fill the space | M    |
 
 ## Density Toggle
 
-- [ ] **Density button** — Click the density toggle in the toolbar. Verify options appear (compact, comfortable, spacious).
-- [ ] **Switch density** — Switch between densities. Verify row height changes accordingly.
+Config: `configs/navigator/layers/all-layers.json`
 
-## Feature Highlight Sync
+| Test           | Description        | Steps                                                | Expected Result                                                                   | Auto |
+| -------------- | ------------------ | ---------------------------------------------------- | --------------------------------------------------------------------------------- | ---- |
+| Density button | Options appear     | 1. Click the density toggle button in the toolbar    | Three density options are shown: compact, comfortable, spacious                   | M    |
+| Switch density | Row height changes | 1. Switch between compact, comfortable, and spacious | Row height/padding changes accordingly (compact is smallest, spacious is largest) | M    |
 
-- [ ] **Zoom to feature from table** — Click the zoom icon on a row. Verify the map zooms to that feature's extent.
-- [ ] **Open details from row** — Click the details icon on a row. Verify the Details panel opens showing the full feature information for that row.
+## Row Actions
+
+Config: `configs/navigator/layers/all-layers.json`
+
+| Test                  | Description                 | Steps                                                   | Expected Result                                                         | Auto |
+| --------------------- | --------------------------- | ------------------------------------------------------- | ----------------------------------------------------------------------- | ---- |
+| Icon column           | Feature symbology shown     | 1. Check the first column of each row                   | Feature style icon is displayed representing the layer's symbology      | M    |
+| Zoom to feature       | Map zooms to feature        | 1. Click the zoom icon (`ZoomInSearchIcon`) on a row    | Map zooms to that feature's extent and highlights it                    | M    |
+| Open details from row | Details panel shows feature | 1. Click the details icon (`InfoOutlinedIcon`) on a row | Details panel/modal opens showing full feature information for that row | M    |
+
+## Store Verification
+
+Config: `configs/navigator/layers/all-layers.json` — open browser DevTools → React DevTools → Components tab → select `getViewStore-'mapWM'` component to inspect Zustand store state (requires `GEOVIEW_DEVTOOLS = 1` in localStorage)
+
+| Test                           | Description               | Steps                                                                                                                                    | Expected Result                                                     | Auto |
+| ------------------------------ | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- | ---- |
+| allFeaturesDataArray populated | Store has feature data    | 1. Open data table<br>2. In React DevTools Components tab, inspect `getViewStore-'mapWM'` → `dataTableState.allFeaturesDataArray`        | Array contains entries for each layer with feature data             | C    |
+| rowsFilteredRecord count       | Filtered count matches UI | 1. Apply a filter<br>2. In React DevTools, inspect `dataTableState.layersDataTableSetting[layerPath].rowsFilteredRecord`                 | Value matches the filtered row count displayed in the table toolbar | C    |
+| mapFilteredRecord boolean      | Apply-to-map state stored | 1. Toggle "Apply filter to map" ON<br>2. In React DevTools, inspect `dataTableState.layersDataTableSetting[layerPath].mapFilteredRecord` | Value is `true`                                                     | C    |
+
+## Data Table in App Bar
+
+Config: `configs/navigator/demos/10-basic-appbar-data-table-tab.json` (data table as appBar tab, footerBar disabled)
+
+| Test                  | Description                  | Steps                                                             | Expected Result                                                            | Auto |
+| --------------------- | ---------------------------- | ----------------------------------------------------------------- | -------------------------------------------------------------------------- | ---- |
+| AppBar data table tab | Table opens in app bar panel | 1. Load the config<br>2. Click the data table icon in the app bar | Data table opens as an app bar panel (not footer bar)                      | A    |
+| Pre-selected layer    | Layer auto-selected on open  | 1. Check which layer is selected when the table opens             | The layer specified by `appBar.selectedDataTableLayerPath` is pre-selected | A    |

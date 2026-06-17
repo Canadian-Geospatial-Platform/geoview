@@ -8,8 +8,8 @@ Map rendering, projections, north pole, and north arrow.
 
 | Test                         | Description                          | Steps                                                                                                                         | Expected Result                                                                                                                           | Auto |
 | ---------------------------- | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ---- |
-| 3 projections supported      | Each projection renders correctly    | 1. Load a map in EPSG:3978 (LCC)<br>2. Load a map in EPSG:3857 (Web Mercator)<br>3. Load a map in EPSG:3573 (North Pole LAEA) | Map renders correctly in all three projections                                                                                            | M    |
-| Projection switch            | Switching projections re-renders map | 1. Switch between LCC (3978) and WM (3857) using the projection selector                                                      | Map re-renders correctly each time; note: EPSG:3573 has no default basemap so switch is not available for it                              | M    |
+| 3 projections supported      | Each projection renders correctly    | 1. Load a map in EPSG:3978 (LCC)<br>2. Load a map in EPSG:3857 (Web Mercator)<br>3. Load a map in EPSG:3573 (North Pole LAEA) | Map renders correctly in all three projections                                                                                            | C    |
+| Projection switch            | Switching projections re-renders map | 1. Switch between LCC (3978) and WM (3857) using the projection selector                                                      | Map re-renders correctly each time; note: EPSG:3573 has no default basemap so switch is not available for it                              | A    |
 | Layer rendering after switch | Layers survive projection switch     | 1. Load layers<br>2. Switch projection                                                                                        | All loaded layers re-render correctly after switch; see also [08 — Layers](08-layers.md#layer-type-edge-cases) for type-specific behavior | M    |
 
 ## North Pole & North Arrow
@@ -27,9 +27,9 @@ Map rendering, projections, north pole, and north arrow.
 
 | Test                 | Description                  | Steps                                             | Expected Result                                                                                                     | Auto |
 | -------------------- | ---------------------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ---- |
-| LCC rotation         | North arrow follows rotation | 1. Rotate the map in LCC                          | North arrow updates direction correctly                                                                             | M    |
-| WM rotation          | North arrow follows rotation | 1. Rotate the map in WM                           | North arrow updates direction correctly                                                                             | M    |
-| Rotation reset       | Reset returns to default     | 1. Rotate the map<br>2. Reset rotation to 0°      | Map returns to its default orientation                                                                              | M    |
+| LCC rotation         | North arrow follows rotation | 1. Rotate the map in LCC                          | North arrow updates direction correctly                                                                             | A    |
+| WM rotation          | North arrow follows rotation | 1. Rotate the map in WM                           | North arrow updates direction correctly                                                                             | C    |
+| Rotation reset       | Reset returns to default     | 1. Rotate the map<br>2. Reset rotation to 0°      | Map returns to its default orientation                                                                              | C    |
 | Fix North (LCC only) | Fix North adjusts rotation   | 1. In LCC, rotate the map<br>2. Click "Fix North" | Map adjusts rotation so north is up in the current view (not necessarily 0° — depends on map center and projection) | M    |
 
 ## Map Interaction

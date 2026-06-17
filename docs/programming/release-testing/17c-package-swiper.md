@@ -1,6 +1,8 @@
 # 17c — Swiper
 
-Swiper plugin for comparing layers.
+> **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
+
+Swiper plugin for comparing layers. The swiper is a core package plugin (`geoview-swiper`) that splits the map view to compare layers side-by-side.
 
 ## Lifecycle
 
@@ -16,29 +18,52 @@ cgpv.api
 cgpv.api.getMapViewer("mapId").plugins["swiper"].deActivateAll();
 ```
 
-- [ ] **Activate swiper** — Call `activateForLayer` with a valid layer path. Verify the split view appears on the map.
-- [ ] **Deactivate swiper** — Call `deActivateForLayer`. Verify the map returns to normal single view.
-- [ ] **Deactivate all** — Activate multiple layers, then call `deActivateAll`. Verify all swiper layers are removed.
+| Test              | Description               | Steps                                                  | Expected Result                                      | Auto |
+| ----------------- | ------------------------- | ------------------------------------------------------ | ---------------------------------------------------- | ---- |
+| Activate swiper   | Split view appears        | 1. Call `activateForLayer` with a valid layer path     | Split view appears on the map with swiper divider    | A    |
+| Deactivate swiper | Map returns to normal     | 1. Call `deActivateForLayer`                           | Map returns to normal single view                    | A    |
+| Deactivate all    | All swiper layers removed | 1. Activate multiple layers<br>2. Call `deActivateAll` | All swiper layers are removed; map returns to normal | A    |
 
 ## Layer Management
 
-- [ ] **Add layer to swiper** — Add a layer to the swiper comparison. Verify it appears on one side.
-- [ ] **Remove layer** — Remove a layer from the swiper. Verify it is removed from the comparison.
-- [ ] **Remove all layers** — Remove all layers from the swiper. Verify the swiper handles empty state.
-- [ ] **Add layer after remove all** — After removing all, add a new layer. Verify the swiper resumes working.
+Demo: `templates/demos/package-swiper.html`
+
+| Test                   | Description                | Steps                                   | Expected Result                           | Auto |
+| ---------------------- | -------------------------- | --------------------------------------- | ----------------------------------------- | ---- |
+| Add layer to swiper    | Layer appears on one side  | 1. Add a layer to the swiper comparison | Layer appears on one side of the split    | C    |
+| Remove layer           | Layer removed from split   | 1. Remove a layer from the swiper       | Layer is removed from the comparison      | C    |
+| Remove all layers      | Swiper handles empty state | 1. Remove all layers from the swiper    | Swiper handles empty state gracefully     | C    |
+| Add layer after remove | Swiper resumes working     | 1. After removing all, add a new layer  | Swiper resumes working with the new layer | C    |
 
 ## Orientation
 
-- [ ] **Vertical swiper** — Set the swiper to vertical orientation. Verify the split is vertical.
-- [ ] **Horizontal swiper** — Set to horizontal orientation. Verify the split is horizontal.
-- [ ] **Switch orientation** — Switch between vertical and horizontal. Verify smooth transition.
+Demo: `templates/demos/package-swiper.html`
+
+```js
+cgpv.api.getMapViewer("mapId").plugins["swiper"].setOrientation("vertical");
+cgpv.api.getMapViewer("mapId").plugins["swiper"].setOrientation("horizontal");
+```
+
+| Test               | Description         | Steps                                                                          | Expected Result                          | Auto |
+| ------------------ | ------------------- | ------------------------------------------------------------------------------ | ---------------------------------------- | ---- |
+| Vertical swiper    | Split is vertical   | 1. Call `setOrientation('vertical')`                                           | Split divider is vertical (left/right)   | C    |
+| Horizontal swiper  | Split is horizontal | 1. Call `setOrientation('horizontal')`                                         | Split divider is horizontal (top/bottom) | C    |
+| Switch orientation | Smooth transition   | 1. Call `setOrientation('vertical')`<br>2. Call `setOrientation('horizontal')` | Smooth transition between orientations   | C    |
 
 ## Map Rotation with Swiper
 
-- [ ] **Rotate map** — Rotate the map while the swiper is active. Verify the swiper divider rotates with the map correctly.
-- [ ] **Swipe position** — Drag the swiper divider. Verify it moves smoothly and clips layers correctly.
+Demo: `templates/demos/package-swiper.html`
+
+| Test           | Description                    | Steps                                        | Expected Result                                   | Auto |
+| -------------- | ------------------------------ | -------------------------------------------- | ------------------------------------------------- | ---- |
+| Rotate map     | Divider rotates with map       | 1. Rotate the map while the swiper is active | Swiper divider rotates with the map correctly     | M    |
+| Swipe position | Divider moves and clips layers | 1. Drag the swiper divider                   | Divider moves smoothly and clips layers correctly | M    |
 
 ## Swiper + Details Interaction
 
-- [ ] **Features hidden by swiper** — Features hidden by the swiper should not be queryable. Click on the hidden side — verify no details appear for those features.
-- [ ] **Hover disabled** — Hover over features on the hidden side. Verify no tooltip appears.
+Demo: `templates/demos/package-swiper.html`
+
+| Test                      | Description                   | Steps                                     | Expected Result                                   | Auto |
+| ------------------------- | ----------------------------- | ----------------------------------------- | ------------------------------------------------- | ---- |
+| Features hidden by swiper | Hidden features not queryable | 1. Click on the hidden side of the swiper | No details appear for features on the hidden side | M    |
+| Hover disabled            | No tooltip on hidden side     | 1. Hover over features on the hidden side | No tooltip appears for hidden features            | M    |

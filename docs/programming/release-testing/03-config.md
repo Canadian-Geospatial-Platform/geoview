@@ -78,9 +78,9 @@ Test how the viewer handles missing or empty config properties.
 
 | Test                  | Description                   | Steps                                                           | Expected Result                                                           | Auto |
 | --------------------- | ----------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------- | ---- |
-| No footerBar property | Defaults applied when omitted | 1. Load a config that omits `footerBar` entirely                | Viewer uses default footer bar tabs (layers, data-table)                  | C    |
-| No appBar property    | Defaults applied when omitted | 1. Load a config that omits `appBar` entirely                   | Viewer uses default app bar tabs (geolocator, legend, details, export)    | C    |
-| Empty footerBar tabs  | Empty array hides tabs        | 1. Load a config with `"footerBar": { "tabs": { "core": [] } }` | No footer bar tabs appear (empty footer)                                  | C    |
-| Empty appBar tabs     | Empty array hides tabs        | 1. Load a config with `"appBar": { "tabs": { "core": [] } }`    | No app bar tabs appear (empty app bar)                                    | C    |
-| No navBar property    | Only default buttons shown    | 1. Load a config that omits `navBar` entirely                   | Default buttons appear (zoom, rotation, fullscreen, home, basemap-select) | C    |
-| Empty navBar array    | Empty array hides all buttons | 1. Load a config with `"navBar": []`                            | No navbar buttons appear                                                  | C    |
+| No footerBar property | Defaults applied when omitted | 1. Load a config that omits `footerBar` entirely                | Viewer uses default footer bar tabs (layers, data-table)                  | A    |
+| No appBar property    | Defaults applied when omitted | 1. Load a config that omits `appBar` entirely                   | Viewer uses default app bar tabs (geolocator, legend, details, export)    | A    |
+| Empty footerBar tabs  | Empty array hides tabs        | 1. Load a config with `"footerBar": { "tabs": { "core": [] } }` | No footer bar tabs appear (empty footer)                                  | A    |
+| Empty appBar tabs     | Empty array hides tabs        | 1. Load a config with `"appBar": { "tabs": { "core": [] } }`    | No app bar tabs appear (empty app bar)                                    | A    |
+| No navBar property    | Only default buttons shown    | 1. Load a config that omits `navBar` entirely                   | Default buttons appear (zoom, rotation, fullscreen, home, basemap-select) | A    |
+| Empty navBar array    | Empty array hides all buttons | 1. Load a config with `"navBar": []`                            | No navbar buttons appear                                                  | A    |
