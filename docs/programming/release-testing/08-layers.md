@@ -195,3 +195,7 @@ Config: `configs/navigator/demos/07-layer-zoom-levels.json`
 - [ ] **Layer disappears** — Zoom outside the visible range. Verify the layer disappears.
 - [ ] **`inVisibleRange` store check** — Open the store and verify `inVisibleRange` is `false` when zoomed out of range and `true` when in range.
 - [ ] **OL layer visibility** — Check `getOLLayer().isVisible()` — should be `false` out of range, `true` in range.
+
+### Layer Type Edge Cases
+
+- [ ] **Vector tile projection warning** — Load a map with a vector tile layer. Switch projection. Verify a message/notification warns the user that vector tile layers do not support projection switching.

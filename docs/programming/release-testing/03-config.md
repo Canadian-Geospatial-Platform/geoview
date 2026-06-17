@@ -2,68 +2,73 @@
 
 Config parsing, duplicate handling, and error layer behavior.
 
+> **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
+
 ## Duplicate UUIDs
 
 Config: `configs/navigator/layers/geocore-duplicates.json`
 
-- [ ] **Duplicate geocore UUID** — Load a config with the same geocore UUID twice. Verify:
-  - Both layers appear in the legend
-  - The `orderedLayers` array has a `:suffix` on the duplicate geocore entry
-  - The non-geocore duplicate type only appears once (filtered out)
-- [ ] **Layer paths are unique** — Open the store and verify all layer paths are unique.
+| Test                   | Description                       | Steps                                               | Expected Result                                                                                                                       | Auto |
+| ---------------------- | --------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ---- |
+| Duplicate geocore UUID | Same UUID appears twice in config | 1. Load the config with the same geocore UUID twice | Both layers appear in legend; `orderedLayers` has `:suffix` on duplicate; non-geocore duplicate type only appears once (filtered out) | C    |
+| Layer paths are unique | No duplicate paths in store       | 1. Open the store after loading                     | All layer paths are unique                                                                                                            | C    |
 
 ## Duplicate Layer via Add Layer
 
-- [ ] **Add same UUID twice** — Use the Add Layer UI to add a geocore UUID. Then try to add the same UUID again. Verify the second add is rejected (not allowed).
+| Test                | Description           | Steps                                                                          | Expected Result                      | Auto |
+| ------------------- | --------------------- | ------------------------------------------------------------------------------ | ------------------------------------ | ---- |
+| Add same UUID twice | Prevent duplicate add | 1. Use Add Layer UI to add a geocore UUID<br>2. Try to add the same UUID again | Second add is rejected (not allowed) | M    |
 
 ## Bad Layer ID
 
 Config: `configs/navigator/layers/esri-dynamic-errors.json` or CESI layer in scale settings config
 
-- [ ] **Non-existing layer ID** — Load a config with a bad `layerId` (one that doesn't exist on the service). Verify:
-  - The bad sublayer shows as error in the legend
-  - The group layer still loads (partial loading)
-  - Other valid sublayers in the group render correctly
+| Test                  | Description                 | Steps                                                                         | Expected Result                                                                                                          | Auto |
+| --------------------- | --------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ---- |
+| Non-existing layer ID | Bad sublayer shows as error | 1. Load a config with a bad `layerId` (one that doesn't exist on the service) | Bad sublayer shows as error in legend; group layer still loads (partial loading); other valid sublayers render correctly | C    |
 
 > Error layer reload tested in [20 — Edge Cases](20-edge-cases.md#error-layer-reload).
 
 ## Wrong Layer Type
 
-- [ ] **Invalid `geoviewLayerType`** — Load a config with `'geoviewLayerType': 'geocore'` (wrong type). Verify:
-  - The viewer still starts and renders the basemap
-  - The invalid layer is reported as an error and filtered out
-  - Other valid layers in the config still load
+| Test                     | Description                | Steps                                                              | Expected Result                                                                                                       | Auto |
+| ------------------------ | -------------------------- | ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- | ---- |
+| Invalid geoviewLayerType | Wrong type is filtered out | 1. Load a config with `'geoviewLayerType': 'geocore'` (wrong type) | Viewer starts and renders basemap; invalid layer is reported as error and filtered out; other valid layers still load | C    |
 
 ## Error Layer Configs
 
-Test each layer type's error config to verify graceful failure:
+Test each layer type's error config to verify graceful failure.
 
-- [ ] `configs/navigator/layers/esri-dynamic-errors.json`
-- [ ] `configs/navigator/layers/esri-feature-errors.json`
-- [ ] `configs/navigator/layers/esri-image-errors.json`
-- [ ] `configs/navigator/layers/wms-errors.json`
-- [ ] `configs/navigator/layers/wfs-errors.json`
-- [ ] `configs/navigator/layers/geojson-errors.json`
-- [ ] `configs/navigator/layers/ogc-feature-api-errors.json`
-- [ ] `configs/navigator/layers/geotiff-errors.json`
-- [ ] `configs/navigator/layers/xyz-tile-errors.json`
-- [ ] `configs/navigator/layers/static-image-errors.json`
-- [ ] `configs/navigator/layers/geocore-errors.json`
-
-For each: verify the viewer loads, error layers are flagged, valid layers still render.
+| Test                   | Description                   | Steps                                                          | Expected Result                                         | Auto |
+| ---------------------- | ----------------------------- | -------------------------------------------------------------- | ------------------------------------------------------- | ---- |
+| Esri Dynamic errors    | Error config loads gracefully | 1. Load `configs/navigator/layers/esri-dynamic-errors.json`    | Viewer loads; error layers flagged; valid layers render | C    |
+| Esri Feature errors    | Error config loads gracefully | 1. Load `configs/navigator/layers/esri-feature-errors.json`    | Viewer loads; error layers flagged; valid layers render | C    |
+| Esri Image errors      | Error config loads gracefully | 1. Load `configs/navigator/layers/esri-image-errors.json`      | Viewer loads; error layers flagged; valid layers render | C    |
+| WMS errors             | Error config loads gracefully | 1. Load `configs/navigator/layers/wms-errors.json`             | Viewer loads; error layers flagged; valid layers render | C    |
+| WFS errors             | Error config loads gracefully | 1. Load `configs/navigator/layers/wfs-errors.json`             | Viewer loads; error layers flagged; valid layers render | C    |
+| GeoJSON errors         | Error config loads gracefully | 1. Load `configs/navigator/layers/geojson-errors.json`         | Viewer loads; error layers flagged; valid layers render | C    |
+| OGC Feature API errors | Error config loads gracefully | 1. Load `configs/navigator/layers/ogc-feature-api-errors.json` | Viewer loads; error layers flagged; valid layers render | C    |
+| GeoTIFF errors         | Error config loads gracefully | 1. Load `configs/navigator/layers/geotiff-errors.json`         | Viewer loads; error layers flagged; valid layers render | C    |
+| XYZ Tile errors        | Error config loads gracefully | 1. Load `configs/navigator/layers/xyz-tile-errors.json`        | Viewer loads; error layers flagged; valid layers render | C    |
+| Static Image errors    | Error config loads gracefully | 1. Load `configs/navigator/layers/static-image-errors.json`    | Viewer loads; error layers flagged; valid layers render | C    |
+| Geocore errors         | Error config loads gracefully | 1. Load `configs/navigator/layers/geocore-errors.json`         | Viewer loads; error layers flagged; valid layers render | C    |
 
 ## Layer Loading Status
 
 > Also tested from the Layers panel in [08 — Layers](08-layers.md#loading-status) and the Legend panel in [07 — Legend](07-legend.md#loading-status).
 
-- [ ] **Green status** — When layers are loading, verify the status indicator shows green (loading) in the Layers panel.
-- [ ] **Loaded status** — Once loaded, verify status changes to loaded.
-- [ ] **Error status** — For error layers, verify status shows error.
+| Test          | Description                         | Steps                                | Expected Result                        | Auto |
+| ------------- | ----------------------------------- | ------------------------------------ | -------------------------------------- | ---- |
+| Green status  | Loading indicator while layers load | 1. Observe Layers panel during load  | Status indicator shows green (loading) | C    |
+| Loaded status | Status changes after load           | 1. Wait for layers to finish loading | Status changes to loaded               | C    |
+| Error status  | Error layers show error status      | 1. Load config with error layers     | Error layers show error status         | C    |
 
 ## Notifications on Error
 
-- [ ] **Error notification appears** — Load a config with error layers. Verify a notification (snackbar + notification panel entry) appears for each failed layer.
-- [ ] **No duplicate notifications** — Reload the same error layer. Verify the notification count increments (stacks) rather than creating duplicate entries.
+| Test                       | Description                         | Steps                              | Expected Result                                                        | Auto |
+| -------------------------- | ----------------------------------- | ---------------------------------- | ---------------------------------------------------------------------- | ---- |
+| Error notification appears | Failed layers trigger notifications | 1. Load a config with error layers | Notification (snackbar + panel entry) appears for each failed layer    | C    |
+| No duplicate notifications | Repeated errors stack               | 1. Reload the same error layer     | Notification count increments (stacks) rather than creating duplicates | C    |
 
 ## Default Config Behavior
 
@@ -71,8 +76,11 @@ Test how the viewer handles missing or empty config properties.
 
 ### footerBar / appBar Defaults
 
-- [ ] **No `footerBar` property** — Load a config that omits `footerBar` entirely. Verify the viewer uses default footer bar tabs (legend, layers, details, data-table).
-- [ ] **No `appBar` property** — Load a config that omits `appBar` entirely. Verify the viewer uses default app bar tabs (geolocator, export, etc.).
-- [ ] **Empty `footerBar.tabs.core` array** — Load a config with `"footerBar": { "tabs": { "core": [] } }`. Verify no footer bar tabs appear (empty footer).
-- [ ] **Empty `appBar.tabs.core` array** — Load a config with `"appBar": { "tabs": { "core": [] } }`. Verify no app bar tabs appear (empty app bar).
-- [ ] **No `navBar` property** — Load a config that omits `navBar` entirely. Verify only the default buttons appear (zoom, rotation).
+| Test                  | Description                   | Steps                                                           | Expected Result                                                           | Auto |
+| --------------------- | ----------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------- | ---- |
+| No footerBar property | Defaults applied when omitted | 1. Load a config that omits `footerBar` entirely                | Viewer uses default footer bar tabs (layers, data-table)                  | C    |
+| No appBar property    | Defaults applied when omitted | 1. Load a config that omits `appBar` entirely                   | Viewer uses default app bar tabs (geolocator, legend, details, export)    | C    |
+| Empty footerBar tabs  | Empty array hides tabs        | 1. Load a config with `"footerBar": { "tabs": { "core": [] } }` | No footer bar tabs appear (empty footer)                                  | C    |
+| Empty appBar tabs     | Empty array hides tabs        | 1. Load a config with `"appBar": { "tabs": { "core": [] } }`    | No app bar tabs appear (empty app bar)                                    | C    |
+| No navBar property    | Only default buttons shown    | 1. Load a config that omits `navBar` entirely                   | Default buttons appear (zoom, rotation, fullscreen, home, basemap-select) | C    |
+| Empty navBar array    | Empty array hides all buttons | 1. Load a config with `"navBar": []`                            | No navbar buttons appear                                                  | C    |

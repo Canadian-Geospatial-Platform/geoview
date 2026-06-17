@@ -5,9 +5,52 @@ This folder contains the **manual release testing checklist** for GeoView. It co
 ## How to Use
 
 1. **Run the automated test suite first** — see [Automated Test Suite](#automated-test-suite) below
-2. Walk through each section in order — each file is a self-contained checklist
-3. Mark items with `[x]` as you complete them
-4. Record any issues found in each test, regroup them logically and use the agent IssueCreator to create GitHub issues. Make sure the failing test reference is linked in the issue
+2. Walk through each section in order — each file is a self-contained test definition
+3. Track pass/fail status using a **GitHub Issue** (see [Release Testing Process](#release-testing-process) below)
+4. Record any issues found during testing and use the IssueCreator agent to create GitHub issues
+
+## Release Testing Process
+
+Test definitions (this folder) are separated from pass/fail tracking (GitHub Issues). This keeps test cases clean and version-controlled, while providing interactive checkboxes and collaboration features for tracking.
+
+### Starting a Release Test Cycle
+
+1. **Create a new issue** from the [Release Testing template](../../.github/ISSUE_TEMPLATE/release-testing.md)
+2. **Fill in the header**: version number, RC branch/tag link, test environment URL, start date
+3. **Assign testers**: Edit the assignee table to split sections across team members
+4. **Test**: Each tester works through their assigned test definition files, checking off sections in the issue as they pass
+
+### Splitting Work
+
+The template includes a suggested 4-way split based on estimated time:
+
+| Assignee | Sections                                                                                         | Est. Time |
+| -------- | ------------------------------------------------------------------------------------------------ | --------- |
+| Tester 1 | 01–06 (Global, Map, Config, Basemap, Navbar, Overview)                                           | ~80 min   |
+| Tester 2 | 07–11 (Legend, Layers, Styles, Details, Data Table)                                              | ~110 min  |
+| Tester 3 | 12–18 (View Settings, Projection, Map Info, Export, Initial Settings, Packages, Global Settings) | ~105 min  |
+| Tester 4 | 19–26 (Integration, Edge Cases, WCAG, API, Config Loading, CDTK, Dev Tools, Production)          | ~130 min  |
+
+Adjust based on team size. For 2 testers, split at section 12.
+
+### Tracking Results
+
+- **Pass**: Check the section checkbox in the issue
+- **Fail**: Leave unchecked, add a comment with the section name and link to the created bug issue
+- **Blocked**: Add a comment explaining why (e.g., environment down, service unavailable)
+
+GitHub shows a progress bar on the issue (e.g., "18/26 tasks completed"), giving visibility into overall release readiness.
+
+### After Testing
+
+1. Fill in the **Results Summary** table in the issue
+2. Link all bug issues in the **Issues Found** section
+3. Get **sign-off** from the release approver
+4. Close the issue once the release is published
+
+### History
+
+Each release gets its own issue. Previous release test results are preserved as closed issues, providing an audit trail. Search issues with label `release` + `testing` to find past cycles.
 
 ## Document Structure
 

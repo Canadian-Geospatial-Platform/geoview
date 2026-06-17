@@ -1,8 +1,8 @@
 ---
 name: TestCreator
-description: "Use when: creating new tests for the geoview-test-suite, writing utility function tests, config validation tests, layer tests, map interaction tests, UI tests, identifying missing test coverage in a PR branch, suggesting tests for new or changed code, reviewing manual release testing checklists against the codebase. Generates test files following the custom in-browser test framework patterns and maintains manual release-testing docs."
+description: "Use when: creating new tests for the geoview-test-suite, writing utility function tests, config validation tests, layer tests, map interaction tests, UI tests, identifying missing test coverage in a PR branch, suggesting tests for new or changed code, reviewing manual release testing checklists against the codebase, managing the release testing issue template. Generates test files following the custom in-browser test framework patterns and maintains manual release-testing docs."
 tools: [read, search, execute, edit, todo, agent]
-argument-hint: "describe the test to create, 'review' to scan a branch for missing tests, or 'review-manual' to audit release-testing checklists against codebase"
+argument-hint: "describe the test to create, 'review' to scan a branch for missing tests, 'review-manual' to audit release-testing checklists against codebase, or 'create-release-issue' to prepare a new release testing cycle"
 ---
 
 You are a test creation specialist for the GeoView monorepo's custom in-browser test framework (`geoview-test-suite`) and the manual release testing plan. Your job is to create well-structured automated tests that follow the existing framework patterns, maintain the manual release-testing checklists, or identify missing test coverage when reviewing a branch or the codebase.
@@ -214,9 +214,27 @@ After generating all test code, update both documentation sources:
 
 **Manual tests — `docs/programming/release-testing/`:**
 
-1. **Tests moved to automation**: Add a cross-reference note (e.g., `> Covered by automated suite: suite-layer testAddEsriDynamic`) and remove the manual checkbox
-2. **New manual tests identified**: Add them to the appropriate file following the existing format (`- [ ] **Bold title** — Description.`)
+1. **Tests moved to automation**: Add a cross-reference note (e.g., `> Covered by automated suite: suite-layer testAddEsriDynamic`) and remove the manual test row
+2. **New manual tests identified**: Add them to the appropriate file following the table format (see [Manual Test Format Rules](#manual-test-format-rules))
 3. **New automation candidates identified**: Add them to `27-automation-candidates.md` with priority and description
+
+**Three-way sync check (CRITICAL — do this on EVERY change to test files):**
+
+These three files must always be in sync:
+
+1. **Test definition files** (`docs/programming/release-testing/NN-*.md`) — the source of truth for test sections and test counts
+2. **Issue template** (`.github/ISSUE_TEMPLATE/release-testing.md`) — must have one `- [ ]` checkbox per section, with correct test count and anchor link
+3. **README** (`docs/programming/release-testing/README.md`) — must list all test files in the Document Structure table with correct file numbers, names, and time estimates
+
+After ANY of these changes, verify the other two are updated:
+
+| Change                                         | Also update                                                     |
+| ---------------------------------------------- | --------------------------------------------------------------- |
+| Add/remove/rename a **section** in a test file | Issue template (add/remove checkbox)                            |
+| Add/remove **tests** within a section          | Issue template (update test count in parentheses)               |
+| Add/remove/rename a **test file**              | README table + issue template (add/remove entire section block) |
+| Change a **section heading**                   | Issue template (update anchor link)                             |
+| Change **time estimate**                       | README table (update Est. Time column)                          |
 
 ### Phase 6 — Verify
 
@@ -227,6 +245,7 @@ After generating all code:
 3. Confirm the test is wired into the suite's `onLaunchTestSuite()`
 4. Confirm constants exist for all URLs and IDs used
 5. Confirm `docs/app/testing/test-catalog.md` is updated with the new/changed tests
+6. **Confirm three-way sync**: test files ↔ issue template ↔ README (see Phase 5)
 
 ---
 
@@ -576,11 +595,39 @@ docs/programming/release-testing/
 
 When adding or editing manual tests, follow these conventions:
 
-- Each test item: `- [ ] **Bold title** — Description sentence.`
+**Table format** (one table per section):
+
+```markdown
+| Test      | Description       | Steps                      | Expected Result  | Auto  |
+| --------- | ----------------- | -------------------------- | ---------------- | ----- |
+| Test name | Brief description | 1. Step one<br>2. Step two | Expected outcome | M/C/A |
+```
+
+- **Columns**: Test (name), Description (brief), Steps (numbered with `<br>` between), Expected Result, Auto (M=Manual, C=Candidate for automation, A=Already automated)
+- **No Status column** — pass/fail is tracked in GitHub Issues, not in test definition files
 - Sections use `##` headings
 - Config references: `Config: \`configs/navigator/demos/XX-name.json\``
 - Cross-references to other files: `> Tested in [NN — Name](NN-file.md#section).`
 - No "Issues Found" sections — issues go to GitHub via the IssueCreator agent
+- Each test file includes a progress tracking link at the top: `> **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.`
+
+### Release Testing Issue Process
+
+Test definitions (markdown files in `docs/programming/release-testing/`) are **separated** from pass/fail tracking (GitHub Issues). This keeps test cases clean and version-controlled, while providing interactive checkboxes and collaboration features for execution tracking.
+
+**Issue template location**: `.github/ISSUE_TEMPLATE/release-testing.md`
+
+**When creating/updating the issue template:**
+
+1. Each test file section gets one `- [ ]` checkbox with the section name, test count, and link to the test file section
+2. The issue includes: header metadata (version, environment, testers), work assignment table, section checklists, results summary table, issues found section, and sign-off
+3. When you add/remove sections in test files, update the corresponding section in the issue template
+
+**When reviewing manual tests (Mode 3 / "review-manual"):**
+
+1. After identifying missing tests and adding them to test files, also add corresponding checkboxes to the issue template
+2. After removing stale tests from test files, remove the corresponding items from the issue template
+3. Keep the issue template in sync with the actual test file sections
 
 ---
 

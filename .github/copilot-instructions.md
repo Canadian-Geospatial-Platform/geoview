@@ -742,16 +742,16 @@ Per [best-practices.md](../docs/programming/best-practices.md), order functions 
 
 Each group must be wrapped in `// #region LABEL` / `// #endregion LABEL` markers (UPPER CASE). Common labels:
 
-| Region label | Contents |
-|---|---|
-| `OVERRIDES` | Abstract / override methods |
-| `PUBLIC METHODS` | Public instance methods (sub-regions allowed, e.g., `PUBLIC METHODS - UI RELATED`) |
-| `PROTECTED METHODS` | Protected instance methods |
-| `PRIVATE METHODS` | Private instance methods |
-| `DOMAIN HANDLERS` | Private handlers subscribed to domain events |
-| `EVENTS` | Event emit/on/off methods |
-| `STATIC METHODS` | Static public and private methods |
-| `EVENT TYPES` or `EVENTS & DELEGATES` | Delegate types and event interfaces (outside the class body) |
+| Region label                          | Contents                                                                           |
+| ------------------------------------- | ---------------------------------------------------------------------------------- |
+| `OVERRIDES`                           | Abstract / override methods                                                        |
+| `PUBLIC METHODS`                      | Public instance methods (sub-regions allowed, e.g., `PUBLIC METHODS - UI RELATED`) |
+| `PROTECTED METHODS`                   | Protected instance methods                                                         |
+| `PRIVATE METHODS`                     | Private instance methods                                                           |
+| `DOMAIN HANDLERS`                     | Private handlers subscribed to domain events                                       |
+| `EVENTS`                              | Event emit/on/off methods                                                          |
+| `STATIC METHODS`                      | Static public and private methods                                                  |
+| `EVENT TYPES` or `EVENTS & DELEGATES` | Delegate types and event interfaces (outside the class body)                       |
 
 A region is only needed when the group has at least one member. The `// #endregion` comment should repeat the label.
 
@@ -962,6 +962,31 @@ items.forEach((item) => {
 - Config validation happens via `src/api` files in geoview-core
 - Plugin packages have their own config schemas (default-config-\*.json) but rely on core's validation APIs
 - Use `ConfigApi` and `ConfigValidation` classes from geoview-core for config operations
+
+### Three Default Value Sources (Must Stay in Sync)
+
+There are three files that declare "default" config values. They serve different purposes but **must stay consistent**:
+
+| File                                                  | Purpose                             | When Used                                                                               |
+| ----------------------------------------------------- | ----------------------------------- | --------------------------------------------------------------------------------------- |
+| `schema.json`                                         | JSON Schema `"default"` annotations | Schema validation (AJV); documents valid enum values                                    |
+| `schema-default-config.json`                          | Minimal starter config template     | Rarely used at runtime; serves as documentation/reference                               |
+| `DEFAULT_MAP_FEATURE_CONFIG` in `map-schema-types.ts` | **Actual runtime defaults**         | `MapFeatureConfig` constructor: `deepMerge(DEFAULT_MAP_FEATURE_CONFIG.x, userConfig.x)` |
+
+**The authoritative source for runtime behavior is `DEFAULT_MAP_FEATURE_CONFIG`** in `packages/geoview-core/src/api/types/map-schema-types.ts`. When a user omits a property from their config, `MapFeatureConfig` (in `map-feature-config.ts`) deep-merges the user config over these defaults.
+
+**Related type files:**
+
+- `map-schema-types.ts` — Map-level types, enums, `DEFAULT_MAP_FEATURE_CONFIG`, `DEFAULT_FOOTERBAR_CORE`, `DEFAULT_APPBAR_CORE`, `DEFAULT_NAVBAR_CORE`
+- `layer-schema-types.ts` — Layer entry config types, source types, style types
+
+**Known drift (as of 2026-06):**
+
+All three sources have been synchronized. If you modify defaults in `DEFAULT_MAP_FEATURE_CONFIG`, also update `schema.json` `"default"` annotations and `schema-default-config.json` values.
+
+Previously drifted properties (now fixed): navBar, footerBar core, appBar core, highlightColor, overviewMap.hideOnZoom, maxExtent, zoomAndCenter center, basemapOptions key name (`id` vs `basemapId`), serviceUrls key name (`geolocator` vs `geolocatorUrl`), globalSettings.
+
+**When modifying defaults:** Update all three locations. `schema.json` defaults are advisory (used by AJV for missing fields during validation) but `DEFAULT_MAP_FEATURE_CONFIG` is what the viewer actually uses.
 
 ### Canonical Config Property Order
 
