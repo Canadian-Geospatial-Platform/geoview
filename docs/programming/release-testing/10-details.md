@@ -32,6 +32,8 @@ Details panel queries, highlighting, lightbox, and coordinate info.
 
 ## Hover Tooltip
 
+> Toggle hoverable/queryable from settings panel tested in [08 — Layers](08-layers.md#hoverable--queryable).
+
 - [ ] **Hover on vector feature** — Hover over a vector feature (GeoJSON, CSV, Esri Feature, WFS, OGC Feature, etc.). Verify a tooltip appears with basic feature info.
 - [ ] **Hover on Esri Dynamic feature** — Hover over an Esri Dynamic layer feature. Verify a tooltip appears.
 - [ ] **Hover on WMS feature** — Hover over a WMS layer feature. Verify a tooltip appears.

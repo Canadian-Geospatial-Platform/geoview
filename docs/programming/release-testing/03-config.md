@@ -54,6 +54,8 @@ For each: verify the viewer loads, error layers are flagged, valid layers still 
 
 ## Layer Loading Status
 
+> Also tested from the Layers panel in [08 — Layers](08-layers.md#loading-status) and the Legend panel in [07 — Legend](07-legend.md#loading-status).
+
 - [ ] **Green status** — When layers are loading, verify the status indicator shows green (loading) in the Layers panel.
 - [ ] **Loaded status** — Once loaded, verify status changes to loaded.
 - [ ] **Error status** — For error layers, verify status shows error.

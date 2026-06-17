@@ -42,6 +42,8 @@ Config: `configs/navigator/demos/28-symbol-shapes-fill-patterns.json`
 
 Config: `configs/navigator/demos/24-configured-feature-labels.json`
 
+> Label toggle on/off tested in [08 — Layers](08-layers.md#text-labelling).
+
 - [ ] **Labels render from config** — Load the feature labels config. Verify text labels appear on map features at appropriate positions.
 - [ ] **Label field** — Verify the label displays the correct field value as configured (not a random field).
 - [ ] **Label styling** — Verify label font size, color, and halo/outline are applied as configured.

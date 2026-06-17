@@ -21,18 +21,15 @@ Multi-step workflows that test cross-panel and cross-feature interactions. These
 
 Config: `configs/navigator/demos/06-zoom-layer.json`
 
+> UI-level zoom-to-extent buttons tested in [07 — Legend](07-legend.md#shortcuts--actions) and [08 — Layers](08-layers.md#actions).
+
 1. [ ] Trigger zoom to layer extent (with specific layer ID) — verify the map zooms to that layer's extent
 2. [ ] Trigger zoom to layer extent (with empty/no ID) — verify fallback behavior
 3. [ ] Check the resulting extent — verify it matches expected bounds
 
 ## Flow 5: Layers in Visible Range
 
-1. [ ] Zoom to a level where a layer is out of visible range
-2. [ ] Check the store — verify `inVisibleRange: false`
-3. [ ] Check `getOLLayer().isVisible()` — verify `false`
-4. [ ] Zoom to a level within the visible range
-5. [ ] Check the store — verify `inVisibleRange: true`
-6. [ ] Check `getOLLayer().isVisible()` — verify `true`
+> Tested in [08 — Layers](08-layers.md#layer-zoom-levels) (store check + OL visibility check at zoom boundaries).
 
 ## Flow 6: Data Table Filter by Extent
 
@@ -62,6 +59,8 @@ Config: `configs/navigator/demos/06-zoom-layer.json`
 > Tested in [08 — Layers](08-layers.md#visibility) ("Toggle group visibility") and [01 — Global](01-global.md#cross-panel-layer-visibility).
 
 ## Flow 12: Style Classes + Toggle All
+
+> Individual class toggles tested in [08 — Layers](08-layers.md#style-classes-visibility). Table reflecting class filter tested in [11 — Data Table](11-data-table.md#table-with-style-classes).
 
 1. [ ] Open Layers panel for a layer with style classes
 2. [ ] Toggle individual classes on/off

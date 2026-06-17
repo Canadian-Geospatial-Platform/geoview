@@ -82,6 +82,8 @@ Demo page: `templates/demos/add-layers.html`
 
 ### Add by Geocore UUID
 
+> Time slider auto-creation behavior tested in [17a — Time Slider](17a-package-time-slider.md#geocore-auto-creation). Geochart auto-creation behavior tested in [17b — Geochart](17b-package-geochart.md#geocore-auto-creation).
+
 - [ ] **Add geocore layer** — Add a layer via geocore UUID. Verify it loads.
 - [ ] **Add geocore layer with geochart** — Add a geocore layer that has geochart config (e.g., Airborne). Verify the layer loads and the geochart shortcut becomes available.
 - [ ] **Add geocore layer with time slider** — Add a geocore layer that has time slider config (e.g., Wireless Network). Verify the layer loads and the time slider shortcut becomes available.
@@ -161,6 +163,8 @@ Config: `configs/navigator/demos/23b-initial-settings-states-controls.json`
 ### Text Labelling
 
 Config: `configs/navigator/demos/24-configured-feature-labels.json`
+
+> Label rendering accuracy (field, styling, zoom) tested in [09 — Styles](09-styles.md#feature-labels).
 
 - [ ] **Labels present** — Verify text labels appear on features on the map.
 - [ ] **Toggle labels off** — Toggle text labelling off in layer settings. Verify labels disappear.

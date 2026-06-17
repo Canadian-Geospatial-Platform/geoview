@@ -40,12 +40,12 @@ When tabbing into GeoView for the first time, a dialog appears asking to enable 
 - [ ] **Shift+Arrow decreases pan distance** — Press Shift + opposite arrow. Verify the step size adjusts (accumulates with repeated Shift presses).
 - [ ] **Enter queries features** — Position crosshair over a feature. Press Enter. Verify the Details panel opens with feature info at that location.
 - [ ] **Static map — no crosshair** — Load a static map (`interaction: 'static'`). Verify Ctrl+M does NOT activate crosshair.
-- [ ] **Rotation-aware** — Rotate the map, then activate crosshair. Verify the crosshair rotates with the map.
+- [ ] **Rotation** — Rotate the map the map.
 - [ ] **Click deactivates** — With crosshair active, click the map with the mouse. Verify the crosshair deactivates.
 
 ## Tab Order
 
-Natural tab order (without WCAG mode):
+Natural tab order (with WCAG mode):
 
 ```
 Host page → Top skip link → App Bar → Map → Nav Bar → Footer Bar → Bottom skip link → Host page continues

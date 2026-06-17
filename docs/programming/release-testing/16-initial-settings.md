@@ -55,3 +55,5 @@ For raster function and WMS style tests, see [08-layers.md — Esri Image Layer 
 
 - [ ] **Feature info field config** — Verify configured `featureInfo` field aliases and formatting are applied correctly in the details panel.
 - [ ] **nameField / outfields** — Verify the configured `nameField` is used as the feature label and `outfields` limits which fields are returned.
+
+> Core nameField/outfields behavior tested in [10 — Details](10-details.md#summary--out-fields).

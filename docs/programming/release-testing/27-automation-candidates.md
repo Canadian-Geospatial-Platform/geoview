@@ -159,7 +159,7 @@ Use the **TestCreator** agent:
 Or for batch creation:
 
 ```
-@TestCreator Review the automation candidates in docs/programming/release-testing/22-automation-candidates.md
+@TestCreator Review the automation candidates in docs/programming/release-testing/27-automation-candidates.md
 and create P1 tests for suite-config
 ```
 

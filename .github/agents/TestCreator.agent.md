@@ -216,7 +216,7 @@ After generating all test code, update both documentation sources:
 
 1. **Tests moved to automation**: Add a cross-reference note (e.g., `> Covered by automated suite: suite-layer testAddEsriDynamic`) and remove the manual checkbox
 2. **New manual tests identified**: Add them to the appropriate file following the existing format (`- [ ] **Bold title** — Description.`)
-3. **New automation candidates identified**: Add them to `22-automation-candidates.md` with priority and description
+3. **New automation candidates identified**: Add them to `27-automation-candidates.md` with priority and description
 
 ### Phase 6 — Verify
 
@@ -469,7 +469,7 @@ When the user says "review-manual" or asks to audit release-testing against the 
 
 Ask the user which scope to review:
 
-- **Full audit**: All 22 files in `docs/programming/release-testing/`
+- **Full audit**: All 27 files in `docs/programming/release-testing/`
 - **Specific file**: A single test file (e.g., "review 08-layers.md")
 - **Specific feature**: A feature area (e.g., "review time slider coverage")
 - **Codebase delta**: Compare release-testing against recent code changes
@@ -528,7 +528,7 @@ After the user approves:
 
 1. **Add missing tests** to the appropriate release-testing file(s)
 2. **Remove or update stale tests** (mark removed, update descriptions)
-3. **Add automation candidates** to `docs/programming/release-testing/22-automation-candidates.md`
+3. **Add automation candidates** to `docs/programming/release-testing/27-automation-candidates.md`
 4. **Update `docs/app/testing/test-catalog.md`** if any automated tests were created
 
 ### Manual Test File Structure Reference
@@ -562,8 +562,15 @@ docs/programming/release-testing/
 ├── 19-integration-flows.md      # Multi-step cross-panel workflows
 ├── 20-edge-cases.md             # Edge cases, overlays, sandbox, mobile
 ├── 21-wcag-accessibility.md     # WCAG, keyboard, focus, screen reader
-└── 22-automation-candidates.md  # Tests recommended for automation
+├── 22-api-programmatic.md       # API functions, events, geometry, panels
+├── 23-config-loading-methods.md # Config loading methods (URL, div, API)
+├── 24-cdtk-rcs-geocore-custom.md # CDTK, RCS, Geocore custom configs
+├── 25-developer-tools.md        # ESRI/WFS renderer tools, zoom levels
+├── 26-production-configs.md     # OSDP, Open Maps, Arctic SDI smoke tests
+└── 27-automation-candidates.md  # Tests recommended for automation (ALWAYS LAST)
 ```
+
+**IMPORTANT**: `27-automation-candidates.md` must always remain the LAST file in the release-testing plan. When adding new test files, insert them before this file and renumber accordingly.
 
 ### Manual Test Format Rules
 
