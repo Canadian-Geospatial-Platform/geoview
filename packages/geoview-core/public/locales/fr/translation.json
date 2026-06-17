@@ -210,6 +210,7 @@
     "serviceGroup": "Groupe de couches",
     "name": "Nom",
     "layerSelect": "Sélectionner couche(s)",
+    "unknownLayer": "Couche inconnue",
     "deleteLayer": "Supprimer la couche",
     "undoLayer": "Annuler la suppression de la couche",
     "errorDisabled": "Le type de couche « {{layerType}} » est désactivé dans cette carte.",

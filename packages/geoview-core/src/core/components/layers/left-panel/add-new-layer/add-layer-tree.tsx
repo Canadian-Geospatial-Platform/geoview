@@ -3,6 +3,8 @@
  */
 import { useEffect, useState } from 'react';
 
+import { useTranslation } from 'react-i18next';
+
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
 import { TreeItem } from '@mui/x-tree-view/TreeItem';
 
@@ -28,6 +30,7 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
   logger.logTraceRender('components/layers/left-panel/add-layer-tree/add-layer-tree');
 
   const { layerTree, onSelectedItemsChange } = props;
+  const { t } = useTranslation();
   const [selectedItems, setSelectedItems] = useState<string[]>([]); // e.g. ["group1/layer1", "group2/layer2"]
 
   /**
@@ -41,27 +44,45 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
   }, [selectedItems]);
 
   /**
-   * Recursive function to render tree item. It renders the layer and its children.
-   * @param layer - the layer to render
-   * @param parentId - the parent id of the layer
+   * Recursively renders a tree item with its nested children.
+   *
+   * @param layer - The layer to render
+   * @param parentId - Optional parent layer id for path construction
+   * @returns The rendered tree item component, or null if the layer is missing a required layerId
    */
-  const renderTreeItem = (layer: TypeGeoviewLayerConfig | TypeLayerEntryConfig, parentId?: string): JSX.Element => {
-    // Depending on the instance
+  const renderTreeItem = (layer: TypeGeoviewLayerConfig | TypeLayerEntryConfig, parentId?: string): JSX.Element | null => {
+    // Step 1: Extract layerId based on instance type
     let layerId: string | undefined;
-    let layerName: string | undefined;
     if (layer instanceof ConfigBaseClass) {
       ({ layerId } = layer);
-      layerName = layer.getLayerName();
     } else {
       layerId = layer.geoviewLayerId;
-      layerName = layer.geoviewLayerName;
     }
 
+    // Step 2: Validate layerId early - return null if missing
+    if (!layerId) {
+      logger.logError('add-layer-tree', 'Layer missing required ID, skipping render', layer);
+      return null;
+    }
+
+    // Step 3: Compute layerName only after layerId is validated
+    let layerName: string;
+    if (layer instanceof ConfigBaseClass) {
+      layerName = layer.getLayerNameCascade(); // Use cascade - always returns non-empty string
+    } else {
+      // Fallback chain for non-ConfigBaseClass with translation
+      layerName = layer.geoviewLayerName?.trim() || layerId || t('layers.unknownLayer');
+    }
+
+    // Step 4: Continue with rendering
     const curLayerId = `${parentId ? `${parentId}/` : ''}${layerId}`;
+
     return (
-      <Tooltip title={layerName} placement="top">
-        <TreeItem key={curLayerId} itemId={curLayerId} label={layerName} aria-label={layerName}>
-          {layer.listOfLayerEntryConfig?.map((subLayer) => renderTreeItem(subLayer, curLayerId))}
+      <Tooltip key={curLayerId} title={layerName} placement="top">
+        <TreeItem itemId={curLayerId} label={layerName} aria-label={layerName}>
+          {layer.listOfLayerEntryConfig
+            ?.map((subLayer) => renderTreeItem(subLayer, curLayerId))
+            .filter((item): item is JSX.Element => item !== null)}
         </TreeItem>
       </Tooltip>
     );
@@ -122,9 +143,9 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
       layerTree.geoviewLayerType === 'ogcWms' ||
       layerTree.geoviewLayerType === 'ogcFeature'
     ) {
-      return layerTree.listOfLayerEntryConfig.map((layer) => renderTreeItem(layer));
+      return layerTree.listOfLayerEntryConfig.map((layer) => renderTreeItem(layer)).filter((item): item is JSX.Element => item !== null);
     }
-    return [renderTreeItem(layerTree)];
+    return [renderTreeItem(layerTree)].filter((item): item is JSX.Element => item !== null);
   };
 
   return (

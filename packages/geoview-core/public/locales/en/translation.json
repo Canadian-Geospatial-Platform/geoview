@@ -210,6 +210,7 @@
     "serviceGroup": "Group Layer",
     "name": "Name",
     "layerSelect": "Select layer(s)",
+    "unknownLayer": "Unknown Layer",
     "deleteLayer": "Delete layer",
     "undoLayer": "Undo layer",
     "errorDisabled": "The layer type '{{layerType}}' is disabled in this map.",
