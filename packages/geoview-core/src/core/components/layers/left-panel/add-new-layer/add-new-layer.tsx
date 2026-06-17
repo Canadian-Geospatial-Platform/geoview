@@ -55,6 +55,7 @@ interface FileUploadSectionProps {
   onKeyDown: (event: KeyboardEvent<HTMLDivElement>) => void;
   displayURL: string;
   disabledLayerTypes: string[];
+  uploadButtonRef?: React.RefObject<HTMLButtonElement | null>;
 }
 
 /**
@@ -69,6 +70,7 @@ function FileUploadSection({
   onKeyDown,
   displayURL,
   disabledLayerTypes,
+  uploadButtonRef,
 }: FileUploadSectionProps): JSX.Element {
   // Log
   logger.logTraceRender('components/layers/left-panel/add-new-layer/file-upload-section');
@@ -194,8 +196,7 @@ function FileUploadSection({
       fileInputRef.current.click();
     }
   };
-  // TODO: WCAG Issue #3117 -  aria-label(layers.fileTypes) needs to include button text (layers.upload)...
-  // TODO: WCAG Issue #3117 -  ... button text (Choose a file) does not begin with sane word aria-label (Upload a...)
+
   return (
     <Box
       className="dropzone"
@@ -227,7 +228,6 @@ function FileUploadSection({
       <Box>
         <input
           type="file"
-          id="fileUpload"
           ref={fileInputRef}
           style={{ display: 'none' }}
           onChange={handleChange}
@@ -245,6 +245,7 @@ function FileUploadSection({
         className="buttonOutlineFilled"
         aria-label={t('layers.fileTypes')}
         tooltip={t('layers.fileTypes')}
+        ref={uploadButtonRef}
       >
         <FileUploadIcon />
         <Box component="span">{t('layers.upload')}</Box>
@@ -323,8 +324,10 @@ export function AddNewLayer(): JSX.Element {
 
   // Ref
   const serviceTypeRef = useRef<HTMLDivElement>(null);
-  const isMultipleRef = useRef<HTMLDivElement>(null);
-  const isMultipleTextFieldRef = useRef<HTMLDivElement>(null);
+  const layerSelectionTreeContainerRef = useRef<HTMLDivElement>(null);
+  const configureLayerNameInputRef = useRef<HTMLInputElement>(null);
+  const finalLayerNameInputRef = useRef<HTMLInputElement>(null);
+  const uploadButtonRef = useRef<HTMLButtonElement>(null);
 
   // Store
   const mapId = useStoreGeoViewMapId();
@@ -891,27 +894,39 @@ export function AddNewLayer(): JSX.Element {
     // Log
     logger.logTraceUseEffect('ADD-NEW-LAYER - step focus management', activeStep);
 
+    if (activeStep === 0) {
+      // Focus the upload button using the ref
+      const timeoutId = setTimeout(() => {
+        uploadButtonRef.current?.focus();
+      }, 0);
+
+      // Cleanup: cancel focus attempt if step changes or unmounts
+      return () => clearTimeout(timeoutId);
+    }
+
     if (activeStep === 1) {
-      (serviceTypeRef.current?.getElementsByTagName('input')[0].previousSibling as HTMLDivElement).focus();
+      const element = serviceTypeRef.current?.querySelector<HTMLElement>('[role="combobox"]');
+      element?.focus();
     }
 
     if (activeStep === 2) {
-      if (isMultipleRef.current) {
-        // handle is Multiple fields focus
-        const id = isMultipleRef.current?.dataset?.id;
-        const elem = isMultipleRef.current?.querySelector('#service-layer-label') as HTMLInputElement;
-        if (id === 'autocomplete' && elem) {
-          elem.focus();
-        } else {
-          isMultipleTextFieldRef.current?.getElementsByTagName('input')[0]?.focus();
-        }
+      if (isMultiple) {
+        // Focus the first tree item in the multi-layer selection tree
+        const treeItemToFocus = layerSelectionTreeContainerRef.current?.querySelector('[role="treeitem"]') as HTMLElement | null;
+        treeItemToFocus?.focus();
+      } else {
+        // Focus the layer name input of single layer configuration
+        configureLayerNameInputRef.current?.focus();
       }
     }
 
     if (activeStep === 3) {
-      isMultipleTextFieldRef.current?.getElementsByTagName('input')[0]?.focus();
+      finalLayerNameInputRef.current?.focus();
     }
-  }, [activeStep]);
+
+    // No cleanup needed for other steps (synchronous focus calls)
+    return undefined;
+  }, [activeStep, isMultiple]);
 
   /**
    * Creates a set of Continue / Back buttons
@@ -930,7 +945,6 @@ export function AddNewLayer(): JSX.Element {
           </IconButton>
         ) : (
           <Button
-            id="nextButton"
             variant="contained"
             className="buttonOutlineFilled"
             size="small"
@@ -987,6 +1001,7 @@ export function AddNewLayer(): JSX.Element {
                     onKeyDown={handleNextKeyDown}
                     displayURL={displayURL}
                     disabledLayerTypes={disabledLayerTypes}
+                    uploadButtonRef={uploadButtonRef}
                   />
                   <NavButtons isFirst handleNext={handleStep1} />{' '}
                 </Box>
@@ -1043,11 +1058,23 @@ export function AddNewLayer(): JSX.Element {
                       variant="standard"
                       value={layerName}
                       onChange={handleNameLayer}
-                      ref={isMultipleTextFieldRef}
+                      inputRef={configureLayerNameInputRef}
                       onKeyDown={handleNextKeyDown}
                     />
                   ) : (
-                    layerTree && <AddLayerTree layerTree={layerTree} onSelectedItemsChange={setLayerIdsToAdd} />
+                    layerTree && (
+                      <Box
+                        ref={layerSelectionTreeContainerRef}
+                        sx={{
+                          // Targets the inner content wrapper when the main item or root receives native JS focus
+                          '& .MuiTreeItem-root:focus > .MuiTreeItem-content, & .MuiTreeItem-root:focus-within > .MuiTreeItem-content': {
+                            backgroundColor: (theme) => theme.palette.action.hover,
+                          },
+                        }}
+                      >
+                        <AddLayerTree layerTree={layerTree} onSelectedItemsChange={setLayerIdsToAdd} />
+                      </Box>
+                    )
                   )}
                   <br />
                   <NavButtons isLast={!isMultiple} handleNext={isMultiple ? handleStep3 : handleStepLast} />
@@ -1070,6 +1097,7 @@ export function AddNewLayer(): JSX.Element {
                         value={layerName}
                         onChange={handleNameLayer}
                         onKeyDown={handleNextKeyDown}
+                        inputRef={finalLayerNameInputRef}
                       />
                       <br />
                       <NavButtons isLast handleNext={handleStepLast} />
