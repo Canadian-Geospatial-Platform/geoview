@@ -46,6 +46,8 @@ Config: `configs/navigator/layers/wfs-cdtk.json`
 
 Config: `configs/navigator/layers/rcs-gcgeo.json`
 
+RCS is a geocore variant designed for VPN environments. It uses the same UUID resolution but through a different internal service endpoint.
+
 | Test            | Description                 | Steps                                                             | Expected Result                                                                     | Auto |
 | --------------- | --------------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ---- |
 | RCS layer type  | RCS resolves and renders    | 1. Load the navigator with `rcs-gcgeo.json`<br>2. Observe the map | Layer resolves from RCS service and renders on the map                              | M    |

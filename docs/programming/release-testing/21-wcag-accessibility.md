@@ -40,17 +40,18 @@ When tabbing into GeoView for the first time, a dialog appears asking to enable 
 
 ## Map Focus & Crosshair
 
-| Test                            | Description                   | Steps                                                             | Expected Result                                                               | Auto |
-| ------------------------------- | ----------------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------------------- | ---- |
-| Ctrl+M activates crosshair      | Crosshair shown at center     | 1. Focus the map (via Tab or skip link)<br>2. Press `Ctrl+M`      | Crosshair graphic appears at the map center                                   | M    |
-| First focus is skip-to-map link | Skip link before map canvas   | 1. Enter the map area via Tab                                     | First focusable element is the skip-to-map link (not the map canvas directly) | M    |
-| Arrow keys pan                  | Map pans with arrows          | 1. With crosshair active, press arrow keys                        | Map pans in the arrow direction                                               | M    |
-| Shift+Arrow increases pan       | Larger pan increments         | 1. Press Shift + arrow keys                                       | Larger pan increments applied                                                 | M    |
-| Shift+Arrow decreases pan       | Step size adjusts             | 1. Press Shift + opposite arrow                                   | Step size adjusts (accumulates with repeated Shift presses)                   | M    |
-| Enter queries features          | Feature info at crosshair     | 1. Position crosshair over a feature<br>2. Press Enter            | Details panel opens with feature info at that location                        | M    |
-| Static map — no crosshair       | Crosshair disabled on static  | 1. Load a static map (`interaction: 'static'`)<br>2. Press Ctrl+M | Crosshair does NOT activate                                                   | M    |
-| Rotation                        | Crosshair works with rotation | 1. Rotate the map<br>2. Use crosshair                             | Crosshair and panning work correctly with rotation applied                    | M    |
-| Click deactivates               | Mouse click removes crosshair | 1. With crosshair active, click the map with the mouse            | Crosshair deactivates                                                         | M    |
+| Test                            | Description                   | Steps                                                             | Expected Result                                                                     | Auto |
+| ------------------------------- | ----------------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ---- |
+| Ctrl+M activates crosshair      | Crosshair shown at center     | 1. Focus the map (via Tab or skip link)<br>2. Press `Ctrl+M`      | Crosshair graphic appears at the map center                                         | M    |
+| First focus is skip-to-map link | Skip link before map canvas   | 1. Enter the map area via Tab                                     | First focusable element is the skip-to-map link (not the map canvas directly)       | M    |
+| Arrow keys pan                  | Map pans with arrows          | 1. With crosshair active, press arrow keys                        | Map pans in the arrow direction (default 128px step)                                | M    |
+| Shift+Up increases step         | Coarser movement              | 1. With crosshair active, press Shift+ArrowUp                     | Pan step increases by 10px (for faster large moves)                                 | M    |
+| Shift+Down decreases step       | Finer movement                | 1. Press Shift+ArrowDown                                          | Pan step decreases by 10px (minimum 10px, for precise positioning over features)    | M    |
+| Enter queries features          | Feature info at crosshair     | 1. Position crosshair over a feature<br>2. Press Enter            | Details panel opens with feature info at that location                              | M    |
+| Static map — no crosshair       | Crosshair disabled on static  | 1. Load a static map (`interaction: 'static'`)<br>2. Press Ctrl+M | Crosshair does NOT activate; map element has `tabIndex=-1` (not keyboard-focusable) | M    |
+| Static map — viewer controls    | Viewer still accessible       | 1. On same static map, Tab through controls                       | App bar (notifications, about) and map info (attribution, scale) are focusable      | M    |
+| Rotation                        | Crosshair works with rotation | 1. Rotate the map<br>2. Use crosshair                             | Crosshair and panning work correctly with rotation applied                          | M    |
+| Click deactivates               | Mouse click removes crosshair | 1. With crosshair active, click the map with the mouse            | Crosshair deactivates                                                               | M    |
 
 ## Tab Order
 

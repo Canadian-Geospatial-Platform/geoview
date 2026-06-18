@@ -77,6 +77,19 @@ const multipleHtmlPluginsOutliersTests = globSync('./public/templates/tests/*.ht
   });
 });
 
+// inject all release testing files
+const multipleHtmlPluginsReleaseTesting = globSync('./public/templates/release-testing/*.html').map((name) => {
+  const filename = path.basename(name);
+  return new HtmlWebpackPlugin({
+    template: `${name}`,
+    filename: filename,
+    title: 'Release Testing - Canadian Geospatial Platform Viewer',
+    inject: 'head',
+    scriptLoading: 'blocking',
+    chunks: ['cgpv-main'],
+  });
+});
+
 const config = {
   cache: {
     type: 'filesystem',
@@ -304,7 +317,8 @@ const config = {
     .concat(multipleHtmlPluginsSamples)
     .concat(multipleHtmlPluginsDemos)
     .concat(multipleHtmlPluginsDemosSpecific)
-    .concat(multipleHtmlPluginsOutliersTests),
+    .concat(multipleHtmlPluginsOutliersTests)
+    .concat(multipleHtmlPluginsReleaseTesting),
 
   performance: {
     maxEntrypointSize: 7 * 1024 * 1024, // 7 MiB

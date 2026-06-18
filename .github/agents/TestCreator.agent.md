@@ -612,6 +612,14 @@ When adding or editing manual tests, follow these conventions:
 - No "Issues Found" sections — issues go to GitHub via the IssueCreator agent
 - Each test file includes a progress tracking link at the top: `> **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.`
 
+**Test page linkage** (when a dedicated release testing HTML page exists):
+
+- Add a `> **Test page**:` link immediately after the progress tracking line pointing to the HTML file: `> **Test page**: [rt-NN-name.html](../../packages/geoview-core/public/templates/release-testing/rt-NN-name.html)`
+- Steps in the test table MUST reference specific maps by ID (e.g., "On Map 1, click..." not "Load a config with...")
+- Do NOT reference sandbox.html, all-layers.json, or generic "load a config" instructions when a dedicated test page exists
+- Each map on the test page should be minimal — only include components/layers needed for that page's tests
+- Use inline `data-config` (not `data-config-url` or JSON files) for simplicity
+
 ### Release Testing Issue Process
 
 Test definitions (markdown files in `docs/programming/release-testing/`) are **separated** from pass/fail tracking (GitHub Issues). This keeps test cases clean and version-controlled, while providing interactive checkboxes and collaboration features for execution tracking.

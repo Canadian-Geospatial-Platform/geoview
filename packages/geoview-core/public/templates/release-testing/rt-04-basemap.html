@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>RT-04 Basemap - Release Testing</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+      .basemap-controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 12px 0;
+      }
+      .basemap-controls button {
+        padding: 6px 12px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 13px;
+        background: #f5f5f5;
+      }
+      .basemap-controls button:hover {
+        background: #e0e0e0;
+      }
+      .basemap-controls button.active {
+        background: #515ba5;
+        color: white;
+        border-color: #515ba5;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="page-header"></div>
+    <div>
+      <div class="back-to-main">
+        <a href="./release-testing.html">← Back to Release Testing</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>04 — Basemap Tests</h4>
+        <p>
+          Basemap selector, labels/shaded toggle, projection-aware basemap switching, and <code>useAsBasemap</code> layer property.
+          Use the buttons below each map to dynamically change basemap options via the API.
+        </p>
+        <p>
+          <strong>Test plan:</strong>
+          <a href="https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/docs/programming/release-testing/04-basemap.md" target="_blank">04-basemap.md</a>
+        </p>
+      </div>
+
+      <!-- Map 1: Main basemap test (LCC) with toggle buttons -->
+      <h5>Map 1 — Basemap Selector + Labels/Shaded Toggle (LCC)</h5>
+      <p>Use the basemap selector (navbar) to cycle through types. Use the buttons to toggle labels and shading dynamically.</p>
+
+      <div class="basemap-controls">
+        <strong>Basemap:</strong>
+        <button onclick="setBasemap('map1', 'transport')" class="active" id="bm-transport">Transport</button>
+        <button onclick="setBasemap('map1', 'simple')" id="bm-simple">Simple</button>
+        <button onclick="setBasemap('map1', 'imagery')" id="bm-imagery">Imagery</button>
+        <button onclick="setBasemap('map1', 'osm')" id="bm-osm">OSM</button>
+        <button onclick="setBasemap('map1', 'nogeom')" id="bm-nogeom">No Geom</button>
+      </div>
+      <div class="basemap-controls">
+        <strong>Options:</strong>
+        <button onclick="toggleLabeled('map1')" id="btn-labeled" class="active">Labeled: ON</button>
+        <button onclick="toggleShaded('map1')" id="btn-shaded" class="active">Shaded: ON</button>
+      </div>
+
+      <div
+        id="map1"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
+            'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
+            'listOfGeoviewLayerConfig': []
+          },
+          'navBar': ['zoom', 'basemap-select', 'projection'],
+          'appBar': { 'tabs': { 'core': [] } },
+          'footerBar': { 'tabs': { 'core': [] } },
+          'theme': 'geo.ca'
+        }"
+      ></div>
+
+      <!-- Map 2: Web Mercator (verify basemaps work in both projections) -->
+      <h5>Map 2 — Basemap in Web Mercator (EPSG:3857)</h5>
+      <p>Verify the same basemap types render correctly in WM. Switch projection on Map 1 and compare.</p>
+      <div
+        id="map2"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': { 'projection': 3857, 'initialView': { 'zoomAndCenter': [3, [-90, 55]] } },
+            'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
+            'listOfGeoviewLayerConfig': []
+          },
+          'navBar': ['zoom', 'basemap-select', 'projection'],
+          'appBar': { 'tabs': { 'core': [] } },
+          'footerBar': { 'tabs': { 'core': [] } },
+          'theme': 'geo.ca'
+        }"
+      ></div>
+
+      <!-- Map 3: Circumpolar with useAsBasemap WMTS -->
+      <h5>Map 3 — Circumpolar (EPSG:3573) with <code>useAsBasemap: true</code></h5>
+      <p>EPSG:3573 has no default basemaps. This map uses a WMTS layer with <code>useAsBasemap: true</code> as the basemap.</p>
+      <div
+        id="map3"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': { 'projection': 3573, 'initialView': { 'zoomAndCenter': [3, [-110, 80]] } },
+            'basemapOptions': { 'basemapId': 'nogeom', 'shaded': false, 'labeled': false },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerType': 'ogcWmts',
+                'geoviewLayerId': 'arctic-sdi',
+                'geoviewLayerName': 'Arctic SDI Basemap',
+                'useAsBasemap': true,
+                'listOfLayerEntryConfig': [{
+                  'layerId': 'arctic_cascading',
+                  'tileMatrixSet': '3573',
+                  'source': {
+                    'extent': [-4889334.802955, -4889334.802955, 4889334.802955, 4889334.802955],
+                    'resolutionLevels': 11,
+                    'projection': 3573,
+                    'dataAccessPath': 'https://basemap.arctic-sdi.org/mapcache/wmts'
+                  }
+                }]
+              }
+            ]
+          },
+          'components': ['north-arrow'],
+          'navBar': ['zoom'],
+          'appBar': { 'tabs': { 'core': [] } },
+          'footerBar': { 'tabs': { 'core': ['legend', 'layers'] } },
+          'theme': 'geo.ca'
+        }"
+      ></div>
+
+      <button type="button" class="collapsible">Map 1 — Configuration Snippet</button>
+      <pre id="map1CS" class="panel"></pre>
+    </div>
+
+    <script src="codedoc.js"></script>
+    <script>
+      insertPageHeader();
+
+      // Track current state for toggle buttons
+      let currentLabeled = true;
+      let currentShaded = true;
+      let currentBasemapId = 'transport';
+
+      function setBasemap(mapId, basemapId) {
+        currentBasemapId = basemapId;
+        const mapViewer = cgpv.api.getMapViewer(mapId);
+        mapViewer.controllers.mapController.setBasemap({
+          basemapId: basemapId,
+          shaded: currentShaded,
+          labeled: currentLabeled
+        });
+        // Update button states
+        document.querySelectorAll('[id^="bm-"]').forEach(btn => btn.classList.remove('active'));
+        const activeBtn = document.getElementById('bm-' + basemapId);
+        if (activeBtn) activeBtn.classList.add('active');
+      }
+
+      function toggleLabeled(mapId) {
+        currentLabeled = !currentLabeled;
+        const btn = document.getElementById('btn-labeled');
+        btn.textContent = 'Labeled: ' + (currentLabeled ? 'ON' : 'OFF');
+        btn.classList.toggle('active', currentLabeled);
+        const mapViewer = cgpv.api.getMapViewer(mapId);
+        mapViewer.controllers.mapController.setBasemap({
+          basemapId: currentBasemapId,
+          shaded: currentShaded,
+          labeled: currentLabeled
+        });
+      }
+
+      function toggleShaded(mapId) {
+        currentShaded = !currentShaded;
+        const btn = document.getElementById('btn-shaded');
+        btn.textContent = 'Shaded: ' + (currentShaded ? 'ON' : 'OFF');
+        btn.classList.toggle('active', currentShaded);
+        const mapViewer = cgpv.api.getMapViewer(mapId);
+        mapViewer.controllers.mapController.setBasemap({
+          basemapId: currentBasemapId,
+          shaded: currentShaded,
+          labeled: currentLabeled
+        });
+      }
+
+      cgpv.init();
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });
+    </script>
+  </body>
+</html>

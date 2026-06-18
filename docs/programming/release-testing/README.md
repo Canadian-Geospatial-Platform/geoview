@@ -57,10 +57,10 @@ Each release gets its own issue. Previous release test results are preserved as 
 | #   | File                                                           | Area                                                   | Est. Time    | Tests (A/C/M)        |
 | --- | -------------------------------------------------------------- | ------------------------------------------------------ | ------------ | -------------------- |
 | 0   | [00-automated-suite.md](00-automated-suite.md)                 | Automated test suite execution                         | 5 min        | 204 automated        |
-| 1   | [01-global.md](01-global.md)                                   | Full screen, shortcuts, search, share, notifications   | 25 min       | 55 (0/16/39)         |
+| 1   | [01-global.md](01-global.md)                                   | Full screen, shortcuts, search, share, notifications   | 25 min       | 56 (0/15/41)         |
 | 2   | [02-map.md](02-map.md)                                         | Projections, north pole, north arrow, rotation         | 15 min       | 19 (2/7/10)          |
 | 3   | [03-config.md](03-config.md)                                   | Config validation, duplicate UUIDs, error layers       | 15 min       | 27 (6/20/1)          |
-| 4   | [04-basemap.md](04-basemap.md)                                 | Basemap selector, labels, shaded relief                | 5 min        | 11 (0/8/3)           |
+| 4   | [04-basemap.md](04-basemap.md)                                 | Basemap selector, labels, shaded relief                | 5 min        | 9 (0/6/3)            |
 | 5   | [05-navbar.md](05-navbar.md)                                   | Navigation bar, zoom, measurement, drawer              | 15 min       | 18 (0/9/9)           |
 | 6   | [06-overview-map.md](06-overview-map.md)                       | Overview map, hide on zoom, projection switch          | 5 min        | 8 (5/0/3)            |
 | 7   | [07-legend.md](07-legend.md)                                   | Legend panel, show/hide all, full screen               | 15 min       | 27 (0/12/15)         |
@@ -76,29 +76,29 @@ Each release gets its own issue. Previous release test results are preserved as 
 | 17a | [17a-package-time-slider.md](17a-package-time-slider.md)       | Time slider, all layer types, custom slider            | 15 min       | 20 (0/0/20)          |
 | 17b | [17b-package-geochart.md](17b-package-geochart.md)             | Geochart, all chart types, slider/stepper              | 10 min       | 11 (0/0/11)          |
 | 17c | [17c-package-swiper.md](17c-package-swiper.md)                 | Swiper, add/remove layers, orientation, rotation       | 10 min       | 14 (3/7/4)           |
-| 17d | [17d-package-panels.md](17d-package-panels.md)                 | About, AOI, Custom Legend, STAC Browser panels         | 15 min       | 27 (0/4/23)          |
-| 17e | [17e-package-drawer.md](17e-package-drawer.md)                 | Drawing tools, edit, snap, export/import               | 25 min       | 35 (0/3/32)          |
-| 18  | [18-global-settings.md](18-global-settings.md)                 | Coord info, theme, highlight color, service URLs       | 15 min       | 22 (0/7/15)          |
-| 19  | [19-integration-flows.md](19-integration-flows.md)             | Multi-step workflows and cross-panel interactions      | 25 min       | 19 (0/7/12)          |
-| 19b | [19b-store-verification.md](19b-store-verification.md)         | Zustand store state assertions (automation candidates) | 10 min       | 14 (0/14/0)          |
-| 20  | [20-edge-cases.md](20-edge-cases.md)                           | Edge cases, outliers, overlays, sandbox, mobile        | 25 min       | 28 (0/0/28)          |
-| 21  | [21-wcag-accessibility.md](21-wcag-accessibility.md)           | WCAG, keyboard nav, focus trap, screen reader          | 30 min       | 73 (0/0/73)          |
-| 22  | [22-api-programmatic.md](22-api-programmatic.md)               | API functions, events, geometry, panels, injection     | 20 min       | 42 (0/0/42)          |
+| 17d | [17d-package-panels.md](17d-package-panels.md)                 | About, AOI, Custom Legend, STAC Browser panels         | 15 min       | 31 (0/4/27)          |
+| 17e | [17e-package-drawer.md](17e-package-drawer.md)                 | Drawing tools, edit, snap, export/import               | 25 min       | 38 (0/3/35)          |
+| 18  | [18-global-settings.md](18-global-settings.md)                 | Coord info, theme, highlight color, service URLs       | 15 min       | 18 (0/6/12)          |
+| 19  | [19-integration-flows.md](19-integration-flows.md)             | Multi-step workflows and cross-panel interactions      | 25 min       | 18 (0/7/11)          |
+| 19b | [19b-store-verification.md](19b-store-verification.md)         | Zustand store state assertions (automation candidates) | 10 min       | 13 (0/13/0)          |
+| 20  | [20-edge-cases.md](20-edge-cases.md)                           | Edge cases, outliers, overlays, sandbox, mobile        | 25 min       | 26 (0/0/26)          |
+| 21  | [21-wcag-accessibility.md](21-wcag-accessibility.md)           | WCAG, keyboard nav, focus trap, screen reader          | 30 min       | 74 (0/0/74)          |
+| 22  | [22-api-programmatic.md](22-api-programmatic.md)               | API functions, events, geometry, panels, injection     | 20 min       | 41 (0/0/41)          |
 | 23  | [23-config-loading-methods.md](23-config-loading-methods.md)   | Config loading (URL params, div attrs, function call)  | 15 min       | 21 (0/0/21)          |
-| 24  | [24-cdtk-rcs-geocore-custom.md](24-cdtk-rcs-geocore-custom.md) | CDTK, RCS, Geocore custom/VCS, vector tiles, WKB       | 25 min       | 47 (0/0/47)          |
+| 24  | [24-cdtk-rcs-geocore-custom.md](24-cdtk-rcs-geocore-custom.md) | CDTK, RCS, Geocore custom/VCS, vector tiles, WKB       | 25 min       | 49 (0/0/49)          |
 | 25  | [25-developer-tools.md](25-developer-tools.md)                 | ESRI/WFS renderer tools, all-layer zoom levels         | 10 min       | 22 (0/0/22)          |
-| 26  | [26-production-configs.md](26-production-configs.md)           | OSDP, Open Maps, Arctic SDI, GSC, CGDI smoke tests     | 20 min       | 38 (0/0/38)          |
+| 26  | [26-production-configs.md](26-production-configs.md)           | OSDP, Open Maps, Arctic SDI, GSC, CGDI smoke tests     | 20 min       | 37 (0/0/37)          |
 | 27  | [27-automation-candidates.md](27-automation-candidates.md)     | Tests recommended for automation via TestCreator       | —            | 112 candidates       |
-|     | **TOTAL**                                                      |                                                        | **~425 min** | **853 (44/156/653)** |
+|     | **TOTAL**                                                      |                                                        | **~425 min** | **842 (44/151/647)** |
 
 **Test breakdown:**
 
 | Category          | Count   | Description                                                |
 | ----------------- | ------- | ---------------------------------------------------------- |
 | **A** — Automated | 44      | Covered by `geoview-test-suite` (no manual effort needed)  |
-| **C** — Candidate | 156     | Candidate for automation (manual today, automatable later) |
-| **M** — Manual    | 653     | Requires manual verification (UI, visual, interaction)     |
-| **Total**         | **853** | All tests across all files                                 |
+| **C** — Candidate | 151     | Candidate for automation (manual today, automatable later) |
+| **M** — Manual    | 647     | Requires manual verification (UI, visual, interaction)     |
+| **Total**         | **842** | All tests across all files                                 |
 
 > **Keeping counts in sync**: When modifying any release-testing file (changing M→C, M→A, C→A, or adding/removing tests), also update the "Tests (A/C/M)" column for that file and recalculate the TOTAL row. Format: `total (A/C/M)`.
 

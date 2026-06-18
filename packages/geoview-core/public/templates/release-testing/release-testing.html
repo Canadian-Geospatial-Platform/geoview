@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Release Testing - Canadian Geospatial Platform Viewer</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+      .test-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 16px;
+        margin-top: 16px;
+      }
+      .test-card {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 16px;
+        transition: box-shadow 0.2s, border-color 0.2s;
+      }
+      .test-card:hover {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+        border-color: #515ba5;
+      }
+      .test-card h5 {
+        margin: 0 0 8px 0;
+        color: #515ba5;
+      }
+      .test-card p {
+        margin: 0 0 12px 0;
+        font-size: 13px;
+        color: #666;
+      }
+      .test-card a {
+        display: inline-block;
+        padding: 6px 12px;
+        background: #515ba5;
+        color: white;
+        border-radius: 4px;
+        text-decoration: none;
+        font-size: 13px;
+      }
+      .test-card a:hover {
+        background: #3d4587;
+      }
+      .test-card .badge {
+        display: inline-block;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-size: 11px;
+        font-weight: 600;
+        margin-left: 6px;
+      }
+      .badge-ready { background: #c8e6c9; color: #2e7d32; }
+      .badge-pending { background: #fff3e0; color: #e65100; }
+      .section-header {
+        margin-top: 32px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #515ba5;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="page-header"></div>
+    <div>
+      <div class="back-to-main">
+        <a href="./index.html?tab=testing">← Back to Main</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>Release Testing Pages</h4>
+        <p>
+          Dedicated test pages for the manual release testing plan. Each page provides the exact map configuration
+          needed to verify a specific test section. See the
+          <a href="https://github.com/Canadian-Geospatial-Platform/geoview/tree/develop/docs/programming/release-testing" target="_blank">
+            release testing documentation
+          </a>
+          for test steps and expected results.
+        </p>
+      </div>
+
+      <!-- Global & UI Chrome -->
+      <h4 class="section-header">Global & UI Chrome</h4>
+      <div class="test-grid">
+        <div class="test-card">
+          <h5>01 — Global <span class="badge badge-pending">pending</span></h5>
+          <p>Full screen, shortcuts, search, share, notifications, language switching.</p>
+          <a href="./rt-01-global.html">Open Test Page</a>
+        </div>
+        <div class="test-card">
+          <h5>04 — Basemap <span class="badge badge-pending">pending</span></h5>
+          <p>Basemap selector, labels, shaded relief, projection-aware basemaps.</p>
+          <a href="./rt-04-basemap.html">Open Test Page</a>
+        </div>
+        <div class="test-card">
+          <h5>05 — Navbar <span class="badge badge-pending">pending</span></h5>
+          <p>Navigation bar, zoom, measurement, fullscreen, projection switch.</p>
+          <a href="./rt-05-navbar.html">Open Test Page</a>
+        </div>
+      </div>
+
+      <!-- Map & Projection -->
+      <h4 class="section-header">Map & Projection</h4>
+      <div class="test-grid">
+        <div class="test-card">
+          <h5>02 — Map <span class="badge badge-pending">pending</span></h5>
+          <p>Projections, north pole, north arrow, rotation.</p>
+          <a href="./rt-02-map.html">Open Test Page</a>
+        </div>
+        <div class="test-card">
+          <h5>06 — Overview Map <span class="badge badge-pending">pending</span></h5>
+          <p>Overview map, hide on zoom, projection switch.</p>
+          <a href="./rt-06-overview-map.html">Open Test Page</a>
+        </div>
+        <div class="test-card">
+          <h5>12 — View Settings <span class="badge badge-pending">pending</span></h5>
+          <p>Zoom constraints, extent override, zoom-to-layer.</p>
+          <a href="./rt-12-view-settings.html">Open Test Page</a>
+        </div>
+        <div class="test-card">
+          <h5>13 — Projection <span class="badge badge-pending">pending</span></h5>
+          <p>Geometry, table, north pole on projection switch.</p>
+          <a href="./rt-13-projection.html">Open Test Page</a>
+        </div>
+      </div>
+
+      <!-- Config & Validation -->
+      <h4 class="section-header">Config & Validation</h4>
+      <div class="test-grid">
+        <div class="test-card">
+          <h5>03 — Config <span class="badge badge-pending">pending</span></h5>
+          <p>Config validation, duplicate UUIDs, error layers.</p>
+          <a href="./rt-03-config.html">Open Test Page</a>
+        </div>
+        <div class="test-card">
+          <h5>16 — Initial Settings <span class="badge badge-pending">pending</span></h5>
+          <p>Initial controls, states, selected tab/layer.</p>
+          <a href="./rt-16-initial-settings.html">Open Test Page</a>
+        </div>
+        <div class="test-card">
+          <h5>18 — Global Settings <span class="badge badge-pending">pending</span></h5>
+          <p>Coord info, theme, highlight color, service URLs.</p>
+          <a href="./rt-18-global-settings.html">Open Test Page</a>
+        </div>
+      </div>
+
+      <!-- Layers & Legend -->
+      <h4 class="section-header">Layers & Legend</h4>
+      <div class="test-grid">
+        <div class="test-card">
+          <h5>07 — Legend <span class="badge badge-pending">pending</span></h5>
+          <p>Legend panel, show/hide all, full screen, style classes.</p>
+          <a href="./rt-07-legend.html">Open Test Page</a>
+        </div>
+        <div class="test-card">
+          <h5>08 — Layers <span class="badge badge-pending">pending</span></h5>
+          <p>Layer panel, add by URL/file, all types, settings.</p>
+          <a href="./rt-08-layers.html">Open Test Page</a>
+        </div>
+        <div class="test-card">
+          <h5>09 — Styles <span class="badge badge-pending">pending</span></h5>
+          <p>Style rendering, visual variables, feature labels.</p>
+          <a href="./rt-09-styles.html">Open Test Page</a>
+        </div>
+      </div>
+
+      <!-- Panels -->
+      <h4 class="section-header">Panels</h4>
+      <div class="test-grid">
+        <div class="test-card">
+          <h5>10 — Details <span class="badge badge-pending">pending</span></h5>
+          <p>Details panel, highlighting, navigation, summary.</p>
+          <a href="./rt-10-details.html">Open Test Page</a>
+        </div>
+        <div class="test-card">
+          <h5>11 — Data Table <span class="badge badge-pending">pending</span></h5>
+          <p>Data table, filtering, columns, density, export.</p>
+          <a href="./rt-11-data-table.html">Open Test Page</a>
+        </div>
+        <div class="test-card">
+          <h5>14 — Map Info <span class="badge badge-pending">pending</span></h5>
+          <p>Map info bar, attribution, tooltips.</p>
+          <a href="./rt-14-map-info.html">Open Test Page</a>
+        </div>
+        <div class="test-card">
+          <h5>15 — Export <span class="badge badge-pending">pending</span></h5>
+          <p>Export modal, options, all layer types, formats.</p>
+          <a href="./rt-15-export.html">Open Test Page</a>
+        </div>
+      </div>
+
+      <!-- Packages -->
+      <h4 class="section-header">Packages</h4>
+      <div class="test-grid">
+        <div class="test-card">
+          <h5>17a — Time Slider <span class="badge badge-pending">pending</span></h5>
+          <p>Time slider, all layer types, custom slider.</p>
+          <a href="./rt-17a-time-slider.html">Open Test Page</a>
+        </div>
+        <div class="test-card">
+          <h5>17b — Geochart <span class="badge badge-pending">pending</span></h5>
+          <p>Geochart, all chart types, slider/stepper.</p>
+          <a href="./rt-17b-geochart.html">Open Test Page</a>
+        </div>
+        <div class="test-card">
+          <h5>17c — Swiper <span class="badge badge-pending">pending</span></h5>
+          <p>Swiper, add/remove layers, orientation, rotation.</p>
+          <a href="./rt-17c-swiper.html">Open Test Page</a>
+        </div>
+        <div class="test-card">
+          <h5>17d — Panels <span class="badge badge-pending">pending</span></h5>
+          <p>About, AOI, Custom Legend, STAC Browser panels.</p>
+          <a href="./rt-17d-panels.html">Open Test Page</a>
+        </div>
+        <div class="test-card">
+          <h5>17e — Drawer <span class="badge badge-pending">pending</span></h5>
+          <p>Drawing tools, edit, snap, export/import.</p>
+          <a href="./rt-17e-drawer.html">Open Test Page</a>
+        </div>
+      </div>
+
+      <!-- Integration & Edge Cases -->
+      <h4 class="section-header">Integration & Edge Cases</h4>
+      <div class="test-grid">
+        <div class="test-card">
+          <h5>19 — Integration Flows <span class="badge badge-pending">pending</span></h5>
+          <p>Multi-step workflows and cross-panel interactions.</p>
+          <a href="./rt-19-integration.html">Open Test Page</a>
+        </div>
+        <div class="test-card">
+          <h5>20 — Edge Cases <span class="badge badge-pending">pending</span></h5>
+          <p>Edge cases, outliers, overlays, sandbox, mobile.</p>
+          <a href="./rt-20-edge-cases.html">Open Test Page</a>
+        </div>
+        <div class="test-card">
+          <h5>21 — WCAG Accessibility <span class="badge badge-pending">pending</span></h5>
+          <p>WCAG, keyboard nav, focus trap, screen reader.</p>
+          <a href="./rt-21-wcag.html">Open Test Page</a>
+        </div>
+      </div>
+
+      <!-- API & Config Loading -->
+      <h4 class="section-header">API & Config Loading</h4>
+      <div class="test-grid">
+        <div class="test-card">
+          <h5>22 — API Programmatic <span class="badge badge-pending">pending</span></h5>
+          <p>API functions, events, geometry, panels, injection.</p>
+          <a href="./rt-22-api.html">Open Test Page</a>
+        </div>
+        <div class="test-card">
+          <h5>23 — Config Loading <span class="badge badge-pending">pending</span></h5>
+          <p>Config loading (URL params, div attrs, function call).</p>
+          <a href="./rt-23-config-loading.html">Open Test Page</a>
+        </div>
+      </div>
+    </div>
+
+    <script src="codedoc.js"></script>
+    <script>
+      insertPageHeader();
+    </script>
+  </body>
+</html>

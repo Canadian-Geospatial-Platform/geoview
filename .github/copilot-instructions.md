@@ -150,6 +150,39 @@ cgpv.init();
 - **`cgpv.api.getMapViewer(mapId)`** — Returns the `MapViewer` instance for a specific map
 - **`cgpv.api.getMapViewerAsync(mapId)`** — Async version that waits for the map to be available
 
+### GeoView Viewer vs Map Element
+
+**Two distinct DOM levels** — always distinguish between the GeoView viewer and the map element:
+
+| Concept            | CSS Class / ID              | Contains                                                                        | Keyboard Focus                                   |
+| ------------------ | --------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------ |
+| **GeoView Viewer** | `.geoview-map` wrapper div  | The shell: app bar, footer bar, nav bar, map element, notifications, focus trap | Always focusable (contains focusable controls)   |
+| **Map element**    | `#mapTargetElement-{mapId}` | The OpenLayers canvas container (`.mapContainer` class)                         | `tabIndex=0` (dynamic) or `tabIndex=-1` (static) |
+
+**Static mode (`interaction: 'static'`):**
+
+- The **map element** is present but NOT keyboard-focusable (`tabIndex=-1`). Ctrl+M is blocked.
+- The **viewer** still renders focusable controls: app bar (notifications, about) and map info bar (attribution, scale).
+- No layers panel, legend, details, data table, or nav bar controls are rendered.
+
+**Dynamic mode (`interaction: 'dynamic'`):**
+
+- The **map element** is keyboard-focusable (`tabIndex=0`). Ctrl+M focuses it and activates the crosshair.
+- The **viewer** renders the full shell: app bar with all tabs, footer bar, nav bar, map info bar.
+
+**Map info bar** — The map info bar (attribution, scale, rotation display) is **separate from the footer bar** and has no schema configuration. It always renders automatically:
+
+- **Dynamic mode**: Displays attribution, scale, and rotation value.
+- **Static mode**: Displays attribution and scale only (no rotation).
+
+**Crosshair activation flow:**
+
+1. `Ctrl+M` (global shortcut) → focuses `#mapTargetElement-{mapId}` → calls `uiController.setCrosshairActive(true)`
+2. Only works when `mapInteraction !== 'static'`
+3. Does NOT toggle — only activates. Deactivation happens via mouse click (focus leaves map element) or `Ctrl+Q` (exit focus trap).
+4. **Escape key does nothing** while crosshair is active — it does NOT deactivate the crosshair.
+5. Arrow keys pan the map (default 128px step). `Shift+ArrowUp` increases step by 10px, `Shift+ArrowDown` decreases by 10px (min 10px).
+
 ### Coordinate Format Pitfall: `NORTH_POLE_POSITION_LONLAT`
 
 `NORTH_POLE_POSITION_LONLAT` in `constant.ts` is `[90, -95]` — stored as **`[lat, lon]`**, NOT `[lon, lat]`. Every function that expects `[lon, lat]` (proj4, OpenLayers, `Projection.transformFromLonLat`, `Projection.transformPoints`, `getPixelFromCoordinate`) requires swapping: `[NORTH_POLE_POSITION_LONLAT[1], NORTH_POLE_POSITION_LONLAT[0]]`.
@@ -962,6 +995,7 @@ items.forEach((item) => {
 - Config validation happens via `src/api` files in geoview-core
 - Plugin packages have their own config schemas (default-config-\*.json) but rely on core's validation APIs
 - Use `ConfigApi` and `ConfigValidation` classes from geoview-core for config operations
+- **No localized fields in the schema** — `geoviewLayerName` and `metadataAccessPath` are plain strings, NOT bilingual `{ en, fr }` objects. The viewer resolves language internally (e.g., GeoCore UUID resolution returns language-specific names). Never use `{ 'en': '...', 'fr': '...' }` for these config properties.
 
 ### Three Default Value Sources (Must Stay in Sync)
 
@@ -1022,7 +1056,58 @@ When creating or editing map configuration JSON files (navigator demos, test con
 7. extraOptions             — Pass-through OpenLayers map options
 ```
 
+**`map.viewSettings` structure (critical — `zoomAndCenter` is NOT a direct child of `viewSettings`):**
+
+```json
+{
+  "viewSettings": {
+    "projection": 3978,
+    "initialView": {
+      "zoomAndCenter": [4, [-90, 60]]
+    },
+    "homeView": {
+      "zoomAndCenter": [4, [-90, 60]]
+    },
+    "rotation": 0,
+    "maxExtent": [-135, 25, -50, 89],
+    "minZoom": 0,
+    "maxZoom": 20,
+    "enableRotation": true
+  }
+}
+```
+
+**Key rule:** `zoomAndCenter` and `extent` live inside `initialView` (or `homeView`), NEVER directly on `viewSettings`. Placing them directly on `viewSettings` triggers a schema validation error: `"must NOT have additional properties"`.
+
 **Rationale:** The order mirrors the logical sequence: _what kind of map_ → _what it shows_ → _how the UI wraps it_ → _what services back it_ → _what extends it_. Following this order makes configs easier to read, review, and diff.
+
+### Plugin Loading Mechanisms
+
+Plugins are loaded through **different config properties** depending on their type:
+
+| Plugin Type                | Config Property             | Examples                                                    |
+| -------------------------- | --------------------------- | ----------------------------------------------------------- |
+| **NavBar plugin**          | `navBar` array              | `drawer` (only one)                                         |
+| **Footer bar plugin**      | `footerBar.tabs.core` array | `time-slider`, `geochart`                                   |
+| **App bar plugin**         | `appBar.tabs.core` array    | `custom-legend`, `stac-browser`, `aoi-panel`, `about-panel` |
+| **Map plugin** (no UI tab) | `corePackages` array        | `swiper` (only one)                                         |
+
+**Critical:** Do NOT put `drawer`, `time-slider`, or `geochart` in `corePackages`. Only `swiper` uses `corePackages` because it renders directly on the map canvas without a tab.
+
+```json
+// ✅ Correct: each plugin loaded via its proper config property
+{
+  "navBar": ["zoom", "rotation", "fullscreen", "drawer"],
+  "footerBar": { "tabs": { "core": ["legend", "layers", "data-table", "time-slider", "geochart"] } },
+  "appBar": { "tabs": { "core": ["geolocator", "legend", "about-panel", "custom-legend"] } },
+  "corePackages": ["swiper"]
+}
+
+// ❌ Wrong: drawer and time-slider are NOT corePackages
+{
+  "corePackages": ["drawer", "time-slider"]
+}
+```
 
 ### Invalid `geoviewLayerType` Prevalidation
 
