@@ -20,6 +20,10 @@
     },
     "listOfGeoviewLayerConfig": [
       {
+        "geoviewLayerId": "65d3db23-b83c-4f49-ab93-65c59ee0e6aa",
+        "geoviewLayerType": "geoCore"
+      },
+      {
         "geoviewLayerId": "21b821cf-0f1c-40ee-8925-eab12d357668",
         "geoviewLayerName": "Le Réseau canadien de surveillance radiologique - Radioactivité de l'air",
         "geoviewLayerType": "geoCore",
