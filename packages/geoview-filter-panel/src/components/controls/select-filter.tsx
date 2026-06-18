@@ -2,6 +2,7 @@ import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { logger } from 'geoview-core/core/utils/logger';
 
 import { useTranslation } from 'geoview-core/core/translation/i18n';
+import { useFilterPanelController } from 'geoview-core/core/controllers/use-controllers';
 
 import type { TypeFilterAttribute, TypeFilterValue } from '../../types';
 import { getSxClasses } from './control-styles';
@@ -43,7 +44,7 @@ export function SelectFilter(props: SelectFilterProps): JSX.Element {
   const theme = ui.useTheme();
   const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
   const { t } = useTranslation<string>();
-
+  const controller = useFilterPanelController();
   /**
    * Memoized menu items for the select dropdown.
    */
@@ -63,13 +64,13 @@ export function SelectFilter(props: SelectFilterProps): JSX.Element {
         type: 'item' as const,
         item: {
           value: val as string,
-          children: <span>{val !== null ? String(val) : t('FilterPanel.nullValue')}</span>,
+          children: <span>{val !== null ? controller.getDisplayLabel(attribute, val) : t('FilterPanel.nullValue')}</span>,
         },
       });
     });
 
     return items;
-  }, [t, uniqueValues]);
+  }, [attribute, controller, t, uniqueValues]);
 
   /**
    * Handles when the select value changes.
