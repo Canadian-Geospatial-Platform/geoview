@@ -1692,6 +1692,10 @@ interface FilterPanelConfig {
 - **filterType** (string, required): One of: `"select"`, `"multiselect"`, `"range"`, `"date"`
 - **enabled** (boolean, default: true): Whether this filter is enabled
 - **defaultValues** (any): Initial filter values (varies by filter type)
+- **domain** (array, optional): Domain mapping for value labels. Maps raw values to display labels. Only applies to `"select"` and `"multiselect"` filter types. Each domain entry has:
+  - **value** (string | number, required): The raw value from the layer
+  - **label** (string, required): The display label for this value
+- **filterMissingDomainValues** (boolean, default: false): If true, values not in the domain are filtered out. If false, they are shown with their raw value. Only applies when domain is defined and filterType is `"select"` or `"multiselect"`
 
 **Settings properties:**
 
@@ -1892,6 +1896,116 @@ interface FilterPanelConfig {
   ]
 }
 ```
+
+**Example 5: Domain Mapping with Custom Labels**
+
+Domain mapping allows you to display user-friendly labels for coded values in select and multiselect filters. This is particularly useful when your layer data contains abbreviations or codes.
+
+```json
+{
+  "appBar": {
+    "tabs": {
+      "core": ["filter-panel"]
+    }
+  },
+  "corePackagesConfig": [
+    {
+      "filter-panel": {
+        "enabled": true,
+        "layers": [
+          {
+            "layerPath": "land-use",
+            "layerName": "Land Use Classification",
+            "attributes": [
+              {
+                "fieldName": "use_code",
+                "displayLabel": "Land Use Type",
+                "filterType": "multiselect",
+                "domain": [
+                  { "value": "RES", "label": "Residential" },
+                  { "value": "COM", "label": "Commercial" },
+                  { "value": "IND", "label": "Industrial" },
+                  { "value": "AGR", "label": "Agricultural" },
+                  { "value": "FOR", "label": "Forest" },
+                  { "value": "WAT", "label": "Water Body" }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+In this example, the layer contains land use codes like "RES", "COM", "IND", but users see "Residential", "Commercial", "Industrial" in the filter dropdown.
+
+**Example 6: Domain Filtering with filterMissingDomainValues**
+
+When `filterMissingDomainValues` is true, only features with values in the domain are shown. This is useful for cleaning up data with unexpected or invalid values.
+
+```json
+{
+  "appBar": {
+    "tabs": {
+      "core": ["filter-panel"]
+    }
+  },
+  "corePackagesConfig": [
+    {
+      "filter-panel": {
+        "enabled": true,
+        "layers": [
+          {
+            "layerPath": "infrastructure",
+            "layerName": "Infrastructure Assets",
+            "attributes": [
+              {
+                "fieldName": "asset_status",
+                "displayLabel": "Asset Status",
+                "filterType": "select",
+                "domain": [
+                  { "value": "A", "label": "Active" },
+                  { "value": "P", "label": "Planned" },
+                  { "value": "R", "label": "Retired" },
+                  { "value": "M", "label": "Maintenance" }
+                ],
+                "filterMissingDomainValues": true
+              },
+              {
+                "fieldName": "priority",
+                "displayLabel": "Priority Level",
+                "filterType": "multiselect",
+                "domain": [
+                  { "value": 1, "label": "Critical" },
+                  { "value": 2, "label": "High" },
+                  { "value": 3, "label": "Medium" },
+                  { "value": 4, "label": "Low" }
+                ],
+                "filterMissingDomainValues": true
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+In this example:
+- `filterMissingDomainValues: true` ensures only features with status codes A, P, R, or M are displayed
+- Any features with unexpected status values (like "X" or null) are automatically filtered out
+- The priority filter only shows features with priority levels 1-4
+
+**Domain Mapping Notes:**
+
+- Domain mapping only applies to `"select"` and `"multiselect"` filter types
+- Values in the dropdown are ordered according to the domain array order (not alphabetically)
+- When `filterMissingDomainValues: false` (default), values not in the domain appear with their raw value
+- When `filterMissingDomainValues: true`, features with values outside the domain are hidden from the map
+- Domain values can be strings or numbers to match your layer's field type
 
 ### Filter Type Details
 

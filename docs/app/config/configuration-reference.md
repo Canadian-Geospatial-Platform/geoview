@@ -3143,6 +3143,10 @@ interface FilterPanelConfig {
     - **filterType** (required): One of: `"select"`, `"multiselect"`, `"range"`, `"date"`
     - **enabled**: Whether this filter is enabled (default: true)
     - **defaultValues**: Initial filter values (varies by filter type)
+    - **domain** (optional): Domain mapping for value labels. Only applies to `"select"` and `"multiselect"`. Array of objects with:
+      - **value** (required): The raw value from the layer (string or number)
+      - **label** (required): The display label for this value
+    - **filterMissingDomainValues** (optional): If true, filter out values not in domain. If false, show them with raw value. Only applies when domain is defined (default: false)
 - **settings**: Panel display and behavior settings
   - **title**: Panel header title (default: "Filter Layers")
   - **collapsible**: Allow collapsing layer sections (default: true)
@@ -3254,6 +3258,37 @@ interface FilterPanelConfig {
 ]
 ```
 
+**Domain Mapping (Custom Labels for Coded Values):**
+
+```json
+"corePackagesConfig": [
+  {
+    "filter-panel": {
+      "layers": [
+        {
+          "layerPath": "land-use",
+          "attributes": [
+            {
+              "fieldName": "use_code",
+              "displayLabel": "Land Use Type",
+              "filterType": "select",
+              "domain": [
+                { "value": "RES", "label": "Residential" },
+                { "value": "COM", "label": "Commercial" },
+                { "value": "AGR", "label": "Agricultural" }
+              ],
+              "filterMissingDomainValues": true
+            }
+          ]
+        }
+      ]
+    }
+  }
+]
+```
+
+Domain mapping displays user-friendly labels instead of raw codes. When `filterMissingDomainValues: true`, only features with domain values are shown.
+
 #### Notes
 
 - Layer paths must reference existing layers in the map configuration
@@ -3262,6 +3297,7 @@ interface FilterPanelConfig {
 - When `autoApply: true`, filters apply immediately on every change
 - UI automatically adapts to the map's theme (geo.ca, light, dark)
 - Range and date filters are optimized for large datasets
+- **Domain mapping**: Use the `domain` property on attributes to display custom labels for coded values. Values are ordered according to the domain array order (not alphabetically). Set `filterMissingDomainValues: true` to hide features with values outside the domain
 
 ---
 

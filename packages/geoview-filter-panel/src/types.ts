@@ -1,50 +1,13 @@
-/**
- * Filter type enumeration.
- */
-export type TypeFilterType = 'select' | 'multiselect' | 'range' | 'date';
+import type {
+  TypeFilterType,
+  TypeFilterValue,
+  TypeRangeValue,
+  TypeDateRangeValue,
+  TypeFilterAttribute,
+  TypeDomainValue,
+} from 'geoview-core/core/stores/states/filter-panel-state';
 
-/**
- * Filter value type - can be single value, array, or range object.
- */
-export type TypeFilterValue = string | number | null | (string | number)[] | TypeRangeValue | TypeDateRangeValue;
-
-/**
- * Range value for numeric filters.
- */
-export interface TypeRangeValue {
-  /** Minimum value. */
-  min: number | null;
-  /** Maximum value. */
-  max: number | null;
-}
-
-/**
- * Date range value for date filters.
- */
-export interface TypeDateRangeValue {
-  /** Start date. */
-  start: string | null;
-  /** End date. */
-  end: string | null;
-}
-
-/**
- * Attribute configuration for filtering.
- */
-export interface TypeFilterAttribute {
-  /** Field name in the layer. */
-  fieldName: string;
-  /** Display label for the filter. */
-  displayLabel: string;
-  /** Type of filter control. */
-  filterType: TypeFilterType;
-  /** Whether this attribute is enabled. */
-  enabled: boolean;
-  /** Default filter values. */
-  defaultValues?: TypeFilterValue;
-  /** Optional custom options (if not fetching from layer). */
-  options?: (string | number)[];
-}
+export type { TypeFilterType, TypeFilterValue, TypeRangeValue, TypeDateRangeValue, TypeFilterAttribute, TypeDomainValue };
 
 /**
  * Layer configuration for filtering.
