@@ -5,6 +5,7 @@ import { logger } from '@/core/utils/logger';
 import { whenThisThen } from '@/core/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
 import {
+  getStoreFilterPanelLayerConfig,
   getStoreFilterPanelFilterState,
   getStoreFilterPanelLayerFilterState,
   setStoreFilterPanelFilterState,
@@ -18,6 +19,7 @@ import {
   type TypeFilterState,
   type TypeRangeValue,
   type TypeDateRangeValue,
+  type TypeFilterAttribute,
 } from '@/core/stores/states/filter-panel-state';
 import { getStoreDataTableFeaturesByPath } from '@/core/stores/states/data-table-state';
 import { getStoreLayerStatus } from '@/core/stores/states/layer-state';
@@ -112,6 +114,9 @@ export class FilterPanelController extends AbstractMapViewerController {
   /**
    * Builds a SQL-like filter expression for a layer based on its current filter state.
    *
+   * Includes both domain base filters (for attributes with filterMissingDomainValues)
+   * and user selection filters.
+   *
    * @param layerPath - The layer path
    * @returns SQL-like filter expression, or undefined if no filters active
    */
@@ -119,6 +124,13 @@ export class FilterPanelController extends AbstractMapViewerController {
     const layerFilterState = getStoreFilterPanelLayerFilterState(this.getMapId(), layerPath);
     const expressions: string[] = [];
 
+    // Add domain base filters (always active if configured)
+    const domainBaseFilters = this.#buildDomainBaseFilters(layerPath);
+    if (domainBaseFilters) {
+      expressions.push(`(${domainBaseFilters})`);
+    }
+
+    // Add user selection filters
     Object.entries(layerFilterState).forEach(([fieldName, value]) => {
       // Skip empty filters
       if (value === null || value === undefined || value === '') {
@@ -348,19 +360,20 @@ export class FilterPanelController extends AbstractMapViewerController {
    * rather than directly accessing OpenLayers sources. It retrieves features that
    * have already been queried and stored in the data table state.
    *
+   * If the attribute has a domain defined and the filterType is 'select' or 'multiselect',
+   * the values are processed through the domain (filtered and ordered).
+   *
    * **Important**: This only works for layers that are queryable (vector sources,
    * WMS with WFS config, etc.). Raster-only layers without feature data will return
    * an empty array.
    *
    * @param layerPath - The layer path
-   * @param fieldName - The field name
-   * @returns An array of unique values, or empty array if the layer is not queryable
-   * or has not been queried yet
+   * @param attribute - The attribute configuration
+   * @returns An array of unique values (processed through domain if applicable), or empty array if the layer is not queryable or has not been queried yet
    */
-  getLayerFieldUniqueValues(layerPath: string, fieldName: string): (string | number)[] {
+  getLayerFieldUniqueValues(layerPath: string, attribute: TypeFilterAttribute): (string | number)[] {
     try {
       // Check if the layer is registered in the AllFeatureInfoLayerSet
-      // This ensures the layer is queryable (vector source, WMS with WFS, etc.)
       const { allFeatureInfoLayerSet } = this.getControllersRegistry().layerSetController;
       const isQueryable = allFeatureInfoLayerSet.getRegisteredLayerPaths().includes(layerPath);
 
@@ -369,7 +382,7 @@ export class FilterPanelController extends AbstractMapViewerController {
         return [];
       }
 
-      // Get features from the data table store (populated by AllFeatureInfoLayerSet)
+      // Get features from the data table store
       const features = getStoreDataTableFeaturesByPath(this.getMapId(), layerPath);
 
       if (!features || features.length === 0) {
@@ -381,27 +394,100 @@ export class FilterPanelController extends AbstractMapViewerController {
       const uniqueSet = new Set<string | number>();
 
       features.forEach((feature) => {
-        const fieldEntry = feature.fieldInfo[fieldName];
+        const fieldEntry = feature.fieldInfo[attribute.fieldName];
         if (fieldEntry) {
           const { value } = fieldEntry;
-          // Only include non-null, non-undefined values
           if (value !== null && value !== undefined) {
-            // Coerce to string or number for consistency
             if (typeof value === 'string' || typeof value === 'number') {
               uniqueSet.add(value);
             } else {
-              // For other types (dates, objects), convert to string
               uniqueSet.add(String(value));
             }
           }
         }
       });
 
-      return Array.from(uniqueSet).sort();
+      let uniqueValues = Array.from(uniqueSet).sort();
+
+      // Apply domain processing if applicable
+      uniqueValues = this.processDomainForUniqueValues(uniqueValues, attribute);
+
+      return uniqueValues;
     } catch (err) {
-      logger.logError(`Error fetching unique values for ${fieldName} in layer ${layerPath}:`, err);
+      logger.logError(`Error fetching unique values for ${attribute.fieldName} in layer ${layerPath}:`, err);
       return [];
     }
+  }
+
+  /**
+   * Processes unique values through domain mapping if applicable.
+   *
+   * Domain processing only applies to 'select' and 'multiselect' filter types.
+   * When a domain is defined:
+   * - Optionally filters out values not in the domain (if filterMissingDomainValues is true)
+   * - Orders values according to the domain order (not alphabetical)
+   *
+   * @param uniqueValues - Array of unique values from the layer (alphabetically sorted)
+   * @param attribute - The attribute configuration
+   * @returns Filtered and ordered array of values
+   */
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  processDomainForUniqueValues(uniqueValues: (string | number)[], attribute: TypeFilterAttribute): (string | number)[] {
+    // Domain only applies to select and multiselect filter types
+    if (
+      !attribute.domain ||
+      attribute.domain.length === 0 ||
+      (attribute.filterType !== 'select' && attribute.filterType !== 'multiselect')
+    ) {
+      return uniqueValues;
+    }
+
+    // Step 1: Filter values if filterMissingDomainValues is true
+    let processedValues = uniqueValues;
+    if (attribute.filterMissingDomainValues) {
+      const domainValueSet = new Set(attribute.domain.map((d) => d.value));
+      processedValues = uniqueValues.filter((val) => domainValueSet.has(val));
+    }
+
+    // Step 2: Order values according to domain order (not alphabetical)
+    const domainOrderMap = new Map<string | number, number>();
+    attribute.domain.forEach((domainEntry, index) => {
+      domainOrderMap.set(domainEntry.value, index);
+    });
+
+    return processedValues.sort((a, b) => {
+      const aIndex = domainOrderMap.get(a);
+      const bIndex = domainOrderMap.get(b);
+
+      // Both have domain order - use domain order
+      if (aIndex !== undefined && bIndex !== undefined) {
+        return aIndex - bIndex;
+      }
+
+      // Only a has domain order - a comes first
+      if (aIndex !== undefined) return -1;
+
+      // Only b has domain order - b comes first
+      if (bIndex !== undefined) return 1;
+
+      // Neither has domain order - alphabetical fallback
+      return String(a).localeCompare(String(b));
+    });
+  }
+
+  /**
+   * Gets the display label for a value using the attribute's domain mapping.
+   *
+   * @param attribute - The attribute configuration
+   * @param value - The raw value from the layer
+   * @returns The display label from the domain, or the stringified value if no domain match
+   */
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  getDisplayLabel(attribute: TypeFilterAttribute, value: string | number): string {
+    if (!attribute.domain) return String(value);
+
+    const domainEntry = attribute.domain.find((d) => d.value === value);
+    return domainEntry ? domainEntry.label : String(value);
   }
 
   /**
@@ -555,6 +641,48 @@ export class FilterPanelController extends AbstractMapViewerController {
   // #endregion PUBLIC METHODS - UTILITIES
 
   // #region PRIVATE HELPER METHODS
+
+  /**
+   * Builds domain base filters for attributes with filterMissingDomainValues enabled.
+   *
+   * These filters restrict the layer to only show features with values in the domain,
+   * regardless of user filter selections.
+   *
+   * @param layerPath - The layer path
+   * @returns SQL-like filter expression for domain restrictions, or undefined if no domain filters
+   */
+
+  #buildDomainBaseFilters(layerPath: string): string | undefined {
+    const layerConfig = getStoreFilterPanelLayerConfig(this.getMapId(), layerPath);
+    if (!layerConfig?.attributes) return undefined;
+
+    const domainExpressions: string[] = [];
+
+    layerConfig.attributes.forEach((attr) => {
+      // Only apply domain base filter if filterMissingDomainValues is true
+      // and filterType is select or multiselect
+      if (
+        attr.filterMissingDomainValues &&
+        attr.domain &&
+        attr.domain.length > 0 &&
+        (attr.filterType === 'select' || attr.filterType === 'multiselect')
+      ) {
+        // Build IN clause with all domain values
+        const valueList = attr.domain
+          .map((d) => {
+            if (typeof d.value === 'string') {
+              return `'${FilterPanelController.escapeString(d.value)}'`;
+            }
+            return d.value;
+          })
+          .join(', ');
+
+        domainExpressions.push(`${attr.fieldName} IN (${valueList})`);
+      }
+    });
+
+    return domainExpressions.length > 0 ? domainExpressions.join(' AND ') : undefined;
+  }
 
   /**
    * Checks if a filter value is a range value.

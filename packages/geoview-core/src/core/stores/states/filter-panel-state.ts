@@ -2,6 +2,7 @@ import { useStore } from 'zustand';
 
 import { getGeoViewStore, useGeoViewStore } from '@/core/stores/stores-managers';
 import type { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
+import { getStoreMapConfigCorePackagesConfig } from '@/core/stores/states/map-state';
 import { PluginStateUninitializedError } from '@/core/exceptions/geoview-exceptions';
 import { logger } from '@/core/utils/logger';
 
@@ -25,6 +26,37 @@ export interface TypeDateRangeValue {
   end: string | null;
 }
 
+/** Domain value mapping for attribute values. */
+export interface TypeDomainValue {
+  /** The raw value from the layer. */
+  value: string | number;
+  /** The display label for this value. */
+  label: string;
+}
+
+/** Attribute configuration for filtering. */
+export interface TypeFilterAttribute {
+  /** Field name in the layer. */
+  fieldName: string;
+  /** Display label for the filter. */
+  displayLabel: string;
+  /** Type of filter control. */
+  filterType: TypeFilterType;
+  /** Whether this attribute is enabled. */
+  enabled: boolean;
+  /** Default filter values. */
+  defaultValues?: TypeFilterValue;
+  /** Optional custom options (if not fetching from layer). */
+  options?: (string | number)[];
+  /** Optional domain mapping for value labels. Only applies to 'select' and 'multiselect' filter types. */
+  domain?: TypeDomainValue[];
+  /** If true, filter out values not in the domain. If false, show them with raw value. Only applies when domain is defined and filterType is 'select' or 'multiselect'. */
+  filterMissingDomainValues?: boolean;
+}
+
+/** Filter type enumeration. */
+export type TypeFilterType = 'select' | 'multiselect' | 'range' | 'date';
+
 /** Filter value type - can be single value, array, or range object. */
 export type TypeFilterValue = string | number | null | (string | number)[] | TypeRangeValue | TypeDateRangeValue;
 
@@ -37,6 +69,18 @@ export type TypeFilterState = Record<string, TypeLayerFilterState>;
 // #endregion TYPE DEFINITIONS
 
 // #region INTERFACE DEFINITION
+
+/** Layer configuration for filtering. */
+export interface TypeFilterLayerConfig {
+  /** Unique identifier for the layer (layer path). */
+  layerPath: string;
+  /** Display name for the layer. */
+  layerName?: string;
+  /** Whether filtering is enabled for this layer. */
+  enabled: boolean;
+  /** Array of filterable attributes. */
+  attributes: TypeFilterAttribute[];
+}
 
 /**
  * Represents the Filter Panel Zustand store slice.
@@ -223,6 +267,31 @@ export function initializeFilterPanelState(set: TypeSetStore, get: TypeGetStore)
 // #endregion STATE INITIALIZATION
 
 // #region STATE GETTERS & HOOKS
+
+/**
+ * Gets the filter panel configuration from the map config.
+ *
+ * @param mapId - The map id
+ * @returns The filter panel configuration, or undefined if not found
+ */
+export const getStoreFilterPanelConfig = (mapId: string): { layers?: TypeFilterLayerConfig[] } | undefined => {
+  const corePackagesConfig = getStoreMapConfigCorePackagesConfig(mapId);
+  return corePackagesConfig?.find((config) => Object.keys(config).includes('filter-panel'))?.['filter-panel'] as
+    | { layers?: TypeFilterLayerConfig[] }
+    | undefined;
+};
+
+/**
+ * Gets the configuration for a specific layer from the filter panel config.
+ *
+ * @param mapId - The map id
+ * @param layerPath - The layer path
+ * @returns The layer configuration, or undefined if not found
+ */
+export const getStoreFilterPanelLayerConfig = (mapId: string, layerPath: string): TypeFilterLayerConfig | undefined => {
+  const filterPanelConfig = getStoreFilterPanelConfig(mapId);
+  return filterPanelConfig?.layers?.find((layer) => layer.layerPath === layerPath);
+};
 
 /**
  * Returns the full filter panel state slice for the given map.

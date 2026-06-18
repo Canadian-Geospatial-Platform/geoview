@@ -2,6 +2,7 @@ import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { logger } from 'geoview-core/core/utils/logger';
 
 import { useTranslation } from 'geoview-core/core/translation/i18n';
+import { useFilterPanelController } from 'geoview-core/core/controllers/use-controllers';
 
 import type { TypeFilterAttribute, TypeFilterValue } from '../../types';
 import { getSxClasses } from './control-styles';
@@ -43,6 +44,7 @@ export function MultiselectFilter(props: MultiselectFilterProps): JSX.Element {
   const theme = ui.useTheme();
   const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
   const { t } = useTranslation<string>();
+  const controller = useFilterPanelController();
 
   /**
    * Handles when a checkbox value changes.
@@ -97,7 +99,7 @@ export function MultiselectFilter(props: MultiselectFilterProps): JSX.Element {
             <FormControlLabel
               key={String(val)}
               control={<Checkbox checked={isSelected} onChange={(e) => handleCheckboxChange(val, e.target.checked)} size="small" />}
-              label={val !== null ? String(val) : t('FilterPanel.nullValue')}
+              label={val !== null ? controller.getDisplayLabel(attribute, val) : t('FilterPanel.nullValue')}
               sx={memoSxClasses.filterCheckboxItem}
             />
           );

@@ -99,7 +99,26 @@
                 "fieldName": "season",
                 "displayLabel": "Season",
                 "filterType": "multiselect",
-                "enabled": true
+                "enabled": true,
+                "filterMissingDomainValues": true,
+                "domain": [
+                  {
+                    "value": "spring",
+                    "label": "Spring"
+                  },
+                  {
+                    "value": "summer",
+                    "label": "Summer"
+                  },
+                  {
+                    "value": "autumn",
+                    "label": "Autumn"
+                  },
+                  {
+                    "value": "winter",
+                    "label": "Winter"
+                  }
+                ]
               },
               {
                 "fieldName": "start_date",

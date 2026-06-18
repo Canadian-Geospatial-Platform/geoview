@@ -113,7 +113,7 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
         const enabledAttributes = layer.attributes.filter((attr) => attr.enabled);
         const results = enabledAttributes.map((attr) => {
           try {
-            const uniqueValues = controller.getLayerFieldUniqueValues(layer.layerPath, attr.fieldName);
+            const uniqueValues = controller.getLayerFieldUniqueValues(layer.layerPath, attr);
             return { fieldName: attr.fieldName, values: uniqueValues };
           } catch (err) {
             logger.logError(`Error fetching values for ${attr.fieldName}:`, err);
