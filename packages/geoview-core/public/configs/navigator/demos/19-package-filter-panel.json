@@ -87,7 +87,6 @@
           },
           {
             "layerPath": "historical-flood/0",
-            "layerName": "Historical Flood Events (HFE)",
             "enabled": true,
             "attributes": [
               {
@@ -110,7 +109,14 @@
               }
             ]
           }
-        ]
+        ],
+        "settings": {
+          "title": "Custom Filter Panel Title",
+          "collapsible": true,
+          "defaultCollapsed": false,
+          "autoApply": true,
+          "showResetButton": false
+        }
       }
     }
   ]

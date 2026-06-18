@@ -3108,7 +3108,7 @@ interface FilterPanelConfig {
   version?: string;
   layers?: Array<{
     layerPath: string;
-    layerName: string;
+    layerName?: string;
     enabled?: boolean;
     attributes?: Array<{
       fieldName: string;
@@ -3120,13 +3120,10 @@ interface FilterPanelConfig {
   }>;
   settings?: {
     title?: string;
-    showLayerNames?: boolean;
     collapsible?: boolean;
     defaultCollapsed?: boolean;
-    showApplyButton?: boolean;
     showResetButton?: boolean;
     autoApply?: boolean;
-    showFeatureCount?: boolean;
   };
 }
 ```
@@ -3138,7 +3135,7 @@ interface FilterPanelConfig {
 - **version**: Schema version (default: "1.0")
 - **layers**: Array of layer configurations for filtering
   - **layerPath** (required): Unique layer path identifier
-  - **layerName** (required): Display name for the layer
+  - **layerName** (optional): Display name for the layer (if not provided, layer path is used)
   - **enabled**: Whether filtering is enabled for this layer (default: true)
   - **attributes**: Array of filterable attributes
     - **fieldName** (required): Field name from the layer schema
@@ -3148,13 +3145,10 @@ interface FilterPanelConfig {
     - **defaultValues**: Initial filter values (varies by filter type)
 - **settings**: Panel display and behavior settings
   - **title**: Panel header title (default: "Filter Layers")
-  - **showLayerNames**: Show layer names in the panel (default: true)
   - **collapsible**: Allow collapsing layer sections (default: true)
   - **defaultCollapsed**: Initial collapsed state (default: false)
-  - **showApplyButton**: Show manual apply button (default: false)
   - **showResetButton**: Show reset all button (default: true)
   - **autoApply**: Apply filters automatically on change (default: true)
-  - **showFeatureCount**: Display filtered feature counts (default: true)
 
 #### Filter Types
 
@@ -3226,7 +3220,7 @@ interface FilterPanelConfig {
 ]
 ```
 
-**Manual Apply Mode:**
+**Custom Settings:**
 
 ```json
 "corePackagesConfig": [
@@ -3251,8 +3245,9 @@ interface FilterPanelConfig {
         }
       ],
       "settings": {
-        "autoApply": false,
-        "showApplyButton": true
+        "title": "Environmental Filters",
+        "collapsible": false,
+        "showResetButton": true
       }
     }
   }
@@ -3262,9 +3257,9 @@ interface FilterPanelConfig {
 #### Notes
 
 - Layer paths must reference existing layers in the map configuration
+- Layer names are optional - if not provided, the layer path will be used as the display name
 - Field names must match actual field names in the layer schema
-- When `autoApply: true`, filters apply on every change. When `false`, user must click "Apply Filters"
-- Feature count shows the number of features matching current filters
+- When `autoApply: true`, filters apply immediately on every change
 - UI automatically adapts to the map's theme (geo.ca, light, dark)
 - Range and date filters are optimized for large datasets
 

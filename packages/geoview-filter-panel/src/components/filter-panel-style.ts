@@ -16,6 +16,15 @@ export const getSxClasses = (theme: any): SxStyles => ({
     bgcolor: 'background.paper',
   },
 
+  filterPanelButtonContainer: {
+    display: 'flex',
+    gap: 1,
+    p: 2,
+    borderTop: 1,
+    borderColor: 'divider',
+    bgcolor: 'background.default',
+  },
+
   filterHeader: {
     padding: '3px',
     borderBottom: 1,
