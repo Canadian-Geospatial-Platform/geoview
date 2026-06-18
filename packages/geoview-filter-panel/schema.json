@@ -26,7 +26,7 @@
       "description": "Array of layer configurations for filtering",
       "items": {
         "type": "object",
-        "required": ["layerPath", "layerName"],
+        "required": ["layerPath"],
         "properties": {
           "layerPath": {
             "type": "string",
@@ -91,11 +91,6 @@
           "description": "Panel title",
           "default": "Filter Layers"
         },
-        "showLayerNames": {
-          "type": "boolean",
-          "description": "Show layer names in the filter panel",
-          "default": true
-        },
         "collapsible": {
           "type": "boolean",
           "description": "Allow collapsing/expanding layer sections",
@@ -106,11 +101,6 @@
           "description": "Default collapsed state for layer sections",
           "default": false
         },
-        "showApplyButton": {
-          "type": "boolean",
-          "description": "Show apply button",
-          "default": false
-        },
         "showResetButton": {
           "type": "boolean",
           "description": "Show reset button",
@@ -119,11 +109,6 @@
         "autoApply": {
           "type": "boolean",
           "description": "Auto-apply filters on change",
-          "default": true
-        },
-        "showFeatureCount": {
-          "type": "boolean",
-          "description": "Show feature count after filtering",
           "default": true
         }
       }
