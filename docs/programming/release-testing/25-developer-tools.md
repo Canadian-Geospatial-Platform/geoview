@@ -1,4 +1,6 @@
-# 26 — Developer Tools
+# 25 — Developer Tools
+
+> **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
 
 Testing the ESRI Renderer and WFS Renderer conversion tools that generate valid GeoView style configurations from external service metadata.
 
@@ -6,27 +8,31 @@ Testing the ESRI Renderer and WFS Renderer conversion tools that generate valid 
 
 Demo: `templates/demos/demo-esri-renderer.html`
 
-- [ ] **Page loads** — Load the page. Verify the CodeMirror editor and input fields render correctly.
-- [ ] **Paste ESRI renderer JSON** — Paste a valid ESRI renderer JSON (uniqueValue or classBreaks) into the input area. Verify it is accepted without errors.
-- [ ] **Generate GeoView style** — Click the generate/convert button. Verify the output produces a valid GeoView `layerStyle` JSON block.
-- [ ] **UniqueValue renderer** — Paste an ESRI uniqueValue renderer. Verify the output contains `"type": "uniqueValue"` with correct `fields`, `info` entries (labels, values, visibility).
-- [ ] **ClassBreaks renderer** — Paste an ESRI classBreaks renderer. Verify the output contains `"type": "classBreaks"` with correct `minValue`, `maxValue`, and class info entries.
-- [ ] **Simple renderer** — Paste an ESRI simple renderer. Verify the output contains `"type": "simple"` with the correct symbol configuration.
-- [ ] **Copy output** — Verify the generated output can be copied and pasted into a GeoView config `listOfLayerEntryConfig[].layerStyle` property without modification.
-- [ ] **Invalid input** — Paste invalid JSON or a non-renderer object. Verify an error message is shown (no crash).
+| Test                     | Description             | Steps                                                                                                         | Expected Result                                                                                            | Auto |
+| ------------------------ | ----------------------- | ------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | ---- |
+| Page loads               | Editor renders          | 1. Load `demo-esri-renderer.html`                                                                             | CodeMirror editor and input fields render correctly                                                        | M    |
+| Paste ESRI renderer JSON | Valid input accepted    | 1. Paste a valid ESRI renderer JSON (uniqueValue or classBreaks) into the input area                          | Input is accepted without errors                                                                           | M    |
+| Generate GeoView style   | Conversion output       | 1. Click the generate/convert button                                                                          | Output produces a valid GeoView `layerStyle` JSON block                                                    | M    |
+| UniqueValue renderer     | UniqueValue conversion  | 1. Paste an ESRI uniqueValue renderer<br>2. Generate output                                                   | Output contains `"type": "uniqueValue"` with correct `fields`, `info` entries (labels, values, visibility) | M    |
+| ClassBreaks renderer     | ClassBreaks conversion  | 1. Paste an ESRI classBreaks renderer<br>2. Generate output                                                   | Output contains `"type": "classBreaks"` with correct `minValue`, `maxValue`, and class info entries        | M    |
+| Simple renderer          | Simple conversion       | 1. Paste an ESRI simple renderer<br>2. Generate output                                                        | Output contains `"type": "simple"` with correct symbol configuration                                       | M    |
+| Copy output              | Output usable in config | 1. Copy the generated output<br>2. Paste into a GeoView config `listOfLayerEntryConfig[].layerStyle` property | Valid JSON that works without modification                                                                 | M    |
+| Invalid input            | Error handling          | 1. Paste invalid JSON or a non-renderer object<br>2. Observe the UI                                           | Error message is shown (no crash)                                                                          | M    |
 
 ## WFS Renderer Style Configuration Tool
 
 Demo: `templates/demos/demo-wfs-renderer.html`
 
-- [ ] **Page loads** — Load the page. Verify the CodeMirror editor, service URL input, and controls render correctly.
-- [ ] **Fetch DescribeFeatureType** — Enter a valid WFS service URL and click fetch. Verify the XML response is loaded into the editor.
-- [ ] **Parse feature type** — After fetching, verify the tool lists available feature type fields (string, numeric, etc.) that can be used for styling.
-- [ ] **Generate style from field** — Select a field and configure style rules. Verify a valid GeoView `layerStyle` JSON is generated.
-- [ ] **UniqueValue from string field** — Select a string field and generate a uniqueValue style. Verify the output has correct field reference and value entries.
-- [ ] **ClassBreaks from numeric field** — Select a numeric field and generate a classBreaks style. Verify the output has correct min/max ranges.
-- [ ] **Invalid URL** — Enter a bad URL and click fetch. Verify an error is shown without crashing.
-- [ ] **Non-WFS URL** — Enter a URL to a non-WFS service. Verify appropriate error handling.
+| Test                           | Description            | Steps                                                            | Expected Result                                                              | Auto |
+| ------------------------------ | ---------------------- | ---------------------------------------------------------------- | ---------------------------------------------------------------------------- | ---- |
+| Page loads                     | Editor renders         | 1. Load `demo-wfs-renderer.html`                                 | CodeMirror editor, service URL input, and controls render correctly          | M    |
+| Fetch DescribeFeatureType      | XML response loaded    | 1. Enter a valid WFS service URL<br>2. Click fetch               | XML response is loaded into the editor                                       | M    |
+| Parse feature type             | Fields listed          | 1. After fetching, observe the field list                        | Available feature type fields (string, numeric, etc.) are listed for styling | M    |
+| Generate style from field      | Style JSON generated   | 1. Select a field and configure style rules<br>2. Click generate | Valid GeoView `layerStyle` JSON is generated                                 | M    |
+| UniqueValue from string field  | String field styling   | 1. Select a string field<br>2. Generate a uniqueValue style      | Output has correct field reference and value entries                         | M    |
+| ClassBreaks from numeric field | Numeric field styling  | 1. Select a numeric field<br>2. Generate a classBreaks style     | Output has correct min/max ranges                                            | M    |
+| Invalid URL                    | Error on bad URL       | 1. Enter a bad URL<br>2. Click fetch                             | Error is shown without crashing                                              | M    |
+| Non-WFS URL                    | Non-WFS error handling | 1. Enter a URL to a non-WFS service<br>2. Click fetch            | Appropriate error handling (no crash)                                        | M    |
 
 ## All Layer Zoom Levels (Comprehensive)
 
@@ -34,9 +40,11 @@ Config: `configs/navigator/demos/08-all-layer-zoom-levels.json`
 
 This config tests zoom and scale constraints across ALL layer types simultaneously.
 
-- [ ] **All layers visible at default zoom** — Load the config. Verify all configured layers are visible at the default zoom level (within their range).
-- [ ] **maxZoom cap (zoom level 8)** — Zoom beyond level 8. Verify layers with `maxZoom: 8` disappear (greyed out in legend, `inVisibleRange: false`).
-- [ ] **minScale threshold** — Zoom in until the map scale denominator drops below 10,000,000. Verify layers with `minScale: 10000000` disappear.
-- [ ] **Combined constraint** — Verify that BOTH constraints apply independently — the most restrictive one wins (layer disappears when either limit is exceeded).
-- [ ] **Layer types tested** — Verify the following layer types all respect zoom/scale limits: GeoJSON, Esri Dynamic, Esri Feature, WMS, WFS.
-- [ ] **Group with hidden child** — Verify the group (`point-feature-group`) with a child that has `visible: false` + maxZoom correctly respects both visibility and zoom constraints.
+| Test                               | Description                   | Steps                                                                                        | Expected Result                                                                    | Auto |
+| ---------------------------------- | ----------------------------- | -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | ---- |
+| All layers visible at default zoom | Layers in range               | 1. Load the navigator with `08-all-layer-zoom-levels.json`<br>2. Check legend                | All configured layers are visible at the default zoom level (within their range)   | M    |
+| maxZoom cap (zoom level 8)         | Layers disappear past max     | 1. Zoom beyond level 8<br>2. Check legend for greyed-out layers                              | Layers with `maxZoom: 8` disappear (greyed out in legend, `inVisibleRange: false`) | M    |
+| minScale threshold                 | Scale-based disappearance     | 1. Zoom in until scale denominator drops below 10,000,000<br>2. Check legend                 | Layers with `minScale: 10000000` disappear                                         | M    |
+| Combined constraint                | Most restrictive wins         | 1. Test layers with both zoom and scale constraints<br>2. Observe which limit triggers first | Both constraints apply independently — the most restrictive one wins               | M    |
+| Layer types tested                 | All types respect limits      | 1. Check each layer type in legend at various zooms                                          | GeoJSON, Esri Dynamic, Esri Feature, WMS, WFS all respect zoom/scale limits        | M    |
+| Group with hidden child            | Visibility + zoom constraints | 1. Check group (`point-feature-group`) with a child that has `visible: false` + maxZoom      | Both visibility and zoom constraints are respected correctly                       | M    |

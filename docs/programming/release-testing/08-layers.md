@@ -268,11 +268,10 @@ Config: `configs/navigator/layers/esri-image.json` (ESRI Image layers)
 
 Config: `configs/navigator/demos/07-layer-zoom-levels.json` (ESRI Dynamic with `minScale: 10000000`, group with `minZoom: 5`, child with `minZoom: 7, maxZoom: 10`)
 
-| Test                       | Description          | Steps                                                                                                           | Expected Result                                           | Auto |
-| -------------------------- | -------------------- | --------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- | ---- |
-| Layer appears at zoom      | Visible in range     | 1. Zoom to the configured visible range                                                                         | Layer appears on the map                                  | M    |
-| Layer disappears           | Hidden out of range  | 1. Zoom outside the visible range                                                                               | Layer disappears from the map                             | M    |
-| inVisibleRange store check | Store reflects range | 1. Open React DevTools → Components → `getViewStore-'mapWM'` and check layer state `inVisibleRange` for a layer | `inVisibleRange` is `false` out of range, `true` in range | C    |
+| Test                  | Description         | Steps                                   | Expected Result               | Auto |
+| --------------------- | ------------------- | --------------------------------------- | ----------------------------- | ---- |
+| Layer appears at zoom | Visible in range    | 1. Zoom to the configured visible range | Layer appears on the map      | M    |
+| Layer disappears      | Hidden out of range | 1. Zoom outside the visible range       | Layer disappears from the map | M    |
 
 ### Layer Type Edge Cases
 

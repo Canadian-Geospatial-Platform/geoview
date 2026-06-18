@@ -1,5 +1,7 @@
 # 21 — WCAG Accessibility
 
+> **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
+
 Keyboard navigation, focus management, screen reader support, and WCAG compliance testing.
 
 Test page: `templates/tests/wcag.html`
@@ -8,40 +10,47 @@ Test page: `templates/tests/wcag.html`
 
 ## Skip Links
 
-Three skip links are rendered (visually hidden, shown on focus):
+Three skip links are rendered (visually hidden, shown on focus).
 
-- [ ] **Top skip link** — Press Tab from outside the viewer. Verify a "Skip after map element" link appears and is focusable.
-- [ ] **Skip to main map link** — Tab to the "Skip to main content - Map" link. Press Enter. Verify focus moves to the map and crosshair mode activates.
-- [ ] **Bottom skip link** — Tab past the footer bar. Verify a "Skip before map element" link appears. Press Enter. Verify focus returns above the map.
+| Test                  | Description                       | Steps                                                             | Expected Result                                                                      | Auto |
+| --------------------- | --------------------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------ | ---- |
+| Top skip link         | First skip link appears on Tab    | 1. Press Tab from outside the viewer                              | A "Skip after map element" link appears and is focusable                             | M    |
+| Skip to main map link | Skip link jumps to map            | 1. Tab to the "Skip to main content - Map" link<br>2. Press Enter | Focus moves to the map and crosshair mode activates                                  | M    |
+| Bottom skip link      | Skip link returns focus above map | 1. Tab past the footer bar                                        | A "Skip before map element" link appears; pressing Enter returns focus above the map | M    |
 
 ## WCAG Mode Dialog
 
 When tabbing into GeoView for the first time, a dialog appears asking to enable keyboard navigation mode.
 
-- [ ] **Dialog appears** — Tab into the GeoView viewer from outside. Verify the "Keyboard navigation" dialog appears.
-- [ ] **Enable button** — Click "Enable". Verify focus is trapped within the viewer (WCAG mode active).
-- [ ] **Skip button** — Click "Skip". Verify the dialog closes and focus continues past the viewer without trapping.
-- [ ] **Dialog does not reappear** — After clicking "Enable" or "Skip", continue tabbing. Verify the dialog does not reappear on subsequent entries.
+| Test                     | Description                      | Steps                                                  | Expected Result                                                 | Auto |
+| ------------------------ | -------------------------------- | ------------------------------------------------------ | --------------------------------------------------------------- | ---- |
+| Dialog appears           | WCAG dialog shown on first entry | 1. Tab into the GeoView viewer from outside            | "Keyboard navigation" dialog appears                            | M    |
+| Enable button            | Enables WCAG focus trap          | 1. Click "Enable"                                      | Focus is trapped within the viewer (WCAG mode active)           | M    |
+| Skip button              | Bypasses viewer                  | 1. Click "Skip"                                        | Dialog closes; focus continues past the viewer without trapping | M    |
+| Dialog does not reappear | One-time per session             | 1. After clicking "Enable" or "Skip", continue tabbing | Dialog does not reappear on subsequent entries                  | M    |
 
 ## Ctrl+Q Exit WCAG Mode
 
-- [ ] **Exit from map** — With WCAG mode enabled and focus on the map, press `Ctrl+Q`. Verify focus trap is disabled and focus returns to the top skip link.
-- [ ] **Exit from panel** — With focus inside a footer bar panel, press `Ctrl+Q`. Verify WCAG mode exits and focus escapes the viewer.
-- [ ] **Exit from app bar** — With focus on an app bar button, press `Ctrl+Q`. Verify WCAG mode exits.
-- [ ] **Re-enter after exit** — After Ctrl+Q, Tab back into the viewer. Verify the WCAG dialog appears again to re-enable.
+| Test                | Description                      | Steps                                                          | Expected Result                                         | Auto |
+| ------------------- | -------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------- | ---- |
+| Exit from map       | Ctrl+Q exits when focused on map | 1. With WCAG mode enabled and focus on the map, press `Ctrl+Q` | Focus trap disabled; focus returns to the top skip link | M    |
+| Exit from panel     | Ctrl+Q exits from footer panel   | 1. With focus inside a footer bar panel, press `Ctrl+Q`        | WCAG mode exits; focus escapes the viewer               | M    |
+| Exit from app bar   | Ctrl+Q exits from app bar        | 1. With focus on an app bar button, press `Ctrl+Q`             | WCAG mode exits                                         | M    |
+| Re-enter after exit | Dialog reappears after Ctrl+Q    | 1. After Ctrl+Q, Tab back into the viewer                      | WCAG dialog appears again to re-enable                  | M    |
 
 ## Map Focus & Crosshair
 
-- [ ] **Ctrl+M activates crosshair** — Focus the map (via Tab or skip link), press `Ctrl+M`. Verify the crosshair graphic appears at the map center.
-- [ ] **Ctrl+M deactivates** — Press `Ctrl+M` again. Verify the crosshair disappears.
-- [ ] **First focus is "Skip to main map" link** — When entering the map area via Tab, verify the first focusable element is the skip-to-map link (not the map canvas directly).
-- [ ] **Arrow keys pan** — With crosshair active, press arrow keys. Verify the map pans.
-- [ ] **Shift+Arrow increases pan distance** — Press Shift + arrow keys. Verify larger pan increments.
-- [ ] **Shift+Arrow decreases pan distance** — Press Shift + opposite arrow. Verify the step size adjusts (accumulates with repeated Shift presses).
-- [ ] **Enter queries features** — Position crosshair over a feature. Press Enter. Verify the Details panel opens with feature info at that location.
-- [ ] **Static map — no crosshair** — Load a static map (`interaction: 'static'`). Verify Ctrl+M does NOT activate crosshair.
-- [ ] **Rotation** — Rotate the map the map.
-- [ ] **Click deactivates** — With crosshair active, click the map with the mouse. Verify the crosshair deactivates.
+| Test                            | Description                   | Steps                                                             | Expected Result                                                               | Auto |
+| ------------------------------- | ----------------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------------------- | ---- |
+| Ctrl+M activates crosshair      | Crosshair shown at center     | 1. Focus the map (via Tab or skip link)<br>2. Press `Ctrl+M`      | Crosshair graphic appears at the map center                                   | M    |
+| First focus is skip-to-map link | Skip link before map canvas   | 1. Enter the map area via Tab                                     | First focusable element is the skip-to-map link (not the map canvas directly) | M    |
+| Arrow keys pan                  | Map pans with arrows          | 1. With crosshair active, press arrow keys                        | Map pans in the arrow direction                                               | M    |
+| Shift+Arrow increases pan       | Larger pan increments         | 1. Press Shift + arrow keys                                       | Larger pan increments applied                                                 | M    |
+| Shift+Arrow decreases pan       | Step size adjusts             | 1. Press Shift + opposite arrow                                   | Step size adjusts (accumulates with repeated Shift presses)                   | M    |
+| Enter queries features          | Feature info at crosshair     | 1. Position crosshair over a feature<br>2. Press Enter            | Details panel opens with feature info at that location                        | M    |
+| Static map — no crosshair       | Crosshair disabled on static  | 1. Load a static map (`interaction: 'static'`)<br>2. Press Ctrl+M | Crosshair does NOT activate                                                   | M    |
+| Rotation                        | Crosshair works with rotation | 1. Rotate the map<br>2. Use crosshair                             | Crosshair and panning work correctly with rotation applied                    | M    |
+| Click deactivates               | Mouse click removes crosshair | 1. With crosshair active, click the map with the mouse            | Crosshair deactivates                                                         | M    |
 
 ## Tab Order
 
@@ -51,9 +60,11 @@ Natural tab order (with WCAG mode):
 Host page → Top skip link → App Bar → Map → Nav Bar → Footer Bar → Bottom skip link → Host page continues
 ```
 
-- [ ] **Full tab cycle** — Press Tab repeatedly through the viewer. Verify focus moves in the order above.
-- [ ] **Shift+Tab reverses** — Press Shift+Tab. Verify focus moves in reverse order.
-- [ ] **Static map skipped** — For a static map, verify the map container is not focusable (tabIndex=-1).
+| Test                        | Description                              | Steps                                             | Expected Result                                                                                           | Auto |
+| --------------------------- | ---------------------------------------- | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ---- |
+| Full tab cycle              | Forward tab order correct                | 1. Press Tab repeatedly through the viewer        | Focus moves in the documented order above                                                                 | M    |
+| Shift+Tab reverses          | Reverse tab order correct                | 1. Press Shift+Tab                                | Focus moves in reverse order                                                                              | M    |
+| Static map limited controls | Static map only exposes non-map controls | 1. Load a static map<br>2. Tab through the viewer | Only notification, about, copyright, and scale controls are focusable; Ctrl+M does not activate crosshair | M    |
 
 ## Panel Focus Trapping (WCAG Mode)
 
@@ -61,70 +72,85 @@ When WCAG mode is enabled and a panel opens, focus should be trapped within it.
 
 ### Footer Bar Panels
 
-- [ ] **Legend panel trap** — Open Legend panel. Verify Tab cycles only through elements inside the Legend panel.
-- [ ] **Layers panel trap** — Open Layers panel. Verify focus is trapped within.
-- [ ] **Data Table panel trap** — Open Data Table. Verify focus is trapped within.
-- [ ] **Details panel trap** — Open Details. Verify focus is trapped within.
-- [ ] **Time Slider panel trap** — Open Time Slider. Verify focus is trapped within.
-- [ ] **Chart panel trap** — Open Chart. Verify focus is trapped within.
-- [ ] **Exit button in footer** — With focus trapped in a footer panel, verify an "Exit" button appears. Click it. Verify focus returns to the tab selector.
-- [ ] **Escape closes panel** — Press Escape inside a trapped panel. Verify focus returns to the tab selector or originating button.
+| Test                    | Description                      | Steps                                                                            | Expected Result                                          | Auto |
+| ----------------------- | -------------------------------- | -------------------------------------------------------------------------------- | -------------------------------------------------------- | ---- |
+| Legend panel trap       | Focus trapped in Legend          | 1. Open Legend panel<br>2. Press Tab repeatedly                                  | Tab cycles only through elements inside the Legend panel | M    |
+| Layers panel trap       | Focus trapped in Layers          | 1. Open Layers panel<br>2. Press Tab                                             | Focus is trapped within                                  | M    |
+| Data Table panel trap   | Focus trapped in Data Table      | 1. Open Data Table<br>2. Press Tab                                               | Focus is trapped within                                  | M    |
+| Details panel trap      | Focus trapped in Details         | 1. Open Details<br>2. Press Tab                                                  | Focus is trapped within                                  | M    |
+| Time Slider panel trap  | Focus trapped in Time Slider     | 1. Open Time Slider<br>2. Press Tab                                              | Focus is trapped within                                  | M    |
+| Chart panel trap        | Focus trapped in Chart           | 1. Open Chart<br>2. Press Tab                                                    | Focus is trapped within                                  | M    |
+| Exit button in footer   | Exit returns focus to tabs       | 1. With focus trapped in a footer panel, locate the "Exit" button<br>2. Click it | Focus returns to the tab selector                        | M    |
+| Escape from right panel | First Esc exits right panel trap | 1. With focus in the right panel (layer details/settings)<br>2. Press Escape     | Focus moves to the left layer list                       | M    |
+| Escape from layer list  | Second Esc exits panel           | 1. With focus on the left layer list<br>2. Press Escape                          | Focus returns to the footer bar tab                      | M    |
 
 ### App Bar Panels
 
-- [ ] **Geolocator panel trap** — Open Geolocator from app bar. Verify focus is trapped within the search panel.
-- [ ] **About panel trap** — Open About panel. Verify focus is trapped.
-- [ ] **AOI panel trap** — Open Area of Interest panel. Verify focus is trapped.
-- [ ] **STAC Browser panel trap** — Open STAC Browser panel. Verify focus is trapped.
-- [ ] **Custom Legend panel trap** — Open Custom Legend panel. Verify focus is trapped.
-- [ ] **Legend panel trap (app bar)** — Open Legend from app bar. Verify focus is trapped.
-- [ ] **Details panel trap (app bar)** — Open Details from app bar. Verify focus is trapped.
-- [ ] **Layers panel trap (app bar)** — Open Layers from app bar. Verify focus is trapped.
-- [ ] **Data Table panel trap (app bar)** — Open Data Table from app bar. Verify focus is trapped.
-- [ ] **Escape closes app bar panel** — Press Escape. Verify focus returns to the app bar button that opened it.
+| Test                            | Description                             | Steps                                           | Expected Result                                    | Auto |
+| ------------------------------- | --------------------------------------- | ----------------------------------------------- | -------------------------------------------------- | ---- |
+| Geolocator panel trap           | Focus trapped in Geolocator             | 1. Open Geolocator from app bar<br>2. Press Tab | Focus is trapped within the search panel           | M    |
+| About panel trap                | Focus trapped in About                  | 1. Open About panel<br>2. Press Tab             | Focus is trapped                                   | M    |
+| AOI panel trap                  | Focus trapped in AOI                    | 1. Open Area of Interest panel<br>2. Press Tab  | Focus is trapped                                   | M    |
+| STAC Browser panel trap         | Focus trapped in STAC                   | 1. Open STAC Browser panel<br>2. Press Tab      | Focus is trapped                                   | M    |
+| Custom Legend panel trap        | Focus trapped in Custom Legend          | 1. Open Custom Legend panel<br>2. Press Tab     | Focus is trapped                                   | M    |
+| Legend panel trap (app bar)     | Focus trapped in Legend via app bar     | 1. Open Legend from app bar<br>2. Press Tab     | Focus is trapped                                   | M    |
+| Details panel trap (app bar)    | Focus trapped in Details via app bar    | 1. Open Details from app bar<br>2. Press Tab    | Focus is trapped                                   | M    |
+| Layers panel trap (app bar)     | Focus trapped in Layers via app bar     | 1. Open Layers from app bar<br>2. Press Tab     | Focus is trapped                                   | M    |
+| Data Table panel trap (app bar) | Focus trapped in Data Table via app bar | 1. Open Data Table from app bar<br>2. Press Tab | Focus is trapped                                   | M    |
+| Escape closes app bar panel     | Escape returns to app bar button        | 1. Press Escape                                 | Focus returns to the app bar button that opened it | M    |
 
 ## Panel Full Screen Mode Focus
 
-- [ ] **Enter fullscreen** — Open Legend panel, click fullscreen button. Verify focus remains within the panel content.
-- [ ] **Tab inside fullscreen** — Tab through elements in the fullscreen panel. Verify focus stays within the fullscreen dialog.
-- [ ] **Exit fullscreen restores focus** — Exit fullscreen (click button or press Escape). Verify focus returns to the fullscreen button.
-- [ ] **Footer panel fullscreen** — Open Data Table in fullscreen. Tab through columns, filters, rows. Verify focus stays within.
-- [ ] **Layers panel fullscreen** — Open Layers in fullscreen. Verify all layer list items and right-panel controls are tabbable.
+| Test                               | Description                        | Steps                                                                     | Expected Result                                                  | Auto |
+| ---------------------------------- | ---------------------------------- | ------------------------------------------------------------------------- | ---------------------------------------------------------------- | ---- |
+| Enter fullscreen                   | Focus remains in panel             | 1. Open Legend panel<br>2. Click fullscreen button                        | Focus remains within the panel content                           | M    |
+| Tab inside fullscreen              | Focus stays within fullscreen      | 1. Tab through elements in the fullscreen panel                           | Focus stays within the fullscreen dialog                         | M    |
+| Escape from fullscreen right panel | First Esc exits fullscreen         | 1. With right panel in fullscreen and focus inside it<br>2. Press Escape  | Exits fullscreen; focus returns to the right panel (normal size) | M    |
+| Escape to layer list               | Second Esc moves to layer list     | 1. After exiting fullscreen, press Escape again                           | Focus moves to the left layer list                               | M    |
+| Escape to tab                      | Third Esc exits panel              | 1. With focus on the layer list, press Escape again                       | Focus returns to the footer bar tab                              | M    |
+| Footer panel fullscreen            | Data Table focusable in fullscreen | 1. Open Data Table in fullscreen<br>2. Tab through columns, filters, rows | Focus stays within                                               | M    |
+| Layers panel fullscreen            | Layers controls tabbable           | 1. Open Layers in fullscreen<br>2. Tab through elements                   | All layer list items and right-panel controls are tabbable       | M    |
 
 ## Guide Panel Keyboard Navigation
 
-Test the Guide panel with keyboard-only navigation:
-
-- [ ] **Open Guide** — Use Tab to reach the Guide button/tab. Press Enter. Verify the Guide opens.
-- [ ] **Search field focus** — Tab to the search field. Type a keyword. Verify results are announced (aria-live region).
-- [ ] **Navigate search results** — Press Enter or ArrowDown in search field. Verify focus moves to the first matching section.
-- [ ] **Expand/collapse sections** — Focus a section heading. Press Enter or Space. Verify it expands/collapses.
-- [ ] **Previous/Next match** — Use Previous/Next buttons. Verify focus cycles through all matches.
-- [ ] **Clear search** — Press the Clear button. Verify search resets and focus returns to the search input.
-- [ ] **Guide in Legend** — Open Guide from Legend panel. Verify keyboard navigation works.
-- [ ] **Guide in Layers** — Open Guide from Layers panel.
-- [ ] **Guide in Data Table** — Open Guide from Data Table.
-- [ ] **Guide in Details** — Open Guide from Details.
-- [ ] **Guide in fullscreen** — Open a panel in fullscreen, then open Guide. Verify Guide is keyboard-navigable inside fullscreen.
+| Test                     | Description                  | Steps                                                      | Expected Result                                     | Auto |
+| ------------------------ | ---------------------------- | ---------------------------------------------------------- | --------------------------------------------------- | ---- |
+| Open Guide               | Guide opens via keyboard     | 1. Use Tab to reach the Guide button/tab<br>2. Press Enter | Guide opens                                         | M    |
+| Search field focus       | Search input accessible      | 1. Tab to the search field<br>2. Type a keyword            | Results are announced (aria-live region)            | M    |
+| Navigate search results  | Focus moves to result        | 1. Press Enter or ArrowDown in search field                | Focus moves to the first matching section           | M    |
+| Expand/collapse sections | Sections toggle via keyboard | 1. Focus a section heading<br>2. Press Enter or Space      | Section expands/collapses                           | M    |
+| Previous/Next match      | Cycle through matches        | 1. Use Previous/Next buttons                               | Focus cycles through all matches                    | M    |
+| Clear search             | Reset returns to input       | 1. Press the Clear button                                  | Search resets and focus returns to the search input | M    |
+| Guide in Legend          | Guide works from Legend      | 1. Open Guide from Legend panel                            | Keyboard navigation works                           | M    |
+| Guide in Layers          | Guide works from Layers      | 1. Open Guide from Layers panel                            | Keyboard navigation works                           | M    |
+| Guide in Data Table      | Guide works from Data Table  | 1. Open Guide from Data Table                              | Keyboard navigation works                           | M    |
+| Guide in Details         | Guide works from Details     | 1. Open Guide from Details                                 | Keyboard navigation works                           | M    |
+| Guide in fullscreen      | Guide works in fullscreen    | 1. Open a panel in fullscreen<br>2. Open Guide             | Guide is keyboard-navigable inside fullscreen       | M    |
 
 ## Screen Reader & ARIA
 
-- [ ] **Aria-labels on icon buttons** — Spot-check all icon buttons (zoom, home, basemap, projection, fullscreen, export). Verify each has a meaningful `aria-label`.
-- [ ] **Aria-live announcements** — Perform actions that trigger announcements (layer loaded, error, search results). With a screen reader enabled, verify announcements are spoken.
-- [ ] **Role="toolbar"** — Verify the nav bar and app bar announce as toolbars to screen readers.
-- [ ] **Role="dialog"** — Verify modals (export, WCAG dialog, version) announce as dialogs.
-- [ ] **Role="status"** — Verify live regions (measurement results, search count) use `role="status"`.
-- [ ] **Aria-expanded states** — Expand/collapse layer groups. Verify `aria-expanded` toggles between true/false.
-- [ ] **Aria-pressed states** — Toggle visibility buttons. Verify `aria-pressed` reflects the state.
-- [ ] **Aria-disabled on panel buttons** — Verify contextual buttons use `aria-disabled="true"` (not `disabled`) to remain focusable for keyboard users. Examples: reorder up/down buttons at list boundaries, prev/next buttons in Details when at first/last feature, zoom-to-layer button when layer has no extent.
+| Test                           | Description                       | Steps                                                                                                            | Expected Result                                                  | Auto |
+| ------------------------------ | --------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- | ---- |
+| Aria-labels on icon buttons    | All icon buttons labeled          | 1. Spot-check icon buttons (zoom, home, basemap, projection, fullscreen, export)                                 | Each has a meaningful `aria-label`                               | M    |
+| Aria-live announcements        | Announcements spoken              | 1. Perform actions that trigger announcements (layer loaded, error, search results)<br>2. Enable a screen reader | Announcements are spoken                                         | M    |
+| Role="toolbar"                 | Bars announce as toolbars         | 1. Focus the nav bar and app bar with screen reader                                                              | Announced as toolbars                                            | M    |
+| Role="dialog"                  | Modals announce as dialogs        | 1. Open export modal, WCAG dialog, or version dialog                                                             | Announced as dialogs                                             | M    |
+| Role="status"                  | Live regions use correct role     | 1. Trigger measurement results or search count                                                                   | Uses `role="status"`                                             | M    |
+| Aria-expanded states           | Groups toggle aria-expanded       | 1. Expand/collapse layer groups                                                                                  | `aria-expanded` toggles between true/false                       | M    |
+| Aria-pressed states            | Toggle buttons use aria-pressed   | 1. Toggle visibility buttons                                                                                     | `aria-pressed` reflects the state                                | M    |
+| Aria-disabled on panel buttons | Disabled buttons remain focusable | 1. Check reorder up/down at boundaries, prev/next at first/last feature, zoom-to-layer with no extent            | Uses `aria-disabled="true"` (not `disabled`) to remain focusable | M    |
 
 ## Contrast & Visual Indicators
 
-- [ ] **Focus indicators visible** — Tab through all elements. Verify every focused element has a visible focus ring/outline.
-- [ ] **Focus indicator in all themes** — Switch to dark theme. Tab through elements. Verify focus indicators are still visible (sufficient contrast).
-- [ ] **Color is not sole indicator** — Verify status changes (loaded/error/loading) use icons or text in addition to color.
+| Test                          | Description                | Steps                                                  | Expected Result                                          | Auto |
+| ----------------------------- | -------------------------- | ------------------------------------------------------ | -------------------------------------------------------- | ---- |
+| Focus indicators visible      | Focus ring on all elements | 1. Tab through all elements                            | Every focused element has a visible focus ring/outline   | M    |
+| Focus indicator in all themes | Focus visible in all theme | 1. Switch to to every theme<br>2. Tab through elements | Focus indicators are still visible (sufficient contrast) | M    |
+| Color is not sole indicator   | Status uses icons/text too | 1. Check layer status changes (loaded/error/loading)   | Icons or text are used in addition to color              | M    |
 
 ## Multi-Map WCAG
 
-- [ ] **Only one map in WCAG mode** — With 2 maps on page, enable WCAG mode on the first map. Tab to the second map and enable WCAG. Verify the first map's WCAG mode deactivates (only one active at a time).
-- [ ] **Ctrl+Q exits active map** — With WCAG active on one map, press Ctrl+Q. Verify WCAG mode exits and focus escapes the viewer. Tab to the other map. Verify the WCAG dialog appears to enable it there.
+| Test                      | Description                  | Steps                                                                                            | Expected Result                                                | Auto |
+| ------------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------ | -------------------------------------------------------------- | ---- |
+| Only one map in WCAG mode | Second map deactivates first | 1. With 2 maps on page, enable WCAG on the first map<br>2. Tab to the second map and enable WCAG | First map's WCAG mode deactivates (only one active at a time)  | M    |
+| Ctrl+Q exits active map   | Exit and switch maps         | 1. With WCAG active on one map, press Ctrl+Q<br>2. Tab to the other map                          | WCAG exits; dialog appears on the other map to enable it there | M    |

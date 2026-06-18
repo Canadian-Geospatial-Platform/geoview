@@ -1,6 +1,8 @@
 # 20 — Edge Cases
 
-Edge cases, metadata issues, WCAG, and weird behaviors.
+> **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
+
+Edge cases, metadata issues, outlier pages, overlays, sandbox, and responsive layout.
 
 ## Guide Panel Persistence
 
@@ -8,16 +10,20 @@ Edge cases, metadata issues, WCAG, and weird behaviors.
 
 ## Custom Legend with Error Layers
 
-- [ ] **Group with error child** — Using custom legend, load a group layer that has a sublayer in error. Try to toggle the group's visibility. Verify no crash, valid sublayers still toggle correctly.
+| Test                   | Description                       | Steps                                                                                                  | Expected Result                                  | Auto |
+| ---------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------ | ---- |
+| Group with error child | Toggle group with broken sublayer | 1. Load a group layer that has a sublayer in error (custom legend)<br>2. Toggle the group's visibility | No crash; valid sublayers still toggle correctly | M    |
 
 ## Metadata Edge Cases
 
 Demo: `templates/tests/outlier-metadata.html`
 
-- [ ] **Layer with `nameField = Date`** — Verify the layer name resolves correctly (not confused with date parsing) and feature info displays the Date field correctly.
-- [ ] **Empty `listOfLayerEntryConfig`** — Load a GeoView layer config with an empty array `[]` for `listOfLayerEntryConfig`. Verify it doesn't crash and handles gracefully.
-- [ ] **WMS with space in layer ID** — Load the WMS layer with a space in the ID (e.g., `nonna:NONNA 10`). Verify the layer loads correctly.
-- [ ] **WMS with slashes in layer ID** — Load the WMS layer with slashes in the ID (e.g., `photo/plot/with/slash`). Verify the layer loads correctly.
+| Test                         | Description                               | Steps                                                                        | Expected Result                                                               | Auto |
+| ---------------------------- | ----------------------------------------- | ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------- | ---- |
+| nameField = Date             | Layer name not confused with date parsing | 1. Load the layer with `nameField = Date`                                    | Layer name resolves correctly; feature info displays the Date field correctly | M    |
+| Empty listOfLayerEntryConfig | Empty array handled gracefully            | 1. Load a GeoView layer config with `listOfLayerEntryConfig: []`             | No crash; handled gracefully                                                  | M    |
+| WMS with space in layer ID   | Space in ID doesn't break loading         | 1. Load the WMS layer with a space in the ID (e.g., `nonna:NONNA 10`)        | Layer loads correctly                                                         | M    |
+| WMS with slashes in layer ID | Slashes in ID don't break loading         | 1. Load the WMS layer with slashes in the ID (e.g., `photo/plot/with/slash`) | Layer loads correctly                                                         | M    |
 
 ## Summary & Out Fields
 
@@ -31,52 +37,66 @@ Demo: `templates/tests/outlier-metadata.html`
 
 Config: `configs/navigator/demos/22-circumpolar.json`
 
-- [ ] **Circumpolar projection** — Load the circumpolar config. Verify it renders correctly in EPSG:3573.
-
 > North pole/arrow behavior tested in [02 — Map](02-map.md#north-pole--north-arrow) (EPSG:3573).
+
+| Test                   | Description          | Steps                          | Expected Result                               | Auto |
+| ---------------------- | -------------------- | ------------------------------ | --------------------------------------------- | ---- |
+| Circumpolar projection | Renders in EPSG:3573 | 1. Load the circumpolar config | Map renders correctly in EPSG:3573 projection | M    |
 
 ## Error Layer Reload
 
-- [ ] **Reload bad URL** — Load a layer with a bad URL. After it shows as error, attempt to reload it. Verify it stays in error (doesn't crash or create duplicates).
-- [ ] **Reload bad ID** — Load a layer with a bad layer ID. After error, attempt reload. Verify same error state.
+| Test           | Description           | Steps                                                                              | Expected Result                                | Auto |
+| -------------- | --------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------- | ---- |
+| Reload bad URL | Reload stays in error | 1. Load a layer with a bad URL<br>2. After it shows as error, attempt to reload it | Stays in error state (no crash, no duplicates) | M    |
+| Reload bad ID  | Reload stays in error | 1. Load a layer with a bad layer ID<br>2. After error, attempt reload              | Same error state (no crash)                    | M    |
 
 ## Two-Map Page
 
 > Shortcut targeting tested in [01 — Global](01-global.md#two-map-shortcuts).
 
-- [ ] **Independent state** — Verify each map maintains independent zoom, projection, and layer state.
+| Test              | Description                  | Steps                                                                                      | Expected Result                              | Auto |
+| ----------------- | ---------------------------- | ------------------------------------------------------------------------------------------ | -------------------------------------------- | ---- |
+| Independent state | Maps maintain separate state | 1. Load a two-map page<br>2. Change zoom, projection, and layers independently on each map | Each map maintains its own independent state | M    |
 
 ## Outlier Test Pages
 
-Spot-check the outlier test pages for regressions:
+Spot-check the outlier test pages for regressions.
 
-- [ ] **`outliers.html`** — Load and verify no crashes.
-- [ ] **`outlier-style.html`** — Verify style edge cases render correctly.
-- [ ] **`outlier-performance.html`** — Verify no excessive lag or memory issues.
-- [ ] **`outlier-many-groups.html`** — Verify deeply nested groups render correctly.
-- [ ] **`outlier-geometry.html`** — Verify geometry edge cases render correctly.
-- [ ] **`outlier-elections-2019.html`** — Load and verify election data renders without errors.
-- [ ] **`outlier-ESRI-maxRecordCount.html`** — Verify layers with high record counts load correctly (pagination/chunking).
-- [ ] **`outlier-GeoAI.html`** — Load and verify GeoAI layer renders without errors.
+| Test                             | Description                  | Steps                                      | Expected Result                                                     | Auto |
+| -------------------------------- | ---------------------------- | ------------------------------------------ | ------------------------------------------------------------------- | ---- |
+| outliers.html                    | General outlier page         | 1. Load `outliers.html`                    | No crashes                                                          | M    |
+| outlier-style.html               | Style edge cases             | 1. Load `outlier-style.html`               | Style edge cases render correctly                                   | M    |
+| outlier-performance.html         | Performance stress test      | 1. Load `outlier-performance.html`         | No excessive lag or memory issues                                   | M    |
+| outlier-many-groups.html         | Deeply nested groups         | 1. Load `outlier-many-groups.html`         | Deeply nested groups render correctly                               | M    |
+| outlier-geometry.html            | Geometry edge cases          | 1. Load `outlier-geometry.html`            | Geometry edge cases render correctly                                | M    |
+| outlier-elections-2019.html      | Election data                | 1. Load `outlier-elections-2019.html`      | Election data renders without errors                                | M    |
+| outlier-ESRI-maxRecordCount.html | High record count pagination | 1. Load `outlier-ESRI-maxRecordCount.html` | Layers with high record counts load correctly (pagination/chunking) | M    |
+| outlier-GeoAI.html               | GeoAI layer                  | 1. Load `outlier-GeoAI.html`               | GeoAI layer renders without errors                                  | M    |
 
 ## Overlay Objects
 
 Config property: `map.overlayObjects.pointMarkers` — non-interactive markers on the map.
 
-- [ ] **Markers render** — Load a config with `overlayObjects` point markers. Verify colored dots appear at the configured coordinates.
-- [ ] **Non-interactive** — Click on an overlay marker. Verify it does NOT trigger a feature query in the Details panel.
-- [ ] **Custom color/opacity** — Verify markers use their configured color and opacity.
+| Test                 | Description                         | Steps                                                | Expected Result                                       | Auto |
+| -------------------- | ----------------------------------- | ---------------------------------------------------- | ----------------------------------------------------- | ---- |
+| Markers render       | Point markers appear at coordinates | 1. Load a config with `overlayObjects` point markers | Colored dots appear at the configured coordinates     | M    |
+| Non-interactive      | Clicking marker doesn't query       | 1. Click on an overlay marker                        | Does NOT trigger a feature query in the Details panel | M    |
+| Custom color/opacity | Markers use configured style        | 1. Check the overlay markers visually                | Markers use their configured color and opacity        | M    |
 
 ## Config Sandbox
 
 Page: `/config-sandbox.html`
 
-- [ ] **Edit and reload** — Edit the JSON in the textarea (e.g., change projection). Click Reload. Verify the map reinitializes with the new config.
-- [ ] **Invalid JSON** — Enter invalid JSON (syntax error). Click Reload. Verify an error is shown and the viewer doesn't crash.
-- [ ] **Add layer via sandbox** — Add a new layer entry in the JSON. Click Reload. Verify the new layer appears.
+| Test                  | Description            | Steps                                                                         | Expected Result                       | Auto |
+| --------------------- | ---------------------- | ----------------------------------------------------------------------------- | ------------------------------------- | ---- |
+| Edit and reload       | Config changes apply   | 1. Edit the JSON in the textarea (e.g., change projection)<br>2. Click Reload | Map reinitializes with the new config | M    |
+| Invalid JSON          | Error shown gracefully | 1. Enter invalid JSON (syntax error)<br>2. Click Reload                       | Error is shown; viewer doesn't crash  | M    |
+| Add layer via sandbox | New layer appears      | 1. Add a new layer entry in the JSON<br>2. Click Reload                       | New layer appears on the map          | M    |
 
 ## Mobile / Responsive Layout
 
-- [ ] **Tabs become dropdown** — Resize the browser below 600px width (or use mobile emulation). Verify footer bar tabs collapse into a dropdown/selector.
-- [ ] **Export button hidden** — At mobile width (below `md` breakpoint ~960px), verify the export button is hidden.
-- [ ] **Panels usable** — Open panels at mobile width. Verify content is scrollable and interactive elements are reachable.
+| Test                 | Description                          | Steps                                                             | Expected Result                                              | Auto |
+| -------------------- | ------------------------------------ | ----------------------------------------------------------------- | ------------------------------------------------------------ | ---- |
+| Tabs become dropdown | Footer bar collapses at mobile width | 1. Resize the browser below 600px width (or use mobile emulation) | Footer bar tabs collapse into a dropdown/selector            | M    |
+| Export button hidden | Export hidden at mobile breakpoint   | 1. Resize below `md` breakpoint (~960px)                          | Export button is hidden                                      | M    |
+| Panels usable        | Panels work at mobile width          | 1. Open panels at mobile width                                    | Content is scrollable and interactive elements are reachable | M    |

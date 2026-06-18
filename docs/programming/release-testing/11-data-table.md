@@ -44,12 +44,11 @@ Config: `configs/navigator/layers/all-layers.json`
 
 Config: `configs/navigator/layers/all-layers.json`
 
-| Test                          | Description               | Steps                                                                                               | Expected Result                                                 | Auto |
-| ----------------------------- | ------------------------- | --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- | ---- |
-| Apply filter to map           | Map features filtered     | 1. Apply a column filter to reduce visible rows<br>2. Toggle "Apply filter to map" ON               | The map only renders features matching the table filter         | M    |
-| Store check tableFilters      | Store updated with filter | 1. After applying filter to map, in React DevTools inspect `dataTableState.tableFilters[layerPath]` | Store contains the filter expression string for that layer path | C    |
-| Remove map filter             | Map shows all features    | 1. Toggle "Apply filter to map" OFF or clear the column filter                                      | Map renders all features again                                  | M    |
-| Disabled during global search | Toggle greyed out         | 1. Type text in the global search box<br>2. Check the "Apply filter to map" toggle                  | Toggle is disabled (cannot apply global search as a map filter) | C    |
+| Test                          | Description            | Steps                                                                                 | Expected Result                                                 | Auto |
+| ----------------------------- | ---------------------- | ------------------------------------------------------------------------------------- | --------------------------------------------------------------- | ---- |
+| Apply filter to map           | Map features filtered  | 1. Apply a column filter to reduce visible rows<br>2. Toggle "Apply filter to map" ON | The map only renders features matching the table filter         | M    |
+| Remove map filter             | Map shows all features | 1. Toggle "Apply filter to map" OFF or clear the column filter                        | Map renders all features again                                  | M    |
+| Disabled during global search | Toggle greyed out      | 1. Type text in the global search box<br>2. Check the "Apply filter to map" toggle    | Toggle is disabled (cannot apply global search as a map filter) | C    |
 
 ## Global Search
 
@@ -64,10 +63,9 @@ Config: `configs/navigator/layers/all-layers.json`
 
 Config: `configs/navigator/layers/esri-feature.json` (layer with uniqueValue or classBreaks style)
 
-| Test                         | Description                        | Steps                                                                                                                                              | Expected Result                                                                            | Auto |
-| ---------------------------- | ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ---- |
-| Class filter reflected       | Hidden classes excluded from table | 1. Open data table for a layer with style classes<br>2. Go to Legend/Layers panel and toggle OFF some style classes<br>3. Return to the data table | Table excludes rows belonging to the hidden style classes (filtered by `layerFilterClass`) | M    |
-| Store check layerFilterClass | Store filter string matches        | 1. After toggling style classes, in React DevTools inspect `layerState.layerFilterClass` for that layer path                                       | Store contains a SQL-like filter string representing visible classes                       | C    |
+| Test                   | Description                        | Steps                                                                                                                                              | Expected Result                                                                            | Auto |
+| ---------------------- | ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ---- |
+| Class filter reflected | Hidden classes excluded from table | 1. Open data table for a layer with style classes<br>2. Go to Legend/Layers panel and toggle OFF some style classes<br>3. Return to the data table | Table excludes rows belonging to the hidden style classes (filtered by `layerFilterClass`) | M    |
 
 ## Export
 
@@ -109,16 +107,6 @@ Config: `configs/navigator/layers/all-layers.json`
 | Icon column           | Feature symbology shown     | 1. Check the first column of each row                   | Feature style icon is displayed representing the layer's symbology      | M    |
 | Zoom to feature       | Map zooms to feature        | 1. Click the zoom icon (`ZoomInSearchIcon`) on a row    | Map zooms to that feature's extent and highlights it                    | M    |
 | Open details from row | Details panel shows feature | 1. Click the details icon (`InfoOutlinedIcon`) on a row | Details panel/modal opens showing full feature information for that row | M    |
-
-## Store Verification
-
-Config: `configs/navigator/layers/all-layers.json` — open browser DevTools → React DevTools → Components tab → select `getViewStore-'mapWM'` component to inspect Zustand store state (requires `GEOVIEW_DEVTOOLS = 1` in localStorage)
-
-| Test                           | Description               | Steps                                                                                                                                    | Expected Result                                                     | Auto |
-| ------------------------------ | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- | ---- |
-| allFeaturesDataArray populated | Store has feature data    | 1. Open data table<br>2. In React DevTools Components tab, inspect `getViewStore-'mapWM'` → `dataTableState.allFeaturesDataArray`        | Array contains entries for each layer with feature data             | C    |
-| rowsFilteredRecord count       | Filtered count matches UI | 1. Apply a filter<br>2. In React DevTools, inspect `dataTableState.layersDataTableSetting[layerPath].rowsFilteredRecord`                 | Value matches the filtered row count displayed in the table toolbar | C    |
-| mapFilteredRecord boolean      | Apply-to-map state stored | 1. Toggle "Apply filter to map" ON<br>2. In React DevTools, inspect `dataTableState.layersDataTableSetting[layerPath].mapFilteredRecord` | Value is `true`                                                     | C    |
 
 ## Data Table in App Bar
 

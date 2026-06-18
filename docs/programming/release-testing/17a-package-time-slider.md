@@ -51,16 +51,6 @@ Config: `configs/navigator/demos/11-package-time-slider.json`
 | Filtering toggle off    | Filter cleared                | 1. Toggle the filter switch off              | Time filter is cleared; all features display regardless of slider position | M    |
 | Filtering toggle on     | Filter re-applies             | 1. Toggle the filter switch back on          | Time filter re-applies based on the current slider position                | M    |
 
-## Store Verification
-
-Config: `configs/navigator/demos/11-package-time-slider.json`
-
-| Test                   | Description               | Steps                                                                                                    | Expected Result                                                      | Auto |
-| ---------------------- | ------------------------- | -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- | ---- |
-| sliderFilters in store | Filter string populated   | 1. Open React DevTools → Components → `getViewStore-'mapId'`<br>2. Check `timeSliderState.sliderFilters` | `sliderFilters` contains the time filter string for the active layer | C    |
-| timeSliderLayers       | Layer config in store     | 1. Check `timeSliderState.timeSliderLayers`                                                              | Range, type, min/max, and current values are correct                 | C    |
-| Values update on drag  | Store updates with slider | 1. Move the slider<br>2. Re-check store values                                                           | Store values update to reflect the new slider position               | C    |
-
 ## Geocore Auto-Creation
 
 Demo page: `templates/demos/add-layers.html`
