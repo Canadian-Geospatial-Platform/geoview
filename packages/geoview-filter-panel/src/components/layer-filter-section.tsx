@@ -3,7 +3,7 @@ import { logger } from 'geoview-core/core/utils/logger';
 
 import { useFilterPanelController } from 'geoview-core/core/controllers/use-controllers';
 import { useStoreFilterPanelLayerFilterState } from 'geoview-core/core/stores/states/filter-panel-state';
-import { useStoreLayerStatus } from 'geoview-core/core/stores/states/layer-state';
+import { useStoreLayerStatus, useStoreLayerName } from 'geoview-core/core/stores/states/layer-state';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
 
 import { SelectFilter, MultiselectFilter, RangeFilter, DateFilter } from './controls';
@@ -57,9 +57,10 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
 
   // Hook the layer status to know if this specific layer is ready
   const layerStatus = useStoreLayerStatus(layer.layerPath);
+  const layerName = useStoreLayerName(layer.layerPath);
 
   // Local state
-  const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
+  const [isCollapsed, setIsCollapsed] = useState(!collapsible ? false : defaultCollapsed); // Not collapsed if you can't uncollapse the layer
   const [fieldValues, setFieldValues] = useState<Record<string, (string | number)[]>>({});
 
   // Determine if this layer is ready for filtering
@@ -242,7 +243,7 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
             </IconButton>
           )}
           <Typography variant="body1" sx={memoSxClasses.filterLayerName}>
-            {layer.layerName}
+            {layer.layerName || layerName}
           </Typography>
         </Box>
         <Button

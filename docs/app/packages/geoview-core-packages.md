@@ -1648,7 +1648,7 @@ interface FilterPanelConfig {
   version?: string;
   layers?: Array<{
     layerPath: string;
-    layerName: string;
+    layerName?: string;
     enabled?: boolean;
     attributes?: Array<{
       fieldName: string;
@@ -1660,13 +1660,10 @@ interface FilterPanelConfig {
   }>;
   settings?: {
     title?: string;
-    showLayerNames?: boolean;
     collapsible?: boolean;
     defaultCollapsed?: boolean;
-    showApplyButton?: boolean;
     showResetButton?: boolean;
     autoApply?: boolean;
-    showFeatureCount?: boolean;
   };
 }
 ```
@@ -1684,7 +1681,7 @@ interface FilterPanelConfig {
 **Layer properties:**
 
 - **layerPath** (string, required): Unique layer path identifier
-- **layerName** (string, required): Display name for the layer
+- **layerName** (string, optional): Display name for the layer (if not provided, layer path is used)
 - **enabled** (boolean, default: true): Whether filtering is enabled for this layer
 - **attributes** (array): Array of filterable attributes
 
@@ -1699,13 +1696,10 @@ interface FilterPanelConfig {
 **Settings properties:**
 
 - **title** (string, default: "Filter Layers"): Panel header title
-- **showLayerNames** (boolean, default: true): Show layer names in the panel
 - **collapsible** (boolean, default: true): Allow collapsing layer sections
 - **defaultCollapsed** (boolean, default: false): Initial collapsed state
-- **showApplyButton** (boolean, default: false): Show manual apply button
 - **showResetButton** (boolean, default: true): Show reset all button
 - **autoApply** (boolean, default: true): Apply filters automatically on change
-- **showFeatureCount** (boolean, default: true): Display filtered feature counts
 
 ### Configuration Examples
 
@@ -1790,8 +1784,7 @@ interface FilterPanelConfig {
         ],
         "settings": {
           "title": "Filter Population Data",
-          "autoApply": true,
-          "showFeatureCount": true
+          "autoApply": true
         }
       }
     }
@@ -1799,7 +1792,7 @@ interface FilterPanelConfig {
 }
 ```
 
-**Example 3: Manual Apply Mode**
+**Example 3: Custom Settings**
 
 ```json
 {
@@ -1832,8 +1825,9 @@ interface FilterPanelConfig {
           }
         ],
         "settings": {
-          "autoApply": false,
-          "showApplyButton": true,
+          "title": "Environmental Filters",
+          "collapsible": true,
+          "defaultCollapsed": false,
           "showResetButton": true
         }
       }
@@ -1959,10 +1953,10 @@ interface FilterPanelConfig {
 ### Usage Notes
 
 - **Layer Paths:** Must reference existing layers in the map configuration
+- **Layer Names:** Optional - if not provided, the layer path will be used as the display name
 - **Field Names:** Must match actual field names in the layer schema
-- **Auto-Apply:** When `autoApply: true`, filters apply on every change. When `false`, user must click "Apply Filters" button
-- **Feature Count:** Shows the number of features matching current filters (requires `showFeatureCount: true`)
-- **Reset:** Individual filters can be reset, or all filters can be reset at once
+- **Auto-Apply:** When `autoApply: true`, filters apply immediately on every change. When `false`, filters still apply automatically but may have a slight delay
+- **Reset:** Individual filters can be reset, or all filters can be reset at once using the reset button
 - **Theme Integration:** UI automatically adapts to the map's theme (geo.ca, light, dark)
 - **Performance:** Range and date filters are optimized for large datasets
 
@@ -1999,7 +1993,7 @@ interface FilterPanelConfig {
         { "fieldName": "measurement_date", "displayLabel": "Date", "filterType": "date" }
       ]
     }],
-    "settings": { "autoApply": false, "showApplyButton": true }
+    "settings": { "autoApply": true }
   }
 }
 ```
@@ -2019,7 +2013,7 @@ interface FilterPanelConfig {
         { "fieldName": "listing_date", "displayLabel": "Listed", "filterType": "date" }
       ]
     }],
-    "settings": { "autoApply": true, "showFeatureCount": true }
+    "settings": { "autoApply": true }
   }
 }
 ```
@@ -2039,7 +2033,7 @@ The Filter Panel includes:
 
 - **Large Datasets:** Range filters use debounced updates to avoid excessive map redraws
 - **Value Loading:** Unique values for select/multiselect filters are loaded asynchronously
-- **Auto-Apply:** May cause frequent map updates with large datasets. Consider using manual apply mode (`autoApply: false`)
+- **Auto-Apply:** When enabled, filters apply immediately which may cause frequent map updates with large datasets
 - **Multiple Layers:** Each layer's filters are managed independently
 
 ### Error Handling

@@ -185,23 +185,14 @@ export function FilterPanel(props: FilterPanelProps): JSX.Element {
         ))}
       </Box>
 
-      {(config.settings?.showApplyButton || config.settings?.showResetButton) && (
-        <Box
-          sx={{
-            display: 'flex',
-            gap: 1,
-            p: 2,
-            borderTop: 1,
-            borderColor: 'divider',
-            bgcolor: 'background.default',
-          }}
-        >
+      {(!config.settings?.autoApply || config.settings?.showResetButton) && (
+        <Box sx={memoSxClasses.filterPanelButtonContainer}>
           {config.settings?.showResetButton && (
             <Button type="text" variant="outlined" onClick={handleReset} disabled={!hasAnyFilters()} fullWidth>
               {t('FilterPanel.reset')}
             </Button>
           )}
-          {config.settings?.showApplyButton && config.settings?.autoApply === false && (
+          {!config.settings?.autoApply && (
             <Button type="text" variant="contained" onClick={handleApply} disabled={isApplying || !hasAnyFilters()} fullWidth>
               {isApplying ? t('FilterPanel.applying') : t('FilterPanel.apply')}
             </Button>
