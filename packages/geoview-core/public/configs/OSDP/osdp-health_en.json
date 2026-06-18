@@ -21,11 +21,6 @@
     "listOfGeoviewLayerConfig": [
       {
         "geoviewLayerId": "65d3db23-b83c-4f49-ab93-65c59ee0e6aa",
-        "geoviewLayerType": "geoCore"
-      },
-      {
-        "geoviewLayerId": "21b821cf-0f1c-40ee-8925-eab12d357668",
-        "geoviewLayerName": "The Canadian Radiological Monitoring Network - Airborne Radioactivity",
         "geoviewLayerType": "geoCore",
         "initialSettings": {
           "states": {
@@ -34,24 +29,67 @@
         },
         "listOfLayerEntryConfig": [
           {
+            "layerId": "3"
+          },
+          {
             "layerId": "1",
-            "layerName": "Airborne Radioactivity",
             "initialSettings": {
               "states": {
                 "legendCollapsed": true,
-                "visible": true
+                "visible": false
               }
             }
           },
           {
             "layerId": "2",
-            "layerName": "Station location range",
             "initialSettings": {
               "states": {
                 "legendCollapsed": true,
-                "visible": true
+                "visible": false
               }
             }
+          },
+          {
+            "layerId": "4",
+            "initialSettings": {
+              "states": {
+                "legendCollapsed": true,
+                "visible": false
+              }
+            }
+          },
+          {
+            "layerId": "5",
+            "initialSettings": {
+              "states": {
+                "legendCollapsed": true,
+                "visible": false
+              }
+            }
+          },
+          {
+            "layerId": "6",
+            "initialSettings": {
+              "states": {
+                "legendCollapsed": true,
+                "visible": false
+              }
+            }
+          }
+        ]   
+      },
+      {
+        "geoviewLayerId": "21b821cf-0f1c-40ee-8925-eab12d357668",
+        "geoviewLayerName": "The Canadian Radiological Monitoring Network - Airborne Radioactivity",
+        "geoviewLayerType": "geoCore",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "1",
+            "layerName": "Airborne Radioactivity"
+          },
+          {
+            "layerId": "2",
+            "layerName": "Station location range"
           }
         ]
       },
@@ -62,23 +100,11 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "1",
-            "layerName": "CRMN Monitoring Stations",
-            "initialSettings": {
-              "states": {
-                "legendCollapsed": false,
-                "visible": true
-              }
-            }
+            "layerName": "CRMN Monitoring Stations"
           },
           {
             "layerId": "2",
-            "layerName": "CTBT Stations",
-            "initialSettings": {
-              "states": {
-                "legendCollapsed": false,
-                "visible": true
-              }
-            }
+            "layerName": "CTBT Stations"
           }
         ]
       },
