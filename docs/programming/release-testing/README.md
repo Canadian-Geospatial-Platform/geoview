@@ -76,8 +76,8 @@ Each release gets its own issue. Previous release test results are preserved as 
 | 17a | [17a-package-time-slider.md](17a-package-time-slider.md)       | Time slider, all layer types, custom slider           | 15 min       | 23 (0/3/20)          |
 | 17b | [17b-package-geochart.md](17b-package-geochart.md)             | Geochart, all chart types, slider/stepper             | 10 min       | 11 (0/0/11)          |
 | 17c | [17c-package-swiper.md](17c-package-swiper.md)                 | Swiper, add/remove layers, orientation, rotation      | 10 min       | 14 (3/7/4)           |
-| 17d | [17d-package-panels.md](17d-package-panels.md)                 | About, AOI, Custom Legend, STAC Browser panels        | 15 min       | — (not refactored)   |
-| 17e | [17e-package-drawer.md](17e-package-drawer.md)                 | Drawing tools, edit, snap, export/import              | 25 min       | — (not refactored)   |
+| 17d | [17d-package-panels.md](17d-package-panels.md)                 | About, AOI, Custom Legend, STAC Browser panels        | 15 min       | 27 (0/4/23)          |
+| 17e | [17e-package-drawer.md](17e-package-drawer.md)                 | Drawing tools, edit, snap, export/import              | 25 min       | 35 (0/3/32)          |
 | 18  | [18-global-settings.md](18-global-settings.md)                 | Coord info, theme, highlight color, service URLs      | 15 min       | — (not refactored)   |
 | 19  | [19-integration-flows.md](19-integration-flows.md)             | Multi-step workflows and cross-panel interactions     | 30 min       | — (not refactored)   |
 | 20  | [20-edge-cases.md](20-edge-cases.md)                           | Edge cases, overlays, sandbox, mobile, WCAG           | 25 min       | — (not refactored)   |
@@ -88,7 +88,7 @@ Each release gets its own issue. Previous release test results are preserved as 
 | 25  | [25-developer-tools.md](25-developer-tools.md)                 | ESRI/WFS renderer tools, all-layer zoom levels        | 10 min       | — (not refactored)   |
 | 26  | [26-production-configs.md](26-production-configs.md)           | OSDP, Open Maps, Arctic SDI, GSC, CGDI smoke tests    | 20 min       | — (not refactored)   |
 | 27  | [27-automation-candidates.md](27-automation-candidates.md)     | Tests recommended for automation via TestCreator      | —            | 112 candidates       |
-|     | **TOTAL**                                                      |                                                       | **~425 min** | **474 (44/130/300)** |
+|     | **TOTAL**                                                      |                                                       | **~425 min** | **536 (44/137/355)** |
 
 > **Keeping counts in sync**: When modifying any release-testing file (changing M→C, M→A, C→A, or adding/removing tests), also update the "Tests (A/C/M)" column for that file and recalculate the TOTAL row. Format: `total (A/C/M)`.
 
