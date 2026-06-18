@@ -66,20 +66,14 @@ export interface TypeFilterLayer {
 export interface TypeFilterSettings {
   /** Panel title. */
   title?: string;
-  /** Show layer names in the filter panel. */
-  showLayerNames?: boolean;
   /** Allow collapsing/expanding layer sections. */
   collapsible?: boolean;
   /** Default collapsed state for layer sections. */
   defaultCollapsed?: boolean;
-  /** Show apply button. */
-  showApplyButton?: boolean;
   /** Show reset button. */
   showResetButton?: boolean;
   /** Auto-apply filters on change. */
   autoApply?: boolean;
-  /** Show feature count after filtering. */
-  showFeatureCount?: boolean;
 }
 
 /**
