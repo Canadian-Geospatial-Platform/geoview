@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>RT-07 Legend - Release Testing</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+
+  <body>
+    <div id="page-header"></div>
+    <div>
+      <div class="back-to-main">
+        <a href="./release-testing.html">← Back to Release Testing</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>07 — Legend Tests</h4>
+        <p>
+          Legend panel display, toggle all controls, visibility, fullscreen, shortcuts, style classes, and WMS legend images.
+        </p>
+        <p>
+          <strong>Test plan:</strong>
+          <a href="https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/docs/programming/release-testing/07-legend.md" target="_blank">07-legend.md</a>
+        </p>
+      </div>
+
+      <!-- Map 1: Legend with multiple layers & groups -->
+      <h5>Map 1 — Legend with Multiple Layers & Groups</h5>
+      <p>
+        Two GeoCore layers with group structure (Fieldnotes = many ESRI groups, Hydro = many WMS groups) + a simple layer +
+        ESRI Feature layers with uniqueValue and classBreaks style classes for style toggle tests.
+        Legend in app bar (fullscreen button available). Layers tab available for legend → layers shortcut test.
+      </p>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px;">
+        <button onclick="collapseAll()">Collapse All</button>
+        <button onclick="expandAll()">Expand All</button>
+        <button onclick="toggleAllVisOff()">All Visibility OFF</button>
+        <button onclick="toggleAllVisOn()">All Visibility ON</button>
+      </div>
+
+      <div
+        id="map1"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
+            'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerType': 'geoCore',
+                'geoviewLayerId': '1dcd28aa-99da-4f62-b157-15631379b170'
+              },
+              {
+                'geoviewLayerType': 'geoCore',
+                'geoviewLayerId': '9d96e8c9-22fe-4ad2-b5e8-94a6991b744b'
+              },
+              {
+                'geoviewLayerType': 'geoCore',
+                'geoviewLayerId': 'ccc75c12-5acc-4a6a-959f-ef6f621147b9'
+              },
+              {
+                'geoviewLayerType': 'esriFeature',
+                'geoviewLayerId': 'uniqueValueId',
+                'geoviewLayerName': 'CESI — uniqueValue (layer 1)',
+                'metadataAccessPath': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/',
+                'listOfLayerEntryConfig': [{ 'layerId': '1' }]
+              },
+              {
+                'geoviewLayerType': 'esriFeature',
+                'geoviewLayerId': 'classBreaksId',
+                'geoviewLayerName': 'CSO Volume — classBreaks (layer 8)',
+                'metadataAccessPath': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/CSO_volume/MapServer/',
+                'listOfLayerEntryConfig': [{ 'layerId': '8' }]
+              }
+            ]
+          },
+          'navBar': ['zoom', 'home'],
+          'appBar': { 'tabs': { 'core': ['legend', 'layers', 'export'] } },
+          'footerBar': { 'tabs': { 'core': [] } },
+          'theme': 'geo.ca'
+        }"
+      ></div>
+
+      <!-- Map 2: WMS Legend Images -->
+      <h5>Map 2 — WMS Legend Images</h5>
+      <p>Multiple WMS layers. Expand each in the legend to see legend images. Click an image to open the lightbox.</p>
+      <div
+        id="map2"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
+            'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerType': 'ogcWms',
+                'geoviewLayerId': 'msiWms',
+                'geoviewLayerName': 'MSI (datacube WMS)',
+                'metadataAccessPath': 'https://datacube.services.geo.ca/ows/msi',
+                'listOfLayerEntryConfig': [{ 'layerId': 'msi' }]
+              },
+              {
+                'geoviewLayerType': 'ogcWms',
+                'geoviewLayerId': 'geometWms',
+                'geoviewLayerName': 'Temperature (GeoMet WMS)',
+                'metadataAccessPath': 'https://geo.weather.gc.ca/geomet',
+                'listOfLayerEntryConfig': [{ 'layerId': 'GDPS.ETA_TT' }]
+              },
+              {
+                'geoviewLayerType': 'geoCore',
+                'geoviewLayerId': '03ccfb5c-a06e-43e3-80fd-09d4f8f69703'
+              },
+              {
+                'geoviewLayerType': 'geoCore',
+                'geoviewLayerId': 'fd4369a4-21fe-4070-914a-067474da0fd6'
+              }
+            ]
+          },
+          'navBar': ['zoom'],
+          'appBar': { 'tabs': { 'core': ['legend'] } },
+          'footerBar': { 'tabs': { 'core': [] } },
+          'theme': 'geo.ca'
+        }"
+      ></div>
+
+      <button type="button" class="collapsible">Map 1 — Configuration Snippet</button>
+      <pre id="map1CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 2 — Configuration Snippet</button>
+      <pre id="map2CS" class="panel"></pre>
+    </div>
+
+    <script src="codedoc.js"></script>
+    <script>
+      insertPageHeader();
+
+      function collapseAll() {
+        try {
+          cgpv.api.getMapViewer('map1').controllers.layerController.setAllLayerCollapsed(true);
+        } catch (e) {
+          console.error('collapseAll failed:', e);
+        }
+      }
+
+      function expandAll() {
+        try {
+          cgpv.api.getMapViewer('map1').controllers.layerController.setAllLayerCollapsed(false);
+        } catch (e) {
+          console.error('expandAll failed:', e);
+        }
+      }
+
+      function toggleAllVisOff() {
+        try {
+          cgpv.api.getMapViewer('map1').controllers.layerController.setAllLayersVisibility(false);
+        } catch (e) {
+          console.error('toggleAllVisOff failed:', e);
+        }
+      }
+
+      function toggleAllVisOn() {
+        try {
+          cgpv.api.getMapViewer('map1').controllers.layerController.setAllLayersVisibility(true);
+        } catch (e) {
+          console.error('toggleAllVisOn failed:', e);
+        }
+      }
+
+      cgpv.init();
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });
+    </script>
+  </body>
+</html>

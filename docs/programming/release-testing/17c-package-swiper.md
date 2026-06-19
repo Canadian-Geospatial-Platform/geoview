@@ -1,6 +1,10 @@
 # 17c — Swiper
 
 > **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
+>
+> **Test page**: [rt-17c-swiper.html](../../packages/geoview-core/public/templates/release-testing/rt-17c-swiper.html) — Map 1 (two GeoCore layers + swiper plugin with activate/deactivate buttons).
+>
+> **Demo page:** [package-swiper.html](../../packages/geoview-core/public/templates/demos/package-swiper.html)
 
 Swiper plugin for comparing layers. The swiper is a core package plugin (`geoview-swiper`) that splits the map view to compare layers side-by-side.
 

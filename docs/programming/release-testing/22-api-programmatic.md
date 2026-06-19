@@ -1,6 +1,8 @@
 # 22 — API & Programmatic Usage
 
 > **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
+>
+> **Test page**: [rt-22-api-programmatic.html](../../packages/geoview-core/public/templates/release-testing/rt-22-api-programmatic.html) — Links to demo-function-event, geometry, inter-all, bounding-box-selector, panels demo pages.
 
 Testing the public JavaScript API, event system, geometry API, dynamic panel management, and programmatic map manipulation.
 

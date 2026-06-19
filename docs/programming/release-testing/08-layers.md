@@ -1,6 +1,12 @@
 # 08 — Layers Panel
 
 > **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
+>
+> **Test page**: [rt-08-layers.html](../../packages/geoview-core/public/templates/release-testing/rt-08-layers.html) — Map 1 (groups + uniqueValue/classBreaks layers, collapse/expand/visibility buttons, layers in footer bar), Map 2 (WMS + ESRI Image for settings tests).
+>
+> **Add Layer tests**: Use the [Add Layers demo page](../../packages/geoview-core/public/templates/demos/add-layers.html).
+>
+> **Navigator configs** (for detailed/edge-case tests): `layers/all-layers.json`, `layers/esri-feature.json`, `layers/wms.json`, `layers/esri-image.json`, `demos/23b-initial-settings-states-controls.json`, `demos/24-configured-feature-labels.json`, `demos/07-layer-zoom-levels.json`
 
 The Layers panel has two areas: the **left layer list** (reorder, visibility, collapse, delete) and the **right panel** (layer info, settings, shortcuts, actions). Delete uses a timer-based undo pattern — clicking delete starts a countdown; clicking undo cancels it.
 
@@ -10,57 +16,47 @@ The Layers panel has two areas: the **left layer list** (reorder, visibility, co
 
 ### Reorder
 
-Config: `configs/navigator/layers/all-layers.json` (many layers for reorder testing)
-
 Reorder uses **up/down arrow buttons** in edit mode (not drag-and-drop). First layer disables up arrow; last disables down arrow.
 
-| Test                | Description          | Steps                                                     | Expected Result                                                                                        | Auto |
-| ------------------- | -------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | ---- |
-| Reorder layer       | Move layer up/down   | 1. Select a layer<br>2. Click the up or down arrow button | Layer order updates in Layers, Legend, Data Table panels, and map draw order                           | C    |
-| Reorder with groups | Hierarchy maintained | 1. Reorder layers that include groups/subgroups           | Group hierarchy is maintained during reorder; child paths remain under parent in store `orderedLayers` | C    |
+| Test                | Description          | Steps                                                               | Expected Result                                                                                        | Auto |
+| ------------------- | -------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | ---- |
+| Reorder layer       | Move layer up/down   | 1. On Map 1, select a layer<br>2. Click the up or down arrow button | Layer order updates in Layers, Legend, Data Table panels, and map draw order                           | C    |
+| Reorder with groups | Hierarchy maintained | 1. On Map 1, reorder layers that include groups/subgroups           | Group hierarchy is maintained during reorder; child paths remain under parent in store `orderedLayers` | C    |
 
 ### Toggle All Controls
 
-Config: `configs/navigator/layers/all-layers.json` (multiple layers and groups)
-
 The ToggleAll component at the top provides collapse/expand all and toggle all visibility.
 
-| Test         | Description         | Steps                                           | Expected Result           | Auto |
-| ------------ | ------------------- | ----------------------------------------------- | ------------------------- | ---- |
-| Collapse all | All groups collapse | 1. Click the collapse icon in the ToggleAll bar | All layer groups collapse | C    |
-| Expand all   | All groups expand   | 1. Click the collapse icon again                | All layer groups expand   | C    |
+| Test         | Description         | Steps                                                                                | Expected Result           | Auto |
+| ------------ | ------------------- | ------------------------------------------------------------------------------------ | ------------------------- | ---- |
+| Collapse all | All groups collapse | 1. On Map 1, click the "Collapse All" button (or collapse icon in the ToggleAll bar) | All layer groups collapse | C    |
+| Expand all   | All groups expand   | 1. On Map 1, click the "Expand All" button (or collapse icon again)                  | All layer groups expand   | C    |
 
 ### Loading Status
 
-Config: any config with layers (e.g., `configs/navigator/layers/all-layers.json`)
-
-| Test                         | Description             | Steps                                                                       | Expected Result                                                 | Auto |
-| ---------------------------- | ----------------------- | --------------------------------------------------------------------------- | --------------------------------------------------------------- | ---- |
-| Circular progress on loading | Shows while layer loads | 1. Load a config (or hard-refresh)<br>2. Watch the layer list while loading | Circular progress indicator appears on each loading layer entry | M    |
-| Status complete              | Hides after load        | 1. Wait for all layers to finish loading                                    | Circular progress disappears and status changes to loaded       | M    |
+| Test                         | Description             | Steps                                                                           | Expected Result                                                 | Auto |
+| ---------------------------- | ----------------------- | ------------------------------------------------------------------------------- | --------------------------------------------------------------- | ---- |
+| Circular progress on loading | Shows while layer loads | 1. Hard-refresh the test page<br>2. Watch the layer list on Map 1 while loading | Circular progress indicator appears on each loading layer entry | M    |
+| Status complete              | Hides after load        | 1. Wait for all layers on Map 1 to finish loading                               | Circular progress disappears and status changes to loaded       | M    |
 
 ### Visibility
 
-Config: `configs/navigator/layers/all-layers.json` (individual layers + group layer with children)
-
 | Test                            | Description             | Steps                                                                    | Expected Result                                                                   | Auto |
 | ------------------------------- | ----------------------- | ------------------------------------------------------------------------ | --------------------------------------------------------------------------------- | ---- |
-| Toggle layer visibility         | Single layer on/off     | 1. Toggle a leaf layer off<br>2. Toggle it on                            | Map and other panels update accordingly                                           | C    |
-| Toggle group visibility         | Group hides children    | 1. Toggle a group off                                                    | Children hidden on map but show greyed out in panel with own visibility preserved | M    |
-| Toggle all on group             | All children toggle     | 1. Use "Toggle All" on a group with sublayers                            | All children toggle visibility together                                           | C    |
+| Toggle layer visibility         | Single layer on/off     | 1. On Map 1, toggle a leaf layer off<br>2. Toggle it on                  | Map and other panels update accordingly                                           | C    |
+| Toggle group visibility         | Group hides children    | 1. On Map 1, toggle a group off                                          | Children hidden on map but show greyed out in panel with own visibility preserved | M    |
+| Toggle all on group             | All children toggle     | 1. On Map 1, use "Toggle All" on a group with sublayers                  | All children toggle visibility together                                           | C    |
 | Toggle all with error sublayers | Error sublayers skipped | 1. Load a config where some sublayers fail<br>2. Toggle all on the group | Error sublayers are skipped (no crash); valid sublayers toggle correctly          | C    |
 
 ### Remove Layer
 
-Config: `configs/navigator/layers/all-layers.json` (layers with potential error states)
-
 The delete button uses a timer-based undo pattern — always visible, even for loading/processing/error layers.
 
-| Test                  | Description             | Steps                                                                                                          | Expected Result                                   | Auto |
-| --------------------- | ----------------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- | ---- |
-| Remove layer in error | Error layer removable   | 1. Load a config with a layer that fails<br>2. Click delete on the error layer<br>3. Let the undo timer expire | Layer is removed cleanly, no crash                | M    |
-| Remove while loading  | Loading layer removable | 1. While a layer is still loading, click delete<br>2. Let the undo timer expire                                | Layer is removed without errors or leftover state | M    |
-| Undo remove           | Cancel deletion         | 1. Click delete on a layer<br>2. Click undo before timer expires                                               | Layer is restored to its previous state           | M    |
+| Test                  | Description             | Steps                                                                                                           | Expected Result                                   | Auto |
+| --------------------- | ----------------------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- | ---- |
+| Remove layer in error | Error layer removable   | 1. On Map 1, if a layer fails to load, click delete on the error layer<br>2. Let the undo timer expire          | Layer is removed cleanly, no crash                | M    |
+| Remove while loading  | Loading layer removable | 1. Hard-refresh the page, while a layer is still loading on Map 1, click delete<br>2. Let the undo timer expire | Layer is removed without errors or leftover state | M    |
+| Undo remove           | Cancel deletion         | 1. On Map 1, click delete on a layer<br>2. Click undo before timer expires                                      | Layer is restored to its previous state           | M    |
 
 ---
 
@@ -148,11 +144,9 @@ Demo page: `templates/demos/add-layers.html` (has projection selector dropdown)
 
 ### Layer Info Panel
 
-Config: `configs/navigator/layers/all-layers.json`
-
 | Test         | Description            | Steps                                           | Expected Result                                                           | Auto |
 | ------------ | ---------------------- | ----------------------------------------------- | ------------------------------------------------------------------------- | ---- |
-| Open info    | Right panel shows info | 1. Select a layer in the left list              | Right panel opens with layer info (name, type, source URL, sublayer list) | M    |
+| Open info    | Right panel shows info | 1. On Map 1, select a layer in the left list    | Right panel opens with layer info (name, type, source URL, sublayer list) | M    |
 | Correct info | Info matches config    | 1. Compare displayed info with the layer config | Layer name, service URL, projection match the config                      | M    |
 
 ### Shortcuts
@@ -171,48 +165,38 @@ Config (table disabled): `configs/navigator/demos/23b-initial-settings-states-co
 
 ### Actions
 
-Config: `configs/navigator/layers/all-layers.json`
-
-| Test                 | Description          | Steps                                                      | Expected Result                                                                     | Auto |
-| -------------------- | -------------------- | ---------------------------------------------------------- | ----------------------------------------------------------------------------------- | ---- |
-| Highlight layer      | Opacity boost on map | 1. Click the highlight button<br>2. Click again to remove  | Layer is visually highlighted (opacity boost); clicking again removes the highlight | M    |
-| Zoom to layer extent | Map zooms to bounds  | 1. Click the zoom-to-extent button                         | Map zooms to that layer's geographic extent                                         | C    |
-| Reload layer         | Layer re-renders     | 1. Click the reload button                                 | Progress indicator appears, layer re-renders after reload                           | M    |
-| Remove layer         | Layer removed        | 1. Click the remove button<br>2. Let the undo timer expire | Layer removed from map and all panels                                               | C    |
+| Test                 | Description          | Steps                                                                | Expected Result                                                                     | Auto |
+| -------------------- | -------------------- | -------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ---- |
+| Highlight layer      | Opacity boost on map | 1. On Map 1, click the highlight button<br>2. Click again to remove  | Layer is visually highlighted (opacity boost); clicking again removes the highlight | M    |
+| Zoom to layer extent | Map zooms to bounds  | 1. On Map 1, click the zoom-to-extent button                         | Map zooms to that layer's geographic extent                                         | C    |
+| Reload layer         | Layer re-renders     | 1. On Map 1, click the reload button                                 | Progress indicator appears, layer re-renders after reload                           | M    |
+| Remove layer         | Layer removed        | 1. On Map 1, click the remove button<br>2. Let the undo timer expire | Layer removed from map and all panels                                               | C    |
 
 ### Opacity
 
-Config: `configs/navigator/layers/all-layers.json` (has group layer with children)
-
-| Test                 | Description            | Steps                                                                     | Expected Result                                | Auto |
-| -------------------- | ---------------------- | ------------------------------------------------------------------------- | ---------------------------------------------- | ---- |
-| Layer opacity slider | Opacity changes on map | 1. Adjust a single layer's opacity slider                                 | Map rendering changes opacity accordingly      | M    |
-| Group opacity        | Children capped        | 1. Set opacity on a group layer                                           | All children are capped by the group's opacity | C    |
-| Nested group opacity | Child capped by parent | 1. Set opacity on parent group<br>2. Set different opacity on child group | Child opacity is capped by parent opacity      | C    |
-| Opacity reset        | Full opacity restored  | 1. Set opacity back to 100%                                               | Full opacity restored on map                   | M    |
+| Test                 | Description            | Steps                                                                               | Expected Result                                | Auto |
+| -------------------- | ---------------------- | ----------------------------------------------------------------------------------- | ---------------------------------------------- | ---- |
+| Layer opacity slider | Opacity changes on map | 1. On Map 1, adjust a single layer's opacity slider                                 | Map rendering changes opacity accordingly      | M    |
+| Group opacity        | Children capped        | 1. On Map 1, set opacity on a group layer                                           | All children are capped by the group's opacity | C    |
+| Nested group opacity | Child capped by parent | 1. On Map 1, set opacity on parent group<br>2. Set different opacity on child group | Child opacity is capped by parent opacity      | C    |
+| Opacity reset        | Full opacity restored  | 1. On Map 1, set opacity back to 100%                                               | Full opacity restored on map                   | M    |
 
 ### Group Layer — Right Panel
 
-Config: `configs/navigator/layers/all-layers.json` (GeoJSON group `point-feature-group`)
-
-Config: `configs/navigator/layers/esri-dynamic-group-of-groups.json` (nested ESRI groups)
-
-| Test                    | Description            | Steps                                                     | Expected Result                                       | Auto |
-| ----------------------- | ---------------------- | --------------------------------------------------------- | ----------------------------------------------------- | ---- |
-| Select group info       | Group info shown       | 1. Select a group layer in the left panel                 | Right panel shows group info with child layers listed | M    |
-| Toggle child from right | Child toggles          | 1. Toggle a child layer's visibility from the right panel | Map and legend update accordingly                     | C    |
-| Toggle group from right | Group toggles children | 1. Toggle the group's own visibility from the right panel | All children hidden on map (greyed out in legend)     | M    |
+| Test                    | Description            | Steps                                                               | Expected Result                                       | Auto |
+| ----------------------- | ---------------------- | ------------------------------------------------------------------- | ----------------------------------------------------- | ---- |
+| Select group info       | Group info shown       | 1. On Map 1, select a group layer in the left panel                 | Right panel shows group info with child layers listed | M    |
+| Toggle child from right | Child toggles          | 1. On Map 1, toggle a child layer's visibility from the right panel | Map and legend update accordingly                     | C    |
+| Toggle group from right | Group toggles children | 1. On Map 1, toggle the group's own visibility from the right panel | All children hidden on map (greyed out in legend)     | M    |
 
 ### Style Classes Visibility
 
-Config: `configs/navigator/layers/esri-feature.json` (uniqueValue + classBreaks layers)
-
-| Test                   | Description           | Steps                                                                               | Expected Result                                 | Auto |
-| ---------------------- | --------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------- | ---- |
-| Toggle style class     | Class hides on map    | 1. In the right panel, toggle a style class off for a uniqueValue/classBreaks layer | That class disappears from the map              | C    |
-| Style class count      | Shows "y of x"        | 1. Check the style class count display                                              | Shows "y of x classes" reflecting visible count | C    |
-| Toggle all classes off | No features render    | 1. Turn off all style classes                                                       | No features render for that layer               | C    |
-| Toggle all classes on  | All features reappear | 1. Turn all back on                                                                 | All features reappear                           | C    |
+| Test                   | Description           | Steps                                                                                         | Expected Result                                 | Auto |
+| ---------------------- | --------------------- | --------------------------------------------------------------------------------------------- | ----------------------------------------------- | ---- |
+| Toggle style class     | Class hides on map    | 1. On Map 1, in the right panel, toggle a style class off for a uniqueValue/classBreaks layer | That class disappears from the map              | C    |
+| Style class count      | Shows "y of x"        | 1. On Map 1, check the style class count display                                              | Shows "y of x classes" reflecting visible count | C    |
+| Toggle all classes off | No features render    | 1. On Map 1, turn off all style classes                                                       | No features render for that layer               | C    |
+| Toggle all classes on  | All features reappear | 1. On Map 1, turn all back on                                                                 | All features reappear                           | C    |
 
 ### Settings Panel Navigation
 
@@ -245,24 +229,20 @@ Config: `configs/navigator/demos/24-configured-feature-labels.json` (ESRI Featur
 
 ### WMS Layer Settings
 
-Config: `configs/navigator/layers/wms.json` (multiple WMS layers)
-
-| Test               | Description            | Steps                            | Expected Result                                                 | Auto |
-| ------------------ | ---------------------- | -------------------------------- | --------------------------------------------------------------- | ---- |
-| WMS style selector | Styles listed as cards | 1. Open settings for a WMS layer | Available WMS styles listed as cards with legend preview images | M    |
-| Switch WMS style   | Map re-renders         | 1. Select a different WMS style  | Map re-renders with the new style                               | M    |
+| Test               | Description            | Steps                                                        | Expected Result                                                 | Auto |
+| ------------------ | ---------------------- | ------------------------------------------------------------ | --------------------------------------------------------------- | ---- |
+| WMS style selector | Styles listed as cards | 1. On Map 2, open settings for a WMS layer in the layers tab | Available WMS styles listed as cards with legend preview images | M    |
+| Switch WMS style   | Map re-renders         | 1. On Map 2, select a different WMS style                    | Map re-renders with the new style                               | M    |
 
 ### Esri Image Layer Settings
 
-Config: `configs/navigator/layers/esri-image.json` (ESRI Image layers)
-
-| Test                     | Description               | Steps                                                              | Expected Result                                                      | Auto |
-| ------------------------ | ------------------------- | ------------------------------------------------------------------ | -------------------------------------------------------------------- | ---- |
-| Raster function selector | Functions listed as cards | 1. Open settings for an Esri Image layer                           | Raster functions listed as cards with preview images                 | M    |
-| Switch raster function   | Map re-renders            | 1. Select a different raster function (e.g., NDVI)                 | Map re-renders with the new function                                 | M    |
-| Mosaic rule configurator | Settings available        | 1. Check the mosaic rule settings                                  | Mosaic rule settings available (method dropdown, operation dropdown) | M    |
-| Change mosaic method     | Map updates               | 1. Change the mosaic method (e.g., Center, Nadir, NorthWest)       | Map updates with the new mosaic method                               | M    |
-| Change mosaic operation  | Map updates               | 1. Change the mosaic operation (e.g., First, Last, Min, Max, Mean) | Map updates with the new operation                                   | M    |
+| Test                     | Description               | Steps                                                                        | Expected Result                                                      | Auto |
+| ------------------------ | ------------------------- | ---------------------------------------------------------------------------- | -------------------------------------------------------------------- | ---- |
+| Raster function selector | Functions listed as cards | 1. On Map 2, open settings for the ESRI Image layer in the layers tab        | Raster functions listed as cards with preview images                 | M    |
+| Switch raster function   | Map re-renders            | 1. On Map 2, select a different raster function (e.g., NDVI)                 | Map re-renders with the new function                                 | M    |
+| Mosaic rule configurator | Settings available        | 1. On Map 2, check the mosaic rule settings                                  | Mosaic rule settings available (method dropdown, operation dropdown) | M    |
+| Change mosaic method     | Map updates               | 1. On Map 2, change the mosaic method (e.g., Center, Nadir, NorthWest)       | Map updates with the new mosaic method                               | M    |
+| Change mosaic operation  | Map updates               | 1. On Map 2, change the mosaic operation (e.g., First, Last, Min, Max, Mean) | Map updates with the new operation                                   | M    |
 
 ### Layer Zoom Levels
 

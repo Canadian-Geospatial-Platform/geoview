@@ -57,12 +57,12 @@ Theme is set via config property `"theme"`: `"geo.ca"` (default), `"light"`, or 
 
 ## Highlight Color
 
-Config property: `map.highlightColor` — options: `black` (default), `white`, `red`, `green`, `aqua`.
+Config property: `map.highlightColor` — options: `aqua` (default), `black`, `white`, `red`, `green`.
 
-| Test                   | Description                     | Steps                                                               | Expected Result                          | Auto |
-| ---------------------- | ------------------------------- | ------------------------------------------------------------------- | ---------------------------------------- | ---- |
-| Default highlight      | Highlight uses default color    | 1. Click a feature                                                  | Highlight uses the default color (black) | M    |
-| Custom highlight color | Highlight uses configured color | 1. Load config with `"highlightColor": "red"`<br>2. Click a feature | Highlight uses the configured color      | C    |
+| Test                   | Description                     | Steps                                                               | Expected Result                         | Auto |
+| ---------------------- | ------------------------------- | ------------------------------------------------------------------- | --------------------------------------- | ---- |
+| Default highlight      | Highlight uses default color    | 1. Click a feature                                                  | Highlight uses the default color (aqua) | M    |
+| Custom highlight color | Highlight uses configured color | 1. Load config with `"highlightColor": "red"`<br>2. Click a feature | Highlight uses the configured color     | C    |
 
 ## Service URLs Override
 

@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>RT-17d Panel Packages - Release Testing</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+
+  <body>
+    <div id="page-header"></div>
+    <div>
+      <div class="back-to-main">
+        <a href="./release-testing.html">← Back to Release Testing</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>17d — Panel Packages Tests (About, AOI, Custom Legend)</h4>
+        <p>Panel-based plugin packages. Each panel is tested via its own map with the relevant plugin loaded.</p>
+        <p>
+          <strong>Test plan:</strong>
+          <a href="https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/docs/programming/release-testing/17d-package-panels.md" target="_blank">17d-package-panels.md</a>
+        </p>
+        <p>
+          <strong>Navigator configs:</strong>
+          <code>demos/18-package-about-panel.json</code>,
+          <code>demos/16-package-area-of-interest.json</code>,
+          <code>demos/17-package-custom-legend.json</code>
+        </p>
+      </div>
+
+      <!-- Map 1: About Panel -->
+      <h5>Map 1 — About Panel</h5>
+      <p>About panel in app bar. Click the About button to open.</p>
+      <div
+        id="map1"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
+            'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
+            'listOfGeoviewLayerConfig': []
+          },
+          'navBar': ['zoom'],
+          'appBar': { 'tabs': { 'core': ['about-panel'] } },
+          'footerBar': { 'tabs': { 'core': [] } },
+          'theme': 'geo.ca'
+        }"
+      ></div>
+
+      <!-- Map 2: Area of Interest -->
+      <h5>Map 2 — Area of Interest Panel</h5>
+      <p>AOI panel in app bar. Click the AOI button to open and select areas.</p>
+      <div
+        id="map2"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
+            'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
+            'listOfGeoviewLayerConfig': []
+          },
+          'navBar': ['zoom'],
+          'appBar': { 'tabs': { 'core': ['aoi-panel'] } },
+          'footerBar': { 'tabs': { 'core': [] } },
+          'theme': 'geo.ca'
+        }"
+      ></div>
+
+      <!-- Map 3: Custom Legend -->
+      <h5>Map 3 — Custom Legend Panel</h5>
+      <p>Custom legend panel in app bar with custom layer groups and ordering.</p>
+      <div
+        id="map3"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
+            'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerType': 'geoCore',
+                'geoviewLayerId': 'ccc75c12-5acc-4a6a-959f-ef6f621147b9'
+              }
+            ]
+          },
+          'navBar': ['zoom'],
+          'appBar': { 'tabs': { 'core': ['custom-legend', 'legend'] } },
+          'footerBar': { 'tabs': { 'core': [] } },
+          'theme': 'geo.ca'
+        }"
+      ></div>
+
+      <button type="button" class="collapsible">Map 1 — Configuration Snippet</button>
+      <pre id="map1CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 2 — Configuration Snippet</button>
+      <pre id="map2CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 3 — Configuration Snippet</button>
+      <pre id="map3CS" class="panel"></pre>
+    </div>
+
+    <script src="codedoc.js"></script>
+    <script>
+      insertPageHeader();
+      cgpv.init();
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });
+    </script>
+  </body>
+</html>

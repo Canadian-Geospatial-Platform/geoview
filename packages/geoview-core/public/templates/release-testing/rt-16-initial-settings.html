@@ -88,15 +88,16 @@
             ]
           },
           'navBar': ['zoom'],
-          'appBar': { 'tabs': { 'core': [] } },
-          'footerBar': { 'tabs': { 'core': ['legend', 'layers'] } },
+          'appBar': { 'tabs': { 'core': ['legend', 'details'] } },
+          'footerBar': { 'tabs': { 'core': ['layers', 'data-table'] } },
           'theme': 'geo.ca'
         }"
       ></div>
 
-      <!-- Map 3: Initial states (visible false, opacity 0.5, queryable false, hoverable false) -->
-      <h5>Map 3 — Initial States (hidden, 50% opacity, not queryable)</h5>
-      <p>Layer starts hidden (visible: false), second layer at 50% opacity and not queryable.</p>
+      <!-- Map 3: Two layers — one with default controls (no query/hover toggles), one with explicit controls.query/hover = true -->
+      <h5>Map 3 — Default controls vs Explicit controls (query/hover toggle test)</h5>
+      <p>First layer: no controls specified → no query/hover toggles in settings (defaults to false).<br>
+         Second layer: controls.query/hover = true, states.queryable/hoverable = false → toggles appear but OFF. Toggle ON to verify.</p>
       <div
         id="map3"
         class="geoview-map"
@@ -108,30 +109,41 @@
             'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
             'listOfGeoviewLayerConfig': [
               {
-                'geoviewLayerType': 'geoCore',
-                'geoviewLayerId': 'ccc75c12-5acc-4a6a-959f-ef6f621147b9',
+                'geoviewLayerType': 'esriDynamic',
+                'geoviewLayerId': 'hfeDefault',
+                'geoviewLayerName': 'Historical Flood (default controls — no query/hover)',
+                'metadataAccessPath': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer',
+                'listOfLayerEntryConfig': [{ 'layerId': '0' }],
                 'initialSettings': {
-                  'states': { 'visible': false, 'legendCollapsed': true }
+                  'states': { 'queryable': false, 'hoverable': false }
                 }
               },
               {
-                'geoviewLayerType': 'geoCore',
-                'geoviewLayerId': 'fe83a604-aa5a-4e46-903c-685f8b0cc33c',
+                'geoviewLayerType': 'esriDynamic',
+                'geoviewLayerId': 'hfeToggle',
+                'geoviewLayerName': 'Historical Flood (controls on, states off)',
+                'metadataAccessPath': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer',
+                'listOfLayerEntryConfig': [{ 'layerId': '0' }],
                 'initialSettings': {
+                  'controls': { 'query': true, 'hover': true },
                   'states': { 'opacity': 0.5, 'queryable': false, 'hoverable': false }
                 }
               }
             ]
           },
           'navBar': ['zoom'],
-          'appBar': { 'tabs': { 'core': [] } },
-          'footerBar': { 'tabs': { 'core': ['legend', 'layers', 'details'] } },
+          'appBar': { 'tabs': { 'core': ['legend', 'details'] } },
+          'footerBar': { 'tabs': { 'core': ['layers', 'data-table'] } },
           'theme': 'geo.ca'
         }"
       ></div>
 
       <button type="button" class="collapsible">Map 1 — Configuration Snippet</button>
       <pre id="map1CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 2 — Configuration Snippet</button>
+      <pre id="map2CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 3 — Configuration Snippet</button>
+      <pre id="map3CS" class="panel"></pre>
     </div>
 
     <script src="codedoc.js"></script>
@@ -145,3 +157,5 @@
     </script>
   </body>
 </html>
+
+

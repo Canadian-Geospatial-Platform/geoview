@@ -1,6 +1,10 @@
 # 17a — Time Slider
 
 > **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
+>
+> **Test page**: [rt-17a-time-slider.html](../../packages/geoview-core/public/templates/release-testing/rt-17a-time-slider.html) — Map 1 (GeoCore HFE + NAPL with time slider in footer bar).
+>
+> **Navigator configs:** `demos/11-package-time-slider.json`, `demos/12-package-time-slider-custom.json`
 
 Time slider plugin for time-aware layers. The time slider is a core package plugin (`geoview-time-slider`) that appears in the footer bar for layers with time dimension metadata.
 

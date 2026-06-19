@@ -1311,7 +1311,7 @@
         },
         "hover": {
           "type": "boolean",
-          "default": true
+          "default": false
         },
         "opacity": {
           "type": "boolean",
@@ -1319,7 +1319,7 @@
         },
         "query": {
           "type": "boolean",
-          "default": true
+          "default": false
         },
         "remove": {
           "type": "boolean",

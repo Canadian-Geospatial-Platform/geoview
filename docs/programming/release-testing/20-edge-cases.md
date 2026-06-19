@@ -1,6 +1,8 @@
 # 20 — Edge Cases
 
 > **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
+>
+> **Test page**: [rt-20-edge-cases.html](../../packages/geoview-core/public/templates/release-testing/rt-20-edge-cases.html) — Links to referenced demo pages (outlier-metadata, circumpolar) and release testing pages.
 
 Edge cases, metadata issues, outlier pages, overlays, sandbox, and responsive layout.
 

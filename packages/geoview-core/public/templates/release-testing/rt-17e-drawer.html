@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>RT-17e Drawer - Release Testing</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+
+  <body>
+    <div id="page-header"></div>
+    <div>
+      <div class="back-to-main">
+        <a href="./release-testing.html">← Back to Release Testing</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>17e — Drawer Tests</h4>
+        <p>Drawing tools plugin for creating and editing geometries on the map.</p>
+        <p>
+          <strong>Test plan:</strong>
+          <a href="https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/docs/programming/release-testing/17e-package-drawer.md" target="_blank">17e-package-drawer.md</a>
+        </p>
+        <p>
+          <strong>Navigator config:</strong> <code>demos/15-package-drawer.json</code>
+        </p>
+      </div>
+
+      <!-- Map 1: Drawer with drawing tools -->
+      <h5>Map 1 — Drawing Tools</h5>
+      <p>Drawer plugin loaded in navbar. Click the Draw button to activate drawing mode. Select geometry type and draw on the map.</p>
+      <div
+        id="map1"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
+            'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerType': 'geoCore',
+                'geoviewLayerId': 'ccc75c12-5acc-4a6a-959f-ef6f621147b9'
+              }
+            ]
+          },
+          'navBar': ['zoom', 'home', 'drawer'],
+          'appBar': { 'tabs': { 'core': ['legend'] } },
+          'footerBar': { 'tabs': { 'core': ['layers'] } },
+          'theme': 'geo.ca'
+        }"
+      ></div>
+
+      <button type="button" class="collapsible">Map 1 — Configuration Snippet</button>
+      <pre id="map1CS" class="panel"></pre>
+    </div>
+
+    <script src="codedoc.js"></script>
+    <script>
+      insertPageHeader();
+      cgpv.init();
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });
+    </script>
+  </body>
+</html>

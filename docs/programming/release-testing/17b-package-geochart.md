@@ -1,6 +1,10 @@
 # 17b — Geochart
 
 > **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
+>
+> **Test page**: [rt-17b-geochart.html](../../packages/geoview-core/public/templates/release-testing/rt-17b-geochart.html) — Map 1 (Airborne GeoCore with geochart in footer bar).
+>
+> **Navigator config:** `demos/13-package-geochart.json`
 
 Geochart plugin for chart visualizations. The geochart is a core package plugin (`geoview-geochart`) that appears in the footer bar and renders Chart.js charts linked to map features.
 

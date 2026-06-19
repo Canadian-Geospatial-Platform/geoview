@@ -10,6 +10,8 @@ GeoView is a lightweight React+TypeScript geospatial viewer built on OpenLayers 
 
 **Key Architecture**: Plugins import and use geoview-core APIs. Core is the foundation; plugins extend functionality.
 
+**NEVER reference files from `packages/geoview-core/public/builds/`** — this folder contains old bundled build artifacts (`cgpv-main-*.js`) with stale, outdated code. Always use the actual source files under `packages/geoview-core/src/` as the source of truth.
+
 ## Critical Build & Dev Workflow
 
 ### Rush Commands (NOT npm/pnpm directly)
@@ -1024,7 +1026,7 @@ Previously drifted properties (now fixed): navBar, footerBar core, appBar core, 
 
 ### Canonical Config Property Order
 
-When creating or editing map configuration JSON files (navigator demos, test configs, inline `data-config` attributes), properties **must** follow the canonical order defined in `packages/geoview-core/schema-default-config.json`. This order groups properties logically — metadata first, then the map definition, then UI chrome, then services and extensions.
+When creating or editing map configuration JSON files (navigator demos, test configs, inline `data-config` attributes), properties **must** follow the canonical order defined in `packages/geoview-core/schema-default-config.json`. This order groups properties logically — metadata first, then the map definition, then UI, then services and extensions.
 
 **Root-level order:**
 

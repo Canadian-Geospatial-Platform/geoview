@@ -1,6 +1,8 @@
 # 21 — WCAG Accessibility
 
 > **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
+>
+> **Test page**: [rt-21-wcag-accessibility.html](../../packages/geoview-core/public/templates/release-testing/rt-21-wcag-accessibility.html) — Links to wcag.html test page and related release testing pages.
 
 Keyboard navigation, focus management, screen reader support, and WCAG compliance testing.
 

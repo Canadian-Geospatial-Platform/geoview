@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>RT-17a Time Slider - Release Testing</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+
+  <body>
+    <div id="page-header"></div>
+    <div>
+      <div class="back-to-main">
+        <a href="./release-testing.html">← Back to Release Testing</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>17a — Time Slider Tests</h4>
+        <p>Time slider plugin for time-aware layers (WMS, ESRI Dynamic, ESRI Feature, ESRI Image).</p>
+        <p>
+          <strong>Test plan:</strong>
+          <a href="https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/docs/programming/release-testing/17a-package-time-slider.md" target="_blank">17a-package-time-slider.md</a>
+        </p>
+        <p>
+          <strong>Navigator configs:</strong> <code>demos/11-package-time-slider.json</code>, <code>demos/12-package-time-slider-custom.json</code>
+        </p>
+      </div>
+
+      <!-- Map 1: Time slider with GeoCore time-aware layers -->
+      <h5>Map 1 — Time Slider with Time-Aware Layers</h5>
+      <p>GeoCore layers with time dimension. Time slider appears in footer bar. Drag slider to change time filter.</p>
+      <div
+        id="map1"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
+            'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerType': 'geoCore',
+                'geoviewLayerId': 'fe83a604-aa5a-4e46-903c-685f8b0cc33c'
+              },
+              {
+                'geoviewLayerType': 'geoCore',
+                'geoviewLayerId': '03ccfb5c-a06e-43e3-80fd-09d4f8f69703'
+              }
+            ]
+          },
+          'navBar': ['zoom', 'home'],
+          'appBar': { 'tabs': { 'core': ['legend'] } },
+          'footerBar': { 'tabs': { 'core': ['layers', 'time-slider'] } },
+          'corePackages': [],
+          'theme': 'geo.ca'
+        }"
+      ></div>
+
+      <button type="button" class="collapsible">Map 1 — Configuration Snippet</button>
+      <pre id="map1CS" class="panel"></pre>
+    </div>
+
+    <script src="codedoc.js"></script>
+    <script>
+      insertPageHeader();
+      cgpv.init();
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });
+    </script>
+  </body>
+</html>

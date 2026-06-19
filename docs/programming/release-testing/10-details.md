@@ -1,6 +1,8 @@
 # 10 — Details Panel
 
 > **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
+>
+> **Test page**: [rt-10-details.html](../../packages/geoview-core/public/templates/release-testing/rt-10-details.html) — Map 1 (multiple queryable layers, details in app bar, clear highlights button).
 
 Details panel queries, feature highlighting, lightbox, coordinate info, and hover tooltips. The Details panel shows query results when the user clicks on the map, with feature navigation, highlighting, and coordinate display (lat/lon, UTM, NTS, elevation).
 

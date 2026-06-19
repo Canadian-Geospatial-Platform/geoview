@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>RT-08 Layers Panel - Release Testing</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+
+  <body>
+    <div id="page-header"></div>
+    <div>
+      <div class="back-to-main">
+        <a href="./release-testing.html">← Back to Release Testing</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>08 — Layers Panel Tests</h4>
+        <p>
+          Left panel (reorder, visibility, collapse, delete), right panel (info, settings, shortcuts, actions, opacity, style classes).
+          For "Add Layer" tests, use the dedicated <a href="../demos/add-layers.html" target="_blank">Add Layers demo page</a>.
+        </p>
+        <p>
+          <strong>Test plan:</strong>
+          <a href="https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/docs/programming/release-testing/08-layers.md" target="_blank">08-layers.md</a>
+        </p>
+      </div>
+
+      <!-- Map 1: Layers panel with many layer types, groups, style classes -->
+      <h5>Map 1 — Layers Panel (Groups, Settings, Style Classes)</h5>
+      <p>
+        GeoCore group layers (Fieldnotes = ESRI dynamic groups, Hydro = WMS groups with scale limits) + simple layer +
+        ESRI Feature layers with uniqueValue/classBreaks style classes. Layers panel in footer bar for reorder, visibility, settings, opacity, shortcuts.
+      </p>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px;">
+        <button onclick="collapseAll()">Collapse All</button>
+        <button onclick="expandAll()">Expand All</button>
+        <button onclick="toggleAllVisOff()">All Visibility OFF</button>
+        <button onclick="toggleAllVisOn()">All Visibility ON</button>
+      </div>
+
+      <div
+        id="map1"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
+            'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerType': 'geoCore',
+                'geoviewLayerId': '1dcd28aa-99da-4f62-b157-15631379b170'
+              },
+              {
+                'geoviewLayerType': 'geoCore',
+                'geoviewLayerId': '9d96e8c9-22fe-4ad2-b5e8-94a6991b744b'
+              },
+              {
+                'geoviewLayerType': 'geoCore',
+                'geoviewLayerId': 'ccc75c12-5acc-4a6a-959f-ef6f621147b9'
+              },
+              {
+                'geoviewLayerType': 'esriFeature',
+                'geoviewLayerId': 'uniqueValueId',
+                'geoviewLayerName': 'CESI — uniqueValue (layer 1)',
+                'metadataAccessPath': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/',
+                'listOfLayerEntryConfig': [{ 'layerId': '1' }]
+              },
+              {
+                'geoviewLayerType': 'esriFeature',
+                'geoviewLayerId': 'classBreaksId',
+                'geoviewLayerName': 'CSO Volume — classBreaks (layer 8)',
+                'metadataAccessPath': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/CSO_volume/MapServer/',
+                'listOfLayerEntryConfig': [{ 'layerId': '8' }]
+              }
+            ]
+          },
+          'navBar': ['zoom', 'home'],
+          'appBar': { 'tabs': { 'core': ['legend', 'details', 'export'] } },
+          'footerBar': { 'tabs': { 'core': ['layers', 'data-table'] } },
+          'theme': 'geo.ca'
+        }"
+      ></div>
+
+      <!-- Map 2: WMS + ESRI Image settings tests -->
+      <h5>Map 2 — WMS & ESRI Image Layer Settings</h5>
+      <p>WMS layers from wms.json with settings panels. ESRI Image layer for raster function and mosaic rule settings.</p>
+      <div
+        id="map2"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
+            'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerType': 'ogcWms',
+                'geoviewLayerId': 'kelownaWells',
+                'geoviewLayerName': 'BC Kelowna Wells (WFS exists, no GetStyles)',
+                'metadataAccessPath': 'https://openmaps.gov.bc.ca/geo/ows',
+                'listOfLayerEntryConfig': [{ 'layerId': 'pub:WHSE_WATER_MANAGEMENT.GW_WATER_WELLS_WRBC_SVW' }]
+              },
+              {
+                'geoviewLayerType': 'ogcWms',
+                'geoviewLayerId': 'spatiotemporel',
+                'geoviewLayerName': 'Test Spatiotemporel',
+                'metadataAccessPath': 'https://geo.weather.gc.ca/geomet',
+                'listOfLayerEntryConfig': [{ 'layerId': 'RADAR_1KM_RSNO' }]
+              },
+              {
+                'geoviewLayerType': 'esriImage',
+                'geoviewLayerId': 'esriImageLyr',
+                'geoviewLayerName': 'Precipitation Percentile (ESRI Image)',
+                'metadataAccessPath': 'https://agriculture.canada.ca/imagery-images/rest/services/agclimate/precipitation_percentile/ImageServer',
+                'listOfLayerEntryConfig': [{ 'layerId': '0' }]
+              }
+            ]
+          },
+          'navBar': ['zoom'],
+          'appBar': { 'tabs': { 'core': ['legend'] } },
+          'footerBar': { 'tabs': { 'core': ['layers'] } },
+          'theme': 'geo.ca'
+        }"
+      ></div>
+
+      <button type="button" class="collapsible">Map 1 — Configuration Snippet</button>
+      <pre id="map1CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 2 — Configuration Snippet</button>
+      <pre id="map2CS" class="panel"></pre>
+    </div>
+
+    <script src="codedoc.js"></script>
+    <script>
+      insertPageHeader();
+
+      function collapseAll() {
+        try {
+          cgpv.api.getMapViewer('map1').controllers.layerController.setAllLayerCollapsed(true);
+        } catch (e) {
+          console.error('collapseAll failed:', e);
+        }
+      }
+
+      function expandAll() {
+        try {
+          cgpv.api.getMapViewer('map1').controllers.layerController.setAllLayerCollapsed(false);
+        } catch (e) {
+          console.error('expandAll failed:', e);
+        }
+      }
+
+      function toggleAllVisOff() {
+        try {
+          cgpv.api.getMapViewer('map1').controllers.layerController.setAllLayersVisibility(false);
+        } catch (e) {
+          console.error('toggleAllVisOff failed:', e);
+        }
+      }
+
+      function toggleAllVisOn() {
+        try {
+          cgpv.api.getMapViewer('map1').controllers.layerController.setAllLayersVisibility(true);
+        } catch (e) {
+          console.error('toggleAllVisOn failed:', e);
+        }
+      }
+
+      cgpv.init();
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });
+    </script>
+  </body>
+</html>

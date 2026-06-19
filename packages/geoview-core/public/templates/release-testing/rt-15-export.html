@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>RT-15 Export - Release Testing</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+
+  <body>
+    <div id="page-header"></div>
+    <div>
+      <div class="back-to-main">
+        <a href="./release-testing.html">← Back to Release Testing</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>15 — Export Tests</h4>
+        <p>Map export: PNG, JPEG, PDF formats. Title, DPI, JPEG quality. Legend column layout.</p>
+        <p>
+          <strong>Test plan:</strong>
+          <a href="https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/docs/programming/release-testing/15-export.md" target="_blank">15-export.md</a>
+        </p>
+        <p>
+          <strong>Navigator config</strong> (for large legend export): <code>demos/20-export-map-large-legend.json</code>
+        </p>
+      </div>
+
+      <!-- Map 1: Export with multiple layers -->
+      <h5>Map 1 — Export with Multiple Layers</h5>
+      <p>Export button in app bar. Click to open the export modal. Test PNG, JPEG (quality slider), PDF formats and DPI options.</p>
+      <div
+        id="map1"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
+            'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerType': 'geoCore',
+                'geoviewLayerId': 'ccc75c12-5acc-4a6a-959f-ef6f621147b9'
+              },
+              {
+                'geoviewLayerType': 'geoCore',
+                'geoviewLayerId': 'fe83a604-aa5a-4e46-903c-685f8b0cc33c'
+              },
+              {
+                'geoviewLayerType': 'esriFeature',
+                'geoviewLayerId': 'classBreaksId',
+                'geoviewLayerName': 'CSO Volume — classBreaks',
+                'metadataAccessPath': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/CSO_volume/MapServer/',
+                'listOfLayerEntryConfig': [{ 'layerId': '8' }]
+              }
+            ]
+          },
+          'navBar': ['zoom', 'home'],
+          'appBar': { 'tabs': { 'core': ['legend', 'export'] } },
+          'footerBar': { 'tabs': { 'core': [] } },
+          'theme': 'geo.ca'
+        }"
+      ></div>
+
+      <button type="button" class="collapsible">Map 1 — Configuration Snippet</button>
+      <pre id="map1CS" class="panel"></pre>
+    </div>
+
+    <script src="codedoc.js"></script>
+    <script>
+      insertPageHeader();
+      cgpv.init();
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });
+    </script>
+  </body>
+</html>

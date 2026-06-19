@@ -1,6 +1,8 @@
 # 19 — Integration Flows
 
 > **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
+>
+> **Test page**: [rt-19-integration-flows.html](../../packages/geoview-core/public/templates/release-testing/rt-19-integration-flows.html) — Links to referenced test pages and navigator configs.
 
 Multi-step workflows that test cross-panel and cross-feature interactions. These tests validate that state stays consistent across panels and operations.
 
@@ -33,10 +35,10 @@ Config: `configs/navigator/demos/06-zoom-layer.json`
 
 > UI-level zoom-to-extent buttons also tested in [07 — Legend](07-legend.md#shortcuts--actions) and [08 — Layers](08-layers.md#actions).
 
-| Test                    | Description                              | Steps                                                   | Expected Result                                     | Auto |
-| ----------------------- | ---------------------------------------- | ------------------------------------------------------- | --------------------------------------------------- | ---- |
-| Zoom to specific layer  | Map zooms to a layer's geographic extent | 1. Trigger zoom to layer extent for a specific layer ID | Map zooms to that layer's bounding extent           | M    |
-| Extent bounds check     | Resulting extent matches expected values | 1. After zoom, check the resulting map extent           | Extent matches expected bounds for the target layer | M    |
+| Test                   | Description                              | Steps                                                   | Expected Result                                     | Auto |
+| ---------------------- | ---------------------------------------- | ------------------------------------------------------- | --------------------------------------------------- | ---- |
+| Zoom to specific layer | Map zooms to a layer's geographic extent | 1. Trigger zoom to layer extent for a specific layer ID | Map zooms to that layer's bounding extent           | M    |
+| Extent bounds check    | Resulting extent matches expected values | 1. After zoom, check the resulting map extent           | Extent matches expected bounds for the target layer | M    |
 
 ## Highlight & Opacity Restore
 

@@ -1,6 +1,8 @@
 # 14 — Map Info Bar
 
 > **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
+>
+> **Test page**: [rt-14-map-info.html](../../packages/geoview-core/public/templates/release-testing/rt-14-map-info.html) — Map 1 (dynamic with full map info bar), Map 2 (static with simplified bar).
 
 Map info bar components: scale, mouse position coordinates, attribution, rotation indicator, and expand mode. The map info bar is always visible at the bottom of the map in `dynamic` interaction mode. In `static` mode, it is simplified (no expand, no mouse position, no rotation indicator).
 

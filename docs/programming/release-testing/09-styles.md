@@ -1,6 +1,10 @@
 # 09 — Styles
 
 > **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
+>
+> **Test page**: [rt-09-styles.html](../../packages/geoview-core/public/templates/release-testing/rt-09-styles.html) — Map 1 (GeoJSON polygons + classBreaks + simple layer).
+>
+> **Navigator configs** (for detailed visual tests): `layers/geojson.json`, `demos/25-feature-visual-variables.json`, `demos/26-complex-classifications.json`, `demos/28-symbol-shapes-fill-patterns.json`, `demos/24-configured-feature-labels.json`
 
 Style rendering, visual variables, classification, symbol shapes, fill patterns, and feature labels.
 

@@ -202,6 +202,8 @@ After generating the test method, you MUST also:
 
 ### Phase 5 — Update Test Catalog & Release-Testing Docs
 
+**MANDATORY**: Every time you add, remove, or modify tests in ANY release-testing MD file (`docs/programming/release-testing/NN-*.md`), you MUST immediately update the README test count for that file and recalculate the TOTAL row. This is not optional — do it in the same edit session, not later. Run the PowerShell count command to get accurate numbers: `$a = (Select-String -Path "NN-file.md" -Pattern '\| A\s*\|?\s*$' -AllMatches).Count; $c = (Select-String -Path "NN-file.md" -Pattern '\| C\s*\|?\s*$' -AllMatches).Count; $m = (Select-String -Path "NN-file.md" -Pattern '\| M\s*\|?\s*$' -AllMatches).Count`
+
 After generating all test code, update both documentation sources:
 
 **Automated tests — `docs/app/testing/test-catalog.md`:**

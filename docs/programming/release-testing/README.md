@@ -59,11 +59,11 @@ Each release gets its own issue. Previous release test results are preserved as 
 | 0   | [00-automated-suite.md](00-automated-suite.md)                 | Automated test suite execution                         | 5 min        | 204 automated        |
 | 1   | [01-global.md](01-global.md)                                   | Full screen, shortcuts, search, share, notifications   | 25 min       | 56 (0/15/41)         |
 | 2   | [02-map.md](02-map.md)                                         | Projections, north pole, north arrow, rotation         | 15 min       | 19 (2/7/10)          |
-| 3   | [03-config.md](03-config.md)                                   | Config validation, duplicate UUIDs, error layers       | 15 min       | 27 (6/20/1)          |
+| 3   | [03-config.md](03-config.md)                                   | Config validation, duplicate UUIDs, error layers       | 15 min       | 23 (6/16/1)          |
 | 4   | [04-basemap.md](04-basemap.md)                                 | Basemap selector, labels, shaded relief                | 5 min        | 9 (0/6/3)            |
 | 5   | [05-navbar.md](05-navbar.md)                                   | Navigation bar, zoom, measurement, drawer              | 15 min       | 18 (0/9/9)           |
 | 6   | [06-overview-map.md](06-overview-map.md)                       | Overview map, hide on zoom, projection switch          | 5 min        | 8 (5/0/3)            |
-| 7   | [07-legend.md](07-legend.md)                                   | Legend panel, show/hide all, full screen               | 15 min       | 27 (0/12/15)         |
+| 7   | [07-legend.md](07-legend.md)                                   | Legend panel, show/hide all, full screen               | 15 min       | 28 (0/12/16)         |
 | 8   | [08-layers.md](08-layers.md)                                   | Layer panel, add (URL/file), all types, settings       | 50 min       | 89 (1/20/68)         |
 | 9   | [09-styles.md](09-styles.md)                                   | Style rendering, visual variables, feature labels      | 10 min       | 15 (0/0/15)          |
 | 10  | [10-details.md](10-details.md)                                 | Details panel, highlighting, navigation, summary       | 15 min       | 23 (1/3/19)          |
@@ -72,7 +72,7 @@ Each release gets its own issue. Previous release test results are preserved as 
 | 13  | [13-projection.md](13-projection.md)                           | Geometry, table, north pole on projection switch       | 10 min       | 10 (0/1/9)           |
 | 14  | [14-map-info.md](14-map-info.md)                               | Map info bar, attribution, tooltips                    | 5 min        | 9 (0/0/9)            |
 | 15  | [15-export.md](15-export.md)                                   | Export modal, options, all layer types, formats        | 15 min       | 24 (0/0/24)          |
-| 16  | [16-initial-settings.md](16-initial-settings.md)               | Initial controls, states, selected tab/layer           | 15 min       | 36 (21/11/4)         |
+| 16  | [16-initial-settings.md](16-initial-settings.md)               | Initial controls, states, selected tab/layer           | 15 min       | 39 (21/11/7)         |
 | 17a | [17a-package-time-slider.md](17a-package-time-slider.md)       | Time slider, all layer types, custom slider            | 15 min       | 20 (0/0/20)          |
 | 17b | [17b-package-geochart.md](17b-package-geochart.md)             | Geochart, all chart types, slider/stepper              | 10 min       | 11 (0/0/11)          |
 | 17c | [17c-package-swiper.md](17c-package-swiper.md)                 | Swiper, add/remove layers, orientation, rotation       | 10 min       | 14 (3/7/4)           |
@@ -89,15 +89,15 @@ Each release gets its own issue. Previous release test results are preserved as 
 | 25  | [25-developer-tools.md](25-developer-tools.md)                 | ESRI/WFS renderer tools, all-layer zoom levels         | 10 min       | 22 (0/0/22)          |
 | 26  | [26-production-configs.md](26-production-configs.md)           | OSDP, Open Maps, Arctic SDI, GSC, CGDI smoke tests     | 20 min       | 37 (0/0/37)          |
 | 27  | [27-automation-candidates.md](27-automation-candidates.md)     | Tests recommended for automation via TestCreator       | —            | 112 candidates       |
-|     | **TOTAL**                                                      |                                                        | **~425 min** | **842 (43/151/648)** |
+|     | **TOTAL**                                                      |                                                        | **~425 min** | **842 (43/147/652)** |
 
 **Test breakdown:**
 
 | Category          | Count   | Description                                                |
 | ----------------- | ------- | ---------------------------------------------------------- |
 | **A** — Automated | 43      | Covered by `geoview-test-suite` (no manual effort needed)  |
-| **C** — Candidate | 151     | Candidate for automation (manual today, automatable later) |
-| **M** — Manual    | 648     | Requires manual verification (UI, visual, interaction)     |
+| **C** — Candidate | 147     | Candidate for automation (manual today, automatable later) |
+| **M** — Manual    | 651     | Requires manual verification (UI, visual, interaction)     |
 | **Total**         | **842** | All tests across all files                                 |
 
 > **Keeping counts in sync**: When modifying any release-testing file (changing M→C, M→A, C→A, or adding/removing tests), also update the "Tests (A/C/M)" column for that file and recalculate the TOTAL row. Format: `total (A/C/M)`.
