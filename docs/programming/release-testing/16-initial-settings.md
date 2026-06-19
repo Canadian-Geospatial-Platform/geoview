@@ -1,6 +1,8 @@
 # 16 — Initial Settings
 
 > **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
+>
+> **Test page**: [rt-16-initial-settings.html](../../packages/geoview-core/public/templates/release-testing/rt-16-initial-settings.html) — Map 1 (selected tab & layer), Map 2 (all controls disabled), Map 3 (initial states: hidden, 50% opacity, not queryable).
 
 Initial controls, states, filters, cascading behavior, and layer-specific source config. The `initialSettings` property is available at both the GeoView layer level and individual layer entry level. It contains `controls` (8 UI controls) and `states` (5 initial states) plus bounds/zoom constraints.
 

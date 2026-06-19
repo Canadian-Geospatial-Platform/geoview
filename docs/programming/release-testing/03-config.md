@@ -3,6 +3,8 @@
 Config parsing, duplicate handling, and error layer behavior.
 
 > **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
+>
+> **Test page**: [rt-03-config.html](../../packages/geoview-core/public/templates/release-testing/rt-03-config.html) — Map 1 (duplicate UUIDs), Map 2 (error layers: bad ID + wrong type + bad URL), Map 3 (defaults — omits UI chrome), Map 4 (empty arrays).
 
 ## Duplicate UUIDs
 

@@ -31,12 +31,20 @@ For standalone north pole / north arrow tests per projection, see [02 — Map �
 
 ## Max Extent Override & Projection
 
-| Test                | Description                          | Steps                                                                                       | Expected Result                                                                                                           | Auto |
-| ------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ---- |
-| Extent after switch | Constraint applies in new projection | 1. On Map 2, verify max extent is applied in WM<br>2. Switch to LCC using projection button | The extent constraint still applies in LCC — cannot pan beyond the configured max extent boundaries in the new projection | M    |
+> **Note:** The configured `maxExtent` is only applied when the map is in its configured projection. When switching to a different projection, the default extent for that projection is used instead. This is intentional — LCC and WM extents are fundamentally different and cannot be meaningfully transformed between projections.
+
+| Test                          | Description                            | Steps                                                                          | Expected Result                                                                                         | Auto |
+| ----------------------------- | -------------------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------- | ---- |
+| Extent applied in native proj | Custom extent constrains in WM         | 1. On Map 2 (WM, maxExtent: [-180, -50, 180, 89]), pan in all directions       | Cannot pan beyond the configured max extent boundaries                                                  | M    |
+| Extent resets on switch       | Default extent used in non-native proj | 1. On Map 2, switch to LCC using projection button<br>2. Pan in all directions | Extent resets to LCC default (approx [-150, -10, -30, 90]) — the WM custom extent does NOT apply in LCC | M    |
+| Extent restores on return     | Custom extent re-applied on return     | 1. Switch back to WM<br>2. Pan in all directions                               | The configured maxExtent [-180, -50, 180, 89] is re-applied — pan is constrained again                  | M    |
 
 ## Vector Tile on Projection Switch
 
-| Test                    | Description                | Steps                                         | Expected Result                                                                            | Auto |
-| ----------------------- | -------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------ | ---- |
-| Incompatible VT warning | Warning notification shown | 1. On Map 3, switch projection from WM to LCC | Warning notification appears: "Vector tile [layerName] doesn't support the map projection" | C    |
+> **Known issue:** The vector tile source should be reloaded automatically when the projection switches to a compatible one. Currently the user must manually reload the layer from the Layers panel after switching back.
+
+Map 3 uses a vector tile layer in EPSG:3978 on a map initially in EPSG:3857. The layer will show an error on load (incompatible projection). Switch to LCC (3978) — the reload button appears in the Layers panel. Reload the layer, then switch back to WM to trigger the warning.
+
+| Test                    | Description                | Steps                                                                                                                                           | Expected Result                                                                            | Auto |
+| ----------------------- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ---- |
+| Incompatible VT warning | Warning notification shown | 1. On Map 3, switch to LCC (3978)<br>2. In Layers panel, reload the vector tile layer<br>3. Layer renders in LCC<br>4. Switch back to WM (3857) | Warning notification appears: "Vector tile [layerName] doesn't support the map projection" | C    |

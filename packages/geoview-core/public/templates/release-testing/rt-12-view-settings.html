@@ -29,6 +29,15 @@
       <!-- Map 1: Restricted zoom (minZoom: 6, maxZoom: 8) -->
       <h5>Map 1 — Restricted Zoom (min: 6, max: 8)</h5>
       <p>Try zooming beyond level 8 (in) or below level 6 (out) — should be clamped.</p>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px;">
+        <strong>Current zoom:</strong>
+        <span id="currentZoom" style="font-weight: bold; min-width: 30px;">7</span>
+        <strong style="margin-left: 16px;">Set zoom:</strong>
+        <input id="zoomInput" type="number" min="0" max="20" step="0.1" value="7" style="width: 60px; padding: 4px;" />
+        <button onclick="setZoom()">Apply</button>
+      </div>
+
       <div
         id="map1"
         class="geoview-map"
@@ -54,7 +63,7 @@
 
       <!-- Map 2: Max extent override -->
       <h5>Map 2 — Max Extent Override (world bounds)</h5>
-      <p>Max extent set to [-180, -50, 180, 89]. Zoom out fully — extent is larger than default. Pan should be constrained.</p>
+      <p>Max extent set to [-180, -50, 180, 85]. Zoom out fully — extent is larger than default. Pan should be constrained.</p>
       <div
         id="map2"
         class="geoview-map"
@@ -65,7 +74,7 @@
             'viewSettings': {
               'projection': 3857,
               'initialView': { 'zoomAndCenter': [3, [-90, 55]] },
-              'maxExtent': [-180, -50, 180, 89]
+              'maxExtent': [-180, -50, 180, 85]
             },
             'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
             'listOfGeoviewLayerConfig': []
@@ -129,7 +138,7 @@
 
       <!-- Map 5: Initial click coordinate -->
       <h5>Map 5 — Initial Click Coordinate</h5>
-      <p>Map loads with a click marker at Ottawa and Details panel opens with query results.</p>
+      <p>Map loads with a click marker and the Details panel opens with query results at the coordinate.</p>
       <div
         id="map5"
         class="geoview-map"
@@ -140,7 +149,8 @@
             'viewSettings': {
               'projection': 3978,
               'initialView': { 'zoomAndCenter': [10, [-75.7, 45.4]] },
-              'initialClickCoordinate': [-75.7, 45.4]
+              'initialClickCoordinate': [ -79.74557060486308,
+        43.570667474941246]
             },
             'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
             'listOfGeoviewLayerConfig': [
@@ -152,7 +162,7 @@
           },
           'navBar': ['zoom', 'home'],
           'appBar': { 'tabs': { 'core': ['details'] } },
-          'footerBar': { 'tabs': { 'core': ['details'] } },
+          'footerBar': { 'tabs': { 'core': [] } },
           'theme': 'geo.ca'
         }"
       ></div>
@@ -164,6 +174,22 @@
     <script src="codedoc.js"></script>
     <script>
       insertPageHeader();
+
+      function setZoom() {
+        const zoom = parseFloat(document.getElementById('zoomInput').value);
+        if (!isNaN(zoom)) {
+          cgpv.api.getMapViewer('map1').setMapZoomLevel(zoom);
+        }
+      }
+
+      cgpv.onMapInit((mapViewer) => {
+        if (mapViewer.mapId === 'map1') {
+          mapViewer.onMapZoomEnd((sender, event) => {
+            document.getElementById('currentZoom').textContent = Math.round(event.zoom * 100) / 100;
+          });
+        }
+      });
+
       cgpv.init();
       window.addEventListener('load', () => {
         createCodeSnippet();

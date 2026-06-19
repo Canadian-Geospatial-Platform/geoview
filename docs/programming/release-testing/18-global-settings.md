@@ -1,6 +1,8 @@
 # 18 — Global Settings
 
 > **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
+>
+> **Test page**: [rt-18-global-settings.html](../../packages/geoview-core/public/templates/release-testing/rt-18-global-settings.html) — Map 1 (geo.ca theme + global settings), Map 2 (dark theme), Map 3 (light theme), Map 4 (red highlight color).
 
 Global settings that affect all layers and panels.
 

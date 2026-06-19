@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>RT-16 Initial Settings - Release Testing</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+
+  <body>
+    <div id="page-header"></div>
+    <div>
+      <div class="back-to-main">
+        <a href="./release-testing.html">← Back to Release Testing</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>16 — Initial Settings Tests</h4>
+        <p>
+          Initial controls, states, cascading behavior. Tests use dedicated configs that exercise all 8 control types and 5 state types.
+        </p>
+        <p>
+          <strong>Test plan:</strong>
+          <a href="https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/docs/programming/release-testing/16-initial-settings.md" target="_blank">16-initial-settings.md</a>
+        </p>
+      </div>
+
+      <!-- Map 1: Selected tab & layer -->
+      <h5>Map 1 — Selected Tab & Layer</h5>
+      <p>Footer bar opens to "layers" tab. App bar opens to "legend" tab. A specific layer is pre-selected.</p>
+      <div
+        id="map1"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
+            'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerType': 'geoCore',
+                'geoviewLayerId': 'ccc75c12-5acc-4a6a-959f-ef6f621147b9'
+              },
+              {
+                'geoviewLayerType': 'geoCore',
+                'geoviewLayerId': 'fe83a604-aa5a-4e46-903c-685f8b0cc33c'
+              }
+            ]
+          },
+          'navBar': ['zoom'],
+          'appBar': { 'tabs': { 'core': ['geolocator', 'legend', 'details', 'export'] }, 'selectedTab': 'legend' },
+          'footerBar': { 'tabs': { 'core': ['layers', 'data-table'] }, 'selectedTab': 'layers' },
+          'theme': 'geo.ca'
+        }"
+      ></div>
+
+      <!-- Map 2: Controls all false (WFS-like layer with all controls disabled) -->
+      <h5>Map 2 — All Controls Disabled</h5>
+      <p>Layer has all 8 controls set to false. No UI buttons/sliders should render for it.</p>
+      <div
+        id="map2"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
+            'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerType': 'geoCore',
+                'geoviewLayerId': 'ccc75c12-5acc-4a6a-959f-ef6f621147b9',
+                'initialSettings': {
+                  'controls': {
+                    'highlight': false,
+                    'hover': false,
+                    'opacity': false,
+                    'query': false,
+                    'remove': false,
+                    'table': false,
+                    'visibility': false,
+                    'zoom': false
+                  }
+                }
+              }
+            ]
+          },
+          'navBar': ['zoom'],
+          'appBar': { 'tabs': { 'core': [] } },
+          'footerBar': { 'tabs': { 'core': ['legend', 'layers'] } },
+          'theme': 'geo.ca'
+        }"
+      ></div>
+
+      <!-- Map 3: Initial states (visible false, opacity 0.5, queryable false, hoverable false) -->
+      <h5>Map 3 — Initial States (hidden, 50% opacity, not queryable)</h5>
+      <p>Layer starts hidden (visible: false), second layer at 50% opacity and not queryable.</p>
+      <div
+        id="map3"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
+            'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerType': 'geoCore',
+                'geoviewLayerId': 'ccc75c12-5acc-4a6a-959f-ef6f621147b9',
+                'initialSettings': {
+                  'states': { 'visible': false, 'legendCollapsed': true }
+                }
+              },
+              {
+                'geoviewLayerType': 'geoCore',
+                'geoviewLayerId': 'fe83a604-aa5a-4e46-903c-685f8b0cc33c',
+                'initialSettings': {
+                  'states': { 'opacity': 0.5, 'queryable': false, 'hoverable': false }
+                }
+              }
+            ]
+          },
+          'navBar': ['zoom'],
+          'appBar': { 'tabs': { 'core': [] } },
+          'footerBar': { 'tabs': { 'core': ['legend', 'layers', 'details'] } },
+          'theme': 'geo.ca'
+        }"
+      ></div>
+
+      <button type="button" class="collapsible">Map 1 — Configuration Snippet</button>
+      <pre id="map1CS" class="panel"></pre>
+    </div>
+
+    <script src="codedoc.js"></script>
+    <script>
+      insertPageHeader();
+      cgpv.init();
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });
+    </script>
+  </body>
+</html>

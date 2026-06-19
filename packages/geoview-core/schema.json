@@ -507,7 +507,7 @@
           "$ref": "#/definitions/TypeZoomAndCenter"
         },
         "extent": {
-          "description": "The extent for the initial view. Called with [minX, minY, maxX, maxY] extent coordinates.",
+          "description": "The extent for the initial view. Called with [minX, minY, maxX, maxY] extent coordinates. The map will fit this extent within the viewport using OpenLayers fit(). Note: the actual displayed extent may be slightly adjusted to match the viewport's aspect ratio (width/height).",
           "type": "array",
           "minItems": 4,
           "maxItems": 4,

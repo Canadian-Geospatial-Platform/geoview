@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>RT-03 Config - Release Testing</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+
+  <body>
+    <div id="page-header"></div>
+    <div>
+      <div class="back-to-main">
+        <a href="./release-testing.html">← Back to Release Testing</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>03 — Config Validation Tests</h4>
+        <p>
+          Config parsing, duplicate UUIDs, error layers, wrong layer types, and default config behavior.
+        </p>
+        <p>
+          <strong>Test plan:</strong>
+          <a href="https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/docs/programming/release-testing/03-config.md" target="_blank">03-config.md</a>
+        </p>
+      </div>
+
+      <!-- Map 1: Duplicate geocore UUIDs -->
+      <h5>Map 1 — Duplicate Geocore UUIDs</h5>
+      <p>Same UUID appears twice. Both should appear in legend with unique paths.</p>
+      <div
+        id="map1"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
+            'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerType': 'geoCore',
+                'geoviewLayerId': 'ccc75c12-5acc-4a6a-959f-ef6f621147b9'
+              },
+              {
+                'geoviewLayerType': 'geoCore',
+                'geoviewLayerId': 'ccc75c12-5acc-4a6a-959f-ef6f621147b9'
+              }
+            ]
+          },
+          'navBar': ['zoom'],
+          'appBar': { 'tabs': { 'core': [] } },
+          'footerBar': { 'tabs': { 'core': ['legend', 'layers'] } },
+          'theme': 'geo.ca'
+        }"
+      ></div>
+
+      <!-- Map 2: Bad layer ID + wrong layer type + bad URL -->
+      <h5>Map 2 — Error Layers (bad ID, wrong type, bad URL)</h5>
+      <p>Contains: invalid geoviewLayerType, bad layerId, and bad URL. Viewer should still render with valid layers.</p>
+      <div
+        id="map2"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
+            'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerType': 'geoCore',
+                'geoviewLayerId': 'ccc75c12-5acc-4a6a-959f-ef6f621147b9'
+              },
+              {
+                'geoviewLayerType': 'geocore',
+                'geoviewLayerId': 'wrong-type-test'
+              },
+              {
+                'geoviewLayerType': 'ogcWms',
+                'geoviewLayerId': 'badUrlLayer',
+                'geoviewLayerName': 'Bad URL Layer',
+                'metadataAccessPath': 'https://badurl.example.com/wms',
+                'listOfLayerEntryConfig': [{ 'layerId': 'nonexistent' }]
+              }
+            ]
+          },
+          'navBar': ['zoom'],
+          'appBar': { 'tabs': { 'core': [] } },
+          'footerBar': { 'tabs': { 'core': ['legend', 'layers'] } },
+          'theme': 'geo.ca'
+        }"
+      ></div>
+
+      <!-- Map 3: Default config behavior (omits footerBar, appBar, navBar) -->
+      <h5>Map 3 — Defaults (no footerBar, appBar, navBar in config)</h5>
+      <p>All config UI chrome properties omitted — viewer applies defaults.</p>
+      <div
+        id="map3"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
+            'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
+            'listOfGeoviewLayerConfig': []
+          },
+          'theme': 'geo.ca'
+        }"
+      ></div>
+
+      <!-- Map 4: Empty arrays (footerBar/appBar empty) -->
+      <h5>Map 4 — Empty UI Chrome (footerBar: [], appBar: [])</h5>
+      <p>Explicit empty arrays — no tabs should render.</p>
+      <div
+        id="map4"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
+            'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
+            'listOfGeoviewLayerConfig': []
+          },
+          'navBar': ['zoom'],
+          'appBar': { 'tabs': { 'core': [] } },
+          'footerBar': { 'tabs': { 'core': [] } },
+          'theme': 'geo.ca'
+        }"
+      ></div>
+
+      <button type="button" class="collapsible">Map 1 — Configuration Snippet</button>
+      <pre id="map1CS" class="panel"></pre>
+    </div>
+
+    <script src="codedoc.js"></script>
+    <script>
+      insertPageHeader();
+      cgpv.init();
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });
+    </script>
+  </body>
+</html>
