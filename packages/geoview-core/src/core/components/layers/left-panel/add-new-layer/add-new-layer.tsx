@@ -3,10 +3,23 @@ import { useEffect, useRef, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
+import { useTheme } from '@mui/material/styles';
 import type { SelectChangeEvent } from '@mui/material';
 
 import type { ButtonPropsLayerPanel } from '@/ui';
-import { Box, Button, IconButton, ButtonGroup, CircularProgressBase, FileUploadIcon, Paper, Select, Stepper, TextField } from '@/ui';
+import {
+  Box,
+  Button,
+  IconButton,
+  ButtonGroup,
+  CircularProgressBase,
+  FileUploadIcon,
+  FormHelperText,
+  Paper,
+  Select,
+  Stepper,
+  TextField,
+} from '@/ui';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useStoreAppDisabledLayerTypes, useStoreAppDisplayLanguage, useStoreAppShellContainer } from '@/core/stores/states/app-state';
 import { ConfigApi } from '@/api/config/config-api';
@@ -64,6 +77,10 @@ interface FileUploadSectionProps {
   disabledLayerTypes: TypeInitialGeoviewLayerType[];
   /** Optional ref to the upload button element. */
   uploadButtonRef?: React.RefObject<HTMLButtonElement | null>;
+  /** Whether the URL field has a validation error. */
+  urlError?: boolean;
+  /** The error message to display when URL validation fails. */
+  urlErrorMessage?: string;
 }
 
 /**
@@ -79,12 +96,15 @@ function FileUploadSection({
   displayURL,
   disabledLayerTypes,
   uploadButtonRef,
+  urlError,
+  urlErrorMessage,
 }: FileUploadSectionProps): JSX.Element {
   // Log
   logger.logTraceRender('components/layers/left-panel/add-new-layer/file-upload-section');
 
   // Hook
   const { t } = useTranslation<string>();
+  const theme = useTheme();
   const uiController = useUIController();
 
   // State
@@ -128,9 +148,7 @@ function FileUploadSection({
   };
 
   /**
-   * Handle file selection from the file input element
-   *
-   * @param event - The change event from the file input
+   * Handle file selection from the file input element.
    */
   const handleChange = (event: ChangeEvent<HTMLInputElement>): void => {
     if (event.target.files && event.target.files.length > 0) {
@@ -139,9 +157,7 @@ function FileUploadSection({
   };
 
   /**
-   * Handle URL input changes in the text field
-   *
-   * @param event - The change event from the text input
+   * Handle URL input changes in the text field.
    */
   const handleInput = (event: ChangeEvent<HTMLInputElement>): void => {
     const url = event.target.value.trim();
@@ -150,11 +166,8 @@ function FileUploadSection({
   };
 
   /**
-   * Handle file drop events in the dropzone
-   *
-   * @param event - The drag event containing dropped files
+   * Handle file drop events in the dropzone.
    */
-
   const handleDrop = (event: React.DragEvent<HTMLDivElement>): void => {
     event.preventDefault();
     event.stopPropagation();
@@ -166,8 +179,6 @@ function FileUploadSection({
 
   /**
    * Handles drag-over behavior for the file dropzone.
-   *
-   * @param event - The drag event over the dropzone
    */
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>): void => {
     event.preventDefault();
@@ -176,8 +187,6 @@ function FileUploadSection({
 
   /**
    * Handles drag-enter behavior for the file dropzone.
-   *
-   * @param event - The drag-enter event for the dropzone
    */
   const handleDragEnter = (event: React.DragEvent<HTMLDivElement>): void => {
     event.preventDefault();
@@ -187,8 +196,6 @@ function FileUploadSection({
 
   /**
    * Handles drag-leave behavior for the file dropzone.
-   *
-   * @param event - The drag-leave event for the dropzone
    */
   const handleDragLeave = (event: React.DragEvent<HTMLDivElement>): void => {
     event.preventDefault();
@@ -269,19 +276,21 @@ function FileUploadSection({
         onChange={handleInput}
         onKeyDown={onKeyDown}
         multiline
+        error={urlError}
+        helperText={urlError ? urlErrorMessage : undefined}
         slotProps={{
           inputLabel: {
             sx: {
-              color: (theme) => theme.palette.geoViewColor?.textColor.light[200], // WCAG - Matches global placeholder text color
+              color: theme.palette.geoViewColor?.textColor.light[200], // WCAG - Matches global placeholder text color
               '&.Mui-focused': {
-                color: (theme) => theme.palette.geoViewColor?.primary.main, // Primary color when focused
+                color: theme.palette.geoViewColor?.primary.main, // Primary color when focused
               },
             },
           },
           input: {
             sx: {
               '&:focus-visible': {
-                outline: (theme) => `2px solid ${theme.palette.geoViewColor?.primary.main}`,
+                outline: `2px solid ${theme.palette.geoViewColor?.primary.main}`,
                 outlineOffset: '2px',
               },
               '& textarea.keyboard-focused': {
@@ -309,6 +318,7 @@ export function AddNewLayer(): JSX.Element {
 
   // Hook
   const { t } = useTranslation<string>();
+  const theme = useTheme();
 
   const { CSV, ESRI_DYNAMIC, ESRI_FEATURE, ESRI_IMAGE, GEOJSON, GEOTIFF, KML, WMS, WMTS, WFS, OGC_FEATURE, XYZ_TILES, VECTOR_TILES } =
     CONST_LAYER_TYPES;
@@ -328,6 +338,10 @@ export function AddNewLayer(): JSX.Element {
   const [isGeoCore, setIsGeoCore] = useState<boolean>(false);
   const [geochartsToAdd, setGeochartsToAdd] = useState<Record<string, GeoViewGeoChartConfig> | undefined>();
   const [timeSliderToAdd, setTimeSliderToAdd] = useState<GeoViewTimeSliderConfig[] | undefined>();
+  const [urlError, setUrlError] = useState<boolean>(false);
+  const [urlErrorMessage, setUrlErrorMessage] = useState<string>('');
+  const [serviceTypeError, setServiceTypeError] = useState<boolean>(false);
+  const [serviceTypeErrorMessage, setServiceTypeErrorMessage] = useState<string>('');
   const isSingle = !isMultiple;
 
   // Ref
@@ -353,9 +367,9 @@ export function AddNewLayer(): JSX.Element {
   // #region ERRORS
 
   /**
-   * Emits an error dialogue when a text field is empty
+   * Emits an error dialogue when a text field is empty.
    *
-   * @param textField label for the TextField input that cannot be empty
+   * @param textField - Label for the TextField input that cannot be empty
    */
   const emitErrorEmpty = (textField: string): void => {
     setIsLoading(false);
@@ -363,9 +377,7 @@ export function AddNewLayer(): JSX.Element {
   };
 
   /**
-   * Emits an error dialogue when a text field is empty
-   *
-   * @param textField label for the TextField input that cannot be empty
+   * Emits an error dialogue when no layers are selected.
    */
   const emitErrorNone = (): void => {
     setIsLoading(false);
@@ -373,9 +385,9 @@ export function AddNewLayer(): JSX.Element {
   };
 
   /**
-   * Emits an error dialogue when a layer type is disabled
+   * Emits an error dialogue when a layer type is disabled.
    *
-   * @param disabledType label for the TextField input that cannot be empty
+   * @param disabledType - Label for the layer type that is disabled
    */
   const emitErrorDisabled = (disabledType: string): void => {
     setIsLoading(false);
@@ -383,9 +395,9 @@ export function AddNewLayer(): JSX.Element {
   };
 
   /**
-   * Emits an error when the URL does not support the selected service type
+   * Emits an error when the URL does not support the selected service type.
    *
-   * @param serviceName type of service provided by the URL
+   * @param serviceName - Type of service provided by the URL
    */
   const emitErrorServer = (serviceName: string): void => {
     setIsLoading(false);
@@ -406,6 +418,9 @@ export function AddNewLayer(): JSX.Element {
     return true;
   };
 
+  /**
+   * Completes the layer addition process.
+   */
   const doneAdding = (): void => {
     // Done adding
     setIsLoading(false);
@@ -413,6 +428,9 @@ export function AddNewLayer(): JSX.Element {
     layerController.setLayerZIndices();
   };
 
+  /**
+   * Shows a notification message based on the layer's loading status.
+   */
   const doneAddedShowMessage = (layerBeingAdded: AbstractGeoViewLayer): void => {
     if (layerBeingAdded.allLayerStatusAreGreaterThanOrEqualTo('error'))
       uiController.addMessage('error', 'layers.layerAddedWithError', { layerName });
@@ -451,6 +469,9 @@ export function AddNewLayer(): JSX.Element {
     const guessedLayerType = ConfigApi.guessLayerType(displayURL) || '';
     const layerTypeIsAllowed = setLayerTypeIfAllowed(guessedLayerType as TypeGeoviewLayerType);
     if (valid && layerTypeIsAllowed) {
+      // Clear Step 2 errors when advancing from Step 1
+      setServiceTypeError(false);
+      setServiceTypeErrorMessage('');
       setActiveStep(1);
     }
   };
@@ -528,8 +549,14 @@ export function AddNewLayer(): JSX.Element {
         const gvError = err as GeoViewError;
         if (gvError?.messageKey && gvError.messageKey.startsWith('validation.')) {
           setIsLoading(false);
+          setServiceTypeError(true);
+          setServiceTypeErrorMessage(t(gvError.messageKey, gvError.messageParams));
+          setStepButtonEnabled(false);
           uiController.addMessage('error', gvError.messageKey, gvError.messageParams);
         } else {
+          setServiceTypeError(true);
+          setServiceTypeErrorMessage(t('layers.errorServer', { serviceTypeName: curlayerType }));
+          setStepButtonEnabled(false);
           emitErrorServer(curlayerType);
         }
         logger.logError(err);
@@ -561,6 +588,9 @@ export function AddNewLayer(): JSX.Element {
       promise = populateLayerList(layerType);
     } else {
       setIsLoading(false);
+      setServiceTypeError(true);
+      setServiceTypeErrorMessage(t('layers.errorEmpty', { textFieldName: t('layers.service') }));
+      setStepButtonEnabled(false);
       emitErrorEmpty(t('layers.service'));
     }
 
@@ -729,17 +759,29 @@ export function AddNewLayer(): JSX.Element {
       setIsLoading(false);
     }
 
+    // Clear errors when going back
+    if (activeStep === 1) {
+      setUrlError(false);
+      setUrlErrorMessage('');
+    }
+    if (activeStep === 2) {
+      setServiceTypeError(false);
+      setServiceTypeErrorMessage('');
+    }
+
     setActiveStep((prevActiveStep: number) => prevActiveStep - 1);
     // We assume previous step ok, so enable continue button
     setStepButtonEnabled(true);
   };
 
   /**
-   * Set layerType from form input (Step 2)
-   *
-   * @param event - TextField event
+   * Set layerType from form input (Step 2).
    */
   const handleSelectType = (event: SelectChangeEvent<unknown>): void => {
+    // Clear previous errors when user makes a selection
+    setServiceTypeError(false);
+    setServiceTypeErrorMessage('');
+
     setLayerType(event.target.value as TypeInitialGeoviewLayerType);
     setLayerTree(undefined);
     setLayerIdsToAdd([]);
@@ -750,9 +792,7 @@ export function AddNewLayer(): JSX.Element {
   };
 
   /**
-   * Set the layer name from form input (Step 3)
-   *
-   * @param event - TextField event
+   * Set the layer name from form input (Step 3).
    */
   const handleNameLayer = (event: ChangeEvent<HTMLInputElement>): void => {
     setStepButtonEnabled(true);
@@ -760,9 +800,7 @@ export function AddNewLayer(): JSX.Element {
   };
 
   /**
-   * Handle keydowns on back button
-   *
-   * @param event - Keyboard event
+   * Handle keydowns on back button.
    */
   const handleBackKeyDown = (event: KeyboardEvent<HTMLButtonElement>): void => {
     if (event.key === 'Enter') {
@@ -772,8 +810,7 @@ export function AddNewLayer(): JSX.Element {
   };
 
   /**
-   * Handle keydowns on continue/finish button
-   * @param event - Keyboard event
+   * Handle keydowns on continue/finish button.
    */
   const handleNextKeyDown = (event: KeyboardEvent<HTMLButtonElement> | KeyboardEvent<HTMLDivElement>): void => {
     if (event.key === 'Enter' && stepButtonEnabled) {
@@ -840,11 +877,16 @@ export function AddNewLayer(): JSX.Element {
     if (activeStep === 0) {
       // Validate URL for step 1
       const validateUrl = async (): Promise<void> => {
+        // Clear previous errors when input changes
+        setUrlError(false);
+        setUrlErrorMessage('');
         // Allow blob URLs (local files) and GeoCore UUIDs without validation
         if (layerURL.startsWith('blob') || isValidUUID(layerURL.trim())) {
           // Check if this UUID is already loaded on the map
           if (isValidUUID(layerURL.trim()) && layerController.getGeoviewLayerIds().includes(layerURL.trim())) {
             setStepButtonEnabled(false);
+            setUrlError(true);
+            setUrlErrorMessage(t('layers.errorUrlDuplicateUUID'));
             uiController.addMessage('error', 'layers.errorUrlDuplicateUUID', {});
             return;
           }
@@ -857,26 +899,44 @@ export function AddNewLayer(): JSX.Element {
           setIsLoading(true);
           try {
             const check = await validateAndPingUrl(layerURL);
-            logger.logWarning('URL validation check', check);
+            logger.logDebug('URL validation check', check);
             const isOk = check.isValid && check.isReachable;
             setStepButtonEnabled(isOk);
-            if (!isOk && check.error) {
-              uiController.addMessage('error', 'layers.errorUrlUnreachable', {});
-            } else if (!isOk && !check.isValid) {
-              uiController.addMessage('error', 'layers.errorUrlInvalid', {});
+            if (!isOk) {
+              setUrlError(true);
+              if (check.error) {
+                setUrlErrorMessage(t('layers.errorUrlUnreachable'));
+                uiController.addMessage('error', 'layers.errorUrlUnreachable', {});
+              } else if (!check.isValid) {
+                setUrlErrorMessage(t('layers.errorUrlInvalid'));
+                uiController.addMessage('error', 'layers.errorUrlInvalid', {});
+              } else {
+                setUrlErrorMessage(t('layers.errorUrlUnreachable'));
+                uiController.addMessage('error', 'layers.errorUrlUnreachable', {});
+              }
             }
+          } catch (error: unknown) {
+            // Handle exceptions from validateAndPingUrl (network errors, timeouts, etc.)
+            logger.logError('URL validation failed', error);
+            setStepButtonEnabled(false);
+            setUrlError(true);
+            setUrlErrorMessage(t('layers.errorUrlUnreachable'));
+            uiController.addMessage('error', 'layers.errorUrlUnreachable', {});
           } finally {
             setIsLoading(false);
           }
         } else {
+          // This else block MUST remain outside the try-catch
+          // It handles invalid UUID format and non-HTTPS URLs
           setStepButtonEnabled(false);
           if (layerURL.trim() !== '') {
-            // Input isn't a blob, valid UUID, or HTTPS URL — determine what the user likely intended
             const trimmedUrl = layerURL.trim();
+            setUrlError(true);
             if (!isValidUUID(trimmedUrl) && !trimmedUrl.includes('.') && !trimmedUrl.includes('/')) {
-              // No dots or slashes means it's not a URL — likely a malformed UUID
+              setUrlErrorMessage(t('layers.errorUrlInvalidUUID'));
               uiController.addMessage('error', 'layers.errorUrlInvalidUUID', {});
             } else {
+              setUrlErrorMessage(t('layers.errorUrlHttps'));
               uiController.addMessage('error', 'layers.errorUrlHttps', {});
             }
           }
@@ -895,7 +955,19 @@ export function AddNewLayer(): JSX.Element {
     }
     if (activeStep === 2 && layerIdsToAdd.length > 0) setStepButtonEnabled(true);
     if (activeStep === 2 && !layerIdsToAdd.length) setStepButtonEnabled(false);
-  }, [layerURL, activeStep, layerIdsToAdd, layerType, uiController, layerController]);
+  }, [layerURL, activeStep, layerIdsToAdd, layerType, uiController, layerController, t]);
+
+  /**
+   * Manages focus when Step 2 validation errors occur.
+   */
+  useEffect(() => {
+    logger.logTraceUseEffect('ADD-NEW-LAYER - Step 2 error focus management', serviceTypeError);
+
+    if (activeStep === 1 && serviceTypeError) {
+      const element = serviceTypeRef.current?.querySelector<HTMLElement>('[role="combobox"]');
+      element?.focus();
+    }
+  }, [serviceTypeError, activeStep]);
 
   /**
    * Manages input focus when the active step changes.
@@ -996,7 +1068,7 @@ export function AddNewLayer(): JSX.Element {
         orientation="vertical"
         sx={{
           '& .MuiStepLabel-label:not(.Mui-active):not(.Mui-completed)': {
-            color: (theme) => theme.palette.geoViewColor?.textColor.light[200], // WCAG - Matches global placeholder text color
+            color: theme.palette.geoViewColor?.textColor.light[200], // WCAG - Matches global placeholder text color
           },
         }}
         steps={[
@@ -1014,6 +1086,8 @@ export function AddNewLayer(): JSX.Element {
                     displayURL={displayURL}
                     disabledLayerTypes={disabledLayerTypes}
                     uploadButtonRef={uploadButtonRef}
+                    urlError={urlError}
+                    urlErrorMessage={urlErrorMessage}
                   />
                   <NavButtons isFirst handleNext={handleStep1} />{' '}
                 </Box>
@@ -1027,30 +1101,39 @@ export function AddNewLayer(): JSX.Element {
             stepContent: {
               children: (
                 <>
-                  <Select
-                    fullWidth
-                    labelId="service-type-label"
-                    value={layerType}
-                    onChange={handleSelectType}
-                    label={t('layers.service')}
-                    variant="standard"
-                    MenuProps={{ container: shellContainer }}
-                    inputLabel={{
-                      id: 'service-type-label',
-                    }}
-                    ref={serviceTypeRef}
-                    menuItems={layerOptions
-                      .filter(([value]) => {
-                        return !disabledLayerTypes.includes(value as TypeInitialGeoviewLayerType);
-                      })
-                      .map(([value, label]) => ({
-                        key: value,
-                        item: {
-                          value,
-                          children: label,
-                        },
-                      }))}
-                  />
+                  <Box>
+                    <Select
+                      fullWidth
+                      labelId="service-type-label"
+                      value={layerType}
+                      onChange={handleSelectType}
+                      label={t('layers.service')}
+                      variant="standard"
+                      MenuProps={{ container: shellContainer }}
+                      inputLabel={{
+                        id: 'service-type-label',
+                      }}
+                      formControlProps={{ error: serviceTypeError }}
+                      ref={serviceTypeRef}
+                      aria-describedby={serviceTypeError ? 'service-type-error' : undefined}
+                      menuItems={layerOptions
+                        .filter(([value]) => {
+                          return !disabledLayerTypes.includes(value as TypeInitialGeoviewLayerType);
+                        })
+                        .map(([value, label]) => ({
+                          key: value,
+                          item: {
+                            value,
+                            children: label,
+                          },
+                        }))}
+                    />
+                    {serviceTypeError && (
+                      <FormHelperText id="service-type-error" error role="status" aria-live="polite" aria-atomic="true">
+                        {serviceTypeErrorMessage}
+                      </FormHelperText>
+                    )}
+                  </Box>
                   <NavButtons handleNext={handleStep2} />
                 </>
               ),
@@ -1080,7 +1163,7 @@ export function AddNewLayer(): JSX.Element {
                         sx={{
                           // Targets the inner content wrapper when the main item or root receives native JS focus
                           '& .MuiTreeItem-root:focus > .MuiTreeItem-content, & .MuiTreeItem-root:focus-within > .MuiTreeItem-content': {
-                            backgroundColor: (theme) => theme.palette.action.hover,
+                            backgroundColor: theme.palette.action.hover,
                           },
                         }}
                       >

@@ -1,6 +1,6 @@
 import type { Ref } from 'react';
 import { forwardRef, useMemo } from 'react';
-import type { InputLabelProps, FormControlProps, SelectChangeEvent, MenuProps } from '@mui/material';
+import type { InputLabelProps, FormControlProps, SelectChangeEvent, MenuProps, SxProps, Theme } from '@mui/material';
 import { FormControl, InputLabel, MenuItem, Select as MaterialSelect } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { getSxClasses } from '@/ui/select/select-style';
@@ -29,7 +29,8 @@ type TypeSelectProps = {
    * Example: MenuProps={{ container: shellContainer }}
    */
   MenuProps?: Partial<MenuProps>;
-};
+  sx?: SxProps<Theme>;
+} & React.AriaAttributes;
 
 /**
  * Menu Item properties
@@ -82,6 +83,7 @@ function SelectUI(props: TypeSelectProps, ref: Ref<HTMLDivElement>): JSX.Element
     disabled,
     variant = 'standard',
     MenuProps,
+    sx,
     ...selectProps
   } = props;
 
@@ -89,40 +91,56 @@ function SelectUI(props: TypeSelectProps, ref: Ref<HTMLDivElement>): JSX.Element
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
-  const memoLabelComponent = useMemo(
-    () =>
-      label ? (
-        <InputLabel id={labelId} sx={sxClasses.label} {...inputLabel}>
-          {label}
-        </InputLabel>
-      ) : null,
-    [label, labelId, sxClasses.label, inputLabel]
-  );
+  /**
+   * Memoized label component.
+   */
+  const memoLabelComponent = useMemo((): JSX.Element | null => {
+    // Log
+    logger.logTraceUseMemo('ui/select/select - memoLabelComponent', label);
 
-  // Memoize menu items rendering
-  const memoMenuItemsComponent = useMemo(
-    () =>
-      menuItems.map((menuItem) => (
-        <MenuItem key={menuItem.item.value} value={menuItem.item.value} sx={sxClasses.menuItem}>
-          {menuItem.item.children}
-        </MenuItem>
-      )),
-    [menuItems, sxClasses.menuItem]
-  );
+    return label ? (
+      <InputLabel id={labelId} sx={sxClasses.label} {...inputLabel}>
+        {label}
+      </InputLabel>
+    ) : null;
+  }, [label, labelId, sxClasses.label, inputLabel]);
 
-  // Memoize the FormControl props
-  const memoFormControlProps = useMemo(
-    () => ({
+  /**
+   * Memoized array of MenuItem components generated from the menuItems prop.
+   */
+  const memoMenuItemsComponent = useMemo((): JSX.Element[] => {
+    // Log
+    logger.logTraceUseMemo('ui/select/select - memoMenuItemsComponent', menuItems);
+
+    return menuItems.map((menuItem) => (
+      <MenuItem key={menuItem.item.value} value={menuItem.item.value} sx={sxClasses.menuItem}>
+        {menuItem.item.children}
+      </MenuItem>
+    ));
+  }, [menuItems, sxClasses.menuItem]);
+
+  /**
+   * Memoized FormControl props.
+   */
+  const memoFormControlProps = useMemo((): Record<string, unknown> => {
+    // Log
+    logger.logTraceUseMemo('ui/select/select - memoFormControlProps', formControlProps);
+
+    return {
       fullWidth,
       variant,
       ...formControlProps,
-    }),
-    [fullWidth, variant, formControlProps]
-  );
+    };
+  }, [fullWidth, variant, formControlProps]);
 
-  // Memoize the MaterialSelect props
-  const memoSelectProps = useMemo(
-    () => ({
+  /**
+   * Memoized Select props.
+   */
+  const memoSelectProps = useMemo((): Record<string, unknown> => {
+    // Log
+    logger.logTraceUseMemo('ui/select/select - memoSelectProps', selectProps);
+
+    return {
       labelId,
       id,
       value,
@@ -132,12 +150,31 @@ function SelectUI(props: TypeSelectProps, ref: Ref<HTMLDivElement>): JSX.Element
       sx: sxClasses.formControl,
       ...(MenuProps ? { MenuProps } : {}),
       ...selectProps,
-    }),
-    [labelId, id, value, onChange, disabled, variant, sxClasses.formControl, MenuProps, selectProps]
-  );
+    };
+  }, [labelId, id, value, onChange, disabled, variant, sxClasses.formControl, MenuProps, selectProps]);
+
+  /**
+   * Merge sx with default and custom styles.
+   */
+  const memoMergedSx = useMemo((): SxProps<Theme> | undefined => {
+    // Log
+    logger.logTraceUseMemo('ui/select/select - memoMergedSx', sx);
+
+    // Collect all sx sources that exist
+    const sources = [formControlProps.sx, sx].filter(Boolean);
+
+    // No sources? Return undefined
+    if (sources.length === 0) return undefined;
+
+    // Single source? Return it directly (avoids unnecessary array wrapping)
+    if (sources.length === 1) return sources[0];
+
+    // Multiple sources? Flatten to avoid nested arrays (MUI handles array sx)
+    return sources.flat() as SxProps<Theme>;
+  }, [formControlProps.sx, sx]);
 
   return (
-    <FormControl {...memoFormControlProps}>
+    <FormControl {...memoFormControlProps} sx={memoMergedSx}>
       {memoLabelComponent}
       <MaterialSelect {...memoSelectProps} ref={ref}>
         {memoMenuItemsComponent}
