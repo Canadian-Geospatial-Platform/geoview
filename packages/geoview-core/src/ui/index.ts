@@ -55,6 +55,7 @@ export {
   TableRow,
   FormControl,
   FormControlLabel,
+  FormHelperText,
   InputLabel,
   Radio,
   RadioGroup,
