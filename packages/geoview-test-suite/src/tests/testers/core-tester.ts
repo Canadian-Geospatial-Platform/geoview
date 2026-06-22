@@ -129,7 +129,7 @@ export class CoreTester extends GVAbstractTester {
       async (test) => {
         const url = GVAbstractTester.GEOMET_URL;
         test.addStep(`Pinging WMS service URL: ${url}...`);
-        const result = await validateAndPingUrl(url, undefined);
+        const result = await validateAndPingUrl(url);
         return result;
       },
       (test, result) => {

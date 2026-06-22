@@ -1026,13 +1026,13 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   /**
    * Utility function allowing to wait for the layer to be loaded at least once.
    *
-   * Sync-checks first, then subscribes to the layer-first-loaded and layer-error events. Resolves with `true`
+   * Sync-checks first, then subscribes to the layer-first-loaded and layer-error events. Resolves
    * when the layer reaches its first loaded state; rejects when the layer enters the `error` state before that.
    *
-   * @returns A promise that resolves with `true` once the layer has been loaded at least once
+   * @returns A promise that resolves once the layer has been loaded at least once
    * @throws {LayerStatusErrorError} When the layer enters the `error` state before being loaded
    */
-  waitLoadedOnce(): Promise<void> {
+  waitForLoadedOnce(): Promise<void> {
     // Sync check: already loaded once
     if (this.loadedOnce) return Promise.resolve();
 
@@ -1072,7 +1072,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @returns A promise that resolves once the layer status is `loaded`
    * @throws {LayerStatusErrorError} When the layer enters the `error` state before reaching `loaded`
    */
-  waitLoadedStatus(): Promise<void> {
+  waitForLoadedStatus(): Promise<void> {
     // Sync check: already loaded
     if (this.getLayerStatus() === 'loaded') return Promise.resolve();
 
@@ -1112,7 +1112,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @returns A promise that resolves once the layer legend has been queried
    * @throws {LayerStatusErrorError} When the layer enters the `error` state before the legend is queried
    */
-  waitLegendQueried(): Promise<void> {
+  waitForLegendQueried(): Promise<void> {
     // Sync check: legend already queried
     if (this.getLegend()) return Promise.resolve();
 
@@ -1699,7 +1699,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     this.getOLLayer().changed();
 
     // Emit event
-    this.emitLayerFilterApplied({
+    this.#emitLayerFilterApplied({
       filter: layerFilters,
       filterCategory: filterCategoryChanged,
     });
@@ -1782,6 +1782,17 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   }
 
   /**
+   * Returns a promise that resolves the next time the layer style changed event fires.
+   *
+   * @param filter - Optional filter predicate. When provided, only events passing the filter resolve the promise
+   * @returns A promise that resolves with the style changed event payload
+   */
+  onceLayerStyleChanged(filter?: (event: StyleChangedEvent) => boolean): Promise<StyleChangedEvent> {
+    // Register a one-shot event handler that resolves a promise
+    return EventHelper.onceEventPromise(this.#onLayerStyleChangedHandlers, filter);
+  }
+
+  /**
    * Registers a layer style changed event handler.
    *
    * @param callback - The callback to be executed whenever the event is emitted
@@ -1807,7 +1818,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    *
    * @param event - The event to emit
    */
-  protected emitLayerFilterApplied(event: LayerFilterAppliedEvent): void {
+  #emitLayerFilterApplied(event: LayerFilterAppliedEvent): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onLayerFilterAppliedHandlers, event);
   }
@@ -1839,6 +1850,17 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   #emitLayerFirstLoaded(): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onLayerFirstLoadedHandlers, {});
+  }
+
+  /**
+   * Returns a promise that resolves the next time the layer first loaded event fires.
+   *
+   * @param filter - Optional filter predicate. When provided, only events passing the filter resolve the promise
+   * @returns A promise that resolves with the layer base event payload
+   */
+  onceLayerFirstLoaded(filter?: (event: LayerBaseEvent) => boolean): Promise<LayerBaseEvent> {
+    // Register a one-shot event handler that resolves a promise
+    return EventHelper.onceEventPromise(this.#onLayerFirstLoadedHandlers, filter);
   }
 
   /**
@@ -1928,6 +1950,17 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   #emitLayerError(event: LayerErrorEvent): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onLayerErrorHandlers, event);
+  }
+
+  /**
+   * Returns a promise that resolves the next time the layer error event fires.
+   *
+   * @param filter - Optional filter predicate. When provided, only events passing the filter resolve the promise
+   * @returns A promise that resolves with the layer error event payload
+   */
+  onceLayerError(filter?: (event: LayerErrorEvent) => boolean): Promise<LayerErrorEvent> {
+    // Register a one-shot event handler that resolves a promise
+    return EventHelper.onceEventPromise(this.#onLayerErrorHandlers, filter);
   }
 
   /**

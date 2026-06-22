@@ -63,7 +63,7 @@ export interface TypeTabsProps {
 
 // Define scroll button component outside of Tabs
 // TODO: Unmemoize this component, probably, because it's in 'ui' folder
-const CustomScrollButton = memo(function CustomScrollButtonFct({ direction, ...props }: TabScrollButtonProps) {
+const CustomScrollButton = memo(({ direction, ...props }: TabScrollButtonProps) => {
   return (
     <TabScrollButton
       {...props}
@@ -74,6 +74,7 @@ const CustomScrollButton = memo(function CustomScrollButtonFct({ direction, ...p
     />
   );
 });
+CustomScrollButton.displayName = 'CustomScrollButton';
 
 /**
  * Creates a standardized tab element ID.

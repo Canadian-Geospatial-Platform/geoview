@@ -165,7 +165,7 @@ export class UUIDmapConfigReader {
           const idClean = `${layerId.split('.')[1]}`;
 
           // Get Geocore custom config layer entries values
-          // TODO: Modification done only for WMS and esriDynamic... If we have esriFeature, esriImage later, we will need to fix
+          // TODO: INVESTIGATE - Modification done only for WMS and esriDynamic... If we have esriFeature, esriImage later, we will need to fix
           // TO.DOCONT: These 4 types are the only one stored in RCS
           const customGeocoreLayerConfig = this.#getGeocoreCustomLayerConfig(resultData, lang);
 

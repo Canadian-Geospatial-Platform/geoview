@@ -169,7 +169,7 @@ export class GeochartTester extends GVAbstractTester {
     test.addStep(`Waiting for its layer 'loaded' status...`);
 
     // Wait until the layer has at least loaded once
-    await layer.waitLoadedOnce();
+    await layer.waitForLoadedOnce();
 
     // Update the step
     test.addStep(`Perform query operation at given coordinates...`);

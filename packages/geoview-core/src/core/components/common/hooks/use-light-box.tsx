@@ -1,4 +1,4 @@
-import { memo, useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Box } from '@/ui';
 import type { LightBoxSlides } from '@/core/components/lightbox/lightbox';
 import { LightboxImg } from '@/core/components/lightbox/lightbox';
@@ -24,22 +24,21 @@ interface UseLightBoxReturnType {
   LightBoxComponent: () => JSX.Element;
 }
 
-// TODO: Unmemoize this component, probably, because it's in 'common' folder
 /**
- * Base component for the lightbox, separated to avoid unnecessary re-renders of the lightbox when parent components update but lightbox props have not changed.
+ * Creates the base lightbox component.
  *
  * @param props - The properties defined in BaseLightBoxProps interface
  * @returns The base lightbox component
  */
-const BaseLightBoxComponent = memo(function BaseLightBoxComponentFct({
+function BaseLightBoxComponent({
   isLightBoxOpen,
   slides,
   slidesIndex,
   returnFocusId,
   onExit,
   onSlideChange,
-}: BaseLightBoxProps) {
-  logger.logTraceRender('components/common/use-lightbox (BaseLightBoxComponent)');
+}: BaseLightBoxProps): JSX.Element {
+  logger.logTraceRender('components/common/hooks/use-light-box (BaseLightBoxComponent)');
 
   const activeTrapGeoView = useStoreUIActiveTrapGeoView();
 
@@ -47,7 +46,7 @@ const BaseLightBoxComponent = memo(function BaseLightBoxComponentFct({
    * Handles when the user changes slides in the lightbox.
    */
   const handleSlideChange = useCallback(
-    (index: number) => {
+    (index: number): void => {
       onSlideChange?.(index);
     },
     [onSlideChange]
@@ -56,7 +55,7 @@ const BaseLightBoxComponent = memo(function BaseLightBoxComponentFct({
   /**
    * Handles when the lightbox is exited, including restoring focus to the triggering element for accessibility.
    */
-  const handleLightboxExit = useCallback(() => {
+  const handleLightboxExit = useCallback((): void => {
     onExit();
 
     if (!activeTrapGeoView) return;
@@ -77,7 +76,7 @@ const BaseLightBoxComponent = memo(function BaseLightBoxComponentFct({
   return (
     <LightboxImg open={isLightBoxOpen} slides={slides} index={slidesIndex} exited={handleLightboxExit} onSlideChange={handleSlideChange} />
   );
-});
+}
 
 /**
  * Custom hook that provides lightbox functionality for displaying images.
@@ -86,7 +85,7 @@ const BaseLightBoxComponent = memo(function BaseLightBoxComponentFct({
  */
 export function useLightBox(): UseLightBoxReturnType {
   // Log
-  logger.logTraceRenderDetailed('components/common/use-light-box');
+  logger.logTraceRenderDetailed('components/common/hooks/use-light-box');
 
   // State
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);

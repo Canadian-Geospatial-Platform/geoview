@@ -354,7 +354,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
       // If tileGrid configuration exists
       const tileGridOptions: TileGridOptions = {
         origin: tileGrid?.origin,
-        resolutions: tileGrid.resolutions, // TODO: ADD - Add a validation about the 'resolutions' property always existing?
+        resolutions: tileGrid.resolutions, // TODO: MINOR - Add a validation about the 'resolutions' property always existing?
         tileSize: tileGrid?.tileSize,
         extent: tileGrid?.extent,
       };

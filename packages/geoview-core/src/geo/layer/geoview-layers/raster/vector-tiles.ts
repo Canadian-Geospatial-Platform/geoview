@@ -171,9 +171,6 @@ export class VectorTiles extends AbstractGeoViewRaster {
     // Sure call parent
     const layer = (await super.onProcessOneLayerEntry(layerConfig)) as GVVectorTiles;
 
-    // TODO: Refactor - Layers refactoring. What is this doing? See how we can do this in the new layers. Can it be done before?
-    const resolutions = layer.getOLSource()?.getTileGrid()?.getResolutions();
-
     // Get the style
     let appliedStyle = layerConfig.getStyleUrl();
 
@@ -181,8 +178,12 @@ export class VectorTiles extends AbstractGeoViewRaster {
       // GV When viewing a style in AGOL, it will typically be given and shown to the user with f=pjson
       if (!appliedStyle.endsWith('/root.json') && !appliedStyle.endsWith('f=pjson')) appliedStyle = `${appliedStyle}/root.json`;
 
+      // Get the tile grid resolutions
+      const resolutions = layer.getOLSource()?.getTileGrid()?.getResolutions() ?? [];
+
+      // Apply the style with the resolutions
       applyStyle(layer.getOLLayer(), appliedStyle, {
-        resolutions: resolutions?.length ? resolutions : [],
+        resolutions,
       }).catch((error: unknown) => {
         // Log
         logger.logPromiseFailed('applyStyle in processOneLayerEntry in VectorTiles', error);
@@ -352,7 +353,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
     // Create the tile grid options
     const tileGridOptions: TileGridOptions = {
       origin: tileGrid?.origin,
-      resolutions: tileGrid!.resolutions, // TODO: ADD - Add a validation about the 'resolutions' property always existing?
+      resolutions: tileGrid?.resolutions ?? [], // TODO: MINOR - Add a validation about the 'resolutions' property always existing?
       tileSize: tileGrid?.tileSize,
       extent: tileGrid?.extent,
     };

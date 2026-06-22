@@ -141,10 +141,11 @@ export function AppBar(props: AppBarProps): JSX.Element {
     // Log
     logger.logTraceUseMemo('APP-BAR - panels');
 
-    // TODO: Refactor - We should find a way to make this 'dictionary of supported components' dynamic.
+    // If the map is static, empty app-bar
     if (interaction === 'static') {
       return {};
     }
+
     return {
       geolocator: { icon: <SearchIcon />, content: <Geolocator key="geolocator" /> },
       guide: { icon: <QuestionMarkIcon />, content: <Guide containerType={CONTAINER_TYPE.APP_BAR} /> },

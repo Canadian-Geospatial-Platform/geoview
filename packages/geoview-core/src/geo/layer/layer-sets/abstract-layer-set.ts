@@ -229,19 +229,10 @@ export abstract class AbstractLayerSet {
     // Early-exit on 'error'
     if (layer.getLayerStatus() === 'error') return;
 
-    // Wait for the layer to reach 'loaded' status. Sync-check first, then subscribe to the
-    // config's status-change event if not loaded yet.
+    // Wait for the layer to reach 'loaded' status if not already loaded
     if (layer.getLayerStatus() !== 'loaded') {
-      const registered = await new Promise<boolean>((resolve) => {
-        const handler: LayerStatusChangedDelegate = (sender, event) => {
-          if (event.layerStatus === 'loaded' || event.layerStatus === 'error') {
-            sender.offLayerStatusChanged(handler);
-            resolve(event.layerStatus === 'loaded');
-          }
-        };
-        layer.getLayerConfig().onLayerStatusChanged(handler);
-      });
-      if (!registered) return;
+      const event = await layer.getLayerConfig().onceLayerStatusChanged((e) => e.layerStatus === 'loaded' || e.layerStatus === 'error');
+      if (event.layerStatus !== 'loaded') return;
     }
 
     // Update the registration of all layer sets
@@ -280,15 +271,7 @@ export abstract class AbstractLayerSet {
     if (this.getRegisteredLayerConfigPaths().includes(layerPath)) return Promise.resolve();
 
     // Otherwise, subscribe and wait
-    return new Promise<void>((resolve) => {
-      const handler = (sender: AbstractLayerSet, event: LayerConfigRegisteredEvent): void => {
-        if (event.layerConfig.layerPath === layerPath) {
-          this.offLayerConfigRegistered(handler);
-          resolve();
-        }
-      };
-      this.onLayerConfigRegistered(handler);
-    });
+    return this.onceLayerConfigRegistered((event) => event.layerConfig.layerPath === layerPath).then(() => {});
   }
 
   /**
@@ -304,15 +287,7 @@ export abstract class AbstractLayerSet {
     if (this.getRegisteredLayerPaths().includes(layerPath)) return Promise.resolve();
 
     // Otherwise, subscribe and wait
-    return new Promise<void>((resolve) => {
-      const handler = (sender: AbstractLayerSet, event: LayerRegisteredEvent): void => {
-        if (event.layer.getLayerPath() === layerPath) {
-          this.offLayerRegistered(handler);
-          resolve();
-        }
-      };
-      this.onLayerRegistered(handler);
-    });
+    return this.onceLayerRegistered((event) => event.layer.getLayerPath() === layerPath).then(() => {});
   }
 
   // #endregion PUBLIC METHODS
@@ -460,6 +435,17 @@ export abstract class AbstractLayerSet {
   }
 
   /**
+   * Returns a promise that resolves the next time a layer config registered event fires.
+   *
+   * @param filter - Optional filter predicate. When provided, only events passing the filter resolve the promise
+   * @returns A promise that resolves with the event payload when layer config registered fires (and passes the filter)
+   */
+  onceLayerConfigRegistered(filter?: (event: LayerConfigRegisteredEvent) => boolean): Promise<LayerConfigRegisteredEvent> {
+    // Register a one-shot event handler that resolves a promise
+    return EventHelper.onceEventPromise(this.#onLayerConfigRegisteredHandlers, filter);
+  }
+
+  /**
    * Registers a layer config registered event callback.
    *
    * @param callback - The callback to be executed whenever the event is emitted
@@ -488,6 +474,17 @@ export abstract class AbstractLayerSet {
   #emitLayerRegistered(event: LayerRegisteredEvent): void {
     // Emit the event
     EventHelper.emitEvent(this, this.#onLayerRegisteredHandlers, event);
+  }
+
+  /**
+   * Returns a promise that resolves the next time a layer registered event fires.
+   *
+   * @param filter - Optional filter predicate. When provided, only events passing the filter resolve the promise
+   * @returns A promise that resolves with the event payload when layer registered fires (and passes the filter)
+   */
+  onceLayerRegistered(filter?: (event: LayerRegisteredEvent) => boolean): Promise<LayerRegisteredEvent> {
+    // Register a one-shot event handler that resolves a promise
+    return EventHelper.onceEventPromise(this.#onLayerRegisteredHandlers, filter);
   }
 
   /**

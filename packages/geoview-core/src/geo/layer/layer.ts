@@ -1,5 +1,4 @@
-﻿import type BaseLayer from 'ol/layer/Base';
-import type { GeoJSONObject } from 'ol/format/GeoJSON';
+﻿import type { GeoJSONObject } from 'ol/format/GeoJSON';
 import type { FitOptions } from 'ol/View';
 
 import type { TypeOutfieldsType } from '@/api/types/map-schema-types';
@@ -441,21 +440,6 @@ export class LayerApi {
   getGeoviewLayerIfExists(layerPath: string): AbstractBaseGVLayer | undefined {
     // Redirect to controller
     return this.#controllers.layerController.getGeoviewLayerIfExists(layerPath);
-  }
-
-  /**
-   * Asynchronously returns the OpenLayer layer associated to a specific layer path.
-   *
-   * Resolves immediately if the layer is already registered; otherwise waits for the next
-   * layer-registered event matching the given path.
-   * Note this function uses the 'Async' suffix to differentiate it from 'getOLLayer'.
-   *
-   * @param layerPath - The layer path to the layer's configuration
-   * @returns A promise that resolves to an OpenLayer layer associated to the layer path
-   */
-  getOLLayerAsync(layerPath: string): Promise<BaseLayer> {
-    // Redirect to controller
-    return this.#controllers.layerController.getOLLayerAsync(layerPath);
   }
 
   // #endregion LAYER CONTROLLER GETTERS REDIRECTIONS

@@ -88,7 +88,7 @@ interface SubLayerProps {
  * Memoized to avoid re-rendering all sublayer items when only one changes.
  * Self-recursive: renders its own children if present.
  */
-const Sublayer = memo(function SublayerFct({ layerPath }: SubLayerProps): JSX.Element {
+const Sublayer = memo(({ layerPath }: SubLayerProps): JSX.Element => {
   // Log
   logger.logTraceRender('components/layers/right-panel/Sublayer');
 
@@ -144,7 +144,6 @@ const Sublayer = memo(function SublayerFct({ layerPath }: SubLayerProps): JSX.El
     </ListItem>
   );
 });
-
 Sublayer.displayName = 'Sublayer';
 
 /**

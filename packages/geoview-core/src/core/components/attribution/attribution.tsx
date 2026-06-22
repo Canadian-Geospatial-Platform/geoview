@@ -27,7 +27,7 @@ const ICON_BUTTON_BASE_STYLES = {
  *
  * @returns The attribution icon button and popover
  */
-export const Attribution = memo(function AttributionFct(): JSX.Element {
+export const Attribution = memo((): JSX.Element => {
   // Log
   logger.logTraceRender('components/attribution/attribution');
 
@@ -130,3 +130,4 @@ export const Attribution = memo(function AttributionFct(): JSX.Element {
     </ClickAwayListener>
   );
 });
+Attribution.displayName = 'Attribution';

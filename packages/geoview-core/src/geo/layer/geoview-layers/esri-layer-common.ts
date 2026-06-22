@@ -354,8 +354,6 @@ export class EsriUtilities {
    * @param fieldName - Field name for which we want to get the domain
    * @returns The domain of the field, or `null` if not found
    */
-  // TODO: ESRI domains are translated to GeoView domains in the configuration. Any GeoView layer that support geoview domains can
-  // TO.DOCONT: call a method getFieldDomain that use config.source.featureInfo.outfields to find a field domain.
   static esriGetFieldDomain(fields: TypeLayerMetadataFields[], fieldName: string): codedValueType | rangeDomainType | undefined {
     // Find the field definition in the provided fields array
     return fields?.find((metadataEntry) => metadataEntry.name === fieldName)?.domain;
@@ -747,7 +745,7 @@ export class EsriUtilities {
   ): void {
     if (!esriTimeDimension?.timeExtent) return;
 
-    // TODO: Review the purpose of the singleHandle variable. It now always defaults to false and is used to set the defaultValues of the timeslider,
+    // TODO: INVESTIGATE - Review the purpose of the singleHandle variable. It now always defaults to false and is used to set the defaultValues of the timeslider,
     // TO.DOCONT: but the default values could be / should be overwritten by the config. Also, the defaultValues seem like the actual way to make the timeslider a single handle?
     // Create the time dimension
     layerConfig.setTimeDimension(DateMgt.createDimensionFromESRI(esriTimeDimension, displayDateMode, singleHandle));

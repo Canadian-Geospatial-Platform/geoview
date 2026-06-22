@@ -74,7 +74,7 @@ interface LayerListItemProps {
  * @param props - Properties defined in LayerListItemProps interface
  * @returns The layer list item element
  */
-export const LayerListItem = memo(function LayerListItemFct({ id, isSelected, layer, onListItemClick }: LayerListItemProps): JSX.Element {
+export const LayerListItem = memo(({ id, isSelected, layer, onListItemClick }: LayerListItemProps): JSX.Element => {
   // Log
   logger.logTraceRender('components/common/layer-list > LayerListItem');
 
@@ -266,6 +266,7 @@ export const LayerListItem = memo(function LayerListItemFct({ id, isSelected, la
     </ListItem>
   );
 });
+LayerListItem.displayName = 'LayerListItem';
 
 /**
  * Renders a list of layers with selection and status indicators.
@@ -278,7 +279,7 @@ export const LayerListItem = memo(function LayerListItemFct({ id, isSelected, la
  * @param props - Properties defined in LayerListProps interface
  * @returns The layer list element
  */
-export const LayerList = memo(function LayerListFct({ layerList, selectedLayerPath, onListItemClick }: LayerListProps): JSX.Element {
+export const LayerList = memo(({ layerList, selectedLayerPath, onListItemClick }: LayerListProps): JSX.Element => {
   // Log
   logger.logTraceRender('components/common/layer-list > LayerList');
 
@@ -330,3 +331,4 @@ export const LayerList = memo(function LayerListFct({ layerList, selectedLayerPa
     </List>
   );
 });
+LayerList.displayName = 'LayerList';

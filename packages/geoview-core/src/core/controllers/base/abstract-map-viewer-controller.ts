@@ -1,7 +1,9 @@
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import type { TypeGeoviewLayerConfig, TypeLayerEntryConfig } from '@/api/types/layer-schema-types';
+import type { TypeMapMouseInfo } from '@/api/types/map-schema-types';
 import { AbstractController } from './abstract-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
+import type { TypeFeatureInfoResultSet } from '@/core/stores/states/feature-info-state';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import type { GeometryApi } from '@/geo/layer/geometry/geometry';
 import type { BasemapApi } from '@/geo/layer/basemap/basemap';
@@ -75,6 +77,20 @@ export class AbstractMapViewerController extends AbstractController {
    */
   getGeometryApi(): GeometryApi {
     return this.getMapViewer().geometry;
+  }
+
+  /**
+   * Performs the map click action by setting the clicked coordinates in the map controller and querying layers at that location.
+   *
+   * @param coordinates - The coordinates of the map click event
+   * @param abortSignal - Optional signal to abort the operation
+   */
+  performMapClickAction(coordinates: TypeMapMouseInfo, abortSignal?: AbortSignal): Promise<TypeFeatureInfoResultSet> {
+    // Redirect to map controller
+    this.getControllersRegistry().mapController.setClickCoordinates(coordinates, abortSignal);
+
+    // Perform a query at the clicked lonlat using layerSetController
+    return this.getControllersRegistry().layerSetController.queryAtLonLat(coordinates.lonlat);
   }
 
   // #region STATIC METHODS

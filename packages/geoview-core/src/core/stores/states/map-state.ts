@@ -326,6 +326,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
        * Sets the view of the home button.
        *
        * @param view - The view to use
+       * @deprecated Seems unused
        */
       setHomeView: (view: TypeMapViewSettings): void => {
         set({
@@ -920,7 +921,10 @@ export const setStoreMapGeolocatorSearchArea = (mapId: string, searchItem: strin
   getStoreMapState(mapId).actions.setGeolocatorSearchArea({ searchItem, coords, bbox });
 };
 
-/** Sets the home button view settings in the store. */
+/**
+ * Sets the home button view settings in the store.
+ * @deprecated Seems unused
+ */
 export const setStoreMapHomeButtonView = (mapId: string, view: TypeMapViewSettings): void => {
   getStoreMapState(mapId).actions.setHomeView(view);
 };

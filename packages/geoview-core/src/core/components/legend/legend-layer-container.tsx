@@ -84,83 +84,86 @@ const WMSLegendImage = memo(
 );
 WMSLegendImage.displayName = 'WMSLegendImage';
 
-export const CollapsibleContent = memo(function CollapsibleContentFct({
-  layerPath,
-  initLightBox,
-  LegendLayerComponent,
-  showControls,
-  containerType,
-  collapseContainerId,
-  layerNameId,
-}: CollapsibleContentProps): JSX.Element | null {
-  // Log
-  logger.logTraceRender('components/legend/legend-layer-container - CollapsibleContent', layerPath);
+export const CollapsibleContent = memo(
+  ({
+    layerPath,
+    initLightBox,
+    LegendLayerComponent,
+    showControls,
+    containerType,
+    collapseContainerId,
+    layerNameId,
+  }: CollapsibleContentProps): JSX.Element | null => {
+    // Log
+    logger.logTraceRender('components/legend/legend-layer-container - CollapsibleContent', layerPath);
 
-  // Hooks
-  const mapId = useStoreGeoViewMapId();
-  const theme = useTheme();
-  const memoSxClasses = useMemo(() => {
-    logger.logTraceUseMemo('components/legend/legend-layer-container - CollapsibleContent - sxClasses', theme);
-    return getSxClasses(theme);
-  }, [theme]);
-  const isCollapsed = useStoreLayerLegendCollapsed(layerPath);
-  const schemaTag = useStoreLayerSchemaTag(layerPath);
-  const layerItems = useStoreLayerItems(layerPath);
-  const layerStyleConfig = useStoreLayerStyleConfig(layerPath);
-  const layerChildPaths = useStoreLayerChildPaths(layerPath);
-  const layerIcons = useStoreLayerIcons(layerPath);
-  const layerStatus = useStoreLayerStatus(layerPath);
-  const layerName = useStoreLayerName(layerPath);
+    // Hooks
+    const mapId = useStoreGeoViewMapId();
+    const theme = useTheme();
+    const memoSxClasses = useMemo(() => {
+      logger.logTraceUseMemo('components/legend/legend-layer-container - CollapsibleContent - sxClasses', theme);
+      return getSxClasses(theme);
+    }, [theme]);
+    const isCollapsed = useStoreLayerLegendCollapsed(layerPath);
+    const schemaTag = useStoreLayerSchemaTag(layerPath);
+    const layerItems = useStoreLayerItems(layerPath);
+    const layerStyleConfig = useStoreLayerStyleConfig(layerPath);
+    const layerChildPaths = useStoreLayerChildPaths(layerPath);
+    const layerIcons = useStoreLayerIcons(layerPath);
+    const layerStatus = useStoreLayerStatus(layerPath);
+    const layerName = useStoreLayerName(layerPath);
 
-  // Has at least 2 layer items and style config
-  const hasMoreThanOneItemsAndStyle = layerHasClassItems(layerItems, layerStyleConfig, 2);
+    // Has at least 2 layer items and style config
+    const hasMoreThanOneItemsAndStyle = layerHasClassItems(layerItems, layerStyleConfig, 2);
 
-  // If the layer has a legend image
-  const hasLegendImage = layerHasLegendImage(schemaTag, layerItems, layerIcons, layerStyleConfig);
+    // If the layer has a legend image
+    const hasLegendImage = layerHasLegendImage(schemaTag, layerItems, layerIcons, layerStyleConfig);
 
-  // If the layer has child layers
-  const hasChildren = layerChildPaths && layerChildPaths.length > 0;
+    // If the layer has child layers
+    const hasChildren = layerChildPaths && layerChildPaths.length > 0;
 
-  // TODO: PERFORMANCE - Early return when the no child or when layer items is 1 or when error. Search id: 39c51cfc
-  if ((layerChildPaths?.length === 0 && layerItems?.length === 1) || layerStatus === 'error') return null;
+    // TODO: PERFORMANCE - Early return when the no child or when layer items is 1 or when error. Search id: 39c51cfc
+    if ((layerChildPaths?.length === 0 && layerItems?.length === 1) || layerStatus === 'error') return null;
 
-  // If it is a WMS legend, create a specific component
-  if (hasMoreThanOneItemsAndStyle || hasChildren) {
-    return (
-      <Collapse
-        id={collapseContainerId}
-        role="region" // WCAG - aria-labelledby requires the region role to be announced by screen readers
-        aria-labelledby={layerNameId} // WCAG - Link collapsible content to its header using aria-labelledby and matching IDs
-        in={!isCollapsed}
-        sx={memoSxClasses.collapsibleContainer}
-        timeout="auto"
-        unmountOnExit
-      >
-        <List>
-          {hasChildren &&
-            layerChildPaths.map((childPath) => (
-              <LegendLayerComponent layerPath={childPath} key={childPath} showControls={showControls} containerType={containerType} />
-            ))}
-        </List>
-        {<ItemsList items={layerItems || []} layerPath={layerPath} />}
-      </Collapse>
-    );
+    // If it is a WMS legend, create a specific component
+    if (hasMoreThanOneItemsAndStyle || hasChildren) {
+      return (
+        <Collapse
+          id={collapseContainerId}
+          role="region" // WCAG - aria-labelledby requires the region role to be announced by screen readers
+          aria-labelledby={layerNameId} // WCAG - Link collapsible content to its header using aria-labelledby and matching IDs
+          in={!isCollapsed}
+          sx={memoSxClasses.collapsibleContainer}
+          timeout="auto"
+          unmountOnExit
+        >
+          <List>
+            {hasChildren &&
+              layerChildPaths.map((childPath) => (
+                <LegendLayerComponent layerPath={childPath} key={childPath} showControls={showControls} containerType={containerType} />
+              ))}
+          </List>
+          {<ItemsList items={layerItems || []} layerPath={layerPath} />}
+        </Collapse>
+      );
+    }
+
+    if (hasLegendImage) {
+      return (
+        <WMSLegendImage
+          imgSrc={layerIcons![0].iconImage!}
+          initLightBox={initLightBox}
+          legendExpanded={!isCollapsed}
+          sxClasses={memoSxClasses}
+          title={layerName}
+          mapId={mapId}
+          containerType={containerType}
+          collapseContainerId={collapseContainerId}
+        />
+      );
+    }
+
+    return null;
   }
-
-  if (hasLegendImage) {
-    return (
-      <WMSLegendImage
-        imgSrc={layerIcons![0].iconImage!}
-        initLightBox={initLightBox}
-        legendExpanded={!isCollapsed}
-        sxClasses={memoSxClasses}
-        title={layerName}
-        mapId={mapId}
-        containerType={containerType}
-        collapseContainerId={collapseContainerId}
-      />
-    );
-  }
-
-  return null;
-});
+);
+CollapsibleContent.displayName = 'CollapsibleContent';

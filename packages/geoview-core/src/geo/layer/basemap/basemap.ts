@@ -87,13 +87,6 @@ export class BasemapApi {
     this.#mapViewer = mapViewer;
     this.#mapController = mapController;
     this.basemapOptions = basemapOptions;
-
-    // TODO: CLEANUP - Remove commented code. Commenting this out doesn't seem necessary and was causing issue where the getView() wasn't ready yet (better performance causing this sync issue?)
-    // // Create the overview default basemap (no label, no shaded)
-    // this.setOverviewMap().catch((error: unknown) => {
-    //   // Log
-    //   logger.logPromiseFailed('setOverviewMap in constructor of layer/basemap', error);
-    // });
   }
 
   /** The basemap creation configuration list */
@@ -297,20 +290,12 @@ export class BasemapApi {
    * @param expectedVisible - The expected visibility state to wait for
    * @returns A promise that resolves once the visibility matches the expected state
    */
-  waitOverviewMapVisibility(expectedVisible: boolean): Promise<void> {
+  waitForOverviewMapVisibility(expectedVisible: boolean): Promise<void> {
     // Sync check
     if (this.getOverviewMapControlVisibility() === expectedVisible) return Promise.resolve();
 
-    // Subscribe to the visibility-changed event and resolve when the expected state is reached
-    return new Promise<void>((resolve) => {
-      const handler: OverviewMapControlVisibilityChangedDelegate = (sender, event) => {
-        if (event.visible === expectedVisible) {
-          this.offOverviewMapControlVisibilityChanged(handler);
-          resolve();
-        }
-      };
-      this.onOverviewMapControlVisibilityChanged(handler);
-    });
+    // Subscribe via onceOverviewMapControlVisibilityChangedPromise with a filter matching the expected state
+    return this.onceOverviewMapControlVisibilityChanged((event) => event.visible === expectedVisible).then(() => {});
   }
 
   // #endregion
@@ -834,6 +819,18 @@ export class BasemapApi {
   #emitOverviewMapControlVisibilityChanged(event: OverviewMapControlVisibilityChangedEvent): void {
     // Emit the overview map control visibility changed event for all handlers
     EventHelper.emitEvent(this, this.#onOverviewMapControlVisibilityChangedHandlers, event);
+  }
+
+  /**
+   * Registers a one-shot overview map control visibility changed event handler that resolves a promise.
+   *
+   * @param filter - Optional filter predicate to skip non-matching events without unsubscribing
+   * @returns A promise that resolves with the overview map control visibility changed event
+   */
+  onceOverviewMapControlVisibilityChanged(
+    filter?: (event: OverviewMapControlVisibilityChangedEvent) => boolean
+  ): Promise<OverviewMapControlVisibilityChangedEvent> {
+    return EventHelper.onceEventPromise(this.#onOverviewMapControlVisibilityChangedHandlers, filter);
   }
 
   /**

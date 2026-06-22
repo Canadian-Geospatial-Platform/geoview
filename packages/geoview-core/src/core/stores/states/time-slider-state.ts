@@ -101,9 +101,6 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
       });
     },
 
-    // TODO: REFACTOR - These setters reassign the whole 'timeSliderLayers' object (for all layerPaths) instead of just
-    // TO.DOCONT: changing the one for the layerPath in question. This should be changed and a hook selector should be put in
-    // TO.DOCONT: place - instead of the too-high-level: useStoreTimeSliderLayers
     actions: {
       /**
        * Adds a time slider layer.
@@ -125,12 +122,12 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
        * @param layerPath - The layer path to remove
        */
       removeTimeSliderLayer(layerPath: string): void {
-        const sliderLayers = get().timeSliderState.timeSliderLayers;
-        delete sliderLayers[layerPath];
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { [layerPath]: _removed, ...remainingLayers } = get().timeSliderState.timeSliderLayers;
         set({
           timeSliderState: {
             ...get().timeSliderState,
-            timeSliderLayers: { ...sliderLayers },
+            timeSliderLayers: remainingLayers,
           },
         });
       },
@@ -143,11 +140,10 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
        */
       setTitle(layerPath: string, title: string): void {
         const sliderLayers = get().timeSliderState.timeSliderLayers;
-        sliderLayers[layerPath].title = title;
         set({
           timeSliderState: {
             ...get().timeSliderState,
-            timeSliderLayers: { ...sliderLayers },
+            timeSliderLayers: { ...sliderLayers, [layerPath]: { ...sliderLayers[layerPath], title } },
           },
         });
       },
@@ -160,11 +156,10 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
        */
       setDescription(layerPath: string, description: string): void {
         const sliderLayers = get().timeSliderState.timeSliderLayers;
-        sliderLayers[layerPath].description = description;
         set({
           timeSliderState: {
             ...get().timeSliderState,
-            timeSliderLayers: { ...sliderLayers },
+            timeSliderLayers: { ...sliderLayers, [layerPath]: { ...sliderLayers[layerPath], description } },
           },
         });
       },
@@ -177,11 +172,10 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
        */
       setDelay(layerPath: string, delay: number): void {
         const sliderLayers = get().timeSliderState.timeSliderLayers;
-        sliderLayers[layerPath].delay = delay;
         set({
           timeSliderState: {
             ...get().timeSliderState,
-            timeSliderLayers: { ...sliderLayers },
+            timeSliderLayers: { ...sliderLayers, [layerPath]: { ...sliderLayers[layerPath], delay } },
           },
         });
       },
@@ -192,13 +186,12 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
        * @param layerPath - The layer path
        * @param displayDateFormat - The date format to use
        */
-      setDisplayDateFormat: (layerPath: string, displayDateFormat: TypeDisplayDateFormat): void => {
+      setDisplayDateFormat(layerPath: string, displayDateFormat: TypeDisplayDateFormat): void {
         const sliderLayers = get().timeSliderState.timeSliderLayers;
-        sliderLayers[layerPath].displayDateFormat = displayDateFormat;
         set({
           timeSliderState: {
             ...get().timeSliderState,
-            timeSliderLayers: { ...sliderLayers },
+            timeSliderLayers: { ...sliderLayers, [layerPath]: { ...sliderLayers[layerPath], displayDateFormat } },
           },
         });
       },
@@ -209,13 +202,12 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
        * @param layerPath - The layer path
        * @param displayDateFormatShort - The short date format to use
        */
-      setDisplayDateFormatShort: (layerPath: string, displayDateFormatShort: TypeDisplayDateFormat): void => {
+      setDisplayDateFormatShort(layerPath: string, displayDateFormatShort: TypeDisplayDateFormat): void {
         const sliderLayers = get().timeSliderState.timeSliderLayers;
-        sliderLayers[layerPath].displayDateFormatShort = displayDateFormatShort;
         set({
           timeSliderState: {
             ...get().timeSliderState,
-            timeSliderLayers: { ...sliderLayers },
+            timeSliderLayers: { ...sliderLayers, [layerPath]: { ...sliderLayers[layerPath], displayDateFormatShort } },
           },
         });
       },
@@ -226,13 +218,12 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
        * @param layerPath - The layer path
        * @param displayDateTimezone - The IANA timezone identifier
        */
-      setDisplayDateTimezone: (layerPath: string, displayDateTimezone: TimeIANA): void => {
+      setDisplayDateTimezone(layerPath: string, displayDateTimezone: TimeIANA): void {
         const sliderLayers = get().timeSliderState.timeSliderLayers;
-        sliderLayers[layerPath].displayDateTimezone = displayDateTimezone;
         set({
           timeSliderState: {
             ...get().timeSliderState,
-            timeSliderLayers: { ...sliderLayers },
+            timeSliderLayers: { ...sliderLayers, [layerPath]: { ...sliderLayers[layerPath], displayDateTimezone } },
           },
         });
       },
@@ -245,11 +236,10 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
        */
       setFiltering(layerPath: string, filtering: boolean): void {
         const sliderLayers = get().timeSliderState.timeSliderLayers;
-        sliderLayers[layerPath].filtering = filtering;
         set({
           timeSliderState: {
             ...get().timeSliderState,
-            timeSliderLayers: { ...sliderLayers },
+            timeSliderLayers: { ...sliderLayers, [layerPath]: { ...sliderLayers[layerPath], filtering } },
           },
         });
       },
@@ -262,11 +252,10 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
        */
       setLocked(layerPath: string, locked: boolean): void {
         const sliderLayers = get().timeSliderState.timeSliderLayers;
-        sliderLayers[layerPath].locked = locked;
         set({
           timeSliderState: {
             ...get().timeSliderState,
-            timeSliderLayers: { ...sliderLayers },
+            timeSliderLayers: { ...sliderLayers, [layerPath]: { ...sliderLayers[layerPath], locked } },
           },
         });
       },
@@ -279,11 +268,10 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
        */
       setReversed(layerPath: string, reversed: boolean): void {
         const sliderLayers = get().timeSliderState.timeSliderLayers;
-        sliderLayers[layerPath].reversed = reversed;
         set({
           timeSliderState: {
             ...get().timeSliderState,
-            timeSliderLayers: { ...sliderLayers },
+            timeSliderLayers: { ...sliderLayers, [layerPath]: { ...sliderLayers[layerPath], reversed } },
           },
         });
       },
@@ -324,11 +312,10 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
        */
       setStep(layerPath: string, step: number): void {
         const sliderLayers = get().timeSliderState.timeSliderLayers;
-        sliderLayers[layerPath].step = step;
         set({
           timeSliderState: {
             ...get().timeSliderState,
-            timeSliderLayers: { ...sliderLayers },
+            timeSliderLayers: { ...sliderLayers, [layerPath]: { ...sliderLayers[layerPath], step } },
           },
         });
       },
@@ -341,11 +328,10 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
        */
       setValues(layerPath: string, values: number[]): void {
         const sliderLayers = get().timeSliderState.timeSliderLayers;
-        sliderLayers[layerPath].values = values;
         set({
           timeSliderState: {
             ...get().timeSliderState,
-            timeSliderLayers: { ...sliderLayers },
+            timeSliderLayers: { ...sliderLayers, [layerPath]: { ...sliderLayers[layerPath], values } },
           },
         });
       },

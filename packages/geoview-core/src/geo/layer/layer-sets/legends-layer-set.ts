@@ -186,7 +186,7 @@ export class LegendsLayerSet extends AbstractLayerSet {
    * @param acceptNoIconsOrNoData - Optional flag. When true, a legend whose first icon is `no data` is treated as a valid resolution. Defaults to false
    * @returns A promise that resolves once the layer legend has been queried
    */
-  waitLegendQueried(layerPath: string, acceptNoIconsOrNoData = false): Promise<LegendQueriedEvent> {
+  waitForLegendQueried(layerPath: string, acceptNoIconsOrNoData = false): Promise<LegendQueriedEvent> {
     // Sync check: legend already queried
     if (getStoreLayerLegendQueryStatus(this.getMapId(), layerPath) === 'queried')
       return Promise.resolve({
@@ -197,23 +197,16 @@ export class LegendsLayerSet extends AbstractLayerSet {
         items: getStoreLayerItems(this.getMapId(), layerPath),
       });
 
-    // Subscribe to legend-changed and layer-error events; the first to fire settles the promise.
-    // GV The handlers cross-reference each other to cross-unsubscribe, so they must be forward-declared.
-    return new Promise<LegendQueriedEvent>((resolve) => {
-      const legendHandler: LegendQueriedDelegate = (sender, event): void => {
-        // Skip events from other layers — LegendsLayerSet emits for every layer registered to this map
-        if (event.layerPath !== layerPath) return;
+    // Subscribe via onceLegendQueried with a filter that matches the layer path and accepts/rejects no-data icons
+    return this.onceLegendQueried((event) => {
+      // Skip events from other layers — LegendsLayerSet emits for every layer registered to this map
+      if (event.layerPath !== layerPath) return false;
 
-        // Skip if the not accepting no data and the icon is a 'no data' image; keep waiting for the next query
-        if (!acceptNoIconsOrNoData && (event.icons?.length === 0 || event.icons?.[0]?.iconImage === 'no data')) return;
+      // Skip if not accepting no data and the icon is a 'no data' image; keep waiting for the next query
+      if (!acceptNoIconsOrNoData && (event.icons?.length === 0 || event.icons?.[0]?.iconImage === 'no data')) return false;
 
-        // Unsubscribe both handlers as the promise is now resolved
-        this.offLegendQueried(legendHandler);
-        resolve(event);
-      };
-
-      // Hook on the legend-changed and error events to resolve the promise in question
-      this.onLegendQueried(legendHandler);
+      // If we got here, the event is valid and we can resolve the promise
+      return true;
     });
   }
 
@@ -378,6 +371,16 @@ export class LegendsLayerSet extends AbstractLayerSet {
   #emitLegendQueried(event: LegendQueriedEvent): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onLegendQueriedHandlers, event);
+  }
+
+  /**
+   * Registers a one-shot legend queried event handler that resolves a promise.
+   *
+   * @param filter - Optional filter predicate to skip non-matching events without unsubscribing
+   * @returns A promise that resolves with the legend queried event
+   */
+  onceLegendQueried(filter?: (event: LegendQueriedEvent) => boolean): Promise<LegendQueriedEvent> {
+    return EventHelper.onceEventPromise(this.#onLegendQueriedHandlers, filter);
   }
 
   /**

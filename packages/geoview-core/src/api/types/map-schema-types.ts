@@ -111,7 +111,7 @@ export type TypeFooterBarTabsCustomProps = {
 export type TypeFooterBarProps = {
   tabs: {
     core: TypeValidFooterBarTabsCoreProps[];
-    custom: TypeFooterBarTabsCustomProps[]; // TODO: support custom tab by creating a Typeobject for it
+    custom: TypeFooterBarTabsCustomProps[];
   };
   selectedTab: TypeValidFooterBarTabsCoreProps;
   selectedDetailsLayerPath: string;
@@ -394,7 +394,7 @@ export const VALID_MAP_CENTER: Record<TypeValidMapProjectionCodes, Record<string
 // Map view extents for each projection
 export const MAP_EXTENTS: Record<TypeValidMapProjectionCodes, number[]> = {
   3857: [-180, 0, 80, 84],
-  // TODO: tighten these up for initial view now that we have a separate MAX_EXTENTS_RESTRICTION_LONLAT
+  // TODO: INVESTIGATE - Tighten these up for initial view now that we have a separate MAX_EXTENTS_RESTRICTION_LONLAT
   3978: [-150, -10, -30, 90],
   3573: [-180, 45, 180, 90],
 };
@@ -509,8 +509,8 @@ export const CONFIG_SHAPEFILE_TYPE = 'shapefile';
 export const VALID_ZOOM_LEVELS: number[] = [0, 20];
 
 /** Definition of the MapFeatureConfig default values. All the default values that applies to the map feature configuration are defined here. */
-// TODO: Move this in better class than here.
-// TODO: Revise default values.
+// TODO: INVESTIGATE - Move this in better class than here.
+// TODO: REVISION - Revise default values.
 // GV: The Cast operation doesn't create a real MapFeatureConfig instance because methods are missing.
 // GV: We do that only to create an object that has the default values who can be accessed using the instance property names.
 export const DEFAULT_MAP_FEATURE_CONFIG = {

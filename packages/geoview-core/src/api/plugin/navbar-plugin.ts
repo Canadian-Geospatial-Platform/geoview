@@ -57,7 +57,6 @@ export abstract class NavBarPlugin extends AbstractPlugin {
    */
   protected onAdd(): void {
     // Create button props
-    logger.logInfo('NavBar Plugin - Default onAdd');
     const buttonConfigs = this.onCreateButtonConfigs();
 
     // Set group configurations first

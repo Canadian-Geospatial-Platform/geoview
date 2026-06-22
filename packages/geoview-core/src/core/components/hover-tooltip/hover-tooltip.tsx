@@ -23,7 +23,7 @@ import {
  *
  * @returns The hover tooltip element, or null when not visible
  */
-export const HoverTooltip = memo(function HoverTooltipFct(): JSX.Element | null {
+export const HoverTooltip = memo((): JSX.Element | null => {
   // Log
   logger.logTraceRenderDetailed('components/hover-tooltip/hover-tooltip');
 
@@ -152,3 +152,4 @@ export const HoverTooltip = memo(function HoverTooltipFct(): JSX.Element | null 
     </Box>
   );
 });
+HoverTooltip.displayName = 'HoverTooltip';

@@ -45,6 +45,9 @@ export class ControllerRegistry {
   /** The data table controller used to interact with the data table. */
   readonly dataTableController: DataTableController;
 
+  /** The layer set controller used to manage the layer sets. */
+  readonly layerSetController: LayerSetController;
+
   /** The swiper controller used to interact with the swiper functionality. Only present when the swiper plugin is configured. */
   readonly swiperController?: SwiperController;
 
@@ -56,9 +59,6 @@ export class ControllerRegistry {
 
   /** The geo chart controller used to interact with the geo chart panel. Only present when the geo chart plugin is configured. */
   readonly geoChartController?: GeoChartController;
-
-  /** The layer set controller used to manage the layer sets. */
-  readonly layerSetController: LayerSetController;
 
   /** All controllers registered in this registry. */
   readonly allControllers: AbstractController[] = [];
@@ -75,8 +75,8 @@ export class ControllerRegistry {
   constructor(mapViewer: MapViewer, uiDomain: UIDomain, layerDomain: LayerDomain) {
     this.uiController = new UIController(mapViewer, this, uiDomain);
     this.mapController = new MapController(mapViewer, this);
-    this.layerController = new LayerController(mapViewer, this, layerDomain);
-    this.layerCreatorController = new LayerCreatorController(mapViewer, this, layerDomain);
+    this.layerController = new LayerController(mapViewer, this, layerDomain, uiDomain);
+    this.layerCreatorController = new LayerCreatorController(mapViewer, this, uiDomain, layerDomain);
     this.pluginController = new PluginController(mapViewer, this);
     this.detailsController = new DetailsController(mapViewer, this);
     this.dataTableController = new DataTableController(mapViewer, this);
@@ -120,6 +120,9 @@ export class ControllerRegistry {
     if (this.drawerController) this.allControllers.push(this.drawerController);
     if (this.timeSliderController) this.allControllers.push(this.timeSliderController);
     if (this.geoChartController) this.allControllers.push(this.geoChartController);
+
+    // Hook the controllers
+    this.hookControllers();
   }
 
   /**

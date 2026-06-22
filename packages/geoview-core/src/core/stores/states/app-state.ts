@@ -578,7 +578,17 @@ export const setStoreAppDisplayTheme = (mapId: string, theme: TypeDisplayTheme):
 };
 
 /**
- * Sets the timezone for date display.
+ * Sets the display date mode for date display.
+ *
+ * @param mapId - The map identifier
+ * @param displayDateMode - The display date mode (e.g. 'iso', 'long')
+ */
+export const setStoreAppDisplayDateMode = (mapId: string, displayDateMode: DisplayDateMode): void => {
+  getStoreAppState(mapId).actions.setDisplayDateMode(displayDateMode);
+};
+
+/**
+ * Sets the display date timezone for date display.
  *
  * @param mapId - The map identifier
  * @param displayDateTimezone - The IANA timezone identifier

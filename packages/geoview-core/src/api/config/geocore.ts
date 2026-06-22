@@ -135,16 +135,6 @@ export class GeoCore {
     // Validate the generated Geoview Layer Config
     ConfigValidation.validateListOfGeoviewLayerConfig(response.layers);
 
-    // TODO: CLEANUP - Remove commented code 2026-03-06 - trying to reduce the clutter with the layer name processing
-    // // In case of simplified geocoreConfig being provided, just update geoviewLayerName and the first layer
-    // // TODO refactor: this is a terrible patch to get it to work the way OSDP wants, should be changed after refactor
-    // // GV: Always the ifrst one because there is only one layer by layers array...
-    // if (layerConfig?.geoviewLayerName) {
-    //   response.layers[0].geoviewLayerName = layerConfig.geoviewLayerName;
-    //   if (response.layers[0].listOfLayerEntryConfig.length === 1)
-    //     response.layers[0].listOfLayerEntryConfig[0].setLayerName(layerConfig.geoviewLayerName);
-    // }
-
     // Always only first one
     return response.layers[0];
   }

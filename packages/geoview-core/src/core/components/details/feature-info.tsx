@@ -97,114 +97,108 @@ const EXTENT_BUFFER = 1000;
  * @param props - Properties defined in FeatureHeaderProps interface
  * @returns The feature header component
  */
-const FeatureHeader = memo(function FeatureHeaderFct({
-  iconSrc,
-  name,
-  hasGeometry,
-  hasGeochart,
-  checked,
-  onCheckChange,
-  onZoomIn,
-  onGeochart,
-}: FeatureHeaderProps): JSX.Element {
-  // Log
-  logger.logTraceRender('components/details/feature-info > FeatureHeader');
+const FeatureHeader = memo(
+  ({ iconSrc, name, hasGeometry, hasGeochart, checked, onCheckChange, onZoomIn, onGeochart }: FeatureHeaderProps): JSX.Element => {
+    // Log
+    logger.logTraceRender('components/details/feature-info > FeatureHeader');
 
-  // Hooks
-  const { t } = useTranslation<string>();
-  const theme = useTheme();
+    // Hooks
+    const { t } = useTranslation<string>();
+    const theme = useTheme();
 
-  /**
-   * Memoizes the style classes for the feature header.
-   */
-  const memoSxClasses = useMemo(() => {
-    logger.logTraceUseMemo('FEATURE-INFO - FeatureHeader - memoSxClasses', theme);
-    return getSxClasses(theme);
-  }, [theme]);
-  const isFocusTrap = useStoreUIActiveTrapGeoView();
+    /**
+     * Memoizes the style classes for the feature header.
+     */
+    const memoSxClasses = useMemo(() => {
+      logger.logTraceUseMemo('FEATURE-INFO - FeatureHeader - memoSxClasses', theme);
+      return getSxClasses(theme);
+    }, [theme]);
+    const isFocusTrap = useStoreUIActiveTrapGeoView();
 
-  // #region Handlers
+    // #region Handlers
 
-  /**
-   * Handles when the checked button is toggled.
-   */
-  const handleChecked = useCallback((): void => {
-    // Callback about the checked state providing the checked information
-    onCheckChange(!checked);
-  }, [checked, onCheckChange]);
+    /**
+     * Handles when the checked button is toggled.
+     */
+    const handleChecked = useCallback((): void => {
+      // Callback about the checked state providing the checked information
+      onCheckChange(!checked);
+    }, [checked, onCheckChange]);
 
-  // #endregion
+    // #endregion
 
-  return (
-    <Box sx={HEADER_STYLES.container}>
-      <Box sx={memoSxClasses.flexBoxAlignCenter}>
-        {iconSrc ? (
-          <Box component="img" src={iconSrc} alt="" className="layer-icon" />
-        ) : (
-          <Box component="div" aria-label={name} className="layer-icon">
-            <BrowserNotSupportedIcon />
-          </Box>
-        )}
-        <Typography sx={TYPOGRAPHY_STYLES} component="h4" variant="body1">
+    return (
+      <Box sx={HEADER_STYLES.container}>
+        <Box sx={memoSxClasses.flexBoxAlignCenter}>
           {iconSrc ? (
-            (name ?? t('details.nullValue'))
+            <Box component="img" src={iconSrc} alt="" className="layer-icon" />
           ) : (
-            <>
-              {`(${name}) `}
-              <Typography component="span" sx={{ fontStyle: 'italic' }}>
-                {t('details.notSymbolized')}
-              </Typography>
-            </>
+            <Box component="div" aria-label={name} className="layer-icon">
+              <BrowserNotSupportedIcon />
+            </Box>
           )}
-        </Typography>
-      </Box>
-      <Box
-        role="group"
-        sx={{
-          ...memoSxClasses.flexBoxAlignCenter,
-          [theme.breakpoints.down('sm')]: { display: 'none' },
-        }}
-        aria-label={t('details.featureActions')}
-      >
-        {/* Hidden in WCAG mode - keyboard users can Tab to layer panel instead */}
-        {hasGeochart && !isFocusTrap && (
+          <Typography sx={TYPOGRAPHY_STYLES} component="h4" variant="body1">
+            {iconSrc ? (
+              (name ?? t('details.nullValue'))
+            ) : (
+              <>
+                {`(${name}) `}
+                <Typography component="span" sx={{ fontStyle: 'italic' }}>
+                  {t('details.notSymbolized')}
+                </Typography>
+              </>
+            )}
+          </Typography>
+        </Box>
+        <Box
+          role="group"
+          sx={{
+            ...memoSxClasses.flexBoxAlignCenter,
+            [theme.breakpoints.down('sm')]: { display: 'none' },
+          }}
+          aria-label={t('details.featureActions')}
+        >
+          {/* Hidden in WCAG mode - keyboard users can Tab to layer panel instead */}
+          {hasGeochart && !isFocusTrap && (
+            <IconButton
+              color="primary"
+              aria-label={t('details.selectLayerAndScrollChart')}
+              tooltipPlacement="top"
+              onClick={onGeochart}
+              className="buttonOutline"
+              size="small"
+            >
+              <ChartIcon />
+            </IconButton>
+          )}
+          <IconButton
+            aria-label={t('details.keepFeatureSelected')}
+            tooltipPlacement="top"
+            aria-disabled={!hasGeometry}
+            onClick={handleChecked}
+            className="buttonOutline"
+            size="small"
+            aria-pressed={checked}
+          >
+            {checked ? <HighlightIcon /> : <HighlightOutlinedIcon />}
+          </IconButton>
           <IconButton
             color="primary"
-            aria-label={t('details.selectLayerAndScrollChart')}
+            aria-label={t('details.zoomTo')}
             tooltipPlacement="top"
-            onClick={onGeochart}
+            aria-disabled={!hasGeometry}
+            onClick={onZoomIn}
             className="buttonOutline"
             size="small"
           >
-            <ChartIcon />
+            <ZoomInSearchIcon />
           </IconButton>
-        )}
-        <IconButton
-          aria-label={t('details.keepFeatureSelected')}
-          tooltipPlacement="top"
-          aria-disabled={!hasGeometry}
-          onClick={handleChecked}
-          className="buttonOutline"
-          size="small"
-          aria-pressed={checked}
-        >
-          {checked ? <HighlightIcon /> : <HighlightOutlinedIcon />}
-        </IconButton>
-        <IconButton
-          color="primary"
-          aria-label={t('details.zoomTo')}
-          tooltipPlacement="top"
-          aria-disabled={!hasGeometry}
-          onClick={onZoomIn}
-          className="buttonOutline"
-          size="small"
-        >
-          <ZoomInSearchIcon />
-        </IconButton>
+        </Box>
       </Box>
-    </Box>
-  );
-});
+    );
+  }
+);
+FeatureHeader.displayName = 'FeatureHeader';
 
 /**
  * Creates the feature info component.
