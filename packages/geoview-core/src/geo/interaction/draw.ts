@@ -1,16 +1,16 @@
-import type { Type as OLGeomType } from 'ol/geom/Geometry';
 import { Draw as OLDraw } from 'ol/interaction';
 import type { GeometryFunction, DrawEvent as OLDrawEvent, Options as OLDrawOptions } from 'ol/interaction/Draw';
 import type { Coordinate } from 'ol/coordinate';
+import type { Type as OLGeomType } from 'ol/geom/Geometry';
 
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
 import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
+import type { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { GeoUtilities } from '@/geo/utils/utilities';
 
 import type { InteractionOptions } from './interaction';
 import { Interaction } from './interaction';
-import type { GeometryApi } from '@/geo/layer/geometry/geometry';
 
 /**
  * Supported options for drawing interactions
@@ -18,7 +18,7 @@ import type { GeometryApi } from '@/geo/layer/geometry/geometry';
 export type DrawOptions = InteractionOptions & {
   geometryGroupKey: string;
   freehand?: boolean;
-  type?: string; // TODO: Refactor - Utiliser un type dans geometry-types comme TypeVectorKeys, en changeant ceux-ci pour s'assoir sur les types OL: https://openlayers.org/en/latest/apidoc/module-ol_geom_Geometry.html#~Type
+  type?: OLGeomType;
   style?: TypeFeatureStyle;
   geometryFunction?: GeometryFunction;
 };
@@ -58,7 +58,7 @@ export class Draw extends Interaction {
     // TODO: Enhancements - Add support for more drawing options
     const olOptions: OLDrawOptions = {
       source: geomGroup.vectorSource,
-      type: (options.type as OLGeomType) || 'Polygon',
+      type: options.type ?? 'Polygon',
       style: GeoUtilities.convertTypeFeatureStyleToOpenLayersStyle(options.style),
       freehand: options.freehand,
       stopClick: true,

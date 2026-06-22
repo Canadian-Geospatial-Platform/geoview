@@ -20,7 +20,7 @@ import { useMapController } from '@/core/controllers/use-controllers';
  *
  * @returns The north arrow component
  */
-export const NorthArrow = memo(function NorthArrowFct(): JSX.Element {
+export const NorthArrow = memo((): JSX.Element => {
   logger.logTraceRender('components/north-arrow/north-arrow');
 
   // Hooks
@@ -66,6 +66,7 @@ export const NorthArrow = memo(function NorthArrowFct(): JSX.Element {
     </Box>
   );
 });
+NorthArrow.displayName = 'NorthArrow';
 
 /**
  * Creates a north pole flag marker icon.
@@ -74,7 +75,7 @@ export const NorthArrow = memo(function NorthArrowFct(): JSX.Element {
  *
  * @returns The north pole marker component
  */
-export const NorthPoleFlag = memo(function NorthPoleFlagFct(): JSX.Element {
+export const NorthPoleFlag = memo((): JSX.Element => {
   // State
   const northPoleRef = useRef<HTMLDivElement | null>(null);
 
@@ -98,3 +99,4 @@ export const NorthPoleFlag = memo(function NorthPoleFlagFct(): JSX.Element {
     </Box>
   );
 });
+NorthPoleFlag.displayName = 'NorthPoleFlag';

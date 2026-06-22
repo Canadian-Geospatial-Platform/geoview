@@ -28,7 +28,7 @@ type CrosshairProps = {
  * @param props - Crosshair properties containing the map target element
  * @returns The crosshair component, or null if inactive
  */
-export const Crosshair = memo(function CrosshairFct({ mapTargetElement }: CrosshairProps): JSX.Element | null {
+export const Crosshair = memo(({ mapTargetElement }: CrosshairProps): JSX.Element | null => {
   logger.logTraceRender('components/crosshair/crosshair');
 
   // Hooks
@@ -149,7 +149,10 @@ export const Crosshair = memo(function CrosshairFct({ mapTargetElement }: Crossh
         abortControllerRef.current?.abort();
         const controller = new AbortController();
         abortControllerRef.current = controller;
-        mapController.setClickCoordinates(currentPointerPosition, controller.signal);
+        mapController.performMapClickAction(currentPointerPosition, controller.signal).catch((error: unknown) => {
+          // Log
+          logger.logPromiseFailed('performMapClickAction in Crosshair.handleDefaultInteraction', error);
+        });
       }
     },
     [mapController]
@@ -335,3 +338,4 @@ export const Crosshair = memo(function CrosshairFct({ mapTargetElement }: Crossh
     </Box>
   );
 });
+Crosshair.displayName = 'Crosshair';

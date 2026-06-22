@@ -574,7 +574,7 @@ export class MapTester extends GVAbstractTester {
         if (!layer.getQueryable()) throw new TestError(`False precondition, the layer ${layerPath} wasn't initially queryable.`);
 
         // Wait for the layer to be loaded after the zoom, a guarantee
-        await layer.waitLoadedStatus();
+        await layer.waitForLoadedStatus();
 
         // Perform a map click using the feature info layer set
         test.addStep(`Perform query operation at given coordinates...`);
@@ -666,7 +666,7 @@ export class MapTester extends GVAbstractTester {
         if (!layer.getHoverable()) throw new TestError(`False precondition, the layer ${layerPath} wasn't initially hoverable.`);
 
         // Wait for the layer to be loaded after the zoom, a guarantee
-        await layer.waitLoadedStatus();
+        await layer.waitForLoadedStatus();
 
         // Perform a hover query using the hover feature info layer set
         test.addStep(`Perform query operation at given coordinates...`);

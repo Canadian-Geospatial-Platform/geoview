@@ -98,7 +98,7 @@ LegendListItem.displayName = 'LegendListItem';
 const CONST_NAME_LENGTH_TOOLTIP = 30;
 
 // Item list component (no memo to force re render from layers panel modifications)
-export const ItemsList = memo(function ItemsListFct({ items, layerPath }: ItemsListProps): JSX.Element | null {
+export const ItemsList = memo(({ items, layerPath }: ItemsListProps): JSX.Element | null => {
   logger.logTraceRender('components/legend/legend-layer-items');
 
   // Hooks
@@ -207,3 +207,4 @@ export const ItemsList = memo(function ItemsListFct({ items, layerPath }: ItemsL
     </List>
   );
 });
+ItemsList.displayName = 'ItemsList';

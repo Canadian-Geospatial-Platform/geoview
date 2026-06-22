@@ -170,6 +170,18 @@ export class ConfigValidation {
   }
 
   /**
+   * Check if the list of layer entry configs are validated.
+   * A layer entry config is considered validated if it is an instance of ConfigBaseClass.
+   *
+   * @param listOfLayerEntryConfig - The list of layer entry configs to check
+   * @returns True if all layer entry configs are validated, false otherwise
+   */
+  static isListOfLayerEntryConfigValidated(listOfLayerEntryConfig: ConfigClassOrType[]): boolean {
+    // Check if the layer entry configs are classes (validated) or types (not validated)
+    return listOfLayerEntryConfig.every((layerEntryConfig) => layerEntryConfig instanceof ConfigBaseClass);
+  }
+
+  /**
    * Validate and adjust the list of GeoView layer configuration.
    *
    * Errors, when expected, are logged and not thrown so that each MapConfigLayerEntry can be processed independently.

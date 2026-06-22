@@ -38,7 +38,7 @@ export function checkSelectedLayerPathList(
       // Select that one
       callbackSetStoreSelectedLayerPath(anotherLayerEntry.layerPath);
     } else {
-      // TODO: Investigate infinite loop in AppBar for statement. (Not sure if still relevant to check or how to check it?)
+      // TODO: INVESTIGATE - Infinite loop in AppBar for statement. (Not sure if still relevant to check or how to check it?)
       // None found, select none
       callbackSetStoreSelectedLayerPath('');
     }

@@ -15,8 +15,9 @@ import {
   type TypeGeoviewLayerConfig,
 } from '@/api/types/layer-schema-types';
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
+import { ConfigValidation } from '@/api/config/config-validation';
 import type { GeoViewGeoChartConfig, GeoViewTimeSliderConfig } from '@/api/config/reader/uuid-config-reader';
-import type { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
+import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { CsvLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/csv-layer-entry-config';
 import { EsriFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
@@ -34,12 +35,13 @@ import { XYZTilesLayerEntryConfig } from '@/api/config/validation-classes/raster
 import { VectorTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
-import type { DomainLayerBaseEvent, LayerDomain } from '@/core/domains/layer-domain';
+import type { LayerDomain } from '@/core/domains/layer-domain';
+import type { UIDomain } from '@/core/domains/ui-domain';
+import { generateId, isValidUUID } from '@/core/utils/utilities';
 import { formatError, NotSupportedError } from '@/core/exceptions/core-exceptions';
 import { GeoViewError, LayerEntryConfigLayerIdMissingError } from '@/core/exceptions/geoview-exceptions';
 import { LayerEntryConfigError } from '@/core/exceptions/layer-entry-config-exceptions';
 import { LayerCreatedTwiceError } from '@/core/exceptions/layer-exceptions';
-import { getStoreAppDisplayDateMode } from '@/core/stores/states/app-state';
 import {
   getStoreLayerLegendLayers,
   getStoreLayerSelectedLayerPath,
@@ -75,12 +77,13 @@ import { XYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
 import { VectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
 import { CSV } from '@/geo/layer/geoview-layers/vector/csv';
 import { WKB } from '@/geo/layer/geoview-layers/vector/wkb';
-import { ConfigValidation } from '@/api/config/config-validation';
-import { generateId, isValidUUID } from '@/core/utils/utilities';
 import { LayerGeoCoreError } from '@/core/exceptions/geocore-exceptions';
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
 
 export class LayerCreatorController extends AbstractMapViewerController {
+  /** Reference on the UI domain. */
+  #uiDomain: UIDomain;
+
   /** Reference on the layer domain. */
   #layerDomain: LayerDomain;
 
@@ -106,8 +109,9 @@ export class LayerCreatorController extends AbstractMapViewerController {
    * @param controllerRegistry - The controller registry for accessing sibling controllers
    * @param layerDomain - The layer domain to be used by the LayerCreator
    */
-  constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry, layerDomain: LayerDomain) {
+  constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry, uiDomain: UIDomain, layerDomain: LayerDomain) {
     super(mapViewer, controllerRegistry);
+    this.#uiDomain = uiDomain;
     this.#layerDomain = layerDomain;
   }
 
@@ -342,12 +346,15 @@ export class LayerCreatorController extends AbstractMapViewerController {
    * @throws {LayerCreatedTwiceError} When there already is a layer on the map with the provided geoviewLayerId
    */
   addGeoviewLayer(geoviewLayerConfig: TypeGeoviewLayerConfig, abortSignal?: AbortSignal): GeoViewLayerAddedResult {
-    // TODO: REFACTOR listOfLayerEntryConfig types - This should be dealt with the config classes and this line commented out.
-    // TO.DOCONT: Right now, this function is called when the configuration is first read and schema checked and everything and then again here when we're adding a geoviewLayerConfig.
-    // TO.DOCONT: Commenting the function from here would remove an redundancy call and it seems to be working in our templates when the line is commented. However, commenting it would
-    // TO.DOCONT: probably cause issues when this 'addGeoviewLayer' function is called by external?
-    // TO.DOCONT: PS: GeoCore also calls this 'validateListOfGeoviewLayerConfig' function from within 'createLayerConfigFromUUID'.
-    ConfigValidation.validateListOfGeoviewLayerConfig([geoviewLayerConfig]);
+    // Check if the geoviewLayerConfig has its list of layer list entry already validated or not
+    // GV It's already validated when it comes from:
+    // GV - (1) validateLayersConfigAgainstSchema (upon map initialization load or in add-new-layer component)
+    // GV - (2) GeoCore within 'createLayerConfigFromUUID'
+    // GV It's not already validated when 'addGeoviewLayer' is called directly from external
+    if (!ConfigValidation.isListOfLayerEntryConfigValidated(geoviewLayerConfig.listOfLayerEntryConfig)) {
+      // Validate the layer entry configs at last minute
+      ConfigValidation.validateListOfGeoviewLayerConfig([geoviewLayerConfig]);
+    }
 
     // If the geoviewlayerid already exists, throw
     if (this.getControllersRegistry().layerController.getGeoviewLayerIds().includes(geoviewLayerConfig.geoviewLayerId)) {
@@ -396,14 +403,15 @@ export class LayerCreatorController extends AbstractMapViewerController {
       .then(() => {
         // After each GeoCore layer loads, remove any new child paths that weren't in the original order
         parentPaths.forEach((parentPath) => {
-          const removeChildLayers = (sender: LayerCreatorController): void => {
-            sender
-              .#getAllChildPaths(parentPath)
-              .filter((childPath) => !originalOrderedLayers.includes(childPath))
-              .forEach((childPath) => sender.removeLayerUsingPath(childPath));
-            sender.offLayerConfigAdded(removeChildLayers);
-          };
-          this.onLayerConfigAdded(removeChildLayers);
+          void this.onceLayerConfigAdded().then(() => {
+            // Only process group layers — single-layer GeoCore UUIDs have no children to prune
+            const layerConfig = this.getControllersRegistry().layerController.getLayerEntryConfigIfExists(parentPath);
+            if (layerConfig instanceof GroupLayerEntryConfig) {
+              this.#getAllChildPaths(parentPath)
+                .filter((childPath) => !originalOrderedLayers.includes(childPath))
+                .forEach((childPath) => this.removeLayerUsingPath(childPath));
+            }
+          });
         });
 
         // Restore original layer order
@@ -411,16 +419,12 @@ export class LayerCreatorController extends AbstractMapViewerController {
 
         // Restore original visibility for each layer when it first loads
         originalOrderedLayers.forEach((layerPath) => {
-          const setLayerVisibility = (sender: LayerDomain, event: DomainLayerBaseEvent): void => {
-            const eventLayerPath = event.layer.getLayerPath();
-            if (layerPath === eventLayerPath) {
-              const { visible } = originalLegendLayersInfo.find((info) => info.layerPath === eventLayerPath) ?? {};
+          void this.#layerDomain
+            .onceLayerFirstLoaded((event) => event.layer.getLayerPath() === layerPath)
+            .then((event) => {
+              const { visible } = originalLegendLayersInfo.find((info) => info.layerPath === layerPath) ?? {};
               event.layer?.setVisible(visible ?? true);
-              sender.offLayerFirstLoaded(setLayerVisibility);
-            }
-          };
-          // TODO: REFACTOR - Instead of attaching on the domain, attach it on the layer itself
-          this.#layerDomain.onLayerFirstLoaded(setLayerVisibility);
+            });
         });
       })
       .catch((error: unknown) => {
@@ -712,7 +716,7 @@ export class LayerCreatorController extends AbstractMapViewerController {
     const promiseLayer = new Promise<void>((resolve, reject) => {
       // Continue the addition process
       layerBeingAdded
-        .createGeoViewLayers(getStoreAppDisplayDateMode(this.getMapId()), this.getMapViewer().getProjection(), abortSignal)
+        .createGeoViewLayers(this.#uiDomain.getDisplayDateMode(), this.getMapViewer().getProjection(), abortSignal)
         .then(() => {
           // Add the layer on the map
           this.#addToMap(layerBeingAdded, geoviewLayerConfig);
@@ -1262,6 +1266,16 @@ export class LayerCreatorController extends AbstractMapViewerController {
   #emitLayerConfigAdded(event: LayerBuilderEvent): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onLayerConfigAddedHandlers, event);
+  }
+
+  /**
+   * Registers a one-shot layer config added event handler that resolves a promise.
+   *
+   * @param filter - Optional filter predicate to skip non-matching events without unsubscribing
+   * @returns A promise that resolves with the layer builder event
+   */
+  onceLayerConfigAdded(filter?: (event: LayerBuilderEvent) => boolean): Promise<LayerBuilderEvent> {
+    return EventHelper.onceEventPromise(this.#onLayerConfigAddedHandlers, filter);
   }
 
   /**

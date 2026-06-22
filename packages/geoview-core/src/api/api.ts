@@ -1,4 +1,6 @@
 import { ConfigApi } from '@/api/config/config-api';
+import EventHelper from '@/api/events/event-helper';
+import type { EventDelegateBase } from '@/api/events/event-helper';
 
 import { Plugin } from '@/api/plugin/plugin';
 
@@ -39,6 +41,9 @@ export class API {
 
   /** List of available maps */
   #maps: Record<string, MapViewer> = {};
+
+  /** Callback delegates for the map viewer set event. */
+  #onMapViewerSetHandlers: MapViewerSetDelegate[] = [];
 
   /**
    * Initiates the event and projection objects.
@@ -97,6 +102,9 @@ export class API {
 
     // Set it
     this.#maps[mapId] = mapViewer;
+
+    // Emit the event
+    this.#emitMapViewerSet(mapViewer);
   }
 
   /**
@@ -106,12 +114,23 @@ export class API {
    * @returns A promise that resolves with the map viewer instance when/if found
    * @throws {Error} When the map with the specified ID is not found
    */
-  async getMapViewerAsync(mapId: string): Promise<MapViewer> {
+  getMapViewerAsync(mapId: string): Promise<MapViewer> {
     // Wait for the MapViewer to be available
-    await Utilities.whenThisThen(() => this.hasMapViewer(mapId));
+    return this.waitForMapViewer(mapId);
+  }
 
-    // Return the now available MapViewer
-    return this.getMapViewer(mapId);
+  /**
+   * Waits for a specific map viewer to be set via the onMapViewerSet event.
+   *
+   * @param mapId - The unique identifier of the map to wait for
+   * @returns A promise that resolves with the map viewer instance once it is set
+   */
+  waitForMapViewer(mapId: string): Promise<MapViewer> {
+    // If the map viewer already exists, return it immediately
+    if (this.hasMapViewer(mapId)) return Promise.resolve(this.getMapViewer(mapId));
+
+    // Wait for the matching map viewer set event
+    return this.onceMapViewerSet((event): boolean => event.mapViewer.mapId === mapId);
   }
 
   /**
@@ -268,6 +287,55 @@ export class API {
     return this.reload(mapId, currentMapConfig);
   }
 
+  // #region EVENTS
+
+  /**
+   * Emits a map viewer set event to all handlers.
+   *
+   * @param mapId - The map ID that was set
+   * @param mapViewer - The map viewer instance that was set
+   */
+  #emitMapViewerSet(mapViewer: MapViewer): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onMapViewerSetHandlers, { mapViewer });
+  }
+
+  /**
+   * Returns a promise that resolves the next time the map viewer set event fires.
+   *
+   * @param filter - Optional filter to only resolve when the event matches
+   * @returns A promise that resolves with the event payload when a map viewer is set
+   */
+  onceMapViewerSet(filter?: (event: MapViewerSetEvent) => boolean): Promise<MapViewer> {
+    // Register a one-shot event handler that resolves a promise
+    return EventHelper.onceEventPromise(this.#onMapViewerSetHandlers, filter).then((event) => event.mapViewer);
+  }
+
+  /**
+   * Registers a map viewer set event callback.
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback delegate that was registered
+   */
+  onMapViewerSet(callback: MapViewerSetDelegate): MapViewerSetDelegate {
+    // Register the event handler
+    return EventHelper.onEvent(this.#onMapViewerSetHandlers, callback);
+  }
+
+  /**
+   * Unregisters a map viewer set event callback.
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
+   */
+  offMapViewerSet(callback: MapViewerSetDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onMapViewerSetHandlers, callback);
+  }
+
+  // #endregion EVENTS
+
+  // #region STATIC METHODS
+
   /**
    * Applies outline to elements when keyboard is used to navigate.
    *
@@ -314,4 +382,19 @@ export class API {
     document.addEventListener('click', removeFocusedClass);
     document.addEventListener('focusout', removeFocusedClass);
   }
+
+  // #endregion STATIC METHODS
 }
+
+// #region EVENT TYPES
+
+/** The event payload for the map viewer set event. */
+export type MapViewerSetEvent = {
+  /** The map viewer instance that was set. */
+  mapViewer: MapViewer;
+};
+
+/** Delegate type for the map viewer set event. */
+export type MapViewerSetDelegate = EventDelegateBase<API, MapViewerSetEvent, void>;
+
+// #endregion EVENT TYPES

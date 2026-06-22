@@ -45,7 +45,7 @@ type GuideItem = TypeGuideObject[string];
  * @param props - Properties defined in GuideType interface
  * @returns The guide component
  */
-export const Guide = memo(function GuidePanel({ containerType }: GuideType): JSX.Element {
+export const Guide = memo(({ containerType }: GuideType): JSX.Element => {
   logger.logTraceRender('components/guide/guide');
 
   // Store
@@ -328,3 +328,4 @@ export const Guide = memo(function GuidePanel({ containerType }: GuideType): JSX
     </Box>
   );
 });
+Guide.displayName = 'Guide';

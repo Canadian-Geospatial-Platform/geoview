@@ -1894,10 +1894,6 @@ export class GVWMS extends AbstractGVRaster {
   static #logErrorThrowIfAborted(error: unknown, _message: string): void {
     // If the error is a RequestAborted error, rethrow it, we want it to be handled by the caller and not eaten by the various attempts to get the feature info
     if (error instanceof RequestAbortedError) throw error;
-
-    // Failed to retrieve features, log it as a warning
-    // TODO: CLEANUP - Remove this dead code if we determine it's better without. Was commented on 2026-06-12
-    // logger.logWarning(message, error);
   }
 
   // #endregion STATIC METHODS

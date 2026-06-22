@@ -1805,11 +1805,11 @@ export class LayerTester extends GVAbstractTester {
     test.addStep(`Waiting for the layer to be loaded...`);
 
     // Wait until the layer has at least loaded once
-    await layer.waitLoadedOnce();
+    await layer.waitForLoadedOnce();
 
     // Wait until the legend has been queried
     test.addStep(`Wait for the legend to be queried...`);
-    await this.getControllersRegistry().layerSetController.legendsLayerSet.waitLegendQueried(layerPath, acceptNoIconsOrNoData);
+    await this.getControllersRegistry().layerSetController.legendsLayerSet.waitForLegendQueried(layerPath, acceptNoIconsOrNoData);
 
     // Return the layer
     return layer;

@@ -117,7 +117,7 @@ export type ConfigVectorTilesClassOrType = VectorTilesLayerEntryConfig | VectorT
 /** Definition of the post settings type needed when the GeoView GeoJSON layers need to use a POST instead of a GET. */
 export type TypePostSettings = { header?: Record<string, string>; data: unknown };
 
-// TODO: refactor remove geoCore
+// TODO: REFACTOR - Remove geoCore from the type
 /** Type of Style to apply to the GeoView vector layer source at creation time. */
 export type TypeLayerEntryType =
   'vector' | 'vector-tile' | 'raster-tile' | 'raster-image' | 'group' | 'geoCore' | 'GeoPackage' | 'shapefile' | 'rcs';

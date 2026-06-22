@@ -49,6 +49,9 @@ export abstract class AbstractBaseGVLayer {
   /** Callback delegates for the z-index changed event */
   #onLayerZIndexChangedHandlers: LayerZIndexChangedDelegate[] = [];
 
+  /** Callback delegates for the bounds initialized event */
+  #onBoundsInitializedHandlers: BoundsInitializedDelegate[] = [];
+
   /**
    * Constructs a GeoView base layer to manage an OpenLayer layer, including group layers.
    *
@@ -225,8 +228,25 @@ export abstract class AbstractBaseGVLayer {
     this.#bounds = bounds;
     this.#bounds4326 = bounds ? Projection.transformExtentFromProj(bounds, projection, Projection.getProjectionLonLat(), stops) : undefined;
 
+    // Emit that the bounds were initialized
+    this.#emitBoundsInitialized({ bounds: this.#bounds, bounds4326: this.#bounds4326 });
+
     // Return the calculated bounds as initialized
     return bounds;
+  }
+
+  /**
+   * Waits for the layer bounds to be initialized. If the bounds are already
+   * available, resolves immediately. Otherwise, waits for the bounds initialized event.
+   *
+   * @returns A promise that resolves with the bounds in the map projection, or undefined
+   */
+  waitForBounds(): Promise<Extent | undefined> {
+    // If bounds are already initialized, resolve immediately
+    if (this.#bounds !== undefined) return Promise.resolve(this.#bounds);
+
+    // Wait for the bounds initialized event
+    return this.onceBoundsInitialized().then((event) => event.bounds);
   }
 
   /**
@@ -759,6 +779,48 @@ export abstract class AbstractBaseGVLayer {
     EventHelper.offEvent(this.#onLayerZIndexChangedHandlers, callback);
   }
 
+  /**
+   * Emits a bounds initialized event.
+   *
+   * @param event - The event to emit
+   */
+  #emitBoundsInitialized(event: BoundsInitializedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onBoundsInitializedHandlers, event);
+  }
+
+  /**
+   * Returns a promise that resolves the next time the bounds initialized event fires.
+   *
+   * @param filter - Optional filter predicate. When provided, only events passing the filter resolve the promise
+   * @returns A promise that resolves with the bounds initialized event payload
+   */
+  onceBoundsInitialized(filter?: (event: BoundsInitializedEvent) => boolean): Promise<BoundsInitializedEvent> {
+    // Register a one-shot event handler that resolves a promise
+    return EventHelper.onceEventPromise(this.#onBoundsInitializedHandlers, filter);
+  }
+
+  /**
+   * Registers a bounds initialized event handler.
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The registered callback, which can be used to unregister the event handler later
+   */
+  onBoundsInitialized(callback: BoundsInitializedDelegate): BoundsInitializedDelegate {
+    // Register the event handler
+    return EventHelper.onEvent(this.#onBoundsInitializedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a bounds initialized event handler.
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
+   */
+  offBoundsInitialized(callback: BoundsInitializedDelegate | undefined): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onBoundsInitializedHandlers, callback);
+  }
+
   // #endregion EVENTS
 
   // #region STATIC METHODS
@@ -869,3 +931,18 @@ export interface LayerZIndexChangedEvent extends LayerBaseEvent {
  * Define a delegate for the event handler function signature
  */
 export type LayerZIndexChangedDelegate = EventDelegateBase<AbstractBaseGVLayer, LayerZIndexChangedEvent, void>;
+
+/**
+ * Define an event for the delegate.
+ */
+export interface BoundsInitializedEvent extends LayerBaseEvent {
+  /** The bounds in the map projection. */
+  bounds: Extent | undefined;
+  /** The bounds in EPSG:4326. */
+  bounds4326: Extent | undefined;
+}
+
+/**
+ * Define a delegate for the event handler function signature.
+ */
+export type BoundsInitializedDelegate = EventDelegateBase<AbstractBaseGVLayer, BoundsInitializedEvent, void>;

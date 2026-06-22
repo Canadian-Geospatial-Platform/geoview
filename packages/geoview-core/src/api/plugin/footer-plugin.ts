@@ -1,5 +1,4 @@
 import type { TypeTabs } from '@/ui/tabs/tabs';
-import { logger } from '@/core/utils/logger';
 import { AbstractPlugin } from './abstract-plugin';
 import { getStoreUIFooterTabs } from '@/core/stores/states/ui-state';
 
@@ -43,9 +42,6 @@ export abstract class FooterPlugin extends AbstractPlugin {
    * Called when a footer plugin is being added
    */
   protected onAdd(): void {
-    // Log
-    // No need to log, parent class does it well already via added() function.
-
     // Set value to length of tabs from the store
     this.value = getStoreUIFooterTabs(this.mapViewer.mapId).length;
 
@@ -60,32 +56,7 @@ export abstract class FooterPlugin extends AbstractPlugin {
    * Called when a footer plugin is being removed
    */
   protected onRemove(): void {
-    // Log
-    // No need to log, parent class does it well already via remove() function.
-
     // Remove the footer tab
     if (this.value && this.mapViewer?.footerBarApi) this.mapViewer.footerBarApi.removeTab(this.footerProps!.id);
-  }
-
-  /**
-   * Selects the Plugin.
-   */
-  select(): void {
-    // Redirect
-    this.onSelect();
-  }
-
-  /**
-   * Overridable function called when the Plugin is being selected.
-   */
-  // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  protected onSelect(): void {
-    // Log
-    logger.logTraceCore('FOOTER-PLUGIN - onSelected');
-
-    // TODO: Refactor - Move 'onSelect' in AbstractPlugin class so that AppBar can eventually benefit as well?
-
-    // Nothing else here.. but inherited FooterPlugins might override this method to do stuff when they are selected!
   }
 }

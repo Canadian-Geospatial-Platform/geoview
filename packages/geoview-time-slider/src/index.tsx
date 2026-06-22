@@ -5,6 +5,7 @@ import { getStoreTimeSliderLayer } from 'geoview-core/core/stores/states/time-sl
 import { TimeSliderIcon } from 'geoview-core/ui';
 import { DateMgt, type TimeIANA, type TypeDisplayDateFormat } from 'geoview-core/core/utils/date-mgt';
 import { FooterPlugin } from 'geoview-core/api/plugin/footer-plugin';
+import { logger } from 'geoview-core/core/utils/logger';
 
 import { TimeSliderPanel } from './time-slider-panel';
 import schema from '../schema.json';
@@ -152,17 +153,20 @@ class TimeSliderPlugin extends FooterPlugin {
    * Overrides the addition of the TimeSlider Footer Plugin to make sure to set the time slider configs in the store and apply filters.
    */
   override onAdd(): void {
-    // Once the map is ready we can initialize the time slider. Layers will be registered for the time slider as they load.
-    if (this.mapViewer.mapReady) {
-      this.initTimeSliderPlugin();
-    } else {
-      this.mapViewer.onMapReady(() => {
-        this.initTimeSliderPlugin();
-      });
-    }
-
     // Call parent
     super.onAdd();
+
+    // Wait for the map to be ready
+    this.mapViewer
+      .waitForMapReady()
+      .then(() => {
+        // Initialize the time slider, layers will be registered for the time slider as they load.
+        this.initTimeSliderPlugin();
+      })
+      .catch((error: unknown) => {
+        // Log error
+        logger.logPromiseFailed('Time Slider Plugin - Error initializing Time Slider Plugin', error);
+      });
   }
 
   /**

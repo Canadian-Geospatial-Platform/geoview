@@ -1,6 +1,11 @@
-import type { TypeDisplayLanguage, TypeDisplayTheme } from '@/api/types/map-schema-types';
+import KeyboardPan from 'ol/interaction/KeyboardPan';
+import KeyboardZoom from 'ol/interaction/KeyboardZoom';
+import type { Coordinate } from 'ol/coordinate';
+
+import type { Extent, TypeDisplayLanguage, TypeDisplayTheme } from '@/api/types/map-schema-types';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
+import { logger } from '@/core/utils/logger';
 import {
   addStoreUIAppBarPanelId,
   addStoreUIFooterTab,
@@ -26,24 +31,32 @@ import {
   removeStoreAppNotification,
   setStoreAppCircularProgress,
   setStoreAppCrosshairActive,
+  setStoreAppDisplayDateMode,
   setStoreAppDisplayDateTimezone,
   setStoreAppDisplayLanguage,
   setStoreAppDisplayTheme,
   setStoreAppFullScreenActive,
   setStoreAppGuide,
 } from '@/core/stores/states/app-state';
-import { getStoreMapConfigNavBar } from '@/core/stores/states/map-state';
-import { DateMgt, type TimeIANA } from '@/core/utils/date-mgt';
+import { getStoreMapConfigNavBar, getStoreMapGeolocatorSearchArea } from '@/core/stores/states/map-state';
+import type { TimeIANA } from '@/core/utils/date-mgt';
 import type { TypeHTMLElement } from '@/core/types/global-types';
 import { formatError } from '@/core/exceptions/core-exceptions';
 import { createGuideObject, exitFullscreen, requestFullscreen } from '@/core/utils/utilities';
 import type { SnackbarType } from '@/core/utils/notifications';
 import type { NotificationDetailsType } from '@/core/components/notifications/notifications';
-import type { DomainLanguageChangedDelegate, DomainLanguageChangedEvent, UIDomain } from '@/core/domains/ui-domain';
+import type {
+  DomainDisplayDateModeChangedDelegate,
+  DomainDisplayDateModeChangedEvent,
+  DomainDisplayDateTimezoneChangedDelegate,
+  DomainDisplayDateTimezoneChangedEvent,
+  DomainLanguageChangedDelegate,
+  DomainLanguageChangedEvent,
+  DomainThemeChangedDelegate,
+  DomainThemeChangedEvent,
+  UIDomain,
+} from '@/core/domains/ui-domain';
 import type { MapViewer } from '@/geo/map/map-viewer';
-import { logger } from '@/core/utils/logger';
-import KeyboardPan from 'ol/interaction/KeyboardPan';
-import KeyboardZoom from 'ol/interaction/KeyboardZoom';
 
 /**
  * Controller responsible for managing the UI state interactions.
@@ -56,6 +69,15 @@ export class UIController extends AbstractMapViewerController {
 
   /** The bounded reference to the display language changed handler. */
   #boundedHandleDisplayLanguageChanged: DomainLanguageChangedDelegate;
+
+  /** The bounded reference to the display theme changed handler. */
+  #boundedHandleDisplayThemeChanged: DomainThemeChangedDelegate;
+
+  /** The bounded reference to the display date mode changed handler. */
+  #boundedHandleDisplayDateModeChanged: DomainDisplayDateModeChangedDelegate;
+
+  /** The bounded reference to the display date timezone changed handler. */
+  #boundedHandleDisplayDateTimezoneChanged: DomainDisplayDateTimezoneChangedDelegate;
 
   /**
    * Creates an instance of UIController.
@@ -72,6 +94,15 @@ export class UIController extends AbstractMapViewerController {
 
     // Keep a bounded reference to the handle display language changed
     this.#boundedHandleDisplayLanguageChanged = this.#handleDisplayLanguageChanged.bind(this);
+
+    // Keep a bounded reference to the handle display theme changed
+    this.#boundedHandleDisplayThemeChanged = this.#handleDisplayThemeChanged.bind(this);
+
+    // Keep a bounded reference to the handle display date mode changed
+    this.#boundedHandleDisplayDateModeChanged = this.#handleDisplayDateModeChanged.bind(this);
+
+    // Keep a bounded reference to the handle display date timezone changed
+    this.#boundedHandleDisplayDateTimezoneChanged = this.#handleDisplayDateTimezoneChanged.bind(this);
   }
 
   // #region OVERRIDES
@@ -82,12 +113,30 @@ export class UIController extends AbstractMapViewerController {
   protected override onHook(): void {
     // Listens when the language is changed in the UI domain and updates the store accordingly
     this.#uiDomain.onLanguageChanged(this.#boundedHandleDisplayLanguageChanged);
+
+    // Listens when the display theme changes
+    this.#uiDomain.onThemeChanged(this.#boundedHandleDisplayThemeChanged);
+
+    // Listens when the display date mode changes
+    this.#uiDomain.onDisplayDateModeChanged(this.#boundedHandleDisplayDateModeChanged);
+
+    // Listens when the display date timezone changes
+    this.#uiDomain.onDisplayDateTimezoneChanged(this.#boundedHandleDisplayDateTimezoneChanged);
   }
 
   /**
    * Unhooks the controller from the action.
    */
   protected override onUnhook(): void {
+    // Unhooks when the display date timezone changes
+    this.#uiDomain.offDisplayDateTimezoneChanged(this.#boundedHandleDisplayDateTimezoneChanged);
+
+    // Listens when the display date mode changes
+    this.#uiDomain.offDisplayDateModeChanged(this.#boundedHandleDisplayDateModeChanged);
+
+    // Unhooks when the display theme changes
+    this.#uiDomain.offThemeChanged(this.#boundedHandleDisplayThemeChanged);
+
     // Unhooks when the language is changed in the UI domain and updates the store accordingly
     this.#uiDomain.offLanguageChanged(this.#boundedHandleDisplayLanguageChanged);
   }
@@ -306,21 +355,19 @@ export class UIController extends AbstractMapViewerController {
    * @param theme - The display theme to set
    */
   setDisplayTheme(theme: TypeDisplayTheme): void {
-    // Save in store
-    setStoreAppDisplayTheme(this.getMapId(), theme);
+    // Set the theme in the domain
+    this.#uiDomain.setDisplayTheme(theme);
   }
 
   /**
    * Sets the display date timezone after validation.
    *
    * @param displayDateTimezone - The IANA timezone identifier to set
+   * @throws {InvalidTimezoneError} When the time zone is not a valid or supported IANA identifier
    */
   setDisplayDateTimezone(displayDateTimezone: TimeIANA): void {
-    // Validate the timezone
-    DateMgt.validateTimezone(displayDateTimezone);
-
-    // Save in store
-    setStoreAppDisplayDateTimezone(this.getMapId(), displayDateTimezone);
+    // Set the display date timezone in the domain
+    this.#uiDomain.setDisplayDateTimezone(displayDateTimezone);
   }
 
   /**
@@ -502,6 +549,16 @@ export class UIController extends AbstractMapViewerController {
     }
   }
 
+  /**
+   * Gets the current geolocator search area from the store.
+   *
+   * @returns The current geolocator search area, or undefined if not set
+   */
+  getMapGeolocatorSearchArea(): { coords: Coordinate; bbox?: Extent } | undefined {
+    // Return the store value
+    return getStoreMapGeolocatorSearchArea(this.getMapId());
+  }
+
   // #endregion PUBLIC METHODS
 
   // #region DOMAIN HANDLERS
@@ -515,7 +572,41 @@ export class UIController extends AbstractMapViewerController {
    * @param event - The language changed event containing the new language
    */
   #handleDisplayLanguageChanged(sender: UIDomain, event: DomainLanguageChangedEvent): void {
+    // Save in the store
     setStoreAppDisplayLanguage(this.getMapId(), event.language);
+  }
+
+  /**
+   * Handles the display theme changed event from the UI domain.
+   *
+   * @param sender - The UI domain that emitted the event
+   * @param event - The theme changed event containing the new theme
+   */
+  #handleDisplayThemeChanged(sender: UIDomain, event: DomainThemeChangedEvent): void {
+    // Save in the store
+    setStoreAppDisplayTheme(this.getMapId(), event.theme);
+  }
+
+  /**
+   * Handles the display date mode changed event from the UI domain.
+   *
+   * @param sender - The UI domain that emitted the event
+   * @param event - The display date mode changed event containing the new mode
+   */
+  #handleDisplayDateModeChanged(sender: UIDomain, event: DomainDisplayDateModeChangedEvent): void {
+    // Save in the store
+    setStoreAppDisplayDateMode(this.getMapId(), event.displayDateMode);
+  }
+
+  /**
+   * Handles the display date timezone changed event from the UI domain.
+   *
+   * @param sender - The UI domain that emitted the event
+   * @param event - The display date timezone changed event containing the new timezone
+   */
+  #handleDisplayDateTimezoneChanged(sender: UIDomain, event: DomainDisplayDateTimezoneChangedEvent): void {
+    // Save in the store
+    setStoreAppDisplayDateTimezone(this.getMapId(), event.displayDateTimezone);
   }
 
   // #endregion DOMAIN HANDLERS

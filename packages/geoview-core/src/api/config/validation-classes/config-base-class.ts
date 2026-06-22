@@ -488,17 +488,6 @@ export abstract class ConfigBaseClass {
   }
 
   /**
-   * Initializes the extent in the initial settings using metadata.
-   *
-   * @param extentToValidate - Optional the extent from metadata to validate and apply
-   */
-  // TODO: CHECK - This function isn't called, but I feel like it should be... What's the relationship between extent and bounds?
-  initInitialSettingsExtentFromMetadata(extentToValidate: Extent | undefined): void {
-    // Redirect
-    this.#initInitialSettingsExtent(extentToValidate);
-  }
-
-  /**
    * Initializes the bounds in the initial settings using metadata.
    *
    * @param extentToValidate - Optional the bounds from metadata to validate and apply
@@ -1275,6 +1264,17 @@ export abstract class ConfigBaseClass {
   #emitLayerStatusChanged(event: LayerStatusChangedEvent): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onLayerStatusChangedHandlers, event);
+  }
+
+  /**
+   * Returns a promise that resolves the next time the layer status changed event fires and passes the optional filter.
+   *
+   * @param filter - Optional filter predicate. When provided, only events passing the filter resolve the promise
+   * @returns A promise that resolves with the layer status changed event payload
+   */
+  onceLayerStatusChanged(filter?: (event: LayerStatusChangedEvent) => boolean): Promise<LayerStatusChangedEvent> {
+    // Register a one-shot event handler that resolves a promise
+    return EventHelper.onceEventPromise(this.#onLayerStatusChangedHandlers, filter);
   }
 
   /**

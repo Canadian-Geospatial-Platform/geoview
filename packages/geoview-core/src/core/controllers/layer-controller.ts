@@ -52,7 +52,7 @@ import {
   setStoreLayerSelectedLayersTabLayer,
   utilFindLayerAndChildrenPaths,
 } from '@/core/stores/states/layer-state';
-import { getStoreAppDisplayDateMode, getStoreAppShowLayerHighlightLayerBbox } from '@/core/stores/states/app-state';
+import { getStoreAppShowLayerHighlightLayerBbox } from '@/core/stores/states/app-state';
 import { setStoreDataTableFilter } from '@/core/stores/states/data-table-state';
 import { isStoreTimeSliderInitialized, setStoreTimeSliderFilter } from '@/core/stores/states/time-slider-state';
 import type {
@@ -90,6 +90,7 @@ import type {
   DomainLayerWMSStyleChangedEvent,
   LayerDomain,
 } from '@/core/domains/layer-domain';
+import type { UIDomain } from '@/core/domains/ui-domain';
 import { doTimeout, isValidUUID, type DelayJob } from '@/core/utils/utilities';
 import type { TemporalMode, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import type { TypeLayersViewDisplayState, TypeLegendItem } from '@/core/components/layers/types';
@@ -118,6 +119,9 @@ export class LayerController extends AbstractMapViewerController {
 
   /** The timeout duration for metadata refresh in milliseconds */
   static readonly #METADATA_REFRESHED_TIMEOUT = 5000; // When the metadata is already fresh of 5 seconds, we consider it as still fresh and we avoid trying to refresh it again to prevent multiple rapid refresh attempts.
+
+  /** The UI Domain instance associated with this controller */
+  #uiDomain: UIDomain;
 
   /** The Layer Domain instance associated with this controller */
   #layerDomain: LayerDomain;
@@ -218,12 +222,16 @@ export class LayerController extends AbstractMapViewerController {
    * @param mapViewer - The map viewer instance to associate with this controller
    * @param controllerRegistry - The controller registry for accessing sibling controllers
    * @param layerDomain - The layer domain instance to associate with this controller
+   * @param uiDomain - The UI domain instance to associate with this controller
    */
-  constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry, layerDomain: LayerDomain) {
+  constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry, layerDomain: LayerDomain, uiDomain: UIDomain) {
     super(mapViewer, controllerRegistry);
 
     // Keep the domain internally
     this.#layerDomain = layerDomain;
+
+    // Keep the UI domain internally
+    this.#uiDomain = uiDomain;
 
     // Keep a bounded reference to the handle map move end method
     this.#boundedHandleMapMoveEnd = this.#handleMapMoveEnd.bind(this);
@@ -665,6 +673,17 @@ export class LayerController extends AbstractMapViewerController {
   // #region PUBLIC METHODS - UI RELATED
 
   /**
+   * Gets the ordered layer paths.
+   *
+   * @returns The ordered layer paths
+   * @deprecated This method doesn't seem to be used anymore, remove?
+   */
+  getMapLayerOrderPaths(): string[] {
+    // Retrieve from the store
+    return getStoreLayerOrderedLayerPaths(this.getMapId());
+  }
+
+  /**
    * Sets the layer panel display state.
    *
    * @param displayState - The new display state for the layers view
@@ -691,10 +710,12 @@ export class LayerController extends AbstractMapViewerController {
   /**
    * Gets the max extent of all layers on the map, or of a provided subset of layers.
    *
+   * Waits for each layer's bounds to be initialized before computing the union.
+   *
    * @param layerIds - Identifiers or layerPaths of layers to get max extents from
-   * @returns The overall extent or undefined when no bounds are found
+   * @returns A promise that resolves with the overall extent or undefined when no bounds are found
    */
-  getExtentOfMultipleLayers(layerIds: string[] = this.getLayerEntryLayerPaths()): Extent | undefined {
+  getExtentOfMultipleLayers(layerIds: string[] = this.getLayerEntryLayerPaths()): Promise<Extent | undefined> {
     // Retrieve from the domain
     return this.#layerDomain.getExtentOfMultipleLayers(layerIds);
   }
@@ -2007,7 +2028,7 @@ export class LayerController extends AbstractMapViewerController {
    * @param layerStatus - The desired status to wait for (e.g., 'loaded', 'processed')
    * @returns A promise that resolves with the number of layers that have reached the specified status
    */
-  waitAllLayersStatus(layerStatus: TypeLayerStatus): Promise<number> {
+  waitForAllLayersStatus(layerStatus: TypeLayerStatus): Promise<number> {
     // Log
     logger.logInfo(`Waiting on layers to become ${layerStatus}`);
 
@@ -2015,27 +2036,20 @@ export class LayerController extends AbstractMapViewerController {
     const [allGoodNow, countNow] = this.checkLayerStatus(layerStatus);
     if (allGoodNow) return Promise.resolve(countNow);
 
-    // Otherwise, subscribe and wait
-    return new Promise<number>((resolve) => {
-      // Re-checks the condition; resolves and unsubscribes when met
-      const handler: DomainLayerStatusChangedDelegate = (sender, event) => {
-        const [allGood, count] = this.checkLayerStatus(layerStatus, (layerConfig) => {
+    // Subscribe via onceLayerStatusChangedAsync with a filter that re-checks the global condition on each event
+    return this.#layerDomain
+      .onceLayerStatusChanged(() => {
+        const [allGood] = this.checkLayerStatus(layerStatus, (layerConfig) => {
           // Log
           logger.logTraceDetailed(
-            `waitAllLayersStatus - waiting on layer to be '${layerStatus}'...`,
+            `waitForAllLayersStatus - waiting on layer to be '${layerStatus}'...`,
             layerConfig.layerPath,
             layerConfig.layerStatus
           );
         });
-        if (allGood) {
-          this.#layerDomain.offLayerStatusChanged(handler);
-          resolve(count);
-        }
-      };
-
-      // Subscribe to layer status changes
-      this.#layerDomain.onLayerStatusChanged(handler);
-    });
+        return allGood;
+      })
+      .then(() => this.checkLayerStatus(layerStatus)[1]);
   }
 
   /**
@@ -2048,7 +2062,7 @@ export class LayerController extends AbstractMapViewerController {
     await this.getMapViewer().waitForMapReady();
 
     // Redirect
-    return this.waitAllLayersStatus('loaded');
+    return this.waitForAllLayersStatus('loaded');
   }
 
   // #endregion PUBLIC METHODS
@@ -2600,7 +2614,7 @@ export class LayerController extends AbstractMapViewerController {
 
     // Refresh metadata on-the-fly and retry time slider registration.
     this.#layersBeingMetadataRefreshed[layerConfig.layerPath] = Date.now();
-    await layerConfig.refreshMetadata(getStoreAppDisplayDateMode(this.getMapId()));
+    await layerConfig.refreshMetadata(this.#uiDomain.getDisplayDateMode());
     this.getControllersRegistry().timeSliderController?.tryRegisterLayer(event.layer);
 
     // Force a refresh so the layer gets drawn again to confirm if the layer was rescued or not by the metadata refresh operation

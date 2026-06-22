@@ -222,7 +222,7 @@ export class DetailsTester extends GVAbstractTester {
     lonlat: Coordinate
   ): Promise<TypeFeatureInfoEntry[] | undefined> {
     // Get the layer and make sure it's in loaded status
-    await layer.waitLoadedOnce();
+    await layer.waitForLoadedOnce();
 
     // Update the step
     test.addStep(`Perform query operation at given coordinates...`);

@@ -1301,7 +1301,7 @@ export function doUntilPromise<T>(callback: () => T, promise: Promise<unknown>, 
  * @param doCallback - The function executed when checkCallback returns true or some object
  * @param failCallback - The function executed when checkCallback has failed for too long (went over the timeout)
  * @param startDate - The initial date this task was started
- * @param timeout - The duration in milliseconds until the task is aborted
+ * @param timeout - Optional duration in milliseconds until the task is aborted (undefined means no timeout)
  * @param checkFrequency - The frequency in milliseconds to callback for a check
  */
 // eslint-disable-next-line no-underscore-dangle
@@ -1310,7 +1310,7 @@ function _whenThisThenThat<T>(
   doCallback: (value: T) => void,
   failCallback: (reason?: unknown) => void,
   startDate: Date,
-  timeout: number,
+  timeout: number | undefined,
   checkFrequency: number
 ): void {
   // GV This pattern immediately calls the callback and then starts checking recursively.
@@ -1335,7 +1335,7 @@ function _whenThisThenThat<T>(
   }
 
   // If expired
-  if (Date.now() - startDate.getTime() > timeout) {
+  if (timeout !== undefined && Date.now() - startDate.getTime() > timeout) {
     // Failed, took too long, this throws an exception in typical async/await contexts
     failCallback(`Task abandoned: exceeded timeout of ${timeout} ms.`);
     return;
@@ -1357,14 +1357,14 @@ function _whenThisThenThat<T>(
  * @param checkCallback - The function executed to verify a particular condition until it's passed
  * @param doCallback - The function executed when checkCallback returns true or some object
  * @param failCallback - The function executed when checkCallback has failed for too long (went over the timeout)
- * @param timeout - The duration in milliseconds until the task is aborted (defaults to Infinity seconds)
+ * @param timeout - Optional duration in milliseconds until the task is aborted (defaults to undefined, meaning no timeout)
  * @param checkFrequency - The frequency in milliseconds to callback for a check (defaults to 100 milliseconds)
  */
 export function whenThisThenThat<T>(
   checkCallback: () => T,
   doCallback: (value: T) => void,
   failCallback: (reason?: unknown) => void,
-  timeout = Infinity,
+  timeout?: number,
   checkFrequency = 100
 ): void {
   const startDate = new Date();
@@ -1376,9 +1376,9 @@ export function whenThisThenThat<T>(
  * This method returns a Promise which the developer can use to await or use .then().catch().finally() principles.
  *
  * @param checkCallback - The function executed to verify a particular condition until it's passed
- * @param timeout - The duration in milliseconds until the task is aborted (defaults to Infinity seconds)
- * @param checkFrequency - The frequency in milliseconds to check for an update (defaults to 100 milliseconds)
- * @returns A Promise which resolves when the check passes
+ * @param timeout - Optional duration in milliseconds until the task is aborted (defaults to undefined, meaning no timeout)
+ * @param checkFrequency - Optional frequency in milliseconds to check for an update (defaults to 100 milliseconds)
+ * @returns A promise that resolves when the check passes
  */
 export function whenThisThen<T>(checkCallback: () => T, timeout?: number, checkFrequency?: number): Promise<T> {
   return new Promise<T>((resolve, reject) => {

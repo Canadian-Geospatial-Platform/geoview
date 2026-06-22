@@ -332,7 +332,7 @@ function testSuiteCreateTable(plugin) {
       Suites: <span id="suitesCompleted-${mapId}">0</span>/<span id="suitesTotal-${mapId}">0</span>
     </div>
     <div style="text-align:right;">
-      Running: <span id="testsRunning-${mapId}">0</span> | Done success: <span id="testsDoneSuccess-${mapId}" style="color:green;">0</span> | Done failed: <span id="testsDoneFailed-${mapId}" style="color:green;">0</span> | Done: <span id="testsDone-${mapId}">0</span>/<span id="testsTotal-${mapId}">0</span>
+      Running: <span id="testsRunning-${mapId}">0</span> | Success: <span id="testsDoneSuccess-${mapId}" style="color:green;">0</span> | Failed: <span id="testsDoneFailed-${mapId}" style="color:green;">0</span> | Done: <span id="testsDone-${mapId}">0</span>/<span id="testsTotal-${mapId}">0</span>
     </div>
     <button id="btnLaunchTest-${mapId}" class="btnLaunchTests" onclick="launchTests('${mapId}')" disabled="true">LAUNCH TESTS ${mapId} !</button>
     <br/><br/>

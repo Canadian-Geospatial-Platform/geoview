@@ -638,10 +638,10 @@ export class LayerSetController extends AbstractMapViewerController {
    * @param event - The map single click event containing the click coordinates
    */
   #handleMapClicked(sender: MapViewer, event: MapSingleClickEvent): void {
-    // Perform a query at the clicked lonlat
-    this.queryAtLonLat(event.lonlat).catch((error: unknown) => {
+    // Redirect to controller
+    this.performMapClickAction(event).catch((error: unknown) => {
       // Log
-      logger.logPromiseFailed('performQueryAtLonLat in #handleMapClicked in LayerSetController', error);
+      logger.logPromiseFailed('performMapClickAction in handleMapClicked', error);
     });
   }
 
@@ -666,7 +666,7 @@ export class LayerSetController extends AbstractMapViewerController {
     // Query
     this.hoverFeatureInfoLayerSet.queryLayers(event.pixel).catch((error: unknown) => {
       // Log
-      logger.logPromiseFailed('queryLayers in onMapPointerStop in HoverFeatureInfoLayerSet', error);
+      logger.logPromiseFailed('queryLayers in handleMapPointerStopped', error);
     });
   }
 

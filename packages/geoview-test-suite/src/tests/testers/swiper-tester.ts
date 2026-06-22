@@ -35,15 +35,16 @@ export class SwiperTester extends GVAbstractTester {
       async (test) => {
         // Step 1: Wait for layers to be registered (not necessarily fully loaded)
         test.addStep('Waiting for layer configs to be registered on the map...');
-        await this.getControllersRegistry().layerSetController.legendsLayerSet.waitForLayerConfigToGetRegistered(
+        const promiseWMS = this.getControllersRegistry().layerSetController.legendsLayerSet.waitForLayerConfigToGetRegistered(
           SwiperTester.SWIPER_WMS_LAYER_PATH
         );
-        await this.getControllersRegistry().layerSetController.legendsLayerSet.waitForLayerConfigToGetRegistered(
+        const promiseGeoJSON = this.getControllersRegistry().layerSetController.legendsLayerSet.waitForLayerConfigToGetRegistered(
           SwiperTester.SWIPER_GEOJSON_LAYER_PATH
         );
-        await this.getControllersRegistry().layerSetController.legendsLayerSet.waitForLayerConfigToGetRegistered(
+        const promiseOgcFeature = this.getControllersRegistry().layerSetController.legendsLayerSet.waitForLayerConfigToGetRegistered(
           SwiperTester.SWIPER_OGC_FEATURE_LAYER_PATH
         );
+        await Promise.all([promiseWMS, promiseGeoJSON, promiseOgcFeature]);
 
         // Step 2: Verify swiper starts with no active layers (config has empty layers array)
         test.addStep('Verifying swiper starts with no active layers...');

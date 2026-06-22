@@ -298,10 +298,7 @@ const config = {
       include: /\.js$/,
     }),
     new webpack.DefinePlugin({
-      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
-      'process.env': JSON.stringify({
-        NODE_ENV: process.env.NODE_ENV || 'development',
-      }),
+      'process.env.DRAGGABLE_DEBUG': JSON.stringify(undefined),
       __VERSION__: {
         major,
         minor,

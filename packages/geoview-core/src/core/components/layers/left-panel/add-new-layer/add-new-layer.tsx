@@ -367,39 +367,39 @@ export function AddNewLayer(): JSX.Element {
   // #region ERRORS
 
   /**
-   * Emits an error dialogue when a text field is empty.
+   * Shows an error when a required field is empty.
    *
-   * @param textField - Label for the TextField input that cannot be empty
+   * @param textField - The label of the required field
    */
-  const emitErrorEmpty = (textField: string): void => {
+  const showRequiredFieldError = (textField: string): void => {
     setIsLoading(false);
     uiController.addMessage('error', 'layers.errorEmpty', { textFieldName: textField });
   };
 
   /**
-   * Emits an error dialogue when no layers are selected.
+   * Shows an error when no URL or input has been provided.
    */
-  const emitErrorNone = (): void => {
+  const showNoInputError = (): void => {
     setIsLoading(false);
     uiController.addMessage('error', 'layers.errorNone', {});
   };
 
   /**
-   * Emits an error dialogue when a layer type is disabled.
+   * Shows an error when the selected layer type is disabled.
    *
-   * @param disabledType - Label for the layer type that is disabled
+   * @param disabledType - The disabled layer type identifier
    */
-  const emitErrorDisabled = (disabledType: string): void => {
+  const showDisabledLayerTypeError = (disabledType: string): void => {
     setIsLoading(false);
     uiController.addMessage('error', 'layers.errorDisabled', { layerType: disabledType });
   };
 
   /**
-   * Emits an error when the URL does not support the selected service type.
+   * Shows an error when the URL does not support the selected service type.
    *
-   * @param serviceName - Type of service provided by the URL
+   * @param serviceName - The service type that failed
    */
-  const emitErrorServer = (serviceName: string): void => {
+  const showUnsupportedServiceError = (serviceName: string): void => {
     setIsLoading(false);
     uiController.addMessage('error', 'layers.errorServer', { serviceTypeName: serviceName });
   };
@@ -409,7 +409,7 @@ export function AddNewLayer(): JSX.Element {
   // Set layer type for "Select format" step if detected (Step 1)
   const setLayerTypeIfAllowed = (layerTypeValue: TypeInitialGeoviewLayerType): boolean => {
     if (disabledLayerTypes.includes(layerTypeValue)) {
-      emitErrorDisabled(layerTypeValue);
+      showDisabledLayerTypeError(layerTypeValue);
       setLayerType('');
       setStepButtonEnabled(false);
       return false;
@@ -463,7 +463,7 @@ export function AddNewLayer(): JSX.Element {
     let valid = true;
     if (layerURL.trim() === '') {
       valid = false;
-      emitErrorNone();
+      showNoInputError();
     }
 
     const guessedLayerType = ConfigApi.guessLayerType(displayURL) || '';
@@ -557,7 +557,7 @@ export function AddNewLayer(): JSX.Element {
           setServiceTypeError(true);
           setServiceTypeErrorMessage(t('layers.errorServer', { serviceTypeName: curlayerType }));
           setStepButtonEnabled(false);
-          emitErrorServer(curlayerType);
+          showUnsupportedServiceError(curlayerType);
         }
         logger.logError(err);
       }
@@ -591,7 +591,7 @@ export function AddNewLayer(): JSX.Element {
       setServiceTypeError(true);
       setServiceTypeErrorMessage(t('layers.errorEmpty', { textFieldName: t('layers.service') }));
       setStepButtonEnabled(false);
-      emitErrorEmpty(t('layers.service'));
+      showRequiredFieldError(t('layers.service'));
     }
 
     // If we have a promise of a layer validation
@@ -624,7 +624,7 @@ export function AddNewLayer(): JSX.Element {
     if (layerIdsToAdd.length === 0) {
       if (!layerName) {
         valid = false;
-        emitErrorEmpty(t('layers.layer'));
+        showRequiredFieldError(t('layers.layer'));
       }
     }
 

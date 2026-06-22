@@ -4,6 +4,7 @@ import type { Extent } from 'ol/extent';
 import GeoJSON from 'ol/format/GeoJSON';
 import { Circle as CircleGeom, LineString } from 'ol/geom';
 import type Geometry from 'ol/geom/Geometry';
+import type { Type as OLGeomType } from 'ol/geom/Geometry';
 import Point from 'ol/geom/Point';
 import Polygon, { fromCircle } from 'ol/geom/Polygon';
 import type SimpleGeometry from 'ol/geom/SimpleGeometry';
@@ -58,8 +59,9 @@ import {
   setStoreIsSnapping,
   setStoreDrawerShortcutsEnabled,
   type StyleProps,
+  type DrawGeometryType,
 } from '@/core/stores/states/drawer-state';
-import { getStoreAppGeoviewHTMLElement, getStoreAppIsCrosshairsActive, getStoreAppDisplayLanguage } from '@/core/stores/states/app-state';
+import { getStoreAppGeoviewHTMLElement, getStoreAppIsCrosshairsActive } from '@/core/stores/states/app-state';
 import { setStoreMapClickMarker } from '@/core/stores/states/map-state';
 import type { DomainLanguageChangedDelegate, DomainLanguageChangedEvent, UIDomain } from '@/core/domains/ui-domain';
 import { formatArea, formatLength, generateId } from '@/core/utils/utilities';
@@ -229,7 +231,7 @@ export class DrawerController extends AbstractMapViewerController {
    * @param geomType - Optional geometry type to draw (uses current state if not provided)
    * @param styleInput - Optional style properties to use
    */
-  startDrawing(geomType?: string, styleInput?: StyleProps): void {
+  startDrawing(geomType?: DrawGeometryType, styleInput?: StyleProps): void {
     // Get the map id
     const mapId = this.getMapId();
 
@@ -284,7 +286,7 @@ export class DrawerController extends AbstractMapViewerController {
     } else if (currentGeomType in customGeometries) {
       draw = viewer.initDrawInteractions(DrawerController.DRAW_GROUP_KEY, 'Circle', currentStyle, customGeometries[currentGeomType]);
     } else {
-      draw = viewer.initDrawInteractions(DrawerController.DRAW_GROUP_KEY, currentGeomType, currentStyle);
+      draw = viewer.initDrawInteractions(DrawerController.DRAW_GROUP_KEY, currentGeomType as OLGeomType, currentStyle);
     }
 
     // Set up draw end event handler
@@ -1126,7 +1128,7 @@ export class DrawerController extends AbstractMapViewerController {
     // Add measurement tooltip for non-point features
     if (!(geom instanceof Point)) {
       const hideMeasurements = getStoreDrawerHideMeasurements(mapId);
-      const overlay = DrawerController.#createMeasureTooltip(feature, hideMeasurements, getStoreAppDisplayLanguage(mapId));
+      const overlay = DrawerController.#createMeasureTooltip(feature, hideMeasurements, this.#uiDomain.getLanguage());
       if (overlay) {
         viewer.map.addOverlay(overlay);
       }
@@ -1872,7 +1874,7 @@ export class DrawerController extends AbstractMapViewerController {
           if (!(olGeometry instanceof Point)) {
             // GV hideMeasurements has to be here, otherwise the value can be stale, unlike style and geomType which restart the interaction
             const hideMeasurements = getStoreDrawerHideMeasurements(mapId);
-            const newOverlay = DrawerController.#createMeasureTooltip(feature, hideMeasurements, getStoreAppDisplayLanguage(mapId));
+            const newOverlay = DrawerController.#createMeasureTooltip(feature, hideMeasurements, this.#uiDomain.getLanguage());
             if (newOverlay) {
               viewer.map.addOverlay(newOverlay);
             }
@@ -2165,9 +2167,6 @@ export class DrawerController extends AbstractMapViewerController {
    * @param action - The action that will be re-performed
    */
   #addFeaturesAction(action: DrawerHistoryAction): void {
-    // Get the map id
-    const mapId = this.getMapId();
-
     const viewer = this.getMapViewer();
     if (!viewer) return;
 
@@ -2187,7 +2186,7 @@ export class DrawerController extends AbstractMapViewerController {
       // Recreate measurement overlay
       const geom = clonedFeature.getGeometry();
       if (geom && !(geom instanceof Point)) {
-        const overlay = DrawerController.#createMeasureTooltip(clonedFeature, false, getStoreAppDisplayLanguage(mapId));
+        const overlay = DrawerController.#createMeasureTooltip(clonedFeature, false, this.#uiDomain.getLanguage());
         if (overlay) viewer.map.addOverlay(overlay);
       }
     });
@@ -2238,9 +2237,6 @@ export class DrawerController extends AbstractMapViewerController {
    * @param action - The action to be redone
    */
   #redoModifyAction(action: DrawerHistoryAction): void {
-    // Get the map id
-    const mapId = this.getMapId();
-
     const viewer = this.getMapViewer();
     if (!viewer) return;
 
@@ -2254,7 +2250,7 @@ export class DrawerController extends AbstractMapViewerController {
           // Recreate measurement overlay only if geometry changed
           const geom = currentFeature.getGeometry();
           if (geom && !(geom instanceof Point)) {
-            const overlay = DrawerController.#createMeasureTooltip(currentFeature, false, getStoreAppDisplayLanguage(mapId));
+            const overlay = DrawerController.#createMeasureTooltip(currentFeature, false, this.#uiDomain.getLanguage());
             if (overlay) viewer.map.addOverlay(overlay);
           }
         }
@@ -2276,9 +2272,6 @@ export class DrawerController extends AbstractMapViewerController {
    * @param action - The action to be undone
    */
   #undoModifyAction(action: DrawerHistoryAction): void {
-    // Get the map id
-    const mapId = this.getMapId();
-
     const viewer = this.getMapViewer();
     if (!viewer) return;
 
@@ -2292,7 +2285,7 @@ export class DrawerController extends AbstractMapViewerController {
           // Recreate overlay
           const geom = currentFeature.getGeometry();
           if (geom && !(geom instanceof Point)) {
-            const overlay = DrawerController.#createMeasureTooltip(currentFeature, false, getStoreAppDisplayLanguage(mapId));
+            const overlay = DrawerController.#createMeasureTooltip(currentFeature, false, this.#uiDomain.getLanguage());
             if (overlay) viewer.map.addOverlay(overlay);
           }
         }
@@ -2540,7 +2533,7 @@ export class DrawerController extends AbstractMapViewerController {
       if (geom instanceof Point) return;
 
       // Update the overlay with new values
-      DrawerController.#createMeasureTooltip(feature, true, getStoreAppDisplayLanguage(mapId));
+      DrawerController.#createMeasureTooltip(feature, true, this.#uiDomain.getLanguage());
 
       // Update the undo redo state
       this.#updateUndoRedoState();
@@ -2642,7 +2635,7 @@ export class DrawerController extends AbstractMapViewerController {
       if (previousFeature && !hideMeasurements) {
         const geom = previousFeature.getGeometry();
         if (geom && !(geom instanceof Point)) {
-          const overlay = DrawerController.#createMeasureTooltip(previousFeature, false, getStoreAppDisplayLanguage(mapId));
+          const overlay = DrawerController.#createMeasureTooltip(previousFeature, false, this.#uiDomain.getLanguage());
           if (overlay) {
             this.getMapViewer().map.addOverlay(overlay);
           }

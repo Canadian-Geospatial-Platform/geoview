@@ -2,6 +2,11 @@
   "map": {
     "interaction": "dynamic",
     "viewSettings": {
+      "initialView": {
+        "layerIds": [
+          "44ef4d33-20b7-45fc-974c-d73a0a8fbae8"
+        ]
+      },
       "projection": 3857
     },
     "basemapOptions": {

@@ -298,6 +298,7 @@ export class MyController extends AbstractMapViewerController {
 
   // #region EVENTS
   #emitMyEvent(event: MyEvent): void { /* … */ }
+  onceMyEvent(): Promise<MyEvent> { /* … */ }
   onMyEvent(callback: MyDelegate): void { /* … */ }
   offMyEvent(callback: MyDelegate): void { /* … */ }
   // #endregion EVENTS
@@ -322,7 +323,7 @@ export type MyEvent = { /* … */ };
 | `PROTECTED METHODS` | Protected instance methods |
 | `PRIVATE METHODS` | Private instance methods |
 | `DOMAIN HANDLERS` | Private handlers subscribed to domain events |
-| `EVENTS` | Event emit/on/off methods |
+| `EVENTS` | Event emit/once/on/off methods (order: `#emit`, `once`, `on`, `off` per event) |
 | `STATIC METHODS` | Static public and private methods |
 | `EVENT TYPES` or `EVENTS & DELEGATES` | Delegate types and event interfaces (outside the class body) |
 
@@ -350,7 +351,39 @@ this.getMapViewer().onMapInit((sender, event): void => {
 });
 ```
 
-## 13- React Performance Patterns
+## 13- Event delegate and payload type declarations
+
+When defining EventHelper delegate types and their associated event payloads in the `// #region EVENT TYPES` section:
+
+- **Delegates** (functions using `EventDelegateBase`) must always be declared with `type`
+- **Event payloads** (the data objects carried by the event) must always be declared with `interface`
+
+```ts
+// #region EVENT TYPES
+
+// ✅ Good: Event payload is an interface
+export interface LayerApiLayerVisibleChangedEvent {
+  /** The GV layer whose visibility changed. */
+  layer: AbstractBaseGVLayer;
+  /** The new visibility state. */
+  visible: boolean;
+}
+
+// ✅ Good: Delegate is a type alias of EventDelegateBase
+export type LayerApiLayerVisibleChangedDelegate = EventDelegateBase<LayerApi, LayerApiLayerVisibleChangedEvent, void>;
+
+// ❌ Bad: Delegate as interface
+export interface LayerApiLayerVisibleChangedDelegate { ... }
+
+// ❌ Bad: Event payload as type
+export type LayerApiLayerVisibleChangedEvent = { ... };
+
+// #endregion EVENT TYPES
+```
+
+**Rationale:** Delegates are type aliases by nature (they alias a function signature via `EventDelegateBase<Sender, Event, Return>`). Event payloads are plain data shapes — `interface` gives them declaration merging capability, inheritance capabilities and clearer intent.
+
+## 14- React Performance Patterns
 
 ### useMemo Naming Convention
 
@@ -384,3 +417,77 @@ const memoFormattedDate = useMemo(() => {
 - Only memoize expensive computations (filtering, sorting, complex calculations)
 - Be cautious: `useMemo` has a cost—use only when profiling shows performance issues
 - Always include proper dependencies array to ensure the memoized value updates correctly
+
+## 15- Prefer `waitFor*` methods for awaiting async conditions
+
+When you need to await an asynchronous condition that is signaled by a `once*` event, always expose it as a `waitFor*` method. These methods check the condition synchronously first (fast-path), and if not yet satisfied, subscribe to the appropriate `once*` event to resolve a Promise.
+
+**Naming convention:** Use the prefix `waitFor` followed by a description of the condition being awaited.
+
+**Implementation pattern:**
+
+```ts
+// In the class that owns the event:
+waitForBounds(): Promise<Extent | undefined> {
+  // Fast-path: already available
+  if (this.#bounds !== undefined) return Promise.resolve(this.#bounds);
+
+  // Subscribe to the once event
+  return this.onceBoundsInitialized().then((event) => event.bounds);
+}
+
+waitForMapReady(): Promise<MapBaseEvent> {
+  if (this.#mapReady) return Promise.resolve({});
+  return this.onceMapReady();
+}
+```
+
+**Existing examples:**
+
+| Method | Class | Resolves when... |
+|---|---|---|
+| `waitForMapReady()` | `MapViewer` | The map is fully initialized |
+| `waitForMoveEnd()` | `MapViewer` | The current animation/interaction completes |
+| `waitForRender()` | `MapViewer` | The next `rendercomplete` event fires |
+| `waitForBounds()` | `AbstractBaseGVLayer` | The layer's bounds become available |
+| `waitForLoadedOnce()` | `AbstractGVLayer` | The layer reaches its first `loaded` state |
+| `waitForLayerToGetRegistered()` | `AbstractLayerSet` | A layer path is registered in the set |
+| `waitForAllLayersStatus()` | `LayerController` | All layers reach a given status |
+| `waitForLayersLoaded()` | `LayerController` | Map is ready + all layers are loaded |
+| `waitForOverviewMapVisibility()` | `MapController` | Overview map reaches expected visibility |
+
+**Why prefer `waitFor*` over `whenThisThen` polling:**
+
+- **Event-driven** — resolves immediately when the condition is met, no polling interval
+- **Deterministic** — no risk of missing a short-lived state between poll intervals
+- **Self-documenting** — the method name describes exactly what is being awaited
+- **Composable** — callers can `await` or combine with `Promise.all`
+
+Use `whenThisThen()` only as a last resort when no event exists for the condition you need to observe.
+
+## 16- `once*` methods must always accept an optional `filter` parameter
+
+Every `once*` method that wraps `EventHelper.onceEventPromise` must expose the optional `filter` parameter and pass it through. This allows callers to wait for a **specific** event occurrence rather than just the next one.
+
+**Signature pattern:**
+
+```ts
+onceLayerQueried(filter?: (event: LayerQueriedEvent) => boolean): Promise<LayerQueriedEvent> {
+  return EventHelper.onceEventPromise(this.#onLayerQueriedHandlers, filter);
+}
+```
+
+**Why:** Without `filter`, callers who need to wait for a specific condition (e.g., a specific layer path) would have to subscribe via `on*`, check the condition manually, and unsubscribe — defeating the purpose of the one-shot helper.
+
+**JSDoc must include:**
+
+```ts
+/**
+ * Returns a promise that resolves the next time the [event name] event fires.
+ *
+ * @param filter - Optional filter predicate. When provided, only events passing the filter resolve the promise
+ * @returns A promise that resolves with the event payload when [event name] fires (and passes the filter)
+ */
+```
+
+**Checklist when adding a new event:** After writing the `#emit*`, `once*`, `on*`, `off*` group, verify that `once*` has `filter?: (event: EventType) => boolean` in its signature and passes it to `onceEventPromise`.

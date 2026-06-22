@@ -192,16 +192,8 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
     // First, check synchronously — the query may have ALREADY finished
     if (getStoreDataTableQueryStatus(this.getMapId(), layerPath) === 'processed') return Promise.resolve();
 
-    // Otherwise, subscribe and wait
-    return new Promise<void>((resolve) => {
-      const handler = (sender: AllFeatureInfoLayerSet, event: LayerQueriedEvent): void => {
-        if (event.layerPath === layerPath) {
-          this.offLayerQueried(handler);
-          resolve();
-        }
-      };
-      this.onLayerQueried(handler);
-    });
+    // Otherwise, wait for the specific layer path to be queried
+    return this.onceLayerQueried((event) => event.layerPath === layerPath).then(() => {});
   }
 
   // #endregion PUBLIC METHODS
@@ -216,6 +208,17 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
   #emitLayerQueried(event: LayerQueriedEvent): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onLayerQueriedHandlers, event);
+  }
+
+  /**
+   * Returns a promise that resolves the next time the layer queried event fires.
+   *
+   * @param filter - Optional filter predicate. When provided, only events passing the filter resolve the promise
+   * @returns A promise that resolves with the event payload when layer queried fires (and passes the filter)
+   */
+  onceLayerQueried(filter?: (event: LayerQueriedEvent) => boolean): Promise<LayerQueriedEvent> {
+    // Register a one-shot event handler that resolves a promise
+    return EventHelper.onceEventPromise(this.#onLayerQueriedHandlers, filter);
   }
 
   /**

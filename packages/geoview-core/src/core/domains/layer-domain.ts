@@ -453,6 +453,21 @@ export class LayerDomain {
   }
 
   /**
+   * Asynchronously waits for a layer to be registered and returns the GeoView layer associated to a specific layer path.
+   *
+   * Resolves immediately if the layer is already registered; otherwise subscribes to the `onLayerRegistered` event and resolves as soon as a layer with the matching path is registered.
+   *
+   * @param layerPath - The layer path to the layer's configuration
+   * @returns A promise that resolves to a GeoView layer associated to the layer path
+   */
+  waitForLayerRegistered(layerPath: string): Promise<AbstractBaseGVLayer> {
+    // Return a promise that resolves when the layer is registered, or immediately if it already is
+    const existing = this.getGeoviewLayerIfExists(layerPath);
+    if (existing) return Promise.resolve(existing);
+    return this.onceLayerRegistered((event) => event.layer.getLayerPath() === layerPath).then((event) => event.layer);
+  }
+
+  /**
    * Asynchronously returns the OpenLayer layer associated to a specific layer path.
    *
    * Resolves immediately if the layer is already registered; otherwise subscribes to the
@@ -462,23 +477,10 @@ export class LayerDomain {
    * @param layerPath - The layer path to the layer's configuration
    * @returns A promise that resolves to an OpenLayer layer associated to the layer path
    */
-  getOLLayerAsync(layerPath: string): Promise<BaseLayer> {
-    // Sync check: layer already registered
-    const existing = this.getGeoviewLayerIfExists(layerPath);
-    if (existing) return Promise.resolve(existing.getOLLayer());
-
-    // Subscribe to the layer-registered event; resolve when a layer with the matching path is registered.
-    return new Promise<BaseLayer>((resolve) => {
-      const registeredHandler: DomainLayerRegisteredDelegate = (sender, event): void => {
-        // Filter: ignore events for other layers and keep waiting
-        if (event.layer.getLayerPath() !== layerPath) return;
-        this.offLayerRegistered(registeredHandler);
-        resolve(event.layer.getOLLayer());
-      };
-
-      // Hook on the layer-registered event to resolve the promise in question
-      this.onLayerRegistered(registeredHandler);
-    });
+  async getOLLayerAsync(layerPath: string): Promise<BaseLayer> {
+    // Wait for the layer to be registered (or get it immediately if already registered)
+    const gvLayer = await this.waitForLayerRegistered(layerPath);
+    return gvLayer.getOLLayer();
   }
 
   // #endregion PUBLIC LAYER GETTERS
@@ -723,30 +725,31 @@ export class LayerDomain {
   /**
    * Gets the max extent of all layers on the map, or of a provided subset of layers.
    *
+   * Waits for each layer's bounds to be initialized before computing the union.
+   *
    * @param layerIds - Identifiers or layerPaths of layers to get max extents from
-   * @returns The overall extent or undefined when no bounds are found
+   * @returns A promise that resolves with the overall extent or undefined when no bounds are found
    */
-  getExtentOfMultipleLayers(layerIds: string[]): Extent | undefined {
-    const allBounds: (Extent | undefined)[] = [];
+  async getExtentOfMultipleLayers(layerIds: string[]): Promise<Extent | undefined> {
+    // Collect all layer paths to process
+    const layerPaths: string[] = [];
     layerIds.forEach((layerId) => {
       // Get sublayerpaths and layerpaths from layer IDs.
       const subLayerPaths = this.getLayerEntryLayerPaths().filter(
         (layerPath) => layerPath.startsWith(`${layerId}/`) || layerPath === layerId
       );
-
-      if (subLayerPaths.length) {
-        // Get max extents from all selected layers.
-        subLayerPaths.forEach((layerPath) => {
-          // Get the GV layer and get its bounds
-          allBounds.push(this.getGeoviewLayer(layerPath).getBounds());
-        });
-      }
+      layerPaths.push(...subLayerPaths);
     });
 
-    // For each bounds found
+    // Wait for all layers' to be registered
+    const allLayers = await Promise.all(layerPaths.map((layerPath) => this.waitForLayerRegistered(layerPath)));
+
+    // Wait for all layers' bounds to be initialized
+    const allBounds = await Promise.all(allLayers.map((layer) => layer.waitForBounds()));
+
+    // Union all bounds together
     let boundsUnion: Extent | undefined;
     allBounds.forEach((bounds) => {
-      // Union the bounds with each other
       boundsUnion = GeoUtilities.getExtentUnion(boundsUnion, bounds);
     });
 
@@ -1090,6 +1093,16 @@ export class LayerDomain {
   }
 
   /**
+   * Registers a one-shot layer status changed event handler that resolves a promise.
+   *
+   * @param filter - Optional filter predicate to skip non-matching events without unsubscribing
+   * @returns A promise that resolves with the layer status changed event
+   */
+  onceLayerStatusChanged(filter?: (event: DomainLayerStatusChangedEvent) => boolean): Promise<DomainLayerStatusChangedEvent> {
+    return EventHelper.onceEventPromise(this.#onLayerStatusChangedHandlers, filter);
+  }
+
+  /**
    * Registers a layer status changed event handler.
    *
    * @param callback - The callback to be executed whenever the event is emitted
@@ -1153,6 +1166,17 @@ export class LayerDomain {
   #emitLayerRegistered(event: DomainLayerRegisteredEvent): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onLayerRegisteredHandlers, event);
+  }
+
+  /**
+   * Returns a promise that resolves the next time a layer registered event fires.
+   *
+   * @param filter - Optional filter predicate. When provided, only events passing the filter resolve the promise
+   * @returns A promise that resolves with the event payload when layer registered fires (and passes the filter)
+   */
+  onceLayerRegistered(filter?: (event: DomainLayerRegisteredEvent) => boolean): Promise<DomainLayerRegisteredEvent> {
+    // Register a one-shot event handler that resolves a promise
+    return EventHelper.onceEventPromise(this.#onLayerRegisteredHandlers, filter);
   }
 
   /**
@@ -1246,6 +1270,16 @@ export class LayerDomain {
   #emitLayerFirstLoaded(event: DomainLayerBaseEvent): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onLayerFirstLoadedHandlers, event);
+  }
+
+  /**
+   * Registers a one-shot layer first loaded event handler that resolves a promise.
+   *
+   * @param filter - Optional filter predicate to skip non-matching events without unsubscribing
+   * @returns A promise that resolves with the layer first loaded event
+   */
+  onceLayerFirstLoaded(filter?: (event: DomainLayerBaseEvent) => boolean): Promise<DomainLayerBaseEvent> {
+    return EventHelper.onceEventPromise(this.#onLayerFirstLoadedHandlers, filter);
   }
 
   /**

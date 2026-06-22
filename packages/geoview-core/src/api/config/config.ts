@@ -47,7 +47,7 @@ export class Config {
         mapConfigLayerEntryIsRCS(geoviewLayerEntry)
       ) {
         //  Skip it, because we don't validate the GeoCore configuration anymore. Not the same way as typical GeoView Layer Types at least.
-        // TODO Why not do GeoCore request here? Then could easily replace listOfLayerEntries and validate / process along with other layers
+        // TODO: INVESTIGATE - Why not do GeoCore request here? Then could easily replace listOfLayerEntries and validate / process along with other layers
         return true;
       }
 
@@ -61,7 +61,7 @@ export class Config {
       return false;
     });
 
-    // TODO: refactor - return only the valid layers
+    // TODO: INVESTIGATE - Return only the valid layers?
     const validLayers = ConfigValidation.validateLayersConfigAgainstSchema(validLayerEntries, onErrorCallback);
 
     // Log (leave the line commented, for quick debug when needed)

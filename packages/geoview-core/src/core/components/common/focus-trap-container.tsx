@@ -48,12 +48,12 @@ const extractTabName = (fullTabId: string, mapId: string): string => {
  * @param props - FocusTrapContainer properties
  * @returns The focus trap wrapper element
  */
-export const FocusTrapContainer = memo(function FocusTrapContainerFct({
+export const FocusTrapContainer = memo(({
   children,
   open = false,
   id,
   containerType,
-}: FocusTrapContainerProps): JSX.Element {
+}: FocusTrapContainerProps): JSX.Element => {
   logger.logTraceRender('component/common/FocusTrapContainer', containerType);
 
   // Hooks
@@ -222,3 +222,4 @@ export const FocusTrapContainer = memo(function FocusTrapContainerFct({
     </FocusTrap>
   );
 });
+FocusTrapContainer.displayName = 'FocusTrapContainer';

@@ -46,7 +46,7 @@ const BOX_STYLES = { minWidth: 120 } as const;
  * @param props - The scale properties
  * @returns The scale component
  */
-export const Scale = memo(function ScaleFct({ expanded }: ScaleProps): JSX.Element {
+export const Scale = memo(({ expanded }: ScaleProps): JSX.Element => {
   logger.logTraceRender('components/scale/scale');
 
   // Hooks
@@ -310,3 +310,4 @@ export const Scale = memo(function ScaleFct({ expanded }: ScaleProps): JSX.Eleme
     </Tooltip>
   );
 });
+Scale.displayName = 'Scale';

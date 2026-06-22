@@ -10,10 +10,10 @@ import { PluginStateUninitializedError } from '@/core/exceptions/geoview-excepti
 /** Represents the Drawer plugin state managed by the Zustand store. */
 export interface IDrawerState {
   /** The currently active geometry type for drawing. */
-  activeGeom: string;
+  activeGeom: DrawGeometryType;
 
   /** The list of available geometry types. */
-  geomTypes: string[];
+  geomTypes: DrawGeometryType[];
 
   /** The current drawing style properties. */
   style: StyleProps;
@@ -158,7 +158,7 @@ export function initializeDrawerState(set: TypeSetStore, get: TypeGetStore): IDr
        *
        * @param geomType - The geometry type to set as active
        */
-      setActiveGeom: (geomType: string): void => {
+      setActiveGeom: (geomType: DrawGeometryType): void => {
         set({
           drawerState: {
             ...get().drawerState,
@@ -599,7 +599,7 @@ export const isStoreDrawerInitialized = (mapId: string): boolean => {
  * @param mapId - The map identifier
  * @returns The active geometry type
  */
-export const getStoreDrawerActiveGeom = (mapId: string): string => {
+export const getStoreDrawerActiveGeom = (mapId: string): DrawGeometryType => {
   return getStoreDrawerState(mapId).activeGeom;
 };
 
@@ -1024,10 +1024,10 @@ export type StyleProps = {
 /** Configuration options for the drawer plugin from the map config. */
 export type TypeDrawerConfig = {
   /** Optional initial active geometry type. */
-  activeGeom?: string;
+  activeGeom?: DrawGeometryType;
 
   /** Optional list of available geometry types. */
-  geomTypes?: string[];
+  geomTypes?: DrawGeometryType[];
 
   /** Optional default drawing style overrides. */
   style?: StyleProps;
@@ -1041,3 +1041,6 @@ type TypeNavBarPackageConfig = {
   /** The drawer plugin configuration, if present. */
   drawer?: TypeDrawerConfig;
 };
+
+/** Drawing geometry types supported by the drawer plugin. */
+export type DrawGeometryType = 'Point' | 'Polygon' | 'LineString' | 'Circle' | 'Rectangle' | 'Star' | 'Text';

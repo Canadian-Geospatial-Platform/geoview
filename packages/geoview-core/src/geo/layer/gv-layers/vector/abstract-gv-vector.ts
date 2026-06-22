@@ -366,12 +366,12 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * @param projection - The projection to initialize the bounds into.
    * @param stops - The number of stops to use to generate the extent.
    * @returns A promise that resolves with the layer bounding box, or undefined if not available.
-   * @throws {LayerStatusErrorError} When the layer enters the `error` state before reaching `loaded` (propagated from `waitLoadedStatus()`)
+   * @throws {LayerStatusErrorError} When the layer enters the `error` state before reaching `loaded` (propagated from `waitForLoadedStatus()`)
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   override async onInitBounds(projection: OLProjection, stops: number): Promise<Extent | undefined> {
     // Wait for the features to be loaded, because this is a vector layer the features have to be loaded for the extent to be valid
-    await this.waitLoadedStatus();
+    await this.waitForLoadedStatus();
 
     // Get the layer bounds
     // ?? undefined to coerce null → undefined because OL 10.9 changed getExtent() to return Extent | null
@@ -559,7 +559,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * @returns A promise that resolves when the style has been applied
    * @throws {LayerStatusErrorError} When the layer is already in (or enters) the `error` state before the style is applied
    */
-  waitStyleAppliedVector(): Promise<void> {
+  waitForStyleAppliedVector(): Promise<void> {
     // Sync check: style already applied
     if (this.getStyle()) return Promise.resolve();
 
@@ -616,23 +616,16 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * @param initialVisible - Whether the layer is visible intially
    */
   #ensureStyleWithTemporaryVisibility(initialVisible: boolean): void {
-    // Subscribe to style changes
-    const hook = this.onLayerStyleChanged(() => {
-      // Unsubscribe after the first style change to avoid repeated triggers
-      this.offLayerStyleChanged(hook);
-
-      // Restore the original visibility state
-      this.setVisible(initialVisible);
-    });
-
     // Handle race condition: style may already be set
-    if (this.getStyle()) {
-      this.offLayerStyleChanged(hook);
-      return;
-    }
+    if (this.getStyle()) return;
 
     // Temporarily make the layer visible so the style can be computed/applied
     this.setVisible(true);
+
+    // Wait for the first style change, then restore the original visibility state
+    void this.onceLayerStyleChanged().then(() => {
+      this.setVisible(initialVisible);
+    });
   }
 
   // #endregion METHODS

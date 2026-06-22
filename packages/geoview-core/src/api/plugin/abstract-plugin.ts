@@ -158,4 +158,24 @@ export abstract class AbstractPlugin {
     // Log
     logger.logInfo(`Plugin '${this.pluginId}' removed from map ${this.mapViewer.mapId}`);
   }
+
+  /**
+   * Selects the tab with the plugin.
+   */
+  select(): void {
+    // Redirect
+    this.onSelect();
+  }
+
+  /**
+   * Overridable function called when the tab with the plugin is being selected.
+   */
+  // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  protected onSelect(): void {
+    // Log
+    logger.logTraceCore('AbstractPlugin - onSelect');
+
+    // Nothing else here.. but inherited plugins might override this method to do stuff when they are selected!
+  }
 }

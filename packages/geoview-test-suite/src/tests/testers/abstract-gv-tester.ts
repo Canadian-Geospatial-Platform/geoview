@@ -561,10 +561,11 @@ export abstract class GVAbstractTester extends AbstractTester {
    * Sets the MapViewer and the Controller registry for the current test.
    *
    * @param mapViewer - The MapViewer to set
+   * @param controllerRegistry - The ControllerRegistry to set
    */
-  reassignMapViewerAndControllers(mapViewer: MapViewer): void {
+  reassignMapViewerAndControllers(mapViewer: MapViewer, controllerRegistry: ControllerRegistry): void {
     this.#mapViewer = mapViewer;
-    this.#controllerRegistry = mapViewer.controllers;
+    this.#controllerRegistry = controllerRegistry;
   }
 
   /**

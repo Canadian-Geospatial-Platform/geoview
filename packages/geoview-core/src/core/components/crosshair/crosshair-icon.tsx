@@ -9,7 +9,7 @@ import { logger } from '@/core/utils/logger';
  *
  * @returns The crosshair icon element
  */
-export const CrosshairIcon = memo(function CrosshairIconFct(): JSX.Element {
+export const CrosshairIcon = memo((): JSX.Element => {
   // Log
   logger.logTraceRender('components/crosshair/crosshair-icon');
 
@@ -21,3 +21,4 @@ export const CrosshairIcon = memo(function CrosshairIconFct(): JSX.Element {
     </svg>
   );
 });
+CrosshairIcon.displayName = 'CrosshairIcon';

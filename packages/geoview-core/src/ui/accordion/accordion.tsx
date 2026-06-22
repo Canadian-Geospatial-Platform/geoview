@@ -70,18 +70,13 @@ const sxClasses = {
  * @param isTransitioning - Whether accordion is currently transitioning
  * @returns Loading spinner icon if both flags are true, otherwise expand arrow icon
  */
-const AccordionExpandIcon = memo(function AccordionExpandIconFct({
-  showLoadingIcon,
-  isTransitioning,
-}: {
-  showLoadingIcon: boolean;
-  isTransitioning: boolean;
-}) {
+const AccordionExpandIcon = memo(({ showLoadingIcon, isTransitioning }: { showLoadingIcon: boolean; isTransitioning: boolean }) => {
   if (showLoadingIcon && isTransitioning) {
     return <LoopIcon sx={sxClasses.loadingIcon} />;
   }
   return <ExpandMoreIcon />;
 });
+AccordionExpandIcon.displayName = 'AccordionExpandIcon';
 
 /**
  * Customizable accordion component with expandable sections and optional loading states.

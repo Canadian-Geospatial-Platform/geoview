@@ -78,85 +78,79 @@ interface FeatureRowProps {
  * @returns The rendered feature item
  */
 // Extracted FeatureItem component
-export const FeatureItem = memo(function FeatureItemFct({
-  item,
-  alias,
-  index,
-  uniqueItemId,
-  mapId,
-  containerType,
-  featureInfoItem,
-  onInitLightBox,
-}: FeatureItemProps): JSX.Element {
-  // Log
-  logger.logTraceRender('components/details/feature-info-table > FeatureItem');
+export const FeatureItem = memo(
+  ({ item, alias, index, uniqueItemId, mapId, containerType, featureInfoItem, onInitLightBox }: FeatureItemProps): JSX.Element => {
+    // Log
+    logger.logTraceRender('components/details/feature-info-table > FeatureItem');
 
-  // Hooks
-  const { t } = useTranslation<string>();
-  const theme = useTheme();
-  const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
-  const featureInfoItemIsTableFormat = featureInfoItem.alias !== 'html' && featureInfoItem.alias !== 'plain_text';
+    // Hooks
+    const { t } = useTranslation<string>();
+    const theme = useTheme();
+    const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
+    const featureInfoItemIsTableFormat = featureInfoItem.alias !== 'html' && featureInfoItem.alias !== 'plain_text';
 
-  /**
-   * Gets the linkify options for converting text URLs into clickable links, memoized to avoid unnecessary recalculations.
-   */
-  const memoLinkifyOptions = useMemo(
-    () => ({
-      attributes: {
-        target: '_blank',
-        rel: 'noopener noreferrer',
-      },
-      defaultProtocol: 'https',
-      format: {
-        url: (value: string) => `${alias || value}`,
-      },
-      ignoreTags: ['script', 'style', 'img'],
-    }),
-    [alias]
-  );
+    /**
+     * Gets the linkify options for converting text URLs into clickable links, memoized to avoid unnecessary recalculations.
+     */
+    const memoLinkifyOptions = useMemo(
+      () => ({
+        attributes: {
+          target: '_blank',
+          rel: 'noopener noreferrer',
+        },
+        defaultProtocol: 'https',
+        format: {
+          url: (value: string) => `${alias || value}`,
+        },
+        ignoreTags: ['script', 'style', 'img'],
+      }),
+      [alias]
+    );
 
-  if (!featureInfoItemIsTableFormat) {
+    if (!featureInfoItemIsTableFormat) {
+      return (
+        <Box sx={memoSxClasses.featureInfoItemValue}>
+          <UseHtmlToReact htmlContent={sanitizeHtmlContent(item)} />
+        </Box>
+      );
+    }
+
+    if (typeof item === 'string' && isImage(item)) {
+      const buttonElementId = `${mapId}-${containerType}-image-btn-${uniqueItemId}`; // Create unique ID for focus management after lightbox closes
+
+      return (
+        <Button
+          type="icon"
+          sx={memoSxClasses.imageButton}
+          id={buttonElementId}
+          onClick={() => onInitLightBox(featureInfoItem.value as string, '', buttonElementId, index)}
+          tooltip={t('general.enlargeImage')} // Tooltip for visual users to indicate the image can be enlarged
+          tooltipPlacement="top"
+          aria-label={t('general.enlargeImageName', { title: index === 0 ? alias : `${alias} ${index + 1}` })} // WCAG - Descriptive aria-label for screen readers
+          disableRipple
+        >
+          <Box
+            src={item}
+            component="img"
+            sx={memoSxClasses.featureInfoItemImage}
+            alt="" // WCAG - Using empty alt text for images as descriptive text is not available
+          />
+        </Button>
+      );
+    }
+
     return (
       <Box sx={memoSxClasses.featureInfoItemValue}>
-        <UseHtmlToReact htmlContent={sanitizeHtmlContent(item)} />
+        <UseHtmlToReact
+          htmlContent={sanitizeHtmlContent(
+            enhanceLinksAccessibility(linkifyHtml(item.toString(), memoLinkifyOptions), t('general.opensInNewTab'))
+          )}
+        />
       </Box>
     );
   }
-
-  if (typeof item === 'string' && isImage(item)) {
-    const buttonElementId = `${mapId}-${containerType}-image-btn-${uniqueItemId}`; // Create unique ID for focus management after lightbox closes
-
-    return (
-      <Button
-        type="icon"
-        sx={memoSxClasses.imageButton}
-        id={buttonElementId}
-        onClick={() => onInitLightBox(featureInfoItem.value as string, '', buttonElementId, index)}
-        tooltip={t('general.enlargeImage')} // Tooltip for visual users to indicate the image can be enlarged
-        tooltipPlacement="top"
-        aria-label={t('general.enlargeImageName', { title: index === 0 ? alias : `${alias} ${index + 1}` })} // WCAG - Descriptive aria-label for screen readers
-        disableRipple
-      >
-        <Box
-          src={item}
-          component="img"
-          sx={memoSxClasses.featureInfoItemImage}
-          alt="" // WCAG - Using empty alt text for images as descriptive text is not available
-        />
-      </Button>
-    );
-  }
-
-  return (
-    <Box sx={memoSxClasses.featureInfoItemValue}>
-      <UseHtmlToReact
-        htmlContent={sanitizeHtmlContent(
-          enhanceLinksAccessibility(linkifyHtml(item.toString(), memoLinkifyOptions), t('general.opensInNewTab'))
-        )}
-      />
-    </Box>
-  );
-});
+);
+FeatureItem.displayName = 'FeatureItem';
 
 /**
  * Creates a table row for a single feature field entry.
@@ -167,59 +161,77 @@ export const FeatureItem = memo(function FeatureItemFct({
  * @returns The rendered table row
  */
 // Extracted FeatureRow component
-export const FeatureRow = memo(function FeatureRowFct({
-  featureInfoItem,
-  onInitLightBox,
-  language,
-  layerDateTemporalMode,
-  displayDateFormat,
-  displayDateTimezone,
-  containerType,
-}: FeatureRowProps): JSX.Element {
-  // Log
-  logger.logTraceRender('components/details/feature-info-table > FeatureRow');
+export const FeatureRow = memo(
+  ({
+    featureInfoItem,
+    onInitLightBox,
+    language,
+    layerDateTemporalMode,
+    displayDateFormat,
+    displayDateTimezone,
+    containerType,
+  }: FeatureRowProps): JSX.Element => {
+    // Log
+    logger.logTraceRender('components/details/feature-info-table > FeatureRow');
 
-  const mapId = useStoreGeoViewMapId();
-  const theme = useTheme();
-  const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
-  const { alias, value } = featureInfoItem;
-  const featureInfoItemIsTableFormat = alias !== 'html' && alias !== 'plain_text';
+    const mapId = useStoreGeoViewMapId();
+    const theme = useTheme();
+    const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
+    const { alias, value } = featureInfoItem;
+    const featureInfoItemIsTableFormat = alias !== 'html' && alias !== 'plain_text';
 
-  // Get the original value in an array
-  let stringValues = useMemo(() => [''], []);
-  if (value !== undefined) {
-    stringValues = [String(value)];
-  }
+    // Get the original value in an array
+    let stringValues = useMemo(() => [''], []);
+    if (value !== undefined) {
+      stringValues = [String(value)];
+    }
 
-  // TODO: Check - Solidify this logic. I'm adding an attempt to guess the value content is a list of images before proceeding with
-  // TO.DOCONT: the logic with the ';' here. It's rough, but it's an improvement. Originally it was not checking at all what the
-  // TO.DOCONT: content was and was doing it on everything, including html content and such!
-  // If the value contains an array of images
-  if (typeof value === 'string' && String(value).includes?.(';http')) {
-    // Stringify values and create array of string to split item with ';' to separate images
-    const stringValue: string = Array.isArray(value) ? String(value.map(stringify)) : String(stringify(value));
-    stringValues = stringValue.split(';');
-  } else if (value instanceof Date) {
-    // The value is a date, format it
-    stringValues = [DateMgt.formatDate(value, displayDateFormat[language], language, displayDateTimezone, layerDateTemporalMode)];
-  }
+    // TODO: Check - Solidify this logic. I'm adding an attempt to guess the value content is a list of images before proceeding with
+    // TO.DOCONT: the logic with the ';' here. It's rough, but it's an improvement. Originally it was not checking at all what the
+    // TO.DOCONT: content was and was doing it on everything, including html content and such!
+    // If the value contains an array of images
+    if (typeof value === 'string' && String(value).includes?.(';http')) {
+      // Stringify values and create array of string to split item with ';' to separate images
+      const stringValue: string = Array.isArray(value) ? String(value.map(stringify)) : String(stringify(value));
+      stringValues = stringValue.split(';');
+    } else if (value instanceof Date) {
+      // The value is a date, format it
+      stringValues = [DateMgt.formatDate(value, displayDateFormat[language], language, displayDateTimezone, layerDateTemporalMode)];
+    }
 
-  // Generate stable deterministic IDs for each item: {fieldKey}-{index}
-  // Using fieldKey and index ensures IDs remain stable across re-renders
-  // Full ID format will be: {mapId}-{containerType}-{elementType}-{fieldKey}-{index}
-  const memoItemIds = useMemo(
-    () => stringValues.map((_, idx) => `${featureInfoItem.fieldKey}-${idx}`),
-    [stringValues, featureInfoItem.fieldKey]
-  );
+    // Generate stable deterministic IDs for each item: {fieldKey}-{index}
+    // Using fieldKey and index ensures IDs remain stable across re-renders
+    // Full ID format will be: {mapId}-{containerType}-{elementType}-{fieldKey}-{index}
+    const memoItemIds = useMemo(
+      () => stringValues.map((_, idx) => `${featureInfoItem.fieldKey}-${idx}`),
+      [stringValues, featureInfoItem.fieldKey]
+    );
 
-  return (
-    <TableRow className="feature-info-row" sx={memoSxClasses.featureInfoRow}>
-      {featureInfoItemIsTableFormat ? (
-        <>
-          <TableCell component="th" scope="row">
-            {alias}
-          </TableCell>
-          <TableCell>
+    return (
+      <TableRow className="feature-info-row" sx={memoSxClasses.featureInfoRow}>
+        {featureInfoItemIsTableFormat ? (
+          <>
+            <TableCell component="th" scope="row">
+              {alias}
+            </TableCell>
+            <TableCell>
+              {stringValues.map((item: string, idx: number) => (
+                <FeatureItem
+                  key={`${alias}-${memoItemIds[idx]}`}
+                  item={item}
+                  alias={alias}
+                  index={idx}
+                  uniqueItemId={memoItemIds[idx]}
+                  mapId={mapId}
+                  containerType={containerType}
+                  featureInfoItem={featureInfoItem}
+                  onInitLightBox={onInitLightBox}
+                />
+              ))}
+            </TableCell>
+          </>
+        ) : (
+          <TableCell colSpan={2}>
             {stringValues.map((item: string, idx: number) => (
               <FeatureItem
                 key={`${alias}-${memoItemIds[idx]}`}
@@ -234,27 +246,12 @@ export const FeatureRow = memo(function FeatureRowFct({
               />
             ))}
           </TableCell>
-        </>
-      ) : (
-        <TableCell colSpan={2}>
-          {stringValues.map((item: string, idx: number) => (
-            <FeatureItem
-              key={`${alias}-${memoItemIds[idx]}`}
-              item={item}
-              alias={alias}
-              index={idx}
-              uniqueItemId={memoItemIds[idx]}
-              mapId={mapId}
-              containerType={containerType}
-              featureInfoItem={featureInfoItem}
-              onInitLightBox={onInitLightBox}
-            />
-          ))}
-        </TableCell>
-      )}
-    </TableRow>
-  );
-});
+        )}
+      </TableRow>
+    );
+  }
+);
+FeatureRow.displayName = 'FeatureRow';
 
 /**
  * Creates the feature info table component.
@@ -264,11 +261,7 @@ export const FeatureRow = memo(function FeatureRowFct({
  * @param props - Properties defined in FeatureInfoTableProps interface
  * @returns The feature info table
  */
-export const FeatureInfoTable = memo(function FeatureInfoTableFct({
-  layerPath,
-  featureInfoList,
-  containerType,
-}: FeatureInfoTableProps): JSX.Element {
+export const FeatureInfoTable = memo(({ layerPath, featureInfoList, containerType }: FeatureInfoTableProps): JSX.Element => {
   logger.logTraceRender('components/details/feature-info-table');
 
   // Hooks
@@ -322,3 +315,4 @@ export const FeatureInfoTable = memo(function FeatureInfoTableFct({
     </>
   );
 });
+FeatureInfoTable.displayName = 'FeatureInfoTable';

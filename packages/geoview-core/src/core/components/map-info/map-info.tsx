@@ -47,7 +47,7 @@ interface MapInfoProps {
  * @param props - Properties defined in MapInfoProps interface
  * @returns The map information bar
  */
-export const MapInfo = memo(function MapInfoFct({ onScrollShellIntoView }: MapInfoProps): JSX.Element {
+export const MapInfo = memo(({ onScrollShellIntoView }: MapInfoProps): JSX.Element => {
   logger.logTraceRender('components/map-info/map-info');
 
   // Hooks
@@ -125,3 +125,4 @@ export const MapInfo = memo(function MapInfoFct({ onScrollShellIntoView }: MapIn
     </Box>
   );
 });
+MapInfo.displayName = 'MapInfo';
