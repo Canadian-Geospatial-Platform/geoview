@@ -22,7 +22,14 @@ interface ItemsListProps {
   layerPath: string;
 }
 
-// Extracted ListItem Component
+/**
+ * Renders a single legend item with icon and toggle functionality.
+ *
+ * Memoized to avoid re-rendering all items when only one item's visibility changes.
+ *
+ * @param props - Properties containing item data, layer state, and handlers
+ * @returns The legend list item element
+ */
 const LegendListItem = memo(
   ({
     item: { icon, name, isVisible },
@@ -43,12 +50,13 @@ const LegendListItem = memo(
   }): JSX.Element => {
     const { t } = useTranslation<string>();
     const theme = useTheme();
-    const tooltipTitle = canToggle ? `${t('layers.toggleVisibility')} - ${name}` : '';
+    const tooltipTitle = canToggle ? `${name} - ${t('layers.toggleVisibility')}` : ''; // WCAG - place name first. see WCAG 2.1 SC 2.5.3
     const getItemClassName = (): string | undefined => {
       return !isVisible || !layerVisible ? 'unchecked' : 'checked';
     };
 
     const itemClassName = getItemClassName();
+    const isDisabled = !canToggle || !onToggle;
 
     return (
       <ListItem sx={sxClasses.layerListItem} disablePadding className={`layerListItem ${itemClassName || ''}`}>
@@ -72,20 +80,27 @@ const LegendListItem = memo(
         >
           <ListItemButton
             id={id}
-            onClick={canToggle && onToggle ? onToggle : undefined}
-            disabled={!canToggle || !onToggle}
+            onClick={!isDisabled ? onToggle : undefined}
+            disabled={isDisabled}
             disableRipple
             sx={sxClasses.layerListItemButton}
             className={`layerListItemButton ${itemClassName || ''}`}
+            {...(tooltipTitle && { 'aria-label': tooltipTitle })} // Only set if non-empty
             aria-pressed={isVisible && layerVisible}
-            aria-label={`${t('layers.toggleVisibility')} - ${name}`} // WCAG - Provide descriptive aria-label for accessibility
           >
             <ListItemIcon>
               <Box sx={{ display: 'flex', padding: '0 18px 0 18px', margin: '0 -18px 0 -18px' }}>
                 {icon ? <Box component="img" alt="" src={icon} /> : <BrowserNotSupportedIcon />}
               </Box>
             </ListItemIcon>
-            <ListItemText primary={name} />
+            <ListItemText
+              primary={name}
+              slotProps={{
+                primary: {
+                  noWrap: !isDisabled,
+                },
+              }}
+            />
           </ListItemButton>
         </Tooltip>
       </ListItem>
@@ -97,7 +112,14 @@ LegendListItem.displayName = 'LegendListItem';
 // Length at which the tooltip should be shown
 const CONST_NAME_LENGTH_TOOLTIP = 30;
 
-// Item list component (no memo to force re render from layers panel modifications)
+/**
+ * Renders the list of legend items for a layer.
+ *
+ * Memoized to prevent unnecessary re-renders when unrelated layer state changes.
+ *
+ * @param props - Properties defined in ItemsListProps interface
+ * @returns The items list element, or null if no items
+ */
 export const ItemsList = memo(({ items, layerPath }: ItemsListProps): JSX.Element | null => {
   logger.logTraceRender('components/legend/legend-layer-items');
 
@@ -124,9 +146,9 @@ export const ItemsList = memo(({ items, layerPath }: ItemsListProps): JSX.Elemen
   const isEsriDynamic = layerSchemaTag === CONST_LAYER_TYPES.ESRI_DYNAMIC;
 
   // Layer has a value expression in its style config
-  const hasValueExpression = useMemo((): boolean => {
+  const memoHasValueExpression = useMemo((): boolean => {
     // Log
-    logger.logTraceUseMemo('LEGEND-LAYER-ITEMS - hasValueExpression', layerStyleConfig);
+    logger.logTraceUseMemo('LEGEND-LAYER-ITEMS - memoHasValueExpression', layerStyleConfig);
 
     return layerStyleConfig
       ? Object.values(layerStyleConfig).some((config) => 'valueExpression' in config && config.valueExpression)
@@ -184,7 +206,7 @@ export const ItemsList = memo(({ items, layerPath }: ItemsListProps): JSX.Elemen
       {items.map((item) => {
         const itemId = getItemId(item);
 
-        const canReallyToggle = Boolean(canToggleItemVisibility && !layerHidden && !(isEsriDynamic && hasValueExpression));
+        const canReallyToggle = Boolean(canToggleItemVisibility && !layerHidden && !(isEsriDynamic && memoHasValueExpression));
 
         // Common properties for the legend list item
         const commonProps = {

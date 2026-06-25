@@ -52,6 +52,12 @@ const responsiveWidths = {
 /** Main container styles for the legend component. */
 const sxClassesMain = getSxClassesMain();
 
+/**
+ * Creates the legend component.
+ *
+ * @param props - Properties defined in LegendType interface
+ * @returns The legend component, or null if no layers are available
+ */
 export function Legend({ containerType }: LegendType): JSX.Element | null {
   logger.logTraceRender('components/legend/legend');
 
@@ -119,8 +125,10 @@ export function Legend({ containerType }: LegendType): JSX.Element | null {
     [getLegendLayerListSize]
   );
 
-  // Memoize the window resize handler and use the hook to add listener to avoid many creation
-  const handleWindowResize = useCallback(() => {
+  /**
+   * Handles window resize events to update legend layout.
+   */
+  const handleWindowResize = useCallback((): void => {
     // Update the layer list based on window size
     updateLegendLayerListByWindowSize(layerPaths);
   }, [layerPaths, updateLegendLayerListByWindowSize]);
@@ -128,7 +136,9 @@ export function Legend({ containerType }: LegendType): JSX.Element | null {
   // Wire a handler using a custom hook on the window resize event
   useEventListener<Window>('resize', handleWindowResize, window);
 
-  // Handle initial layer setup
+  /**
+   * Handles initial layer setup and updates on layer path changes.
+   */
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('LEGEND - layer setup', layerPaths);
@@ -137,7 +147,9 @@ export function Legend({ containerType }: LegendType): JSX.Element | null {
     updateLegendLayerListByWindowSize(layerPaths);
   }, [layerPaths, updateLegendLayerListByWindowSize]);
 
-  // Memoize the no layers content
+  /**
+   * Renders the empty state message when no layers are added.
+   */
   const memoNoLayersContent = useMemo(() => {
     // Log
     logger.logTraceUseMemo('components/legend - noLayersContent');
@@ -154,7 +166,9 @@ export function Legend({ containerType }: LegendType): JSX.Element | null {
     );
   }, [t, memoSxClasses]);
 
-  // Memoize the rendered content based on whether there are legend layers
+  /**
+   * Renders the legend layer list content organized in responsive columns.
+   */
   const memoContent = useMemo(() => {
     // Log
     logger.logTraceUseMemo('components/legend - content', formattedLegendLayerList.length);
@@ -195,15 +209,17 @@ export function Legend({ containerType }: LegendType): JSX.Element | null {
         buttonRef={fullScreenBtnRef}
       />
 
-      <Box sx={memoSxClasses.toggleBar}>
-        <ToggleAll containerType={containerType} source="legend" />
-        <LegendFullscreenButton containerType={containerType} onClick={() => setIsFullScreen(true)} buttonRef={fullScreenBtnRef} />
-      </Box>
-      <Box
-        sx={{ background: theme.palette.geoViewColor.bgColor.main, ...sxClassesMain.container }}
-        id={`${mapId}-${containerType}-legendContainer`}
-      >
-        <Box sx={styles.flexContainer}>{memoContent}</Box>
+      <Box sx={sxClassesMain.legendWrapper}>
+        <Box sx={memoSxClasses.toggleBar}>
+          <ToggleAll containerType={containerType} source="legend" />
+          <LegendFullscreenButton containerType={containerType} onClick={() => setIsFullScreen(true)} buttonRef={fullScreenBtnRef} />
+        </Box>
+        <Box
+          sx={{ background: theme.palette.geoViewColor.bgColor.main, ...sxClassesMain.container }}
+          id={`${mapId}-${containerType}-legendContainer`}
+        >
+          <Box sx={styles.flexContainer}>{memoContent}</Box>
+        </Box>
       </Box>
     </>
   );

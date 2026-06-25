@@ -11,6 +11,7 @@ import { visuallyHidden } from '@/ui/style/default';
 export const getSxClasses = (theme: Theme): SxStyles => ({
   list: {
     color: 'text.primary',
+    height: 'fit-content',
     width: '100%',
     '& .MuiListItemText-primary': {
       fontSize: theme.palette.geoViewFontSize.lg,
@@ -63,11 +64,11 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       fontSize: theme.palette.geoViewFontSize.default,
       fontWeight: '600',
       lineHeight: 1.5,
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-      whiteSpace: 'nowrap',
       paddingRight: '10px',
       display: 'block',
+      overflowWrap: 'break-word',
+      wordBreak: 'normal',
+      hyphens: 'auto',
     },
     '>div': {
       display: 'flex',

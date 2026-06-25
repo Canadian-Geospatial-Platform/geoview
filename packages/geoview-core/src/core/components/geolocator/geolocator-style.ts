@@ -14,8 +14,8 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     position: 'absolute',
     top: 17,
     left: 68,
+    right: 20,
     maxWidth: 350,
-    width: 350,
   },
   geolocator: {
     position: 'relative',
@@ -48,9 +48,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   filter: {
     display: 'flex',
     flexDirection: 'row',
-    alignItems: 'end',
+    alignItems: 'flex-end',
+    gap: 6,
     padding: 6,
-    paddingTop: 2,
     borderBottom: `1px solid ${theme.palette.divider}`,
     '& .MuiInputLabel-formControl': {
       fontSize: theme.palette.geoViewFontSize.default,
@@ -62,11 +62,13 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     '& .MuiSelect-select': {
       padding: '0px 12px 4px 0px !important',
     },
+    [theme.breakpoints.down('sm')]: {
+      flexDirection: 'column',
+      alignItems: 'stretch',
+    },
   },
   filterBox: {
     flexGrow: 2,
-    paddingRight: '8px',
-    maxWidth: 150,
     '& .MuiInputLabel-root': {
       fontSize: theme.palette.geoViewFontSize.sm,
     },
@@ -100,21 +102,20 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
  * @returns The sx classes object
  */
 export const getSxClassesList = (theme: Theme): SxStyles => ({
-  listStyle: {
-    fontSize: theme.palette.geoViewFontSize.sm,
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
+  geoListItemGrid: {
+    width: '100%',
   },
-  main: {
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    '& span': {
-      fontSize: theme.palette.geoViewFontSize.xs,
-      ':first-of-type': {
-        fontSize: theme.palette.geoViewFontSize.sm,
-      },
+
+  // Location name + province cell (left side, 66% width on sm+)
+  geoListLocationCell: {
+    fontSize: theme.palette.geoViewFontSize.sm,
+  },
+
+  geoListCategoryCell: {
+    fontSize: theme.palette.geoViewFontSize.sm,
+    textAlign: 'right',
+    [theme.breakpoints.down('sm')]: {
+      textAlign: 'left',
     },
   },
 });
