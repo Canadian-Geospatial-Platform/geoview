@@ -243,6 +243,7 @@
     "only": "only",
     "opacity": "Opacity (%)",
     "opacityMax": "Maximum from parent",
+    "outOfVisibleRange": "out of visible range",
     "reloadLayer": "Reload layer",
     "reloadSublayers": "Reload all layers in error",
     "visibilityIsAlways": "Visibility is always enabled",
@@ -251,7 +252,7 @@
     "toggleSublayersVisibility": "Toggle sublayers visibility",
     "toggleCollapse": "Toggle collapse",
     "zoomVisibleScale": "Zoom to visible scale",
-    "querying": "Querying",
+    "querying": "Querying...",
     "layerAdded": "Layer {{layerName}} added",
     "layerAddedAndLoading": "Layer {{layerName}} added and loading",
     "layerAddedWithError": "Layer {{layerName}} in error",
@@ -301,6 +302,8 @@
     "layerControls": "Layers controls",
     "selectLayerAndScrollTimeSlider": "Access Time Slider panel",
     "selectLayer": "Select {{layerName}}",
+    "selectLayerWithDescription": "Select {{layerName}} ({{description}})",
+    "layerTooltipWithStatus": "{{title}} ({{status}})",
     "layerActions": "Layer actions",
     "settings": {
       "title": "Layer settings",
@@ -371,7 +374,8 @@
     "featureInfoTable": "Feature information",
     "featureInfoTableField": "Field",
     "featureInfoTableValue": "Value",
-    "featureActions": "Feature actions"
+    "featureActions": "Feature actions",
+    "featureNavigation": "Feature navigation"
   },
   "lightbox": {
     "next": "Next",

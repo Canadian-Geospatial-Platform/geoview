@@ -243,6 +243,7 @@
     "only": "seulement",
     "opacity": "Opacité (%)",
     "opacityMax": "Maximum du parent",
+    "outOfVisibleRange": "hors de la plage visible",
     "reloadLayer": "Recharger la couche",
     "reloadSublayers": "Recharger toutes les couches en erreur",
     "visibilityIsAlways": "La visibilité est toujours activée",
@@ -251,7 +252,7 @@
     "toggleSublayersVisibility": "Basculer la visibilité des sous-couches",
     "toggleCollapse": "Basculer la fermeture",
     "zoomVisibleScale": "Zoom à l'échelle visible",
-    "querying": "Requête en cours",
+    "querying": "Requête en cours...",
     "layerAdded": "Couche {{layerName}} ajoutée",
     "layerAddedAndLoading": "Couche {{layerName}} ajoutée et en chargement",
     "layerAddedWithError": "Couche {{layerName}} en erreur",
@@ -301,6 +302,8 @@
     "layerControls": "Commandes des couches",
     "selectLayerAndScrollTimeSlider": "Accéder au panneau Curseur Temporel",
     "selectLayer": "Sélectionner {{layerName}}",
+    "selectLayerWithDescription": "Sélectionner {{layerName}} ({{description}})",
+    "layerTooltipWithStatus": "{{title}} ({{status}})",
     "layerActions": "Actions sur les couches",
     "settings": {
       "title": "Paramètres de couche",
@@ -371,7 +374,8 @@
     "featureInfoTable": "Informations sur les éléments",
     "featureInfoTableField": "Champ",
     "featureInfoTableValue": "Valeur",
-    "featureActions": "Actions sur les éléments"
+    "featureActions": "Actions sur les éléments",
+    "featureNavigation": "Navigation des éléments"
   },
   "lightbox": {
     "next": "Prochaine",

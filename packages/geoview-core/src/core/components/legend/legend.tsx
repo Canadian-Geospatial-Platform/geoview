@@ -195,15 +195,17 @@ export function Legend({ containerType }: LegendType): JSX.Element | null {
         buttonRef={fullScreenBtnRef}
       />
 
-      <Box sx={memoSxClasses.toggleBar}>
-        <ToggleAll containerType={containerType} source="legend" />
-        <LegendFullscreenButton containerType={containerType} onClick={() => setIsFullScreen(true)} buttonRef={fullScreenBtnRef} />
-      </Box>
-      <Box
-        sx={{ background: theme.palette.geoViewColor.bgColor.main, ...sxClassesMain.container }}
-        id={`${mapId}-${containerType}-legendContainer`}
-      >
-        <Box sx={styles.flexContainer}>{memoContent}</Box>
+      <Box sx={sxClassesMain.legendWrapper}>
+        <Box sx={memoSxClasses.toggleBar}>
+          <ToggleAll containerType={containerType} source="legend" />
+          <LegendFullscreenButton containerType={containerType} onClick={() => setIsFullScreen(true)} buttonRef={fullScreenBtnRef} />
+        </Box>
+        <Box
+          sx={{ background: theme.palette.geoViewColor.bgColor.main, ...sxClassesMain.container }}
+          id={`${mapId}-${containerType}-legendContainer`}
+        >
+          <Box sx={styles.flexContainer}>{memoContent}</Box>
+        </Box>
       </Box>
     </>
   );

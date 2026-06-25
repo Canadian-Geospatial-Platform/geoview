@@ -43,7 +43,7 @@ const LegendListItem = memo(
   }): JSX.Element => {
     const { t } = useTranslation<string>();
     const theme = useTheme();
-    const tooltipTitle = canToggle ? `${t('layers.toggleVisibility')} - ${name}` : '';
+    const tooltipTitle = canToggle ? `${name} - ${t('layers.toggleVisibility')}` : ''; // WCAG - place name first. see WCAG 2.1 SC 2.5.3
     const getItemClassName = (): string | undefined => {
       return !isVisible || !layerVisible ? 'unchecked' : 'checked';
     };
@@ -77,15 +77,22 @@ const LegendListItem = memo(
             disableRipple
             sx={sxClasses.layerListItemButton}
             className={`layerListItemButton ${itemClassName || ''}`}
+            {...(tooltipTitle && { 'aria-label': tooltipTitle })} // Only set if non-empty
             aria-pressed={isVisible && layerVisible}
-            aria-label={`${t('layers.toggleVisibility')} - ${name}`} // WCAG - Provide descriptive aria-label for accessibility
           >
             <ListItemIcon>
               <Box sx={{ display: 'flex', padding: '0 18px 0 18px', margin: '0 -18px 0 -18px' }}>
                 {icon ? <Box component="img" alt="" src={icon} /> : <BrowserNotSupportedIcon />}
               </Box>
             </ListItemIcon>
-            <ListItemText primary={name} />
+            <ListItemText
+              primary={name}
+              slotProps={{
+                primary: {
+                  noWrap: true,
+                },
+              }}
+            />
           </ListItemButton>
         </Tooltip>
       </ListItem>

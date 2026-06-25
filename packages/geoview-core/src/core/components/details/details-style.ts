@@ -28,9 +28,20 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   rightPanelContainer: {
     color: theme.palette.geoViewColor.textColor.main,
   },
-  rightPanelBtnHolder: {
+  rightPanelStatus: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    flexWrap: 'wrap',
     padding: '10px 16px',
     boxShadow: `0px 12px 9px -13px ${theme.palette.geoViewColor.bgColor.dark[200]}`,
+  },
+  rightPanelButtons: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 3,
+    flexWrap: 'wrap',
   },
   featureInfoListContainer: {
     padding: '0 16px 16px',
@@ -99,7 +110,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   flexBoxAlignCenter: {
     display: 'flex',
-    flexDirection: 'row',
     alignItems: 'center',
   },
   featureDetailModal: {

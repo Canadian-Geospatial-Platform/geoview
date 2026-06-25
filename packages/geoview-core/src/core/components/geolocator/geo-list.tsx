@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react';
-import { useTheme } from '@mui/material';
+import { useTheme, useMediaQuery } from '@mui/material';
 import { List, ListItem, ListItemButton, Grid, Tooltip, Typography } from '@/ui';
 import type { GeoListItem } from '@/core/components/geolocator/geolocator';
 import { getSxClassesList } from '@/core/components/geolocator/geolocator-style';
@@ -29,6 +29,7 @@ export function GeoList({ geoListItems, searchValue }: GeoListProps): JSX.Elemen
   const theme = useTheme();
   const sxClassesList = useMemo(() => getSxClassesList(theme), [theme]);
   const mapController = useMapController();
+  const isAboveSmBreakpoint = useMediaQuery(theme.breakpoints.up('sm'));
 
   /**
    * Handles zooming to a geolocation result.
@@ -72,16 +73,22 @@ export function GeoList({ geoListItems, searchValue }: GeoListProps): JSX.Elemen
         // tooltip is here for when the name is too long to be shown in full in the list
         <Tooltip
           title={getTooltipTitle(geoListItem)}
-          placement="right"
+          placement="top"
           // sometimes when we search by `bay`, response can have name and lat same, that's why index is used to distinguish
           key={`${geoListItem.name}-${geoListItem.lat}-${index.toString()}`}
           describeChild
+          // prevent tooltip from showing on small screens because the full text is already shown
+          // in the list at smaller breakpoints
+          disableFocusListener={!isAboveSmBreakpoint}
+          disableTouchListener={!isAboveSmBreakpoint}
+          disableHoverListener={!isAboveSmBreakpoint}
         >
           <ListItem disablePadding>
             <ListItemButton onClick={() => handleZoomToGeoLocator(geoListItem)} aria-label={getTooltipTitle(geoListItem)}>
-              <Grid container sx={{ width: '100%' }}>
-                <Grid size={{ xs: 12, sm: 8 }}>
-                  <Typography component="div" sx={sxClassesList.listStyle}>
+              <Grid container spacing={6} sx={sxClassesList.geoListItemGrid}>
+                {/* Location name + province (truncates when > 66% of row width) */}
+                <Grid size={{ xs: 12, sm: 8 }} sx={sxClassesList.geoListLocationCell}>
+                  <Typography component="div" noWrap={isAboveSmBreakpoint}>
                     {transformListTitle(
                       geoListItem.name,
                       searchValue,
@@ -89,10 +96,12 @@ export function GeoList({ geoListItems, searchValue }: GeoListProps): JSX.Elemen
                     )}
                   </Typography>
                 </Grid>
-                <Grid size={{ xs: 12, sm: 4 }} sx={{ textAlign: 'right' }}>
+
+                {/* Category (truncates when > 33% of row width) */}
+                <Grid size={{ xs: 12, sm: 4 }} sx={sxClassesList.geoListCategoryCell}>
                   {!!geoListItem.category && geoListItem.category !== 'null' && (
-                    <Typography component="div" sx={sxClassesList.main}>
-                      <Typography component="span"> {geoListItem.category}</Typography>
+                    <Typography component="div" noWrap={isAboveSmBreakpoint}>
+                      {geoListItem.category}
                     </Typography>
                   )}
                 </Grid>

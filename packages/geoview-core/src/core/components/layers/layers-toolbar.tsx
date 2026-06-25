@@ -28,8 +28,9 @@ export function LayersToolbar({ containerType }: TypeLayersToolbar): JSX.Element
   const userClickedAdd = useRef(false);
 
   const layerToolbarStyle = {
-    display: 'inline-flex',
-    gap: '4px',
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: 3,
     '&>button': { padding: '10px 15px' },
     '& .MuiButton-startIcon': { [theme.breakpoints.down('sm')]: { margin: 0, padding: '0 0.25rem' } },
     '& .MuiButtonGroup-root': { backgroundColor: theme.palette.geoViewColor.bgColor.light[300] },
@@ -118,6 +119,7 @@ export function LayersToolbar({ containerType }: TypeLayersToolbar): JSX.Element
         type="text"
         size="small"
         tooltip={t('legend.addLayer')}
+        tooltipPlacement="top"
         variant={displayState === 'add' ? 'contained' : 'outlined'}
         startIcon={<AddCircleOutlineIcon sx={{ fontSize: theme.palette.geoViewFontSize.sm }} />}
         onClick={() => handleSetDisplayState('add')}
