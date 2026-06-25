@@ -124,6 +124,8 @@ _(Optimizations, refactors, structural changes)_
 
 _(WCAG fixes and improvements)_
 
+- Fixed reflow issues at 400% zoom level (1280px viewport) to meet WCAG SC 1.4.10 Reflow requirements (#3325)
+
 ## Documentation & Cleanup
 
 _(Doc updates, demo cleanup, code organization)_

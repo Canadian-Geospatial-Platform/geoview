@@ -26,11 +26,9 @@ interface ToggleAllProps {
 /** Default styles for the toggle all container. */
 const toggleAllStyle = {
   display: 'flex',
-  flexDirection: 'row',
-  gap: '0px',
-  justifyContent: 'flex-start',
+  flexWrap: 'wrap',
+  gap: 3,
   alignItems: 'center',
-  width: 'fit-content',
 };
 
 /**

@@ -62,7 +62,8 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
   /**
    * Handles when the user clicks the clear filters button.
    */
-  const handleClearFilters = (): void => {
+  const handleClearFilters = (event: React.MouseEvent<HTMLButtonElement>): void => {
+    event.preventDefault();
     // Prevent action when button is disabled
     if (!memoHasActiveFilters) {
       return;
@@ -130,7 +131,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
   }, [province, category, t, memoSxClasses.filterListError]);
 
   return (
-    <Paper component="div" elevation={4} square sx={{ width: 350 }}>
+    <Paper component="div" elevation={4} square>
       {!error && (
         <Box sx={memoSxClasses.filter} className="geolocator-filters" role="group" aria-label={t('geolocator.filtersGroupTitle')}>
           <Box sx={memoSxClasses.filterBox}>

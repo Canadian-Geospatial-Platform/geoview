@@ -14,6 +14,7 @@ import {
   useStoreLayerStatus,
   useStoreLayerSchemaTag,
   useStoreLayerIsHiddenOnMap,
+  useStoreLayerInVisibleRange,
   useStoreLayerLegendCollapsed,
   useStoreLayerStyleConfig,
   useStoreLayerIcons,
@@ -67,8 +68,10 @@ const LegendLayerHeader = memo(
     logger.logTraceRender('components/legend/legend-layer - LegendLayerHeader', layerPath);
 
     // Hooks
+    const { t } = useTranslation();
     const isCollapsed = useStoreLayerLegendCollapsed(layerPath);
     const layerHidden = useStoreLayerIsHiddenOnMap(layerPath);
+    const layerInVisibleRange = useStoreLayerInVisibleRange(layerPath);
     const layerName = useStoreLayerName(layerPath) ?? layerPath;
     const layerItems = useStoreLayerItems(layerPath);
     const layerStyleConfig = useStoreLayerStyleConfig(layerPath);
@@ -96,8 +99,14 @@ const LegendLayerHeader = memo(
         <LayerIcon layerPath={layerPath} />
         <ListItemText
           primary={
-            <Typography component="div" id={layerNameId}>
+            <Typography component="div" id={layerNameId} sx={sxClasses.legendListItemHeaderText}>
               {layerName}
+              {!layerInVisibleRange && (
+                <Box component="span" sx={sxClasses.visuallyHidden}>
+                  {' '}
+                  ({t('layers.outOfVisibleRange')})
+                </Box>
+              )}
             </Typography>
           }
           sx={sxClasses.legendTitle}
@@ -137,7 +146,7 @@ export function LegendLayer({ layerPath, showControls, containerType }: LegendLa
   logger.logTraceRender('components/legend/legend-layer', layerPath);
 
   // Hooks
-  const { t } = useTranslation<string>();
+  const { t } = useTranslation();
   const theme = useTheme();
   /** Memoized sx class definitions for the legend layer. */
   const memoSxClasses = useMemo(() => {
