@@ -122,6 +122,52 @@ export const LayerListItem = memo(({ id, isSelected, layer, onListItemClick }: L
   // However, if "coordinateInfoEnabled" is true, and no map click has been done,the layer coord info will show zero-ed out coordinates in the UI.
   if (isLayerCoordinateInfo) isDisabled = false;
 
+  /**
+   * Computes the layer status text for tooltip (plain text only).
+   */
+  const memoLayerStatusText = useMemo((): string => {
+    logger.logTraceUseMemo('LAYER-LIST - LayerListItem - memoLayerStatusText', layerStatus, layerQueryStatus, layer.layerFeatures);
+
+    if (layerStatus === 'error' || layerQueryStatus === 'error') {
+      return t('legend.layerError');
+    }
+    if (layerQueryStatus === 'processing') {
+      return t('layers.querying');
+    }
+    // Return plain text feature count (layer.layerFeatures is already a string from details-panel)
+    return layer.layerFeatures ?? '';
+  }, [layerStatus, layerQueryStatus, layer.layerFeatures, t]);
+
+  /**
+   * Computes the tooltip title with layer name and status.
+   */
+  const memoTooltipTitle = useMemo((): ReactNode => {
+    logger.logTraceUseMemo('LAYER-LIST - LayerListItem - memoTooltipTitle', layer.tooltip, memoLayerStatusText, isDisabled);
+
+    // No tooltip when disabled (text wraps and is fully visible)
+    if (isDisabled) {
+      return undefined;
+    }
+
+    // If tooltip is a JSX.Element/ReactNode, pass it through as-is
+    if (layer.tooltip && typeof layer.tooltip !== 'string') {
+      return layer.tooltip;
+    }
+
+    // Handle string tooltips with status concatenation
+    const baseTitle = typeof layer.tooltip === 'string' ? layer.tooltip : '';
+    const hasStatusText = typeof memoLayerStatusText === 'string' && memoLayerStatusText.trim().length > 0;
+
+    if (hasStatusText) {
+      // If no base title, return status text alone; otherwise use localized format with status
+      return baseTitle.trim() ? t('layers.layerTooltipWithStatus', { title: baseTitle, status: memoLayerStatusText }) : memoLayerStatusText;
+    }
+
+    return baseTitle || undefined;
+  }, [layer.tooltip, memoLayerStatusText, isDisabled, t]);
+
+  const hasTooltip = !!memoTooltipTitle;
+
   // #region Handlers
 
   /**
@@ -130,18 +176,17 @@ export const LayerListItem = memo(({ id, isSelected, layer, onListItemClick }: L
    * @returns The status label as JSX element or string
    */
   const getLayerStatus = useCallback((): JSX.Element | string => {
-    if (layerStatus === 'error' || layerQueryStatus === 'error') {
-      return `${t('legend.layerError')}`;
+    // If there's a map filter icon, wrap text with icon in JSX
+    if (layer?.mapFilteredIcon) {
+      return (
+        <>
+          {memoLayerStatusText} {layer.mapFilteredIcon}
+        </>
+      );
     }
-    if (layerQueryStatus === 'processing') {
-      return `${t('layers.querying')}...`;
-    }
-    return (
-      <>
-        {layer.layerFeatures ?? ''} {layer?.mapFilteredIcon ?? ''}
-      </>
-    );
-  }, [layer.layerFeatures, layerStatus, layer?.mapFilteredIcon, layerQueryStatus, t]);
+    // Otherwise return plain text
+    return memoLayerStatusText;
+  }, [memoLayerStatusText, layer?.mapFilteredIcon]);
 
   /**
    * Handles layer selection with keyboard (Enter or Spacebar).
@@ -202,11 +247,14 @@ export const LayerListItem = memo(({ id, isSelected, layer, onListItemClick }: L
         {statusMessage}
       </Box>
       <Tooltip
-        title={layer.tooltip}
+        title={memoTooltipTitle ?? ''}
         placement="top"
         arrow
         enterDelay={theme.transitions.duration.tooltipDelay}
         enterNextDelay={theme.transitions.duration.tooltipDelay}
+        disableHoverListener={!hasTooltip}
+        disableFocusListener={!hasTooltip}
+        disableTouchListener={!hasTooltip}
         slotProps={{
           popper: {
             modifiers: [
@@ -236,11 +284,11 @@ export const LayerListItem = memo(({ id, isSelected, layer, onListItemClick }: L
             layer.layerPath && !layer.content && <LayerIcon layerPath={layer.layerPath} />
           )}
           <Box component="span" sx={memoSxClasses.listPrimaryText} className="layerInfo">
-            <Typography component="span" className="layerTitle">
+            <Typography component="span" className="layerTitle" noWrap={!isDisabled}>
               {layer.layerName}
             </Typography>
             <Box component="span" sx={{ display: 'flex', alignContent: 'center' }}>
-              <Typography component="span" variant="subtitle1" noWrap sx={{ display: 'block' }}>
+              <Typography component="span" variant="subtitle1" noWrap={!isDisabled} sx={{ display: 'block' }}>
                 {getLayerStatus()}
               </Typography>
             </Box>
@@ -322,7 +370,7 @@ export const LayerList = memo(({ layerList, selectedLayerPath, onListItemClick }
             layerFeatures: t('layers.instructionsNoLayersBody'),
             layerStatus: 'processed',
             queryStatus: 'processed',
-            numOffeatures: 0, // Just so it's disabled..
+            numOffeatures: 0, // Just so it's disabled.
           }}
           onListItemClick={onListItemClick}
         />

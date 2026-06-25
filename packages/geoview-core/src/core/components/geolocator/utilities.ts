@@ -72,7 +72,7 @@ export const getDecimalDegreeItem = (searchTerm: string): GeoListItem | null => 
  * @returns The tooltip title
  */
 export const getTooltipTitle = ({ name, province, category }: tooltipProp): string => {
-  return [name, category !== 'null' && category, province !== 'null' && province].filter(Boolean).join(', ');
+  return [name, province !== 'null' && province, category !== 'null' && category].filter(Boolean).join(', ');
 };
 
 /**

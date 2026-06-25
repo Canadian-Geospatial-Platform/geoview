@@ -505,6 +505,21 @@ export function SingleLayer({
   }, [layerPath, layerStatus, parentHidden, t, layerChildPaths, layerItems]);
 
   /**
+   * Computes the tooltip title with layer name and description.
+   */
+  const memoTooltipTitle = useMemo((): string => {
+    // Log
+    logger.logTraceUseMemo('SINGLE-LAYER - memoTooltipTitle', layerName, memoLayerDescription);
+
+    // Only include description if it's a non-empty string
+    if (typeof memoLayerDescription === 'string' && memoLayerDescription.trim()) {
+      return t('layers.selectLayerWithDescription', { layerName, description: memoLayerDescription });
+    }
+
+    return t('layers.selectLayer', { layerName });
+  }, [layerName, memoLayerDescription, t]);
+
+  /**
    * Renders the edit mode buttons (reorder arrows).
    */
   const memoEditModeButtons = useMemo((): JSX.Element | null => {
@@ -863,7 +878,7 @@ export function SingleLayer({
           {statusMessage}
         </Box>
         <Tooltip
-          title={t('layers.selectLayer', { layerName })}
+          title={memoTooltipTitle}
           placement="top"
           enterDelay={theme.transitions.duration.tooltipDelay}
           enterNextDelay={theme.transitions.duration.tooltipDelay}
@@ -879,7 +894,14 @@ export function SingleLayer({
             aria-current={layerIsSelected ? true : undefined}
           >
             <LayerIcon layerPath={layerPath} />
-            <ListItemText primary={layerName !== undefined ? layerName : layerId} secondary={memoLayerDescription} />
+            <ListItemText
+              primary={layerName !== undefined ? layerName : layerId}
+              secondary={memoLayerDescription}
+              slotProps={{
+                primary: { noWrap: true },
+                secondary: { noWrap: true },
+              }}
+            />
           </ListItemButton>
         </Tooltip>
         {!isLayoutEnlarged && (
