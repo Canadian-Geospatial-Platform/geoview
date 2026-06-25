@@ -193,8 +193,6 @@ export function Geolocator(): JSX.Element {
   }, [isLoading, t]);
 
   return (
-    // Determine if the panel is actually open and visible
-
     <Box
       ref={panelRef}
       component="section"

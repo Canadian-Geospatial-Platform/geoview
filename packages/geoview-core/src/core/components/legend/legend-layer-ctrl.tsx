@@ -53,11 +53,14 @@ type ControlActions = {
 };
 
 /**
- * Custom hook for control actions.
+ * Builds memoized control action handlers for layer operations.
  *
  * Performance optimization: Only depends on layerPath for stable memoization.
  * State values (visibility, parentHidden, etc.) are read imperatively from the store
  * inside each handler when executed, preventing callback recreation on every state change.
+ *
+ * @param layerPath - The layer path identifier
+ * @returns Object containing memoized handler functions
  */
 const useControlActions = (layerPath: string): ControlActions => {
   // Store
@@ -154,7 +157,7 @@ const useControlActions = (layerPath: string): ControlActions => {
  */
 const useSubtitle = (layerPath: string, childPaths: string[], items: TypeLegendItem[]): string => {
   // Hooks
-  const { t } = useTranslation<string>();
+  const { t } = useTranslation();
   const parentHidden = useStoreLayerIsParentHiddenOnMap(layerPath);
 
   return useMemo(() => {
@@ -195,9 +198,11 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
 
   // #region Handlers
 
-  // Create stable handler for layer navigation
+  /**
+   * Handles navigating to the layers panel and selecting the layer.
+   */
   const handleNavigateToLayers = useCallback(
-    (event: React.MouseEvent) => {
+    (event: React.MouseEvent): void => {
       // Stop propagation to prevent AppBar's onScrollShellIntoView from firing
       event.stopPropagation();
       navigateToLayers({ layerPath });
@@ -211,7 +216,7 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
   logger.logTraceRender('components/legend/legend-layer-ctrl', layerPath);
 
   // Hooks
-  const { t } = useTranslation<string>();
+  const { t } = useTranslation();
   const theme = useTheme();
   const memoSxClasses = useMemo(() => {
     logger.logTraceUseMemo('LEGEND-LAYER-CTRL - memoSxClasses', theme);
@@ -274,7 +279,11 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
             tooltip={t('layers.zoomVisibleScale')}
             className={`buttonOutline`}
             onClick={controls.handleZoomToLayerVisibleScale}
-            aria-label={`${t('layers.zoomVisibleScale')} - ${layerName}`} // WCAG - Provide descriptive aria-label for screen readers
+            aria-label={
+              isZoomToVisibleScaleCapable
+                ? `${layerName} - ${t('layers.outOfVisibleRange')}. ${t('layers.zoomVisibleScale')}`
+                : `${t('layers.zoomVisibleScale')} - ${layerName}`
+            } // WCAG - Explicitly announce out-of-range state for screen readers
             aria-disabled={!isZoomToVisibleScaleCapable} // WCAG - used instead of disabled to allow button to retain focus after keyboard press
           >
             <CenterFocusScaleIcon />
