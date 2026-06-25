@@ -8,13 +8,20 @@ type SxClasses = Record<string, object>;
  * @returns An object containing the style classes
  */
 export const getSxClassesMain = (): SxClasses => ({
+  legendWrapper: {
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+    overflow: 'hidden',
+  },
   container: {
     padding: '16px',
     display: 'flex',
     flexDirection: 'column',
-    height: 'calc(100% - 47px)', // 47px is the height of the div containing the show/hide toggles
     overflowY: 'auto',
     overflowX: 'hidden',
+    flex: '1 1 auto',
+    minHeight: 0,
   },
 });
 
@@ -35,22 +42,6 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     fontWeight: 'normal',
     fontSize: theme.palette.geoViewFontSize.md,
     textAlign: 'left',
-  },
-  layersListContainer: {
-    padding: '20px',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-
-    [theme.breakpoints.down('sm')]: {
-      width: '100%',
-    },
-    [theme.breakpoints.up('md')]: {
-      width: '50%',
-    },
-    [theme.breakpoints.up('lg')]: {
-      width: '33.33%',
-    },
   },
   legendList: {
     paddingRight: '0.65rem',
@@ -79,11 +70,16 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
   legendListItemHeader: {
     width: '100%',
     display: 'flex',
+    gap: 8,
     alignItems: 'center',
     borderBottom: `1px solid ${theme.palette.geoViewColor.bgColor.dark[100]}`,
   },
+  legendListItemHeaderText: {
+    overflowWrap: 'break-word',
+    wordBreak: 'normal',
+    hyphens: 'auto',
+  },
   legendTitle: {
-    marginLeft: '12px',
     fontSize: theme.palette.geoViewFontSize.md,
     fontWeight: '600',
     '& div': {
@@ -112,12 +108,13 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     paddingLeft: '6px',
     marginBottom: '3px',
     fontWeight: '400',
-    '& .MuiListItemText-root': {
-      marginLeft: '12px',
-    },
   },
   layerListItemButton: {
     padding: '0 0 0 6px',
+    gap: 8,
+    overflowWrap: 'break-word',
+    wordBreak: 'normal',
+    hyphens: 'auto',
     '&:hover': {
       backgroundColor: 'transparent',
     },
@@ -173,8 +170,9 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
   },
   toggleBar: {
     borderBottom: `1px solid ${theme.palette.geoViewColor.bgColor.dark[100]}`,
-    padding: '8px',
+    padding: 6,
     display: 'flex',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
     alignItems: 'center',
   },

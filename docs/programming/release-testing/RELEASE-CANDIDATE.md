@@ -124,6 +124,8 @@ _(Optimizations, refactors, structural changes)_
 
 _(WCAG fixes and improvements)_
 
+- Fixed reflow issues (geolocator, legend, layers, details panels) at 400% zoom level (1280px viewport) (#3560)
+
 ## Documentation & Cleanup
 
 _(Doc updates, demo cleanup, code organization)_

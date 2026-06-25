@@ -3,7 +3,7 @@ import type { Theme } from '@mui/material/styles';
 type SxClasses = Record<string, object>;
 
 /**
- * Get custom sx classes for the layer left panel
+ * Gets custom sx classes for the layer left panel.
  *
  * @param theme - The theme object
  * @returns The sx classes object
@@ -51,9 +51,6 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     '& .MuiListItemText-primary': {
       fontWeight: '600',
       fontSize: `${theme.palette.geoViewFontSize.default} !important`,
-      overflow: 'hidden',
-      whiteSpace: 'nowrap',
-      textOverflow: 'ellipsis',
     },
 
     '& .layer-panel': {
@@ -84,9 +81,6 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
       },
       '> p': {
         fontSize: theme.palette.geoViewFontSize.sm,
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        whiteSpace: 'nowrap',
         color: `${theme.palette.geoViewColor.textColor.main} !important`,
         fontWeight: '400 !important',
       },
