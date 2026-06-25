@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
-import { IconButton, Grid, ArrowForwardIosOutlinedIcon, ArrowBackIosOutlinedIcon, ClearHighlightIcon, Box } from '@/ui';
+import { IconButton, ArrowForwardIosOutlinedIcon, ArrowBackIosOutlinedIcon, ClearHighlightIcon, Box } from '@/ui';
 
 import type { TypeContainerBox } from '@/core/types/global-types';
 import {
@@ -828,45 +828,37 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
 
       return (
         <Box sx={memoSxClasses.rightPanelContainer} className="guide-content-container">
-          <Grid container sx={memoSxClasses.rightPanelBtnHolder}>
-            <Grid size={{ xs: 6 }} sx={{ alignSelf: 'center' }}>
-              <Box role="status" aria-live="polite" aria-atomic="true">
-                {t('details.featureDetailsTitle')
-                  .replace('{count}', `${currentFeatureIndex + 1}`)
-                  .replace('{total}', `${memoSelectedLayerDataFeatures?.length}`)}
-              </Box>
-            </Grid>
+          <Box sx={memoSxClasses.rightPanelStatus}>
+            <Box role="status" aria-live="polite" aria-atomic="true">
+              {t('details.featureDetailsTitle')
+                .replace('{count}', `${currentFeatureIndex + 1}`)
+                .replace('{total}', `${memoSelectedLayerDataFeatures?.length}`)}
+            </Box>
             {memoSelectedLayerData?.features && memoSelectedLayerData.features.length > 1 && (
-              <Grid size={{ xs: 6 }} className="buttonGroup">
-                {/* Navigation buttons use aria-disabled with manual styling to preserve keyboard focus when users reach first/last items */}
-                <Box sx={{ textAlign: 'right' }}>
-                  <IconButton
-                    iconRef={prevButtonRef}
-                    aria-label={t('details.previousFeatureBtn')}
-                    tooltipPlacement="top"
-                    onClick={handlePrevFeature}
-                    aria-disabled={isPrevDisabled}
-                    className="buttonOutline"
-                  >
-                    <ArrowBackIosOutlinedIcon />
-                  </IconButton>
-                  <IconButton
-                    iconRef={nextButtonRef}
-                    sx={{
-                      marginLeft: '16px',
-                    }}
-                    aria-label={t('details.nextFeatureBtn')}
-                    tooltipPlacement="top"
-                    onClick={handleNextFeature}
-                    aria-disabled={isNextDisabled}
-                    className="buttonOutline"
-                  >
-                    <ArrowForwardIosOutlinedIcon />
-                  </IconButton>
-                </Box>
-              </Grid>
+              <Box role="group" aria-label={t('details.featureNavigation')} sx={memoSxClasses.rightPanelButtons}>
+                <IconButton
+                  iconRef={prevButtonRef}
+                  aria-label={t('details.previousFeatureBtn')}
+                  tooltipPlacement="top"
+                  onClick={handlePrevFeature}
+                  aria-disabled={isPrevDisabled}
+                  className="buttonOutline"
+                >
+                  <ArrowBackIosOutlinedIcon />
+                </IconButton>
+                <IconButton
+                  iconRef={nextButtonRef}
+                  aria-label={t('details.nextFeatureBtn')}
+                  tooltipPlacement="top"
+                  onClick={handleNextFeature}
+                  aria-disabled={isNextDisabled}
+                  className="buttonOutline"
+                >
+                  <ArrowForwardIosOutlinedIcon />
+                </IconButton>
+              </Box>
             )}
-          </Grid>
+          </Box>
 
           <FeatureInfo
             key={`${memoCurrentFeature.uid}-${memoCurrentFeatureHasGeometry ? 'with-geo' : 'no-geo'}`}

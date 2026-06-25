@@ -54,7 +54,7 @@ All interactive elements include context-specific aria-label attributes:
 
 ---
 
-## 002 - Intentional Interaction Patterns
+## 002. Intentional Interaction Patterns
 
 ### 1. Time Slider
 
@@ -80,44 +80,78 @@ This deferred-close pattern prevents focus trap corruption that occurs when the 
 
 ## 003. Best Practices
 
-### 1. Use unique and valid element IDs
+**Guidance for code review:**
+
+These guidelines help catch common accessibility issues during branch review. They are **advisory, not blocking** — the goal is to assist developers in writing accessible code, not to prevent work-in-progress from merging.
+
+**Priority levels:**
+
+- 🔴 **HIGH PRIORITY** — WCAG violation, should be addressed before release
+- 🟡 **MEDIUM PRIORITY** — Accessibility gap, worth fixing when feasible
+- 🔵 **ENHANCEMENT** — Best practice, improves user experience
+
+---
+
+### 1. Use unique and valid element IDs (🔴 HIGH PRIORITY)
 
 Every element id in the DOM must be unique. Duplicate IDs break label-input associations (htmlFor), invalidate ARIA relationships (aria-labelledby, aria-describedby), and cause screen readers to behave unpredictably.
 
-- ensure ids are always unique
-- use kebab-case (as much as possible)
-- layer paths can generate invalid ids
+- Ensure IDs are always unique across the entire map viewer
+- Use kebab-case (as much as possible)
+- **Layer paths can generate invalid IDs** because they may contain special characters (`/`, `.`, spaces) that are not valid in HTML id attributes
 
-Suggested format (goes from least specific to most specific)
+**ID naming patterns** (from least specific to most specific):
 
 ```typescript
-// Start by prefixing ids with the following
-${mapId}-${containerType}-[element]
-${mapId}-${containerType}-${panelId}-[element]
+// Pattern 1: Element in a container
+`${mapId}-${containerType}-${elementName}`
+// Example: "mapA-footer-zoom-button"
 
-// If a unique ID is required. uniqueId could be generated from:
-// const uniqueId = useId();
-// const uniqueId = generateId(8);
-${mapId}-${containerType}-[element]-${uniqueId}
-${mapId}-${containerType}-${panelId}-[element]-${uniqueId}
+// Pattern 2: Element in a panel within a container
+`${mapId}-${containerType}-${panelId}-${elementName}`
+// Example: "mapA-footer-layers-panel-close-button"
+
+// Pattern 3: When a truly unique ID is required
+// Generate uniqueId using React's useId() or generateId(8)
+`${mapId}-${containerType}-${elementName}-${uniqueId}`;
+// Example: "mapA-footer-layer-item-k8j3n2m9"
 ```
 
-### 2. Use Semantic Elements for Interactions
+**Sanitizing layer paths for IDs:**
+
+```typescript
+// ❌ Bad: using raw layer path
+id={layerPath}  // Could be "group/sublayer.json" — invalid!
+
+// ✅ Good: sanitized
+id={`${mapId}-layer-${layerPath.replace(/[/.\s]/g, '-')}`}
+```
+
+### 2. Use Semantic Elements for Interactions (🔴 HIGH PRIORITY)
 
 Clickable `<div>` and `<span>` elements are inaccessible by default — they receive no keyboard focus, emit no semantic role, and are invisible to assistive technologies. Native `<button>` and `<a>` elements come with built-in keyboard support, appropriate ARIA roles, and browser-managed focus behaviour at no extra cost. In MUI, use Button, IconButton, and Link components over attaching onClick handlers to arbitrary elements.
 
-### 3. Use IconButton for buttons without labels
+### 3. Use IconButton for buttons without labels (🔴 HIGH PRIORITY)
 
 The IconButton component in GeoView has built-in accessibility support. Use IconButton instead of Button when a button does not have a text label.
 
-### 4. Validate HTML Output and WCAG level 2.1 AA
+### 4. Ensure WCAG 2.1 Level AA Compliance (🟡 MEDIUM PRIORITY)
 
-From the browser's developer tools, copy a section of generated code from a map, or a map component, and validate it
+**Critical checks during code review:**
 
-- W3C.org validator
-- AI tools
+- ✅ All interactive elements have accessible names (via `aria-label`, `aria-labelledby`, or visible text)
+- ✅ Form inputs are associated with labels (via `<label>` or `aria-labelledby`)
+- ✅ Color is not the only means of conveying information
+- ✅ Focus indicators are visible and meet 3:1 contrast ratio
+- ✅ Interactive elements have minimum 44×44px touch target (WCAG 2.2 AAA, but GeoView target)
 
-### 5. Focus management: Use aria-disabled instead of disabled on UI elements that toggle between enabled/disabled states
+**Testing tools (post-implementation):**
+
+- [W3C Markup Validator](https://validator.w3.org/)
+- [axe DevTools](https://www.deque.com/axe/devtools/) browser extension
+- Lighthouse accessibility audit in Chrome DevTools
+
+### 5. Focus management: Use aria-disabled instead of disabled on UI elements that toggle between enabled/disabled states (🟡 MEDIUM PRIORITY)
 
 When a button has keyboard focus and becomes disabled on press, focus is lost and jumps unpredictably to another element, disorienting keyboard users who lose track of their position in the interface.
 
@@ -139,20 +173,71 @@ const handleClick = (e) => {
 </button>
 ```
 
-### 6. Focus management: Avoid removing buttons from the DOM
+### 6. Focus management: Avoid removing buttons from the DOM (🟡 MEDIUM PRIORITY)
 
-- Causes focus management issues
-- Add example here
-
-### 7. Focus management: Restore focus when removing elements from the DOM
-
+- After a button is pressed, if it is removed from the DOM it causes focus management issues.
+- From a UI perspective, often the most predictable thing to do is to leave the element in the DOM and keep focus on it after it's been pressed. See section 5 above
 - If removing elements from the DOM, ensure that focus is placed somewhere that is logical to keyboard users.
 
-### 8. Handle esc key
+### 7. Handle Esc key for dismissible UI elements (🔴 HIGH PRIORITY)
 
-- Use “handleEscapeKey”
+All modal dialogs, panels, and popups that can be closed must respond to the Esc key.
 
-### 9. Announce loading states and progress updates using ARIA live regions
+**Pattern 1: GeoView Popper component (simplest)**
+
+The GeoView `Popper` component from `@/ui` accepts `handleEscapeKey` directly:
+
+```typescript
+import { handleEscapeKey } from '@/core/utils/utilities';
+
+<Popper
+  open={isOpen}
+  anchorEl={anchorEl}
+  onClose={handleClose}
+  handleKeyDown={handleEscapeKey}  // ← Pass directly
+>
+  {/* content */}
+</Popper>
+```
+
+**Pattern 2: Other components (Panel, Dialog, native elements)**
+
+For components with `onKeyDown` props or native event listeners, extract `event.key`:
+
+```typescript
+import { handleEscapeKey } from '@/core/utils/utilities';
+
+// Inline usage (simplest)
+<Panel
+  onKeyDown={(event: KeyboardEvent) => {
+    handleEscapeKey(event.key, () => {
+      onClose();
+    });
+  }}
+>
+  {/* content */}
+</Panel>
+
+// Or with useCallback (if reused or in dependency arrays)
+const handleKeyDown = useCallback((event: KeyboardEvent): void => {
+  handleEscapeKey(event.key, onClose);
+}, [onClose]);
+
+<Dialog onKeyDown={handleKeyDown}>
+  {/* content */}
+</Dialog>
+```
+
+**Critical detail:** `handleEscapeKey` expects a **key string** (`event.key`), not the event object itself.
+
+**What to check in code review:**
+
+- ❌ **VIOLATION**: Modal/panel/popup with no keyboard handler
+- ❌ **VIOLATION**: Custom Esc key handling that doesn't prevent propagation
+- ❌ **VIOLATION**: Passing entire event object to `handleEscapeKey` instead of `event.key`
+- ✅ **CORRECT**: Using `handleEscapeKey` utility from `@/core/utils/utilities` with `event.key`
+
+### 8. Announce loading states and progress updates using ARIA live regions (🟡 MEDIUM PRIORITY)
 
 Avoid "Loader Fatigue" by not using aria-live or role="status" when using <ProgressBar>s while layers are loading. Let the user discover them via navigation.
 
@@ -175,7 +260,7 @@ Otherwise, use as follows:
 )}
 ```
 
-### 10. Avoid Tooltips on Non-Interactive Elements
+### 9. Avoid Tooltips on Non-Interactive Elements (🟡 MEDIUM PRIORITY)
 
 Tooltips should not be placed on non-interactive elements like ListItem because assistive technologies such as screen readers cannot focus on them, making the tooltip content completely inaccessible to keyboard-only users and those using screen readers.
 
@@ -266,6 +351,8 @@ The aria-live region and progress bar serve separate concerns — the live regio
 
 ### aria-pressed
 
+See the Legend panel for an implementation example.
+
 The aria-pressed attribute is only relevant for toggle buttons. Use aria-pressed to communicate toggle state rather than changing the button label dynamically.
 
 - When a label changes on toggle, screen readers announce the entire new label on every state change — users hear "Hide Layer Name button" / "Show Layer Name button" instead of a clean state update.
@@ -301,7 +388,7 @@ The aria-pressed attribute is only relevant for toggle buttons. Use aria-pressed
 
 ### SC 1.4.10 - Reflow
 
-- Resize browser window to 1280 pixels wide and set zoom to 400%
+- Resize browser window to 1280 pixels wide and set zoom level to 400%
 
 ### SC 1.4.11 - Text Spacing
 
@@ -336,7 +423,7 @@ Empty alt is not used as a substitute for informative images where a meaningful 
 
 #### Symbology Images
 
-This gap is a consequence of the **same issue described under SC 1.1.1.\*** Because symbology images cannot be programmatically described at this time, the relationship between a symbol's visual properties — such as colour, size, and shape — and the map element it corresponds to cannot be conveyed to assistive technology (AT) users. Without a text alternative for what a symbol looks like, that relationship has no programmatic basis to be determined from.
+This gap is a consequence of the **same issue described under SC 1.1.1 above.** Because symbology images cannot be programmatically described at this time, the relationship between a symbol's visual properties — such as colour, size, and shape — and the map element it corresponds to cannot be conveyed to assistive technology (AT) users. Without a text alternative for what a symbol looks like, that relationship has no programmatic basis to be determined from.
 
 **Impact** for users: AT users are not blocked from interacting with map symbology — they can show and hide map elements by name — but cannot independently interpret what the associated symbols look like. This is a partial gap rather than a complete barrier to use.
 
@@ -396,5 +483,319 @@ Some content within the GeoView app may not include a lang attribute to identify
 - [Text spacing bookmarklet](https://www.html5accessibility.com/tests/tsbookmarklet.html)
 - [WAVE Evaluation Tool](https://chromewebstore.google.com/detail/wave-evaluation-tool/jbbplnpkjmmeebjpijfedlgcdilocofh)
 - [WCAG Color contrast checker](https://chromewebstore.google.com/detail/wcag-color-contrast-check/plnahcmalebffmaghcpcmpaciebdhgdf)
+
+---
+
+## <a id="code-review-checklist"></a>008. Code Review Checklist — Common Accessibility Patterns
+
+This section helps branch reviewers spot common accessibility issues. Like other [best practices](programming/best-practices.md) in GeoView, these guidelines **rely on the goodwill of our programmers** and are not enforced automatically.
+
+**Purpose:** Assist developers during branch review by flagging patterns that commonly lead to accessibility issues. These are **not merge blockers** — they help catch mistakes early, but WIP and incremental improvements are welcome.
+
+**For concise code review patterns, see [best-practices.md Section 17](programming/best-practices.md#accessibility).**
+
+**TypeScript Enforcement:** Some accessibility rules are enforced at compile time by TypeScript and **do not need manual review**. These are marked with ✅ **TypeScript-enforced**.
+
+**Manual review patterns** that benefit from human/AI review are marked with ⚠️ **Manual check helpful**.
+
+### Summary: What to Check in Code Review
+
+| Pattern                             | TypeScript-enforced? | Review Recommendation                  |
+| ----------------------------------- | -------------------- | -------------------------------------- |
+| IconButton missing `aria-label`     | ✅ Yes               | **Skip** — compiler prevents this      |
+| onClick on non-semantic element     | ❌ No                | **Check** — common accessibility issue |
+| Dynamic aria-label on toggles       | ❌ No                | **Check** — common accessibility issue |
+| `disabled` prop causing focus loss  | ❌ No                | **Check** — common accessibility issue |
+| Modal without Esc key handler       | ❌ No                | **Check** — common accessibility issue |
+| Missing `alt` attribute             | ❌ No                | **Check** — common accessibility issue |
+| Tooltip on non-interactive element  | ❌ No                | **Check** — common accessibility issue |
+| aria-live on user-initiated updates | ❌ No                | **Consider** — may be unnecessary      |
+| Duplicate element IDs               | ❌ No                | **Check** — common accessibility issue |
+| Generic aria-labels                 | ❌ No                | **Consider** — enhancement             |
+| Missing aria-atomic                 | ❌ No                | **Consider** — enhancement             |
+| Small touch targets                 | ❌ No                | **Consider** — enhancement             |
+
+---
+
+### **HIGH PRIORITY PATTERNS** (Common issues worth addressing)
+
+#### ✅ IconButton missing `aria-label` — **TypeScript-enforced** (no review needed)
+
+**Status:** This is automatically caught by TypeScript at compile time. The code will not compile without an `aria-label` prop on `IconButton`.
+
+```typescript
+// ❌ Will NOT compile — TypeScript error
+<IconButton onClick={handleClick}>
+  <CloseIcon />
+</IconButton>
+// Error: Property 'aria-label' is missing in type '...'
+
+// ✅ CORRECT — required by TypeScript
+<IconButton aria-label={t('general.close')} onClick={handleClick}>
+  <CloseIcon />
+</IconButton>
+```
+
+**Implementation detail:** GeoView's `IconButton` component extends MUI's `IconButtonProps` with `Omit<IconButtonProps, 'aria-label'>` and adds `'aria-label': string` (not optional), making it a required prop enforced by the type system.
+
+**For code reviewers:** You do not need to check for missing `aria-label` on `IconButton` — TypeScript already prevents this violation.
+
+---
+
+#### ⚠️ onClick on non-semantic element without accessibility support — **Manual check helpful**
+
+```typescript
+// VIOLATION — clickable div with no keyboard support
+<div onClick={handleClick}>Click me</div>
+<span onClick={handleClick}>Click me</span>
+
+// CORRECT — use Button or add full keyboard support
+<Button onClick={handleClick}>Click me</Button>
+
+// OR (if Box is required for styling)
+<Box
+  onClick={handleClick}
+  onKeyDown={handleKeyDown}  // Must handle Enter/Space
+  role="button"
+  tabIndex={0}
+>
+  Click me
+</Box>
+```
+
+**Search pattern:** `onClick` on `<div>`, `<span>`, `<Box>` without `role="button"` and `tabIndex`
+
+**Why this matters:** Keyboard users cannot activate clickable divs/spans — they are not focusable and do not respond to Enter/Space keys.
+
+---
+
+#### ⚠️ Dynamic aria-label on toggle buttons — **Manual check helpful**
+
+```typescript
+// VIOLATION — label changes on every toggle
+<IconButton
+  aria-label={isVisible ? 'Hide layer' : 'Show layer'}
+/>
+
+// CORRECT — stable label + aria-pressed
+<IconButton
+  aria-label="Toggle visibility, Layer Name"
+  aria-pressed={isVisible}
+/>
+```
+
+**Search pattern:** `aria-label=` with ternary operator (`? :`) on buttons that toggle state
+
+**Why this matters:** Changing labels create verbose announcements ("Hide layer button" / "Show layer button") instead of clean state updates.
+
+---
+
+#### ⚠️ `disabled` prop causing focus loss — **Manual check helpful**
+
+```typescript
+// VIOLATION — button becomes disabled on click, loses focus
+<Button disabled={isProcessing} onClick={handleClick}>
+  Submit
+</Button>
+
+// CORRECT — aria-disabled keeps focus
+<Button
+  aria-disabled={isProcessing}
+  onClick={(e) => {
+    if (isProcessing) return;
+    handleClick(e);
+  }}
+  sx={{
+    // Style to look disabled when aria-disabled is true
+    opacity: isProcessing ? 0.5 : 1,
+    cursor: isProcessing ? 'not-allowed' : 'pointer',
+  }}
+>
+  Submit
+</Button>
+```
+
+**Search pattern:** `disabled={` on buttons that toggle between enabled/disabled based on state
+
+**Why this matters:** When a button becomes disabled while focused, focus jumps unpredictably to another element, disorienting keyboard users.
+
+---
+
+#### ⚠️ Modal/panel without Esc key handler — **Manual check helpful**
+
+```typescript
+// VIOLATION — no keyboard close
+<Dialog open={isOpen}>
+  <Button onClick={onClose}>Close</Button>
+</Dialog>
+
+// CORRECT — responds to Esc key (inline)
+import { handleEscapeKey } from '@/core/utils/utilities';
+
+<Dialog
+  open={isOpen}
+  onKeyDown={(event) => handleEscapeKey(event.key, onClose)}
+>
+  <Button onClick={onClose}>Close</Button>
+</Dialog>
+
+// CORRECT — responds to Esc key (useCallback)
+import { handleEscapeKey } from '@/core/utils/utilities';
+
+const handleKeyDown = useCallback((event: KeyboardEvent): void => {
+  handleEscapeKey(event.key, onClose);
+}, [onClose]);
+
+<Dialog open={isOpen} onKeyDown={handleKeyDown}>
+  <Button onClick={onClose}>Close</Button>
+</Dialog>
+```
+
+**Search pattern:** `<Dialog`, `<Modal`, `<Drawer`, panel components without `onKeyDown` handler
+
+**Why this matters:** Keyboard users expect Esc to close modal content — without it, they may be trapped.
+
+---
+
+### **MEDIUM PRIORITY PATTERNS** (Worth reviewing when feasible)
+
+#### ⚠️ Missing alt attribute on images — **Manual check helpful**
+
+```typescript
+// CHECK — is this image decorative or informative?
+<img src={imageUrl} />
+
+// If decorative (per SC 1.1.1 exceptions):
+<img src={imageUrl} alt="" />
+
+// If informative:
+<img src={imageUrl} alt={t('layer.symbolDescription')} />
+```
+
+**Search pattern:** `<img` without `alt=` attribute
+
+**Why this matters:** Screen readers announce "image" with no context. Decorative images should use `alt=""`, informative images need descriptive text.
+
+**Known exceptions:** Legend symbol images, map tiles (see section 006).
+
+---
+
+#### ⚠️ Tooltip on non-interactive element — **Manual check helpful**
+
+```typescript
+// VIOLATION
+<Tooltip title="Layer info">
+  <ListItem>Layer name</ListItem>
+</Tooltip>
+
+// CORRECT
+<Tooltip title="Layer info">
+  <ListItemButton>Layer name</ListItemButton>
+</Tooltip>
+```
+
+**Search pattern:** `<Tooltip>` wrapping non-interactive elements like `ListItem`, `Box`, `Typography`
+
+**Why this matters:** Tooltips require focus/hover — non-interactive elements cannot receive focus, making tooltips inaccessible to keyboard users.
+
+---
+
+#### ⚠️ aria-live on user-initiated content updates — **Manual check helpful**
+
+```typescript
+// UNNECESSARY — user clicked the button, expects content to update
+<Button onClick={() => setContent('new')}>Update</Button>
+<Box role="status" aria-live="polite">{content}</Box>
+
+// aria-live should only announce unexpected/background changes
+```
+
+**Search pattern:** `aria-live` on content that updates as the direct result of a user action
+
+**Why this matters:** Announcing expected results creates noise. Reserve `aria-live` for background/async changes users wouldn't otherwise know about.
+
+---
+
+#### ⚠️ Duplicate element IDs — **Manual check helpful**
+
+```typescript
+// VIOLATION — same ID used in a loop
+{layers.map(layer => (
+  <Box key={layer.id} id="layer-item">  {/* All items get same ID! */}
+    {layer.name}
+  </Box>
+))}
+
+// CORRECT — unique IDs
+{layers.map(layer => (
+  <Box key={layer.id} id={`${mapId}-layer-${layer.id}`}>
+    {layer.name}
+  </Box>
+))}
+```
+
+**Search pattern:** IDs generated in loops without unique suffixes
+
+**Why this matters:** Duplicate IDs break ARIA relationships, label associations, and cause unpredictable screen reader behavior.
+
+---
+
+### **ENHANCEMENTS** (Nice-to-have improvements)
+
+#### ℹ️ Generic aria-label lacking context — **Manual check helpful**
+
+```typescript
+// IMPROVEMENT OPPORTUNITY
+<Button aria-label="Learn more">...</Button>
+<Button aria-label="Learn more">...</Button>  {/* Same label! */}
+
+// BETTER — each label is unique and contextual
+<Button aria-label="Learn more about layer filtering">...</Button>
+<Button aria-label="Learn more about time slider">...</Button>
+```
+
+**Search pattern:** Multiple elements with identical `aria-label` values
+
+**Why this matters:** Generic labels don't distinguish between elements when users navigate by button list in screen readers.
+
+---
+
+#### ℹ️ Missing aria-atomic on aria-live region — **Manual check helpful**
+
+```typescript
+// INCOMPLETE — missing aria-atomic
+<Box role="status" aria-live="polite">
+  {statusMessage}
+</Box>
+
+// COMPLETE — specifies announcement behavior
+<Box role="status" aria-live="polite" aria-atomic="true">
+  {statusMessage}
+</Box>
+```
+
+**Search pattern:** `aria-live` without `aria-atomic`
+
+**Why this matters:** Without `aria-atomic`, screen reader behavior is undefined — some may announce only changed nodes, some may announce the entire region.
+
+---
+
+#### ℹ️ Interactive element with insufficient touch target size — **Manual check helpful**
+
+```typescript
+// SUBOPTIMAL — small touch target
+<IconButton sx={{ width: '20px', height: '20px' }}>
+  <CloseIcon />
+</IconButton>
+
+// BETTER — meets 44×44px target
+<IconButton sx={{ minWidth: '44px', minHeight: '44px' }}>
+  <CloseIcon />
+</IconButton>
+```
+
+**Search pattern:** Interactive elements with `width`/`height` < 44px
+
+**Why this matters:** Small targets are difficult for users with motor impairments or touch screen users.
 
 ---

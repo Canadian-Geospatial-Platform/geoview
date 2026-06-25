@@ -22,8 +22,16 @@ const typographyProps = {
  * @param ref - Reference to the underlying div element
  * @returns ListItemText component for list item text layout
  */
-function ListItemTextUI(props: ListItemTextProps, ref: Ref<HTMLDivElement>): JSX.Element {
-  return <MaterialListItemText ref={ref} {...props} slotProps={typographyProps} />;
+function ListItemTextUI({ slotProps, ...restProps }: ListItemTextProps, ref: Ref<HTMLDivElement>): JSX.Element {
+  // Preserve all consumer-provided slotProps (root, secondary, etc.) while merging defaults into primary (consumer overrides win)
+  const mergedSlotProps = {
+    ...slotProps,
+    primary: {
+      ...typographyProps.primary,
+      ...slotProps?.primary,
+    },
+  };
+  return <MaterialListItemText ref={ref} {...restProps} slotProps={mergedSlotProps} />;
 }
 
 // Export the List Item Text using forwardRef so that passing ref is permitted and functional in the react standards
