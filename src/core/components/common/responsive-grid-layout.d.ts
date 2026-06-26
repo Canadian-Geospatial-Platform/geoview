@@ -31,9 +31,9 @@ interface ResponsiveGridLayoutExposedMethods {
     closeBtnRef?: React.RefObject<HTMLButtonElement | null>;
 }
 /**
- * Two-panel responsive grid layout with guide, enlarge, and fullscreen support.
+ * Creates the two-panel responsive grid layout with guide, enlarge, and fullscreen support.
  *
- * @param props - ResponsiveGridLayout properties
+ * @param props - Properties defined in ResponsiveGridLayoutProps interface
  * @param ref - Ref exposing panel visibility and focus methods
  * @returns The responsive grid layout element
  */

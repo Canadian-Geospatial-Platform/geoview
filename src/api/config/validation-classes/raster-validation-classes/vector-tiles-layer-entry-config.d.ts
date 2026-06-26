@@ -35,6 +35,18 @@ export declare class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
      */
     getServiceMetadata(): TypeMetadataVectorTiles | undefined;
     /**
+     * Gets the projection WKID from the service metadata if available.
+     *
+     * @returns The projection WKID, or undefined if not available
+     */
+    getProjectionWKID(): number | undefined;
+    /**
+     * Gets the projection code from the service metadata if available.
+     *
+     * @returns The projection code, or undefined if not available
+     */
+    getProjectionCodeEPSG(): string | undefined;
+    /**
      * Gets the style url.
      *
      * @returns The style url, or undefined if not set

@@ -186,6 +186,8 @@ export declare class LayerDomain {
      *
      * Keeps both the GeoView layer wrapper and the underlying OpenLayers layer by path.
      * For regular (non-group) layers, additionally registers a handler to track queryable state changes.
+     * If the layer entry config was deleted while the layer was being created (e.g. the user cancelled
+     * the process before the layer finished initializing), this method returns without registering.
      *
      * @param gvLayer - The GeoView layer to register
      */
