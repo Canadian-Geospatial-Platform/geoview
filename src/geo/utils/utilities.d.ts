@@ -513,13 +513,18 @@ export declare abstract class GeoUtilities {
      *
      * This method uses the OpenLayers `GML3` format to convert the provided
      * `Geometry` object into a GML XML string, using the specified spatial
-     * reference system (`srsName`).
+     * reference system (`srsName`). The GML3 writer hardcodes the default
+     * `http://www.opengis.net/gml` namespace on the root element, so the
+     * serialized output is post-processed to rewrite both the default and `gml:`
+     * namespace declarations to the supplied `gmlNamespace` (e.g.
+     * `http://www.opengis.net/gml/3.2` for GML 3.2 / WFS 2.0).
      *
      * @param geometry - The OpenLayers geometry to serialize
      * @param srsName - The spatial reference system (e.g., 'EPSG:3857') to assign to the GML geometry
+     * @param gmlNamespace - The GML namespace URI to apply on the serialized root element (e.g. `http://www.opengis.net/gml/3.2` for GML 3.2)
      * @returns The serialized GML geometry as a string
      */
-    static writeGeometryToGML(geometry: Geometry, srsName: string): string;
+    static writeGeometryToGML(geometry: Geometry, srsName: string, gmlNamespace: string): string;
     /**
      * Converts a WFS geometry type string to a TypeStyleGeometry.
      *

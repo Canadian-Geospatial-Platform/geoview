@@ -13,12 +13,6 @@ export declare class GVVectorTiles extends AbstractGVVectorTile {
      */
     constructor(olSource: VectorTile, layerConfig: VectorTilesLayerEntryConfig);
     /**
-     * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     *
-     * @returns The strongly-typed layer configuration specific to this layer.
-     */
-    getLayerConfig(): VectorTilesLayerEntryConfig;
-    /**
      * Used to change the style of the vector tile layer.
      *
      * @param styleUrl - The style URL to apply to the layer.

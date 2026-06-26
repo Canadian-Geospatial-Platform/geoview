@@ -71,9 +71,9 @@ export declare abstract class WfsRenderer {
      *
      * @param ogcFilterToWrap - The OGC filter XML string to wrap, or undefined
      * @param wmsOrWfs - Whether the service is WMS or WFS
-     * @param version - The service version
+     * @param versionIsHigherThan2 - Indicates if the version is higher than 2
      * @returns The wrapped filter XML string, or undefined if nothing to wrap
      */
-    static wrapOGCFilter(ogcFilterToWrap: string | undefined, wmsOrWfs: 'wms' | 'wfs', version: string): string | undefined;
+    static wrapOGCFilter(ogcFilterToWrap: string | undefined, wmsOrWfs: 'wms' | 'wfs', versionIsHigherThan2: boolean): string | undefined;
 }
 //# sourceMappingURL=wfs-renderer.d.ts.map

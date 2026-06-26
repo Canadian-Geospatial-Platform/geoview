@@ -2,6 +2,7 @@ import type VectorTile from 'ol/source/VectorTile';
 import type VectorTileLayer from 'ol/layer/VectorTile';
 import type { Extent } from 'ol/extent';
 import type { Projection as OLProjection } from 'ol/proj';
+import type { VectorTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 /**
  * Abstract Geoview Layer managing an OpenLayer vector tile type layer.
@@ -19,6 +20,12 @@ export declare abstract class AbstractGVVectorTile extends AbstractGVLayer {
      * @returns The VectorTile source instance associated with this layer.
      */
     getOLSource(): VectorTile;
+    /**
+     * Overrides the parent class's getter to provide a more specific return type (covariant return).
+     *
+     * @returns The strongly-typed layer configuration specific to this layer.
+     */
+    getLayerConfig(): VectorTilesLayerEntryConfig;
     /**
      * Overrides the way to initialize the bounds for this layer type.
      *
