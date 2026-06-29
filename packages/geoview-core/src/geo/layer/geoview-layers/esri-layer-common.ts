@@ -699,6 +699,22 @@ export class EsriUtilities {
     // Validate and update the visible initial settings
     layerConfig.initInitialSettingsStatesVisibleFromMetadata(layerMetadataEsriDynamicLayer?.defaultVisibility);
 
+    // If the layer is an EsriDynamic layer config
+    if (layerConfig instanceof EsriDynamicLayerEntryConfig) {
+      // Get the parent service metadata
+      const parentServiceMetadata = layerConfig.getServiceMetadata();
+
+      // Get the parent layer config
+      const parentLayerConfig = layerConfig.getParentLayerConfig();
+
+      // If there's a parent config
+      if (parentLayerConfig) {
+        // Find the metadata for the parent layer
+        const parentLayerMetadata = parentServiceMetadata?.layers?.find((l) => l.id === Number(parentLayerConfig?.layerId));
+        parentLayerConfig.initInitialSettingsStatesVisibleFromMetadata(parentLayerMetadata?.defaultVisibility);
+      }
+    }
+
     // Update Min / Max Scales with value if service doesn't allow the configured value for proper UI functionality
     layerConfig.initMinScaleFromMetadata(layerMetadataEsriDynamicLayer?.minScale);
     layerConfig.initMaxScaleFromMetadata(layerMetadataEsriDynamicLayer?.maxScale);
