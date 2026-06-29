@@ -387,15 +387,16 @@ export class LayerSetController extends AbstractMapViewerController {
     // Get the layer name
     const layerName = LayerSetController.#getLayerName(layer, layerConfig);
 
+    const opacity = layerConfig.getInitialSettings()?.states?.opacity ?? 1; // default: 1
+    const legendCollapsed = layerConfig.getInitialSettings()?.states?.legendCollapsed ?? false; // default: false
+    const visible = layerConfig.getInitialSettings()?.states?.visible ?? true; // default: true
+
     if (entryIndex === -1) {
       // Get if the layer is a child, use the gv layer if we can or use the layerConfig.getParent
       const isChild = LayerSetController.#isLegendLayerChild(layerConfig, layer);
 
       // Build the controls
       const controls: TypeLayerControls = this.#buildLegendLayerControls(layerConfig, isChild);
-
-      const opacity = layerConfig.getInitialSettings()?.states?.opacity ?? 1; // default: 1
-      const legendCollapsed = layerConfig.getInitialSettings()?.states?.legendCollapsed ?? false; // default: false
 
       const legendLayerEntry: TypeLegendLayer = {
         controls,
@@ -409,7 +410,7 @@ export class LayerSetController extends AbstractMapViewerController {
         entryType: 'group',
         canToggle: true,
         opacity,
-        visible: true,
+        visible,
         inVisibleRange: true,
         legendCollapsed,
         icons: [] as TypeLegendLayerItem[],
@@ -427,6 +428,10 @@ export class LayerSetController extends AbstractMapViewerController {
     // TODO: REFACTOR - propagateLegendToStore - this should be refactored so that the entry type is not 'magically' updated in this function
     // eslint-disable-next-line no-param-reassign
     existingEntries[entryIndex].entryType = 'group';
+
+    // eslint-disable-next-line no-param-reassign
+    existingEntries[entryIndex].visible = visible;
+
     return entryIndex;
   }
 
