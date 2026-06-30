@@ -35,7 +35,7 @@ export const getSxClasses = (theme: Theme, isMapFullScreen: boolean, appHeight: 
     padding: '0.5rem 1.5rem',
     margin: 0,
     textTransform: 'capitalize',
-    '.MuiTab-iconWrapper': {
+    '.MuiTab-icon': {
       marginRight: '7px',
       maxWidth: '18px',
     },

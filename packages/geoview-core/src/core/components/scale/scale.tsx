@@ -238,8 +238,10 @@ export const Scale = memo(function Scale({ expanded }: ScaleProps): JSX.Element 
                   // Prevent any pointer interaction directly on the Radio
                   pointerEvents: 'none',
                 }}
-                inputProps={{
-                  'aria-label': `${value.label}${value.borderBottom ? ` ${t('mapnav.scale.graphicScale')}` : ''}`,
+                slotProps={{
+                  input: {
+                    'aria-label': `${value.label}${value.borderBottom ? ` ${t('mapnav.scale.graphicScale')}` : ''}`,
+                  },
                 }}
               />
             }
