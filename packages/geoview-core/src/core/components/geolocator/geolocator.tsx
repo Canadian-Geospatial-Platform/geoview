@@ -202,8 +202,7 @@ export function Geolocator(): JSX.Element {
       aria-modal={isPanelOpen && activeTrapGeoView ? true : undefined}
       aria-hidden={!isPanelOpen}
       aria-label={t('geolocator.panelTitle')}
-      sx={memoSxClasses.root}
-      visibility={isPanelOpen ? 'visible' : 'hidden'}
+      sx={{ ...memoSxClasses.root, visibility: isPanelOpen ? 'visible' : 'hidden' }}
       id={`${mapId}-${CONTAINER_TYPE.APP_BAR}-${DEFAULT_APPBAR_CORE.GEOLOCATOR}-panel`}
     >
       <FocusTrapContainer open={isPanelOpen && activeTrapGeoView} id="geolocator-focus-trap" containerType={CONTAINER_TYPE.APP_BAR}>

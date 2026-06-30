@@ -29,13 +29,13 @@ export const getSxClasses = (theme: Theme, isMapFullScreen: boolean, appHeight: 
     },
   },
   tab: {
-    fontSize: theme.palette.geoViewFontSize.default,
+    fontSize: theme.palette.geoViewFontSize?.default ?? theme.typography.fontSize,
     fontWeight: 'bold',
     minWidth: 'min(4vw, 24px)',
     padding: '0.5rem 1.5rem',
     margin: 0,
     textTransform: 'capitalize',
-    '.MuiTab-iconWrapper': {
+    '.MuiTab-icon': {
       marginRight: '7px',
       maxWidth: '18px',
     },
