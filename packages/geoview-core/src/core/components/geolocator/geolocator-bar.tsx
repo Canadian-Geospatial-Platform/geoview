@@ -51,8 +51,10 @@ export function GeolocatorBar({ searchValue, onChange, onSearch, onReset, isLoad
                 <SearchIcon />
               </InputAdornment>
             }
-            inputProps={{
-              'aria-label': t('geolocator.searchInputLabel'),
+            slotProps={{
+              input: {
+                'aria-label': t('geolocator.searchInputLabel'),
+              },
             }}
             placeholder={t('geolocator.search')}
             onChange={onChange}

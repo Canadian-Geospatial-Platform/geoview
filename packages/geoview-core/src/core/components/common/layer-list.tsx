@@ -231,7 +231,6 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
           aria-current={isSelected ? true : undefined}
         >
           {layer.layerPath === LAYER_PATH_COORDINATE_INFO ? (
-            // Treat
             <LocationSearchingIcon />
           ) : (
             layer.layerPath && !layer.content && <LayerIcon layerPath={layer.layerPath} />
@@ -240,8 +239,8 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
             <Typography component="span" className="layerTitle">
               {layer.layerName}
             </Typography>
-            <Box component="span" display="flex" alignContent="center">
-              <Typography component="span" variant="subtitle1" noWrap display="block">
+            <Box component="span" sx={{ display: 'flex', alignContent: 'center' }}>
+              <Typography component="span" variant="subtitle1" noWrap sx={{ display: 'block' }}>
                 {getLayerStatus()}
               </Typography>
             </Box>

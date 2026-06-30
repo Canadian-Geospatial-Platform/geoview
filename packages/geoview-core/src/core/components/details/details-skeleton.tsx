@@ -25,7 +25,7 @@ export const DetailsSkeleton = memo(function DetailsSkeleton(): JSX.Element {
       <Skeleton variant="text" width="60%" height={32} sx={SKELETON_STYLES.title} />
       <Box sx={SKELETON_STYLES.box}>
         {sizes.map((size, index) => (
-          <Box display="flex" justifyContent="space-between" sx={SKELETON_STYLES.text} key={`${index.toString()}-${size}}`}>
+          <Box sx={{ ...SKELETON_STYLES.text, display: 'flex', justifyContent: 'space-between' }} key={`${index.toString()}-${size}`}>
             <Skeleton variant="text" width={size} height="25px" />
             <Skeleton variant="text" width={size} height="25px" />
           </Box>

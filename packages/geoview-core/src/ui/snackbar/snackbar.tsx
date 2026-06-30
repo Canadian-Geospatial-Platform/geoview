@@ -27,7 +27,7 @@ interface SnackBarProps {
  * @param ref - Forwarded ref to the underlying div element
  * @returns Alert component with filled variant and elevation
  */
-const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref): JSX.Element {
+const Alert = forwardRef<HTMLDivElement, AlertProps>((props, ref): JSX.Element => {
   return <MaterialAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 

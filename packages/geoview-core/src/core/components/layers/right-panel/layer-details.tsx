@@ -539,7 +539,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
     if (hasLayerLegendImage) {
       return (
         <Grid sx={sxClasses.itemsGrid}>
-          <Grid container pt={6} pb={6}>
+          <Grid container sx={{ pt: 6, pb: 6 }}>
             <Box component="img" alt="" src={layerIcons![0].iconImage!} sx={sxClasses.wmsImage} />
           </Grid>
         </Grid>
@@ -559,11 +559,13 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
         <Grid
           className="layer-details-panel"
           container
-          direction="column"
           spacing={0}
-          sx={sxClasses.itemsGrid}
-          justifyContent="left"
-          justifyItems="stretch"
+          sx={{
+            ...sxClasses.itemsGrid,
+            flexDirection: 'column',
+            justifyContent: 'flex-start',
+            justifyItems: 'stretch',
+          }}
         >
           {layerItems?.map((item) => (
             <Grid key={`${layerPath}/${item.geometryType}/${item.name}/${item.icon || 'no-icon'}`} sx={{ marginBottom: '5px' }}>

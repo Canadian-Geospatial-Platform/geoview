@@ -694,9 +694,9 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
                   id={timeDelayId}
                   key={delay}
                   defaultValue={delay}
+                  onChange={handleTimeChange}
                   inputProps={{
                     name: 'timeDelay',
-                    onChange: handleTimeChange,
                   }}
                 >
                   <option value={500}>0.5s</option>
@@ -719,9 +719,9 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
                   <NativeSelect
                     id={stepValueId}
                     defaultValue={step}
+                    onChange={handleStepChange}
                     inputProps={{
                       name: 'timeStep',
-                      onChange: handleStepChange,
                     }}
                   >
                     <option value={3600000}>{t('timeSlider.slider.hour')}</option>
