@@ -71,12 +71,22 @@ export class TimeSliderController extends AbstractMapViewerController {
     // Try to get the temporal dimension from the layer's metadata
     let layerTimeDimension = layer.getTimeDimension();
 
-    // If the VCS config provides a timeDimension, it overrides the metadata-derived one
+    // If the VCS config provides a timeDimension, it overrides the metadata-derived one except for the field property
     if (timesliderConfig?.timeDimension) {
       layerTimeDimension = {
         ...timesliderConfig.timeDimension,
+        field: layerTimeDimension?.field ?? timesliderConfig.timeDimension.field,
         isValid: !!timesliderConfig.timeDimension.rangeItems?.range?.length,
       };
+
+      // The field property is overridden if it actually exists in the outfields
+      const fieldAsConfigured = timesliderConfig?.timeDimension.field;
+      if (fieldAsConfigured) {
+        const outfields = layer.getLayerConfig().getOutfields();
+        if (outfields && outfields.some((outfield) => outfield.name === fieldAsConfigured)) {
+          layerTimeDimension.field = fieldAsConfigured;
+        }
+      }
     }
 
     // If still no temporal dimension or invalid
