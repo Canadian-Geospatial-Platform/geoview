@@ -948,9 +948,11 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
     },
     // Improve global filter accessibility
     muiSearchTextFieldProps: {
-      inputProps: {
-        type: 'search',
-        'aria-label': t('dataTable.searchInputLabel'),
+      slotProps: {
+        input: {
+          type: 'search',
+          'aria-label': t('dataTable.searchInputLabel'),
+        },
       },
     },
     // Improve table accessibility

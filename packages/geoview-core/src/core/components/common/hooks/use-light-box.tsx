@@ -38,7 +38,7 @@ const BaseLightBoxComponent = memo(function BaseLightBoxComponent({
   returnFocusId,
   onExit,
   onSlideChange,
-}: BaseLightBoxProps) {
+}: BaseLightBoxProps): JSX.Element {
   logger.logTraceRender('components/common/use-lightbox (BaseLightBoxComponent)');
 
   const activeTrapGeoView = useStoreUIActiveTrapGeoView();

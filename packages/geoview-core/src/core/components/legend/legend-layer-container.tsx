@@ -45,43 +45,41 @@ interface WMSLegendImageProps {
 }
 
 // Extracted WMS Legend Component
-const WMSLegendImage = memo(
-  ({
-    imgSrc,
-    initLightBox,
-    legendExpanded,
-    sxClasses,
-    title,
-    mapId,
-    containerType,
-    collapseContainerId,
-  }: WMSLegendImageProps): JSX.Element => {
-    // Log
-    logger.logTraceRender('components/legend/legend-layer-container - WMSLegendImage');
+const WMSLegendImage = memo(function WMSLegendImage({
+  imgSrc,
+  initLightBox,
+  legendExpanded,
+  sxClasses,
+  title,
+  mapId,
+  containerType,
+  collapseContainerId,
+}: WMSLegendImageProps): JSX.Element {
+  // Log
+  logger.logTraceRender('components/legend/legend-layer-container - WMSLegendImage');
 
-    const { t } = useTranslation<string>();
-    const id = useId();
-    const buttonId = `${mapId}-${containerType}-legend-image-btn-${id}`; // Create unique ID for focus management after lightbox closes
-    const altText = title ? `${t('legend.title')}, ${title}` : t('legend.title');
+  const { t } = useTranslation<string>();
+  const id = useId();
+  const buttonId = `${mapId}-${containerType}-legend-image-btn-${id}`; // Create unique ID for focus management after lightbox closes
+  const altText = title ? `${t('legend.title')}, ${title}` : t('legend.title');
 
-    return (
-      <Collapse id={collapseContainerId} in={legendExpanded} sx={sxClasses.collapsibleContainer} timeout="auto">
-        <Button
-          type="icon"
-          sx={sxClasses.imageButton}
-          id={buttonId}
-          onClick={() => initLightBox(imgSrc, altText, buttonId, 0)}
-          tooltip={t('general.enlargeImage')}
-          tooltipPlacement="top"
-          aria-label={title ? t('general.enlargeImageName', { title }) : t('general.enlargeImage')} // WCAG - Descriptive aria-label for screen readers
-          disableRipple
-        >
-          <Box component="img" src={imgSrc} alt={altText} sx={sxClasses.wmsImage} />
-        </Button>
-      </Collapse>
-    );
-  }
-);
+  return (
+    <Collapse id={collapseContainerId} in={legendExpanded} sx={sxClasses.collapsibleContainer} timeout="auto">
+      <Button
+        type="icon"
+        sx={sxClasses.imageButton}
+        id={buttonId}
+        onClick={() => initLightBox(imgSrc, altText, buttonId, 0)}
+        tooltip={t('general.enlargeImage')}
+        tooltipPlacement="top"
+        aria-label={title ? t('general.enlargeImageName', { title }) : t('general.enlargeImage')} // WCAG - Descriptive aria-label for screen readers
+        disableRipple
+      >
+        <Box component="img" src={imgSrc} alt={altText} sx={sxClasses.wmsImage} />
+      </Button>
+    </Collapse>
+  );
+});
 WMSLegendImage.displayName = 'WMSLegendImage';
 
 export const CollapsibleContent = memo(function CollapsibleContent({

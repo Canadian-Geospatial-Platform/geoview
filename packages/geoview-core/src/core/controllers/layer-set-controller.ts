@@ -539,8 +539,7 @@ export class LayerSetController extends AbstractMapViewerController {
         legendLayerEntry.rasterFunctionInfos = layer.getMetadataRasterFunctionInfos();
         legendLayerEntry.mosaicRule = layer.getMosaicRule();
         legendLayerEntry.allowedMosaicMethods = layer.getLayerConfig().getAllowedMosaicMethods()?.split(',') as
-          | TypeMosaicMethod[]
-          | undefined;
+          TypeMosaicMethod[] | undefined;
       }
 
       // If the layer is WMS

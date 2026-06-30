@@ -116,7 +116,7 @@ function CheckboxListUI(props: CheckboxListProps): JSX.Element {
                 checked={checked.includes(item.value)}
                 tabIndex={-1}
                 disableRipple
-                inputProps={{ 'aria-labelledby': labelId }}
+                slotProps={{ input: { 'aria-labelledby': labelId } }}
                 aria-hidden="true"
               />
             </ListItemIcon>

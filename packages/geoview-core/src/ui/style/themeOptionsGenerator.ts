@@ -292,8 +292,10 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
     components: {
       MuiTooltip: {
         defaultProps: {
-          PopperProps: {
-            container: tooltipsPopperContainer,
+          slotProps: {
+            popper: {
+              container: tooltipsPopperContainer,
+            },
           },
         },
         styleOverrides: {

@@ -69,8 +69,7 @@ export function StacCollectionDetail(props: StacCollectionDetailProps): JSX.Elem
       const iBbox = item.bbox;
       if (iBbox && iBbox.length >= 4) {
         union = GeoUtilities.getExtentUnion(union, [iBbox[0], iBbox[1], iBbox[2], iBbox[3]]) as
-          | [number, number, number, number]
-          | undefined;
+          [number, number, number, number] | undefined;
       }
     }
 

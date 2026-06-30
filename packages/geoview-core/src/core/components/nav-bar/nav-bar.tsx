@@ -32,15 +32,7 @@ type NavBarProps = {
 
 /** Valid default navbar button identifiers. */
 type DefaultNavbar =
-  | 'fullScreen'
-  | 'location'
-  | 'home'
-  | 'zoomIn'
-  | 'zoomOut'
-  | 'basemapSelect'
-  | 'measurement'
-  | 'projection'
-  | 'mapRotation';
+  'fullScreen' | 'location' | 'home' | 'zoomIn' | 'zoomOut' | 'basemapSelect' | 'measurement' | 'projection' | 'mapRotation';
 /** A group of button panels indexed by key. */
 type NavbarButtonGroup = Record<string, TypeButtonPanel | DefaultNavbar>;
 /** All button panel groups indexed by group name. */
