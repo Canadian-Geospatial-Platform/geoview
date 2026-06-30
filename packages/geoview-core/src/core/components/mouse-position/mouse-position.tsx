@@ -204,8 +204,10 @@ export const MousePosition = memo(function MousePosition(props: MousePositionPro
                     // Prevent any pointer interaction directly on the Radio
                     pointerEvents: 'none',
                   }}
-                  inputProps={{
-                    'aria-label': POSITION_LABELS[index],
+                  slotProps={{
+                    input: {
+                      'aria-label': POSITION_LABELS[index],
+                    },
                   }}
                 />
               }

@@ -1,9 +1,9 @@
 import type { SyntheticEvent, ReactNode, MouseEvent } from 'react';
-import { useState, useEffect, useMemo, useCallback, useRef, memo } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import type { TabsProps, TabProps, BoxProps, SelectChangeEvent, TabScrollButtonProps } from '@mui/material';
-import { Grid, Tab as MaterialTab, Tabs as MaterialTabs, Box, TabScrollButton, useMediaQuery } from '@mui/material';
+import type { TabsProps, TabProps, BoxProps, SelectChangeEvent } from '@mui/material';
+import { Grid, Tab as MaterialTab, Tabs as MaterialTabs, Box, useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { logger } from '@/core/utils/logger';
@@ -60,20 +60,6 @@ export interface TypeTabsProps {
   hiddenTabs: string[];
   isFullScreen: boolean;
 }
-
-// Define scroll button component outside of Tabs
-// TODO: Unmemoize this component, probably, because it's in 'ui' folder
-const CustomScrollButton = memo(function CustomScrollButton({ direction, ...props }: TabScrollButtonProps) {
-  return (
-    <TabScrollButton
-      {...props}
-      direction={direction}
-      sx={{
-        display: props.disabled ? 'none' : 'flex',
-      }}
-    />
-  );
-});
 
 /**
  * Creates a standardized tab element ID.
@@ -369,7 +355,6 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
               value={validSelectedTab !== undefined ? Math.max(0, validSelectedTab) : false}
               onChange={handleChange}
               aria-label={t('footerBar.tabsLabel')}
-              ScrollButtonComponent={CustomScrollButton}
               {...tabsProps}
             >
               {memoVisibleTabs.map((tab) => {

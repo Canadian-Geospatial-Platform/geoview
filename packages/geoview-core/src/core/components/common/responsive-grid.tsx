@@ -166,8 +166,8 @@ const ResponsiveGridPanel = forwardRef<HTMLDivElement, ResponsiveGridPanelProps 
       <Grid
         className={className}
         size={isLeftPanel ? size.left : size.right}
-        padding="0 10px"
         sx={{
+          padding: '0 10px',
           ...(isLeftPanel
             ? {}
             : {

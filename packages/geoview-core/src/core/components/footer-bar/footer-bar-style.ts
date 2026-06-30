@@ -27,7 +27,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     '& .MuiTabs-indicator': {
       display: 'none',
     },
-    '& .MuiTabs-root .MuiTab-iconWrapper': {
+    '& .MuiTabs-root .MuiTab-icon': {
       maxWidth: '24px',
       color: theme.palette.geoViewColor.primary.main,
     },
@@ -36,10 +36,10 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       background: theme.palette.geoViewColor.primary.main,
       minHeight: 0,
     },
-    '& .MuiTab-root:hover .MuiTab-iconWrapper': {
+    '& .MuiTab-root:hover .MuiTab-icon': {
       color: theme.palette.geoViewColor.white,
     },
-    '& .MuiTab-root.Mui-selected .MuiTab-iconWrapper': {
+    '& .MuiTab-root.Mui-selected .MuiTab-icon': {
       color: theme.palette.geoViewColor.white,
     },
   },
