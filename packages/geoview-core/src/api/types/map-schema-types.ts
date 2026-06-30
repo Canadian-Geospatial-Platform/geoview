@@ -63,15 +63,7 @@ export const VALID_DISPLAY_THEME: TypeDisplayTheme[] = ['dark', 'light', 'geo.ca
 
 /** Valid values for the navBar array. */
 export type TypeValidNavBarProps =
-  | 'zoom'
-  | 'rotation'
-  | 'fullscreen'
-  | 'home'
-  | 'location'
-  | 'basemap-select'
-  | 'measurement'
-  | 'projection'
-  | 'drawer';
+  'zoom' | 'rotation' | 'fullscreen' | 'home' | 'location' | 'basemap-select' | 'measurement' | 'projection' | 'drawer';
 
 /** Built-in nav bar core components that are not plugins. */
 export const DEFAULT_NAVBAR_CORE = {
@@ -972,15 +964,7 @@ export interface TypePolygonVectorConfig extends TypeBaseVectorGeometryConfig {
 
 /** Valid values to specify fill styles. */
 export type TypeFillStyle =
-  | 'null'
-  | 'solid'
-  | 'backwardDiagonal'
-  | 'cross'
-  | 'diagonalCross'
-  | 'forwardDiagonal'
-  | 'horizontal'
-  | 'vertical'
-  | 'dot';
+  'null' | 'solid' | 'backwardDiagonal' | 'cross' | 'diagonalCross' | 'forwardDiagonal' | 'horizontal' | 'vertical' | 'dot';
 
 /** Definition of the circle symbol vector settings type. */
 export interface TypeSimpleSymbolVectorConfig extends TypeBaseVectorGeometryConfig {

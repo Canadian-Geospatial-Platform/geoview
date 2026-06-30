@@ -121,7 +121,7 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
     return [...new Set(result)].sort();
   };
 
-  const handleItemSelectionToggle = (event: React.SyntheticEvent, itemId: string, isSelected: boolean): void => {
+  const handleItemSelectionToggle = (event: React.SyntheticEvent | null, itemId: string, isSelected: boolean): void => {
     const layerChildren = getLayerChildren(itemId);
     const toAddOrRemove = [itemId, ...layerChildren];
     const splitId = itemId.split('/');

@@ -120,15 +120,7 @@ export type TypePostSettings = { header?: Record<string, string>; data: unknown 
 // TODO: refactor remove geoCore
 /** Type of Style to apply to the GeoView vector layer source at creation time. */
 export type TypeLayerEntryType =
-  | 'vector'
-  | 'vector-tile'
-  | 'raster-tile'
-  | 'raster-image'
-  | 'group'
-  | 'geoCore'
-  | 'GeoPackage'
-  | 'shapefile'
-  | 'rcs';
+  'vector' | 'vector-tile' | 'raster-tile' | 'raster-image' | 'group' | 'geoCore' | 'GeoPackage' | 'shapefile' | 'rcs';
 
 /** The possible layer statuses when processing layer configs */
 export type TypeLayerStatus = 'newInstance' | 'registered' | 'processing' | 'processed' | 'loading' | 'loaded' | 'error';
@@ -138,15 +130,7 @@ export type VectorStrategy = 'all' | 'bbox';
 
 // Definition of the keys used to create the constants of the GeoView layer
 export type LayerEntryTypesKey =
-  | 'VECTOR'
-  | 'VECTOR_TILE'
-  | 'RASTER_TILE'
-  | 'RASTER_IMAGE'
-  | 'GROUP'
-  | 'GEOCORE'
-  | 'GEOPACKAGE'
-  | 'SHAPEFILE'
-  | 'RCS';
+  'VECTOR' | 'VECTOR_TILE' | 'RASTER_TILE' | 'RASTER_IMAGE' | 'GROUP' | 'GEOCORE' | 'GEOPACKAGE' | 'SHAPEFILE' | 'RCS';
 
 /** Definition of the sub schema to use for each type of Geoview layer. */
 export const CONST_GEOVIEW_SCHEMA_BY_TYPE: Record<TypeGeoviewLayerType, string> = {
@@ -299,9 +283,7 @@ export interface TypeSourceEsriDynamicInitialConfig extends TypeBaseSourceInitia
 }
 
 export type TypeSourceImageInitialConfig =
-  | TypeSourceImageWmsInitialConfig
-  | TypeSourceImageEsriInitialConfig
-  | TypeSourceImageStaticInitialConfig;
+  TypeSourceImageWmsInitialConfig | TypeSourceImageEsriInitialConfig | TypeSourceImageStaticInitialConfig;
 
 export interface TypeSourceImageStaticInitialConfig extends TypeBaseSourceInitialConfig {
   /** Image extent */

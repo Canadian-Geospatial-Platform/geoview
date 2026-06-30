@@ -157,6 +157,12 @@ const config = {
   module: {
     rules: [
       {
+        test: /\.m?js$/,
+        resolve: {
+          fullySpecified: false,
+        },
+      },
+      {
         test: /\.s?[ac]ss$/,
         use: ['style-loader', 'css-loader'],
       },
