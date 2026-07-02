@@ -1,6 +1,8 @@
 # 25 — Developer Tools
 
 > **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
+>
+> **Test page**: [rt-25-developer-tools.html](../../packages/geoview-core/public/templates/release-testing/rt-25-developer-tools.html) — Links to ESRI Renderer and WFS Renderer demo pages.
 
 Testing the ESRI Renderer and WFS Renderer conversion tools that generate valid GeoView style configurations from external service metadata.
 
@@ -34,17 +36,4 @@ Demo: `templates/demos/demo-wfs-renderer.html`
 | Invalid URL                    | Error on bad URL       | 1. Enter a bad URL<br>2. Click fetch                             | Error is shown without crashing                                              | M    |
 | Non-WFS URL                    | Non-WFS error handling | 1. Enter a URL to a non-WFS service<br>2. Click fetch            | Appropriate error handling (no crash)                                        | M    |
 
-## All Layer Zoom Levels (Comprehensive)
-
-Config: `configs/navigator/demos/08-all-layer-zoom-levels.json`
-
-This config tests zoom and scale constraints across ALL layer types simultaneously.
-
-| Test                               | Description                   | Steps                                                                                        | Expected Result                                                                    | Auto |
-| ---------------------------------- | ----------------------------- | -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | ---- |
-| All layers visible at default zoom | Layers in range               | 1. Load the navigator with `08-all-layer-zoom-levels.json`<br>2. Check legend                | All configured layers are visible at the default zoom level (within their range)   | M    |
-| maxZoom cap (zoom level 8)         | Layers disappear past max     | 1. Zoom beyond level 8<br>2. Check legend for greyed-out layers                              | Layers with `maxZoom: 8` disappear (greyed out in legend, `inVisibleRange: false`) | M    |
-| minScale threshold                 | Scale-based disappearance     | 1. Zoom in until scale denominator drops below 10,000,000<br>2. Check legend                 | Layers with `minScale: 10000000` disappear                                         | M    |
-| Combined constraint                | Most restrictive wins         | 1. Test layers with both zoom and scale constraints<br>2. Observe which limit triggers first | Both constraints apply independently — the most restrictive one wins               | M    |
-| Layer types tested                 | All types respect limits      | 1. Check each layer type in legend at various zooms                                          | GeoJSON, Esri Dynamic, Esri Feature, WMS, WFS all respect zoom/scale limits        | M    |
-| Group with hidden child            | Visibility + zoom constraints | 1. Check group (`point-feature-group`) with a child that has `visible: false` + maxZoom      | Both visibility and zoom constraints are respected correctly                       | M    |
+> All Layer Zoom Levels tests moved to [08 — Layers](08-layers.md#all-layer-zoom-levels-comprehensive).

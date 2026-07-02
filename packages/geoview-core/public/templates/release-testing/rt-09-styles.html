@@ -70,8 +70,56 @@
         }"
       ></div>
 
+      <!-- Map 2: Visual Variables -->
+      <h5>Map 2 — Feature Visual Variables</h5>
+      <p>Tests visual variables: rotation, size variation, color ramps applied to feature attributes.</p>
+      <div
+        id="map2"
+        class="geoview-map"
+        data-lang="en"
+        data-config-url="./../../configs/navigator/demos/25-feature-visual-variables.json"
+      ></div>
+
+      <!-- Map 3: Complex Classifications -->
+      <h5>Map 3 — Complex Classifications</h5>
+      <p>Multi-field uniqueValue, nested classBreaks, and combined style types on the same layer.</p>
+      <div
+        id="map3"
+        class="geoview-map"
+        data-lang="en"
+        data-config-url="./../../configs/navigator/demos/26-complex-classifications.json"
+      ></div>
+
+      <!-- Map 4: Symbol Shapes & Fill Patterns -->
+      <h5>Map 4 — Symbol Shapes & Fill Patterns</h5>
+      <p>All symbol shapes (circle, square, diamond, triangle, cross, star, X) and polygon fill patterns.</p>
+      <div
+        id="map4"
+        class="geoview-map"
+        data-lang="en"
+        data-config-url="./../../configs/navigator/demos/28-symbol-shapes-fill-patterns.json"
+      ></div>
+
+      <!-- Map 5: Feature Labels -->
+      <h5>Map 5 — Configured Feature Labels</h5>
+      <p>Text labels on features with configured font, halo, declutter, and zoom-dependent visibility.</p>
+      <div
+        id="map5"
+        class="geoview-map"
+        data-lang="en"
+        data-config-url="./../../configs/navigator/demos/24-configured-feature-labels.json"
+      ></div>
+
       <button type="button" class="collapsible">Map 1 — Configuration Snippet</button>
       <pre id="map1CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 2 — Configuration Snippet</button>
+      <pre id="map2CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 3 — Configuration Snippet</button>
+      <pre id="map3CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 4 — Configuration Snippet</button>
+      <pre id="map4CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 5 — Configuration Snippet</button>
+      <pre id="map5CS" class="panel"></pre>
     </div>
 
     <script src="codedoc.js"></script>
@@ -81,6 +129,8 @@
       window.addEventListener('load', () => {
         createCodeSnippet();
         createConfigSnippet();
+        createConfigModals();
+        createMapNavigation();
       });
     </script>
   </body>

@@ -1,6 +1,8 @@
 # 26 — Production Config Smoke Tests
 
 > **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
+>
+> **Test page**: [rt-26-production-configs.html](../../packages/geoview-core/public/templates/release-testing/rt-26-production-configs.html) — Links to all production demo pages.
 
 Smoke tests for production-like configurations. These are real-world configs used by partner organizations. The goal is to verify no regressions — layers load, panels open, and no crashes occur.
 
@@ -100,13 +102,3 @@ Demo: `templates/demos-specific/demo-flood.html`
 | French map        | FR flood layers    | 1. Check map2 (French)                                     | French floods map loads with French labels                      | M    |
 | Layer types       | Mixed flood layers | 1. Observe layers on both maps                             | Mix of flood-related layers (imagery, vectors) render correctly | M    |
 | No console errors | Clean load         | 1. Open browser console<br>2. Check for errors during load | No JavaScript errors in the console                             | M    |
-
-## Function Event with Swiper
-
-Config: `configs/OSDP/function-event-swiper.json`
-
-| Test                    | Description              | Steps                                                              | Expected Result                                 | Auto |
-| ----------------------- | ------------------------ | ------------------------------------------------------------------ | ----------------------------------------------- | ---- |
-| Swiper with OSDP layers | Swiper initializes       | 1. Load the config via navigator or demo page                      | Swiper initializes with the configured layers   | M    |
-| Swiper interaction      | Divider drag works       | 1. Drag the swiper divider left/right                              | Layers compare correctly on each side           | M    |
-| Combined with events    | Events fire during swipe | 1. If page has event monitoring, drag swiper<br>2. Check event log | Events fire correctly during swiper interaction | M    |

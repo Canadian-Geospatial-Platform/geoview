@@ -51,7 +51,7 @@
           },
           'navBar': ['zoom'],
           'appBar': { 'tabs': { 'core': ['geolocator', 'legend', 'details', 'export'] }, 'selectedTab': 'legend' },
-          'footerBar': { 'tabs': { 'core': ['layers', 'data-table'] }, 'selectedTab': 'layers' },
+          'footerBar': { 'tabs': { 'core': ['layers', 'data-table'] }, 'selectedTab': 'layers', 'selectedLayersLayerPath': 'fe83a604-aa5a-4e46-903c-685f8b0cc33c' },
           'theme': 'geo.ca'
         }"
       ></div>
@@ -153,6 +153,8 @@
       window.addEventListener('load', () => {
         createCodeSnippet();
         createConfigSnippet();
+        createConfigModals();
+        createMapNavigation();
       });
     </script>
   </body>

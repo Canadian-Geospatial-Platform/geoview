@@ -141,6 +141,189 @@ function createCollapsible() {
   }
 }
 
+/**
+ * Builds a map navigation bar and back-to-top links for release testing pages.
+ * Call after createConfigModals() so config buttons can be placed in the heading bar.
+ * Scans for all h5 elements whose text starts with "Map", builds an anchor-based
+ * navigation list, and wraps each heading in a bar with: ↑ Back | { } Config | Title.
+ */
+function createMapNavigation() {
+  // Find all map headings (h5 starting with "Map")
+  const headings = Array.from(document.querySelectorAll('h5')).filter(function (h) {
+    return /^Map\s/i.test(h.textContent.trim());
+  });
+  if (headings.length === 0) return;
+
+  // Add an anchor id at the top of the page
+  var topAnchor = document.getElementById('rt-top');
+  if (!topAnchor) {
+    topAnchor = document.createElement('a');
+    topAnchor.id = 'rt-top';
+    document.body.insertBefore(topAnchor, document.body.firstChild);
+  }
+
+  // Build the nav list (only if 2+ maps)
+  if (headings.length >= 2) {
+    var nav = document.createElement('div');
+    nav.className = 'rt-map-nav';
+    nav.innerHTML = '<strong>Jump to:</strong> ';
+    var links = [];
+    headings.forEach(function (h, idx) {
+      if (!h.id) h.id = 'rt-map-' + (idx + 1);
+      var a = document.createElement('a');
+      a.href = '#' + h.id;
+      a.textContent = h.textContent.replace(/\s*—.*/, '').trim();
+      links.push(a.outerHTML);
+    });
+    nav.innerHTML += links.join(' · ');
+
+    var demoSection = document.querySelector('.demo-section');
+    if (demoSection && demoSection.nextSibling) {
+      demoSection.parentNode.insertBefore(nav, demoSection.nextSibling);
+    }
+  }
+
+  // Wrap each heading in a bar: [↑ Back] [{ } Config] [Title]
+  headings.forEach(function (h, idx) {
+    if (!h.id) h.id = 'rt-map-' + (idx + 1);
+
+    // Find the map div associated with this heading (next .geoview-map sibling)
+    var mapDiv = h.nextElementSibling;
+    while (mapDiv && !mapDiv.classList.contains('geoview-map')) {
+      mapDiv = mapDiv.nextElementSibling;
+    }
+    var mapId = mapDiv ? mapDiv.id : '';
+
+    // Create the heading bar wrapper
+    var bar = document.createElement('div');
+    bar.className = 'rt-heading-bar';
+
+    // Back to top link
+    var backLink = document.createElement('a');
+    backLink.href = '#rt-top';
+    backLink.className = 'rt-back-link';
+    backLink.textContent = '↑ Back';
+    backLink.title = 'Back to top';
+    bar.appendChild(backLink);
+
+    // Find and move the config modal button for this map by data-map-id
+    if (mapId) {
+      var configBtn = document.querySelector('.rt-config-btn[data-map-id="' + mapId + '"]');
+      if (configBtn) {
+        bar.appendChild(configBtn);
+      }
+    }
+
+    // Move the heading text into the bar
+    var titleSpan = document.createElement('h5');
+    titleSpan.id = h.id;
+    titleSpan.innerHTML = h.innerHTML;
+    titleSpan.style.margin = '0';
+    bar.appendChild(titleSpan);
+
+    // Replace the original h5 with the bar
+    h.parentNode.insertBefore(bar, h);
+    h.style.display = 'none';
+  });
+
+  // Inject minimal styles
+  if (!document.getElementById('rt-nav-styles')) {
+    var style = document.createElement('style');
+    style.id = 'rt-nav-styles';
+    style.textContent =
+      '.rt-map-nav { margin: 12px 0 16px; padding: 10px 14px; background: #f5f5f5; border-radius: 6px; font-size: 13px; line-height: 2; }' +
+      '.rt-map-nav a { color: #515ba5; text-decoration: none; white-space: nowrap; }' +
+      '.rt-map-nav a:hover { text-decoration: underline; }' +
+      '.rt-heading-bar { display: flex; align-items: center; gap: 10px; margin: 20px 0 6px; flex-wrap: wrap; }' +
+      '.rt-back-link { font-size: 12px; color: #666; text-decoration: none; padding: 3px 8px; border: 1px solid #ddd; border-radius: 4px; white-space: nowrap; }' +
+      '.rt-back-link:hover { color: #515ba5; border-color: #515ba5; }';
+    document.head.appendChild(style);
+  }
+}
+
+/**
+ * Converts collapsible config snippet panels into modal dialog buttons.
+ * Call AFTER createConfigSnippet() so the pre elements are already populated.
+ * Each collapsible button + pre pair is replaced by a compact button that opens a modal.
+ */
+function createConfigModals() {
+  // Inject modal styles and overlay if not already present
+  if (!document.getElementById('rt-modal-styles')) {
+    var style = document.createElement('style');
+    style.id = 'rt-modal-styles';
+    style.textContent =
+      '.rt-modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:999999; justify-content:center; align-items:center; }' +
+      '.rt-modal-overlay.active { display:flex; }' +
+      '.rt-modal { background:#fff; border-radius:8px; width:80vw; max-height:80vh; display:flex; flex-direction:column; padding:0; box-shadow:0 8px 32px rgba(0,0,0,0.5); }' +
+      '.rt-modal-header { display:flex; justify-content:space-between; align-items:center; padding:12px 16px; border-bottom:1px solid #e0e0e0; background:#fff; border-radius:8px 8px 0 0; flex-shrink:0; }' +
+      '.rt-modal-header h5 { margin:0; color:#515ba5; }' +
+      '.rt-modal-close { background:none; border:none; font-size:24px; cursor:pointer; color:#666; padding:4px 8px; }' +
+      '.rt-modal-close:hover { color:#333; }' +
+      '.rt-modal-body { flex:1; overflow:auto; }' +
+      '.rt-modal-body pre { margin:0; white-space:pre-wrap; word-break:break-all; font-size:14px; line-height:1.5; max-height:none; background:#1e1e1e; color:#d4d4d4; padding:16px; border-radius:0 0 8px 8px; }' +
+      '.rt-config-btn { display:inline-block; padding:4px 10px; background:#f5f5f5; border:1px solid #ccc; border-radius:4px; font-size:12px; cursor:pointer; color:#515ba5; margin:4px 4px 4px 0; }' +
+      '.rt-config-btn:hover { background:#e8e8e8; border-color:#515ba5; }';
+    document.head.appendChild(style);
+  }
+
+  // Create the modal overlay (shared singleton)
+  var overlay = document.getElementById('rt-modal-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'rt-modal-overlay';
+    overlay.className = 'rt-modal-overlay';
+    overlay.innerHTML =
+      '<div class="rt-modal">' +
+      '<div class="rt-modal-header"><h5 id="rt-modal-title"></h5><button class="rt-modal-close" title="Close">&times;</button></div>' +
+      '<div class="rt-modal-body"><pre id="rt-modal-content"></pre></div>' +
+      '</div>';
+    document.body.appendChild(overlay);
+
+    // Close on X button
+    overlay.querySelector('.rt-modal-close').addEventListener('click', function () {
+      overlay.classList.remove('active');
+    });
+    // Close on overlay click (outside modal)
+    overlay.addEventListener('click', function (e) {
+      if (e.target === overlay) overlay.classList.remove('active');
+    });
+    // Close on Escape
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') overlay.classList.remove('active');
+    });
+  }
+
+  // Replace each collapsible button + pre pair with a compact modal button
+  var buttons = Array.from(document.querySelectorAll('button.collapsible'));
+  buttons.forEach(function (btn) {
+    var pre = btn.nextElementSibling;
+    if (!pre || pre.tagName !== 'PRE') return;
+
+    var title = btn.textContent.trim();
+
+    // Extract the map ID from the pre element's id (e.g., "map7CS" → "map7")
+    var mapId = pre.id ? pre.id.replace(/CS$/, '') : '';
+
+    // Create a small button with a data-map-id for reliable matching
+    var configBtn = document.createElement('button');
+    configBtn.className = 'rt-config-btn';
+    if (mapId) configBtn.setAttribute('data-map-id', mapId);
+    configBtn.textContent = '{ } ' + title.replace(' — Configuration Snippet', '').replace('Configuration Snippet', 'Config');
+    configBtn.title = 'View ' + title;
+    // Read pre content lazily at click time (data-config-url maps load async)
+    configBtn.addEventListener('click', function () {
+      document.getElementById('rt-modal-title').textContent = title;
+      document.getElementById('rt-modal-content').textContent = pre.textContent || '(loading...)';
+      overlay.classList.add('active');
+    });
+
+    // Replace the collapsible button + pre with the compact button
+    btn.parentNode.insertBefore(configBtn, btn);
+    btn.style.display = 'none';
+    pre.style.display = 'none';
+  });
+}
+
 function addLog(logId, msg) {
   const logs = document.getElementById(logId);
   logs.innerText += `${msg}\n`;

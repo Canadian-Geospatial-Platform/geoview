@@ -73,3 +73,11 @@ Config property: `serviceUrls` — overrides default service endpoints.
 | Custom geolocator  | Geolocator uses custom endpoint        | 1. Set `geolocatorUrl` to the actual URL but remove the API key, keeping only `locate`<br>2. Perform a search                 | Geolocator returns fewer results than default (missing key limits results) | M    |
 | Custom geocore URL | GeoCore loading uses custom endpoint   | 1. While on VPN, set `geocoreUrl` to `https://dev.geocore.api.geo.ca`<br>2. Add a GeoCore layer                               | GeoCore layer loading uses the dev endpoint                                | M    |
 | Custom proxy URL   | CORS-proxied requests use custom proxy | 1. Set `proxyUrl` to `https://example.com/proxy`<br>2. Load a layer that requires CORS proxy (e.g., a WMS behind same-origin) | Layer fails to load, proving the override is being used                    | M    |
+
+## Date Display Mode
+
+| Test                        | Description                | Steps                                                                                                 | Expected Result                                                               | Auto |
+| --------------------------- | -------------------------- | ----------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- | ---- |
+| ISO date format             | Dates show as ISO          | 1. Set `globalSettings.displayDateMode: 'iso'`<br>2. Open a layer with date fields in details/table   | Dates display in ISO format (e.g., `2024-01-15`)                              | C    |
+| Default date format         | Dates show as localized    | 1. Set `globalSettings.displayDateMode: 'default'`<br>2. Check same layer                             | Dates display in localized format (e.g., `January 15, 2024`)                  | C    |
+| Date timezone local         | Local timezone applied     | 1. Check date values with `displayDateTimezone: 'local'`                                              | Times reflect the browser's local timezone                                    | M    |

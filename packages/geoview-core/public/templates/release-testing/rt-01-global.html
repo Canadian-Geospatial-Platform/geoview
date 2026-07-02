@@ -76,7 +76,7 @@
           'components': ['north-arrow', 'overview-map'],
           'navBar': ['zoom', 'rotation', 'fullscreen', 'home', 'location', 'basemap-select', 'projection'],
           'appBar': { 'tabs': { 'core': ['geolocator', 'legend', 'details', 'export'] } },
-          'footerBar': { 'tabs': { 'core': ['layers', 'data-table', 'guide', 'time-slider', 'geochart'] } },
+          'footerBar': { 'tabs': { 'core': ['layers', 'data-table', 'time-slider', 'geochart'] } },
           'theme': 'geo.ca'
         }"
       ></div>
@@ -148,6 +148,8 @@
       window.addEventListener('load', () => {
         createCodeSnippet();
         createConfigSnippet();
+        createConfigModals();
+        createMapNavigation();
       });
     </script>
   </body>

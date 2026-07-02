@@ -64,8 +64,32 @@
         }"
       ></div>
 
+      <!-- Map 2: Large Legend Export -->
+      <h5>Map 2 — Large Legend Export</h5>
+      <p>Many layers with large legend entries. Tests legend column layout and pagination in exported image/PDF.</p>
+      <div
+        id="map2"
+        class="geoview-map"
+        data-lang="en"
+        data-config-url="./../../configs/navigator/demos/20-export-map-large-legend.json"
+      ></div>
+
+      <!-- Map 3: Bad Legend Export -->
+      <h5>Map 3 — Bad/Edge-Case Legend Export</h5>
+      <p>Layers with missing or broken legend entries. Verifies export handles edge cases without crashing.</p>
+      <div
+        id="map3"
+        class="geoview-map"
+        data-lang="en"
+        data-config-url="./../../configs/navigator/demos/21-export-map-bad-legend.json"
+      ></div>
+
       <button type="button" class="collapsible">Map 1 — Configuration Snippet</button>
       <pre id="map1CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 2 — Configuration Snippet</button>
+      <pre id="map2CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 3 — Configuration Snippet</button>
+      <pre id="map3CS" class="panel"></pre>
     </div>
 
     <script src="codedoc.js"></script>
@@ -75,6 +99,8 @@
       window.addEventListener('load', () => {
         createCodeSnippet();
         createConfigSnippet();
+        createConfigModals();
+        createMapNavigation();
       });
     </script>
   </body>

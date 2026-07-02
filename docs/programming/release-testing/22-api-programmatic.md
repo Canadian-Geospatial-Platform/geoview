@@ -109,3 +109,32 @@ Demo: `templates/demos/events.html`
 | Map init event    | Init event fires on load | 1. Load the page                                 | Init event fires and is logged         | M    |
 | Map move event    | Move events captured     | 1. Pan the map                                   | Move events are captured and displayed | M    |
 | Custom event emit | Custom events received   | 1. Click the button to emit notifications events | Event is received by the listener      | M    |
+
+## Event Lifecycle
+
+Demo: `templates/demos-specific/demo-function-event.html`
+
+| Test                          | Description                    | Steps                                                                                              | Expected Result                                                                    | Auto |
+| ----------------------------- | ------------------------------ | -------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | ---- |
+| onMapInit fires               | Init event fires               | 1. Register `cgpv.onMapInit(callback)` before `cgpv.init()`<br>2. Call `cgpv.init()`               | Callback fires with a valid `MapViewer` instance                                   | C    |
+| onMapReady fires              | Ready event fires              | 1. Register `cgpv.onMapReady(callback)` before `cgpv.init()`<br>2. Wait for map to fully load      | Callback fires after all layers are loaded                                         | C    |
+| Init before Ready             | Event order correct            | 1. Register both `onMapInit` and `onMapReady`<br>2. Log timestamps in each                         | `onMapInit` always fires before `onMapReady`                                       | C    |
+| Multiple listeners            | All fire                       | 1. Register 3 listeners on `onMapInit`<br>2. Call `cgpv.init()`                                    | All 3 callbacks fire                                                               | C    |
+| Handler exception              | Map survives error             | 1. Register a handler that throws an error<br>2. Call `cgpv.init()`                                | Map still initializes despite the handler error                                    | C    |
+| onMapMoveEnd                  | Move event fires               | 1. Register `mapViewer.onMapMoveEnd(callback)`<br>2. Pan the map                                   | Callback fires with correct `lonlat` coordinates                                   | C    |
+
+## Controller Direct API
+
+Demo: `templates/demos-specific/demo-function-event.html`
+
+Tests that controller methods work when called programmatically (not just via UI).
+
+| Test                            | Description                      | Steps                                                                                             | Expected Result                                                     | Auto |
+| ------------------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- | ---- |
+| mapController.zoomMap           | Programmatic zoom                | 1. Call `mapViewer.controllers.mapController.zoomMap(8)`                                          | Map zooms to level 8                                                | C    |
+| mapController.zoomToExtent      | Programmatic extent zoom         | 1. Call `mapViewer.controllers.mapController.zoomToExtent(extent)`                                | Map zooms to the specified extent                                   | C    |
+| mapController.rotate            | Programmatic rotation            | 1. Call `mapViewer.controllers.mapController.rotate(45, false)`                                   | Map rotates to 45 degrees                                           | C    |
+| layerController.setLayerOpacity | Programmatic opacity             | 1. Call `mapViewer.controllers.layerController.setLayerOpacity(layerPath, 0.3)`                   | Layer opacity changes to 0.3 on the map                             | C    |
+| layerController.setLayerVisibility | Programmatic visibility       | 1. Call `mapViewer.controllers.layerController.setLayerVisibility(layerPath, false)`               | Layer disappears from the map                                       | C    |
+| uiController.setFullscreen      | Programmatic fullscreen          | 1. Call `mapViewer.controllers.uiController.setFullScreenActive(true)`                            | Map enters fullscreen mode                                          | C    |
+| mapController.setProjection     | Programmatic projection switch   | 1. Call `mapViewer.controllers.mapController.setProjection(3857)`                                 | Map switches to Web Mercator and re-renders                         | C    |

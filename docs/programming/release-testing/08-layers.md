@@ -2,11 +2,11 @@
 
 > **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
 >
-> **Test page**: [rt-08-layers.html](../../packages/geoview-core/public/templates/release-testing/rt-08-layers.html) — Map 1 (groups + uniqueValue/classBreaks layers, collapse/expand/visibility buttons, layers in footer bar), Map 2 (WMS + ESRI Image for settings tests).
+> **Test page**: [rt-08-layers.html](../../packages/geoview-core/public/templates/release-testing/rt-08-layers.html) — Map 1 (groups + uniqueValue/classBreaks layers, collapse/expand/visibility buttons, layers in footer bar), Map 2 (WMS + ESRI Image for settings tests), Maps 3–8 (layer type configs: Esri Dynamic groups, projections, Vector Tiles, WKB, Shapefile, GeoJSON Multi).
 >
 > **Add Layer tests**: Use the [Add Layers demo page](../../packages/geoview-core/public/templates/demos/add-layers.html).
 >
-> **Navigator configs** (for detailed/edge-case tests): `layers/all-layers.json`, `layers/esri-feature.json`, `layers/wms.json`, `layers/esri-image.json`, `demos/23b-initial-settings-states-controls.json`, `demos/24-configured-feature-labels.json`, `demos/07-layer-zoom-levels.json`
+> **Navigator configs** (for detailed/edge-case tests): `layers/all-layers.json`, `layers/esri-feature.json`, `layers/wms.json`, `layers/esri-image.json`, `demos/23b-initial-settings-states-controls.json`, `demos/24-configured-feature-labels.json`, `demos/07-layer-zoom-levels.json`, `demos/08-all-layer-zoom-levels.json`, `layers/esri-dynamic-group-of-groups.json`, `layers/esri-dynamic-projections.json`, `layers/vector-tile.json`, `layers/wkb.json`, `layers/shapefile.json`, `layers/geojson-multi.json`
 
 The Layers panel has two areas: the **left layer list** (reorder, visibility, collapse, delete) and the **right panel** (layer info, settings, shortcuts, actions). Delete uses a timer-based undo pattern — clicking delete starts a countdown; clicking undo cancels it.
 
@@ -253,8 +253,111 @@ Config: `configs/navigator/demos/07-layer-zoom-levels.json` (ESRI Dynamic with `
 | Layer appears at zoom | Visible in range    | 1. Zoom to the configured visible range | Layer appears on the map      | M    |
 | Layer disappears      | Hidden out of range | 1. Zoom outside the visible range       | Layer disappears from the map | M    |
 
+### All Layer Zoom Levels (Comprehensive)
+
+Config: `configs/navigator/demos/08-all-layer-zoom-levels.json`
+
+This config tests zoom and scale constraints across ALL layer types simultaneously.
+
+| Test                               | Description                   | Steps                                                                                        | Expected Result                                                                    | Auto |
+| ---------------------------------- | ----------------------------- | -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | ---- |
+| All layers visible at default zoom | Layers in range               | 1. Load the navigator with `08-all-layer-zoom-levels.json`<br>2. Check legend                | All configured layers are visible at the default zoom level (within their range)   | M    |
+| maxZoom cap (zoom level 8)         | Layers disappear past max     | 1. Zoom beyond level 8<br>2. Check legend for greyed-out layers                              | Layers with `maxZoom: 8` disappear (greyed out in legend, `inVisibleRange: false`) | M    |
+| minScale threshold                 | Scale-based disappearance     | 1. Zoom in until scale denominator drops below 10,000,000<br>2. Check legend                 | Layers with `minScale: 10000000` disappear                                         | M    |
+| Combined constraint                | Most restrictive wins         | 1. Test layers with both zoom and scale constraints<br>2. Observe which limit triggers first | Both constraints apply independently — the most restrictive one wins               | M    |
+| Layer types tested                 | All types respect limits      | 1. Check each layer type in legend at various zooms                                          | GeoJSON, Esri Dynamic, Esri Feature, WMS, WFS all respect zoom/scale limits        | M    |
+| Group with hidden child            | Visibility + zoom constraints | 1. Check group (`point-feature-group`) with a child that has `visible: false` + maxZoom      | Both visibility and zoom constraints are respected correctly                       | M    |
+
 ### Layer Type Edge Cases
 
 | Test                           | Description                  | Steps                                                          | Expected Result                                                                  | Auto |
 | ------------------------------ | ---------------------------- | -------------------------------------------------------------- | -------------------------------------------------------------------------------- | ---- |
 | Vector tile projection warning | Warning on projection switch | 1. Load a map with a vector tile layer<br>2. Switch projection | A notification warns that vector tile layers do not support projection switching | C    |
+
+---
+
+## Layer Type Configs
+
+These tests validate specific layer types using dedicated navigator configs. For "Add by URL" tests with empty maps, see [Add by URL](#add-by-url) above.
+
+### Esri Dynamic — Group of Groups
+
+Config: `configs/navigator/layers/esri-dynamic-group-of-groups.json`
+
+| Test                         | Description               | Steps                                                                                   | Expected Result                                                      | Auto |
+| ---------------------------- | ------------------------- | --------------------------------------------------------------------------------------- | -------------------------------------------------------------------- | ---- |
+| Deeply nested groups         | Multi-level hierarchy     | 1. Load the navigator with `esri-dynamic-group-of-groups.json`<br>2. Expand legend tree | Multi-level group hierarchy renders correctly (groups within groups) | M    |
+| Expand/collapse nested       | Tree navigation           | 1. Click expand/collapse arrows on nested groups<br>2. Navigate the tree                | Tree structure is fully navigable at all levels                      | M    |
+| Visibility per level         | Parent/child visibility   | 1. Toggle visibility at different nesting levels<br>2. Observe map and child icons      | Parent hide hides all descendants; children show greyed-out state    | M    |
+| Feature query on nested leaf | Query deeply nested layer | 1. Click on a feature from a deeply nested layer<br>2. Check details panel              | Correct layer path and attributes displayed                          | M    |
+
+### Esri Dynamic — Projections
+
+Config: `configs/navigator/layers/esri-dynamic-projections.json`
+
+| Test                       | Description                  | Steps                                                                            | Expected Result                                                       | Auto |
+| -------------------------- | ---------------------------- | -------------------------------------------------------------------------------- | --------------------------------------------------------------------- | ---- |
+| Load in default projection | Initial render               | 1. Load the navigator with `esri-dynamic-projections.json`<br>2. Observe the map | Esri Dynamic layers render correctly in the configured projection     | M    |
+| Switch projection          | Re-request in new projection | 1. Switch to a different projection via footer bar<br>2. Observe map tiles       | Layers re-request tiles in the new projection and render correctly    | M    |
+| No artifacts               | Clean projection switch      | 1. After switching projection<br>2. Pan/zoom the map                             | No leftover tiles or rendering artifacts from the previous projection | M    |
+
+### Vector Tiles
+
+Config: `configs/navigator/layers/vector-tile.json`
+
+| Test                        | Description               | Steps                                                               | Expected Result                                                 | Auto |
+| --------------------------- | ------------------------- | ------------------------------------------------------------------- | --------------------------------------------------------------- | ---- |
+| Vector tile load            | Layers render             | 1. Load the navigator with `vector-tile.json`<br>2. Observe the map | Vector tile layers (CBCT French, CBMT English) render correctly | M    |
+| Style URL                   | Style applied from URL    | 1. Observe tile rendering (colors, line weights, labels)            | `styleUrl` is fetched and applied — correct visual appearance   | M    |
+| Multiple vector tile layers | Independent toggle        | 1. Toggle each vector tile layer in legend                          | Both layers can be toggled independently                        | M    |
+| Zoom interaction            | Level-of-detail rendering | 1. Zoom in and out<br>2. Observe tile detail                        | Vector tiles re-render at appropriate detail levels             | M    |
+
+### WKB (Well-Known Binary)
+
+Config: `configs/navigator/layers/wkb.json`
+
+| Test                        | Description         | Steps                                                             | Expected Result                                                           | Auto |
+| --------------------------- | ------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------- | ---- |
+| WKB from metadataAccessPath | Hex string geometry | 1. Load the navigator with `wkb.json`<br>2. Check first WKB layer | Layer loads geometry from the hex string in `metadataAccessPath`          | M    |
+| WKB from dataAccessPath     | Data path geometry  | 1. Check the second WKB layer                                     | Layer loads geometry from `source.dataAccessPath`                         | M    |
+| Geometry display            | Polygons render     | 1. Observe the map                                                | Both WKB polygons (South Africa shapes) render correctly                  | M    |
+| Initial view layerIds       | Map zooms to extent | 1. Observe map extent on initial load                             | Map zooms to the WKB layer extent (configured via `initialView.layerIds`) | M    |
+
+### Shapefile (ZIP)
+
+Config: `configs/navigator/layers/shapefile.json`
+
+| Test                        | Description               | Steps                                                                                                  | Expected Result                                                  | Auto |
+| --------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------- | ---- |
+| Local shapefile ZIP         | Local ZIP loads           | 1. Load the navigator with `shapefile.json`<br>2. Check local shapefile layer                          | Crown Harvest Plans shapefile loads and renders polygons         | M    |
+| Remote shapefile            | Remote fetch and render   | 1. Check the remote shapefile layer                                                                    | Wildfire HotSpots from `cwfis.cfs.nrcan.gc.ca` loads and renders | M    |
+| Shapefile with custom style | UniqueValue style         | 1. Check the shapefile with `layerStyle` (uniqueValue on "SOURCE")<br>2. Compare legend icons with map | Renders with correct icon styles per source category             | M    |
+| Multi-file shapefile        | Specific layerId from ZIP | 1. Check the shapefile with specific `layerId` entry (e.g., "sunchild_aquifer_py_tm")                  | Correct layer extracted from the multi-file ZIP                  | M    |
+
+### GeoJSON Multi
+
+Config: `configs/navigator/layers/geojson-multi.json`
+
+| Test                    | Description                | Steps                                                                      | Expected Result                                   | Auto |
+| ----------------------- | -------------------------- | -------------------------------------------------------------------------- | ------------------------------------------------- | ---- |
+| Multiple GeoJSON layers | All layers render          | 1. Load the navigator with `geojson-multi.json`<br>2. Check legend and map | All configured GeoJSON layers render              | M    |
+| Mixed geometry types    | Point/line/polygon display | 1. Observe map for different geometry types                                | Points, lines, and polygons all display correctly | M    |
+| Independent visibility  | Toggle each layer          | 1. Toggle each GeoJSON layer in legend<br>2. Observe map                   | Each layer toggles independently                  | M    |
+
+### Layer Filter Combination
+
+Tests the four-source filter system (class + time + data + config) combined with AND logic.
+
+| Test                          | Description                     | Steps                                                                                                           | Expected Result                                                                     | Auto |
+| ----------------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ---- |
+| Style class filter            | Toggle class filters data table | 1. On Map 1, toggle a style class off for a uniqueValue layer<br>2. Open data table for that layer              | Data table rows filtered to exclude the toggled-off class                           | C    |
+| Combined class + data filter  | Both filters apply              | 1. Toggle a style class off<br>2. Apply a column filter in data table<br>3. Check map rendering                 | Map shows only features matching both filters (AND logic)                           | C    |
+| Clear all filters             | Filters reset                   | 1. Re-enable all style classes<br>2. Clear data table filters                                                   | All features reappear on map and in data table                                      | C    |
+
+### Opacity Hierarchical Capping
+
+| Test                              | Description                    | Steps                                                                                               | Expected Result                                                           | Auto |
+| --------------------------------- | ------------------------------ | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- | ---- |
+| Parent caps child opacity         | Child limited by parent        | 1. On Map 1, set a group to 50% opacity<br>2. Set a child layer to 100%                            | Child renders at 50% (capped by parent)                                   | C    |
+| Restore after parent reset        | Full opacity restored          | 1. Set parent group back to 100%<br>2. Check child opacity                                          | Child renders at its own opacity value (100%)                             | C    |
+| Highlight opacity snapshot        | Opacity preserved after highlight | 1. Highlight a layer<br>2. Remove highlight<br>3. Check all sibling layer opacities                | All layers return to their pre-highlight opacity values                    | C    |

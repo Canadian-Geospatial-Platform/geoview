@@ -75,3 +75,13 @@ Config: `configs/navigator/layers/all-layers.json`
 | Export as PNG  | PNG file valid  | 1. Select PNG format<br>2. Click export  | PNG file downloads and opens correctly in an image viewer | M    |
 | Export as JPEG | JPEG file valid | 1. Select JPEG format<br>2. Click export | JPEG file downloads and opens correctly                   | M    |
 | Export as PDF  | PDF file valid  | 1. Select PDF format<br>2. Click export  | PDF file downloads and opens correctly in a PDF reader    | M    |
+
+## Export Edge Cases
+
+Config: `configs/navigator/demos/20-export-map-large-legend.json` (Map 2), `configs/navigator/demos/21-export-map-bad-legend.json` (Map 3)
+
+| Test                        | Description                | Steps                                                                                     | Expected Result                                                              | Auto |
+| --------------------------- | -------------------------- | ----------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ---- |
+| Large legend columns        | Legend wraps to columns    | 1. On Map 2 (large legend), click export<br>2. Check the legend section in the export      | Legend entries wrap into multiple columns to fit the export layout            | M    |
+| Missing legend fallback     | No crash on bad legend     | 1. On Map 3 (bad legend), click export                                                    | Export completes without errors; missing legend entries are skipped gracefully | M    |
+| Export with rotation        | Rotated map exports        | 1. Rotate the map on Map 1<br>2. Export as PNG                                            | Exported image reflects the rotated view                                      | M    |

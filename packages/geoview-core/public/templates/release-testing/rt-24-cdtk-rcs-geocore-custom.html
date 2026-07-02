@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>RT-24 CDTK, RCS & Geocore Custom - Release Testing</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+
+  <body>
+    <div id="page-header"></div>
+    <div>
+      <div class="back-to-main">
+        <a href="./release-testing.html">← Back to Release Testing</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>24 — CDTK, RCS & Geocore Custom Tests</h4>
+        <p>
+          CDTK (Cloud Data Toolkit / QGIS) WMS and WFS services, RCS (Remote Config Service), and Geocore with inline/VCS custom overrides.
+        </p>
+        <p>
+          <strong>Test plan:</strong>
+          <a href="https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/docs/programming/release-testing/24-cdtk-rcs-geocore-custom.md" target="_blank">24-cdtk-rcs-geocore-custom.md</a>
+        </p>
+      </div>
+
+      <!-- Map 1: CDTK WMS Basic -->
+      <h5>Map 1 — CDTK WMS Basic</h5>
+      <p>QGIS WMS layers from <code>qgis-stage.cdtk.geogc.ca</code>. Tests basic load, fetchVectorsOnWFS: false, raster tile rendering.</p>
+      <div
+        id="map1"
+        class="geoview-map"
+        data-lang="en"
+        data-config-url="./../../configs/navigator/layers/wms-cdtk-basic.json"
+      ></div>
+
+      <!-- Map 2: CDTK WMS with Geocore -->
+      <h5>Map 2 — CDTK WMS with Geocore</h5>
+      <p>Mixed source config: geocore and CDTK layers together. Tests custom featureInfo config (nameField, outfields).</p>
+      <div
+        id="map2"
+        class="geoview-map"
+        data-lang="en"
+        data-config-url="./../../configs/navigator/layers/wms-cdtk.json"
+      ></div>
+
+      <!-- Map 3: CDTK WFS Basic -->
+      <h5>Map 3 — CDTK WFS Basic</h5>
+      <p>QGIS WFS layers with fetchStylesOnWMS: false, custom inline uniqueValue style, multiple sublayer entries per layer.</p>
+      <div
+        id="map3"
+        class="geoview-map"
+        data-lang="en"
+        data-config-url="./../../configs/navigator/layers/wfs-cdtk-basic.json"
+      ></div>
+
+      <!-- Map 4: CDTK WFS with featureInfo -->
+      <h5>Map 4 — CDTK WFS with featureInfo</h5>
+      <p>CDTK WFS layers with nameField and outfields config applied. Tests feature query and details display.</p>
+      <div
+        id="map4"
+        class="geoview-map"
+        data-lang="en"
+        data-config-url="./../../configs/navigator/layers/wfs-cdtk.json"
+      ></div>
+
+      <!-- Map 5: RCS -->
+      <h5>Map 5 — RCS (Remote Config Service)</h5>
+      <p>RCS geocore variant for VPN environments. Tests UUID resolution, legend, and feature query.</p>
+      <div
+        id="map5"
+        class="geoview-map"
+        data-lang="en"
+        data-config-url="./../../configs/navigator/layers/rcs-gcgeo.json"
+      ></div>
+
+      <!-- Map 6: Geocore Custom Inline Config -->
+      <h5>Map 6 — Geocore with Custom Inline Config</h5>
+      <p>Geocore UUID with custom listOfLayerEntryConfig, custom groups, initial visibility states, style overrides, and geoviewLayerName override.</p>
+      <div
+        id="map6"
+        class="geoview-map"
+        data-lang="en"
+        data-config-url="./../../configs/navigator/layers/geocore-custom-inline-config.json"
+      ></div>
+
+      <!-- Map 7: Geocore Custom VCS -->
+      <h5>Map 7 — Geocore with VCS Custom Config</h5>
+      <p>Geocore UUIDs with VCS-published customizations (time slider, geochart configs). Tests VCS override resolution and plugin initialization.</p>
+      <div
+        id="map7"
+        class="geoview-map"
+        data-lang="en"
+        data-config-url="./../../configs/navigator/layers/geocore-custom.json"
+      ></div>
+
+      <!-- Map 8: Geocore WMS -->
+      <h5>Map 8 — Geocore WMS</h5>
+      <p>Geocore UUID resolving to WMS. Tests WMS legend (GetLegendGraphic) and WMS GetFeatureInfo.</p>
+      <div
+        id="map8"
+        class="geoview-map"
+        data-lang="en"
+        data-config-url="./../../configs/navigator/layers/geocore-wms.json"
+      ></div>
+
+      <button type="button" class="collapsible">Map 1 — Configuration Snippet</button>
+      <pre id="map1CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 2 — Configuration Snippet</button>
+      <pre id="map2CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 3 — Configuration Snippet</button>
+      <pre id="map3CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 4 — Configuration Snippet</button>
+      <pre id="map4CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 5 — Configuration Snippet</button>
+      <pre id="map5CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 6 — Configuration Snippet</button>
+      <pre id="map6CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 7 — Configuration Snippet</button>
+      <pre id="map7CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 8 — Configuration Snippet</button>
+      <pre id="map8CS" class="panel"></pre>
+    </div>
+
+    <script src="codedoc.js"></script>
+    <script>
+      insertPageHeader();
+      cgpv.init();
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+        createConfigModals();
+        createMapNavigation();
+      });
+    </script>
+  </body>
+</html>

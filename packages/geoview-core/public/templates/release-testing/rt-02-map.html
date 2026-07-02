@@ -77,7 +77,7 @@
 
       <!-- Map 3: Circumpolar (EPSG:3573) -->
       <h5>Map 3 — North Pole LAEA (EPSG:3573)</h5>
-      <p>Pole is center of projection — neither north pole icon nor north arrow should display.</p>
+      <p>Pole is center of projection. North arrow component is configured but should auto-hide since the pole is at the center.</p>
       <div
         id="map3"
         class="geoview-map"
@@ -139,6 +139,12 @@
 
       <button type="button" class="collapsible">Map 1 — Configuration Snippet</button>
       <pre id="map1CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 2 — Configuration Snippet</button>
+      <pre id="map2CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 3 — Configuration Snippet</button>
+      <pre id="map3CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 4 — Configuration Snippet</button>
+      <pre id="map4CS" class="panel"></pre>
     </div>
 
     <script src="codedoc.js"></script>
@@ -148,6 +154,8 @@
       window.addEventListener('load', () => {
         createCodeSnippet();
         createConfigSnippet();
+        createConfigModals();
+        createMapNavigation();
       });
     </script>
   </body>

@@ -52,3 +52,10 @@ Zoom constraints, extent overrides, initial view modes, home view, rotation, and
 | Test                 | Description                | Steps                  | Expected Result                                                                                                            | Auto |
 | -------------------- | -------------------------- | ---------------------- | -------------------------------------------------------------------------------------------------------------------------- | ---- |
 | Initial click marker | Marker and details on load | 1. Check Map 5 on load | Map loads with a click marker at the specified coordinate and the Details panel opens with query results for that location | M    |
+
+## Rotation Disabled
+
+| Test                       | Description                 | Steps                                                                                    | Expected Result                                                          | Auto |
+| -------------------------- | --------------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | ---- |
+| enableRotation false       | Rotation control hidden     | 1. Load a config with `enableRotation: false`<br>2. Check navBar                         | Rotation button is not rendered even if listed in navBar                  | C    |
+| Shift+drag blocked         | Cannot rotate by gesture    | 1. With `enableRotation: false`<br>2. Try Shift+drag to rotate                           | Map does not rotate                                                      | M    |

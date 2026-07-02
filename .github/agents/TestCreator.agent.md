@@ -1,7 +1,7 @@
 ---
 name: TestCreator
 description: "Use when: creating new tests for the geoview-test-suite, writing utility function tests, config validation tests, layer tests, map interaction tests, UI tests, identifying missing test coverage in a PR branch, suggesting tests for new or changed code, reviewing manual release testing checklists against the codebase, managing the release testing issue template. Generates test files following the custom in-browser test framework patterns and maintains manual release-testing docs."
-tools: [read, search, execute, edit, todo, agent]
+tools: [execute/runNotebookCell, execute/getTerminalOutput, execute/killTerminal, execute/sendToTerminal, execute/runTask, execute/createAndRunTask, execute/runInTerminal, execute/runTests, execute/testFailure, read/getNotebookSummary, read/problems, read/readFile, read/viewImage, read/readNotebookCellOutput, read/terminalSelection, read/terminalLastCommand, read/getTaskOutput, agent/runSubagent, edit/createDirectory, edit/createFile, edit/createJupyterNotebook, edit/editFiles, edit/editNotebook, edit/rename, search/changes, search/codebase, search/fileSearch, search/listDirectory, search/textSearch, search/usages, todo]
 argument-hint: "describe the test to create, 'review' to scan a branch for missing tests, 'review-manual' to audit release-testing checklists against codebase, or 'create-release-issue' to prepare a new release testing cycle"
 ---
 

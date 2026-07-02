@@ -54,11 +54,49 @@
       }
       .badge-ready { background: #c8e6c9; color: #2e7d32; }
       .badge-pending { background: #fff3e0; color: #e65100; }
+      .badge { cursor: pointer; user-select: none; }
+      .badge:hover { opacity: 0.8; }
+      .test-card.done { border-color: #4caf50; background: #f9fff9; }
       .section-header {
         margin-top: 32px;
         padding-bottom: 8px;
         border-bottom: 2px solid #515ba5;
       }
+      .progress-bar-container {
+        margin: 16px 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .progress-bar {
+        flex: 1;
+        height: 12px;
+        background: #e0e0e0;
+        border-radius: 6px;
+        overflow: hidden;
+      }
+      .progress-bar-fill {
+        height: 100%;
+        background: #4caf50;
+        border-radius: 6px;
+        transition: width 0.3s;
+      }
+      .progress-text {
+        font-size: 14px;
+        font-weight: 600;
+        color: #333;
+        white-space: nowrap;
+      }
+      .clear-btn {
+        padding: 6px 12px;
+        background: #e53935;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 12px;
+        cursor: pointer;
+      }
+      .clear-btn:hover { background: #c62828; }
     </style>
   </head>
 
@@ -79,6 +117,12 @@
           </a>
           for test steps and expected results.
         </p>
+      </div>
+
+      <div class="progress-bar-container">
+        <div class="progress-bar"><div class="progress-bar-fill" id="progressFill"></div></div>
+        <span class="progress-text" id="progressText">0 / 0</span>
+        <button class="clear-btn" id="clearBtn" title="Reset all badges to pending">Clear Progress</button>
       </div>
 
       <!-- Global & UI -->
@@ -254,12 +298,116 @@
           <p>Config loading (URL params, div attrs, function call).</p>
           <a href="./rt-23-config-loading-methods.html">Open Test Page</a>
         </div>
+        <div class="test-card">
+          <h5>24 — CDTK, RCS & Geocore Custom <span class="badge badge-pending">pending</span></h5>
+          <p>CDTK WMS/WFS, RCS, Geocore custom inline/VCS configs.</p>
+          <a href="./rt-24-cdtk-rcs-geocore-custom.html">Open Test Page</a>
+        </div>
+        <div class="test-card">
+          <h5>25 — Developer Tools <span class="badge badge-pending">pending</span></h5>
+          <p>ESRI Renderer and WFS Renderer style configuration tools.</p>
+          <a href="./rt-25-developer-tools.html">Open Test Page</a>
+        </div>
+        <div class="test-card">
+          <h5>26 — Production Config Smoke Tests <span class="badge badge-pending">pending</span></h5>
+          <p>OSDP, Open Maps, Arctic SDI, GSC, CGDI, Flood, GeoDiscovery smoke tests.</p>
+          <a href="./rt-26-production-configs.html">Open Test Page</a>
+        </div>
       </div>
     </div>
 
     <script src="codedoc.js"></script>
     <script>
       insertPageHeader();
+
+      // LocalStorage-based badge toggle for release testing progress
+      const STORAGE_KEY = 'geoview-release-testing-done';
+
+      function getDoneSet() {
+        try {
+          return new Set(JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'));
+        } catch {
+          return new Set();
+        }
+      }
+
+      function saveDoneSet(doneSet) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify([...doneSet]));
+      }
+
+      function getCardId(card) {
+        const heading = card.querySelector('h5');
+        if (!heading) return null;
+        // Extract the section number/name (e.g., "01", "17a") from the heading text
+        const match = heading.textContent.match(/^([\d]+[a-z]?)/);
+        return match ? match[1] : heading.textContent.trim().substring(0, 20);
+      }
+
+      function updateBadge(card, isDone) {
+        const badge = card.querySelector('.badge');
+        if (!badge) return;
+        if (isDone) {
+          badge.textContent = 'done';
+          badge.className = 'badge badge-ready';
+          card.classList.add('done');
+        } else {
+          badge.textContent = 'pending';
+          badge.className = 'badge badge-pending';
+          card.classList.remove('done');
+        }
+      }
+
+      function updateProgress() {
+        const cards = document.querySelectorAll('.test-card');
+        const total = cards.length;
+        const done = document.querySelectorAll('.test-card.done').length;
+        const fill = document.getElementById('progressFill');
+        const text = document.getElementById('progressText');
+        if (fill) fill.style.width = total > 0 ? ((done / total) * 100) + '%' : '0%';
+        if (text) text.textContent = done + ' / ' + total + ' sections';
+      }
+
+      // Initialize badges from localStorage
+      const doneSet = getDoneSet();
+      document.querySelectorAll('.test-card').forEach(function(card) {
+        const id = getCardId(card);
+        if (id && doneSet.has(id)) {
+          updateBadge(card, true);
+        }
+
+        // Click badge to toggle
+        const badge = card.querySelector('.badge');
+        if (badge) {
+          badge.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const cardId = getCardId(card);
+            if (!cardId) return;
+            const currentDone = getDoneSet();
+            if (currentDone.has(cardId)) {
+              currentDone.delete(cardId);
+              updateBadge(card, false);
+            } else {
+              currentDone.add(cardId);
+              updateBadge(card, true);
+            }
+            saveDoneSet(currentDone);
+            updateProgress();
+          });
+        }
+      });
+
+      // Clear button
+      document.getElementById('clearBtn').addEventListener('click', function() {
+        if (!confirm('Reset all sections to pending?')) return;
+        localStorage.removeItem(STORAGE_KEY);
+        document.querySelectorAll('.test-card').forEach(function(card) {
+          updateBadge(card, false);
+        });
+        updateProgress();
+      });
+
+      updateProgress();
     </script>
   </body>
 </html>

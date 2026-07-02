@@ -66,8 +66,20 @@
         }"
       ></div>
 
+      <!-- Map 2: Summary & Out Fields -->
+      <h5>Map 2 — Summary & Out Fields</h5>
+      <p>Tests nameField, outfields, and aliasFields configuration for controlling which fields display in details panel.</p>
+      <div
+        id="map2"
+        class="geoview-map"
+        data-lang="en"
+        data-config-url="./../../configs/navigator/demos/29-summary-outfields.json"
+      ></div>
+
       <button type="button" class="collapsible">Map 1 — Configuration Snippet</button>
       <pre id="map1CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 2 — Configuration Snippet</button>
+      <pre id="map2CS" class="panel"></pre>
     </div>
 
     <script src="codedoc.js"></script>
@@ -86,6 +98,8 @@
       window.addEventListener('load', () => {
         createCodeSnippet();
         createConfigSnippet();
+        createConfigModals();
+        createMapNavigation();
       });
     </script>
   </body>

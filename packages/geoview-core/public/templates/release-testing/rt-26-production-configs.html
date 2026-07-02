@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>RT-26 Production Config Smoke Tests - Release Testing</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+
+  <body>
+    <div id="page-header"></div>
+    <div>
+      <div class="back-to-main">
+        <a href="./release-testing.html">← Back to Release Testing</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>26 — Production Config Smoke Tests</h4>
+        <p>
+          Smoke tests for production-like configs used by partner organizations. Open each demo page, verify layers load,
+          panels open, and no crashes occur.
+        </p>
+        <p>
+          <strong>Test plan:</strong>
+          <a href="https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/docs/programming/release-testing/26-production-configs.md" target="_blank">26-production-configs.md</a>
+        </p>
+      </div>
+
+      <h5>Demo Page Links</h5>
+      <p>Each link opens the corresponding production demo page in a new tab. Verify layers render, panels open, and no console errors occur.</p>
+
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
+        <thead>
+          <tr style="text-align: left; border-bottom: 2px solid #ccc;">
+            <th style="padding: 8px;">Section</th>
+            <th style="padding: 8px;">Demo Page</th>
+            <th style="padding: 8px;">Tests</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid #eee;">
+            <td style="padding: 8px;">GeoDiscovery + Geochart</td>
+            <td style="padding: 8px;"><a href="../demos-specific/demo-geodiscovery-geochart.html" target="_blank">demo-geodiscovery-geochart.html</a></td>
+            <td style="padding: 8px;">5</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #eee;">
+            <td style="padding: 8px;">OSDP Air</td>
+            <td style="padding: 8px;"><a href="../demos-specific/demo-osdp-air.html" target="_blank">demo-osdp-air.html</a></td>
+            <td style="padding: 8px;" rowspan="7">7 (spot-check subset)</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #eee;">
+            <td style="padding: 8px;">OSDP Water</td>
+            <td style="padding: 8px;"><a href="../demos-specific/demo-osdp-water.html" target="_blank">demo-osdp-water.html</a></td>
+          </tr>
+          <tr style="border-bottom: 1px solid #eee;">
+            <td style="padding: 8px;">OSDP Climate</td>
+            <td style="padding: 8px;"><a href="../demos-specific/demo-osdp-climate.html" target="_blank">demo-osdp-climate.html</a></td>
+          </tr>
+          <tr style="border-bottom: 1px solid #eee;">
+            <td style="padding: 8px;">OSDP Integration</td>
+            <td style="padding: 8px;"><a href="../demos-specific/demo-osdp-integration.html" target="_blank">demo-osdp-integration.html</a></td>
+          </tr>
+          <tr style="border-bottom: 1px solid #eee;">
+            <td style="padding: 8px;">OSDP Non-curated</td>
+            <td style="padding: 8px;"><a href="../demos-specific/demo-osdp-non-currated.html" target="_blank">demo-osdp-non-currated.html</a></td>
+          </tr>
+          <tr style="border-bottom: 1px solid #eee;">
+            <td style="padding: 8px;">Open Maps</td>
+            <td style="padding: 8px;"><a href="../demos-specific/demo-open-maps.html" target="_blank">demo-open-maps.html</a></td>
+            <td style="padding: 8px;">3</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #eee;">
+            <td style="padding: 8px;">Open Maps (WET)</td>
+            <td style="padding: 8px;"><a href="../demos-specific/demo-open-maps-wet.html" target="_blank">demo-open-maps-wet.html</a></td>
+            <td style="padding: 8px;">2</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #eee;">
+            <td style="padding: 8px;">Arctic SDI</td>
+            <td style="padding: 8px;"><a href="../demos-specific/demo-arctic-sdi.html" target="_blank">demo-arctic-sdi.html</a></td>
+            <td style="padding: 8px;">4</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #eee;">
+            <td style="padding: 8px;">GSC</td>
+            <td style="padding: 8px;"><a href="../demos-specific/demo-gsc.html" target="_blank">demo-gsc.html</a></td>
+            <td style="padding: 8px;">3</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #eee;">
+            <td style="padding: 8px;">CGDI Water Resources</td>
+            <td style="padding: 8px;"><a href="../demos-specific/demo-cgdi.html" target="_blank">demo-cgdi.html</a></td>
+            <td style="padding: 8px;">3</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #eee;">
+            <td style="padding: 8px;">World of Maps / NTS</td>
+            <td style="padding: 8px;"><a href="../demos-specific/demo-world-of-maps.html" target="_blank">demo-world-of-maps.html</a></td>
+            <td style="padding: 8px;">3</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #eee;">
+            <td style="padding: 8px;">Flood Demo (EGS)</td>
+            <td style="padding: 8px;"><a href="../demos-specific/demo-flood.html" target="_blank">demo-flood.html</a></td>
+            <td style="padding: 8px;">4</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <script src="codedoc.js"></script>
+    <script>
+      insertPageHeader();
+    </script>
+  </body>
+</html>

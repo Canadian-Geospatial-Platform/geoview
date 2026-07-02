@@ -103,3 +103,15 @@ For raster function and WMS style tests, see [08 — Layers — Esri Image Layer
 | Coded value domain      | Domain values displayed    | 1. Check the "Tour" field in U2 Tour Locations details                                       | Tour field shows translated domain names (e.g., "Zoo TV Tour Domain") instead of raw coded values | A    |
 
 > Core nameField/outfields behavior tested in [10 — Details — Summary & Out Fields](10-details.md#summary--out-fields).
+
+## Deep Nesting Cascading (4+ Levels)
+
+Config: `configs/navigator/demos/23b-initial-settings-states-controls.json`
+
+Tests `initialSettings` cascading through deeply nested group hierarchies.
+
+| Test                               | Description                     | Steps                                                                                                      | Expected Result                                                                              | Auto |
+| ---------------------------------- | ------------------------------- | ---------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | ---- |
+| Parent visible=false cascades      | Children greyed out             | 1. Load a config with a group set to `visible: false`<br>2. Check children in the legend                   | Children show `visible: true` but greyed out (parent OL layer hides rendering)               | C    |
+| Child override wins                | Explicit child value preserved  | 1. Check a child that explicitly sets `opacity: 0.5` inside a parent with `opacity: 1.0`                  | Child renders at 0.5 opacity (not overridden by parent)                                      | C    |
+| controls.remove=false cascades     | Remove button hidden            | 1. Check a group with `controls.remove: false`<br>2. Check its children and grandchildren                 | Remove button is hidden at all descendant levels                                             | C    |

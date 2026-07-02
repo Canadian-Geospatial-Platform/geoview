@@ -31,7 +31,7 @@
       <p>
         Two GeoCore layers with group structure (Fieldnotes = many ESRI groups, Hydro = many WMS groups) + a simple layer +
         ESRI Feature layers with uniqueValue and classBreaks style classes for style toggle tests.
-        Legend in app bar (fullscreen button available). Layers tab available for legend → layers shortcut test.
+        Legend in app bar (fullscreen button available). Layers tab in footer bar for legend → layers shortcut test.
       </p>
 
       <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px;">
@@ -80,8 +80,8 @@
             ]
           },
           'navBar': ['zoom', 'home'],
-          'appBar': { 'tabs': { 'core': ['legend', 'layers', 'export'] } },
-          'footerBar': { 'tabs': { 'core': [] } },
+          'appBar': { 'tabs': { 'core': ['legend', 'export'] } },
+          'footerBar': { 'tabs': { 'core': ['layers'] } },
           'theme': 'geo.ca'
         }"
       ></div>
@@ -176,6 +176,8 @@
       window.addEventListener('load', () => {
         createCodeSnippet();
         createConfigSnippet();
+        createConfigModals();
+        createMapNavigation();
       });
     </script>
   </body>

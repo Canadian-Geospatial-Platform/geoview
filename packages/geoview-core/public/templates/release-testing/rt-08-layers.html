@@ -129,10 +129,196 @@
         }"
       ></div>
 
+      <!-- Map 3: Esri Dynamic Group of Groups -->
+      <h5>Map 3 — Esri Dynamic: Group of Groups</h5>
+      <p>Multi-level group hierarchy (groups within groups). Tests expand/collapse, visibility per level, feature query on nested leaves.</p>
+      <div
+        id="map3"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': { 'projection': 3857, 'initialView': { 'zoomAndCenter': [10, [-75.370748, 45.001058]] } },
+            'basemapOptions': { 'basemapId': 'transport', 'shaded': false, 'labeled': true },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerId': 'group-of-groups',
+                'geoviewLayerName': 'Group-Of-Groups',
+                'metadataAccessPath': 'https://egisp.dfo-mpo.gc.ca/arcgis/rest/services/open_data_donnees_ouvertes/fieldnotes_pacific_science_field_operations_en/MapServer',
+                'geoviewLayerType': 'esriDynamic',
+                'listOfLayerEntryConfig': [
+                  {
+                    'entryType': 'group',
+                    'layerId': 'my-group',
+                    'layerName': 'My Group!',
+                    'listOfLayerEntryConfig': [{ 'layerId': '1' }, { 'layerId': '2' }]
+                  },
+                  { 'layerId': '22' }
+                ]
+              }
+            ]
+          },
+          'navBar': ['zoom', 'home'],
+          'appBar': { 'tabs': { 'core': ['legend', 'details'] } },
+          'footerBar': { 'tabs': { 'core': ['layers'] } },
+          'theme': 'geo.ca'
+        }"
+      ></div>
+
+      <!-- Map 4: Esri Dynamic Projections -->
+      <h5>Map 4 — Esri Dynamic: Projections (forceServiceProjection)</h5>
+      <p>Tests forceServiceProjection flag: OL reproject-on-the-fly vs server-side reprojection. Switch projection and verify no artifacts.</p>
+      <div
+        id="map4"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': { 'projection': 3857, 'initialView': { 'zoomAndCenter': [5, [-90, 50]] } },
+            'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': true },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerId': 'uniqueValueId-ol',
+                'metadataAccessPath': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/',
+                'geoviewLayerType': 'esriDynamic',
+                'listOfLayerEntryConfig': [{ 'layerId': '7', 'layerName': '(OL) Labels', 'source': { 'forceServiceProjection': true } }]
+              },
+              {
+                'geoviewLayerId': 'uniqueValueId-server',
+                'metadataAccessPath': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/',
+                'geoviewLayerType': 'esriDynamic',
+                'listOfLayerEntryConfig': [{ 'layerId': '7', 'layerName': '(Server) Labels 3978' }]
+              }
+            ]
+          },
+          'navBar': ['zoom', 'home', 'projection'],
+          'appBar': { 'tabs': { 'core': ['legend'] } },
+          'footerBar': { 'tabs': { 'core': ['layers'] } },
+          'theme': 'geo.ca'
+        }"
+      ></div>
+
+      <!-- Map 5: Vector Tiles -->
+      <h5>Map 5 — Vector Tiles</h5>
+      <p>CBCT French and CBMT English vector tile layers with styleUrl. Toggle independently, zoom for level-of-detail.</p>
+      <div
+        id="map5"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': { 'projection': 3978 },
+            'basemapOptions': { 'basemapId': 'imagery', 'shaded': false, 'labeled': false },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerId': 'vectorTilesLYR1',
+                'geoviewLayerName': 'CBCT - French Basemap',
+                'geoviewLayerType': 'vectorTiles',
+                'metadataAccessPath': 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT_CBCT_3978_V_OSM/VectorTileServer/',
+                'listOfLayerEntryConfig': [{ 'layerId': 'CBMT_CBCT_3978_V_OSM', 'styleUrl': 'https://nrcan-rncan.maps.arcgis.com/sharing/rest/content/items/88ad9e2ef6e040a19472985e6606a2f9/resources/styles/root.json' }]
+              },
+              {
+                'geoviewLayerId': 'vectorTilesLYR2',
+                'geoviewLayerName': 'CBMT - English Basemap',
+                'geoviewLayerType': 'vectorTiles',
+                'metadataAccessPath': 'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT_CBCT_3978_V_OSM/VectorTileServer/',
+                'listOfLayerEntryConfig': [{ 'layerId': 'CBMT_CBCT_3978_V_OSM', 'styleUrl': 'https://nrcan-rncan.maps.arcgis.com/sharing/rest/content/items/708e92c1f00941e3af3dd3c092ae4a0a/resources/styles/root.json' }]
+              }
+            ]
+          },
+          'navBar': ['zoom', 'home'],
+          'appBar': { 'tabs': { 'core': ['legend'] } },
+          'footerBar': { 'tabs': { 'core': ['layers'] } },
+          'theme': 'geo.ca'
+        }"
+      ></div>
+
+      <!-- Map 6: WKB -->
+      <h5>Map 6 — WKB (Well-Known Binary)</h5>
+      <p>Two WKB layers (South Africa polygons): one from metadataAccessPath hex string, one from dataAccessPath. Initial view zooms to layerIds.</p>
+      <div
+        id="map6"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': { 'projection': 3857, 'maxExtent': [-180, -90, 180, 90], 'initialView': { 'layerIds': ['wkbLYR1/1'] } },
+            'basemapOptions': { 'basemapId': 'transport', 'shaded': true, 'labeled': false },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerId': 'wkbLYR1',
+                'geoviewLayerName': 'South Africa',
+                'geoviewLayerType': 'WKB',
+                'metadataAccessPath': '0103000000010000000500000054E3A59BC4602540643BDF4F8D1739C05C8FC2F5284C4140EC51B81E852B34C0D578E926316843406F1283C0CAD141C01B2FDD2406012B40A4703D0AD79343C054E3A59BC4602540643BDF4F8D1739C0',
+                'listOfLayerEntryConfig': [{ 'layerId': '1' }]
+              },
+              {
+                'geoviewLayerId': 'wkbLYR2',
+                'geoviewLayerType': 'WKB',
+                'geoviewLayerName': 'South Africa - dataAccessPath',
+                'listOfLayerEntryConfig': [{ 'layerId': '2', 'source': { 'dataAccessPath': '0103000000010000000500000054E3A59BC4602540643BDF4F8D1739C05C8FC2F5284C4140EC51B81E852B34C0D578E926316843406F1283C0CAD141C01B2FDD2406012B40A4703D0AD79343C054E3A59BC4602540643BDF4F8D1739C0' } }]
+              }
+            ]
+          },
+          'navBar': ['zoom', 'home'],
+          'appBar': { 'tabs': { 'core': ['legend'] } },
+          'footerBar': { 'tabs': { 'core': ['layers'] } },
+          'theme': 'geo.ca'
+        }"
+      ></div>
+
+      <!-- Map 7: Shapefile -->
+      <h5>Map 7 — Shapefile (ZIP)</h5>
+      <p>Local shapefiles in ZIP (Crown Harvest Plans, Sunchild Aquifer), remote shapefile (Wildfire HotSpots .shp with uniqueValue style on SOURCE field).</p>
+      <div
+        id="map7"
+        class="geoview-map"
+        data-lang="en"
+        data-config-url="./../../configs/navigator/layers/shapefile.json"
+      ></div>
+
+      <!-- Map 8: GeoJSON Multi -->
+      <h5>Map 8 — GeoJSON Multi</h5>
+      <p>Multiple GeoJSON layers with mixed geometry types (points, lines, polygons). Independent visibility toggle.</p>
+      <div
+        id="map8"
+        class="geoview-map"
+        data-lang="en"
+        data-config-url="./../../configs/navigator/layers/geojson-multi.json"
+      ></div>
+
+      <!-- Map 9: All Layer Zoom Levels -->
+      <h5>Map 9 — All Layer Zoom Levels (Comprehensive)</h5>
+      <p>Zoom and scale constraints across ALL layer types simultaneously. Zoom in/out to verify layers appear/disappear at configured thresholds.</p>
+      <div
+        id="map9"
+        class="geoview-map"
+        data-lang="en"
+        data-config-url="./../../configs/navigator/demos/08-all-layer-zoom-levels.json"
+      ></div>
+
       <button type="button" class="collapsible">Map 1 — Configuration Snippet</button>
       <pre id="map1CS" class="panel"></pre>
       <button type="button" class="collapsible">Map 2 — Configuration Snippet</button>
       <pre id="map2CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 3 — Configuration Snippet</button>
+      <pre id="map3CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 4 — Configuration Snippet</button>
+      <pre id="map4CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 5 — Configuration Snippet</button>
+      <pre id="map5CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 6 — Configuration Snippet</button>
+      <pre id="map6CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 7 — Configuration Snippet</button>
+      <pre id="map7CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 8 — Configuration Snippet</button>
+      <pre id="map8CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 9 — Configuration Snippet</button>
+      <pre id="map9CS" class="panel"></pre>
     </div>
 
     <script src="codedoc.js"></script>
@@ -175,6 +361,8 @@
       window.addEventListener('load', () => {
         createCodeSnippet();
         createConfigSnippet();
+        createConfigModals();
+        createMapNavigation();
       });
     </script>
   </body>

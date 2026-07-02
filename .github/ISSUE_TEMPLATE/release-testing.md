@@ -92,6 +92,8 @@ labels: ["testing", "release"]
 - [ ] [Add by File](../docs/programming/release-testing/08-layers.md#add-by-file)
 - [ ] [Layer Types](../docs/programming/release-testing/08-layers.md#layer-types)
 - [ ] [Layer Settings](../docs/programming/release-testing/08-layers.md#layer-settings)
+- [ ] [Layer Type Configs](../docs/programming/release-testing/08-layers.md#layer-type-configs) (22 tests)
+- [ ] [Layer Filters & Opacity](../docs/programming/release-testing/08-layers.md#layer-filter-combination) (6 tests)
 
 ## 09 — Styles
 
@@ -109,12 +111,14 @@ labels: ["testing", "release"]
 
 - [ ] [Data Table](../docs/programming/release-testing/11-data-table.md#data-table)
 - [ ] [Filtering](../docs/programming/release-testing/11-data-table.md#filtering)
+- [ ] [Column Management](../docs/programming/release-testing/11-data-table.md#column-management) (5 tests)
 - [ ] [Export](../docs/programming/release-testing/11-data-table.md#export)
 
 ## 12 — View Settings
 
 - [ ] [Zoom Constraints](../docs/programming/release-testing/12-view-settings.md#zoom-constraints)
 - [ ] [Extent Override](../docs/programming/release-testing/12-view-settings.md#extent-override)
+- [ ] [Rotation Disabled](../docs/programming/release-testing/12-view-settings.md#rotation-disabled) (2 tests)
 
 ## 13 — Projection
 
@@ -127,11 +131,13 @@ labels: ["testing", "release"]
 ## 15 — Export
 
 - [ ] [Export Modal](../docs/programming/release-testing/15-export.md#export-modal)
+- [ ] [Export Edge Cases](../docs/programming/release-testing/15-export.md#export-edge-cases) (3 tests)
 
 ## 16 — Initial Settings
 
 - [ ] [Initial Controls](../docs/programming/release-testing/16-initial-settings.md#initial-controls)
 - [ ] [Initial States](../docs/programming/release-testing/16-initial-settings.md#initial-states)
+- [ ] [Deep Nesting Cascading](../docs/programming/release-testing/16-initial-settings.md#deep-nesting-cascading-4-levels) (3 tests)
 
 ## 17a — Time Slider
 
@@ -159,6 +165,7 @@ labels: ["testing", "release"]
 ## 18 — Global Settings
 
 - [ ] [Global Settings](../docs/programming/release-testing/18-global-settings.md#global-settings)
+- [ ] [Date Display Mode](../docs/programming/release-testing/18-global-settings.md#date-display-mode) (3 tests)
 
 ## 19 — Integration Flows
 
@@ -175,6 +182,8 @@ labels: ["testing", "release"]
 ## 22 — API / Programmatic
 
 - [ ] [API Functions & Events](../docs/programming/release-testing/22-api-programmatic.md#api-functions--events)
+- [ ] [Event Lifecycle](../docs/programming/release-testing/22-api-programmatic.md#event-lifecycle) (6 tests)
+- [ ] [Controller Direct API](../docs/programming/release-testing/22-api-programmatic.md#controller-direct-api) (7 tests)
 
 ## 23 — Config Loading Methods
 
@@ -182,7 +191,11 @@ labels: ["testing", "release"]
 
 ## 24 — CDTK / RCS / Geocore Custom
 
-- [ ] [CDTK & Custom Configs](../docs/programming/release-testing/24-cdtk-rcs-geocore-custom.md#cdtk--custom-configs)
+- [ ] [CDTK WMS Services](../docs/programming/release-testing/24-cdtk-rcs-geocore-custom.md#cdtk-wms-services) (6 tests)
+- [ ] [CDTK WFS Services](../docs/programming/release-testing/24-cdtk-rcs-geocore-custom.md#cdtk-wfs-services) (6 tests)
+- [ ] [RCS](../docs/programming/release-testing/24-cdtk-rcs-geocore-custom.md#rcs-remote-config-service) (4 tests)
+- [ ] [Geocore Custom](../docs/programming/release-testing/24-cdtk-rcs-geocore-custom.md#geocore-with-custom-inline-config) (8 tests)
+- [ ] [Geocore WMS](../docs/programming/release-testing/24-cdtk-rcs-geocore-custom.md#geocore-wms) (3 tests)
 
 ## 25 — Developer Tools
 

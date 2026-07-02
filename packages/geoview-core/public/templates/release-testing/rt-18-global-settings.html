@@ -134,9 +134,14 @@
           'theme': 'geo.ca'
         }"
       ></div>
-
-      <button type="button" class="collapsible">Map 1 — Configuration Snippet</button>
+      <button type="button" class="collapsible">Map 1 - Configuration Snippet</button>
       <pre id="map1CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 2 - Configuration Snippet</button>
+      <pre id="map2CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 3 - Configuration Snippet</button>
+      <pre id="map3CS" class="panel"></pre>
+      <button type="button" class="collapsible">Map 4 - Configuration Snippet</button>
+      <pre id="map4CS" class="panel"></pre>
     </div>
 
     <script src="codedoc.js"></script>
@@ -146,6 +151,8 @@
       window.addEventListener('load', () => {
         createCodeSnippet();
         createConfigSnippet();
+        createConfigModals();
+        createMapNavigation();
       });
     </script>
   </body>
