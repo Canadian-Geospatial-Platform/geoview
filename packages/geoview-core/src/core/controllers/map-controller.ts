@@ -260,7 +260,10 @@ export class MapController extends AbstractMapViewerController {
   // #region OVERRIDES
 
   /**
-   * Subscribes to the map projection changed event on the MapViewer.
+   * Subscribes to MapViewer events for map state synchronization.
+   *
+   * Registers handlers for ready, resolution, rotation, move, pointer, click,
+   * mouse enter/leave, interaction mode, projection change, size change, and marker icon events.
    */
   protected override onHook(): void {
     // Listens on the map ready event
@@ -304,7 +307,7 @@ export class MapController extends AbstractMapViewerController {
   }
 
   /**
-   * Unsubscribes from the map projection changed event on the MapViewer.
+   * Unsubscribes from all MapViewer events registered in onHook.
    */
   protected override onUnhook(): void {
     // Unhooks when a marker icon is showed
