@@ -147,6 +147,9 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
     // Test initial settings cascade
     const pInitialSettingsCascade = this.#layerTester.testInitialSettingsCascade();
 
+    // Test geocore group with defaultVisibility=false
+    const pGeocoreGroupDefaultVisibilityFalse = this.#layerTester.testAddGeocoreWithGroupDefaultVisibilityFalse();
+
     // Test domain fields
     const pEsriDynamicDomainField = this.#layerTester.testAddEsriDynamicWithDomainField();
     const pEsriFeatureDomainField = this.#layerTester.testAddEsriFeatureWithDomainField();
@@ -181,6 +184,7 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
       pLayerGeoTIFFVegetation,
       pLayerGeoTIFFBadUrl,
       pInitialSettingsCascade,
+      pGeocoreGroupDefaultVisibilityFalse,
       pEsriDynamicDomainField,
       pEsriFeatureDomainField,
     ]);

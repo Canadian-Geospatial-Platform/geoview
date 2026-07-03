@@ -1724,6 +1724,63 @@ export class LayerTester extends GVAbstractTester {
 
   // #endregion DOMAIN FIELDS
 
+  // #region GROUP LAYER VISIBILITY
+
+  /**
+   * Tests adding a geocore layer that has group layers with defaultVisibility set to false.
+   * Verifies that the groups are loaded with visible=false and their children are not effectively visible.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testAddGeocoreWithGroupDefaultVisibilityFalse(): Promise<Test<void>> {
+    const gvLayerId = GVAbstractTester.GEOCORE_MARINE_FISHERIES_UUID;
+    const gvLayerPath = GVAbstractTester.GEOCORE_MARINE_FISHERIES_LAYER_PATH;
+    const gvLayerPathWithGroupVisibilityFalse = GVAbstractTester.GEOCORE_MARINE_FISHERIES_LAYER_PATH_GROUP_NON_VISIBLE;
+
+    // Test
+    return this.test(
+      `Test Adding layer with group layer defaultVisibility to false...`,
+      async (test) => {
+        // Creating the configuration
+        test.addStep('Adding the geocore layer on the map via UUID...');
+
+        // Redirect to helper to add the layer to the map and wait
+        await this.helperStepAddLayerOnMapFromUUID(test, gvLayerId);
+
+        // Wait for all layers to finish loading
+        test.addStep('Waiting for all layers to be loaded...');
+        await this.getControllersRegistry().layerController.waitForLayersLoaded();
+      },
+      (test) => {
+        // Get the root layer (group)
+        const rootLayer = this.getControllersRegistry().layerController.getGeoviewLayerIfExists(gvLayerPathWithGroupVisibilityFalse);
+
+        // The root group should exist
+        Test.assertIsDefined('rootLayer', rootLayer);
+
+        // The root group should have visible=false (defaultVisibility=false in the service metadata)
+        test.addStep('Checking that group layer with defaultVisibility=false is not visible in its property...');
+        Test.assertIsEqual(rootLayer.getVisible(), false);
+
+        // Check in the store as well
+        const storeLayer = getStoreLayerLegendLayerByPath(this.getMapId(), gvLayerPathWithGroupVisibilityFalse);
+
+        // The store layer should exist
+        Test.assertIsDefined('storeLayer', storeLayer);
+
+        // The store layer should be not visible
+        test.addStep('Checking that group layer with defaultVisibility=false is not visible in the store...');
+        Test.assertIsEqual(storeLayer?.visible, false);
+      },
+      (test) => {
+        // Redirect to helper to clean up and assert
+        this.helperFinalizeStepRemoveLayerAndAssert(test, gvLayerPath);
+      }
+    );
+  }
+
+  // #endregion GROUP LAYER VISIBILITY
+
   // #region HELPERS
 
   /**
