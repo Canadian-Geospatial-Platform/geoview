@@ -466,6 +466,7 @@ export class UIController extends AbstractMapViewerController {
    * @param messageParams - Optional parameters for message interpolation
    */
   addMessage(type: SnackbarType, messageKey: string, messageParams?: Record<string, unknown>): void {
+    // Redirect to the MapViewer
     switch (type) {
       case 'info':
         this.getMapViewer().notifications.showMessage(messageKey, messageParams);

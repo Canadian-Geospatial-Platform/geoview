@@ -62,7 +62,7 @@ import { LayerInfoPanel } from './layer-info/layer-info';
 import { logger } from '@/core/utils/logger';
 import { LAYER_STATUS, TABS, TIMEOUT } from '@/core/utils/constant';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
-import { useStoreTimeSliderLayers } from '@/core/stores/states/time-slider-state';
+import { useStoreTimeSliderLayer } from '@/core/stores/states/time-slider-state';
 import { useNavigateToTab } from '@/core/components/common/hooks/use-navigate-to-tab';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { DeleteUndoButton } from '@/core/components/layers/delete-undo-button';
@@ -195,7 +195,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
   const parentHidden = useStoreLayerIsParentHiddenOnMap(layerPath);
   const layerHidden = useStoreLayerIsHiddenOnMap(layerPath);
   const availableSettings = useStoreLayerStyleSettings(layerPath);
-  const timeSliderLayers = useStoreTimeSliderLayers();
+  const timeSliderLayer = useStoreTimeSliderLayer(layerPath);
   const isFocusTrap = useStoreUIActiveTrapGeoView();
   const footerBarComponents = useStoreUIFooterBarComponents();
   const appBarComponents = useStoreUIAppbarComponents();
@@ -605,7 +605,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
    */
   const renderTimeSliderButton = (): JSX.Element | null => {
     // Check if layer is in time slider
-    const isLayerInTimeSlider = timeSliderLayers && timeSliderLayers[layerPath];
+    const isLayerInTimeSlider = !!timeSliderLayer;
     const isDisabled = layerHidden || parentHidden;
 
     // Button to navigate to Time Slider panel and select this layer

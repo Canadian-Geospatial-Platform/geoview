@@ -487,7 +487,7 @@ export class MapViewer {
     // However, careful, the layers are still processing and some sub-layer-entries can get registered on-the-fly (notably: EsriDynamic, WMS).
 
     // Ready the map
-    await this.#readyMap();
+    return this.#readyMap();
   }
 
   /**
@@ -1004,7 +1004,7 @@ export class MapViewer {
   }
 
   /**
-   * Set the map zoom level.
+   * Set the map zoom level instantaneously, no animation.
    *
    * @param zoom - New zoom level
    */

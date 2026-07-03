@@ -1,4 +1,4 @@
-import { memo, useId, useMemo, type ComponentType } from 'react';
+import { memo, useCallback, useId, useMemo, type ComponentType } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -44,7 +44,11 @@ interface WMSLegendImageProps {
   collapseContainerId: string;
 }
 
-// Extracted WMS Legend Component
+/**
+ * Renders a WMS legend image with lightbox support.
+ *
+ * Memoized to avoid re-rendering when parent CollapsibleContent re-renders due to unrelated state changes.
+ */
 const WMSLegendImage = memo(function WMSLegendImage({
   imgSrc,
   initLightBox,

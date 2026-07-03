@@ -1790,6 +1790,7 @@ export class GVWMS extends AbstractGVRaster {
    * @param layerConfig - The layer configuration
    * @param chosenStyle - Style to get the legend image for
    * @returns A promise that resolves to an image blob or null if it fails to retrieve the legend image
+   * @throws {ResponseContentError} When no URL is available to fetch the legend image
    */
   static async #getLegendImage(layerConfig: OgcWmsLayerEntryConfig, chosenStyle?: string): Promise<string | ArrayBuffer | null> {
     // Get the legend URL from the layer metadata
