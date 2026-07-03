@@ -1109,7 +1109,7 @@
         // Activate the test button for the map in question
         const btn = document.getElementById('btnLaunchTest-' + mapViewer.mapId);
         if (btn) btn.disabled = false;
-        
+
         // If all buttons are disabled
         const allEnabled = Array.from(document.getElementsByClassName('btnLaunchTests')).every((button) => !button.disabled);
         if (allEnabled) {

@@ -805,7 +805,7 @@ export class MapController extends AbstractMapViewerController {
    * @param marker - The click marker containing lon/lat coordinates
    */
   clickMarkerIconShow(marker: TypeClickMarker): void {
-    // Redirect to the map viewer
+    // Redirect to the MapViewer
     this.getMapViewer().clickMarkerIconShow(marker);
   }
 
@@ -1879,7 +1879,7 @@ export class MapController extends AbstractMapViewerController {
 
     // Set interaction (enable/disables map controls)
     // TODO: CHECK - This line should likely happen elsewhere in the initialization of the map, not really updating a map control per-se
-    this.getMapViewer().setInteraction(getStoreMapInteraction(mapViewer.mapId));
+    mapViewer.setInteraction(getStoreMapInteraction(mapViewer.mapId));
 
     // Save in store
     setStoreMapSize(mapViewer.mapId, size);
