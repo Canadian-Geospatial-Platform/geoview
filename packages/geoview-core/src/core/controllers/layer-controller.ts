@@ -99,7 +99,13 @@ import { NoBoundsError } from '@/core/exceptions/geoview-exceptions';
 import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { Projection } from '@/geo/utils/projection';
 import { GeoUtilities } from '@/geo/utils/utilities';
-import { MapViewer, type MapLayersProcessedDelegate, type MapMoveEndDelegate, type MapMoveEndEvent } from '@/geo/map/map-viewer';
+import {
+  MapViewer,
+  type MapBaseEvent,
+  type MapLayersProcessedDelegate,
+  type MapMoveEndDelegate,
+  type MapMoveEndEvent,
+} from '@/geo/map/map-viewer';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
@@ -2075,7 +2081,7 @@ export class LayerController extends AbstractMapViewerController {
    * @param sender - The map viewer that fired the event
    * @param event - The event data (not used in this handler)
    */
-  #handleMapLayersProcessed(sender: MapViewer, event: unknown): void {
+  #handleMapLayersProcessed(sender: MapViewer, event: MapBaseEvent): void {
     // Update the layers visible in range
     this.#updateLayersVisibleInRange();
   }

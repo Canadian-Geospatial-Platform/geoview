@@ -25,7 +25,7 @@ export const NorthArrow = memo((): JSX.Element => {
 
   // Hooks
   const theme = useTheme();
-  const memoSxClasses = useMemo(() => {
+  const memoSxClasses = useMemo((): ReturnType<typeof getSxClasses> => {
     logger.logTraceUseMemo('NORTH-ARROW - memoSxClasses', theme);
     return getSxClasses(theme);
   }, [theme]);
@@ -76,6 +76,8 @@ NorthArrow.displayName = 'NorthArrow';
  * @returns The north pole marker component
  */
 export const NorthPoleFlag = memo((): JSX.Element => {
+  logger.logTraceRender('components/north-arrow/north-arrow > NorthPoleFlag');
+
   // State
   const northPoleRef = useRef<HTMLDivElement | null>(null);
 

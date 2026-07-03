@@ -1,4 +1,4 @@
-import { memo, useId, useMemo, type ComponentType } from 'react';
+import { memo, useCallback, useId, useMemo, type ComponentType } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -44,7 +44,11 @@ interface WMSLegendImageProps {
   collapseContainerId: string;
 }
 
-// Extracted WMS Legend Component
+/**
+ * Renders a WMS legend image with lightbox support.
+ *
+ * Memoized to avoid re-rendering when parent CollapsibleContent re-renders due to unrelated state changes.
+ */
 const WMSLegendImage = memo(
   ({
     imgSrc,
@@ -64,13 +68,20 @@ const WMSLegendImage = memo(
     const buttonId = `${mapId}-${containerType}-legend-image-btn-${id}`; // Create unique ID for focus management after lightbox closes
     const altText = title ? `${t('legend.title')}, ${title}` : t('legend.title');
 
+    /**
+     * Handles when the user clicks the legend image to open the lightbox.
+     */
+    const handleClick = useCallback((): void => {
+      initLightBox(imgSrc, altText, buttonId, 0);
+    }, [initLightBox, imgSrc, altText, buttonId]);
+
     return (
       <Collapse id={collapseContainerId} in={legendExpanded} sx={sxClasses.collapsibleContainer} timeout="auto">
         <Button
           type="icon"
           sx={sxClasses.imageButton}
           id={buttonId}
-          onClick={() => initLightBox(imgSrc, altText, buttonId, 0)}
+          onClick={handleClick}
           tooltip={t('general.enlargeImage')}
           tooltipPlacement="top"
           aria-label={title ? t('general.enlargeImageName', { title }) : t('general.enlargeImage')} // WCAG - Descriptive aria-label for screen readers
