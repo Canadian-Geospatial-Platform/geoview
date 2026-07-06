@@ -1175,6 +1175,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param features - Array of features to format
    * @param layerConfig - Configuration of the associated layer
    * @param language - The display language, used to guess the best name field if `nameField` is not provided
+   * @param includeNoStyleFeatures - Whether to include features that have no matching style (no icon generated)
    * @param serviceDateFormat - Optional date format used by the service
    * @param serviceDateIANA - Optional IANA time zone identifier used by the service
    * @param serviceDateTemporalMode - Optional temporal mode for date handling
@@ -1184,6 +1185,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     features: Feature[],
     layerConfig: OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig | VectorLayerEntryConfig,
     language: TypeDisplayLanguage,
+    includeNoStyleFeatures: boolean,
     serviceDateFormat: string | undefined,
     serviceDateIANA: string | undefined,
     serviceDateTemporalMode: TemporalMode | undefined
@@ -1210,6 +1212,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
       true,
       domainsLookup,
       this.getStyle(),
+      includeNoStyleFeatures,
       serviceDateFormat,
       serviceDateIANA,
       serviceDateTemporalMode,
@@ -2354,6 +2357,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param supportZoomTo - Whether zoom-to functionality is supported for these features
    * @param domainsLookup - Optional array of field metadata for domain lookups
    * @param layerStyle - Optional mapping of geometry type to style settings for icons
+   * @param includeNoStyleFeatures - Whether to include features that have no matching style (no icon generated)
    * @param inputFormat - Optional format(s) to prioritize for string inputs
    * @param inputTimezone - Optional IANA timezone the dates are in
    * @param inputTemporalMode - Optional temporal mode for date handling
@@ -2369,6 +2373,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     supportZoomTo: boolean,
     domainsLookup: TypeLayerMetadataFields[] | undefined,
     layerStyle: Partial<Record<TypeStyleGeometry, TypeLayerStyleSettings>> | undefined,
+    includeNoStyleFeatures: boolean,
     inputFormat: string | string[] | undefined,
     inputTimezone: TimeIANA | undefined,
     inputTemporalMode: TemporalMode | undefined,
@@ -2392,33 +2397,40 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
           ? AbstractGVLayer.getFeatureIconSource(feature, layerStyle, domainsLookup, aliasLookup, imageSourceDict)
           : undefined;
 
-        // Get the TypeFeatureInfoEntry object
-        const featureInfoEntry: TypeFeatureInfoEntry = {
-          uid: getUid(feature),
-          featureKey: featureKeyCounter++,
-          geoviewLayerType: schemaTag,
-          feature,
-          geometry: feature.getGeometry(),
-          extent: feature.getGeometry()?.getExtent(),
-          featureIcon: imageSource,
-          fieldInfo: {},
-          nameField,
-          supportZoomTo,
-          layerPath,
-        };
+        // Check if we do want to include the feature when it has no style
+        let includeFeature = true;
+        if (!includeNoStyleFeatures && !imageSource) includeFeature = false;
 
-        // Process the feature fields
-        fieldKeyCounter = this.#helperFeatureFields(
-          feature,
-          outFields,
-          featureInfoEntry,
-          fieldKeyCounter,
-          inputFormat,
-          inputTimezone,
-          inputTemporalMode,
-          callbackGetFieldValue
-        );
-        queryResult.push(featureInfoEntry);
+        // If including the feature
+        if (includeFeature) {
+          // Get the TypeFeatureInfoEntry object
+          const featureInfoEntry: TypeFeatureInfoEntry = {
+            uid: getUid(feature),
+            featureKey: featureKeyCounter++,
+            geoviewLayerType: schemaTag,
+            feature,
+            geometry: feature.getGeometry(),
+            extent: feature.getGeometry()?.getExtent(),
+            featureIcon: imageSource,
+            fieldInfo: {},
+            nameField,
+            supportZoomTo,
+            layerPath,
+          };
+
+          // Process the feature fields
+          fieldKeyCounter = this.#helperFeatureFields(
+            feature,
+            outFields,
+            featureInfoEntry,
+            fieldKeyCounter,
+            inputFormat,
+            inputTimezone,
+            inputTemporalMode,
+            callbackGetFieldValue
+          );
+          queryResult.push(featureInfoEntry);
+        }
       }
 
       return queryResult;
