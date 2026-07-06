@@ -46,5 +46,5 @@ export * from './toolbar/toolbar';
 export * from './tooltip/tooltip';
 export * from './typography/typography';
 export { default as FocusTrap } from '@mui/material/Unstable_TrapFocus';
-export { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, FormControl, FormControlLabel, InputLabel, Radio, RadioGroup, NativeSelect, } from '@mui/material';
+export { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, FormControl, FormControlLabel, FormHelperText, InputLabel, Radio, RadioGroup, NativeSelect, } from '@mui/material';
 //# sourceMappingURL=index.d.ts.map
