@@ -60,7 +60,7 @@ export class GVGeoTIFF extends AbstractGVTile {
    *
    * @returns The GeoTIFF source instance associated with this layer.
    */
-  override getOLSource(): GeoTIFFSource {
+  protected override getOLSource(): GeoTIFFSource {
     // Get source from OL
     return super.getOLSource() as GeoTIFFSource;
   }
@@ -86,14 +86,14 @@ export class GVGeoTIFF extends AbstractGVTile {
     // Wait for the source to be ready, just in case the caller is early
     await this.waitForSourceReady();
 
-    // Get the source
+    // Get the OpenLayers source (not the configured source property)
     const source = this.getOLSource();
 
     // Get the source projection
-    const sourceProjection = source?.getProjection() || undefined;
+    const sourceProjection = source.getProjection() ?? undefined;
 
     // Get the layer bounds
-    let sourceExtent = source?.getTileGrid()?.getExtent();
+    let sourceExtent = source.getTileGrid()?.getExtent();
 
     // If both found
     if (sourceExtent && sourceProjection) {

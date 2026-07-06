@@ -70,6 +70,7 @@ export class UtilitiesProjectionTester extends GVAbstractTester {
           Projection.readEPSGNumber('EPSG : 3005'),
           Projection.readEPSGNumber('invalid'),
           Projection.readEPSGNumber('CRS:84'),
+          Projection.readEPSGNumber(4326),
         ];
       },
       (test, results) => {
@@ -90,6 +91,9 @@ export class UtilitiesProjectionTester extends GVAbstractTester {
 
         test.addStep('Verifying CRS:84 returns undefined (not EPSG)...');
         Test.assertIsUndefined('crs84', results[5]);
+
+        test.addStep('Verifying numeric input returns the same number...');
+        Test.assertIsEqual(results[6], 4326);
       }
     );
   }
@@ -167,8 +171,8 @@ export class UtilitiesProjectionTester extends GVAbstractTester {
       'Test Projection.transformExtentFromProj() transforms extents...',
       (test) => {
         test.addStep('Transforming extent from EPSG:4326 to EPSG:3857...');
-        const lonLatProj = Projection.getProjectionFromString('EPSG:4326');
-        const wmProj = Projection.getProjectionFromString('EPSG:3857');
+        const lonLatProj = Projection.getProjectionFromStringOrNumber('EPSG:4326');
+        const wmProj = Projection.getProjectionFromStringOrNumber('EPSG:3857');
         return Projection.transformExtentFromProj([-75, 45, -60, 55], lonLatProj, wmProj);
       },
       (test, result) => {
@@ -200,9 +204,9 @@ export class UtilitiesProjectionTester extends GVAbstractTester {
       'Test Projection.getProjectionFromString() resolves projections...',
       (test) => {
         test.addStep('Getting projections from string codes...');
-        const proj4326 = Projection.getProjectionFromString('EPSG:4326');
-        const proj3857 = Projection.getProjectionFromString('EPSG:3857');
-        const proj3978 = Projection.getProjectionFromString('EPSG:3978');
+        const proj4326 = Projection.getProjectionFromStringOrNumber('EPSG:4326');
+        const proj3857 = Projection.getProjectionFromStringOrNumber('EPSG:3857');
+        const proj3978 = Projection.getProjectionFromStringOrNumber('EPSG:3978');
         return [proj4326.getCode(), proj3857.getCode(), proj3978.getCode()];
       },
       (test, results) => {

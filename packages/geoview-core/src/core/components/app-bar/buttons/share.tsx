@@ -54,7 +54,7 @@ function getShareUrl(
     params.push(`z=${zoom}`);
 
     // Set current center (c) - format: lon,lat (reprojected to EPSG:4326)
-    const lonLat = Projection.transformToLonLat(center, Projection.getProjectionFromString(`EPSG:${projection}`));
+    const lonLat = Projection.transformToLonLat(center, Projection.getProjectionFromStringOrNumber(projection));
     params.push(`c=${lonLat[0].toFixed(6)},${lonLat[1].toFixed(6)}`);
 
     // Get basemap options (b) - format: id:value,s:on/off,l:on/off

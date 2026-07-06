@@ -31,9 +31,9 @@ import {
   useStoreLayerSchemaTag,
   useStoreLayerTimeDimension,
   useStoreLayerUrl,
+  useStoreLayerDataProjectionCode,
 } from '@/core/stores/states/layer-state';
 import { useStoreTimeSliderFilter, useStoreTimeSliderLayer } from '@/core/stores/states/time-slider-state';
-import { useLayerController } from '@/core/controllers/use-controllers';
 import { GeoUtilities } from '@/geo/utils/utilities';
 
 interface LayerInfoPanelProps {
@@ -91,10 +91,7 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
   const layerDisplayDateTimezone = useStoreLayerDisplayDateTimezone(layerPath);
   const layerTimeDimension = useStoreLayerTimeDimension(layerPath);
   const timeSliderDimension = useStoreTimeSliderLayer(layerPath);
-  const layerController = useLayerController();
-
-  // TODO: CHECK - This should probably be a Zustand store hook instead of a controller getter?
-  const layerNativeProjection = layerController.getLayerMetatadaProjectionEPSG(layerPath);
+  const layerDataProjectionCode = useStoreLayerDataProjectionCode(layerPath);
 
   // Derived values
   /** Builds localized layer type labels for the current language. */
@@ -162,7 +159,7 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
         <Box sx={memoSxClasses.infoSectionContent}>
           {isLocalhost() && <Box>{`${t('layers.layerPath')}: ${layerPath}`}</Box>}
           <Box>{`${t('layers.layerType')}${memoLocalizedTypeName}`}</Box>
-          {layerNativeProjection && <Box>{`${t('layers.layerServiceProjection')}${layerNativeProjection}`}</Box>}
+          {layerDataProjectionCode && <Box>{`${t('layers.layerServiceProjection')}: ${layerDataProjectionCode}`}</Box>}
           {memoResources !== '' && (
             <Box className="info-container">
               {`${t('layers.layerResource')}`}
@@ -255,7 +252,7 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
               )}
               {layerTimeDimension?.field && (
                 <ListItem sx={memoSxClasses.layerDetailsListItem}>
-                  <ListItemText primary={`${t('layers.layerTimeDimensionField')}${layerTimeDimension.field}`} />
+                  <ListItemText primary={`${t('layers.layerTimeDimensionField')}: ${layerTimeDimension.field}`} />
                 </ListItem>
               )}
               {layerTimeDimension?.rangeItems?.range?.[0] && (
@@ -293,7 +290,7 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
               )}
               {timeSliderDimension?.field && timeSliderDimension?.field !== layerTimeDimension?.field && (
                 <ListItem sx={memoSxClasses.layerDetailsListItem}>
-                  <ListItemText primary={`${t('layers.layerTimeDimensionField')}${timeSliderDimension.field}`} />
+                  <ListItemText primary={`${t('layers.layerTimeDimensionField')}: ${timeSliderDimension.field}`} />
                 </ListItem>
               )}
               {timeSliderDimension?.range?.[0] && (

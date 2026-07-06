@@ -106,7 +106,6 @@ import {
   type MapMoveEndDelegate,
   type MapMoveEndEvent,
 } from '@/geo/map/map-viewer';
-import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
@@ -740,32 +739,6 @@ export class LayerController extends AbstractMapViewerController {
   getExtentFromFeatures(layerPath: string, objectIds: number[], outfield?: string): Promise<Extent> {
     // Get extent from features calling the GV Layer method
     return this.getGeoviewLayerRegular(layerPath).getExtentFromFeatures(objectIds, this.getMapViewer().getProjection(), outfield);
-  }
-
-  /**
-   * Retrieves the service (metadata) projection code for a specific raster layer.
-   *
-   * Looks up the GeoView layer associated with the provided `layerPath`.
-   * If the layer exists and is an instance of `AbstractGVRaster`, it retrieves the
-   * projection defined in the service metadata via `getMetadataProjection()`.
-   *
-   * @param layerPath - The fully qualified path of the layer
-   * @returns The projection code (e.g., "EPSG:4326") defined in the layer's service metadata,
-   * or `undefined` if the layer does not exist, is not a raster layer, or the metadata projection is not available
-   */
-  getLayerMetatadaProjectionEPSG(layerPath: string): string | undefined {
-    // Get the layer if it exists
-    const geoviewLayer = this.getGeoviewLayerIfExists(layerPath);
-
-    // If of the right type
-    if (geoviewLayer instanceof AbstractGVRaster) {
-      // Get the projection and return its code
-      const projection = geoviewLayer.getMetadataProjection();
-      return projection?.getCode();
-    }
-
-    // Layer not found or not a Raster layer or no metadata projection
-    return undefined;
   }
 
   /**

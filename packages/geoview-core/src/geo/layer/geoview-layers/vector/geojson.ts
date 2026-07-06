@@ -18,8 +18,7 @@ import { GVGeoJSON } from '@/geo/layer/gv-layers/vector/gv-geojson';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { LayerServiceMetadataUnableToFetchError } from '@/core/exceptions/layer-exceptions';
 import { formatError } from '@/core/exceptions/core-exceptions';
-import { Projection } from '@/geo/utils/projection';
-import { GeoUtilities } from '@/geo/utils/utilities';
+import { GeoUtilities, type SourceFeaturesInfo } from '@/geo/utils/utilities';
 import type { DisplayDateMode } from '@/api/types/map-schema-types';
 
 export interface TypeGeoJSONLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
@@ -166,7 +165,7 @@ export class GeoJSON extends AbstractGeoViewVector {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     sourceOptions: SourceOptions<Feature>,
     readOptions: ReadOptions
-  ): Promise<Feature[]> {
+  ): Promise<SourceFeaturesInfo> {
     // Cast it to proper type
     const layerConfigGeoJSON = layerConfig as GeoJSONLayerEntryConfig;
 
@@ -186,19 +185,8 @@ export class GeoJSON extends AbstractGeoViewVector {
       );
     }
 
-    // Read the EPSG from the data
-    const dataEPSG = GeoUtilities.readEPSGOfGeoJSON(responseData);
-
-    // Check if we have it in Projection and try adding it if we're missing it
-    await Projection.addProjectionIfMissing(dataEPSG);
-
-    // Assign the data projection reading options best we can, otherwise use the config, otherwise leave it undefined to let OpenLayers figure it out by itself using the GeoJSON parser later
-    // https://openlayers.org/en/latest/apidoc/module-ol_format_GeoJSON-GeoJSON.html
-    // eslint-disable-next-line no-param-reassign
-    readOptions.dataProjection = dataEPSG || layerConfigGeoJSON.getSource().dataProjection;
-
     // Read the features
-    return GeoUtilities.readFeaturesFromGeoJSON(responseData, readOptions);
+    return GeoUtilities.readFeaturesFromGeoJSON(responseData, readOptions.dataProjection, readOptions.featureProjection);
   }
 
   /**
