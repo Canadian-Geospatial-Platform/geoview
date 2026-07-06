@@ -12,7 +12,6 @@ import { GeoTIFFLayerEntryConfig } from '@/api/config/validation-classes/raster-
 
 import { GVGeoTIFF } from '@/geo/layer/gv-layers/tile/gv-geotiff';
 import { logger } from '@/core/utils/logger';
-import { Projection, type TypeProjection } from '@/geo/utils/projection';
 import { generateId, extractGeotiffColorMap } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
 import type { DisplayDateMode } from '@/api/types/map-schema-types';
@@ -122,6 +121,12 @@ export class GeoTIFF extends AbstractGeoViewRaster {
         // Update the data access path
         layerConfig.setDataAccessPath(metadata.assets[layerConfig.layerId].href);
       }
+
+      // If there's a projection
+      if (metadata.properties['proj:epsg']) {
+        // Set the projection as read from metadata
+        await layerConfig.initProjectionFromMetadata(metadata.properties['proj:epsg']);
+      }
     }
 
     // Extract embedded color map from the GeoTIFF if present
@@ -149,9 +154,6 @@ export class GeoTIFF extends AbstractGeoViewRaster {
 
     // Create the GV Layer with WebGL layer
     const gvLayer = new GVGeoTIFF(source, layerConfig);
-
-    // Setup async initialization monitoring (don't await here)
-    void GeoTIFF.#initializeSourceProjection(source, layerConfig);
 
     // Return the layer immediately
     return gvLayer;
@@ -218,29 +220,6 @@ export class GeoTIFF extends AbstractGeoViewRaster {
     };
 
     return new GeoTIFFSource(sourceOptions);
-  }
-
-  /**
-   * Initializes monitoring for the GeoTIFF source (async)
-   *
-   * @param source - The GeoTIFF source
-   * @param layerConfig - The layer config
-   */
-  static async #initializeSourceProjection(source: GeoTIFFSource, layerConfig: GeoTIFFLayerEntryConfig): Promise<void> {
-    try {
-      const srcView = await source.getView();
-      const { projection } = srcView;
-      const projectionObject: TypeProjection = projection ? { wkid: Projection.readEPSGNumber(projection)! } : { wkid: 4326 };
-
-      // Add projection definition if not already included
-      await Projection.addProjectionIfMissing(projectionObject);
-    } catch (error) {
-      logger.logError('Failed to initialize GeoTIFF source:', {
-        layerId: layerConfig.layerId,
-        error: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
-      });
-    }
   }
 
   /**

@@ -260,7 +260,7 @@ export class GeometryApi {
 
     const featureId = optionalFeatureId || generateId();
 
-    const projectionConv = Projection.getProjectionFromString(`EPSG:${options?.projection || 4326}`);
+    const projectionConv = Projection.getProjectionFromStringOrNumber(options?.projection ?? 4326);
 
     const projectedCoordinates = Projection.transform(coordinate, projectionConv, this.#mapViewer.getProjection());
 

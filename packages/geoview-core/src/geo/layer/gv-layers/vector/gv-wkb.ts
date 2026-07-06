@@ -4,7 +4,6 @@ import type { Projection as OLProjection } from 'ol/proj';
 
 import type { WkbLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wkb-layer-entry-config';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
-import { Projection } from '@/geo/utils/projection';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { logger } from '@/core/utils/logger';
 
@@ -76,17 +75,8 @@ export class GVWKB extends AbstractGVVector {
     // Keep internally
     this.#wkbSource = wkbObject;
 
-    // Read the EPSG
-    const dataEPSG = GeoUtilities.readEPSGOfGeoJSON(wkbObject) || Projection.PROJECTION_NAMES.LONLAT; // default: read the features as LONLAT
-
-    // Check if we have it in Projection and try adding it if we're missing it
-    await Projection.addProjectionIfMissing(dataEPSG);
-
     // Read the features
-    const features = GeoUtilities.readFeaturesFromWKB(wkbObject, {
-      dataProjection: dataEPSG,
-      featureProjection: projection,
-    });
+    const sourceFeatureInfo = await GeoUtilities.readFeaturesFromWKB(wkbObject, this.getDataProjection(), projection);
 
     // Get the OL layer
     const olLayer = this.getOLLayer();
@@ -95,8 +85,8 @@ export class GVWKB extends AbstractGVVector {
     olLayer.getSource()?.clear();
 
     // If has features to add
-    if (features.length) {
-      olLayer.getSource()?.addFeatures(features);
+    if (sourceFeatureInfo.features.length) {
+      olLayer.getSource()?.addFeatures(sourceFeatureInfo.features);
     }
 
     // Refresh

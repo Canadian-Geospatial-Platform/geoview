@@ -1,8 +1,9 @@
 import type { ConfigClassOrType, TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
-import type { TypeSourceImageXYZTilesInitialConfig, TypeXYZTilesConfig } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
 import type { AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { TileLayerEntryConfig } from '@/api/config/validation-classes/tile-layer-entry-config';
+import type { TypeSourceImageXYZTilesInitialConfig, TypeXYZTilesConfig } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
+import type { TypeProjection } from '@/geo/utils/projection';
 
 export interface XYZTilesLayerEntryConfigProps extends AbstractBaseLayerEntryConfigProps {
   /** Source settings to apply to the GeoView layer source at creation time. */
@@ -60,6 +61,15 @@ export class XYZTilesLayerEntryConfig extends TileLayerEntryConfig {
     return super.getSource();
   }
 
+  /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   *
+   * @returns The strongly-typed service metadata specific to this layer entry config.
+   */
+  override getServiceMetadata(): TypeMetadataXYZTiles | undefined {
+    return super.getServiceMetadata() as TypeMetadataXYZTiles | undefined;
+  }
+
   // #endregion OVERRIDES
 
   // #region STATIC METHODS
@@ -83,6 +93,8 @@ export class XYZTilesLayerEntryConfig extends TileLayerEntryConfig {
 export interface TypeMetadataXYZTiles {
   layers: TypeMetadataXYZTilesLayer[];
   listOfLayerEntryConfig: XYZTilesLayerEntryConfigProps[];
+  spatialReference?: TypeProjection;
+  crs?: string; // The CRS url such as http://www.opengis.net/def/crs/OGC/1.3/CRS84
 }
 
 export type TypeMetadataXYZTilesLayer = XYZTilesLayerEntryConfigProps & { id: string };

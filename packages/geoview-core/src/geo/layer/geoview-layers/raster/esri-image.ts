@@ -281,7 +281,7 @@ export class EsriImage extends AbstractGeoViewRaster {
         ...(mosaicRule && { mosaicRule: JSON.stringify(mosaicRule) }),
       },
       crossOrigin: source.crossOrigin ?? 'Anonymous',
-      projection: layerConfig.getProjectionWithEPSG(),
+      projection: layerConfig.getSourceProjectionWithEPSG(),
     };
 
     // Create the source

@@ -172,6 +172,15 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   // #region OVERRIDES
 
   /**
+   * Gets the data projection of the layer source, either coming from the data itself or as indicated from the metadata.
+   *
+   * @returns The OpenLayers projection of the layer's source data, or undefined if not available
+   */
+  getDataProjection(): OLProjection | undefined {
+    return this.getLayerConfig().getMetadataProjection();
+  }
+
+  /**
    * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
    *
    * @returns The OpenLayers generic type.
@@ -573,7 +582,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    *
    * @returns The OpenLayers Layer Source
    */
-  getOLSource(): Source {
+  protected getOLSource(): Source {
     return this.#olSource;
   }
 
