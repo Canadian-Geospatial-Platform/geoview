@@ -89,7 +89,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
    * @returns A promise that resolves once the layer entry configuration has gotten its metadata processed.
    */
-  protected override onProcessLayerMetadata(
+  protected override async onProcessLayerMetadata(
     layerConfig: ImageStaticLayerEntryConfig,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     displayDateMode: DisplayDateMode,
@@ -98,6 +98,11 @@ export class ImageStatic extends AbstractGeoViewRaster {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     abortSignal?: AbortSignal
   ): Promise<ImageStaticLayerEntryConfig> {
+    // If in the source
+    if (layerConfig.getSource().projection) {
+      await layerConfig.initProjectionFromMetadata(layerConfig.getSource().projection);
+    }
+
     // Return as-is
     return Promise.resolve(layerConfig);
   }
@@ -256,7 +261,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
     }
 
     // Get the source projection
-    const sourceProjection = layerConfig.getProjection();
+    const sourceProjection = layerConfig.getSourceProjectionWithEPSG();
 
     if (!sourceProjection) {
       throw new LayerEntryConfigParameterProjectionNotDefinedInSourceError(layerConfig);
@@ -266,7 +271,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
     const sourceOptions: SourceOptions = {
       url: layerConfig.getDataAccessPath(),
       imageExtent: sourceExtent,
-      projection: `EPSG:${sourceProjection}`,
+      projection: sourceProjection,
       crossOrigin: layerConfig.getSource().crossOrigin ?? 'Anonymous',
     };
 

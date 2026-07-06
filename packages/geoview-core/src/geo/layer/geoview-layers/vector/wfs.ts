@@ -34,7 +34,7 @@ import { LayerNoCapabilitiesError, LayerServiceMetadataUnableToFetchError } from
 import { GVWFS } from '@/geo/layer/gv-layers/vector/gv-wfs';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { formatError } from '@/core/exceptions/core-exceptions';
-import { GeoUtilities } from '@/geo/utils/utilities';
+import { GeoUtilities, type SourceFeaturesInfo } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { logger } from '@/core/utils/logger';
 
@@ -252,7 +252,7 @@ export class WFS extends AbstractGeoViewVector {
     layerConfig: VectorLayerEntryConfig,
     sourceOptions: SourceOptions<Feature>,
     readOptions: ReadOptions
-  ): Promise<Feature[]> {
+  ): Promise<SourceFeaturesInfo> {
     // Cast it to proper type
     const layerConfigWFS = layerConfig as OgcWfsLayerEntryConfig;
 
@@ -280,7 +280,7 @@ export class WFS extends AbstractGeoViewVector {
 
     // if an extent is provided, use it in the url
     if (sourceOptions.strategy === bbox && Number.isFinite(readOptions.extent?.[0])) {
-      wfsUrl = `${wfsUrl}&bbox=${readOptions.extent},${Projection.getProjectionFromString(readOptions.featureProjection)?.getCode()}`;
+      wfsUrl = `${wfsUrl}&bbox=${readOptions.extent},${Projection.getProjectionFromStringOrNumber(readOptions.featureProjection)?.getCode()}`;
     }
 
     // If output format is json
@@ -295,29 +295,19 @@ export class WFS extends AbstractGeoViewVector {
 
     // Check if the data is GeoJSON
     if (GeoUtilities.isGeoJSONObject(responseData)) {
-      // Read the EPSG from the data
-      const dataEPSG = GeoUtilities.readEPSGOfGeoJSON(responseData);
-
-      // Check if we have it in Projection and try adding it if we're missing it
-      await Projection.addProjectionIfMissing(dataEPSG);
-
       // Read the features
-      return GeoUtilities.readFeaturesFromGeoJSON(responseData, readOptions);
+      return GeoUtilities.readFeaturesFromGeoJSON(responseData, readOptions.dataProjection, readOptions.featureProjection);
     }
 
     // Here, the output isn't GeoJSON, probably XML/GML
 
-    // Use the features response to determine the EPSG of the data, otherwise use the config otherwise force it to 4326, because OpenLayers struggles to figure it out by itself here
-    const dataEPSG = GeoUtilities.readEPSGOfGML(responseData);
-
-    // Check if we have it in Projection and try adding it if we're missing it
-    await Projection.addProjectionIfMissing(dataEPSG);
-
-    // eslint-disable-next-line no-param-reassign
-    readOptions.dataProjection = dataEPSG || 'EPSG:4326'; // default: 4326
-
     // Read the features
-    return GeoUtilities.readFeaturesFromWFS(responseData, layerConfigWFS.getVersionOrDefault(), readOptions);
+    return GeoUtilities.readFeaturesFromWFS(
+      responseData,
+      layerConfigWFS.getVersionOrDefault(),
+      readOptions.dataProjection,
+      readOptions.featureProjection
+    );
   }
 
   /**

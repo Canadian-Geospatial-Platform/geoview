@@ -17,6 +17,7 @@ import { logger } from '@/core/utils/logger';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { formatError } from '@/core/exceptions/core-exceptions';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
+import type { SourceFeaturesInfo } from '@/geo/utils/utilities';
 
 /**
  * The AbstractGeoViewVector class.
@@ -58,7 +59,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     layerConfig: VectorLayerEntryConfig,
     sourceOptions: SourceOptions<Feature>,
     readOptions: ReadOptions
-  ): Promise<Feature[]>;
+  ): Promise<SourceFeaturesInfo>;
 
   /**
    * Overrides the way the metadata is fetched.
@@ -106,7 +107,11 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
           const options: ReadOptions = { dataProjection: layerConfig.getSource().dataProjection, featureProjection: projection, extent };
 
           // Grab the features to load in the source
-          const features = await this.onCreateVectorSourceLoadFeatures(layerConfig, sourceOptions, options);
+          const sourceFeaturesInfo = await this.onCreateVectorSourceLoadFeatures(layerConfig, sourceOptions, options);
+          const { features, dataProjection } = sourceFeaturesInfo;
+
+          // Keep the read options that were used to interpret the source data
+          vectorSource.setDataProjection(dataProjection);
 
           // Only keep the features that fit the initial filter
           const layerFilters = new LayerFilters(layerConfig.getLayerFilter());

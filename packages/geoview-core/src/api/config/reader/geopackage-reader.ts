@@ -20,7 +20,6 @@ import { WkbLayerEntryConfig } from '@/api/config/validation-classes/vector-vali
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { NotSupportedError } from '@/core/exceptions/core-exceptions';
-import { Projection } from '@/geo/utils/projection';
 import { logger } from '@/core/utils/logger';
 
 interface SldsInterface {
@@ -106,7 +105,7 @@ export class GeoPackageReader {
                   entryType: CONST_LAYER_ENTRY_TYPES.VECTOR,
                   source: {
                     dataAccessPath: url,
-                    dataProjection: matchingLayerData.dataProjection || Projection.PROJECTION_NAMES.LONLAT,
+                    dataProjection: matchingLayerData.dataProjection,
                     featureInfo:
                       AbstractBaseLayerEntryConfig.getClassOrTypeFeatureInfo(layerEntryConfig) ||
                       GeoPackageReader.#processFeatureInfoConfig(matchingLayerData.geoPackageFeatures[0].properties),
@@ -135,7 +134,7 @@ export class GeoPackageReader {
                 entryType: CONST_LAYER_ENTRY_TYPES.VECTOR,
                 source: {
                   dataAccessPath: url,
-                  dataProjection: layerData.dataProjection || Projection.PROJECTION_NAMES.LONLAT,
+                  dataProjection: layerData.dataProjection,
                   featureInfo:
                     AbstractBaseLayerEntryConfig.getClassOrTypeFeatureInfo(layerEntryConfig) ||
                     GeoPackageReader.#processFeatureInfoConfig(layerData.geoPackageFeatures[0].properties),
@@ -172,7 +171,7 @@ export class GeoPackageReader {
             entryType: CONST_LAYER_ENTRY_TYPES.VECTOR,
             source: {
               dataAccessPath: layerConfig.metadataAccessPath,
-              dataProjection: layerData.dataProjection || Projection.PROJECTION_NAMES.LONLAT,
+              dataProjection: layerData.dataProjection,
               featureInfo: GeoPackageReader.#processFeatureInfoConfig(layerData.geoPackageFeatures[0].properties),
               geoPackageFeatures: layerData.geoPackageFeatures,
             },

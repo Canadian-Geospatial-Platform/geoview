@@ -693,18 +693,18 @@ export class MapViewer {
     viewOptions.center = mapViewSettings.initialView?.zoomAndCenter
       ? Projection.transformFromLonLat(
           mapViewSettings.initialView?.zoomAndCenter[1],
-          Projection.getProjectionFromString(viewOptions.projection)
+          Projection.getProjectionFromStringOrNumber(viewOptions.projection)
         )
       : Projection.transformFromLonLat(
           Projection.transformToLonLat(currentView.getCenter()!, currentView.getProjection()),
-          Projection.getProjectionFromString(viewOptions.projection)
+          Projection.getProjectionFromStringOrNumber(viewOptions.projection)
         );
     viewOptions.minZoom = mapViewSettings.minZoom ? mapViewSettings.minZoom : currentView.getMinZoom();
     viewOptions.maxZoom = mapViewSettings.maxZoom ? mapViewSettings.maxZoom : currentView.getMaxZoom();
     viewOptions.rotation = mapViewSettings.rotation ? mapViewSettings.rotation : currentView.getRotation();
 
     if (mapViewSettings.maxExtent) {
-      const projObj = Projection.getProjectionFromString(`EPSG:${mapViewSettings.projection}`);
+      const projObj = Projection.getProjectionFromStringOrNumber(mapViewSettings.projection);
       viewOptions.extent = MapViewer.#computeViewExtent(Number(mapViewSettings.projection), mapViewSettings.maxExtent, projObj);
     }
 
@@ -1106,7 +1106,7 @@ export class MapViewer {
    * Shows a marker on the map.
    *
    * @param marker - The marker to add
-   * @returns The projected coordinates of the marker
+   * @returns The projected coordinates of the marker, in the same projection of the map
    */
   clickMarkerIconShow(marker: TypeClickMarker): number[] {
     // Project coords
@@ -2949,9 +2949,7 @@ export type MapMoveEndDelegate = EventDelegateBase<MapViewer, MapMoveEndEvent, v
 /**
  * Event for the map pointer move delegate.
  */
-// TODO: REFACTOR - These should be changed to interface and extend from MapBaseEvent, bit of confusion with reuse of the type
-// TO.DOCONT: export interface MapPointerMoveEvent extends MapBaseEvent
-export type MapPointerMoveEvent = TypeMapMouseInfo;
+export interface MapPointerMoveEvent extends MapBaseEvent, TypeMapMouseInfo {}
 
 /**
  * Delegate for the map pointer move event handler function signature.
@@ -2971,9 +2969,7 @@ export type MapMouseLeaveDelegate = EventDelegateBase<MapViewer, MapBaseEvent, v
 /**
  * Event for the map single click delegate.
  */
-// TODO: REFACTOR - These should be changed to interface and extend from MapBaseEvent, bit of confusion with reuse of the type
-// TO.DOCONT: export interface MapSingleClickEvent extends MapBaseEvent
-export type MapSingleClickEvent = TypeMapMouseInfo;
+export interface MapSingleClickEvent extends MapBaseEvent, TypeMapMouseInfo {}
 
 /**
  * Delegate for the map single click event handler function signature.

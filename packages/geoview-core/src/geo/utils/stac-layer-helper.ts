@@ -65,7 +65,7 @@ export abstract class StacLayerHelper {
       if (sourceView.projection) {
         const epsgCode = Projection.readEPSGNumber(sourceView.projection);
         if (epsgCode) {
-          await Projection.addProjectionIfMissing({ wkid: epsgCode });
+          await Projection.addProjectionIfMissing(epsgCode);
         }
       }
 
@@ -166,7 +166,7 @@ export abstract class StacLayerHelper {
    * @returns The transformed extent in the map's projection
    */
   static transformBboxToMapProjection(mapId: string, bbox: [number, number, number, number]): [number, number, number, number] {
-    const destProj = Projection.getProjectionFromString(getStoreMapCurrentProjectionEPSG(mapId));
+    const destProj = Projection.getProjectionFromStringOrNumber(getStoreMapCurrentProjectionEPSG(mapId));
     const srcProj = Projection.getProjectionLonLat();
     const coords = Projection.transformAndDensifyExtent(bbox, srcProj, destProj);
     let minX = Infinity;
@@ -191,7 +191,7 @@ export abstract class StacLayerHelper {
   static getMapExtentAsWgs84Bbox(mapId: string): [number, number, number, number] {
     const extent = getStoreMapExtent(mapId);
     if (!extent) return [-180, -90, 180, 90];
-    const srcProj = Projection.getProjectionFromString(getStoreMapCurrentProjectionEPSG(mapId));
+    const srcProj = Projection.getProjectionFromStringOrNumber(getStoreMapCurrentProjectionEPSG(mapId));
     const destProj = Projection.getProjectionLonLat();
     const bbox4326 = Projection.transformExtentFromProj(extent, srcProj, destProj) as [number, number, number, number];
     return [Math.max(bbox4326[0], -180), Math.max(bbox4326[1], -90), Math.min(bbox4326[2], 180), Math.min(bbox4326[3], 90)];

@@ -529,6 +529,7 @@ export class LayerSetController extends AbstractMapViewerController {
       legendLayerEntry.displayDateFormat = layerConfigCasted.getDisplayDateFormat();
       legendLayerEntry.displayDateFormatShort = layerConfigCasted.getDisplayDateFormatShort();
       legendLayerEntry.displayDateTimezone = layerConfigCasted.getDisplayDateTimezone();
+      legendLayerEntry.dataProjectionCode = layer?.getDataProjection()?.getCode();
 
       // If the layer is vector
       if (layer instanceof AbstractGVVector) {

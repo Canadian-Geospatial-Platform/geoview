@@ -29,7 +29,7 @@ export abstract class AbstractGVVectorTile extends AbstractGVLayer {
    *
    * @returns The VectorTile source instance associated with this layer.
    */
-  override getOLSource(): VectorTile {
+  protected override getOLSource(): VectorTile {
     // Get source from OL
     return super.getOLSource() as VectorTile;
   }
@@ -55,11 +55,14 @@ export abstract class AbstractGVVectorTile extends AbstractGVLayer {
     // Wait for the source to be ready, just in case the caller is early
     await this.waitForSourceReady();
 
+    // Get the OpenLayers source (not the configured source property)
+    const source = this.getOLSource();
+
     // Get the source projection
-    const sourceProjection = this.getOLSource().getProjection();
+    const sourceProjection = source.getProjection() ?? undefined;
 
     // Get the layer bounds
-    let sourceExtent = this.getOLSource().getTileGrid()?.getExtent();
+    let sourceExtent = source.getTileGrid()?.getExtent();
 
     // If both found
     if (sourceExtent && sourceProjection) {

@@ -2,6 +2,7 @@
 import { WKB, WKT, GeoJSON, EsriJSON, KML, WFS } from 'ol/format';
 import type { ReadOptions } from 'ol/format/Feature';
 import type Geometry from 'ol/geom/Geometry';
+import type { ProjectionLike } from 'ol/proj';
 import { Style, Stroke, Fill, Circle } from 'ol/style';
 import type { Color } from 'ol/color';
 import { getArea as getAreaOL, getLength as getLengthOL } from 'ol/sphere';
@@ -58,6 +59,7 @@ interface EsriFeatureCollection {
 interface EsriJSONReadResult {
   features: Feature<Geometry>[];
   hadInvalidGeometries: boolean;
+  dataProjection?: ProjectionLike;
 }
 
 // #region FETCH METADATA
@@ -922,7 +924,7 @@ export abstract class GeoUtilities {
 
   // #endregion LEGEND
 
-  // #region GEOMETRY
+  // #region GEOMETRY PUBLIC
 
   /**
    * Returns the WKT representation of a given geometry.
@@ -1038,6 +1040,264 @@ export abstract class GeoUtilities {
   }
 
   /**
+   * Reads OpenLayers features from an Esri features object.
+   *
+   * If `inProjection` is provided, it is registered via `addProjectionIfMissing` and used as the data projection.
+   * Otherwise, the projection is detected from the `spatialReference` embedded in the Esri JSON response.
+   * When parsing fails due to invalid geometries, the method attempts to clean them and retries.
+   *
+   * @param features - The Esri JSON features data to read
+   * @param inProjection - Optional input data projection (falls back to spatialReference embedded in the Esri JSON)
+   * @param outProjection - Optional output feature projection
+   * @returns A promise that resolves with the parsed features, the interpreted source data projection, and whether there were any invalid geometries
+   * @throws {Error} When the EsriJSON data is invalid and cannot be parsed, even after attempting to clean invalid geometries
+   */
+  static async readFeaturesFromEsriJSON(
+    features: unknown,
+    inProjection?: ProjectionLike,
+    outProjection?: ProjectionLike
+  ): Promise<EsriJSONReadResult> {
+    const format = new EsriJSON();
+
+    // Resolve the data projection: register inProjection first so getProjectionFromString can find it,
+    // or fall back to format-detected projection when no inProjection is available
+    let dataProjection: ProjectionLike;
+    if (inProjection) {
+      dataProjection = await Projection.addProjectionIfMissing(inProjection);
+    } else {
+      // Format can only resolve projections OL already knows about (e.g., EPSG:4326)
+      dataProjection = format.readProjection(features);
+    }
+
+    // GV Anything other than numbers in the geometry will throw errors in EsriJSON().readFeatures()
+    try {
+      // First try to process features right away and only clean the geometries if it fails.
+      // If the data was cleaned, a flag is raised so that a message can be emitted to the user.
+      return {
+        features: format.readFeatures(features, { dataProjection, featureProjection: outProjection }),
+        dataProjection,
+        hadInvalidGeometries: false,
+      };
+    } catch (error) {
+      if (features && typeof features === 'object' && 'features' in features) {
+        try {
+          const cleanedFeatures = this.#cleanEsriGeometries(features);
+
+          return {
+            features: format.readFeatures(cleanedFeatures, { dataProjection, featureProjection: outProjection }),
+            dataProjection,
+            hadInvalidGeometries: true,
+          };
+        } catch (secondError) {
+          throw new Error(`Invalid geometries found in EsriJSON data that could not be cleaned: ${secondError}`);
+        }
+      }
+
+      throw new Error(`Failed to parse EsriJSON data: ${error}`);
+    }
+  }
+
+  /**
+   * Reads OpenLayers features from a GeoJSON object.
+   *
+   * The projection is resolved in priority order: CRS embedded in the GeoJSON > `inProjection` > format default.
+   * When resolved, the projection is registered via `addProjectionIfMissing` before reading features.
+   *
+   * @param geojson - The GeoJSON data to read
+   * @param inProjection - Optional input data projection (overridden by CRS embedded in the GeoJSON)
+   * @param outProjection - Optional output feature projection
+   * @returns A promise that resolves with the parsed features and the interpreted source data projection
+   */
+  static async readFeaturesFromGeoJSON(
+    geojson: unknown,
+    inProjection?: ProjectionLike,
+    outProjection?: ProjectionLike
+  ): Promise<SourceFeaturesInfo> {
+    const format = new GeoJSON();
+
+    // Read the EPSG from the GeoJson content — overrides caller-provided projection if present
+    const interpretedProjection = GeoUtilities.readEPSGOfGeoJSON(geojson);
+
+    // If the projection was interpreted from the data, use that
+    // eslint-disable-next-line no-param-reassign
+    if (interpretedProjection) inProjection = interpretedProjection;
+
+    // Resolve the data projection: register inProjection first so getProjectionFromString can find it,
+    // or fall back to format-detected projection when no inProjection is available
+    let dataProjection: ProjectionLike;
+    if (inProjection) {
+      dataProjection = await Projection.addProjectionIfMissing(inProjection);
+    } else {
+      // Format can only resolve projections OL already knows about (e.g., EPSG:4326)
+      dataProjection = format.readProjection(geojson);
+    }
+
+    // Read the features
+    const features = format.readFeatures(geojson, { dataProjection, featureProjection: outProjection });
+
+    // Return the features and the interpreted source projection
+    return { features, dataProjection };
+  }
+
+  /**
+   * Reads OpenLayers features from a WFS features object.
+   *
+   * The projection is resolved in priority order: srsName embedded in the GML > `inProjection` > format default.
+   * When resolved, the projection is registered via `addProjectionIfMissing` before reading features.
+   *
+   * @param wfs - The WFS data to read (XML string or document)
+   * @param version - The WFS version
+   * @param inProjection - Optional input data projection (overridden by srsName embedded in the GML)
+   * @param outProjection - Optional output feature projection
+   * @returns A promise that resolves with the parsed features and the interpreted source data projection
+   */
+  static async readFeaturesFromWFS(
+    wfs: unknown,
+    version: string,
+    inProjection?: ProjectionLike,
+    outProjection?: ProjectionLike
+  ): Promise<SourceFeaturesInfo> {
+    const format = new WFS({ version });
+
+    // Read the EPSG from the GML content
+    const interpretedProjection = GeoUtilities.readEPSGOfGML(wfs);
+
+    // If the projection was interpreted from the data, use that
+    // eslint-disable-next-line no-param-reassign
+    if (interpretedProjection) inProjection = interpretedProjection;
+
+    // Resolve the data projection: register inProjection first so getProjectionFromString can find it,
+    // or fall back to format-detected projection when no inProjection is available
+    let dataProjection: ProjectionLike;
+    if (inProjection) {
+      dataProjection = await Projection.addProjectionIfMissing(inProjection);
+    } else {
+      // Format can only resolve projections OL already knows about (e.g., EPSG:4326)
+      dataProjection = format.readProjection(wfs);
+    }
+
+    // Read the features
+    const features = format.readFeatures(wfs, { dataProjection, featureProjection: outProjection });
+
+    // Return the features and the interpreted source projection
+    return { features, dataProjection };
+  }
+
+  /**
+   * Reads OpenLayers features from a WKB object.
+   *
+   * WKB does not embed projection metadata, so `inProjection` defaults to EPSG:4326 when not provided.
+   * The resolved projection is registered via `addProjectionIfMissing` before reading features.
+   *
+   * @param wkbObject - The WKB data to read (string, ArrayBuffer, or ArrayBufferView)
+   * @param inProjection - Optional input data projection (defaults to EPSG:4326 if not provided)
+   * @param outProjection - Optional output feature projection
+   * @returns A promise that resolves with the parsed features and the interpreted source data projection
+   */
+  static async readFeaturesFromWKB(
+    wkbObject: string | ArrayBuffer | ArrayBufferView<ArrayBufferLike>,
+    inProjection?: ProjectionLike,
+    outProjection?: ProjectionLike
+  ): Promise<SourceFeaturesInfo> {
+    const format = new WKB();
+
+    // If no projection was found, default to EPSG:4326 (lon/lat) to help OpenLayers read the features, it struggles for WKB here otherwise
+    // eslint-disable-next-line no-param-reassign
+    inProjection ??= Projection.PROJECTION_NAMES.LONLAT;
+
+    // Resolve the data projection: register inProjection first so getProjectionFromString can find it
+    // WKB always has inProjection set (defaulted above), so the else branch is effectively unreachable
+    let dataProjection: ProjectionLike;
+    if (inProjection) {
+      dataProjection = await Projection.addProjectionIfMissing(inProjection);
+    } else {
+      dataProjection = format.readProjection(wkbObject);
+    }
+
+    // Read the features
+    const features = format.readFeatures(wkbObject, { dataProjection, featureProjection: outProjection });
+
+    // Return the features and the interpreted source projection
+    return { features, dataProjection };
+  }
+
+  /**
+   * Reads OpenLayers features from a KML object.
+   *
+   * The projection is resolved in priority order: srsName embedded in the KML > `inProjection` > format default.
+   * When resolved, the projection is registered via `addProjectionIfMissing` before reading features.
+   *
+   * @param kmlObject - The KML data to read
+   * @param inProjection - Optional input data projection (overridden by srsName embedded in the KML)
+   * @param outProjection - Optional output feature projection
+   * @returns A promise that resolves with the parsed features and the interpreted source data projection
+   */
+  static async readFeaturesFromKML(
+    kmlObject: unknown,
+    inProjection?: ProjectionLike,
+    outProjection?: ProjectionLike
+  ): Promise<SourceFeaturesInfo> {
+    const format = new KML();
+
+    // Read the EPSG from the GML content
+    const interpretedProjection = GeoUtilities.readEPSGOfGML(kmlObject);
+
+    // If the projection was interpreted from the data, use that
+    // eslint-disable-next-line no-param-reassign
+    if (interpretedProjection) inProjection = interpretedProjection;
+
+    // Resolve the data projection: register inProjection first so getProjectionFromString can find it,
+    // or fall back to format-detected projection when no inProjection is available
+    let dataProjection: ProjectionLike;
+    if (inProjection) {
+      dataProjection = await Projection.addProjectionIfMissing(inProjection);
+    } else {
+      // Format can only resolve projections OL already knows about (e.g., EPSG:4326)
+      dataProjection = format.readProjection(kmlObject);
+    }
+
+    // Read the features
+    const features = format.readFeatures(kmlObject, { dataProjection, featureProjection: outProjection });
+
+    // Return the features and the interpreted source projection
+    return { features, dataProjection };
+  }
+
+  /**
+   * Default drawing style for GeoView.
+   *
+   * @param strokeColor - Optional stroke color
+   * @param strokeWidth - Optional stroke width
+   * @param fillColor - Optional fill color
+   * @returns An Open Layers styling for drawing on a map
+   */
+  static getDefaultDrawingStyle(strokeColor?: Color | string, strokeWidth?: number, fillColor?: Color | string): Style {
+    return new Style({
+      stroke: new Stroke({
+        color: strokeColor || 'orange',
+        width: strokeWidth || 2,
+      }),
+      fill: new Fill({
+        color: fillColor || 'transparent',
+      }),
+      image: new Circle({
+        radius: 4,
+        fill: new Fill({
+          color: fillColor || 'orange',
+        }),
+        stroke: new Stroke({
+          color: strokeColor || 'orange',
+          width: strokeWidth || 2,
+        }),
+      }),
+    });
+  }
+
+  // #endregion GEOMETRY PUBLIC
+
+  // #region GEOMETRY PRIVATE
+
+  /**
    * Extracts an EPSG code from a SRS/CRS standard string.
    *
    * Supports common formats used in GeoJSON/WFS/GML.
@@ -1057,40 +1317,6 @@ export abstract class GeoUtilities {
     if (match) return `EPSG:${match[1]}`;
 
     return undefined;
-  }
-
-  /**
-   * Reads OpenLayers features from an Esri features object.
-   *
-   * @param features - The Features data to read
-   * @param options - Optional read options such as projection or extent
-   * @returns An array of parsed OpenLayers Feature and whether there were any invalid geometries
-   * @throws {Error} When the EsriJSON data is invalid and cannot be parsed, even after attempting to clean invalid geometries
-   */
-  static readFeaturesFromEsriJSON(features: unknown, options: ReadOptions | undefined): EsriJSONReadResult {
-    // GV Anything other than numbers in the geometry will throw errors in EsriJSON().readFeatures()
-    try {
-      // First try to process features right away and only clean the geometries if it fails
-      // If the data was cleaned, a flag is raised so that a message can be emitted to the user
-      return {
-        features: new EsriJSON().readFeatures(features, options),
-        hadInvalidGeometries: false,
-      };
-    } catch (error) {
-      if (features && typeof features === 'object' && 'features' in features) {
-        try {
-          const cleanedFeatures = this.#cleanEsriGeometries(features);
-          return {
-            features: new EsriJSON().readFeatures(cleanedFeatures, options),
-            hadInvalidGeometries: true,
-          };
-        } catch (secondError) {
-          throw new Error(`Invalid geometries found in EsriJSON data that could not be cleaned: ${secondError}`);
-        }
-      }
-
-      throw new Error(`Failed to parse EsriJSON data: ${error}`);
-    }
   }
 
   /**
@@ -1149,89 +1375,9 @@ export abstract class GeoUtilities {
     return cleanedFeatures;
   }
 
-  /**
-   * Reads OpenLayers features from a GeoJSON object.
-   *
-   * @param geojson - The GeoJSON data to read
-   * @param options - Optional read options such as projection or extent
-   * @returns An array of parsed OpenLayers Feature instances
-   */
-  static readFeaturesFromGeoJSON(geojson: unknown, options: ReadOptions | undefined): Feature<Geometry>[] {
-    // Read the features
-    return new GeoJSON().readFeatures(geojson, options);
-  }
+  // #endregion GEOMETRY PRIVATE
 
-  /**
-   * Reads OpenLayers features from an WFS features object.
-   *
-   * @param features - The Features data to read
-   * @param version - The WFS version
-   * @param options - Optional read options such as projection or extent
-   * @returns An array of parsed OpenLayers Feature instances
-   */
-  static readFeaturesFromWFS(features: unknown, version: string, options: ReadOptions | undefined): Feature<Geometry>[] {
-    // Read the features
-    return new WFS({
-      version,
-    }).readFeatures(features, options);
-  }
-
-  /**
-   * Reads OpenLayers features from a WKBObject object.
-   *
-   * @param wkbObject - The WKBObject data to read
-   * @param options - Optional read options such as projection or extent
-   * @returns An array of parsed OpenLayers Feature instances
-   */
-  static readFeaturesFromWKB(
-    wkbObject: string | ArrayBuffer | ArrayBufferView<ArrayBufferLike>,
-    options: ReadOptions | undefined
-  ): Feature<Geometry>[] {
-    return new WKB().readFeatures(wkbObject, options);
-  }
-
-  /**
-   * Reads OpenLayers features from a KML object.
-   *
-   * @param kmlObject - The KML data to read
-   * @param options - Optional read options such as projection or extent
-   * @returns An array of parsed OpenLayers Feature instances
-   */
-  static readFeaturesFromKML(kmlObject: unknown, options: ReadOptions | undefined): Feature<Geometry>[] {
-    return new KML().readFeatures(kmlObject, options);
-  }
-
-  /**
-   * Default drawing style for GeoView.
-   *
-   * @param strokeColor - Optional stroke color
-   * @param strokeWidth - Optional stroke width
-   * @param fillColor - Optional fill color
-   * @returns An Open Layers styling for drawing on a map
-   */
-  static getDefaultDrawingStyle(strokeColor?: Color | string, strokeWidth?: number, fillColor?: Color | string): Style {
-    return new Style({
-      stroke: new Stroke({
-        color: strokeColor || 'orange',
-        width: strokeWidth || 2,
-      }),
-      fill: new Fill({
-        color: fillColor || 'transparent',
-      }),
-      image: new Circle({
-        radius: 4,
-        fill: new Fill({
-          color: fillColor || 'orange',
-        }),
-        stroke: new Stroke({
-          color: strokeColor || 'orange',
-          width: strokeWidth || 2,
-        }),
-      }),
-    });
-  }
-
-  // #endregion GEOMETRY
+  // #region VARIA
 
   /**
    * Create empty basemap tilelayer to use as initial basemap while we load basemap
@@ -1285,7 +1431,10 @@ export abstract class GeoUtilities {
     return this.getDefaultDrawingStyle(style?.strokeColor, style?.strokeWidth, style?.fillColor);
   }
 
+  // #endregion VARIA
+
   // #region EXTENT
+
   /**
    * Check if a point is contained in an extent.
    *
@@ -1534,7 +1683,7 @@ export abstract class GeoUtilities {
    *
    * @param mapEvent - The map event
    * @param projCode - The map projection code
-   * @returns An object representing pointer position information
+   * @returns An object representing pointer position information in EPSG:4326
    */
   static getPointerPositionFromMapEvent(mapEvent: MapBrowserEvent, projCode: string): TypeMapMouseInfo {
     // Return an object representing pointer position information
@@ -1706,3 +1855,11 @@ export type CallbackNewMetadataDelegate = (proxiedUrl: string, proxyUsed: string
 export interface TypeVectorLegend extends TypeLegend {
   legend: TypeVectorLayerStyles;
 }
+
+/** Represents the result of reading features from a source, including the parsed features and their original projection. */
+export type SourceFeaturesInfo = {
+  /** The array of parsed OpenLayers features. */
+  features: Feature<Geometry>[];
+  /** The projection the source data was in, or undefined if it could not be determined. */
+  dataProjection: ProjectionLike;
+};

@@ -49,7 +49,7 @@ export class GVXYZTiles extends AbstractGVTile {
    *
    * @returns The XYZ source instance associated with this layer.
    */
-  override getOLSource(): XYZ {
+  protected override getOLSource(): XYZ {
     // Get source from OL
     return super.getOLSource() as XYZ;
   }
@@ -75,14 +75,14 @@ export class GVXYZTiles extends AbstractGVTile {
     // Wait for the source to be ready, just in case the caller is early
     await this.waitForSourceReady();
 
-    // Get the layer
-    const layer = this.getOLLayer() as TileLayer<XYZ> | undefined;
+    // Get the OpenLayers source (not the configured source property)
+    const source = this.getOLSource();
 
     // Get the source projection
-    const sourceProjection = this.getOLSource().getProjection();
+    const sourceProjection = source.getProjection() ?? undefined;
 
     // Get the layer bounds
-    let sourceExtent = layer?.getSource()?.getTileGrid()?.getExtent();
+    let sourceExtent = source.getTileGrid()?.getExtent();
 
     // If both found
     if (sourceExtent && sourceProjection) {

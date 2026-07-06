@@ -56,6 +56,9 @@ export abstract class Projection {
   /** List of supported projections and their OpenLayers projection */
   static PROJECTIONS: Record<string, OLProjection> = {};
 
+  /** In-flight projection addition promises to prevent duplicate fetches for the same code. */
+  static #pendingAdditions: Map<string, Promise<OLProjection>> = new Map();
+
   /**
    * Transforms an extent from source projection to destination projection.
    *
@@ -122,7 +125,7 @@ export abstract class Projection {
    */
   static transformExtentFromWKID(extent: Extent, wkid: number, destination: OLProjection, stops?: number | undefined): Extent {
     // The projection
-    const proj = Projection.getProjectionFromString(`EPSG:${wkid}`);
+    const proj = Projection.getProjectionFromStringOrNumber(wkid);
 
     // Redirect
     return Projection.transformExtentFromProj(extent, proj, destination, stops);
@@ -256,7 +259,7 @@ export abstract class Projection {
       register(proj4);
     }
 
-    const utmProjection = Projection.getProjectionFromString(utmEpsgCode);
+    const utmProjection = Projection.getProjectionFromStringOrNumber(utmEpsgCode);
     return Projection.transform(coordinate, Projection.PROJECTIONS['4326'], utmProjection);
   }
 
@@ -266,12 +269,18 @@ export abstract class Projection {
    * @param projection - Object containing wkid and possibly latestWkid from service metadata
    * @returns A promise that resolves when the projection is added
    */
-  static async addProjection(projection: TypeProjection): Promise<void> {
-    // Add latestWkid if provided
-    if (projection.latestWkid && projection.latestWkid !== projection.wkid) await this.addProjection({ wkid: projection.latestWkid });
+  static async addProjection(projection: TypeProjection): Promise<OLProjection> {
+    // Resolve the effective code: favor latestWkid, fall back to wkid
+    const effectiveCode = projection.latestWkid ?? projection.wkid;
+    if (!effectiveCode) throw new InvalidProjectionError(`TypeProjection has no wkid or latestWkid: ${JSON.stringify(projection)}`);
+
+    // Also register wkid if latestWkid differs
+    if (projection.latestWkid && projection.wkid && projection.latestWkid !== projection.wkid) {
+      await this.addProjectionCode(projection.wkid);
+    }
 
     // Redirect
-    return this.addProjectionCode(projection.wkid);
+    return this.addProjectionCode(effectiveCode);
   }
 
   /**
@@ -280,7 +289,7 @@ export abstract class Projection {
    * @param code - Projection code number
    * @returns A promise that resolves when the projection is added
    */
-  static async addProjectionCode(code: number): Promise<void> {
+  static async addProjectionCode(code: number): Promise<OLProjection> {
     // The projection name
     const projectionName = `EPSG:${code}`;
 
@@ -294,67 +303,102 @@ export abstract class Projection {
     proj4.defs(projectionName, definition);
     register(proj4);
 
+    // Created a projection based a EPSG code
+    logger.logInfo(`Projection ${projectionName} added on-the-fly.`);
+
     // Register in supported projections
     this.PROJECTION_NAMES = { ...this.PROJECTION_NAMES, [code]: projectionName };
-    this.PROJECTIONS[code] = Projection.getProjectionFromString(projectionName);
+    this.PROJECTIONS[code] = Projection.getProjectionFromStringOrNumber(projectionName);
+    return this.PROJECTIONS[code];
   }
 
   /**
-   * Checks if a projection exists for GeoView and if not it adds it on-the-fly using the provided projection string information.
+   * Checks if a projection exists for GeoView and if not it adds it on-the-fly by fetching its definition from epsg.io.
    *
-   * @param projection - The projection string to check if existing and to add when not existing
-   * @returns A promise that resolves when the projection is added if missing
+   * Accepts:
+   * - A `TypeProjection` object (with `wkid` / `latestWkid` / `wkt`)
+   * - A `ProjectionLike` string (e.g., `"EPSG:4326"`, CRS URI/URN, or an OLProjection instance)
+   * - A numeric EPSG code (e.g., `4326`)
+   *
+   * @param projection - The projection identifier to check and register if missing
+   * @returns A promise that resolves with the OLProjection
    */
-  static addProjectionIfMissing(projection: TypeProjection | ProjectionLike | undefined): Promise<void> {
-    // Add projection definition if not already included
-    if (projection) {
-      // If TypeProjection object
-      if (typeof projection === 'object' && 'wkid' in projection) {
-        // Redirect
-        return this.#addProjectionIfMissingUsingObj(projection);
-      }
-
+  static addProjectionIfMissing(projection: TypeProjection | ProjectionLike | number): Promise<OLProjection> {
+    // If TypeProjection object
+    if (typeof projection === 'object') {
       // Redirect
-      return this.#addProjectionIfMissingUsingString(projection);
+      return this.#addProjectionIfMissingUsingObj(projection as TypeProjection);
     }
 
-    // Nothing to do
-    return Promise.resolve();
+    // Redirect
+    return this.#addProjectionIfMissingUsingStringOrNumber(projection);
   }
 
   /**
-   * Checks if a projection exists for GeoView and if not it adds it on-the-fly using the provided TypeProjection information.
+   * Checks if a projection exists for GeoView and if not it adds it on-the-fly using the provided TypeProjection object.
    *
-   * @param projection - The projection to check if existing and to add when not existing
-   * @returns A promise that resolves when the projection is added if missing
+   * Attempts resolution via `getProjectionFromObj` (checking `latestWkid`, `wkid`, then `wkt`).
+   * If not found, fetches the definition from epsg.io via `addProjection`.
+   *
+   * @param projection - A TypeProjection object with wkid (and optionally latestWkid/wkt)
+   * @returns A promise that resolves with the OLProjection
    */
-  static async #addProjectionIfMissingUsingObj(projection: TypeProjection): Promise<void> {
+  static #addProjectionIfMissingUsingObj(projection: TypeProjection): Promise<OLProjection> {
     try {
       const projectionObj = Projection.getProjectionFromObj(projection);
-      if (projectionObj) return; // Already available
+      if (projectionObj) return Promise.resolve(projectionObj); // Already available
     } catch (error: unknown) {
       logger.logWarning(`Unsupported projection, attempting to add projection ${JSON.stringify(projection)} now.`, error);
     }
-    // If we got here, the projection wasn't found or threw an error, so add it
-    await Projection.addProjection(projection);
+
+    // Derive a stable key for deduplication (favor latestWkid, fall back to wkid)
+    const key = `EPSG:${projection.latestWkid ?? projection.wkid}`;
+
+    // If another call is already fetching this projection, wait for it
+    const pending = this.#pendingAdditions.get(key);
+    if (pending) return pending;
+
+    // Start the addition and cache the promise
+    const additionPromise = Projection.addProjection(projection).then((addedProjection) => {
+      this.#pendingAdditions.delete(key);
+      return addedProjection;
+    });
+    this.#pendingAdditions.set(key, additionPromise);
+    return additionPromise;
   }
 
   /**
-   * Checks if a projection exists for GeoView and if not it adds it on-the-fly using the provided projection string information.
+   * Checks if a projection exists for GeoView and if not it adds it on-the-fly using a string or numeric identifier.
    *
-   * @param projection - The projection string to check if existing and to add when not existing
-   * @returns A promise that resolves when the projection is added if missing
+   * Attempts resolution via `getProjectionFromStringOrNumber` (supports EPSG strings, numbers, CRS URIs/URNs).
+   * If not found, extracts the EPSG code via `readEPSGNumber` and fetches the definition from epsg.io.
+   *
+   * @param projection - A ProjectionLike string, OLProjection instance, or numeric EPSG code
+   * @returns A promise that resolves with the OLProjection
    */
-  static async #addProjectionIfMissingUsingString(projection: ProjectionLike): Promise<void> {
+  static #addProjectionIfMissingUsingStringOrNumber(projection: ProjectionLike | number): Promise<OLProjection> {
     try {
-      const projectionObj = Projection.getProjectionFromString(projection);
-      if (projectionObj) return; // Already available
+      const projectionObj = Projection.getProjectionFromStringOrNumber(projection);
+      if (projectionObj) return Promise.resolve(projectionObj); // Already available
     } catch (error: unknown) {
       logger.logWarning(`Unsupported projection, attempting to add projection ${projection} now.`, error);
     }
-    // Read the number and add the projection if we can read it
-    const epsgCode = this.readEPSGNumber(projection);
-    if (epsgCode) await Projection.addProjectionCode(epsgCode);
+
+    // Derive a stable key for deduplication
+    const epsgCode = this.readEPSGNumber(projection)!;
+    const key = `EPSG:${epsgCode}`;
+
+    // If another call is already fetching this projection, wait for it
+    const pending = this.#pendingAdditions.get(key);
+    if (pending) return pending;
+
+    // Start the addition and cache the promise
+    const additionPromise = Projection.addProjectionCode(epsgCode).then((addedProjection) => {
+      this.#pendingAdditions.delete(key);
+      return addedProjection;
+    });
+    this.#pendingAdditions.set(key, additionPromise);
+    return additionPromise;
   }
 
   /**
@@ -364,19 +408,19 @@ export abstract class Projection {
    * @returns Projection object, or undefined if not in list
    */
   static getProjectionFromObj(projectionObj: TypeProjection | undefined): OLProjection | undefined {
-    // If wkid
-    if (projectionObj) {
-      if (projectionObj.latestWkid) {
-        return Projection.getProjectionFromString(`EPSG:${projectionObj.latestWkid}`);
-      }
-      if (projectionObj.wkid) {
-        // Redirect
-        return Projection.getProjectionFromString(`EPSG:${projectionObj.wkid}`);
-      }
+    // If latestWkid, favor that
+    if (projectionObj?.latestWkid) {
+      return Projection.getProjectionFromStringOrNumber(projectionObj.latestWkid);
     }
 
-    // If wkt
-    if (projectionObj && projectionObj.wkt) {
+    // If wkid, favor that
+    if (projectionObj?.wkid) {
+      // Redirect
+      return Projection.getProjectionFromStringOrNumber(projectionObj.wkid);
+    }
+
+    // If wkt use that
+    if (projectionObj?.wkt) {
       // Redirect
       return Projection.getProjectionFromWKT(projectionObj.wkt);
     }
@@ -395,7 +439,7 @@ export abstract class Projection {
     // If the custom WKT doesn't exist
     if (!this.CUSTOM_WKT_AND_NUM[customWKT]) {
       // Register a new custom projection using the WKT
-      const WKT_KEY = `CUSTOM:${this.CUSTOM_WKT_NUM}`;
+      const WKT_KEY = `CUSTOM:${this.readProjectionNameFromWKT(customWKT)}:${this.CUSTOM_WKT_NUM}`;
       // Increment for the next one
       this.CUSTOM_WKT_NUM++;
 
@@ -405,23 +449,66 @@ export abstract class Projection {
 
       // Add it for the next time this WKT is used
       this.CUSTOM_WKT_AND_NUM[customWKT] = WKT_KEY;
+
+      // Created a custom projection based on WKT
+      logger.logInfo(`Projection based on WKT ${customWKT} added on-the-fly.`);
     }
 
     // Get the key
     const wktKey = this.CUSTOM_WKT_AND_NUM[customWKT];
 
     // Get the projection
-    return Projection.getProjectionFromString(wktKey);
+    return Projection.getProjectionFromStringOrNumber(wktKey);
   }
 
   /**
-   * Wrapper around OpenLayers get function that fetches a Projection object for the code specified.
+   * Extracts the projection name from a WKT string.
    *
-   * @param projection - A code string which is a combination of authority and identifier such as "EPSG:4326"
-   * @returns Projection object, or undefined if not found
+   * Parses the first quoted string after the opening keyword (e.g., `PROJCS["NAD83 / BC Albers", ...]`
+   * returns `"NAD83 / BC Albers"`).
+   *
+   * @param wkt - The WKT projection definition string
+   * @returns The extracted projection name, or undefined if not found
    */
-  static getProjectionFromString(projection: ProjectionLike): OLProjection {
-    // Get the projection from string
+  static readProjectionNameFromWKT(wkt: string): string | undefined {
+    const match = /^[A-Z_]+\["([^"]+)"/.exec(wkt);
+    return match?.[1];
+  }
+
+  /**
+   * Resolves a projection from various input formats to an OpenLayers Projection object.
+   *
+   * Supports:
+   * - Authority:code strings (e.g., `"EPSG:4326"`, `"CRS:84"`)
+   * - Numeric EPSG codes (e.g., `4326`, `3857`)
+   * - Numeric strings (e.g., `"4326"`, `"3857"`)
+   * - OGC CRS URIs (e.g., `"http://www.opengis.net/def/crs/EPSG/0/4326"`)
+   * - OGC URNs (e.g., `"urn:ogc:def:crs:EPSG::4326"`)
+   * - Existing OLProjection objects (pass-through)
+   *
+   * @param projection - A projection identifier (string, number, or OLProjection)
+   * @returns The resolved OpenLayers Projection object
+   * @throws {InvalidProjectionError} When the projection cannot be resolved
+   */
+  static getProjectionFromStringOrNumber(projection: ProjectionLike | number): OLProjection {
+    // Handle numeric input (e.g., 4326 → "EPSG:4326")
+    if (typeof projection === 'number') {
+      return Projection.getProjectionFromStringOrNumber(`EPSG:${projection}`);
+    }
+
+    // Handle numeric strings (e.g., '4326' → "EPSG:4326")
+    if (typeof projection === 'string' && /^\d+$/.test(projection.trim())) {
+      return Projection.getProjectionFromStringOrNumber(`EPSG:${projection.trim()}`);
+    }
+
+    // Handle CRS URI/URN formats (e.g., "http://www.opengis.net/def/crs/EPSG/0/4326" or "urn:ogc:def:crs:EPSG::4326")
+    if (typeof projection === 'string' && (projection.includes('/') || projection.includes('urn:'))) {
+      const resolved = Projection.getProjectionFromCRS(projection);
+      if (resolved) return resolved;
+      // Fall through to throw if unresolved
+    }
+
+    // Standard resolution via OpenLayers get()
     const proj = OLGetProjection(projection);
 
     // If found
@@ -432,13 +519,48 @@ export abstract class Projection {
   }
 
   /**
+   * Resolves an OGC CRS URI or standard code string to an OpenLayers projection.
+   *
+   * Supports formats:
+   * - `http://www.opengis.net/def/crs/EPSG/0/4326` → `EPSG:4326`
+   * - `http://www.opengis.net/def/crs/OGC/1.3/CRS84` → `CRS:84`
+   * - `urn:ogc:def:crs:EPSG::4326` → `EPSG:4326`
+   * - `EPSG:4326` (pass-through)
+   *
+   * @param crs - The CRS string (URI, URN, or authority:code)
+   * @returns The resolved OpenLayers projection, or undefined if unrecognized
+   */
+  static getProjectionFromCRS(crs: string): OLProjection | undefined {
+    // Direct code (e.g., "EPSG:4326", "CRS:84")
+    if (!crs.includes('/') && !crs.includes('urn:')) {
+      return OLGetProjection(crs) ?? undefined;
+    }
+
+    // OGC HTTP URI: http://www.opengis.net/def/crs/{authority}/{version}/{code}
+    const httpMatch = crs.match(/\/def\/crs\/([^/]+)\/[^/]+\/([^/\s]+)$/i);
+    if (httpMatch) {
+      const code = `${httpMatch[1]}:${httpMatch[2]}`;
+      return OLGetProjection(code) ?? undefined;
+    }
+
+    // URN: urn:ogc:def:crs:EPSG::4326
+    const urnMatch = crs.match(/^urn:[^:]+:[^:]+:crs:([^:]+):[^:]*:([^:\s]+)$/i);
+    if (urnMatch) {
+      const code = `${urnMatch[1]}:${urnMatch[2]}`;
+      return OLGetProjection(code) ?? undefined;
+    }
+
+    return undefined;
+  }
+
+  /**
    * Gets the projection representing a LonLat projection.
    *
    * @returns Projection object representing LonLat
    */
   static getProjectionLonLat(): OLProjection {
     // Redirect
-    return Projection.getProjectionFromString(Projection.PROJECTION_NAMES.LONLAT);
+    return Projection.getProjectionFromStringOrNumber(Projection.PROJECTION_NAMES.LONLAT);
   }
 
   /**
@@ -454,21 +576,25 @@ export abstract class Projection {
   }
 
   /**
-   * Reads the numeric EPSG code from a projection string.
+   * Reads the numeric EPSG code from a projection identifier.
    *
-   * Supports case-insensitive formats such as:
-   * - `"EPSG:4326"`
-   * - `"epsg:3857"`
-   * - `"EpSg: 1234"`
+   * Supports:
+   * - Numeric input (e.g., `4326`) — returned immediately
+   * - Case-insensitive `"EPSG:4326"`, `"epsg:3857"`, `"EpSg: 1234"` strings
+   * - OLProjection objects (extracts the code via `getCode()`)
+   *
    * The function trims whitespace and validates that the string matches a proper
    * `EPSG:<number>` pattern. Returns `undefined` if the format is invalid or the
    * numeric part is not a valid number.
    *
-   * @param projection - The projection like identifier containing the EPSG code
+   * @param projection - The projection identifier containing the EPSG code (string, number, or OLProjection)
    * @returns The extracted EPSG numeric code, or `undefined` if invalid
    */
-  static readEPSGNumber(projection: ProjectionLike): number | undefined {
-    if (!projection) return undefined;
+  static readEPSGNumber(projection: ProjectionLike | number): number | undefined {
+    if (!projection && projection !== 0) return undefined;
+
+    // Handle numeric input directly
+    if (typeof projection === 'number') return Number.isFinite(projection) ? projection : undefined;
 
     // Treat both OLProjection or string inputs
     let projectionCode: string = projection as string;
@@ -525,8 +651,8 @@ export abstract class Projection {
     let projectedCoordinates;
 
     // Read the projections
-    const startProjectionConv = Projection.getProjectionFromString(startProjection);
-    const endProjectionConv = Projection.getProjectionFromString(endProjection);
+    const startProjectionConv = Projection.getProjectionFromStringOrNumber(startProjection);
+    const endProjectionConv = Projection.getProjectionFromStringOrNumber(endProjection);
 
     if (coordinates && GeometryApi.isCoordinates(coordinates)) {
       projectedCoordinates = Projection.transform(coordinates, startProjectionConv, endProjectionConv);
@@ -588,7 +714,7 @@ export abstract class Projection {
  * A Type to represent a Projection in JSON.
  */
 export type TypeProjection = {
-  wkid: number;
+  wkid?: number; // Old web map services or custom ones might not have a wkid, only a wkt
   latestWkid?: number;
   wkt?: string;
 };
@@ -601,7 +727,7 @@ function initCRS84Projection(): void {
   proj4.defs(Projection.PROJECTION_NAMES.CRS84, '+proj=longlat +datum=WGS84 +no_defs +type=crs');
   register(proj4);
 
-  const projection = Projection.getProjectionFromString(Projection.PROJECTION_NAMES.CRS84);
+  const projection = Projection.getProjectionFromStringOrNumber(Projection.PROJECTION_NAMES.CRS84);
   Projection.PROJECTIONS['CRS:84'] = projection;
 }
 
@@ -612,7 +738,7 @@ function init4326Projection(): void {
   proj4.defs(Projection.PROJECTION_NAMES.LONLAT, '+proj=longlat +datum=WGS84 +no_defs +type=crs');
   register(proj4);
 
-  const projection = Projection.getProjectionFromString(Projection.PROJECTION_NAMES.LONLAT);
+  const projection = Projection.getProjectionFromStringOrNumber(Projection.PROJECTION_NAMES.LONLAT);
   Projection.PROJECTIONS['4326'] = projection;
 }
 
@@ -620,7 +746,7 @@ function init4326Projection(): void {
  * Initializes the WM Projection
  */
 function initWMProjection(): void {
-  const projection = Projection.getProjectionFromString(Projection.PROJECTION_NAMES.WM);
+  const projection = Projection.getProjectionFromStringOrNumber(Projection.PROJECTION_NAMES.WM);
   Projection.PROJECTIONS['3857'] = projection;
 }
 
@@ -635,7 +761,7 @@ function initLCCProjection(): void {
   );
   register(proj4);
 
-  const projection = Projection.getProjectionFromString(Projection.PROJECTION_NAMES.LCC);
+  const projection = Projection.getProjectionFromStringOrNumber(Projection.PROJECTION_NAMES.LCC);
   Projection.PROJECTIONS['3978'] = projection;
 }
 
@@ -647,7 +773,7 @@ function initCSRSProjection(): void {
   proj4.defs(Projection.PROJECTION_NAMES.CSRS, '+proj=longlat +ellps=GRS80 +no_defs +type=crs');
   register(proj4);
 
-  const projection = Projection.getProjectionFromString(Projection.PROJECTION_NAMES.CSRS);
+  const projection = Projection.getProjectionFromStringOrNumber(Projection.PROJECTION_NAMES.CSRS);
   Projection.PROJECTIONS['4617'] = projection;
 }
 
@@ -659,7 +785,7 @@ function initCSRS98Projection(): void {
   proj4.defs(Projection.PROJECTION_NAMES.CSRS98, '+proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs +type=crs');
   register(proj4);
 
-  const projection = Projection.getProjectionFromString(Projection.PROJECTION_NAMES.CSRS98);
+  const projection = Projection.getProjectionFromStringOrNumber(Projection.PROJECTION_NAMES.CSRS98);
   Projection.PROJECTIONS['4140'] = projection;
 }
 
@@ -673,7 +799,7 @@ function init3578Projection(): void {
   );
   register(proj4);
 
-  const projection = Projection.getProjectionFromString(Projection.PROJECTION_NAMES[3578]);
+  const projection = Projection.getProjectionFromStringOrNumber(Projection.PROJECTION_NAMES[3578]);
   Projection.PROJECTIONS['3578'] = projection;
 }
 
@@ -684,7 +810,7 @@ function init4269Projection(): void {
   proj4.defs(Projection.PROJECTION_NAMES[4269], '+proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs +type=crs');
   register(proj4);
 
-  const projection = Projection.getProjectionFromString(Projection.PROJECTION_NAMES[4269]);
+  const projection = Projection.getProjectionFromStringOrNumber(Projection.PROJECTION_NAMES[4269]);
   Projection.PROJECTIONS['4269'] = projection;
 }
 
@@ -698,7 +824,7 @@ function init42101Projection(): void {
   );
   register(proj4);
 
-  const projection = Projection.getProjectionFromString(Projection.PROJECTION_NAMES[42101]);
+  const projection = Projection.getProjectionFromStringOrNumber(Projection.PROJECTION_NAMES[42101]);
   Projection.PROJECTIONS['42101'] = projection;
 }
 
@@ -712,7 +838,7 @@ function init3979Projection(): void {
   );
   register(proj4);
 
-  const projection = Projection.getProjectionFromString(Projection.PROJECTION_NAMES[3979]);
+  const projection = Projection.getProjectionFromStringOrNumber(Projection.PROJECTION_NAMES[3979]);
   Projection.PROJECTIONS['3979'] = projection;
 }
 
@@ -723,7 +849,7 @@ function init102001Projection(): void {
   );
   register(proj4);
 
-  const projection = Projection.getProjectionFromString(Projection.PROJECTION_NAMES[102001]);
+  const projection = Projection.getProjectionFromStringOrNumber(Projection.PROJECTION_NAMES[102001]);
   Projection.PROJECTIONS['102001'] = projection;
 }
 
@@ -737,7 +863,7 @@ function init102100Projection(): void {
   );
   register(proj4);
 
-  const projection = Projection.getProjectionFromString(Projection.PROJECTION_NAMES[102100]);
+  const projection = Projection.getProjectionFromStringOrNumber(Projection.PROJECTION_NAMES[102100]);
   Projection.PROJECTIONS['102100'] = projection;
 }
 
@@ -751,7 +877,7 @@ function init102184Projection(): void {
   );
   register(proj4);
 
-  const projection = Projection.getProjectionFromString(Projection.PROJECTION_NAMES[102184]);
+  const projection = Projection.getProjectionFromStringOrNumber(Projection.PROJECTION_NAMES[102184]);
   Projection.PROJECTIONS['102184'] = projection;
 }
 
@@ -765,7 +891,7 @@ function init102190Projection(): void {
   );
   register(proj4);
 
-  const projection = Projection.getProjectionFromString(Projection.PROJECTION_NAMES[102190]);
+  const projection = Projection.getProjectionFromStringOrNumber(Projection.PROJECTION_NAMES[102190]);
   Projection.PROJECTIONS['102190'] = projection;
 }
 
@@ -779,7 +905,7 @@ function init3400Projection(): void {
   );
   register(proj4);
 
-  const projection = Projection.getProjectionFromString(Projection.PROJECTION_NAMES[3400]);
+  const projection = Projection.getProjectionFromStringOrNumber(Projection.PROJECTION_NAMES[3400]);
   Projection.PROJECTIONS['3400'] = projection;
 }
 
@@ -790,7 +916,7 @@ function init2151Projection(): void {
   proj4.defs(Projection.PROJECTION_NAMES[2151], '+proj=utm +zone=13 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs');
   register(proj4);
 
-  const projection = Projection.getProjectionFromString(Projection.PROJECTION_NAMES[2151]);
+  const projection = Projection.getProjectionFromStringOrNumber(Projection.PROJECTION_NAMES[2151]);
   Projection.PROJECTIONS['2151'] = projection;
 }
 
@@ -804,7 +930,7 @@ function init2957Projection(): void {
   );
   register(proj4);
 
-  const projection = Projection.getProjectionFromString(Projection.PROJECTION_NAMES[2957]);
+  const projection = Projection.getProjectionFromStringOrNumber(Projection.PROJECTION_NAMES[2957]);
   Projection.PROJECTIONS['2957'] = projection;
 }
 
@@ -815,7 +941,7 @@ function init26914Projection(): void {
   proj4.defs(Projection.PROJECTION_NAMES[26914], '+proj=utm +zone=14 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs');
   register(proj4);
 
-  const projection = Projection.getProjectionFromString(Projection.PROJECTION_NAMES[26914]);
+  const projection = Projection.getProjectionFromStringOrNumber(Projection.PROJECTION_NAMES[26914]);
   Projection.PROJECTIONS['26914'] = projection;
 }
 
@@ -830,7 +956,7 @@ function initBCAlbersProjection(): void {
   );
   register(proj4);
 
-  const projection = Projection.getProjectionFromString('EPSG:3005');
+  const projection = Projection.getProjectionFromStringOrNumber('EPSG:3005');
   Projection.PROJECTIONS['3005'] = projection;
 }
 
@@ -842,19 +968,20 @@ function init3573Projection(): void {
   proj4.defs('EPSG:3573', '+proj=laea +lat_0=90 +lon_0=-100 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs');
   register(proj4);
 
-  const projection = Projection.getProjectionFromString(Projection.PROJECTION_NAMES[3573]);
+  const projection = Projection.getProjectionFromStringOrNumber(Projection.PROJECTION_NAMES[3573]);
   // The extent must be set at registration time so the map View picks it up for zoom constraints.
   projection.setExtent([-9000000, -9000000, 9000000, 9000000]);
   Projection.PROJECTIONS['3573'] = projection;
 }
+
 // Initialize the supported projections
-init3573Projection();
 initCRS84Projection();
 init4326Projection();
 initWMProjection();
 initLCCProjection();
 initCSRSProjection();
 initCSRS98Projection();
+init3573Projection();
 init3578Projection();
 init3979Projection();
 init4269Projection();
