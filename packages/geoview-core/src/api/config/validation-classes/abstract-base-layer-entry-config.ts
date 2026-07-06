@@ -1,3 +1,5 @@
+import type { Projection as OLProjection, ProjectionLike } from 'ol/proj';
+
 import type {
   TypeLayerStyleConfig,
   TypeStyleGeometry,
@@ -12,7 +14,6 @@ import type {
   TypeFeatureInfoLayerConfig,
   TypeGeoviewLayerType,
   TypeLayerEntryType,
-  TypeValidSourceProjectionCodes,
 } from '@/api/types/layer-schema-types';
 import type { ConfigBaseClassProps } from '@/api/config/validation-classes/config-base-class';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
@@ -22,6 +23,7 @@ import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-excep
 import { NoPrimaryKeyFieldError } from '@/core/exceptions/geoview-exceptions';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { deepMerge } from '@/core/utils/utilities';
+import { Projection, type TypeProjection } from '@/geo/utils/projection';
 
 export interface AbstractBaseLayerEntryConfigProps extends ConfigBaseClassProps {
   /** Source settings to apply to the GeoView layer source at creation time. */
@@ -48,6 +50,9 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /** The metadata associated with the layer. */
   #layerMetadata?: unknown;
+
+  /** The projection code as read from the metadata. */
+  #metadataProjection?: OLProjection;
 
   /** Whether the layer is using proxy to connect to the service */
   #isUsingProxy = false;
@@ -201,6 +206,23 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    */
   setLayerMetadata(layerMetadata: unknown): void {
     this.#layerMetadata = layerMetadata;
+  }
+
+  /**
+   * Gets the projection as it was initialized from the metadata.
+   */
+  getMetadataProjection(): OLProjection | undefined {
+    return this.#metadataProjection;
+  }
+
+  /**
+   * Initializes the metadata projection by registering it if missing and storing the result.
+   *
+   * @param projection - Optional projection to register and store as the metadata projection
+   */
+  async initProjectionFromMetadata(projection: TypeProjection | ProjectionLike | number | undefined): Promise<void> {
+    // Add the projection if missing and store it
+    this.#metadataProjection = await Projection.addProjectionIfMissing(projection);
   }
 
   /**
@@ -464,6 +486,19 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   }
 
   /**
+   * Gets the source projection as explicitly defined in the layer entry's `source.projection` config property.
+   *
+   * This is NOT the actual projection that OpenLayers determines from the source data — it is strictly the
+   * user-configured `projection` number from the config, prefixed with `"EPSG:"`.
+   *
+   * @returns The source projection with the EPSG prefix, or undefined if not set in config
+   */
+  getSourceProjectionWithEPSG(): string | undefined {
+    if (this.getSource().projection) return `EPSG:${this.getSource().projection}`;
+    return undefined;
+  }
+
+  /**
    * Initializes the source configuration by filling the blanks in our config with the information from the metadata.
    *
    * @param sourceMetadata - Optional source metadata to use to help fill the blanks in our source config
@@ -537,37 +572,6 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    */
   getFeatureInfo(): TypeFeatureInfoLayerConfig {
     return this.getSource().featureInfo!; // Always defined to something, minimally an empty object.
-  }
-
-  /**
-   * Gets the source projection.
-   *
-   * @returns The source projection, or undefined if not set
-   */
-  getProjection(): TypeValidSourceProjectionCodes | undefined {
-    return this.getSource().projection;
-  }
-
-  /**
-   * Gets the source projection with the EPSG prefix.
-   *
-   * @returns The source projection with the EPSG prefix, or undefined if not set
-   */
-  getProjectionWithEPSG(): string | undefined {
-    return this.getProjection() ? `EPSG:${this.getProjection()}` : undefined;
-  }
-
-  /**
-   * Sets the source projection in the source object only if it's not already set and if the parameter is defined.
-   *
-   * @param projection - Optional source projection
-   */
-  initProjectionFromMetadata(projection: TypeValidSourceProjectionCodes | undefined): void {
-    // If not projection, skip
-    if (!projection) return;
-
-    // Set it if not already set.
-    this.getSource().projection ??= projection;
   }
 
   /**

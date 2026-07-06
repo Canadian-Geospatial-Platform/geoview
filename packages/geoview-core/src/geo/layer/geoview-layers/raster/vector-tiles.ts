@@ -9,21 +9,13 @@ import { applyStyle } from 'ol-mapbox-style';
 import { MVT } from 'ol/format';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import type {
-  TypeGeoviewLayerConfig,
-  TypeTileGrid,
-  TypeMetadataVectorTiles,
-  TypeValidSourceProjectionCodes,
-} from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerConfig, TypeTileGrid, TypeMetadataVectorTiles } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { Projection } from '@/geo/utils/projection';
 import { VectorTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { logger } from '@/core/utils/logger';
-import {
-  LayerEntryConfigParameterProjectionNotDefinedInSourceError,
-  LayerEntryNotSupportingProjectionError,
-} from '@/core/exceptions/layer-entry-config-exceptions';
+import { LayerEntryNotSupportingProjectionError } from '@/core/exceptions/layer-entry-config-exceptions';
 import { GVVectorTiles } from '@/geo/layer/gv-layers/vector/gv-vector-tiles';
 import type { DisplayDateMode } from '@/api/types/map-schema-types';
 
@@ -107,6 +99,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
     // Get the metadata
     const metadata = this.getMetadata();
 
+    let sourceProjection: number | undefined = undefined;
     if (metadata) {
       const { tileInfo, fullExtent, minScale, maxScale, minZoom, maxZoom } = metadata;
       const newTileGrid: TypeTileGrid = {
@@ -119,14 +112,11 @@ export class VectorTiles extends AbstractGeoViewRaster {
       // eslint-disable-next-line no-param-reassign
       layerConfig.getSource().tileGrid = newTileGrid;
 
-      // Get the spatial reference from the metadata
-      const projectionMetadata = metadata.tileInfo?.spatialReference?.wkid;
-
-      // Make sure the projection is set on the source config
-      layerConfig.initProjectionFromMetadata(projectionMetadata as unknown as TypeValidSourceProjectionCodes);
-
-      // Check if we support that projection and if not add it on-the-fly
-      await Projection.addProjectionIfMissing(fullExtent.spatialReference);
+      // If there's a spatial reference in the metadata
+      if (metadata.tileInfo?.spatialReference ?? fullExtent.spatialReference) {
+        await layerConfig.initProjectionFromMetadata(metadata.tileInfo?.spatialReference ?? fullExtent.spatialReference);
+        sourceProjection = Projection.readEPSGNumber(layerConfig.getMetadataProjection()?.getCode());
+      }
 
       // Set zoom levels. Vector tiles may be unique as they can have both scale and zoom level properties
       layerConfig.initMinScaleFromMetadata(minScale);
@@ -148,8 +138,8 @@ export class VectorTiles extends AbstractGeoViewRaster {
       }
     }
 
-    // Get the source projection
-    const sourceProjection = layerConfig.getSource().projection;
+    // Default on the projection defined in the source when none could be determined
+    sourceProjection ??= layerConfig.getSource().projection;
 
     // Validate the projection of the source is the same as the map projection, otherwise the the open layers vector tile will throw an uncatchable error
     if (mapProjection && sourceProjection && sourceProjection !== Projection.readEPSGNumber(mapProjection)) {
@@ -179,7 +169,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
       if (!appliedStyle.endsWith('/root.json') && !appliedStyle.endsWith('f=pjson')) appliedStyle = `${appliedStyle}/root.json`;
 
       // Get the tile grid resolutions
-      const resolutions = layer.getOLSource()?.getTileGrid()?.getResolutions() ?? [];
+      const resolutions = layer.getTileGridResolutions() ?? [];
 
       // Apply the style with the resolutions
       applyStyle(layer.getOLLayer(), appliedStyle, {
@@ -329,22 +319,13 @@ export class VectorTiles extends AbstractGeoViewRaster {
    * @param layerConfig - Configuration object for the vector tile layer.
    * @returns An initialized VectorTileSource ready for use in a layer.
    * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
-   * @throws {LayerEntryConfigParameterProjectionNotDefinedInSourceError} When the source projection isn't defined.
    */
   static createVectorTileSource(layerConfig: VectorTilesLayerEntryConfig): VectorTileSource {
-    // Get the projection from the source config
-    const sourceProjection = layerConfig.getProjection();
-
-    // If no projection for the layer
-    if (!sourceProjection) {
-      throw new LayerEntryConfigParameterProjectionNotDefinedInSourceError(layerConfig);
-    }
-
     // Create the source options
     const sourceOptions: SourceOptions = {
       url: layerConfig.getDataAccessPath(),
       format: new MVT(),
-      projection: layerConfig.getProjectionWithEPSG(),
+      projection: layerConfig.getMetadataProjection()?.getCode(), // Force the projection of the metadata (only one that'll work in a vector-tile case)
     };
 
     // Get the tile grid

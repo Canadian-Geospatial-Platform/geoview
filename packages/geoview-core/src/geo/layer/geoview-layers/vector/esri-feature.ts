@@ -1,7 +1,7 @@
 import type { Feature } from 'ol';
 import type { ReadOptions } from 'ol/format/Feature';
 import type { Options as SourceOptions } from 'ol/source/Vector';
-import type { Projection as OLProjection } from 'ol/proj';
+import type { Projection as OLProjection, ProjectionLike } from 'ol/proj';
 
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
@@ -26,7 +26,7 @@ import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstrac
 import { GVEsriFeature } from '@/geo/layer/gv-layers/vector/gv-esri-feature';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { formatError } from '@/core/exceptions/core-exceptions';
-import { GeoUtilities } from '@/geo/utils/utilities';
+import { GeoUtilities, type SourceFeaturesInfo } from '@/geo/utils/utilities';
 import type { DisplayDateMode } from '@/api/types/map-schema-types';
 
 export interface TypeEsriFeatureLayerConfig extends TypeGeoviewLayerConfig {
@@ -194,7 +194,7 @@ export class EsriFeature extends AbstractGeoViewVector {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     sourceOptions: SourceOptions<Feature>,
     readOptions: ReadOptions
-  ): Promise<Feature[]> {
+  ): Promise<SourceFeaturesInfo> {
     // Cast it to proper type
     const layerConfigEsriFeature = layerConfig as EsriFeatureLayerEntryConfig;
 
@@ -225,12 +225,25 @@ export class EsriFeature extends AbstractGeoViewVector {
 
     // Convert each ESRI response chunk to features and flatten the result
     let hadInvalidGeometries = false;
+    let dataProjection: ProjectionLike;
     try {
-      const allFeatures = responseData.flatMap((json) => {
-        const result = GeoUtilities.readFeaturesFromEsriJSON(json, readOptions);
+      const results = await Promise.all(
+        responseData.map((json) => {
+          return GeoUtilities.readFeaturesFromEsriJSON(json, readOptions.dataProjection, readOptions.featureProjection);
+        })
+      );
+
+      const allFeatures = results.flatMap((result, index) => {
+        // capture projection once (first valid result wins)
+        if (index === 0) {
+          // eslint-disable-next-line prefer-destructuring
+          dataProjection = result.dataProjection;
+        }
+
         if (result.hadInvalidGeometries) {
           hadInvalidGeometries = true;
         }
+
         return result.features;
       });
 
@@ -239,7 +252,7 @@ export class EsriFeature extends AbstractGeoViewVector {
         this.emitMessage('warning.layer.invalidGeometry', { layerName: layerConfigEsriFeature.getLayerNameCascade() }, 'warning');
       }
 
-      return allFeatures;
+      return { features: allFeatures, dataProjection };
     } catch (error: unknown) {
       throw new LayerFeatureParsingError(layerConfigEsriFeature.layerId, layerConfigEsriFeature.getLayerNameCascade(), formatError(error));
     }

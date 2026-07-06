@@ -124,13 +124,11 @@ export class EsriUtilities {
       layerConfig.initLayerStyleFromMetadata(styleFromRenderer);
     }
 
-    // Check if we support that projection and if not add it on-the-fly
-    await Projection.addProjectionIfMissing(layerMetadata.spatialReference || layerMetadata.sourceSpatialReference);
+    // Get one of the spatial references
+    const spatRef = layerMetadata.spatialReference ?? layerMetadata.extent?.spatialReference ?? layerMetadata.sourceSpatialReference;
 
-    // Also register the extent's spatial reference if it exists
-    if (layerMetadata.extent?.spatialReference) {
-      await Projection.addProjectionIfMissing(layerMetadata.extent.spatialReference);
-    }
+    // Set the metadata projection on the layer config
+    await layerConfig.initProjectionFromMetadata(spatRef);
 
     this.#commonProcessFeatureInfoConfig(layerConfig, layerMetadata);
 

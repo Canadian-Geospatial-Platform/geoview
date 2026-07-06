@@ -57,7 +57,7 @@ export class GVWMTS extends AbstractGVTile {
    *
    * @returns The WMTS source instance associated with this layer.
    */
-  override getOLSource(): WMTSSource {
+  protected override getOLSource(): WMTSSource {
     // Get source from OL
     return super.getOLSource() as WMTSSource;
   }
@@ -83,14 +83,14 @@ export class GVWMTS extends AbstractGVTile {
     // Wait for the source to be ready, just in case the caller is early
     await this.waitForSourceReady();
 
-    // Get the layer
-    const layer = this.getOLLayer() as TileLayer<WMTSSource> | undefined;
+    // Get the OpenLayers source (not the configured source property)
+    const source = this.getOLSource();
 
     // Get the source projection
-    const sourceProjection = this.getOLSource()?.getProjection() || undefined;
+    const sourceProjection = source.getProjection() ?? undefined;
 
     // Get the layer bounds
-    let sourceExtent = layer?.getSource()?.getTileGrid()?.getExtent();
+    let sourceExtent = source.getTileGrid()?.getExtent();
 
     // If both found
     if (sourceExtent && sourceProjection) {

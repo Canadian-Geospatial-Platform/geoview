@@ -751,6 +751,20 @@ export const useStoreLayerMinScale = createLayerSelectorHook('minScale');
 export const useStoreLayerMaxScale = createLayerSelectorHook('maxScale');
 
 /**
+ * Gets the data projection code for a specific layer.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to look up
+ * @returns The data projection code, or undefined
+ */
+export const getStoreLayerDataProjectionCode = (mapId: string, layerPath: string): string | undefined => {
+  return getStoreLayerLegendLayerByPath(mapId, layerPath)?.dataProjectionCode;
+};
+
+/** Hook that returns the data projection code for a specific layer. */
+export const useStoreLayerDataProjectionCode = createLayerSelectorHook('dataProjectionCode');
+
+/**
  * Gets the layer status for a specific layer.
  *
  * @param mapId - The map identifier

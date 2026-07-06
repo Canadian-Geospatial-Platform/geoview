@@ -77,25 +77,6 @@ export class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
   // #region METHODS
 
   /**
-   * Gets the projection WKID from the service metadata if available.
-   *
-   * @returns The projection WKID, or undefined if not available
-   */
-  getProjectionWKID(): number | undefined {
-    return this.getServiceMetadata()?.fullExtent?.spatialReference?.wkid;
-  }
-
-  /**
-   * Gets the projection code from the service metadata if available.
-   *
-   * @returns The projection code, or undefined if not available
-   */
-  getProjectionCodeEPSG(): string | undefined {
-    const wkid = this.getProjectionWKID();
-    return wkid ? `EPSG:${wkid.toString()}` : undefined;
-  }
-
-  /**
    * Gets the style url.
    *
    * @returns The style url, or undefined if not set

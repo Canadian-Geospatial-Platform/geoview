@@ -134,8 +134,8 @@ export class GVWMS extends AbstractGVRaster {
         const imageExtent = image.getExtent();
         const supportedBBOX = Projection.transformExtentFromProj(
           imageExtent,
-          Projection.getProjectionFromString(overridingCRS.mapProjection),
-          Projection.getProjectionFromString(overridingCRS.layerProjection)
+          Projection.getProjectionFromStringOrNumber(overridingCRS.mapProjection),
+          Projection.getProjectionFromStringOrNumber(overridingCRS.layerProjection)
         );
 
         // Replace the BBOX param in the src url
@@ -167,7 +167,7 @@ export class GVWMS extends AbstractGVRaster {
    *
    * @returns The ImageWMS source instance associated with this layer
    */
-  override getOLSource(): ImageWMS {
+  protected override getOLSource(): ImageWMS {
     // Get source from OL
     return super.getOLSource() as ImageWMS;
   }
@@ -474,7 +474,7 @@ export class GVWMS extends AbstractGVRaster {
 
       // If read something
       if (metadataProj) {
-        const metadataProjConv = Projection.getProjectionFromString(metadataProj);
+        const metadataProjConv = Projection.getProjectionFromStringOrNumber(metadataProj);
         layerBounds = Projection.transformExtentFromProj(metadataBounds, metadataProjConv, projection, stops);
         layerBounds = GeoUtilities.validateExtentWhenDefined(layerBounds, projection.getCode());
       }
@@ -1137,14 +1137,10 @@ export class GVWMS extends AbstractGVRaster {
     // Call the GetFeature
     const responseData = await Fetch.fetchJson(urlWithOutputJson, abortController);
 
-    // Read the EPSG from the data
-    const dataEPSG = GeoUtilities.readEPSGOfGeoJSON(responseData);
-
-    // Check if we have it in Projection and try adding it if we're missing it
-    await Projection.addProjectionIfMissing(dataEPSG);
-
     // Read the features
-    const features = GeoUtilities.readFeaturesFromGeoJSON(responseData, undefined);
+    const sourceFeaturesInfo = await GeoUtilities.readFeaturesFromGeoJSON(responseData, undefined);
+    const { features } = sourceFeaturesInfo;
+    // ? Ignore the data projection of the WFS, because we don't want to confuse it with the data projection of the WMS
 
     // Find the best name field and validate its existance at the same time when one was initially configured
     const nameField = AbstractGVLayer.findBestNameField(wmsLayerConfig.getNameField(), wfsLayerConfig.getOutfields(), language);

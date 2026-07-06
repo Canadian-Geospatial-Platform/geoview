@@ -18,8 +18,7 @@ import { GVWKB } from '@/geo/layer/gv-layers/vector/gv-wkb';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { LayerServiceMetadataUnableToFetchError } from '@/core/exceptions/layer-exceptions';
 import { formatError } from '@/core/exceptions/core-exceptions';
-import { GeoUtilities } from '@/geo/utils/utilities';
-import { Projection } from '@/geo/utils/projection';
+import { GeoUtilities, type SourceFeaturesInfo } from '@/geo/utils/utilities';
 import type { DisplayDateMode } from '@/api/types/map-schema-types';
 
 export interface TypeWkbLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
@@ -163,33 +162,40 @@ export class WKB extends AbstractGeoViewVector {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     sourceOptions: SourceOptions<Feature>,
     readOptions: ReadOptions
-  ): Promise<Feature[]> {
+  ): Promise<SourceFeaturesInfo> {
     // Cast it to proper type
     const layerConfigWKB = layerConfig as WkbLayerEntryConfig;
 
-    // Check if we have it in Projection and try adding it if we're missing it (should already be done?)
-    await Projection.addProjectionIfMissing(layerConfig.getSource().dataProjection);
-
     // Read the data projection
     // eslint-disable-next-line no-param-reassign
-    readOptions.dataProjection ??= layerConfig.getSource().dataProjection || 'EPSG:4326'; // default: 4326 because OpenLayers struggles to figure it out by itself for WKB here
+    readOptions.dataProjection ??= layerConfig.getSource().dataProjection;
 
     // If we have a feature package
-    let features = [];
+    let result: SourceFeaturesInfo = { features: [], dataProjection: '' };
     if (layerConfigWKB.getSource().geoPackageFeatures?.length) {
       const { geoPackageFeatures } = layerConfigWKB.getSource();
-      features = geoPackageFeatures!.map(({ geom, properties }) => {
-        const feature = GeoUtilities.readFeaturesFromWKB(geom, readOptions)[0];
-        if (properties) feature.setProperties(properties);
-        return feature;
-      });
+      const subResults = await Promise.all(
+        geoPackageFeatures!.map(({ geom, properties }) => {
+          return GeoUtilities.readFeaturesFromWKB(geom, readOptions.dataProjection, readOptions.featureProjection).then((subResult) => {
+            const subResultFeature = subResult.features[0];
+            if (properties) subResultFeature.setProperties(properties);
+            return { feature: subResultFeature, dataProjection: subResult.dataProjection };
+          });
+        })
+      );
+      result.features = subResults.map((r) => r.feature);
+      result.dataProjection = subResults[subResults.length - 1].dataProjection;
     } else {
       // Fallback to using default read method
-      features = GeoUtilities.readFeaturesFromWKB(layerConfigWKB.getDataAccessPath(), readOptions);
+      result = await GeoUtilities.readFeaturesFromWKB(
+        layerConfigWKB.getDataAccessPath(),
+        readOptions.dataProjection,
+        readOptions.featureProjection
+      );
     }
 
     // Return them
-    return Promise.resolve(features);
+    return Promise.resolve(result);
   }
 
   /**

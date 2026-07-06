@@ -2,11 +2,9 @@ import type BaseImageLayer from 'ol/layer/BaseImage';
 import type ImageSource from 'ol/source/Image';
 import type LayerRenderer from 'ol/renderer/Layer';
 import type { Extent } from 'ol/extent';
-import type { Projection as OLProjection } from 'ol/proj';
 
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
-import { Projection } from '@/geo/utils/projection';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import type { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { logger } from '@/core/utils/logger';
@@ -66,21 +64,6 @@ export abstract class AbstractGVRaster extends AbstractGVLayer {
   // #endregion OVERRIDES
 
   // #region METHODS
-
-  /**
-   * Gets the metadata extent projection, if any.
-   *
-   * @returns The OpenLayer projection or undefined when not found
-   */
-  getMetadataProjection(): OLProjection | undefined {
-    // Get metadata
-    // GV Can be any object so disable eslint and proceed with caution
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const metadata = this.getLayerConfig().getServiceMetadata() as any;
-
-    // Redirect
-    return Projection.getProjectionFromObj(metadata?.fullExtent?.spatialReference);
-  }
 
   /**
    * Gets the metadata extent, if any.

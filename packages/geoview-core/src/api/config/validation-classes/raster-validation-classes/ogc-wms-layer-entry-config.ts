@@ -401,7 +401,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     const layerCapabilities = WMS.findLayerMetadataInCapability(this.layerId, layerMetadata.Capability.Layer);
 
     // Init the layer metadata
-    WMS.initLayerMetadata(this, layerCapabilities, displayDateMode);
+    await WMS.initLayerMetadata(this, layerCapabilities, displayDateMode);
   }
 
   /**
