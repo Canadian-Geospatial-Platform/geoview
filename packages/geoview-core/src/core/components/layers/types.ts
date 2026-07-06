@@ -54,6 +54,9 @@ export interface TypeLegendLayer {
   /** Layer UI controls configuration. */
   controls?: TypeLayerControls;
 
+  /** The projection code of the layer's data. */
+  dataProjectionCode?: string;
+
   /** Timestamp when layer deletion was started. */
   deletionStartTime?: number;
 

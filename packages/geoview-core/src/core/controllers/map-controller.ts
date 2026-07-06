@@ -403,7 +403,7 @@ export class MapController extends AbstractMapViewerController {
         ? Projection.transformExtentFromProj(
             lonlatExtent,
             Projection.getProjectionLonLat(),
-            Projection.getProjectionFromString(`EPSG:${currProjection}`)
+            Projection.getProjectionFromStringOrNumber(currProjection)
           )
         : lonlatExtent;
 
@@ -418,7 +418,7 @@ export class MapController extends AbstractMapViewerController {
       extent = Projection.transformExtentFromProj(
         MAP_EXTENTS[currProjection],
         Projection.getProjectionLonLat(),
-        Projection.getProjectionFromString(`EPSG:${currProjection}`)
+        Projection.getProjectionFromStringOrNumber(currProjection)
       );
 
     return this.zoomToExtent(extent, useAnimation, options);
@@ -427,7 +427,7 @@ export class MapController extends AbstractMapViewerController {
   /**
    * Zooms to geolocation position provided.
    *
-   * @param position - Info on position to zoom to
+   * @param position - lon/lat position to zoom to
    * @returns A promise that resolves when the zoom animation is complete
    */
   zoomToMyLocation(position: GeolocationPosition): Promise<void> {
@@ -1573,11 +1573,11 @@ export class MapController extends AbstractMapViewerController {
       .layerController.getGeoviewLayers()
       .filter((layer) => layer instanceof AbstractGVVectorTile)
       .forEach((layer) => {
-        // Get the config
-        const config = layer.getLayerConfig();
+        // Get the data projection
+        const dataProjection = layer.getDataProjection();
 
         // If the projection of the layer isn't the same of the map projection, it means the vector tile layer won't be reprojected, show a warning
-        if (config.getProjectionCodeEPSG() !== event.projection.getCode()) {
+        if (dataProjection && dataProjection.getCode() !== event.projection.getCode()) {
           // Log
           this.getMapViewer().notifications.showWarning('warning.layer.vectorTileUnsupportedProjection', {
             layerName: layer.getLayerName(),

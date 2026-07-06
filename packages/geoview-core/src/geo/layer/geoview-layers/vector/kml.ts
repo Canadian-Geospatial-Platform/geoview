@@ -10,8 +10,7 @@ import { KmlLayerEntryConfig } from '@/api/config/validation-classes/vector-vali
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { GVKML } from '@/geo/layer/gv-layers/vector/gv-kml';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
-import { GeoUtilities } from '@/geo/utils/utilities';
-import { Projection } from '@/geo/utils/projection';
+import { GeoUtilities, type SourceFeaturesInfo } from '@/geo/utils/utilities';
 import type { DisplayDateMode } from '@/api/types/map-schema-types';
 
 export interface TypeKmlLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
@@ -102,21 +101,12 @@ export class KML extends AbstractGeoViewVector {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     sourceOptions: SourceOptions<Feature>,
     readOptions: ReadOptions
-  ): Promise<Feature[]> {
+  ): Promise<SourceFeaturesInfo> {
     // Query
     const responseData = await AbstractGeoViewVector.fetchText(layerConfig.getDataAccessPath(false), layerConfig.getSource().postSettings);
 
-    // Use the features response to determine the EPSG of the data, otherwise use the config otherwise force it to 4326, because OpenLayers struggles to figure it out by itself here
-    const dataEPSG = GeoUtilities.readEPSGOfGML(responseData);
-
-    // Check if we have it in Projection and try adding it if we're missing it
-    await Projection.addProjectionIfMissing(dataEPSG);
-
-    // eslint-disable-next-line no-param-reassign
-    readOptions.dataProjection = dataEPSG || layerConfig.getSource().dataProjection || 'EPSG:4326'; // default: 4326
-
     // Read the features
-    return GeoUtilities.readFeaturesFromKML(responseData, readOptions);
+    return GeoUtilities.readFeaturesFromKML(responseData, readOptions.dataProjection, readOptions.featureProjection);
   }
 
   /**

@@ -68,7 +68,7 @@ export function AoiPanel(props: AoiPanelProps): JSX.Element {
       const extentInMapProjection = Projection.transformExtentFromProj(
         aoiItem.extent,
         Projection.getProjectionLonLat(),
-        Projection.getProjectionFromString(mapProjectionEPSG)
+        Projection.getProjectionFromStringOrNumber(mapProjectionEPSG)
       );
 
       // Zoom to extent and highlight

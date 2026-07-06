@@ -138,6 +138,13 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   // #region OVERRIDES
 
   /**
+   * Gets the projection of the data based on the projection of the source.
+   */
+  override getDataProjection(): OLProjection | undefined {
+    return this.getSourceProjection();
+  }
+
+  /**
    * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
    *
    * @returns The strongly-typed OpenLayers type.
@@ -152,7 +159,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    *
    * @returns The VectorSource source instance associated with this layer.
    */
-  override getOLSource(): GVVectorSource {
+  protected override getOLSource(): GVVectorSource {
     // Get source from OL
     return super.getOLSource() as GVVectorSource;
   }
@@ -284,7 +291,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoResult> {
-    // Get the layer source
+    // Get the OpenLayers source (not the configured source property)
     const layerSource = this.getOLSource();
 
     // Prepare a filter by layer to know on which layer we want to query features
@@ -399,7 +406,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   override onGetExtentFromFeatures(objectIds: number[] | string[], outProjection: OLProjection, outfield?: string): Promise<Extent> {
-    // Get the feature source
+    // Get the OpenLayers source (not the configured source property)
     const source = this.getOLSource();
 
     // Get array of features and only keep the ones we could find by id
@@ -432,57 +439,6 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     return Promise.resolve(calculatedExtent);
   }
 
-  // #endregion OVERRIDES
-
-  // #region METHODS
-
-  /**
-   * Gets or creates a cached style for a feature.
-   *
-   * @param feature - The feature to calculate style for.
-   * @param label - Style label for fallback styling.
-   * @returns The cached or newly calculated style.
-   */
-  #getOrCreateCachedStyle(feature: FeatureLike, label: string): Style | undefined {
-    // Calculate new style and cache it
-    const featureStyle = AbstractGVVector.calculateStyleForFeature(this, feature, label, this.getLayerFilters()?.getFilterEquation());
-
-    // If no feature style generated
-    if (!featureStyle) {
-      // No style
-      return undefined;
-    }
-
-    // Clone the style
-    const styleClone = featureStyle.clone();
-    // Eliminate geometry from the style clone to prevent cache misses due to different geometries on features
-    styleClone.setGeometry('');
-    // Create a cache key based on the stringified style (without geometry)
-    const styleKey = JSON.stringify(styleClone);
-
-    // Cache the style if not already cached
-    if (!this.#styleCache.has(styleKey)) {
-      this.#styleCache.set(styleKey, featureStyle);
-
-      // Limit cache size to prevent memory bloat
-      if (this.#styleCache.size > AbstractGVVector.STYLE_CACHE_SIZE_LIMIT) {
-        const firstKey = this.#styleCache.keys().next().value;
-        if (firstKey) {
-          this.#styleCache.delete(firstKey);
-        }
-      }
-    }
-
-    return this.#styleCache.get(styleKey);
-  }
-
-  /**
-   * Clears the style cache. Call this when layer style, filters, or visibility changes to ensure fresh styles are recalculated.
-   */
-  #clearStyleCache(): void {
-    this.#styleCache.clear();
-  }
-
   /**
    * Sets the layer style.
    *
@@ -495,6 +451,10 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     // Trigger a refresh to apply the new style to all features
     this.refresh(undefined);
   }
+
+  // #endregion OVERRIDES
+
+  // #region PUBLIC METHODS
 
   /**
    * Sets the style applied flag indicating when a style has been applied for the AbstractGVVector via the style callback function.
@@ -595,6 +555,75 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   }
 
   /**
+   * Gets the OpenLayers Layer Source projection.
+   *
+   * @returns The OpenLayers Layer Source projection or undefined
+   */
+  getSourceProjection(): OLProjection | undefined {
+    // If the projection is in the OLSource, return it
+    const sourceProj = this.getOLSource().getProjection();
+    if (sourceProj) return sourceProj;
+
+    // The data projection
+    const dataProj = this.getOLSource().getDataProjection();
+    if (dataProj) return Projection.getProjectionFromStringOrNumber(dataProj);
+
+    // Not set
+    return undefined;
+  }
+
+  // #endregion PUBLIC METHODS
+
+  // #region PRIVATE METHODS
+
+  /**
+   * Gets or creates a cached style for a feature.
+   *
+   * @param feature - The feature to calculate style for.
+   * @param label - Style label for fallback styling.
+   * @returns The cached or newly calculated style.
+   */
+  #getOrCreateCachedStyle(feature: FeatureLike, label: string): Style | undefined {
+    // Calculate new style and cache it
+    const featureStyle = AbstractGVVector.calculateStyleForFeature(this, feature, label, this.getLayerFilters()?.getFilterEquation());
+
+    // If no feature style generated
+    if (!featureStyle) {
+      // No style
+      return undefined;
+    }
+
+    // Clone the style
+    const styleClone = featureStyle.clone();
+    // Eliminate geometry from the style clone to prevent cache misses due to different geometries on features
+    styleClone.setGeometry('');
+    // Create a cache key based on the stringified style (without geometry)
+    const styleKey = JSON.stringify(styleClone);
+
+    // Cache the style if not already cached
+    if (!this.#styleCache.has(styleKey)) {
+      this.#styleCache.set(styleKey, featureStyle);
+
+      // Limit cache size to prevent memory bloat
+      if (this.#styleCache.size > AbstractGVVector.STYLE_CACHE_SIZE_LIMIT) {
+        const firstKey = this.#styleCache.keys().next().value;
+        if (firstKey) {
+          this.#styleCache.delete(firstKey);
+        }
+      }
+    }
+
+    return this.#styleCache.get(styleKey);
+  }
+
+  /**
+   * Clears the style cache. Call this when layer style, filters, or visibility changes to ensure fresh styles are recalculated.
+   */
+  #clearStyleCache(): void {
+    this.#styleCache.clear();
+  }
+
+  /**
    * Handles the first loaded event for the layer.
    *
    * If the layer starts with no style and is initially invisible, it temporarily sets the layer to visible
@@ -630,7 +659,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     });
   }
 
-  // #endregion METHODS
+  // #endregion PRIVATE METHODS
 
   // #region EVENTS
 

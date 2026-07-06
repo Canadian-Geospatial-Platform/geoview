@@ -33,11 +33,11 @@ import {
   LayerEntryConfigWMSSubLayerNotFoundError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
 import { generateId, normalizeDatacubeAccessPath } from '@/core/utils/utilities';
+import { logger } from '@/core/utils/logger';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { WfsRenderer } from '@/geo/utils/renderer/wfs-renderer';
-import { logger } from '@/core/utils/logger';
 
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.WMS;
@@ -206,7 +206,7 @@ export class WMS extends AbstractGeoViewRaster {
     const layerCapabilities = WMS.findLayerMetadataInCapability(layerConfig.layerId, this.getMetadata()?.Capability.Layer)!;
 
     // Init the layer metadata
-    WMS.initLayerMetadata(layerConfig, layerCapabilities, displayDateMode);
+    await WMS.initLayerMetadata(layerConfig, layerCapabilities, displayDateMode);
 
     // If found
     if (layerCapabilities) {
@@ -296,7 +296,7 @@ export class WMS extends AbstractGeoViewRaster {
     };
 
     // Optional projection override
-    sourceOptions.projection = layerConfig.getProjectionWithEPSG();
+    sourceOptions.projection = layerConfig.getSourceProjectionWithEPSG();
 
     // Create the source
     const olSource = new ImageWMS(sourceOptions);
@@ -828,11 +828,11 @@ export class WMS extends AbstractGeoViewRaster {
    * @param layerCapabilities - The WMS capabilities metadata for the specific layer
    * @param displayDateMode - The display date mode to use when creating time dimensions
    */
-  static initLayerMetadata(
+  static async initLayerMetadata(
     layerConfig: OgcWmsLayerEntryConfig,
     layerCapabilities: TypeMetadataWMSCapabilityLayer | undefined,
     displayDateMode: DisplayDateMode
-  ): void {
+  ): Promise<void> {
     // Set the layer metadata (capabilities)
     layerConfig.setLayerMetadata(layerCapabilities);
 
@@ -857,6 +857,11 @@ export class WMS extends AbstractGeoViewRaster {
         // Validate and update the bounds initial settings
         layerConfig.initInitialSettingsBoundsFromMetadata(layerCapabilities.EX_GeographicBoundingBox.extent);
       }
+
+      // Read the first CRS from the list
+      // TODO: Do we want to have an array instead - just for WMS (other types don't work like this)?
+      const firstCRS = layerCapabilities.CRS?.[0];
+      if (firstCRS) await layerConfig.initProjectionFromMetadata(firstCRS);
 
       // If there's a dimension
       if (layerCapabilities.Dimension) {

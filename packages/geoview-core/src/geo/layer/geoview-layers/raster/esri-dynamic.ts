@@ -14,6 +14,7 @@ import { EsriUtilities } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import type { DisplayDateMode } from '@/api/types/map-schema-types';
+import { Projection } from '@/geo/utils/projection';
 
 export interface TypeEsriDynamicLayerConfig extends TypeGeoviewLayerConfig {
   // TODO: Refactor - Layers - Get rid of the `geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_DYNAMIC` property in this interface and all others in other layers.
@@ -323,16 +324,15 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     // If forcing service projection so that OpenLayers takes care of reprojecting locally on the map
     if (source.forceServiceProjection) {
       // Find the SRID from the layer metadata
-      const srid =
-        layerConfig.getLayerMetadata()?.sourceSpatialReference?.latestWkid || layerConfig.getLayerMetadata()?.sourceSpatialReference?.wkid;
+      const projection = layerConfig.getMetadataProjection()!.getCode();
 
       // Tweak the source params and projection to force it to use the native projection of the service, not the projection of the map
       // GV Set the image spatial reference to the service source - performance is better when open layers does the conversion
       // GV.CONT Older versions of ArcGIS Server are not properly converted, so this is only used for version 10.8+
       // GV This line (especially bboxSR) fixes an issue with EsriDynamic not taking in consideration the map projection in sourceOptions.projection (maybe an old Esri service?)
-      sourceOptions.projection = `EPSG:${srid}`;
-      sourceOptions.params!.imageSR = srid;
-      sourceOptions.params!.bboxSR = srid;
+      sourceOptions.projection = projection;
+      sourceOptions.params!.imageSR = Projection.readEPSGNumber(projection);
+      sourceOptions.params!.bboxSR = Projection.readEPSGNumber(projection);
     }
 
     // Create the source

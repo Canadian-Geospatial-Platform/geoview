@@ -4,7 +4,6 @@ import type { Projection as OLProjection } from 'ol/proj';
 
 import type { GeoJSONLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
-import { Projection } from '@/geo/utils/projection';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { logger } from '@/core/utils/logger';
 
@@ -79,14 +78,12 @@ export class GVGeoJSON extends AbstractGVVector {
     // Keep internally
     this.#geoJsonSource = geojsonObject;
 
-    // Read the EPSG from the data
-    const dataEPSG = GeoUtilities.readEPSGOfGeoJSON(geojsonObject);
-
-    // Check if we have it in Projection and try adding it if we're missing it
-    await Projection.addProjectionIfMissing(dataEPSG);
-
     // Read the features (dataProjection can remain undefined here to let OpenLayers guess it via the GeoJSON reader)
-    const features = GeoUtilities.readFeaturesFromGeoJSON(geojsonObject, { featureProjection: projection, dataProjection: dataEPSG });
+    const sourceFeaturesInfo = await GeoUtilities.readFeaturesFromGeoJSON(geojsonObject, this.getDataProjection(), projection);
+    const { features } = sourceFeaturesInfo;
+
+    // Update the source data projection
+    this.getOLSource().setDataProjection(sourceFeaturesInfo.dataProjection);
 
     // Get the OL layer
     const olLayer = this.getOLLayer();

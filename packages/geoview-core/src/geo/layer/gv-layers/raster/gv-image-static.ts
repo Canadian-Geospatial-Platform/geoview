@@ -53,7 +53,7 @@ export class GVImageStatic extends AbstractGVRaster {
    *
    * @returns The Static source instance associated with this layer.
    */
-  override getOLSource(): Static {
+  protected override getOLSource(): Static {
     // Get source from OL
     return super.getOLSource() as Static;
   }
@@ -118,11 +118,14 @@ export class GVImageStatic extends AbstractGVRaster {
     // Wait for the source to be ready, just in case the caller is early
     await this.waitForSourceReady();
 
+    // Get the OpenLayers source (not the configured source property)
+    const source = this.getOLSource();
+
     // Get the source projection
-    const sourceProjection = this.getOLSource().getProjection() || undefined;
+    const sourceProjection = source.getProjection() ?? undefined;
 
     // Get the layer bounds
-    let sourceExtent = this.getOLSource()?.getImageExtent();
+    let sourceExtent = source.getImageExtent();
 
     // If both found
     if (sourceExtent && sourceProjection) {

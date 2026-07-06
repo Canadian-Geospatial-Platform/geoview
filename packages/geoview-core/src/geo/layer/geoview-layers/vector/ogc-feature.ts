@@ -24,7 +24,7 @@ import { GVOGCFeature } from '@/geo/layer/gv-layers/vector/gv-ogc-feature';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { LayerServiceMetadataUnableToFetchError } from '@/core/exceptions/layer-exceptions';
 import { formatError } from '@/core/exceptions/core-exceptions';
-import { GeoUtilities } from '@/geo/utils/utilities';
+import { GeoUtilities, type SourceFeaturesInfo } from '@/geo/utils/utilities';
 
 export interface TypeOgcFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig' | 'geoviewLayerType'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.OGC_FEATURE;
@@ -149,7 +149,7 @@ export class OgcFeature extends AbstractGeoViewVector {
         // Project the latlong
         bounds = Projection.transformExtentFromProj(
           foundCollection.extent.spatial.bbox[0],
-          Projection.getProjectionFromString(foundCollection.extent.spatial.crs),
+          Projection.getProjectionFromStringOrNumber(foundCollection.extent.spatial.crs),
           Projection.getProjectionLonLat()
         );
 
@@ -211,18 +211,12 @@ export class OgcFeature extends AbstractGeoViewVector {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     sourceOptions: SourceOptions<Feature>,
     readOptions: ReadOptions
-  ): Promise<Feature[]> {
+  ): Promise<SourceFeaturesInfo> {
     // Query
     const responseData = await Fetch.fetchJson(`${layerConfig.getDataAccessPath(true)}collections/${layerConfig.layerId}/items?f=json`);
 
-    // Read the EPSG from the data
-    const dataEPSG = GeoUtilities.readEPSGOfGeoJSON(responseData);
-
-    // Check if we have it in Projection and try adding it if we're missing it
-    await Projection.addProjectionIfMissing(dataEPSG);
-
     // Read the features
-    return GeoUtilities.readFeaturesFromGeoJSON(responseData, readOptions);
+    return GeoUtilities.readFeaturesFromGeoJSON(responseData, readOptions.dataProjection, readOptions.featureProjection);
   }
 
   /**

@@ -414,8 +414,8 @@ export class WMTS extends AbstractGeoViewRaster {
     let metadataProjectionCode = metadataTileMatrixFound['ows:SupportedCRS'].split(':').slice(-1)[0];
     if (metadataProjectionCode === 'CRS84') metadataProjectionCode = '4326'; // CRS84 is equivalent to EPSG:4326
 
-    // Check if we support that projection and if not add it on-the-fly
-    await Projection.addProjectionIfMissing(`EPSG:${metadataProjectionCode}`);
+    // Set the metadata projection on the layer config
+    await layerConfig.initProjectionFromMetadata(metadataProjectionCode);
 
     // Set the metadata on the layer config
     const layerMetadata = { Layer: metadataLayerFound, TileMatrixSet: metadataTileMatrixFound };
@@ -501,7 +501,7 @@ export class WMTS extends AbstractGeoViewRaster {
     if (
       layerConfig.hasDataAccessPath() &&
       layerConfig.getSource().extent &&
-      (layerConfig.tileMatrixSet || layerConfig.getProjectionWithEPSG())
+      (layerConfig.tileMatrixSet || layerConfig.getSourceProjectionWithEPSG())
     ) {
       return WMTS.#createWMTSSourceFromConfig(layerConfig);
     }
@@ -541,18 +541,15 @@ export class WMTS extends AbstractGeoViewRaster {
       style = foundStyle['ows:Identifier'] || 'default';
     }
 
-    // Extract the projection code from the TileMatrixSet's SupportedCRS and create an OpenLayers projection object.
-    let metadataProjectionCode = tileMatrixSet['ows:SupportedCRS'].split(':').slice(-1)[0];
-    if (metadataProjectionCode === 'CRS84') metadataProjectionCode = '4326'; // CRS84 is equivalent to EPSG:4326
-    const projection = getProjection(`EPSG:${metadataProjectionCode}`);
+    // Get the projection from the metadata
+    const projection = layerConfig.getMetadataProjection();
 
     // Calculate max resolution for projection extent, defaults to max resolution for Web Mercator if extent is unavailable.
     const maxResolution = projection?.getExtent() ? getWidth(projection.getExtent()) / 256 : 156543.03392804097;
 
     const bounds = layerConfig.getInitialSettingsBounds();
-    const extent = bounds
-      ? Projection.transformExtentFromProj(bounds, getProjection('EPSG:4326')!, getProjection(`EPSG:${metadataProjectionCode}`)!)
-      : undefined;
+    const extent =
+      bounds && projection ? Projection.transformExtentFromProj(bounds, Projection.getProjectionLonLat(), projection) : undefined;
 
     // Calculate the resolutions, matrixIds, tileSizes, origins, and sizes arrays needed to create the WMTS tile grid.
     const resolutions: number[] = [];
@@ -591,7 +588,7 @@ export class WMTS extends AbstractGeoViewRaster {
       format: layer.Format || 'image/png',
       layer: layerConfig.layerId,
       matrixSet: tileMatrixSet['ows:Identifier'],
-      projection: projection!,
+      projection: projection,
       style,
       tileGrid,
     };
@@ -614,7 +611,7 @@ export class WMTS extends AbstractGeoViewRaster {
     const sourceConfig = layerConfig.getSource();
 
     // Derive the projection code from the tileMatrixSet identifier or the source projection
-    const projectionCode = layerConfig.tileMatrixSet ? `EPSG:${layerConfig.tileMatrixSet}` : layerConfig.getProjectionWithEPSG();
+    const projectionCode = layerConfig.tileMatrixSet ? `EPSG:${layerConfig.tileMatrixSet}` : layerConfig.getSourceProjectionWithEPSG();
     const url = layerConfig.hasDataAccessPath() ? layerConfig.getDataAccessPath() : undefined;
     const projection = projectionCode ? getProjection(projectionCode) : undefined;
     const serviceExtent = sourceConfig?.extent;
