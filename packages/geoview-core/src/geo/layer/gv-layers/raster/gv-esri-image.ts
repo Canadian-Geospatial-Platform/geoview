@@ -363,6 +363,7 @@ export class GVEsriImage extends AbstractGVRaster {
       [feature],
       layerConfig,
       language,
+      true,
       layerConfig.getServiceDateFormat(),
       layerConfig.getServiceDateTimezone(),
       layerConfig.getServiceDateTemporalMode()
@@ -386,6 +387,7 @@ export class GVEsriImage extends AbstractGVRaster {
     features: Feature[],
     layerConfig: EsriImageLayerEntryConfig,
     language: TypeDisplayLanguage,
+    includeNoStyleFeatures: boolean,
     serviceDateFormat: string | undefined,
     serviceDateIANA: string | undefined,
     serviceDateTemporalMode: TemporalMode | undefined
@@ -403,6 +405,7 @@ export class GVEsriImage extends AbstractGVRaster {
       features,
       layerConfig,
       language,
+      includeNoStyleFeatures,
       serviceDateFormat,
       serviceDateIANA,
       serviceDateTemporalMode

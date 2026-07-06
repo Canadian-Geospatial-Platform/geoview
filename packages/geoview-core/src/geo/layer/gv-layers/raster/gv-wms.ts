@@ -16,7 +16,13 @@ import { GeoUtilities } from '@/geo/utils/utilities';
 import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
 import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import type { OgcWfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
-import type { TypeFeatureInfoEntry, TypeOutfieldsType, TypeFeatureInfoResult, TypeDisplayLanguage } from '@/api/types/map-schema-types';
+import type {
+  TypeFeatureInfoEntry,
+  TypeOutfieldsType,
+  TypeFeatureInfoResult,
+  TypeDisplayLanguage,
+  TypeLayerStyleConfig,
+} from '@/api/types/map-schema-types';
 import { CONFIG_PROXY_URL } from '@/api/types/map-schema-types';
 import type { TypeLegend, TypeMetadataFeatureInfo } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
@@ -657,78 +663,6 @@ export class GVWMS extends AbstractGVRaster {
     this.#emitWmsStyleChanged({ wmsStyleName: wmsStyleId });
   }
 
-  /**
-   * Fetches feature data from a WFS GetFeature request URL (expected to return GeoJSON),
-   * parses the response into OpenLayers features, and converts them into GeoView
-   * Feature Info entries with appropriate attribute formatting.
-   *
-   * This method:
-   * - Performs an HTTP request to a WFS GetFeature endpoint.
-   * - Parses the returned GeoJSON into OL features.
-   * - Applies WFS/WMS configuration (schema, outfields, styles, filters).
-   * - Formats fields according to WFS metadata, including date parsing rules.
-   * - Returns an array of standardized `TypeFeatureInfoEntry` objects.
-   *
-   * @param urlWithOutputJson - The full WFS GetFeature request URL. Must specify an output format compatible
-   *   with GeoJSON (e.g., `outputFormat=application/json`)
-   * @param wmsLayerConfig - The associated WMS layer configuration. Styling and filter settings from this
-   *   config are applied when formatting the Feature Info results
-   * @param wfsLayerConfig - The WFS layer configuration used for schema tags, outfields, metadata, and
-   *   date formatting
-   * @param language - The display language, used to guess the best name field if `nameField` is not provided in the WMS layer config
-   * @param abortController - Optional {@link AbortController} used to cancel the fetch request
-   * @returns A promise that resolves with the feature info result
-   * @throws {ResponseError} When the response is not OK (non-2xx)
-   * @throws {ResponseEmptyError} When the JSON response is empty
-   * @throws {RequestTimeoutError} When the request exceeds the timeout duration
-   * @throws {RequestAbortedError} When the request was aborted by the caller's signal
-   * @throws {NetworkError} When a network issue happened
-   */
-  static async fetchAndParseFeaturesFromWFSUrl(
-    urlWithOutputJson: string,
-    wmsLayerConfig: OgcWmsLayerEntryConfig,
-    wfsLayerConfig: OgcWfsLayerEntryConfig,
-    language: TypeDisplayLanguage,
-    abortController: AbortController | undefined = undefined
-  ): Promise<TypeFeatureInfoResult> {
-    // Call the GetFeature
-    const responseData = await Fetch.fetchJson(urlWithOutputJson, abortController);
-
-    // Read the EPSG from the data
-    const dataEPSG = GeoUtilities.readEPSGOfGeoJSON(responseData);
-
-    // Check if we have it in Projection and try adding it if we're missing it
-    await Projection.addProjectionIfMissing(dataEPSG);
-
-    // Read the features
-    const features = GeoUtilities.readFeaturesFromGeoJSON(responseData, undefined);
-
-    // Find the best name field and validate its existance at the same time when one was initially configured
-    const nameField = AbstractGVLayer.findBestNameField(wmsLayerConfig.getNameField(), wfsLayerConfig.getOutfields(), language);
-
-    // The style favoring the style in the WMS layer config in case it was overridden otherwise take the WFS style if any
-    const layerStyle = wmsLayerConfig.getLayerStyle() ?? wfsLayerConfig.getLayerStyle();
-
-    // Parse the features
-    const results = AbstractGVLayer.helperFormatFeatureInfoResult(
-      features,
-      wfsLayerConfig.layerPath,
-      wfsLayerConfig.getSchemaTag(),
-      nameField,
-      wfsLayerConfig.getOutfields(),
-      wmsLayerConfig.hasOutfieldsPK(),
-      undefined,
-      layerStyle,
-      wmsLayerConfig.getServiceDateFormat(),
-      wmsLayerConfig.getServiceDateTimezone(),
-      wmsLayerConfig.getServiceDateTemporalMode(),
-      AbstractGVLayer.helperGetFieldValue
-    );
-
-    // Return the results
-    return { results };
-  }
-
   // #endregion PUBLIC METHODS
 
   // #region PRIVATE METHODS
@@ -1069,7 +1003,7 @@ export class GVWMS extends AbstractGVRaster {
 
   // #endregion PRIVATE METHODS
 
-  // #region STATIC METHODS
+  // #region STATIC PUBLIC METHODS
 
   /**
    * Applies a view filter to a WMS or an Esri Image layer's source by updating the source parameters.
@@ -1165,6 +1099,83 @@ export class GVWMS extends AbstractGVRaster {
       );
     }
   }
+
+  /**
+   * Fetches feature data from a WFS GetFeature request URL (expected to return GeoJSON),
+   * parses the response into OpenLayers features, and converts them into GeoView
+   * Feature Info entries with appropriate attribute formatting.
+   *
+   * This method:
+   * - Performs an HTTP request to a WFS GetFeature endpoint.
+   * - Parses the returned GeoJSON into OL features.
+   * - Applies WFS/WMS configuration (schema, outfields, styles, filters).
+   * - Formats fields according to WFS metadata, including date parsing rules.
+   * - Returns an array of standardized `TypeFeatureInfoEntry` objects.
+   *
+   * @param urlWithOutputJson - The full WFS GetFeature request URL. Must specify an output format compatible
+   *   with GeoJSON (e.g., `outputFormat=application/json`)
+   * @param wmsLayerConfig - The associated WMS layer configuration. Styling and filter settings from this
+   *   config are applied when formatting the Feature Info results
+   * @param wfsLayerConfig - The WFS layer configuration used for schema tags, outfields, metadata, and
+   *   date formatting
+   * @param language - The display language, used to guess the best name field if `nameField` is not provided in the WMS layer config
+   * @param abortController - Optional {@link AbortController} used to cancel the fetch request
+   * @returns A promise that resolves with the feature info result
+   * @throws {ResponseError} When the response is not OK (non-2xx)
+   * @throws {ResponseEmptyError} When the JSON response is empty
+   * @throws {RequestTimeoutError} When the request exceeds the timeout duration
+   * @throws {RequestAbortedError} When the request was aborted by the caller's signal
+   * @throws {NetworkError} When a network issue happened
+   */
+  static async fetchAndParseFeaturesFromWFSUrl(
+    urlWithOutputJson: string,
+    wmsLayerConfig: OgcWmsLayerEntryConfig,
+    wfsLayerConfig: OgcWfsLayerEntryConfig,
+    language: TypeDisplayLanguage,
+    abortController: AbortController | undefined = undefined
+  ): Promise<TypeFeatureInfoResult> {
+    // Call the GetFeature
+    const responseData = await Fetch.fetchJson(urlWithOutputJson, abortController);
+
+    // Read the EPSG from the data
+    const dataEPSG = GeoUtilities.readEPSGOfGeoJSON(responseData);
+
+    // Check if we have it in Projection and try adding it if we're missing it
+    await Projection.addProjectionIfMissing(dataEPSG);
+
+    // Read the features
+    const features = GeoUtilities.readFeaturesFromGeoJSON(responseData, undefined);
+
+    // Find the best name field and validate its existance at the same time when one was initially configured
+    const nameField = AbstractGVLayer.findBestNameField(wmsLayerConfig.getNameField(), wfsLayerConfig.getOutfields(), language);
+
+    // The style favoring the style in the WMS layer config in case it was overridden otherwise take the WFS style if any
+    const layerStyle = wmsLayerConfig.getLayerStyle() ?? wfsLayerConfig.getLayerStyle();
+
+    // Parse the features
+    const results = AbstractGVLayer.helperFormatFeatureInfoResult(
+      features,
+      wfsLayerConfig.layerPath,
+      wfsLayerConfig.getSchemaTag(),
+      nameField,
+      wfsLayerConfig.getOutfields(),
+      wmsLayerConfig.hasOutfieldsPK(),
+      undefined,
+      layerStyle,
+      this.#shouldIncludeNoStyleFeatures(layerStyle),
+      wmsLayerConfig.getServiceDateFormat(),
+      wmsLayerConfig.getServiceDateTimezone(),
+      wmsLayerConfig.getServiceDateTemporalMode(),
+      AbstractGVLayer.helperGetFieldValue
+    );
+
+    // Return the results
+    return { results };
+  }
+
+  // #endregion STATIC PUBLIC METHODS
+
+  // #region STATIC PRIVATE METHODS
 
   /**
    * Retrieves feature information from a WMS layer using the `application/json` or `application/geojson` info format.
@@ -1897,7 +1908,21 @@ export class GVWMS extends AbstractGVRaster {
     if (error instanceof RequestAbortedError) throw error;
   }
 
-  // #endregion STATIC METHODS
+  /**
+   * Determines whether features without a matching style should be included in results.
+   *
+   * @param layerStyle - The layer style configuration, or undefined if no style is applied
+   * @returns Whether to include features that have no matching style
+   */
+  static #shouldIncludeNoStyleFeatures(layerStyle: TypeLayerStyleConfig | undefined): boolean {
+    // If we have a style, we want to make sure to only get the features for which we have a style
+    // If we have no style, we do our best to include any/all features
+    let includeNoStyleFeatures = true;
+    if (layerStyle) includeNoStyleFeatures = false;
+    return includeNoStyleFeatures;
+  }
+
+  // #endregion STATIC PRIVATE METHODS
 
   // #region EVENTS
 

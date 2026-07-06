@@ -303,6 +303,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
           features,
           layerConfig,
           language,
+          true,
           layerConfig.getServiceDateFormat(),
           layerConfig.getServiceDateTimezone(),
           layerConfig.getServiceDateTemporalMode()
@@ -432,6 +433,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       features,
       layerConfig,
       language,
+      true,
       layerConfig.getServiceDateFormatIdentify(),
       layerConfig.getServiceDateTimezone(),
       layerConfig.getServiceDateTemporalMode()
