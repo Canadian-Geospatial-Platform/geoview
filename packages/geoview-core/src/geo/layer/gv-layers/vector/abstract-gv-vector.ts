@@ -257,6 +257,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
         features,
         layerConfig,
         language,
+        true,
         layerConfig.getServiceDateFormat(),
         layerConfig.getServiceDateTimezone(),
         layerConfig.getServiceDateTemporalMode()
@@ -308,6 +309,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
         features,
         layerConfig,
         language,
+        true,
         layerConfig.getServiceDateFormat(),
         layerConfig.getServiceDateTimezone(),
         layerConfig.getServiceDateTemporalMode()
