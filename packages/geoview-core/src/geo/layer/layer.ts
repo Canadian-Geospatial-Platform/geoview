@@ -2,7 +2,7 @@
 import type { FitOptions } from 'ol/View';
 
 import type { TypeOutfieldsType } from '@/api/types/map-schema-types';
-import type { TypeGeoviewLayerConfig, TypeMosaicRule } from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerConfig, TypeLayerStatus, TypeMosaicRule } from '@/api/types/layer-schema-types';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import type { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import EventHelper, { type EventDelegateBase } from '@/api/events/event-helper';
@@ -743,6 +743,27 @@ export class LayerApi {
   setOrToggleLayerVisibility(layerPath: string, newValue?: boolean): boolean {
     // Redirect to controller
     return this.#controllers.layerController.setOrToggleLayerVisibility(layerPath, newValue);
+  }
+
+  /**
+   * Waits for all layers to reach a given status.
+   *
+   * @param layerStatus - The desired status to wait for (e.g., 'loaded', 'processed')
+   * @returns A promise that resolves with the number of layers that have reached the specified status
+   */
+  waitForAllLayersStatus(layerStatus: TypeLayerStatus): Promise<number> {
+    // Redirect to controller
+    return this.#controllers.layerController.waitForAllLayersStatus(layerStatus);
+  }
+
+  /**
+   * Waits for all layers to be loaded.
+   *
+   * @returns A promise that resolves with the number of layers that have reached the loaded status
+   */
+  waitForLayersLoaded(): Promise<number> {
+    // Redirect to controller
+    return this.#controllers.layerController.waitForLayersLoaded();
   }
 
   // #endregion PUBLIC METHODS - LAYER CONTROLLER GENERAL REDIRECTIONS

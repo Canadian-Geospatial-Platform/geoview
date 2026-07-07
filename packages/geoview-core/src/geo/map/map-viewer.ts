@@ -1220,6 +1220,18 @@ export class MapViewer {
   }
 
   /**
+   * Returns to initial view state of the map using config.
+   *
+   * @param useAnimation - Indicates if a zoom animation should be used, default: true
+   * @returns A promise that resolves when the zoom animation is complete
+   */
+  // TODO: REFACTOR MAPVIEWER - Move this function at the 'application' level, because it has nothing to do with the map itself (more applicative)
+  zoomToInitialExtent(useAnimation = true): Promise<void> {
+    // Redirect to controller
+    return this.controllers.mapController.zoomToInitialExtent(useAnimation);
+  }
+
+  /**
    * Update the size of the icon image list based on styles.
    *
    * @param legend - The legend to check
@@ -2204,7 +2216,7 @@ export class MapViewer {
    */
   async #checkMapLayersProcessed(): Promise<void> {
     // When all layers are processed
-    const layersCount = await this.controllers.layerController.waitForAllLayersStatus('processed');
+    const layersCount = await this.layer.waitForAllLayersStatus('processed');
 
     // Log
     logger.logInfo(`Map is ready with ${layersCount} processed layer entries`, this.mapId);
@@ -2222,7 +2234,7 @@ export class MapViewer {
    */
   async #checkMapLayersLoaded(): Promise<void> {
     // When all layers are loaded
-    const layersCount = await this.controllers.layerController.waitForAllLayersStatus('loaded');
+    const layersCount = await this.layer.waitForAllLayersStatus('loaded');
 
     // Log
     logger.logInfo(`Map is ready with ${layersCount} loaded layer entries`, this.mapId);
@@ -2239,7 +2251,7 @@ export class MapViewer {
    * This is done after the layers are loaded to ensure that the map features depending on the layers (details, geochart) are properly updated with the repeated query.
    */
   #initLastQuery(): void {
-    this.controllers.layerController
+    this.layer
       .waitForLayersLoaded()
       .then(() => {
         this.controllers.layerSetController
