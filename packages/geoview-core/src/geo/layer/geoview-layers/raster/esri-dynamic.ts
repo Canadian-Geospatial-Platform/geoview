@@ -304,7 +304,13 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       };
 
       // Overwrite default from geocore custom config
+      // TODO: CHECK - Should we really deep merge a 'new' geoviewLayerConfig json object here?
+      // TO.DOCONT: It complicates things a bit in the geoviewLayerConfig in all layer entries if they are different than
+      // TO.DOCONT: the root geoviewLayerConfig, search id: e80ea1d4
+      // TO.DOCONT: If we keep the deepmerge, maybe we reoverride the geoviewLayerConfig reference at least
+      // TO.DOCONT: (mergedConfig.geoviewLayerConfig = geoviewLayerConfig) (added and commented below)?
       const mergedConfig = deepMergeObjects<EsriDynamicLayerEntryConfigProps>(layerEntryConfig, customGeocoreLayerConfig);
+      // mergedConfig.geoviewLayerConfig = geoviewLayerConfig;
 
       // Reconstruct
       return new EsriDynamicLayerEntryConfig(mergedConfig);
