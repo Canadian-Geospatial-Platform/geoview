@@ -143,6 +143,10 @@
           <code>cgpv.api.getMapViewer('map1').zoomToLonLatExtentOrCoordinate([-90, 60])</code>
         </li>
         <li>
+          <button class="btn btn-primary" id="Set-home-view">Set home view</button><br />
+          <code>cgpv.api.getMapViewer('map1').setHomeButtonView({ zoomAndCenter: [8, [-71.26, 46.8]]})</code>
+        </li>
+        <li>
           <button class="btn btn-primary" id="Extent-to-polygon">Convert an extent to a polygon (result in console)</button><br />
           <code
             >cgpv.api.utilities.geo.extentToPolygon([-87.77486341686723, 51.62285357468582, -84.57727128084842, 53.83335497555107])</code
@@ -590,6 +594,7 @@
       const placeMarkerButton = document.getElementById('Place-marker');
       const zoomExtentButton = document.getElementById('Zoom-extent');
       const zoomCoordinateButton = document.getElementById('Zoom-coordinate');
+      const setHomeButtonView = document.getElementById('Set-home-view');
       const extentToPolygonButton = document.getElementById('Extent-to-polygon');
       const polygonToExtentButton = document.getElementById('Polygon-to-extent');
       const redefineAliasFieldsButton = document.getElementById('Redefine-alias-fields');
@@ -709,7 +714,7 @@
       };
 
       // add an event listener when a button is clicked
-      addLayerButton.addEventListener('click', async () => {
+      addLayerButton.addEventListener('click', () => {
         const wmsLayerAlreadyExists = cgpv.api.getMapViewer(mapId).layer.getLayerEntryLayerPaths().includes('wmsLYR1-msi/msi-94-or-more');
         if (!wmsLayerAlreadyExists) cgpv.api.getMapViewer(mapId).layer.addGeoviewLayer(config);
         else console.log('WMS layer already exists');
@@ -717,7 +722,7 @@
 
       // Remove GeoJSON Button======================================================================================================
       // add an event listener when a button is clicked
-      removeLayerButton.addEventListener('click', async () => {
+      removeLayerButton.addEventListener('click', () => {
         const geojsonLayerAlreadyExists = cgpv.api.getMapViewer(mapId).layer.getLayerEntryLayerPaths().includes('geojsonLYR1/base-group');
         if (geojsonLayerAlreadyExists) cgpv.api.getMapViewer(mapId).layer.removeLayerUsingPath('geojsonLYR1/base-group');
         else console.log('GeoJSON layer does not exist');
@@ -725,57 +730,62 @@
 
       // Remove All Button==========================================================================================================
       // add an event listener when a button is clicked
-      removeAllLayersButton.addEventListener('click', async () => {
+      removeAllLayersButton.addEventListener('click', () => {
         cgpv.api.getMapViewer(mapId).layer.removeAllGeoviewLayers();
       });
 
       // Toggle Visibility Button===================================================================================================
       // add an event listener when a button is clicked
-      toggleVisibilityButton.addEventListener('click', async () => {
+      toggleVisibilityButton.addEventListener('click', () => {
         cgpv.api.getMapViewer(mapId).layer.setOrToggleLayerVisibility(LYR_PATH_FEATURE);
       });
 
       // Set All Visible Button=====================================================================================================
       // add an event listener when a button is clicked
-      setAllVisibleButton.addEventListener('click', async () => {
+      setAllVisibleButton.addEventListener('click', () => {
         cgpv.api.getMapViewer(mapId).layer.setAllLayersVisibility(true);
       });
 
       // Set All Not Visible Button=================================================================================================
       // add an event listener when a button is clicked
-      setAllNotVisibleButton.addEventListener('click', async () => {
+      setAllNotVisibleButton.addEventListener('click', () => {
         cgpv.api.getMapViewer(mapId).layer.setAllLayersVisibility(false);
       });
 
       // Rename Layer Button========================================================================================================
       // add an event listener when a button is clicked
-      renameLayerButton.addEventListener('click', async () => {
+      renameLayerButton.addEventListener('click', () => {
         cgpv.api.getMapViewer(mapId).layer.setLayerName(LYR_PATH_UNIQUE, 'Water Quantity');
       });
 
       // Place Marker Button========================================================================================================
       // add an event listener when a button is clicked
-      placeMarkerButton.addEventListener('click', async () => {
+      placeMarkerButton.addEventListener('click', () => {
         cgpv.api.getMapViewer(mapId).clickMarkerIconShow({ lonlat: [-90, 60] });
       });
 
       // Zoom to Extent Button========================================================================================================
       // add an event listener when a button is clicked
-      zoomExtentButton.addEventListener('click', async () => {
+      zoomExtentButton.addEventListener('click', () => {
         cgpv.api
           .getMapViewer(mapId)
           .zoomToLonLatExtentOrCoordinate([-87.77486341686723, 51.62285357468582, -84.57727128084842, 53.833354975551075]);
       });
 
-      // Zoom to Coordinate Button========================================================================================================
+      // Zoom to Coordinate Button=======================================================================================================
       // add an event listener when a button is clicked
-      zoomCoordinateButton.addEventListener('click', async () => {
+      zoomCoordinateButton.addEventListener('click', () => {
         cgpv.api.getMapViewer(mapId).zoomToLonLatExtentOrCoordinate([-90, 60]);
+      });
+
+      // Set the home view===============================================================================================================
+      setHomeButtonView.addEventListener('click', () => {
+        cgpv.api.getMapViewer(mapId).setHomeButtonView({ zoomAndCenter: [8, [-71.26, 46.8]]});
       });
 
       // Extent to Polygon Button========================================================================================================
       // add an event listener when a button is clicked
-      extentToPolygonButton.addEventListener('click', async () => {
+      extentToPolygonButton.addEventListener('click', () => {
         console.log(
           cgpv.api.utilities.geo.extentToPolygon([-87.77486341686723, 51.62285357468582, -84.57727128084842, 53.833354975551075])
         );
@@ -787,13 +797,13 @@
       ]);
 
       // add an event listener when a button is clicked
-      polygonToExtentButton.addEventListener('click', async () => {
+      polygonToExtentButton.addEventListener('click', () => {
         console.log(cgpv.api.utilities.geo.polygonToExtent(polygon));
       });
 
       // Redefine alias fields Button========================================================================================================
       // add an event listener when a button is clicked
-      redefineAliasFieldsButton.addEventListener('click', async () => {
+      redefineAliasFieldsButton.addEventListener('click', () => {
         cgpv.api
           .getMapViewer(mapId)
           .layer.redefineFeatureFields('geojsonLYR1/base-group/polygons.json', ['Location Province', 'Date Created', 'Images'], 'alias');
@@ -801,94 +811,97 @@
 
       // Open details Button========================================================================================================
       // add an event listener when a button is clicked
-      openDetailsButton.addEventListener('click', async () => {
+      openDetailsButton.addEventListener('click', () => {
         cgpv.api.getMapViewer(mapId).footerBarApi.selectTab('details');
       });
 
       // Open geolocator Button========================================================================================================
       // add an event listener when a button is clicked
-      openGeolocatorButton.addEventListener('click', async () => {
+      openGeolocatorButton.addEventListener('click', () => {
         cgpv.api.getMapViewer(mapId).appBarApi.selectTab('geolocator');
       });
 
       // Disable hover Button========================================================================================================
       // add an event listener when a button is clicked
-      disableHoverButton.addEventListener('click', async () => {
+      disableHoverButton.addEventListener('click', () => {
         cgpv.api.getMapViewer(mapId).layer.setLayerHoverable(LYR_PATH_FEATURE, false);
       });
 
       // Enable hover Button========================================================================================================
       // add an event listener when a button is clicked
-      enableHoverButton.addEventListener('click', async () => {
+      enableHoverButton.addEventListener('click', () => {
         cgpv.api.getMapViewer(mapId).layer.setLayerHoverable(LYR_PATH_FEATURE, true);
       });
 
       // Disable feature info Button=================================================================================================
       // add an event listener when a button is clicked
-      disableFeatureInfoButton.addEventListener('click', async () => {
+      disableFeatureInfoButton.addEventListener('click', () => {
         cgpv.api.getMapViewer(mapId).layer.setLayerQueryable(LYR_PATH_FEATURE, false);
       });
 
       // Enable feature info Button==================================================================================================
       // add an event listener when a button is clicked
-      enableFeatureInfoButton.addEventListener('click', async () => {
+      enableFeatureInfoButton.addEventListener('click', () => {
         cgpv.api.getMapViewer(mapId).layer.setLayerQueryable(LYR_PATH_FEATURE, true);
       });
 
       // Enable show collapsed state Button==========================================================================================
       // add an event listener when a button is clicked
-      showCollapsedStateButton.addEventListener('click', async () => {
+      showCollapsedStateButton.addEventListener('click', () => {
         console.log(cgpv.api.getMapViewer(mapId).stateApi.getLegendCollapsedState(LYR_PATH_GEOCORE));
       });
 
       // Enable toggle collapse state Button==========================================================================================
       // add an event listener when a button is clicked
-      toggleCollapseButton.addEventListener('click', async () => {
+      toggleCollapseButton.addEventListener('click', () => {
         cgpv.api.getMapViewer(mapId).stateApi.setLegendCollapsedState(LYR_PATH_GEOCORE, !cgpv.api.getMapViewer(mapId).stateApi.getLegendCollapsedState(LYR_PATH_GEOCORE));
       });
 
       // Enable show layer info Button================================================================================================
       // add an event listener when a button is clicked
-      showLayerInfoButton.addEventListener('click', async () => {
+      showLayerInfoButton.addEventListener('click', () => {
         console.log(cgpv.api.getMapViewer(mapId).getMapLayerOrderInfo());
       });
 
       // Enable language en Button================================================================================================
       // add an event listener when a button is clicked
-      changeLanguageEnglishButton.addEventListener('click', async () => {
+      changeLanguageEnglishButton.addEventListener('click', () => {
         cgpv.api.getMapViewer(mapId).setLanguage('en');
       });
 
       // Enable language fr Button================================================================================================
       // add an event listener when a button is clicked
-      changeLanguageFrenchButton.addEventListener('click', async () => {
+      changeLanguageFrenchButton.addEventListener('click', () => {
         cgpv.api.getMapViewer(mapId).setLanguage('fr');
       });
 
       // Change basemap Button================================================================================================
       // add an event listener when a button is clicked
-      changeBasemapButton.addEventListener('click', async () => {
+      changeBasemapButton.addEventListener('click', () => {
         // Create basemap
-        const basemap = await cgpv.api.getMapViewer(mapId).basemap.createCoreBasemap((basemapOptions = { basemapId: 'simple' }));
-        // Set on map
-        cgpv.api.getMapViewer(mapId).basemap.setBasemap(basemap);
+        cgpv.api.getMapViewer(mapId).basemap.createCoreBasemap({ basemapId: 'simple' }).then((basemap) => {
+          // Set on map
+          cgpv.api.getMapViewer(mapId).basemap.setBasemap(basemap);
+        }).catch((error) => {
+          console.error('Failed to create basemap:', error);
+        });
       });
 
       // Set layer Button================================================================================================
       // add an event listener when a button is clicked
-      setLayerButton.addEventListener('click', async () => {
+      setLayerButton.addEventListener('click', () => {
         cgpv.api.getMapViewer(mapId).stateApi.setSelectedLayersTabLayer(LYR_PATH_NON_METAL);
       });
 
       // Swiper add Button================================================================================================
       // add an event listener when a button is clicked
-      swiperAddButton.addEventListener('click', async () => {
+      swiperAddButton.addEventListener('click', () => {
         cgpv.api.getMapViewer(mapId).plugins['swiper'].activateForLayer(LYR_PATH_NON_METAL);
       });
 
       // Swiper remove Button================================================================================================
       // add an event listener when a button is clicked
-      swiperRemoveButton.addEventListener('click', async () => {
+      swiperRemoveButton.addEventListener('click', () => {
         cgpv.api.getMapViewer(mapId).plugins['swiper'].deActivateForLayer(LYR_PATH_NON_METAL);
       });
 

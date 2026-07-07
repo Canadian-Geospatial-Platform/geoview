@@ -28,6 +28,7 @@ import type {
   TypeStyleGeometry,
   TypeMapMouseInfo,
   TypeMapState,
+  TypeMapViewSettings,
 } from '@/api/types/map-schema-types';
 import {
   MAP_CENTER,
@@ -1205,6 +1206,17 @@ export class MapViewer {
         },
       });
     });
+  }
+
+  /**
+   * Sets the home button view settings for the map.
+   *
+   * @param view - The view settings to set for the home button
+   */
+  // TODO: REFACTOR MAPVIEWER - Move this function at the 'application' level, because it has nothing to do with the map itself (more applicative) (or if so, keep the home view settings at the domain level instead of coupling to store via controller here)
+  setHomeButtonView(view: TypeMapViewSettings): void {
+    // Redirect to controller
+    this.controllers.mapController.setHomeButtonView(view);
   }
 
   /**

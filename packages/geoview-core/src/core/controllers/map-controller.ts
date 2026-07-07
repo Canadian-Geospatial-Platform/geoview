@@ -14,6 +14,7 @@ import {
   type TypeMapConfig,
   type TypeMapFeaturesInstance,
   type TypeMapMouseInfo,
+  type TypeMapViewSettings,
   type TypeNtsResponse,
   type TypePointMarker,
   type TypeServiceUrls,
@@ -69,6 +70,7 @@ import {
   setStoreMapFixNorth,
   setStoreMapGeolocatorSearchArea,
   setStoreMapHighlightedFeatures,
+  setStoreMapHomeButtonView,
   setStoreMapInteraction,
   setStoreMapIsMouseInsideMap,
   setStoreMapLoaded,
@@ -554,6 +556,16 @@ export class MapController extends AbstractMapViewerController {
 
     // Emit the geolocator search event
     this.#emitGeolocatorSearch({ searchItem, coords, bbox });
+  }
+
+  /**
+   * Sets the home button view settings in the store for the map.
+   *
+   * @param view - The view settings to set for the home button
+   */
+  setHomeButtonView(view: TypeMapViewSettings): void {
+    // Save to the store
+    setStoreMapHomeButtonView(this.getMapId(), view);
   }
 
   // #endregion PUBLIC METHODS - ZOOM FUNCTIONS

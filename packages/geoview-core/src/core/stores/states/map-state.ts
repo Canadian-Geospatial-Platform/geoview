@@ -289,7 +289,8 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       /**
        * Sets the initial view of the map.
        *
-       * @param view - The view extent or zoom&center
+       * @param view - The view extent or zoom & center
+       * @deprecated Seems unused as this is set upon initialization and never actually changed later
        */
       setInitialView: (view: TypeZoomAndCenter | Extent): void => {
         const viewType = get().mapState.initialView;
@@ -326,7 +327,6 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
        * Sets the view of the home button.
        *
        * @param view - The view to use
-       * @deprecated Seems unused
        */
       setHomeView: (view: TypeMapViewSettings): void => {
         set({
@@ -923,7 +923,6 @@ export const setStoreMapGeolocatorSearchArea = (mapId: string, searchItem: strin
 
 /**
  * Sets the home button view settings in the store.
- * @deprecated Seems unused
  */
 export const setStoreMapHomeButtonView = (mapId: string, view: TypeMapViewSettings): void => {
   getStoreMapState(mapId).actions.setHomeView(view);

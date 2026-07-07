@@ -90,13 +90,18 @@ export class GeoCore {
       response.layers[0].geoviewLayerName = layerConfig.geoviewLayerName;
     }
 
-    // TODO: CLEANUP - Remove commented code 2026-03-06 - trying to reduce the clutter with the layer name processing
-    // // In case of simplified geocoreConfig being provided, just update geoviewLayerName and the first layer
-    // if (layerConfig?.geoviewLayerName) {
-    //   response.layers[0].geoviewLayerName = layerConfig.geoviewLayerName;
-    //   if (response.layers[0].listOfLayerEntryConfig.length === 1)
-    //     response.layers[0].listOfLayerEntryConfig[0].setLayerName(layerConfig.geoviewLayerName);
-    // }
+    // In case of simplified geocoreConfig being provided, just update geoviewLayerName and the first layer
+    // GV This fixes the test like adding DFO via custom layer config such as:
+    // [
+    //   {
+    //     "layerName": "Critical Habitat for Aquatic Species at Risk - Canada"
+    //   }
+    // ]
+    if (layerConfig?.geoviewLayerName) {
+      response.layers[0].geoviewLayerName = layerConfig.geoviewLayerName;
+      if (response.layers[0].listOfLayerEntryConfig.length === 1)
+        response.layers[0].listOfLayerEntryConfig[0].setLayerName(layerConfig.geoviewLayerName);
+    }
 
     // Make sure if it's a duplicate, the response has the duplicates safe ID
     if (uuid.includes(':') && uuid.split(':')[0] === response.layers[0].geoviewLayerId) {
