@@ -1108,6 +1108,9 @@ export class WMS extends AbstractGeoViewRaster {
     };
 
     // Merge with custom config if provided
+    // TODO: CHECK - Should we really deep merge a 'new' geoviewLayerConfig json object here?
+    // TO.DOCONT: It complicates things a bit in the geoviewLayerConfig in all layer entries if they are different than
+    // TO.DOCONT: the root geoviewLayerConfig, search id: e80ea1d4
     const mergedConfig = deepMergeObjects<OgcWmsLayerEntryConfigProps>(layerEntryConfig, customGeocoreLayerConfig);
 
     // Construct and return layer entry
