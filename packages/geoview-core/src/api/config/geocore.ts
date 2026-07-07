@@ -97,6 +97,7 @@ export class GeoCore {
     //     "layerName": "Critical Habitat for Aquatic Species at Risk - Canada"
     //   }
     // ]
+    // GV and called like cgpv.api.getMapViewer('map1').layer.addGeoviewLayerByGeoCoreUUID(uuid, customListOfLayerEntries);
     if (layerConfig?.geoviewLayerName) {
       response.layers[0].geoviewLayerName = layerConfig.geoviewLayerName;
       if (response.layers[0].listOfLayerEntryConfig.length === 1)
