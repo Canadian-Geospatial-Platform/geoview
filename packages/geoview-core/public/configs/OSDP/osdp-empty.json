@@ -54,7 +54,8 @@
     "tabs": {
       "core": [
         "layers",
-        "data-table"
+        "data-table",
+        "time-slider"
       ]
     }
   },

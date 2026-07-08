@@ -1,11 +1,43 @@
+import { memo } from 'react';
+
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { logger } from 'geoview-core/core/utils/logger';
 
 import { useTranslation } from 'geoview-core/core/translation/i18n';
 import { useFilterPanelController } from 'geoview-core/core/controllers/use-controllers';
 
+import type { SxStyles } from 'geoview-core/ui/style/types';
+
 import type { TypeFilterAttribute, TypeFilterValue } from '../../types';
 import { getSxClasses } from './control-styles';
+
+/**
+ * Props for FilterCheckboxItem component.
+ */
+interface FilterCheckboxItemProps {
+  /** The value for this checkbox item. */
+  value: string | number;
+  /** Whether this item is currently selected. */
+  isSelected: boolean;
+  /** The display label for this item. */
+  displayLabel: string;
+  /** Callback when the checkbox state changes. */
+  onCheckboxChange: (val: string | number, checked: boolean) => void;
+  /** The sx classes object. */
+  sxClasses: SxStyles;
+}
+
+/**
+ * Event details for multiselect filter changes.
+ */
+interface MultiselectFilterChangeEvent {
+  /** The value that was toggled. */
+  value: string | number;
+  /** Whether the value was checked (true) or unchecked (false). */
+  checked: boolean;
+  /** The complete array of currently selected values after the change. */
+  currentValues: TypeFilterValue;
+}
 
 /**
  * Props for MultiselectFilter component.
@@ -16,12 +48,51 @@ interface MultiselectFilterProps {
   /** Current filter value. */
   value: TypeFilterValue;
   /** Callback when value changes. */
-  onChange: (value: TypeFilterValue) => void;
+  onChange: (event: MultiselectFilterChangeEvent) => void;
   /** Unique values available for selection. */
   uniqueValues: (string | number)[];
   /** Whether data is loading. */
   loading: boolean;
 }
+
+/**
+ * Renders a single filter checkbox item with label.
+ *
+ * Memoized to avoid re-rendering all items when only one checkbox changes.
+ *
+ * @param props - Properties defined in FilterCheckboxItemProps interface
+ * @returns The filter checkbox item element
+ */
+const FilterCheckboxItem = memo(function FilterCheckboxItem({
+  value,
+  isSelected,
+  displayLabel,
+  onCheckboxChange,
+  sxClasses,
+}: FilterCheckboxItemProps): JSX.Element {
+  const { cgpv } = window as TypeWindow;
+  const { useCallback } = cgpv.reactUtilities.react;
+  const { ui } = cgpv;
+  const { Checkbox, FormControlLabel } = ui.elements;
+
+  /**
+   * Handles when this checkbox's state changes.
+   */
+  const handleChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>): void => {
+      onCheckboxChange(value, event.target.checked);
+    },
+    [value, onCheckboxChange]
+  );
+
+  return (
+    <FormControlLabel
+      control={<Checkbox checked={isSelected} onChange={handleChange} size="small" />}
+      label={displayLabel}
+      sx={sxClasses.filterCheckboxItem}
+    />
+  );
+});
 
 /**
  * Creates a multi-selection checkbox filter control.
@@ -39,7 +110,7 @@ export function MultiselectFilter(props: MultiselectFilterProps): JSX.Element {
   const { cgpv } = window as TypeWindow;
   const { useCallback, useMemo } = cgpv.reactUtilities.react;
   const { ui } = cgpv;
-  const { Box, Checkbox, FormControlLabel, Typography } = ui.elements;
+  const { Box, Typography } = ui.elements;
 
   const theme = ui.useTheme();
   const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
@@ -52,11 +123,19 @@ export function MultiselectFilter(props: MultiselectFilterProps): JSX.Element {
   const handleCheckboxChange = useCallback(
     (val: string | number, checked: boolean): void => {
       const currentValues = Array.isArray(value) ? [...value] : [];
+      let newValues: TypeFilterValue;
+
       if (checked) {
-        onChange([...currentValues, val]);
+        newValues = [...currentValues, val];
       } else {
-        onChange(currentValues.filter((v) => v !== val));
+        newValues = currentValues.filter((v) => v !== val);
       }
+
+      onChange({
+        value: val,
+        checked,
+        currentValues: newValues,
+      });
     },
     [value, onChange]
   );
@@ -95,12 +174,16 @@ export function MultiselectFilter(props: MultiselectFilterProps): JSX.Element {
       <Box sx={memoSxClasses.filterMultiselectContainer}>
         {uniqueValues.map((val) => {
           const isSelected = Array.isArray(value) && value.includes(val);
+          const displayLabel = val !== null ? controller.getDisplayLabel(attribute, val) : t('FilterPanel.nullValue');
+
           return (
-            <FormControlLabel
+            <FilterCheckboxItem
               key={String(val)}
-              control={<Checkbox checked={isSelected} onChange={(e) => handleCheckboxChange(val, e.target.checked)} size="small" />}
-              label={val !== null ? controller.getDisplayLabel(attribute, val) : t('FilterPanel.nullValue')}
-              sx={memoSxClasses.filterCheckboxItem}
+              value={val}
+              isSelected={isSelected}
+              displayLabel={displayLabel}
+              onCheckboxChange={handleCheckboxChange}
+              sxClasses={memoSxClasses}
             />
           );
         })}

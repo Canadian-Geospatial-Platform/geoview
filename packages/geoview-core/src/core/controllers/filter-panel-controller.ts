@@ -23,6 +23,11 @@ import {
 } from '@/core/stores/states/filter-panel-state';
 import { getStoreDataTableFeaturesByPath } from '@/core/stores/states/data-table-state';
 import { getStoreLayerStatus } from '@/core/stores/states/layer-state';
+import {
+  LayerFilterPanelClearError,
+  LayerFilterPanelQueryError,
+  LayerRegistrationTimeoutError,
+} from '@/core/exceptions/geoview-exceptions';
 
 // #region TYPES (minimal config types for reading filter panel configuration)
 
@@ -193,42 +198,40 @@ export class FilterPanelController extends AbstractMapViewerController {
    * to the layer. Only applies if the layer is ready and exists.
    *
    * @param layerPath - The layer path
-   * @returns True if the filter was applied successfully, false otherwise
+   * @throws {LayerFilterPanelQueryError} If the layer is not found or an error occurs during application
    */
-  applyLayerFilter(layerPath: string): boolean {
+  applyLayerFilter(layerPath: string): void {
+    // Check if layer is ready
+    if (!this.isLayerReady(layerPath)) {
+      logger.logDebug(`Layer ${layerPath} is not ready yet - skipping filter application`);
+      return;
+    }
+
+    // Get the layer
+    const gvLayer = this.getControllersRegistry().layerController.getGeoviewLayerRegularIfExists(layerPath);
+    if (!gvLayer) {
+      logger.logWarning(`Layer not found: ${layerPath}`);
+      return;
+    }
+
+    // Build the filter expression from the current filter state
+    const expression = this.buildFilterExpression(layerPath);
+
+    // Apply or clear the panel filter using the proper LayerFilters API
     try {
-      // Check if layer is ready
-      if (!this.isLayerReady(layerPath)) {
-        logger.logDebug(`Layer ${layerPath} is not ready yet - skipping filter application`);
-        return false;
-      }
-
-      // Get the layer
-      const gvLayer = this.getControllersRegistry().layerController.getGeoviewLayerRegularIfExists(layerPath);
-      if (!gvLayer) {
-        logger.logWarning(`Layer not found: ${layerPath}`);
-        return false;
-      }
-
-      // Build the filter expression from the current filter state
-      const expression = this.buildFilterExpression(layerPath);
-
-      // Apply or clear the panel filter using the proper LayerFilters API
       gvLayer.setLayerFiltersPanel(expression);
-
-      // Track active filters in the store
-      if (expression) {
-        addStoreFilterPanelActiveLayerFilter(this.getMapId(), layerPath);
-        logger.logInfo(`Applied filter panel filter to layer ${layerPath}:`, expression);
-      } else {
-        removeStoreFilterPanelActiveLayerFilter(this.getMapId(), layerPath);
-        logger.logInfo(`Cleared filter panel filter for layer ${layerPath}`);
-      }
-
-      return true;
     } catch (err) {
-      logger.logError(`Error applying filter panel filter to layer ${layerPath}:`, err);
-      return false;
+      logger.logError(`Error applying filter panel filter for layer ${layerPath}:`, err);
+      throw new LayerFilterPanelQueryError(layerPath);
+    }
+
+    // Track active filters in the store
+    if (expression) {
+      addStoreFilterPanelActiveLayerFilter(this.getMapId(), layerPath);
+      logger.logInfo(`Applied filter panel filter to layer ${layerPath}:`, expression);
+    } else {
+      removeStoreFilterPanelActiveLayerFilter(this.getMapId(), layerPath);
+      logger.logInfo(`Cleared filter panel filter for layer ${layerPath}`);
     }
   }
 
@@ -252,21 +255,24 @@ export class FilterPanelController extends AbstractMapViewerController {
    * Resets the filter state and removes the panel filter from the layer's filter system.
    *
    * @param layerPath - The layer path
+   * @throws {LayerFilterPanelClearError} If the layer is not found or an error occurs during clearing
    */
   clearLayerFilters(layerPath: string): void {
     // Clear the filter state
     clearStoreFilterPanelLayerFilters(this.getMapId(), layerPath);
 
-    // Remove the panel filter from the layer using the proper LayerFilters API
+    // Try to get the gvLayer
+    const gvLayer = this.getControllersRegistry().layerController.getGeoviewLayerRegularIfExists(layerPath);
+    if (!gvLayer) return;
+
+    // Try to remove the panel filter from the layer using the proper LayerFilters API
     try {
-      const gvLayer = this.getControllersRegistry().layerController.getGeoviewLayerRegularIfExists(layerPath);
-      if (gvLayer) {
-        gvLayer.setLayerFiltersPanel(undefined);
-        removeStoreFilterPanelActiveLayerFilter(this.getMapId(), layerPath);
-        logger.logInfo(`Cleared filter panel filters for layer ${layerPath}`);
-      }
+      gvLayer.setLayerFiltersPanel(undefined);
+      removeStoreFilterPanelActiveLayerFilter(this.getMapId(), layerPath);
+      logger.logInfo(`Cleared filter panel filters for layer ${layerPath}`);
     } catch (err) {
       logger.logError(`Error clearing filter panel filter for layer ${layerPath}:`, err);
+      throw new LayerFilterPanelClearError(layerPath);
     }
   }
 
@@ -281,13 +287,15 @@ export class FilterPanelController extends AbstractMapViewerController {
 
     // Remove panel filters from all layers using the proper LayerFilters API
     Object.keys(filterState).forEach((layerPath) => {
+      const gvLayer = this.getControllersRegistry().layerController.getGeoviewLayerRegularIfExists(layerPath);
+      if (!gvLayer) return;
+
+      // Try to clear the panel filter for this layer
       try {
-        const gvLayer = this.getControllersRegistry().layerController.getGeoviewLayerRegularIfExists(layerPath);
-        if (gvLayer) {
-          gvLayer.setLayerFiltersPanel(undefined);
-        }
+        gvLayer.setLayerFiltersPanel(undefined);
       } catch (err) {
         logger.logError(`Error clearing filter panel filter for layer ${layerPath}:`, err);
+        throw new LayerFilterPanelClearError(layerPath);
       }
     });
 
@@ -325,7 +333,7 @@ export class FilterPanelController extends AbstractMapViewerController {
    *
    * @param layerPath - The layer path
    * @returns A promise that resolves when the layer is registered and queried
-   * @throws {Error} When the timeout is reached before registration
+   * @throws {LayerRegistrationTimeoutError} When the timeout is reached before registration
    */
   async ensureLayerQueried(layerPath: string): Promise<void> {
     const { allFeatureInfoLayerSet } = this.getControllersRegistry().layerSetController;
@@ -333,24 +341,25 @@ export class FilterPanelController extends AbstractMapViewerController {
 
     try {
       // Wait for the layer to be registered in AllFeatureInfoLayerSet
+      // TODO: replace the whenThisThen with: allFeatureInfoLayerSet.waitForLayerToGetRegistered(layerPath)
       await whenThisThen(() => allFeatureInfoLayerSet.getRegisteredLayerPaths().includes(layerPath), REGISTRATION_TIMEOUT);
-
-      // Layer is now registered - check if we need to trigger a query
-      const existingFeatures = getStoreDataTableFeaturesByPath(this.getMapId(), layerPath);
-
-      if (existingFeatures && existingFeatures.length > 0) {
-        logger.logDebug(`Layer ${layerPath} already has ${existingFeatures.length} features`);
-        return;
-      }
-
-      // Trigger the query
-      logger.logInfo(`Triggering feature query for layer: ${layerPath}`);
-      await this.getControllersRegistry().layerSetController.triggerGetAllFeatureInfo(layerPath);
-      logger.logDebug(`Feature query completed for layer: ${layerPath}`);
     } catch (error) {
-      logger.logWarning(`Timeout or error waiting for layer ${layerPath} to be registered:`, error);
-      throw error;
+      logger.logWarning(`Layer registration timeout for layer ${layerPath}:`, error);
+      throw new LayerRegistrationTimeoutError(layerPath);
     }
+
+    // Layer is now registered - check if we need to trigger a query
+    const existingFeatures = getStoreDataTableFeaturesByPath(this.getMapId(), layerPath);
+
+    if (existingFeatures && existingFeatures.length > 0) {
+      logger.logDebug(`Layer ${layerPath} already has ${existingFeatures.length} features`);
+      return;
+    }
+
+    // Trigger the query
+    logger.logInfo(`Triggering feature query for layer: ${layerPath}`);
+    await this.getControllersRegistry().layerSetController.triggerGetAllFeatureInfo(layerPath);
+    logger.logDebug(`Feature query completed for layer: ${layerPath}`);
   }
 
   /**
@@ -372,25 +381,25 @@ export class FilterPanelController extends AbstractMapViewerController {
    * @returns An array of unique values (processed through domain if applicable), or empty array if the layer is not queryable or has not been queried yet
    */
   getLayerFieldUniqueValues(layerPath: string, attribute: TypeFilterAttribute): (string | number)[] {
+    // Check if the layer is registered in the AllFeatureInfoLayerSet
+    const { allFeatureInfoLayerSet } = this.getControllersRegistry().layerSetController;
+    const isQueryable = allFeatureInfoLayerSet.getRegisteredLayerPaths().includes(layerPath);
+
+    if (!isQueryable) {
+      logger.logDebug(`Layer ${layerPath} is not queryable - cannot get unique values`);
+      return [];
+    }
+
+    // Get features from the data table store
+    const features = getStoreDataTableFeaturesByPath(this.getMapId(), layerPath);
+
+    if (!features || features.length === 0) {
+      logger.logDebug(`No features available yet for layer ${layerPath} - may need to query first`);
+      return [];
+    }
+
+    // Extract unique values from the feature field info
     try {
-      // Check if the layer is registered in the AllFeatureInfoLayerSet
-      const { allFeatureInfoLayerSet } = this.getControllersRegistry().layerSetController;
-      const isQueryable = allFeatureInfoLayerSet.getRegisteredLayerPaths().includes(layerPath);
-
-      if (!isQueryable) {
-        logger.logDebug(`Layer ${layerPath} is not queryable - cannot get unique values`);
-        return [];
-      }
-
-      // Get features from the data table store
-      const features = getStoreDataTableFeaturesByPath(this.getMapId(), layerPath);
-
-      if (!features || features.length === 0) {
-        logger.logDebug(`No features available yet for layer ${layerPath} - may need to query first`);
-        return [];
-      }
-
-      // Extract unique values from the feature field info
       const uniqueSet = new Set<string | number>();
 
       features.forEach((feature) => {
@@ -414,7 +423,7 @@ export class FilterPanelController extends AbstractMapViewerController {
 
       return uniqueValues;
     } catch (err) {
-      logger.logError(`Error fetching unique values for ${attribute.fieldName} in layer ${layerPath}:`, err);
+      logger.logError(`Error extracting unique values for layer ${layerPath}, field ${attribute.fieldName}:`, err);
       return [];
     }
   }
@@ -504,62 +513,58 @@ export class FilterPanelController extends AbstractMapViewerController {
    * @returns A promise that resolves when all queries have been triggered (or skipped if not needed)
    */
   async ensureLayerFeaturesQueried(): Promise<void> {
-    try {
-      // Get the filter panel config from mapFeaturesConfig (not store, to support runtime config merges)
-      const filterPanelConfig = this.getMapViewer().mapFeaturesConfig.corePackagesConfig?.find((config) =>
-        Object.keys(config).includes('filter-panel')
-      )?.['filter-panel'] as TypeFilterPanelConfig | undefined;
+    // Get the filter panel config from mapFeaturesConfig (not store, to support runtime config merges)
+    const filterPanelConfig = this.getMapViewer().mapFeaturesConfig.corePackagesConfig?.find((config) =>
+      Object.keys(config).includes('filter-panel')
+    )?.['filter-panel'] as TypeFilterPanelConfig | undefined;
 
-      if (!filterPanelConfig?.layers) {
-        logger.logDebug('No filter panel config found or no layers configured');
+    if (!filterPanelConfig?.layers) {
+      logger.logDebug('No filter panel config found or no layers configured');
+      return;
+    }
+
+    // Get the layer set controller for querying
+    const { allFeatureInfoLayerSet } = this.getControllersRegistry().layerSetController;
+
+    // Trigger queries for each enabled layer that needs it
+    const queryPromises: Promise<unknown>[] = [];
+
+    filterPanelConfig.layers.forEach((layerConfig: TypeFilterLayerConfig) => {
+      // Skip disabled layers
+      if (!layerConfig.enabled) return;
+
+      const { layerPath } = layerConfig;
+
+      // Check if the layer is queryable (registered in AllFeatureInfoLayerSet)
+      const isQueryable = allFeatureInfoLayerSet.getRegisteredLayerPaths().includes(layerPath);
+
+      if (!isQueryable) {
+        logger.logDebug(`Layer ${layerPath} is not queryable - skipping feature query`);
         return;
       }
 
-      // Get the layer set controller for querying
-      const { allFeatureInfoLayerSet } = this.getControllersRegistry().layerSetController;
+      // Check if features are already available in the store
+      const existingFeatures = getStoreDataTableFeaturesByPath(this.getMapId(), layerPath);
 
-      // Trigger queries for each enabled layer that needs it
-      const queryPromises: Promise<unknown>[] = [];
+      if (existingFeatures && existingFeatures.length > 0) {
+        logger.logDebug(`Layer ${layerPath} already has ${existingFeatures.length} features - skipping query`);
+        return;
+      }
 
-      filterPanelConfig.layers.forEach((layerConfig: TypeFilterLayerConfig) => {
-        // Skip disabled layers
-        if (!layerConfig.enabled) return;
+      // Trigger the query
+      logger.logInfo(`Triggering feature query for filter panel layer: ${layerPath}`);
+      const queryPromise = this.getControllersRegistry()
+        .layerSetController.triggerGetAllFeatureInfo(layerPath)
+        .catch((error: unknown) => {
+          logger.logError(`Error querying features for layer ${layerPath}:`, error);
+        });
 
-        const { layerPath } = layerConfig;
+      queryPromises.push(queryPromise);
+    });
 
-        // Check if the layer is queryable (registered in AllFeatureInfoLayerSet)
-        const isQueryable = allFeatureInfoLayerSet.getRegisteredLayerPaths().includes(layerPath);
-
-        if (!isQueryable) {
-          logger.logDebug(`Layer ${layerPath} is not queryable - skipping feature query`);
-          return;
-        }
-
-        // Check if features are already available in the store
-        const existingFeatures = getStoreDataTableFeaturesByPath(this.getMapId(), layerPath);
-
-        if (existingFeatures && existingFeatures.length > 0) {
-          logger.logDebug(`Layer ${layerPath} already has ${existingFeatures.length} features - skipping query`);
-          return;
-        }
-
-        // Trigger the query
-        logger.logInfo(`Triggering feature query for filter panel layer: ${layerPath}`);
-        const queryPromise = this.getControllersRegistry()
-          .layerSetController.triggerGetAllFeatureInfo(layerPath)
-          .catch((error: unknown) => {
-            logger.logError(`Error querying features for layer ${layerPath}:`, error);
-          });
-
-        queryPromises.push(queryPromise);
-      });
-
-      // Wait for all queries to complete
-      await Promise.all(queryPromises);
-      logger.logDebug('Filter panel feature queries completed');
-    } catch (err) {
-      logger.logError('Error ensuring layer features are queried:', err);
-    }
+    // Wait for all queries to complete
+    await Promise.all(queryPromises);
+    logger.logDebug('Filter panel feature queries completed');
   }
 
   /**

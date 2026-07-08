@@ -19,7 +19,7 @@ import { logger } from '@/core/utils/logger';
 
 import type { TypeFeatureCircleStyle, TypeFeatureStyle, TypeIconStyle } from '@/geo/layer/geometry/geometry-types';
 import { NotSupportedError } from '@/core/exceptions/core-exceptions';
-import { InvaliGeometryGroupIdError } from '@/core/exceptions/geoview-exceptions';
+import { InvalidGeometryGroupIdError } from '@/core/exceptions/geoview-exceptions';
 
 /**
  * Store a group of features
@@ -498,13 +498,13 @@ export class GeometryApi {
    *
    * @param geometryGroupId - The id of the geometry group to return
    * @returns The geometry group
-   * @throws {InvaliGeometryGroupIdError} When the provided geometry group id does not exist
+   * @throws {InvalidGeometryGroupIdError} When the provided geometry group id does not exist
    */
   getGeometryGroup(geometryGroupId: string): FeatureCollection {
     const geometryGroups = this.getGeometryGroups();
     const geometryGroupIndex = geometryGroups.findIndex((theGeometryGroup) => theGeometryGroup.geometryGroupId === geometryGroupId);
 
-    if (geometryGroupIndex === -1) throw new InvaliGeometryGroupIdError(geometryGroupId); // Failed
+    if (geometryGroupIndex === -1) throw new InvalidGeometryGroupIdError(geometryGroupId); // Failed
 
     return geometryGroups[geometryGroupIndex];
   }
@@ -544,7 +544,7 @@ export class GeometryApi {
    * Shows the identified geometry group on the map.
    *
    * @param geometryGroupId - The id of the group to show on the map
-   * @throws {InvaliGeometryGroupIdError} When the provided geometry group id does not exist
+   * @throws {InvalidGeometryGroupIdError} When the provided geometry group id does not exist
    */
   setGeometryGroupAsVisible(geometryGroupId: string): void {
     const geometryGroup = this.getGeometryGroup(geometryGroupId);
@@ -557,7 +557,7 @@ export class GeometryApi {
    * Hides the identified geometry group from the map.
    *
    * @param geometryGroupId - The id of the group to hide from the map
-   * @throws {InvaliGeometryGroupIdError} When the provided geometry group id does not exist
+   * @throws {InvalidGeometryGroupIdError} When the provided geometry group id does not exist
    */
   setGeometryGroupAsInvisible(geometryGroupId: string): void {
     const geometryGroup = this.getGeometryGroup(geometryGroupId);
@@ -571,7 +571,7 @@ export class GeometryApi {
    *
    * @param geometryGroupId - The id of the group
    * @returns The z-index value of the vector layer
-   * @throws {InvaliGeometryGroupIdError} When the provided geometry group id does not exist
+   * @throws {InvalidGeometryGroupIdError} When the provided geometry group id does not exist
    */
   getGeometryGroupZIndex(geometryGroupId: string): number {
     const geometryGroup = this.getGeometryGroup(geometryGroupId);
@@ -584,7 +584,7 @@ export class GeometryApi {
    *
    * @param geometryGroupId - The id of the group
    * @param zIndex - The z-index value to set
-   * @throws {InvaliGeometryGroupIdError} When the provided geometry group id does not exist
+   * @throws {InvalidGeometryGroupIdError} When the provided geometry group id does not exist
    */
   setGeometryGroupZIndex(geometryGroupId: string, zIndex: number): void {
     const geometryGroup = this.getGeometryGroup(geometryGroupId);
@@ -645,7 +645,7 @@ export class GeometryApi {
    *
    * @param featureId - The feature id to be deleted
    * @param geometryGroupid - The group id
-   * @throws {InvaliGeometryGroupIdError} When the provided geometry group id does not exist
+   * @throws {InvalidGeometryGroupIdError} When the provided geometry group id does not exist
    */
   deleteGeometryFromGroup(featureId: string, geometryGroupid: string): void {
     const geometry = this.getGeometry(featureId);
@@ -666,7 +666,7 @@ export class GeometryApi {
    *
    * @param geometryGroupid - The group id
    * @returns The group with empty layers
-   * @throws {InvaliGeometryGroupIdError} When the provided geometry group id does not exist
+   * @throws {InvalidGeometryGroupIdError} When the provided geometry group id does not exist
    */
   deleteGeometriesFromGroup(geometryGroupid: string): FeatureCollection {
     const geometryGroup = this.getGeometryGroup(geometryGroupid);

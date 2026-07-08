@@ -78,7 +78,7 @@ export function SelectFilter(props: SelectFilterProps): JSX.Element {
   const handleSelectChange = useCallback(
     (event: { target: { value: unknown } }): void => {
       const newValue = event.target.value as string | number;
-      onChange(newValue !== '' ? newValue : null);
+      onChange(newValue);
     },
     [onChange]
   );
