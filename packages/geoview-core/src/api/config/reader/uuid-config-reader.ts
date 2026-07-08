@@ -1,7 +1,20 @@
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
-import type { TypeGeoviewLayerConfig, TypeGeoviewLayerType, TypeOfServer } from '@/api/types/layer-schema-types';
+import type {
+  TypeBaseSourceInitialConfig,
+  TypeGeoviewLayerConfig,
+  TypeGeoviewLayerType,
+  TypeOfServer,
+} from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
-
+import type { TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
+import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import { formatError, NotSupportedError } from '@/core/exceptions/core-exceptions';
+import {
+  LayerGeoCoreServiceFailError,
+  LayerGeoCoreInvalidResponseError,
+  LayerGeoCoreNoLayersError,
+} from '@/core/exceptions/geocore-exceptions';
+import { Fetch } from '@/core/utils/fetch-helper';
 import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { EsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
 import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
@@ -15,16 +28,6 @@ import { WFS } from '@/geo/layer/geoview-layers/vector/wfs';
 import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
 import { WMTS } from '@/geo/layer/geoview-layers/raster/wmts';
 import { XYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
-
-import {
-  LayerGeoCoreServiceFailError,
-  LayerGeoCoreInvalidResponseError,
-  LayerGeoCoreNoLayersError,
-} from '@/core/exceptions/geocore-exceptions';
-import { Fetch } from '@/core/utils/fetch-helper';
-import { formatError, NotSupportedError } from '@/core/exceptions/core-exceptions';
-import type { TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
-
 /** A class to generate GeoView layers config from a URL using a UUID. */
 export class UUIDmapConfigReader {
   /**
@@ -248,9 +251,22 @@ export class UUIDmapConfigReader {
           // Add it
           listOfGeoviewLayerConfig.push(geoviewLayerConfig);
 
-          // If there's only the one layer AND customGeocoreLayerConfig.layerName is provided, replace the layer name with the name from config
-          if (listOfGeoviewLayerConfig[i].listOfLayerEntryConfig.length === 1 && customGeocoreLayerConfig?.layerName) {
-            listOfGeoviewLayerConfig[i].listOfLayerEntryConfig[0].setLayerName(customGeocoreLayerConfig.layerName);
+          // Get the layer entry
+          const layerConfig = listOfGeoviewLayerConfig[i];
+
+          // If there's only the one layer AND customGeocoreLayerConfig is provided
+          if (layerConfig.listOfLayerEntryConfig.length === 1 && customGeocoreLayerConfig) {
+            const layerEntryConfig = layerConfig.listOfLayerEntryConfig[0];
+
+            // Replace the layer name with the metadata name from geocore config
+            if (customGeocoreLayerConfig.layerName) {
+              layerEntryConfig.setLayerName(customGeocoreLayerConfig.layerName);
+            }
+
+            if (layerEntryConfig instanceof AbstractBaseLayerEntryConfig && customGeocoreLayerConfig.source) {
+              // Init the source from the metadata coming from geocore config
+              layerEntryConfig.initSourceFromMetadata(customGeocoreLayerConfig.source);
+            }
           }
         }
       }
@@ -351,11 +367,12 @@ export type GeoCoreConfigResponseRCSLayers = {
 
 export type GeoCoreConfigResponseGCSLayers = {
   layers?: GeoCoreConfigResponseGCSLayer;
-  packages: GeoCoreConfigResponsePackages;
+  packages?: GeoCoreConfigResponsePackages;
 };
 
 export type GeoCoreConfigResponseGCSLayer = {
   layerName: string;
+  source?: TypeBaseSourceInitialConfig;
 };
 
 export type GeoCoreConfigResponsePackages = {

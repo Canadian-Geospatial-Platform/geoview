@@ -32,7 +32,7 @@ import {
   LayerEntryConfigLayerIdNotFoundError,
   LayerEntryConfigWMSSubLayerNotFoundError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
-import { deepMergeObjects, generateId, normalizeDatacubeAccessPath } from '@/core/utils/utilities';
+import { generateId, normalizeDatacubeAccessPath } from '@/core/utils/utilities';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
@@ -759,7 +759,6 @@ export class WMS extends AbstractGeoViewRaster {
    * @param isTimeAware - Indicates whether the layer supports time-based filtering
    * @param layerEntries - The root array of parsed layer entries (may include nested groups)
    * @param useFullWmsSublayers - Optional to indicates if we want the full sublayers of all wms or grouped (default is all sublayers)
-   * @param customGeocoreLayerConfig - Optional custom layer configuration to merge into leaf layers
    * @returns The fully constructed WMS layer configuration object
    */
   static createGeoviewLayerConfig(
@@ -769,8 +768,7 @@ export class WMS extends AbstractGeoViewRaster {
     serverType: TypeOfServer | undefined,
     isTimeAware: boolean | undefined,
     layerEntries: TypeLayerEntryShell[],
-    useFullWmsSublayers: boolean = this.DEFAULT_WMS_LAYER_GROUP_FULL_SUB_LAYERS,
-    customGeocoreLayerConfig: unknown = {}
+    useFullWmsSublayers: boolean = this.DEFAULT_WMS_LAYER_GROUP_FULL_SUB_LAYERS
   ): TypeWMSLayerConfig {
     const geoviewLayerConfig: TypeWMSLayerConfig = {
       geoviewLayerId,
@@ -784,7 +782,7 @@ export class WMS extends AbstractGeoViewRaster {
 
     // Recursively map layer entries
     geoviewLayerConfig.listOfLayerEntryConfig = layerEntries.map((layerEntry) =>
-      WMS.#createLayerEntryConfig(layerEntry, geoviewLayerConfig, serverType, customGeocoreLayerConfig)
+      WMS.#createLayerEntryConfig(layerEntry, geoviewLayerConfig, serverType)
     ) as OgcWmsLayerEntryConfig[]; // Untrue 'as' operation, but we'll fix later
 
     // Return it
@@ -1069,14 +1067,12 @@ export class WMS extends AbstractGeoViewRaster {
    * @param layerEntry - The WMS layer entry shell to convert (may be a group or leaf)
    * @param geoviewLayerConfig - The parent GeoView layer config that this entry belongs to
    * @param serverType - The type of WMS server (e.g., 'geoserver', 'mapserver', etc.)
-   * @param customGeocoreLayerConfig - Optional custom layer configuration to merge into leaf layers
    * @returns The fully constructed layer entry configuration object
    */
   static #createLayerEntryConfig(
     layerEntry: TypeLayerEntryShell,
     geoviewLayerConfig: TypeWMSLayerConfig,
-    serverType: TypeOfServer | undefined,
-    customGeocoreLayerConfig: unknown
+    serverType: TypeOfServer | undefined
   ): OgcWmsLayerEntryConfig | GroupLayerEntryConfig {
     // Check if it's a group layer (has children)
     const isGroup = Array.isArray(layerEntry.listOfLayerEntryConfig) && layerEntry.listOfLayerEntryConfig.length > 0;
@@ -1107,14 +1103,8 @@ export class WMS extends AbstractGeoViewRaster {
       },
     };
 
-    // Merge with custom config if provided
-    // TODO: CHECK - Should we really deep merge a 'new' geoviewLayerConfig json object here?
-    // TO.DOCONT: It complicates things a bit in the geoviewLayerConfig in all layer entries if they are different than
-    // TO.DOCONT: the root geoviewLayerConfig, search id: e80ea1d4
-    const mergedConfig = deepMergeObjects<OgcWmsLayerEntryConfigProps>(layerEntryConfig, customGeocoreLayerConfig);
-
     // Construct and return layer entry
-    return new OgcWmsLayerEntryConfig(mergedConfig);
+    return new OgcWmsLayerEntryConfig(layerEntryConfig);
   }
 
   /**
@@ -1252,12 +1242,15 @@ export class WMS extends AbstractGeoViewRaster {
         // Keep it as reference
         layerConfig.setWfsLayerConfig(wfsLayerConfig);
 
-        // Validate the outfields could be read
-        const outFields = wfsLayerConfig.getOutfields();
-        if (!outFields) throw new LayerEntryConfigFieldsNotFoundError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerNameCascade());
+        // If no outfields already configured
+        if (!layerConfig.getOutfields()?.length) {
+          // Validate the outfields could be read
+          const outFields = wfsLayerConfig.getOutfields();
+          if (!outFields) throw new LayerEntryConfigFieldsNotFoundError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerNameCascade());
 
-        // Override the outfields of the WMS to leverage possibilities working with a WMS layer, like knowing the field types when performing WMS queries
-        layerConfig.setOutfields(outFields);
+          // Override the outfields of the WMS to leverage possibilities working with a WMS layer, like knowing the field types when performing WMS queries
+          layerConfig.setOutfields(outFields);
+        }
 
         // If no layer style defined
         if (!layerConfig.getLayerStyle()) {
