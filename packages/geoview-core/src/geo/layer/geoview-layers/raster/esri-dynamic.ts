@@ -11,7 +11,6 @@ import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validati
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 
 import { EsriUtilities } from '@/geo/layer/geoview-layers/esri-layer-common';
-import { deepMergeObjects } from '@/core/utils/utilities';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import type { DisplayDateMode } from '@/api/types/map-schema-types';
@@ -189,7 +188,6 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param metadataAccessPath - The URL or path to access metadata
    * @param isTimeAware - Indicates whether the layer supports time-based filtering
    * @param layerEntries - An array of layer entries objects to be included in the configuration
-   * @param customGeocoreLayerConfig - An optional layer config from Geocore
    * @returns The constructed configuration object for the Esri Dynamic layer
    */
   static createGeoviewLayerConfig(
@@ -197,8 +195,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     geoviewLayerName: string,
     metadataAccessPath: string,
     isTimeAware: boolean | undefined,
-    layerEntries: TypeLayerEntryShell[],
-    customGeocoreLayerConfig: unknown = {}
+    layerEntries: TypeLayerEntryShell[]
   ): TypeEsriDynamicLayerConfig {
     const geoviewLayerConfig: TypeEsriDynamicLayerConfig = {
       geoviewLayerId,
@@ -210,11 +207,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     };
 
     // Convert the tree of entries to GeoviewLayerConfigs
-    geoviewLayerConfig.listOfLayerEntryConfig = EsriDynamic.#convertTreeToLayerConfigs(
-      geoviewLayerConfig,
-      layerEntries,
-      customGeocoreLayerConfig
-    );
+    geoviewLayerConfig.listOfLayerEntryConfig = EsriDynamic.#convertTreeToLayerConfigs(geoviewLayerConfig, layerEntries);
 
     // Return it
     return geoviewLayerConfig;
@@ -251,8 +244,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       isTimeAware,
       layerIds.map((layerId) => {
         return { id: layerId, index: layerId };
-      }),
-      {}
+      })
     );
 
     // Create the class from geoview-layers package
@@ -273,20 +265,18 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @param geoviewLayerConfig - The top-level ESRI dynamic layer configuration object
    * @param layerEntries - An array representing the tree structure of the layer entries (may include groups or leaves)
-   * @param customGeocoreLayerConfig - Optional GeoCore-specific configuration overrides to apply to each entry
    * @returns An array of fully-formed layer entry configuration instances
    */
   static #convertTreeToLayerConfigs(
     geoviewLayerConfig: TypeEsriDynamicLayerConfig,
-    layerEntries: TypeLayerEntryShell[],
-    customGeocoreLayerConfig: unknown = {}
+    layerEntries: TypeLayerEntryShell[]
   ): (GroupLayerEntryConfig | EsriDynamicLayerEntryConfig)[] {
     // For each layer entry
     return layerEntries.map((layerEntry) => {
       // If is a group layer
       if (layerEntry.subLayers && layerEntry.subLayers.length > 0) {
         // Recursively convert sublayers
-        const subConfigs = EsriDynamic.#convertTreeToLayerConfigs(geoviewLayerConfig, layerEntry.subLayers, customGeocoreLayerConfig);
+        const subConfigs = EsriDynamic.#convertTreeToLayerConfigs(geoviewLayerConfig, layerEntry.subLayers);
 
         return new GroupLayerEntryConfig({
           geoviewLayerConfig,
@@ -303,17 +293,8 @@ export class EsriDynamic extends AbstractGeoViewRaster {
         layerName: layerEntry.layerName,
       };
 
-      // Overwrite default from geocore custom config
-      // TODO: CHECK - Should we really deep merge a 'new' geoviewLayerConfig json object here?
-      // TO.DOCONT: It complicates things a bit in the geoviewLayerConfig in all layer entries if they are different than
-      // TO.DOCONT: the root geoviewLayerConfig, search id: e80ea1d4
-      // TO.DOCONT: If we keep the deepmerge, maybe we reoverride the geoviewLayerConfig reference at least
-      // TO.DOCONT: (mergedConfig.geoviewLayerConfig = geoviewLayerConfig) (added and commented below)?
-      const mergedConfig = deepMergeObjects<EsriDynamicLayerEntryConfigProps>(layerEntryConfig, customGeocoreLayerConfig);
-      // mergedConfig.geoviewLayerConfig = geoviewLayerConfig;
-
       // Reconstruct
-      return new EsriDynamicLayerEntryConfig(mergedConfig);
+      return new EsriDynamicLayerEntryConfig(layerEntryConfig);
     });
   }
 

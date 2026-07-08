@@ -7,7 +7,6 @@ import { generateId } from '@/core/utils/utilities';
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import { DEFAULT_MAP_FEATURE_CONFIG } from '@/api/types/map-schema-types';
 import type { GeoCoreLayerConfig, TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
-import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import type { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { getStoreMapConfigServiceUrls, getStoreMapConfigState } from '@/core/stores/states/map-state';
 
@@ -68,7 +67,6 @@ export class GeoCore {
     // Use user supplied listOfLayerEntryConfig if provided
     if (layerConfig?.listOfLayerEntryConfig || layerConfig?.initialSettings) {
       // TODO: CHECK - Should we really spread here and create a 'new' TypeGeoviewLayerConfig json object here?
-      // TO.DOCONT: It complicates things a bit in the geoviewLayerConfig in all layer entries if they are different than the root geoviewLayerConfig, search id: e80ea1d4
       const tempLayerConfig = { ...layerConfig } as unknown as TypeGeoviewLayerConfig;
       tempLayerConfig.metadataAccessPath = response.layers[0].metadataAccessPath;
       tempLayerConfig.geoviewLayerType = response.layers[0].geoviewLayerType;
@@ -105,11 +103,6 @@ export class GeoCore {
     if (uuid.includes(':') && uuid.split(':')[0] === response.layers[0].geoviewLayerId) {
       // Update the geoview layer id
       response.layers[0].geoviewLayerId = uuid;
-
-      // Make sure the geoviewLayerConfig reference in all layer entries are updated as well because of a deepMergeObjects happening.., search id: e80ea1d4
-      response.layers[0].listOfLayerEntryConfig.forEach((layerEntryConfig) => {
-        ConfigBaseClass.getClassOrTypeGeoviewLayerConfig(layerEntryConfig).geoviewLayerId = uuid;
-      });
     }
 
     // Always only first one
