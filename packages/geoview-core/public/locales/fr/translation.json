@@ -517,6 +517,11 @@
   "testSuite": {
     "initializationError": "L'initialisation de la suite de Test '{{testSuite}}' a échoué sur la carte '{{mapId}}'."
   },
+  "filterPanel": {
+    "errorRegistrationTimeout": "Erreur de délai d'attente du panneau de filtres : La couche '{{layerName}}' a mis trop de temps à s'enregistrer",
+    "errorFilterPanelQuery": "Erreur de requête du panneau de filtres : La couche '{{layerName}}' n'a pas pu être interrogée",
+    "errorFilterPanelClear": "Erreur de nettoyage du panneau de filtres : La couche '{{layerName}}' n'a pas pu effacer les filtres"
+  },
   "guide": {
     "title": "Guide",
     "search": "Rechercher dans le guide...",

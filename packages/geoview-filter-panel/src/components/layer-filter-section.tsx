@@ -188,7 +188,7 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
               key={attr.fieldName}
               attribute={attr}
               value={value}
-              onChange={(val) => onFilterChange(attr.fieldName, val)}
+              onChange={(event) => onFilterChange(attr.fieldName, event.currentValues)}
               uniqueValues={uniqueValues}
               loading={loading}
             />

@@ -108,13 +108,14 @@ export function DateFilter(props: DateFilterProps): JSX.Element {
    */
   const handleSliderChange = useCallback(
     (newValue: number | number[]): void => {
-      if (Array.isArray(newValue) && newValue.length === 2) {
-        // Convert timestamps to YYYY-MM-DD strings using the controller
-        onChange({
-          start: controller.formatDateForFilter(newValue[0]),
-          end: controller.formatDateForFilter(newValue[1]),
-        });
-      }
+      // Assert that newValue is number[] since this is a range slider
+      const [start, end] = newValue as number[];
+
+      // Convert timestamps to YYYY-MM-DD strings using the controller
+      onChange({
+        start: controller.formatDateForFilter(start),
+        end: controller.formatDateForFilter(end),
+      });
     },
     [controller, onChange]
   );
