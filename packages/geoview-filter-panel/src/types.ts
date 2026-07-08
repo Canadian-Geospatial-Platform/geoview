@@ -21,6 +21,10 @@ export interface TypeFilterLayer {
   enabled: boolean;
   /** Array of filterable attributes. */
   attributes: TypeFilterAttribute[];
+  /** Whether this layer's filter section is collapsible. */
+  collapsible?: boolean;
+  /** Default collapsed state for this layer's filter section. */
+  defaultCollapsed?: boolean;
 }
 
 /**

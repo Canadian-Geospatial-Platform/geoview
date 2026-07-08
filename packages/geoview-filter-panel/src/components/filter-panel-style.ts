@@ -55,6 +55,13 @@ export const getSxClasses = (theme: any): SxStyles => ({
     justifyContent: 'space-between',
     p: 1.5,
     bgcolor: 'background.default',
+    gap: 1,
+  },
+
+  filterLayerHeaderRRight: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 5,
   },
 
   // Layer section header (collapsed state - no bottom border)
@@ -68,18 +75,11 @@ export const getSxClasses = (theme: any): SxStyles => ({
     borderColor: 'divider',
   },
 
-  // Layer header left side (icon + name)
-  filterLayerHeaderLeft: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 1,
-    flex: 1,
-  },
-
   // Toggle icon button
   filterLayerToggleIcon: {
     transform: 'rotate(0deg)',
     transition: 'transform 0.2s',
+    flexShrink: 0,
   },
 
   // Toggle icon button (collapsed state)
@@ -90,11 +90,14 @@ export const getSxClasses = (theme: any): SxStyles => ({
   // Layer name text
   filterLayerName: {
     fontWeight: 500,
+    flex: 1,
+    minWidth: 0,
   },
 
   // Clear button
   filterLayerClearButton: {
     minWidth: 'auto',
+    whiteSpace: 'nowrap',
   },
 
   // Layer content area
