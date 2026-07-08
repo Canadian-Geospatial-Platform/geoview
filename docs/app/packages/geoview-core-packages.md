@@ -1643,28 +1643,25 @@ The Filter Panel supports four filter types:
 
 ```typescript
 interface FilterPanelConfig {
-  enabled?: boolean;
   isOpen?: boolean;
   version?: string;
+  title?: string;
   layers?: Array<{
     layerPath: string;
     layerName?: string;
     enabled?: boolean;
+    collapsible?: boolean;
+    defaultCollapsed?: boolean;
     attributes?: Array<{
       fieldName: string;
       displayLabel: string;
       filterType: 'select' | 'multiselect' | 'range' | 'date';
       enabled?: boolean;
       defaultValues?: any;
+      domain?: Array<{ value: string | number; label: string }>;
+      filterMissingDomainValues?: boolean;
     }>;
   }>;
-  settings?: {
-    title?: string;
-    collapsible?: boolean;
-    defaultCollapsed?: boolean;
-    showResetButton?: boolean;
-    autoApply?: boolean;
-  };
 }
 ```
 
@@ -1672,17 +1669,18 @@ interface FilterPanelConfig {
 
 **Top-level properties:**
 
-- **enabled** (boolean, default: true): Whether the filter panel is enabled
 - **isOpen** (boolean, default: false): Initial panel open state
 - **version** (string, default: "1.0"): Configuration version
+- **title** (string, default: "Filter Layers"): Panel header title
 - **layers** (array): Array of layer configurations for filtering
-- **settings** (object): Panel display and behavior settings
 
 **Layer properties:**
 
 - **layerPath** (string, required): Unique layer path identifier
 - **layerName** (string, optional): Display name for the layer (if not provided, layer path is used)
 - **enabled** (boolean, default: true): Whether filtering is enabled for this layer
+- **collapsible** (boolean, default: true): Allow collapsing/expanding this layer section
+- **defaultCollapsed** (boolean, default: false): Default collapsed state for this layer section. If `collapsible` is false, this is ignored and the section is forced open.
 - **attributes** (array): Array of filterable attributes
 
 **Attribute properties:**
@@ -1696,14 +1694,6 @@ interface FilterPanelConfig {
   - **value** (string | number, required): The raw value from the layer
   - **label** (string, required): The display label for this value
 - **filterMissingDomainValues** (boolean, default: false): If true, values not in the domain are filtered out. If false, they are shown with their raw value. Only applies when domain is defined and filterType is `"select"` or `"multiselect"`
-
-**Settings properties:**
-
-- **title** (string, default: "Filter Layers"): Panel header title
-- **collapsible** (boolean, default: true): Allow collapsing layer sections
-- **defaultCollapsed** (boolean, default: false): Initial collapsed state
-- **showResetButton** (boolean, default: true): Show reset all button
-- **autoApply** (boolean, default: true): Apply filters automatically on change
 
 ### Configuration Examples
 
@@ -1719,13 +1709,15 @@ interface FilterPanelConfig {
   "corePackagesConfig": [
     {
       "filter-panel": {
-        "enabled": true,
         "isOpen": false,
+        "title": "Filter Layers",
         "layers": [
           {
             "layerPath": "cities-layer",
             "layerName": "Canadian Cities",
             "enabled": true,
+            "collapsible": true,
+            "defaultCollapsed": false,
             "attributes": [
               {
                 "fieldName": "province",
@@ -1755,13 +1747,15 @@ interface FilterPanelConfig {
   "corePackagesConfig": [
     {
       "filter-panel": {
-        "enabled": true,
         "isOpen": true,
+        "title": "Population Filters",
         "layers": [
           {
             "layerPath": "population-data",
             "layerName": "Population Data",
             "enabled": true,
+            "collapsible": true,
+            "defaultCollapsed": false,
             "attributes": [
               {
                 "fieldName": "city_name",
@@ -1785,11 +1779,7 @@ interface FilterPanelConfig {
               }
             ]
           }
-        ],
-        "settings": {
-          "title": "Filter Population Data",
-          "autoApply": true
-        }
+        ]
       }
     }
   ]
@@ -1808,12 +1798,14 @@ interface FilterPanelConfig {
   "corePackagesConfig": [
     {
       "filter-panel": {
-        "enabled": true,
         "isOpen": false,
+        "title": "Environmental Filters",
         "layers": [
           {
             "layerPath": "environmental-data",
             "layerName": "Environmental Monitoring",
+            "enabled": true,
+            "collapsible": false,
             "attributes": [
               {
                 "fieldName": "pollutant_type",
@@ -1827,13 +1819,7 @@ interface FilterPanelConfig {
               }
             ]
           }
-        ],
-        "settings": {
-          "title": "Environmental Filters",
-          "collapsible": true,
-          "defaultCollapsed": false,
-          "showResetButton": true
-        }
+        ]
       }
     }
   ]

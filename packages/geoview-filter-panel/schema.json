@@ -43,6 +43,16 @@
             "description": "Whether filtering is enabled for this layer",
             "default": true
           },
+          "collapsible": {
+            "type": "boolean",
+            "description": "Allow collapsing/expanding this layer section",
+            "default": true
+          },
+          "defaultCollapsed": {
+            "type": "boolean",
+            "description": "Default collapsed state for this layer section. Ignored if collapsible is false (forced to false/open).",
+            "default": false
+          },
           "attributes": {
             "type": "array",
             "description": "Array of filterable attributes",
@@ -76,16 +86,6 @@
                   "type": "boolean",
                   "description": "Whether this attribute filter is enabled",
                   "default": true
-                },
-                "collapsible": {
-                  "type": "boolean",
-                  "description": "Allow collapsing/expanding layer sections",
-                  "default": true
-                },
-                "defaultCollapsed": {
-                  "type": "boolean",
-                  "description": "Default collapsed state for layer sections",
-                  "default": false
                 },
                 "defaultValues": {
                   "description": "Default filter values",
