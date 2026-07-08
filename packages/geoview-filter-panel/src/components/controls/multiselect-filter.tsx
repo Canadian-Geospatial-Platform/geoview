@@ -63,36 +63,32 @@ interface MultiselectFilterProps {
  * @param props - Properties defined in FilterCheckboxItemProps interface
  * @returns The filter checkbox item element
  */
-const FilterCheckboxItem = memo(function FilterCheckboxItem({
-  value,
-  isSelected,
-  displayLabel,
-  onCheckboxChange,
-  sxClasses,
-}: FilterCheckboxItemProps): JSX.Element {
-  const { cgpv } = window as TypeWindow;
-  const { useCallback } = cgpv.reactUtilities.react;
-  const { ui } = cgpv;
-  const { Checkbox, FormControlLabel } = ui.elements;
+const FilterCheckboxItem = memo(
+  ({ value, isSelected, displayLabel, onCheckboxChange, sxClasses }: FilterCheckboxItemProps): JSX.Element => {
+    const { cgpv } = window as TypeWindow;
+    const { useCallback } = cgpv.reactUtilities.react;
+    const { ui } = cgpv;
+    const { Checkbox, FormControlLabel } = ui.elements;
 
-  /**
-   * Handles when this checkbox's state changes.
-   */
-  const handleChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>): void => {
-      onCheckboxChange(value, event.target.checked);
-    },
-    [value, onCheckboxChange]
-  );
+    /**
+     * Handles when this checkbox's state changes.
+     */
+    const handleChange = useCallback(
+      (event: React.ChangeEvent<HTMLInputElement>): void => {
+        onCheckboxChange(value, event.target.checked);
+      },
+      [value, onCheckboxChange]
+    );
 
-  return (
-    <FormControlLabel
-      control={<Checkbox checked={isSelected} onChange={handleChange} size="small" />}
-      label={displayLabel}
-      sx={sxClasses.filterCheckboxItem}
-    />
-  );
-});
+    return (
+      <FormControlLabel
+        control={<Checkbox checked={isSelected} onChange={handleChange} size="small" />}
+        label={displayLabel}
+        sx={sxClasses.filterCheckboxItem}
+      />
+    );
+  }
+);
 
 /**
  * Creates a multi-selection checkbox filter control.
