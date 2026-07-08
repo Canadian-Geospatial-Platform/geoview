@@ -3103,40 +3103,39 @@ Layer attribute filtering panel with support for multiple filter types.
 
 ```typescript
 interface FilterPanelConfig {
-  enabled?: boolean;
   isOpen?: boolean;
   version?: string;
+  title?: string;
   layers?: Array<{
     layerPath: string;
     layerName?: string;
     enabled?: boolean;
+    collapsible?: boolean;
+    defaultCollapsed?: boolean;
     attributes?: Array<{
       fieldName: string;
       displayLabel: string;
       filterType: 'select' | 'multiselect' | 'range' | 'date';
       enabled?: boolean;
       defaultValues?: any;
+      domain?: Array<{ value: string | number; label: string }>;
+      filterMissingDomainValues?: boolean;
     }>;
   }>;
-  settings?: {
-    title?: string;
-    collapsible?: boolean;
-    defaultCollapsed?: boolean;
-    showResetButton?: boolean;
-    autoApply?: boolean;
-  };
 }
 ```
 
 #### Properties
 
-- **enabled**: Whether the filter panel is enabled (default: true)
 - **isOpen**: Initial panel state (default: false)
 - **version**: Schema version (default: "1.0")
+- **title**: Panel header title (default: "Filter Layers")
 - **layers**: Array of layer configurations for filtering
   - **layerPath** (required): Unique layer path identifier
   - **layerName** (optional): Display name for the layer (if not provided, layer path is used)
   - **enabled**: Whether filtering is enabled for this layer (default: true)
+  - **collapsible**: Allow collapsing/expanding this layer section (default: true)
+  - **defaultCollapsed**: Default collapsed state for this layer section. If `collapsible` is false, this is ignored and the section is forced open (default: false)
   - **attributes**: Array of filterable attributes
     - **fieldName** (required): Field name from the layer schema
     - **displayLabel** (required): Label displayed in the UI
@@ -3147,12 +3146,6 @@ interface FilterPanelConfig {
       - **value** (required): The raw value from the layer (string or number)
       - **label** (required): The display label for this value
     - **filterMissingDomainValues** (optional): If true, filter out values not in domain. If false, show them with raw value. Only applies when domain is defined (default: false)
-- **settings**: Panel display and behavior settings
-  - **title**: Panel header title (default: "Filter Layers")
-  - **collapsible**: Allow collapsing layer sections (default: true)
-  - **defaultCollapsed**: Initial collapsed state (default: false)
-  - **showResetButton**: Show reset all button (default: true)
-  - **autoApply**: Apply filters automatically on change (default: true)
 
 #### Filter Types
 
@@ -3169,12 +3162,15 @@ interface FilterPanelConfig {
 "corePackagesConfig": [
   {
     "filter-panel": {
-      "enabled": true,
       "isOpen": false,
+      "title": "Filter Layers",
       "layers": [
         {
           "layerPath": "cities-layer",
           "layerName": "Canadian Cities",
+          "enabled": true,
+          "collapsible": true,
+          "defaultCollapsed": false,
           "attributes": [
             {
               "fieldName": "province",
@@ -3195,11 +3191,15 @@ interface FilterPanelConfig {
 "corePackagesConfig": [
   {
     "filter-panel": {
-      "enabled": true,
+      "isOpen": false,
+      "title": "Population Filters",
       "layers": [
         {
           "layerPath": "population-data",
           "layerName": "Population Data",
+          "enabled": true,
+          "collapsible": true,
+          "defaultCollapsed": false,
           "attributes": [
             {
               "fieldName": "city_name",
@@ -3234,6 +3234,8 @@ interface FilterPanelConfig {
         {
           "layerPath": "environmental-data",
           "layerName": "Environmental Monitoring",
+          "enabled": true,
+          "collapsible": false,
           "attributes": [
             {
               "fieldName": "pollutant_type",
@@ -3247,7 +3249,7 @@ interface FilterPanelConfig {
             }
           ]
         }
-      ],
+      ]
       "settings": {
         "title": "Environmental Filters",
         "collapsible": false,
