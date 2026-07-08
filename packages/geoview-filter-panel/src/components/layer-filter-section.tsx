@@ -2,7 +2,13 @@ import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { logger } from 'geoview-core/core/utils/logger';
 
 import { useFilterPanelController } from 'geoview-core/core/controllers/use-controllers';
-import { useStoreFilterPanelLayerFilterState } from 'geoview-core/core/stores/states/filter-panel-state';
+import {
+  useStoreFilterPanelLayerFilterState,
+  useStoreFilterPanelLayerCollapsed,
+  getStoreFilterPanelLayerConfig,
+  setStoreFilterPanelLayerCollapsed,
+} from 'geoview-core/core/stores/states/filter-panel-state';
+import { useStoreGeoViewMapId } from 'geoview-core/core/stores/geoview-store';
 import { useStoreLayerStatus, useStoreLayerName } from 'geoview-core/core/stores/states/layer-state';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
 
@@ -20,12 +26,6 @@ interface LayerFilterSectionProps {
   onFilterChange: (fieldName: string, value: TypeFilterValue) => void;
   /** Callback when layer filters are cleared. */
   onClearLayer: () => void;
-  /** Whether layer sections are collapsible. */
-  collapsible: boolean;
-  /** Default collapsed state. */
-  defaultCollapsed: boolean;
-  /** Whether filters should be applied automatically. */
-  autoApply: boolean;
 }
 
 /**
@@ -38,7 +38,7 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
   // Log
   logger.logTraceRender('geoview-filter-panel/components/layer-filter-section');
 
-  const { layer, onFilterChange, onClearLayer, collapsible, defaultCollapsed, autoApply } = props;
+  const { layer, onFilterChange, onClearLayer } = props;
 
   // Access UI components via window.cgpv pattern
   const { cgpv } = window as TypeWindow;
@@ -53,14 +53,19 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
   const { t } = useTranslation<string>();
 
   // Hook the filter state for this layer from the store
+  const mapId = useStoreGeoViewMapId();
   const filterState = useStoreFilterPanelLayerFilterState(layer.layerPath);
+  const isCollapsed = useStoreFilterPanelLayerCollapsed(layer.layerPath);
+
+  // Get config values (static)
+  const layerConfig = getStoreFilterPanelLayerConfig(mapId, layer.layerPath);
+  const collapsible = layerConfig?.collapsible ?? true;
 
   // Hook the layer status to know if this specific layer is ready
   const layerStatus = useStoreLayerStatus(layer.layerPath);
   const layerName = useStoreLayerName(layer.layerPath);
 
   // Local state
-  const [isCollapsed, setIsCollapsed] = useState(!collapsible ? false : defaultCollapsed); // Not collapsed if you can't uncollapse the layer
   const [fieldValues, setFieldValues] = useState<Record<string, (string | number)[]>>({});
 
   // Determine if this layer is ready for filtering
@@ -90,8 +95,8 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
    * Handles when the toggle button is clicked.
    */
   const handleToggle = useCallback((): void => {
-    setIsCollapsed((prev) => !prev);
-  }, []);
+    setStoreFilterPanelLayerCollapsed(mapId, layer.layerPath, !isCollapsed);
+  }, [mapId, layer.layerPath, isCollapsed]);
 
   /**
    * Gets unique values for layer attributes once the layer is ready and registered.
@@ -148,14 +153,14 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
    * Auto-applies filters when the layer becomes ready or when filter state changes.
    */
   useEffect((): void => {
-    logger.logTraceUseEffect('LAYER FILTER SECTION - Auto-apply filters', layerIsReady, autoApply);
+    logger.logTraceUseEffect('LAYER FILTER SECTION - Auto-apply filters', layerIsReady);
 
     // Only auto-apply if enabled and layer is ready
-    if (!autoApply || !layerIsReady) return;
+    if (!layerIsReady) return;
 
     // Apply this layer's filters via the controller
     controller.applyLayerFilter(layer.layerPath);
-  }, [controller, layer.layerPath, layerIsReady, autoApply, filterState]);
+  }, [controller, layer.layerPath, layerIsReady, filterState]);
 
   /**
    * Renders a filter control based on attribute type.
@@ -230,7 +235,20 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
   return (
     <Box sx={memoSxClasses.filterLayerSection}>
       <Box sx={memoHeaderSx}>
-        <Box sx={memoSxClasses.filterLayerHeaderLeft}>
+        <Typography variant="body1" sx={memoSxClasses.filterLayerName}>
+          {layer.layerName || layerName}
+        </Typography>
+        <Box sx={memoSxClasses.filterLayerHeaderRRight}>
+          <Button
+            type="text"
+            variant="outlined"
+            size="small"
+            startIcon={<CloseIcon />}
+            onClick={onClearLayer}
+            sx={memoSxClasses.filterLayerClearButton}
+          >
+            {t('FilterPanel.clear')}
+          </Button>
           {collapsible && (
             <IconButton
               aria-label={isCollapsed ? t('FilterPanel.expandFilters') : t('FilterPanel.collapseFilters')}
@@ -242,20 +260,7 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
               <ExpandMoreIcon />
             </IconButton>
           )}
-          <Typography variant="body1" sx={memoSxClasses.filterLayerName}>
-            {layer.layerName || layerName}
-          </Typography>
         </Box>
-        <Button
-          type="text"
-          variant="outlined"
-          size="small"
-          startIcon={<CloseIcon />}
-          onClick={onClearLayer}
-          sx={memoSxClasses.filterLayerClearButton}
-        >
-          {t('FilterPanel.clear')}
-        </Button>
       </Box>
 
       <Collapse in={!isCollapsed}>

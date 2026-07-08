@@ -104,7 +104,10 @@ export const geoviewStoreDefinition = (set: TypeSetStore, get: TypeGetStore): IG
         set({ drawerState: initializeDrawerState(set, get) });
         get().drawerState.setDefaultConfigValues(config);
       }
-      if (config.appBar?.tabs?.core?.includes('filter-panel')) set({ filterPanelState: initializeFilterPanelState(set, get) });
+      if (config.appBar?.tabs?.core?.includes('filter-panel')) {
+        set({ filterPanelState: initializeFilterPanelState(set, get) });
+        get().filterPanelState.setDefaultConfigValues(config);
+      }
     },
 
     // core states

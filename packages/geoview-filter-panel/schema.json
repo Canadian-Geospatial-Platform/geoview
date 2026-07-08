@@ -6,11 +6,6 @@
   "type": "object",
   "additionalProperties": false,
   "properties": {
-    "enabled": {
-      "type": "boolean",
-      "description": "Whether the filter panel is enabled",
-      "default": true
-    },
     "isOpen": {
       "type": "boolean",
       "description": "Whether the panel is open by default",
@@ -20,6 +15,11 @@
       "type": "string",
       "description": "Configuration version",
       "default": "1.0"
+    },
+    "title": {
+      "type": "string",
+      "description": "Panel title",
+      "default": "Filter Layers"
     },
     "layers": {
       "type": "array",
@@ -77,6 +77,16 @@
                   "description": "Whether this attribute filter is enabled",
                   "default": true
                 },
+                "collapsible": {
+                  "type": "boolean",
+                  "description": "Allow collapsing/expanding layer sections",
+                  "default": true
+                },
+                "defaultCollapsed": {
+                  "type": "boolean",
+                  "description": "Default collapsed state for layer sections",
+                  "default": false
+                },
                 "defaultValues": {
                   "description": "Default filter values",
                   "oneOf": [
@@ -133,37 +143,6 @@
               }
             }
           }
-        }
-      }
-    },
-    "settings": {
-      "type": "object",
-      "description": "Global filter panel settings",
-      "properties": {
-        "title": {
-          "type": "string",
-          "description": "Panel title",
-          "default": "Filter Layers"
-        },
-        "collapsible": {
-          "type": "boolean",
-          "description": "Allow collapsing/expanding layer sections",
-          "default": true
-        },
-        "defaultCollapsed": {
-          "type": "boolean",
-          "description": "Default collapsed state for layer sections",
-          "default": false
-        },
-        "showResetButton": {
-          "type": "boolean",
-          "description": "Show reset button",
-          "default": true
-        },
-        "autoApply": {
-          "type": "boolean",
-          "description": "Auto-apply filters on change",
-          "default": true
         }
       }
     }
