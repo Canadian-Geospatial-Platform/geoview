@@ -58,7 +58,7 @@ export interface TypeFilterAttribute {
 export type TypeFilterType = 'select' | 'multiselect' | 'range' | 'date';
 
 /** Filter value type - can be single value, array, or range object. */
-export type TypeFilterValue = string | number | null | (string | number)[] | TypeRangeValue | TypeDateRangeValue;
+export type TypeFilterValue = string | number | (string | number)[] | TypeRangeValue | TypeDateRangeValue;
 
 /** Filter state for a single layer - maps field names to their current filter values. */
 export type TypeLayerFilterState = Record<string, TypeFilterValue>;
@@ -433,7 +433,7 @@ export const clearStoreFilterPanelAllFilters = (mapId: string): void => {
 export const addStoreFilterPanelActiveLayerFilter = (mapId: string, layerId: string): void => {
   const state = getStoreFilterPanelState(mapId);
   state.actions.addActiveLayerFilter(layerId);
-  logger.logInfo('Added active filter for layer:', layerId);
+  logger.logInfo('Added active filter-panel filter for layer:', layerId);
 };
 
 /**
@@ -446,7 +446,7 @@ export const addStoreFilterPanelActiveLayerFilter = (mapId: string, layerId: str
 export const removeStoreFilterPanelActiveLayerFilter = (mapId: string, layerId: string): void => {
   const state = getStoreFilterPanelState(mapId);
   state.actions.removeActiveLayerFilter(layerId);
-  logger.logInfo('Removed active filter for layer:', layerId);
+  logger.logInfo('Removed active filter-panel filter for layer:', layerId);
 };
 
 /**
@@ -458,7 +458,7 @@ export const removeStoreFilterPanelActiveLayerFilter = (mapId: string, layerId: 
 export const clearStoreFilterPanelActiveLayerFilters = (mapId: string): void => {
   const state = getStoreFilterPanelState(mapId);
   state.actions.clearActiveLayerFilters();
-  logger.logInfo('Cleared all active filters');
+  logger.logInfo('Cleared all active filter-panel filters');
 };
 
 // #endregion STATE SETTERS

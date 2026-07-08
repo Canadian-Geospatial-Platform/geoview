@@ -1975,7 +1975,7 @@ export class DrawerController extends AbstractMapViewerController {
    * Gets all drawing features for a map.
    *
    * @returns Array of features
-   * @throws {InvaliGeometryGroupIdError} When the provided geometry group id does not exist
+   * @throws {InvalidGeometryGroupIdError} When the provided geometry group id does not exist
    */
   #getDrawingFeatures(): Feature[] {
     // Check if the geometry group exists (it may have been destroyed during language switch/map reload)
@@ -2196,7 +2196,7 @@ export class DrawerController extends AbstractMapViewerController {
    * Re-deletes features from a history action.
    *
    * @param action - The action that will be re-performed
-   * @throws {InvaliGeometryGroupIdError} When the provided geometry group id does not exist
+   * @throws {InvalidGeometryGroupIdError} When the provided geometry group id does not exist
    */
   #deleteFeaturesAction(action: DrawerHistoryAction): void {
     action.features.forEach((feature) => {

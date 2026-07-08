@@ -89,13 +89,14 @@ export function RangeFilter(props: RangeFilterProps): JSX.Element {
    */
   const handleSliderChange = useCallback(
     (newValue: number | number[]): void => {
-      if (Array.isArray(newValue) && newValue.length === 2) {
-        onChange({
-          min: newValue[0],
-          max: newValue[1],
-        });
-      }
+      // Assert that newValue is number[] since this is a range slider with two handles
+      const [minValue, maxValue] = newValue as number[];
+      onChange({
+        min: minValue,
+        max: maxValue,
+      });
     },
+
     [onChange]
   );
 

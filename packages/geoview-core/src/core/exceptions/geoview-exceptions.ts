@@ -264,9 +264,9 @@ export class InvalidProjectionError extends GeoViewError {
 /**
  * Error thrown when an invalid geometry group id is encountered.
  */
-export class InvaliGeometryGroupIdError extends GeoViewError {
+export class InvalidGeometryGroupIdError extends GeoViewError {
   /**
-   * Creates a new InvaliGeometryGroupIdError.
+   * Creates a new InvalidGeometryGroupIdError.
    *
    * @param geometryGroupId - The invalid geometry group id that caused the error
    */
@@ -274,10 +274,10 @@ export class InvaliGeometryGroupIdError extends GeoViewError {
     super('error.map.errorGeometryGroupId', { geometryGroupId });
 
     // Set a custom name for the error type to differentiate it from other error types
-    this.name = 'InvaliGeometryGroupIdError';
+    this.name = 'InvalidGeometryGroupIdError';
 
     // Ensure correct inheritance (important for transpilation targets)
-    Object.setPrototypeOf(this, InvaliGeometryGroupIdError.prototype);
+    Object.setPrototypeOf(this, InvalidGeometryGroupIdError.prototype);
   }
 }
 
@@ -735,5 +735,66 @@ export class LayerNoLastQueryToPerformError extends GeoViewError {
 
     // Ensure correct inheritance (important for transpilation targets)
     Object.setPrototypeOf(this, LayerNoLastQueryToPerformError.prototype);
+  }
+}
+
+/**
+ * Error thrown when a layer registration takes longer than expected and times out.
+ */
+export class LayerRegistrationTimeoutError extends GeoViewError {
+  /**
+   * Creates an instance of LayerRegistrationTimeoutError.
+   *
+   * @param layerName - The layer name of the layer that failed to register
+   */
+  constructor(layerName: string) {
+    super('filterPanel.errorRegistrationTimeout', { layerName });
+
+    // Set a custom name for the error type to differentiate it from other error types
+    this.name = 'LayerRegistrationTimeoutError';
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, LayerRegistrationTimeoutError.prototype);
+  }
+}
+
+/**
+ * Error thrown when a query to a layer from the filter panel fails.
+ */
+export class LayerFilterPanelQueryError extends GeoViewError {
+  /**
+   * Creates an instance of LayerFilterPanelQueryError.
+   *
+   * @param layerName - The layer name of the layer that caused the query error
+   * @param message - The error message
+   */
+  constructor(layerName: string) {
+    super('filterPanel.errorFilterPanelQuery', { layerName });
+
+    // Set a custom name for the error type to differentiate it from other error types
+    this.name = 'LayerFilterPanelQueryError';
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, LayerFilterPanelQueryError.prototype);
+  }
+}
+
+/**
+ * Error thrown when clearing a filter panel filter for a layer fails.
+ */
+export class LayerFilterPanelClearError extends GeoViewError {
+  /**
+   * Creates an instance of LayerFilterPanelClearError.
+   *
+   * @param layerName - The layer name of the layer that caused the clear error
+   */
+  constructor(layerName: string) {
+    super('filterPanel.errorFilterPanelClear', { layerName });
+
+    // Set a custom name for the error type to differentiate it from other error types
+    this.name = 'LayerFilterPanelClearError';
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, LayerFilterPanelClearError.prototype);
   }
 }

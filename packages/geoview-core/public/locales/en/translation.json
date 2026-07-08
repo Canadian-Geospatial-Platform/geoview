@@ -517,6 +517,11 @@
   "testSuite": {
     "initializationError": "Test Suite '{{testSuite}}' failed to initialize on map '{{mapId}}'."
   },
+  "filterPanel": {
+    "errorRegistrationTimeout": "Filter panel timeout error: Layer '{{layerName}}' took too long to register",
+    "errorFilterPanelQuery": "Filter panel query error: Layer '{{layerName}}' failed to query",
+    "errorFilterPanelClear": "Filter panel clear error: Layer '{{layerName}}' failed to clear filters"
+  },
   "guide": {
     "title": "Guide",
     "search": "Search guide...",
