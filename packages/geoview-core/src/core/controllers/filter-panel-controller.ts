@@ -2,7 +2,6 @@ import type { MapViewer } from '@/geo/map/map-viewer';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import { logger } from '@/core/utils/logger';
-import { whenThisThen } from '@/core/utils/utilities';
 import { DateMgt } from '@/core/utils/date-mgt';
 import {
   getStoreFilterPanelLayerConfig,
@@ -23,11 +22,7 @@ import {
 } from '@/core/stores/states/filter-panel-state';
 import { getStoreDataTableFeaturesByPath } from '@/core/stores/states/data-table-state';
 import { getStoreLayerStatus } from '@/core/stores/states/layer-state';
-import {
-  LayerFilterPanelClearError,
-  LayerFilterPanelQueryError,
-  LayerRegistrationTimeoutError,
-} from '@/core/exceptions/geoview-exceptions';
+import { LayerFilterPanelClearError, LayerFilterPanelQueryError } from '@/core/exceptions/geoview-exceptions';
 
 // #region TYPES (minimal config types for reading filter panel configuration)
 
@@ -337,16 +332,9 @@ export class FilterPanelController extends AbstractMapViewerController {
    */
   async ensureLayerQueried(layerPath: string): Promise<void> {
     const { allFeatureInfoLayerSet } = this.getControllersRegistry().layerSetController;
-    const REGISTRATION_TIMEOUT = 5000; // 5 seconds
 
-    try {
-      // Wait for the layer to be registered in AllFeatureInfoLayerSet
-      // TODO: replace the whenThisThen with: allFeatureInfoLayerSet.waitForLayerToGetRegistered(layerPath)
-      await whenThisThen(() => allFeatureInfoLayerSet.getRegisteredLayerPaths().includes(layerPath), REGISTRATION_TIMEOUT);
-    } catch (error) {
-      logger.logWarning(`Layer registration timeout for layer ${layerPath}:`, error);
-      throw new LayerRegistrationTimeoutError(layerPath);
-    }
+    // Wait for the layer to be registered in AllFeatureInfoLayerSet
+    await allFeatureInfoLayerSet.waitForLayerToGetRegistered(layerPath);
 
     // Layer is now registered - check if we need to trigger a query
     const existingFeatures = getStoreDataTableFeaturesByPath(this.getMapId(), layerPath);
