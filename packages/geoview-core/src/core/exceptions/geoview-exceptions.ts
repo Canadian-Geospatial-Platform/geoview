@@ -739,26 +739,6 @@ export class LayerNoLastQueryToPerformError extends GeoViewError {
 }
 
 /**
- * Error thrown when a layer registration takes longer than expected and times out.
- */
-export class LayerRegistrationTimeoutError extends GeoViewError {
-  /**
-   * Creates an instance of LayerRegistrationTimeoutError.
-   *
-   * @param layerName - The layer name of the layer that failed to register
-   */
-  constructor(layerName: string) {
-    super('filterPanel.errorRegistrationTimeout', { layerName });
-
-    // Set a custom name for the error type to differentiate it from other error types
-    this.name = 'LayerRegistrationTimeoutError';
-
-    // Ensure correct inheritance (important for transpilation targets)
-    Object.setPrototypeOf(this, LayerRegistrationTimeoutError.prototype);
-  }
-}
-
-/**
  * Error thrown when a query to a layer from the filter panel fails.
  */
 export class LayerFilterPanelQueryError extends GeoViewError {
