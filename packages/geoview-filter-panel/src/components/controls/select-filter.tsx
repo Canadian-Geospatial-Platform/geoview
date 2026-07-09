@@ -112,7 +112,7 @@ export function SelectFilter(props: SelectFilterProps): JSX.Element {
         displayEmpty
         renderValue={(selected: unknown) => {
           if (!selected || selected === '') {
-            return <em style={{ color: '#999' }}>{t('FilterPanel.all')}</em>;
+            return <em style={{ color: theme.palette.geoViewColor?.textColor?.light?.[400] || '#999' }}>{t('FilterPanel.all')}</em>;
           }
           return selected as string | number;
         }}
