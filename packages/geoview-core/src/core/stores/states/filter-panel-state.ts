@@ -4,8 +4,8 @@ import { getGeoViewStore, useGeoViewStore } from '@/core/stores/stores-managers'
 import type { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { getStoreMapConfigCorePackagesConfig } from '@/core/stores/states/map-state';
 import { PluginStateUninitializedError } from '@/core/exceptions/geoview-exceptions';
+import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
-import type { TypeMapFeaturesConfig } from '@/index';
 
 // #region TYPE DEFINITIONS
 
