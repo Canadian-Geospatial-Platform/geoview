@@ -6,7 +6,7 @@ A customizable filter panel plugin for GeoView that allows users to filter map l
 
 The Filter Panel does not currently sync with other components like the layer list / legend and the data-table. 
 - **Layer List / Legend**: When a layer is using the attribute for displaying unique values, the value will still be showing in the UI and showing as enabled. Also, disabling a unique class in the layer list or legend will not remove it from the filter panel.
-- **Data Table**: When a layer is filtered in the Filter Panel, the filtered items will still show in the data-table. As well, if a filter is applied to a field in the data table that is present in the filter panel, the unique values in the filter panel are not updated.
+- **Data Table**: When a layer is filtered in the Filter Panel, the filtered items are hidden in the data-table. However, if a filter is applied to a field in the data table that is present in the filter panel, the unique values in the filter panel are not updated.
 
 ## Features
 

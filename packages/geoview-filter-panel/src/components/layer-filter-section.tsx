@@ -99,6 +99,19 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
   }, [mapId, layer.layerPath, isCollapsed]);
 
   /**
+   * Auto-applies filters when the layer becomes ready or when filter state changes.
+   */
+  useEffect((): void => {
+    logger.logTraceUseEffect('LAYER FILTER SECTION - Auto-apply filters', layerIsReady);
+
+    // Only auto-apply if enabled and layer is ready
+    if (!layerIsReady) return;
+
+    // Apply this layer's filters via the controller
+    controller.applyLayerFilter(layer.layerPath);
+  }, [controller, layer.layerPath, layerIsReady, filterState]);
+
+  /**
    * Gets unique values for layer attributes once the layer is ready and registered.
    */
   useEffect((): void => {

@@ -47,6 +47,7 @@ import {
 } from '@/core/stores/states/layer-state';
 import { useStoreDataTableLayerSettings } from '@/core/stores/states/data-table-state';
 import { useStoreTimeSliderFilter } from '@/core/stores/states/time-slider-state';
+import { useStoreFilterPanelFilterExpression } from '@/core/stores/states/filter-panel-state';
 import { useStoreAppDisplayLanguage } from '@/core/stores/states/app-state';
 import { DateMgt } from '@/core/utils/date-mgt';
 import linkifyHtml from 'linkify-html';
@@ -210,6 +211,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
   const datatableSettings = useStoreDataTableLayerSettings();
   const layerClassFilter = useStoreLayerFilterClass(layerPath);
   const layerTimeFilter = useStoreTimeSliderFilter(layerPath);
+  const layerFilterPanelFilterExpression = useStoreFilterPanelFilterExpression(layerPath);
   const layerDateTemporalMode = useStoreLayerDateTemporalMode(layerPath);
   const displayDateFormat = useStoreLayerDisplayDateFormat(layerPath);
   const displayDateTimezone = useStoreLayerDisplayDateTimezone(layerPath);
@@ -786,7 +788,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
     logger.logTraceUseMemo('DATA-TABLE - memoFilteredFeatures', data.features);
 
     // In addition, filter on the class renderer filters and the time slider filter
-    const layerFilterClassAndTime = LayerFilters.joinWithAnd([layerClassFilter, layerTimeFilter]);
+    const layerFilterClassAndTime = LayerFilters.joinWithAnd([layerClassFilter, layerTimeFilter, layerFilterPanelFilterExpression]);
 
     // Create the filter equation equivalent of the combined filter
     const layerFilterEquation = GeoviewRenderer.createFilterNodeFromFilter(layerFilterClassAndTime);
@@ -797,7 +799,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
         return f.feature && GeoviewRenderer.featureRespectsFilterEquation(f.feature, layerFilterEquation);
       }) ?? []
     );
-  }, [data.features, layerClassFilter, layerTimeFilter]);
+  }, [data.features, layerClassFilter, layerTimeFilter, layerFilterPanelFilterExpression]);
 
   /**
    * Updates filtered features ref for handler access.
