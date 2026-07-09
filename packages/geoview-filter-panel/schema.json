@@ -57,91 +57,279 @@
             "type": "array",
             "description": "Array of filterable attributes",
             "items": {
-              "type": "object",
-              "required": [
-                "fieldName",
-                "displayLabel",
-                "filterType"
-              ],
-              "properties": {
-                "fieldName": {
-                  "type": "string",
-                  "description": "Field name in the layer"
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/TypeSelectFilterAttribute"
                 },
-                "displayLabel": {
-                  "type": "string",
-                  "description": "Display label for the filter"
+                {
+                  "$ref": "#/definitions/TypeMultiselectFilterAttribute"
                 },
-                "filterType": {
-                  "type": "string",
-                  "enum": [
-                    "select",
-                    "multiselect",
-                    "range",
-                    "date"
-                  ],
-                  "description": "Type of filter control"
+                {
+                  "$ref": "#/definitions/TypeRangeFilterAttribute"
                 },
-                "enabled": {
-                  "type": "boolean",
-                  "description": "Whether this attribute filter is enabled",
-                  "default": true
-                },
-                "defaultValues": {
-                  "description": "Default filter values",
-                  "oneOf": [
-                    {
-                      "type": "null"
-                    },
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "number"
-                    },
-                    {
-                      "type": "array"
-                    },
-                    {
-                      "type": "object"
-                    }
-                  ]
-                },
-                "domain": {
-                  "type": "array",
-                  "description": "Domain mapping for value labels. Maps raw values to display labels. Only applies to 'select' and 'multiselect' filter types.",
-                  "items": {
-                    "type": "object",
-                    "required": [
-                      "value",
-                      "label"
-                    ],
-                    "properties": {
-                      "value": {
-                        "oneOf": [
-                          {
-                            "type": "string"
-                          },
-                          {
-                            "type": "number"
-                          }
-                        ],
-                        "description": "The raw value from the layer"
-                      },
-                      "label": {
-                        "type": "string",
-                        "description": "The display label for this value"
-                      }
-                    }
-                  }
-                },
-                "filterMissingDomainValues": {
-                  "type": "boolean",
-                  "description": "If true, values not in the domain are filtered out. If false, they are shown with their raw value. Only applies when domain is defined and filterType is 'select' or 'multiselect'.",
-                  "default": false
+                {
+                  "$ref": "#/definitions/TypeDateFilterAttribute"
                 }
-              }
+              ]
             }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "TypeBaseFilterAttribute": {
+      "type": "object",
+      "description": "Base properties shared by all filter attributes",
+      "properties": {
+        "fieldName": {
+          "type": "string",
+          "description": "Field name in the layer"
+        },
+        "displayLabel": {
+          "type": "string",
+          "description": "Display label for the filter"
+        },
+        "enabled": {
+          "type": "boolean",
+          "description": "Whether this attribute filter is enabled",
+          "default": true
+        }
+      },
+      "required": [
+        "fieldName",
+        "displayLabel"
+      ]
+    },
+    "TypeSelectFilterAttribute": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/TypeBaseFilterAttribute"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "filterType": {
+              "const": "select",
+              "description": "Single-value dropdown selection"
+            },
+            "defaultValues": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "description": "Default single value"
+            },
+            "domain": {
+              "$ref": "#/definitions/TypeDomainArray"
+            },
+            "filterMissingDomainValues": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          "required": [
+            "filterType"
+          ]
+        }
+      ]
+    },
+    "TypeMultiselectFilterAttribute": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/TypeBaseFilterAttribute"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "filterType": {
+              "const": "multiselect",
+              "description": "Multiple-value checkbox list"
+            },
+            "defaultValues": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "description": "Default array of selected values"
+            },
+            "domain": {
+              "$ref": "#/definitions/TypeDomainArray"
+            },
+            "filterMissingDomainValues": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          "required": [
+            "filterType"
+          ]
+        }
+      ]
+    },
+    "TypeRangeFilterAttribute": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/TypeBaseFilterAttribute"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "filterType": {
+              "const": "range",
+              "description": "Numeric min/max range"
+            },
+            "defaultValues": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "oneOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "max": {
+                      "oneOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ],
+              "description": "Default range object with min/max"
+            }
+          },
+          "required": [
+            "filterType"
+          ]
+        }
+      ]
+    },
+    "TypeDateFilterAttribute": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/TypeBaseFilterAttribute"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "filterType": {
+              "const": "date",
+              "description": "Date range picker"
+            },
+            "dateStep": {
+              "type": "string",
+              "description": "Step interval for date filter keyboard navigation",
+              "enum": [
+                "second",
+                "minute",
+                "hour",
+                "day",
+                "week",
+                "month",
+                "year"
+              ],
+              "default": "day"
+            },
+            "defaultValues": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "start": {
+                      "oneOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "end": {
+                      "oneOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ],
+              "description": "Default date range with start/end"
+            }
+          },
+          "required": [
+            "filterType"
+          ]
+        }
+      ]
+    },
+    "TypeDomainArray": {
+      "type": "array",
+      "description": "Domain mapping for value labels",
+      "items": {
+        "type": "object",
+        "required": [
+          "value",
+          "label"
+        ],
+        "properties": {
+          "value": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              }
+            ]
+          },
+          "label": {
+            "type": "string"
           }
         }
       }

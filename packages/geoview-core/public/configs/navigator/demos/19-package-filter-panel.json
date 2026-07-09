@@ -59,11 +59,14 @@
     {
       "filter-panel": {
         "isOpen": true,
+        "title": "Custom Filter Panel Title",
         "layers": [
           {
             "layerPath": "esriFeatureLYR4/0",
             "layerName": "Top 100 exploration projects in Canada",
             "enabled": true,
+            "collapsible": true,
+            "defaultCollapsed": true,
             "attributes": [
               {
                 "fieldName": "province_en",
@@ -81,19 +84,25 @@
                 "fieldName": "longitude",
                 "displayLabel": "Longitude",
                 "filterType": "range",
-                "enabled": true
+                "enabled": true,
+                "defaultValues": {
+                  "min": -100,
+                  "max": -60
+                }
               }
             ]
           },
           {
             "layerPath": "historical-flood/0",
             "enabled": true,
+            "collapsible": false,
             "attributes": [
               {
                 "fieldName": "flood_cause",
                 "displayLabel": "Flood Cause",
                 "filterType": "select",
-                "enabled": true
+                "enabled": true,
+                "defaultValues": "heavy rain"
               },
               {
                 "fieldName": "season",
@@ -101,6 +110,10 @@
                 "filterType": "multiselect",
                 "enabled": true,
                 "filterMissingDomainValues": true,
+                "defaultValues": [
+                  "spring",
+                  "summer"
+                ],
                 "domain": [
                   {
                     "value": "spring",
@@ -124,18 +137,16 @@
                 "fieldName": "start_date",
                 "displayLabel": "Start Date",
                 "filterType": "date",
-                "enabled": true
+                "enabled": true,
+                "defaultValues": {
+                  "start": "1847-09-01",
+                  "end": "2007-08-20"
+                },
+                "dateStep": "year"
               }
             ]
           }
-        ],
-        "settings": {
-          "title": "Custom Filter Panel Title",
-          "collapsible": true,
-          "defaultCollapsed": false,
-          "autoApply": true,
-          "showResetButton": false
-        }
+        ]
       }
     }
   ]
