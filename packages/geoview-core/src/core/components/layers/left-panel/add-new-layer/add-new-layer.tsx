@@ -342,6 +342,7 @@ export function AddNewLayer(): JSX.Element {
   const [urlErrorMessage, setUrlErrorMessage] = useState<string>('');
   const [serviceTypeError, setServiceTypeError] = useState<boolean>(false);
   const [serviceTypeErrorMessage, setServiceTypeErrorMessage] = useState<string>('');
+  const [loadErrorMessage, setLoadErrorMessage] = useState<string>('');
   const isSingle = !isMultiple;
 
   // Ref
@@ -723,6 +724,7 @@ export function AddNewLayer(): JSX.Element {
    * shows appropriate notifications, and returns to the layer panel.
    */
   const handleStepLast = (): void => {
+    setLoadErrorMessage('');
     setIsLoading(true);
     const newGeoViewLayer = UtilAddLayer.buildGeoLayerToAdd({
       layerIdsToAdd,
@@ -737,12 +739,14 @@ export function AddNewLayer(): JSX.Element {
       addGeoviewLayer(newGeoViewLayer).catch((error) => {
         doneAdding();
         uiController.addMessage('error', 'layers.errorNotLoaded', { layerName });
+        setLoadErrorMessage(t('layers.errorNotLoaded', { layerName }));
         logger.logError(error, 'Unable to load layer');
       });
     else {
       // Remove spinning circle if failed.
       doneAdding();
       uiController.addMessage('error', 'layers.errorNotLoaded', { layerName });
+      setLoadErrorMessage(t('layers.errorNotLoaded', { layerName }));
       logger.logError('Unable to load layer');
     }
   };
@@ -769,6 +773,10 @@ export function AddNewLayer(): JSX.Element {
     if (activeStep === 2) {
       setServiceTypeError(false);
       setServiceTypeErrorMessage('');
+      setLoadErrorMessage('');
+    }
+    if (activeStep === 3) {
+      setLoadErrorMessage('');
     }
 
     setActiveStep((prevActiveStep: number) => prevActiveStep - 1);
@@ -1158,6 +1166,8 @@ export function AddNewLayer(): JSX.Element {
                       onChange={handleNameLayer}
                       inputRef={configureLayerNameInputRef}
                       onKeyDown={handleNextKeyDown}
+                      error={!!loadErrorMessage}
+                      helperText={loadErrorMessage ? loadErrorMessage : undefined}
                     />
                   ) : (
                     layerTree && (
@@ -1195,6 +1205,8 @@ export function AddNewLayer(): JSX.Element {
                         value={layerName}
                         onChange={handleNameLayer}
                         onKeyDown={handleNextKeyDown}
+                        error={!!loadErrorMessage}
+                        helperText={loadErrorMessage ? loadErrorMessage : undefined}
                         inputRef={finalLayerNameInputRef}
                       />
                       <br />
