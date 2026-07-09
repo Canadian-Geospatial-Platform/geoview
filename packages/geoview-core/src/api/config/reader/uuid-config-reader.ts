@@ -254,6 +254,7 @@ export class UUIDmapConfigReader {
           // Get the layer entry
           const layerConfig = listOfGeoviewLayerConfig[i];
 
+          // TODO: Add support for more than 1 layer overrides, see issue #3548
           // If there's only the one layer AND customGeocoreLayerConfig is provided
           if (layerConfig.listOfLayerEntryConfig.length === 1 && customGeocoreLayerConfig) {
             const layerEntryConfig = layerConfig.listOfLayerEntryConfig[0];
