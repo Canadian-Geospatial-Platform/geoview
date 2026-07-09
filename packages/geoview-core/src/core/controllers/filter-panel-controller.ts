@@ -2,7 +2,7 @@ import type { MapViewer } from '@/geo/map/map-viewer';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import { logger } from '@/core/utils/logger';
-import { DateMgt } from '@/core/utils/date-mgt';
+import { DateMgt, type ManipulateType } from '@/core/utils/date-mgt';
 import {
   getStoreFilterPanelLayerConfig,
   getStoreFilterPanelFilterState,
@@ -631,6 +631,24 @@ export class FilterPanelController extends AbstractMapViewerController {
     return DateMgt.formatDate(timestamp, DateMgt.ISO_DATE_FORMAT, 'en', DateMgt.TIME_UTC);
   }
 
+  /**
+   * Applies a calendar-aware date step to a timestamp.
+   *
+   * Uses Day.js (via DateMgt) to handle calendar arithmetic correctly,
+   * including variable-length months and leap years.
+   *
+   * @param timestamp - The starting timestamp in milliseconds
+   * @param dateStep - The step type from attribute config (day, week, month, year, etc.)
+   * @param direction - 1 for forward (right arrow), -1 for backward (left arrow)
+   * @returns The adjusted timestamp in milliseconds
+   */
+  applyDateStep(timestamp: number, dateStep: string, direction: 1 | -1): number {
+    const stepUnit = this.#getDateStepUnit(dateStep);
+    const date = DateMgt.createDayjs(timestamp);
+    const adjustedDate = date.add(direction, stepUnit);
+    return adjustedDate.valueOf();
+  }
+
   // #endregion PUBLIC METHODS - UTILITIES
 
   // #region PRIVATE HELPER METHODS
@@ -712,6 +730,26 @@ export class FilterPanelController extends AbstractMapViewerController {
    */
   static escapeString(str: string): string {
     return str.replace(/'/g, "''");
+  }
+
+  /**
+   * Maps dateStep config values to Day.js duration units.
+   *
+   * @param dateStep - The step type from attribute config
+   * @returns The corresponding Day.js ManipulateType
+   */
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  #getDateStepUnit(dateStep: string): ManipulateType {
+    const units: Record<string, ManipulateType> = {
+      second: 'second',
+      minute: 'minute',
+      hour: 'hour',
+      day: 'day',
+      week: 'week',
+      month: 'month',
+      year: 'year',
+    };
+    return units[dateStep] ?? 'day';
   }
 
   // #endregion PRIVATE HELPER METHODS

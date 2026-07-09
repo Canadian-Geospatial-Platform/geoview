@@ -37,7 +37,7 @@ export function DateFilter(props: DateFilterProps): JSX.Element {
 
   // Access UI components via window.cgpv pattern
   const { cgpv } = window as TypeWindow;
-  const { useMemo, useCallback } = cgpv.reactUtilities.react;
+  const { useMemo, useCallback, useRef } = cgpv.reactUtilities.react;
   const { ui } = cgpv;
   const { Box, Slider, Typography } = ui.elements;
 
@@ -46,6 +46,9 @@ export function DateFilter(props: DateFilterProps): JSX.Element {
   const { t } = useTranslation<string>();
 
   const controller = useFilterPanelController();
+
+  // Track which thumb (0 = start, 1 = end) was last interacted with
+  const activeThumbRef = useRef<number>(1);
 
   /**
    * Memoized date value to prevent dependency changes on every render.
@@ -107,7 +110,10 @@ export function DateFilter(props: DateFilterProps): JSX.Element {
    * Handles when the slider value changes.
    */
   const handleSliderChange = useCallback(
-    (newValue: number | number[]): void => {
+    (newValue: number | number[], activeThumb: number): void => {
+      // Track which thumb is being moved
+      activeThumbRef.current = activeThumb;
+
       // Assert that newValue is number[] since this is a range slider
       const [start, end] = newValue as number[];
 
@@ -118,6 +124,49 @@ export function DateFilter(props: DateFilterProps): JSX.Element {
       });
     },
     [controller, onChange]
+  );
+
+  /**
+   * Handles keyboard navigation with calendar-aware stepping.
+   */
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent): void => {
+      if (!memoBounds) return;
+
+      const isLeftArrow = event.key === 'ArrowLeft';
+      const isRightArrow = event.key === 'ArrowRight';
+
+      if (!isLeftArrow && !isRightArrow) return;
+
+      event.preventDefault(); // Prevent default slider behavior
+
+      const [currentStart, currentEnd] = memoSliderValue;
+      const direction = isRightArrow ? 1 : -1;
+      const dateStep = attribute.dateStep ?? 'day';
+      const activeThumb = activeThumbRef.current;
+
+      // Apply date step to the active thumb (0 = start, 1 = end)
+      if (activeThumb === 0) {
+        // Modify start date
+        const newStartTimestamp = controller.applyDateStep(currentStart, dateStep, direction);
+        const clampedStart = Math.min(Math.max(newStartTimestamp, memoBounds.min), memoBounds.max);
+
+        onChange({
+          start: controller.formatDateForFilter(clampedStart),
+          end: controller.formatDateForFilter(currentEnd),
+        });
+      } else {
+        // Modify end date
+        const newEndTimestamp = controller.applyDateStep(currentEnd, dateStep, direction);
+        const clampedEnd = Math.min(Math.max(newEndTimestamp, memoBounds.min), memoBounds.max);
+
+        onChange({
+          start: controller.formatDateForFilter(currentStart),
+          end: controller.formatDateForFilter(clampedEnd),
+        });
+      }
+    },
+    [memoBounds, memoSliderValue, attribute.dateStep, controller, onChange]
   );
 
   /**
@@ -166,10 +215,12 @@ export function DateFilter(props: DateFilterProps): JSX.Element {
         <Slider
           value={memoSliderValue}
           onChange={handleSliderChange}
+          onKeyDown={handleKeyDown}
           valueLabelDisplay={'off'}
           valueLabelFormat={formatValue}
           min={memoBounds.min}
           max={memoBounds.max}
+          step={1}
         />
       </Box>
 

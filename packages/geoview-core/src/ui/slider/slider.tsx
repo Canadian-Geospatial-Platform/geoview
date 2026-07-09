@@ -30,6 +30,7 @@ type SliderProps = {
   onChangeCommitted?: (value: number | number[]) => void;
   onValueLabelFormat?: (value: number, index: number) => string;
   onValueDisplayAriaLabel?: (value: number, index: number) => string;
+  onKeyDown?: (event: React.KeyboardEvent) => void;
 
   // MUI optional props
   disabled?: boolean;
@@ -87,6 +88,7 @@ function SliderUI(props: SliderProps): JSX.Element {
     onChangeCommitted,
     onValueLabelFormat,
     onValueDisplayAriaLabel,
+    onKeyDown,
     disabled,
     slotProps,
     ...properties
@@ -244,8 +246,11 @@ function SliderUI(props: SliderProps): JSX.Element {
         }
         focusSlider();
       }
+
+      // Call custom handler if provided
+      onKeyDown?.(event);
     },
-    [focusSlider]
+    [focusSlider, onKeyDown]
   );
 
   // #endregion
