@@ -24,7 +24,7 @@ import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useStoreAppDisabledLayerTypes, useStoreAppDisplayLanguage, useStoreAppShellContainer } from '@/core/stores/states/app-state';
 import { ConfigApi } from '@/api/config/config-api';
 import { logger } from '@/core/utils/logger';
-import { generateId, isValidUUID, validateAndPingUrl } from '@/core/utils/utilities';
+import { delay, generateId, isValidUUID, validateAndPingUrl } from '@/core/utils/utilities';
 import { VALID_FILE_EXTENSIONS_ACCEPT } from '@/core/utils/constant';
 import { Config } from '@/api/config/config';
 import type { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -980,12 +980,11 @@ export function AddNewLayer(): JSX.Element {
 
     if (activeStep === 0) {
       // Focus the upload button using the ref
-      const timeoutId = setTimeout(() => {
+      void delay(0).then(() => {
         uploadButtonRef.current?.focus();
-      }, 0);
+      });
 
-      // Cleanup: cancel focus attempt if step changes or unmounts
-      return () => clearTimeout(timeoutId);
+      return undefined;
     }
 
     if (activeStep === 1) {
@@ -1015,14 +1014,16 @@ export function AddNewLayer(): JSX.Element {
   // #endregion USE EFFECTS
 
   /**
-   * Creates a set of Continue / Back buttons
+   * Creates the navigation button set for the add-layer wizard.
    *
-   * @param param0 specify if button is first or last in the list
-   * @returns React component
+   * @param props - Properties defined in ButtonPropsLayerPanel interface
+   * @returns The navigation button set
    */
   // TODO: refactor - remove the unstable nested component
   // eslint-disable-next-line react/no-unstable-nested-components
   function NavButtons({ isFirst = false, isLast = false, handleNext }: ButtonPropsLayerPanel): JSX.Element {
+    logger.logTraceRender('components/layers/left-panel/add-new-layer/add-new-layer > NavButtons');
+
     return (
       <ButtonGroup sx={sxClasses.buttonGroup}>
         {isLoading ? (

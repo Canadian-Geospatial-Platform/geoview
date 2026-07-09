@@ -1464,6 +1464,7 @@ export interface LayerGroupCreatedEvent {
  */
 type LayerGroupCreatedDelegate = EventDelegateBase<AbstractGeoViewLayer, LayerGroupCreatedEvent, void>;
 
+/** Describes a WMS legend style and its associated canvas preview. */
 export interface TypeWmsLegendStyle {
   /** The name of the WMS legend style. */
   name: string;
