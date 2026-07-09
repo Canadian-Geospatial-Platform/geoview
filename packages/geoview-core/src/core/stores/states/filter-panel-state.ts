@@ -116,6 +116,9 @@ export interface IFilterPanelState {
   /** Tracks collapsed state for each layer (layerPath -> isCollapsed). */
   collapsedLayers: Record<string, boolean>;
 
+  /** Tracks the current filter expression values for the panel as a string */
+  panelFilterExpressions: Record<string, string>;
+
   /** Sets default filter panel configuration values from the map features config. */
   setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
 
@@ -144,6 +147,9 @@ export interface IFilterPanelState {
 
     /** Sets the collapsed state for a specific layer. */
     setLayerCollapsed: (layerPath: string, collapsed: boolean) => void;
+
+    /** Sets the panel filter value for a specific layer. */
+    setPanelFilterExpression: (layerPath: string, filter: string) => void;
   };
 }
 
@@ -163,6 +169,7 @@ export function initializeFilterPanelState(set: TypeSetStore, get: TypeGetStore)
     filterState: {},
     activeLayerFilters: new Set<string>(),
     collapsedLayers: {},
+    panelFilterExpressions: {},
 
     setDefaultConfigValues(geoviewConfig: TypeMapFeaturesConfig) {
       const filterPanelPackageConfig = geoviewConfig.corePackagesConfig?.find((config) => Object.keys(config).includes('filter-panel')) as
@@ -352,6 +359,26 @@ export function initializeFilterPanelState(set: TypeSetStore, get: TypeGetStore)
           },
         });
       },
+
+      /**
+       * Sets the panel filter value for a specific layer.
+       *
+       * @param layerPath - The layer path
+       * @param filter - The filter value as a string
+       */
+      setPanelFilterExpression(layerPath: string, filter: string) {
+        const currentFilters = get().filterPanelState.panelFilterExpressions;
+
+        set({
+          filterPanelState: {
+            ...get().filterPanelState,
+            panelFilterExpressions: {
+              ...currentFilters,
+              [layerPath]: filter,
+            },
+          },
+        });
+      },
     },
   };
 
@@ -478,6 +505,16 @@ export const getStoreFilterPanelLayerCollapsed = (mapId: string, layerPath: stri
 /** Hooks the collapsed state for a specific layer from the store. */
 export const useStoreFilterPanelLayerCollapsed = (layerPath: string): boolean =>
   useStore(useGeoViewStore(), (state) => state.filterPanelState.collapsedLayers[layerPath] ?? false);
+
+/** Gets the panel filter for a specific layer from the store. */
+export const useStoreFilterPanelFilterExpression = (layerPath: string): string | undefined =>
+  useStore(useGeoViewStore(), (state) => state.filterPanelState?.panelFilterExpressions[layerPath]);
+
+/** Sets the panel filter for a specific layer in the store. */
+export const setStoreFilterPanelFilterExpression = (mapId: string, layerPath: string, filter: string): void => {
+  const state = getStoreFilterPanelState(mapId);
+  state.actions.setPanelFilterExpression(layerPath, filter);
+};
 
 // #endregion STATE GETTERS & HOOKS
 

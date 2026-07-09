@@ -9,6 +9,7 @@ import {
   getStoreFilterPanelLayerFilterState,
   setStoreFilterPanelFilterState,
   setStoreFilterPanelLayerFieldFilter,
+  setStoreFilterPanelFilterExpression,
   clearStoreFilterPanelLayerFilters,
   clearStoreFilterPanelAllFilters,
   addStoreFilterPanelActiveLayerFilter,
@@ -215,6 +216,7 @@ export class FilterPanelController extends AbstractMapViewerController {
     // Apply or clear the panel filter using the proper LayerFilters API
     try {
       gvLayer.setLayerFiltersPanel(expression);
+      setStoreFilterPanelFilterExpression(this.getMapId(), layerPath, expression || '');
     } catch (err) {
       logger.logError(`Error applying filter panel filter for layer ${layerPath}:`, err);
       throw new LayerFilterPanelQueryError(layerPath);
@@ -263,6 +265,7 @@ export class FilterPanelController extends AbstractMapViewerController {
     // Try to remove the panel filter from the layer using the proper LayerFilters API
     try {
       gvLayer.setLayerFiltersPanel(undefined);
+
       removeStoreFilterPanelActiveLayerFilter(this.getMapId(), layerPath);
       logger.logInfo(`Cleared filter panel filters for layer ${layerPath}`);
     } catch (err) {
