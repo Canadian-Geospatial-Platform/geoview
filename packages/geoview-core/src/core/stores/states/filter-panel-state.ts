@@ -65,6 +65,8 @@ export interface TypeFilterAttribute {
   domain?: TypeDomainValue[];
   /** If true, filter out values not in the domain. If false, show them with raw value. Only applies when domain is defined and filterType is 'select' or 'multiselect'. */
   filterMissingDomainValues?: boolean;
+  /** Optional step interval for date filters. Only applies when filterType is 'date'. */
+  dateStep?: 'second' | 'minute' | 'hour' | 'day' | 'week' | 'month' | 'year';
 }
 
 /** Filter type enumeration. */

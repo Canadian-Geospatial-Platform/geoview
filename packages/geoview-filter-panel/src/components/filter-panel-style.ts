@@ -58,7 +58,7 @@ export const getSxClasses = (theme: any): SxStyles => ({
     gap: 1,
   },
 
-  filterLayerHeaderRRight: {
+  filterLayerHeaderRight: {
     display: 'flex',
     alignItems: 'center',
     gap: 5,

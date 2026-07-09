@@ -52,6 +52,9 @@ const timeUnitsESRI = {
   esriTimeUnitsYears: 'Y',
 };
 
+/** Type alias for Day.js manipulate type. */
+export type ManipulateType = dayjs.ManipulateType;
+
 /** Type used to define the range values for an OGC time dimension. */
 type RangeItems = {
   type: string;
