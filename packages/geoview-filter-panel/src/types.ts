@@ -49,6 +49,8 @@ export interface TypeFilterSettings {
 export interface TypeFilterPanelProps {
   /** Plugin identifier. */
   id: string;
+  /** Panel title. */
+  title: string;
   /** Whether the filter panel is enabled. */
   enabled: boolean;
   /** Whether the panel is open by default. */
@@ -57,8 +59,6 @@ export interface TypeFilterPanelProps {
   version: string;
   /** Array of layer configurations. */
   layers: TypeFilterLayer[];
-  /** Global filter panel settings. */
-  settings: TypeFilterSettings;
 }
 
 /**

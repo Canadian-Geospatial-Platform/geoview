@@ -124,7 +124,7 @@ class FilterPanelPlugin extends AppBarPlugin {
   override onCreateContentProps(): TypePanelProps {
     // Panel props
     return {
-      title: 'FilterPanel.title',
+      title: this.getConfig().title ?? 'FilterPanel.title',
       icon: <FilterAltIcon />,
       width: 30, // use as %
       status: this.getConfig().isOpen,

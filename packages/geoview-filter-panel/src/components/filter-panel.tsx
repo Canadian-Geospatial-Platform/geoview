@@ -31,7 +31,7 @@ export function FilterPanel(props: FilterPanelProps): JSX.Element {
 
   // Access UI components via window.cgpv pattern
   const { cgpv } = window as TypeWindow;
-  const { useEffect, useCallback, useMemo } = cgpv.reactUtilities.react;
+  const { useCallback, useMemo } = cgpv.reactUtilities.react;
   const { ui } = cgpv;
   const { Box, Typography } = ui.elements;
 
@@ -64,30 +64,6 @@ export function FilterPanel(props: FilterPanelProps): JSX.Element {
     },
     [filterPanelController]
   );
-
-  /**
-   * Applies all filters to all layers.
-   *
-   * Builds filter expressions from the current filter state and applies them via the controller.
-   */
-  const applyAllFilters = useCallback((): void => {
-    if (!filterPanelController) return;
-    filterPanelController.applyAllFilters();
-  }, [filterPanelController]);
-
-  /**
-   * Auto-applies filters when filter state changes.
-   */
-  useEffect((): void => {
-    // Log
-    logger.logTraceUseEffect('FILTER PANEL - Auto-apply filters');
-
-    const shouldAutoApply = config.settings?.autoApply !== false;
-
-    if (shouldAutoApply && filterPanelController) {
-      applyAllFilters();
-    }
-  }, [config.settings?.autoApply, filterPanelController, applyAllFilters]);
 
   if (!config) {
     return (
