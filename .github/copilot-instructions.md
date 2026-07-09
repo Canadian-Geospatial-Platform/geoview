@@ -1150,6 +1150,7 @@ The GeoCore VCS API (`https://geocore.api.geo.ca/vcs?lang={lang}&id={uuid}`) ret
 1. **Initial load** (`loadListOfGeoviewLayer` → `convertMapConfigToGeoviewLayerConfig` callback)
 2. **Runtime UUID add** (`addGeoviewLayerByGeoCoreUUID` — direct merge after response)
 3. **Add Layer UI** (`add-new-layer.tsx` — state variable + merge before `addGeoviewLayer`)
+4. **Add Layer failure handling** — If layer-type conversion fails before `addGeoviewLayer()` starts (for example, a shapefile or GeoPackage conversion is attempted against a non-matching URL), the wizard must still call `doneAdding()` and surface `layers.errorNotLoaded` in the `handleStepLast` catch block so the spinner stops and the user can recover
 
 **Config source: `mapFeaturesConfig` vs Zustand store** — GeoCore merges package configs into `mapFeaturesConfig.corePackagesConfig` at runtime (after the layer resolves from the API). Controllers that read package configs during layer registration must read from `this.getMapViewer().mapFeaturesConfig.corePackagesConfig`, NOT from the store (`getStoreMapConfigCorePackagesConfig`), because the store snapshot may not yet reflect the merged configs.
 
@@ -1166,6 +1167,7 @@ The GeoCore VCS API (`https://geocore.api.geo.ca/vcs?lang={lang}&id={uuid}`) ret
 1. `this.olRootLayer = layer?.getOLLayer()` must be set **before** checking for errors
 2. Only throw (`#throwAggregatedLayerLoadErrors()`) when `!this.olRootLayer` (ALL sub-layers failed)
 3. When some sub-layers are valid, errors are recorded on individual configs (`status='error'`) and reported by the caller via `getLayerLoadErrors()` + `showLayerError()`
+4. Validation-time failures that never create a GV layer must still call `updateLayerStatusParent()` from the error site itself, because the GV lifecycle hooks that normally propagate parent status never run in that path
 
 **Parent status propagation** — `#updateLayerStatusParentRec` in `config-base-class.ts` determines a parent group's status from its children:
 
@@ -1183,6 +1185,8 @@ The GeoCore VCS API (`https://geocore.api.geo.ca/vcs?lang={lang}&id={uuid}`) ret
 1. **Toggle-all visibility** (`handleToggleAllVisibility` in `layer-details.tsx`): Skip children with `layerStatus === LAYER_STATUS.ERROR` — they have no valid GV layer on the map, so toggling them is meaningless and would cause errors.
 2. **"All visible" state check** (`utilAllChildrenVisible` in `layer-state.ts`): Treat error children as "don't care" in `Array.every()` — return `true` for error children so they don't prevent the toggle-all switch from reflecting the state of the remaining valid children.
 3. **Individual sublayer UI** (`Sublayer` component in `layer-details.tsx`): Disable the checkbox and force it unchecked for error layers. Style the label with grey/italic to visually indicate the broken state.
+
+**Shared HTML rendering safety** — When displaying external or user-authored HTML through `UseHtmlToReact`, the shared converter is the preferred abstraction, but a safe malformed-HTML fallback there would require a converter rewrite rather than a small try/catch patch. A caller-level fallback can still be an effective local mitigation for a known crash path, but wrapping the JSX call site in a `try/catch` does not protect against errors thrown while the child component renders.
 
 **`#processListOfLayerEntryConfig` behavior with error children:**
 

@@ -96,6 +96,9 @@ _(Fixes discovered or applied during this cycle)_
 - Fixed Swiper `process` environment variable causing failure when moving the slider (#3544)
 - Fixed `onBasemapError` handler not being unhooked from MapViewer (persisting across lifecycle) (#3544)
 - Fixed test suite buttons enabled before map ready — now disabled until map is initialized (#3544)
+- Fixed malformed HTML handling in the KML data table path to prevent render crashes during cell content conversion (#3551)
+- Fixed Add Layer wizard infinite spinner when selected layer type does not match the provided source/extension (#3550)
+- Fixed group layers with all child layers in error state not being surfaced correctly as errored in layer status propagation (#3549)
 
 ## Build & Dependencies
 
@@ -127,6 +130,7 @@ _(Doc updates, demo cleanup, code organization)_
 
 - Standardized 30+ component `memo` utilizations to use arrow function syntax (#3544)
 - Categorized many TODOs for better organization (#3544)
+- Branch review follow-up cleanup and hardening edits across data table and add-layer flows (6694b74ab, aee29d274)
 
 ## Test Plan Changes
 
