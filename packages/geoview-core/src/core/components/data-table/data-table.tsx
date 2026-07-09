@@ -357,15 +357,21 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
       }
 
       // convert string to react component.
-      return (typeof cellValue === 'string' && cellValue.length) || typeof cellValue === 'number' ? (
-        <UseHtmlToReact
-          htmlContent={sanitizeHtmlContent(
-            enhanceLinksAccessibility(linkifyHtml(cellValue.toString(), linkifyOptions), t('general.opensInNewTab'))
-          )}
-        />
-      ) : (
-        cellValue
-      );
+      if ((typeof cellValue === 'string' && cellValue.length) || typeof cellValue === 'number') {
+        try {
+          const reactComponent = (
+            <UseHtmlToReact
+              htmlContent={sanitizeHtmlContent(
+                enhanceLinksAccessibility(linkifyHtml(cellValue.toString(), linkifyOptions), t('general.opensInNewTab'))
+              )}
+            />
+          );
+          return reactComponent;
+        } catch (error) {
+          logger.logError('Error rendering HTML content:', error);
+        }
+      }
+      return cellValue;
     },
     [initLightBox, t, containerType, mapId, memoSxClasses.lightboxButton]
   );

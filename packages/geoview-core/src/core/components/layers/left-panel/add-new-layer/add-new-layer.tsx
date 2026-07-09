@@ -735,6 +735,8 @@ export function AddNewLayer(): JSX.Element {
 
     if (newGeoViewLayer)
       addGeoviewLayer(newGeoViewLayer).catch((error) => {
+        doneAdding();
+        uiController.addMessage('error', 'layers.errorNotLoaded', { layerName });
         logger.logError(error, 'Unable to load layer');
       });
     else {

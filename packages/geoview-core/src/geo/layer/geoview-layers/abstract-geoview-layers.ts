@@ -589,6 +589,9 @@ export abstract class AbstractGeoViewLayer {
 
     // Set the layer status to error
     layerConfig?.setLayerStatusError();
+
+    // Propagate error to parent group layers, if any
+    layerConfig?.updateLayerStatusParent();
   }
 
   /**
