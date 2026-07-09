@@ -9,7 +9,7 @@ import type { SxStyles } from 'geoview-core/ui/style/types';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getSxClasses = (theme: any): SxStyles => ({
   filterPanel: {
-    padding: '3px',
+    padding: '16px',
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
@@ -40,10 +40,13 @@ export const getSxClasses = (theme: any): SxStyles => ({
 
   // Layer section container
   filterLayerSection: {
-    m: 1.5,
+    mb: 5,
+    '&:last-child': {
+      mb: 0,
+    },
     padding: '3px 6px 0px',
     border: 1,
-    borderColor: 'divider',
+    borderColor: theme.palette.geoViewColor?.bgColor?.dark?.[100] || 'divider',
     borderRadius: 1,
     overflow: 'hidden',
   },
@@ -61,7 +64,7 @@ export const getSxClasses = (theme: any): SxStyles => ({
   filterLayerHeaderRight: {
     display: 'flex',
     alignItems: 'center',
-    gap: 5,
+    gap: 1,
   },
 
   // Layer section header (collapsed state - no bottom border)
@@ -72,7 +75,7 @@ export const getSxClasses = (theme: any): SxStyles => ({
   // Layer section header (expanded state - with bottom border)
   filterLayerHeaderExpanded: {
     borderBottom: 1,
-    borderColor: 'divider',
+    borderColor: theme.palette.geoViewColor?.bgColor?.dark?.[100] || 'divider',
   },
 
   // Toggle icon button
@@ -89,7 +92,8 @@ export const getSxClasses = (theme: any): SxStyles => ({
 
   // Layer name text
   filterLayerName: {
-    fontWeight: 500,
+    fontSize: theme.palette.geoViewFontSize?.md || '1rem',
+    fontWeight: 600,
     flex: 1,
     minWidth: 0,
   },

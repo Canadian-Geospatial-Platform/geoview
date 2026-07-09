@@ -22,13 +22,14 @@ export const getSxClasses = (theme: any): SxStyles => ({
     mb: 0.75,
     mt: '5px',
     fontWeight: 500,
-    fontSize: theme.palette.geoViewFontSize?.sm || '0.875rem',
+    fontSize: theme.palette.geoViewFontSize?.md || '1rem',
   },
 
   // Loading/empty states
   filterLoading: {
-    color: 'text.secondary',
+    color: theme.palette.geoViewColor?.textColor?.light?.[400] || 'text.secondary',
     fontStyle: 'italic',
+    fontSize: theme.palette.geoViewFontSize?.md || '1rem',
   },
 
   // Multiselect checkbox container
@@ -36,7 +37,7 @@ export const getSxClasses = (theme: any): SxStyles => ({
     maxHeight: '200px',
     overflowY: 'auto',
     border: 1,
-    borderColor: 'divider',
+    borderColor: theme.palette.geoViewColor?.bgColor?.dark?.[100] || 'divider',
     borderRadius: 1,
     p: 0.5,
   },
@@ -47,29 +48,18 @@ export const getSxClasses = (theme: any): SxStyles => ({
     ml: 0,
   },
 
-  // Date range container
-  filterDateRangeContainer: {
-    display: 'flex',
-    gap: 1,
-    alignItems: 'center',
-  },
-
-  // Date range separator
-  filterDateSeparator: {
-    color: 'text.secondary',
-    px: 1,
-  },
-
   // Date range info text
   filterDateInfo: {
-    color: 'text.secondary',
-    mt: 0.5,
+    color: theme.palette.geoViewColor?.textColor?.light?.[400] || 'text.secondary',
+    pt: 0.5,
+    px: 5,
     display: 'block',
+    fontSize: theme.palette.geoViewFontSize?.sm || '0.875rem',
   },
 
   // Range slider container
   filterSliderContainer: {
-    px: 1.5,
+    px: '25px',
     pt: 1,
   },
 
@@ -77,8 +67,8 @@ export const getSxClasses = (theme: any): SxStyles => ({
   filterRangeValues: {
     display: 'flex',
     justifyContent: 'space-between',
-    fontSize: '0.75rem',
-    color: 'text.secondary',
-    px: 1.5,
+    fontSize: theme.palette.geoViewFontSize?.sm || '0.875rem',
+    color: theme.palette.geoViewColor?.textColor?.light?.[400] || 'text.secondary',
+    px: 5,
   },
 });
