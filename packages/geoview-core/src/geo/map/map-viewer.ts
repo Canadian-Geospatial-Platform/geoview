@@ -1507,7 +1507,7 @@ export class MapViewer {
 
     // Zoom-in limit (maxScale: smaller denominator, e.g. 1:50 000)
     // Most restrictive = largest value (requires being less zoomed-in to be visible)
-    const maxScaleFromConfig = layerConfig.getMaxScale();
+    const maxScaleFromConfig = layerConfig.getMaxScaleIncludingParent();
     const maxScaleFromInitialSettingsZoom =
       initialSettings?.maxZoom !== undefined ? mapViewer.getMapScaleFromZoom(initialSettings.maxZoom) : undefined;
     const effectiveMaxScaleCandidates = [maxScaleFromConfig, maxScaleFromInitialSettingsZoom].filter(
@@ -1517,7 +1517,7 @@ export class MapViewer {
 
     // Zoom-out limit (minScale: larger denominator, e.g. 1:1 000 000)
     // Most restrictive = smallest value (restricts how far out the user can zoom)
-    const minScaleFromConfig = layerConfig.getMinScale();
+    const minScaleFromConfig = layerConfig.getMinScaleIncludingParent();
     const minScaleFromInitialSettingsZoom =
       initialSettings?.minZoom !== undefined ? mapViewer.getMapScaleFromZoom(initialSettings.minZoom) : undefined;
     const effectiveMinScaleCandidates = [minScaleFromConfig, minScaleFromInitialSettingsZoom].filter(

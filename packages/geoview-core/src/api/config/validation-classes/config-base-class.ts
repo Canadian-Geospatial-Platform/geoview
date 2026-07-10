@@ -393,6 +393,42 @@ export abstract class ConfigBaseClass {
   }
 
   /**
+   * Gets the most restrictive min scale across this layer and all its ancestors.
+   *
+   * @returns The smallest min scale value found, or undefined if none is defined
+   */
+  getMinScaleIncludingParent(): number | undefined {
+    let result = this.getMinScale();
+    let parent = this.getParentLayerConfig();
+    while (parent) {
+      const parentMinScale = parent.getMinScale();
+      if (parentMinScale !== undefined) {
+        result = result !== undefined ? Math.min(result, parentMinScale) : parentMinScale;
+      }
+      parent = parent.getParentLayerConfig();
+    }
+    return result;
+  }
+
+  /**
+   * Gets the most restrictive max scale across this layer and all its ancestors.
+   *
+   * @returns The largest max scale value found, or undefined if none is defined
+   */
+  getMaxScaleIncludingParent(): number | undefined {
+    let result = this.getMaxScale();
+    let parent = this.getParentLayerConfig();
+    while (parent) {
+      const parentMaxScale = parent.getMaxScale();
+      if (parentMaxScale !== undefined) {
+        result = result !== undefined ? Math.max(result, parentMaxScale) : parentMaxScale;
+      }
+      parent = parent.getParentLayerConfig();
+    }
+    return result;
+  }
+
+  /**
    * Gets the initial settings.
    *
    * @returns The initial settings
