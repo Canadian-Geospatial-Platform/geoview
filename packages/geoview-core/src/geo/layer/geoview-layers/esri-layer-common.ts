@@ -706,10 +706,13 @@ export class EsriUtilities {
       const parentLayerConfig = layerConfig.getParentLayerConfig();
 
       // If there's a parent config
-      if (parentLayerConfig) {
-        // Find the metadata for the parent layer
-        const parentLayerMetadata = parentServiceMetadata?.layers?.find((l) => l.id === Number(parentLayerConfig?.layerId));
+      if (parentLayerConfig && parentServiceMetadata) {
+        // TODO: These set calls should actually probably happen with a recursion check on the parents, not just the first parent up
+        // Find the parent layer metadata by looking for the layer whose subLayerIds contains this layer's id
+        const parentLayerMetadata = layerConfig.getParentMetadata(parentServiceMetadata);
         parentLayerConfig.initInitialSettingsStatesVisibleFromMetadata(parentLayerMetadata?.defaultVisibility);
+        parentLayerConfig.initMaxScaleFromMetadata(parentLayerMetadata?.maxScale);
+        parentLayerConfig.initMinScaleFromMetadata(parentLayerMetadata?.minScale);
       }
     }
 
