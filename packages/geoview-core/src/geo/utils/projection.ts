@@ -438,8 +438,11 @@ export abstract class Projection {
   static getProjectionFromWKT(customWKT: string): OLProjection {
     // If the custom WKT doesn't exist
     if (!this.CUSTOM_WKT_AND_NUM[customWKT]) {
+      // WKT short name
+      const wktShortName = this.readProjectionNameFromWKT(customWKT);
+
       // Register a new custom projection using the WKT
-      const WKT_KEY = `CUSTOM:${this.readProjectionNameFromWKT(customWKT)}:${this.CUSTOM_WKT_NUM}`;
+      const WKT_KEY = `CUSTOM:${wktShortName}:${this.CUSTOM_WKT_NUM}`;
       // Increment for the next one
       this.CUSTOM_WKT_NUM++;
 
@@ -451,7 +454,7 @@ export abstract class Projection {
       this.CUSTOM_WKT_AND_NUM[customWKT] = WKT_KEY;
 
       // Created a custom projection based on WKT
-      logger.logInfo(`Projection based on WKT ${customWKT} added on-the-fly.`);
+      logger.logInfo(`Projection based on WKT ${wktShortName} added on-the-fly.`);
     }
 
     // Get the key
