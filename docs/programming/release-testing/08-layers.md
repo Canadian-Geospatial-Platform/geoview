@@ -2,7 +2,7 @@
 
 > **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
 >
-> **Test page**: [rt-08-layers.html](../../packages/geoview-core/public/templates/release-testing/rt-08-layers.html) — Map 1 (groups + uniqueValue/classBreaks layers, collapse/expand/visibility buttons, layers in footer bar), Map 2 (WMS + ESRI Image for settings tests), Maps 3–8 (layer type configs: Esri Dynamic groups, projections, Vector Tiles, WKB, Shapefile, GeoJSON Multi).
+> **Test page**: [rt-08-layers.html](https://canadian-geospatial-platform.github.io/geoview/public/rt-08-layers.html) — Map 1 (groups + uniqueValue/classBreaks layers, collapse/expand/visibility buttons, layers in footer bar), Map 2 (WMS + ESRI Image for settings tests), Maps 3–8 (layer type configs: Esri Dynamic groups, projections, Vector Tiles, WKB, Shapefile, GeoJSON Multi).
 >
 > **Add Layer tests**: Use the [Add Layers demo page](../../packages/geoview-core/public/templates/demos/add-layers.html).
 >

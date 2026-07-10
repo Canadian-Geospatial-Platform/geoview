@@ -2,7 +2,7 @@
 
 > **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
 >
-> **Test page**: [rt-17d-panels.html](../../packages/geoview-core/public/templates/release-testing/rt-17d-panels.html) — Map 1 (About panel), Map 2 (AOI panel), Map 3 (Custom Legend panel).
+> **Test page**: [rt-17d-panels.html](https://canadian-geospatial-platform.github.io/geoview/public/rt-17d-panels.html) — Map 1 (About panel), Map 2 (AOI panel), Map 3 (Custom Legend panel).
 >
 > **Navigator configs:** `demos/18-package-about-panel.json`, `demos/16-package-area-of-interest.json`, `demos/17-package-custom-legend.json`
 

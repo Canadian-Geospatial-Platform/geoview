@@ -2,7 +2,7 @@
 
 > **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
 >
-> **Test page**: [rt-10-details.html](../../packages/geoview-core/public/templates/release-testing/rt-10-details.html) — Map 1 (multiple queryable layers, details in app bar, clear highlights button), Map 2 (summary/outfields config).
+> **Test page**: [rt-10-details.html](https://canadian-geospatial-platform.github.io/geoview/public/rt-10-details.html) — Map 1 (multiple queryable layers, details in app bar, clear highlights button), Map 2 (summary/outfields config).
 >
 > **Navigator configs** (for edge-case tests): `layers/all-layers.json`, `demos/23b-initial-settings-states-controls.json`, `demos/29-summary-outfields.json`
 

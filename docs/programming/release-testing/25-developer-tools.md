@@ -2,7 +2,7 @@
 
 > **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
 >
-> **Test page**: [rt-25-developer-tools.html](../../packages/geoview-core/public/templates/release-testing/rt-25-developer-tools.html) — Links to ESRI Renderer and WFS Renderer demo pages.
+> **Test page**: [rt-25-developer-tools.html](https://canadian-geospatial-platform.github.io/geoview/public/rt-25-developer-tools.html) — Links to ESRI Renderer and WFS Renderer demo pages.
 
 Testing the ESRI Renderer and WFS Renderer conversion tools that generate valid GeoView style configurations from external service metadata.
 

@@ -2,7 +2,7 @@
 
 > **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
 >
-> **Test page**: [rt-19-integration-flows.html](../../packages/geoview-core/public/templates/release-testing/rt-19-integration-flows.html) — Links to referenced test pages and navigator configs.
+> **Test page**: [rt-19-integration-flows.html](https://canadian-geospatial-platform.github.io/geoview/public/rt-19-integration-flows.html) — Links to referenced test pages and navigator configs.
 
 Multi-step workflows that test cross-panel and cross-feature interactions. These tests validate that state stays consistent across panels and operations.
 

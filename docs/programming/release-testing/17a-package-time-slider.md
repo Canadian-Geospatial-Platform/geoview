@@ -2,7 +2,7 @@
 
 > **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
 >
-> **Test page**: [rt-17a-time-slider.html](../../packages/geoview-core/public/templates/release-testing/rt-17a-time-slider.html) — Map 1 (GeoCore HFE + NAPL with time slider in footer bar).
+> **Test page**: [rt-17a-time-slider.html](https://canadian-geospatial-platform.github.io/geoview/public/rt-17a-time-slider.html) — Map 1 (GeoCore HFE + NAPL with time slider in footer bar).
 >
 > **Navigator configs:** `demos/11-package-time-slider.json`, `demos/12-package-time-slider-custom.json`
 

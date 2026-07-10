@@ -108,6 +108,12 @@ export class GVTestSuiteMapVaria extends GVAbstractTestSuite {
     // Wait until the north arrow rotation finishes, because there are zooms and projection changes happening in that test
     await pNorthArrowRotationLCC;
 
+    // Test vector tile projection warning
+    const pVectorTileProjectionWarning = this.#mapTester.testVectorTileProjectionWarning();
+
+    // Wait until the VT projection warning test finishes before continuing manipulating the map
+    await pVectorTileProjectionWarning;
+
     // Make sure the map is reset in its initial extent after the zooms
     await this.getControllersRegistry().mapController.zoomToInitialExtent(GVAbstractTester.USE_ZOOM_ANIMATION);
 

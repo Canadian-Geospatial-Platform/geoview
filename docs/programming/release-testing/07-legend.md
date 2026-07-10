@@ -2,7 +2,7 @@
 
 > **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
 >
-> **Test page**: [rt-07-legend.html](../../packages/geoview-core/public/templates/release-testing/rt-07-legend.html) — Map 1 (Fieldnotes + Hydro GeoCore groups + simple layer + ESRI uniqueValue/classBreaks layers, collapse/expand/visibility buttons), Map 2 (4 WMS layers — MSI datacube, GeoMet, NAPL, Man-made).
+> **Test page**: [rt-07-legend.html](https://canadian-geospatial-platform.github.io/geoview/public/rt-07-legend.html) — Map 1 (Fieldnotes + Hydro GeoCore groups + simple layer + ESRI uniqueValue/classBreaks layers, collapse/expand/visibility buttons), Map 2 (4 WMS layers — MSI datacube, GeoMet, NAPL, Man-made).
 >
 > **Navigator configs** (for detailed tests with specific layer types): `layers/all-layers.json`, `layers/esri-feature.json`, `layers/wms.json`, `demos/26-complex-classifications.json`
 

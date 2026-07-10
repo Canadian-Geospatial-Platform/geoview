@@ -76,13 +76,13 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | 1. Core / Utility | `suite-config`     | `ConfigTester`                                                                                  | 33         | Parallel                    |
 | 1. Core / Utility | `suite-utilities`  | `UtilitiesCoreTester`, `UtilitiesDateTester`, `UtilitiesGeoTester`, `UtilitiesProjectionTester` | 52         | Parallel                    |
 | 2. Layers         | `suite-layer`      | `LayerTester`                                                                                   | 34         | Mixed parallel + sequential |
-| 3. Map            | `suite-map-varia`  | `MapTester`                                                                                     | 15         | Complex mixed               |
-| 3. Map            | `suite-map-config` | `MapConfigTester`                                                                               | 25         | Fully sequential            |
+| 3. Map            | `suite-map-varia`  | `MapTester`                                                                                     | 16         | Complex mixed               |
+| 3. Map            | `suite-map-config` | `MapConfigTester`                                                                               | 37         | Fully sequential            |
 | 4. Components     | `suite-ui`         | `UITester`                                                                                      | 1          | Parallel                    |
 | 4. Components     | `suite-details`    | `DetailsTester`                                                                                 | 1          | Guarded sequential          |
 | 5. Packages       | `suite-geochart`   | `GeochartTester`                                                                                | 3          | Guarded sequential          |
 | 5. Packages       | `suite-swiper`     | `SwiperTester`                                                                                  | 1          | Guarded                     |
-| **Total**         |                    |                                                                                                 | **170**    |                             |
+| **Total**         |                    |                                                                                                 | **183**    |                             |
 
 ---
 
@@ -512,6 +512,7 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | 13  | `testNonQueryableLayerNotInDetails`    | test | Test non-queryable layer not in details after map click                |
 | 14  | `testLayerHoverableState`              | test | Test layer hoverable state in hoverFeatureInfoLayerSet                 |
 | 15  | `testDetailsLayerSelectionPersistence` | test | Test details layer selection persistence across map clicks             |
+| 16  | `testVectorTileProjectionWarning`      | test | Test vector tile projection warning on projection switch               |
 
 ---
 
@@ -555,9 +556,11 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 
 [↑ Back to top](#table-of-contents)
 
-| #   | Method                            | Type | Description                                       |
-| --- | --------------------------------- | ---- | ------------------------------------------------- |
-| 9   | `testViewSettingsZoomConstraints` | test | Test viewSettings minZoom and maxZoom constraints |
+| #   | Method                                          | Type | Description                                                                                    |
+| --- | ----------------------------------------------- | ---- | ---------------------------------------------------------------------------------------------- |
+| 9   | `testViewSettingsZoomConstraints`               | test | Test viewSettings minZoom and maxZoom constraints                                              |
+| 10  | `testViewSettingsInitialViewVsHomeView`         | test | Test initialView sets zoom = 7, zoomToInitialExtent() changes zoom to 4 (homeView)             |
+| 11  | `testViewSettingsHomeButtonNavigatesToHomeView` | test | Test zoomToInitialExtent() navigates center to homeView coordinates ≈ [-95, 60] with tolerance |
 
 #### 3.2.5 Overview Map
 
@@ -565,57 +568,95 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 
 | #   | Method                                      | Type | Description                                                           |
 | --- | ------------------------------------------- | ---- | --------------------------------------------------------------------- |
-| 10  | `testOverviewMapPresent`                    | test | Test overview map is present when configured in components            |
-| 11  | `testOverviewMapAbsent`                     | test | Test overview map is absent when not in components                    |
-| 12  | `testOverviewMapHideOnZoom`                 | test | Test overview map hideOnZoom hides at low zoom, shows above threshold |
-| 13  | `testOverviewMapHideOnZoomWithReprojection` | test | Test overview map hideOnZoom with reprojection preserves visibility   |
+| 12  | `testOverviewMapPresent`                    | test | Test overview map is present when configured in components            |
+| 13  | `testOverviewMapAbsent`                     | test | Test overview map is absent when not in components                    |
+| 14  | `testOverviewMapHideOnZoom`                 | test | Test overview map hideOnZoom hides at low zoom, shows above threshold |
+| 15  | `testOverviewMapHideOnZoomWithReprojection` | test | Test overview map hideOnZoom with reprojection preserves visibility   |
 
-#### 3.2.6 Initial Settings — Controls
+#### 3.2.6 North Arrow
+
+[↑ Back to top](#table-of-contents)
+
+| #   | Method                  | Type | Description                                               |
+| --- | ----------------------- | ---- | --------------------------------------------------------- |
+| 16  | `testNorthArrowPresent` | test | Test north arrow is present when configured in components |
+| 17  | `testNorthArrowAbsent`  | test | Test north arrow is absent when not in components         |
+
+#### 3.2.7 Initial Settings — Controls
 
 [↑ Back to top](#table-of-contents)
 
 | #   | Method                                | Type | Description                                  |
 | --- | ------------------------------------- | ---- | -------------------------------------------- |
-| 14  | `testInitialSettingsControlsAllFalse` | test | Test initialSettings all controls = false... |
+| 18  | `testInitialSettingsControlsAllFalse` | test | Test initialSettings all controls = false... |
 
-#### 3.2.7 Initial Settings — States
+#### 3.2.8 Initial Settings — States
 
 [↑ Back to top](#table-of-contents)
 
 | #   | Method                                   | Type | Description                                      |
 | --- | ---------------------------------------- | ---- | ------------------------------------------------ |
-| 15  | `testInitialSettingsStateVisibleFalse`   | test | Test initialSettings states.visible = false...   |
-| 16  | `testInitialSettingsStateOpacity`        | test | Test initialSettings states.opacity = 0.5...     |
-| 17  | `testInitialSettingsStateQueryableFalse` | test | Test initialSettings states.queryable = false... |
-| 18  | `testInitialSettingsStateHoverableFalse` | test | Test initialSettings states.hoverable = false... |
+| 19  | `testInitialSettingsStateVisibleFalse`   | test | Test initialSettings states.visible = false...   |
+| 20  | `testInitialSettingsStateOpacity`        | test | Test initialSettings states.opacity = 0.5...     |
+| 21  | `testInitialSettingsStateQueryableFalse` | test | Test initialSettings states.queryable = false... |
+| 22  | `testInitialSettingsStateHoverableFalse` | test | Test initialSettings states.hoverable = false... |
 
-#### 3.2.8 Initial Settings — Opacity Cascading
+#### 3.2.9 Initial Settings — Opacity Cascading
 
 [↑ Back to top](#table-of-contents)
 
 | #   | Method                                                   | Type | Description                                                                   |
 | --- | -------------------------------------------------------- | ---- | ----------------------------------------------------------------------------- |
-| 19  | `testInitialSettingsOpacityCascadingChildCappedByParent` | test | Test opacity cascading: child (1.0) capped by parent (0.5) = effective 0.5... |
-| 20  | `testInitialSettingsOpacityCascadingChildBelowParent`    | test | Test opacity cascading: child (0.3) below parent (0.5) = effective 0.3...     |
-| 21  | `testInitialSettingsOpacityCascadingRuntimeParentChange` | test | Test opacity cascading: runtime parent change cascades to children...         |
+| 23  | `testInitialSettingsOpacityCascadingChildCappedByParent` | test | Test opacity cascading: child (1.0) capped by parent (0.5) = effective 0.5... |
+| 24  | `testInitialSettingsOpacityCascadingChildBelowParent`    | test | Test opacity cascading: child (0.3) below parent (0.5) = effective 0.3...     |
+| 25  | `testInitialSettingsOpacityCascadingRuntimeParentChange` | test | Test opacity cascading: runtime parent change cascades to children...         |
 
-#### 3.2.9 Initial Settings — Cascading (Controls & Visibility)
+#### 3.2.10 Initial Settings — Cascading (Controls & Visibility)
 
 [↑ Back to top](#table-of-contents)
 
 | #   | Method                                                   | Type | Description                                                                                                      |
 | --- | -------------------------------------------------------- | ---- | ---------------------------------------------------------------------------------------------------------------- |
-| 22  | `testInitialSettingsControlRemoveCascadingToDescendants` | test | Test controls.remove cascading: parent false cascades unless child explicitly overrides with true...             |
-| 23  | `testInitialSettingsStateVisibleCascadingToDescendants`  | test | Test states.visible cascading: parent false hides all descendants on map, children keep visible true in store... |
+| 26  | `testInitialSettingsControlRemoveCascadingToDescendants` | test | Test controls.remove cascading: parent false cascades unless child explicitly overrides with true...             |
+| 27  | `testInitialSettingsStateVisibleCascadingToDescendants`  | test | Test states.visible cascading: parent false hides all descendants on map, children keep visible true in store... |
 
-#### 3.2.10 Initial Settings — Combo Tests
+#### 3.2.11 Initial Settings — Combo Tests
 
 [↑ Back to top](#table-of-contents)
 
 | #   | Method                                                        | Type | Description                                                              |
 | --- | ------------------------------------------------------------- | ---- | ------------------------------------------------------------------------ |
-| 24  | `testInitialSettingsComboQueryControlTrueStateQueryableFalse` | test | Test initialSettings controls.query = true + states.queryable = false... |
-| 25  | `testInitialSettingsComboHoverControlTrueStateHoverableFalse` | test | Test initialSettings controls.hover = true + states.hoverable = false... |
+| 28  | `testInitialSettingsComboQueryControlTrueStateQueryableFalse` | test | Test initialSettings controls.query = true + states.queryable = false... |
+| 29  | `testInitialSettingsComboHoverControlTrueStateHoverableFalse` | test | Test initialSettings controls.hover = true + states.hoverable = false... |
+
+#### 3.2.12 Initial Settings — Legend Collapsed
+
+[↑ Back to top](#table-of-contents)
+
+| #   | Method                               | Type | Description                                                          |
+| --- | ------------------------------------ | ---- | -------------------------------------------------------------------- |
+| 30  | `testInitialSettingsLegendCollapsed` | test | Test initialSettings states.legendCollapsed = true on group layer... |
+
+#### 3.2.13 Initial Settings — Controls Cascading (All Controls)
+
+[↑ Back to top](#table-of-contents)
+
+| #   | Method                                         | Type | Description                                                                                                                |
+| --- | ---------------------------------------------- | ---- | -------------------------------------------------------------------------------------------------------------------------- |
+| 31  | `testInitialSettingsControlsCascadeToChildren` | test | Test parent controls { highlight: false, zoom: false, hover: false, query: false } cascade to children...                  |
+| 32  | `testInitialSettingsControlsGroupOverride`     | test | Test group-level override: parent { highlight: false, zoom: false }, subgroup overrides { highlight: true, zoom: true }... |
+
+#### 3.2.14 Initial Settings — Filters
+
+[↑ Back to top](#table-of-contents)
+
+| #   | Method                                  | Type | Description                                                             |
+| --- | --------------------------------------- | ---- | ----------------------------------------------------------------------- |
+| 33  | `testInitialSettingsFilters`            | test | Test GeoJSON layerFilter is stored and accessible after loading...      |
+| 34  | `testInitialSettingsFiltersOgcFeature`  | test | Test OGC Feature layerFilter is stored and accessible after loading...  |
+| 35  | `testInitialSettingsFiltersWfs`         | test | Test WFS layerFilter is stored and accessible after loading...          |
+| 36  | `testInitialSettingsFiltersEsriDynamic` | test | Test Esri Dynamic layerFilter is stored and accessible after loading... |
+| 37  | `testInitialSettingsFiltersEsriFeature` | test | Test Esri Feature layerFilter is stored and accessible after loading... |
 
 ---
 

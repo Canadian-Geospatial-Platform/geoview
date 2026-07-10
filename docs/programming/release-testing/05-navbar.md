@@ -2,7 +2,7 @@
 
 > **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
 >
-> **Test page**: [rt-05-navbar.html](../../packages/geoview-core/public/templates/release-testing/rt-05-navbar.html) — Map 1 has all 9 navbar buttons, Map 2 has only zoom + rotation.
+> **Test page**: [rt-05-navbar.html](https://canadian-geospatial-platform.github.io/geoview/public/rt-05-navbar.html) — Map 1 has all 9 navbar buttons, Map 2 has only zoom + rotation.
 
 Navbar controls and buttons. The navbar supports 9 button types: `zoom`, `rotation`, `fullscreen`, `home`, `location`, `basemap-select`, `projection`, `measurement`, `drawer`.
 

@@ -94,6 +94,14 @@ export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
     const pViewSettingsZoomConstraints = this.#mapConfigTester.testViewSettingsZoomConstraints();
     await pViewSettingsZoomConstraints;
 
+    // Test initial view vs home view (zoom difference)
+    const pInitialViewVsHomeView = this.#mapConfigTester.testViewSettingsInitialViewVsHomeView();
+    await pInitialViewVsHomeView;
+
+    // Test home button navigates to homeView center coordinates
+    const pHomeButtonNavigatesToHomeView = this.#mapConfigTester.testViewSettingsHomeButtonNavigatesToHomeView();
+    await pHomeButtonNavigatesToHomeView;
+
     // Test overview map is present when configured
     const pOverviewMapPresent = this.#mapConfigTester.testOverviewMapPresent();
     await pOverviewMapPresent;
@@ -101,6 +109,14 @@ export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
     // Test overview map is absent when not configured
     const pOverviewMapAbsent = this.#mapConfigTester.testOverviewMapAbsent();
     await pOverviewMapAbsent;
+
+    // Test north arrow is present when configured
+    const pNorthArrowPresent = this.#mapConfigTester.testNorthArrowPresent();
+    await pNorthArrowPresent;
+
+    // Test north arrow is absent when not configured
+    const pNorthArrowAbsent = this.#mapConfigTester.testNorthArrowAbsent();
+    await pNorthArrowAbsent;
 
     // Test overview map hideOnZoom behavior
     const pOverviewMapHideOnZoom = this.#mapConfigTester.testOverviewMapHideOnZoom();
@@ -152,6 +168,38 @@ export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
     const pOpacityRuntimeCascade = this.#mapConfigTester.testInitialSettingsOpacityCascadingRuntimeParentChange();
     await pOpacityRuntimeCascade;
 
+    // Test legend collapsed initial state
+    const pLegendCollapsed = this.#mapConfigTester.testInitialSettingsLegendCollapsed();
+    await pLegendCollapsed;
+
+    // Test parent controls cascade to children (all controls)
+    const pControlsCascade = this.#mapConfigTester.testInitialSettingsControlsCascadeToChildren();
+    await pControlsCascade;
+
+    // Test group-level control override
+    const pControlsGroupOverride = this.#mapConfigTester.testInitialSettingsControlsGroupOverride();
+    await pControlsGroupOverride;
+
+    // Test initial filter on GeoJSON layer
+    const pInitialFilters = this.#mapConfigTester.testInitialSettingsFilters();
+    await pInitialFilters;
+
+    // Test initial filter on OGC Feature layer
+    const pInitialFiltersOgcFeature = this.#mapConfigTester.testInitialSettingsFiltersOgcFeature();
+    await pInitialFiltersOgcFeature;
+
+    // Test initial filter on WFS layer
+    const pInitialFiltersWfs = this.#mapConfigTester.testInitialSettingsFiltersWfs();
+    await pInitialFiltersWfs;
+
+    // Test initial filter on Esri Dynamic layer
+    const pInitialFiltersEsriDynamic = this.#mapConfigTester.testInitialSettingsFiltersEsriDynamic();
+    await pInitialFiltersEsriDynamic;
+
+    // Test initial filter on Esri Feature layer
+    const pInitialFiltersEsriFeature = this.#mapConfigTester.testInitialSettingsFiltersEsriFeature();
+    await pInitialFiltersEsriFeature;
+
     // Resolve when all
     return Promise.all([
       pDataTableInFooterBar,
@@ -163,8 +211,12 @@ export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
       pInitialViewLayerIds,
       pOverlayObjectsPointMarkers,
       pViewSettingsZoomConstraints,
+      pInitialViewVsHomeView,
+      pHomeButtonNavigatesToHomeView,
       pOverviewMapPresent,
       pOverviewMapAbsent,
+      pNorthArrowPresent,
+      pNorthArrowAbsent,
       pOverviewMapHideOnZoom,
       pOverviewMapHideOnZoomReproject,
       pControlsAllFalse,
@@ -179,6 +231,14 @@ export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
       pOpacityCappedByParent,
       pOpacityBelowParent,
       pOpacityRuntimeCascade,
+      pLegendCollapsed,
+      pControlsCascade,
+      pControlsGroupOverride,
+      pInitialFilters,
+      pInitialFiltersOgcFeature,
+      pInitialFiltersWfs,
+      pInitialFiltersEsriDynamic,
+      pInitialFiltersEsriFeature,
     ]);
   }
 }

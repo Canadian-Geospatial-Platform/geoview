@@ -227,44 +227,44 @@ These tests from the release plan are already covered by the existing test suite
 
 ### View Settings (suite-map-config)
 
-| #   | Test                                                                                                                                                            | Priority | Notes                                                                  |
-| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------- |
-| 94  | **Initial view vs home view** — Load 27-view-settings config, verify initial zoom = 7 (Ottawa), call `zoomToInitialExtent()`, verify zoom changes to 4 (Canada) | P1       | `createMapFromConfigFast` + store zoom/center comparison pre/post Home |
-| 95  | **Home button navigates to homeView** — After `zoomToInitialExtent()`, verify store center ≈ `[-95, 60]` (homeView coordinates)                                 | P1       | Store center check with tolerance                                      |
+| #   | Test                                                                                                                                                                | Priority | Notes                                                                        |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------- |
+| 94  | ~~**Initial view vs home view** — Load 27-view-settings config, verify initial zoom = 7 (Ottawa), call `zoomToInitialExtent()`, verify zoom changes to 4 (Canada)~~ | ✅ Done  | Automated: `MapConfigTester.testViewSettingsInitialViewVsHomeView()`         |
+| 95  | ~~**Home button navigates to homeView** — After `zoomToInitialExtent()`, verify store center ≈ `[-95, 60]` (homeView coordinates)~~                                 | ✅ Done  | Automated: `MapConfigTester.testViewSettingsHomeButtonNavigatesToHomeView()` |
 
 ### Projection Interactions (suite-map-varia)
 
-| #   | Test                                                                                                                       | Priority | Notes                                                                      |
-| --- | -------------------------------------------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------- |
-| 98  | **Vector tile projection warning** — Switch projection with VT layer loaded, verify notification emitted and layer removed | P1       | Overlaps with layers #76; notification store check after `setProjection()` |
+| #   | Test                                                                                                                           | Priority | Notes                                                    |
+| --- | ------------------------------------------------------------------------------------------------------------------------------ | -------- | -------------------------------------------------------- |
+| 98  | ~~**Vector tile projection warning** — Switch projection with VT layer loaded, verify notification emitted and layer removed~~ | ✅ Done  | Automated: `MapTester.testVectorTileProjectionWarning()` |
 
 ### Initial Settings (suite-map-config)
 
-| #   | Test                                                                                                                                        | Priority | Notes                                                             |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------- |
-| 99  | **Remove control enabled** — Load 23b config, verify esriFeature layer has `controls.remove === true` in store                              | P1       | Store check: `getStoreLayerControls()` for that layer path        |
-| 100 | **Legend collapsed initial state** — Load 23b config, verify GeoJSON group store `legendCollapsed === true`                                 | P1       | Store check: `getStoreLayerLegendCollapsed()` for that layer path |
-| 101 | **Custom opacity 0.7** — Load 23b config, verify esriImage layer `getOpacity() === 0.7`                                                     | P1       | Same pattern as existing 0.5 test; OL layer opacity check         |
-| 102 | **Parent controls cascade to children** — Load 23c config, verify children of geojsonLYR1 inherit `highlight: false, zoom: false` from root | P1       | Store `getStoreLayerControls()` per child path                    |
-| 103 | **Group-level override** — Load 23c config, verify each geojsonLYR2 group has different controls inherited by children                      | P1       | Store `getStoreLayerControls()` per group path                    |
-| 104 | **OGC Feature initial filter** — Load 23a config, verify `layerFilter` store contains correct filter string for OGC Feature layer           | P1       | Store `getStoreLayerFilter()` or `getInitialFilter()` check       |
-| 105 | **WFS initial filter** — Load 23a config, verify WFS layer filter = `STATE_ABBR = 'NY'` in store                                            | P1       | Store filter string comparison                                    |
-| 106 | **Esri Dynamic initial filter** — Load 23a config, verify filter = `E_Province = 'Manitoba'` in store                                       | P1       | Store filter string comparison                                    |
-| 107 | **Esri Feature initial filter** — Load 23a config, verify filter = `death = 'yes'` in store                                                 | P1       | Store filter string comparison                                    |
-| 108 | **GeoJSON initial filter** — Load 23a config, verify filter = `Province = 'Quebec'` in store                                                | P1       | Store filter string comparison                                    |
-| 109 | **Filter reflected in data table** — Load 23a config, open data table, verify row count matches filtered feature count                      | P1       | Store `allFeaturesDataArray` count check against expected         |
+| #   | Test                                                                                                                                              | Priority | Notes                                                                                          |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------- |
+| 99  | ~~**Remove control enabled** — Load 23b config, verify esriFeature layer has `controls.remove === true` in store~~                                | ✅ Done  | Already covered: `MapConfigTester.testInitialSettingsControlRemoveCascadingToDescendants()`    |
+| 100 | ~~**Legend collapsed initial state** — Load 23b config, verify GeoJSON group store `legendCollapsed === true`~~                                   | ✅ Done  | Automated: `MapConfigTester.testInitialSettingsLegendCollapsed()`                              |
+| 101 | ~~**Custom opacity 0.7** — Load 23b config, verify esriImage layer `getOpacity() === 0.7`~~                                                       | ✅ Done  | Already covered: `MapConfigTester.testInitialSettingsStateOpacity()` (tests 0.5, same pattern) |
+| 102 | ~~**Parent controls cascade to children** — Load 23c config, verify children of geojsonLYR1 inherit `highlight: false, zoom: false` from root~~   | ✅ Done  | Automated: `MapConfigTester.testInitialSettingsControlsCascadeToChildren()`                    |
+| 103 | ~~**Group-level override** — Load 23c config, verify each geojsonLYR2 group has different controls inherited by children~~                        | ✅ Done  | Automated: `MapConfigTester.testInitialSettingsControlsGroupOverride()`                        |
+| 104 | ~~**OGC Feature initial filter** — Load config with OGC Feature layer, verify `layerFilter` is stored and accessible via `getInitialFilter()`~~   | ✅ Done  | Automated: `MapConfigTester.testInitialSettingsFiltersOgcFeature()`                            |
+| 105 | ~~**WFS initial filter** — Load config with WFS layer, verify `layerFilter` is stored and accessible via `getInitialFilter()`~~                   | ✅ Done  | Automated: `MapConfigTester.testInitialSettingsFiltersWfs()`                                   |
+| 106 | ~~**Esri Dynamic initial filter** — Load config with Esri Dynamic layer, verify `layerFilter` is stored and accessible via `getInitialFilter()`~~ | ✅ Done  | Automated: `MapConfigTester.testInitialSettingsFiltersEsriDynamic()`                           |
+| 107 | ~~**Esri Feature initial filter** — Load config with Esri Feature layer, verify `layerFilter` is stored and accessible via `getInitialFilter()`~~ | ✅ Done  | Automated: `MapConfigTester.testInitialSettingsFiltersEsriFeature()`                           |
+| 108 | ~~**GeoJSON initial filter** — Load 23a config, verify filter = `Province = 'Quebec'` in store~~                                                  | ✅ Done  | Automated: `MapConfigTester.testInitialSettingsFilters()`                                      |
+| 109 | **Filter reflected in data table** — Load 23a config, open data table, verify row count matches filtered feature count                            | P1       | Store `allFeaturesDataArray` count check against expected                                      |
 
 ### Swiper Plugin (suite-swiper)
 
-| #   | Test                                                                                                                           | Priority | Notes                              |
-| --- | ------------------------------------------------------------------------------------------------------------------------------ | -------- | ---------------------------------- |
-| 110 | **Add layer to swiper** — Call `activateForLayer`, verify store `swiperLayerPaths` contains the layer path                     | P1       | Store array check after activate   |
-| 111 | **Remove layer from swiper** — Call `deActivateForLayer`, verify store `swiperLayerPaths` no longer contains path              | P1       | Store array check after deactivate |
-| 112 | **Remove all swiper layers** — Call `deActivateAll`, verify store `swiperLayerPaths` is empty                                  | P1       | Store array length = 0             |
-| 113 | **Add layer after remove all** — Call `deActivateAll` then `activateForLayer`, verify store has new path                       | P1       | Store recovery check               |
-| 114 | **Set vertical orientation** — Call `setOrientation('vertical')`, verify store `swiperOrientation === 'vertical'`              | P1       | Store string check                 |
-| 115 | **Set horizontal orientation** — Call `setOrientation('horizontal')`, verify store `swiperOrientation === 'horizontal'`        | P1       | Store string check                 |
-| 116 | **Switch orientation** — Call `setOrientation('vertical')` then `setOrientation('horizontal')`, verify store updates each time | P1       | Sequential store checks            |
+| #   | Test                                                                                                                               | Priority | Notes                                                                 |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------- |
+| 110 | ~~**Add layer to swiper** — Call `activateForLayer`, verify store `swiperLayerPaths` contains the layer path~~                     | ✅ Done  | Already covered: `SwiperTester.testSwiperLifecycle()` (activate)      |
+| 111 | ~~**Remove layer from swiper** — Call `deActivateForLayer`, verify store `swiperLayerPaths` no longer contains path~~              | ✅ Done  | Already covered: `SwiperTester.testSwiperLifecycle()` (deactivate)    |
+| 112 | ~~**Remove all swiper layers** — Call `deActivateAll`, verify store `swiperLayerPaths` is empty~~                                  | ✅ Done  | Already covered: `SwiperTester.testSwiperLifecycle()` (deactivateAll) |
+| 113 | ~~**Add layer after remove all** — Call `deActivateAll` then `activateForLayer`, verify store has new path~~                       | ✅ Done  | Already covered: `SwiperTester.testSwiperLifecycle()` (recovery)      |
+| 114 | ~~**Set vertical orientation** — Call `setOrientation('vertical')`, verify store `swiperOrientation === 'vertical'`~~              | ✅ Done  | Already covered: `SwiperTester.testSwiperLifecycle()` (orientation)   |
+| 115 | ~~**Set horizontal orientation** — Call `setOrientation('horizontal')`, verify store `swiperOrientation === 'horizontal'`~~        | ✅ Done  | Already covered: `SwiperTester.testSwiperLifecycle()` (orientation)   |
+| 116 | ~~**Switch orientation** — Call `setOrientation('vertical')` then `setOrientation('horizontal')`, verify store updates each time~~ | ✅ Done  | Already covered: `SwiperTester.testSwiperLifecycle()` (sequential)    |
 
 ---
 

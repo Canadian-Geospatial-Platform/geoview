@@ -450,6 +450,11 @@ export abstract class GVAbstractTester extends AbstractTester {
     'https://datacube-prod-data-public.s3.ca-central-1.amazonaws.com/store/eo4ce/vegetation/vegetation-2020-fCOVER.tif';
   static readonly GEOTIFF_VEGETATION_FILE: string = 'vegetation-2020-fCOVER.tif';
 
+  /** Vector Tiles (EPSG:3978 — CBMT Canadian Basemap Transport). */
+  static readonly VECTOR_TILES_CBMT_3978_URL: string =
+    'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT_CBCT_3978_V_OSM/VectorTileServer';
+  static readonly VECTOR_TILES_CBMT_3978_LAYER_NAME: string = 'CBMT 3978 Vector Tiles';
+
   /** Water Network (has fields with coded value domains, e.g. "material" on layer 16). */
   static readonly WATER_NETWORK_MAP_SERVER: string = 'https://sampleserver6.arcgisonline.com/arcgis/rest/services/Water_Network/MapServer';
   static readonly WATER_NETWORK_LAYER_ID: string = '16';

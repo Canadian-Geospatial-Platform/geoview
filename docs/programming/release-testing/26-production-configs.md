@@ -2,7 +2,7 @@
 
 > **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
 >
-> **Test page**: [rt-26-production-configs.html](../../packages/geoview-core/public/templates/release-testing/rt-26-production-configs.html) — Links to all production demo pages.
+> **Test page**: [rt-26-production-configs.html](https://canadian-geospatial-platform.github.io/geoview/public/rt-26-production-configs.html) — Links to all production demo pages.
 
 Smoke tests for production-like configurations. These are real-world configs used by partner organizations. The goal is to verify no regressions — layers load, panels open, and no crashes occur.
 

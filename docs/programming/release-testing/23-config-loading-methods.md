@@ -2,7 +2,7 @@
 
 > **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
 >
-> **Test page**: [rt-23-config-loading-methods.html](../../packages/geoview-core/public/templates/release-testing/rt-23-config-loading-methods.html) — Links to default-config, demo-flood, demo-custom-footer-height demo pages.
+> **Test page**: [rt-23-config-loading-methods.html](https://canadian-geospatial-platform.github.io/geoview/public/rt-23-config-loading-methods.html) — Links to default-config, demo-flood, demo-custom-footer-height demo pages.
 
 Testing all supported methods for loading map configurations, including div attributes, URL parameters, function calls, and share mechanics.
 

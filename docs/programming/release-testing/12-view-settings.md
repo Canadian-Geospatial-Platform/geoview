@@ -2,7 +2,7 @@
 
 > **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
 >
-> **Test page**: [rt-12-view-settings.html](../../packages/geoview-core/public/templates/release-testing/rt-12-view-settings.html) — Map 1 (restricted zoom 6–8), Map 2 (max extent override), Map 3 (rotation + homeView ≠ initialView), Map 4 (initial extent), Map 5 (initial click coordinate), Map 6 (enableRotation: false).
+> **Test page**: [rt-12-view-settings.html](https://canadian-geospatial-platform.github.io/geoview/public/rt-12-view-settings.html) — Map 1 (restricted zoom 6–8), Map 2 (max extent override), Map 3 (rotation + homeView ≠ initialView), Map 4 (initial extent), Map 5 (initial click coordinate), Map 6 (enableRotation: false).
 
 Zoom constraints, extent overrides, initial view modes, home view, rotation, and initial click coordinate. The `viewSettings` config property controls the map's initial state (projection, zoom, center, extent, rotation) and constraints (min/max zoom, max extent).
 
@@ -39,12 +39,12 @@ Zoom constraints, extent overrides, initial view modes, home view, rotation, and
 
 ## Rotation & Home View
 
-| Test                              | Description                        | Steps                                            | Expected Result                                                                                     | Auto |
-| --------------------------------- | ---------------------------------- | ------------------------------------------------ | --------------------------------------------------------------------------------------------------- | ---- |
-| Initial rotation                  | Map loads rotated                  | 1. Check Map 3 on load                           | Map loads with 45° rotation applied                                                                 | M    |
-| Initial view on load              | Loads at initialView, not homeView | 1. Check Map 3 zoom level and center on load     | Map is at zoom 7, centered on Ottawa — NOT at homeView (zoom 4, Canada)                             | C    |
-| Home button navigates to homeView | Home differs from initial          | 1. On Map 3, click the Home button in the navbar | Map navigates to homeView: zoom 4, centered on Canada `[-95, 60]` — different from the initial view | C    |
-| setHomeView programmatic          | Runtime home view change           | 1. On Map 3, run in console: `cgpv.api.getMapViewer('map3').setHomeButtonView({ zoomAndCenter: [10, [-75, 45]] })`<br>2. Click the Home button in the navbar | Map navigates to the new home view: zoom 10, centered on `[-75, 45]` (not the original homeView) | C    |
+| Test                              | Description                        | Steps                                                                                                                                                        | Expected Result                                                                                     | Auto |
+| --------------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------- | ---- |
+| Initial rotation                  | Map loads rotated                  | 1. Check Map 3 on load                                                                                                                                       | Map loads with 45° rotation applied                                                                 | M    |
+| Initial view on load              | Loads at initialView, not homeView | 1. Check Map 3 zoom level and center on load                                                                                                                 | Map is at zoom 7, centered on Ottawa — NOT at homeView (zoom 4, Canada)                             | A    |
+| Home button navigates to homeView | Home differs from initial          | 1. On Map 3, click the Home button in the navbar                                                                                                             | Map navigates to homeView: zoom 4, centered on Canada `[-95, 60]` — different from the initial view | A    |
+| setHomeView programmatic          | Runtime home view change           | 1. On Map 3, run in console: `cgpv.api.getMapViewer('map3').setHomeButtonView({ zoomAndCenter: [10, [-75, 45]] })`<br>2. Click the Home button in the navbar | Map navigates to the new home view: zoom 10, centered on `[-75, 45]` (not the original homeView)    | C    |
 
 ## Initial Click Coordinate
 

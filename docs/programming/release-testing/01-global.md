@@ -4,7 +4,7 @@ Cross-cutting tests that apply to all panels and the viewer shell.
 
 > **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
 >
-> **Test page**: [rt-01-global.html](../../packages/geoview-core/public/templates/release-testing/rt-01-global.html) — Map 1 (EN, shared, all panels, includes a bad layer for notifications), Map 2 (FR, no share, for two-map and language tests).
+> **Test page**: [rt-01-global.html](https://canadian-geospatial-platform.github.io/geoview/public/rt-01-global.html) — Map 1 (EN, shared, all panels, includes a bad layer for notifications), Map 2 (FR, no share, for two-map and language tests).
 
 ## Full Screen
 

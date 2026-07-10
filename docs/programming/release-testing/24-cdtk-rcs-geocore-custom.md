@@ -2,7 +2,7 @@
 
 > **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
 >
-> **Test page**: [rt-24-cdtk-rcs-geocore-custom.html](../../packages/geoview-core/public/templates/release-testing/rt-24-cdtk-rcs-geocore-custom.html)
+> **Test page**: [rt-24-cdtk-rcs-geocore-custom.html](https://canadian-geospatial-platform.github.io/geoview/public/rt-24-cdtk-rcs-geocore-custom.html)
 
 Testing specialized service types: CDTK (Cloud Data Toolkit / QGIS), RCS (Remote Config Service), and Geocore with inline/VCS custom overrides.
 

@@ -19,7 +19,10 @@ import {
   getStoreMapPointMarkers,
   getStoreMapConfigOverviewMap,
   getStoreMapConfigComponents,
+  getStoreMapStateJson,
+  getStoreMapNorthArrow,
 } from 'geoview-core/core/stores/states/map-state';
+import { Projection } from 'geoview-core/geo/utils/projection';
 
 /**
  * Main Map Config testing class.
@@ -535,6 +538,76 @@ export class MapConfigTester extends GVAbstractTester {
   }
 
   /**
+   * Test that north arrow is present when 'north-arrow' is in components config.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testNorthArrowPresent(): Promise<Test> {
+    const mapId = this.getMapId();
+
+    return this.test(
+      'Test north arrow is present when configured in components',
+      async (test) => {
+        // Create the mapViewer with north-arrow in components
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [['components', ['north-arrow']]]);
+        return mapViewer;
+      },
+      (test) => {
+        // Verify north-arrow is in the components config
+        test.addStep('Verifying north-arrow is in components config...');
+        const components = getStoreMapConfigComponents(mapId);
+        Test.assertIsDefined('components', components);
+        Test.assertArrayIncludes(components, 'north-arrow');
+
+        // Verify northArrow boolean is true in the store
+        test.addStep('Verifying northArrow is true in the store...');
+        const northArrow = getStoreMapNorthArrow(mapId);
+        Test.assertIsEqual(northArrow, true);
+
+        // Verify the north arrow SVG exists inside the map target element (not the map-info rotation section)
+        test.addStep('Verifying north arrow SVG exists inside mapTargetElement...');
+        const northArrowEl = document.querySelector(`#mapTargetElement-${mapId} #northarrow`);
+        Test.assertIsDefined('northArrowDomElement', northArrowEl);
+      }
+    );
+  }
+
+  /**
+   * Test that north arrow is absent when 'north-arrow' is not in components config.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testNorthArrowAbsent(): Promise<Test> {
+    const mapId = this.getMapId();
+
+    return this.test(
+      'Test north arrow is absent when not in components',
+      async (test) => {
+        // Create the mapViewer with empty components (no north-arrow)
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [['components', []]]);
+        return mapViewer;
+      },
+      (test) => {
+        // Verify north-arrow is NOT in the components config
+        test.addStep('Verifying north-arrow is not in components config...');
+        const components = getStoreMapConfigComponents(mapId);
+        Test.assertIsDefined('components', components);
+        Test.assertArrayExcludes(components, 'north-arrow');
+
+        // Verify northArrow boolean is false in the store
+        test.addStep('Verifying northArrow is false in the store...');
+        const northArrow = getStoreMapNorthArrow(mapId);
+        Test.assertIsEqual(northArrow, false);
+
+        // Verify the north arrow SVG does NOT exist inside the map target element
+        test.addStep('Verifying north arrow SVG does not exist inside mapTargetElement...');
+        const northArrowEl = document.querySelector(`#mapTargetElement-${mapId} #northarrow`);
+        Test.assertIsUndefined('northArrowDomElement', northArrowEl ?? undefined);
+      }
+    );
+  }
+
+  /**
    * Test that hideOnZoom config hides the overview map at low zoom and shows it above the threshold.
    *
    * @returns A promise that resolves when the test completes
@@ -676,6 +749,109 @@ export class MapConfigTester extends GVAbstractTester {
       }
     );
   }
+
+  // #region View Settings Tests
+
+  /**
+   * Tests that initialView sets the initial zoom and zoomToInitialExtent navigates to homeView zoom.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testViewSettingsInitialViewVsHomeView(): Promise<Test> {
+    const mapId = this.getMapId();
+
+    return this.test<MapViewer>(
+      'Test initialView sets zoom = 7 (Ottawa), zoomToInitialExtent() changes zoom to 4 (homeView Canada)',
+      async (test) => {
+        // Create the mapViewer with distinct initialView and homeView
+        const viewSettingsConfig = {
+          projection: 3978,
+          initialView: { zoomAndCenter: [7, [-75.7, 45.4]] },
+          homeView: { zoomAndCenter: [4, [-95, 60]] },
+        };
+
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [['map.viewSettings', viewSettingsConfig]]);
+        return mapViewer;
+      },
+      async (test, newMapViewer) => {
+        // Verify initial zoom is 7 (from initialView)
+        test.addStep('Verifying initial zoom = 7 from initialView...');
+        const initialZoom = newMapViewer.getView().getZoom();
+        Test.assertIsEqual(initialZoom, 7);
+
+        // Call zoomToInitialExtent which uses homeView
+        test.addStep('Calling zoomToInitialExtent() which navigates to homeView...');
+        await this.getControllersRegistry().mapController.zoomToInitialExtent(GVAbstractTester.USE_ZOOM_ANIMATION);
+
+        // Verify zoom changed to 4 (from homeView)
+        test.addStep('Verifying zoom changed to 4 from homeView...');
+        const homeZoom = newMapViewer.getView().getZoom();
+        Test.assertIsEqual(homeZoom, 4);
+      }
+    );
+  }
+
+  /**
+   * Tests that after zoomToInitialExtent the map center is approximately at homeView coordinates.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testViewSettingsHomeButtonNavigatesToHomeView(): Promise<Test> {
+    const mapId = this.getMapId();
+    const EXPECTED_HOME_LON = -95;
+    const EXPECTED_HOME_LAT = 60;
+    const TOLERANCE_DEGREES = 5;
+
+    return this.test(
+      'Test zoomToInitialExtent() navigates center to homeView coordinates ≈ [-95, 60]',
+      async (test) => {
+        // Create the mapViewer with distinct initialView and homeView
+        const viewSettingsConfig = {
+          projection: 3978,
+          initialView: { zoomAndCenter: [7, [-75.7, 45.4]] },
+          homeView: { zoomAndCenter: [4, [-95, 60]] },
+        };
+
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [['map.viewSettings', viewSettingsConfig]]);
+
+        // Call zoomToInitialExtent which navigates to homeView
+        test.addStep('Calling zoomToInitialExtent() to navigate to homeView...');
+        await this.getControllersRegistry().mapController.zoomToInitialExtent(GVAbstractTester.USE_ZOOM_ANIMATION);
+
+        return mapViewer;
+      },
+      (test) => {
+        // Get the center from the store (in map projection coordinates)
+        test.addStep('Getting center coordinates from store...');
+        const { mapCenterCoordinates } = getStoreMapStateJson(mapId);
+        Test.assertIsDefined('mapCenterCoordinates', mapCenterCoordinates);
+
+        // Transform center from map projection (EPSG:3978) back to lonlat
+        test.addStep('Transforming center coordinates to lonlat...');
+        const lonLatCenter = Projection.transformPoints([mapCenterCoordinates], 'EPSG:3978', Projection.PROJECTION_NAMES.LONLAT);
+        Test.assertIsDefined('lonLatCenter', lonLatCenter);
+        Test.assertIsArrayLengthEqual(lonLatCenter, 1);
+
+        const [lon, lat] = lonLatCenter[0];
+
+        // Verify longitude is within tolerance of expected homeView center
+        test.addStep(`Verifying longitude ≈ ${EXPECTED_HOME_LON} (tolerance ±${TOLERANCE_DEGREES})...`);
+        const lonDiff = Math.abs(lon - EXPECTED_HOME_LON);
+        if (lonDiff > TOLERANCE_DEGREES) {
+          Test.assertFail(`Longitude ${lon} is ${lonDiff}° from expected ${EXPECTED_HOME_LON}, exceeds tolerance of ${TOLERANCE_DEGREES}°`);
+        }
+
+        // Verify latitude is within tolerance of expected homeView center
+        test.addStep(`Verifying latitude ≈ ${EXPECTED_HOME_LAT} (tolerance ±${TOLERANCE_DEGREES})...`);
+        const latDiff = Math.abs(lat - EXPECTED_HOME_LAT);
+        if (latDiff > TOLERANCE_DEGREES) {
+          Test.assertFail(`Latitude ${lat} is ${latDiff}° from expected ${EXPECTED_HOME_LAT}, exceeds tolerance of ${TOLERANCE_DEGREES}°`);
+        }
+      }
+    );
+  }
+
+  // #endregion
 
   // #region Initial Settings Controls Tests
 
@@ -1131,6 +1307,396 @@ export class MapConfigTester extends GVAbstractTester {
         test.addStep('Verifying layer is still registered in featureInfoLayerSet...');
         const featureInfoPaths = this.getControllersRegistry().layerSetController.featureInfoLayerSet.getRegisteredLayerPaths();
         Test.assertArrayIncludes(featureInfoPaths, LAYER_PATH);
+      }
+    );
+  }
+
+  // #endregion
+
+  // #region Initial Settings Legend Collapsed Tests
+
+  /**
+   * Tests that setting states.legendCollapsed to true on a group layer results in the legend being collapsed in the store.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testInitialSettingsLegendCollapsed(): Promise<Test> {
+    const mapId = this.getMapId();
+    const groupLayerPath = 'geojsonLYR5/pointGroup1';
+
+    return this.test(
+      'Test initialSettings states.legendCollapsed = true on group layer...',
+      (test) => {
+        test.addStep('Creating map with group layer having states.legendCollapsed = true...');
+        return this.#helperCreateMapConfigWithGroupInitialSettings(test, mapId, { legendCollapsed: true });
+      },
+      (test) => {
+        // Verify the group layer legend is collapsed in the store
+        test.addStep('Verifying legendCollapsed = true in store for group layer...');
+        const legendLayer = getStoreLayerLegendLayerByPath(mapId, groupLayerPath);
+        Test.assertIsDefined('legendLayer', legendLayer);
+        Test.assertIsEqual(legendLayer.legendCollapsed, true);
+      }
+    );
+  }
+
+  // #endregion
+
+  // #region Initial Settings Controls Cascading Tests
+
+  /**
+   * Tests that controls set on the parent group cascade to all descendants (subgroup and child leaf).
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testInitialSettingsControlsCascadeToChildren(): Promise<Test> {
+    const mapId = this.getMapId();
+    const groupLayerPath = 'geojsonLYR5/pointGroup1';
+    const subGroupLayerPath = 'geojsonLYR5/pointGroup1/pointGroup2';
+    const childLayerPath = 'geojsonLYR5/pointGroup1/pointGroup2/points_1.json';
+    const controlNames = ['highlight', 'zoom', 'hover', 'query'];
+
+    return this.test(
+      'Test parent controls { highlight: false, zoom: false, hover: false, query: false } cascade to children...',
+      (test) => {
+        test.addStep('Creating map with parent controls all false, no overrides on children...');
+        return this.#helperCreateMapConfigWithNestedGroupInitialSettings(
+          test,
+          mapId,
+          { controls: { highlight: false, zoom: false, hover: false, query: false } },
+          {},
+          {}
+        );
+      },
+      (test) => {
+        // Verify parent group has all controls false
+        test.addStep('Verifying parent group has all controls false...');
+        const parentControls = getStoreLayerControls(mapId, groupLayerPath);
+        Test.assertIsDefined('parentControls', parentControls);
+        controlNames.forEach((name) => {
+          Test.assertIsEqual((parentControls as Record<string, unknown>)[name], false);
+        });
+
+        // Verify subgroup inherits all controls false
+        test.addStep('Verifying subgroup inherits all controls false...');
+        const subGroupControls = getStoreLayerControls(mapId, subGroupLayerPath);
+        Test.assertIsDefined('subGroupControls', subGroupControls);
+        controlNames.forEach((name) => {
+          Test.assertIsEqual((subGroupControls as Record<string, unknown>)[name], false);
+        });
+
+        // Verify child leaf inherits all controls false
+        test.addStep('Verifying child leaf inherits all controls false...');
+        const childControls = getStoreLayerControls(mapId, childLayerPath);
+        Test.assertIsDefined('childControls', childControls);
+        controlNames.forEach((name) => {
+          Test.assertIsEqual((childControls as Record<string, unknown>)[name], false);
+        });
+      }
+    );
+  }
+
+  /**
+   * Tests that a child group can override specific controls from the parent while inheriting the rest.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testInitialSettingsControlsGroupOverride(): Promise<Test> {
+    const mapId = this.getMapId();
+    const groupLayerPath = 'geojsonLYR5/pointGroup1';
+    const subGroupLayerPath = 'geojsonLYR5/pointGroup1/pointGroup2';
+    const childLayerPath = 'geojsonLYR5/pointGroup1/pointGroup2/points_1.json';
+
+    return this.test(
+      'Test group-level override: parent { highlight: false, zoom: false }, subgroup overrides { highlight: true, zoom: true }...',
+      (test) => {
+        test.addStep('Creating map with parent controls and subgroup overrides...');
+        return this.#helperCreateMapConfigWithNestedGroupInitialSettings(
+          test,
+          mapId,
+          { controls: { highlight: false, zoom: false } },
+          { controls: { highlight: true, zoom: true } },
+          {}
+        );
+      },
+      (test) => {
+        // Verify parent group has highlight: false, zoom: false
+        test.addStep('Verifying parent group has highlight: false, zoom: false...');
+        const parentControls = getStoreLayerControls(mapId, groupLayerPath);
+        Test.assertIsDefined('parentControls', parentControls);
+        Test.assertIsEqual((parentControls as Record<string, unknown>).highlight, false);
+        Test.assertIsEqual((parentControls as Record<string, unknown>).zoom, false);
+
+        // Verify subgroup overrides to highlight: true, zoom: true
+        test.addStep('Verifying subgroup overrides highlight: true, zoom: true...');
+        const subGroupControls = getStoreLayerControls(mapId, subGroupLayerPath);
+        Test.assertIsDefined('subGroupControls', subGroupControls);
+        Test.assertIsEqual((subGroupControls as Record<string, unknown>).highlight, true);
+        Test.assertIsEqual((subGroupControls as Record<string, unknown>).zoom, true);
+
+        // Verify child leaf inherits subgroup's overridden values (highlight: true, zoom: true)
+        test.addStep('Verifying child leaf inherits subgroup overrides (highlight: true, zoom: true)...');
+        const childControls = getStoreLayerControls(mapId, childLayerPath);
+        Test.assertIsDefined('childControls', childControls);
+        Test.assertIsEqual((childControls as Record<string, unknown>).highlight, true);
+        Test.assertIsEqual((childControls as Record<string, unknown>).zoom, true);
+      }
+    );
+  }
+
+  // #endregion
+
+  // #region Initial Filters Tests
+
+  /**
+   * Tests that a GeoJSON layer with a layerFilter config property has the filter stored and accessible at runtime.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testInitialSettingsFilters(): Promise<Test> {
+    const mapId = this.getMapId();
+    const LAYER_PATH = 'geojsonLYR5/polygons.json';
+    const FILTER_EXPRESSION = "Province = 'Quebec'";
+
+    return this.test(
+      'Test GeoJSON layerFilter is stored and accessible after loading...',
+      async (test) => {
+        test.addStep('Creating map with GeoJSON layer having layerFilter...');
+        await this.#helperCreateMapConfig(test, mapId, [
+          [
+            'map.listOfGeoviewLayerConfig',
+            [
+              {
+                geoviewLayerId: 'geojsonLYR5',
+                geoviewLayerName: 'GeoJSON Sample',
+                metadataAccessPath: GVAbstractTester.GEOJSON_METADATA_META,
+                geoviewLayerType: 'GeoJSON' as TypeGeoviewLayerType,
+                serviceDateFormat: 'DD/MM/YYYYTHH:mm:ss',
+                listOfLayerEntryConfig: [
+                  {
+                    layerId: 'polygons.json',
+                    layerName: 'Polygons',
+                    layerFilter: FILTER_EXPRESSION,
+                  },
+                ],
+              },
+            ],
+          ],
+        ]);
+      },
+      (test) => {
+        // Verify the filter is accessible on the GV layer via getLayerFilters().getInitialFilter()
+        test.addStep('Verifying layerFilter is stored on GV layer via getInitialFilter()...');
+        const gvLayer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(LAYER_PATH);
+        Test.assertIsDefined('gvLayer', gvLayer);
+        const initialFilter = gvLayer.getLayerFilters().getInitialFilter();
+        Test.assertIsEqual(initialFilter, FILTER_EXPRESSION);
+
+        // Verify the filter is also stored in the legend layer store
+        test.addStep('Verifying layerFilter is stored in legend layer store...');
+        const legendLayer = getStoreLayerLegendLayerByPath(mapId, LAYER_PATH);
+        Test.assertIsDefined('legendLayer', legendLayer);
+        Test.assertIsEqual(legendLayer.layerFilter, FILTER_EXPRESSION);
+      }
+    );
+  }
+
+  /**
+   * Tests that an OGC Feature layer with a layerFilter config property has the filter stored and accessible at runtime.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testInitialSettingsFiltersOgcFeature(): Promise<Test> {
+    const mapId = this.getMapId();
+    const GV_LAYER_ID = 'ogcFeatureLYR';
+    const LAYER_PATH = `${GV_LAYER_ID}/${GVAbstractTester.PYGEOAPI_B6RYUVAKK5_LAKES}`;
+    const FILTER_EXPRESSION = "name = 'Lake Huron'";
+
+    return this.test(
+      'Test OGC Feature layerFilter is stored and accessible after loading...',
+      async (test) => {
+        test.addStep('Creating map with OGC Feature layer having layerFilter...');
+        await this.#helperCreateMapConfig(test, mapId, [
+          [
+            'map.listOfGeoviewLayerConfig',
+            [
+              {
+                geoviewLayerId: GV_LAYER_ID,
+                geoviewLayerName: 'OGC Feature Lakes',
+                metadataAccessPath: GVAbstractTester.PYGEOAPI_B6RYUVAKK5,
+                geoviewLayerType: 'ogcFeature' as TypeGeoviewLayerType,
+                listOfLayerEntryConfig: [
+                  {
+                    layerId: GVAbstractTester.PYGEOAPI_B6RYUVAKK5_LAKES,
+                    layerFilter: FILTER_EXPRESSION,
+                  },
+                ],
+              },
+            ],
+          ],
+        ]);
+      },
+      (test) => {
+        test.addStep('Verifying layerFilter is stored on GV layer via getInitialFilter()...');
+        const gvLayer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(LAYER_PATH);
+        Test.assertIsDefined('gvLayer', gvLayer);
+        const initialFilter = gvLayer.getLayerFilters().getInitialFilter();
+        Test.assertIsEqual(initialFilter, FILTER_EXPRESSION);
+
+        test.addStep('Verifying layerFilter is stored in legend layer store...');
+        const legendLayer = getStoreLayerLegendLayerByPath(mapId, LAYER_PATH);
+        Test.assertIsDefined('legendLayer', legendLayer);
+        Test.assertIsEqual(legendLayer.layerFilter, FILTER_EXPRESSION);
+      }
+    );
+  }
+
+  /**
+   * Tests that a WFS layer with a layerFilter config property has the filter stored and accessible at runtime.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testInitialSettingsFiltersWfs(): Promise<Test> {
+    const mapId = this.getMapId();
+    const GV_LAYER_ID = 'wfsLYR';
+    const LAYER_PATH = `${GV_LAYER_ID}/${GVAbstractTester.GEOMET_URL_CURRENT_COND_LAYER_ID}`;
+    const FILTER_EXPRESSION = "element_name_e = 'Temperature'";
+
+    return this.test(
+      'Test WFS layerFilter is stored and accessible after loading...',
+      async (test) => {
+        test.addStep('Creating map with WFS layer having layerFilter...');
+        await this.#helperCreateMapConfig(test, mapId, [
+          [
+            'map.listOfGeoviewLayerConfig',
+            [
+              {
+                geoviewLayerId: GV_LAYER_ID,
+                geoviewLayerName: 'WFS Current Conditions',
+                metadataAccessPath: GVAbstractTester.GEOMET_URL,
+                geoviewLayerType: 'ogcWfs' as TypeGeoviewLayerType,
+                listOfLayerEntryConfig: [
+                  {
+                    layerId: GVAbstractTester.GEOMET_URL_CURRENT_COND_LAYER_ID,
+                    layerFilter: FILTER_EXPRESSION,
+                  },
+                ],
+              },
+            ],
+          ],
+        ]);
+      },
+      (test) => {
+        test.addStep('Verifying layerFilter is stored on GV layer via getInitialFilter()...');
+        const gvLayer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(LAYER_PATH);
+        Test.assertIsDefined('gvLayer', gvLayer);
+        const initialFilter = gvLayer.getLayerFilters().getInitialFilter();
+        Test.assertIsEqual(initialFilter, FILTER_EXPRESSION);
+
+        test.addStep('Verifying layerFilter is stored in legend layer store...');
+        const legendLayer = getStoreLayerLegendLayerByPath(mapId, LAYER_PATH);
+        Test.assertIsDefined('legendLayer', legendLayer);
+        Test.assertIsEqual(legendLayer.layerFilter, FILTER_EXPRESSION);
+      }
+    );
+  }
+
+  /**
+   * Tests that an Esri Dynamic layer with a layerFilter config property has the filter stored and accessible at runtime.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testInitialSettingsFiltersEsriDynamic(): Promise<Test> {
+    const mapId = this.getMapId();
+    const GV_LAYER_ID = 'esriDynamicLYR';
+    const LAYER_PATH = `${GV_LAYER_ID}/${GVAbstractTester.HISTORICAL_FLOOD_URL_LAYER_ID}`;
+    const FILTER_EXPRESSION = "event_type = 'freshet'";
+
+    return this.test(
+      'Test Esri Dynamic layerFilter is stored and accessible after loading...',
+      async (test) => {
+        test.addStep('Creating map with Esri Dynamic layer having layerFilter...');
+        await this.#helperCreateMapConfig(test, mapId, [
+          [
+            'map.listOfGeoviewLayerConfig',
+            [
+              {
+                geoviewLayerId: GV_LAYER_ID,
+                geoviewLayerName: 'Historical Flood Events',
+                metadataAccessPath: GVAbstractTester.HISTORICAL_FLOOD_URL_MAP_SERVER,
+                geoviewLayerType: 'esriDynamic' as TypeGeoviewLayerType,
+                listOfLayerEntryConfig: [
+                  {
+                    layerId: GVAbstractTester.HISTORICAL_FLOOD_URL_LAYER_ID,
+                    layerFilter: FILTER_EXPRESSION,
+                  },
+                ],
+              },
+            ],
+          ],
+        ]);
+      },
+      (test) => {
+        test.addStep('Verifying layerFilter is stored on GV layer via getInitialFilter()...');
+        const gvLayer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(LAYER_PATH);
+        Test.assertIsDefined('gvLayer', gvLayer);
+        const initialFilter = gvLayer.getLayerFilters().getInitialFilter();
+        Test.assertIsEqual(initialFilter, FILTER_EXPRESSION);
+
+        test.addStep('Verifying layerFilter is stored in legend layer store...');
+        const legendLayer = getStoreLayerLegendLayerByPath(mapId, LAYER_PATH);
+        Test.assertIsDefined('legendLayer', legendLayer);
+        Test.assertIsEqual(legendLayer.layerFilter, FILTER_EXPRESSION);
+      }
+    );
+  }
+
+  /**
+   * Tests that an Esri Feature layer with a layerFilter config property has the filter stored and accessible at runtime.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testInitialSettingsFiltersEsriFeature(): Promise<Test> {
+    const mapId = this.getMapId();
+    const GV_LAYER_ID = 'esriFeatureLYR';
+    const LAYER_PATH = `${GV_LAYER_ID}/${GVAbstractTester.FOREST_INDUSTRY_LAYER_ID}`;
+    const FILTER_EXPRESSION = "Province = 'Ontario'";
+
+    return this.test(
+      'Test Esri Feature layerFilter is stored and accessible after loading...',
+      async (test) => {
+        test.addStep('Creating map with Esri Feature layer having layerFilter...');
+        await this.#helperCreateMapConfig(test, mapId, [
+          [
+            'map.listOfGeoviewLayerConfig',
+            [
+              {
+                geoviewLayerId: GV_LAYER_ID,
+                geoviewLayerName: 'Forest Industry',
+                metadataAccessPath: GVAbstractTester.FOREST_INDUSTRY_MAP_SERVER,
+                geoviewLayerType: 'esriFeature' as TypeGeoviewLayerType,
+                listOfLayerEntryConfig: [
+                  {
+                    layerId: GVAbstractTester.FOREST_INDUSTRY_LAYER_ID,
+                    layerFilter: FILTER_EXPRESSION,
+                  },
+                ],
+              },
+            ],
+          ],
+        ]);
+      },
+      (test) => {
+        test.addStep('Verifying layerFilter is stored on GV layer via getInitialFilter()...');
+        const gvLayer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(LAYER_PATH);
+        Test.assertIsDefined('gvLayer', gvLayer);
+        const initialFilter = gvLayer.getLayerFilters().getInitialFilter();
+        Test.assertIsEqual(initialFilter, FILTER_EXPRESSION);
+
+        test.addStep('Verifying layerFilter is stored in legend layer store...');
+        const legendLayer = getStoreLayerLegendLayerByPath(mapId, LAYER_PATH);
+        Test.assertIsDefined('legendLayer', legendLayer);
+        Test.assertIsEqual(legendLayer.layerFilter, FILTER_EXPRESSION);
       }
     );
   }
