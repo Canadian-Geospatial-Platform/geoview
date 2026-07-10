@@ -1,17 +1,18 @@
 import type { GeometryFunction, DrawEvent as OLDrawEvent } from 'ol/interaction/Draw';
 import type { Coordinate } from 'ol/coordinate';
+import type { Type as OLGeomType } from 'ol/geom/Geometry';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
+import type { GeometryApi } from '@/geo/layer/geometry/geometry';
 import type { InteractionOptions } from './interaction';
 import { Interaction } from './interaction';
-import type { GeometryApi } from '@/geo/layer/geometry/geometry';
 /**
  * Supported options for drawing interactions
  */
 export type DrawOptions = InteractionOptions & {
     geometryGroupKey: string;
     freehand?: boolean;
-    type?: string;
+    type?: OLGeomType;
     style?: TypeFeatureStyle;
     geometryFunction?: GeometryFunction;
 };

@@ -3,9 +3,9 @@ import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 /** Represents the Drawer plugin state managed by the Zustand store. */
 export interface IDrawerState {
     /** The currently active geometry type for drawing. */
-    activeGeom: string;
+    activeGeom: DrawGeometryType;
     /** The list of available geometry types. */
-    geomTypes: string[];
+    geomTypes: DrawGeometryType[];
     /** The current drawing style properties. */
     style: StyleProps;
     /** Whether the drawer is currently drawing. */
@@ -83,7 +83,7 @@ export declare const isStoreDrawerInitialized: (mapId: string) => boolean;
  * @param mapId - The map identifier
  * @returns The active geometry type
  */
-export declare const getStoreDrawerActiveGeom: (mapId: string) => string;
+export declare const getStoreDrawerActiveGeom: (mapId: string) => DrawGeometryType;
 /** Hooks the active geometry type from the drawer state. */
 export declare const useStoreDrawerActiveGeom: () => string;
 /**
@@ -369,12 +369,14 @@ export type StyleProps = {
 /** Configuration options for the drawer plugin from the map config. */
 export type TypeDrawerConfig = {
     /** Optional initial active geometry type. */
-    activeGeom?: string;
+    activeGeom?: DrawGeometryType;
     /** Optional list of available geometry types. */
-    geomTypes?: string[];
+    geomTypes?: DrawGeometryType[];
     /** Optional default drawing style overrides. */
     style?: StyleProps;
     /** Optional flag to hide measurements by default. */
     hideMeasurements?: boolean;
 };
+/** Drawing geometry types supported by the drawer plugin. */
+export type DrawGeometryType = 'Point' | 'Polygon' | 'LineString' | 'Circle' | 'Rectangle' | 'Star' | 'Text';
 //# sourceMappingURL=drawer-state.d.ts.map

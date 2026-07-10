@@ -1,4 +1,5 @@
 import { ConfigApi } from '@/api/config/config-api';
+import type { EventDelegateBase } from '@/api/events/event-helper';
 import { Plugin } from '@/api/plugin/plugin';
 import { DateMgt } from '@/core/utils/date-mgt';
 import * as Utilities from '@/core/utils/utilities';
@@ -65,6 +66,13 @@ export declare class API {
      */
     getMapViewerAsync(mapId: string): Promise<MapViewer>;
     /**
+     * Waits for a specific map viewer to be set via the onMapViewerSet event.
+     *
+     * @param mapId - The unique identifier of the map to wait for
+     * @returns A promise that resolves with the map viewer instance once it is set
+     */
+    waitForMapViewer(mapId: string): Promise<MapViewer>;
+    /**
      * Deletes a map viewer instance by its ID and unmounts it from the DOM - for React.
      *
      * @param mapId - The unique identifier of the map to delete
@@ -114,5 +122,32 @@ export declare class API {
      * @returns A promise that resolves with the MapViewer which will be created once reloaded
      */
     reloadWithCurrentState(mapId: string, maintainGeocoreLayerNames?: boolean): Promise<MapViewer>;
+    /**
+     * Returns a promise that resolves the next time the map viewer set event fires.
+     *
+     * @param filter - Optional filter to only resolve when the event matches
+     * @returns A promise that resolves with the event payload when a map viewer is set
+     */
+    onceMapViewerSet(filter?: (event: MapViewerSetEvent) => boolean): Promise<MapViewer>;
+    /**
+     * Registers a map viewer set event callback.
+     *
+     * @param callback - The callback to be executed whenever the event is emitted
+     * @returns The callback delegate that was registered
+     */
+    onMapViewerSet(callback: MapViewerSetDelegate): MapViewerSetDelegate;
+    /**
+     * Unregisters a map viewer set event callback.
+     *
+     * @param callback - The callback to stop being called whenever the event is emitted
+     */
+    offMapViewerSet(callback: MapViewerSetDelegate): void;
 }
+/** The event payload for the map viewer set event. */
+export type MapViewerSetEvent = {
+    /** The map viewer instance that was set. */
+    mapViewer: MapViewer;
+};
+/** Delegate type for the map viewer set event. */
+export type MapViewerSetDelegate = EventDelegateBase<API, MapViewerSetEvent, void>;
 //# sourceMappingURL=api.d.ts.map

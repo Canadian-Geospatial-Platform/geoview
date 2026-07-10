@@ -291,12 +291,6 @@ export declare abstract class ConfigBaseClass {
      */
     initInitialSettingsExtentAndBoundsFromConfig(): void;
     /**
-     * Initializes the extent in the initial settings using metadata.
-     *
-     * @param extentToValidate - Optional the extent from metadata to validate and apply
-     */
-    initInitialSettingsExtentFromMetadata(extentToValidate: Extent | undefined): void;
-    /**
      * Initializes the bounds in the initial settings using metadata.
      *
      * @param extentToValidate - Optional the bounds from metadata to validate and apply
@@ -605,6 +599,13 @@ export declare abstract class ConfigBaseClass {
      */
     protected static isClassOrTypeSchemaTag<T extends ConfigClassOrType | TypeGeoviewLayerConfig>(layerConfig: T, layerType: TypeGeoviewLayerType): layerConfig is T;
     /**
+     * Returns a promise that resolves the next time the layer status changed event fires and passes the optional filter.
+     *
+     * @param filter - Optional filter predicate. When provided, only events passing the filter resolve the promise
+     * @returns A promise that resolves with the layer status changed event payload
+     */
+    onceLayerStatusChanged(filter?: (event: LayerStatusChangedEvent) => boolean): Promise<LayerStatusChangedEvent>;
+    /**
      * Registers a layer status changed event handler.
      *
      * @param callback - The callback to be executed whenever the event is emitted
@@ -637,9 +638,9 @@ export type TypeLayerEntryShellSource = {
     projection?: TypeValidSourceProjectionCodes;
 };
 /** Defines an event for the delegate. */
-export type LayerStatusChangedEvent = {
+export interface LayerStatusChangedEvent {
     layerStatus: TypeLayerStatus;
-};
+}
 /** Defines a delegate for the event handler function signature. */
 export type LayerStatusChangedDelegate = EventDelegateBase<ConfigBaseClass, LayerStatusChangedEvent, void>;
 //# sourceMappingURL=config-base-class.d.ts.map

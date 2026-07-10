@@ -52,9 +52,9 @@ export declare abstract class AbstractGVRaster extends AbstractGVLayer {
 /**
  * Define an event for the delegate
  */
-export type ImageLoadRescueEvent = {
+export interface ImageLoadRescueEvent {
     imageLoadErrorEvent: Error;
-};
+}
 /**
  * Define a delegate for the event handler function signature
  */

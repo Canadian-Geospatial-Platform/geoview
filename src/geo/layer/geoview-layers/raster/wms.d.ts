@@ -117,10 +117,9 @@ export declare class WMS extends AbstractGeoViewRaster {
      * @param isTimeAware - Indicates whether the layer supports time-based filtering
      * @param layerEntries - The root array of parsed layer entries (may include nested groups)
      * @param useFullWmsSublayers - Optional to indicates if we want the full sublayers of all wms or grouped (default is all sublayers)
-     * @param customGeocoreLayerConfig - Optional custom layer configuration to merge into leaf layers
      * @returns The fully constructed WMS layer configuration object
      */
-    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, serverType: TypeOfServer | undefined, isTimeAware: boolean | undefined, layerEntries: TypeLayerEntryShell[], useFullWmsSublayers?: boolean, customGeocoreLayerConfig?: unknown): TypeWMSLayerConfig;
+    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, serverType: TypeOfServer | undefined, isTimeAware: boolean | undefined, layerEntries: TypeLayerEntryShell[], useFullWmsSublayers?: boolean): TypeWMSLayerConfig;
     /**
      * Initializes a GeoView layer configuration for a WMS layer.
      *

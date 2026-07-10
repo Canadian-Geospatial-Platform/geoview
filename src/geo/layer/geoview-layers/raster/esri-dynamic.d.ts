@@ -91,10 +91,9 @@ export declare class EsriDynamic extends AbstractGeoViewRaster {
      * @param metadataAccessPath - The URL or path to access metadata
      * @param isTimeAware - Indicates whether the layer supports time-based filtering
      * @param layerEntries - An array of layer entries objects to be included in the configuration
-     * @param customGeocoreLayerConfig - An optional layer config from Geocore
      * @returns The constructed configuration object for the Esri Dynamic layer
      */
-    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware: boolean | undefined, layerEntries: TypeLayerEntryShell[], customGeocoreLayerConfig?: unknown): TypeEsriDynamicLayerConfig;
+    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware: boolean | undefined, layerEntries: TypeLayerEntryShell[]): TypeEsriDynamicLayerConfig;
     /**
      * Processes an Esri Dynamic GeoviewLayerConfig and returns a promise
      * that resolves to an array of `ConfigBaseClass` layer entry configurations.

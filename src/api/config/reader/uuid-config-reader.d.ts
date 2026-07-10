@@ -1,5 +1,5 @@
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
-import type { TypeGeoviewLayerConfig, TypeGeoviewLayerType, TypeOfServer } from '@/api/types/layer-schema-types';
+import type { TypeBaseSourceInitialConfig, TypeGeoviewLayerConfig, TypeGeoviewLayerType, TypeOfServer } from '@/api/types/layer-schema-types';
 import type { TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 /** A class to generate GeoView layers config from a URL using a UUID. */
 export declare class UUIDmapConfigReader {
@@ -47,10 +47,11 @@ export type GeoCoreConfigResponseRCSLayers = {
 };
 export type GeoCoreConfigResponseGCSLayers = {
     layers?: GeoCoreConfigResponseGCSLayer;
-    packages: GeoCoreConfigResponsePackages;
+    packages?: GeoCoreConfigResponsePackages;
 };
 export type GeoCoreConfigResponseGCSLayer = {
     layerName: string;
+    source?: TypeBaseSourceInitialConfig;
 };
 export type GeoCoreConfigResponsePackages = {
     /** The geochart configurations. */

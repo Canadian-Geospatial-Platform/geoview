@@ -251,7 +251,7 @@ export declare abstract class GeoUtilities {
      * @returns A flattened array of legend items derived from the
      * provided icons, including any dynamically generated items for special layer types.
      */
-    static getLayerItemsFromIcons(schemaTag: TypeGeoviewLayerType, icons: TypeLegendLayerItem[]): TypeLegendItem[];
+    static getLayerItemsFromIcons(schemaTag: TypeGeoviewLayerType, icons: TypeLegendLayerItem[] | undefined): TypeLegendItem[];
     /**
      * Type guard function that redefines a TypeLegend as a TypeVectorLegend
      * if the type attribute of the verifyIfLegend parameter is valid.

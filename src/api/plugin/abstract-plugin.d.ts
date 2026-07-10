@@ -90,5 +90,13 @@ export declare abstract class AbstractPlugin {
      * This function is called when the plugin is removed, used for clean up. See plugin.addPlugin for details.
      */
     remove(): void;
+    /**
+     * Selects the tab with the plugin.
+     */
+    select(): void;
+    /**
+     * Overridable function called when the tab with the plugin is being selected.
+     */
+    protected onSelect(): void;
 }
 //# sourceMappingURL=abstract-plugin.d.ts.map

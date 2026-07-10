@@ -1,9 +1,7 @@
 /** Return type for the useManageArrow hook. */
 interface ArrowReturn {
     /** The current rotation angle for the north arrow. */
-    rotationAngle: {
-        angle: number;
-    };
+    rotationAngle: number;
     /** The horizontal offset in pixels for the north arrow. */
     northOffset: number;
 }

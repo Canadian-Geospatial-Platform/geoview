@@ -438,35 +438,33 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     /**
      * Utility function allowing to wait for the layer to be loaded at least once.
      *
-     * @param timeout - A timeout for the period to wait for. Defaults to 30,000 ms
-     * @returns A promise that resolves when the layer has been loaded at least once
+     * Sync-checks first, then subscribes to the layer-first-loaded and layer-error events. Resolves
+     * when the layer reaches its first loaded state; rejects when the layer enters the `error` state before that.
+     *
+     * @returns A promise that resolves once the layer has been loaded at least once
      * @throws {LayerStatusErrorError} When the layer enters the `error` state before being loaded
      */
-    waitLoadedOnce(timeout?: number): Promise<boolean>;
+    waitForLoadedOnce(): Promise<void>;
     /**
      * Utility function allowing to wait for the layer status to become `loaded`.
      *
-     * @param timeout - A timeout for the period to wait for. Defaults to 30,000 ms
-     * @returns A promise that resolves when the layer status is `loaded`
+     * Sync-checks first, then subscribes to the layer-loaded and layer-error events. Resolves
+     * when the layer reaches the `loaded` state; rejects when the layer enters the `error` state first.
+     *
+     * @returns A promise that resolves once the layer status is `loaded`
      * @throws {LayerStatusErrorError} When the layer enters the `error` state before reaching `loaded`
      */
-    waitLoadedStatus(timeout?: number): Promise<boolean>;
+    waitForLoadedStatus(): Promise<void>;
     /**
-     * Utility function allowing to wait for the layer legend to be fetched.
+     * Utility function allowing to wait for the layer legend to be queried.
      *
-     * @param timeout - A timeout for the period to wait for. Defaults to 30,000 ms
-     * @returns A promise that resolves when the layer legend has been fetched
-     * @throws {LayerStatusErrorError} When the layer enters the `error` state before the legend is fetched
-     */
-    waitLegendFetched(timeout?: number): Promise<TypeLegend>;
-    /**
-     * Utility function allowing to wait for the layer style to be applied.
+     * Sync-checks first, then subscribes to the legend-changed and layer-error events. Resolves
+     * when the legend becomes available; rejects when the layer enters the `error` state first.
      *
-     * @param timeout - A timeout for the period to wait for. Defaults to 30,000 ms
-     * @returns A promise that resolves when the layer style has been applied
-     * @throws {LayerStatusErrorError} When the layer enters the `error` state before the style is applied
+     * @returns A promise that resolves once the layer legend has been queried
+     * @throws {LayerStatusErrorError} When the layer enters the `error` state before the legend is queried
      */
-    waitStyleApplied(timeout?: number): Promise<TypeLayerStyleConfig>;
+    waitForLegendQueried(): Promise<void>;
     /**
      * Formats a list of features into an array of TypeFeatureInfoEntry, including icons, field values, domains, and metadata.
      *
@@ -521,11 +519,25 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      */
     offLegendQueried(callback: LegendQueriedDelegate | undefined): void;
     /**
-     * Emits filter applied event.
+     * Returns a promise that resolves the next time the layer style changed event fires.
      *
-     * @param event - The event to emit
+     * @param filter - Optional filter predicate. When provided, only events passing the filter resolve the promise
+     * @returns A promise that resolves with the style changed event payload
      */
-    protected emitLayerFilterApplied(event: LayerFilterAppliedEvent): void;
+    onceLayerStyleChanged(filter?: (event: StyleChangedEvent) => boolean): Promise<StyleChangedEvent>;
+    /**
+     * Registers a layer style changed event handler.
+     *
+     * @param callback - The callback to be executed whenever the event is emitted
+     * @returns The registered callback for potential unregistration
+     */
+    onLayerStyleChanged(callback: StyleChangedDelegate): StyleChangedDelegate;
+    /**
+     * Unregisters a layer style changed event handler.
+     *
+     * @param callback - The callback to stop being called whenever the event is emitted
+     */
+    offLayerStyleChanged(callback: StyleChangedDelegate | undefined): void;
     /**
      * Registers a filter applied event handler.
      *
@@ -540,18 +552,12 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      */
     offLayerFilterApplied(callback: LayerFilterAppliedDelegate | undefined): void;
     /**
-     * Registers a layer style changed event handler.
+     * Returns a promise that resolves the next time the layer first loaded event fires.
      *
-     * @param callback - The callback to be executed whenever the event is emitted
-     * @returns The registered callback for potential unregistration
+     * @param filter - Optional filter predicate. When provided, only events passing the filter resolve the promise
+     * @returns A promise that resolves with the layer base event payload
      */
-    onLayerStyleChanged(callback: StyleChangedDelegate): StyleChangedDelegate;
-    /**
-     * Unregisters a layer style changed event handler.
-     *
-     * @param callback - The callback to stop being called whenever the event is emitted
-     */
-    offLayerStyleChanged(callback: StyleChangedDelegate | undefined): void;
+    onceLayerFirstLoaded(filter?: (event: LayerBaseEvent) => boolean): Promise<LayerBaseEvent>;
     /**
      * Registers when a layer have been first loaded on the map event handler.
      *
@@ -591,6 +597,13 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      * @param callback - The callback to stop being called whenever the event is emitted
      */
     offLayerLoaded(callback: LayerBaseDelegate | undefined): void;
+    /**
+     * Returns a promise that resolves the next time the layer error event fires.
+     *
+     * @param filter - Optional filter predicate. When provided, only events passing the filter resolve the promise
+     * @returns A promise that resolves with the layer error event payload
+     */
+    onceLayerError(filter?: (event: LayerErrorEvent) => boolean): Promise<LayerErrorEvent>;
     /**
      * Registers when a layer is turning into a error stage event handler.
      *
@@ -765,6 +778,13 @@ export interface LegendQueriedEvent extends LayerBaseEvent {
 }
 /** Delegate for the {@link LegendQueriedEvent} handler. */
 export type LegendQueriedDelegate = EventDelegateBase<AbstractGVLayer, LegendQueriedEvent, void>;
+/** Event payload emitted when the layer legend changes. */
+export interface LegendChangedEvent extends LayerBaseEvent {
+    /** The new legend assigned to the layer. */
+    legend: TypeLegend;
+}
+/** Delegate for the {@link LegendChangedEvent} handler. */
+export type LegendChangedDelegate = EventDelegateBase<AbstractGVLayer, LegendChangedEvent, void>;
 /** Event payload emitted when a layer filter is applied. */
 export interface LayerFilterAppliedEvent extends LayerBaseEvent {
     /** The filter currently applied on the layer. */

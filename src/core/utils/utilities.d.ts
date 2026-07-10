@@ -181,10 +181,10 @@ export declare function isValidUUID(uuid: string): boolean;
  *
  * @param targetUrl - The URL to validate and ping
  * @param proxyBase - Optional proxy server base URL (defaults to CONFIG_PROXY_URL)
- * @param timeoutMs - Optional request timeout in milliseconds (defaults to 5000ms)
+ * @param timeoutMs - Optional request timeout in milliseconds (defaults to none)
  * @returns A promise that resolves with a result object containing isValid, isReachable, needsProxy, status, and optional error
  */
-export declare function validateAndPingUrl(targetUrl: string, proxyBase?: string, timeoutMs?: number): Promise<PingResult>;
+export declare function validateAndPingUrl(targetUrl: string, proxyBase?: string, timeoutMs?: undefined): Promise<PingResult>;
 /**
  * Extracts the embedded color palette from a GeoTIFF file at the given URL.
  *
@@ -414,18 +414,18 @@ export declare function doUntilPromise<T>(callback: () => T, promise: Promise<un
  * @param checkCallback - The function executed to verify a particular condition until it's passed
  * @param doCallback - The function executed when checkCallback returns true or some object
  * @param failCallback - The function executed when checkCallback has failed for too long (went over the timeout)
- * @param timeout - The duration in milliseconds until the task is aborted (defaults to 10 seconds)
+ * @param timeout - Optional duration in milliseconds until the task is aborted (defaults to undefined, meaning no timeout)
  * @param checkFrequency - The frequency in milliseconds to callback for a check (defaults to 100 milliseconds)
  */
 export declare function whenThisThenThat<T>(checkCallback: () => T, doCallback: (value: T) => void, failCallback: (reason?: unknown) => void, timeout?: number, checkFrequency?: number): void;
 /**
  * This asynchronous generic function checks for a validity of something via the checkCallback() until it's found or until the timer runs out.
- * This method returns a Promise which the developper can use to await or use .then().catch().finally() principles.
+ * This method returns a Promise which the developer can use to await or use .then().catch().finally() principles.
  *
  * @param checkCallback - The function executed to verify a particular condition until it's passed
- * @param timeout - The duration in milliseconds until the task is aborted (defaults to 10 seconds)
- * @param checkFrequency - The frequency in milliseconds to check for an update (defaults to 100 milliseconds)
- * @returns A Promise which resolves when the check passes
+ * @param timeout - Optional duration in milliseconds until the task is aborted (defaults to undefined, meaning no timeout)
+ * @param checkFrequency - Optional frequency in milliseconds to check for an update (defaults to 100 milliseconds)
+ * @returns A promise that resolves when the check passes
  */
 export declare function whenThisThen<T>(checkCallback: () => T, timeout?: number, checkFrequency?: number): Promise<T>;
 /**

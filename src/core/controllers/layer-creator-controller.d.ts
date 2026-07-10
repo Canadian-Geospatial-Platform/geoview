@@ -5,6 +5,7 @@ import type { GeoViewGeoChartConfig, GeoViewTimeSliderConfig } from '@/api/confi
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import type { LayerDomain } from '@/core/domains/layer-domain';
+import type { UIDomain } from '@/core/domains/ui-domain';
 import type { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import type { MapViewer } from '@/geo/map/map-viewer';
@@ -17,7 +18,7 @@ export declare class LayerCreatorController extends AbstractMapViewerController 
      * @param controllerRegistry - The controller registry for accessing sibling controllers
      * @param layerDomain - The layer domain to be used by the LayerCreator
      */
-    constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry, layerDomain: LayerDomain);
+    constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry, uiDomain: UIDomain, layerDomain: LayerDomain);
     /**
      * Loads layers that were passed in with the map config.
      *
@@ -131,6 +132,13 @@ export declare class LayerCreatorController extends AbstractMapViewerController 
      */
     static convertMapConfigToGeoviewLayerConfig(mapId: string, currentLayerIds: string[], language: TypeDisplayLanguage, entry: MapConfigLayerEntry, addGeoChartCallback: (layerPath: string, geochartConfig: GeoViewGeoChartConfig) => void, addTimeSliderCallback: (timeSliderConfigs: GeoViewTimeSliderConfig[]) => void, errorCallback: (mapConfigLayerEntry: MapConfigLayerEntry, error: unknown) => void): Promise<TypeGeoviewLayerConfig>;
     /**
+     * Registers a one-shot layer config added event handler that resolves a promise.
+     *
+     * @param filter - Optional filter predicate to skip non-matching events without unsubscribing
+     * @returns A promise that resolves with the layer builder event
+     */
+    onceLayerConfigAdded(filter?: (event: LayerBuilderEvent) => boolean): Promise<LayerBuilderEvent>;
+    /**
      * Registers a layer config added event handler.
      *
      * @param callback - The callback to be executed whenever the event is emitted
@@ -187,35 +195,35 @@ export type GeoViewLayerAddedResult = {
     promiseLayer: Promise<void>;
 };
 /** Defines the event payload for the layer loaded delegate. */
-export type LayerEvent = {
+export interface LayerEvent {
     /** The loaded layer. */
     layer: AbstractGVLayer;
-};
+}
 /** Defines a delegate for the layer loaded event handler function signature. */
 export type LayerDelegate = EventDelegateBase<LayerCreatorController, LayerEvent, void>;
 /** Defines the event payload for the layer path delegate. */
-export type LayerPathEvent = {
+export interface LayerPathEvent {
     /** The layer path. */
     layerPath: string;
     /** The layer name. */
     layerName: string;
-};
+}
 /** Defines a delegate for the layer path event handler function signature. */
 export type LayerPathDelegate = EventDelegateBase<LayerCreatorController, LayerPathEvent, void>;
 /** Defines the event payload for the layer builder delegate. */
-export type LayerBuilderEvent = {
+export interface LayerBuilderEvent {
     /** The built layer. */
     layer: AbstractGeoViewLayer;
-};
+}
 /** Defines a delegate for the layer builder event handler function signature. */
 export type LayerBuilderDelegate = EventDelegateBase<LayerCreatorController, LayerBuilderEvent, void>;
 /** Defines the event payload for the layer config error delegate. */
-export type LayerConfigErrorEvent = {
+export interface LayerConfigErrorEvent {
     /** The layer path (or the geoview layer id) depending when the error occurs in the process. */
     layerPath: string;
     /** The error message. */
     error: string;
-};
+}
 /** Defines a delegate for the layer config error event handler function signature. */
 export type LayerConfigErrorDelegate = EventDelegateBase<LayerCreatorController, LayerConfigErrorEvent, void>;
 //# sourceMappingURL=layer-creator-controller.d.ts.map

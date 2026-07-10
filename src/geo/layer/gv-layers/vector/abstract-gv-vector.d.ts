@@ -9,13 +9,13 @@ import type { Extent } from 'ol/extent';
 import type { Pixel } from 'ol/pixel';
 import type { Projection as OLProjection } from 'ol/proj';
 import type { EventDelegateBase } from '@/api/events/event-helper';
-import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import type { TypeDisplayLanguage, TypeFeatureInfoResult, TypeLayerStyleConfig } from '@/api/types/map-schema-types';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import type { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVVectorSource } from '@/geo/layer/source/vector-source';
 import type { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
-import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 /**
  * Abstract Geoview Layer managing an OpenLayer vector type layer.
  */
@@ -127,7 +127,7 @@ export declare abstract class AbstractGVVector extends AbstractGVLayer {
      * @param projection - The projection to initialize the bounds into.
      * @param stops - The number of stops to use to generate the extent.
      * @returns A promise that resolves with the layer bounding box, or undefined if not available.
-     * @throws {LayerStatusErrorError} When the layer enters the `error` state before reaching `loaded` (propagated from `waitLoadedStatus()`)
+     * @throws {LayerStatusErrorError} When the layer enters the `error` state before reaching `loaded` (propagated from `waitForLoadedStatus()`)
      */
     onInitBounds(projection: OLProjection, stops: number): Promise<Extent | undefined>;
     /**
@@ -178,6 +178,17 @@ export declare abstract class AbstractGVVector extends AbstractGVLayer {
      */
     getTextLayerVisible(): boolean;
     /**
+     * Waits until the vector layer's style has been applied or the layer enters an error state.
+     *
+     * Resolves immediately if a style is already set, or rejects immediately if the layer is already in `error` state.
+     * Otherwise subscribes to the `styleApplied` and `layerError` events; the first event to fire settles the promise
+     * and both subscriptions are cleaned up.
+     *
+     * @returns A promise that resolves when the style has been applied
+     * @throws {LayerStatusErrorError} When the layer is already in (or enters) the `error` state before the style is applied
+     */
+    waitForStyleAppliedVector(): Promise<void>;
+    /**
      * Registers a style applied event handler.
      *
      * @param callback - The callback to be executed whenever the event is emitted
@@ -223,9 +234,9 @@ export declare abstract class AbstractGVVector extends AbstractGVLayer {
 /**
  * Define an event for the delegate
  */
-export type StyleAppliedEvent = {
+export interface StyleAppliedEvent {
     styleApplied: boolean;
-};
+}
 /**
  * Define a delegate for the event handler function signature
  */
@@ -233,9 +244,9 @@ export type StyleAppliedDelegate = EventDelegateBase<AbstractGVVector, StyleAppl
 /**
  * Define an event for the delegate
  */
-export type TextVisibleChangedEvent = {
+export interface TextVisibleChangedEvent {
     textVisible: boolean;
-};
+}
 /**
  * Define a delegate for the event handler function signature
  */
