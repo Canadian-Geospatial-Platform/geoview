@@ -3,7 +3,7 @@ import type { Coordinate } from 'ol/coordinate';
 import { TestError } from '../core/exceptions';
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
-import { delay } from 'geoview-core/core/utils/utilities';
+import { delay, generateId } from 'geoview-core/core/utils/utilities';
 import type { Extent, TypeBasemapId, TypeMapState, TypeValidMapProjectionCodes } from 'geoview-core/api/types/map-schema-types';
 import {
   getStoreDetailsFeatures,
@@ -14,12 +14,15 @@ import {
 import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
 import { Projection } from 'geoview-core/geo/utils/projection';
 import { getStoreUIActiveAppBarTab, getStoreUIActiveFooterBarTab, getStoreUIFooterTabs } from 'geoview-core/core/stores/states/ui-state';
-import { getStoreAppDisplayLanguage } from 'geoview-core/core/stores/states/app-state';
+import { getStoreAppDisplayLanguage, getStoreAppNotifications } from 'geoview-core/core/stores/states/app-state';
 import {
   getStoreMapConfigViewSettingsProjection,
   getStoreMapHoverFeatureInfo,
   getStoreMapStateJson,
 } from 'geoview-core/core/stores/states/map-state';
+import { getStoreLayerOrderedLayerPaths } from 'geoview-core/core/stores/states/layer-state';
+import { VectorTiles } from 'geoview-core/geo/layer/geoview-layers/raster/vector-tiles';
+import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 
 /**
  * Main Map testing class.
@@ -725,6 +728,92 @@ export class MapTester extends GVAbstractTester {
       (_test, result) => {
         // Make sure to turn it back to hoverable
         result.layer.setHoverable(true);
+      }
+    );
+  }
+
+  /**
+   * Tests that switching projection with a vector tile layer loaded emits a warning notification.
+   *
+   * This test performs the following operations:
+   * 1. Adds a vector tile layer (EPSG:3978) to the map
+   * 2. Verifies the layer loads and appears in ordered layers
+   * 3. Records the notification count before projection switch
+   * 4. Switches projection to 3857
+   * 5. Verifies a warning notification about vector tiles was emitted
+   * 6. Restores projection to 3978 and removes the layer
+   *
+   * @returns A promise that resolves with the Test containing the MapViewer instance
+   */
+  testVectorTileProjectionWarning(): Promise<Test<MapViewer>> {
+    const gvLayerId = generateId();
+    const layerUrl = GVAbstractTester.VECTOR_TILES_CBMT_3978_URL;
+    const gvLayerName = GVAbstractTester.VECTOR_TILES_CBMT_3978_LAYER_NAME;
+
+    return this.test<MapViewer>(
+      'Test vector tile projection warning on projection switch',
+      async (test) => {
+        // Ensure the map starts in 3978
+        const { currentProjection } = getStoreMapStateJson(this.getMapId());
+        if (currentProjection !== 3978) {
+          test.addStep('Switching to LCC projection (3978) as precondition...');
+          await this.getControllersRegistry().mapController.setProjection(3978);
+        }
+
+        // Create the VT layer config
+        test.addStep('Creating Vector Tiles layer configuration...');
+        const gvConfig = VectorTiles.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [{ id: '' }]);
+
+        // Add the layer to the map
+        test.addStep('Adding the Vector Tiles layer on the map...');
+        const result = this.getControllersRegistry().layerCreatorController.addGeoviewLayer(gvConfig);
+
+        // Wait for the layer to be added
+        test.addStep('Waiting for the layer to be added...');
+        await result.promiseLayer;
+
+        // Verify the layer appears in ordered layers
+        test.addStep('Verifying the layer is present in ordered layers...');
+        const orderedLayersBefore = getStoreLayerOrderedLayerPaths(this.getMapId());
+        const layerPresent = orderedLayersBefore.some((path) => path.startsWith(gvLayerId));
+
+        if (!layerPresent) {
+          throw new TestError(`Vector tile layer ${gvLayerId} was not found in ordered layers after adding.`);
+        }
+
+        // Switch projection to 3857
+        test.addStep('Switching projection to Web Mercator (3857)...');
+        await this.getControllersRegistry().mapController.setProjection(3857);
+
+        // Wait for render after projection change
+        await this.getMapViewer().waitForRender();
+
+        // Return the map viewer for assertions
+        return this.getMapViewer();
+      },
+      (test, _result) => {
+        // Verify a warning notification was emitted about vector tiles
+        test.addStep('Verifying warning notification was emitted about vector tiles...');
+        const notificationsAfter = getStoreAppNotifications(this.getMapId());
+
+        // Check that at least one notification mentions vector tile projection
+        const vtWarning = notificationsAfter.find(
+          (n) => n.notificationType === 'warning' && n.message.toLowerCase().includes('vector tile')
+        );
+        Test.assertIsDefined('vtWarning', vtWarning);
+      },
+      async (test) => {
+        // Cleanup: switch back to 3978 and remove the layer
+        test.addStep('Restoring projection to LCC (3978)...');
+        await this.getControllersRegistry().mapController.setProjection(3978);
+
+        // Remove the layer using its path prefix
+        test.addStep('Removing the Vector Tiles layer...');
+        const orderedLayers = getStoreLayerOrderedLayerPaths(this.getMapId());
+        const vtLayerPath = orderedLayers.find((path) => path.startsWith(gvLayerId));
+        if (vtLayerPath) {
+          this.getControllersRegistry().layerCreatorController.removeLayerUsingPath(vtLayerPath);
+        }
       }
     );
   }

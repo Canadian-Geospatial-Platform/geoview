@@ -2,7 +2,7 @@
 
 > **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
 >
-> **Test page**: [rt-13-projection.html](../../packages/geoview-core/public/templates/release-testing/rt-13-projection.html) — Map 1 (LCC with drawer + vector layer + data table + projection), Map 2 (WM with max extent + projection), Map 3 (WM with vector tile layer).
+> **Test page**: [rt-13-projection.html](https://canadian-geospatial-platform.github.io/geoview/public/rt-13-projection.html) — Map 1 (LCC with drawer + vector layer + data table + projection), Map 2 (WM with max extent + projection), Map 3 (WM with vector tile layer).
 
 Cross-feature interactions between projection switches and other features (geometry, data tables, north pole, extent, vector tiles). GeoView supports EPSG:3978 (LCC), EPSG:3857 (Web Mercator), and EPSG:3573 (North Pole LAEA). For basic projection switch and layer re-rendering tests, see [02 — Map — Projections](02-map.md#projections).
 
@@ -47,4 +47,4 @@ Map 3 uses a vector tile layer in EPSG:3978 on a map initially in EPSG:3857. The
 
 | Test                    | Description                | Steps                                                                                                                                           | Expected Result                                                                            | Auto |
 | ----------------------- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ---- |
-| Incompatible VT warning | Warning notification shown | 1. On Map 3, switch to LCC (3978)<br>2. In Layers panel, reload the vector tile layer<br>3. Layer renders in LCC<br>4. Switch back to WM (3857) | Warning notification appears: "Vector tile [layerName] doesn't support the map projection" | C    |
+| Incompatible VT warning | Warning notification shown | 1. On Map 3, switch to LCC (3978)<br>2. In Layers panel, reload the vector tile layer<br>3. Layer renders in LCC<br>4. Switch back to WM (3857) | Warning notification appears: "Vector tile [layerName] doesn't support the map projection" | A    |

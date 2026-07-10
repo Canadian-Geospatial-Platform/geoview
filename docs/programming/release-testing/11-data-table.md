@@ -2,7 +2,7 @@
 
 > **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
 >
-> **Test page**: [rt-11-data-table.html](../../packages/geoview-core/public/templates/release-testing/rt-11-data-table.html) — Map 1 (multiple layers, data table in footer bar).
+> **Test page**: [rt-11-data-table.html](https://canadian-geospatial-platform.github.io/geoview/public/rt-11-data-table.html) — Map 1 (multiple layers, data table in footer bar).
 
 Data table display, column/global filtering, map filter sync, export, and row actions. The data table uses Material React Table (MRT) with a custom toolbar for map-specific features. Two display modes exist: interactive panel (footer bar or app bar tab) and read-only modal (opened via layer shortcut when no `data-table` tab configured).
 

@@ -4,7 +4,7 @@ Map rendering, projections, north pole, and north arrow.
 
 > **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
 >
-> **Test page**: [rt-02-map.html](../../packages/geoview-core/public/templates/release-testing/rt-02-map.html) — Map 1 (LCC with projection switch + rotation + layer), Map 2 (WM), Map 3 (Circumpolar EPSG:3573), Map 4 (Static).
+> **Test page**: [rt-02-map.html](https://canadian-geospatial-platform.github.io/geoview/public/rt-02-map.html) — Map 1 (LCC with projection switch + rotation + layer), Map 2 (WM), Map 3 (Circumpolar EPSG:3573), Map 4 (Static).
 
 ## Projections
 

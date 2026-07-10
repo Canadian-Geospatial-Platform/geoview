@@ -2,7 +2,7 @@
 
 > **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
 >
-> **Test page**: [rt-17b-geochart.html](../../packages/geoview-core/public/templates/release-testing/rt-17b-geochart.html) — Map 1 (Airborne GeoCore with geochart in footer bar).
+> **Test page**: [rt-17b-geochart.html](https://canadian-geospatial-platform.github.io/geoview/public/rt-17b-geochart.html) — Map 1 (Airborne GeoCore with geochart in footer bar).
 >
 > **Navigator config:** `demos/13-package-geochart.json`
 

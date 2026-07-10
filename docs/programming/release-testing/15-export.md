@@ -2,7 +2,7 @@
 
 > **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
 >
-> **Test page**: [rt-15-export.html](../../packages/geoview-core/public/templates/release-testing/rt-15-export.html) — Map 1 (export button in app bar, multiple layers for legend).
+> **Test page**: [rt-15-export.html](https://canadian-geospatial-platform.github.io/geoview/public/rt-15-export.html) — Map 1 (export button in app bar, multiple layers for legend).
 >
 > **Navigator config** (for large legend): `demos/20-export-map-large-legend.json`
 

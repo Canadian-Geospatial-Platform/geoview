@@ -2,7 +2,7 @@
 
 > **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
 >
-> **Test page**: [rt-17e-drawer.html](../../packages/geoview-core/public/templates/release-testing/rt-17e-drawer.html) — Map 1 (drawer plugin in navbar, drawing tools).
+> **Test page**: [rt-17e-drawer.html](https://canadian-geospatial-platform.github.io/geoview/public/rt-17e-drawer.html) — Map 1 (drawer plugin in navbar, drawing tools).
 >
 > **Navigator config:** `demos/15-package-drawer.json`
 

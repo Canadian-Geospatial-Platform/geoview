@@ -792,6 +792,9 @@ export const useStoreMapLoaded = (): boolean => useStore(useGeoViewStore(), (sta
 /** Selects whether the map is displayed from the store. */
 export const useStoreMapDisplayed = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.mapDisplayed);
 
+/** Returns whether the north arrow is enabled. */
+export const getStoreMapNorthArrow = (mapId: string): boolean => getStoreMapState(mapId).northArrow;
+
 /** Selects whether the north arrow is enabled from the store. */
 export const useStoreMapNorthArrow = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.northArrow);
 

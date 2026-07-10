@@ -58,7 +58,7 @@ Focus on these categories first:
 | Category             | Dependencies                                                      |
 | -------------------- | ----------------------------------------------------------------- |
 | **Map Engine**       | `ol` (OpenLayers)                                                 |
-| **UI Framework**     | `@mui/material`, `@mui/icons-material`, `@mui/base`, `@emotion/*` |
+| **UI Framework**     | `@mui/material`, `@mui/icons-material`, `@mui/lab`, `@mui/system`, `@mui/x-date-pickers`, `@mui/x-tree-view`, `@emotion/*` |
 | **State Management** | `zustand`                                                         |
 | **Build**            | `webpack`, `typescript`, `ts-loader`                              |
 | **React Ecosystem**  | `react`, `react-dom`, `react-i18next`, `i18next`                  |
@@ -259,7 +259,7 @@ These dependencies must always be updated together:
 
 | Group       | Packages                                                                   |
 | ----------- | -------------------------------------------------------------------------- |
-| **MUI**     | `@mui/material`, `@mui/icons-material`, `@mui/base`, `@mui/x-date-pickers` |
+| **MUI**     | `@mui/material`, `@mui/icons-material`, `@mui/lab`, `@mui/system`, `@mui/x-date-pickers`, `@mui/x-tree-view` |
 | **Emotion** | `@emotion/react`, `@emotion/styled`                                        |
 | **React**   | `react`, `react-dom`, `@types/react`, `@types/react-dom`                   |
 | **i18next** | `i18next`, `react-i18next`                                                 |

@@ -2,7 +2,7 @@
 
 > **Progress tracking**: Use the [Release Testing Issue Template](../../.github/ISSUE_TEMPLATE/release-testing.md) to track pass/fail status per release.
 >
-> **Test page**: [rt-04-basemap.html](../../packages/geoview-core/public/templates/release-testing/rt-04-basemap.html) — Map 1 (LCC with basemap buttons + labeled/shaded toggles), Map 2 (WM), Map 3 (Circumpolar with `useAsBasemap`).
+> **Test page**: [rt-04-basemap.html](https://canadian-geospatial-platform.github.io/geoview/public/rt-04-basemap.html) — Map 1 (LCC with basemap buttons + labeled/shaded toggles), Map 2 (WM), Map 3 (Circumpolar with `useAsBasemap`).
 
 Basemap selector and basemap options.
 
