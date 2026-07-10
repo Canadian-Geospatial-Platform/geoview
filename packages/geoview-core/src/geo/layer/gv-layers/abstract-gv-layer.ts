@@ -2535,7 +2535,8 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     const fieldValue = feature.get(fieldName);
     if (fieldType === 'date') {
       // If the value is null or undefined, return it as-is instead of trying to parse it as a date
-      if (fieldValue === null || fieldValue === undefined) return fieldValue;
+      // GV Some services have date fields with 'Null' in their data.. go figure.. e.g. https://sampleserver6.arcgisonline.com/arcgis/rest/services/Water_Network/MapServer/6
+      if (fieldValue === null || fieldValue === undefined || fieldValue === 'Null') return fieldValue;
 
       // Read the date
       return DateMgt.createDate(fieldValue, inputFormat, inputTimezone, inputTemporalMode);

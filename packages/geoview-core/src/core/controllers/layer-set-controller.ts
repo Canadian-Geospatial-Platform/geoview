@@ -595,8 +595,8 @@ export class LayerSetController extends AbstractMapViewerController {
     // Show zoom-to-visible-scale control whenever the layer has any scale or zoom range constraint.
     // Do not rely only on layer min/max zoom because constraints can be provided as minScale/maxScale.
     const visibleScale: boolean =
-      layerConfig.getMinScale() !== undefined ||
-      layerConfig.getMaxScale() !== undefined ||
+      layerConfig.getMinScaleIncludingParent() !== undefined ||
+      layerConfig.getMaxScaleIncludingParent() !== undefined ||
       initialSettings?.minZoom !== undefined ||
       initialSettings?.maxZoom !== undefined;
 
@@ -610,7 +610,7 @@ export class LayerSetController extends AbstractMapViewerController {
       table: initialSettings?.controls?.table ?? true, // default: true
       visibility: initialSettings?.controls?.visibility ?? true, // default: true
       zoom: initialSettings?.controls?.zoom ?? true, // default: true
-      visibleScale, // default: false
+      visibleScale,
     };
   }
 

@@ -450,13 +450,16 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
   const getCellContentDate = useCallback(
     (date: Dayjs, cellId: string): JSX.Element => {
       const isOpen = focusedCell === cellId;
-      const formattedDate = DateMgt.formatDate(
-        date.toDate(),
-        displayDateFormat[language],
-        language,
-        displayDateTimezone,
-        layerDateTemporalMode
-      );
+      let formattedDate = '';
+      if (date) {
+        formattedDate = DateMgt.formatDate(
+          date.toDate(),
+          displayDateFormat[language],
+          language,
+          displayDateTimezone,
+          layerDateTemporalMode
+        );
+      }
 
       return (
         <TooltipCell title={formattedDate} isOpen={isOpen}>
