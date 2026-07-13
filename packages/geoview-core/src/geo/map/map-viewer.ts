@@ -1535,10 +1535,8 @@ export class MapViewer {
 
     return {
       maxScale: roundedMaxScale,
-      maxScaleTolerance,
       maxScaleZoomAt: maxScaleTolerance, // Same as the tolerance, adjust this to add an additional offset if necessary
       minScale: roundedMinScale,
-      minScaleTolerance,
       minScaleZoomAt: minScaleTolerance, // Same as the tolerance, adjust this to add an additional offset if necessary
     };
   }

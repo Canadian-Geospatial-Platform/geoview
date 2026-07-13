@@ -476,7 +476,7 @@ export class LayerSetController extends AbstractMapViewerController {
     // Compute effective layer scales to get the in visible range flag
     const effectiveScales = MapViewer.computeEffectiveLayerScales(this.getMapViewer(), layerConfig);
     const { maxScale, minScale } = effectiveScales;
-    const inVisibleRange = layer?.isInVisibleRange(context.calculatedMapResolution, context.calculatedMapScale, effectiveScales) ?? true; // default: true
+    const inVisibleRange = layer?.isInVisibleRange(context.calculatedMapResolution) ?? true; // default: true
 
     // Reuse existing value to make sure we don't override it when we shouldn't have (should be refactored, view note of this function)
     const schemaTag = existingStoreEntry?.legendSchemaTag ?? layerConfig.getSchemaTag();

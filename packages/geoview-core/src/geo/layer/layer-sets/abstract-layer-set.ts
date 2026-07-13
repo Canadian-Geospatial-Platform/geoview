@@ -17,7 +17,7 @@ import type {
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
-import { MapViewer } from '@/geo/map/map-viewer';
+import type { MapViewer } from '@/geo/map/map-viewer';
 import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
@@ -330,9 +330,7 @@ export abstract class AbstractLayerSet {
     // If is not in visible range
     const currentResolution =
       this.mapViewer.getView().getResolution() ?? this.mapViewer.getView().getResolutionForZoom(this.mapViewer.getView().getZoom() ?? 0);
-    const currentScale = this.mapViewer.getMapScaleFromZoom(this.mapViewer.getView().getZoom() ?? 0);
-    const effectiveScales = MapViewer.computeEffectiveLayerScales(this.mapViewer, geoviewLayer.getLayerConfig());
-    if (!geoviewLayer.isInVisibleRange(currentResolution, currentScale, effectiveScales)) {
+    if (!geoviewLayer.isInVisibleRange(currentResolution)) {
       return Promise.resolve({ results: [] });
     }
 
