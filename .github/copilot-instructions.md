@@ -946,6 +946,8 @@ setStoreMapClickMarker(this.getMapId(), projectedCoords[0]);
 this.getControllersRegistry().mapController.applyLayerFilters(layerPath);
 ```
 
+**Missing `getStore*` getters** — When a `useStore*` hook exists but no corresponding `getStore*` getter is available, **create the getter** in the same store file (immediately after the hook). Tests and controllers run outside React and cannot use hooks — they need `getStore*` getters. Follow the naming convention `getStore{Slice}{Property}(mapId, ...)` and match the return type of the hook. Never use `getStoreMapStateJson(mapId).property` as a workaround — always create a dedicated getter.
+
 ### Batch Operations & Store Synchronization
 
 **Critical:** When controllers perform batch operations (e.g., toggling all items at once), they often suppress individual event handlers to avoid redundant processing. **After the batch completes, you must manually synchronize the store to reflect all state changes.**

@@ -776,6 +776,9 @@ export const useStoreMapCenterCoordinates = (): Coordinate => useStore(useGeoVie
 /** Selects the click marker state from the store. */
 export const useStoreMapClickMarker = (): TypeClickMarker | undefined => useStore(useGeoViewStore(), (state) => state.mapState.clickMarker);
 
+/** Gets the click marker state from the store (non-hook version for controllers and tests). */
+export const getStoreMapClickMarker = (mapId: string): TypeClickMarker | undefined => getStoreMapState(mapId).clickMarker;
+
 /** Selects whether the map has a geoview basemap layer from the store. */
 export const useStoreMapHasGeoviewBasemapLayer = (): boolean =>
   useStore(useGeoViewStore(), (state) => state.mapState.hasGeoviewBasemapLayer);

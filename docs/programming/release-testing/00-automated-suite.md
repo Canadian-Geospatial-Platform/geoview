@@ -39,10 +39,10 @@ rush serve
 | 6   | `suite-map-varia`               | 16       | [ ] Pass |
 | 7   | `suite-map-config`              | 37       | [ ] Pass |
 | 8   | `suite-ui`                      | 1        | [ ] Pass |
-| 9   | `suite-details`                 | 1        | [ ] Pass |
+| 9   | `suite-details`                 | 6        | [ ] Pass |
 | 10  | `suite-geochart`                | 3        | [ ] Pass |
 | 11  | `suite-swiper`                  | 1        | [ ] Pass |
-|     | **Total**                       | **~183** |          |
+|     | **Total**                       | **~188** |          |
 
 ## What to Do if a Suite Fails
 
