@@ -6,20 +6,24 @@ import type { FitOptions } from 'ol/View';
 import View from 'ol/View';
 import type { Coordinate } from 'ol/coordinate';
 import type { Extent } from 'ol/extent';
+import type { Type as OLGeomType } from 'ol/geom/Geometry';
 import type { Projection as OLProjection } from 'ol/proj';
 import type { Condition } from 'ol/events/condition';
 import type { Size } from 'ol/size';
 import type { GeometryFunction } from 'ol/interaction/Draw';
-import type { TypeMapFeaturesInstance, TypeViewSettings, TypeInteraction, TypeValidMapProjectionCodes, TypeDisplayLanguage, TypeDisplayTheme, TypeMapViewSettings, TypeMapMouseInfo, TypeMapState } from '@/api/types/map-schema-types';
-import type { EffectiveLayerScales, TypeLayerStatus, TypeLegend } from '@/api/types/layer-schema-types';
+import type { TypeMapFeaturesInstance, TypeViewSettings, TypeInteraction, TypeValidMapProjectionCodes, TypeDisplayLanguage, TypeDisplayTheme, TypeMapMouseInfo, TypeMapState, TypeMapViewSettings } from '@/api/types/map-schema-types';
+import type { EffectiveLayerScales, TypeLegend } from '@/api/types/layer-schema-types';
 import { BasemapApi } from '@/geo/layer/basemap/basemap';
 import { LayerApi } from '@/geo/layer/layer';
 import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
-import { ControllerRegistry } from '@/core/controllers/base/controller-registry';
+import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
+import type { PluginsContainer } from '@/api/plugin/plugin-types';
+import type { AbstractPlugin } from '@/api/plugin/abstract-plugin';
 import { AppBarApi } from '@/core/components/app-bar/app-bar-api';
 import { NavBarApi } from '@/core/components/nav-bar/nav-bar-api';
 import { FooterBarApi } from '@/core/components/footer-bar/footer-bar-api';
 import { StateApi } from '@/core/stores/state-api';
+import { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import { Select } from '@/geo/interaction/select';
 import { Draw } from '@/geo/interaction/draw';
 import { Extent as ExtentInteraction } from '@/geo/interaction/extent';
@@ -35,11 +39,9 @@ import type { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global
 import type { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import { Notifications } from '@/core/utils/notifications';
 import { type TypeScaleInfo } from '@/core/stores/states/map-state';
-import type { PluginsContainer } from '@/api/plugin/plugin-types';
-import type { AbstractPlugin } from '@/api/plugin/abstract-plugin';
+import { type TypeFeatureInfoResultSet } from '@/core/stores/states/feature-info-state';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { FeatureHighlight } from './feature-highlight';
-import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 /**
  * Class used to manage created maps.
  */
@@ -133,7 +135,7 @@ export declare class MapViewer {
     /**
      * Initializes the map controls
      */
-    initMapControls(): Promise<void>;
+    initMapControls(): void;
     /**
      * Returns the click marker overlay.
      *
@@ -154,13 +156,6 @@ export declare class MapViewer {
      */
     getPlugin(pluginId: string): AbstractPlugin;
     /**
-     * Asynchronously attempts to get a plugin by its id.
-     *
-     * @param pluginId - The plugin id
-     * @returns A promise that resolves with the plugin
-     */
-    getPluginAsync(pluginId: string): Promise<AbstractPlugin>;
-    /**
      * Retrieves the configuration object for a specific core plugin from the map's features configuration.
      *
      * @param pluginId - The ID of the core plugin to look up
@@ -174,11 +169,25 @@ export declare class MapViewer {
      */
     getDisplayLanguage(): TypeDisplayLanguage;
     /**
+     * Set the display language of the map.
+     *
+     * @param displayLanguage - The language to use (en, fr)
+     * @param reloadLayers - Optional flag to ask viewer to reload layers with the new localize language
+     * @returns A promise that resolves when the language change is complete
+     */
+    setLanguage(displayLanguage: TypeDisplayLanguage, reloadLayers?: boolean | false): Promise<void>;
+    /**
      * Returns the current display theme.
      *
      * @returns The display theme
      */
     getDisplayTheme(): TypeDisplayTheme;
+    /**
+     * Set the display theme of the map.
+     *
+     * @param displayTheme - The theme to use (geo.ca, light, dark)
+     */
+    setTheme(displayTheme: TypeDisplayTheme): void;
     /**
      * Returns the map current state information.
      *
@@ -198,34 +207,11 @@ export declare class MapViewer {
      */
     setView(mapViewSettings: TypeViewSettings): void;
     /**
-     * Asynchronously gets the map center coordinate to give a chance for the map to
-     * render before returning the value.
-     *
-     * @returns A promise that resolves with the map center
-     */
-    getCenter(): Promise<Coordinate>;
-    /**
      * Sets the map center.
      *
      * @param center - New center to use
      */
     setCenter(center: Coordinate): void;
-    /**
-     * Asynchronously gets the map size to give a chance for the map to
-     * render before returning the value.
-     *
-     * @returns A promise that resolves with the map size
-     */
-    getMapSize(): Promise<Size>;
-    /**
-     * Asynchronously gets the map coordinate from pixel to give a chance for the map to
-     * render before returning the value.
-     *
-     * @param pointXY - The pixel coordinate to convert
-     * @param timeoutMs - The maximum time in milliseconds to wait for the getCoordinateFromPixel to return a value
-     * @returns A promise that resolves with the map coordinate at the given pixel location
-     */
-    getCoordinateFromPixel(pointXY: [number, number], timeoutMs: number): Promise<Coordinate>;
     /**
      * Gets the map projection.
      *
@@ -256,6 +242,7 @@ export declare class MapViewer {
      * Gets the ordered layer paths.
      *
      * @returns The ordered layer paths
+     * @deprecated This method doesn't seem to be used anymore, remove?
      */
     getMapLayerOrderPaths(): string[];
     /**
@@ -287,14 +274,6 @@ export declare class MapViewer {
      */
     setInteraction(interaction: TypeInteraction): void;
     /**
-     * Set the display language of the map.
-     *
-     * @param displayLanguage - The language to use (en, fr)
-     * @param reloadLayers - Optional flag to ask viewer to reload layers with the new localize language
-     * @returns A promise that resolves when the language change is complete
-     */
-    setLanguage(displayLanguage: TypeDisplayLanguage, reloadLayers?: boolean | false): Promise<void>;
-    /**
      * Sets the timezone used to display date values for this map.
      *
      * This affects how parsed date instants are converted and presented in the UI,
@@ -310,12 +289,6 @@ export declare class MapViewer {
      * @param degree - The degrees to rotate the map to
      */
     rotate(degree: number): void;
-    /**
-     * Set the display theme of the map.
-     *
-     * @param displayTheme - The theme to use (geo.ca, light, dark)
-     */
-    setTheme(displayTheme: TypeDisplayTheme): void;
     /**
      * Gets map scale for Web Mercator or Lambert Conformal Conic projections.
      *
@@ -340,12 +313,31 @@ export declare class MapViewer {
      */
     getMapResolutionFromScale(targetScale: number | undefined, dpiValue?: number): number | undefined;
     /**
-     * Set the map zoom level.
+     * Animates the map to the specified zoom level.
      *
-     * @param zoom - New zoom level
+     * The store is updated automatically via the MapViewer move-end event.
+     *
+     * @param zoom - The target zoom level
+     * @param useAnimation - Indicates if a zoom animation should be used, default: true
+     * @param duration - Optional animation duration in ms
+     * @returns A promise that resolves when the zoom animation is complete
+     */
+    zoomMap(zoom: number, useAnimation?: boolean, duration?: number): Promise<void>;
+    /**
+     * Zoom to specified extent or coordinate provided in lonlat.
+     *
+     * @param extent - The extent or coordinate to zoom to
+     * @param useAnimation - Indicates if a zoom animation should be used, default: true
+     * @param options - Optional options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11 })
      * @returns A promise that resolves when the zoom operation completes
      */
-    setMapZoomLevel(zoom: number): Promise<void>;
+    zoomToLonLatExtentOrCoordinate(extent: Extent | Coordinate, useAnimation?: boolean, options?: FitOptions): Promise<void>;
+    /**
+     * Set the map zoom level instantaneously, no animation.
+     *
+     * @param zoom - New zoom level
+     */
+    setMapZoomLevel(zoom: number): void;
     /**
      * Set the minimum map zoom level.
      *
@@ -359,19 +351,6 @@ export declare class MapViewer {
      */
     setMaxZoomLevel(zoom: number): void;
     /**
-     * Set map extent.
-     *
-     * @param extent - New extent to zoom to
-     * @returns A promise that resolves when the zoom operation completes
-     */
-    setExtent(extent: Extent): Promise<void>;
-    /**
-     * Set the maximum extent of the map.
-     *
-     * @param extent - New extent to use
-     */
-    setMaxExtent(extent: Extent): void;
-    /**
      * Add a new custom component to the map.
      *
      * @param mapComponentId - An id to the new component
@@ -384,14 +363,6 @@ export declare class MapViewer {
      * @param mapComponentId - The id of the component to remove
      */
     removeComponent(mapComponentId: string): void;
-    /**
-     * Emits a map single click event.
-     *
-     * NOTE: This Does not update the store, only emit the click.
-     *
-     * @param clickCoordinates - The clicked coordinates to emit
-     */
-    emitMapSingleClick(clickCoordinates: MapSingleClickEvent): void;
     /**
      * Simulate a map click and return promises of store update and ui update.
      *
@@ -415,33 +386,28 @@ export declare class MapViewer {
      */
     delete(): Promise<void>;
     /**
-     * Zoom to the specified extent.
+     * Zooms to the specified extent.
      *
      * @param extent - The extent to zoom to
-     * @param options - Optional options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11 })
-     * @returns A promise that resolves when the zoom operation completes
+     * @param useAnimation - Indicates if a zoom animation should be used, default: true
+     * @param options - The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 13, duration: 500 })
+     * @returns A promise that resolves when the zoom animation is complete
+     * @throws {InvalidExtentError} When the extent is invalid
      */
-    zoomToExtent(extent: Extent, options?: FitOptions): Promise<void>;
+    zoomToExtent(extent: Extent, useAnimation?: boolean, options?: FitOptions): Promise<void>;
     /**
-     * Zoom to the initial extent defined in the map configuration.
+     * Sets the home button view settings for the map.
      *
-     * @returns A promise that resolves when the zoom operation completes
-     */
-    zoomToInitialExtent(): Promise<void>;
-    /**
-     * Update nav bar home button view settings.
-     *
-     * @param view - The new view settings
+     * @param view - The view settings to set for the home button
      */
     setHomeButtonView(view: TypeMapViewSettings): void;
     /**
-     * Zoom to specified extent or coordinate provided in lonlat.
+     * Returns to initial view state of the map using config.
      *
-     * @param extent - The extent or coordinate to zoom to
-     * @param options - Optional options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11 })
-     * @returns A promise that resolves when the zoom operation completes
+     * @param useAnimation - Indicates if a zoom animation should be used, default: true
+     * @returns A promise that resolves when the zoom animation is complete
      */
-    zoomToLonLatExtentOrCoordinate(extent: Extent | Coordinate, options?: FitOptions): Promise<void>;
+    zoomToInitialExtent(useAnimation?: boolean): Promise<void>;
     /**
      * Update the size of the icon image list based on styles.
      *
@@ -455,26 +421,21 @@ export declare class MapViewer {
      *
      * @returns A promise that resolves when the map is ready
      */
-    waitForMapReady(): Promise<void>;
+    waitForMapReady(): Promise<MapBaseEvent>;
     /**
-     * Waits until all GeoView layers reach the specified status before resolving the promise.
+     * Waits for the next map move-end event to be emitted.
      *
-     * This function repeatedly checks whether all layers have reached the given layerStatus.
-     *
-     * @param layerStatus - The desired status to wait for (e.g., 'loaded', 'processed')
-     * @returns A promise that resolves with the number of layers that have reached the specified status
+     * @returns A promise that resolves when the map move-end event fires
      */
-    waitAllLayersStatus(layerStatus: TypeLayerStatus): Promise<number>;
+    waitForMoveEnd(): Promise<MapMoveEndEvent>;
     /**
-     * Waits for the map layers loaded event to be emitted.
+     * Waits for the next rendercomplete event to be emitted.
      *
-     * @returns A promise that resolves with the number of layers that have reached the specified status
-     */
-    waitForLayersLoaded(): Promise<number>;
-    /**
-     * Waits for the rendercomplete event to be triggered.
+     * Forces a synchronous frame via `map.renderSync()` so `rendercomplete` is guaranteed to fire,
+     * even when the map is idle. Without this, waiting on `rendercomplete` for an idle map hangs
+     * forever because OL does not schedule a frame unless something invalidates the view.
      *
-     * @returns A promise that resolves when map render is complete
+     * @returns A promise that resolves when the map render is complete
      */
     waitForRender(): Promise<void>;
     /**
@@ -511,7 +472,7 @@ export declare class MapViewer {
      * @param geometryFunction - Optional geometry function for custom drawing behavior
      * @returns The draw interaction
      */
-    initDrawInteractions(geomGroupKey: string, type: string, style: TypeFeatureStyle, geometryFunction?: GeometryFunction): Draw;
+    initDrawInteractions(geomGroupKey: string, type: OLGeomType, style: TypeFeatureStyle, geometryFunction?: GeometryFunction): Draw;
     /**
      * Initializes modifying interactions on the given vector source.
      *
@@ -567,7 +528,7 @@ export declare class MapViewer {
      *
      * @returns The arrow angle
      */
-    getNorthArrowAngle(): string;
+    getNorthArrowAngle(): number;
     /**
      * Transforms coordinate from LonLat to the current projection of the map.
      *
@@ -674,6 +635,13 @@ export declare class MapViewer {
      */
     offMapInit(callback: MapInitDelegate): void;
     /**
+     * Returns a promise that resolves the next time the map ready event fires.
+     *
+     * @param filter - Optional filter predicate. When provided, only events passing the filter resolve the promise
+     * @returns A promise that resolves with the event payload when map ready fires
+     */
+    onceMapReady(filter?: (event: MapBaseEvent) => boolean): Promise<MapBaseEvent>;
+    /**
      * Registers a map ready event callback.
      *
      * @param callback - The callback to be executed whenever the event is emitted
@@ -713,6 +681,13 @@ export declare class MapViewer {
      */
     offMapLayersLoaded(callback: MapLayersLoadedDelegate): void;
     /**
+     * Returns a promise that resolves the next time the map move end event fires.
+     *
+     * @param filter - Optional filter predicate. When provided, only events passing the filter resolve the promise
+     * @returns A promise that resolves with the event payload when map move end fires
+     */
+    onceMapMoveEnd(filter?: (event: MapMoveEndEvent) => boolean): Promise<MapMoveEndEvent>;
+    /**
      * Registers a map move end event callback.
      *
      * @param callback - The callback to be executed whenever the event is emitted
@@ -738,6 +713,32 @@ export declare class MapViewer {
      * @param callback - The callback to stop being called whenever the event is emitted
      */
     offMapPointerMove(callback: MapPointerMoveDelegate | undefined): void;
+    /**
+     * Registers a map mouse enter event callback.
+     *
+     * @param callback - The callback to be executed whenever the event is emitted
+     * @returns The callback delegate that was registered
+     */
+    onMapMouseEnter(callback: MapMouseEnterDelegate): MapMouseEnterDelegate;
+    /**
+     * Unregisters a map mouse enter event callback.
+     *
+     * @param callback - The callback to stop being called whenever the event is emitted
+     */
+    offMapMouseEnter(callback: MapMouseEnterDelegate | undefined): void;
+    /**
+     * Registers a map mouse leave event callback.
+     *
+     * @param callback - The callback to be executed whenever the event is emitted
+     * @returns The callback delegate that was registered
+     */
+    onMapMouseLeave(callback: MapMouseLeaveDelegate): MapMouseLeaveDelegate;
+    /**
+     * Unregisters a map mouse leave event callback.
+     *
+     * @param callback - The callback to stop being called whenever the event is emitted
+     */
+    offMapMouseLeave(callback: MapMouseLeaveDelegate | undefined): void;
     /**
      * Registers a map pointer stop event callback.
      *
@@ -770,13 +771,13 @@ export declare class MapViewer {
      * @param callback - The callback to be executed whenever the event is emitted
      * @returns The callback delegate that was registered
      */
-    onMapZoomEnd(callback: MapZoomEndDelegate): MapZoomEndDelegate;
+    onMapResolutionChanged(callback: MapResolutionChangedDelegate): MapResolutionChangedDelegate;
     /**
      * Unregisters a map zoom end event callback.
      *
      * @param callback - The callback to stop being called whenever the event is emitted
      */
-    offMapZoomEnd(callback: MapZoomEndDelegate): void;
+    offMapResolutionChanged(callback: MapResolutionChangedDelegate): void;
     /**
      * Registers a map rotation event callback.
      *
@@ -796,13 +797,13 @@ export declare class MapViewer {
      * @param callback - The callback to be executed whenever the event is emitted
      * @returns The callback delegate that was registered
      */
-    onMapChangeSize(callback: MapChangeSizeDelegate): MapChangeSizeDelegate;
+    onMapSizeChanged(callback: MapSizeChangedDelegate): MapSizeChangedDelegate;
     /**
      * Unregisters a map change size event callback.
      *
      * @param callback - The callback to stop being called whenever the event is emitted
      */
-    offMapChangeSize(callback: MapChangeSizeDelegate): void;
+    offMapSizeChanged(callback: MapSizeChangedDelegate): void;
     /**
      * Registers a map projection change event callback.
      *
@@ -856,6 +857,19 @@ export declare class MapViewer {
      */
     offMapComponentRemoved(callback: MapComponentRemovedDelegate): void;
     /**
+     * Registers an interaction changed event callback.
+     *
+     * @param callback - The callback to be executed whenever the event is emitted
+     * @returns The callback delegate that was registered
+     */
+    onMapInteractionChanged(callback: MapInteractionChangedDelegate): MapInteractionChangedDelegate;
+    /**
+     * Unregisters an interaction changed event callback.
+     *
+     * @param callback - The callback to stop being called whenever the event is emitted
+     */
+    offMapInteractionChanged(callback: MapInteractionChangedDelegate): void;
+    /**
      * Registers a language changed event callback.
      *
      * @param callback - The callback to be executed whenever the event is emitted
@@ -868,6 +882,19 @@ export declare class MapViewer {
      * @param callback - The callback to stop being called whenever the event is emitted
      */
     offMapLanguageChanged(callback: MapLanguageChangedDelegate): void;
+    /**
+     * Registers a marker icon showed event callback.
+     *
+     * @param callback - The callback to be executed whenever the event is emitted
+     * @returns The callback delegate that was registered
+     */
+    onMarkerIconShowed(callback: MarkerIconShowedDelegate): MarkerIconShowedDelegate;
+    /**
+     * Unregisters a marker icon showed event callback.
+     *
+     * @param callback - The callback to stop being called whenever the event is emitted
+     */
+    offMarkerIconShowed(callback: MarkerIconShowedDelegate): void;
 }
 /**
  * Type used when fetching geometry json
@@ -881,28 +908,31 @@ export type GeometryJsonResponse = {
 export type GeometryJsonResponseGeometry = {
     coordinates: number[] | Coordinate[][];
 };
+/** Base interface for map events */
+export interface MapBaseEvent {
+}
 /**
  * Delegate for the map init event handler function signature.
  */
-export type MapInitDelegate = EventDelegateBase<MapViewer, undefined, void>;
+export type MapInitDelegate = EventDelegateBase<MapViewer, MapBaseEvent, void>;
 /**
  * Delegate for the map ready event handler function signature.
  */
-export type MapReadyDelegate = EventDelegateBase<MapViewer, undefined, void>;
+export type MapReadyDelegate = EventDelegateBase<MapViewer, MapBaseEvent, void>;
 /**
  * Delegate for the map layers processed event handler function signature.
  */
-export type MapLayersProcessedDelegate = EventDelegateBase<MapViewer, undefined, void>;
+export type MapLayersProcessedDelegate = EventDelegateBase<MapViewer, MapBaseEvent, void>;
 /**
  * Delegate for the map layers loaded event handler function signature.
  */
-export type MapLayersLoadedDelegate = EventDelegateBase<MapViewer, undefined, void>;
+export type MapLayersLoadedDelegate = EventDelegateBase<MapViewer, MapBaseEvent, void>;
 /**
  * Event for the map move end delegate.
  */
-export type MapMoveEndEvent = {
+export interface MapMoveEndEvent extends MapBaseEvent {
     lonlat: Coordinate;
-};
+}
 /**
  * Delegate for the map move end event handler function signature.
  */
@@ -916,6 +946,14 @@ export type MapPointerMoveEvent = TypeMapMouseInfo;
  */
 export type MapPointerMoveDelegate = EventDelegateBase<MapViewer, MapPointerMoveEvent, void>;
 /**
+ * Delegate for the map mouse enter event handler function signature.
+ */
+export type MapMouseEnterDelegate = EventDelegateBase<MapViewer, MapBaseEvent, void>;
+/**
+ * Delegate for the map mouse leave event handler function signature.
+ */
+export type MapMouseLeaveDelegate = EventDelegateBase<MapViewer, MapBaseEvent, void>;
+/**
  * Event for the map single click delegate.
  */
 export type MapSingleClickEvent = TypeMapMouseInfo;
@@ -926,19 +964,20 @@ export type MapSingleClickDelegate = EventDelegateBase<MapViewer, MapSingleClick
 /**
  * Event for the map zoom end delegate.
  */
-export type MapZoomEndEvent = {
+export interface MapResolutionChangedEvent extends MapBaseEvent {
+    resolution: number;
     zoom: number;
-};
+}
 /**
  * Delegate for the map zoom end event handler function signature.
  */
-export type MapZoomEndDelegate = EventDelegateBase<MapViewer, MapZoomEndEvent, void>;
+export type MapResolutionChangedDelegate = EventDelegateBase<MapViewer, MapResolutionChangedEvent, void>;
 /**
  * Event for the map rotation delegate.
  */
-export type MapRotationEvent = {
+export interface MapRotationEvent extends MapBaseEvent {
     rotation: number;
-};
+}
 /**
  * Delegate for the map rotation event handler function signature.
  */
@@ -946,20 +985,21 @@ export type MapRotationDelegate = EventDelegateBase<MapViewer, MapRotationEvent,
 /**
  * Event for the map change size delegate.
  */
-export type MapChangeSizeEvent = {
+export interface MapSizeChangedEvent extends MapBaseEvent {
     size: Size;
-};
+    scale: TypeScaleInfo;
+}
 /**
  * Delegate for the map change size event handler function signature.
  */
-export type MapChangeSizeDelegate = EventDelegateBase<MapViewer, MapChangeSizeEvent, void>;
+export type MapSizeChangedDelegate = EventDelegateBase<MapViewer, MapSizeChangedEvent, void>;
 /**
  * Event for the map projection changed delegate.
  */
-export type MapProjectionChangedEvent = {
+export interface MapProjectionChangedEvent extends MapBaseEvent {
     projection: OLProjection;
     previousProjection: OLProjection;
-};
+}
 /**
  * Delegate for the map projection changed event handler function signature.
  */
@@ -967,10 +1007,10 @@ export type MapProjectionChangedDelegate = EventDelegateBase<MapViewer, MapProje
 /**
  * Event for the map component added delegate.
  */
-export type MapComponentAddedEvent = {
+export interface MapComponentAddedEvent extends MapBaseEvent {
     mapComponentId: string;
     component: JSX.Element;
-};
+}
 /**
  * Delegate for the map component added event handler function signature.
  */
@@ -978,9 +1018,9 @@ export type MapComponentAddedDelegate = EventDelegateBase<MapViewer, MapComponen
 /**
  * Event for the map component removed delegate.
  */
-export type MapComponentRemovedEvent = {
+export interface MapComponentRemovedEvent extends MapBaseEvent {
     mapComponentId: string;
-};
+}
 /**
  * Delegate for the map component removed event handler function signature.
  */
@@ -988,19 +1028,40 @@ export type MapComponentRemovedDelegate = EventDelegateBase<MapViewer, MapCompon
 /**
  * Event for the map language changed delegate.
  */
-export type MapLanguageChangedEvent = {
+export interface MapLanguageChangedEvent extends MapBaseEvent {
     language: TypeDisplayLanguage;
-};
+}
 /**
  * Delegate for the map language changed event handler function signature.
  */
 export type MapLanguageChangedDelegate = EventDelegateBase<MapViewer, MapLanguageChangedEvent, void>;
 /**
+ * Event for the interaction changed delegate.
+ */
+export interface MapInteractionChangedEvent extends MapBaseEvent {
+    interaction: TypeInteraction;
+}
+/**
+ * Delegate for the interaction changed event handler function signature.
+ */
+export type MapInteractionChangedDelegate = EventDelegateBase<MapViewer, MapInteractionChangedEvent, void>;
+/**
+ * Event for the marker icon showed delegate.
+ */
+export interface MarkerIconShowedEvent extends MapBaseEvent {
+    /** The projected coordinates of the marker. */
+    projectedCoords: number[];
+}
+/**
+ * Delegate for the marker icon showed event handler function signature.
+ */
+export type MarkerIconShowedDelegate = EventDelegateBase<MapViewer, MarkerIconShowedEvent, void>;
+/**
  * Define a return type for a map click simulation to be able to await on different promises.
  */
 export type SimulatedMapClick = {
     /** Promise resolving when the query of the map click is complete */
-    promiseQuery: Promise<void>;
+    promiseQuery: Promise<TypeFeatureInfoResultSet>;
     /** Promise resolving when the query of the map click is complete and the UI has been updated */
     promiseQueryBatched: Promise<void>;
 };

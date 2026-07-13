@@ -54,7 +54,7 @@ interface FeatureRowProps {
  * @param props - Properties defined in FeatureItemProps interface
  * @returns The rendered feature item
  */
-export declare const FeatureItem: import("react").MemoExoticComponent<({ item, alias, index, uniqueItemId, mapId, containerType, featureInfoItem, onInitLightBox, }: FeatureItemProps) => JSX.Element>;
+export declare const FeatureItem: import("react").MemoExoticComponent<({ item, alias, index, uniqueItemId, mapId, containerType, featureInfoItem, onInitLightBox }: FeatureItemProps) => JSX.Element>;
 /**
  * Creates a table row for a single feature field entry.
  *
@@ -72,6 +72,6 @@ export declare const FeatureRow: import("react").MemoExoticComponent<({ featureI
  * @param props - Properties defined in FeatureInfoTableProps interface
  * @returns The feature info table
  */
-export declare const FeatureInfoTable: import("react").MemoExoticComponent<({ layerPath, featureInfoList, containerType, }: FeatureInfoTableProps) => JSX.Element>;
+export declare const FeatureInfoTable: import("react").MemoExoticComponent<({ layerPath, featureInfoList, containerType }: FeatureInfoTableProps) => JSX.Element>;
 export {};
 //# sourceMappingURL=feature-info-table.d.ts.map

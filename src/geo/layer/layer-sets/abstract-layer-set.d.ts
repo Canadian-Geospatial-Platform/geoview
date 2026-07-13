@@ -1,4 +1,5 @@
 import type { QueryType, TypeDisplayLanguage, TypeFeatureInfoEntry, TypeFeatureInfoResult, TypeLocation } from '@/api/types/map-schema-types';
+import { type EventDelegateBase } from '@/api/events/event-helper';
 import type { LayerDomain } from '@/core/domains/layer-domain';
 import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
@@ -99,8 +100,12 @@ export declare abstract class AbstractLayerSet {
      * Registers the layer in the layer-set.
      *
      * If the layer is already registered, the function returns immediately.
+     * If the layer hasn't reached the `loaded` status yet, this method subscribes to the layer
+     * config's status change event and waits until the status becomes `loaded` before registering.
+     * This await is important when devs call this method directly to register ad-hoc layers.
      *
      * @param layer - The layer to register
+     * @returns A promise that resolves once the layer has been registered (or skipped)
      */
     registerLayer(layer: AbstractBaseGVLayer): Promise<void>;
     /**
@@ -109,6 +114,24 @@ export declare abstract class AbstractLayerSet {
      * @param layerPath - The layer path
      */
     unregister(layerPath: string): void;
+    /**
+     * Waits for a layer config to be registered in the all-feature-info-layer-set.
+     *
+     * This method returns a promise that resolves when the given `layerPath` is included in the registered layer config paths of the set.
+     *
+     * @param layerPath - The unique path identifying the layer to check for registration
+     * @returns A promise that resolves when the layer is registered
+     */
+    waitForLayerConfigToGetRegistered(layerPath: string): Promise<void>;
+    /**
+     * Waits for a layer config to be registered in the all-feature-info-layer-set.
+     *
+     * This method returns a promise that resolves when the given `layerPath` is included in the registered layer config paths of the set.
+     *
+     * @param layerPath - The unique path identifying the layer to check for registration
+     * @returns A promise that resolves when the layer is registered
+     */
+    waitForLayerToGetRegistered(layerPath: string): Promise<void>;
     /**
      * Gets the MapId for the layer set.
      *
@@ -137,6 +160,46 @@ export declare abstract class AbstractLayerSet {
      * @returns True if the coordinate should be queried (not clipped by swiper)
      */
     protected shouldQueryAtPixel(layerPath: string, pixelCoordinate: Coordinate): boolean;
+    /**
+     * Returns a promise that resolves the next time a layer config registered event fires.
+     *
+     * @param filter - Optional filter predicate. When provided, only events passing the filter resolve the promise
+     * @returns A promise that resolves with the event payload when layer config registered fires (and passes the filter)
+     */
+    onceLayerConfigRegistered(filter?: (event: LayerConfigRegisteredEvent) => boolean): Promise<LayerConfigRegisteredEvent>;
+    /**
+     * Registers a layer config registered event callback.
+     *
+     * @param callback - The callback to be executed whenever the event is emitted
+     * @returns The callback delegate that was registered
+     */
+    onLayerConfigRegistered(callback: LayerConfigRegisteredDelegate): LayerConfigRegisteredDelegate;
+    /**
+     * Unregisters a layer config registered event callback.
+     *
+     * @param callback - The callback to stop being called whenever the event is emitted
+     */
+    offLayerConfigRegistered(callback: LayerConfigRegisteredDelegate): void;
+    /**
+     * Returns a promise that resolves the next time a layer registered event fires.
+     *
+     * @param filter - Optional filter predicate. When provided, only events passing the filter resolve the promise
+     * @returns A promise that resolves with the event payload when layer registered fires (and passes the filter)
+     */
+    onceLayerRegistered(filter?: (event: LayerRegisteredEvent) => boolean): Promise<LayerRegisteredEvent>;
+    /**
+     * Registers a layer registered event callback.
+     *
+     * @param callback - The callback to be executed whenever the event is emitted
+     * @returns The callback delegate that was registered
+     */
+    onLayerRegistered(callback: LayerRegisteredDelegate): LayerRegisteredDelegate;
+    /**
+     * Unregisters a layer registered event callback.
+     *
+     * @param callback - The callback to stop being called whenever the event is emitted
+     */
+    offLayerRegistered(callback: LayerRegisteredDelegate): void;
     /**
      * Checks if the layer is of queryable type based on its class definition.
      *
@@ -182,4 +245,18 @@ export declare abstract class AbstractLayerSet {
      */
     protected static recordsContainActualFields(layerConfig: AbstractBaseLayerEntryConfig, arrayOfRecords: TypeFeatureInfoEntry[]): boolean;
 }
+/** Event emitted when a layer config is registered in the layer-set. */
+export interface LayerConfigRegisteredEvent {
+    /** The layer config */
+    layerConfig: ConfigBaseClass;
+}
+/** Delegate for the layer config registered event handler function signature. */
+export type LayerConfigRegisteredDelegate = EventDelegateBase<AbstractLayerSet, LayerConfigRegisteredEvent, void>;
+/** Event emitted when a layer is registered in the layer-set. */
+export interface LayerRegisteredEvent {
+    /** The layer */
+    layer: AbstractBaseGVLayer;
+}
+/** Delegate for the layer registered event handler function signature. */
+export type LayerRegisteredDelegate = EventDelegateBase<AbstractLayerSet, LayerRegisteredEvent, void>;
 //# sourceMappingURL=abstract-layer-set.d.ts.map

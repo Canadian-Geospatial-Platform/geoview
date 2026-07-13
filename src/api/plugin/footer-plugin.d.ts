@@ -28,13 +28,5 @@ export declare abstract class FooterPlugin extends AbstractPlugin {
      * Called when a footer plugin is being removed
      */
     protected onRemove(): void;
-    /**
-     * Selects the Plugin.
-     */
-    select(): void;
-    /**
-     * Overridable function called when the Plugin is being selected.
-     */
-    protected onSelect(): void;
 }
 //# sourceMappingURL=footer-plugin.d.ts.map

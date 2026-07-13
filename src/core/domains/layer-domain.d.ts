@@ -152,17 +152,25 @@ export declare class LayerDomain {
      */
     getGeoviewLayerRegularIfExists(layerPath: string): AbstractGVLayer | undefined;
     /**
+     * Asynchronously waits for a layer to be registered and returns the GeoView layer associated to a specific layer path.
+     *
+     * Resolves immediately if the layer is already registered; otherwise subscribes to the `onLayerRegistered` event and resolves as soon as a layer with the matching path is registered.
+     *
+     * @param layerPath - The layer path to the layer's configuration
+     * @returns A promise that resolves to a GeoView layer associated to the layer path
+     */
+    waitForLayerRegistered(layerPath: string): Promise<AbstractBaseGVLayer>;
+    /**
      * Asynchronously returns the OpenLayer layer associated to a specific layer path.
      *
-     * This function waits the timeout period before abandonning (or uses the default timeout when not provided).
+     * Resolves immediately if the layer is already registered; otherwise subscribes to the
+     * `onLayerRegistered` event and resolves as soon as a layer with the matching path is registered.
      * Note this function uses the 'Async' suffix to differentiate it from 'getOLLayer'.
      *
      * @param layerPath - The layer path to the layer's configuration
-     * @param timeout - Optionally indicate the timeout after which time to abandon the promise
-     * @param checkFrequency - Optionally indicate the frequency at which to check for the condition on the layerabstract
      * @returns A promise that resolves to an OpenLayer layer associated to the layer path
      */
-    getOLLayerAsync(layerPath: string, timeout?: number, checkFrequency?: number): Promise<BaseLayer>;
+    getOLLayerAsync(layerPath: string): Promise<BaseLayer>;
     /**
      * Registers a layer entry configuration.
      *
@@ -217,10 +225,12 @@ export declare class LayerDomain {
     /**
      * Gets the max extent of all layers on the map, or of a provided subset of layers.
      *
+     * Waits for each layer's bounds to be initialized before computing the union.
+     *
      * @param layerIds - Identifiers or layerPaths of layers to get max extents from
-     * @returns The overall extent or undefined when no bounds are found
+     * @returns A promise that resolves with the overall extent or undefined when no bounds are found
      */
-    getExtentOfMultipleLayers(layerIds: string[]): Extent | undefined;
+    getExtentOfMultipleLayers(layerIds: string[]): Promise<Extent | undefined>;
     /**
      * Registers a layer entry config registered handler.
      *
@@ -248,6 +258,13 @@ export declare class LayerDomain {
      */
     offLayerEntryConfigUnregistered(callback: DomainLayerStatusChangedDelegate | undefined): void;
     /**
+     * Registers a one-shot layer status changed event handler that resolves a promise.
+     *
+     * @param filter - Optional filter predicate to skip non-matching events without unsubscribing
+     * @returns A promise that resolves with the layer status changed event
+     */
+    onceLayerStatusChanged(filter?: (event: DomainLayerStatusChangedEvent) => boolean): Promise<DomainLayerStatusChangedEvent>;
+    /**
      * Registers a layer status changed event handler.
      *
      * @param callback - The callback to be executed whenever the event is emitted
@@ -273,6 +290,13 @@ export declare class LayerDomain {
      * @param callback - The callback to stop being called whenever the event is emitted
      */
     offLayerAllLoaded(callback: DomainLayerStatusChangedDelegate | undefined): void;
+    /**
+     * Returns a promise that resolves the next time a layer registered event fires.
+     *
+     * @param filter - Optional filter predicate. When provided, only events passing the filter resolve the promise
+     * @returns A promise that resolves with the event payload when layer registered fires (and passes the filter)
+     */
+    onceLayerRegistered(filter?: (event: DomainLayerRegisteredEvent) => boolean): Promise<DomainLayerRegisteredEvent>;
     /**
      * Registers a layer registered handler.
      *
@@ -312,6 +336,13 @@ export declare class LayerDomain {
      * @param callback - The callback to stop being called whenever the event is emitted
      */
     offLayerLoading(callback: DomainLayerBaseDelegate | undefined): void;
+    /**
+     * Registers a one-shot layer first loaded event handler that resolves a promise.
+     *
+     * @param filter - Optional filter predicate to skip non-matching events without unsubscribing
+     * @returns A promise that resolves with the layer first loaded event
+     */
+    onceLayerFirstLoaded(filter?: (event: DomainLayerBaseEvent) => boolean): Promise<DomainLayerBaseEvent>;
     /**
      * Registers a layer first loaded event handler.
      *

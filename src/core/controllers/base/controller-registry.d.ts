@@ -36,6 +36,8 @@ export declare class ControllerRegistry {
     readonly detailsController: DetailsController;
     /** The data table controller used to interact with the data table. */
     readonly dataTableController: DataTableController;
+    /** The layer set controller used to manage the layer sets. */
+    readonly layerSetController: LayerSetController;
     /** The swiper controller used to interact with the swiper functionality. Only present when the swiper plugin is configured. */
     readonly swiperController?: SwiperController;
     /** The drawer controller used to interact with the drawer. Only present when the drawer plugin is configured. */
@@ -44,8 +46,6 @@ export declare class ControllerRegistry {
     readonly timeSliderController?: TimeSliderController;
     /** The geo chart controller used to interact with the geo chart panel. Only present when the geo chart plugin is configured. */
     readonly geoChartController?: GeoChartController;
-    /** The layer set controller used to manage the layer sets. */
-    readonly layerSetController: LayerSetController;
     /** All controllers registered in this registry. */
     readonly allControllers: AbstractController[];
     /**

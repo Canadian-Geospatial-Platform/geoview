@@ -68,9 +68,9 @@ export declare class StateApi {
 /** Defines a delegate for the event handler function signature. */
 type LayersReorderedDelegate = EventDelegateBase<StateApi, LayersReorderedEvent, void>;
 /** Defines an event for the delegate. */
-export type LayersReorderedEvent = {
+export interface LayersReorderedEvent {
     /** The layer paths in the new order. */
     orderedLayers: string[];
-};
+}
 export {};
 //# sourceMappingURL=state-api.d.ts.map

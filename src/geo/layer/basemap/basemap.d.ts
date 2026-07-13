@@ -77,6 +77,15 @@ export declare class BasemapApi {
      */
     setOverviewMapControlVisibility(olMap: OLMap, visible: boolean): void;
     /**
+     * Waits until the overview map visibility matches the expected state.
+     *
+     * Sync-checks first, then subscribes to the visibility-changed event until the condition is met.
+     *
+     * @param expectedVisible - The expected visibility state to wait for
+     * @returns A promise that resolves once the visibility matches the expected state
+     */
+    waitForOverviewMapVisibility(expectedVisible: boolean): Promise<void>;
+    /**
      * Creates the core basemap and adds the layers to it.
      *
      * @param basemapOptions - The basemap options
@@ -131,13 +140,32 @@ export declare class BasemapApi {
      * @param callback - The callback to stop being called whenever the event is emitted
      */
     offBasemapError(callback: BasemapErrorDelegate): void;
+    /**
+     * Registers a one-shot overview map control visibility changed event handler that resolves a promise.
+     *
+     * @param filter - Optional filter predicate to skip non-matching events without unsubscribing
+     * @returns A promise that resolves with the overview map control visibility changed event
+     */
+    onceOverviewMapControlVisibilityChanged(filter?: (event: OverviewMapControlVisibilityChangedEvent) => boolean): Promise<OverviewMapControlVisibilityChangedEvent>;
+    /**
+     * Registers an overview map control visibility changed event callback.
+     *
+     * @param callback - The callback to be executed whenever the event is emitted
+     */
+    onOverviewMapControlVisibilityChanged(callback: OverviewMapControlVisibilityChangedDelegate): void;
+    /**
+     * Unregisters an overview map control visibility changed event callback.
+     *
+     * @param callback - The callback to stop being called whenever the event is emitted
+     */
+    offOverviewMapControlVisibilityChanged(callback: OverviewMapControlVisibilityChangedDelegate): void;
 }
 /**
  * Define an event for the delegate.
  */
-export type BasemapChangedEvent = {
+export interface BasemapChangedEvent {
     basemap: TypeBasemapProps;
-};
+}
 /**
  * Define a delegate for the event handler function signature.
  */
@@ -145,12 +173,22 @@ type BasemapChangedDelegate = EventDelegateBase<BasemapApi, BasemapChangedEvent,
 /**
  * Define an event for the delegate.
  */
-export type BasemapErrorEvent = {
+export interface BasemapErrorEvent {
     error: GeoViewError;
-};
+}
 /**
  * Define a delegate for the event handler function signature.
  */
 type BasemapErrorDelegate = EventDelegateBase<BasemapApi, BasemapErrorEvent, void>;
+/**
+ * Define an event for the delegate.
+ */
+export interface OverviewMapControlVisibilityChangedEvent {
+    visible: boolean;
+}
+/**
+ * Define a delegate for the event handler function signature.
+ */
+type OverviewMapControlVisibilityChangedDelegate = EventDelegateBase<BasemapApi, OverviewMapControlVisibilityChangedEvent, void>;
 export {};
 //# sourceMappingURL=basemap.d.ts.map

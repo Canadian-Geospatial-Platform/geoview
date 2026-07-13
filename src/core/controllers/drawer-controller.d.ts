@@ -2,7 +2,7 @@ import type { StyleLike } from 'ol/style/Style';
 import { DrawerStyle } from '@/geo/style/drawer-style';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
-import { type StyleProps } from '@/core/stores/states/drawer-state';
+import { type StyleProps, type DrawGeometryType } from '@/core/stores/states/drawer-state';
 import type { UIDomain } from '@/core/domains/ui-domain';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import { HandleType } from '@/geo/interaction/transform/transform';
@@ -48,7 +48,7 @@ export declare class DrawerController extends AbstractMapViewerController {
      * @param geomType - Optional geometry type to draw (uses current state if not provided)
      * @param styleInput - Optional style properties to use
      */
-    startDrawing(geomType?: string, styleInput?: StyleProps): void;
+    startDrawing(geomType?: DrawGeometryType, styleInput?: StyleProps): void;
     /**
      * Stops the current drawing operation.
      */

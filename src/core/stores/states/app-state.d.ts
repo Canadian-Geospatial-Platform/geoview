@@ -280,7 +280,14 @@ export declare const setStoreAppDisplayLanguage: (mapId: string, lang: TypeDispl
  */
 export declare const setStoreAppDisplayTheme: (mapId: string, theme: TypeDisplayTheme) => void;
 /**
- * Sets the timezone for date display.
+ * Sets the display date mode for date display.
+ *
+ * @param mapId - The map identifier
+ * @param displayDateMode - The display date mode (e.g. 'iso', 'long')
+ */
+export declare const setStoreAppDisplayDateMode: (mapId: string, displayDateMode: DisplayDateMode) => void;
+/**
+ * Sets the display date timezone for date display.
  *
  * @param mapId - The map identifier
  * @param displayDateTimezone - The IANA timezone identifier

@@ -1,8 +1,9 @@
-import type { TypeDisplayLanguage, TypeDisplayTheme } from '@/api/types/map-schema-types';
+import type { Coordinate } from 'ol/coordinate';
+import type { Extent, TypeDisplayLanguage, TypeDisplayTheme } from '@/api/types/map-schema-types';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import { type FocusItemProps, type TypeFooterTabEntry } from '@/core/stores/states/ui-state';
-import { type TimeIANA } from '@/core/utils/date-mgt';
+import type { TimeIANA } from '@/core/utils/date-mgt';
 import type { TypeHTMLElement } from '@/core/types/global-types';
 import type { SnackbarType } from '@/core/utils/notifications';
 import type { NotificationDetailsType } from '@/core/components/notifications/notifications';
@@ -151,6 +152,7 @@ export declare class UIController extends AbstractMapViewerController {
      * Sets the display date timezone after validation.
      *
      * @param displayDateTimezone - The IANA timezone identifier to set
+     * @throws {InvalidTimezoneError} When the time zone is not a valid or supported IANA identifier
      */
     setDisplayDateTimezone(displayDateTimezone: TimeIANA): void;
     /**
@@ -209,5 +211,14 @@ export declare class UIController extends AbstractMapViewerController {
      * @returns A promise that resolves when the guide has been created and stored
      */
     createGuide(): Promise<void>;
+    /**
+     * Gets the current geolocator search area from the store.
+     *
+     * @returns The current geolocator search area, or undefined if not set
+     */
+    getMapGeolocatorSearchArea(): {
+        coords: Coordinate;
+        bbox?: Extent;
+    } | undefined;
 }
 //# sourceMappingURL=ui-controller.d.ts.map

@@ -284,13 +284,17 @@ export type TypeMapViewSettings = {
     /**
      * Option to set the zoom and center of initial view.
      * Zoom and center of the map defined as [zoom, [longitude, latitude]]. Longitude domain = [-160..160],
-     * Latitude domain = [-80..80]. */
+     * Latitude domain = [-80..80].
+     */
     zoomAndCenter?: TypeZoomAndCenter;
     /**
      * Option to set initial view by extent.
-     * Called with [minX, minY, maxX, maxY] extent coordinates. */
+     * Called with [minX, minY, maxX, maxY] extent coordinates.
+     */
     extent?: Extent;
-    /** Geoview layer ID(s) or layer path(s) of layer(s) to use as initial map focus. If empty, will use all layers. */
+    /**
+     * Geoview layer ID(s) or layer path(s) of layer(s) to use as initial map focus. If empty, will use all layers.
+     */
     layerIds?: string[];
 };
 /** Type used to define valid map projection codes. */

@@ -66,9 +66,10 @@ export interface IMapState {
         setInteraction: (interaction: TypeInteraction) => void;
         setIsMouseInsideMap: (isMouseInsideMap: boolean) => void;
         setZoom: (zoom: number) => void;
+        setMapExtent: (mapExtent: Extent) => void;
         setRotation: (rotation: number) => void;
         setProjection: (projectionCode: TypeValidMapProjectionCodes) => void;
-        setMapMoveEnd: (centerCoordinates: Coordinate, pointerPosition: TypeMapMouseInfo, degreeRotation: string, isNorthVisible: boolean, mapExtent: Extent, scale: TypeScaleInfo) => void;
+        setMapMoveEnd: (centerCoordinates: Coordinate, pointerPosition: TypeMapMouseInfo, degreeRotation: number, isNorthVisible: boolean, zoom: number, mapExtent: Extent, scale: TypeScaleInfo) => void;
         setPointerPosition: (pointerPosition: TypeMapMouseInfo) => void;
         setPointMarkers: (pointMarkers: Record<string, TypePointMarker[]>) => void;
         setClickCoordinates: (clickCoordinates: TypeMapMouseInfo) => void;
@@ -255,7 +256,9 @@ export declare const getStoreMapConfigListOfGeoviewLayerConfig: (mapId: string) 
 export declare const setStoreMapLoaded: (mapId: string, mapLoaded: boolean) => void;
 /** Sets the geolocator search area with coordinates and optional bounding box in the store. */
 export declare const setStoreMapGeolocatorSearchArea: (mapId: string, searchItem: string, coords: Coordinate, bbox?: Extent) => void;
-/** Sets the home button view settings in the store. */
+/**
+ * Sets the home button view settings in the store.
+ */
 export declare const setStoreMapHomeButtonView: (mapId: string, view: TypeMapViewSettings) => void;
 /** Sets the current basemap options in the store. */
 export declare const setStoreMapCurrentBasemapOptions: (mapId: string, basemapOptions: TypeBasemapOptions) => void;
@@ -267,6 +270,8 @@ export declare const setStoreMapClickMarkerIconHide: (mapId: string) => void;
 export declare const setStoreMapProjection: (mapId: string, projectionCode: TypeValidMapProjectionCodes) => void;
 /** Sets the zoom level in the store. */
 export declare const setStoreMapZoom: (mapId: string, zoom: number) => void;
+/** Sets the map extent in the store. */
+export declare const setStoreMapExtent: (mapId: string, mapExtent: Extent) => void;
 /** Sets the click coordinates in the store. */
 export declare const setStoreMapClickCoordinates: (mapId: string, clickCoordinates: TypeMapMouseInfo) => void;
 /** Sets the point markers in the store. */
@@ -292,7 +297,7 @@ export declare const setStoreMapRotation: (mapId: string, rotation: number) => v
 /** Sets the highlighted features in the store. */
 export declare const setStoreMapHighlightedFeatures: (mapId: string, highlightedFeatures: TypeFeatureInfoEntry[]) => void;
 /** Updates the store with map move end properties including center, rotation, extent, and scale. */
-export declare const setStoreMapMoveEnd: (mapId: string, centerCoordinates: Coordinate, pointerPosition: TypeMapMouseInfo, degreeRotation: string, isNorthVisible: boolean, mapExtent: Extent, scale: TypeScaleInfo) => void;
+export declare const setStoreMapMoveEnd: (mapId: string, centerCoordinates: Coordinate, pointerPosition: TypeMapMouseInfo, degreeRotation: number, isNorthVisible: boolean, zoom: number, mapExtent: Extent, scale: TypeScaleInfo) => void;
 /** Sets the fix north state in the store. */
 export declare const setStoreMapFixNorth: (mapId: string, fixNorth: boolean) => void;
 /** Represents the map scale display information for metric and imperial units. */
@@ -311,7 +316,7 @@ export interface TypeScaleInfo {
 /** Represents the north arrow display state. */
 export interface TypeNorthArrow {
     /** The rotation angle in degrees as a string. */
-    degreeRotation: string;
+    degreeRotation: number;
     /** Whether the north direction is currently visible on the map. */
     isNorthVisible: boolean;
 }

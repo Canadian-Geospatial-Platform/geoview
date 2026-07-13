@@ -96,10 +96,10 @@ export declare class Notifications {
 /** Delegate for the snackbar open event handler function signature. */
 type SnackBarOpenDelegate = EventDelegateBase<Notifications, SnackBarOpenEvent, void>;
 /** Event payload for the snackbar open delegate. */
-export type SnackBarOpenEvent = {
+export interface SnackBarOpenEvent {
     snackbarType: SnackbarType;
     message: string;
-};
+}
 /** The supported snackbar message types. */
 export type SnackbarType = 'success' | 'error' | 'info' | 'warning';
 /** Properties for a queued snackbar message. */

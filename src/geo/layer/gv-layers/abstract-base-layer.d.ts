@@ -101,6 +101,13 @@ export declare abstract class AbstractBaseGVLayer {
      */
     initBounds(projection: OLProjection, stops: number): Promise<Extent | undefined>;
     /**
+     * Waits for the layer bounds to be initialized. If the bounds are already
+     * available, resolves immediately. Otherwise, waits for the bounds initialized event.
+     *
+     * @returns A promise that resolves with the bounds in the map projection, or undefined
+     */
+    waitForBounds(): Promise<Extent | undefined>;
+    /**
      * Gets the projection in which the layer bounds are defined.
      *
      * @returns The projection of the layer bounds, or undefined if not initialized
@@ -405,6 +412,26 @@ export declare abstract class AbstractBaseGVLayer {
      */
     offLayerZIndexChanged(callback: LayerZIndexChangedDelegate | undefined): void;
     /**
+     * Returns a promise that resolves the next time the bounds initialized event fires.
+     *
+     * @param filter - Optional filter predicate. When provided, only events passing the filter resolve the promise
+     * @returns A promise that resolves with the bounds initialized event payload
+     */
+    onceBoundsInitialized(filter?: (event: BoundsInitializedEvent) => boolean): Promise<BoundsInitializedEvent>;
+    /**
+     * Registers a bounds initialized event handler.
+     *
+     * @param callback - The callback to be executed whenever the event is emitted
+     * @returns The registered callback, which can be used to unregister the event handler later
+     */
+    onBoundsInitialized(callback: BoundsInitializedDelegate): BoundsInitializedDelegate;
+    /**
+     * Unregisters a bounds initialized event handler.
+     *
+     * @param callback - The callback to stop being called whenever the event is emitted
+     */
+    offBoundsInitialized(callback: BoundsInitializedDelegate | undefined): void;
+    /**
      * Recursively searches the layer tree to find the parent GVGroupLayer
      * of a given layer.
      *
@@ -475,4 +502,17 @@ export interface LayerZIndexChangedEvent extends LayerBaseEvent {
  * Define a delegate for the event handler function signature
  */
 export type LayerZIndexChangedDelegate = EventDelegateBase<AbstractBaseGVLayer, LayerZIndexChangedEvent, void>;
+/**
+ * Define an event for the delegate.
+ */
+export interface BoundsInitializedEvent extends LayerBaseEvent {
+    /** The bounds in the map projection. */
+    bounds: Extent | undefined;
+    /** The bounds in EPSG:4326. */
+    bounds4326: Extent | undefined;
+}
+/**
+ * Define a delegate for the event handler function signature.
+ */
+export type BoundsInitializedDelegate = EventDelegateBase<AbstractBaseGVLayer, BoundsInitializedEvent, void>;
 //# sourceMappingURL=abstract-base-layer.d.ts.map

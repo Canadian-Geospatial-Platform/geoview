@@ -1,4 +1,5 @@
 import type { QueryType, TypeFeatureInfoResult } from '@/api/types/map-schema-types';
+import type { EventDelegateBase } from '@/api/events/event-helper';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
 /**
@@ -49,5 +50,46 @@ export declare class AllFeatureInfoLayerSet extends AbstractLayerSet {
      * @param layerPath - The unique path identifying the layer to clear
      */
     clearLayerFeatures(layerPath: string): void;
+    /**
+     * Waits for the query associated with a specific layer path to finish processing.
+     *
+     * This method returns a promise that resolves when the query status for the given `layerPath` in the store is 'processed'.
+     *
+     * @param layerPath - The unique path identifying the layer to check
+     * @returns A promise that resolves when the query status is 'processed'
+     */
+    waitForLayerQueryToFinish(layerPath: string): Promise<void>;
+    /**
+     * Returns a promise that resolves the next time the layer queried event fires.
+     *
+     * @param filter - Optional filter predicate. When provided, only events passing the filter resolve the promise
+     * @returns A promise that resolves with the event payload when layer queried fires (and passes the filter)
+     */
+    onceLayerQueried(filter?: (event: LayerQueriedEvent) => boolean): Promise<LayerQueriedEvent>;
+    /**
+     * Registers a layer queried event handler.
+     *
+     * @param callback - The callback to be executed whenever the event is emitted
+     */
+    onLayerQueried(callback: LayerQueriedDelegate): void;
+    /**
+     * Unregisters a layer queried event handler.
+     *
+     * @param callback - The callback to stop being called whenever the event is emitted
+     */
+    offLayerQueried(callback: LayerQueriedDelegate): void;
 }
+/**
+ * Define an event for the delegate
+ */
+export interface LayerQueriedEvent {
+    /** The layer path that was queried. */
+    layerPath: string;
+    /** The result of the query. */
+    result: TypeFeatureInfoResult;
+}
+/**
+ * Define a delegate for the event handler function signature
+ */
+export type LayerQueriedDelegate = EventDelegateBase<AllFeatureInfoLayerSet, LayerQueriedEvent, void>;
 //# sourceMappingURL=all-feature-info-layer-set.d.ts.map

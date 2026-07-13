@@ -914,16 +914,20 @@ export declare const setStoreReorderLegendLayers: (mapId: string) => void;
  */
 export declare const setStoreLayersAreLoading: (mapId: string, areLoading: boolean) => void;
 /**
- * Sets the legend query status and optional legend data for a specific layer.
+ * Sets the legend query status and associated legend data for a specific layer.
  *
- * Updates the layer's icon images and legend items when legend data with a type is provided.
+ * Updates the layer's `legendQueryStatus`, `legendSchemaTag`, `styleConfig`, `icons`, and `items` in one
+ * atomic mutation. Icons and items default to empty arrays when not provided.
  *
  * @param mapId - The map identifier
  * @param layerPath - The layer path to update
  * @param legendQueryStatus - The new legend query status
- * @param data - Optional legend data containing the layer type, legend styles, and style config
+ * @param legendSchemaTag - Optional GeoView layer type tag describing the legend schema
+ * @param styleConfig - Optional layer style configuration to associate with the legend
+ * @param icons - Optional legend icon images to associate with the layer
+ * @param items - Optional legend items to associate with the layer
  */
-export declare const setStoreLegendQueryStatus: (mapId: string, layerPath: string, legendQueryStatus: LegendQueryStatus, legendSchemaTag: TypeGeoviewLayerType | undefined, icons: TypeLegendLayerItem[] | undefined, items: TypeLegendItem[] | undefined, styleConfig: TypeLayerStyleConfig | undefined) => void;
+export declare const setStoreLegendQueryStatus: (mapId: string, layerPath: string, legendQueryStatus: LegendQueryStatus, legendSchemaTag: TypeGeoviewLayerType | undefined, styleConfig: TypeLayerStyleConfig | undefined, icons: TypeLegendLayerItem[] | undefined, items: TypeLegendItem[] | undefined) => void;
 /**
  * Deletes a layer from the legend layers in the store.
  *

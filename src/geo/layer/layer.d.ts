@@ -1,8 +1,7 @@
-import type BaseLayer from 'ol/layer/Base';
 import type { GeoJSONObject } from 'ol/format/GeoJSON';
 import type { FitOptions } from 'ol/View';
 import type { TypeOutfieldsType } from '@/api/types/map-schema-types';
-import type { TypeGeoviewLayerConfig, TypeMosaicRule } from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerConfig, TypeLayerStatus, TypeMosaicRule } from '@/api/types/layer-schema-types';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import type { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import { type EventDelegateBase } from '@/api/events/event-helper';
@@ -198,18 +197,6 @@ export declare class LayerApi {
      */
     getGeoviewLayerIfExists(layerPath: string): AbstractBaseGVLayer | undefined;
     /**
-     * Asynchronously returns the OpenLayer layer associated to a specific layer path.
-     *
-     * This function waits the timeout period before abandonning (or uses the default timeout when not provided).
-     * Note this function uses the 'Async' suffix to differentiate it from 'getOLLayer'.
-     *
-     * @param layerPath - The layer path to the layer's configuration
-     * @param timeout - Optionally indicate the timeout after which time to abandon the promise
-     * @param checkFrequency - Optionally indicate the frequency at which to check for the condition on the layer
-     * @returns A promise that resolves to an OpenLayer layer associated to the layer path
-     */
-    getOLLayerAsync(layerPath: string, timeout?: number, checkFrequency?: number): Promise<BaseLayer>;
-    /**
      * Adds a layer to the map.
      *
      * This is the main method to add a GeoView Layer on the map. It handles all the processing, including the validations,
@@ -369,11 +356,12 @@ export declare class LayerApi {
      * Zoom to extents of a layer.
      *
      * @param layerPath - The path of the layer to zoom to
+     * @param useAnimation - Indicates if a zoom animation should be used, default: true
      * @param fitOptions - Optional fit options for zooming
      * @returns A promise that resolves when the zoom operation is complete
      * @throws {NoBoundsError} When the layer doesn't have bounds
      */
-    zoomToLayerExtent(layerPath: string, fitOptions?: FitOptions): Promise<void>;
+    zoomToLayerExtent(layerPath: string, useAnimation?: boolean, fitOptions?: FitOptions): Promise<void>;
     /**
      * Sets the visibility of a single legend item on a regular (non-group) layer.
      *
@@ -415,6 +403,19 @@ export declare class LayerApi {
      * @throws {LayerNotFoundError} When the layer cannot be found at the given path
      */
     setOrToggleLayerVisibility(layerPath: string, newValue?: boolean): boolean;
+    /**
+     * Waits for all layers to reach a given status.
+     *
+     * @param layerStatus - The desired status to wait for (e.g., 'loaded', 'processed')
+     * @returns A promise that resolves with the number of layers that have reached the specified status
+     */
+    waitForAllLayersStatus(layerStatus: TypeLayerStatus): Promise<number>;
+    /**
+     * Waits for all layers to be loaded.
+     *
+     * @returns A promise that resolves with the number of layers that have reached the loaded status
+     */
+    waitForLayersLoaded(): Promise<number>;
     /**
      * Redefine feature info fields.
      *

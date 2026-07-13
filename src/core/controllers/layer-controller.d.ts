@@ -11,6 +11,7 @@ import type { GroupLayerEntryConfig } from '@/api/config/validation-classes/grou
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import type { LayerDomain } from '@/core/domains/layer-domain';
+import type { UIDomain } from '@/core/domains/ui-domain';
 import type { TemporalMode, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import type { TypeLayersViewDisplayState, TypeLegendItem } from '@/core/components/layers/types';
 import { MapViewer } from '@/geo/map/map-viewer';
@@ -30,8 +31,9 @@ export declare class LayerController extends AbstractMapViewerController {
      * @param mapViewer - The map viewer instance to associate with this controller
      * @param controllerRegistry - The controller registry for accessing sibling controllers
      * @param layerDomain - The layer domain instance to associate with this controller
+     * @param uiDomain - The UI domain instance to associate with this controller
      */
-    constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry, layerDomain: LayerDomain);
+    constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry, layerDomain: LayerDomain, uiDomain: UIDomain);
     /**
      * Hooks layer domain listeners.
      */
@@ -168,15 +170,21 @@ export declare class LayerController extends AbstractMapViewerController {
     /**
      * Asynchronously returns the OpenLayer layer associated to a specific layer path.
      *
-     * This function waits the timeout period before abandonning (or uses the default timeout when not provided).
+     * Resolves immediately if the layer is already registered; otherwise waits for the next
+     * layer-registered event matching the given path.
      * Note this function uses the 'Async' suffix to differentiate it from 'getOLLayer'.
      *
      * @param layerPath - The layer path to the layer's configuration
-     * @param timeout - Optionally indicate the timeout after which time to abandon the promise
-     * @param checkFrequency - Optionally indicate the frequency at which to check for the condition on the layer
      * @returns A promise that resolves to an OpenLayer layer associated to the layer path
      */
-    getOLLayerAsync(layerPath: string, timeout?: number, checkFrequency?: number): Promise<BaseLayer>;
+    getOLLayerAsync(layerPath: string): Promise<BaseLayer>;
+    /**
+     * Gets the ordered layer paths.
+     *
+     * @returns The ordered layer paths
+     * @deprecated This method doesn't seem to be used anymore, remove?
+     */
+    getMapLayerOrderPaths(): string[];
     /**
      * Sets the layer panel display state.
      *
@@ -192,10 +200,12 @@ export declare class LayerController extends AbstractMapViewerController {
     /**
      * Gets the max extent of all layers on the map, or of a provided subset of layers.
      *
+     * Waits for each layer's bounds to be initialized before computing the union.
+     *
      * @param layerIds - Identifiers or layerPaths of layers to get max extents from
-     * @returns The overall extent or undefined when no bounds are found
+     * @returns A promise that resolves with the overall extent or undefined when no bounds are found
      */
-    getExtentOfMultipleLayers(layerIds?: string[]): Extent | undefined;
+    getExtentOfMultipleLayers(layerIds?: string[]): Promise<Extent | undefined>;
     /**
      * Gets the extent of a feature or group of features.
      *
@@ -618,9 +628,10 @@ export declare class LayerController extends AbstractMapViewerController {
      * Zooms to extents of a layer.
      *
      * @param layerPath - The path of the layer to zoom to
+     * @param useAnimation - Indicates if a zoom animation should be used, default: true
      * @throws {NoBoundsError} When the layer doesn't have bounds
      */
-    zoomToLayerExtent(layerPath: string, fitOptions?: FitOptions): Promise<void>;
+    zoomToLayerExtent(layerPath: string, useAnimation?: boolean, fitOptions?: FitOptions): Promise<void>;
     /**
      * Clears any overridden CRS settings on all WMS layers in the map.
      *
@@ -726,6 +737,27 @@ export declare class LayerController extends AbstractMapViewerController {
      */
     deleteLayerAbort(layerPath: string): void;
     /**
+     * Waits until all GeoView layers reach the specified status before resolving the promise.
+     *
+     * Event-driven: subscribes to layer status changes and re-checks the condition on each event.
+     * Immune to background-tab timer throttling.
+     *
+     * Note: we don't need to subscribe to layer-entry-config-registered events. When a sub-layer
+     * registers on-the-fly (notably: EsriDynamic, WMS), the LayerDomain attaches its status-change
+     * handler at registration time, so every subsequent transition (toward loaded/error) of that
+     * new sub-layer will fire onLayerStatusChanged here.
+     *
+     * @param layerStatus - The desired status to wait for (e.g., 'loaded', 'processed')
+     * @returns A promise that resolves with the number of layers that have reached the specified status
+     */
+    waitForAllLayersStatus(layerStatus: TypeLayerStatus): Promise<number>;
+    /**
+     * Waits for the map layers loaded event to be emitted.
+     *
+     * @returns A promise that resolves with the number of layers that have reached the specified status
+     */
+    waitForLayersLoaded(): Promise<number>;
+    /**
      * Starts bounds calculation and stores bounds as they get calculated.
      *
      * Uses a fire-and-forget pattern and handles completion or failure in promise handlers.
@@ -750,14 +782,14 @@ export declare class LayerController extends AbstractMapViewerController {
     offLayerItemVisibilityChanged(callback: ControllerLayerItemVisibilityChangedDelegate): void;
 }
 /** Defines the event payload for the layer item visibility changed delegate. */
-export type ControllerLayerItemVisibilityChangedEvent = {
+export interface ControllerLayerItemVisibilityChangedEvent {
     /** The affected layer. */
     layer: AbstractGVLayer;
     /** The item being changed. */
     item: TypeLegendItem;
     /** The new visibility. */
     visible: boolean;
-};
+}
 /** Defines a delegate for the layer item visibility changed event handler function signature. */
 export type ControllerLayerItemVisibilityChangedDelegate = EventDelegateBase<LayerController, ControllerLayerItemVisibilityChangedEvent, void>;
 //# sourceMappingURL=layer-controller.d.ts.map

@@ -1,13 +1,13 @@
 import type { Root } from 'react-dom/client';
 import type { Pixel } from 'ol/pixel';
-import type { Size } from 'ol/size';
 import type { Coordinate } from 'ol/coordinate';
 import type { OverviewMap as OLOverviewMap } from 'ol/control';
-import { type Extent, type TypeBasemapOptions, type TypeFeatureInfoEntry, type TypeMapFeaturesInstance, type TypeMapMouseInfo, type TypePointMarker, type TypeServiceUrls, type TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
+import type { Type as OLGeomType } from 'ol/geom/Geometry';
+import { type Extent, type TypeBasemapOptions, type TypeFeatureInfoEntry, type TypeMapFeaturesInstance, type TypeMapMouseInfo, type TypeMapViewSettings, type TypePointMarker, type TypeServiceUrls, type TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
-import type { MapViewer } from '@/geo/map/map-viewer';
+import { MapViewer } from '@/geo/map/map-viewer';
 import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import type { Draw } from '@/geo/interaction/draw';
 import type { TypeClickMarker } from '@/core/components/click-marker/click-marker';
@@ -18,8 +18,6 @@ import type { EventDelegateBase } from '@/api/events/event-helper';
  */
 export declare class MapController extends AbstractMapViewerController {
     #private;
-    /** The minimal delay in ms to wait after a zoom animation to ensure it has completed. */
-    static readonly ZOOM_MIN_DELAY = 500;
     /**
      * Creates an instance of MapController.
      *
@@ -28,28 +26,33 @@ export declare class MapController extends AbstractMapViewerController {
      */
     constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry);
     /**
-     * Subscribes to the map projection changed event on the MapViewer.
+     * Subscribes to MapViewer events for map state synchronization.
+     *
+     * Registers handlers for ready, resolution, rotation, move, pointer, click,
+     * mouse enter/leave, interaction mode, projection change, size change, and marker icon events.
      */
     protected onHook(): void;
     /**
-     * Unsubscribes from the map projection changed event on the MapViewer.
+     * Unsubscribes from all MapViewer events registered in onHook.
      */
     protected onUnhook(): void;
     /**
      * Zooms to the specified extent.
      *
      * @param extent - The extent to zoom to
+     * @param useAnimation - Indicates if a zoom animation should be used, default: true
      * @param options - The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 13, duration: 500 })
      * @returns A promise that resolves when the zoom animation is complete
      * @throws {InvalidExtentError} When the extent is invalid
      */
-    zoomToExtent(extent: Extent, options?: FitOptions): Promise<void>;
+    zoomToExtent(extent: Extent, useAnimation?: boolean, options?: FitOptions): Promise<void>;
     /**
      * Returns to initial view state of map using config.
      *
+     * @param useAnimation - Indicates if a zoom animation should be used, default: true
      * @returns A promise that resolves when the zoom animation is complete
      */
-    zoomToInitialExtent(): Promise<void>;
+    zoomToInitialExtent(useAnimation?: boolean): Promise<void>;
     /**
      * Zooms to geolocation position provided.
      *
@@ -63,19 +66,30 @@ export declare class MapController extends AbstractMapViewerController {
      * The store is updated automatically via the MapViewer move-end event.
      *
      * @param zoom - The target zoom level
+     * @param useAnimation - Indicates if a zoom animation should be used, default: true
      * @param duration - Optional animation duration in ms
      * @returns A promise that resolves when the zoom animation is complete
      */
-    zoomMap(zoom: number, duration?: number): Promise<void>;
+    zoomMap(zoom: number, useAnimation?: boolean, duration?: number): Promise<void>;
     /**
      * Animates the map zoom without awaiting the result.
      *
      * Fires and forgets the zoom, logging any errors.
      *
      * @param zoom - The target zoom level
+     * @param useAnimation - Indicates if a zoom animation should be used, default: true
      * @param duration - Optional animation duration in ms
      */
-    zoomMapAndForget(zoom: number, duration?: number): void;
+    zoomMapAndForget(zoom: number, useAnimation?: boolean, duration?: number): void;
+    /**
+     * Zoom to specified extent or coordinate provided in lonlat.
+     *
+     * @param extent - The extent or coordinate to zoom to
+     * @param useAnimation - Indicates if a zoom animation should be used, default: true
+     * @param options - Optional options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11 })
+     * @returns A promise that resolves when the zoom operation completes
+     */
+    zoomToLonLatExtentOrCoordinate(extent: Extent | Coordinate, useAnimation?: boolean, options?: FitOptions): Promise<void>;
     /**
      * Zooms to a geolocator search result location.
      *
@@ -83,10 +97,17 @@ export declare class MapController extends AbstractMapViewerController {
      *
      * @param searchItem - The search item description
      * @param coords - The lon/lat coordinates to zoom to
+     * @param useAnimation - Indicates if a zoom animation should be used, default: true
      * @param bbox - Optional bounding box extent for the search result
      * @returns A promise that resolves when the zoom is complete
      */
-    zoomToGeoLocatorLocation(searchItem: string, coords: Coordinate, bbox?: Extent): Promise<void>;
+    zoomToGeoLocatorLocation(searchItem: string, coords: Coordinate, useAnimation?: boolean, bbox?: Extent): Promise<void>;
+    /**
+     * Sets the home button view settings in the store for the map.
+     *
+     * @param view - The view settings to set for the home button
+     */
+    setHomeButtonView(view: TypeMapViewSettings): void;
     /**
      * Adds a feature to the highlighted features list and visually highlights it on the map.
      *
@@ -163,9 +184,10 @@ export declare class MapController extends AbstractMapViewerController {
      */
     getMapCenterPosition(): TypeMapMouseInfo;
     /**
-     * Sets the click coordinates in the store and emits a single click event in WCAG mode.
+     * Sets the click coordinates in the store, updates coordinate info if enabled, and triggers a feature query at the clicked location.
      *
      * @param clickCoordinates - The click coordinate information
+     * @param abortSignal - Optional abort signal to cancel the coordinate info fetch requests
      */
     setClickCoordinates(clickCoordinates: TypeMapMouseInfo, abortSignal?: AbortSignal): void;
     /**
@@ -209,13 +231,6 @@ export declare class MapController extends AbstractMapViewerController {
      * @param overviewRoot - The React root element for the overview map
      */
     setMapOverviewMapRoot(overviewRoot: Root): void;
-    /**
-     * Sets the map size in the store and optionally resizes the OpenLayers map.
-     *
-     * @param size - The new map size
-     * @param resizeMap - Optional flag to also resize the OpenLayers map element
-     */
-    setMapSize(size: Size, resizeMap?: boolean): void;
     /**
      * Nudges the map center by an imperceptible amount to trigger extent change events.
      *
@@ -286,10 +301,9 @@ export declare class MapController extends AbstractMapViewerController {
      * Waits until the overview map visibility matches the expected state.
      *
      * @param expectedVisible - The expected visibility state to wait for
-     * @param timeoutMs - Optional maximum time in milliseconds to wait (defaults to 5000)
      * @returns A promise that resolves when the visibility matches the expected state
      */
-    waitOverviewMapVisibility(expectedVisible: boolean, timeoutMs?: number): Promise<boolean>;
+    waitForOverviewMapVisibility(expectedVisible: boolean): Promise<void>;
     /**
      * Resets the basemap using the current display language and projection.
      *
@@ -352,7 +366,7 @@ export declare class MapController extends AbstractMapViewerController {
      * @param style - The styles for the drawing
      * @returns The init draw interactions object
      */
-    initDrawInteractions(geomGroupKey: string, type: string, style: TypeFeatureStyle): Draw;
+    initDrawInteractions(geomGroupKey: string, type: OLGeomType, style: TypeFeatureStyle): Draw;
     /**
      * Sets the active measurement Draw interaction for keyboard accessibility.
      *
@@ -385,14 +399,14 @@ export declare class MapController extends AbstractMapViewerController {
 /**
  * Event for the geolocator search delegate.
  */
-export type GeolocatorSearchEvent = {
+export interface GeolocatorSearchEvent {
     /** The search description string. */
     searchItem: string;
     /** The lon/lat coordinates of the selected result. */
     coords: Coordinate;
     /** Optional bounding box extent of the selected result. */
     bbox?: Extent;
-};
+}
 /**
  * Delegate for the geolocator search event handler function signature.
  */
