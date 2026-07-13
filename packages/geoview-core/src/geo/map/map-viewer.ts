@@ -948,6 +948,18 @@ export class MapViewer {
   }
 
   /**
+   * Converts a map scale denominator to the corresponding zoom level.
+   *
+   * @param scale - The scale denominator (e.g. 50000 for 1:50,000)
+   * @returns The zoom level for the given scale, or undefined if conversion is unavailable
+   */
+  getZoomFromScale(scale: number): number | undefined {
+    const resolution = this.getMapResolutionFromScale(scale);
+    if (resolution === undefined) return undefined;
+    return this.getView().getZoomForResolution(resolution) ?? undefined;
+  }
+
+  /**
    * Converts a map scale denominator (1:X) into the corresponding OpenLayers resolution.
    *
    * Resolution is computed using: resolution = scale / (metersPerUnit * inchesPerMeter * dpi)

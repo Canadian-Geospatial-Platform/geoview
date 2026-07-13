@@ -719,13 +719,14 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
       if (extent) {
         // Project
         const center = getCenter(extent);
+
         // Transform the coordinate and use a state getter here, because we don't need to hook on value changes in this callback function.
         const newCenter = Projection.transformPoints([center], getStoreMapCurrentProjectionEPSG(mapId), `EPSG:4326`)[0];
 
         // Zoom to extent and wait for it to finish
         // TODO: We have the same patch in details, see if we should create a reusable custom patch / or change design
-        mapController
-          .zoomToExtent(extent)
+        layerController
+          .zoomToExtentRestricted(layerPath, extent, true)
           .then(async () => {
             // Typically, the click marker is removed after a zoom, so wait a bit here and re-add it...
             // TODO: Refactor - Zoom ClickMarker - Improve the logic in general of when/if a click marker should be removed after a zoom

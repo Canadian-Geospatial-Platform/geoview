@@ -139,6 +139,8 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
   /**
    * Gets the projection of the data based on the projection of the source.
+   *
+   * @returns The OpenLayers projection of the source data, or undefined if not available
    */
   override getDataProjection(): OLProjection | undefined {
     return this.getSourceProjection();

@@ -25,6 +25,8 @@ import {
   getStoreLayerMosaicRule,
   getStoreLayerHighlightedLayer,
   getStoreLayerLegendLayerByPath,
+  getStoreLayerMaxScale,
+  getStoreLayerMinScale,
   getStoreLayerOrderedLayerIndexByPath,
   getStoreLayerOrderedLayerPaths,
   setStoreLayerAllMapLayerCollapsed,
@@ -96,7 +98,7 @@ import type { TemporalMode, TypeDisplayDateFormat } from '@/core/utils/date-mgt'
 import type { TypeLayersViewDisplayState, TypeLegendItem } from '@/core/components/layers/types';
 import { logger } from '@/core/utils/logger';
 import { NoBoundsError } from '@/core/exceptions/geoview-exceptions';
-import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
+import { DEFAULT_OL_FITOPTIONS, OL_ZOOM_DURATION } from '@/core/utils/constant';
 import { Projection } from '@/geo/utils/projection';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import {
@@ -739,6 +741,71 @@ export class LayerController extends AbstractMapViewerController {
   getExtentFromFeatures(layerPath: string, objectIds: number[], outfield?: string): Promise<Extent> {
     // Get extent from features calling the GV Layer method
     return this.getGeoviewLayerRegular(layerPath).getExtentFromFeatures(objectIds, this.getMapViewer().getProjection(), outfield);
+  }
+
+  /**
+   * Zooms to the full extent of a layer.
+   *
+   * @param layerPath - The path of the layer to zoom to
+   * @param useAnimation - Optional flag indicating if a zoom animation should be used
+   * @param fitOptions - Optional OL fit options to configure the zoom
+   * @returns A promise that resolves when the zoom animation is complete
+   * @throws {NoBoundsError} When the layer doesn't have bounds
+   */
+  zoomToLayerExtent(layerPath: string, useAnimation = true, fitOptions: FitOptions = DEFAULT_OL_FITOPTIONS): Promise<void> {
+    // Get the layer bounds
+    const bounds = getStoreLayerBounds(this.getMapId(), layerPath);
+
+    // If found
+    if (bounds) {
+      return this.getControllersRegistry().mapController.zoomToExtent(bounds, useAnimation, fitOptions);
+    }
+
+    // Failed
+    throw new NoBoundsError(layerPath);
+  }
+
+  /**
+   * Zooms to the specified extent, clamping the zoom level to the layer's visible scale range.
+   *
+   * Reads the layer's min/max scale from the store and converts them to OL fit constraints
+   * (maxZoom from maxScale, minResolution from minScale) so the resulting zoom does not exceed
+   * the layer's visibility boundaries.
+   *
+   * @param layerPath - The layer path used to look up scale limits
+   * @param extent - The extent to zoom to
+   * @param useAnimation - Optional flag indicating if a zoom animation should be used
+   * @param fitOptions - Optional OL fit options to merge scale constraints into
+   * @returns A promise that resolves when the zoom animation is complete
+   */
+  zoomToExtentRestricted(
+    layerPath: string,
+    extent: Extent,
+    useAnimation = true,
+    fitOptions: FitOptions = DEFAULT_OL_FITOPTIONS
+  ): Promise<void> {
+    // Read the min/max scales from the store for the corresponding layer path
+    const layerMaxScale = getStoreLayerMaxScale(this.getMapId(), layerPath);
+    const layerMinScale = getStoreLayerMinScale(this.getMapId(), layerPath);
+
+    // Compute zoom constraints from the layer's scale range so we don't zoom beyond the layer's visible range
+    if (layerMaxScale) {
+      const maxZoomFromScale = this.getControllersRegistry().mapController.getZoomFromScale(layerMaxScale);
+      if (maxZoomFromScale !== undefined) {
+        // eslint-disable-next-line no-param-reassign
+        fitOptions.maxZoom = Math.min(fitOptions.maxZoom ?? maxZoomFromScale, maxZoomFromScale);
+      }
+    }
+    if (layerMinScale) {
+      const minResolution = this.getControllersRegistry().mapController.getResolutionFromScale(layerMinScale);
+      if (minResolution !== undefined) {
+        // eslint-disable-next-line no-param-reassign
+        fitOptions.minResolution = Math.floor(minResolution * 100) / 100;
+      }
+    }
+
+    // Zoom to extent and wait for it to finish
+    return this.getControllersRegistry().mapController.zoomToExtent(extent, useAnimation, fitOptions);
   }
 
   /**
@@ -1732,29 +1799,6 @@ export class LayerController extends AbstractMapViewerController {
       resolution: targetResolution,
       duration: OL_ZOOM_DURATION,
     });
-  }
-
-  /**
-   * Zooms to extents of a layer.
-   *
-   * @param layerPath - The path of the layer to zoom to
-   * @param useAnimation - Indicates if a zoom animation should be used, default: true
-   * @throws {NoBoundsError} When the layer doesn't have bounds
-   */
-  zoomToLayerExtent(layerPath: string, useAnimation = true, fitOptions?: FitOptions): Promise<void> {
-    // Define some zoom options
-    const options: FitOptions = fitOptions ?? { padding: OL_ZOOM_PADDING, duration: OL_ZOOM_DURATION };
-
-    // Get the layer bounds
-    const bounds = getStoreLayerBounds(this.getMapId(), layerPath);
-
-    // If found
-    if (bounds) {
-      return this.getControllersRegistry().mapController.zoomToExtent(bounds, useAnimation, options);
-    }
-
-    // Failed
-    throw new NoBoundsError(layerPath);
   }
 
   /**

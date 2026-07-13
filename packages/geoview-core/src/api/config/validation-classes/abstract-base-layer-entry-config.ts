@@ -210,6 +210,8 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * Gets the projection as it was initialized from the metadata.
+   *
+   * @returns The metadata projection, or undefined if not initialized
    */
   getMetadataProjection(): OLProjection | undefined {
     return this.#metadataProjection;
