@@ -4,9 +4,11 @@ import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
 import { delay } from 'geoview-core/core/utils/utilities';
 import type { TypeFeatureInfoEntry } from 'geoview-core/api/types/map-schema-types';
+import type { TypeGeoviewLayerType } from 'geoview-core/api/types/layer-schema-types';
 import { logger } from 'geoview-core/core/utils/logger';
 import { getStoreUIActiveFooterBarTab } from 'geoview-core/core/stores/states/ui-state';
 import { getStoreLayerItemVisibility } from 'geoview-core/core/stores/states/layer-state';
+import { getStoreMapHighlightedFeatures, getStoreMapClickMarker } from 'geoview-core/core/stores/states/map-state';
 import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
 
 /**
@@ -79,8 +81,8 @@ export class DetailsTester extends GVAbstractTester {
           results as unknown[][];
 
         // Check that there was 1 result for the Ontario
-        test.addStep('Verifying there is 1 feature info result for the Ontario query...');
-        Test.assertIsArrayLengthEqual(resultsOntarioResults, 1);
+        test.addStep('Verifying there is 2 feature info result for the Ontario query...');
+        Test.assertIsArrayLengthEqual(resultsOntarioResults, 2);
 
         // Check that there was 0 result for the Ontario
         test.addStep('Verifying there is 0 feature info result for the Ontario query...');
@@ -106,103 +108,6 @@ export class DetailsTester extends GVAbstractTester {
       }
     );
   }
-
-  // /**
-  //  * Tests adding a the Airborne Geocore layer, launching a query layers at a given lonlat, set the active footerbar tab to geochart and select the layer in the geochart panel.
-  //  * @returns A Promise resolving when the test completes.
-  //  */
-  // testAddGeocoreLayerUUIDForGeochartAirborne(): Promise<Test<AbstractGVLayer>> {
-  //   // Test it
-  //   return this.testAddGeocoreLayerUUIDForGeochart(
-  //     GVAbstractTester.AIRBORNE_RADIOACTIVITY_UUID,
-  //     GVAbstractTester.AIRBORNE_RADIOACTIVITY_UUID_WITH_SUFFIX,
-  //     GVAbstractTester.AIRBORNE_RADIOACTIVITY_GROUP,
-  //     GVAbstractTester.QUEBEC_LONLAT,
-  //     {
-  //       [GVAbstractTester.AIRBORNE_RADIOACTIVITY_UUID_WITH_SUFFIX]: {
-  //         layers: [
-  //           {
-  //             layerId: GVAbstractTester.AIRBORNE_RADIOACTIVITY_UUID_WITH_SUFFIX,
-  //             propertyValue: 'OBJECTID',
-  //             propertyDisplay: 'Location_Emplacement',
-  //           },
-  //         ],
-  //         chart: 'line',
-  //         query: {
-  //           type: 'esriRegular',
-  //           url: 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/airborne_radioactivity_en/MapServer/3',
-  //           queryOptions: {
-  //             whereClauses: [
-  //               {
-  //                 field: 'Location_Emplacement',
-  //                 prefix: "'",
-  //                 valueFrom: 'Location_Emplacement',
-  //                 suffix: "'",
-  //               },
-  //             ],
-  //             orderByField: 'CollectionStart_DebutPrelevement',
-  //           },
-  //         },
-  //       },
-  //     }
-  //   );
-  // }
-
-  // /**
-  //  * Tests adding a Geocore layer, launching a query layers at a given lonlat, set the active footerbar tab to geochart and select the layer in the geochart panel.
-  //  * @param uuid - The uuid of the Gecoore layer
-  //  * @param layerPathAdd - The layer path of the layer that was added
-  //  * @param layerPathRemove - The layer path of the layer to remove once the test terminates.
-  //  * @param lonlat - The coordinate on the map to query.
-  //  * @param expectedGeochartChartsConfig - The expected geochart charts configuration to validate.
-  //  * @returns
-  //  */
-  // testAddGeocoreLayerUUIDForGeochart(
-  //   uuid: string,
-  //   layerPathAdd: string,
-  //   layerPathRemove: string,
-  //   lonlat: Coordinate,
-  //   expectedGeochartChartsConfig: Record<string, unknown>
-  // ): Promise<Test<AbstractGVLayer>> {
-  //   // Test
-  //   return this.test(
-  //     'Test Geochart',
-  //     async (test) => {
-  //       // Update the step
-  //       test.addStep(`Adding the layer on the map for ${uuid}`);
-
-  //       // Add the geoview layer by geocore uuid
-  //       const result = await this.getMapViewer().layer.addGeoviewLayerByGeoCoreUUID(uuid);
-
-  //       // Update the step
-  //       test.addStep(`Adding the layer on the map...`);
-
-  //       // Wait for the layer to be processed (bit optional)
-  //       await result!.promiseLayer;
-
-  //       // Continue the test and return the layer
-  //       return GeochartTester.helperStepLayerWithGeochart(test, this.getMapViewer(), layerPathAdd, lonlat);
-  //     },
-  //     (test) => {
-  //       // Perform assertions
-  //       test.addStep('Verifying expected geochart config...');
-  //       const geochartsConfig = GeochartController.getSingleGeochartState(this.getMapId(), 'geochartChartsConfig');
-  //       Test.assertJsonObject(geochartsConfig, expectedGeochartChartsConfig);
-
-  //       // Check that geochart is the active footer bar
-  //       test.addStep("Verifying 'geochart' is the selected footer tab...");
-  //       Test.assertIsEqual(UIController.getActiveFooterBarTab(this.getMapId()), 'geochart');
-
-  //       // Check that layer path is selected
-  //       test.addStep(`Verifying ${layerPathAdd} is the selected layer for the geochart...`);
-  //       Test.assertIsEqual(GeochartController.getSingleGeochartState(this.getMapId(), 'selectedLayerPath'), layerPathAdd);
-  //     },
-  //     (test) => {
-  //       // Redirect to LayerTest to help test the removal of the layer
-  //       LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPathRemove);
-  //     }
-  //   );
-  // }
 
   /**
    * Retrieves a layer from the map, performs a feature info query at a specific coordinate,
@@ -252,4 +157,330 @@ export class DetailsTester extends GVAbstractTester {
     // Select the right layer path
     this.getControllersRegistry().detailsController.setSelectedLayerPath(layerPath);
   }
+
+  /**
+   * Tests that clearing all highlights removes highlighted features from the store.
+   *
+   * @param lonlat - The coordinate on the map to query
+   * @returns A promise resolving when the test completes
+   */
+  testClearAllHighlights(lonlat: Coordinate): Promise<Test<unknown>> {
+    return this.test(
+      `Test Clear all highlights across multiple layers...`,
+      async (test) => {
+        // Simulate a map click — this queries ALL layers and auto-highlights the first feature from each layer with results
+        test.addStep('Simulating map click to trigger highlight on all queryable layers...');
+        const simulatedClick = this.getMapViewer().simulateMapClick(lonlat);
+
+        // Wait for query to complete
+        await simulatedClick.promiseQueryBatched;
+
+        // Verify highlights exist in store
+        test.addStep('Verifying highlighted features exist in store...');
+        const highlightedBefore = getStoreMapHighlightedFeatures(this.getMapId());
+        const uniqueUids = new Set(highlightedBefore.map((f) => f.uid));
+        test.addStep(`Highlighted features — unique uids: ${uniqueUids.size}, total entries in store: ${highlightedBefore.length}`);
+        Test.assertIsArrayLengthMinimal(highlightedBefore, 1);
+
+        // Clear all highlights
+        test.addStep('Clearing all highlighted features...');
+        this.getControllersRegistry().mapController.removeHighlightedFeature('all');
+
+        // Wait for UI
+        await delay(500);
+
+        // Check highlights after clear — store is immediately emptied by removeHighlightedFeature('all')
+        test.addStep('Checking highlighted features after clear (details panel still open)...');
+        const highlightedAfterClear = getStoreMapHighlightedFeatures(this.getMapId());
+        test.addStep(`Highlighted after clear (details open): ${highlightedAfterClear.length}`);
+        Test.assertIsArrayLengthEqual(highlightedAfterClear, 0);
+
+        // Close the details panel — this should remove the active feature highlight
+        test.addStep('Closing the details panel...');
+        this.getControllersRegistry().uiController.setActiveFooterBarTab('');
+
+        // Wait for UI to settle after panel close
+        await delay(1000);
+
+        // Check highlighted features after closing panel
+        const highlightedAfterClose = getStoreMapHighlightedFeatures(this.getMapId());
+        test.addStep(`Highlighted after close panel: ${highlightedAfterClose.length}`);
+
+        // Also hide the click marker explicitly (closing the panel does not auto-clear the click marker)
+        test.addStep('Hiding click marker...');
+        this.getControllersRegistry().mapController.clickMarkerIconHide();
+
+        // Wait for UI
+        await delay(500);
+
+        // Return the highlighted features and click marker after all cleanup
+        const clickMarker = getStoreMapClickMarker(this.getMapId());
+        return { highlightedAfterClose, clickMarker };
+      },
+      (test, result) => {
+        const { highlightedAfterClose, clickMarker } = result as { highlightedAfterClose: TypeFeatureInfoEntry[]; clickMarker: unknown };
+        // After clear all AND closing details panel, the store should be empty
+        test.addStep('Verifying no highlighted features remain after clear + close details panel...');
+        Test.assertIsArrayLengthEqual(highlightedAfterClose, 0);
+
+        // Verify click marker is also cleared
+        test.addStep('Verifying click marker is removed after explicit hide...');
+        Test.assertIsUndefined('clickMarker', clickMarker);
+      }
+    );
+  }
+
+  /**
+   * Tests that zoom-to-feature changes the map extent.
+   *
+   * @param layerPath - The layer path of the layer
+   * @param lonlat - The coordinate on the map to query
+   * @returns A promise resolving when the test completes
+   */
+  testZoomToFeature(layerPath: string, lonlat: Coordinate): Promise<Test<unknown>> {
+    return this.test(
+      `Test Zoom to feature on layer ${layerPath}...`,
+      async (test) => {
+        // Get the layer
+        const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
+
+        // Record initial zoom
+        test.addStep('Recording initial zoom level...');
+        const initialZoom = this.getMapViewer().getView().getZoom();
+
+        // Query the coordinate to get features
+        const features = await this.helperStepQueryLayerAtCoordinate(test, layer, lonlat);
+
+        // Verify we have features with extent
+        test.addStep('Verifying feature has extent for zoom...');
+        Test.assertIsDefined('features', features);
+        Test.assertIsArrayLengthMinimal(features, 1);
+        const feature = features[0];
+        Test.assertIsDefined('feature.extent', feature.extent);
+
+        // Zoom to the feature extent (no animation = instant, no await needed)
+        test.addStep('Zooming to feature extent...');
+        await this.getControllersRegistry().mapController.zoomToExtent(feature.extent, false, {
+          padding: [100, 100, 100, 100],
+          maxZoom: 13,
+        });
+
+        // Return the zoom level after zooming
+        return { initialZoom, finalZoom: this.getMapViewer().getView().getZoom() };
+      },
+      (test, result) => {
+        // Verify zoom level changed
+        test.addStep('Verifying zoom level changed...');
+        const { initialZoom, finalZoom } = result as { initialZoom: number; finalZoom: number };
+        Test.assertIsNotEqual(initialZoom, finalZoom);
+      }
+    );
+  }
+
+  /**
+   * Tests that nameField configuration controls the feature display label.
+   *
+   * @returns A promise resolving when the test completes
+   */
+  testNameFieldAsLabel(): Promise<Test<unknown>> {
+    const mapId = this.getMapId();
+    const LAYER_PATH = 'geojsonLYR5/polygons.json';
+    const NAME_FIELD = 'Province';
+
+    return this.test(
+      'Test nameField as label in query results...',
+      async (test) => {
+        // Create map with custom featureInfo nameField config
+        test.addStep('Creating map with nameField configuration...');
+        await this.#helperCreateMapWithFeatureInfoConfig(test, mapId, {
+          queryable: true,
+          nameField: NAME_FIELD,
+        });
+
+        // Get the layer
+        test.addStep('Getting the layer...');
+        const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(LAYER_PATH);
+
+        // Query at Ontario coordinates
+        const features = await this.helperStepQueryLayerAtCoordinate(test, layer, GVAbstractTester.ONTARIO_CENTER_LONLAT);
+
+        return features;
+      },
+      (test, result) => {
+        const features = result as TypeFeatureInfoEntry[];
+        // Verify we got results
+        test.addStep('Verifying query returned features...');
+        Test.assertIsDefined('features', features);
+        Test.assertIsArrayLengthMinimal(features, 1);
+
+        // Verify the nameField is set correctly on the result
+        test.addStep('Verifying nameField is set on result...');
+        Test.assertIsEqual(features[0].nameField, NAME_FIELD);
+      }
+    );
+  }
+
+  /**
+   * Tests that fields with summary: false are excluded from query results.
+   *
+   * @returns A promise resolving when the test completes
+   */
+  testSummaryFalseHidesField(): Promise<Test<unknown>> {
+    const mapId = this.getMapId();
+    const LAYER_PATH = 'geojsonLYR5/polygons.json';
+    const HIDDEN_FIELD = 'Name_en';
+
+    return this.test(
+      'Test summary false hides field from query results...',
+      async (test) => {
+        // Create map with outfields config where Name_en has summary: false
+        test.addStep('Creating map with outfields summary:false configuration...');
+        await this.#helperCreateMapWithFeatureInfoConfig(test, mapId, {
+          queryable: true,
+          nameField: 'Province',
+          outfields: [
+            { name: 'Province', alias: 'Province', type: 'string' },
+            { name: 'Name_en', alias: 'English Name', type: 'string', summary: false },
+          ],
+        });
+
+        // Get the layer
+        test.addStep('Getting the layer...');
+        const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(LAYER_PATH);
+
+        // Query at Ontario coordinates
+        const features = await this.helperStepQueryLayerAtCoordinate(test, layer, GVAbstractTester.ONTARIO_CENTER_LONLAT);
+
+        return features;
+      },
+      (test, result) => {
+        const features = result as TypeFeatureInfoEntry[];
+        // Verify we got results
+        test.addStep('Verifying query returned features...');
+        Test.assertIsDefined('features', features);
+        Test.assertIsArrayLengthMinimal(features, 1);
+
+        // Verify the hidden field is NOT in fieldInfo
+        test.addStep(`Verifying field '${HIDDEN_FIELD}' is excluded from fieldInfo...`);
+        Test.assertIsUndefined(`fieldInfo.${HIDDEN_FIELD}`, features[0].fieldInfo[HIDDEN_FIELD]);
+
+        // Verify that Province field IS present
+        test.addStep('Verifying Province field IS present in fieldInfo...');
+        Test.assertIsDefined('fieldInfo.Province', features[0].fieldInfo.Province);
+      }
+    );
+  }
+
+  /**
+   * Tests that field alias configuration is applied in query results.
+   *
+   * @returns A promise resolving when the test completes
+   */
+  testFieldAliasRenamesField(): Promise<Test<unknown>> {
+    const mapId = this.getMapId();
+    const LAYER_PATH = 'geojsonLYR5/polygons.json';
+    const ALIAS_VALUE = 'Custom Province Name';
+
+    return this.test(
+      'Test field alias renames field in query results...',
+      async (test) => {
+        // Create map with outfields config where Province has a custom alias
+        test.addStep('Creating map with outfields alias configuration...');
+        await this.#helperCreateMapWithFeatureInfoConfig(test, mapId, {
+          queryable: true,
+          nameField: 'Province',
+          outfields: [
+            { name: 'Province', alias: ALIAS_VALUE, type: 'string' },
+            { name: 'Name_en', alias: 'English Name', type: 'string' },
+          ],
+        });
+
+        // Get the layer
+        test.addStep('Getting the layer...');
+        const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(LAYER_PATH);
+
+        // Query at Ontario coordinates
+        const features = await this.helperStepQueryLayerAtCoordinate(test, layer, GVAbstractTester.ONTARIO_CENTER_LONLAT);
+
+        return features;
+      },
+      (test, result) => {
+        const features = result as TypeFeatureInfoEntry[];
+        // Verify we got results
+        test.addStep('Verifying query returned features...');
+        Test.assertIsDefined('features', features);
+        Test.assertIsArrayLengthMinimal(features, 1);
+
+        // Verify the alias is applied
+        test.addStep(`Verifying Province field alias is '${ALIAS_VALUE}'...`);
+        Test.assertIsDefined('fieldInfo.Province', features[0].fieldInfo.Province);
+        Test.assertIsEqual(features[0].fieldInfo.Province.alias, ALIAS_VALUE);
+      }
+    );
+  }
+
+  // #region PRIVATE HELPERS
+
+  /**
+   * Creates a map with a GeoJSON polygons layer configured with custom featureInfo settings.
+   *
+   * @param test - The test instance used to log steps
+   * @param mapId - The map identifier
+   * @param featureInfoConfig - The featureInfo configuration to apply to the layer
+   * @returns A promise that resolves when the map is created and layers are loaded
+   */
+  async #helperCreateMapWithFeatureInfoConfig<T>(test: Test<T>, mapId: string, featureInfoConfig: Record<string, unknown>): Promise<void> {
+    const baseConfig = {
+      map: {
+        interaction: 'dynamic',
+        viewSettings: { projection: 3978, initialView: { zoomAndCenter: [4.5, [-90, 60]] } },
+        basemapOptions: { basemapId: 'transport', shaded: true, labeled: true },
+        listOfGeoviewLayerConfig: [
+          {
+            geoviewLayerId: 'geojsonLYR5',
+            geoviewLayerName: 'GeoJSON Sample',
+            metadataAccessPath: GVAbstractTester.GEOJSON_METADATA_META,
+            geoviewLayerType: 'GeoJSON' as TypeGeoviewLayerType,
+            serviceDateFormat: 'DD/MM/YYYYTHH:mm:ss',
+            listOfLayerEntryConfig: [
+              {
+                layerId: 'polygons.json',
+                layerName: 'Polygons',
+                source: {
+                  featureInfo: featureInfoConfig,
+                },
+              },
+            ],
+          },
+        ],
+      },
+      components: [],
+      corePackages: ['test-suite'],
+      corePackagesConfig: [{ 'test-suite': { suites: ['suite-details'] } }],
+      theme: 'geo.ca',
+      footerBar: {
+        tabs: {
+          core: ['legend', 'layers', 'details'],
+        },
+      },
+    };
+
+    // Delete current map
+    test.addStep('Deleting current map...');
+    await this.getApi().deleteMapViewer(mapId, false);
+
+    // Create new map from config
+    test.addStep('Creating the map from config...');
+    const mapViewer = await this.getApi().createMapFromConfigFast(mapId, JSON.stringify(baseConfig), 500);
+
+    // Replace the map viewer and the controller registry in the tester with the new one
+    this.reassignMapViewerAndControllers(mapViewer, mapViewer.controllers);
+
+    // Wait for layers to load
+    test.addStep('Waiting for layers to get loaded...');
+    const loadedLayersCount = await this.getControllersRegistry().layerController.waitForLayersLoaded();
+    test.addStep(`Layers loaded (${loadedLayersCount})`);
+  }
+
+  // #endregion
 }

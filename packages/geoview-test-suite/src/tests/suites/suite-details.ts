@@ -67,7 +67,7 @@ export class GVTestSuiteDetails extends GVAbstractTestSuite {
    * @returns A promise that resolves when tests are completed
    */
   protected override async onLaunchTestSuite(): Promise<unknown> {
-    // Test Geochart
+    // Test Details with polygons (visibility toggling)
     const pGeochartPolygons = this.#detailsTester.testDetailsForGeoJSONOntarioAlberta(
       'geojsonLYR5/polygons.json',
       GVAbstractTester.ONTARIO_CENTER_LONLAT,
@@ -77,10 +77,18 @@ export class GVTestSuiteDetails extends GVAbstractTestSuite {
     // Wait for the test with polygons to complete
     await pGeochartPolygons;
 
-    // Test Geochart
-    // const pGeochartAirborne = this.#detailsTester.testAddGeocoreLayerUUIDForGeochartAirborne();
+    // Test clear all highlights
+    await this.#detailsTester.testClearAllHighlights(GVAbstractTester.ONTARIO_CENTER_LONLAT);
 
-    // Resolve when all
-    return Promise.all([pGeochartPolygons]);
+    // Test zoom to feature
+    await this.#detailsTester.testZoomToFeature('geojsonLYR5/polygons.json', GVAbstractTester.ONTARIO_CENTER_LONLAT);
+
+    // Tests that recreate the map with custom featureInfo config (sequential)
+    await this.#detailsTester.testNameFieldAsLabel();
+    await this.#detailsTester.testSummaryFalseHidesField();
+    await this.#detailsTester.testFieldAliasRenamesField();
+
+    // Resolve when all done
+    return Promise.resolve();
   }
 }

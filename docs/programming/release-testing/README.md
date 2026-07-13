@@ -72,7 +72,7 @@ Each release gets its own issue. Previous release test results are preserved as 
 | 7   | [07-legend.md](07-legend.md)                                   | Legend panel, show/hide all, full screen               | 15 min       | 31 (0/12/19)         |
 | 8   | [08-layers.md](08-layers.md)                                   | Layer panel, add (URL/file), all types, settings       | 55 min       | 123 (1/23/99)        |
 | 9   | [09-styles.md](09-styles.md)                                   | Style rendering, visual variables, feature labels      | 10 min       | 15 (0/0/15)          |
-| 10  | [10-details.md](10-details.md)                                 | Details panel, highlighting, navigation, summary       | 15 min       | 23 (1/3/19)          |
+| 10  | [10-details.md](10-details.md)                                 | Details panel, highlighting, navigation, summary       | 15 min       | 24 (6/0/18)          |
 | 11  | [11-data-table.md](11-data-table.md)                           | Data table, filtering, columns, density, export        | 20 min       | 41 (2/8/31)          |
 | 12  | [12-view-settings.md](12-view-settings.md)                     | Zoom constraints, extent override, rotation disabled   | 10 min       | 16 (4/2/10)          |
 | 13  | [13-projection.md](13-projection.md)                           | Geometry, table, north pole on projection switch       | 10 min       | 10 (1/0/9)           |
@@ -95,16 +95,16 @@ Each release gets its own issue. Previous release test results are preserved as 
 | 25  | [25-developer-tools.md](25-developer-tools.md)                 | ESRI/WFS renderer tools                                | 10 min       | 16 (0/0/16)          |
 | 26  | [26-production-configs.md](26-production-configs.md)           | OSDP, Open Maps, Arctic SDI, GSC, CGDI smoke tests     | 20 min       | 34 (0/0/34)          |
 | 27  | [27-automation-candidates.md](27-automation-candidates.md)     | Tests recommended for automation via TestCreator       | —            | 112 candidates       |
-|     | **TOTAL**                                                      |                                                        | **~445 min** | **899 (54/172/673)** |
+|     | **TOTAL**                                                      |                                                        | **~445 min** | **900 (59/169/672)** |
 
 **Test breakdown:**
 
 | Category          | Count   | Description                                                |
 | ----------------- | ------- | ---------------------------------------------------------- |
-| **A** — Automated | 54      | Covered by `geoview-test-suite` (no manual effort needed)  |
-| **C** — Candidate | 172     | Candidate for automation (manual today, automatable later) |
-| **M** — Manual    | 673     | Requires manual verification (UI, visual, interaction)     |
-| **Total**         | **899** | All tests across all files                                 |
+| **A** — Automated | 59      | Covered by `geoview-test-suite` (no manual effort needed)  |
+| **C** — Candidate | 169     | Candidate for automation (manual today, automatable later) |
+| **M** — Manual    | 672     | Requires manual verification (UI, visual, interaction)     |
+| **Total**         | **900** | All tests across all files                                 |
 
 > **Keeping counts in sync**: When modifying any release-testing file (changing M→C, M→A, C→A, or adding/removing tests), also update the "Tests (A/C/M)" column for that file and recalculate the TOTAL row. Format: `total (A/C/M)`.
 
