@@ -212,20 +212,20 @@ These tests from the release plan are already covered by the existing test suite
 | 117 | ~~**Summary false hides field** — Query a layer with `outfields[].summary: false`, verify field excluded from result features' fieldInfo~~ | P1       | ✅ Done — `testSummaryFalseHidesField` in `suite-details`                  |
 | 118 | ~~**Field alias renames field** — Query a layer with `outfields[].alias`, verify field label uses alias instead of raw name~~              | P1       | ✅ Done — `testFieldAliasRenamesField` in `suite-details`                  |
 
-### Data Table (suite-data-table or suite-map-varia)
+### Data Table (suite-data-table)
 
-| #   | Test                                                                                                                               | Priority | Notes                                                                  |
-| --- | ---------------------------------------------------------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------- |
-| 83  | **Row count matches store** — Open data table, verify displayed row count matches `allFeaturesDataArray` length for that layer     | P1       | Store `allFeaturesDataArray` count check                               |
-| 84  | **geoviewID column hidden by default** — Check store `columnVisibilityRecord.geoviewID === false`                                  | P1       | Store default state check                                              |
-| 85  | **Filter by extent unavailable for Esri Dynamic** — Select Esri Dynamic layer, verify filter toggle absent/disabled                | P1       | DOM/store check: `filterDataToExtent` not available for dynamic layers |
-| 86  | **Clear filters resets state** — Apply column filter, click Clear, verify store `columnFiltersRecord` is empty                     | P1       | Store check pre/post clear                                             |
-| 87  | **tableFilters store on apply** — Apply filter to map, verify `tableFilters[layerPath]` store contains filter string               | P1       | Store check after `applyMapFilters()`                                  |
-| 88  | **Apply-to-map disabled during global search** — Set global search text, verify `mapFilteredRecord` toggle disabled                | P1       | Store/DOM check: toggle disabled when `globalFilterRecord` non-empty   |
-| 89  | **layerFilterClass reflected in table** — Toggle style classes off, verify store `layerFilterClass` affects table                  | P1       | Overlaps with legend #56; table perspective                            |
-| 90  | **allFeaturesDataArray populated** — Open data table, verify store array has entries                                               | P1       | Store basic population check                                           |
-| 91  | **rowsFilteredRecord count** — Apply filter, verify `layersDataTableSetting[layerPath].rowsFilteredRecord` matches displayed count | P1       | Store value vs DOM count comparison                                    |
-| 92  | **mapFilteredRecord boolean** — Toggle "Apply filter to map" ON, verify store `mapFilteredRecord === true`                         | P1       | Store boolean check                                                    |
+| #   | Test                                                                                                                               | Priority | Notes                                                                                |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------ | --- |
+| 83  | ~~**Row count matches store** — Open data table, verify displayed row count matches `allFeaturesDataArray` length for that layer~~ | ✅ Done  | `DataTableTester.testRowCountMatchesStore()`                                         |
+| 84  | ~~**geoviewID column hidden by default** — Check store `columnVisibilityRecord.geoviewID === false`~~                              | ✅ Done  | `DataTableTester.testGeoviewIdColumnHiddenByDefault()`                               |
+| 85  | **Filter by extent unavailable for Esri Dynamic** — Select Esri Dynamic layer, verify filter toggle absent/disabled                | P1       | DOM/store check: `filterDataToExtent` not available for dynamic layers               |
+| 86  | ~~**Clear filters resets state** — Apply column filter, click Clear, verify store `columnFiltersRecord` is empty~~                 | ✅ Done  | `DataTableTester.testClearFiltersResetsState()`                                      |
+| 87  | ~~**tableFilters store on apply** — Apply filter to map, verify `tableFilters[layerPath]` store contains filter string~~           | ✅ Done  | `DataTableTester.testTableFiltersStoreOnApply()`                                     |
+| 88  | **Apply-to-map disabled during global search** — Set global search text, verify `mapFilteredRecord` toggle disabled                | P1       | Store/DOM check: toggle disabled when `globalFilterRecord` non-empty                 |
+| 89  | **layerFilterClass reflected in table** — Toggle style classes off, verify store `layerFilterClass` affects table                  | P1       | Overlaps with legend #56; table perspective                                          |
+| 90  | ~~**allFeaturesDataArray populated** — Open data table, verify store array has entries~~                                           | ✅ Done  | `DataTableTester.testAllFeaturesDataArrayPopulated()`                                |
+| 91  | ~~**rowsFilteredRecord count** — Apply filter, verify `layersDataTableSetting[layerPath].rowsFilteredRecord` matches count~~       | ✅ Done  | `DataTableTester.testRowsFilteredRecordCount()`                                      |
+| 92  | ~~**mapFilteredRecord boolean** — Toggle "Apply filter to map" ON, verify store `mapFilteredRecord === true`~~                     | ✅ Done  | `DataTableTester.testMapFilteredRecordDefault()` + `testSetMapFilteredRecordFalse()` |     |
 
 ### View Settings (suite-map-config)
 

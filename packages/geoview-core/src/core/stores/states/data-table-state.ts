@@ -465,6 +465,16 @@ export const useStoreDataTableQueryStatusSet = (): Record<string, TypeQueryStatu
   });
 };
 
+/** Returns the per-layer data table settings record. */
+export const getStoreDataTableLayerSettings = (mapId: string): Record<string, IDataTableSettings> => {
+  return getStoreDataTableState(mapId)?.layersDataTableSetting ?? {};
+};
+
+/** Hook that returns the per-layer data table settings record. */
+export const useStoreDataTableLayerSettings = (): Record<string, IDataTableSettings> => {
+  return useStableSelector(useGeoViewStore(), (state) => state.dataTableState.layersDataTableSetting);
+};
+
 // #endregion STATE GETTERS & HOOKS
 
 // #region STATE GETTERS & HOOKS - OTHERS (no match between getter-hook)
@@ -489,11 +499,6 @@ export const getStoreDataTableFeaturesByPath = (mapId: string, layerPath: string
  */
 export const getStoreDataTableMapFilteredRecord = (mapId: string, layerPath: string): boolean | undefined => {
   return getStoreDataTableState(mapId)?.layersDataTableSetting?.[layerPath]?.mapFilteredRecord;
-};
-
-/** Hook that returns the per-layer data table settings record. */
-export const useStoreDataTableLayerSettings = (): Record<string, IDataTableSettings> => {
-  return useStableSelector(useGeoViewStore(), (state) => state.dataTableState.layersDataTableSetting);
 };
 
 /** Hook that returns the currently selected feature in the data table. */

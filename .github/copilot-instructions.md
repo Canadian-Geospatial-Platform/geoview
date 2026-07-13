@@ -946,7 +946,7 @@ setStoreMapClickMarker(this.getMapId(), projectedCoords[0]);
 this.getControllersRegistry().mapController.applyLayerFilters(layerPath);
 ```
 
-**Missing `getStore*` getters** — When a `useStore*` hook exists but no corresponding `getStore*` getter is available, **create the getter** in the same store file (immediately after the hook). Tests and controllers run outside React and cannot use hooks — they need `getStore*` getters. Follow the naming convention `getStore{Slice}{Property}(mapId, ...)` and match the return type of the hook. Never use `getStoreMapStateJson(mapId).property` as a workaround — always create a dedicated getter.
+**Missing `getStore*` getters** — When a `useStore*` hook exists but no corresponding `getStore*` getter is available, **create the getter** in the same store file (immediately before the hook, so the pair reads getter-then-hook). Tests and controllers run outside React and cannot use hooks — they need `getStore*` getters. Follow the naming convention `getStore{Slice}{Property}(mapId, ...)` and match the return type of the hook. Never use `getStoreMapStateJson(mapId).property` as a workaround — always create a dedicated getter.
 
 **Store region organization** — Store files have two regions:
 

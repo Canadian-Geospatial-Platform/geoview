@@ -16,6 +16,7 @@ import { GVTestSuiteUI } from './tests/suites/suite-ui';
 import { GVTestSuiteDetails } from './tests/suites/suite-details';
 import { GVTestSuiteUtilities } from './tests/suites/suite-utilities';
 import { GVTestSuiteSwiper } from './tests/suites/suite-swiper';
+import { GVTestSuiteDataTable } from './tests/suites/suite-data-table';
 
 /**
  * Create a class for the plugin instance.
@@ -109,6 +110,9 @@ class TestSuitePlugin extends AbstractPlugin {
       } else if (suite === 'suite-details') {
         // Instanciate the GeoView Test Suite
         this.addTestSuite(new GVTestSuiteDetails(window.cgpv.api, this.mapViewer, this.controllerRegistry));
+      } else if (suite === 'suite-data-table') {
+        // Instanciate the GeoView Test Suite
+        this.addTestSuite(new GVTestSuiteDataTable(window.cgpv.api, this.mapViewer, this.controllerRegistry));
       } else if (suite === 'suite-utilities') {
         // Instanciate the GeoView Test Suite
         this.addTestSuite(new GVTestSuiteUtilities(window.cgpv.api, this.mapViewer, this.controllerRegistry));

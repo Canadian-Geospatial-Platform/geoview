@@ -330,8 +330,8 @@ Run this and compare with the README table. Fix any discrepancy immediately.
 - ALWAYS use `generateId()` for layer IDs in layer/config tests
 - ALWAYS ask clarifying questions before generating test code — do not guess test requirements
 - ALWAYS follow the JSDoc, comment, and TypeScript conventions from `.github/copilot-instructions.md`
-- When a `useStore*` hook exists but no corresponding `getStore*` getter is available, **create the getter** in the same store file (immediately after the hook) rather than working around it via `getStoreLayerLegendLayerByPath()?.property`. Tests run outside React and cannot use hooks — they need `getStore*` getters. Follow the naming convention `getStore{Slice}{Property}(mapId, ...)` and match the return type of the hook.
-  - Getter location: same file as the hook, immediately after it.
+- When a `useStore*` hook exists but no corresponding `getStore*` getter is available, **create the getter** in the same store file (immediately before the hook, so the pair reads getter-then-hook) rather than working around it via `getStoreLayerLegendLayerByPath()?.property`. Tests run outside React and cannot use hooks — they need `getStore*` getters. Follow the naming convention `getStore{Slice}{Property}(mapId, ...)` and match the return type of the hook.
+  - Getter location: same file as the hook, immediately before it.
   - Pattern: `export const getStore{Slice}{Property} = (mapId: string, ...args): ReturnType => { return getStoreLayer...(...); };`
   - Example: Created `getStoreLayerControls(mapId, layerPath)` alongside existing `useStoreLayerControls` hook.
   - **Region rule**: Store files have two regions — `#region STATE GETTERS & HOOKS` (matched getter+hook pairs) and `#region STATE GETTERS & HOOKS - OTHERS` (orphan hooks with no getter). When you create a getter for a hook in the OTHERS region, **move both** to the main region. The OTHERS region is exclusively for items without a matching pair.

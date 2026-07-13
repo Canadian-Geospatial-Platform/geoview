@@ -210,9 +210,6 @@ export class DetailsTester extends GVAbstractTester {
         test.addStep('Hiding click marker...');
         this.getControllersRegistry().mapController.clickMarkerIconHide();
 
-        // Wait for UI
-        await delay(500);
-
         // Return the highlighted features and click marker after all cleanup
         const clickMarker = getStoreMapClickMarker(this.getMapId());
         return { highlightedAfterClose, clickMarker };
@@ -260,7 +257,7 @@ export class DetailsTester extends GVAbstractTester {
 
         // Zoom to the feature extent (no animation = instant, no await needed)
         test.addStep('Zooming to feature extent...');
-        await this.getControllersRegistry().mapController.zoomToExtent(feature.extent, false, {
+        void this.getControllersRegistry().mapController.zoomToExtent(feature.extent, false, {
           padding: [100, 100, 100, 100],
           maxZoom: 13,
         });
@@ -285,13 +282,13 @@ export class DetailsTester extends GVAbstractTester {
   testNameFieldAsLabel(): Promise<Test<unknown>> {
     const mapId = this.getMapId();
     const LAYER_PATH = 'geojsonLYR5/polygons.json';
-    const NAME_FIELD = 'Province';
+    const NAME_FIELD = 'creationDate';
 
     return this.test(
       'Test nameField as label in query results...',
       async (test) => {
-        // Create map with custom featureInfo nameField config
-        test.addStep('Creating map with nameField configuration...');
+        // Create map with custom featureInfo nameField config using a date field
+        test.addStep('Creating map with nameField configuration (date field)...');
         await this.#helperCreateMapWithFeatureInfoConfig(test, mapId, {
           queryable: true,
           nameField: NAME_FIELD,
@@ -328,19 +325,19 @@ export class DetailsTester extends GVAbstractTester {
   testSummaryFalseHidesField(): Promise<Test<unknown>> {
     const mapId = this.getMapId();
     const LAYER_PATH = 'geojsonLYR5/polygons.json';
-    const HIDDEN_FIELD = 'Name_en';
+    const HIDDEN_FIELD = 'creationDate';
 
     return this.test(
       'Test summary false hides field from query results...',
       async (test) => {
-        // Create map with outfields config where Name_en has summary: false
+        // Create map with outfields config where creationDate has summary: false
         test.addStep('Creating map with outfields summary:false configuration...');
         await this.#helperCreateMapWithFeatureInfoConfig(test, mapId, {
           queryable: true,
           nameField: 'Province',
           outfields: [
             { name: 'Province', alias: 'Province', type: 'string' },
-            { name: 'Name_en', alias: 'English Name', type: 'string', summary: false },
+            { name: 'creationDate', alias: 'Creation Date', type: 'date', summary: false },
           ],
         });
 
@@ -389,10 +386,7 @@ export class DetailsTester extends GVAbstractTester {
         await this.#helperCreateMapWithFeatureInfoConfig(test, mapId, {
           queryable: true,
           nameField: 'Province',
-          outfields: [
-            { name: 'Province', alias: ALIAS_VALUE, type: 'string' },
-            { name: 'Name_en', alias: 'English Name', type: 'string' },
-          ],
+          outfields: [{ name: 'Province', alias: ALIAS_VALUE, type: 'string' }],
         });
 
         // Get the layer
