@@ -1008,10 +1008,9 @@ export class LayerController extends AbstractMapViewerController {
     // Using resolution directly matches OL rendering behavior and covers both scale-sourced
     // and zoom-sourced limits without any conversion.
     const currentResolution = view.getResolution() ?? view.getResolutionForZoom(view.getZoom() ?? 0);
-    const currentScale = (view.getZoom() ?? undefined) !== undefined ? mapViewer.getMapScaleFromZoom(view.getZoom()!) : undefined;
 
     // Check if the layer falls in visible resolution range
-    const inVisibleRange = currentResolution ? gvLayer.isInVisibleRange(currentResolution, currentScale, effectiveScales) : true;
+    const inVisibleRange = currentResolution ? gvLayer.isInVisibleRange(currentResolution) : true;
 
     // Redirect
     this.setLayerInVisibleRange(gvLayer.getLayerPath(), inVisibleRange);
@@ -1020,7 +1019,7 @@ export class LayerController extends AbstractMapViewerController {
     let parentLayer = gvLayer.getParent();
     while (parentLayer) {
       // Check if the parent layer falls in visible resolution range
-      const parentInVisibleRange = currentResolution ? parentLayer.isInVisibleRange(currentResolution, currentScale) : true;
+      const parentInVisibleRange = currentResolution ? parentLayer.isInVisibleRange(currentResolution) : true;
 
       // Redirect
       this.setLayerInVisibleRange(parentLayer.getLayerPath(), parentInVisibleRange);
@@ -2507,15 +2506,11 @@ export class LayerController extends AbstractMapViewerController {
 
     // Current map resolution used for resolution-based visibility checks.
     const currentResolution = mapViewer.getView().getResolution() ?? mapViewer.getView().getResolutionForZoom(zoom);
-    const currentScale = mapViewer.getMapScaleFromZoom(zoom);
 
     // Get the inVisibleRange property by checking each layer's OL resolution thresholds.
     allLayers.forEach((layer) => {
-      // Get the effective scales
-      const effectiveScales = MapViewer.computeEffectiveLayerScales(mapViewer, layer.getLayerConfig());
-
       // Check if the layer is in visible range
-      const inVisibleRange = layer.isInVisibleRange(currentResolution, currentScale, effectiveScales);
+      const inVisibleRange = layer.isInVisibleRange(currentResolution);
 
       // Save to the store
       this.setLayerInVisibleRange(layer.getLayerPath(), inVisibleRange);

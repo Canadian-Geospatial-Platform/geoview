@@ -3,7 +3,6 @@ import type { Options as LayerGroupOptions } from 'ol/layer/Group';
 import type { Projection as OLProjection } from 'ol/proj';
 import type { Extent } from 'ol/extent';
 
-import type { EffectiveLayerScales } from '@/api/types/layer-schema-types';
 import EventHelper, { type EventDelegateBase } from '@/api/events/event-helper';
 import type { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import { LayerNotFoundError } from '@/core/exceptions/layer-exceptions';
@@ -144,18 +143,12 @@ export class GVGroupLayer extends AbstractBaseGVLayer {
    * A group layer is considered in range when at least one descendant leaf layer
    * is in visible range for the provided resolution and effective scale context.
    *
-   * @param currentResolution - The current map resolution used for visibility checks
-   * @param currentScale - Optional current map scale denominator
-   * @param effectiveScales - Optional effective min/max scale constraints
+   * @param currentResolution - The current map resolution
    * @returns True when at least one leaf child layer is in visible range
    */
-  protected override onIsInVisibleRange(
-    currentResolution: number | undefined,
-    currentScale?: number,
-    effectiveScales?: EffectiveLayerScales
-  ): boolean {
+  protected override onIsInVisibleRange(currentResolution: number | undefined): boolean {
     // A group layer is in visible range if any of its child leaf layers are in visible range
-    return this.getLayersAllLeafs().some((child) => child.isInVisibleRange(currentResolution, currentScale, effectiveScales));
+    return this.getLayersAllLeafs().some((child) => child.isInVisibleRange(currentResolution));
   }
 
   // #endregion OVERRIDES

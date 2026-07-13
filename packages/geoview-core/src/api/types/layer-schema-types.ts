@@ -514,10 +514,8 @@ export type ShapefileLayerConfig = {
  */
 export type EffectiveLayerScales = {
   maxScale?: number;
-  maxScaleTolerance?: number;
   maxScaleZoomAt?: number;
   minScale?: number;
-  minScaleTolerance?: number;
   minScaleZoomAt?: number;
 };
 
