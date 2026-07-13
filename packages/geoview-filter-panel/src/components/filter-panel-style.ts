@@ -80,14 +80,14 @@ export const getSxClasses = (theme: any): SxStyles => ({
 
   // Toggle icon button
   filterLayerToggleIcon: {
-    transform: 'rotate(0deg)',
+    transform: 'rotate(180deg)',
     transition: 'transform 0.2s',
     flexShrink: 0,
   },
 
   // Toggle icon button (collapsed state)
   filterLayerToggleIconCollapsed: {
-    transform: 'rotate(-90deg)',
+    transform: 'rotate(0deg)',
   },
 
   // Layer name text
@@ -96,6 +96,9 @@ export const getSxClasses = (theme: any): SxStyles => ({
     fontWeight: 600,
     flex: 1,
     minWidth: 0,
+    overflowWrap: 'break-word',
+    wordBreak: 'normal',
+    hyphens: 'auto',
   },
 
   // Clear button

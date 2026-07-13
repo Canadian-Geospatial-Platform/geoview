@@ -63,7 +63,7 @@
         "layers": [
           {
             "layerPath": "esriFeatureLYR4/0",
-            "layerName": "Top 100 exploration projects in Canada",
+            "filterName": "Top 100 exploration projects in Canada",
             "enabled": true,
             "collapsible": true,
             "defaultCollapsed": true,

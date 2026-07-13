@@ -33,6 +33,7 @@ import {
   useStoreLayerUrl,
 } from '@/core/stores/states/layer-state';
 import { useStoreTimeSliderFilter, useStoreTimeSliderLayer } from '@/core/stores/states/time-slider-state';
+import { useStoreFilterPanelFilterExpression } from '@/core/stores/states/filter-panel-state';
 import { useLayerController } from '@/core/controllers/use-controllers';
 import { GeoUtilities } from '@/geo/utils/utilities';
 
@@ -72,6 +73,7 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
   const classFilter = useStoreLayerFilterClass(layerPath);
   const dataFilter = useStoreDataTableFilter(layerPath);
   const timeFilter = useStoreTimeSliderFilter(layerPath);
+  const panelFilter = useStoreFilterPanelFilterExpression(layerPath);
   const schemaTag = useStoreLayerSchemaTag(layerPath);
   const url = useStoreLayerUrl(layerPath);
   const ogcVersion = useStoreLayerOgcVersion(layerPath);
@@ -214,7 +216,12 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
                 <ListItemText primary={`${t('layers.layerTimeFilter')}${timeFilter}`} />
               </ListItem>
             )}
-            {!layerFilter && !classFilter && !dataFilter && !timeFilter && (
+            {panelFilter && (
+              <ListItem sx={memoSxClasses.layerDetailsListItem}>
+                <ListItemText primary={`${t('layers.layerPanelFilter')}${panelFilter}`} />
+              </ListItem>
+            )}
+            {!layerFilter && !classFilter && !dataFilter && !timeFilter && !panelFilter && (
               <ListItem sx={memoSxClasses.layerDetailsListItem}>
                 <ListItemText primary={t('layers.layerActiveFiltersNone')} />
               </ListItem>

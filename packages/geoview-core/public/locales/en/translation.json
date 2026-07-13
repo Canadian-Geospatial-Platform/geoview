@@ -279,6 +279,7 @@
     "layerClassFilter": "Class filter: ",
     "layerDataTableFilter": "Data Table filter: ",
     "layerTimeFilter": "Time Slider filter: ",
+    "layerPanelFilter": "Filter Panel filter: ",
     "layerTemporalSettings": "Temporal settings: ",
     "layerDisplayDateFormat": "Display date format: ",
     "layerDisplayDateFormatShort": "Display date format (short): ",

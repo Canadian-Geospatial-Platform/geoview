@@ -236,7 +236,7 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
     <Box sx={memoSxClasses.filterLayerSection}>
       <Box sx={memoHeaderSx}>
         <Typography variant="body1" sx={memoSxClasses.filterLayerName}>
-          {layer.layerName || layerName}
+          {layer.filterName || layerName}
         </Typography>
         <Box sx={memoSxClasses.filterLayerHeaderRight}>
           <Button
@@ -251,7 +251,7 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
           </Button>
           {collapsible && (
             <IconButton
-              aria-label={t('FilterPanel.toggleCollapse', { layerName: layer.layerName })}
+              aria-label={t('FilterPanel.toggleCollapse', { filterName: layer.filterName })}
               aria-expanded={!isCollapsed}
               aria-controls={`filter-panel-layer-${layer.layerPath}`}
               tooltip={isCollapsed ? t('FilterPanel.expand') : t('FilterPanel.collapse')}

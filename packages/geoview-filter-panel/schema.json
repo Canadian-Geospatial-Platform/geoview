@@ -34,7 +34,7 @@
             "type": "string",
             "description": "Unique identifier for the layer (layer path)"
           },
-          "layerName": {
+          "filterName": {
             "type": "string",
             "description": "Display name for the layer"
           },

@@ -16,7 +16,7 @@ export interface TypeFilterLayer {
   /** Unique identifier for the layer (layer path). */
   layerPath: string;
   /** Display name for the layer. */
-  layerName: string;
+  filterName: string;
   /** Whether filtering is enabled for this layer. */
   enabled: boolean;
   /** Array of filterable attributes. */
