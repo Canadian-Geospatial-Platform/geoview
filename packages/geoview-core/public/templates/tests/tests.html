@@ -159,6 +159,7 @@
     <div id="group4-tabs" class="tabs group-tabs">
       <button class="tab-button" onclick="openTab(event, 'map7-test')">UI Tests</button>
       <button class="tab-button" onclick="openTab(event, 'map8-test')">Details</button>
+      <button class="tab-button" onclick="openTab(event, 'map11-test')">Data Table</button>
     </div>
 
     <!-- Group 5: Packages -->
@@ -967,6 +968,73 @@
                 'layers': []
               },
               'test-suite': { 'suites': ['suite-swiper'] }
+            }
+          ]
+        }"
+      ></div>
+    </div>
+
+    <!-- Map 11 Tab -->
+    <div id="map11-test" class="tab-content">
+      <div class="map-title-holder">
+        <h4 id="HEVNT11">11. Tests on map 11 (Data Table)</h4>
+        <a class="ref-link" href="#top">Top</a>
+      </div>
+
+      <div id="testSuiteTable-map11"></div>
+      <br />
+      <div
+        id="map11"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'projection': 3978,
+              'initialView': {
+                'zoomAndCenter': [4.5, [-90, 60]]
+              }
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': true,
+              'labeled': true
+            },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerId': 'geojsonLYR5',
+                'geoviewLayerName': 'GeoJSON Sample',
+                'metadataAccessPath': './datasets/geojson/metadata.meta',
+                'geoviewLayerType': 'GeoJSON',
+                'serviceDateFormat': 'DD/MM/YYYYTHH:mm:ss',
+                'listOfLayerEntryConfig': [
+                  {
+                    'layerId': 'polygons.json',
+                    'layerName': 'Polygons'
+                  }
+                ]
+              },
+              {
+                'geoviewLayerType': 'geoCore',
+                'geoviewLayerId': 'ccc75c12-5acc-4a6a-959f-ef6f621147b9'
+              }
+            ]
+          },
+          'components': [],
+          'footerBar': {
+            'tabs': {
+              'core': [
+                'data-table'
+              ]
+            },
+            'selectedTab': 'data-table'
+          },
+          'corePackages': ['test-suite'],
+          'theme': 'geo.ca',
+          'corePackagesConfig': [
+            {
+              'test-suite': { 'suites': ['suite-data-table'] }
             }
           ]
         }"
