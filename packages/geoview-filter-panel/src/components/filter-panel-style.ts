@@ -54,16 +54,16 @@ export const getSxClasses = (theme: any): SxStyles => ({
   // Layer section header
   filterLayerHeader: {
     display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: 'column',
+    gap: 1,
     p: 1.5,
     bgcolor: 'background.default',
-    gap: 1,
   },
 
-  filterLayerHeaderRight: {
+  filterLayerHeaderTop: {
     display: 'flex',
     alignItems: 'center',
+    justifyContent: 'space-between',
     gap: 1,
   },
 
@@ -105,6 +105,8 @@ export const getSxClasses = (theme: any): SxStyles => ({
   filterLayerClearButton: {
     minWidth: 'auto',
     whiteSpace: 'nowrap',
+    alignSelf: 'flex-start',
+    marginBottom: 5,
   },
 
   // Layer content area

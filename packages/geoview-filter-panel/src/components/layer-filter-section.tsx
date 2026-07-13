@@ -235,20 +235,10 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
   return (
     <Box sx={memoSxClasses.filterLayerSection}>
       <Box sx={memoHeaderSx}>
-        <Typography variant="body1" sx={memoSxClasses.filterLayerName}>
-          {layer.filterName || layerName}
-        </Typography>
-        <Box sx={memoSxClasses.filterLayerHeaderRight}>
-          <Button
-            type="text"
-            variant="outlined"
-            size="small"
-            startIcon={<CloseIcon />}
-            onClick={onClearLayer}
-            sx={memoSxClasses.filterLayerClearButton}
-          >
-            {t('FilterPanel.clear')}
-          </Button>
+        <Box sx={memoSxClasses.filterLayerHeaderTop}>
+          <Typography variant="body1" sx={memoSxClasses.filterLayerName}>
+            {layer.filterName || layerName}
+          </Typography>
           {collapsible && (
             <IconButton
               aria-label={t('FilterPanel.toggleCollapse', { filterName: layer.filterName })}
@@ -263,6 +253,16 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
             </IconButton>
           )}
         </Box>
+        <Button
+          type="text"
+          variant="outlined"
+          size="small"
+          startIcon={<CloseIcon />}
+          onClick={onClearLayer}
+          sx={memoSxClasses.filterLayerClearButton}
+        >
+          {t('FilterPanel.clear')}
+        </Button>
       </Box>
 
       <Collapse in={!isCollapsed}>
