@@ -203,12 +203,14 @@ These tests from the release plan are already covered by the existing test suite
 
 ### Details Panel (suite-details or suite-map-varia)
 
-| #   | Test                                                                                                             | Priority | Notes                                                                 |
-| --- | ---------------------------------------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------- |
-| 79  | **Clear all highlights** — Call `clearHighlightsUnchecked()`, verify no highlighted features remain on the map   | P1       | Store/API check: no highlighted features after clear                  |
-| 80  | **Non-queryable layer excluded** — Load config with `queryable: false`, query map, verify layer not in results   | P1       | Already in suite-map-varia (`testNonQueryableLayerNotInDetails`)      |
-| 81  | **Zoom to feature** — Trigger zoom-to-feature on a query result, verify map extent changes                       | P2       | Store extent check after zoom                                         |
-| 82  | **nameField as label** — Query a layer with configured `nameField`, verify feature label matches the field value | P2       | `createMapFromConfigFast` with 29-summary config + query result check |
+| #   | Test                                                                                                                                       | Priority | Notes                                                                      |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------ | -------- | -------------------------------------------------------------------------- |
+| 79  | ~~**Clear all highlights** — Call `clearHighlightsUnchecked()`, verify no highlighted features remain on the map~~                         | P1       | ✅ Done — `testClearAllHighlights` in `suite-details`                      |
+| 80  | ~~**Non-queryable layer excluded** — Load config with `queryable: false`, query map, verify layer not in results~~                         | P1       | ✅ Done — Already in suite-map-varia (`testNonQueryableLayerNotInDetails`) |
+| 81  | ~~**Zoom to feature** — Trigger zoom-to-feature on a query result, verify map extent changes~~                                             | P2       | ✅ Done — `testZoomToFeature` in `suite-details`                           |
+| 82  | ~~**nameField as label** — Query a layer with configured `nameField`, verify feature label matches the field value~~                       | P2       | ✅ Done — `testNameFieldAsLabel` in `suite-details`                        |
+| 117 | ~~**Summary false hides field** — Query a layer with `outfields[].summary: false`, verify field excluded from result features' fieldInfo~~ | P1       | ✅ Done — `testSummaryFalseHidesField` in `suite-details`                  |
+| 118 | ~~**Field alias renames field** — Query a layer with `outfields[].alias`, verify field label uses alias instead of raw name~~              | P1       | ✅ Done — `testFieldAliasRenamesField` in `suite-details`                  |
 
 ### Data Table (suite-data-table or suite-map-varia)
 

@@ -763,6 +763,18 @@ export const getStoreMapSize = (mapId: string): Size => {
 /** Selects the map size from the store. */
 export const useStoreMapSize = (): Size => useStore(useGeoViewStore(), (state) => state.mapState.size);
 
+/** Returns the click marker state from the store. */
+export const getStoreMapClickMarker = (mapId: string): TypeClickMarker | undefined => getStoreMapState(mapId).clickMarker;
+
+/** Selects the click marker state from the store. */
+export const useStoreMapClickMarker = (): TypeClickMarker | undefined => useStore(useGeoViewStore(), (state) => state.mapState.clickMarker);
+
+/** Returns whether the north arrow is enabled. */
+export const getStoreMapNorthArrow = (mapId: string): boolean => getStoreMapState(mapId).northArrow;
+
+/** Selects whether the north arrow is enabled from the store. */
+export const useStoreMapNorthArrow = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.northArrow);
+
 // #endregion STATE GETTERS & HOOKS
 
 // #region STATE GETTERS & HOOKS - OTHERS (no match between getter-hook)
@@ -772,9 +784,6 @@ export const useStoreMapAttribution = (): string[] => useStore(useGeoViewStore()
 
 /** Selects the map center coordinates from the store. */
 export const useStoreMapCenterCoordinates = (): Coordinate => useStore(useGeoViewStore(), (state) => state.mapState.centerCoordinates);
-
-/** Selects the click marker state from the store. */
-export const useStoreMapClickMarker = (): TypeClickMarker | undefined => useStore(useGeoViewStore(), (state) => state.mapState.clickMarker);
 
 /** Selects whether the map has a geoview basemap layer from the store. */
 export const useStoreMapHasGeoviewBasemapLayer = (): boolean =>
@@ -791,12 +800,6 @@ export const useStoreMapLoaded = (): boolean => useStore(useGeoViewStore(), (sta
 
 /** Selects whether the map is displayed from the store. */
 export const useStoreMapDisplayed = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.mapDisplayed);
-
-/** Returns whether the north arrow is enabled. */
-export const getStoreMapNorthArrow = (mapId: string): boolean => getStoreMapState(mapId).northArrow;
-
-/** Selects whether the north arrow is enabled from the store. */
-export const useStoreMapNorthArrow = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.northArrow);
 
 /** Selects the north arrow element state from the store. */
 export const useStoreMapNorthArrowElement = (): TypeNorthArrow => useStore(useGeoViewStore(), (state) => state.mapState.northArrowElement);

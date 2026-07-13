@@ -684,9 +684,14 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 **Suite:** `suite-details` · **File:** `tests/suites/suite-details.ts` · **Tester:** `DetailsTester` (`tests/testers/details-tester.ts`)
 **Execution:** Sequential + parallel · **Guard:** `details` must be in `footerBar.tabs.core`
 
-| #   | Method               | Type | Description                             |
-| --- | -------------------- | ---- | --------------------------------------- |
-| 1   | `testDetailsOnLayer` | test | Test Details on layer _{layerPath}_ ... |
+| #   | Method                       | Type | Description                                          |
+| --- | ---------------------------- | ---- | ---------------------------------------------------- |
+| 1   | `testDetailsOnLayer`         | test | Test Details on layer _{layerPath}_ ...              |
+| 2   | `testClearAllHighlights`     | test | Test Clear all highlights on layer _{layerPath}_ ... |
+| 3   | `testZoomToFeature`          | test | Test Zoom to feature on layer _{layerPath}_ ...      |
+| 4   | `testNameFieldAsLabel`       | test | Test nameField as label in query results...          |
+| 5   | `testSummaryFalseHidesField` | test | Test summary false hides field from query results... |
+| 6   | `testFieldAliasRenamesField` | test | Test field alias renames field in query results...   |
 
 ---
 

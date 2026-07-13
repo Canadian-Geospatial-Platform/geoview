@@ -323,6 +323,8 @@ Run this and compare with the README table. Fix any discrepancy immediately.
 - DO NOT use `if/else` for assertions — use `Test.assertXxx()` static methods only
 - DO NOT skip `test.addStep()` calls — they are required for test UI visibility
 - For zoom operations, use `this.getMapViewer().setMapZoomLevel()` (direct, no animation) or `this.getControllersRegistry().mapController.zoomMap()` (animated)
+- **`zoomToExtent(extent, false, options)`** — When `animate` is `false`, the zoom is instant. Do NOT `await` it and do NOT add a `delay()` after it. Only use `await` when `animate` is `true`.
+- **After `await promiseQueryBatched`** — The store state is immediately available (highlights, features, etc.). Do NOT add extra `delay()` calls to "wait for the store to settle" — the `await` already guarantees completion.
 - DO NOT hardcode URLs or layer IDs — add them as `static readonly` constants on the appropriate tester class or `GVAbstractTester`
 - DO NOT create tests that modify shared state without cleanup in `callbackFinalize`
 - ALWAYS use `generateId()` for layer IDs in layer/config tests
@@ -332,6 +334,7 @@ Run this and compare with the README table. Fix any discrepancy immediately.
   - Getter location: same file as the hook, immediately after it.
   - Pattern: `export const getStore{Slice}{Property} = (mapId: string, ...args): ReturnType => { return getStoreLayer...(...); };`
   - Example: Created `getStoreLayerControls(mapId, layerPath)` alongside existing `useStoreLayerControls` hook.
+  - **Region rule**: Store files have two regions — `#region STATE GETTERS & HOOKS` (matched getter+hook pairs) and `#region STATE GETTERS & HOOKS - OTHERS` (orphan hooks with no getter). When you create a getter for a hook in the OTHERS region, **move both** to the main region. The OTHERS region is exclusively for items without a matching pair.
 
 ## Creating a New Suite & Tester (Full Stack)
 
