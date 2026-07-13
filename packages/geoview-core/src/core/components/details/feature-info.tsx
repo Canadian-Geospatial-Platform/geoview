@@ -16,7 +16,6 @@ import { useStoreDetailsCheckedFeatures } from '@/core/stores/states/feature-inf
 import { useStoreGeochartChartsConfig, useStoreGeochartLayerDataArrayBatch } from '@/core/stores/states/geochart-state';
 import { useNavigateToTab } from '@/core/components/common/hooks/use-navigate-to-tab';
 import { logger } from '@/core/utils/logger';
-import { GeoUtilities } from '@/geo/utils/utilities';
 import type { TypeFeatureInfoEntry, TypeFieldEntry } from '@/api/types/map-schema-types';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { FeatureInfoTable } from './feature-info-table';
@@ -28,7 +27,12 @@ import {
   useStoreLayerDisplayDateFormat,
   useStoreLayerDisplayDateTimezone,
 } from '@/core/stores/states/layer-state';
-import { useDetailsController, useGeoChartControllerIfExists, useMapController } from '@/core/controllers/use-controllers';
+import {
+  useDetailsController,
+  useGeoChartControllerIfExists,
+  useMapController,
+  useLayerController,
+} from '@/core/controllers/use-controllers';
 import { DateMgt } from '@/core/utils/date-mgt';
 
 /** Properties for the FeatureInfo component. */
@@ -84,10 +88,6 @@ const TYPOGRAPHY_STYLES = {
 
 /** Padding values for zoom operations. */
 const ZOOM_PADDING = [5, 5, 5, 5];
-/** Maximum zoom level for zoom-to-feature. */
-const ZOOM_MAX_LEVEL = 17;
-/** Buffer distance in meters for point extent. */
-const EXTENT_BUFFER = 1000;
 
 /**
  * Creates the feature header component.
@@ -232,6 +232,7 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
   const displayDateFormat = useStoreLayerDisplayDateFormat(feature.layerPath);
   const displayDateTimezone = useStoreLayerDisplayDateTimezone(feature.layerPath);
   const mapController = useMapController();
+  const layerController = useLayerController();
   const detailsController = useDetailsController();
   const geoChartController = useGeoChartControllerIfExists();
 
@@ -323,11 +324,10 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
 
       // Buffer the extent to avoid zooming too close if it's a point
       const isPoint = feature.geometry!.getType() === 'Point';
-      const zoomExtent = isPoint ? GeoUtilities.bufferExtent(feature.extent, EXTENT_BUFFER) : feature.extent;
 
       // Zoom to extent and highlight the feature
-      mapController
-        .zoomToExtent(zoomExtent, true, { padding: ZOOM_PADDING, maxZoom: ZOOM_MAX_LEVEL })
+      layerController
+        .zoomToExtentRestricted(feature.layerPath, feature.extent, true, { padding: ZOOM_PADDING })
         .then(() => {
           // Highlight the bounding box
           if (feature.extent && !isPoint) {
@@ -340,7 +340,7 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
           logger.logPromiseFailed('zoomToExtent in handleZoomIn in FeatureInfoNew', error);
         });
     },
-    [feature, mapController]
+    [feature, layerController, mapController]
   );
 
   /**

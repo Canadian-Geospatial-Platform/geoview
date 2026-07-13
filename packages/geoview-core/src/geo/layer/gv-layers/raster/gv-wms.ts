@@ -1913,9 +1913,7 @@ export class GVWMS extends AbstractGVRaster {
   static #shouldIncludeNoStyleFeatures(layerStyle: TypeLayerStyleConfig | undefined): boolean {
     // If we have a style, we want to make sure to only get the features for which we have a style
     // If we have no style, we do our best to include any/all features
-    let includeNoStyleFeatures = true;
-    if (layerStyle) includeNoStyleFeatures = false;
-    return includeNoStyleFeatures;
+    return !layerStyle;
   }
 
   // #endregion STATIC PRIVATE METHODS

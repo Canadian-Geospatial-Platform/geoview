@@ -371,6 +371,36 @@ export class MapController extends AbstractMapViewerController {
   }
 
   /**
+   * Converts a zoom level to a map scale denominator.
+   *
+   * @param zoom - The zoom level
+   * @returns The scale denominator (e.g. 50000 for 1:50,000), or undefined if conversion is unavailable
+   */
+  getScaleFromZoom(zoom: number): number | undefined {
+    return this.getMapViewer().getMapScaleFromZoom(zoom);
+  }
+
+  /**
+   * Converts a map scale denominator to the corresponding zoom level.
+   *
+   * @param scale - The scale denominator (e.g. 50000 for 1:50,000)
+   * @returns The zoom level for the given scale, or undefined if conversion is unavailable
+   */
+  getZoomFromScale(scale: number): number | undefined {
+    return this.getMapViewer().getZoomFromScale(scale);
+  }
+
+  /**
+   * Converts a map scale denominator into the corresponding OpenLayers resolution.
+   *
+   * @param scale - The scale denominator (e.g. 50000 for 1:50,000)
+   * @returns The map resolution in map units per pixel, or undefined if conversion is unavailable
+   */
+  getResolutionFromScale(scale: number): number | undefined {
+    return this.getMapViewer().getMapResolutionFromScale(scale);
+  }
+
+  /**
    * Returns to initial view state of map using config.
    *
    * @param useAnimation - Indicates if a zoom animation should be used, default: true
