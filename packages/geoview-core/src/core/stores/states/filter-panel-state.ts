@@ -66,6 +66,8 @@ export interface TypeFilterAttribute {
   filterMissingDomainValues?: boolean;
   /** Optional step interval for date filters. Only applies when filterType is 'date'. */
   dateStep?: 'second' | 'minute' | 'hour' | 'day' | 'week' | 'month' | 'year';
+  /** Optional step interval for range filters. Only applies when filterType is 'range'. */
+  rangeStep?: number;
 }
 
 /** Filter type enumeration. */

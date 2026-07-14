@@ -3110,7 +3110,7 @@ interface FilterPanelConfig {
   title?: string;
   layers?: Array<{
     layerPath: string;
-    layerName?: string;
+    filterName?: string;
     enabled?: boolean;
     collapsible?: boolean;
     defaultCollapsed?: boolean;
@@ -3142,7 +3142,7 @@ type DateFilterAttribute = {
 - **title**: Panel header title (default: "Filter Layers")
 - **layers**: Array of layer configurations for filtering
   - **layerPath** (required): Unique layer path identifier
-  - **layerName** (optional): Display name for the layer (if not provided, layer path is used)
+  - **filterName** (optional): Display name for the layer (if not provided, layer path is used)
   - **enabled**: Whether filtering is enabled for this layer (default: true)
   - **collapsible**: Allow collapsing/expanding this layer section (default: true)
   - **defaultCollapsed**: Default collapsed state for this layer section. If `collapsible` is false, this is ignored and the section is forced open (default: false)
@@ -3165,6 +3165,7 @@ type DateFilterAttribute = {
 - **filterMissingDomainValues** (optional): If true, filter out values not in domain (default: false)
 
 **Range filter-specific properties:**
+- **rangeStep** (optional): Keyboard arrow key increment for range slider navigation (default: 1). Useful for large ranges (e.g., 0-100000 with step of 1000) or small/decimal ranges (e.g., 0.0-1.0 with step of 0.01). Must be a positive number.
 - **defaultValues** (optional): Object with `min` and `max` numeric properties
 
 #### Filter Types
@@ -3187,7 +3188,7 @@ type DateFilterAttribute = {
       "layers": [
         {
           "layerPath": "cities-layer",
-          "layerName": "Canadian Cities",
+          "filterName": "Canadian Cities",
           "enabled": true,
           "collapsible": true,
           "defaultCollapsed": false,
@@ -3216,7 +3217,7 @@ type DateFilterAttribute = {
       "layers": [
         {
           "layerPath": "population-data",
-          "layerName": "Population Data",
+          "filterName": "Population Data",
           "enabled": true,
           "collapsible": true,
           "defaultCollapsed": false,
@@ -3229,7 +3230,8 @@ type DateFilterAttribute = {
             {
               "fieldName": "population",
               "displayLabel": "Population Range",
-              "filterType": "range"
+              "filterType": "range",
+              "rangeStep": 10000
             },
             {
               "fieldName": "census_date",
@@ -3253,7 +3255,7 @@ type DateFilterAttribute = {
       "layers": [
         {
           "layerPath": "environmental-data",
-          "layerName": "Environmental Monitoring",
+          "filterName": "Environmental Monitoring",
           "enabled": true,
           "collapsible": false,
           "attributes": [

@@ -85,6 +85,7 @@
                 "displayLabel": "Longitude",
                 "filterType": "range",
                 "enabled": true,
+                "rangeStep": 0.1,
                 "defaultValues": {
                   "min": -100,
                   "max": -60

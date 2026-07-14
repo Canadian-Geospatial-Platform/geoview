@@ -279,7 +279,7 @@
     "layerClassFilter": "Filtre de classe : ",
     "layerDataTableFilter": "Filtre du tableau de données : ",
     "layerTimeFilter": "Filtre curseur temporel : ",
-    "layerPanelFilter": "Filtre du panneau : ",
+    "layerPanelFilter": "Panneau de filtres : ",
     "layerTemporalSettings": "Paramètres temporels: ",
     "layerDisplayDateFormat": "Format d'affichage: ",
     "layerDisplayDateFormatShort": "Format d'affichage (court): ",

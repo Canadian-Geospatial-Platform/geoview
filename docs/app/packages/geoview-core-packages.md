@@ -1650,7 +1650,7 @@ interface FilterPanelConfig {
   title?: string;
   layers?: Array<{
     layerPath: string;
-    layerName?: string;
+    filterName?: string;
     enabled?: boolean;
     collapsible?: boolean;
     defaultCollapsed?: boolean;
@@ -1688,6 +1688,7 @@ type RangeFilterAttribute = {
   displayLabel: string;
   filterType: 'range';
   enabled?: boolean;
+  rangeStep?: number;
   defaultValues?: { min: number | null; max: number | null } | null;
 };
 
@@ -1713,7 +1714,7 @@ type DateFilterAttribute = {
 **Layer properties:**
 
 - **layerPath** (string, required): Unique layer path identifier
-- **layerName** (string, optional): Display name for the layer (if not provided, layer path is used)
+- **filterName** (string, optional): Display name for the layer (if not provided, layer path is used)
 - **enabled** (boolean, default: true): Whether filtering is enabled for this layer
 - **collapsible** (boolean, default: true): Allow collapsing/expanding this layer section
 - **defaultCollapsed** (boolean, default: false): Default collapsed state for this layer section. If `collapsible` is false, this is ignored and the section is forced open.
@@ -1743,6 +1744,7 @@ type DateFilterAttribute = {
 **Range filter properties:**
 
 - **defaultValues** (object | null): Initial range with `min` and `max` properties (e.g., `{ "min": 0, "max": 100 }`)
+- **rangeStep** (number, default: 1): Keyboard arrow key increment for range slider navigation. Useful for large ranges (e.g., 0-100000 with step of 1000) or small/decimal ranges (e.g., 0.0-1.0 with step of 0.01). Must be a positive number.
 
 **Date filter properties:**
 
@@ -1775,7 +1777,7 @@ type DateFilterAttribute = {
         "layers": [
           {
             "layerPath": "cities-layer",
-            "layerName": "Canadian Cities",
+            "filterName": "Canadian Cities",
             "enabled": true,
             "collapsible": true,
             "defaultCollapsed": false,
@@ -1813,7 +1815,7 @@ type DateFilterAttribute = {
         "layers": [
           {
             "layerPath": "historical-data/0",
-            "layerName": "Historical Events",
+            "filterName": "Historical Events",
             "enabled": true,
             "attributes": [
               {
@@ -1853,7 +1855,7 @@ type DateFilterAttribute = {
         "layers": [
           {
             "layerPath": "population-data",
-            "layerName": "Population Data",
+            "filterName": "Population Data",
             "enabled": true,
             "collapsible": true,
             "defaultCollapsed": false,
@@ -1869,6 +1871,7 @@ type DateFilterAttribute = {
                 "displayLabel": "Population Range",
                 "filterType": "range",
                 "enabled": true,
+                "rangeStep": 10000,
                 "defaultValues": { "min": null, "max": null }
               },
               {
@@ -1904,7 +1907,7 @@ type DateFilterAttribute = {
         "layers": [
           {
             "layerPath": "environmental-data",
-            "layerName": "Environmental Monitoring",
+            "filterName": "Environmental Monitoring",
             "enabled": true,
             "collapsible": false,
             "attributes": [
@@ -1916,7 +1919,8 @@ type DateFilterAttribute = {
               {
                 "fieldName": "concentration",
                 "displayLabel": "Concentration (ppm)",
-                "filterType": "range"
+                "filterType": "range",
+                "rangeStep": 0.1
               }
             ]
           }
@@ -1943,7 +1947,7 @@ type DateFilterAttribute = {
         "layers": [
           {
             "layerPath": "weather-stations",
-            "layerName": "Weather Stations",
+            "filterName": "Weather Stations",
             "attributes": [
               {
                 "fieldName": "station_type",
@@ -1959,7 +1963,7 @@ type DateFilterAttribute = {
           },
           {
             "layerPath": "climate-data",
-            "layerName": "Climate Data",
+            "filterName": "Climate Data",
             "attributes": [
               {
                 "fieldName": "temperature",
@@ -2002,7 +2006,7 @@ Domain mapping allows you to display user-friendly labels for coded values in se
         "layers": [
           {
             "layerPath": "land-use",
-            "layerName": "Land Use Classification",
+            "filterName": "Land Use Classification",
             "attributes": [
               {
                 "fieldName": "use_code",
@@ -2046,7 +2050,7 @@ When `filterMissingDomainValues` is true, only features with values in the domai
         "layers": [
           {
             "layerPath": "infrastructure",
-            "layerName": "Infrastructure Assets",
+            "filterName": "Infrastructure Assets",
             "attributes": [
               {
                 "fieldName": "asset_status",
@@ -2154,7 +2158,7 @@ In this example:
 ### Usage Notes
 
 - **Layer Paths:** Must reference existing layers in the map configuration
-- **Layer Names:** Optional - if not provided, the layer path will be used as the display name
+- **Filter Names:** Optional - if not provided, the layer path will be used as the display name
 - **Field Names:** Must match actual field names in the layer schema
 - **Auto-Apply:** When `autoApply: true`, filters apply immediately on every change. When `false`, filters still apply automatically but may have a slight delay
 - **Reset:** Individual filters can be reset, or all filters can be reset at once using the reset button
@@ -2170,7 +2174,7 @@ In this example:
   "filter-panel": {
     "layers": [{
       "layerPath": "canadian-cities",
-      "layerName": "Canadian Cities",
+      "filterName": "Canadian Cities",
       "attributes": [
         { "fieldName": "province", "displayLabel": "Province", "filterType": "multiselect" },
         { "fieldName": "population", "displayLabel": "Population", "filterType": "range" }
@@ -2187,7 +2191,7 @@ In this example:
   "filter-panel": {
     "layers": [{
       "layerPath": "air-quality",
-      "layerName": "Air Quality Stations",
+      "filterName": "Air Quality Stations",
       "attributes": [
         { "fieldName": "pollutant", "displayLabel": "Pollutant Type", "filterType": "select" },
         { "fieldName": "concentration", "displayLabel": "Concentration (ppm)", "filterType": "range" },
@@ -2206,7 +2210,7 @@ In this example:
   "filter-panel": {
     "layers": [{
       "layerPath": "properties",
-      "layerName": "Properties",
+      "filterName": "Properties",
       "attributes": [
         { "fieldName": "property_type", "displayLabel": "Type", "filterType": "multiselect" },
         { "fieldName": "price", "displayLabel": "Price Range", "filterType": "range" },

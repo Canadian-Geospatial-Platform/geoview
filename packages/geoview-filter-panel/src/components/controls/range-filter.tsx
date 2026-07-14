@@ -36,13 +36,16 @@ export function RangeFilter(props: RangeFilterProps): JSX.Element {
 
   // Access UI components via window.cgpv pattern
   const { cgpv } = window as TypeWindow;
-  const { useMemo, useCallback } = cgpv.reactUtilities.react;
+  const { useMemo, useCallback, useRef } = cgpv.reactUtilities.react;
   const { ui } = cgpv;
   const { Box, Slider, Typography } = ui.elements;
 
   const theme = ui.useTheme();
   const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
   const { t } = useTranslation<string>();
+
+  // Reference to which slider thumb (0 = start, 1 = end) was last interacted with
+  const activeThumbRef = useRef<number>(1);
 
   /**
    * Memoized range value to prevent dependency changes on every render.
@@ -88,9 +91,11 @@ export function RangeFilter(props: RangeFilterProps): JSX.Element {
    * Handles when the slider value changes.
    */
   const handleSliderChange = useCallback(
-    (newValue: number | number[]): void => {
+    (newValue: number | number[], activeThumb: number): void => {
       // Assert that newValue is number[] since this is a range slider with two handles
       const [minValue, maxValue] = newValue as number[];
+      activeThumbRef.current = activeThumb;
+
       onChange({
         min: minValue,
         max: maxValue,
@@ -98,6 +103,38 @@ export function RangeFilter(props: RangeFilterProps): JSX.Element {
     },
 
     [onChange]
+  );
+
+  /**
+   * Handles keyboard navigation for the slider.
+   */
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent): void => {
+      const isLeftArrow = event.key === 'ArrowLeft';
+      const isRightArrow = event.key === 'ArrowRight';
+
+      if (!isLeftArrow && !isRightArrow) return;
+
+      event.preventDefault();
+
+      const [currentMin, currentMax] = memoSliderValue;
+      const step = attribute.rangeStep ?? 1;
+      const direction = isRightArrow ? 1 : -1;
+      const activeThumb = activeThumbRef.current;
+
+      if (activeThumb === 0) {
+        // Modify min value
+        const newMin = currentMin + step * direction;
+        const clampedMin = Math.min(Math.max(newMin, memoBounds.min), memoBounds.max);
+        onChange({ min: clampedMin, max: currentMax });
+      } else {
+        // Modify max value
+        const newMax = currentMax + step * direction;
+        const clampedMax = Math.min(Math.max(newMax, memoBounds.min), memoBounds.max);
+        onChange({ min: currentMin, max: clampedMax });
+      }
+    },
+    [memoSliderValue, memoBounds, attribute.rangeStep, onChange]
   );
 
   /**
@@ -144,10 +181,12 @@ export function RangeFilter(props: RangeFilterProps): JSX.Element {
         <Slider
           value={memoSliderValue}
           onChange={handleSliderChange}
+          onKeyDown={handleKeyDown}
           valueLabelDisplay={'off'}
           valueLabelFormat={formatValue}
           min={memoBounds.min}
           max={memoBounds.max}
+          step={attribute.rangeStep ?? 1}
         />
       </Box>
 

@@ -200,6 +200,11 @@
               "const": "range",
               "description": "Numeric min/max range"
             },
+            "rangeStep": {
+              "type": "number",
+              "description": "Step interval for range filter keyboard navigation",
+              "default": 1
+            },
             "defaultValues": {
               "oneOf": [
                 {
