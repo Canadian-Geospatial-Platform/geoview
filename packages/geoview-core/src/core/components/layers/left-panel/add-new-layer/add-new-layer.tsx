@@ -20,9 +20,10 @@ import {
   Stepper,
   TextField,
 } from '@/ui';
+import { ConfigApi } from '@/api/config/config-api';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useStoreAppDisabledLayerTypes, useStoreAppDisplayLanguage, useStoreAppShellContainer } from '@/core/stores/states/app-state';
-import { ConfigApi } from '@/api/config/config-api';
+import { useStoreMapConfigServiceUrlsProxyUrl } from '@/core/stores/states/map-state';
 import { logger } from '@/core/utils/logger';
 import { delay, generateId, isValidUUID, validateAndPingUrl } from '@/core/utils/utilities';
 import { VALID_FILE_EXTENSIONS_ACCEPT } from '@/core/utils/constant';
@@ -357,6 +358,7 @@ export function AddNewLayer(): JSX.Element {
   const disabledLayerTypes = useStoreAppDisabledLayerTypes();
   const language = useStoreAppDisplayLanguage();
   const shellContainer = useStoreAppShellContainer();
+  const proxyUrl = useStoreMapConfigServiceUrlsProxyUrl();
   const uiController = useUIController();
   const geoChartController = useGeoChartControllerIfExists();
   const layerController = useLayerController();
@@ -908,7 +910,7 @@ export function AddNewLayer(): JSX.Element {
         if (layerURL.startsWith('https://')) {
           setIsLoading(true);
           try {
-            const check = await validateAndPingUrl(layerURL);
+            const check = await validateAndPingUrl(layerURL, proxyUrl);
             logger.logDebug('URL validation check', check);
             const isOk = check.isValid && check.isReachable;
             setStepButtonEnabled(isOk);
@@ -965,7 +967,7 @@ export function AddNewLayer(): JSX.Element {
     }
     if (activeStep === 2 && layerIdsToAdd.length > 0) setStepButtonEnabled(true);
     if (activeStep === 2 && !layerIdsToAdd.length) setStepButtonEnabled(false);
-  }, [layerURL, activeStep, layerIdsToAdd, layerType, uiController, layerController, t]);
+  }, [layerURL, activeStep, layerIdsToAdd, layerType, uiController, layerController, proxyUrl, t]);
 
   /**
    * Manages focus when Step 2 validation errors occur.

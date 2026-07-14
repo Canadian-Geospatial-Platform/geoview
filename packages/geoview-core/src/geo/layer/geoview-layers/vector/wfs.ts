@@ -230,7 +230,7 @@ export class WFS extends AbstractGeoViewVector {
     WFS.initLayerMetadata(layerConfig as OgcWfsLayerEntryConfig, featureProps);
 
     // Try
-    const layerStyle = await WFS.#tryProcessLayerStylingInformationIfAny(layerConfigWFS);
+    const layerStyle = await WFS.#tryProcessLayerStylingInformationIfAny(layerConfigWFS, this.getConfigProxyUrl());
 
     // Initialize the layer style by filling the blanks with the information from the metadata
     layerConfig.initLayerStyleFromMetadata(layerStyle);
@@ -781,11 +781,13 @@ export class WFS extends AbstractGeoViewVector {
    * style retrieval through WMS `GetStyles`.
    *
    * @param layerConfig - The WFS layer configuration for which styling should be processed
+   * @param proxyUrl - Proxy URL to use if necessary
    * @returns A promise that resolves with the layer style settings or undefined
    * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called
    */
   static async #tryProcessLayerStylingInformationIfAny(
-    layerConfig: OgcWfsLayerEntryConfig
+    layerConfig: OgcWfsLayerEntryConfig,
+    proxyUrl: string | undefined
   ): Promise<Record<TypeStyleGeometry, TypeLayerStyleSettings> | undefined> {
     // If should fetch styles from the WMS (default)
     if (layerConfig.getShouldFetchStylesFromWMS()) {
@@ -797,7 +799,7 @@ export class WFS extends AbstractGeoViewVector {
         const tweakedUrl = layerConfig.getDataAccessPath().replaceAll('cgi-bin/wfs', 'cgi-bin/wms');
 
         // Create the layer style and return
-        return await WMS.createStylesFromWMS(tweakedUrl, wmsLayerId, layerConfig.getGeometryType());
+        return await WMS.createStylesFromWMS(tweakedUrl, proxyUrl, wmsLayerId, layerConfig.getGeometryType());
       } catch (error: unknown) {
         // Log warning
         logger.logWarning(`Failed to create a dynamic layer style for the WFS using the WMS styles for ${layerConfig.layerPath}`, error);

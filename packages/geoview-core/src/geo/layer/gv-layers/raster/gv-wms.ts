@@ -23,7 +23,6 @@ import type {
   TypeDisplayLanguage,
   TypeLayerStyleConfig,
 } from '@/api/types/map-schema-types';
-import { CONFIG_PROXY_URL } from '@/api/types/map-schema-types';
 import type { TypeLegend, TypeMetadataFeatureInfo } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
@@ -127,6 +126,12 @@ export class GVWMS extends AbstractGVRaster {
       // Assign the src to the image, this is the regular behavior
       let theUrl = src;
 
+      // If we're behind a proxy
+      if (layerConfig.getIsUsingProxy()) {
+        // Tweak the url to use the proxy
+        theUrl = `${layerConfig.getProxyUrl()}?${theUrl}`;
+      }
+
       // If we're overriding the CRS for the layer as an attempt to do on-the-fly projection for tricky layers
       const overridingCRS = this.getOverrideCRS();
       if (overridingCRS) {
@@ -139,7 +144,7 @@ export class GVWMS extends AbstractGVRaster {
         );
 
         // Replace the BBOX param in the src url
-        theUrl = GeoUtilities.replaceCRSandBBOXParam(src, overridingCRS.layerProjection, supportedBBOX);
+        theUrl = GeoUtilities.replaceCRSandBBOXParam(theUrl, overridingCRS.layerProjection, supportedBBOX);
       }
 
       // eslint-disable-next-line no-param-reassign
@@ -1599,10 +1604,16 @@ export class GVWMS extends AbstractGVRaster {
     params.FI_POLYGON_TOLERANCE = qgisServerTolerance;
 
     // Generate the url
-    const featureInfoUrl = wmsSource?.getFeatureInfoUrl(clickCoordinate, viewResolution, projectionCode, params);
+    let featureInfoUrl = wmsSource?.getFeatureInfoUrl(clickCoordinate, viewResolution, projectionCode, params);
 
     // If generated a url
     if (featureInfoUrl) {
+      // If using a proxy
+      if (layerConfig.getIsUsingProxy()) {
+        // Tweak the url to use the proxy
+        featureInfoUrl = `${layerConfig.getProxyUrl()}?${featureInfoUrl}`;
+      }
+
       // Get the response data as text
       return Fetch.fetchText(featureInfoUrl, { signal: abortController?.signal });
     }
@@ -1831,10 +1842,10 @@ export class GVWMS extends AbstractGVRaster {
       // Retry with proxy if it's a network error (e.g., CORS)
       if (error instanceof NetworkError) {
         // Read the blob again, using the proxy this time
-        let proxyUrl = `${CONFIG_PROXY_URL}?${queryUrl}`;
+        let proxyUrl = `${layerConfig.getProxyUrl()!}?${queryUrl}`;
 
-        // If need to double layer encoding
-        if (GeoUtilities.DOUBLE_ENCODING_LAYERS_WHEN_BEHIND_PROXY) {
+        // If the proxy to use is the Esri proxy
+        if (layerConfig.getIsUsingEsriProxy()) {
           // Encode the layers parameter if present
           proxyUrl = encodeLayersParam(proxyUrl);
         }

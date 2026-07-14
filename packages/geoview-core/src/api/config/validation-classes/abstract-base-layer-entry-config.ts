@@ -54,8 +54,11 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /** The projection code as read from the metadata. */
   #metadataProjection?: OLProjection;
 
-  /** Whether the layer is using proxy to connect to the service */
-  #isUsingProxy = false;
+  /** The proxy to use, when necessary */
+  #proxy?: string;
+
+  /** The data access path before applying the proxy. */
+  #dataAccessPathBeforeProxy?: string;
 
   /** The geometry field information. */
   #geometryField?: TypeOutfields;
@@ -553,6 +556,17 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   }
 
   /**
+   * Gets the original data access path before the proxy was applied.
+   *
+   * Falls back to the current data access path if no proxy has been set.
+   *
+   * @returns The data access path before proxy application
+   */
+  getDataAccessPathBeforeProxy(): string {
+    return this.#dataAccessPathBeforeProxy ?? this.getDataAccessPath();
+  }
+
+  /**
    * Overrides the data access path using the value provided by metadata.
    *
    * If the metadata source does not define a data access path, no action is taken.
@@ -591,21 +605,40 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   }
 
   /**
+   * Gets the proxy URL used for the layer's data access.
+   *
+   * @returns The proxy URL, or undefined if no proxy is configured
+   */
+  getProxyUrl(): string | undefined {
+    return this.#proxy;
+  }
+
+  /**
+   * Sets the proxy URL to be used for the layer's data access.
+   *
+   * @param proxy - The proxy URL to set
+   */
+  setProxyUrl(proxy: string | undefined): void {
+    if (proxy) this.#dataAccessPathBeforeProxy = this.getDataAccessPath();
+    this.#proxy = proxy;
+  }
+
+  /**
    * Indicates whether the layer is using a proxy to connect to its service.
    *
    * @returns `true` if the layer is using a proxy; otherwise, `false`
    */
   getIsUsingProxy(): boolean {
-    return this.#isUsingProxy;
+    return !!this.#proxy;
   }
 
   /**
-   * Sets whether the layer is using a proxy to connect to its service.
+   * Indicates whether the layer is using an ESRI proxy.
    *
-   * @param isUsingProxy - `true` if the layer is using a proxy; otherwise, `false`
+   * @returns `true` if the proxy URL matches the ESRI proxy pattern; otherwise, `false`
    */
-  setIsUsingProxy(isUsingProxy: boolean): void {
-    this.#isUsingProxy = isUsingProxy;
+  getIsUsingEsriProxy(): boolean {
+    return GeoUtilities.IS_ESRI_PROXY(this.getProxyUrl());
   }
 
   /**

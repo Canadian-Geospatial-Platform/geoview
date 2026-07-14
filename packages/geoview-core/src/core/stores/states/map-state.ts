@@ -888,6 +888,10 @@ export const getStoreMapConfigGlobalSettings = (mapId: string): TypeGlobalSettin
 /** Returns the service URLs from the map config. */
 export const getStoreMapConfigServiceUrls = (mapId: string): TypeServiceUrls => getStoreMapConfigState(mapId).serviceUrls;
 
+/** Returns the proxy URL from the service URLs in the map config. */
+export const useStoreMapConfigServiceUrlsProxyUrl = (): string | undefined =>
+  useStore(useGeoViewStore(), (state) => state.mapConfig?.serviceUrls.proxyUrl);
+
 /** Returns the config metadata from the map config. */
 export const getStoreMapConfigMeta = (mapId: string): TypeConfigMeta | undefined => getStoreMapConfigState(mapId).configMeta;
 
