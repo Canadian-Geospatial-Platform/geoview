@@ -95,7 +95,7 @@ Each release gets its own issue. Previous release test results are preserved as 
 | 25  | [25-developer-tools.md](25-developer-tools.md)                 | ESRI/WFS renderer tools                                | 10 min       | 16 (0/0/16)          |
 | 26  | [26-production-configs.md](26-production-configs.md)           | OSDP, Open Maps, Arctic SDI, GSC, CGDI smoke tests     | 20 min       | 34 (0/0/34)          |
 | 27  | [27-automation-candidates.md](27-automation-candidates.md)     | Tests recommended for automation via TestCreator       | —            | 112 candidates       |
-|     | **TOTAL**                                                      |                                                        | **~445 min** | **900 (59/169/672)** |
+|     | **TOTAL**                                                      |                                                        | **~445 min** | **901 (60/169/672)** |
 
 **Test breakdown:**
 
@@ -104,7 +104,7 @@ Each release gets its own issue. Previous release test results are preserved as 
 | **A** — Automated | 59      | Covered by `geoview-test-suite` (no manual effort needed)  |
 | **C** — Candidate | 169     | Candidate for automation (manual today, automatable later) |
 | **M** — Manual    | 672     | Requires manual verification (UI, visual, interaction)     |
-| **Total**         | **900** | All tests across all files                                 |
+| **Total**         | **901** | All tests across all files                                 |
 
 > **Keeping counts in sync**: When modifying any release-testing file (changing M→C, M→A, C→A, or adding/removing tests), also update the "Tests (A/C/M)" column for that file and recalculate the TOTAL row. Format: `total (A/C/M)`.
 

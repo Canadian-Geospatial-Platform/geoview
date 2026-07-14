@@ -139,12 +139,23 @@ _(Doc updates, demo cleanup, code organization)_
 - Standardized 30+ component `memo` utilizations to use arrow function syntax (#3544)
 - Categorized many TODOs for better organization (#3544)
 - Branch review follow-up cleanup and hardening edits across data table and add-layer flows (6694b74ab, aee29d274)
+- Updated copilot-instructions.md: store region organization rule (getter-then-hook pairs), zoomToExtent/promiseQueryBatched patterns, no-guess/no-remove-assertion rules
+- Updated TestCreator agent: store region rule, zoomToExtent no-await rule, DOM fallback for UI state verification, no-guess field names constraint
+- Updated 27-automation-candidates.md: marked data table tests #83-92 as Done, added filter-by-extent and showUnsymbolizedFeatures tests
+- Fixed broken test page links in tests.html navigation
+- Updated dependency documentation (release-testing docs)
 
 ## Test Plan Changes
 
 _(Tests added, moved, removed, or reorganized)_
 
 - New automated test case for group layer with `defaultVisibility: false` (#3544)
+- New `suite-data-table` test suite (13 tests): allFeaturesDataArray populated, row count, geoviewID hidden, mapFilteredRecord, global filter + DOM disabled check, column filters set/clear, tableFilters on apply, column visibility toggle, rowsFilteredRecord, filter-by-extent absent for esriDynamic, filter-by-extent on GeoJSON, showUnsymbolizedFeatures pre-filter
+- New `suite-details` tests (6 total): details panel query, clear all highlights, zoom to feature, nameField as label, summary false hides field, field alias renames field
+- Added `getStoreDataTableLayerSettings` getter to `data-table-state.ts` (moved paired hook from OTHERS region to main region)
+- Added `getStoreMapClickMarker` and `getStoreMapNorthArrow` getters to `map-state.ts` (moved from OTHERS to main region)
+- Map 11 test page added for `suite-data-table` (GeoJSON + Commemorative Map + Esri Dynamic + Permafrost layers)
+- Updated test-catalog.md: total 196 tests, 00-automated-suite.md: ~200, README: 901 (60/169/672)
 
 ## Config Schema Changes
 
@@ -154,10 +165,10 @@ _(Properties added, renamed, or with changed defaults)_
 
 | Metric        | Before | After |
 | ------------- | ------ | ----- |
-| Total tests   | —      | —     |
-| Automated (A) | —      | —     |
-| Candidate (C) | —      | —     |
-| Manual (M)    | —      | —     |
+| Total tests   | 900    | 901   |
+| Automated (A) | 59     | 60    |
+| Candidate (C) | 169    | 169   |
+| Manual (M)    | 672    | 672   |
 
 ## Notes for Release Notes Author
 
