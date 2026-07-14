@@ -18,7 +18,6 @@ export const OL_ZOOM_PADDING: [number, number, number, number] = [100, 100, 100,
 /** Default OpenLayers fit options combining padding, max zoom, and duration. */
 export const DEFAULT_OL_FITOPTIONS: FitOptions = {
   padding: OL_ZOOM_PADDING,
-  maxZoom: OL_ZOOM_MAXZOOM,
   duration: OL_ZOOM_DURATION,
 };
 

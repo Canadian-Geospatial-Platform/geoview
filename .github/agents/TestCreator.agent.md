@@ -326,6 +326,9 @@ Run this and compare with the README table. Fix any discrepancy immediately.
 - **`zoomToExtent(extent, false, options)`** — When `animate` is `false`, the zoom is instant. Do NOT `await` it and do NOT add a `delay()` after it. Only use `await` when `animate` is `true`.
 - **After `await promiseQueryBatched`** — The store state is immediately available (highlights, features, etc.). Do NOT add extra `delay()` calls to "wait for the store to settle" — the `await` already guarantees completion.
 - DO NOT hardcode URLs or layer IDs — add them as `static readonly` constants on the appropriate tester class or `GVAbstractTester`
+- **DO NOT guess field names, property names, or data values** — always verify against the actual data source (metadata files, service responses, GeoJSON files). If unsure, **ask the user** rather than making a false assumption. Getting a field name wrong causes a test that passes for the wrong reason or fails with a confusing error.
+- **DO NOT remove assertions to fix failing tests** — when an assertion fails, find an alternative approach to verify the behavior (e.g., use DOM queries for UI-level state that isn't reflected in the store). Removing the check just hides the problem.
+- **Store vs DOM assertions** — Some behaviors only manifest in the React UI, not in the store. When the store doesn't reflect a UI state (e.g., a toggle being disabled), use DOM queries (`document.querySelector`, `document.querySelectorAll`) to check element attributes like `disabled`, `aria-checked`, class names, or text content.
 - DO NOT create tests that modify shared state without cleanup in `callbackFinalize`
 - ALWAYS use `generateId()` for layer IDs in layer/config tests
 - ALWAYS ask clarifying questions before generating test code — do not guess test requirements

@@ -82,6 +82,9 @@ export class GVTestSuiteDataTable extends GVAbstractTestSuite {
     await this.#dataTableTester.testTableFiltersStoreOnApply();
     await this.#dataTableTester.testColumnVisibilityToggle();
     await this.#dataTableTester.testRowsFilteredRecordCount();
+    await this.#dataTableTester.testFilterByExtentUnavailableForEsriDynamic();
+    await this.#dataTableTester.testFilterByExtentOnGeoJSON();
+    await this.#dataTableTester.testShowUnsymbolizedFeaturesFalsePrefiltersTable();
 
     return Promise.resolve();
   }

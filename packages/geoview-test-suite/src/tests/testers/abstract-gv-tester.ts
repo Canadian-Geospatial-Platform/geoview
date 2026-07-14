@@ -25,6 +25,9 @@ export abstract class GVAbstractTester extends AbstractTester {
   static readonly ONTARIO_CENTER_LONLAT: Coordinate = [-88.31, 51.97];
   static readonly ALBERTA_CENTER_LONLAT: Coordinate = [-112, 51];
 
+  /** Extent covering Ontario province in lonlat [minX, minY, maxX, maxY]. */
+  static readonly ONTARIO_EXTENT: [number, number, number, number] = [-100, 50, -80, 57];
+
   /** Indicates if using animation to perform zoom operations */
   static readonly USE_ZOOM_ANIMATION = false;
 

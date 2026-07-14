@@ -357,7 +357,7 @@ export class MapController extends AbstractMapViewerController {
   // #region PUBLIC METHODS - ZOOM FUNCTIONS
 
   /**
-   * Zooms to the specified extent.
+   * Zooms to the specified extent (in map projection).
    *
    * @param extent - The extent to zoom to
    * @param useAnimation - Indicates if a zoom animation should be used, default: true

@@ -80,10 +80,10 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | 3. Map            | `suite-map-config` | `MapConfigTester`                                                                               | 37         | Fully sequential            |
 | 4. Components     | `suite-ui`         | `UITester`                                                                                      | 1          | Parallel                    |
 | 4. Components     | `suite-details`    | `DetailsTester`                                                                                 | 6          | Guarded sequential          |
-| 4. Components     | `suite-data-table` | `DataTableTester`                                                                               | 10         | Guarded sequential          |
+| 4. Components     | `suite-data-table` | `DataTableTester`                                                                               | 11         | Guarded sequential          |
 | 5. Packages       | `suite-geochart`   | `GeochartTester`                                                                                | 3          | Guarded sequential          |
 | 5. Packages       | `suite-swiper`     | `SwiperTester`                                                                                  | 1          | Guarded                     |
-| **Total**         |                    |                                                                                                 | **193**    |                             |
+| **Total**         |                    |                                                                                                 | **194**    |                             |
 
 ---
 
@@ -704,7 +704,7 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 **Execution:** Sequential · **Guard:** `data-table` must be in `footerBar.tabs.core`
 
 | #   | Method                               | Type | Description                                                 |
-| --- | ------------------------------------ | ---- | ----------------------------------------------------------- |
+| --- | ------------------------------------ | ---- | ----------------------------------------------------------- | --- | --- | --------------------------------------------- | ---- | ------------------------------------------------------------- |
 | 1   | `testAllFeaturesDataArrayPopulated`  | test | Test allFeaturesDataArray is populated for GeoJSON layer... |
 | 2   | `testRowCountMatchesStore`           | test | Test row count matches allFeaturesDataArray length...       |
 | 3   | `testGeoviewIdColumnHiddenByDefault` | test | Test geoviewID column hidden by default...                  |
@@ -714,7 +714,7 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | 7   | `testClearFiltersResetsState`        | test | Test clear filters resets columnFiltersRecord...            |
 | 8   | `testTableFiltersStoreOnApply`       | test | Test tableFilters store updates after applyMapFilters...    |
 | 9   | `testColumnVisibilityToggle`         | test | Test column visibility toggle updates store...              |
-| 10  | `testRowsFilteredRecordCount`        | test | Test rowsFilteredRecord updates in store...                 |
+| 10  | `testRowsFilteredRecordCount`        | test | Test rowsFilteredRecord updates in store...                 |     | 11  | `testFilterByExtentUnavailableForEsriDynamic` | test | Test filter-by-extent toggle absent for Esri Dynamic layer... |
 
 ---
 

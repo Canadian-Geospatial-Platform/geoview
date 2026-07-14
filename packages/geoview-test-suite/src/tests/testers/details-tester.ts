@@ -299,9 +299,7 @@ export class DetailsTester extends GVAbstractTester {
         const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(LAYER_PATH);
 
         // Query at Ontario coordinates
-        const features = await this.helperStepQueryLayerAtCoordinate(test, layer, GVAbstractTester.ONTARIO_CENTER_LONLAT);
-
-        return features;
+        return this.helperStepQueryLayerAtCoordinate(test, layer, GVAbstractTester.ONTARIO_CENTER_LONLAT);
       },
       (test, result) => {
         const features = result as TypeFeatureInfoEntry[];
@@ -346,9 +344,7 @@ export class DetailsTester extends GVAbstractTester {
         const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(LAYER_PATH);
 
         // Query at Ontario coordinates
-        const features = await this.helperStepQueryLayerAtCoordinate(test, layer, GVAbstractTester.ONTARIO_CENTER_LONLAT);
-
-        return features;
+        return this.helperStepQueryLayerAtCoordinate(test, layer, GVAbstractTester.ONTARIO_CENTER_LONLAT);
       },
       (test, result) => {
         const features = result as TypeFeatureInfoEntry[];
@@ -394,9 +390,7 @@ export class DetailsTester extends GVAbstractTester {
         const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(LAYER_PATH);
 
         // Query at Ontario coordinates
-        const features = await this.helperStepQueryLayerAtCoordinate(test, layer, GVAbstractTester.ONTARIO_CENTER_LONLAT);
-
-        return features;
+        return this.helperStepQueryLayerAtCoordinate(test, layer, GVAbstractTester.ONTARIO_CENTER_LONLAT);
       },
       (test, result) => {
         const features = result as TypeFeatureInfoEntry[];
