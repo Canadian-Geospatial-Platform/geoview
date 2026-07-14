@@ -39,7 +39,12 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
     let responseJson;
     try {
       // Fetch it
-      responseJson = await AbstractGeoViewRaster.fetchMetadata<T>(this.getMetadataAccessPath(), undefined, abortSignal);
+      responseJson = await AbstractGeoViewRaster.fetchMetadata<T>(
+        this.getMetadataAccessPath(),
+        this.getConfigProxyUrl(),
+        undefined,
+        abortSignal
+      );
     } catch (error: unknown) {
       // Throw
       throw new LayerServiceMetadataUnableToFetchError(
@@ -67,7 +72,8 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
    * The response is parsed and checked for service-level errors. If an error is found, an exception is thrown.
    *
    * @param url - The base URL to fetch the metadata from (e.g., ArcGIS REST endpoint).
-   * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata
+   * @param proxyUrl - Proxy URL to use if necessary (not implemented yet..)
+   * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata (not implemented yet..)
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
    * @returns A promise resolving to the parsed JSON metadata response.
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
@@ -75,8 +81,14 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
    * @throws {ResponseError} When the response is not OK (non-2xx).
    * @throws {ResponseEmptyError} When the JSON response is empty.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  static fetchMetadata<T>(url: string, callbackNewMetadataUrl?: CallbackNewMetadataDelegate, abortSignal?: AbortSignal): Promise<T> {
+  static fetchMetadata<T>(
+    url: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    proxyUrl: string | undefined,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    callbackNewMetadataUrl?: CallbackNewMetadataDelegate,
+    abortSignal?: AbortSignal
+  ): Promise<T> {
     // The url
     const parsedUrl = url.toLowerCase().endsWith('json') ? url : `${url}?f=json`;
 

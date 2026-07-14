@@ -9,7 +9,7 @@ import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-class
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
-import type { DisplayDateMode } from '@/api/types/map-schema-types';
+import type { DisplayDateMode, TypeServiceUrls } from '@/api/types/map-schema-types';
 import type {
   TypeGeoviewLayerConfig,
   TypeLayerEntryConfig,
@@ -102,6 +102,9 @@ export abstract class AbstractGeoViewLayer {
 
   /** The service metadata. */
   #metadata?: unknown;
+
+  /** The map-level service URLs configuration (proxy, geocore, geolocator, etc.) for this layer's map instance. */
+  #configServiceUrls?: TypeServiceUrls;
 
   /** Callback delegates for the layer entry register init event */
   #onLayerEntryRegisterInitHandlers: LayerEntryRegisterInitDelegate[] = [];
@@ -283,6 +286,33 @@ export abstract class AbstractGeoViewLayer {
    */
   getGeoviewLayerConfig(): TypeGeoviewLayerConfig {
     return this.#geoviewLayerConfig;
+  }
+
+  /**
+   * Gets the map-level service URLs configuration for this layer's map instance.
+   *
+   * @returns The service URLs configuration, or undefined if not set
+   */
+  getConfigServiceUrls(): TypeServiceUrls | undefined {
+    return this.#configServiceUrls;
+  }
+
+  /**
+   * Gets the proxy URL from the map-level service URLs configuration.
+   *
+   * @returns The proxy URL, or undefined if not configured
+   */
+  getConfigProxyUrl(): string | undefined {
+    return this.getConfigServiceUrls()?.proxyUrl;
+  }
+
+  /**
+   * Sets the map-level service URLs configuration for this layer's map instance.
+   *
+   * @param serviceUrls - The service URLs configuration from the map features config
+   */
+  setConfigServiceUrls(serviceUrls: TypeServiceUrls): void {
+    this.#configServiceUrls = serviceUrls;
   }
 
   /**

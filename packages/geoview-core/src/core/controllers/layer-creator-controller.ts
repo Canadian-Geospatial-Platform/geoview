@@ -685,6 +685,10 @@ export class LayerCreatorController extends AbstractMapViewerController {
     // Create the layer for the processing
     const layerBeingAdded = LayerCreatorController.createLayerConfigFromType(geoviewLayerConfig);
 
+    // Set the map-level service URLs configuration so the layer knows which proxy to use
+    const { serviceUrls } = this.getMapViewer().mapFeaturesConfig;
+    if (serviceUrls) layerBeingAdded.setConfigServiceUrls(serviceUrls);
+
     // Add in the geoviewLayers set
     this.#geoviewLayers[layerBeingAdded.getGeoviewLayerId()] = layerBeingAdded;
 

@@ -20,9 +20,14 @@ import { parseXMLToJson } from '@/core/utils/utilities';
 import { encodeLayersParam, ensureServiceRequestUrl } from '@/core/utils/ogc-url-helper';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { Projection } from '@/geo/utils/projection';
-import { CONFIG_PROXY_URL } from '@/api/types/map-schema-types';
 import { CONST_LAYER_TYPES, validVectorLayerLegendTypes } from '@/api/types/layer-schema-types';
-import type { TypeMapMouseInfo, TypeOutfields, TypeStyleGeometry, TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
+import {
+  CONFIG_PROXY_URL,
+  type TypeMapMouseInfo,
+  type TypeOutfields,
+  type TypeStyleGeometry,
+  type TypeValidMapProjectionCodes,
+} from '@/api/types/map-schema-types';
 import type {
   TypeGeoviewLayerType,
   TypeLegend,
@@ -65,8 +70,15 @@ interface EsriJSONReadResult {
 // #region FETCH METADATA
 
 export abstract class GeoUtilities {
-  /** Whether to double encode the layers when behind a proxy */
-  static readonly DOUBLE_ENCODING_LAYERS_WHEN_BEHIND_PROXY = true;
+  /**
+   * Checks if the provided proxy URL is an Esri proxy.
+   *
+   * @param proxyUrl - The proxy URL to check
+   * @returns `true` if the proxy URL includes "executeFromProxy", indicating an Esri proxy; otherwise, `false`.
+   */
+  static IS_ESRI_PROXY(proxyUrl: string | undefined): boolean {
+    return proxyUrl?.includes('executeFromProxy') ?? false; // default: false
+  }
 
   /**
    * Extracts the base URL (origin + pathname) from a full URL string,
@@ -252,6 +264,7 @@ export abstract class GeoUtilities {
    * Fetch the json response from the XML response of a WMS getCapabilities request.
    *
    * @param url - The url the url of the WMS server
+   * @param proxyUrl - Proxy URL to use if necessary (defaults to CONFIG_PROXY_URL)
    * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
    * The parameter sent in the callback is the proxy prefix with the '?' at the end.
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
@@ -264,6 +277,7 @@ export abstract class GeoUtilities {
    */
   static async getWMSServiceString(
     url: string,
+    proxyUrl: string = CONFIG_PROXY_URL,
     callbackNewMetadataUrl?: CallbackNewMetadataDelegate,
     abortSignal?: AbortSignal
   ): Promise<string> {
@@ -277,21 +291,21 @@ export abstract class GeoUtilities {
     } catch (error: unknown) {
       // If a network error such as CORS
       if (error instanceof NetworkError) {
-        // If double encoding the layers param when behind proxy
-        if (GeoUtilities.DOUBLE_ENCODING_LAYERS_WHEN_BEHIND_PROXY) {
+        // If the proxy to use is the Esri proxy
+        if (GeoUtilities.IS_ESRI_PROXY(proxyUrl)) {
           // Encode the layers parameter if present
           // eslint-disable-next-line no-param-reassign
           url = encodeLayersParam(url);
         }
 
         // We're going to change the metadata url to use a proxy
-        const newProxiedMetadataUrl = `${CONFIG_PROXY_URL}?${url}`;
+        const newProxiedMetadataUrl = `${proxyUrl}?${url}`;
 
         // Try again with the proxy this time
         capabilitiesString = await Fetch.fetchText(newProxiedMetadataUrl);
 
         // Callback about it
-        callbackNewMetadataUrl?.(newProxiedMetadataUrl, CONFIG_PROXY_URL);
+        callbackNewMetadataUrl?.(newProxiedMetadataUrl, proxyUrl);
 
         // Return it
         return capabilitiesString;
@@ -306,6 +320,7 @@ export abstract class GeoUtilities {
    * Fetch the json response from the XML response of a WMS getCapabilities request.
    *
    * @param url - The url the url of the WMS server
+   * @param proxyUrl - Proxy URL to use if necessary (defaults to CONFIG_PROXY_URL)
    * @param layers - The layers to query separate by
    * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
    * The parameter sent in the callback is the proxy prefix with the '?' at the end.
@@ -319,6 +334,7 @@ export abstract class GeoUtilities {
    */
   static async getWMSServiceMetadata(
     url: string,
+    proxyUrl: string = CONFIG_PROXY_URL,
     layers?: string,
     callbackNewMetadataUrl?: CallbackNewMetadataDelegate,
     abortSignal?: AbortSignal
@@ -327,7 +343,7 @@ export abstract class GeoUtilities {
     const capUrl = this.ensureServiceRequestUrlGetCapabilities(url, 'WMS', layers);
 
     // Redirect
-    const metadataRaw = await this.getWMSServiceString(capUrl, callbackNewMetadataUrl, abortSignal);
+    const metadataRaw = await this.getWMSServiceString(capUrl, proxyUrl, callbackNewMetadataUrl, abortSignal);
 
     // Parse it
     const metadataParsed = parseXMLToJson<TypeMetadataWMSRoot>(metadataRaw);
@@ -372,6 +388,7 @@ export abstract class GeoUtilities {
    * Fetch the json response from the XML response of a WMS getCapabilities request.
    *
    * @param url - The url the url of the WMS server
+   * @param proxyUrl - Proxy URL to use if necessary (defaults to CONFIG_PROXY_URL)
    * @param layers - The layers to query separate by
    * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
    * @param abortSignal - Optional abort signal to handle cancelling of the process
@@ -384,6 +401,7 @@ export abstract class GeoUtilities {
    */
   static async getWMTSServiceMetadata(
     url: string,
+    proxyUrl: string = CONFIG_PROXY_URL,
     layers?: string,
     callbackNewMetadataUrl?: CallbackNewMetadataDelegate,
     abortSignal?: AbortSignal
@@ -392,7 +410,7 @@ export abstract class GeoUtilities {
     const capUrl = this.ensureServiceRequestUrlGetCapabilities(url, 'WMTS', layers);
 
     // Redirect
-    const metadataRaw = await this.getWMSServiceString(capUrl, callbackNewMetadataUrl, abortSignal);
+    const metadataRaw = await this.getWMSServiceString(capUrl, proxyUrl, callbackNewMetadataUrl, abortSignal);
 
     // Parse it
     const metadataParsed = parseXMLToJson<TypeMetadataWMTS>(metadataRaw);
@@ -646,6 +664,7 @@ export abstract class GeoUtilities {
    * Fetch the json response from the XML response of a WMS getCapabilities request.
    *
    * @param url - The url the url of the WMS server
+   * @param proxyUrl - Proxy URL to use if necessary (defaults to CONFIG_PROXY_URL)
    * @param layers - The layers to query separate by
    * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
    * The parameter sent in the callback is the proxy prefix with the '?' at the end.
@@ -659,6 +678,7 @@ export abstract class GeoUtilities {
    */
   static async getWMSServiceStyles(
     url: string,
+    proxyUrl: string = CONFIG_PROXY_URL,
     layers?: string,
     callbackNewMetadataUrl?: CallbackNewMetadataDelegate,
     abortSignal?: AbortSignal
@@ -667,7 +687,7 @@ export abstract class GeoUtilities {
     const stylesUrl = this.ensureServiceRequestUrlGetStyles(url, layers);
 
     // Redirect
-    const responseXML = await this.getWMSServiceString(stylesUrl, callbackNewMetadataUrl, abortSignal);
+    const responseXML = await this.getWMSServiceString(stylesUrl, proxyUrl, callbackNewMetadataUrl, abortSignal);
 
     // Read the styles
     return parseXMLToJson(responseXML);

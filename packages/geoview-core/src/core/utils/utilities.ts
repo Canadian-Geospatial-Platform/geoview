@@ -4,6 +4,7 @@ import sanitizeHtml from 'sanitize-html';
 import { fromUrl } from 'geotiff';
 
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
+import { CONFIG_PROXY_URL } from '@/api/types/map-schema-types';
 import { logger } from '@/core/utils/logger';
 import i18n from '@/core/translation/i18n';
 import type { TypeGuideObject } from '@/core/stores/states/app-state';
@@ -11,7 +12,6 @@ import { Fetch } from '@/core/utils/fetch-helper';
 import { ensureServiceRequestUrl } from '@/core/utils/ogc-url-helper';
 import type { TypeHTMLElement } from '@/core/types/global-types';
 import { TIMEOUT, VALID_FILE_EXTENSIONS_REGEX } from '@/core/utils/constant';
-import { CONFIG_PROXY_URL } from '@/api/types/map-schema-types';
 
 /** The observers to monitor element removals from the DOM tree */
 const observers: Record<string, MutationObserver> = {};
@@ -473,13 +473,13 @@ async function probeFileUrl(url: string): Promise<boolean> {
  * The function never throws — all failures are returned as part of the result object.
  *
  * @param targetUrl - The URL to validate and ping
- * @param proxyBase - Optional proxy server base URL (defaults to CONFIG_PROXY_URL)
+ * @param proxyUrl - Proxy URL to use if necessary (defaults to CONFIG_PROXY_URL)
  * @param timeoutMs - Optional request timeout in milliseconds (defaults to none)
  * @returns A promise that resolves with a result object containing isValid, isReachable, needsProxy, status, and optional error
  */
 export async function validateAndPingUrl(
   targetUrl: string,
-  proxyBase: string = CONFIG_PROXY_URL,
+  proxyUrl: string = CONFIG_PROXY_URL,
   timeoutMs = undefined
 ): Promise<PingResult> {
   const result: PingResult = {
@@ -562,7 +562,7 @@ export async function validateAndPingUrl(
   if (reason === 'cors') {
     // Use fetchTextPermissive because the proxy may forward non-2xx responses
     // that still contain valid capabilities XML in the body.
-    const proxyChecks = await Promise.allSettled(ogcCheckUrls.map((checkUrl) => Fetch.fetchTextPermissive(`${proxyBase}?${checkUrl}`)));
+    const proxyChecks = await Promise.allSettled(ogcCheckUrls.map((checkUrl) => Fetch.fetchTextPermissive(`${proxyUrl}?${checkUrl}`)));
 
     // Same as above: if either WMS or WFS GetCapabilities succeeds through the proxy, it's reachable.
     for (const settled of proxyChecks) {
@@ -574,7 +574,7 @@ export async function validateAndPingUrl(
     }
 
     // Not a valid OGC service through proxy — try a lightweight GET for file-based URLs
-    if (VALID_FILE_EXTENSIONS_REGEX.test(targetUrlWithoutParams) && (await probeFileUrl(`${proxyBase}?${targetUrlWithoutParams}`))) {
+    if (VALID_FILE_EXTENSIONS_REGEX.test(targetUrlWithoutParams) && (await probeFileUrl(`${proxyUrl}?${targetUrlWithoutParams}`))) {
       result.isReachable = true;
       result.needsProxy = true;
       return result;
