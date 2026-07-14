@@ -71,6 +71,9 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
   // Determine if this layer is ready for filtering
   const layerIsReady = layerStatus === 'processed' || layerStatus === 'loaded';
 
+  // Check if any filters are currently applied for this layer
+  const hasFilter = useMemo(() => Object.keys(filterState).length > 0, [filterState]);
+
   /**
    * Memoized header styles based on collapsed state.
    */
@@ -259,6 +262,7 @@ export function LayerFilterSection(props: LayerFilterSectionProps): JSX.Element 
           size="small"
           startIcon={<CloseIcon />}
           onClick={onClearLayer}
+          disabled={!hasFilter}
           sx={memoSxClasses.filterLayerClearButton}
         >
           {t('FilterPanel.clear')}

@@ -12,9 +12,6 @@ import {
   setStoreFilterPanelFilterExpression,
   clearStoreFilterPanelLayerFilters,
   clearStoreFilterPanelAllFilters,
-  addStoreFilterPanelActiveLayerFilter,
-  removeStoreFilterPanelActiveLayerFilter,
-  clearStoreFilterPanelActiveLayerFilters,
   type TypeFilterValue,
   type TypeFilterState,
   type TypeRangeValue,
@@ -78,7 +75,6 @@ export class FilterPanelController extends AbstractMapViewerController {
    * @param fieldName - The field name
    * @param value - The filter value
    */
-  // TODO: Currently, data-table and filter-panel do not interact
   updateLayerFieldFilter(layerPath: string, fieldName: string, value: TypeFilterValue): void {
     setStoreFilterPanelLayerFieldFilter(this.getMapId(), layerPath, fieldName, value);
   }
@@ -221,15 +217,6 @@ export class FilterPanelController extends AbstractMapViewerController {
       logger.logError(`Error applying filter panel filter for layer ${layerPath}:`, err);
       throw new LayerFilterPanelQueryError(layerPath);
     }
-
-    // Track active filters in the store
-    if (expression) {
-      addStoreFilterPanelActiveLayerFilter(this.getMapId(), layerPath);
-      logger.logInfo(`Applied filter panel filter to layer ${layerPath}:`, expression);
-    } else {
-      removeStoreFilterPanelActiveLayerFilter(this.getMapId(), layerPath);
-      logger.logInfo(`Cleared filter panel filter for layer ${layerPath}`);
-    }
   }
 
   /**
@@ -265,8 +252,6 @@ export class FilterPanelController extends AbstractMapViewerController {
     // Try to remove the panel filter from the layer using the proper LayerFilters API
     try {
       gvLayer.setLayerFiltersPanel(undefined);
-
-      removeStoreFilterPanelActiveLayerFilter(this.getMapId(), layerPath);
       logger.logInfo(`Cleared filter panel filters for layer ${layerPath}`);
     } catch (err) {
       logger.logError(`Error clearing filter panel filter for layer ${layerPath}:`, err);
@@ -296,10 +281,6 @@ export class FilterPanelController extends AbstractMapViewerController {
         throw new LayerFilterPanelClearError(layerPath);
       }
     });
-
-    // Clear active layer filters
-    clearStoreFilterPanelActiveLayerFilters(this.getMapId());
-    logger.logInfo('Cleared all filter panel filters');
   }
 
   // #endregion PUBLIC METHODS - FILTER APPLICATION

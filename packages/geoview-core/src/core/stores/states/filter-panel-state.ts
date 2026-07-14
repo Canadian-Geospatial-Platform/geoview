@@ -5,7 +5,6 @@ import type { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { getStoreMapConfigCorePackagesConfig } from '@/core/stores/states/map-state';
 import { PluginStateUninitializedError } from '@/core/exceptions/geoview-exceptions';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
-import { logger } from '@/core/utils/logger';
 
 // #region TYPE DEFINITIONS
 
@@ -110,9 +109,6 @@ export interface IFilterPanelState {
   /** The current filter state for all layers (layerPath -> field filters). */
   filterState: TypeFilterState;
 
-  /** Tracks which layers have filters applied to the map. */
-  activeLayerFilters: Set<string>;
-
   /** Tracks collapsed state for each layer (layerPath -> isCollapsed). */
   collapsedLayers: Record<string, boolean>;
 
@@ -136,15 +132,6 @@ export interface IFilterPanelState {
     /** Clears all filters for all layers. */
     clearAllFilters: () => void;
 
-    /** Marks a layer as having active filters on the map. */
-    addActiveLayerFilter: (layerPath: string) => void;
-
-    /** Removes a layer from the active filters set. */
-    removeActiveLayerFilter: (layerPath: string) => void;
-
-    /** Clears all active layer filters. */
-    clearActiveLayerFilters: () => void;
-
     /** Sets the collapsed state for a specific layer. */
     setLayerCollapsed: (layerPath: string, collapsed: boolean) => void;
 
@@ -167,7 +154,6 @@ export interface IFilterPanelState {
 export function initializeFilterPanelState(set: TypeSetStore, get: TypeGetStore): IFilterPanelState {
   const init = {
     filterState: {},
-    activeLayerFilters: new Set<string>(),
     collapsedLayers: {},
     panelFilterExpressions: {},
 
@@ -266,10 +252,15 @@ export function initializeFilterPanelState(set: TypeSetStore, get: TypeGetStore)
         const newState = { ...currentState };
         newState[layerPath] = {};
 
+        const expressions = get().filterPanelState.panelFilterExpressions;
+        const newExpressions = { ...expressions };
+        newExpressions[layerPath] = '';
+
         set({
           filterPanelState: {
             ...get().filterPanelState,
             filterState: newState,
+            panelFilterExpressions: newExpressions,
           },
         });
       },
@@ -286,56 +277,17 @@ export function initializeFilterPanelState(set: TypeSetStore, get: TypeGetStore)
           clearedState[layerPath] = {};
         });
 
+        const expressions = get().filterPanelState.panelFilterExpressions;
+        const newExpressions: Record<string, string> = {};
+        Object.keys(expressions).forEach((layerPath) => {
+          newExpressions[layerPath] = '';
+        });
+
         set({
           filterPanelState: {
             ...get().filterPanelState,
             filterState: clearedState,
-          },
-        });
-      },
-
-      /**
-       * Marks a layer as having active filters on the map.
-       *
-       * @param layerPath - The layer path
-       */
-      addActiveLayerFilter(layerPath: string) {
-        const currentSet = new Set(get().filterPanelState.activeLayerFilters);
-        currentSet.add(layerPath);
-
-        set({
-          filterPanelState: {
-            ...get().filterPanelState,
-            activeLayerFilters: currentSet,
-          },
-        });
-      },
-
-      /**
-       * Removes a layer from the active filters set.
-       *
-       * @param layerPath - The layer path
-       */
-      removeActiveLayerFilter(layerPath: string) {
-        const currentSet = new Set(get().filterPanelState.activeLayerFilters);
-        currentSet.delete(layerPath);
-
-        set({
-          filterPanelState: {
-            ...get().filterPanelState,
-            activeLayerFilters: currentSet,
-          },
-        });
-      },
-
-      /**
-       * Clears all active layer filters.
-       */
-      clearActiveLayerFilters() {
-        set({
-          filterPanelState: {
-            ...get().filterPanelState,
-            activeLayerFilters: new Set<string>(),
+            panelFilterExpressions: newExpressions,
           },
         });
       },
@@ -476,21 +428,6 @@ export const useStoreFilterPanelLayerFilterState = (layerId: string): TypeLayerF
   useStore(useGeoViewStore(), (state) => state.filterPanelState.filterState[layerId] || {});
 
 /**
- * Gets the active layer filters set from the store.
- *
- * @param mapId - The map id
- * @returns The set of layer IDs with active filters
- * @throws {PluginStateUninitializedError} When the Filter Panel plugin is uninitialized
- */
-export const getStoreFilterPanelActiveLayerFilters = (mapId: string): Set<string> => {
-  return getStoreFilterPanelState(mapId).activeLayerFilters;
-};
-
-/** Hooks the active layer filters set from the store. */
-export const useStoreFilterPanelActiveLayerFilters = (): Set<string> =>
-  useStore(useGeoViewStore(), (state) => state.filterPanelState.activeLayerFilters);
-
-/**
  * Gets the collapsed state for a specific layer from the store.
  *
  * @param mapId - The map id
@@ -567,44 +504,6 @@ export const clearStoreFilterPanelLayerFilters = (mapId: string, layerId: string
 export const clearStoreFilterPanelAllFilters = (mapId: string): void => {
   const state = getStoreFilterPanelState(mapId);
   state.actions.clearAllFilters();
-};
-
-/**
- * Marks a layer as having active filters on the map.
- *
- * @param mapId - The map id
- * @param layerId - The layer id
- * @throws {PluginStateUninitializedError} When the Filter Panel plugin is uninitialized
- */
-export const addStoreFilterPanelActiveLayerFilter = (mapId: string, layerId: string): void => {
-  const state = getStoreFilterPanelState(mapId);
-  state.actions.addActiveLayerFilter(layerId);
-  logger.logInfo('Added active filter-panel filter for layer:', layerId);
-};
-
-/**
- * Removes a layer from the active filters set.
- *
- * @param mapId - The map id
- * @param layerId - The layer id
- * @throws {PluginStateUninitializedError} When the Filter Panel plugin is uninitialized
- */
-export const removeStoreFilterPanelActiveLayerFilter = (mapId: string, layerId: string): void => {
-  const state = getStoreFilterPanelState(mapId);
-  state.actions.removeActiveLayerFilter(layerId);
-  logger.logInfo('Removed active filter-panel filter for layer:', layerId);
-};
-
-/**
- * Clears all active layer filters.
- *
- * @param mapId - The map id
- * @throws {PluginStateUninitializedError} When the Filter Panel plugin is uninitialized
- */
-export const clearStoreFilterPanelActiveLayerFilters = (mapId: string): void => {
-  const state = getStoreFilterPanelState(mapId);
-  state.actions.clearActiveLayerFilters();
-  logger.logInfo('Cleared all active filter-panel filters');
 };
 
 /**
