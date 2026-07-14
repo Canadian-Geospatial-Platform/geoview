@@ -90,6 +90,14 @@ _(User-facing features added or enabled)_
 
 _(Fixes discovered or applied during this cycle)_
 
+- Fixed WMS layer querying through WFS to also consider filtering when layer has style but feature is not symbolized (Cities query) without breaking behavior when no symbologies could be read for WFS (Major Projects query) (#3555)
+- Improved projection information reading from metadata for all layer types — now stored in store for layer-info panel (#3555)
+- Greatly improved `Projection` class flexibility in function parameters and stability (#3555)
+- Fixed layer min/max scale inherited from parent: layer still turns visible/invisible at those scales, so zoomToVisibleScale button is now shown (#3555)
+- Added stability for badly formatted date values like `'Null'` as a string in data reading (#3555)
+- Added stability in data-table component for undefined dates in a `'date'` field (#3555)
+- Simplified zoom-to-visible-scale check and function, adding precision for services like Illinois Water Network (#3555)
+- Clamping zoom-to-extent for a particular layer to its min/max scale visible range when any (#3555)
 - Fixed group layers visible despite metadata setting `visible: false` (#3544)
 - Fixed map waiting for ALL layers before zooming to `layerIds` extent — now zooms as soon as bounds are ready (#3544)
 - Fixed custom time-slider `field` property applied to layers that don't have that field — now uses layer's own metadata date field as fallback (#3544)
