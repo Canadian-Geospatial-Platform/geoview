@@ -35,7 +35,6 @@ import {
 } from '@/core/stores/states/layer-state';
 import { useStoreTimeSliderFilter, useStoreTimeSliderLayer } from '@/core/stores/states/time-slider-state';
 import { useStoreFilterPanelFilterExpression } from '@/core/stores/states/filter-panel-state';
-import { useLayerController } from '@/core/controllers/use-controllers';
 import { GeoUtilities } from '@/geo/utils/utilities';
 
 interface LayerInfoPanelProps {
