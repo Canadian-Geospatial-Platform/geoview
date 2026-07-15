@@ -2,14 +2,26 @@ import type { GeoViewGeoChartConfig, GeoViewTimeSliderConfig } from '@/api/confi
 import { UUIDmapConfigReader } from '@/api/config/reader/uuid-config-reader';
 import { Config } from '@/api/config/config';
 import { ConfigValidation } from '@/api/config/config-validation';
-import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
-import { generateId } from '@/core/utils/utilities';
+import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
+import { deepMerge, generateId } from '@/core/utils/utilities';
 
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import { DEFAULT_MAP_FEATURE_CONFIG } from '@/api/types/map-schema-types';
 import type { GeoCoreLayerConfig, TypeGeoviewLayerConfig, TypeLayerEntryConfig } from '@/api/types/layer-schema-types';
 import type { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { getStoreMapConfigServiceUrls, getStoreMapConfigState } from '@/core/stores/states/map-state';
+
+/** Entry fields that can be safely deep-merged without touching cyclic class/object graphs. */
+type MergeableLayerEntry = {
+  source?: unknown;
+  initialSettings?: unknown;
+  layerStyle?: unknown;
+  layerText?: unknown;
+  listOfLayerEntryConfig?: TypeLayerEntryConfig[];
+};
+
+/** Supported nested keys to deep-merge for layer entry overrides. */
+const NESTED_MERGE_KEYS = ['source', 'initialSettings', 'layerStyle', 'layerText'] as const;
 
 /** Class used to add GeoCore layers to the map. */
 export class GeoCore {
@@ -36,7 +48,7 @@ export class GeoCore {
     layerConfig?: GeoCoreLayerConfig,
     abortSignal?: AbortSignal
   ): Promise<GeoCoreLayerConfigResponse> {
-    // If there's a mapId provided, validate the uuid
+    // Resolve GeoCore URL and duplicate-safe UUID in map context.
     let { geocoreUrl } = DEFAULT_MAP_FEATURE_CONFIG.serviceUrls;
 
     if (mapId) {
@@ -66,14 +78,18 @@ export class GeoCore {
     // Collect all time-slider configs from the response
     const timeSliderConfigs = response.timeSliderConfigs ?? [];
 
-    // Normalize GCS custom layer entries to best-effort match inline listOfLayerEntryConfig behavior.
+    // Normalize and merge entries with precedence: RCS < GCS < inline.
     const defaultLayerId =
       response.layers[0].listOfLayerEntryConfig.length === 1
-        ? AbstractBaseLayerEntryConfig.getClassOrTypeLayerId(response.layers[0].listOfLayerEntryConfig[0])
+        ? ConfigBaseClass.getClassOrTypeLayerId(response.layers[0].listOfLayerEntryConfig[0])
         : undefined;
     const normalizedCustomListOfLayerEntryConfig = GeoCore.#normalizeCustomListOfLayerEntryConfig(
       response.customListOfLayerEntryConfig,
       defaultLayerId
+    );
+    const mergedListOfLayerEntryConfig = GeoCore.#mergeLayerEntryConfigListPair(
+      GeoCore.#mergeLayerEntryConfigListPair(response.layers[0].listOfLayerEntryConfig, normalizedCustomListOfLayerEntryConfig),
+      layerConfig?.listOfLayerEntryConfig
     );
 
     // Use merged custom layer entry config (inline config has precedence over GCS custom config).
@@ -83,8 +99,7 @@ export class GeoCore {
       tempLayerConfig.geoviewLayerId = layerConfig?.geoviewLayerId ?? response.layers[0].geoviewLayerId;
       tempLayerConfig.metadataAccessPath = response.layers[0].metadataAccessPath;
       tempLayerConfig.geoviewLayerType = response.layers[0].geoviewLayerType;
-      tempLayerConfig.listOfLayerEntryConfig =
-        layerConfig?.listOfLayerEntryConfig ?? normalizedCustomListOfLayerEntryConfig ?? response.layers[0].listOfLayerEntryConfig ?? [];
+      tempLayerConfig.listOfLayerEntryConfig = mergedListOfLayerEntryConfig ?? [];
       if (response.layers[0].isTimeAware === true || response.layers[0].isTimeAware === false)
         tempLayerConfig.isTimeAware = response.layers[0].isTimeAware;
 
@@ -146,10 +161,10 @@ export class GeoCore {
 
     const normalizedCustomList = customListOfLayerEntryConfig
       .map((entryConfig) => {
-        const entryLayerId = AbstractBaseLayerEntryConfig.getClassOrTypeLayerId(entryConfig);
+        const entryLayerId = ConfigBaseClass.getClassOrTypeLayerId(entryConfig);
 
         // For legacy custom payloads with no layerId, use the default layer id when we can infer it safely.
-        if (!entryLayerId && defaultLayerId && !AbstractBaseLayerEntryConfig.getClassOrTypeEntryType(entryConfig)) {
+        if (!entryLayerId && defaultLayerId && !ConfigBaseClass.getClassOrTypeEntryType(entryConfig)) {
           return {
             ...entryConfig,
             layerId: defaultLayerId,
@@ -159,14 +174,96 @@ export class GeoCore {
         return entryConfig;
       })
       .filter((entryConfig) => {
-        const entryLayerId = AbstractBaseLayerEntryConfig.getClassOrTypeLayerId(entryConfig);
-        const entryType = AbstractBaseLayerEntryConfig.getClassOrTypeEntryType(entryConfig);
+        const entryLayerId = ConfigBaseClass.getClassOrTypeLayerId(entryConfig);
+        const entryType = ConfigBaseClass.getClassOrTypeEntryType(entryConfig);
 
         // Best-effort behavior: keep entries with layerId and keep group entries; skip malformed leaf entries.
         return Boolean(entryLayerId || entryType === 'group');
       });
 
     return normalizedCustomList.length ? normalizedCustomList : undefined;
+  }
+
+  /**
+   * Merges two layer entry config lists by layer id and entry type.
+   *
+   * Entries in `overrideList` take precedence while preserving non-overridden values from `baseList`.
+   *
+   * @param baseList - The base list of layer entry configs
+   * @param overrideList - The overriding list of layer entry configs
+   * @returns The merged list
+   */
+  static #mergeLayerEntryConfigListPair(
+    baseList: TypeLayerEntryConfig[] | undefined,
+    overrideList: TypeLayerEntryConfig[] | undefined
+  ): TypeLayerEntryConfig[] | undefined {
+    if (!baseList?.length) return overrideList;
+    if (!overrideList?.length) return baseList;
+
+    const mergedList: TypeLayerEntryConfig[] = [...baseList];
+
+    overrideList.forEach((overrideEntry) => {
+      const matchingIndex = mergedList.findIndex((candidateEntry) => GeoCore.#isMatchingLayerEntry(candidateEntry, overrideEntry));
+
+      if (matchingIndex === -1) {
+        mergedList.push(overrideEntry);
+        return;
+      }
+
+      const baseEntry = mergedList[matchingIndex];
+
+      // Merge only known nested config fields to avoid deep-merging cyclic object graphs.
+      const mergedEntry = {
+        ...baseEntry,
+        ...overrideEntry,
+      } as TypeLayerEntryConfig;
+      const baseMergeable = baseEntry as unknown as MergeableLayerEntry;
+      const overrideMergeable = overrideEntry as unknown as MergeableLayerEntry;
+      const mergedMergeable = mergedEntry as unknown as MergeableLayerEntry;
+
+      NESTED_MERGE_KEYS.forEach((key) => {
+        if (baseMergeable[key] || overrideMergeable[key]) {
+          mergedMergeable[key] = deepMerge(baseMergeable[key], overrideMergeable[key]);
+        }
+      });
+
+      if (ConfigBaseClass.getClassOrTypeEntryTypeIsGroup(baseEntry) && ConfigBaseClass.getClassOrTypeEntryTypeIsGroup(overrideEntry)) {
+        // Recursively merge child entries so partial group overrides keep child source metadata.
+        const mergedChildren = GeoCore.#mergeLayerEntryConfigListPair(
+          baseEntry.listOfLayerEntryConfig,
+          overrideEntry.listOfLayerEntryConfig
+        );
+        if (mergedChildren) {
+          mergedMergeable.listOfLayerEntryConfig = mergedChildren;
+        }
+      }
+
+      mergedList[matchingIndex] = mergedEntry;
+    });
+
+    return mergedList;
+  }
+
+  /**
+   * Checks whether two layer entries should be merged together.
+   *
+   * Matching is based on layerId, with optional entryType compatibility when override entryType is provided.
+   *
+   * @param candidateEntry - Existing entry from the base list
+   * @param overrideEntry - Incoming entry from the override list
+   * @returns True when entries represent the same logical layer entry
+   */
+  static #isMatchingLayerEntry(candidateEntry: TypeLayerEntryConfig, overrideEntry: TypeLayerEntryConfig): boolean {
+    const overrideLayerId = ConfigBaseClass.getClassOrTypeLayerId(overrideEntry);
+    const overrideEntryType = ConfigBaseClass.getClassOrTypeEntryType(overrideEntry);
+    const candidateLayerId = ConfigBaseClass.getClassOrTypeLayerId(candidateEntry);
+    const candidateEntryType = ConfigBaseClass.getClassOrTypeEntryType(candidateEntry);
+
+    if (!overrideLayerId || candidateLayerId !== overrideLayerId) {
+      return false;
+    }
+
+    return overrideEntryType === undefined || candidateEntryType === overrideEntryType;
   }
 
   /**

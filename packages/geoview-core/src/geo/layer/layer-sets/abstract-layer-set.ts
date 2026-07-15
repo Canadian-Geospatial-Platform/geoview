@@ -557,7 +557,19 @@ export abstract class AbstractLayerSet {
 
         const fieldsToDelete = Object.keys(record.fieldInfo).filter((fieldName) => {
           // Look for an attribute with the name or alias (alias because a GetFeature responds with the alias in the features response!)
-          const outfield = outfields.find((f) => f.name === fieldName || f.alias === fieldName);
+          const normalizedFieldName = fieldName.toLowerCase();
+          const fieldLeafToken = normalizedFieldName.split('.').pop();
+          const outfield = outfields.find((f) => {
+            const normalizedOutfieldName = f.name.toLowerCase();
+            const normalizedOutfieldAlias = f.alias.toLowerCase();
+            const outfieldLeafToken = normalizedOutfieldName.split('.').pop();
+
+            if (normalizedOutfieldName === normalizedFieldName || normalizedOutfieldAlias === normalizedFieldName) {
+              return true;
+            }
+
+            return fieldLeafToken !== undefined && outfieldLeafToken === fieldLeafToken;
+          });
 
           if (outfield) {
             const field = record.fieldInfo[fieldName]!;
