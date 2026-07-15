@@ -1148,6 +1148,36 @@ When the same geocore UUID appears multiple times in a map config, `Config.preva
 
 The GeoCore VCS API (`https://geocore.api.geo.ca/vcs?lang={lang}&id={uuid}`) returns per-layer package configs in `response.gcs[].{lang}.packages`. Each package type (geochart, time-slider, etc.) has its own extraction method in `UUIDmapConfigReader` — they are **not** handled by a generic extractor because each type has unique parsing needs (e.g., geochart requires `.layers` array transformation and `.trim()` cleanup; time-slider is passed through as-is).
 
+### GeoCore Custom Config Merge Precedence
+
+GeoCore custom layer-entry config merging must stay centralized in `GeoCore.createLayerConfigFromUUID()` so precedence is explicit and consistent.
+
+**Precedence order:**
+
+1. **Inline `listOfLayerEntryConfig` override** — highest precedence
+2. **GCS `customListOfLayerEntryConfig`** — fallback custom structure from VCS
+3. **RCS default `listOfLayerEntryConfig`** — base structure from the resolved layer config
+
+**Reader responsibilities:**
+
+- `UUIDmapConfigReader` must extract GCS custom layer-entry overrides as `customListOfLayerEntryConfig`
+- `UUIDmapConfigReaderResponse` should carry custom GCS entries in a dedicated `customListOfLayerEntryConfig` field; avoid mutating RCS-derived `layers` in the reader
+- Legacy temporary GCS `layers` payloads must be adapted into list format for backward compatibility instead of mutating the resolved RCS config in-place
+- Best-effort normalization may infer a missing `layerId` only for safe single-layer legacy payloads; malformed leaf entries without a `layerId` should be skipped rather than causing the whole layer to fail
+
+**Design rule:** Do not split override behavior between UUID-reader mutation and GeoCore merge logic. The reader should parse and adapt, while `GeoCore.createLayerConfigFromUUID()` remains the single point that decides merge precedence.
+
+**Simplified inline override compatibility:**
+
+- `addGeoviewLayerByGeoCoreUUID()` payloads that only provide `layerName` (without `listOfLayerEntryConfig`) are still supported
+- In `GeoCore.createLayerConfigFromUUID()`, this path maps the simplified value to `geoviewLayerName`; when the resolved layer has a single entry, it also applies the same name to that first entry for consistency
+- Keep this compatibility branch separate from the merged `listOfLayerEntryConfig` path; it is a name-only convenience flow, not a general custom entry override flow
+
+**Duplicate UUID propagation in merge branch:**
+
+- When `createLayerConfigFromUUID()` uses the merged/prevalidated path (`Config.prevalidateGeoviewLayersConfig`), duplicate GeoCore IDs with `:suffix` must be re-applied to `newLayerConfig[0].geoviewLayerId` before returning
+- Do not rely only on the non-merge return branch for duplicate ID restoration; both branches must preserve the suffixed ID
+
 **Extraction pipeline:**
 
 1. `UUIDmapConfigReader.#getTimeSliderConfigFromResponse()` / `#getGeoChartConfigFromResponse()` — Parse VCS response per package type
@@ -2153,7 +2183,7 @@ protected override onLaunchTestSuite(): Promise<unknown> {
 **Critical requirements:**
 
 - **Wait for `allFeatureInfoLayerSet` registration** using `whenThisThen()` before querying
-- **Set zoom level** using `await this.getMapViewer().setMapZoomLevel(zoom)` (direct) or `await this.getControllersRegistry().mapController.zoomMap(zoom)` (animated)
+- **Set zoom level** using `this.getMapViewer().setMapZoomLevel(zoom)` for immediate non-awaited zoom changes, or `await this.getControllersRegistry().mapController.zoomMap(zoom)` when the test must wait for the zoom to finish before continuing
 - **Run sequentially** at the end of the suite to avoid zoom conflicts with other tests
 
 **Template:**
@@ -2184,7 +2214,7 @@ testMyLayerQuery(): Promise<Test<TypeFeatureInfoResult>> {
 
       // Set zoom to layer's visible range (required — query returns empty if out of range)
       test.addStep('Setting zoom level...');
-      await this.getMapViewer().setMapZoomLevel(REQUIRED_ZOOM);
+      await this.getControllersRegistry().mapController.zoomMap(REQUIRED_ZOOM, GVAbstractTester.USE_ZOOM_ANIMATION);
 
       // Query all features
       test.addStep('Triggering getAllFeatureInfo query...');
@@ -2502,8 +2532,8 @@ import { GVTestSuiteMyFeature } from './tests/suites/suite-my-feature';
 Controllers are the preferred path. MapViewer provides low-level OL access (transitional — will eventually become internal):
 
 - `await this.getControllersRegistry().mapController.zoomMap(zoom, duration)` — Preferred. Animated zoom with validation. Returns a Promise that resolves when the animation completes.
-- `await this.getMapViewer().setMapZoomLevel(zoom)` — Low-level. Sets the OL view zoom directly (no animation). Returns a Promise that resolves on `rendercomplete`.
-- Use `setMapZoomLevel()` only when you need an immediate zoom without animation (e.g., before querying features that have visibility range constraints).
+- `this.getMapViewer().setMapZoomLevel(zoom)` — Low-level. Sets the OL view zoom directly with no awaitable completion signal.
+- Use `setMapZoomLevel()` only when you need an immediate non-awaited zoom change. When the next step depends on the zoom having completed, use `await this.getControllersRegistry().mapController.zoomMap(...)` instead.
 
 **`queryLayerFeatures()` visibility guards:**
 

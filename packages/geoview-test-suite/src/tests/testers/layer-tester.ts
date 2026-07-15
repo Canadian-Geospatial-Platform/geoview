@@ -26,6 +26,9 @@ import { KML } from 'geoview-core/geo/layer/geoview-layers/vector/kml';
  * Main Layer testing class.
  */
 export class LayerTester extends GVAbstractTester {
+  /** The GeoCore UUID used for simplified inline layer name override tests. */
+  static readonly GEOCORE_SIMPLIFIED_INLINE_NAME_OVERRIDE_UUID = 'ea4c0bdb-a63f-49a4-b14a-09c1560aad0b';
+
   /**
    * Returns the name of the Tester.
    *
@@ -1587,7 +1590,7 @@ export class LayerTester extends GVAbstractTester {
 
         // Set the zoom to 17.4 so the layer is within its visible scale range for the query
         test.addStep('Setting zoom to 17.4 for the layer visible range...');
-        this.getMapViewer().setMapZoomLevel(17.4);
+        await this.getControllersRegistry().mapController.zoomMap(17.4, GVAbstractTester.USE_ZOOM_ANIMATION);
 
         // Query all features
         test.addStep('Triggering getAllFeatureInfo query...');
@@ -1670,7 +1673,7 @@ export class LayerTester extends GVAbstractTester {
 
         // Set the zoom to 17.4 so the layer is within its visible scale range for the query
         test.addStep('Setting zoom to 17.4 for the layer visible range...');
-        this.getMapViewer().setMapZoomLevel(17.4);
+        await this.getControllersRegistry().mapController.zoomMap(17.4, GVAbstractTester.USE_ZOOM_ANIMATION);
 
         // Query all features
         test.addStep('Triggering getAllFeatureInfo query...');
@@ -1867,7 +1870,7 @@ export class LayerTester extends GVAbstractTester {
    * @returns A promise that resolves when the test completes
    */
   testAddGeocoreWithSimplifiedInlineLayerNameOverride(): Promise<Test<TypeMapFeaturesInstance | undefined>> {
-    const geocoreUuid = 'ea4c0bdb-a63f-49a4-b14a-09c1560aad0b';
+    const geocoreUuid = LayerTester.GEOCORE_SIMPLIFIED_INLINE_NAME_OVERRIDE_UUID;
     const customLayerName = 'Issue 3548 - Simplified Inline Name';
     const customLayerEntryConfig = JSON.stringify([
       {
@@ -1918,7 +1921,6 @@ export class LayerTester extends GVAbstractTester {
    * Each step of the process is logged into the provided test instance for traceability and debugging.
    *
    * @param test - The test instance used to log each step in the layer setup process
-   * @param mapViewer - The map viewer to which the layer will be added
    * @param gvConfig - The configuration object defining the GeoView layer to be added
    * @returns A promise that resolves to the fully loaded GeoView layer instance
    */
@@ -1945,7 +1947,6 @@ export class LayerTester extends GVAbstractTester {
    * Each step of the process is logged into the provided test instance for traceability and debugging.
    *
    * @param test - The test instance used to log each step in the layer setup process
-   * @param mapViewer - The map viewer to which the layer will be added
    * @param uuid - The GeoCore UUID used to add the layer
    * @returns A promise that resolves to the fully loaded GeoView layer instance
    */
@@ -2094,7 +2095,6 @@ export class LayerTester extends GVAbstractTester {
    * Each step is logged to the provided test instance for traceability.
    *
    * @param test - The test instance used to record each step of the removal process
-   * @param mapViewer - The map viewer instance from which the layer is removed
    * @param geoviewLayerId - The geoview layer id of the layer config to be removed
    */
   helperFinalizeStepRemoveLayerConfigAndAssert<T>(test: Test<T>, geoviewLayerId: string): void {

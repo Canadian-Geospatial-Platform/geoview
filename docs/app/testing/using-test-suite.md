@@ -23,16 +23,18 @@ Add the test-suite package to your GeoView map configuration:
 
 ### Available Suites
 
-| Suite ID           | Description                                       |
-| ------------------ | ------------------------------------------------- |
-| `suite-core`       | Date/utility function tests                       |
-| `suite-config`     | Layer configuration validation                    |
-| `suite-map`        | Map zoom, projection, basemap, UI                 |
-| `suite-layer`      | Layer add/remove, legend, queries                 |
-| `suite-map-config` | Map config creation/destruction                   |
-| `suite-geochart`   | Geochart plugin (requires geochart in footer bar) |
-| `suite-details`    | Details panel (requires details in footer bar)    |
-| `suite-ui`         | DOM-level UI tests                                |
+| Suite ID           | Description                                          |
+| ------------------ | ---------------------------------------------------- |
+| `suite-core`       | Date/utility function tests                          |
+| `suite-config`     | Layer configuration validation                       |
+| `suite-map`        | Map zoom, projection, basemap, UI                    |
+| `suite-layer`      | Layer add/remove, legend, queries                    |
+| `suite-map-config` | Map config creation/destruction                      |
+| `suite-geochart`   | Geochart plugin (requires geochart in footer bar)    |
+| `suite-details`    | Details panel (requires details in footer bar)       |
+| `suite-ui`         | DOM-level UI tests                                   |
+| `suite-utilities`  | Utility function tests (core, date, geo, projection) |
+| `suite-swiper`     | Swiper plugin tests (requires swiper)                |
 
 ### HTML Configuration
 

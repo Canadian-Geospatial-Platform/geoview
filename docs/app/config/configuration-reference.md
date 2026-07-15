@@ -39,7 +39,7 @@ GeoView uses JSON Schema validation to ensure configuration objects are valid be
 When a validation error occurs, you'll see a message in the console with the following information:
 
 ```
-SCHEMA VALIDATION 
+SCHEMA VALIDATION
 SchemaPath: https://cgpv/schema#/definitions/TypeMapFeaturesInstance
 Schema error: {
   instancePath: '/map/viewSettings/projection',
@@ -576,7 +576,7 @@ TypeValidAppBarCoreProps = "about-panel" | "geolocator" | "export" | "aoi-panel"
 
 - **selectedLayersLayerPath**: Layer path for layers tab selection
 
-- **selectedDetailsLayerPath**:  Layer path for details tab selection
+- **selectedDetailsLayerPath**: Layer path for details tab selection
 
 - **selectedDataTableLayerPath**: Layer path for data table tab selection
 
@@ -642,13 +642,13 @@ TypeFooterBarTabsCustomProps = {
 
 - **selectedLayersLayerPath**: Layer path for layers tab selection
 
-- **selectedDetailsLayerPath**:  Layer path for details tab selection
+- **selectedDetailsLayerPath**: Layer path for details tab selection
 
 - **selectedDataTableLayerPath**: Layer path for data table tab selection
 
 - **selectedTimeSliderLayerPath**: Layer path for time slider tab selection
 
-- **selectedGeochartLayerPath**:  Layer path for geochart tab selection
+- **selectedGeochartLayerPath**: Layer path for geochart tab selection
 
 **Default:** `{ tabs: { core: ["layers", "data-table"] } }`
 
@@ -3127,9 +3127,9 @@ interface FilterPanelConfig {
 type DateFilterAttribute = {
   fieldName: string;
   displayLabel: string;
-  filterType: 'date';
+  filterType: "date";
   enabled?: boolean;
-  dateStep?: 'second' | 'minute' | 'hour' | 'day' | 'week' | 'month' | 'year';
+  dateStep?: "second" | "minute" | "hour" | "day" | "week" | "month" | "year";
   defaultValues?: { start: string | null; end: string | null } | null;
 };
 // ... (similar types for select, multiselect, range)
@@ -3149,22 +3149,26 @@ type DateFilterAttribute = {
   - **attributes**: Array of filterable attributes (each attribute must specify one of the four filter types)
 
 **Common attribute properties:**
+
 - **fieldName** (required): Field name from the layer schema
 - **displayLabel** (required): Label displayed in the UI
 - **filterType** (required): One of: `"select"`, `"multiselect"`, `"range"`, `"date"`
 - **enabled**: Whether this filter is enabled (default: true)
 
 **Date filter-specific properties:**
+
 - **dateStep** (optional): Keyboard arrow key increment. Uses calendar-aware stepping. One of: `"second"`, `"minute"`, `"hour"`, `"day"` (default), `"week"`, `"month"`, `"year"`
 - **defaultValues** (optional): Object with `start` and `end` date strings (YYYY-MM-DD format)
 
 **Select/Multiselect filter-specific properties:**
+
 - **domain** (optional): Array of objects with:
   - **value** (required): The raw value from the layer (string or number)
   - **label** (required): The display label for this value
 - **filterMissingDomainValues** (optional): If true, filter out values not in domain (default: false)
 
 **Range filter-specific properties:**
+
 - **rangeStep** (optional): Keyboard arrow key increment for range slider navigation (default: 1). Useful for large ranges (e.g., 0-100000 with step of 1000) or small/decimal ranges (e.g., 0.0-1.0 with step of 0.01). Must be a positive number.
 - **defaultValues** (optional): Object with `min` and `max` numeric properties
 

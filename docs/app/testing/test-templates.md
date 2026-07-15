@@ -27,7 +27,7 @@ Before writing a test, classify it into one of these groups:
 
 | Category            | Tester Class      | Suite Class        | Execution Pattern  |
 | ------------------- | ----------------- | ------------------ | ------------------ |
-| **Map Interaction** | `MapTester`       | `suite-map-varia`  | Sequential `await` |
+| **Map Interaction** | `MapTester`       | `suite-map`        | Sequential `await` |
 | **Map Config**      | `MapConfigTester` | `suite-map-config` | Sequential `await` |
 
 ### Group 4 — Component Panels (footer bar tabs, app bar features)

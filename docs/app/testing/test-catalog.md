@@ -493,7 +493,7 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 
 [↑ Back to top](#table-of-contents)
 
-**Suite:** `suite-map-varia` · **File:** `tests/suites/suite-map-varia.ts` · **Tester:** `MapTester` (`tests/testers/map-tester.ts`)
+**Suite:** `suite-map` · **File:** `tests/suites/suite-map-varia.ts` · **Tester:** `MapTester` (`tests/testers/map-tester.ts`)
 **Execution:** Complex mixed — sequential `await` for state-modifying tests · **Guard:** None
 
 | #   | Method                                 | Type | Description                                                            |

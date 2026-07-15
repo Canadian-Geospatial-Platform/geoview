@@ -107,6 +107,7 @@ _(Fixes discovered or applied during this cycle)_
 - Fixed malformed HTML handling in the KML data table path to prevent render crashes during cell content conversion (#3551)
 - Fixed Add Layer wizard infinite spinner when selected layer type does not match the provided source/extension (#3550)
 - Fixed group layers with all child layers in error state not being surfaced correctly as errored in layer status propagation (#3549)
+- Fixed GeoCore custom config precedence so inline `listOfLayerEntryConfig` overrides are applied ahead of GCS custom configs, while legacy GCS `layers` payloads are still adapted for backward compatibility (#3548)
 
 ## Build & Dependencies
 
