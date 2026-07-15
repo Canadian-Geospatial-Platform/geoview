@@ -319,7 +319,9 @@ export class ImageStatic extends AbstractGeoViewRaster {
   /**
    * Fetches service metadata (not needed for static images).
    */
-  protected async onFetchServiceMetadata<T>(abortSignal?: AbortSignal): Promise<T> {
+  protected async onFetchServiceMetadata<T>(
+    abortSignal?: AbortSignal,
+  ): Promise<T> {
     // Static images don't have service metadata
     return Promise.resolve(undefined as T);
   }

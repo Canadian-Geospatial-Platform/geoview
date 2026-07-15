@@ -742,25 +742,25 @@ const mapViewer = cgpv.api.getMapViewer("mapId");
 
 ### Keyboard Shortcuts
 
-The Drawer package provides comprehensive keyboard shortcuts for efficient drawing and editing. These shortcuts (except undo/redo/escape) can be toggled on/off via the shortcuts button in the drawer toolbar, with the backtick key \`,  or programmatically via `DrawerController.setShortcutsEnabled()`.
+The Drawer package provides comprehensive keyboard shortcuts for efficient drawing and editing. These shortcuts (except undo/redo/escape) can be toggled on/off via the shortcuts button in the drawer toolbar, with the backtick key \`, or programmatically via `DrawerController.setShortcutsEnabled()`.
 
 **Note:** Undo (**Ctrl+Z**), Redo (**Ctrl+Y** / **Ctrl+Shift+Z**), and Escape remain active at all times, regardless of the shortcuts toggle state.
 
-| Shortcut | Action |
-|----------|--------|
-| **D** | Toggle Drawing mode |
-| **E** | Toggle Editing mode |
-| **G** | Cycle Geometry Type (forward) |
-| **Shift+G** | Cycle Geometry Type (backward) |
-| **S** | Open Style Menu |
-| **M** | Toggle Measurements visibility |
-| **N** | Toggle Snapping |
-| **Ctrl+Z** | Undo last action |
-| **Ctrl+Y / Ctrl+Shift+Z** | Redo action |
-| **Shift+S** | Save / Download drawings (GeoJSON) |
-| **Shift+O** | Open / Upload drawings |
-| **Shift+C** | Clear all drawings |
-| **Escape** | Clear selection / Exit edit mode |
+| Shortcut                  | Action                             |
+| ------------------------- | ---------------------------------- |
+| **D**                     | Toggle Drawing mode                |
+| **E**                     | Toggle Editing mode                |
+| **G**                     | Cycle Geometry Type (forward)      |
+| **Shift+G**               | Cycle Geometry Type (backward)     |
+| **S**                     | Open Style Menu                    |
+| **M**                     | Toggle Measurements visibility     |
+| **N**                     | Toggle Snapping                    |
+| **Ctrl+Z**                | Undo last action                   |
+| **Ctrl+Y / Ctrl+Shift+Z** | Redo action                        |
+| **Shift+S**               | Save / Download drawings (GeoJSON) |
+| **Shift+O**               | Open / Upload drawings             |
+| **Shift+C**               | Clear all drawings                 |
+| **Escape**                | Clear selection / Exit edit mode   |
 
 ### Crosshair Integration
 
@@ -783,6 +783,7 @@ When keyboard navigation is enabled (crosshair mode), the Drawer tool provides e
 #### Zoom Control with Crosshairs
 
 While in drawing or editing mode with crosshairs active:
+
 - **Ctrl+Up Arrow**: Zoom in centered on the crosshair position
 - **Ctrl+Down Arrow**: Zoom out centered on the crosshair position
 
@@ -1666,7 +1667,7 @@ interface FilterPanelConfig {
 type SelectFilterAttribute = {
   fieldName: string;
   displayLabel: string;
-  filterType: 'select';
+  filterType: "select";
   enabled?: boolean;
   defaultValues?: string | number | null;
   domain?: Array<{ value: string | number; label: string }>;
@@ -1676,7 +1677,7 @@ type SelectFilterAttribute = {
 type MultiselectFilterAttribute = {
   fieldName: string;
   displayLabel: string;
-  filterType: 'multiselect';
+  filterType: "multiselect";
   enabled?: boolean;
   defaultValues?: Array<string | number> | null;
   domain?: Array<{ value: string | number; label: string }>;
@@ -1686,7 +1687,7 @@ type MultiselectFilterAttribute = {
 type RangeFilterAttribute = {
   fieldName: string;
   displayLabel: string;
-  filterType: 'range';
+  filterType: "range";
   enabled?: boolean;
   rangeStep?: number;
   defaultValues?: { min: number | null; max: number | null } | null;
@@ -1695,9 +1696,9 @@ type RangeFilterAttribute = {
 type DateFilterAttribute = {
   fieldName: string;
   displayLabel: string;
-  filterType: 'date';
+  filterType: "date";
   enabled?: boolean;
-  dateStep?: 'second' | 'minute' | 'hour' | 'day' | 'week' | 'month' | 'year';
+  dateStep?: "second" | "minute" | "hour" | "day" | "week" | "month" | "year";
   defaultValues?: { start: string | null; end: string | null } | null;
 };
 ```
@@ -2086,6 +2087,7 @@ When `filterMissingDomainValues` is true, only features with values in the domai
 ```
 
 In this example:
+
 - `filterMissingDomainValues: true` ensures only features with status codes A, P, R, or M are displayed
 - Any features with unexpected status values (like "X" or null) are automatically filtered out
 - The priority filter only shows features with priority levels 1-4
@@ -2101,6 +2103,7 @@ In this example:
 ### Filter Type Details
 
 **Select Filter:**
+
 - Single-value dropdown
 - Automatically populated with unique field values
 - Default: no selection (all values pass)
@@ -2114,6 +2117,7 @@ In this example:
 ```
 
 **Multiselect Filter:**
+
 - Multiple-value checkbox list
 - "All" option to select/deselect all values
 - Default: all values selected
@@ -2128,6 +2132,7 @@ In this example:
 ```
 
 **Range Filter:**
+
 - Numeric min/max range with slider
 - Automatically detects field min/max values
 - Default: full range
@@ -2142,6 +2147,7 @@ In this example:
 ```
 
 **Date Filter:**
+
 - Date range picker
 - Start and end date selection
 - Default: no date restriction
@@ -2172,14 +2178,24 @@ In this example:
 ```json
 {
   "filter-panel": {
-    "layers": [{
-      "layerPath": "canadian-cities",
-      "filterName": "Canadian Cities",
-      "attributes": [
-        { "fieldName": "province", "displayLabel": "Province", "filterType": "multiselect" },
-        { "fieldName": "population", "displayLabel": "Population", "filterType": "range" }
-      ]
-    }]
+    "layers": [
+      {
+        "layerPath": "canadian-cities",
+        "filterName": "Canadian Cities",
+        "attributes": [
+          {
+            "fieldName": "province",
+            "displayLabel": "Province",
+            "filterType": "multiselect"
+          },
+          {
+            "fieldName": "population",
+            "displayLabel": "Population",
+            "filterType": "range"
+          }
+        ]
+      }
+    ]
   }
 }
 ```
@@ -2189,15 +2205,29 @@ In this example:
 ```json
 {
   "filter-panel": {
-    "layers": [{
-      "layerPath": "air-quality",
-      "filterName": "Air Quality Stations",
-      "attributes": [
-        { "fieldName": "pollutant", "displayLabel": "Pollutant Type", "filterType": "select" },
-        { "fieldName": "concentration", "displayLabel": "Concentration (ppm)", "filterType": "range" },
-        { "fieldName": "measurement_date", "displayLabel": "Date", "filterType": "date" }
-      ]
-    }],
+    "layers": [
+      {
+        "layerPath": "air-quality",
+        "filterName": "Air Quality Stations",
+        "attributes": [
+          {
+            "fieldName": "pollutant",
+            "displayLabel": "Pollutant Type",
+            "filterType": "select"
+          },
+          {
+            "fieldName": "concentration",
+            "displayLabel": "Concentration (ppm)",
+            "filterType": "range"
+          },
+          {
+            "fieldName": "measurement_date",
+            "displayLabel": "Date",
+            "filterType": "date"
+          }
+        ]
+      }
+    ],
     "settings": { "autoApply": true }
   }
 }
@@ -2208,16 +2238,34 @@ In this example:
 ```json
 {
   "filter-panel": {
-    "layers": [{
-      "layerPath": "properties",
-      "filterName": "Properties",
-      "attributes": [
-        { "fieldName": "property_type", "displayLabel": "Type", "filterType": "multiselect" },
-        { "fieldName": "price", "displayLabel": "Price Range", "filterType": "range" },
-        { "fieldName": "bedrooms", "displayLabel": "Bedrooms", "filterType": "range" },
-        { "fieldName": "listing_date", "displayLabel": "Listed", "filterType": "date" }
-      ]
-    }],
+    "layers": [
+      {
+        "layerPath": "properties",
+        "filterName": "Properties",
+        "attributes": [
+          {
+            "fieldName": "property_type",
+            "displayLabel": "Type",
+            "filterType": "multiselect"
+          },
+          {
+            "fieldName": "price",
+            "displayLabel": "Price Range",
+            "filterType": "range"
+          },
+          {
+            "fieldName": "bedrooms",
+            "displayLabel": "Bedrooms",
+            "filterType": "range"
+          },
+          {
+            "fieldName": "listing_date",
+            "displayLabel": "Listed",
+            "filterType": "date"
+          }
+        ]
+      }
+    ],
     "settings": { "autoApply": true }
   }
 }

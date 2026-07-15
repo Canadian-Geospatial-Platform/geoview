@@ -31,10 +31,13 @@ const mapViewer = await cgpv.api.createMapFromConfig(
   JSON.stringify({
     map: {
       interaction: "dynamic",
-      viewSettings: { zoom: 4, center: [-95, 55], projection: 3978 },
+      viewSettings: {
+        projection: 3978,
+        initialView: { zoomAndCenter: [4, [-95, 55]] },
+      },
       basemapOptions: { basemapId: "transport", shaded: true },
     },
-    theme: "dark"
+    theme: "dark",
   }),
   800,
 );

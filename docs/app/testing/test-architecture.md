@@ -23,7 +23,9 @@ packages/geoview-test-suite/src/
     │   ├── suite-map-config.ts         # Map config creation/destruction
     │   ├── suite-geochart.ts           # Geochart plugin tests
     │   ├── suite-details.ts            # Details panel tests
-    │   └── suite-ui.ts                 # DOM-level UI tests
+    │   ├── suite-ui.ts                 # DOM-level UI tests
+    │   ├── suite-utilities.ts          # Utility function tests
+    │   └── suite-swiper.ts             # Swiper plugin tests
     └── testers/                         # GeoView-specific testers
         ├── abstract-gv-tester.ts        # GV base — constants, URLs, helpers
         ├── core-tester.ts
@@ -101,12 +103,12 @@ Test instance
 
 ## Execution Patterns
 
-| Pattern                         | When to Use                        | Example                               |
-| ------------------------------- | ---------------------------------- | ------------------------------------- |
-| `Promise.all()` (parallel)      | Independent tests, no shared state | `suite-config`, `suite-ui`            |
-| Mixed parallel + sequential     | Some tests modify map state        | `suite-layer`                         |
-| Sequential `await`              | All tests modify shared state      | `suite-map-varia`, `suite-map-config` |
-| `onCanExecuteTestSuite()` guard | Suite requires specific plugin     | `suite-geochart`, `suite-details`     |
+| Pattern                         | When to Use                        | Example                           |
+| ------------------------------- | ---------------------------------- | --------------------------------- |
+| `Promise.all()` (parallel)      | Independent tests, no shared state | `suite-config`, `suite-ui`        |
+| Mixed parallel + sequential     | Some tests modify map state        | `suite-layer`                     |
+| Sequential `await`              | All tests modify shared state      | `suite-map`, `suite-map-config`   |
+| `onCanExecuteTestSuite()` guard | Suite requires specific plugin     | `suite-geochart`, `suite-details` |
 
 ## Key Design Decisions
 

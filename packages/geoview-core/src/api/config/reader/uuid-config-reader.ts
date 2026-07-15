@@ -362,22 +362,26 @@ export type GeoCoreConfigResponseRoot = {
   errorMessage?: string;
 };
 
+/** The GeoCore response payload containing RCS and GCS sections. */
 export type GeoCoreConfigResponse = {
   // GV When Geocore fails, the payload may have an object in the rcs.en property, hence the 'GeoCoreConfigResponseRCSLayers[] | object' typing here
   rcs: Record<TypeDisplayLanguage, GeoCoreConfigResponseRCSLayers[] | object>;
   gcs: Record<TypeDisplayLanguage, GeoCoreConfigResponseGCSLayers>[];
 };
 
+/** The RCS response item containing layer definitions. */
 export type GeoCoreConfigResponseRCSLayers = {
   layers: GeoCoreConfigResponseLayer[];
 };
 
+/** The GCS response item containing layer overrides and package configs. */
 export type GeoCoreConfigResponseGCSLayers = {
   listOfLayerEntryConfig?: TypeLayerEntryConfig[];
   layers?: GeoCoreConfigResponseGCSLayer;
   packages?: GeoCoreConfigResponsePackages;
 };
 
+/** The legacy GCS single-layer override payload. */
 export type GeoCoreConfigResponseGCSLayer = {
   layerId?: string;
   layerName?: string;
@@ -391,16 +395,19 @@ export type GeoCoreConfigResponsePackages = {
   'time-slider'?: GeoViewTimeSliderConfig[];
 };
 
+/** The GeoCore geochart package payload. */
 export type GeoChartGeoCoreConfig = {
   layers: GeoChartGeoCoreConfigLayer; // For GeoCore, this is not an array.
 };
 
+/** The GeoCore geochart layer payload. */
 export type GeoChartGeoCoreConfigLayer = {
   layerId: string;
   propertyValue: string;
   propertyDisplay: string;
 };
 
+/** The RCS layer payload used to construct GeoView layer configs. */
 export type GeoCoreConfigResponseLayer = {
   id: string;
   name: string;

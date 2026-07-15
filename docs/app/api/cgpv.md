@@ -36,7 +36,7 @@ type MapViewerDelegate = (mapViewer: MapViewer) => void;
   id="map1"
   class="geoview-map"
   data-lang="en"
-  data-config='{"map": {"viewSettings": {"zoom": 4, "center": [-95, 55], "projection": 3978}}}'
+  data-config='{"map": {"viewSettings": {"projection": 3978, "initialView": {"zoomAndCenter": [4, [-95, 55]]}}}}'
 ></div>
 
 <script src="cgpv-main.js"></script>
