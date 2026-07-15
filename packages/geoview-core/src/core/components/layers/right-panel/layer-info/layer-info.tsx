@@ -160,7 +160,9 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
         <Box sx={memoSxClasses.infoSectionContent}>
           {isLocalhost() && <Box>{`${t('layers.layerPath')}: ${layerPath}`}</Box>}
           <Box>{`${t('layers.layerType')}${memoLocalizedTypeName}`}</Box>
-          {layerDataProjectionCode && <Box>{`${t('layers.layerServiceProjection')}: ${layerDataProjectionCode}`}</Box>}
+          {layerDataProjectionCode && (
+            <Box>{`${t('layers.layerServiceProjection')}: ${layerDataProjectionCode}${schemaTag === CONST_LAYER_TYPES.WMS ? ` (${t('layers.layerServiceProjectionAndMore')})` : ''}`}</Box>
+          )}
           {memoResources !== '' && (
             <Box className="info-container">
               {`${t('layers.layerResource')}`}
