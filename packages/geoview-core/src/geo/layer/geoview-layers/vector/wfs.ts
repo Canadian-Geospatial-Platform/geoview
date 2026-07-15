@@ -781,7 +781,7 @@ export class WFS extends AbstractGeoViewVector {
    * style retrieval through WMS `GetStyles`.
    *
    * @param layerConfig - The WFS layer configuration for which styling should be processed
-   * @param proxyUrl - Proxy URL to use if necessary
+   * @param proxyUrl - Proxy URL to use when necessary
    * @returns A promise that resolves with the layer style settings or undefined
    * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called
    */

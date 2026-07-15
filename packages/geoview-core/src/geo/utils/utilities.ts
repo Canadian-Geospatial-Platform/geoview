@@ -264,7 +264,7 @@ export abstract class GeoUtilities {
    * Fetch the json response from the XML response of a WMS getCapabilities request.
    *
    * @param url - The url the url of the WMS server
-   * @param proxyUrl - Proxy URL to use if necessary (defaults to CONFIG_PROXY_URL)
+   * @param proxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
    * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
    * The parameter sent in the callback is the proxy prefix with the '?' at the end.
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
@@ -320,7 +320,7 @@ export abstract class GeoUtilities {
    * Fetch the json response from the XML response of a WMS getCapabilities request.
    *
    * @param url - The url the url of the WMS server
-   * @param proxyUrl - Proxy URL to use if necessary (defaults to CONFIG_PROXY_URL)
+   * @param proxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
    * @param layers - The layers to query separate by
    * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
    * The parameter sent in the callback is the proxy prefix with the '?' at the end.
@@ -388,7 +388,7 @@ export abstract class GeoUtilities {
    * Fetch the json response from the XML response of a WMTS getCapabilities request.
    *
    * @param url - The url the url of the WMTS server
-   * @param proxyUrl - Proxy URL to use if necessary (defaults to CONFIG_PROXY_URL)
+   * @param proxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
    * @param layers - The layers to query, separated by comma
    * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
    * @param abortSignal - Optional abort signal to handle cancelling of the process
@@ -664,7 +664,7 @@ export abstract class GeoUtilities {
    * Fetch the json response from the XML response of a WMS GetStyles request.
    *
    * @param url - The url the url of the WMS server
-   * @param proxyUrl - Proxy URL to use if necessary (defaults to CONFIG_PROXY_URL)
+   * @param proxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
    * @param layers - The layers to query, separated by comma
    * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
    * The parameter sent in the callback is the proxy prefix with the '?' at the end.

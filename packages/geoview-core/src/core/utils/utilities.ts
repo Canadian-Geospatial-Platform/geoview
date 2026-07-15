@@ -473,7 +473,7 @@ async function probeFileUrl(url: string): Promise<boolean> {
  * The function never throws — all failures are returned as part of the result object.
  *
  * @param targetUrl - The URL to validate and ping
- * @param proxyUrl - Proxy URL to use if necessary (defaults to CONFIG_PROXY_URL)
+ * @param proxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
  * @param timeoutMs - Optional request timeout in milliseconds (defaults to none)
  * @returns A promise that resolves with a result object containing isValid, isReachable, needsProxy, status, and optional error
  */
