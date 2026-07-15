@@ -2,8 +2,7 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 
-import { Box, Divider, List, ListItem, Typography } from '@/ui';
-import { ListItemText } from '@/ui/list';
+import { Box, Divider, Typography } from '@/ui';
 
 import { getSxClasses } from '../layer-details-style';
 import { logger } from '@/core/utils/logger';
@@ -192,38 +191,12 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
       <Box sx={memoSxClasses.infoSection}>
         <Typography sx={memoSxClasses.infoSectionTitle}>{t('layers.layerInfoActiveFilters')}</Typography>
         <Box sx={memoSxClasses.infoSectionContent}>
-          <List sx={memoSxClasses.layerDetailsListGroup}>
-            {layerFilter && (
-              <ListItem sx={memoSxClasses.layerDetailsListItem}>
-                <ListItemText primary={`${t('layers.layerDefaultFilter')}${layerFilter}`} />
-              </ListItem>
-            )}
-            {classFilter && (
-              <ListItem sx={memoSxClasses.layerDetailsListItem}>
-                <ListItemText primary={`${t('layers.layerClassFilter')}${classFilter}`} />
-              </ListItem>
-            )}
-            {dataFilter && (
-              <ListItem sx={memoSxClasses.layerDetailsListItem}>
-                <ListItemText primary={`${t('layers.layerDataTableFilter')}${dataFilter}`} />
-              </ListItem>
-            )}
-            {timeFilter && (
-              <ListItem sx={memoSxClasses.layerDetailsListItem}>
-                <ListItemText primary={`${t('layers.layerTimeFilter')}${timeFilter}`} />
-              </ListItem>
-            )}
-            {panelFilter && (
-              <ListItem sx={memoSxClasses.layerDetailsListItem}>
-                <ListItemText primary={`${t('layers.layerPanelFilter')}${panelFilter}`} />
-              </ListItem>
-            )}
-            {!layerFilter && !classFilter && !dataFilter && !timeFilter && !panelFilter && (
-              <ListItem sx={memoSxClasses.layerDetailsListItem}>
-                <ListItemText primary={t('layers.layerActiveFiltersNone')} />
-              </ListItem>
-            )}
-          </List>
+          {layerFilter && <Box>{`${t('layers.layerDefaultFilter')}${layerFilter}`}</Box>}
+          {classFilter && <Box>{`${t('layers.layerClassFilter')}${classFilter}`}</Box>}
+          {dataFilter && <Box>{`${t('layers.layerDataTableFilter')}${dataFilter}`}</Box>}
+          {timeFilter && <Box>{`${t('layers.layerTimeFilter')}${timeFilter}`}</Box>}
+          {panelFilter && <Box>{`${t('layers.layerPanelFilter')}${panelFilter}`}</Box>}
+          {!layerFilter && !classFilter && !dataFilter && !timeFilter && !panelFilter && <Box>{t('layers.layerActiveFiltersNone')}</Box>}
         </Box>
       </Box>
 
@@ -236,40 +209,16 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
         <Box sx={memoSxClasses.infoSection}>
           <Typography sx={memoSxClasses.infoSectionTitle}>{t('layers.layerInfoTemporalSettings')}</Typography>
           <Box sx={memoSxClasses.infoSectionContent}>
-            <List sx={memoSxClasses.layerDetailsListGroup}>
-              {layerDisplayDateFormat && (
-                <ListItem sx={memoSxClasses.layerDetailsListItem}>
-                  <ListItemText primary={`${t('layers.layerDisplayDateFormat')}${layerDisplayDateFormat[language]}`} />
-                </ListItem>
-              )}
-              {layerDisplayDateFormatShort && (
-                <ListItem sx={memoSxClasses.layerDetailsListItem}>
-                  <ListItemText primary={`${t('layers.layerDisplayDateFormatShort')}${layerDisplayDateFormatShort[language]}`} />
-                </ListItem>
-              )}
-              {layerDateTemporalMode && (
-                <ListItem sx={memoSxClasses.layerDetailsListItem}>
-                  <ListItemText primary={`${t('layers.layerDateTemporalMode')}${layerDateTemporalMode}`} />
-                </ListItem>
-              )}
-              {layerDisplayDateTimezone && (
-                <ListItem sx={memoSxClasses.layerDetailsListItem}>
-                  <ListItemText primary={`${t('layers.layerDisplayDateTimezone')}${layerDisplayDateTimezone}`} />
-                </ListItem>
-              )}
-              {layerTimeDimension?.field && (
-                <ListItem sx={memoSxClasses.layerDetailsListItem}>
-                  <ListItemText primary={`${t('layers.layerTimeDimensionField')}: ${layerTimeDimension.field}`} />
-                </ListItem>
-              )}
-              {layerTimeDimension?.rangeItems?.range?.[0] && (
-                <ListItem sx={memoSxClasses.layerDetailsListItem}>
-                  <ListItemText
-                    primary={`${'Min/Max: '}${layerTimeDimension.rangeItems.range[0]} / ${layerTimeDimension.rangeItems.range[layerTimeDimension.rangeItems.range.length - 1]}`}
-                  />
-                </ListItem>
-              )}
-            </List>
+            {layerDisplayDateFormat && <Box>{`${t('layers.layerDisplayDateFormat')}${layerDisplayDateFormat[language]}`}</Box>}
+            {layerDisplayDateFormatShort && (
+              <Box>{`${t('layers.layerDisplayDateFormatShort')}${layerDisplayDateFormatShort[language]}`}</Box>
+            )}
+            {layerDateTemporalMode && <Box>{`${t('layers.layerDateTemporalMode')}${layerDateTemporalMode}`}</Box>}
+            {layerDisplayDateTimezone && <Box>{`${t('layers.layerDisplayDateTimezone')}${layerDisplayDateTimezone}`}</Box>}
+            {layerTimeDimension?.field && <Box>{`${t('layers.layerTimeDimensionField')}: ${layerTimeDimension.field}`}</Box>}
+            {layerTimeDimension?.rangeItems?.range?.[0] && (
+              <Box>{`Min/Max: ${layerTimeDimension.rangeItems.range[0]} / ${layerTimeDimension.rangeItems.range[layerTimeDimension.rangeItems.range.length - 1]}`}</Box>
+            )}
           </Box>
         </Box>
       )}
@@ -279,35 +228,21 @@ export function LayerInfoPanel({ layerPath }: LayerInfoPanelProps): JSX.Element 
         <Box sx={memoSxClasses.infoSection}>
           <Typography sx={memoSxClasses.infoSectionTitle}>{t('layers.layerInfoTemporalDimension')}</Typography>
           <Box sx={memoSxClasses.infoSectionContent}>
-            <List sx={memoSxClasses.layerDetailsListGroup}>
-              {timeSliderDimension.displayDateFormat?.[language] && (
-                <ListItem sx={memoSxClasses.layerDetailsListItem}>
-                  <ListItemText primary={`${t('layers.layerDisplayDateFormat')}${timeSliderDimension.displayDateFormat[language]}`} />
-                </ListItem>
-              )}
-              {timeSliderDimension.serviceDateTemporalMode && (
-                <ListItem sx={memoSxClasses.layerDetailsListItem}>
-                  <ListItemText primary={`${t('layers.layerDateTemporalMode')}${timeSliderDimension.serviceDateTemporalMode}`} />
-                </ListItem>
-              )}
-              {timeSliderDimension.displayDateTimezone && (
-                <ListItem sx={memoSxClasses.layerDetailsListItem}>
-                  <ListItemText primary={`${t('layers.layerDisplayDateTimezone')}${timeSliderDimension.displayDateTimezone}`} />
-                </ListItem>
-              )}
-              {timeSliderDimension?.field && timeSliderDimension?.field !== layerTimeDimension?.field && (
-                <ListItem sx={memoSxClasses.layerDetailsListItem}>
-                  <ListItemText primary={`${t('layers.layerTimeDimensionField')}: ${timeSliderDimension.field}`} />
-                </ListItem>
-              )}
-              {timeSliderDimension?.range?.[0] && (
-                <ListItem sx={memoSxClasses.layerDetailsListItem}>
-                  <ListItemText
-                    primary={`${'Min/Max: '}${timeSliderDimension.range[0]} / ${timeSliderDimension.range[timeSliderDimension.range.length - 1]}`}
-                  />
-                </ListItem>
-              )}
-            </List>
+            {timeSliderDimension.displayDateFormat?.[language] && (
+              <Box>{`${t('layers.layerDisplayDateFormat')}${timeSliderDimension.displayDateFormat[language]}`}</Box>
+            )}
+            {timeSliderDimension.serviceDateTemporalMode && (
+              <Box>{`${t('layers.layerDateTemporalMode')}${timeSliderDimension.serviceDateTemporalMode}`}</Box>
+            )}
+            {timeSliderDimension.displayDateTimezone && (
+              <Box>{`${t('layers.layerDisplayDateTimezone')}${timeSliderDimension.displayDateTimezone}`}</Box>
+            )}
+            {timeSliderDimension?.field && timeSliderDimension?.field !== layerTimeDimension?.field && (
+              <Box>{`${t('layers.layerTimeDimensionField')}: ${timeSliderDimension.field}`}</Box>
+            )}
+            {timeSliderDimension?.range?.[0] && (
+              <Box>{`Min/Max: ${timeSliderDimension.range[0]} / ${timeSliderDimension.range[timeSliderDimension.range.length - 1]}`}</Box>
+            )}
           </Box>
         </Box>
       )}

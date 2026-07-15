@@ -526,7 +526,7 @@ export class DataTableTester extends GVAbstractTester {
 
         // Zoom to Ontario using lonlat extent via MapViewer directly (same as console: cgpv.api.getMapViewer().zoomToLonLatExtentOrCoordinate)
         test.addStep('Zooming to Ontario extent...');
-        this.getMapViewer().zoomToLonLatExtentOrCoordinate(GVAbstractTester.ONTARIO_EXTENT, false);
+        void this.getMapViewer().zoomToLonLatExtentOrCoordinate(GVAbstractTester.ONTARIO_EXTENT, false);
 
         // Wait for render after zoom
         await this.getMapViewer().waitForRender();
