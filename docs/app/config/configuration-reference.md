@@ -1019,6 +1019,14 @@ See [Initial Settings](#initial-settings) section for complete details.
 
 Array of sublayer configurations (for services with multiple layers).
 
+For GeoCore layers, the `listOfLayerEntryConfig` source is selected by complete-list precedence:
+
+- Inline custom config list (if provided)
+- GeoCore GCS custom list
+- GeoCore RCS default list
+
+The selected list is treated as complete (entries are not merged across sources).
+
 ```typescript
 listOfLayerEntryConfig?: TypeLayerEntryConfig[];
 ```

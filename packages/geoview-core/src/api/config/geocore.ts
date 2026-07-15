@@ -2,7 +2,7 @@ import type { GeoViewGeoChartConfig, GeoViewTimeSliderConfig } from '@/api/confi
 import { UUIDmapConfigReader } from '@/api/config/reader/uuid-config-reader';
 import { Config } from '@/api/config/config';
 import { ConfigValidation } from '@/api/config/config-validation';
-import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import { generateId } from '@/core/utils/utilities';
 
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
@@ -36,7 +36,7 @@ export class GeoCore {
     layerConfig?: GeoCoreLayerConfig,
     abortSignal?: AbortSignal
   ): Promise<GeoCoreLayerConfigResponse> {
-    // If there's a mapId provided, validate the uuid
+    // Resolve GeoCore URL and duplicate-safe UUID in map context.
     let { geocoreUrl } = DEFAULT_MAP_FEATURE_CONFIG.serviceUrls;
 
     if (mapId) {
@@ -66,15 +66,19 @@ export class GeoCore {
     // Collect all time-slider configs from the response
     const timeSliderConfigs = response.timeSliderConfigs ?? [];
 
-    // Normalize GCS custom layer entries to best-effort match inline listOfLayerEntryConfig behavior.
+    // Normalize custom entries then select one complete list by precedence:
+    // inline > GCS > RCS.
     const defaultLayerId =
       response.layers[0].listOfLayerEntryConfig.length === 1
-        ? AbstractBaseLayerEntryConfig.getClassOrTypeLayerId(response.layers[0].listOfLayerEntryConfig[0])
+        ? ConfigBaseClass.getClassOrTypeLayerId(response.layers[0].listOfLayerEntryConfig[0])
         : undefined;
     const normalizedCustomListOfLayerEntryConfig = GeoCore.#normalizeCustomListOfLayerEntryConfig(
       response.customListOfLayerEntryConfig,
       defaultLayerId
     );
+
+    const selectedListOfLayerEntryConfig =
+      layerConfig?.listOfLayerEntryConfig ?? normalizedCustomListOfLayerEntryConfig ?? response.layers[0].listOfLayerEntryConfig;
 
     // Use merged custom layer entry config (inline config has precedence over GCS custom config).
     if (layerConfig?.listOfLayerEntryConfig || normalizedCustomListOfLayerEntryConfig || layerConfig?.initialSettings) {
@@ -83,8 +87,7 @@ export class GeoCore {
       tempLayerConfig.geoviewLayerId = layerConfig?.geoviewLayerId ?? response.layers[0].geoviewLayerId;
       tempLayerConfig.metadataAccessPath = response.layers[0].metadataAccessPath;
       tempLayerConfig.geoviewLayerType = response.layers[0].geoviewLayerType;
-      tempLayerConfig.listOfLayerEntryConfig =
-        layerConfig?.listOfLayerEntryConfig ?? normalizedCustomListOfLayerEntryConfig ?? response.layers[0].listOfLayerEntryConfig ?? [];
+      tempLayerConfig.listOfLayerEntryConfig = selectedListOfLayerEntryConfig ?? [];
       if (response.layers[0].isTimeAware === true || response.layers[0].isTimeAware === false)
         tempLayerConfig.isTimeAware = response.layers[0].isTimeAware;
 
@@ -146,10 +149,10 @@ export class GeoCore {
 
     const normalizedCustomList = customListOfLayerEntryConfig
       .map((entryConfig) => {
-        const entryLayerId = AbstractBaseLayerEntryConfig.getClassOrTypeLayerId(entryConfig);
+        const entryLayerId = ConfigBaseClass.getClassOrTypeLayerId(entryConfig);
 
         // For legacy custom payloads with no layerId, use the default layer id when we can infer it safely.
-        if (!entryLayerId && defaultLayerId && !AbstractBaseLayerEntryConfig.getClassOrTypeEntryType(entryConfig)) {
+        if (!entryLayerId && defaultLayerId && !ConfigBaseClass.getClassOrTypeEntryType(entryConfig)) {
           return {
             ...entryConfig,
             layerId: defaultLayerId,
@@ -159,8 +162,8 @@ export class GeoCore {
         return entryConfig;
       })
       .filter((entryConfig) => {
-        const entryLayerId = AbstractBaseLayerEntryConfig.getClassOrTypeLayerId(entryConfig);
-        const entryType = AbstractBaseLayerEntryConfig.getClassOrTypeEntryType(entryConfig);
+        const entryLayerId = ConfigBaseClass.getClassOrTypeLayerId(entryConfig);
+        const entryType = ConfigBaseClass.getClassOrTypeEntryType(entryConfig);
 
         // Best-effort behavior: keep entries with layerId and keep group entries; skip malformed leaf entries.
         return Boolean(entryLayerId || entryType === 'group');
