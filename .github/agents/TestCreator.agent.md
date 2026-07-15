@@ -250,7 +250,7 @@ After generating all test code, update both documentation sources:
 **Manual tests — `docs/programming/release-testing/`:**
 
 1. **Tests moved to automation**: Change the Auto column from `C` (candidate) or `M` (manual) to `A` (automated) in the release-testing MD file where the test is defined. Do NOT remove the row — keep it as documentation with the `A` flag so testers know it's covered by the automated suite.
-2. **New manual tests identified**: Add them to the appropriate file following the table format (see [Manual Test Format Rules](#manual-test-format-rules))
+2. **New manual tests identified**: Add them to the appropriate file following the table format (see Manual Test Format Rules section below)
 3. **New automation candidates identified**: Add them to `27-automation-candidates.md` with priority and description
 
 **Three-way sync check (CRITICAL — do this on EVERY change to test files):**
@@ -721,7 +721,7 @@ Test definitions (markdown files in `docs/programming/release-testing/`) are **s
 
 ## Assertion API Reference
 
-See the full assertion API in [docs/app/testing/test-templates.md](../../../docs/app/testing/test-templates.md#assertion-api-quick-reference).
+See the full assertion API in [docs/app/testing/test-templates.md](../../docs/app/testing/test-templates.md#assertion-api-quick-reference).
 
 ## Files Reference
 
