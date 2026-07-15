@@ -289,6 +289,7 @@
     "layerTimeDimension": "Temporal dimension (time-slider): ",
     "layerTimeDimensionField": "Field",
     "layerServiceProjection": "Service projection",
+    "layerServiceProjectionAndMore": "and more",
     "layerHoverable": "Information on mouse over",
     "layerQueryable": "Queryable on mouse click",
     "layerQueryableSource": "Source is queryable",
