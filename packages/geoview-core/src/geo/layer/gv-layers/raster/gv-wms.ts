@@ -34,7 +34,7 @@ import {
   LayerInvalidLayerFilterError,
 } from '@/core/exceptions/layer-exceptions';
 import { encodeLayersParam } from '@/core/utils/ogc-url-helper';
-import { formatError, NetworkError, RequestAbortedError, ResponseContentError } from '@/core/exceptions/core-exceptions';
+import { formatError, RequestAbortedError, ResponseContentError } from '@/core/exceptions/core-exceptions';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { WfsRenderer } from '@/geo/utils/renderer/wfs-renderer';
@@ -1810,7 +1810,7 @@ export class GVWMS extends AbstractGVRaster {
    * @returns A promise that resolves to an image blob or null if it fails to retrieve the legend image
    * @throws {ResponseContentError} When no URL is available to fetch the legend image
    */
-  static async #getLegendImage(layerConfig: OgcWmsLayerEntryConfig, chosenStyle?: string): Promise<string | ArrayBuffer | null> {
+  static #getLegendImage(layerConfig: OgcWmsLayerEntryConfig, chosenStyle?: string): Promise<string | ArrayBuffer | null> {
     // Get the legend URL from the layer metadata
     let queryUrl = layerConfig.getLegendUrl(chosenStyle);
 
@@ -1835,28 +1835,19 @@ export class GVWMS extends AbstractGVRaster {
       queryUrl = `https${queryUrl.slice(4)}`;
     }
 
-    try {
-      // Fetch the image (must await so CORS/network errors are caught below)
-      return await Fetch.fetchBlobImage(queryUrl);
-    } catch (error) {
-      // Retry with proxy if it's a network error (e.g., CORS)
-      if (error instanceof NetworkError) {
-        // Read the blob again, using the proxy this time
-        let proxyUrl = `${layerConfig.getProxyUrl()!}?${queryUrl}`;
+    // If we know that the layer is using a proxy, use it right away instead of even attempting to fetch the image directly (which would fail due to CORS)
+    if (layerConfig.getIsUsingProxy()) {
+      queryUrl = `${layerConfig.getProxyUrl()}?${queryUrl}`;
 
-        // If the proxy to use is the Esri proxy
-        if (layerConfig.getIsUsingEsriProxy()) {
-          // Encode the layers parameter if present
-          proxyUrl = encodeLayersParam(proxyUrl);
-        }
-
-        // Requery
-        return Fetch.fetchBlobImage(proxyUrl);
+      // If the proxy to use is the Esri proxy
+      if (layerConfig.getIsUsingEsriProxy()) {
+        // Encode the layers parameter if present
+        queryUrl = encodeLayersParam(queryUrl);
       }
-
-      // Failed
-      throw error;
     }
+
+    // Fetch the image (must await so CORS/network errors are caught below)
+    return Fetch.fetchBlobImage(queryUrl);
   }
 
   /**

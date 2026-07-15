@@ -473,13 +473,13 @@ async function probeFileUrl(url: string): Promise<boolean> {
  * The function never throws — all failures are returned as part of the result object.
  *
  * @param targetUrl - The URL to validate and ping
- * @param proxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
+ * @param configProxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
  * @param timeoutMs - Optional request timeout in milliseconds (defaults to none)
  * @returns A promise that resolves with a result object containing isValid, isReachable, needsProxy, status, and optional error
  */
 export async function validateAndPingUrl(
   targetUrl: string,
-  proxyUrl: string = CONFIG_PROXY_URL,
+  configProxyUrl: string = CONFIG_PROXY_URL,
   timeoutMs = undefined
 ): Promise<PingResult> {
   const result: PingResult = {
@@ -568,7 +568,9 @@ export async function validateAndPingUrl(
   if (reason === 'cors') {
     // Use fetchTextPermissive because the proxy may forward non-2xx responses
     // that still contain valid capabilities XML in the body.
-    const proxyChecks = await Promise.allSettled(ogcCheckUrls.map((checkUrl) => Fetch.fetchTextPermissive(`${proxyUrl}?${checkUrl}`)));
+    const proxyChecks = await Promise.allSettled(
+      ogcCheckUrls.map((checkUrl) => Fetch.fetchTextPermissive(`${configProxyUrl}?${checkUrl}`))
+    );
 
     // Same as above: if either WMS or WFS GetCapabilities succeeds through the proxy, it's reachable.
     for (const settled of proxyChecks) {
@@ -580,7 +582,7 @@ export async function validateAndPingUrl(
     }
 
     // Not a valid OGC service through proxy — try a lightweight GET for file-based URLs
-    if (VALID_FILE_EXTENSIONS_REGEX.test(targetUrlWithoutParams) && (await probeFileUrl(`${proxyUrl}?${targetUrlWithoutParams}`))) {
+    if (VALID_FILE_EXTENSIONS_REGEX.test(targetUrlWithoutParams) && (await probeFileUrl(`${configProxyUrl}?${targetUrlWithoutParams}`))) {
       result.isReachable = true;
       result.needsProxy = true;
       return result;

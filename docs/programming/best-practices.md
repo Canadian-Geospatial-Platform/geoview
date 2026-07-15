@@ -213,7 +213,7 @@ Tags Worth Using
 - @returns
 - @throws (@throws {TheErrorType} (description)  e.g. @throws {LayerNotGeoJsonError} When...)
 - @example
-- @deprecated
+- @deprecated (must include a reason, e.g. `@deprecated Use \`newMethod()\` instead`)
 - @see
 
 Tags Usually Overkill in TS

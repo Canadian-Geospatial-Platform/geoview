@@ -15,11 +15,6 @@ import { LineString, Point, Polygon } from 'ol/geom';
 import type { Coordinate } from 'ol/coordinate';
 import GML3 from 'ol/format/GML3';
 
-import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
-import { parseXMLToJson } from '@/core/utils/utilities';
-import { encodeLayersParam, ensureServiceRequestUrl } from '@/core/utils/ogc-url-helper';
-import { Fetch } from '@/core/utils/fetch-helper';
-import { Projection } from '@/geo/utils/projection';
 import { CONST_LAYER_TYPES, validVectorLayerLegendTypes } from '@/api/types/layer-schema-types';
 import {
   CONFIG_PROXY_URL,
@@ -28,9 +23,11 @@ import {
   type TypeStyleGeometry,
   type TypeValidMapProjectionCodes,
 } from '@/api/types/map-schema-types';
+import type { TypeMetadataWMTS } from '@/api/config/validation-classes/raster-validation-classes/ogc-wmts-layer-entry-config';
 import type {
   TypeGeoviewLayerType,
   TypeLegend,
+  TypeMetadataWFS,
   TypeMetadataWMS,
   TypeMetadataWMSCapabilityLayer,
   TypeMetadataWMSRoot,
@@ -38,10 +35,15 @@ import type {
   TypeStylesWMS,
   TypeVectorLayerStyles,
 } from '@/api/types/layer-schema-types';
-import type { TypeBasemapLayer } from '@/geo/layer/basemap/basemap-types';
 import { NetworkError, NotSupportedError, ResponseEmptyError } from '@/core/exceptions/core-exceptions';
-import type { TypeMetadataWMTS } from '@/api/config/validation-classes/raster-validation-classes/ogc-wmts-layer-entry-config';
+import { parseXMLToJson } from '@/core/utils/utilities';
+import { encodeLayersParam, ensureServiceRequestUrl } from '@/core/utils/ogc-url-helper';
+import { Fetch } from '@/core/utils/fetch-helper';
+import { findPropertyByRegexPath } from '@/core/utils/utilities';
 import type { TypeLegendItem, TypeLegendLayerItem } from '@/core/components/layers/types';
+import type { TypeBasemapLayer } from '@/geo/layer/basemap/basemap-types';
+import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
+import { Projection } from '@/geo/utils/projection';
 
 // available layer types
 export const layerTypes = CONST_LAYER_TYPES;
@@ -264,7 +266,7 @@ export abstract class GeoUtilities {
    * Fetch the json response from the XML response of a WMS getCapabilities request.
    *
    * @param url - The url the url of the WMS server
-   * @param proxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
+   * @param configProxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
    * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
    * The parameter sent in the callback is the proxy prefix with the '?' at the end.
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
@@ -277,7 +279,7 @@ export abstract class GeoUtilities {
    */
   static async getWMSServiceString(
     url: string,
-    proxyUrl: string = CONFIG_PROXY_URL,
+    configProxyUrl: string = CONFIG_PROXY_URL,
     callbackNewMetadataUrl?: CallbackNewMetadataDelegate,
     abortSignal?: AbortSignal
   ): Promise<string> {
@@ -292,20 +294,20 @@ export abstract class GeoUtilities {
       // If a network error such as CORS
       if (error instanceof NetworkError) {
         // If the proxy to use is the Esri proxy
-        if (GeoUtilities.isEsriProxy(proxyUrl)) {
+        if (GeoUtilities.isEsriProxy(configProxyUrl)) {
           // Encode the layers parameter if present
           // eslint-disable-next-line no-param-reassign
           url = encodeLayersParam(url);
         }
 
         // We're going to change the metadata url to use a proxy
-        const newProxiedMetadataUrl = `${proxyUrl}?${url}`;
+        const newProxiedMetadataUrl = `${configProxyUrl}?${url}`;
 
         // Try again with the proxy this time
         capabilitiesString = await Fetch.fetchText(newProxiedMetadataUrl);
 
         // Callback about it
-        callbackNewMetadataUrl?.(newProxiedMetadataUrl, proxyUrl);
+        callbackNewMetadataUrl?.(newProxiedMetadataUrl, configProxyUrl);
 
         // Return it
         return capabilitiesString;
@@ -320,7 +322,7 @@ export abstract class GeoUtilities {
    * Fetch the json response from the XML response of a WMS getCapabilities request.
    *
    * @param url - The url the url of the WMS server
-   * @param proxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
+   * @param configProxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
    * @param layers - The layers to query separate by
    * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
    * The parameter sent in the callback is the proxy prefix with the '?' at the end.
@@ -334,7 +336,7 @@ export abstract class GeoUtilities {
    */
   static async getWMSServiceMetadata(
     url: string,
-    proxyUrl: string = CONFIG_PROXY_URL,
+    configProxyUrl: string = CONFIG_PROXY_URL,
     layers?: string,
     callbackNewMetadataUrl?: CallbackNewMetadataDelegate,
     abortSignal?: AbortSignal
@@ -343,7 +345,7 @@ export abstract class GeoUtilities {
     const capUrl = this.ensureServiceRequestUrlGetCapabilities(url, 'WMS', layers);
 
     // Redirect
-    const metadataRaw = await this.getWMSServiceString(capUrl, proxyUrl, callbackNewMetadataUrl, abortSignal);
+    const metadataRaw = await this.getWMSServiceString(capUrl, configProxyUrl, callbackNewMetadataUrl, abortSignal);
 
     // Parse it
     const metadataParsed = parseXMLToJson<TypeMetadataWMSRoot>(metadataRaw);
@@ -385,10 +387,44 @@ export abstract class GeoUtilities {
   }
 
   /**
+   * Fetch the json response from the XML response of a WFS getCapabilities request.
+   *
+   * @param url - The url of the WFS server
+   * @param configProxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
+   * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
+   * The parameter sent in the callback is the proxy prefix with the '?' at the end.
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+   * @returns A promise that resolves with the parsed WFS metadata, or undefined when capabilities weren't found
+   * @throws {RequestTimeoutError} When the request exceeds the timeout duration
+   * @throws {RequestAbortedError} When the request was aborted by the caller's signal
+   * @throws {ResponseError} When the response is not OK (non-2xx)
+   * @throws {ResponseEmptyError} When the JSON response is empty
+   * @throws {NetworkError} When a network issue happened
+   */
+  static async getWFSServiceMetadata(
+    url: string,
+    configProxyUrl: string = CONFIG_PROXY_URL,
+    callbackNewMetadataUrl?: CallbackNewMetadataDelegate,
+    abortSignal?: AbortSignal
+  ): Promise<TypeMetadataWFS | undefined> {
+    // Make sure the URL has necessary information
+    const capUrl = this.ensureServiceRequestUrlGetCapabilities(url, 'WFS');
+
+    // Redirect
+    const metadataRaw = await this.getWMSServiceString(capUrl, configProxyUrl, callbackNewMetadataUrl, abortSignal);
+
+    // Parse it
+    const metadataParsed = parseXMLToJson<Record<string, unknown>>(metadataRaw);
+
+    // Parse the WFS_Capabilities opening the root node right away to skip to the meat.
+    return findPropertyByRegexPath<TypeMetadataWFS>(metadataParsed, /(?:WFS_Capabilities)/);
+  }
+
+  /**
    * Fetch the json response from the XML response of a WMTS getCapabilities request.
    *
    * @param url - The url the url of the WMTS server
-   * @param proxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
+   * @param configProxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
    * @param layers - The layers to query, separated by comma
    * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
    * @param abortSignal - Optional abort signal to handle cancelling of the process
@@ -401,7 +437,7 @@ export abstract class GeoUtilities {
    */
   static async getWMTSServiceMetadata(
     url: string,
-    proxyUrl: string = CONFIG_PROXY_URL,
+    configProxyUrl: string = CONFIG_PROXY_URL,
     layers?: string,
     callbackNewMetadataUrl?: CallbackNewMetadataDelegate,
     abortSignal?: AbortSignal
@@ -410,7 +446,7 @@ export abstract class GeoUtilities {
     const capUrl = this.ensureServiceRequestUrlGetCapabilities(url, 'WMTS', layers);
 
     // Redirect
-    const metadataRaw = await this.getWMSServiceString(capUrl, proxyUrl, callbackNewMetadataUrl, abortSignal);
+    const metadataRaw = await this.getWMSServiceString(capUrl, configProxyUrl, callbackNewMetadataUrl, abortSignal);
 
     // Parse it
     const metadataParsed = parseXMLToJson<TypeMetadataWMTS>(metadataRaw);
@@ -421,6 +457,104 @@ export abstract class GeoUtilities {
     // Return it
     return metadataParsed;
   }
+
+  /**
+   * Fetch the json response from the XML response of a WMS GetStyles request.
+   *
+   * @param url - The url the url of the WMS server
+   * @param configProxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
+   * @param layers - The layers to query, separated by comma
+   * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
+   * The parameter sent in the callback is the proxy prefix with the '?' at the end.
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+   * @returns A promise that resolves with the parsed WMS styles
+   * @throws {RequestTimeoutError} When the request exceeds the timeout duration
+   * @throws {RequestAbortedError} When the request was aborted by the caller's signal
+   * @throws {ResponseError} When the response is not OK (non-2xx)
+   * @throws {ResponseEmptyError} When the JSON response is empty
+   * @throws {NetworkError} When a network issue happened
+   */
+  static async getWMSServiceStyles(
+    url: string,
+    configProxyUrl: string = CONFIG_PROXY_URL,
+    layers?: string,
+    callbackNewMetadataUrl?: CallbackNewMetadataDelegate,
+    abortSignal?: AbortSignal
+  ): Promise<TypeStylesWMS> {
+    // Make sure the URL has necessary information
+    const stylesUrl = this.ensureServiceRequestUrlGetStyles(url, layers);
+
+    // Redirect
+    const responseXML = await this.getWMSServiceString(stylesUrl, configProxyUrl, callbackNewMetadataUrl, abortSignal);
+
+    // Read the styles
+    return parseXMLToJson(responseXML);
+  }
+
+  /**
+   * Return the map server url from a layer service.
+   *
+   * @param url - The service url for a wms / dynamic or feature layers
+   * @param rest - Boolean value to add rest services if not present (default false)
+   * @returns The map server url
+   * @deprecated As it's not being used anymore (or only used by external developers?)
+   */
+  static getMapServerUrl(url: string, rest = false): string {
+    let mapServerUrl = url;
+    if (mapServerUrl.includes('MapServer')) {
+      mapServerUrl = mapServerUrl.slice(0, mapServerUrl.indexOf('MapServer') + 'MapServer'.length);
+    }
+    if (mapServerUrl.includes('FeatureServer')) {
+      mapServerUrl = mapServerUrl.slice(0, mapServerUrl.indexOf('FeatureServer') + 'FeatureServer'.length);
+    }
+
+    if (rest) {
+      const urlRightSide = mapServerUrl.slice(mapServerUrl.indexOf('/services/'));
+      mapServerUrl = `${mapServerUrl.slice(0, url.indexOf('services/'))}rest${urlRightSide}`;
+    }
+
+    return mapServerUrl;
+  }
+
+  /**
+   * Return the root server url from a OGC layer service.
+   *
+   * @param url - The service url for an ogc layer
+   * @returns The root ogc server url
+   * @deprecated As it's not being used anymore (or only used by external developers?)
+   */
+  static getOGCServerUrl(url: string): string {
+    let ogcServerUrl = url;
+    if (ogcServerUrl.includes('collections')) {
+      ogcServerUrl = ogcServerUrl.slice(0, ogcServerUrl.indexOf('collections'));
+    }
+    return ogcServerUrl;
+  }
+
+  /**
+   * Replaces or adds the BBOX parameter in a WMS GetMap URL.
+   *
+   * @param url - The original WMS GetMap URL
+   * @param newCRS - The new CRS
+   * @param newBBOX - The new BBOX to set, as an array of 4 numbers: [minX, minY, maxX, maxY]
+   * @returns A new URL string with the updated BBOX parameter
+   */
+  static replaceCRSandBBOXParam(url: string, newCRS: string, newBBOX: number[]): string {
+    const urlObj = new URL(url);
+
+    // Format the new BBOX as a comma-separated string
+    const bboxString = newBBOX.join(',');
+
+    // Replace or add the BBOX parameter
+    urlObj.searchParams.set('BBOX', bboxString);
+    urlObj.searchParams.set('CRS', newCRS);
+
+    return urlObj.toString();
+  }
+
+  // #endregion FETCH METADATA
+
+  // #region FETCH METADATA - PRIVATE METHODS
 
   /**
    * Detects whether a WMS GetCapabilities document was produced by QGIS Server.
@@ -660,101 +794,7 @@ export abstract class GeoUtilities {
     });
   }
 
-  /**
-   * Fetch the json response from the XML response of a WMS GetStyles request.
-   *
-   * @param url - The url the url of the WMS server
-   * @param proxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
-   * @param layers - The layers to query, separated by comma
-   * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
-   * The parameter sent in the callback is the proxy prefix with the '?' at the end.
-   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
-   * @returns A promise that resolves with the parsed WMS styles
-   * @throws {RequestTimeoutError} When the request exceeds the timeout duration
-   * @throws {RequestAbortedError} When the request was aborted by the caller's signal
-   * @throws {ResponseError} When the response is not OK (non-2xx)
-   * @throws {ResponseEmptyError} When the JSON response is empty
-   * @throws {NetworkError} When a network issue happened
-   */
-  static async getWMSServiceStyles(
-    url: string,
-    proxyUrl: string = CONFIG_PROXY_URL,
-    layers?: string,
-    callbackNewMetadataUrl?: CallbackNewMetadataDelegate,
-    abortSignal?: AbortSignal
-  ): Promise<TypeStylesWMS> {
-    // Make sure the URL has necessary information
-    const stylesUrl = this.ensureServiceRequestUrlGetStyles(url, layers);
-
-    // Redirect
-    const responseXML = await this.getWMSServiceString(stylesUrl, proxyUrl, callbackNewMetadataUrl, abortSignal);
-
-    // Read the styles
-    return parseXMLToJson(responseXML);
-  }
-
-  /**
-   * Return the map server url from a layer service.
-   *
-   * @param url - The service url for a wms / dynamic or feature layers
-   * @param rest - Boolean value to add rest services if not present (default false)
-   * @returns The map server url
-   * @deprecated
-   */
-  static getMapServerUrl(url: string, rest = false): string {
-    let mapServerUrl = url;
-    if (mapServerUrl.includes('MapServer')) {
-      mapServerUrl = mapServerUrl.slice(0, mapServerUrl.indexOf('MapServer') + 'MapServer'.length);
-    }
-    if (mapServerUrl.includes('FeatureServer')) {
-      mapServerUrl = mapServerUrl.slice(0, mapServerUrl.indexOf('FeatureServer') + 'FeatureServer'.length);
-    }
-
-    if (rest) {
-      const urlRightSide = mapServerUrl.slice(mapServerUrl.indexOf('/services/'));
-      mapServerUrl = `${mapServerUrl.slice(0, url.indexOf('services/'))}rest${urlRightSide}`;
-    }
-
-    return mapServerUrl;
-  }
-
-  /**
-   * Return the root server url from a OGC layer service.
-   *
-   * @param url - The service url for an ogc layer
-   * @returns The root ogc server url
-   * @deprecated
-   */
-  static getOGCServerUrl(url: string): string {
-    let ogcServerUrl = url;
-    if (ogcServerUrl.includes('collections')) {
-      ogcServerUrl = ogcServerUrl.slice(0, ogcServerUrl.indexOf('collections'));
-    }
-    return ogcServerUrl;
-  }
-
-  /**
-   * Replaces or adds the BBOX parameter in a WMS GetMap URL.
-   *
-   * @param url - The original WMS GetMap URL
-   * @param newCRS - The new CRS
-   * @param newBBOX - The new BBOX to set, as an array of 4 numbers: [minX, minY, maxX, maxY]
-   * @returns A new URL string with the updated BBOX parameter
-   */
-  static replaceCRSandBBOXParam(url: string, newCRS: string, newBBOX: number[]): string {
-    const urlObj = new URL(url);
-
-    // Format the new BBOX as a comma-separated string
-    const bboxString = newBBOX.join(',');
-
-    // Replace or add the BBOX parameter
-    urlObj.searchParams.set('BBOX', bboxString);
-    urlObj.searchParams.set('CRS', newCRS);
-
-    return urlObj.toString();
-  }
-
-  // #endregion FETCH METADATA
+  // #endregion FETCH METADATA - PRIVATE METHODS
 
   // #region LEGEND
 

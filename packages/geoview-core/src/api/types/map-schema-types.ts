@@ -176,7 +176,7 @@ export type TypeServiceUrls = {
    * Service end point to access API for layers specification (loading and plugins parameters). By default it is GeoCore but can
    * be another endpoint with similar output. Default = CONFIG_GEOCORE_URL ('https://geocore.api.geo.ca').
    */
-  geocoreUrl: string;
+  geocoreUrl?: string;
   /**
    * Service end point to access API for layers specification for RCS gcGeo.
    */

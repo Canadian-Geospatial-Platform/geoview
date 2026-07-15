@@ -634,7 +634,16 @@ export class ConfigApi {
       case 'ogcFeature':
         return OgcFeature.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], isTimeAware);
       case 'ogcWfs':
-        return WFS.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], isTimeAware, 'all', true);
+        return WFS.processGeoviewLayerConfig(
+          geoviewLayerId,
+          geoviewLayerName,
+          layerURL,
+          undefined,
+          layerIds as string[],
+          isTimeAware,
+          'all',
+          true
+        );
       default:
         // Unsupported
         throw new NotSupportedError(`Unsupported layer type ${layerType}`);

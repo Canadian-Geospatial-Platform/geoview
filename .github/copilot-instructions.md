@@ -249,6 +249,34 @@ const isVisible =
 
 **Always use `getLayerNameCascade()` when you need a display name.** Use `getLayerName()` only when you specifically need to check if the entry has its own name set.
 
+### Layer Proxy Architecture
+
+**Per-instance proxy** — Each layer stores its own proxy URL on `AbstractBaseLayerEntryConfig`. There is NO shared mutable static for proxy configuration.
+
+| Method on `AbstractBaseLayerEntryConfig` | Purpose |
+|---|---|
+| `getProxyUrl()` | Returns the proxy URL for this layer, or `undefined` if none |
+| `setProxyUrl(proxy)` | Sets the proxy URL; also snapshots `#dataAccessPathBeforeProxy` |
+| `getIsUsingProxy()` | Returns `true` if a proxy URL is set (`!!this.#proxy`) |
+| `getIsUsingEsriProxy()` | Returns `true` if the proxy matches the ESRI proxy pattern |
+| `getDataAccessPathBeforeProxy()` | Returns the original URL before proxy was applied (falls back to current data access path) |
+
+**How proxy is assigned** — `LayerCreatorController.#addGeoviewLayerStep2()` calls `geoviewLayer.setConfigServiceUrls(mapFeaturesConfig.serviceUrls)` on the `AbstractGeoViewLayer` instance. During metadata fetch, if a network error triggers a proxy retry, the callback calls `layerConfig.setProxyUrl(proxyUsed)` on the individual layer entry config.
+
+**ESRI proxy detection** — `GeoUtilities.isEsriProxy(proxyUrl)` checks if the proxy URL contains `executeFromProxy`. When true, OGC `LAYERS` params must be double-encoded before being sent through the proxy.
+
+**GV layer (runtime) proxy usage pattern:**
+
+```typescript
+// In image load function or feature info request:
+if (layerConfig.getIsUsingProxy()) {
+  url = `${layerConfig.getProxyUrl()}?${url}`;
+}
+
+// For OL source URL (proxy applied in load callback, not source URL):
+const sourceUrl = layerConfig.getDataAccessPathBeforeProxy();
+```
+
 ### Layer Opacity System
 
 **Hierarchical capping** — `AbstractBaseGVLayer.onSetOpacity()` clamps each layer's opacity to `Math.min(parent.getOpacity(), opacity)`. A child can never exceed its parent's opacity. This means:

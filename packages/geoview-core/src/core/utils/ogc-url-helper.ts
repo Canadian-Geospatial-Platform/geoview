@@ -53,7 +53,7 @@ export function ensureServiceRequestUrl(url: string, service: string, request: s
 export function encodeLayersParam(url: string): string {
   // Use regex (not URL parsing) so we don't touch the rest of the URL.
   // This preserves proxy-style URLs that embed another URL after `?`
-  // (e.g. "{...proxyUrl...}?https://other?layer=foo").
+  // (e.g. "{...configProxyUrl...}?https://other?layer=foo").
   return url.replace(/([?&])(layers?)=([^&]*)/gi, (_match, sep: string, key: string, value: string) => {
     return `${sep}${key}=${encodeURIComponent(value)}`;
   });
