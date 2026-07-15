@@ -902,7 +902,7 @@ export class WMS extends AbstractGeoViewRaster {
    * Fetches the metadata for WMS Capabilities.
    *
    * @param url - The url to query the metadata from
-   * @param proxyUrl - Proxy URL to use if necessary
+   * @param proxyUrl - Proxy URL to use when necessary
    * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
    * The parameter sent in the callback is the proxy prefix with the '?' at the end.
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
@@ -926,7 +926,7 @@ export class WMS extends AbstractGeoViewRaster {
    * Fetches the metadata for WMS Capabilities for particular layer(s).
    *
    * @param url - The url to query the metadata from
-   * @param proxyUrl - Proxy URL to use if necessary
+   * @param proxyUrl - Proxy URL to use when necessary
    * @param layers - The layers to get the capabilities for
    * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
    * The parameter sent in the callback is the proxy prefix with the '?' at the end.
@@ -953,7 +953,7 @@ export class WMS extends AbstractGeoViewRaster {
    * Fetches the WMS styles for the specified layer(s) from a WMS service.
    *
    * @param url - The url to query the metadata from
-   * @param proxyUrl - Proxy URL to use if necessary
+   * @param proxyUrl - Proxy URL to use when necessary
    * @param layers - The layers to get the capabilities for
    * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
    * The parameter sent in the callback is the proxy prefix with the '?' at the end.
@@ -984,7 +984,7 @@ export class WMS extends AbstractGeoViewRaster {
    * types to their corresponding layer style settings.
    *
    * @param url - The base WMS service URL used to fetch styles
-   * @param proxyUrl - Proxy URL to use if necessary
+   * @param proxyUrl - Proxy URL to use when necessary
    * @param layers - A comma-separated list of WMS layer names to retrieve styles for
    * @param geomType - Optional geometry type
    * @returns A promise that resolves to a record mapping geometry types to layer style settings
@@ -1024,7 +1024,7 @@ export class WMS extends AbstractGeoViewRaster {
    * resolve to a metadata result or reject with a wrapped error.
    *
    * @param url - The base GetCapabilities URL used to fetch layer-specific metadata
-   * @param proxyUrl - Proxy URL to use if necessary
+   * @param proxyUrl - Proxy URL to use when necessary
    * @param layers - An array of layer configurations to fetch metadata for
    * @returns An array of metadata fetch promises, one per unique layer config
    */
@@ -1251,7 +1251,7 @@ export class WMS extends AbstractGeoViewRaster {
    * Failures during processing do not stop execution; they are logged as warnings.
    *
    * @param layerConfig - The WMS layer configuration being processed
-   * @param proxyUrl - Proxy URL to use if necessary
+   * @param proxyUrl - Proxy URL to use when necessary
    * @returns A promise that resolves when processing is complete
    * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called
    * @throws {LayerEntryConfigFieldsNotFoundError} When WFS `outfields` cannot be read from the derived config

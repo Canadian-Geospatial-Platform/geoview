@@ -471,7 +471,7 @@ export class WMTS extends AbstractGeoViewRaster {
    * Fetches the metadata for WMS Capabilities.
    *
    * @param url - The url to query the metadata from
-   * @param proxyUrl - Proxy URL to use if necessary
+   * @param proxyUrl - Proxy URL to use when necessary
    * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata
    * @param abortSignal - Optional abort signal to handle cancelling of the process
    * @returns A promise that resolves to the parsed metadata object
