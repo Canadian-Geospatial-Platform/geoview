@@ -34,11 +34,14 @@ export class XYZTilesLayerEntryConfig extends TileLayerEntryConfig {
     // Value for this.source.featureInfo.queryable can only be false.
     this.setQueryableSource(false);
 
-    // If pointing to something else than {z}/{y}/{x}
-    if (!this.getDataAccessPath().includes('{z}/{y}/{x}')) {
-      // Set it
+    // If there's no z,y,z parameters in the data access path, append it to the end of the path (e.g. Esri XYZ service)
+    if (!XYZTilesLayerEntryConfig.containsXYZParams(this.getDataAccessPath())) {
+      // Append the tile/{z}/{y}/{x}
       this.setDataAccessPath(`${this.getDataAccessPath(true)}tile/{z}/{y}/{x}`);
     }
+
+    // If the layer entry config has no layerId (that's possible for XYZ Tile layer when there's only a dataAccessPath), default to 0
+    this.layerId ??= '0';
   }
 
   // #region OVERRIDES
@@ -85,6 +88,16 @@ export class XYZTilesLayerEntryConfig extends TileLayerEntryConfig {
   static isClassOrTypeXYZTiles(layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig): layerConfig is TypeXYZTilesConfig {
     // Redirect
     return this.isClassOrTypeSchemaTag(layerConfig, CONST_LAYER_TYPES.XYZ_TILES);
+  }
+
+  /**
+   * Checks whether the given URL contains the XYZ tile parameters ({x}, {y}, {z}).
+   *
+   * @param url - The URL to check
+   * @returns `true` if the URL contains the XYZ tile parameters; otherwise `false`
+   */
+  static containsXYZParams(url: string): boolean {
+    return url.includes('{x}') && url.includes('{y}') && url.includes('{z}');
   }
 
   // #endregion STATIC METHODS

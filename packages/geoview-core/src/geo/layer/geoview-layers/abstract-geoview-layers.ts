@@ -722,8 +722,10 @@ export abstract class AbstractGeoViewLayer {
    */
   async #fetchAndSetServiceMetadata(abortSignal?: AbortSignal): Promise<void> {
     try {
-      // If there's no metadata access path
-      // GV e.g.: CSV (csvLYR2) and some outlier demos, we want to skip those (not fail)
+      // If there's no metadata access path, we want to skip those
+      // GV e.g.: XYZ Tiles added via configuration without a metadataAccessPath
+      // GV e.g.: XYZ Tiles added via add-new-layer component like 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
+      // GV e.g.: CSV (csvLYR2) and some outlier demos
       if (!this.hasMetadataAccessPath()) return;
 
       // Log
