@@ -358,7 +358,7 @@ export function AddNewLayer(): JSX.Element {
   const disabledLayerTypes = useStoreAppDisabledLayerTypes();
   const language = useStoreAppDisplayLanguage();
   const shellContainer = useStoreAppShellContainer();
-  const proxyUrl = useStoreMapConfigServiceUrlsProxyUrl();
+  const configProxyUrl = useStoreMapConfigServiceUrlsProxyUrl();
   const uiController = useUIController();
   const geoChartController = useGeoChartControllerIfExists();
   const layerController = useLayerController();
@@ -938,7 +938,7 @@ export function AddNewLayer(): JSX.Element {
         // Validate and ping HTTPS URLs
         setIsLoading(true);
         try {
-          const check = await validateAndPingUrl(layerURL, proxyUrl);
+          const check = await validateAndPingUrl(layerURL, configProxyUrl);
           logger.logDebug('URL validation check', check);
           const isOk = check.isValid && check.isReachable;
           setStepButtonEnabled(isOk);
@@ -971,7 +971,7 @@ export function AddNewLayer(): JSX.Element {
     }
     if (activeStep === 2 && layerIdsToAdd.length > 0) setStepButtonEnabled(true);
     if (activeStep === 2 && !layerIdsToAdd.length) setStepButtonEnabled(false);
-  }, [layerURL, activeStep, layerIdsToAdd, layerType, uiController, layerController, proxyUrl, t]);
+  }, [layerURL, activeStep, layerIdsToAdd, layerType, uiController, layerController, configProxyUrl, t]);
 
   /**
    * Manages focus when Step 2 validation errors occur.

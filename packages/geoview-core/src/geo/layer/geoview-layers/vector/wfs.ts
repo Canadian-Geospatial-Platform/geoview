@@ -23,7 +23,6 @@ import type {
   TypeMetadataWFSTextOnly,
 } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
-import { findPropertyByRegexPath } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
 import {
   OgcWfsLayerEntryConfig,
@@ -34,7 +33,7 @@ import { LayerNoCapabilitiesError, LayerServiceMetadataUnableToFetchError } from
 import { GVWFS } from '@/geo/layer/gv-layers/vector/gv-wfs';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { formatError } from '@/core/exceptions/core-exceptions';
-import { GeoUtilities, type SourceFeaturesInfo } from '@/geo/utils/utilities';
+import { GeoUtilities, type CallbackNewMetadataDelegate, type SourceFeaturesInfo } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { logger } from '@/core/utils/logger';
 
@@ -341,7 +340,15 @@ export class WFS extends AbstractGeoViewVector {
     let metadata;
     try {
       // Fetch it
-      metadata = await WFS.fetchMetadata(this.getMetadataAccessPath(), abortSignal);
+      metadata = await WFS.fetchMetadata(
+        this.getMetadataAccessPath(),
+        this.getConfigProxyUrl(),
+        (proxiedUrl) => {
+          // Update the metadata access path to use the proxy
+          this.setMetadataAccessPath(proxiedUrl);
+        },
+        abortSignal
+      );
     } catch (error: unknown) {
       // Throw
       throw new LayerServiceMetadataUnableToFetchError(
@@ -496,14 +503,19 @@ export class WFS extends AbstractGeoViewVector {
    * @param geoviewLayerId - The unique identifier for the GeoView layer
    * @param geoviewLayerName - The display name for the GeoView layer
    * @param url - The URL of the service endpoint
+   * @param configProxyUrl - Proxy URL to use when necessary
    * @param layerIds - An array of layer IDs to include in the configuration
    * @param isTimeAware - Indicates if the layer is time aware
+   * @param vectorStrategy - The strategy to use for fetching vector data
+   * @param fetchStylesOnWMS - Indicates whether to fetch styles from WMS
+   * @param callbackCreateLayerEntryConfig - Optional callback to customize each layer entry configuration
    * @returns A promise that resolves to an array of layer configurations
    */
   static processGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
     url: string,
+    configProxyUrl: string | undefined,
     layerIds: string[],
     isTimeAware: boolean,
     vectorStrategy: VectorStrategy,
@@ -532,12 +544,13 @@ export class WFS extends AbstractGeoViewVector {
     );
 
     // If not fetching styles on the WMS
-    if (!fetchStylesOnWMS) {
-      layerConfig.fetchStylesOnWMS = false;
-    }
+    layerConfig.fetchStylesOnWMS = fetchStylesOnWMS;
 
     // Create the class from geoview-layers package
     const myLayer = new WFS(layerConfig);
+
+    // Set the proxy url, if any
+    myLayer.setConfigProxyUrl(configProxyUrl);
 
     // Process it
     return AbstractGeoViewVector.processConfig(myLayer);
@@ -611,18 +624,25 @@ export class WFS extends AbstractGeoViewVector {
    * Fetches the metadata for a typical WFS class.
    *
    * @param url - The url to query the metadata from
+   * @param configProxyUrl - Proxy URL to use when necessary
+   * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
+   * The parameter sent in the callback is the proxy prefix with the '?' at the end.
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves with the metadata when fetched or undefined when capabilities weren't found
+   * @throws {RequestTimeoutError} When the request exceeds the timeout duration
+   * @throws {RequestAbortedError} When the request was aborted by the caller's signal
+   * @throws {ResponseError} When the response is not OK (non-2xx)
+   * @throws {ResponseEmptyError} When the JSON response is empty
+   * @throws {NetworkError} When a network issue happened
    */
-  static async fetchMetadata(url: string, abortSignal?: AbortSignal): Promise<TypeMetadataWFS | undefined> {
-    // Get the GetCapabilities url
-    const urlGetCap = GeoUtilities.ensureServiceRequestUrlGetCapabilities(url, 'WFS');
-
-    // Query XML to Json
-    const responseJson = await Fetch.fetchXMLToJson(`${urlGetCap}`, { signal: abortSignal });
-
-    // Parse the WFS_Capabilities opening the root node right away to skip to the meat.
-    return findPropertyByRegexPath(responseJson, /(?:WFS_Capabilities)/);
+  static fetchMetadata(
+    url: string,
+    configProxyUrl: string | undefined,
+    callbackNewMetadataUrl?: CallbackNewMetadataDelegate,
+    abortSignal?: AbortSignal
+  ): Promise<TypeMetadataWFS | undefined> {
+    // Redirect
+    return GeoUtilities.getWFSServiceMetadata(url, configProxyUrl, callbackNewMetadataUrl, abortSignal);
   }
 
   /**
@@ -643,7 +663,8 @@ export class WFS extends AbstractGeoViewVector {
    */
   static async fetchMetadataAndRetrieveFieldsInfo(url: string, layerId: string, abortSignal?: AbortSignal): Promise<TypeOutfields[]> {
     // Fetch the WFS metadata
-    const metadata = await WFS.fetchMetadata(url, abortSignal);
+    // TODO: CHECK - Do we need to send the configProxyUrl (this.getConfigProxyUrl()) here
+    const metadata = await WFS.fetchMetadata(url, undefined, undefined, abortSignal);
     const version = metadata?.['@attributes'].version || '1.1.0';
     const outputFormat = WFS.extractDescribeFeatureOutputFormat(metadata!);
 
@@ -781,13 +802,13 @@ export class WFS extends AbstractGeoViewVector {
    * style retrieval through WMS `GetStyles`.
    *
    * @param layerConfig - The WFS layer configuration for which styling should be processed
-   * @param proxyUrl - Proxy URL to use when necessary
+   * @param configProxyUrl - Proxy URL to use when necessary
    * @returns A promise that resolves with the layer style settings or undefined
    * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called
    */
   static async #tryProcessLayerStylingInformationIfAny(
     layerConfig: OgcWfsLayerEntryConfig,
-    proxyUrl: string | undefined
+    configProxyUrl: string | undefined
   ): Promise<Record<TypeStyleGeometry, TypeLayerStyleSettings> | undefined> {
     // If should fetch styles from the WMS (default)
     if (layerConfig.getShouldFetchStylesFromWMS()) {
@@ -799,7 +820,7 @@ export class WFS extends AbstractGeoViewVector {
         const tweakedUrl = layerConfig.getDataAccessPath().replaceAll('cgi-bin/wfs', 'cgi-bin/wms');
 
         // Create the layer style and return
-        return await WMS.createStylesFromWMS(tweakedUrl, proxyUrl, wmsLayerId, layerConfig.getGeometryType());
+        return await WMS.createStylesFromWMS(tweakedUrl, configProxyUrl, wmsLayerId, layerConfig.getGeometryType());
       } catch (error: unknown) {
         // Log warning
         logger.logWarning(`Failed to create a dynamic layer style for the WFS using the WMS styles for ${layerConfig.layerPath}`, error);

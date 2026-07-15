@@ -298,6 +298,15 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
+   * Sets the map-level service URLs configuration for this layer's map instance.
+   *
+   * @param serviceUrls - The service URLs configuration from the map features config
+   */
+  setConfigServiceUrls(serviceUrls: TypeServiceUrls): void {
+    this.#configServiceUrls = serviceUrls;
+  }
+
+  /**
    * Gets the proxy URL from the map-level service URLs configuration.
    *
    * @returns The proxy URL, or undefined if not configured
@@ -307,12 +316,13 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
-   * Sets the map-level service URLs configuration for this layer's map instance.
+   * Sets the proxy URL in the map-level service URLs configuration.
    *
-   * @param serviceUrls - The service URLs configuration from the map features config
+   * @param configProxyUrl - The proxy URL to set, or undefined to clear it
    */
-  setConfigServiceUrls(serviceUrls: TypeServiceUrls): void {
-    this.#configServiceUrls = serviceUrls;
+  setConfigProxyUrl(configProxyUrl: string | undefined): void {
+    this.#configServiceUrls ??= {};
+    this.#configServiceUrls.proxyUrl = configProxyUrl;
   }
 
   /**
