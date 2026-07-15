@@ -1177,9 +1177,9 @@ export class MapViewer {
   }
 
   /**
-   * Zooms to the specified extent (in map projection).
+   * Zooms to the specified extent.
    *
-   * @param extent - The extent to zoom to
+   * @param extent - The extent to zoom to (in map projection)
    * @param useAnimation - Indicates if a zoom animation should be used, default: true
    * @param options - The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 13, duration: 500 })
    * @returns A promise that resolves when the zoom animation is complete

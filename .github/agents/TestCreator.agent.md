@@ -301,7 +301,13 @@ After generating all code:
 2. Verify all imports resolve correctly
 3. Confirm the test is wired into the suite's `onLaunchTestSuite()`
 4. Confirm constants exist for all URLs and IDs used
-5. Confirm `docs/app/testing/test-catalog.md` is updated with the new/changed tests — add the row, renumber subsequent rows, and update the summary table count
+5. Confirm `docs/app/testing/` folder is kept in sync — update the relevant files when tests change:
+   - `test-catalog.md` — Add/remove/rename test rows, renumber, update summary table count
+   - `test-architecture.md` — Update if suites, testers, class hierarchy, or execution patterns changed
+   - `available-suites.md` — Update if new suites or testers are added/removed
+   - `creating-tests.md` — Update if new patterns, helpers, or conventions are introduced
+   - `api-reference.md` — Update if new assertion methods or helper APIs are added
+   - `test-templates.md` — Update if template patterns change
 6. Confirm `docs/programming/release-testing/00-automated-suite.md` suite counts are updated (e.g., `suite-map-config` count, total)
 7. Confirm `docs/programming/release-testing/README.md` per-file counts `(A/C/M)` and TOTAL row are updated — run the PowerShell count command to get accurate numbers
 8. **Confirm three-way sync**: test files ↔ issue template ↔ README (see Phase 5)
@@ -323,7 +329,6 @@ Run this and compare with the README table. Fix any discrepancy immediately.
 - DO NOT use `if/else` for assertions — use `Test.assertXxx()` static methods only
 - DO NOT skip `test.addStep()` calls — they are required for test UI visibility
 - For zoom operations, use `this.getMapViewer().setMapZoomLevel()` (direct, no animation) or `this.getControllersRegistry().mapController.zoomMap()` (animated)
-- **`zoomToExtent(extent, false, options)`** — When `animate` is `false`, the zoom is instant. Do NOT `await` it and do NOT add a `delay()` after it. Only use `await` when `animate` is `true`.
 - **After `await promiseQueryBatched`** — The store state is immediately available (highlights, features, etc.). Do NOT add extra `delay()` calls to "wait for the store to settle" — the `await` already guarantees completion.
 - DO NOT hardcode URLs or layer IDs — add them as `static readonly` constants on the appropriate tester class or `GVAbstractTester`
 - **DO NOT guess field names, property names, or data values** — always verify against the actual data source (metadata files, service responses, GeoJSON files). If unsure, **ask the user** rather than making a false assumption. Getting a field name wrong causes a test that passes for the wrong reason or fails with a confusing error.

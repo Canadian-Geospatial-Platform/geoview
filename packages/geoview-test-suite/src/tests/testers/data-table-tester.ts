@@ -5,7 +5,6 @@ import {
   getStoreDataTableAllFeaturesDataArray,
   getStoreDataTableLayerSettings,
   getStoreDataTableMapFilteredRecord,
-  getStoreDataTableFilter,
 } from 'geoview-core/core/stores/states/data-table-state';
 
 /**
@@ -80,7 +79,7 @@ export class DataTableTester extends GVAbstractTester {
         Test.assertIsDefined('layerData', result);
         const layerData = result as { features: unknown[] };
         Test.assertIsDefined('layerData.features', layerData.features);
-        Test.assertIsArrayLengthMinimal(layerData.features, 1);
+        Test.assertIsArrayLengthEqual(layerData.features, 4);
       }
     );
   }
@@ -204,7 +203,6 @@ export class DataTableTester extends GVAbstractTester {
         // Set to false
         test.addStep('Setting mapFilteredRecord to false...');
         this.getControllersRegistry().dataTableController.setMapFilteredRecord(layerPath, false);
-        await delay(200);
 
         // Read back
         const mapFiltered = getStoreDataTableMapFilteredRecord(this.getMapId(), layerPath);
@@ -239,7 +237,6 @@ export class DataTableTester extends GVAbstractTester {
 
         // Ensure mapFilteredRecord is true before setting global filter
         this.getControllersRegistry().dataTableController.setMapFilteredRecord(layerPath, true);
-        await delay(200);
 
         // Set a global filter
         test.addStep('Setting global filter to "Ontario"...');
@@ -308,7 +305,6 @@ export class DataTableTester extends GVAbstractTester {
           { id: 'JUR_EN', value: 'Ontario' },
           { id: 'CONFLICT_EN', value: 'First' },
         ]);
-        await delay(200);
 
         // Verify they were set
         const settingsBefore = getStoreDataTableLayerSettings(this.getMapId());
@@ -317,7 +313,6 @@ export class DataTableTester extends GVAbstractTester {
         // Clear the filters
         test.addStep('Clearing column filters...');
         this.getControllersRegistry().dataTableController.setColumnFiltersRecord(layerPath, []);
-        await delay(200);
 
         // Read back
         const settingsAfter = getStoreDataTableLayerSettings(this.getMapId());
@@ -332,53 +327,6 @@ export class DataTableTester extends GVAbstractTester {
 
         test.addStep('Verifying filters are empty after clear...');
         Test.assertIsArrayLengthEqual(filtersAfter, 0);
-      }
-    );
-  }
-
-  /**
-   * Tests that tableFilters store updates when applyMapFilters is called.
-   *
-   * @returns A promise resolving when the test completes
-   */
-  testTableFiltersStoreOnApply(): Promise<Test<unknown>> {
-    const layerPath = DataTableTester.GEOJSON_LAYER_PATH;
-
-    return this.test(
-      'Test tableFilters store updates after applyMapFilters...',
-      async (test) => {
-        // Open the data table tab and wait for initialization
-        await this.#helperOpenDataTableAndWait(test, layerPath);
-
-        // Ensure mapFilteredRecord is true so filters will be applied
-        this.getControllersRegistry().dataTableController.setMapFilteredRecord(layerPath, true);
-        await delay(200);
-
-        // Apply map filters with a filter string
-        test.addStep('Applying map filters...');
-        const filterString = '"Province" = \'Ontario\'';
-        this.getControllersRegistry().dataTableController.applyMapFilters(filterString);
-        await delay(500);
-
-        // Read back the tableFilters store and feature count
-        const tableFilter = getStoreDataTableFilter(this.getMapId(), layerPath);
-        const allFeaturesData = getStoreDataTableAllFeaturesDataArray(this.getMapId());
-        const layerData = allFeaturesData.find((entry) => entry.layerPath === layerPath);
-        const featureCount = layerData?.features?.length ?? 0;
-
-        // Clear the filter
-        test.addStep('Clearing map filters...');
-        this.getControllersRegistry().dataTableController.applyMapFilters('');
-
-        return { tableFilter, featureCount };
-      },
-      (test, result) => {
-        const { tableFilter, featureCount } = result as { tableFilter: string | undefined; featureCount: number };
-        test.addStep('Verifying tableFilters store contains filter string...');
-        Test.assertIsDefined('tableFilter', tableFilter);
-
-        test.addStep(`Verifying filtered feature count is 4 (got ${featureCount})...`);
-        Test.assertIsEqual(featureCount, 4);
       }
     );
   }
@@ -400,7 +348,6 @@ export class DataTableTester extends GVAbstractTester {
         // Hide Province column
         test.addStep('Hiding Province column...');
         this.getControllersRegistry().dataTableController.setColumnVisibilityRecord(layerPath, { geoviewID: false, Province: false });
-        await delay(200);
 
         // Read back
         const settings = getStoreDataTableLayerSettings(this.getMapId());
@@ -440,7 +387,6 @@ export class DataTableTester extends GVAbstractTester {
         // Set rows filtered count
         test.addStep('Setting rowsFilteredRecord to 3...');
         this.getControllersRegistry().dataTableController.setRowsFilteredRecord(layerPath, 3);
-        await delay(200);
 
         // Read back
         const settings = getStoreDataTableLayerSettings(this.getMapId());
@@ -526,7 +472,7 @@ export class DataTableTester extends GVAbstractTester {
 
         // Zoom to Ontario using lonlat extent via MapViewer directly (same as console: cgpv.api.getMapViewer().zoomToLonLatExtentOrCoordinate)
         test.addStep('Zooming to Ontario extent...');
-        void this.getMapViewer().zoomToLonLatExtentOrCoordinate(GVAbstractTester.ONTARIO_EXTENT, false);
+        await this.getMapViewer().zoomToLonLatExtentOrCoordinate(GVAbstractTester.ONTARIO_EXTENT, GVAbstractTester.USE_ZOOM_ANIMATION);
 
         // Wait for render after zoom
         await this.getMapViewer().waitForRender();

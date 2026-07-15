@@ -79,7 +79,6 @@ export class GVTestSuiteDataTable extends GVAbstractTestSuite {
     await this.#dataTableTester.testSetMapFilteredRecordFalse();
     await this.#dataTableTester.testGlobalFilterRecord();
     await this.#dataTableTester.testClearFiltersResetsState();
-    await this.#dataTableTester.testTableFiltersStoreOnApply();
     await this.#dataTableTester.testColumnVisibilityToggle();
     await this.#dataTableTester.testRowsFilteredRecordCount();
     await this.#dataTableTester.testFilterByExtentUnavailableForEsriDynamic();

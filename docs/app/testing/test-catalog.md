@@ -80,10 +80,10 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | 3. Map            | `suite-map-config` | `MapConfigTester`                                                                               | 37         | Fully sequential            |
 | 4. Components     | `suite-ui`         | `UITester`                                                                                      | 1          | Parallel                    |
 | 4. Components     | `suite-details`    | `DetailsTester`                                                                                 | 6          | Guarded sequential          |
-| 4. Components     | `suite-data-table` | `DataTableTester`                                                                               | 13         | Guarded sequential          |
+| 4. Components     | `suite-data-table` | `DataTableTester`                                                                               | 12         | Guarded sequential          |
 | 5. Packages       | `suite-geochart`   | `GeochartTester`                                                                                | 3          | Guarded sequential          |
 | 5. Packages       | `suite-swiper`     | `SwiperTester`                                                                                  | 1          | Guarded                     |
-| **Total**         |                    |                                                                                                 | **196**    |                             |
+| **Total**         |                    |                                                                                                 | **195**    |                             |
 
 ---
 
@@ -712,12 +712,11 @@ This catalog lists every test in the GeoView test suite, organized by group, sui
 | 5   | `testSetMapFilteredRecordFalse`                    | test | Test setting mapFilteredRecord to false...                    |
 | 6   | `testGlobalFilterRecord`                           | test | Test global filter record updates store...                    |
 | 7   | `testClearFiltersResetsState`                      | test | Test clear filters resets columnFiltersRecord...              |
-| 8   | `testTableFiltersStoreOnApply`                     | test | Test tableFilters store updates after applyMapFilters...      |
-| 9   | `testColumnVisibilityToggle`                       | test | Test column visibility toggle updates store...                |
-| 10  | `testRowsFilteredRecordCount`                      | test | Test rowsFilteredRecord updates in store...                   |
-| 11  | `testFilterByExtentUnavailableForEsriDynamic`      | test | Test filter-by-extent toggle absent for Esri Dynamic layer... |
-| 12  | `testFilterByExtentOnGeoJSON`                      | test | Test filter-by-extent on GeoJSON layer (zoom to Ontario)...   |
-| 13  | `testShowUnsymbolizedFeaturesFalsePrefiltersTable` | test | Test showUnsymbolizedFeatures false pre-filters data table... |
+| 8   | `testColumnVisibilityToggle`                       | test | Test column visibility toggle updates store...                |
+| 9   | `testRowsFilteredRecordCount`                      | test | Test rowsFilteredRecord updates in store...                   |
+| 10  | `testFilterByExtentUnavailableForEsriDynamic`      | test | Test filter-by-extent toggle absent for Esri Dynamic layer... |
+| 11  | `testFilterByExtentOnGeoJSON`                      | test | Test filter-by-extent on GeoJSON layer (zoom to Ontario)...   |
+| 12  | `testShowUnsymbolizedFeaturesFalsePrefiltersTable` | test | Test showUnsymbolizedFeatures false pre-filters data table... |
 
 ---
 

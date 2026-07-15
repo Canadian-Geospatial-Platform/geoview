@@ -40,7 +40,7 @@ rush serve
 | 7   | `suite-map-config`              | 37       | [ ] Pass |
 | 8   | `suite-ui`                      | 1        | [ ] Pass |
 | 9   | `suite-details`                 | 6        | [ ] Pass |
-| 10  | `suite-data-table`              | 13       | [ ] Pass |
+| 10  | `suite-data-table`              | 12       | [ ] Pass |
 | 11  | `suite-geochart`                | 3        | [ ] Pass |
 | 12  | `suite-swiper`                  | 1        | [ ] Pass |
 |     | **Total**                       | **~200** |          |

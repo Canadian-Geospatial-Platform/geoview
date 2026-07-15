@@ -257,7 +257,7 @@ export class DetailsTester extends GVAbstractTester {
 
         // Zoom to the feature extent (no animation = instant, no await needed)
         test.addStep('Zooming to feature extent...');
-        void this.getControllersRegistry().mapController.zoomToExtent(feature.extent, false, {
+        await this.getControllersRegistry().mapController.zoomToExtent(feature.extent, GVAbstractTester.USE_ZOOM_ANIMATION, {
           padding: [100, 100, 100, 100],
           maxZoom: 13,
         });
