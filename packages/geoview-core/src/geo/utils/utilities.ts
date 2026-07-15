@@ -76,7 +76,7 @@ export abstract class GeoUtilities {
    * @param proxyUrl - The proxy URL to check
    * @returns `true` if the proxy URL includes "executeFromProxy", indicating an Esri proxy; otherwise, `false`.
    */
-  static IS_ESRI_PROXY(proxyUrl: string | undefined): boolean {
+  static isEsriProxy(proxyUrl: string | undefined): boolean {
     return proxyUrl?.includes('executeFromProxy') ?? false; // default: false
   }
 
@@ -292,7 +292,7 @@ export abstract class GeoUtilities {
       // If a network error such as CORS
       if (error instanceof NetworkError) {
         // If the proxy to use is the Esri proxy
-        if (GeoUtilities.IS_ESRI_PROXY(proxyUrl)) {
+        if (GeoUtilities.isEsriProxy(proxyUrl)) {
           // Encode the layers parameter if present
           // eslint-disable-next-line no-param-reassign
           url = encodeLayersParam(url);
@@ -385,11 +385,11 @@ export abstract class GeoUtilities {
   }
 
   /**
-   * Fetch the json response from the XML response of a WMS getCapabilities request.
+   * Fetch the json response from the XML response of a WMTS getCapabilities request.
    *
-   * @param url - The url the url of the WMS server
+   * @param url - The url the url of the WMTS server
    * @param proxyUrl - Proxy URL to use if necessary (defaults to CONFIG_PROXY_URL)
-   * @param layers - The layers to query separate by
+   * @param layers - The layers to query, separated by comma
    * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
    * @param abortSignal - Optional abort signal to handle cancelling of the process
    * @returns A promise that resolves with the parsed WMTS metadata
@@ -661,11 +661,11 @@ export abstract class GeoUtilities {
   }
 
   /**
-   * Fetch the json response from the XML response of a WMS getCapabilities request.
+   * Fetch the json response from the XML response of a WMS GetStyles request.
    *
    * @param url - The url the url of the WMS server
    * @param proxyUrl - Proxy URL to use if necessary (defaults to CONFIG_PROXY_URL)
-   * @param layers - The layers to query separate by
+   * @param layers - The layers to query, separated by comma
    * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
    * The parameter sent in the callback is the proxy prefix with the '?' at the end.
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process

@@ -795,7 +795,7 @@ export class WMS extends AbstractGeoViewRaster {
       }
 
       // Read the first CRS from the list
-      // TODO: Do we want to have an array instead - just for WMS (other types don't work like this)?
+      // TODO: MINOR - do we want to have an array instead - just for WMS (other types don't work like this)?
       const firstCRS = layerCapabilities.CRS?.[0];
       if (firstCRS) await layerConfig.initProjectionFromMetadata(firstCRS);
 
@@ -931,6 +931,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
    * The parameter sent in the callback is the proxy prefix with the '?' at the end.
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+   * @returns A promise that resolves with the parsed WMS metadata
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration
    * @throws {RequestAbortedError} When the request was aborted by the caller's signal
    * @throws {ResponseError} When the response is not OK (non-2xx)
@@ -1025,7 +1026,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param url - The base GetCapabilities URL used to fetch layer-specific metadata
    * @param proxyUrl - Proxy URL to use if necessary
    * @param layers - An array of layer configurations to fetch metadata for
-   * @returns A promise that resolves to an array of metadata fetch promises, one per layer config
+   * @returns An array of metadata fetch promises, one per unique layer config
    */
   static #createLayerMetadataPromises(
     url: string,

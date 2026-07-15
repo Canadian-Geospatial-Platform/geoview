@@ -141,6 +141,7 @@ export default [
         1,
         {
           allowExpressions: true,
+          allowTypedFunctionExpressions: true
         },
       ],
 

@@ -96,11 +96,12 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * @param layerConfig - The layer entry config to validate
    */
   protected override onValidateLayerEntryConfig(layerConfig: ConfigBaseClass): void {
-    // TODO: Update to properly use metadata from map server
-    // Note that XYZ metadata as we defined it does not contain metadata layer group. If you need geojson layer group,
-    // you can define them in the configuration section.
+    // GV Note that XYZ metadata as we defined it does not contain metadata layer group. If you need geojson layer group,
+    // GV you can define them in the configuration section.
 
     // Get the metadata
+    // TODO: METADATA - Add support/validation for metadata coming from another XYZ Tile service than Esri. Search id: f32d024b
+    // TO.DOCONT: e.g. https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}.png
     const metadata = this.getMetadata();
 
     if (Array.isArray(metadata?.listOfLayerEntryConfig)) {
@@ -146,7 +147,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     abortSignal?: AbortSignal
   ): Promise<XYZTilesLayerEntryConfig> {
-    // TODO: Need to see why the metadata isn't handled properly for ESRI XYZ tiles.
+    // TODO: METADATA - Need to see why the metadata isn't handled properly for ESRI XYZ tiles. Search id: f32d024b
     // GV Possibly caused by a difference between OGC and ESRI XYZ Tiles, but only have ESRI XYZ Tiles as example currently
     // GV Also, might be worth checking out OGCMapTile for this? https://openlayers.org/en/latest/examples/ogc-map-tiles-geographic.html
     // GV Seems like it can deal with less specificity in the url and can handle the x y z internally?

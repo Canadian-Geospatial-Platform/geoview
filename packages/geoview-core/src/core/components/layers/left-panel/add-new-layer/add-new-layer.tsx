@@ -892,66 +892,70 @@ export function AddNewLayer(): JSX.Element {
         // Clear previous errors when input changes
         setUrlError(false);
         setUrlErrorMessage('');
-        // Allow blob URLs (local files) and GeoCore UUIDs without validation
-        if (layerURL.startsWith('blob') || isValidUUID(layerURL.trim())) {
-          // Check if this UUID is already loaded on the map
-          if (isValidUUID(layerURL.trim()) && layerController.getGeoviewLayerIds().includes(layerURL.trim())) {
-            setStepButtonEnabled(false);
-            setUrlError(true);
-            setUrlErrorMessage(t('layers.errorUrlDuplicateUUID'));
-            uiController.addMessage('error', 'layers.errorUrlDuplicateUUID', {});
-            return;
-          }
+
+        const trimmedUrl = layerURL.trim();
+
+        // Nothing to validate if empty
+        if (!trimmedUrl) {
+          setStepButtonEnabled(false);
+          return;
+        }
+
+        // Allow blob URLs (local files) without validation
+        if (layerURL.startsWith('blob')) {
           setStepButtonEnabled(true);
           return;
         }
 
-        // Validate and ping HTTPS URLs
-        if (layerURL.startsWith('https://')) {
-          setIsLoading(true);
-          try {
-            const check = await validateAndPingUrl(layerURL, proxyUrl);
-            logger.logDebug('URL validation check', check);
-            const isOk = check.isValid && check.isReachable;
-            setStepButtonEnabled(isOk);
-            if (!isOk) {
-              setUrlError(true);
-              if (check.error) {
-                setUrlErrorMessage(t('layers.errorUrlUnreachable'));
-                uiController.addMessage('error', 'layers.errorUrlUnreachable', {});
-              } else if (!check.isValid) {
-                setUrlErrorMessage(t('layers.errorUrlInvalid'));
-                uiController.addMessage('error', 'layers.errorUrlInvalid', {});
-              } else {
-                setUrlErrorMessage(t('layers.errorUrlUnreachable'));
-                uiController.addMessage('error', 'layers.errorUrlUnreachable', {});
-              }
-            }
-          } catch (error: unknown) {
-            // Handle exceptions from validateAndPingUrl (network errors, timeouts, etc.)
-            logger.logError('URL validation failed', error);
+        // Allow GeoCore UUIDs without ping validation, but check for duplicates
+        if (isValidUUID(trimmedUrl)) {
+          if (layerController.getGeoviewLayerIds().includes(trimmedUrl)) {
             setStepButtonEnabled(false);
             setUrlError(true);
-            setUrlErrorMessage(t('layers.errorUrlUnreachable'));
-            uiController.addMessage('error', 'layers.errorUrlUnreachable', {});
-          } finally {
-            setIsLoading(false);
+            setUrlErrorMessage(t('layers.errorUrlDuplicateUUID'));
+            uiController.addMessage('error', 'layers.errorUrlDuplicateUUID', {});
+          } else {
+            setStepButtonEnabled(true);
           }
-        } else {
-          // This else block MUST remain outside the try-catch
-          // It handles invalid UUID format and non-HTTPS URLs
+          return;
+        }
+
+        // Reject non-HTTPS URLs (not blob, not UUID)
+        if (!layerURL.startsWith('https://')) {
           setStepButtonEnabled(false);
-          if (layerURL.trim() !== '') {
-            const trimmedUrl = layerURL.trim();
-            setUrlError(true);
-            if (!isValidUUID(trimmedUrl) && !trimmedUrl.includes('.') && !trimmedUrl.includes('/')) {
-              setUrlErrorMessage(t('layers.errorUrlInvalidUUID'));
-              uiController.addMessage('error', 'layers.errorUrlInvalidUUID', {});
-            } else {
-              setUrlErrorMessage(t('layers.errorUrlHttps'));
-              uiController.addMessage('error', 'layers.errorUrlHttps', {});
-            }
+          setUrlError(true);
+          // Distinguish between malformed UUID attempts and plain HTTP URLs
+          if (!trimmedUrl.includes('.') && !trimmedUrl.includes('/')) {
+            setUrlErrorMessage(t('layers.errorUrlInvalidUUID'));
+            uiController.addMessage('error', 'layers.errorUrlInvalidUUID', {});
+          } else {
+            setUrlErrorMessage(t('layers.errorUrlHttps'));
+            uiController.addMessage('error', 'layers.errorUrlHttps', {});
           }
+          return;
+        }
+
+        // Validate and ping HTTPS URLs
+        setIsLoading(true);
+        try {
+          const check = await validateAndPingUrl(layerURL, proxyUrl);
+          logger.logDebug('URL validation check', check);
+          const isOk = check.isValid && check.isReachable;
+          setStepButtonEnabled(isOk);
+          if (!isOk) {
+            setUrlError(true);
+            const errorKey = !check.isValid ? 'layers.errorUrlInvalid' : 'layers.errorUrlUnreachable';
+            setUrlErrorMessage(t(errorKey));
+            uiController.addMessage('error', errorKey, {});
+          }
+        } catch (error: unknown) {
+          logger.logError('URL validation failed', error);
+          setStepButtonEnabled(false);
+          setUrlError(true);
+          setUrlErrorMessage(t('layers.errorUrlUnreachable'));
+          uiController.addMessage('error', 'layers.errorUrlUnreachable', {});
+        } finally {
+          setIsLoading(false);
         }
       };
 

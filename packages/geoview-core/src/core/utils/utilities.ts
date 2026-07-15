@@ -489,8 +489,14 @@ export async function validateAndPingUrl(
     status: null,
   };
 
+  // Replace XYZ tile template placeholders with valid sample coordinates so the URL is pingable
+  const resolvedUrl = targetUrl
+    .replace(/\{z\}/gi, '0')
+    .replace(/\{x\}/gi, '0')
+    .replace(/\{-?y\}/gi, '0');
+
   // Strip query params for the reachability check
-  const targetUrlWithoutParams = targetUrl.split('?')[0];
+  const targetUrlWithoutParams = resolvedUrl.split('?')[0];
 
   // Syntax validation
   try {
@@ -503,9 +509,9 @@ export async function validateAndPingUrl(
 
   // Build OGC GetCapabilities check URLs
   const ogcCheckUrls = [
-    ensureServiceRequestUrl(targetUrl, 'WMS', 'GetCapabilities'),
-    ensureServiceRequestUrl(targetUrl, 'WFS', 'GetCapabilities'),
-    ensureServiceRequestUrl(targetUrl, 'WMTS', 'GetCapabilities'),
+    ensureServiceRequestUrl(resolvedUrl, 'WMS', 'GetCapabilities'),
+    ensureServiceRequestUrl(resolvedUrl, 'WFS', 'GetCapabilities'),
+    ensureServiceRequestUrl(resolvedUrl, 'WMTS', 'GetCapabilities'),
   ];
 
   // HEAD request to see if the server responds

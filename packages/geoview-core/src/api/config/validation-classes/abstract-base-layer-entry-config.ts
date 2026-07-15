@@ -638,7 +638,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    * @returns `true` if the proxy URL matches the ESRI proxy pattern; otherwise, `false`
    */
   getIsUsingEsriProxy(): boolean {
-    return GeoUtilities.IS_ESRI_PROXY(this.getProxyUrl());
+    return GeoUtilities.isEsriProxy(this.getProxyUrl());
   }
 
   /**
