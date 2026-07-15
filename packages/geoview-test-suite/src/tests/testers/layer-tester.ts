@@ -1781,6 +1781,135 @@ export class LayerTester extends GVAbstractTester {
 
   // #endregion GROUP LAYER VISIBILITY
 
+  // #region GEOCORE CUSTOM CONFIG
+
+  /**
+   * Tests adding a geocore layer with an inline listOfLayerEntryConfig override.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testAddGeocoreWithInlineListOfLayerEntryConfigOverride(): Promise<Test<TypeMapFeaturesInstance | undefined>> {
+    const geocoreUuid = GVAbstractTester.AIRBORNE_RADIOACTIVITY_UUID;
+    const customGeoviewLayerName = 'Issue 3548 - Inline GeoCore Override';
+    const customLayerEntryConfig = JSON.stringify([
+      {
+        geoviewLayerName: customGeoviewLayerName,
+        listOfLayerEntryConfig: [
+          {
+            layerId: '0',
+            entryType: 'group',
+            layerName: 'Issue 3548 - Main Group',
+            listOfLayerEntryConfig: [
+              {
+                layerId: '1',
+                layerName: 'Issue 3548 - Child Layer',
+                initialSettings: {
+                  states: {
+                    visible: false,
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+
+    return this.test(
+      'Test geocore inline listOfLayerEntryConfig override',
+      async (test) => {
+        test.addStep('Adding geocore layer with inline custom listOfLayerEntryConfig...');
+        const result = await this.getControllersRegistry().layerCreatorController.addGeoviewLayerByGeoCoreUUID(
+          geocoreUuid,
+          customLayerEntryConfig
+        );
+
+        test.addStep('Waiting for the geocore layer to be added...');
+        await result?.promiseLayer;
+
+        test.addStep('Creating map config from current map state...');
+        return this.getControllersRegistry().mapController.createMapConfigFromMapState();
+      },
+      (test, result) => {
+        test.addStep('Finding the added geocore layer config in map state...');
+        const layerConfig = result?.map?.listOfGeoviewLayerConfig.find((layer) => layer.geoviewLayerId.startsWith(geocoreUuid));
+        Test.assertIsDefined('layerConfig', layerConfig);
+
+        test.addStep('Verifying custom geoviewLayerName override is applied...');
+        Test.assertIsEqual(layerConfig?.geoviewLayerName, customGeoviewLayerName);
+
+        test.addStep('Verifying overridden listOfLayerEntryConfig structure is applied...');
+        Test.assertIsArrayLengthEqual(layerConfig?.listOfLayerEntryConfig, 1);
+
+        const groupEntry = layerConfig?.listOfLayerEntryConfig?.[0];
+        Test.assertIsEqual(AbstractBaseLayerEntryConfig.getClassOrTypeLayerId(groupEntry), '0');
+        Test.assertIsEqual(AbstractBaseLayerEntryConfig.getClassOrTypeLayerName(groupEntry), 'Issue 3548 - Main Group');
+
+        const childEntry = groupEntry?.listOfLayerEntryConfig?.[0];
+        Test.assertIsDefined('childEntry', childEntry);
+        Test.assertIsEqual(AbstractBaseLayerEntryConfig.getClassOrTypeLayerId(childEntry), '1');
+        Test.assertIsEqual(AbstractBaseLayerEntryConfig.getClassOrTypeLayerName(childEntry), 'Issue 3548 - Child Layer');
+        Test.assertIsEqual(AbstractBaseLayerEntryConfig.getClassOrTypeInitialSettings(childEntry)?.states?.visible, false);
+      },
+      (test) => {
+        const cleanupLayerPath = this.getControllersRegistry()
+          .layerController.getGeoviewLayerPaths()
+          .find((layerPath) => layerPath.startsWith(`${geocoreUuid}/`) || layerPath.startsWith(`${geocoreUuid}:`));
+        Test.assertIsDefined('cleanupLayerPath', cleanupLayerPath);
+        if (cleanupLayerPath) this.helperFinalizeStepRemoveLayerAndAssert(test, cleanupLayerPath);
+      }
+    );
+  }
+
+  /**
+   * Tests adding a geocore layer with a simplified inline name override.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testAddGeocoreWithSimplifiedInlineLayerNameOverride(): Promise<Test<TypeMapFeaturesInstance | undefined>> {
+    const geocoreUuid = 'ea4c0bdb-a63f-49a4-b14a-09c1560aad0b';
+    const customLayerName = 'Issue 3548 - Simplified Inline Name';
+    const customLayerEntryConfig = JSON.stringify([
+      {
+        layerName: customLayerName,
+      },
+    ]);
+
+    return this.test(
+      'Test geocore simplified inline layerName override precedence',
+      async (test) => {
+        test.addStep('Adding geocore layer with simplified inline layerName override...');
+        const result = await this.getControllersRegistry().layerCreatorController.addGeoviewLayerByGeoCoreUUID(
+          geocoreUuid,
+          customLayerEntryConfig
+        );
+
+        test.addStep('Waiting for the geocore layer to be added...');
+        await result?.promiseLayer;
+
+        test.addStep('Creating map config from current map state...');
+        return this.getControllersRegistry().mapController.createMapConfigFromMapState();
+      },
+      (test, result) => {
+        test.addStep('Finding the added geocore layer config in map state...');
+        const layerConfig = result?.map?.listOfGeoviewLayerConfig.find((layer) => layer.geoviewLayerId.startsWith(geocoreUuid));
+        Test.assertIsDefined('layerConfig', layerConfig);
+
+        test.addStep('Verifying simplified inline layerName override is applied...');
+        Test.assertIsEqual(layerConfig?.geoviewLayerName, customLayerName);
+      },
+      (test) => {
+        const cleanupLayerPath = this.getControllersRegistry()
+          .layerController.getGeoviewLayerPaths()
+          .find((layerPath) => layerPath.startsWith(`${geocoreUuid}/`) || layerPath.startsWith(`${geocoreUuid}:`));
+        Test.assertIsDefined('cleanupLayerPath', cleanupLayerPath);
+        if (cleanupLayerPath) this.helperFinalizeStepRemoveLayerAndAssert(test, cleanupLayerPath);
+      }
+    );
+  }
+
+  // #endregion GEOCORE CUSTOM CONFIG
+
   // #region HELPERS
 
   /**
