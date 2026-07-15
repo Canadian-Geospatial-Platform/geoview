@@ -150,6 +150,10 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
     // Test geocore group with defaultVisibility=false
     const pGeocoreGroupDefaultVisibilityFalse = this.#layerTester.testAddGeocoreWithGroupDefaultVisibilityFalse();
 
+    // Test geocore custom inline override scenarios
+    const pGeocoreInlineListOverride = this.#layerTester.testAddGeocoreWithInlineListOfLayerEntryConfigOverride();
+    const pGeocoreSimplifiedNameOverride = this.#layerTester.testAddGeocoreWithSimplifiedInlineLayerNameOverride();
+
     // Test domain fields
     const pEsriDynamicDomainField = this.#layerTester.testAddEsriDynamicWithDomainField();
     const pEsriFeatureDomainField = this.#layerTester.testAddEsriFeatureWithDomainField();
@@ -185,6 +189,8 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
       pLayerGeoTIFFBadUrl,
       pInitialSettingsCascade,
       pGeocoreGroupDefaultVisibilityFalse,
+      pGeocoreInlineListOverride,
+      pGeocoreSimplifiedNameOverride,
       pEsriDynamicDomainField,
       pEsriFeatureDomainField,
     ]);

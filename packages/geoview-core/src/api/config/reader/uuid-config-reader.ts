@@ -1,5 +1,6 @@
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import type {
+  TypeLayerEntryConfig,
   TypeBaseSourceInitialConfig,
   TypeGeoviewLayerConfig,
   TypeGeoviewLayerType,
@@ -7,7 +8,6 @@ import type {
 } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
-import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { formatError, NotSupportedError } from '@/core/exceptions/core-exceptions';
 import {
   LayerGeoCoreServiceFailError,
@@ -60,6 +60,7 @@ export class UUIDmapConfigReader {
       // Return the parsed response
       return {
         layers: this.#getLayerConfigFromResponse(uuids, result, lang),
+        customListOfLayerEntryConfig: this.#getGeocoreCustomListOfLayerEntryConfig(result, lang),
         geocharts: this.#getGeoChartConfigFromResponse(result, lang),
         timeSliderConfigs: this.#getTimeSliderConfigFromResponse(result, lang),
       };
@@ -167,11 +168,6 @@ export class UUIDmapConfigReader {
           // Remove rcs. and .[lang] from geocore response
           const idClean = `${layerId.split('.')[1]}`;
 
-          // Get Geocore custom config layer entries values
-          // TODO: INVESTIGATE - Modification done only for WMS and esriDynamic... If we have esriFeature, esriImage later, we will need to fix
-          // TO.DOCONT: These 4 types are the only one stored in RCS
-          const customGeocoreLayerConfig = this.#getGeocoreCustomLayerConfig(resultData, lang);
-
           const isFeature = layerUrl.indexOf('FeatureServer') > -1;
 
           let geoviewLayerConfig: TypeGeoviewLayerConfig;
@@ -250,25 +246,6 @@ export class UUIDmapConfigReader {
 
           // Add it
           listOfGeoviewLayerConfig.push(geoviewLayerConfig);
-
-          // Get the layer entry
-          const layerConfig = listOfGeoviewLayerConfig[i];
-
-          // TODO: Add support for more than 1 layer overrides, see issue #3548
-          // If there's only the one layer AND customGeocoreLayerConfig is provided
-          if (layerConfig.listOfLayerEntryConfig.length === 1 && customGeocoreLayerConfig) {
-            const layerEntryConfig = layerConfig.listOfLayerEntryConfig[0];
-
-            // Replace the layer name with the metadata name from geocore config
-            if (customGeocoreLayerConfig.layerName) {
-              layerEntryConfig.setLayerName(customGeocoreLayerConfig.layerName);
-            }
-
-            if (layerEntryConfig instanceof AbstractBaseLayerEntryConfig && customGeocoreLayerConfig.source) {
-              // Init the source from the metadata coming from geocore config
-              layerEntryConfig.initSourceFromMetadata(customGeocoreLayerConfig.source);
-            }
-          }
         }
       }
     }
@@ -276,25 +253,54 @@ export class UUIDmapConfigReader {
   }
 
   /**
-   * Reads the layers config from uuid request result.
+   * Reads the list of layer entry config from the uuid request result.
    *
    * @param resultData - The uuid request result
    * @param lang - The language to use to read results
-   * @returns The layers snippet configs, or undefined if not found
+   * @returns The list of layer entry configs, or undefined if not found
    */
-  static #getGeocoreCustomLayerConfig(
+  static #getGeocoreCustomListOfLayerEntryConfig(
     resultData: GeoCoreConfigResponseRoot,
     lang: TypeDisplayLanguage
-  ): GeoCoreConfigResponseGCSLayer | undefined {
+  ): TypeLayerEntryConfig[] | undefined {
     // Check for valid response format
     if (!resultData?.response?.gcs || !Array.isArray(resultData.response.gcs)) {
       return undefined;
     }
 
-    // Find the first config that has layers under the specified language
-    const found = resultData.response.gcs.find((gcItem) => gcItem?.[lang]?.layers);
+    // Prefer the new array format.
+    const foundListConfig = resultData.response.gcs.find((gcItem) => gcItem?.[lang]?.listOfLayerEntryConfig);
+    if (foundListConfig?.[lang]?.listOfLayerEntryConfig?.length) {
+      return foundListConfig[lang].listOfLayerEntryConfig;
+    }
 
-    return found?.[lang].layers || undefined;
+    // Fallback for legacy temporary format.
+    const foundLegacyConfig = resultData.response.gcs.find((gcItem) => gcItem?.[lang]?.layers);
+    if (!foundLegacyConfig?.[lang]?.layers) {
+      return undefined;
+    }
+
+    return this.#convertLegacyCustomLayerToListOfLayerEntryConfig(foundLegacyConfig[lang].layers);
+  }
+
+  /**
+   * Converts legacy GCS single-layer custom config to listOfLayerEntryConfig format.
+   *
+   * @param customLayer - The legacy custom layer config to convert
+   * @returns The converted listOfLayerEntryConfig or undefined when conversion is not possible
+   */
+  static #convertLegacyCustomLayerToListOfLayerEntryConfig(customLayer: GeoCoreConfigResponseGCSLayer): TypeLayerEntryConfig[] | undefined {
+    if (!customLayer.layerName && !customLayer.source) {
+      return undefined;
+    }
+
+    const convertedConfig = {
+      layerId: customLayer.layerId,
+      layerName: customLayer.layerName,
+      source: customLayer.source,
+    } as unknown as TypeLayerEntryConfig;
+
+    return [convertedConfig];
   }
 
   /**
@@ -367,12 +373,14 @@ export type GeoCoreConfigResponseRCSLayers = {
 };
 
 export type GeoCoreConfigResponseGCSLayers = {
+  listOfLayerEntryConfig?: TypeLayerEntryConfig[];
   layers?: GeoCoreConfigResponseGCSLayer;
   packages?: GeoCoreConfigResponsePackages;
 };
 
 export type GeoCoreConfigResponseGCSLayer = {
-  layerName: string;
+  layerId?: string;
+  layerName?: string;
   source?: TypeBaseSourceInitialConfig;
 };
 
@@ -419,6 +427,8 @@ export type GeoViewTimeSliderConfig = {
 export type UUIDmapConfigReaderResponse = {
   /** The parsed layer configurations. */
   layers: TypeGeoviewLayerConfig[];
+  /** Optional parsed custom list of layer entry config from GCS. */
+  customListOfLayerEntryConfig?: TypeLayerEntryConfig[];
   /** Optional geochart configurations. */
   geocharts?: GeoViewGeoChartConfig[];
   /** Optional time-slider configurations. */

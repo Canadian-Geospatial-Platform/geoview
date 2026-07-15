@@ -2,11 +2,12 @@ import type { GeoViewGeoChartConfig, GeoViewTimeSliderConfig } from '@/api/confi
 import { UUIDmapConfigReader } from '@/api/config/reader/uuid-config-reader';
 import { Config } from '@/api/config/config';
 import { ConfigValidation } from '@/api/config/config-validation';
+import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { generateId } from '@/core/utils/utilities';
 
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import { DEFAULT_MAP_FEATURE_CONFIG } from '@/api/types/map-schema-types';
-import type { GeoCoreLayerConfig, TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
+import type { GeoCoreLayerConfig, TypeGeoviewLayerConfig, TypeLayerEntryConfig } from '@/api/types/layer-schema-types';
 import type { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { getStoreMapConfigServiceUrls, getStoreMapConfigState } from '@/core/stores/states/map-state';
 
@@ -64,13 +65,25 @@ export class GeoCore {
     // Collect all time-slider configs from the response
     const timeSliderConfigs = response.timeSliderConfigs ?? [];
 
-    // Use user supplied listOfLayerEntryConfig if provided
-    if (layerConfig?.listOfLayerEntryConfig || layerConfig?.initialSettings) {
+    // Normalize GCS custom layer entries to best-effort match inline listOfLayerEntryConfig behavior.
+    const defaultLayerId =
+      response.layers[0].listOfLayerEntryConfig.length === 1
+        ? AbstractBaseLayerEntryConfig.getClassOrTypeLayerId(response.layers[0].listOfLayerEntryConfig[0])
+        : undefined;
+    const normalizedCustomListOfLayerEntryConfig = GeoCore.#normalizeCustomListOfLayerEntryConfig(
+      response.customListOfLayerEntryConfig,
+      defaultLayerId
+    );
+
+    // Use merged custom layer entry config (inline config has precedence over GCS custom config).
+    if (layerConfig?.listOfLayerEntryConfig || normalizedCustomListOfLayerEntryConfig || layerConfig?.initialSettings) {
       // TODO: CHECK - Should we really spread here and create a 'new' TypeGeoviewLayerConfig json object here?
       const tempLayerConfig = { ...layerConfig } as unknown as TypeGeoviewLayerConfig;
+      tempLayerConfig.geoviewLayerId = layerConfig?.geoviewLayerId ?? response.layers[0].geoviewLayerId;
       tempLayerConfig.metadataAccessPath = response.layers[0].metadataAccessPath;
       tempLayerConfig.geoviewLayerType = response.layers[0].geoviewLayerType;
-      tempLayerConfig.listOfLayerEntryConfig ??= response.layers[0].listOfLayerEntryConfig ?? [];
+      tempLayerConfig.listOfLayerEntryConfig =
+        layerConfig?.listOfLayerEntryConfig ?? normalizedCustomListOfLayerEntryConfig ?? response.layers[0].listOfLayerEntryConfig ?? [];
       if (response.layers[0].isTimeAware === true || response.layers[0].isTimeAware === false)
         tempLayerConfig.isTimeAware = response.layers[0].isTimeAware;
 
@@ -81,6 +94,12 @@ export class GeoCore {
         // When an error happens, raise the exception, we handle it higher in this case
         throw error;
       });
+
+      // Make sure if it's a duplicate, the response has the duplicates safe ID.
+      if (uuid.includes(':') && uuid.split(':')[0] === newLayerConfig[0].geoviewLayerId) {
+        newLayerConfig[0].geoviewLayerId = uuid;
+      }
+
       // Return the created layer config from the merged config informations
       return { config: newLayerConfig[0] as TypeGeoviewLayerConfig, geocharts, timeSliderConfigs };
     }
@@ -107,6 +126,46 @@ export class GeoCore {
 
     // Always only first one
     return { config: response.layers[0], geocharts, timeSliderConfigs };
+  }
+
+  /**
+   * Normalizes custom layer entries to improve backward compatibility with legacy GCS payloads.
+   *
+   * @param customListOfLayerEntryConfig - The custom list of layer entries to normalize
+   * @param defaultLayerId - Optional fallback layer id for legacy single-layer payloads
+   * @returns The normalized list, or undefined when no valid entries remain
+   */
+  static #normalizeCustomListOfLayerEntryConfig(
+    customListOfLayerEntryConfig: TypeLayerEntryConfig[] | undefined,
+    defaultLayerId?: string
+  ): TypeLayerEntryConfig[] | undefined {
+    if (!customListOfLayerEntryConfig?.length) {
+      return undefined;
+    }
+
+    const normalizedCustomList = customListOfLayerEntryConfig
+      .map((entryConfig) => {
+        const entryLayerId = AbstractBaseLayerEntryConfig.getClassOrTypeLayerId(entryConfig);
+
+        // For legacy custom payloads with no layerId, use the default layer id when we can infer it safely.
+        if (!entryLayerId && defaultLayerId && !AbstractBaseLayerEntryConfig.getClassOrTypeEntryType(entryConfig)) {
+          return {
+            ...entryConfig,
+            layerId: defaultLayerId,
+          } as TypeLayerEntryConfig;
+        }
+
+        return entryConfig;
+      })
+      .filter((entryConfig) => {
+        const entryLayerId = AbstractBaseLayerEntryConfig.getClassOrTypeLayerId(entryConfig);
+        const entryType = AbstractBaseLayerEntryConfig.getClassOrTypeEntryType(entryConfig);
+
+        // Best-effort behavior: keep entries with layerId and keep group entries; skip malformed leaf entries.
+        return Boolean(entryLayerId || entryType === 'group');
+      });
+
+    return normalizedCustomList.length ? normalizedCustomList : undefined;
   }
 
   /**
