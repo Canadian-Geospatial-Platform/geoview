@@ -1148,9 +1148,9 @@ When the same geocore UUID appears multiple times in a map config, `Config.preva
 
 The GeoCore VCS API (`https://geocore.api.geo.ca/vcs?lang={lang}&id={uuid}`) returns per-layer package configs in `response.gcs[].{lang}.packages`. Each package type (geochart, time-slider, etc.) has its own extraction method in `UUIDmapConfigReader` — they are **not** handled by a generic extractor because each type has unique parsing needs (e.g., geochart requires `.layers` array transformation and `.trim()` cleanup; time-slider is passed through as-is).
 
-### GeoCore Custom Config Merge Precedence
+### GeoCore Custom Config Precedence
 
-GeoCore custom layer-entry config merging must stay centralized in `GeoCore.createLayerConfigFromUUID()` so precedence is explicit and consistent.
+GeoCore `listOfLayerEntryConfig` selection must stay centralized in `GeoCore.createLayerConfigFromUUID()` so precedence is explicit and consistent.
 
 **Precedence order:**
 
@@ -1158,20 +1158,21 @@ GeoCore custom layer-entry config merging must stay centralized in `GeoCore.crea
 2. **GCS `customListOfLayerEntryConfig`** — fallback custom structure from VCS
 3. **RCS default `listOfLayerEntryConfig`** — base structure from the resolved layer config
 
+The selected list is treated as complete: entries are not merged across sources.
+
 **Reader responsibilities:**
 
 - `UUIDmapConfigReader` must extract GCS custom layer-entry overrides as `customListOfLayerEntryConfig`
 - `UUIDmapConfigReaderResponse` should carry custom GCS entries in a dedicated `customListOfLayerEntryConfig` field; avoid mutating RCS-derived `layers` in the reader
-- Legacy temporary GCS `layers` payloads must be adapted into list format for backward compatibility instead of mutating the resolved RCS config in-place
-- Best-effort normalization may infer a missing `layerId` only for safe single-layer legacy payloads; malformed leaf entries without a `layerId` should be skipped rather than causing the whole layer to fail
+- `UUIDmapConfigReader` no longer supports legacy GCS `layers` payloads; only `listOfLayerEntryConfig` is supported
 
-**Design rule:** Do not split override behavior between UUID-reader mutation and GeoCore merge logic. The reader should parse and adapt, while `GeoCore.createLayerConfigFromUUID()` remains the single point that decides merge precedence.
+**Design rule:** Do not split override behavior between UUID-reader parsing and GeoCore selection logic. `GeoCore.createLayerConfigFromUUID()` remains the single point that decides precedence.
 
 **Simplified inline override compatibility:**
 
 - `addGeoviewLayerByGeoCoreUUID()` payloads that only provide `layerName` (without `listOfLayerEntryConfig`) are still supported
 - In `GeoCore.createLayerConfigFromUUID()`, this path maps the simplified value to `geoviewLayerName`; when the resolved layer has a single entry, it also applies the same name to that first entry for consistency
-- Keep this compatibility branch separate from the merged `listOfLayerEntryConfig` path; it is a name-only convenience flow, not a general custom entry override flow
+- Keep this compatibility branch separate from the selected `listOfLayerEntryConfig` path; it is a name-only convenience flow, not a general custom entry override flow
 
 **Duplicate UUID propagation in merge branch:**
 
