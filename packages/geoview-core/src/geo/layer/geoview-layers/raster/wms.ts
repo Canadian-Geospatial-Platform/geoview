@@ -322,9 +322,12 @@ export class WMS extends AbstractGeoViewRaster {
       // Fetch the XML
       return this.#fetchXmlServiceMetadata(
         this.getMetadataAccessPath(),
-        (proxiedUrl) => {
+        (proxiedUrl, proxyUsed) => {
           // If updating the metadataAccessPath as we go
           if (updateMetadataAccessPath) {
+            // Indicate the proxy that was used
+            this.setProxyUrl(proxyUsed);
+
             // Update the access path to use the proxy if one was required
             this.setMetadataAccessPath(proxiedUrl);
           }
@@ -341,7 +344,10 @@ export class WMS extends AbstractGeoViewRaster {
 
     if (layerConfigsToQuery.length === 0) {
       // If no specific layers to query, fetch and process metadata for the entire service
-      return this.#fetchAndProcessSingleWmsMetadata(url, (proxiedUrl) => {
+      return this.#fetchAndProcessSingleWmsMetadata(url, (proxiedUrl, proxyUsed) => {
+        // Indicate the proxy that was used
+        this.setProxyUrl(proxyUsed);
+
         // If updating the metadataAccessPath as we go
         if (updateMetadataAccessPath) {
           // Update the metadata access path accordingly
@@ -1036,6 +1042,10 @@ export class WMS extends AbstractGeoViewRaster {
     const seen = new Map<string, Promise<MetatadaFetchResult>>();
 
     return layers.map((layerConfig) => {
+      // TODO: PERFORMANCE - For the service that requires a proxy, this will attempt with the base url and then the proxy for each layer entry
+      // TO.DOCONT: A better approach would be that once a proxy is determined necessary, it's immediately applied for each layer entry call
+      // TO.DOCONT: However, to do so, requires changing the logic of the parallelism happening here..
+
       // Avoid duplicate fetches for the same layerId
       if (!seen.has(layerConfig.layerId)) {
         const promise = new Promise<MetatadaFetchResult>((resolve, reject) => {

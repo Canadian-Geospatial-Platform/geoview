@@ -343,7 +343,10 @@ export class WFS extends AbstractGeoViewVector {
       metadata = await WFS.fetchMetadata(
         this.getMetadataAccessPath(),
         this.getConfigProxyUrl(),
-        (proxiedUrl) => {
+        (proxiedUrl, proxyUsed) => {
+          // Indicate the proxy that was used
+          this.setProxyUrl(proxyUsed);
+
           // Update the metadata access path to use the proxy
           this.setMetadataAccessPath(proxiedUrl);
         },

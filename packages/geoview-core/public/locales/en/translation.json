@@ -416,7 +416,7 @@
       "missingSourceProjection": "The source.projection parameter is mandatory.",
       "unableToFetch": "Unable to fetch and read metadata for layer '{{layerNameOrId}}'.",
       "wmtsMetadataError": "Error with WMTS metadata for layer '{{layerNameOrId}}': {{missingElement}} missing in metadata.",
-      "serviceMetadataEmpty": "Metadata of the service was empty for layer '{{layerNameOrId}}'.",
+      "serviceMetadataEmpty": "Metadata of the service was empty or insufficient for layer '{{layerNameOrId}}'.",
       "invalidLayerFilter": "Layer '{{layerNameOrPath}}' has an invalid layer filter.\nfilter = '{{layerFilter}}'\ninternal filter = '{{filter}}'.",
       "failedToCreateLayer": "Failed to create the layer '{{layerNameOrId}}'.",
       "noCapabilitiesOrEmpty": "No capabilities (or empty) found for layer '{{layerNameOrId}}'.",
