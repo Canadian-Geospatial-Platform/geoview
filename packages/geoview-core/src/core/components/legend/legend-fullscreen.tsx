@@ -277,12 +277,7 @@ export function LegendFullscreen({ layerPaths, mapId, containerType, isOpen, onC
       <Box
         sx={memoSxClasses.fullscreenContainer}
         id={`${mapId}-${containerType}-${DEFAULT_APPBAR_CORE.LEGEND}-panel-fullscreen-container`}
-        {...({
-          // To set the content behind the dialog as inert to remove access to content
-          // @ts-ignore - inert is a valid HTML attribute but not in React types yet
-          inert: 'true',
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } as any)}
+        inert={true}
       >
         {memoFullscreenContent}
       </Box>

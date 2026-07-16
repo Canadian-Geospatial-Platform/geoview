@@ -81,11 +81,6 @@ const PAPER_STYLES = {
   paddingTop: '0.5rem',
 } as const;
 
-/** Style constants for the Typography component. */
-const TYPOGRAPHY_STYLES = {
-  overflowWrap: 'anywhere',
-} as const;
-
 /** Padding values for zoom operations. */
 const ZOOM_PADDING = [5, 5, 5, 5];
 
@@ -137,7 +132,7 @@ const FeatureHeader = memo(
               <BrowserNotSupportedIcon />
             </Box>
           )}
-          <Typography sx={TYPOGRAPHY_STYLES} component="h4" variant="body1">
+          <Typography component="h4" variant="body1">
             {iconSrc ? (
               (name ?? t('details.nullValue'))
             ) : (

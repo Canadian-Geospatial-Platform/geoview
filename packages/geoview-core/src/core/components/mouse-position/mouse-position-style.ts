@@ -1,5 +1,6 @@
 import type { Theme } from '@mui/material/styles';
 import type { SxStyles } from '@/ui/style/types';
+import { ellipsisOverflow } from '@/ui/style/default';
 
 /**
  * Gets custom sx classes for the mouse position.
@@ -11,9 +12,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   mousePosition: {
     display: 'flex',
     minWidth: 'fit-content',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
+    ...ellipsisOverflow,
     alignItems: 'center',
     width: 'auto',
     backgroundColor: 'transparent !important',
@@ -40,9 +39,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     alignItems: 'center',
     '& span': {
       fontSize: theme.palette.geoViewFontSize.default,
-      textOverflow: 'ellipsis',
-      whiteSpace: 'nowrap',
-      overflow: 'hidden',
+      ...ellipsisOverflow,
     },
   },
   mousePositionCheckmark: {
@@ -50,8 +47,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   mousePositionText: {
     fontSize: theme.palette.geoViewFontSize.default,
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
+    ...ellipsisOverflow,
   },
 });

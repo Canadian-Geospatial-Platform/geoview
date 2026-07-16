@@ -99,7 +99,7 @@ const LegendLayerHeader = memo(
         <LayerIcon layerPath={layerPath} />
         <ListItemText
           primary={
-            <Typography component="div" id={layerNameId} sx={sxClasses.legendListItemHeaderText}>
+            <Typography component="div" id={layerNameId}>
               {layerName}
               {!layerInVisibleRange && (
                 <Box component="span" sx={sxClasses.visuallyHidden}>
