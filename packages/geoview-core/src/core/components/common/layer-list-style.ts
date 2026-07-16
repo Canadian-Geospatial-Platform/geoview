@@ -36,9 +36,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       },
       '> p': {
         fontSize: theme.palette.geoViewFontSize.sm,
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        whiteSpace: 'nowrap',
       },
     },
   },
@@ -66,9 +63,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       lineHeight: 1.5,
       paddingRight: '10px',
       display: 'block',
-      overflowWrap: 'break-word',
-      wordBreak: 'normal',
-      hyphens: 'auto',
     },
     '>div': {
       display: 'flex',
