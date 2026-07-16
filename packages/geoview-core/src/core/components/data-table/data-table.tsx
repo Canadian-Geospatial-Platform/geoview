@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, memo, isValidElement, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, memo, isValidElement, createContext, useContext, type ReactNode } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -12,13 +12,18 @@ import { MRT_Localization_FR as MRTLocalizationFR } from 'material-react-table/l
 import { MRT_Localization_EN as MRTLocalizationEN } from 'material-react-table/locales/en';
 
 import { useTheme } from '@mui/material/styles';
+import type { SxProps } from '@mui/material';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 
 import type { SxStyles } from '@/ui/style/types';
+import { ellipsisOverflow } from '@/ui/style/default';
 
 import {
   MaterialReactTable,
   useMaterialReactTable,
+  type MRT_Cell as MRTCell,
+  type MRT_Column as MRTColumn,
+  type MRT_Row as MRTRow,
   type MRT_ColumnDef as MRTColumnDef,
   type MRT_SortingState as MRTSortingState,
   type MRT_RowVirtualizer as MRTRowVirtualizer,
@@ -51,8 +56,9 @@ import { useStoreFilterPanelFilterExpression } from '@/core/stores/states/filter
 import { useStoreAppDisplayLanguage } from '@/core/stores/states/app-state';
 import { DateMgt } from '@/core/utils/date-mgt';
 import linkifyHtml from 'linkify-html';
-import { isImage, delay, sanitizeHtmlContent, enhanceLinksAccessibility } from '@/core/utils/utilities';
+import { isImage, delay, sanitizeHtmlContent, enhanceLinksAccessibility, containsHtmlTags } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
+import { createFocusStore, useIsActive, type FocusStore } from '@/core/utils/focus-store';
 import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 import { useFilterRows, useGlobalFilter, useColumnVisibility } from './hooks';
 import { getSxClasses } from './data-table-style';
@@ -83,6 +89,19 @@ const DATE_FIELD_FILTERS = NUMERIC_FIELD_FILTERS;
 /** The possible filters for string columns */
 const STRING_FIELD_FILTERS = ['contains', 'startsWith', 'endsWith'];
 
+/** The column ID used by Material React Table for CSS Grid spacer columns. */
+const SPACER_COLUMN_ID = 'mrt-row-spacer';
+
+/** Accessibility attributes for spacer columns — removes them from the interaction tree. */
+const SPACER_COLUMN_A11Y_PROPS = {
+  'aria-hidden': true,
+  tabIndex: -1,
+  inert: true,
+} as const;
+
+/** React context for the focus store, scoped to each DataTable instance. */
+const FocusStoreContext = createContext<FocusStore<string> | null>(null);
+
 /** Checks if a value is a Dayjs instance. */
 const isDayjs = (v: unknown): v is Dayjs => typeof v === 'object' && v !== null && 'isValid' in v;
 
@@ -101,6 +120,9 @@ const linkifyOptions = {
   },
   ignoreTags: ['script', 'style', 'img'],
 };
+
+/** No-op fallback store — used only if FocusAwareTooltipCell somehow renders outside the Provider. */
+const FALLBACK_FOCUS_STORE = createFocusStore<string>();
 
 /** Properties for the TooltipCell component. */
 interface TooltipCellProps {
@@ -172,9 +194,7 @@ function TooltipCell({ children, title, isOpen = false }: TooltipCellProps): JSX
         sx={{
           display: 'block',
           width: '100%',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
+          ...ellipsisOverflow,
         }}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
@@ -182,6 +202,43 @@ function TooltipCell({ children, title, isOpen = false }: TooltipCellProps): JSX
         {children}
       </Box>
     </Tooltip>
+  );
+}
+
+/** Properties for the FocusAwareTooltipCell component. */
+interface FocusAwareTooltipCellProps {
+  /** The cell or header ID to track focus state for. */
+  cellId: string;
+  /** The tooltip text to display. */
+  title: string | number;
+  /** The content to wrap with the tooltip. */
+  children: ReactNode;
+}
+
+/**
+ * Creates a focus-aware tooltip cell wrapper.
+ *
+ * Wraps TooltipCell, reading focus state from FocusStoreContext instead of via props —
+ * keeps parent column-builder callbacks free of focus dependencies.
+ *
+ * @param props - Properties defined in FocusAwareTooltipCellProps interface
+ * @returns The tooltip cell wrapper element
+ */
+function FocusAwareTooltipCell({ cellId, title, children }: FocusAwareTooltipCellProps): JSX.Element {
+  // Log
+  logger.logTraceRender('components/data-table/data-table > FocusAwareTooltipCell');
+
+  const store = useContext(FocusStoreContext);
+  if (!store) {
+    // Should never happen — FocusStoreContext.Provider always wraps DataTable
+    logger.logError('FocusAwareTooltipCell rendered outside FocusStoreContext.Provider');
+  }
+  const isOpen = useIsActive(store ?? FALLBACK_FOCUS_STORE, cellId);
+
+  return (
+    <TooltipCell title={title} isOpen={isOpen}>
+      {children}
+    </TooltipCell>
   );
 }
 
@@ -226,7 +283,6 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
   // internal state
   const [density, setDensity] = useState<MRTDensityState>('compact');
   const [showColumnFilters, setShowColumnFilters] = useState<boolean>(datatableSettings[layerPath].columnsFiltersVisibility);
-  const [focusedCell, setFocusedCell] = useState<string | null>(null);
   const rowVirtualizerInstanceRef = useRef<MRTRowVirtualizer>(null);
   const columnVirtualizerInstanceRef = useRef<MRTColumnVirtualizer>(null);
   const [sorting, setSorting] = useState<MRTSortingState>([]);
@@ -243,6 +299,9 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
   const { globalFilter, setGlobalFilter } = useGlobalFilter({ layerPath });
   const { columnVisibility, onColumnVisibilityChange } = useColumnVisibility({ layerPath });
   // #endregion
+
+  /** Focus store for this table instance — tracks which cell/header currently has keyboard focus. */
+  const focusStoreRef = useRef<FocusStore<string>>(createFocusStore<string>());
 
   // #region Handlers
 
@@ -266,18 +325,10 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
   );
 
   /**
-   * Handles cell focus for tooltip display.
-   */
-  const handleCellFocus = useCallback((event: React.FocusEvent<HTMLTableCellElement>): void => {
-    const cellId = event.currentTarget.getAttribute('data-cell-id');
-    if (cellId) setFocusedCell(cellId);
-  }, []);
-
-  /**
    * Handles cell blur to hide tooltip.
    */
   const handleCellBlur = useCallback((): void => {
-    setFocusedCell(null);
+    focusStoreRef.current.setActive(null);
   }, []);
 
   /**
@@ -304,22 +355,10 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
   }, []);
 
   /**
-   * Handles focusing a table header cell.
-   */
-  const handleTableHeadCellFocus = useCallback((event: React.FocusEvent<HTMLTableCellElement>): void => {
-    const {
-      dataset: { columnId },
-    } = event.currentTarget;
-    if (columnId) {
-      setFocusedCell(`header-${columnId}`);
-    }
-  }, []);
-
-  /**
    * Handles blurring a table header cell.
    */
   const handleTableHeadCellBlur = useCallback((): void => {
-    setFocusedCell(null);
+    focusStoreRef.current.setActive(null);
   }, []);
 
   // #endregion
@@ -335,16 +374,15 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
    */
   const getTableHeader = useCallback(
     (header: string, columnId: string): JSX.Element => {
-      const isOpen = focusedCell === `header-${columnId}`;
       return (
-        <TooltipCell title={header} isOpen={isOpen}>
+        <FocusAwareTooltipCell cellId={`header-${columnId}`} title={header}>
           <Box component="span" sx={memoSxClasses.tableHeaderContent}>
             {header}
           </Box>
-        </TooltipCell>
+        </FocusAwareTooltipCell>
       );
     },
-    [memoSxClasses.tableHeaderContent, focusedCell]
+    [memoSxClasses.tableHeaderContent]
   );
 
   /**
@@ -396,14 +434,21 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
       // convert string to react component.
       if ((typeof cellValue === 'string' && cellValue.length) || typeof cellValue === 'number') {
         try {
-          const reactComponent = (
-            <UseHtmlToReact
-              htmlContent={sanitizeHtmlContent(
-                enhanceLinksAccessibility(linkifyHtml(cellValue.toString(), linkifyOptions), t('general.opensInNewTab'))
-              )}
-            />
-          );
-          return reactComponent;
+          // Apply linkification and accessibility enhancements
+          const linkified = linkifyHtml(cellValue.toString(), linkifyOptions);
+          const enhanced = enhanceLinksAccessibility(linkified, t('general.opensInNewTab'));
+          const sanitized = sanitizeHtmlContent(enhanced);
+
+          // Fast path: no '<' character means no HTML elements possible
+          if (!sanitized.includes('<')) {
+            return sanitized;
+          }
+
+          // Check if sanitized output contains actual HTML tags using lightweight regex
+          if (containsHtmlTags(sanitized)) {
+            return <UseHtmlToReact htmlContent={sanitized} omitWrappers />;
+          }
+          return sanitized;
         } catch (error) {
           logger.logError('Error rendering HTML content:', error);
         }
@@ -449,7 +494,6 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
    */
   const getCellValueWithTooltip = useCallback(
     (cellValue: string | number | JSX.Element, cellId: string, feature?: TypeFeatureInfoEntry): JSX.Element => {
-      const isOpen = focusedCell === cellId;
       const isImageValue = typeof cellValue === 'string' && isImage(cellValue);
 
       // For images, the button handles its own tooltip
@@ -471,16 +515,16 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
 
       // TooltipCell directly wraps the content - NO extra Box wrapper
       return typeof cellValue === 'string' || typeof cellValue === 'number' ? (
-        <TooltipCell title={tooltipTitle} isOpen={isOpen}>
+        <FocusAwareTooltipCell cellId={cellId} title={tooltipTitle}>
           {createLightBoxButton(cellValue, cellId)}
-        </TooltipCell>
+        </FocusAwareTooltipCell>
       ) : (
         <Box component="div" sx={density === 'compact' ? memoSxClasses.tableCell : {}}>
           {cellValue}
         </Box>
       );
     },
-    [createLightBoxButton, density, memoSxClasses.tableCell, focusedCell, extractTooltipText]
+    [createLightBoxButton, density, memoSxClasses.tableCell, extractTooltipText]
   );
 
   /**
@@ -492,7 +536,6 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
    */
   const getCellContentDate = useCallback(
     (date: Dayjs, cellId: string): JSX.Element => {
-      const isOpen = focusedCell === cellId;
       let formattedDate = '';
       if (date) {
         formattedDate = DateMgt.formatDate(
@@ -505,12 +548,12 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
       }
 
       return (
-        <TooltipCell title={formattedDate} isOpen={isOpen}>
+        <FocusAwareTooltipCell cellId={cellId} title={formattedDate}>
           {formattedDate}
-        </TooltipCell>
+        </FocusAwareTooltipCell>
       );
     },
-    [language, displayDateFormat, displayDateTimezone, layerDateTemporalMode, focusedCell]
+    [language, displayDateFormat, displayDateTimezone, layerDateTemporalMode]
   );
 
   /**
@@ -546,8 +589,6 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
   /**
    * Builds material react data table column definitions.
    */
-
-  // TODO: WCAG Issue #3450 At times generates empty table headings.
   const memoColumns = useMemo<MRTColumnDef<DataTableRow>[]>(() => {
     // Log
     logger.logTraceUseMemo('DATA-TABLE - memoColumns', density);
@@ -894,6 +935,137 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
   /** Ref to the table instance — used to access state in callbacks without adding the table instance to effect deps. */
   const tableInstanceRef = useRef<MRTTableInstance<DataTableRow> | null>(null);
 
+  /** Ref to the scrollable table container — used for scroll correction when focusing cells behind pinned columns. */
+  const tableContainerRef = useRef<HTMLDivElement | null>(null);
+
+  /**
+   * Scrolls a focused table cell into view, accounting for pinned columns.
+   *
+   * When a cell receives focus via keyboard navigation, this function ensures the cell
+   * is fully visible between the right edge of left-pinned columns and the right edge
+   * of the scroll container. It calculates the total width of pinned columns and adjusts
+   * the container's scrollLeft if the cell is occluded or overflowing.
+   *
+   * @param cell - The focused table cell element
+   */
+  const scrollCellIntoView = useCallback((cell: HTMLTableCellElement): void => {
+    const container = tableContainerRef.current;
+    if (!container) return;
+
+    const table = tableInstanceRef.current;
+    if (!table) return;
+
+    // Get pinned column IDs and calculate total pinned width
+    const pinnedColumnIds = table.getState().columnPinning?.left ?? [];
+    const pinnedWidth = pinnedColumnIds.reduce((total, columnId) => {
+      const column = table.getColumn(columnId);
+      return total + (column?.getSize() ?? 0);
+    }, 0);
+
+    // Get bounding rectangles
+    const containerRect = container.getBoundingClientRect();
+    const cellRect = cell.getBoundingClientRect();
+
+    // Calculate visible viewport boundaries (accounting for pinned columns)
+    const visibleLeft = containerRect.left + pinnedWidth;
+    const visibleRight = containerRect.right;
+
+    // Calculate occlusion/overflow amounts
+    const leftOcclusion = visibleLeft - cellRect.left;
+    const rightOverflow = cellRect.right - visibleRight;
+
+    // Apply scroll correction
+    if (leftOcclusion > 0) {
+      // Cell is hidden under pinned columns — scroll left
+      container.scrollLeft -= leftOcclusion;
+    } else if (rightOverflow > 0) {
+      // Cell extends beyond right edge — scroll right
+      container.scrollLeft += rightOverflow;
+    }
+  }, []);
+
+  /**
+   * Handles cell focus for tooltip display.
+   */
+  const handleCellFocus = useCallback(
+    (event: React.FocusEvent<HTMLTableCellElement>): void => {
+      const cellEl = event.currentTarget;
+      const cellId = cellEl.getAttribute('data-cell-id');
+      if (cellId) focusStoreRef.current.setActive(cellId);
+      // Defer scroll correction to avoid layout thrashing during rapid navigation
+      requestAnimationFrame(() => scrollCellIntoView(cellEl));
+    },
+    [scrollCellIntoView]
+  );
+
+  /**
+   * Handles focusing a table header cell.
+   */
+  const handleTableHeadCellFocus = useCallback(
+    (event: React.FocusEvent<HTMLTableCellElement>): void => {
+      const cellEl = event.currentTarget;
+      const {
+        dataset: { columnId },
+      } = cellEl;
+      if (columnId) {
+        focusStoreRef.current.setActive(`header-${columnId}`);
+      }
+      // Defer scroll correction to avoid layout thrashing during rapid navigation
+      requestAnimationFrame(() => scrollCellIntoView(cellEl));
+    },
+    [scrollCellIntoView]
+  );
+
+  /** MUI table paper props configuration. */
+  const memoMuiTablePaperProps = useCallback(
+    ({ table }: { table: MRTTableInstance<DataTableRow> }): { style: React.CSSProperties } => ({
+      style: {
+        zIndex: table.getState().isFullScreen ? 999999 : undefined,
+        height: '100%',
+        paddingBottom: '5px', // Add padding to account for by horizontal scrollbar
+      },
+    }),
+    []
+  );
+
+  /** MUI table body cell props configuration. */
+  const memoMuiTableBodyCellProps = useCallback(
+    ({ cell }: { cell: MRTCell<DataTableRow> }): Record<string, unknown> => ({
+      sx: cell.column.id === SPACER_COLUMN_ID ? { pointerEvents: 'none' } : undefined,
+      'data-cell-id': cell.id,
+      onFocus: handleCellFocus,
+      onBlur: handleCellBlur,
+      // WCAG: Make spacer columns completely non-interactive
+      ...(cell.column.id === SPACER_COLUMN_ID && SPACER_COLUMN_A11Y_PROPS),
+    }),
+    [handleCellFocus, handleCellBlur]
+  );
+
+  /** MUI table head cell props configuration. */
+  const memoMuiTableHeadCellProps = useCallback(
+    ({ column }: { column: MRTColumn<DataTableRow> }): Record<string, unknown> => ({
+      sx:
+        column.id === SPACER_COLUMN_ID
+          ? ([memoSxClasses.tableHeadCell, { pointerEvents: 'none' }] as SxProps)
+          : memoSxClasses.tableHeadCell,
+      'data-column-id': column.id,
+      onKeyDown: handleTableHeadKeyDown,
+      onFocus: handleTableHeadCellFocus,
+      onBlur: handleTableHeadCellBlur,
+      // WCAG: Make spacer columns completely non-interactive
+      ...(column.id === SPACER_COLUMN_ID && SPACER_COLUMN_A11Y_PROPS),
+    }),
+    [handleTableHeadKeyDown, handleTableHeadCellFocus, handleTableHeadCellBlur, memoSxClasses.tableHeadCell]
+  );
+
+  /** MUI table body row props configuration. */
+  const memoMuiTableBodyRowProps = useCallback(
+    ({ row }: { row: MRTRow<DataTableRow> }): { 'aria-rowindex': number } => ({
+      'aria-rowindex': row.index + 2, // +2 to account for 1-based indexing and header row
+    }),
+    []
+  );
+
   // Create the Material React Table
   const useTable = useMaterialReactTable<DataTableRow>({
     columns: memoColumns,
@@ -952,6 +1124,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
     enablePagination: false,
     enableRowVirtualization: true,
     muiTableContainerProps: {
+      ref: tableContainerRef,
       sx: memoSxClasses.tableContainer,
       className: 'data-table-container',
     },
@@ -960,13 +1133,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
     rowVirtualizerOptions: { overscan: 5 },
     columnVirtualizerOptions: { overscan: 2 },
     localization: dataTableLocalization,
-    muiTableHeadCellProps: ({ column }) => ({
-      sx: memoSxClasses.tableHeadCell,
-      'data-column-id': column.id,
-      onKeyDown: handleTableHeadKeyDown,
-      onFocus: handleTableHeadCellFocus,
-      onBlur: handleTableHeadCellBlur,
-    }),
+    muiTableHeadCellProps: memoMuiTableHeadCellProps,
     muiColumnActionsButtonProps: {
       onKeyDown: handleColumnActionsKeyDown,
     },
@@ -979,18 +1146,8 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
       },
     },
     // override z-index of table when table is in fullscreen mode
-    muiTablePaperProps: ({ table }) => ({
-      style: {
-        zIndex: table.getState().isFullScreen ? 999999 : undefined,
-        height: '100%',
-        paddingBottom: '5px', // Add padding to account for by horizontal scrollbar
-      },
-    }),
-    muiTableBodyCellProps: ({ cell }) => ({
-      'data-cell-id': cell.id,
-      onFocus: handleCellFocus,
-      onBlur: handleCellBlur,
-    }),
+    muiTablePaperProps: memoMuiTablePaperProps,
+    muiTableBodyCellProps: memoMuiTableBodyCellProps,
     muiTableBodyProps: {
       sx: memoSxClasses.tableBody,
     },
@@ -1008,9 +1165,7 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
       'aria-label': t('dataTable.tableAriaLabelWithLayer', { layerName }),
       'aria-rowcount': memoRows.length + 1, // +1 to account for the header row
     },
-    muiTableBodyRowProps: ({ row }) => ({
-      'aria-rowindex': row.index + 2, // +2 to account for 1-based indexing and header row
-    }),
+    muiTableBodyRowProps: memoMuiTableBodyRowProps,
   });
   tableInstanceRef.current = useTable;
 
@@ -1207,12 +1362,14 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
   }, [globalFilter]);
 
   return (
-    <Box ref={dataTableWrapperRef} sx={memoSxClasses.dataTableWrapper} className="data-table-wrapper">
-      <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={language}>
-        <MaterialReactTable table={useTable} />
-      </LocalizationProvider>
-      <LightBoxComponent />
-    </Box>
+    <FocusStoreContext.Provider value={focusStoreRef.current}>
+      <Box ref={dataTableWrapperRef} sx={memoSxClasses.dataTableWrapper} className="data-table-wrapper">
+        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={language}>
+          <MaterialReactTable table={useTable} />
+        </LocalizationProvider>
+        <LightBoxComponent />
+      </Box>
+    </FocusStoreContext.Provider>
   );
 }
 

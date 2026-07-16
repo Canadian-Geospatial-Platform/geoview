@@ -451,6 +451,9 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
         styleOverrides: {
           root: {
             color: geoViewColors.textColor.main,
+            overflowWrap: 'anywhere',
+            wordBreak: 'normal',
+            hyphens: 'auto',
           },
         },
       },

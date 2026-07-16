@@ -884,6 +884,30 @@ export function sanitizeHtmlContent(contentHtml: string): string {
     },
   });
 }
+
+/**
+ * Regex pattern for detecting HTML tags (opening/closing/self-closing).
+ *
+ * Uses negated character class `[^>]*` to reduce backtracking risk. Note: This is
+ * a fast structural check, not an HTML parser — may produce false negatives for
+ * edge cases like attribute values containing `>` (e.g., `<a href="?x>y">`).
+ */
+const HTML_TAG_PATTERN = /<\/?[a-z][^>]*>/i;
+
+/**
+ * Checks if a string contains HTML tags using a lightweight regex pattern.
+ *
+ * This is a structural check that detects the presence of HTML elements,
+ * not a validation check. Use this when you need to decide whether to
+ * parse HTML content, avoiding redundant parsing operations.
+ *
+ * @param text - The string to check
+ * @returns True if the string contains HTML tags, false otherwise
+ */
+export function containsHtmlTags(text: string): boolean {
+  return text.includes('<') && HTML_TAG_PATTERN.test(text);
+}
+
 /**
  * Enhances links accessibility by adding screen reader announcements for external links.
  *

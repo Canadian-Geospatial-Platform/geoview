@@ -13,6 +13,7 @@ import type { TypeGeoviewLayerConfig, TypeLayerEntryConfig } from '@/api/types/l
 import { UtilAddLayer } from '@/core/components/layers/left-panel/add-new-layer/add-layer-utils';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import { Tooltip } from '@/ui/tooltip/tooltip';
+import { ellipsisOverflow } from '@/ui/style/default';
 
 export interface AddLayerTreeProps {
   layerTree: TypeGeoviewLayerConfig;
@@ -96,6 +97,9 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
   const getLayerChildren = (treeLayerId: string): string[] => {
     const result: string[] = [];
 
+    /**
+     * Recursively populates the result array with layer IDs.
+     */
     function populateLayerChildren(origLayerId: string, parentViewId: string | undefined): void {
       const viewLayerId = `${parentViewId ?? ''}${parentViewId ? '/' : ''}${origLayerId}`;
       result.push(viewLayerId);
@@ -121,6 +125,11 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
     return [...new Set(result)].sort();
   };
 
+  // #region Handlers
+
+  /**
+   * Handles when the user toggles selection of a tree item.
+   */
   const handleItemSelectionToggle = (event: React.SyntheticEvent | null, itemId: string, isSelected: boolean): void => {
     const layerChildren = getLayerChildren(itemId);
     const toAddOrRemove = [itemId, ...layerChildren];
@@ -135,6 +144,13 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
     else setSelectedItems(selectedItems.filter((item) => !toAddOrRemove.includes(item)));
   };
 
+  // #endregion Handlers
+
+  /**
+   * Renders all tree items for the layer tree.
+   *
+   * @returns Array of rendered tree item JSX elements
+   */
   const renderTreeItems = (): JSX.Element[] => {
     // If the layer tree is a TypeGeoviewLayerConfig of type EsriDynamic or WFS
     if (
@@ -156,8 +172,7 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
           fontSize: '0.8rem !important',
           paddingTop: '3px',
           paddingBottom: '3px',
-          textOverflow: 'ellipsis',
-          overflow: 'hidden',
+          ...ellipsisOverflow,
         },
       }}
       multiSelect
