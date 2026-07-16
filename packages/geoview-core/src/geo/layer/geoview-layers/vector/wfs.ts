@@ -552,7 +552,7 @@ export class WFS extends AbstractGeoViewVector {
     // Create the class from geoview-layers package
     const myLayer = new WFS(layerConfig);
 
-    // Set the proxy url, if any
+    // Set the config proxy url, if any in case the layer needs a proxy during processing
     myLayer.setConfigProxyUrl(configProxyUrl);
 
     // Process it

@@ -39,26 +39,13 @@
       },
       {
         "geoviewLayerId": "xyzTilesWikimedia",
-        "geoviewLayerName": "Wikimedia",
+        "geoviewLayerName": "Wikimedia (localhost only)",
         "geoviewLayerType": "xyzTiles",
         "listOfLayerEntryConfig": [
           {
             "layerId": "wikimedia",
             "source": {
               "dataAccessPath": "https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png"
-            }
-          }
-        ]
-      },
-      {
-        "geoviewLayerId": "xyzTilesNatEarth",
-        "geoviewLayerName": "Natural Earth",
-        "geoviewLayerType": "xyzTiles",
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "natEarth",
-            "source": {
-              "dataAccessPath": "https://demo.mapserver.org/cgi-bin/mapserv?map=/var/www/htdocs/msautotest/naturalearth_tiles.map&MODE=tile&TILE={x}+{y}+{z}&LAYERS=countries&TILEMODE=gmap"
             }
           }
         ]
@@ -123,5 +110,8 @@
     }
   },
   "corePackages": [],
-  "theme": "geo.ca"
+  "theme": "geo.ca",
+  "serviceUrls": {
+    "proxyUrl": "https://proxy.app-dev.geo.ca"
+  }
 }

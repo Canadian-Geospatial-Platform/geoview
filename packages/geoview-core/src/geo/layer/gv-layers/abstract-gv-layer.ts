@@ -1593,8 +1593,18 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
     // If we were not error before
     if (layerStatusBefore !== 'error') {
-      // Tile errors are non-fatal => at this point it was the last tile in flight, we can process the layer as loaded
-      this.#processLoaded();
+      // If loaded once already
+      if (this.loadedOnce) {
+        // Tile errors are non-fatal => at this point it was the last tile in flight, we can process the layer as loaded
+        this.#processLoaded();
+      } else {
+        // Never got loaded, ever
+        // Set the layer config status to error to keep mirroring the AbstractGeoViewLayer for now
+        this.getLayerConfig().setLayerStatusError();
+
+        // Update the parent group if any
+        this.getLayerConfig().updateLayerStatusParent();
+      }
     }
 
     // Emit event for all layer error events
