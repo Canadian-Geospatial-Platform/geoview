@@ -122,6 +122,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param mapProjection - Optional map projection
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that the layer entry configuration has gotten its metadata processed
+   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
    */
   protected override onProcessLayerMetadata(
     layerConfig: EsriDynamicLayerEntryConfig,

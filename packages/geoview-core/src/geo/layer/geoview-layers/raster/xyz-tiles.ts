@@ -8,6 +8,7 @@ import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstrac
 import type { DisplayDateMode } from '@/api/types/map-schema-types';
 import type { TypeSourceTileInitialConfig, TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
+import { LayerServiceMetadataUnableToFetchError } from '@/core/exceptions/layer-exceptions';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import {
   XYZTilesLayerEntryConfig,
@@ -20,6 +21,7 @@ import {
 import { GVXYZTiles } from '@/geo/layer/gv-layers/tile/gv-xyz-tiles';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import type { TypeProjection } from '@/geo/utils/projection';
+import { validateAndPingUrl } from '@/core/utils/utilities';
 
 // ? Do we keep this TODO ? Dynamic parameters can be placed on the dataAccessPath and initial settings can be used on xyz-tiles.
 // TODO: Implement method to validate XYZ tile service
@@ -137,6 +139,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * @param mapProjection - Optional map projection
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves once the layer entry configuration has gotten its metadata processed
+   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
    */
   protected override async onProcessLayerMetadata(
     layerConfig: XYZTilesLayerEntryConfig,
@@ -151,6 +154,32 @@ export class XYZTiles extends AbstractGeoViewRaster {
     // GV Possibly caused by a difference between OGC and ESRI XYZ Tiles, but only have ESRI XYZ Tiles as example currently
     // GV Also, might be worth checking out OGCMapTile for this? https://openlayers.org/en/latest/examples/ogc-map-tiles-geographic.html
     // GV Seems like it can deal with less specificity in the url and can handle the x y z internally?
+
+    // Get the data access path
+    const dataAccessPath = layerConfig.getDataAccessPath();
+
+    // Get the configProxyUrl
+    const configProxyUrl = this.getConfigProxyUrl();
+
+    // Test to reach one tile to see if the service is reachable
+    const test = await validateAndPingUrl(layerConfig.getDataAccessPath(), configProxyUrl);
+
+    // If not reachable, throw an error immediately
+    if (!test.isReachable)
+      throw new LayerServiceMetadataUnableToFetchError(
+        layerConfig.getGeoviewLayerId(),
+        layerConfig.getLayerNameCascade(),
+        new Error(test.error)
+      );
+
+    // If a proxy was necessary
+    if (test.needsProxy) {
+      // Indicate the proxy that was used
+      layerConfig.setProxyUrl(configProxyUrl);
+
+      // Update the access path to use the proxy if one was required
+      layerConfig.setDataAccessPath(`${configProxyUrl}?${dataAccessPath}`);
+    }
 
     // Get the metadata
     const metadata = this.getMetadata();

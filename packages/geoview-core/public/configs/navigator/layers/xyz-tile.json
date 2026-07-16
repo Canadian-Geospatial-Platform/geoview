@@ -25,19 +25,6 @@
         ]
       },
       {
-        "geoviewLayerId": "xyzTilesOpenStreetMap",
-        "geoviewLayerName": "Open Street Map",
-        "geoviewLayerType": "xyzTiles",
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "openStreetMap",
-            "source": {
-              "dataAccessPath": "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-            }
-          }
-        ]
-      },
-      {
         "geoviewLayerId": "xyzTilesWikimedia",
         "geoviewLayerName": "Wikimedia",
         "geoviewLayerType": "xyzTiles",
@@ -47,41 +34,6 @@
             "source": {
               "dataAccessPath": "https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png"
             }
-          }
-        ]
-      },
-      {
-        "geoviewLayerId": "xyzTilesNatEarth",
-        "geoviewLayerName": "Natural Earth",
-        "geoviewLayerType": "xyzTiles",
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "natEarth",
-            "source": {
-              "dataAccessPath": "https://demo.mapserver.org/cgi-bin/mapserv?map=/var/www/htdocs/msautotest/naturalearth_tiles.map&MODE=tile&TILE={x}+{y}+{z}&LAYERS=countries&TILEMODE=gmap"
-            }
-          }
-        ]
-      },
-      {
-        "geoviewLayerId": "xyzTilesUsgsTopo",
-        "geoviewLayerName": "USGS Topo",
-        "metadataAccessPath": "https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer",
-        "geoviewLayerType": "xyzTiles",
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "0"
-          }
-        ]
-      },
-      {
-        "geoviewLayerId": "xyzTilesWorldTopo",
-        "geoviewLayerName": "World Topo Map",
-        "metadataAccessPath": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/",
-        "geoviewLayerType": "xyzTiles",
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "0"
           }
         ]
       }
@@ -123,5 +75,8 @@
     }
   },
   "corePackages": [],
-  "theme": "geo.ca"
+  "theme": "geo.ca",
+  "serviceUrls": {
+    "proxyUrl": "https://proxy.app-dev.geo.ca"
+  }
 }

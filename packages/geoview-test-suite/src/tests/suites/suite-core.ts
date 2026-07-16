@@ -50,14 +50,27 @@ export class GVTestSuiteCore extends GVAbstractTestSuite {
    * @returns A promise that resolves when tests are completed
    */
   protected override onLaunchTestSuite(): Promise<unknown> {
-    // Test validateAndPingUrl
-    const pPingValidReachable = this.#coreTester.testValidateAndPingUrlValidReachable();
+    // Test validateAndPingUrl (simple)
+    const pSimplePingValid = this.#coreTester.testSimplePingValidReachable();
+    const pSimplePingXyz = this.#coreTester.testSimplePingXyzTileUrl();
+    const pSimplePingXyz401 = this.#coreTester.testSimplePingXyzTileUrlUnauthorized();
+
+    // Test validateAndPingUrlOGC (OGC-aware)
     const pPingInvalidFormat = this.#coreTester.testValidateAndPingUrlInvalidFormat();
     const pPingUnreachable = this.#coreTester.testValidateAndPingUrlUnreachable();
     const pPingWmsService = this.#coreTester.testValidateAndPingUrlWmsService();
+
     const pGeometryCollectionLegendStyles = this.#coreTester.testGeometryCollectionLegendStyles();
 
     // Resolve when all
-    return Promise.all([pPingValidReachable, pPingInvalidFormat, pPingUnreachable, pPingWmsService, pGeometryCollectionLegendStyles]);
+    return Promise.all([
+      pSimplePingValid,
+      pSimplePingXyz,
+      pSimplePingXyz401,
+      pPingInvalidFormat,
+      pPingUnreachable,
+      pPingWmsService,
+      pGeometryCollectionLegendStyles,
+    ]);
   }
 }
