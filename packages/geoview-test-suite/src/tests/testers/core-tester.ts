@@ -1,5 +1,5 @@
 ﻿import type { PingResult } from 'geoview-core/core/utils/utilities';
-import { validateAndPingUrl } from 'geoview-core/core/utils/utilities';
+import { validateAndPingUrl, validateAndPingUrlOGC } from 'geoview-core/core/utils/utilities';
 import type { TypeLayerStyleConfig, TypePolygonVectorConfig } from 'geoview-core/api/types/map-schema-types';
 import { GeoviewRenderer } from 'geoview-core/geo/utils/renderer/geoview-renderer';
 
@@ -19,22 +19,22 @@ export class CoreTester extends GVAbstractTester {
     return 'CoreTester';
   }
 
-  // #region VALIDATE AND PING URL
+  // #region VALIDATE AND PING URL (SIMPLE)
 
   /**
-   * Tests validateAndPingUrl with a valid and reachable URL.
+   * Tests validateAndPingUrl (simple) with a directly reachable URL.
    *
-   * Uses the Historical Flood MapServer URL which is known to be reachable.
-   * Asserts that the result has isValid=true and isReachable=true.
+   * Uses the Historical Flood MapServer URL which responds to HEAD with 2xx.
+   * Asserts that the simple ping succeeds without needing OGC fallback.
    *
    * @returns A promise that resolves when the test completes
    */
-  testValidateAndPingUrlValidReachable(): Promise<Test<PingResult>> {
+  testSimplePingValidReachable(): Promise<Test<PingResult>> {
     return this.test(
-      `Test validateAndPingUrl with a valid reachable URL...`,
+      `Test validateAndPingUrl (simple) with a directly reachable URL...`,
       async (test) => {
         const url = GVAbstractTester.HISTORICAL_FLOOD_URL_MAP_SERVER;
-        test.addStep(`Pinging valid reachable URL: ${url}...`);
+        test.addStep(`Simple pinging valid reachable URL: ${url}...`);
         const result = await validateAndPingUrl(url);
         return result;
       },
@@ -45,6 +45,9 @@ export class CoreTester extends GVAbstractTester {
         test.addStep('Verifying isReachable is true...');
         Test.assertIsEqual(result.isReachable, true);
 
+        test.addStep('Verifying needsProxy is false...');
+        Test.assertIsEqual(result.needsProxy, false);
+
         test.addStep('Verifying no error message...');
         Test.assertIsUndefined('error', result.error);
       }
@@ -52,7 +55,74 @@ export class CoreTester extends GVAbstractTester {
   }
 
   /**
-   * Tests validateAndPingUrl with an invalid URL format.
+   * Tests validateAndPingUrl (simple) with an XYZ tile URL template.
+   *
+   * Verifies that XYZ placeholder tokens ({z}, {x}, {y}) are resolved before pinging.
+   * Uses the OpenStreetMap tile server which is publicly reachable.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testSimplePingXyzTileUrl(): Promise<Test<PingResult>> {
+    return this.test(
+      `Test validateAndPingUrl (simple) with an XYZ tile URL template...`,
+      async (test) => {
+        const url = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+        test.addStep(`Simple pinging XYZ tile URL: ${url}...`);
+        const result = await validateAndPingUrl(url);
+        return result;
+      },
+      (test, result) => {
+        test.addStep('Verifying isValid is true (XYZ placeholders resolved)...');
+        Test.assertIsEqual(result.isValid, true);
+
+        test.addStep('Verifying isReachable is true...');
+        Test.assertIsEqual(result.isReachable, true);
+
+        test.addStep('Verifying needsProxy is false...');
+        Test.assertIsEqual(result.needsProxy, false);
+      }
+    );
+  }
+
+  /**
+   * Tests validateAndPingUrl (simple) with an XYZ tile URL that requires authentication.
+   *
+   * Uses the Gnosis Earth OGC API tile endpoint which returns 401 Unauthorized.
+   * Asserts that the result has isValid=true but isReachable=false with a 401 status.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testSimplePingXyzTileUrlUnauthorized(): Promise<Test<PingResult>> {
+    return this.test(
+      `Test validateAndPingUrl (simple) with an XYZ tile URL returning 401...`,
+      async (test) => {
+        const url = 'https://maps.gnosis.earth/ogcapi/collections/blueMarble/map/tiles/WebMercatorQuad/{z}/{x}/{y}.jpg';
+        test.addStep(`Simple pinging XYZ tile URL requiring auth: ${url}...`);
+        const result = await validateAndPingUrl(url);
+        return result;
+      },
+      (test, result) => {
+        test.addStep('Verifying isValid is true (URL format is valid)...');
+        Test.assertIsEqual(result.isValid, true);
+
+        test.addStep('Verifying isReachable is false (401 Unauthorized)...');
+        Test.assertIsEqual(result.isReachable, false);
+
+        test.addStep('Verifying status is 401...');
+        Test.assertIsEqual(result.status, 401);
+
+        test.addStep('Verifying error message exists...');
+        Test.assertIsDefined('error', result.error);
+      }
+    );
+  }
+
+  // #endregion VALIDATE AND PING URL (SIMPLE)
+
+  // #region VALIDATE AND PING URL (OGC)
+
+  /**
+   * Tests validateAndPingUrlOGC with an invalid URL format.
    *
    * Uses a malformed string that is not a valid URL.
    * Asserts that the result has isValid=false and isReachable=false.
@@ -65,7 +135,7 @@ export class CoreTester extends GVAbstractTester {
       async (test) => {
         const url = 'not-a-valid-url';
         test.addStep(`Pinging invalid URL format: ${url}...`);
-        const result = await validateAndPingUrl(url);
+        const result = await validateAndPingUrlOGC(url);
         return result;
       },
       (test, result) => {
@@ -85,7 +155,7 @@ export class CoreTester extends GVAbstractTester {
   }
 
   /**
-   * Tests validateAndPingUrl with a valid URL that is unreachable.
+   * Tests validateAndPingUrlOGC with a valid URL that is unreachable.
    *
    * Uses GVAbstractTester.BAD_URL which has valid URL syntax but the server does not exist.
    * Asserts that the result has isValid=true and isReachable=false.
@@ -98,7 +168,7 @@ export class CoreTester extends GVAbstractTester {
       async (test) => {
         const url = GVAbstractTester.BAD_URL;
         test.addStep(`Pinging unreachable URL: ${url}...`);
-        const result = await validateAndPingUrl(url);
+        const result = await validateAndPingUrlOGC(url);
         return result;
       },
       (test, result) => {
@@ -115,7 +185,7 @@ export class CoreTester extends GVAbstractTester {
   }
 
   /**
-   * Tests validateAndPingUrl with a WMS service URL.
+   * Tests validateAndPingUrlOGC with a WMS service URL.
    *
    * Uses the Geomet WMS URL. WMS services often require query params to respond properly,
    * so this validates that the OGC GetCapabilities fallback logic works.
@@ -129,7 +199,7 @@ export class CoreTester extends GVAbstractTester {
       async (test) => {
         const url = GVAbstractTester.GEOMET_URL;
         test.addStep(`Pinging WMS service URL: ${url}...`);
-        const result = await validateAndPingUrl(url);
+        const result = await validateAndPingUrlOGC(url);
         return result;
       },
       (test, result) => {
@@ -141,6 +211,8 @@ export class CoreTester extends GVAbstractTester {
       }
     );
   }
+
+  // #endregion VALIDATE AND PING URL (OGC)
 
   /**
    * Tests GeometryCollection legend generation through the renderer.

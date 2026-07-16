@@ -168,7 +168,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    * @param mapProjection - Optional map projection
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves once the layer entry configuration has gotten its metadata processed
-   * @throws {LayerTooManyEsriFeatures} When the layer has too many Esri features
+   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
    */
   protected override onProcessLayerMetadata(
     layerConfig: EsriFeatureLayerEntryConfig,
@@ -188,6 +188,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    * @param sourceOptions - The OpenLayers vector source options associated with the layer
    * @param readOptions - Options controlling how features are read, including the target `featureProjection`
    * @returns A promise that resolves to an array of OpenLayers features
+   * @throws {LayerTooManyEsriFeatures} When the layer has too many Esri features
    */
   protected override async onCreateVectorSourceLoadFeatures(
     layerConfig: VectorLayerEntryConfig,

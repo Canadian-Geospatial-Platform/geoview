@@ -54,6 +54,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param sourceOptions - The OpenLayers vector source options associated with the layer
    * @param readOptions - Options controlling how features are read, including the target `featureProjection`
    * @returns A promise that resolves to an array of OpenLayers features created from the underlying data source
+   * @throws {LayerTooManyEsriFeatures} When the layer has too many features
    */
   protected abstract onCreateVectorSourceLoadFeatures(
     layerConfig: VectorLayerEntryConfig,
