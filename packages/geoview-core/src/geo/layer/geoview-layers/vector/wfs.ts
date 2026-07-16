@@ -543,7 +543,7 @@ export class WFS extends AbstractGeoViewVector {
       })
     );
 
-    // If not fetching styles on the WMS
+    // Keep track if fetching styles on the WMS
     layerConfig.fetchStylesOnWMS = fetchStylesOnWMS;
 
     // Create the class from geoview-layers package
