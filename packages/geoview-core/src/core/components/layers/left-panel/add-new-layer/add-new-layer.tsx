@@ -25,7 +25,7 @@ import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useStoreAppDisabledLayerTypes, useStoreAppDisplayLanguage, useStoreAppShellContainer } from '@/core/stores/states/app-state';
 import { useStoreMapConfigServiceUrlsProxyUrl } from '@/core/stores/states/map-state';
 import { logger } from '@/core/utils/logger';
-import { delay, generateId, isValidUUID, validateAndPingUrl } from '@/core/utils/utilities';
+import { delay, generateId, isValidUUID, validateAndPingUrlOGC } from '@/core/utils/utilities';
 import { VALID_FILE_EXTENSIONS_ACCEPT } from '@/core/utils/constant';
 import { Config } from '@/api/config/config';
 import type { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -938,7 +938,7 @@ export function AddNewLayer(): JSX.Element {
         // Validate and ping HTTPS URLs
         setIsLoading(true);
         try {
-          const check = await validateAndPingUrl(layerURL, configProxyUrl);
+          const check = await validateAndPingUrlOGC(layerURL, configProxyUrl);
           logger.logDebug('URL validation check', check);
           const isOk = check.isValid && check.isReachable;
           setStepButtonEnabled(isOk);

@@ -36,6 +36,19 @@
             }
           }
         ]
+      },
+      {
+        "geoviewLayerId": "xyzTilesNatEarth",
+        "geoviewLayerName": "Natural Earth",
+        "geoviewLayerType": "xyzTiles",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "natEarth",
+            "source": {
+              "dataAccessPath": "https://demo.mapserver.org/cgi-bin/mapserv?map=/var/www/htdocs/msautotest/naturalearth_tiles.map&MODE=tile&TILE={x}+{y}+{z}&LAYERS=countries&TILEMODE=gmap"
+            }
+          }
+        ]
       }
     ]
   },
