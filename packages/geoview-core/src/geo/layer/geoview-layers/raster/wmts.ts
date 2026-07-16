@@ -214,9 +214,12 @@ export class WMTS extends AbstractGeoViewRaster {
     // Fetch the XML
     return this.#fetchXmlServiceMetadata(
       url,
-      (proxiedUrl) => {
+      (proxiedUrl, proxyUsed) => {
         // If updating the metadataAccessPath as we go
         if (updateMetadataAccessPath) {
+          // Indicate the proxy that was used
+          this.setProxyUrl(proxyUsed);
+
           // Update the access path to use the proxy if one was required
           this.setMetadataAccessPath(proxiedUrl);
         }

@@ -54,7 +54,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /** The projection code as read from the metadata. */
   #metadataProjection?: OLProjection;
 
-  /** The proxy to use, when necessary */
+  /** The proxy to use, when one is being used */
   #proxy?: string;
 
   /** The data access path before applying the proxy. */
@@ -606,8 +606,9 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * Gets the proxy URL used for the layer's data access.
+   * GV Not to be confused with the layer processing function of the same name.
    *
-   * @returns The proxy URL, or undefined if no proxy is configured
+   * @returns The proxy URL, or undefined if no proxy is being used
    */
   getProxyUrl(): string | undefined {
     return this.#proxy;
@@ -615,6 +616,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * Sets the proxy URL to be used for the layer's data access.
+   * GV Not to be confused with the layer processing function of the same name.
    *
    * @param proxy - The proxy URL to set
    */
@@ -625,6 +627,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * Indicates whether the layer is using a proxy to connect to its service.
+   * GV Not to be confused with the layer processing function of the same name.
    *
    * @returns `true` if the layer is using a proxy; otherwise, `false`
    */

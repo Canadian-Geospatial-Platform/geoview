@@ -106,6 +106,9 @@ export abstract class AbstractGeoViewLayer {
   /** The map-level service URLs configuration (proxy, geocore, geolocator, etc.) for this layer's map instance. */
   #configServiceUrls?: TypeServiceUrls;
 
+  /** The proxy to use, when one is being used */
+  #proxy?: string;
+
   /** Callback delegates for the layer entry register init event */
   #onLayerEntryRegisterInitHandlers: LayerEntryRegisterInitDelegate[] = [];
 
@@ -323,6 +326,37 @@ export abstract class AbstractGeoViewLayer {
   setConfigProxyUrl(configProxyUrl: string | undefined): void {
     this.#configServiceUrls ??= {};
     this.#configServiceUrls.proxyUrl = configProxyUrl;
+  }
+
+  /**
+   * Gets the proxy URL used for the layer's processing.
+   * GV Not to be confused with the layer entry config function of the same name.
+   *
+   *
+   * @returns The proxy URL, or undefined if no proxy is being used
+   */
+  getProxyUrl(): string | undefined {
+    return this.#proxy;
+  }
+
+  /**
+   * Sets the proxy URL to be used for the layer's processing.
+   * GV Not to be confused with the layer entry config function of the same name.
+   *
+   * @param proxy - The proxy URL to set
+   */
+  setProxyUrl(proxy: string | undefined): void {
+    this.#proxy = proxy;
+  }
+
+  /**
+   * Indicates whether the layer is using a proxy to connect to its service.
+   * GV Not to be confused with the layer entry config function of the same name.
+   *
+   * @returns `true` if the layer is using a proxy; otherwise, `false`
+   */
+  getIsUsingProxy(): boolean {
+    return !!this.#proxy;
   }
 
   /**

@@ -416,7 +416,7 @@
       "missingSourceProjection": "Le paramètre source.projection est obligatoire.",
       "unableToFetch": "Impossible de récupérer et de lire les métadonnées pour la couche '{{layerNameOrId}}'.",
       "wmtsMetadataError": "Erreur avec les métadonnées WMTS pour la couche '{{layerNameOrId}}' : {{missingElement}} manquant dans les métadonnées.",
-      "serviceMetadataEmpty": "Les métadonnées du service sont vides pour la couche '{{layerNameOrId}}'.",
+      "serviceMetadataEmpty": "Les métadonnées du service sont vides ou insuffisantes pour la couche '{{layerNameOrId}}'.",
       "invalidLayerFilter": "La couche '{{layerNameOrPath}}' contient un filtre invalide.\nfiltre = '{{layerFilter}}'\nfiltre interne = '{{filter}}'.",
       "failedToCreateLayer": "Échec de la création de la couche '{{layerNameOrId}}'.",
       "noCapabilitiesOrEmpty": "Aucune capacité trouvée (ou vide) pour la couche '{{layerNameOrId}}'.",
