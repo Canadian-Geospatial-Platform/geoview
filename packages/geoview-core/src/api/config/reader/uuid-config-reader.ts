@@ -1,11 +1,5 @@
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
-import type {
-  TypeLayerEntryConfig,
-  TypeBaseSourceInitialConfig,
-  TypeGeoviewLayerConfig,
-  TypeGeoviewLayerType,
-  TypeOfServer,
-} from '@/api/types/layer-schema-types';
+import type { TypeLayerEntryConfig, TypeGeoviewLayerConfig, TypeGeoviewLayerType, TypeOfServer } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { formatError, NotSupportedError } from '@/core/exceptions/core-exceptions';
@@ -268,39 +262,13 @@ export class UUIDmapConfigReader {
       return undefined;
     }
 
-    // Prefer the new array format.
+    // Only support listOfLayerEntryConfig.
     const foundListConfig = resultData.response.gcs.find((gcItem) => gcItem?.[lang]?.listOfLayerEntryConfig);
     if (foundListConfig?.[lang]?.listOfLayerEntryConfig?.length) {
       return foundListConfig[lang].listOfLayerEntryConfig;
     }
 
-    // Fallback for legacy temporary format.
-    const foundLegacyConfig = resultData.response.gcs.find((gcItem) => gcItem?.[lang]?.layers);
-    if (!foundLegacyConfig?.[lang]?.layers) {
-      return undefined;
-    }
-
-    return this.#convertLegacyCustomLayerToListOfLayerEntryConfig(foundLegacyConfig[lang].layers);
-  }
-
-  /**
-   * Converts legacy GCS single-layer custom config to listOfLayerEntryConfig format.
-   *
-   * @param customLayer - The legacy custom layer config to convert
-   * @returns The converted listOfLayerEntryConfig or undefined when conversion is not possible
-   */
-  static #convertLegacyCustomLayerToListOfLayerEntryConfig(customLayer: GeoCoreConfigResponseGCSLayer): TypeLayerEntryConfig[] | undefined {
-    if (!customLayer.layerName && !customLayer.source) {
-      return undefined;
-    }
-
-    const convertedConfig = {
-      layerId: customLayer.layerId,
-      layerName: customLayer.layerName,
-      source: customLayer.source,
-    } as unknown as TypeLayerEntryConfig;
-
-    return [convertedConfig];
+    return undefined;
   }
 
   /**
@@ -377,15 +345,7 @@ export type GeoCoreConfigResponseRCSLayers = {
 /** The GCS response item containing layer overrides and package configs. */
 export type GeoCoreConfigResponseGCSLayers = {
   listOfLayerEntryConfig?: TypeLayerEntryConfig[];
-  layers?: GeoCoreConfigResponseGCSLayer;
   packages?: GeoCoreConfigResponsePackages;
-};
-
-/** The legacy GCS single-layer override payload. */
-export type GeoCoreConfigResponseGCSLayer = {
-  layerId?: string;
-  layerName?: string;
-  source?: TypeBaseSourceInitialConfig;
 };
 
 export type GeoCoreConfigResponsePackages = {
