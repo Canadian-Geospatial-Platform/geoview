@@ -100,7 +100,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
    */
   protected override onFetchServiceMetadata<T = TypeMetadataWMS | undefined>(abortSignal?: AbortSignal): Promise<T> {
-    // Redirect and when a proxy has to be used, update the metadataAccessPath along the way
+    // Redirect and update the metadataAccessPath when a proxy has to be used
     return this.fetchServiceMetadataWMS(true, abortSignal) as Promise<T>;
   }
 
@@ -811,7 +811,7 @@ export class WMS extends AbstractGeoViewRaster {
 
         // TODO: Validate the layerConfig.layerFilter is compatible with the layerCapabilities.Dimension and if not remove it completely like `delete layerConfig.layerFilter`
 
-        const timeDimension = layerCapabilities.Dimension.find((dimension) => dimension.name === 'time');
+        const timeDimension = layerCapabilities.Dimension.find((dimension) => dimension.name?.toLowerCase() === 'time');
 
         // If a temporal dimension was found
         if (timeDimension) {

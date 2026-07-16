@@ -460,16 +460,16 @@ async function probeFileUrl(url: string): Promise<boolean> {
 }
 
 /**
- * Validates a URL's syntax and tests whether the server is reachable.
+ * Validates a URL's syntax and tests whether the server is reachable using a simple HEAD request
+ * with file extension probe fallback.
  *
  * Strategy:
  * 1. **HEAD → 2xx/3xx** → reachable, no proxy needed.
- * 2. **HEAD → 4xx/5xx** → server is alive but the bare path fails. Try OGC GetCapabilities
- *    directly (CORS was fine since HEAD got a response). If valid → reachable. Otherwise → not reachable.
- * 3. **HEAD → CORS** → server is alive but blocks cross-origin. Try OGC GetCapabilities
- *    through the proxy. If valid → reachable + needsProxy. Otherwise → not reachable.
+ * 2. **HEAD → 4xx/5xx** → try file extension probe. If valid → reachable. Otherwise → not reachable.
+ * 3. **HEAD → CORS** → try file extension probe through proxy. If valid → reachable + needsProxy. Otherwise → not reachable.
  * 4. **HEAD → network/timeout** → server unreachable.
  *
+ * This function has no OGC/GetCapabilities knowledge. For OGC-aware validation, use `validateAndPingUrl`.
  * The function never throws — all failures are returned as part of the result object.
  *
  * @param targetUrl - The URL to validate and ping
@@ -490,10 +490,11 @@ export async function validateAndPingUrl(
   };
 
   // Replace XYZ tile template placeholders with valid sample coordinates so the URL is pingable
+  // GV Putting '1' instead of '0', because some web services will accept 0/0/0.png but not any other tiles, e.g. https://maps.wikimedia.org/osm-intl/0/0/0.png
   const resolvedUrl = targetUrl
-    .replace(/\{z\}/gi, '0')
-    .replace(/\{x\}/gi, '0')
-    .replace(/\{-?y\}/gi, '0');
+    .replace(/\{z\}/gi, '1')
+    .replace(/\{x\}/gi, '1')
+    .replace(/\{-?y\}/gi, '1');
 
   // Strip query params for the reachability check
   const targetUrlWithoutParams = resolvedUrl.split('?')[0];
@@ -506,13 +507,6 @@ export async function validateAndPingUrl(
     result.error = 'Invalid URL format';
     return result;
   }
-
-  // Build OGC GetCapabilities check URLs
-  const ogcCheckUrls = [
-    ensureServiceRequestUrl(resolvedUrl, 'WMS', 'GetCapabilities'),
-    ensureServiceRequestUrl(resolvedUrl, 'WFS', 'GetCapabilities'),
-    ensureServiceRequestUrl(resolvedUrl, 'WMTS', 'GetCapabilities'),
-  ];
 
   // HEAD request to see if the server responds
   const { response, reason } = await Fetch.fetchHeadWithTimeout(targetUrlWithoutParams, timeoutMs);
@@ -527,29 +521,15 @@ export async function validateAndPingUrl(
     }
 
     // 4xx/5xx — server is alive but bare path fails.
-    // WMS/WFS services often return 4xx without query params. Since HEAD succeeded (no CORS issue),
-    // try GetCapabilities directly to see if it is a valid OGC service.
-    // Use fetchTextPermissive because OGC services may return valid capabilities XML with non-2xx status.
-    const directChecks = await Promise.allSettled(ogcCheckUrls.map((url) => Fetch.fetchTextPermissive(url)));
-
-    // We fire both WMS and WFS GetCapabilities in parallel. If either one returns a valid
-    // capabilities response, the URL is considered reachable — we don't need both to succeed.
-    for (const settled of directChecks) {
-      if (settled.status === 'fulfilled' && isOgcCapabilitiesResponse(settled.value)) {
-        result.isReachable = true;
-        return result;
-      }
-    }
-
-    // Not a valid OGC service — try a lightweight GET for file-based URLs
+    // Try a lightweight GET for file-based URLs
     if (VALID_FILE_EXTENSIONS_REGEX.test(targetUrlWithoutParams) && (await probeFileUrl(targetUrlWithoutParams))) {
       result.isReachable = true;
       return result;
     }
 
-    // The path is truly wrong
+    // The path is not reachable
     result.isReachable = false;
-    result.error = `Server returned status ${response.status} and no OGC service found at this URL`;
+    result.error = `Server returned status ${response.status}`;
     return result;
   }
 
@@ -564,24 +544,8 @@ export async function validateAndPingUrl(
   }
 
   // CORS — server is alive but blocks cross-origin.
-  // Try OGC GetCapabilities through proxy (only WMS/WFS have CORS issues).
+  // Try a lightweight GET for file-based URLs through proxy
   if (reason === 'cors') {
-    // Use fetchTextPermissive because the proxy may forward non-2xx responses
-    // that still contain valid capabilities XML in the body.
-    const proxyChecks = await Promise.allSettled(
-      ogcCheckUrls.map((checkUrl) => Fetch.fetchTextPermissive(`${configProxyUrl}?${checkUrl}`))
-    );
-
-    // Same as above: if either WMS or WFS GetCapabilities succeeds through the proxy, it's reachable.
-    for (const settled of proxyChecks) {
-      if (settled.status === 'fulfilled' && isOgcCapabilitiesResponse(settled.value)) {
-        result.isReachable = true;
-        result.needsProxy = true;
-        return result;
-      }
-    }
-
-    // Not a valid OGC service through proxy — try a lightweight GET for file-based URLs
     if (VALID_FILE_EXTENSIONS_REGEX.test(targetUrlWithoutParams) && (await probeFileUrl(`${configProxyUrl}?${targetUrlWithoutParams}`))) {
       result.isReachable = true;
       result.needsProxy = true;
@@ -589,12 +553,93 @@ export async function validateAndPingUrl(
     }
 
     result.isReachable = false;
-    result.error = 'Server blocks cross-origin requests and no OGC service found';
+    result.error = 'Server blocks cross-origin requests';
     return result;
   }
 
   // Unknown failure
   result.error = 'Unexpected error during URL validation';
+  return result;
+}
+
+/**
+ * Validates a URL's syntax and tests whether the server is reachable, with OGC GetCapabilities fallback.
+ *
+ * Strategy:
+ * 1. Calls `pingUrl` for basic HEAD + file probe validation.
+ * 2. If HEAD returned 4xx/5xx (server alive but bare path fails), tries OGC GetCapabilities
+ *    directly (WMS/WFS/WMTS) since CORS was fine.
+ * 3. If HEAD returned CORS error, tries OGC GetCapabilities through the proxy.
+ *
+ * The function never throws — all failures are returned as part of the result object.
+ *
+ * @param targetUrl - The URL to validate and ping
+ * @param configProxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
+ * @param timeoutMs - Optional request timeout in milliseconds (defaults to none)
+ * @returns A promise that resolves with a result object containing isValid, isReachable, needsProxy, status, and optional error
+ */
+export async function validateAndPingUrlOGC(
+  targetUrl: string,
+  configProxyUrl: string = CONFIG_PROXY_URL,
+  timeoutMs = undefined
+): Promise<PingResult> {
+  // First, try the simple ping
+  const result = await validateAndPingUrl(targetUrl, configProxyUrl, timeoutMs);
+
+  // If already reachable or invalid URL, return immediately
+  if (result.isReachable || !result.isValid) return result;
+
+  // Resolve XYZ placeholders for the OGC check URLs (same logic as validateAndPingUrl)
+  const resolvedUrl = targetUrl
+    .replace(/\{z\}/gi, '1')
+    .replace(/\{x\}/gi, '1')
+    .replace(/\{-?y\}/gi, '1');
+
+  // Build OGC GetCapabilities check URLs
+  const ogcCheckUrls = [
+    ensureServiceRequestUrl(resolvedUrl, 'WMS', 'GetCapabilities'),
+    ensureServiceRequestUrl(resolvedUrl, 'WFS', 'GetCapabilities'),
+    ensureServiceRequestUrl(resolvedUrl, 'WMTS', 'GetCapabilities'),
+  ];
+
+  // If server responded with 4xx/5xx (status is set), try OGC GetCapabilities directly
+  if (result.status !== null && result.status >= 400) {
+    const directChecks = await Promise.allSettled(ogcCheckUrls.map((url) => Fetch.fetchTextPermissive(url)));
+
+    for (const settled of directChecks) {
+      if (settled.status === 'fulfilled' && isOgcCapabilitiesResponse(settled.value)) {
+        result.isReachable = true;
+        result.error = undefined;
+        return result;
+      }
+    }
+
+    // Update error message
+    result.error = `Server returned status ${result.status} and no OGC service found at this URL`;
+    return result;
+  }
+
+  // If CORS blocked (status is null, error mentions cross-origin), try OGC GetCapabilities through proxy
+  if (result.error?.includes('cross-origin')) {
+    const proxyChecks = await Promise.allSettled(
+      ogcCheckUrls.map((checkUrl) => Fetch.fetchTextPermissive(`${configProxyUrl}?${checkUrl}`))
+    );
+
+    for (const settled of proxyChecks) {
+      if (settled.status === 'fulfilled' && isOgcCapabilitiesResponse(settled.value)) {
+        result.isReachable = true;
+        result.needsProxy = true;
+        result.error = undefined;
+        return result;
+      }
+    }
+
+    // Update error message
+    result.error = 'Server blocks cross-origin requests and no OGC service found';
+    return result;
+  }
+
+  // Return whatever pingUrl returned (timeout, network error, etc.)
   return result;
 }
 
