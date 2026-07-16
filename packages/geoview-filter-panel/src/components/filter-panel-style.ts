@@ -96,9 +96,6 @@ export const getSxClasses = (theme: any): SxStyles => ({
     fontWeight: 600,
     flex: 1,
     minWidth: 0,
-    overflowWrap: 'break-word',
-    wordBreak: 'normal',
-    hyphens: 'auto',
   },
 
   // Clear button

@@ -67,7 +67,6 @@ export const getSxClasses = (theme: any): SxStyles => ({
     fontSize: '1.125rem', // 18px
     fontWeight: '700',
     lineHeight: 1.2,
-    textOverflow: 'ellipsis',
     color: theme.palette.geoViewColor?.textColor.main,
   },
 
