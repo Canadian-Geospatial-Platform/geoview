@@ -1,5 +1,6 @@
 import type { Theme } from '@mui/material';
 import type { SxStyles } from '@/ui/style/types';
+import { ellipsisOverflow } from '@/ui/style/default';
 
 /**
  * Gets custom sx classes for the data table.
@@ -25,7 +26,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     display: 'flex',
     flexDirection: 'column',
   },
-  tableCell: { whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' },
+  tableCell: ellipsisOverflow,
   dataTableWrapper: {
     height: '100%',
     '& .MuiTableContainer-root': {
