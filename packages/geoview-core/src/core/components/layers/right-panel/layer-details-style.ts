@@ -1,5 +1,6 @@
 import type { Theme } from '@mui/material/styles';
 import type { SxStyles } from '@/ui/style/types';
+import { ellipsisOverflow } from '@/ui/style/default';
 
 /**
  * Get custom sx classes for the layers right panel
@@ -56,9 +57,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       alignItems: 'center',
       width: '100%',
       '& a': {
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        whiteSpace: 'nowrap',
+        ...ellipsisOverflow,
         marginLeft: '4px',
         flex: 1,
         minWidth: 0,

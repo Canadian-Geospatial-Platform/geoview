@@ -73,7 +73,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   featureInfoItemValue: {
     marginRight: 0,
     overflowX: 'auto',
-    textOverflow: 'ellipsis',
     overflowWrap: 'break-word',
     wordBreak: 'break-word',
     whiteSpace: 'pre-wrap',

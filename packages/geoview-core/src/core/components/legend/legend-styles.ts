@@ -74,11 +74,6 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     alignItems: 'center',
     borderBottom: `1px solid ${theme.palette.geoViewColor.bgColor.dark[100]}`,
   },
-  legendListItemHeaderText: {
-    overflowWrap: 'break-word',
-    wordBreak: 'normal',
-    hyphens: 'auto',
-  },
   legendTitle: {
     fontSize: theme.palette.geoViewFontSize.md,
     fontWeight: '600',
@@ -112,9 +107,6 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
   layerListItemButton: {
     padding: '0 0 0 6px',
     gap: 8,
-    overflowWrap: 'break-word',
-    wordBreak: 'normal',
-    hyphens: 'auto',
     '&:hover': {
       backgroundColor: 'transparent',
     },
