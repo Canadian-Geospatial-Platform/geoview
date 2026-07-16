@@ -33,6 +33,47 @@ export const visuallyHidden = {
   border: 0,
 } as const;
 
+/**
+ * Standard CSS properties for text truncation with ellipsis.
+ *
+ * Use this for non-Typography elements (Box, span, div, table cells) that need text truncation.
+ * For Typography components, use the `noWrap` prop instead.
+ *
+ * Note: This constant does not include `display` or width constraints. For ellipsis to work:
+ * - The element must have `display: block` or `display: inline-block` (or be a flex/grid item)
+ * - The element must have a constrained width (`maxWidth`, `width`, or flex constraints)
+ * - For inline elements like `<span>`, use `display: 'inline-block'` to preserve inline flow
+ *
+ * @example
+ * ```tsx
+ * // Block element with maxWidth
+ * const styles = {
+ *   truncatedText: {
+ *     display: 'block',
+ *     maxWidth: '200px',
+ *     ...ellipsisOverflow,
+ *   },
+ * };
+ *
+ * // Inline element (span) with inline-block
+ * <Box component="span" sx={{ display: 'inline-block', maxWidth: '300px', ...ellipsisOverflow }}>
+ *   {longText}
+ * </Box>
+ *
+ * // Flex item (width constraint from parent)
+ * <Box sx={{ display: 'flex' }}>
+ *   <Box sx={{ flex: 1, minWidth: 0, ...ellipsisOverflow }}>
+ *     {longText}
+ *   </Box>
+ * </Box>
+ * ```
+ */
+export const ellipsisOverflow = {
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+} as const;
+
 /** Opacity values for interactive states (hover, selected, disabled, focus, activated) */
 export const opacity = {
   hoverOpacity: 0.08,

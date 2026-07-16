@@ -86,6 +86,14 @@ function ButtonUI(props: ButtonProps, ref: Ref<HTMLButtonElement>): JSX.Element 
     'aria-hidden': ariaHidden,
     'aria-disabled': ariaDisabled,
     role,
+    // Destructure custom TypeButtonProps fields to exclude from rest
+    type: _buttonType,
+    icon: _icon,
+    iconClassName: _iconClassName,
+    textClassName: _textClassName,
+    state: _state,
+    visible: _visible,
+    ...rest
   } = props;
 
   // Hooks
@@ -139,6 +147,7 @@ function ButtonUI(props: ButtonProps, ref: Ref<HTMLButtonElement>): JSX.Element 
         role={role}
         {...(onKeyDown && { onKeyDown })}
         ref={ref}
+        {...rest}
       >
         {!(makeResponsive && mobileView) ? children : null}
       </MaterialButton>
