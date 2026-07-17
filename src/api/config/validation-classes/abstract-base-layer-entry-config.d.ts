@@ -1,8 +1,10 @@
+import type { Projection as OLProjection, ProjectionLike } from 'ol/proj';
 import type { TypeLayerStyleConfig, TypeStyleGeometry, TypeLayerStyleSettings, TypeOutfields, TypeLayerTextConfig, DisplayDateMode } from '@/api/types/map-schema-types';
-import type { ConfigClassOrType, TypeBaseSourceInitialConfig, TypeFeatureInfoLayerConfig, TypeGeoviewLayerType, TypeLayerEntryType, TypeValidSourceProjectionCodes } from '@/api/types/layer-schema-types';
+import type { ConfigClassOrType, TypeBaseSourceInitialConfig, TypeFeatureInfoLayerConfig, TypeGeoviewLayerType, TypeLayerEntryType } from '@/api/types/layer-schema-types';
 import type { ConfigBaseClassProps } from '@/api/config/validation-classes/config-base-class';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import type { TemporalMode, TimeDimension, TimeIANA, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
+import { type TypeProjection } from '@/geo/utils/projection';
 export interface AbstractBaseLayerEntryConfigProps extends ConfigBaseClassProps {
     /** Source settings to apply to the GeoView layer source at creation time. */
     source?: TypeBaseSourceInitialConfig;
@@ -77,6 +79,18 @@ export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseCla
      * @param layerMetadata - The layer metadata to set
      */
     setLayerMetadata(layerMetadata: unknown): void;
+    /**
+     * Gets the projection as it was initialized from the metadata.
+     *
+     * @returns The metadata projection, or undefined if not initialized
+     */
+    getMetadataProjection(): OLProjection | undefined;
+    /**
+     * Initializes the metadata projection by registering it if missing and storing the result.
+     *
+     * @param projection - Optional projection to register and store as the metadata projection
+     */
+    initProjectionFromMetadata(projection: TypeProjection | ProjectionLike | number | undefined): Promise<void>;
     /**
      * Gets the layer style that is associated to the layer.
      *
@@ -215,6 +229,15 @@ export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseCla
      */
     getSource(): TypeBaseSourceInitialConfig;
     /**
+     * Gets the source projection as explicitly defined in the layer entry's `source.projection` config property.
+     *
+     * This is NOT the actual projection that OpenLayers determines from the source data — it is strictly the
+     * user-configured `projection` number from the config, prefixed with `"EPSG:"`.
+     *
+     * @returns The source projection with the EPSG prefix, or undefined if not set in config
+     */
+    getSourceProjectionWithEPSG(): string | undefined;
+    /**
      * Initializes the source configuration by filling the blanks in our config with the information from the metadata.
      *
      * @param sourceMetadata - Optional source metadata to use to help fill the blanks in our source config
@@ -254,24 +277,6 @@ export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseCla
      * @returns The feature info
      */
     getFeatureInfo(): TypeFeatureInfoLayerConfig;
-    /**
-     * Gets the source projection.
-     *
-     * @returns The source projection, or undefined if not set
-     */
-    getProjection(): TypeValidSourceProjectionCodes | undefined;
-    /**
-     * Gets the source projection with the EPSG prefix.
-     *
-     * @returns The source projection with the EPSG prefix, or undefined if not set
-     */
-    getProjectionWithEPSG(): string | undefined;
-    /**
-     * Sets the source projection in the source object only if it's not already set and if the parameter is defined.
-     *
-     * @param projection - Optional source projection
-     */
-    initProjectionFromMetadata(projection: TypeValidSourceProjectionCodes | undefined): void;
     /**
      * Refreshes the layer metadata information.
      *

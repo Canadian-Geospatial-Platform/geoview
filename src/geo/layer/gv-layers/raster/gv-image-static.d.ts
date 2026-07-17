@@ -28,7 +28,7 @@ export declare class GVImageStatic extends AbstractGVRaster {
      *
      * @returns The Static source instance associated with this layer.
      */
-    getOLSource(): Static;
+    protected getOLSource(): Static;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
      *

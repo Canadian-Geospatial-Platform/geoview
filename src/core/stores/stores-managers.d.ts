@@ -14,6 +14,7 @@ export declare function hasTimeSliderPlugin(store: GeoviewStoreType): boolean;
 export declare function hasGeoChartPlugin(store: GeoviewStoreType): boolean;
 export declare function hasSwiperPlugin(store: GeoviewStoreType): boolean;
 export declare function hasDrawerPlugin(store: GeoviewStoreType): boolean;
+export declare function hasFilterPanelPlugin(store: GeoviewStoreType): boolean;
 export declare const addGeoViewStore: (config: TypeMapFeaturesConfig) => void;
 export declare const removeGeoviewStore: (id: string) => void;
 /**

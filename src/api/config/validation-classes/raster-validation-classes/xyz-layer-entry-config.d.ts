@@ -1,7 +1,8 @@
 import type { ConfigClassOrType, TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
-import type { TypeSourceImageXYZTilesInitialConfig, TypeXYZTilesConfig } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
 import type { AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { TileLayerEntryConfig } from '@/api/config/validation-classes/tile-layer-entry-config';
+import type { TypeSourceImageXYZTilesInitialConfig, TypeXYZTilesConfig } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
+import type { TypeProjection } from '@/geo/utils/projection';
 export interface XYZTilesLayerEntryConfigProps extends AbstractBaseLayerEntryConfigProps {
     /** Source settings to apply to the GeoView layer source at creation time. */
     source?: TypeSourceImageXYZTilesInitialConfig;
@@ -34,6 +35,12 @@ export declare class XYZTilesLayerEntryConfig extends TileLayerEntryConfig {
      */
     getSource(): TypeSourceImageXYZTilesInitialConfig;
     /**
+     * Overrides the parent class's getter to provide a more specific return type (covariant return).
+     *
+     * @returns The strongly-typed service metadata specific to this layer entry config.
+     */
+    getServiceMetadata(): TypeMetadataXYZTiles | undefined;
+    /**
      * Type guard that checks whether the given configuration (class instance or plain object) represents a XYZTiles layer type.
      *
      * Supports `ConfigClassOrType` (class instance or plain object) and plain layer config objects (`TypeGeoviewLayerConfig`).
@@ -46,6 +53,8 @@ export declare class XYZTilesLayerEntryConfig extends TileLayerEntryConfig {
 export interface TypeMetadataXYZTiles {
     layers: TypeMetadataXYZTilesLayer[];
     listOfLayerEntryConfig: XYZTilesLayerEntryConfigProps[];
+    spatialReference?: TypeProjection;
+    crs?: string;
 }
 export type TypeMetadataXYZTilesLayer = XYZTilesLayerEntryConfigProps & {
     id: string;

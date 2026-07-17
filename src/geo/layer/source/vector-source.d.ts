@@ -1,11 +1,25 @@
 import type Feature from 'ol/Feature';
 import { Vector as VectorSource } from 'ol/source';
+import type { ProjectionLike } from 'ol/proj';
 /**
  * The GeoView equivalent of an OpenLayers Vector Source class, adding notably a loaderError management.
  */
 export declare class GVVectorSource extends VectorSource<Feature> {
+    #private;
     /** The load error which occurred */
     protected loaderError?: Error;
+    /**
+     * Gets the data projection of the source features.
+     *
+     * @returns The projection the source data is in, or undefined if not set
+     */
+    getDataProjection(): ProjectionLike | undefined;
+    /**
+     * Sets the data projection of the source features.
+     *
+     * @param projection - The projection the source data is in
+     */
+    setDataProjection(projection: ProjectionLike): void;
     /**
      * Gets the error that happened during the vector loader callback.
      *

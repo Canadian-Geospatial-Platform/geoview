@@ -303,6 +303,13 @@ export declare class MapViewer {
      */
     getMapScaleFromZoom(zoom: number): number | undefined;
     /**
+     * Converts a map scale denominator to the corresponding zoom level.
+     *
+     * @param scale - The scale denominator (e.g. 50000 for 1:50,000)
+     * @returns The zoom level for the given scale, or undefined if conversion is unavailable
+     */
+    getZoomFromScale(scale: number): number | undefined;
+    /**
      * Converts a map scale denominator (1:X) into the corresponding OpenLayers resolution.
      *
      * Resolution is computed using: resolution = scale / (metersPerUnit * inchesPerMeter * dpi)
@@ -374,7 +381,7 @@ export declare class MapViewer {
      * Shows a marker on the map.
      *
      * @param marker - The marker to add
-     * @returns The projected coordinates of the marker
+     * @returns The projected coordinates of the marker, in the same projection of the map
      */
     clickMarkerIconShow(marker: TypeClickMarker): number[];
     /**
@@ -388,7 +395,7 @@ export declare class MapViewer {
     /**
      * Zooms to the specified extent.
      *
-     * @param extent - The extent to zoom to
+     * @param extent - The extent to zoom to (in map projection)
      * @param useAnimation - Indicates if a zoom animation should be used, default: true
      * @param options - The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 13, duration: 500 })
      * @returns A promise that resolves when the zoom animation is complete
@@ -940,7 +947,8 @@ export type MapMoveEndDelegate = EventDelegateBase<MapViewer, MapMoveEndEvent, v
 /**
  * Event for the map pointer move delegate.
  */
-export type MapPointerMoveEvent = TypeMapMouseInfo;
+export interface MapPointerMoveEvent extends MapBaseEvent, TypeMapMouseInfo {
+}
 /**
  * Delegate for the map pointer move event handler function signature.
  */
@@ -956,7 +964,8 @@ export type MapMouseLeaveDelegate = EventDelegateBase<MapViewer, MapBaseEvent, v
 /**
  * Event for the map single click delegate.
  */
-export type MapSingleClickEvent = TypeMapMouseInfo;
+export interface MapSingleClickEvent extends MapBaseEvent, TypeMapMouseInfo {
+}
 /**
  * Delegate for the map single click event handler function signature.
  */

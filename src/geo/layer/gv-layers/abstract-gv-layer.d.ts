@@ -42,6 +42,12 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      */
     protected constructor(olSource: Source, layerConfig: AbstractBaseLayerEntryConfig);
     /**
+     * Gets the data projection of the layer source, either coming from the data itself or as indicated from the metadata.
+     *
+     * @returns The OpenLayers projection of the layer's source data, or undefined if not available
+     */
+    getDataProjection(): OLProjection | undefined;
+    /**
      * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
      *
      * @returns The OpenLayers generic type.
@@ -247,7 +253,7 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      *
      * @returns The OpenLayers Layer Source
      */
-    getOLSource(): Source;
+    protected getOLSource(): Source;
     /**
      * Gets the hit tolerance associated with the layer.
      *
@@ -382,6 +388,15 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      */
     setLayerFiltersTime(timeFilterQueryString: string | undefined): void;
     /**
+     * Sets the panel filter on the layer.
+     *
+     * This function only updates the panel filter query string inside the layer filters object.
+     * The active filter applied on the layer will update accordingly, however, the UI component elements themselves won't update.
+     *
+     * @param panelFilterQueryString - Optional panel filter expression to apply
+     */
+    setLayerFiltersPanel(panelFilterQueryString: string | undefined): void;
+    /**
      * Applies a time filter on a date range.
      *
      * This function only updates the time filter query string inside the layer filters object.
@@ -471,12 +486,13 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      * @param features - Array of features to format
      * @param layerConfig - Configuration of the associated layer
      * @param language - The display language, used to guess the best name field if `nameField` is not provided
+     * @param includeNoStyleFeatures - Whether to include features that have no matching style (no icon generated)
      * @param serviceDateFormat - Optional date format used by the service
      * @param serviceDateIANA - Optional IANA time zone identifier used by the service
      * @param serviceDateTemporalMode - Optional temporal mode for date handling
      * @returns An array of TypeFeatureInfoEntry objects
      */
-    protected formatFeatureInfoResult(features: Feature[], layerConfig: OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig | VectorLayerEntryConfig, language: TypeDisplayLanguage, serviceDateFormat: string | undefined, serviceDateIANA: string | undefined, serviceDateTemporalMode: TemporalMode | undefined): TypeFeatureInfoEntry[];
+    protected formatFeatureInfoResult(features: Feature[], layerConfig: OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig | VectorLayerEntryConfig, language: TypeDisplayLanguage, includeNoStyleFeatures: boolean, serviceDateFormat: string | undefined, serviceDateIANA: string | undefined, serviceDateTemporalMode: TemporalMode | undefined): TypeFeatureInfoEntry[];
     /**
      * Emits a layer-specific message event with localization support.
      *
@@ -728,13 +744,14 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      * @param supportZoomTo - Whether zoom-to functionality is supported for these features
      * @param domainsLookup - Optional array of field metadata for domain lookups
      * @param layerStyle - Optional mapping of geometry type to style settings for icons
+     * @param includeNoStyleFeatures - Whether to include features that have no matching style (no icon generated)
      * @param inputFormat - Optional format(s) to prioritize for string inputs
      * @param inputTimezone - Optional IANA timezone the dates are in
      * @param inputTemporalMode - Optional temporal mode for date handling
      * @param callbackGetFieldValue - Callback that returns the value of a field for a feature, in the correct type
      * @returns Array of feature info entries representing each feature with enriched metadata
      */
-    static helperFormatFeatureInfoResult(features: Feature[], layerPath: string, schemaTag: TypeGeoviewLayerType, nameField: string | undefined, outFields: TypeOutfields[] | undefined, supportZoomTo: boolean, domainsLookup: TypeLayerMetadataFields[] | undefined, layerStyle: Partial<Record<TypeStyleGeometry, TypeLayerStyleSettings>> | undefined, inputFormat: string | string[] | undefined, inputTimezone: TimeIANA | undefined, inputTemporalMode: TemporalMode | undefined, callbackGetFieldValue: GetFieldValueDelegate): TypeFeatureInfoEntry[];
+    static helperFormatFeatureInfoResult(features: Feature[], layerPath: string, schemaTag: TypeGeoviewLayerType, nameField: string | undefined, outFields: TypeOutfields[] | undefined, supportZoomTo: boolean, domainsLookup: TypeLayerMetadataFields[] | undefined, layerStyle: Partial<Record<TypeStyleGeometry, TypeLayerStyleSettings>> | undefined, includeNoStyleFeatures: boolean, inputFormat: string | string[] | undefined, inputTimezone: TimeIANA | undefined, inputTemporalMode: TemporalMode | undefined, callbackGetFieldValue: GetFieldValueDelegate): TypeFeatureInfoEntry[];
     /**
      * Retrieves and formats the value of a field from an OpenLayers feature.
      * - For `date` fields, the raw value (epoch ms or date string) is normalized

@@ -19,7 +19,7 @@ export declare abstract class AbstractGVVectorTile extends AbstractGVLayer {
      *
      * @returns The VectorTile source instance associated with this layer.
      */
-    getOLSource(): VectorTile;
+    protected getOLSource(): VectorTile;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
      *

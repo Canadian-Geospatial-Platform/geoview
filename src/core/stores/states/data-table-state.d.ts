@@ -110,6 +110,10 @@ export declare const getStoreDataTableQueryStatus: (mapId: string, layerPath: st
 export declare const useStoreDataTableQueryStatus: (layerPath: string) => TypeQueryStatus | undefined;
 /** Hook that returns the per-layer query status record. */
 export declare const useStoreDataTableQueryStatusSet: () => Record<string, TypeQueryStatus>;
+/** Returns the per-layer data table settings record. */
+export declare const getStoreDataTableLayerSettings: (mapId: string) => Record<string, IDataTableSettings>;
+/** Hook that returns the per-layer data table settings record. */
+export declare const useStoreDataTableLayerSettings: () => Record<string, IDataTableSettings>;
 /**
  * Gets the feature info entries for a specific layer from the data table store.
  *
@@ -126,8 +130,6 @@ export declare const getStoreDataTableFeaturesByPath: (mapId: string, layerPath:
  * @returns True if map extent filtering is enabled, or undefined if the layer has no settings
  */
 export declare const getStoreDataTableMapFilteredRecord: (mapId: string, layerPath: string) => boolean | undefined;
-/** Hook that returns the per-layer data table settings record. */
-export declare const useStoreDataTableLayerSettings: () => Record<string, IDataTableSettings>;
 /** Hook that returns the currently selected feature in the data table. */
 export declare const useStoreDataTableSelectedFeature: () => TypeFeatureInfoEntry | null;
 /**

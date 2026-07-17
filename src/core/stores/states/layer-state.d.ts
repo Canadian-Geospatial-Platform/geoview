@@ -201,10 +201,36 @@ export declare const useStoreLayerId: (layerPath: string) => string | undefined;
 export declare const getStoreLayerBounds: (mapId: string, layerPath: string) => Extent | undefined;
 /** Hook that returns the bounds extent for a specific layer. */
 export declare const useStoreLayerBounds: (layerPath: string) => Extent | undefined;
+/**
+ * Gets the minimum scale denominator for a specific layer.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to look up
+ * @returns The minimum scale denominator, or undefined
+ */
+export declare const getStoreLayerMinScale: (mapId: string, layerPath: string) => number | undefined;
 /** Hook that returns the minimum scale denominator for a specific layer. */
 export declare const useStoreLayerMinScale: (layerPath: string) => number | undefined;
+/**
+ * Gets the maximum scale denominator for a specific layer.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to look up
+ * @returns The maximum scale denominator, or undefined
+ */
+export declare const getStoreLayerMaxScale: (mapId: string, layerPath: string) => number | undefined;
 /** Hook that returns the maximum scale denominator for a specific layer. */
 export declare const useStoreLayerMaxScale: (layerPath: string) => number | undefined;
+/**
+ * Gets the data projection code for a specific layer.
+ *
+ * @param mapId - The map identifier
+ * @param layerPath - The layer path to look up
+ * @returns The data projection code, or undefined
+ */
+export declare const getStoreLayerDataProjectionCode: (mapId: string, layerPath: string) => string | undefined;
+/** Hook that returns the data projection code for a specific layer. */
+export declare const useStoreLayerDataProjectionCode: (layerPath: string) => string | undefined;
 /**
  * Gets the layer status for a specific layer.
  *

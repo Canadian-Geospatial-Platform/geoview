@@ -17,6 +17,7 @@ type SliderProps = {
     onChangeCommitted?: (value: number | number[]) => void;
     onValueLabelFormat?: (value: number, index: number) => string;
     onValueDisplayAriaLabel?: (value: number, index: number) => string;
+    onKeyDown?: (event: React.KeyboardEvent) => void;
     disabled?: boolean;
     marks?: Mark[];
     orientation?: 'vertical' | 'horizontal';
@@ -25,7 +26,7 @@ type SliderProps = {
     track?: 'inverted' | 'normal' | false;
     ariaLabelledby?: string;
     valueLabelFormat?: string | ((value: number, index: number) => ReactNode);
-    valueLabelDisplay?: 'auto' | 'on';
+    valueLabelDisplay?: 'auto' | 'on' | 'off';
     slotProps?: MuiSliderProps['slotProps'];
 };
 /**

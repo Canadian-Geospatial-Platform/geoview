@@ -58,7 +58,7 @@ export declare class GVWMS extends AbstractGVRaster {
      *
      * @returns The ImageWMS source instance associated with this layer
      */
-    getOLSource(): ImageWMS;
+    protected getOLSource(): ImageWMS;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
      *
@@ -212,6 +212,18 @@ export declare class GVWMS extends AbstractGVRaster {
      */
     setWmsStyle(wmsStyleId: string): void;
     /**
+     * Applies a view filter to a WMS or an Esri Image layer's source by updating the source parameters.
+     *
+     * This function is responsible for generating the appropriate filter expression based on the layer configuration,
+     * optional style, and time-based fragments. It ensures the filter is only applied if it has changed or needs to be reset.
+     *
+     * @param layerConfig - The configuration object for the WMS or Esri Image layer
+     * @param source - The OpenLayers `ImageWMS` or `ImageArcGISRest` source instance to which the filter will be applied
+     * @param filter - The raw filter string input (defaults to an empty string if not provided)
+     * @throws {LayerInvalidLayerFilterError} When the filter expression fails to parse or cannot be applied
+     */
+    static applyViewFilterOnSource(layerConfig: OgcWmsLayerEntryConfig | EsriImageLayerEntryConfig, source: ImageWMS | ImageArcGISRest, filter: LayerFilters | undefined): void;
+    /**
      * Fetches feature data from a WFS GetFeature request URL (expected to return GeoJSON),
      * parses the response into OpenLayers features, and converts them into GeoView
      * Feature Info entries with appropriate attribute formatting.
@@ -239,18 +251,6 @@ export declare class GVWMS extends AbstractGVRaster {
      * @throws {NetworkError} When a network issue happened
      */
     static fetchAndParseFeaturesFromWFSUrl(urlWithOutputJson: string, wmsLayerConfig: OgcWmsLayerEntryConfig, wfsLayerConfig: OgcWfsLayerEntryConfig, language: TypeDisplayLanguage, abortController?: AbortController | undefined): Promise<TypeFeatureInfoResult>;
-    /**
-     * Applies a view filter to a WMS or an Esri Image layer's source by updating the source parameters.
-     *
-     * This function is responsible for generating the appropriate filter expression based on the layer configuration,
-     * optional style, and time-based fragments. It ensures the filter is only applied if it has changed or needs to be reset.
-     *
-     * @param layerConfig - The configuration object for the WMS or Esri Image layer
-     * @param source - The OpenLayers `ImageWMS` or `ImageArcGISRest` source instance to which the filter will be applied
-     * @param filter - The raw filter string input (defaults to an empty string if not provided)
-     * @throws {LayerInvalidLayerFilterError} When the filter expression fails to parse or cannot be applied
-     */
-    static applyViewFilterOnSource(layerConfig: OgcWmsLayerEntryConfig | EsriImageLayerEntryConfig, source: ImageWMS | ImageArcGISRest, filter: LayerFilters | undefined): void;
     /**
      * Registers a WMS style changed event handler.
      *

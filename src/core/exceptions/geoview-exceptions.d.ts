@@ -127,9 +127,9 @@ export declare class InvalidProjectionError extends GeoViewError {
 /**
  * Error thrown when an invalid geometry group id is encountered.
  */
-export declare class InvaliGeometryGroupIdError extends GeoViewError {
+export declare class InvalidGeometryGroupIdError extends GeoViewError {
     /**
-     * Creates a new InvaliGeometryGroupIdError.
+     * Creates a new InvalidGeometryGroupIdError.
      *
      * @param geometryGroupId - The invalid geometry group id that caused the error
      */
@@ -393,5 +393,28 @@ export declare class LayerNoLastQueryToPerformError extends GeoViewError {
      * Creates an instance of LayerNoLastQueryToPerformError.
      */
     constructor();
+}
+/**
+ * Error thrown when a query to a layer from the filter panel fails.
+ */
+export declare class LayerFilterPanelQueryError extends GeoViewError {
+    /**
+     * Creates an instance of LayerFilterPanelQueryError.
+     *
+     * @param layerName - The layer name of the layer that caused the query error
+     * @param message - The error message
+     */
+    constructor(layerName: string);
+}
+/**
+ * Error thrown when clearing a filter panel filter for a layer fails.
+ */
+export declare class LayerFilterPanelClearError extends GeoViewError {
+    /**
+     * Creates an instance of LayerFilterPanelClearError.
+     *
+     * @param layerName - The layer name of the layer that caused the clear error
+     */
+    constructor(layerName: string);
 }
 //# sourceMappingURL=geoview-exceptions.d.ts.map

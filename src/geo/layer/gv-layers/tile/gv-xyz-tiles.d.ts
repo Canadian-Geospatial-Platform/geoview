@@ -26,7 +26,7 @@ export declare class GVXYZTiles extends AbstractGVTile {
      *
      * @returns The XYZ source instance associated with this layer.
      */
-    getOLSource(): XYZ;
+    protected getOLSource(): XYZ;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
      *

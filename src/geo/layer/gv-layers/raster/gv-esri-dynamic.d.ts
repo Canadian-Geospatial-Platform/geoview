@@ -35,7 +35,7 @@ export declare class GVEsriDynamic extends AbstractGVRaster {
      *
      * @returns The ImageArcGISRest source instance associated with this layer.
      */
-    getOLSource(): ImageArcGISRest;
+    protected getOLSource(): ImageArcGISRest;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
      *

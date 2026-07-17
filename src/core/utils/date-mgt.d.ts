@@ -1,4 +1,5 @@
 import type { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 import 'dayjs/locale/en';
 import 'dayjs/locale/fr';
 import type { TypeDisplayLanguage, DisplayDateMode } from '@/api/types/map-schema-types';
@@ -24,6 +25,8 @@ export type TimeIANA = string | 'local';
  *   Interprets input as an absolute moment in time, timezones will affect dates using this mode.
  */
 export type TemporalMode = 'calendar' | 'instant';
+/** Type alias for Day.js manipulate type. */
+export type ManipulateType = dayjs.ManipulateType;
 /** Type used to define the range values for an OGC time dimension. */
 type RangeItems = {
     type: string;

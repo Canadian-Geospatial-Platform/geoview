@@ -1,4 +1,4 @@
-import type { ConfigClassOrType, TypeGeoviewLayerConfig, TypeMetadataEsriDynamic, TypeMetadataEsriDynamicLayer, TypeSourceEsriDynamicInitialConfig } from '@/api/types/layer-schema-types';
+import type { ConfigClassOrType, TypeGeoviewLayerConfig, TypeMetadataEsriDynamic, TypeMetadataEsriDynamicLayer, TypeMetadataEsriLayerSummary, TypeSourceEsriDynamicInitialConfig } from '@/api/types/layer-schema-types';
 import type { AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import type { TypeEsriDynamicLayerConfig } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
@@ -50,6 +50,13 @@ export declare class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryC
      * @throws {NotSupportedError} When the geometry type is not supported.
      */
     protected onGetGeometryType(): TypeStyleGeometry | undefined;
+    /**
+     * Finds the parent layer summary whose subLayerIds contains this layer's ID.
+     *
+     * @param serviceMetadata - The ESRI Dynamic service metadata to search
+     * @returns The parent layer summary, or undefined if not found
+     */
+    getParentMetadata(serviceMetadata: TypeMetadataEsriDynamic): TypeMetadataEsriLayerSummary | undefined;
     /**
      * Type guard that checks whether the given configuration (class instance or plain object) represents an Esri Dynamic layer type.
      *
