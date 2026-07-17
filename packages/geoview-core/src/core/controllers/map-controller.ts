@@ -1495,6 +1495,9 @@ export class MapController extends AbstractMapViewerController {
   #handleMapMoveEnd(sender: MapViewer, event: MapBaseEvent): void {
     // Update the map controls based on the original map state
     this.#updateMapControls();
+
+    // On map center coord change, hide click marker
+    this.clickMarkerIconHide();
   }
 
   /**

@@ -2,8 +2,14 @@ import type BaseLayer from 'ol/layer/Base';
 import type { GeoJSONObject } from 'ol/format/GeoJSON';
 import type { FitOptions } from 'ol/View';
 import type { Projection as OLProjection } from 'ol/proj';
+import { getCenter } from 'ol/extent';
 
-import { VALID_PROJECTION_CODES, type Extent, type TypeFeatureInfoEntryPartial } from '@/api/types/map-schema-types';
+import {
+  VALID_PROJECTION_CODES,
+  type Extent,
+  type TypeFeatureInfoEntry,
+  type TypeFeatureInfoEntryPartial,
+} from '@/api/types/map-schema-types';
 import type {
   TypeGeoviewLayerConfig,
   TypeLayerEntryConfig,
@@ -773,7 +779,7 @@ export class LayerController extends AbstractMapViewerController {
    * the layer's visibility boundaries.
    *
    * @param layerPath - The layer path used to look up scale limits
-   * @param extent - The extent to zoom to
+   * @param extent - The extent to zoom to (in current map projection)
    * @param useAnimation - Optional flag indicating if a zoom animation should be used
    * @param fitOptions - Optional OL fit options to merge scale constraints into
    * @returns A promise that resolves when the zoom animation is complete
@@ -806,6 +812,47 @@ export class LayerController extends AbstractMapViewerController {
 
     // Zoom to extent and wait for it to finish
     return this.getControllersRegistry().mapController.zoomToExtent(extent, useAnimation, fitOptions);
+  }
+
+  /**
+   * Zooms to a feature's extent clamped to the layer's visible scale range, then highlights the feature.
+   *
+   * After the zoom completes, adds a click marker at the feature center, highlights the bounding box
+   * with a fade-out effect, and sets the feature as the active highlight.
+   *
+   * @param layerPath - The layer path used to look up scale limits
+   * @param feature - The feature info entry to zoom to and highlight
+   * @param useAnimation - Optional flag indicating if a zoom animation should be used
+   * @param fitOptions - Optional OL fit options to merge scale constraints into
+   * @returns A promise that resolves when the zoom and highlight are complete
+   */
+  async zoomToExtentRestrictedAndHighlight(
+    layerPath: string,
+    feature: TypeFeatureInfoEntry,
+    useAnimation = true,
+    fitOptions: FitOptions = DEFAULT_OL_FITOPTIONS
+  ): Promise<void> {
+    // If no extent on the feature, skip
+    if (!feature.extent) return Promise.resolve();
+
+    // Get extent and center
+    const { extent } = feature;
+    const center = getCenter(extent);
+
+    // Transform the coordinate and use a state getter here, because we don't need to hook on value changes in this callback function.
+    const lonlatCenter = Projection.transformToLonLat(
+      center,
+      Projection.getProjectionFromStringOrNumber(this.getMapViewer().getProjection())
+    );
+
+    // Zoom to extent and wait for it to finish
+    await this.zoomToExtentRestricted(layerPath, extent, useAnimation, fitOptions);
+
+    // Add a click marker, a bbox extent who will disapear and remove/add higlight the zoomed feature
+    this.getControllersRegistry().mapController.clickMarkerIconShow({ lonlat: lonlatCenter });
+    this.getControllersRegistry().mapController.highlightBBox(extent, false);
+    this.getControllersRegistry().mapController.removeHighlightedFeature('all');
+    this.getControllersRegistry().mapController.addHighlightedFeature(feature);
   }
 
   /**

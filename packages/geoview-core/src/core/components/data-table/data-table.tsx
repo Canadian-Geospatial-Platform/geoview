@@ -2,8 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState, memo, isValidElement
 
 import { useTranslation } from 'react-i18next';
 
-import { getCenter } from 'ol/extent';
-
 import type { Dayjs } from 'dayjs';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -42,7 +40,6 @@ import {
 } from '@/ui';
 
 import TopToolbar from './top-toolbar';
-import { getStoreMapCurrentProjectionEPSG } from '@/core/stores/states/map-state';
 import {
   useStoreLayerDateTemporalMode,
   useStoreLayerDisplayDateFormat,
@@ -68,8 +65,7 @@ import type { DataTableProps, DataTableRow } from './data-table-types';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
-import { Projection } from '@/geo/utils/projection';
-import { useDataTableController, useLayerController, useMapController, useUIController } from '@/core/controllers/use-controllers';
+import { useDataTableController, useLayerController, useUIController } from '@/core/controllers/use-controllers';
 
 /** The possible filters for numeric columns */
 const NUMERIC_FIELD_FILTERS = [
@@ -276,7 +272,6 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
   const layerName = useStoreLayerName(layerPath);
   const dataTableController = useDataTableController();
   const layerController = useLayerController();
-  const mapController = useMapController();
   const uiController = useUIController();
   const { mapFilteredRecord } = datatableSettings[layerPath];
 
@@ -760,37 +755,17 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
 
       // If the extent was found
       if (extent) {
-        // Project
-        const center = getCenter(extent);
-
-        // Transform the coordinate and use a state getter here, because we don't need to hook on value changes in this callback function.
-        const newCenter = Projection.transformPoints([center], getStoreMapCurrentProjectionEPSG(mapId), `EPSG:4326`)[0];
-
         // Zoom to extent and wait for it to finish
-        // TODO: We have the same patch in details, see if we should create a reusable custom patch / or change design
-        layerController
-          .zoomToExtentRestricted(layerPath, extent, true)
-          .then(async () => {
-            // Typically, the click marker is removed after a zoom, so wait a bit here and re-add it...
-            // TODO: Refactor - Zoom ClickMarker - Improve the logic in general of when/if a click marker should be removed after a zoom
-            await delay(150);
-
-            // Add (back?) a click marker, a bbox extent who will disapear and remove/add higlight the zoomed feature
-            mapController.clickMarkerIconShow({ lonlat: newCenter });
-            mapController.highlightBBox(extent, false);
-            mapController.removeHighlightedFeature('all');
-            mapController.addHighlightedFeature(feature);
-          })
-          .catch((error: unknown) => {
-            // Log
-            logger.logPromiseFailed('zoomToExtent in zoomToFeature in FeatureInfoNew', error);
-          });
+        layerController.zoomToExtentRestrictedAndHighlight(layerPath, feature, true).catch((error: unknown) => {
+          // Log
+          logger.logPromiseFailed('zoomToExtentRestrictedAndHighlight in zoomToFeature in FeatureInfoNew', error);
+        });
       } else {
         // Log error
         logger.logError('Cannot zoom to feature, no extent found.');
       }
     },
-    [mapId, layerPath, layerController, mapController]
+    [layerPath, layerController]
   );
 
   /**

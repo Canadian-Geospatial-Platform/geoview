@@ -1213,8 +1213,18 @@ export class MapViewer {
       this.getView().fit(validatedExtent, {
         ...mergedOptions,
         callback: (complete) => {
-          userCallback?.(complete);
-          resolve();
+          // Add a hook (once) on the map move end so that we know any other hooks on the mapMoveEnd got executed prior to this hook here.
+          // GV This is useful, because in the map controller we have a hook on map move end which hides the click marker icon
+          // GV.cont Resolving later assures us that the click marker icon has been removed when the caller has awaited
+          // GV.cont Using this.waitForRender() or delay(10) are also options that would work well here.
+          this.onceMapMoveEnd()
+            .then(() => {
+              userCallback?.(complete);
+              resolve();
+            })
+            .catch((error: unknown) => {
+              logger.logPromiseFailed('onceMapMoveEnd in zoomToExtent fit callback', error);
+            });
         },
       });
     });

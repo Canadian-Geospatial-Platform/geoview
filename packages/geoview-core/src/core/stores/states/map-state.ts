@@ -467,9 +467,6 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
           },
         });
 
-        // On map center coord change, hide click marker
-        get().mapState.actions.setClickMarker(undefined);
-
         // If crosshair is active and user uses keyboard, update pointer position
         // This will enable mouse position and hover tooltip
         if (get().appState.isCrosshairsActive) {
