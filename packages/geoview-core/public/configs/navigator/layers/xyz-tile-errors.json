@@ -11,18 +11,6 @@
     },
     "listOfGeoviewLayerConfig": [
       {
-        "geoviewLayerId": "xyzTilesLYR1",
-        "geoviewLayerName": "Error metadata",
-        "metadataAccessPath": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServerERROR/",
-        "geoviewLayerType": "xyzTiles",
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "0",
-            "layerName": "World Topo Map"
-          }
-        ]
-      },
-      {
         "geoviewLayerId": "xyzTilesLYR2",
         "geoviewLayerName": "Error layerId",
         "metadataAccessPath": "https://maps.gnosis.earth/ogcapi/collections/blueMarble/map/tiles/WebMercatorQuad",
@@ -47,6 +35,18 @@
             "source": {
               "dataAccessPath": "https://demo.mapserver.org/cgi-bin/mapserv?map=/var/www/htdocs/msautotest/naturalearth_tiles.map&MODE=tile&TILE={x}+{y}+{z}&LAYERS=countries&TILEMODE=gmap"
             }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "xyzTilesLYR1",
+        "geoviewLayerName": "Error metadata",
+        "metadataAccessPath": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServerERROR/",
+        "geoviewLayerType": "xyzTiles",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "layerName": "World Topo Map"
           }
         ]
       }

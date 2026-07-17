@@ -115,6 +115,9 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   /** Indicates if the layer is currently hoverable. */
   #hoverable: boolean;
 
+  /** Indicates if a message about a tile error has been emitted. */
+  #emittedMessageAboutTileError = false;
+
   /** Callback delegates for the layer style changed event. */
   #onLayerStyleChangedHandlers: StyleChangedDelegate[] = [];
 
@@ -1322,10 +1325,10 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
     if (!wasLast) return;
 
-    // Decipher the error, allowing children classes to be more specific (ex: Vector specific errors)
+    // Decipher the error, allowing children classes to be more specific
     const gvError = this.onErrorDecipherError(event);
 
-    // Call overridable method (sets layer status to error)
+    // Call overridable method
     this.onFeaturesLoadError(gvError);
   }
 
@@ -1357,7 +1360,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     // Decipher the error, allowing children classes to be more specific (ex: WMS GetMap specific errors)
     const gvError = this.onImageLoadErrorDecipherError(event);
 
-    // Call overridable method (sets layer status to error)
+    // Call overridable method
     this.onImageLoadError(gvError);
   }
 
@@ -1387,10 +1390,10 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
     if (!wasLast) return;
 
-    // Decipher the error, allowing children classes to be more specific (ex: Vector specific errors)
+    // Decipher the error, allowing children classes to be more specific
     const gvError = this.onErrorDecipherError(event);
 
-    // Call overridable method (does not flip status to error)
+    // Call overridable method
     this.onImageTileLoadError(gvError);
   }
 
@@ -1587,14 +1590,23 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
       // If loaded once already
       if (this.loadedOnce) {
         // Tile errors are non-fatal => at this point it was the last tile in flight, we can process the layer as loaded
+        // GV For example, Circompolar view, we don't want a error to pop for the user all the time
         this.#processLoaded();
       } else {
         // Never got loaded, ever
+        // GV For example, a service that is reachable, but fails to return actual tiles on the map
+
         // Set the layer config status to error to keep mirroring the AbstractGeoViewLayer for now
         this.getLayerConfig().setLayerStatusError(true);
 
-        // Emits a user-facing error message
-        this.emitMessage(error.messageKey, error.messageParams, 'error');
+        // If we never warned the user about a tile issue for that layer, warn them once
+        if (!this.#emittedMessageAboutTileError) {
+          // Flag
+          this.#emittedMessageAboutTileError = true;
+
+          // Emits a user-facing error message
+          this.emitMessage(error.messageKey, error.messageParams, 'error');
+        }
       }
     }
 

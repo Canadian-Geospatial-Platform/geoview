@@ -228,6 +228,7 @@
     "errorImageLoadSizeLimitExceededWidth": "The image requested for layer '{{layerName}}' exceeds the maximum width allowed by the server ({{requestedWidth}}px > {{maxWidth}}px).",
     "errorImageLoadSizeLimitExceededHeight": "The image requested for layer '{{layerName}}' exceeds the maximum height allowed by the server ({{requestedHeight}}px > {{maxHeight}}px).",
     "errorImageLoadNoImageReturned": "No image was returned from the server for layer '{{layerName}}'.",
+    "errorTileLoad": "An error occurred with a tile for layer '{{layerName}}'.",
     "errorNoLastQueryToPerform": "No last query to perform.",
     "errorProj": "Projection '{{projectionCode}}' invalid.",
     "errorResponseNoFeaturesProperty": "The response from the service didn't provide a 'features' property.",
