@@ -609,26 +609,50 @@ export abstract class ConfigBaseClass {
 
   /**
    * Sets the layer status to loading.
+   *
+   * @param updateStatusParents - Indicate whether to update the status of parent layers as well.
    */
-  setLayerStatusLoading(): void {
+  setLayerStatusLoading(updateStatusParents: boolean): void {
     // Redirect
     this.setLayerStatus(LAYER_STATUS.LOADING);
+
+    // If setting parent to loaded as well
+    if (updateStatusParents) {
+      // Update the parent group if any
+      this.updateLayerStatusParent();
+    }
   }
 
   /**
    * Sets the layer status to loaded.
+   *
+   * @param updateStatusParents - Indicate whether to update the status of parent layers as well.
    */
-  setLayerStatusLoaded(): void {
+  setLayerStatusLoaded(updateStatusParents: boolean): void {
     // Redirect
     this.setLayerStatus(LAYER_STATUS.LOADED);
+
+    // If setting parent to loaded as well
+    if (updateStatusParents) {
+      // Update the parent group if any
+      this.updateLayerStatusParent();
+    }
   }
 
   /**
    * Sets the layer status to error.
+   *
+   * @param updateStatusParents - Indicate whether to update the status of parent layers as well.
    */
-  setLayerStatusError(): void {
+  setLayerStatusError(updateStatusParents: boolean): void {
     // Redirect
     this.setLayerStatus(LAYER_STATUS.ERROR);
+
+    // If setting parent to error as well
+    if (updateStatusParents) {
+      // Update the parent group if any
+      this.updateLayerStatusParent();
+    }
   }
 
   /**
@@ -855,9 +879,7 @@ export abstract class ConfigBaseClass {
     // If at least one layer is loading
     if (siblingsInLoading.length > 0) {
       // Set the parent layer status as loading
-      parentLayerConfig.setLayerStatusLoading();
-      // Continue with the parent
-      ConfigBaseClass.#updateLayerStatusParentRec(parentLayerConfig);
+      parentLayerConfig.setLayerStatusLoading(true);
       return;
     }
 
@@ -867,9 +889,7 @@ export abstract class ConfigBaseClass {
     // If all siblings are loaded
     if (siblings.length === siblingsInLoaded.length) {
       // Set the parent layer status as loaded
-      parentLayerConfig.setLayerStatusLoaded();
-      // Continue with the parent
-      ConfigBaseClass.#updateLayerStatusParentRec(parentLayerConfig);
+      parentLayerConfig.setLayerStatusLoaded(true);
       return;
     }
 
@@ -880,13 +900,11 @@ export abstract class ConfigBaseClass {
     if (siblings.length === siblingsInTerminalState.length) {
       // If at least one sibling is loaded, the parent is loaded (partial success — some children loaded, some errored)
       if (siblingsInLoaded.length > 0) {
-        parentLayerConfig.setLayerStatusLoaded();
+        parentLayerConfig.setLayerStatusLoaded(true);
       } else {
         // All siblings are in error
-        parentLayerConfig.setLayerStatusError();
+        parentLayerConfig.setLayerStatusError(true);
       }
-      // Continue with the parent
-      ConfigBaseClass.#updateLayerStatusParentRec(parentLayerConfig);
     }
   }
 

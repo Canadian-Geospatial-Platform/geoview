@@ -662,10 +662,7 @@ export abstract class AbstractGeoViewLayer {
     this.#layerLoadError.push(error);
 
     // Set the layer status to error
-    layerConfig?.setLayerStatusError();
-
-    // Propagate error to parent group layers, if any
-    layerConfig?.updateLayerStatusParent();
+    layerConfig?.setLayerStatusError(true);
   }
 
   /**
@@ -1405,13 +1402,13 @@ export abstract class AbstractGeoViewLayer {
         // Recursively set the status to the children
         AbstractGeoViewLayer.#setStatusErrorAll(error, layerConfig.listOfLayerEntryConfig);
         // Set the layer status to error
-        layerConfig?.setLayerStatusError();
+        layerConfig?.setLayerStatusError(false);
       } else {
         // If already set to error, don't touch it
         if (layerConfig.layerStatus === 'error') return;
 
         // Set the layer status to error
-        layerConfig?.setLayerStatusError();
+        layerConfig?.setLayerStatusError(false);
       }
     });
   }

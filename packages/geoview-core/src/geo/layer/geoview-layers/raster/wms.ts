@@ -433,7 +433,7 @@ export class WMS extends AbstractGeoViewRaster {
     // TODO: Think of a better way to handle this? Improve the 'setLayerStatusError' internally to check for siblings and set the parent - instead of here?
     if (results.every((r) => r.status === 'rejected')) {
       // Set the parent in error
-      layers[0].getParentLayerConfig()?.setLayerStatusError();
+      layers[0].getParentLayerConfig()?.setLayerStatusError(false);
     }
 
     // Merge metadata results
