@@ -421,7 +421,7 @@ export type TypeHighlightColors = 'aqua' | 'black' | 'white' | 'red' | 'green';
 export const DEFAULT_HIGHLIGHT_COLOR: TypeHighlightColors = 'aqua';
 
 /** Type used to define overlay objects. */
-// TODO: Add more overlay objects - polygons, bounding box?
+// TODO: MINOR - Add more overlay objects - polygons, bounding box?
 export type TypeOverlayObjects = {
   /** Non interactive markers */
   pointMarkers?: TypePointMarkers;

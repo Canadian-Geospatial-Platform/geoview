@@ -221,10 +221,10 @@ export interface TypeBaseVectorSourceInitialConfig extends TypeBaseSourceInitial
   strategy?: VectorStrategy;
 
   /** The projection code of the source. */
-  dataProjection?: string; // TODO: refactor - from geo map schema types
+  dataProjection?: string; // TODO: ? refactor - from geo map schema types
 
   /** Settings to use when loading a GeoJSON layer using a POST instead of a GET */
-  postSettings?: TypePostSettings; // TODO: refactor - from geo map schema types
+  postSettings?: TypePostSettings; // TODO: ? refactor - from geo map schema types
 }
 
 export interface TypeSourceGeoJSONInitialConfig extends TypeBaseVectorSourceInitialConfig {
@@ -291,6 +291,10 @@ export interface TypeSourceImageStaticInitialConfig extends TypeBaseSourceInitia
 }
 
 export interface TypeSourceCSVInitialConfig extends TypeBaseVectorSourceInitialConfig {
+  /**
+   * The separator used in the CSV file. Default = ','.
+   * @default ','
+   */
   separator?: ',';
 }
 
@@ -302,7 +306,8 @@ export interface TypeSourceImageWmsInitialConfig extends TypeBaseSourceInitialCo
 }
 
 export interface TypeSourceImageEsriInitialConfig extends TypeBaseSourceInitialConfig {
-  /** The format used by the image layer.
+  /**
+   * The format used by the image layer.
    */
   format?: TypeEsriFormatParameter;
   /**
@@ -412,7 +417,7 @@ export type TypeGeoviewLayerConfig = {
   maxScale?: number;
 
   /** The layer entries to use from the GeoView layer. */
-  // TODO: Refactor - This array isn't only containing TypeLayerEntryConfig, sometimes it's just an array of strict json objects of
+  // TODO: REFACTOR - This array isn't only containing TypeLayerEntryConfig, sometimes it's just an array of strict json objects of
   // TO.DOCONT: either ConfigBaseClassProps and/or even TypeGeoviewLayerConfig(?). It'd be great to change the type here, but it has lots of impacts throughout the codebase.
   // TO.DOCONT: Something like: `(ConfigBaseClass | ConfigBaseClassProps | TypeGeoviewLayerConfig)[]`
   listOfLayerEntryConfig: TypeLayerEntryConfig[];

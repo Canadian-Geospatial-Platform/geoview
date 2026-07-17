@@ -599,7 +599,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    * @param displayDateMode - The display date mode that should be used
    */
   refreshMetadata(displayDateMode: DisplayDateMode): Promise<void> {
-    // TODO: Add onRefreshMetadata overrides for all layer types (only WMS for now)
+    // TODO: MINOR - Add onRefreshMetadata overrides for all layer types (only WMS/WMTS for now)
     // Call overridable method
     return this.onRefreshMetadata(displayDateMode);
   }

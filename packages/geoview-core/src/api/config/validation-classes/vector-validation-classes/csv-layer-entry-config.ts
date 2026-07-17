@@ -5,8 +5,6 @@ import type { ConfigClassOrType, TypeGeoviewLayerConfig, TypeSourceCSVInitialCon
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 
 export interface CsvLayerEntryConfigProps extends VectorLayerEntryConfigProps {
-  // TODO: Think of using a TypeSourceCSVInitialConfigProps, because it can be different properties than the resulting 'source' object stored.
-  // TO.DOCONT: e.g.: this.source.format, format isn't necessary to provide as input props here.
   /** Source settings to apply to the GeoView layer source at creation time. */
   source?: TypeSourceCSVInitialConfig;
 }

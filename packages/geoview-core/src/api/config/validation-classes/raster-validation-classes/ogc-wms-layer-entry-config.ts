@@ -121,6 +121,25 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     return super.getAttributions();
   }
 
+  /**
+   * Refreshes the layer metadata information by re-fetching the WMS GetCapabilities response and updating the layer configuration accordingly.
+   *
+   * This method is typically used when the display date mode changes, as the metadata may contain time-sensitive information that needs to be updated on-the-fly.
+   *
+   * @param displayDateMode - The display date mode that should be used
+   * @returns A promise that resolves when the metadata refresh operation has completed
+   */
+  override async onRefreshMetadata(displayDateMode: DisplayDateMode): Promise<void> {
+    // Refetch the metadata again with the new date mode and update the config
+    const layerMetadata = await WMS.fetchMetadataWMSForLayer(this.getMetadataAccessPath()!, this.getProxyUrl(), this.layerId);
+
+    // Read the capabilities
+    const layerCapabilities = WMS.findLayerMetadataInCapability(this.layerId, layerMetadata.Capability.Layer);
+
+    // Init the layer metadata
+    await WMS.initLayerMetadata(this, layerCapabilities, displayDateMode);
+  }
+
   // #endregion OVERRIDES
 
   // #region METHODS
@@ -385,25 +404,6 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
     // Get the first layer config
     return layerConfigs[0] as OgcWfsLayerEntryConfig;
-  }
-
-  /**
-   * Refreshes the layer metadata information by re-fetching the WMS GetCapabilities response and updating the layer configuration accordingly.
-   *
-   * This method is typically used when the display date mode changes, as the metadata may contain time-sensitive information that needs to be updated on-the-fly.
-   *
-   * @param displayDateMode - The display date mode that should be used
-   * @returns A promise that resolves when the metadata refresh operation has completed
-   */
-  override async onRefreshMetadata(displayDateMode: DisplayDateMode): Promise<void> {
-    // Refetch the metadata again with the new date mode and update the config
-    const layerMetadata = await WMS.fetchMetadataWMSForLayer(this.getMetadataAccessPath()!, this.getProxyUrl(), this.layerId);
-
-    // Read the capabilities
-    const layerCapabilities = WMS.findLayerMetadataInCapability(this.layerId, layerMetadata.Capability.Layer);
-
-    // Init the layer metadata
-    await WMS.initLayerMetadata(this, layerCapabilities, displayDateMode);
   }
 
   /**

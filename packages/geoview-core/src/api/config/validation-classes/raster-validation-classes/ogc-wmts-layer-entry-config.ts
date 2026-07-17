@@ -1,8 +1,9 @@
 import type { ConfigClassOrType, TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
+import type { DisplayDateMode } from '@/api/types/map-schema-types';
 import type { AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { TileLayerEntryConfig } from '@/api/config/validation-classes/tile-layer-entry-config';
-import type { TypeSourceImageWMTSInitialConfig, TypeWmtsLayerConfig } from '@/geo/layer/geoview-layers/raster/wmts';
+import { WMTS, type TypeSourceImageWMTSInitialConfig, type TypeWmtsLayerConfig } from '@/geo/layer/geoview-layers/raster/wmts';
 
 export interface OgcWmtsLayerEntryConfigProps extends AbstractBaseLayerEntryConfigProps {
   /** The tile matrix set identifier to use for this WMTS layer. If not provided, the first TileMatrixSet found in the metadata will be used by default. */
@@ -63,6 +64,22 @@ export class OgcWmtsLayerEntryConfig extends TileLayerEntryConfig {
    */
   override getLayerMetadata(): TypeMetadataWMTSContents | undefined {
     return super.getLayerMetadata() as TypeMetadataWMTSContents | undefined;
+  }
+
+  /**
+   * Refreshes the layer metadata information by re-fetching the WMS GetCapabilities response and updating the layer configuration accordingly.
+   *
+   * This method is typically used when the display date mode changes, as the metadata may contain time-sensitive information that needs to be updated on-the-fly.
+   *
+   * @param displayDateMode - The display date mode that should be used
+   * @returns A promise that resolves when the metadata refresh operation has completed
+   */
+  override async onRefreshMetadata(_displayDateMode: DisplayDateMode): Promise<void> {
+    // Refetch the metadata again with the new date mode and update the config
+    const layerMetadata = await WMTS.fetchMetadata(this.getMetadataAccessPath()!, this.getProxyUrl());
+
+    // Init the layer metadata
+    await WMTS.initLayerMetadata(this, layerMetadata);
   }
 
   // #endregion OVERRIDES
