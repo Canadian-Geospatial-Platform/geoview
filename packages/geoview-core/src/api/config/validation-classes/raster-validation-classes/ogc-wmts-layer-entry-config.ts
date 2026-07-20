@@ -97,7 +97,8 @@ export class OgcWmtsLayerEntryConfig extends TileLayerEntryConfig {
    * @returns The service version as read from the metadata attribute
    */
   getVersion(): string | undefined {
-    return this.getServiceMetadata()?.['@attributes']?.version;
+    // Redirect
+    return this.getServiceMetadata()?.version;
   }
 
   /**
@@ -106,6 +107,7 @@ export class OgcWmtsLayerEntryConfig extends TileLayerEntryConfig {
    * @returns The service version as read from the metadata attribute, or '1.0.0' if not available
    */
   getVersionOrDefault(): string {
+    // Redirect
     return this.getVersion() ?? '1.0.0';
   }
 
