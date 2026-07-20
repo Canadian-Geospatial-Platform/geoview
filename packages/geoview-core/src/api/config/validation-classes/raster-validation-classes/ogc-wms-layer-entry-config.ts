@@ -3,7 +3,7 @@ import type { Extent } from 'ol/extent';
 import type {
   ConfigClassOrType,
   TypeGeoviewLayerConfig,
-  TypeMetadataWMS,
+  TypeMetadataWMSCapabilities,
   TypeMetadataWMSCapabilityLayer,
   TypeMetadataWMSCapabilityLayerStyle,
   TypeOfServer,
@@ -82,8 +82,8 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    *
    * @returns The strongly-typed service metadata specific to this layer entry config
    */
-  override getServiceMetadata(): TypeMetadataWMS | undefined {
-    return super.getServiceMetadata() as TypeMetadataWMS | undefined;
+  override getServiceMetadata(): TypeMetadataWMSCapabilities | undefined {
+    return super.getServiceMetadata() as TypeMetadataWMSCapabilities | undefined;
   }
 
   /**

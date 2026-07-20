@@ -207,6 +207,9 @@ export class MapController extends AbstractMapViewerController {
   /** Callback delegates for the geolocator search event. */
   #onGeolocatorSearchHandlers: GeolocatorSearchDelegate[] = [];
 
+  /** Callback delegates for the feature highlighted event. */
+  #onFeatureHighlightedHandlers: FeatureHighlightedDelegate[] = [];
+
   /** The active measurement Draw interaction, if any. */
   #activeMeasurementDraw?: Draw;
 
@@ -617,6 +620,9 @@ export class MapController extends AbstractMapViewerController {
       // TODO: CHECK - What is this doing? Just refreshing the highlighted features with the same list?
       setStoreMapHighlightedFeatures(this.getMapId(), [...getStoreMapHighlightedFeatures(this.getMapId()), feature]);
     }
+
+    // Emit about it
+    this.#emitHighlightedFeature({ feature });
   }
 
   /**
@@ -720,6 +726,19 @@ export class MapController extends AbstractMapViewerController {
     // Set the pointMarkers and update on map
     setStoreMapPointMarkers(this.getMapId(), curMarkers);
     this.getMapViewer().featureHighlight.pointMarkers?.updatePointMarkers(curMarkers);
+  }
+
+  /**
+   * Returns a promise that resolves the next time a feature highlighted event fires.
+   *
+   * When a filter is provided, the handler keeps listening until the filter returns true.
+   *
+   * @param filter - Optional filter predicate. When provided, only events passing the filter resolve the promise
+   * @returns A promise that resolves with the feature highlighted event payload
+   */
+  waitForFeatureHighlighted(filter?: (event: FeatureHighlightedEvent) => boolean): Promise<FeatureHighlightedEvent> {
+    // Wait for the next feature highlighted event
+    return EventHelper.onceEventPromise(this.#onFeatureHighlightedHandlers, filter);
   }
 
   // #endregion PUBLIC METHODS - HIGHLIGHT FEATURES
@@ -2128,6 +2147,54 @@ export class MapController extends AbstractMapViewerController {
     EventHelper.offEvent(this.#onGeolocatorSearchHandlers, callback);
   }
 
+  /**
+   * Emits a feature highlighted event to all handlers.
+   *
+   * @param event - The feature highlighted event payload
+   */
+  #emitHighlightedFeature(event: FeatureHighlightedEvent): void {
+    // Emit the feature highlighted event for all handlers
+    EventHelper.emitEvent(this, this.#onFeatureHighlightedHandlers, event);
+  }
+
+  /**
+   * Registers a one-shot feature highlighted event callback that automatically unsubscribes after the first firing.
+   *
+   * When a filter is provided, the handler keeps listening until the filter returns true.
+   *
+   * @param callback - The callback to execute once when the event fires (and passes the filter)
+   * @param filter - Optional filter predicate. When provided, only events passing the filter trigger the callback
+   * @returns The wrapper callback reference (can be used with offFeatureHighlighted to cancel before it fires)
+   */
+  onceFeatureHighlighted(
+    callback: FeatureHighlightedDelegate,
+    filter?: (event: FeatureHighlightedEvent) => boolean
+  ): FeatureHighlightedDelegate {
+    // Register a one-shot feature highlighted event handler
+    return EventHelper.onceEvent(this.#onFeatureHighlightedHandlers, callback, filter);
+  }
+
+  /**
+   * Registers a feature highlighted event callback.
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
+   * @returns The callback delegate that was registered
+   */
+  onFeatureHighlighted(callback: FeatureHighlightedDelegate): FeatureHighlightedDelegate {
+    // Register the feature highlighted event handler
+    return EventHelper.onEvent(this.#onFeatureHighlightedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a feature highlighted event callback.
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
+   */
+  offFeatureHighlighted(callback: FeatureHighlightedDelegate): void {
+    // Unregister the feature highlighted event handler
+    EventHelper.offEvent(this.#onFeatureHighlightedHandlers, callback);
+  }
+
   // #endregion EVENTS
 }
 
@@ -2147,3 +2214,16 @@ export interface GeolocatorSearchEvent {
  * Delegate for the geolocator search event handler function signature.
  */
 export type GeolocatorSearchDelegate = EventDelegateBase<MapController, GeolocatorSearchEvent, void>;
+
+/**
+ * Event for the feature highlighted delegate.
+ */
+export interface FeatureHighlightedEvent {
+  /** The feature being highlighted. */
+  feature: TypeFeatureInfoEntry;
+}
+
+/**
+ * Delegate for the feature highlighted event handler function signature.
+ */
+export type FeatureHighlightedDelegate = EventDelegateBase<MapController, FeatureHighlightedEvent, void>;

@@ -23,23 +23,24 @@ import {
   type TypeStyleGeometry,
   type TypeValidMapProjectionCodes,
 } from '@/api/types/map-schema-types';
-import type { TypeMetadataWMTS } from '@/api/config/validation-classes/raster-validation-classes/ogc-wmts-layer-entry-config';
 import type {
   TypeGeoviewLayerType,
   TypeLegend,
   TypeMetadataWFS,
+  TypeMetadataWFSCapabilities,
   TypeMetadataWMS,
+  TypeMetadataWMSCapabilities,
   TypeMetadataWMSCapabilityLayer,
-  TypeMetadataWMSRoot,
+  TypeMetadataWMTS,
+  TypeMetadataWMTSCapabilities,
   TypeOGCService,
   TypeStylesWMS,
   TypeVectorLayerStyles,
 } from '@/api/types/layer-schema-types';
 import { NetworkError, NotSupportedError, ResponseEmptyError } from '@/core/exceptions/core-exceptions';
-import { parseXMLToJson } from '@/core/utils/utilities';
+import { findPropertyByRegexPath, parseXMLToJson } from '@/core/utils/utilities';
 import { encodeLayersParam, ensureServiceRequestUrl } from '@/core/utils/ogc-url-helper';
 import { Fetch } from '@/core/utils/fetch-helper';
-import { findPropertyByRegexPath } from '@/core/utils/utilities';
 import type { TypeLegendItem, TypeLegendLayerItem } from '@/core/components/layers/types';
 import type { TypeBasemapLayer } from '@/geo/layer/basemap/basemap-types';
 import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
@@ -256,10 +257,197 @@ export abstract class GeoUtilities {
    *
    * @param url - The url of the ESRI map server
    * @returns A promise that resolves with the JSON metadata from the server
+   * @deprecated - Unused in our framework and templates, is it used by external devs? If not, remove it
    */
   static getESRIServiceMetadata(url: string): Promise<unknown> {
     // fetch the map server returning a json object
     return Fetch.fetchJson(`${url}?f=json`);
+  }
+
+  /**
+   * Fetch the json response from the XML response of a WMS getCapabilities request.
+   *
+   * @param url - The url the url of the WMS server
+   * @param configProxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
+   * @param layers - The layers to query separate by
+   * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
+   * The parameter sent in the callback is the proxy prefix with the '?' at the end.
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+   * @returns A promise that resolves with the parsed WMS metadata
+   * @throws {RequestTimeoutError} When the request exceeds the timeout duration
+   * @throws {RequestAbortedError} When the request was aborted by the caller's signal
+   * @throws {ResponseError} When the response is not OK (non-2xx)
+   * @throws {ResponseEmptyError} When the JSON response is empty
+   * @throws {NetworkError} When a network issue happened
+   */
+  static async getWMSServiceMetadata(
+    url: string,
+    configProxyUrl: string = CONFIG_PROXY_URL,
+    layers?: string,
+    callbackNewMetadataUrl?: CallbackNewMetadataDelegate,
+    abortSignal?: AbortSignal
+  ): Promise<TypeMetadataWMSCapabilities> {
+    // Make sure the URL has necessary information
+    const capUrl = this.ensureServiceRequestUrlGetCapabilities(url, 'WMS', layers);
+
+    // Redirect
+    const metadataRaw = await this.fetchServiceUrl(capUrl, configProxyUrl, callbackNewMetadataUrl, abortSignal);
+
+    // Parse it and return
+    const metadataParsed = parseXMLToJson<TypeMetadataWMS>(metadataRaw);
+
+    // Because of the Esri proxy returning an embedded error on a ok response instead of failing, we have to check it here
+    this.#validateEsriProxyError(metadataParsed);
+
+    // Result to be returned
+    let metadataResult = findPropertyByRegexPath<TypeMetadataWMSCapabilities>(metadataParsed, /WMS_Capabilities/);
+
+    // If nothing found, try with a less common WMT_MS_Capabilities response
+    // GV e.g. for service https://maps.geogratis.gc.ca/wms/elevation_en?VERSION=1.1.0
+    if (!metadataResult) {
+      metadataResult = findPropertyByRegexPath<TypeMetadataWMSCapabilities>(metadataParsed, /WMT_MS_Capabilities/);
+    }
+
+    // If it's an array, find the best object in the array
+    if (Array.isArray(metadataResult)) {
+      metadataResult = metadataResult.find((obj) => obj.Capability);
+    }
+
+    // Validate and extend metadata result
+    metadataResult = this.#validateExtendWMSWMTSWFSParsedResult(metadataRaw, metadataResult);
+
+    // Normalize the Json to make it more uniform, simulating what ol/Format/WMSCapabilities was doing before being replaced
+    this.#helperParseCapabilityNormalizeArray(metadataResult.Capability.Request.GetMap, 'DCPType');
+    this.#helperParseCapabilityNormalizeArray(metadataResult.Capability.Request.GetFeatureInfo, 'Format');
+    this.#helperParseCapabilityLayer(metadataResult.Capability.Layer);
+
+    // Return it
+    return metadataResult;
+  }
+
+  /**
+   * Fetch the json response from the XML response of a WFS getCapabilities request.
+   *
+   * @param url - The url of the WFS server
+   * @param configProxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
+   * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
+   * The parameter sent in the callback is the proxy prefix with the '?' at the end.
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+   * @returns A promise that resolves with the parsed WFS metadata, or undefined when capabilities weren't found
+   * @throws {RequestTimeoutError} When the request exceeds the timeout duration
+   * @throws {RequestAbortedError} When the request was aborted by the caller's signal
+   * @throws {ResponseError} When the response is not OK (non-2xx)
+   * @throws {ResponseEmptyError} When the JSON response is empty
+   * @throws {NetworkError} When a network issue happened
+   */
+  static async getWFSServiceMetadata(
+    url: string,
+    configProxyUrl: string = CONFIG_PROXY_URL,
+    callbackNewMetadataUrl?: CallbackNewMetadataDelegate,
+    abortSignal?: AbortSignal
+  ): Promise<TypeMetadataWFSCapabilities> {
+    // Make sure the URL has necessary information
+    const capUrl = this.ensureServiceRequestUrlGetCapabilities(url, 'WFS');
+
+    // Redirect
+    const metadataRaw = await this.fetchServiceUrl(capUrl, configProxyUrl, callbackNewMetadataUrl, abortSignal);
+
+    // Parse it and return
+    const metadataParsed = parseXMLToJson<TypeMetadataWFS>(metadataRaw);
+
+    // Because of the Esri proxy returning an embedded error on a ok response instead of failing, we have to check it here
+    this.#validateEsriProxyError(metadataParsed);
+
+    // Result to be returned
+    let metadataResult = findPropertyByRegexPath<TypeMetadataWFSCapabilities>(metadataParsed, /WFS_Capabilities/);
+
+    // If it's an array, find the best object in the array
+    if (Array.isArray(metadataResult)) {
+      metadataResult = metadataResult.find((obj) => obj.FeatureTypeList);
+    }
+
+    // Validate and extend metadata result
+    metadataResult = this.#validateExtendWMSWMTSWFSParsedResult(metadataRaw, metadataResult);
+
+    // Return it
+    return metadataResult;
+  }
+
+  /**
+   * Fetch the json response from the XML response of a WMTS getCapabilities request.
+   *
+   * @param url - The url the url of the WMTS server
+   * @param configProxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
+   * @param layers - The layers to query, separated by comma
+   * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
+   * @param abortSignal - Optional abort signal to handle cancelling of the process
+   * @returns A promise that resolves with the parsed WMTS metadata
+   * @throws {RequestTimeoutError} When the request exceeds the timeout duration
+   * @throws {RequestAbortedError} When the request was aborted by the caller's signal
+   * @throws {ResponseError} When the response is not OK (non-2xx)
+   * @throws {ResponseEmptyError} When the JSON response is empty
+   * @throws {NetworkError} When a network issue happened
+   */
+  static async getWMTSServiceMetadata(
+    url: string,
+    configProxyUrl: string = CONFIG_PROXY_URL,
+    layers?: string,
+    callbackNewMetadataUrl?: CallbackNewMetadataDelegate,
+    abortSignal?: AbortSignal
+  ): Promise<TypeMetadataWMTSCapabilities> {
+    // Make sure the URL has necessary information
+    const capUrl = this.ensureServiceRequestUrlGetCapabilities(url, 'WMTS', layers);
+
+    // Redirect
+    const metadataRaw = await this.fetchServiceUrl(capUrl, configProxyUrl, callbackNewMetadataUrl, abortSignal);
+
+    // Parse it and return
+    const metadataParsed = parseXMLToJson<TypeMetadataWMTS>(metadataRaw);
+
+    // Because of the Esri proxy returning an embedded error on a ok response instead of failing, we have to check it here
+    this.#validateEsriProxyError(metadataParsed);
+
+    // Result to be returned
+    let metadataResult = metadataParsed.Capabilities;
+
+    // Validate and extend metadata result
+    metadataResult = this.#validateExtendWMSWMTSWFSParsedResult(metadataRaw, metadataResult);
+
+    // Return it
+    return metadataResult;
+  }
+
+  /**
+   * Fetch the json response from the XML response of a WMS GetStyles request.
+   *
+   * @param url - The url the url of the WMS server
+   * @param configProxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
+   * @param layers - The layers to query, separated by comma
+   * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
+   * The parameter sent in the callback is the proxy prefix with the '?' at the end.
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+   * @returns A promise that resolves with the parsed WMS styles
+   * @throws {RequestTimeoutError} When the request exceeds the timeout duration
+   * @throws {RequestAbortedError} When the request was aborted by the caller's signal
+   * @throws {ResponseError} When the response is not OK (non-2xx)
+   * @throws {ResponseEmptyError} When the JSON response is empty
+   * @throws {NetworkError} When a network issue happened
+   */
+  static async getWMSServiceStyles(
+    url: string,
+    configProxyUrl: string = CONFIG_PROXY_URL,
+    layers?: string,
+    callbackNewMetadataUrl?: CallbackNewMetadataDelegate,
+    abortSignal?: AbortSignal
+  ): Promise<TypeStylesWMS> {
+    // Make sure the URL has necessary information
+    const stylesUrl = this.ensureServiceRequestUrlGetStyles(url, layers);
+
+    // Redirect
+    const responseXML = await this.fetchServiceUrl(stylesUrl, configProxyUrl, callbackNewMetadataUrl, abortSignal);
+
+    // Read the styles
+    return parseXMLToJson(responseXML);
   }
 
   /**
@@ -277,7 +465,7 @@ export abstract class GeoUtilities {
    * @throws {ResponseEmptyError} When the JSON response is empty
    * @throws {NetworkError} When a network issue happened
    */
-  static async getWMSServiceString(
+  static async fetchServiceUrl(
     url: string,
     configProxyUrl: string = CONFIG_PROXY_URL,
     callbackNewMetadataUrl?: CallbackNewMetadataDelegate,
@@ -316,179 +504,6 @@ export abstract class GeoUtilities {
       // Unknown error, throw it higher
       throw error;
     }
-  }
-
-  /**
-   * Fetch the json response from the XML response of a WMS getCapabilities request.
-   *
-   * @param url - The url the url of the WMS server
-   * @param configProxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
-   * @param layers - The layers to query separate by
-   * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
-   * The parameter sent in the callback is the proxy prefix with the '?' at the end.
-   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
-   * @returns A promise that resolves with the parsed WMS metadata
-   * @throws {RequestTimeoutError} When the request exceeds the timeout duration
-   * @throws {RequestAbortedError} When the request was aborted by the caller's signal
-   * @throws {ResponseError} When the response is not OK (non-2xx)
-   * @throws {ResponseEmptyError} When the JSON response is empty
-   * @throws {NetworkError} When a network issue happened
-   */
-  static async getWMSServiceMetadata(
-    url: string,
-    configProxyUrl: string = CONFIG_PROXY_URL,
-    layers?: string,
-    callbackNewMetadataUrl?: CallbackNewMetadataDelegate,
-    abortSignal?: AbortSignal
-  ): Promise<TypeMetadataWMS> {
-    // Make sure the URL has necessary information
-    const capUrl = this.ensureServiceRequestUrlGetCapabilities(url, 'WMS', layers);
-
-    // Redirect
-    const metadataRaw = await this.getWMSServiceString(capUrl, configProxyUrl, callbackNewMetadataUrl, abortSignal);
-
-    // Parse it
-    const metadataParsed = parseXMLToJson<TypeMetadataWMSRoot>(metadataRaw);
-
-    // Result to be returned
-    let metadataResult = metadataParsed.WMS_Capabilities || metadataParsed.WMT_MS_Capabilities;
-
-    // Weird case, if it's an array, find the best object in the array
-    if (Array.isArray(metadataResult)) {
-      metadataResult = metadataResult.find((obj) => (obj as TypeMetadataWMS).Capability);
-    }
-
-    // If nothing
-    if (!metadataResult) throw new ResponseEmptyError();
-
-    // Read the version
-    metadataResult.version = metadataResult['@attributes']?.version;
-
-    // Try to guess the server type
-    metadataResult.serverType = this.#isQgisServer(metadataRaw) ? 'qgis' : undefined;
-
-    // If server type not determined, check geoserver
-    if (!metadataResult.serverType) {
-      metadataResult.serverType = this.#isGeoServer(metadataRaw) ? 'geoserver' : undefined;
-    }
-
-    // If server type not determined, check mapserver
-    if (!metadataResult.serverType) {
-      metadataResult.serverType = this.#isMapServer(metadataRaw) ? 'mapserver' : undefined;
-    }
-
-    // Normalize the Json to make it more uniform, simulating what ol/Format/WMSCapabilities was doing before being replaced
-    this.#helperParseCapabilityNormalizeArray(metadataResult.Capability.Request.GetMap, 'DCPType');
-    this.#helperParseCapabilityNormalizeArray(metadataResult.Capability.Request.GetFeatureInfo, 'Format');
-    this.#helperParseCapabilityLayer(metadataResult.Capability.Layer);
-
-    // Return it
-    return metadataResult;
-  }
-
-  /**
-   * Fetch the json response from the XML response of a WFS getCapabilities request.
-   *
-   * @param url - The url of the WFS server
-   * @param configProxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
-   * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
-   * The parameter sent in the callback is the proxy prefix with the '?' at the end.
-   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
-   * @returns A promise that resolves with the parsed WFS metadata, or undefined when capabilities weren't found
-   * @throws {RequestTimeoutError} When the request exceeds the timeout duration
-   * @throws {RequestAbortedError} When the request was aborted by the caller's signal
-   * @throws {ResponseError} When the response is not OK (non-2xx)
-   * @throws {ResponseEmptyError} When the JSON response is empty
-   * @throws {NetworkError} When a network issue happened
-   */
-  static async getWFSServiceMetadata(
-    url: string,
-    configProxyUrl: string = CONFIG_PROXY_URL,
-    callbackNewMetadataUrl?: CallbackNewMetadataDelegate,
-    abortSignal?: AbortSignal
-  ): Promise<TypeMetadataWFS | undefined> {
-    // Make sure the URL has necessary information
-    const capUrl = this.ensureServiceRequestUrlGetCapabilities(url, 'WFS');
-
-    // Redirect
-    const metadataRaw = await this.getWMSServiceString(capUrl, configProxyUrl, callbackNewMetadataUrl, abortSignal);
-
-    // Parse it
-    const metadataParsed = parseXMLToJson<Record<string, unknown>>(metadataRaw);
-
-    // Parse the WFS_Capabilities opening the root node right away to skip to the meat.
-    return findPropertyByRegexPath<TypeMetadataWFS>(metadataParsed, /(?:WFS_Capabilities)/);
-  }
-
-  /**
-   * Fetch the json response from the XML response of a WMTS getCapabilities request.
-   *
-   * @param url - The url the url of the WMTS server
-   * @param configProxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
-   * @param layers - The layers to query, separated by comma
-   * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
-   * @param abortSignal - Optional abort signal to handle cancelling of the process
-   * @returns A promise that resolves with the parsed WMTS metadata
-   * @throws {RequestTimeoutError} When the request exceeds the timeout duration
-   * @throws {RequestAbortedError} When the request was aborted by the caller's signal
-   * @throws {ResponseError} When the response is not OK (non-2xx)
-   * @throws {ResponseEmptyError} When the JSON response is empty
-   * @throws {NetworkError} When a network issue happened
-   */
-  static async getWMTSServiceMetadata(
-    url: string,
-    configProxyUrl: string = CONFIG_PROXY_URL,
-    layers?: string,
-    callbackNewMetadataUrl?: CallbackNewMetadataDelegate,
-    abortSignal?: AbortSignal
-  ): Promise<TypeMetadataWMTS> {
-    // Make sure the URL has necessary information
-    const capUrl = this.ensureServiceRequestUrlGetCapabilities(url, 'WMTS', layers);
-
-    // Redirect
-    const metadataRaw = await this.getWMSServiceString(capUrl, configProxyUrl, callbackNewMetadataUrl, abortSignal);
-
-    // Parse it
-    const metadataParsed = parseXMLToJson<TypeMetadataWMTS>(metadataRaw);
-
-    // If nothing
-    if (!metadataParsed) throw new ResponseEmptyError();
-
-    // Return it
-    return metadataParsed;
-  }
-
-  /**
-   * Fetch the json response from the XML response of a WMS GetStyles request.
-   *
-   * @param url - The url the url of the WMS server
-   * @param configProxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
-   * @param layers - The layers to query, separated by comma
-   * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
-   * The parameter sent in the callback is the proxy prefix with the '?' at the end.
-   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
-   * @returns A promise that resolves with the parsed WMS styles
-   * @throws {RequestTimeoutError} When the request exceeds the timeout duration
-   * @throws {RequestAbortedError} When the request was aborted by the caller's signal
-   * @throws {ResponseError} When the response is not OK (non-2xx)
-   * @throws {ResponseEmptyError} When the JSON response is empty
-   * @throws {NetworkError} When a network issue happened
-   */
-  static async getWMSServiceStyles(
-    url: string,
-    configProxyUrl: string = CONFIG_PROXY_URL,
-    layers?: string,
-    callbackNewMetadataUrl?: CallbackNewMetadataDelegate,
-    abortSignal?: AbortSignal
-  ): Promise<TypeStylesWMS> {
-    // Make sure the URL has necessary information
-    const stylesUrl = this.ensureServiceRequestUrlGetStyles(url, layers);
-
-    // Redirect
-    const responseXML = await this.getWMSServiceString(stylesUrl, configProxyUrl, callbackNewMetadataUrl, abortSignal);
-
-    // Read the styles
-    return parseXMLToJson(responseXML);
   }
 
   /**
@@ -555,6 +570,61 @@ export abstract class GeoUtilities {
   // #endregion FETCH METADATA
 
   // #region FETCH METADATA - PRIVATE METHODS
+
+  /**
+   * Validates the Esri proxy error in the parsed metadata.
+   *
+   * @param metadataParsed - The parsed metadata object
+   * @throws {NetworkError} When the Esri proxy returned an error
+   * @deprecated The Esri proxy should be evenutally completely replaced via the default configuration. Once it's gone, this can be removed for cleanup.
+   */
+  static #validateEsriProxyError<T extends TypeMetadataWMS | TypeMetadataWMTS | TypeMetadataWFS>(metadataParsed: T | undefined): void {
+    // TODO: CHECK - The serviceexceptionreport stuff here is related to the Esri proxy which respond with such a payload
+    // TO.DOCONT: Could probably be removed once we've completely migrated to the new proxy
+    if (metadataParsed?.ServiceExceptionReport) throw new NetworkError('The Esri proxy returned an error with the underlying url.', '500');
+  }
+
+  /**
+   * Validates and interprets parsed OGC capabilities metadata, detecting the server type.
+   *
+   * Handles edge cases where the parsed result is an array (picks the object with a `Capability` property),
+   * reads the version from `@attributes`, and detects whether the server is QGIS, GeoServer, or MapServer.
+   *
+   * @param metadataRaw - The raw XML string of the capabilities response (used for server type detection)
+   * @param metadataParsed - The fully parsed metadata object
+   * @param metadataResult - The extracted capabilities object (may be undefined or an array in edge cases)
+   * @returns The validated and enriched capabilities object with version and server type populated
+   * @throws {ResponseEmptyError} When the parsed metadata or the extracted result is empty
+   */
+  static #validateExtendWMSWMTSWFSParsedResult<
+    U extends TypeMetadataWMSCapabilities | TypeMetadataWFSCapabilities | TypeMetadataWMTSCapabilities,
+  >(metadataRaw: string, metadataResult: U | undefined): U {
+    // If nothing
+    if (!metadataResult) throw new ResponseEmptyError();
+
+    // Read the version
+    // eslint-disable-next-line no-param-reassign
+    metadataResult.version = metadataResult['@attributes']?.version;
+
+    // Try to guess the server type
+    // eslint-disable-next-line no-param-reassign
+    metadataResult.serverType = this.#isQgisServer(metadataRaw) ? 'qgis' : undefined;
+
+    // If server type not determined, check geoserver
+    if (!metadataResult.serverType) {
+      // eslint-disable-next-line no-param-reassign
+      metadataResult.serverType = this.#isGeoServer(metadataRaw) ? 'geoserver' : undefined;
+    }
+
+    // If server type not determined, check mapserver
+    if (!metadataResult.serverType) {
+      // eslint-disable-next-line no-param-reassign
+      metadataResult.serverType = this.#isMapServer(metadataRaw) ? 'mapserver' : undefined;
+    }
+
+    // Return it
+    return metadataResult;
+  }
 
   /**
    * Detects whether a WMS GetCapabilities document was produced by QGIS Server.

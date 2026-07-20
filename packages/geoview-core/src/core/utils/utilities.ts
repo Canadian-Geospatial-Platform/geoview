@@ -1152,7 +1152,7 @@ export function exportFile(dataUrl: string, name: string, format: 'pdf' | 'png' 
 export function findPropertyByRegexPath<T = Record<string, unknown>>(
   objectItem: unknown | undefined,
   patterns: RegExp | RegExp[]
-): T | undefined {
+): T | T[] | undefined {
   const regexes = Array.isArray(patterns) ? patterns : [patterns];
 
   let current = objectItem;
@@ -1165,7 +1165,7 @@ export function findPropertyByRegexPath<T = Record<string, unknown>>(
     current = match?.[1] as Record<string, unknown>;
   }
 
-  return current as T;
+  return current as T | T[];
 }
 
 /**

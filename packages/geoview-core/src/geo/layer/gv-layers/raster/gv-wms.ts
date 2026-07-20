@@ -1469,6 +1469,9 @@ export class GVWMS extends AbstractGVRaster {
       abortController
     );
 
+    // TODO: CHECK - The serviceexceptionreport stuff here is related to the Esri proxy which respond with such a payload
+    // TO.DOCONT: Could probably be removed once we've completely migrated to the new proxy
+
     // Check if the response is a WMS ServiceException XML
     const parser = new DOMParser();
     const xmlTestDoc = parser.parseFromString(responseData, GVWMS.MIME_TYPE_FORMAT_APP_XML);

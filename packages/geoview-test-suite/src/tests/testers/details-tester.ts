@@ -170,10 +170,11 @@ export class DetailsTester extends GVAbstractTester {
       async (test) => {
         // Simulate a map click — this queries ALL layers and auto-highlights the first feature from each layer with results
         test.addStep('Simulating map click to trigger highlight on all queryable layers...');
-        const simulatedClick = this.getMapViewer().simulateMapClick(lonlat);
+        this.getMapViewer().simulateMapClick(lonlat);
 
-        // Wait for query to complete
-        await simulatedClick.promiseQueryBatched;
+        // Wait for the highlight to happen.
+        // GV We can't only wait for the promiseQuery or the promiseQueryBatched, because the highlight only happens after all that
+        await this.getControllersRegistry().mapController.waitForFeatureHighlighted();
 
         // Verify highlights exist in store
         test.addStep('Verifying highlighted features exist in store...');

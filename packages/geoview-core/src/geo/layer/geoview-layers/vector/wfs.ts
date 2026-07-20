@@ -16,7 +16,7 @@ import type {
 import type {
   TypeGeoviewLayerConfig,
   WFSJsonResponse,
-  TypeMetadataWFS,
+  TypeMetadataWFSCapabilities,
   VectorStrategy,
   TypeMetadataWFSOperationMetadataOperationParameter,
   TypeMetadataWFSOperationMetadataOperationParameterValue,
@@ -32,7 +32,7 @@ import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vec
 import { LayerNoCapabilitiesError, LayerServiceMetadataUnableToFetchError } from '@/core/exceptions/layer-exceptions';
 import { GVWFS } from '@/geo/layer/gv-layers/vector/gv-wfs';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
-import { formatError } from '@/core/exceptions/core-exceptions';
+import { formatError, ResponseEmptyError } from '@/core/exceptions/core-exceptions';
 import { GeoUtilities, type CallbackNewMetadataDelegate, type SourceFeaturesInfo } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { logger } from '@/core/utils/logger';
@@ -74,8 +74,8 @@ export class WFS extends AbstractGeoViewVector {
    *
    * @returns The strongly-typed metadata specific to this layer
    */
-  override getMetadata(): TypeMetadataWFS | undefined {
-    return super.getMetadata() as TypeMetadataWFS | undefined;
+  override getMetadata(): TypeMetadataWFSCapabilities | undefined {
+    return super.getMetadata() as TypeMetadataWFSCapabilities | undefined;
   }
 
   /**
@@ -88,7 +88,7 @@ export class WFS extends AbstractGeoViewVector {
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
    * @throws {LayerNoCapabilitiesError} When the metadata is empty (no Capabilities)
    */
-  protected override onFetchServiceMetadata<T = TypeMetadataWFS>(abortSignal?: AbortSignal): Promise<T> {
+  protected override onFetchServiceMetadata<T = TypeMetadataWFSCapabilities>(abortSignal?: AbortSignal): Promise<T> {
     // Redirect
     return this.fetchServiceMetadataWFS(abortSignal) as Promise<T>;
   }
@@ -336,7 +336,7 @@ export class WFS extends AbstractGeoViewVector {
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
    * @throws {LayerNoCapabilitiesError} When the metadata is empty (no Capabilities)
    */
-  protected async fetchServiceMetadataWFS(abortSignal?: AbortSignal): Promise<TypeMetadataWFS> {
+  protected async fetchServiceMetadataWFS(abortSignal?: AbortSignal): Promise<TypeMetadataWFSCapabilities> {
     let metadata;
     try {
       // Fetch it
@@ -352,20 +352,23 @@ export class WFS extends AbstractGeoViewVector {
         },
         abortSignal
       );
+
+      // Return it
+      return metadata;
     } catch (error: unknown) {
-      // Throw
+      // If empty response
+      if (error instanceof ResponseEmptyError) {
+        // Throw no capabilities response
+        throw new LayerNoCapabilitiesError(this.getGeoviewLayerId(), this.getLayerEntryNameOrGeoviewLayerName());
+      }
+
+      // Throw standard
       throw new LayerServiceMetadataUnableToFetchError(
         this.getGeoviewLayerId(),
         this.getLayerEntryNameOrGeoviewLayerName(),
         formatError(error)
       );
     }
-
-    // If not found
-    if (!metadata) throw new LayerNoCapabilitiesError(this.getGeoviewLayerId(), this.getLayerEntryNameOrGeoviewLayerName());
-
-    // Return it
-    return metadata;
   }
 
   // #endregion PROTECTED METHODS
@@ -570,7 +573,7 @@ export class WFS extends AbstractGeoViewVector {
    * @param metadata - The parsed WFS capabilities metadata object
    * @returns The detected output format string for the DescribeFeatureType operation, or an empty string if no suitable value is found
    */
-  static extractDescribeFeatureOutputFormat(metadata: TypeMetadataWFS): string {
+  static extractDescribeFeatureOutputFormat(metadata: TypeMetadataWFSCapabilities): string {
     // Find the operation for DescribeFeatureOutput
     const describeFeatureOp = metadata['ows:OperationsMetadata']['ows:Operation'].find(
       (op) => op['@attributes'].name === 'DescribeFeatureType'
@@ -643,7 +646,7 @@ export class WFS extends AbstractGeoViewVector {
     configProxyUrl: string | undefined,
     callbackNewMetadataUrl?: CallbackNewMetadataDelegate,
     abortSignal?: AbortSignal
-  ): Promise<TypeMetadataWFS | undefined> {
+  ): Promise<TypeMetadataWFSCapabilities> {
     // Redirect
     return GeoUtilities.getWFSServiceMetadata(url, configProxyUrl, callbackNewMetadataUrl, abortSignal);
   }
@@ -668,8 +671,8 @@ export class WFS extends AbstractGeoViewVector {
     // Fetch the WFS metadata
     // TODO: CHECK - Do we need to send the configProxyUrl (this.getConfigProxyUrl()) here
     const metadata = await WFS.fetchMetadata(url, undefined, undefined, abortSignal);
-    const version = metadata?.['@attributes'].version || '1.1.0';
-    const outputFormat = WFS.extractDescribeFeatureOutputFormat(metadata!);
+    const version = metadata.version ?? '1.1.0';
+    const outputFormat = WFS.extractDescribeFeatureOutputFormat(metadata);
 
     // Build a describe feature url
     const describeFeatureUrl = GeoUtilities.ensureServiceRequestUrlDescribeFeatureType(url, layerId, version, outputFormat);

@@ -7,7 +7,8 @@ import { getStoreLayerLegendLayerByPath } from 'geoview-core/core/stores/states/
 import type { GeoViewLayerAddedResult } from 'geoview-core/core/controllers/layer-creator-controller';
 import { generateId } from 'geoview-core/core/utils/utilities';
 import { LayerStatusErrorError } from 'geoview-core/core/exceptions/layer-exceptions';
-import { LayerNoCapabilitiesError, LayerServiceMetadataUnableToFetchError } from 'geoview-core/core/exceptions/layer-exceptions';
+import type { LayerNoCapabilitiesError } from 'geoview-core/core/exceptions/layer-exceptions';
+import { LayerServiceMetadataUnableToFetchError } from 'geoview-core/core/exceptions/layer-exceptions';
 import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
 import { EsriDynamic } from 'geoview-core/geo/layer/geoview-layers/raster/esri-dynamic';
 import { AbstractBaseLayerEntryConfig } from 'geoview-core/api/config/validation-classes/abstract-base-layer-entry-config';
@@ -766,7 +767,7 @@ export class LayerTester extends GVAbstractTester {
     // Test
     return this.testError(
       `Test Adding WFS with okay url no capabilities...`,
-      LayerNoCapabilitiesError,
+      LayerServiceMetadataUnableToFetchError,
       async (test) => {
         // Creating the configuration
         test.addStep('Creating the GeoView Layer Configuration...');

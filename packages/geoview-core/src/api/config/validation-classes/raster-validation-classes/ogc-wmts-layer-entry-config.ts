@@ -1,4 +1,9 @@
-import type { ConfigClassOrType, TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
+import type {
+  ConfigClassOrType,
+  TypeGeoviewLayerConfig,
+  TypeMetadataWMTSCapabilities,
+  TypeMetadataWMTSContents,
+} from '@/api/types/layer-schema-types';
 import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { DisplayDateMode } from '@/api/types/map-schema-types';
 import type { AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
@@ -53,8 +58,8 @@ export class OgcWmtsLayerEntryConfig extends TileLayerEntryConfig {
    *
    * @returns The strongly-typed service metadata specific to this layer entry config.
    */
-  override getServiceMetadata(): TypeMetadataWMTS | undefined {
-    return super.getServiceMetadata() as TypeMetadataWMTS | undefined;
+  override getServiceMetadata(): TypeMetadataWMTSCapabilities | undefined {
+    return super.getServiceMetadata() as TypeMetadataWMTSCapabilities | undefined;
   }
 
   /**
@@ -92,7 +97,7 @@ export class OgcWmtsLayerEntryConfig extends TileLayerEntryConfig {
    * @returns The service version as read from the metadata attribute
    */
   getVersion(): string | undefined {
-    return this.getServiceMetadata()?.Capabilities?.['@attributes']?.version;
+    return this.getServiceMetadata()?.['@attributes']?.version;
   }
 
   /**
@@ -122,84 +127,4 @@ export class OgcWmtsLayerEntryConfig extends TileLayerEntryConfig {
   }
 
   // #endregion STATIC METHODS
-}
-
-export interface TypeMetadataWMTS {
-  Capabilities: {
-    '@attributes': {
-      version: string;
-    };
-    'ows:OperationsMetadata': TypeMetadataWMTSOperations;
-    Contents: TypeMetadataWMTSContents;
-  };
-}
-
-export interface TypeMetadataWMTSOperations {
-  'ows:Operation': {
-    '@attributes': {
-      name: string;
-    };
-    'ows:DCP': {
-      'ows:HTTP': {
-        'ows:Get': {
-          '@attributes': {
-            'xlink:href': string;
-          };
-          'ows:Constraint'?: {
-            'ows:AllowedValues': {
-              'ows:Value': string | string[];
-            };
-          };
-        };
-      };
-    };
-  }[];
-}
-
-export interface TypeMetadataWMTSContents {
-  Layer: TypeMetadataWMTSLayer[] | TypeMetadataWMTSLayer;
-  TileMatrixSet: TypeWMTSTileMatrixSet[] | TypeWMTSTileMatrixSet;
-}
-
-export interface TypeMetadataWMTSLayer {
-  'ows:Identifier': string;
-  'ows:WGS84BoundingBox'?: {
-    'ows:LowerCorner': string | [number, number];
-    'ows:UpperCorner': string | [number, number];
-  };
-  ResourceURL: {
-    '@attributes': {
-      template: string;
-      resourceType: string;
-      format: string;
-    };
-  };
-  'ows:Title'?: string;
-  'ows:Abstract'?: string;
-  Format: string;
-  TileMatrixSetLink: TypeTileMatrixSetLink[] | TypeTileMatrixSetLink;
-  Style?: {
-    'ows:Identifier': string;
-    'ows:Title'?: string;
-  };
-}
-
-interface TypeTileMatrixSetLink {
-  TileMatrixSet: string;
-}
-
-export interface TypeWMTSTileMatrixSet {
-  'ows:Identifier': string;
-  'ows:SupportedCRS': string;
-  TileMatrix: TypeWMTSTileMatrix[];
-}
-
-interface TypeWMTSTileMatrix {
-  'ows:Identifier': string;
-  ScaleDenominator: number;
-  TopLeftCorner: string | [number, number];
-  TileWidth: number;
-  TileHeight: number;
-  MatrixWidth: number;
-  MatrixHeight: number;
 }

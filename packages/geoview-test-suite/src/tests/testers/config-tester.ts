@@ -2,7 +2,8 @@ import { GVAbstractTester } from './abstract-gv-tester';
 import { Test } from '../core/test';
 import type { ClassType } from 'geoview-core/core/types/global-types';
 import type { MapConfigLayerEntry, TypeGeoviewLayerConfig, TypeGeoviewLayerType } from 'geoview-core/api/types/layer-schema-types';
-import { LayerNoCapabilitiesError, LayerServiceMetadataUnableToFetchError } from 'geoview-core/core/exceptions/layer-exceptions';
+import type { LayerNoCapabilitiesError } from 'geoview-core/core/exceptions/layer-exceptions';
+import { LayerServiceMetadataUnableToFetchError } from 'geoview-core/core/exceptions/layer-exceptions';
 import { EsriDynamic } from 'geoview-core/geo/layer/geoview-layers/raster/esri-dynamic';
 import { EsriFeature } from 'geoview-core/geo/layer/geoview-layers/vector/esri-feature';
 import { EsriImage } from 'geoview-core/geo/layer/geoview-layers/raster/esri-image';
@@ -724,13 +725,17 @@ export class ConfigTester extends GVAbstractTester {
     const urlBad: string = GVAbstractTester.FAKE_URL_ALWAYS_RETURNING_RESPONSE_INSTEAD_OF_NETWORK_ERROR;
 
     // Test
-    return this.testError(`Test a WFS config with a okay url but no capabilities...`, LayerNoCapabilitiesError, async (test) => {
-      // Creating the configuration
-      test.addStep('Creating the GeoView Layer Configuration...');
+    return this.testError(
+      `Test a WFS config with a okay url but no capabilities...`,
+      LayerServiceMetadataUnableToFetchError,
+      async (test) => {
+        // Creating the configuration
+        test.addStep('Creating the GeoView Layer Configuration...');
 
-      // Try it and expect a fail
-      await WFS.initGeoviewLayerConfig('gvLayerId', 'gvLayerName', urlBad);
-    });
+        // Try it and expect a fail
+        await WFS.initGeoviewLayerConfig('gvLayerId', 'gvLayerName', urlBad);
+      }
+    );
   }
 
   // #endregion WFS
