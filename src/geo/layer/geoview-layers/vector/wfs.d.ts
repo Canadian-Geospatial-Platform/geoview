@@ -10,6 +10,7 @@ import { OgcWfsLayerEntryConfig } from '@/api/config/validation-classes/vector-v
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { GVWFS } from '@/geo/layer/gv-layers/vector/gv-wfs';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
+import { type SourceFeaturesInfo } from '@/geo/utils/utilities';
 export interface TypeWFSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'geoviewLayerType'> {
     geoviewLayerType: typeof CONST_LAYER_TYPES.WFS;
     fetchStylesOnWMS?: boolean;
@@ -84,7 +85,7 @@ export declare class WFS extends AbstractGeoViewVector {
      * @param readOptions - Options controlling how features are read, including the target `featureProjection`
      * @returns A promise that resolves to an array of OpenLayers features
      */
-    protected onCreateVectorSourceLoadFeatures(layerConfig: VectorLayerEntryConfig, sourceOptions: SourceOptions<Feature>, readOptions: ReadOptions): Promise<Feature[]>;
+    protected onCreateVectorSourceLoadFeatures(layerConfig: VectorLayerEntryConfig, sourceOptions: SourceOptions<Feature>, readOptions: ReadOptions): Promise<SourceFeaturesInfo>;
     /**
      * Overrides the creation of the GV Layer.
      *

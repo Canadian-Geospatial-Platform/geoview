@@ -1,5 +1,5 @@
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
-import type { TypeBaseSourceInitialConfig, TypeGeoviewLayerConfig, TypeGeoviewLayerType, TypeOfServer } from '@/api/types/layer-schema-types';
+import type { TypeLayerEntryConfig, TypeGeoviewLayerConfig, TypeGeoviewLayerType, TypeOfServer } from '@/api/types/layer-schema-types';
 import type { TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 /** A class to generate GeoView layers config from a URL using a UUID. */
 export declare class UUIDmapConfigReader {
@@ -38,20 +38,19 @@ export type GeoCoreConfigResponseRoot = {
     response: GeoCoreConfigResponse;
     errorMessage?: string;
 };
+/** The GeoCore response payload containing RCS and GCS sections. */
 export type GeoCoreConfigResponse = {
     rcs: Record<TypeDisplayLanguage, GeoCoreConfigResponseRCSLayers[] | object>;
     gcs: Record<TypeDisplayLanguage, GeoCoreConfigResponseGCSLayers>[];
 };
+/** The RCS response item containing layer definitions. */
 export type GeoCoreConfigResponseRCSLayers = {
     layers: GeoCoreConfigResponseLayer[];
 };
+/** The GCS response item containing layer overrides and package configs. */
 export type GeoCoreConfigResponseGCSLayers = {
-    layers?: GeoCoreConfigResponseGCSLayer;
+    listOfLayerEntryConfig?: TypeLayerEntryConfig[];
     packages?: GeoCoreConfigResponsePackages;
-};
-export type GeoCoreConfigResponseGCSLayer = {
-    layerName: string;
-    source?: TypeBaseSourceInitialConfig;
 };
 export type GeoCoreConfigResponsePackages = {
     /** The geochart configurations. */
@@ -59,14 +58,17 @@ export type GeoCoreConfigResponsePackages = {
     /** Optional time-slider configurations. */
     'time-slider'?: GeoViewTimeSliderConfig[];
 };
+/** The GeoCore geochart package payload. */
 export type GeoChartGeoCoreConfig = {
     layers: GeoChartGeoCoreConfigLayer;
 };
+/** The GeoCore geochart layer payload. */
 export type GeoChartGeoCoreConfigLayer = {
     layerId: string;
     propertyValue: string;
     propertyDisplay: string;
 };
+/** The RCS layer payload used to construct GeoView layer configs. */
 export type GeoCoreConfigResponseLayer = {
     id: string;
     name: string;
@@ -89,6 +91,8 @@ export type GeoViewTimeSliderConfig = {
 export type UUIDmapConfigReaderResponse = {
     /** The parsed layer configurations. */
     layers: TypeGeoviewLayerConfig[];
+    /** Optional parsed custom list of layer entry config from GCS. */
+    customListOfLayerEntryConfig?: TypeLayerEntryConfig[];
     /** Optional geochart configurations. */
     geocharts?: GeoViewGeoChartConfig[];
     /** Optional time-slider configurations. */

@@ -30,5 +30,15 @@ export declare const Select: import("react").ForwardRefExoticComponent<{
      */
     MenuProps?: Partial<MenuProps>;
     sx?: SxProps<Theme>;
+    /**
+     * If true, the selected value is rendered when the value is empty.
+     * Used with renderValue to display placeholder-style content.
+     */
+    displayEmpty?: boolean;
+    /**
+     * Render function for the selected value display.
+     * Allows custom rendering of the selected value in the input.
+     */
+    renderValue?: (value: unknown) => React.ReactNode;
 } & import("react").AriaAttributes & import("react").RefAttributes<HTMLDivElement>>;
 //# sourceMappingURL=select.d.ts.map

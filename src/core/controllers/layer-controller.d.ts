@@ -219,17 +219,29 @@ export declare class LayerController extends AbstractMapViewerController {
      */
     getExtentFromFeatures(layerPath: string, objectIds: number[], outfield?: string): Promise<Extent>;
     /**
-     * Retrieves the service (metadata) projection code for a specific raster layer.
+     * Zooms to the full extent of a layer.
      *
-     * Looks up the GeoView layer associated with the provided `layerPath`.
-     * If the layer exists and is an instance of `AbstractGVRaster`, it retrieves the
-     * projection defined in the service metadata via `getMetadataProjection()`.
-     *
-     * @param layerPath - The fully qualified path of the layer
-     * @returns The projection code (e.g., "EPSG:4326") defined in the layer's service metadata,
-     * or `undefined` if the layer does not exist, is not a raster layer, or the metadata projection is not available
+     * @param layerPath - The path of the layer to zoom to
+     * @param useAnimation - Optional flag indicating if a zoom animation should be used
+     * @param fitOptions - Optional OL fit options to configure the zoom
+     * @returns A promise that resolves when the zoom animation is complete
+     * @throws {NoBoundsError} When the layer doesn't have bounds
      */
-    getLayerMetatadaProjectionEPSG(layerPath: string): string | undefined;
+    zoomToLayerExtent(layerPath: string, useAnimation?: boolean, fitOptions?: FitOptions): Promise<void>;
+    /**
+     * Zooms to the specified extent, clamping the zoom level to the layer's visible scale range.
+     *
+     * Reads the layer's min/max scale from the store and converts them to OL fit constraints
+     * (maxZoom from maxScale, minResolution from minScale) so the resulting zoom does not exceed
+     * the layer's visibility boundaries.
+     *
+     * @param layerPath - The layer path used to look up scale limits
+     * @param extent - The extent to zoom to
+     * @param useAnimation - Optional flag indicating if a zoom animation should be used
+     * @param fitOptions - Optional OL fit options to merge scale constraints into
+     * @returns A promise that resolves when the zoom animation is complete
+     */
+    zoomToExtentRestricted(layerPath: string, extent: Extent, useAnimation?: boolean, fitOptions?: FitOptions): Promise<void>;
     /**
      * Gets the raster function previews for the ESRI image layer.
      *
@@ -624,14 +636,6 @@ export declare class LayerController extends AbstractMapViewerController {
      * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
      */
     zoomToLayerVisibleScale(layerPath: string): void;
-    /**
-     * Zooms to extents of a layer.
-     *
-     * @param layerPath - The path of the layer to zoom to
-     * @param useAnimation - Indicates if a zoom animation should be used, default: true
-     * @throws {NoBoundsError} When the layer doesn't have bounds
-     */
-    zoomToLayerExtent(layerPath: string, useAnimation?: boolean, fitOptions?: FitOptions): Promise<void>;
     /**
      * Clears any overridden CRS settings on all WMS layers in the map.
      *

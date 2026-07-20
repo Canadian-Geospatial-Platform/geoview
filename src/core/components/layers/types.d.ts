@@ -37,6 +37,8 @@ export interface TypeLegendLayer {
     bounds4326?: Extent;
     /** Layer UI controls configuration. */
     controls?: TypeLayerControls;
+    /** The projection code of the layer's data. */
+    dataProjectionCode?: string;
     /** Timestamp when layer deletion was started. */
     deletionStartTime?: number;
     /** The layer entry id. */

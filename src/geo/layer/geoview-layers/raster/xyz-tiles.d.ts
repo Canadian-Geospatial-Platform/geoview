@@ -1,13 +1,12 @@
 import type { Projection as OLProjection } from 'ol/proj';
 import XYZ from 'ol/source/XYZ';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
+import type { DisplayDateMode } from '@/api/types/map-schema-types';
 import type { TypeSourceTileInitialConfig, TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
-import type { TypeMetadataXYZTiles } from '@/api/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
-import { XYZTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
-import { GVXYZTiles } from '@/geo/layer/gv-layers/tile/gv-xyz-tiles';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
-import type { DisplayDateMode } from '@/api/types/map-schema-types';
+import { XYZTilesLayerEntryConfig, type TypeMetadataXYZTiles } from '@/api/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
+import { GVXYZTiles } from '@/geo/layer/gv-layers/tile/gv-xyz-tiles';
 export type TypeSourceImageXYZTilesInitialConfig = TypeSourceTileInitialConfig;
 export interface TypeXYZTilesConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
     geoviewLayerType: typeof CONST_LAYER_TYPES.XYZ_TILES;
@@ -102,7 +101,7 @@ export declare class XYZTiles extends AbstractGeoViewRaster {
      * @param layerConfig - The XYZTiles layer entry configuration to initialize with metadata
      * @param metadata - The metadata object containing information about the layers, which may include a list of layer entry configurations or a list of layers (for ESRI MapServer XYZ Tiles)
      */
-    static initLayerMetadata(layerConfig: XYZTilesLayerEntryConfig, metadata: TypeMetadataXYZTiles | undefined): void;
+    static initLayerMetadata(layerConfig: XYZTilesLayerEntryConfig, metadata: TypeMetadataXYZTiles | undefined): Promise<void>;
     /**
      * Processes an XYZ Tiles GeoviewLayerConfig and returns a promise
      * that resolves to an array of `ConfigBaseClass` layer entry configurations.

@@ -28,7 +28,7 @@ export declare class GVWMTS extends AbstractGVTile {
      *
      * @returns The WMTS source instance associated with this layer.
      */
-    getOLSource(): WMTSSource;
+    protected getOLSource(): WMTSSource;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
      *

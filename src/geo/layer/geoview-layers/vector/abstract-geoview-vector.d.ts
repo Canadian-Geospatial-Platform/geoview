@@ -5,6 +5,7 @@ import type { TypePostSettings } from '@/api/types/layer-schema-types';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { GVVectorSource } from '@/geo/layer/source/vector-source';
+import type { SourceFeaturesInfo } from '@/geo/utils/utilities';
 /**
  * The AbstractGeoViewVector class.
  */
@@ -34,7 +35,7 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
      * @param readOptions - Options controlling how features are read, including the target `featureProjection`
      * @returns A promise that resolves to an array of OpenLayers features created from the underlying data source
      */
-    protected abstract onCreateVectorSourceLoadFeatures(layerConfig: VectorLayerEntryConfig, sourceOptions: SourceOptions<Feature>, readOptions: ReadOptions): Promise<Feature[]>;
+    protected abstract onCreateVectorSourceLoadFeatures(layerConfig: VectorLayerEntryConfig, sourceOptions: SourceOptions<Feature>, readOptions: ReadOptions): Promise<SourceFeaturesInfo>;
     /**
      * Overrides the way the metadata is fetched.
      *

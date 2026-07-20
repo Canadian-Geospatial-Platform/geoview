@@ -2,7 +2,6 @@ import type BaseImageLayer from 'ol/layer/BaseImage';
 import type ImageSource from 'ol/source/Image';
 import type LayerRenderer from 'ol/renderer/Layer';
 import type { Extent } from 'ol/extent';
-import type { Projection as OLProjection } from 'ol/proj';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import type { GeoViewError } from '@/core/exceptions/geoview-exceptions';
@@ -23,12 +22,6 @@ export declare abstract class AbstractGVRaster extends AbstractGVLayer {
      * @param gvError - The error which has been triggered
      */
     protected onImageLoadError(gvError: GeoViewError): void;
-    /**
-     * Gets the metadata extent projection, if any.
-     *
-     * @returns The OpenLayer projection or undefined when not found
-     */
-    getMetadataProjection(): OLProjection | undefined;
     /**
      * Gets the metadata extent, if any.
      *

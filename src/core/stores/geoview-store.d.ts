@@ -8,6 +8,7 @@ import type { ITimeSliderState } from '@/core/stores/states/time-slider-state';
 import type { IGeochartState } from '@/core/stores/states/geochart-state';
 import type { ISwiperState } from '@/core/stores/states/swiper-state';
 import type { IDrawerState } from './states/drawer-state';
+import type { IFilterPanelState } from '@/core/stores/states/filter-panel-state';
 import type { IUIState } from '@/core/stores/states/ui-state';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 export type TypeSetStore = (partial: IGeoviewState | Partial<IGeoviewState> | ((state: IGeoviewState) => IGeoviewState | Partial<IGeoviewState>), replace?: false | undefined) => void;
@@ -26,6 +27,7 @@ export interface IGeoviewState {
     timeSliderState: ITimeSliderState;
     swiperState: ISwiperState;
     drawerState: IDrawerState;
+    filterPanelState: IFilterPanelState;
 }
 export declare const geoviewStoreDefinition: (set: TypeSetStore, get: TypeGetStore) => IGeoviewState;
 export declare const geoviewStoreDefinitionWithSubscribeSelector: import("zustand").StateCreator<IGeoviewState, [], [["zustand/subscribeWithSelector", never]]>;

@@ -33,6 +33,12 @@ export declare abstract class AbstractGVVector extends AbstractGVLayer {
      */
     protected constructor(olSource: VectorSource<Feature<Geometry>>, layerConfig: VectorLayerEntryConfig);
     /**
+     * Gets the projection of the data based on the projection of the source.
+     *
+     * @returns The OpenLayers projection of the source data, or undefined if not available
+     */
+    getDataProjection(): OLProjection | undefined;
+    /**
      * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
      *
      * @returns The strongly-typed OpenLayers type.
@@ -43,7 +49,7 @@ export declare abstract class AbstractGVVector extends AbstractGVLayer {
      *
      * @returns The VectorSource source instance associated with this layer.
      */
-    getOLSource(): GVVectorSource;
+    protected getOLSource(): GVVectorSource;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
      *
@@ -188,6 +194,12 @@ export declare abstract class AbstractGVVector extends AbstractGVLayer {
      * @throws {LayerStatusErrorError} When the layer is already in (or enters) the `error` state before the style is applied
      */
     waitForStyleAppliedVector(): Promise<void>;
+    /**
+     * Gets the OpenLayers Layer Source projection.
+     *
+     * @returns The OpenLayers Layer Source projection or undefined
+     */
+    getSourceProjection(): OLProjection | undefined;
     /**
      * Registers a style applied event handler.
      *

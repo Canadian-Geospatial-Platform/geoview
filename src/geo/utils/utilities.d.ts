@@ -1,6 +1,7 @@
 import type { Feature, MapBrowserEvent } from 'ol';
 import type { ReadOptions } from 'ol/format/Feature';
 import type Geometry from 'ol/geom/Geometry';
+import type { ProjectionLike } from 'ol/proj';
 import { Style } from 'ol/style';
 import type { Color } from 'ol/color';
 import type { Extent } from 'ol/extent';
@@ -18,6 +19,7 @@ export declare const layerTypes: Record<"CSV" | "KML" | "WKB" | "ESRI_DYNAMIC" |
 interface EsriJSONReadResult {
     features: Feature<Geometry>[];
     hadInvalidGeometries: boolean;
+    dataProjection?: ProjectionLike;
 }
 export declare abstract class GeoUtilities {
     #private;
@@ -317,45 +319,66 @@ export declare abstract class GeoUtilities {
     /**
      * Reads OpenLayers features from an Esri features object.
      *
-     * @param features - The Features data to read
-     * @param options - Optional read options such as projection or extent
-     * @returns An array of parsed OpenLayers Feature and whether there were any invalid geometries
+     * If `inProjection` is provided, it is registered via `addProjectionIfMissing` and used as the data projection.
+     * Otherwise, the projection is detected from the `spatialReference` embedded in the Esri JSON response.
+     * When parsing fails due to invalid geometries, the method attempts to clean them and retries.
+     *
+     * @param features - The Esri JSON features data to read
+     * @param inProjection - Optional input data projection (falls back to spatialReference embedded in the Esri JSON)
+     * @param outProjection - Optional output feature projection
+     * @returns A promise that resolves with the parsed features, the interpreted source data projection, and whether there were any invalid geometries
      * @throws {Error} When the EsriJSON data is invalid and cannot be parsed, even after attempting to clean invalid geometries
      */
-    static readFeaturesFromEsriJSON(features: unknown, options: ReadOptions | undefined): EsriJSONReadResult;
+    static readFeaturesFromEsriJSON(features: unknown, inProjection?: ProjectionLike, outProjection?: ProjectionLike): Promise<EsriJSONReadResult>;
     /**
      * Reads OpenLayers features from a GeoJSON object.
      *
+     * The projection is resolved in priority order: CRS embedded in the GeoJSON > `inProjection` > format default.
+     * When resolved, the projection is registered via `addProjectionIfMissing` before reading features.
+     *
      * @param geojson - The GeoJSON data to read
-     * @param options - Optional read options such as projection or extent
-     * @returns An array of parsed OpenLayers Feature instances
+     * @param inProjection - Optional input data projection (overridden by CRS embedded in the GeoJSON)
+     * @param outProjection - Optional output feature projection
+     * @returns A promise that resolves with the parsed features and the interpreted source data projection
      */
-    static readFeaturesFromGeoJSON(geojson: unknown, options: ReadOptions | undefined): Feature<Geometry>[];
+    static readFeaturesFromGeoJSON(geojson: unknown, inProjection?: ProjectionLike, outProjection?: ProjectionLike): Promise<SourceFeaturesInfo>;
     /**
-     * Reads OpenLayers features from an WFS features object.
+     * Reads OpenLayers features from a WFS features object.
      *
-     * @param features - The Features data to read
+     * The projection is resolved in priority order: srsName embedded in the GML > `inProjection` > format default.
+     * When resolved, the projection is registered via `addProjectionIfMissing` before reading features.
+     *
+     * @param wfs - The WFS data to read (XML string or document)
      * @param version - The WFS version
-     * @param options - Optional read options such as projection or extent
-     * @returns An array of parsed OpenLayers Feature instances
+     * @param inProjection - Optional input data projection (overridden by srsName embedded in the GML)
+     * @param outProjection - Optional output feature projection
+     * @returns A promise that resolves with the parsed features and the interpreted source data projection
      */
-    static readFeaturesFromWFS(features: unknown, version: string, options: ReadOptions | undefined): Feature<Geometry>[];
+    static readFeaturesFromWFS(wfs: unknown, version: string, inProjection?: ProjectionLike, outProjection?: ProjectionLike): Promise<SourceFeaturesInfo>;
     /**
-     * Reads OpenLayers features from a WKBObject object.
+     * Reads OpenLayers features from a WKB object.
      *
-     * @param wkbObject - The WKBObject data to read
-     * @param options - Optional read options such as projection or extent
-     * @returns An array of parsed OpenLayers Feature instances
+     * WKB does not embed projection metadata, so `inProjection` defaults to EPSG:4326 when not provided.
+     * The resolved projection is registered via `addProjectionIfMissing` before reading features.
+     *
+     * @param wkbObject - The WKB data to read (string, ArrayBuffer, or ArrayBufferView)
+     * @param inProjection - Optional input data projection (defaults to EPSG:4326 if not provided)
+     * @param outProjection - Optional output feature projection
+     * @returns A promise that resolves with the parsed features and the interpreted source data projection
      */
-    static readFeaturesFromWKB(wkbObject: string | ArrayBuffer | ArrayBufferView<ArrayBufferLike>, options: ReadOptions | undefined): Feature<Geometry>[];
+    static readFeaturesFromWKB(wkbObject: string | ArrayBuffer | ArrayBufferView<ArrayBufferLike>, inProjection?: ProjectionLike, outProjection?: ProjectionLike): Promise<SourceFeaturesInfo>;
     /**
      * Reads OpenLayers features from a KML object.
      *
+     * The projection is resolved in priority order: srsName embedded in the KML > `inProjection` > format default.
+     * When resolved, the projection is registered via `addProjectionIfMissing` before reading features.
+     *
      * @param kmlObject - The KML data to read
-     * @param options - Optional read options such as projection or extent
-     * @returns An array of parsed OpenLayers Feature instances
+     * @param inProjection - Optional input data projection (overridden by srsName embedded in the KML)
+     * @param outProjection - Optional output feature projection
+     * @returns A promise that resolves with the parsed features and the interpreted source data projection
      */
-    static readFeaturesFromKML(kmlObject: unknown, options: ReadOptions | undefined): Feature<Geometry>[];
+    static readFeaturesFromKML(kmlObject: unknown, inProjection?: ProjectionLike, outProjection?: ProjectionLike): Promise<SourceFeaturesInfo>;
     /**
      * Default drawing style for GeoView.
      *
@@ -487,7 +510,7 @@ export declare abstract class GeoUtilities {
      *
      * @param mapEvent - The map event
      * @param projCode - The map projection code
-     * @returns An object representing pointer position information
+     * @returns An object representing pointer position information in EPSG:4326
      */
     static getPointerPositionFromMapEvent(mapEvent: MapBrowserEvent, projCode: string): TypeMapMouseInfo;
     /**
@@ -547,5 +570,12 @@ export type CallbackNewMetadataDelegate = (proxiedUrl: string, proxyUsed: string
 export interface TypeVectorLegend extends TypeLegend {
     legend: TypeVectorLayerStyles;
 }
+/** Represents the result of reading features from a source, including the parsed features and their original projection. */
+export type SourceFeaturesInfo = {
+    /** The array of parsed OpenLayers features. */
+    features: Feature<Geometry>[];
+    /** The projection the source data was in, or undefined if it could not be determined. */
+    dataProjection: ProjectionLike;
+};
 export {};
 //# sourceMappingURL=utilities.d.ts.map

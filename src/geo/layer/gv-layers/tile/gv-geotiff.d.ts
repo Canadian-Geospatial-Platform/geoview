@@ -28,7 +28,7 @@ export declare class GVGeoTIFF extends AbstractGVTile {
      *
      * @returns The GeoTIFF source instance associated with this layer.
      */
-    getOLSource(): GeoTIFFSource;
+    protected getOLSource(): GeoTIFFSource;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
      *

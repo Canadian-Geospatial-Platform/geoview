@@ -14,8 +14,9 @@ export declare class LayerFilters {
      * @param classFilter - Optional filter regarding the class renderers
      * @param dataFilter - Optional filter regarding data
      * @param timeFilter - Optional filter regarding time
+     * @param panelFilter - Optional filter from the filter panel
      */
-    constructor(initialFilter?: string, classFilter?: string, dataFilter?: string, timeFilter?: string);
+    constructor(initialFilter?: string, classFilter?: string, dataFilter?: string, timeFilter?: string, panelFilter?: string);
     /**
      * Gets the initial base filter.
      *
@@ -89,6 +90,24 @@ export declare class LayerFilters {
      */
     hasTimeFilter(): boolean;
     /**
+     * Gets the panel filter.
+     *
+     * @returns The panel filter or undefined when not set
+     */
+    getPanelFilter(): string | undefined;
+    /**
+     * Sets the panel filter.
+     *
+     * @param panelFilter - The panel filter
+     */
+    setPanelFilter(panelFilter: string | undefined): void;
+    /**
+     * Gets if the layer has a panel filter.
+     *
+     * @returns True when the layer has a panel filter
+     */
+    hasPanelFilter(): boolean;
+    /**
      * Returns all active data-related filters combined into a single expression
      * using the logical AND operator.
      *
@@ -128,6 +147,6 @@ export declare class LayerFilters {
      */
     static joinWithAnd(filters: (string | undefined)[], extraSpacing?: string): string;
 }
-/** Represents the types of filters that can be composed: initial, class, data, or time-based filters. */
-export type FilterCategory = 'initial' | 'class' | 'data' | 'time';
+/** Represents the types of filters that can be composed: initial, class, data, panel, or time-based filters. */
+export type FilterCategory = 'initial' | 'class' | 'data' | 'panel' | 'time';
 //# sourceMappingURL=layer-filters.d.ts.map

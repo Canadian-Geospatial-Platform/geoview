@@ -233,6 +233,18 @@ export declare abstract class ConfigBaseClass {
      */
     initMaxScaleFromMetadata(maxScaleMetadata?: number): void;
     /**
+     * Gets the most restrictive min scale across this layer and all its ancestors.
+     *
+     * @returns The smallest min scale value found, or undefined if none is defined
+     */
+    getMinScaleIncludingParent(): number | undefined;
+    /**
+     * Gets the most restrictive max scale across this layer and all its ancestors.
+     *
+     * @returns The largest max scale value found, or undefined if none is defined
+     */
+    getMaxScaleIncludingParent(): number | undefined;
+    /**
      * Gets the initial settings.
      *
      * @returns The initial settings

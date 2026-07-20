@@ -9,6 +9,7 @@ import { KmlLayerEntryConfig } from '@/api/config/validation-classes/vector-vali
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { GVKML } from '@/geo/layer/gv-layers/vector/gv-kml';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
+import { type SourceFeaturesInfo } from '@/geo/utils/utilities';
 import type { DisplayDateMode } from '@/api/types/map-schema-types';
 export interface TypeKmlLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
     geoviewLayerType: typeof CONST_LAYER_TYPES.KML;
@@ -55,7 +56,7 @@ export declare class KML extends AbstractGeoViewVector {
      * @param readOptions - Options controlling how features are read, including the target `featureProjection`
      * @returns A promise that resolves to an array of OpenLayers features
      */
-    protected onCreateVectorSourceLoadFeatures(layerConfig: VectorLayerEntryConfig, sourceOptions: SourceOptions<Feature>, readOptions: ReadOptions): Promise<Feature[]>;
+    protected onCreateVectorSourceLoadFeatures(layerConfig: VectorLayerEntryConfig, sourceOptions: SourceOptions<Feature>, readOptions: ReadOptions): Promise<SourceFeaturesInfo>;
     /**
      * Overrides the creation of the GV Layer.
      *

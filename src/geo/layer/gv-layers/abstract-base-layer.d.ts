@@ -1,7 +1,7 @@
 import type BaseLayer from 'ol/layer/Base';
 import type { Projection as OLProjection } from 'ol/proj';
 import type { Extent } from '@/api/types/map-schema-types';
-import type { TypeLayerStatus, EffectiveLayerScales } from '@/api/types/layer-schema-types';
+import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
@@ -76,12 +76,10 @@ export declare abstract class AbstractBaseGVLayer {
      * minScale and maxScale are both inclusive. This ensures a layer with maxScale=41999
      * is visible at exactly scale 41999.
      *
-     * @param currentResolution - Optional. The current map resolution in map units per pixel
-     * @param currentScale - Optional. The current map scale denominator (1:X)
-     * @param effectiveScales - Optional. Effective layer scales with buffer thresholds
+     * @param currentResolution - The current map resolution
      * @returns True if the layer is in visible range
      */
-    protected onIsInVisibleRange(currentResolution: number | undefined, currentScale?: number, effectiveScales?: EffectiveLayerScales): boolean;
+    protected onIsInVisibleRange(currentResolution: number | undefined): boolean;
     /**
      * Gets the attributions for the layer by calling the overridable function 'onGetAttributions'.
      * When the layer is a GVLayer, its layer attributions are returned.
@@ -353,12 +351,10 @@ export declare abstract class AbstractBaseGVLayer {
      * minScale and maxScale are both inclusive. This ensures a layer with maxScale=41999
      * is visible at exactly scale 41999.
      *
-     * @param currentResolution - Optional. The current map resolution in map units per pixel
-     * @param currentScale - Optional. The current map scale denominator (1:X)
-     * @param effectiveScales - Optional. Effective layer scales with buffer thresholds
+     * @param currentResolution - The current map resolution
      * @returns True if the layer is in visible range
      */
-    isInVisibleRange(currentResolution: number | undefined, currentScale?: number, effectiveScales?: EffectiveLayerScales): boolean;
+    isInVisibleRange(currentResolution: number | undefined): boolean;
     /**
      * Registers a layer name changed event handler.
      *

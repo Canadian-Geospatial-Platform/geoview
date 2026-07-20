@@ -152,7 +152,7 @@ export declare class GeometryApi {
      *
      * @param geometryGroupId - The id of the geometry group to return
      * @returns The geometry group
-     * @throws {InvaliGeometryGroupIdError} When the provided geometry group id does not exist
+     * @throws {InvalidGeometryGroupIdError} When the provided geometry group id does not exist
      */
     getGeometryGroup(geometryGroupId: string): FeatureCollection;
     /**
@@ -172,14 +172,14 @@ export declare class GeometryApi {
      * Shows the identified geometry group on the map.
      *
      * @param geometryGroupId - The id of the group to show on the map
-     * @throws {InvaliGeometryGroupIdError} When the provided geometry group id does not exist
+     * @throws {InvalidGeometryGroupIdError} When the provided geometry group id does not exist
      */
     setGeometryGroupAsVisible(geometryGroupId: string): void;
     /**
      * Hides the identified geometry group from the map.
      *
      * @param geometryGroupId - The id of the group to hide from the map
-     * @throws {InvaliGeometryGroupIdError} When the provided geometry group id does not exist
+     * @throws {InvalidGeometryGroupIdError} When the provided geometry group id does not exist
      */
     setGeometryGroupAsInvisible(geometryGroupId: string): void;
     /**
@@ -187,7 +187,7 @@ export declare class GeometryApi {
      *
      * @param geometryGroupId - The id of the group
      * @returns The z-index value of the vector layer
-     * @throws {InvaliGeometryGroupIdError} When the provided geometry group id does not exist
+     * @throws {InvalidGeometryGroupIdError} When the provided geometry group id does not exist
      */
     getGeometryGroupZIndex(geometryGroupId: string): number;
     /**
@@ -195,7 +195,7 @@ export declare class GeometryApi {
      *
      * @param geometryGroupId - The id of the group
      * @param zIndex - The z-index value to set
-     * @throws {InvaliGeometryGroupIdError} When the provided geometry group id does not exist
+     * @throws {InvalidGeometryGroupIdError} When the provided geometry group id does not exist
      */
     setGeometryGroupZIndex(geometryGroupId: string, zIndex: number): void;
     /**
@@ -219,7 +219,7 @@ export declare class GeometryApi {
      *
      * @param featureId - The feature id to be deleted
      * @param geometryGroupid - The group id
-     * @throws {InvaliGeometryGroupIdError} When the provided geometry group id does not exist
+     * @throws {InvalidGeometryGroupIdError} When the provided geometry group id does not exist
      */
     deleteGeometryFromGroup(featureId: string, geometryGroupid: string): void;
     /**
@@ -227,7 +227,7 @@ export declare class GeometryApi {
      *
      * @param geometryGroupid - The group id
      * @returns The group with empty layers
-     * @throws {InvaliGeometryGroupIdError} When the provided geometry group id does not exist
+     * @throws {InvalidGeometryGroupIdError} When the provided geometry group id does not exist
      */
     deleteGeometriesFromGroup(geometryGroupid: string): FeatureCollection;
     /**

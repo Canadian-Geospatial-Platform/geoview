@@ -13,6 +13,12 @@ export declare class GVVectorTiles extends AbstractGVVectorTile {
      */
     constructor(olSource: VectorTile, layerConfig: VectorTilesLayerEntryConfig);
     /**
+     * Gets the resolutions defined in the tile grid of the source.
+     *
+     * @returns The array of tile grid resolutions, or undefined if no tile grid is available
+     */
+    getTileGridResolutions(): number[] | undefined;
+    /**
      * Used to change the style of the vector tile layer.
      *
      * @param styleUrl - The style URL to apply to the layer.

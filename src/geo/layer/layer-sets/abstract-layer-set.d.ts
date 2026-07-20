@@ -4,7 +4,7 @@ import type { LayerDomain } from '@/core/domains/layer-domain';
 import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
-import { MapViewer } from '@/geo/map/map-viewer';
+import type { MapViewer } from '@/geo/map/map-viewer';
 import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { Coordinate } from 'ol/coordinate';

@@ -142,7 +142,7 @@ export declare class WMS extends AbstractGeoViewRaster {
      * @param layerCapabilities - The WMS capabilities metadata for the specific layer
      * @param displayDateMode - The display date mode to use when creating time dimensions
      */
-    static initLayerMetadata(layerConfig: OgcWmsLayerEntryConfig, layerCapabilities: TypeMetadataWMSCapabilityLayer | undefined, displayDateMode: DisplayDateMode): void;
+    static initLayerMetadata(layerConfig: OgcWmsLayerEntryConfig, layerCapabilities: TypeMetadataWMSCapabilityLayer | undefined, displayDateMode: DisplayDateMode): Promise<void>;
     /**
      * Processes a WMS GeoviewLayerConfig and returns a promise
      * that resolves to an array of `ConfigBaseClass` layer entry configurations.

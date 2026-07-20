@@ -10,6 +10,7 @@ import type { DrawerController } from '@/core/controllers/drawer-controller';
 import type { PluginController } from '@/core/controllers/plugin-controller';
 import type { TimeSliderController } from '@/core/controllers/time-slider-controller';
 import type { GeoChartController } from '@/core/controllers/geochart-controller';
+import type { FilterPanelController } from '@/core/controllers/filter-panel-controller';
 /**
  * Hook to access the MapController from the controller context.
  *
@@ -141,4 +142,23 @@ export declare function useGeoChartController(): GeoChartController;
  * @throws {Error} When used outside of a ControllerContext.Provider
  */
 export declare function useGeoChartControllerIfExists(): GeoChartController | undefined;
+/**
+ * Hook to access the FilterPanelController from the controller context.
+ *
+ * @returns The filter panel controller instance
+ * @throws {Error} When used outside of a ControllerContext.Provider
+ * @throws {Error} When the FilterPanel plugin is not configured
+ */
+export declare function useFilterPanelController(): FilterPanelController;
+/**
+ * Hook to optionally access the FilterPanelController from the controller context.
+ *
+ * Unlike `useFilterPanelController`, this hook does not throw when the FilterPanel
+ * plugin is not configured. Use this in shared components that may or may not
+ * have the filter panel plugin active.
+ *
+ * @returns The filter panel controller instance, or undefined if the plugin is not configured
+ * @throws {Error} When used outside of a ControllerContext.Provider
+ */
+export declare function useFilterPanelControllerIfExists(): FilterPanelController | undefined;
 //# sourceMappingURL=use-controllers.d.ts.map

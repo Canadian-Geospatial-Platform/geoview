@@ -7,6 +7,7 @@ export declare class GeoCore {
      * Gets GeoView layer configurations list from the UUIDs of the list of layer entry configurations.
      *
      * @param uuid - The UUID of the layer
+     * @param currentLayerIds - The current layer ids already registered on the map
      * @param language - The language
      * @param mapId - Optional map id
      * @param layerConfig - Optional layer configuration

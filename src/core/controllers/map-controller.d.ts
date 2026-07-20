@@ -39,13 +39,34 @@ export declare class MapController extends AbstractMapViewerController {
     /**
      * Zooms to the specified extent.
      *
-     * @param extent - The extent to zoom to
+     * @param extent - The extent to zoom to (in map projection)
      * @param useAnimation - Indicates if a zoom animation should be used, default: true
      * @param options - The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 13, duration: 500 })
      * @returns A promise that resolves when the zoom animation is complete
      * @throws {InvalidExtentError} When the extent is invalid
      */
     zoomToExtent(extent: Extent, useAnimation?: boolean, options?: FitOptions): Promise<void>;
+    /**
+     * Converts a zoom level to a map scale denominator.
+     *
+     * @param zoom - The zoom level
+     * @returns The scale denominator (e.g. 50000 for 1:50,000), or undefined if conversion is unavailable
+     */
+    getScaleFromZoom(zoom: number): number | undefined;
+    /**
+     * Converts a map scale denominator to the corresponding zoom level.
+     *
+     * @param scale - The scale denominator (e.g. 50000 for 1:50,000)
+     * @returns The zoom level for the given scale, or undefined if conversion is unavailable
+     */
+    getZoomFromScale(scale: number): number | undefined;
+    /**
+     * Converts a map scale denominator into the corresponding OpenLayers resolution.
+     *
+     * @param scale - The scale denominator (e.g. 50000 for 1:50,000)
+     * @returns The map resolution in map units per pixel, or undefined if conversion is unavailable
+     */
+    getResolutionFromScale(scale: number): number | undefined;
     /**
      * Returns to initial view state of map using config.
      *
@@ -56,7 +77,7 @@ export declare class MapController extends AbstractMapViewerController {
     /**
      * Zooms to geolocation position provided.
      *
-     * @param position - Info on position to zoom to
+     * @param position - lon/lat position to zoom to
      * @returns A promise that resolves when the zoom animation is complete
      */
     zoomToMyLocation(position: GeolocationPosition): Promise<void>;

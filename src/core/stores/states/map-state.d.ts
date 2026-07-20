@@ -171,12 +171,18 @@ export declare const useStoreMapExtent: () => Extent | undefined;
 export declare const getStoreMapSize: (mapId: string) => Size;
 /** Selects the map size from the store. */
 export declare const useStoreMapSize: () => Size;
+/** Returns the click marker state from the store. */
+export declare const getStoreMapClickMarker: (mapId: string) => TypeClickMarker | undefined;
+/** Selects the click marker state from the store. */
+export declare const useStoreMapClickMarker: () => TypeClickMarker | undefined;
+/** Returns whether the north arrow is enabled. */
+export declare const getStoreMapNorthArrow: (mapId: string) => boolean;
+/** Selects whether the north arrow is enabled from the store. */
+export declare const useStoreMapNorthArrow: () => boolean;
 /** Selects the map attribution strings from the store. */
 export declare const useStoreMapAttribution: () => string[];
 /** Selects the map center coordinates from the store. */
 export declare const useStoreMapCenterCoordinates: () => Coordinate;
-/** Selects the click marker state from the store. */
-export declare const useStoreMapClickMarker: () => TypeClickMarker | undefined;
 /** Selects whether the map has a geoview basemap layer from the store. */
 export declare const useStoreMapHasGeoviewBasemapLayer: () => boolean;
 /** Selects whether the map is fixed to north from the store. */
@@ -187,8 +193,6 @@ export declare const useStoreMapIsMouseInsideMap: () => boolean;
 export declare const useStoreMapLoaded: () => boolean;
 /** Selects whether the map is displayed from the store. */
 export declare const useStoreMapDisplayed: () => boolean;
-/** Selects whether the north arrow is enabled from the store. */
-export declare const useStoreMapNorthArrow: () => boolean;
 /** Selects the north arrow element state from the store. */
 export declare const useStoreMapNorthArrowElement: () => TypeNorthArrow;
 /** Selects the zoom level at which the overview map hides from the store. */

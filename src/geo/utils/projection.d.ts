@@ -124,21 +124,26 @@ export declare abstract class Projection {
      * @param projection - Object containing wkid and possibly latestWkid from service metadata
      * @returns A promise that resolves when the projection is added
      */
-    static addProjection(projection: TypeProjection): Promise<void>;
+    static addProjection(projection: TypeProjection): Promise<OLProjection>;
     /**
      * Fetches definitions for unsupported projections and adds them.
      *
      * @param code - Projection code number
      * @returns A promise that resolves when the projection is added
      */
-    static addProjectionCode(code: number): Promise<void>;
+    static addProjectionCode(code: number): Promise<OLProjection>;
     /**
-     * Checks if a projection exists for GeoView and if not it adds it on-the-fly using the provided projection string information.
+     * Checks if a projection exists for GeoView and if not it adds it on-the-fly by fetching its definition from epsg.io.
      *
-     * @param projection - The projection string to check if existing and to add when not existing
-     * @returns A promise that resolves when the projection is added if missing
+     * Accepts:
+     * - A `TypeProjection` object (with `wkid` / `latestWkid` / `wkt`)
+     * - A `ProjectionLike` string (e.g., `"EPSG:4326"`, CRS URI/URN, or an OLProjection instance)
+     * - A numeric EPSG code (e.g., `4326`)
+     *
+     * @param projection - The projection identifier to check and register if missing
+     * @returns A promise that resolves with the OLProjection
      */
-    static addProjectionIfMissing(projection: TypeProjection | ProjectionLike | undefined): Promise<void>;
+    static addProjectionIfMissing(projection: TypeProjection | ProjectionLike | number): Promise<OLProjection>;
     /**
      * Wrapper around OpenLayers get function that fetches a Projection object for the code specified.
      *
@@ -154,12 +159,44 @@ export declare abstract class Projection {
      */
     static getProjectionFromWKT(customWKT: string): OLProjection;
     /**
-     * Wrapper around OpenLayers get function that fetches a Projection object for the code specified.
+     * Extracts the projection name from a WKT string.
      *
-     * @param projection - A code string which is a combination of authority and identifier such as "EPSG:4326"
-     * @returns Projection object, or undefined if not found
+     * Parses the first quoted string after the opening keyword (e.g., `PROJCS["NAD83 / BC Albers", ...]`
+     * returns `"NAD83 / BC Albers"`).
+     *
+     * @param wkt - The WKT projection definition string
+     * @returns The extracted projection name, or undefined if not found
      */
-    static getProjectionFromString(projection: ProjectionLike): OLProjection;
+    static readProjectionNameFromWKT(wkt: string): string | undefined;
+    /**
+     * Resolves a projection from various input formats to an OpenLayers Projection object.
+     *
+     * Supports:
+     * - Authority:code strings (e.g., `"EPSG:4326"`, `"CRS:84"`)
+     * - Numeric EPSG codes (e.g., `4326`, `3857`)
+     * - Numeric strings (e.g., `"4326"`, `"3857"`)
+     * - OGC CRS URIs (e.g., `"http://www.opengis.net/def/crs/EPSG/0/4326"`)
+     * - OGC URNs (e.g., `"urn:ogc:def:crs:EPSG::4326"`)
+     * - Existing OLProjection objects (pass-through)
+     *
+     * @param projection - A projection identifier (string, number, or OLProjection)
+     * @returns The resolved OpenLayers Projection object
+     * @throws {InvalidProjectionError} When the projection cannot be resolved
+     */
+    static getProjectionFromStringOrNumber(projection: ProjectionLike | number): OLProjection;
+    /**
+     * Resolves an OGC CRS URI or standard code string to an OpenLayers projection.
+     *
+     * Supports formats:
+     * - `http://www.opengis.net/def/crs/EPSG/0/4326` → `EPSG:4326`
+     * - `http://www.opengis.net/def/crs/OGC/1.3/CRS84` → `CRS:84`
+     * - `urn:ogc:def:crs:EPSG::4326` → `EPSG:4326`
+     * - `EPSG:4326` (pass-through)
+     *
+     * @param crs - The CRS string (URI, URN, or authority:code)
+     * @returns The resolved OpenLayers projection, or undefined if unrecognized
+     */
+    static getProjectionFromCRS(crs: string): OLProjection | undefined;
     /**
      * Gets the projection representing a LonLat projection.
      *
@@ -175,20 +212,21 @@ export declare abstract class Projection {
      */
     static getResolution(projection: string, center: Coordinate): number;
     /**
-     * Reads the numeric EPSG code from a projection string.
+     * Reads the numeric EPSG code from a projection identifier.
      *
-     * Supports case-insensitive formats such as:
-     * - `"EPSG:4326"`
-     * - `"epsg:3857"`
-     * - `"EpSg: 1234"`
+     * Supports:
+     * - Numeric input (e.g., `4326`) — returned immediately
+     * - Case-insensitive `"EPSG:4326"`, `"epsg:3857"`, `"EpSg: 1234"` strings
+     * - OLProjection objects (extracts the code via `getCode()`)
+     *
      * The function trims whitespace and validates that the string matches a proper
      * `EPSG:<number>` pattern. Returns `undefined` if the format is invalid or the
      * numeric part is not a valid number.
      *
-     * @param projection - The projection like identifier containing the EPSG code
+     * @param projection - The projection identifier containing the EPSG code (string, number, or OLProjection)
      * @returns The extracted EPSG numeric code, or `undefined` if invalid
      */
-    static readEPSGNumber(projection: ProjectionLike): number | undefined;
+    static readEPSGNumber(projection: ProjectionLike | number): number | undefined;
     /**
      * Reads an extent and verifies if it might be reversed (ymin,xmin,ymax,ymin) and when
      * so puts it back in order (xmin,ymin,xmax,ymax).
@@ -214,7 +252,7 @@ export declare abstract class Projection {
  * A Type to represent a Projection in JSON.
  */
 export type TypeProjection = {
-    wkid: number;
+    wkid?: number;
     latestWkid?: number;
     wkt?: string;
 };

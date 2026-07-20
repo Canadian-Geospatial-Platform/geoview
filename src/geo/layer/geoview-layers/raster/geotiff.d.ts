@@ -15,7 +15,6 @@ export interface TypeGeoTIFFLayerConfig extends Omit<TypeGeoviewLayerConfig, 'li
  * A class to add GeoTIFF layer.
  */
 export declare class GeoTIFF extends AbstractGeoViewRaster {
-    #private;
     /**
      * Constructs a GeoTIFF Layer configuration processor.
      *

@@ -10,6 +10,7 @@ import { CsvLayerEntryConfig } from '@/api/config/validation-classes/vector-vali
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { GVCSV } from '@/geo/layer/gv-layers/vector/gv-csv';
 import type { DisplayDateMode } from '@/api/types/map-schema-types';
+import type { SourceFeaturesInfo } from '@/geo/utils/utilities';
 export interface TypeCSVLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
     geoviewLayerType: typeof CONST_LAYER_TYPES.CSV;
     listOfLayerEntryConfig: CsvLayerEntryConfig[];
@@ -56,7 +57,7 @@ export declare class CSV extends AbstractGeoViewVector {
      * @param readOptions - Options controlling how features are read, including the target `featureProjection`
      * @returns A promise that resolves to an array of OpenLayers features
      */
-    protected onCreateVectorSourceLoadFeatures(layerConfig: VectorLayerEntryConfig, sourceOptions: SourceOptions<Feature>, readOptions: ReadOptions): Promise<Feature[]>;
+    protected onCreateVectorSourceLoadFeatures(layerConfig: VectorLayerEntryConfig, sourceOptions: SourceOptions<Feature>, readOptions: ReadOptions): Promise<SourceFeaturesInfo>;
     /**
      * Overrides the creation of the GV Layer.
      *
@@ -110,13 +111,19 @@ export declare class CSV extends AbstractGeoViewVector {
      */
     static processGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, url: string, layerIds: string[], isTimeAware: boolean): Promise<ConfigBaseClass[]>;
     /**
-     * Converts csv text to feature array.
+     * Converts CSV text into an array of OpenLayers point features.
      *
-     * @param csvData - The data from the .csv file
-     * @param layerConfig - The config of the layer
-     * @param outProjection - The output projection for the features
-     * @returns The array of features
+     * Parses the CSV rows, identifies latitude/longitude columns by header name,
+     * reprojects coordinates if necessary, and builds a Feature with Point geometry
+     * for each valid row.
+     *
+     * @param csvData - The raw CSV text content
+     * @param layerConfig - The CSV layer entry configuration containing source settings (separator, etc.)
+     * @param inProjection - The projection of the coordinates in the CSV data
+     * @param outProjection - The target projection for the output features
+     * @returns The array of OpenLayers features created from the CSV rows
+     * @throws {LayerNoGeographicDataInCSVError} When latitude or longitude columns cannot be identified
      */
-    static convertCsv(csvData: string, layerConfig: CsvLayerEntryConfig, outProjection: ProjectionLike): Feature[];
+    static convertCsv(csvData: string, layerConfig: CsvLayerEntryConfig, inProjection: ProjectionLike, outProjection: ProjectionLike): Feature[];
 }
 //# sourceMappingURL=csv.d.ts.map

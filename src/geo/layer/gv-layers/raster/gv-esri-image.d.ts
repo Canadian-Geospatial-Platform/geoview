@@ -37,7 +37,7 @@ export declare class GVEsriImage extends AbstractGVRaster {
      *
      * @returns The ImageArcGISRest source instance associated with this layer.
      */
-    getOLSource(): ImageArcGISRest;
+    protected getOLSource(): ImageArcGISRest;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
      *
@@ -104,7 +104,7 @@ export declare class GVEsriImage extends AbstractGVRaster {
      * @param serviceDateTemporalMode - Optional temporal mode for date handling
      * @returns The formatted feature info entries
      */
-    protected formatFeatureInfoResult(features: Feature[], layerConfig: EsriImageLayerEntryConfig, language: TypeDisplayLanguage, serviceDateFormat: string | undefined, serviceDateIANA: string | undefined, serviceDateTemporalMode: TemporalMode | undefined): TypeFeatureInfoEntry[];
+    protected formatFeatureInfoResult(features: Feature[], layerConfig: EsriImageLayerEntryConfig, language: TypeDisplayLanguage, includeNoStyleFeatures: boolean, serviceDateFormat: string | undefined, serviceDateIANA: string | undefined, serviceDateTemporalMode: TemporalMode | undefined): TypeFeatureInfoEntry[];
     /**
      * Gets the list of rasterFunctionInfos that are available in the ImageServer
      *
