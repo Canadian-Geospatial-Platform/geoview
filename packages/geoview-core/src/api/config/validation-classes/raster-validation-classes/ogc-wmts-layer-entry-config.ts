@@ -2,7 +2,7 @@ import type {
   ConfigClassOrType,
   TypeGeoviewLayerConfig,
   TypeMetadataWMTSCapabilities,
-  TypeMetadataWMTSContents,
+  TypeWMTSLayerParsedInfo,
 } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { DisplayDateMode } from '@/api/types/map-schema-types';
@@ -67,8 +67,17 @@ export class OgcWmtsLayerEntryConfig extends TileLayerEntryConfig {
    *
    * @returns The strongly-typed layer metadata specific to this layer entry config.
    */
-  override getLayerMetadata(): TypeMetadataWMTSContents | undefined {
-    return super.getLayerMetadata() as TypeMetadataWMTSContents | undefined;
+  override getLayerMetadata(): TypeWMTSLayerParsedInfo | undefined {
+    return super.getLayerMetadata() as TypeWMTSLayerParsedInfo | undefined;
+  }
+
+  /**
+   * Overrides the parent class's setter to provide a more specific parameter type (contravariant parameter).
+   *
+   * @param layerMetadata - The strongly-typed layer metadata specific to this layer entry config
+   */
+  override setLayerMetadata(layerMetadata: TypeWMTSLayerParsedInfo): void {
+    super.setLayerMetadata(layerMetadata);
   }
 
   /**

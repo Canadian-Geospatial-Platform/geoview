@@ -833,7 +833,7 @@ export class LayerController extends AbstractMapViewerController {
     fitOptions: FitOptions = DEFAULT_OL_FITOPTIONS
   ): Promise<void> {
     // If no extent on the feature, skip
-    if (!feature.extent) return Promise.resolve();
+    if (!feature.extent) return;
 
     // Get extent and center
     const { extent } = feature;

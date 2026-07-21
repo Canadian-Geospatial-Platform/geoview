@@ -688,7 +688,7 @@ export type TypeMetadataWMS = {
   /**
    * The ServiceExceptionReport is not part of the WFS capabilities, but it is included here for convenience as it's part of the response when going through the Esri proxy.
    *
-   * @deprecated The Esri proxy should be evenutally completely replaced via the default configuration. Once it's gone, this can be removed for cleanup.
+   * @deprecated The Esri proxy should be eventually completely replaced via the default configuration. Once it's gone, this can be removed for cleanup.
    */
   ServiceExceptionReport?: unknown;
 };
@@ -956,7 +956,7 @@ export type TypeMetadataWMTS = {
   /**
    * The ServiceExceptionReport is not part of the WFS capabilities, but it is included here for convenience as it's part of the response when going through the Esri proxy.
    *
-   * @deprecated The Esri proxy should be evenutally completely replaced via the default configuration. Once it's gone, this can be removed for cleanup.
+   * @deprecated The Esri proxy should be eventually completely replaced via the default configuration. Once it's gone, this can be removed for cleanup.
    */
   ServiceExceptionReport?: unknown;
 };
@@ -997,6 +997,12 @@ export type TypeMetadataWMTSContents = {
   TileMatrixSet: TypeWMTSTileMatrixSet[] | TypeWMTSTileMatrixSet;
 };
 
+/** Represents the parsed WMTS layer information extracted from the capabilities metadata. */
+export type TypeWMTSLayerParsedInfo = {
+  Layer: TypeMetadataWMTSLayer;
+  TileMatrixSet: TypeWMTSTileMatrixSet;
+};
+
 export type TypeMetadataWMTSLayer = {
   'ows:Identifier': string;
   'ows:WGS84BoundingBox'?: {
@@ -1014,10 +1020,13 @@ export type TypeMetadataWMTSLayer = {
   'ows:Abstract'?: string;
   Format: string;
   TileMatrixSetLink: TypeTileMatrixSetLink[] | TypeTileMatrixSetLink;
-  Style?: {
-    'ows:Identifier': string;
-    'ows:Title'?: string;
-  };
+  Style?: TypeMetadataWMTSStyle[] | TypeMetadataWMTSStyle;
+};
+
+export type TypeMetadataWMTSStyle = {
+  'ows:Identifier': string;
+  'ows:Title'?: string;
+  '@attributes': Record<string, unknown>;
 };
 
 export type TypeTileMatrixSetLink = {
@@ -1058,7 +1067,7 @@ export type TypeMetadataWFS = {
   /**
    * The ServiceExceptionReport is not part of the WFS capabilities, but it is included here for convenience as it's part of the response when going through the Esri proxy.
    *
-   * @deprecated The Esri proxy should be evenutally completely replaced via the default configuration. Once it's gone, this can be removed for cleanup.
+   * @deprecated The Esri proxy should be eventually completely replaced via the default configuration. Once it's gone, this can be removed for cleanup.
    */
   ServiceExceptionReport?: unknown;
 };

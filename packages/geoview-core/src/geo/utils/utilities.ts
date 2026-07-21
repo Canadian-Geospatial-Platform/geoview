@@ -380,7 +380,7 @@ export abstract class GeoUtilities {
    * @param configProxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
    * @param layers - The layers to query, separated by comma
    * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
-   * @param abortSignal - Optional abort signal to handle cancelling of the process
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process of the process
    * @returns A promise that resolves with the parsed WMTS metadata
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration
    * @throws {RequestAbortedError} When the request was aborted by the caller's signal
@@ -408,7 +408,12 @@ export abstract class GeoUtilities {
     this.#validateEsriProxyError(metadataParsed);
 
     // Result to be returned
-    let metadataResult = metadataParsed.Capabilities;
+    let metadataResult = findPropertyByRegexPath<TypeMetadataWMTSCapabilities>(metadataParsed, /Capabilities/);
+
+    // If it's an array, find the best object in the array
+    if (Array.isArray(metadataResult)) {
+      metadataResult = metadataResult.find((obj) => obj.Contents);
+    }
 
     // Validate and extend metadata result
     metadataResult = this.#validateExtendWMSWMTSWFSParsedResult(metadataRaw, metadataResult);
@@ -451,14 +456,14 @@ export abstract class GeoUtilities {
   }
 
   /**
-   * Fetch the json response from the XML response of a WMS getCapabilities request.
+   * Fetches the raw text response from a service URL, retrying through a proxy on network errors.
    *
-   * @param url - The url the url of the WMS server
+   * @param url - The service URL to fetch
    * @param configProxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
    * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
    * The parameter sent in the callback is the proxy prefix with the '?' at the end.
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
-   * @returns A promise that resolves with the capabilities XML as a string
+   * @returns A promise that resolves with the response text as a string
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration
    * @throws {RequestAbortedError} When the request was aborted by the caller's signal
    * @throws {ResponseError} When the response is not OK (non-2xx)
@@ -576,7 +581,7 @@ export abstract class GeoUtilities {
    *
    * @param metadataParsed - The parsed metadata object
    * @throws {NetworkError} When the Esri proxy returned an error
-   * @deprecated The Esri proxy should be evenutally completely replaced via the default configuration. Once it's gone, this can be removed for cleanup.
+   * @deprecated The Esri proxy should be eventually completely replaced via the default configuration. Once it's gone, this can be removed for cleanup.
    */
   static #validateEsriProxyError<T extends TypeMetadataWMS | TypeMetadataWMTS | TypeMetadataWFS>(metadataParsed: T | undefined): void {
     // TODO: CHECK - The serviceexceptionreport stuff here is related to the Esri proxy which respond with such a payload
@@ -587,14 +592,12 @@ export abstract class GeoUtilities {
   /**
    * Validates and interprets parsed OGC capabilities metadata, detecting the server type.
    *
-   * Handles edge cases where the parsed result is an array (picks the object with a `Capability` property),
-   * reads the version from `@attributes`, and detects whether the server is QGIS, GeoServer, or MapServer.
+   * Reads the version from `@attributes` and detects whether the server is QGIS, GeoServer, or MapServer.
    *
    * @param metadataRaw - The raw XML string of the capabilities response (used for server type detection)
-   * @param metadataParsed - The fully parsed metadata object
-   * @param metadataResult - The extracted capabilities object (may be undefined or an array in edge cases)
+   * @param metadataResult - The extracted capabilities object (may be undefined if parsing found nothing)
    * @returns The validated and enriched capabilities object with version and server type populated
-   * @throws {ResponseEmptyError} When the parsed metadata or the extracted result is empty
+   * @throws {ResponseEmptyError} When the extracted result is empty
    */
   static #validateExtendWMSWMTSWFSParsedResult<
     U extends TypeMetadataWMSCapabilities | TypeMetadataWFSCapabilities | TypeMetadataWMTSCapabilities,

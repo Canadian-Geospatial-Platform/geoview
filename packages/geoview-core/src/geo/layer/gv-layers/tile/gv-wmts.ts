@@ -4,10 +4,7 @@ import type WMTSSource from 'ol/source/WMTS';
 import type { Extent } from 'ol/extent';
 import type { Projection as OLProjection } from 'ol/proj';
 
-import type {
-  OgcWmtsLayerEntryConfig,
-  TypeMetadataWMTSLayer,
-} from '@/api/config/validation-classes/raster-validation-classes/ogc-wmts-layer-entry-config';
+import type { OgcWmtsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wmts-layer-entry-config';
 import { CONST_LAYER_TYPES, type TypeLegend } from '@/api/types/layer-schema-types';
 import { AbstractGVTile } from '@/geo/layer/gv-layers/tile/abstract-gv-tile';
 import { GeoUtilities } from '@/geo/utils/utilities';
@@ -178,11 +175,14 @@ export class GVWMTS extends AbstractGVTile {
    * @returns A promise that resolves with the legend image as a data URL or null
    */
   static async #getLegendImage(layerConfig: OgcWmtsLayerEntryConfig): Promise<string | null> {
-    const metadata = layerConfig.getLayerMetadata();
-    const layer = metadata?.Layer as TypeMetadataWMTSLayer | undefined;
-    const foundStyle = Array.isArray(layer?.Style)
-      ? layer.Style.find((style) => style['@attributes'].isDefault === 'true') || layer.Style[0]
-      : layer?.Style;
+    const layerMetadata = layerConfig.getLayerMetadata();
+
+    // Find the style
+    const foundStyle = Array.isArray(layerMetadata?.Layer?.Style)
+      ? layerMetadata?.Layer.Style.find((style) => style['@attributes'].isDefault === 'true') || layerMetadata.Layer.Style[0]
+      : layerMetadata?.Layer?.Style;
+
+    // Find the legend url
     const legendUrl = foundStyle?.LegendURL?.['@attributes']?.['xlink:href'];
 
     if (legendUrl) {
