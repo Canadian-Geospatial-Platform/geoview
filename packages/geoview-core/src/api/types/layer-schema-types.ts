@@ -1027,6 +1027,7 @@ export type TypeMetadataWMTSStyle = {
   'ows:Identifier': string;
   'ows:Title'?: string;
   '@attributes': Record<string, unknown>;
+  LegendURL: TypeOnlineResourceWMS;
 };
 
 export type TypeTileMatrixSetLink = {

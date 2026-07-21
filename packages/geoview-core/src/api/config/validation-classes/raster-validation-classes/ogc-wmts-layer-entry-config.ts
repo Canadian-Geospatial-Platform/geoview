@@ -72,21 +72,15 @@ export class OgcWmtsLayerEntryConfig extends TileLayerEntryConfig {
   }
 
   /**
-   * Overrides the parent class's setter to provide a more specific parameter type (contravariant parameter).
-   *
-   * @param layerMetadata - The strongly-typed layer metadata specific to this layer entry config
-   */
-  override setLayerMetadata(layerMetadata: TypeWMTSLayerParsedInfo): void {
-    super.setLayerMetadata(layerMetadata);
-  }
-
-  /**
-   * Refreshes the layer metadata information by re-fetching the WMS GetCapabilities response and updating the layer configuration accordingly.
+   * Refreshes the layer metadata information by re-fetching the WMTS GetCapabilities response and updating the layer configuration accordingly.
    *
    * This method is typically used when the display date mode changes, as the metadata may contain time-sensitive information that needs to be updated on-the-fly.
    *
    * @param displayDateMode - The display date mode that should be used
    * @returns A promise that resolves when the metadata refresh operation has completed
+   * @throws {LayerWMTSMetadataError} When the metadata is missing necessary information
+   * @throws {ResponseEmptyError} When the capabilities response is empty
+   * @throws {NetworkError} When a network issue happened
    */
   override async onRefreshMetadata(_displayDateMode: DisplayDateMode): Promise<void> {
     // Refetch the metadata again with the new date mode and update the config

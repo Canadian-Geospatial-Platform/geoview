@@ -112,7 +112,7 @@ import {
   isStoreGeochartInitialized,
   getStoreGeochartChartsConfig,
 } from '@/core/stores/states/geochart-state';
-import { DEFAULT_OL_FITOPTIONS, OL_ZOOM_DURATION, OL_ZOOM_PADDING, TIMEOUT } from '@/core/utils/constant';
+import { OL_ZOOM_DURATION, OL_ZOOM_PADDING, TIMEOUT } from '@/core/utils/constant';
 import { DateMgt, type TimeDimension } from '@/core/utils/date-mgt';
 import { doTimeout, isValidUUID } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
@@ -364,11 +364,11 @@ export class MapController extends AbstractMapViewerController {
    *
    * @param extent - The extent to zoom to (in map projection)
    * @param useAnimation - Indicates if a zoom animation should be used, default: true
-   * @param options - The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 13, duration: 500 })
+   * @param fitOptions - Optional OL fit options to merge scale constraints into
    * @returns A promise that resolves when the zoom animation is complete
    * @throws {InvalidExtentError} When the extent is invalid
    */
-  zoomToExtent(extent: Extent, useAnimation = true, options: FitOptions = DEFAULT_OL_FITOPTIONS): Promise<void> {
+  zoomToExtent(extent: Extent, useAnimation = true, options?: FitOptions): Promise<void> {
     // Redirect to the MapViewer
     return this.getMapViewer().zoomToExtent(extent, useAnimation, options);
   }

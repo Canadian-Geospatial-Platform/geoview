@@ -98,6 +98,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns A promise that resolves to the parsed metadata object,
    * or `undefined` if metadata could not be retrieved or no capabilities were found.
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
+   * @throws {LayerNoCapabilitiesError} When the metadata is empty (no Capabilities)
    */
   protected override onFetchServiceMetadata<T = TypeMetadataWMSCapabilities | undefined>(abortSignal?: AbortSignal): Promise<T> {
     // Redirect and update the metadataAccessPath when a proxy has to be used
@@ -109,6 +110,7 @@ export class WMS extends AbstractGeoViewRaster {
    *
    * @returns A promise that resolves once the layer entries have been initialized
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
+   * @throws {LayerNoCapabilitiesError} When the metadata is empty (no Capabilities)
    */
   protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Get the metadata and leave the metadataAccessPath unchanged, even if a proxy had to be used
@@ -248,6 +250,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param layerConfig - The configuration for the WMS layer
    * @returns A fully configured ImageWMS source
    * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called
+   * @throws {LayerEntryConfigWMSSubLayerNotFoundError} When the layer is not found in the capabilities metadata
    */
   createImageWMSSource(layerConfig: OgcWmsLayerEntryConfig): ImageWMS {
     // Get the layer capabilities
@@ -314,6 +317,8 @@ export class WMS extends AbstractGeoViewRaster {
    * @param updateMetadataAccessPath - Whether to update the layer's metadata access path if a proxy is required to fetch the metadata
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves to the parsed metadata object, or `undefined` if metadata could not be retrieved or no capabilities were found.
+   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
+   * @throws {LayerNoCapabilitiesError} When the metadata is empty (no Capabilities)
    */
   protected fetchServiceMetadataWMS(
     updateMetadataAccessPath: boolean,
@@ -481,6 +486,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves once the execution is completed
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
+   * @throws {LayerNoCapabilitiesError} When the metadata is empty (no Capabilities)
    */
   async #fetchXmlServiceMetadata(
     metadataUrl: string,
@@ -775,11 +781,11 @@ export class WMS extends AbstractGeoViewRaster {
     layerCapabilities: TypeMetadataWMSCapabilityLayer | undefined,
     displayDateMode: DisplayDateMode
   ): Promise<void> {
-    // Set the layer metadata (capabilities)
-    layerConfig.setLayerMetadata(layerCapabilities);
-
     // If found
     if (layerCapabilities) {
+      // Set the layer metadata (capabilities)
+      layerConfig.setLayerMetadata(layerCapabilities);
+
       // Check if metadata says it's queryable
       const raw = layerCapabilities['@attributes']?.queryable;
       const queryable = raw === '1' || raw === true;

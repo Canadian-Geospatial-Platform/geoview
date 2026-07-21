@@ -9,12 +9,18 @@ export const GEO_URL_TEXT = {
   text: 'Geo.ca',
 };
 
+/**
+ * OpenLayers default maximum zoom level.
+ * @deprecated Doesn't seem used anymore
+ */
+export const OL_ZOOM_MAXZOOM = 13;
+
 /** OpenLayers zoom animation duration in milliseconds. */
 export const OL_ZOOM_DURATION = 500;
-/** OpenLayers default maximum zoom level. */
-export const OL_ZOOM_MAXZOOM = 13;
+
 /** OpenLayers zoom padding values [top, right, bottom, left]. */
 export const OL_ZOOM_PADDING: [number, number, number, number] = [100, 100, 100, 100];
+
 /** Default OpenLayers fit options combining padding, max zoom, and duration. */
 export const DEFAULT_OL_FITOPTIONS: FitOptions = {
   padding: OL_ZOOM_PADDING,

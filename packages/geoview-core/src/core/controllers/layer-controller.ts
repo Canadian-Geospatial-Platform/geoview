@@ -104,7 +104,7 @@ import type { TemporalMode, TypeDisplayDateFormat } from '@/core/utils/date-mgt'
 import type { TypeLayersViewDisplayState, TypeLegendItem } from '@/core/components/layers/types';
 import { logger } from '@/core/utils/logger';
 import { NoBoundsError } from '@/core/exceptions/geoview-exceptions';
-import { DEFAULT_OL_FITOPTIONS, OL_ZOOM_DURATION } from '@/core/utils/constant';
+import { OL_ZOOM_DURATION } from '@/core/utils/constant';
 import { Projection } from '@/geo/utils/projection';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import {
@@ -758,7 +758,7 @@ export class LayerController extends AbstractMapViewerController {
    * @returns A promise that resolves when the zoom animation is complete
    * @throws {NoBoundsError} When the layer doesn't have bounds
    */
-  zoomToLayerExtent(layerPath: string, useAnimation = true, fitOptions: FitOptions = DEFAULT_OL_FITOPTIONS): Promise<void> {
+  zoomToLayerExtent(layerPath: string, useAnimation = true, fitOptions?: FitOptions): Promise<void> {
     // Get the layer bounds
     const bounds = getStoreLayerBounds(this.getMapId(), layerPath);
 
@@ -784,34 +784,28 @@ export class LayerController extends AbstractMapViewerController {
    * @param fitOptions - Optional OL fit options to merge scale constraints into
    * @returns A promise that resolves when the zoom animation is complete
    */
-  zoomToExtentRestricted(
-    layerPath: string,
-    extent: Extent,
-    useAnimation = true,
-    fitOptions: FitOptions = DEFAULT_OL_FITOPTIONS
-  ): Promise<void> {
+  zoomToExtentRestricted(layerPath: string, extent: Extent, useAnimation = true, fitOptions?: FitOptions): Promise<void> {
     // Read the min/max scales from the store for the corresponding layer path
     const layerMaxScale = getStoreLayerMaxScale(this.getMapId(), layerPath);
     const layerMinScale = getStoreLayerMinScale(this.getMapId(), layerPath);
 
     // Compute zoom constraints from the layer's scale range so we don't zoom beyond the layer's visible range
+    const theFitOptions: FitOptions = fitOptions ?? {};
     if (layerMaxScale) {
       const maxZoomFromScale = this.getControllersRegistry().mapController.getZoomFromScale(layerMaxScale);
       if (maxZoomFromScale !== undefined) {
-        // eslint-disable-next-line no-param-reassign
-        fitOptions.maxZoom = Math.min(fitOptions.maxZoom ?? maxZoomFromScale, maxZoomFromScale);
+        theFitOptions.maxZoom = Math.min(theFitOptions.maxZoom ?? maxZoomFromScale, maxZoomFromScale);
       }
     }
     if (layerMinScale) {
       const minResolution = this.getControllersRegistry().mapController.getResolutionFromScale(layerMinScale);
       if (minResolution !== undefined) {
-        // eslint-disable-next-line no-param-reassign
-        fitOptions.minResolution = Math.floor(minResolution * 100) / 100;
+        theFitOptions.minResolution = Math.floor(minResolution * 100) / 100;
       }
     }
 
     // Zoom to extent and wait for it to finish
-    return this.getControllersRegistry().mapController.zoomToExtent(extent, useAnimation, fitOptions);
+    return this.getControllersRegistry().mapController.zoomToExtent(extent, useAnimation, theFitOptions);
   }
 
   /**
@@ -830,7 +824,7 @@ export class LayerController extends AbstractMapViewerController {
     layerPath: string,
     feature: TypeFeatureInfoEntry,
     useAnimation = true,
-    fitOptions: FitOptions = DEFAULT_OL_FITOPTIONS
+    fitOptions?: FitOptions
   ): Promise<void> {
     // If no extent on the feature, skip
     if (!feature.extent) return;

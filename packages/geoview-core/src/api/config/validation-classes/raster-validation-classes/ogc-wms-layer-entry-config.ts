@@ -128,6 +128,9 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    *
    * @param displayDateMode - The display date mode that should be used
    * @returns A promise that resolves when the metadata refresh operation has completed
+   * @throws {RequestTimeoutError} When the request exceeds the timeout duration
+   * @throws {ResponseEmptyError} When the capabilities response is empty
+   * @throws {NetworkError} When a network issue happened
    */
   override async onRefreshMetadata(displayDateMode: DisplayDateMode): Promise<void> {
     // Refetch the metadata again with the new date mode and update the config
@@ -460,5 +463,5 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     return this.isClassOrTypeSchemaTag(layerConfig, CONST_LAYER_TYPES.WMS);
   }
 
-  // #region STATIC METHODS
+  // #endregion STATIC METHODS
 }

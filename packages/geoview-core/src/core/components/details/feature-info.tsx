@@ -76,9 +76,6 @@ const PAPER_STYLES = {
   paddingTop: '0.5rem',
 } as const;
 
-/** Padding values for zoom operations. */
-const ZOOM_PADDING = [5, 5, 5, 5];
-
 /**
  * Creates the feature header component.
  *
@@ -312,11 +309,10 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
       if (!feature?.extent) return;
 
       // Zoom to extent and highlight the feature
-      layerController
-        .zoomToExtentRestrictedAndHighlight(feature.layerPath, feature, true, { padding: ZOOM_PADDING })
-        .catch((error: unknown) => {
-          logger.logPromiseFailed('zoomToExtentRestrictedAndHighlight in handleZoomIn in FeatureInfoNew', error);
-        });
+      layerController.zoomToExtentRestrictedAndHighlight(feature.layerPath, feature, true).catch((error: unknown) => {
+        // Log
+        logger.logPromiseFailed('zoomToExtentRestrictedAndHighlight in handleZoomIn in FeatureInfoNew', error);
+      });
     },
     [feature, layerController]
   );

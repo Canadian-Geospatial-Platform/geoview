@@ -92,6 +92,7 @@ export class WMTS extends AbstractGeoViewRaster {
    * @returns A promise that resolves to the parsed metadata object,
    * or `undefined` if metadata could not be retrieved or no capabilities were found.
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
+   * @throws {LayerNoCapabilitiesError} When the metadata is empty (no Capabilities)
    */
   protected override onFetchServiceMetadata<T = TypeMetadataWMTSCapabilities | undefined>(abortSignal?: AbortSignal): Promise<T> {
     // Redirect
@@ -102,6 +103,8 @@ export class WMTS extends AbstractGeoViewRaster {
    * Overrides the way a geoview layer config initializes its layer entries.
    *
    * @returns A promise that resolves once the layer entries have been initialized
+   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
+   * @throws {LayerNoCapabilitiesError} When the metadata is empty (no Capabilities)
    */
   protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Fetch the metadata
@@ -205,6 +208,8 @@ export class WMTS extends AbstractGeoViewRaster {
    * @param updateMetadataAccessPath - Whether to update the layer's metadata access path if a proxy is required to fetch the metadata
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves to the parsed metadata object, or `undefined` if metadata could not be retrieved or no capabilities were found.
+   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
+   * @throws {LayerNoCapabilitiesError} When the metadata is empty (no Capabilities)
    */
   protected fetchServiceMetadataWMTS(updateMetadataAccessPath: boolean, abortSignal?: AbortSignal): Promise<TypeMetadataWMTSCapabilities> {
     // Construct a proper WMTS GetCapabilities URL
@@ -370,6 +375,7 @@ export class WMTS extends AbstractGeoViewRaster {
    *
    * @param layerConfig - The layer entry configuration
    * @param metadata - The WMTS metadata
+   * @throws {LayerWMTSMetadataError} When the metadata is missing necessary information (TileMatrixSet, Layer, TileMatrixSetLink, or KVP GetTile)
    */
   static async initLayerMetadata(layerConfig: OgcWmtsLayerEntryConfig, metadata: TypeMetadataWMTSCapabilities | undefined): Promise<void> {
     // If no metadata (e.g. no metadataAccessPath was provided), skip metadata processing entirely
@@ -495,12 +501,12 @@ export class WMTS extends AbstractGeoViewRaster {
   }
 
   /**
-   * Fetches the metadata for WMS Capabilities.
+   * Fetches the metadata for WMTS Capabilities.
    *
    * @param url - The url to query the metadata from
    * @param configProxyUrl - Proxy URL to use when necessary
    * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata
-   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process of the process
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves to the parsed metadata object
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration
    * @throws {RequestAbortedError} When the request was aborted by the caller's signal

@@ -267,9 +267,9 @@ export abstract class GeoUtilities {
   /**
    * Fetch the json response from the XML response of a WMS getCapabilities request.
    *
-   * @param url - The url the url of the WMS server
+   * @param url - The url of the WMS server
    * @param configProxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
-   * @param layers - The layers to query separate by
+   * @param layers - The layers to query, separated by comma
    * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
    * The parameter sent in the callback is the proxy prefix with the '?' at the end.
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
@@ -333,7 +333,7 @@ export abstract class GeoUtilities {
    * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
    * The parameter sent in the callback is the proxy prefix with the '?' at the end.
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
-   * @returns A promise that resolves with the parsed WFS metadata, or undefined when capabilities weren't found
+   * @returns A promise that resolves with the parsed WFS metadata
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration
    * @throws {RequestAbortedError} When the request was aborted by the caller's signal
    * @throws {ResponseError} When the response is not OK (non-2xx)
@@ -376,11 +376,11 @@ export abstract class GeoUtilities {
   /**
    * Fetch the json response from the XML response of a WMTS getCapabilities request.
    *
-   * @param url - The url the url of the WMTS server
+   * @param url - The url of the WMTS server
    * @param configProxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
    * @param layers - The layers to query, separated by comma
    * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
-   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process of the process
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves with the parsed WMTS metadata
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration
    * @throws {RequestAbortedError} When the request was aborted by the caller's signal
@@ -425,7 +425,7 @@ export abstract class GeoUtilities {
   /**
    * Fetch the json response from the XML response of a WMS GetStyles request.
    *
-   * @param url - The url the url of the WMS server
+   * @param url - The url of the WMS server
    * @param configProxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
    * @param layers - The layers to query, separated by comma
    * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
