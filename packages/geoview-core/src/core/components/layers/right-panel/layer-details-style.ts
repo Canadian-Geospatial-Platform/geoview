@@ -12,7 +12,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   categoryTitle: {
     textAlign: 'left',
     fontWeight: '600',
-    fontSize: theme.palette.geoViewFontSize.lg,
+    fontSize: theme.palette.geoViewFontSize?.lg,
   },
   layerDetails: {
     padding: '16px',
@@ -21,8 +21,8 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     width: '100%',
     '& .MuiGrid-container': {
       '&:first-of-type': {
-        borderTop: `1px solid ${theme.palette.geoViewColor.bgColor.dark[300]}`,
-        borderBottom: `1px solid ${theme.palette.geoViewColor.bgColor.dark[300]}`,
+        borderTop: `1px solid ${theme.palette.geoViewColor?.bgColor.dark[300]}`,
+        borderBottom: `1px solid ${theme.palette.geoViewColor?.bgColor.dark[300]}`,
       },
       '& .MuiGrid-item': {
         padding: '3px 6px',
@@ -41,8 +41,8 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
   },
   tableIconLabel: {
-    color: theme.palette.geoViewColor.textColor.main,
-    fontSize: theme.palette.geoViewFontSize.default,
+    color: theme.palette.geoViewColor?.textColor.main,
+    fontSize: theme.palette.geoViewFontSize?.default,
     alignSelf: 'center',
   },
   wmsImage: {
@@ -50,8 +50,8 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     height: 'auto',
   },
   layerInfo: {
-    color: theme.palette.geoViewColor.textColor.light[200],
-    fontSize: theme.palette.geoViewFontSize.sm,
+    color: theme.palette.geoViewColor?.textColor.light[200],
+    fontSize: theme.palette.geoViewFontSize?.sm,
     '& .info-container': {
       display: 'flex',
       alignItems: 'center',
@@ -69,8 +69,8 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   infoSectionTitle: {
     fontWeight: 600,
-    fontSize: theme.palette.geoViewFontSize.default,
-    color: theme.palette.geoViewColor.textColor.main,
+    fontSize: theme.palette.geoViewFontSize?.default,
+    color: theme.palette.geoViewColor?.textColor.main,
     marginBottom: theme.spacing(0.5),
   },
   infoSectionContent: {
@@ -79,7 +79,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   verticalDivider: {
     width: '1px',
     height: '30px',
-    backgroundColor: theme.palette.geoViewColor.bgColor.dark[300],
+    backgroundColor: theme.palette.geoViewColor?.bgColor.dark[300],
     // Absorb flex gap so divider spacing equals half a normal gap on each side (7.5px + 1px + 7.5px)
     margin: '0 -7.5px',
   },

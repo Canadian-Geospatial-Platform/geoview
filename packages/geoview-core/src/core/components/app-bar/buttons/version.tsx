@@ -37,26 +37,26 @@ export type TypeAppVersion = {
 const getSxClasses = (theme: Theme): SxStyles => ({
   versionInfoPanel: {
     width: '200px',
-    backgroundColor: theme.palette.geoViewColor.bgColor.light[200],
+    backgroundColor: theme.palette.geoViewColor?.bgColor.light[200],
     borderRadius: '5px',
     boxShadow: 2,
     marginLeft: '15px',
     '& a': {
-      color: theme.palette.mode === 'light' ? theme.palette.secondary.contrastText : theme.palette.geoViewColor.primary.light[300],
+      color: theme.palette.mode === 'light' ? theme.palette.secondary.contrastText : theme.palette.geoViewColor?.primary.light[300],
       textDecoration: 'underLine',
     },
   },
   versionHeading: {
     display: 'flex',
     alignItems: 'center',
-    borderBottom: `1px solid ${theme.palette.geoViewColor.bgColor.dark[100]}`,
+    borderBottom: `1px solid ${theme.palette.geoViewColor?.bgColor.dark[100]}`,
     padding: '10px',
     justifyContent: 'space-between',
   },
   versionsInfoTitle: {
-    fontSize: theme.palette.geoViewFontSize.default,
+    fontSize: theme.palette.geoViewFontSize?.default,
     fontWeight: '700',
-    color: theme.palette.geoViewColor.textColor.main,
+    color: theme.palette.geoViewColor?.textColor.main,
   },
   versionInfoContent: {
     padding: '10px',

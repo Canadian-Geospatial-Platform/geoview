@@ -32,15 +32,15 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   rightButtonsContainer: {
     alignSelf: 'end',
-    backgroundColor: theme.palette.geoViewColor.bgColor.light[300],
+    backgroundColor: theme.palette.geoViewColor?.bgColor.light[300],
     display: 'flex',
     flexDirection: 'row',
     gap: '0.6rem',
     borderTopLeftRadius: '0.5rem',
     borderTopRightRadius: '0.5rem',
-    borderTop: `2px solid ${theme.palette.geoViewColor.primary.main}`,
-    borderLeft: `2px solid ${theme.palette.geoViewColor.primary.main}`,
-    borderRight: `2px solid ${theme.palette.geoViewColor.primary.main}`,
+    borderTop: `2px solid ${theme.palette.geoViewColor?.primary.main}`,
+    borderLeft: `2px solid ${theme.palette.geoViewColor?.primary.main}`,
+    borderRight: `2px solid ${theme.palette.geoViewColor?.primary.main}`,
     '& .MuiButton-startIcon': {
       [theme.breakpoints.down('md')]: {
         margin: 0,
@@ -52,8 +52,8 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       borderBottomLeftRadius: 0,
       borderBottomRightRadius: 0,
       '&.active': {
-        backgroundColor: theme.palette.geoViewColor.primary.main,
-        color: theme.palette.geoViewColor.white,
+        backgroundColor: theme.palette.geoViewColor?.primary.main,
+        color: theme.palette.geoViewColor?.white,
         boxShadow: 1,
       },
       '&.keyboard-focused': {
@@ -82,7 +82,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
     '& .guideBox': {
       position: 'relative',
-      color: `${theme.palette.geoViewColor.grey.dark[800]}  !important`,
+      color: `${theme.palette.geoViewColor?.grey.dark[800]}  !important`,
       padding: '16px',
       img: {
         maxWidth: '100%',
@@ -101,14 +101,14 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
     '&.fullscreen-mode': {
       a: {
-        color: theme.palette.geoViewColor.primary.main,
+        color: theme.palette.geoViewColor?.primary.main,
         '&:hover': {
-          color: theme.palette.geoViewColor.primary.dark[300],
+          color: theme.palette.geoViewColor?.primary.dark[300],
         },
       },
     },
     '& .noSelection': {
-      fontSize: theme.palette.geoViewFontSize.md,
+      fontSize: theme.palette.geoViewFontSize?.md,
       fontWeight: '500',
       padding: 10,
     },
@@ -119,14 +119,14 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       borderRadius: '0',
     },
     '& .guide-button-group': {
-      border: `2px solid ${theme.palette.geoViewColor.primary.main}`,
+      border: `2px solid ${theme.palette.geoViewColor?.primary.main}`,
       borderBottom: 'none',
       borderRadius: '8px 8px 0 0',
     },
     '& .panel-content-container': {
-      backgroundColor: theme.palette.geoViewColor.white,
+      backgroundColor: theme.palette.geoViewColor?.white,
       minHeight: '0',
-      border: `2px solid ${theme.palette.geoViewColor.primary.main}`,
+      border: `2px solid ${theme.palette.geoViewColor?.primary.main}`,
       borderRadius: '5px 0 5px 5px',
       overflow: 'auto',
     },

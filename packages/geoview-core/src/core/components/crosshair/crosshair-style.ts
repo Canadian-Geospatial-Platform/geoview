@@ -27,7 +27,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     right: theme.spacing(0),
     left: theme.spacing(0),
     padding: theme.spacing(2, 1, 0, 1),
-    backgroundColor: theme.palette.geoViewColor.grey.lighten(0.1, 0.8),
+    backgroundColor: theme.palette.geoViewColor?.grey.lighten(0.1, 0.8),
     '& span': {
       paddingLeft: 70,
     },

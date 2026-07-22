@@ -53,7 +53,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     padding: 6,
     borderBottom: `1px solid ${theme.palette.divider}`,
     '& .MuiInputLabel-formControl': {
-      fontSize: theme.palette.geoViewFontSize.default,
+      fontSize: theme.palette.geoViewFontSize?.default,
       marginTop: 0,
     },
     '& .MuiInputLabel-formControl.Mui-focused': {
@@ -70,7 +70,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   filterBox: {
     flexGrow: 2,
     '& .MuiInputLabel-root': {
-      fontSize: theme.palette.geoViewFontSize.sm,
+      fontSize: theme.palette.geoViewFontSize?.sm,
     },
   },
   searchResult: {
@@ -108,11 +108,11 @@ export const getSxClassesList = (theme: Theme): SxStyles => ({
 
   // Location name + province cell (left side, 66% width on sm+)
   geoListLocationCell: {
-    fontSize: theme.palette.geoViewFontSize.sm,
+    fontSize: theme.palette.geoViewFontSize?.sm,
   },
 
   geoListCategoryCell: {
-    fontSize: theme.palette.geoViewFontSize.sm,
+    fontSize: theme.palette.geoViewFontSize?.sm,
     textAlign: 'right',
     [theme.breakpoints.down('sm')]: {
       textAlign: 'left',
@@ -123,7 +123,7 @@ export const getSxClassesList = (theme: Theme): SxStyles => ({
 export const StyledInputField = styled(Input)(({ theme }) => ({
   color: 'inherit',
   width: '100%',
-  fontSize: theme.palette.geoViewFontSize.default,
+  fontSize: theme.palette.geoViewFontSize?.default,
   '& .MuiInputBase-input': {
     transition: theme.transitions.create('width'),
     width: '100%',

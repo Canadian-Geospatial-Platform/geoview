@@ -176,7 +176,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
               onClick={handleClearFilters}
               aria-disabled={!memoHasActiveFilters}
             >
-              <ClearFiltersIcon sx={{ fontSize: theme.palette.geoViewFontSize.md }} />
+              <ClearFiltersIcon sx={{ fontSize: theme.palette.geoViewFontSize?.md }} />
             </IconButton>
           </Box>
         </Box>
@@ -193,7 +193,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
             aria-live="polite"
             aria-atomic="true"
             component="p"
-            sx={{ p: 10, fontSize: theme.palette.geoViewFontSize.md }}
+            sx={{ p: 10, fontSize: theme.palette.geoViewFontSize?.md }}
           >
             {t('error.geolocator.noService')}
           </Typography>
@@ -217,7 +217,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
               aria-live="polite"
               aria-atomic="true"
               component="p"
-              sx={{ fontSize: theme.palette.geoViewFontSize.md }}
+              sx={{ fontSize: theme.palette.geoViewFontSize?.md }}
             >
               {t('geolocator.noResult')} <b>{searchValue}</b>
             </Typography>

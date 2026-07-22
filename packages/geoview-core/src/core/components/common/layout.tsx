@@ -130,7 +130,7 @@ const Layout = forwardRef(
         containerType,
         layerName,
         theme.breakpoints,
-        theme.palette.geoViewFontSize.lg,
+        theme.palette.geoViewFontSize?.lg,
         toggleMode
       );
 
@@ -139,7 +139,7 @@ const Layout = forwardRef(
       // clamping code copied from https://tailwindcss.com/docs/line-clamp
       const sxClasses = {
         ...TITLE_STYLES,
-        fontSize: theme.palette.geoViewFontSize.lg,
+        fontSize: theme.palette.geoViewFontSize?.lg,
         width: containerType === CONTAINER_TYPE.APP_BAR ? '100%' : 'auto',
         ...(!toggleMode && { [theme.breakpoints.up('sm')]: { display: 'none' } }),
       };
@@ -149,7 +149,7 @@ const Layout = forwardRef(
           {layerName}
         </Typography>
       );
-    }, [containerType, layerName, theme.breakpoints, theme.palette.geoViewFontSize.lg, toggleMode]);
+    }, [containerType, layerName, theme.breakpoints, theme.palette.geoViewFontSize?.lg, toggleMode]);
 
     // Expose methods to parent component
     useImperativeHandle(ref, () => ({

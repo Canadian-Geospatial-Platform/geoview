@@ -26,6 +26,7 @@ export type Shape = {
 declare module '@mui/material/styles' {
   // allow configuration using `createTheme`
   interface ThemeOptions {
+    // GV No theme when this UI component is used by external component (e.g. GeoChart). All geoViewColor and geoViewFontSize properties need to have the "?" to support when no theme are set (no map).
     geoViewColor?: IGeoViewColors;
     shape?: Shape;
     overrides?: {
@@ -58,13 +59,15 @@ declare module '@mui/material/styles' {
 declare module '@mui/material/styles/createPalette' {
   interface Palette {
     backdrop: string;
-    geoViewColor: IGeoViewColors;
-    geoViewFontSize: IGeoViewFontSizes;
-    geoViewSpacingAndSizing: IGeoViewSpacingAndSizing;
+    // GV No theme when this UI component is used by external component (e.g. GeoChart). All geoViewColor and geoViewFontSize properties need to have the "?" to support when no theme are set (no map).
+    geoViewColor?: IGeoViewColors;
+    geoViewFontSize?: IGeoViewFontSizes;
+    geoViewSpacingAndSizing?: IGeoViewSpacingAndSizing;
   }
 
   interface PaletteOptions {
     backdrop?: string;
+    // GV No theme when this UI component is used by external component (e.g. GeoChart). All geoViewColor and geoViewFontSize properties need to have the "?" to support when no theme are set (no map).
     geoViewColor?: IGeoViewColors;
     geoViewFontSize?: IGeoViewFontSizes;
     geoViewSpacingAndSizing?: IGeoViewSpacingAndSizing;

@@ -10,23 +10,23 @@ import { visuallyHidden } from '@/ui/style/default';
  */
 export const getSxClasses = (theme: Theme): SxStyles => ({
   detailsContainer: {
-    background: theme.palette.geoViewColor.bgColor.main,
+    background: theme.palette.geoViewColor?.bgColor.main,
     paddingBottom: '1rem',
   },
   detailsInstructionsTitle: {
-    fontSize: theme.palette.geoViewFontSize.lg,
+    fontSize: theme.palette.geoViewFontSize?.lg,
     fontWeight: '600',
     lineHeight: '1.5em',
   },
   detailsInstructionsBody: {
-    fontSize: theme.palette.geoViewFontSize.default,
+    fontSize: theme.palette.geoViewFontSize?.default,
   },
   panelHeaders: {
-    fontSize: theme.palette.geoViewFontSize.lg,
+    fontSize: theme.palette.geoViewFontSize?.lg,
     fontWeight: '600',
   },
   rightPanelContainer: {
-    color: theme.palette.geoViewColor.textColor.main,
+    color: theme.palette.geoViewColor?.textColor.main,
   },
   rightPanelStatus: {
     display: 'flex',
@@ -34,7 +34,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     alignItems: 'center',
     flexWrap: 'wrap',
     padding: '10px 16px',
-    boxShadow: `0px 12px 9px -13px ${theme.palette.geoViewColor.bgColor.dark[200]}`,
+    boxShadow: `0px 12px 9px -13px ${theme.palette.geoViewColor?.bgColor.dark[200]}`,
   },
   rightPanelButtons: {
     display: 'flex',
@@ -66,8 +66,8 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       whiteSpace: 'pre-wrap',
     },
     '&:nth-of-type(odd)': {
-      backgroundColor: theme.palette.geoViewColor.bgColor.darken(0.1),
-      color: theme.palette.geoViewColor.bgColor.darken(0.9),
+      backgroundColor: theme.palette.geoViewColor?.bgColor.darken(0.1),
+      color: theme.palette.geoViewColor?.bgColor.darken(0.9),
     },
   },
   featureInfoItemValue: {
@@ -99,7 +99,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     overflowWrap: 'break-word',
     wordBreak: 'break-word',
     whiteSpace: 'pre-wrap',
-    fontSize: theme.palette.geoViewFontSize.default,
+    fontSize: theme.palette.geoViewFontSize?.default,
     lineHeight: '19px',
     '& .MuiTable-root': {
       tableLayout: 'fixed',
@@ -133,7 +133,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
   },
   coordinateInfoContainer: {
-    backgroundColor: theme.palette.geoViewColor.bgColor.light[600],
+    backgroundColor: theme.palette.geoViewColor?.bgColor.light[600],
     padding: '16px',
   },
   coordinateInfoTitle: {

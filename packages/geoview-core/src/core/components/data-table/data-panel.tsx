@@ -360,7 +360,7 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
       layerFeatures: getFeaturesOfLayer(layer.layerPath),
       tooltip: getLayerTooltip(layerNames[layer.layerPath] ?? '', layer.layerPath),
       mapFilteredIcon: isMapFilteredSelectedForLayer(layer.layerPath) && (
-        <FilterAltIcon sx={{ color: theme.palette.geoViewColor.grey.main, verticalAlign: 'middle' }} />
+        <FilterAltIcon sx={{ color: theme.palette.geoViewColor?.grey.main, verticalAlign: 'middle' }} />
       ),
     }));
   }, [
@@ -373,7 +373,7 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
     queryStatuses,
     mapId,
     memoOrderedLayerData,
-    theme.palette.geoViewColor.grey.main,
+    theme.palette.geoViewColor?.grey.main,
   ]);
 
   return (

@@ -508,7 +508,7 @@ const ResponsiveGridLayout = forwardRef(
           size="small"
           variant="outlined"
           color="primary"
-          startIcon={<CloseIcon sx={{ fontSize: theme.palette.geoViewFontSize.sm }} />}
+          startIcon={<CloseIcon sx={{ fontSize: theme.palette.geoViewFontSize?.sm }} />}
           onClick={handleClosePanel}
           tooltip={t('general.closeSelection')}
           aria-label={t('general.closeSelection')}

@@ -16,13 +16,13 @@ export const getSxClasses = (theme: Theme): any => ({
       width: '9px',
       height: '9px',
       opacity: 1,
-      backgroundColor: theme.palette.geoViewColor.primary.light[600],
-      border: `2px solid ${theme.palette.geoViewColor.primary.main}`,
+      backgroundColor: theme.palette.geoViewColor?.primary.light[600],
+      border: `2px solid ${theme.palette.geoViewColor?.primary.main}`,
       borderRadius: '50%',
     },
     '& .MuiSlider-markLabel': {
-      fontSize: theme.palette.geoViewFontSize.xs,
-      color: theme.palette.geoViewColor.textColor.main,
+      fontSize: theme.palette.geoViewFontSize?.xs,
+      color: theme.palette.geoViewColor?.textColor.main,
     },
   },
   controlHidden: {

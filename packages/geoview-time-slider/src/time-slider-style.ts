@@ -7,7 +7,7 @@
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getSxClasses = (theme: any): any => ({
   panelHeaders: {
-    fontSize: theme.palette.geoViewFontSize.lg,
+    fontSize: theme.palette.geoViewFontSize?.lg,
     fontWeight: '600',
     marginBottom: '20px',
   },

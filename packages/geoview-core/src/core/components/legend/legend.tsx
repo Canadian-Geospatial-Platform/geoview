@@ -215,7 +215,7 @@ export function Legend({ containerType }: LegendType): JSX.Element | null {
           <LegendFullscreenButton containerType={containerType} onClick={() => setIsFullScreen(true)} buttonRef={fullScreenBtnRef} />
         </Box>
         <Box
-          sx={{ background: theme.palette.geoViewColor.bgColor.main, ...sxClassesMain.container }}
+          sx={{ background: theme.palette.geoViewColor?.bgColor.main, ...sxClassesMain.container }}
           id={`${mapId}-${containerType}-legendContainer`}
         >
           <Box sx={styles.flexContainer}>{memoContent}</Box>

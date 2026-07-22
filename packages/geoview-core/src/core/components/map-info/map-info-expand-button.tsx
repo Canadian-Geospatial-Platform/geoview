@@ -56,7 +56,7 @@ export const MapInfoExpandButton = memo(({ onExpand, expanded }: MapInfoExpandBu
 
   const buttonStyles = {
     ...BUTTON_BASE_STYLES,
-    color: theme.palette.geoViewColor.bgColor.dark[650],
+    color: theme.palette.geoViewColor?.bgColor.dark[650],
     width: 30,
     height: 30,
   };

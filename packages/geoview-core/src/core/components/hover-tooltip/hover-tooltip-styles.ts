@@ -11,10 +11,10 @@ type SxClasses = Record<string, object>;
  */
 export const getSxClasses = (theme: Theme): SxClasses => ({
   tooltipItem: {
-    color: theme.palette.geoViewColor.bgColor.light[900],
-    background: theme.palette.geoViewColor.bgColor.dark[900],
+    color: theme.palette.geoViewColor?.bgColor.light[900],
+    background: theme.palette.geoViewColor?.bgColor.dark[900],
     opacity: 0.9,
-    fontSize: theme.palette.geoViewFontSize.default,
+    fontSize: theme.palette.geoViewFontSize?.default,
     padding: '3px 8px',
     borderRadius: '5px',
     textAlign: 'center',
@@ -27,12 +27,12 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     left: '3px',
     zIndex: 250,
     '& .MuiSvgIcon-root': {
-      color: theme.palette.geoViewColor.textColor.main,
+      color: theme.palette.geoViewColor?.textColor.main,
     },
   },
   tooltipText: {
-    fontSize: theme.palette.geoViewFontSize.default,
-    color: theme.palette.geoViewColor.bgColor.light[900],
+    fontSize: theme.palette.geoViewFontSize?.default,
+    color: theme.palette.geoViewColor?.bgColor.light[900],
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
     overflow: 'hidden',

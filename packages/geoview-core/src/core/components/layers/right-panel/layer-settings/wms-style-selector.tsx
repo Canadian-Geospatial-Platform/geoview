@@ -176,7 +176,7 @@ export function WmsStylePanel({ layerPath }: WmsStylePanelProps): JSX.Element {
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography sx={sxClasses.settingsSectionTitle}>{t('layers.settings.selectWmsStyle')}</Typography>
           {currentWmsStyle && (
-            <Typography variant="body2" color="text.secondary" sx={{ fontSize: theme.palette.geoViewFontSize.sm }} noWrap>
+            <Typography variant="body2" color="text.secondary" sx={{ fontSize: theme.palette.geoViewFontSize?.sm }} noWrap>
               {currentWmsStyle}
             </Typography>
           )}

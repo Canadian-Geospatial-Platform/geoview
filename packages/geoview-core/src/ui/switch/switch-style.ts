@@ -22,7 +22,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       background: theme.palette.geoViewColor?.primary.main,
     },
     '& .MuiFormControlLabel-label': {
-      fontSize: theme.palette.geoViewFontSize.default,
+      fontSize: theme.palette.geoViewFontSize?.default,
       color: 'inherit',
       whiteSpace: 'normal',
     },

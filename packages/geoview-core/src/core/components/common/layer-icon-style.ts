@@ -41,9 +41,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     padding: 0,
     borderRadius: 0,
     border: '1px solid',
-    borderColor: theme.palette.geoViewColor.bgColor.dark[600],
+    borderColor: theme.palette.geoViewColor?.bgColor.dark[600],
     boxShadow: 2,
-    backgroundColor: theme.palette.geoViewColor.white,
+    backgroundColor: theme.palette.geoViewColor?.white,
   },
   maxIconImg: {
     maxWidth: 24,
@@ -57,19 +57,19 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     alignItems: 'center',
     width: 24,
     height: '24px !important',
-    backgroundColor: theme.palette.geoViewColor.white,
+    backgroundColor: theme.palette.geoViewColor?.white,
     border: '1px solid',
-    borderColor: theme.palette.geoViewColor.bgColor.dark[600],
+    borderColor: theme.palette.geoViewColor?.bgColor.dark[600],
     borderRadius: 0.5,
   },
   titleIcon: {
     '&.MuiSvgIcon-root': {
       border: '1px solid',
-      backgroundColor: theme.palette.geoViewColor.white,
-      borderColor: theme.palette.geoViewColor.primary.main,
+      backgroundColor: theme.palette.geoViewColor?.white,
+      borderColor: theme.palette.geoViewColor?.primary.main,
       borderRadius: 0.5,
       '& path': {
-        fill: theme.palette.geoViewColor.bgColor.dark[800],
+        fill: theme.palette.geoViewColor?.bgColor.dark[800],
       },
     },
   },
@@ -79,9 +79,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     justifyContent: 'center',
     width: '30px',
     height: '30px',
-    backgroundColor: theme.palette.geoViewColor.white,
+    backgroundColor: theme.palette.geoViewColor?.white,
     border: '1px solid',
-    borderColor: theme.palette.geoViewColor.primary.main,
+    borderColor: theme.palette.geoViewColor?.primary.main,
     borderRadius: '4px',
   },
   groupIcon: {
@@ -92,7 +92,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     height: 24,
     position: 'relative',
     '&:focus': {
-      outlineColor: theme.palette.geoViewColor.bgColor.dark[600],
+      outlineColor: theme.palette.geoViewColor?.bgColor.dark[600],
     },
   },
   iconPreview: {

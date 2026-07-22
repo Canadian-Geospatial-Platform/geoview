@@ -815,7 +815,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
           {subTitle && (
             <Typography
               sx={{
-                fontSize: theme.palette.geoViewFontSize.sm,
+                fontSize: theme.palette.geoViewFontSize?.sm,
                 ...(layerHidden && hiddenStyle),
               }}
             >
@@ -870,8 +870,8 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
                       <Typography
                         sx={{
                           marginTop: '10px',
-                          color: theme.palette.geoViewColor.textColor.light[200],
-                          fontSize: theme.palette.geoViewFontSize.sm,
+                          color: theme.palette.geoViewColor?.textColor.light[200],
+                          fontSize: theme.palette.geoViewFontSize?.sm,
                           textAlign: 'center',
                         }}
                         key={attribution}

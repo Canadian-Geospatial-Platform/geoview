@@ -48,7 +48,7 @@ export const getSxClasses = (theme: any): SxStyles => ({
 
   // Header text styling
   headerText: {
-    fontSize: theme.palette.geoViewFontSize.md,
+    fontSize: theme.palette.geoViewFontSize?.md,
     fontWeight: '600',
     color: theme.palette.geoViewColor?.textColor.main,
     maxWidth: '400px',

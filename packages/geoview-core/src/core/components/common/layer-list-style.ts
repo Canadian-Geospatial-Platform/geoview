@@ -14,14 +14,14 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     height: 'fit-content',
     width: '100%',
     '& .MuiListItemText-primary': {
-      fontSize: theme.palette.geoViewFontSize.lg,
+      fontSize: theme.palette.geoViewFontSize?.lg,
       fontWeight: '600',
     },
     '& .MuiListItem-root': {
       '& .MuiListItemButton-root': {
         padding: '0 2px 0 16px',
         height: '100%',
-        backgroundColor: theme.palette.geoViewColor.bgColor.light[500],
+        backgroundColor: theme.palette.geoViewColor?.bgColor.light[500],
       },
     },
     '& .MuiListItemButton-root': {
@@ -32,10 +32,10 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
     '& .MuiListItemText-root': {
       '> span': {
-        fontSize: theme.palette.geoViewFontSize.default,
+        fontSize: theme.palette.geoViewFontSize?.default,
       },
       '> p': {
-        fontSize: theme.palette.geoViewFontSize.sm,
+        fontSize: theme.palette.geoViewFontSize?.sm,
       },
     },
   },
@@ -58,7 +58,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     display: 'flex',
     flexDirection: 'column',
     '& .layerTitle': {
-      fontSize: theme.palette.geoViewFontSize.default,
+      fontSize: theme.palette.geoViewFontSize?.default,
       fontWeight: '600',
       lineHeight: 1.5,
       paddingRight: '10px',
@@ -69,7 +69,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       alignItems: 'center',
       marginTop: '4px',
       '>p': {
-        fontSize: `${theme.palette.geoViewFontSize.sm} !important`,
+        fontSize: `${theme.palette.geoViewFontSize?.sm} !important`,
         color: theme.palette.text.secondary,
         fontWeight: 400,
       },
@@ -125,7 +125,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   dividerVertical: {
     marginLeft: '0.4rem',
     height: '1.5rem',
-    backgroundColor: theme.palette.geoViewColor.bgColor.dark[300],
+    backgroundColor: theme.palette.geoViewColor?.bgColor.dark[300],
   },
   zoomButton: {
     height: 40,

@@ -37,10 +37,10 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   navBtnGroup: {
     borderRadius: theme.spacing(5),
-    backgroundColor: theme.palette.geoViewColor.bgColor.light[500],
+    backgroundColor: theme.palette.geoViewColor?.bgColor.light[500],
     overflow: 'clip',
     '& .MuiButtonGroup-grouped:not(:last-child)': {
-      borderColor: theme.palette.geoViewColor.bgColor.light[900],
+      borderColor: theme.palette.geoViewColor?.bgColor.light[900],
     },
   },
   navBtnGroupColumns: {
@@ -50,8 +50,8 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     alignItems: 'center',
   },
   navButton: {
-    backgroundColor: theme.palette.geoViewColor.bgColor.light[500],
-    color: theme.palette.geoViewColor.bgColor.dark[900],
+    backgroundColor: theme.palette.geoViewColor?.bgColor.light[500],
+    color: theme.palette.geoViewColor?.bgColor.dark[900],
     borderRadius: 0,
     width: '44px',
     height: '44px',
@@ -62,23 +62,23 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     '&:not(:last-of-type)': {
       borderBottomLeftRadius: 0,
       borderBottomRightRadius: 0,
-      borderBottom: `1px solid ${theme.palette.geoViewColor.bgColor.light[900]}`,
+      borderBottom: `1px solid ${theme.palette.geoViewColor?.bgColor.light[900]}`,
     },
     '&:not(:first-of-type)': {
       borderTopLeftRadius: 0,
       borderTopRightRadius: 0,
     },
     '&:hover': {
-      backgroundColor: theme.palette.geoViewColor.bgColor.light[500],
-      color: theme.palette.geoViewColor.bgColor.dark[700],
+      backgroundColor: theme.palette.geoViewColor?.bgColor.light[500],
+      color: theme.palette.geoViewColor?.bgColor.dark[700],
     },
     '&:focus': {
-      backgroundColor: theme.palette.geoViewColor.bgColor.light[500],
-      color: theme.palette.geoViewColor.bgColor.dark[700],
+      backgroundColor: theme.palette.geoViewColor?.bgColor.light[500],
+      color: theme.palette.geoViewColor?.bgColor.dark[700],
     },
     '&:active': {
-      backgroundColor: theme.palette.geoViewColor.bgColor.light[500],
-      color: theme.palette.geoViewColor.bgColor.dark[950],
+      backgroundColor: theme.palette.geoViewColor?.bgColor.light[500],
+      color: theme.palette.geoViewColor?.bgColor.dark[950],
     },
   },
   popoverTitle: {

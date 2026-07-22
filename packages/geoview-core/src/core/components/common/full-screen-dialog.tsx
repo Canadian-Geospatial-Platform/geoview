@@ -40,12 +40,12 @@ const CLOSE_BUTTON_STYLES = {
 const DIALOG_HEADER_STYLES = (theme: Theme): SxProps => ({
   display: 'flex',
   justifyContent: 'space-between',
-  borderBottom: `1px solid ${theme.palette.geoViewColor.bgColor.dark[300]}`,
+  borderBottom: `1px solid ${theme.palette.geoViewColor?.bgColor.dark[300]}`,
 });
 
 /** Styles for the dialog title text. */
 const DIALOG_TITLE_STYLES = (theme: Theme): SxProps => ({
-  fontSize: theme.palette.geoViewFontSize.lg,
+  fontSize: theme.palette.geoViewFontSize?.lg,
   fontWeight: '600',
 });
 

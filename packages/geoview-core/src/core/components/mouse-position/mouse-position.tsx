@@ -216,7 +216,7 @@ export const MousePosition = memo((props: MousePositionProps): JSX.Element => {
                   <CheckIcon
                     sx={{
                       ...memoSxClasses.mousePositionCheckmark,
-                      fontSize: theme.palette.geoViewFontSize.lg,
+                      fontSize: theme.palette.geoViewFontSize?.lg,
                       opacity: checkmarkOpacity,
                       color: theme.palette.geoViewColor?.bgColor?.dark?.[650],
                     }}

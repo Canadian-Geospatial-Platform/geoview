@@ -45,7 +45,7 @@ export type ButtonProps = {
  *    size="small"
  *    tooltip={t('legend.sortLayers')!}
  *    variant={displayState === 'order' ? 'contained' : 'outlined'}
- *    startIcon={<HandleIcon fontSize={theme.palette.geoViewFontSize.sm} />}
+ *    startIcon={<HandleIcon fontSize={theme.palette.geoViewFontSize?.sm} />}
  *    onClick={() => handleSetDisplayState('order')}
  * >
  *    {t('legend.sort')}

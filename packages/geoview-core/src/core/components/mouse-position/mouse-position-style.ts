@@ -17,15 +17,15 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     width: 'auto',
     backgroundColor: 'transparent !important',
     height: 'inherit !important',
-    color: theme.palette.geoViewColor.bgColor.dark[650],
+    color: theme.palette.geoViewColor?.bgColor.dark[650],
     lineHeight: 1.5,
     ':hover': {
       backgroundColor: 'transparent !important',
-      color: theme.palette.geoViewColor.bgColor.dark[750],
+      color: theme.palette.geoViewColor?.bgColor.dark[750],
     },
   },
   mousePositionTextContainer: {
-    color: theme.palette.geoViewColor.bgColor.dark[650],
+    color: theme.palette.geoViewColor?.bgColor.dark[650],
     display: 'flex',
     flexDirection: 'column',
     [theme.breakpoints.down('md')]: {
@@ -38,7 +38,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     justifyContent: 'center',
     alignItems: 'center',
     '& span': {
-      fontSize: theme.palette.geoViewFontSize.default,
+      fontSize: theme.palette.geoViewFontSize?.default,
       ...ellipsisOverflow,
     },
   },
@@ -46,7 +46,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     paddingRight: 5,
   },
   mousePositionText: {
-    fontSize: theme.palette.geoViewFontSize.default,
+    fontSize: theme.palette.geoViewFontSize?.default,
     ...ellipsisOverflow,
   },
 });

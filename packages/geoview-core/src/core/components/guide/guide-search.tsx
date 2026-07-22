@@ -588,7 +588,7 @@ export function GuideSearch({ containerType, guide, onSectionChange, onSearchSta
                       <>
                         <Box
                           role="status"
-                          sx={{ fontSize: '0.75rem', color: theme.palette.geoViewColor.textColor.light[200], whiteSpace: 'nowrap' }}
+                          sx={{ fontSize: '0.75rem', color: theme.palette.geoViewColor?.textColor.light[200], whiteSpace: 'nowrap' }}
                           aria-label={t('guide.searchMatchCountLabel', {
                             current: currentMatchIndex + 1,
                             total: allMatches.length,
@@ -604,7 +604,7 @@ export function GuideSearch({ containerType, guide, onSectionChange, onSearchSta
                           aria-disabled={isNavigationDisabled}
                           onKeyDown={handleNavigationKeyDown}
                         >
-                          <KeyboardArrowUpIcon sx={{ fontSize: theme.palette.geoViewFontSize.sm }} />
+                          <KeyboardArrowUpIcon sx={{ fontSize: theme.palette.geoViewFontSize?.sm }} />
                         </IconButton>
                         <IconButton
                           size="small"
@@ -614,13 +614,13 @@ export function GuideSearch({ containerType, guide, onSectionChange, onSearchSta
                           aria-disabled={isNavigationDisabled}
                           onKeyDown={handleNavigationKeyDown}
                         >
-                          <KeyboardArrowDownIcon sx={{ fontSize: theme.palette.geoViewFontSize.sm }} />
+                          <KeyboardArrowDownIcon sx={{ fontSize: theme.palette.geoViewFontSize?.sm }} />
                         </IconButton>
                       </>
                     )}
                     {searchTerm.trim().length >= 3 && allMatches.length === 0 && (
                       <Box
-                        sx={{ fontSize: '0.75rem', color: theme.palette.geoViewColor.textColor.light[200], whiteSpace: 'nowrap', mr: 1 }}
+                        sx={{ fontSize: '0.75rem', color: theme.palette.geoViewColor?.textColor.light[200], whiteSpace: 'nowrap', mr: 1 }}
                         role="status"
                       >
                         {t('guide.noResults')}
@@ -636,7 +636,7 @@ export function GuideSearch({ containerType, guide, onSectionChange, onSearchSta
                       onKeyDown={handleClearKeyDown}
                       sx={{ ml: 1 }}
                     >
-                      <CloseIcon sx={{ fontSize: theme.palette.geoViewFontSize.sm }} />
+                      <CloseIcon sx={{ fontSize: theme.palette.geoViewFontSize?.sm }} />
                     </IconButton>
                   </Box>
                 </InputAdornment>

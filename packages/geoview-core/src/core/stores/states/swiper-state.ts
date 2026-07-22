@@ -247,9 +247,6 @@ export const addStoreSwiperLayerPath = (mapId: string, layerPath: string): void 
   // Get the swiper state which is only initialized if the Swiper Plugin exists.
   const swiperState = getStoreSwiperState(mapId);
 
-  // If no layer paths, return
-  if (!swiperState.layerPaths) return;
-
   // If not already added
   if (!swiperState.layerPaths.includes(layerPath)) {
     // Add in the array

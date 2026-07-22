@@ -193,7 +193,7 @@ export function RasterFunctionPanel({ layerPath }: RasterFunctionPanelProps): JS
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography sx={sxClasses.settingsSectionTitle}>{t('layers.settings.selectRasterFunction')}</Typography>
           {currentRasterFunction && (
-            <Typography variant="body2" color="text.secondary" sx={{ fontSize: theme.palette.geoViewFontSize.sm }} noWrap>
+            <Typography variant="body2" color="text.secondary" sx={{ fontSize: theme.palette.geoViewFontSize?.sm }} noWrap>
               {currentRasterFunction}
             </Typography>
           )}

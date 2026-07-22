@@ -611,6 +611,9 @@ export type EsriBaseSymbol = {
 
 /** ESRI simple marker symbol configuration for point geometries. */
 export interface EsriSimpleMarkerSymbol extends EsriBaseSymbol {
+  angle: number;
+  color: TypeEsriColor;
+  outline: EsriSimpleLineSymbol;
   size: number;
   style: EsriSymbolStyle;
   type: 'esriSMS';
@@ -640,6 +643,8 @@ export type EsriFillStyle =
 
 /** ESRI simple line symbol configuration for line geometries and outlines. */
 export interface EsriSimpleLineSymbol extends EsriBaseSymbol {
+  color: TypeEsriColor;
+  style: EsriLineStyle;
   type: 'esriSLS';
   width: number;
 }

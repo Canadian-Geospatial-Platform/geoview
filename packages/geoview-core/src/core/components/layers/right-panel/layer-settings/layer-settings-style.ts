@@ -27,7 +27,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
-    color: theme.palette.geoViewColor.textColor.main,
+    color: theme.palette.geoViewColor?.textColor.main,
     cursor: 'pointer',
     userSelect: 'none',
     transition: 'color 0.2s',
@@ -43,7 +43,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
 
   settingsSectionTitle: {
     fontWeight: 600,
-    fontSize: theme.palette.geoViewFontSize.default,
+    fontSize: theme.palette.geoViewFontSize?.default,
   },
 
   // Shared card list styles (used by raster function and WMS style selectors)

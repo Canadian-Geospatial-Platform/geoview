@@ -39,7 +39,7 @@ export function LayersToolbar({ containerType }: TypeLayersToolbar): JSX.Element
     gap: 3,
     '&>button': { padding: '10px 15px' },
     '& .MuiButton-startIcon': { [theme.breakpoints.down('sm')]: { margin: 0, padding: '0 0.25rem' } },
-    '& .MuiButtonGroup-root': { backgroundColor: theme.palette.geoViewColor.bgColor.light[300] },
+    '& .MuiButtonGroup-root': { backgroundColor: theme.palette.geoViewColor?.bgColor.light[300] },
   };
 
   // Store
@@ -127,7 +127,7 @@ export function LayersToolbar({ containerType }: TypeLayersToolbar): JSX.Element
         tooltip={t('legend.addLayer')}
         tooltipPlacement="top"
         variant={displayState === 'add' ? 'contained' : 'outlined'}
-        startIcon={<AddCircleOutlineIcon sx={{ fontSize: theme.palette.geoViewFontSize.sm }} />}
+        startIcon={<AddCircleOutlineIcon sx={{ fontSize: theme.palette.geoViewFontSize?.sm }} />}
         onClick={() => handleSetDisplayState('add')}
       >
         {t('legend.addLayer')}

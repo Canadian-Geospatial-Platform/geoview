@@ -17,7 +17,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     height: '100%',
     ':hover': {
       backgroundColor: 'transparent',
-      color: theme.palette.geoViewColor.white,
+      color: theme.palette.geoViewColor?.white,
     },
   },
   scaleExpandedContainer: {
@@ -33,23 +33,23 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     maxHeight: '18px',
   },
   scaleText: {
-    fontSize: theme.palette.geoViewFontSize.default,
-    color: theme.palette.geoViewColor.bgColor.dark[650],
+    fontSize: theme.palette.geoViewFontSize?.default,
+    color: theme.palette.geoViewColor?.bgColor.dark[650],
     whiteSpace: 'nowrap',
-    borderBottom: `2px solid ${theme.palette.geoViewColor.bgColor.dark[650]}`,
+    borderBottom: `2px solid ${theme.palette.geoViewColor?.bgColor.dark[650]}`,
     textTransform: 'lowercase',
     position: 'relative',
     display: 'inline-block',
     textAlign: 'center',
 
     '&.interaction-static': {
-      fontSize: theme.palette.geoViewFontSize.md,
+      fontSize: theme.palette.geoViewFontSize?.md,
       fontWeight: 'bold',
       borderBottom: '2px solid',
-      color: theme.palette.geoViewColor.grey.dark[500],
+      color: theme.palette.geoViewColor?.grey.dark[500],
 
       '&.hasScaleLine::before, &.hasScaleLine::after': {
-        backgroundColor: `${theme.palette.geoViewColor.grey.dark[500]} !important`,
+        backgroundColor: `${theme.palette.geoViewColor?.grey.dark[500]} !important`,
         width: '2px !important',
       },
     },
@@ -60,7 +60,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       bottom: '-1px',
       width: '1px',
       height: '8px',
-      backgroundColor: theme.palette.geoViewColor.bgColor.dark[650],
+      backgroundColor: theme.palette.geoViewColor?.bgColor.dark[650],
     },
 
     '&.hasScaleLine::before': {
@@ -73,6 +73,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   scaleCheckmark: {
     paddingRight: 5,
-    color: theme.palette.geoViewColor.bgColor.light[800],
+    color: theme.palette.geoViewColor?.bgColor.light[800],
   },
 });

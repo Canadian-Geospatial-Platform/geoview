@@ -9,12 +9,12 @@ import { ellipsisOverflow } from '@/ui/style/default';
  * @returns The sx classes object
  */
 export const getSxClasses = (theme: Theme): SxStyles => ({
-  dataPanel: { background: theme.palette.geoViewColor.bgColor.main, paddingBottom: '1rem' },
+  dataPanel: { background: theme.palette.geoViewColor?.bgColor.main, paddingBottom: '1rem' },
   gridContainer: { paddingLeft: '1rem', paddingRight: '1rem' },
   selectedRows: {
     transition: 'box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
     fontWeight: 400,
-    fontSize: theme.palette.geoViewFontSize.sm,
+    fontSize: theme.palette.geoViewFontSize?.sm,
     linHeight: 1.43,
     letterSpacing: '0.01071em',
     display: 'flex',
@@ -39,7 +39,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       marginRight: '0 !important',
     },
     '& .MuiFormHelperText-root': {
-      color: theme.palette.geoViewColor.textColor.light[200], // WCAG - Matches global placeholder text color
+      color: theme.palette.geoViewColor?.textColor.light[200], // WCAG - Matches global placeholder text color
     },
   },
   filterMap: {
@@ -49,7 +49,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       },
     },
     '& .MuiTouchRipple-root': {
-      color: theme.palette.geoViewColor.grey.dark[900],
+      color: theme.palette.geoViewColor?.grey.dark[900],
     },
   },
   filterTextField: {
@@ -75,7 +75,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
         gridTemplateColumns: '1fr',
       },
     },
-    '& .MuiInput-root': { fontSize: theme.palette.geoViewFontSize.sm, '& .MuiSvgIcon-root': { width: '0.75em', height: '0.75em' } },
+    '& .MuiInput-root': { fontSize: theme.palette.geoViewFontSize?.sm, '& .MuiSvgIcon-root': { width: '0.75em', height: '0.75em' } },
     '& .MuiBadge-root': {
       marginLeft: '0.5rem',
       svg: {
@@ -121,7 +121,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
         border: `2px solid ${theme.palette.divider}`,
       },
       '&.keyboard-focused, &:focus-visible': {
-        backgroundColor: theme.palette.geoViewColor.bgColor.dark[100],
+        backgroundColor: theme.palette.geoViewColor?.bgColor.dark[100],
         borderRadius: '50%',
         border: `2px solid black !important`,
       },
@@ -141,16 +141,16 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
   },
   dataTableInstructionsTitle: {
-    fontSize: theme.palette.geoViewFontSize.lg,
+    fontSize: theme.palette.geoViewFontSize?.lg,
     fontWeight: '600',
     lineHeight: '1.5em',
   },
   dataTableInstructionsBody: {
-    fontSize: theme.palette.geoViewFontSize.sm,
+    fontSize: theme.palette.geoViewFontSize?.sm,
   },
   rightPanelContainer: {
     overflowY: 'auto',
-    color: theme.palette.geoViewColor.textColor.main,
+    color: theme.palette.geoViewColor?.textColor.main,
   },
   toolbarContainer: {
     justifyContent: 'space-between',
@@ -203,7 +203,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   tableBody: {
     '& tr:nth-of-type(odd) > td': {
-      backgroundColor: theme.palette.geoViewColor.bgColor.darken(0.01),
+      backgroundColor: theme.palette.geoViewColor?.bgColor.darken(0.01),
     },
   },
   lightboxButton: {

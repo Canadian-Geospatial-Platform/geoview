@@ -69,12 +69,12 @@ export const MapInfo = memo(({ onScrollShellIntoView }: MapInfoProps): JSX.Eleme
     return {
       ...MAP_INFO_BASE_STYLES,
       height: expanded ? '80px' : '40px',
-      borderBottom: `1px solid ${theme.palette.geoViewColor.bgColor.dark[650]}`,
-      color: theme.palette.geoViewColor.bgColor.dark[650],
-      backgroundColor: theme.palette.geoViewColor.bgColor.dark[50],
+      borderBottom: `1px solid ${theme.palette.geoViewColor?.bgColor.dark[650]}`,
+      color: theme.palette.geoViewColor?.bgColor.dark[650],
+      backgroundColor: theme.palette.geoViewColor?.bgColor.dark[50],
       width: 'calc(100% - 50px)',
       zIndex: theme.zIndex.appBar + 100, // Above app-bar panels
-      boxShadow: `0 0 5px ${theme.palette.geoViewColor.bgColor.dark[200]}`,
+      boxShadow: `0 0 5px ${theme.palette.geoViewColor?.bgColor.dark[200]}`,
     };
   }, [expanded, theme]);
 
@@ -86,7 +86,7 @@ export const MapInfo = memo(({ onScrollShellIntoView }: MapInfoProps): JSX.Eleme
     return {
       ...MAP_INFO_BASE_STYLES,
       height: '50px',
-      background: theme.palette.geoViewColor.grey.lighten(0.8, 0.8),
+      background: theme.palette.geoViewColor?.grey.lighten(0.8, 0.8),
       width: 'fit-content',
       borderRadius: '70px',
     };

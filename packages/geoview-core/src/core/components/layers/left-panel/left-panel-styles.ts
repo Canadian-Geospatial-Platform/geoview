@@ -25,7 +25,7 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        borderBottom: `1px solid ${theme.palette.geoViewColor.grey.darken(1, 0.12)}`,
+        borderBottom: `1px solid ${theme.palette.geoViewColor?.grey.darken(1, 0.12)}`,
       },
     },
 
@@ -50,7 +50,7 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     // layer title
     '& .MuiListItemText-primary': {
       fontWeight: '600',
-      fontSize: `${theme.palette.geoViewFontSize.default} !important`,
+      fontSize: `${theme.palette.geoViewFontSize?.default} !important`,
     },
 
     '& .layer-panel': {
@@ -77,11 +77,11 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     },
     '& .MuiListItemText-root': {
       '> span': {
-        fontSize: theme.palette.geoViewFontSize.default,
+        fontSize: theme.palette.geoViewFontSize?.default,
       },
       '> p': {
-        fontSize: theme.palette.geoViewFontSize.sm,
-        color: `${theme.palette.geoViewColor.textColor.main} !important`,
+        fontSize: theme.palette.geoViewFontSize?.sm,
+        color: `${theme.palette.geoViewColor?.textColor.main} !important`,
         fontWeight: '400 !important',
       },
     },

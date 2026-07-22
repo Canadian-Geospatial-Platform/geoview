@@ -250,7 +250,7 @@ export const Scale = memo(({ expanded }: ScaleProps): JSX.Element => {
                 <CheckIcon
                   sx={{
                     ...memoSxClasses.scaleCheckmark,
-                    fontSize: theme.palette.geoViewFontSize.lg,
+                    fontSize: theme.palette.geoViewFontSize?.lg,
                     opacity: scaleMode === index ? 1 : 0,
                     color: theme.palette.geoViewColor?.bgColor?.dark?.[650],
                   }}
