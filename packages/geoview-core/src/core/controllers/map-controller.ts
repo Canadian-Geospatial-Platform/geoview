@@ -1487,6 +1487,9 @@ export class MapController extends AbstractMapViewerController {
     // Save to the store that the map is properly being displayed now
     setStoreMapDisplayed(sender.mapId);
 
+    // Set interaction (enable/disables map controls)
+    sender.setInteraction(getStoreMapInteraction(sender.mapId));
+
     // Update the map controls based on the original map state
     this.#updateMapControls();
   }
@@ -1941,10 +1944,6 @@ export class MapController extends AbstractMapViewerController {
 
     // Get the scale information
     const scale = mapViewer.getScaleInfoFromDomElement();
-
-    // Set interaction (enable/disables map controls)
-    // TODO: CHECK - This line should likely happen elsewhere in the initialization of the map, not really updating a map control per-se
-    mapViewer.setInteraction(getStoreMapInteraction(mapViewer.mapId));
 
     // Save in store
     setStoreMapSize(mapViewer.mapId, size);
