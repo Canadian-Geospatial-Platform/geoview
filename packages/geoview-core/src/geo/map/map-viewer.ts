@@ -5,7 +5,7 @@ import type { i18n } from 'i18next';
 import { Overlay, type MapBrowserEvent, type MapEvent } from 'ol';
 import { ObjectEvent } from 'ol/Object';
 import OLMap from 'ol/Map';
-import type { FitOptions, ViewOptions } from 'ol/View';
+import type { ViewOptions } from 'ol/View';
 import View from 'ol/View';
 import type { Coordinate } from 'ol/coordinate';
 import type { Extent } from 'ol/extent';
@@ -75,7 +75,7 @@ import { delay, generateId, getLocalizedMessage } from '@/core/utils/utilities';
 import { debounce } from '@/core/utils/debounce';
 import type { TimeIANA } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
-import { DEFAULT_OL_FITOPTIONS, NORTH_POLE_POSITION_LONLAT, OL_ZOOM_DURATION } from '@/core/utils/constant';
+import { DEFAULT_OL_GVFITOPTIONS, NORTH_POLE_POSITION_LONLAT, OL_ZOOM_DURATION, type GVFitOptions } from '@/core/utils/constant';
 import type { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';
 import type { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import { InvalidExtentError } from '@/core/exceptions/geoview-exceptions';
@@ -406,7 +406,7 @@ export class MapViewer {
         rotation: mapViewSettings.rotation || 0,
       }),
       controls: [],
-      keyboardEventTarget: document.getElementById(`map-${this.mapId}`) as HTMLElement,
+      keyboardEventTarget: this.getHTMLElementMapContainer(),
     });
 
     // Set the map
@@ -505,14 +505,14 @@ export class MapViewer {
     // Add map controls (scale)
     const scaleBarMetric = new ScaleLine({
       units: 'metric',
-      target: document.getElementById(`${mapId}-scaleControlBarMetric`) as HTMLElement,
+      target: this.getHTMLElementScaleControlBarMetric(),
       bar: true,
       text: true,
     });
 
     const scaleBarImperial = new ScaleLine({
       units: 'imperial',
-      target: document.getElementById(`${mapId}-scaleControlBarImperial`) as HTMLElement,
+      target: this.getHTMLElementScaleControlBarImperial(),
       bar: true,
       text: true,
     });
@@ -530,7 +530,7 @@ export class MapViewer {
       id: northPoleId,
       position: northPolePosition,
       positioning: 'center-center',
-      element: document.getElementById(northPoleId) as HTMLElement,
+      element: this.getHTMLElementNorthPole(),
       stopEvent: false,
     });
     map.addOverlay(this.#northPoleMarkerOverlay);
@@ -542,7 +542,7 @@ export class MapViewer {
       position: [-1, -1],
       positioning: 'center-center',
       offset: [-18, -30],
-      element: document.getElementById(clickMarkerId) as HTMLElement,
+      element: this.getHTMLElementClickMarker(),
       stopEvent: false,
     });
     map.addOverlay(this.#clickMarkerOverlay);
@@ -984,7 +984,7 @@ export class MapViewer {
    *
    * @param zoom - The target zoom level
    * @param useAnimation - Indicates if a zoom animation should be used, default: true
-   * @param duration - Optional animation duration in ms
+   * @param duration - Optional animation duration in ms (default: OL_ZOOM_DURATION)
    * @returns A promise that resolves when the zoom animation is complete
    */
   zoomMap(zoom: number, useAnimation = true, duration: number = OL_ZOOM_DURATION): Promise<void> {
@@ -1007,10 +1007,10 @@ export class MapViewer {
    *
    * @param extent - The extent or coordinate to zoom to
    * @param useAnimation - Indicates if a zoom animation should be used, default: true
-   * @param options - Optional options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11 })
+   * @param options - Optional options to configure the zoomToExtent
    * @returns A promise that resolves when the zoom operation completes
    */
-  zoomToLonLatExtentOrCoordinate(extent: Extent | Coordinate, useAnimation = true, options?: FitOptions): Promise<void> {
+  zoomToLonLatExtentOrCoordinate(extent: Extent | Coordinate, useAnimation = true, options?: GVFitOptions): Promise<void> {
     const fullExtent = extent.length === 2 ? [extent[0], extent[1], extent[0], extent[1]] : extent;
     const projectedExtent = Projection.transformExtentFromProj(fullExtent, Projection.getProjectionLonLat(), this.getProjection());
     return this.zoomToExtent(projectedExtent, useAnimation, options);
@@ -1181,13 +1181,27 @@ export class MapViewer {
    *
    * @param extent - The extent to zoom to (in map projection)
    * @param useAnimation - Indicates if a zoom animation should be used, default: true
-   * @param options - The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 13, duration: 500 })
+   * @param options - The options to configure the zoomToExtent (default: DEFAULT_OL_GVFITOPTIONS)
    * @returns A promise that resolves when the zoom animation is complete
    * @throws {InvalidExtentError} When the extent is invalid
    */
-  zoomToExtent(extent: Extent, useAnimation = true, options: FitOptions = DEFAULT_OL_FITOPTIONS): Promise<void> {
+  zoomToExtent(extent: Extent, useAnimation = true, options: GVFitOptions = DEFAULT_OL_GVFITOPTIONS): Promise<void> {
     // Merge user options with defaults
-    const mergedOptions: FitOptions = { ...DEFAULT_OL_FITOPTIONS, ...options };
+    const mergedOptions: GVFitOptions = { ...DEFAULT_OL_GVFITOPTIONS, ...options };
+
+    // If no padding already included in the options
+    if (!mergedOptions.padding) {
+      // Calculate the absolute padding values based on the map current size
+      const [width, height] = this.map.getSize() ?? [0, 0];
+      const paddingWidth = Math.round(width * mergedOptions.percentPadding![0]);
+      const paddingHeight = Math.round(height * mergedOptions.percentPadding![1]);
+
+      // Get the mapInfo bar's actual pixel height
+      const mapInfoHeight = this.getHTMLElementMapInfo()?.offsetHeight ?? 0;
+
+      // Assign absolute padding values for the actual fit options
+      mergedOptions.padding = [paddingHeight, paddingWidth, paddingHeight + mapInfoHeight, paddingWidth];
+    }
 
     // Validate the extent coordinates - need to make sure we aren't excluding zero with !number or using invalid extents
     const validatedExtent = GeoUtilities.validateExtent(extent, this.getProjectionEPSG());
@@ -1488,22 +1502,75 @@ export class MapViewer {
 
   // #endregion
 
-  // #region OTHERS
+  // #region HTML DOM MANIPULATIONS
 
   /**
-   * Retrieves the scale information from the DOM elements for the given map ID.
+   * Gets the map keyboard event target element.
    *
-   * @param mapId - The unique identifier of the map
+   * @returns The map container HTML element, if found
+   */
+  getHTMLElementMapContainer(): HTMLElement | undefined {
+    return document.getElementById(`map-${this.mapId}`) ?? undefined;
+  }
+
+  /**
+   * Gets the scale control bar metric element.
+   *
+   * @returns The scale control bar metric HTML element, if found
+   */
+  getHTMLElementScaleControlBarMetric(): HTMLElement | undefined {
+    return document.getElementById(`${this.mapId}-scaleControlBarMetric`) ?? undefined;
+  }
+
+  /**
+   * Gets the scale control bar imperial element.
+   *
+   * @returns The scale control bar imperial HTML element, if found
+   */
+  getHTMLElementScaleControlBarImperial(): HTMLElement | undefined {
+    return document.getElementById(`${this.mapId}-scaleControlBarImperial`) ?? undefined;
+  }
+
+  /**
+   * Gets the north pole marker element.
+   *
+   * @returns The north pole marker HTML element, if found
+   */
+  getHTMLElementNorthPole(): HTMLElement | undefined {
+    return document.getElementById(`${this.mapId}-northpole`) ?? undefined;
+  }
+
+  /**
+   * Gets the click marker element.
+   *
+   * @returns The click marker HTML element, if found
+   */
+  getHTMLElementClickMarker(): HTMLElement | undefined {
+    return document.getElementById(`${this.mapId}-clickmarker`) ?? undefined;
+  }
+
+  /**
+   * Gets the map info bar element.
+   *
+   * @returns The map info bar HTML element, if found
+   */
+  getHTMLElementMapInfo(): HTMLElement | undefined {
+    return document.getElementById(`${this.mapId}-mapInfo`) ?? undefined;
+  }
+
+  /**
+   * Retrieves the scale information from the DOM elements.
+   *
    * @returns The scale information object
    */
-  static getScaleInfoFromDomElement(mapId: string): TypeScaleInfo {
+  getScaleInfoFromDomElement(): TypeScaleInfo {
     // Get metric values
-    const scaleControlBarMetric = document.getElementById(`${mapId}-scaleControlBarMetric`);
+    const scaleControlBarMetric = this.getHTMLElementScaleControlBarMetric();
     const lineWidthMetric = (scaleControlBarMetric?.querySelector('.ol-scale-bar-inner') as HTMLElement)?.style.width;
     const labelGraphicMetric = (scaleControlBarMetric?.querySelector('.ol-scale-bar-inner')?.lastChild as HTMLElement)?.innerHTML;
 
-    // Get metric values
-    const scaleControlBarImperial = document.getElementById(`${mapId}-scaleControlBarImperial`);
+    // Get imperial values
+    const scaleControlBarImperial = this.getHTMLElementScaleControlBarImperial();
     const lineWidthImperial = (scaleControlBarImperial?.querySelector('.ol-scale-bar-inner') as HTMLElement)?.style.width;
     const labelGraphicImperial = (scaleControlBarImperial?.querySelector('.ol-scale-bar-inner')?.lastChild as HTMLElement)?.innerHTML;
 
@@ -1512,6 +1579,10 @@ export class MapViewer {
 
     return { lineWidthMetric, labelGraphicMetric, lineWidthImperial, labelGraphicImperial, labelNumeric };
   }
+
+  // #endregion HTML DOM MANIPULATIONS
+
+  // #region OTHERS
 
   /**
    * Computes the effective minimum and maximum scales for a layer from its configuration and initial settings.
@@ -2030,7 +2101,7 @@ export class MapViewer {
       if (!size) return;
 
       // Get the scale information
-      const scale = MapViewer.getScaleInfoFromDomElement(this.mapId);
+      const scale = this.getScaleInfoFromDomElement();
 
       // Emit to the outside
       this.#emitMapSizeChanged({ size, scale });
@@ -2183,9 +2254,7 @@ export class MapViewer {
         : this.mapFeaturesConfig.map.viewSettings.initialView.extent;
 
       // Zoom to extent
-      return this.zoomToExtent(extent, false, {
-        padding: [0, 0, 0, 0],
-      });
+      return this.zoomToExtent(extent, false);
     }
 
     // No zoom to do, resolve

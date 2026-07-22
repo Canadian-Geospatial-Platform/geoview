@@ -112,34 +112,34 @@ import {
   isStoreGeochartInitialized,
   getStoreGeochartChartsConfig,
 } from '@/core/stores/states/geochart-state';
-import { OL_ZOOM_DURATION, OL_ZOOM_PADDING, TIMEOUT } from '@/core/utils/constant';
+import { TIMEOUT, type GVFitOptions } from '@/core/utils/constant';
 import { DateMgt, type TimeDimension } from '@/core/utils/date-mgt';
 import { doTimeout, isValidUUID } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { logger } from '@/core/utils/logger';
-import {
-  type MapInteractionChangedDelegate,
-  type MapInteractionChangedEvent,
-  type MapBaseEvent,
-  type MapMouseEnterDelegate,
-  type MapMouseLeaveDelegate,
-  type MapProjectionChangedDelegate,
-  type MapProjectionChangedEvent,
-  MapViewer,
-  type MapReadyDelegate,
-  type MapMoveEndDelegate,
-  type MapResolutionChangedDelegate,
-  type MapResolutionChangedEvent,
-  type MapRotationEvent,
-  type MapRotationDelegate,
-  type MapPointerMoveEvent,
-  type MapPointerMoveDelegate,
-  type MapSizeChangedDelegate,
-  type MapSizeChangedEvent,
-  type MarkerIconShowedDelegate,
-  type MarkerIconShowedEvent,
-  type MapSingleClickDelegate,
-  type MapSingleClickEvent,
+import type { MapViewer } from '@/geo/map/map-viewer';
+import type {
+  MapInteractionChangedDelegate,
+  MapInteractionChangedEvent,
+  MapBaseEvent,
+  MapMouseEnterDelegate,
+  MapMouseLeaveDelegate,
+  MapProjectionChangedDelegate,
+  MapProjectionChangedEvent,
+  MapReadyDelegate,
+  MapMoveEndDelegate,
+  MapResolutionChangedDelegate,
+  MapResolutionChangedEvent,
+  MapRotationEvent,
+  MapRotationDelegate,
+  MapPointerMoveEvent,
+  MapPointerMoveDelegate,
+  MapSizeChangedDelegate,
+  MapSizeChangedEvent,
+  MarkerIconShowedDelegate,
+  MarkerIconShowedEvent,
+  MapSingleClickDelegate,
+  MapSingleClickEvent,
 } from '@/geo/map/map-viewer';
 import { Projection } from '@/geo/utils/projection';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
@@ -148,7 +148,6 @@ import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-cla
 import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import type { Draw } from '@/geo/interaction/draw';
 import type { TypeClickMarker } from '@/core/components/click-marker/click-marker';
-import type { FitOptions } from 'ol/View';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { AbstractGVVectorTile } from '@/geo/layer/gv-layers/vector/abstract-gv-vector-tile';
 import type { EventDelegateBase } from '@/api/events/event-helper';
@@ -364,11 +363,11 @@ export class MapController extends AbstractMapViewerController {
    *
    * @param extent - The extent to zoom to (in map projection)
    * @param useAnimation - Indicates if a zoom animation should be used, default: true
-   * @param fitOptions - Optional OL fit options to merge scale constraints into
+   * @param fitOptions - Optional fit options to merge scale constraints into
    * @returns A promise that resolves when the zoom animation is complete
    * @throws {InvalidExtentError} When the extent is invalid
    */
-  zoomToExtent(extent: Extent, useAnimation = true, options?: FitOptions): Promise<void> {
+  zoomToExtent(extent: Extent, useAnimation = true, options?: GVFitOptions): Promise<void> {
     // Redirect to the MapViewer
     return this.getMapViewer().zoomToExtent(extent, useAnimation, options);
   }
@@ -415,7 +414,7 @@ export class MapController extends AbstractMapViewerController {
 
     const currProjection = this.getMapViewer().getProjectionNumber();
     let extent: Extent | undefined = MAP_EXTENTS[currProjection];
-    const options: FitOptions = { padding: OL_ZOOM_PADDING, duration: OL_ZOOM_DURATION };
+    const options: GVFitOptions = {};
     const homeView = getStoreMapHomeView(mapId) || getStoreMapInitialView(mapId);
 
     // Transform center coordinates and update options if zoomAndCenter are in config
@@ -440,6 +439,7 @@ export class MapController extends AbstractMapViewerController {
           )
         : lonlatExtent;
 
+      // Precise zooming, no default padding to be applied in this case
       options.padding = [0, 0, 0, 0];
     }
 
@@ -486,7 +486,7 @@ export class MapController extends AbstractMapViewerController {
    * @param duration - Optional animation duration in ms
    * @returns A promise that resolves when the zoom animation is complete
    */
-  zoomMap(zoom: number, useAnimation = true, duration: number = OL_ZOOM_DURATION): Promise<void> {
+  zoomMap(zoom: number, useAnimation = true, duration?: number): Promise<void> {
     // Redirect to the MapViewer
     return this.getMapViewer().zoomMap(zoom, useAnimation, duration);
   }
@@ -500,7 +500,7 @@ export class MapController extends AbstractMapViewerController {
    * @param useAnimation - Indicates if a zoom animation should be used, default: true
    * @param duration - Optional animation duration in ms
    */
-  zoomMapAndForget(zoom: number, useAnimation = true, duration: number = OL_ZOOM_DURATION): void {
+  zoomMapAndForget(zoom: number, useAnimation = true, duration?: number): void {
     // Redirect
     this.zoomMap(zoom, useAnimation, duration).catch((error: unknown) => {
       logger.logError('Map-State Failed to zoom map', error);
@@ -512,10 +512,10 @@ export class MapController extends AbstractMapViewerController {
    *
    * @param extent - The extent or coordinate to zoom to
    * @param useAnimation - Indicates if a zoom animation should be used, default: true
-   * @param options - Optional options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11 })
+   * @param options - Optional options to configure the zoomToExtent
    * @returns A promise that resolves when the zoom operation completes
    */
-  zoomToLonLatExtentOrCoordinate(extent: Extent | Coordinate, useAnimation = true, options?: FitOptions): Promise<void> {
+  zoomToLonLatExtentOrCoordinate(extent: Extent | Coordinate, useAnimation = true, options?: GVFitOptions): Promise<void> {
     // Redirect to the MapViewer
     return this.getMapViewer().zoomToLonLatExtentOrCoordinate(extent, useAnimation, options);
   }
@@ -558,9 +558,7 @@ export class MapController extends AbstractMapViewerController {
 
       // Zoom to extent and await
       await this.zoomToExtent(convertedExtent, useAnimation, {
-        padding: [50, 50, 50, 50],
         maxZoom: 16,
-        duration: OL_ZOOM_DURATION,
       });
 
       // Now show the click marker icon
@@ -1942,7 +1940,7 @@ export class MapController extends AbstractMapViewerController {
     const extent = mapViewer.getView().calculateExtent();
 
     // Get the scale information
-    const scale = MapViewer.getScaleInfoFromDomElement(mapViewer.mapId);
+    const scale = mapViewer.getScaleInfoFromDomElement();
 
     // Set interaction (enable/disables map controls)
     // TODO: CHECK - This line should likely happen elsewhere in the initialization of the map, not really updating a map control per-se

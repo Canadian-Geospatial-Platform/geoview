@@ -1,6 +1,5 @@
 import type BaseLayer from 'ol/layer/Base';
 import type { GeoJSONObject } from 'ol/format/GeoJSON';
-import type { FitOptions } from 'ol/View';
 import type { Projection as OLProjection } from 'ol/proj';
 import { getCenter } from 'ol/extent';
 
@@ -104,7 +103,7 @@ import type { TemporalMode, TypeDisplayDateFormat } from '@/core/utils/date-mgt'
 import type { TypeLayersViewDisplayState, TypeLegendItem } from '@/core/components/layers/types';
 import { logger } from '@/core/utils/logger';
 import { NoBoundsError } from '@/core/exceptions/geoview-exceptions';
-import { OL_ZOOM_DURATION } from '@/core/utils/constant';
+import { OL_ZOOM_DURATION, type GVFitOptions } from '@/core/utils/constant';
 import { Projection } from '@/geo/utils/projection';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import {
@@ -754,11 +753,11 @@ export class LayerController extends AbstractMapViewerController {
    *
    * @param layerPath - The path of the layer to zoom to
    * @param useAnimation - Optional flag indicating if a zoom animation should be used
-   * @param fitOptions - Optional OL fit options to configure the zoom
+   * @param fitOptions - Optional fit options to configure the zoom
    * @returns A promise that resolves when the zoom animation is complete
    * @throws {NoBoundsError} When the layer doesn't have bounds
    */
-  zoomToLayerExtent(layerPath: string, useAnimation = true, fitOptions?: FitOptions): Promise<void> {
+  zoomToLayerExtent(layerPath: string, useAnimation = true, fitOptions?: GVFitOptions): Promise<void> {
     // Get the layer bounds
     const bounds = getStoreLayerBounds(this.getMapId(), layerPath);
 
@@ -781,16 +780,16 @@ export class LayerController extends AbstractMapViewerController {
    * @param layerPath - The layer path used to look up scale limits
    * @param extent - The extent to zoom to (in current map projection)
    * @param useAnimation - Optional flag indicating if a zoom animation should be used
-   * @param fitOptions - Optional OL fit options to merge scale constraints into
+   * @param fitOptions - Optional fit options to merge scale constraints into
    * @returns A promise that resolves when the zoom animation is complete
    */
-  zoomToExtentRestricted(layerPath: string, extent: Extent, useAnimation = true, fitOptions?: FitOptions): Promise<void> {
+  zoomToExtentRestricted(layerPath: string, extent: Extent, useAnimation = true, fitOptions?: GVFitOptions): Promise<void> {
     // Read the min/max scales from the store for the corresponding layer path
     const layerMaxScale = getStoreLayerMaxScale(this.getMapId(), layerPath);
     const layerMinScale = getStoreLayerMinScale(this.getMapId(), layerPath);
 
     // Compute zoom constraints from the layer's scale range so we don't zoom beyond the layer's visible range
-    const theFitOptions: FitOptions = fitOptions ?? {};
+    const theFitOptions: GVFitOptions = fitOptions ?? {};
     if (layerMaxScale) {
       const maxZoomFromScale = this.getControllersRegistry().mapController.getZoomFromScale(layerMaxScale);
       if (maxZoomFromScale !== undefined) {
@@ -817,14 +816,14 @@ export class LayerController extends AbstractMapViewerController {
    * @param layerPath - The layer path used to look up scale limits
    * @param feature - The feature info entry to zoom to and highlight
    * @param useAnimation - Optional flag indicating if a zoom animation should be used
-   * @param fitOptions - Optional OL fit options to merge scale constraints into
+   * @param fitOptions - Optional fit options to merge scale constraints into
    * @returns A promise that resolves when the zoom and highlight are complete
    */
   async zoomToExtentRestrictedAndHighlight(
     layerPath: string,
     feature: TypeFeatureInfoEntry,
     useAnimation = true,
-    fitOptions?: FitOptions
+    fitOptions?: GVFitOptions
   ): Promise<void> {
     // If no extent on the feature, skip
     if (!feature.extent) return;

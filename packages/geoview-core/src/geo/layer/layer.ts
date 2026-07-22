@@ -1,5 +1,4 @@
 ﻿import type { GeoJSONObject } from 'ol/format/GeoJSON';
-import type { FitOptions } from 'ol/View';
 
 import type { TypeOutfieldsType } from '@/api/types/map-schema-types';
 import type { TypeGeoviewLayerConfig, TypeLayerStatus, TypeMosaicRule } from '@/api/types/layer-schema-types';
@@ -10,6 +9,7 @@ import type { ConfigBaseClass } from '@/api/config/validation-classes/config-bas
 import type { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { LayerDifferingFieldLengthsError, LayerNotQueryableError } from '@/core/exceptions/layer-exceptions';
 import type { TemporalMode, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
+import type { GVFitOptions } from '@/core/utils/constant';
 import type { TypeLegendItem } from '@/core/components/layers/types';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import type {
@@ -687,7 +687,7 @@ export class LayerApi {
    * @returns A promise that resolves when the zoom operation is complete
    * @throws {NoBoundsError} When the layer doesn't have bounds
    */
-  zoomToLayerExtent(layerPath: string, useAnimation = true, fitOptions?: FitOptions): Promise<void> {
+  zoomToLayerExtent(layerPath: string, useAnimation = true, fitOptions?: GVFitOptions): Promise<void> {
     // Redirect to controller
     return this.#controllers.layerController.zoomToLayerExtent(layerPath, useAnimation, fitOptions);
   }

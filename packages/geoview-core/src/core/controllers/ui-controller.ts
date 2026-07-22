@@ -439,10 +439,11 @@ export class UIController extends AbstractMapViewerController {
       // Store the extent and other relevant information
       const handleSizeChange = (): void => {
         this.getControllersRegistry()
-          .mapController.zoomToExtent(currentExtent, true, { padding: [0, 0, 0, 0] })
+          .mapController.zoomToExtent(currentExtent, true, { padding: [0, 0, 0, 0] }) // Precise zooming, no default padding to be applied in this case
           .then(() => {
+            // TODO: CLEANUP - Removed the commented code if it still behaves correctly now, commented on 2026-07-22
             // Force render
-            this.getMapViewer().map.renderSync();
+            // this.getMapViewer().map.renderSync();
           })
           .catch((error: unknown) => {
             logger.logError('Error during zoom after fullscreen exit:', error);
