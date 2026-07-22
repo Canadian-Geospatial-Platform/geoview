@@ -43,7 +43,7 @@ import {
 } from '@/api/types/map-schema-types';
 import type { TypeLayerMetadataFields, TypeVectorLayerStyles } from '@/api/types/layer-schema-types';
 import type { FillPatternLine, FillPatternSettings, FilterNodeType } from './geoview-renderer-types';
-import { binaryKeywors, defaultColor, groupKeywords, NodeType, operatorPriority, unaryKeywords } from './geoview-renderer-types';
+import { binaryKeywords, defaultColor, groupKeywords, NodeType, operatorPriority, unaryKeywords } from './geoview-renderer-types';
 import { logger } from '@/core/utils/logger';
 
 type TypeStyleProcessor = (
@@ -2759,7 +2759,7 @@ export abstract class GeoviewRenderer {
   static extractKeyword(filterNodeArray: FilterNodeType[], keyword: string, regExp?: RegExp): FilterNodeType[] {
     const getNodeType = (keywordValue: string): NodeType => {
       if (['+', '-'].includes(keywordValue)) return NodeType.unprocessedNode;
-      if (binaryKeywors.includes(keywordValue)) return NodeType.binary;
+      if (binaryKeywords.includes(keywordValue)) return NodeType.binary;
       if (unaryKeywords.includes(keywordValue)) return NodeType.unary;
       if (groupKeywords.includes(keywordValue)) return NodeType.group;
       return NodeType.keyword;

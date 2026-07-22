@@ -10,7 +10,7 @@ import type { TypeFeatureInfoEntry, TypeQueryStatus } from '@/api/types/map-sche
 import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
 import { getSxClasses } from './layer-list-style';
 import { LayerIcon } from './layer-icon';
-import { useStoreLayerStatus } from '@/core/stores/states/layer-state';
+import { useStoreLayerName, useStoreLayerStatus } from '@/core/stores/states/layer-state';
 import { logger } from '@/core/utils/logger';
 import { LAYER_PATH_COORDINATE_INFO } from '@/core/stores/states/feature-info-state';
 
@@ -90,11 +90,12 @@ export const LayerListItem = memo(({ id, isSelected, layer, onListItemClick }: L
     return getSxClasses(theme);
   }, [theme]);
 
+  // Deconstruct the layer object into immutable variables to be used by this component and its hooks
+  const { layerPath, layerName: propLayerName, layerStatus: propLayerStatus, tooltip, layerFeatures, queryStatus, numOffeatures, mapFilteredIcon, isDisabled: propIsDisabled, content } = layer;
+
   // Store
-  // TODO: REFACTOR - The whole 'layer' parameter received in the component parameters list should be reviewed and turned obsolete.
-  // TO.DOCONT: It should all be using store selector hooks instead. Fallback to layer query status if details query status is not available for now.
-  const layerStatus = useStoreLayerStatus(layer.layerPath) ?? layer.layerStatus;
-  const layerQueryStatus = layer.queryStatus;
+  const layerStatus = useStoreLayerStatus(layerPath) ?? propLayerStatus;
+  const layerName = useStoreLayerName(layerPath) ?? propLayerName;
 
   // Internal state - WCAG accessibility for screen reader announcements
   const prevStatusRef = useRef<string | undefined>(undefined); // Ref to track previous status for status change detection
@@ -105,18 +106,18 @@ export const LayerListItem = memo(({ id, isSelected, layer, onListItemClick }: L
     'layer-panel',
     'bordered',
     layerStatus ?? '',
-    `query-${layerQueryStatus}`,
+    `query-${queryStatus}`,
     isSelected ? 'selectedLayer bordered-primary' : '',
   ]
     .join(' ')
     .trim();
 
   // Constant for state
-  const isLoading = layerQueryStatus === 'processing' || layerStatus === 'loading' || layerStatus === 'processing';
-  const isLayerCoordinateInfo = layer.layerPath === LAYER_PATH_COORDINATE_INFO;
+  const isLoading = queryStatus === 'processing' || layerStatus === 'loading' || layerStatus === 'processing';
+  const isLayerCoordinateInfo = layerPath === LAYER_PATH_COORDINATE_INFO;
 
   // Default disabled state
-  let isDisabled = isLoading || layer?.isDisabled || layer?.numOffeatures === 0;
+  let isDisabled = isLoading || propIsDisabled || numOffeatures === 0;
 
   // If it's the layer coordinate info, it's never disabled, because it always at least have the clicked map coordinates information.
   // However, if "coordinateInfoEnabled" is true, and no map click has been done,the layer coord info will show zero-ed out coordinates in the UI.
@@ -126,23 +127,23 @@ export const LayerListItem = memo(({ id, isSelected, layer, onListItemClick }: L
    * Computes the layer status text for tooltip (plain text only).
    */
   const memoLayerStatusText = useMemo((): string => {
-    logger.logTraceUseMemo('LAYER-LIST - LayerListItem - memoLayerStatusText', layerStatus, layerQueryStatus, layer.layerFeatures);
+    logger.logTraceUseMemo('LAYER-LIST - LayerListItem - memoLayerStatusText', layerStatus, queryStatus, layerFeatures);
 
-    if (layerStatus === 'error' || layerQueryStatus === 'error') {
+    if (layerStatus === 'error' || queryStatus === 'error') {
       return t('legend.layerError');
     }
-    if (layerQueryStatus === 'processing') {
+    if (queryStatus === 'processing') {
       return t('layers.querying');
     }
-    // Return plain text feature count (layer.layerFeatures is already a string from details-panel)
-    return layer.layerFeatures ?? '';
-  }, [layerStatus, layerQueryStatus, layer.layerFeatures, t]);
+    // Return plain text feature count (layerFeatures is already a string from details-panel)
+    return layerFeatures ?? '';
+  }, [layerStatus, queryStatus, layerFeatures, t]);
 
   /**
    * Computes the tooltip title with layer name and status.
    */
   const memoTooltipTitle = useMemo((): ReactNode => {
-    logger.logTraceUseMemo('LAYER-LIST - LayerListItem - memoTooltipTitle', layer.tooltip, memoLayerStatusText, isDisabled);
+    logger.logTraceUseMemo('LAYER-LIST - LayerListItem - memoTooltipTitle', tooltip, memoLayerStatusText, isDisabled);
 
     // No tooltip when disabled (text wraps and is fully visible)
     if (isDisabled) {
@@ -150,12 +151,12 @@ export const LayerListItem = memo(({ id, isSelected, layer, onListItemClick }: L
     }
 
     // If tooltip is a JSX.Element/ReactNode, pass it through as-is
-    if (layer.tooltip && typeof layer.tooltip !== 'string') {
-      return layer.tooltip;
+    if (tooltip && typeof tooltip !== 'string') {
+      return tooltip;
     }
 
     // Handle string tooltips with status concatenation
-    const baseTitle = typeof layer.tooltip === 'string' ? layer.tooltip : '';
+    const baseTitle = typeof tooltip === 'string' ? tooltip : '';
     const hasStatusText = typeof memoLayerStatusText === 'string' && memoLayerStatusText.trim().length > 0;
 
     if (hasStatusText) {
@@ -164,7 +165,7 @@ export const LayerListItem = memo(({ id, isSelected, layer, onListItemClick }: L
     }
 
     return baseTitle || undefined;
-  }, [layer.tooltip, memoLayerStatusText, isDisabled, t]);
+  }, [tooltip, memoLayerStatusText, isDisabled, t]);
 
   const hasTooltip = !!memoTooltipTitle;
 
@@ -177,16 +178,16 @@ export const LayerListItem = memo(({ id, isSelected, layer, onListItemClick }: L
    */
   const getLayerStatus = useCallback((): JSX.Element | string => {
     // If there's a map filter icon, wrap text with icon in JSX
-    if (layer?.mapFilteredIcon) {
+    if (mapFilteredIcon) {
       return (
         <>
-          {memoLayerStatusText} {layer.mapFilteredIcon}
+          {memoLayerStatusText} {mapFilteredIcon}
         </>
       );
     }
     // Otherwise return plain text
     return memoLayerStatusText;
-  }, [memoLayerStatusText, layer?.mapFilteredIcon]);
+  }, [memoLayerStatusText, mapFilteredIcon]);
 
   /**
    * Handles layer selection with keyboard (Enter or Spacebar).
@@ -218,27 +219,27 @@ export const LayerListItem = memo(({ id, isSelected, layer, onListItemClick }: L
 
     if (layerStatus === 'loading' && prevStatusRef.current !== 'loading') {
       // Announce when loading starts
-      setStatusMessage(t('layers.status.layerLoadingDescriptive', { layerName: layer.layerName }) || '');
+      setStatusMessage(t('layers.status.layerLoadingDescriptive', { layerName }) || '');
       prevStatusRef.current = layerStatus;
     } else if (layerStatus === 'processing' && prevStatusRef.current !== 'processing') {
       // Announce when processing starts (distinct phase after initial load)
-      setStatusMessage(t('layers.status.layerProcessingDescriptive', { layerName: layer.layerName }) || '');
+      setStatusMessage(t('layers.status.layerProcessingDescriptive', { layerName }) || '');
       prevStatusRef.current = layerStatus;
     } else if (layerStatus === 'loaded' && prevStateWasInProgress) {
       // Announce when layer completes successfully from any in-progress state (loading or processing).
       // This ensures transitions like processing→loaded are announced, not just loading→loaded.
-      setStatusMessage(t('layers.status.layerLoadedDescriptive', { layerName: layer.layerName }) || '');
+      setStatusMessage(t('layers.status.layerLoadedDescriptive', { layerName }) || '');
       prevStatusRef.current = layerStatus;
     } else if (layerStatus === 'error' && prevStateWasInProgress) {
       // Announce when layer fails from any in-progress state (loading or processing).
       // This ensures transitions like processing→error are announced, not just loading→error.
-      setStatusMessage(t('layers.status.layerErrorDescriptive', { layerName: layer.layerName }) || '');
+      setStatusMessage(t('layers.status.layerErrorDescriptive', { layerName }) || '');
       prevStatusRef.current = layerStatus;
     } else {
       // Update ref for any other status changes (no announcement needed)
       prevStatusRef.current = layerStatus;
     }
-  }, [layerStatus, layer.layerName, t]);
+  }, [layerStatus, layerName, t]);
 
   return (
     <ListItem disablePadding className={containerClass}>
@@ -278,14 +279,14 @@ export const LayerListItem = memo(({ id, isSelected, layer, onListItemClick }: L
           disabled={isDisabled}
           aria-current={isSelected ? true : undefined}
         >
-          {layer.layerPath === LAYER_PATH_COORDINATE_INFO ? (
+          {layerPath === LAYER_PATH_COORDINATE_INFO ? (
             <LocationSearchingIcon />
           ) : (
-            layer.layerPath && !layer.content && <LayerIcon layerPath={layer.layerPath} />
+            layerPath && !content && <LayerIcon layerPath={layerPath} />
           )}
           <Box component="span" sx={memoSxClasses.listPrimaryText} className="layerInfo">
             <Typography component="span" className="layerTitle" noWrap={!isDisabled}>
-              {layer.layerName}
+              {layerName}
             </Typography>
             <Box component="span" sx={{ display: 'flex', alignContent: 'center' }}>
               <Typography component="span" variant="subtitle1" noWrap={!isDisabled} sx={{ display: 'block' }}>
@@ -293,9 +294,9 @@ export const LayerListItem = memo(({ id, isSelected, layer, onListItemClick }: L
               </Typography>
             </Box>
           </Box>
-          {layer.layerPath !== LAYER_PATH_COORDINATE_INFO && (layer.numOffeatures ?? 0) > 0 && (
+          {layerPath !== LAYER_PATH_COORDINATE_INFO && (numOffeatures ?? 0) > 0 && (
             <Badge
-              badgeContent={layer.numOffeatures}
+              badgeContent={numOffeatures}
               max={99}
               color="info"
               sx={memoSxClasses.layerCount}
@@ -307,7 +308,7 @@ export const LayerListItem = memo(({ id, isSelected, layer, onListItemClick }: L
       </Tooltip>
       {layerStatus === 'loading' && (
         <Box component="span" sx={memoSxClasses.progressBar}>
-          <ProgressBar aria-label={t('layers.status.layerLoadingDescriptive', { layerName: layer.layerName })} />
+          <ProgressBar aria-label={t('layers.status.layerLoadingDescriptive', { layerName })} />
         </Box>
       )}
     </ListItem>

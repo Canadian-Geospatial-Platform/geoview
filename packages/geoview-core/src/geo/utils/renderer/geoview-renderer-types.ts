@@ -1,5 +1,6 @@
 import type { TypeFillStyle } from '@/api/types/map-schema-types';
 
+/** Default color palette used when generating layer styles without explicit color assignments. */
 export const defaultColor = [
   '#800000',
   '#008000',
@@ -67,10 +68,13 @@ export const defaultColor = [
   '#ffdead',
 ];
 
+/** Represents a single line segment in a fill pattern, defined by a start and end point. */
 export type FillPatternLine = { moveTo: [number, number]; lineTo: [number, number] };
 
+/** Maps each fill style to its corresponding array of fill pattern line segments. */
 export type FillPatternSettings = Record<TypeFillStyle, FillPatternLine[] | []>;
 
+/** Node types used in the filter expression parser. */
 export enum NodeType {
   unprocessedNode,
   keyword,
@@ -81,10 +85,20 @@ export enum NodeType {
   binary,
   group,
 }
+
+/** Represents a single node in the parsed filter expression tree. */
 export type FilterNodeType = { nodeType: NodeType; nodeValue: null | string | number | boolean | string[] | number[] };
-export const binaryKeywors = ['is', 'is not', 'in', 'like', 'and', 'or', '<', '<=', '=', '<>', '>', '>=', '||', '/', '*', ','];
+
+/** Binary operator keywords recognized by the filter expression parser. */
+export const binaryKeywords = ['is', 'is not', 'in', 'like', 'and', 'or', '<', '<=', '=', '<>', '>', '>=', '||', '/', '*', ','];
+
+/** Unary operator keywords recognized by the filter expression parser. */
 export const unaryKeywords = ['not', 'upper', 'lower', 'date'];
+
+/** Grouping keywords recognized by the filter expression parser. */
 export const groupKeywords = ['(', ')'];
+
+/** Operator precedence table for the filter expression parser (higher priority binds tighter). */
 export const operatorPriority = [
   { key: 'date', priority: 15 },
   { key: 'upper', priority: 15 },

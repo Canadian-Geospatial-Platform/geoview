@@ -88,7 +88,7 @@ export class WMTS extends AbstractGeoViewRaster {
    *   - If no specific layer configs are provided, a single metadata fetch is made.
    *   - If layer configs are present (e.g., Geomet use case), individual layer metadata is merged.
    *
-   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process of the process
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves to the parsed metadata object,
    * or `undefined` if metadata could not be retrieved or no capabilities were found.
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
@@ -158,7 +158,7 @@ export class WMTS extends AbstractGeoViewRaster {
    *
    * @param layerConfig - The layer entry configuration to process
    * @param mapProjection - Optional map projection
-   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process of the process
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves once the layer entry configuration has gotten its metadata processed
    * @throws {LayerWMTSMetadataError} When the metadata is missing necessary information or contains an error
    */
@@ -243,7 +243,7 @@ export class WMTS extends AbstractGeoViewRaster {
    *
    * @param metadataUrl - The metadataAccessPath
    * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata
-   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process of the process
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves once the execution is completed
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
    * @throws {LayerNoCapabilitiesError} When the metadata is empty (no Capabilities)
@@ -460,7 +460,7 @@ export class WMTS extends AbstractGeoViewRaster {
   }
 
   /**
-   * Processes an  WMTS GeoviewLayerConfig and returns a promise
+   * Processes a WMTS GeoviewLayerConfig and returns a promise
    * that resolves to an array of `ConfigBaseClass` layer entry configurations.
    *
    * This method:
