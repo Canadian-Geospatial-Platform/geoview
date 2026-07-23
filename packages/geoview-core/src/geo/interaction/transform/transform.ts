@@ -54,6 +54,9 @@ export class Transform extends Interaction {
   /** Callback handler for when a feature is selected, deselected, or both (one deselected, another selected) */
   #onSelectionChangeHandlers: TransformSelectionEventDelegate[] = [];
 
+  /** Bounded context menu handler to prevent context menu when removing vertices. */
+  #boundedContextMenuHandler: (e: MouseEvent) => void;
+
   /**
    * Initializes a Transform component.
    *
@@ -100,12 +103,17 @@ export class Transform extends Interaction {
     this.#ol_transform = new OLTransform(olOptions);
 
     // Register event handlers
-    this.#ol_transform.onTransformstart = this.#emitTransformStart.bind(this);
+    this.#ol_transform.onTransformStart = this.#emitTransformStart.bind(this);
     this.#ol_transform.onTransforming = this.#emitTransforming.bind(this);
-    this.#ol_transform.onTransformend = this.#emitTransformEnd.bind(this);
-    this.#ol_transform.onDeletefeature = this.#emitDeleteFeature.bind(this);
+    this.#ol_transform.onTransformEnd = this.#emitTransformEnd.bind(this);
+    this.#ol_transform.onDeleteFeature = this.#emitDeleteFeature.bind(this);
     this.#ol_transform.onSelectionChange = this.#emitSelectionChange.bind(this);
+
+    // Keep a bounded reference to the context menu handler to allow for removal of the event listener when stopping the interaction
+    this.#boundedContextMenuHandler = this.#handleContextMenu.bind(this);
   }
+
+  // #region OVERRIDES
 
   /**
    * Starts the interaction on the map.
@@ -115,7 +123,7 @@ export class Transform extends Interaction {
     if (this.mapViewer) {
       this.mapViewer.map.addLayer(this.#ol_transform.handleLayer);
       // Prevent context menu on map element
-      this.mapViewer.map.getTargetElement().addEventListener('contextmenu', this.#ol_transform.contextMenuHandler);
+      this.mapViewer.map.getTargetElement().addEventListener('contextmenu', this.#boundedContextMenuHandler);
     }
 
     // Redirect to super method to start interaction
@@ -130,7 +138,7 @@ export class Transform extends Interaction {
     if (this.mapViewer) {
       this.mapViewer.map.removeLayer(this.#ol_transform.handleLayer);
       // Remove context menu handler
-      this.mapViewer.map.getTargetElement().removeEventListener('contextmenu', this.#ol_transform.contextMenuHandler);
+      this.mapViewer.map.getTargetElement().removeEventListener('contextmenu', this.#boundedContextMenuHandler);
     }
 
     // Clear any selected feature
@@ -139,6 +147,10 @@ export class Transform extends Interaction {
     // Redirect to super method to stop interaction
     super.stopInteraction(this.#ol_transform);
   }
+
+  // #endregion OVERRIDES
+
+  // #region METHODS
 
   /**
    * Gets the features being transformed.
@@ -340,6 +352,21 @@ export class Transform extends Interaction {
     this.#ol_transform.restoreHandleStyle();
   }
 
+  // #endregion METHODS
+
+  // #region HANDLERS
+
+  /** Context menu event handler to prevent context menu when removing vertices */
+  #handleContextMenu(e: MouseEvent): void {
+    if (this.#ol_transform.selectedFeature) {
+      e.preventDefault();
+    }
+  }
+
+  // #endregion HANDLERS
+
+  // #region EVENTS
+
   /**
    * Emits a transform start event to all handlers.
    *
@@ -479,6 +506,8 @@ export class Transform extends Interaction {
   offSelectionChange(callback: TransformSelectionEventDelegate): void {
     EventHelper.offEvent(this.#onSelectionChangeHandlers, callback);
   }
+
+  // #endregion EVENTS
 }
 
 /**

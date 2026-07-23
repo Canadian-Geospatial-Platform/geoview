@@ -114,9 +114,9 @@ const utilLegendLayerByPathRec = (layers: TypeLegendLayer[], layerPath: string |
       foundLayer = layer;
     }
 
-    // TODO: CHECK - Change this startsWith to an equal operator? Seems safer
+    // GV startsWith with trailing '/' is intentional — it prunes branches that can't contain the target path.
+    // GV Using === here would prevent recursion since the target path is never equal to an intermediate parent's path.
     if (layerPath?.startsWith(`${layer.layerPath}/`) && layer.children?.length > 0) {
-      // Recursively search in children if the layerPath starts with the current layer's path followed by a slash (indicating it's a descendant)
       const result = utilLegendLayerByPathRec(layer.children, layerPath);
       if (result) {
         foundLayer = result;

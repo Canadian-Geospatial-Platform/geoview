@@ -47,7 +47,7 @@ export class Notifications {
     this.#uiController.addNotification(notification);
   }
 
-  // TODO: Refactor - Small problem. These 'addNotificationXXXX' and 'showXXXX' functions are public, but the outside devs don't know about the message keys.
+  // TODO: REFACTOR - These 'addNotificationXXXX' and 'showXXXX' functions are public, but the outside devs don't know about the message keys.
   // TO.DOCONT: So when they try to do:
   // TO.DOCONT: cgpv.api.getMapViewer('map1').notifications.addNotificationSuccess(`${LYR_PATH_UNIQUE} visibility set to ${payload.visible} - individual`);
   // TO.DOCONT: For example, we log an error in logger about not having translation for 'that' messageKey which is not a message key.
