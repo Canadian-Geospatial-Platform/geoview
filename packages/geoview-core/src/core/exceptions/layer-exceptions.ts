@@ -552,6 +552,32 @@ export class LayerInvalidFeatureInfoFormatWMSError extends LayerError {
 }
 
 /**
+ * Error thrown when an unsupported `Format` parameter is used in a WMS `GetFeature` request.
+ *
+ * According to WMS standards, the `Format` parameter for `GetFeature` requests must be one of:
+ * `application/json`, `text/xml`, `text/html`, or `text/plain`. This error indicates that a different or invalid format
+ * was supplied.
+ */
+export class LayerInvalidFeatureInfoFormatWFSError extends LayerError {
+  /**
+   * Creates an instance of LayerInvalidFeatureInfoFormatWFSError.
+   *
+   * @param layerPath - The path or identifier of the WMS layer that received the invalid format
+   * @param format - The invalid format
+   * @param layerName - The layer name
+   */
+  constructor(layerPath: string, format: string | string[], layerName: string | undefined) {
+    super(layerPath, 'validation.layer.wfsServiceFormatParameter', {
+      infoFormat: Array.isArray(format) ? format.join(',') : format,
+      layerNameOrPath: layerName || layerPath,
+    });
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, LayerInvalidFeatureInfoFormatWFSError.prototype);
+  }
+}
+
+/**
  * Error thrown when no geographic data (e.g., coordinates or location fields) is found in a CSV sheet.
  *
  * This error typically occurs when attempting to load a CSV file as a map layer,

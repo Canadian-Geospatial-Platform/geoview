@@ -24,7 +24,16 @@ import type {
   TypeLayerStyleConfig,
 } from '@/api/types/map-schema-types';
 import type { TypeLegend, TypeMetadataFeatureInfo } from '@/api/types/layer-schema-types';
-import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
+import {
+  CONST_LAYER_TYPES,
+  MIME_TYPE_FORMAT_APP_XML,
+  MIME_TYPE_FORMAT_GEOJSON,
+  MIME_TYPE_FORMAT_GML,
+  MIME_TYPE_FORMAT_HTML,
+  MIME_TYPE_FORMAT_JSON,
+  MIME_TYPE_FORMAT_TEXT,
+  MIME_TYPE_FORMAT_TEXT_XML,
+} from '@/api/types/layer-schema-types';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import { Projection } from '@/geo/utils/projection';
@@ -34,11 +43,12 @@ import {
   LayerInvalidLayerFilterError,
 } from '@/core/exceptions/layer-exceptions';
 import { encodeLayersParam } from '@/core/utils/ogc-url-helper';
-import { formatError, RequestAbortedError, ResponseContentError } from '@/core/exceptions/core-exceptions';
+import { formatError, ResponseContentError } from '@/core/exceptions/core-exceptions';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { WfsRenderer } from '@/geo/utils/renderer/wfs-renderer';
-import type { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { WFS } from '@/geo/layer/geoview-layers/vector/wfs';
 import {
   LayerImageFailedNoImageError,
   LayerImageFailedToLoadHeightTooBigError,
@@ -54,27 +64,6 @@ import { logger } from '@/core/utils/logger';
 export class GVWMS extends AbstractGVRaster {
   /** The max feature count returned by the GetFeatureInfo */
   static readonly DEFAULT_MAX_FEATURE_COUNT: number = 100;
-
-  /** Mime/type for GEOJSON */
-  static readonly MIME_TYPE_FORMAT_GEOJSON = 'application/geojson';
-
-  /** Mime/type for JSON */
-  static readonly MIME_TYPE_FORMAT_JSON = 'application/json';
-
-  /** Mime/type for GML */
-  static readonly MIME_TYPE_FORMAT_GML = 'application/vnd.ogc.gml';
-
-  /** Mime/type for XML */
-  static readonly MIME_TYPE_FORMAT_APP_XML = 'application/xml';
-
-  /** Mime/type for XML */
-  static readonly MIME_TYPE_FORMAT_TEXT_XML = 'text/xml';
-
-  /** Mime/type for HTML */
-  static readonly MIME_TYPE_FORMAT_HTML = 'text/html';
-
-  /** Mime/type for Text */
-  static readonly MIME_TYPE_FORMAT_TEXT = 'text/plain';
 
   /**
    * The default Get Feature Info tolerance to use for QGIS Server services which are more picky by default (really needs to be zoomed in to get results, by default).
@@ -324,7 +313,7 @@ export class GVWMS extends AbstractGVRaster {
     // If the layer has a WFS associated
     if (wfsLayerConfig) {
       // We're going to try performing a GetFeature using the WFS query instead of WMS, better chance to retrieve the geometry that way
-      return await this.#getFeatureInfoUsingWFS(
+      return await this.#fetchFeatureInfoWithFormatFallbackForWFS(
         wmsLayerConfig,
         wfsLayerConfig,
         clickCoordinate,
@@ -337,7 +326,7 @@ export class GVWMS extends AbstractGVRaster {
     }
 
     // Try various info formats patterns to get feature info
-    return this.#getFeatureInfoUsingWMS(
+    return this.#fetchFeatureInfoWithFormatFallbackForWMS(
       wmsLayerConfig,
       clickCoordinate,
       viewResolution,
@@ -378,7 +367,7 @@ export class GVWMS extends AbstractGVRaster {
     if (!wfsLayerConfig) throw new LayerConfigWFSMissingError(this.getLayerPath());
 
     // Redirect
-    return this.#getFeatureInfoUsingWFS(
+    return this.#fetchFeatureInfoWithFormatFallbackForWFS(
       wmsLayerConfig,
       wfsLayerConfig,
       undefined,
@@ -537,10 +526,12 @@ export class GVWMS extends AbstractGVRaster {
     const xmlFilterReady = WfsRenderer.wrapOGCFilter(xmlFilter, 'wfs', wfsLayerConfig.getVersionIsHigherThan2());
 
     // Get the supported info formats
-    const featureInfoFormat = wfsLayerConfig.getSupportedFormats(GVWMS.MIME_TYPE_FORMAT_JSON); // application/json by default (QGIS Server doesn't seem to provide the metadata for the output formats, use application/json)
+    const featureInfoFormat = wfsLayerConfig.getSupportedFormats(MIME_TYPE_FORMAT_JSON); // application/json by default (QGIS Server doesn't seem to provide the metadata for the output formats, use application/json)
 
     // If one of those contain application/json, use that format to get features
-    const outputFormat = featureInfoFormat.find((format) => format.toLowerCase().includes(GVWMS.MIME_TYPE_FORMAT_JSON));
+    const outputFormat = featureInfoFormat.find((format) => format.toLowerCase().includes(MIME_TYPE_FORMAT_JSON));
+
+    // TODO: WMS - Add support for other formats. Not quite the GV issue #3134, but similar
 
     // Format the url
     const urlWithOutputJson = GeoUtilities.ensureServiceRequestUrlGetFeature(
@@ -700,7 +691,7 @@ export class GVWMS extends AbstractGVRaster {
    * @throws {RequestAbortedError} When the request was aborted by the caller's signal
    * @throws {LayerInvalidFeatureInfoFormatWMSError} When no supported format returns usable feature info data
    */
-  #getFeatureInfoUsingWFS(
+  #fetchFeatureInfoWithFormatFallbackForWFS(
     wmsLayerConfig: OgcWmsLayerEntryConfig,
     wfsLayerConfig: OgcWfsLayerEntryConfig,
     clickCoordinate: Coordinate | undefined,
@@ -710,92 +701,72 @@ export class GVWMS extends AbstractGVRaster {
     layerFilters?: LayerFilters,
     abortController?: AbortController
   ): Promise<TypeFeatureInfoResult> {
-    try {
-      // Get the supported info formats
-      const featureInfoFormat = wfsLayerConfig.getSupportedFormats(GVWMS.MIME_TYPE_FORMAT_JSON); // application/json by default (QGIS Server doesn't seem to provide the metadata for the output formats, use application/json)
+    // Get the version
+    const version = wfsLayerConfig.getVersionOrDefault();
 
-      // If one of those contain application/json, use that format to get features
-      const outputFormat = featureInfoFormat.find((format) => format.toLowerCase().includes(GVWMS.MIME_TYPE_FORMAT_JSON));
+    // Create the filterXML from the sql filter
+    let gmlFilterAttribute;
+    let gmlFilterSpatial;
+    let fieldsToReturn = wfsLayerConfig.getOutfields();
 
-      // Get the version
-      const version = wfsLayerConfig.getVersionOrDefault();
+    // Total filter
+    const totalFilter = layerFilters?.getAllFilters();
+
+    // If any
+    if (totalFilter) {
+      // Build a OGC Filter for the filter
+      gmlFilterAttribute = WfsRenderer.sqlToOlFilterXml(totalFilter, version, wfsLayerConfig.getOutfields()?.[0]?.name!);
+    }
+
+    // If performing a query based on a clicked coordinate, we want to filter spatially
+    if (clickCoordinate && viewResolution) {
+      // Get the geometry field name
+      const geomFieldName = wfsLayerConfig.getGeometryField()?.name || 'geometry'; // default: geometry
+
+      // Buffer the point into a polygon-circle to get features around the click point
+      const bufferedPoint = GVWMS.#buildBufferPolygon(clickCoordinate, viewResolution, this.getGetFeatureInfoTolerance());
 
       // The gml namespace to be used when generating the filter
+      // GV This is the namespace for GML that should be used in relation to the version of the service, that's valid and
+      // GV it's purposely different than the outputFormat which can be e.g. 'text/xml; subtype=gml/3.1.1' which is the way
+      // GV the response is returned, not how the query excepted to be sent as. So this here is valid.
       let gmlNamespace = 'http://www.opengis.net/gml';
       if (wfsLayerConfig.getVersionIsHigherThan2()) {
         gmlNamespace = 'http://www.opengis.net/gml/3.2';
       }
 
-      // TODO: WMS - Add support for other formats. Not quite the GV issue #3134, but similar
+      // Write the polygon to GML
+      const polygonGML = GeoUtilities.writeGeometryToGML(bufferedPoint, projectionCode, gmlNamespace);
 
-      // Create the filterXML from the sql filter
-      let gmlFilterAttribute;
-      let gmlFilterSpatial;
-      let fieldsToReturn = wfsLayerConfig.getOutfields();
-
-      // Total filter
-      const totalFilter = layerFilters?.getAllFilters();
-
-      // If any
-      if (totalFilter) {
-        // Build a OGC Filter for the filter
-        gmlFilterAttribute = WfsRenderer.sqlToOlFilterXml(totalFilter, version, wfsLayerConfig.getOutfields()?.[0]?.name!);
+      // If the version of the service is 2.0.0 or later
+      if (wfsLayerConfig.getVersionIsHigherThan2()) {
+        // Create the intersects filter
+        gmlFilterSpatial = `<Intersects><ValueReference>${geomFieldName}</ValueReference>${polygonGML}</Intersects>`;
+      } else {
+        // Create the intersects filter
+        gmlFilterSpatial = `<Intersects><PropertyName>${geomFieldName}</PropertyName>${polygonGML}</Intersects>`;
       }
 
-      // If performing a query based on a clicked coordinate, we want to filter spatially
-      if (clickCoordinate && viewResolution) {
-        // Get the geometry field name
-        const geomFieldName = wfsLayerConfig.getGeometryField()?.name || 'geometry'; // default: geometry
-
-        // Buffer the point into a polygon-circle to get features around the click point
-        const bufferedPoint = GVWMS.#buildBufferPolygon(clickCoordinate, viewResolution, this.getGetFeatureInfoTolerance());
-
-        // Write the polygon to GML
-        const polygonGML = GeoUtilities.writeGeometryToGML(bufferedPoint, projectionCode, gmlNamespace);
-
-        // If the version of the service is 2.0.0 or later
-        if (wfsLayerConfig.getVersionIsHigherThan2()) {
-          // Create the intersects filter
-          gmlFilterSpatial = `<Intersects><ValueReference>${geomFieldName}</ValueReference>${polygonGML}</Intersects>`;
-        } else {
-          // Create the intersects filter
-          gmlFilterSpatial = `<Intersects><PropertyName>${geomFieldName}</PropertyName>${polygonGML}</Intersects>`;
-        }
-
-        // We want all fields in the response, to make sure the geometry is included, clear it
-        fieldsToReturn = undefined;
-      }
-
-      // Build attribute+spatial OGC filter
-      const xmlFilterTotal = WfsRenderer.combineGmlFilters(gmlFilterSpatial, gmlFilterAttribute);
-
-      // Wrap the ogc filter request
-      const xmlFilterReady = WfsRenderer.wrapOGCFilter(xmlFilterTotal, 'wfs', wfsLayerConfig.getVersionIsHigherThan2());
-
-      // Format the url
-      const urlWithOutputJson = GeoUtilities.ensureServiceRequestUrlGetFeature(
-        wfsLayerConfig.getMetadataAccessPath()!,
-        wfsLayerConfig.layerId,
-        wfsLayerConfig.getVersionOrDefault(),
-        outputFormat,
-        fieldsToReturn,
-        xmlFilterReady,
-        projectionCode
-      );
-
-      // Fetch and parse features
-      return GVWMS.fetchAndParseFeaturesFromWFSUrl(urlWithOutputJson, wmsLayerConfig, wfsLayerConfig, language, abortController);
-    } catch (error: unknown) {
-      // Log if the request was not aborted, when aborted, we don't really care for logging
-      GVWMS.#logErrorThrowIfAborted(error, `${wmsLayerConfig.getLayerNameCascade()} - Failed to retrieve features from its WFS service`);
-
-      // Failed
-      throw new LayerInvalidFeatureInfoFormatWMSError(
-        wmsLayerConfig.layerPath,
-        GVWMS.MIME_TYPE_FORMAT_JSON,
-        wmsLayerConfig.getLayerNameCascade()
-      );
+      // We want all fields in the response, to make sure the geometry is included, clear it
+      fieldsToReturn = undefined;
     }
+
+    // Build attribute+spatial OGC filter
+    const xmlFilterTotal = WfsRenderer.combineGmlFilters(gmlFilterSpatial, gmlFilterAttribute);
+
+    // Wrap the ogc filter request
+    const xmlFilterReady = WfsRenderer.wrapOGCFilter(xmlFilterTotal, 'wfs', wfsLayerConfig.getVersionIsHigherThan2());
+
+    // Use the generic format fallback strategy with our own parse pipeline
+    return WFS.fetchWithFormatFallback<TypeFeatureInfoResult>(
+      wfsLayerConfig,
+      (url) => GVWMS.fetchAndParseFeaturesFromWFSUrl(url, wmsLayerConfig, wfsLayerConfig, language, abortController),
+      (url) => GVWMS.fetchAndParseFeaturesFromWFSUrl(url, wmsLayerConfig, wfsLayerConfig, language, abortController),
+      undefined,
+      fieldsToReturn,
+      xmlFilterReady,
+      projectionCode
+    );
   }
 
   /**
@@ -815,7 +786,7 @@ export class GVWMS extends AbstractGVRaster {
    * @throws {RequestAbortedError} When the request was aborted by the caller's signal
    * @throws {LayerInvalidFeatureInfoFormatWMSError} When no supported format returns usable feature info data
    */
-  async #getFeatureInfoUsingWMS(
+  async #fetchFeatureInfoWithFormatFallbackForWMS(
     wmsLayerConfig: OgcWmsLayerEntryConfig,
     clickCoordinate: Coordinate,
     viewResolution: number,
@@ -827,9 +798,7 @@ export class GVWMS extends AbstractGVRaster {
     const wmsSource = this.getOLSource();
 
     // Get the supported info formats
-    let featureInfoFormat = wmsLayerConfig.getServiceMetadata()?.Capability?.Request?.GetFeatureInfo?.Format || [
-      GVWMS.MIME_TYPE_FORMAT_TEXT,
-    ];
+    let featureInfoFormat = wmsLayerConfig.getServiceMetadata()?.Capability?.Request?.GetFeatureInfo?.Format || [MIME_TYPE_FORMAT_TEXT];
 
     // If any output format has worked in the past
     if (this.#featureOutputFormatWMSWorked) featureInfoFormat = [this.#featureOutputFormatWMSWorked];
@@ -839,26 +808,26 @@ export class GVWMS extends AbstractGVRaster {
 
     // If the info format includes GEOJSON
     let featureMember: Record<string, unknown>[] | undefined;
-    if (featureInfoFormat.includes(GVWMS.MIME_TYPE_FORMAT_GEOJSON)) {
+    if (featureInfoFormat.includes(MIME_TYPE_FORMAT_GEOJSON)) {
       try {
         // Try to get the feature member using GEOJSON format
-        featureMember = await GVWMS.#getFeatureInfoUsingJSON(
+        featureMember = await GVWMS.#fetchFeatureInfoUsingJSON(
           wmsLayerConfig,
           wmsSource,
           clickCoordinate,
           viewResolution,
           this.getGetFeatureInfoTolerance(),
           projectionCode,
-          GVWMS.MIME_TYPE_FORMAT_GEOJSON,
+          MIME_TYPE_FORMAT_GEOJSON,
           this.getGetFeatureInfoFeatureCount(),
           abortController
         );
 
         // Keep in mind, this output format works
-        this.#featureOutputFormatWMSWorked = GVWMS.MIME_TYPE_FORMAT_GEOJSON;
+        this.#featureOutputFormatWMSWorked = MIME_TYPE_FORMAT_GEOJSON;
       } catch (error: unknown) {
         // Log if the request was not aborted, when aborted, we don't really care for logging
-        GVWMS.#logErrorThrowIfAborted(
+        GeoViewError.logErrorThrowIfAborted(
           error,
           `${wmsLayerConfig.getLayerNameCascade()} - Failed to retrieve featureMember using GeoJSON, eat the error, we'll try with another format`
         );
@@ -866,26 +835,26 @@ export class GVWMS extends AbstractGVRaster {
     }
 
     // If not found and format includes JSON
-    if (!featureMember && featureInfoFormat.includes(GVWMS.MIME_TYPE_FORMAT_JSON)) {
+    if (!featureMember && featureInfoFormat.includes(MIME_TYPE_FORMAT_JSON)) {
       try {
         // Try to get the feature member using JSON format
-        featureMember = await GVWMS.#getFeatureInfoUsingJSON(
+        featureMember = await GVWMS.#fetchFeatureInfoUsingJSON(
           wmsLayerConfig,
           wmsSource,
           clickCoordinate,
           viewResolution,
           this.getGetFeatureInfoTolerance(),
           projectionCode,
-          GVWMS.MIME_TYPE_FORMAT_JSON,
+          MIME_TYPE_FORMAT_JSON,
           this.getGetFeatureInfoFeatureCount(),
           abortController
         );
 
         // Keep in mind, this output format works
-        this.#featureOutputFormatWMSWorked = GVWMS.MIME_TYPE_FORMAT_JSON;
+        this.#featureOutputFormatWMSWorked = MIME_TYPE_FORMAT_JSON;
       } catch (error: unknown) {
         // Log if the request was not aborted, when aborted, we don't really care for logging
-        GVWMS.#logErrorThrowIfAborted(
+        GeoViewError.logErrorThrowIfAborted(
           error,
           `${wmsLayerConfig.getLayerNameCascade()} - Failed to retrieve featureMember using JSON, eat the error, we'll try with another format`
         );
@@ -893,10 +862,10 @@ export class GVWMS extends AbstractGVRaster {
     }
 
     // If not found and format includes application/vnd.ogc.gml
-    if (!featureMember && featureInfoFormat.includes(GVWMS.MIME_TYPE_FORMAT_GML)) {
+    if (!featureMember && featureInfoFormat.includes(MIME_TYPE_FORMAT_GML)) {
       try {
         // Try to get the feature member using GML format
-        featureMember = await GVWMS.#getFeatureInfoUsingGML(
+        featureMember = await GVWMS.#fetchFeatureInfoUsingGML(
           wmsLayerConfig,
           wmsSource,
           clickCoordinate,
@@ -908,10 +877,10 @@ export class GVWMS extends AbstractGVRaster {
         );
 
         // Keep in mind, this output format works
-        this.#featureOutputFormatWMSWorked = GVWMS.MIME_TYPE_FORMAT_GML;
+        this.#featureOutputFormatWMSWorked = MIME_TYPE_FORMAT_GML;
       } catch (error: unknown) {
         // Log if the request was not aborted, when aborted, we don't really care for logging
-        GVWMS.#logErrorThrowIfAborted(
+        GeoViewError.logErrorThrowIfAborted(
           error,
           `${wmsLayerConfig.getLayerNameCascade()} - Failed to retrieve featureMember using GML, eat the error, we'll try with another format`
         );
@@ -919,10 +888,10 @@ export class GVWMS extends AbstractGVRaster {
     }
 
     // If not found and format includes XML
-    if (!featureMember && featureInfoFormat.includes(GVWMS.MIME_TYPE_FORMAT_TEXT_XML)) {
+    if (!featureMember && featureInfoFormat.includes(MIME_TYPE_FORMAT_TEXT_XML)) {
       try {
         // Try to get the feature member using XML format
-        featureMember = await GVWMS.#getFeatureInfoUsingXML(
+        featureMember = await GVWMS.#fetchFeatureInfoUsingXML(
           wmsLayerConfig,
           wmsSource,
           clickCoordinate,
@@ -933,10 +902,10 @@ export class GVWMS extends AbstractGVRaster {
         );
 
         // Keep in mind, this output format works
-        this.#featureOutputFormatWMSWorked = GVWMS.MIME_TYPE_FORMAT_TEXT_XML;
+        this.#featureOutputFormatWMSWorked = MIME_TYPE_FORMAT_TEXT_XML;
       } catch (error: unknown) {
         // Log if the request was not aborted, when aborted, we don't really care for logging
-        GVWMS.#logErrorThrowIfAborted(
+        GeoViewError.logErrorThrowIfAborted(
           error,
           `${wmsLayerConfig.getLayerNameCascade()} - Failed to retrieve featureMember using XML, eat the error, we'll try with another format`
         );
@@ -944,10 +913,10 @@ export class GVWMS extends AbstractGVRaster {
     }
 
     // If not found and format includes HTML
-    if (!featureMember && featureInfoFormat.includes(GVWMS.MIME_TYPE_FORMAT_HTML)) {
+    if (!featureMember && featureInfoFormat.includes(MIME_TYPE_FORMAT_HTML)) {
       try {
         // Try to get the feature member using HTML format
-        const featMember = await GVWMS.#getFeatureInfoUsingHTML(
+        const featMember = await GVWMS.#fetchFeatureInfoUsingHTML(
           wmsLayerConfig,
           wmsSource,
           clickCoordinate,
@@ -959,7 +928,7 @@ export class GVWMS extends AbstractGVRaster {
         featureMember = [featMember];
       } catch (error: unknown) {
         // Log if the request was not aborted, when aborted, we don't really care for logging
-        GVWMS.#logErrorThrowIfAborted(
+        GeoViewError.logErrorThrowIfAborted(
           error,
           `${wmsLayerConfig.getLayerNameCascade()} - Failed to retrieve featureMember using HTML, eat the error, we'll try with another format`
         );
@@ -969,7 +938,7 @@ export class GVWMS extends AbstractGVRaster {
     // If not found anything, last attempt with text/plain
     if (!featureMember) {
       try {
-        const featMember = await GVWMS.#getFeatureInfoUsingPlain(
+        const featMember = await GVWMS.#fetchFeatureInfoUsingPlain(
           wmsLayerConfig,
           wmsSource,
           clickCoordinate,
@@ -981,7 +950,7 @@ export class GVWMS extends AbstractGVRaster {
         featureMember = [featMember];
       } catch (error: unknown) {
         // Log if the request was not aborted, when aborted, we don't really care for logging
-        GVWMS.#logErrorThrowIfAborted(
+        GeoViewError.logErrorThrowIfAborted(
           error,
           `${wmsLayerConfig.getLayerNameCascade()} - Failed to retrieve featureMember using plain text. Nothing can be done.`
         );
@@ -1194,7 +1163,7 @@ export class GVWMS extends AbstractGVRaster {
    * @param abortController - Optional {@link AbortController} to allow cancellation of the request
    * @returns A promise that resolves with an array of feature member records
    */
-  static async #getFeatureInfoUsingJSON(
+  static async #fetchFeatureInfoUsingJSON(
     layerConfig: OgcWmsLayerEntryConfig,
     wmsSource: ImageWMS,
     clickCoordinate: Coordinate,
@@ -1206,7 +1175,7 @@ export class GVWMS extends AbstractGVRaster {
     abortController: AbortController | undefined = undefined
   ): Promise<Record<string, unknown>[]> {
     // Try to get the information using xml format
-    const responseData = await GVWMS.#readFeatureInfo(
+    const responseData = await GVWMS.#fetchFeatureInfo(
       layerConfig,
       wmsSource,
       clickCoordinate,
@@ -1273,7 +1242,7 @@ export class GVWMS extends AbstractGVRaster {
    * @param abortController - Optional {@link AbortController} to allow cancellation of the request
    * @returns A promise that resolves with an array of feature member records
    */
-  static async #getFeatureInfoUsingGML(
+  static async #fetchFeatureInfoUsingGML(
     layerConfig: OgcWmsLayerEntryConfig,
     wmsSource: ImageWMS,
     clickCoordinate: Coordinate,
@@ -1284,25 +1253,25 @@ export class GVWMS extends AbstractGVRaster {
     abortController: AbortController | undefined = undefined
   ): Promise<Record<string, unknown>[]> {
     // Try to get the information using GML format
-    const responseData = await GVWMS.#readFeatureInfo(
+    const responseData = await GVWMS.#fetchFeatureInfo(
       layerConfig,
       wmsSource,
       clickCoordinate,
       viewResolution,
       qgisServerTolerance,
       projectionCode,
-      GVWMS.MIME_TYPE_FORMAT_GML,
+      MIME_TYPE_FORMAT_GML,
       maxFeatures,
       abortController
     );
 
     // Parse the content as XML
     const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(responseData, GVWMS.MIME_TYPE_FORMAT_APP_XML);
+    const xmlDoc = parser.parseFromString(responseData, MIME_TYPE_FORMAT_APP_XML);
 
     // Abort if XML could not be parsed
     if (xmlDoc.getElementsByTagName('parsererror').length > 0) {
-      throw new LayerInvalidFeatureInfoFormatWMSError(layerConfig.layerPath, GVWMS.MIME_TYPE_FORMAT_GML, layerConfig.getLayerNameCascade());
+      throw new LayerInvalidFeatureInfoFormatWMSError(layerConfig.layerPath, MIME_TYPE_FORMAT_GML, layerConfig.getLayerNameCascade());
     }
 
     // Preferred path: parse standard gml:featureMember entries using localName for namespace safety.
@@ -1357,7 +1326,7 @@ export class GVWMS extends AbstractGVRaster {
    * @param abortController - Optional {@link AbortController} to allow cancellation of the request
    * @returns A promise that resolves with an array of feature member records
    */
-  static async #getFeatureInfoUsingXML(
+  static async #fetchFeatureInfoUsingXML(
     layerConfig: OgcWmsLayerEntryConfig,
     wmsSource: ImageWMS,
     clickCoordinate: Coordinate,
@@ -1367,14 +1336,14 @@ export class GVWMS extends AbstractGVRaster {
     abortController: AbortController | undefined = undefined
   ): Promise<Record<string, unknown>[]> {
     // Try to get the information using xml format
-    const responseData = await GVWMS.#readFeatureInfo(
+    const responseData = await GVWMS.#fetchFeatureInfo(
       layerConfig,
       wmsSource,
       clickCoordinate,
       viewResolution,
       qgisServerTolerance,
       projectionCode,
-      GVWMS.MIME_TYPE_FORMAT_TEXT_XML,
+      MIME_TYPE_FORMAT_TEXT_XML,
       undefined,
       abortController
     );
@@ -1425,11 +1394,7 @@ export class GVWMS extends AbstractGVRaster {
     }
 
     // Failed
-    throw new LayerInvalidFeatureInfoFormatWMSError(
-      layerConfig.layerPath,
-      GVWMS.MIME_TYPE_FORMAT_TEXT_XML,
-      layerConfig.getLayerNameCascade()
-    );
+    throw new LayerInvalidFeatureInfoFormatWMSError(layerConfig.layerPath, MIME_TYPE_FORMAT_TEXT_XML, layerConfig.getLayerNameCascade());
   }
 
   /**
@@ -1447,7 +1412,7 @@ export class GVWMS extends AbstractGVRaster {
    * @param abortController - Optional {@link AbortController} to allow cancellation of the request
    * @returns A promise that resolves with an object containing the html info response under the key `html`
    */
-  static async #getFeatureInfoUsingHTML(
+  static async #fetchFeatureInfoUsingHTML(
     layerConfig: OgcWmsLayerEntryConfig,
     wmsSource: ImageWMS,
     clickCoordinate: Coordinate,
@@ -1457,14 +1422,14 @@ export class GVWMS extends AbstractGVRaster {
     abortController: AbortController | undefined = undefined
   ): Promise<Record<string, unknown>> {
     // Try to get the information using html format
-    const responseData = await GVWMS.#readFeatureInfo(
+    const responseData = await GVWMS.#fetchFeatureInfo(
       layerConfig,
       wmsSource,
       clickCoordinate,
       viewResolution,
       qgisServerTolerance,
       projectionCode,
-      GVWMS.MIME_TYPE_FORMAT_HTML,
+      MIME_TYPE_FORMAT_HTML,
       undefined,
       abortController
     );
@@ -1474,31 +1439,23 @@ export class GVWMS extends AbstractGVRaster {
 
     // Check if the response is a WMS ServiceException XML
     const parser = new DOMParser();
-    const xmlTestDoc = parser.parseFromString(responseData, GVWMS.MIME_TYPE_FORMAT_APP_XML);
+    const xmlTestDoc = parser.parseFromString(responseData, MIME_TYPE_FORMAT_APP_XML);
     if (
       xmlTestDoc.documentElement?.localName?.toLowerCase() === 'serviceexceptionreport' ||
       xmlTestDoc.documentElement?.localName?.toLowerCase() === 'serviceexception'
     ) {
-      throw new LayerInvalidFeatureInfoFormatWMSError(
-        layerConfig.layerPath,
-        GVWMS.MIME_TYPE_FORMAT_HTML,
-        layerConfig.getLayerNameCascade()
-      );
+      throw new LayerInvalidFeatureInfoFormatWMSError(layerConfig.layerPath, MIME_TYPE_FORMAT_HTML, layerConfig.getLayerNameCascade());
     }
 
     // Read the response as html
-    const xmlDomResponse = new DOMParser().parseFromString(responseData, GVWMS.MIME_TYPE_FORMAT_HTML);
+    const xmlDomResponse = new DOMParser().parseFromString(responseData, MIME_TYPE_FORMAT_HTML);
 
     // Get body text content and trim it
     const bodyContent = xmlDomResponse.body?.textContent?.trim();
 
     // Check if it's empty or only whitespace
     if (!bodyContent) {
-      throw new LayerInvalidFeatureInfoFormatWMSError(
-        layerConfig.layerPath,
-        GVWMS.MIME_TYPE_FORMAT_HTML,
-        layerConfig.getLayerNameCascade()
-      );
+      throw new LayerInvalidFeatureInfoFormatWMSError(layerConfig.layerPath, MIME_TYPE_FORMAT_HTML, layerConfig.getLayerNameCascade());
     }
 
     // The response is in html format
@@ -1521,7 +1478,7 @@ export class GVWMS extends AbstractGVRaster {
    * @returns A promise that resolves with an object containing the plain-text feature info response
    *          under the key `plain_text['#text']`
    */
-  static async #getFeatureInfoUsingPlain(
+  static async #fetchFeatureInfoUsingPlain(
     layerConfig: OgcWmsLayerEntryConfig,
     wmsSource: ImageWMS,
     clickCoordinate: Coordinate,
@@ -1531,30 +1488,26 @@ export class GVWMS extends AbstractGVRaster {
     abortController: AbortController | undefined = undefined
   ): Promise<Record<string, unknown>> {
     // Try to get the information using plain format
-    const responseData = await GVWMS.#readFeatureInfo(
+    const responseData = await GVWMS.#fetchFeatureInfo(
       layerConfig,
       wmsSource,
       clickCoordinate,
       viewResolution,
       qgisServerTolerance,
       projectionCode,
-      GVWMS.MIME_TYPE_FORMAT_TEXT,
+      MIME_TYPE_FORMAT_TEXT,
       undefined,
       abortController
     );
 
     // Sanitize response by stripping any HTML/XML nodes and keeping only text content
     const parser = new DOMParser();
-    const htmlDoc = parser.parseFromString(responseData, GVWMS.MIME_TYPE_FORMAT_HTML);
+    const htmlDoc = parser.parseFromString(responseData, MIME_TYPE_FORMAT_HTML);
     const sanitizedText = htmlDoc.body?.textContent?.trim() || '';
 
     // If no meaningful text remains after sanitization, treat as invalid
     if (!sanitizedText) {
-      throw new LayerInvalidFeatureInfoFormatWMSError(
-        layerConfig.layerPath,
-        GVWMS.MIME_TYPE_FORMAT_TEXT,
-        layerConfig.getLayerNameCascade()
-      );
+      throw new LayerInvalidFeatureInfoFormatWMSError(layerConfig.layerPath, MIME_TYPE_FORMAT_TEXT, layerConfig.getLayerNameCascade());
     }
 
     // The response is in plain format
@@ -1580,7 +1533,7 @@ export class GVWMS extends AbstractGVRaster {
    * @throws {LayerInvalidFeatureInfoFormatWMSError} When the GetFeatureInfo URL could not be constructed,
    *         which likely indicates the info format is unsupported or the layer is misconfigured.
    */
-  static #readFeatureInfo(
+  static #fetchFeatureInfo(
     layerConfig: OgcWmsLayerEntryConfig,
     wmsSource: ImageWMS,
     clickCoordinate: Coordinate,
@@ -1895,18 +1848,6 @@ export class GVWMS extends AbstractGVRaster {
 
     // Return the polygon
     return new Polygon([coordinates]);
-  }
-
-  /**
-   * Logs the provided error with the given message if the error is not a `RequestAbortedError`. If the error is a `RequestAbortedError`, it rethrows it to be handled by the caller.
-   *
-   * @param error - The error to check and log if necessary
-   * @param message - The message to log alongside the error if it's not a `RequestAbortedError`
-   * @throws {RequestAbortedError} When the error is an instance of `RequestAbortedError`, it is rethrown for the caller to handle
-   */
-  static #logErrorThrowIfAborted(error: unknown, _message: string): void {
-    // If the error is a RequestAborted error, rethrow it, we want it to be handled by the caller and not eaten by the various attempts to get the feature info
-    if (error instanceof RequestAbortedError) throw error;
   }
 
   /**

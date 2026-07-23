@@ -215,6 +215,39 @@ export interface TypeSourceGeoTIFFInitialConfig extends TypeBaseSourceInitialCon
 /** Type of server. */
 export type TypeOfServer = 'mapserver' | 'geoserver' | 'qgis';
 
+/** Mime/type for GEOJSON */
+export const MIME_TYPE_FORMAT_GEOJSON = 'application/geojson';
+
+/** Mime/type for JSON */
+export const MIME_TYPE_FORMAT_JSON = 'application/json';
+
+/** Mime/type for GML */
+export const MIME_TYPE_FORMAT_GML = 'application/vnd.ogc.gml';
+
+/** Mime/type for XML */
+export const MIME_TYPE_FORMAT_APP_XML = 'application/xml';
+
+/** Mime/type for XML */
+export const MIME_TYPE_FORMAT_TEXT_XML = 'text/xml';
+
+/** Mime/type for HTML */
+export const MIME_TYPE_FORMAT_HTML = 'text/html';
+
+/** Mime/type for GML 3.2 (application) */
+export const MIME_TYPE_FORMAT_GML_XML_32 = 'application/gml+xml';
+
+/** Mime/type for GML 3.2.1 (text/xml subtype) */
+export const MIME_TYPE_FORMAT_TEXT_XML_GML_321 = 'text/xml; subtype=gml/3.2.1';
+
+/** Mime/type for GML 3.1.1 (text/xml subtype) */
+export const MIME_TYPE_FORMAT_TEXT_XML_GML_311 = 'text/xml; subtype=gml/3.1.1';
+
+/** Mime/type for GML 2.1.2 (text/xml subtype) */
+export const MIME_TYPE_FORMAT_TEXT_XML_GML_212 = 'text/xml; subtype=gml/2.1.2';
+
+/** Mime/type for Text */
+export const MIME_TYPE_FORMAT_TEXT = 'text/plain';
+
 /** Base type from which we derive the source properties for all the vector leaf nodes in the layer tree. */
 export interface TypeBaseVectorSourceInitialConfig extends TypeBaseSourceInitialConfig {
   /** Loading strategy to use (all or bbox). */

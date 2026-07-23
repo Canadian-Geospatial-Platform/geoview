@@ -47,6 +47,9 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   /** Callback delegates for the text visible changed event */
   #onTextVisibleChangedHandlers: TextVisibleChangedDelegate[] = [];
 
+  /** Guard flag to prevent refresh when setStyle is called from within the style callback */
+  #inStyleCallback = false;
+
   /** Cache for feature styles keyed by feature ID */
   #styleCache: Map<string, Style | undefined> = new Map();
 
@@ -70,17 +73,23 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
       properties: { layerConfig },
       source: olSource,
       style: (feature) => {
-        // Get or create cached style
-        const style =
-          feature.getGeometry()?.getType() === 'Point'
-            ? this.#getOrCreateCachedStyle(feature, label)
-            : AbstractGVVector.calculateStyleForFeature(this, feature, label, this.getLayerFilters()?.getFilterEquation());
+        // Guard to prevent setStyle from triggering refresh while inside the style callback
+        this.#inStyleCallback = true;
+        try {
+          // Get or create cached style
+          const style =
+            feature.getGeometry()?.getType() === 'Point'
+              ? this.#getOrCreateCachedStyle(feature, label)
+              : AbstractGVVector.calculateStyleForFeature(this, feature, label, this.getLayerFilters()?.getFilterEquation());
 
-        // Set the style applied, throwing a style applied event in the process
-        this.setStyleApplied(true);
+          // Set the style applied, throwing a style applied event in the process
+          this.setStyleApplied(true);
 
-        // Return the style
-        return style;
+          // Return the style
+          return style;
+        } finally {
+          this.#inStyleCallback = false;
+        }
       },
     };
 
@@ -450,8 +459,12 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     // Clear the style cache to ensure new styles are calculated with the updated style configuration
     this.#clearStyleCache();
     super.setStyle(style);
-    // Trigger a refresh to apply the new style to all features
-    this.refresh(undefined);
+
+    // Trigger a refresh to apply the new style to all features, but skip when called
+    // from within the style callback to avoid re-triggering the source loader
+    if (!this.#inStyleCallback) {
+      this.refresh(undefined);
+    }
   }
 
   // #endregion OVERRIDES

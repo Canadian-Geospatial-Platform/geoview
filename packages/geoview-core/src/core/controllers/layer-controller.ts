@@ -2433,7 +2433,7 @@ export class LayerController extends AbstractMapViewerController {
    * @param event - The event containing the layer and filter information
    */
   #handleDomainLayerFilterApplied(sender: LayerDomain, event: DomainLayerFilterAppliedEvent): void {
-    // TODO: REFACTOR - Ideally, this handler wouldn't exist and the layer would have custom events when adjusting their data/time filters.
+    // TODO: REFACTOR FILTERS - Ideally, this handler wouldn't exist and the layer would have custom events when adjusting their data/time filters.
     // TO.DOCONT: It'd have to be a custom event, because it'd have to be more elaborate than a single query string if we
     // TO.DOCONT: want to update the UI based on a query filter that happened. Refer to setStyleItemVisibility for the
     // TO.DOCONT: correct pattern (which does update the UI automatically). Search id: 0ecb948f

@@ -811,7 +811,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param dataFilterQueryString - Optional data filter expression to apply
    */
   setLayerFiltersData(dataFilterQueryString: string | undefined): void {
-    // TODO: REFACTOR - We should probably replace this function with a public-facing one which filters using time properties (other than
+    // TODO: REFACTOR FILTERS - We should probably replace this function with a public-facing one which filters using time properties (other than
     // TO.DOCONT: a single query string) which raises an event on the domain to update which updates the UI accordingly.
     // TO.DOCONT: This would be more user-friendly and less error prone than having to create the query string outside
     // TO.DOCONT: of the layer and then set it here, which requires the user to know the exact syntax of the query string
@@ -836,7 +836,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param timeFilterQueryString - Optional time filter expression to apply
    */
   setLayerFiltersTime(timeFilterQueryString: string | undefined): void {
-    // TODO: REFACTOR - We should probably replace this function with a public-facing one which filters using time properties (other than
+    // TODO: REFACTOR FILTERS - We should probably replace this function with a public-facing one which filters using time properties (other than
     // TO.DOCONT: a single query string) which raises an event on the domain to update which updates the UI accordingly.
     // TO.DOCONT: This would be more user-friendly and less error prone than having to create the query string outside
     // TO.DOCONT: of the layer and then set it here, which requires the user to know the exact syntax of the query string

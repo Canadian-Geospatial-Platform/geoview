@@ -7,6 +7,7 @@ import type { Extent } from 'ol/extent';
 import { getLocalizedMessage } from '@/core/utils/utilities';
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import { logger } from '@/core/utils/logger';
+import { RequestAbortedError } from './core-exceptions';
 
 /**
  * Base error for GeoView that includes the map ID and supports localized messages.
@@ -116,6 +117,18 @@ export class GeoViewError extends Error {
 
     // Return the message
     return String(message);
+  }
+
+  /**
+   * Logs the provided error with the given message if the error is not a `RequestAbortedError`. If the error is a `RequestAbortedError`, it rethrows it to be handled by the caller.
+   *
+   * @param error - The error to check
+   * @param _message - The message to log alongside the error if it's not a `RequestAbortedError`
+   * @throws {RequestAbortedError} When the error is an instance of `RequestAbortedError`, it is rethrown for the caller to handle
+   */
+  static logErrorThrowIfAborted(error: unknown, _message: string): void {
+    // If the error is a RequestAborted error, rethrow it, we want it to be handled by the caller and not eaten by the various attempts to get the feature info
+    if (error instanceof RequestAbortedError) throw error;
   }
 }
 
