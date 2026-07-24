@@ -33,6 +33,7 @@ import {
   LayerEntryConfigWMSSubLayerNotFoundError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
 import { generateId, normalizeDatacubeAccessPath } from '@/core/utils/utilities';
+import { Fetch } from '@/core/utils/fetch-helper';
 import { logger } from '@/core/utils/logger';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
@@ -204,6 +205,12 @@ export class WMS extends AbstractGeoViewRaster {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     abortSignal?: AbortSignal
   ): Promise<OgcWmsLayerEntryConfig> {
+    // If a proxy was necessary when the metadata were fetched (either the whole metadata or the layer-metadatas individually
+    if (this.getIsUsingProxy()) {
+      // Indicate the proxy that was used
+      layerConfig.setProxyUrl(this.getProxyUrl());
+    }
+
     // Get the layer capabilities
     const layerCapabilities = WMS.findLayerMetadataInCapability(layerConfig.layerId, this.getMetadata()?.Capability.Layer)!;
 
@@ -280,8 +287,8 @@ export class WMS extends AbstractGeoViewRaster {
     const styleToUse = layerConfig.getStyleToUse();
     if (styleToUse) sourceParams.STYLES = styleToUse;
 
-    // Get the data access path without any proxy url applied, the proxy url is prefixed in the setImageLoadFunction callback
-    let dataAccessPathUrl = layerConfig.getDataAccessPathBeforeProxy();
+    // Get the data access path
+    let dataAccessPathUrl = layerConfig.getDataAccessPath();
 
     // Strip down parameters that should not be in the OL param url
     // -> 'request' and 'service' shouldn't be there, OL will write them automatically
@@ -289,6 +296,7 @@ export class WMS extends AbstractGeoViewRaster {
     dataAccessPathUrl = GeoUtilities.ensureURLForOpenLayersSource(dataAccessPathUrl, ['request', 'service', 'layers', 'version']);
 
     // Create the source options
+    // GV The proxy is handled in the setImageLoadFunction callback in GVWMS constructor.
     const sourceOptions: SourceOptions = {
       url: dataAccessPathUrl,
       params: sourceParams,
@@ -350,6 +358,7 @@ export class WMS extends AbstractGeoViewRaster {
     // Get the layer entries we need to query
     const layerConfigsToQuery = this.#getLayersToQuery();
 
+    // Only if there's no layer configs specified (because that call might be slow we only do it when necessary)
     if (layerConfigsToQuery.length === 0) {
       // If no specific layers to query, fetch and process metadata for the entire service
       return this.#fetchAndProcessSingleWmsMetadata(
@@ -369,7 +378,21 @@ export class WMS extends AbstractGeoViewRaster {
     }
 
     // Fetch and merge metadata for each layer individually
-    return this.#fetchAndMergeMultipleWmsMetadata(url, layerConfigsToQuery, abortSignal);
+    return this.#fetchAndMergeMultipleWmsMetadata(
+      url,
+      layerConfigsToQuery,
+      (proxiedUrl, proxyUsed) => {
+        // Indicate the proxy that was used
+        this.setProxyUrl(proxyUsed);
+
+        // If updating the metadataAccessPath as we go
+        if (updateMetadataAccessPath) {
+          // Update the metadata access path accordingly
+          this.setMetadataAccessPath(proxiedUrl);
+        }
+      },
+      abortSignal
+    );
   }
 
   // #endregion PROTECTED METHODS
@@ -385,7 +408,6 @@ export class WMS extends AbstractGeoViewRaster {
    *
    * @param url - The full WMS GetCapabilities URL to fetch metadata from
    * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
-   * The parameter sent in the callback is the proxy prefix with the '?' at the end.
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process of the process
    * @returns A promise that resolves to the parsed metadata object,
    * or `undefined` if the fetch failed or metadata is invalid.
@@ -431,6 +453,7 @@ export class WMS extends AbstractGeoViewRaster {
    *
    * @param url - The base WMS GetCapabilities URL used to fetch metadata
    * @param layers - An array of layer configurations to fetch and merge metadata for
+   * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves to the merged metadata object,
    * or `undefined` if all requests failed.
@@ -438,10 +461,11 @@ export class WMS extends AbstractGeoViewRaster {
   async #fetchAndMergeMultipleWmsMetadata(
     url: string,
     layers: AbstractBaseLayerEntryConfig[],
+    callbackNewMetadataUrl: CallbackNewMetadataDelegate,
     abortSignal?: AbortSignal
   ): Promise<TypeMetadataWMSCapabilities | undefined> {
     // Create one metadata fetch promise per unique layerId
-    const metadataPromises = WMS.#createLayerMetadataPromises(url, this.getConfigProxyUrl(), layers, abortSignal);
+    const metadataPromises = WMS.#createLayerMetadataPromises(url, this.getConfigProxyUrl(), layers, callbackNewMetadataUrl, abortSignal);
 
     // Wait for all requests to settle (either fulfilled or rejected)
     const results = await Promise.allSettled(metadataPromises);
@@ -482,7 +506,6 @@ export class WMS extends AbstractGeoViewRaster {
    *
    * @param metadataUrl - The metadataAccessPath
    * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
-   * The parameter sent in the callback is the proxy prefix with the '?' at the end.
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves once the execution is completed
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
@@ -916,7 +939,6 @@ export class WMS extends AbstractGeoViewRaster {
    * @param url - The url to query the metadata from
    * @param configProxyUrl - Proxy URL to use when necessary
    * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
-   * The parameter sent in the callback is the proxy prefix with the '?' at the end.
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration
    * @throws {RequestAbortedError} When the request was aborted by the caller's signal
@@ -941,7 +963,6 @@ export class WMS extends AbstractGeoViewRaster {
    * @param configProxyUrl - Proxy URL to use when necessary
    * @param layers - The layers to get the capabilities for
    * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
-   * The parameter sent in the callback is the proxy prefix with the '?' at the end.
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves with the parsed WMS metadata
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration
@@ -962,54 +983,23 @@ export class WMS extends AbstractGeoViewRaster {
   }
 
   /**
-   * Fetches the WMS styles for the specified layer(s) from a WMS service.
-   *
-   * @param url - The url to query the metadata from
-   * @param configProxyUrl - Proxy URL to use when necessary
-   * @param layers - The layers to get the capabilities for
-   * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
-   * The parameter sent in the callback is the proxy prefix with the '?' at the end.
-   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
-   * @returns A promise that resolves with a TypeStylesWMS object for the layer(s)
-   * @throws {RequestTimeoutError} When the request exceeds the timeout duration
-   * @throws {RequestAbortedError} When the request was aborted by the caller's signal
-   * @throws {ResponseError} When the response is not OK (non-2xx)
-   * @throws {ResponseEmptyError} When the JSON response is empty
-   * @throws {NetworkError} When a network issue happened
-   */
-  static fetchStylesForLayer(
-    url: string,
-    configProxyUrl: string | undefined,
-    layers: string,
-    callbackNewMetadataUrl?: CallbackNewMetadataDelegate,
-    abortSignal?: AbortSignal
-  ): Promise<TypeStylesWMS> {
-    // Redirect
-    return GeoUtilities.getWMSServiceStyles(url, configProxyUrl, layers, callbackNewMetadataUrl, abortSignal);
-  }
-
-  /**
    * Fetches and constructs style configurations for WMS layers.
    *
    * This method retrieves style definitions from a WMS (Web Map Service) endpoint
    * for the specified layers, processes them, and returns a mapping of geometry
    * types to their corresponding layer style settings.
    *
-   * @param url - The base WMS service URL used to fetch styles
-   * @param configProxyUrl - Proxy URL to use when necessary
-   * @param layers - A comma-separated list of WMS layer names to retrieve styles for
+   * @param url - The WMS service URL used to fetch styles. If a proxy should be used, it has to be part of the URL here.
    * @param geomType - Optional geometry type
    * @returns A promise that resolves to a record mapping geometry types to layer style settings
    * @throws {NotSupportedError} When the symbolizer type in a rule is unsupported
    */
-  static async createStylesFromWMS(
+  static async createLayerStyleFromWMS(
     url: string,
-    configProxyUrl: string | undefined,
-    layers: string,
     geomType: TypeStyleGeometry | undefined
   ): Promise<Record<TypeStyleGeometry, TypeLayerStyleSettings>> {
-    // Fetch styles using the WMS url associated with the WFS
-    const styles = await WMS.fetchStylesForLayer(url, configProxyUrl, layers);
+    // Fetch the styles from the service
+    const styles = await Fetch.fetchXMLToJson<TypeStylesWMS>(url);
 
     // Log it, leaving the logDebug for dev purposes
     // logger.logDebug('STYLES', styles);
@@ -1038,6 +1028,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param url - The base GetCapabilities URL used to fetch layer-specific metadata
    * @param configProxyUrl - Proxy URL to use when necessary
    * @param layers - An array of layer configurations to fetch metadata for
+   * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns An array of metadata fetch promises, one per unique layer config
    */
@@ -1045,6 +1036,7 @@ export class WMS extends AbstractGeoViewRaster {
     url: string,
     configProxyUrl: string | undefined,
     layers: AbstractBaseLayerEntryConfig[],
+    callbackNewMetadataUrl?: CallbackNewMetadataDelegate,
     abortSignal?: AbortSignal
   ): Promise<MetatadaFetchResult>[] {
     const seen = new Map<string, Promise<MetatadaFetchResult>>();
@@ -1058,19 +1050,7 @@ export class WMS extends AbstractGeoViewRaster {
       if (!seen.has(layerConfig.layerId)) {
         const promise = new Promise<MetatadaFetchResult>((resolve, reject) => {
           // Perform the actual metadata fetch
-          WMS.fetchMetadataWMSForLayer(
-            url,
-            configProxyUrl,
-            layerConfig.layerId,
-            (proxiedUrl, proxyUsed) => {
-              // Indicate the proxy that was used
-              layerConfig.setProxyUrl(proxyUsed);
-
-              // Update the layer's data access path
-              layerConfig.setDataAccessPath(proxiedUrl);
-            },
-            abortSignal
-          )
+          WMS.fetchMetadataWMSForLayer(url, configProxyUrl, layerConfig.layerId, callbackNewMetadataUrl, abortSignal)
             .then((metadata) => {
               if (metadata.Capability) {
                 resolve({ metadata, layerConfig });
@@ -1287,9 +1267,6 @@ export class WMS extends AbstractGeoViewRaster {
     // If should fetch vectorial information from WFS
     if (layerConfig.getShouldFetchVectorInformationFromWFS()) {
       try {
-        // Get the base url
-        const baseUrl = GeoUtilities.getBaseUrl(layerConfig.getDataAccessPath());
-
         // Create the Geoview Layer Config WFS equivalent
         const wfsLayerConfig = await layerConfig.createGeoviewLayerConfigWfs(configProxyUrl);
 
@@ -1310,8 +1287,14 @@ export class WMS extends AbstractGeoViewRaster {
         if (!layerConfig.getLayerStyle()) {
           // If the service metadata offers GetStyles
           if (layerConfig.getSupportsGetStyles()) {
+            // Make sure the URL has necessary information
+            let tweakedUrl = GeoUtilities.ensureServiceRequestUrlGetStyles(layerConfig.getDataAccessPath(), layerConfig.layerId);
+
+            // Tweak url with the proxy if necessary
+            tweakedUrl = layerConfig.getUrlWithProxyWhenNeeded(tweakedUrl);
+
             // Try to create dynamic style from the WMS GetStyles metadata
-            return await WMS.createStylesFromWMS(baseUrl, configProxyUrl, layerConfig.layerId, wfsLayerConfig.getGeometryType());
+            return await WMS.createLayerStyleFromWMS(tweakedUrl, layerConfig.getGeometryType());
           }
 
           // Log

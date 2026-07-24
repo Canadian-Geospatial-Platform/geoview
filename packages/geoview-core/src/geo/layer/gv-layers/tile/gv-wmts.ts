@@ -1,6 +1,7 @@
 import TileLayer from 'ol/layer/Tile';
 import type { Options as TileOptions } from 'ol/layer/BaseTile';
 import type WMTSSource from 'ol/source/WMTS';
+import type ImageTile from 'ol/ImageTile';
 import type { Extent } from 'ol/extent';
 import type { Projection as OLProjection } from 'ol/proj';
 
@@ -26,6 +27,16 @@ export class GVWMTS extends AbstractGVTile {
    */
   constructor(olSource: WMTSSource, layerConfig: OgcWmtsLayerEntryConfig) {
     super(olSource, layerConfig);
+
+    // Hook a custom function to the TileLoadFunction of the source object to handle proxy
+    olSource.setTileLoadFunction((tile, src) => {
+      // Tweak url with the proxy if necessary
+      const theUrl = layerConfig.getUrlWithProxyWhenNeeded(src);
+
+      // Assign the src to the tile image
+      // eslint-disable-next-line no-param-reassign
+      ((tile as ImageTile).getImage() as HTMLImageElement).src = theUrl;
+    });
 
     // Create the tile layer options.
     const tileLayerOptions: TileOptions<WMTSSource> = { source: olSource };

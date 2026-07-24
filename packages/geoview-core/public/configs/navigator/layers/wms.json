@@ -219,7 +219,7 @@
       },
       {
         "geoviewLayerId": "LYR16-nonna",
-        "geoviewLayerName": "Nonna w/ space in id",
+        "geoviewLayerName": "Nonna w/ space in id (CORS)",
         "metadataAccessPath": "https://nonna-geoserver.data.chs-shc.ca/geoserver/wms",
         "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [

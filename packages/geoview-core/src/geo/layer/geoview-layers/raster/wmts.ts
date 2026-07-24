@@ -177,6 +177,12 @@ export class WMTS extends AbstractGeoViewRaster {
     // Init the layer metadata
     await WMTS.initLayerMetadata(layerConfig, metadata);
 
+    // If a proxy was necessary when the metadata were fetched
+    if (this.getIsUsingProxy()) {
+      // Indicate the proxy that was used
+      layerConfig.setProxyUrl(this.getProxyUrl());
+    }
+
     // Return the layer config
     return layerConfig;
   }
@@ -619,6 +625,7 @@ export class WMTS extends AbstractGeoViewRaster {
     });
 
     // Construct the source options for the WMTS source.
+    // GV The proxy is handled in the setTileLoadFunction callback in GVWMTS constructor.
     const sourceOptions: SourceOptions = {
       url: layerConfig.getDataAccessPath(),
       crossOrigin: layerConfig.getSource().crossOrigin ?? 'Anonymous',

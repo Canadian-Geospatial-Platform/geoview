@@ -115,11 +115,8 @@ export class GVWMS extends AbstractGVRaster {
       // Assign the src to the image, this is the regular behavior
       let theUrl = src;
 
-      // If we're behind a proxy
-      if (layerConfig.getIsUsingProxy()) {
-        // Tweak the url to use the proxy
-        theUrl = `${layerConfig.getProxyUrl()}?${theUrl}`;
-      }
+      // Tweak url with the proxy if necessary
+      theUrl = layerConfig.getUrlWithProxyWhenNeeded(theUrl);
 
       // If we're overriding the CRS for the layer as an attempt to do on-the-fly projection for tricky layers
       const overridingCRS = this.getOverrideCRS();
@@ -1564,11 +1561,8 @@ export class GVWMS extends AbstractGVRaster {
 
     // If generated a url
     if (featureInfoUrl) {
-      // If using a proxy
-      if (layerConfig.getIsUsingProxy()) {
-        // Tweak the url to use the proxy
-        featureInfoUrl = `${layerConfig.getProxyUrl()}?${featureInfoUrl}`;
-      }
+      // Tweak url with the proxy if necessary
+      featureInfoUrl = layerConfig.getUrlWithProxyWhenNeeded(featureInfoUrl);
 
       // Get the response data as text
       return Fetch.fetchText(featureInfoUrl, { signal: abortController?.signal });
@@ -1791,16 +1785,14 @@ export class GVWMS extends AbstractGVRaster {
       queryUrl = `https${queryUrl.slice(4)}`;
     }
 
-    // If we know that the layer is using a proxy, use it right away instead of even attempting to fetch the image directly (which would fail due to CORS)
-    if (layerConfig.getIsUsingProxy()) {
-      queryUrl = `${layerConfig.getProxyUrl()}?${queryUrl}`;
-
-      // If the proxy to use is the Esri proxy
-      if (layerConfig.getIsUsingEsriProxy()) {
-        // Encode the layers parameter if present
-        queryUrl = encodeLayersParam(queryUrl);
-      }
+    // If the proxy to use is the Esri proxy
+    if (layerConfig.getIsUsingEsriProxy()) {
+      // Encode the layers parameter if present
+      queryUrl = encodeLayersParam(queryUrl);
     }
+
+    // Tweak url with the proxy if necessary
+    queryUrl = layerConfig.getUrlWithProxyWhenNeeded(queryUrl);
 
     // Fetch the image (must await so CORS/network errors are caught below)
     return Fetch.fetchBlobImage(queryUrl);

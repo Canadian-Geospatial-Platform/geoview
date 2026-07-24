@@ -71,8 +71,9 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
     const metadata = this.getServiceMetadata();
 
     // If no metadata
-    if (!metadata || !metadata.FeatureTypeList || !metadata.FeatureTypeList.FeatureType)
+    if (!metadata || !metadata.FeatureTypeList || !metadata.FeatureTypeList.FeatureType) {
       throw new LayerServiceMetadataEmptyError(this.getGeoviewLayerId(), this.getLayerNameCascade());
+    }
 
     // If metadata FeatureType isn't an array
     let featureTypes: TypeMetadataWFSFeatureTypeListFeatureType[] = metadata.FeatureTypeList

@@ -57,9 +57,6 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /** The proxy to use, when one is being used */
   #proxy?: string;
 
-  /** The data access path before applying the proxy. */
-  #dataAccessPathBeforeProxy?: string;
-
   /** The geometry field information. */
   #geometryField?: TypeOutfields;
 
@@ -532,6 +529,22 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   }
 
   /**
+   * Retrieves the metadata access path used by this GeoView layer by making sure the proxy url isn't included in the path.
+   *
+   * @returns The metadata access path without the proxy url (if any), or undefined if not set
+   */
+  getMetadataAccessPathWithoutProxy(): string | undefined {
+    // If using proxy
+    let url = this.getMetadataAccessPath();
+    if (this.getIsUsingProxy()) {
+      url = url?.replace(this.getProxyUrl()!, '');
+    }
+
+    // Return the url minus the proxy if it was included and trimming the '?' in the url
+    return url?.replace(/^\?+|\?+$/g, '');
+  }
+
+  /**
    * Gets the source data access path from the source object.
    *
    * @param endsWithSlash - Indicates if the dataAccessPath received should end with a '/'
@@ -556,14 +569,20 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   }
 
   /**
-   * Gets the original data access path before the proxy was applied.
+   * Prepends the proxy URL to the given URL when the layer is configured to use a proxy.
    *
-   * Falls back to the current data access path if no proxy has been set.
-   *
-   * @returns The data access path before proxy application
+   * @param url - The URL to optionally prepend the proxy to
+   * @returns The URL with proxy prefix if using a proxy, or the original URL as-is
    */
-  getDataAccessPathBeforeProxy(): string {
-    return this.#dataAccessPathBeforeProxy ?? this.getDataAccessPath();
+  getUrlWithProxyWhenNeeded(url: string): string {
+    // If using proxy
+    if (this.getIsUsingProxy()) {
+      // Add the proxy to the url
+      return `${this.getProxyUrl()}?${url}`;
+    }
+
+    // As-is
+    return url;
   }
 
   /**
@@ -621,7 +640,6 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    * @param proxy - The proxy URL to set
    */
   setProxyUrl(proxy: string | undefined): void {
-    if (proxy) this.#dataAccessPathBeforeProxy = this.getDataAccessPath();
     this.#proxy = proxy;
   }
 

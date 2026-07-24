@@ -56,17 +56,6 @@
         ]
       },
       {
-        "geoviewLayerId": "LYR13-qgis",
-        "geoviewLayerName": "BC Wells (known issue, have to zoom to BC for the style to kick in and features to get loaded)",
-        "metadataAccessPath": "https://openmaps.gov.bc.ca/geo/ows",
-        "geoviewLayerType": "ogcWfs",
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "pub:WHSE_WATER_MANAGEMENT.GW_WATER_WELLS_WRBC_SVW"
-          }
-        ]
-      },
-      {
         "geoviewLayerId": "LYR14-qgis",
         "geoviewLayerName": "Cities Basic",
         "metadataAccessPath": "https://demo.mapserver.org/cgi-bin/wfs",
@@ -97,6 +86,28 @@
                 "nameField": "NAME"
               }
             }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "LYR13-qgis",
+        "geoviewLayerName": "BC Wells (known issue, have to zoom to BC for the style to kick in and features to get loaded)",
+        "metadataAccessPath": "https://openmaps.gov.bc.ca/geo/ows",
+        "geoviewLayerType": "ogcWfs",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "pub:WHSE_WATER_MANAGEMENT.GW_WATER_WELLS_WRBC_SVW"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "wfsbelgiumMeteo",
+        "geoviewLayerName": "Belgium meteo stations (CORS) (known issue, have to zoom to BC for the style to kick in and features to get loaded)",
+        "metadataAccessPath": "https://opendata.meteo.be/service/aws/ows",
+        "geoviewLayerType": "ogcWfs",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "aws:aws_station"
           }
         ]
       }

@@ -155,9 +155,6 @@ export class XYZTiles extends AbstractGeoViewRaster {
     // GV Also, might be worth checking out OGCMapTile for this? https://openlayers.org/en/latest/examples/ogc-map-tiles-geographic.html
     // GV Seems like it can deal with less specificity in the url and can handle the x y z internally?
 
-    // Get the data access path
-    const dataAccessPath = layerConfig.getDataAccessPath();
-
     // Get the configProxyUrl
     const configProxyUrl = this.getConfigProxyUrl();
 
@@ -172,13 +169,10 @@ export class XYZTiles extends AbstractGeoViewRaster {
         new Error(test.error)
       );
 
-    // If a proxy was necessary
+    // If a proxy was necessary when the metadata were fetched
     if (test.needsProxy) {
       // Indicate the proxy that was used
       layerConfig.setProxyUrl(configProxyUrl);
-
-      // Update the access path to use the proxy if one was required
-      layerConfig.setDataAccessPath(`${configProxyUrl}?${dataAccessPath}`);
     }
 
     // Get the metadata
