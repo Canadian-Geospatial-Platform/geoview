@@ -264,6 +264,14 @@ export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseCla
      */
     getDataAccessPath(endsWithSlash?: boolean): string;
     /**
+     * Gets the original data access path before the proxy was applied.
+     *
+     * Falls back to the current data access path if no proxy has been set.
+     *
+     * @returns The data access path before proxy application
+     */
+    getDataAccessPathBeforeProxy(): string;
+    /**
      * Overrides the data access path using the value provided by metadata.
      *
      * If the metadata source does not define a data access path, no action is taken.
@@ -287,17 +295,32 @@ export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseCla
      */
     refreshMetadata(displayDateMode: DisplayDateMode): Promise<void>;
     /**
+     * Gets the proxy URL used for the layer's data access.
+     * GV Not to be confused with the layer processing function of the same name.
+     *
+     * @returns The proxy URL, or undefined if no proxy is being used
+     */
+    getProxyUrl(): string | undefined;
+    /**
+     * Sets the proxy URL to be used for the layer's data access.
+     * GV Not to be confused with the layer processing function of the same name.
+     *
+     * @param proxy - The proxy URL to set
+     */
+    setProxyUrl(proxy: string | undefined): void;
+    /**
      * Indicates whether the layer is using a proxy to connect to its service.
+     * GV Not to be confused with the layer processing function of the same name.
      *
      * @returns `true` if the layer is using a proxy; otherwise, `false`
      */
     getIsUsingProxy(): boolean;
     /**
-     * Sets whether the layer is using a proxy to connect to its service.
+     * Indicates whether the layer is using an ESRI proxy.
      *
-     * @param isUsingProxy - `true` if the layer is using a proxy; otherwise, `false`
+     * @returns `true` if the proxy URL matches the ESRI proxy pattern; otherwise, `false`
      */
-    setIsUsingProxy(isUsingProxy: boolean): void;
+    getIsUsingEsriProxy(): boolean;
     /**
      * Gets the source outfields from the source object.
      *

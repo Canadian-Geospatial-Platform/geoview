@@ -352,16 +352,22 @@ export declare abstract class ConfigBaseClass {
     setLayerStatusProcessed(): void;
     /**
      * Sets the layer status to loading.
+     *
+     * @param updateStatusParents - Indicate whether to update the status of parent layers as well.
      */
-    setLayerStatusLoading(): void;
+    setLayerStatusLoading(updateStatusParents: boolean): void;
     /**
      * Sets the layer status to loaded.
+     *
+     * @param updateStatusParents - Indicate whether to update the status of parent layers as well.
      */
-    setLayerStatusLoaded(): void;
+    setLayerStatusLoaded(updateStatusParents: boolean): void;
     /**
      * Sets the layer status to error.
+     *
+     * @param updateStatusParents - Indicate whether to update the status of parent layers as well.
      */
-    setLayerStatusError(): void;
+    setLayerStatusError(updateStatusParents: boolean): void;
     /**
      * Sets the layer status and emits an event when changed.
      *

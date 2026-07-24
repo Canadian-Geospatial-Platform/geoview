@@ -29,7 +29,8 @@ export declare abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer
      * The response is parsed and checked for service-level errors. If an error is found, an exception is thrown.
      *
      * @param url - The base URL to fetch the metadata from (e.g., ArcGIS REST endpoint).
-     * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata
+     * @param configProxyUrl - Proxy URL to use when necessary (not implemented yet..)
+     * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata (not implemented yet..)
      * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
      * @returns A promise resolving to the parsed JSON metadata response.
      * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
@@ -37,7 +38,7 @@ export declare abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer
      * @throws {ResponseError} When the response is not OK (non-2xx).
      * @throws {ResponseEmptyError} When the JSON response is empty.
      */
-    static fetchMetadata<T>(url: string, callbackNewMetadataUrl?: CallbackNewMetadataDelegate, abortSignal?: AbortSignal): Promise<T>;
+    static fetchMetadata<T>(url: string, configProxyUrl: string | undefined, callbackNewMetadataUrl?: CallbackNewMetadataDelegate, abortSignal?: AbortSignal): Promise<T>;
     /**
      * Throws a LayerServiceMetadataUnableToFetchError if the provided metadata has an error in its content.
      *

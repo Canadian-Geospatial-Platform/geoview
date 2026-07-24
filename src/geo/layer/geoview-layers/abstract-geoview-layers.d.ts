@@ -2,7 +2,7 @@ import type BaseLayer from 'ol/layer/Base';
 import type { Projection as OLProjection } from 'ol/proj';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import type { EventDelegateBase } from '@/api/events/event-helper';
-import type { DisplayDateMode } from '@/api/types/map-schema-types';
+import type { DisplayDateMode, TypeServiceUrls } from '@/api/types/map-schema-types';
 import type { TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeLayerStatus } from '@/api/types/layer-schema-types';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import type { SnackbarType } from '@/core/utils/notifications';
@@ -125,6 +125,52 @@ export declare abstract class AbstractGeoViewLayer {
      * @returns The geoview layer config
      */
     getGeoviewLayerConfig(): TypeGeoviewLayerConfig;
+    /**
+     * Gets the map-level service URLs configuration for this layer's map instance.
+     *
+     * @returns The service URLs configuration, or undefined if not set
+     */
+    getConfigServiceUrls(): TypeServiceUrls | undefined;
+    /**
+     * Sets the map-level service URLs configuration for this layer's map instance.
+     *
+     * @param serviceUrls - The service URLs configuration from the map features config
+     */
+    setConfigServiceUrls(serviceUrls: TypeServiceUrls): void;
+    /**
+     * Gets the proxy URL from the map-level service URLs configuration.
+     *
+     * @returns The proxy URL, or undefined if not configured
+     */
+    getConfigProxyUrl(): string | undefined;
+    /**
+     * Sets the proxy URL in the map-level service URLs configuration.
+     *
+     * @param configProxyUrl - The proxy URL to set, or undefined to clear it
+     */
+    setConfigProxyUrl(configProxyUrl: string | undefined): void;
+    /**
+     * Gets the proxy URL used for the layer's processing.
+     * GV Not to be confused with the layer entry config function of the same name.
+     *
+     *
+     * @returns The proxy URL, or undefined if no proxy is being used
+     */
+    getProxyUrl(): string | undefined;
+    /**
+     * Sets the proxy URL to be used for the layer's processing.
+     * GV Not to be confused with the layer entry config function of the same name.
+     *
+     * @param proxy - The proxy URL to set
+     */
+    setProxyUrl(proxy: string | undefined): void;
+    /**
+     * Indicates whether the layer is using a proxy to connect to its service.
+     * GV Not to be confused with the layer entry config function of the same name.
+     *
+     * @returns `true` if the layer is using a proxy; otherwise, `false`
+     */
+    getIsUsingProxy(): boolean;
     /**
      * Gets the Geoview layer id.
      *

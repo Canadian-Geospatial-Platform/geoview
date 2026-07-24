@@ -167,9 +167,10 @@ export declare class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig
      * 3. Modifying each generated entry to include the current WMS layer ID.
      * 4. Returning the first generated WFS layer configuration.
      *
+     * @param configProxyUrl - Proxy URL to use when necessary
      * @returns A promise that resolves with the first generated WFS layer entry configuration
      */
-    createGeoviewLayerConfigWfs(): Promise<OgcWfsLayerEntryConfig>;
+    createGeoviewLayerConfigWfs(configProxyUrl: string | undefined): Promise<OgcWfsLayerEntryConfig>;
     /**
      * Refreshes the layer metadata information by re-fetching the WMS GetCapabilities response and updating the layer configuration accordingly.
      *

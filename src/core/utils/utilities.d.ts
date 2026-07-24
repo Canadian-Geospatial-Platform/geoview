@@ -167,24 +167,41 @@ export declare function generateId(length?: 8 | 18 | 36): string;
  */
 export declare function isValidUUID(uuid: string): boolean;
 /**
- * Validates a URL's syntax and tests whether the server is reachable.
+ * Validates a URL's syntax and tests whether the server is reachable using a simple HEAD request
+ * with file extension probe fallback.
  *
  * Strategy:
  * 1. **HEAD → 2xx/3xx** → reachable, no proxy needed.
- * 2. **HEAD → 4xx/5xx** → server is alive but the bare path fails. Try OGC GetCapabilities
- *    directly (CORS was fine since HEAD got a response). If valid → reachable. Otherwise → not reachable.
- * 3. **HEAD → CORS** → server is alive but blocks cross-origin. Try OGC GetCapabilities
- *    through the proxy. If valid → reachable + needsProxy. Otherwise → not reachable.
+ * 2. **HEAD → 4xx/5xx** → try file extension probe. If valid → reachable. Otherwise → not reachable.
+ * 3. **HEAD → CORS** → try file extension probe through proxy. If valid → reachable + needsProxy. Otherwise → not reachable.
  * 4. **HEAD → network/timeout** → server unreachable.
+ *
+ * This function has no OGC/GetCapabilities knowledge. For OGC-aware validation, use `validateAndPingUrl`.
+ * The function never throws — all failures are returned as part of the result object.
+ *
+ * @param targetUrl - The URL to validate and ping
+ * @param configProxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
+ * @param timeoutMs - Optional request timeout in milliseconds (defaults to none)
+ * @returns A promise that resolves with a result object containing isValid, isReachable, needsProxy, status, and optional error
+ */
+export declare function validateAndPingUrl(targetUrl: string, configProxyUrl?: string, timeoutMs?: undefined): Promise<PingResult>;
+/**
+ * Validates a URL's syntax and tests whether the server is reachable, with OGC GetCapabilities fallback.
+ *
+ * Strategy:
+ * 1. Calls `pingUrl` for basic HEAD + file probe validation.
+ * 2. If HEAD returned 4xx/5xx (server alive but bare path fails), tries OGC GetCapabilities
+ *    directly (WMS/WFS/WMTS) since CORS was fine.
+ * 3. If HEAD returned CORS error, tries OGC GetCapabilities through the proxy.
  *
  * The function never throws — all failures are returned as part of the result object.
  *
  * @param targetUrl - The URL to validate and ping
- * @param proxyBase - Optional proxy server base URL (defaults to CONFIG_PROXY_URL)
+ * @param configProxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
  * @param timeoutMs - Optional request timeout in milliseconds (defaults to none)
  * @returns A promise that resolves with a result object containing isValid, isReachable, needsProxy, status, and optional error
  */
-export declare function validateAndPingUrl(targetUrl: string, proxyBase?: string, timeoutMs?: undefined): Promise<PingResult>;
+export declare function validateAndPingUrlOGC(targetUrl: string, configProxyUrl?: string, timeoutMs?: undefined): Promise<PingResult>;
 /**
  * Extracts the embedded color palette from a GeoTIFF file at the given URL.
  *
@@ -247,6 +264,17 @@ export declare function addUiComponent(targetDivId: string, component: React.Rea
  * @returns Sanitized HTML or empty string if all dirty
  */
 export declare function sanitizeHtmlContent(contentHtml: string): string;
+/**
+ * Checks if a string contains HTML tags using a lightweight regex pattern.
+ *
+ * This is a structural check that detects the presence of HTML elements,
+ * not a validation check. Use this when you need to decide whether to
+ * parse HTML content, avoiding redundant parsing operations.
+ *
+ * @param text - The string to check
+ * @returns True if the string contains HTML tags, false otherwise
+ */
+export declare function containsHtmlTags(text: string): boolean;
 /**
  * Enhances links accessibility by adding screen reader announcements for external links.
  *

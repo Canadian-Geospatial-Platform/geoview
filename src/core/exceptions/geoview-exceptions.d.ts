@@ -386,6 +386,17 @@ export declare class LayerImageFailedNoImageError extends GeoViewError {
     constructor(layerName: string);
 }
 /**
+ * Error thrown when a Tiled Layer fails to produce a tile on the map.
+ */
+export declare class LayerTileFailedToLoadError extends GeoViewError {
+    /**
+     * Creates an instance of LayerTileFailedToLoadError.
+     *
+     * @param layerName - The layer name of the layer tile that couldn't produce a tile
+     */
+    constructor(layerName: string, cause?: Error);
+}
+/**
  * Error thrown when there's no last query to perform.
  */
 export declare class LayerNoLastQueryToPerformError extends GeoViewError {
