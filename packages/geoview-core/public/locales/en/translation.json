@@ -56,7 +56,7 @@
     "zoomIn": "Zoom in",
     "zoomOut": "Zoom out",
     "scale": "Toggle between scale and resolution",
-    "cycleHint": "Click, press Enter/Space, or use arrow keys to cycle scale display mode",
+    "cycleHint": "Click, or press Enter/Space, to cycle scale display mode",
     "selectFormat": "Select scale format",
     "graphicScale": "graphic scale",
     "location": "Zoom to my location",
@@ -67,6 +67,10 @@
       "degrees": "Degrees",
       "reset": "Reset"
     },
+    "toggleMenu": "Toggle navigation menu",
+    "closeMenu": "Close navigation menu",
+    "expandGroup": "Expand {{groupName}} group",
+    "collapseGroup": "Collapse {{groupName}} group",
     "groups": {
       "generic": "Vertical button group for map navigation",
       "zoom": "Zoom and rotation controls",

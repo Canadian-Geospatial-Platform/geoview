@@ -36,6 +36,7 @@ import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import type { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import type { TypeHoverFeatureInfo } from './feature-info-state';
 import type { TypeMapStateForExportLayout } from '@/core/components/export/utilities';
+import { OVERVIEW_MAP_MIN_CONTAINER_WIDTH, OVERVIEW_MAP_MIN_CONTAINER_HEIGHT } from '@/core/utils/constant';
 
 // #region INTERFACE DEFINITION
 
@@ -811,13 +812,6 @@ export const useStoreMapScale = (): TypeScaleInfo => useStore(useGeoViewStore(),
 /** Selects the current zoom level from the store. */
 export const useStoreMapZoom = (): number => useStore(useGeoViewStore(), (state) => state.mapState.zoom);
 
-/** Selects whether the overview map should be visible based on the current zoom level and the hide-on-zoom setting from the store. */
-export const useStoreMapOverviewShouldBeVisible = (): boolean => {
-  const zoomLevel = useStoreMapZoom();
-  const hideOnZoom = useStoreMapOverviewMapHideZoom();
-  return hideOnZoom === 0 || zoomLevel > hideOnZoom;
-};
-
 // #endregion STATE GETTERS & HOOKS - OTHERS (no match between getter-hook)
 
 // #region STATE SELECTORS MAPCONFIG
@@ -869,6 +863,50 @@ export const getStoreMapConfigOverviewMap = (mapId: string): TypeOverviewMapProp
 
 /** Selects whether the overview map is enabled from the store. */
 export const useStoreMapOverviewMap = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.overviewMap);
+
+/**
+ * Computes whether the overview map should be visible based on config, map size, and zoom level.
+ *
+ * Internal helper to ensure consistent visibility logic between getter and hook.
+ *
+ * @param enabled - Whether the overview map is enabled in config
+ * @param size - The current map container size [width, height]
+ * @param zoom - The current zoom level
+ * @param hideOnZoom - The zoom threshold below which to hide (0 = always show)
+ * @returns True if all visibility criteria are met (config enabled, size threshold met, zoom level appropriate), false otherwise
+ */
+function computeOverviewVisibility(enabled: boolean, size: Size, zoom: number, hideOnZoom: number): boolean {
+  const [width, height] = size;
+  const meetsMinSize = width >= OVERVIEW_MAP_MIN_CONTAINER_WIDTH && height >= OVERVIEW_MAP_MIN_CONTAINER_HEIGHT;
+  const meetsZoomRequirement = hideOnZoom === 0 || zoom > hideOnZoom;
+  return enabled && meetsMinSize && meetsZoomRequirement;
+}
+
+/**
+ * Returns whether the overview map should be visible based on config, map size, and zoom level.
+ *
+ * @param mapId - The map identifier
+ * @returns True if all visibility criteria are met (config enabled, size threshold met, zoom level appropriate), false otherwise
+ */
+export const getStoreMapOverviewShouldBeVisible = (mapId: string): boolean => {
+  const mapState = getStoreMapState(mapId);
+  return computeOverviewVisibility(mapState.overviewMap, mapState.size, mapState.zoom, mapState.overviewMapHideZoom);
+};
+
+/**
+ * Selects whether the overview map should be visible based on config, map size, and zoom level.
+ *
+ * Combines three visibility criteria:
+ * - Config enabled: overview-map component is in the components array
+ * - Size threshold: map container meets minimum width and height
+ * - Zoom threshold: current zoom is above hideOnZoom setting (or hideOnZoom is 0)
+ */
+export const useStoreMapOverviewShouldBeVisible = (): boolean => {
+  return useStore(useGeoViewStore(), (state) => {
+    const { overviewMap, size, zoom, overviewMapHideZoom } = state.mapState;
+    return computeOverviewVisibility(overviewMap, size, zoom, overviewMapHideZoom);
+  });
+};
 
 /** Returns the enabled map components from the map config. */
 export const getStoreMapConfigComponents = (mapId: string): TypeValidMapComponentProps[] | undefined =>

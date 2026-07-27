@@ -1,12 +1,12 @@
-import { memo, useCallback, useMemo, useState } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
+
 import type { SxProps } from '@mui/material';
 
 import { Box } from '@/ui';
-
 import { Attribution } from '@/core/components/attribution/attribution';
 import { MousePosition } from '@/core/components/mouse-position/mouse-position';
 import { Scale } from '@/core/components/scale/scale';
@@ -14,7 +14,10 @@ import { MapInfoExpandButton } from './map-info-expand-button';
 import { MapInfoRotationButton } from './map-info-rotation-button';
 import { useStoreMapInteraction } from '@/core/stores/states/map-state';
 import { logger } from '@/core/utils/logger';
+import { MAP_INFO_HEIGHT_COLLAPSED, MAP_INFO_HEIGHT_EXPANDED } from '@/core/utils/constant';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
+import { useUIController } from '@/core/controllers/use-controllers';
+import { useStoreUIMapInfoExpanded } from '@/core/stores/states/ui-state';
 
 /** Base styles for the map info bar container. */
 const MAP_INFO_BASE_STYLES = {
@@ -26,10 +29,10 @@ const MAP_INFO_BASE_STYLES = {
   left: '50px',
   right: 0,
   px: '1rem',
+  overflowX: 'auto',
+  overflowY: 'hidden',
+  scrollbarWidth: 'thin',
 } as const;
-
-/** Flex spacer style for distributing map info items. */
-const FLEX_STYLE = { flexGrow: 1, height: '100%' };
 
 /** Props for the MapInfo component. */
 interface MapInfoProps {
@@ -57,9 +60,8 @@ export const MapInfo = memo(({ onScrollShellIntoView }: MapInfoProps): JSX.Eleme
   // Store
   const mapId = useStoreGeoViewMapId();
   const interaction = useStoreMapInteraction(); // Static map, do not display mouse position or rotation controls
-
-  // State
-  const [expanded, setExpanded] = useState(false);
+  const expanded = useStoreUIMapInfoExpanded();
+  const uiController = useUIController();
 
   /**
    * Computes the dynamic container styles for the map info bar.
@@ -68,13 +70,14 @@ export const MapInfo = memo(({ onScrollShellIntoView }: MapInfoProps): JSX.Eleme
     logger.logTraceUseMemo('MAP-INFO - memoContainerStyles', expanded);
     return {
       ...MAP_INFO_BASE_STYLES,
-      height: expanded ? '80px' : '40px',
-      borderBottom: `1px solid ${theme.palette.geoViewColor?.bgColor.dark[650]}`,
-      color: theme.palette.geoViewColor?.bgColor.dark[650],
-      backgroundColor: theme.palette.geoViewColor?.bgColor.dark[50],
+      scrollbarColor: `${theme.palette.geoViewColor?.primary.main ?? theme.palette.primary.main} transparent`,
+      height: expanded ? MAP_INFO_HEIGHT_EXPANDED : MAP_INFO_HEIGHT_COLLAPSED,
+      borderBottom: `1px solid ${theme.palette.geoViewColor?.bgColor.dark[650] ?? theme.palette.divider}`,
+      color: theme.palette.geoViewColor?.bgColor.dark[650] ?? theme.palette.text.primary,
+      backgroundColor: theme.palette.geoViewColor?.bgColor.dark[50] ?? theme.palette.background.paper,
       width: 'calc(100% - 50px)',
       zIndex: theme.zIndex.appBar + 100, // Above app-bar panels
-      boxShadow: `0 0 5px ${theme.palette.geoViewColor?.bgColor.dark[200]}`,
+      boxShadow: `0 0 5px ${theme.palette.geoViewColor?.bgColor.dark[200] ?? theme.palette.grey[300]}`,
     };
   }, [expanded, theme]);
 
@@ -97,9 +100,12 @@ export const MapInfo = memo(({ onScrollShellIntoView }: MapInfoProps): JSX.Eleme
   /**
    * Handles toggling the expanded state.
    */
-  const handleExpand = useCallback((value: boolean): void => {
-    setExpanded(value);
-  }, []);
+  const handleExpand = useCallback(
+    (value: boolean): void => {
+      uiController.setMapInfoExpanded(value);
+    },
+    [uiController]
+  );
 
   // #endregion Handlers
 
@@ -113,14 +119,14 @@ export const MapInfo = memo(({ onScrollShellIntoView }: MapInfoProps): JSX.Eleme
     >
       {interaction === 'dynamic' && <MapInfoExpandButton onExpand={handleExpand} expanded={expanded} />}
       <Attribution />
-      {interaction === 'dynamic' && (
-        <>
-          <div className={`${mapId}-mapInfo-flex`} style={FLEX_STYLE} />
+      {interaction === 'dynamic' ? (
+        <Box sx={{ marginLeft: 'auto', marginRight: 'auto', display: 'flex', gap: '6px', alignItems: 'center' }}>
           <MousePosition expanded={expanded} />
-        </>
+          <Scale expanded={expanded} />
+        </Box>
+      ) : (
+        <Scale expanded={expanded} />
       )}
-      <Scale expanded={expanded} />
-      <div className={`${mapId}-mapInfo-flex`} style={FLEX_STYLE} />
       {interaction === 'dynamic' && <MapInfoRotationButton />}
     </Box>
   );

@@ -40,6 +40,43 @@ export const OL_OVERVIEWMAP_SIZE = {
   height: '150px',
 };
 
+/** Visual separation margin between overview map and nav bar (in pixels). */
+export const OVERVIEW_MAP_NAV_BAR_MARGIN = 25;
+
+/** Visual separation margin between map info bar and nav bar (in pixels). */
+export const MAP_INFO_NAV_BAR_MARGIN = 15;
+
+/** Top spacing added to nav bar when overview map is visible (overview height + visual separation margin). */
+export const NAV_BAR_OVERVIEW_OFFSET = `calc(${OL_OVERVIEWMAP_SIZE.height} + ${OVERVIEW_MAP_NAV_BAR_MARGIN}px)`;
+
+/** Map info bar height when collapsed. */
+export const MAP_INFO_HEIGHT_COLLAPSED = '40px';
+
+/** Map info bar height when expanded. */
+export const MAP_INFO_HEIGHT_EXPANDED = '80px';
+
+/** Bottom spacing for nav bar when map info is collapsed (map-info height + margin). */
+export const NAV_BAR_BOTTOM_OFFSET = `calc(${MAP_INFO_HEIGHT_COLLAPSED} + ${MAP_INFO_NAV_BAR_MARGIN}px)`;
+
+/** Bottom spacing for nav bar when map info is expanded (expanded map-info height + margin). */
+export const NAV_BAR_BOTTOM_OFFSET_EXPANDED = `calc(${MAP_INFO_HEIGHT_EXPANDED} + ${MAP_INFO_NAV_BAR_MARGIN}px)`;
+
+/**
+ * Minimum map container width (in pixels) required to render overview map.
+ *
+ * Measured via ResizeObserver on the actual map container element (mapTargetElement), NOT the browser viewport.
+ */
+export const OVERVIEW_MAP_MIN_CONTAINER_WIDTH = 900;
+
+/**
+ * Minimum map container height (in pixels) required to render overview map.
+ *
+ * Measured via ResizeObserver on the actual map container element (mapTargetElement), NOT the browser viewport.
+ * Below this threshold, the overview map would crowd the interface vertically.
+ * Breakdown: overview map (150px) + info bar (40px or 80px) + Room for navBar and spacing (balance).
+ */
+export const OVERVIEW_MAP_MIN_CONTAINER_HEIGHT = 361;
+
 /** Layer lifecycle status values. */
 export const LAYER_STATUS = {
   NEW_INSTANCE: 'newInstance',

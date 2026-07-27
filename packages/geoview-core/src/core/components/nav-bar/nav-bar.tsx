@@ -1,16 +1,18 @@
-import { useRef, useState, useEffect, Fragment, useMemo, isValidElement } from 'react';
+import { useState, Fragment, useMemo, isValidElement } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
+import type { SxProps } from '@mui/material/styles';
 
 import { ButtonGroup, Box, IconButton } from '@/ui';
-import { ExpandLessIcon, ExpandMoreIcon } from '@/ui/icons';
+import { MoreVertIcon, MoreHorizIcon } from '@/ui/icons';
 import type { TypeButtonPanel } from '@/ui/panel/panel-types';
 import type { SxStyles } from '@/ui/style/types';
 import type { NavBarApi } from '@/core/components';
-import { useStoreUINavbarComponents, useStoreUINavBarButtonPanelVersion } from '@/core/stores/states/ui-state';
+import { useStoreUINavbarComponents, useStoreUINavBarButtonPanelVersion, useStoreUIMapInfoExpanded } from '@/core/stores/states/ui-state';
 import { useStoreAppDisplayLanguage } from '@/core/stores/states/app-state';
+import { useStoreMapOverviewShouldBeVisible } from '@/core/stores/states/map-state';
 import { logger } from '@/core/utils/logger';
 import BasemapSelect from './buttons/basemap-select';
 import Measurement from './buttons/measurement';
@@ -67,6 +69,8 @@ export function NavBar(props: NavBarProps): JSX.Element {
   const { t } = useTranslation();
   const theme = useTheme();
   const language = useStoreAppDisplayLanguage();
+  const overviewShouldBeVisible = useStoreMapOverviewShouldBeVisible();
+  const isMapInfoExpanded = useStoreUIMapInfoExpanded();
 
   /**
    * Memoizes style classes for the navbar component.
@@ -82,12 +86,8 @@ export function NavBar(props: NavBarProps): JSX.Element {
   const navBarComponents = useStoreUINavbarComponents();
   const navBarButtonPanelVersion = useStoreUINavBarButtonPanelVersion();
 
-  // Ref
-  const navBarRef = useRef<HTMLDivElement>(null);
-
   // State
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
-  const [maxButtonsPerColumn, setMaxButtonsPerColumn] = useState<number>(10);
 
   /**
    * Derives button panel groups from config and the NavBar API registry.
@@ -141,52 +141,6 @@ export function NavBar(props: NavBarProps): JSX.Element {
     return groups;
     // navBarButtonPanelVersion triggers re-computation when plugins add/remove button panels
   }, [navBarComponents, navBarButtonPanelVersion, navBarApi.buttons]);
-
-  /**
-   * Calculates and updates the maximum buttons per column based on available height.
-   */
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('NAV-BAR - calculate max buttons per column');
-
-    const calculateMaxButtons = (): void => {
-      if (!navBarRef.current) return;
-
-      const mapContainer = navBarRef.current.parentElement;
-      if (!mapContainer) return;
-
-      const mapHeight = mapContainer.clientHeight;
-      const overviewMapSpace = 167; // 150px + 6px margin top + 6px margin bottom + 5px from top
-      const infoBarHeight = 40; // Map info bar at bottom
-      const navbarPadding = 12; // 6px top + 6px bottom
-      const buttonGroupGap = 15; // Gap between button groups
-
-      const availableHeight = mapHeight - overviewMapSpace - infoBarHeight - navbarPadding - buttonGroupGap;
-
-      const buttonHeight = 44; // Each button is 44px
-      const maxButtons = Math.floor(availableHeight / buttonHeight);
-
-      // Set minimum of 3 buttons per column to avoid too many columns
-      setMaxButtonsPerColumn(Math.max(3, maxButtons));
-    };
-
-    // Calculate on mount
-    calculateMaxButtons();
-
-    // Watch for resize
-    const resizeObserver = new ResizeObserver(() => {
-      calculateMaxButtons();
-    });
-
-    const mapContainer = navBarRef.current?.parentElement;
-    if (mapContainer) {
-      resizeObserver.observe(mapContainer);
-    }
-
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, []);
 
   /**
    * Renders a single button panel or default button.
@@ -263,8 +217,8 @@ export function NavBar(props: NavBarProps): JSX.Element {
     // Determine which buttons to show
     const visibleButtonKeys = needsExpansion && !isExpanded ? buttonKeys.slice(0, threshold) : buttonKeys;
 
-    // Use dynamic maxButtonsPerColumn from state instead of config
-    const buttonsPerColumn = maxButtonsPerColumn;
+    // Single column layout - all visible buttons in one column
+    const buttonsPerColumn = visibleButtonKeys.length;
 
     // Split buttons into columns
     const columns: string[][] = [];
@@ -295,7 +249,7 @@ export function NavBar(props: NavBarProps): JSX.Element {
             key={`${groupName}-column-${columnIndex}`}
             aria-label={groupDisplayName}
             variant="contained"
-            sx={memoSxClasses.navBtnGroup}
+            sx={[memoSxClasses.navBtnGroup, memoSxClasses.navBtnGroupMultiColumn] as SxProps}
             orientation="vertical"
           >
             {columnKeys.map((buttonPanelKey) => {
@@ -307,12 +261,16 @@ export function NavBar(props: NavBarProps): JSX.Element {
             {needsExpansion && columnIndex === columns.length - 1 && (
               <IconButton
                 key={`expand-${groupName}`}
-                aria-label={isExpanded ? t('general.close') : t('general.open')}
+                aria-label={
+                  isExpanded
+                    ? t('mapnav.collapseGroup', { groupName: groupDisplayName })
+                    : t('mapnav.expandGroup', { groupName: groupDisplayName })
+                }
                 tooltipPlacement="left"
                 sx={memoSxClasses.navButton}
                 onClick={toggleExpansion}
               >
-                {isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                {isExpanded ? <MoreHorizIcon /> : <MoreVertIcon />}
               </IconButton>
             )}
           </ButtonGroup>
@@ -322,8 +280,19 @@ export function NavBar(props: NavBarProps): JSX.Element {
   }
 
   return (
-    <Box ref={navBarRef} sx={memoSxClasses.navBarRef} role="toolbar" aria-label={t('mapnav.ariarole')}>
-      {[...Object.keys(memoButtonPanelGroups)].map((key) => renderButtonPanelGroup(memoButtonPanelGroups[key], key))}
+    <Box
+      role="group"
+      aria-label={t('mapnav.ariarole')}
+      sx={
+        [
+          memoSxClasses.navBarContainer,
+          overviewShouldBeVisible && memoSxClasses.navBarContainerWithOverview,
+          memoSxClasses.navBarContainerMultiColumn,
+          isMapInfoExpanded && memoSxClasses.navBarContainerWithExpandedMapInfo,
+        ] as SxProps
+      }
+    >
+      {Object.keys(memoButtonPanelGroups).map((key) => renderButtonPanelGroup(memoButtonPanelGroups[key], key))}
     </Box>
   );
 }

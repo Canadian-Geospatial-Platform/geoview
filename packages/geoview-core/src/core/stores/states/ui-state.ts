@@ -65,6 +65,9 @@ export interface IUIState {
   /** The current resize value (percentage) for the footer panel. */
   footerPanelResizeValue: number;
 
+  /** Whether the map info bar is expanded (dynamic mode only). */
+  mapInfoExpanded: boolean;
+
   /** Sets default UI configuration values from the map features config. */
   setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
 
@@ -108,6 +111,9 @@ export interface IUIState {
 
     /** Increments the nav-bar button panel version to trigger a re-render. */
     bumpNavBarButtonPanelVersion: () => void;
+
+    /** Sets the map info bar expanded state. */
+    setMapInfoExpanded: (expanded: boolean) => void;
   };
 }
 
@@ -137,6 +143,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
     footerTabs: [],
     appBarPanelIds: [],
     footerPanelResizeValue: 35,
+    mapInfoExpanded: false,
 
     // initialize default stores section from config information when store receive configuration file
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig): void => {
@@ -268,7 +275,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
        *
        * @param value - The resize value
        */
-      setFooterPanelResizeValue: (value): void => {
+      setFooterPanelResizeValue: (value: number): void => {
         set({
           uiState: {
             ...get().uiState,
@@ -377,6 +384,20 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
           uiState: {
             ...get().uiState,
             navBarButtonPanelVersion: get().uiState.navBarButtonPanelVersion + 1,
+          },
+        });
+      },
+
+      /**
+       * Sets the map info bar expanded state.
+       *
+       * @param expanded - Whether the map info bar is expanded
+       */
+      setMapInfoExpanded: (expanded: boolean): void => {
+        set({
+          uiState: {
+            ...get().uiState,
+            mapInfoExpanded: expanded,
           },
         });
       },
@@ -541,6 +562,17 @@ export const useStoreUIFooterPanelResizeValue = (): number => useStore(useGeoVie
 /** Hooks the list of hidden tab identifiers. */
 export const useStoreUIHiddenTabs = (): string[] => useStore(useGeoViewStore(), (state) => state.uiState.hiddenTabs);
 
+/**
+ * Gets the map info bar expanded state from the store.
+ *
+ * @param mapId - The map identifier
+ * @returns Whether the map info bar is expanded
+ */
+export const getStoreUIMapInfoExpanded = (mapId: string): boolean => getStoreUIState(mapId).mapInfoExpanded;
+
+/** Hooks the map info bar expanded state. */
+export const useStoreUIMapInfoExpanded = (): boolean => useStore(useGeoViewStore(), (state) => state.uiState.mapInfoExpanded);
+
 // #endregion STATE GETTERS & HOOKS
 
 // #region STATE ADAPTORS
@@ -618,6 +650,16 @@ export const setStoreUIActiveTrapGeoView = (mapId: string, active: boolean): voi
  */
 export const setStoreUIFooterPanelResizeValue = (mapId: string, value: number): void => {
   getStoreUIState(mapId).actions.setFooterPanelResizeValue(value);
+};
+
+/**
+ * Sets the map info bar expanded state.
+ *
+ * @param mapId - The map identifier
+ * @param expanded - Whether the map info bar is expanded
+ */
+export const setStoreUIMapInfoExpanded = (mapId: string, expanded: boolean): void => {
+  getStoreUIState(mapId).actions.setMapInfoExpanded(expanded);
 };
 
 /**

@@ -2,23 +2,23 @@ import { useEffect, useRef } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
-import { Box, useMediaQuery } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
-
-import { ProgressBar } from '@/ui';
-
+import { Box, ProgressBar } from '@/ui';
 import { NorthArrow, NorthPoleFlag } from '@/core/components/north-arrow/north-arrow';
 import { Crosshair } from '@/core/components/crosshair/crosshair';
 import { OverviewMap } from '@/core/components/overview-map/overview-map';
 import { ClickMarker } from '@/core/components/click-marker/click-marker';
 import { HoverTooltip } from '@/core/components/hover-tooltip/hover-tooltip';
-
 import type { MapViewer } from '@/geo/map/map-viewer';
-
 import { getSxClasses } from './map-style';
-import { useStoreMapInteraction, useStoreMapLoaded, useStoreMapNorthArrow, useStoreMapOverviewMap } from '@/core/stores/states/map-state';
+import {
+  useStoreMapInteraction,
+  useStoreMapLoaded,
+  useStoreMapNorthArrow,
+  useStoreMapOverviewShouldBeVisible,
+} from '@/core/stores/states/map-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
+
 import { useStoreLayerAreLayersLoading } from '@/core/stores/states/layer-state';
 import { getStoreAppIsCrosshairsActive, useStoreAppGeoviewHTMLElement } from '@/core/stores/states/app-state';
 import { useUIController } from '@/core/controllers/use-controllers';
@@ -45,15 +45,12 @@ export function Map(props: MapProps): JSX.Element {
   const { viewer } = props;
   const { t } = useTranslation();
 
-  const defaultTheme = useTheme();
-
   // internal state - get ref to div element
   const mapElement = useRef<HTMLElement>(null);
-  const deviceSizeMedUp = useMediaQuery(defaultTheme.breakpoints.up('md')); // if screen size is medium and up
 
   // get values from the store
   const mapId = useStoreGeoViewMapId();
-  const overviewMap = useStoreMapOverviewMap();
+  const overviewShouldBeVisible = useStoreMapOverviewShouldBeVisible();
   const northArrow = useStoreMapNorthArrow();
   const mapLoaded = useStoreMapLoaded();
   const mapInteraction = useStoreMapInteraction();
@@ -79,6 +76,7 @@ export function Map(props: MapProps): JSX.Element {
       // Create map
       viewer.createMap(mapElement.current);
     }
+    // NOTE: `viewer` is included for React exhaustive-deps compliance but does not change during component lifetime.
   }, [viewer]);
 
   /**
@@ -139,7 +137,7 @@ export function Map(props: MapProps): JSX.Element {
           <Crosshair mapTargetElement={mapElement.current!} />
           <ClickMarker />
           <HoverTooltip />
-          {deviceSizeMedUp && overviewMap && viewer.map && <OverviewMap i18n={viewer.getI18nInstance()} />}
+          {overviewShouldBeVisible && viewer.map && <OverviewMap i18n={viewer.getI18nInstance()} />}
         </>
       )}
       {layersAreLoading && (

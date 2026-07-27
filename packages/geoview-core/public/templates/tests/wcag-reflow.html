@@ -26,7 +26,7 @@
 
     <!-- Test 1: Short Height -->
     <div class="map-section">
-      <h3>1. Short Map Height (Forces appBar Scrolling)</h3>
+      <h3>1. Short Map Height, Full navBar</h3>
       <p>200px height forces scrollbar with moderate button count</p>
       <div
         id="map1"
@@ -51,7 +51,7 @@
       ></div>
     </div>
 
-    <!-- Test 2: Minimal AppBar -->
+    <!-- Test 2: Minimal appBar, full NavBar, static mapInfo -->
     <div class="map-section">
       <h3>2. Minimal AppBar (No Scrolling)</h3>
       <p>Just 2 buttons - no scrolling needed</p>
@@ -61,6 +61,7 @@
         data-lang="en"
         data-config="{
           'map': {
+            'interaction': 'static',
             'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
             'basemapOptions': { 'basemapId': 'transport', 'shaded': false, 'labeled': true },
             'listOfGeoviewLayerConfig': []
@@ -120,7 +121,12 @@
             'listOfGeoviewLayerConfig': []
           },
           'appBar': { 'tabs': { 'core': [] } },
-          'theme': 'geo.ca'
+          'navBar': ['zoom', 'rotation', 'fullscreen', 'home', 'location', 'basemap-select', 'measurement', 'projection', 'drawer'],
+          'theme': 'geo.ca',
+          'components': ['overview-map', 'north-arrow'],
+          'overviewMap': {
+            'hideOnZoom': 3
+          }
         }"
         style="height: 600px;"
       ></div>
