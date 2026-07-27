@@ -70,6 +70,7 @@ export interface IMapState {
   northArrowElement: TypeNorthArrow;
   overviewMap: boolean;
   overviewMapHideZoom: number;
+  overviewMapVisible: boolean;
   pointerPosition?: TypeMapMouseInfo;
   pointMarkers: Record<string, TypePointMarker[]>;
   rotation: number;
@@ -111,6 +112,7 @@ export interface IMapState {
     setHighlightedFeatures: (highlightedFeatures: TypeFeatureInfoEntry[]) => void;
     setClickMarker: (coord: number[] | undefined) => void;
     setHoverFeatureInfo: (hoverFeatureInfo: TypeHoverFeatureInfo) => void;
+    setOverviewMapVisible: (visible: boolean) => void;
   };
 }
 
@@ -152,6 +154,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
     northArrowElement: { degreeRotation: 180.0, isNorthVisible: true },
     overviewMap: false,
     overviewMapHideZoom: 0,
+    overviewMapVisible: false,
     pointerPosition: undefined,
     pointMarkers: {},
     rotation: 0,
@@ -197,6 +200,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
           northArrow: geoviewConfig.components!.indexOf('north-arrow') >= 0 || false, // Was defaulted so can use '!'
           overviewMap: geoviewConfig.components!.indexOf('overview-map') >= 0 || false, // Was defaulted so can use '!'
           overviewMapHideZoom: geoviewConfig.overviewMap?.hideOnZoom ?? 0,
+          overviewMapVisible: false, // Will be set by Map component based on container size + config
           pointMarkers: geoviewConfig.map.overlayObjects?.pointMarkers ?? {},
           rotation: geoviewConfig.map.viewSettings.rotation ?? 0,
           zoom: geoviewConfig.map.viewSettings.initialView?.zoomAndCenter?.[0] ?? 4.5,
@@ -555,6 +559,20 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
           },
         });
       },
+
+      /**
+       * Sets the runtime visibility of the overview map.
+       *
+       * @param visible - Whether the overview map is currently visible
+       */
+      setOverviewMapVisible: (visible: boolean): void => {
+        set({
+          mapState: {
+            ...get().mapState,
+            overviewMapVisible: visible,
+          },
+        });
+      },
     },
   } as IMapState;
 
@@ -805,6 +823,12 @@ export const useStoreMapNorthArrowElement = (): TypeNorthArrow => useStore(useGe
 /** Selects the zoom level at which the overview map hides from the store. */
 export const useStoreMapOverviewMapHideZoom = (): number => useStore(useGeoViewStore(), (state) => state.mapState.overviewMapHideZoom);
 
+/** Returns the runtime visibility of the overview map for the given map. */
+export const getStoreMapOverviewMapVisible = (mapId: string): boolean => getStoreMapState(mapId).overviewMapVisible;
+
+/** Selects the runtime visibility of the overview map from the store. */
+export const useStoreMapOverviewMapVisible = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.overviewMapVisible);
+
 /** Selects the map scale information from the store. */
 export const useStoreMapScale = (): TypeScaleInfo => useStore(useGeoViewStore(), (state) => state.mapState.scale);
 
@@ -869,6 +893,16 @@ export const getStoreMapConfigOverviewMap = (mapId: string): TypeOverviewMapProp
 
 /** Selects whether the overview map is enabled from the store. */
 export const useStoreMapOverviewMap = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.overviewMap);
+
+/**
+ * Sets the runtime visibility of the overview map.
+ *
+ * @param mapId - The map identifier
+ * @param visible - Whether the overview map is currently visible
+ */
+export const setStoreMapOverviewMapVisible = (mapId: string, visible: boolean): void => {
+  getStoreMapState(mapId).actions.setOverviewMapVisible(visible);
+};
 
 /** Returns the enabled map components from the map config. */
 export const getStoreMapConfigComponents = (mapId: string): TypeValidMapComponentProps[] | undefined =>

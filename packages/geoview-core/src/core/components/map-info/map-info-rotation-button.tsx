@@ -11,8 +11,6 @@ import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 /**
  * Creates the map information rotation indicator component.
  *
- * Memoized to prevent re-renders since this component has no props.
- *
  * @returns The rotation indicator
  */
 export function MapInfoRotationButton(): JSX.Element {

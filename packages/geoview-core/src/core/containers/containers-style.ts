@@ -97,6 +97,8 @@ export const getShellSxClasses = (theme: Theme, appHeight: number): SxStyles => 
     position: 'relative',
     alignItems: 'stretch',
     zIndex: 0,
+    containerType: 'size',
+    containerName: 'map',
   },
   mapContainer: {
     display: 'flex',
