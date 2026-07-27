@@ -1431,19 +1431,6 @@ export class GVWMS extends AbstractGVRaster {
       abortController
     );
 
-    // TODO: CHECK - The serviceexceptionreport stuff here is related to the Esri proxy which respond with such a payload
-    // TO.DOCONT: Could probably be removed once we've completely migrated to the new proxy
-
-    // Check if the response is a WMS ServiceException XML
-    const parser = new DOMParser();
-    const xmlTestDoc = parser.parseFromString(responseData, MIME_TYPE_FORMAT_APP_XML);
-    if (
-      xmlTestDoc.documentElement?.localName?.toLowerCase() === 'serviceexceptionreport' ||
-      xmlTestDoc.documentElement?.localName?.toLowerCase() === 'serviceexception'
-    ) {
-      throw new LayerInvalidFeatureInfoFormatWMSError(layerConfig.layerPath, MIME_TYPE_FORMAT_HTML, layerConfig.getLayerNameCascade());
-    }
-
     // Read the response as html
     const xmlDomResponse = new DOMParser().parseFromString(responseData, MIME_TYPE_FORMAT_HTML);
 
@@ -1530,7 +1517,7 @@ export class GVWMS extends AbstractGVRaster {
    * @throws {LayerInvalidFeatureInfoFormatWMSError} When the GetFeatureInfo URL could not be constructed,
    *         which likely indicates the info format is unsupported or the layer is misconfigured.
    */
-  static #fetchFeatureInfo(
+  static async #fetchFeatureInfo(
     layerConfig: OgcWmsLayerEntryConfig,
     wmsSource: ImageWMS,
     clickCoordinate: Coordinate,
@@ -1565,7 +1552,14 @@ export class GVWMS extends AbstractGVRaster {
       featureInfoUrl = layerConfig.getUrlWithProxyWhenNeeded(featureInfoUrl);
 
       // Get the response data as text
-      return Fetch.fetchText(featureInfoUrl, { signal: abortController?.signal });
+      const responseData = await Fetch.fetchText(featureInfoUrl, { signal: abortController?.signal });
+
+      // TODO: CHECK - The serviceexceptionreport stuff here is related to the Esri proxy which respond with such a payload
+      // TO.DOCONT: Could probably be removed once we've completely migrated to the new proxy
+      GeoUtilities.validateEsriProxyErrorXML(responseData);
+
+      // Return the response
+      return responseData;
     }
 
     // Error

@@ -406,7 +406,7 @@ export class ConfigApi {
     const stylesUrl = GeoUtilities.ensureServiceRequestUrlGetStyles(wmsUrl, layers);
 
     // Redirect
-    return GeoUtilities.fetchServiceUrl(stylesUrl, configProxyUrl);
+    return GeoUtilities.fetchServiceUrlWithProxyFallback(stylesUrl, configProxyUrl);
   }
 
   /**

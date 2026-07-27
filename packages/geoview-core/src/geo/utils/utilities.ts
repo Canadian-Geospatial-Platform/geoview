@@ -15,7 +15,7 @@ import { LineString, Point, Polygon } from 'ol/geom';
 import type { Coordinate } from 'ol/coordinate';
 import GML3 from 'ol/format/GML3';
 
-import { CONST_LAYER_TYPES, validVectorLayerLegendTypes } from '@/api/types/layer-schema-types';
+import { CONST_LAYER_TYPES, MIME_TYPE_FORMAT_APP_XML, validVectorLayerLegendTypes } from '@/api/types/layer-schema-types';
 import {
   CONFIG_PROXY_URL,
   type TypeMapMouseInfo,
@@ -289,13 +289,13 @@ export abstract class GeoUtilities {
     const capUrl = this.ensureServiceRequestUrlGetCapabilities(url, 'WMS', layers);
 
     // Redirect
-    const metadataRaw = await this.fetchServiceUrl(capUrl, configProxyUrl, callbackNewMetadataUrl, abortSignal);
+    const metadataRaw = await this.fetchServiceUrlWithProxyFallback(capUrl, configProxyUrl, callbackNewMetadataUrl, abortSignal);
 
     // Parse it and return
     const metadataParsed = parseXMLToJson<TypeMetadataWMS>(metadataRaw);
 
     // Because of the Esri proxy returning an embedded error on a ok response instead of failing, we have to check it here
-    this.#validateEsriProxyError(metadataParsed);
+    this.validateEsriProxyError(metadataParsed);
 
     // Result to be returned
     let metadataResult = findPropertyByRegexPath<TypeMetadataWMSCapabilities>(metadataParsed, /WMS_Capabilities/);
@@ -347,13 +347,13 @@ export abstract class GeoUtilities {
     const capUrl = this.ensureServiceRequestUrlGetCapabilities(url, 'WFS');
 
     // Redirect
-    const metadataRaw = await this.fetchServiceUrl(capUrl, configProxyUrl, callbackNewMetadataUrl, abortSignal);
+    const metadataRaw = await this.fetchServiceUrlWithProxyFallback(capUrl, configProxyUrl, callbackNewMetadataUrl, abortSignal);
 
     // Parse it and return
     const metadataParsed = parseXMLToJson<TypeMetadataWFS>(metadataRaw);
 
     // Because of the Esri proxy returning an embedded error on a ok response instead of failing, we have to check it here
-    this.#validateEsriProxyError(metadataParsed);
+    this.validateEsriProxyError(metadataParsed);
 
     // Result to be returned
     let metadataResult = findPropertyByRegexPath<TypeMetadataWFSCapabilities>(metadataParsed, /WFS_Capabilities/);
@@ -396,13 +396,13 @@ export abstract class GeoUtilities {
     const capUrl = this.ensureServiceRequestUrlGetCapabilities(url, 'WMTS', layers);
 
     // Redirect
-    const metadataRaw = await this.fetchServiceUrl(capUrl, configProxyUrl, callbackNewMetadataUrl, abortSignal);
+    const metadataRaw = await this.fetchServiceUrlWithProxyFallback(capUrl, configProxyUrl, callbackNewMetadataUrl, abortSignal);
 
     // Parse it and return
     const metadataParsed = parseXMLToJson<TypeMetadataWMTS>(metadataRaw);
 
     // Because of the Esri proxy returning an embedded error on a ok response instead of failing, we have to check it here
-    this.#validateEsriProxyError(metadataParsed);
+    this.validateEsriProxyError(metadataParsed);
 
     // Result to be returned
     let metadataResult = findPropertyByRegexPath<TypeMetadataWMTSCapabilities>(metadataParsed, /Capabilities/);
@@ -433,7 +433,7 @@ export abstract class GeoUtilities {
    * @throws {ResponseEmptyError} When the JSON response is empty
    * @throws {NetworkError} When a network issue happened
    */
-  static async fetchServiceUrl(
+  static async fetchServiceUrlWithProxyFallback(
     url: string,
     configProxyUrl: string = CONFIG_PROXY_URL,
     callbackNewMetadataUrl?: CallbackNewMetadataDelegate,
@@ -546,10 +546,31 @@ export abstract class GeoUtilities {
    * @throws {NetworkError} When the Esri proxy returned an error
    * @deprecated The Esri proxy should be eventually completely replaced via the default configuration. Once it's gone, this can be removed for cleanup.
    */
-  static #validateEsriProxyError<T extends TypeMetadataWMS | TypeMetadataWMTS | TypeMetadataWFS>(metadataParsed: T | undefined): void {
+  static validateEsriProxyError<T extends TypeMetadataWMS | TypeMetadataWMTS | TypeMetadataWFS>(metadataParsed: T | undefined): void {
     // TODO: CHECK - The serviceexceptionreport stuff here is related to the Esri proxy which respond with such a payload
     // TO.DOCONT: Could probably be removed once we've completely migrated to the new proxy
     if (metadataParsed?.ServiceExceptionReport) throw new NetworkError('The Esri proxy returned an error with the underlying url.', '500');
+  }
+
+  /**
+   * Validates the Esri proxy error in the parsed metadata.
+   *
+   * @param metadataParsed - The parsed metadata object
+   * @throws {NetworkError} When the Esri proxy returned an error
+   * @deprecated The Esri proxy should be eventually completely replaced via the default configuration. Once it's gone, this can be removed for cleanup.
+   */
+  static validateEsriProxyErrorXML(metadataXML: string): void {
+    // TODO: CHECK - The serviceexceptionreport stuff here is related to the Esri proxy which respond with such a payload
+    // TO.DOCONT: Could probably be removed once we've completely migrated to the new proxy
+    // Check if the response is a WMS ServiceException XML
+    const parser = new DOMParser();
+    const xmlTestDoc = parser.parseFromString(metadataXML, MIME_TYPE_FORMAT_APP_XML);
+    if (
+      xmlTestDoc.documentElement?.localName?.toLowerCase() === 'serviceexceptionreport' ||
+      xmlTestDoc.documentElement?.localName?.toLowerCase() === 'serviceexception'
+    ) {
+      throw new NetworkError('The Esri proxy returned an error with the underlying url.', '500');
+    }
   }
 
   /**

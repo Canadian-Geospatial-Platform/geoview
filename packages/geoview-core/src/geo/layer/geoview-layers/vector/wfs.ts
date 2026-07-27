@@ -701,8 +701,8 @@ export class WFS extends AbstractGeoViewVector {
    */
   static async fetchWithFormatFallback<T>(
     layerConfig: OgcWfsLayerEntryConfig,
-    parseFnJSON: (url: string) => Promise<T>,
-    parseFnFallback: (url: string) => Promise<T>,
+    queryFnJSON: (url: string) => Promise<T>,
+    queryFnFallback: (url: string) => Promise<T>,
     bboxExtent?: string,
     outfields?: TypeOutfields[],
     filter?: string,
@@ -712,13 +712,13 @@ export class WFS extends AbstractGeoViewVector {
 
     // Ordered list of formats to try, from most preferred to least preferred.
     // Each entry maps a MIME type to the parse function to use for that format.
-    const formatCandidates: { format: string; parseFn: (url: string) => Promise<T> }[] = [
-      { format: MIME_TYPE_FORMAT_JSON, parseFn: parseFnJSON },
-      { format: MIME_TYPE_FORMAT_GML_XML_32, parseFn: parseFnFallback },
-      { format: MIME_TYPE_FORMAT_TEXT_XML_GML_321, parseFn: parseFnFallback },
-      { format: MIME_TYPE_FORMAT_TEXT_XML_GML_311, parseFn: parseFnFallback },
-      { format: MIME_TYPE_FORMAT_TEXT_XML_GML_212, parseFn: parseFnFallback },
-      { format: MIME_TYPE_FORMAT_TEXT_XML, parseFn: parseFnFallback },
+    const formatCandidates: { format: string; queryFn: (url: string) => Promise<T> }[] = [
+      { format: MIME_TYPE_FORMAT_JSON, queryFn: queryFnJSON },
+      { format: MIME_TYPE_FORMAT_GML_XML_32, queryFn: queryFnFallback },
+      { format: MIME_TYPE_FORMAT_TEXT_XML_GML_321, queryFn: queryFnFallback },
+      { format: MIME_TYPE_FORMAT_TEXT_XML_GML_311, queryFn: queryFnFallback },
+      { format: MIME_TYPE_FORMAT_TEXT_XML_GML_212, queryFn: queryFnFallback },
+      { format: MIME_TYPE_FORMAT_TEXT_XML, queryFn: queryFnFallback },
     ];
 
     // Try each format candidate in order
@@ -733,7 +733,7 @@ export class WFS extends AbstractGeoViewVector {
 
           // GV Here, we do want to await in the loop, because we want to know if the fetch/parse succeeded before looping to the next format request.
           // eslint-disable-next-line no-await-in-loop
-          result = await candidate.parseFn(url);
+          result = await candidate.queryFn(url);
 
           // If the fetch/parse succeeded, return right away
           if (result) return result;
@@ -750,7 +750,7 @@ export class WFS extends AbstractGeoViewVector {
     if (!result) {
       try {
         const url = WFS.#buildGetFeatureUrl(layerConfig, '', bboxExtent, outfields, filter, srsName);
-        result = await parseFnFallback(url);
+        result = await queryFnFallback(url);
       } catch (error: unknown) {
         GeoViewError.logErrorThrowIfAborted(
           error,
