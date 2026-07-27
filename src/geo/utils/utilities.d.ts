@@ -10,11 +10,11 @@ import { XYZ } from 'ol/source';
 import TileLayer from 'ol/layer/Tile';
 import { Polygon } from 'ol/geom';
 import type { Coordinate } from 'ol/coordinate';
-import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
-import type { TypeMapMouseInfo, TypeOutfields, TypeStyleGeometry, TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
-import type { TypeGeoviewLayerType, TypeLegend, TypeMetadataWMS, TypeOGCService, TypeStylesWMS, TypeVectorLayerStyles } from '@/api/types/layer-schema-types';
+import { type TypeMapMouseInfo, type TypeOutfields, type TypeStyleGeometry, type TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
 import type { TypeMetadataWMTS } from '@/api/config/validation-classes/raster-validation-classes/ogc-wmts-layer-entry-config';
+import type { TypeGeoviewLayerType, TypeLegend, TypeMetadataWFS, TypeMetadataWMS, TypeOGCService, TypeStylesWMS, TypeVectorLayerStyles } from '@/api/types/layer-schema-types';
 import type { TypeLegendItem, TypeLegendLayerItem } from '@/core/components/layers/types';
+import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 export declare const layerTypes: Record<"CSV" | "KML" | "WKB" | "ESRI_DYNAMIC" | "ESRI_FEATURE" | "ESRI_IMAGE" | "IMAGE_STATIC" | "GEOJSON" | "GEOTIFF" | "XYZ_TILES" | "VECTOR_TILES" | "OGC_FEATURE" | "WFS" | "WMS" | "WMTS", TypeGeoviewLayerType>;
 interface EsriJSONReadResult {
     features: Feature<Geometry>[];
@@ -23,8 +23,13 @@ interface EsriJSONReadResult {
 }
 export declare abstract class GeoUtilities {
     #private;
-    /** Whether to double encode the layers when behind a proxy */
-    static readonly DOUBLE_ENCODING_LAYERS_WHEN_BEHIND_PROXY = true;
+    /**
+     * Checks if the provided proxy URL is an Esri proxy.
+     *
+     * @param proxyUrl - The proxy URL to check
+     * @returns `true` if the proxy URL includes "executeFromProxy", indicating an Esri proxy; otherwise, `false`.
+     */
+    static isEsriProxy(proxyUrl: string | undefined): boolean;
     /**
      * Extracts the base URL (origin + pathname) from a full URL string,
      * removing any query parameters, hash fragments, or authentication data.
@@ -120,6 +125,7 @@ export declare abstract class GeoUtilities {
      * Fetch the json response from the XML response of a WMS getCapabilities request.
      *
      * @param url - The url the url of the WMS server
+     * @param configProxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
      * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
      * The parameter sent in the callback is the proxy prefix with the '?' at the end.
      * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
@@ -130,11 +136,12 @@ export declare abstract class GeoUtilities {
      * @throws {ResponseEmptyError} When the JSON response is empty
      * @throws {NetworkError} When a network issue happened
      */
-    static getWMSServiceString(url: string, callbackNewMetadataUrl?: CallbackNewMetadataDelegate, abortSignal?: AbortSignal): Promise<string>;
+    static getWMSServiceString(url: string, configProxyUrl?: string, callbackNewMetadataUrl?: CallbackNewMetadataDelegate, abortSignal?: AbortSignal): Promise<string>;
     /**
      * Fetch the json response from the XML response of a WMS getCapabilities request.
      *
      * @param url - The url the url of the WMS server
+     * @param configProxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
      * @param layers - The layers to query separate by
      * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
      * The parameter sent in the callback is the proxy prefix with the '?' at the end.
@@ -146,12 +153,29 @@ export declare abstract class GeoUtilities {
      * @throws {ResponseEmptyError} When the JSON response is empty
      * @throws {NetworkError} When a network issue happened
      */
-    static getWMSServiceMetadata(url: string, layers?: string, callbackNewMetadataUrl?: CallbackNewMetadataDelegate, abortSignal?: AbortSignal): Promise<TypeMetadataWMS>;
+    static getWMSServiceMetadata(url: string, configProxyUrl?: string, layers?: string, callbackNewMetadataUrl?: CallbackNewMetadataDelegate, abortSignal?: AbortSignal): Promise<TypeMetadataWMS>;
     /**
-     * Fetch the json response from the XML response of a WMS getCapabilities request.
+     * Fetch the json response from the XML response of a WFS getCapabilities request.
      *
-     * @param url - The url the url of the WMS server
-     * @param layers - The layers to query separate by
+     * @param url - The url of the WFS server
+     * @param configProxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
+     * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
+     * The parameter sent in the callback is the proxy prefix with the '?' at the end.
+     * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+     * @returns A promise that resolves with the parsed WFS metadata, or undefined when capabilities weren't found
+     * @throws {RequestTimeoutError} When the request exceeds the timeout duration
+     * @throws {RequestAbortedError} When the request was aborted by the caller's signal
+     * @throws {ResponseError} When the response is not OK (non-2xx)
+     * @throws {ResponseEmptyError} When the JSON response is empty
+     * @throws {NetworkError} When a network issue happened
+     */
+    static getWFSServiceMetadata(url: string, configProxyUrl?: string, callbackNewMetadataUrl?: CallbackNewMetadataDelegate, abortSignal?: AbortSignal): Promise<TypeMetadataWFS | undefined>;
+    /**
+     * Fetch the json response from the XML response of a WMTS getCapabilities request.
+     *
+     * @param url - The url the url of the WMTS server
+     * @param configProxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
+     * @param layers - The layers to query, separated by comma
      * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
      * @param abortSignal - Optional abort signal to handle cancelling of the process
      * @returns A promise that resolves with the parsed WMTS metadata
@@ -161,12 +185,13 @@ export declare abstract class GeoUtilities {
      * @throws {ResponseEmptyError} When the JSON response is empty
      * @throws {NetworkError} When a network issue happened
      */
-    static getWMTSServiceMetadata(url: string, layers?: string, callbackNewMetadataUrl?: CallbackNewMetadataDelegate, abortSignal?: AbortSignal): Promise<TypeMetadataWMTS>;
+    static getWMTSServiceMetadata(url: string, configProxyUrl?: string, layers?: string, callbackNewMetadataUrl?: CallbackNewMetadataDelegate, abortSignal?: AbortSignal): Promise<TypeMetadataWMTS>;
     /**
-     * Fetch the json response from the XML response of a WMS getCapabilities request.
+     * Fetch the json response from the XML response of a WMS GetStyles request.
      *
      * @param url - The url the url of the WMS server
-     * @param layers - The layers to query separate by
+     * @param configProxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
+     * @param layers - The layers to query, separated by comma
      * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
      * The parameter sent in the callback is the proxy prefix with the '?' at the end.
      * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
@@ -177,14 +202,14 @@ export declare abstract class GeoUtilities {
      * @throws {ResponseEmptyError} When the JSON response is empty
      * @throws {NetworkError} When a network issue happened
      */
-    static getWMSServiceStyles(url: string, layers?: string, callbackNewMetadataUrl?: CallbackNewMetadataDelegate, abortSignal?: AbortSignal): Promise<TypeStylesWMS>;
+    static getWMSServiceStyles(url: string, configProxyUrl?: string, layers?: string, callbackNewMetadataUrl?: CallbackNewMetadataDelegate, abortSignal?: AbortSignal): Promise<TypeStylesWMS>;
     /**
      * Return the map server url from a layer service.
      *
      * @param url - The service url for a wms / dynamic or feature layers
      * @param rest - Boolean value to add rest services if not present (default false)
      * @returns The map server url
-     * @deprecated
+     * @deprecated As it's not being used anymore (or only used by external developers?)
      */
     static getMapServerUrl(url: string, rest?: boolean): string;
     /**
@@ -192,7 +217,7 @@ export declare abstract class GeoUtilities {
      *
      * @param url - The service url for an ogc layer
      * @returns The root ogc server url
-     * @deprecated
+     * @deprecated As it's not being used anymore (or only used by external developers?)
      */
     static getOGCServerUrl(url: string): string;
     /**

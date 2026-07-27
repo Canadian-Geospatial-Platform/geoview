@@ -240,6 +240,8 @@ export declare const getStoreMapConfigExternalPackages: (mapId: string) => TypeE
 export declare const getStoreMapConfigGlobalSettings: (mapId: string) => TypeGlobalSettings | undefined;
 /** Returns the service URLs from the map config. */
 export declare const getStoreMapConfigServiceUrls: (mapId: string) => TypeServiceUrls;
+/** Returns the proxy URL from the service URLs in the map config. */
+export declare const useStoreMapConfigServiceUrlsProxyUrl: () => string | undefined;
 /** Returns the config metadata from the map config. */
 export declare const getStoreMapConfigMeta: (mapId: string) => TypeConfigMeta | undefined;
 /** Returns the view settings from the map config. */

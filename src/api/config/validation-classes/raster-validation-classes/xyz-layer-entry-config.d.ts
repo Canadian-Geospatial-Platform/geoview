@@ -49,6 +49,13 @@ export declare class XYZTilesLayerEntryConfig extends TileLayerEntryConfig {
      * @returns `true` if the config is for a XYZTiles layer; otherwise `false`
      */
     static isClassOrTypeXYZTiles(layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig): layerConfig is TypeXYZTilesConfig;
+    /**
+     * Checks whether the given URL contains the XYZ tile parameters ({x}, {y}, {z}).
+     *
+     * @param url - The URL to check
+     * @returns `true` if the URL contains the XYZ tile parameters; otherwise `false`
+     */
+    static containsXYZParams(url: string): boolean;
 }
 export interface TypeMetadataXYZTiles {
     layers: TypeMetadataXYZTilesLayer[];

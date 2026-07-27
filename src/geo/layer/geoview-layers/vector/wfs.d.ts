@@ -10,7 +10,7 @@ import { OgcWfsLayerEntryConfig } from '@/api/config/validation-classes/vector-v
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { GVWFS } from '@/geo/layer/gv-layers/vector/gv-wfs';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
-import { type SourceFeaturesInfo } from '@/geo/utils/utilities';
+import { type CallbackNewMetadataDelegate, type SourceFeaturesInfo } from '@/geo/utils/utilities';
 export interface TypeWFSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'geoviewLayerType'> {
     geoviewLayerType: typeof CONST_LAYER_TYPES.WFS;
     fetchStylesOnWMS?: boolean;
@@ -153,11 +153,15 @@ export declare class WFS extends AbstractGeoViewVector {
      * @param geoviewLayerId - The unique identifier for the GeoView layer
      * @param geoviewLayerName - The display name for the GeoView layer
      * @param url - The URL of the service endpoint
+     * @param configProxyUrl - Proxy URL to use when necessary
      * @param layerIds - An array of layer IDs to include in the configuration
      * @param isTimeAware - Indicates if the layer is time aware
+     * @param vectorStrategy - The strategy to use for fetching vector data
+     * @param fetchStylesOnWMS - Indicates whether to fetch styles from WMS
+     * @param callbackCreateLayerEntryConfig - Optional callback to customize each layer entry configuration
      * @returns A promise that resolves to an array of layer configurations
      */
-    static processGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, url: string, layerIds: string[], isTimeAware: boolean, vectorStrategy: VectorStrategy, fetchStylesOnWMS: boolean, callbackCreateLayerEntryConfig?: (wfsEntry: TypeLayerEntryShell) => TypeLayerEntryShell): Promise<ConfigBaseClass[]>;
+    static processGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, url: string, configProxyUrl: string | undefined, layerIds: string[], isTimeAware: boolean, vectorStrategy: VectorStrategy, fetchStylesOnWMS: boolean, callbackCreateLayerEntryConfig?: (wfsEntry: TypeLayerEntryShell) => TypeLayerEntryShell): Promise<ConfigBaseClass[]>;
     /**
      * Extracts the preferred output format value for a WFS DescribeFeatureType operation
      * from the parsed WFS capabilities metadata.
@@ -174,10 +178,18 @@ export declare class WFS extends AbstractGeoViewVector {
      * Fetches the metadata for a typical WFS class.
      *
      * @param url - The url to query the metadata from
+     * @param configProxyUrl - Proxy URL to use when necessary
+     * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
+     * The parameter sent in the callback is the proxy prefix with the '?' at the end.
      * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
      * @returns A promise that resolves with the metadata when fetched or undefined when capabilities weren't found
+     * @throws {RequestTimeoutError} When the request exceeds the timeout duration
+     * @throws {RequestAbortedError} When the request was aborted by the caller's signal
+     * @throws {ResponseError} When the response is not OK (non-2xx)
+     * @throws {ResponseEmptyError} When the JSON response is empty
+     * @throws {NetworkError} When a network issue happened
      */
-    static fetchMetadata(url: string, abortSignal?: AbortSignal): Promise<TypeMetadataWFS | undefined>;
+    static fetchMetadata(url: string, configProxyUrl: string | undefined, callbackNewMetadataUrl?: CallbackNewMetadataDelegate, abortSignal?: AbortSignal): Promise<TypeMetadataWFS | undefined>;
     /**
      * Fetches WFS metadata for a given service URL and layer ID, then retrieves
      * the corresponding geometry type from the DescribeFeatureType response.

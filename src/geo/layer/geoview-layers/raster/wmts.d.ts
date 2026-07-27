@@ -156,6 +156,7 @@ export declare class WMTS extends AbstractGeoViewRaster {
      * Fetches the metadata for WMS Capabilities.
      *
      * @param url - The url to query the metadata from
+     * @param configProxyUrl - Proxy URL to use when necessary
      * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata
      * @param abortSignal - Optional abort signal to handle cancelling of the process
      * @returns A promise that resolves to the parsed metadata object
@@ -165,7 +166,7 @@ export declare class WMTS extends AbstractGeoViewRaster {
      * @throws {ResponseEmptyError} When the JSON response is empty
      * @throws {NetworkError} When a network issue happened
      */
-    static fetchMetadata<T = TypeMetadataWMTS>(url: string, callbackNewMetadataUrl?: CallbackNewMetadataDelegate, abortSignal?: AbortSignal): Promise<T>;
+    static fetchMetadata<T = TypeMetadataWMTS>(url: string, configProxyUrl: string | undefined, callbackNewMetadataUrl?: CallbackNewMetadataDelegate, abortSignal?: AbortSignal): Promise<T>;
     /**
      * Creates a WMTS source from a layer config.
      *
