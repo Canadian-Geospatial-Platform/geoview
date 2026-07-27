@@ -1,27 +1,30 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
-import { Box, useMediaQuery } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
+import { Box } from '@mui/material';
 
 import { ProgressBar } from '@/ui';
-
 import { NorthArrow, NorthPoleFlag } from '@/core/components/north-arrow/north-arrow';
 import { Crosshair } from '@/core/components/crosshair/crosshair';
 import { OverviewMap } from '@/core/components/overview-map/overview-map';
 import { ClickMarker } from '@/core/components/click-marker/click-marker';
 import { HoverTooltip } from '@/core/components/hover-tooltip/hover-tooltip';
-
 import type { MapViewer } from '@/geo/map/map-viewer';
-
 import { getSxClasses } from './map-style';
-import { useStoreMapInteraction, useStoreMapLoaded, useStoreMapNorthArrow, useStoreMapOverviewMap } from '@/core/stores/states/map-state';
+import {
+  useStoreMapInteraction,
+  useStoreMapLoaded,
+  useStoreMapNorthArrow,
+  useStoreMapOverviewMap,
+  getStoreMapOverviewMapVisible,
+} from '@/core/stores/states/map-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
+import { OVERVIEW_MAP_MIN_CONTAINER_WIDTH, OVERVIEW_MAP_MIN_CONTAINER_HEIGHT } from '@/core/utils/constant';
 import { useStoreLayerAreLayersLoading } from '@/core/stores/states/layer-state';
 import { getStoreAppIsCrosshairsActive, useStoreAppGeoviewHTMLElement } from '@/core/stores/states/app-state';
-import { useUIController } from '@/core/controllers/use-controllers';
+import { useUIController, useMapController } from '@/core/controllers/use-controllers';
 
 /** Props for the Map component. */
 type MapProps = {
@@ -45,11 +48,9 @@ export function Map(props: MapProps): JSX.Element {
   const { viewer } = props;
   const { t } = useTranslation();
 
-  const defaultTheme = useTheme();
-
   // internal state - get ref to div element
   const mapElement = useRef<HTMLElement>(null);
-  const deviceSizeMedUp = useMediaQuery(defaultTheme.breakpoints.up('md')); // if screen size is medium and up
+  const [mapContainerDimensions, setMapContainerDimensions] = useState({ width: 0, height: 0 });
 
   // get values from the store
   const mapId = useStoreGeoViewMapId();
@@ -61,6 +62,7 @@ export function Map(props: MapProps): JSX.Element {
   const geoviewHTMLElement = useStoreAppGeoviewHTMLElement();
 
   const uiController = useUIController();
+  const mapController = useMapController();
 
   // flag to check if map is initialized. we added to prevent double rendering in StrictMode
   const hasRun = useRef<boolean>(false);
@@ -79,7 +81,64 @@ export function Map(props: MapProps): JSX.Element {
       // Create map
       viewer.createMap(mapElement.current);
     }
-  }, [viewer]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  /**
+   * Tracks map container dimensions for overview map visibility control.
+   */
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('MAP - ResizeObserver for overview map visibility', mapElement);
+
+    if (!mapElement.current) return undefined;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      // Use entries[0] to get the observed element's dimensions
+      // This is more reliable than accessing mapElement.current in the callback
+      if (entries[0]) {
+        const { width, height } = entries[0].contentRect;
+        setMapContainerDimensions({
+          width,
+          height,
+        });
+      }
+    });
+
+    resizeObserver.observe(mapElement.current);
+
+    // Capture initial dimensions immediately (ResizeObserver only fires on actual resize, not on initial observe)
+    setMapContainerDimensions({
+      width: mapElement.current.clientWidth,
+      height: mapElement.current.clientHeight,
+    });
+
+    return (): void => {
+      resizeObserver.disconnect();
+    };
+  }, []);
+
+  /**
+   * Syncs overview map visibility to store based on container dimensions and config.
+   */
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('MAP - Overview map visibility sync', mapContainerDimensions, overviewMap);
+
+    // Calculate whether overview map SHOULD be visible based on:
+    // 1. Config has 'overview-map' enabled
+    // 2. Container meets minimum size requirements
+    const shouldBeVisible =
+      overviewMap &&
+      mapContainerDimensions.width >= OVERVIEW_MAP_MIN_CONTAINER_WIDTH &&
+      mapContainerDimensions.height >= OVERVIEW_MAP_MIN_CONTAINER_HEIGHT;
+
+    // Only update if visibility state actually changed (prevents redundant store writes and re-renders)
+    const currentVisibility = getStoreMapOverviewMapVisible(mapId);
+    if (currentVisibility !== shouldBeVisible) {
+      mapController.setOverviewMapVisibility(shouldBeVisible);
+    }
+  }, [mapContainerDimensions, overviewMap, mapController, mapId]);
 
   /**
    * Global keyboard shortcut to activate crosshair and focus map.
@@ -139,7 +198,10 @@ export function Map(props: MapProps): JSX.Element {
           <Crosshair mapTargetElement={mapElement.current!} />
           <ClickMarker />
           <HoverTooltip />
-          {deviceSizeMedUp && overviewMap && viewer.map && <OverviewMap i18n={viewer.getI18nInstance()} />}
+          {mapContainerDimensions.width >= OVERVIEW_MAP_MIN_CONTAINER_WIDTH &&
+            mapContainerDimensions.height >= OVERVIEW_MAP_MIN_CONTAINER_HEIGHT &&
+            overviewMap &&
+            viewer.map && <OverviewMap i18n={viewer.getI18nInstance()} />}
         </>
       )}
       {layersAreLoading && (

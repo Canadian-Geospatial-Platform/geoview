@@ -301,7 +301,7 @@ export const Scale = memo(({ expanded }: ScaleProps): JSX.Element => {
             sx={{ ...memoSxClasses.scaleContainer, maxHeight: '40px' }}
             disableRipple
             className={`interaction-${interaction}`}
-            aria-label={t('mapnav.scale.cycleHint')}
+            aria-label={t('mapnav.cycleHint')}
           >
             {memoCollapsedContent}
           </Button>

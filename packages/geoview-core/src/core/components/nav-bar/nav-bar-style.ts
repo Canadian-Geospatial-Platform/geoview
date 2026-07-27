@@ -1,5 +1,6 @@
 import type { Theme } from '@mui/material/styles';
 import type { SxStyles } from '@/ui/style/types';
+import { NAV_BAR_OVERVIEW_OFFSET, NAV_BAR_BOTTOM_OFFSET, NAV_BAR_BOTTOM_OFFSET_EXPANDED } from '@/core/utils/constant';
 
 /**
  * Gets custom sx classes for the navigation bar.
@@ -8,50 +9,64 @@ import type { SxStyles } from '@/ui/style/types';
  * @returns The sx classes object
  */
 export const getSxClasses = (theme: Theme): SxStyles => ({
-  navBarRef: {
-    width: 'min-content !important',
+  navBarContainer: {
     position: 'absolute',
     right: theme.spacing(7),
-    padding: '6px',
-    display: 'flex',
-    flexDirection: 'column',
-    marginRight: 0,
+    top: theme.spacing(7),
+    bottom: NAV_BAR_BOTTOM_OFFSET,
+    left: 'auto',
+    width: 'auto',
+    maxWidth: '90vw',
+    minHeight: '100px',
     zIndex: 150,
-    pointerEvents: 'all',
-    backgroundColor: 'transparent',
-    transition: 'top 300ms ease-in-out, bottom 300ms ease-in-out',
-    top: '180px',
-    bottom: '55px',
-    alignItems: 'flex-start',
-    justifyContent: 'flex-end',
-    flexWrap: 'wrap-reverse',
-    gap: '15px',
-  },
-  navBtnGroupContainer: {
     display: 'flex',
-    position: 'relative',
-    pointerEvents: 'auto',
-    overflowY: 'hidden',
-    padding: 5,
     flexDirection: 'column',
-  },
-  navBtnGroup: {
+    justifyContent: 'safe flex-end',
+    gap: theme.spacing(11),
+    alignItems: 'center',
+    overflowY: 'auto',
+    padding: theme.spacing(2),
+    backgroundColor: 'transparent',
     borderRadius: theme.spacing(5),
-    backgroundColor: theme.palette.geoViewColor.bgColor.light[500],
-    overflow: 'clip',
-    '& .MuiButtonGroup-grouped:not(:last-child)': {
-      borderColor: theme.palette.geoViewColor.bgColor.light[900],
-    },
+    pointerEvents: 'all',
+    scrollbarWidth: 'thin',
+    scrollbarColor: `${theme.palette.geoViewColor?.primary.main} transparent`,
+  },
+  // Add top offset to nav bar when overview map is visible to avoid overlap
+  navBarContainerWithOverview: {
+    top: NAV_BAR_OVERVIEW_OFFSET,
+  },
+  // Enable multi-column layout when overview map is visible (indicates sufficient space)
+  navBarContainerMultiColumn: {
+    flexFlow: 'column wrap-reverse',
+    overflowY: 'hidden',
+  },
+  // Add bottom offset to nav bar when map-info bar is expanded to avoid overlap
+  navBarContainerWithExpandedMapInfo: {
+    bottom: NAV_BAR_BOTTOM_OFFSET_EXPANDED,
   },
   navBtnGroupColumns: {
     display: 'flex',
     flexDirection: 'row',
-    gap: '8px',
+    gap: theme.spacing(6),
     alignItems: 'center',
   },
+  navBtnGroup: {
+    borderRadius: theme.spacing(5),
+    backgroundColor: theme.palette.geoViewColor?.bgColor.light[500],
+    overflow: 'clip',
+    '& .MuiButtonGroup-grouped:not(:last-child)': {
+      borderColor: theme.palette.geoViewColor?.bgColor.light[900],
+    },
+  },
+  // Allow button groups to wrap when overview map is visible (indicates sufficient space)
+  navBtnGroupMultiColumn: {
+    flexWrap: 'wrap',
+    maxHeight: '340px',
+  },
   navButton: {
-    backgroundColor: theme.palette.geoViewColor.bgColor.light[500],
-    color: theme.palette.geoViewColor.bgColor.dark[900],
+    backgroundColor: theme.palette.geoViewColor?.bgColor.light[500],
+    color: theme.palette.geoViewColor?.bgColor.dark[900],
     borderRadius: 0,
     width: '44px',
     height: '44px',
@@ -62,23 +77,23 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     '&:not(:last-of-type)': {
       borderBottomLeftRadius: 0,
       borderBottomRightRadius: 0,
-      borderBottom: `1px solid ${theme.palette.geoViewColor.bgColor.light[900]}`,
+      borderBottom: `1px solid ${theme.palette.geoViewColor?.bgColor.light[900]}`,
     },
     '&:not(:first-of-type)': {
       borderTopLeftRadius: 0,
       borderTopRightRadius: 0,
     },
     '&:hover': {
-      backgroundColor: theme.palette.geoViewColor.bgColor.light[500],
-      color: theme.palette.geoViewColor.bgColor.dark[700],
+      backgroundColor: theme.palette.geoViewColor?.bgColor.light[500],
+      color: theme.palette.geoViewColor?.bgColor.dark[700],
     },
     '&:focus': {
-      backgroundColor: theme.palette.geoViewColor.bgColor.light[500],
-      color: theme.palette.geoViewColor.bgColor.dark[700],
+      backgroundColor: theme.palette.geoViewColor?.bgColor.light[500],
+      color: theme.palette.geoViewColor?.bgColor.dark[700],
     },
     '&:active': {
-      backgroundColor: theme.palette.geoViewColor.bgColor.light[500],
-      color: theme.palette.geoViewColor.bgColor.dark[950],
+      backgroundColor: theme.palette.geoViewColor?.bgColor.light[500],
+      color: theme.palette.geoViewColor?.bgColor.dark[950],
     },
   },
   popoverTitle: {

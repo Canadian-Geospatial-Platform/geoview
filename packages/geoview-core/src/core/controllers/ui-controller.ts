@@ -20,6 +20,7 @@ import {
   setStoreUIActiveTrapGeoView,
   setStoreUIFooterBarIsOpen,
   setStoreUIFooterPanelResizeValue,
+  setStoreUIMapInfoExpanded,
   showStoreUITabButton,
   type FocusItemProps,
   type TypeFooterTabEntry,
@@ -297,6 +298,18 @@ export class UIController extends AbstractMapViewerController {
   setFooterPanelResizeValue(value: number): void {
     // Save in store
     setStoreUIFooterPanelResizeValue(this.getMapId(), value);
+  }
+
+  /**
+   * Sets the map info bar expanded state.
+   *
+   * Affects nav-bar positioning to avoid overlap when the info bar expands.
+   *
+   * @param expanded - Whether the map info bar is expanded
+   */
+  setMapInfoExpanded(expanded: boolean): void {
+    // Save in store
+    setStoreUIMapInfoExpanded(this.getMapId(), expanded);
   }
 
   /**

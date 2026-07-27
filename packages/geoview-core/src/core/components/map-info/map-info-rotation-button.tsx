@@ -11,8 +11,6 @@ import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 /**
  * Creates the map information rotation indicator component.
  *
- * Memoized to prevent re-renders since this component has no props.
- *
  * @returns The rotation indicator
  */
 export function MapInfoRotationButton(): JSX.Element {
@@ -46,12 +44,12 @@ export function MapInfoRotationButton(): JSX.Element {
     width: '40px',
     height: '40px',
     my: '1rem',
-    color: theme.palette.geoViewColor.bgColor.light[800],
+    color: theme.palette.geoViewColor?.bgColor.light[800],
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     '&:focus-visible': {
-      outlineColor: theme.palette.geoViewColor.primary.main,
+      outlineColor: theme.palette.geoViewColor?.primary.main,
     },
   };
 

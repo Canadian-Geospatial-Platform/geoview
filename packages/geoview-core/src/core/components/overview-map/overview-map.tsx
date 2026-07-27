@@ -6,12 +6,12 @@ import type { i18n } from 'i18next';
 
 import { ThemeProvider } from '@mui/material/styles';
 
+import { Box } from '@/ui/layout';
 import { cgpvTheme } from '@/ui/style/theme';
 import { OverviewMapToggle } from './overview-map-toggle';
 import { useStoreAppDisplayLanguage } from '@/core/stores/states/app-state';
 import { useStoreMapOverviewMapHideZoom, useStoreMapZoom } from '@/core/stores/states/map-state';
 import { logger } from '@/core/utils/logger';
-import { Box } from '@/ui/layout';
 import { TIMEOUT } from '@/core/utils/constant';
 import { useMapController } from '@/core/controllers/use-controllers';
 
@@ -91,6 +91,8 @@ export function OverviewMap(props: OverviewMapProps): JSX.Element {
     return () => {
       logger.logTraceUseEffectUnmount('OVERVIEW-MAP - unmount');
       clearTimeout(timeoutId);
+      // Hide the overview map control when component unmounts
+      mapController.setOverviewMapVisibility(false);
       setTimeout(() => {
         if (root) {
           root.unmount();

@@ -25,6 +25,12 @@ export const getSxClasses = (): SxStyles => ({
       cursor: 'grabbing',
     },
 
+    // FIX: Hide duplicate overview maps that can appear during window resize.
+    // Only the last overview map instance should be visible.
+    '& .ol-overlaycontainer-stopevent .ol-overviewmap:not(:last-child)': {
+      display: 'none',
+    },
+
     '& .ol-overviewmap.ol-custom-overviewmap': {
       bottom: 'auto',
       left: 'auto',

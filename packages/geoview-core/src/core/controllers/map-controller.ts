@@ -75,6 +75,7 @@ import {
   setStoreMapIsMouseInsideMap,
   setStoreMapLoaded,
   setStoreMapMoveEnd,
+  setStoreMapOverviewMapVisible,
   setStoreMapPointerPosition,
   setStoreMapPointMarkers,
   setStoreMapProjection,
@@ -1129,6 +1130,7 @@ export class MapController extends AbstractMapViewerController {
   setOverviewMapVisibility(visible: boolean): void {
     const olMap = this.getMapViewer().map;
     this.getMapViewer().basemap.setOverviewMapControlVisibility(olMap, visible);
+    setStoreMapOverviewMapVisible(this.getMapId(), visible);
   }
 
   /**
