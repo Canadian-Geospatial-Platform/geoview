@@ -288,8 +288,16 @@ export abstract class ConfigBaseClass {
    *
    * @returns The metadata access path, or undefined if not set
    */
-  getMetadataAccessPath(): string | undefined {
-    return this.getGeoviewLayerConfig().metadataAccessPath;
+  getMetadataAccessPath(endsWithSlash = false): string | undefined {
+    let { metadataAccessPath } = this.getGeoviewLayerConfig();
+    if (metadataAccessPath) {
+      if (endsWithSlash) {
+        if (!metadataAccessPath.endsWith('/')) metadataAccessPath += '/';
+      } else {
+        if (metadataAccessPath.endsWith('/')) metadataAccessPath = metadataAccessPath.slice(0, -1);
+      }
+    }
+    return metadataAccessPath;
   }
 
   /**

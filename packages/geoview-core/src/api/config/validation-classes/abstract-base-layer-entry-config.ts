@@ -19,7 +19,7 @@ import type { ConfigBaseClassProps } from '@/api/config/validation-classes/confi
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import { DateMgt } from '@/core/utils/date-mgt';
 import type { TemporalMode, TimeDimension, TimeIANA, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
-import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
+import { LayerDataAccessPathMandatoryError, LayerMetadataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
 import { NoPrimaryKeyFieldError } from '@/core/exceptions/geoview-exceptions';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { deepMerge } from '@/core/utils/utilities';
@@ -520,28 +520,42 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   }
 
   /**
+   * Gets the metadata access path with proxy prepended when the layer is configured to use a proxy.
+   *
+   * @param endsWithSlash - Optional indicates if the path should end with a '/'
+   * @returns The metadata access path, proxied if necessary
+   * @throws {LayerMetadataAccessPathMandatoryError} When the metadata access path is not set
+   */
+  getMetadataAccessPathProxiedWhenNecessary(endsWithSlash = false): string {
+    // Get the metadata access path
+    let metadataAccessPath = this.getMetadataAccessPath(endsWithSlash);
+
+    // Throw if not set
+    if (!metadataAccessPath) {
+      throw new LayerMetadataAccessPathMandatoryError(
+        this.getGeoviewLayerId(),
+        this.getGeoviewLayerConfig().geoviewLayerType,
+        this.getLayerNameCascade()
+      );
+    }
+
+    // If proxy was necessary
+    if (this.getIsUsingProxy()) {
+      // Tweak url with the proxy if necessary
+      metadataAccessPath = this.getUrlWithProxyWhenNeeded(metadataAccessPath);
+    }
+
+    // Return it
+    return metadataAccessPath;
+  }
+
+  /**
    * Indicates whether the source has a data access path defined.
    *
    * @returns `true` if a data access path is present; otherwise, `false`
    */
   hasDataAccessPath(): boolean {
     return !!this.getSource().dataAccessPath;
-  }
-
-  /**
-   * Retrieves the metadata access path used by this GeoView layer by making sure the proxy url isn't included in the path.
-   *
-   * @returns The metadata access path without the proxy url (if any), or undefined if not set
-   */
-  getMetadataAccessPathWithoutProxy(): string | undefined {
-    // If using proxy
-    let url = this.getMetadataAccessPath();
-    if (this.getIsUsingProxy()) {
-      url = url?.replace(this.getProxyUrl()!, '');
-    }
-
-    // Return the url minus the proxy if it was included and trimming the '?' in the url
-    return url?.replace(/^\?+|\?+$/g, '');
   }
 
   /**
@@ -562,10 +576,25 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
     if (endsWithSlash) {
       // Format the dataAccessPath correctly
       if (!dataAccessPath.endsWith('/')) dataAccessPath += '/';
+    } else {
+      // Format the dataAccessPath correctly without trailing slash
+      if (dataAccessPath.endsWith('/')) dataAccessPath = dataAccessPath.slice(0, -1);
     }
 
     // Return it
     return dataAccessPath;
+  }
+
+  /**
+   * Gets the data access path with proxy prepended when the layer is configured to use a proxy.
+   *
+   * @param endsWithSlash - Optional indicates if the path should end with a '/'
+   * @returns The data access path, proxied if necessary
+   * @throws {LayerDataAccessPathMandatoryError} When the data access path is not set
+   */
+  getDataAccessPathProxiedWhenNecessary(endsWithSlash = false): string {
+    // Get the data access path
+    return this.getUrlWithProxyWhenNeeded(this.getDataAccessPath(endsWithSlash));
   }
 
   /**

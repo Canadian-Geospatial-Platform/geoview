@@ -156,8 +156,10 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
     try {
       if (!layerConfig) return null;
-      const legendUrl = `${layerConfig.getMetadataAccessPath()}/legend?f=json`;
+      // Get the legend url to use to query
+      const legendUrl = `${layerConfig.getMetadataAccessPathProxiedWhenNecessary(true)}/legend?f=json`;
 
+      // Perform the fetch query
       const legendJson = await Fetch.fetchJson<TypeEsriImageLayerLegend>(legendUrl);
       const layerInfo = legendJson.layers?.find((lyr) => lyr.layerId.toString() === layerConfig.layerId) ?? legendJson.layers?.[0];
       const legendInfo = layerInfo?.legend;
@@ -391,7 +393,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
     // Identify query to get oid features value and attributes, at this point we do not query geometry
     const identifyUrl =
-      `${layerConfig.getDataAccessPath(true)}identify?f=json&tolerance=${this.getHitTolerance()}` +
+      `${layerConfig.getDataAccessPathProxiedWhenNecessary(true)}identify?f=json&tolerance=${this.getHitTolerance()}` +
       `&mapExtent=${extent.xmin},${extent.ymin},${extent.xmax},${extent.ymax}` +
       `&imageDisplay=${size[0]},${size[1]},96` +
       `&layers=visible:${layerConfig.layerId}` +
@@ -399,11 +401,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
       `&geometryType=esriGeometryPoint&geometry=${lonlat[0]},${lonlat[1]}` +
       `&returnGeometry=false&sr=4326&returnFieldName=true`;
 
-    // Tweak url with the proxy if necessary
-    const identifyUrlProxied = layerConfig.getUrlWithProxyWhenNeeded(identifyUrl);
-
     // If it takes more then 10 seconds it means the server is unresponsive and we should not continue. This will throw an error...
-    const identifyJsonResponse = await Fetch.fetchWithTimeout<EsriIdentifyJsonResponse>(identifyUrlProxied, undefined, 10000);
+    const identifyJsonResponse = await Fetch.fetchWithTimeout<EsriIdentifyJsonResponse>(identifyUrl, undefined, 10000);
 
     // If no features identified return []
     if (identifyJsonResponse.results.length === 0) return featureInfoResult;
@@ -572,7 +571,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     const oidField = layerConfig.getOutfieldsPKNameOrDefault('OBJECTID');
 
     // Build the base URL and tweak with the proxy if necessary
-    const url = layerConfig.getUrlWithProxyWhenNeeded(`${layerConfig.getDataAccessPath(true)}${layerConfig.layerId}`);
+    const url = `${layerConfig.getDataAccessPathProxiedWhenNecessary(true)}${layerConfig.layerId}`;
 
     // Query for the specific object ids
     return EsriUtilities.queryRecordsByUrlObjectIds(url, geometryType, objectIDs, oidField, true, outSR);
@@ -594,7 +593,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     whereClause: string | undefined
   ): Promise<EsriFeaturesJsonResponse> {
     // Build the base URL and tweak with the proxy if necessary
-    const url = layerConfig.getUrlWithProxyWhenNeeded(`${layerConfig.getDataAccessPath(true)}${layerConfig.layerId}`);
+    const url = `${layerConfig.getDataAccessPathProxiedWhenNecessary(true)}${layerConfig.layerId}`;
 
     // Create the params clause
     const params: QueryParams = {
@@ -632,7 +631,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     maxAllowableOffset: number
   ): Promise<EsriFeaturesJsonResponse> {
     // Build the base URL and tweak with the proxy if necessary
-    const url = layerConfig.getUrlWithProxyWhenNeeded(`${layerConfig.getDataAccessPath(true)}${layerConfig.layerId}`);
+    const url = `${layerConfig.getDataAccessPathProxiedWhenNecessary(true)}${layerConfig.layerId}`;
 
     // Create the params clause
     const params: QueryParams = {

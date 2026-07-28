@@ -530,6 +530,8 @@ export class GVWMS extends AbstractGVRaster {
 
     // TODO: WMS - Add support for other formats. Not quite the GV issue #3134, but similar
 
+    // TODO: WMS - Add support for proxy
+
     // Format the url
     const urlWithOutputJson = GeoUtilities.ensureServiceRequestUrlGetFeature(
       wfsLayerConfig.getMetadataAccessPath()!,

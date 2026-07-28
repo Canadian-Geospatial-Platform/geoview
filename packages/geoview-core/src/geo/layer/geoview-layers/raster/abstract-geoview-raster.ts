@@ -44,11 +44,8 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
       responseJson = await AbstractGeoViewRaster.fetchMetadata<T>(
         url,
         this.getConfigProxyUrl(),
-        (proxiedUrl, proxyUsed) => {
+        (_proxiedUrl, proxyUsed) => {
           this.setProxyUrl(proxyUsed);
-
-          // Update the metadata access path to use the proxy
-          this.setMetadataAccessPath(proxiedUrl);
         },
         abortSignal
       );

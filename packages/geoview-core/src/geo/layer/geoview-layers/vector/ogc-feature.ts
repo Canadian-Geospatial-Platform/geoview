@@ -190,13 +190,12 @@ export class OgcFeature extends AbstractGeoViewVector {
     }
 
     // The metadata url
-    let metadataUrl = layerConfig.getMetadataAccessPath();
+    const metadataUrl = layerConfig.getMetadataAccessPath();
 
     // If there is a metadata url
     if (metadataUrl) {
       // The query url
-      metadataUrl = metadataUrl.endsWith('/') ? metadataUrl : `${metadataUrl}/`;
-      const queryUrl = `${metadataUrl}collections/${layerConfig.layerId}/queryables?f=json`;
+      const queryUrl = `${layerConfig.getMetadataAccessPathProxiedWhenNecessary(true)}collections/${layerConfig.layerId}/queryables?f=json`;
 
       // Query the metadata for the queryables
       const queryResultData = await Fetch.fetchJson<TypeLayerMetadataQueryables>(queryUrl, { signal: abortSignal });
@@ -225,10 +224,7 @@ export class OgcFeature extends AbstractGeoViewVector {
     readOptions: ReadOptions
   ): Promise<SourceFeaturesInfo> {
     // Build the URL
-    let url = `${layerConfig.getDataAccessPath(true)}collections/${layerConfig.layerId}/items`;
-
-    // Tweak url with the proxy if necessary
-    url = layerConfig.getUrlWithProxyWhenNeeded(url);
+    const url = `${layerConfig.getDataAccessPathProxiedWhenNecessary(true)}collections/${layerConfig.layerId}/items`;
 
     // Fetch with proxy fallback support
     const responseData = await Fetch.fetchJson(url);
@@ -269,11 +265,8 @@ export class OgcFeature extends AbstractGeoViewVector {
       return await OgcFeature.fetchMetadata(
         this.getMetadataAccessPath(),
         this.getConfigProxyUrl(),
-        (proxiedUrl, proxyUsed) => {
+        (_proxiedUrl, proxyUsed) => {
           this.setProxyUrl(proxyUsed);
-
-          // Update the access path to use the proxy if one was required
-          this.setMetadataAccessPath(proxiedUrl);
         },
         abortSignal
       );

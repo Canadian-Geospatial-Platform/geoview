@@ -73,6 +73,11 @@ interface EsriJSONReadResult {
 
 export abstract class GeoUtilities {
   /**
+   * Debug flag to force the use of a proxy for all requests.
+   */
+  static #DEBUG_FORCE_PROXY = false;
+
+  /**
    * Checks if the provided proxy URL is an Esri proxy.
    *
    * @param proxyUrl - The proxy URL to check
@@ -423,7 +428,7 @@ export abstract class GeoUtilities {
    * Fetches JSON metadata, retrying through a proxy on network errors.
    *
    * @param url - The base URL to fetch the metadata from (e.g., ArcGIS REST endpoint)
-   * @param configProxyUrl - Proxy URL to use when necessary
+   * @param configProxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
    * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the request
    * @returns A promise resolving to the parsed JSON metadata response
@@ -435,16 +440,22 @@ export abstract class GeoUtilities {
    */
   static async fetchJsonWithProxyFallback<T>(
     url: string,
-    configProxyUrl: string | undefined,
+    configProxyUrl: string = CONFIG_PROXY_URL,
     callbackNewMetadataUrl?: CallbackNewMetadataDelegate,
     abortSignal?: AbortSignal
   ): Promise<T> {
     try {
-      // Fetch the metadata and return it
-      return await Fetch.fetchJson<T>(url, { signal: abortSignal });
+      // Fetch the metadata
+      const responseData = await Fetch.fetchJson<T>(url, { signal: abortSignal });
+
+      // If pretending, after calling the service, that the request failed to force a proxy in debug
+      if (GeoUtilities.#DEBUG_FORCE_PROXY) throw new NetworkError('DEBUG_FORCE_PROXY is enabled, forcing a proxy request.', '500');
+
+      // Return the response data
+      return responseData;
     } catch (error: unknown) {
       // If a network error such as CORS and we have a proxy to try
-      if (error instanceof NetworkError && configProxyUrl) {
+      if (error instanceof NetworkError) {
         // If the proxy to use is the Esri proxy
         if (GeoUtilities.isEsriProxy(configProxyUrl)) {
           // Encode the layers parameter if present
@@ -492,8 +503,14 @@ export abstract class GeoUtilities {
   ): Promise<string> {
     let responseString;
     try {
-      // Fetch the metadata and return it
-      return await Fetch.fetchText(url, { signal: abortSignal });
+      // Fetch the metadata
+      const responseData = await Fetch.fetchText(url, { signal: abortSignal });
+
+      // If pretending, after calling the service, that the request failed to force a proxy in debug
+      if (GeoUtilities.#DEBUG_FORCE_PROXY) throw new NetworkError('DEBUG_FORCE_PROXY is enabled, forcing a proxy request.', '500');
+
+      // Return the response data
+      return responseData;
     } catch (error: unknown) {
       // If a network error such as CORS
       if (error instanceof NetworkError) {

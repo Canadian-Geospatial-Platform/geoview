@@ -360,6 +360,23 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
+   * Prepends the proxy URL to the given URL when the layer is configured to use a proxy.
+   *
+   * @param url - The URL to optionally prepend the proxy to
+   * @returns The URL with proxy prefix if using a proxy, or the original URL as-is
+   */
+  getUrlWithProxyWhenNeeded(url: string): string {
+    // If using proxy
+    if (this.getIsUsingProxy()) {
+      // Add the proxy to the url
+      return `${this.getProxyUrl()}?${url}`;
+    }
+
+    // As-is
+    return url;
+  }
+
+  /**
    * Gets the Geoview layer id.
    *
    * @returns The geoview layer id

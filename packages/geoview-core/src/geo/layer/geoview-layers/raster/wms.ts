@@ -103,7 +103,7 @@ export class WMS extends AbstractGeoViewRaster {
    */
   protected override onFetchServiceMetadata<T = TypeMetadataWMSCapabilities | undefined>(abortSignal?: AbortSignal): Promise<T> {
     // Redirect and update the metadataAccessPath when a proxy has to be used
-    return this.fetchServiceMetadataWMS(true, abortSignal) as Promise<T>;
+    return this.fetchServiceMetadataWMS(abortSignal) as Promise<T>;
   }
 
   /**
@@ -115,7 +115,7 @@ export class WMS extends AbstractGeoViewRaster {
    */
   protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Get the metadata and leave the metadataAccessPath unchanged, even if a proxy had to be used
-    const metadata = await this.fetchServiceMetadataWMS(false);
+    const metadata = await this.fetchServiceMetadataWMS();
 
     // Based on the capabilities
     const layers = metadata!.Capability.Layer.Layer;
@@ -322,31 +322,21 @@ export class WMS extends AbstractGeoViewRaster {
   /**
    * Fetches the service metadata for a WMS layer, handling both standard WMS GetCapabilities requests and direct XML metadata access.
    *
-   * @param updateMetadataAccessPath - Whether to update the layer's metadata access path if a proxy is required to fetch the metadata
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves to the parsed metadata object, or `undefined` if metadata could not be retrieved or no capabilities were found.
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
    * @throws {LayerNoCapabilitiesError} When the metadata is empty (no Capabilities)
    */
-  protected fetchServiceMetadataWMS(
-    updateMetadataAccessPath: boolean,
-    abortSignal?: AbortSignal
-  ): Promise<TypeMetadataWMSCapabilities | undefined> {
+  protected fetchServiceMetadataWMS(abortSignal?: AbortSignal): Promise<TypeMetadataWMSCapabilities | undefined> {
     // If metadata is in XML format (not WMS GetCapabilities)
     const isXml = this.getMetadataAccessPath().toLowerCase().endsWith('.xml');
     if (isXml) {
       // Fetch the XML
       return this.#fetchXmlServiceMetadata(
         this.getMetadataAccessPath(),
-        (proxiedUrl, proxyUsed) => {
-          // If updating the metadataAccessPath as we go
-          if (updateMetadataAccessPath) {
-            // Indicate the proxy that was used
-            this.setProxyUrl(proxyUsed);
-
-            // Update the access path to use the proxy if one was required
-            this.setMetadataAccessPath(proxiedUrl);
-          }
+        (_proxiedUrl, proxyUsed) => {
+          // Indicate the proxy that was used
+          this.setProxyUrl(proxyUsed);
         },
         abortSignal
       );
@@ -363,15 +353,9 @@ export class WMS extends AbstractGeoViewRaster {
       // If no specific layers to query, fetch and process metadata for the entire service
       return this.#fetchAndProcessSingleWmsMetadata(
         url,
-        (proxiedUrl, proxyUsed) => {
+        (_proxiedUrl, proxyUsed) => {
           // Indicate the proxy that was used
           this.setProxyUrl(proxyUsed);
-
-          // If updating the metadataAccessPath as we go
-          if (updateMetadataAccessPath) {
-            // Update the metadata access path accordingly
-            this.setMetadataAccessPath(proxiedUrl);
-          }
         },
         abortSignal
       );
@@ -381,15 +365,9 @@ export class WMS extends AbstractGeoViewRaster {
     return this.#fetchAndMergeMultipleWmsMetadata(
       url,
       layerConfigsToQuery,
-      (proxiedUrl, proxyUsed) => {
+      (_proxiedUrl, proxyUsed) => {
         // Indicate the proxy that was used
         this.setProxyUrl(proxyUsed);
-
-        // If updating the metadataAccessPath as we go
-        if (updateMetadataAccessPath) {
-          // Update the metadata access path accordingly
-          this.setMetadataAccessPath(proxiedUrl);
-        }
       },
       abortSignal
     );

@@ -229,7 +229,7 @@ export class WFS extends AbstractGeoViewVector {
     // Build url
     let outputFormat = WFS.extractDescribeFeatureOutputFormat(this.getMetadata()!);
 
-    // TODO: CHECK - Why is it better to call DescribeFeatureType without outputFormat!?
+    // TODO: CHECK IMPORTANT - Why is it better to call DescribeFeatureType without outputFormat!?
     outputFormat = '';
 
     // Get the version
@@ -337,12 +337,8 @@ export class WFS extends AbstractGeoViewVector {
       metadata = await WFS.fetchMetadata(
         this.getMetadataAccessPath(),
         this.getConfigProxyUrl(),
-        (proxiedUrl, proxyUsed) => {
-          // Indicate the proxy that was used
+        (_proxiedUrl, proxyUsed) => {
           this.setProxyUrl(proxyUsed);
-
-          // Update the metadata access path to use the proxy
-          this.setMetadataAccessPath(proxiedUrl);
         },
         abortSignal
       );

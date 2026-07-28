@@ -488,7 +488,7 @@ export class LayerSetController extends AbstractMapViewerController {
     const icons = existingStoreEntry?.icons ?? [];
 
     const legendLayerEntry: TypeLegendLayer = {
-      url: layerConfigCasted.getMetadataAccessPathWithoutProxy(),
+      url: layerConfigCasted.getMetadataAccessPath(),
       bounds: layer?.getBounds(),
       bounds4326: layer?.getBoundsLonLat(),
       controls,

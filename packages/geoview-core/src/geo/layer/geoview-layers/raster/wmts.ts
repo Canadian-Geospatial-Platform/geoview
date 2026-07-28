@@ -96,7 +96,7 @@ export class WMTS extends AbstractGeoViewRaster {
    */
   protected override onFetchServiceMetadata<T = TypeMetadataWMTSCapabilities | undefined>(abortSignal?: AbortSignal): Promise<T> {
     // Redirect
-    return this.fetchServiceMetadataWMTS(true, abortSignal) as Promise<T>;
+    return this.fetchServiceMetadataWMTS(abortSignal) as Promise<T>;
   }
 
   /**
@@ -108,7 +108,7 @@ export class WMTS extends AbstractGeoViewRaster {
    */
   protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Fetch the metadata
-    const metadata = await this.fetchServiceMetadataWMTS(false);
+    const metadata = await this.fetchServiceMetadataWMTS();
 
     // Now that we have metadata
     const layers = metadata?.Contents.Layer;
@@ -217,7 +217,7 @@ export class WMTS extends AbstractGeoViewRaster {
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
    * @throws {LayerNoCapabilitiesError} When the metadata is empty (no Capabilities)
    */
-  protected fetchServiceMetadataWMTS(updateMetadataAccessPath: boolean, abortSignal?: AbortSignal): Promise<TypeMetadataWMTSCapabilities> {
+  protected fetchServiceMetadataWMTS(abortSignal?: AbortSignal): Promise<TypeMetadataWMTSCapabilities> {
     // Construct a proper WMTS GetCapabilities URL
     let url = this.getMetadataAccessPath();
     // Ensure HTTPS
@@ -228,15 +228,9 @@ export class WMTS extends AbstractGeoViewRaster {
     // Fetch the XML
     return this.#fetchXmlServiceMetadata(
       url,
-      (proxiedUrl, proxyUsed) => {
-        // If updating the metadataAccessPath as we go
-        if (updateMetadataAccessPath) {
-          // Indicate the proxy that was used
-          this.setProxyUrl(proxyUsed);
-
-          // Update the access path to use the proxy if one was required
-          this.setMetadataAccessPath(proxiedUrl);
-        }
+      (_proxiedUrl, proxyUsed) => {
+        // Indicate the proxy that was used
+        this.setProxyUrl(proxyUsed);
       },
       abortSignal
     );

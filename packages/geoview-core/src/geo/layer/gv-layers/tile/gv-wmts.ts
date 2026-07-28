@@ -143,8 +143,13 @@ export class GVWMTS extends AbstractGVTile {
       const metadataAccessPath = layerConfig.getMetadataAccessPath();
       const { looksLikeArcGisWmtsService, normalizedMetadataAccessPath } = GVWMTS.#looksLikeArcGisWmtsServiceUrl(metadataAccessPath);
       if (looksLikeArcGisWmtsService && normalizedMetadataAccessPath) {
-        const legendUrl = `${normalizedMetadataAccessPath}/legend?f=json`;
+        // Tweak url with the proxy if necessary
+        const normalizedMetadataAccessPathProxied = layerConfig.getUrlWithProxyWhenNeeded(normalizedMetadataAccessPath);
 
+        // Complete url
+        const legendUrl = `${normalizedMetadataAccessPathProxied}/legend?f=json`;
+
+        // Fetch
         const legendJson = await Fetch.fetchEsriJson<TypeEsriImageLayerLegend>(legendUrl);
         const layerInfo = legendJson.layers?.find((lyr) => lyr.layerId.toString() === layerConfig.layerId) ?? legendJson.layers?.[0];
         const legendInfo = layerInfo?.legend;

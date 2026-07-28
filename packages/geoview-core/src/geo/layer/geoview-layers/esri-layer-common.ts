@@ -84,13 +84,13 @@ export class EsriUtilities {
     let layerMetadata: TypeMetadataEsriDynamicLayer | TypeMetadataEsriFeatureLayer | TypeMetadataEsriImage;
     if (layerConfig instanceof EsriDynamicLayerEntryConfig || layerConfig instanceof EsriFeatureLayerEntryConfig) {
       // The url
-      const baseUrl = layer.getMetadataAccessPath().replace(/\/$/, '');
-      const queryUrl = `${baseUrl}/${layerConfig.layerId}`;
+      const baseUrl = layerConfig.getMetadataAccessPathProxiedWhenNecessary(false);
+      const queryUrl = `${baseUrl}/${layerConfig.layerId}?f=json`;
 
       try {
         // Fetch the layer metadata
         layerMetadata = await Fetch.fetchJson<TypeMetadataEsriDynamicLayer | TypeMetadataEsriFeatureLayer | TypeMetadataEsriImage>(
-          `${queryUrl}?f=json`,
+          queryUrl,
           {
             signal: abortSignal,
           }

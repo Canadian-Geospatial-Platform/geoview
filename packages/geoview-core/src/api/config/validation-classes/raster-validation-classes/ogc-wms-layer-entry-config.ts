@@ -134,7 +134,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    */
   override async onRefreshMetadata(displayDateMode: DisplayDateMode): Promise<void> {
     // Refetch the metadata again with the new date mode and update the config
-    const layerMetadata = await WMS.fetchMetadataWMSForLayer(this.getMetadataAccessPathWithoutProxy()!, this.getProxyUrl(), this.layerId);
+    const layerMetadata = await WMS.fetchMetadataWMSForLayer(this.getMetadataAccessPath()!, this.getProxyUrl(), this.layerId);
 
     // Read the capabilities
     const layerCapabilities = WMS.findLayerMetadataInCapability(this.layerId, layerMetadata.Capability.Layer);
@@ -385,7 +385,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    */
   async createGeoviewLayerConfigWfs(configProxyUrl: string | undefined): Promise<OgcWfsLayerEntryConfig> {
     // The base url
-    let url = this.getMetadataAccessPathWithoutProxy()!;
+    let url = this.getMetadataAccessPath()!;
 
     // Tweak url, all the time, typical wms/wfs url
     url = url.replaceAll('cgi-bin/wms', 'cgi-bin/wfs');
