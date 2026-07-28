@@ -841,7 +841,7 @@ export class LayerController extends AbstractMapViewerController {
     // Zoom to extent and wait for it to finish
     await this.zoomToExtentRestricted(layerPath, extent, useAnimation, fitOptions);
 
-    // Add a click marker, a bbox extent who will disapear and remove/add higlight the zoomed feature
+    // Add a click marker, a bbox extent who will disappear and remove/add higlight the zoomed feature
     this.getControllersRegistry().mapController.clickMarkerIconShow({ lonlat: lonlatCenter });
     this.getControllersRegistry().mapController.highlightBBox(extent, false);
     this.getControllersRegistry().mapController.removeHighlightedFeature('all');

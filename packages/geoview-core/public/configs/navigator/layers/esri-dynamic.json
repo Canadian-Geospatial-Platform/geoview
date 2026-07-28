@@ -364,5 +364,8 @@
   "globalSettings": {
     "coordinateInfoEnabled": false
   },
-  "theme": "geo.ca"
+  "theme": "geo.ca",
+  "serviceUrls": {
+    "proxyUrl": "https://proxy.app-dev.geo.ca"
+  }
 }

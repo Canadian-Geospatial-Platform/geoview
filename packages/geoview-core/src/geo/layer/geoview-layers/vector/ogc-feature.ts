@@ -4,6 +4,7 @@ import type { Options as SourceOptions } from 'ol/source/Vector';
 import type { Projection as OLProjection } from 'ol/proj';
 
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
+import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import type { DisplayDateMode, TypeOutfields, TypeOutfieldsType } from '@/api/types/map-schema-types';
 import type {
   TypeGeoviewLayerConfig,
@@ -20,11 +21,11 @@ import {
   LayerEntryConfigInvalidLayerEntryConfigError,
   LayerEntryConfigLayerIdNotFoundError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
-import { GVOGCFeature } from '@/geo/layer/gv-layers/vector/gv-ogc-feature';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { LayerServiceMetadataUnableToFetchError } from '@/core/exceptions/layer-exceptions';
 import { formatError } from '@/core/exceptions/core-exceptions';
-import { GeoUtilities, type SourceFeaturesInfo } from '@/geo/utils/utilities';
+import { GeoUtilities, type CallbackNewMetadataDelegate, type SourceFeaturesInfo } from '@/geo/utils/utilities';
+import { GVOGCFeature } from '@/geo/layer/gv-layers/vector/gv-ogc-feature';
 
 export interface TypeOgcFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig' | 'geoviewLayerType'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.OGC_FEATURE;
@@ -182,11 +183,22 @@ export class OgcFeature extends AbstractGeoViewVector {
     mapProjection?: OLProjection,
     abortSignal?: AbortSignal
   ): Promise<VectorLayerEntryConfig> {
-    const metadataUrl = this.getMetadataAccessPath();
+    // If a proxy was necessary when the metadata were fetched
+    if (this.getIsUsingProxy()) {
+      // Indicate the proxy that was used
+      layerConfig.setProxyUrl(this.getProxyUrl());
+    }
+
+    // The metadata url
+    let metadataUrl = layerConfig.getMetadataAccessPath();
+
+    // If there is a metadata url
     if (metadataUrl) {
-      const queryUrl = metadataUrl.endsWith('/')
-        ? `${metadataUrl}collections/${layerConfig.layerId}/queryables?f=json`
-        : `${metadataUrl}/collections/${layerConfig.layerId}/queryables?f=json`;
+      // The query url
+      metadataUrl = metadataUrl.endsWith('/') ? metadataUrl : `${metadataUrl}/`;
+      const queryUrl = `${metadataUrl}collections/${layerConfig.layerId}/queryables?f=json`;
+
+      // Query the metadata for the queryables
       const queryResultData = await Fetch.fetchJson<TypeLayerMetadataQueryables>(queryUrl, { signal: abortSignal });
 
       // Init the layer metadata
@@ -212,8 +224,14 @@ export class OgcFeature extends AbstractGeoViewVector {
     sourceOptions: SourceOptions<Feature>,
     readOptions: ReadOptions
   ): Promise<SourceFeaturesInfo> {
-    // Query
-    const responseData = await Fetch.fetchJson(`${layerConfig.getDataAccessPath(true)}collections/${layerConfig.layerId}/items?f=json`);
+    // Build the URL
+    let url = `${layerConfig.getDataAccessPath(true)}collections/${layerConfig.layerId}/items`;
+
+    // Tweak url with the proxy if necessary
+    url = layerConfig.getUrlWithProxyWhenNeeded(url);
+
+    // Fetch with proxy fallback support
+    const responseData = await Fetch.fetchJson(url);
 
     // Read the features
     return GeoUtilities.readFeaturesFromGeoJSON(responseData, readOptions.dataProjection, readOptions.featureProjection);
@@ -248,7 +266,17 @@ export class OgcFeature extends AbstractGeoViewVector {
   protected async fetchServiceMetadataOGCFeature(abortSignal?: AbortSignal): Promise<TypeMetadataOGCFeature> {
     try {
       // Fetch it
-      return await OgcFeature.fetchMetadata(this.getMetadataAccessPath(), abortSignal);
+      return await OgcFeature.fetchMetadata(
+        this.getMetadataAccessPath(),
+        this.getConfigProxyUrl(),
+        (proxiedUrl, proxyUsed) => {
+          this.setProxyUrl(proxyUsed);
+
+          // Update the access path to use the proxy if one was required
+          this.setMetadataAccessPath(proxiedUrl);
+        },
+        abortSignal
+      );
     } catch (error: unknown) {
       // Throw
       throw new LayerServiceMetadataUnableToFetchError(
@@ -390,18 +418,39 @@ export class OgcFeature extends AbstractGeoViewVector {
    * Fetches the metadata for a typical OGCFeature class.
    *
    * @param url - The url to query the metadata from
+   * @param configProxyUrl - Proxy URL to use when necessary
+   * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration
    * @throws {RequestAbortedError} When the request was aborted by the caller's signal
    * @throws {ResponseError} When the response is not OK (non-2xx)
    * @throws {ResponseEmptyError} When the JSON response is empty
    */
-  static fetchMetadata(url: string, abortSignal?: AbortSignal): Promise<TypeMetadataOGCFeature> {
+  static fetchMetadata(
+    url: string,
+    configProxyUrl: string | undefined,
+    callbackNewMetadataUrl?: CallbackNewMetadataDelegate,
+    abortSignal?: AbortSignal
+  ): Promise<TypeMetadataOGCFeature> {
     // The url
-    const queryUrl = url.endsWith('/') ? `${url}collections?f=json` : `${url}/collections?f=json`;
+    const queryUrl = url.endsWith('/') ? `${url}collections` : `${url}/collections`;
 
-    // Set it
-    return Fetch.fetchJson<TypeMetadataOGCFeature>(queryUrl, { signal: abortSignal });
+    // Redirect
+    return AbstractGeoViewRaster.fetchMetadata(
+      queryUrl,
+      configProxyUrl,
+      (proxiedUrl, proxyUsed) => {
+        // Remove the /collections from the proxied url used, because we don't want it in the metadata access path
+        if (proxiedUrl.toLowerCase().endsWith('/collections')) {
+          // eslint-disable-next-line no-param-reassign
+          proxiedUrl = proxiedUrl.slice(0, -12);
+        }
+
+        // If a callback was provided, execute it
+        callbackNewMetadataUrl?.(proxiedUrl, proxyUsed);
+      },
+      abortSignal
+    );
   }
 
   // #endregion STATIC PUBLIC METHODS

@@ -363,7 +363,7 @@ export class MapController extends AbstractMapViewerController {
    *
    * @param extent - The extent to zoom to (in map projection)
    * @param useAnimation - Indicates if a zoom animation should be used, default: true
-   * @param fitOptions - Optional fit options to merge scale constraints into
+   * @param fitOptions - Optional fit options for the zoom
    * @returns A promise that resolves when the zoom animation is complete
    * @throws {InvalidExtentError} When the extent is invalid
    */

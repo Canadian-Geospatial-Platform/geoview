@@ -74,6 +74,16 @@ export class GVEsriImage extends AbstractGVRaster {
     // Init the layer options with initial settings
     AbstractGVRaster.initOptionsWithInitialSettings(imageLayerOptions, layerConfig);
 
+    // Hook a custom function to the ImageLoadFunction of the source object to apply proxy when needed
+    olSource.setImageLoadFunction((image, src) => {
+      // Tweak url with the proxy if necessary
+      const theUrl = layerConfig.getUrlWithProxyWhenNeeded(src);
+
+      // Assign the src to the image
+      // eslint-disable-next-line no-param-reassign
+      (image.getImage() as HTMLImageElement).src = theUrl;
+    });
+
     // Create and set the OpenLayer layer
     this.setOLLayer(new ImageLayer(imageLayerOptions));
   }

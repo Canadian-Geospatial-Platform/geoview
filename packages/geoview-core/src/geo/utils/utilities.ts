@@ -289,7 +289,7 @@ export abstract class GeoUtilities {
     const capUrl = this.ensureServiceRequestUrlGetCapabilities(url, 'WMS', layers);
 
     // Redirect
-    const metadataRaw = await this.fetchServiceUrlWithProxyFallback(capUrl, configProxyUrl, callbackNewMetadataUrl, abortSignal);
+    const metadataRaw = await this.fetchTextWithProxyFallback(capUrl, configProxyUrl, callbackNewMetadataUrl, abortSignal);
 
     // Parse it and return
     const metadataParsed = parseXMLToJson<TypeMetadataWMS>(metadataRaw);
@@ -347,7 +347,7 @@ export abstract class GeoUtilities {
     const capUrl = this.ensureServiceRequestUrlGetCapabilities(url, 'WFS');
 
     // Redirect
-    const metadataRaw = await this.fetchServiceUrlWithProxyFallback(capUrl, configProxyUrl, callbackNewMetadataUrl, abortSignal);
+    const metadataRaw = await this.fetchTextWithProxyFallback(capUrl, configProxyUrl, callbackNewMetadataUrl, abortSignal);
 
     // Parse it and return
     const metadataParsed = parseXMLToJson<TypeMetadataWFS>(metadataRaw);
@@ -396,7 +396,7 @@ export abstract class GeoUtilities {
     const capUrl = this.ensureServiceRequestUrlGetCapabilities(url, 'WMTS', layers);
 
     // Redirect
-    const metadataRaw = await this.fetchServiceUrlWithProxyFallback(capUrl, configProxyUrl, callbackNewMetadataUrl, abortSignal);
+    const metadataRaw = await this.fetchTextWithProxyFallback(capUrl, configProxyUrl, callbackNewMetadataUrl, abortSignal);
 
     // Parse it and return
     const metadataParsed = parseXMLToJson<TypeMetadataWMTS>(metadataRaw);
@@ -420,6 +420,57 @@ export abstract class GeoUtilities {
   }
 
   /**
+   * Fetches JSON metadata, retrying through a proxy on network errors.
+   *
+   * @param url - The base URL to fetch the metadata from (e.g., ArcGIS REST endpoint)
+   * @param configProxyUrl - Proxy URL to use when necessary
+   * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the request
+   * @returns A promise resolving to the parsed JSON metadata response
+   * @throws {RequestTimeoutError} When the request exceeds the timeout duration
+   * @throws {RequestAbortedError} When the request was aborted by the caller's signal
+   * @throws {ResponseError} When the response is not OK (non-2xx)
+   * @throws {ResponseEmptyError} When the JSON response is empty
+   * @throws {NetworkError} When a network issue happened and no proxy is available
+   */
+  static async fetchJsonWithProxyFallback<T>(
+    url: string,
+    configProxyUrl: string | undefined,
+    callbackNewMetadataUrl?: CallbackNewMetadataDelegate,
+    abortSignal?: AbortSignal
+  ): Promise<T> {
+    try {
+      // Fetch the metadata and return it
+      return await Fetch.fetchJson<T>(url, { signal: abortSignal });
+    } catch (error: unknown) {
+      // If a network error such as CORS and we have a proxy to try
+      if (error instanceof NetworkError && configProxyUrl) {
+        // If the proxy to use is the Esri proxy
+        if (GeoUtilities.isEsriProxy(configProxyUrl)) {
+          // Encode the layers parameter if present
+          // eslint-disable-next-line no-param-reassign
+          url = encodeLayersParam(url);
+        }
+
+        // We're going to change the metadata url to use a proxy
+        const newProxiedMetadataUrl = `${configProxyUrl}?${url}`;
+
+        // Try again with the proxy this time
+        const responseJson = await Fetch.fetchJson<T>(newProxiedMetadataUrl);
+
+        // Callback about it
+        callbackNewMetadataUrl?.(newProxiedMetadataUrl, configProxyUrl);
+
+        // Return it
+        return responseJson;
+      }
+
+      // Unknown error, throw it higher
+      throw error;
+    }
+  }
+
+  /**
    * Fetches the raw text response from a service URL, retrying through a proxy on network errors.
    *
    * @param url - The service URL to fetch
@@ -433,19 +484,16 @@ export abstract class GeoUtilities {
    * @throws {ResponseEmptyError} When the JSON response is empty
    * @throws {NetworkError} When a network issue happened
    */
-  static async fetchServiceUrlWithProxyFallback(
+  static async fetchTextWithProxyFallback(
     url: string,
     configProxyUrl: string = CONFIG_PROXY_URL,
     callbackNewMetadataUrl?: CallbackNewMetadataDelegate,
     abortSignal?: AbortSignal
   ): Promise<string> {
-    let capabilitiesString;
+    let responseString;
     try {
-      // Fetch the metadata
-      capabilitiesString = await Fetch.fetchText(url, { signal: abortSignal });
-
-      // Return it
-      return capabilitiesString;
+      // Fetch the metadata and return it
+      return await Fetch.fetchText(url, { signal: abortSignal });
     } catch (error: unknown) {
       // If a network error such as CORS
       if (error instanceof NetworkError) {
@@ -460,13 +508,13 @@ export abstract class GeoUtilities {
         const newProxiedMetadataUrl = `${configProxyUrl}?${url}`;
 
         // Try again with the proxy this time
-        capabilitiesString = await Fetch.fetchText(newProxiedMetadataUrl);
+        responseString = await Fetch.fetchText(newProxiedMetadataUrl);
 
         // Callback about it
         callbackNewMetadataUrl?.(newProxiedMetadataUrl, configProxyUrl);
 
         // Return it
-        return capabilitiesString;
+        return responseString;
       }
 
       // Unknown error, throw it higher

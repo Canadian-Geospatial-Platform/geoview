@@ -74,6 +74,12 @@ export class EsriUtilities {
     // User-defined groups do not have metadata provided by the service endpoint.
     if (layerConfig.getEntryTypeIsGroup() && !layerConfig.getIsMetadataLayerGroup()) return layerConfig;
 
+    // If a proxy was necessary when the metadata were fetched
+    if (layer.getIsUsingProxy()) {
+      // Indicate the proxy that was used
+      layerConfig.setProxyUrl(layer.getProxyUrl());
+    }
+
     // If the layer is EsriDynamic or EsriFeature (basically not EsriImage)
     let layerMetadata: TypeMetadataEsriDynamicLayer | TypeMetadataEsriFeatureLayer | TypeMetadataEsriImage;
     if (layerConfig instanceof EsriDynamicLayerEntryConfig || layerConfig instanceof EsriFeatureLayerEntryConfig) {

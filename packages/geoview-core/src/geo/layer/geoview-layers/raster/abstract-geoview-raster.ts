@@ -1,8 +1,7 @@
 import { formatError } from '@/core/exceptions/core-exceptions';
 import { LayerServiceMetadataUnableToFetchError } from '@/core/exceptions/layer-exceptions';
-import { Fetch } from '@/core/utils/fetch-helper';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import type { CallbackNewMetadataDelegate } from '@/geo/utils/utilities';
+import { GeoUtilities, type CallbackNewMetadataDelegate } from '@/geo/utils/utilities';
 
 /**
  * The AbstractGeoViewRaster class.
@@ -38,11 +37,19 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
   protected async fetchServiceMetadataRaster<T>(abortSignal?: AbortSignal): Promise<T> {
     let responseJson;
     try {
+      // The url
+      const url = this.getMetadataAccessPath();
+
       // Fetch it
       responseJson = await AbstractGeoViewRaster.fetchMetadata<T>(
-        this.getMetadataAccessPath(),
+        url,
         this.getConfigProxyUrl(),
-        undefined,
+        (proxiedUrl, proxyUsed) => {
+          this.setProxyUrl(proxyUsed);
+
+          // Update the metadata access path to use the proxy
+          this.setMetadataAccessPath(proxiedUrl);
+        },
         abortSignal
       );
     } catch (error: unknown) {
@@ -72,8 +79,8 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
    * The response is parsed and checked for service-level errors. If an error is found, an exception is thrown.
    *
    * @param url - The base URL to fetch the metadata from (e.g., ArcGIS REST endpoint).
-   * @param configProxyUrl - Proxy URL to use when necessary (not implemented yet..)
-   * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata (not implemented yet..)
+   * @param configProxyUrl - Proxy URL to use when necessary
+   * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
    * @returns A promise resolving to the parsed JSON metadata response.
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
@@ -83,17 +90,29 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
    */
   static fetchMetadata<T>(
     url: string,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     configProxyUrl: string | undefined,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     callbackNewMetadataUrl?: CallbackNewMetadataDelegate,
     abortSignal?: AbortSignal
   ): Promise<T> {
     // The url
-    const parsedUrl = url.toLowerCase().endsWith('json') ? url : `${url}?f=json`;
+    const parsedUrl = `${url}?f=json`;
 
-    // Query and read
-    return Fetch.fetchJson<T>(parsedUrl, { signal: abortSignal });
+    // Redirect to GeoUtilities
+    return GeoUtilities.fetchJsonWithProxyFallback<T>(
+      parsedUrl,
+      configProxyUrl,
+      (proxiedUrl, proxyUsed) => {
+        // Remove the f=json from the proxied url used, because we don't want it in the metadata access path
+        if (proxiedUrl.toLowerCase().endsWith('?f=json')) {
+          // eslint-disable-next-line no-param-reassign
+          proxiedUrl = proxiedUrl.slice(0, -7);
+        }
+
+        // If a callback was provided, execute it
+        callbackNewMetadataUrl?.(proxiedUrl, proxyUsed);
+      },
+      abortSignal
+    );
   }
 
   /**

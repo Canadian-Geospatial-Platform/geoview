@@ -199,9 +199,15 @@ export class EsriFeature extends AbstractGeoViewVector {
     // Cast it to proper type
     const layerConfigEsriFeature = layerConfig as EsriFeatureLayerEntryConfig;
 
+    // Get the url to fetch features
+    let url = layerConfigEsriFeature.getDataAccessPath(true);
+
+    // Tweak url with the proxy if necessary
+    url = layerConfig.getUrlWithProxyWhenNeeded(url);
+
     // Use the basic fetch
     const responseDataCount = await Fetch.fetchEsriJson<{ count: number }>(
-      `${layerConfigEsriFeature.getDataAccessPath(true)}${layerConfigEsriFeature.layerId}/query?f=json&where=1=1&returnCountOnly=true`
+      `${url}${layerConfigEsriFeature.layerId}/query?f=json&where=1=1&returnCountOnly=true`
     );
 
     // Check if feature count is too large
@@ -219,7 +225,7 @@ export class EsriFeature extends AbstractGeoViewVector {
 
     // Retrieve the full ESRI feature data
     const responseData = await EsriFeature.#fetchEsriFeaturesByChunk(
-      `${layerConfigEsriFeature.getDataAccessPath(true)}${layerConfigEsriFeature.layerId}/query?f=json&where=1=1&outfields=*&geometryPrecision=1&maxAllowableOffset=5`,
+      `${url}${layerConfigEsriFeature.layerId}/query?f=json&where=1=1&outfields=*&geometryPrecision=1&maxAllowableOffset=5`,
       responseDataCount.count,
       maxRecords
     );
@@ -295,10 +301,19 @@ export class EsriFeature extends AbstractGeoViewVector {
   ): Promise<TypeMetadataEsriDynamic | TypeMetadataEsriDynamicLayer | TypeMetadataEsriFeature> {
     let responseJson;
     try {
-      // Query
-      responseJson = await Fetch.fetchJson<TypeMetadataEsriDynamic | TypeMetadataEsriDynamicLayer | TypeMetadataEsriFeature>(
-        `${this.getMetadataAccessPath()}?f=json`,
-        { signal: abortSignal }
+      // Query with proxy fallback support
+      responseJson = await AbstractGeoViewRaster.fetchMetadata<
+        TypeMetadataEsriDynamic | TypeMetadataEsriDynamicLayer | TypeMetadataEsriFeature
+      >(
+        this.getMetadataAccessPath(),
+        this.getConfigProxyUrl(),
+        (proxiedUrl, proxyUsed) => {
+          this.setProxyUrl(proxyUsed);
+
+          // Update the metadata access path to use the proxy
+          this.setMetadataAccessPath(proxiedUrl);
+        },
+        abortSignal
       );
     } catch (error: unknown) {
       // Throw
