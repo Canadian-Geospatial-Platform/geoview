@@ -53,7 +53,7 @@ import { useStoreFilterPanelFilterExpression } from '@/core/stores/states/filter
 import { useStoreAppDisplayLanguage } from '@/core/stores/states/app-state';
 import { DateMgt } from '@/core/utils/date-mgt';
 import linkifyHtml from 'linkify-html';
-import { isImage, delay, sanitizeHtmlContent, enhanceLinksAccessibility, containsHtmlTags } from '@/core/utils/utilities';
+import { isImage, sanitizeHtmlContent, enhanceLinksAccessibility, containsHtmlTags } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { createFocusStore, useIsActive, type FocusStore } from '@/core/utils/focus-store';
 import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';

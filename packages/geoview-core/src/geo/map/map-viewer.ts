@@ -1559,6 +1559,21 @@ export class MapViewer {
   }
 
   /**
+   * Calculates the height of the map-info bar in map coordinate units.
+   *
+   * This is useful for understanding how much of the map extent is hidden beneath the map-info bar overlay.
+   * The zoomToExtent function adds this height as extra bottom padding so the layer appears visually centered
+   * in the visible area above the bar.
+   *
+   * @returns The map-info bar height in map coordinate units, or 0 if the element is not found or resolution is unavailable
+   */
+  getHTMLElementMapInfoHeightInMapUnits(): number {
+    const mapInfoHeightPx = this.getHTMLElementMapInfo()?.offsetHeight ?? 0;
+    const resolution = this.getView().getResolution() ?? 0;
+    return mapInfoHeightPx * resolution;
+  }
+
+  /**
    * Retrieves the scale information from the DOM elements.
    *
    * @returns The scale information object
