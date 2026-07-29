@@ -4,7 +4,6 @@ import type { Options as SourceOptions } from 'ol/source/Vector';
 import type { Projection as OLProjection } from 'ol/proj';
 
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
-import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import type { DisplayDateMode, TypeOutfields, TypeOutfieldsType } from '@/api/types/map-schema-types';
 import type {
   TypeGeoviewLayerConfig,
@@ -103,7 +102,7 @@ export class OgcFeature extends AbstractGeoViewVector {
     // If no id
     if (!id) {
       // Fetch the metadata
-      const metadata = await this.fetchServiceMetadataOGCFeature();
+      const metadata = await this.onFetchServiceMetadata();
 
       // Now that we have metadata
       entries = metadata.collections.map((collection) => {
@@ -265,7 +264,8 @@ export class OgcFeature extends AbstractGeoViewVector {
       return await OgcFeature.fetchMetadata(
         this.getMetadataAccessPath(),
         this.getConfigProxyUrl(),
-        (_proxiedUrl, proxyUsed) => {
+        (proxyUsed) => {
+          // Keep in mind a proxy was used for the request
           this.setProxyUrl(proxyUsed);
         },
         abortSignal
@@ -426,24 +426,11 @@ export class OgcFeature extends AbstractGeoViewVector {
     abortSignal?: AbortSignal
   ): Promise<TypeMetadataOGCFeature> {
     // The url
-    const queryUrl = url.endsWith('/') ? `${url}collections` : `${url}/collections`;
+    let queryUrl = url.endsWith('/') ? `${url}collections` : `${url}/collections`;
+    queryUrl = `${queryUrl}?f=json`;
 
-    // Redirect
-    return AbstractGeoViewRaster.fetchMetadata(
-      queryUrl,
-      configProxyUrl,
-      (proxiedUrl, proxyUsed) => {
-        // Remove the /collections from the proxied url used, because we don't want it in the metadata access path
-        if (proxiedUrl.toLowerCase().endsWith('/collections')) {
-          // eslint-disable-next-line no-param-reassign
-          proxiedUrl = proxiedUrl.slice(0, -12);
-        }
-
-        // If a callback was provided, execute it
-        callbackNewMetadataUrl?.(proxiedUrl, proxyUsed);
-      },
-      abortSignal
-    );
+    // Redirect to GeoUtilities
+    return GeoUtilities.fetchJsonWithProxyFallback(queryUrl, configProxyUrl, callbackNewMetadataUrl, abortSignal);
   }
 
   // #endregion STATIC PUBLIC METHODS

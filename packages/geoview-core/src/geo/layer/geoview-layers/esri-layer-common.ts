@@ -32,7 +32,7 @@ import { Fetch } from '@/core/utils/fetch-helper';
 import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import type { EsriRelatedRecordsJsonResponse, EsriRelatedRecordsJsonResponseRelatedRecord } from '@/geo/layer/gv-layers/utils';
-import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
+import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { EsriRenderer } from '@/geo/utils/renderer/esri-renderer';
 import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { EsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
@@ -107,7 +107,7 @@ export class EsriUtilities {
     }
 
     // Validate the metadata response
-    AbstractGeoViewRaster.throwIfMetatadaHasError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerName(), layerMetadata);
+    AbstractGeoViewLayer.throwIfMetatadaHasError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerName(), layerMetadata);
 
     // Set the layer metadata
     layerConfig.setLayerMetadata(layerMetadata);

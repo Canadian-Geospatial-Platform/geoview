@@ -18,4 +18,32 @@ export class ServicesManagement {
     // All good by default
     return outputFormats;
   }
+
+  /**
+   * Converts a WMS service URL to its WFS equivalent by replacing the CGI-bin path segment.
+   *
+   * @param url - The WMS service URL to convert
+   * @returns The URL with 'cgi-bin/wms' replaced by 'cgi-bin/wfs'
+   */
+  static checkUrlSwitchWMSToWFS(url: string): string {
+    // Tweak url
+    const parsedUrl = url.replaceAll('cgi-bin/wms', 'cgi-bin/wfs');
+
+    // Return the tweaked url
+    return parsedUrl;
+  }
+
+  /**
+   * Converts a WFS service URL to its WMS equivalent by replacing the CGI-bin path segment.
+   *
+   * @param url - The WFS service URL to convert
+   * @returns The URL with 'cgi-bin/wfs' replaced by 'cgi-bin/wms'
+   */
+  static checkUrlSwitchWFSToWMS(url: string): string {
+    // Tweak url
+    const parsedUrl = url.replaceAll('cgi-bin/wfs', 'cgi-bin/wms');
+
+    // Return the tweaked url
+    return parsedUrl;
+  }
 }
