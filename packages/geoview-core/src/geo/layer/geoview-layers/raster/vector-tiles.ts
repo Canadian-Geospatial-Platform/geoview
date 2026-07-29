@@ -62,6 +62,20 @@ export class VectorTiles extends AbstractGeoViewRaster {
   }
 
   /**
+   * Overrides the way the metadata is fetched.
+   *
+   * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
+   *
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
+   * @returns A promise with the metadata or undefined when no metadata for the particular layer type.
+   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
+   */
+  protected override onFetchServiceMetadata<T>(abortSignal?: AbortSignal): Promise<T> {
+    // Redirect using default way of fetching service metadata which is to use the url with f=json parameter
+    return this.helperFetchServiceMetadataWithFJson(abortSignal);
+  }
+
+  /**
    * Overrides the way a geoview layer config initializes its layer entries.
    *
    * @returns A promise that resolves once the layer entries have been initialized.

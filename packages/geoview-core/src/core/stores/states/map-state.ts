@@ -811,6 +811,13 @@ export const useStoreMapScale = (): TypeScaleInfo => useStore(useGeoViewStore(),
 /** Selects the current zoom level from the store. */
 export const useStoreMapZoom = (): number => useStore(useGeoViewStore(), (state) => state.mapState.zoom);
 
+/** Selects whether the overview map should be visible based on the current zoom level and the hide-on-zoom setting from the store. */
+export const useStoreMapOverviewShouldBeVisible = (): boolean => {
+  const zoomLevel = useStoreMapZoom();
+  const hideOnZoom = useStoreMapOverviewMapHideZoom();
+  return hideOnZoom === 0 || zoomLevel > hideOnZoom;
+};
+
 // #endregion STATE GETTERS & HOOKS - OTHERS (no match between getter-hook)
 
 // #region STATE SELECTORS MAPCONFIG

@@ -87,7 +87,7 @@ export class GeoJSON extends AbstractGeoViewVector {
     const id = this.getMetadataAccessPath().substring(idx + 1);
 
     // Attempt a fetch of the metadata
-    await this.fetchServiceMetadataGeoJSON();
+    await this.onFetchServiceMetadata();
 
     // Redirect
     return Promise.resolve(

@@ -119,7 +119,7 @@ export class WFS extends AbstractGeoViewVector {
   protected override async onInitLayerEntries(abortSignal?: AbortSignal): Promise<TypeGeoviewLayerConfig> {
     // Fetch metadata
     const rootUrl = this.getMetadataAccessPath();
-    const metadata = await this.fetchServiceMetadataWFS(abortSignal);
+    const metadata = await this.onFetchServiceMetadata(abortSignal);
 
     // The entries
     let entries: TypeLayerEntryShell[] = [];
@@ -337,7 +337,8 @@ export class WFS extends AbstractGeoViewVector {
       metadata = await WFS.fetchMetadata(
         this.getMetadataAccessPath(),
         this.getConfigProxyUrl(),
-        (_proxiedUrl, proxyUsed) => {
+        (proxyUsed) => {
+          // Keep in mind a proxy was used for the request
           this.setProxyUrl(proxyUsed);
         },
         abortSignal
@@ -734,10 +735,8 @@ export class WFS extends AbstractGeoViewVector {
           // If the fetch/parse succeeded, return right away
           if (result) return result;
         } catch (error: unknown) {
-          GeoViewError.logErrorThrowIfAborted(
-            error,
-            `${layerConfig.getLayerNameCascade()} - Failed to retrieve features from WFS using '${candidate.format}', trying next format.`
-          );
+          // Throw on abort to skip remaining format attempts
+          GeoViewError.throwIfAborted(error);
         }
       }
     }
@@ -748,10 +747,8 @@ export class WFS extends AbstractGeoViewVector {
         const url = WFS.#buildGetFeatureUrl(layerConfig, '', bboxExtent, outfields, filter, srsName);
         result = await queryFnFallback(url);
       } catch (error: unknown) {
-        GeoViewError.logErrorThrowIfAborted(
-          error,
-          `${layerConfig.getLayerNameCascade()} - Failed to retrieve features from WFS using no specific format. Nothing can be done.`
-        );
+        // Throw on abort to skip
+        GeoViewError.throwIfAborted(error);
       }
     }
 
@@ -967,8 +964,8 @@ export class WFS extends AbstractGeoViewVector {
         // Get the layer id equivalent for the WMS
         const wmsLayerId = layerConfig.getWmsStylesLayerId();
 
-        // TODO: ADD to ServicesManagement - Tweak the url, all the time, typical wms/wfs url
-        let tweakedUrl = layerConfig.getDataAccessPath().replaceAll('cgi-bin/wfs', 'cgi-bin/wms');
+        // Tweak url when switching from WFS to WMS
+        let tweakedUrl = ServicesManagement.checkUrlSwitchWFSToWMS(layerConfig.getDataAccessPath());
 
         // Make sure the URL has necessary information
         tweakedUrl = GeoUtilities.ensureServiceRequestUrlGetStyles(tweakedUrl, wmsLayerId);
