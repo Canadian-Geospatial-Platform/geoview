@@ -120,14 +120,16 @@ export class GeoViewError extends Error {
   }
 
   /**
-   * Logs the provided error with the given message if the error is not a `RequestAbortedError`. If the error is a `RequestAbortedError`, it rethrows it to be handled by the caller.
+   * Rethrows the error if it is a `RequestAbortedError`, allowing abort signals to propagate through catch blocks.
+   *
+   * Call this at the top of catch blocks that intentionally swallow errors (e.g., format fallback loops)
+   * so that abort-triggered cancellations are not silently eaten.
    *
    * @param error - The error to check
-   * @param _message - The message to log alongside the error if it's not a `RequestAbortedError`
-   * @throws {RequestAbortedError} When the error is an instance of `RequestAbortedError`, it is rethrown for the caller to handle
+   * @throws {RequestAbortedError} When the error is an instance of `RequestAbortedError`
    */
-  static logErrorThrowIfAborted(error: unknown, _message: string): void {
-    // If the error is a RequestAborted error, rethrow it, we want it to be handled by the caller and not eaten by the various attempts to get the feature info
+  static throwIfAborted(error: unknown): void {
+    // If the error is a RequestAborted error, rethrow it so the caller can handle the abort
     if (error instanceof RequestAbortedError) throw error;
   }
 }

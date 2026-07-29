@@ -18,6 +18,7 @@ import { WMS, type TypeWMSLayerConfig } from '@/geo/layer/geoview-layers/raster/
 import { normalizeDatacubeAccessPath } from '@/core/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { WFS } from '@/geo/layer/geoview-layers/vector/wfs';
+import { ServicesManagement } from '@/geo/utils/services-management';
 
 export interface OgcWmsLayerEntryConfigProps extends AbstractBaseLayerEntryConfigProps {
   /** Source settings to apply to the GeoView layer source at creation time. */
@@ -153,7 +154,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    * @returns The service version as read from the metadata attribute
    */
   getVersion(): string | undefined {
-    // Redirect
+    // Read the version from the metadata information
     return this.getServiceMetadata()?.version;
   }
 
@@ -387,8 +388,8 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     // The base url
     let url = this.getMetadataAccessPath()!;
 
-    // Tweak url, all the time, typical wms/wfs url
-    url = url.replaceAll('cgi-bin/wms', 'cgi-bin/wfs');
+    // Tweak url when switching from WMS to WFS
+    url = ServicesManagement.checkUrlSwitchWMSToWFS(url);
 
     // Initializes a WFS layer config
     const layerConfigs = await WFS.processGeoviewLayerConfig(

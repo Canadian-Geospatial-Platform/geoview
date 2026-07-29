@@ -470,7 +470,7 @@ export abstract class GeoUtilities {
         const responseJson = await Fetch.fetchJson<T>(newProxiedMetadataUrl);
 
         // Callback about it
-        callbackNewMetadataUrl?.(newProxiedMetadataUrl, configProxyUrl);
+        callbackNewMetadataUrl?.(configProxyUrl);
 
         // Return it
         return responseJson;
@@ -528,7 +528,7 @@ export abstract class GeoUtilities {
         responseString = await Fetch.fetchText(newProxiedMetadataUrl);
 
         // Callback about it
-        callbackNewMetadataUrl?.(newProxiedMetadataUrl, configProxyUrl);
+        callbackNewMetadataUrl?.(configProxyUrl);
 
         // Return it
         return responseString;
@@ -2032,7 +2032,7 @@ export abstract class GeoUtilities {
 }
 
 /** The type for the function callback for getWMSServiceMetadata() */
-export type CallbackNewMetadataDelegate = (proxiedUrl: string, proxyUsed: string) => void;
+export type CallbackNewMetadataDelegate = (proxyUsed: string) => void;
 
 export interface TypeVectorLegend extends TypeLegend {
   legend: TypeVectorLayerStyles;

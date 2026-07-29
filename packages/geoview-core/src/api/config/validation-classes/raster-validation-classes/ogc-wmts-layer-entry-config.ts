@@ -84,7 +84,7 @@ export class OgcWmtsLayerEntryConfig extends TileLayerEntryConfig {
    */
   override async onRefreshMetadata(_displayDateMode: DisplayDateMode): Promise<void> {
     // Refetch the metadata again with the new date mode and update the config
-    const layerMetadata = await WMTS.fetchMetadata(this.getMetadataAccessPath()!, this.getProxyUrl());
+    const layerMetadata = await WMTS.fetchMetadataWMTS(this.getMetadataAccessPath()!, this.getProxyUrl());
 
     // Init the layer metadata
     await WMTS.initLayerMetadata(this, layerMetadata);
@@ -100,7 +100,7 @@ export class OgcWmtsLayerEntryConfig extends TileLayerEntryConfig {
    * @returns The service version as read from the metadata attribute
    */
   getVersion(): string | undefined {
-    // Redirect
+    // Read the version from the metadata information
     return this.getServiceMetadata()?.version;
   }
 

@@ -88,7 +88,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
         maxWidth: '50px',
       },
       '&[aria-disabled="true"]': {
-        color: theme.palette.geoViewColor.bgColor.dark[450],
+        color: theme.palette.geoViewColor?.bgColor.dark[450],
         cursor: 'not-allowed',
       },
     },
@@ -103,7 +103,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       top: 0,
       left: '4px',
       right: '4px',
-      borderTop: `1px solid ${theme.palette.geoViewColor.grey.light[100]}`,
+      borderTop: `1px solid ${theme.palette.geoViewColor?.grey.light[100]}`,
     },
   },
   appBarBottomSection: {

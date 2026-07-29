@@ -115,7 +115,7 @@ export class WMS extends AbstractGeoViewRaster {
    */
   protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Get the metadata and leave the metadataAccessPath unchanged, even if a proxy had to be used
-    const metadata = await this.fetchServiceMetadataWMS();
+    const metadata = await this.onFetchServiceMetadata();
 
     // Based on the capabilities
     const layers = metadata!.Capability.Layer.Layer;
@@ -334,8 +334,8 @@ export class WMS extends AbstractGeoViewRaster {
       // Fetch the XML
       return this.#fetchXmlServiceMetadata(
         this.getMetadataAccessPath(),
-        (_proxiedUrl, proxyUsed) => {
-          // Indicate the proxy that was used
+        (proxyUsed) => {
+          // Keep in mind a proxy was used for the request
           this.setProxyUrl(proxyUsed);
         },
         abortSignal
@@ -353,8 +353,8 @@ export class WMS extends AbstractGeoViewRaster {
       // If no specific layers to query, fetch and process metadata for the entire service
       return this.#fetchAndProcessSingleWmsMetadata(
         url,
-        (_proxiedUrl, proxyUsed) => {
-          // Indicate the proxy that was used
+        (proxyUsed) => {
+          // Keep in mind a proxy was used for the request
           this.setProxyUrl(proxyUsed);
         },
         abortSignal
@@ -365,8 +365,8 @@ export class WMS extends AbstractGeoViewRaster {
     return this.#fetchAndMergeMultipleWmsMetadata(
       url,
       layerConfigsToQuery,
-      (_proxiedUrl, proxyUsed) => {
-        // Indicate the proxy that was used
+      (proxyUsed) => {
+        // Keep in mind a proxy was used for the request
         this.setProxyUrl(proxyUsed);
       },
       abortSignal

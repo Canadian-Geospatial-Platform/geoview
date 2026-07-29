@@ -249,7 +249,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     const idStringClause = `&objectIds=${objectIds.join(',')}`;
     const outfieldQueryClause = outfield ? `&outFields=${outfield}` : '';
     const outSrClause = `&outSR=${Projection.readEPSGNumber(outProjection)}`;
-    const queryUrl = `${layerEntryConfig.getDataAccessPath(true)}${layerEntryConfig.layerId}/query?${idStringClause}${outfieldQueryClause}${outSrClause}&returnExtentOnly=true&f=json`;
+    const queryUrl = `${layerEntryConfig.getDataAccessPathProxiedWhenNecessary(true)}${layerEntryConfig.layerId}/query?${idStringClause}${outfieldQueryClause}${outSrClause}&returnExtentOnly=true&f=json`;
 
     // Fetch
     const responseJson = await Fetch.fetchEsriJson<EsriQueryJsonResponse>(queryUrl);

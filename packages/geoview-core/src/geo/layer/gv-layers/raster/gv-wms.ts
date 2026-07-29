@@ -530,8 +530,6 @@ export class GVWMS extends AbstractGVRaster {
 
     // TODO: WMS - Add support for other formats. Not quite the GV issue #3134, but similar
 
-    // TODO: WMS - Add support for proxy
-
     // Format the url
     const urlWithOutputJson = GeoUtilities.ensureServiceRequestUrlGetFeature(
       wfsLayerConfig.getMetadataAccessPath()!,
@@ -543,9 +541,12 @@ export class GVWMS extends AbstractGVRaster {
       outProjection.getCode()
     );
 
+    // Tweak url with the proxy if necessary (hard to test this, because the dev proxy isn't accessible through the VPN, but wfsLayerConfig.getIsUsingProxy() should return true if wmsLayerConfig.getIsUsingProxy() is true)
+    const url = wfsLayerConfig.getUrlWithProxyWhenNeeded(urlWithOutputJson);
+
     // Fetch and parse features
     const parsedFeatures = await GVWMS.fetchAndParseFeaturesFromWFSUrl(
-      urlWithOutputJson,
+      url,
       wmsLayerConfig,
       wfsLayerConfig,
       'en' // Language isn't necessary here as we're interested in the features extent
@@ -825,11 +826,8 @@ export class GVWMS extends AbstractGVRaster {
         // Keep in mind, this output format works
         this.#featureOutputFormatWMSWorked = MIME_TYPE_FORMAT_GEOJSON;
       } catch (error: unknown) {
-        // Log if the request was not aborted, when aborted, we don't really care for logging
-        GeoViewError.logErrorThrowIfAborted(
-          error,
-          `${wmsLayerConfig.getLayerNameCascade()} - Failed to retrieve featureMember using GeoJSON, eat the error, we'll try with another format`
-        );
+        // Throw on abort to skip remaining format attempts
+        GeoViewError.throwIfAborted(error);
       }
     }
 
@@ -852,11 +850,8 @@ export class GVWMS extends AbstractGVRaster {
         // Keep in mind, this output format works
         this.#featureOutputFormatWMSWorked = MIME_TYPE_FORMAT_JSON;
       } catch (error: unknown) {
-        // Log if the request was not aborted, when aborted, we don't really care for logging
-        GeoViewError.logErrorThrowIfAborted(
-          error,
-          `${wmsLayerConfig.getLayerNameCascade()} - Failed to retrieve featureMember using JSON, eat the error, we'll try with another format`
-        );
+        // Throw on abort to skip remaining format attempts
+        GeoViewError.throwIfAborted(error);
       }
     }
 
@@ -878,11 +873,8 @@ export class GVWMS extends AbstractGVRaster {
         // Keep in mind, this output format works
         this.#featureOutputFormatWMSWorked = MIME_TYPE_FORMAT_GML;
       } catch (error: unknown) {
-        // Log if the request was not aborted, when aborted, we don't really care for logging
-        GeoViewError.logErrorThrowIfAborted(
-          error,
-          `${wmsLayerConfig.getLayerNameCascade()} - Failed to retrieve featureMember using GML, eat the error, we'll try with another format`
-        );
+        // Throw on abort to skip remaining format attempts
+        GeoViewError.throwIfAborted(error);
       }
     }
 
@@ -903,11 +895,8 @@ export class GVWMS extends AbstractGVRaster {
         // Keep in mind, this output format works
         this.#featureOutputFormatWMSWorked = MIME_TYPE_FORMAT_TEXT_XML;
       } catch (error: unknown) {
-        // Log if the request was not aborted, when aborted, we don't really care for logging
-        GeoViewError.logErrorThrowIfAborted(
-          error,
-          `${wmsLayerConfig.getLayerNameCascade()} - Failed to retrieve featureMember using XML, eat the error, we'll try with another format`
-        );
+        // Throw on abort to skip remaining format attempts
+        GeoViewError.throwIfAborted(error);
       }
     }
 
@@ -926,11 +915,8 @@ export class GVWMS extends AbstractGVRaster {
         );
         featureMember = [featMember];
       } catch (error: unknown) {
-        // Log if the request was not aborted, when aborted, we don't really care for logging
-        GeoViewError.logErrorThrowIfAborted(
-          error,
-          `${wmsLayerConfig.getLayerNameCascade()} - Failed to retrieve featureMember using HTML, eat the error, we'll try with another format`
-        );
+        // Throw on abort to skip remaining format attempts
+        GeoViewError.throwIfAborted(error);
       }
     }
 
@@ -948,11 +934,8 @@ export class GVWMS extends AbstractGVRaster {
         );
         featureMember = [featMember];
       } catch (error: unknown) {
-        // Log if the request was not aborted, when aborted, we don't really care for logging
-        GeoViewError.logErrorThrowIfAborted(
-          error,
-          `${wmsLayerConfig.getLayerNameCascade()} - Failed to retrieve featureMember using plain text. Nothing can be done.`
-        );
+        // Throw on abort to skip
+        GeoViewError.throwIfAborted(error);
       }
     }
 

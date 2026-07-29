@@ -309,9 +309,9 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
       if (!feature?.extent) return;
 
       // Zoom to extent and highlight the feature
-      layerController.zoomToExtentRestrictedAndHighlight(feature.layerPath, feature, true).catch((error: unknown) => {
+      layerController.zoomToExtentRestrictedAndHighlight(feature.layerPath, feature, feature.extent, true).catch((error: unknown) => {
         // Log
-        logger.logPromiseFailed('zoomToExtentRestrictedAndHighlight in handleZoomIn in FeatureInfoNew', error);
+        logger.logPromiseFailed('zoomToExtentRestrictedAndHighlight in handleZoomIn in FeatureInfo', error);
       });
     },
     [feature, layerController]

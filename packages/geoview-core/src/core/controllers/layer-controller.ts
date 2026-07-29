@@ -815,6 +815,7 @@ export class LayerController extends AbstractMapViewerController {
    *
    * @param layerPath - The layer path used to look up scale limits
    * @param feature - The feature info entry to zoom to and highlight
+   * @param extent - The extent to restrictively zoom to
    * @param useAnimation - Optional flag indicating if a zoom animation should be used
    * @param fitOptions - Optional fit options to merge scale constraints into
    * @returns A promise that resolves when the zoom and highlight are complete
@@ -822,14 +823,11 @@ export class LayerController extends AbstractMapViewerController {
   async zoomToExtentRestrictedAndHighlight(
     layerPath: string,
     feature: TypeFeatureInfoEntry,
+    extent: Extent,
     useAnimation = true,
     fitOptions?: GVFitOptions
   ): Promise<void> {
-    // If no extent on the feature, skip
-    if (!feature.extent) return;
-
     // Get extent and center
-    const { extent } = feature;
     const center = getCenter(extent);
 
     // Transform the coordinate and use a state getter here, because we don't need to hook on value changes in this callback function.

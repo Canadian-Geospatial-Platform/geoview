@@ -602,6 +602,7 @@ export class GVEsriImage extends AbstractGVRaster {
     const bounds = this.getMetadataExtent();
     if (!bounds) return promises;
 
+    const baseUrl = layerConfig.getMetadataAccessPathProxiedWhenNecessary(true);
     const bbox = bounds.join(',');
 
     rasterFunctionInfos.forEach((info) => {
@@ -615,7 +616,7 @@ export class GVEsriImage extends AbstractGVRaster {
       const promise = (async () => {
         try {
           const renderingRule = encodeURIComponent(JSON.stringify({ rasterFunction: info.name }));
-          const previewUrl = `${layerConfig.getMetadataAccessPathProxiedWhenNecessary(true)}exportImage?bbox=${bbox}&size=${size},${size}&f=image&renderingRule=${renderingRule}`;
+          const previewUrl = `${baseUrl}exportImage?bbox=${bbox}&size=${size},${size}&f=image&renderingRule=${renderingRule}`;
 
           // Cache the result
           const result = await Fetch.fetchBlobImage(previewUrl);

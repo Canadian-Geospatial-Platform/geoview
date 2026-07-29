@@ -756,9 +756,9 @@ function DataTable({ data, layerPath, containerType, unfilteredFeaturesCount }: 
       // If the extent was found
       if (extent) {
         // Zoom to extent and wait for it to finish
-        layerController.zoomToExtentRestrictedAndHighlight(layerPath, feature, true).catch((error: unknown) => {
+        layerController.zoomToExtentRestrictedAndHighlight(layerPath, feature, extent, true).catch((error: unknown) => {
           // Log
-          logger.logPromiseFailed('zoomToExtentRestrictedAndHighlight in zoomToFeature in FeatureInfoNew', error);
+          logger.logPromiseFailed('zoomToExtentRestrictedAndHighlight in zoomToFeature in DataTable', error);
         });
       } else {
         // Log error
