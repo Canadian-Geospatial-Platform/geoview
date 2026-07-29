@@ -94,7 +94,7 @@ export class WMTS extends AbstractGeoViewRaster {
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
    * @throws {LayerNoCapabilitiesError} When the metadata is empty (no Capabilities)
    */
-  protected override onFetchServiceMetadata<T = TypeMetadataWMTSCapabilities | undefined>(abortSignal?: AbortSignal): Promise<T> {
+  protected override onFetchServiceMetadata<T = TypeMetadataWMTSCapabilities>(abortSignal?: AbortSignal): Promise<T> {
     // Redirect
     return this.fetchServiceMetadataWMTS(abortSignal) as Promise<T>;
   }
@@ -108,7 +108,7 @@ export class WMTS extends AbstractGeoViewRaster {
    */
   protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Fetch the metadata
-    const metadata = await this.fetchServiceMetadataWMTS();
+    const metadata = await this.onFetchServiceMetadata();
 
     // Now that we have metadata
     const layers = metadata?.Contents.Layer;
@@ -228,8 +228,8 @@ export class WMTS extends AbstractGeoViewRaster {
     // Fetch the XML
     return this.#fetchXmlServiceMetadata(
       url,
-      (_proxiedUrl, proxyUsed) => {
-        // Indicate the proxy that was used
+      (proxyUsed) => {
+        // Keep in mind a proxy was used for the request
         this.setProxyUrl(proxyUsed);
       },
       abortSignal
@@ -256,7 +256,7 @@ export class WMTS extends AbstractGeoViewRaster {
     let metadata;
     try {
       // Fetch it
-      metadata = await WMTS.fetchMetadata(metadataUrl, this.getConfigProxyUrl(), callbackNewMetadataUrl, abortSignal);
+      metadata = await WMTS.fetchMetadataWMTS(metadataUrl, this.getConfigProxyUrl(), callbackNewMetadataUrl, abortSignal);
 
       // Return the metadata
       return metadata;
@@ -514,7 +514,7 @@ export class WMTS extends AbstractGeoViewRaster {
    * @throws {ResponseEmptyError} When the JSON response is empty
    * @throws {NetworkError} When a network issue happened
    */
-  static override fetchMetadata<T = TypeMetadataWMTSCapabilities>(
+  static fetchMetadataWMTS<T = TypeMetadataWMTSCapabilities>(
     url: string,
     configProxyUrl: string | undefined,
     callbackNewMetadataUrl?: CallbackNewMetadataDelegate,

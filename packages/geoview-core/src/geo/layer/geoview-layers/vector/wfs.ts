@@ -119,7 +119,7 @@ export class WFS extends AbstractGeoViewVector {
   protected override async onInitLayerEntries(abortSignal?: AbortSignal): Promise<TypeGeoviewLayerConfig> {
     // Fetch metadata
     const rootUrl = this.getMetadataAccessPath();
-    const metadata = await this.fetchServiceMetadataWFS(abortSignal);
+    const metadata = await this.onFetchServiceMetadata(abortSignal);
 
     // The entries
     let entries: TypeLayerEntryShell[] = [];
@@ -337,7 +337,8 @@ export class WFS extends AbstractGeoViewVector {
       metadata = await WFS.fetchMetadata(
         this.getMetadataAccessPath(),
         this.getConfigProxyUrl(),
-        (_proxiedUrl, proxyUsed) => {
+        (proxyUsed) => {
+          // Keep in mind a proxy was used for the request
           this.setProxyUrl(proxyUsed);
         },
         abortSignal

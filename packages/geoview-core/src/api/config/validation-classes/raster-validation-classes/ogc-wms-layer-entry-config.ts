@@ -153,7 +153,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    * @returns The service version as read from the metadata attribute
    */
   getVersion(): string | undefined {
-    // Redirect
+    // Read the version from the metadata information
     return this.getServiceMetadata()?.version;
   }
 

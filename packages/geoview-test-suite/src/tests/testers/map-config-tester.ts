@@ -315,7 +315,9 @@ export class MapConfigTester extends GVAbstractTester {
 
         const mapViewer = await this.#helperCreateMapConfig(test, mapId, [['map.viewSettings.initialView', initialViewConfig]]);
 
-        // Waiting for the zoom on layer extent to happen
+        // GV The zoom on layers happens asynchronously and is not awaited during the map creation processing.
+        // GV Therefore, we have to wait a short while here to let the zoom on layer extent happen.
+        // TODO: Add a promise on the zoom on layer extent, upon map creation processing, so that we can properly await on that promise instead of using a delay here
         await delay(2000);
 
         // Return the map viewer

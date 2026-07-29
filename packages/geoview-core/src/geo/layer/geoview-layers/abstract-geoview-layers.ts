@@ -33,6 +33,7 @@ import { CancelledError, ResponseEmptyError, PromiseRejectErrorWrapper, formatEr
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
+import { GeoUtilities } from '@/geo/utils/utilities';
 
 /** Default display names keyed by GeoView layer type, used when no name is provided in the configuration. */
 const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
@@ -722,6 +723,49 @@ export abstract class AbstractGeoViewLayer {
   }
 
   // #endregion PUBLIC METHODS
+
+  // #region PROTECTED METHODS
+
+  /**
+   * Fetches and processes service metadata for the raster layer.
+   *
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
+   * @returns A promise that resolves to the parsed metadata object, or `undefined` if metadata could not be retrieved or no capabilities were found.
+   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
+   */
+  protected async helperFetchServiceMetadataWithFJson<T>(abortSignal?: AbortSignal): Promise<T> {
+    let responseJson;
+    try {
+      // The url
+      const queryUrl = `${this.getMetadataAccessPath()}?f=json`;
+
+      // Redirect to GeoUtilities
+      responseJson = await GeoUtilities.fetchJsonWithProxyFallback<T>(
+        queryUrl,
+        this.getConfigProxyUrl(),
+        (proxyUsed) => {
+          // Keep in mind a proxy was used for the request
+          this.setProxyUrl(proxyUsed);
+        },
+        abortSignal
+      );
+    } catch (error: unknown) {
+      // Throw
+      throw new LayerServiceMetadataUnableToFetchError(
+        this.getGeoviewLayerId(),
+        this.getLayerEntryNameOrGeoviewLayerName(),
+        formatError(error)
+      );
+    }
+
+    // Validate the metadata response
+    AbstractGeoViewLayer.throwIfMetatadaHasError(this.getGeoviewLayerId(), this.getLayerEntryNameOrGeoviewLayerName(), responseJson);
+
+    // Return it
+    return responseJson;
+  }
+
+  // #endregion PROTECTED METHODS
 
   // #region PRIVATE METHODS
 
@@ -1431,6 +1475,24 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
+   * Throws a LayerServiceMetadataUnableToFetchError if the provided metadata has an error in its content.
+   *
+   * @param geoviewLayerId - The geoview layer id
+   * @param layerName - The layer name
+   * @param metadata - The metadata to check
+   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
+   */
+  // GV The metadata structure can be anything, we only care to check if there's an error inside of it
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  static throwIfMetatadaHasError(geoviewLayerId: string, layerName: string | undefined, metadata: any): void {
+    // If there's an error in the content of the response itself
+    if ('error' in metadata && metadata.error.message) {
+      // Throw the error as read from the metadata error
+      throw new LayerServiceMetadataUnableToFetchError(geoviewLayerId, layerName, formatError(metadata.error.message));
+    }
+  }
+
+  /**
    * Processes a Layer Config by calling 'createGeoViewLayers' on the provided layer.
    *
    * @param layer - The layer to use to process the configuration
@@ -1481,7 +1543,7 @@ export abstract class AbstractGeoViewLayer {
     return promise;
   }
 
-  // #endregion
+  // #endregion STATIC METHODS
 } // END CLASS
 
 // #region EVENT DEFINITIONS
