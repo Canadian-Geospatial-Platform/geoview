@@ -325,7 +325,7 @@ export interface TypeSourceImageStaticInitialConfig extends TypeBaseSourceInitia
 
 export interface TypeSourceCSVInitialConfig extends TypeBaseVectorSourceInitialConfig {
   /**
-   * The separator used in the CSV file. Default = ','.
+   * The separator used in the CSV file.
    * @default ','
    */
   separator?: ',';

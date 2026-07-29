@@ -45,6 +45,8 @@ export type PingResult = {
   isReachable: boolean;
   /** Whether the request required a proxy to succeed. */
   needsProxy: boolean;
+  /** The proxy that was used if necessary */
+  proxyUsed?: string;
   /** The HTTP status code from the server response, or null if no response. */
   status: number | null;
   /** Optional error message describing why the check failed. */
@@ -557,6 +559,7 @@ export async function validateAndPingUrl(
     if (VALID_FILE_EXTENSIONS_REGEX.test(targetUrlWithoutParams) && (await probeFileUrl(`${configProxyUrl}?${targetUrlWithoutParams}`))) {
       result.isReachable = true;
       result.needsProxy = true;
+      result.proxyUsed = configProxyUrl;
       return result;
     }
 
@@ -637,6 +640,7 @@ export async function validateAndPingUrlOGC(
       if (settled.status === 'fulfilled' && isOgcCapabilitiesResponse(settled.value)) {
         result.isReachable = true;
         result.needsProxy = true;
+        result.proxyUsed = configProxyUrl;
         result.error = undefined;
         return result;
       }

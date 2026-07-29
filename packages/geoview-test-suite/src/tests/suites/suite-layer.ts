@@ -53,12 +53,12 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
   protected override async onLaunchTestSuite(): Promise<unknown> {
     // // GV START DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
     // // Test DEBUG
-    // const pDevTest0 = this.#layerTester.testAddWMSLayerWithDatacubeMSI();
-    // const pDevTest1 = this.#layerTester.testAddGeoJSONWithMetadataPolygons();
+    // const pDevTest0 = this.#layerTester.testAddWMSNonna();
+    // // const pDevTest1 = this.#layerTester.testAddGeoJSONWithMetadataPolygons();
     // // const pDevTest2 = this.#layerTester.testAddOGCFeatureWithPygeoapi();
 
     // // Resolve when all
-    // return Promise.all([pDevTest0, pDevTest1]);
+    // return Promise.all([pDevTest0]);
     // // GV END DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
 
     // Test adding layer
@@ -87,14 +87,16 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
     const pLayerEsriImageBadUrl = this.#layerTester.testAddEsriImageBadUrl();
 
     // Test adding layer OWS Mundialis
-    // GV Commented out for now, because the layer is acting strangely, messing up our tests
-    // const pLayerWMSOWSMundialis = this.#layerTester.testAddWMSLayerWithOWSMundialis();
+    const pLayerWMSOWSMundialis = this.#layerTester.testAddWMSLayerWithOWSMundialis();
 
     // Test adding layer
     const pLayerWMSDatacubeOWSMSI = this.#layerTester.testAddWMSLayerWithDatacubeMSI();
 
     // Test adding layer
     const pLayerWMSDatacubeRingFireHalifax = this.#layerTester.testAddWMSLayerWithDatacubeRingOfFire();
+
+    // Test adding layer
+    const pLayerNonnaWithCors = this.#layerTester.testAddWMSNonna();
 
     // Test true negative
     const pLayerWMSBadUrl = this.#layerTester.testAddWMSBadUrl();
@@ -168,9 +170,10 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
       playerEsriFeatureInvalidGeometry,
       pLayerEsriImageElevation,
       pLayerEsriImageBadUrl,
-      // pLayerWMSOWSMundialis,
+      pLayerWMSOWSMundialis,
       pLayerWMSDatacubeOWSMSI,
       pLayerWMSDatacubeRingFireHalifax,
+      pLayerNonnaWithCors,
       pLayerWMSBadUrl,
       pLayerWFSWithGeometCurrentConditions,
       pLayerWFSBadUrl,

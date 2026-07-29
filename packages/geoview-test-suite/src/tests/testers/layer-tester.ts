@@ -615,6 +615,47 @@ export class LayerTester extends GVAbstractTester {
   }
 
   /**
+   * Tests adding a WMS layer from the Nonna service (CORS blocked, requires proxy fallback).
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testAddWMSNonna(): Promise<Test<AbstractGVLayer>> {
+    // Create a random geoview layer id
+    const gvLayerId = generateId();
+    const layerUrl = GVAbstractTester.NONNA_WMS_URL;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.NONNA_WMS_LAYER_ID}`;
+    const gvLayerName = 'Nonna WMS';
+
+    // Test
+    return this.test(
+      `Test Adding WMS Nonna on map (proxy fallback)...`,
+      async (test) => {
+        // Creating the configuration
+        test.addStep('Creating the GeoView Layer Configuration...');
+
+        // Create the config
+        const gvConfig = WMS.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, undefined, false, [
+          { id: GVAbstractTester.NONNA_WMS_LAYER_ID },
+        ]);
+
+        // Redirect to helper to add the layer to the map and wait
+        await this.helperStepAddLayerOnMap(test, gvConfig);
+
+        // Find the layer and wait until its ready
+        return this.helperStepCheckLayerAtLayerPath(test, layerPath);
+      },
+      (test) => {
+        // Perform assertions
+        LayerTester.helperStepAssertLayerExists(test, this.getMapId(), layerPath);
+      },
+      (test) => {
+        // Redirect to helper to clean up and assert
+        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+      }
+    );
+  }
+
+  /**
    * Tests the behavior of initializing a WMS layer configuration using an invalid metadata URL.
    *
    * This test verifies that when a WMS layer configuration is initialized with an invalid or unreachable

@@ -23,7 +23,7 @@ import {
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { LayerServiceMetadataUnableToFetchError } from '@/core/exceptions/layer-exceptions';
 import { formatError } from '@/core/exceptions/core-exceptions';
-import { GeoUtilities, type CallbackNewMetadataDelegate, type SourceFeaturesInfo } from '@/geo/utils/utilities';
+import { GeoUtilities, type ProxyUsedDelegate, type SourceFeaturesInfo } from '@/geo/utils/utilities';
 import { GVOGCFeature } from '@/geo/layer/gv-layers/vector/gv-ogc-feature';
 
 export interface TypeOgcFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig' | 'geoviewLayerType'> {
@@ -71,13 +71,23 @@ export class OgcFeature extends AbstractGeoViewVector {
    *
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
    *
+   * @param callbackProxyUsed - Optional callback executed when a proxy had to be used to fetch the metadata.
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves with the metadata or undefined when no metadata for the particular layer type
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
    */
-  protected override onFetchServiceMetadata<T = TypeMetadataOGCFeature>(abortSignal?: AbortSignal): Promise<T> {
-    // Redirect
-    return this.fetchServiceMetadataOGCFeature(abortSignal) as Promise<T>;
+  protected override async onFetchServiceMetadata(callbackProxyUsed?: ProxyUsedDelegate, abortSignal?: AbortSignal): Promise<unknown> {
+    try {
+      // Fetch it and return
+      return await OgcFeature.fetchMetadata(this.getMetadataAccessPath(), this.getConfigProxyUrl(), callbackProxyUsed, abortSignal);
+    } catch (error: unknown) {
+      // Throw
+      throw new LayerServiceMetadataUnableToFetchError(
+        this.getGeoviewLayerId(),
+        this.getLayerEntryNameOrGeoviewLayerName(),
+        formatError(error)
+      );
+    }
   }
 
   /**
@@ -102,7 +112,7 @@ export class OgcFeature extends AbstractGeoViewVector {
     // If no id
     if (!id) {
       // Fetch the metadata
-      const metadata = await this.onFetchServiceMetadata();
+      const metadata = await this.fetchServiceMetadata<TypeMetadataOGCFeature>();
 
       // Now that we have metadata
       entries = metadata.collections.map((collection) => {
@@ -182,12 +192,6 @@ export class OgcFeature extends AbstractGeoViewVector {
     mapProjection?: OLProjection,
     abortSignal?: AbortSignal
   ): Promise<VectorLayerEntryConfig> {
-    // If a proxy was necessary when the metadata were fetched
-    if (this.getIsUsingProxy()) {
-      // Indicate the proxy that was used
-      layerConfig.setProxyUrl(this.getProxyUrl());
-    }
-
     // The metadata url
     const metadataUrl = layerConfig.getMetadataAccessPath();
 
@@ -248,39 +252,6 @@ export class OgcFeature extends AbstractGeoViewVector {
   }
 
   // #endregion OVERRIDES
-
-  // #region PROTECTED METHODS
-
-  /**
-   * Fetches the OGC Feature metadata for the layer.
-   *
-   * @param abortSignal - Optional {@link AbortSignal} used to cancel the metadata fetch
-   * @returns A promise that resolves with the OGC Feature metadata
-   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
-   */
-  protected async fetchServiceMetadataOGCFeature(abortSignal?: AbortSignal): Promise<TypeMetadataOGCFeature> {
-    try {
-      // Fetch it
-      return await OgcFeature.fetchMetadata(
-        this.getMetadataAccessPath(),
-        this.getConfigProxyUrl(),
-        (proxyUsed) => {
-          // Keep in mind a proxy was used for the request
-          this.setProxyUrl(proxyUsed);
-        },
-        abortSignal
-      );
-    } catch (error: unknown) {
-      // Throw
-      throw new LayerServiceMetadataUnableToFetchError(
-        this.getGeoviewLayerId(),
-        this.getLayerEntryNameOrGeoviewLayerName(),
-        formatError(error)
-      );
-    }
-  }
-
-  // #endregion PROTECTED METHODS
 
   // #region STATIC PUBLIC METHODS
 
@@ -412,7 +383,7 @@ export class OgcFeature extends AbstractGeoViewVector {
    *
    * @param url - The url to query the metadata from
    * @param configProxyUrl - Proxy URL to use when necessary
-   * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
+   * @param callbackProxyUsed - Optional callback executed when a proxy had to be used to fetch the metadata.
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration
    * @throws {RequestAbortedError} When the request was aborted by the caller's signal
@@ -422,7 +393,7 @@ export class OgcFeature extends AbstractGeoViewVector {
   static fetchMetadata(
     url: string,
     configProxyUrl: string | undefined,
-    callbackNewMetadataUrl?: CallbackNewMetadataDelegate,
+    callbackProxyUsed?: ProxyUsedDelegate,
     abortSignal?: AbortSignal
   ): Promise<TypeMetadataOGCFeature> {
     // The url
@@ -430,7 +401,7 @@ export class OgcFeature extends AbstractGeoViewVector {
     queryUrl = `${queryUrl}?f=json`;
 
     // Redirect to GeoUtilities
-    return GeoUtilities.fetchJsonWithProxyFallback(queryUrl, configProxyUrl, callbackNewMetadataUrl, abortSignal);
+    return GeoUtilities.fetchJsonWithProxyFallback(queryUrl, configProxyUrl, callbackProxyUsed, abortSignal);
   }
 
   // #endregion STATIC PUBLIC METHODS

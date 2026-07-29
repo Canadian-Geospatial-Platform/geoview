@@ -18,7 +18,7 @@ import { GVWKB } from '@/geo/layer/gv-layers/vector/gv-wkb';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { LayerServiceMetadataUnableToFetchError } from '@/core/exceptions/layer-exceptions';
 import { formatError } from '@/core/exceptions/core-exceptions';
-import { GeoUtilities, type SourceFeaturesInfo } from '@/geo/utils/utilities';
+import { GeoUtilities, type ProxyUsedDelegate, type SourceFeaturesInfo } from '@/geo/utils/utilities';
 import type { DisplayDateMode } from '@/api/types/map-schema-types';
 
 export interface TypeWkbLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
@@ -66,13 +66,37 @@ export class WKB extends AbstractGeoViewVector {
    *
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
    *
+   * @param callbackProxyUsed - Optional callback executed when a proxy had to be used to fetch the metadata (not implemented)
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves with the metadata or undefined when no metadata for the particular layer type
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
    */
-  protected override onFetchServiceMetadata<T = TypeMetadataGeoJSON | undefined>(abortSignal?: AbortSignal): Promise<T> {
-    // Redirect
-    return this.fetchServiceMetadataWKB(abortSignal) as Promise<T>;
+  protected override async onFetchServiceMetadata(_callbackProxyUsed?: ProxyUsedDelegate, abortSignal?: AbortSignal): Promise<unknown> {
+    // If metadataAccessPath ends with .meta or .json
+    if (
+      this.getMetadataAccessPathIfExists()?.toLowerCase().endsWith('.meta') ||
+      this.getMetadataAccessPathIfExists()?.toLowerCase().endsWith('.json')
+    ) {
+      try {
+        // Fetch it and return
+        return await WKB.fetchMetadata(this.getMetadataAccessPath(), abortSignal);
+      } catch (error: unknown) {
+        // Throw
+        throw new LayerServiceMetadataUnableToFetchError(
+          this.getGeoviewLayerId(),
+          this.getLayerEntryNameOrGeoviewLayerName(),
+          formatError(error)
+        );
+      }
+    }
+
+    // The metadataAccessPath didn't seem like it was containing actual metadata, so it was skipped
+    logger.logWarning(
+      `The metadataAccessPath '${this.getMetadataAccessPathIfExists()}' didn't seem like it was containing actual metadata, so it was skipped`
+    );
+
+    // None
+    return Promise.resolve(undefined);
   }
 
   /**
@@ -87,7 +111,7 @@ export class WKB extends AbstractGeoViewVector {
     const id = this.getMetadataAccessPath().substring(idx + 1);
 
     // Attempt a fetch of the metadata
-    await this.onFetchServiceMetadata();
+    await this.fetchServiceMetadata();
 
     // Redirect
     return Promise.resolve(
@@ -214,45 +238,6 @@ export class WKB extends AbstractGeoViewVector {
   }
 
   // #endregion OVERRIDES
-
-  // #region PROTECTED METHODS
-
-  /**
-   * Fetches the WKB service metadata.
-   *
-   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
-   * @returns A promise that resolves with the metadata or undefined when no metadata for the particular layer type
-   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
-   */
-  protected async fetchServiceMetadataWKB(abortSignal?: AbortSignal): Promise<TypeMetadataGeoJSON | undefined> {
-    // If metadataAccessPath ends with .meta or .json
-    if (
-      this.getMetadataAccessPathIfExists()?.toLowerCase().endsWith('.meta') ||
-      this.getMetadataAccessPathIfExists()?.toLowerCase().endsWith('.json')
-    ) {
-      try {
-        // Fetch it
-        return await WKB.fetchMetadata(this.getMetadataAccessPath(), abortSignal);
-      } catch (error: unknown) {
-        // Throw
-        throw new LayerServiceMetadataUnableToFetchError(
-          this.getGeoviewLayerId(),
-          this.getLayerEntryNameOrGeoviewLayerName(),
-          formatError(error)
-        );
-      }
-    }
-
-    // The metadataAccessPath didn't seem like it was containing actual metadata, so it was skipped
-    logger.logWarning(
-      `The metadataAccessPath '${this.getMetadataAccessPathIfExists()}' didn't seem like it was containing actual metadata, so it was skipped`
-    );
-
-    // None
-    return Promise.resolve(undefined);
-  }
-
-  // #endregion PROTECTED METHODS
 
   // #region STATIC PUBLIC METHODS
 

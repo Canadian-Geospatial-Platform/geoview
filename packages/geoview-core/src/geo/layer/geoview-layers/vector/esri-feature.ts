@@ -25,7 +25,7 @@ import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstrac
 import { GVEsriFeature } from '@/geo/layer/gv-layers/vector/gv-esri-feature';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { formatError } from '@/core/exceptions/core-exceptions';
-import { GeoUtilities, type SourceFeaturesInfo } from '@/geo/utils/utilities';
+import { GeoUtilities, type ProxyUsedDelegate, type SourceFeaturesInfo } from '@/geo/utils/utilities';
 import type { DisplayDateMode } from '@/api/types/map-schema-types';
 
 export interface TypeEsriFeatureLayerConfig extends TypeGeoviewLayerConfig {
@@ -79,15 +79,14 @@ export class EsriFeature extends AbstractGeoViewVector {
    * the url is MapServer/?f=json, sometimes MapServer/{layerId}?f=json and sometimes FeatureServer/?f=json
    * which all return different payloads.
    *
+   * @param callbackProxyUsed - Optional callback executed when a proxy had to be used to fetch the metadata.
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves with the metadata or undefined when no metadata for the particular layer type
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
    */
-  protected override onFetchServiceMetadata<T = TypeMetadataEsriDynamic | TypeMetadataEsriDynamicLayer | TypeMetadataEsriFeature>(
-    abortSignal?: AbortSignal
-  ): Promise<T> {
+  protected override onFetchServiceMetadata(callbackProxyUsed?: ProxyUsedDelegate, abortSignal?: AbortSignal): Promise<unknown> {
     // Redirect
-    return this.helperFetchServiceMetadataWithFJson(abortSignal);
+    return this.helperFetchServiceMetadataWithFJson(callbackProxyUsed, abortSignal);
   }
 
   /**
@@ -98,7 +97,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    */
   protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Fetch metadata, in this init context we fetch either via /MapServer/{layerId} or /FeatureServer url endpoints
-    const metadata = await this.onFetchServiceMetadata();
+    const metadata = await this.fetchServiceMetadata<TypeMetadataEsriDynamic | TypeMetadataEsriDynamicLayer | TypeMetadataEsriFeature>();
 
     // If metadata was fetched successfully
     const entries = [];
@@ -176,7 +175,7 @@ export class EsriFeature extends AbstractGeoViewVector {
     mapProjection?: OLProjection,
     abortSignal?: AbortSignal
   ): Promise<EsriFeatureLayerEntryConfig> {
-    return EsriUtilities.initLayerMetadata(this, layerConfig, displayDateMode, abortSignal);
+    return EsriUtilities.initLayerMetadata(layerConfig, displayDateMode, abortSignal);
   }
 
   /**
