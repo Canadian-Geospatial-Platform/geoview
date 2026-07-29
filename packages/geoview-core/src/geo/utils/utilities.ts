@@ -274,7 +274,7 @@ export abstract class GeoUtilities {
    * @param url - The url of the WMS server
    * @param configProxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
    * @param layers - The layers to query, separated by comma
-   * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
+   * @param callbackProxyUsed - Optional callback executed when a proxy had to be used to fetch the metadata.
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves with the parsed WMS metadata
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration
@@ -287,14 +287,14 @@ export abstract class GeoUtilities {
     url: string,
     configProxyUrl: string = CONFIG_PROXY_URL,
     layers?: string,
-    callbackNewMetadataUrl?: CallbackNewMetadataDelegate,
+    callbackProxyUsed?: ProxyUsedDelegate,
     abortSignal?: AbortSignal
   ): Promise<TypeMetadataWMSCapabilities> {
     // Make sure the URL has necessary information
     const capUrl = this.ensureServiceRequestUrlGetCapabilities(url, 'WMS', layers);
 
     // Redirect
-    const metadataRaw = await this.fetchTextWithProxyFallback(capUrl, configProxyUrl, callbackNewMetadataUrl, abortSignal);
+    const metadataRaw = await this.fetchTextWithProxyFallback(capUrl, configProxyUrl, callbackProxyUsed, abortSignal);
 
     // Parse it and return
     const metadataParsed = parseXMLToJson<TypeMetadataWMS>(metadataRaw);
@@ -333,7 +333,7 @@ export abstract class GeoUtilities {
    *
    * @param url - The url of the WFS server
    * @param configProxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
-   * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
+   * @param callbackProxyUsed - Optional callback executed when a proxy had to be used to fetch the metadata.
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves with the parsed WFS metadata
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration
@@ -345,14 +345,14 @@ export abstract class GeoUtilities {
   static async getWFSServiceMetadata(
     url: string,
     configProxyUrl: string = CONFIG_PROXY_URL,
-    callbackNewMetadataUrl?: CallbackNewMetadataDelegate,
+    callbackProxyUsed?: ProxyUsedDelegate,
     abortSignal?: AbortSignal
   ): Promise<TypeMetadataWFSCapabilities> {
     // Make sure the URL has necessary information
     const capUrl = this.ensureServiceRequestUrlGetCapabilities(url, 'WFS');
 
     // Redirect
-    const metadataRaw = await this.fetchTextWithProxyFallback(capUrl, configProxyUrl, callbackNewMetadataUrl, abortSignal);
+    const metadataRaw = await this.fetchTextWithProxyFallback(capUrl, configProxyUrl, callbackProxyUsed, abortSignal);
 
     // Parse it and return
     const metadataParsed = parseXMLToJson<TypeMetadataWFS>(metadataRaw);
@@ -381,7 +381,7 @@ export abstract class GeoUtilities {
    * @param url - The url of the WMTS server
    * @param configProxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
    * @param layers - The layers to query, separated by comma
-   * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
+   * @param callbackProxyUsed - Optional callback executed when a proxy had to be used to fetch the metadata.
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves with the parsed WMTS metadata
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration
@@ -394,14 +394,14 @@ export abstract class GeoUtilities {
     url: string,
     configProxyUrl: string = CONFIG_PROXY_URL,
     layers?: string,
-    callbackNewMetadataUrl?: CallbackNewMetadataDelegate,
+    callbackProxyUsed?: ProxyUsedDelegate,
     abortSignal?: AbortSignal
   ): Promise<TypeMetadataWMTSCapabilities> {
     // Make sure the URL has necessary information
     const capUrl = this.ensureServiceRequestUrlGetCapabilities(url, 'WMTS', layers);
 
     // Redirect
-    const metadataRaw = await this.fetchTextWithProxyFallback(capUrl, configProxyUrl, callbackNewMetadataUrl, abortSignal);
+    const metadataRaw = await this.fetchTextWithProxyFallback(capUrl, configProxyUrl, callbackProxyUsed, abortSignal);
 
     // Parse it and return
     const metadataParsed = parseXMLToJson<TypeMetadataWMTS>(metadataRaw);
@@ -429,7 +429,7 @@ export abstract class GeoUtilities {
    *
    * @param url - The base URL to fetch the metadata from (e.g., ArcGIS REST endpoint)
    * @param configProxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
-   * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata
+   * @param callbackProxyUsed - Optional callback executed when a proxy had to be used to fetch the metadata.
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the request
    * @returns A promise resolving to the parsed JSON metadata response
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration
@@ -441,7 +441,7 @@ export abstract class GeoUtilities {
   static async fetchJsonWithProxyFallback<T>(
     url: string,
     configProxyUrl: string = CONFIG_PROXY_URL,
-    callbackNewMetadataUrl?: CallbackNewMetadataDelegate,
+    callbackProxyUsed?: ProxyUsedDelegate,
     abortSignal?: AbortSignal
   ): Promise<T> {
     try {
@@ -470,7 +470,7 @@ export abstract class GeoUtilities {
         const responseJson = await Fetch.fetchJson<T>(newProxiedMetadataUrl);
 
         // Callback about it
-        callbackNewMetadataUrl?.(configProxyUrl);
+        callbackProxyUsed?.(configProxyUrl);
 
         // Return it
         return responseJson;
@@ -486,7 +486,7 @@ export abstract class GeoUtilities {
    *
    * @param url - The service URL to fetch
    * @param configProxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
-   * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
+   * @param callbackProxyUsed - Optional callback executed when a proxy had to be used to fetch the metadata.
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves with the response text as a string
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration
@@ -498,7 +498,7 @@ export abstract class GeoUtilities {
   static async fetchTextWithProxyFallback(
     url: string,
     configProxyUrl: string = CONFIG_PROXY_URL,
-    callbackNewMetadataUrl?: CallbackNewMetadataDelegate,
+    callbackProxyUsed?: ProxyUsedDelegate,
     abortSignal?: AbortSignal
   ): Promise<string> {
     let responseString;
@@ -528,7 +528,7 @@ export abstract class GeoUtilities {
         responseString = await Fetch.fetchText(newProxiedMetadataUrl);
 
         // Callback about it
-        callbackNewMetadataUrl?.(configProxyUrl);
+        callbackProxyUsed?.(configProxyUrl);
 
         // Return it
         return responseString;
@@ -2032,7 +2032,7 @@ export abstract class GeoUtilities {
 }
 
 /** The type for the function callback for getWMSServiceMetadata() */
-export type CallbackNewMetadataDelegate = (proxyUsed: string) => void;
+export type ProxyUsedDelegate = (proxyUsed: string) => void;
 
 export interface TypeVectorLegend extends TypeLegend {
   legend: TypeVectorLayerStyles;

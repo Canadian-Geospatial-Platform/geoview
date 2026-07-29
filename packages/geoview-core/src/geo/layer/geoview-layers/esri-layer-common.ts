@@ -36,7 +36,6 @@ import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geovie
 import { EsriRenderer } from '@/geo/utils/renderer/esri-renderer';
 import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { EsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
-import type { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import {
   LayerEntryConfigLayerIdEsriMustBeNumberError,
   LayerNotFeatureLayerError,
@@ -67,18 +66,13 @@ export class EsriUtilities {
    * @returns A promise that resolves once the layer configuration has its metadata processed
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
    */
-  static async initLayerMetadata<
-    T extends EsriDynamic | EsriFeature | EsriImage,
-    U extends EsriDynamicLayerEntryConfig | EsriFeatureLayerEntryConfig | EsriImageLayerEntryConfig,
-  >(layer: T, layerConfig: U, displayDateMode?: DisplayDateMode, abortSignal?: AbortSignal): Promise<U> {
+  static async initLayerMetadata<T extends EsriDynamicLayerEntryConfig | EsriFeatureLayerEntryConfig | EsriImageLayerEntryConfig>(
+    layerConfig: T,
+    displayDateMode?: DisplayDateMode,
+    abortSignal?: AbortSignal
+  ): Promise<T> {
     // User-defined groups do not have metadata provided by the service endpoint.
     if (layerConfig.getEntryTypeIsGroup() && !layerConfig.getIsMetadataLayerGroup()) return layerConfig;
-
-    // If a proxy was necessary when the metadata were fetched
-    if (layer.getIsUsingProxy()) {
-      // Indicate the proxy that was used
-      layerConfig.setProxyUrl(layer.getProxyUrl());
-    }
 
     // If the layer is EsriDynamic or EsriFeature (basically not EsriImage)
     let layerMetadata: TypeMetadataEsriDynamicLayer | TypeMetadataEsriFeatureLayer | TypeMetadataEsriImage;

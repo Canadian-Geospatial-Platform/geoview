@@ -15,6 +15,7 @@ import { logger } from '@/core/utils/logger';
 import { generateId, extractGeotiffColorMap } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
 import type { DisplayDateMode } from '@/api/types/map-schema-types';
+import type { ProxyUsedDelegate } from '@/geo/utils/utilities';
 
 export interface TypeGeoTIFFLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.GEOTIFF;
@@ -61,13 +62,38 @@ export class GeoTIFF extends AbstractGeoViewRaster {
    *
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
    *
+   * @param callbackProxyUsed - Optional callback executed when a proxy had to be used to fetch the metadata (not implemented)
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
    * @returns A promise with the metadata or undefined when no metadata for the particular layer type.
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
    */
-  protected override onFetchServiceMetadata<T = TypeMetadataGeoTIFF | undefined>(abortSignal?: AbortSignal): Promise<T> {
-    // Redirect
-    return this.fetchServiceMetadataGeoTiff(abortSignal) as Promise<T>;
+  protected override async onFetchServiceMetadata(_callbackProxyUsed?: ProxyUsedDelegate, abortSignal?: AbortSignal): Promise<unknown> {
+    // If metadataAccessPath does not point to a .tif file, we try to fetch metadata
+    const metadataAccessPath = this.getMetadataAccessPath();
+
+    try {
+      // GV: This is currently only for datacube sources that provide a JSON metadata file
+      if (metadataAccessPath && !metadataAccessPath.endsWith('.tif')) {
+        const url = metadataAccessPath.endsWith('/') ? metadataAccessPath.slice(0, -1) : metadataAccessPath;
+
+        // Fetch it and return
+        return await Fetch.fetchJson<TypeMetadataGeoTIFF>(url, { signal: abortSignal });
+      }
+
+      // The metadataAccessPath didn't seem like it was containing actual metadata, so it was skipped
+      logger.logWarning(
+        `The metadataAccessPath '${metadataAccessPath}' didn't seem like it was containing actual metadata, so it was skipped`
+      );
+
+      // None
+      return Promise.resolve(undefined);
+    } catch (error: unknown) {
+      // Error likely means there is no metadata to fetch
+      logger.logWarning(
+        `The metadataAccessPath '${metadataAccessPath}' didn't seem like it was containing actual metadata, so it was skipped. Error: ${error}`
+      );
+      return Promise.resolve(undefined);
+    }
   }
 
   /**
@@ -160,45 +186,6 @@ export class GeoTIFF extends AbstractGeoViewRaster {
   }
 
   // #endregion OVERRIDES
-
-  // #region PROTECTED METHODS
-
-  /**
-   * Fetches metadata for a GeoTIFF layer, if available.
-   *
-   * @param abortSignal - Optional {@link AbortSignal} used to cancel the metadata fetch.
-   * @returns A promise that resolves to the metadata or undefined if not available.
-   */
-  protected async fetchServiceMetadataGeoTiff(abortSignal?: AbortSignal): Promise<TypeMetadataGeoTIFF | undefined> {
-    // If metadataAccessPath does not point to a .tif file, we try to fetch metadata
-    const metadataAccessPath = this.getMetadataAccessPath();
-
-    try {
-      // GV: This is currently only for datacube sources that provide a JSON metadata file
-      if (metadataAccessPath && !metadataAccessPath.endsWith('.tif')) {
-        const url = metadataAccessPath.endsWith('/') ? metadataAccessPath.slice(0, -1) : metadataAccessPath;
-
-        // Fetch it
-        return await Fetch.fetchJson<TypeMetadataGeoTIFF>(url, { signal: abortSignal });
-      }
-
-      // The metadataAccessPath didn't seem like it was containing actual metadata, so it was skipped
-      logger.logWarning(
-        `The metadataAccessPath '${metadataAccessPath}' didn't seem like it was containing actual metadata, so it was skipped`
-      );
-
-      // None
-      return Promise.resolve(undefined);
-    } catch (error: unknown) {
-      // Error likely means there is no metadata to fetch
-      logger.logWarning(
-        `The metadataAccessPath '${metadataAccessPath}' didn't seem like it was containing actual metadata, so it was skipped. Error: ${error}`
-      );
-      return Promise.resolve(undefined);
-    }
-  }
-
-  // #endregion PROTECTED METHODS
 
   // #region STATIC METHODS
 

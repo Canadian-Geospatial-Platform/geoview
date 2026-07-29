@@ -47,7 +47,7 @@ import { parseXMLToJson } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { GVWFS } from '@/geo/layer/gv-layers/vector/gv-wfs';
 import { formatError, ResponseEmptyError } from '@/core/exceptions/core-exceptions';
-import { GeoUtilities, type CallbackNewMetadataDelegate, type SourceFeaturesInfo } from '@/geo/utils/utilities';
+import { GeoUtilities, type ProxyUsedDelegate, type SourceFeaturesInfo } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { logger } from '@/core/utils/logger';
 import { ServicesManagement } from '@/geo/utils/services-management';
@@ -98,14 +98,30 @@ export class WFS extends AbstractGeoViewVector {
    *
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
    *
+   * @param callbackProxyUsed - Optional callback executed when a proxy had to be used to fetch the metadata.
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves with the metadata or undefined when no metadata for the particular layer type
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
    * @throws {LayerNoCapabilitiesError} When the metadata is empty (no Capabilities)
    */
-  protected override onFetchServiceMetadata<T = TypeMetadataWFSCapabilities>(abortSignal?: AbortSignal): Promise<T> {
-    // Redirect
-    return this.fetchServiceMetadataWFS(abortSignal) as Promise<T>;
+  protected override async onFetchServiceMetadata(callbackProxyUsed?: ProxyUsedDelegate, abortSignal?: AbortSignal): Promise<unknown> {
+    try {
+      // Fetch it and return
+      return await WFS.fetchMetadata(this.getMetadataAccessPath(), this.getConfigProxyUrl(), callbackProxyUsed, abortSignal);
+    } catch (error: unknown) {
+      // If empty response
+      if (error instanceof ResponseEmptyError) {
+        // Throw no capabilities response
+        throw new LayerNoCapabilitiesError(this.getGeoviewLayerId(), this.getLayerEntryNameOrGeoviewLayerName());
+      }
+
+      // Throw standard
+      throw new LayerServiceMetadataUnableToFetchError(
+        this.getGeoviewLayerId(),
+        this.getLayerEntryNameOrGeoviewLayerName(),
+        formatError(error)
+      );
+    }
   }
 
   /**
@@ -119,7 +135,7 @@ export class WFS extends AbstractGeoViewVector {
   protected override async onInitLayerEntries(abortSignal?: AbortSignal): Promise<TypeGeoviewLayerConfig> {
     // Fetch metadata
     const rootUrl = this.getMetadataAccessPath();
-    const metadata = await this.onFetchServiceMetadata(abortSignal);
+    const metadata = await this.fetchServiceMetadata<TypeMetadataWFSCapabilities>(abortSignal);
 
     // The entries
     let entries: TypeLayerEntryShell[] = [];
@@ -220,12 +236,6 @@ export class WFS extends AbstractGeoViewVector {
     // Cast it
     const layerConfigWFS = layerConfig as OgcWfsLayerEntryConfig;
 
-    // If a proxy was necessary when the metadata were fetched
-    if (this.getIsUsingProxy()) {
-      // Indicate the proxy that was used
-      layerConfigWFS.setProxyUrl(this.getProxyUrl());
-    }
-
     // Build url
     let outputFormat = WFS.extractDescribeFeatureOutputFormat(this.getMetadata()!);
 
@@ -319,50 +329,6 @@ export class WFS extends AbstractGeoViewVector {
   }
 
   // #endregion OVERRIDES
-
-  // #region PROTECTED METHODS
-
-  /**
-   * Fetches the WFS service metadata.
-   *
-   * @param abortSignal - Optional {@link AbortSignal} used to cancel the fetch process
-   * @returns A promise that resolves with the WFS metadata
-   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
-   * @throws {LayerNoCapabilitiesError} When the metadata is empty (no Capabilities)
-   */
-  protected async fetchServiceMetadataWFS(abortSignal?: AbortSignal): Promise<TypeMetadataWFSCapabilities> {
-    let metadata;
-    try {
-      // Fetch it
-      metadata = await WFS.fetchMetadata(
-        this.getMetadataAccessPath(),
-        this.getConfigProxyUrl(),
-        (proxyUsed) => {
-          // Keep in mind a proxy was used for the request
-          this.setProxyUrl(proxyUsed);
-        },
-        abortSignal
-      );
-
-      // Return it
-      return metadata;
-    } catch (error: unknown) {
-      // If empty response
-      if (error instanceof ResponseEmptyError) {
-        // Throw no capabilities response
-        throw new LayerNoCapabilitiesError(this.getGeoviewLayerId(), this.getLayerEntryNameOrGeoviewLayerName());
-      }
-
-      // Throw standard
-      throw new LayerServiceMetadataUnableToFetchError(
-        this.getGeoviewLayerId(),
-        this.getLayerEntryNameOrGeoviewLayerName(),
-        formatError(error)
-      );
-    }
-  }
-
-  // #endregion PROTECTED METHODS
 
   // #region STATIC METHODS
 
@@ -622,7 +588,7 @@ export class WFS extends AbstractGeoViewVector {
    *
    * @param url - The url to query the metadata from
    * @param configProxyUrl - Proxy URL to use when necessary
-   * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
+   * @param callbackProxyUsed - Optional callback executed when a proxy had to be used to fetch the metadata.
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    * @returns A promise that resolves with the metadata when fetched or undefined when capabilities weren't found
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration
@@ -634,11 +600,11 @@ export class WFS extends AbstractGeoViewVector {
   static fetchMetadata(
     url: string,
     configProxyUrl: string | undefined,
-    callbackNewMetadataUrl?: CallbackNewMetadataDelegate,
+    callbackProxyUsed?: ProxyUsedDelegate,
     abortSignal?: AbortSignal
   ): Promise<TypeMetadataWFSCapabilities> {
     // Redirect
-    return GeoUtilities.getWFSServiceMetadata(url, configProxyUrl, callbackNewMetadataUrl, abortSignal);
+    return GeoUtilities.getWFSServiceMetadata(url, configProxyUrl, callbackProxyUsed, abortSignal);
   }
 
   /**

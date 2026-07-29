@@ -19,9 +19,10 @@ import {
   LayerEntryConfigLayerIdNotFoundError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
 import { GVXYZTiles } from '@/geo/layer/gv-layers/tile/gv-xyz-tiles';
-import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { AbstractGeoViewLayer, type PreprocessLayerConfigResult } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import type { TypeProjection } from '@/geo/utils/projection';
 import { validateAndPingUrl } from '@/core/utils/utilities';
+import type { ProxyUsedDelegate } from '@/geo/utils/utilities';
 
 // ? Do we keep this TODO ? Dynamic parameters can be placed on the dataAccessPath and initial settings can be used on xyz-tiles.
 // TODO: Implement method to validate XYZ tile service
@@ -79,13 +80,14 @@ export class XYZTiles extends AbstractGeoViewRaster {
    *
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
    *
+   * @param callbackProxyUsed - Optional callback executed when a proxy had to be used to fetch the metadata.
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
    * @returns A promise with the metadata or undefined when no metadata for the particular layer type.
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
    */
-  protected override onFetchServiceMetadata<T>(abortSignal?: AbortSignal): Promise<T> {
+  protected override onFetchServiceMetadata(callbackProxyUsed?: ProxyUsedDelegate, abortSignal?: AbortSignal): Promise<unknown> {
     // Redirect using default way of fetching service metadata which is to use the url with f=json parameter
-    return this.helperFetchServiceMetadataWithFJson(abortSignal);
+    return this.helperFetchServiceMetadataWithFJson(callbackProxyUsed, abortSignal);
   }
 
   /**
@@ -146,6 +148,37 @@ export class XYZTiles extends AbstractGeoViewRaster {
   }
 
   /**
+   * Preprocesses the layer config by pinging the data access path to verify the tile service is reachable.
+   *
+   * @param layerConfig - The XYZ tiles layer entry configuration to preprocess
+   * @returns A promise that resolves with the ping result indicating proxy usage
+   * @throws {LayerServiceMetadataUnableToFetchError} When the tile service is not reachable
+   */
+  protected override async onPreprocessLayerConfig(layerConfig: XYZTilesLayerEntryConfig): Promise<PreprocessLayerConfigResult> {
+    // Get the configProxyUrl
+    const configProxyUrl = this.getConfigProxyUrl();
+
+    // Test to reach one tile to see if the service is reachable
+    const pingResult = await validateAndPingUrl(layerConfig.getDataAccessPath(), configProxyUrl);
+
+    // PRETEND:
+    pingResult.needsProxy = true;
+    pingResult.proxyUsed = configProxyUrl;
+
+    // If not reachable, throw an error immediately
+    if (!pingResult.isReachable) {
+      throw new LayerServiceMetadataUnableToFetchError(
+        layerConfig.getGeoviewLayerId(),
+        layerConfig.getLayerNameCascade(),
+        new Error(pingResult.error)
+      );
+    }
+
+    // Return the test
+    return { pingResult };
+  }
+
+  /**
    * Overrides the way the layer metadata is processed.
    *
    * @param layerConfig - The layer entry configuration to process
@@ -168,26 +201,6 @@ export class XYZTiles extends AbstractGeoViewRaster {
     // GV Possibly caused by a difference between OGC and ESRI XYZ Tiles, but only have ESRI XYZ Tiles as example currently
     // GV Also, might be worth checking out OGCMapTile for this? https://openlayers.org/en/latest/examples/ogc-map-tiles-geographic.html
     // GV Seems like it can deal with less specificity in the url and can handle the x y z internally?
-
-    // Get the configProxyUrl
-    const configProxyUrl = this.getConfigProxyUrl();
-
-    // Test to reach one tile to see if the service is reachable
-    const test = await validateAndPingUrl(layerConfig.getDataAccessPath(), configProxyUrl);
-
-    // If not reachable, throw an error immediately
-    if (!test.isReachable)
-      throw new LayerServiceMetadataUnableToFetchError(
-        layerConfig.getGeoviewLayerId(),
-        layerConfig.getLayerNameCascade(),
-        new Error(test.error)
-      );
-
-    // If a proxy was necessary when the metadata were fetched
-    if (test.needsProxy) {
-      // Indicate the proxy that was used
-      layerConfig.setProxyUrl(configProxyUrl);
-    }
 
     // Get the metadata
     const metadata = this.getMetadata();

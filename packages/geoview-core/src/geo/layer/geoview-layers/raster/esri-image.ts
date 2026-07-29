@@ -12,6 +12,7 @@ import { EsriUtilities } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import type { DisplayDateMode } from '@/api/types/map-schema-types';
+import type { ProxyUsedDelegate } from '@/geo/utils/utilities';
 
 export interface TypeEsriImageLayerConfig extends TypeGeoviewLayerConfig {
   geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_IMAGE;
@@ -58,13 +59,14 @@ export class EsriImage extends AbstractGeoViewRaster {
    *
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
    *
+   * @param callbackProxyUsed - Optional callback executed when a proxy had to be used to fetch the metadata.
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
    * @returns A promise with the metadata or undefined when no metadata for the particular layer type.
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
    */
-  protected override onFetchServiceMetadata<T>(abortSignal?: AbortSignal): Promise<T> {
+  protected override onFetchServiceMetadata(callbackProxyUsed?: ProxyUsedDelegate, abortSignal?: AbortSignal): Promise<unknown> {
     // Redirect using default way of fetching service metadata which is to use the url with f=json parameter
-    return this.helperFetchServiceMetadataWithFJson(abortSignal);
+    return this.helperFetchServiceMetadataWithFJson(callbackProxyUsed, abortSignal);
   }
 
   /**
@@ -74,7 +76,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    */
   protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Attempt a fetch of the metadata
-    await this.onFetchServiceMetadata();
+    await this.fetchServiceMetadata();
 
     // Redirect
     return Promise.resolve(
@@ -104,7 +106,7 @@ export class EsriImage extends AbstractGeoViewRaster {
     mapProjection?: OLProjection,
     abortSignal?: AbortSignal
   ): Promise<EsriImageLayerEntryConfig> {
-    return EsriUtilities.initLayerMetadata(this, layerConfig, displayDateMode, abortSignal);
+    return EsriUtilities.initLayerMetadata(layerConfig, displayDateMode, abortSignal);
   }
 
   /**

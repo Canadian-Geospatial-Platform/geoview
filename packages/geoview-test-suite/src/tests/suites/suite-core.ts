@@ -50,6 +50,21 @@ export class GVTestSuiteCore extends GVAbstractTestSuite {
    * @returns A promise that resolves when tests are completed
    */
   protected override onLaunchTestSuite(): Promise<unknown> {
+    // // GV START DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
+    // // Test DEBUG
+    // const pDevTest0 = this.#coreTester.testGetWMSServiceMetadata();
+    // const pDevTest1 = this.#coreTester.testGetWMSServiceMetadataBadUrl();
+    // const pDevTest2 = this.#coreTester.testGetWFSServiceMetadata();
+    // const pDevTest3 = this.#coreTester.testGetWFSServiceMetadataBadUrl();
+    // const pDevTest4 = this.#coreTester.testGetWMTSServiceMetadata();
+    // const pDevTest5 = this.#coreTester.testGetWMTSServiceMetadataBadUrl();
+    // const pDevTest6 = this.#coreTester.testFetchJsonWithProxyFallback();
+    // const pDevTest7 = this.#coreTester.testFetchJsonWithProxyFallbackBadUrl();
+
+    // // Resolve when all
+    // return Promise.all([pDevTest0, pDevTest1, pDevTest2, pDevTest3, pDevTest4, pDevTest5, pDevTest6, pDevTest7]);
+    // // GV END DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
+
     // Test validateAndPingUrl (simple)
     const pSimplePingValid = this.#coreTester.testSimplePingValidReachable();
     const pSimplePingXyz = this.#coreTester.testSimplePingXyzTileUrl();
@@ -62,6 +77,18 @@ export class GVTestSuiteCore extends GVAbstractTestSuite {
 
     const pGeometryCollectionLegendStyles = this.#coreTester.testGeometryCollectionLegendStyles();
 
+    // Test GeoUtilities service metadata functions
+    const pWmsMetadata = this.#coreTester.testGetWMSServiceMetadata();
+    const pWmsMetadataBadUrl = this.#coreTester.testGetWMSServiceMetadataBadUrl();
+    const pWfsMetadata = this.#coreTester.testGetWFSServiceMetadata();
+    const pWfsMetadataBadUrl = this.#coreTester.testGetWFSServiceMetadataBadUrl();
+    const pWmtsMetadata = this.#coreTester.testGetWMTSServiceMetadata();
+    const pWmtsMetadataBadUrl = this.#coreTester.testGetWMTSServiceMetadataBadUrl();
+
+    // Test GeoUtilities fetch with proxy fallback
+    const pFetchJsonProxy = this.#coreTester.testFetchJsonWithProxyFallback();
+    const pFetchJsonProxyBadUrl = this.#coreTester.testFetchJsonWithProxyFallbackBadUrl();
+
     // Resolve when all
     return Promise.all([
       pSimplePingValid,
@@ -71,6 +98,14 @@ export class GVTestSuiteCore extends GVAbstractTestSuite {
       pPingUnreachable,
       pPingWmsService,
       pGeometryCollectionLegendStyles,
+      pWmsMetadata,
+      pWmsMetadataBadUrl,
+      pWfsMetadata,
+      pWfsMetadataBadUrl,
+      pWmtsMetadata,
+      pWmtsMetadataBadUrl,
+      pFetchJsonProxy,
+      pFetchJsonProxyBadUrl,
     ]);
   }
 }
