@@ -441,7 +441,7 @@ export class UIController extends AbstractMapViewerController {
         this.getControllersRegistry()
           .mapController.zoomToExtent(currentExtent, true, { padding: [0, 0, 0, 0] }) // Precise zooming, no default padding to be applied in this case
           .then(() => {
-            // TODO: CLEANUP - Removed the commented code if it still behaves correctly now, commented on 2026-07-22
+            // TODO: CLEANUP - Remove the commented code if it still behaves correctly now, commented on 2026-07-22
             // Force render
             // this.getMapViewer().map.renderSync();
           })
