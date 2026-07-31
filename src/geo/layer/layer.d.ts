@@ -1,5 +1,4 @@
 import type { GeoJSONObject } from 'ol/format/GeoJSON';
-import type { FitOptions } from 'ol/View';
 import type { TypeOutfieldsType } from '@/api/types/map-schema-types';
 import type { TypeGeoviewLayerConfig, TypeLayerStatus, TypeMosaicRule } from '@/api/types/layer-schema-types';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
@@ -8,6 +7,7 @@ import { type EventDelegateBase } from '@/api/events/event-helper';
 import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import type { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import type { TemporalMode, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
+import type { GVFitOptions } from '@/core/utils/constant';
 import type { TypeLegendItem } from '@/core/components/layers/types';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import type { ControllerLayerItemVisibilityChangedDelegate, LayerController } from '@/core/controllers/layer-controller';
@@ -361,7 +361,7 @@ export declare class LayerApi {
      * @returns A promise that resolves when the zoom operation is complete
      * @throws {NoBoundsError} When the layer doesn't have bounds
      */
-    zoomToLayerExtent(layerPath: string, useAnimation?: boolean, fitOptions?: FitOptions): Promise<void>;
+    zoomToLayerExtent(layerPath: string, useAnimation?: boolean, fitOptions?: GVFitOptions): Promise<void>;
     /**
      * Sets the visibility of a single legend item on a regular (non-group) layer.
      *

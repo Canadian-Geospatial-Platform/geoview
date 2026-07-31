@@ -4,12 +4,12 @@ import type { Options as SourceOptions } from 'ol/source/Vector';
 import type { Projection as OLProjection } from 'ol/proj';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import type { DisplayDateMode, TypeOutfields, TypeOutfieldsType } from '@/api/types/map-schema-types';
-import type { TypeGeoviewLayerConfig, TypeMetadataWFS, VectorStrategy } from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerConfig, TypeMetadataWFSCapabilities, VectorStrategy } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { OgcWfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
-import { GVWFS } from '@/geo/layer/gv-layers/vector/gv-wfs';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
+import { GVWFS } from '@/geo/layer/gv-layers/vector/gv-wfs';
 import { type CallbackNewMetadataDelegate, type SourceFeaturesInfo } from '@/geo/utils/utilities';
 export interface TypeWFSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'geoviewLayerType'> {
     geoviewLayerType: typeof CONST_LAYER_TYPES.WFS;
@@ -38,7 +38,7 @@ export declare class WFS extends AbstractGeoViewVector {
      *
      * @returns The strongly-typed metadata specific to this layer
      */
-    getMetadata(): TypeMetadataWFS | undefined;
+    getMetadata(): TypeMetadataWFSCapabilities | undefined;
     /**
      * Overrides the way the metadata is fetched.
      *
@@ -49,7 +49,7 @@ export declare class WFS extends AbstractGeoViewVector {
      * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
      * @throws {LayerNoCapabilitiesError} When the metadata is empty (no Capabilities)
      */
-    protected onFetchServiceMetadata<T = TypeMetadataWFS>(abortSignal?: AbortSignal): Promise<T>;
+    protected onFetchServiceMetadata<T = TypeMetadataWFSCapabilities>(abortSignal?: AbortSignal): Promise<T>;
     /**
      * Overrides the way a geoview layer config initializes its layer entries.
      *
@@ -101,7 +101,7 @@ export declare class WFS extends AbstractGeoViewVector {
      * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
      * @throws {LayerNoCapabilitiesError} When the metadata is empty (no Capabilities)
      */
-    protected fetchServiceMetadataWFS(abortSignal?: AbortSignal): Promise<TypeMetadataWFS>;
+    protected fetchServiceMetadataWFS(abortSignal?: AbortSignal): Promise<TypeMetadataWFSCapabilities>;
     /**
      * Creates a configuration object for an WFS Feature layer.
      *
@@ -173,14 +173,13 @@ export declare class WFS extends AbstractGeoViewVector {
      * @param metadata - The parsed WFS capabilities metadata object
      * @returns The detected output format string for the DescribeFeatureType operation, or an empty string if no suitable value is found
      */
-    static extractDescribeFeatureOutputFormat(metadata: TypeMetadataWFS): string;
+    static extractDescribeFeatureOutputFormat(metadata: TypeMetadataWFSCapabilities): string;
     /**
      * Fetches the metadata for a typical WFS class.
      *
      * @param url - The url to query the metadata from
      * @param configProxyUrl - Proxy URL to use when necessary
      * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
-     * The parameter sent in the callback is the proxy prefix with the '?' at the end.
      * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
      * @returns A promise that resolves with the metadata when fetched or undefined when capabilities weren't found
      * @throws {RequestTimeoutError} When the request exceeds the timeout duration
@@ -189,60 +188,7 @@ export declare class WFS extends AbstractGeoViewVector {
      * @throws {ResponseEmptyError} When the JSON response is empty
      * @throws {NetworkError} When a network issue happened
      */
-    static fetchMetadata(url: string, configProxyUrl: string | undefined, callbackNewMetadataUrl?: CallbackNewMetadataDelegate, abortSignal?: AbortSignal): Promise<TypeMetadataWFS | undefined>;
-    /**
-     * Fetches WFS metadata for a given service URL and layer ID, then retrieves
-     * the corresponding geometry type from the DescribeFeatureType response.
-     *
-     * This method performs the following steps:
-     * 1. Normalizes the base service URL.
-     * 2. Fetches WFS capabilities or metadata from the service.
-     * 3. Determines the WFS version and the proper output format for DescribeFeatureType.
-     * 4. Builds and executes the DescribeFeatureType request.
-     * 5. Extracts and returns the geometry type (e.g., `"Point"`, `"LineString"`, `"Polygon"`).
-     *
-     * @param url - The full WFS or WMS service URL from which to derive the base endpoint
-     * @param layerId - The name or identifier of the layer to inspect
-     * @param abortSignal - Optional {@link AbortSignal} that allows the request to be aborted
-     * @returns A promise that resolves with the list of fields for the layer
-     */
-    static fetchMetadataAndRetrieveFieldsInfo(url: string, layerId: string, abortSignal?: AbortSignal): Promise<TypeOutfields[]>;
-    /**
-     * Fetches and parses a WFS `DescribeFeatureType` response from the given URL,
-     * automatically selecting the appropriate parsing method (JSON or XML)
-     * based on the specified output format.
-     *
-     * @param url - The DescribeFeatureType request URL
-     * @param outputFormat - The expected response format (`"application/json"` or XML-based MIME type)
-     * @param abortSignal - Optional {@link AbortSignal} that allows the fetch request to be aborted
-     * @returns A promise that resolves to an array of field definitions describing the feature type's properties
-     */
-    static fetchDescribeFeature(url: string, outputFormat: string, abortSignal?: AbortSignal): Promise<TypeOutfields[]>;
-    /**
-     * Fetches and parses a WFS `DescribeFeatureType` response in JSON format.
-     *
-     * This method is used when the WFS server supports
-     * `outputFormat=application/json` for DescribeFeatureType requests.
-     * It extracts and returns the list of feature type properties.
-     *
-     * @param url - The DescribeFeatureType request URL
-     * @param abortSignal - Optional {@link AbortSignal} to abort the fetch request
-     * @returns A promise that resolves to an array of feature type field definitions extracted from the JSON response
-     */
-    static fetchDescribeFeatureJson(url: string, abortSignal?: AbortSignal): Promise<TypeOutfields[]>;
-    /**
-     * Fetches and parses a WFS `DescribeFeatureType` response in XML format.
-     *
-     * This method is used for servers that only support XML DescribeFeatureType responses
-     * (e.g., GeoServer, MapServer, or QGIS Server without JSON output).
-     * It converts the XML schema to JSON and extracts the list of feature properties
-     * from the complex type definition.
-     *
-     * @param url - The DescribeFeatureType request URL
-     * @param abortSignal - Optional {@link AbortSignal} to abort the fetch request
-     * @returns A promise that resolves to an array of feature type field definitions extracted from the XML schema
-     */
-    static fetchDescribeFeatureXML(url: string, abortSignal?: AbortSignal): Promise<TypeOutfields[]>;
+    static fetchMetadata(url: string, configProxyUrl: string | undefined, callbackNewMetadataUrl?: CallbackNewMetadataDelegate, abortSignal?: AbortSignal): Promise<TypeMetadataWFSCapabilities>;
     /**
      * Determines whether a given WFS feature type field represents a geometry property.
      *
@@ -258,12 +204,27 @@ export declare class WFS extends AbstractGeoViewVector {
      *
      * Extracts the field definition from the layer's metadata, interprets its WFS type
      * (e.g., `xsd:int`, `xsd:date`), and maps it to a normalized internal type
-     * (`'string'`, `'number'`, or `'date'`).
+     * (`'string'`, `'number'`, `'date'`, or `'dateTime'`).
      *
      * @param fieldName - The name of the field whose type should be retrieved
      * @param layerConfig - The WFS layer configuration containing metadata definitions
-     * @returns The normalized field type (`'string'`, `'number'`, or `'date'`)
+     * @returns The normalized field type (`'string'`, `'number'`, `'date'`, or `'dateTime'`)
      */
     static getFieldType(fieldName: string, layerConfig: OgcWfsLayerEntryConfig): TypeOutfieldsType;
+    /**
+     * Generic format fallback strategy: tries the preferred format first, then falls back to no specific format.
+     * Accepts custom parse functions so callers can plug in their own fetch+parse pipeline.
+     *
+     * @param layerConfig - The WFS layer entry configuration
+     * @param parseFnJSON - A function that receives a URL and parses the response as JSON
+     * @param parseFnFallback - A function that receives a URL and parses the response as text (used when JSON format is unavailable or fails)
+     * @param bboxExtent - Optional bbox extent string (e.g., 'minx,miny,maxx,maxy,EPSG:3978')
+     * @param outfields - Optional list of fields to return (propertyName parameter)
+     * @param filter - Optional OGC XML filter string
+     * @param srsName - Optional output projection code (e.g., 'EPSG:3857')
+     * @returns A promise that resolves with the result of the parse function
+     * @throws {LayerInvalidFeatureInfoFormatWFSError} When no format produces usable results
+     */
+    static fetchWithFormatFallback<T>(layerConfig: OgcWfsLayerEntryConfig, queryFnJSON: (url: string) => Promise<T>, queryFnFallback: (url: string) => Promise<T>, bboxExtent?: string, outfields?: TypeOutfields[], filter?: string, srsName?: string): Promise<T>;
 }
 //# sourceMappingURL=wfs.d.ts.map

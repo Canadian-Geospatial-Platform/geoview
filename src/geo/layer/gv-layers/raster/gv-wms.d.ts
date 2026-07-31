@@ -11,8 +11,8 @@ import type { OgcWfsLayerEntryConfig } from '@/api/config/validation-classes/vec
 import type { TypeFeatureInfoResult, TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import type { TypeLegend } from '@/api/types/layer-schema-types';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
-import type { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import type { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 /**
  * Manages a WMS layer.
@@ -21,20 +21,6 @@ export declare class GVWMS extends AbstractGVRaster {
     #private;
     /** The max feature count returned by the GetFeatureInfo */
     static readonly DEFAULT_MAX_FEATURE_COUNT: number;
-    /** Mime/type for GEOJSON */
-    static readonly MIME_TYPE_FORMAT_GEOJSON = "application/geojson";
-    /** Mime/type for JSON */
-    static readonly MIME_TYPE_FORMAT_JSON = "application/json";
-    /** Mime/type for GML */
-    static readonly MIME_TYPE_FORMAT_GML = "application/vnd.ogc.gml";
-    /** Mime/type for XML */
-    static readonly MIME_TYPE_FORMAT_APP_XML = "application/xml";
-    /** Mime/type for XML */
-    static readonly MIME_TYPE_FORMAT_TEXT_XML = "text/xml";
-    /** Mime/type for HTML */
-    static readonly MIME_TYPE_FORMAT_HTML = "text/html";
-    /** Mime/type for Text */
-    static readonly MIME_TYPE_FORMAT_TEXT = "text/plain";
     /**
      * The default Get Feature Info tolerance to use for QGIS Server services which are more picky by default (really needs to be zoomed in to get results, by default).
      * WMS needed a bigger tolerance to pick up more results during the spatial queries (to make it look more like the tolerance for other layer types)

@@ -1,4 +1,4 @@
-import type { ConfigClassOrType, TypeGeoviewLayerConfig, TypeMetadataWFS, TypeMetadataWFSFeatureTypeListFeatureType } from '@/api/types/layer-schema-types';
+import type { ConfigClassOrType, TypeGeoviewLayerConfig, TypeMetadataWFSCapabilities, TypeMetadataWFSFeatureTypeListFeatureType } from '@/api/types/layer-schema-types';
 import type { TypeOutfields } from '@/api/types/map-schema-types';
 import type { TypeWFSLayerConfig } from '@/geo/layer/geoview-layers/vector/wfs';
 import type { VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
@@ -23,7 +23,7 @@ export declare class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
      *
      * @returns The strongly-typed service metadata specific to this layer entry config
      */
-    getServiceMetadata(): TypeMetadataWFS | undefined;
+    getServiceMetadata(): TypeMetadataWFSCapabilities | undefined;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
      *

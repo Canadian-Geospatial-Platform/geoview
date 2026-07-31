@@ -1,8 +1,7 @@
 import type BaseLayer from 'ol/layer/Base';
 import type { GeoJSONObject } from 'ol/format/GeoJSON';
-import type { FitOptions } from 'ol/View';
 import type { Projection as OLProjection } from 'ol/proj';
-import { type Extent, type TypeFeatureInfoEntryPartial } from '@/api/types/map-schema-types';
+import { type Extent, type TypeFeatureInfoEntry, type TypeFeatureInfoEntryPartial } from '@/api/types/map-schema-types';
 import type { TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeLayerStatus, TypeMosaicMethod, TypeMosaicOperation, TypeMosaicRule } from '@/api/types/layer-schema-types';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
@@ -14,6 +13,7 @@ import type { LayerDomain } from '@/core/domains/layer-domain';
 import type { UIDomain } from '@/core/domains/ui-domain';
 import type { TemporalMode, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import type { TypeLayersViewDisplayState, TypeLegendItem } from '@/core/components/layers/types';
+import { type GVFitOptions } from '@/core/utils/constant';
 import { MapViewer } from '@/geo/map/map-viewer';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
@@ -223,11 +223,11 @@ export declare class LayerController extends AbstractMapViewerController {
      *
      * @param layerPath - The path of the layer to zoom to
      * @param useAnimation - Optional flag indicating if a zoom animation should be used
-     * @param fitOptions - Optional OL fit options to configure the zoom
+     * @param fitOptions - Optional fit options to configure the zoom
      * @returns A promise that resolves when the zoom animation is complete
      * @throws {NoBoundsError} When the layer doesn't have bounds
      */
-    zoomToLayerExtent(layerPath: string, useAnimation?: boolean, fitOptions?: FitOptions): Promise<void>;
+    zoomToLayerExtent(layerPath: string, useAnimation?: boolean, fitOptions?: GVFitOptions): Promise<void>;
     /**
      * Zooms to the specified extent, clamping the zoom level to the layer's visible scale range.
      *
@@ -236,12 +236,26 @@ export declare class LayerController extends AbstractMapViewerController {
      * the layer's visibility boundaries.
      *
      * @param layerPath - The layer path used to look up scale limits
-     * @param extent - The extent to zoom to
+     * @param extent - The extent to zoom to (in current map projection)
      * @param useAnimation - Optional flag indicating if a zoom animation should be used
-     * @param fitOptions - Optional OL fit options to merge scale constraints into
+     * @param fitOptions - Optional fit options to merge scale constraints into
      * @returns A promise that resolves when the zoom animation is complete
      */
-    zoomToExtentRestricted(layerPath: string, extent: Extent, useAnimation?: boolean, fitOptions?: FitOptions): Promise<void>;
+    zoomToExtentRestricted(layerPath: string, extent: Extent, useAnimation?: boolean, fitOptions?: GVFitOptions): Promise<void>;
+    /**
+     * Zooms to a feature's extent clamped to the layer's visible scale range, then highlights the feature.
+     *
+     * After the zoom completes, adds a click marker at the feature center, highlights the bounding box
+     * with a fade-out effect, and sets the feature as the active highlight.
+     *
+     * @param layerPath - The layer path used to look up scale limits
+     * @param feature - The feature info entry to zoom to and highlight
+     * @param extent - The extent to restrictively zoom to
+     * @param useAnimation - Optional flag indicating if a zoom animation should be used
+     * @param fitOptions - Optional fit options to merge scale constraints into
+     * @returns A promise that resolves when the zoom and highlight are complete
+     */
+    zoomToExtentRestrictedAndHighlight(layerPath: string, feature: TypeFeatureInfoEntry, extent: Extent, useAnimation?: boolean, fitOptions?: GVFitOptions): Promise<void>;
     /**
      * Gets the raster function previews for the ESRI image layer.
      *

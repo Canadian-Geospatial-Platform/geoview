@@ -114,13 +114,16 @@ export declare abstract class EsriRenderer {
      */
     static getStyleGeometry(settings: TypeKindOfVectorSettings): TypeStyleGeometry | undefined;
 }
+/** The supported ESRI renderer type identifiers. */
 export type EsriRendererTypes = 'uniqueValue' | 'simple' | 'classBreaks';
+/** Base properties shared by all ESRI renderer types. */
 export type EsriBaseRenderer = {
     type: EsriRendererTypes;
     visualVariables?: TypeLayerStyleVisualVariable[];
     drawInClassOrder?: boolean;
 };
 type TypeEsriColor = [number, number, number, number];
+/** ESRI unique value renderer configuration. */
 export interface EsriUniqueValueRenderer extends EsriBaseRenderer {
     type: 'uniqueValue';
     defaultLabel: string;
@@ -134,16 +137,20 @@ export interface EsriUniqueValueRenderer extends EsriBaseRenderer {
     valueExpression?: string;
     valueExpressionTitle?: string;
 }
+/** A single unique value entry with its symbol and label. */
 export type EsriUniqueValueInfo = {
     description: string;
     label: string;
     symbol: EsriSymbol;
     value: string;
 };
+/** Union of all supported ESRI symbol types. */
 export type EsriSymbol = EsriBaseSymbol | EsriSimpleMarkerSymbol | EsriSimpleLineSymbol | EsriPictureMarkerSymbol;
+/** Base properties shared by all ESRI symbol types. */
 export type EsriBaseSymbol = {
     type: 'esriSMS' | 'esriSLS' | 'esriPMS' | 'esriSFS';
 };
+/** ESRI simple marker symbol configuration for point geometries. */
 export interface EsriSimpleMarkerSymbol extends EsriBaseSymbol {
     angle: number;
     color: TypeEsriColor;
@@ -154,6 +161,7 @@ export interface EsriSimpleMarkerSymbol extends EsriBaseSymbol {
     xoffset: number;
     yoffset: number;
 }
+/** ESRI simple fill symbol configuration for polygon geometries. */
 export interface EsriSimpleFillSymbol extends EsriBaseSymbol {
     color: TypeEsriColor;
     outline: EsriSimpleLineSymbol;
@@ -161,15 +169,20 @@ export interface EsriSimpleFillSymbol extends EsriBaseSymbol {
     type: 'esriSFS';
     width: number;
 }
+/** ESRI fill style identifiers for polygon symbols. */
 export type EsriFillStyle = 'esriSFSBackwardDiagonal' | 'esriSFSCross' | 'esriSFSDiagonalCross' | 'esriSFSForwardDiagonal' | 'esriSFSHorizontal' | 'esriSFSNull' | 'esriSFSSolid' | 'esriSFSVertical';
+/** ESRI simple line symbol configuration for line geometries and outlines. */
 export interface EsriSimpleLineSymbol extends EsriBaseSymbol {
     color: TypeEsriColor;
     style: EsriLineStyle;
     type: 'esriSLS';
     width: number;
 }
+/** ESRI line style identifiers for line symbols. */
 export type EsriLineStyle = 'esriSLSDash' | 'esriSLSDashDot' | 'esriSLSDashDotDot' | 'esriSLSDot' | 'esriSLSLongDash' | 'esriSLSLongDashDot' | 'esriSLSNull' | 'esriSLSShortDash' | 'esriSLSShortDashDot' | 'esriSLSShortDashDotDot' | 'esriSLSShortDot' | 'esriSLSSolid';
+/** ESRI marker symbol style identifiers for point symbols. */
 export type EsriSymbolStyle = 'esriSMSCircle' | 'esriSMSCross' | 'esriSMSDiamond' | 'esriSMSSquare' | 'esriSMSTriangle' | 'esriSMSX';
+/** ESRI simple renderer configuration (single symbol for all features). */
 export interface EsriSimpleRenderer extends EsriBaseRenderer {
     type: 'simple';
     description: string;
@@ -178,6 +191,7 @@ export interface EsriSimpleRenderer extends EsriBaseRenderer {
     rotationType: 'arithmetic' | 'geographic';
     symbol: EsriSymbol;
 }
+/** ESRI picture marker symbol configuration for image-based point symbols. */
 export interface EsriPictureMarkerSymbol extends EsriBaseSymbol {
     angle: number;
     contentType: string;
@@ -195,6 +209,7 @@ type EsriClassBreakInfoEntry = {
     label: string;
     symbol: EsriSymbol;
 };
+/** ESRI class breaks renderer configuration (ranges of values mapped to symbols). */
 export interface EsriClassBreakRenderer extends EsriBaseRenderer {
     type: 'classBreaks';
     classBreakInfos: EsriClassBreakInfoEntry[];

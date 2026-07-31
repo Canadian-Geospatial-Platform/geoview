@@ -250,6 +250,14 @@ export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseCla
      */
     cloneSource(): TypeBaseSourceInitialConfig;
     /**
+     * Gets the metadata access path with proxy prepended when the layer is configured to use a proxy.
+     *
+     * @param endsWithSlash - Optional indicates if the path should end with a '/'
+     * @returns The metadata access path, proxied if necessary
+     * @throws {LayerMetadataAccessPathMandatoryError} When the metadata access path is not set
+     */
+    getMetadataAccessPathProxiedWhenNecessary(endsWithSlash?: boolean): string;
+    /**
      * Indicates whether the source has a data access path defined.
      *
      * @returns `true` if a data access path is present; otherwise, `false`
@@ -264,13 +272,20 @@ export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseCla
      */
     getDataAccessPath(endsWithSlash?: boolean): string;
     /**
-     * Gets the original data access path before the proxy was applied.
+     * Gets the data access path with proxy prepended when the layer is configured to use a proxy.
      *
-     * Falls back to the current data access path if no proxy has been set.
-     *
-     * @returns The data access path before proxy application
+     * @param endsWithSlash - Optional indicates if the path should end with a '/'
+     * @returns The data access path, proxied if necessary
+     * @throws {LayerDataAccessPathMandatoryError} When the data access path is not set
      */
-    getDataAccessPathBeforeProxy(): string;
+    getDataAccessPathProxiedWhenNecessary(endsWithSlash?: boolean): string;
+    /**
+     * Prepends the proxy URL to the given URL when the layer is configured to use a proxy.
+     *
+     * @param url - The URL to optionally prepend the proxy to
+     * @returns The URL with proxy prefix if using a proxy, or the original URL as-is
+     */
+    getUrlWithProxyWhenNeeded(url: string): string;
     /**
      * Overrides the data access path using the value provided by metadata.
      *

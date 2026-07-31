@@ -3,11 +3,9 @@ import { Pointer as OLPointer } from 'ol/interaction';
 import Collection from 'ol/Collection';
 import Feature from 'ol/Feature';
 import type { Geometry } from 'ol/geom';
-import { Polygon, LineString } from 'ol/geom';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import type { Coordinate } from 'ol/coordinate';
-import type { Extent } from 'ol/extent';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import { TransformEvent, TransformSelectionEvent, TransformDeleteFeatureEvent } from './transform-events';
 /**
@@ -30,29 +28,6 @@ export declare enum HandleType {
     DELETE = "delete",
     VERTEX = "vertex",
     EDGE_MIDPOINT = "edge-midpoint"
-}
-/**
- * Options for the transform interaction
- */
-export interface TransformBaseOptions {
-    features?: Collection<Feature>;
-    source?: VectorSource;
-    translate?: boolean;
-    scale?: boolean;
-    rotate?: boolean;
-    stretch?: boolean;
-    keepAspectRatio?: boolean;
-    hitTolerance?: number;
-    enableDelete?: boolean;
-    mapViewer?: MapViewer;
-}
-/**
- * Properties for creating a handle feature.
- */
-export interface CreateHandleProps {
-    vertexIndex?: number;
-    isCircleCenter?: boolean;
-    isCircleEdge?: boolean;
 }
 /**
  * OpenLayers Transform interaction for manipulating features on the map.
@@ -81,11 +56,15 @@ export declare class OLTransform extends OLPointer {
     angle: number;
     /** The map viewer */
     mapViewer?: MapViewer;
-    /** Callback functions for events */
-    onTransformstart?: (event: TransformEvent) => void;
+    /** Callback invoked when a transformation starts. Bridged to EventHelper delegates by the Transform wrapper. */
+    onTransformStart?: (event: TransformEvent) => void;
+    /** Callback invoked during an ongoing transformation. Bridged to EventHelper delegates by the Transform wrapper. */
     onTransforming?: (event: TransformEvent) => void;
-    onTransformend?: (event: TransformEvent) => void;
-    onDeletefeature?: (event: TransformDeleteFeatureEvent) => void;
+    /** Callback invoked when a transformation ends. Bridged to EventHelper delegates by the Transform wrapper. */
+    onTransformEnd?: (event: TransformEvent) => void;
+    /** Callback invoked when a feature is deleted. Bridged to EventHelper delegates by the Transform wrapper. */
+    onDeleteFeature?: (event: TransformDeleteFeatureEvent) => void;
+    /** Callback invoked when the selected feature changes. Bridged to EventHelper delegates by the Transform wrapper. */
     onSelectionChange?: (event: TransformSelectionEvent) => void;
     /**
      * Initializes a OLTransform component.
@@ -94,13 +73,44 @@ export declare class OLTransform extends OLPointer {
      */
     constructor(options?: TransformBaseOptions);
     /**
-     * Handles when a feature is removed from the collection.
+     * Handles click events for feature selection and handle interaction.
      *
-     * @param event - The event containing the removed feature
+     * @param event - The map browser event
+     * @returns Whether the event was handled
      */
-    onFeatureRemove(event: {
-        element: Feature;
-    }): void;
+    handleDownEvent(event: MapBrowserEvent<PointerEvent>): boolean;
+    /**
+     * Handles pointer drag events for feature transformation.
+     *
+     * @param event - The map browser event
+     */
+    handleDragEvent(event: MapBrowserEvent<PointerEvent>): void;
+    /**
+     * Handles pointer up events to finalize transformation.
+     *
+     * @param event - The map browser event
+     * @returns Whether the event was handled
+     */
+    handleUpEvent(event: MapBrowserEvent<PointerEvent>): boolean;
+    /**
+     * Handles pointer move events for cursor updates.
+     *
+     * Not to be confused with moving handles. This overrides the move event from OL Pointer.
+     *
+     * @param event - The map browser event
+     */
+    handleMoveEvent(event: MapBrowserEvent<PointerEvent>): void;
+    /**
+     * Handles all events, including double-click.
+     *
+     * @param event - The map browser event
+     * @returns Whether the event was handled
+     */
+    handleEvent(event: MapBrowserEvent<PointerEvent>): boolean;
+    /**
+     * Cleans up the interaction.
+     */
+    dispose(): void;
     /**
      * Selects a feature for transformation.
      *
@@ -157,92 +167,16 @@ export declare class OLTransform extends OLPointer {
      */
     restoreHandleStyle(): void;
     /**
-     * Rotates a coordinate around a center point by an angle.
+     * Deletes a vertex at the specified coordinate if one exists.
      *
-     * @param coordinate - The coordinate to rotate
-     * @param center - The center point
-     * @param angle - The angle in radians
-     * @returns The rotated coordinate
+     * @param coordinate - The coordinate to check for a vertex
+     * @returns Whether a vertex was deleted
      */
-    static rotateCoordinate(coordinate: Coordinate, center: Coordinate, angle: number): Coordinate;
-    /**
-     * Scales a coordinate relative to a fixed point.
-     *
-     * @param coordinate - The coordinate to scale
-     * @param fixedPoint - The fixed point
-     * @param scaleX - The X scale factor
-     * @param scaleY - The Y scale factor
-     * @returns The scaled coordinate
-     */
-    static scaleCoordinate(coordinate: Coordinate, fixedPoint: Coordinate, scaleX: number, scaleY: number): Coordinate;
-    /** Context menu event handler to prevent context menu when removing vertices */
-    contextMenuHandler: (e: MouseEvent) => void;
-    /**
-     * Cleans up the interaction.
-     */
-    dispose(): void;
+    deleteVertexAtCoordinate(coordinate: Coordinate): boolean;
     /**
      * Creates handles for the selected feature.
      */
     createHandles(): void;
-    /**
-     * Creates a handle at the specified coordinate with the given type.
-     *
-     * @param coordinate - The coordinate for the handle
-     * @param type - The type of handle
-     */
-    createHandle(coordinate: Coordinate, type: HandleType, properties?: CreateHandleProps): void;
-    /**
-     * Creates the extent boundary rectangle.
-     *
-     * @param extent - The expanded extent
-     */
-    createExtentBoundary(extent: Extent): void;
-    /**
-     * Creates scale handles at the corners of the extent.
-     *
-     * @param extent - The extent of the feature
-     */
-    createScaleHandles(extent: Extent): void;
-    /**
-     * Creates stretch handles at the middle of each side of the extent.
-     *
-     * @param extent - The extent of the feature
-     */
-    createStretchHandles(extent: Extent): void;
-    /**
-     * Creates a rotation handle above the feature.
-     *
-     * @param extent - The extent of the feature
-     */
-    createRotateHandle(extent: Extent): void;
-    /**
-     * Creates a delete handle for the feature.
-     *
-     * @param extent - The extent of the feature
-     */
-    createDeleteHandle(extent: Extent): void;
-    /**
-     * Creates vertex handles for LineString and Polygon geometries.
-     *
-     * @param geometry - The geometry to create vertex handles for
-     */
-    createVertexHandles(geometry: LineString | Polygon): void;
-    /**
-     * Gets the cursor style for a handle type.
-     *
-     * @param handleType - The handle type
-     * @returns The cursor style
-     */
-    static getCursorForHandleType(handleType: HandleType): string;
-    /**
-     * Gets the event type from a handle type.
-     *
-     * @param handleType - The handle type
-     * @param suffix - The event suffix (start, ing, end)
-     * @returns The event type
-     */
-    static getEventTypeFromHandleType(handleType: HandleType, suffix: string): string;
     /**
      * Clears all handles.
      */
@@ -251,90 +185,6 @@ export declare class OLTransform extends OLPointer {
      * Updates the handles to match the new geometry.
      */
     updateHandles(): void;
-    /**
-     * Handles translation of a feature.
-     *
-     * @param deltaX - The change in X coordinate
-     * @param deltaY - The change in Y coordinate
-     */
-    handleTranslate(deltaX: number, deltaY: number): void;
-    /**
-     * Handles rotation of a feature.
-     *
-     * @param coordinate - The current coordinate
-     */
-    handleRotate(coordinate: Coordinate): void;
-    /**
-     * Handles scaling of a feature.
-     *
-     * @param coordinate - The current coordinate
-     * @param handleType - The type of handle being dragged
-     * @param ctrlKey - If the ctrlKey is being pressed to maintain the ratio
-     */
-    handleScale(coordinate: Coordinate, handleType: HandleType, ctrlKey?: boolean): void;
-    /**
-     * Handles stretching of a feature.
-     *
-     * @param coordinate - The current coordinate
-     * @param handleType - The type of handle being dragged
-     */
-    handleStretch(coordinate: Coordinate, handleType: HandleType): void;
-    /**
-     * Handles all events, including double-click.
-     *
-     * @param event - The map browser event
-     * @returns Whether the event was handled
-     */
-    handleEvent(event: MapBrowserEvent<PointerEvent>): boolean;
-    /**
-     * Handles click events for feature selection and handle interaction.
-     *
-     * @param event - The map browser event
-     * @returns Whether the event was handled
-     */
-    handleDownEvent(event: MapBrowserEvent<PointerEvent>): boolean;
-    /**
-     * Handles pointer drag events for feature transformation.
-     *
-     * @param event - The map browser event
-     */
-    handleDragEvent(event: MapBrowserEvent<PointerEvent>): void;
-    /**
-     * Handles pointer up events to finalize transformation.
-     *
-     * @param event - The map browser event
-     * @returns Whether the event was handled
-     */
-    handleUpEvent(event: MapBrowserEvent<PointerEvent>): boolean;
-    /**
-     * Handles pointer move events for cursor updates.
-     *
-     * Not to be confused with moving handles. This overrides the move event from OL Pointer.
-     *
-     * @param event - The map browser event
-     */
-    handleMoveEvent(event: MapBrowserEvent<PointerEvent>): void;
-    /**
-     * Handles moving a vertex.
-     *
-     * @param coordinate - The new coordinate
-     * @param vertexHandle - The vertex handle being dragged
-     */
-    handleVertexMove(coordinate: Coordinate, vertexHandle?: Feature): void;
-    /**
-     * Handles adding a new vertex.
-     *
-     * @param coordinate - The coordinate for the new vertex
-     * @param midpointHandle - The midpoint handle being dragged
-     */
-    handleAddVertex(coordinate: Coordinate, midpointHandle?: Feature): void;
-    /**
-     * Deletes a vertex at the specified coordinate if one exists.
-     *
-     * @param coordinate - The coordinate to check for a vertex
-     * @returns Whether a vertex was deleted
-     */
-    deleteVertexAtCoordinate(coordinate: Coordinate): boolean;
     /**
      * Creates a simple text editor for text features
      */
@@ -363,5 +213,62 @@ export declare class OLTransform extends OLPointer {
      * @returns True if redo is available
      */
     canRedo(): boolean;
+    /**
+     * Gets the cursor style for a handle type.
+     *
+     * @param handleType - The handle type
+     * @returns The cursor style
+     */
+    static getCursorForHandleType(handleType: HandleType): string;
+    /**
+     * Gets the event type from a handle type.
+     *
+     * @param handleType - The handle type
+     * @param suffix - The event suffix (start, ing, end)
+     * @returns The event type
+     */
+    static getEventTypeFromHandleType(handleType: HandleType, suffix: string): string;
+    /**
+     * Rotates a coordinate around a center point by an angle.
+     *
+     * @param coordinate - The coordinate to rotate
+     * @param center - The center point
+     * @param angle - The angle in radians
+     * @returns The rotated coordinate
+     */
+    static rotateCoordinate(coordinate: Coordinate, center: Coordinate, angle: number): Coordinate;
+    /**
+     * Scales a coordinate relative to a fixed point.
+     *
+     * @param coordinate - The coordinate to scale
+     * @param fixedPoint - The fixed point
+     * @param scaleX - The X scale factor
+     * @param scaleY - The Y scale factor
+     * @returns The scaled coordinate
+     */
+    static scaleCoordinate(coordinate: Coordinate, fixedPoint: Coordinate, scaleX: number, scaleY: number): Coordinate;
+}
+/**
+ * Options for the transform interaction
+ */
+export interface TransformBaseOptions {
+    features?: Collection<Feature>;
+    source?: VectorSource;
+    translate?: boolean;
+    scale?: boolean;
+    rotate?: boolean;
+    stretch?: boolean;
+    keepAspectRatio?: boolean;
+    hitTolerance?: number;
+    enableDelete?: boolean;
+    mapViewer?: MapViewer;
+}
+/**
+ * Properties for creating a handle feature.
+ */
+export interface CreateHandleProps {
+    vertexIndex?: number;
+    isCircleCenter?: boolean;
+    isCircleEdge?: boolean;
 }
 //# sourceMappingURL=transform-base.d.ts.map
