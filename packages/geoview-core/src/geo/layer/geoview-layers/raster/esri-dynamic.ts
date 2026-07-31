@@ -15,7 +15,7 @@ import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import type { DisplayDateMode } from '@/api/types/map-schema-types';
 import { Projection } from '@/geo/utils/projection';
-import type { ProxyUsedDelegate } from '@/geo/utils/utilities';
+import type { FetchWithProxyResult } from '@/geo/utils/utilities';
 
 export interface TypeEsriDynamicLayerConfig extends TypeGeoviewLayerConfig {
   // TODO: Refactor - Layers - Get rid of the `geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_DYNAMIC` property in this interface and all others in other layers.
@@ -68,16 +68,13 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   /**
    * Overrides the way the metadata is fetched.
    *
-   * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
-   *
-   * @param callbackProxyUsed - Optional callback executed when a proxy had to be used to fetch the metadata.
-   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
-   * @returns A promise with the metadata or undefined when no metadata for the particular layer type.
-   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+   * @returns A promise that resolves with the fetched metadata and proxy information
+   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
    */
-  protected override onFetchServiceMetadata(callbackProxyUsed?: ProxyUsedDelegate, abortSignal?: AbortSignal): Promise<unknown> {
+  protected override onFetchServiceMetadata(abortSignal?: AbortSignal): Promise<FetchWithProxyResult<unknown>> {
     // Redirect using default way of fetching service metadata which is to use the url with f=json parameter
-    return this.helperFetchServiceMetadataWithFJson(callbackProxyUsed, abortSignal);
+    return this.helperFetchServiceMetadataWithFJson(abortSignal);
   }
 
   /**
@@ -90,7 +87,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     const metadata = await this.fetchServiceMetadata<TypeMetadataEsriDynamic>();
 
     // Now that we have metadata
-    const { layers } = metadata;
+    const { layers } = metadata.data;
 
     // Get all entries
     const entries = layers.map((layer) => {

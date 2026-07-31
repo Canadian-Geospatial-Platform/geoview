@@ -15,7 +15,7 @@ import { logger } from '@/core/utils/logger';
 import { generateId, extractGeotiffColorMap } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
 import type { DisplayDateMode } from '@/api/types/map-schema-types';
-import type { ProxyUsedDelegate } from '@/geo/utils/utilities';
+import { EMPTY_FETCH_RESULT, type FetchWithProxyResult } from '@/geo/utils/utilities';
 
 export interface TypeGeoTIFFLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.GEOTIFF;
@@ -60,14 +60,11 @@ export class GeoTIFF extends AbstractGeoViewRaster {
   /**
    * Overrides the way the metadata is fetched.
    *
-   * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
-   *
-   * @param callbackProxyUsed - Optional callback executed when a proxy had to be used to fetch the metadata (not implemented)
-   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
-   * @returns A promise with the metadata or undefined when no metadata for the particular layer type.
-   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
+   * @param _abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process (not implemented)
+   * @returns A promise that resolves with the fetched metadata and proxy information
+   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
    */
-  protected override async onFetchServiceMetadata(_callbackProxyUsed?: ProxyUsedDelegate, abortSignal?: AbortSignal): Promise<unknown> {
+  protected override async onFetchServiceMetadata(_abortSignal?: AbortSignal): Promise<FetchWithProxyResult<unknown>> {
     // If metadataAccessPath does not point to a .tif file, we try to fetch metadata
     const metadataAccessPath = this.getMetadataAccessPath();
 
@@ -77,7 +74,7 @@ export class GeoTIFF extends AbstractGeoViewRaster {
         const url = metadataAccessPath.endsWith('/') ? metadataAccessPath.slice(0, -1) : metadataAccessPath;
 
         // Fetch it and return
-        return await Fetch.fetchJson<TypeMetadataGeoTIFF>(url, { signal: abortSignal });
+        return { data: await Fetch.fetchJson<TypeMetadataGeoTIFF>(url, { signal: _abortSignal }) };
       }
 
       // The metadataAccessPath didn't seem like it was containing actual metadata, so it was skipped
@@ -86,13 +83,13 @@ export class GeoTIFF extends AbstractGeoViewRaster {
       );
 
       // None
-      return Promise.resolve(undefined);
+      return EMPTY_FETCH_RESULT;
     } catch (error: unknown) {
       // Error likely means there is no metadata to fetch
       logger.logWarning(
         `The metadataAccessPath '${metadataAccessPath}' didn't seem like it was containing actual metadata, so it was skipped. Error: ${error}`
       );
-      return Promise.resolve(undefined);
+      return EMPTY_FETCH_RESULT;
     }
   }
 

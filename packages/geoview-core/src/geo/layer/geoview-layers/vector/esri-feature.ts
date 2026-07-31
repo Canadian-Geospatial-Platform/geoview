@@ -25,7 +25,7 @@ import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstrac
 import { GVEsriFeature } from '@/geo/layer/gv-layers/vector/gv-esri-feature';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { formatError } from '@/core/exceptions/core-exceptions';
-import { GeoUtilities, type ProxyUsedDelegate, type SourceFeaturesInfo } from '@/geo/utils/utilities';
+import { GeoUtilities, type FetchWithProxyResult, type SourceFeaturesInfo } from '@/geo/utils/utilities';
 import type { DisplayDateMode } from '@/api/types/map-schema-types';
 
 export interface TypeEsriFeatureLayerConfig extends TypeGeoviewLayerConfig {
@@ -74,19 +74,17 @@ export class EsriFeature extends AbstractGeoViewVector {
   /**
    * Overrides the way the metadata is fetched.
    *
-   * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
    * Returns TypeMetadataEsriDynamic | TypeMetadataEsriDynamicLayer | TypeMetadataEsriFeature because sometimes
    * the url is MapServer/?f=json, sometimes MapServer/{layerId}?f=json and sometimes FeatureServer/?f=json
    * which all return different payloads.
    *
-   * @param callbackProxyUsed - Optional callback executed when a proxy had to be used to fetch the metadata.
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
-   * @returns A promise that resolves with the metadata or undefined when no metadata for the particular layer type
+   * @returns A promise that resolves with the fetched metadata and proxy information
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
    */
-  protected override onFetchServiceMetadata(callbackProxyUsed?: ProxyUsedDelegate, abortSignal?: AbortSignal): Promise<unknown> {
+  protected override onFetchServiceMetadata(abortSignal?: AbortSignal): Promise<FetchWithProxyResult<unknown>> {
     // Redirect
-    return this.helperFetchServiceMetadataWithFJson(callbackProxyUsed, abortSignal);
+    return this.helperFetchServiceMetadataWithFJson(abortSignal);
   }
 
   /**
@@ -102,7 +100,7 @@ export class EsriFeature extends AbstractGeoViewVector {
     // If metadata was fetched successfully
     const entries = [];
     let finalUrl = this.getMetadataAccessPath();
-    if (metadata) {
+    if (metadata.data) {
       // Detect the service type separator (MapServer or FeatureServer)
       const url = this.getMetadataAccessPath().toLowerCase();
       const separators = ['/mapserver', '/featureserver'];
@@ -122,7 +120,7 @@ export class EsriFeature extends AbstractGeoViewVector {
         }
 
         // Metadata is at root level when a layer id is present
-        const metadataLayer = metadata as TypeMetadataEsriDynamicLayer;
+        const metadataLayer = metadata.data as TypeMetadataEsriDynamicLayer;
         finalUrl = this.getMetadataAccessPath().substring(0, idx + sep.length);
 
         entries.push({

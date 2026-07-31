@@ -17,7 +17,7 @@ import { logger } from '@/core/utils/logger';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { formatError } from '@/core/exceptions/core-exceptions';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
-import type { ProxyUsedDelegate, SourceFeaturesInfo } from '@/geo/utils/utilities';
+import { EMPTY_FETCH_RESULT, type FetchWithProxyResult, type SourceFeaturesInfo } from '@/geo/utils/utilities';
 
 /**
  * The AbstractGeoViewVector class.
@@ -65,16 +65,12 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   /**
    * Overrides the way the metadata is fetched.
    *
-   * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
-   *
-   * @param callbackProxyUsed - Optional callback executed when a proxy had to be used to fetch the metadata (not implemented)
-   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
-   * @returns A promise that resolves with the metadata or undefined when no metadata for the particular layer type
+   * @param _abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process (not implemented)
+   * @returns A promise that resolves with no metadata (vector layers fetch metadata in subclasses)
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected override onFetchServiceMetadata(callbackProxyUsed?: ProxyUsedDelegate, abortSignal?: AbortSignal): Promise<unknown> {
+  protected override onFetchServiceMetadata(_abortSignal?: AbortSignal): Promise<FetchWithProxyResult<unknown>> {
     // None
-    return Promise.resolve(undefined);
+    return Promise.resolve(EMPTY_FETCH_RESULT);
   }
 
   /**

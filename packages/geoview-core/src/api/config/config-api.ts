@@ -401,12 +401,13 @@ export class ConfigApi {
    * @param configProxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
    * @returns A promise that resolves to the style definition (typically an XML or SLD string) retrieved from the WMS service
    */
-  static fetchStyleFromWMS(wmsUrl: string, layers: string, configProxyUrl?: string): Promise<string> {
+  static async fetchStyleFromWMS(wmsUrl: string, layers: string, configProxyUrl?: string): Promise<string> {
     // Make sure the URL has necessary information
     const stylesUrl = GeoUtilities.ensureServiceRequestUrlGetStyles(wmsUrl, layers);
 
     // Redirect
-    return GeoUtilities.fetchTextWithProxyFallback(stylesUrl, configProxyUrl);
+    const result = await GeoUtilities.fetchTextWithProxyFallback(stylesUrl, configProxyUrl);
+    return result.data;
   }
 
   /**

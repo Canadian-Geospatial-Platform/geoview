@@ -23,7 +23,7 @@ import {
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { LayerServiceMetadataUnableToFetchError } from '@/core/exceptions/layer-exceptions';
 import { formatError } from '@/core/exceptions/core-exceptions';
-import { GeoUtilities, type ProxyUsedDelegate, type SourceFeaturesInfo } from '@/geo/utils/utilities';
+import { GeoUtilities, type FetchWithProxyResult, type SourceFeaturesInfo } from '@/geo/utils/utilities';
 import { GVOGCFeature } from '@/geo/layer/gv-layers/vector/gv-ogc-feature';
 
 export interface TypeOgcFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig' | 'geoviewLayerType'> {
@@ -69,17 +69,14 @@ export class OgcFeature extends AbstractGeoViewVector {
   /**
    * Overrides the way the metadata is fetched.
    *
-   * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
-   *
-   * @param callbackProxyUsed - Optional callback executed when a proxy had to be used to fetch the metadata.
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
-   * @returns A promise that resolves with the metadata or undefined when no metadata for the particular layer type
+   * @returns A promise that resolves with the fetched metadata and proxy information
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
    */
-  protected override async onFetchServiceMetadata(callbackProxyUsed?: ProxyUsedDelegate, abortSignal?: AbortSignal): Promise<unknown> {
+  protected override async onFetchServiceMetadata(abortSignal?: AbortSignal): Promise<FetchWithProxyResult<unknown>> {
     try {
       // Fetch it and return
-      return await OgcFeature.fetchMetadata(this.getMetadataAccessPath(), this.getConfigProxyUrl(), callbackProxyUsed, abortSignal);
+      return await OgcFeature.fetchMetadata(this.getMetadataAccessPath(), this.getConfigProxyUrl(), abortSignal);
     } catch (error: unknown) {
       // Throw
       throw new LayerServiceMetadataUnableToFetchError(
@@ -115,7 +112,7 @@ export class OgcFeature extends AbstractGeoViewVector {
       const metadata = await this.fetchServiceMetadata<TypeMetadataOGCFeature>();
 
       // Now that we have metadata
-      entries = metadata.collections.map((collection) => {
+      entries = metadata.data.collections.map((collection) => {
         return { id: collection.id, layerId: collection.id, layerName: collection.description };
       });
     }
@@ -383,25 +380,25 @@ export class OgcFeature extends AbstractGeoViewVector {
    *
    * @param url - The url to query the metadata from
    * @param configProxyUrl - Proxy URL to use when necessary
-   * @param callbackProxyUsed - Optional callback executed when a proxy had to be used to fetch the metadata.
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+   * @returns A promise that resolves with the fetched metadata and proxy information
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration
    * @throws {RequestAbortedError} When the request was aborted by the caller's signal
    * @throws {ResponseError} When the response is not OK (non-2xx)
    * @throws {ResponseEmptyError} When the JSON response is empty
+   * @throws {NetworkError} When a network issue happened
    */
   static fetchMetadata(
     url: string,
     configProxyUrl: string | undefined,
-    callbackProxyUsed?: ProxyUsedDelegate,
     abortSignal?: AbortSignal
-  ): Promise<TypeMetadataOGCFeature> {
+  ): Promise<FetchWithProxyResult<TypeMetadataOGCFeature>> {
     // The url
     let queryUrl = url.endsWith('/') ? `${url}collections` : `${url}/collections`;
     queryUrl = `${queryUrl}?f=json`;
 
     // Redirect to GeoUtilities
-    return GeoUtilities.fetchJsonWithProxyFallback(queryUrl, configProxyUrl, callbackProxyUsed, abortSignal);
+    return GeoUtilities.fetchJsonWithProxyFallback(queryUrl, configProxyUrl, abortSignal);
   }
 
   // #endregion STATIC PUBLIC METHODS

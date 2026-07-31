@@ -33,7 +33,7 @@ import { CancelledError, ResponseEmptyError, PromiseRejectErrorWrapper, formatEr
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
-import { GeoUtilities, type ProxyUsedDelegate } from '@/geo/utils/utilities';
+import { GeoUtilities, type FetchWithProxyResult } from '@/geo/utils/utilities';
 
 /** Default display names keyed by GeoView layer type, used when no name is provided in the configuration. */
 const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
@@ -146,12 +146,11 @@ export abstract class AbstractGeoViewLayer {
   /**
    * Must override method to read the service metadata from the metadataAccessPath.
    *
-   * @param callbackProxyUsed - Optional callback executed when a proxy had to be used to fetch the metadata.
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
-   * @returns A promise that resolves once the metadata has been fetched
+   * @returns A promise that resolves with the fetched metadata and proxy information
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
    */
-  protected abstract onFetchServiceMetadata(callbackProxyUsed?: ProxyUsedDelegate, abortSignal?: AbortSignal): Promise<unknown>;
+  protected abstract onFetchServiceMetadata(abortSignal?: AbortSignal): Promise<FetchWithProxyResult<unknown>>;
 
   /**
    * Must override method to initialize a layer entry based on a GeoView layer config.
@@ -589,12 +588,15 @@ export abstract class AbstractGeoViewLayer {
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
    * @throws {LayerNoCapabilitiesError} When the metadata is empty (no Capabilities) (WMS/WFS layers)
    */
-  fetchServiceMetadata<T>(abortSignal?: AbortSignal): Promise<T> {
-    // Redirect
-    return this.onFetchServiceMetadata((proxyUsed) => {
-      // Keep in mind a proxy was used for the request
-      this.setProxyUrl(proxyUsed);
-    }, abortSignal) as Promise<T>;
+  async fetchServiceMetadata<T>(abortSignal?: AbortSignal): Promise<FetchWithProxyResult<T>> {
+    // Call the overridable method
+    const result = (await this.onFetchServiceMetadata(abortSignal)) as FetchWithProxyResult<T>;
+
+    // If a proxy was used, store it on the instance
+    if (result.proxyUsed) this.setProxyUrl(result.proxyUsed);
+
+    // Return the result
+    return result;
   }
 
   /**
@@ -760,20 +762,19 @@ export abstract class AbstractGeoViewLayer {
    * After a successful fetch, the response is validated via `throwIfMetatadaHasError` to detect ESRI-level
    * error payloads (e.g., `{ error: { code, message } }`) embedded in an otherwise successful HTTP response.
    *
-   * @param callbackProxyUsed - Optional callback executed when a proxy had to be used to fetch the metadata.
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the metadata fetch
    * @returns A promise that resolves with the parsed JSON metadata object
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails (network, proxy, or HTTP error)
    * @throws {LayerServiceMetadataHasErrorPayloadError} When the response contains an ESRI error payload (propagated from `throwIfMetatadaHasError()`)
    */
-  protected async helperFetchServiceMetadataWithFJson(callbackProxyUsed?: ProxyUsedDelegate, abortSignal?: AbortSignal): Promise<unknown> {
-    let responseJson;
+  protected async helperFetchServiceMetadataWithFJson<T>(abortSignal?: AbortSignal): Promise<FetchWithProxyResult<T>> {
+    let result: FetchWithProxyResult<T>;
     try {
       // The url
       const queryUrl = `${this.getMetadataAccessPath()}?f=json`;
 
       // Redirect to GeoUtilities
-      responseJson = await GeoUtilities.fetchJsonWithProxyFallback(queryUrl, this.getConfigProxyUrl(), callbackProxyUsed, abortSignal);
+      result = await GeoUtilities.fetchJsonWithProxyFallback<T>(queryUrl, this.getConfigProxyUrl(), abortSignal);
     } catch (error: unknown) {
       // Throw
       throw new LayerServiceMetadataUnableToFetchError(
@@ -784,10 +785,10 @@ export abstract class AbstractGeoViewLayer {
     }
 
     // Validate the metadata response
-    AbstractGeoViewLayer.throwIfMetatadaHasError(this.getGeoviewLayerId(), this.getLayerEntryNameOrGeoviewLayerName(), responseJson);
+    AbstractGeoViewLayer.throwIfMetatadaHasError(this.getGeoviewLayerId(), this.getLayerEntryNameOrGeoviewLayerName(), result.data);
 
     // Return it
-    return responseJson;
+    return result;
   }
 
   // #endregion PROTECTED METHODS
@@ -853,7 +854,7 @@ export abstract class AbstractGeoViewLayer {
       // GV e.g.: XYZ Tiles added via configuration without a metadataAccessPath
       // GV e.g.: XYZ Tiles added via add-new-layer component like 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
       // GV e.g.: CSV (csvLYR2) and some outlier demos
-      if (!this.hasMetadataAccessPath()) return;
+      if (!this.hasMetadataAccessPath()) debugger;
 
       // Log
       logger.logTraceCore(
@@ -865,7 +866,10 @@ export abstract class AbstractGeoViewLayer {
       this.#startMetadataFetchWatcher();
 
       // Process and, yes, keep the await here, because we want the try/catch to work nicely here.
-      this.#metadata = await this.fetchServiceMetadata(abortSignal);
+      const result = await this.fetchServiceMetadata(abortSignal);
+
+      // Keep the metadata
+      this.#metadata = result.data;
     } catch (error: unknown) {
       // Set the layer status to all layer entries to error (that logic was as-is in this refactor, leaving as-is for now)
       AbstractGeoViewLayer.#setStatusErrorAll(formatError(error), this.listOfLayerEntryConfig);

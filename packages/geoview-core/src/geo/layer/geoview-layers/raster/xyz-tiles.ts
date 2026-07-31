@@ -22,7 +22,7 @@ import { GVXYZTiles } from '@/geo/layer/gv-layers/tile/gv-xyz-tiles';
 import { AbstractGeoViewLayer, type PreprocessLayerConfigResult } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import type { TypeProjection } from '@/geo/utils/projection';
 import { validateAndPingUrl } from '@/core/utils/utilities';
-import type { ProxyUsedDelegate } from '@/geo/utils/utilities';
+import { EMPTY_FETCH_RESULT, type FetchWithProxyResult } from '@/geo/utils/utilities';
 
 // ? Do we keep this TODO ? Dynamic parameters can be placed on the dataAccessPath and initial settings can be used on xyz-tiles.
 // TODO: Implement method to validate XYZ tile service
@@ -78,16 +78,16 @@ export class XYZTiles extends AbstractGeoViewRaster {
   /**
    * Overrides the way the metadata is fetched.
    *
-   * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
-   *
-   * @param callbackProxyUsed - Optional callback executed when a proxy had to be used to fetch the metadata.
-   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
-   * @returns A promise with the metadata or undefined when no metadata for the particular layer type.
-   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+   * @returns A promise that resolves with the fetched metadata and proxy information
+   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
    */
-  protected override onFetchServiceMetadata(callbackProxyUsed?: ProxyUsedDelegate, abortSignal?: AbortSignal): Promise<unknown> {
+  protected override onFetchServiceMetadata(abortSignal?: AbortSignal): Promise<FetchWithProxyResult<unknown>> {
+    // If the config has a metadata access path (not all of them have it, e.g., XYZ Tiles added via configuration without a metadataAccessPath, or XYZ Tiles added via add-new-layer component like 'https://tile.openstreetmap.org/{z}/{x}/{y}.png')
+    if (!this.hasMetadataAccessPath()) return Promise.resolve(EMPTY_FETCH_RESULT);
+
     // Redirect using default way of fetching service metadata which is to use the url with f=json parameter
-    return this.helperFetchServiceMetadataWithFJson(callbackProxyUsed, abortSignal);
+    return this.helperFetchServiceMetadataWithFJson(abortSignal);
   }
 
   /**
@@ -160,10 +160,6 @@ export class XYZTiles extends AbstractGeoViewRaster {
 
     // Test to reach one tile to see if the service is reachable
     const pingResult = await validateAndPingUrl(layerConfig.getDataAccessPath(), configProxyUrl);
-
-    // PRETEND:
-    pingResult.needsProxy = true;
-    pingResult.proxyUsed = configProxyUrl;
 
     // If not reachable, throw an error immediately
     if (!pingResult.isReachable) {
