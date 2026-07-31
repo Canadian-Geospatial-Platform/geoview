@@ -16,7 +16,7 @@ import {
 } from '@/core/exceptions/layer-entry-config-exceptions';
 import { LayerMissingSourceExtentError, LayerMissingSourceProjectionError } from '@/core/exceptions/layer-exceptions';
 import { GVImageStatic } from '@/geo/layer/gv-layers/raster/gv-image-static';
-import type { ProxyUsedDelegate } from '@/geo/utils/utilities';
+import { EMPTY_FETCH_RESULT, type FetchWithProxyResult } from '@/geo/utils/utilities';
 
 export interface TypeImageStaticLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.IMAGE_STATIC;
@@ -52,15 +52,12 @@ export class ImageStatic extends AbstractGeoViewRaster {
   /**
    * Overrides the way the metadata is fetched.
    *
-   * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
-   *
-   * @param callbackProxyUsed - Optional callback executed when a proxy had to be used to fetch the metadata (not implemented)
-   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process (not implemented).
-   * @returns A promise that resolves with the metadata or undefined when no metadata for the particular layer type.
+   * @param _abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process (not implemented)
+   * @returns A promise that resolves with no metadata (this layer type has no service metadata)
    */
-  protected override onFetchServiceMetadata(_callbackProxyUsed?: ProxyUsedDelegate, _abortSignal?: AbortSignal): Promise<unknown> {
+  protected override onFetchServiceMetadata(_abortSignal?: AbortSignal): Promise<FetchWithProxyResult<unknown>> {
     // No metadata
-    return Promise.resolve(undefined);
+    return Promise.resolve(EMPTY_FETCH_RESULT);
   }
 
   /**

@@ -7,7 +7,7 @@ import type {
   TypeMetadataWMTSCapabilities,
 } from 'geoview-core/api/types/layer-schema-types';
 import { GeoviewRenderer } from 'geoview-core/geo/utils/renderer/geoview-renderer';
-import { GeoUtilities } from 'geoview-core/geo/utils/utilities';
+import { GeoUtilities, type FetchWithProxyResult } from 'geoview-core/geo/utils/utilities';
 
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
@@ -314,24 +314,20 @@ export class CoreTester extends GVAbstractTester {
    *
    * @returns A promise that resolves when the test completes
    */
-  testGetWMSServiceMetadata(): Promise<Test<MetadataWithProxy<TypeMetadataWMSCapabilities>>> {
+  testGetWMSServiceMetadata(): Promise<Test<FetchWithProxyResult<TypeMetadataWMSCapabilities>>> {
     return this.test(
       `Test GeoUtilities.getWMSServiceMetadata with Nonna WMS (proxy fallback)...`,
-      async (test) => {
+      (test) => {
         const url = GVAbstractTester.NONNA_WMS_URL;
         test.addStep(`Fetching WMS metadata from: ${url}...`);
-        let proxied = false;
-        const metadata = await GeoUtilities.getWMSServiceMetadata(url, CoreTester.PROXY_URL_TO_USE_FOR_TESTING, undefined, () => {
-          proxied = true;
-        });
-        return { metadata, proxied };
+        return GeoUtilities.getWMSServiceMetadata(url, CoreTester.PROXY_URL_TO_USE_FOR_TESTING);
       },
       (test, result) => {
         test.addStep('Verifying the request indeed required a proxy');
-        Test.assertIsEqual(result.proxied, true);
+        Test.assertIsDefined('proxyUsed', result.proxyUsed);
 
         test.addStep('Verifying Capability property exists...');
-        Test.assertIsDefined('Capability', result.metadata.Capability);
+        Test.assertIsDefined('Capability', result.data.Capability);
       }
     );
   }
@@ -358,24 +354,20 @@ export class CoreTester extends GVAbstractTester {
    *
    * @returns A promise that resolves when the test completes
    */
-  testGetWFSServiceMetadata(): Promise<Test<MetadataWithProxy<TypeMetadataWFSCapabilities>>> {
+  testGetWFSServiceMetadata(): Promise<Test<FetchWithProxyResult<TypeMetadataWFSCapabilities>>> {
     return this.test(
       `Test GeoUtilities.getWFSServiceMetadata with Belgium WFS (proxy fallback)...`,
-      async (test) => {
+      (test) => {
         const url = GVAbstractTester.BELGIUM_WFS_URL;
         test.addStep(`Fetching WFS metadata from: ${url}...`);
-        let proxied = false;
-        const metadata = await GeoUtilities.getWFSServiceMetadata(url, CoreTester.PROXY_URL_TO_USE_FOR_TESTING, () => {
-          proxied = true;
-        });
-        return { metadata, proxied };
+        return GeoUtilities.getWFSServiceMetadata(url, CoreTester.PROXY_URL_TO_USE_FOR_TESTING);
       },
       (test, result) => {
         test.addStep('Verifying the request indeed required a proxy');
-        Test.assertIsEqual(result.proxied, true);
+        Test.assertIsDefined('proxyUsed', result.proxyUsed);
 
         test.addStep('Verifying FeatureTypeList property exists...');
-        Test.assertIsDefined('FeatureTypeList', result.metadata.FeatureTypeList);
+        Test.assertIsDefined('FeatureTypeList', result.data.FeatureTypeList);
       }
     );
   }
@@ -402,24 +394,20 @@ export class CoreTester extends GVAbstractTester {
    *
    * @returns A promise that resolves when the test completes
    */
-  testGetWMTSServiceMetadata(): Promise<Test<MetadataWithProxy<TypeMetadataWMTSCapabilities>>> {
+  testGetWMTSServiceMetadata(): Promise<Test<FetchWithProxyResult<TypeMetadataWMTSCapabilities>>> {
     return this.test(
       `Test GeoUtilities.getWMTSServiceMetadata with Taiwan WMTS service...`,
-      async (test) => {
+      (test) => {
         const url = GVAbstractTester.TAIWAN_WMTS_URL;
         test.addStep(`Fetching WMTS metadata from: ${url}...`);
-        let proxied = false;
-        const metadata = await GeoUtilities.getWMTSServiceMetadata(url, CoreTester.PROXY_URL_TO_USE_FOR_TESTING, undefined, () => {
-          proxied = true;
-        });
-        return { metadata, proxied };
+        return GeoUtilities.getWMTSServiceMetadata(url, CoreTester.PROXY_URL_TO_USE_FOR_TESTING);
       },
       (test, result) => {
         test.addStep('Verifying the request indeed required a proxy');
-        Test.assertIsEqual(result.proxied, true);
+        Test.assertIsDefined('proxyUsed', result.proxyUsed);
 
         test.addStep('Verifying Contents property exists...');
-        Test.assertIsDefined('Contents', result.metadata.Contents);
+        Test.assertIsDefined('Contents', result.data.Contents);
       }
     );
   }
@@ -450,24 +438,20 @@ export class CoreTester extends GVAbstractTester {
    *
    * @returns A promise that resolves when the test completes
    */
-  testFetchJsonWithProxyFallback(): Promise<Test<MetadataWithProxy<unknown>>> {
+  testFetchJsonWithProxyFallback(): Promise<Test<FetchWithProxyResult<unknown>>> {
     return this.test(
       `Test GeoUtilities.fetchJsonWithProxyFallback with JSON endpoint...`,
-      async (test) => {
+      (test) => {
         const url = GVAbstractTester.PUBLIC_JSON_URL_CORS;
         test.addStep(`Fetching JSON metadata from: ${url}...`);
-        let proxied = false;
-        const metadata = await GeoUtilities.fetchJsonWithProxyFallback(url, CoreTester.PROXY_URL_TO_USE_FOR_TESTING, () => {
-          proxied = true;
-        });
-        return { metadata, proxied };
+        return GeoUtilities.fetchJsonWithProxyFallback(url, CoreTester.PROXY_URL_TO_USE_FOR_TESTING);
       },
       (test, result) => {
         test.addStep('Verifying the request indeed required a proxy');
-        Test.assertIsEqual(result.proxied, true);
+        Test.assertIsDefined('proxyUsed', result.proxyUsed);
 
         test.addStep('Verifying response metadata...');
-        Test.assertIsDefined('metadata', result.metadata);
+        Test.assertIsDefined('data', result.data);
       }
     );
   }
@@ -489,9 +473,3 @@ export class CoreTester extends GVAbstractTester {
 
   // #endregion GEO UTILITIES - FETCH WITH PROXY FALLBACK
 }
-
-/** Helper type to bundle a metadata response with a flag indicating if the proxy was used. */
-type MetadataWithProxy<T> = {
-  metadata: T;
-  proxied: boolean;
-};

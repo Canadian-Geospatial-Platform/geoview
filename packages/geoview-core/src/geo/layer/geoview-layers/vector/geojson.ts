@@ -18,7 +18,7 @@ import { GVGeoJSON } from '@/geo/layer/gv-layers/vector/gv-geojson';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { LayerServiceMetadataUnableToFetchError } from '@/core/exceptions/layer-exceptions';
 import { formatError } from '@/core/exceptions/core-exceptions';
-import { GeoUtilities, type ProxyUsedDelegate, type SourceFeaturesInfo } from '@/geo/utils/utilities';
+import { EMPTY_FETCH_RESULT, GeoUtilities, type FetchWithProxyResult, type SourceFeaturesInfo } from '@/geo/utils/utilities';
 import type { DisplayDateMode } from '@/api/types/map-schema-types';
 
 export interface TypeGeoJSONLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
@@ -64,14 +64,11 @@ export class GeoJSON extends AbstractGeoViewVector {
   /**
    * Overrides the way the metadata is fetched.
    *
-   * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
-   *
-   * @param callbackProxyUsed - Optional callback executed when a proxy had to be used to fetch the metadata (not implemented)
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
-   * @returns A promise that resolves with the metadata or undefined when no metadata for the particular layer type
+   * @returns A promise that resolves with the fetched metadata and proxy information
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
    */
-  protected override async onFetchServiceMetadata(_callbackProxyUsed?: ProxyUsedDelegate, abortSignal?: AbortSignal): Promise<unknown> {
+  protected override async onFetchServiceMetadata(abortSignal?: AbortSignal): Promise<FetchWithProxyResult<unknown>> {
     try {
       // Get the metadataAccessPath if it exists
       const metadataAccessPath = this.getMetadataAccessPathIfExists();
@@ -83,7 +80,7 @@ export class GeoJSON extends AbstractGeoViewVector {
         metadataAccessPath?.toLowerCase().endsWith('.geojson')
       ) {
         // Fetch it and return
-        return await GeoJSON.fetchMetadata(metadataAccessPath, abortSignal);
+        return { data: await GeoJSON.fetchMetadata(metadataAccessPath, abortSignal) };
       }
 
       // The metadataAccessPath didn't seem like it was containing actual metadata, so it was skipped
@@ -92,7 +89,7 @@ export class GeoJSON extends AbstractGeoViewVector {
       );
 
       // None
-      return Promise.resolve(undefined);
+      return EMPTY_FETCH_RESULT;
     } catch (error: unknown) {
       // Throw
       throw new LayerServiceMetadataUnableToFetchError(
