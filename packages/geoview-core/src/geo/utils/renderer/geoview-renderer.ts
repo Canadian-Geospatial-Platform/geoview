@@ -178,8 +178,10 @@ export abstract class GeoviewRenderer {
     // Fix QGIS stroke property not being spaced correctly...
     svgText = svgText.replace('"stroke=', '" stroke=');
 
-    // Fix QGIS stroke-opacity/fill-opacity having wrong values...
-    svgText = svgText.replace(/(stroke-opacity|fill-opacity|stroke-width)="([\d.]+)\s+[\d.]+"/g, '$1="$2"');
+    // Fix QGIS parametric SVG fallback values after param() substitution.
+    // After replacing param(fill) with "#413939", the original fallback "#000" remains as "fill="#413939 #000"".
+    // This regex keeps only the first (substituted) value for color and numeric attributes.
+    svgText = svgText.replace(/((?:stroke-opacity|fill-opacity|stroke-width|fill|stroke))="([^\s"]+)\s+[^\s"]+"/g, '$1="$2"');
 
     // Replace extra QGIS meta stuff
     svgText = svgText
@@ -347,6 +349,15 @@ export abstract class GeoviewRenderer {
         drawingCanvas.height = height;
         const drawingContext = drawingCanvas.getContext('2d', { willReadFrequently: true })!;
         drawingContext.globalAlpha = iconStyle.getOpacity();
+
+        // Apply rotation if set on the icon style
+        const rotation = iconStyle.getRotation();
+        if (rotation) {
+          drawingContext.translate(width / 2, height / 2);
+          drawingContext.rotate(rotation);
+          drawingContext.translate(-width / 2, -height / 2);
+        }
+
         drawingContext.drawImage(image, 0, 0);
         return drawingCanvas;
       }
@@ -1074,7 +1085,7 @@ export abstract class GeoviewRenderer {
     iconOptions.src = `data:${settings.mimeType};base64,${settings.src}`;
     if (settings.width !== undefined && settings.height !== undefined) iconOptions.size = [settings.width, settings.height];
     if (settings.offset !== undefined) iconOptions.offset = settings.offset;
-    if (settings.rotation !== undefined) iconOptions.rotation = settings.rotation;
+    if (settings.rotation !== undefined) iconOptions.rotation = (settings.rotation * Math.PI) / 180;
     if (settings.opacity !== undefined) iconOptions.opacity = settings.opacity;
     if (settings.scale !== undefined) iconOptions.scale = settings.scale;
     return new Style({
