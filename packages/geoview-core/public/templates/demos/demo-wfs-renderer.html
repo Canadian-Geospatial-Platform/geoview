@@ -120,6 +120,8 @@
               </pre>
             </p>
       </div>
+      <h4>Preview of the SVGs:</h4>
+      <div id="previewSVGs"></div>
     </div>
 
     <script src="codedoc.js"></script>
@@ -173,16 +175,88 @@
           await cgpv.api.utilities.core.delay(500);
 
           // Parse it right away
-          parseOutputStyles();
+          await parseOutputStyles();
         } catch (error) {
           alert(error);
         }
       };
       fetchWMSStyles();
 
-      function parseOutputStyles() {
-        const geoViewRenderer = cgpv.api.config.getStyleFromWMSRenderer(editorInputProcess.getValue());
-        editorOutputProcess.setValue(JSON.stringify(geoViewRenderer, undefined, 2));
+      async function parseOutputStyles() {
+        const styleConfig = cgpv.api.config.getStyleFromWMSRenderer(editorInputProcess.getValue());
+        editorOutputProcess.setValue(JSON.stringify(styleConfig, undefined, 2));
+
+        // Generate icon previews
+        const previewDiv = document.getElementById('previewSVGs');
+        previewDiv.innerHTML = '';
+        try {
+          const legendStyles = await cgpv.api.utilities.renderer.getLegendStyles(styleConfig);
+          const geometryTypes = ['Point', 'LineString', 'Polygon', 'GeometryCollection'];
+          geometryTypes.forEach((geomType) => {
+            const geomStyle = legendStyles[geomType];
+            if (!geomStyle) return;
+
+            const section = document.createElement('div');
+            section.style.marginBottom = '16px';
+            const heading = document.createElement('h5');
+            heading.textContent = geomType;
+            section.appendChild(heading);
+
+            const container = document.createElement('div');
+            container.style.display = 'flex';
+            container.style.flexWrap = 'wrap';
+            container.style.gap = '12px';
+            container.style.alignItems = 'flex-start';
+
+            // Collect canvases: default + array
+            const canvases = [];
+            const styleInfo = styleConfig[geomType];
+            if (geomStyle.defaultCanvas) {
+              const defaultLabel = styleInfo?.type === 'simple' ? (styleInfo.info?.[0]?.label || 'Default') : 'Default';
+              canvases.push({ canvas: geomStyle.defaultCanvas, label: defaultLabel });
+            }
+            if (geomStyle.arrayOfCanvas) {
+              geomStyle.arrayOfCanvas.forEach((canvas, i) => {
+                const label = styleInfo?.info?.[i]?.label || `Item ${i + 1}`;
+                canvases.push({ canvas, label });
+              });
+            }
+
+            canvases.forEach(({ canvas, label }) => {
+              const item = document.createElement('div');
+              item.style.textAlign = 'center';
+              item.style.display = 'flex';
+              item.style.flexDirection = 'column';
+              item.style.alignItems = 'center';
+              item.style.width = '80px';
+              const img = document.createElement('img');
+              img.src = canvas.toDataURL();
+              img.title = label;
+              img.style.display = 'block';
+              img.style.marginBottom = '4px';
+              item.appendChild(img);
+              const text = document.createElement('span');
+              text.textContent = label;
+              text.style.fontSize = '11px';
+              text.style.display = 'block';
+              text.style.wordBreak = 'break-word';
+              text.style.lineHeight = '1.2';
+              text.title = label;
+              item.appendChild(text);
+              container.appendChild(item);
+            });
+
+            section.appendChild(container);
+            previewDiv.appendChild(section);
+          });
+
+          if (!previewDiv.hasChildNodes()) {
+            previewDiv.textContent = 'No renderable styles found.';
+          }
+        } catch (error) {
+          previewDiv.textContent = 'Error generating icon previews: ' + error.message;
+          console.error('Icon preview error:', error);
+        }
       }
 
       rendererDropdown.addEventListener('change', (e) => {
