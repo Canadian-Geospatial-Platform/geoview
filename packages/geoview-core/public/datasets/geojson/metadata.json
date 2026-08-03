@@ -82,7 +82,7 @@
           "nameField": "Province",
           "outfields": [
             { "name": "Province", "alias": "Province", "type": "string" },
-            { "name": "creationDate", "alias": "Creation Date", "type": "number" }
+            { "name": "creationDate", "alias": "Creation Date", "type": "date" }
           ]
         }
       },
@@ -158,7 +158,7 @@
           "outfields": [
             { "name": "data", "alias": "data", "type": "string" },
             { "name": "label", "alias": "label", "type": "string" },
-            { "name": "creationDate", "alias": "Creation Date", "type": "number" }
+            { "name": "creationDate", "alias": "Creation Date", "type": "date" }
           ]
         }
       },
