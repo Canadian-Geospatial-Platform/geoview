@@ -84,6 +84,8 @@ export function OverviewMap(props: OverviewMapProps): JSX.Element {
       mapController.setOverviewMapVisibility(false);
       root.unmount();
       setIsInitialized(false);
+      // Defer unmount to avoid "synchronously unmount a root while React was already rendering" error. A setTimeout with 0 ms is the standard workaround for this.
+      setTimeout(() => root.unmount(), 0);
     };
   }, [mapController, displayLanguage, i18n]);
 
