@@ -110,14 +110,6 @@ export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
     const pOverviewMapAbsent = this.#mapConfigTester.testOverviewMapAbsent();
     await pOverviewMapAbsent;
 
-    // Test north arrow is present when configured
-    const pNorthArrowPresent = this.#mapConfigTester.testNorthArrowPresent();
-    await pNorthArrowPresent;
-
-    // Test north arrow is absent when not configured
-    const pNorthArrowAbsent = this.#mapConfigTester.testNorthArrowAbsent();
-    await pNorthArrowAbsent;
-
     // Test overview map hideOnZoom behavior
     const pOverviewMapHideOnZoom = this.#mapConfigTester.testOverviewMapHideOnZoom();
     await pOverviewMapHideOnZoom;
@@ -125,6 +117,14 @@ export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
     // Test overview map hideOnZoom with reprojection
     const pOverviewMapHideOnZoomReproject = this.#mapConfigTester.testOverviewMapHideOnZoomWithReprojection();
     await pOverviewMapHideOnZoomReproject;
+
+    // Test north arrow is present when configured
+    const pNorthArrowPresent = this.#mapConfigTester.testNorthArrowPresent();
+    await pNorthArrowPresent;
+
+    // Test north arrow is absent when not configured
+    const pNorthArrowAbsent = this.#mapConfigTester.testNorthArrowAbsent();
+    await pNorthArrowAbsent;
 
     // Test initialSettings all controls set to false
     const pControlsAllFalse = this.#mapConfigTester.testInitialSettingsControlsAllFalse();
