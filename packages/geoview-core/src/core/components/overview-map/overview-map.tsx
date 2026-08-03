@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
+import { createRoot } from 'react-dom/client';
 import { I18nextProvider } from 'react-i18next';
 
 import type { i18n } from 'i18next';
@@ -12,7 +12,6 @@ import { OverviewMapToggle } from './overview-map-toggle';
 import { useStoreAppDisplayLanguage } from '@/core/stores/states/app-state';
 import { useStoreMapOverviewShouldBeVisible } from '@/core/stores/states/map-state';
 import { logger } from '@/core/utils/logger';
-import { TIMEOUT } from '@/core/utils/constant';
 import { useMapController } from '@/core/controllers/use-controllers';
 
 /** The properties for the overview map component. */
@@ -61,39 +60,29 @@ export function OverviewMap(props: OverviewMapProps): JSX.Element {
   useEffect(() => {
     logger.logTraceUseEffect('OVERVIEW-MAP - mount');
 
-    let root: Root | null = null;
     const toggleButton = document.createElement('div');
     const overviewMapControl = mapController.initOverviewMapControl(toggleButton);
 
-    // Use setTimeout to defer root creation to next tick
-    const timeoutId = setTimeout(() => {
-      root = createRoot(toggleButton);
-      root.render(
-        <I18nextProvider i18n={i18n}>
-          <ThemeProvider theme={cgpvTheme}>
-            <OverviewMapToggle overviewMap={overviewMapControl} />
-          </ThemeProvider>
-        </I18nextProvider>
-      );
-      // Store the root reference for cleanup
-      mapController.setMapOverviewMapRoot(root);
+    const root = createRoot(toggleButton);
+    root.render(
+      <I18nextProvider i18n={i18n}>
+        <ThemeProvider theme={cgpvTheme}>
+          <OverviewMapToggle overviewMap={overviewMapControl} />
+        </ThemeProvider>
+      </I18nextProvider>
+    );
+    // Store the root reference for cleanup
+    mapController.setMapOverviewMapRoot(root);
 
-      // Set initialized to true after everything is set up
-      setIsInitialized(true);
-    }, TIMEOUT.deferExecution);
+    // Set initialized to true after everything is set up
+    setIsInitialized(true);
 
     // Cleanup
     return () => {
       logger.logTraceUseEffectUnmount('OVERVIEW-MAP - unmount');
-      clearTimeout(timeoutId);
       // Hide the overview map control when component unmounts
       mapController.setOverviewMapVisibility(false);
-      setTimeout(() => {
-        if (root) {
-          root.unmount();
-          root = null;
-        }
-      }, TIMEOUT.deferExecution);
+      root.unmount();
       setIsInitialized(false);
     };
   }, [mapController, displayLanguage, i18n]);
