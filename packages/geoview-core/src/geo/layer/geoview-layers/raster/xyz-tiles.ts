@@ -152,7 +152,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
    *
    * @param layerConfig - The XYZ tiles layer entry configuration to preprocess
    * @returns A promise that resolves with the ping result indicating proxy usage
-   * @throws {LayerServiceMetadataUnableToFetchError} When the tile service is not reachable
+   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails (network, proxy, or HTTP error)
    */
   protected override async onPreprocessLayerConfig(layerConfig: XYZTilesLayerEntryConfig): Promise<PreprocessLayerConfigResult> {
     // Get the configProxyUrl
