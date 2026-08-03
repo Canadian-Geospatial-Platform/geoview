@@ -592,7 +592,7 @@ export abstract class AbstractGeoViewLayer {
     // Call the overridable method
     const result = (await this.onFetchServiceMetadata(abortSignal)) as FetchWithProxyResult<T>;
 
-    // If a proxy was used, store it on the instance
+    // If a proxy was used, store it on the instance so that it can be forwarded to the layer configs a bit later
     if (result.proxyUsed) this.setProxyUrl(result.proxyUsed);
 
     // Return the result
@@ -854,7 +854,7 @@ export abstract class AbstractGeoViewLayer {
       // GV e.g.: XYZ Tiles added via configuration without a metadataAccessPath
       // GV e.g.: XYZ Tiles added via add-new-layer component like 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
       // GV e.g.: CSV (csvLYR2) and some outlier demos
-      if (!this.hasMetadataAccessPath()) debugger;
+      if (!this.hasMetadataAccessPath()) return;
 
       // Log
       logger.logTraceCore(
