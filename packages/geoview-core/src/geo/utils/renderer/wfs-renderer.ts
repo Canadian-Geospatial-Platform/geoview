@@ -30,6 +30,16 @@ import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { isNumeric } from '@/core/utils/utilities';
 
 /**
+ * Normalizes a value to an array. If the value is already an array, returns it as-is; otherwise wraps it in a single-element array.
+ *
+ * @param value - The value to normalize
+ * @returns The value as an array
+ */
+function toArray<T>(value: T | T[]): T[] {
+  return Array.isArray(value) ? value : [value];
+}
+
+/**
  * Class used to interpret a WFS, via its WMS equivalent, and build a Geoview Renderer style.
  */
 export abstract class WfsRenderer {
@@ -65,7 +75,7 @@ export abstract class WfsRenderer {
 
     // Read rules
     const rulesRaw = firstFeatureTypeStyle['se:Rule'];
-    const rules = Array.isArray(rulesRaw) ? rulesRaw : [rulesRaw];
+    const rules = toArray(rulesRaw);
 
     // Default geometry type
     let geomType: TypeStyleGeometry = 'Point';
@@ -87,7 +97,7 @@ export abstract class WfsRenderer {
         hasClassBreaks = filterInfo.hasGreaterOrLessThan;
 
         // Compile the fields
-        const propertyNames = Array.isArray(filterInfo.propertyName) ? filterInfo.propertyName : [filterInfo.propertyName];
+        const propertyNames = toArray(filterInfo.propertyName);
         propertyNames.forEach((name) => {
           if (!fields.includes(name)) fields.push(name);
         });
@@ -250,10 +260,10 @@ export abstract class WfsRenderer {
     // Parse the XML structure - typically alternates PropertyName/Literal
     Object.keys(func).forEach((key) => {
       if (key === 'ogc:PropertyName') {
-        const props = Array.isArray(func[key]) ? func[key] : [func[key]];
+        const props = toArray(func[key]);
         fields.push(...props);
       } else if (key === 'ogc:Literal') {
-        const lits = Array.isArray(func[key]) ? func[key] : [func[key]];
+        const lits = toArray(func[key]);
         separators.push(...lits);
       }
     });
@@ -441,7 +451,7 @@ export abstract class WfsRenderer {
   static #buildLayerStyleInfoPointSymbolizer(
     symbolizer: TypeUserStyleSymbolizer | TypeUserStyleSymbolizer[]
   ): Partial<TypeLayerStyleConfigInfo> | undefined {
-    const symbolizers = Array.isArray(symbolizer) ? symbolizer : [symbolizer];
+    const symbolizers = toArray(symbolizer);
 
     // For each symbolizer
     let globalMimeType: string | undefined;
@@ -519,7 +529,7 @@ export abstract class WfsRenderer {
   static #buildLayerStyleInfoLineSymbolizer(
     symbolizer: TypeUserStyleSymbolizer | TypeUserStyleSymbolizer[]
   ): Partial<TypeLayerStyleConfigInfo> | undefined {
-    const symbolizers = Array.isArray(symbolizer) ? symbolizer : [symbolizer];
+    const symbolizers = toArray(symbolizer);
 
     // Accumulated stroke settings (first non-undefined wins per field)
     let strokeColor: string | undefined;
@@ -632,7 +642,7 @@ export abstract class WfsRenderer {
   static #buildLayerStyleInfoPolygonSymbolizer(
     symbolizer: TypeUserStyleSymbolizer | TypeUserStyleSymbolizer[]
   ): Partial<TypeLayerStyleConfigInfo> | undefined {
-    const symbolizers = Array.isArray(symbolizer) ? symbolizer : [symbolizer];
+    const symbolizers = toArray(symbolizer);
 
     // Accumulated fill settings
     let fillColor: string | undefined;
@@ -790,6 +800,33 @@ export abstract class WfsRenderer {
   }
 
   /**
+   * Extracts name-value pairs from SvgParameter/CssParameter nodes inside a style node.
+   *
+   * This is the shared extraction logic used by both stroke and fill parameter readers.
+   *
+   * @param styleNode - The `<se:Stroke>` or `<se:Fill>` XML node
+   * @returns A map of lowercase parameter names to their trimmed string values
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  static #extractSvgParamsMap(styleNode: any): Record<string, string> {
+    const out: Record<string, string> = {};
+    if (!styleNode) return out;
+
+    const svgParams = styleNode['se:SvgParameter'] ?? styleNode['se:CssParameter'] ?? [];
+    const params = toArray(svgParams);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    params.forEach((p: any) => {
+      const name = p?.['@attributes']?.name ?? p?.name ?? p?.Name;
+      const val = p?.['#text'] ?? p?.['#value'] ?? (typeof p === 'string' ? p : undefined);
+      if (!name || val === undefined) return;
+      out[String(name).toLowerCase()] = String(val).trim();
+    });
+
+    return out;
+  }
+
+  /**
    * Extracts stroke parameters from a `<se:Stroke>` node (SvgParameter/CssParameter)
    * and returns a normalized object.
    *
@@ -816,35 +853,37 @@ export abstract class WfsRenderer {
       lineCap?: string;
     } = {};
 
-    if (!strokeNode) return out;
+    const raw = this.#extractSvgParamsMap(strokeNode);
 
-    const svgParams = strokeNode['se:SvgParameter'] ?? strokeNode['se:CssParameter'] ?? [];
-    const params = Array.isArray(svgParams) ? svgParams : [svgParams];
+    const colorVal = raw['stroke'] ?? raw['color'];
+    if (colorVal) out.color = colorVal;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    params.forEach((p: any) => {
-      const name = p?.['@attributes']?.name ?? p?.name ?? p?.Name;
-      const val = p?.['#text'] ?? p?.['#value'] ?? (typeof p === 'string' ? p : undefined);
-      if (!name || val === undefined) return;
-      const n = String(name).toLowerCase();
-      const v = String(val).trim();
+    const widthVal = raw['stroke-width'] ?? raw['width'];
+    if (widthVal !== undefined) {
+      const num = Number(widthVal);
+      if (!Number.isNaN(num)) out.width = num;
+    }
 
-      if (n === 'stroke' || n === 'color') out.color ??= v;
-      else if (n === 'stroke-width' || n === 'width') {
-        const num = Number(v);
-        if (!Number.isNaN(num)) out.width ??= num;
-      } else if (n === 'stroke-opacity' || n === 'opacity') {
-        const num = Number(v);
-        if (!Number.isNaN(num)) out.opacity ??= Math.max(0, Math.min(1, num));
-      } else if (n === 'stroke-dasharray' || n === 'dasharray') {
-        const arr = v
-          .split(/[\s,]+/)
-          .map((s) => Number(s))
-          .filter((n1) => !Number.isNaN(n1));
-        if (arr.length) out.dasharray ??= arr;
-      } else if (n === 'stroke-linejoin' || n === 'linejoin') out.lineJoin ??= v.toLowerCase();
-      else if (n === 'stroke-linecap' || n === 'linecap') out.lineCap ??= v.toLowerCase();
-    });
+    const opacityVal = raw['stroke-opacity'] ?? raw['opacity'];
+    if (opacityVal !== undefined) {
+      const num = Number(opacityVal);
+      if (!Number.isNaN(num)) out.opacity = Math.max(0, Math.min(1, num));
+    }
+
+    const dasharrayVal = raw['stroke-dasharray'] ?? raw['dasharray'];
+    if (dasharrayVal) {
+      const arr = dasharrayVal
+        .split(/[\s,]+/)
+        .map((s) => Number(s))
+        .filter((n1) => !Number.isNaN(n1));
+      if (arr.length) out.dasharray = arr;
+    }
+
+    const lineJoinVal = raw['stroke-linejoin'] ?? raw['linejoin'];
+    if (lineJoinVal) out.lineJoin = lineJoinVal;
+
+    const lineCapVal = raw['stroke-linecap'] ?? raw['linecap'];
+    if (lineCapVal) out.lineCap = lineCapVal;
 
     return out;
   }
@@ -867,26 +906,19 @@ export abstract class WfsRenderer {
       pattern?: string;
     } = {};
 
-    if (!fillNode) return out;
+    const raw = this.#extractSvgParamsMap(fillNode);
 
-    const svgParams = fillNode['se:SvgParameter'] ?? fillNode['se:CssParameter'] ?? [];
-    const params = Array.isArray(svgParams) ? svgParams : [svgParams];
+    const colorVal = raw['fill'] ?? raw['color'];
+    if (colorVal) out.color = colorVal;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    params.forEach((p: any) => {
-      const name = p?.['@attributes']?.name ?? p?.name ?? p?.Name;
-      const val = p?.['#text'] ?? p?.['#value'] ?? (typeof p === 'string' ? p : undefined);
-      if (!name || val === undefined) return;
+    const opacityVal = raw['fill-opacity'] ?? raw['opacity'];
+    if (opacityVal !== undefined) {
+      const num = Number(opacityVal);
+      if (!Number.isNaN(num)) out.opacity = Math.max(0, Math.min(1, num));
+    }
 
-      const n = String(name).toLowerCase();
-      const v = String(val).trim();
-
-      if (n === 'fill' || n === 'color') out.color ??= v;
-      else if (n === 'fill-opacity' || n === 'opacity') {
-        const num = Number(v);
-        if (!Number.isNaN(num)) out.opacity ??= Math.max(0, Math.min(1, num));
-      } else if (n === 'fill-pattern' || n === 'pattern') out.pattern ??= v.toLowerCase();
-    });
+    const patternVal = raw['fill-pattern'] ?? raw['pattern'];
+    if (patternVal) out.pattern = patternVal;
 
     return out;
   }
@@ -923,7 +955,7 @@ export abstract class WfsRenderer {
     const vendorOptions = sym?.['se:VendorOption'];
     if (!vendorOptions) return placements;
 
-    const items = Array.isArray(vendorOptions) ? vendorOptions : [vendorOptions];
+    const items = toArray(vendorOptions);
     for (const opt of items) {
       const name = opt?.['@attributes']?.name ?? opt?.name;
       if (String(name).toLowerCase() === 'placement') {
@@ -947,7 +979,7 @@ export abstract class WfsRenderer {
     const vendorOptions = sym?.['se:VendorOption'];
     if (!vendorOptions) return undefined;
 
-    const items = Array.isArray(vendorOptions) ? vendorOptions : [vendorOptions];
+    const items = toArray(vendorOptions);
     for (const opt of items) {
       const name = opt?.['@attributes']?.name ?? opt?.name;
       if (String(name).toLowerCase() === 'fill-pattern') {
@@ -1233,12 +1265,7 @@ export abstract class WfsRenderer {
     const output: Record<string, string> = {};
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let items: any[] = [];
-    if (Array.isArray(obj)) {
-      items = obj;
-    } else if (obj) {
-      items = [obj];
-    }
+    const items: any[] = obj ? toArray(obj) : [];
 
     for (const node of items) {
       if (typeof node === 'string') {
@@ -1311,6 +1338,8 @@ export abstract class WfsRenderer {
    * This method parses the provided SVG markup into a DOM tree,
    * then recursively serializes each node with consistent indentation,
    * returning a formatted string suitable for display or inspection.
+   * Currently only called with `minify = true`, but the pretty-print branch is
+   * intentionally kept for upcoming debugging and style inspection tooling.
    *
    * @param svg - The raw SVG string
    * @param indent - Optional the number of spaces per indentation level (used only when `minify` is false)
