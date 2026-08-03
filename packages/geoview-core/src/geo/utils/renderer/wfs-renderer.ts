@@ -487,6 +487,12 @@ export abstract class WfsRenderer {
       globalFromSVGsOrMarkers = globalFromSVGsOrMarkers !== 'svg' ? fromGraphic : 'svg';
       globalSize = Math.max(globalSize, symSize);
       globalMaxViewBox = Math.max(globalMaxViewBox, maxViewBox);
+
+      // Tag each graphic with its symbolizer's intended size for proportional scaling
+      graphicsInfo.forEach((gInfo) => {
+        // eslint-disable-next-line no-param-reassign
+        gInfo.sizeGraphic = symSize;
+      });
       allGraphicsInfo.push(...graphicsInfo);
     });
 
@@ -1090,7 +1096,7 @@ export abstract class WfsRenderer {
       // logger.logDebug('INNER SVG', innerSVG);
 
       // Add it
-      graphicsInfo.push({ innerSVG, vx, vy, vw, vh });
+      graphicsInfo.push({ innerSVG, vx, vy, vw, vh, sizeGraphic, isMarker: false });
     });
 
     // Return the information
@@ -1172,7 +1178,9 @@ export abstract class WfsRenderer {
     // Build a simple SVG for common well-known names
     const cx = sizeGraphic / 2;
     const cy = sizeGraphic / 2;
-    const r = Math.max(1, sizeGraphic * 0.4);
+    // Per SLD spec, se:Size is the total graphic size including stroke.
+    // Radius = (size - strokeWidth) / 2 so the stroke fits within the viewBox.
+    const r = Math.max(1, (sizeGraphic - strokeWidth) / 2);
     let shape = '';
 
     switch (wellKnownName.toLowerCase()) {
@@ -1243,7 +1251,7 @@ export abstract class WfsRenderer {
     const vh = sizeGraphic;
     const mimeType = 'image/svg+xml';
     const maxViewBox = Math.max(0, vw, vh);
-    graphicsInfo.push({ innerSVG, vx, vy, vw, vh });
+    graphicsInfo.push({ innerSVG, vx, vy, vw, vh, sizeGraphic, isMarker: true });
 
     // Return the information
     return { graphicsInfo, maxViewBox, sizeGraphic, mimeType, fromSVGsOrMarkers: 'marker' };
@@ -1305,17 +1313,32 @@ export abstract class WfsRenderer {
     // If from multiple svgs (compilation) the viewBox needs adjusting again and svgs recentered
     let svgs: string[] = [];
     if (graphicsInfo.length > 1) {
-      const scale = size / maxViewBox;
       const half = size / 2;
 
-      svgs = graphicsInfo.map(({ innerSVG, vx, vy, vw, vh }) => {
+      // Check if the first (background) graphic is a marker shape (circle, square, etc.)
+      const backgroundIsMarker = graphicsInfo[0].isMarker;
+      // Uniform scale for SVG-only compositions (content bounds naturally encode size differences)
+      const uniformScale = size / maxViewBox;
+
+      svgs = graphicsInfo.map(({ innerSVG, vx, vy, vw, vh, sizeGraphic: graphicSize }, idx) => {
+        let graphicScale: number;
+        if (backgroundIsMarker) {
+          // When background is a marker, use proportional scaling with inset so
+          // foreground fits inside the marker shape (marker radius = 0.4 * size)
+          const maxDim = Math.max(vw, vh, 1);
+          const inset = idx > 0 ? 0.8 : 1;
+          graphicScale = (graphicSize / maxDim) * inset;
+        } else {
+          // For all-SVG compositions, uniform scaling preserves natural proportions
+          graphicScale = uniformScale;
+        }
         // Center of original content
         const cx = vx + vw / 2;
         const cy = vy + vh / 2;
         // Translate so center aligns with output center, then scale
-        const tx = half - cx * scale;
-        const ty = half - cy * scale;
-        return `<g transform="translate(${tx},${ty}) scale(${scale})">${innerSVG}</g>`;
+        const tx = half - cx * graphicScale;
+        const ty = half - cy * graphicScale;
+        return `<g transform="translate(${tx},${ty}) scale(${graphicScale})">${innerSVG}</g>`;
       });
     } else {
       // Only 1 graphic, if svg created recenter it(?)
@@ -1326,7 +1349,8 @@ export abstract class WfsRenderer {
     }
 
     // Combine into one big svg
-    const svgContent = `<svg ${outerViewBox} xmlns="http://www.w3.org/2000/svg" width="${maxViewBox}" height="${maxViewBox}" preserveAspectRatio="xMidYMid meet">${svgs.join('')}</svg>`;
+    const svgSize = Math.max(size, maxViewBox);
+    const svgContent = `<svg ${outerViewBox} xmlns="http://www.w3.org/2000/svg" width="${svgSize}" height="${svgSize}" preserveAspectRatio="xMidYMid meet">${svgs.join('')}</svg>`;
 
     // Pretty print it and return
     return this.#prettyPrintSVG(svgContent, 2, true);
@@ -1829,7 +1853,7 @@ type ExternalGraphicsInfo = {
   rotation?: number;
 };
 
-type GraphicInfo = { innerSVG: string; vx: number; vy: number; vw: number; vh: number };
+type GraphicInfo = { innerSVG: string; vx: number; vy: number; vw: number; vh: number; sizeGraphic: number; isMarker: boolean };
 
 type FilterInfo = {
   hasGreaterOrLessThan: boolean;
