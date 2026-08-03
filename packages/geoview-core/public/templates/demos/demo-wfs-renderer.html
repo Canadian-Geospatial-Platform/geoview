@@ -121,6 +121,7 @@
             </p>
       </div>
       <h4>Preview of the SVGs:</h4>
+      <button class="btn btn-primary" id="createPreview" style="margin: 0 0 10px 0;">Create preview</button>
       <div id="previewSVGs"></div>
     </div>
 
@@ -185,6 +186,14 @@
       async function parseOutputStyles() {
         const styleConfig = cgpv.api.config.getStyleFromWMSRenderer(editorInputProcess.getValue());
         editorOutputProcess.setValue(JSON.stringify(styleConfig, undefined, 2));
+
+        // Generate previews from the newly created config
+        await generatePreview();
+      }
+
+      async function generatePreview() {
+        // Read the current style config from the output editor
+        const styleConfig = JSON.parse(editorOutputProcess.getValue());
 
         // Generate icon previews
         const previewDiv = document.getElementById('previewSVGs');
@@ -271,6 +280,10 @@
 
       executeButton.addEventListener('click', (e) => {
         parseOutputStyles();
+      });
+
+      document.getElementById('createPreview').addEventListener('click', (e) => {
+        generatePreview();
       });
     </script>
   </body>
