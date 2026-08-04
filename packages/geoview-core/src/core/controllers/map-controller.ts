@@ -793,12 +793,21 @@ export class MapController extends AbstractMapViewerController {
   // #region PUBLIC METHODS - OTHERS
 
   /**
+   * Updates the OL View padding to account for the map-info bar height.
+   */
+  updateViewPadding(): void {
+    // Redirect to the MapViewer
+    this.getMapViewer().updateViewPadding();
+  }
+
+  /**
    * Converts a map coordinate to a pixel position.
    *
    * @param coord - The map coordinate
    * @returns The pixel position on the map viewport, or undefined if the map is not yet initialized
    */
   getPixelFromCoordinate(coord: Coordinate): Pixel | undefined {
+    // Redirect to the MapViewer
     return this.getMapViewer().map?.getPixelFromCoordinate(coord) ?? undefined;
   }
 
@@ -811,6 +820,7 @@ export class MapController extends AbstractMapViewerController {
    * @returns The map center position info
    */
   getMapCenterPosition(): TypeMapMouseInfo {
+    // Redirect to the MapViewer
     const mapViewer = this.getMapViewer();
     const view = mapViewer.getView();
     const projected = view.getCenter()!;
@@ -849,6 +859,7 @@ export class MapController extends AbstractMapViewerController {
    * @param clickMarkerRef - The HTMLDivElement reference for the click marker overlay
    */
   setClickMarkerOverlayRef(clickMarkerRef: HTMLDivElement): void {
+    // Redirect to the MapViewer
     this.getMapViewer().getClickMarkerOverlay().setElement(clickMarkerRef);
   }
 
@@ -858,6 +869,7 @@ export class MapController extends AbstractMapViewerController {
    * @param northPoleMarkerRef - The HTMLDivElement reference for the north pole marker overlay
    */
   setNorthPoleMarkerOverlayRef(northPoleMarkerRef: HTMLDivElement): void {
+    // Redirect to the MapViewer
     this.getMapViewer().getNorthPoleMarkerOverlay().setElement(northPoleMarkerRef);
   }
 
