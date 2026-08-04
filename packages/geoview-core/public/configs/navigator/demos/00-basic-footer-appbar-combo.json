@@ -3,7 +3,6 @@
     "description": "FooterBar and appBar combo with multiple layer types, overlay markers, uniqueValue styles, and canRemoveSublayers disabled."
   },
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "projection": 3978
     },

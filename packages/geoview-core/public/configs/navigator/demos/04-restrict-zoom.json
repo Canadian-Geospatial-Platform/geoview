@@ -3,7 +3,6 @@
     "description": "Restricted zoom range with minZoom 6 and maxZoom 8 on LCC projection."
   },
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "minZoom": 6,
       "maxZoom": 8,

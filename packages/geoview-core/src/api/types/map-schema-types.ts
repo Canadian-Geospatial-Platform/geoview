@@ -505,9 +505,10 @@ export const CONFIG_SHAPEFILE_TYPE = 'shapefile';
 // valid zoom levels from each projection
 export const VALID_ZOOM_LEVELS: number[] = [0, 20];
 
-/** Definition of the MapFeatureConfig default values. All the default values that applies to the map feature configuration are defined here. */
+/** Definition of the MapFeatureConfig default values. */
 // TODO: INVESTIGATE - Move this in better class than here.
 // TODO: REVISION - Revise default values.
+// GV: All the default values that applies to the map feature configuration are defined here.
 // GV: The Cast operation doesn't create a real MapFeatureConfig instance because methods are missing.
 // GV: We do that only to create an object that has the default values who can be accessed using the instance property names.
 export const DEFAULT_MAP_FEATURE_CONFIG = {

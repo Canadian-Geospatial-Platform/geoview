@@ -3,7 +3,6 @@
     "description": "Map export with large legend and many layers on imagery basemap."
   },
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "projection": 3978
     },

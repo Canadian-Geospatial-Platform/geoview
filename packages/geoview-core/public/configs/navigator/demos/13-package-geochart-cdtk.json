@@ -3,7 +3,6 @@
     "description": "Geochart plugin with CDTK/QGIS data sources (WMS, WFS)."
   },
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "projection": 3857
     },

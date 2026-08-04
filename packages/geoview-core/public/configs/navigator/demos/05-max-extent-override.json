@@ -3,7 +3,6 @@
     "description": "maxExtent override on Web Mercator to allow full world extent."
   },
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "maxExtent": [
         -180,

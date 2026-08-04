@@ -3,7 +3,6 @@
     "description": "AOI panel plugin in appBar with 2 areas of interest."
   },
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "projection": 3978
     },

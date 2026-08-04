@@ -3,7 +3,6 @@
     "description": "Combined initialSettings demo with all categories: filters, states, controls, cascading settings, and layer-specific config. See 23a through 23d for individual focused demos."
   },
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "projection": 3857
     },

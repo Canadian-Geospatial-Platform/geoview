@@ -4,7 +4,6 @@
     "description": "Tests using the same geocore UUID multiple times with different custom settings on each instance. Also tests the swiper package with duplicate geocore UUIDs."
   },
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "projection": 3978
     },

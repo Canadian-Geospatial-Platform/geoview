@@ -4,7 +4,6 @@
     "description": "Tests the forceServiceProjection flag to compare performance and rendering between OpenLayers reproject-on-the-fly and server-side reprojection."
   },
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "initialView": {
         "zoomAndCenter": [

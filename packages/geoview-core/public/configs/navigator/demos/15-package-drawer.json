@@ -3,7 +3,6 @@
     "description": "Drawer plugin with custom fill and stroke style, all geometry types, and measurements hidden by default."
   },
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "initialView": {
         "layerIds": []

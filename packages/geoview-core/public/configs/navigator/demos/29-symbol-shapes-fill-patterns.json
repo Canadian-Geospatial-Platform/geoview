@@ -3,7 +3,6 @@
     "description": "All symbol shapes (circle, +, diamond, square, triangle, X, star), all fill patterns (solid, null, backwardDiagonal, cross, diagonalCross, forwardDiagonal, horizontal, vertical), lineString vector settings with various line styles, and iconSymbol vector settings."
   },
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "initialView": {
         "zoomAndCenter": [

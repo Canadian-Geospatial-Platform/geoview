@@ -3,7 +3,6 @@
     "description": "Time-slider footerBar tab with multiple temporal layers including ESRI Image, WMS, esriDynamic, and esriFeature."
   },
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "projection": 3857
     },

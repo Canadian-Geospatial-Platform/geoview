@@ -3,7 +3,6 @@
     "description": "globalSettings with canRemoveSublayers, disabledLayerTypes, showUnsymbolizedFeatures (visible in data table for permafrost features with no style), highlightLayer with no bbox, displayDateMode ISO and hideCoordinateInfoSwitch that removes coordinate info from the details panel. On the Major Projects Inventory layer, we will see no data records in the data table panel."
   },
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "projection": 3978
     },

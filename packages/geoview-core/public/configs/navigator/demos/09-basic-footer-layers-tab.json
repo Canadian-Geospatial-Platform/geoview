@@ -3,7 +3,6 @@
     "description": "FooterBar with layers tab, overlay point markers, intentional bad URL layer, and canRemoveSublayers disabled."
   },
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "projection": 3857
     },

@@ -28,7 +28,6 @@ The map config file could be named **myMap.json** and it content is something si
 ```
 {
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "projection": 3978
     },

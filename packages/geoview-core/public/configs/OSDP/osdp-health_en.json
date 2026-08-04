@@ -1,6 +1,5 @@
 {
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "initialView": {
         "zoomAndCenter": [
@@ -76,7 +75,7 @@
               }
             }
           }
-        ]   
+        ]
       },
       {
         "geoviewLayerId": "21b821cf-0f1c-40ee-8925-eab12d357668",

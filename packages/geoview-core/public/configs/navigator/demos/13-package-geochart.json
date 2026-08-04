@@ -3,7 +3,6 @@
     "description": "Full geochart with multiple layer types and inline chart definitions with xSlider and ySlider."
   },
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "projection": 3857
     },

@@ -3,7 +3,6 @@
     "description": "initialSettings for layer filters using layerFilter on multiple layer types: ogcFeature, ogcWfs, esriDynamic, esriFeature, and GeoJSON."
   },
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "projection": 3857
     },

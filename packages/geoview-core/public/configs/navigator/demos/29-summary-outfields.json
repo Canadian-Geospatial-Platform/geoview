@@ -3,7 +3,6 @@
     "description": "Demonstrates the summary flag on outfields across layer types. U2 esriFeature hides City and Date. NRCan esriDynamic hides Commodity Group, Longitude and Latitude. GeoJSON points hide Orange and creationDate. OGC Feature lakes hide admin_level. CSV Shoreline hides OBJECTID, SHAPE_LENGTH and CREATEDBY. CESI uses defaults (all fields visible)."
   },
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "projection": 3857
     },

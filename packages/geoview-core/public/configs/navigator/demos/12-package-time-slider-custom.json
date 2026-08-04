@@ -3,7 +3,6 @@
     "description": "Multiple custom time-slider configurations: one with multiple layers sharing a slider, one with range, custom displayDateFormat and single handle for the network dataset."
   },
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "projection": 3857
     },

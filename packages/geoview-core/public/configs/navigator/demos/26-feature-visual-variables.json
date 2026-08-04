@@ -3,7 +3,6 @@
     "description": "visualVariables on esriFeature with colorInfo, sizeInfo, and opacityInfo."
   },
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "projection": 3857
     },

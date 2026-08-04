@@ -82,7 +82,7 @@
           "description": "Additional options used for OpenLayers map options"
         }
       },
-      "required": ["basemapOptions", "interaction", "viewSettings"]
+      "required": ["basemapOptions", "viewSettings"]
     },
     "TypeDisplayTheme": {
       "description": "Valid values for the theme property.",

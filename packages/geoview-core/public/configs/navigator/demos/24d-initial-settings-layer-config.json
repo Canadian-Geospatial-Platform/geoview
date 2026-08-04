@@ -3,7 +3,6 @@
     "description": "Layer-specific source settings: rasterFunction on esriImage (Dry Spell ds_30), wmsStyle on ogcWms, featureInfo with custom outfields including codedValue and range domains, nameField, and WMS group with nested sublayers."
   },
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "projection": 3857
     },

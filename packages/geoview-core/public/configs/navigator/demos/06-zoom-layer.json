@@ -3,7 +3,6 @@
     "description": "initialView.layerIds to zoom to layer extents on load and highlightColor red instead of default."
   },
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "initialView": {
         "layerIds": [

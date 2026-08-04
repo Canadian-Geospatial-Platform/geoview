@@ -3,7 +3,6 @@
     "description": "Complex classification styles with WMS/WFS concatenate filters, ESRI valueExpression, and multi-type style definitions."
   },
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "projection": 3857
     },

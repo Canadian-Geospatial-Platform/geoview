@@ -3,7 +3,6 @@
     "description": "initialSettings cascading at three levels: root-level settings (geojsonLYR1 sets controls and states on the geoviewLayer), group-level settings (geojsonLYR2 sets controls on groups), and child-level overrides (geojsonLYR3 sets controls on individual sublayers). Demonstrates how controls like highlight, zoom, and remove propagate from parent to child."
   },
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "projection": 3857
     },

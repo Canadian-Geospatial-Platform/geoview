@@ -4,7 +4,6 @@
     "description": "Similar to the inline custom config test, but the custom overrides are fetched from geocore VCS instead of being defined inline."
   },
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "projection": 3978
     },

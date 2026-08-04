@@ -3,7 +3,6 @@
     "description": "Circumpolar arctic projection (EPSG:3573) with arctic-sdi WMTS as basemap."
   },
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "initialView": {
         "zoomAndCenter": [

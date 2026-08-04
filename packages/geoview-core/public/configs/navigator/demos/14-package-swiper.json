@@ -3,7 +3,6 @@
     "description": "Swiper plugin with horizontal orientation on esriFeature layer."
   },
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "initialView": {
         "layerIds": []

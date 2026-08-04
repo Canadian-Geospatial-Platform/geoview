@@ -3,7 +3,6 @@
     "description": "Custom-legend plugin with structured legendList, headers, and groups with collapsed states."
   },
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "projection": 3978
     },

@@ -3,7 +3,6 @@
     "description": "Comprehensive zoom and scale test covering all layer types. Each layer sets both initialSettings.maxZoom (zoom-level cap, discrete 0-18) and minScale (denominator-based threshold e.g. 1:10000000). maxZoom hides the layer when the user zooms beyond level 8, while minScale hides it when the map scale denominator drops below 10000000. Both constraints are combined — the most restrictive wins."
   },
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "projection": 3978
     },

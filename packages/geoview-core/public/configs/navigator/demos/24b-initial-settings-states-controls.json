@@ -3,7 +3,6 @@
     "description": "initialSettings testing all controls (highlight, hover, opacity, query, remove, table, visibility, zoom) and all states (visible, legendCollapsed, opacity, hoverable, queryable) across multiple layer types."
   },
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "projection": 3857
     },

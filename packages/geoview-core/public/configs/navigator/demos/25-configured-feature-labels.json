@@ -3,7 +3,6 @@
     "description": "layerText config for feature labels with rich text options and multi-segment text arrays."
   },
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "projection": 3857
     },

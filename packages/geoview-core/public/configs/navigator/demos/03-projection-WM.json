@@ -3,7 +3,6 @@
     "description": "Web Mercator projection (3857) with transport basemap and measurement navBar."
   },
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "projection": 3857
     },

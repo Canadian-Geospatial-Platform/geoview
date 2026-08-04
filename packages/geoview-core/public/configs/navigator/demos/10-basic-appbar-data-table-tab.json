@@ -3,7 +3,6 @@
     "description": "All core tabs in appBar including data-table, selectedTab data-table, and selectedDataTableLayerPath. FooterBar is set to [] to remove it from map instead of default tabs, to show that appBar and data-table can work without footerBar."
   },
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "projection": 3978
     },

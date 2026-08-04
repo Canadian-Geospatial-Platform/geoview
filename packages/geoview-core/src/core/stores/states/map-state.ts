@@ -192,7 +192,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
           homeView: geoviewConfig.map.viewSettings.homeView ??
             geoviewConfig.map.viewSettings.initialView ?? { zoomAndCenter: [MAP_ZOOM_LEVEL[3857], MAP_CENTER[3857]] },
           initialView: geoviewConfig.map.viewSettings.initialView ?? { zoomAndCenter: [MAP_ZOOM_LEVEL[3857], MAP_CENTER[3857]] },
-          interaction: geoviewConfig.map.interaction ?? 'dynamic',
+          interaction: geoviewConfig.map.interaction,
           mapExtent: geoviewConfig.map.viewSettings.maxExtent,
           northArrow: geoviewConfig.components!.indexOf('north-arrow') >= 0 || false, // Was defaulted so can use '!'
           overviewMap: geoviewConfig.components!.indexOf('overview-map') >= 0 || false, // Was defaulted so can use '!'

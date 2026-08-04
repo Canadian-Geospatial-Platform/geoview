@@ -3,7 +3,6 @@
     "description": "viewSettings with homeView (custom home button extent), rotation (45°), enableRotation, and serviceUrls overrides for geocoreUrl and geolocatorUrl."
   },
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "initialView": {
         "zoomAndCenter": [

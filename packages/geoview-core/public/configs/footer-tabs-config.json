@@ -4,7 +4,6 @@
     "description": "Used in demo-custom-footer-height.html to demo the custom footer bar height."
   },
   "map": {
-    "interaction": "dynamic",
     "viewSettings": {
       "projection": 3978
     },
