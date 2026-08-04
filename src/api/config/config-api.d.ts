@@ -70,9 +70,10 @@ export declare class ConfigApi {
      *
      * @param wmsUrl - The base WMS service URL
      * @param layers - A comma-separated list of WMS layer names to request styles for
+     * @param configProxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
      * @returns A promise that resolves to the style definition (typically an XML or SLD string) retrieved from the WMS service
      */
-    static fetchStyleFromWMS(wmsUrl: string, layers: string): Promise<string>;
+    static fetchStyleFromWMS(wmsUrl: string, layers: string, configProxyUrl?: string): Promise<string>;
     /**
      * Converts a WMS XML Styles renderer into a GeoView-compatible layer style configuration.
      *

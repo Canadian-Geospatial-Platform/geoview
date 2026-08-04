@@ -42,6 +42,16 @@ export declare class GeoViewError extends Error {
      * @param language - The language to translate the error into (English by default)
      */
     static logWarning(error: unknown, language?: TypeDisplayLanguage): void;
+    /**
+     * Rethrows the error if it is a `RequestAbortedError`, allowing abort signals to propagate through catch blocks.
+     *
+     * Call this at the top of catch blocks that intentionally swallow errors (e.g., format fallback loops)
+     * so that abort-triggered cancellations are not silently eaten.
+     *
+     * @param error - The error to check
+     * @throws {RequestAbortedError} When the error is an instance of `RequestAbortedError`
+     */
+    static throwIfAborted(error: unknown): void;
 }
 /**
  * Error thrown when a configuration schema has a wrong path.

@@ -7,11 +7,11 @@ import { type Extent, type TypeBasemapOptions, type TypeFeatureInfoEntry, type T
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
-import { MapViewer } from '@/geo/map/map-viewer';
+import { type GVFitOptions } from '@/core/utils/constant';
+import type { MapViewer } from '@/geo/map/map-viewer';
 import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import type { Draw } from '@/geo/interaction/draw';
 import type { TypeClickMarker } from '@/core/components/click-marker/click-marker';
-import type { FitOptions } from 'ol/View';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 /**
  * Controller responsible for Map interactions.
@@ -41,11 +41,11 @@ export declare class MapController extends AbstractMapViewerController {
      *
      * @param extent - The extent to zoom to (in map projection)
      * @param useAnimation - Indicates if a zoom animation should be used, default: true
-     * @param options - The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 13, duration: 500 })
+     * @param fitOptions - Optional fit options for the zoom
      * @returns A promise that resolves when the zoom animation is complete
      * @throws {InvalidExtentError} When the extent is invalid
      */
-    zoomToExtent(extent: Extent, useAnimation?: boolean, options?: FitOptions): Promise<void>;
+    zoomToExtent(extent: Extent, useAnimation?: boolean, options?: GVFitOptions): Promise<void>;
     /**
      * Converts a zoom level to a map scale denominator.
      *
@@ -107,10 +107,10 @@ export declare class MapController extends AbstractMapViewerController {
      *
      * @param extent - The extent or coordinate to zoom to
      * @param useAnimation - Indicates if a zoom animation should be used, default: true
-     * @param options - Optional options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11 })
+     * @param options - Optional options to configure the zoomToExtent
      * @returns A promise that resolves when the zoom operation completes
      */
-    zoomToLonLatExtentOrCoordinate(extent: Extent | Coordinate, useAnimation?: boolean, options?: FitOptions): Promise<void>;
+    zoomToLonLatExtentOrCoordinate(extent: Extent | Coordinate, useAnimation?: boolean, options?: GVFitOptions): Promise<void>;
     /**
      * Zooms to a geolocator search result location.
      *
@@ -170,6 +170,15 @@ export declare class MapController extends AbstractMapViewerController {
      * @param idsOrCoordinates - Optional IDs or coordinates of the markers to remove; if omitted, the entire group is removed
      */
     removePointMarkersOrGroup(group: string, idsOrCoordinates?: string[] | Coordinate[]): void;
+    /**
+     * Returns a promise that resolves the next time a feature highlighted event fires.
+     *
+     * When a filter is provided, the handler keeps listening until the filter returns true.
+     *
+     * @param filter - Optional filter predicate. When provided, only events passing the filter resolve the promise
+     * @returns A promise that resolves with the feature highlighted event payload
+     */
+    waitForFeatureHighlighted(filter?: (event: FeatureHighlightedEvent) => boolean): Promise<FeatureHighlightedEvent>;
     /**
      * Changes the map projection.
      *
@@ -416,6 +425,29 @@ export declare class MapController extends AbstractMapViewerController {
      * @param callback - The callback to stop being called whenever the event is emitted
      */
     offGeolocatorSearch(callback: GeolocatorSearchDelegate): void;
+    /**
+     * Registers a one-shot feature highlighted event callback that automatically unsubscribes after the first firing.
+     *
+     * When a filter is provided, the handler keeps listening until the filter returns true.
+     *
+     * @param callback - The callback to execute once when the event fires (and passes the filter)
+     * @param filter - Optional filter predicate. When provided, only events passing the filter trigger the callback
+     * @returns The wrapper callback reference (can be used with offFeatureHighlighted to cancel before it fires)
+     */
+    onceFeatureHighlighted(callback: FeatureHighlightedDelegate, filter?: (event: FeatureHighlightedEvent) => boolean): FeatureHighlightedDelegate;
+    /**
+     * Registers a feature highlighted event callback.
+     *
+     * @param callback - The callback to be executed whenever the event is emitted
+     * @returns The callback delegate that was registered
+     */
+    onFeatureHighlighted(callback: FeatureHighlightedDelegate): FeatureHighlightedDelegate;
+    /**
+     * Unregisters a feature highlighted event callback.
+     *
+     * @param callback - The callback to stop being called whenever the event is emitted
+     */
+    offFeatureHighlighted(callback: FeatureHighlightedDelegate): void;
 }
 /**
  * Event for the geolocator search delegate.
@@ -432,4 +464,15 @@ export interface GeolocatorSearchEvent {
  * Delegate for the geolocator search event handler function signature.
  */
 export type GeolocatorSearchDelegate = EventDelegateBase<MapController, GeolocatorSearchEvent, void>;
+/**
+ * Event for the feature highlighted delegate.
+ */
+export interface FeatureHighlightedEvent {
+    /** The feature being highlighted. */
+    feature: TypeFeatureInfoEntry;
+}
+/**
+ * Delegate for the feature highlighted event handler function signature.
+ */
+export type FeatureHighlightedDelegate = EventDelegateBase<MapController, FeatureHighlightedEvent, void>;
 //# sourceMappingURL=map-controller.d.ts.map

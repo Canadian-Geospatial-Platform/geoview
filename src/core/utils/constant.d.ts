@@ -6,14 +6,21 @@ export declare const GEO_URL_TEXT: {
     url: string;
     text: string;
 };
+/**
+ * OpenLayers default maximum zoom level.
+ * @deprecated Doesn't seem used anymore
+ */
+export declare const OL_ZOOM_MAXZOOM = 13;
 /** OpenLayers zoom animation duration in milliseconds. */
 export declare const OL_ZOOM_DURATION = 500;
-/** OpenLayers default maximum zoom level. */
-export declare const OL_ZOOM_MAXZOOM = 13;
-/** OpenLayers zoom padding values [top, right, bottom, left]. */
-export declare const OL_ZOOM_PADDING: [number, number, number, number];
+/** OpenLayers zoom padding values as percentage of the map size dimensions [width, height] (both sides!). */
+export declare const OL_ZOOM_PERCENT_PADDING: [number, number];
+/** The extended FitOptions for Geoview. */
+export type GVFitOptions = FitOptions & {
+    percentPadding?: [number, number];
+};
 /** Default OpenLayers fit options combining padding, max zoom, and duration. */
-export declare const DEFAULT_OL_FITOPTIONS: FitOptions;
+export declare const DEFAULT_OL_GVFITOPTIONS: GVFitOptions;
 /** The north pole position used for north arrow marker and rotation angle. */
 export declare const NORTH_POLE_POSITION_LONLAT: [number, number];
 /** Overview map widget dimensions. */

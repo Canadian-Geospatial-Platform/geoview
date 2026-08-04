@@ -8,9 +8,9 @@ import type { TypeGeoviewLayerConfig, TypeMetadataOGCFeature, TypeLayerMetadataQ
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { OgcFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
-import { GVOGCFeature } from '@/geo/layer/gv-layers/vector/gv-ogc-feature';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
-import { type SourceFeaturesInfo } from '@/geo/utils/utilities';
+import { type CallbackNewMetadataDelegate, type SourceFeaturesInfo } from '@/geo/utils/utilities';
+import { GVOGCFeature } from '@/geo/layer/gv-layers/vector/gv-ogc-feature';
 export interface TypeOgcFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig' | 'geoviewLayerType'> {
     geoviewLayerType: typeof CONST_LAYER_TYPES.OGC_FEATURE;
     listOfLayerEntryConfig: OgcFeatureLayerEntryConfig[];
@@ -156,12 +156,14 @@ export declare class OgcFeature extends AbstractGeoViewVector {
      * Fetches the metadata for a typical OGCFeature class.
      *
      * @param url - The url to query the metadata from
+     * @param configProxyUrl - Proxy URL to use when necessary
+     * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
      * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
      * @throws {RequestTimeoutError} When the request exceeds the timeout duration
      * @throws {RequestAbortedError} When the request was aborted by the caller's signal
      * @throws {ResponseError} When the response is not OK (non-2xx)
      * @throws {ResponseEmptyError} When the JSON response is empty
      */
-    static fetchMetadata(url: string, abortSignal?: AbortSignal): Promise<TypeMetadataOGCFeature>;
+    static fetchMetadata(url: string, configProxyUrl: string | undefined, callbackNewMetadataUrl?: CallbackNewMetadataDelegate, abortSignal?: AbortSignal): Promise<TypeMetadataOGCFeature>;
 }
 //# sourceMappingURL=ogc-feature.d.ts.map

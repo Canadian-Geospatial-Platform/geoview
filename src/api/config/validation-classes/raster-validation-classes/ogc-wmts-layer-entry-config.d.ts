@@ -1,7 +1,8 @@
-import type { ConfigClassOrType, TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
+import type { ConfigClassOrType, TypeGeoviewLayerConfig, TypeMetadataWMTSCapabilities, TypeWMTSLayerParsedInfo } from '@/api/types/layer-schema-types';
+import type { DisplayDateMode } from '@/api/types/map-schema-types';
 import type { AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { TileLayerEntryConfig } from '@/api/config/validation-classes/tile-layer-entry-config';
-import type { TypeSourceImageWMTSInitialConfig, TypeWmtsLayerConfig } from '@/geo/layer/geoview-layers/raster/wmts';
+import { type TypeSourceImageWMTSInitialConfig, type TypeWmtsLayerConfig } from '@/geo/layer/geoview-layers/raster/wmts';
 export interface OgcWmtsLayerEntryConfigProps extends AbstractBaseLayerEntryConfigProps {
     /** The tile matrix set identifier to use for this WMTS layer. If not provided, the first TileMatrixSet found in the metadata will be used by default. */
     tileMatrixSet?: string;
@@ -33,13 +34,25 @@ export declare class OgcWmtsLayerEntryConfig extends TileLayerEntryConfig {
      *
      * @returns The strongly-typed service metadata specific to this layer entry config.
      */
-    getServiceMetadata(): TypeMetadataWMTS | undefined;
+    getServiceMetadata(): TypeMetadataWMTSCapabilities | undefined;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
      *
      * @returns The strongly-typed layer metadata specific to this layer entry config.
      */
-    getLayerMetadata(): TypeMetadataWMTSContents | undefined;
+    getLayerMetadata(): TypeWMTSLayerParsedInfo | undefined;
+    /**
+     * Refreshes the layer metadata information by re-fetching the WMTS GetCapabilities response and updating the layer configuration accordingly.
+     *
+     * This method is typically used when the display date mode changes, as the metadata may contain time-sensitive information that needs to be updated on-the-fly.
+     *
+     * @param displayDateMode - The display date mode that should be used
+     * @returns A promise that resolves when the metadata refresh operation has completed
+     * @throws {LayerWMTSMetadataError} When the metadata is missing necessary information
+     * @throws {ResponseEmptyError} When the capabilities response is empty
+     * @throws {NetworkError} When a network issue happened
+     */
+    onRefreshMetadata(_displayDateMode: DisplayDateMode): Promise<void>;
     /**
      * Gets the version.
      *
@@ -62,78 +75,4 @@ export declare class OgcWmtsLayerEntryConfig extends TileLayerEntryConfig {
      */
     static isClassOrTypeWMTS(layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig): layerConfig is TypeWmtsLayerConfig;
 }
-export interface TypeMetadataWMTS {
-    Capabilities: {
-        '@attributes': {
-            version: string;
-        };
-        'ows:OperationsMetadata': TypeMetadataWMTSOperations;
-        Contents: TypeMetadataWMTSContents;
-    };
-}
-export interface TypeMetadataWMTSOperations {
-    'ows:Operation': {
-        '@attributes': {
-            name: string;
-        };
-        'ows:DCP': {
-            'ows:HTTP': {
-                'ows:Get': {
-                    '@attributes': {
-                        'xlink:href': string;
-                    };
-                    'ows:Constraint'?: {
-                        'ows:AllowedValues': {
-                            'ows:Value': string | string[];
-                        };
-                    };
-                };
-            };
-        };
-    }[];
-}
-export interface TypeMetadataWMTSContents {
-    Layer: TypeMetadataWMTSLayer[] | TypeMetadataWMTSLayer;
-    TileMatrixSet: TypeWMTSTileMatrixSet[] | TypeWMTSTileMatrixSet;
-}
-export interface TypeMetadataWMTSLayer {
-    'ows:Identifier': string;
-    'ows:WGS84BoundingBox'?: {
-        'ows:LowerCorner': string | [number, number];
-        'ows:UpperCorner': string | [number, number];
-    };
-    ResourceURL: {
-        '@attributes': {
-            template: string;
-            resourceType: string;
-            format: string;
-        };
-    };
-    'ows:Title'?: string;
-    'ows:Abstract'?: string;
-    Format: string;
-    TileMatrixSetLink: TypeTileMatrixSetLink[] | TypeTileMatrixSetLink;
-    Style?: {
-        'ows:Identifier': string;
-        'ows:Title'?: string;
-    };
-}
-interface TypeTileMatrixSetLink {
-    TileMatrixSet: string;
-}
-export interface TypeWMTSTileMatrixSet {
-    'ows:Identifier': string;
-    'ows:SupportedCRS': string;
-    TileMatrix: TypeWMTSTileMatrix[];
-}
-interface TypeWMTSTileMatrix {
-    'ows:Identifier': string;
-    ScaleDenominator: number;
-    TopLeftCorner: string | [number, number];
-    TileWidth: number;
-    TileHeight: number;
-    MatrixWidth: number;
-    MatrixHeight: number;
-}
-export {};
 //# sourceMappingURL=ogc-wmts-layer-entry-config.d.ts.map

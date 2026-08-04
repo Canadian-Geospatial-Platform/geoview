@@ -4,10 +4,15 @@ import type { TypeGuideObject } from '@/core/stores/states/app-state';
 import type { TypeHTMLElement } from '@/core/types/global-types';
 /** Result of a URL reachability ping check. */
 export type PingResult = {
+    /** Whether the URL has valid syntax. */
     isValid: boolean;
+    /** Whether the server responded successfully. */
     isReachable: boolean;
+    /** Whether the request required a proxy to succeed. */
     needsProxy: boolean;
+    /** The HTTP status code from the server response, or null if no response. */
     status: number | null;
+    /** Optional error message describing why the check failed. */
     error?: string;
 };
 /** Represents RGBA color as [Red, Green, Blue, Alpha]. */
@@ -366,7 +371,7 @@ export declare function exportFile(dataUrl: string, name: string, format?: 'pdf'
  * @param patterns - A single RegExp or an array of RegExp patterns to match in sequence
  * @returns The value found at the end of the matching path, or undefined if not found
  */
-export declare function findPropertyByRegexPath<T = Record<string, unknown>>(objectItem: unknown | undefined, patterns: RegExp | RegExp[]): T | undefined;
+export declare function findPropertyByRegexPath<T = Record<string, unknown>>(objectItem: unknown | undefined, patterns: RegExp | RegExp[]): T | T[] | undefined;
 /**
  * Check string to see if it is an image.
  *

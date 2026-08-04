@@ -163,9 +163,10 @@ export declare abstract class ConfigBaseClass {
     /**
      * Retrieves the metadata access path used by this GeoView layer.
      *
+     * @param endsWithSlash - Optional indicates if the path should end with a '/'
      * @returns The metadata access path, or undefined if not set
      */
-    getMetadataAccessPath(): string | undefined;
+    getMetadataAccessPath(endsWithSlash?: boolean): string | undefined;
     /**
      * Updates the metadata access path for this GeoView layer.
      *

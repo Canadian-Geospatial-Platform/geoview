@@ -86,6 +86,28 @@ export interface TypeSourceGeoTIFFInitialConfig extends TypeBaseSourceInitialCon
 }
 /** Type of server. */
 export type TypeOfServer = 'mapserver' | 'geoserver' | 'qgis';
+/** Mime/type for GEOJSON */
+export declare const MIME_TYPE_FORMAT_GEOJSON = "application/geojson";
+/** Mime/type for JSON */
+export declare const MIME_TYPE_FORMAT_JSON = "application/json";
+/** Mime/type for GML */
+export declare const MIME_TYPE_FORMAT_GML = "application/vnd.ogc.gml";
+/** Mime/type for XML */
+export declare const MIME_TYPE_FORMAT_APP_XML = "application/xml";
+/** Mime/type for XML */
+export declare const MIME_TYPE_FORMAT_TEXT_XML = "text/xml";
+/** Mime/type for HTML */
+export declare const MIME_TYPE_FORMAT_HTML = "text/html";
+/** Mime/type for GML 3.2 (application) */
+export declare const MIME_TYPE_FORMAT_GML_XML_32 = "application/gml+xml";
+/** Mime/type for GML 3.2.1 (text/xml subtype) */
+export declare const MIME_TYPE_FORMAT_TEXT_XML_GML_321 = "text/xml; subtype=gml/3.2.1";
+/** Mime/type for GML 3.1.1 (text/xml subtype) */
+export declare const MIME_TYPE_FORMAT_TEXT_XML_GML_311 = "text/xml; subtype=gml/3.1.1";
+/** Mime/type for GML 2.1.2 (text/xml subtype) */
+export declare const MIME_TYPE_FORMAT_TEXT_XML_GML_212 = "text/xml; subtype=gml/2.1.2";
+/** Mime/type for Text */
+export declare const MIME_TYPE_FORMAT_TEXT = "text/plain";
 /** Base type from which we derive the source properties for all the vector leaf nodes in the layer tree. */
 export interface TypeBaseVectorSourceInitialConfig extends TypeBaseSourceInitialConfig {
     /** Loading strategy to use (all or bbox). */
@@ -148,6 +170,10 @@ export interface TypeSourceImageStaticInitialConfig extends TypeBaseSourceInitia
     extent?: Extent;
 }
 export interface TypeSourceCSVInitialConfig extends TypeBaseVectorSourceInitialConfig {
+    /**
+     * The separator used in the CSV file. Default = ','.
+     * @default ','
+     */
     separator?: ',';
 }
 export interface TypeSourceImageWmsInitialConfig extends TypeBaseSourceInitialConfig {
@@ -157,7 +183,8 @@ export interface TypeSourceImageWmsInitialConfig extends TypeBaseSourceInitialCo
     wmsStyle?: string | string[];
 }
 export interface TypeSourceImageEsriInitialConfig extends TypeBaseSourceInitialConfig {
-    /** The format used by the image layer.
+    /**
+     * The format used by the image layer.
      */
     format?: TypeEsriFormatParameter;
     /**
@@ -393,121 +420,125 @@ export type TypeStyleRepresentation = {
     arrayOfCanvas?: (HTMLCanvasElement | null)[];
 };
 export type TypeVectorLayerStyles = Partial<Record<TypeStyleGeometry, TypeStyleRepresentation>>;
-export interface TypeMetadataWMSRoot {
-    WMS_Capabilities?: TypeMetadataWMS;
-    WMT_MS_Capabilities?: TypeMetadataWMS;
-}
-export interface TypeMetadataWMS {
+export type TypeMetadataWMS = {
+    /**
+     * The ServiceExceptionReport is not part of the WFS capabilities, but it is included here for convenience as it's part of the response when going through the Esri proxy.
+     *
+     * @deprecated The Esri proxy should be eventually completely replaced via the default configuration. Once it's gone, this can be removed for cleanup.
+     */
+    ServiceExceptionReport?: unknown;
+};
+export type TypeMetadataWMSCapabilities = {
     Capability: TypeMetadataWMSCapability;
     Service: TypeMetadataWMSService;
     '@attributes': TypeMetadataWMSAttributes;
     version?: string;
     serverType?: TypeOfServer;
-}
-export interface TypeMetadataWMSAttributes {
+};
+export type TypeMetadataWMSAttributes = {
     version?: string;
-}
-export interface TypeStylesWMS {
+};
+export type TypeStylesWMS = {
     StyledLayerDescriptor: TypeStyledLayerDescriptorWMS;
-}
-export interface TypeStyledLayerDescriptorWMS {
+};
+export type TypeStyledLayerDescriptorWMS = {
     NamedLayer: TypeNamedLayerWMS;
-}
-export interface TypeNamedLayerWMS {
+};
+export type TypeNamedLayerWMS = {
     '#text': string;
     'se:Name': string;
     UserStyle: TypeUserStyleWMS;
-}
-export interface TypeUserStyleWMS {
+};
+export type TypeUserStyleWMS = {
     'se:FeatureTypeStyle': TypeFeatureTypeStyleWMS | TypeFeatureTypeStyleWMS[];
-}
-export interface TypeFeatureTypeStyleWMS {
+};
+export type TypeFeatureTypeStyleWMS = {
     'se:Rule': TypeUserStyleRule | TypeUserStyleRule[];
-}
-export interface TypeUserStyleRule {
+};
+export type TypeUserStyleRule = {
     'se:Name'?: string;
     'ogc:Filter'?: TypeUserStyleRuleFilter;
     'se:PointSymbolizer'?: TypeUserStyleSymbolizer | TypeUserStyleSymbolizer[];
     'se:LineSymbolizer'?: TypeUserStyleSymbolizer | TypeUserStyleSymbolizer[];
     'se:PolygonSymbolizer'?: TypeUserStyleSymbolizer | TypeUserStyleSymbolizer[];
     'se:TextSymbolizer'?: unknown;
-}
-export interface TypeUserStyleRuleFilter {
+};
+export type TypeUserStyleRuleFilter = {
     'ogc:And'?: TypeUserStyleRuleFilter;
     'ogc:PropertyIsEqualTo'?: TypeUserStyleRuleFilterPropertyDetails;
     'ogc:PropertyIsGreaterThan'?: TypeUserStyleRuleFilterPropertyDetails;
     'ogc:PropertyIsGreaterThanOrEqualTo'?: TypeUserStyleRuleFilterPropertyDetails;
     'ogc:PropertyIsLessThan'?: TypeUserStyleRuleFilterPropertyDetails;
     'ogc:PropertyIsLessThanOrEqualTo'?: TypeUserStyleRuleFilterPropertyDetails;
-}
-export interface TypeUserStyleRuleFilterPropertyDetails {
+};
+export type TypeUserStyleRuleFilterPropertyDetails = {
     'ogc:PropertyName': string;
     'ogc:Literal': string;
     'ogc:Function'?: TypeUserStyleRuleFilterFunction;
-}
-export interface TypeUserStyleRuleFilterFunction {
+};
+export type TypeUserStyleRuleFilterFunction = {
     '@attributes': TypeUserStyleRuleFilterFunctionAttributes;
     'ogc:PropertyName': string;
     'ogc:Literal': string;
-}
-export interface TypeUserStyleRuleFilterFunctionAttributes {
+};
+export type TypeUserStyleRuleFilterFunctionAttributes = {
     name: string;
-}
-export interface TypeUserStyleSymbolizer {
+};
+export type TypeUserStyleSymbolizer = {
     'se:Stroke'?: TypeUserStyleParameter;
     'se:Fill'?: TypeUserStyleParameter;
     'se:Graphic'?: TypeUserStyleGraphic;
     'se:VendorOption'?: unknown;
-}
-export interface TypeUserStyleParameter {
+};
+export type TypeUserStyleParameter = {
     'se:SvgParameter'?: TypeUserStyleParameterValue[];
     'se:CssParameter'?: TypeUserStyleParameterValue[];
     'se:GraphicStroke'?: TypeUserStyleParameter;
     'se:GraphicFill'?: TypeUserStyleSymbolizer;
     'se:Graphic'?: TypeUserStyleGraphic;
-}
-export interface TypeUserStyleParameterValue {
+};
+export type TypeUserStyleParameterValue = {
     '@attributes'?: TypeUserStyleLineSymbolizerStrokeParameterAttributes;
     '#text'?: string;
     '#value'?: string;
     name?: string;
     Name?: string;
-}
-export interface TypeUserStyleLineSymbolizerStrokeParameterAttributes {
+};
+export type TypeUserStyleLineSymbolizerStrokeParameterAttributes = {
     n?: string;
     name?: string;
     Name?: string;
-}
-export interface TypeUserStyleGraphic {
+};
+export type TypeUserStyleGraphic = {
     'se:ExternalGraphic': TypeUserStyleExternalGraphic[] | undefined;
     'se:Mark': TypeUserStyleMark;
     'se:Size': string;
     'se:Rotation': TypeLiteral;
-}
-export interface TypeLiteral {
+};
+export type TypeLiteral = {
     'ogc:Literal': string;
-}
-export interface TypeUserStyleMark {
+};
+export type TypeUserStyleMark = {
     'se:WellKnownName'?: string;
     'se:Fill'?: TypeUserStyleParameter;
     'se:Stroke'?: TypeUserStyleParameter;
-}
-export interface TypeUserStyleExternalGraphic {
+};
+export type TypeUserStyleExternalGraphic = {
     'se:Format': string;
     'se:OnlineResource': TypeOnlineResourceWMS;
-}
-export interface TypeOnlineResourceWMS {
+};
+export type TypeOnlineResourceWMS = {
     '@attributes': TypeOnlineResourceAttributesWMS;
-}
-export interface TypeOnlineResourceAttributesWMS {
+};
+export type TypeOnlineResourceAttributesWMS = {
     'xlink:href': string;
     'xlink:type': string;
-}
-export interface TypeMetadataWMSCapability {
+};
+export type TypeMetadataWMSCapability = {
     Request: TypeMetadataWMSCapabilityRequest;
     Layer: TypeMetadataWMSCapabilityLayer;
-}
-export interface TypeMetadataWMSService {
+};
+export type TypeMetadataWMSService = {
     Abstract: string;
     Name: string;
     Title: string;
@@ -515,11 +546,11 @@ export interface TypeMetadataWMSService {
     OnlineResource: TypeOnlineResourceWMS;
     MaxWidth?: number;
     MaxHeight?: number;
-}
-export interface TypeMetadataWMSServiceKeyword {
+};
+export type TypeMetadataWMSServiceKeyword = {
     Keyword: string[];
-}
-export interface TypeMetadataWMSCapabilityRequest {
+};
+export type TypeMetadataWMSCapabilityRequest = {
     GetCapabilities: unknown;
     GetMap: TypeMetadataWMSCapabilityRequestGetMap;
     GetFeatureInfo: TypeMetadataWMSCapabilityRequestFeatureInfo;
@@ -527,23 +558,23 @@ export interface TypeMetadataWMSCapabilityRequest {
     'sld:DescribeLayer'?: unknown;
     'qgs:GetStyles'?: unknown;
     'ms:GetStyles'?: unknown;
-}
-export interface TypeMetadataWMSCapabilityRequestGetMap {
+};
+export type TypeMetadataWMSCapabilityRequestGetMap = {
     DCPType: TypeMetadataWMSCapabilityRequestGetMapDCPType[];
-}
-export interface TypeMetadataWMSCapabilityRequestGetMapDCPType {
+};
+export type TypeMetadataWMSCapabilityRequestGetMapDCPType = {
     HTTP: TypeMetadataWMSCapabilityRequestGetMapDCPTypeHTTP;
-}
-export interface TypeMetadataWMSCapabilityRequestGetMapDCPTypeHTTP {
+};
+export type TypeMetadataWMSCapabilityRequestGetMapDCPTypeHTTP = {
     Get: TypeMetadataWMSCapabilityRequestGetMapDCPTypeHTTPGet;
-}
-export interface TypeMetadataWMSCapabilityRequestGetMapDCPTypeHTTPGet {
+};
+export type TypeMetadataWMSCapabilityRequestGetMapDCPTypeHTTPGet = {
     OnlineResource: TypeOnlineResourceWMS;
-}
-export interface TypeMetadataWMSCapabilityRequestFeatureInfo {
+};
+export type TypeMetadataWMSCapabilityRequestFeatureInfo = {
     Format: string[];
-}
-export interface TypeMetadataWMSCapabilityLayer {
+};
+export type TypeMetadataWMSCapabilityLayer = {
     Name?: string;
     Title?: string;
     Layer?: TypeMetadataWMSCapabilityLayer[];
@@ -564,33 +595,33 @@ export interface TypeMetadataWMSCapabilityLayer {
         fixedHeight?: unknown;
         noSubsets?: unknown;
     };
-}
-export interface TypeMetadataWMSCapabilityLayerBBox {
+};
+export type TypeMetadataWMSCapabilityLayerBBox = {
     '@attributes': TypeMetadataWMSCapabilityLayerBBoxAttributes;
-}
-export interface TypeMetadataWMSCapabilityLayerBBoxAttributes {
+};
+export type TypeMetadataWMSCapabilityLayerBBoxAttributes = {
     CRS: string;
     minx: string;
     miny: string;
     maxx: string;
     maxy: string;
     extent?: number[];
-}
-export interface TypeMetadataWMSCapabilityLayerEXGeographicBBox {
+};
+export type TypeMetadataWMSCapabilityLayerEXGeographicBBox = {
     northBoundLatitude: string;
     southBoundLatitude: string;
     westBoundLongitude: string;
     eastBoundLongitude: string;
     extent?: number[];
-}
-export interface TypeMetadataWMSCapabilityLayerStyle {
+};
+export type TypeMetadataWMSCapabilityLayerStyle = {
     Name: string;
     LegendURL: TypeLayerMetadataWMSStyleLegendUrl[];
-}
-export interface TypeMetadataWMSCapabilityLayerAttribution {
+};
+export type TypeMetadataWMSCapabilityLayerAttribution = {
     Title: string;
-}
-export interface TypeMetadataWMSCapabilityLayerDimension {
+};
+export type TypeMetadataWMSCapabilityLayerDimension = {
     '#text': string;
     '@attributes': TypeMetadataWMSCapabilityLayerDimensionAttribute;
     default?: string;
@@ -598,51 +629,202 @@ export interface TypeMetadataWMSCapabilityLayerDimension {
     name?: string;
     units?: string;
     values?: string;
-}
-export interface TypeMetadataWMSCapabilityLayerDimensionAttribute {
+};
+export type TypeMetadataWMSCapabilityLayerDimensionAttribute = {
     default: string;
     multipleValues?: string;
     name: string;
     units: string;
-}
-export interface TypeLayerMetadataWMSStyleLegendUrl {
+};
+export type TypeLayerMetadataWMSStyleLegendUrl = {
     Format: string;
     OnlineResource: TypeOnlineResourceWMS;
-}
-export interface TypeMetadataFeatureInfo {
+};
+export type TypeMetadataWMTS = {
+    Capabilities?: TypeMetadataWMTSCapabilities;
+    /**
+     * The ServiceExceptionReport is not part of the WFS capabilities, but it is included here for convenience as it's part of the response when going through the Esri proxy.
+     *
+     * @deprecated The Esri proxy should be eventually completely replaced via the default configuration. Once it's gone, this can be removed for cleanup.
+     */
+    ServiceExceptionReport?: unknown;
+};
+export type TypeMetadataWMTSCapabilities = {
+    'ows:OperationsMetadata': TypeMetadataWMTSOperations;
+    Contents: TypeMetadataWMTSContents;
+    '@attributes': TypeMetadataWMSAttributes;
+    version?: string;
+    serverType?: TypeOfServer;
+};
+export type TypeMetadataWMTSOperations = {
+    'ows:Operation': {
+        '@attributes': {
+            name: string;
+        };
+        'ows:DCP': {
+            'ows:HTTP': {
+                'ows:Get': {
+                    '@attributes': {
+                        'xlink:href': string;
+                    };
+                    'ows:Constraint'?: {
+                        'ows:AllowedValues': {
+                            'ows:Value': string | string[];
+                        };
+                    };
+                };
+            };
+        };
+    }[];
+};
+export type TypeMetadataWMTSContents = {
+    Layer: TypeMetadataWMTSLayer[] | TypeMetadataWMTSLayer;
+    TileMatrixSet: TypeWMTSTileMatrixSet[] | TypeWMTSTileMatrixSet;
+};
+/** Represents the parsed WMTS layer information extracted from the capabilities metadata. */
+export type TypeWMTSLayerParsedInfo = {
+    Layer: TypeMetadataWMTSLayer;
+    TileMatrixSet: TypeWMTSTileMatrixSet;
+};
+export type TypeMetadataWMTSLayer = {
+    'ows:Identifier': string;
+    'ows:WGS84BoundingBox'?: {
+        'ows:LowerCorner': string | [number, number];
+        'ows:UpperCorner': string | [number, number];
+    };
+    ResourceURL: {
+        '@attributes': {
+            template: string;
+            resourceType: string;
+            format: string;
+        };
+    };
+    'ows:Title'?: string;
+    'ows:Abstract'?: string;
+    Format: string;
+    TileMatrixSetLink: TypeTileMatrixSetLink[] | TypeTileMatrixSetLink;
+    Style?: TypeMetadataWMTSStyle[] | TypeMetadataWMTSStyle;
+};
+export type TypeMetadataWMTSStyle = {
+    'ows:Identifier': string;
+    'ows:Title'?: string;
+    '@attributes': Record<string, unknown>;
+    LegendURL: TypeOnlineResourceWMS;
+};
+export type TypeTileMatrixSetLink = {
+    TileMatrixSet: string;
+};
+export type TypeWMTSTileMatrixSet = {
+    'ows:Identifier': string;
+    'ows:SupportedCRS': string;
+    TileMatrix: TypeWMTSTileMatrix[];
+};
+export type TypeWMTSTileMatrix = {
+    'ows:Identifier': string;
+    ScaleDenominator: number;
+    TopLeftCorner: string | [number, number];
+    TileWidth: number;
+    TileHeight: number;
+    MatrixWidth: number;
+    MatrixHeight: number;
+};
+export type WFSJsonResponse = {
+    featureTypes: WFSJsonResponseFeatureType[];
+};
+export type WFSJsonResponseFeatureType = {
+    properties: TypeOutfields[];
+};
+export type TypeMetadataWFS = {
+    WFS_Capabilities?: TypeMetadataWFSCapabilities;
+    /**
+     * The ServiceExceptionReport is not part of the WFS capabilities, but it is included here for convenience as it's part of the response when going through the Esri proxy.
+     *
+     * @deprecated The Esri proxy should be eventually completely replaced via the default configuration. Once it's gone, this can be removed for cleanup.
+     */
+    ServiceExceptionReport?: unknown;
+};
+export type TypeMetadataWFSCapabilities = {
+    FeatureTypeList: TypeMetadataWFSFeatureTypeList;
+    '@attributes': TypeMetadataWFSAttributes;
+    'ows:OperationsMetadata': TypeMetadataWFSOperationMetadata;
+    version?: string;
+    serverType?: TypeOfServer;
+};
+export type TypeMetadataWFSFeatureTypeList = {
+    FeatureType: TypeMetadataWFSFeatureTypeListFeatureType | TypeMetadataWFSFeatureTypeListFeatureType[];
+};
+export type TypeMetadataWFSFeatureTypeListFeatureType = {
+    Name: string | TypeMetadataWFSTextOnly;
+    Title: string | TypeMetadataWFSTextOnly;
+    DefaultSRS: string | TypeMetadataWFSTextOnly;
+    OutputFormats?: TypeMetadataWFSFeatureTypeListFeatureOutputFormat;
+    'ows:WGS84BoundingBox': TypeMetadataWFSFeatureTypeListFeatureTypeBBox;
+};
+export type TypeMetadataWFSFeatureTypeListFeatureTypeBBox = {
+    'ows:LowerCorner': string | TypeMetadataWFSTextOnly;
+    'ows:UpperCorner': string | TypeMetadataWFSTextOnly;
+};
+export type TypeMetadataWFSTextOnly = {
+    '#text': string;
+};
+export type TypeMetadataWFSFeatureTypeListFeatureOutputFormat = {
+    Format?: string | (string | TypeMetadataWFSTextOnly)[];
+};
+export type TypeMetadataWFSAttributes = {
+    version?: string;
+};
+export type TypeMetadataWFSOperationMetadata = {
+    'ows:Operation': TypeMetadataWFSOperationMetadataOperation[];
+};
+export type TypeMetadataWFSOperationMetadataOperation = {
+    '@attributes': TypeMetadataWFSAttribute;
+    'ows:Parameter': TypeMetadataWFSOperationMetadataOperationParameter | TypeMetadataWFSOperationMetadataOperationParameter[];
+};
+export type TypeMetadataWFSOperationMetadataOperationParameter = {
+    '@attributes': TypeMetadataWFSAttribute;
+    'ows:AllowedValues'?: TypeMetadataWFSOperationMetadataOperationParameterValue | TypeMetadataWFSOperationMetadataOperationParameterValue[];
+    'ows:Value'?: string | string[] | TypeMetadataWFSTextOnly | TypeMetadataWFSTextOnly[];
+};
+export type TypeMetadataWFSOperationMetadataOperationParameterValue = {
+    'ows:Value': string | string[] | TypeMetadataWFSTextOnly | TypeMetadataWFSTextOnly[];
+};
+export type TypeMetadataWFSAttribute = {
+    name: string;
+};
+export type TypeMetadataFeatureInfo = {
     Layer: TypeMetadataFeatureInfoLayer;
-}
-export interface TypeMetadataFeatureInfoLayer {
+};
+export type TypeMetadataFeatureInfoLayer = {
     Attribute: TypeMetadataFeatureInfoLayerAttributes;
     '@attributes': TypeMetadataFeatureInfoLayerAttribute;
-}
-export interface TypeMetadataFeatureInfoLayerAttributes {
+};
+export type TypeMetadataFeatureInfoLayerAttributes = {
     '@attributes': TypeMetadataFeatureInfoLayerAttribute;
-}
-export interface TypeMetadataFeatureInfoLayerAttribute {
+};
+export type TypeMetadataFeatureInfoLayerAttribute = {
     name: string;
     value: unknown;
-}
-export interface TypeMetadataGeoTIFF {
+};
+export type TypeMetadataGeoTIFF = {
     id: string;
     bbox: number[];
     properties: TypeMetadataGeoTIFFProperties;
     assets: TypeMetadataGeoTIFFAssets;
-}
-export interface TypeMetadataGeoTIFFProperties {
+};
+export type TypeMetadataGeoTIFFProperties = {
     datetime: string;
     'proj:epsg': number;
-}
-export interface TypeMetadataGeoTIFFAssets {
+};
+export type TypeMetadataGeoTIFFAssets = {
     [key: string]: TypeMetadataGeoTIFFAsset;
     thumbnail: TypeMetadataGeoTIFFAsset;
-}
-export interface TypeMetadataGeoTIFFAsset {
+};
+export type TypeMetadataGeoTIFFAsset = {
     href: string;
     type: string;
-}
+};
 /** Represents layer metadata as read from an Esri layer service. */
-export interface TypeLayerMetadataEsri {
+export type TypeLayerMetadataEsri = {
     type: string;
     capabilities: string;
     geometryField: TypeLayerMetadataEsriField;
@@ -665,15 +847,15 @@ export interface TypeLayerMetadataEsri {
     sortAscending: boolean;
     sortValue: string;
     mosaicOperator: string;
-}
-export interface TypeLayerMetadataEsriDrawingInfo {
+};
+export type TypeLayerMetadataEsriDrawingInfo = {
     renderer: EsriBaseRenderer;
-}
-export interface TypeMetadataEsriRasterFunctionInfos {
+};
+export type TypeMetadataEsriRasterFunctionInfos = {
     name: string;
     description: string;
     help: string;
-}
+};
 /**
  * Type definition for ESRI ImageServer mosaic rule parameters.
  * Controls which raster items are selected from a mosaic dataset.
@@ -707,23 +889,23 @@ export type TypeMosaicRule = {
 };
 export type TypeMosaicMethod = 'esriMosaicNone' | 'esriMosaicCenter' | 'esriMosaicNadir' | 'esriMosaicViewpoint' | 'esriMosaicAttribute' | 'esriMosaicLockRaster' | 'esriMosaicNorthwest' | 'esriMosaicSeamline';
 export type TypeMosaicOperation = 'MT_FIRST' | 'MT_LAST' | 'MT_MIN' | 'MT_MAX' | 'MT_MEAN' | 'MT_BLEND' | 'MT_SUM';
-export interface TypeLayerMetadataEsriExtent {
+export type TypeLayerMetadataEsriExtent = {
     spatialReference: TypeProjection;
     xmin: number;
     xmax: number;
     ymin: number;
     ymax: number;
-}
-export interface TypeLayerMetadataEsriField {
+};
+export type TypeLayerMetadataEsriField = {
     name: unknown;
-}
-export interface TypeEsriSpatialReference {
+};
+export type TypeEsriSpatialReference = {
     wkid: number;
     latestWkid?: number;
     wkt?: string;
-}
+};
 /** Payload response for a url call to {server_url}/MapServer?f=json. */
-export interface TypeMetadataEsriDynamic {
+export type TypeMetadataEsriDynamic = {
     currentVersion: number;
     serviceDescription: string;
     mapName: string;
@@ -734,9 +916,9 @@ export interface TypeMetadataEsriDynamic {
     spatialReference: TypeEsriSpatialReference;
     fullExtent: TypeLayerMetadataEsriExtent;
     initialExtent: TypeLayerMetadataEsriExtent;
-}
+};
 /** Payload response for a url call to {server_url}/MapServer/{layerId}?f=json. */
-export interface TypeMetadataEsriDynamicLayer {
+export type TypeMetadataEsriDynamicLayer = {
     id: number;
     name: string;
     type: string;
@@ -756,9 +938,9 @@ export interface TypeMetadataEsriDynamicLayer {
     parentLayer?: TypeMetadataEsriLayerSummary;
     drawingInfo?: TypeLayerMetadataEsriDrawingInfo;
     timeInfo?: TimeDimensionESRI;
-}
+};
 /** Payload response for a url call to {server_url}/FeatureServer?f=json. */
-export interface TypeMetadataEsriFeature {
+export type TypeMetadataEsriFeature = {
     currentVersion: number;
     serviceDescription: string;
     capabilities: string;
@@ -768,9 +950,9 @@ export interface TypeMetadataEsriFeature {
     spatialReference?: TypeEsriSpatialReference;
     fullExtent?: TypeLayerMetadataEsriExtent;
     initialExtent?: TypeLayerMetadataEsriExtent;
-}
+};
 /** Payload response for a url call to {server_url}/FeatureServer/{layerId}?f=json. */
-export interface TypeMetadataEsriFeatureLayer {
+export type TypeMetadataEsriFeatureLayer = {
     id: number;
     name: string;
     type: 'Feature Layer';
@@ -798,9 +980,9 @@ export interface TypeMetadataEsriFeatureLayer {
     drawingInfo?: TypeLayerMetadataEsriDrawingInfo;
     editingInfo?: unknown;
     timeInfo?: TimeDimensionESRI;
-}
+};
 /** Payload response for a url call to {server_url}/ImageServer?f=json. */
-export interface TypeMetadataEsriImage {
+export type TypeMetadataEsriImage = {
     currentVersion: number;
     name: string;
     type?: string;
@@ -833,8 +1015,8 @@ export interface TypeMetadataEsriImage {
     allowedCompressionMethods?: string[];
     rasterFunctionInfos?: TypeMetadataEsriRasterFunctionInfos[];
     defaultResamplingMethod?: string;
-}
-export interface TypeMetadataEsriMosaicDatasetInfo {
+};
+export type TypeMetadataEsriMosaicDatasetInfo = {
     objectIdField: string;
     globalIdField?: string;
     timeField?: string;
@@ -842,13 +1024,13 @@ export interface TypeMetadataEsriMosaicDatasetInfo {
     supportsTime?: boolean;
     supportsZ?: boolean;
     supportsM?: boolean;
-}
-export interface TypeMetadataEsriRasterFunctionInfo {
+};
+export type TypeMetadataEsriRasterFunctionInfo = {
     name: string;
     description?: string;
     help?: string;
-}
-export interface TypeMetadataEsriLayerSummary {
+};
+export type TypeMetadataEsriLayerSummary = {
     id: number;
     name: string;
     parentLayerId: number;
@@ -857,93 +1039,41 @@ export interface TypeMetadataEsriLayerSummary {
     minScale: number;
     maxScale: number;
     type?: string;
-}
-export interface TypeLayerMetadataFields {
+};
+export type TypeLayerMetadataFields = {
     name: string;
     type: string;
     alias: string;
     domain: codedValueType | rangeDomainType;
-}
-export interface TypeMetadataOGCFeature {
+};
+export type TypeMetadataOGCFeature = {
     collections: TypeMetadataOGCFeatureCollection[];
-}
-export interface TypeMetadataOGCFeatureCollection {
+};
+export type TypeMetadataOGCFeatureCollection = {
     id: string;
     description: string;
     extent: TypeMetadataOGCFeatureCollectionExtent;
-}
-export interface TypeMetadataOGCFeatureCollectionExtent {
+};
+export type TypeMetadataOGCFeatureCollectionExtent = {
     spatial: TypeMetadataOGCFeatureCollectionExtentSpatial;
-}
-export interface TypeMetadataOGCFeatureCollectionExtentSpatial {
+};
+export type TypeMetadataOGCFeatureCollectionExtentSpatial = {
     crs: string;
     bbox: number[][];
-}
-export interface TypeLayerMetadataQueryables {
+};
+export type TypeLayerMetadataQueryables = {
     properties: TypeLayerMetadataOGC;
-}
-export interface TypeLayerMetadataOGC {
+};
+export type TypeLayerMetadataOGC = {
     [key: string]: TypeLayerMetadataOGCRecord;
-}
-export interface TypeLayerMetadataOGCRecord {
+};
+export type TypeLayerMetadataOGCRecord = {
     type: string;
-}
-export interface WFSJsonResponse {
-    featureTypes: WFSJsonResponseFeatureType[];
-}
-export interface WFSJsonResponseFeatureType {
-    properties: TypeOutfields[];
-}
-export interface TypeMetadataWFS {
-    FeatureTypeList: TypeMetadataWFSFeatureTypeList;
-    '@attributes': TypeMetadataWFSAttributes;
-    'ows:OperationsMetadata': TypeMetadataWFSOperationMetadata;
-}
-export interface TypeMetadataWFSFeatureTypeList {
-    FeatureType: TypeMetadataWFSFeatureTypeListFeatureType | TypeMetadataWFSFeatureTypeListFeatureType[];
-}
-export interface TypeMetadataWFSFeatureTypeListFeatureType {
-    Name: string | TypeMetadataWFSTextOnly;
-    Title: string | TypeMetadataWFSTextOnly;
-    DefaultSRS: string | TypeMetadataWFSTextOnly;
-    OutputFormats?: TypeMetadataWFSFeatureTypeListFeatureOutputFormat;
-    'ows:WGS84BoundingBox': TypeMetadataWFSFeatureTypeListFeatureTypeBBox;
-}
-export interface TypeMetadataWFSFeatureTypeListFeatureTypeBBox {
-    'ows:LowerCorner': string | TypeMetadataWFSTextOnly;
-    'ows:UpperCorner': string | TypeMetadataWFSTextOnly;
-}
-export interface TypeMetadataWFSTextOnly {
-    '#text': string;
-}
-export interface TypeMetadataWFSFeatureTypeListFeatureOutputFormat {
-    Format?: string | (string | TypeMetadataWFSTextOnly)[];
-}
-export interface TypeMetadataWFSAttributes {
-    version?: string;
-}
-export interface TypeMetadataWFSOperationMetadata {
-    'ows:Operation': TypeMetadataWFSOperationMetadataOperation[];
-}
-export interface TypeMetadataWFSOperationMetadataOperation {
-    '@attributes': TypeMetadataWFSAttribute;
-    'ows:Parameter': TypeMetadataWFSOperationMetadataOperationParameter | TypeMetadataWFSOperationMetadataOperationParameter[];
-}
-export interface TypeMetadataWFSOperationMetadataOperationParameter {
-    '@attributes': TypeMetadataWFSAttribute;
-    'ows:AllowedValues'?: TypeMetadataWFSOperationMetadataOperationParameterValue | TypeMetadataWFSOperationMetadataOperationParameterValue[];
-    'ows:Value'?: string | string[] | TypeMetadataWFSTextOnly | TypeMetadataWFSTextOnly[];
-}
-export interface TypeMetadataWFSOperationMetadataOperationParameterValue {
-    'ows:Value': string | string[] | TypeMetadataWFSTextOnly | TypeMetadataWFSTextOnly[];
-}
-export interface TypeMetadataWFSAttribute {
-    name: string;
-}
-export interface TypeMetadataGeoJSON {
+};
+export type TypeMetadataGeoJSON = {
     listOfLayerEntryConfig: TypeLayerEntryShell[];
-}
-export interface TypeMetadataVectorTiles {
+};
+export type TypeMetadataVectorTiles = {
     defaultStyles: string;
     tileInfo: TypeMetadataVectorTilesTileInfo;
     fullExtent: TypeMetadataVectorTilesFullExtent;
@@ -951,29 +1081,29 @@ export interface TypeMetadataVectorTiles {
     maxScale?: number;
     minZoom?: number;
     maxZoom?: number;
-}
-export interface TypeMetadataVectorTilesTileInfo {
+};
+export type TypeMetadataVectorTilesTileInfo = {
     spatialReference: TypeProjection;
     origin: TypeMetadataVectorTilesTileInfoOrigin;
     lods: TypeLod[];
     rows: number;
     cols: number;
-}
-export interface TypeLod {
+};
+export type TypeLod = {
     resolution: number;
     scale: number;
     level: number;
-}
-export interface TypeMetadataVectorTilesTileInfoOrigin {
+};
+export type TypeMetadataVectorTilesTileInfoOrigin = {
     x: number;
     y: number;
-}
-export interface TypeMetadataVectorTilesFullExtent {
+};
+export type TypeMetadataVectorTilesFullExtent = {
     spatialReference: TypeProjection;
     xmin: number;
     ymin: number;
     xmax: number;
     ymax: number;
-}
+};
 export {};
 //# sourceMappingURL=layer-schema-types.d.ts.map

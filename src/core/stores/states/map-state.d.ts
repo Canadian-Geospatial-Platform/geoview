@@ -201,6 +201,8 @@ export declare const useStoreMapOverviewMapHideZoom: () => number;
 export declare const useStoreMapScale: () => TypeScaleInfo;
 /** Selects the current zoom level from the store. */
 export declare const useStoreMapZoom: () => number;
+/** Selects whether the overview map should be visible based on the current zoom level and the hide-on-zoom setting from the store. */
+export declare const useStoreMapOverviewShouldBeVisible: () => boolean;
 /**
  * Returns the map config state for the given map.
  *

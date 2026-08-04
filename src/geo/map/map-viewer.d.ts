@@ -2,7 +2,6 @@ import type { Root } from 'react-dom/client';
 import type { i18n } from 'i18next';
 import { Overlay } from 'ol';
 import OLMap from 'ol/Map';
-import type { FitOptions } from 'ol/View';
 import View from 'ol/View';
 import type { Coordinate } from 'ol/coordinate';
 import type { Extent } from 'ol/extent';
@@ -35,6 +34,7 @@ import { Transform } from '@/geo/interaction/transform/transform';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import { ModalApi } from '@/ui';
 import type { TimeIANA } from '@/core/utils/date-mgt';
+import { type GVFitOptions } from '@/core/utils/constant';
 import type { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';
 import type { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import { Notifications } from '@/core/utils/notifications';
@@ -326,7 +326,7 @@ export declare class MapViewer {
      *
      * @param zoom - The target zoom level
      * @param useAnimation - Indicates if a zoom animation should be used, default: true
-     * @param duration - Optional animation duration in ms
+     * @param duration - Optional animation duration in ms (default: OL_ZOOM_DURATION)
      * @returns A promise that resolves when the zoom animation is complete
      */
     zoomMap(zoom: number, useAnimation?: boolean, duration?: number): Promise<void>;
@@ -335,10 +335,10 @@ export declare class MapViewer {
      *
      * @param extent - The extent or coordinate to zoom to
      * @param useAnimation - Indicates if a zoom animation should be used, default: true
-     * @param options - Optional options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11 })
+     * @param options - Optional options to configure the zoomToExtent
      * @returns A promise that resolves when the zoom operation completes
      */
-    zoomToLonLatExtentOrCoordinate(extent: Extent | Coordinate, useAnimation?: boolean, options?: FitOptions): Promise<void>;
+    zoomToLonLatExtentOrCoordinate(extent: Extent | Coordinate, useAnimation?: boolean, options?: GVFitOptions): Promise<void>;
     /**
      * Set the map zoom level instantaneously, no animation.
      *
@@ -397,11 +397,11 @@ export declare class MapViewer {
      *
      * @param extent - The extent to zoom to (in map projection)
      * @param useAnimation - Indicates if a zoom animation should be used, default: true
-     * @param options - The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 13, duration: 500 })
+     * @param options - The options to configure the zoomToExtent (default: DEFAULT_OL_GVFITOPTIONS)
      * @returns A promise that resolves when the zoom animation is complete
      * @throws {InvalidExtentError} When the extent is invalid
      */
-    zoomToExtent(extent: Extent, useAnimation?: boolean, options?: FitOptions): Promise<void>;
+    zoomToExtent(extent: Extent, useAnimation?: boolean, options?: GVFitOptions): Promise<void>;
     /**
      * Sets the home button view settings for the map.
      *
@@ -505,12 +505,57 @@ export declare class MapViewer {
      */
     initTransformInteractions(options?: Partial<TransformOptions>): Transform;
     /**
-     * Retrieves the scale information from the DOM elements for the given map ID.
+     * Gets the map keyboard event target element.
      *
-     * @param mapId - The unique identifier of the map
+     * @returns The map container HTML element, if found
+     */
+    getHTMLElementMapContainer(): HTMLElement | undefined;
+    /**
+     * Gets the scale control bar metric element.
+     *
+     * @returns The scale control bar metric HTML element, if found
+     */
+    getHTMLElementScaleControlBarMetric(): HTMLElement | undefined;
+    /**
+     * Gets the scale control bar imperial element.
+     *
+     * @returns The scale control bar imperial HTML element, if found
+     */
+    getHTMLElementScaleControlBarImperial(): HTMLElement | undefined;
+    /**
+     * Gets the north pole marker element.
+     *
+     * @returns The north pole marker HTML element, if found
+     */
+    getHTMLElementNorthPole(): HTMLElement | undefined;
+    /**
+     * Gets the click marker element.
+     *
+     * @returns The click marker HTML element, if found
+     */
+    getHTMLElementClickMarker(): HTMLElement | undefined;
+    /**
+     * Gets the map info bar element.
+     *
+     * @returns The map info bar HTML element, if found
+     */
+    getHTMLElementMapInfo(): HTMLElement | undefined;
+    /**
+     * Calculates the height of the map-info bar in map coordinate units.
+     *
+     * This is useful for understanding how much of the map extent is hidden beneath the map-info bar overlay.
+     * The zoomToExtent function adds this height as extra bottom padding so the layer appears visually centered
+     * in the visible area above the bar.
+     *
+     * @returns The map-info bar height in map coordinate units, or 0 if the element is not found or resolution is unavailable
+     */
+    getHTMLElementMapInfoHeightInMapUnits(): number;
+    /**
+     * Retrieves the scale information from the DOM elements.
+     *
      * @returns The scale information object
      */
-    static getScaleInfoFromDomElement(mapId: string): TypeScaleInfo;
+    getScaleInfoFromDomElement(): TypeScaleInfo;
     /**
      * Computes the effective minimum and maximum scales for a layer from its configuration and initial settings.
      *

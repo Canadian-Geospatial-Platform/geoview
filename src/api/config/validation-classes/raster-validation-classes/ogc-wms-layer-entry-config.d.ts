@@ -1,5 +1,5 @@
 import type { Extent } from 'ol/extent';
-import type { ConfigClassOrType, TypeGeoviewLayerConfig, TypeMetadataWMS, TypeMetadataWMSCapabilityLayer, TypeMetadataWMSCapabilityLayerStyle, TypeOfServer, TypeSourceImageWmsInitialConfig } from '@/api/types/layer-schema-types';
+import type { ConfigClassOrType, TypeGeoviewLayerConfig, TypeMetadataWMSCapabilities, TypeMetadataWMSCapabilityLayer, TypeMetadataWMSCapabilityLayerStyle, TypeOfServer, TypeSourceImageWmsInitialConfig } from '@/api/types/layer-schema-types';
 import type { DisplayDateMode } from '@/api/types/map-schema-types';
 import type { OgcWfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import type { AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
@@ -35,7 +35,7 @@ export declare class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig
      *
      * @returns The strongly-typed service metadata specific to this layer entry config
      */
-    getServiceMetadata(): TypeMetadataWMS | undefined;
+    getServiceMetadata(): TypeMetadataWMSCapabilities | undefined;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
      *
@@ -52,6 +52,18 @@ export declare class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig
      * @returns The list of layer attributions, or `undefined` if none are available
      */
     getAttributions(): string[] | undefined;
+    /**
+     * Refreshes the layer metadata information by re-fetching the WMS GetCapabilities response and updating the layer configuration accordingly.
+     *
+     * This method is typically used when the display date mode changes, as the metadata may contain time-sensitive information that needs to be updated on-the-fly.
+     *
+     * @param displayDateMode - The display date mode that should be used
+     * @returns A promise that resolves when the metadata refresh operation has completed
+     * @throws {RequestTimeoutError} When the request exceeds the timeout duration
+     * @throws {ResponseEmptyError} When the capabilities response is empty
+     * @throws {NetworkError} When a network issue happened
+     */
+    onRefreshMetadata(displayDateMode: DisplayDateMode): Promise<void>;
     /**
      * Gets the version.
      *
@@ -171,15 +183,6 @@ export declare class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig
      * @returns A promise that resolves with the first generated WFS layer entry configuration
      */
     createGeoviewLayerConfigWfs(configProxyUrl: string | undefined): Promise<OgcWfsLayerEntryConfig>;
-    /**
-     * Refreshes the layer metadata information by re-fetching the WMS GetCapabilities response and updating the layer configuration accordingly.
-     *
-     * This method is typically used when the display date mode changes, as the metadata may contain time-sensitive information that needs to be updated on-the-fly.
-     *
-     * @param displayDateMode - The display date mode that should be used
-     * @returns A promise that resolves when the metadata refresh operation has completed
-     */
-    onRefreshMetadata(displayDateMode: DisplayDateMode): Promise<void>;
     /**
      * Type guard that checks whether the given configuration (class instance or plain object) represents a WMS layer type.
      *

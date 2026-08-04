@@ -172,6 +172,13 @@ export declare abstract class AbstractGeoViewLayer {
      */
     getIsUsingProxy(): boolean;
     /**
+     * Prepends the proxy URL to the given URL when the layer is configured to use a proxy.
+     *
+     * @param url - The URL to optionally prepend the proxy to
+     * @returns The URL with proxy prefix if using a proxy, or the original URL as-is
+     */
+    getUrlWithProxyWhenNeeded(url: string): string;
+    /**
      * Gets the Geoview layer id.
      *
      * @returns The geoview layer id
@@ -322,6 +329,24 @@ export declare abstract class AbstractGeoViewLayer {
      */
     getAllLayerEntryConfigs(): ConfigBaseClass[];
     /**
+     * Fetches and validates service metadata for layers that use the `?f=json` convention.
+     *
+     * This helper builds the metadata URL by appending `?f=json` to the `metadataAccessPath`, then fetches it
+     * using `GeoUtilities.fetchJsonWithProxyFallback`. If the initial request fails with a network error, the
+     * fallback automatically retries through the configured proxy. When a proxy is used successfully, it is
+     * stored on the GeoView layer instance via `setProxyUrl` so that subsequent requests (legend, identify,
+     * layer metadata) can reuse it.
+     *
+     * After a successful fetch, the response is validated via `throwIfMetatadaHasError` to detect ESRI-level
+     * error payloads (e.g., `{ error: { code, message } }`) embedded in an otherwise successful HTTP response.
+     *
+     * @param abortSignal - Optional {@link AbortSignal} used to cancel the metadata fetch
+     * @returns A promise that resolves with the parsed JSON metadata object
+     * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails (network, proxy, or HTTP error)
+     * @throws {LayerServiceMetadataHasErrorPayloadError} When the response contains an ESRI error payload (propagated from `throwIfMetatadaHasError()`)
+     */
+    protected helperFetchServiceMetadataWithFJson<T>(abortSignal?: AbortSignal): Promise<T>;
+    /**
      * Emits an event to all handlers.
      *
      * @param event - The event to emit
@@ -399,6 +424,15 @@ export declare abstract class AbstractGeoViewLayer {
      * @param callback - The callback to stop being called whenever the event is emitted
      */
     offLayerMessage(callback: LayerMessageDelegate): void;
+    /**
+     * Throws a LayerServiceMetadataUnableToFetchError if the provided metadata has an error in its content.
+     *
+     * @param geoviewLayerId - The geoview layer id
+     * @param layerName - The layer name
+     * @param metadata - The metadata to check
+     * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
+     */
+    static throwIfMetatadaHasError(geoviewLayerId: string, layerName: string | undefined, metadata: any): void;
     /**
      * Processes a Layer Config by calling 'createGeoViewLayers' on the provided layer.
      *
