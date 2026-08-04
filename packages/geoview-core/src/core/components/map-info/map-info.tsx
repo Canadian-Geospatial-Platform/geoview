@@ -13,6 +13,7 @@ import { Scale } from '@/core/components/scale/scale';
 import { MapInfoExpandButton } from './map-info-expand-button';
 import { MapInfoRotationButton } from './map-info-rotation-button';
 import { useStoreMapInteraction } from '@/core/stores/states/map-state';
+import { useMapController } from '@/core/controllers/use-controllers';
 import { logger } from '@/core/utils/logger';
 import { MAP_INFO_HEIGHT_COLLAPSED, MAP_INFO_HEIGHT_EXPANDED } from '@/core/utils/constant';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
@@ -62,6 +63,20 @@ export const MapInfo = memo(({ onScrollShellIntoView }: MapInfoProps): JSX.Eleme
   const interaction = useStoreMapInteraction(); // Static map, do not display mouse position or rotation controls
   const expanded = useStoreUIMapInfoExpanded();
   const uiController = useUIController();
+
+  /**
+   * Updates the OL View padding when the map-info bar height changes.
+   */
+  useEffect(() => {
+    logger.logTraceUseEffect('MAP-INFO - updateViewPadding', expanded);
+    // Defer to next frame so the DOM has updated its height before we read it
+    const frame = requestAnimationFrame(() => {
+      mapController.updateViewPadding();
+    });
+    return (): void => {
+      cancelAnimationFrame(frame);
+    };
+  }, [expanded, mapController]);
 
   /**
    * Computes the dynamic container styles for the map info bar.
