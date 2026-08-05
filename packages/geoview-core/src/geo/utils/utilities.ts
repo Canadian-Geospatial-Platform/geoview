@@ -571,16 +571,14 @@ export abstract class GeoUtilities {
    * @returns A new URL string with the updated BBOX parameter
    */
   static replaceCRSandBBOXParam(url: string, newCRS: string, newBBOX: number[]): string {
-    const urlObj = new URL(url);
-
     // Format the new BBOX as a comma-separated string
     const bboxString = newBBOX.join(',');
 
-    // Replace or add the BBOX parameter
-    urlObj.searchParams.set('BBOX', bboxString);
-    urlObj.searchParams.set('CRS', newCRS);
+    // Replace params using regex to avoid re-encoding proxy-wrapped URLs (new URL() encodes the proxied portion)
+    let result = url.replace(/([?&])BBOX=[^&]*/i, `$1BBOX=${bboxString}`);
+    result = result.replace(/([?&])CRS=[^&]*/i, `$1CRS=${newCRS}`);
 
-    return urlObj.toString();
+    return result;
   }
 
   // #endregion FETCH METADATA
