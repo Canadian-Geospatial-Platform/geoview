@@ -408,7 +408,6 @@ export function AddNewLayer(): JSX.Element {
   const [isMultiple, setIsMultiple] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [stepButtonEnabled, setStepButtonEnabled] = useState<boolean>(false);
-  const [abortController, setAbortController] = useState<AbortController>(new AbortController());
   const [isGeoCore, setIsGeoCore] = useState<boolean>(false);
   const [geochartsToAdd, setGeochartsToAdd] = useState<Record<string, GeoViewGeoChartConfig> | undefined>();
   const [timeSliderToAdd, setTimeSliderToAdd] = useState<GeoViewTimeSliderConfig[] | undefined>();
@@ -420,6 +419,7 @@ export function AddNewLayer(): JSX.Element {
   const isSingle = !isMultiple;
 
   // Ref
+  const abortControllerRef = useRef<AbortController>(new AbortController());
   const serviceTypeRef = useRef<HTMLDivElement>(null);
   const layerSelectionTreeContainerRef = useRef<HTMLDivElement>(null);
   const configureLayerNameInputRef = useRef<HTMLInputElement>(null);
@@ -534,7 +534,7 @@ export function AddNewLayer(): JSX.Element {
     if (layerType === GEOCORE) setLayerURL(displayURL);
 
     // Set new AbortController to handle returning to this step
-    setAbortController(new AbortController());
+    abortControllerRef.current = new AbortController();
 
     let valid = true;
     if (layerURL.trim() === '') {
@@ -572,7 +572,7 @@ export function AddNewLayer(): JSX.Element {
           true, // isTimeAware true by default
           language,
           mapId,
-          abortController.signal
+          abortControllerRef.current.signal
         );
 
         // Get the config info from the created config
@@ -671,20 +671,19 @@ export function AddNewLayer(): JSX.Element {
     }
 
     // If we have a promise of a layer validation
-    if (promise && !abortController.signal.aborted) {
+    if (promise && !abortControllerRef.current.signal.aborted) {
       promise
         .then((isValid) => {
           if (isValid) {
             setIsLoading(false);
-            if (!abortController.signal.aborted) setActiveStep(2);
-            else setAbortController(new AbortController());
+            if (!abortControllerRef.current.signal.aborted) setActiveStep(2);
           }
         })
         .catch((error: unknown) => {
           // Log
           logger.logPromiseFailed('promise of layer validation in handleStep2 in AddNewLayer', error);
         });
-    } else if (abortController.signal.aborted) setAbortController(new AbortController());
+    }
   };
 
   /**
@@ -719,15 +718,15 @@ export function AddNewLayer(): JSX.Element {
    * @returns A Promise that resolves when the layer is added
    */
   const addGeoviewLayer = async (newGeoViewLayer: MapConfigLayerEntry): Promise<void> => {
-    // Create new abort controller to handle canceling of this step.
-    setAbortController(new AbortController());
+    // Create new abort controller for this operation
+    abortControllerRef.current = new AbortController();
 
     // Shapefile config must be converted to GeoJSON before we proceed
     if (newGeoViewLayer.geoviewLayerType === SHAPEFILE)
       // eslint-disable-next-line no-param-reassign
       newGeoViewLayer = await ShapefileReader.convertShapefileConfigToGeoJson(
         newGeoViewLayer as ShapefileLayerConfig,
-        abortController.signal
+        abortControllerRef.current.signal
       );
 
     // GeoPackage config must be converted to WKB before we proceed
@@ -735,7 +734,7 @@ export function AddNewLayer(): JSX.Element {
       // eslint-disable-next-line no-param-reassign
       newGeoViewLayer = await GeoPackageReader.createLayerConfigFromGeoPackage(
         newGeoViewLayer as GeoPackageLayerConfig,
-        abortController.signal
+        abortControllerRef.current.signal
       );
 
     // Use the config to convert simplified layer config into proper layer config
@@ -773,10 +772,10 @@ export function AddNewLayer(): JSX.Element {
       // Add the layer through the controller
       const addedLayer: GeoViewLayerAddedResult = layerCreatorController.addGeoviewLayer(
         configObj[0] as TypeGeoviewLayerConfig,
-        abortController.signal
+        abortControllerRef.current.signal
       );
 
-      if (!abortController.signal.aborted) {
+      if (!abortControllerRef.current.signal.aborted) {
         // Wait on the promise
         addedLayer.promiseLayer
           .then(() => {
@@ -788,7 +787,7 @@ export function AddNewLayer(): JSX.Element {
             logger.logPromiseFailed('addedLayer.promiseLayer in handleStepLast in AddNewLayer', error);
             setIsLoading(false);
           });
-      } else if (abortController.signal.aborted) setAbortController(new AbortController());
+      }
     }
   };
 
@@ -836,7 +835,8 @@ export function AddNewLayer(): JSX.Element {
   const handleBack = (): void => {
     // On step 1 or 3, abort the fetch that may be underway
     if (activeStep === 1 || activeStep === 3) {
-      abortController.abort();
+      abortControllerRef.current.abort();
+      abortControllerRef.current = new AbortController();
       setIsLoading(false);
     }
 
