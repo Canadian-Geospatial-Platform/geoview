@@ -350,17 +350,12 @@ export class MapConfigTester extends GVAbstractTester {
         }
 
         // Verify horizontal centering: left buffer ≈ right buffer
-        test.addStep(`Verifying layer is horizontally centered in map extent... ${Math.round(leftBuffer)} vs ${Math.round(rightBuffer)}`);
+        test.addStep(`Verifying horizontal centering... ${Math.round(leftBuffer)} vs ${Math.round(rightBuffer)}`);
         Test.assertIsEqual(Math.round(leftBuffer), Math.round(rightBuffer));
 
-        // Verify vertical centering accounts for the map-info bar.
-        // zoomToExtent applies padding = [paddingHeight, paddingWidth, paddingHeight + mapInfoHeight, paddingWidth],
-        // so the bottom buffer (index 2) includes the map-info bar pixel height converted to map units.
-        const mapInfoHeightMapUnits = newMapViewer.getHTMLElementMapInfoHeightInMapUnits();
-
-        // The bottomBuffer should equal topBuffer + mapInfoHeightMapUnits
-        test.addStep(`Verifying vertical centering with map-info bar offset (${Math.round(mapInfoHeightMapUnits)} map units)...`);
-        Test.assertIsEqual(Math.round(bottomBuffer), Math.round(topBuffer + mapInfoHeightMapUnits));
+        // Verify vertical centering: bottom buffer ≈ top buffer
+        test.addStep(`Verifying vertical centering... ${Math.round(bottomBuffer)} vs ${Math.round(topBuffer)}`);
+        Test.assertIsEqual(Math.round(bottomBuffer), Math.round(topBuffer));
       }
     );
   }
