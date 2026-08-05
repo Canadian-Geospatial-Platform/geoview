@@ -274,7 +274,7 @@ export class MapTester extends GVAbstractTester {
       (test, result) => {
         // The map adjusts extent to fit viewport aspect ratio, compare with tolerance for aspect ratio adjustment
         test.addStep('Verifying map zoomed to extent (with aspect ratio tolerance)...');
-        Test.assertIsArrayEqual(result, expectedExtent, 2);
+        Test.assertIsArrayEqual(result, expectedExtent, 0);
       }
     );
   }
@@ -523,7 +523,7 @@ export class MapTester extends GVAbstractTester {
         }
 
         test.addStep('Zooming to British Columbia extent...');
-        await this.getControllersRegistry().mapController.zoomToLonLatExtentOrCoordinate(bcExtent, GVAbstractTester.USE_ZOOM_ANIMATION); // GVAbstractTester.USE_ZOOM_ANIMATION
+        await this.getControllersRegistry().mapController.zoomToLonLatExtentOrCoordinate(bcExtent, GVAbstractTester.USE_ZOOM_ANIMATION);
 
         // Wait for render
         await this.getMapViewer().waitForRender();
