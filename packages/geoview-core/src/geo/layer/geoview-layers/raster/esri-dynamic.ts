@@ -207,11 +207,17 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    */
   static createGeoviewLayerConfig(
     geoviewLayerId: string,
-    geoviewLayerName: string,
+    geoviewLayerName: string | undefined,
     metadataAccessPath: string,
     isTimeAware: boolean | undefined,
     layerEntries: TypeLayerEntryShell[]
   ): TypeEsriDynamicLayerConfig {
+    // For ESRI Dynamic, the numeric id is also the service layer index
+    const enrichedEntries = layerEntries.map((entry) => ({
+      ...entry,
+      index: entry.index ?? (typeof entry.id === 'number' ? entry.id : undefined),
+    }));
+
     const geoviewLayerConfig: TypeEsriDynamicLayerConfig = {
       geoviewLayerId,
       geoviewLayerName,
@@ -222,7 +228,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     };
 
     // Convert the tree of entries to GeoviewLayerConfigs
-    geoviewLayerConfig.listOfLayerEntryConfig = EsriDynamic.#convertTreeToLayerConfigs(geoviewLayerConfig, layerEntries);
+    geoviewLayerConfig.listOfLayerEntryConfig = EsriDynamic.#convertTreeToLayerConfigs(geoviewLayerConfig, enrichedEntries);
 
     // Return it
     return geoviewLayerConfig;
@@ -240,7 +246,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param geoviewLayerId - The unique identifier for the GeoView layer
    * @param geoviewLayerName - The display name for the GeoView layer
    * @param url - The URL of the service endpoint
-   * @param layerIds - An array of layer IDs to include in the configuration
+   * @param layerEntries - An array of layer entry shells to include in the configuration
    * @param isTimeAware - Indicates if the layer is time aware
    * @returns A promise that resolves to an array of layer configurations
    */
@@ -248,19 +254,11 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     geoviewLayerId: string,
     geoviewLayerName: string,
     url: string,
-    layerIds: number[],
+    layerEntries: TypeLayerEntryShell[],
     isTimeAware: boolean
   ): Promise<ConfigBaseClass[]> {
     // Create the Layer config
-    const layerConfig = EsriDynamic.createGeoviewLayerConfig(
-      geoviewLayerId,
-      geoviewLayerName,
-      url,
-      isTimeAware,
-      layerIds.map((layerId) => {
-        return { id: layerId, index: layerId };
-      })
-    );
+    const layerConfig = EsriDynamic.createGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, url, isTimeAware, layerEntries);
 
     // Create the class from geoview-layers package
     const myLayer = new EsriDynamic(layerConfig);

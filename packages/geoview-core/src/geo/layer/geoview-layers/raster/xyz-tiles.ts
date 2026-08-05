@@ -239,14 +239,13 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * @param geoviewLayerName - The display name of the GeoView layer
    * @param metadataAccessPath - The URL or path to access metadata
    * @param isTimeAware - Indicates whether the layer supports time-based filtering
-   * @param layerEntries - An array of layer entries objects to be included
-   * in the configuration.
+   * @param layerEntries - An array of layer entry configurations to be included in the GeoView layer configuration
    * @returns The constructed configuration object for the XYZTiles layer
    */
   static createGeoviewLayerConfig(
     geoviewLayerId: string,
-    geoviewLayerName: string,
-    metadataAccessPath: string,
+    geoviewLayerName: string | undefined,
+    metadataAccessPath: string | undefined,
     isTimeAware: boolean | undefined,
     layerEntries: TypeLayerEntryShell[]
   ): TypeXYZTilesConfig {
@@ -262,6 +261,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
       const layerEntryConfig = new XYZTilesLayerEntryConfig({
         geoviewLayerConfig,
         layerId: `${layerEntry.id}`,
+        source: layerEntry.source,
         ...(layerEntry.layerName && { layerName: `${layerEntry.layerName}` }),
       });
       return layerEntryConfig;
@@ -362,27 +362,19 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * @param geoviewLayerId - The unique identifier for the GeoView layer
    * @param geoviewLayerName - The display name for the GeoView layer
    * @param url - The URL of the service endpoint
-   * @param layerIds - An array of layer IDs to include in the configuration
+   * @param layerEntries - An array of layer entry shells to include in the configuration
    * @param isTimeAware - Indicates if the layer is time aware
    * @returns A promise that resolves to an array of layer configurations
    */
   static processGeoviewLayerConfig(
     geoviewLayerId: string,
-    geoviewLayerName: string,
+    geoviewLayerName: string | undefined,
     url: string,
-    layerIds: string[],
+    layerEntries: TypeLayerEntryShell[],
     isTimeAware: boolean
   ): Promise<ConfigBaseClass[]> {
     // Create the Layer config
-    const layerConfig = XYZTiles.createGeoviewLayerConfig(
-      geoviewLayerId,
-      geoviewLayerName,
-      url,
-      isTimeAware,
-      layerIds.map((layerId) => {
-        return { id: layerId };
-      })
-    );
+    const layerConfig = XYZTiles.createGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, url, isTimeAware, layerEntries);
 
     // Create the class from geoview-layers package
     const myLayer = new XYZTiles(layerConfig);

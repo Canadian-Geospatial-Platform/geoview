@@ -383,7 +383,7 @@
           'geoviewLayerId',
           'geoviewLayerName',
           layerUrl.trim(),
-          layerIds,
+          layerIds.map((id) => ({ id })),
           true
         );
 

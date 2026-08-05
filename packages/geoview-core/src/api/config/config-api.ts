@@ -33,7 +33,7 @@ import { NotSupportedError } from '@/core/exceptions/core-exceptions';
 import { isJsonString, isValidUUID, parseXMLToJson, removeCommentsFromJSON } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { GeoCore, type GeoCoreLayerConfigResponse } from '@/api/config/geocore';
-import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
+import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { GeoPackageReader } from '@/api/config/reader/geopackage-reader';
 import { ShapefileReader } from '@/api/config/reader/shapefile-reader';
 
@@ -583,7 +583,7 @@ export class ConfigApi {
    * @param geoviewLayerId - The geoview layer id
    * @param geoviewLayerName - The geoview layer name
    * @param layerURL - The layer url
-   * @param layerIds - The layer ids for each layer entry config
+   * @param layerEntries - The layer entry shells for each layer entry config
    * @param isTimeAware - Indicates if the layer is time aware
    * @returns A promise that resolves with a list of ConfigBaseClass objects
    * @throws {NotSupportedError} When the provided layer type is not recognized or supported
@@ -593,59 +593,54 @@ export class ConfigApi {
     geoviewLayerId: string,
     geoviewLayerName: string,
     layerURL: string,
-    layerIds: number[] | string[],
+    layerEntries: TypeLayerEntryShell[],
     isTimeAware: boolean
   ): Promise<ConfigBaseClass[]> {
     // Depending on the type
     switch (layerType) {
       case 'esriDynamic':
-        return EsriDynamic.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as number[], isTimeAware);
+        return EsriDynamic.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerEntries, isTimeAware);
       case 'esriImage':
         return EsriImage.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
       case 'GeoTIFF':
-        return GeoTIFF.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], isTimeAware);
+        return GeoTIFF.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerEntries, isTimeAware);
       case 'imageStatic':
         // TODO: MINOR - Config init - Check if there's a way to better determine the source extent to send, defaults to napl-ring-of-fire's extent
         return ImageStatic.processGeoviewLayerConfig(
           geoviewLayerId,
           geoviewLayerName,
           layerURL,
-          layerIds as string[],
-          isTimeAware,
-          [-87.77486341686723, 51.62285357468582, -84.57727128084842, 53.833354975551075],
-          4326
+          layerEntries.map((entry) => ({
+            ...entry,
+            source: entry.source ?? {
+              extent: [-87.77486341686723, 51.62285357468582, -84.57727128084842, 53.833354975551075],
+              projection: 4326,
+            },
+          })),
+          isTimeAware
         );
       case 'vectorTiles':
-        return VectorTiles.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], isTimeAware);
+        return VectorTiles.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerEntries, isTimeAware);
       case 'ogcWms':
-        return WMS.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as number[], isTimeAware);
+        return WMS.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerEntries, isTimeAware);
       case 'ogcWmts':
-        return WMTS.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], isTimeAware);
+        return WMTS.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerEntries, isTimeAware);
       case 'xyzTiles':
-        return XYZTiles.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], isTimeAware);
+        return XYZTiles.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerEntries, isTimeAware);
       case 'CSV':
-        return CSV.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], isTimeAware);
+        return CSV.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerEntries, isTimeAware);
       case 'esriFeature':
-        return EsriFeature.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as number[], isTimeAware);
+        return EsriFeature.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerEntries, isTimeAware);
       case 'GeoJSON':
-        return GeoJSON.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], isTimeAware);
+        return GeoJSON.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerEntries, isTimeAware);
       case 'KML':
-        return KML.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], isTimeAware);
+        return KML.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerEntries, isTimeAware);
       case 'WKB':
-        return WKB.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], isTimeAware);
+        return WKB.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerEntries, isTimeAware);
       case 'ogcFeature':
-        return OgcFeature.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], isTimeAware);
+        return OgcFeature.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerEntries, isTimeAware);
       case 'ogcWfs':
-        return WFS.processGeoviewLayerConfig(
-          geoviewLayerId,
-          geoviewLayerName,
-          layerURL,
-          undefined,
-          layerIds as string[],
-          isTimeAware,
-          'all',
-          true
-        );
+        return WFS.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, undefined, layerEntries, isTimeAware, 'all', true);
       default:
         // Unsupported
         throw new NotSupportedError(`Unsupported layer type ${layerType}`);

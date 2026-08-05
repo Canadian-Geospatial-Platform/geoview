@@ -397,15 +397,10 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
       `Temporary WFS layer config for the WMS layer '${this.getLayerNameCascade()}'`,
       url,
       configProxyUrl,
-      [this.getWfsStylesLayerId() || this.layerId],
+      [{ id: this.getWfsStylesLayerId() || this.layerId, wmsLayerId: this.layerId }],
       false,
       'all',
-      false, // Don't fetch styles from the WMS, we already are working with the WMS, we only want the vector information, prevents a "loop"
-      (entryConfig) => {
-        // eslint-disable-next-line no-param-reassign
-        entryConfig.wmsLayerId = this.layerId; // Assign itself as the wms layer id obviously
-        return entryConfig;
-      }
+      false // Don't fetch styles from the WMS, we already are working with the WMS, we only want the vector information, prevents a "loop"
     );
 
     // Get the first layer config

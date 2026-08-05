@@ -151,7 +151,7 @@ export class CSV extends AbstractGeoViewVector {
    */
   static createGeoviewLayerConfig(
     geoviewLayerId: string,
-    geoviewLayerName: string,
+    geoviewLayerName: string | undefined,
     metadataAccessPath: string,
     isTimeAware: boolean | undefined,
     layerEntries: TypeLayerEntryShell[]
@@ -213,7 +213,7 @@ export class CSV extends AbstractGeoViewVector {
    * @param geoviewLayerId - The unique identifier for the GeoView layer
    * @param geoviewLayerName - The display name for the GeoView layer
    * @param url - The URL of the service endpoint
-   * @param layerIds - An array of layer IDs to include in the configuration
+   * @param layerEntries - An array of layer entry shells to include in the configuration
    * @param isTimeAware - Indicates if the layer is time aware
    * @returns A promise that resolves to an array of layer configurations
    */
@@ -221,19 +221,11 @@ export class CSV extends AbstractGeoViewVector {
     geoviewLayerId: string,
     geoviewLayerName: string,
     url: string,
-    layerIds: string[],
+    layerEntries: TypeLayerEntryShell[],
     isTimeAware: boolean
   ): Promise<ConfigBaseClass[]> {
     // Create the Layer config
-    const layerConfig = CSV.createGeoviewLayerConfig(
-      geoviewLayerId,
-      geoviewLayerName,
-      url,
-      isTimeAware,
-      layerIds.map((layerId) => {
-        return { id: layerId };
-      })
-    );
+    const layerConfig = CSV.createGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, url, isTimeAware, layerEntries);
 
     // Create the class from geoview-layers package
     const myLayer = new CSV(layerConfig);
