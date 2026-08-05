@@ -1,5 +1,6 @@
 import type { ReactNode, Ref } from 'react';
 import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
 
@@ -13,6 +14,7 @@ import { CONTAINER_TYPE } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
 import { useStoreLayerName } from '@/core/stores/states/layer-state';
 import { useUIController } from '@/core/controllers/use-controllers';
+import { LAYER_PATH_COORDINATE_INFO } from '@/core/stores/states/feature-info-state';
 
 /** Properties for the Layout component. */
 interface LayoutProps {
@@ -84,7 +86,11 @@ const Layout = forwardRef(
     // Hooks
     const responsiveLayoutRef = useRef<ResponsiveGridLayoutExposedMethods>(null);
     const theme = useTheme();
-    const layerName = useStoreLayerName(selectedLayerPath!);
+      const { t } = useTranslation();
+    let layerName = useStoreLayerName(selectedLayerPath!);
+    if (!layerName && selectedLayerPath === LAYER_PATH_COORDINATE_INFO) {
+      layerName = t('details.coordinateInfoTitle');
+    }
     const uiController = useUIController();
 
     // #region Handlers
@@ -133,7 +139,7 @@ const Layout = forwardRef(
         theme.palette.geoViewFontSize?.lg,
         toggleMode
       );
-
+      
       if (!layerName) return null; // Don't render when no layer selected
 
       // clamping code copied from https://tailwindcss.com/docs/line-clamp

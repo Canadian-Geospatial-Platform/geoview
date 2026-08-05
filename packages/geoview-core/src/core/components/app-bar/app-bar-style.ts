@@ -66,11 +66,10 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     borderRightColor: theme.palette.geoViewColor?.primary.light[100],
     borderRightWidth: 1,
     borderRightStyle: 'solid',
-    width: 50,
+    width: 48,
     '& button': {
-      height: '54px',
-      width: '50px',
-      minWidth: '40px',
+      height: '48px',
+      width: '48px',
       alignContent: 'center',
       padding: 0,
       borderRadius: 0,
@@ -85,7 +84,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
         width: 25,
       },
       '& .MuiTouchRipple-root': {
-        maxWidth: '50px',
+        maxWidth: '48px',
       },
       '&[aria-disabled="true"]': {
         color: theme.palette.geoViewColor?.bgColor.dark[450],
@@ -96,7 +95,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   appBarSeparator: {
     position: 'relative',
     marginTop: '0.5em',
-    paddingTop: '0.5em',
+    paddingTop: '0.5em !important',
     '&::before': {
       content: '""',
       position: 'absolute',

@@ -141,10 +141,6 @@ export function CoordinateInfo(): JSX.Element {
   return (
     <Box sx={memoSxClasses.rightPanelContainer} className="guide-content-container">
       <Box sx={memoSxClasses.coordinateInfoContainer}>
-        <Typography component="h4" variant="h6" sx={memoSxClasses.coordinateInfoTitle}>
-          {t('details.coordinateInfoTitle')}
-        </Typography>
-
         <List>
           <ListItem sx={memoSxClasses.coordinateInfoSection} disablePadding>
             <Typography variant="subtitle1" sx={memoSxClasses.coordinateInfoSectionTitle}>

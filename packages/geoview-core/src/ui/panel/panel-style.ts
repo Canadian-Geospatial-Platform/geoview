@@ -1,8 +1,8 @@
 import type { Theme } from '@mui/material/styles';
 import type { SxStyles } from '@/ui/style/types';
 
-// offset values
-const appBarWidth = 50;
+/** Width of the app-bar used to offset panel positioning. */
+const appBarWidth = 48;
 
 /**
  * Gets custom sx classes for the panel component.
@@ -40,7 +40,7 @@ export const getSxClasses = (theme: Theme, open: boolean, panelWidth: string | n
       borderBottomColor: theme.palette.geoViewColor?.bgColor.dark[100],
       borderBottomWidth: 1,
       borderBottomStyle: 'solid',
-      height: 64,
+      height: 48,
     },
     '& .MuiCardHeader-title': {
       fontSize: theme.palette.geoViewFontSize?.default,
@@ -60,10 +60,11 @@ export const getSxClasses = (theme: Theme, open: boolean, panelWidth: string | n
       },
     },
     '& .MuiCardHeader-action': {
+      marginTop: '-10px',
       '& .MuiButtonBase-root': {
         border: `1px solid ${theme.palette.geoViewColor?.primary.main}`,
-        height: 44,
-        width: 44,
+        height: 36,
+        width: 36,
         marginRight: 8,
         transition: 'all 0.3s ease-in-out',
         '& .MuiSvgIcon-root': {
@@ -86,7 +87,7 @@ export const getSxClasses = (theme: Theme, open: boolean, panelWidth: string | n
     '&:last-child': {
       paddingBottom: 0,
     },
-    height: 'calc(100% - 64px)',
+    height: 'calc(100% - 48px)',
     opacity: 0,
     animation: 'fadein 500ms ease-in-out forwards',
     animationDelay: '400ms',

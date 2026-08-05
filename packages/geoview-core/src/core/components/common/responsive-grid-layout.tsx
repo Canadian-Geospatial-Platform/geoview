@@ -29,7 +29,6 @@ import { CONTAINER_TYPE, TIMEOUT, LIGHTBOX_SELECTORS } from '@/core/utils/consta
 const MAIN_ROW_SX: SxProps = {
   flexGrow: 1,
   overflow: 'hidden',
-  paddingTop: '30px',
 };
 
 /** Properties for the ResponsiveGridLayout component. */
