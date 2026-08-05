@@ -345,11 +345,11 @@ export class WFS extends AbstractGeoViewVector {
    */
   static createGeoviewLayerConfig(
     geoviewLayerId: string,
-    geoviewLayerName: string,
+    geoviewLayerName: string | undefined,
     metadataAccessPath: string,
     isTimeAware: boolean | undefined,
     strategy: VectorStrategy,
-    layerEntries: TypeLayerEntryShell[] // TODO: Change this (and in all siblings) to receive a OgcWfsLayerEntryConfigProps[] Search id: fec7d10d
+    layerEntries: TypeLayerEntryShell[]
   ): TypeWFSLayerConfig {
     const geoviewLayerConfig: TypeWFSLayerConfig = {
       geoviewLayerId,
@@ -464,11 +464,10 @@ export class WFS extends AbstractGeoViewVector {
    * @param geoviewLayerName - The display name for the GeoView layer
    * @param url - The URL of the service endpoint
    * @param configProxyUrl - Proxy URL to use when necessary
-   * @param layerIds - An array of layer IDs to include in the configuration
+   * @param layerEntries - An array of layer entry shells to include in the configuration
    * @param isTimeAware - Indicates if the layer is time aware
    * @param vectorStrategy - The strategy to use for fetching vector data
    * @param fetchStylesOnWMS - Indicates whether to fetch styles from WMS
-   * @param callbackCreateLayerEntryConfig - Optional callback to customize each layer entry configuration
    * @returns A promise that resolves to an array of layer configurations
    */
   static processGeoviewLayerConfig(
@@ -476,32 +475,13 @@ export class WFS extends AbstractGeoViewVector {
     geoviewLayerName: string,
     url: string,
     configProxyUrl: string | undefined,
-    layerIds: string[],
+    layerEntries: TypeLayerEntryShell[],
     isTimeAware: boolean,
     vectorStrategy: VectorStrategy,
-    fetchStylesOnWMS: boolean,
-    callbackCreateLayerEntryConfig?: (wfsEntry: TypeLayerEntryShell) => TypeLayerEntryShell // TODO: Review this to simplify it. Search id: fec7d10d
+    fetchStylesOnWMS: boolean
   ): Promise<ConfigBaseClass[]> {
     // Create the Layer config
-    const layerConfig = WFS.createGeoviewLayerConfig(
-      geoviewLayerId,
-      geoviewLayerName,
-      url,
-      isTimeAware,
-      vectorStrategy,
-      layerIds.map((layerId) => {
-        // Create the entry config
-        let entryConfig = { id: layerId } as TypeLayerEntryShell;
-
-        // Callback in case we want to tweak the config
-        if (callbackCreateLayerEntryConfig) {
-          entryConfig = callbackCreateLayerEntryConfig(entryConfig);
-        }
-
-        // Return the entry config
-        return entryConfig;
-      })
-    );
+    const layerConfig = WFS.createGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, url, isTimeAware, vectorStrategy, layerEntries);
 
     // Keep track if fetching styles on the WMS
     layerConfig.fetchStylesOnWMS = fetchStylesOnWMS;

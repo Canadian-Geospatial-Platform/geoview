@@ -165,7 +165,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    */
   static createGeoviewLayerConfigSimple(
     geoviewLayerId: string,
-    geoviewLayerName: string,
+    geoviewLayerName: string | undefined,
     metadataAccessPath: string,
     isTimeAware: boolean | undefined
   ): TypeEsriImageLayerConfig {
@@ -209,7 +209,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    */
   static createGeoviewLayerConfig(
     geoviewLayerId: string,
-    geoviewLayerName: string,
+    geoviewLayerName: string | undefined,
     metadataAccessPath: string,
     isTimeAware: boolean | undefined,
     layerEntries: TypeLayerEntryShell[]

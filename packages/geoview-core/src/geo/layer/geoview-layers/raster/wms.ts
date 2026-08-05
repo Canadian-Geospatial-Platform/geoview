@@ -665,7 +665,7 @@ export class WMS extends AbstractGeoViewRaster {
    */
   static createGeoviewLayerConfig(
     geoviewLayerId: string,
-    geoviewLayerName: string,
+    geoviewLayerName: string | undefined,
     metadataAccessPath: string,
     serverType: TypeOfServer | undefined,
     isTimeAware: boolean | undefined,
@@ -802,7 +802,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param geoviewLayerId - The unique identifier for the GeoView layer
    * @param geoviewLayerName - The display name for the GeoView layer
    * @param url - The URL of the service endpoint
-   * @param layerIds - An array of layer IDs to include in the configuration
+   * @param layerEntries - An array of layer entry shells to include in the configuration
    * @param isTimeAware - Indicates if the layer is time aware
    * @param useFullWmsSublayers - Optional - Indicates if we want the full sublayers of all wms or grouped (default is all sublayers)
    * @returns A promise that resolves to an array of layer configurations
@@ -811,7 +811,7 @@ export class WMS extends AbstractGeoViewRaster {
     geoviewLayerId: string,
     geoviewLayerName: string,
     url: string,
-    layerIds: number[],
+    layerEntries: TypeLayerEntryShell[],
     isTimeAware: boolean,
     useFullWmsSublayers?: boolean
   ): Promise<ConfigBaseClass[]> {
@@ -822,9 +822,7 @@ export class WMS extends AbstractGeoViewRaster {
       url,
       undefined,
       isTimeAware,
-      layerIds.map((layerId) => {
-        return { id: layerId };
-      }),
+      layerEntries,
       useFullWmsSublayers
     );
 
