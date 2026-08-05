@@ -308,6 +308,79 @@ function FileUploadSection({
   );
 }
 
+/** Props for the NavButtons component. */
+interface NavButtonsProps extends ButtonPropsLayerPanel {
+  /** Whether a loading operation is in progress. */
+  isLoading: boolean;
+  /** Whether the step button is enabled. */
+  stepButtonEnabled: boolean;
+  /** The layer name for validation. */
+  layerName: string;
+  /** Handler for keydown on continue/finish button. */
+  onNextKeyDown: (event: KeyboardEvent<HTMLButtonElement> | KeyboardEvent<HTMLDivElement>) => void;
+  /** Handler for back button click. */
+  onBack: () => void;
+  /** Handler for keydown on back button. */
+  onBackKeyDown: (event: KeyboardEvent<HTMLButtonElement>) => void;
+  /** Handler for cancel button click. */
+  onCancel: () => void;
+}
+
+/**
+ * Creates the navigation button set for the add-layer wizard.
+ *
+ * @param props - Properties defined in NavButtonsProps interface
+ * @returns The navigation button set
+ */
+function NavButtons({
+  isFirst = false,
+  isLast = false,
+  handleNext,
+  isLoading,
+  stepButtonEnabled,
+  layerName,
+  onNextKeyDown,
+  onBack,
+  onBackKeyDown,
+  onCancel,
+}: NavButtonsProps): JSX.Element {
+  logger.logTraceRender('components/layers/left-panel/add-new-layer/add-new-layer > NavButtons');
+
+  const { t } = useTranslation<string>();
+
+  return (
+    <ButtonGroup sx={sxClasses.buttonGroup}>
+      {isLoading ? (
+        <IconButton sx={{ width: '80px' }} size="small" className="buttonOutlineFilled" disabled aria-label={t('layers.stepOneLoading')}>
+          <CircularProgressBase size="20px" />
+        </IconButton>
+      ) : (
+        <Button
+          variant="contained"
+          className="buttonOutlineFilled"
+          size="small"
+          type="text"
+          disabled={isLast ? layerName === undefined || layerName === '' : !stepButtonEnabled}
+          onClick={handleNext}
+          onKeyDown={onNextKeyDown}
+        >
+          {isLast ? t('layers.finish') : t('layers.continue')}
+        </Button>
+      )}
+      {!isFirst && (
+        <Button variant="contained" className="buttonOutlineFilled" size="small" type="text" onClick={onBack} onKeyDown={onBackKeyDown}>
+          {t('layers.back')}
+        </Button>
+      )}
+      {isFirst && (
+        <Button variant="contained" className="buttonOutlineFilled" size="small" type="text" onClick={onCancel}>
+          {t('general.cancel')}
+        </Button>
+      )}
+    </ButtonGroup>
+  );
+}
+
 /**
  * Creates the add-new-layer component.
  *
@@ -1027,57 +1100,6 @@ export function AddNewLayer(): JSX.Element {
 
   // #endregion USE EFFECTS
 
-  /**
-   * Creates the navigation button set for the add-layer wizard.
-   *
-   * @param props - Properties defined in ButtonPropsLayerPanel interface
-   * @returns The navigation button set
-   */
-  // TODO: refactor - remove the unstable nested component
-  // eslint-disable-next-line react/no-unstable-nested-components
-  function NavButtons({ isFirst = false, isLast = false, handleNext }: ButtonPropsLayerPanel): JSX.Element {
-    logger.logTraceRender('components/layers/left-panel/add-new-layer/add-new-layer > NavButtons');
-
-    return (
-      <ButtonGroup sx={sxClasses.buttonGroup}>
-        {isLoading ? (
-          <IconButton sx={{ width: '80px' }} size="small" className="buttonOutlineFilled" disabled aria-label={t('layers.stepOneLoading')}>
-            <CircularProgressBase size="20px" />
-          </IconButton>
-        ) : (
-          <Button
-            variant="contained"
-            className="buttonOutlineFilled"
-            size="small"
-            type="text"
-            disabled={isLast ? layerName === undefined || layerName === '' : !stepButtonEnabled}
-            onClick={handleNext}
-            onKeyDown={handleNextKeyDown}
-          >
-            {isLast ? t('layers.finish') : t('layers.continue')}
-          </Button>
-        )}
-        {!isFirst && (
-          <Button
-            variant="contained"
-            className="buttonOutlineFilled"
-            size="small"
-            type="text"
-            onClick={handleBack}
-            onKeyDown={handleBackKeyDown}
-          >
-            {t('layers.back')}
-          </Button>
-        )}
-        {isFirst && (
-          <Button variant="contained" className="buttonOutlineFilled" size="small" type="text" onClick={handleCancelAddLayer}>
-            {t('general.cancel')}
-          </Button>
-        )}
-      </ButtonGroup>
-    );
-  }
-
   return (
     <Paper sx={{ padding: '20px', gap: '8' }}>
       <Stepper
@@ -1106,7 +1128,17 @@ export function AddNewLayer(): JSX.Element {
                     urlError={urlError}
                     urlErrorMessage={urlErrorMessage}
                   />
-                  <NavButtons isFirst handleNext={handleStep1} />{' '}
+                  <NavButtons
+                    isFirst
+                    handleNext={handleStep1}
+                    isLoading={isLoading}
+                    stepButtonEnabled={stepButtonEnabled}
+                    layerName={layerName}
+                    onNextKeyDown={handleNextKeyDown}
+                    onBack={handleBack}
+                    onBackKeyDown={handleBackKeyDown}
+                    onCancel={handleCancelAddLayer}
+                  />{' '}
                 </Box>
               ),
             },
@@ -1151,7 +1183,16 @@ export function AddNewLayer(): JSX.Element {
                       </FormHelperText>
                     )}
                   </Box>
-                  <NavButtons handleNext={handleStep2} />
+                  <NavButtons
+                    handleNext={handleStep2}
+                    isLoading={isLoading}
+                    stepButtonEnabled={stepButtonEnabled}
+                    layerName={layerName}
+                    onNextKeyDown={handleNextKeyDown}
+                    onBack={handleBack}
+                    onBackKeyDown={handleBackKeyDown}
+                    onCancel={handleCancelAddLayer}
+                  />
                 </>
               ),
             },
@@ -1191,7 +1232,17 @@ export function AddNewLayer(): JSX.Element {
                     )
                   )}
                   <br />
-                  <NavButtons isLast={!isMultiple} handleNext={isMultiple ? handleStep3 : handleStepLast} />
+                  <NavButtons
+                    isLast={!isMultiple}
+                    handleNext={isMultiple ? handleStep3 : handleStepLast}
+                    isLoading={isLoading}
+                    stepButtonEnabled={stepButtonEnabled}
+                    layerName={layerName}
+                    onNextKeyDown={handleNextKeyDown}
+                    onBack={handleBack}
+                    onBackKeyDown={handleBackKeyDown}
+                    onCancel={handleCancelAddLayer}
+                  />
                 </>
               ),
             },
@@ -1216,7 +1267,17 @@ export function AddNewLayer(): JSX.Element {
                         inputRef={finalLayerNameInputRef}
                       />
                       <br />
-                      <NavButtons isLast handleNext={handleStepLast} />
+                      <NavButtons
+                        isLast
+                        handleNext={handleStepLast}
+                        isLoading={isLoading}
+                        stepButtonEnabled={stepButtonEnabled}
+                        layerName={layerName}
+                        onNextKeyDown={handleNextKeyDown}
+                        onBack={handleBack}
+                        onBackKeyDown={handleBackKeyDown}
+                        onCancel={handleCancelAddLayer}
+                      />
                     </>
                   ),
                 },
