@@ -138,15 +138,15 @@
 
     <!-- Group 1: Core / Utility -->
     <div id="group1-tabs" class="tabs group-tabs">
-      <button class="tab-button" onclick="openTab(event, 'map0-test')">Core (EPSG: 3978)</button>
+      <button class="tab-button" onclick="openTab(event, 'map0-test')">Core</button>
       <button class="tab-button" onclick="openTab(event, 'map1-test')">Config Validation</button>
       <button class="tab-button" onclick="openTab(event, 'map9-test')">Utilities</button>
     </div>
 
     <!-- Group 2: Layers -->
     <div id="group2-tabs" class="tabs group-tabs">
-      <button class="tab-button" onclick="openTab(event, 'map2-test')">Layers (EPSG: 3978)</button>
-      <button class="tab-button" onclick="openTab(event, 'map3-test')">Layers (EPSG: 3857)</button>
+      <button class="tab-button" onclick="openTab(event, 'map2-test')">Layers (EPSG: 3857)</button>
+      <button class="tab-button" onclick="openTab(event, 'map3-test')">Layers (EPSG: 3978)</button>
     </div>
 
     <!-- Group 3: Map -->
@@ -192,7 +192,7 @@
 
       <!-- Map 0 Results -->
       <button id="collapsibleMap0" class="collapsible" onclick="toggleCollapsible(this)">
-        <span style="font-weight: bold">Map 0 - Core Tests (EPSG: 3978)</span>
+        <span style="font-weight: bold">Map 0 - Core Tests</span>
         <span id="statsMap0" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Done success: 0 | Done failed: 0 | Done: 0/0</span>
       </button>
       <div class="panel">
@@ -305,7 +305,7 @@
     <!-- Map 0 Tab -->
     <div id="map0-test" class="tab-content">
       <div class="map-title-holder">
-        <h4 id="HEVNT1">0. Tests on map 0 (EPSG: 3978)</h4>
+        <h4 id="HEVNT1">0. Tests on map 0</h4>
         <a class="ref-link" href="#top">Top</a>
       </div>
 
@@ -395,7 +395,7 @@
     <!-- Map 2 Tab -->
     <div id="map2-test" class="tab-content">
       <div class="map-title-holder">
-        <h4 id="HEVNT2">2. Tests on map 2 (EPSG: 3978)</h4>
+        <h4 id="HEVNT2">2. Tests on map 2 (EPSG: 3857)</h4>
         <a class="ref-link" href="#top">Top</a>
       </div>
 
@@ -408,7 +408,7 @@
         data-config="{
           'map': {
             'viewSettings': {
-              'projection': 3978
+              'projection': 3857
             },
             'basemapOptions': {
               'basemapId': 'transport',
@@ -442,7 +442,7 @@
     <!-- Map 3 Tab -->
     <div id="map3-test" class="tab-content">
       <div class="map-title-holder">
-        <h4 id="HEVNT3">3. Tests on map 3 (EPSG: 3857)</h4>
+        <h4 id="HEVNT3">3. Tests on map 3 (EPSG: 3978)</h4>
         <a class="ref-link" href="#top">Top</a>
       </div>
 
@@ -455,7 +455,7 @@
         data-config="{
           'map': {
             'viewSettings': {
-              'projection': 3857
+              'projection': 3978
             },
             'basemapOptions': {
               'basemapId': 'transport',

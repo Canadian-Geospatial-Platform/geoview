@@ -477,6 +477,10 @@ export abstract class GVAbstractTester extends AbstractTester {
     'https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT_CBCT_3978_V_OSM/VectorTileServer';
   static readonly VECTOR_TILES_CBMT_3978_LAYER_NAME: string = 'CBMT 3978 Vector Tiles';
 
+  /** XYZ Tiles — OpenStreetMap standard tile server. */
+  static readonly XYZ_TILES_OSM_URL: string = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+  static readonly XYZ_TILES_OSM_LAYER_ID: string = 'OpenStreetMapXYZ';
+
   /** Water Network (has fields with coded value domains, e.g. "material" on layer 16). */
   static readonly WATER_NETWORK_MAP_SERVER: string = 'https://sampleserver6.arcgisonline.com/arcgis/rest/services/Water_Network/MapServer';
   static readonly WATER_NETWORK_LAYER_ID: string = '16';

@@ -424,7 +424,7 @@ export abstract class AbstractTester {
       this.onPerformingTestAssertions(test);
 
       // Creating the configuration
-      test.addStep('Verifying the Error obtained is of the correct class type...');
+      test.addStep(`Verifying if error '${result?.constructor.name}' obtained is of the expected class type...`);
 
       // Check if the result is instance of the error we're testing for
       Test.assertIsErrorInstance(result as T, errorClass);

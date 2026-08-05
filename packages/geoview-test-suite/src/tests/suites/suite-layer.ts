@@ -53,7 +53,7 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
   protected override async onLaunchTestSuite(): Promise<unknown> {
     // // GV START DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
     // // Test DEBUG
-    // const pDevTest0 = this.#layerTester.testAddWMSNonna();
+    // const pDevTest0 = this.#layerTester.testAddWMSLayerWithOWSMundialis();
     // // const pDevTest1 = this.#layerTester.testAddGeoJSONWithMetadataPolygons();
     // // const pDevTest2 = this.#layerTester.testAddOGCFeatureWithPygeoapi();
 
@@ -146,11 +146,26 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
     // Test true negative
     const pLayerGeoTIFFBadUrl = this.#layerTester.testAddGeoTIFFWithBadUrl();
 
+    // Test adding layer
+    const pLayerWMTSWorldTimezones = this.#layerTester.testAddWMTSWorldTimezones();
+
+    // Test true negative
+    const pLayerWMTSBadUrl = this.#layerTester.testAddWMTSBadUrl();
+
+    // Test adding layer
+    const pLayerXYZTilesOSM = this.#layerTester.testAddXYZTilesOSM();
+
+    // Test true negative
+    const pLayerXYZTilesBadUrl = this.#layerTester.testAddXYZTilesBadUrl();
+
+    // Test adding layer
+    const pLayerVectorTilesCBMT = this.#layerTester.testAddVectorTilesCBMT();
+
+    // Test true negative
+    const pLayerVectorTilesBadUrl = this.#layerTester.testAddVectorTilesBadUrl();
+
     // Test initial settings cascade
     const pInitialSettingsCascade = this.#layerTester.testInitialSettingsCascade();
-
-    // Test geocore group with defaultVisibility=false
-    const pGeocoreGroupDefaultVisibilityFalse = this.#layerTester.testAddGeocoreWithGroupDefaultVisibilityFalse();
 
     // Test geocore custom inline override scenarios
     const pGeocoreInlineListOverride = this.#layerTester.testAddGeocoreWithInlineListOfLayerEntryConfigOverride();
@@ -190,8 +205,13 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
       pLayerKMLBadUrl,
       pLayerGeoTIFFVegetation,
       pLayerGeoTIFFBadUrl,
+      pLayerWMTSWorldTimezones,
+      pLayerWMTSBadUrl,
+      pLayerXYZTilesOSM,
+      pLayerXYZTilesBadUrl,
+      pLayerVectorTilesCBMT,
+      pLayerVectorTilesBadUrl,
       pInitialSettingsCascade,
-      pGeocoreGroupDefaultVisibilityFalse,
       pGeocoreInlineListOverride,
       pGeocoreSimplifiedNameOverride,
       pEsriDynamicDomainField,
@@ -207,6 +227,13 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
     await this.getControllersRegistry().mapController.zoomToInitialExtent(GVAbstractTester.USE_ZOOM_ANIMATION);
 
     // Run the GeometryCollection layer test last to avoid perturbing icon color ordering used by earlier strict icon assertions.
-    return this.#layerTester.testAddGeoJSONWithGeometryCollection();
+    await this.#layerTester.testAddGeoJSONWithGeometryCollection();
+
+    // Test geocore group with defaultVisibility=false
+    // GV This test is pretty demanding. It's at the end so that it's clearer to see what's hogging all the ressources when this test suite is executing.
+    await this.#layerTester.testAddGeocoreWithGroupDefaultVisibilityFalse();
+
+    // Done
+    return;
   }
 }
