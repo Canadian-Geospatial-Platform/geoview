@@ -623,7 +623,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
   return (
     <Box sx={sxClasses.appBar} className={`interaction-${interaction}`} id={`${mapId}-appBar`} onClick={onScrollShellIntoView}>
       <Box
-        sx={[sxClasses.appBarButtons, !scrollState.isScrollable && { paddingTop: '16px' }] as SxProps}
+        sx={[sxClasses.appBarButtons, !scrollState.isScrollable && { paddingTop: '8px' }] as SxProps}
         component="nav"
         aria-label={t('appbar.navLabel')}
       >

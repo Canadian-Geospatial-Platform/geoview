@@ -12,8 +12,8 @@ import { visuallyHidden } from '@/ui/style/default';
 export const getSxClasses = (theme: Theme): SxStyles => ({
   root: {
     position: 'absolute',
-    top: 17,
-    left: 68,
+    top: 8,
+    left: 56,
     right: 20,
     maxWidth: 350,
   },

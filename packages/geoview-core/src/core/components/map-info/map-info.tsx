@@ -23,7 +23,7 @@ const MAP_INFO_BASE_STYLES = {
   alignItems: 'center',
   position: 'absolute',
   bottom: 0,
-  left: '50px',
+  left: '48px',
   right: 0,
   px: '1rem',
 } as const;
@@ -72,7 +72,7 @@ export const MapInfo = memo(({ onScrollShellIntoView }: MapInfoProps): JSX.Eleme
       borderBottom: `1px solid ${theme.palette.geoViewColor?.bgColor.dark[650]}`,
       color: theme.palette.geoViewColor?.bgColor.dark[650],
       backgroundColor: theme.palette.geoViewColor?.bgColor.dark[50],
-      width: 'calc(100% - 50px)',
+      width: 'calc(100% - 48px)',
       zIndex: theme.zIndex.appBar + 100, // Above app-bar panels
       boxShadow: `0 0 5px ${theme.palette.geoViewColor?.bgColor.dark[200]}`,
     };

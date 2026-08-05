@@ -341,7 +341,7 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
         id={`${mapId}-footerbar-header`}
         sx={{
           width: '100%',
-          paddingLeft: '9px',
+          paddingLeft: '7px',
           border: 'unset',
           borderBottom: isCollapsed ? 'none' : `2px solid ${theme.palette.geoViewColor?.primary.main} !important`,
         }}

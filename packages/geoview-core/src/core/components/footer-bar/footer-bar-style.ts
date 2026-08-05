@@ -18,10 +18,10 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     width: '100%',
     transition: 'height 0.2s ease-out',
     '& .MuiTab-root': {
-      minHeight: '50px',
+      minHeight: '48px',
     },
     '& .MuiTabs-root': {
-      minHeight: '50px',
+      minHeight: '48px',
       background: theme.palette.geoViewColor?.bgColor.main,
     },
     '& .MuiTabs-indicator': {
