@@ -9,12 +9,16 @@ import { generateId } from 'geoview-core/core/utils/utilities';
 import { LayerStatusErrorError } from 'geoview-core/core/exceptions/layer-exceptions';
 import type { LayerNoCapabilitiesError } from 'geoview-core/core/exceptions/layer-exceptions';
 import { LayerServiceMetadataUnableToFetchError } from 'geoview-core/core/exceptions/layer-exceptions';
+import { LayerEntryNotSupportingProjectionError } from 'geoview-core/core/exceptions/layer-entry-config-exceptions';
 import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
 import { EsriDynamic } from 'geoview-core/geo/layer/geoview-layers/raster/esri-dynamic';
 import { AbstractBaseLayerEntryConfig } from 'geoview-core/api/config/validation-classes/abstract-base-layer-entry-config';
 import { EsriFeature } from 'geoview-core/geo/layer/geoview-layers/vector/esri-feature';
 import { EsriImage } from 'geoview-core/geo/layer/geoview-layers/raster/esri-image';
 import { WMS } from 'geoview-core/geo/layer/geoview-layers/raster/wms';
+import { WMTS } from 'geoview-core/geo/layer/geoview-layers/raster/wmts';
+import { XYZTiles } from 'geoview-core/geo/layer/geoview-layers/raster/xyz-tiles';
+import { VectorTiles } from 'geoview-core/geo/layer/geoview-layers/raster/vector-tiles';
 import { WFS } from 'geoview-core/geo/layer/geoview-layers/vector/wfs';
 import { GeoJSON } from 'geoview-core/geo/layer/geoview-layers/vector/geojson';
 import { GeoTIFF } from 'geoview-core/geo/layer/geoview-layers/raster/geotiff';
@@ -705,6 +709,285 @@ export class LayerTester extends GVAbstractTester {
   }
 
   // #endregion WMS
+
+  // #region WMTS
+
+  /**
+   * Tests adding a WMTS layer with World Timezones on the map.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testAddWMTSWorldTimezones(): Promise<Test<AbstractGVLayer>> {
+    // Create a random geoview layer id
+    const gvLayerId = generateId();
+    const layerUrl = GVAbstractTester.WORLD_TIMEZONES_WMTS_URL;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.WORLD_TIMEZONES_WMTS_URL_LAYER_ID}`;
+    const gvLayerName = 'World Timezones WMTS';
+
+    // Test
+    return this.test(
+      `Test Adding WMTS World Timezones on map...`,
+      async (test) => {
+        // Creating the configuration
+        test.addStep('Creating the GeoView Layer Configuration...');
+
+        // Create the config
+        const gvConfig = WMTS.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
+          {
+            id: GVAbstractTester.WORLD_TIMEZONES_WMTS_URL_LAYER_ID,
+            tileMatrixSet: GVAbstractTester.WORLD_TIMEZONES_WMTS_URL_MATRIX_SET_ID,
+          },
+        ]);
+
+        // Redirect to helper to add the layer to the map and wait
+        await this.helperStepAddLayerOnMap(test, gvConfig);
+
+        // Find the layer and wait until its ready
+        return this.helperStepCheckLayerAtLayerPath(test, layerPath, true);
+      },
+      (test) => {
+        // Perform assertions
+        LayerTester.helperStepAssertLayerExists(test, this.getMapId(), layerPath);
+      },
+      (test) => {
+        // Redirect to helper to clean up and assert
+        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+      }
+    );
+  }
+
+  /**
+   * Tests the behavior of initializing a WMTS layer configuration using an invalid metadata URL.
+   *
+   * This test verifies that when a WMTS layer configuration is initialized with an invalid or unreachable
+   * metadata URL, the initialization process fails as expected and throws a
+   * {@link LayerServiceMetadataUnableToFetchError}.
+   *
+   * @returns A promise that resolves with the test result
+   */
+  testAddWMTSBadUrl(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
+    // Create a random geoview layer id
+    const gvLayerId = generateId();
+    const layerUrl = GVAbstractTester.BAD_URL;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.WORLD_TIMEZONES_WMTS_URL_LAYER_ID}`;
+    const gvLayerName = 'World Timezones WMTS';
+
+    // Test
+    return this.testError(
+      `Test Adding WMTS with bad url...`,
+      LayerServiceMetadataUnableToFetchError,
+      async (test) => {
+        // Creating the configuration
+        test.addStep('Creating the GeoView Layer Configuration...');
+
+        // Create the config
+        const gvConfig = WMTS.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
+          {
+            id: GVAbstractTester.WORLD_TIMEZONES_WMTS_URL_LAYER_ID,
+            tileMatrixSet: GVAbstractTester.WORLD_TIMEZONES_WMTS_URL_MATRIX_SET_ID,
+          },
+        ]);
+
+        // Redirect to helper to add the layer to the map and wait
+        await this.helperStepAddLayerOnMap(test, gvConfig);
+      },
+      undefined,
+      (test) => {
+        // Redirect to helper to clean up and assert
+        this.helperFinalizeStepRemoveLayerConfigAndAssert(test, layerPath);
+      }
+    );
+  }
+
+  // #endregion WMTS
+
+  // #region XYZ TILES
+
+  /**
+   * Tests adding an XYZ Tiles layer with OpenStreetMap on the map.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testAddXYZTilesOSM(): Promise<Test<AbstractGVLayer>> {
+    // Create a random geoview layer id
+    const gvLayerId = generateId();
+    const layerUrl = GVAbstractTester.XYZ_TILES_OSM_URL;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.XYZ_TILES_OSM_LAYER_ID}`;
+    const gvLayerName = GVAbstractTester.XYZ_TILES_OSM_LAYER_ID;
+
+    // Test
+    return this.test(
+      `Test Adding XYZ Tiles OSM on map...`,
+      async (test) => {
+        // Creating the configuration
+        test.addStep('Creating the GeoView Layer Configuration...');
+
+        // Create the config
+        const gvConfig = XYZTiles.createGeoviewLayerConfig(gvLayerId, gvLayerName, undefined, false, [
+          {
+            id: GVAbstractTester.XYZ_TILES_OSM_LAYER_ID,
+            source: {
+              dataAccessPath: layerUrl,
+            },
+          },
+        ]);
+
+        // Redirect to helper to add the layer to the map and wait
+        await this.helperStepAddLayerOnMap(test, gvConfig);
+
+        // Find the layer and wait until its ready
+        return this.helperStepCheckLayerAtLayerPath(test, layerPath, true);
+      },
+      (test) => {
+        // Perform assertions
+        LayerTester.helperStepAssertLayerExists(test, this.getMapId(), layerPath);
+      },
+      (test) => {
+        // Redirect to helper to clean up and assert
+        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+      }
+    );
+  }
+
+  /**
+   * Tests the behavior of initializing an XYZ Tiles layer configuration using an invalid metadata URL.
+   *
+   * This test verifies that when an XYZ Tiles layer configuration is initialized with an invalid or unreachable
+   * metadata URL, the initialization process fails as expected and throws a
+   * {@link LayerServiceMetadataUnableToFetchError}.
+   *
+   * @returns A promise that resolves with the test result
+   */
+  testAddXYZTilesBadUrl(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
+    // Create a random geoview layer id
+    const gvLayerId = generateId();
+    const layerUrl = GVAbstractTester.BAD_URL;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.XYZ_TILES_OSM_LAYER_ID}`;
+    const gvLayerName = GVAbstractTester.XYZ_TILES_OSM_LAYER_ID;
+
+    // Test
+    return this.testError(
+      `Test Adding XYZ Tiles with bad url...`,
+      LayerServiceMetadataUnableToFetchError,
+      async (test) => {
+        // Creating the configuration
+        test.addStep('Creating the GeoView Layer Configuration...');
+
+        // Create the config
+        const gvConfig = XYZTiles.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
+          { id: GVAbstractTester.XYZ_TILES_OSM_LAYER_ID },
+        ]);
+
+        // Redirect to helper to add the layer to the map and wait
+        await this.helperStepAddLayerOnMap(test, gvConfig);
+      },
+      undefined,
+      (test) => {
+        // Redirect to helper to clean up and assert
+        this.helperFinalizeStepRemoveLayerConfigAndAssert(test, layerPath);
+      }
+    );
+  }
+
+  // #endregion XYZ TILES
+
+  // #region VECTOR TILES
+
+  /**
+   * Tests adding a Vector Tiles layer with CBMT 3978 on the map.
+   *
+   * @returns A promise that resolves when the test completes
+   */
+  testAddVectorTilesCBMT(): Promise<Test<AbstractGVLayer | LayerEntryNotSupportingProjectionError>> {
+    // Create a random geoview layer id
+    const gvLayerId = generateId();
+    const layerUrl = GVAbstractTester.VECTOR_TILES_CBMT_3978_URL;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.VECTOR_TILES_CBMT_3978_LAYER_NAME}`;
+    const gvLayerName = GVAbstractTester.VECTOR_TILES_CBMT_3978_LAYER_NAME;
+
+    // Create the config
+    const gvConfig = VectorTiles.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
+      { id: GVAbstractTester.VECTOR_TILES_CBMT_3978_LAYER_NAME },
+    ]);
+
+    // If the map projection is 3978
+    if (this.getMapViewer().getProjectionNumber() === 3978) {
+      // Test a true positive
+      return this.test(
+        `Test Adding Vector Tiles CBMT 3978 on map...`,
+        async (test) => {
+          // Creating the configuration
+          test.addStep('Creating the GeoView Layer Configuration...');
+
+          // Redirect to helper to add the layer to the map and wait
+          await this.helperStepAddLayerOnMap(test, gvConfig);
+
+          // Find the layer and wait until its ready
+          return this.helperStepCheckLayerAtLayerPath(test, layerPath, true);
+        },
+        (test) => {
+          // Perform assertions
+          LayerTester.helperStepAssertLayerExists(test as Test<AbstractGVLayer>, this.getMapId(), layerPath);
+        },
+        (test) => {
+          // Redirect to helper to clean up and assert
+          this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
+        }
+      );
+    }
+
+    // Test a true negative, it's supposed to crash
+    return this.testError(
+      `Test Adding Vector Tiles CBMT 3978 on map with wrong projection...`,
+      LayerEntryNotSupportingProjectionError,
+      async (test) => {
+        // Redirect to helper to add the layer to the map and wait
+        await this.helperStepAddLayerOnMap(test, gvConfig);
+      }
+    );
+  }
+
+  /**
+   * Tests the behavior of initializing a Vector Tiles layer configuration using an invalid metadata URL.
+   *
+   * This test verifies that when a Vector Tiles layer configuration is initialized with an invalid or unreachable
+   * metadata URL, the initialization process fails as expected and throws a
+   * {@link LayerServiceMetadataUnableToFetchError}.
+   *
+   * @returns A promise that resolves with the test result
+   */
+  testAddVectorTilesBadUrl(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
+    // Create a random geoview layer id
+    const gvLayerId = generateId();
+    const layerUrl = GVAbstractTester.BAD_URL;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.VECTOR_TILES_CBMT_3978_LAYER_NAME}`;
+    const gvLayerName = GVAbstractTester.VECTOR_TILES_CBMT_3978_LAYER_NAME;
+
+    // Test
+    return this.testError(
+      `Test Adding Vector Tiles with bad url...`,
+      LayerServiceMetadataUnableToFetchError,
+      async (test) => {
+        // Creating the configuration
+        test.addStep('Creating the GeoView Layer Configuration...');
+
+        // Create the config
+        const gvConfig = VectorTiles.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
+          { id: GVAbstractTester.VECTOR_TILES_CBMT_3978_LAYER_NAME },
+        ]);
+
+        // Redirect to helper to add the layer to the map and wait
+        await this.helperStepAddLayerOnMap(test, gvConfig);
+      },
+      undefined,
+      (test) => {
+        // Redirect to helper to clean up and assert
+        this.helperFinalizeStepRemoveLayerConfigAndAssert(test, layerPath);
+      }
+    );
+  }
+
+  // #endregion VECTOR TILES
 
   // #region WFS
 
