@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo } from 'react';
+import { memo, useCallback, useMemo, useEffect } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -63,6 +63,7 @@ export const MapInfo = memo(({ onScrollShellIntoView }: MapInfoProps): JSX.Eleme
   const interaction = useStoreMapInteraction(); // Static map, do not display mouse position or rotation controls
   const expanded = useStoreUIMapInfoExpanded();
   const uiController = useUIController();
+  const mapController = useMapController();
 
   /**
    * Updates the OL View padding when the map-info bar height changes.
