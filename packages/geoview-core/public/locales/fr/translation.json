@@ -395,6 +395,7 @@
     "start": "Aller après l'élément carte",
     "end": "Aller avant l'élément carte",
     "map": "Aller au contenu principal - Carte",
+    "skipToFooter": "Aller au bouton Supprimer tout",
     "focusdialog": {
       "title": "Navigation clavier",
       "main": "Si activé, le focus sera verrouillé sur le visualiseur. \nPour sortir, appuyez sur <strong>CTRL + Q</strong>.",

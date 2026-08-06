@@ -51,6 +51,23 @@ const getButtonStyleOverrides = (geoViewColors: IGeoViewColors): any => ({
       cursor: 'not-allowed',
     },
   },
+  '&.buttonPopperClose': {
+    // used for Popper/dialog close buttons
+    backgroundColor: 'transparent',
+    border: `1px solid ${geoViewColors.primary.main}`,
+    color: `${geoViewColors.primary.main}`,
+    height: 36,
+    width: 36,
+    transition: 'background-color 0.3s ease-in-out',
+    '&:hover': {
+      backgroundColor: `${geoViewColors.bgColor.dark[100]}`,
+    },
+    '&:disabled': {
+      color: `${geoViewColors.bgColor.dark[450]}`,
+      borderColor: `${geoViewColors.bgColor.dark[450]}`,
+      backgroundColor: 'transparent',
+    },
+  },
   '&.buttonFilledOutline:not(:disabled)': {
     backgroundColor: `${geoViewColors.primary.main}`,
     border: `3px solid transparent`,

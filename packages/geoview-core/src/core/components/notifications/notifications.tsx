@@ -14,6 +14,7 @@ import {
   WarningIcon,
   CheckCircleIcon,
   CloseIcon,
+  DeleteIcon,
   IconButton,
   NotificationsIcon,
   NotificationsActiveIcon,
@@ -23,6 +24,7 @@ import {
   Paper,
   Button,
   List,
+  Link,
 } from '@/ui';
 import type { SxStyles } from '@/ui/style/types';
 import { visuallyHidden } from '@/ui/style/default';
@@ -68,7 +70,7 @@ const NotificationItem = memo(
     onRemove,
     sxClasses,
     t,
-    closeButtonId,
+    closeButtonRef,
   }: {
     /** The notification details to display. */
     notification: NotificationDetailsType;
@@ -78,9 +80,12 @@ const NotificationItem = memo(
     sxClasses: SxStyles;
     /** The translation function. */
     t: (key: string, options?: Record<string, unknown>) => string;
-    /** The close button element ID for focus management. */
-    closeButtonId: string;
+    /** Ref to the close button for focus management. */
+    closeButtonRef: React.RefObject<HTMLButtonElement | null>;
   }): JSX.Element => {
+    // Log
+    logger.logTraceRender('components/notifications/notifications > NotificationItem');
+
     // #region Handlers
 
     /**
@@ -89,11 +94,8 @@ const NotificationItem = memo(
     const handleRemove = useCallback((): void => {
       onRemove(notification.key);
       // Move focus to close button after removal to prevent focus loss
-      const closeButton = document.getElementById(closeButtonId);
-      if (closeButton) {
-        closeButton.focus();
-      }
-    }, [notification.key, onRemove, closeButtonId]);
+      closeButtonRef.current?.focus();
+    }, [notification.key, onRemove, closeButtonRef]);
 
     // #endregion Handlers
 
@@ -126,14 +128,13 @@ const NotificationItem = memo(
           )}
         </Box>
         <IconButton
-          className="buttonOutline"
           tooltip={t('general.remove')}
           aria-label={t('appbar.removeNotification')}
           aria-describedby={notification.key}
           size="small"
           onClick={handleRemove}
         >
-          <CloseIcon />
+          <DeleteIcon />
         </IconButton>
       </Box>
     );
@@ -142,7 +143,7 @@ const NotificationItem = memo(
 NotificationItem.displayName = 'NotificationItem';
 
 /**
- * Renders the notification panel header with title, remove all, and close buttons.
+ * Renders the notification panel header with title and close button.
  *
  * Memoized to avoid re-rendering when notification list changes but header props remain the same.
  *
@@ -152,19 +153,14 @@ NotificationItem.displayName = 'NotificationItem';
 const NotificationHeader = memo(
   ({
     onClose,
-    onRemoveAll,
-    hasNotifications,
     t,
     sxClasses,
     titleId,
     closeButtonId,
+    closeButtonRef,
   }: {
     /** Callback to close the notification panel. */
     onClose: () => void;
-    /** Callback to remove all notifications. */
-    onRemoveAll: () => void;
-    /** Whether there are any notifications. */
-    hasNotifications: boolean;
     /** The translation function. */
     t: (key: string) => string;
     /** The sx classes object. */
@@ -173,40 +169,87 @@ const NotificationHeader = memo(
     titleId: string;
     /** The close button element ID. */
     closeButtonId: string;
+    /** Ref to the close button for focus management. */
+    closeButtonRef: React.RefObject<HTMLButtonElement | null>;
   }): JSX.Element => {
+    // Log
+    logger.logTraceRender('components/notifications/notifications > NotificationHeader');
+
     return (
       <Box component="header" sx={sxClasses.notificationsHeader}>
         <Typography component="h2" sx={sxClasses.notificationsTitle} id={titleId}>
           {t('appbar.notifications')}
         </Typography>
-        <Box>
-          <Button
-            type="text"
-            variant="contained"
-            disabled={!hasNotifications}
-            size="small"
-            onClick={onRemoveAll}
-            aria-label={t('appbar.removeAllNotifications')}
-          >
-            {t('general.removeAll')}
-          </Button>
-          <IconButton
-            className="buttonOutline"
-            id={closeButtonId}
-            tooltip={t('general.close')}
-            size="small"
-            sx={{ ml: '0.25rem' }}
-            onClick={onClose}
-            aria-label={t('appbar.closeNotificationsDialog')}
-          >
-            <CloseIcon />
-          </IconButton>
-        </Box>
+        <IconButton
+          sx={sxClasses.notificationsCloseButton}
+          className="buttonPopperClose"
+          id={closeButtonId}
+          iconRef={closeButtonRef}
+          tooltip={t('general.close')}
+          size="small"
+          onClick={onClose}
+          aria-label={t('appbar.closeNotificationsDialog')}
+        >
+          <CloseIcon />
+        </IconButton>
       </Box>
     );
   }
 );
 NotificationHeader.displayName = 'NotificationHeader';
+
+/**
+ * Renders the notification panel footer with remove all button.
+ *
+ * Memoized to avoid re-rendering when notification list changes but footer props remain the same.
+ *
+ * @param props - The notification footer properties
+ * @returns The notification footer element
+ */
+const NotificationFooter = memo(
+  ({
+    onRemoveAll,
+    hasNotifications,
+    t,
+    sxClasses,
+    removeAllButtonId,
+    removeAllButtonRef,
+  }: {
+    /** Callback to remove all notifications. */
+    onRemoveAll: () => void;
+    /** Whether there are any notifications. */
+    hasNotifications: boolean;
+    /** The translation function. */
+    t: (key: string) => string;
+    /** The sx classes object. */
+    sxClasses: SxStyles;
+    /** The ID for the remove all button. */
+    removeAllButtonId: string;
+    /** Ref to the remove all button for focus management. */
+    removeAllButtonRef: React.RefObject<HTMLButtonElement | null>;
+  }): JSX.Element => {
+    // Log
+    logger.logTraceRender('components/notifications/notifications > NotificationFooter');
+
+    return (
+      <Box component="footer" sx={sxClasses.notificationsFooter}>
+        <Button
+          id={removeAllButtonId}
+          ref={removeAllButtonRef}
+          type="text"
+          variant="outlined"
+          disabled={!hasNotifications}
+          size="small"
+          onClick={onRemoveAll}
+          aria-label={t('appbar.removeAllNotifications')}
+        >
+          {t('general.removeAll')}
+        </Button>
+      </Box>
+    );
+  }
+);
+NotificationFooter.displayName = 'NotificationFooter';
 
 /**
  * Renders the notification panel with a badge, popover, and notification list.
@@ -221,7 +264,11 @@ const Notifications = memo((): JSX.Element => {
   // Hooks
   const { t } = useTranslation();
   const theme = useTheme();
-  const memoSxClasses = useMemo(() => {
+
+  /**
+   * Builds custom sx classes for the notifications component.
+   */
+  const memoSxClasses = useMemo((): SxStyles => {
     logger.logTraceUseMemo('NOTIFICATIONS - memoSxClasses', theme);
     return getSxClasses(theme);
   }, [theme]);
@@ -231,6 +278,11 @@ const Notifications = memo((): JSX.Element => {
   const [hasNewNotification, setHasNewNotification] = useState(false);
   const [notificationsCount, setNotificationsCount] = useState(0);
   const [open, setOpen] = useState(false);
+
+  // Refs
+  const bellButtonRef = useRef<HTMLButtonElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const removeAllButtonRef = useRef<HTMLButtonElement>(null);
 
   // Ref to read the latest notificationsCount inside the notifications effect without making it a dep
   const notificationsCountRef = useRef(notificationsCount);
@@ -251,6 +303,7 @@ const Notifications = memo((): JSX.Element => {
   const titleId = `${mapId}-notification-title`;
   const closeButtonId = `${mapId}-notification-close-button`;
   const bellButtonId = `${mapId}-${CONTAINER_TYPE.APP_BAR}-notifications-btn`;
+  const removeAllButtonId = `${mapId}-notification-remove-all-button`;
 
   // Animation
   const shakeAnimation = useShake();
@@ -292,11 +345,24 @@ const Notifications = memo((): JSX.Element => {
   const handleRemoveAllNotifications = useCallback((): void => {
     uiController.removeAllNotifications();
     // Move focus to close button after removal to prevent focus loss
-    const closeButton = document.getElementById(closeButtonId);
-    if (closeButton) {
-      closeButton.focus();
-    }
-  }, [uiController, closeButtonId]);
+    closeButtonRef.current?.focus();
+  }, [uiController]);
+
+  /**
+   * Handles skip link click to focus the remove all button.
+   *
+   * Prevents default scroll behavior but manually updates the URL fragment for
+   * assistive technology support while programmatically managing focus.
+   */
+  const handleSkipToFooter = useCallback(
+    (event: React.MouseEvent<HTMLAnchorElement>): void => {
+      event.preventDefault();
+      // Manually update URL fragment for AT without triggering scroll
+      window.history.replaceState(null, '', `#${removeAllButtonId}`);
+      removeAllButtonRef.current?.focus();
+    },
+    [removeAllButtonId]
+  );
 
   // #endregion Handlers
 
@@ -355,16 +421,17 @@ const Notifications = memo((): JSX.Element => {
         onRemove={handleRemoveNotification}
         sxClasses={memoSxClasses}
         t={t}
-        closeButtonId={closeButtonId}
+        closeButtonRef={closeButtonRef}
       />
     ));
-  }, [notifications, handleRemoveNotification, memoSxClasses, t, closeButtonId]);
+  }, [notifications, handleRemoveNotification, memoSxClasses, t]);
 
   return (
     <ClickAwayListener mouseEvent="onMouseDown" touchEvent="onTouchStart" onClickAway={handleClickAway}>
       <Box sx={{ padding: interaction === 'dynamic' ? 'none' : '5px' }}>
         <IconButton
           id={bellButtonId}
+          iconRef={bellButtonRef}
           tooltipPlacement="right"
           onClick={handleOpenPopover}
           className={`${interaction === 'dynamic' ? 'buttonFilled' : 'style4'} ${open ? 'active' : ''}`}
@@ -395,6 +462,7 @@ const Notifications = memo((): JSX.Element => {
           open={open}
           anchorEl={anchorEl}
           placement="right-end"
+          strategy="fixed"
           onClose={handleClickAway}
           container={mapElem}
           focusSelector={`#${closeButtonId}`}
@@ -404,33 +472,49 @@ const Notifications = memo((): JSX.Element => {
               name: 'eventListeners',
               options: { scroll: false, resize: true },
             },
+            {
+              name: 'preventOverflow',
+              enabled: true,
+              options: {
+                boundary: 'viewport',
+                padding: 8,
+              },
+            },
           ]}
-          sx={{
-            position: 'fixed',
-            pointerEvents: 'auto',
-            zIndex: theme.zIndex.modal + 100,
-          }}
+          sx={memoSxClasses.popper}
           handleKeyDown={handleEscapeKey}
         >
-          <Paper component="section" sx={memoSxClasses.notificationPanel}>
+          <Paper component="section" sx={memoSxClasses.popoverPaper}>
             <NotificationHeader
               onClose={handleClickAway}
-              onRemoveAll={handleRemoveAllNotifications}
-              hasNotifications={notifications.length > 0}
               t={t}
               sxClasses={memoSxClasses}
               titleId={titleId}
               closeButtonId={closeButtonId}
+              closeButtonRef={closeButtonRef}
             />
-            <List sx={memoSxClasses.notificationsList} aria-live="polite" aria-relevant="all">
-              {notifications.length > 0 ? (
-                memoNotificationsList
-              ) : (
-                <Typography component="p" sx={{ padding: '10px 0' }}>
-                  {t('appbar.noNotificationsAvailable')}
-                </Typography>
-              )}
-            </List>
+            {notifications.length > 0 && (
+              <Link href={`#${removeAllButtonId}`} tabIndex={0} sx={memoSxClasses.skipLink} onClick={handleSkipToFooter}>
+                {t('keyboardnav.skipToFooter')}
+              </Link>
+            )}
+            {notifications.length > 0 ? (
+              <List sx={memoSxClasses.notificationsList} aria-live="polite" aria-relevant="all">
+                {memoNotificationsList}
+              </List>
+            ) : (
+              <Typography component="p" sx={memoSxClasses.emptyMessage} aria-live="polite">
+                {t('appbar.noNotificationsAvailable')}
+              </Typography>
+            )}
+            <NotificationFooter
+              onRemoveAll={handleRemoveAllNotifications}
+              hasNotifications={notifications.length > 0}
+              t={t}
+              sxClasses={memoSxClasses}
+              removeAllButtonId={removeAllButtonId}
+              removeAllButtonRef={removeAllButtonRef}
+            />
           </Paper>
         </Popper>
       </Box>

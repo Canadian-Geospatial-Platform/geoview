@@ -2,14 +2,16 @@ import ReactDOMServer from 'react-dom/server';
 import type { TypeWindow } from 'geoview-core';
 import { useStoreDrawerActiveGeom, useStoreDrawerIsDrawing, useStoreDrawerStyle } from 'geoview-core/core/stores/states/drawer-state';
 import { useTranslation } from 'geoview-core/core/translation/i18n';
+import { useTheme } from '@mui/material/styles';
 
 import { logger } from 'geoview-core/core/utils/logger';
 import { useDrawerController } from 'geoview-core/core/controllers/use-controllers';
+import { getSxClasses } from 'geoview-core/core/components/nav-bar/nav-bar-style';
+import type { SxStyles } from 'geoview-core/ui/style/types';
 
 /** Props for the GeometryPickerPanel component. */
 export interface GeometryPickerPanelProps {
   geomTypes: string[];
-  closePanel?: () => void;
 }
 
 /** Props for the PointIcon component. */
@@ -93,6 +95,10 @@ export function GeometryPickerButton(): JSX.Element {
 
   const geomType = useStoreDrawerActiveGeom();
   const style = useStoreDrawerStyle();
+
+  /**
+   * Builds icon style properties from the current drawing style.
+   */
   const memoIconStyle = useMemo(() => {
     logger.logTraceUseMemo('GEOMETRY-PICKER - GeomIcon - memoIconStyle', style);
     return {
@@ -116,6 +122,9 @@ export function GeometryPickerButton(): JSX.Element {
 /**
  * Creates a geometry picker panel for changing the geometry type for the draw tool.
  *
+ * Uses Button component with aria-pressed for WCAG-compliant toggle semantics,
+ * matching the basemap select pattern.
+ *
  * @param props - The component props
  * @returns The geometry picker panel element
  */
@@ -125,10 +134,11 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
   // const { geomTypes } = props;
   const { cgpv } = window as TypeWindow;
   const { useCallback, useMemo } = cgpv.reactUtilities.react;
-  const { IconButton, List, ListItem } = cgpv.ui.elements;
+  const { Button, List, ListItem } = cgpv.ui.elements;
   const { PlaceIcon, TextFieldsIcon, ShowChartIcon, HexagonIcon, RectangleIcon, CircleIcon, StarIcon } = cgpv.ui.elements;
 
-  const { geomTypes, closePanel } = props;
+  const { geomTypes } = props;
+  const theme = useTheme();
 
   // Store
   const { t } = useTranslation<string>();
@@ -137,6 +147,16 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
   const isDrawing = useStoreDrawerIsDrawing();
   const drawerController = useDrawerController();
 
+  /**
+   * Builds custom sx classes for the geometry picker panel.
+   */
+  const memoSxClasses = useMemo((): SxStyles => {
+    return getSxClasses(theme);
+  }, [theme]);
+
+  /**
+   * Builds icon style properties from the current drawing style.
+   */
   const memoIconStyle = useMemo(() => {
     logger.logTraceUseMemo('GEOMETRY-PICKER - GeometryPickerPanel - memoIconStyle', style);
     return {
@@ -154,25 +174,13 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
     },
     listItem: {
       p: 0.5,
-      justifyContent: 'center',
-    },
-    iconButton: {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: 0.5,
-      minWidth: '80px',
-      textAlign: 'center',
-    },
-    activeButton: {
-      backgroundColor: 'rgba(0, 0, 0, 0.1)',
-      borderRadius: 1,
     },
   };
 
   // #region Handlers
 
   /**
-   * Checks if isDrawing and starts drawing if not
+   * Checks if drawing is active and starts drawing if not.
    */
   const safeStartDrawing = useCallback((): void => {
     if (!isDrawing) {
@@ -186,8 +194,7 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
   const handleGeometrySelectPoint = useCallback((): void => {
     drawerController.setActiveGeom('Point');
     safeStartDrawing();
-    closePanel?.();
-  }, [drawerController, closePanel, safeStartDrawing]);
+  }, [drawerController, safeStartDrawing]);
 
   /**
    * Sets the current geometry type to Text
@@ -195,8 +202,7 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
   const handleGeometrySelectText = useCallback((): void => {
     drawerController.setActiveGeom('Text');
     safeStartDrawing();
-    closePanel?.();
-  }, [drawerController, closePanel, safeStartDrawing]);
+  }, [drawerController, safeStartDrawing]);
 
   /**
    * Sets the current geometry type to LineString
@@ -204,8 +210,7 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
   const handleGeometrySelectLineString = useCallback((): void => {
     drawerController.setActiveGeom('LineString');
     safeStartDrawing();
-    closePanel?.();
-  }, [drawerController, closePanel, safeStartDrawing]);
+  }, [drawerController, safeStartDrawing]);
 
   /**
    * Sets the current geometry type to Polygon
@@ -213,8 +218,7 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
   const handleGeometrySelectPolygon = useCallback((): void => {
     drawerController.setActiveGeom('Polygon');
     safeStartDrawing();
-    closePanel?.();
-  }, [drawerController, closePanel, safeStartDrawing]);
+  }, [drawerController, safeStartDrawing]);
 
   /**
    * Sets the current geometry type to Rectangle
@@ -222,8 +226,7 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
   const handleGeometrySelectRectangle = useCallback((): void => {
     drawerController.setActiveGeom('Rectangle');
     safeStartDrawing();
-    closePanel?.();
-  }, [drawerController, closePanel, safeStartDrawing]);
+  }, [drawerController, safeStartDrawing]);
 
   /**
    * Sets the current geometry type to Circle
@@ -231,8 +234,7 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
   const handleGeometrySelectCircle = useCallback((): void => {
     drawerController.setActiveGeom('Circle');
     safeStartDrawing();
-    closePanel?.();
-  }, [drawerController, closePanel, safeStartDrawing]);
+  }, [drawerController, safeStartDrawing]);
 
   /**
    * Sets the current geometry type to Star
@@ -240,8 +242,7 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
   const handleGeometrySelectStar = useCallback((): void => {
     drawerController.setActiveGeom('Star');
     safeStartDrawing();
-    closePanel?.();
-  }, [drawerController, closePanel, safeStartDrawing]);
+  }, [drawerController, safeStartDrawing]);
 
   // #endregion
 
@@ -249,107 +250,128 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
     <List sx={sxClasses.list}>
       {geomTypes?.includes('Point') && (
         <ListItem sx={sxClasses.listItem}>
-          <IconButton
+          <Button
             id="button-point"
+            type="textWithIcon"
+            startIcon={<PointIcon IconComponent={PlaceIcon} />}
             aria-label={t('drawer.point')}
+            aria-pressed={activeGeom === 'Point'}
             tooltipPlacement="left"
             size="small"
             onClick={handleGeometrySelectPoint}
-            sx={{ ...sxClasses.iconButton, ...(activeGeom === 'Point' && sxClasses.activeButton) }}
+            fullWidth
+            sx={memoSxClasses.button}
           >
-            <PointIcon IconComponent={PlaceIcon} />
             {t('drawer.point')}
-          </IconButton>
+          </Button>
         </ListItem>
       )}
       {geomTypes?.includes('Text') && (
         <ListItem sx={sxClasses.listItem}>
-          <IconButton
+          <Button
             id="button-text"
+            type="textWithIcon"
+            startIcon={<TextFieldsIcon sx={{ color: memoIconStyle.textColor }} stroke={memoIconStyle.textHaloColor} />}
             aria-label={t('drawer.text')}
+            aria-pressed={activeGeom === 'Text'}
             tooltipPlacement="left"
             size="small"
             onClick={handleGeometrySelectText}
-            sx={{ ...sxClasses.iconButton, ...(activeGeom === 'Text' && sxClasses.activeButton) }}
+            fullWidth
+            sx={memoSxClasses.button}
           >
-            <TextFieldsIcon sx={{ color: memoIconStyle.textColor }} stroke={memoIconStyle.textHaloColor} />
             {t('drawer.text')}
-          </IconButton>
+          </Button>
         </ListItem>
       )}
       {geomTypes?.includes('LineString') && (
         <ListItem sx={sxClasses.listItem}>
-          <IconButton
+          <Button
             id="button-linestring"
+            type="textWithIcon"
+            startIcon={<ShowChartIcon sx={{ color: memoIconStyle.stroke }} />}
             aria-label={t('drawer.linestring')}
+            aria-pressed={activeGeom === 'LineString'}
             tooltipPlacement="left"
             size="small"
             onClick={handleGeometrySelectLineString}
-            sx={{ ...sxClasses.iconButton, ...(activeGeom === 'LineString' && sxClasses.activeButton) }}
+            fullWidth
+            sx={memoSxClasses.button}
           >
-            <ShowChartIcon sx={{ color: memoIconStyle.stroke }} />
             {t('drawer.linestring')}
-          </IconButton>
+          </Button>
         </ListItem>
       )}
       {geomTypes?.includes('Polygon') && (
         <ListItem sx={sxClasses.listItem}>
-          <IconButton
+          <Button
             id="button-polygon"
+            type="textWithIcon"
+            startIcon={<HexagonIcon sx={{ color: memoIconStyle.color }} stroke={memoIconStyle.stroke} />}
             aria-label={t('drawer.polygon')}
+            aria-pressed={activeGeom === 'Polygon'}
             tooltipPlacement="left"
             size="small"
             onClick={handleGeometrySelectPolygon}
-            sx={{ ...sxClasses.iconButton, ...(activeGeom === 'Polygon' && sxClasses.activeButton) }}
+            fullWidth
+            sx={memoSxClasses.button}
           >
-            <HexagonIcon sx={{ color: memoIconStyle.color }} stroke={memoIconStyle.stroke} />
             {t('drawer.polygon')}
-          </IconButton>
+          </Button>
         </ListItem>
       )}
       {geomTypes?.includes('Rectangle') && (
         <ListItem sx={sxClasses.listItem}>
-          <IconButton
+          <Button
             id="button-rectangle"
+            type="textWithIcon"
+            startIcon={<RectangleIcon sx={{ color: memoIconStyle.color }} stroke={memoIconStyle.stroke} />}
             aria-label={t('drawer.rectangle')}
+            aria-pressed={activeGeom === 'Rectangle'}
             tooltipPlacement="left"
             size="small"
             onClick={handleGeometrySelectRectangle}
-            sx={{ ...sxClasses.iconButton, ...(activeGeom === 'Rectangle' && sxClasses.activeButton) }}
+            fullWidth
+            sx={memoSxClasses.button}
           >
-            <RectangleIcon sx={{ color: memoIconStyle.color }} stroke={memoIconStyle.stroke} />
             {t('drawer.rectangle')}
-          </IconButton>
+          </Button>
         </ListItem>
       )}
       {geomTypes?.includes('Circle') && (
         <ListItem sx={sxClasses.listItem}>
-          <IconButton
+          <Button
             id="button-circle"
+            type="textWithIcon"
+            startIcon={<CircleIcon sx={{ color: memoIconStyle.color }} stroke={memoIconStyle.stroke} />}
             aria-label={t('drawer.circle')}
+            aria-pressed={activeGeom === 'Circle'}
             tooltipPlacement="left"
             size="small"
             onClick={handleGeometrySelectCircle}
-            sx={{ ...sxClasses.iconButton, ...(activeGeom === 'Circle' && sxClasses.activeButton) }}
+            fullWidth
+            sx={memoSxClasses.button}
           >
-            <CircleIcon sx={{ color: memoIconStyle.color }} stroke={memoIconStyle.stroke} />
             {t('drawer.circle')}
-          </IconButton>
+          </Button>
         </ListItem>
       )}
       {geomTypes?.includes('Star') && (
         <ListItem sx={sxClasses.listItem}>
-          <IconButton
+          <Button
             id="button-star"
+            type="textWithIcon"
+            startIcon={<StarIcon sx={{ color: memoIconStyle.color }} stroke={memoIconStyle.stroke} />}
             aria-label={t('drawer.star')}
+            aria-pressed={activeGeom === 'Star'}
             tooltipPlacement="left"
             size="small"
             onClick={handleGeometrySelectStar}
-            sx={{ ...sxClasses.iconButton, ...(activeGeom === 'Star' && sxClasses.activeButton) }}
+            fullWidth
+            sx={memoSxClasses.button}
           >
-            <StarIcon sx={{ color: memoIconStyle.color }} stroke={memoIconStyle.stroke} />
             {t('drawer.star')}
-          </IconButton>
+          </Button>
         </ListItem>
       )}
     </List>

@@ -501,7 +501,6 @@ export default function Measurement(): JSX.Element {
     title: 'measurement.title',
     icon: createElement(StraightenIcon),
     content: renderButtons(),
-    width: 'flex',
   };
 
   return <NavbarPanelButton buttonPanel={{ buttonPanelId: 'measurement', button, panel }} isActive={activeMeasurement !== null} />;

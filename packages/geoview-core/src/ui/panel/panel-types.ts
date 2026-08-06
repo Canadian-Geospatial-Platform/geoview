@@ -32,8 +32,14 @@ export type TypePanelProps = {
   type?: string;
   /** Panel open status (open/closed). */
   status?: boolean;
-  /** Width of the panel. */
-  width: string | number;
+  /**
+   * Width of the panel (optional).
+   *
+   * Behavior depends on container type:
+   * - **App-bar/footer-bar panels**: Percentage of viewport width (default 100). Example: `30` = 30% width.
+   * - **Nav-bar panels**: Fixed width in pixels or CSS string. If not provided, defaults to auto-sizing (`width: auto`, `minWidth: 180px`, `maxWidth: 70vw`).
+   */
+  width?: string | number;
   /** Panel header icon. */
   icon: ReactNode;
   /** Panel header title. */

@@ -44,7 +44,7 @@ export const OL_OVERVIEWMAP_SIZE = {
 export const OVERVIEW_MAP_NAV_BAR_MARGIN = 25;
 
 /** Visual separation margin between map info bar and nav bar (in pixels). */
-export const MAP_INFO_NAV_BAR_MARGIN = 15;
+export const MAP_INFO_NAV_BAR_MARGIN = 8;
 
 /** Top spacing added to nav bar when overview map is visible (overview height + visual separation margin). */
 export const NAV_BAR_OVERVIEW_OFFSET = `calc(${OL_OVERVIEWMAP_SIZE.height} + ${OVERVIEW_MAP_NAV_BAR_MARGIN}px)`;
@@ -60,6 +60,9 @@ export const NAV_BAR_BOTTOM_OFFSET = `calc(${MAP_INFO_HEIGHT_COLLAPSED} + ${MAP_
 
 /** Bottom spacing for nav bar when map info is expanded (expanded map-info height + margin). */
 export const NAV_BAR_BOTTOM_OFFSET_EXPANDED = `calc(${MAP_INFO_HEIGHT_EXPANDED} + ${MAP_INFO_NAV_BAR_MARGIN}px)`;
+
+/** Maximum height for navbar button groups in multi-column layout. */
+export const NAV_BAR_BUTTON_GROUP_MAX_HEIGHT = '340px';
 
 /**
  * Minimum map container width (in pixels) required to render overview map.

@@ -4,6 +4,7 @@ import { useMemo, memo, useCallback, useState } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { ClickAwayListener } from '@mui/material';
 import Slider from '@mui/material/Slider';
+import type { SxStyles } from '@/ui/style/types';
 import { Box, CloseIcon, HeightIcon, IconButton, Paper, Popper, Typography } from '@/ui';
 
 import { useUIController } from '@/core/controllers/use-controllers';
@@ -40,7 +41,13 @@ export const ResizeFooterPanel = memo((): JSX.Element => {
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
-  const memoSxClasses = useMemo(() => {
+
+  /**
+   * Builds custom sx classes for the resize footer panel.
+   */
+  const memoSxClasses = useMemo((): SxStyles => {
+    // Log
+    logger.logTraceUseMemo('RESIZE-FOOTER-PANEL - memoSxClasses', theme);
     return getSxClasses(theme);
   }, [theme]);
 
@@ -167,13 +174,13 @@ export const ResizeFooterPanel = memo((): JSX.Element => {
           open={open}
           anchorEl={anchorEl}
           placement="top-start"
+          strategy="fixed"
           container={mapElem}
           focusSelector={`#${closeButtonId}`}
           focusTrap={activeTrapGeoView}
           handleKeyDown={handleEscapeKey}
           onClose={handleClose}
           sx={{
-            position: 'fixed',
             pointerEvents: 'auto',
             zIndex: theme.zIndex.modal + 100,
           }}
@@ -185,6 +192,7 @@ export const ResizeFooterPanel = memo((): JSX.Element => {
               </Typography>
               <IconButton
                 id={closeButtonId}
+                className="buttonPopperClose"
                 tooltip={t('general.close')}
                 size="small"
                 onClick={handleClose}

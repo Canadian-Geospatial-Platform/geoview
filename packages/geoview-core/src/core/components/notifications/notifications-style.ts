@@ -1,5 +1,6 @@
 import type { Theme } from '@mui/material/styles';
 import type { SxStyles } from '@/ui/style/types';
+import { visuallyHidden } from '@/ui/style/default';
 
 /**
  * Gets custom sx classes for the notification.
@@ -8,65 +9,95 @@ import type { SxStyles } from '@/ui/style/types';
  * @returns The sx classes object
  */
 export const getSxClasses = (theme: Theme): SxStyles => ({
-  notificationPanel: {
+  popper: {
+    pointerEvents: 'auto',
+    zIndex: theme.zIndex.modal,
+  },
+  popoverPaper: {
     display: 'flex',
     flexDirection: 'column',
-    width: '350px',
-    maxHeight: '500px',
-    overflowY: 'hidden',
-    marginLeft: '8px',
+    width: '340px',
+    minWidth: '180px',
+    maxWidth: '70vw',
+    maxHeight: 'min(100vh, 500px)',
+    marginLeft: theme.spacing(6),
     backgroundColor: theme.palette.geoViewColor?.bgColor.light[200],
     borderRadius: '5px',
     boxShadow: 2,
   },
   notificationsHeader: {
     display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    padding: '10px',
+    justifyContent: 'space-between',
+    minHeight: '48px',
+    minWidth: 0,
+    padding: '4px 8px 4px 16px',
     borderBottom: `1px solid ${theme.palette.geoViewColor?.bgColor.dark[100]}`,
+    gap: '16px',
   },
   notificationsTitle: {
     fontSize: theme.palette.geoViewFontSize?.default,
     fontWeight: '700',
     color: theme.palette.geoViewColor?.textColor.main,
   },
+  notificationsFooter: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    padding: '8px 8px 8px 16px',
+    borderTop: `1px solid ${theme.palette.geoViewColor?.bgColor.dark[100]}`,
+    minWidth: 0,
+    minHeight: '48px',
+  },
+  skipLink: {
+    ...visuallyHidden,
+    backgroundColor: theme.palette.geoViewColor?.white,
+    zIndex: theme.zIndex.tooltip,
+    '&:active, &:focus': {
+      position: 'absolute',
+      display: 'inline-block',
+      left: theme.spacing(1),
+      top: '40px',
+      zIndex: theme.zIndex.tooltip,
+      width: 'auto',
+      height: 'auto',
+      clip: 'auto',
+      margin: 0,
+      padding: theme.spacing(1),
+      textDecoration: 'underline',
+      overflow: 'visible',
+      whiteSpace: 'normal',
+    },
+  },
   notificationsList: {
     overflowY: 'auto',
-    padding: '0 10px',
+    overflowX: 'hidden',
+    scrollbarGutter: 'stable',
+    padding: '8px 16px',
+    scrollbarWidth: 'thin',
+    scrollbarColor: `${theme.palette.geoViewColor?.primary.main ?? theme.palette.primary.main} transparent`,
   },
   notificationItem: {
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
     gap: '8px',
-    padding: '10px 0',
-
+    padding: '8px 0 8px 8px',
+    minWidth: 0,
     '&:not(:last-child)': {
       borderBottom: `1px solid ${theme.palette.geoViewColor?.bgColor.dark[300]}`,
     },
   },
   notificationsItemMsg: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: '8px',
-    flexGrow: '1',
     fontSize: theme.palette.geoViewFontSize?.sm,
     color: theme.palette.geoViewColor?.textColor.light[250],
     margin: '0',
-    '& span': {
-      flexGrow: '1',
-      display: 'inline-block',
-      backgroundColor: theme.palette.geoViewColor?.bgColor.dark[800],
-      color: theme.palette.geoViewColor?.bgColor.light[800],
-      fontSize: theme.palette.geoViewFontSize?.sm,
-      borderRadius: '10px',
-      height: '20px',
-      padding: '0 16px',
-      textAlign: 'center',
-      lineHeight: '20px',
-    },
+    overflowWrap: 'break-word',
+    wordBreak: 'break-word',
+    whiteSpace: 'pre-wrap',
+  },
+  emptyMessage: {
+    padding: '16px 16px',
   },
 });
