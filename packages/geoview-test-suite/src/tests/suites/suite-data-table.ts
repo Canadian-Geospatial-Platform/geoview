@@ -42,7 +42,12 @@ export class GVTestSuiteDataTable extends GVAbstractTestSuite {
    * @returns The description of the Test Suite
    */
   override getDescriptionAsHtml(): string {
-    return 'Test Suite to perform various Data Table related tests.';
+    return `Tests the Data Table footer panel store and DOM behavior:<br/>
+      <b>Features</b> — allFeaturesDataArray population (GeoJSON + ESRI)<br/>
+      <b>Settings</b> — geoviewID column hidden, column visibility toggle, rows filtered count<br/>
+      <b>Filters</b> — mapFilteredRecord default/set, global filter disables toggle, column filter set/clear<br/>
+      <b>Extent filter</b> — Available for vector, unavailable for ESRI Dynamic, zoom-to-Ontario filtering<br/>
+      <b>Style filter</b> — showUnsymbolizedFeatures:false pre-filters table rows`;
   }
 
   /**

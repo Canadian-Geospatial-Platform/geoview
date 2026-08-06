@@ -41,7 +41,12 @@ export class GVTestSuiteConfig extends GVAbstractTestSuite {
    * @returns The description of the Test Suite
    */
   override getDescriptionAsHtml(): string {
-    return 'Test Suite to perform various layer config related tests.';
+    return `Tests layer configuration creation and validation across all supported layer types:<br/>
+      <b>ESRI</b> — Dynamic, Feature, Image (happy path + bad URL)<br/>
+      <b>OGC</b> — WMS, WFS, OGC Feature (happy path + bad URL + no capabilities)<br/>
+      <b>File-based</b> — GeoJSON, CSV, WKB, KML, GeoTIFF (happy path + bad URL skip/error)<br/>
+      <b>GeoCore</b> — Standalone UUID resolution<br/>
+      <b>Settings</b> — initialSettings cascade to sublayers`;
   }
 
   /**
