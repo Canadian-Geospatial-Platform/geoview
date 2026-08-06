@@ -634,6 +634,20 @@ export class EsriUtilities {
     // Initialize the outfields
     // dynamic group layer doesn't have fields definition
     if (hasFields && !isGroupLayer) {
+      // Always detect and store the geometry field from the metadata, regardless of whether outfields are user-configured.
+      // This ensures we can still fetch geometry when needed even when the user's outfields don't include the geometry field.
+      if (layerMetadataEsriDynamicLayer.geometryField) {
+        const geoField = fields.find((f) => f.name === layerMetadataEsriDynamicLayer.geometryField?.name);
+        if (geoField) {
+          layerConfig.setGeometryField({
+            name: geoField.name,
+            alias: geoField.alias || geoField.name,
+            // TODO: CHECK - Mismatch of TypeOutfieldsType and geometryType as string. This seems wrong, should the TypeOutfieldsType be enhanced to include geometry types?
+            type: layerMetadataEsriDynamicLayer.geometryType as TypeOutfieldsType,
+          });
+        }
+      }
+
       // Get the outfields
       let outfields = layerConfig.getOutfields();
 
@@ -644,17 +658,8 @@ export class EsriUtilities {
 
         // Loop
         fields.forEach((fieldEntry) => {
-          // If the field is the geometry field
+          // Skip the geometry field — it was already stored above
           if (layerMetadataEsriDynamicLayer.geometryField && fieldEntry?.name === layerMetadataEsriDynamicLayer.geometryField?.name) {
-            // Keep the geometry field for future use
-            layerConfig.setGeometryField({
-              name: fieldEntry.name,
-              alias: fieldEntry.alias || fieldEntry.name,
-              // TODO: CHECK - Mismatch of TypeOutfieldsType and geometryType as string. This seems wrong, should the TypeOutfieldsType be enhanced to include geometry types?
-              type: layerMetadataEsriDynamicLayer.geometryType as TypeOutfieldsType,
-            });
-
-            // Skip that geometry field
             return;
           }
 
