@@ -4,6 +4,7 @@ import {
   NAV_BAR_OVERVIEW_OFFSET,
   NAV_BAR_BOTTOM_OFFSET,
   NAV_BAR_BOTTOM_OFFSET_EXPANDED,
+  NAV_BAR_BUTTON_GROUP_MAX_HEIGHT,
   OVERVIEW_MAP_MIN_CONTAINER_WIDTH,
   OVERVIEW_MAP_MIN_CONTAINER_HEIGHT,
 } from '@/core/utils/constant';
@@ -12,17 +13,18 @@ import {
  * Gets custom sx classes for the navigation bar.
  *
  * @param theme - The theme object
+ * @param panelWidth - Optional panel width (px or string). If not provided, defaults to auto-sizing.
  * @returns The sx classes object
  */
-export const getSxClasses = (theme: Theme): SxStyles => {
+export const getSxClasses = (theme: Theme, panelWidth?: string | number): SxStyles => {
   /** Container query string for minimum size thresholds (used by multi-column layout styles). */
   const mapContainerMinSizeQuery = `@container map (min-width: ${OVERVIEW_MAP_MIN_CONTAINER_WIDTH}px) and (min-height: ${OVERVIEW_MAP_MIN_CONTAINER_HEIGHT}px)`;
 
   return {
     navBarContainer: {
       position: 'absolute',
-      right: theme.spacing(7),
-      top: theme.spacing(7),
+      right: theme.spacing(6),
+      top: theme.spacing(6),
       bottom: NAV_BAR_BOTTOM_OFFSET,
       left: 'auto',
       width: 'auto',
@@ -32,7 +34,7 @@ export const getSxClasses = (theme: Theme): SxStyles => {
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'safe flex-end',
-      gap: theme.spacing(11),
+      gap: theme.spacing(6),
       alignItems: 'center',
       overflowY: 'auto',
       padding: theme.spacing(2),
@@ -87,7 +89,7 @@ export const getSxClasses = (theme: Theme): SxStyles => {
     navBtnGroupMultiColumn: {
       [mapContainerMinSizeQuery]: {
         flexWrap: 'wrap',
-        maxHeight: '340px',
+        maxHeight: NAV_BAR_BUTTON_GROUP_MAX_HEIGHT,
       },
     },
     navButton: {
@@ -121,21 +123,70 @@ export const getSxClasses = (theme: Theme): SxStyles => {
         backgroundColor: theme.palette.geoViewColor?.bgColor.light[500],
         color: theme.palette.geoViewColor?.bgColor.dark[950],
       },
+      '&.highlighted.active': {
+        backgroundColor: theme.palette.geoViewColor?.primary.main ?? theme.palette.primary.main,
+        color: theme.palette.geoViewColor?.white ?? theme.palette.common.white,
+        '& .MuiSvgIcon-root': {
+          color: `inherit`,
+          fill: `${theme.palette.geoViewColor?.white ?? theme.palette.common.white}`,
+          stroke: `${theme.palette.geoViewColor?.white ?? theme.palette.common.white}`,
+        },
+      },
+    },
+    popper: {
+      zIndex: theme.zIndex.modal,
+    },
+    popoverPaper: {
+      // If panelWidth is provided, use it; otherwise auto-size with constraints
+      width: panelWidth ?? 'auto',
+      minWidth: '180px',
+      maxWidth: '70vw',
+      maxHeight: 'min(100vh, 500px)',
+      display: 'flex',
+      flexDirection: 'column',
+      marginRight: theme.spacing(6),
+    },
+    popoverTitleContainer: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      width: '100%',
+      minHeight: '48px',
+      borderBottom: `1px solid ${theme.palette.geoViewColor?.bgColor.dark[100] ?? theme.palette.divider}`,
+      padding: '4px 8px 4px 16px',
+      flexShrink: 0,
+      gap: '8px',
+    },
+    popoverTitleLabel: {
+      fontSize: theme.palette.geoViewFontSize?.default ?? theme.typography.fontSize,
+      fontWeight: '700',
+      color: theme.palette.geoViewColor?.textColor.main ?? theme.palette.text.primary,
+      flexShrink: 1,
+      padding: 0,
+    },
+    popoverTitleActions: {
+      display: 'flex',
+      flexShrink: 0,
+      color: theme.palette.geoViewColor?.textColor.main ?? theme.palette.text.primary,
     },
     popoverTitle: {
       fontSize: theme.palette.geoViewFontSize?.default ?? theme.typography.fontSize,
       fontWeight: '700',
       color: theme.palette.geoViewColor?.textColor.main ?? theme.palette.text.primary,
+      minHeight: '48px',
       borderBottom: `1px solid ${theme.palette.geoViewColor?.bgColor.dark[100] ?? theme.palette.divider}`,
-      paddingTop: theme.spacing(11),
-      paddingBottom: theme.spacing(11),
-      paddingLeft: theme.spacing(11),
+      display: 'flex',
+      alignItems: 'center',
+      padding: '4px 16px',
     },
     popoverContent: {
       '&.MuiDialogContent-root': {
-        paddingTop: theme.spacing(11),
-        paddingBottom: theme.spacing(11),
-        paddingLeft: theme.spacing(11),
+        padding: '16px 16px',
+        flexGrow: 1 /* Forces this child to fill all remaining space */,
+        minHeight: 0,
+        overflowY: 'auto',
+        scrollbarWidth: 'thin',
+        scrollbarColor: `${theme.palette.geoViewColor?.primary.main ?? theme.palette.primary.main} transparent`,
       },
     },
     button: {
@@ -143,10 +194,53 @@ export const getSxClasses = (theme: Theme): SxStyles => {
       '&[aria-pressed="true"]': {
         backgroundColor: theme.palette.geoViewColor?.primary.main ?? theme.palette.primary.main,
         color: theme.palette.geoViewColor?.white ?? theme.palette.common.white,
+        // Force icon colors to white when pressed
+        '& .MuiSvgIcon-root': {
+          color: theme.palette.geoViewColor?.white ?? theme.palette.common.white,
+          fill: theme.palette.geoViewColor?.white ?? theme.palette.common.white,
+          stroke: theme.palette.geoViewColor?.white ?? theme.palette.common.white,
+        },
         '&:hover': {
           backgroundColor: theme.palette.geoViewColor?.primary.dark[200] ?? theme.palette.primary.dark,
         },
       },
+    },
+    rotationControlContainer: {
+      width: '100%',
+      maxWidth: '300px',
+      padding: `0 ${theme.spacing(11)}`,
+    },
+    rotationLabelBox: {
+      display: 'flex',
+      justifyContent: 'center',
+      paddingTop: theme.spacing(7),
+      minWidth: 0,
+    },
+    rotationLabel: {
+      fontWeight: 'bold',
+    },
+    rotationLabelProjection: {
+      display: 'none',
+      [theme.breakpoints.up('sm')]: {
+        display: 'inline',
+      },
+    },
+    rotationButtonContainer: {
+      display: 'flex',
+      justifyContent: 'center',
+      flexDirection: 'column',
+      alignItems: 'center',
+      marginTop: theme.spacing(7),
+      gap: 1,
+      [theme.breakpoints.up('sm')]: {
+        flexDirection: 'row',
+      },
+    },
+    rotationIconBase: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      transition: 'transform 0.3s ease-in-out',
     },
   };
 };

@@ -152,6 +152,7 @@ _(WCAG fixes and improvements)_
 - Added global long-word wrapping and centralized text-ellipsis patterns to reduce clipping/truncation issues in high-zoom/reflow scenarios (#3574)
 - Fixed nav bar reflow at high zoom and constrained viewport sizes with scrollable overflow behavior, improved expand/collapse affordance, and map-info overlap fixes (#3581)
 - Fixed map info bar reflow with horizontal overflow handling and improved expand/collapse state management for constrained layouts (#3581)
+- Improved responsive popper behavior for version, attribution, notifications, and nav bar panel components with enhanced focus management and keyboard handling (#3558)
 
 ## Documentation & Cleanup
 

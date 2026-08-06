@@ -27,6 +27,8 @@ interface PopperPropsExtend extends PopperProps {
   role?: AriaRole;
   /** ID of the element that labels the popper. */
   'aria-labelledby'?: string;
+  /** Positioning strategy - 'absolute' (default) or 'fixed'. */
+  strategy?: 'absolute' | 'fixed';
   /** The content to display in the popper. */
   children: ReactElement<Record<string, unknown>>;
 }
@@ -106,6 +108,9 @@ function PopperUI({ open, onClose, handleKeyDown, focusSelector, focusTrap = fal
 
   // #endregion Handlers
 
+  /**
+   * Registers keyboard event handlers for the popper.
+   */
   useEffect(() => {
     logger.logTraceUseEffect('UI.POPPER - handleKeyDown/onClose');
     if (!open) return;

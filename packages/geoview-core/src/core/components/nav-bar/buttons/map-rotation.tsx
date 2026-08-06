@@ -1,7 +1,10 @@
 import type { ReactNode } from 'react';
-import { createElement, useCallback, useEffect, useState, useRef } from 'react';
+import { createElement, useCallback, useEffect, useState, useRef, useMemo } from 'react';
 
 import { useTranslation } from 'react-i18next';
+
+import { useTheme } from '@mui/material/styles';
+import type { SxProps } from '@mui/material';
 
 import {
   useStoreMapRotation,
@@ -11,12 +14,14 @@ import {
 } from '@/core/stores/states/map-state';
 import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from '@/core/components/nav-bar/nav-bar-panel-button';
+import { getSxClasses } from '@/core/components/nav-bar/nav-bar-style';
 import { Box, Slider, Switch, Typography } from '@/ui';
 import { ThreeSixtyIcon } from '@/ui/icons';
 import { Projection } from '@/geo/utils/projection';
 import { useManageArrow } from '@/core/components/north-arrow/hooks/useManageArrow';
 import type { TypePanelProps } from '@/ui/panel/panel-types';
 import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
+import type { SxStyles } from '@/ui/style/types';
 import { Button } from '@/ui/button/button';
 import { useMapController } from '@/core/controllers/use-controllers';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
@@ -31,6 +36,7 @@ export default function MapRotation(): JSX.Element {
   logger.logTraceRender('components/nav-bar/buttons/map-rotation');
 
   const { t } = useTranslation<string>();
+  const theme = useTheme();
   const mapId = useStoreGeoViewMapId();
 
   // Get values from store
@@ -40,6 +46,15 @@ export default function MapRotation(): JSX.Element {
   const mapProjectionEPSG = useStoreMapCurrentProjectionEPSG();
   const { rotationAngle } = useManageArrow();
   const mapController = useMapController();
+
+  /**
+   * Builds custom sx classes for the map rotation component.
+   */
+  const memoSxClasses = useMemo((): SxStyles => {
+    // Log
+    logger.logTraceUseMemo('MAP-ROTATION - memoSxClasses', theme);
+    return getSxClasses(theme);
+  }, [theme]);
 
   const isLCCProjection = mapProjectionEPSG === Projection.PROJECTION_NAMES.LCC;
   const showFixNorthSwitch = isLCCProjection && isNorthEnable;
@@ -68,10 +83,18 @@ export default function MapRotation(): JSX.Element {
 
   // Build label text
   const rotationLabel =
-    projectionRotation !== 0
-      ? `${t('mapctrl.rotation.rotation')}: ${displayedRotationDegrees}° (${t('mapctrl.rotation.projection')}: ${projectionRotation}°)`
-      : `${t('mapctrl.rotation.rotation')}: ${displayedRotationDegrees}°`;
-
+    projectionRotation !== 0 ? (
+      <>
+        {t('mapctrl.rotation.rotation')}: {displayedRotationDegrees}°{' '}
+        <Box component="span" sx={memoSxClasses.rotationLabelProjection}>
+          ({t('mapctrl.rotation.projection')}: {projectionRotation}°)
+        </Box>
+      </>
+    ) : (
+      <>
+        {t('mapctrl.rotation.rotation')}: {displayedRotationDegrees}°
+      </>
+    );
   /**
    * Syncs the slider display with the store whenever the user is not dragging it.
    */
@@ -153,11 +176,11 @@ export default function MapRotation(): JSX.Element {
    */
   const renderRotationControl = (): ReactNode => {
     return (
-      <Box sx={{ width: '300px', padding: '0 20px' }}>
-        <Box sx={{ display: 'flex', justifyContent: 'center', paddingTop: '10px' }}>
+      <Box sx={memoSxClasses.rotationControlContainer}>
+        <Box sx={memoSxClasses.rotationLabelBox}>
           <Typography
             variant="body2"
-            sx={{ fontWeight: 'bold' }}
+            sx={memoSxClasses.rotationLabel}
             role="status"
             aria-live={isSliderDragging ? 'off' : 'polite'}
             aria-atomic="true"
@@ -189,21 +212,19 @@ export default function MapRotation(): JSX.Element {
             },
           }}
         />
-        <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
-          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-            <Button
-              type="text"
-              id={`${mapId}-rotation-reset`}
-              size="small"
-              onClick={handleReset}
-              disabled={displayedRotationDegrees === 0 || isFixNorth}
-            >
-              {t('mapnav.rotation.reset')}
-            </Button>
-            {showFixNorthSwitch && (
-              <Switch size="small" onChange={handleFixNorth} label={t('mapctrl.rotation.fixedNorth') || ''} checked={isFixNorth} />
-            )}
-          </Box>
+        <Box sx={memoSxClasses.rotationButtonContainer}>
+          <Button
+            type="text"
+            id={`${mapId}-rotation-reset`}
+            size="small"
+            onClick={handleReset}
+            disabled={displayedRotationDegrees === 0 || isFixNorth}
+          >
+            {t('mapnav.rotation.reset')}
+          </Button>
+          {showFixNorthSwitch && (
+            <Switch size="small" onChange={handleFixNorth} label={t('mapctrl.rotation.fixedNorth') || ''} checked={isFixNorth} />
+          )}
         </Box>
       </Box>
     );
@@ -211,15 +232,9 @@ export default function MapRotation(): JSX.Element {
 
   // Set up props for nav bar panel button
   const button: IconButtonPropsExtend = {
-    'aria-label': t('mapnav.rotation.title'),
+    'aria-label': 'mapnav.rotation.title',
     children: createElement(Box, {
-      sx: {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        transform: `rotate(${mapRotation}rad)`,
-        transition: 'transform 0.3s ease-in-out',
-      },
+      sx: [memoSxClasses.rotationIconBase, { transform: `rotate(${mapRotation}rad)` }] as SxProps,
       children: createElement(ThreeSixtyIcon),
     }),
     tooltipPlacement: 'left',
@@ -229,7 +244,7 @@ export default function MapRotation(): JSX.Element {
     title: 'mapnav.rotation.title',
     icon: createElement(ThreeSixtyIcon),
     content: renderRotationControl(),
-    width: 'flex',
+    width: 340, // Fixed width for nav bar panel popper
   };
 
   return <NavbarPanelButton buttonPanel={{ buttonPanelId: 'mapRotation', button, panel }} />;

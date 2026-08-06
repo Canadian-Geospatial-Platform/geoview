@@ -17,7 +17,8 @@ import { FONT_OPTIONS, DEFAULT_FONT, loadGoogleFont } from '../utils/fonts';
 // Styles
 const sxClasses = {
   listItem: {
-    mb: 2,
+    mb: 8,
+    p: 0,
     flexDirection: 'column',
     alignItems: 'flex-start',
   },
@@ -310,7 +311,7 @@ export function StylePanel(): JSX.Element {
   }, []);
 
   return (
-    <List sx={{ p: 2 }}>
+    <List>
       {/* Text-specific controls */}
       {currentGeomType === 'Text' && (
         <>

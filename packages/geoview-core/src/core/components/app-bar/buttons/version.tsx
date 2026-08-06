@@ -1,6 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { Theme } from '@mui/material';
 import { Typography, Box, Link, SvgIcon, ClickAwayListener, List, Paper, useTheme } from '@mui/material';
 
 import { useUIController } from '@/core/controllers/use-controllers';
@@ -13,8 +12,9 @@ import { handleEscapeKey } from '@/core/utils/utilities';
 import { FocusTrapContainer } from '@/core/components/common/focus-trap-container';
 import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
 import { DateMgt } from '@/core/utils/date-mgt';
+import { logger } from '@/core/utils/logger';
 import type { SxStyles } from '@/ui/style/types';
-import { visuallyHidden } from '@/ui/style/default';
+import { getSxClasses } from './version-style';
 
 // eslint-disable-next-line no-underscore-dangle
 declare const __VERSION__: TypeAppVersion;
@@ -29,62 +29,29 @@ export type TypeAppVersion = {
 };
 
 /**
- * Gets custom sx classes for the version panel.
- *
- * @param theme - The MUI theme object
- * @returns The sx classes for version panel styling
- */
-const getSxClasses = (theme: Theme): SxStyles => ({
-  versionInfoPanel: {
-    width: '200px',
-    backgroundColor: theme.palette.geoViewColor?.bgColor.light[200],
-    borderRadius: '5px',
-    boxShadow: 2,
-    marginLeft: '8px',
-    '& a': {
-      color: theme.palette.mode === 'light' ? theme.palette.secondary.contrastText : theme.palette.geoViewColor?.primary.light[300],
-      textDecoration: 'underLine',
-    },
-  },
-  versionHeading: {
-    display: 'flex',
-    alignItems: 'center',
-    borderBottom: `1px solid ${theme.palette.geoViewColor?.bgColor.dark[100]}`,
-    padding: '10px',
-    justifyContent: 'space-between',
-  },
-  versionsInfoTitle: {
-    fontSize: theme.palette.geoViewFontSize?.default,
-    fontWeight: '700',
-    color: theme.palette.geoViewColor?.textColor.main,
-  },
-  versionInfoContent: {
-    padding: '10px',
-    gap: '5px',
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  versionList: {
-    listStyle: 'none',
-    padding: 0,
-    margin: 0,
-    '& li': {
-      margin: '0 0 5px 0',
-    },
-  },
-  visuallyHidden,
-});
-
-/**
  * Version button and popover panel displaying app version, build date, and links.
+ *
+ * Not memoized because it has no props and the component's internal state
+ * (popover open/close) changes independently.
  *
  * @returns The version button and popover panel
  */
 export default function Version(): JSX.Element {
+  // Log
+  logger.logTraceRender('core/components/app-bar/buttons/version');
+
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+
+  /**
+   * Builds custom sx classes for the version panel.
+   */
+  const memoSxClasses = useMemo((): SxStyles => {
+    // Log
+    logger.logTraceUseMemo('VERSION - memoSxClasses', theme);
+    return getSxClasses(theme);
+  }, [theme]);
 
   // Store
   const mapId = useStoreGeoViewMapId();
@@ -105,7 +72,7 @@ export default function Version(): JSX.Element {
    * Handles when the version button is clicked to toggle the popover.
    */
   const handleOpenPopover = useCallback(
-    (event: React.MouseEvent<HTMLButtonElement>) => {
+    (event: React.MouseEvent<HTMLButtonElement>): void => {
       setAnchorEl(event.currentTarget);
       setOpen((prev) => !prev);
 
@@ -155,6 +122,7 @@ export default function Version(): JSX.Element {
           open={open}
           anchorEl={anchorEl}
           placement="right-end"
+          strategy="fixed"
           onClose={handleClickAway}
           container={mapElem}
           focusSelector="button"
@@ -163,12 +131,16 @@ export default function Version(): JSX.Element {
               name: 'eventListeners',
               options: { scroll: false, resize: true },
             },
+            {
+              name: 'preventOverflow',
+              enabled: true,
+              options: {
+                boundary: 'viewport',
+                padding: 8,
+              },
+            },
           ]}
-          sx={{
-            position: 'fixed',
-            pointerEvents: 'auto',
-            zIndex: theme.zIndex.modal + 100,
-          }}
+          sx={memoSxClasses.popper}
           handleKeyDown={handleEscapeKey}
         >
           <FocusTrapContainer
@@ -176,17 +148,24 @@ export default function Version(): JSX.Element {
             open={open && activeTrapGeoView}
             containerType={CONTAINER_TYPE.APP_BAR}
           >
-            <Paper component="section" sx={sxClasses.versionInfoPanel}>
-              <Box component="header" sx={sxClasses.versionHeading}>
-                <Typography sx={sxClasses.versionsInfoTitle} component="h2" id={`${mapId}-${CONTAINER_TYPE.APP_BAR}-version-title`}>
+            <Paper component="section" sx={memoSxClasses.versionInfoPanel}>
+              <Box component="header" sx={memoSxClasses.versionHeading}>
+                <Typography sx={memoSxClasses.versionsInfoTitle} component="h2" id={`${mapId}-${CONTAINER_TYPE.APP_BAR}-version-title`}>
                   {t('appbar.version')}
                 </Typography>
-                <IconButton onClick={handleClickAway} size="small" aria-label={t('general.close')} tooltipPlacement="right">
+                <IconButton
+                  sx={memoSxClasses.versionCloseButton}
+                  className="buttonPopperClose"
+                  onClick={handleClickAway}
+                  size="small"
+                  aria-label={t('general.close')}
+                  tooltipPlacement="right"
+                >
                   <CloseIcon />
                 </IconButton>
               </Box>
-              <Box sx={sxClasses.versionInfoContent}>
-                <List sx={sxClasses.versionList}>
+              <Box sx={memoSxClasses.versionInfoContent}>
+                <List sx={memoSxClasses.versionList}>
                   <Box component="li" sx={{ display: 'flex', flexDirection: 'row', alignContent: 'center', gap: '6px' }}>
                     <SvgIcon viewBox="-4 -2 38 36">
                       <GeoCaIcon />

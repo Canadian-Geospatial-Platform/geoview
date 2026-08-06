@@ -1,4 +1,4 @@
-import { useCallback, useState, memo } from 'react';
+import { useCallback, useState, useMemo, memo } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -6,24 +6,18 @@ import { useTheme } from '@mui/material/styles';
 import { ClickAwayListener } from '@mui/material';
 
 import { Box, CopyrightIcon, Popper, Paper, IconButton, Typography } from '@/ui';
+import type { SxStyles } from '@/ui/style/types';
 import { useStoreMapAttribution, useStoreMapInteraction } from '@/core/stores/states/map-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { handleEscapeKey } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
-
-/** Styles for the popper content box. */
-const BOX_STYLES = { padding: '1rem', width: '28.125rem' } as const;
-
-/** Base styles for the attribution icon button. */
-const ICON_BUTTON_BASE_STYLES = {
-  width: '30px',
-  height: '30px',
-  my: '1rem',
-  margin: 'auto',
-} as const;
+import { getSxClasses } from './attribution-style';
 
 /**
  * Creates the attribution component that displays a popover with map attribution text.
+ *
+ * Memoized to prevent re-renders when parent components update, since attribution
+ * content changes infrequently (only when layers are added/removed).
  *
  * @returns The attribution icon button and popover
  */
@@ -34,6 +28,14 @@ export const Attribution = memo((): JSX.Element => {
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
+
+  /**
+   * Builds custom sx classes for the attribution component.
+   */
+  const memoSxClasses = useMemo((): SxStyles => {
+    logger.logTraceUseMemo('ATTRIBUTION - memoSxClasses', theme);
+    return getSxClasses(theme);
+  }, [theme]);
 
   // State
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
@@ -47,10 +49,14 @@ export const Attribution = memo((): JSX.Element => {
   // Get container
   const mapElem = document.getElementById(`shell-${mapId}`);
 
-  // Set style for type of interaction (dynamic vs static)
+  // Set color for type of interaction (dynamic vs static)
+  const iconButtonColor =
+    interaction === 'dynamic' ? theme.palette.geoViewColor?.bgColor.dark[650] : theme.palette.geoViewColor?.grey.dark[500];
+
+  // Icon button styles with conditional color
   const buttonStyles = {
-    ...ICON_BUTTON_BASE_STYLES,
-    color: interaction === 'dynamic' ? theme.palette.geoViewColor?.bgColor.dark[650] : theme.palette.geoViewColor?.grey.dark[500],
+    ...memoSxClasses.iconButton,
+    color: iconButtonColor,
   };
 
   // Attribution values
@@ -114,16 +120,28 @@ export const Attribution = memo((): JSX.Element => {
           open={open}
           anchorEl={anchorEl}
           placement="top-end"
+          strategy="fixed"
           container={mapElem}
           handleKeyDown={handleEscapeKey}
           onClose={handleClose}
-          sx={{
-            pointerEvents: 'auto',
-            zIndex: theme.zIndex.modal + 100,
-          }}
+          modifiers={[
+            {
+              name: 'eventListeners',
+              options: { scroll: false, resize: true },
+            },
+            {
+              name: 'preventOverflow',
+              enabled: true,
+              options: {
+                boundary: 'viewport',
+                padding: 8,
+              },
+            },
+          ]}
+          sx={memoSxClasses.popper}
         >
-          <Paper>
-            <Box sx={BOX_STYLES}>{attributionContent}</Box>
+          <Paper sx={memoSxClasses.popoverPaper}>
+            <Box sx={memoSxClasses.content}>{attributionContent}</Box>
           </Paper>
         </Popper>
       </Box>

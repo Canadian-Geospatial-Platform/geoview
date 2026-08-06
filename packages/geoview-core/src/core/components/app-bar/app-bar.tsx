@@ -62,6 +62,19 @@ import { IconButton } from '@/ui/icon-button/icon-button';
 /** Scroll step size in pixels (matches single button height). */
 const BUTTON_HEIGHT = 54;
 
+/**
+ * Translates an optional tooltip value.
+ *
+ * @param t - Translation function
+ * @param tooltip - Tooltip value (translation key, null to disable, or undefined for fallback)
+ * @returns Translated string, null (disabled), or undefined (fallback to aria-label)
+ */
+function translateTooltip(t: (key: string) => string, tooltip: string | null | undefined): string | null | undefined {
+  if (tooltip === null) return null;
+  if (tooltip !== undefined) return t(tooltip);
+  return undefined;
+}
+
 /** Mapping of panel id to its icon and content. */
 interface GroupPanelType {
   /** The icon element for the panel button. */
@@ -83,6 +96,9 @@ export interface ButtonPanelType {
 
 /**
  * Creates an app-bar with buttons that can open a panel.
+ *
+ * Not memoized because this component receives props that change frequently
+ * (api, onScrollShellIntoView callbacks). Memoization would add overhead without benefit.
  *
  * @param props - Properties defined in AppBarProps interface
  * @returns The app bar component
@@ -389,8 +405,8 @@ export function AppBar(props: AppBarProps): JSX.Element {
       .map((tab): [IconButtonPropsExtend, TypePanelProps, string] => {
         const button: IconButtonPropsExtend = {
           id: tab,
-          'aria-label': t(`${camelCase(tab)}.title`),
-          tooltip: t(`${camelCase(tab)}.title`),
+          'aria-label': `${camelCase(tab)}.title`,
+          tooltip: `${camelCase(tab)}.title`,
           tooltipPlacement: 'bottom',
           children: memoPanels[tab].icon,
         };
@@ -519,6 +535,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
               // In default mode, panels are treated as regions, so we use aria-controls and aria-expanded to indicate the relationship and state.
               aria-controls={ariaControls}
               aria-expanded={ariaExpanded}
+              tooltip={translateTooltip(t, buttonPanel.button.tooltip)}
               tooltipPlacement="right"
               className={`buttonFilled ${tabId === buttonPanel.button.id && isOpen ? 'active' : ''}`}
               size="small"

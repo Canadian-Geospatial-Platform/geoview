@@ -54,6 +54,19 @@ const defaultNavbar: Record<DefaultNavbar, JSX.Element> = {
 };
 
 /**
+ * Translates an optional tooltip value.
+ *
+ * @param t - Translation function
+ * @param tooltip - Tooltip value (translation key, null to disable, or undefined for fallback)
+ * @returns Translated string, null (disabled), or undefined (fallback to aria-label)
+ */
+function translateTooltip(t: (key: string) => string, tooltip: string | null | undefined): string | null | undefined {
+  if (tooltip === null) return null;
+  if (tooltip !== undefined) return t(tooltip);
+  return undefined;
+}
+
+/**
  * Creates a nav-bar with buttons that can call functions or open custom panels.
  *
  * @param props - The nav-bar properties
@@ -171,8 +184,8 @@ export function NavBar(props: NavBarProps): JSX.Element {
           <IconButton
             key={buttonPanel.button.id}
             id={buttonPanel.button.id}
-            aria-label={buttonPanel.button['aria-label']}
-            tooltip={buttonPanel.button.tooltip}
+            aria-label={t(buttonPanel.button['aria-label'])}
+            tooltip={translateTooltip(t, buttonPanel.button.tooltip)}
             tooltipPlacement={buttonPanel.button.tooltipPlacement}
             sx={memoSxClasses.navButton}
             onClick={buttonPanel.button.onClick}

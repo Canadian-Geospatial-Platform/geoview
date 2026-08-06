@@ -34,10 +34,8 @@ export const getSxClasses = (): SxStyles => ({
     '& .ol-overviewmap.ol-custom-overviewmap': {
       bottom: 'auto',
       left: 'auto',
-      right: '5px',
-      top: '5px',
-      margin: 5,
-      order: 1,
+      right: '10px', // Adding 2px to the usual 8px to account for the box shadow
+      top: '10px', // Adding 2px to the usual 8px to account for the box shadow
       padding: 0,
       position: 'absolute',
       borderRadius: 4,

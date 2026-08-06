@@ -48,7 +48,7 @@ export default function Projection(): JSX.Element {
   const mapController = useMapController();
 
   /**
-   * Memoizes style classes for the projection component.
+   * Builds custom sx classes for the projection component.
    */
   const memoSxClasses = useMemo((): SxStyles => {
     // Log
@@ -123,7 +123,7 @@ export default function Projection(): JSX.Element {
 
   // Set up props for nav bar panel button
   const button: IconButtonPropsExtend = {
-    'aria-label': t('mapnav.projection'),
+    'aria-label': 'mapnav.projection',
     children: createElement(ProjectionIcon),
     tooltipPlacement: 'left',
   };
@@ -132,7 +132,6 @@ export default function Projection(): JSX.Element {
     title: 'Projection',
     icon: createElement(ProjectionIcon),
     content: renderButtons(),
-    width: 'flex',
   };
 
   return <NavbarPanelButton buttonPanel={{ buttonPanelId: 'projection', button, panel }} />;

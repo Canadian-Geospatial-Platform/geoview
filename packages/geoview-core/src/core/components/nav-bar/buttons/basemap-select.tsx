@@ -48,7 +48,7 @@ export default function BasemapSelect(): JSX.Element {
   const layerController = useLayerController();
 
   /**
-   * Memoizes style classes for the basemap select component.
+   * Builds custom sx classes for the basemap select component.
    */
   const memoSxClasses = useMemo((): SxStyles => {
     // Log
@@ -189,7 +189,7 @@ export default function BasemapSelect(): JSX.Element {
 
   // Set up props for nav bar panel button
   const button: IconButtonPropsExtend = {
-    'aria-label': t('mapnav.basemap'),
+    'aria-label': 'mapnav.basemap',
     children: createElement(MapIcon),
     tooltipPlacement: 'left',
   };
@@ -198,7 +198,6 @@ export default function BasemapSelect(): JSX.Element {
     title: 'basemaps.select',
     icon: createElement(MapIcon),
     content: renderButtons(),
-    width: 'flex',
   };
 
   return <NavbarPanelButton buttonPanel={{ buttonPanelId: 'basemapSelect', button, panel }} />;

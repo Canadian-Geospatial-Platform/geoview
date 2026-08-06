@@ -492,7 +492,7 @@ export default function Measurement(): JSX.Element {
 
   // Set up props for nav bar panel button
   const button: IconButtonPropsExtend = {
-    'aria-label': t('mapnav.measurement'),
+    'aria-label': 'mapnav.measurement',
     children: createElement(StraightenIcon),
     tooltipPlacement: 'left',
   };
@@ -501,7 +501,6 @@ export default function Measurement(): JSX.Element {
     title: 'measurement.title',
     icon: createElement(StraightenIcon),
     content: renderButtons(),
-    width: 'flex',
   };
 
   return <NavbarPanelButton buttonPanel={{ buttonPanelId: 'measurement', button, panel }} isActive={activeMeasurement !== null} />;

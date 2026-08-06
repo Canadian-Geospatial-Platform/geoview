@@ -16,6 +16,19 @@ import { handleEscapeKey } from '@/core/utils/utilities';
 import { useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
 import type { SxStyles } from '@/ui/style/types';
 
+/**
+ * Translates an optional tooltip value.
+ *
+ * @param t - Translation function
+ * @param tooltip - Tooltip value (translation key, null to disable, or undefined for fallback)
+ * @returns Translated string, null (disabled), or undefined (fallback to aria-label)
+ */
+function translateTooltip(t: (key: string) => string, tooltip: string | null | undefined): string | null | undefined {
+  if (tooltip === null) return null;
+  if (tooltip !== undefined) return t(tooltip);
+  return undefined;
+}
+
 /** The properties for the navbar panel button. */
 interface NavbarPanelButtonType {
   /** The button panel configuration. */
@@ -44,15 +57,18 @@ export default function NavbarPanelButton({ buttonPanel, isActive = false }: Nav
   const activeTrapGeoView = useStoreUIActiveTrapGeoView();
   const shellContainer = useStoreAppShellContainer();
 
+  // Extract panel width if provided
+  const panelWidth = buttonPanel.panel?.width;
+
   /**
-   * Memoizes style classes for the navbar panel button.
+   * Builds custom sx classes for the navbar panel button.
    */
   const memoSxClasses = useMemo((): SxStyles => {
     // Log
-    logger.logTraceUseMemo('NAV-BAR-PANEL-BUTTON - memoSxClasses', theme);
+    logger.logTraceUseMemo('NAV-BAR-PANEL-BUTTON - memoSxClasses', theme, panelWidth);
 
-    return getSxClasses(theme);
-  }, [theme]);
+    return getSxClasses(theme, panelWidth);
+  }, [theme, panelWidth]);
 
   // States
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
@@ -114,10 +130,10 @@ export default function NavbarPanelButton({ buttonPanel, isActive = false }: Nav
         <IconButton
           key={buttonPanel.button.id}
           id={buttonPanel.button.id}
-          aria-label={buttonPanel.button['aria-label']}
+          aria-label={t(buttonPanel.button['aria-label'])}
           aria-expanded={open}
           aria-haspopup="dialog"
-          tooltip={buttonPanel.button.tooltip}
+          tooltip={translateTooltip(t, buttonPanel.button.tooltip)}
           tooltipPlacement={buttonPanel.button.tooltipPlacement}
           sx={memoSxClasses.navButton}
           onClick={handleClick}
@@ -130,29 +146,36 @@ export default function NavbarPanelButton({ buttonPanel, isActive = false }: Nav
           open={open}
           anchorEl={anchorEl}
           placement="left-end"
+          modifiers={[
+            {
+              name: 'preventOverflow',
+              enabled: true,
+              options: {
+                boundary: 'viewport',
+                padding: 8,
+              },
+            },
+          ]}
           onClose={handleClickAway}
           container={shellContainer}
           focusSelector="button"
           role="dialog"
           aria-labelledby={dialogTitleId}
           focusTrap={activeTrapGeoView}
-          sx={{ marginRight: '5px !important' }}
+          sx={memoSxClasses.popper}
           handleKeyDown={handleEscapeKey}
         >
-          <Paper sx={{ width: `${buttonPanel.panel?.width ?? 300}px`, maxHeight: '500px' }}>
-            <DialogTitle id={dialogTitleId} sx={memoSxClasses.popoverTitle}>
-              <span style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+          <Paper sx={memoSxClasses.popoverPaper}>
+            <Box sx={memoSxClasses.popoverTitleContainer}>
+              <DialogTitle id={dialogTitleId} sx={memoSxClasses.popoverTitleLabel}>
                 {t(buttonPanel.panel?.title as string) ?? ''}
-                <IconButton
-                  size="small"
-                  aria-label={t('general.close')}
-                  onClick={closePanel}
-                  sx={{ padding: 0.5, color: 'inherit', position: 'relative', left: '16px' }}
-                >
+              </DialogTitle>
+              <Box sx={memoSxClasses.popoverTitleActions}>
+                <IconButton className="buttonPopperClose" size="small" aria-label={t('general.close')} onClick={closePanel} color="inherit">
                   <CloseIcon fontSize="small" />
                 </IconButton>
-              </span>
-            </DialogTitle>
+              </Box>
+            </Box>
             <DialogContent sx={memoSxClasses.popoverContent}>{renderPanelContent()}</DialogContent>
           </Paper>
         </Popper>

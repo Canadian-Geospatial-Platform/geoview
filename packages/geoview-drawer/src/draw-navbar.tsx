@@ -50,7 +50,7 @@ export function createDrawerButtons(config: TypeDrawerConfig): Record<string, Ty
   buttonConfigs.geometryPicker = {
     buttonProps: {
       id: 'drawer-geometry-picker',
-      'aria-label': 'drawer.geometryPicker',
+      'aria-label': 'drawer.geometryPickerPanel',
       tooltipPlacement: 'left',
       children: createElement(GeometryPickerButton),
       visible: true,
@@ -60,7 +60,6 @@ export function createDrawerButtons(config: TypeDrawerConfig): Record<string, Ty
       title: 'drawer.geometryPicker',
       icon: createElement(CloseIcon),
       content: createElement(GeometryPickerPanel, { geomTypes }),
-      width: 'flex',
       status: false,
     },
   };
@@ -79,7 +78,7 @@ export function createDrawerButtons(config: TypeDrawerConfig): Record<string, Ty
       title: 'drawer.style',
       icon: createElement(CloseIcon),
       content: createElement(StylePanel),
-      width: 'flex',
+      width: 'auto',
       status: false,
     },
   };

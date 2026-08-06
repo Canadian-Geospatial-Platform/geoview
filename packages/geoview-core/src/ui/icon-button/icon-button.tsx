@@ -9,9 +9,9 @@ import { logger } from '@/core/utils/logger';
  * Extends Material-UI's IconButtonProps with tooltip support and accessibility enhancements.
  *
  * @property children - The icon or content to display inside the button
- * @property aria-label - Screen reader text for accessibility. An icon button will never have a text label so it needs a descriptive label for screen readers
+ * @property aria-label - Accessible label for screen readers (pre-translated string)
  * @property aria-disabled - Optional ARIA attribute to mark button as disabled without disabling pointer events (accepts boolean or string values per React standard)
- * @property tooltip - Optional tooltip text shown on hover (defaults to aria-label if not provided, set to null to disable)
+ * @property tooltip - Optional tooltip text (pre-translated string). Defaults to aria-label if omitted, set to null to disable
  * @property tooltipPlacement - Optional position of the tooltip (top, bottom, left, right, etc.)
  * @property tabIndex - Optional tab order for keyboard navigation
  * @property iconRef - Optional ref to access the button element
@@ -38,19 +38,28 @@ export interface IconButtonPropsExtend extends Omit<IconButtonProps, 'aria-label
  * Tooltip can either use the aria-label or be customized via tooltip prop.
  * All Material-UI IconButton props are supported and passed through directly.
  *
+ * **IMPORTANT:** This component expects pre-translated strings for `aria-label` and `tooltip`.
+ * Always call `t()` before passing values to this component.
+ *
+ * **Note on NavBar/AppBar configs:** When configuring buttons for NavBar/AppBar components,
+ * those configs accept translation keys (e.g., `'mapnav.zoomIn'`), which the bar components
+ * translate internally before passing to IconButton. This is a config-level pattern — the
+ * IconButton component itself still receives pre-translated strings.
+ *
  * @param props - IconButton configuration (see IconButtonPropsExtend interface)
  * @returns The icon button component
  *
  * @example
  * ```tsx
- * // Basic usage
- * <IconButton aria-label="Delete item">
+ * // Direct usage with translation (standard pattern)
+ * const { t } = useTranslation();
+ * <IconButton aria-label={t('general.delete')}>
  *   <DeleteIcon />
  * </IconButton>
  *
- *  // With implicit tooltip (aria-label)
+ * // With implicit tooltip (uses aria-label)
  * <IconButton
- *   aria-label="Delete item"
+ *   aria-label={t('general.delete')}
  *   tooltipPlacement="top"
  * >
  *   <DeleteIcon />
@@ -58,8 +67,8 @@ export interface IconButtonPropsExtend extends Omit<IconButtonProps, 'aria-label
  *
  * // With explicit tooltip
  * <IconButton
- *   aria-label="Delete item"
- *   tooltip="Delete item permanently"
+ *   aria-label={t('general.delete')}
+ *   tooltip={t('general.deleteItemPermanently')}
  *   tooltipPlacement="top"
  * >
  *   <DeleteIcon />
@@ -67,30 +76,10 @@ export interface IconButtonPropsExtend extends Omit<IconButtonProps, 'aria-label
  *
  * // Tooltip disabled (no tooltip on hover)
  * <IconButton
- * aria-label="Close dialog"
- * tooltip={null}
+ *   aria-label={t('general.close')}
+ *   tooltip={null}
  * >
- * <CloseIcon />
- * </IconButton>
- *
- * // With custom styling
- * <IconButton
- *   aria-label="Edit item"
- *   tooltip="Edit this item"
- *   className="custom-button"
- *   size="small"
- *   color="primary"
- * >
- *   <EditIcon />
- * </IconButton>
- *
- * // With disabled state
- * <IconButton
- *   aria-label="Save document"
- *   disabled={true}
- *   tooltip="Not available"
- * >
- *   <SaveIcon />
+ *   <CloseIcon />
  * </IconButton>
  * ```
  *
