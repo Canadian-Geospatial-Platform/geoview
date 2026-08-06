@@ -90,7 +90,7 @@ export class GVTestSuiteCore extends GVAbstractTestSuite {
     const pWmtsMetadataBadUrl = this.#coreTester.testGetWMTSServiceMetadataBadUrl();
 
     // Test GeoUtilities fetch with proxy fallback
-    const pFetchJsonProxy = this.#coreTester.testFetchJsonWithProxyFallback();
+    // const pFetchJsonProxy = this.#coreTester.testFetchJsonWithProxyFallback();
     const pFetchJsonProxyBadUrl = this.#coreTester.testFetchJsonWithProxyFallbackBadUrl();
 
     // Resolve when all
@@ -108,7 +108,7 @@ export class GVTestSuiteCore extends GVAbstractTestSuite {
       pWfsMetadataBadUrl,
       pWmtsMetadata,
       pWmtsMetadataBadUrl,
-      pFetchJsonProxy,
+      // pFetchJsonProxy,
       pFetchJsonProxyBadUrl,
     ]);
   }

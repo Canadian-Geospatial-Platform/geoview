@@ -370,6 +370,7 @@ export abstract class GVAbstractTester extends AbstractTester {
   static readonly TAIWAN_WMTS_URL: string = 'https://maps.nlsc.gov.tw/S_Maps/wmt';
 
   /** JSON endpoint (CORS blocked, triggers proxy fallback) */
+  // GV Not working anymore, url got blocked by NRCan, have to find another public CORS example to replace this test..
   static readonly PUBLIC_JSON_URL_CORS: string = 'https://fantasy.premierleague.com/api/bootstrap-static/';
 
   /** WMTS — ArcGIS World Timezones sample service */
