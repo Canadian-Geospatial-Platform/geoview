@@ -1,11 +1,12 @@
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
-import { delay, whenThisThen } from 'geoview-core/core/utils/utilities';
+import type { IDataTableSettings, TypeColumnFiltersState } from 'geoview-core/core/stores/states/data-table-state';
 import {
-  getStoreDataTableAllFeaturesDataArray,
+  getStoreDataTableFeaturesByPath,
   getStoreDataTableLayerSettings,
   getStoreDataTableMapFilteredRecord,
 } from 'geoview-core/core/stores/states/data-table-state';
+import type { TypeFeatureInfoEntry } from 'geoview-core/api/types/map-schema-types';
 
 /**
  * Main Data Table testing class.
@@ -23,111 +24,23 @@ export class DataTableTester extends GVAbstractTester {
     return 'DataTableTester';
   }
 
-  /**
-   * Opens the data-table footer tab and waits for layer settings to initialize.
-   *
-   * @param test - The test instance for step logging
-   * @param layerPath - The layer path to wait for
-   */
-  async #helperOpenDataTableAndWait<T>(test: Test<T>, layerPath: string): Promise<void> {
-    // Open the data-table tab to trigger component mount
-    test.addStep('Opening data-table footer tab...');
-    this.getControllersRegistry().uiController.setActiveFooterBarTab('data-table');
-
-    // Wait for the layer settings to be initialized by the component
-    test.addStep('Waiting for data table layer settings to initialize...');
-    await whenThisThen(() => {
-      const settings = getStoreDataTableLayerSettings(this.getMapId());
-      return settings[layerPath] !== undefined;
-    }, 15000);
-
-    // Select the layer in the data table
-    test.addStep('Selecting layer in data table...');
-    this.getControllersRegistry().dataTableController.setSelectedLayerPath(layerPath);
-    await delay(500);
-  }
+  // #region PUBLIC METHDOS
 
   /**
    * Tests that allFeaturesDataArray is populated after layer loads.
    *
    * @returns A promise resolving when the test completes
    */
-  testAllFeaturesDataArrayPopulated(): Promise<Test<unknown>> {
-    const layerPath = DataTableTester.GEOJSON_LAYER_PATH;
-
+  testAllFeaturesDataArrayPopulated(layerPath: string, expectedCount: number): Promise<Test<TypeFeatureInfoEntry[] | undefined>> {
     return this.test(
-      'Test allFeaturesDataArray is populated for GeoJSON layer...',
-      async (test) => {
+      `Test allFeaturesDataArray is populated for layer ${layerPath}...`,
+      (test) => {
         // Open the data table tab and wait for initialization
-        await this.#helperOpenDataTableAndWait(test, layerPath);
-
-        // Wait for the allFeaturesDataArray to have data for our layer
-        test.addStep('Waiting for allFeaturesDataArray to populate...');
-        await whenThisThen(() => {
-          const array = getStoreDataTableAllFeaturesDataArray(this.getMapId());
-          return array.some((entry) => entry.layerPath === layerPath && entry.features && entry.features.length > 0);
-        }, 15000);
-
-        // Get the features
-        const allFeaturesData = getStoreDataTableAllFeaturesDataArray(this.getMapId());
-        const layerData = allFeaturesData.find((entry) => entry.layerPath === layerPath);
-
-        return layerData;
+        return this.#helperOpenDataTableAndWait(test, layerPath);
       },
       (test, result) => {
         test.addStep('Verifying allFeaturesDataArray has entries for the layer...');
-        Test.assertIsDefined('layerData', result);
-        const layerData = result as { features: unknown[] };
-        Test.assertIsDefined('layerData.features', layerData.features);
-        Test.assertIsArrayLengthEqual(layerData.features, 4);
-      }
-    );
-  }
-
-  /**
-   * Tests that row count in store matches the expected feature count for the Commemorative Map layer.
-   *
-   * @returns A promise resolving when the test completes
-   */
-  testRowCountMatchesStore(): Promise<Test<unknown>> {
-    return this.test(
-      'Test row count matches allFeaturesDataArray length for Commemorative Map...',
-      async (test) => {
-        // First find the layer path from whatever is already available
-        test.addStep('Finding Commemorative Map layer path...');
-        await whenThisThen(() => {
-          const array = getStoreDataTableAllFeaturesDataArray(this.getMapId());
-          return array.some((entry) => entry.layerPath.includes('ccc75c12'));
-        }, 30000);
-
-        const allFeaturesData = getStoreDataTableAllFeaturesDataArray(this.getMapId());
-        const layerData = allFeaturesData.find((entry) => entry.layerPath.includes('ccc75c12'));
-        const { layerPath } = layerData!;
-
-        // Select the commemorative map layer in the data table (triggers feature query)
-        await this.#helperOpenDataTableAndWait(test, layerPath);
-
-        // Now wait for features to populate after selection
-        test.addStep('Waiting for Commemorative Map features to populate...');
-        await whenThisThen(() => {
-          const array = getStoreDataTableAllFeaturesDataArray(this.getMapId());
-          const entry = array.find((e) => e.layerPath === layerPath);
-          return entry?.features !== undefined && entry.features.length > 0;
-        }, 30000);
-
-        // Read features
-        const updatedData = getStoreDataTableAllFeaturesDataArray(this.getMapId());
-        const updatedLayerData = updatedData.find((entry) => entry.layerPath === layerPath);
-
-        return { featureCount: updatedLayerData?.features?.length ?? 0, layerPath };
-      },
-      (test, result) => {
-        const { featureCount, layerPath } = result as { featureCount: number; layerPath: string | undefined };
-        test.addStep(`Verifying Commemorative Map layer found (path: ${layerPath})...`);
-        Test.assertIsDefined('layerPath', layerPath);
-
-        test.addStep(`Verifying feature count is 598 (got ${featureCount})...`);
-        Test.assertIsEqual(featureCount, 598);
+        Test.assertIsArrayLengthEqual(result, expectedCount);
       }
     );
   }
@@ -137,9 +50,7 @@ export class DataTableTester extends GVAbstractTester {
    *
    * @returns A promise resolving when the test completes
    */
-  testGeoviewIdColumnHiddenByDefault(): Promise<Test<unknown>> {
-    const layerPath = DataTableTester.GEOJSON_LAYER_PATH;
-
+  testGeoviewIdColumnHiddenByDefault(layerPath: string): Promise<Test<IDataTableSettings>> {
     return this.test(
       'Test geoviewID column hidden by default...',
       async (test) => {
@@ -153,9 +64,8 @@ export class DataTableTester extends GVAbstractTester {
       (test, result) => {
         test.addStep('Verifying geoviewID column visibility is false...');
         Test.assertIsDefined('layerSettings', result);
-        const settings = result as { columnVisibilityRecord: Record<string, boolean> };
-        Test.assertIsDefined('columnVisibilityRecord', settings.columnVisibilityRecord);
-        Test.assertIsEqual(settings.columnVisibilityRecord.geoviewID, false);
+        Test.assertIsDefined('columnVisibilityRecord', result.columnVisibilityRecord);
+        Test.assertIsEqual(result.columnVisibilityRecord.geoviewID, false);
       }
     );
   }
@@ -165,9 +75,7 @@ export class DataTableTester extends GVAbstractTester {
    *
    * @returns A promise resolving when the test completes
    */
-  testMapFilteredRecordDefault(): Promise<Test<unknown>> {
-    const layerPath = DataTableTester.GEOJSON_LAYER_PATH;
-
+  testMapFilteredRecordDefault(layerPath: string): Promise<Test<{ mapFiltered: boolean | undefined }>> {
     return this.test(
       'Test mapFilteredRecord is true by default...',
       async (test) => {
@@ -179,7 +87,7 @@ export class DataTableTester extends GVAbstractTester {
         return { mapFiltered };
       },
       (test, result) => {
-        const { mapFiltered } = result as { mapFiltered: boolean | undefined };
+        const { mapFiltered } = result;
         test.addStep('Verifying mapFilteredRecord is true by default...');
         Test.assertIsEqual(mapFiltered, true);
       }
@@ -191,9 +99,7 @@ export class DataTableTester extends GVAbstractTester {
    *
    * @returns A promise resolving when the test completes
    */
-  testSetMapFilteredRecordFalse(): Promise<Test<unknown>> {
-    const layerPath = DataTableTester.GEOJSON_LAYER_PATH;
-
+  testSetMapFilteredRecordFalse(layerPath: string): Promise<Test<boolean | undefined>> {
     return this.test(
       'Test setting mapFilteredRecord to false...',
       async (test) => {
@@ -205,18 +111,16 @@ export class DataTableTester extends GVAbstractTester {
         this.getControllersRegistry().dataTableController.setMapFilteredRecord(layerPath, false);
 
         // Read back
-        const mapFiltered = getStoreDataTableMapFilteredRecord(this.getMapId(), layerPath);
-
+        return getStoreDataTableMapFilteredRecord(this.getMapId(), layerPath);
+      },
+      (test, result) => {
+        test.addStep('Verifying mapFilteredRecord was set to false...');
+        Test.assertIsEqual(result, false);
+      },
+      (test) => {
         // Restore to true
         test.addStep('Restoring mapFilteredRecord to true...');
         this.getControllersRegistry().dataTableController.setMapFilteredRecord(layerPath, true);
-
-        return { mapFiltered };
-      },
-      (test, result) => {
-        const { mapFiltered } = result as { mapFiltered: boolean | undefined };
-        test.addStep('Verifying mapFilteredRecord was set to false...');
-        Test.assertIsEqual(mapFiltered, false);
       }
     );
   }
@@ -226,9 +130,10 @@ export class DataTableTester extends GVAbstractTester {
    *
    * @returns A promise resolving when the test completes
    */
-  testGlobalFilterRecord(): Promise<Test<unknown>> {
-    const layerPath = DataTableTester.GEOJSON_LAYER_PATH;
-
+  testGlobalFilterRecord(
+    layerPath: string,
+    globalFilterValue: string
+  ): Promise<Test<{ globalFilter: string; isFilterMapDisabled: boolean }>> {
     return this.test(
       'Test global filter record updates store and disables map filter toggle...',
       async (test) => {
@@ -239,9 +144,8 @@ export class DataTableTester extends GVAbstractTester {
         this.getControllersRegistry().dataTableController.setMapFilteredRecord(layerPath, true);
 
         // Set a global filter
-        test.addStep('Setting global filter to "Ontario"...');
-        this.getControllersRegistry().dataTableController.setGlobalFilterRecord(layerPath, 'Ontario');
-        await delay(500);
+        test.addStep(`Setting global filter to '${globalFilterValue}'...`);
+        this.getControllersRegistry().dataTableController.setGlobalFilterRecord(layerPath, globalFilterValue);
 
         // Read back global filter value from store
         const settings = getStoreDataTableLayerSettings(this.getMapId());
@@ -267,9 +171,9 @@ export class DataTableTester extends GVAbstractTester {
         return { globalFilter, isFilterMapDisabled };
       },
       (test, result) => {
-        const { globalFilter, isFilterMapDisabled } = result as { globalFilter: string; isFilterMapDisabled: boolean };
-        test.addStep('Verifying global filter was set to "Ontario"...');
-        Test.assertIsEqual(globalFilter, 'Ontario');
+        const { globalFilter, isFilterMapDisabled } = result;
+        test.addStep(`Verifying global filter was set to ${globalFilterValue}'...`);
+        Test.assertIsEqual(globalFilter, globalFilterValue);
 
         test.addStep('Verifying filter-map switch is disabled in DOM when global filter is active...');
         Test.assertIsEqual(isFilterMapDisabled, true);
@@ -286,25 +190,19 @@ export class DataTableTester extends GVAbstractTester {
    *
    * @returns A promise resolving when the test completes
    */
-  testClearFiltersResetsState(): Promise<Test<unknown>> {
+  testClearFiltersResetsState(
+    layerPath: string,
+    columnFilters: TypeColumnFiltersState
+  ): Promise<Test<{ filtersBefore: unknown[]; filtersAfter: unknown[] }>> {
     return this.test(
-      'Test clear filters resets columnFiltersRecord on Commemorative Map...',
+      'Test clear filters resets columnFiltersRecord...',
       async (test) => {
-        // Find the Commemorative Map layer path
-        test.addStep('Finding Commemorative Map layer path...');
-        const allFeaturesData = getStoreDataTableAllFeaturesDataArray(this.getMapId());
-        const layerData = allFeaturesData.find((entry) => entry.layerPath.includes('ccc75c12'));
-        const { layerPath } = layerData!;
-
         // Open the data table tab and wait for initialization
         await this.#helperOpenDataTableAndWait(test, layerPath);
 
-        // Set column filters in store (2 entries)
-        test.addStep('Setting column filters (JUR_EN + CONFLICT_EN) in store...');
-        this.getControllersRegistry().dataTableController.setColumnFiltersRecord(layerPath, [
-          { id: 'JUR_EN', value: 'Ontario' },
-          { id: 'CONFLICT_EN', value: 'First' },
-        ]);
+        // Set column filters in store
+        test.addStep(`Setting column filters on ${columnFilters.length} columns in store...`);
+        this.getControllersRegistry().dataTableController.setColumnFiltersRecord(layerPath, columnFilters);
 
         // Verify they were set
         const settingsBefore = getStoreDataTableLayerSettings(this.getMapId());
@@ -321,9 +219,9 @@ export class DataTableTester extends GVAbstractTester {
         return { filtersBefore, filtersAfter };
       },
       (test, result) => {
-        const { filtersBefore, filtersAfter } = result as { filtersBefore: unknown[]; filtersAfter: unknown[] };
-        test.addStep('Verifying filters were set (2 entries)...');
-        Test.assertIsArrayLengthEqual(filtersBefore, 2);
+        const { filtersBefore, filtersAfter } = result;
+        test.addStep(`Verifying filters were set (${columnFilters.length} entries)...`);
+        Test.assertIsArrayLengthEqual(filtersBefore, columnFilters.length);
 
         test.addStep('Verifying filters are empty after clear...');
         Test.assertIsArrayLengthEqual(filtersAfter, 0);
@@ -336,9 +234,7 @@ export class DataTableTester extends GVAbstractTester {
    *
    * @returns A promise resolving when the test completes
    */
-  testColumnVisibilityToggle(): Promise<Test<unknown>> {
-    const layerPath = DataTableTester.GEOJSON_LAYER_PATH;
-
+  testColumnVisibilityToggle(layerPath: string, col1: string, col2: string): Promise<Test<Record<string, boolean>>> {
     return this.test(
       'Test column visibility toggle updates store...',
       async (test) => {
@@ -357,15 +253,14 @@ export class DataTableTester extends GVAbstractTester {
         test.addStep('Restoring column visibility...');
         this.getControllersRegistry().dataTableController.setColumnVisibilityRecord(layerPath, { geoviewID: false });
 
-        return { visibilityAfterHide };
+        return visibilityAfterHide;
       },
       (test, result) => {
-        const { visibilityAfterHide } = result as { visibilityAfterHide: Record<string, boolean> };
-        test.addStep('Verifying Province column is hidden...');
-        Test.assertIsEqual(visibilityAfterHide.Province, false);
+        test.addStep(`Verifying ${col1} column is hidden...`);
+        Test.assertIsEqual(result[col1], false);
 
-        test.addStep('Verifying geoviewID column is still hidden...');
-        Test.assertIsEqual(visibilityAfterHide.geoviewID, false);
+        test.addStep(`Verifying ${col2} column is still hidden...`);
+        Test.assertIsEqual(result[col2], false);
       }
     );
   }
@@ -375,9 +270,7 @@ export class DataTableTester extends GVAbstractTester {
    *
    * @returns A promise resolving when the test completes
    */
-  testRowsFilteredRecordCount(): Promise<Test<unknown>> {
-    const layerPath = DataTableTester.GEOJSON_LAYER_PATH;
-
+  testRowsFilteredRecordCount(layerPath: string, rows: number): Promise<Test<number>> {
     return this.test(
       'Test rowsFilteredRecord updates in store...',
       async (test) => {
@@ -385,8 +278,8 @@ export class DataTableTester extends GVAbstractTester {
         await this.#helperOpenDataTableAndWait(test, layerPath);
 
         // Set rows filtered count
-        test.addStep('Setting rowsFilteredRecord to 3...');
-        this.getControllersRegistry().dataTableController.setRowsFilteredRecord(layerPath, 3);
+        test.addStep(`Setting rowsFilteredRecord to ${rows}...`);
+        this.getControllersRegistry().dataTableController.setRowsFilteredRecord(layerPath, rows);
 
         // Read back
         const settings = getStoreDataTableLayerSettings(this.getMapId());
@@ -396,12 +289,44 @@ export class DataTableTester extends GVAbstractTester {
         test.addStep('Resetting rowsFilteredRecord to 0...');
         this.getControllersRegistry().dataTableController.setRowsFilteredRecord(layerPath, 0);
 
-        return { rowsFiltered };
+        return rowsFiltered;
       },
       (test, result) => {
-        const { rowsFiltered } = result as { rowsFiltered: number };
-        test.addStep('Verifying rowsFilteredRecord is 3...');
-        Test.assertIsEqual(rowsFiltered, 3);
+        test.addStep(`Verifying rowsFilteredRecord is ${rows}...`);
+        Test.assertIsEqual(result, rows);
+      }
+    );
+  }
+
+  /**
+   * Tests that filter-by-extent toggle is present for vector layers.
+   *
+   * @returns A promise resolving when the test completes
+   */
+  testFilterByExtentAvailableForVector(layerPath: string): Promise<Test<boolean>> {
+    return this.test(
+      'Test filter-by-extent toggle present for vector layer...',
+      async (test) => {
+        // Open the data table tab and select the vector layer
+        await this.#helperOpenDataTableAndWait(test, layerPath);
+
+        // Check DOM — FilterDataToExtent IS rendered for vector layers
+        test.addStep('Checking DOM for presence of filter-by-extent switch...');
+        const mapId = this.getMapId();
+        const mapContainer = document.getElementById(mapId);
+        const allSwitchLabels = mapContainer?.querySelectorAll('.MuiFormControlLabel-root') ?? [];
+        let filterByExtentFound = false;
+        allSwitchLabels.forEach((label) => {
+          if (label.textContent?.includes('filter') && label.textContent?.includes('extent')) {
+            filterByExtentFound = true;
+          }
+        });
+
+        return filterByExtentFound;
+      },
+      (test, result) => {
+        test.addStep('Verifying filter-by-extent toggle IS present for vector layer...');
+        Test.assertIsEqual(result, true);
       }
     );
   }
@@ -411,24 +336,12 @@ export class DataTableTester extends GVAbstractTester {
    *
    * @returns A promise resolving when the test completes
    */
-  testFilterByExtentUnavailableForEsriDynamic(): Promise<Test<unknown>> {
+  testFilterByExtentUnavailableForEsriDynamic(layerPath: string): Promise<Test<boolean>> {
     return this.test(
       'Test filter-by-extent toggle absent for Esri Dynamic layer...',
       async (test) => {
-        // Find the Esri Dynamic (Forest Industry) layer path
-        test.addStep('Finding Esri Dynamic layer path...');
-        const allFeaturesData = getStoreDataTableAllFeaturesDataArray(this.getMapId());
-        const layerData = allFeaturesData.find((entry) => entry.layerPath.includes('forest_industry'));
-
-        // If not found by URL fragment, find by checking geoviewLayerType
-        const esriDynamicLayerPath = layerData?.layerPath;
-        Test.assertIsDefined('esriDynamicLayerPath', esriDynamicLayerPath);
-
         // Open the data table tab and select the Esri Dynamic layer
-        await this.#helperOpenDataTableAndWait(test, esriDynamicLayerPath);
-
-        // Wait for UI to render
-        await delay(500);
+        await this.#helperOpenDataTableAndWait(test, layerPath);
 
         // Check DOM — FilterDataToExtent is NOT rendered for Esri Dynamic (conditional: {!isEsriDynamic && ...})
         // The component uses the label t('dataTable.filterDataToExtent') — look for its absence
@@ -443,12 +356,11 @@ export class DataTableTester extends GVAbstractTester {
           }
         });
 
-        return { filterByExtentFound };
+        return filterByExtentFound;
       },
       (test, result) => {
-        const { filterByExtentFound } = result as { filterByExtentFound: boolean };
         test.addStep('Verifying filter-by-extent toggle is NOT present for Esri Dynamic...');
-        Test.assertIsEqual(filterByExtentFound, false);
+        Test.assertIsEqual(result, false);
       }
     );
   }
@@ -458,7 +370,7 @@ export class DataTableTester extends GVAbstractTester {
    *
    * @returns A promise resolving when the test completes
    */
-  testFilterByExtentOnGeoJSON(): Promise<Test<unknown>> {
+  testFilterByExtentOnGeoJSONOntario(): Promise<Test<unknown>> {
     const layerPath = DataTableTester.GEOJSON_LAYER_PATH;
 
     return this.test(
@@ -476,30 +388,34 @@ export class DataTableTester extends GVAbstractTester {
 
         // Wait for render after zoom
         await this.getMapViewer().waitForRender();
-        await delay(1000);
 
-        // Enable filter by extent and nudge map to trigger re-filtering
+        // Get the dom element we want to track for changes
+        test.addStep('Waiting for filter-results-summary to render...');
+        const summaryEl = await GVAbstractTester.waitForDomElement(`#${this.getMapId()} .filter-results-summary`);
+
+        // Start observing for DOM change, then trigger the store change
         test.addStep('Enabling filter by extent...');
+        let domChanged = GVAbstractTester.waitForDomChange(summaryEl);
         this.getControllersRegistry().dataTableController.setFilterDataToExtent(layerPath, true);
-        this.getControllersRegistry().mapController.nudgeMapCenter(0.00001, 0);
-        await delay(2000);
+
+        // Wait for the UI to react to the store change
+        await domChanged;
 
         // Read DOM summary text with filter enabled
         test.addStep('Reading filter-results-summary with extent filter ON...');
-        const mapId = this.getMapId();
-        const summaryElEnabled = document.querySelector(`#${mapId} .filter-results-summary`);
-        const summaryTextEnabled = summaryElEnabled?.textContent ?? '';
+        const summaryTextEnabled = summaryEl.textContent;
 
-        // Disable filter by extent and nudge to trigger reset
+        // Start observing for DOM change, then disable filter by extent
         test.addStep('Disabling filter by extent...');
+        domChanged = GVAbstractTester.waitForDomChange(summaryEl);
         this.getControllersRegistry().dataTableController.setFilterDataToExtent(layerPath, false);
-        this.getControllersRegistry().mapController.nudgeMapCenter(-0.00001, 0);
-        await delay(2000);
+
+        // Wait for the UI to react to the store change
+        await domChanged;
 
         // Read DOM summary text with filter disabled
         test.addStep('Reading filter-results-summary with extent filter OFF...');
-        const summaryElDisabled = document.querySelector(`#${mapId} .filter-results-summary`);
-        const summaryTextDisabled = summaryElDisabled?.textContent ?? '';
+        const summaryTextDisabled = summaryEl.textContent;
 
         return { summaryTextEnabled, summaryTextDisabled };
       },
@@ -520,54 +436,67 @@ export class DataTableTester extends GVAbstractTester {
    *
    * @returns A promise resolving when the test completes
    */
-  testShowUnsymbolizedFeaturesFalsePrefiltersTable(): Promise<Test<unknown>> {
+  testShowUnsymbolizedFeaturesFalsePrefiltersTable(
+    layerPath: string,
+    countFilter: number,
+    countTotal: number
+  ): Promise<Test<{ featureCount: number; summaryText: string }>> {
     return this.test(
       'Test showUnsymbolizedFeatures false pre-filters data table (68 of 213)...',
       async (test) => {
-        // Find the geocore layer (4baa66ad) path in allFeaturesDataArray
-        test.addStep('Waiting for geocore layer (4baa66ad) to appear...');
-        await whenThisThen(() => {
-          const array = getStoreDataTableAllFeaturesDataArray(this.getMapId());
-          return array.some((entry) => entry.layerPath.includes('4baa66ad'));
-        }, 30000);
-
-        const allFeaturesData = getStoreDataTableAllFeaturesDataArray(this.getMapId());
-        const layerData = allFeaturesData.find((entry) => entry.layerPath.includes('4baa66ad'));
-        const { layerPath } = layerData!;
-
         // Select the permafrost layer in the data table
-        await this.#helperOpenDataTableAndWait(test, layerPath);
+        const features = await this.#helperOpenDataTableAndWait(test, layerPath);
+        const featureCount = features?.length ?? 0;
 
-        // Wait for features to populate after selection
-        test.addStep('Waiting for features to populate...');
-        await whenThisThen(() => {
-          const array = getStoreDataTableAllFeaturesDataArray(this.getMapId());
-          const entry = array.find((e) => e.layerPath === layerPath);
-          return entry?.features !== undefined && entry.features.length > 0;
-        }, 30000);
-
-        const updatedData = getStoreDataTableAllFeaturesDataArray(this.getMapId());
-        const updatedLayerData = updatedData.find((entry) => entry.layerPath === layerPath);
-        const featureCount = updatedLayerData?.features?.length ?? 0;
+        // Wait for the dom element we want to check for content
+        test.addStep('Waiting for filter-results-summary to render with the content...');
+        const summaryEl = await GVAbstractTester.waitForDomElement(`#${this.getMapId()} .filter-results-summary`);
 
         // Check the DOM for the filter results summary text
         test.addStep('Checking DOM for filter-results-summary...');
-        await delay(500);
-        const mapId = this.getMapId();
-        const summaryEl = document.querySelector(`#${mapId} .filter-results-summary`);
-        const summaryText = summaryEl?.textContent ?? '';
+        const summaryText = summaryEl.textContent;
 
-        return { featureCount, layerPath, summaryText };
+        return { featureCount, summaryText };
       },
       (test, result) => {
-        const { layerPath, summaryText } = result as { featureCount: number; layerPath: string | undefined; summaryText: string };
-        test.addStep(`Verifying geocore layer found (path: ${layerPath})...`);
-        Test.assertIsDefined('layerPath', layerPath);
-
-        test.addStep(`Verifying DOM summary shows "68 feature(s) showing (213 total)" (got "${summaryText}")...`);
-        Test.assertIsEqual(summaryText.includes('68'), true);
-        Test.assertIsEqual(summaryText.includes('213'), true);
+        const { summaryText } = result;
+        test.addStep(`Verifying DOM summary shows "${countFilter} feature(s) showing (${countTotal} total)" (got "${summaryText}")...`);
+        Test.assertIsEqual(summaryText.includes(countFilter.toString()), true);
+        Test.assertIsEqual(summaryText.includes(countTotal.toString()), true);
       }
     );
   }
+
+  // #endregion PUBLIC METHDOS
+
+  // #region PRIVATE METHDOS
+
+  /**
+   * Opens the data-table footer tab and waits for layer settings to initialize.
+   *
+   * @param test - The test instance for step logging
+   * @param layerPath - The layer path to wait for
+   */
+  async #helperOpenDataTableAndWait<T>(test: Test<T>, layerPath: string): Promise<TypeFeatureInfoEntry[] | undefined> {
+    // Open the data-table tab to trigger component mount
+    test.addStep('Opening data-table footer tab...');
+    this.getControllersRegistry().uiController.setActiveFooterBarTab('data-table');
+
+    // Wait for the layer to be queried and data-table filled
+    test.addStep('Wait for the layer path to be registered...');
+    await this.getControllersRegistry().layerSetController.allFeatureInfoLayerSet.waitForLayerToGetRegistered(layerPath);
+
+    // Select the layer in the data table
+    test.addStep('Selecting layer in data-table...');
+    this.getControllersRegistry().dataTableController.setSelectedLayerPath(layerPath);
+
+    // Wait for the layer to be queried and data-table filled
+    test.addStep('Wait for the layer data to be processed in the data-table...');
+    await this.getControllersRegistry().layerSetController.allFeatureInfoLayerSet.waitForLayerQueryToFinish(layerPath);
+
+    // Read features in the store
+    return getStoreDataTableFeaturesByPath(this.getMapId(), layerPath);
+  }
+
+  // #endregion PRIVATE METHDOS
 }

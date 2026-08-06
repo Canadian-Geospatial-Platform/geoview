@@ -67,24 +67,30 @@ export class GVTestSuiteDataTable extends GVAbstractTestSuite {
    *
    * @returns A promise that resolves when tests are completed
    */
-  protected override async onLaunchTestSuite(): Promise<unknown> {
-    // Wait for all layers to be loaded before running data table tests
-    await this.getControllersRegistry().layerController.waitForLayersLoaded();
+  protected override async onLaunchTestSuite(): Promise<void> {
+    // // GV START DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
+    // // Test DEBUG
+    // const pDevTest0 = this.#dataTableTester.testFilterByExtentOnGeoJSONOntario();
+
+    // // Resolve when all
+    // return Promise.all([pDevTest0]);
+    // // GV END DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
 
     // Sequential — tests interact with shared data table state
-    await this.#dataTableTester.testAllFeaturesDataArrayPopulated();
-    await this.#dataTableTester.testRowCountMatchesStore();
-    await this.#dataTableTester.testGeoviewIdColumnHiddenByDefault();
-    await this.#dataTableTester.testMapFilteredRecordDefault();
-    await this.#dataTableTester.testSetMapFilteredRecordFalse();
-    await this.#dataTableTester.testGlobalFilterRecord();
-    await this.#dataTableTester.testClearFiltersResetsState();
-    await this.#dataTableTester.testColumnVisibilityToggle();
-    await this.#dataTableTester.testRowsFilteredRecordCount();
-    await this.#dataTableTester.testFilterByExtentUnavailableForEsriDynamic();
-    await this.#dataTableTester.testFilterByExtentOnGeoJSON();
-    await this.#dataTableTester.testShowUnsymbolizedFeaturesFalsePrefiltersTable();
-
-    return Promise.resolve();
+    await this.#dataTableTester.testAllFeaturesDataArrayPopulated(DataTableTester.GEOJSON_LAYER_PATH, 4);
+    await this.#dataTableTester.testAllFeaturesDataArrayPopulated('ccc75c12-5acc-4a6a-959f-ef6f621147b9/0', 598);
+    await this.#dataTableTester.testGeoviewIdColumnHiddenByDefault(DataTableTester.GEOJSON_LAYER_PATH);
+    await this.#dataTableTester.testMapFilteredRecordDefault(DataTableTester.GEOJSON_LAYER_PATH);
+    await this.#dataTableTester.testSetMapFilteredRecordFalse(DataTableTester.GEOJSON_LAYER_PATH);
+    await this.#dataTableTester.testGlobalFilterRecord(DataTableTester.GEOJSON_LAYER_PATH, 'Ontario');
+    await this.#dataTableTester.testClearFiltersResetsState('ccc75c12-5acc-4a6a-959f-ef6f621147b9/0', [
+      { id: 'JUR_EN', value: 'Ontario' },
+      { id: 'CONFLICT_EN', value: 'First' },
+    ]);
+    await this.#dataTableTester.testColumnVisibilityToggle(DataTableTester.GEOJSON_LAYER_PATH, 'Province', 'geoviewID');
+    await this.#dataTableTester.testRowsFilteredRecordCount(DataTableTester.GEOJSON_LAYER_PATH, 3);
+    await this.#dataTableTester.testFilterByExtentUnavailableForEsriDynamic('forest_industry/0');
+    await this.#dataTableTester.testFilterByExtentOnGeoJSONOntario();
+    await this.#dataTableTester.testShowUnsymbolizedFeaturesFalsePrefiltersTable('4baa66ad-aa29-4233-a6a8-7f5cbefb5ea8/6', 68, 213);
   }
 }

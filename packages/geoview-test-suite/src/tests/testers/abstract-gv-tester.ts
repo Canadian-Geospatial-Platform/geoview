@@ -627,4 +627,105 @@ export abstract class GVAbstractTester extends AbstractTester {
     const legendLayer = getStoreLayerLegendLayerByPath(this.getMapId(), layerPath);
     Test.assertIsUndefined('legendLayer', legendLayer);
   }
+
+  /**
+   * Returns a promise that resolves when an element matching the given selector exists in the DOM.
+   *
+   * Resolves immediately if the element already exists. Otherwise, uses a MutationObserver on the parent
+   * to wait for the element to appear. Useful for waiting on React to mount a component.
+   *
+   * @param selector - The CSS selector to query for
+   * @param parent - Optional parent element to observe (default: document.body)
+   * @param timeout - Optional maximum duration in milliseconds to wait before rejecting. When omitted, waits indefinitely
+   * @returns A promise that resolves with the matched element
+   */
+  static waitForDomElement(selector: string, parent?: Element, timeout?: number): Promise<Element> {
+    const root = parent ?? document.body;
+
+    // If the element already exists, resolve immediately
+    const existing = root.querySelector(selector);
+    if (existing) {
+      return Promise.resolve(existing);
+    }
+
+    return new Promise<Element>((resolve, reject) => {
+      const state = { resolved: false };
+      const observer = new MutationObserver(() => {
+        if (state.resolved) return;
+        const el = root.querySelector(selector);
+        if (el) {
+          state.resolved = true;
+          observer.disconnect();
+          resolve(el);
+        }
+      });
+      observer.observe(root, { childList: true, subtree: true });
+
+      // Only set up the timeout when a duration is provided; otherwise wait indefinitely
+      if (timeout !== undefined) {
+        setTimeout(() => {
+          if (state.resolved) return;
+          state.resolved = true;
+          observer.disconnect();
+          reject(new Error(`waitForDomElement timed out after ${timeout}ms waiting for "${selector}"`));
+        }, timeout);
+      }
+    });
+  }
+
+  /**
+   * Returns a promise that resolves when the given element has non-empty text content.
+   *
+   * Resolves immediately if the element already has text content. Otherwise, delegates to waitForDomChange
+   * with a filter that checks for non-empty text. Useful for waiting on React to render text into a DOM element.
+   *
+   * @param element - The DOM element to check for text content
+   * @param timeout - Optional maximum duration in milliseconds to wait before rejecting. When omitted, waits indefinitely
+   * @returns A promise that resolves when the element has text content, or rejects on timeout
+   */
+  static waitForDomContent(element: Element, timeout?: number): Promise<void> {
+    // If the element already has content, resolve immediately
+    if (element.textContent?.trim()) {
+      return Promise.resolve();
+    }
+
+    // Otherwise, wait for a DOM change that results in non-empty text content
+    return GVAbstractTester.waitForDomChange(element, () => !!element.textContent?.trim(), timeout);
+  }
+
+  /**
+   * Returns a promise that resolves when a DOM mutation is observed on the given element.
+   *
+   * Uses a MutationObserver to detect changes (childList, subtree, characterData) without polling.
+   * Useful for waiting on React UI updates after a store change.
+   * When a filter is provided, the observer keeps listening until the filter returns true.
+   *
+   * @param element - The DOM element to observe for changes
+   * @param filter - Optional predicate evaluated on each mutation. When provided, only resolves when filter returns true
+   * @param timeout - Optional maximum duration in milliseconds to wait before rejecting. When omitted, waits indefinitely
+   * @returns A promise that resolves when the DOM changes (and passes the filter), or rejects on timeout
+   */
+  static waitForDomChange(element: Element, filter?: () => boolean, timeout?: number): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const state = { resolved: false };
+      const observer = new MutationObserver(() => {
+        if (state.resolved) return;
+        if (filter && !filter()) return;
+        state.resolved = true;
+        observer.disconnect();
+        resolve();
+      });
+      observer.observe(element, { childList: true, subtree: true, characterData: true });
+
+      // Only set up the timeout when a duration is provided; otherwise wait indefinitely
+      if (timeout !== undefined) {
+        setTimeout(() => {
+          if (state.resolved) return;
+          state.resolved = true;
+          observer.disconnect();
+          reject(new Error(`waitForDomChange timed out after ${timeout}ms`));
+        }, timeout);
+      }
+    });
+  }
 }

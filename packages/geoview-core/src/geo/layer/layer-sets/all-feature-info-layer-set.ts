@@ -186,14 +186,13 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
    * This method returns a promise that resolves when the query status for the given `layerPath` in the store is 'processed'.
    *
    * @param layerPath - The unique path identifying the layer to check
+   * @param timeout - Optional maximum duration in milliseconds to wait before rejecting
    * @returns A promise that resolves when the query status is 'processed'
    */
-  waitForLayerQueryToFinish(layerPath: string): Promise<void> {
+  async waitForLayerQueryToFinish(layerPath: string, timeout?: number): Promise<void> {
     // First, check synchronously — the query may have ALREADY finished
     if (getStoreDataTableQueryStatus(this.getMapId(), layerPath) === 'processed') return Promise.resolve();
-
-    // Otherwise, wait for the specific layer path to be queried
-    return this.onceLayerQueried((event) => event.layerPath === layerPath).then(() => {});
+    await this.onceLayerQueried((event) => event.layerPath === layerPath, timeout);
   }
 
   // #endregion PUBLIC METHODS
@@ -214,11 +213,12 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
    * Returns a promise that resolves the next time the layer queried event fires.
    *
    * @param filter - Optional filter predicate. When provided, only events passing the filter resolve the promise
+   * @param timeout - Optional maximum duration in milliseconds to wait before rejecting
    * @returns A promise that resolves with the event payload when layer queried fires (and passes the filter)
    */
-  onceLayerQueried(filter?: (event: LayerQueriedEvent) => boolean): Promise<LayerQueriedEvent> {
+  onceLayerQueried(filter?: (event: LayerQueriedEvent) => boolean, timeout?: number): Promise<LayerQueriedEvent> {
     // Register a one-shot event handler that resolves a promise
-    return EventHelper.onceEventPromise(this.#onLayerQueriedHandlers, filter);
+    return EventHelper.onceEventPromise(this.#onLayerQueriedHandlers, filter, timeout);
   }
 
   /**
