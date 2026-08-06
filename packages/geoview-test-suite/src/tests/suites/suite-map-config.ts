@@ -41,7 +41,15 @@ export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
    * @returns The description of the Test Suite
    */
   override getDescriptionAsHtml(): string {
-    return 'Test Suite to perform various map configuration related tests';
+    return `Tests map configuration overrides by creating fresh map instances:<br/>
+      <b>Footer/App bar</b> — Tab selection, default/empty configs<br/>
+      <b>Nav bar</b> — Default controls, empty array fallback<br/>
+      <b>View settings</b> — Zoom constraints, initialView vs homeView, home button navigation<br/>
+      <b>Components</b> — Overview map (present/absent/hideOnZoom/reprojection), North arrow<br/>
+      <b>Overlays</b> — Point markers from config<br/>
+      <b>initialSettings</b> — Controls (all false, remove cascading), states (visible, opacity, queryable, hoverable),<br/>
+      &nbsp;&nbsp;legend collapsed, filters (GeoJSON, OGC Feature, WFS, ESRI Dynamic, ESRI Feature),<br/>
+      &nbsp;&nbsp;opacity parent-child capping, runtime parent opacity change`;
   }
 
   /**

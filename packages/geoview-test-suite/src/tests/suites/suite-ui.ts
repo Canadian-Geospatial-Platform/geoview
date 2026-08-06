@@ -41,7 +41,8 @@ export class GVTestSuiteUI extends GVAbstractTestSuite {
    * @returns The description of the Test Suite
    */
   override getDescriptionAsHtml(): string {
-    return 'Test Suite to perform UI related tests';
+    return `Tests UI component rendering and DOM structure:<br/>
+      <b>Guide/Details</b> — Panel top anchor positioning and scroll behavior`;
   }
 
   /**

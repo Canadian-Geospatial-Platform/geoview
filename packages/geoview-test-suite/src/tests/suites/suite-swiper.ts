@@ -42,7 +42,8 @@ export class GVTestSuiteSwiper extends GVAbstractTestSuite {
    * @returns The description of the Test Suite
    */
   override getDescriptionAsHtml(): string {
-    return 'Test Suite to perform various Swiper plugin related tests.';
+    return `Tests the Swiper plugin lifecycle:<br/>
+      <b>Lifecycle</b> — Plugin initialization, layer assignment, drag interaction, and cleanup`;
   }
 
   /**

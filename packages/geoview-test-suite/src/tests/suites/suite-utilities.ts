@@ -57,7 +57,15 @@ export class GVTestSuiteUtilities extends GVAbstractTestSuite {
    * @returns The description of the Test Suite
    */
   override getDescriptionAsHtml(): string {
-    return 'Test Suite for cgpv.api.utilities — core, date, geo, and projection functions.';
+    return `Tests cgpv.api.utilities — pure function unit tests:<br/>
+      <b>Core</b> — range, camelCase, deepEqual, deepClone, deepMerge, shallowEquals, isNumeric,<br/>
+      &nbsp;&nbsp;generateId/isValidUUID, setAlphaColor, isJsonString, escapeRegExp, stringify,<br/>
+      &nbsp;&nbsp;sanitizeHtmlContent, enhanceLinksAccessibility, getLocalizedMessage<br/>
+      <b>Date</b> — formatDate, ISO short, toMilliseconds, tryParseDate, hasTimeComponents,<br/>
+      &nbsp;&nbsp;isValidTimezone, createRangeOGC, epoch timestamps, US standard, special formats<br/>
+      <b>Geo</b> — getBaseUrl, getMapServerUrl, DMS format, isPointInExtent, extent union/intersection,<br/>
+      &nbsp;&nbsp;bufferExtent, isGeoJSONObject, geometryType conversions, ensureServiceRequestUrl<br/>
+      <b>Projection</b> — projection names, readEPSGNumber, getLonLat, transformPoints, transformExtent`;
   }
 
   /**

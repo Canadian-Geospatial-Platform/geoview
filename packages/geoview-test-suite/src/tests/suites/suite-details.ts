@@ -43,7 +43,11 @@ export class GVTestSuiteDetails extends GVAbstractTestSuite {
    * @returns The description of the Test Suite
    */
   override getDescriptionAsHtml(): string {
-    return 'Test Suite to perform various Details related tests.';
+    return `Tests the Details panel feature info display and interaction:<br/>
+      <b>Feature info</b> — Query GeoJSON layer at Ontario/Alberta extent<br/>
+      <b>Highlight</b> — Clear all highlights after selection<br/>
+      <b>Navigation</b> — Zoom to feature from details panel<br/>
+      <b>Config overrides</b> — nameField as label, summary:false hides field, field alias renaming`;
   }
 
   /**

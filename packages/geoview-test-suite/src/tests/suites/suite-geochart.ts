@@ -43,7 +43,9 @@ export class GVTestSuiteGeochart extends GVAbstractTestSuite {
    * @returns The description of the Test Suite
    */
   override getDescriptionAsHtml(): string {
-    return 'Test Suite to perform various Geochart related tests.';
+    return `Tests the Geochart plugin integration:<br/>
+      <b>Interaction</b> — Open geochart panel via simulated map click on layer<br/>
+      <b>GeoCore</b> — Add layer by UUID and verify geochart config loading`;
   }
 
   /**

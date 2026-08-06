@@ -42,7 +42,15 @@ export class GVTestSuiteMapVaria extends GVAbstractTestSuite {
    * @returns The description of the Test Suite
    */
   override getDescriptionAsHtml(): string {
-    return 'Test Suite to perform various map related tests.';
+    return `Tests map interactions, projection, basemap, and UI tabs:<br/>
+      <b>Map state</b> — Initial state verification, zoom operations, extent/coordinate navigation<br/>
+      <b>Projection</b> — Switch between EPSG:3978 and EPSG:3857, vector tile warning<br/>
+      <b>Basemap</b> — Runtime basemap creation and activation<br/>
+      <b>North arrow</b> — Rotation computation under LCC projection<br/>
+      <b>UI tabs</b> — Footer bar select/create tab, app bar select tab<br/>
+      <b>Language</b> — Runtime language switch<br/>
+      <b>Layers</b> — Non-queryable exclusion from details, hoverable state, geometry group z-index<br/>
+      <b>Details</b> — Layer selection persistence across tab switches`;
   }
 
   /**

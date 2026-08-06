@@ -42,7 +42,14 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
    * @returns The description of the Test Suite
    */
   override getDescriptionAsHtml(): string {
-    return 'Test Suite to perform various layer related tests.';
+    return `Tests adding layers to the map, verifying load status and legend icons:<br/>
+      <b>ESRI</b> — Dynamic, Feature, Image (+ bad URL, invalid geometry, domain fields)<br/>
+      <b>OGC</b> — WMS (multiple services + CORS proxy), WFS, WMTS (+ bad URLs)<br/>
+      <b>File-based</b> — GeoJSON, CSV, OGC Feature, WKB, KML, GeoTIFF (+ bad URLs)<br/>
+      <b>Tiles</b> — XYZ (OSM), Vector Tiles (CBMT) (+ bad URLs)<br/>
+      <b>GeoCore</b> — Inline override, simplified name override, group visibility<br/>
+      <b>Settings</b> — initialSettings cascade on added layers<br/>
+      <b>Queries</b> — Domain field value translation (sequential)`;
   }
 
   /**
