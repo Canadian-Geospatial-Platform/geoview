@@ -1,4 +1,5 @@
 import type BaseLayer from 'ol/layer/Base';
+import type Layer from 'ol/layer/Layer';
 import type { Projection as OLProjection } from 'ol/proj';
 
 import type { Extent } from '@/api/types/map-schema-types';
@@ -623,6 +624,21 @@ export abstract class AbstractBaseGVLayer {
   isInVisibleRange(currentResolution: number | undefined): boolean {
     // Redirect to overridable method
     return this.onIsInVisibleRange(currentResolution);
+  }
+
+  /**
+   * Gets the renderer container element for this layer.
+   *
+   * The container is a protected property on CanvasLayerRenderer, accessed via cast.
+   * This is useful for CSS-based operations like clip-path (e.g., swiper).
+   *
+   * @returns The container HTMLElement, or undefined if the renderer has no container
+   */
+  getRendererContainer(): HTMLElement | undefined {
+    const renderer = (this.#olLayer as Layer).getRenderer?.();
+    // Access the protected 'container' property which exists at runtime on CanvasLayerRenderer
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (renderer as any)?.container as HTMLElement | undefined;
   }
 
   // #endregion METHODS
