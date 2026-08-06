@@ -45,6 +45,7 @@ function FilterDataToExtent(props: FilterDataToExtentProps): JSX.Element {
     const newFilterState = !datatableSettings[layerPath].filterDataToExtent;
     dataTableController.setFilterDataToExtent(layerPath, newFilterState);
 
+    // TODO: CHECK - Do we really need this nudge? Seems to be working without it in some tests? Clarify why needed in some cases..
     // Very slightly nudge the map center to trigger extent-based filtering
     // Alternate direction to prevent long-term drift
     const offset = newFilterState ? 0.00001 : -0.00001;

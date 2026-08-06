@@ -187,12 +187,32 @@ export abstract class AbstractLayerSet {
   }
 
   /**
+   * Gets a registered layer config by its layer path.
+   *
+   * @param layerPath - The layer path to look up
+   * @returns The registered layer config, or undefined if not found
+   */
+  getRegisteredLayerConfig(layerPath: string): ConfigBaseClass | undefined {
+    return this.#registeredLayerConfigs.find((layer) => layer.layerPath === layerPath);
+  }
+
+  /**
    * Gets the registered layer paths based on the registered layers.
    *
    * @returns An array of layer paths
    */
   getRegisteredLayerPaths(): string[] {
     return this.#registeredLayers.map((layer) => layer.getLayerPath());
+  }
+
+  /**
+   * Gets a registered layer by its layer path.
+   *
+   * @param layerPath - The layer path to look up
+   * @returns The registered layer, or undefined if not found
+   */
+  getRegisteredLayer(layerPath: string): AbstractBaseGVLayer | undefined {
+    return this.#registeredLayers.find((layer) => layer.getLayerPath() === layerPath);
   }
 
   /**
@@ -266,12 +286,13 @@ export abstract class AbstractLayerSet {
    * @param layerPath - The unique path identifying the layer to check for registration
    * @returns A promise that resolves when the layer is registered
    */
-  waitForLayerConfigToGetRegistered(layerPath: string): Promise<void> {
+  waitForLayerConfigToGetRegistered(layerPath: string): Promise<LayerConfigRegisteredEvent> {
     // First, check synchronously — it may ALREADY be registered
-    if (this.getRegisteredLayerConfigPaths().includes(layerPath)) return Promise.resolve();
+    const registeredLayerConfig = this.getRegisteredLayerConfig(layerPath);
+    if (registeredLayerConfig) return Promise.resolve({ layerConfig: registeredLayerConfig });
 
     // Otherwise, subscribe and wait
-    return this.onceLayerConfigRegistered((event) => event.layerConfig.layerPath === layerPath).then(() => {});
+    return this.onceLayerConfigRegistered((event) => event.layerConfig.layerPath === layerPath);
   }
 
   /**
@@ -282,12 +303,13 @@ export abstract class AbstractLayerSet {
    * @param layerPath - The unique path identifying the layer to check for registration
    * @returns A promise that resolves when the layer is registered
    */
-  waitForLayerToGetRegistered(layerPath: string): Promise<void> {
+  waitForLayerToGetRegistered(layerPath: string): Promise<LayerRegisteredEvent> {
     // First, check synchronously — it may ALREADY be registered
-    if (this.getRegisteredLayerPaths().includes(layerPath)) return Promise.resolve();
+    const registeredLayer = this.getRegisteredLayer(layerPath);
+    if (registeredLayer) return Promise.resolve({ layer: registeredLayer });
 
     // Otherwise, subscribe and wait
-    return this.onceLayerRegistered((event) => event.layer.getLayerPath() === layerPath).then(() => {});
+    return this.onceLayerRegistered((event) => event.layer.getLayerPath() === layerPath);
   }
 
   // #endregion PUBLIC METHODS
