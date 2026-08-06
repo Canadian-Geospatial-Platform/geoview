@@ -80,42 +80,18 @@ export default class EventHelper {
    *
    * Registers a one-shot handler internally and resolves with the event payload.
    * When a filter is provided, the handler keeps listening until the filter returns true.
+   * If a timeout is provided and expires before the event fires, the handler is removed and the promise rejects.
    *
    * @param handlersList - The list of handlers to listen on
    * @param filter - Optional filter predicate. When provided, only events passing the filter resolve the promise
+   * @param timeout - Optional maximum duration in milliseconds to wait before rejecting
    * @returns A promise that resolves with the event payload when the event fires (and passes the filter)
-   */
-  static onceEventPromise<T, U>(handlersList: EventDelegateBase<T, U, void>[], filter?: (event: U) => boolean): Promise<U> {
-    return new Promise<U>((resolve) => {
-      const wrapper: EventDelegateBase<T, U, void> = (sender: T, event: U): void => {
-        // If a filter is provided and the event doesn't match, keep waiting
-        if (filter && !filter(event)) return;
-
-        // Unsubscribe and resolve
-        EventHelper.offEvent(handlersList, wrapper);
-        resolve(event);
-      };
-      handlersList.push(wrapper);
-    });
-  }
-
-  /**
-   * Returns a promise that resolves the next time the event fires, or rejects after a timeout.
-   *
-   * Registers a one-shot handler internally and resolves with the event payload.
-   * When a filter is provided, the handler keeps listening until the filter returns true.
-   * If the timeout expires before the event fires, the handler is removed and the promise rejects.
-   *
-   * @param handlersList - The list of handlers to listen on
-   * @param timeout - Maximum duration in milliseconds to wait before rejecting
-   * @param filter - Optional filter predicate. When provided, only events passing the filter resolve the promise
-   * @returns A promise that resolves with the event payload or rejects on timeout
    * @throws {Error} When the timeout expires before a matching event fires
    */
-  static onceEventPromiseWithTimeout<T, U>(
+  static onceEventPromise<T, U>(
     handlersList: EventDelegateBase<T, U, void>[],
-    timeout: number,
-    filter?: (event: U) => boolean
+    filter?: (event: U) => boolean,
+    timeout?: number
   ): Promise<U> {
     return new Promise<U>((resolve, reject) => {
       let settled = false;
@@ -127,17 +103,21 @@ export default class EventHelper {
         // Unsubscribe, cancel timer, and resolve
         settled = true;
         // eslint-disable-next-line @typescript-eslint/no-use-before-define
-        clearTimeout(timer);
+        if (timer !== undefined) clearTimeout(timer);
         EventHelper.offEvent(handlersList, wrapper);
         resolve(event);
       };
 
-      const timer = setTimeout(() => {
-        if (settled) return;
-        settled = true;
-        EventHelper.offEvent(handlersList, wrapper);
-        reject(new Error(`Event awaiting abandoned: exceeded timeout of ${timeout} ms.`));
-      }, timeout);
+      // Only set up the timeout when a duration is provided; otherwise wait indefinitely
+      const timer =
+        timeout !== undefined
+          ? setTimeout(() => {
+              if (settled) return;
+              settled = true;
+              EventHelper.offEvent(handlersList, wrapper);
+              reject(new Error(`Event awaiting abandoned: exceeded timeout of ${timeout} ms.`));
+            }, timeout)
+          : undefined;
 
       handlersList.push(wrapper);
     });

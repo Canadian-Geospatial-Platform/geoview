@@ -1,9 +1,6 @@
 import Draggable from 'react-draggable';
 import { useMemo } from 'react';
 
-import type BaseLayer from 'ol/layer/Base';
-import type Layer from 'ol/layer/Layer';
-
 import type { SwipeOrientation } from 'geoview-core/core/stores/states/swiper-state';
 import { useStoreSwiperLayerPaths, useStoreSwiperOrientation } from 'geoview-core/core/stores/states/swiper-state';
 import { logger } from 'geoview-core/core/utils/logger';
@@ -14,7 +11,11 @@ import { useStoreMapSize } from 'geoview-core/core/stores/states/map-state';
 import { useStoreLayerVisibleLayers } from 'geoview-core/core/stores/states/layer-state';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
+import type { AbstractBaseGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-base-layer';
 import { getSxClasses } from './swiper-style';
+
+/** The number of milliseconds to wait for a layer when trying to attach it to the swiper */
+const TIMEOUT_WAIT_TO_ATTACH_LAYERS = 20000;
 
 /** Properties for the Swiper component. */
 type SwiperProps = {
@@ -74,7 +75,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
   }, [mapHeight]);
 
   // States
-  const [olLayers, setOlLayers] = useState<BaseLayer[]>([]);
+  const [gvLayers, setGvLayers] = useState<AbstractBaseGVLayer[]>([]);
   const [xPositionVertical, setXPositionVertical] = useState(mapSize.current[0] / 2);
   const [yPositionVertical, setYPositionVertical] = useState(0);
   const [xPositionHorizontal, setXPositionHorizontal] = useState(0);
@@ -92,20 +93,6 @@ export function Swiper(props: SwiperProps): JSX.Element {
   // #region Handlers
 
   /**
-   * Gets the renderer container element for an OL layer.
-   * The container is a protected property on CanvasLayerRenderer, accessed via cast.
-   *
-   * @param layer - The OL layer
-   * @returns The container HTMLElement, or undefined
-   */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const getRendererContainer = (layer: BaseLayer): HTMLElement | undefined => {
-    const renderer = (layer as Layer).getRenderer?.();
-    // Access the protected 'container' property which exists at runtime on CanvasLayerRenderer
-    return (renderer as any)?.container as HTMLElement | undefined;
-  };
-
-  /**
    * Applies CSS clip-path on each tracked OL layer's renderer container to clip the layer
    * at the swiper position. This approach works regardless of layer opacity because it clips
    * the final rendered DOM element, not the canvas context.
@@ -113,8 +100,8 @@ export function Swiper(props: SwiperProps): JSX.Element {
   const applyClipPath = useCallback((): void => {
     const swiperValue = orientation === 'vertical' ? swiperValueVertical.current : swiperValueHorizontal.current;
 
-    olLayers.forEach((layer: BaseLayer) => {
-      const container = getRendererContainer(layer);
+    gvLayers.forEach((layer) => {
+      const container = layer.getRendererContainer();
       if (container) {
         if (orientation === 'vertical') {
           // Clip: show left portion up to swiperValue%
@@ -125,19 +112,19 @@ export function Swiper(props: SwiperProps): JSX.Element {
         }
       }
     });
-  }, [olLayers, orientation]);
+  }, [gvLayers, orientation]);
 
   /**
    * Removes CSS clip-path from all tracked OL layer renderer containers.
    */
   const removeClipPath = useCallback((): void => {
-    olLayers.forEach((layer: BaseLayer) => {
-      const container = getRendererContainer(layer);
+    gvLayers.forEach((layer) => {
+      const container = layer.getRendererContainer();
       if (container) {
         container.style.clipPath = '';
       }
     });
-  }, [olLayers]);
+  }, [gvLayers]);
 
   /**
    * Calculates the computed style to return values of x and y position.
@@ -198,7 +185,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
 
     // Apply CSS clip-path
     applyClipPath();
-  }, [layerPaths.length, viewer.map, orientation, olLayers, controllerRegistry.swiperController, applyClipPath]);
+  }, [layerPaths.length, viewer.map, orientation, controllerRegistry.swiperController, applyClipPath]);
 
   /**
    * Updates swiper and layers from keyboard CTRL + Arrow key.
@@ -240,32 +227,6 @@ export function Swiper(props: SwiperProps): JSX.Element {
     [layerPaths, orientation, onStop]
   );
 
-  /**
-   * Tracks the OL layer at the given layer path and applies the CSS clip-path to it.
-   *
-   * @param layerPath - The layer path of the layer to track for swiping
-   */
-  const attachLayerOnPath = useCallback(
-    async (layerPath: string) => {
-      try {
-        // Get the layer at the layer path
-        const olLayer = await controllerRegistry.layerController.getOLLayerAsync(layerPath);
-
-        // Set the OL layers
-        setOlLayers((prevArray) => [...prevArray, olLayer]);
-      } catch (error: unknown) {
-        // Log
-        logger.logError(
-          'SWIPER - Failed to attach layer',
-          controllerRegistry.layerController.getGeoviewLayerIds(),
-          layerPath,
-          error
-        );
-      }
-    },
-    [controllerRegistry]
-  );
-
   // #endregion
 
   /**
@@ -275,48 +236,58 @@ export function Swiper(props: SwiperProps): JSX.Element {
     // Log
     logger.logTraceUseEffect('SWIPER - layerPaths', layerPaths);
 
+    // Flag to prevent state updates after cleanup
+    let cancelled = false;
+
     // Get all associated layerPaths in case provided path is a layer ID or group layer path
     const associatedLayerPaths = layerPaths
       .map((layerPath) => visibleLayers.filter((visibleLayerPath) => visibleLayerPath.includes(layerPath)))
       .flat();
 
-    // For each layer path
-    associatedLayerPaths.forEach((layerPath: string) => {
-      // Track the layer
-      attachLayerOnPath(layerPath).catch((error: unknown) => {
-        // Log
-        logger.logPromiseFailed('attachLayerOnPath in useEffect in Swiper', error);
+    // Fetch all OL layers in parallel and set state once
+    Promise.all(
+      associatedLayerPaths.map((layerPath) => {
+        return controllerRegistry.layerController
+          .waitForLayerRegistered(layerPath, TIMEOUT_WAIT_TO_ATTACH_LAYERS)
+          .catch((error: unknown) => {
+            logger.logError('SWIPER - Failed to attach layer', layerPath, error);
+            return undefined;
+          });
+      })
+    )
+      .then((layers) => {
+        if (cancelled) return;
+        const validLayers = layers.filter((layer): layer is AbstractBaseGVLayer => !!layer);
+        setGvLayers(validLayers);
+      })
+      .catch((error: unknown) => {
+        logger.logPromiseFailed('SWIPER - waitForLayerRegistered in useEffect', error);
       });
-    });
 
     return () => {
       // Log
       logger.logTraceUseEffectUnmount('SWIPER - layerPaths', layerPaths);
+      cancelled = true;
 
       // Remove clip-path from layers and clear tracking
       associatedLayerPaths.forEach((layerPath: string) => {
         try {
-          const olLayer = controllerRegistry.layerController.getGeoviewLayerIfExists(layerPath)?.getOLLayer();
-          if (olLayer) {
-            // Remove CSS clip-path
-            const container = getRendererContainer(olLayer);
+          const gvLayer = controllerRegistry.layerController.getGeoviewLayerIfExists(layerPath);
+          if (gvLayer) {
+            const container = gvLayer.getRendererContainer();
             if (container) {
               container.style.clipPath = '';
             }
-          } else {
-            // Log
-            logger.logError('SWIPER - Failed to find layer to remove clip-path', layerPath);
           }
         } catch (error: unknown) {
-          // Log
           logger.logError('SWIPER - Failed to remove clip-path from layer', layerPath, error);
         }
       });
 
       // Empty layers array
-      setOlLayers([]);
+      setGvLayers([]);
     };
-  }, [controllerRegistry, layerPaths, attachLayerOnPath, visibleLayers]);
+  }, [controllerRegistry, layerPaths, visibleLayers]);
 
   /**
    * UseEffect for applying and maintaining clip-path. Applies clip-path on initial layer tracking
@@ -324,9 +295,9 @@ export function Swiper(props: SwiperProps): JSX.Element {
    */
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('SWIPER - applyClipPath', olLayers);
+    logger.logTraceUseEffect('SWIPER - applyClipPath', gvLayers);
 
-    if (!olLayers.length) return undefined;
+    if (!gvLayers.length) return undefined;
 
     // Apply clip-path immediately for newly tracked layers
     applyClipPath();
@@ -339,11 +310,11 @@ export function Swiper(props: SwiperProps): JSX.Element {
 
     return () => {
       // Log
-      logger.logTraceUseEffectUnmount('SWIPER - applyClipPath', olLayers);
+      logger.logTraceUseEffectUnmount('SWIPER - applyClipPath', gvLayers);
       viewer.map.un('postrender', handlePostRender);
       removeClipPath();
     };
-  }, [olLayers, applyClipPath, removeClipPath, viewer.map]);
+  }, [gvLayers, applyClipPath, removeClipPath, viewer.map]);
 
   /**
    * UseEffect for WCAG keyboard navigation.

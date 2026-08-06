@@ -674,6 +674,8 @@ export class LayerController extends AbstractMapViewerController {
    *
    * @param layerPath - The layer path to the layer's configuration
    * @returns A promise that resolves to an OpenLayer layer associated to the layer path
+   * @deprecated This method is deprecated and will be removed in future versions. Use `getGeoviewLayerRegular(layerPath).getOLLayer()` instead and
+   * make the waiting asynchronicity happening here more clear in the caller, as it's a bit risky (layer might never be registered).
    */
   getOLLayerAsync(layerPath: string): Promise<BaseLayer> {
     // Retrieve from the domain
@@ -2088,7 +2090,7 @@ export class LayerController extends AbstractMapViewerController {
    * @param layerStatus - The desired status to wait for (e.g., 'loaded', 'processed')
    * @returns A promise that resolves with the number of layers that have reached the specified status
    */
-  waitForAllLayersStatus(layerStatus: TypeLayerStatus): Promise<number> {
+  async waitForAllLayersStatus(layerStatus: TypeLayerStatus): Promise<number> {
     // Log
     logger.logInfo(`Waiting on layers to become ${layerStatus}`);
 
@@ -2097,19 +2099,48 @@ export class LayerController extends AbstractMapViewerController {
     if (allGoodNow) return Promise.resolve(countNow);
 
     // Subscribe via onceLayerStatusChangedAsync with a filter that re-checks the global condition on each event
-    return this.#layerDomain
-      .onceLayerStatusChanged(() => {
-        const [allGood] = this.checkLayerStatus(layerStatus, (layerConfig) => {
-          // Log
-          logger.logTraceDetailed(
-            `waitForAllLayersStatus - waiting on layer to be '${layerStatus}'...`,
-            layerConfig.layerPath,
-            layerConfig.layerStatus
-          );
-        });
-        return allGood;
-      })
-      .then(() => this.checkLayerStatus(layerStatus)[1]);
+    await this.#layerDomain.onceLayerStatusChanged(() => {
+      const [allGood] = this.checkLayerStatus(layerStatus, (layerConfig) => {
+        // Log
+        logger.logTraceDetailed(
+          `waitForAllLayersStatus - waiting on layer to be '${layerStatus}'...`,
+          layerConfig.layerPath,
+          layerConfig.layerStatus
+        );
+      });
+      return allGood;
+    });
+
+    // After the event fires, re-check the condition and return the count
+    return this.checkLayerStatus(layerStatus)[1];
+  }
+
+  /**
+   * Waits for a layer entry config to be registered and returns the config associated to a specific layer path.
+   *
+   * Resolves immediately if the config is already registered; otherwise subscribes to the `onceLayerEntryConfigRegistered` event and resolves as soon as a config with the matching path is registered.
+   *
+   * @param layerPath - The layer path to the layer's configuration
+   * @param timeout - Optional timeout in milliseconds. When provided, the promise will reject if the config is not registered within the specified time
+   * @returns A promise that resolves to the layer entry config associated to the layer path
+   */
+  waitForLayerConfigRegistered(layerPath: string, timeout?: number): Promise<ConfigBaseClass> {
+    // Redirect
+    return this.#layerDomain.waitForLayerConfigRegistered(layerPath, timeout);
+  }
+
+  /**
+   * Waits for a layer to be registered and returns the GeoView layer associated to a specific layer path.
+   *
+   * Resolves immediately if the layer is already registered; otherwise subscribes to the `onceLayerRegistered` event and resolves as soon as a layer with the matching path is registered.
+   *
+   * @param layerPath - The layer path to the layer's configuration
+   * @param timeout - Optional timeout in milliseconds. When provided, the promise will reject if the layer is not registered within the specified time
+   * @returns A promise that resolves to a GeoView layer associated to the layer path
+   */
+  waitForLayerRegistered(layerPath: string, timeout?: number): Promise<AbstractBaseGVLayer> {
+    // Redirect
+    return this.#layerDomain.waitForLayerRegistered(layerPath, timeout);
   }
 
   /**
