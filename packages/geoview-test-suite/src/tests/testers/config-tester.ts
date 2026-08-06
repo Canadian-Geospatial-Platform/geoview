@@ -52,17 +52,10 @@ export class ConfigTester extends GVAbstractTester {
    * @returns A promise that resolves with a Test containing the configuration
    */
   testEsriDynamicWithHistoricalFloodEvents(): Promise<Test<TypeGeoviewLayerConfig>> {
-    // The url
-    const url: string = ConfigTester.HISTORICAL_FLOOD_URL_MAP_SERVER;
-
-    // Test the Esri Dynamic config
+    // Redirect
     return this.testEsriDynamic(
-      'Test an Esri Dynamic with Historical Flood Events',
-      url,
-      {
-        metadataAccessPath: url,
-        listOfLayerEntryConfig: [{ layerEntryProps: { layerName: ConfigTester.HISTORICAL_FLOOD_LAYER_NAME } }],
-      },
+      ConfigTester.HISTORICAL_FLOOD_URL_MAP_SERVER,
+      ConfigTester.HISTORICAL_FLOOD_LAYER_NAME,
       EsriDynamicLayerEntryConfig
     );
   }
@@ -73,33 +66,21 @@ export class ConfigTester extends GVAbstractTester {
    * @returns A promise that resolves with a Test containing the configuration
    */
   testEsriDynamicWithCESI(): Promise<Test<TypeGeoviewLayerConfig>> {
-    // The url
-    const url: string = ConfigTester.CESI_MAP_SERVER;
-
-    // Test the Esri Dynamic config
-    return this.testEsriDynamic(
-      'Test an Esri Dynamic with CESI',
-      url,
-      {
-        metadataAccessPath: url,
-        listOfLayerEntryConfig: [{ layerEntryProps: { layerName: ConfigTester.CESI_GROUP_0_LAYER_NAME } }],
-      },
-      GroupLayerEntryConfig
-    );
+    // Redirect
+    return this.testEsriDynamic(ConfigTester.CESI_MAP_SERVER, ConfigTester.CESI_GROUP_0_LAYER_NAME, GroupLayerEntryConfig);
   }
 
   /**
    * Tests an Esri Dynamic Config.
    *
-   * @param testName - The test name
-   * @param url - The url of the Esri Dynamic layer
-   * @param expectedConfig - The expected configuration on which the assertions will be done
+   * @param metadataAccessPath - The url of the Esri Dynamic layer
+   * @param layerName - The name of the layer to be tested
+   * @param expectedTypeFirstLayerEntry - The expected class type on which the assertions will be done
    * @returns A promise that resolves with a Test containing the configuration
    */
   testEsriDynamic(
-    testName: string,
-    url: string,
-    expectedConfig: Record<string, unknown>,
+    metadataAccessPath: string,
+    layerName: string,
     expectedTypeFirstLayerEntry: ClassType<GroupLayerEntryConfig | EsriDynamicLayerEntryConfig>
   ): Promise<Test<TypeGeoviewLayerConfig>> {
     // Dummy names
@@ -109,7 +90,10 @@ export class ConfigTester extends GVAbstractTester {
 
     // Complete the expected config by adding the geoviewLayerId and geoviewLayerName
     const expectedConfigFull = {
-      ...expectedConfig,
+      ...{
+        metadataAccessPath,
+        listOfLayerEntryConfig: [{ layerEntryProps: { layerName } }],
+      },
       geoviewLayerId: gvLayerId,
       geoviewLayerName: gvLayerName,
       geoviewLayerType: gvLayerType,
@@ -117,13 +101,13 @@ export class ConfigTester extends GVAbstractTester {
 
     // Test
     return this.test(
-      testName,
+      `Test an Esri Dynamic with ${layerName}`,
       (test) => {
         // Set step
-        test.addStep(`Initializing config on url: ${url}`);
+        test.addStep(`Initializing config on url: ${metadataAccessPath}`);
 
         // Initialize the layer config
-        return EsriDynamic.initGeoviewLayerConfig(gvLayerId, gvLayerName, url);
+        return EsriDynamic.initGeoviewLayerConfig(gvLayerId, gvLayerName, metadataAccessPath);
       },
       (test, result) => {
         // Perform assertions
@@ -171,17 +155,12 @@ export class ConfigTester extends GVAbstractTester {
    * @returns A promise that resolves to the configured test instance
    */
   testEsriFeatureWithTorontoNeighbourhoods(): Promise<Test<TypeGeoviewLayerConfig>> {
-    // The url
-    const url = ConfigTester.FEATURE_SERVER_TORONTO_NEIGHBOURHOODS_FEATURE_SERVER;
-    const expectedUrl = ConfigTester.FEATURE_SERVER_TORONTO_NEIGHBOURHOODS_URL;
-
-    // Test the Esri Feature config
-    return this.testEsriFeature('Test an Esri Feature with Toronto Neighbourhoods', url, {
-      metadataAccessPath: expectedUrl,
-      listOfLayerEntryConfig: [
-        { layerEntryProps: { layerId: '0', layerName: ConfigTester.FEATURE_SERVER_TORONTO_NEIGHBOURHOODS_LAYER_NAME } },
-      ],
-    });
+    // Redirect
+    return this.testEsriFeature(
+      ConfigTester.FEATURE_SERVER_TORONTO_NEIGHBOURHOODS_URL,
+      '0',
+      ConfigTester.FEATURE_SERVER_TORONTO_NEIGHBOURHOODS_LAYER_NAME
+    );
   }
 
   /**
@@ -190,15 +169,8 @@ export class ConfigTester extends GVAbstractTester {
    * @returns A promise that resolves to the configured test instance
    */
   testEsriFeatureWithHistoricalFloodEvents(): Promise<Test<TypeGeoviewLayerConfig>> {
-    // The url
-    const url = ConfigTester.HISTORICAL_FLOOD_URL_FEATURE_SERVER;
-    const expectedUrl = ConfigTester.HISTORICAL_FLOOD_URL_MAP_SERVER;
-
-    // Test the Esri Feature config
-    return this.testEsriFeature('Test an Esri Feature with Historical Flood Events', url, {
-      metadataAccessPath: expectedUrl,
-      listOfLayerEntryConfig: [{ layerEntryProps: { layerId: '0', layerName: ConfigTester.HISTORICAL_FLOOD_LAYER_NAME } }],
-    });
+    // Redirect
+    return this.testEsriFeature(ConfigTester.HISTORICAL_FLOOD_URL_MAP_SERVER, '0', ConfigTester.HISTORICAL_FLOOD_LAYER_NAME);
   }
 
   /**
@@ -207,26 +179,19 @@ export class ConfigTester extends GVAbstractTester {
    * @returns A promise that resolves to the configured test instance
    */
   testEsriFeatureWithForestIndustry(): Promise<Test<TypeGeoviewLayerConfig>> {
-    // The url
-    const url = ConfigTester.FOREST_INDUSTRY_FEATURE_SERVER;
-    const expectedUrl = ConfigTester.FOREST_INDUSTRY_MAP_SERVER;
-
-    // Test the Esri Feature config
-    return this.testEsriFeature('Test an Esri Feature with Forest Industry', url, {
-      metadataAccessPath: expectedUrl,
-      listOfLayerEntryConfig: [{ layerEntryProps: { layerId: '0', layerName: ConfigTester.FOREST_INDUSTRY_LAYER_NAME } }],
-    });
+    // Redirect
+    return this.testEsriFeature(ConfigTester.FOREST_INDUSTRY_MAP_SERVER, '0', ConfigTester.FOREST_INDUSTRY_LAYER_NAME);
   }
 
   /**
    * Tests an Esri Feature Config.
    *
-   * @param testName - The test name
-   * @param url - The url of the Esri Feature layer
-   * @param expectedConfig - The expected configuration on which the assertions will be done
+   * @param metadataAccessPath - The url of the Esri Dynamic layer
+   * @param layerId - The id of the layer to be tested
+   * @param layerName - The name of the layer to be tested
    * @returns A promise that resolves with a Test containing the configuration
    */
-  testEsriFeature(testName: string, url: string, expectedConfig: Record<string, unknown>): Promise<Test<TypeGeoviewLayerConfig>> {
+  testEsriFeature(metadataAccessPath: string, layerId: string, layerName: string): Promise<Test<TypeGeoviewLayerConfig>> {
     // Dummy names
     const gvLayerId = 'gvLayerId';
     const gvLayerName = 'gvLayerName';
@@ -234,21 +199,27 @@ export class ConfigTester extends GVAbstractTester {
 
     // Complete the expected config by adding the geoviewLayerId and geoviewLayerName
     const expectedConfigFull = {
-      ...expectedConfig,
+      ...{
+        metadataAccessPath,
+        listOfLayerEntryConfig: [{ layerEntryProps: { layerId: layerId, layerName: layerName } }],
+      },
       geoviewLayerId: gvLayerId,
       geoviewLayerName: gvLayerName,
       geoviewLayerType: gvLayerType,
     };
 
+    // Full url
+    const fullUrl = `${metadataAccessPath}/${layerId}`;
+
     // Test
     return this.test(
-      testName,
+      `Test an Esri Feature with ${layerName}`,
       (test) => {
         // Set step
-        test.addStep(`Initializing config on url: ${url}`);
+        test.addStep(`Initializing config on url: ${fullUrl}`);
 
         // Initialize the layer config
-        return EsriFeature.initGeoviewLayerConfig(gvLayerId, gvLayerName, url);
+        return EsriFeature.initGeoviewLayerConfig(gvLayerId, gvLayerName, fullUrl);
       },
       (test, result) => {
         // Perform assertions
@@ -296,25 +267,18 @@ export class ConfigTester extends GVAbstractTester {
    * @returns A promise that resolves with a Test containing the configuration
    */
   testEsriImageWithElevation(): Promise<Test<TypeGeoviewLayerConfig>> {
-    // The url
-    const url = ConfigTester.IMAGE_SERVER_ELEVATION_URL;
-
-    // Test the Esri Image config
-    return this.testEsriImage('Test Esri Image with Elevation', url, {
-      metadataAccessPath: url,
-      listOfLayerEntryConfig: [{ layerEntryProps: { layerId: ConfigTester.IMAGE_SERVER_ELEVATION_LAYER_ID } }],
-    });
+    // Redirect
+    return this.testEsriImage(ConfigTester.IMAGE_SERVER_ELEVATION_URL, ConfigTester.IMAGE_SERVER_ELEVATION_LAYER_ID);
   }
 
   /**
    * Tests an Esri Image Config.
    *
-   * @param testName - The test name
-   * @param url - The url of the Esri Image layer
-   * @param expectedConfig - The expected configuration on which the assertions will be done
+   * @param metadataAccessPath - The url of the Esri Image layer
+   * @param layerId - The id of the layer to be tested
    * @returns A promise that resolves with a Test containing the configuration
    */
-  testEsriImage(testName: string, url: string, expectedConfig: Record<string, unknown>): Promise<Test<TypeGeoviewLayerConfig>> {
+  testEsriImage(metadataAccessPath: string, layerId: string): Promise<Test<TypeGeoviewLayerConfig>> {
     // Dummy names
     const gvLayerId = 'gvLayerId';
     const gvLayerName = 'gvLayerName';
@@ -322,7 +286,10 @@ export class ConfigTester extends GVAbstractTester {
 
     // Complete the expected config by adding the geoviewLayerId and geoviewLayerName
     const expectedConfigFull = {
-      ...expectedConfig,
+      ...{
+        metadataAccessPath,
+        listOfLayerEntryConfig: [{ layerEntryProps: { layerId } }],
+      },
       geoviewLayerId: gvLayerId,
       geoviewLayerName: gvLayerName,
       geoviewLayerType: gvLayerType,
@@ -330,13 +297,13 @@ export class ConfigTester extends GVAbstractTester {
 
     // Test
     return this.test(
-      testName,
+      `Test Esri Image with ${layerId}`,
       (test) => {
         // Set step
-        test.addStep(`Initializing config on url: ${url}`);
+        test.addStep(`Initializing config on url: ${metadataAccessPath}`);
 
         // Initialize the layer config
-        return EsriImage.initGeoviewLayerConfig(gvLayerId, gvLayerName, url);
+        return EsriImage.initGeoviewLayerConfig(gvLayerId, gvLayerName, metadataAccessPath);
       },
       (test, result) => {
         // Perform assertions
