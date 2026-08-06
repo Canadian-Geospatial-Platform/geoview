@@ -30,13 +30,14 @@ _(Config properties, public API methods, event names — affects external consum
 
 ### MapViewer — Signature Changes
 
-| Method                                 | Change                                                          | PR    |
-| -------------------------------------- | --------------------------------------------------------------- | ----- |
-| `setMapZoomLevel(zoom)`                | No longer returns a Promise                                     | #3544 |
-| `getNorthArrowAngle()`                 | Returns `number` instead of `string`                            | #3544 |
-| `zoomToExtent(extent, options?)`       | New signature: `zoomToExtent(extent, useAnimation, options)`    | #3544 |
-| `onMapZoomEnd` / `offMapZoomEnd`       | Renamed to `onMapResolutionChanged` / `offMapResolutionChanged` | #3544 |
-| `onMapChangeSize` / `offMapChangeSize` | Renamed to `onMapSizeChanged` / `offMapSizeChanged`             | #3544 |
+| Method                                 | Change                                                                 | PR    |
+| -------------------------------------- | ---------------------------------------------------------------------- | ----- |
+| `setMapZoomLevel(zoom)`                | No longer returns a Promise                                            | #3544 |
+| `getNorthArrowAngle()`                 | Returns `number` instead of `string`                                   | #3544 |
+| `getScaleInfoFromDomElement(mapId)`    | Changed from static to instance method: `getScaleInfoFromDomElement()` | #3580 |
+| `zoomToExtent(extent, options?)`       | New signature: `zoomToExtent(extent, useAnimation, options)`           | #3544 |
+| `onMapZoomEnd` / `offMapZoomEnd`       | Renamed to `onMapResolutionChanged` / `offMapResolutionChanged`        | #3544 |
+| `onMapChangeSize` / `offMapChangeSize` | Renamed to `onMapSizeChanged` / `offMapSizeChanged`                    | #3544 |
 
 ### LayerApi — Removed Methods
 
@@ -85,6 +86,7 @@ _(User-facing features added or enabled)_
 - New `EventHelper.onceEventPromise` helper for creating one-shot event listeners with filter support (#3544)
 - `select` and `onSelect` functions moved from footer-plugin to abstract-plugin — app-bar plugins can now use them (#3544)
 - New `ConfigValidation.isListOfLayerEntryConfigValidated` to prevent double-validation in `addGeoviewLayer()` (#3544)
+- Map configuration `map.interaction` is no longer mandatory in schema; when omitted, runtime defaults to `dynamic` (#3584)
 
 ## Bug Fixes
 
@@ -108,6 +110,14 @@ _(Fixes discovered or applied during this cycle)_
 - Fixed Add Layer wizard infinite spinner when selected layer type does not match the provided source/extension (#3550)
 - Fixed group layers with all child layers in error state not being surfaced correctly as errored in layer status propagation (#3549)
 - Fixed GeoCore custom config precedence so inline `listOfLayerEntryConfig` overrides are applied ahead of GCS custom configs, while legacy GCS `layers` payloads are still adapted for backward compatibility (#3548)
+- Added proxy configuration resolution for WFS/WMTS/EsriFeature/EsriDynamic/OGCFeatureAPI paired-proxy usage in anticipation of new proxy (#3564)
+- Fixed OGC URL validation and probing by splitting generic URL checks from OGC-specific GetCapabilities validation paths (#3564)
+- Fixed tile-load status handling to avoid false error states for partially reachable services while still surfacing fully broken tile services (#3564)
+- Fixed app bar layout/CSS regressions with targeted cleanup and alignment updates (#3585)
+- Fixed `zoomToExtent` completion behavior so same-extent zoom operations still resolve reliably (#3580)
+- Fixed WMTS metadata handling and style typing (including `LegendURL`) to prevent metadata parsing issues (#3580)
+- Fixed WFS feature query handling to support additional response formats beyond `application/json` and blank defaults (#3580)
+- Fixed scale control accessibility labeling by correcting the aria-label translation key wiring for map info scale output (#3581)
 
 ## Build & Dependencies
 
@@ -128,12 +138,20 @@ _(Optimizations, refactors, structural changes)_
 - Reviewed and replaced 30+ `onEvent/offEvent` patterns with new `onceEvent` pattern (#3544)
 - Changed map click pattern for WCAG mode vs regular mode (#3544)
 - Fixed time-slider-state action setters to be immutable and focused on individual layerPath values (#3544)
+- Improved zoom-to-extent implementation by centralizing fit-option handling (including percent-based padding + map-info bar compensation) for more consistent map framing behavior (#3580)
+- Refactored data-table keyboard focus tracking into a dedicated focus-store utility and removed per-cell overhead that caused navigation lag (#3574)
+- Refactored overview-map visibility and sizing flow into centralized store-driven logic (`overviewMapVisible`) with unified controller/event handling and atomic selector usage (#3581)
 
 ## Accessibility (WCAG)
 
 _(WCAG fixes and improvements)_
 
 - Fixed reflow issues (geolocator, legend, layers, details panels) at 400% zoom level (1280px viewport) (#3560)
+- Fixed app bar reflow by restructuring app-bar controls into a single list and adding overflow navigation arrows at high zoom / low-height viewports (#3579)
+- Fixed data-table WCAG issues: keyboard focus flow, empty spacer-cell accessibility semantics, and cell scroll-into-view behavior (#3574)
+- Added global long-word wrapping and centralized text-ellipsis patterns to reduce clipping/truncation issues in high-zoom/reflow scenarios (#3574)
+- Fixed nav bar reflow at high zoom and constrained viewport sizes with scrollable overflow behavior, improved expand/collapse affordance, and map-info overlap fixes (#3581)
+- Fixed map info bar reflow with horizontal overflow handling and improved expand/collapse state management for constrained layouts (#3581)
 
 ## Documentation & Cleanup
 
