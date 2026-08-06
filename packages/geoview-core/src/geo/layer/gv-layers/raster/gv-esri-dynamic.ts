@@ -476,6 +476,9 @@ export class GVEsriDynamic extends AbstractGVRaster {
       // Assign a promise that resolves to true once geometries are fetched
       featureInfoResult.promiseGeometries = promiseGeometries.then(() => true);
 
+      // Get the geometry type
+      const geomType = layerConfig?.getGeometryType();
+
       // GV: This `.then()` executes asynchronously after the function has already returned.
       // GV: As a result, `featureInfoResult` is returned to the caller and the store is
       // GV: updated (via the layer-set calling this method) before geometries are effectively assigned to the records.
@@ -502,9 +505,6 @@ export class GVEsriDynamic extends AbstractGVRaster {
             //   dataProjection: `EPSG:${mapViewer.getMapState().currentProjection}`,
             //   featureProjection: `EPSG:${mapViewer.getMapState().currentProjection}`,
             // }) as Feature<Geometry>;
-
-            // Get the geometry type
-            const geomType = layerConfig?.getGeometryType();
 
             // Get coordinates in right format and create geometry
             const coordinates = (feat.geometry?.points ||
