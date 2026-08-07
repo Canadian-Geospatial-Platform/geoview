@@ -201,8 +201,6 @@ export declare const useStoreMapOverviewMapHideZoom: () => number;
 export declare const useStoreMapScale: () => TypeScaleInfo;
 /** Selects the current zoom level from the store. */
 export declare const useStoreMapZoom: () => number;
-/** Selects whether the overview map should be visible based on the current zoom level and the hide-on-zoom setting from the store. */
-export declare const useStoreMapOverviewShouldBeVisible: () => boolean;
 /**
  * Returns the map config state for the given map.
  *
@@ -230,6 +228,22 @@ export declare const getStoreMapConfigAppBar: (mapId: string) => TypeAppBarProps
 export declare const getStoreMapConfigOverviewMap: (mapId: string) => TypeOverviewMapProps | undefined;
 /** Selects whether the overview map is enabled from the store. */
 export declare const useStoreMapOverviewMap: () => boolean;
+/**
+ * Returns whether the overview map should be visible based on config, map size, and zoom level.
+ *
+ * @param mapId - The map identifier
+ * @returns True if all visibility criteria are met (config enabled, size threshold met, zoom level appropriate), false otherwise
+ */
+export declare const getStoreMapOverviewShouldBeVisible: (mapId: string) => boolean;
+/**
+ * Selects whether the overview map should be visible based on config, map size, and zoom level.
+ *
+ * Combines three visibility criteria:
+ * - Config enabled: overview-map component is in the components array
+ * - Size threshold: map container meets minimum width and height
+ * - Zoom threshold: current zoom is above hideOnZoom setting (or hideOnZoom is 0)
+ */
+export declare const useStoreMapOverviewShouldBeVisible: () => boolean;
 /** Returns the enabled map components from the map config. */
 export declare const getStoreMapConfigComponents: (mapId: string) => TypeValidMapComponentProps[] | undefined;
 /** Returns the enabled core packages from the map config. */

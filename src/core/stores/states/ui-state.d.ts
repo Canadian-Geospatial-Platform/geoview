@@ -40,6 +40,8 @@ export interface IUIState {
     navBarButtonPanelVersion: number;
     /** The current resize value (percentage) for the footer panel. */
     footerPanelResizeValue: number;
+    /** Whether the map info bar is expanded (dynamic mode only). */
+    mapInfoExpanded: boolean;
     /** Sets default UI configuration values from the map features config. */
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
     /** Actions to mutate the UI state. */
@@ -70,6 +72,8 @@ export interface IUIState {
         removeAppBarPanelId: (id: string) => void;
         /** Increments the nav-bar button panel version to trigger a re-render. */
         bumpNavBarButtonPanelVersion: () => void;
+        /** Sets the map info bar expanded state. */
+        setMapInfoExpanded: (expanded: boolean) => void;
     };
 }
 /**
@@ -163,6 +167,15 @@ export declare const useStoreUIFooterPanelResizeValue: () => number;
 /** Hooks the list of hidden tab identifiers. */
 export declare const useStoreUIHiddenTabs: () => string[];
 /**
+ * Gets the map info bar expanded state from the store.
+ *
+ * @param mapId - The map identifier
+ * @returns Whether the map info bar is expanded
+ */
+export declare const getStoreUIMapInfoExpanded: (mapId: string) => boolean;
+/** Hooks the map info bar expanded state. */
+export declare const useStoreUIMapInfoExpanded: () => boolean;
+/**
  * Sets the active footer bar tab.
  *
  * @param mapId - The map identifier
@@ -215,6 +228,13 @@ export declare const setStoreUIActiveTrapGeoView: (mapId: string, active: boolea
  * @param value - The resize percentage value
  */
 export declare const setStoreUIFooterPanelResizeValue: (mapId: string, value: number) => void;
+/**
+ * Sets the map info bar expanded state.
+ *
+ * @param mapId - The map identifier
+ * @param expanded - Whether the map info bar is expanded
+ */
+export declare const setStoreUIMapInfoExpanded: (mapId: string, expanded: boolean) => void;
 /**
  * Shows a tab button by removing it from the hidden tabs list.
  *

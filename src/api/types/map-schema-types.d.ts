@@ -378,7 +378,7 @@ export declare const CONFIG_RCS_TYPE = "rcs";
 export declare const CONFIG_GEOPACKAGE_TYPE = "GeoPackage";
 export declare const CONFIG_SHAPEFILE_TYPE = "shapefile";
 export declare const VALID_ZOOM_LEVELS: number[];
-/** Definition of the MapFeatureConfig default values. All the default values that applies to the map feature configuration are defined here. */
+/** Definition of the MapFeatureConfig default values. */
 export declare const DEFAULT_MAP_FEATURE_CONFIG: MapFeatureConfig;
 /** Definition of the default order of the tabs inside appbar. */
 export declare const DEFAULT_APPBAR_TABS_ORDER: string[];
