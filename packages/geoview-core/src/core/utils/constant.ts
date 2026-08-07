@@ -66,7 +66,7 @@ export const NAV_BAR_BOTTOM_OFFSET_EXPANDED = `calc(${MAP_INFO_HEIGHT_EXPANDED} 
  *
  * Measured via ResizeObserver on the actual map container element (mapTargetElement), NOT the browser viewport.
  */
-export const OVERVIEW_MAP_MIN_CONTAINER_WIDTH = 900;
+export const OVERVIEW_MAP_MIN_CONTAINER_WIDTH = 700;
 
 /**
  * Minimum map container height (in pixels) required to render overview map.
