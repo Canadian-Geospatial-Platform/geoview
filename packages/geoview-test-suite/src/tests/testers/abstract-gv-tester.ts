@@ -637,6 +637,7 @@ export abstract class GVAbstractTester extends AbstractTester {
     test.addStep('Waiting for map render...');
     await mapViewer.waitForRender();
 
+    // Return the map viewer
     return mapViewer;
   }
 

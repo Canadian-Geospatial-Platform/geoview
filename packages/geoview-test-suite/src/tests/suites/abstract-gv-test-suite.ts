@@ -32,6 +32,28 @@ export abstract class GVAbstractTestSuite extends AbstractTestSuite {
     this.#controllerRegistry = controllerRegistry;
   }
 
+  // #region OVERRIDES
+
+  /**
+   * Overrides preparation to force a synchronous OL render before tests execute.
+   *
+   * This ensures `frameState_` is populated so that `getPixelFromCoordinate` works
+   * correctly even when the map is in a hidden tab.
+   *
+   * @returns A promise that resolves when the render is complete
+   */
+  protected override async onPrepareLaunchTestSuite(): Promise<void> {
+    // Call parent
+    await super.onPrepareLaunchTestSuite();
+
+    // Force a synchronous render so OL populates frameState_ (required for getPixelFromCoordinate to work in hidden tabs)
+    return this.getMapViewer().waitForRender();
+  }
+
+  // #endregion OVERRIDES
+
+  // #region METHODS
+
   /**
    * Gets the shared api.
    *
@@ -67,4 +89,6 @@ export abstract class GVAbstractTestSuite extends AbstractTestSuite {
   getMapId(): string {
     return this.#mapViewer.mapId;
   }
+
+  // #endregion METHODS
 }
