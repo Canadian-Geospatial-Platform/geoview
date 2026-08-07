@@ -53,19 +53,22 @@ export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
   }
 
   /**
+   * Overrides the debug hook for running a subset of tests during development.
+   *
+   * GV DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
+   *
+   * @returns A promise that resolves when the debug tests are completed
+   */
+  protected override onLaunchTestSuiteDEBUG(): Promise<unknown> {
+    return Promise.resolve();
+  }
+
+  /**
    * Overrides the implementation to perform the tests for this Test Suite.
    *
    * @returns A promise that resolves when tests are completed
    */
   protected override async onLaunchTestSuite(): Promise<unknown> {
-    // // GV START DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
-    // // Test DEBUG
-    // const pDevTest0 = this.#mapConfigTester.testInitialViewLayerIdsSetExtent();
-
-    // // Resolve when all
-    // return Promise.all([pDevTest0]);
-    // // GV END DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
-
     // Test data table pre-loaded in footer bar
     const pDataTableInFooterBar = this.#mapConfigTester.testDataTableSelectedTabFooterBar();
     await pDataTableInFooterBar;

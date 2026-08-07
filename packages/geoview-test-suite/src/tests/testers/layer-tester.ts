@@ -2308,13 +2308,13 @@ export class LayerTester extends GVAbstractTester {
    */
   async helperStepCheckLayerAtLayerPath<T>(test: Test<T>, layerPath: string, acceptNoIconsOrNoData = false): Promise<AbstractGVLayer> {
     // Creating the configuration
-    test.addStep(`Find the layer ${layerPath} on the map...`);
+    test.addStep(`Wait for the layer ${layerPath} to be registered...`);
 
-    // Get the layer
-    const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
+    // Wait for the layer to get registered
+    const layer = (await this.getControllersRegistry().layerController.waitForLayerRegistered(layerPath)) as AbstractGVLayer;
 
     // Creating the configuration
-    test.addStep(`Waiting for the layer to be loaded...`);
+    test.addStep(`Waiting for the layer to be loaded at least once...`);
 
     // Wait until the layer has at least loaded once
     await layer.waitForLoadedOnce();

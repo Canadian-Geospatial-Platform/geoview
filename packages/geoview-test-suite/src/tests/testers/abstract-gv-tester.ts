@@ -9,6 +9,7 @@ import type { TypeLegendItem } from 'geoview-core/core/components/layers/types';
 import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
 import { getStoreLayerLegendLayerByPath } from 'geoview-core/core/stores/states/layer-state';
 import type { GeometryApi } from 'geoview-core/geo/layer/geometry/geometry';
+import { delay, whenThisThen } from 'geoview-core/core/utils/utilities';
 
 /**
  * Main GeoView Abstract Tester class.
@@ -605,6 +606,41 @@ export abstract class GVAbstractTester extends AbstractTester {
   }
 
   /**
+   * Destroys the current map and creates a new one from the given config.
+   *
+   * Deletes the existing map viewer, creates a fresh instance via `createMapFromConfigFast`,
+   * reassigns the tester's internal references, and waits for all layers to finish loading.
+   *
+   * @param test - The test instance used to log each step
+   * @param mapId - The map identifier to destroy and recreate
+   * @param mapConfig - The map configuration object (will be JSON-stringified)
+   * @returns A promise that resolves with the newly created MapViewer
+   */
+  async replaceMap<T>(test: Test<T>, mapId: string, mapConfig: unknown): Promise<MapViewer> {
+    // Delete current map
+    test.addStep('Deleting current map...');
+    await this.getApi().deleteMapViewer(mapId, false);
+
+    // Wait for layer to load and data table to initialize
+    test.addStep('Creating the map from config...');
+    const mapViewer = await this.getApi().createMapFromConfigFast(mapId, JSON.stringify(mapConfig), 500);
+
+    // Replace the map viewer and the controller registry in the tester with the new one created from config
+    this.reassignMapViewerAndControllers(mapViewer, mapViewer.controllers);
+
+    // Wait for layer to load and data table to initialize
+    test.addStep('Waiting for layers to get loaded...');
+    const loadedLayersCount = await this.getControllersRegistry().layerController.waitForLayersLoaded();
+    test.addStep(`Layers loaded (${loadedLayersCount})`);
+
+    // Force a synchronous render so OL populates frameState_ (required for getPixelFromCoordinate to work in hidden tabs)
+    test.addStep('Waiting for map render...');
+    await mapViewer.waitForRender();
+
+    return mapViewer;
+  }
+
+  /**
    * Removes a layer from the map using its path and asserts that it no longer exists in the legend store.
    *
    * Each step is logged to the provided test instance for traceability.
@@ -727,5 +763,66 @@ export abstract class GVAbstractTester extends AbstractTester {
         }, timeout);
       }
     });
+  }
+
+  /**
+   * Polls a condition at short intervals until it returns true, then resolves.
+   *
+   * This is the preferred way to wait for an expected state change (e.g., store update, layer registration)
+   * rather than using a fixed delay. Delegates to `whenThisThen` from geoview-core utilities.
+   *
+   * @param condition - A predicate that returns true when the expected state is reached
+   * @param timeout - Optional maximum duration in milliseconds to wait before rejecting
+   * @returns A promise that resolves with true when the condition is met, or rejects on timeout
+   */
+  static waitForCondition(condition: () => boolean, timeout?: number): Promise<boolean> {
+    return whenThisThen(condition, timeout);
+  }
+
+  /**
+   * Waits for a fixed delay to allow React to re-render after a store update.
+   *
+   * This is a brute-force workaround that should only be used as a last resort when no DOM signal
+   * is available to observe. Prefer {@link waitForDomElement}, {@link waitForDomContent}, or
+   * {@link waitForDomChange} which react to actual DOM mutations instead of relying on an arbitrary delay.
+   * The default period is rather long, because it's a very arbitrary period to wait for.. and when many tests are
+   * happening in parallel, react will be much slower at rendering and triggering the components useEffects.
+   *
+   * @param period - Optional delay in milliseconds (default: 5000)
+   * @returns A promise that resolves after the fixed delay
+   */
+  static waitForUI(period = 5000): Promise<void> {
+    // Wait for a short delay to allow React to process the store update and re-render components
+    return delay(period);
+  }
+
+  /**
+   * Waits until the browser's main thread becomes idle using `requestIdleCallback`.
+   *
+   * This is useful for waiting until React has finished its render and commit phases, since the
+   * idle callback fires only after all pending tasks (renders, effects, layout) have completed.
+   * Prefer polling with `whenThisThen` for specific expected outcomes; use this when you need a
+   * lightweight "wait for React to settle" without knowing the exact condition to check.
+   *
+   * @returns A promise that resolves when the browser reports an idle period
+   */
+  static waitForBrowserIdle(): Promise<void> {
+    return new Promise((resolve) => {
+      (window as unknown as { requestIdleCallback: (cb: () => void) => void }).requestIdleCallback(resolve);
+    });
+  }
+
+  /**
+   * Waits for a purely aesthetic delay to allow the test UI to visually catch up.
+   *
+   * This should only be used for display purposes (e.g., giving the human observer time to see
+   * intermediate state changes in the test runner UI). Never use this for functional synchronization.
+   *
+   * @param period - Optional delay in milliseconds (default: 5000)
+   * @returns A promise that resolves after the delay
+   */
+  static waitForFun(period = 5000): Promise<void> {
+    // Wait for the React UI to actually pick up on the store update
+    return delay(period);
   }
 }

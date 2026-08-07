@@ -66,23 +66,22 @@ export class GVTestSuiteGeochart extends GVAbstractTestSuite {
   }
 
   /**
+   * Overrides the debug hook for running a subset of tests during development.
+   *
+   * GV DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
+   *
+   * @returns A promise that resolves when the debug tests are completed
+   */
+  protected override onLaunchTestSuiteDEBUG(): Promise<unknown> {
+    return Promise.resolve();
+  }
+
+  /**
    * Overrides the implementation to perform the tests for this Test Suite.
    *
    * @returns A promise that resolves when tests are completed
    */
   protected override async onLaunchTestSuite(): Promise<unknown> {
-    // // GV START DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
-    // // Test DEBUG
-    // const pDevTest0 = this.#geochartTester.testGeochartOpenForLayerMapClick(
-    //   'geojsonLYR5/polygons.json',
-    //   GVAbstractTester.ONTARIO_CENTER_LONLAT
-    // );
-    // // const pDevTest1 = await this.#mapTester.testZoomToExtent([-87, 51, -84, 53], [-88.584, 50.227, -82.142, 53.726]);
-
-    // // Resolve when all
-    // return Promise.all([pDevTest0]);
-    // // GV END DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
-
     // Test Geochart
     const pGeochartPolygons = this.#geochartTester.testGeochartOpenForLayerMapClick(
       'geojsonLYR5/polygons.json',

@@ -2,14 +2,13 @@ import type { Coordinate } from 'ol/coordinate';
 
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
-import { delay } from 'geoview-core/core/utils/utilities';
 import type { TypeFeatureInfoEntry } from 'geoview-core/api/types/map-schema-types';
 import type { TypeGeoviewLayerType } from 'geoview-core/api/types/layer-schema-types';
-import { logger } from 'geoview-core/core/utils/logger';
 import { getStoreUIActiveFooterBarTab } from 'geoview-core/core/stores/states/ui-state';
 import { getStoreLayerItemVisibility } from 'geoview-core/core/stores/states/layer-state';
 import { getStoreMapHighlightedFeatures, getStoreMapClickMarker } from 'geoview-core/core/stores/states/map-state';
 import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
+import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 
 /**
  * Main Map testing class.
@@ -39,20 +38,24 @@ export class DetailsTester extends GVAbstractTester {
       async (test) => {
         // Get the layer
         const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
+        await layer.waitForLoadedOnce();
 
         // Query the lonlat coordinate
         const resultsOntarioResults = await this.helperStepQueryLayerAtCoordinate(test, layer, lonlat1);
 
-        // Check that the details panel was selected for the layer
-        await this.helperStepCheckDetailsPanel(test, layerPath);
+        // Select the right layer path
+        test.addStep(`Selecting the details for the added layer...`);
+        this.getControllersRegistry().detailsController.setSelectedLayerPath(layerPath);
 
         // Make the layer invisible
+        test.addStep(`Make the layer invisible...`);
         layer.setVisible(false);
 
         // Query the lonlat coordinate
         const resultsOntarioNoResults = await this.helperStepQueryLayerAtCoordinate(test, layer, lonlat1);
 
         // Make the layer visible
+        test.addStep(`Make the layer visible...`);
         layer.setVisible(true);
 
         // Query in Alberta where there should be no results
@@ -103,8 +106,6 @@ export class DetailsTester extends GVAbstractTester {
         // Check that details is the active footer bar
         test.addStep("Verifying 'details' is the selected footer tab...");
         Test.assertIsEqual(getStoreUIActiveFooterBarTab(this.getMapId()).tabId, 'details');
-
-        logger.logDebug(results);
       }
     );
   }
@@ -137,93 +138,136 @@ export class DetailsTester extends GVAbstractTester {
   }
 
   /**
-   * Checks that the details panel is selected for the given layer path.
-   *
-   * @template T - The type parameter for the test instance
-   * @param test - The test instance used to log each step
-   * @param layerPath - The unique path or ID of the layer to check
-   * @returns A promise that resolves when the check is complete
-   */
-  async helperStepCheckDetailsPanel<T>(test: Test<T>, layerPath: string): Promise<void> {
-    // Update the step
-    test.addStep(`Waiting on UI to refresh...`);
-
-    // Wait purposely on the UI, 2 seconds seem to be the minimum.. 1 second fails sometimes..
-    await delay(2000);
-
-    // Update the step
-    test.addStep(`Selecting the details for the added layer...`);
-
-    // Select the right layer path
-    this.getControllersRegistry().detailsController.setSelectedLayerPath(layerPath);
-  }
-
-  /**
    * Tests that clearing all highlights removes highlighted features from the store.
    *
    * @param lonlat - The coordinate on the map to query
    * @returns A promise resolving when the test completes
    */
-  testClearAllHighlights(lonlat: Coordinate): Promise<Test<unknown>> {
+  testClearAllHighlights(lonlat: Coordinate): Promise<Test<TestDetailsHighlights>> {
     return this.test(
       `Test Clear all highlights across multiple layers...`,
       async (test) => {
+        // Wait for the layers to be loaded
+        await this.getControllersRegistry().layerController.waitForLayersLoaded();
+
         // Simulate a map click — this queries ALL layers and auto-highlights the first feature from each layer with results
         test.addStep('Simulating map click to trigger highlight on all queryable layers...');
         this.getMapViewer().simulateMapClick(lonlat);
 
-        // Wait for the highlight to happen.
-        // GV We can't only wait for the promiseQuery or the promiseQueryBatched, because the highlight only happens after all that
-        await this.getControllersRegistry().mapController.waitForFeatureHighlighted();
+        // Wait for the React UI to actually pick up on the store update
+        test.addStep(`Waiting on UI to refresh and the details panel to open...`);
+        await GVAbstractTester.waitForUI();
 
-        // Verify highlights exist in store
-        test.addStep('Verifying highlighted features exist in store...');
+        // Wait for the React UI to actually pick up on the store update
+        // GV The highlight only happens through a React render effect so we can't wait for a particular event
+        test.addStep(`Waiting on highlights to happen via react rendering...`);
+        await GVAbstractTester.waitForCondition(() => getStoreMapHighlightedFeatures(this.getMapId()).length > 0);
+
+        // Keep track of the store state
+        const clickMarkerBefore = getStoreMapClickMarker(this.getMapId());
         const highlightedBefore = getStoreMapHighlightedFeatures(this.getMapId());
-        const uniqueUids = new Set(highlightedBefore.map((f) => f.uid));
-        test.addStep(`Highlighted features — unique uids: ${uniqueUids.size}, total entries in store: ${highlightedBefore.length}`);
-        Test.assertIsArrayLengthMinimal(highlightedBefore, 1);
 
         // Clear all highlights
         test.addStep('Clearing all highlighted features...');
         this.getControllersRegistry().mapController.removeHighlightedFeature('all');
 
-        // Wait for UI
-        await delay(500);
-
-        // Check highlights after clear — store is immediately emptied by removeHighlightedFeature('all')
-        test.addStep('Checking highlighted features after clear (details panel still open)...');
-        const highlightedAfterClear = getStoreMapHighlightedFeatures(this.getMapId());
-        test.addStep(`Highlighted after clear (details open): ${highlightedAfterClear.length}`);
-        Test.assertIsArrayLengthEqual(highlightedAfterClear, 0);
-
-        // Close the details panel — this should remove the active feature highlight
-        test.addStep('Closing the details panel...');
-        this.getControllersRegistry().uiController.setActiveFooterBarTab('');
-
-        // Wait for UI to settle after panel close
-        await delay(1000);
-
-        // Check highlighted features after closing panel
-        const highlightedAfterClose = getStoreMapHighlightedFeatures(this.getMapId());
-        test.addStep(`Highlighted after close panel: ${highlightedAfterClose.length}`);
+        // Keep track of the store state
+        const highlightedAfter = getStoreMapHighlightedFeatures(this.getMapId());
 
         // Also hide the click marker explicitly (closing the panel does not auto-clear the click marker)
         test.addStep('Hiding click marker...');
         this.getControllersRegistry().mapController.clickMarkerIconHide();
 
-        // Return the highlighted features and click marker after all cleanup
-        const clickMarker = getStoreMapClickMarker(this.getMapId());
-        return { highlightedAfterClose, clickMarker };
+        // Keep track of the store state
+        const clickMarkerAfter = getStoreMapClickMarker(this.getMapId());
+
+        // Simulate a map click — this queries ALL layers and auto-highlights the first feature from each layer with results
+        test.addStep('Simulating map click to trigger highlight again...');
+        this.getMapViewer().simulateMapClick(lonlat);
+
+        // Wait for the React UI to actually pick up on the store update
+        test.addStep(`Waiting on UI to refresh and the details panel to open (again)...`);
+        await GVAbstractTester.waitForUI();
+
+        // Wait for the React UI to actually pick up on the store update
+        // GV The highlight only happens through a React render effect so we can't wait for a particular event
+        test.addStep(`Waiting on highlights to happen via react rendering...`);
+        await GVAbstractTester.waitForCondition(() => getStoreMapHighlightedFeatures(this.getMapId()).length > 0);
+
+        // Keep track of the store state
+        const highlighted2Before = getStoreMapHighlightedFeatures(this.getMapId());
+
+        // Close the details panel which will remove the highlight
+        test.addStep('Closing details app bar panel...');
+        this.getControllersRegistry().uiController.setActiveAppBarTab('details', false, false);
+
+        // Wait for the React UI to actually pick up on the store update
+        test.addStep(`Waiting on UI to refresh and the details panel to close...`);
+        await GVAbstractTester.waitForUI();
+
+        // Wait for the React UI to actually pick up on the store update
+        // GV The highlight only happens through a React render effect so we can't wait for a particular event
+        test.addStep(`Waiting on highlights to be cleared via react rendering...`);
+        await GVAbstractTester.waitForCondition(() => getStoreMapHighlightedFeatures(this.getMapId()).length === 0);
+
+        // Keep track of the store state
+        const highlighted2After = getStoreMapHighlightedFeatures(this.getMapId());
+
+        // Reshowing the details panel which will re-add the highlight
+        test.addStep('Reopening details app bar panel...');
+        this.getControllersRegistry().uiController.setActiveAppBarTab('details', true, false);
+
+        // Wait for the React UI to actually pick up on the store update
+        test.addStep(`Waiting on UI to refresh and the details panel to reopen...`);
+        await GVAbstractTester.waitForUI();
+
+        // Wait for the React UI to actually pick up on the store update
+        // GV The highlight only happens through a React render effect so we can't wait for a particular event
+        test.addStep(`Waiting on highlights to happen via react rendering...`);
+        await GVAbstractTester.waitForCondition(() => getStoreMapHighlightedFeatures(this.getMapId()).length > 0);
+
+        // Keep track of the store state
+        const highlighted3After = getStoreMapHighlightedFeatures(this.getMapId());
+
+        // Return the test execution results
+        return {
+          clickMarkerBefore,
+          clickMarkerAfter,
+          highlightedBefore,
+          highlightedAfter,
+          highlighted2Before,
+          highlighted2After,
+          highlighted3After,
+        };
       },
       (test, result) => {
-        const { highlightedAfterClose, clickMarker } = result as { highlightedAfterClose: TypeFeatureInfoEntry[]; clickMarker: unknown };
-        // After clear all AND closing details panel, the store should be empty
-        test.addStep('Verifying no highlighted features remain after clear + close details panel...');
-        Test.assertIsArrayLengthEqual(highlightedAfterClose, 0);
+        // Verify click marker is defined
+        test.addStep('Verifying click marker existed after the first map click...');
+        Test.assertIsDefined('clickMarkerBefore', result.clickMarkerBefore);
 
-        // Verify click marker is also cleared
-        test.addStep('Verifying click marker is removed after explicit hide...');
-        Test.assertIsUndefined('clickMarker', clickMarker);
+        // Verify click marker is undefined (cleared)
+        test.addStep('Verifying click marker was removed after explicit hide...');
+        Test.assertIsUndefined('clickMarker', result.clickMarkerAfter);
+
+        // Verify highlights existed after the map click
+        test.addStep('Verifying highlighted features existed after the first map click...');
+        Test.assertIsArrayLengthMinimal(result.highlightedBefore, 1);
+
+        // Verify highlights were cleared while details panel was still open
+        test.addStep('Verifying highlighted features were cleared after explicit removal...');
+        Test.assertIsArrayLengthEqual(result.highlightedAfter, 0);
+
+        // Verify highlights existed after the map click
+        test.addStep('Verifying highlighted features existed after the second map click...');
+        Test.assertIsArrayLengthMinimal(result.highlighted2Before, 1);
+
+        // Verify highlights were cleared while details panel was still open
+        test.addStep('Verifying highlighted features were cleared after panel was closed...');
+        Test.assertIsArrayLengthEqual(result.highlighted2After, 0);
+
+        // Verify highlights were cleared while details panel was still open
+        test.addStep('Verifying highlighted features were cleared after panel was reopened...');
+        Test.assertIsArrayLengthEqual(result.highlighted3After, 1);
       }
     );
   }
@@ -235,7 +279,10 @@ export class DetailsTester extends GVAbstractTester {
    * @param lonlat - The coordinate on the map to query
    * @returns A promise resolving when the test completes
    */
-  testZoomToFeature(layerPath: string, lonlat: Coordinate): Promise<Test<unknown>> {
+  testZoomToFeature(
+    layerPath: string,
+    lonlat: Coordinate
+  ): Promise<Test<{ initialZoom: number | undefined; finalZoom: number | undefined }>> {
     return this.test(
       `Test Zoom to feature on layer ${layerPath}...`,
       async (test) => {
@@ -268,8 +315,7 @@ export class DetailsTester extends GVAbstractTester {
       (test, result) => {
         // Verify zoom level changed
         test.addStep('Verifying zoom level changed...');
-        const { initialZoom, finalZoom } = result as { initialZoom: number; finalZoom: number };
-        Test.assertIsNotEqual(initialZoom, finalZoom);
+        Test.assertIsNotEqual(result.initialZoom, result.finalZoom);
       }
     );
   }
@@ -279,7 +325,7 @@ export class DetailsTester extends GVAbstractTester {
    *
    * @returns A promise resolving when the test completes
    */
-  testNameFieldAsLabel(): Promise<Test<unknown>> {
+  testNameFieldAsLabel(): Promise<Test<TypeFeatureInfoEntry[] | undefined>> {
     const mapId = this.getMapId();
     const LAYER_PATH = 'geojsonLYR5/polygons.json';
     const NAME_FIELD = 'creationDate';
@@ -302,15 +348,14 @@ export class DetailsTester extends GVAbstractTester {
         return this.helperStepQueryLayerAtCoordinate(test, layer, GVAbstractTester.ONTARIO_CENTER_LONLAT);
       },
       (test, result) => {
-        const features = result as TypeFeatureInfoEntry[];
         // Verify we got results
         test.addStep('Verifying query returned features...');
-        Test.assertIsDefined('features', features);
-        Test.assertIsArrayLengthMinimal(features, 1);
+        Test.assertIsDefined('features', result);
+        Test.assertIsArrayLengthMinimal(result, 1);
 
         // Verify the nameField is set correctly on the result
         test.addStep('Verifying nameField is set on result...');
-        Test.assertIsEqual(features[0].nameField, NAME_FIELD);
+        Test.assertIsEqual(result[0].nameField, NAME_FIELD);
       }
     );
   }
@@ -320,9 +365,10 @@ export class DetailsTester extends GVAbstractTester {
    *
    * @returns A promise resolving when the test completes
    */
-  testSummaryFalseHidesField(): Promise<Test<unknown>> {
+  testSummaryFalseHidesField(): Promise<Test<TypeFeatureInfoEntry[] | undefined>> {
     const mapId = this.getMapId();
     const LAYER_PATH = 'geojsonLYR5/polygons.json';
+    const NAME_FIELD = 'Province';
     const HIDDEN_FIELD = 'creationDate';
 
     return this.test(
@@ -332,10 +378,10 @@ export class DetailsTester extends GVAbstractTester {
         test.addStep('Creating map with outfields summary:false configuration...');
         await this.#helperCreateMapWithFeatureInfoConfig(test, mapId, {
           queryable: true,
-          nameField: 'Province',
+          nameField: NAME_FIELD,
           outfields: [
-            { name: 'Province', alias: 'Province', type: 'string' },
-            { name: 'creationDate', alias: 'Creation Date', type: 'date', summary: false },
+            { name: NAME_FIELD, type: 'string' },
+            { name: HIDDEN_FIELD, type: 'date', summary: false },
           ],
         });
 
@@ -347,19 +393,18 @@ export class DetailsTester extends GVAbstractTester {
         return this.helperStepQueryLayerAtCoordinate(test, layer, GVAbstractTester.ONTARIO_CENTER_LONLAT);
       },
       (test, result) => {
-        const features = result as TypeFeatureInfoEntry[];
         // Verify we got results
         test.addStep('Verifying query returned features...');
-        Test.assertIsDefined('features', features);
-        Test.assertIsArrayLengthMinimal(features, 1);
+        Test.assertIsDefined('features', result);
+        Test.assertIsArrayLengthMinimal(result, 1);
 
         // Verify the hidden field is NOT in fieldInfo
         test.addStep(`Verifying field '${HIDDEN_FIELD}' is excluded from fieldInfo...`);
-        Test.assertIsUndefined(`fieldInfo.${HIDDEN_FIELD}`, features[0].fieldInfo[HIDDEN_FIELD]);
+        Test.assertIsUndefined(`fieldInfo.${HIDDEN_FIELD}`, result[0].fieldInfo[HIDDEN_FIELD]);
 
         // Verify that Province field IS present
         test.addStep('Verifying Province field IS present in fieldInfo...');
-        Test.assertIsDefined('fieldInfo.Province', features[0].fieldInfo.Province);
+        Test.assertIsDefined('fieldInfo.Province', result[0].fieldInfo.Province);
       }
     );
   }
@@ -369,7 +414,7 @@ export class DetailsTester extends GVAbstractTester {
    *
    * @returns A promise resolving when the test completes
    */
-  testFieldAliasRenamesField(): Promise<Test<unknown>> {
+  testFieldAliasRenamesField(): Promise<Test<TypeFeatureInfoEntry[] | undefined>> {
     const mapId = this.getMapId();
     const LAYER_PATH = 'geojsonLYR5/polygons.json';
     const ALIAS_VALUE = 'Custom Province Name';
@@ -393,16 +438,15 @@ export class DetailsTester extends GVAbstractTester {
         return this.helperStepQueryLayerAtCoordinate(test, layer, GVAbstractTester.ONTARIO_CENTER_LONLAT);
       },
       (test, result) => {
-        const features = result as TypeFeatureInfoEntry[];
         // Verify we got results
         test.addStep('Verifying query returned features...');
-        Test.assertIsDefined('features', features);
-        Test.assertIsArrayLengthMinimal(features, 1);
+        Test.assertIsDefined('features', result);
+        Test.assertIsArrayLengthMinimal(result, 1);
 
         // Verify the alias is applied
         test.addStep(`Verifying Province field alias is '${ALIAS_VALUE}'...`);
-        Test.assertIsDefined('fieldInfo.Province', features[0].fieldInfo.Province);
-        Test.assertIsEqual(features[0].fieldInfo.Province.alias, ALIAS_VALUE);
+        Test.assertIsDefined('fieldInfo.Province', result[0].fieldInfo.Province);
+        Test.assertIsEqual(result[0].fieldInfo.Province.alias, ALIAS_VALUE);
       }
     );
   }
@@ -417,7 +461,7 @@ export class DetailsTester extends GVAbstractTester {
    * @param featureInfoConfig - The featureInfo configuration to apply to the layer
    * @returns A promise that resolves when the map is created and layers are loaded
    */
-  async #helperCreateMapWithFeatureInfoConfig<T>(test: Test<T>, mapId: string, featureInfoConfig: Record<string, unknown>): Promise<void> {
+  #helperCreateMapWithFeatureInfoConfig<T>(test: Test<T>, mapId: string, featureInfoConfig: Record<string, unknown>): Promise<MapViewer> {
     const baseConfig = {
       map: {
         interaction: 'dynamic',
@@ -453,22 +497,27 @@ export class DetailsTester extends GVAbstractTester {
       },
     };
 
-    // Delete current map
-    test.addStep('Deleting current map...');
-    await this.getApi().deleteMapViewer(mapId, false);
-
-    // Create new map from config
-    test.addStep('Creating the map from config...');
-    const mapViewer = await this.getApi().createMapFromConfigFast(mapId, JSON.stringify(baseConfig), 500);
-
-    // Replace the map viewer and the controller registry in the tester with the new one
-    this.reassignMapViewerAndControllers(mapViewer, mapViewer.controllers);
-
-    // Wait for layers to load
-    test.addStep('Waiting for layers to get loaded...');
-    const loadedLayersCount = await this.getControllersRegistry().layerController.waitForLayersLoaded();
-    test.addStep(`Layers loaded (${loadedLayersCount})`);
+    // Replace the map!
+    return this.replaceMap(test, mapId, baseConfig);
   }
 
   // #endregion
 }
+
+/** Result type for the testClearAllHighlights test execution. */
+export type TestDetailsHighlights = {
+  /** The click marker state after the first map click (before any cleanup). */
+  clickMarkerBefore: unknown;
+  /** The click marker state after explicit hide. */
+  clickMarkerAfter: unknown;
+  /** The highlighted features after the first map click. */
+  highlightedBefore: TypeFeatureInfoEntry[];
+  /** The highlighted features after explicit removal via removeHighlightedFeature('all'). */
+  highlightedAfter: TypeFeatureInfoEntry[];
+  /** The highlighted features after the second map click. */
+  highlighted2Before: TypeFeatureInfoEntry[];
+  /** The highlighted features after the details panel is closed. */
+  highlighted2After: TypeFeatureInfoEntry[];
+  /** The highlighted features after the details panel is reopened. */
+  highlighted3After: TypeFeatureInfoEntry[];
+};

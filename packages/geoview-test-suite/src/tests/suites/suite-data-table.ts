@@ -68,19 +68,22 @@ export class GVTestSuiteDataTable extends GVAbstractTestSuite {
   }
 
   /**
+   * Overrides the debug hook for running a subset of tests during development.
+   *
+   * GV DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
+   *
+   * @returns A promise that resolves when the debug tests are completed
+   */
+  protected override onLaunchTestSuiteDEBUG(): Promise<unknown> {
+    return Promise.resolve();
+  }
+
+  /**
    * Overrides the implementation to perform the tests for this Test Suite.
    *
    * @returns A promise that resolves when tests are completed
    */
   protected override async onLaunchTestSuite(): Promise<void> {
-    // // GV START DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
-    // // Test DEBUG
-    // const pDevTest0 = this.#dataTableTester.testFilterByExtentOnGeoJSONOntario();
-
-    // // Resolve when all
-    // return Promise.all([pDevTest0]);
-    // // GV END DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
-
     // Sequential — tests interact with shared data table state
     await this.#dataTableTester.testAllFeaturesDataArrayPopulated(DataTableTester.GEOJSON_LAYER_PATH, 4);
     await this.#dataTableTester.testAllFeaturesDataArrayPopulated('ccc75c12-5acc-4a6a-959f-ef6f621147b9/0', 598);

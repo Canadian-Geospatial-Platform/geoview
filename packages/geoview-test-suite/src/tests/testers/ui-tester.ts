@@ -1,6 +1,5 @@
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
-import { delay } from 'geoview-core/core/utils/utilities';
 import { getStoreAppGeoviewHTMLElement } from 'geoview-core/core/stores/states/app-state';
 
 /**
@@ -31,8 +30,9 @@ export class UITester extends GVAbstractTester {
         test.addStep('Selecting details panel...');
         this.getControllersRegistry().uiController.setActiveFooterBarTab('details');
 
-        // Wait a bit for the UI to update
-        await delay(500);
+        // Wait for the React UI to actually pick up on the store update
+        test.addStep(`Waiting on UI to refresh and the active footer tab to be details...`);
+        await GVAbstractTester.waitForUI();
 
         // Get the GeoView HTML element
         test.addStep('Getting GeoView HTML element...');

@@ -3,7 +3,7 @@ import type { Coordinate } from 'ol/coordinate';
 import { TestError } from '../core/exceptions';
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
-import { delay, generateId } from 'geoview-core/core/utils/utilities';
+import { generateId } from 'geoview-core/core/utils/utilities';
 import type { Extent, TypeBasemapId, TypeMapState, TypeValidMapProjectionCodes } from 'geoview-core/api/types/map-schema-types';
 import {
   getStoreDetailsFeatures,
@@ -326,14 +326,11 @@ export class MapTester extends GVAbstractTester {
 
     return this.test(
       'Test footer bar select tab',
-      async (test) => {
+      (test) => {
         test.addStep(`Selecting footer bar tab '${targetTab}'...`);
 
         // Select the tab
         this.getControllersRegistry().uiController.setActiveFooterBarTab(targetTab);
-
-        // Wait for tab selection to complete
-        await delay(500);
 
         return targetTab;
       },
@@ -355,14 +352,11 @@ export class MapTester extends GVAbstractTester {
 
     return this.test(
       'Test app bar select tab',
-      async (test) => {
+      (test) => {
         test.addStep(`Selecting app bar tab '${targetTab}'...`);
 
         // Select the tab
         this.getControllersRegistry().uiController.setActiveAppBarTab(targetTab, true, true);
-
-        // Wait for tab selection to complete
-        await delay(500);
 
         return targetTab;
       },
@@ -390,14 +384,11 @@ export class MapTester extends GVAbstractTester {
 
     return this.test(
       'Test footer bar create custom tab',
-      async (test) => {
+      (test) => {
         test.addStep('Creating custom footer bar tab...');
 
         // Create the tab
         this.getMapViewer().footerBarApi.createTab(customTabConfig);
-
-        // Wait for tab creation to complete
-        await delay(500);
 
         return customTabId;
       },
