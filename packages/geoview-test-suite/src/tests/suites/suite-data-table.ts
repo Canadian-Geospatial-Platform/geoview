@@ -83,7 +83,7 @@ export class GVTestSuiteDataTable extends GVAbstractTestSuite {
    *
    * @returns A promise that resolves when tests are completed
    */
-  protected override async onLaunchTestSuite(): Promise<void> {
+  protected override async onLaunchTestSuite(): Promise<unknown> {
     // Sequential — tests interact with shared data table state
     await this.#dataTableTester.testAllFeaturesDataArrayPopulated(DataTableTester.GEOJSON_LAYER_PATH, 4);
     await this.#dataTableTester.testAllFeaturesDataArrayPopulated('ccc75c12-5acc-4a6a-959f-ef6f621147b9/0', 598);
@@ -100,5 +100,8 @@ export class GVTestSuiteDataTable extends GVAbstractTestSuite {
     await this.#dataTableTester.testFilterByExtentUnavailableForEsriDynamic('forest_industry/0');
     await this.#dataTableTester.testFilterByExtentOnGeoJSONOntario();
     await this.#dataTableTester.testShowUnsymbolizedFeaturesFalsePrefiltersTable('4baa66ad-aa29-4233-a6a8-7f5cbefb5ea8/6', 68, 213);
+
+    // Done
+    return;
   }
 }

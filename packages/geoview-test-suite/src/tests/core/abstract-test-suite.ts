@@ -39,6 +39,29 @@ export abstract class AbstractTestSuite {
   abstract getDescriptionAsHtml(): string;
 
   /**
+   * Overridable function called when the test suite is about to launch, to validate if it can be executed on the given map.
+   *
+   * @returns A promise that resolves to true if the test suite can execute on the given map
+   */
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  protected onCanExecuteTestSuite(): Promise<boolean> {
+    return Promise.resolve(true);
+  }
+
+  /**
+   * Performs setup tasks before the test suite launches.
+   *
+   * Override this method in a subclass to run initialization logic (e.g., forcing a map render)
+   * that must complete before any tests execute.
+   *
+   * @returns A promise that resolves when preparation is complete
+   */
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  protected onPrepareLaunchTestSuite(): Promise<void> {
+    return Promise.resolve();
+  }
+
+  /**
    * Provides a debug hook for running a subset of tests during development.
    *
    * Override this method in a concrete suite to temporarily run only specific tests
@@ -61,16 +84,6 @@ export abstract class AbstractTestSuite {
    * @returns A promise that resolves when the tests are over
    */
   protected abstract onLaunchTestSuite(): Promise<unknown>;
-
-  /**
-   * Overridable function called when the test suite is about to launch, to validate if it can be executed on the given map.
-   *
-   * @returns A promise that resolves to true if the test suite can execute on the given map
-   */
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  protected onCanExecuteTestSuite(): Promise<boolean> {
-    return Promise.resolve(true);
-  }
 
   // #endregion OVERRIDES
 
@@ -173,6 +186,9 @@ export abstract class AbstractTestSuite {
 
     // Validates the Test Suite can execute
     if (!(await this.onCanExecuteTestSuite())) throw new TestSuiteCannotExecuteError();
+
+    // Prepare to launch the test suite
+    await this.onPrepareLaunchTestSuite();
 
     // If only running the debug tests
     if (this.RUN_DEBUG_ONLY && isLocalhost()) {
