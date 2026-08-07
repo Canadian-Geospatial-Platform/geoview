@@ -222,7 +222,7 @@
 
       <!-- Map 2 Results -->
       <button id="collapsibleMap2" class="collapsible" onclick="toggleCollapsible(this)">
-        <span style="font-weight: bold">Map 2 - Layer Tests (EPSG: 3978)</span>
+        <span style="font-weight: bold">Map 2 - Layer Tests (EPSG: 3857)</span>
         <span id="statsMap2" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Done success: 0 | Done failed: 0 | Done: 0/0</span>
       </button>
       <div class="panel">
@@ -231,7 +231,7 @@
 
       <!-- Map 3 Results -->
       <button id="collapsibleMap3" class="collapsible" onclick="toggleCollapsible(this)">
-        <span style="font-weight: bold">Map 3 - Layer Tests (EPSG: 3857)</span>
+        <span style="font-weight: bold">Map 3 - Layer Tests (EPSG: 3978)</span>
         <span id="statsMap3" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Done success: 0 | Done failed: 0 | Done: 0/0</span>
       </button>
       <div class="panel">
@@ -434,7 +434,10 @@
             {
               'test-suite': { 'suites': ['suite-layer'] }
             }
-          ]
+          ],
+          'serviceUrls': {
+            'proxyUrl': 'https://proxy.app-dev.geo.ca'
+          }
         }"
       ></div>
     </div>
@@ -481,7 +484,10 @@
             {
               'test-suite': { 'suites': ['suite-layer'] }
             }
-          ]
+          ],
+          'serviceUrls': {
+            'proxyUrl': 'https://proxy.app-dev.geo.ca'
+          }
         }"
       ></div>
     </div>

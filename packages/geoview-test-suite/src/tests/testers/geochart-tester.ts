@@ -1,7 +1,6 @@
 import type { Coordinate } from 'ol/coordinate';
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
-import { delay } from 'geoview-core/core/utils/utilities';
 import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
 import { getStoreUIActiveFooterBarTab } from 'geoview-core/core/stores/states/ui-state';
 import { getStoreGeochartChartsConfig, getStoreGeochartSelectedLayerPath } from 'geoview-core/core/stores/states/geochart-state';
@@ -183,11 +182,9 @@ export class GeochartTester extends GVAbstractTester {
     // Set the footer tab to Geochart
     this.getControllersRegistry().uiController.setActiveFooterBarTab('geochart');
 
-    // Update the step
-    test.addStep(`Waiting on UI to refresh...`);
-
-    // Wait purposely on the UI, 2 seconds seem to be the minimum.. 1 second fails sometimes..
-    await delay(2000);
+    // Wait for the React UI to actually pick up on the store update
+    test.addStep(`Waiting on UI to refresh and the active footer tab to be geochart...`);
+    await GVAbstractTester.waitForUI();
 
     // Update the step
     test.addStep(`Selecting the geochart for the added layer...`);
@@ -195,8 +192,8 @@ export class GeochartTester extends GVAbstractTester {
     // Select the right layer path
     this.getControllersRegistry().geoChartController?.setSelectedLayerPath(layerPath);
 
-    // Wait purposely on the UI, this waiting period isn't necessary for the test, but it's good to see it happen in real-time
-    await delay(1000);
+    // Wait for fun so that we can see the actual chart in the UI before terminating the test
+    await GVAbstractTester.waitForFun();
 
     // Return the layer
     return layer;

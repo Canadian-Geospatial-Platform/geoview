@@ -49,26 +49,22 @@ export class GVTestSuiteCore extends GVAbstractTestSuite {
   }
 
   /**
+   * Overrides the debug hook for running a subset of tests during development.
+   *
+   * GV DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
+   *
+   * @returns A promise that resolves when the debug tests are completed
+   */
+  protected override onLaunchTestSuiteDEBUG(): Promise<unknown> {
+    return Promise.resolve();
+  }
+
+  /**
    * Overrides the implementation to perform the tests for this Test Suite.
    *
    * @returns A promise that resolves when tests are completed
    */
   protected override onLaunchTestSuite(): Promise<unknown> {
-    // // GV START DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
-    // // Test DEBUG
-    // const pDevTest0 = this.#coreTester.testGetWMSServiceMetadata();
-    // const pDevTest1 = this.#coreTester.testGetWMSServiceMetadataBadUrl();
-    // const pDevTest2 = this.#coreTester.testGetWFSServiceMetadata();
-    // const pDevTest3 = this.#coreTester.testGetWFSServiceMetadataBadUrl();
-    // const pDevTest4 = this.#coreTester.testGetWMTSServiceMetadata();
-    // const pDevTest5 = this.#coreTester.testGetWMTSServiceMetadataBadUrl();
-    // const pDevTest6 = this.#coreTester.testFetchJsonWithProxyFallback();
-    // const pDevTest7 = this.#coreTester.testFetchJsonWithProxyFallbackBadUrl();
-
-    // // Resolve when all
-    // return Promise.all([pDevTest0, pDevTest1, pDevTest2, pDevTest3, pDevTest4, pDevTest5, pDevTest6, pDevTest7]);
-    // // GV END DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
-
     // Test validateAndPingUrl (simple)
     const pSimplePingValid = this.#coreTester.testSimplePingValidReachable();
     const pSimplePingXyz = this.#coreTester.testSimplePingXyzTileUrl();
