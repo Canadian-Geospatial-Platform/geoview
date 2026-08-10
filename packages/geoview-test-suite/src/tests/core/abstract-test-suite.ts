@@ -23,7 +23,7 @@ export abstract class AbstractTestSuite {
   /** Callback delegates for the test failure event */
   #onTestersTestFailureHandlers: TesterFailureDelegate[] = [];
 
-  /** Indicates if the test suite should only run the DEBUG tests */
+  // Indicates if the test suite should only run the DEBUG tests
   DEBUG_RUN_ONLY_DEBUG_FUNCTION = false;
 
   // #region OVERRIDES
