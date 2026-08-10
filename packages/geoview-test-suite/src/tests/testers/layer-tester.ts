@@ -54,7 +54,7 @@ export class LayerTester extends GVAbstractTester {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.HISTORICAL_FLOOD_URL_MAP_SERVER;
-    const layerPath = `${gvLayerId}/${GVAbstractTester.HISTORICAL_FLOOD_URL_LAYER_ID}`;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.HISTORICAL_FLOOD_LAYER_ID}`;
     const gvLayerName = 'Esri Dynamic Histo Flood Events';
 
     // Test
@@ -66,7 +66,7 @@ export class LayerTester extends GVAbstractTester {
 
         // Create the config
         const gvConfig = EsriDynamic.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
-          { id: GVAbstractTester.HISTORICAL_FLOOD_URL_LAYER_ID },
+          { id: GVAbstractTester.HISTORICAL_FLOOD_LAYER_ID },
         ]);
 
         // Redirect to helper to add the layer to the map and wait
@@ -186,7 +186,7 @@ export class LayerTester extends GVAbstractTester {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.BAD_URL;
-    const layerPath = `${gvLayerId}/${GVAbstractTester.HISTORICAL_FLOOD_URL_LAYER_ID}`;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.HISTORICAL_FLOOD_LAYER_ID}`;
     const gvLayerName = 'Esri Dynamic Histo Flood Events';
 
     // Test
@@ -199,7 +199,7 @@ export class LayerTester extends GVAbstractTester {
 
         // Create the config
         const gvConfig = EsriDynamic.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
-          { id: GVAbstractTester.HISTORICAL_FLOOD_URL_LAYER_ID },
+          { id: GVAbstractTester.HISTORICAL_FLOOD_LAYER_ID },
         ]);
 
         // Redirect to helper to add the layer to the map and wait

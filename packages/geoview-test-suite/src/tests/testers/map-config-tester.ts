@@ -1690,7 +1690,7 @@ export class MapConfigTester extends GVAbstractTester {
   testInitialSettingsFiltersEsriDynamic(): Promise<Test> {
     const mapId = this.getMapId();
     const GV_LAYER_ID = 'esriDynamicLYR';
-    const LAYER_PATH = `${GV_LAYER_ID}/${GVAbstractTester.HISTORICAL_FLOOD_URL_LAYER_ID}`;
+    const LAYER_PATH = `${GV_LAYER_ID}/${GVAbstractTester.HISTORICAL_FLOOD_LAYER_ID}`;
     const FILTER_EXPRESSION = "event_type = 'freshet'";
 
     return this.test(
@@ -1708,7 +1708,7 @@ export class MapConfigTester extends GVAbstractTester {
                 geoviewLayerType: 'esriDynamic' as TypeGeoviewLayerType,
                 listOfLayerEntryConfig: [
                   {
-                    layerId: GVAbstractTester.HISTORICAL_FLOOD_URL_LAYER_ID,
+                    layerId: GVAbstractTester.HISTORICAL_FLOOD_LAYER_ID,
                     layerFilter: FILTER_EXPRESSION,
                   },
                 ],
