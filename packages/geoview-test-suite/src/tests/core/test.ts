@@ -278,7 +278,7 @@ export class Test<T = unknown> {
    * @param actualValue - The actual value being checked
    * @throws {AssertionUndefinedError} When the value isn't defined.
    */
-  static assertIsDefined<T = unknown>(propertyPath: string, actualValue: T | undefined): asserts actualValue is T {
+  static assertIsDefined<T = unknown>(propertyPath: string, actualValue: T | undefined | null): asserts actualValue is NonNullable<T> {
     // Checks if the value is defined
     if (actualValue !== undefined && actualValue !== null) return;
 
@@ -293,7 +293,7 @@ export class Test<T = unknown> {
    * @param actualValue - The actual value being checked
    * @throws {AssertionUndefinedError} When the value is defined.
    */
-  static assertIsUndefined<T = unknown>(propertyPath: string, actualValue: T | undefined): void {
+  static assertIsUndefined<T = unknown>(propertyPath: string, actualValue: T | undefined | null): void {
     // Checks if the value is defined
     if (actualValue === undefined || actualValue === null) return;
 
@@ -384,7 +384,7 @@ export class Test<T = unknown> {
    * @param actualValue - The object to check
    * @throws {AssertionValueNotAnArrayError} When the value is not an array.
    */
-  static assertIsArray(actualValue: unknown | unknown[] | undefined): asserts actualValue is unknown[] {
+  static assertIsArray(actualValue: unknown | unknown[] | undefined | null): asserts actualValue is unknown[] {
     if (Array.isArray(actualValue)) return;
 
     // Throw

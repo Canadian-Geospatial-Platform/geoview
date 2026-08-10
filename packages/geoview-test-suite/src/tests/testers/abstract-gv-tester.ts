@@ -5,6 +5,7 @@ import { Test } from '../core/test';
 import type { API } from 'geoview-core/api/api';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import type { TypeGeoviewLayerType } from 'geoview-core/api/types/layer-schema-types';
+import type { TypeOutfields } from 'geoview-core/api/types/map-schema-types';
 import type { TypeLegendItem } from 'geoview-core/core/components/layers/types';
 import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
 import { getStoreLayerLegendLayerByPath } from 'geoview-core/core/stores/states/layer-state';
@@ -49,6 +50,142 @@ export abstract class GVAbstractTester extends AbstractTester {
   static AIRBORNE_RADIOACTIVITY_UUID_WITH_SUFFIX = `${GVAbstractTester.AIRBORNE_RADIOACTIVITY_UUID}/0/1`;
   static AIRBORNE_RADIOACTIVITY_LAYER_GROUP_NAME = 'Airborne Radioactivity';
 
+  /** Airborne Radioactivity wms */
+  static AIRBORNE_RADIOACTIVITY_WMS_URL = 'https://qgis-stage.cdtk.geogc.ca/ows/hc/airborne_radioactivity_en';
+  static AIRBORNE_RADIOACTIVITY_WMS_LAYER_ID = 'AIRB_RAD';
+  static AIRBORNE_RADIOACTIVITY_WMS_OUTFIELDS: TypeOutfields[] = [
+    {
+      name: 'pk_lyr_id',
+      alias: 'pk_lyr_id',
+      type: 'oid',
+    },
+    {
+      name: 'Location_Emplacement',
+      alias: 'Location_Emplacement',
+      type: 'string',
+    },
+    {
+      name: 'Province',
+      alias: 'Province',
+      type: 'string',
+    },
+    {
+      name: 'Be7_Med_mBqM3',
+      alias: 'Be7_Med_mBqM3',
+      type: 'number',
+    },
+    {
+      name: 'Be7_Max_mBqM3',
+      alias: 'Be7_Max_mBqM3',
+      type: 'number',
+    },
+    {
+      name: 'Be7_Min_mBqM3',
+      alias: 'Be7_Min_mBqM3',
+      type: 'number',
+    },
+    {
+      name: 'Be7_Readings_Lectures',
+      alias: 'Be7_Readings_Lectures',
+      type: 'string',
+    },
+    {
+      name: 'Pb210_Med_mBqM3',
+      alias: 'Pb210_Med_mBqM3',
+      type: 'number',
+    },
+    {
+      name: 'Pb210_Max_mBqM3',
+      alias: 'Pb210_Max_mBqM3',
+      type: 'number',
+    },
+    {
+      name: 'Pb210_Min_mBqM3',
+      alias: 'Pb210_Min_mBqM3',
+      type: 'number',
+    },
+    {
+      name: 'Pb210_Readings_Lectures',
+      alias: 'Pb210_Readings_Lectures',
+      type: 'string',
+    },
+    {
+      name: 'I131_Med_mBqM3',
+      alias: 'I131_Med_mBqM3',
+      type: 'number',
+    },
+    {
+      name: 'I131_Max_mBqM3',
+      alias: 'I131_Max_mBqM3',
+      type: 'number',
+    },
+    {
+      name: 'I131_Min_mBqM3',
+      alias: 'I131_Min_mBqM3',
+      type: 'number',
+    },
+    {
+      name: 'I131_Readings_Lectures',
+      alias: 'I131_Readings_Lectures',
+      type: 'string',
+    },
+    {
+      name: 'Cs134_Med_mBqM3',
+      alias: 'Cs134_Med_mBqM3',
+      type: 'number',
+    },
+    {
+      name: 'Cs134_Max_mBqM3',
+      alias: 'Cs134_Max_mBqM3',
+      type: 'number',
+    },
+    {
+      name: 'Cs134_Min_mBqM3',
+      alias: 'Cs134_Min_mBqM3',
+      type: 'number',
+    },
+    {
+      name: 'Cs134_Readings_Lectures',
+      alias: 'Cs134_Readings_Lectures',
+      type: 'string',
+    },
+    {
+      name: 'Cs137_Med_mBqM3',
+      alias: 'Cs137_Med_mBqM3',
+      type: 'number',
+    },
+    {
+      name: 'Cs137_Max_mBqM3',
+      alias: 'Cs137_Max_mBqM3',
+      type: 'number',
+    },
+    {
+      name: 'Cs137_Min_mBqM3',
+      alias: 'Cs137_Min_mBqM3',
+      type: 'number',
+    },
+    {
+      name: 'Cs137_Readings_Lectures',
+      alias: 'Cs137_Readings_Lectures',
+      type: 'string',
+    },
+    {
+      name: 'StartDate_DateDebut',
+      alias: 'StartDate_DateDebut',
+      type: 'string',
+    },
+    {
+      name: 'EndDate_DateFin',
+      alias: 'EndDate_DateFin',
+      type: 'string',
+    },
+    {
+      name: 'Graph_Graphique',
+      alias: 'Graph_Graphique',
+      type: 'string',
+    },
+  ];
+
   /** Geocore UUID with group layers having defaultVisibility set to false */
   static readonly GEOCORE_MARINE_FISHERIES_UUID = '44ef4d33-20b7-45fc-974c-d73a0a8fbae8';
   static readonly GEOCORE_MARINE_FISHERIES_LAYER_PATH = GVAbstractTester.GEOCORE_MARINE_FISHERIES_UUID + '/0';
@@ -57,10 +194,118 @@ export abstract class GVAbstractTester extends AbstractTester {
   /** Historical Flood */
   static readonly HISTORICAL_FLOOD_URL_MAP_SERVER: string =
     'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer';
-  static readonly HISTORICAL_FLOOD_URL_LAYER_ID: string = '0';
+  static readonly HISTORICAL_FLOOD_LAYER_ID: string = '0';
   static readonly HISTORICAL_FLOOD_LAYER_NAME: string = 'Historical Flood Events';
 
-  static readonly HISTORICAL_FLOOD_URL_FEATURE_SERVER: string = `${GVAbstractTester.HISTORICAL_FLOOD_URL_MAP_SERVER}/${GVAbstractTester.HISTORICAL_FLOOD_URL_LAYER_ID}`;
+  static readonly HISTORICAL_FLOOD_URL_FEATURE_SERVER: string = `${GVAbstractTester.HISTORICAL_FLOOD_URL_MAP_SERVER}/${GVAbstractTester.HISTORICAL_FLOOD_LAYER_ID}`;
+
+  static readonly HISTORICAL_FLOOD_OUTFIELDS: TypeOutfields[] = [
+    {
+      name: 'event_name',
+      alias: 'Event name',
+      type: 'string',
+    },
+    {
+      name: 'year',
+      alias: 'Year',
+      type: 'number',
+    },
+    {
+      name: 'event_summary',
+      alias: 'Event summary',
+      type: 'string',
+    },
+    {
+      name: 'evacuation',
+      alias: 'Evacuation',
+      type: 'string',
+    },
+    {
+      name: 'death',
+      alias: 'Death',
+      type: 'string',
+    },
+    {
+      name: 'flood_cause',
+      alias: 'Flood cause',
+      type: 'string',
+    },
+    {
+      name: 'flood_cause_description',
+      alias: 'Flood cause description',
+      type: 'string',
+    },
+    {
+      name: 'start_date',
+      alias: 'Start date',
+      type: 'string',
+    },
+    {
+      name: 'end_date',
+      alias: 'End date',
+      type: 'string',
+    },
+    {
+      name: 'season',
+      alias: 'Season',
+      type: 'string',
+    },
+    {
+      name: 'province_territory',
+      alias: 'Province or territory',
+      type: 'string',
+    },
+    {
+      name: 'province_territory_description',
+      alias: 'Province or territory description',
+      type: 'string',
+    },
+    {
+      name: 'source',
+      alias: 'Source',
+      type: 'string',
+    },
+    {
+      name: 'source_description',
+      alias: 'Source description',
+      type: 'string',
+    },
+    {
+      name: 'precipitation_analysis_url',
+      alias: 'Precipitation analysis',
+      type: 'string',
+    },
+    {
+      name: 'precipitation_animation_url',
+      alias: 'Precipitation animation',
+      type: 'string',
+    },
+    {
+      name: 'precipitation_data_url',
+      alias: 'Precipitation data',
+      type: 'string',
+    },
+    {
+      name: 'uuid',
+      alias: 'Unique ID',
+      type: 'string',
+    },
+    {
+      name: 'event_id',
+      alias: 'Event ID',
+      type: 'string',
+    },
+    {
+      name: 'OBJECTID',
+      alias: 'OBJECTID',
+      type: 'oid',
+    },
+    {
+      name: 'time_slider_date',
+      alias: 'Time slider date',
+      type: 'date',
+    },
+  ];
 
   static readonly HISTORICAL_FLOOD_ICON_LIST: TypeLegendItem[] = [
     {
@@ -323,8 +568,81 @@ export abstract class GVAbstractTester extends AbstractTester {
   /** Toronto */
   static readonly FEATURE_SERVER_TORONTO_NEIGHBOURHOODS_URL: string =
     'https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/Toronto_Neighbourhoods/FeatureServer';
-  static readonly FEATURE_SERVER_TORONTO_NEIGHBOURHOODS_FEATURE_SERVER: string = `${GVAbstractTester.FEATURE_SERVER_TORONTO_NEIGHBOURHOODS_URL}/0`;
+  static readonly FEATURE_SERVER_TORONTO_NEIGHBOURHOODS_LAYER_ID: string = '0';
   static readonly FEATURE_SERVER_TORONTO_NEIGHBOURHOODS_LAYER_NAME: string = 'Toronto_Neighbourhoods';
+  static readonly FEATURE_SERVER_TORONTO_NEIGHBOURHOODS_FEATURE_SERVER: string = `${GVAbstractTester.FEATURE_SERVER_TORONTO_NEIGHBOURHOODS_URL}/${GVAbstractTester.FEATURE_SERVER_TORONTO_NEIGHBOURHOODS_LAYER_ID}`;
+  static readonly FEATURE_SERVER_TORONTO_NEIGHBOURHOODS_OUTFIELDS: TypeOutfields[] = [
+    {
+      name: 'FID',
+      alias: 'FID',
+      type: 'oid',
+    },
+    {
+      name: 'F_id1',
+      alias: '_id1',
+      type: 'number',
+    },
+    {
+      name: 'AREA_ID2',
+      alias: 'AREA_ID2',
+      type: 'number',
+    },
+    {
+      name: 'AREA_AT3',
+      alias: 'AREA_AT3',
+      type: 'number',
+    },
+    {
+      name: 'PARENT_4',
+      alias: 'PARENT_4',
+      type: 'number',
+    },
+    {
+      name: 'AREA_SH5',
+      alias: 'AREA_SH5',
+      type: 'string',
+    },
+    {
+      name: 'AREA_LO6',
+      alias: 'AREA_LO6',
+      type: 'string',
+    },
+    {
+      name: 'AREA_NA7',
+      alias: 'AREA_NA7',
+      type: 'string',
+    },
+    {
+      name: 'AREA_DE8',
+      alias: 'AREA_DE8',
+      type: 'string',
+    },
+    {
+      name: 'CLASSIF9',
+      alias: 'CLASSIF9',
+      type: 'string',
+    },
+    {
+      name: 'CLASSIF10',
+      alias: 'CLASSIF10',
+      type: 'string',
+    },
+    {
+      name: 'OBJECTI11',
+      alias: 'OBJECTI11',
+      type: 'number',
+    },
+    {
+      name: 'Shape__Area',
+      alias: 'Shape__Area',
+      type: 'number',
+    },
+    {
+      name: 'Shape__Length',
+      alias: 'Shape__Length',
+      type: 'number',
+    },
+  ];
 
   /** Elevation */
   static readonly IMAGE_SERVER_ELEVATION_URL: string =
@@ -359,6 +677,123 @@ export abstract class GVAbstractTester extends AbstractTester {
   /** Geomet (serves WMS and WFS) */
   static readonly GEOMET_URL: string = 'https://geo.weather.gc.ca/geomet';
   static readonly GEOMET_URL_CURRENT_COND_LAYER_ID: string = 'ec-msc:CURRENT_CONDITIONS';
+  static readonly GEOMET_WFS_OUTFIELDS: TypeOutfields[] = [
+    {
+      name: 'name',
+      alias: 'name',
+      type: 'string',
+    },
+    {
+      name: 'nom',
+      alias: 'nom',
+      type: 'string',
+    },
+    {
+      name: 'station_en',
+      alias: 'station_en',
+      type: 'string',
+    },
+    {
+      name: 'station_fr',
+      alias: 'station_fr',
+      type: 'string',
+    },
+    {
+      name: 'icon',
+      alias: 'icon',
+      type: 'string',
+    },
+    {
+      name: 'cond_en',
+      alias: 'cond_en',
+      type: 'string',
+    },
+    {
+      name: 'cond_fr',
+      alias: 'cond_fr',
+      type: 'string',
+    },
+    {
+      name: 'temp',
+      alias: 'temp',
+      type: 'string',
+    },
+    {
+      name: 'dewpoint',
+      alias: 'dewpoint',
+      type: 'string',
+    },
+    {
+      name: 'windchill',
+      alias: 'windchill',
+      type: 'string',
+    },
+    {
+      name: 'pres_en',
+      alias: 'pres_en',
+      type: 'string',
+    },
+    {
+      name: 'pres_fr',
+      alias: 'pres_fr',
+      type: 'string',
+    },
+    {
+      name: 'prestnd_en',
+      alias: 'prestnd_en',
+      type: 'string',
+    },
+    {
+      name: 'prestnd_fr',
+      alias: 'prestnd_fr',
+      type: 'string',
+    },
+    {
+      name: 'rel_hum',
+      alias: 'rel_hum',
+      type: 'string',
+    },
+    {
+      name: 'speed',
+      alias: 'speed',
+      type: 'string',
+    },
+    {
+      name: 'gust',
+      alias: 'gust',
+      type: 'string',
+    },
+    {
+      name: 'direction',
+      alias: 'direction',
+      type: 'string',
+    },
+    {
+      name: 'bearing',
+      alias: 'bearing',
+      type: 'string',
+    },
+    {
+      name: 'timestamp',
+      alias: 'timestamp',
+      type: 'string',
+    },
+    {
+      name: 'url_en',
+      alias: 'url_en',
+      type: 'string',
+    },
+    {
+      name: 'url_fr',
+      alias: 'url_fr',
+      type: 'string',
+    },
+    {
+      name: 'national',
+      alias: 'national',
+      type: 'string',
+    },
+  ];
 
   /** WMS — Nonna service (CORS blocked, triggers proxy fallback) */
   static readonly NONNA_WMS_URL: string = 'https://nonna-geoserver.data.chs-shc.ca/geoserver/wms';
@@ -436,6 +871,24 @@ export abstract class GVAbstractTester extends AbstractTester {
       geometryType: 'GeometryCollection',
       name: 'Other',
       isVisible: true,
+    },
+  ];
+
+  static readonly GEOJSON_POLYGONS_OUTFIELDS: TypeOutfields[] = [
+    {
+      name: 'Province',
+      alias: 'Province',
+      type: 'string',
+    },
+    {
+      name: 'creationDate',
+      alias: 'Creation Date',
+      type: 'date',
+    },
+    {
+      name: 'myImages',
+      alias: 'My Images',
+      type: 'string',
     },
   ];
 

@@ -662,7 +662,7 @@ export type TypeOutfields = {
   name: string;
   alias: string;
   type: TypeOutfieldsType;
-  domain?: codedValueType | rangeDomainType;
+  domain?: codedValueType | rangeDomainType | null; // null here, because that's what Esri uses in the response
   /** Whether this field appears in summary views. Default = true. */
   summary?: boolean;
 };

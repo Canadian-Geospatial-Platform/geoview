@@ -60,12 +60,11 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
    * @returns A promise that resolves when the debug tests are completed
    */
   protected override onLaunchTestSuiteDEBUG(): Promise<unknown> {
-    // // Test DEBUG
-    // const pDevTest0 = this.#layerTester.testAddWMSLayerWithOWSMundialis();
-    // // Resolve when all
-    // return Promise.all([pDevTest0]);
+    // Test DEBUG
+    const pDevTest0 = this.#layerTester.testAddEsriDynamicHistoFloodEvents();
 
-    return Promise.resolve();
+    // Resolve when all
+    return Promise.all([pDevTest0]);
   }
 
   /**
