@@ -127,6 +127,14 @@ export declare class UIController extends AbstractMapViewerController {
      */
     setFooterPanelResizeValue(value: number): void;
     /**
+     * Sets the map info bar expanded state.
+     *
+     * Affects nav-bar positioning to avoid overlap when the info bar expands.
+     *
+     * @param expanded - Whether the map info bar is expanded
+     */
+    setMapInfoExpanded(expanded: boolean): void;
+    /**
      * Sets the circular progress indicator state.
      *
      * @param active - Whether the circular progress is active

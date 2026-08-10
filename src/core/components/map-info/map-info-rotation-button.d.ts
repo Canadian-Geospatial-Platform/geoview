@@ -1,8 +1,6 @@
 /**
  * Creates the map information rotation indicator component.
  *
- * Memoized to prevent re-renders since this component has no props.
- *
  * @returns The rotation indicator
  */
 export declare function MapInfoRotationButton(): JSX.Element;
