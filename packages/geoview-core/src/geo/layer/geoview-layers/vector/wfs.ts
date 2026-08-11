@@ -130,7 +130,7 @@ export class WFS extends AbstractGeoViewVector {
    * @throws {LayerNoCapabilitiesError} When the metadata is empty (no Capabilities)
    */
   protected override async onInitLayerEntries(abortSignal?: AbortSignal): Promise<TypeGeoviewLayerConfig> {
-    // Fetch metadata
+    // Calls fetchServiceMetadata which delegates to this class's overridden onFetchServiceMetadata (may use a proxy fallback and store the proxyUrl on the instance)
     const rootUrl = this.getMetadataAccessPath();
     const metadata = await this.fetchServiceMetadata<TypeMetadataWFSCapabilities>(abortSignal);
 

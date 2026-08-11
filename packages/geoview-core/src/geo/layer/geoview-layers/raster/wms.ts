@@ -133,7 +133,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @throws {LayerNoCapabilitiesError} When the metadata is empty (no Capabilities)
    */
   protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
-    // Get the metadata and leave the metadataAccessPath unchanged, even if a proxy had to be used
+    // Calls fetchServiceMetadata which delegates to this class's overridden onFetchServiceMetadata (may use a proxy fallback and store the proxyUrl on the instance)
     const metadata = await this.fetchServiceMetadata<TypeMetadataWMSCapabilities>();
 
     // Based on the capabilities

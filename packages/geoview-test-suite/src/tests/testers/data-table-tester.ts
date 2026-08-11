@@ -1,12 +1,12 @@
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
+import type { TypeFeatureInfoEntry } from 'geoview-core/api/types/map-schema-types';
 import type { IDataTableSettings, TypeColumnFiltersState } from 'geoview-core/core/stores/states/data-table-state';
 import {
   getStoreDataTableFeaturesByPath,
   getStoreDataTableLayerSettings,
   getStoreDataTableMapFilteredRecord,
 } from 'geoview-core/core/stores/states/data-table-state';
-import type { TypeFeatureInfoEntry } from 'geoview-core/api/types/map-schema-types';
 
 /**
  * Main Data Table testing class.

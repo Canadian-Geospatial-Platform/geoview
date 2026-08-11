@@ -17,9 +17,6 @@ import { NetworkError } from 'geoview-core/core/exceptions/core-exceptions';
  * Main Core testing class.
  */
 export class CoreTester extends GVAbstractTester {
-  /** Proxy URL used for testing proxy-fallback behavior (non-production). */
-  static PROXY_URL_TO_USE_FOR_TESTING = 'https://proxy.app-dev.geo.ca'; // CONFIG_PROXY_URL
-
   /**
    * Returns the name of the Tester.
    *
@@ -320,7 +317,7 @@ export class CoreTester extends GVAbstractTester {
       (test) => {
         const url = GVAbstractTester.NONNA_WMS_URL;
         test.addStep(`Fetching WMS metadata from: ${url}...`);
-        return GeoUtilities.getWMSServiceMetadata(url, CoreTester.PROXY_URL_TO_USE_FOR_TESTING);
+        return GeoUtilities.getWMSServiceMetadata(url, this.getMapViewer().mapFeaturesConfig.serviceUrls.proxyUrl);
       },
       (test, result) => {
         test.addStep('Verifying the request indeed required a proxy');
@@ -343,7 +340,7 @@ export class CoreTester extends GVAbstractTester {
     return this.testError(`Test GeoUtilities.getWMSServiceMetadata with bad URL...`, NetworkError, async (test) => {
       const url = GVAbstractTester.BAD_URL;
       test.addStep(`Fetching WMS metadata from bad URL: ${url}...`);
-      await GeoUtilities.getWMSServiceMetadata(url, CoreTester.PROXY_URL_TO_USE_FOR_TESTING);
+      await GeoUtilities.getWMSServiceMetadata(url, this.getMapViewer().mapFeaturesConfig.serviceUrls.proxyUrl);
     });
   }
 
@@ -360,7 +357,7 @@ export class CoreTester extends GVAbstractTester {
       (test) => {
         const url = GVAbstractTester.BELGIUM_WFS_URL;
         test.addStep(`Fetching WFS metadata from: ${url}...`);
-        return GeoUtilities.getWFSServiceMetadata(url, CoreTester.PROXY_URL_TO_USE_FOR_TESTING);
+        return GeoUtilities.getWFSServiceMetadata(url, this.getMapViewer().mapFeaturesConfig.serviceUrls.proxyUrl);
       },
       (test, result) => {
         test.addStep('Verifying the request indeed required a proxy');
@@ -383,7 +380,7 @@ export class CoreTester extends GVAbstractTester {
     return this.testError(`Test GeoUtilities.getWFSServiceMetadata with bad URL...`, NetworkError, async (test) => {
       const url = GVAbstractTester.BAD_URL;
       test.addStep(`Fetching WFS metadata from bad URL: ${url}...`);
-      await GeoUtilities.getWFSServiceMetadata(url, CoreTester.PROXY_URL_TO_USE_FOR_TESTING);
+      await GeoUtilities.getWFSServiceMetadata(url, this.getMapViewer().mapFeaturesConfig.serviceUrls.proxyUrl);
     });
   }
 
@@ -400,7 +397,7 @@ export class CoreTester extends GVAbstractTester {
       (test) => {
         const url = GVAbstractTester.TAIWAN_WMTS_URL;
         test.addStep(`Fetching WMTS metadata from: ${url}...`);
-        return GeoUtilities.getWMTSServiceMetadata(url, CoreTester.PROXY_URL_TO_USE_FOR_TESTING);
+        return GeoUtilities.getWMTSServiceMetadata(url, this.getMapViewer().mapFeaturesConfig.serviceUrls.proxyUrl);
       },
       (test, result) => {
         test.addStep('Verifying the request indeed required a proxy');
@@ -423,7 +420,7 @@ export class CoreTester extends GVAbstractTester {
     return this.testError(`Test GeoUtilities.getWMTSServiceMetadata with bad URL...`, NetworkError, async (test) => {
       const url = GVAbstractTester.BAD_URL;
       test.addStep(`Fetching WMTS metadata from bad URL: ${url}...`);
-      await GeoUtilities.getWMTSServiceMetadata(url, CoreTester.PROXY_URL_TO_USE_FOR_TESTING);
+      await GeoUtilities.getWMTSServiceMetadata(url, this.getMapViewer().mapFeaturesConfig.serviceUrls.proxyUrl);
     });
   }
 
@@ -444,7 +441,7 @@ export class CoreTester extends GVAbstractTester {
       (test) => {
         const url = GVAbstractTester.PUBLIC_JSON_URL_CORS;
         test.addStep(`Fetching JSON metadata from: ${url}...`);
-        return GeoUtilities.fetchJsonWithProxyFallback(url, CoreTester.PROXY_URL_TO_USE_FOR_TESTING);
+        return GeoUtilities.fetchJsonWithProxyFallback(url, this.getMapViewer().mapFeaturesConfig.serviceUrls.proxyUrl);
       },
       (test, result) => {
         test.addStep('Verifying the request indeed required a proxy');
@@ -467,7 +464,10 @@ export class CoreTester extends GVAbstractTester {
     return this.testError(`Test GeoUtilities.fetchJsonWithProxyFallback with bad URL...`, NetworkError, async (test) => {
       const url = GVAbstractTester.BAD_URL;
       test.addStep(`Fetching JSON metadata from bad URL: ${url}...`);
-      await GeoUtilities.fetchJsonWithProxyFallback<Record<string, unknown>>(url, CoreTester.PROXY_URL_TO_USE_FOR_TESTING);
+      await GeoUtilities.fetchJsonWithProxyFallback<Record<string, unknown>>(
+        url,
+        this.getMapViewer().mapFeaturesConfig.serviceUrls.proxyUrl
+      );
     });
   }
 

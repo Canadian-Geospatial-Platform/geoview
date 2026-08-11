@@ -292,10 +292,10 @@ export abstract class GeoUtilities {
     const capUrl = this.ensureServiceRequestUrlGetCapabilities(url, 'WMS', layers);
 
     // Redirect
-    const { data: metadataRaw, proxyUsed } = await this.fetchTextWithProxyFallback(capUrl, configProxyUrl, abortSignal);
+    const { data, proxyUsed } = await this.fetchTextWithProxyFallback(capUrl, configProxyUrl, abortSignal);
 
     // Parse it and return
-    const metadataParsed = parseXMLToJson<TypeMetadataWMS>(metadataRaw);
+    const metadataParsed = parseXMLToJson<TypeMetadataWMS>(data);
 
     // Because of the Esri proxy returning an embedded error on a ok response instead of failing, we have to check it here
     this.validateEsriProxyError(metadataParsed);
@@ -315,7 +315,7 @@ export abstract class GeoUtilities {
     }
 
     // Validate and extend metadata result
-    metadataResult = this.#validateExtendWMSWMTSWFSParsedResult(metadataRaw, metadataResult);
+    metadataResult = this.#validateExtendWMSWMTSWFSParsedResult(data, metadataResult);
 
     // Normalize the Json to make it more uniform, simulating what ol/Format/WMSCapabilities was doing before being replaced
     this.#helperParseCapabilityNormalizeArray(metadataResult.Capability.Request.GetMap, 'DCPType');
@@ -348,10 +348,10 @@ export abstract class GeoUtilities {
     const capUrl = this.ensureServiceRequestUrlGetCapabilities(url, 'WFS');
 
     // Redirect
-    const { data: metadataRaw, proxyUsed } = await this.fetchTextWithProxyFallback(capUrl, configProxyUrl, abortSignal);
+    const { data, proxyUsed } = await this.fetchTextWithProxyFallback(capUrl, configProxyUrl, abortSignal);
 
     // Parse it and return
-    const metadataParsed = parseXMLToJson<TypeMetadataWFS>(metadataRaw);
+    const metadataParsed = parseXMLToJson<TypeMetadataWFS>(data);
 
     // Because of the Esri proxy returning an embedded error on a ok response instead of failing, we have to check it here
     this.validateEsriProxyError(metadataParsed);
@@ -365,7 +365,7 @@ export abstract class GeoUtilities {
     }
 
     // Validate and extend metadata result
-    metadataResult = this.#validateExtendWMSWMTSWFSParsedResult(metadataRaw, metadataResult);
+    metadataResult = this.#validateExtendWMSWMTSWFSParsedResult(data, metadataResult);
 
     // Return it
     return { data: metadataResult, proxyUsed };
@@ -395,10 +395,10 @@ export abstract class GeoUtilities {
     const capUrl = this.ensureServiceRequestUrlGetCapabilities(url, 'WMTS', layers);
 
     // Redirect
-    const { data: metadataRaw, proxyUsed } = await this.fetchTextWithProxyFallback(capUrl, configProxyUrl, abortSignal);
+    const { data, proxyUsed } = await this.fetchTextWithProxyFallback(capUrl, configProxyUrl, abortSignal);
 
     // Parse it and return
-    const metadataParsed = parseXMLToJson<TypeMetadataWMTS>(metadataRaw);
+    const metadataParsed = parseXMLToJson<TypeMetadataWMTS>(data);
 
     // Because of the Esri proxy returning an embedded error on a ok response instead of failing, we have to check it here
     this.validateEsriProxyError(metadataParsed);
@@ -412,7 +412,7 @@ export abstract class GeoUtilities {
     }
 
     // Validate and extend metadata result
-    metadataResult = this.#validateExtendWMSWMTSWFSParsedResult(metadataRaw, metadataResult);
+    metadataResult = this.#validateExtendWMSWMTSWFSParsedResult(data, metadataResult);
 
     // Return it
     return { data: metadataResult, proxyUsed };

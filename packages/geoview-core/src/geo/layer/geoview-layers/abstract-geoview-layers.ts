@@ -590,13 +590,13 @@ export abstract class AbstractGeoViewLayer {
    */
   async fetchServiceMetadata<T>(abortSignal?: AbortSignal): Promise<FetchWithProxyResult<T>> {
     // Call the overridable method
-    const result = (await this.onFetchServiceMetadata(abortSignal)) as FetchWithProxyResult<T>;
+    const result = await this.onFetchServiceMetadata(abortSignal);
 
     // If a proxy was used, store it on the instance so that it can be forwarded to the layer configs a bit later
     if (result.proxyUsed) this.setProxyUrl(result.proxyUsed);
 
-    // Return the result
-    return result;
+    // Return the result, narrowing from unknown to T at the boundary
+    return result as FetchWithProxyResult<T>;
   }
 
   /**
@@ -865,7 +865,7 @@ export abstract class AbstractGeoViewLayer {
       // Start a timer to see if the layer metadata could be fetched after delay
       this.#startMetadataFetchWatcher();
 
-      // Process and, yes, keep the await here, because we want the try/catch to work nicely here.
+      // Calls fetchServiceMetadata which delegates to the child class's overridden onFetchServiceMetadata (may use a proxy fallback and store the proxyUrl on the instance)
       const result = await this.fetchServiceMetadata(abortSignal);
 
       // Keep the metadata
@@ -1037,7 +1037,8 @@ export abstract class AbstractGeoViewLayer {
           this.setProxyUrl(preprocessResult.pingResult.proxyUsed);
         }
 
-        // If a proxy was necessary either when the metadata were fetched or when the layer config was preprocessed
+        // If a proxy was necessary either when the metadata were fetched (from an earlier process step) or
+        // when the layer config was preprocessed (from just above)
         if (this.getIsUsingProxy()) {
           // Indicate to the layer config that a proxy was used so future requests (legend, identify, tile loading) can reuse it.
           layerConfig.setProxyUrl(this.getProxyUrl());
