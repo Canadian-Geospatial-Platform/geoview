@@ -187,12 +187,12 @@ export abstract class AbstractLayerSet {
   }
 
   /**
-   * Gets a registered layer config by its layer path.
+   * Gets a registered layer config by its layer path if it exists.
    *
    * @param layerPath - The layer path to look up
    * @returns The registered layer config, or undefined if not found
    */
-  getRegisteredLayerConfig(layerPath: string): ConfigBaseClass | undefined {
+  getRegisteredLayerConfigIfExists(layerPath: string): ConfigBaseClass | undefined {
     return this.#registeredLayerConfigs.find((layer) => layer.layerPath === layerPath);
   }
 
@@ -206,12 +206,12 @@ export abstract class AbstractLayerSet {
   }
 
   /**
-   * Gets a registered layer by its layer path.
+   * Gets a registered layer by its layer path if it exists.
    *
    * @param layerPath - The layer path to look up
    * @returns The registered layer, or undefined if not found
    */
-  getRegisteredLayer(layerPath: string): AbstractBaseGVLayer | undefined {
+  getRegisteredLayerIfExists(layerPath: string): AbstractBaseGVLayer | undefined {
     return this.#registeredLayers.find((layer) => layer.getLayerPath() === layerPath);
   }
 
@@ -288,7 +288,7 @@ export abstract class AbstractLayerSet {
    */
   waitForLayerConfigToGetRegistered(layerPath: string): Promise<LayerConfigRegisteredEvent> {
     // First, check synchronously — it may ALREADY be registered
-    const registeredLayerConfig = this.getRegisteredLayerConfig(layerPath);
+    const registeredLayerConfig = this.getRegisteredLayerConfigIfExists(layerPath);
     if (registeredLayerConfig) return Promise.resolve({ layerConfig: registeredLayerConfig });
 
     // Otherwise, subscribe and wait
@@ -305,7 +305,7 @@ export abstract class AbstractLayerSet {
    */
   waitForLayerToGetRegistered(layerPath: string): Promise<LayerRegisteredEvent> {
     // First, check synchronously — it may ALREADY be registered
-    const registeredLayer = this.getRegisteredLayer(layerPath);
+    const registeredLayer = this.getRegisteredLayerIfExists(layerPath);
     if (registeredLayer) return Promise.resolve({ layer: registeredLayer });
 
     // Otherwise, subscribe and wait

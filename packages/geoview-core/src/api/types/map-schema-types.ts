@@ -482,7 +482,7 @@ export const CONFIG_RCS_URL = 'https://gcgeo.gc.ca/geonetwork/srv/api/v2/docs';
 /** The default geolocator url */
 export const CONFIG_GEOLOCATOR_URL = 'https://geolocator.api.geo.ca?keys=geonames,nominatim,locate';
 
-/** The default proxy url */
+/** The default proxy url soon to be officially changed to the production equivalent url for https://proxy.app-dev.geo.ca (our own proxy implementation) */
 export const CONFIG_PROXY_URL = 'https://maps.canada.ca/wmsproxy/ws/wmsproxy/executeFromProxy';
 
 /** The default metadata recors url for uuid layer (empty because it needs to be set by config en and fr) */

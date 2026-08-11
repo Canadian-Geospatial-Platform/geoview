@@ -82,7 +82,6 @@ export function OverviewMap(props: OverviewMapProps): JSX.Element {
       logger.logTraceUseEffectUnmount('OVERVIEW-MAP - unmount');
       // Hide the overview map control when component unmounts
       mapController.setOverviewMapVisibility(false);
-      root.unmount();
       setIsInitialized(false);
       // Defer unmount to avoid "synchronously unmount a root while React was already rendering" error. A setTimeout with 0 ms is the standard workaround for this.
       setTimeout(() => root.unmount(), 0);

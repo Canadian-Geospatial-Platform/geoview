@@ -2237,6 +2237,7 @@ export type GeolocatorSearchDelegate = EventDelegateBase<MapController, Geolocat
 export interface FeatureHighlightedEvent {
   /** The feature being highlighted. */
   feature: TypeFeatureInfoEntry | 'all';
+  /** The operation that was performed on the feature highlight. */
   operation: 'added' | 'removed';
 }
 

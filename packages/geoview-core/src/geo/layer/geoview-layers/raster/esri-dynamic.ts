@@ -83,7 +83,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @returns A promise resolved once the layer entries have been initialized
    */
   protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
-    // Fetch the metadata
+    // Calls fetchServiceMetadata which delegates to this class's overridden onFetchServiceMetadata (may use a proxy fallback and store the proxyUrl on the instance)
     const metadata = await this.fetchServiceMetadata<TypeMetadataEsriDynamic>();
 
     // Now that we have metadata

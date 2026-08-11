@@ -582,9 +582,6 @@ export class ConfigTester extends GVAbstractTester {
    * @returns A promise that resolves with the test result, expecting a `LayerNoCapabilitiesError`
    */
   testWMSBadUrl(): Promise<Test<LayerNoCapabilitiesError>> {
-    // GV: In the case of a WMS, since a proxy is used when the url fails, and that proxy always returns a 200 response (with an internal error inside)
-    // GV: We can't really test the LayerServiceMetadataUnableToFetchError error exception.
-
     // The bad url
     const urlBad: string = GVAbstractTester.BAD_URL;
 

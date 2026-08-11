@@ -39,7 +39,7 @@ export abstract class GVAbstractTester extends AbstractTester {
    * Fake url acting like a WMS/WFS url for a GetCapabilities call - the proxy is a good url to use to fake this.
    * Something like https://google.ca will get turned into https://google.ca/?service=WFS&request=GetCapabilities and that's
    * not a 200 response and we can't test with that.
-   * Not using the core config url constant on purpose, because it serves a whole different purpose here.
+   * The Esri proxy is special in the sense that it returns a non-typical 200 with an error written inside the content.
    */
   static FAKE_URL_ALWAYS_RETURNING_RESPONSE_INSTEAD_OF_NETWORK_ERROR = 'https://maps.canada.ca/wmsproxy/ws/wmsproxy/executeFromProxy';
 

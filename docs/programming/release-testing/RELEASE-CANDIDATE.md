@@ -39,17 +39,25 @@ _(Config properties, public API methods, event names — affects external consum
 | `onMapZoomEnd` / `offMapZoomEnd`       | Renamed to `onMapResolutionChanged` / `offMapResolutionChanged`        | #3544 |
 | `onMapChangeSize` / `offMapChangeSize` | Renamed to `onMapSizeChanged` / `offMapSizeChanged`                    | #3544 |
 
-### LayerApi — Removed Methods
+### MapViewer — New Methods
 
-| Method              | Replacement    | PR    |
-| ------------------- | -------------- | ----- |
-| `getOLLayerAsync()` | No replacement | #3544 |
+| Method              | Description                                                                    | PR    |
+| ------------------- | ------------------------------------------------------------------------------ | ----- |
+| `updateViewPadding()` | Updates OL View padding to account for the map-info bar height               | #3562 |
+
+### LayerApi — Removed / Deprecated Methods
+
+| Method              | Status     | Replacement    | PR    |
+| ------------------- | ---------- | -------------- | ----- |
+| `getOLLayerAsync()` | Deprecated | Use GV layer types instead of OL types directly | #3562 |
 
 ### LayerApi — Signature Changes
 
 | Method                                      | Change                                                                   | PR    |
 | ------------------------------------------- | ------------------------------------------------------------------------ | ----- |
 | `zoomToLayerExtent(layerPath, fitOptions?)` | New signature: `zoomToLayerExtent(layerPath, useAnimation, fitOptions?)` | #3544 |
+| `waitForLayerRegistered(layerPath)`         | New signature: `waitForLayerRegistered(layerPath, timeout?)` — added optional timeout | #3562 |
+| `waitForAllLayersStatus(layerStatus)`       | Now `async` (was returning a raw promise chain)                          | #3562 |
 
 ### Controller — Renames
 
@@ -64,6 +72,12 @@ _(Config properties, public API methods, event names — affects external consum
 | `degreeRotation`               | Type changed from `string` to `number`              | #3544 |
 | `whenThisThen` default timeout | Changed from 10 seconds to `undefined` (no timeout) | #3544 |
 | `emitLayerFilterApplied`       | Privatized — no longer accessible externally        | #3544 |
+| `createGeoviewLayerConfig` / `processGeoviewLayerConfig` | All layer types now accept `TypeLayerEntryShell[]` instead of `layerIds[]`, giving callers more flexibility | #3562 |
+| `ConfigApi.processLayerFromType` | Parameter renamed from `layerIds` to `layerEntries` (`TypeLayerEntryShell[]`) | #3562 |
+| `onceEventPromise`             | Now accepts an optional `timeout` parameter (replaces short-lived `onceEventPromiseWithTimeout`) | #3562 |
+| `CallbackNewMetadataDelegate`  | Removed — replaced by `FetchWithProxyResult<T>` return wrapper in `GeoUtilities` | #3562 |
+| `GeoUtilities.fetchWMSMetadata` / `fetchWFSMetadata` / `fetchWMTSMetadata` | Now return `FetchWithProxyResult<T>` instead of raw data + callback | #3562 |
+| `OVERVIEW_MAP_MIN_CONTAINER_WIDTH` | Changed from `900` to `700` px | #3562 |
 
 ## Breaking Changes — Developer-Only (Internal)
 
@@ -87,6 +101,12 @@ _(User-facing features added or enabled)_
 - `select` and `onSelect` functions moved from footer-plugin to abstract-plugin — app-bar plugins can now use them (#3544)
 - New `ConfigValidation.isListOfLayerEntryConfigValidated` to prevent double-validation in `addGeoviewLayer()` (#3544)
 - Map configuration `map.interaction` is no longer mandatory in schema; when omitted, runtime defaults to `dynamic` (#3584)
+- New `waitForLayerConfigRegistered` in layer-domain and enhanced `waitForLayerRegistered` with optional timeout (#3562)
+- New `getRendererContainer` function on `AbstractBaseGVLayer` (#3562)
+- New `waitForDomElement`, `waitForDomContent`, and `waitForDomChange` test utilities for explicit React UI tracking (#3562)
+- Map view now uses `viewOptions.padding` to account for the map-info bar height (#3562)
+- New `MapViewer.updateViewPadding()` and `mapController.updateViewPadding()` for dynamic map-info bar padding (#3562)
+- New `waitForLayerQueryToFinish` timeout parameter on `AllFeatureInfoLayerSet` (#3562)
 
 ## Bug Fixes
 
@@ -118,6 +138,17 @@ _(Fixes discovered or applied during this cycle)_
 - Fixed WMTS metadata handling and style typing (including `LegendURL`) to prevent metadata parsing issues (#3580)
 - Fixed WFS feature query handling to support additional response formats beyond `application/json` and blank defaults (#3580)
 - Fixed scale control accessibility labeling by correcting the aria-label translation key wiring for map info scale output (#3581)
+- Fixed overview-map visible on load when `hideOnZoom` threshold should hide it (e.g., outlier-elections-2019.html) (#3562)
+- Fixed Swiper layer opacity handling by rewriting clip logic for features based on slider position (#3562)
+- Fixed abort controller in add-new-layer component when clicking 'back' then completing steps to add a layer (#3562)
+- Fixed WMS CRS override when layers are behind a proxy — was re-encoding the entire string instead of only adjusting CRS and BBOX properties (#3562)
+- Fixed zoom-to-feature-geometry working even when the geometry field is not included in the outFields configuration (#3562)
+- Fixed initial extent being slightly off vertically vs the home view extent, causing the home view button to shift the map (#3562)
+- Fixed CESI layer in outlier-style.html template to point to a valid layer id (#3562)
+- Fixed Permafrost by Ecoprovince in outlier-metadata template to point to a valid layer URL (#3562)
+- Fixed broken layer in performance.json template demo (#3562)
+- Fixed creationDate field type in metadata (#3562)
+- Added precision slack on zoom-to-extent to compensate for minor floating-point precision issues (#3562)
 
 ## Build & Dependencies
 
@@ -141,6 +172,16 @@ _(Optimizations, refactors, structural changes)_
 - Improved zoom-to-extent implementation by centralizing fit-option handling (including percent-based padding + map-info bar compensation) for more consistent map framing behavior (#3580)
 - Refactored data-table keyboard focus tracking into a dedicated focus-store utility and removed per-cell overhead that caused navigation lag (#3574)
 - Refactored overview-map visibility and sizing flow into centralized store-driven logic (`overviewMapVisible`) with unified controller/event handling and atomic selector usage (#3581)
+- Optimized proxy support with a second pass using `FetchWithProxyResult` return wrapper instead of `CallbackNewMetadataDelegate` callbacks (#3562)
+- Simplified `processGeoviewLayerConfig` and `createGeoviewLayerConfig` in all layer types to accept `TypeLayerEntryShell[]` instead of `layerIds[]` (#3562)
+- Consolidated `onceEventPromiseWithTimeout` into `onceEventPromise` with an optional timeout parameter (#3562)
+- Deprecated `getOLLayerAsync` from layer-controller to centralize code logic around GV types instead of OL types (#3562)
+- Improved Swiper component implementation with enhanced lifecycle functions and code cleanup (~221 lines changed) (#3562)
+- Lowered min width threshold to show the overview-map from 900px to 700px (#3562)
+- Map-info bar height now managed via OL View padding instead of manual fit-option compensation (#3562)
+- `ConfigApi.fetchStyleFromWMS` now uses `FetchWithProxyResult` internally (#3562)
+- New `onceEventPromise` timeout parameter for creating one-shot event listeners that auto-reject after a deadline (#3562)
+- New `RUN_DEBUG_ONLY` flag in test-suite package for isolating individual test execution during development (#3562)
 
 ## Accessibility (WCAG)
 
@@ -166,6 +207,10 @@ _(Doc updates, demo cleanup, code organization)_
 - Updated 27-automation-candidates.md: marked data table tests #83-92 as Done, added filter-by-extent and showUnsymbolizedFeatures tests
 - Fixed broken test page links in tests.html navigation
 - Updated dependency documentation (release-testing docs)
+- Added missing proxy configurations in templates (#3562)
+- Improved add-new-layer component to resolve ESLint warning about `react/no-unstable-nested-components` (#3562)
+- Clearer static-image-errors.json template (#3562)
+- Improved HTML descriptions of all test suites (#3562)
 
 ## Test Plan Changes
 
@@ -178,6 +223,16 @@ _(Tests added, moved, removed, or reorganized)_
 - Added `getStoreMapClickMarker` and `getStoreMapNorthArrow` getters to `map-state.ts` (moved from OTHERS to main region)
 - Map 11 test page added for `suite-data-table` (GeoJSON + Commemorative Map + Esri Dynamic + Permafrost layers)
 - Updated test-catalog.md: total 196 tests, 00-automated-suite.md: ~200, README: 901 (60/169/672)
+- Added WMTS, VectorTiles, and XYZTiles layer types to automated functional testing (#3562)
+- Moved `testAddGeocoreWithGroupDefaultVisibilityFalse` to end of suite to reduce resource contention with other tests (#3562)
+- Fixed automated tests for new `viewSettings` padding behavior (#3562)
+- Massive improvements and cleanup to data-table-tester: replaced many `delay` calls with explicit `waitForDomElement`/`waitForDomContent`/`waitForDomChange` utilities (#3562)
+- Cleanup in layer test-suite (#3562)
+- Improvements to details panel and highlights tests with explicit React render waiting (#3562)
+- Fixed test-suite rendering for maps in hidden tabs to prevent odd behavior when running all tests concurrently (#3562)
+- Updated test for JSON behind CORS (URL blocked by NRCan) (#3562)
+- Configured new proxy in test-suite for upcoming proxy features (#3562)
+- New `RUN_DEBUG_ONLY` flag for isolating test execution during development (#3562)
 
 ## Config Schema Changes
 

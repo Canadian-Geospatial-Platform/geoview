@@ -75,7 +75,13 @@ import { delay, generateId, getLocalizedMessage } from '@/core/utils/utilities';
 import { debounce } from '@/core/utils/debounce';
 import type { TimeIANA } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
-import { DEFAULT_OL_GVFITOPTIONS, NORTH_POLE_POSITION_LONLAT, OL_ZOOM_DURATION, type GVFitOptions } from '@/core/utils/constant';
+import {
+  DEFAULT_OL_GVFITOPTIONS,
+  MAP_INFO_HEIGHT_COLLAPSED,
+  NORTH_POLE_POSITION_LONLAT,
+  OL_ZOOM_DURATION,
+  type GVFitOptions,
+} from '@/core/utils/constant';
 import type { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';
 import type { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import { InvalidExtentError } from '@/core/exceptions/geoview-exceptions';
@@ -389,8 +395,7 @@ export class MapViewer {
     // Compute the initial map-info bar height for View padding. The DOM doesn't exist yet, so we use
     // the known CSS heights (dynamic: 40px collapsed, static: 0px). The MapInfo component's useEffect
     // will update the padding dynamically when it mounts or changes height.
-    // TODO: Use constant.MAP_INFO_HEIGHT_COLLAPSED once Ken's PR is merged
-    const mapInfoInitialHeight = this.mapFeaturesConfig.map.interaction === 'static' ? 0 : 40;
+    const mapInfoInitialHeight = this.mapFeaturesConfig.map.interaction === 'static' ? 0 : parseInt(MAP_INFO_HEIGHT_COLLAPSED);
 
     const initialMap = new OLMap({
       target: mapElement,

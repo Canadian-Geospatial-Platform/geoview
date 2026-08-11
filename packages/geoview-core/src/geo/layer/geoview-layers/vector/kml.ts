@@ -55,7 +55,7 @@ export class KML extends AbstractGeoViewVector {
     const rootUrl = this.getMetadataAccessPath().substring(0, idx);
     const id = this.getMetadataAccessPath().substring(idx + 1);
 
-    // Attempt a fetch of the metadata
+    // Calls fetchServiceMetadata which delegates to this class's overridden onFetchServiceMetadata (may use a proxy fallback and store the proxyUrl on the instance)
     await this.fetchServiceMetadata();
 
     // Redirect

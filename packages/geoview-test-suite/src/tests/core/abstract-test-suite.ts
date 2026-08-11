@@ -89,8 +89,6 @@ export abstract class AbstractTestSuite {
 
   // #region PUBLIC METHODS
 
-  // #endregion PUBLIC METHODS
-
   /**
    * Gets the total number of tests in the Suite.
    *
@@ -210,6 +208,8 @@ export abstract class AbstractTestSuite {
     // Resets tests in all testers
     this.#testers.forEach((tester) => tester.resetTests());
   }
+
+  // #endregion PUBLIC METHODS
 
   // #region PRIVATE METHODS
 

@@ -45,7 +45,7 @@ export type PingResult = {
   isReachable: boolean;
   /** Whether the request required a proxy to succeed. */
   needsProxy: boolean;
-  /** The proxy that was used if necessary */
+  /** The proxy that was used when necessary */
   proxyUsed?: string;
   /** The HTTP status code from the server response, or null if no response. */
   status: number | null;

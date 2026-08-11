@@ -94,7 +94,8 @@ export class EsriFeature extends AbstractGeoViewVector {
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
    */
   protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
-    // Fetch metadata, in this init context we fetch either via /MapServer/{layerId} or /FeatureServer url endpoints
+    // Calls fetchServiceMetadata which delegates to this class's overridden onFetchServiceMetadata (may use a proxy fallback and store the proxyUrl on the instance)
+    // In this init context we fetch either via /MapServer/{layerId} or /FeatureServer url endpoints
     const metadata = await this.fetchServiceMetadata<TypeMetadataEsriDynamic | TypeMetadataEsriDynamicLayer | TypeMetadataEsriFeature>();
 
     // If metadata was fetched successfully

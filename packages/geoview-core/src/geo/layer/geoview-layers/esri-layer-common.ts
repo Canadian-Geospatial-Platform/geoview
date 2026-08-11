@@ -658,7 +658,7 @@ export class EsriUtilities {
 
         // Loop
         fields.forEach((fieldEntry) => {
-          // Skip the geometry field — it was already stored above
+          // Skip the geometry field - it was already stored above
           if (layerMetadataEsriDynamicLayer.geometryField && fieldEntry?.name === layerMetadataEsriDynamicLayer.geometryField?.name) {
             return;
           }
