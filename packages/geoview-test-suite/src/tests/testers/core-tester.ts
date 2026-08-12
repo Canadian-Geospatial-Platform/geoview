@@ -311,7 +311,7 @@ export class CoreTester extends GVAbstractTester {
    *
    * @returns A promise that resolves when the test completes
    */
-  testGetWMSServiceMetadata(): Promise<Test<FetchWithProxyResult<TypeMetadataWMSCapabilities>>> {
+  testProxyGetWMSServiceMetadata(): Promise<Test<FetchWithProxyResult<TypeMetadataWMSCapabilities>>> {
     return this.test(
       `Test GeoUtilities.getWMSServiceMetadata with Nonna WMS (proxy fallback)...`,
       (test) => {
@@ -336,7 +336,7 @@ export class CoreTester extends GVAbstractTester {
    *
    * @returns A promise that resolves when the test completes
    */
-  testGetWMSServiceMetadataBadUrl(): Promise<Test<NetworkError>> {
+  testProxyGetWMSServiceMetadataBadUrl(): Promise<Test<NetworkError>> {
     return this.testError(`Test GeoUtilities.getWMSServiceMetadata with bad URL...`, NetworkError, async (test) => {
       const url = GVAbstractTester.BAD_URL;
       test.addStep(`Fetching WMS metadata from bad URL: ${url}...`);
@@ -351,7 +351,7 @@ export class CoreTester extends GVAbstractTester {
    *
    * @returns A promise that resolves when the test completes
    */
-  testGetWFSServiceMetadata(): Promise<Test<FetchWithProxyResult<TypeMetadataWFSCapabilities>>> {
+  testProxyGetWFSServiceMetadata(): Promise<Test<FetchWithProxyResult<TypeMetadataWFSCapabilities>>> {
     return this.test(
       `Test GeoUtilities.getWFSServiceMetadata with Belgium WFS (proxy fallback)...`,
       (test) => {
@@ -376,7 +376,7 @@ export class CoreTester extends GVAbstractTester {
    *
    * @returns A promise that resolves when the test completes
    */
-  testGetWFSServiceMetadataBadUrl(): Promise<Test<NetworkError>> {
+  testProxyGetWFSServiceMetadataBadUrl(): Promise<Test<NetworkError>> {
     return this.testError(`Test GeoUtilities.getWFSServiceMetadata with bad URL...`, NetworkError, async (test) => {
       const url = GVAbstractTester.BAD_URL;
       test.addStep(`Fetching WFS metadata from bad URL: ${url}...`);
@@ -391,9 +391,9 @@ export class CoreTester extends GVAbstractTester {
    *
    * @returns A promise that resolves when the test completes
    */
-  testGetWMTSServiceMetadata(): Promise<Test<FetchWithProxyResult<TypeMetadataWMTSCapabilities>>> {
+  testProxyGetWMTSServiceMetadata(): Promise<Test<FetchWithProxyResult<TypeMetadataWMTSCapabilities>>> {
     return this.test(
-      `Test GeoUtilities.getWMTSServiceMetadata with Taiwan WMTS service...`,
+      `Test GeoUtilities.getWMTSServiceMetadata with Taiwan WMTS service (proxy fallback)...`,
       (test) => {
         const url = GVAbstractTester.TAIWAN_WMTS_URL;
         test.addStep(`Fetching WMTS metadata from: ${url}...`);
@@ -416,7 +416,7 @@ export class CoreTester extends GVAbstractTester {
    *
    * @returns A promise that resolves when the test completes
    */
-  testGetWMTSServiceMetadataBadUrl(): Promise<Test<NetworkError>> {
+  testProxyGetWMTSServiceMetadataBadUrl(): Promise<Test<NetworkError>> {
     return this.testError(`Test GeoUtilities.getWMTSServiceMetadata with bad URL...`, NetworkError, async (test) => {
       const url = GVAbstractTester.BAD_URL;
       test.addStep(`Fetching WMTS metadata from bad URL: ${url}...`);

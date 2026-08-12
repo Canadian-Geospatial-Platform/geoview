@@ -132,18 +132,18 @@ export class WFS extends AbstractGeoViewVector {
   protected override async onInitLayerEntries(abortSignal?: AbortSignal): Promise<TypeGeoviewLayerConfig> {
     // Calls fetchServiceMetadata which delegates to this class's overridden onFetchServiceMetadata (may use a proxy fallback and store the proxyUrl on the instance)
     const rootUrl = this.getMetadataAccessPath();
-    const metadata = await this.fetchServiceMetadata<TypeMetadataWFSCapabilities>(abortSignal);
+    const fetchResult = await this.fetchServiceMetadata<TypeMetadataWFSCapabilities>(abortSignal);
 
     // The entries
     let entries: TypeLayerEntryShell[] = [];
 
     // If any
-    if (metadata.data.FeatureTypeList?.FeatureType) {
+    if (fetchResult.data.FeatureTypeList?.FeatureType) {
       // Now that we have metadata, get the layer ids from it
-      if (!Array.isArray(metadata.data.FeatureTypeList?.FeatureType))
-        metadata.data.FeatureTypeList.FeatureType = [metadata.data.FeatureTypeList?.FeatureType];
+      if (!Array.isArray(fetchResult.data.FeatureTypeList?.FeatureType))
+        fetchResult.data.FeatureTypeList.FeatureType = [fetchResult.data.FeatureTypeList?.FeatureType];
 
-      const metadataLayerList = metadata?.data.FeatureTypeList.FeatureType;
+      const metadataLayerList = fetchResult?.data.FeatureTypeList.FeatureType;
       entries = metadataLayerList.map((layerMetadata) => {
         let id = layerMetadata.Name as string;
         if (typeof layerMetadata.Name === 'object' && '#text' in layerMetadata.Name) id = layerMetadata.Name['#text'];

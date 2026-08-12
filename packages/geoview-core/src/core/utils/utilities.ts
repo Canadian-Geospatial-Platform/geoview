@@ -363,6 +363,7 @@ export function getLocalizedMessage(
  *
  * @param objects - The objects to deep merge
  * @returns The merged object
+ * @throws {TypeError} When an object contains circular references that prevent JSON serialization
  */
 export function deepMergeObjects<T>(...objects: unknown[]): T {
   const deepCopyObjects = objects.map((object) => JSON.parse(JSON.stringify(object)));
@@ -663,6 +664,7 @@ export async function validateAndPingUrlOGC(
  *
  * @param url - URL to the GeoTIFF file
  * @returns A promise that resolves with an array of RGBA color tuples, or undefined if no palette
+ * @throws {Error} When the GeoTIFF file cannot be fetched or parsed
  */
 export async function extractGeotiffColorMap(url: string): Promise<RGBA[] | undefined> {
   const tiff = await fromUrl(url);
@@ -1116,6 +1118,7 @@ export function removeCommentsFromJSON(config: string): string {
  *
  * @param configStr - Map config to parse
  * @returns Cleaned and parsed config object
+ * @throws {SyntaxError} When the cleaned string is not valid JSON
  */
 export function parseJSONConfig<T>(configStr: string): T {
   // remove CR and LF from the map config
@@ -1262,18 +1265,17 @@ export function doTimeout(timeout: number): DelayJob {
 }
 
 /**
- * Delay helper function.
+ * Awaits for a specified duration before resolving.
  *
  * @param timeout - The number of milliseconds to wait for
  * @returns A promise that resolves when the delay timeout expires
+ * @throws {Error} When the delay is cancelled unexpectedly
  */
-export function delay(timeout: number): Promise<void> {
-  // Redirect
-  return doTimeout(timeout).promise.then((result) => {
-    if (result !== 'timeout') {
-      throw new Error('Delay was cancelled unexpectedly');
-    }
-  });
+export async function delay(timeout: number): Promise<void> {
+  const result = await doTimeout(timeout).promise;
+  if (result !== 'timeout') {
+    throw new Error('Delay was cancelled unexpectedly');
+  }
 }
 
 /**
@@ -1427,7 +1429,7 @@ function _whenThisThenThat<T>(
   // If expired
   if (timeout !== undefined && Date.now() - startDate.getTime() > timeout) {
     // Failed, took too long, this throws an exception in typical async/await contexts
-    failCallback(`Task abandoned: exceeded timeout of ${timeout} ms.`);
+    failCallback(new Error(`Task abandoned: exceeded timeout of ${timeout} ms.`));
     return;
   }
 
@@ -1449,6 +1451,7 @@ function _whenThisThenThat<T>(
  * @param failCallback - The function executed when checkCallback has failed for too long (went over the timeout)
  * @param timeout - Optional duration in milliseconds until the task is aborted (defaults to undefined, meaning no timeout)
  * @param checkFrequency - The frequency in milliseconds to callback for a check (defaults to 100 milliseconds)
+ * @throws When doCallback throws on the first synchronous check (propagated to the caller directly)
  */
 export function whenThisThenThat<T>(
   checkCallback: () => T,
@@ -1469,6 +1472,8 @@ export function whenThisThenThat<T>(
  * @param timeout - Optional duration in milliseconds until the task is aborted (defaults to undefined, meaning no timeout)
  * @param checkFrequency - Optional frequency in milliseconds to check for an update (defaults to 100 milliseconds)
  * @returns A promise that resolves when the check passes
+ * @throws {Error} When the timeout is exceeded before the check passes
+ * @throws When the checkCallback throws an error (propagated as rejection)
  */
 export function whenThisThen<T>(checkCallback: () => T, timeout?: number, checkFrequency?: number): Promise<T> {
   return new Promise<T>((resolve, reject) => {
@@ -1544,6 +1549,11 @@ function getSectionHeading(content: string): string {
  * @param language - Language to use for guide
  * @param assetsURL - The base URL for assets
  * @returns A promise that resolves with the guide object, or undefined on error
+ * @throws {RequestTimeoutError} When the request exceeds the timeout duration (propagated from `Fetch.fetchText()`)
+ * @throws {RequestAbortedError} When the request was aborted by the caller's signal (propagated from `Fetch.fetchText()`)
+ * @throws {ResponseError} When the response is not OK / non-2xx (propagated from `Fetch.fetchText()`)
+ * @throws {ResponseEmptyError} When the text response is empty (propagated from `Fetch.fetchText()`)
+ * @throws {NetworkError} When a network issue happened (propagated from `Fetch.fetchText()`)
  */
 export async function createGuideObject(language: TypeDisplayLanguage, assetsURL: string): Promise<TypeGuideObject> {
   // Fetch the guide content

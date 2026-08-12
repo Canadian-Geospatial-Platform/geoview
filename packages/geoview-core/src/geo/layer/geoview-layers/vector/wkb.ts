@@ -192,7 +192,7 @@ export class WKB extends AbstractGeoViewVector {
     readOptions.dataProjection ??= layerConfig.getSource().dataProjection;
 
     // If we have a feature package
-    let result: SourceFeaturesInfo = { features: [], dataProjection: '' };
+    let sourceFeaturesInfo: SourceFeaturesInfo = { features: [], dataProjection: '' };
     if (layerConfigWKB.getSource().geoPackageFeatures?.length) {
       const { geoPackageFeatures } = layerConfigWKB.getSource();
       const subResults = await Promise.all(
@@ -204,11 +204,11 @@ export class WKB extends AbstractGeoViewVector {
           });
         })
       );
-      result.features = subResults.map((r) => r.feature);
-      result.dataProjection = subResults[subResults.length - 1].dataProjection;
+      sourceFeaturesInfo.features = subResults.map((r) => r.feature);
+      sourceFeaturesInfo.dataProjection = subResults[subResults.length - 1].dataProjection;
     } else {
       // Fallback to using default read method
-      result = await GeoUtilities.readFeaturesFromWKB(
+      sourceFeaturesInfo = await GeoUtilities.readFeaturesFromWKB(
         layerConfigWKB.getDataAccessPath(),
         readOptions.dataProjection,
         readOptions.featureProjection
@@ -216,7 +216,7 @@ export class WKB extends AbstractGeoViewVector {
     }
 
     // Return them
-    return Promise.resolve(result);
+    return Promise.resolve(sourceFeaturesInfo);
   }
 
   /**

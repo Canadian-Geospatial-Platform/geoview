@@ -24,7 +24,7 @@ export abstract class AbstractTestSuite {
   #onTestersTestFailureHandlers: TesterFailureDelegate[] = [];
 
   /** Indicates if the test suite should only run the DEBUG tests */
-  RUN_DEBUG_ONLY = false;
+  DEBUG_RUN_ONLY_DEBUG_FUNCTION = false;
 
   // #region OVERRIDES
 
@@ -176,7 +176,12 @@ export abstract class AbstractTestSuite {
   /**
    * Launches the test suite.
    *
+   * When `DEBUG_RUN_ONLY_DEBUG_FUNCTION` is `true` and the environment is localhost,
+   * only the debug subset (`onLaunchTestSuiteDEBUG`) is executed instead of the full suite.
+   *
    * @returns A promise that resolves when the tests are over
+   * @throws {TestSuiteRunningError} When the test suite is already running
+   * @throws {TestSuiteCannotExecuteError} When `onCanExecuteTestSuite()` resolves to false
    */
   async launchTestSuite(): Promise<unknown> {
     // Validates the Test Suite isn't already running tests
@@ -189,7 +194,7 @@ export abstract class AbstractTestSuite {
     await this.onPrepareLaunchTestSuite();
 
     // If only running the debug tests
-    if (this.RUN_DEBUG_ONLY && isLocalhost()) {
+    if (this.DEBUG_RUN_ONLY_DEBUG_FUNCTION && isLocalhost()) {
       // Launching the debug test suite first to see if we proceed with the full tests or not
       return this.onLaunchTestSuiteDEBUG();
     }

@@ -135,10 +135,10 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    */
   override async onRefreshMetadata(displayDateMode: DisplayDateMode): Promise<void> {
     // Refetch the metadata again with the new date mode and update the config
-    const result = await WMS.fetchMetadataWMSForLayer(this.getMetadataAccessPath()!, this.getProxyUrl(), this.layerId);
+    const fetchResult = await WMS.fetchMetadataWMSForLayer(this.getMetadataAccessPath()!, this.getProxyUrl(), this.layerId);
 
     // Read the capabilities
-    const layerCapabilities = WMS.findLayerMetadataInCapability(this.layerId, result.data.Capability.Layer);
+    const layerCapabilities = WMS.findLayerMetadataInCapability(this.layerId, fetchResult.data.Capability.Layer);
 
     // Init the layer metadata
     await WMS.initLayerMetadata(this, layerCapabilities, displayDateMode);

@@ -96,12 +96,12 @@ export class EsriFeature extends AbstractGeoViewVector {
   protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Calls fetchServiceMetadata which delegates to this class's overridden onFetchServiceMetadata (may use a proxy fallback and store the proxyUrl on the instance)
     // In this init context we fetch either via /MapServer/{layerId} or /FeatureServer url endpoints
-    const metadata = await this.fetchServiceMetadata<TypeMetadataEsriDynamic | TypeMetadataEsriDynamicLayer | TypeMetadataEsriFeature>();
+    const fetchResult = await this.fetchServiceMetadata<TypeMetadataEsriDynamic | TypeMetadataEsriDynamicLayer | TypeMetadataEsriFeature>();
 
     // If metadata was fetched successfully
     const entries = [];
     let finalUrl = this.getMetadataAccessPath();
-    if (metadata.data) {
+    if (fetchResult.data) {
       // Detect the service type separator (MapServer or FeatureServer)
       const url = this.getMetadataAccessPath().toLowerCase();
       const separators = ['/mapserver', '/featureserver'];
@@ -121,7 +121,7 @@ export class EsriFeature extends AbstractGeoViewVector {
         }
 
         // Metadata is at root level when a layer id is present
-        const metadataLayer = metadata.data as TypeMetadataEsriDynamicLayer;
+        const metadataLayer = fetchResult.data as TypeMetadataEsriDynamicLayer;
         finalUrl = this.getMetadataAccessPath().substring(0, idx + sep.length);
 
         entries.push({
@@ -226,24 +226,24 @@ export class EsriFeature extends AbstractGeoViewVector {
     let hadInvalidGeometries = false;
     let dataProjection: ProjectionLike;
     try {
-      const results = await Promise.all(
+      const featureResults = await Promise.all(
         responseData.map((json) => {
           return GeoUtilities.readFeaturesFromEsriJSON(json, readOptions.dataProjection, readOptions.featureProjection);
         })
       );
 
-      const allFeatures = results.flatMap((result, index) => {
+      const allFeatures = featureResults.flatMap((featureResult, index) => {
         // capture projection once (first valid result wins)
         if (index === 0) {
           // eslint-disable-next-line prefer-destructuring
-          dataProjection = result.dataProjection;
+          dataProjection = featureResult.dataProjection;
         }
 
-        if (result.hadInvalidGeometries) {
+        if (featureResult.hadInvalidGeometries) {
           hadInvalidGeometries = true;
         }
 
-        return result.features;
+        return featureResult.features;
       });
 
       // If we had to clean geometries, emit a warning message

@@ -109,10 +109,10 @@ export class OgcFeature extends AbstractGeoViewVector {
     // If no id
     if (!id) {
       // Calls fetchServiceMetadata which delegates to this class's overridden onFetchServiceMetadata (may use a proxy fallback and store the proxyUrl on the instance)
-      const metadata = await this.fetchServiceMetadata<TypeMetadataOGCFeature>();
+      const fetchResult = await this.fetchServiceMetadata<TypeMetadataOGCFeature>();
 
       // Now that we have metadata
-      entries = metadata.data.collections.map((collection) => {
+      entries = fetchResult.data.collections.map((collection) => {
         return { id: collection.id, layerId: collection.id, layerName: collection.description };
       });
     }
