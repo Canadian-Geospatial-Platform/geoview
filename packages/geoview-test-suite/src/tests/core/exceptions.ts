@@ -30,6 +30,37 @@ export class TestError extends Error {
 }
 
 /**
+ * Custom error to indicate that a test should be skipped.
+ *
+ * Thrown inside a test callback to signal that the test cannot or should not run under current conditions
+ * (e.g., VPN not connected, required service unavailable). The framework catches this error and routes
+ * the test to the skipped lifecycle path instead of the failure path.
+ */
+export class TestSkippedError extends Error {
+  /**
+   * Creates a new TestSkippedError.
+   *
+   * @param message - The reason the test is being skipped
+   */
+  constructor(message = 'Test skipped') {
+    // Call the base Error constructor with the provided message
+    super(message);
+
+    // Set a custom name for the error type to differentiate it from other error types
+    this.name = 'TestSkippedError';
+
+    // Capture the stack trace (V8-specific, e.g., Chrome and Node.js)
+    // Omits the constructor call from the trace for cleaner debugging
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, TestSkippedError);
+    }
+
+    // Ensure the prototype chain is correct (required in some transpilation targets)
+    Object.setPrototypeOf(this, TestSkippedError.prototype);
+  }
+}
+
+/**
  * Custom error to indicate that a test suite is currently running and shouldn't be interfered with.
  */
 export class TestSuiteRunningError extends Error {

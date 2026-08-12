@@ -3,7 +3,13 @@ import { AbstractPlugin } from 'geoview-core/api/plugin/abstract-plugin';
 import { PluginConfigNotFoundError, TestSuiteInitializationError } from 'geoview-core/core/exceptions/geoview-exceptions';
 import type { EventDelegateBase } from 'geoview-core/api/events/event-helper';
 import EventHelper from 'geoview-core/api/events/event-helper';
-import type { TesterFailureEvent, TesterSuccessEvent, TesterTestEvent, TesterTestUpdatedEvent } from './tests/core/abstract-test-suite';
+import type {
+  TesterFailureEvent,
+  TesterSkippedEvent,
+  TesterSuccessEvent,
+  TesterTestEvent,
+  TesterTestUpdatedEvent,
+} from './tests/core/abstract-test-suite';
 import { TestSuiteRunningError } from './tests/core/exceptions';
 import type { GVAbstractTestSuite } from './tests/suites/abstract-gv-test-suite';
 import { GVTestSuiteCore } from './tests/suites/suite-core';
@@ -40,6 +46,9 @@ class TestSuitePlugin extends AbstractPlugin {
 
   /** Callback delegates for the test failure event */
   #onSuiteTestersTestFailureHandlers: SuiteTesterFailureDelegate[] = [];
+
+  /** Callback delegates for the test skipped event */
+  #onSuiteTestersTestSkippedHandlers: SuiteTesterSkippedDelegate[] = [];
 
   /**
    * Returns the package schema.
@@ -170,6 +179,12 @@ class TestSuitePlugin extends AbstractPlugin {
       // Re-emit
       this.#emitFailure({ ...event, suite: sender as GVAbstractTestSuite });
     });
+
+    // Register handlers when the a test has failed
+    testSuite.onSkipped((sender, event) => {
+      // Re-emit
+      this.#emitSkipped({ ...event, suite: sender as GVAbstractTestSuite });
+    });
   }
 
   /**
@@ -295,6 +310,18 @@ class TestSuitePlugin extends AbstractPlugin {
   }
 
   /**
+   * Gets the total number of currently skipped across all test suites.
+   *
+   * @returns The total number of tests skipped.
+   */
+  getTestsDoneSkipped(): number {
+    // For each test suite
+    return this.testSuites.reduce((total, testSuite) => {
+      return total + testSuite.getTestsDoneSkipped();
+    }, 0);
+  }
+
+  /**
    * Gets the total number of currently done failed across all test suites.
    *
    * @returns The total number of tests done failed.
@@ -352,6 +379,17 @@ class TestSuitePlugin extends AbstractPlugin {
    */
   getTestsDoneAllSuccessAndSuiteDone(): boolean {
     return this.getSuitesDone() && this.getTestsDoneAllSuccess();
+  }
+  /**
+   * Sets the VPN flag on all registered test suites.
+   *
+   * @param runningOnVPN - Whether the test environment is running on VPN
+   */
+  setIsRunningOnVPN(runningOnVPN: boolean): void {
+    // Set the running on VPN flag for all all test suites
+    this.testSuites.forEach((testSuite) => {
+      testSuite.setIsRunningOnVPN(runningOnVPN);
+    });
   }
 
   // #region EVENTS
@@ -476,6 +514,36 @@ class TestSuitePlugin extends AbstractPlugin {
     EventHelper.offEvent(this.#onSuiteTestersTestFailureHandlers, callback);
   }
 
+  /**
+   * Emits an event to all handlers.
+   *
+   * @param event - The event to emit
+   */
+  #emitSkipped(event: SuiteTesterSkippedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onSuiteTestersTestSkippedHandlers, event);
+  }
+
+  /**
+   * Registers a failure event handler.
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
+   */
+  onSkipped(callback: SuiteTesterSkippedDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onSuiteTestersTestSkippedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a failure event handler.
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
+   */
+  offSkipped(callback: SuiteTesterSkippedDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onSuiteTestersTestSkippedHandlers, callback);
+  }
+
   // #endregion EVENTS
 }
 
@@ -527,6 +595,21 @@ export interface SuiteTesterFailureEvent extends TesterFailureEvent {
  */
 export type SuiteTesterFailureDelegate = EventDelegateBase<TestSuitePlugin, SuiteTesterFailureEvent, void>;
 
+/**
+ * Define an event for the delegate
+ */
+export interface SuiteTesterSkippedEvent extends TesterSkippedEvent {
+  suite: GVAbstractTestSuite;
+}
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+export type SuiteTesterSkippedDelegate = EventDelegateBase<TestSuitePlugin, SuiteTesterSkippedEvent, void>;
+
+/**
+ * Define the configuration for the Test Suite Plugin.
+ */
 /** Configuration properties for the test suite plugin. */
 export type TestSuitePluginConfig = {
   /** The test suites to execute. */

@@ -1,7 +1,7 @@
 import type { EventDelegateBase } from 'geoview-core/api/events/event-helper';
 import EventHelper from 'geoview-core/api/events/event-helper';
 import { isLocalhost } from 'geoview-core/core/utils/utilities';
-import type { AbstractTester, FailureEvent, SuccessEvent, TestEvent, TestUpdatedEvent } from './abstract-tester';
+import type { AbstractTester, FailureEvent, SkippedEvent, SuccessEvent, TestEvent, TestUpdatedEvent } from './abstract-tester';
 import { TestSuiteCannotExecuteError, TestSuiteRunningError } from './exceptions';
 
 /**
@@ -22,6 +22,12 @@ export abstract class AbstractTestSuite {
 
   /** Callback delegates for the test failure event */
   #onTestersTestFailureHandlers: TesterFailureDelegate[] = [];
+
+  /** Callback delegates for the test skipped event */
+  #onTestersTestSkippedHandlers: TesterSkippedDelegate[] = [];
+
+  /** Indicates whether the plugin is running on a VPN */
+  #isRunningOnVPN = false;
 
   // Indicates if the test suite should only run the DEBUG tests
   DEBUG_RUN_ONLY_DEBUG_FUNCTION = false;
@@ -130,6 +136,16 @@ export abstract class AbstractTestSuite {
   }
 
   /**
+   * Gets the total number of currently done successful tests in the Suite.
+   *
+   * @returns The total number of tests done
+   */
+  getTestsDoneSkipped(): number {
+    // Return the total completed tests across all testers
+    return this.#testers.reduce((total, tester) => total + tester.getTestsDoneSkipped(), 0);
+  }
+
+  /**
    * Gets the total number of currently done failed tests in the Suite.
    *
    * @returns The total number of tests done
@@ -149,7 +165,7 @@ export abstract class AbstractTestSuite {
   }
 
   /**
-   * Gets if all the tests are done and successfully.
+   * Gets if all the tests are done and successfully or skipped.
    *
    * @returns Indicate if the tests are all done and finished successfully
    */
@@ -171,6 +187,7 @@ export abstract class AbstractTestSuite {
     tester.onStepUpdated(this.#handleTesterTestStepUpdated.bind(this));
     tester.onSuccess(this.#handleTesterSuccess.bind(this));
     tester.onFailure(this.#handleTesterFailure.bind(this));
+    tester.onSkipped(this.#handleTesterSkipped.bind(this));
   }
 
   /**
@@ -212,6 +229,24 @@ export abstract class AbstractTestSuite {
 
     // Resets tests in all testers
     this.#testers.forEach((tester) => tester.resetTests());
+  }
+
+  /**
+   * Gets whether the test suite is running on a VPN.
+   *
+   * @returns Whether the environment is running on VPN
+   */
+  getIsRunningOnVPN(): boolean {
+    return this.#isRunningOnVPN;
+  }
+
+  /**
+   * Sets whether the test suite is running on a VPN.
+   *
+   * @param isRunningOnVPN - Whether the environment is running on VPN
+   */
+  setIsRunningOnVPN(isRunningOnVPN: boolean): void {
+    this.#isRunningOnVPN = isRunningOnVPN;
   }
 
   // #endregion PUBLIC METHODS
@@ -267,6 +302,18 @@ export abstract class AbstractTestSuite {
   #handleTesterFailure(sender: AbstractTester, event: FailureEvent): void {
     // Re-emit
     this.#emitFailure({ ...event, tester: sender });
+  }
+
+  /**
+   * Handles a test skipped event emitted by a tester,
+   * and re-emits it with additional tester context.
+   *
+   * @param sender - The tester instance that encountered the skip
+   * @param event - The event containing the test and the associated error
+   */
+  #handleTesterSkipped(sender: AbstractTester, event: SkippedEvent): void {
+    // Re-emit
+    this.#emitSkipped({ ...event, tester: sender });
   }
 
   // #endregion PRIVATE METHODS
@@ -393,6 +440,36 @@ export abstract class AbstractTestSuite {
     EventHelper.offEvent(this.#onTestersTestFailureHandlers, callback);
   }
 
+  /**
+   * Emits an event to all handlers.
+   *
+   * @param event - The event to emit
+   */
+  #emitSkipped(event: TesterSkippedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onTestersTestSkippedHandlers, event);
+  }
+
+  /**
+   * Registers a skipped event handler.
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
+   */
+  onSkipped(callback: TesterSkippedDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onTestersTestSkippedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a skipped event handler.
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
+   */
+  offSkipped(callback: TesterSkippedDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onTestersTestSkippedHandlers, callback);
+  }
+
   // #endregion EVENTS
 }
 
@@ -427,3 +504,11 @@ export interface TesterFailureEvent extends FailureEvent {
 
 /** Define a delegate for the event handler function signature. */
 export type TesterFailureDelegate = EventDelegateBase<AbstractTestSuite, TesterFailureEvent, void>;
+
+/** Define an event for the delegate. */
+export interface TesterSkippedEvent extends SkippedEvent {
+  tester: AbstractTester;
+}
+
+/** Define a delegate for the event handler function signature. */
+export type TesterSkippedDelegate = EventDelegateBase<AbstractTestSuite, TesterSkippedEvent, void>;

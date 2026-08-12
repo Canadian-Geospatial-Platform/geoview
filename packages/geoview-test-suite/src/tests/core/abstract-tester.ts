@@ -5,6 +5,7 @@ import EventHelper from 'geoview-core/api/events/event-helper';
 import { logger } from 'geoview-core/core/utils/logger';
 import { formatError } from 'geoview-core/core/exceptions/core-exceptions';
 import { Test } from './test';
+import { TestSkippedError } from './exceptions';
 
 /**
  * Abstract base class for creating custom testers with assertion and event capabilities.
@@ -24,6 +25,9 @@ export abstract class AbstractTester {
 
   /** Callback delegates for the test failure event */
   #onFailureHandlers: FailureDelegate[] = [];
+
+  /** Callback delegates for the test skipped event */
+  #onSkippedHandlers: SkippedDelegate[] = [];
 
   /** Callback delegates for the test done event */
   #onDoneHandlers: TestDelegate[] = [];
@@ -79,12 +83,21 @@ export abstract class AbstractTester {
   }
 
   /**
-   * Gets the total number of currently done failed tests which were successful.
+   * Gets the total number of currently done skipped tests.
+   *
+   * @returns The total number of tests
+   */
+  getTestsDoneSkipped(): number {
+    return this.#testsDone.filter((test) => test.getStatus() === 'skipped').length;
+  }
+
+  /**
+   * Gets the total number of currently done failed tests.
    *
    * @returns The total number of tests
    */
   getTestsDoneFailed(): number {
-    return this.getTestsDone() - this.getTestsDoneSuccess();
+    return this.getTestsDone() - this.getTestsDoneSuccess() - this.getTestsDoneSkipped();
   }
 
   /**
@@ -97,12 +110,12 @@ export abstract class AbstractTester {
   }
 
   /**
-   * Gets if all the tests are done and successfully.
+   * Gets if all the tests are done and successfully or skipped.
    *
    * @returns Indicate if the tests are all done and finished successfully
    */
   getTestsDoneAllSuccess(): boolean {
-    return this.getTestsDoneAll() && this.#tests.every((test) => test.getStatus() === 'success');
+    return this.getTestsDoneAll() && this.#tests.every((test) => test.getStatus() === 'success' || test.getStatus() === 'skipped');
   }
 
   /**
@@ -118,27 +131,27 @@ export abstract class AbstractTester {
    * Performs a test using the provided test callback and assertion callback.
    *
    * @template T The type of the result produced by the test.
-   * @param message - A message describing the test
+   * @param title - A title describing the test
    * @param callback - The function to execute to obtain a test result
    * @param callbackAssert - The function to perform assertions on the result
    * @param [callbackFinalize] - Optional function to finalize the test after completion
    * @returns A promise that resolves to the {@link Test} result object
    */
   test<T>(
-    message: string,
+    title: string,
     callback: BaseTestDelegate<T, T>,
     callbackAssert: BaseAssertionDelegate<T>,
     callbackFinalize?: BaseFinalizeDelegate<T>
   ): Promise<Test<T>> {
     // Redirect
-    return this.#testPerformTest(message, callback, callbackAssert, callbackFinalize);
+    return this.#testPerformTest(title, callback, callbackAssert, callbackFinalize);
   }
 
   /**
    * Performs a test which is supposed to throw an error (a true negative) using the provided test callback and assertion callback.
    *
    * @template T The expected error that the test should throw.
-   * @param message - A message describing the test
+   * @param title - A title describing the test
    * @param errorClass - The expected error class that the test should throw
    * @param callback - The function to execute which should be throwing an error
    * @param [callbackAssert] - Optional function to perform assertions on the result
@@ -146,14 +159,14 @@ export abstract class AbstractTester {
    * @returns A promise that resolves to the {@link Test} result object
    */
   testError<T extends Error>(
-    message: string,
+    title: string,
     errorClass: ClassType<T>,
     callback: BaseTestDelegate<T, void>,
     callbackAssert?: BaseAssertionDelegate<T>,
     callbackFinalize?: BaseFinalizeDelegate<T>
   ): Promise<Test<T>> {
     // Redirect
-    return this.#testPerformTestError(message, errorClass, callback, callbackAssert, callbackFinalize);
+    return this.#testPerformTestError(title, errorClass, callback, callbackAssert, callbackFinalize);
   }
 
   // #region PROTECTED
@@ -161,12 +174,12 @@ export abstract class AbstractTester {
   /**
    * Overridable function called when a test is being created for execution.
    *
-   * @param message - A message describing the test
+   * @param title - A title describing the test
    * @returns The test about to be performed
    */
-  protected onCreatingTest<T>(message: string): Test<T> {
+  protected onCreatingTest<T>(title: string): Test<T> {
     // Create the test
-    const test = new Test<T>(message);
+    const test = new Test<T>(title);
 
     // Hook on step changed
     test.onStepChanged(this.#handleTestStepChanged.bind(this));
@@ -233,7 +246,6 @@ export abstract class AbstractTester {
   protected onPerformingTestSuccess<T>(test: Test<T>, result: T): void {
     // Update the step - clearing it
     test.setStatus('success');
-    test.addStep('Completed assertions.');
 
     // Emit
     this.#emitSuccess({ test, result });
@@ -264,9 +276,24 @@ export abstract class AbstractTester {
     if (shouldSetError) {
       // Set the error
       test.setError(normalizedError);
+
       // Emit
       this.#emitFailure({ test, error: normalizedError });
     }
+  }
+
+  /**
+   * Marks a test as skipped and emits the skipped event.
+   *
+   * @param test - The test being skipped
+   * @param reason - The reason the test was skipped
+   */
+  protected onPerformingTestSkipped<T>(test: Test<T>, reason: string): void {
+    // Set status to skipped
+    test.setStatus('skipped');
+
+    // Emit
+    this.#emitSkipped({ test, reason });
   }
 
   /**
@@ -293,8 +320,14 @@ export abstract class AbstractTester {
     // Move the test from the running list and add it to the done list
     this.#moveTestFromRunningToDone(test);
 
+    // Determine the color based on status
+    const status = test.getStatus();
+    let color = 'red';
+    if (status === 'success') color = 'green';
+    else if (status === 'skipped') color = 'orange';
+
     // Add done step
-    test.addStep('Done', 'major', test.getStatus() === 'success' ? 'green' : 'red');
+    test.addStep('Done', 'major', color);
 
     // Emit
     this.#emitDone({ test });
@@ -316,20 +349,20 @@ export abstract class AbstractTester {
    * - Optionally finalizing the test (e.g., cleanup or logging)
    *
    * @template T - The type of the result returned by the test.
-   * @param message - A human-readable description of the test
+   * @param title - The title of the test
    * @param callback - Function that performs the main test logic and returns the result
    * @param callbackAssert - Function that asserts the correctness of the test result
    * @param [callbackFinalize] - Optional finalization callback, called after the test completes (regardless of success or failure)
    * @returns A promise that resolves to the fully populated {@link Test} object
    */
   async #testPerformTest<T>(
-    message: string,
+    title: string,
     callback: BaseTestDelegate<T, T>,
     callbackAssert: BaseAssertionDelegate<T>,
     callbackFinalize?: BaseFinalizeDelegate<T>
   ): Promise<Test<T>> {
     // Create the test
-    const test = this.onCreatingTest<T>(message);
+    const test = this.onCreatingTest<T>(title);
 
     try {
       // Testing
@@ -350,8 +383,15 @@ export abstract class AbstractTester {
       // All good
       this.onPerformingTestSuccess(test, result);
     } catch (error: unknown) {
-      // The execution of the test has failed
-      this.onPerformingTestFailure(test, error, false);
+      // If the test was skipped via TestSkippedError
+      if (error instanceof TestSkippedError) {
+        // Skipped
+        test.addStep(`Test skipped: ${error.message}`);
+        this.onPerformingTestSkipped(test, error.message);
+      } else {
+        // The execution of the test has failed
+        this.onPerformingTestFailure(test, error, false);
+      }
     }
 
     try {
@@ -384,21 +424,21 @@ export abstract class AbstractTester {
    * - Optionally finalizing the test (e.g., cleanup or logging)
    *
    * @template T - The type of the result returned by the test.
-   * @param message - A human-readable description of the test
+   * @param title - A human-readable description of the test
    * @param callback - Function that performs the main test logic and is supposed to throw an Error
    * @param callbackAssert - Function that asserts the correctness of the test result
    * @param [callbackFinalize] - Optional finalization callback, called after the test completes (regardless of success or failure)
    * @returns A promise that resolves to the fully populated {@link Test} object
    */
   async #testPerformTestError<T extends Error>(
-    message: string,
+    title: string,
     errorClass: ClassType<T>,
     callback: BaseTestDelegate<T, void>,
     callbackAssert?: BaseAssertionDelegate<T>,
     callbackFinalize?: BaseFinalizeDelegate<T>
   ): Promise<Test<T>> {
     // Create the test
-    const test = this.onCreatingTest<T>(message);
+    const test = this.onCreatingTest<T>(title);
 
     // Set the type to a true-negative, because we're testing for an Error.
     test.setType('true-negative');
@@ -625,6 +665,36 @@ export abstract class AbstractTester {
    *
    * @param event - The event to emit
    */
+  #emitSkipped(event: SkippedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onSkippedHandlers, event);
+  }
+
+  /**
+   * Registers a skipped event handler.
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
+   */
+  onSkipped(callback: SkippedDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onSkippedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a skipped event handler.
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
+   */
+  offSkipped(callback: SkippedDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onSkippedHandlers, callback);
+  }
+
+  /**
+   * Emits an event to all handlers.
+   *
+   * @param event - The event to emit
+   */
   #emitDone(event: TestEvent): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onDoneHandlers, event);
@@ -671,8 +741,7 @@ export interface TestEvent {
 export type TestDelegate = EventDelegateBase<AbstractTester, TestEvent, void>;
 
 /** Define an event for the delegate. */
-export interface TestUpdatedEvent<T = BaseTestChangedEvent> {
-  test: Test;
+export interface TestUpdatedEvent<T = BaseTestChangedEvent> extends TestEvent {
   event: T;
 }
 
@@ -680,8 +749,7 @@ export interface TestUpdatedEvent<T = BaseTestChangedEvent> {
 export type TestUpdatedDelegate = EventDelegateBase<AbstractTester, TestUpdatedEvent, void>;
 
 /** Define an event for the delegate. */
-export interface SuccessEvent<T = unknown> {
-  test: Test;
+export interface SuccessEvent<T = unknown> extends TestEvent {
   result: T;
 }
 
@@ -689,10 +757,17 @@ export interface SuccessEvent<T = unknown> {
 export type SuccessDelegate = EventDelegateBase<AbstractTester, SuccessEvent, void>;
 
 /** Define an event for the delegate. */
-export interface FailureEvent {
-  test: Test;
+export interface FailureEvent extends TestEvent {
   error: unknown;
 }
 
 /** Define a delegate for the event handler function signature. */
 export type FailureDelegate = EventDelegateBase<AbstractTester, FailureEvent, void>;
+
+/** Define an event for the delegate. */
+export interface SkippedEvent extends TestEvent {
+  reason: string;
+}
+
+/** Define a delegate for the event handler function signature. */
+export type SkippedDelegate = EventDelegateBase<AbstractTester, SkippedEvent, void>;
