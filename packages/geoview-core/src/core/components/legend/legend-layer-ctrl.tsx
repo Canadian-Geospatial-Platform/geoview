@@ -255,9 +255,9 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
   const subTitle = useSubtitle(layerPath, layerChildPaths || [], layerItems || []);
 
   return (
-    <Stack direction="row" sx={{ ...memoSxClasses.layerStackIcons, alignItems: 'center' }}>
-      {!!subTitle.length && <Typography sx={{ fontSize: 14 }}>{subTitle}</Typography>}
-      <Box sx={{ ...memoSxClasses.subtitle, display: 'flex', alignItems: 'center' }}>
+    <Stack direction="row" sx={memoSxClasses.layerStackContainer}>
+      {!!subTitle.length && <Typography sx={memoSxClasses.layerStackSubtitle}>{subTitle}</Typography>}
+      <Box sx={memoSxClasses.layerStackIcons} role="group" aria-label={`${t('legend.layerControls')} - ${layerName}`}>
         {/* Button to select layer in panel and scroll to footer
             Hidden in WCAG mode - keyboard users can Tab to layer panel instead
           */}

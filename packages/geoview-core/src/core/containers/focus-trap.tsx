@@ -75,6 +75,9 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   // Use shellElementRef.current instead of querying DOM multiple times
   const shellElementRef = useRef<HTMLElement | null>(null);
 
+  /** Tracks the current mousemove handler to prevent listener accumulation. */
+  const mouseMoveHandlerRef = useRef<((event: MouseEvent) => void) | null>(null);
+
   /**
    * Caches the shell element reference to avoid repeated DOM queries.
    */
@@ -140,8 +143,6 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   /**
    * Disables scrolling on keydown space, so that screen doesn't scroll down
    * when focus is set to map and arrows and enter keys are used to navigate the map.
-   *
-   * @param evt - The keyboard event to intercept
    */
   const handleScrolling = useCallback((evt: KeyboardEvent): void => {
     if (mapElementRef.current === document.activeElement) {
@@ -181,6 +182,12 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
         }
         document.removeEventListener('keydown', handleScrolling);
 
+        // Clean up mousemove listener if it exists
+        if (mouseMoveHandlerRef.current && shellElementRef.current) {
+          shellElementRef.current.removeEventListener('mousemove', mouseMoveHandlerRef.current);
+          mouseMoveHandlerRef.current = null;
+        }
+
         // The setTimeout is used to ensure the DOM has been updated and the element is ready to receive focus
         setTimeout(() => document.getElementById(`toplink-${focusTrapId}`)?.focus(), FOCUS_DELAY);
         uiController.setCrosshairActive(false);
@@ -195,7 +202,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
         }
       },
     };
-  }, [focusTrapId, geoviewElement, handleScrolling, mapElementStore, uiController]);
+  }, [activeTrapGeoView, focusTrapId, geoviewElement, handleScrolling, mapElementStore, mapId, uiController]);
 
   /**
    * Exits the focus trap by delegating to the handlers ref.
@@ -248,8 +255,6 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
   /**
    * Manages skip top and bottom link navigation.
-   *
-   * @param event - The DOM event triggered on the skip link element
    */
   const manageLinks = useCallback(
     (event: HTMLElementEventMap[keyof HTMLElementEventMap]): void => {
@@ -275,14 +280,28 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
         // remove the top and bottom link from focus cycle and start the FocusTrap
         document.addEventListener('keydown', handleScrolling);
         if (shellElementRef.current) {
-          shellElementRef.current.addEventListener(
-            'mousemove',
-            () => {
+          // Remove previous listener if it exists to prevent accumulation
+          if (mouseMoveHandlerRef.current) {
+            shellElementRef.current.removeEventListener('mousemove', mouseMoveHandlerRef.current);
+          }
+
+          // Create named handler so we can remove it manually after real movement
+          const handleMouseMove = (mouseEvent: MouseEvent): void => {
+            // Only exit WCAG mode if mouse actually moved (not a window resize event)
+            if (mouseEvent.movementX !== 0 || mouseEvent.movementY !== 0) {
+              // Real movement detected - remove listener and exit WCAG mode
+              if (mouseMoveHandlerRef.current && shellElementRef.current) {
+                shellElementRef.current.removeEventListener('mousemove', mouseMoveHandlerRef.current);
+                mouseMoveHandlerRef.current = null;
+              }
               setOpen(false);
               exitFocus();
-            },
-            { once: true }
-          );
+            }
+          };
+
+          // Store and add the listener
+          mouseMoveHandlerRef.current = handleMouseMove;
+          shellElementRef.current.addEventListener('mousemove', handleMouseMove);
         }
       }
     },

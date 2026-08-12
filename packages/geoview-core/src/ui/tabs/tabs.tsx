@@ -53,6 +53,7 @@ export interface TypeTabsProps {
   TabContentVisibilty?: string;
   onToggleCollapse?: () => void;
   onSelectedTabChanged?: (tab: TypeTabs) => void;
+  onHeaderClick?: () => void;
   onOpenKeyboard?: (uiFocus: FocusItemProps) => void;
   onCloseKeyboard?: () => void;
   containerType: TypeContainerBox;
@@ -143,6 +144,7 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
     activeTrap,
     onToggleCollapse,
     onSelectedTabChanged,
+    onHeaderClick,
     onOpenKeyboard,
     onCloseKeyboard,
     TabContentVisibilty = 'inherit',
@@ -339,6 +341,7 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
       <Grid
         container
         id={`${mapId}-footerbar-header`}
+        onClick={onHeaderClick}
         sx={{
           width: '100%',
           paddingLeft: '7px',

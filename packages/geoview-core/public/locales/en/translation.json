@@ -171,7 +171,8 @@
     "selectLayerAndScroll": "Manage layer",
     "hideText": "Hide feature text labels",
     "showText": "Show feature text labels",
-    "layerOutOfRangeScreenReader": "(visibility limited by scale)"
+    "layerOutOfRangeScreenReader": "(visibility limited by scale)",
+    "layerControls": "Layer controls"
   },
   "layers": {
     "title": "Layers",

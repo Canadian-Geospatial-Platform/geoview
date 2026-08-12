@@ -1501,7 +1501,7 @@ export function whenThisThen<T>(checkCallback: () => T, timeout?: number, checkF
  * Escape special characters from string.
  *
  * @param text - The text to escape
- * @returns Espaced string
+ * @returns Escaped string
  */
 export function escapeRegExp(text: string): string {
   return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
@@ -1543,6 +1543,40 @@ export function readTextWithBestEncoding(
 
   // If none are clean, return the first partially-decodable fallback
   return fallback ?? { text: '', encoding: '' };
+}
+
+/**
+ * Transforms guide anchor IDs and hrefs to be unique per map/container instance.
+ *
+ * Processes markdown content that contains HTML elements, adding a prefix to
+ * id and href="#..." attributes that end with "Section". This targets only the
+ * custom guide navigation anchors (geolocatorSection, legendSection, etc.) and
+ * avoids false positives on embedded HTML, URLs, or third-party content.
+ *
+ * Skips IDs that are already prefixed (idempotent). Does not affect auto-generated
+ * IDs from markdown heading syntax.
+ *
+ * @param content - Content string containing HTML id and href attributes
+ * @param prefix - The unique prefix (typically `{mapId}-{containerType}`)
+ * @returns The transformed content with prefixed Section IDs
+ *
+ * @example
+ * transformMarkdownIds('<a id="legendSection" href="#layersSection">Link</a>', 'map1-about');
+ * '<a id="map1-about-legendSection" href="#map1-about-layersSection">Link</a>'
+ */
+export function transformMarkdownIds(content: string, prefix: string): string {
+  // Step 1: Prefix id="..." attributes ending with "Section" (skip if already prefixed)
+  const withPrefixedIds = content.replace(/\bid=(["'])([^"']+Section)\1/g, (match, quote, id) => {
+    return id.startsWith(`${prefix}-`) ? match : `id=${quote}${prefix}-${id}${quote}`;
+  });
+
+  // Step 2: Prefix href="#..." anchor links ending with "Section" (skip if already prefixed)
+  const withPrefixedAnchors = withPrefixedIds.replace(/href=(["'])(#[^"']+Section)\1/g, (match, quote, href) => {
+    const id = href.slice(1); // Remove #
+    return id.startsWith(`${prefix}-`) ? match : `href=${quote}#${prefix}-${id}${quote}`;
+  });
+
+  return withPrefixedAnchors;
 }
 
 /**

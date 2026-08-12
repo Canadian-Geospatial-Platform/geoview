@@ -171,7 +171,8 @@
     "selectLayerAndScroll": "Gérer la couche",
     "hideText": "Masquer les étiquettes de texte des éléments",
     "showText": "Afficher les étiquettes de texte des éléments",
-    "layerOutOfRangeScreenReader": "(visibilité limitée par l'échelle)"
+    "layerOutOfRangeScreenReader": "(visibilité limitée par l'échelle)",
+    "layerControls": "Contrôles de couche"
   },
   "layers": {
     "title": "Couches",

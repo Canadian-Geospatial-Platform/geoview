@@ -572,9 +572,9 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
       // Restore focus to the navigation button after React completes the state update and re-render
       requestAnimationFrame(() => {
         if (change === -1) {
-          prevButtonRef.current?.focus();
+          prevButtonRef.current?.focus({ preventScroll: true });
         } else {
-          nextButtonRef.current?.focus();
+          nextButtonRef.current?.focus({ preventScroll: true });
         }
       });
     },

@@ -28,6 +28,7 @@ import { DetailsPanel } from '@/core/components/details/details-panel';
 import { Datapanel } from '@/core/components/data-table/data-panel';
 import { camelCase, delay, scrollIfNotVisible } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
+import { TIMEOUT } from '@/core/utils/constant';
 import { Guide } from '@/core/components/guide/guide';
 import { FooterPlugin } from '@/api/plugin/footer-plugin';
 import type { FooterBarApi } from './footer-bar-api';
@@ -101,6 +102,21 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     },
     [uiController]
   );
+
+  /**
+   * Handles when the user clicks the footer header to scroll it into view.
+   */
+  const handleHeaderClick = useCallback((): void => {
+    // Need delay to allow tabs container to resize on expand/collapse
+    delay(TIMEOUT.tabsContainerResize).then(
+      () => {
+        if (tabsContainerRef.current) {
+          scrollIfNotVisible(tabsContainerRef.current, 'end');
+        }
+      },
+      (error: unknown) => logger.logPromiseFailed('Delay failed in handleHeaderClick', error)
+    );
+  }, []);
 
   // #endregion HANDLERS
 
@@ -264,40 +280,6 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     }
   }, [pluginController, activeFooterBarTab]);
 
-  /**
-   * Scrolls the footer into view on mouse click.
-   *
-   * TODO: WCAG issue #3418 - Replace querySelector + addEventListener with declarative pattern
-   * TO.DOCONT: Use useRef for headerRef and forward to Tabs component
-   * TO.DOCONT: Replace addEventListener with onClick prop on header element
-   */
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('FOOTER BAR - scrollIntoViewListener');
-
-    if (!tabsContainerRef?.current) return () => {};
-
-    const handleClick = (): void => {
-      // Need delay to allow tabs container to resize on expand/collapse
-      delay(25).then(
-        () => {
-          if (tabsContainerRef.current) {
-            scrollIfNotVisible(tabsContainerRef.current, 'end');
-          }
-        },
-        (error: unknown) => logger.logPromiseFailed('Delay failed', error)
-      );
-    };
-
-    const header = tabsContainerRef.current.querySelector(`#${mapId}-footerbar-header`);
-    header?.addEventListener('click', handleClick);
-
-    // Cleanup function to remove event listener
-    return () => {
-      header?.removeEventListener('click', handleClick);
-    };
-  }, [mapId]);
-
   return memoFooterBarTabs.length > 0 ? (
     <Box ref={tabsContainerRef} sx={memoSxClasses.tabsContainer} className="tabsContainer" id={`${mapId}-tabsContainer`}>
       <Tabs
@@ -307,6 +289,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
         isCollapsed={!activeFooterBarTab.isOpen}
         onToggleCollapse={handleToggleCollapse}
         onSelectedTabChanged={handleSelectedTabChanged}
+        onHeaderClick={handleHeaderClick}
         onOpenKeyboard={(e) => uiController.enableFocusTrap(e)}
         onCloseKeyboard={() => uiController.disableFocusTrap()}
         selectedTab={memoFooterBarTabs.findIndex((t) => t.id === activeFooterBarTab.tabId)}

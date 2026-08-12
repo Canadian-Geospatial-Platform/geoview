@@ -38,10 +38,25 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     color: theme.palette.geoViewColor?.textColor.main,
     fontSize: theme.palette.geoViewFontSize?.md,
   },
-  subtitle: {
-    fontWeight: 'normal',
-    fontSize: theme.palette.geoViewFontSize?.md,
-    textAlign: 'left',
+  layerStackContainer: {
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: 3,
+    '& button': {
+      padding: '0.25rem',
+      marginRight: 0,
+      '& svg': {
+        width: '1.25rem',
+        height: '1.25rem',
+      },
+    },
+  },
+  layerStackSubtitle: {
+    fontSize: theme.palette.geoViewFontSize?.sm,
+  },
+  layerStackIcons: {
+    display: 'flex',
+    alignItems: 'center',
   },
   legendList: {
     paddingRight: '0.65rem',
@@ -149,17 +164,6 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
   legendInstructionsBody: {
     fontSize: theme.palette.geoViewFontSize?.default,
   },
-  layerStackIcons: {
-    flexWrap: 'wrap',
-    '& button': {
-      padding: '0.25rem',
-      marginRight: 0,
-      '& svg': {
-        width: '1.25rem',
-        height: '1.25rem',
-      },
-    },
-  },
   toggleBar: {
     borderBottom: `1px solid ${theme.palette.geoViewColor?.bgColor.dark[100]}`,
     padding: 6,
@@ -171,8 +175,8 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
   buttonDivider: {
     display: 'flex',
     alignItems: 'center',
-    marginRight: 2,
-    paddingRight: 2,
+    marginRight: 3,
+    paddingRight: 3,
     position: 'relative',
     '&::after': {
       content: '""',

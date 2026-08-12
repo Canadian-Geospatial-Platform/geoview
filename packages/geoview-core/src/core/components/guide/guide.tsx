@@ -18,6 +18,7 @@ import { useStoreAppGuide } from '@/core/stores/states/app-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { TABS, TIMEOUT } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
+import { transformMarkdownIds } from '@/core/utils/utilities';
 import { getSxClasses } from './guide-style';
 import { GuideSearch } from './guide-search';
 import type { SxStyles } from '@/ui/style/types';
@@ -106,25 +107,29 @@ export const Guide = memo(({ containerType }: GuideType): JSX.Element => {
    * continuation line inside the <li>.
    *
    * @param guideItem - The guide item to concatenate
-   * @returns The concatenated content string
+   * @returns The concatenated content string with unique IDs
    */
-  const concatenateGuideContent = useCallback((guideItem: GuideItem): string => {
-    let { content } = guideItem;
+  const concatenateGuideContent = useCallback(
+    (guideItem: GuideItem): string => {
+      let { content } = guideItem;
 
-    if (guideItem.children) {
-      Object.entries(guideItem.children).forEach(([, child]: [string, GuideItem]) => {
-        content += `\n\n${child.content}`;
+      if (guideItem.children) {
+        Object.entries(guideItem.children).forEach(([, child]: [string, GuideItem]) => {
+          content += `\n\n${child.content}`;
 
-        if (child.children) {
-          Object.values(child.children).forEach((grandChild: GuideItem) => {
-            content += `\n\n${grandChild.content}`;
-          });
-        }
-      });
-    }
+          if (child.children) {
+            Object.values(child.children).forEach((grandChild: GuideItem) => {
+              content += `\n\n${grandChild.content}`;
+            });
+          }
+        });
+      }
 
-    return content;
-  }, []);
+      // Transform IDs to be unique for this map/container instance
+      return transformMarkdownIds(content, `${mapId}-${containerType}`);
+    },
+    [mapId, containerType]
+  );
 
   /**
    * Builds the memoized layer list with markdown content.
@@ -195,8 +200,6 @@ export const Guide = memo(({ containerType }: GuideType): JSX.Element => {
 
   /**
    * Handles guide layer list item click.
-   *
-   * @param layer - The clicked guide item layer
    */
   const handleGuideItemClick = useCallback(
     (layer: LayerListEntry): void => {
@@ -254,7 +257,13 @@ export const Guide = memo(({ containerType }: GuideType): JSX.Element => {
         e.preventDefault();
         e.stopPropagation();
 
-        const element = container.querySelector(target.hash);
+        // Query for the target element using the hash
+        // Hash includes the transformed prefix (mapId-containerType-originalId)
+        // ensuring it finds the correct element in this specific guide instance.
+        // Extract ID from hash (remove leading #) and escape for safe querySelector usage
+        // to handle IDs with special CSS selector characters like :, ., [, ], etc.
+        const targetId = target.hash.slice(1);
+        const element = container.querySelector(`#${CSS.escape(targetId)}`);
 
         if (element) {
           // Add tabindex="-1" if the element doesn't have one

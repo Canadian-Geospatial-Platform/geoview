@@ -164,6 +164,8 @@ export const TIMEOUT: Record<string, number> = {
   deferExecution: 0,
   focusDelay: 0,
 
+  tabsContainerResize: 25,
+
   dataPanelLoading: 100,
   interactionFocusText: 100,
   guideSearchVisibility: 100,
