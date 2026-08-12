@@ -515,7 +515,7 @@ function testSuiteCreateTable(plugin) {
       Suites: <span id="suitesCompleted-${mapId}">0</span>/<span id="suitesTotal-${mapId}">0</span>
     </div>
     <div style="text-align:right;">
-      Running: <span id="testsRunning-${mapId}">0</span> | Success: <span id="testsDoneSuccess-${mapId}" style="color:green;">0</span> | Failed: <span id="testsDoneFailed-${mapId}" style="color:green;">0</span> | Done: <span id="testsDone-${mapId}">0</span>/<span id="testsTotal-${mapId}">0</span>
+      Running: <span id="testsRunning-${mapId}">0</span> | Success: <span id="testsDoneSuccess-${mapId}" style="color:green;">0</span> | Skipped: <span id="testsDoneSkipped-${mapId}" style="color:orange;">0</span> | Failed: <span id="testsDoneFailed-${mapId}" style="color:green;">0</span> | Done: <span id="testsDone-${mapId}">0</span>/<span id="testsTotal-${mapId}">0</span>
     </div>
     <button id="btnLaunchTest-${mapId}" class="btnLaunchTests" onclick="launchTests('${mapId}')" disabled="true">LAUNCH TESTS ${mapId} !</button>
     <br/><br/>
@@ -553,6 +553,9 @@ function testSuiteUpdateTotals(plugin, idPrefix = '') {
   if (testsRunning) testsRunning.textContent = plugin.getTestsRunning();
   const testsDoneSuccess = document.getElementById(prefix + 'testsDoneSuccess-' + plugin.mapViewer.mapId);
   if (testsDoneSuccess) testsDoneSuccess.textContent = plugin.getTestsDoneSuccess();
+  const testsDoneSkipped = document.getElementById(prefix + 'testsDoneSkipped-' + plugin.mapViewer.mapId);
+  if (testsDoneSkipped) testsDoneSkipped.textContent = plugin.getTestsDoneSkipped();
+
   const testsDoneFailed = document.getElementById(prefix + 'testsDoneFailed-' + plugin.mapViewer.mapId);
   if (testsDoneFailed) {
     testsDoneFailed.textContent = plugin.getTestsDoneFailed();
@@ -608,10 +611,6 @@ function testSuiteUpdateGrandTotal(plugins) {
 }
 
 function testSuiteAddOrUpdateTestResultRow(plugin, testSuite, testTester, test, details, idPrefix = '') {
-  let passed = null;
-  if (test.getStatus() === 'success') passed = true;
-  else if (test.getStatus() === 'failed') passed = false;
-
   const prefix = idPrefix ? idPrefix + '-' : '';
 
   // Find the table for the map id
@@ -664,12 +663,17 @@ function testSuiteAddOrUpdateTestResultRow(plugin, testSuite, testTester, test, 
 
   if (resultCell) {
     resultCell.style.textAlign = 'center';
-    if (passed === true) {
+    if (test.getStatus() === 'success') {
       row.classList.add('collapsed');
       row.classList.remove('expanded');
       resultCell.style.color = 'green';
       resultCell.textContent = '✔';
-    } else if (passed === false) {
+    } else if (test.getStatus() === 'skipped') {
+      row.classList.add('collapsed');
+      row.classList.remove('expanded');
+      resultCell.style.color = 'orange';
+      resultCell.textContent = '↷';
+    } else if (test.getStatus() === 'failed') {
       // Expand the row
       row.classList.add('expanded');
       row.classList.remove('collapsed');
