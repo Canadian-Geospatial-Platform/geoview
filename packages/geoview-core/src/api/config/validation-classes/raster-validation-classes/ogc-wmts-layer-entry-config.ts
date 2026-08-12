@@ -84,10 +84,10 @@ export class OgcWmtsLayerEntryConfig extends TileLayerEntryConfig {
    */
   override async onRefreshMetadata(_displayDateMode: DisplayDateMode): Promise<void> {
     // Refetch the metadata again with the new date mode and update the config
-    const result = await WMTS.fetchMetadataWMTS(this.getMetadataAccessPath()!, this.getProxyUrl());
+    const fetchResult = await WMTS.fetchMetadataWMTS(this.getMetadataAccessPath()!, this.getProxyUrl());
 
     // Init the layer metadata
-    await WMTS.initLayerMetadata(this, result.data);
+    await WMTS.initLayerMetadata(this, fetchResult.data);
   }
 
   // #endregion OVERRIDES

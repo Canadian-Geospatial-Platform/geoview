@@ -768,13 +768,13 @@ export abstract class AbstractGeoViewLayer {
    * @throws {LayerServiceMetadataHasErrorPayloadError} When the response contains an ESRI error payload (propagated from `throwIfMetatadaHasError()`)
    */
   protected async helperFetchServiceMetadataWithFJson<T>(abortSignal?: AbortSignal): Promise<FetchWithProxyResult<T>> {
-    let result: FetchWithProxyResult<T>;
+    let fetchResult: FetchWithProxyResult<T>;
     try {
       // The url
       const queryUrl = `${this.getMetadataAccessPath()}?f=json`;
 
       // Redirect to GeoUtilities
-      result = await GeoUtilities.fetchJsonWithProxyFallback<T>(queryUrl, this.getConfigProxyUrl(), abortSignal);
+      fetchResult = await GeoUtilities.fetchJsonWithProxyFallback<T>(queryUrl, this.getConfigProxyUrl(), abortSignal);
     } catch (error: unknown) {
       // Throw
       throw new LayerServiceMetadataUnableToFetchError(
@@ -785,10 +785,10 @@ export abstract class AbstractGeoViewLayer {
     }
 
     // Validate the metadata response
-    AbstractGeoViewLayer.throwIfMetatadaHasError(this.getGeoviewLayerId(), this.getLayerEntryNameOrGeoviewLayerName(), result.data);
+    AbstractGeoViewLayer.throwIfMetatadaHasError(this.getGeoviewLayerId(), this.getLayerEntryNameOrGeoviewLayerName(), fetchResult.data);
 
     // Return it
-    return result;
+    return fetchResult;
   }
 
   // #endregion PROTECTED METHODS
@@ -866,10 +866,10 @@ export abstract class AbstractGeoViewLayer {
       this.#startMetadataFetchWatcher();
 
       // Calls fetchServiceMetadata which delegates to the child class's overridden onFetchServiceMetadata (may use a proxy fallback and store the proxyUrl on the instance)
-      const result = await this.fetchServiceMetadata(abortSignal);
+      const fetchResult = await this.fetchServiceMetadata(abortSignal);
 
       // Keep the metadata
-      this.#metadata = result.data;
+      this.#metadata = fetchResult.data;
     } catch (error: unknown) {
       // Set the layer status to all layer entries to error (that logic was as-is in this refactor, leaving as-is for now)
       AbstractGeoViewLayer.#setStatusErrorAll(formatError(error), this.listOfLayerEntryConfig);

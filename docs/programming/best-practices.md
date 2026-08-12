@@ -247,6 +247,31 @@ Advanced Best Practice
  */
 ```
 
+### Propagating `@throws` from called functions
+
+When a function calls another function that throws and does **not** catch the error, the caller must list each specific `@throws` from the callee — not a generic `@throws {Error}`. Copy the exact error types and descriptions, appending `(propagated from \`calledFunction()\`)` to each.
+
+```ts
+// ❌ Bad: generic @throws hides the actual error types callers need to handle
+/**
+ * @throws {Error} When the guide file cannot be fetched (propagated from `Fetch.fetchText()`)
+ */
+
+// ✅ Good: each specific error type from the callee is listed individually
+/**
+ * @throws {RequestTimeoutError} When the request exceeds the timeout duration (propagated from `Fetch.fetchText()`)
+ * @throws {RequestAbortedError} When the request was aborted by the caller's signal (propagated from `Fetch.fetchText()`)
+ * @throws {ResponseError} When the response is not OK / non-2xx (propagated from `Fetch.fetchText()`)
+ * @throws {ResponseEmptyError} When the text response is empty (propagated from `Fetch.fetchText()`)
+ * @throws {NetworkError} When a network issue happened (propagated from `Fetch.fetchText()`)
+ */
+```
+
+**Rules:**
+- If the caller catches and handles the error (e.g., logs it, returns a fallback), do **not** add `@throws`
+- If the caller wraps the error into a new error type, document the new type only
+- If the callee has no `@throws` documentation, check its implementation and document what it actually throws
+
 ## 10- How we order functions in component
 
 In components, functions should be ordered in the following way:

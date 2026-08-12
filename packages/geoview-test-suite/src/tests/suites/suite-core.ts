@@ -78,12 +78,12 @@ export class GVTestSuiteCore extends GVAbstractTestSuite {
     const pGeometryCollectionLegendStyles = this.#coreTester.testGeometryCollectionLegendStyles();
 
     // Test GeoUtilities service metadata functions
-    const pWmsMetadata = this.#coreTester.testGetWMSServiceMetadata();
-    const pWmsMetadataBadUrl = this.#coreTester.testGetWMSServiceMetadataBadUrl();
-    const pWfsMetadata = this.#coreTester.testGetWFSServiceMetadata();
-    const pWfsMetadataBadUrl = this.#coreTester.testGetWFSServiceMetadataBadUrl();
-    const pWmtsMetadata = this.#coreTester.testGetWMTSServiceMetadata();
-    const pWmtsMetadataBadUrl = this.#coreTester.testGetWMTSServiceMetadataBadUrl();
+    const pWmsMetadata = this.#coreTester.testProxyGetWMSServiceMetadata();
+    const pWmsMetadataBadUrl = this.#coreTester.testProxyGetWMSServiceMetadataBadUrl();
+    const pWfsMetadata = this.#coreTester.testProxyGetWFSServiceMetadata();
+    const pWfsMetadataBadUrl = this.#coreTester.testProxyGetWFSServiceMetadataBadUrl();
+    const pWmtsMetadata = this.#coreTester.testProxyGetWMTSServiceMetadata();
+    const pWmtsMetadataBadUrl = this.#coreTester.testProxyGetWMTSServiceMetadataBadUrl();
 
     // Test GeoUtilities fetch with proxy fallback
     // const pFetchJsonProxy = this.#coreTester.testFetchJsonWithProxyFallback();

@@ -113,10 +113,10 @@ export class WMTS extends AbstractGeoViewRaster {
    */
   protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Calls fetchServiceMetadata which delegates to this class's overridden onFetchServiceMetadata (may use a proxy fallback and store the proxyUrl on the instance)
-    const metadata = await this.fetchServiceMetadata<TypeMetadataWMTSCapabilities>();
+    const fetchResult = await this.fetchServiceMetadata<TypeMetadataWMTSCapabilities>();
 
     // Now that we have metadata
-    const layers = metadata?.data.Contents.Layer;
+    const layers = fetchResult?.data.Contents.Layer;
 
     // Get all entries
     const entries = Array.isArray(layers)

@@ -134,10 +134,10 @@ export class WMS extends AbstractGeoViewRaster {
    */
   protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Calls fetchServiceMetadata which delegates to this class's overridden onFetchServiceMetadata (may use a proxy fallback and store the proxyUrl on the instance)
-    const metadata = await this.fetchServiceMetadata<TypeMetadataWMSCapabilities>();
+    const fetchResult = await this.fetchServiceMetadata<TypeMetadataWMSCapabilities>();
 
     // Based on the capabilities
-    const layers = metadata.data.Capability.Layer.Layer;
+    const layers = fetchResult.data.Capability.Layer.Layer;
 
     // Build the layer tree
     const entries = layers?.length ? WMS.#buildLayerTree(layers) : [];
@@ -145,8 +145,8 @@ export class WMS extends AbstractGeoViewRaster {
     // Create the root entry
     const entry: TypeLayerEntryShell[] = [
       {
-        id: metadata.data.Capability.Layer.Name ?? generateId(18),
-        layerName: metadata.data.Capability.Layer.Title ?? metadata.data.Capability.Layer.Name,
+        id: fetchResult.data.Capability.Layer.Name ?? generateId(18),
+        layerName: fetchResult.data.Capability.Layer.Title ?? fetchResult.data.Capability.Layer.Name,
         listOfLayerEntryConfig: entries,
       },
     ];
@@ -352,13 +352,13 @@ export class WMS extends AbstractGeoViewRaster {
   ): Promise<FetchWithProxyResult<TypeMetadataWMSCapabilities | undefined>> {
     try {
       // Fetch the WMS GetCapabilities document from the given URL
-      const result = await WMS.fetchMetadataWMS(url, this.getConfigProxyUrl(), abortSignal);
+      const fetchResult = await WMS.fetchMetadataWMS(url, this.getConfigProxyUrl(), abortSignal);
 
       // Apply metadata inheritance to ensure nested layer structures are properly populated
-      this.#processMetadataInheritance(result.data?.Capability?.Layer);
+      this.#processMetadataInheritance(fetchResult.data?.Capability?.Layer);
 
       // Return the result of the fetch as-is, including if a proxy was needed
-      return result;
+      return fetchResult;
     } catch (error: unknown) {
       // If empty response
       if (error instanceof ResponseEmptyError) {
@@ -449,10 +449,10 @@ export class WMS extends AbstractGeoViewRaster {
   ): Promise<FetchWithProxyResult<TypeMetadataWMSCapabilities>> {
     try {
       // Fetch it
-      const result = await WMS.fetchMetadataWMS(metadataUrl, this.getConfigProxyUrl(), abortSignal);
+      const fetchResult = await WMS.fetchMetadataWMS(metadataUrl, this.getConfigProxyUrl(), abortSignal);
 
       // Process
-      this.#processMetadataInheritance(result.data.Capability.Layer);
+      this.#processMetadataInheritance(fetchResult.data.Capability.Layer);
 
       // Normalize metadataAccessPath - datacube specific normalization
       this.setMetadataAccessPath(normalizeDatacubeAccessPath(this.getMetadataAccessPath()));
@@ -461,12 +461,14 @@ export class WMS extends AbstractGeoViewRaster {
       this.listOfLayerEntryConfig.forEach((layerEntry) => {
         // Normalize and set the data access path, when a layer entry is a group, this goes recursive
         layerEntry.setDataAccessPath(
-          normalizeDatacubeAccessPath(result.data.Capability.Request.GetMap.DCPType[0].HTTP.Get.OnlineResource['@attributes']['xlink:href'])
+          normalizeDatacubeAccessPath(
+            fetchResult.data.Capability.Request.GetMap.DCPType[0].HTTP.Get.OnlineResource['@attributes']['xlink:href']
+          )
         );
       });
 
-      // Return the metadata
-      return result;
+      // Return the fetch result
+      return fetchResult;
     } catch (error: unknown) {
       // If empty response
       if (error instanceof ResponseEmptyError) {
@@ -972,36 +974,36 @@ export class WMS extends AbstractGeoViewRaster {
 
       // Avoid duplicate fetches for the same layerId
       if (!seen.has(layerConfig.layerId)) {
-        const promise = new Promise<MetatadaFetchResult>((resolve, reject) => {
-          // Perform the actual metadata fetch
-          WMS.fetchMetadataWMSForLayer(url, configProxyUrl, layerConfig.layerId, abortSignal)
-            .then((result) => {
-              if (result.data.Capability) {
-                resolve({ metadata: result.data, proxyUsed: result.proxyUsed, layerConfig });
-              } else {
-                // Wrap error about no capabilities found. Search id: 8c97d776.
-                reject(
-                  new PromiseRejectErrorWrapper(
-                    new LayerNoCapabilitiesError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerNameCascade()),
-                    layerConfig
-                  )
-                );
-              }
-            })
-            .catch((error) => {
-              // Wrap error with additional layer context. Search id: 8c97d776.
-              reject(
-                new PromiseRejectErrorWrapper(
-                  new LayerServiceMetadataUnableToFetchError(
-                    layerConfig.getGeoviewLayerId(),
-                    layerConfig.getLayerNameCascade(),
-                    formatError(error)
-                  ),
-                  layerConfig
-                )
+        const promise = (async (): Promise<MetatadaFetchResult> => {
+          try {
+            // Perform the actual metadata fetch
+            const result = await WMS.fetchMetadataWMSForLayer(url, configProxyUrl, layerConfig.layerId, abortSignal);
+
+            // Validate capabilities exist
+            if (!result.data.Capability) {
+              // Wrap error about no capabilities found. Search id: 8c97d776.
+              throw new PromiseRejectErrorWrapper(
+                new LayerNoCapabilitiesError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerNameCascade()),
+                layerConfig
               );
-            });
-        });
+            }
+
+            return { metadata: result.data, proxyUsed: result.proxyUsed, layerConfig };
+          } catch (error: unknown) {
+            // If already wrapped, rethrow as-is
+            if (error instanceof PromiseRejectErrorWrapper) throw error;
+
+            // Wrap error with additional layer context. Search id: 8c97d776.
+            throw new PromiseRejectErrorWrapper(
+              new LayerServiceMetadataUnableToFetchError(
+                layerConfig.getGeoviewLayerId(),
+                layerConfig.getLayerNameCascade(),
+                formatError(error)
+              ),
+              layerConfig
+            );
+          }
+        })();
 
         // Store the promise for this layerId to avoid duplicate requests
         seen.set(layerConfig.layerId, promise);
