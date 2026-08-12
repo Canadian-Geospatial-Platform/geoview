@@ -58,10 +58,14 @@ export class GVTestSuiteConfig extends GVAbstractTestSuite {
    */
   protected override onLaunchTestSuiteDEBUG(): Promise<unknown> {
     // Test DEBUG
-    const pDevTest0 = this.#configTester.testProcessGeoJsonPolygons();
+    const pDevTest0 = this.#configTester.testProcessEsriDynamicHistoricalFlood();
+    const pDevTest1 = this.#configTester.testProcessEsriFeatureWithTorontoNeighbourhoods();
+    const pDevTest2 = this.#configTester.testProcessWMSAirborneRadioactivity(this.getIsRunningOnVPN());
+    const pDevTest3 = this.#configTester.testProcessWFSGeomet();
+    const pDevTest4 = this.#configTester.testProcessGeoJsonPolygons();
 
     // Resolve when all
-    return Promise.all([pDevTest0]);
+    return Promise.all([pDevTest0, pDevTest1, pDevTest2, pDevTest3, pDevTest4]);
   }
 
   /**
@@ -107,31 +111,31 @@ export class GVTestSuiteConfig extends GVAbstractTestSuite {
     const pProcessEsriImage = this.#configTester.testInitEsriImageWithElevation();
 
     // Test WMS OWSMundialis config
-    const pWMSMundialis = this.#configTester.testWMSLayerWithOWSMundialis();
+    const pWMSMundialis = this.#configTester.testInitWMSLayerWithOWSMundialis();
 
     // Test WMS OWSMundialis config no full sub layers
-    const pWMSMundialisNoFullSubLayers = this.#configTester.testWMSLayerWithOWSMundialisNoFullSubLayers();
+    const pWMSMundialisNoFullSubLayers = this.#configTester.testInitWMSLayerWithOWSMundialisNoFullSubLayers();
 
     // Test WMS DatacubeMSI config
-    const pWMSDatacubeMSI = this.#configTester.testWMSLayerWithDatacubeMSI();
+    const pWMSDatacubeMSI = this.#configTester.testInitWMSLayerWithDatacubeMSI();
 
     // Test WMS DatacubeMSI config
-    const pWMSDatacubeMSINoFullSubLayers = this.#configTester.testWMSLayerWithDatacubeMSINoFullSubLayers();
+    const pWMSDatacubeMSINoFullSubLayers = this.#configTester.testInitWMSLayerWithDatacubeMSINoFullSubLayers();
 
     // Test a true negative
-    const pWMSBadUrl = this.#configTester.testWMSBadUrl();
+    const pWMSBadUrl = this.#configTester.testInitWMSBadUrl();
 
     // Process the WMS Airborne Radioactivity
-    const pProcessWMSAirborneRadioactivity = this.#configTester.testProcessWMSAirborneRadioactivity();
+    const pProcessWMSAirborneRadioactivity = this.#configTester.testProcessWMSAirborneRadioactivity(this.getIsRunningOnVPN());
 
     // Test WFS CurrentCondition config
-    const pWFSCurrentConditions = this.#configTester.testWFSLayerWithGeometCurrentConditions();
+    const pWFSCurrentConditions = this.#configTester.testInitWFSLayerWithGeometCurrentConditions();
 
     // Test a true negative
-    const pWFSBadUrl = this.#configTester.testWFSBadUrl();
+    const pWFSBadUrl = this.#configTester.testInitWFSBadUrl();
 
     // Test a true negative
-    const pWFSOkayUrlNoCap = this.#configTester.testWFSOkayUrlNoCap();
+    const pWFSOkayUrlNoCap = this.#configTester.testInitWFSOkayUrlNoCap();
 
     // Process the WFS Geomet
     const pWFSGeomet = this.#configTester.testProcessWFSGeomet();

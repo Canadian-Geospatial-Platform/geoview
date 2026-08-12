@@ -217,21 +217,7 @@ export class Test<T = unknown> {
     this.#error = error;
   }
 
-  // #region STATIC
-
-  // #region PRIMITIVES
-
-  /**
-   * Rounds a number to the specified precision.
-   *
-   * @param value - The number to round
-   * @param precision - The number of decimal places
-   * @returns The rounded value
-   */
-  static #roundToPrecision(value: number, precision: number): number {
-    const multiplier = Math.pow(10, precision);
-    return Math.round(value * multiplier) / multiplier;
-  }
+  // #region PUBLIC STATIC METHODS -  PRIMITIVES
 
   /**
    * Asserts that two values are strictly equal (`===`).
@@ -374,9 +360,9 @@ export class Test<T = unknown> {
     return { equal: actualValue === expectedValue, actualValue, expectedValue };
   }
 
-  // #endregion PRIMITIVES
+  // #endregion PUBLIC STATIC METHODS -  PRIMITIVES
 
-  // #region ARRAYS
+  // #region PUBLIC STATIC METHODS -  ARRAYS
 
   /**
    * Asserts that a value is an array.
@@ -545,9 +531,9 @@ export class Test<T = unknown> {
     return;
   }
 
-  // #endregion ARRAYS
+  // #endregion PUBLIC STATIC METHODS -  ARRAYS
 
-  // #region JSON
+  // #region PUBLIC STATIC METHODS -  JSON
 
   /**
    * Asserts that a JSON object has at least all the properties/values of the expected JSON object.
@@ -684,9 +670,23 @@ export class Test<T = unknown> {
     };
   }
 
-  // #endregion JSON
+  // #endregion PUBLIC STATIC METHODS -  JSON
 
-  // #endregion
+  // #region PRIVATE STATIC METHODS
+
+  /**
+   * Rounds a number to the specified precision.
+   *
+   * @param value - The number to round
+   * @param precision - The number of decimal places
+   * @returns The rounded value
+   */
+  static #roundToPrecision(value: number, precision: number): number {
+    const multiplier = Math.pow(10, precision);
+    return Math.round(value * multiplier) / multiplier;
+  }
+
+  // #endregion PRIVATE STATIC METHODS
 
   // #region EVENTS
 
@@ -776,7 +776,7 @@ export type TestChangedDelegate = EventDelegateBase<Test, BaseTestChangedEvent, 
 export type TestType = 'regular' | 'true-negative';
 
 /** The test statuses. */
-export type TestStatus = 'new' | 'running' | 'verifying' | 'success' | 'failed';
+export type TestStatus = 'new' | 'running' | 'verifying' | 'success' | 'failed' | 'skipped';
 
 /** A comparer delegate to compare 2 objects and determine if they are equal. */
 export type ComparerDelegate<T> = (array1: T, array2: T) => boolean;

@@ -1,5 +1,6 @@
 import { GVAbstractTester } from './abstract-gv-tester';
 import { Test } from '../core/test';
+import { TestSkippedError } from '../core/exceptions';
 import type { ClassType } from 'geoview-core/core/types/global-types';
 import type { MapConfigLayerEntry, TypeGeoviewLayerConfig, TypeGeoviewLayerType } from 'geoview-core/api/types/layer-schema-types';
 import type { TypeOutfields } from 'geoview-core/api/types/map-schema-types';
@@ -452,7 +453,7 @@ export class ConfigTester extends GVAbstractTester {
    *
    * @returns A promise that resolves with a Test containing the configuration
    */
-  testWMSLayerWithOWSMundialis(): Promise<Test<TypeGeoviewLayerConfig>> {
+  testInitWMSLayerWithOWSMundialis(): Promise<Test<TypeGeoviewLayerConfig>> {
     // The url
     const url = ConfigTester.OWS_MUNDIALIS;
 
@@ -511,7 +512,7 @@ export class ConfigTester extends GVAbstractTester {
    *
    * @returns A promise that resolves with a Test containing the configuration
    */
-  testWMSLayerWithOWSMundialisNoFullSubLayers(): Promise<Test<TypeGeoviewLayerConfig>> {
+  testInitWMSLayerWithOWSMundialisNoFullSubLayers(): Promise<Test<TypeGeoviewLayerConfig>> {
     // The url
     const url = ConfigTester.OWS_MUNDIALIS;
 
@@ -563,7 +564,7 @@ export class ConfigTester extends GVAbstractTester {
    *
    * @returns A promise that resolves with a Test containing the configuration
    */
-  testWMSLayerWithDatacubeMSI(): Promise<Test<TypeGeoviewLayerConfig>> {
+  testInitWMSLayerWithDatacubeMSI(): Promise<Test<TypeGeoviewLayerConfig>> {
     // The url
     const url = GVAbstractTester.DATACUBE_MSI;
 
@@ -628,7 +629,7 @@ export class ConfigTester extends GVAbstractTester {
    *
    * @returns A promise that resolves with a Test containing the configuration
    */
-  testWMSLayerWithDatacubeMSINoFullSubLayers(): Promise<Test<TypeGeoviewLayerConfig>> {
+  testInitWMSLayerWithDatacubeMSINoFullSubLayers(): Promise<Test<TypeGeoviewLayerConfig>> {
     // The url
     const url = GVAbstractTester.DATACUBE_MSI;
 
@@ -684,7 +685,7 @@ export class ConfigTester extends GVAbstractTester {
    *
    * @returns A promise that resolves with the test result, expecting a `LayerNoCapabilitiesError`
    */
-  testWMSBadUrl(): Promise<Test<LayerNoCapabilitiesError>> {
+  testInitWMSBadUrl(): Promise<Test<LayerNoCapabilitiesError>> {
     // The bad url
     const urlBad: string = GVAbstractTester.BAD_URL;
 
@@ -704,9 +705,11 @@ export class ConfigTester extends GVAbstractTester {
    * Verifies that `ConfigApi.processLayerFromType` returns a valid `OgcWmsLayerEntryConfig`
    * with the expected outfields configuration.
    *
+   * @param isRunningOnVPN - Whether the test is running on VPN (required to reach the service)
    * @returns A promise that resolves with a Test containing the processed layer entry configs
+   * @throws {TestSkippedError} When not running on VPN
    */
-  testProcessWMSAirborneRadioactivity(): Promise<Test<ConfigBaseClass[]>> {
+  testProcessWMSAirborneRadioactivity(isRunningOnVPN: boolean): Promise<Test<ConfigBaseClass[]>> {
     // Dummy names
     const gvLayerId = 'gvLayerId';
     const gvLayerName = 'gvLayerName';
@@ -717,6 +720,11 @@ export class ConfigTester extends GVAbstractTester {
     return this.test(
       `Test processing a WMS with ${layerName}`,
       (test) => {
+        // If not running on VPN, skip it
+        if (!isRunningOnVPN) {
+          throw new TestSkippedError('Not running on VPN');
+        }
+
         // Set step
         test.addStep(`Processing geoview layer config on url: ${metadataAccessPath}`);
 
@@ -756,7 +764,7 @@ export class ConfigTester extends GVAbstractTester {
    *
    * @returns A promise that resolves with a Test containing the configuration
    */
-  testWFSLayerWithGeometCurrentConditions(): Promise<Test<TypeGeoviewLayerConfig>> {
+  testInitWFSLayerWithGeometCurrentConditions(): Promise<Test<TypeGeoviewLayerConfig>> {
     // The url
     const url = GVAbstractTester.GEOMET_URL;
 
@@ -814,7 +822,7 @@ export class ConfigTester extends GVAbstractTester {
    *
    * @returns A promise that resolves with the test result, expecting a `LayerServiceMetadataUnableToFetchError`
    */
-  testWFSBadUrl(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
+  testInitWFSBadUrl(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
     // The bad url
     const urlBad: string = GVAbstractTester.BAD_URL;
 
@@ -836,7 +844,7 @@ export class ConfigTester extends GVAbstractTester {
    *
    * @returns A promise that resolves with the test result, expecting a `LayerNoCapabilitiesError`
    */
-  testWFSOkayUrlNoCap(): Promise<Test<LayerNoCapabilitiesError>> {
+  testInitWFSOkayUrlNoCap(): Promise<Test<LayerNoCapabilitiesError>> {
     // The bad url which still respond something (not a 404, 500, etc)
     const urlBad: string = GVAbstractTester.FAKE_URL_ALWAYS_RETURNING_RESPONSE_INSTEAD_OF_NETWORK_ERROR;
 
