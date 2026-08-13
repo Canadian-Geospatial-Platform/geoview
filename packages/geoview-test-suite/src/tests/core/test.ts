@@ -42,6 +42,42 @@ export class Test<T = unknown> {
   /** The assertion result when the test has executed its run. */
   #result?: T;
 
+  /** The start time of the test. */
+  #timeStart?: Date;
+
+  /** The end time of the test. */
+  #timeEnd?: Date;
+
+  /** The start time of the test execution. */
+  #timeStartTest?: Date;
+
+  /** The end time of the test execution. */
+  #timeEndTest?: Date;
+
+  /** The start time of the assertion phase. */
+  #timeStartAssert?: Date;
+
+  /** The end time of the assertion phase. */
+  #timeEndAssert?: Date;
+
+  /** The start time of the finalization phase. */
+  #timeStartFinalize?: Date;
+
+  /** The end time of the finalization phase. */
+  #timeEndFinalize?: Date;
+
+  /** Accumulated estimated starvation time in milliseconds. */
+  #estimatedStarvationMs = 0;
+
+  /** The handle for the heartbeat setTimeout, used to cancel on stop. */
+  #heartbeatHandle: ReturnType<typeof setTimeout> | undefined;
+
+  /** The last heartbeat timestamp from performance.now(). */
+  #lastHeartbeat = 0;
+
+  /** The reason why the test was skipped, if applicable. */
+  #skippedReason?: string;
+
   /** The error which occurred during the test if any. */
   #error?: Error;
 
@@ -216,6 +252,283 @@ export class Test<T = unknown> {
   setError(error: Error): void {
     this.#error = error;
   }
+
+  /**
+   * Gets the reason why the test was skipped.
+   *
+   * @returns The skipped reason, or undefined if the test was not skipped
+   */
+  getSkippedReason(): string | undefined {
+    return this.#skippedReason;
+  }
+
+  /**
+   * Sets the reason why the test was skipped.
+   *
+   * @param reason - The reason the test was skipped
+   */
+  setSkippedReason(reason: string): void {
+    this.#skippedReason = reason;
+  }
+
+  /**
+   * Gets the start time of the test.
+   *
+   * @returns The start time, or undefined if the test has not started
+   */
+  getTimeStart(): Date | undefined {
+    return this.#timeStart;
+  }
+
+  /**
+   * Sets the start time of the test.
+   *
+   * @param date - The start time to set
+   */
+  setTimeStart(date: Date): void {
+    this.#timeStart = date;
+  }
+
+  /**
+   * Gets the start time of the test execution (right before the callback).
+   *
+   * @returns The test execution start time, or undefined if not set
+   */
+  getTimeStartTest(): Date | undefined {
+    return this.#timeStartTest;
+  }
+
+  /**
+   * Sets the start time of the test execution (right before the callback).
+   *
+   * @param date - The test execution start time to set
+   */
+  setTimeStartTest(date: Date): void {
+    this.#timeStartTest = date;
+  }
+
+  /**
+   * Gets the end time of the test execution (right after the callback resolves).
+   *
+   * @returns The test execution end time, or undefined if not set
+   */
+  getTimeEndTest(): Date | undefined {
+    return this.#timeEndTest;
+  }
+
+  /**
+   * Sets the end time of the test execution (right after the callback resolves).
+   *
+   * @param date - The test execution end time to set
+   */
+  setTimeEndTest(date: Date): void {
+    this.#timeEndTest = date;
+  }
+
+  /**
+   * Gets the end time of the test.
+   *
+   * @returns The end time, or undefined if the test has not ended
+   */
+  getTimeEnd(): Date | undefined {
+    return this.#timeEnd;
+  }
+
+  /**
+   * Sets the end time of the test.
+   *
+   * @param date - The end time to set
+   */
+  setTimeEnd(date: Date): void {
+    this.#timeEnd = date;
+  }
+
+  /**
+   * Gets the duration of the test in milliseconds.
+   *
+   * @returns The duration in milliseconds, or undefined if the test has not started or ended
+   */
+  getDurationMs(): number | undefined {
+    if (!this.#timeStart || !this.#timeEnd) return undefined;
+    return this.#timeEnd.getTime() - this.#timeStart.getTime();
+  }
+
+  /**
+   * Gets the duration of the test callback execution in milliseconds.
+   *
+   * @returns The callback duration in milliseconds, or undefined if timestamps are not set
+   */
+  getDurationTestMs(): number | undefined {
+    if (!this.#timeStartTest || !this.#timeEndTest) return undefined;
+    return this.#timeEndTest.getTime() - this.#timeStartTest.getTime();
+  }
+
+  /**
+   * Gets the start time of the assertion phase.
+   *
+   * @returns The assertion start time, or undefined if not set
+   */
+  getTimeStartAssert(): Date | undefined {
+    return this.#timeStartAssert;
+  }
+
+  /**
+   * Sets the start time of the assertion phase.
+   *
+   * @param date - The assertion start time to set
+   */
+  setTimeStartAssert(date: Date): void {
+    this.#timeStartAssert = date;
+  }
+
+  /**
+   * Gets the end time of the assertion phase.
+   *
+   * @returns The assertion end time, or undefined if not set
+   */
+  getTimeEndAssert(): Date | undefined {
+    return this.#timeEndAssert;
+  }
+
+  /**
+   * Sets the end time of the assertion phase.
+   *
+   * @param date - The assertion end time to set
+   */
+  setTimeEndAssert(date: Date): void {
+    this.#timeEndAssert = date;
+  }
+
+  /**
+   * Gets the duration of the assertion phase in milliseconds.
+   *
+   * @returns The assertion duration in milliseconds, or undefined if timestamps are not set
+   */
+  getDurationAssertMs(): number | undefined {
+    if (!this.#timeStartAssert || !this.#timeEndAssert) return undefined;
+    return this.#timeEndAssert.getTime() - this.#timeStartAssert.getTime();
+  }
+
+  /**
+   * Gets the start time of the finalization phase.
+   *
+   * @returns The finalization start time, or undefined if not set
+   */
+  getTimeStartFinalize(): Date | undefined {
+    return this.#timeStartFinalize;
+  }
+
+  /**
+   * Sets the start time of the finalization phase.
+   *
+   * @param date - The finalization start time to set
+   */
+  setTimeStartFinalize(date: Date): void {
+    this.#timeStartFinalize = date;
+  }
+
+  /**
+   * Gets the end time of the finalization phase.
+   *
+   * @returns The finalization end time, or undefined if not set
+   */
+  getTimeEndFinalize(): Date | undefined {
+    return this.#timeEndFinalize;
+  }
+
+  /**
+   * Sets the end time of the finalization phase.
+   *
+   * @param date - The finalization end time to set
+   */
+  setTimeEndFinalize(date: Date): void {
+    this.#timeEndFinalize = date;
+  }
+
+  /**
+   * Gets the duration of the finalization phase in milliseconds.
+   *
+   * @returns The finalization duration in milliseconds, or undefined if timestamps are not set
+   */
+  getDurationFinalizeMs(): number | undefined {
+    if (!this.#timeStartFinalize || !this.#timeEndFinalize) return undefined;
+    return this.#timeEndFinalize.getTime() - this.#timeStartFinalize.getTime();
+  }
+
+  /**
+   * Gets the estimated net test duration in milliseconds — the wall-clock callback time minus
+   * estimated event loop starvation. This approximates how long the test's actual work
+   * (network I/O, processing) took without contention.
+   *
+   * Because the starvation estimate may slightly overcount (see `getDurationStarvationMs()`),
+   * this value may underestimate the true network/work time by a small margin.
+   *
+   * @returns The estimated net duration in milliseconds, or undefined if callback timestamps are not set
+   */
+  getDurationNetMs(): number | undefined {
+    const test = this.getDurationTestMs();
+    if (test === undefined) return undefined;
+    return Math.max(0, test - this.getDurationStarvationMs());
+  }
+
+  /**
+   * Gets the estimated event loop starvation duration in milliseconds.
+   *
+   * This is an approximation based on heartbeat sampling. The heartbeat fires at a fixed interval
+   * and measures how long each tick actually took — the excess is accumulated as starvation.
+   * Because the heartbeat cannot distinguish between starvation that overlaps with concurrent
+   * network I/O and starvation that delays promise continuations, the value may slightly
+   * overestimate actual starvation.
+   *
+   * @returns The estimated starvation duration in milliseconds
+   */
+  getDurationStarvationMs(): number {
+    return this.#estimatedStarvationMs;
+  }
+
+  // #region EVENT LOOP MONITOR
+
+  /** The heartbeat interval in milliseconds used to probe event loop availability. */
+  static readonly HEARTBEAT_INTERVAL_MS = 200;
+
+  /** Per-tick jitter threshold in milliseconds below which excess is ignored (normal timer imprecision). */
+  static readonly HEARTBEAT_JITTER_THRESHOLD_MS = 10;
+
+  /**
+   * Starts the event loop starvation monitor.
+   *
+   * Schedules recurring heartbeat ticks at a known interval. Each tick measures how
+   * long it actually took versus the expected interval — the excess beyond a small
+   * jitter threshold is accumulated as starvation time caused by main-thread contention.
+   * The threshold filters out normal setTimeout scheduling imprecision (~1-4ms).
+   */
+  startEventLoopMonitor(): void {
+    this.#estimatedStarvationMs = 0;
+    this.#lastHeartbeat = performance.now();
+
+    const tick = (): void => {
+      const now = performance.now();
+      const elapsed = now - this.#lastHeartbeat;
+      const excess = Math.max(0, elapsed - Test.HEARTBEAT_INTERVAL_MS - Test.HEARTBEAT_JITTER_THRESHOLD_MS);
+      this.#estimatedStarvationMs += excess;
+      this.#lastHeartbeat = now;
+      this.#heartbeatHandle = setTimeout(tick, Test.HEARTBEAT_INTERVAL_MS);
+    };
+
+    this.#heartbeatHandle = setTimeout(tick, Test.HEARTBEAT_INTERVAL_MS);
+  }
+
+  /**
+   * Stops the event loop starvation monitor and finalizes the accumulated starvation value.
+   */
+  stopEventLoopMonitor(): void {
+    if (this.#heartbeatHandle !== undefined) {
+      clearTimeout(this.#heartbeatHandle);
+      this.#heartbeatHandle = undefined;
+    }
+  }
+
+  // #endregion
 
   // #region PUBLIC STATIC METHODS -  PRIMITIVES
 

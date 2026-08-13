@@ -2091,9 +2091,6 @@ export class LayerController extends AbstractMapViewerController {
    * @returns A promise that resolves with the number of layers that have reached the specified status
    */
   async waitForAllLayersStatus(layerStatus: TypeLayerStatus): Promise<number> {
-    // Log
-    logger.logInfo(`Waiting on layers to become ${layerStatus}`);
-
     // First, check synchronously — the condition may ALREADY be met
     const [allGoodNow, countNow] = this.checkLayerStatus(layerStatus);
     if (allGoodNow) return Promise.resolve(countNow);
