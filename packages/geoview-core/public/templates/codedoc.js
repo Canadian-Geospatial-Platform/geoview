@@ -500,6 +500,24 @@ function cleanURL(url) {
   return `${protocolPart}://${domain}${path}`;
 }
 
+/**
+ * Formats a duration in milliseconds into a short human-readable string.
+ * Under 1s: shows milliseconds (e.g., "123ms").
+ * Under 1min: shows seconds with ms precision (e.g., "4.512s").
+ * 1min and over: shows minutes and seconds (e.g., "2m 05s").
+ *
+ * @param {number} ms - The duration in milliseconds.
+ * @returns {string} The formatted duration string.
+ */
+function formatDuration(ms) {
+  if (ms === undefined || ms === null) return '';
+  if (ms < 1000) return `${Math.round(ms)}ms`;
+  if (ms < 60000) return `${(ms / 1000).toFixed(3)}s`;
+  const minutes = Math.floor(ms / 60000);
+  const seconds = Math.round((ms % 60000) / 1000);
+  return `${minutes}m ${String(seconds).padStart(2, '0')}s`;
+}
+
 function testSuiteCreateTable(plugin) {
   // The map id
   const mapId = plugin.mapViewer.mapId;
@@ -526,7 +544,7 @@ function testSuiteCreateTable(plugin) {
         <col>
       </colgroup>
       <thead>
-        <tr><td>TEST</td><td>RESULT</td><td>DETAILS</td></tr>
+        <tr><td>TEST</td><td>RESULT</td><td>DURATION</td><td>DETAILS</td></tr>
       </thead>
       <tbody id="tableBody-${mapId}"></tbody>
     </table>
@@ -575,6 +593,7 @@ function testSuiteUpdateGrandTotal(plugins) {
   let totalSuitesTotal = 0;
   let totalTestsRunning = 0;
   let totalTestsDoneSuccess = 0;
+  let totalTestsDoneSkipped = 0;
   let totalTestsDoneFailed = 0;
   let totalTestsDone = 0;
   let totalTestsTotal = 0;
@@ -584,6 +603,7 @@ function testSuiteUpdateGrandTotal(plugins) {
     totalSuitesTotal += plugin.getSuitesTotal();
     totalTestsRunning += plugin.getTestsRunning();
     totalTestsDoneSuccess += plugin.getTestsDoneSuccess();
+    totalTestsDoneSkipped += plugin.getTestsDoneSkipped();
     totalTestsDoneFailed += plugin.getTestsDoneFailed();
     totalTestsDone += plugin.getTestsDone();
     totalTestsTotal += plugin.getTestsTotal();
@@ -602,6 +622,8 @@ function testSuiteUpdateGrandTotal(plugins) {
   testsRunning.textContent = totalTestsRunning;
   const testsDoneSuccess = document.getElementById('allSuitesTestsDoneSuccess');
   testsDoneSuccess.textContent = totalTestsDoneSuccess;
+  const testsDoneSkipped = document.getElementById('allSuitesTestsDoneSkipped');
+  testsDoneSkipped.textContent = totalTestsDoneSkipped;
   const testsDoneFailed = document.getElementById('allSuitesTestsDoneFailed');
   testsDoneFailed.textContent = totalTestsDoneFailed;
   const testsDone = document.getElementById('allSuitesTestsDone');
@@ -610,7 +632,10 @@ function testSuiteUpdateGrandTotal(plugins) {
   testsTotal.textContent = totalTestsTotal;
 }
 
-function testSuiteAddOrUpdateTestResultRow(plugin, testSuite, testTester, test, details, idPrefix = '') {
+function testSuiteAddOrUpdateTestResultRow(plugin, testSuite, testTester, test, idPrefix = '') {
+  // If the test is not success, return
+  // if (test.getStatus() !== 'success') return;
+
   const prefix = idPrefix ? idPrefix + '-' : '';
 
   // Find the table for the map id
@@ -629,6 +654,7 @@ function testSuiteAddOrUpdateTestResultRow(plugin, testSuite, testTester, test, 
     row.classList.add('expanded');
 
     // Create and append the three cells
+    row.appendChild(document.createElement('td'));
     row.appendChild(document.createElement('td'));
     row.appendChild(document.createElement('td'));
     row.appendChild(document.createElement('td'));
@@ -656,44 +682,67 @@ function testSuiteAddOrUpdateTestResultRow(plugin, testSuite, testTester, test, 
   testMessage += '<div class="collapsible-content" style="margin-top: 5px;">';
   testMessage += '<font style="font-size: x-small;">' + '<i>[' + testSuite.getName() + ' | ' + testTester.getName() + ']' + '</i></font>';
   testMessage += test.getStepsAsHtml();
+  testMessage += '</div>';
   testCell.innerHTML = testMessage;
 
   const resultCell = row.cells?.[1];
-  const detailsCell = row.cells?.[2];
+  resultCell.style.textAlign = 'center';
 
-  if (resultCell) {
-    resultCell.style.textAlign = 'center';
-    if (test.getStatus() === 'success') {
-      row.classList.add('collapsed');
-      row.classList.remove('expanded');
-      resultCell.style.color = 'green';
-      resultCell.textContent = '✔';
-    } else if (test.getStatus() === 'skipped') {
-      row.classList.add('collapsed');
-      row.classList.remove('expanded');
-      resultCell.style.color = 'orange';
-      resultCell.textContent = '↷';
-    } else if (test.getStatus() === 'failed') {
-      // Expand the row
-      row.classList.add('expanded');
-      row.classList.remove('collapsed');
-      resultCell.style.color = 'red';
-      resultCell.textContent = '✘';
-      detailsCell.textContent = details;
-      detailsCell.style.whiteSpace = 'pre-line';
-    } else {
-      resultCell.style.color = 'black';
-      resultCell.textContent = '⏳';
-    }
+  const execTimeCell = row.cells?.[2];
+  execTimeCell.style.textAlign = 'center';
+
+  const detailsCell = row.cells?.[3];
+  detailsCell.style.whiteSpace = 'pre-line';
+
+  // Results cell section
+  if (test.getStatus() === 'success') {
+    row.classList.add('collapsed');
+    row.classList.remove('expanded');
+    resultCell.style.color = 'green';
+    resultCell.textContent = '✔';
+  } else if (test.getStatus() === 'skipped') {
+    row.classList.add('collapsed');
+    row.classList.remove('expanded');
+    resultCell.style.color = 'orange';
+    resultCell.style.fontWeight = 'bold';
+    resultCell.textContent = '↷';
+  } else if (test.getStatus() === 'failed') {
+    // Expand the row
+    row.classList.add('expanded');
+    row.classList.remove('collapsed');
+    resultCell.style.color = 'red';
+    resultCell.textContent = '✘';
+  } else {
+    resultCell.style.color = 'black';
+    resultCell.textContent = '⏳';
   }
-  testMessage += '</div>';
+
+  // Exec time section
+  const durationAll = test.getDurationMs();
+  const durationStarvation = test.getDurationStarvationMs();
+
+  // If the test was starved for over 1 second, put it red
+  let durationStarvationIndicator = '';
+  if (durationStarvation > 1000) {
+    durationStarvationIndicator = ` <span style='color:orange' title='Estimated starvation duration'>(${formatDuration(durationStarvation)})</span>`;
+  }
+
+  const duration = `<span>${formatDuration(durationAll)}</span>${durationStarvationIndicator}`;
+  execTimeCell.innerHTML = duration;
+
+  // Details section
+  const details = test.getError()?.message ?? test.getSkippedReason() ?? '';
+  detailsCell.textContent = details;
 }
 
-function testSuiteEmptyTestResults(plugin) {
+function testSuiteEmptyTestResults(plugin, idPrefix = '') {
+  const prefix = idPrefix ? idPrefix + '-' : '';
   // Empty the table
-  const tableBody = document.getElementById('tableBody-' + plugin.mapViewer.mapId);
-  while (tableBody.firstChild) {
-    tableBody.removeChild(tableBody.firstChild);
+  const tableBody = document.getElementById(prefix + 'tableBody-' + plugin.mapViewer.mapId);
+  if (tableBody) {
+    while (tableBody.firstChild) {
+      tableBody.removeChild(tableBody.firstChild);
+    }
   }
 }
 

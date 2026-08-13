@@ -204,6 +204,7 @@ export abstract class AbstractTester {
     this.#addTestRunning(test);
 
     // Update the status and step
+    test.setTimeStart(new Date());
     test.setStatus('running');
     test.addStep('Running test...', 'major');
 
@@ -290,6 +291,7 @@ export abstract class AbstractTester {
    */
   protected onPerformingTestSkipped<T>(test: Test<T>, reason: string): void {
     // Set status to skipped
+    test.setSkippedReason(reason);
     test.setStatus('skipped');
 
     // Emit
@@ -327,6 +329,7 @@ export abstract class AbstractTester {
     else if (status === 'skipped') color = 'orange';
 
     // Add done step
+    test.setTimeEnd(new Date());
     test.addStep('Done', 'major', color);
 
     // Emit
@@ -368,8 +371,13 @@ export abstract class AbstractTester {
       // Testing
       this.onPerformingTest(test);
 
+      // Start event loop starvation monitor
+      test.startEventLoopMonitor();
+
       // Start the test and await
+      test.setTimeStartTest(new Date());
       const result = await callback(test);
+      test.setTimeEndTest(new Date());
 
       // Assign it to the current test
       test.setResult(result);
@@ -378,7 +386,9 @@ export abstract class AbstractTester {
       this.onPerformingTestAssertions(test);
 
       // Callback with the result to verify using an assertion check
+      test.setTimeStartAssert(new Date());
       await callbackAssert(test, result);
+      test.setTimeEndAssert(new Date());
 
       // All good
       this.onPerformingTestSuccess(test, result);
@@ -399,11 +409,16 @@ export abstract class AbstractTester {
       this.onPerformingTestFinalization(test, callbackFinalize);
 
       // Possibly callback for more
+      test.setTimeStartFinalize(new Date());
       await callbackFinalize?.(test, test.getResult()!);
+      test.setTimeEndFinalize(new Date());
     } catch (error: unknown) {
       // The execution of the test has failed during finalization
       this.onPerformingTestFailure(test, error, true);
     }
+
+    // Stop event loop starvation monitor
+    test.stopEventLoopMonitor();
 
     // Done
     this.onPerformingTestDone(test);
@@ -447,9 +462,13 @@ export abstract class AbstractTester {
       // Testing
       this.onPerformingTest(test);
 
+      // Start event loop starvation monitor
+      test.startEventLoopMonitor();
+
       // Start the test and expect it to fail
       let result: Error | undefined = undefined;
       try {
+        test.setTimeStartTest(new Date());
         await callback(test);
       } catch (error: unknown) {
         // An error happened, as expected
@@ -459,6 +478,7 @@ export abstract class AbstractTester {
         // Assign it to the current test
         test.setResult(result as T);
       }
+      test.setTimeEndTest(new Date());
 
       // Checking assertions
       this.onPerformingTestAssertions(test);
@@ -467,10 +487,12 @@ export abstract class AbstractTester {
       test.addStep(`Verifying if error '${result?.constructor.name}' obtained is of the expected class type...`);
 
       // Check if the result is instance of the error we're testing for
+      test.setTimeStartAssert(new Date());
       Test.assertIsErrorInstance(result as T, errorClass);
 
       // Callback with the result to verify using an assertion check
       await callbackAssert?.(test, result as T);
+      test.setTimeEndAssert(new Date());
 
       // All good
       this.onPerformingTestSuccess(test, result);
@@ -484,11 +506,16 @@ export abstract class AbstractTester {
       this.onPerformingTestFinalization(test, callbackFinalize);
 
       // Possibly callback for more
+      test.setTimeStartFinalize(new Date());
       await callbackFinalize?.(test, test.getResult()!);
+      test.setTimeEndFinalize(new Date());
     } catch (error: unknown) {
       // The execution of the test has failed during finalization
       this.onPerformingTestFailure(test, error, true);
     }
+
+    // Stop event loop starvation monitor
+    test.stopEventLoopMonitor();
 
     // Done
     this.onPerformingTestDone(test);
