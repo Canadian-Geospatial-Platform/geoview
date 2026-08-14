@@ -44,12 +44,15 @@ export default class EventHelper {
      *
      * Registers a one-shot handler internally and resolves with the event payload.
      * When a filter is provided, the handler keeps listening until the filter returns true.
+     * If a timeout is provided and expires before the event fires, the handler is removed and the promise rejects.
      *
      * @param handlersList - The list of handlers to listen on
      * @param filter - Optional filter predicate. When provided, only events passing the filter resolve the promise
+     * @param timeout - Optional maximum duration in milliseconds to wait before rejecting
      * @returns A promise that resolves with the event payload when the event fires (and passes the filter)
+     * @throws {Error} When the timeout expires before a matching event fires
      */
-    static onceEventPromise<T, U>(handlersList: EventDelegateBase<T, U, void>[], filter?: (event: U) => boolean): Promise<U>;
+    static onceEventPromise<T, U>(handlersList: EventDelegateBase<T, U, void>[], filter?: (event: U) => boolean, timeout?: number): Promise<U>;
     /**
      * Waits for a delegate-style event to fire, with optional synchronous fast-paths, an optional payload filter
      * and an optional concurrent error event that rejects the promise.

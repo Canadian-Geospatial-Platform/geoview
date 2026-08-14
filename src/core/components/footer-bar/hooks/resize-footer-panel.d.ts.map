@@ -1,1 +1,1 @@
-{"version":3,"file":"resize-footer-panel.d.ts","sourceRoot":"","sources":["../../../../../../src/core/components/footer-bar/hooks/resize-footer-panel.tsx"],"names":[],"mappings":"AA4BA;;;;;;GAMG;AACH,eAAO,MAAM,iBAAiB,4CAAY,GAAG,CAAC,OAAO,CAmLnD,CAAC"}
+{"version":3,"file":"resize-footer-panel.d.ts","sourceRoot":"","sources":["../../../../../../src/core/components/footer-bar/hooks/resize-footer-panel.tsx"],"names":[],"mappings":"AA6BA;;;;;;;GAOG;AACH,eAAO,MAAM,iBAAiB,4CAAY,GAAG,CAAC,OAAO,CA0LnD,CAAC"}

@@ -78,7 +78,7 @@ export declare class CSV extends AbstractGeoViewVector {
      * @param layerEntries - An array of layer entries objects to be included in the configuration
      * @returns The constructed configuration object for the CSV Feature layer
      */
-    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware: boolean | undefined, layerEntries: TypeLayerEntryShell[]): TypeCSVLayerConfig;
+    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string | undefined, metadataAccessPath: string, isTimeAware: boolean | undefined, layerEntries: TypeLayerEntryShell[]): TypeCSVLayerConfig;
     /**
      * Initializes a GeoView layer configuration for a CSV layer.
      *
@@ -105,11 +105,11 @@ export declare class CSV extends AbstractGeoViewVector {
      * @param geoviewLayerId - The unique identifier for the GeoView layer
      * @param geoviewLayerName - The display name for the GeoView layer
      * @param url - The URL of the service endpoint
-     * @param layerIds - An array of layer IDs to include in the configuration
+     * @param layerEntries - An array of layer entry shells to include in the configuration
      * @param isTimeAware - Indicates if the layer is time aware
      * @returns A promise that resolves to an array of layer configurations
      */
-    static processGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, url: string, layerIds: string[], isTimeAware: boolean): Promise<ConfigBaseClass[]>;
+    static processGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, url: string, layerEntries: TypeLayerEntryShell[], isTimeAware: boolean): Promise<ConfigBaseClass[]>;
     /**
      * Converts CSV text into an array of OpenLayers point features.
      *

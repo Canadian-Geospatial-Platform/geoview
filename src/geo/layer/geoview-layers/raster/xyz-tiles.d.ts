@@ -7,6 +7,8 @@ import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { XYZTilesLayerEntryConfig, type TypeMetadataXYZTiles } from '@/api/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import { GVXYZTiles } from '@/geo/layer/gv-layers/tile/gv-xyz-tiles';
+import { type PreprocessLayerConfigResult } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { type FetchWithProxyResult } from '@/geo/utils/utilities';
 export type TypeSourceImageXYZTilesInitialConfig = TypeSourceTileInitialConfig;
 export interface TypeXYZTilesConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
     geoviewLayerType: typeof CONST_LAYER_TYPES.XYZ_TILES;
@@ -37,13 +39,11 @@ export declare class XYZTiles extends AbstractGeoViewRaster {
     /**
      * Overrides the way the metadata is fetched.
      *
-     * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
-     *
-     * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
-     * @returns A promise with the metadata or undefined when no metadata for the particular layer type.
-     * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
+     * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+     * @returns A promise that resolves with the fetched metadata and proxy information
+     * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
      */
-    protected onFetchServiceMetadata<T>(abortSignal?: AbortSignal): Promise<T>;
+    protected onFetchServiceMetadata(abortSignal?: AbortSignal): Promise<FetchWithProxyResult<unknown>>;
     /**
      * Overrides the way a geoview layer config initializes its layer entries.
      *
@@ -56,6 +56,14 @@ export declare class XYZTiles extends AbstractGeoViewRaster {
      * @param layerConfig - The layer entry config to validate
      */
     protected onValidateLayerEntryConfig(layerConfig: ConfigBaseClass): void;
+    /**
+     * Preprocesses the layer config by pinging the data access path to verify the tile service is reachable.
+     *
+     * @param layerConfig - The XYZ tiles layer entry configuration to preprocess
+     * @returns A promise that resolves with the ping result indicating proxy usage
+     * @throws {LayerServiceMetadataUnableToFetchError} When the tile service is not reachable
+     */
+    protected onPreprocessLayerConfig(layerConfig: XYZTilesLayerEntryConfig): Promise<PreprocessLayerConfigResult>;
     /**
      * Overrides the way the layer metadata is processed.
      *
@@ -84,11 +92,10 @@ export declare class XYZTiles extends AbstractGeoViewRaster {
      * @param geoviewLayerName - The display name of the GeoView layer
      * @param metadataAccessPath - The URL or path to access metadata
      * @param isTimeAware - Indicates whether the layer supports time-based filtering
-     * @param layerEntries - An array of layer entries objects to be included
-     * in the configuration.
+     * @param layerEntries - An array of layer entry configurations to be included in the GeoView layer configuration
      * @returns The constructed configuration object for the XYZTiles layer
      */
-    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware: boolean | undefined, layerEntries: TypeLayerEntryShell[]): TypeXYZTilesConfig;
+    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string | undefined, metadataAccessPath: string | undefined, isTimeAware: boolean | undefined, layerEntries: TypeLayerEntryShell[]): TypeXYZTilesConfig;
     /**
      * Initializes a GeoView layer configuration for a XYZ Tiles layer.
      *
@@ -125,11 +132,11 @@ export declare class XYZTiles extends AbstractGeoViewRaster {
      * @param geoviewLayerId - The unique identifier for the GeoView layer
      * @param geoviewLayerName - The display name for the GeoView layer
      * @param url - The URL of the service endpoint
-     * @param layerIds - An array of layer IDs to include in the configuration
+     * @param layerEntries - An array of layer entry shells to include in the configuration
      * @param isTimeAware - Indicates if the layer is time aware
      * @returns A promise that resolves to an array of layer configurations
      */
-    static processGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, url: string, layerIds: string[], isTimeAware: boolean): Promise<ConfigBaseClass[]>;
+    static processGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string | undefined, url: string, layerEntries: TypeLayerEntryShell[], isTimeAware: boolean): Promise<ConfigBaseClass[]>;
     /**
      * Creates an XYZ source from a layer config.
      *

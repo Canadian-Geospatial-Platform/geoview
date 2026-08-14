@@ -2,11 +2,12 @@ import type { Projection as OLProjection } from 'ol/proj';
 import Static from 'ol/source/ImageStatic';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import type { DisplayDateMode, Extent } from '@/api/types/map-schema-types';
-import type { TypeGeoviewLayerConfig, TypeValidSourceProjectionCodes } from '@/api/types/layer-schema-types';
+import type { DisplayDateMode } from '@/api/types/map-schema-types';
+import type { TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { ImageStaticLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/image-static-layer-entry-config';
 import { GVImageStatic } from '@/geo/layer/gv-layers/raster/gv-image-static';
+import { type FetchWithProxyResult } from '@/geo/utils/utilities';
 export interface TypeImageStaticLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
     geoviewLayerType: typeof CONST_LAYER_TYPES.IMAGE_STATIC;
     listOfLayerEntryConfig: ImageStaticLayerEntryConfig[];
@@ -30,12 +31,10 @@ export declare class ImageStatic extends AbstractGeoViewRaster {
     /**
      * Overrides the way the metadata is fetched.
      *
-     * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
-     *
-     * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
-     * @returns A promise that resolves with the metadata or undefined when no metadata for the particular layer type.
+     * @param _abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process (not implemented)
+     * @returns A promise that resolves with no metadata (this layer type has no service metadata)
      */
-    protected onFetchServiceMetadata<T>(abortSignal?: AbortSignal): Promise<T>;
+    protected onFetchServiceMetadata(_abortSignal?: AbortSignal): Promise<FetchWithProxyResult<unknown>>;
     /**
      * Overrides the way a geoview layer config initializes its layer entries.
      *
@@ -82,7 +81,7 @@ export declare class ImageStatic extends AbstractGeoViewRaster {
      * @param layerEntries - An array of layer entries objects to be included in the configuration.
      * @returns The constructed configuration object for the Static Image layer.
      */
-    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string | undefined, isTimeAware: boolean | undefined, layerEntries: TypeLayerEntryShell[]): TypeImageStaticLayerConfig;
+    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string | undefined, metadataAccessPath: string | undefined, isTimeAware: boolean | undefined, layerEntries: TypeLayerEntryShell[]): TypeImageStaticLayerConfig;
     /**
      * Processes an ImageStatic GeoviewLayerConfig and returns a promise
      * that resolves to an array of `ConfigBaseClass` layer entry configurations.
@@ -95,13 +94,11 @@ export declare class ImageStatic extends AbstractGeoViewRaster {
      * @param geoviewLayerId - The unique identifier for the GeoView layer.
      * @param geoviewLayerName - The display name for the GeoView layer.
      * @param url - The URL of the service endpoint.
-     * @param layerIds - An array of layer IDs to include in the configuration.
+     * @param layerEntries - An array of layer entry shells to include in the configuration.
      * @param isTimeAware - Indicates if the layer is time aware.
-     * @param sourceExtent - Indicates the extent where the static image should be.
-     * @param sourceProjection - Indicates the projection used for the sourceExtent.
      * @returns A promise that resolves to an array of layer configurations.
      */
-    static processGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, url: string, layerIds: string[], isTimeAware: boolean, sourceExtent: Extent, sourceProjection: TypeValidSourceProjectionCodes): Promise<ConfigBaseClass[]>;
+    static processGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, url: string, layerEntries: TypeLayerEntryShell[], isTimeAware: boolean): Promise<ConfigBaseClass[]>;
     /**
      * Creates a StaticImage source from a layer config.
      *

@@ -1,5 +1,6 @@
 import type BaseLayer from 'ol/layer/Base';
 import type { Projection as OLProjection } from 'ol/proj';
+import { type PingResult } from '@/core/utils/utilities';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import type { DisplayDateMode, TypeServiceUrls } from '@/api/types/map-schema-types';
@@ -8,6 +9,7 @@ import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-cla
 import type { SnackbarType } from '@/core/utils/notifications';
 import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
+import { type FetchWithProxyResult } from '@/geo/utils/utilities';
 /**
  * The AbstractGeoViewLayer class is the abstraction class of all GeoView Layers classes.
  * It registers the configuration options and defines the methods shared by all its descendant. The class constructor has
@@ -53,16 +55,26 @@ export declare abstract class AbstractGeoViewLayer {
      * Must override method to read the service metadata from the metadataAccessPath.
      *
      * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
-     * @returns A promise that resolves once the metadata has been fetched
+     * @returns A promise that resolves with the fetched metadata and proxy information
      * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
      */
-    protected abstract onFetchServiceMetadata<T>(abortSignal?: AbortSignal): Promise<T>;
+    protected abstract onFetchServiceMetadata(abortSignal?: AbortSignal): Promise<FetchWithProxyResult<unknown>>;
     /**
      * Must override method to initialize a layer entry based on a GeoView layer config.
      *
      * @returns A promise that resolves once the layer entries have been initialized
      */
     protected abstract onInitLayerEntries(): Promise<TypeGeoviewLayerConfig>;
+    /**
+     * Overridable method to preprocess a layer entry config before its metadata is processed.
+     *
+     * Used by layer types (e.g., XYZ Tiles) that need to verify the data access path is reachable
+     * when no metadata endpoint exists. The base implementation is a no-op.
+     *
+     * @param layerConfig - The layer entry configuration to preprocess
+     * @returns A promise that resolves with the preprocessing result (e.g., ping/proxy info)
+     */
+    protected onPreprocessLayerConfig(layerConfig: AbstractBaseLayerEntryConfig): Promise<PreprocessLayerConfigResult>;
     /**
      * Must override method to process a layer entry and return a Promise of an Open Layer Base Layer object.
      *
@@ -253,14 +265,17 @@ export declare abstract class AbstractGeoViewLayer {
      */
     createGeoViewLayers(displayDateMode: DisplayDateMode, mapProjection?: OLProjection, abortSignal?: AbortSignal): Promise<ConfigBaseClass[]>;
     /**
-     * Fetches the metadata by calling onFetchServiceMetadata.
+     * Fetches the service metadata by delegating to the abstract `onFetchServiceMetadata` method.
+     *
+     * When the fetch requires a proxy (e.g., due to CORS restrictions), the proxy URL is stored on the instance
+     * via `setProxyUrl` so that subsequent requests (legend, identify, tile loading) can reuse it.
      *
      * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
-     * @returns A promise that resolves with the metadata
+     * @returns A promise that resolves with the parsed metadata
      * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
      * @throws {LayerNoCapabilitiesError} When the metadata is empty (no Capabilities) (WMS/WFS layers)
      */
-    fetchServiceMetadata<T>(abortSignal?: AbortSignal): Promise<T>;
+    fetchServiceMetadata<T>(abortSignal?: AbortSignal): Promise<FetchWithProxyResult<T>>;
     /**
      * Recursively validates the configuration of the layer entries to ensure that each layer is correctly defined.
      *
@@ -345,7 +360,7 @@ export declare abstract class AbstractGeoViewLayer {
      * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails (network, proxy, or HTTP error)
      * @throws {LayerServiceMetadataHasErrorPayloadError} When the response contains an ESRI error payload (propagated from `throwIfMetatadaHasError()`)
      */
-    protected helperFetchServiceMetadataWithFJson<T>(abortSignal?: AbortSignal): Promise<T>;
+    protected helperFetchServiceMetadataWithFJson<T>(abortSignal?: AbortSignal): Promise<FetchWithProxyResult<T>>;
     /**
      * Emits an event to all handlers.
      *
@@ -520,5 +535,10 @@ export interface LayerMessageEvent {
     /** The severity type of the message. */
     messageType: SnackbarType;
 }
+/** Result returned by `onPreprocessLayerConfig` indicating whether a proxy was needed to reach the service. */
+export type PreprocessLayerConfigResult = {
+    /** The ping result from validating the layer's data access path, if applicable. */
+    pingResult?: PingResult;
+};
 export {};
 //# sourceMappingURL=abstract-geoview-layers.d.ts.map

@@ -7,7 +7,7 @@ import type { DisplayDateMode } from '@/api/types/map-schema-types';
 import { OgcWmtsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wmts-layer-entry-config';
 import { GVWMTS } from '@/geo/layer/gv-layers/tile/gv-wmts';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
-import { type CallbackNewMetadataDelegate } from '@/geo/utils/utilities';
+import { type FetchWithProxyResult } from '@/geo/utils/utilities';
 import type { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 export interface TypeSourceImageWMTSInitialConfig extends TypeSourceTileInitialConfig {
     wmtsStyle?: string;
@@ -44,20 +44,18 @@ export declare class WMTS extends AbstractGeoViewRaster {
     /**
      * Fetches and processes service metadata for the WMTS layer.
      *
-     * Depending on whether the metadata URL points to an XML document or a standard WMS endpoint,
+     * Depending on whether the metadata URL points to an XML document or a standard WMTS endpoint,
      * this method delegates to the appropriate metadata fetching logic.
      * - If the URL ends in `.xml`, a direct XML metadata fetch is performed.
-     * - Otherwise, the method constructs a WMS GetCapabilities request.
-     *   - If no specific layer configs are provided, a single metadata fetch is made.
-     *   - If layer configs are present (e.g., Geomet use case), individual layer metadata is merged.
+     * - Otherwise, the method constructs a WMTS GetCapabilities request.
      *
      * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
-     * @returns A promise that resolves to the parsed metadata object,
-     * or `undefined` if metadata could not be retrieved or no capabilities were found.
+     * @returns A promise that resolves with the fetched metadata and proxy information,
+     * or data of `undefined` if metadata could not be retrieved or no capabilities were found.
      * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
      * @throws {LayerNoCapabilitiesError} When the metadata is empty (no Capabilities)
      */
-    protected onFetchServiceMetadata<T = TypeMetadataWMTSCapabilities>(abortSignal?: AbortSignal): Promise<T>;
+    protected onFetchServiceMetadata(abortSignal?: AbortSignal): Promise<FetchWithProxyResult<unknown>>;
     /**
      * Overrides the way a geoview layer config initializes its layer entries.
      *
@@ -90,16 +88,6 @@ export declare class WMTS extends AbstractGeoViewRaster {
      */
     protected onCreateGVLayer(layerConfig: OgcWmtsLayerEntryConfig): GVWMTS;
     /**
-     * Fetches and processes service metadata for the WMTS layer.
-     *
-     * @param updateMetadataAccessPath - Whether to update the layer's metadata access path if a proxy is required to fetch the metadata
-     * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
-     * @returns A promise that resolves to the parsed metadata object, or `undefined` if metadata could not be retrieved or no capabilities were found.
-     * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
-     * @throws {LayerNoCapabilitiesError} When the metadata is empty (no Capabilities)
-     */
-    protected fetchServiceMetadataWMTS(abortSignal?: AbortSignal): Promise<TypeMetadataWMTSCapabilities>;
-    /**
      * Creates a configuration object for a WMTS layer.
      *
      * This function constructs a `TypeWMTSConfig` object that describes a WMTS layer
@@ -112,7 +100,7 @@ export declare class WMTS extends AbstractGeoViewRaster {
      * @param layerEntries - An array of layer entries objects to be included in the configuration
      * @returns The constructed configuration object for the WMTS layer
      */
-    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware: boolean | undefined, layerEntries: TypeLayerEntryShell[]): TypeWmtsLayerConfig;
+    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string | undefined, metadataAccessPath: string, isTimeAware: boolean | undefined, layerEntries: TypeLayerEntryShell[]): TypeWmtsLayerConfig;
     /**
      * Initializes a GeoView layer configuration for a WMTS layer.
      *
@@ -160,26 +148,25 @@ export declare class WMTS extends AbstractGeoViewRaster {
      * @param geoviewLayerId - The unique identifier for the GeoView layer
      * @param geoviewLayerName - The display name for the GeoView layer
      * @param url - The URL of the service endpoint
-     * @param layerIds - An array of layer IDs to include in the configuration
+     * @param layerEntries - An array of layer entry shells to include in the configuration
      * @param isTimeAware - Indicates if the layer is time aware
      * @returns A promise that resolves to an array of layer configurations
      */
-    static processGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, url: string, layerIds: string[], isTimeAware: boolean): Promise<ConfigBaseClass[]>;
+    static processGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, url: string, layerEntries: TypeLayerEntryShell[], isTimeAware: boolean): Promise<ConfigBaseClass[]>;
     /**
      * Fetches the metadata for WMTS Capabilities.
      *
      * @param url - The url to query the metadata from
      * @param configProxyUrl - Proxy URL to use when necessary
-     * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata
      * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
-     * @returns A promise that resolves to the parsed metadata object
+     * @returns A promise that resolves with the parsed WMTS metadata and proxy information
      * @throws {RequestTimeoutError} When the request exceeds the timeout duration
      * @throws {RequestAbortedError} When the request was aborted by the caller's signal
      * @throws {ResponseError} When the response is not OK (non-2xx)
      * @throws {ResponseEmptyError} When the JSON response is empty
      * @throws {NetworkError} When a network issue happened
      */
-    static fetchMetadataWMTS<T = TypeMetadataWMTSCapabilities>(url: string, configProxyUrl: string | undefined, callbackNewMetadataUrl?: CallbackNewMetadataDelegate, abortSignal?: AbortSignal): Promise<T>;
+    static fetchMetadataWMTS(url: string, configProxyUrl: string | undefined, abortSignal?: AbortSignal): Promise<FetchWithProxyResult<TypeMetadataWMTSCapabilities>>;
     /**
      * Creates a WMTS source from a layer config.
      *

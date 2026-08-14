@@ -12,6 +12,9 @@ export interface ButtonPanelType {
 /**
  * Creates an app-bar with buttons that can open a panel.
  *
+ * Not memoized because this component receives props that change frequently
+ * (api, onScrollShellIntoView callbacks). Memoization would add overhead without benefit.
+ *
  * @param props - Properties defined in AppBarProps interface
  * @returns The app bar component
  */

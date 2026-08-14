@@ -8,6 +8,7 @@ import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import type { DisplayDateMode } from '@/api/types/map-schema-types';
+import type { FetchWithProxyResult } from '@/geo/utils/utilities';
 export interface TypeEsriDynamicLayerConfig extends TypeGeoviewLayerConfig {
     geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_DYNAMIC;
     listOfLayerEntryConfig: (GroupLayerEntryConfig | EsriDynamicLayerEntryConfig)[];
@@ -40,13 +41,11 @@ export declare class EsriDynamic extends AbstractGeoViewRaster {
     /**
      * Overrides the way the metadata is fetched.
      *
-     * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
-     *
-     * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
-     * @returns A promise with the metadata or undefined when no metadata for the particular layer type.
-     * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
+     * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+     * @returns A promise that resolves with the fetched metadata and proxy information
+     * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
      */
-    protected onFetchServiceMetadata<T>(abortSignal?: AbortSignal): Promise<T>;
+    protected onFetchServiceMetadata(abortSignal?: AbortSignal): Promise<FetchWithProxyResult<unknown>>;
     /**
      * Overrides the way a geoview layer config initializes its layer entries.
      *
@@ -104,7 +103,7 @@ export declare class EsriDynamic extends AbstractGeoViewRaster {
      * @param layerEntries - An array of layer entries objects to be included in the configuration
      * @returns The constructed configuration object for the Esri Dynamic layer
      */
-    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware: boolean | undefined, layerEntries: TypeLayerEntryShell[]): TypeEsriDynamicLayerConfig;
+    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string | undefined, metadataAccessPath: string, isTimeAware: boolean | undefined, layerEntries: TypeLayerEntryShell[]): TypeEsriDynamicLayerConfig;
     /**
      * Processes an Esri Dynamic GeoviewLayerConfig and returns a promise
      * that resolves to an array of `ConfigBaseClass` layer entry configurations.
@@ -117,11 +116,11 @@ export declare class EsriDynamic extends AbstractGeoViewRaster {
      * @param geoviewLayerId - The unique identifier for the GeoView layer
      * @param geoviewLayerName - The display name for the GeoView layer
      * @param url - The URL of the service endpoint
-     * @param layerIds - An array of layer IDs to include in the configuration
+     * @param layerEntries - An array of layer entry shells to include in the configuration
      * @param isTimeAware - Indicates if the layer is time aware
      * @returns A promise that resolves to an array of layer configurations
      */
-    static processGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, url: string, layerIds: number[], isTimeAware: boolean): Promise<ConfigBaseClass[]>;
+    static processGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, url: string, layerEntries: TypeLayerEntryShell[], isTimeAware: boolean): Promise<ConfigBaseClass[]>;
     /**
      * Creates an ImageArcGISRest source from a layer config.
      *

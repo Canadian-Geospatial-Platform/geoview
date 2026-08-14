@@ -138,6 +138,14 @@ export declare class MapController extends AbstractMapViewerController {
      */
     addHighlightedFeature(feature: TypeFeatureInfoEntry): void;
     /**
+     * Removes a highlighted feature, or all highlighted features, from the map.
+     *
+     * WMS features are excluded since they cannot be individually highlighted.
+     *
+     * @param feature - The feature to remove, or 'all' to remove all highlights
+     */
+    removeHighlightedFeature(feature: TypeFeatureInfoEntry | 'all'): void;
+    /**
      * Highlights a bounding box on the map.
      *
      * @param extent - The extent to highlight
@@ -148,14 +156,6 @@ export declare class MapController extends AbstractMapViewerController {
      * Removes the highlighted bounding box from the map.
      */
     removeBBoxHighlight(): void;
-    /**
-     * Removes a highlighted feature, or all highlighted features, from the map.
-     *
-     * WMS features are excluded since they cannot be individually highlighted.
-     *
-     * @param feature - The feature to remove, or 'all' to remove all highlights
-     */
-    removeHighlightedFeature(feature: TypeFeatureInfoEntry | 'all'): void;
     /**
      * Adds point markers to a group, replacing existing markers with matching IDs or coordinates.
      *
@@ -171,14 +171,17 @@ export declare class MapController extends AbstractMapViewerController {
      */
     removePointMarkersOrGroup(group: string, idsOrCoordinates?: string[] | Coordinate[]): void;
     /**
-     * Returns a promise that resolves the next time a feature highlighted event fires.
+     * Waits for the next feature highlighted 'added' event.
      *
-     * When a filter is provided, the handler keeps listening until the filter returns true.
-     *
-     * @param filter - Optional filter predicate. When provided, only events passing the filter resolve the promise
-     * @returns A promise that resolves with the feature highlighted event payload
+     * @returns A promise that resolves with the event when a feature is highlighted
      */
-    waitForFeatureHighlighted(filter?: (event: FeatureHighlightedEvent) => boolean): Promise<FeatureHighlightedEvent>;
+    waitForFeatureHighlightedAdded(): Promise<FeatureHighlightedEvent>;
+    /**
+     * Waits for the next feature highlighted 'removed' event.
+     *
+     * @returns A promise that resolves with the event when a feature highlight is removed
+     */
+    waitForFeatureHighlightedRemoved(): Promise<FeatureHighlightedEvent>;
     /**
      * Changes the map projection.
      *
@@ -197,6 +200,10 @@ export declare class MapController extends AbstractMapViewerController {
      * @param projectionCode - The target projection code
      */
     setProjectionAndForget(projectionCode: TypeValidMapProjectionCodes): void;
+    /**
+     * Updates the OL View padding to account for the map-info bar height.
+     */
+    updateViewPadding(): void;
     /**
      * Converts a map coordinate to a pixel position.
      *
@@ -434,7 +441,7 @@ export declare class MapController extends AbstractMapViewerController {
      * @param filter - Optional filter predicate. When provided, only events passing the filter trigger the callback
      * @returns The wrapper callback reference (can be used with offFeatureHighlighted to cancel before it fires)
      */
-    onceFeatureHighlighted(callback: FeatureHighlightedDelegate, filter?: (event: FeatureHighlightedEvent) => boolean): FeatureHighlightedDelegate;
+    onceFeatureHighlighted(filter?: (event: FeatureHighlightedEvent) => boolean): Promise<FeatureHighlightedEvent>;
     /**
      * Registers a feature highlighted event callback.
      *
@@ -469,7 +476,9 @@ export type GeolocatorSearchDelegate = EventDelegateBase<MapController, Geolocat
  */
 export interface FeatureHighlightedEvent {
     /** The feature being highlighted. */
-    feature: TypeFeatureInfoEntry;
+    feature: TypeFeatureInfoEntry | 'all';
+    /** The operation that was performed on the feature highlight. */
+    operation: 'added' | 'removed';
 }
 /**
  * Delegate for the feature highlighted event handler function signature.

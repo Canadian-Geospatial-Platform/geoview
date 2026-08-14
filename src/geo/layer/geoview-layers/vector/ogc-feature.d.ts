@@ -9,7 +9,7 @@ import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { OgcFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
-import { type CallbackNewMetadataDelegate, type SourceFeaturesInfo } from '@/geo/utils/utilities';
+import { type FetchWithProxyResult, type SourceFeaturesInfo } from '@/geo/utils/utilities';
 import { GVOGCFeature } from '@/geo/layer/gv-layers/vector/gv-ogc-feature';
 export interface TypeOgcFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig' | 'geoviewLayerType'> {
     geoviewLayerType: typeof CONST_LAYER_TYPES.OGC_FEATURE;
@@ -41,13 +41,11 @@ export declare class OgcFeature extends AbstractGeoViewVector {
     /**
      * Overrides the way the metadata is fetched.
      *
-     * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
-     *
      * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
-     * @returns A promise that resolves with the metadata or undefined when no metadata for the particular layer type
+     * @returns A promise that resolves with the fetched metadata and proxy information
      * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
      */
-    protected onFetchServiceMetadata<T = TypeMetadataOGCFeature>(abortSignal?: AbortSignal): Promise<T>;
+    protected onFetchServiceMetadata(abortSignal?: AbortSignal): Promise<FetchWithProxyResult<unknown>>;
     /**
      * Overrides the way a geoview layer config initializes its layer entries.
      *
@@ -89,14 +87,6 @@ export declare class OgcFeature extends AbstractGeoViewVector {
      */
     protected onCreateGVLayer(layerConfig: OgcFeatureLayerEntryConfig): GVOGCFeature;
     /**
-     * Fetches the OGC Feature metadata for the layer.
-     *
-     * @param abortSignal - Optional {@link AbortSignal} used to cancel the metadata fetch
-     * @returns A promise that resolves with the OGC Feature metadata
-     * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
-     */
-    protected fetchServiceMetadataOGCFeature(abortSignal?: AbortSignal): Promise<TypeMetadataOGCFeature>;
-    /**
      * Creates a configuration object for an OGC Feature layer.
      *
      * This function constructs a `TypeOgcFeatureLayerConfig` object that describes an OGC Feature layer
@@ -109,7 +99,7 @@ export declare class OgcFeature extends AbstractGeoViewVector {
      * @param layerEntries - An array of layer entries objects to be included in the configuration
      * @returns The constructed configuration object for the OGC Feature layer
      */
-    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware: boolean | undefined, layerEntries: TypeLayerEntryShell[]): TypeOgcFeatureLayerConfig;
+    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string | undefined, metadataAccessPath: string, isTimeAware: boolean | undefined, layerEntries: TypeLayerEntryShell[]): TypeOgcFeatureLayerConfig;
     /**
      * Initializes a GeoView layer configuration for an OGC Feature layer.
      *
@@ -147,23 +137,24 @@ export declare class OgcFeature extends AbstractGeoViewVector {
      * @param geoviewLayerId - The unique identifier for the GeoView layer
      * @param geoviewLayerName - The display name for the GeoView layer
      * @param url - The URL of the service endpoint
-     * @param layerIds - An array of layer IDs to include in the configuration
+     * @param layerEntries - An array of layer entry shells to include in the configuration
      * @param isTimeAware - Indicates if the layer is time aware
      * @returns A promise that resolves to an array of layer configurations
      */
-    static processGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, url: string, layerIds: string[], isTimeAware: boolean): Promise<ConfigBaseClass[]>;
+    static processGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, url: string, layerEntries: TypeLayerEntryShell[], isTimeAware: boolean): Promise<ConfigBaseClass[]>;
     /**
      * Fetches the metadata for a typical OGCFeature class.
      *
      * @param url - The url to query the metadata from
      * @param configProxyUrl - Proxy URL to use when necessary
-     * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
      * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+     * @returns A promise that resolves with the fetched metadata and proxy information
      * @throws {RequestTimeoutError} When the request exceeds the timeout duration
      * @throws {RequestAbortedError} When the request was aborted by the caller's signal
      * @throws {ResponseError} When the response is not OK (non-2xx)
      * @throws {ResponseEmptyError} When the JSON response is empty
+     * @throws {NetworkError} When a network issue happened
      */
-    static fetchMetadata(url: string, configProxyUrl: string | undefined, callbackNewMetadataUrl?: CallbackNewMetadataDelegate, abortSignal?: AbortSignal): Promise<TypeMetadataOGCFeature>;
+    static fetchMetadata(url: string, configProxyUrl: string | undefined, abortSignal?: AbortSignal): Promise<FetchWithProxyResult<TypeMetadataOGCFeature>>;
 }
 //# sourceMappingURL=ogc-feature.d.ts.map

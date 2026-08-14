@@ -551,6 +551,15 @@ export declare class MapViewer {
      */
     getHTMLElementMapInfoHeightInMapUnits(): number;
     /**
+     * Updates the OL View padding to account for the map-info bar height.
+     *
+     * OL View padding defines a dead zone at the bottom of the viewport. This causes the logical
+     * center to appear at the midpoint of the usable area above the bar, and fit() operations
+     * to respect the reserved area. Call this method whenever the map-info bar height changes
+     * (e.g., on mount, expand/collapse).
+     */
+    updateViewPadding(): void;
+    /**
      * Retrieves the scale information from the DOM elements.
      *
      * @returns The scale information object
