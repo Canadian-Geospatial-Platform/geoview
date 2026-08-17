@@ -5,7 +5,7 @@ import type { TypePostSettings } from '@/api/types/layer-schema-types';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { GVVectorSource } from '@/geo/layer/source/vector-source';
-import type { SourceFeaturesInfo } from '@/geo/utils/utilities';
+import { type FetchWithProxyResult, type SourceFeaturesInfo } from '@/geo/utils/utilities';
 /**
  * The AbstractGeoViewVector class.
  */
@@ -40,11 +40,10 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
     /**
      * Overrides the way the metadata is fetched.
      *
-     * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
-     *
-     * @returns A promise that resolves with the metadata or undefined when no metadata for the particular layer type
+     * @param _abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process (not implemented)
+     * @returns A promise that resolves with no metadata (vector layers fetch metadata in subclasses)
      */
-    protected onFetchServiceMetadata<T>(abortSignal?: AbortSignal): Promise<T>;
+    protected onFetchServiceMetadata(_abortSignal?: AbortSignal): Promise<FetchWithProxyResult<unknown>>;
     /**
      * Overridable function to create a source configuration for the vector layer.
      *
@@ -60,12 +59,6 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
      * @returns An initialized VectorSource ready for use in a layer
      */
     createVectorSource(layerConfig: VectorLayerEntryConfig): GVVectorSource;
-    /**
-     * Fetches metadata for the vector layer.
-     *
-     * @returns A promise that resolves to the metadata or undefined if not available
-     */
-    protected fetchServiceMetadataVector<T>(abortSignal?: AbortSignal): Promise<T>;
     /**
      * Fetches text data from the given URL using settings defined in the vector source configuration.
      *

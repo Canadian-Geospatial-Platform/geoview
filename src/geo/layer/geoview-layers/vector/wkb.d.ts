@@ -9,7 +9,7 @@ import { WkbLayerEntryConfig } from '@/api/config/validation-classes/vector-vali
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { GVWKB } from '@/geo/layer/gv-layers/vector/gv-wkb';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
-import { type SourceFeaturesInfo } from '@/geo/utils/utilities';
+import { type FetchWithProxyResult, type SourceFeaturesInfo } from '@/geo/utils/utilities';
 import type { DisplayDateMode } from '@/api/types/map-schema-types';
 export interface TypeWkbLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
     geoviewLayerType: typeof CONST_LAYER_TYPES.WKB;
@@ -41,13 +41,11 @@ export declare class WKB extends AbstractGeoViewVector {
     /**
      * Overrides the way the metadata is fetched.
      *
-     * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
-     *
      * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
-     * @returns A promise that resolves with the metadata or undefined when no metadata for the particular layer type
+     * @returns A promise that resolves with the fetched metadata and proxy information
      * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
      */
-    protected onFetchServiceMetadata<T = TypeMetadataGeoJSON | undefined>(abortSignal?: AbortSignal): Promise<T>;
+    protected onFetchServiceMetadata(abortSignal?: AbortSignal): Promise<FetchWithProxyResult<unknown>>;
     /**
      * Overrides the way a geoview layer config initializes its layer entries.
      *
@@ -88,14 +86,6 @@ export declare class WKB extends AbstractGeoViewVector {
      */
     protected onCreateGVLayer(layerConfig: WkbLayerEntryConfig): GVWKB;
     /**
-     * Fetches the WKB service metadata.
-     *
-     * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
-     * @returns A promise that resolves with the metadata or undefined when no metadata for the particular layer type
-     * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
-     */
-    protected fetchServiceMetadataWKB(abortSignal?: AbortSignal): Promise<TypeMetadataGeoJSON | undefined>;
-    /**
      * Creates a configuration object for a WKB Feature layer.
      *
      * This function constructs a `TypeWkbLayerConfig` object that describes an WKB Feature layer
@@ -108,7 +98,7 @@ export declare class WKB extends AbstractGeoViewVector {
      * @param layerEntries - An array of layer entries objects to be included in the configuration
      * @returns The constructed configuration object for the WKB Feature layer
      */
-    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware: boolean | undefined, layerEntries: TypeLayerEntryShell[]): TypeWkbLayerConfig;
+    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string | undefined, metadataAccessPath: string, isTimeAware: boolean | undefined, layerEntries: TypeLayerEntryShell[]): TypeWkbLayerConfig;
     /**
      * Initializes a GeoView layer configuration for a WKB layer.
      *
@@ -146,11 +136,11 @@ export declare class WKB extends AbstractGeoViewVector {
      * @param geoviewLayerId - The unique identifier for the GeoView layer
      * @param geoviewLayerName - The display name for the GeoView layer
      * @param url - The URL of the service endpoint
-     * @param layerIds - An array of layer IDs to include in the configuration
+     * @param layerEntries - An array of layer entry shells to include in the configuration
      * @param isTimeAware - Indicates if the layer is time aware
      * @returns A promise that resolves to an array of layer configurations
      */
-    static processGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, url: string, layerIds: string[], isTimeAware: boolean): Promise<ConfigBaseClass[]>;
+    static processGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, url: string, layerEntries: TypeLayerEntryShell[], isTimeAware: boolean): Promise<ConfigBaseClass[]>;
     /**
      * Fetches the metadata for a typical GeoJson class.
      *

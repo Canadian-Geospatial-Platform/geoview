@@ -8,7 +8,6 @@ import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-lay
 import type { EsriRelatedRecordsJsonResponseRelatedRecord } from '@/geo/layer/gv-layers/utils';
 import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { EsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
-import type { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 export declare class EsriUtilities {
     #private;
     /**
@@ -24,7 +23,7 @@ export declare class EsriUtilities {
      * @returns A promise that resolves once the layer configuration has its metadata processed
      * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
      */
-    static initLayerMetadata<T extends EsriDynamic | EsriFeature | EsriImage, U extends EsriDynamicLayerEntryConfig | EsriFeatureLayerEntryConfig | EsriImageLayerEntryConfig>(layer: T, layerConfig: U, displayDateMode?: DisplayDateMode, abortSignal?: AbortSignal): Promise<U>;
+    static initLayerMetadata<T extends EsriDynamicLayerEntryConfig | EsriFeatureLayerEntryConfig | EsriImageLayerEntryConfig>(layerConfig: T, displayDateMode?: DisplayDateMode, abortSignal?: AbortSignal): Promise<T>;
     /**
      * This method validates recursively the configuration of the layer entries to ensure that
      * it is a feature layer identified with a numeric layerId and creates a group entry

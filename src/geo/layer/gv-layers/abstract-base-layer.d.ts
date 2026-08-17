@@ -356,6 +356,15 @@ export declare abstract class AbstractBaseGVLayer {
      */
     isInVisibleRange(currentResolution: number | undefined): boolean;
     /**
+     * Gets the renderer container element for this layer.
+     *
+     * The container is a protected property on CanvasLayerRenderer, accessed via cast.
+     * This is useful for CSS-based operations like clip-path (e.g., swiper).
+     *
+     * @returns The container HTMLElement, or undefined if the renderer has no container
+     */
+    getRendererContainer(): HTMLElement | undefined;
+    /**
      * Registers a layer name changed event handler.
      *
      * @param callback - The callback to be executed whenever the event is emitted

@@ -176,6 +176,8 @@ export declare class LayerController extends AbstractMapViewerController {
      *
      * @param layerPath - The layer path to the layer's configuration
      * @returns A promise that resolves to an OpenLayer layer associated to the layer path
+     * @deprecated This method is deprecated and will be removed in future versions. Use `getGeoviewLayerRegular(layerPath).getOLLayer()` instead and
+     * make the waiting asynchronicity happening here more clear in the caller, as it's a bit risky (layer might never be registered).
      */
     getOLLayerAsync(layerPath: string): Promise<BaseLayer>;
     /**
@@ -769,6 +771,26 @@ export declare class LayerController extends AbstractMapViewerController {
      * @returns A promise that resolves with the number of layers that have reached the specified status
      */
     waitForAllLayersStatus(layerStatus: TypeLayerStatus): Promise<number>;
+    /**
+     * Waits for a layer entry config to be registered and returns the config associated to a specific layer path.
+     *
+     * Resolves immediately if the config is already registered; otherwise subscribes to the `onceLayerEntryConfigRegistered` event and resolves as soon as a config with the matching path is registered.
+     *
+     * @param layerPath - The layer path to the layer's configuration
+     * @param timeout - Optional timeout in milliseconds. When provided, the promise will reject if the config is not registered within the specified time
+     * @returns A promise that resolves to the layer entry config associated to the layer path
+     */
+    waitForLayerConfigRegistered(layerPath: string, timeout?: number): Promise<ConfigBaseClass>;
+    /**
+     * Waits for a layer to be registered and returns the GeoView layer associated to a specific layer path.
+     *
+     * Resolves immediately if the layer is already registered; otherwise subscribes to the `onceLayerRegistered` event and resolves as soon as a layer with the matching path is registered.
+     *
+     * @param layerPath - The layer path to the layer's configuration
+     * @param timeout - Optional timeout in milliseconds. When provided, the promise will reject if the layer is not registered within the specified time
+     * @returns A promise that resolves to a GeoView layer associated to the layer path
+     */
+    waitForLayerRegistered(layerPath: string, timeout?: number): Promise<AbstractBaseGVLayer>;
     /**
      * Waits for the map layers loaded event to be emitted.
      *

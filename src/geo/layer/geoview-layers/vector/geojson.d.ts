@@ -9,7 +9,7 @@ import { GeoJSONLayerEntryConfig } from '@/api/config/validation-classes/vector-
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { GVGeoJSON } from '@/geo/layer/gv-layers/vector/gv-geojson';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
-import { type SourceFeaturesInfo } from '@/geo/utils/utilities';
+import { type FetchWithProxyResult, type SourceFeaturesInfo } from '@/geo/utils/utilities';
 import type { DisplayDateMode } from '@/api/types/map-schema-types';
 export interface TypeGeoJSONLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
     geoviewLayerType: typeof CONST_LAYER_TYPES.GEOJSON;
@@ -41,13 +41,11 @@ export declare class GeoJSON extends AbstractGeoViewVector {
     /**
      * Overrides the way the metadata is fetched.
      *
-     * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
-     *
      * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
-     * @returns A promise that resolves with the metadata or undefined when no metadata for the particular layer type
+     * @returns A promise that resolves with the fetched metadata and proxy information
      * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
      */
-    protected onFetchServiceMetadata<T = TypeMetadataGeoJSON | undefined>(abortSignal?: AbortSignal): Promise<T>;
+    protected onFetchServiceMetadata(abortSignal?: AbortSignal): Promise<FetchWithProxyResult<unknown>>;
     /**
      * Overrides the way a geoview layer config initializes its layer entries.
      *
@@ -88,14 +86,6 @@ export declare class GeoJSON extends AbstractGeoViewVector {
      */
     protected onCreateGVLayer(layerConfig: GeoJSONLayerEntryConfig): GVGeoJSON;
     /**
-     * Fetches the metadata for a GeoJSON layer, which is expected to be in a specific format defined by `TypeMetadataGeoJSON`.
-     *
-     * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
-     * @returns A promise that resolves with the metadata or undefined when no metadata for the particular layer type
-     * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
-     */
-    protected fetchServiceMetadataGeoJSON(abortSignal?: AbortSignal): Promise<TypeMetadataGeoJSON | undefined>;
-    /**
      * Creates a configuration object for a GeoJson Feature layer.
      *
      * This function constructs a `TypeGeoJSONLayerConfig` object that describes an GeoJson Feature layer
@@ -108,7 +98,7 @@ export declare class GeoJSON extends AbstractGeoViewVector {
      * @param layerEntries - An array of layer entries objects to be included in the configuration
      * @returns The constructed configuration object for the GeoJson Feature layer
      */
-    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string | undefined, isTimeAware: boolean | undefined, layerEntries: TypeLayerEntryShell[]): TypeGeoJSONLayerConfig;
+    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string | undefined, metadataAccessPath: string | undefined, isTimeAware: boolean | undefined, layerEntries: TypeLayerEntryShell[]): TypeGeoJSONLayerConfig;
     /**
      * Initializes a GeoView layer configuration for a GeoJson layer.
      *
@@ -144,11 +134,11 @@ export declare class GeoJSON extends AbstractGeoViewVector {
      * @param geoviewLayerId - The unique identifier for the GeoView layer
      * @param geoviewLayerName - The display name for the GeoView layer
      * @param url - The URL of the service endpoint
-     * @param layerIds - An array of layer IDs to include in the configuration
+     * @param layerEntries - An array of layer entry shells to include in the configuration
      * @param isTimeAware - Indicates if the layer is time aware
      * @returns A promise that resolves to an array of layer configurations
      */
-    static processGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, url: string, layerIds: string[], isTimeAware: boolean): Promise<ConfigBaseClass[]>;
+    static processGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, url: string, layerEntries: TypeLayerEntryShell[], isTimeAware: boolean): Promise<ConfigBaseClass[]>;
     /**
      * Fetches the metadata for a typical GeoJson class.
      *

@@ -56,16 +56,18 @@ export declare class AllFeatureInfoLayerSet extends AbstractLayerSet {
      * This method returns a promise that resolves when the query status for the given `layerPath` in the store is 'processed'.
      *
      * @param layerPath - The unique path identifying the layer to check
+     * @param timeout - Optional maximum duration in milliseconds to wait before rejecting
      * @returns A promise that resolves when the query status is 'processed'
      */
-    waitForLayerQueryToFinish(layerPath: string): Promise<void>;
+    waitForLayerQueryToFinish(layerPath: string, timeout?: number): Promise<void>;
     /**
      * Returns a promise that resolves the next time the layer queried event fires.
      *
      * @param filter - Optional filter predicate. When provided, only events passing the filter resolve the promise
+     * @param timeout - Optional maximum duration in milliseconds to wait before rejecting
      * @returns A promise that resolves with the event payload when layer queried fires (and passes the filter)
      */
-    onceLayerQueried(filter?: (event: LayerQueriedEvent) => boolean): Promise<LayerQueriedEvent>;
+    onceLayerQueried(filter?: (event: LayerQueriedEvent) => boolean, timeout?: number): Promise<LayerQueriedEvent>;
     /**
      * Registers a layer queried event handler.
      *

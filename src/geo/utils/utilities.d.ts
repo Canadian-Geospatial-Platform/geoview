@@ -126,78 +126,73 @@ export declare abstract class GeoUtilities {
      *
      * @param url - The url of the WMS server
      * @param configProxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
-     * @param layers - The layers to query, separated by comma
-     * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
+     * @param layers - Optional layers to query, separated by comma
      * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
-     * @returns A promise that resolves with the parsed WMS metadata
+     * @returns A promise that resolves with the parsed WMS metadata and proxy information
      * @throws {RequestTimeoutError} When the request exceeds the timeout duration
      * @throws {RequestAbortedError} When the request was aborted by the caller's signal
      * @throws {ResponseError} When the response is not OK (non-2xx)
      * @throws {ResponseEmptyError} When the JSON response is empty
      * @throws {NetworkError} When a network issue happened
      */
-    static getWMSServiceMetadata(url: string, configProxyUrl?: string, layers?: string, callbackNewMetadataUrl?: CallbackNewMetadataDelegate, abortSignal?: AbortSignal): Promise<TypeMetadataWMSCapabilities>;
+    static getWMSServiceMetadata(url: string, configProxyUrl?: string, layers?: string, abortSignal?: AbortSignal): Promise<FetchWithProxyResult<TypeMetadataWMSCapabilities>>;
     /**
      * Fetch the json response from the XML response of a WFS getCapabilities request.
      *
      * @param url - The url of the WFS server
      * @param configProxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
-     * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
      * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
-     * @returns A promise that resolves with the parsed WFS metadata
+     * @returns A promise that resolves with the parsed WFS metadata and proxy information
      * @throws {RequestTimeoutError} When the request exceeds the timeout duration
      * @throws {RequestAbortedError} When the request was aborted by the caller's signal
      * @throws {ResponseError} When the response is not OK (non-2xx)
      * @throws {ResponseEmptyError} When the JSON response is empty
      * @throws {NetworkError} When a network issue happened
      */
-    static getWFSServiceMetadata(url: string, configProxyUrl?: string, callbackNewMetadataUrl?: CallbackNewMetadataDelegate, abortSignal?: AbortSignal): Promise<TypeMetadataWFSCapabilities>;
+    static getWFSServiceMetadata(url: string, configProxyUrl?: string, abortSignal?: AbortSignal): Promise<FetchWithProxyResult<TypeMetadataWFSCapabilities>>;
     /**
      * Fetch the json response from the XML response of a WMTS getCapabilities request.
      *
      * @param url - The url of the WMTS server
      * @param configProxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
-     * @param layers - The layers to query, separated by comma
-     * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
+     * @param layers - Optional layers to query, separated by comma
      * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
-     * @returns A promise that resolves with the parsed WMTS metadata
+     * @returns A promise that resolves with the parsed WMTS metadata and proxy information
      * @throws {RequestTimeoutError} When the request exceeds the timeout duration
      * @throws {RequestAbortedError} When the request was aborted by the caller's signal
      * @throws {ResponseError} When the response is not OK (non-2xx)
      * @throws {ResponseEmptyError} When the JSON response is empty
      * @throws {NetworkError} When a network issue happened
      */
-    static getWMTSServiceMetadata(url: string, configProxyUrl?: string, layers?: string, callbackNewMetadataUrl?: CallbackNewMetadataDelegate, abortSignal?: AbortSignal): Promise<TypeMetadataWMTSCapabilities>;
+    static getWMTSServiceMetadata(url: string, configProxyUrl?: string, layers?: string, abortSignal?: AbortSignal): Promise<FetchWithProxyResult<TypeMetadataWMTSCapabilities>>;
     /**
      * Fetches JSON metadata, retrying through a proxy on network errors.
      *
      * @param url - The base URL to fetch the metadata from (e.g., ArcGIS REST endpoint)
      * @param configProxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
-     * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata
      * @param abortSignal - Optional {@link AbortSignal} used to cancel the request
-     * @returns A promise resolving to the parsed JSON metadata response
+     * @returns A promise resolving to the fetched data and proxy information
      * @throws {RequestTimeoutError} When the request exceeds the timeout duration
      * @throws {RequestAbortedError} When the request was aborted by the caller's signal
      * @throws {ResponseError} When the response is not OK (non-2xx)
      * @throws {ResponseEmptyError} When the JSON response is empty
      * @throws {NetworkError} When a network issue happened and no proxy is available
      */
-    static fetchJsonWithProxyFallback<T>(url: string, configProxyUrl?: string, callbackNewMetadataUrl?: CallbackNewMetadataDelegate, abortSignal?: AbortSignal): Promise<T>;
+    static fetchJsonWithProxyFallback<T>(url: string, configProxyUrl?: string, abortSignal?: AbortSignal): Promise<FetchWithProxyResult<T>>;
     /**
      * Fetches the raw text response from a service URL, retrying through a proxy on network errors.
      *
      * @param url - The service URL to fetch
      * @param configProxyUrl - Proxy URL to use when necessary (defaults to CONFIG_PROXY_URL)
-     * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
      * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
-     * @returns A promise that resolves with the response text as a string
+     * @returns A promise that resolves with the response text and proxy information
      * @throws {RequestTimeoutError} When the request exceeds the timeout duration
      * @throws {RequestAbortedError} When the request was aborted by the caller's signal
      * @throws {ResponseError} When the response is not OK (non-2xx)
      * @throws {ResponseEmptyError} When the JSON response is empty
      * @throws {NetworkError} When a network issue happened
      */
-    static fetchTextWithProxyFallback(url: string, configProxyUrl?: string, callbackNewMetadataUrl?: CallbackNewMetadataDelegate, abortSignal?: AbortSignal): Promise<string>;
+    static fetchTextWithProxyFallback(url: string, configProxyUrl?: string, abortSignal?: AbortSignal): Promise<FetchWithProxyResult<string>>;
     /**
      * Return the map server url from a layer service.
      *
@@ -601,8 +596,15 @@ export declare abstract class GeoUtilities {
      */
     static esriConvertEsriGeometryTypeToOLGeometryType(esriGeometryType: string): TypeStyleGeometry;
 }
-/** The type for the function callback for getWMSServiceMetadata() */
-export type CallbackNewMetadataDelegate = (proxyUsed: string) => void;
+/** Result from a fetch operation that may have required a proxy fallback. */
+export type FetchWithProxyResult<T> = {
+    /** The fetched data. */
+    data: T;
+    /** The proxy URL that was used, or undefined if no proxy was needed. */
+    proxyUsed?: string;
+};
+/** Empty result for layers that have no metadata to fetch. */
+export declare const EMPTY_FETCH_RESULT: FetchWithProxyResult<undefined>;
 export interface TypeVectorLegend extends TypeLegend {
     legend: TypeVectorLayerStyles;
 }

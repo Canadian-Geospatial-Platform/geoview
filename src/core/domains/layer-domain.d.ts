@@ -152,23 +152,36 @@ export declare class LayerDomain {
      */
     getGeoviewLayerRegularIfExists(layerPath: string): AbstractGVLayer | undefined;
     /**
-     * Asynchronously waits for a layer to be registered and returns the GeoView layer associated to a specific layer path.
+     * Waits for a layer entry config to be registered and returns it.
      *
-     * Resolves immediately if the layer is already registered; otherwise subscribes to the `onLayerRegistered` event and resolves as soon as a layer with the matching path is registered.
+     * Resolves immediately if the config is already registered; otherwise subscribes to the `onceLayerEntryConfigRegistered` event and resolves as soon as a config with the matching layer path is registered.
      *
      * @param layerPath - The layer path to the layer's configuration
+     * @param timeout - Optional timeout in milliseconds. When provided, the promise will reject if the layer is not registered within the specified time
+     * @returns A promise that resolves to the ConfigBaseClass associated to the layer path
+     */
+    waitForLayerConfigRegistered(layerPath: string, timeout?: number): Promise<ConfigBaseClass>;
+    /**
+     * Waits for a layer to be registered and returns the GeoView layer associated to a specific layer path.
+     *
+     * Resolves immediately if the layer is already registered; otherwise subscribes to the `onceLayerRegistered` event and resolves as soon as a layer with the matching path is registered.
+     *
+     * @param layerPath - The layer path to the layer's configuration
+     * @param timeout - Optional timeout in milliseconds. When provided, the promise will reject if the layer is not registered within the specified time
      * @returns A promise that resolves to a GeoView layer associated to the layer path
      */
-    waitForLayerRegistered(layerPath: string): Promise<AbstractBaseGVLayer>;
+    waitForLayerRegistered(layerPath: string, timeout?: number): Promise<AbstractBaseGVLayer>;
     /**
      * Asynchronously returns the OpenLayer layer associated to a specific layer path.
      *
      * Resolves immediately if the layer is already registered; otherwise subscribes to the
-     * `onLayerRegistered` event and resolves as soon as a layer with the matching path is registered.
+     * `onceLayerRegistered` event and resolves as soon as a layer with the matching path is registered.
      * Note this function uses the 'Async' suffix to differentiate it from 'getOLLayer'.
      *
      * @param layerPath - The layer path to the layer's configuration
      * @returns A promise that resolves to an OpenLayer layer associated to the layer path
+     * @deprecated This method is deprecated and will be removed in future versions. Use `getGeoviewLayerRegular(layerPath).getOLLayer()` instead and
+     * make the waiting asynchronicity happening here more clear in the caller, as it's a bit risky (layer might never be registered).
      */
     getOLLayerAsync(layerPath: string): Promise<BaseLayer>;
     /**
@@ -232,6 +245,14 @@ export declare class LayerDomain {
      */
     getExtentOfMultipleLayers(layerIds: string[]): Promise<Extent | undefined>;
     /**
+     * Returns a promise that resolves the next time a layer entry config registered event fires.
+     *
+     * @param filter - Optional filter predicate. When provided, only events passing the filter resolve the promise
+     * @param timeout - Optional timeout in milliseconds. When provided, the promise will reject if the layer is not registered within the specified time
+     * @returns A promise that resolves with the event payload when layer entry config registered fires (and passes the filter)
+     */
+    onceLayerEntryConfigRegistered(filter?: (event: DomainLayerStatusChangedEvent) => boolean, timeout?: number): Promise<DomainLayerStatusChangedEvent>;
+    /**
      * Registers a layer entry config registered handler.
      *
      * @param callback - The callback to be executed whenever the event is emitted
@@ -294,9 +315,10 @@ export declare class LayerDomain {
      * Returns a promise that resolves the next time a layer registered event fires.
      *
      * @param filter - Optional filter predicate. When provided, only events passing the filter resolve the promise
+     * @param timeout - Optional timeout in milliseconds. When provided, the promise will reject if the event does not fire within the specified time
      * @returns A promise that resolves with the event payload when layer registered fires (and passes the filter)
      */
-    onceLayerRegistered(filter?: (event: DomainLayerRegisteredEvent) => boolean): Promise<DomainLayerRegisteredEvent>;
+    onceLayerRegistered(filter?: (event: DomainLayerRegisteredEvent) => boolean, timeout?: number): Promise<DomainLayerRegisteredEvent>;
     /**
      * Registers a layer registered handler.
      *

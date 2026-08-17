@@ -7,6 +7,7 @@ import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import type { DisplayDateMode } from '@/api/types/map-schema-types';
+import type { FetchWithProxyResult } from '@/geo/utils/utilities';
 export interface TypeEsriImageLayerConfig extends TypeGeoviewLayerConfig {
     geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_IMAGE;
     listOfLayerEntryConfig: EsriImageLayerEntryConfig[];
@@ -36,13 +37,11 @@ export declare class EsriImage extends AbstractGeoViewRaster {
     /**
      * Overrides the way the metadata is fetched.
      *
-     * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
-     *
-     * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
-     * @returns A promise with the metadata or undefined when no metadata for the particular layer type.
-     * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
+     * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+     * @returns A promise that resolves with the fetched metadata and proxy information
+     * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
      */
-    protected onFetchServiceMetadata<T>(abortSignal?: AbortSignal): Promise<T>;
+    protected onFetchServiceMetadata(abortSignal?: AbortSignal): Promise<FetchWithProxyResult<unknown>>;
     /**
      * Overrides the way a geoview layer config initializes its layer entries.
      *
@@ -93,7 +92,7 @@ export declare class EsriImage extends AbstractGeoViewRaster {
      * @param isTimeAware - Indicates whether the layer supports time-based filtering
      * @returns The constructed configuration object for the Esri Image layer
      */
-    static createGeoviewLayerConfigSimple(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware: boolean | undefined): TypeEsriImageLayerConfig;
+    static createGeoviewLayerConfigSimple(geoviewLayerId: string, geoviewLayerName: string | undefined, metadataAccessPath: string, isTimeAware: boolean | undefined): TypeEsriImageLayerConfig;
     /**
      * Creates a configuration object for a Esri Image layer.
      *
@@ -107,7 +106,7 @@ export declare class EsriImage extends AbstractGeoViewRaster {
      * @param layerEntries - An array of layer entries objects to be included in the configuration
      * @returns The constructed configuration object for the Esri Image layer
      */
-    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware: boolean | undefined, layerEntries: TypeLayerEntryShell[]): TypeEsriImageLayerConfig;
+    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string | undefined, metadataAccessPath: string, isTimeAware: boolean | undefined, layerEntries: TypeLayerEntryShell[]): TypeEsriImageLayerConfig;
     /**
      * Processes an Esri Image GeoviewLayerConfig and returns a promise
      * that resolves to an array of `ConfigBaseClass` layer entry configurations.

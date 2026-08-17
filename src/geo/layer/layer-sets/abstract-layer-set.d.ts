@@ -85,11 +85,25 @@ export declare abstract class AbstractLayerSet {
      */
     getRegisteredLayerConfigPaths(): string[];
     /**
+     * Gets a registered layer config by its layer path if it exists.
+     *
+     * @param layerPath - The layer path to look up
+     * @returns The registered layer config, or undefined if not found
+     */
+    getRegisteredLayerConfigIfExists(layerPath: string): ConfigBaseClass | undefined;
+    /**
      * Gets the registered layer paths based on the registered layers.
      *
      * @returns An array of layer paths
      */
     getRegisteredLayerPaths(): string[];
+    /**
+     * Gets a registered layer by its layer path if it exists.
+     *
+     * @param layerPath - The layer path to look up
+     * @returns The registered layer, or undefined if not found
+     */
+    getRegisteredLayerIfExists(layerPath: string): AbstractBaseGVLayer | undefined;
     /**
      * Registers the layer config in the layer-set.
      *
@@ -122,7 +136,7 @@ export declare abstract class AbstractLayerSet {
      * @param layerPath - The unique path identifying the layer to check for registration
      * @returns A promise that resolves when the layer is registered
      */
-    waitForLayerConfigToGetRegistered(layerPath: string): Promise<void>;
+    waitForLayerConfigToGetRegistered(layerPath: string): Promise<LayerConfigRegisteredEvent>;
     /**
      * Waits for a layer config to be registered in the all-feature-info-layer-set.
      *
@@ -131,7 +145,7 @@ export declare abstract class AbstractLayerSet {
      * @param layerPath - The unique path identifying the layer to check for registration
      * @returns A promise that resolves when the layer is registered
      */
-    waitForLayerToGetRegistered(layerPath: string): Promise<void>;
+    waitForLayerToGetRegistered(layerPath: string): Promise<LayerRegisteredEvent>;
     /**
      * Gets the MapId for the layer set.
      *

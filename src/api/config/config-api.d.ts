@@ -2,7 +2,7 @@ import { MapFeatureConfig } from '@/api/config/map-feature-config';
 import type { TypeDisplayLanguage, TypeLayerStyleConfig } from '@/api/types/map-schema-types';
 import type { TypeGeoviewLayerConfig, TypeInitialGeoviewLayerType } from '@/api/types/layer-schema-types';
 import { type GeoCoreLayerConfigResponse } from '@/api/config/geocore';
-import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
+import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 /**
  * The API class that creates configuration objects. It is used to validate and read the service and layer metadata.
  */
@@ -110,12 +110,12 @@ export declare class ConfigApi {
      * @param geoviewLayerId - The geoview layer id
      * @param geoviewLayerName - The geoview layer name
      * @param layerURL - The layer url
-     * @param layerIds - The layer ids for each layer entry config
+     * @param layerEntries - The layer entry shells for each layer entry config
      * @param isTimeAware - Indicates if the layer is time aware
      * @returns A promise that resolves with a list of ConfigBaseClass objects
      * @throws {NotSupportedError} When the provided layer type is not recognized or supported
      */
-    static processLayerFromType(layerType: TypeInitialGeoviewLayerType, geoviewLayerId: string, geoviewLayerName: string, layerURL: string, layerIds: number[] | string[], isTimeAware: boolean): Promise<ConfigBaseClass[]>;
+    static processLayerFromType(layerType: TypeInitialGeoviewLayerType, geoviewLayerId: string, geoviewLayerName: string, layerURL: string, layerEntries: TypeLayerEntryShell[], isTimeAware: boolean): Promise<ConfigBaseClass[]>;
     /**
      * Utility function to serialize to string a TypeGeoviewLayerConfig object.
      *

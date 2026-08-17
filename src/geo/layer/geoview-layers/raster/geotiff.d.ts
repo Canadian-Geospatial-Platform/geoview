@@ -7,6 +7,7 @@ import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { GeoTIFFLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/geotiff-layer-entry-config';
 import { GVGeoTIFF } from '@/geo/layer/gv-layers/tile/gv-geotiff';
 import type { DisplayDateMode } from '@/api/types/map-schema-types';
+import { type FetchWithProxyResult } from '@/geo/utils/utilities';
 export interface TypeGeoTIFFLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
     geoviewLayerType: typeof CONST_LAYER_TYPES.GEOTIFF;
     listOfLayerEntryConfig: GeoTIFFLayerEntryConfig[];
@@ -36,13 +37,11 @@ export declare class GeoTIFF extends AbstractGeoViewRaster {
     /**
      * Overrides the way the metadata is fetched.
      *
-     * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
-     *
-     * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
-     * @returns A promise with the metadata or undefined when no metadata for the particular layer type.
-     * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
+     * @param _abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process (not implemented)
+     * @returns A promise that resolves with the fetched metadata and proxy information
+     * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
      */
-    protected onFetchServiceMetadata<T = TypeMetadataGeoTIFF | undefined>(abortSignal?: AbortSignal): Promise<T>;
+    protected onFetchServiceMetadata(_abortSignal?: AbortSignal): Promise<FetchWithProxyResult<unknown>>;
     /**
      * Overrides the way a geoview layer config initializes its layer entries.
      *
@@ -66,13 +65,6 @@ export declare class GeoTIFF extends AbstractGeoViewRaster {
      * @returns The GV Layer
      */
     protected onCreateGVLayer(layerConfig: GeoTIFFLayerEntryConfig): GVGeoTIFF;
-    /**
-     * Fetches metadata for a GeoTIFF layer, if available.
-     *
-     * @param abortSignal - Optional {@link AbortSignal} used to cancel the metadata fetch.
-     * @returns A promise that resolves to the metadata or undefined if not available.
-     */
-    protected fetchServiceMetadataGeoTiff(abortSignal?: AbortSignal): Promise<TypeMetadataGeoTIFF | undefined>;
     /**
      * Creates a GeoTIFF source from a layer config.
      *
@@ -108,7 +100,7 @@ export declare class GeoTIFF extends AbstractGeoViewRaster {
      * @param layerEntries - An array of layer entries objects to be included in the configuration.
      * @returns The constructed configuration object for the GeoTIFF layer.
      */
-    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string | undefined, isTimeAware: boolean | undefined, layerEntries: TypeLayerEntryShell[]): TypeGeoTIFFLayerConfig;
+    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string | undefined, metadataAccessPath: string | undefined, isTimeAware: boolean | undefined, layerEntries: TypeLayerEntryShell[]): TypeGeoTIFFLayerConfig;
     /**
      * Processes a GeoTIFF GeoviewLayerConfig and returns a promise
      * that resolves to an array of `ConfigBaseClass` layer entry configurations.
@@ -121,10 +113,10 @@ export declare class GeoTIFF extends AbstractGeoViewRaster {
      * @param geoviewLayerId - The unique identifier for the GeoView layer.
      * @param geoviewLayerName - The display name for the GeoView layer.
      * @param url - The URL of the service endpoint.
+     * @param layerEntries - An array of layer entry shells to include in the configuration.
      * @param isTimeAware - Indicates if the layer is time aware.
-     * @param layerIds - An array of layer IDs to include in the configuration.
      * @returns A promise that resolves to an array of layer configurations.
      */
-    static processGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, url: string, layerIds: string[], isTimeAware: boolean): Promise<ConfigBaseClass[]>;
+    static processGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, url: string, layerEntries: TypeLayerEntryShell[], isTimeAware: boolean): Promise<ConfigBaseClass[]>;
 }
 //# sourceMappingURL=geotiff.d.ts.map

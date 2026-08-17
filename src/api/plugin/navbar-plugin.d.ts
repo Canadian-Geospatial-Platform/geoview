@@ -18,6 +18,10 @@ export declare abstract class NavBarPlugin extends AbstractPlugin {
     /**
      * Overridable function to create nav bar button props content.
      *
+     * Note: Both `aria-label` and `tooltip` should be translation keys (e.g., 'myPlugin.buttonLabel')
+     * for proper localization support. The NavBar component will translate them at render time.
+     * Omitting `tooltip` will cause it to fall back to the `aria-label` value.
+     *
      * @returns The nav bar button props content
      */
     protected onCreateButtonConfigs(): Record<string, TypeNavBarButtonConfig>;

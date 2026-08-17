@@ -10,6 +10,8 @@ export type PingResult = {
     isReachable: boolean;
     /** Whether the request required a proxy to succeed. */
     needsProxy: boolean;
+    /** The proxy that was used when necessary */
+    proxyUsed?: string;
     /** The HTTP status code from the server response, or null if no response. */
     status: number | null;
     /** Optional error message describing why the check failed. */
@@ -130,11 +132,20 @@ export declare function shallowArrayEqual<T>(a: T[], b: T[]): boolean;
  */
 export declare function getLocalizedMessage(language: TypeDisplayLanguage, messageKey: string, params?: Record<string, unknown> | undefined): string;
 /**
+ * Translates an optional tooltip value with tri-state semantics.
+ *
+ * @param t - Translation function from i18next
+ * @param tooltip - Tooltip value (translation key, null to disable, or undefined for fallback)
+ * @returns Translated string, null (disabled), or undefined (fallback to aria-label)
+ */
+export declare function translateTooltip(t: (key: string) => string, tooltip: string | null | undefined): string | null | undefined;
+/**
  * Deep merge objects together. Latest object will overwrite value on previous one
  * if property exist.
  *
  * @param objects - The objects to deep merge
  * @returns The merged object
+ * @throws {TypeError} When an object contains circular references that prevent JSON serialization
  */
 export declare function deepMergeObjects<T>(...objects: unknown[]): T;
 /**
@@ -215,6 +226,7 @@ export declare function validateAndPingUrlOGC(targetUrl: string, configProxyUrl?
  *
  * @param url - URL to the GeoTIFF file
  * @returns A promise that resolves with an array of RGBA color tuples, or undefined if no palette
+ * @throws {Error} When the GeoTIFF file cannot be fetched or parsed
  */
 export declare function extractGeotiffColorMap(url: string): Promise<RGBA[] | undefined>;
 /**
@@ -354,6 +366,7 @@ export declare function removeCommentsFromJSON(config: string): string;
  *
  * @param configStr - Map config to parse
  * @returns Cleaned and parsed config object
+ * @throws {SyntaxError} When the cleaned string is not valid JSON
  */
 export declare function parseJSONConfig<T>(configStr: string): T;
 /**
@@ -398,10 +411,11 @@ export declare function stringify(str: unknown): unknown | string;
  */
 export declare function doTimeout(timeout: number): DelayJob;
 /**
- * Delay helper function.
+ * Awaits for a specified duration before resolving.
  *
  * @param timeout - The number of milliseconds to wait for
  * @returns A promise that resolves when the delay timeout expires
+ * @throws {Error} When the delay is cancelled unexpectedly
  */
 export declare function delay(timeout: number): Promise<void>;
 /**
@@ -449,6 +463,7 @@ export declare function doUntilPromise<T>(callback: () => T, promise: Promise<un
  * @param failCallback - The function executed when checkCallback has failed for too long (went over the timeout)
  * @param timeout - Optional duration in milliseconds until the task is aborted (defaults to undefined, meaning no timeout)
  * @param checkFrequency - The frequency in milliseconds to callback for a check (defaults to 100 milliseconds)
+ * @throws When doCallback throws on the first synchronous check (propagated to the caller directly)
  */
 export declare function whenThisThenThat<T>(checkCallback: () => T, doCallback: (value: T) => void, failCallback: (reason?: unknown) => void, timeout?: number, checkFrequency?: number): void;
 /**
@@ -459,6 +474,8 @@ export declare function whenThisThenThat<T>(checkCallback: () => T, doCallback: 
  * @param timeout - Optional duration in milliseconds until the task is aborted (defaults to undefined, meaning no timeout)
  * @param checkFrequency - Optional frequency in milliseconds to check for an update (defaults to 100 milliseconds)
  * @returns A promise that resolves when the check passes
+ * @throws {Error} When the timeout is exceeded before the check passes
+ * @throws When the checkCallback throws an error (propagated as rejection)
  */
 export declare function whenThisThen<T>(checkCallback: () => T, timeout?: number, checkFrequency?: number): Promise<T>;
 /**
@@ -485,6 +502,11 @@ export declare function readTextWithBestEncoding(buffer: ArrayBuffer, encodings?
  * @param language - Language to use for guide
  * @param assetsURL - The base URL for assets
  * @returns A promise that resolves with the guide object, or undefined on error
+ * @throws {RequestTimeoutError} When the request exceeds the timeout duration (propagated from `Fetch.fetchText()`)
+ * @throws {RequestAbortedError} When the request was aborted by the caller's signal (propagated from `Fetch.fetchText()`)
+ * @throws {ResponseError} When the response is not OK / non-2xx (propagated from `Fetch.fetchText()`)
+ * @throws {ResponseEmptyError} When the text response is empty (propagated from `Fetch.fetchText()`)
+ * @throws {NetworkError} When a network issue happened (propagated from `Fetch.fetchText()`)
  */
 export declare function createGuideObject(language: TypeDisplayLanguage, assetsURL: string): Promise<TypeGuideObject>;
 /**
