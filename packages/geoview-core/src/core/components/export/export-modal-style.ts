@@ -17,6 +17,8 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     padding: '16px 10%',
     width: '100%',
     overflowX: 'hidden',
+    flex: '1 0 auto',
+    justifyContent: 'center',
   },
 
   exportSettings: {
@@ -32,7 +34,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
 
   exportTitleInput: {
-    minWidth: 300,
+    flex: '0 0 min(300px, 100%)',
     '& input.keyboard-focused': {
       // hide keyboard-focused default black outline (style.css)
       // MUI adds a 2px border to the bottom of the input parent on focus.
@@ -43,9 +45,12 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
 
   exportOptions: {
     display: 'flex',
+    flexWrap: 'wrap',
+    flex: '0 1 auto',
+    minWidth: 0,
     gap: '1rem',
     justifyContent: 'center',
-    alignItems: 'end',
+    alignItems: 'flex-end',
     '& .MuiFormControl-root': {
       minWidth: '100px',
     },

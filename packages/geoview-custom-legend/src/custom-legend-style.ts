@@ -1,4 +1,4 @@
-import type { SxStyles } from 'geoview-core/ui/style/types';
+import type { Theme, SxStyles } from 'geoview-core/ui/style/types';
 
 /**
  * Returns the sx style classes for the Custom Legend components.
@@ -6,8 +6,7 @@ import type { SxStyles } from 'geoview-core/ui/style/types';
  * @param theme - The MUI theme object
  * @returns The sx style classes
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const getSxClasses = (theme: any): SxStyles => ({
+export const getSxClasses = (theme: Theme): SxStyles => ({
   // Main container styles
   container: {
     padding: '16px',

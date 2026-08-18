@@ -182,6 +182,7 @@ _(Optimizations, refactors, structural changes)_
 - `ConfigApi.fetchStyleFromWMS` now uses `FetchWithProxyResult` internally (#3562)
 - New `onceEventPromise` timeout parameter for creating one-shot event listeners that auto-reject after a deadline (#3562)
 - New `RUN_DEBUG_ONLY` flag in test-suite package for isolating individual test execution during development (#3562)
+- Enforced type safety in style files: replaced `theme: any` with `theme: Theme`, replaced return type `: any` with `: SxStyles`, removed `@typescript-eslint/no-explicit-any` suppressions across all packages (geoview-core, about-panel, aoi-panel, custom-legend, filter-panel, stac-browser, swiper, time-slider)
 
 ## Accessibility (WCAG)
 
@@ -199,6 +200,10 @@ _(WCAG fixes and improvements)_
 - Fixed details panel scrolling issue when navigating between features with prev/next buttons — focus now stays on the button without viewport scroll (#3567)
 - Fixed critical WCAG bug where entering fullscreen mode deactivated WCAG mode due to zero-movement mousemove events during browser resize animation — now only real mouse movement (movementX/Y !== 0) exits WCAG mode (#3591)
 - Improved legend panel styling: moved inline CSS to legend-styles, added spacing between subtitle and icon buttons, improved button divider spacing, added ARIA to layer icon groups
+- Fixed export panel reflow issues: removed breakpoint hiding export icon button in appBar, updated layout for usability at smaller viewports and 400% zoom level (#3594)
+- Fixed time-slider reflow issues: panel header "time filtering" label now wraps for legibility at high zoom, simplified CSS consolidation (#3595)
+- Updated A11Y documentation: documented ESC key behavior in fullscreen mode and focus trap behavior when multiple panels auto-open simultaneously (#3490)
+- Improved about panel styling: replaced hard-coded values with theme tokens, consolidated CSS into about-panel-style.ts (#3477)
 
 ## Documentation & Cleanup
 

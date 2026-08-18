@@ -18,6 +18,8 @@ import { visuallyHidden } from 'geoview-core/ui/style/default';
 import { Switch } from 'geoview-core/ui/switch/switch';
 import { useTimeSliderController } from 'geoview-core/core/controllers/use-controllers';
 
+import type { SxStyles } from 'geoview-core/ui/style/types';
+
 /** Properties for the TimeSlider component. */
 interface TimeSliderProps {
   layerPath: string;
@@ -39,9 +41,8 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   const { layerPath, onRequestClose, isFullScreen = false } = props;
   const { reactUtilities, ui } = cgpv;
   const { useTheme } = ui;
-  const { useState, useRef, useEffect, useCallback, useId } = reactUtilities.react;
+  const { useState, useRef, useEffect, useCallback, useId, useMemo } = reactUtilities.react;
   const {
-    Grid,
     Slider,
     Typography,
     Tooltip,
@@ -60,7 +61,9 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   } = ui.elements;
 
   const theme = useTheme();
-  const sxClasses = getSxClasses(theme);
+  const memoSxClasses = useMemo((): SxStyles => {
+    return getSxClasses(theme);
+  }, [theme]);
 
   const playIntervalRef = useRef<number | undefined>(undefined);
 
@@ -576,173 +579,159 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   // #endregion
 
   return (
-    <Grid onKeyDown={handleKeyDown}>
-      <Box sx={{ padding: '10px 10px' }}>
-        <Grid
-          container
-          sx={{
-            ...sxClasses.rightPanelBtnHolder,
-            flexWrap: 'nowrap',
-            alignItems: 'center',
-          }}
+    <Box onKeyDown={handleKeyDown} sx={memoSxClasses.containerPadding}>
+      {/* Header with title and filter switch */}
+      <Box sx={memoSxClasses.headerContainer}>
+        <Typography id={sliderLabelId} component="h2" sx={memoSxClasses.panelTitle}>
+          {displayTitle}
+        </Typography>
+        <Tooltip title={filtering ? t('timeSlider.slider.disableFilter') : t('timeSlider.slider.enableFilter')}>
+          <Box component="span">
+            <Switch size="small" checked={filtering} onChange={handleCheckbox} label={t('timeSlider.slider.filter')} />
+          </Box>
+        </Tooltip>
+      </Box>
+
+      {/* Slider */}
+      <Box sx={memoSxClasses.centeredContainer}>
+        <Slider
+          style={{ width: '80%' }}
+          min={minAndMax[0]}
+          max={minAndMax[1]}
+          value={values}
+          marks={sliderMarks}
+          step={discreteValues ? null : step || (minAndMax[1] - minAndMax[0]) / 20}
+          onChange={handleSliderChange}
+          onChangeCommitted={handleSliderChangeCommitted}
+          onValueLabelFormat={handleLabelFormat}
+          aria-labelledby={sliderLabelId}
+        />
+        {/* WCAG - Live region to announce slider value changes */}
+        <Typography role="status" aria-live="polite" aria-atomic="true" sx={visuallyHidden}>
+          {`${handleLabelFormat(values[0])}${
+            values.length > 1 ? ` ${t('timeSlider.slider.to')} ${handleLabelFormat(values[values.length - 1])}` : ''
+          }`}
+        </Typography>
+      </Box>
+
+      {/* Animation controls */}
+      <Box role="group" aria-label={t('timeSlider.slider.animationControls')} sx={memoSxClasses.centeredContainer}>
+        {!singleHandle && (
+          <IconButton
+            className="buttonOutline"
+            aria-label={getLockLabel()}
+            aria-pressed={locked}
+            tooltip={getLockTooltip()}
+            tooltipPlacement="top"
+            aria-disabled={isPlaying}
+            onClick={handleLock}
+          >
+            {locked ? <LockIcon /> : <LockOpenIcon />}
+          </IconButton>
+        )}
+
+        <IconButton
+          className="buttonOutline"
+          aria-label={t('timeSlider.slider.back')}
+          tooltip={t('timeSlider.slider.back')}
+          tooltipPlacement="top"
+          aria-disabled={isPlaying || !filtering}
+          onClick={handleBack}
         >
-          <Grid size={{ sm: 6, md: 9 }}>
-            <Typography id={sliderLabelId} component="h2" sx={{ ...sxClasses.panelHeaders, paddingLeft: '20px' }}>
-              {displayTitle}
-            </Typography>
-          </Grid>
-          <Grid size={{ sm: 6, md: 3 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: '10px' }}>
-              <Tooltip title={filtering ? t('timeSlider.slider.disableFilter') : t('timeSlider.slider.enableFilter')}>
-                <span>
-                  <Switch size="small" checked={filtering} onChange={handleCheckbox} label={t('timeSlider.slider.filter')} />
-                </span>
-              </Tooltip>
-            </Box>
-          </Grid>
-        </Grid>
-        <Grid size={{ xs: 12 }}>
-          <Box sx={{ textAlign: 'center', paddingTop: '20px' }}>
-            <Slider
-              style={{ width: '80%' }}
-              min={minAndMax[0]}
-              max={minAndMax[1]}
-              value={values}
-              marks={sliderMarks}
-              step={discreteValues ? null : step || (minAndMax[1] - minAndMax[0]) / 20}
-              onChange={handleSliderChange}
-              onChangeCommitted={handleSliderChangeCommitted}
-              onValueLabelFormat={handleLabelFormat}
-              aria-labelledby={sliderLabelId}
-            />
-            {/* WCAG - Live region to announce slider value changes */}
-            <Typography role="status" aria-live="polite" aria-atomic="true" sx={visuallyHidden}>
-              {`${handleLabelFormat(values[0])}${
-                values.length > 1 ? ` ${t('timeSlider.slider.to')} ${handleLabelFormat(values[values.length - 1])}` : ''
-              }`}
-            </Typography>
-          </Box>
-        </Grid>
-        <Grid size={{ xs: 12 }}>
-          <Box role="group" aria-label={t('timeSlider.slider.animationControls')} sx={{ textAlign: 'center', paddingTop: '20px' }}>
-            {!singleHandle && (
-              <IconButton
-                className="buttonOutline"
-                aria-label={getLockLabel()}
-                aria-pressed={locked}
-                tooltip={getLockTooltip()}
-                tooltipPlacement="top"
-                aria-disabled={isPlaying}
-                onClick={handleLock}
+          <ArrowLeftIcon />
+        </IconButton>
+
+        <IconButton
+          className="buttonOutline"
+          aria-label={t('timeSlider.slider.playAnimation')}
+          aria-pressed={isPlaying}
+          tooltip={isPlaying ? t('timeSlider.slider.pauseAnimation') : t('timeSlider.slider.playAnimation')}
+          tooltipPlacement="top"
+          aria-disabled={!filtering}
+          onClick={handlePlay}
+        >
+          {!isPlaying ? <PlayArrowIcon /> : <PauseIcon />}
+        </IconButton>
+
+        <IconButton
+          className="buttonOutline"
+          aria-label={t('timeSlider.slider.forward')}
+          tooltip={t('timeSlider.slider.forward')}
+          tooltipPlacement="top"
+          aria-disabled={isPlaying || !filtering}
+          onClick={handleForward}
+        >
+          <ArrowRightIcon />
+        </IconButton>
+
+        <IconButton
+          className="buttonOutline"
+          aria-label={t('timeSlider.slider.reverseAnimation')}
+          aria-pressed={reversed}
+          tooltip={t('timeSlider.slider.changeDirection')}
+          tooltipPlacement="top"
+          aria-disabled={isPlaying}
+          onClick={handleReverse}
+        >
+          {reversed ? <SwitchRightIcon /> : <SwitchLeftIcon />}
+        </IconButton>
+
+        <Box component="span" sx={memoSxClasses.controlWrapper}>
+          <FormControl sx={memoSxClasses.formControlWidth}>
+            <InputLabel htmlFor={timeDelayId} variant="standard">
+              {t('timeSlider.slider.timeDelay')}
+            </InputLabel>
+            <NativeSelect
+              id={timeDelayId}
+              key={delay}
+              defaultValue={delay}
+              onChange={handleTimeChange}
+              inputProps={{
+                name: 'timeDelay',
+              }}
+            >
+              <option value={500}>0.5s</option>
+              <option value={750}>0.75s</option>
+              <option value={1000}>1.0s</option>
+              <option value={1500}>1.5s</option>
+              <option value={2000}>2.0s</option>
+              <option value={3000}>3.0s</option>
+              <option value={5000}>5.0s</option>
+            </NativeSelect>
+          </FormControl>
+        </Box>
+
+        {!discreteValues && (
+          <Box component="span" sx={memoSxClasses.controlWrapper}>
+            <FormControl sx={memoSxClasses.formControlWidth}>
+              <InputLabel htmlFor={stepValueId} variant="standard">
+                {t('timeSlider.slider.stepValue')}
+              </InputLabel>
+              <NativeSelect
+                id={stepValueId}
+                defaultValue={step}
+                onChange={handleStepChange}
+                inputProps={{
+                  name: 'timeStep',
+                }}
               >
-                {locked ? <LockIcon /> : <LockOpenIcon />}
-              </IconButton>
-            )}
-
-            <IconButton
-              className="buttonOutline"
-              aria-label={t('timeSlider.slider.back')}
-              tooltip={t('timeSlider.slider.back')}
-              tooltipPlacement="top"
-              aria-disabled={isPlaying || !filtering}
-              onClick={handleBack}
-            >
-              <ArrowLeftIcon />
-            </IconButton>
-
-            <IconButton
-              className="buttonOutline"
-              aria-label={t('timeSlider.slider.playAnimation')}
-              aria-pressed={isPlaying}
-              tooltip={isPlaying ? t('timeSlider.slider.pauseAnimation') : t('timeSlider.slider.playAnimation')}
-              tooltipPlacement="top"
-              aria-disabled={!filtering}
-              onClick={handlePlay}
-            >
-              {!isPlaying ? <PlayArrowIcon /> : <PauseIcon />}
-            </IconButton>
-
-            <IconButton
-              className="buttonOutline"
-              aria-label={t('timeSlider.slider.forward')}
-              tooltip={t('timeSlider.slider.forward')}
-              tooltipPlacement="top"
-              aria-disabled={isPlaying || !filtering}
-              onClick={handleForward}
-            >
-              <ArrowRightIcon />
-            </IconButton>
-
-            <IconButton
-              className="buttonOutline"
-              aria-label={t('timeSlider.slider.reverseAnimation')}
-              aria-pressed={reversed}
-              tooltip={t('timeSlider.slider.changeDirection')}
-              tooltipPlacement="top"
-              aria-disabled={isPlaying}
-              onClick={handleReverse}
-            >
-              {reversed ? <SwitchRightIcon /> : <SwitchLeftIcon />}
-            </IconButton>
-
-            <Box component="span" sx={{ paddingLeft: '10px' }}>
-              <FormControl sx={{ width: '100px' }}>
-                <InputLabel htmlFor={timeDelayId} variant="standard">
-                  {t('timeSlider.slider.timeDelay')}
-                </InputLabel>
-                <NativeSelect
-                  id={timeDelayId}
-                  key={delay}
-                  defaultValue={delay}
-                  onChange={handleTimeChange}
-                  inputProps={{
-                    name: 'timeDelay',
-                  }}
-                >
-                  <option value={500}>0.5s</option>
-                  <option value={750}>0.75s</option>
-                  <option value={1000}>1.0s</option>
-                  <option value={1500}>1.5s</option>
-                  <option value={2000}>2.0s</option>
-                  <option value={3000}>3.0s</option>
-                  <option value={5000}>5.0s</option>
-                </NativeSelect>
-              </FormControl>
-            </Box>
-
-            {!discreteValues && (
-              <Box component="span" sx={{ paddingLeft: '10px' }}>
-                <FormControl sx={{ width: '100px' }}>
-                  <InputLabel htmlFor={stepValueId} variant="standard">
-                    {t('timeSlider.slider.stepValue')}
-                  </InputLabel>
-                  <NativeSelect
-                    id={stepValueId}
-                    defaultValue={step}
-                    onChange={handleStepChange}
-                    inputProps={{
-                      name: 'timeStep',
-                    }}
-                  >
-                    <option value={3600000}>{t('timeSlider.slider.hour')}</option>
-                    <option value={86400000}>{t('timeSlider.slider.day')}</option>
-                    <option value={604800000}>{t('timeSlider.slider.week')}</option>
-                    <option value={2592000000}>{t('timeSlider.slider.month')}</option>
-                    <option value={31536000000}>{t('timeSlider.slider.year')}</option>
-                  </NativeSelect>
-                </FormControl>
-              </Box>
-            )}
+                <option value={3600000}>{t('timeSlider.slider.hour')}</option>
+                <option value={86400000}>{t('timeSlider.slider.day')}</option>
+                <option value={604800000}>{t('timeSlider.slider.week')}</option>
+                <option value={2592000000}>{t('timeSlider.slider.month')}</option>
+                <option value={31536000000}>{t('timeSlider.slider.year')}</option>
+              </NativeSelect>
+            </FormControl>
           </Box>
-        </Grid>
-        {(description || additionalNames?.length) && (
-          <Grid size={{ xs: 12 }}>
-            <Typography component="div" sx={{ px: '20px', py: '5px', paddingTop: '15px', fontSize: '0.875rem' }}>
-              {description || combinedNames}
-            </Typography>
-          </Grid>
         )}
       </Box>
-    </Grid>
+
+      {/* Description */}
+      {(description || additionalNames?.length) && (
+        <Typography component="div" sx={memoSxClasses.descriptionText}>
+          {description || combinedNames}
+        </Typography>
+      )}
+    </Box>
   );
 }

@@ -76,6 +76,30 @@ When the time slider is in fullscreen mode, Esc stops any active animation and i
 
 This deferred-close pattern prevents focus trap corruption that occurs when the panel DOM is removed mid-animation or while layers are still loading.
 
+### 2. Multi-Panel Auto-Open and Focus Priority
+
+**Focus trap mutual exclusion when multiple panels open:**
+
+When a map interaction (such as clicking a feature) triggers multiple panels to auto-open simultaneously (e.g., Details panel in the app-bar and Chart panel in the footer-bar), only one panel can receive the focus trap at a time.
+
+Only focus-trapped panels display a close button. This means that only the panel receiving focus will display a close button.
+
+**Behavior:**
+
+1. **Priority order** — One panel will be prioritized to receive the focus trap, while other auto-opened panels remain accessible without focus trap
+2. **Non-focused panels remain keyboard-accessible** — Users can Tab through auto-opened panels that aren't focus-trapped, but these panels won't display a close button until explicitly activated (by pressing on a layer in that panel, for example)
+3. **Activating a non-focused panel** — Navigate to the panel with Tab, then press Enter or Space on a layer in the left panel list. This enables the focus trap and reveals the close button.
+
+**Rationale:**
+
+This mutual exclusion pattern balances WCAG requirements with multi-panel workflows:
+
+- Prevents multiple simultaneous traps (which are disorienting for keyboard users)
+- Maintains keyboard access to all auto-opened content (users can explore without being trapped)
+- Requires explicit activation (Enter/Space on a layer) to enable panel-level focus management
+
+This is intentional architectural behaviour, not a bug.
+
 ---
 
 ## 003. Best Practices
@@ -399,6 +423,14 @@ The aria-pressed attribute is only relevant for toggle buttons. Use aria-pressed
 ## 006. Constraints and Limitations
 
 GeoView is built to meet WCAG 2.1 Level AA. Where full conformance is not technically achievable — due to the nature of the app's content or its reliance on third-party data sources — the constraint is documented with a rationale. **These are not failures;** they are considered exceptions within the bounds of what the WCAG specification allows, and will be revisited as the app evolves.
+
+### Fullscreen API and ESC Key Priority
+
+**ESC exits browser fullscreen first, closes panels second — one press at a time, no exceptions.** When the Fullscreen API is active (entire browser window in fullscreen), the browser intercepts ESC as a user-safety mechanism before any application JavaScript runs. This is a security feature of the Fullscreen API spec, not something GeoView controls. It's not something to design around; it's something to design _with_.
+
+**Implication for UI design:** If a user has both browser fullscreen active AND a panel open, they'll need two ESC presses: one to exit browser fullscreen, another to close the panel. This two-step sequence cannot be collapsed into one.
+
+**Note:** This constraint applies only to browser fullscreen via the Fullscreen API, not panel "fullscreen views".
 
 ### SC 1.1.1 Non-text Content
 

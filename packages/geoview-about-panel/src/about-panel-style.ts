@@ -1,4 +1,4 @@
-import type { SxStyles } from 'geoview-core/ui/style/types';
+import type { Theme, SxStyles } from 'geoview-core/ui/style/types';
 
 /**
  * Returns the sx style classes for the About Panel components.
@@ -6,8 +6,7 @@ import type { SxStyles } from 'geoview-core/ui/style/types';
  * @param theme - The MUI theme object
  * @returns The sx style classes
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const getSxClasses = (theme: any): SxStyles => ({
+export const getSxClasses = (theme: Theme): SxStyles => ({
   container: {
     padding: theme.spacing(11),
     height: '100%',
@@ -33,6 +32,7 @@ export const getSxClasses = (theme: any): SxStyles => ({
       },
     },
     '& img': {
+      display: 'block',
       maxWidth: '100%',
       height: 'auto',
     },
@@ -62,18 +62,23 @@ export const getSxClasses = (theme: any): SxStyles => ({
     gap: theme.spacing(11),
   },
   title: {
-    marginTop: '1rem',
-    fontSize: '2rem',
-    fontWeight: 600,
+    marginTop: theme.spacing(11),
+    fontSize: theme.palette.geoViewFontSize?.xl,
+    fontWeight: theme.typography.fontWeightBold,
   },
   logoContainer: {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
     padding: theme.spacing(11),
+    '& img': {
+      display: 'block',
+      maxWidth: '100%',
+      height: 'auto',
+    },
   },
   description: {
-    lineHeight: 1.6,
+    lineHeight: theme.typography.body1.lineHeight,
   },
   linkContainer: {
     marginTop: theme.spacing(11),

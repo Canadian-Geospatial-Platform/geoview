@@ -1,3 +1,4 @@
+import type { SxProps } from 'geoview-core/ui/style/types';
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { Box, Button, IconButton, Typography } from 'geoview-core/ui';
 import { CopyIcon, DownloadIcon, VisibilityIcon, VisibilityOffIcon } from 'geoview-core/ui/icons';
@@ -210,7 +211,7 @@ export function StacItemDetail(props: StacItemDetailProps): JSX.Element {
       </Box>
 
       {/* Title */}
-      <Typography sx={[sxClasses.detailTitle, sxClasses.detailSection]}>{title}</Typography>
+      <Typography sx={[sxClasses.detailTitle, sxClasses.detailSection] as SxProps}>{title}</Typography>
 
       {/* Preview image */}
       {previewUrl && (

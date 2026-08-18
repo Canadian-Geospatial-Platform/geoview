@@ -1,11 +1,12 @@
+import type { Theme, SxStyles } from 'geoview-core/ui/style/types';
+
 /**
  * Gets the sx classes for the STAC browser components.
  *
  * @param theme - The MUI theme
  * @returns The sx style definitions
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const getSxClasses = (theme: any): any => ({
+export const getSxClasses = (theme: Theme): SxStyles => ({
   mainContainer: {
     display: 'flex',
     flexDirection: 'column',

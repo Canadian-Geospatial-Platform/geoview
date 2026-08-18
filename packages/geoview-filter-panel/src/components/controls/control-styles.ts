@@ -1,4 +1,4 @@
-import type { SxStyles } from 'geoview-core/ui/style/types';
+import type { Theme, SxStyles } from 'geoview-core/ui/style/types';
 
 /**
  * Gets the style classes for filter controls.
@@ -6,8 +6,7 @@ import type { SxStyles } from 'geoview-core/ui/style/types';
  * @param theme - The MUI theme object
  * @returns The SxStyles object containing style definitions
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const getSxClasses = (theme: any): SxStyles => ({
+export const getSxClasses = (theme: Theme): SxStyles => ({
   // Common control wrapper
   filterControl: {
     mb: 2,
