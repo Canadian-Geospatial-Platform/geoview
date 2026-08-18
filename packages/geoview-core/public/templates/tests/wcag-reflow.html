@@ -96,7 +96,7 @@
           'appBar': { 'tabs': { 'core': ['geolocator', 'legend', 'layers', 'details', 'data-table', 'guide'] } },
           'footerBar': {
             'tabs': {
-              'core': ['layers', 'legend', 'details']
+              'core': ['layers', 'legend', 'details', 'data-table', 'time-slider', 'guide', 'geochart']
             }
           },
           'navBar': ['zoom', 'rotation', 'fullscreen', 'home', 'location', 'basemap-select', 'measurement', 'projection', 'drawer'],
@@ -132,10 +132,10 @@
       ></div>
     </div>
 
-    <!-- Test 5: Guide Only -->
+    <!-- Test 5: Everything -->
     <div class="map-section">
-      <h3>5. Guide Button Only</h3>
-      <p>Guide gets marginTop: auto - should be at bottom</p>
+      <h3>5. Everything</h3>
+      <p>All panels and buttons enabled</p>
       <div
         id="map5"
         class="geoview-map"
@@ -144,9 +144,129 @@
           'map': {
             'viewSettings': { 'projection': 3978, 'initialView': { 'zoomAndCenter': [4, [-90, 60]] } },
             'basemapOptions': { 'basemapId': 'transport', 'shaded': false, 'labeled': true },
-            'listOfGeoviewLayerConfig': []
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerId': 'historical-flood-dynamic',
+                'geoviewLayerName': 'Hist. Flood',
+                'metadataAccessPath': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer',
+                'geoviewLayerType': 'esriDynamic',
+                'listOfLayerEntryConfig': [
+                  {
+                    'layerId': '0'
+                  }
+                ]
+              },
+              {
+                'geoviewLayerId': 'historical-flood-feature',
+                'geoviewLayerName': 'Hist. Flood Feature',
+                'metadataAccessPath': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer',
+                'geoviewLayerType': 'esriFeature',
+                'listOfLayerEntryConfig': [
+                  {
+                    'layerId': '0'
+                  }
+                ]
+              },
+              {
+                'geoviewLayerId': 'airborne',
+                'geoviewLayerName': 'Airborne Radioactivity',
+                'metadataAccessPath': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/airborne_radioactivity_en/MapServer',
+                'geoviewLayerType': 'esriDynamic',
+                'listOfLayerEntryConfig': [
+                  {
+                    'layerId': '1'
+                  }
+                ]
+              }
+            ]
           },
-          'appBar': { 'tabs': { 'core': ['guide'] } },
+          'appBar': { 'tabs': { 'core': ['about-panel', 'geolocator', 'export', 'aoi-panel', 'custom-legend', 'guide', 'legend', 'details', 'data-table', 'layers', 'stac-browser', 'filter-panel'] } },
+          'footerBar': {
+            'tabs': {
+              'core': ['layers', 'legend', 'details', 'data-table', 'time-slider', 'geochart', 'guide']
+            }
+          },
+          'corePackagesConfig': [
+            {
+              'geochart': {
+                'charts': [
+                  {
+                    'layers': [
+                      {
+                        'layerId': 'airborne/1',
+                        'propertyValue': 'OBJECTID',
+                        'propertyDisplay': 'Location_Emplacement'
+                      }
+                    ],
+                    'chart': 'line',
+                    'query': {
+                      'type': 'esriRegular',
+                      'url': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/airborne_radioactivity_en/MapServer/3',
+                      'queryOptions': {
+                        'whereClauses': [],
+                        'orderByField': 'CollectionStart_DebutPrelevement'
+                      }
+                    },
+                    'geochart': {
+                      'xAxis': {
+                        'type': 'time',
+                        'property': 'CollectionStart_DebutPrelevement',
+                        'label': 'Date'
+                      },
+                      'yAxis': {
+                        'type': 'linear',
+                        'property': 'Activity_Activite_mBqm3',
+                        'label': 'Activity'
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              'aoi-panel': {
+                'aoiList': [
+                  {
+                    'imageUrl': 'https://encrypted-tbn1.gstatic.com/licensed-image?q=tbn:ANd9GcSbleN5tjC2Dilx77SCBJD9f3CxlnDEEGx5qY786BpVlu4JLzUd1ixjIOfO1WX5mJjUQLmSSg4JFuNWgqGZJZDV7LBH8y3QBz3KrjuHdg',
+                    'aoiTitle': 'CN Tower',
+                    'extent': [-79.3881, 43.6416, -79.3861, 43.6436]
+                  },
+                  {
+                    'imageUrl': 'https://encrypted-tbn0.gstatic.com/licensed-image?q=tbn:ANd9GcTCSU8D4pV4fY9MfYa6NZvpcMrCDhxE-ySOSzbxqSCC67_loNeJ9WI-2Ki7zCfU36M0Iwt7-4aw0y3_Vg8t_8sxo86xS6HVewQdYjOOXA',
+                    'aoiTitle': 'Parliament Hill',
+                    'extent': [-75.7019, 45.4226, -75.6999, 45.4246]
+                  }
+                ]
+              }
+            },
+            {
+              'filter-panel': {
+                'layers': [
+                  {
+                    'layerPath': 'historical-flood-feature/0',
+                    'filterName': 'Historical Flood Events',
+                    'enabled': true,
+                    'collapsible': true,
+                    'defaultCollapsed': false,
+                    'attributes': [
+                      {
+                        'fieldName': 'flood_cause',
+                        'displayLabel': 'Flood Cause',
+                        'filterType': 'select',
+                        'enabled': true
+                      },
+                      {
+                        'fieldName': 'season',
+                        'displayLabel': 'Season',
+                        'filterType': 'multiselect',
+                        'enabled': true
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ],
           'theme': 'geo.ca'
         }"
         style="height: 600px;"

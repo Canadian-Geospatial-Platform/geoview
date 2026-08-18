@@ -376,7 +376,6 @@ export function ExportModal(): JSX.Element {
               variant="standard"
               MenuProps={{ container: shellContainer }}
               inputLabel={{ id: `${mapId}-export-type-label` }}
-              fullWidth
             />
 
             {/* DPI Selection - Only show for PNG and JPEG */}
@@ -392,7 +391,6 @@ export function ExportModal(): JSX.Element {
                 variant="standard"
                 MenuProps={{ container: shellContainer }}
                 inputLabel={{ id: `${mapId}-export-value-label` }}
-                fullWidth
               />
             )}
 
@@ -409,7 +407,6 @@ export function ExportModal(): JSX.Element {
                 variant="standard"
                 MenuProps={{ container: shellContainer }}
                 inputLabel={{ id: `${mapId}-export-quality-label` }}
-                fullWidth
               />
             )}
           </Box>

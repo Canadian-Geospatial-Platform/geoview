@@ -17,6 +17,8 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     padding: '16px 10%',
     width: '100%',
     overflowX: 'hidden',
+    flex: '1 0 auto',
+    justifyContent: 'center',
   },
 
   exportSettings: {
@@ -32,7 +34,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
 
   exportTitleInput: {
-    minWidth: 300,
+    flex: '0 0 min(300px, 100%)',
     '& input.keyboard-focused': {
       // hide keyboard-focused default black outline (style.css)
       // MUI adds a 2px border to the bottom of the input parent on focus.
@@ -43,11 +45,15 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
 
   exportOptions: {
     display: 'flex',
+    flexDirection: 'row',
+    flex: '1 1 auto',
     gap: '1rem',
-    justifyContent: 'center',
-    alignItems: 'end',
+    justifyContent: 'flex-end',
+    alignItems: 'flex-end',
+    containerType: 'inline-size',
     '& .MuiFormControl-root': {
       minWidth: '100px',
+      width: 'auto',
     },
     '& .MuiInputLabel-formControl': {
       fontSize: theme.palette.geoViewFontSize?.default,
@@ -58,6 +64,13 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
     '& .MuiSelect-select': {
       padding: '0px 12px 4px 0px !important',
+    },
+    // When container is narrow, switch to column and make selects full width
+    [`@container (max-width: ${theme.breakpoints.values.sm}px)`]: {
+      flexDirection: 'column',
+      '& .MuiFormControl-root': {
+        width: '100%',
+      },
     },
   },
 
@@ -85,6 +98,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
 
   dialogActions: {
+    flexWrap: 'wrap',
     padding: '1rem',
     gap: '0.5rem',
   },

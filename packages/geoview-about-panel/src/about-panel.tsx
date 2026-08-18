@@ -170,7 +170,7 @@ function DefaultContent(props: TypeDefaultContentProps): JSX.Element {
 
       {logoPath && (
         <Box sx={sxClasses.logoContainer}>
-          <img src={logoPath} alt={title || 'Logo'} style={{ maxWidth: '100%', height: 'auto' }} />
+          <img src={logoPath} alt={title || 'Logo'} />
         </Box>
       )}
 

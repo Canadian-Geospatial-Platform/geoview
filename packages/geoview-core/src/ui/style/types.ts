@@ -9,6 +9,12 @@ const ColorKeyValues = range(50, 1000, 50);
 type ColorKey = (typeof ColorKeyValues)[number];
 type ColorRecord = Record<ColorKey, string>;
 
+/** MUI Theme type re-exported for plugin package use. */
+export type { Theme };
+
+/** MUI SxProps type re-exported for plugin package use when casting array sx props. */
+export type { SxProps };
+
 /** Record mapping sx property names to MUI SxProps values */
 export type SxStyles = Record<string, SxProps<Theme> | SxProps>;
 

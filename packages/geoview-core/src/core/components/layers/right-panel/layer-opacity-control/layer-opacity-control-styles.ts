@@ -1,8 +1,13 @@
 import type { Theme } from '@mui/material/styles';
+import type { SxStyles } from '@/ui/style/types';
 
-// ? I doubt we want to define an explicit type for style properties?
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const getSxClasses = (theme: Theme): any => ({
+/**
+ * Gets the sx classes for the layer opacity control.
+ *
+ * @param theme - The MUI theme object
+ * @returns The sx style classes
+ */
+export const getSxClasses = (theme: Theme): SxStyles => ({
   layerOpacityControl: {
     display: 'flex',
     alignItems: 'center',

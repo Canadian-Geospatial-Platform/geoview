@@ -805,11 +805,11 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element | null {
           justifyContent: 'space-between',
           width: '100%',
           alignItems: 'center',
-          gap: '15px',
+          gap: '16px',
         }}
       >
         <Box sx={{ textAlign: 'left', flex: 1, minWidth: 0 }}>
-          <Typography sx={{ ...sxClasses.categoryTitle, ...(layerHidden && hiddenStyle) }} title={layerName}>
+          <Typography component="h2" sx={{ ...sxClasses.categoryTitle, ...(layerHidden && hiddenStyle) }} title={layerName}>
             {layerName}
           </Typography>
           {subTitle && (

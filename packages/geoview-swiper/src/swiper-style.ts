@@ -1,11 +1,12 @@
+import type { SxStyles } from 'geoview-core/ui/style/types';
+
 /**
  * Gets custom sx classes for the swiper.
  *
  * @param mapHeight - The map height
  * @returns The sx classes object
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const getSxClasses = (mapHeight: number): any => ({
+export const getSxClasses = (mapHeight: number): SxStyles => ({
   layerSwipe: {
     position: 'absolute',
     width: '100%',

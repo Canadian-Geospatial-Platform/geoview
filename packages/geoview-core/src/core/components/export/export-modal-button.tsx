@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
-import { useTheme } from '@mui/material/styles';
+import type { SxProps, Theme } from '@mui/material/styles';
 
 import { IconButton } from '@/ui/icon-button/icon-button';
 import { DownloadIcon } from '@/ui/icons';
@@ -15,7 +15,7 @@ interface ExportProps {
   /** Optional CSS class name. */
   className?: string;
   /** Optional additional sx styles. */
-  sxDetails?: object;
+  sxDetails?: SxProps<Theme>;
 }
 
 /**
@@ -28,7 +28,6 @@ export default function ExportButton({ id, className = '', sxDetails }: ExportPr
   logger.logTraceRender('components/export/export-modal-button');
 
   // Hooks
-  const theme = useTheme();
   const { t } = useTranslation<string>();
 
   // get store function
@@ -42,7 +41,7 @@ export default function ExportButton({ id, className = '', sxDetails }: ExportPr
       aria-haspopup="dialog"
       tooltipPlacement="right"
       onClick={() => uiController.enableFocusTrap({ activeElementId: 'export', callbackElementId: id })}
-      sx={{ [theme.breakpoints.down('md')]: { display: 'none' }, ...sxDetails }}
+      sx={sxDetails}
       className={className}
       disabled={layersAreLoading}
     >

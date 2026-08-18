@@ -1,3 +1,4 @@
+import type { SxProps } from 'geoview-core/ui/style/types';
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { Box, Typography } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
@@ -354,7 +355,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
       {view !== 'item-detail' && (
         <Box sx={sxClasses.modeToggle}>
           <Box
-            sx={[sxClasses.modeButton, mode === 'browse' && sxClasses.modeButtonActive]}
+            sx={[sxClasses.modeButton, mode === 'browse' && sxClasses.modeButtonActive] as SxProps}
             onClick={(): void => handleModeChange('browse')}
             role="tab"
             tabIndex={0}
@@ -365,7 +366,7 @@ export function StacBrowser(props: StacBrowserProps): JSX.Element {
             {t('stacBrowser.browse')}
           </Box>
           <Box
-            sx={[sxClasses.modeButton, mode === 'search' && sxClasses.modeButtonActive]}
+            sx={[sxClasses.modeButton, mode === 'search' && sxClasses.modeButtonActive] as SxProps}
             onClick={(): void => handleModeChange('search')}
             role="tab"
             tabIndex={0}

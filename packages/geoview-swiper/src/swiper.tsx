@@ -1,3 +1,4 @@
+import type { SxProps } from 'geoview-core/ui/style/types';
 import Draggable from 'react-draggable';
 import { useMemo } from 'react';
 
@@ -367,7 +368,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
           onDrag={onDrag}
         >
           <Box
-            sx={[orientation === 'vertical' ? memoSxClasses.vertical : memoSxClasses.horizontal, memoSxClasses.bar]}
+            sx={[orientation === 'vertical' ? memoSxClasses.vertical : memoSxClasses.horizontal, memoSxClasses.bar] as SxProps}
             tabIndex={0}
             ref={swiperRef}
           >
