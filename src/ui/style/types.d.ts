@@ -3,6 +3,10 @@ import type { SxProps } from '@mui/system';
 declare const ColorKeyValues: number[];
 type ColorKey = (typeof ColorKeyValues)[number];
 type ColorRecord = Record<ColorKey, string>;
+/** MUI Theme type re-exported for plugin package use. */
+export type { Theme };
+/** MUI SxProps type re-exported for plugin package use when casting array sx props. */
+export type { SxProps };
 /** Record mapping sx property names to MUI SxProps values */
 export type SxStyles = Record<string, SxProps<Theme> | SxProps>;
 /**
@@ -91,5 +95,4 @@ export interface IGeoViewFontSizes {
 export interface IGeoViewSpacingAndSizing {
     layersTitleHeight?: string;
 }
-export {};
 //# sourceMappingURL=types.d.ts.map

@@ -35,6 +35,7 @@ export interface TypeTabsProps {
     TabContentVisibilty?: string;
     onToggleCollapse?: () => void;
     onSelectedTabChanged?: (tab: TypeTabs) => void;
+    onHeaderClick?: () => void;
     onOpenKeyboard?: (uiFocus: FocusItemProps) => void;
     onCloseKeyboard?: () => void;
     containerType: TypeContainerBox;

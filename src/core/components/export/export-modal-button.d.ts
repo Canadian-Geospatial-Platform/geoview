@@ -1,3 +1,4 @@
+import type { SxProps, Theme } from '@mui/material/styles';
 /** Props for the ExportButton component. */
 interface ExportProps {
     /** The button element id. */
@@ -5,7 +6,7 @@ interface ExportProps {
     /** Optional CSS class name. */
     className?: string;
     /** Optional additional sx styles. */
-    sxDetails?: object;
+    sxDetails?: SxProps<Theme>;
 }
 /**
  * Creates the export PNG button component.

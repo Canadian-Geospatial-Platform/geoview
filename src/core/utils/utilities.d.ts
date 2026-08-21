@@ -482,7 +482,7 @@ export declare function whenThisThen<T>(checkCallback: () => T, timeout?: number
  * Escape special characters from string.
  *
  * @param text - The text to escape
- * @returns Espaced string
+ * @returns Escaped string
  */
 export declare function escapeRegExp(text: string): string;
 /**
@@ -496,6 +496,26 @@ export declare function readTextWithBestEncoding(buffer: ArrayBuffer, encodings?
     text: string;
     encoding: string;
 };
+/**
+ * Transforms guide anchor IDs and hrefs to be unique per map/container instance.
+ *
+ * Processes markdown content that contains HTML elements, adding a prefix to
+ * id and href="#..." attributes that end with "Section". This targets only the
+ * custom guide navigation anchors (geolocatorSection, legendSection, etc.) and
+ * avoids false positives on embedded HTML, URLs, or third-party content.
+ *
+ * Skips IDs that are already prefixed (idempotent). Does not affect auto-generated
+ * IDs from markdown heading syntax.
+ *
+ * @param content - Content string containing HTML id and href attributes
+ * @param prefix - The unique prefix (typically `{mapId}-{containerType}`)
+ * @returns The transformed content with prefixed Section IDs
+ *
+ * @example
+ * transformMarkdownIds('<a id="legendSection" href="#layersSection">Link</a>', 'map1-about');
+ * '<a id="map1-about-legendSection" href="#map1-about-layersSection">Link</a>'
+ */
+export declare function transformMarkdownIds(content: string, prefix: string): string;
 /**
  * Create guide object from .md file.
  *
