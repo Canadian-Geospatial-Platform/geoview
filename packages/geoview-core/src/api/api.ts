@@ -337,9 +337,18 @@ export class API {
   // #region STATIC METHODS
 
   /**
-   * Applies outline to elements when keyboard is used to navigate.
+   * LEGACY: Applies the .keyboard-focused class to any element receiving Tab focus within .geoview-map containers.
+   *
+   * This custom JavaScript-based focus management is being phased out in favor of native :focus-visible
+   * and MUI's .Mui-focusVisible classes. The .keyboard-focused class is applied to ANY element that receives
+   * Tab focus (buttons, inputs, map element, etc.), while crosshair activation is separate logic that only
+   * triggers for the specific map element (mapTargetElement-{mapId}).
    *
    * Code from: https://github.com/MaxMaeder/keyboardFocus.js
+   *
+   * @deprecated Being replaced by native :focus-visible / MUI .Mui-focusVisible; remove per issue #3607
+   *
+   * TODO issue #3607: Remove this method when migration to :focus-visible is complete.
    */
   static #manageKeyboardFocus(apiInstance: API): void {
     // Remove the 'keyboard-focused' class from any elements that have it

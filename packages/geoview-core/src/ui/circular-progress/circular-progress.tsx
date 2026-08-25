@@ -6,6 +6,7 @@ import type { CircularProgressProps } from '@mui/material';
 import { CircularProgress as MaterialCircularProgress, Box, Fade } from '@mui/material';
 
 import { getSxClasses } from '@/ui/circular-progress/circular-progress-style';
+import { composeSxProps } from '@/ui/style/types';
 import { logger } from '@/core/utils/logger';
 
 /**
@@ -64,14 +65,15 @@ function CircularProgressUI(props: CircularProgressPropsExtend): JSX.Element {
   logger.logTraceRenderDetailed('ui/circular-progress/circular-progress');
 
   // Get constant from props
-  const { style = {}, isLoaded, sx = {}, sxCircular = {}, ...rest } = props;
+  const { style = {}, isLoaded, sx, sxCircular, ...rest } = props;
 
   // Hook
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
-  const sxMerged = { ...sxClasses.loading, ...sx };
-  const sxCircularMerged = { ...sxClasses.progress, ...sxCircular };
+  // Compose internal and caller sx props without nesting array-form sx.
+  const sxMerged = composeSxProps(sxClasses.loading, sx);
+  const sxCircularMerged = composeSxProps(sxClasses.progress, sxCircular);
 
   return (
     <Fade in={!isLoaded} timeout={{ enter: 0, exit: theme.transitions.duration.splash }} mountOnEnter unmountOnExit>

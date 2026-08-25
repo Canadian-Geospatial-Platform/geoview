@@ -133,6 +133,7 @@ const NotificationItem = memo(
           aria-describedby={notification.key}
           size="small"
           onClick={handleRemove}
+          sx={sxClasses.notificationsItemButton}
         >
           <DeleteIcon />
         </IconButton>
@@ -428,7 +429,7 @@ const Notifications = memo((): JSX.Element => {
 
   return (
     <ClickAwayListener mouseEvent="onMouseDown" touchEvent="onTouchStart" onClickAway={handleClickAway}>
-      <Box sx={{ padding: interaction === 'dynamic' ? 'none' : '5px' }}>
+      <Box sx={{ padding: interaction === 'dynamic' ? '0' : '5px' }}>
         <IconButton
           id={bellButtonId}
           iconRef={bellButtonRef}

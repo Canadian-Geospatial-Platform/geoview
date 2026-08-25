@@ -240,7 +240,8 @@ export function Shell(props: ShellProps): JSX.Element {
   const handleSkipLinkClick = useCallback((targetId: string): void => {
     const targetElement = document.getElementById(targetId);
     if (targetElement) {
-      targetElement.focus();
+      // Explicitly request focus indicator for keyboard users (WCAG 2.4.1 skip links)
+      targetElement.focus({ focusVisible: true });
     }
   }, []);
 
@@ -250,6 +251,9 @@ export function Shell(props: ShellProps): JSX.Element {
   const handleSkipToMainContent = useCallback((): void => {
     // Focus the map and set crosshair
     uiController.setCrosshairActive(true);
+    // Intentionally use plain focus() without focusVisible: true because the crosshair itself
+    // serves as the visual indicator for keyboard navigation mode. The focus ring is redundant
+    // when the crosshair is active and would create visual noise.
     document.getElementById(`mapTargetElement-${mapId}`)?.focus();
   }, [mapId, uiController]);
 

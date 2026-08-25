@@ -97,6 +97,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     wordBreak: 'break-word',
     whiteSpace: 'pre-wrap',
   },
+  notificationsItemButton: {
+    marginLeft: 'auto',
+  },
   emptyMessage: {
     padding: '16px 16px',
   },

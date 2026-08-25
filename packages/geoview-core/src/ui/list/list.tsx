@@ -2,6 +2,7 @@ import type { Ref } from 'react';
 import { forwardRef } from 'react';
 import MaterialList from '@mui/material/List';
 import type { ListProps } from '@mui/material';
+import { composeSxProps } from '@/ui/style/types';
 import { logger } from '@/core/utils/logger';
 
 /**
@@ -34,16 +35,10 @@ function ListUI(props: TypeListProps, ref: Ref<HTMLUListElement>): JSX.Element {
 
   // Get constant from props
   const { children, className, style, type, sx, ...rest } = props;
+  const sxMerged = composeSxProps(sxClasses.list, sx);
 
   return (
-    <MaterialList
-      ref={ref}
-      sx={{ ...sxClasses.list, ...sx }}
-      className={className || ''}
-      style={style || undefined}
-      component={type || 'ul'}
-      {...rest}
-    >
+    <MaterialList ref={ref} sx={sxMerged} className={className || ''} style={style || undefined} component={type || 'ul'} {...rest}>
       {children !== undefined && children}
     </MaterialList>
   );

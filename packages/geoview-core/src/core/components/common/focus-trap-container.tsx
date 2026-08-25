@@ -152,7 +152,10 @@ export const FocusTrapContainer = memo(({
 
     if (id === focusItem.activeElementId) {
       // SetTimeout with a delay of 0 to force the rendering
-      setTimeout(() => document.getElementById(exitBtnId)?.focus(), TIMEOUT.focusDelay);
+      setTimeout(() => {
+        // Explicitly request focus indicator for keyboard users
+        document.getElementById(exitBtnId)?.focus({ focusVisible: true });
+      }, TIMEOUT.focusDelay);
     }
   }, [focusItem, id, exitBtnId]);
 
@@ -211,7 +214,7 @@ export const FocusTrapContainer = memo(({
   // <Box tabIndex={-1}: MUI will add this automatically if not set. Adding here to prevent console log noise
   return (
     <FocusTrap open={memoIsActive} disableAutoFocus disableRestoreFocus>
-      <Box tabIndex={-1} sx={{ height: '100%' }}>
+      <Box tabIndex={-1} sx={{ overflow: 'clip', height: '100%', paddingTop: memoShowExitButton ? '16px' : undefined }}>
         {memoShowExitButton && (
           <Button id={exitBtnId} type="text" onClick={handleClose} sx={memoExitButtonStyles}>
             {t('general.exit')}

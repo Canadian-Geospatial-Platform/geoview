@@ -15,6 +15,16 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     padding: '16px 0',
     gap: '10px',
   },
+  guideCloseBtn: {
+    position: 'absolute',
+    top: '16px',
+    right: '16px',
+    zIndex: 1000,
+  },
+  /** App bar guide sits below a taller header, so the close button needs extra top offset. */
+  guideCloseBtnAppBar: {
+    top: '32px',
+  },
   topRow: {
     '& .responsive-layout-left-top': {
       alignItems: 'end',
@@ -56,9 +66,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
         color: theme.palette.geoViewColor?.white,
         boxShadow: 1,
       },
-      '&.keyboard-focused': {
-        border: 'none !important',
-        outline: `2px solid ${theme.palette.common.black}`,
+      '&.Mui-focusVisible': {
+        outlineOffset: '-2px',
+        boxShadow: 'none',
       },
     },
     '& .MuiButtonGroup-firstButton': {
@@ -140,7 +150,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   gridLeftMain: {
     height: '100%',
     overflowY: 'auto',
-    marginTop: '30px', // To align left list with right panel box (below 30px right panel toolbar)
+    paddingTop: '30px', // To align left list with right panel box and leave room for focus indicator (below 30px right panel toolbar)
     paddingBottom: '25px', // To ensure last item can be fully scrolled up to be fully visible
     '&.MuiGrid-grid-xs-auto': {
       '& .layer-panel': {
