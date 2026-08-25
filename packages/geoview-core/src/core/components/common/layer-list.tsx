@@ -242,7 +242,7 @@ export const LayerListItem = memo(({ id, isSelected, layer, onListItemClick }: L
   }, [layerStatus, layerName, t]);
 
   return (
-    <ListItem disablePadding className={containerClass}>
+    <ListItem className={containerClass}>
       {/* WCAG - ARIA live region for screen reader announcements */}
       <Box sx={memoSxClasses.visuallyHidden} role="status" aria-live="polite" aria-atomic="true">
         {statusMessage}

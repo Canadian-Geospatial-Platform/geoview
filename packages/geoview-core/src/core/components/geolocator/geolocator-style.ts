@@ -102,6 +102,13 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
  * @returns The sx classes object
  */
 export const getSxClassesList = (theme: Theme): SxStyles => ({
+  geoList: {
+    paddingTop: '6px', // Add spacing between the search bar and the list for the first items focus indicator to be visible
+  },
+  geoListItemButton: {
+    marginInline: '6px', // Create space for the focus indicator to be visible on the left and right sides of the button
+    paddingInline: '10px', // Reduce padding (from 16px) to maintain the same overall width as before the margin was added
+  },
   geoListItemGrid: {
     width: '100%',
   },
@@ -128,8 +135,7 @@ export const StyledInputField = styled(Input)(({ theme }) => ({
     transition: theme.transitions.create('width'),
     width: '100%',
   },
-  '& input.keyboard-focused': {
-    // hide keyboard-focused default black outline (style.css)
+  '& input:focus-visible': {
     // MUI adds a 2px border to the bottom of the input parent on focus.
     // It has sufficient contrast to meet WCAG 2.1 requirements (see Success Criterion 1.4.11 and 2.4.7)
     border: 'none !important',

@@ -15,7 +15,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     zIndex: theme.zIndex.appBar,
     pointerEvents: 'all',
     backgroundColor: theme.palette.geoViewColor?.bgColor.main,
-    border: theme.palette.geoViewColor?.primary.light[100],
 
     '&.interaction-static': {
       position: 'absolute',
@@ -53,8 +52,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     '& li': {
       backgroundColor: 'transparent',
       justifyContent: 'center',
-      paddingTop: 0,
-      paddingBottom: 0,
     },
   },
   appBarButtons: {
@@ -63,9 +60,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     flexDirection: 'column',
     minHeight: 0,
     position: 'relative',
-    borderRightColor: theme.palette.geoViewColor?.primary.light[100],
-    borderRightWidth: 1,
-    borderRightStyle: 'solid',
+    borderRight: `1px solid ${theme.palette.geoViewColor?.primary.light[100] ?? theme.palette.divider}`,
     width: 48,
     '& button': {
       height: '48px',
@@ -90,6 +85,11 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
         color: theme.palette.geoViewColor?.bgColor.dark[450],
         cursor: 'not-allowed',
       },
+      // Override global focus indicator for AppBar buttons
+      '&.Mui-focusVisible': {
+        outlineColor: 'transparent',
+        boxShadow: 'none',
+      },
     },
   },
   appBarSeparator: {
@@ -102,7 +102,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       top: 0,
       left: '4px',
       right: '4px',
-      borderTop: `1px solid ${theme.palette.geoViewColor?.grey.light[100]}`,
+      borderTop: `1px solid ${theme.palette.geoViewColor?.grey.light[100] ?? theme.palette.divider}`,
     },
   },
   appBarBottomSection: {

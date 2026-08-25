@@ -144,10 +144,8 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     '&:hover': {
       backgroundColor: 'transparent',
     },
-    '&.keyboard-focused': {
-      border: 'none !important',
-    },
     '&:focus-visible': {
+      border: 'none !important',
       outline: '2px solid',
       color: theme.palette.geoViewColor?.textColor.dark[200],
       outlineOffset: '2px',

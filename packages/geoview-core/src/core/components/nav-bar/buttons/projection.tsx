@@ -102,7 +102,7 @@ export default function Projection(): JSX.Element {
     return (
       <List key="projectionButtons" role="group" aria-label={t('mapnav.projection')}>
         {Object.entries(projectionChoiceOptions).map(([key, proj]) => (
-          <ListItem key={key}>
+          <ListItem key={key} sx={memoSxClasses.listItem}>
             <Button
               id={`${mapId}-proj-${proj.code}`}
               type="textWithIcon"
