@@ -1,9 +1,20 @@
 /*
 Hold viewer specific css not inside theme
 */
-.keyboard-focused {
-  border: revert !important;
-}
+
+/*
+ * LEGACY: The .keyboard-focused class is applied by JavaScript (api.ts #manageKeyboardFocus)
+ * to ANY element that receives Tab focus within a .geoview-map container (not just the map 
+ * element). Crosshair activation is separate logic that only triggers when the specific map
+ * element (mapTargetElement-{mapId}) receives focus.
+ * 
+ * This CSS rule targets the outer map container shell element, but the JavaScript actually
+ * applies the class to the focused element itself, making this selector currently ineffective
+ * for the map container case. All other focus indicators use native :focus-visible and 
+ * MUI's .Mui-focusVisible.
+ * 
+ * TODO #3607: Phase out .keyboard-focused in favour of native :focus-visible.
+ */
 
 /* Work around to have border map container focus */
 [class*='mapContainer'].keyboard-focused {

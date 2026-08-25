@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import type { MouseEvent } from 'react';
-import { useMemo, memo, useCallback, useState } from 'react';
+import { useMemo, memo, useCallback, useState, useRef, useEffect } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { ClickAwayListener } from '@mui/material';
 import Slider from '@mui/material/Slider';
@@ -13,6 +13,7 @@ import { getSxClasses } from './resize-footer-panel-style';
 import { useStoreUIFooterPanelResizeValue, useStoreUIActiveTrapGeoView } from '@/core/stores/states/ui-state';
 import { logger } from '@/core/utils/logger';
 import { handleEscapeKey } from '@/core/utils/utilities';
+import { TIMEOUT } from '@/core/utils/constant';
 
 /** Slider input styles for vertical orientation. */
 const SLIDER_STYLES = {
@@ -61,6 +62,12 @@ export const ResizeFooterPanel = memo((): JSX.Element => {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const [pendingValue, setPendingValue] = useState<number | undefined>(undefined);
   const [open, setOpen] = useState(false);
+
+  // Refs
+  const resizeButtonRef = useRef<HTMLButtonElement>(null);
+  const focusTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const prevOpenRef = useRef<boolean>(false);
+  const keyboardCloseRef = useRef<boolean>(false);
 
   // Get container
   const mapId = useStoreGeoViewMapId();
@@ -115,6 +122,7 @@ export const ResizeFooterPanel = memo((): JSX.Element => {
 
       // Enter closes the popper and applies the pending value
       if (event.key === 'Enter') {
+        keyboardCloseRef.current = true;
         handleClose();
         return;
       }
@@ -165,10 +173,46 @@ export const ResizeFooterPanel = memo((): JSX.Element => {
 
   // #endregion Handlers
 
+  /**
+   * Restores focus to the Resize button when the popper closes via keyboard (Enter key).
+   *
+   * Only restores focus on Enter-key close to avoid stealing focus from click-away or mouse drag closes.
+   * Uses 100ms timeout to allow DOM reflow to complete after footer panel resize.
+   */
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('RESIZE-FOOTER-PANEL - restore focus', open);
+
+    // When popper closes, reset the flag and attempt focus restoration
+    if (prevOpenRef.current && !open) {
+      // Reset flag at start of close transition — before any async callbacks
+      const wasKeyboardClose = keyboardCloseRef.current;
+      keyboardCloseRef.current = false;
+
+      // Only restore focus if this was a keyboard-initiated close and button is available
+      if (resizeButtonRef.current && wasKeyboardClose) {
+        focusTimeoutRef.current = setTimeout(() => {
+          resizeButtonRef.current?.focus({ focusVisible: true });
+          focusTimeoutRef.current = undefined;
+        }, TIMEOUT.resizeButtonFocusRestore);
+      }
+    }
+
+    // Track previous open state for next render
+    prevOpenRef.current = open;
+
+    return () => {
+      if (focusTimeoutRef.current !== undefined) {
+        clearTimeout(focusTimeoutRef.current);
+        focusTimeoutRef.current = undefined;
+      }
+    };
+  }, [open]);
+
   return (
     <ClickAwayListener mouseEvent="onMouseDown" touchEvent="onTouchStart" onClickAway={handleClose}>
       <Box>
-        <IconButton onClick={handleClick} aria-label={t('footerBar.resizeTooltip')}>
+        <IconButton iconRef={resizeButtonRef} onClick={handleClick} aria-label={t('footerBar.resizeTooltip')}>
           <HeightIcon />
         </IconButton>
         <Popper

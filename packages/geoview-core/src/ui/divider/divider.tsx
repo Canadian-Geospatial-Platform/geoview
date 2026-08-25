@@ -5,6 +5,7 @@ import type { DividerProps } from '@mui/material';
 import { Divider as MaterialDivider } from '@mui/material';
 
 import { getSxClasses } from '@/ui/divider/divider-style';
+import { composeSxProps } from '@/ui/style/types';
 import { logger } from '@/core/utils/logger';
 
 /**
@@ -58,9 +59,9 @@ function DividerUI(props: DividerPropsExtend): JSX.Element {
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
-  // Style
+  // Style - compose internal and caller sx props without nesting array-form sx.
   const dividerOrientation = orientation === 'horizontal' ? sxClasses.horizontal : sxClasses.vertical;
-  const sxMerged = { ...(grow ? sxClasses.grow : {}), ...dividerOrientation, ...sx };
+  const sxMerged = composeSxProps(grow && sxClasses.grow, dividerOrientation, sx);
 
   return <MaterialDivider sx={sxMerged} className={className} style={style} {...rest} />;
 }

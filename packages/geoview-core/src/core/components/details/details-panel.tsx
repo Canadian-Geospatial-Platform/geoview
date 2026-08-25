@@ -572,9 +572,11 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
       // Restore focus to the navigation button after React completes the state update and re-render
       requestAnimationFrame(() => {
         if (change === -1) {
-          prevButtonRef.current?.focus({ preventScroll: true });
+          // Explicitly request focus indicator for keyboard users
+          prevButtonRef.current?.focus({ preventScroll: true, focusVisible: true });
         } else {
-          nextButtonRef.current?.focus({ preventScroll: true });
+          // Explicitly request focus indicator for keyboard users
+          nextButtonRef.current?.focus({ preventScroll: true, focusVisible: true });
         }
       });
     },

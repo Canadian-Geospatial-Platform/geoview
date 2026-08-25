@@ -266,7 +266,8 @@ export function AppBar(props: AppBarProps): JSX.Element {
       // Return focus to the AppBar button that opened this panel
       if (isFocusTrapped) {
         setTimeout(() => {
-          document.getElementById(getButtonElementId(buttonId, '-panel-btn'))?.focus();
+          // Explicitly request focus indicator for keyboard users
+          document.getElementById(getButtonElementId(buttonId, '-panel-btn'))?.focus({ focusVisible: true });
         }, TIMEOUT.dataPanelLoading);
       }
 

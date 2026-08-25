@@ -8,6 +8,8 @@ import { Radio, RadioGroup, FormControlLabel, CheckIcon, Tooltip, Box, Button } 
 
 import { getSxClasses } from './scale-style';
 import type { SxStyles } from '@/ui/style/types';
+import { getFocusIndicatorStyles } from '@/ui/style/themeOptionsGenerator';
+import { geoViewColors as defaultGeoViewColors } from '@/ui/style/default';
 import { useStoreMapInteraction, useStoreMapScale } from '@/core/stores/states/map-state';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
@@ -213,9 +215,10 @@ export const Scale = memo(({ expanded }: ScaleProps): JSX.Element => {
           ...memoSxClasses.scaleExpandedContainer,
           // Show focus ring when any child Radio has focus
           '&:has(:focus-visible)': {
-            outline: `2px solid ${theme.palette.common.black}`,
-            outlineOffset: '2px',
             borderRadius: '4px',
+            ...getFocusIndicatorStyles(theme.palette.geoViewColor ?? defaultGeoViewColors),
+            boxShadow: 'none',
+            outlineOffset: 0,
           },
         }}
       >
@@ -298,7 +301,7 @@ export const Scale = memo(({ expanded }: ScaleProps): JSX.Element => {
           <Button
             onClick={handleCycleScale}
             type="text"
-            sx={{ ...memoSxClasses.scaleContainer, maxHeight: '40px' }}
+            sx={{ ...memoSxClasses.scaleContainerButton }}
             disableRipple
             className={`interaction-${interaction}`}
             aria-label={t('mapnav.cycleHint')}

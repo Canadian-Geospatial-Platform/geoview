@@ -11,6 +11,7 @@ import Markdown from 'markdown-to-jsx';
 import { Box, FullscreenIcon, ButtonGroup, Button, Typography, IconButton } from '@/ui';
 import { FocusTrap } from '@/ui';
 import type { SxStyles } from '@/ui/style/types';
+import { composeSxProps } from '@/ui/style/types';
 
 import { ResponsiveGrid } from './responsive-grid';
 import { getSxClasses } from './responsive-grid-layout-style';
@@ -641,12 +642,10 @@ const ResponsiveGridLayout = forwardRef(
               <IconButton
                 id={`${mapId}-${containerType}-guide-close-btn`}
                 onClick={handleCloseGuide}
-                sx={{
-                  position: 'absolute',
-                  top: 15,
-                  right: 0,
-                  zIndex: 1000,
-                }}
+                sx={composeSxProps(
+                  memoSxClasses.guideCloseBtn,
+                  containerType === CONTAINER_TYPE.APP_BAR ? memoSxClasses.guideCloseBtnAppBar : undefined
+                )}
                 tabIndex={0}
                 aria-label={t('guide.closeGuide')}
               >

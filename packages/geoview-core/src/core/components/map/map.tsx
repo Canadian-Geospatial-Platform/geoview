@@ -1,6 +1,8 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 
 import { useTranslation } from 'react-i18next';
+
+import { useTheme } from '@mui/material/styles';
 
 import { Box, ProgressBar } from '@/ui';
 import { NorthArrow, NorthPoleFlag } from '@/core/components/north-arrow/north-arrow';
@@ -29,9 +31,6 @@ type MapProps = {
   viewer: MapViewer;
 };
 
-/** Sx class definitions for the map component (static - no theme dependency). */
-const sxClasses = getSxClasses();
-
 /**
  * Creates the map component.
  *
@@ -44,6 +43,8 @@ export function Map(props: MapProps): JSX.Element {
 
   const { viewer } = props;
   const { t } = useTranslation();
+  const theme = useTheme();
+  const memoSxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // internal state - get ref to div element
   const mapElement = useRef<HTMLElement>(null);
@@ -125,7 +126,7 @@ export function Map(props: MapProps): JSX.Element {
     <Box
       id={`mapTargetElement-${mapId}`}
       ref={mapElement}
-      sx={sxClasses.mapContainer}
+      sx={memoSxClasses.mapContainer}
       tabIndex={mapInteraction === 'static' ? -1 : 0}
       role="region"
       aria-label={t('map.container', { mapId })}
@@ -141,7 +142,7 @@ export function Map(props: MapProps): JSX.Element {
         </>
       )}
       {layersAreLoading && (
-        <Box sx={{ ...sxClasses.progressBar, bottom: mapInteraction === 'static' ? 0 : 40 }}>
+        <Box sx={{ ...memoSxClasses.progressBar, bottom: mapInteraction === 'static' ? 0 : 40 }}>
           <ProgressBar aria-label={t('error.map.loadingLayers')} />
         </Box>
       )}
