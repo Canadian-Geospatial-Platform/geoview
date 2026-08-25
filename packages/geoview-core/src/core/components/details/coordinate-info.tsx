@@ -142,7 +142,7 @@ export function CoordinateInfo(): JSX.Element {
     <Box sx={memoSxClasses.rightPanelContainer} className="guide-content-container">
       <Box sx={memoSxClasses.coordinateInfoContainer}>
         <List>
-          <ListItem sx={memoSxClasses.coordinateInfoSection} disablePadding>
+          <ListItem sx={memoSxClasses.coordinateInfoSection}>
             <Typography variant="subtitle1" sx={memoSxClasses.coordinateInfoSectionTitle}>
               {t('details.geographicCoordinates')}
             </Typography>
@@ -168,7 +168,7 @@ export function CoordinateInfo(): JSX.Element {
             </Box>
           </ListItem>
 
-          <ListItem sx={memoSxClasses.coordinateInfoSection} disablePadding>
+          <ListItem sx={memoSxClasses.coordinateInfoSection}>
             <Typography variant="subtitle1" sx={memoSxClasses.coordinateInfoSectionTitle}>
               {t('details.utmCoordinates')}
             </Typography>
@@ -188,7 +188,7 @@ export function CoordinateInfo(): JSX.Element {
             )}
           </ListItem>
 
-          <ListItem sx={memoSxClasses.coordinateInfoSection} disablePadding>
+          <ListItem sx={memoSxClasses.coordinateInfoSection}>
             <Typography variant="subtitle1" sx={memoSxClasses.coordinateInfoSectionTitle}>
               {t('details.ntsMapsheet')}
             </Typography>
@@ -202,7 +202,7 @@ export function CoordinateInfo(): JSX.Element {
             )}
           </ListItem>
 
-          <ListItem sx={memoSxClasses.coordinateInfoSection} disablePadding>
+          <ListItem sx={memoSxClasses.coordinateInfoSection}>
             <Typography variant="subtitle1" sx={memoSxClasses.coordinateInfoSectionTitle}>
               {t('details.elevation')}
             </Typography>

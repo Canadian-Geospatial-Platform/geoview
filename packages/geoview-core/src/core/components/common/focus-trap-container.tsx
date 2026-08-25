@@ -129,6 +129,7 @@ export const FocusTrapContainer = memo(({
     () => ({
       ...EXIT_BUTTON_STYLES,
       display: activeTrapGeoView ? 'block' : 'none',
+      marginTop: '32px',
     }),
     [activeTrapGeoView]
   );
@@ -152,7 +153,10 @@ export const FocusTrapContainer = memo(({
 
     if (id === focusItem.activeElementId) {
       // SetTimeout with a delay of 0 to force the rendering
-      setTimeout(() => document.getElementById(exitBtnId)?.focus(), TIMEOUT.focusDelay);
+      setTimeout(() => {
+        // Explicitly request focus indicator for keyboard users
+        document.getElementById(exitBtnId)?.focus({ focusVisible: true });
+      }, TIMEOUT.focusDelay);
     }
   }, [focusItem, id, exitBtnId]);
 
