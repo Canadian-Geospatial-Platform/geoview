@@ -48,6 +48,10 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     '&.Mui-selected.Mui-focusVisible': {
       backgroundColor: 'inherit',
     },
+    '&.Mui-focusVisible': {
+      outlineOffset: '-2px',
+      boxShadow: 'none',
+    },
   },
   listPrimaryText: {
     minWidth: '0',
