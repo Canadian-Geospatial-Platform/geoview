@@ -287,7 +287,8 @@ export const Guide = memo(({ containerType }: GuideType): JSX.Element => {
 
           // Set focus on the target element after scrolling
           focusTimeoutRef.current = setTimeout(() => {
-            (element as HTMLElement).focus({ preventScroll: true });
+            // Explicitly request focus indicator for keyboard users
+            (element as HTMLElement).focus({ preventScroll: true, focusVisible: true });
           }, TIMEOUT.guideAnchorFocus);
         }
       }

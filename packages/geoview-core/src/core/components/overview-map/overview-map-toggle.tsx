@@ -14,15 +14,6 @@ interface OverviewMapToggleProps {
   /** OpenLayers overview map control. */
   overviewMap: OLOverviewMap;
 }
-
-/** Static styles for the overview toggle button. */
-const OVERVIEW_STYLES = {
-  margin: 0,
-  padding: 0,
-  height: 'initial',
-  minWidth: 'initial',
-} as const;
-
 /**
  * Creates a toggle icon button for the overview map.
  *
@@ -106,7 +97,7 @@ export function OverviewMapToggle(props: OverviewMapToggleProps): JSX.Element | 
   return createPortal(
     <Tooltip title={tooltipAndAria}>
       <Box sx={sxClasses.toggleBtnContainer}>
-        <Box component="div" sx={sxClasses.toggleBtn} className={isExpanded ? `minimapOpen` : `minimapClosed`} style={OVERVIEW_STYLES}>
+        <Box component="div" sx={sxClasses.toggleBtn} className={isExpanded ? `minimapOpen` : `minimapClosed`}>
           <ChevronLeftIcon />
         </Box>
       </Box>

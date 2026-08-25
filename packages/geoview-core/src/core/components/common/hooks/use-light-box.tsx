@@ -63,8 +63,8 @@ function BaseLightBoxComponent({
     setTimeout(() => {
       const element = document.getElementById(returnFocusId);
       if (element) {
-        element.focus();
-        element.classList.add('keyboard-focused');
+        // Explicitly request focus indicator for keyboard users
+        element.focus({ focusVisible: true });
       } else {
         logger.logWarning(`LightBox focus restoration failed: element "${returnFocusId}" not found`);
       }
