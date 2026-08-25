@@ -2,6 +2,8 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { Box, Tooltip } from '@/ui';
 import { NorthArrowIcon } from '@/core/components/north-arrow/north-arrow-icon';
+import { getFocusIndicatorStyles } from '@/ui/style/themeOptionsGenerator';
+import { geoViewColors as defaultGeoViewColors } from '@/ui/style/default';
 
 import { useStoreMapRotation } from '@/core/stores/states/map-state';
 import { useManageArrow } from '@/core/components/north-arrow/hooks/useManageArrow';
@@ -41,15 +43,15 @@ export function MapInfoRotationButton(): JSX.Element {
       : `${t('mapctrl.rotation.rotation')}: ${rotationDegrees}°`;
 
   const containerStyles = {
-    width: '40px',
-    height: '40px',
-    my: '1rem',
     color: theme.palette.geoViewColor?.bgColor.light[800],
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     '&:focus-visible': {
-      outlineColor: theme.palette.geoViewColor?.primary.main,
+      borderRadius: '4px',
+      ...getFocusIndicatorStyles(theme.palette.geoViewColor ?? defaultGeoViewColors),
+      outlineOffset: 0,
+      boxShadow: 'none',
     },
   };
 

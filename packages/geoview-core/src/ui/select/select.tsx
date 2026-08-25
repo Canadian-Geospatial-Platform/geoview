@@ -4,6 +4,7 @@ import type { InputLabelProps, FormControlProps, SelectChangeEvent, MenuProps, S
 import { FormControl, InputLabel, MenuItem, Select as MaterialSelect } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { getSxClasses } from '@/ui/select/select-style';
+import { composeSxProps } from '@/ui/style/types';
 import { logger } from '@/core/utils/logger';
 
 /**
@@ -168,23 +169,13 @@ function SelectUI(props: TypeSelectProps, ref: Ref<HTMLDivElement>): JSX.Element
   }, [labelId, id, value, onChange, disabled, variant, sxClasses.formControl, MenuProps, displayEmpty, renderValue, selectProps]);
 
   /**
-   * Merge sx with default and custom styles.
+   * Composes FormControl and caller sx props without nesting array-form sx.
    */
   const memoMergedSx = useMemo((): SxProps<Theme> | undefined => {
     // Log
     logger.logTraceUseMemo('ui/select/select - memoMergedSx', sx);
 
-    // Collect all sx sources that exist
-    const sources = [formControlProps.sx, sx].filter(Boolean);
-
-    // No sources? Return undefined
-    if (sources.length === 0) return undefined;
-
-    // Single source? Return it directly (avoids unnecessary array wrapping)
-    if (sources.length === 1) return sources[0];
-
-    // Multiple sources? Flatten to avoid nested arrays (MUI handles array sx)
-    return sources.flat() as SxProps<Theme>;
+    return composeSxProps(formControlProps.sx, sx);
   }, [formControlProps.sx, sx]);
 
   return (

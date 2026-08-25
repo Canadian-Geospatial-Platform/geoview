@@ -71,7 +71,7 @@ export function GeoList({ geoListItems, searchValue }: GeoListProps): JSX.Elemen
   };
 
   return (
-    <List>
+    <List sx={memoSxClassesList.geoList}>
       {geoListItems.map((geoListItem, index) => (
         // tooltip is here for when the name is too long to be shown in full in the list
         <Tooltip
@@ -86,8 +86,12 @@ export function GeoList({ geoListItems, searchValue }: GeoListProps): JSX.Elemen
           disableTouchListener={!isAboveSmBreakpoint}
           disableHoverListener={!isAboveSmBreakpoint}
         >
-          <ListItem disablePadding>
-            <ListItemButton onClick={() => handleZoomToGeoLocator(geoListItem)} aria-label={getTooltipTitle(geoListItem)}>
+          <ListItem>
+            <ListItemButton
+              onClick={() => handleZoomToGeoLocator(geoListItem)}
+              aria-label={getTooltipTitle(geoListItem)}
+              sx={memoSxClassesList.geoListItemButton}
+            >
               <Grid container spacing={6} sx={memoSxClassesList.geoListItemGrid}>
                 {/* Location name + province (truncates when > 66% of row width) */}
                 <Grid size={{ xs: 12, sm: 8 }} sx={memoSxClassesList.geoListLocationCell}>
