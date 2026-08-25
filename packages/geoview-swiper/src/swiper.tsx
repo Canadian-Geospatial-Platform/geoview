@@ -54,6 +54,7 @@ type SwiperProps = {
    */
   controllerRegistry: ControllerRegistry;
 
+  /** The Swiper plugin configuration. */
   // We have this eslint here for "standardization between plugins"
   // eslint-disable-next-line react/no-unused-prop-types
   config: ConfigProps;
@@ -61,7 +62,10 @@ type SwiperProps = {
 
 /** Configuration properties for the Swiper plugin. */
 export type ConfigProps = {
+  /** The layer paths selected for swiping. */
   layers: string[];
+
+  /** The orientation of the swiper divider. */
   orientation: SwipeOrientation;
 };
 
@@ -274,15 +278,21 @@ export function Swiper(props: SwiperProps): JSX.Element {
     const handlersByLayer = new Map<AbstractBaseGVLayer, LayerRenderHandlers>();
 
     gvLayers.forEach((layer) => {
-      // OpenLayers may render layers with either a Canvas 2D or WebGL context. Each renderer
-      // requires its own state tracking so postrender can restore the context to its prior state.
-      let canvasContextSaved = false;
+      // AbstractBaseGVLayer exposes BaseLayer, but resolved leaf layers use the renderable Layer
+      // event surface that provides the prerender and postrender events.
+      const olLayer = layer.getOLLayer() as Layer;
+
+      // OpenLayers vector renderers use a temporary canvas when layer opacity is below 1. Read the
+      // renderer's current context because the RenderEvent context remains the destination canvas.
+      let canvasContextSaved: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | undefined;
+      let webGLContext: WebGLRenderingContext | WebGL2RenderingContext | undefined;
       let webGLScissorState: WebGLScissorState | undefined;
 
       // Clip immediately before this specific layer renders. Applying the clip at the layer event
       // level is important because OpenLayers can compose multiple layers into one shared canvas.
       const preRender = (event: RenderEvent): void => {
-        const { context } = event;
+        const rendererContext = (olLayer.getRenderer() as { context?: typeof event.context }).context;
+        const context = rendererContext ?? event.context;
         const currentMapSize = viewer.map.getSize();
         if (!context || !currentMapSize) return;
 
@@ -299,6 +309,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
           // conversion, including device pixel ratio and the renderer's coordinate transform.
           const bottomLeft = getRenderPixel(event, [0, clipHeight]);
           const topRight = getRenderPixel(event, [clipWidth, 0]);
+          webGLContext = context;
           webGLScissorState = {
             enabled: context.isEnabled(context.SCISSOR_TEST),
             box: new Int32Array(context.getParameter(context.SCISSOR_BOX) as Int32Array),
@@ -324,8 +335,8 @@ export function Swiper(props: SwiperProps): JSX.Element {
 
         // Save before clipping because Canvas clip regions are cumulative and cannot be directly
         // reset. postrender restores this state after only the target layer has been drawn.
+        canvasContextSaved = context;
         context.save();
-        canvasContextSaved = true;
         context.beginPath();
         context.moveTo(topLeft[0], topLeft[1]);
         context.lineTo(bottomLeft[0], bottomLeft[1]);
@@ -337,29 +348,22 @@ export function Swiper(props: SwiperProps): JSX.Element {
 
       // Restore whichever rendering context was changed in prerender. Leaving either clipping
       // mechanism active would affect layers rendered afterward on the same underlying context.
-      const postRender = (event: RenderEvent): void => {
-        const { context } = event;
-        if (!context) return;
-
-        if ('scissor' in context) {
-          if (!webGLScissorState) return;
-
+      const postRender = (): void => {
+        if (webGLContext && webGLScissorState) {
           // Restore both the previous box and whether scissor testing was originally enabled.
-          context.scissor(webGLScissorState.box[0], webGLScissorState.box[1], webGLScissorState.box[2], webGLScissorState.box[3]);
-          if (!webGLScissorState.enabled) context.disable(context.SCISSOR_TEST);
+          webGLContext.scissor(webGLScissorState.box[0], webGLScissorState.box[1], webGLScissorState.box[2], webGLScissorState.box[3]);
+          if (!webGLScissorState.enabled) webGLContext.disable(webGLContext.SCISSOR_TEST);
+          webGLContext = undefined;
           webGLScissorState = undefined;
           return;
         }
 
         if (canvasContextSaved) {
-          context.restore();
-          canvasContextSaved = false;
+          canvasContextSaved.restore();
+          canvasContextSaved = undefined;
         }
       };
 
-      // AbstractBaseGVLayer exposes BaseLayer, but resolved leaf layers use the renderable Layer
-      // event surface that provides the prerender and postrender events.
-      const olLayer = layer.getOLLayer() as Layer;
       olLayer.on('prerender', preRender);
       olLayer.on('postrender', postRender);
       handlersByLayer.set(layer, { preRender, postRender });

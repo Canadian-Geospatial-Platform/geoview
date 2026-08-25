@@ -140,6 +140,8 @@ _(Fixes discovered or applied during this cycle)_
 - Fixed scale control accessibility labeling by correcting the aria-label translation key wiring for map info scale output (#3581)
 - Fixed overview-map visible on load when `hideOnZoom` threshold should hide it (e.g., outlier-elections-2019.html) (#3562)
 - Fixed Swiper layer opacity handling by rewriting clip logic for features based on slider position (#3562)
+- Fixed Swiper rendering isolation so clipping is applied only to selected layers and their descendants (#3597)
+- Fixed time-slider reset behavior and dual-handle constraints so registered defaults are preserved and handles remain separated (#3569, #3599)
 - Fixed abort controller in add-new-layer component when clicking 'back' then completing steps to add a layer (#3562)
 - Fixed WMS CRS override when layers are behind a proxy — was re-encoding the entire string instead of only adjusting CRS and BBOX properties (#3562)
 - Fixed zoom-to-feature-geometry working even when the geometry field is not included in the outFields configuration (#3562)
