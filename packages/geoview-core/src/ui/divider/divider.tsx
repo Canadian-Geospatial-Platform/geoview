@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import type { SxProps, Theme } from '@mui/material/styles';
 import { useTheme } from '@mui/material/styles';
-import type { DividerProps } from '@mui/material';
+import type { DividerProps, SxProps as MuiSxProps } from '@mui/material';
 import { Divider as MaterialDivider } from '@mui/material';
 
 import { getSxClasses } from '@/ui/divider/divider-style';
@@ -58,9 +58,9 @@ function DividerUI(props: DividerPropsExtend): JSX.Element {
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
-  // Style
+  // Style - compose sx as array to support all valid SxProps shapes (object, array, function)
   const dividerOrientation = orientation === 'horizontal' ? sxClasses.horizontal : sxClasses.vertical;
-  const sxMerged = { ...(grow ? sxClasses.grow : {}), ...dividerOrientation, ...sx };
+  const sxMerged = [grow && sxClasses.grow, dividerOrientation, sx] as MuiSxProps;
 
   return <MaterialDivider sx={sxMerged} className={className} style={style} {...rest} />;
 }

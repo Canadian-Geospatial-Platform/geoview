@@ -142,7 +142,8 @@ function PopperUI({ open, onClose, handleKeyDown, focusSelector, focusTrap = fal
         .then(() => {
           const focusElement = popperRef.current?.querySelector(focusSelector) as HTMLElement;
           if (focusElement) {
-            focusElement.focus();
+            // Explicitly request focus indicator for keyboard users
+            focusElement.focus({ focusVisible: true });
           }
         })
         .catch(() => {

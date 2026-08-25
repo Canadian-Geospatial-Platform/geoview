@@ -130,6 +130,14 @@ export class GeoViewColorClass {
   }
 }
 
+/** Focus indicator color configuration for WCAG-compliant keyboard navigation */
+export interface IGeoViewFocusIndicator {
+  /** Outline color for focus indicators (e.g., '#000' for light themes, '#fff' for dark themes) */
+  outline: string;
+  /** Halo/box-shadow color for focus indicators (e.g., '#fff' for light themes, 'rgba(0,0,0,0.8)' for dark themes) */
+  halo: string;
+}
+
 /** GeoView color palette interface with semantic color categories */
 export interface IGeoViewColors {
   white: string;
@@ -144,6 +152,9 @@ export interface IGeoViewColors {
   error: GeoViewColorClass;
   info: GeoViewColorClass;
   warning: GeoViewColorClass;
+
+  /** WCAG-compliant focus indicator colors for keyboard navigation */
+  focusIndicator: IGeoViewFocusIndicator;
 }
 
 /** GeoView font size scale interface from xs to xxl with dynamic key support */

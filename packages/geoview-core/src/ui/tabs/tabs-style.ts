@@ -40,8 +40,8 @@ export const getSxClasses = (theme: Theme, isMapFullScreen: boolean, appHeight: 
       maxWidth: '18px',
     },
     ':focus-visible': {
-      border: `2px solid ${theme.palette.common.black}`,
-      outline: 'none',
+      outlineOffset: '-3px',
+      boxShadow: `inset 0 0 0 6px ${theme.palette.geoViewColor?.focusIndicator.halo ?? '#fff'}`,
     },
     transition: 'background-color 0.3s ease-in-out',
     '&:hover': {

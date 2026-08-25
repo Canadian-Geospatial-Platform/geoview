@@ -59,7 +59,7 @@ const LegendListItem = memo(
     const isDisabled = !canToggle || !onToggle;
 
     return (
-      <ListItem sx={sxClasses.layerListItem} disablePadding className={`layerListItem ${itemClassName || ''}`}>
+      <ListItem sx={sxClasses.layerListItem} className={`layerListItem ${itemClassName || ''}`}>
         <Tooltip
           title={tooltipTitle || (showNameTooltip ? name : '')}
           placement="top"

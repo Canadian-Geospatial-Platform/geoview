@@ -1,7 +1,7 @@
 import type { Ref } from 'react';
 import { forwardRef } from 'react';
 import MaterialList from '@mui/material/List';
-import type { ListProps } from '@mui/material';
+import type { ListProps, SxProps } from '@mui/material';
 import { logger } from '@/core/utils/logger';
 
 /**
@@ -38,7 +38,7 @@ function ListUI(props: TypeListProps, ref: Ref<HTMLUListElement>): JSX.Element {
   return (
     <MaterialList
       ref={ref}
-      sx={{ ...sxClasses.list, ...sx }}
+      sx={[sxClasses.list, sx] as SxProps}
       className={className || ''}
       style={style || undefined}
       component={type || 'ul'}

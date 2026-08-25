@@ -77,8 +77,8 @@ export const helpClosePanelById = (
   const buttonElementId = `${mapId}-${CONTAINER_TYPE.APP_BAR}-${buttonId}-panel-btn`;
   const buttonElement = document.getElementById(buttonElementId);
   if (buttonElement) {
-    // put back focus on calling button
-    buttonElement.focus();
+    // Explicitly request focus indicator for keyboard users
+    buttonElement.focus({ focusVisible: true });
   } else {
     // Nothing to put focus on, callback
     focusWhenNoElementCallback?.();
