@@ -15,4 +15,10 @@ export const darkThemeColors: IGeoViewColors = {
   bgColor: new GeoViewColorClass('#3C3E42', true),
   primary: new GeoViewColorClass('#8ec4fa'),
   textColor: new GeoViewColorClass('#ffffff'),
+
+  /** Dark theme focus indicator with white outline and semi-transparent black halo */
+  focusIndicator: {
+    outline: '#fff',
+    halo: 'rgba(0, 0, 0, 0.8)',
+  },
 };

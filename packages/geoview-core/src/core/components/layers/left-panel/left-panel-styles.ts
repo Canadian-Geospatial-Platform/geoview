@@ -64,6 +64,7 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
         flexDirection: 'row',
         justifyContent: 'right',
         alignItems: 'center',
+        paddingRight: '6px',
 
         '& .MuiIconButton-root': {
           margin: '0px 1px',

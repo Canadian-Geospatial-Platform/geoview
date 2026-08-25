@@ -29,6 +29,9 @@ yet-another-react-lightbox
 .yarl__button:focus-visible {
   background-color: #515ba5 !important;
   color: #fff !important;
+  outline: 3px solid #000 !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 6px #fff !important;
 }
 
 .yarl__button:disabled {

@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material';
 
 import { Box, AddCircleOutlineIcon, Button } from '@/ui';
+import type { SxStyles } from '@/ui/style/types';
 import { ToggleAll } from '@/core/components/toggle-all/toggle-all';
 import { useStoreLayerDisplayState, useStoreLayerTopLevelLayerPaths } from '@/core/stores/states/layer-state';
 import type { TypeLayersViewDisplayState } from './types';
@@ -12,6 +13,7 @@ import { logger } from '@/core/utils/logger';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { useStoreGeoViewMapId } from '@/core/stores/geoview-store';
 import { useLayerController } from '@/core/controllers/use-controllers';
+import { getSxClasses } from './layers-toolbar-style';
 
 interface TypeLayersToolbar {
   containerType: TypeContainerBox;
@@ -33,14 +35,9 @@ export function LayersToolbar({ containerType }: TypeLayersToolbar): JSX.Element
   const addButtonRef = useRef<HTMLButtonElement>(null);
   const userClickedAdd = useRef(false);
 
-  const layerToolbarStyle = {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: 3,
-    '&>button': { padding: '10px 15px' },
-    '& .MuiButton-startIcon': { [theme.breakpoints.down('sm')]: { margin: 0, padding: '0 0.25rem' } },
-    '& .MuiButtonGroup-root': { backgroundColor: theme.palette.geoViewColor?.bgColor.light[300] },
-  };
+  const memoSxClasses = useMemo((): SxStyles => {
+    return getSxClasses(theme);
+  }, [theme]);
 
   // Store
   const mapId = useStoreGeoViewMapId();
@@ -118,7 +115,7 @@ export function LayersToolbar({ containerType }: TypeLayersToolbar): JSX.Element
   }, [layerPaths.length, layerController]); // Only depend on layerPaths.length and layerController
 
   return (
-    <Box id={`${mapId}-${containerType}-layers-toolbar`} sx={layerToolbarStyle}>
+    <Box id={`${mapId}-${containerType}-layers-toolbar`} sx={memoSxClasses.container}>
       <Button
         ref={addButtonRef}
         makeResponsive
@@ -127,8 +124,9 @@ export function LayersToolbar({ containerType }: TypeLayersToolbar): JSX.Element
         tooltip={t('legend.addLayer')}
         tooltipPlacement="top"
         variant={displayState === 'add' ? 'contained' : 'outlined'}
-        startIcon={<AddCircleOutlineIcon sx={{ fontSize: theme.palette.geoViewFontSize?.sm }} />}
+        startIcon={<AddCircleOutlineIcon />}
         onClick={() => handleSetDisplayState('add')}
+        sx={memoSxClasses.addButton}
       >
         {t('legend.addLayer')}
       </Button>

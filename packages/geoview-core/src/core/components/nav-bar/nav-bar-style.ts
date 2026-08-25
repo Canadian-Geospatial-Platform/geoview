@@ -132,6 +132,11 @@ export const getSxClasses = (theme: Theme, panelWidth?: string | number): SxStyl
           stroke: `${theme.palette.geoViewColor?.white ?? theme.palette.common.white}`,
         },
       },
+      // Override global focus indicator for NavBar buttons
+      '&.Mui-focusVisible': {
+        outlineColor: 'transparent',
+        boxShadow: 'none',
+      },
     },
     popper: {
       zIndex: theme.zIndex.modal,
@@ -188,6 +193,9 @@ export const getSxClasses = (theme: Theme, panelWidth?: string | number): SxStyl
         scrollbarWidth: 'thin',
         scrollbarColor: `${theme.palette.geoViewColor?.primary.main ?? theme.palette.primary.main} transparent`,
       },
+    },
+    listItem: {
+      marginBottom: '6px', // Create space for the focus indicator to be visible
     },
     button: {
       justifyContent: 'flex-start',

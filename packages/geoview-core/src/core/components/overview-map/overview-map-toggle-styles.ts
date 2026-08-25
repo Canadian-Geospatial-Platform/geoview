@@ -14,6 +14,10 @@ export const getSxClasses = (): SxClasses => ({
     right: 0,
   },
   toggleBtn: {
+    margin: 0,
+    padding: 0,
+    height: 'initial',
+    minWidth: 'initial',
     color: 'black',
     zIndex: 150,
     transform: 'rotate(45deg)',

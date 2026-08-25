@@ -20,6 +20,15 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       color: theme.palette.geoViewColor?.white,
     },
   },
+  scaleContainerButton: {
+    height: '100%',
+    maxHeight: '40px',
+    paddingBlock: '2px',
+    '&.Mui-focusVisible': {
+      outlineOffset: '0',
+      boxShadow: 'none',
+    },
+  },
   scaleExpandedContainer: {
     gap: theme.spacing(5),
     padding: theme.spacing(0, 6),

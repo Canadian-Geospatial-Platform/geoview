@@ -1,11 +1,15 @@
+import type { Theme } from '@mui/material/styles';
 import type { SxStyles } from '@/ui/style/types';
+import { getFocusIndicatorStyles } from '@/ui/style/themeOptionsGenerator';
+import { geoViewColors as defaultGeoViewColors } from '@/ui/style/default';
 
 /**
  * Gets custom sx classes for the map.
  *
+ * @param theme - The MUI theme object
  * @returns The sx classes object
  */
-export const getSxClasses = (): SxStyles => ({
+export const getSxClasses = (theme: Theme): SxStyles => ({
   mapContainer: {
     boxSizing: 'border-box',
     display: 'flex',
@@ -75,6 +79,14 @@ export const getSxClasses = (): SxStyles => ({
         left: 'auto !important',
         bottom: 'auto !important',
         backgroundColor: '#cccccc',
+      },
+      // Override ol.css' .ol-control button:hover/:focus (higher specificity needed to win over ol.css)
+      '& button:focus': {
+        outline: 0,
+      },
+      '& button:focus-visible': {
+        borderRadius: '50%',
+        ...getFocusIndicatorStyles(theme.palette.geoViewColor ?? defaultGeoViewColors),
       },
       '&::before': {
         content: '""',

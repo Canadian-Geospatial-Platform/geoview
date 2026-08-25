@@ -855,10 +855,11 @@ export function SingleLayer({
     logger.logTraceUseMemo('SINGLE-LAYER - memoListItemButtonSx', inVisibleRange, parentHidden, isVisible, layerStatus);
 
     return [
+      memoSxClasses.listItemButton,
       { minHeight: '4.51rem' },
       (!inVisibleRange || parentHidden || !isVisible || layerStatus === 'error') && memoSxClasses.outOfRange,
     ] as SxProps;
-  }, [inVisibleRange, parentHidden, isVisible, layerStatus, memoSxClasses.outOfRange]);
+  }, [inVisibleRange, parentHidden, isVisible, layerStatus, memoSxClasses.listItemButton, memoSxClasses.outOfRange]);
 
   return (
     <ListItem

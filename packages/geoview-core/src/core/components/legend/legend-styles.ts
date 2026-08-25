@@ -41,7 +41,7 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
   layerStackContainer: {
     flexWrap: 'wrap',
     alignItems: 'center',
-    gap: 3,
+    gap: 5,
     '& button': {
       padding: '0.25rem',
       marginRight: 0,
@@ -116,7 +116,7 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
   },
   layerListItem: {
     paddingLeft: '6px',
-    marginBottom: '3px',
+    marginBottom: '6px',
     fontWeight: '400',
   },
   layerListItemButton: {
@@ -130,19 +130,13 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
       color: theme.palette.geoViewColor?.textColor.light[600],
       borderLeft: `5px solid ${theme.palette.geoViewColor?.bgColor.dark[200]}`,
     },
-    '&.unchecked:focus, &.unchecked.keyboard-focused': {
-      borderLeft: `5px solid ${theme.palette.geoViewColor?.bgColor.dark[200]} !important`,
-    },
-    '&.unchecked.Mui-focusVisible': {
+    '&.unchecked:focus-visible, &.unchecked.Mui-focusVisible': {
       borderLeft: `5px solid ${theme.palette.geoViewColor?.bgColor.dark[200]} !important`,
     },
     '&.checked': {
       borderLeft: `5px solid ${theme.palette.geoViewColor?.bgColor.dark[600]}`,
     },
-    '&.checked:focus, &.checked.keyboard-focused': {
-      borderLeft: `5px solid ${theme.palette.geoViewColor?.bgColor.dark[600]} !important`,
-    },
-    '&.checked.Mui-focusVisible': {
+    '&.checked:focus-visible, &.checked.Mui-focusVisible': {
       borderLeft: `5px solid ${theme.palette.geoViewColor?.bgColor.dark[600]} !important`,
     },
     '&.Mui-disabled': {
