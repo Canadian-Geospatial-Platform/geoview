@@ -35,6 +35,7 @@ Add the test-suite package to your GeoView map configuration:
 | `suite-ui`         | DOM-level UI tests                                   |
 | `suite-utilities`  | Utility function tests (core, date, geo, projection) |
 | `suite-swiper`     | Swiper plugin tests (requires swiper)                |
+| `suite-time-slider` | Time Slider plugin tests (requires time-slider)       |
 
 ### HTML Configuration
 

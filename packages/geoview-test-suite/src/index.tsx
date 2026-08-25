@@ -17,6 +17,7 @@ import { GVTestSuiteDetails } from './tests/suites/suite-details';
 import { GVTestSuiteUtilities } from './tests/suites/suite-utilities';
 import { GVTestSuiteSwiper } from './tests/suites/suite-swiper';
 import { GVTestSuiteDataTable } from './tests/suites/suite-data-table';
+import { GVTestSuiteTimeSlider } from './tests/suites/suite-time-slider';
 
 /**
  * Create a class for the plugin instance.
@@ -119,6 +120,9 @@ class TestSuitePlugin extends AbstractPlugin {
       } else if (suite === 'suite-swiper') {
         // Instanciate the GeoView Test Suite
         this.addTestSuite(new GVTestSuiteSwiper(window.cgpv.api, this.mapViewer, this.controllerRegistry));
+      } else if (suite === 'suite-time-slider') {
+        // Instanciate the GeoView Test Suite
+        this.addTestSuite(new GVTestSuiteTimeSlider(window.cgpv.api, this.mapViewer, this.controllerRegistry));
       } else {
         // Throw
         throw new TestSuiteInitializationError(suite, this.mapViewer.mapId);

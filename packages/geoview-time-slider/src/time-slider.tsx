@@ -55,6 +55,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
     ArrowRightIcon,
     SwitchRightIcon,
     SwitchLeftIcon,
+    RestartAltIcon,
     FormControl,
     InputLabel,
     NativeSelect,
@@ -70,6 +71,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   // References for play button
   const sliderValueRef = useRef<number | undefined>(undefined);
   const sliderDeltaRef = useRef<number | undefined>(undefined);
+  const activeThumbRef = useRef<number>(0);
 
   const pendingCloseRef = useRef<boolean>(false);
 
@@ -342,6 +344,17 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   }, [isPlaying, timeSliderController, layerPath, reversed]);
 
   /**
+   * Handles when the user resets the slider values.
+   */
+  const handleReset = useCallback((): void => {
+    clearTimeout(playIntervalRef.current);
+    setIsPlaying(false);
+    sliderValueRef.current = undefined;
+    sliderDeltaRef.current = undefined;
+    timeSliderController.resetValues(layerPath);
+  }, [layerPath, timeSliderController]);
+
+  /**
    * Handles when the user changes the time delay.
    */
   const handleTimeChange = useCallback(
@@ -434,15 +447,18 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
    *
    * Adjusts the local state so the Slider thumb updates.
    */
-  const handleSliderChange = useCallback((newValues: number | number[]) => {
-    clearTimeout(playIntervalRef.current);
-    setIsPlaying(false);
-    sliderDeltaRef.current = undefined;
+  const handleSliderChange = useCallback(
+    (newValues: number | number[], activeThumb: number): void => {
+      clearTimeout(playIntervalRef.current);
+      setIsPlaying(false);
+      sliderDeltaRef.current = undefined;
+      activeThumbRef.current = activeThumb;
 
-    // Update the local values
-    if (Array.isArray(newValues)) setValues(newValues);
-    else setValues([newValues]);
-  }, []);
+      const valuesAsArray = Array.isArray(newValues) ? newValues : [newValues];
+      setValues(timeSliderController.constrainValues(layerPath, valuesAsArray, activeThumb));
+    },
+    [layerPath, timeSliderController]
+  );
 
   /**
    * Handles when the slider thumb has committed to a value in the slider.
@@ -456,7 +472,9 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
         const nearest = timeStampRange.reduce((prev, curr) => (Math.abs(curr - value) < Math.abs(prev - value) ? curr : prev));
         timeSliderController.updateTimeSliderValues(layerPath, [nearest]);
       } else {
-        timeSliderController.updateTimeSliderValues(layerPath, Array.isArray(newValues) ? newValues : [newValues]);
+        const valuesAsArray = Array.isArray(newValues) ? newValues : [newValues];
+        const constrainedValues = timeSliderController.constrainValues(layerPath, valuesAsArray, activeThumbRef.current);
+        timeSliderController.updateTimeSliderValues(layerPath, constrainedValues);
       }
     },
     [timeSliderController, discreteValues, layerPath, singleHandle, timeStampRange]
@@ -616,6 +634,16 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
 
       {/* Animation controls */}
       <Box role="group" aria-label={t('timeSlider.slider.animationControls')} sx={memoSxClasses.centeredContainer}>
+        <IconButton
+          className="buttonOutline"
+          aria-label={t('timeSlider.slider.reset')}
+          tooltip={t('timeSlider.slider.reset')}
+          tooltipPlacement="top"
+          onClick={handleReset}
+        >
+          <RestartAltIcon />
+        </IconButton>
+
         {!singleHandle && (
           <IconButton
             className="buttonOutline"

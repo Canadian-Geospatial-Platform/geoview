@@ -166,6 +166,7 @@
     <div id="group5-tabs" class="tabs group-tabs">
       <button class="tab-button" onclick="openTab(event, 'map5-test')">Geochart</button>
       <button class="tab-button" onclick="openTab(event, 'map10-test')">Swiper</button>
+      <button class="tab-button" onclick="openTab(event, 'map12-test')">Time Slider</button>
     </div>
 
     <!-- Run All Tests Tab -->
@@ -299,6 +300,15 @@
       </button>
       <div class="panel">
         <div id="runAllMap10Results"></div>
+      </div>
+
+      <!-- Map 12 Results -->
+      <button id="collapsibleMap12" class="collapsible" onclick="toggleCollapsible(this)">
+        <span style="font-weight: bold">Map 12 - Time Slider Tests</span>
+        <span id="statsMap12" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Done success: 0 | Done failed: 0 | Done: 0/0</span>
+      </button>
+      <div class="panel">
+        <div id="runAllMap12Results"></div>
       </div>
     </div>
 
@@ -1057,6 +1067,67 @@
           'corePackagesConfig': [
             {
               'test-suite': { 'suites': ['suite-data-table'] }
+            }
+          ]
+        }"
+      ></div>
+    </div>
+
+    <!-- Map 12 Tab -->
+    <div id="map12-test" class="tab-content">
+      <div class="map-title-holder">
+        <h4 id="HEVNT12">12. Tests on map 12 (Time Slider)</h4>
+        <a class="ref-link" href="#top">Top</a>
+      </div>
+
+      <div id="testSuiteTable-map12"></div>
+      <br />
+      <div
+        id="map12"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
+          'map': {
+            'viewSettings': {
+              'projection': 3978,
+              'initialView': {
+                'zoomAndCenter': [4, [-90, 60]]
+              }
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': false,
+              'labeled': false
+            },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerId': 'timeSliderFlood',
+                'geoviewLayerName': 'Historical Flood Events',
+                'metadataAccessPath': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer',
+                'geoviewLayerType': 'esriDynamic',
+                'listOfLayerEntryConfig': [
+                  {
+                    'layerId': '0'
+                  }
+                ]
+              }
+            ]
+          },
+          'components': [],
+          'footerBar': {
+            'tabs': {
+              'core': [
+                'time-slider'
+              ]
+            },
+            'selectedTab': 'time-slider',
+            'selectedTimeSliderLayerPath': 'timeSliderFlood/0'
+          },
+          'corePackages': ['test-suite'],
+          'theme': 'geo.ca',
+          'corePackagesConfig': [
+            {
+              'test-suite': { 'suites': ['suite-time-slider'] }
             }
           ]
         }"

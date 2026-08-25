@@ -243,6 +243,8 @@ _(Tests added, moved, removed, or reorganized)_
 - Updated test for JSON behind CORS (URL blocked by NRCan) (#3562)
 - Configured new proxy in test-suite for upcoming proxy features (#3562)
 - New `RUN_DEBUG_ONLY` flag for isolating test execution during development (#3562)
+- Added a swiper rendering-isolation regression test covering descendant path resolution, per-target OL render handlers, CSS clip-path removal, and listener cleanup
+- Added `suite-time-slider` with reset-to-default and dual-handle overlap constraint regression tests, plus a dedicated temporal-layer test map
 
 ## Config Schema Changes
 
