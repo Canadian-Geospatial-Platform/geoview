@@ -1,4 +1,4 @@
-import { darken, lighten, alpha } from '@mui/material';
+import { darken, lighten, alpha } from '@mui/material/styles';
 import type { Theme } from '@mui/material/styles';
 import type { SxProps } from '@mui/system';
 import { NotSupportedError } from '@/core/exceptions/core-exceptions';
@@ -17,6 +17,34 @@ export type { SxProps };
 
 /** Record mapping sx property names to MUI SxProps values */
 export type SxStyles = Record<string, SxProps<Theme> | SxProps>;
+
+/** Supported sx sources for style composition. */
+type SxPropSource<TTheme extends object = Theme> = SxProps<TTheme> | false | null | undefined;
+
+/**
+ * Checks whether an sx prop source should be included in composition.
+ *
+ * @param source - Style source to check
+ * @returns Whether the style source is defined
+ */
+const isDefinedSxPropSource = <TTheme extends object = Theme>(source: SxPropSource<TTheme>): source is SxProps<TTheme> => {
+  return source !== false && source !== null && source !== undefined;
+};
+
+/**
+ * Composes MUI sx prop sources.
+ *
+ * @param sources - Style sources to compose in order
+ * @returns Composed sx props, or undefined when no style sources exist
+ */
+export const composeSxProps = <TTheme extends object = Theme>(...sources: Array<SxPropSource<TTheme>>): SxProps<TTheme> | undefined => {
+  const filteredSources = sources.filter(isDefinedSxPropSource);
+
+  if (filteredSources.length === 0) return undefined;
+  if (filteredSources.length === 1) return filteredSources[0];
+
+  return filteredSources.flat();
+};
 
 /**
  * Generates color shades and variants from a base color.
@@ -130,6 +158,14 @@ export class GeoViewColorClass {
   }
 }
 
+/** Focus indicator color configuration for WCAG-compliant keyboard navigation */
+export interface IGeoViewFocusIndicator {
+  /** Outline color for focus indicators (e.g., '#000' for light themes, '#fff' for dark themes) */
+  outline: string;
+  /** Halo/box-shadow color for focus indicators (e.g., '#fff' for light themes, 'rgba(0,0,0,0.8)' for dark themes) */
+  halo: string;
+}
+
 /** GeoView color palette interface with semantic color categories */
 export interface IGeoViewColors {
   white: string;
@@ -144,6 +180,9 @@ export interface IGeoViewColors {
   error: GeoViewColorClass;
   info: GeoViewColorClass;
   warning: GeoViewColorClass;
+
+  /** WCAG-compliant focus indicator colors for keyboard navigation */
+  focusIndicator: IGeoViewFocusIndicator;
 }
 
 /** GeoView font size scale interface from xs to xxl with dynamic key support */
