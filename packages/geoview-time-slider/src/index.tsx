@@ -14,16 +14,37 @@ import type { ConfigProps } from './time-slider-types';
 
 /** Properties for the slider filter configuration. */
 export interface SliderFilterProps {
+  /** The title displayed for the slider filter. */
   title: string;
+
+  /** The description displayed for the slider filter. */
   description: string;
+
+  /** The available time range values. */
   range: string[];
+
+  /** The minimum and maximum timestamps. */
   minAndMax: number[];
+
+  /** The temporal field used by the filter. */
   field: string;
+
+  /** Whether the slider uses a single handle. */
   singleHandle: boolean;
+
+  /** The current slider values. */
   values: number[];
+
+  /** Whether time filtering is enabled. */
   filtering: boolean;
+
+  /** The animation delay in milliseconds. */
   delay: number;
+
+  /** Whether the slider handles are locked. */
   locked: boolean;
+
+  /** Whether playback is reversed. */
   reversed: boolean;
 }
 

@@ -22,8 +22,13 @@ import type { SxStyles } from 'geoview-core/ui/style/types';
 
 /** Properties for the TimeSlider component. */
 interface TimeSliderProps {
+  /** The layer path displayed by the time slider. */
   layerPath: string;
+
+  /** Optional callback used to request panel closure. */
   onRequestClose?: () => void;
+
+  /** Whether the panel is currently displayed in fullscreen mode. */
   isFullScreen?: boolean;
 }
 

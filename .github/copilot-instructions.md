@@ -1133,6 +1133,8 @@ Plugins are loaded through **different config properties** depending on their ty
 
 **Critical:** Do NOT put `drawer`, `time-slider`, or `geochart` in `corePackages`. Only `swiper` uses `corePackages` because it renders directly on the map canvas without a tab.
 
+**Swiper render clipping** — The swiper must clip only the configured layer outputs. Do not apply CSS `clip-path` to `AbstractBaseGVLayer.getRendererContainer()` because OpenLayers renderer containers/canvases can be shared across conceptual layers, which can hide non-swiped layers. Use per-layer OpenLayers render events instead: clip in `prerender`, restore in `postrender`, use `getRenderPixel()` for canvas pixel conversion, and restore WebGL scissor state when the renderer uses WebGL. Regression tests should verify that only selected/resolved descendant layers gain render handlers and that non-target layers remain unaffected.
+
 ```json
 // ✅ Correct: each plugin loaded via its proper config property
 {
@@ -1225,7 +1227,7 @@ The selected list is treated as complete: entries are not merged across sources.
 **Time-slider dual-init and override semantics:**
 
 - The time-slider has two init paths: (1) `tryRegisterLayer` triggered by domain layer-loaded events, (2) `initTimeSliderPlugin()` in the plugin's `onAdd`. Path 1 runs first and uses VCS-merged configs from `mapFeaturesConfig`. Path 2 must skip layers already registered by path 1.
-- VCS `timeDimension` **overrides** the layer's metadata-derived `timeDimension` (not a fallback). This is because VCS configs are curated by data publishers and may correct or customize the raw service metadata.
+- VCS `timeDimension` is **overlaid** on the layer's metadata-derived `timeDimension`, so incomplete plugin configurations remain usable with metadata values as fallback. The configured `rangeItems` takes precedence when present; otherwise metadata `rangeItems` supplies the range and validity. The metadata field is preserved by default, and a configured field replaces it only when that field exists in the layer outfields.
 - The `tryRegisterLayer` condition must accept layers that have either a VCS slider config OR a metadata time dimension: `if (layerSliderConfig || (layer.getIsTimeAware() && layer.getTimeDimension()))`.
 
 ### Partial Layer Loading & Group Status Propagation

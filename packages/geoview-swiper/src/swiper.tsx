@@ -54,6 +54,7 @@ type SwiperProps = {
    */
   controllerRegistry: ControllerRegistry;
 
+  /** The Swiper plugin configuration. */
   // We have this eslint here for "standardization between plugins"
   // eslint-disable-next-line react/no-unused-prop-types
   config: ConfigProps;
@@ -61,7 +62,10 @@ type SwiperProps = {
 
 /** Configuration properties for the Swiper plugin. */
 export type ConfigProps = {
+  /** The layer paths selected for swiping. */
   layers: string[];
+
+  /** The orientation of the swiper divider. */
   orientation: SwipeOrientation;
 };
 

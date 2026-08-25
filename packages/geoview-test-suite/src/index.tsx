@@ -527,7 +527,9 @@ export interface SuiteTesterFailureEvent extends TesterFailureEvent {
  */
 export type SuiteTesterFailureDelegate = EventDelegateBase<TestSuitePlugin, SuiteTesterFailureEvent, void>;
 
+/** Configuration properties for the test suite plugin. */
 export type TestSuitePluginConfig = {
+  /** The test suites to execute. */
   suites: string[];
 };
 
